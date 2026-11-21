@@ -275,6 +275,12 @@ BASE = {
 }
 
 CONTROLS = {
+    'Image': {
+        'fields': [
+            "ImageOpenedEvent: RoutedEvent<RoutedEventArgs> => || *Image::image_opened_event()",
+            "ImageFailedEvent: RoutedEvent<ImageFailedEventArgs> => || *Image::image_failed_event()",
+        ],
+    },
     # The text-edit automation of WinUI's rich text (docs/porting/winui-rich-text.md, R8).
     'AutomationPeer': {
         'properties': [

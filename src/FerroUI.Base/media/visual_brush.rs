@@ -278,8 +278,12 @@ mod tests {
             log.entries(),
             [
                 "PushRoundedClip 0, 0, 20, 10",
+                "PushOpacity 1",
                 "DrawRectangle Red none 0, 0, 20, 10 shadows=0",
+                "PushOpacity 1",
                 "DrawRectangle Red none 0, 0, 2, 2 shadows=0",
+                "PopOpacity",
+                "PopOpacity",
                 "PopClip"
             ]
         );

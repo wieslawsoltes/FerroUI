@@ -52,24 +52,23 @@ pub(crate) fn accent_shades_from_ui_colors(colors: [Color; 6]) -> AccentColorSha
     AccentColorShades { dark1, dark2, dark3, light1, light2, light3 }
 }
 
-/// The colour values of a system in a high contrast mode, from the name of
-/// its high contrast scheme and its accent colour.
-pub(crate) fn high_contrast_color_values(high_contrast_scheme: Option<&str>, accent: Color) -> PlatformColorValues {
-    // Windows 11 has 4 different high contrast schemes:
-    // - Aquatic - High Contrast Black
-    // - Desert - High Contrast White
-    // - Dusk - High Contrast #1
-    // - Night sky - High Contrast #2
-    // Only "Desert" one can be considered a "light" preference.
+/// The colour values of a system in a high contrast mode. The window colour
+/// determines the variant for stock, localized, and edited contrast themes.
+pub(crate) fn high_contrast_color_values(system_colors: SystemColors, accent: Color) -> PlatformColorValues {
     PlatformColorValues::new()
-        .with_theme_variant(if high_contrast_scheme.is_some_and(|scheme| scheme.contains("White")) {
-            PlatformThemeVariant::Light
-        } else {
-            PlatformThemeVariant::Dark
-        })
+        .with_theme_variant(system_colors.theme_variant())
         .with_contrast_preference(ColorContrastPreference::High)
-        // Windows provides more than one accent color for the HighContrast themes, but with no API for that (at least not in the WinRT)
         .with_accent_color1(accent)
+        .with_system_colors(Some(system_colors))
+}
+
+fn fallback_color_values(high_contrast: Option<bool>, system_colors: impl FnOnce() -> SystemColors) -> PlatformColorValues {
+    let values = PlatformColorValues::new();
+    if high_contrast == Some(true) {
+        high_contrast_color_values(system_colors(), values.accent_color1())
+    } else {
+        values.with_theme_variant(PlatformThemeVariant::Light)
+    }
 }
 
 /// The colour values of a system that is not in a high contrast mode, from
@@ -151,7 +150,6 @@ mod imp {
         UI_SETTINGS_SUPPORTED.with(|supported| {
             *supported.get_or_init(|| {
                 WinRTApiInformation::is_type_present("Windows.UI.ViewManagement.UISettings")
-                    && WinRTApiInformation::is_type_present("Windows.UI.ViewManagement.AccessibilitySettings")
             })
         })
     }
@@ -202,9 +200,9 @@ mod imp {
     /// The platform settings of the Windows backend.
     ///
     /// The gesture metrics of the mouse come from the system metrics. The
-    /// colour values and the preferred language are read through the
-    /// Windows Runtime (`UISettings`, `AccessibilitySettings`,
-    /// `GlobalizationPreferences`) and kept until the platform tells the
+    /// contrast flag and palette come from Win32, with the Windows Runtime
+    /// supplying the accent, normal theme and preferred language. The values
+    /// are kept until the platform tells the
     /// settings that the system changed them (`WM_SETTINGCHANGE` of the
     /// message window). The motion preference and the transparency effects
     /// (`UISettings`) and the energy saver (the power status) are read each
@@ -253,21 +251,23 @@ mod imp {
         }
 
         fn get_uncached_color_values(&self) -> PlatformColorValues {
+            let system_high_contrast = Self::read_system_high_contrast();
+            let fallback = || fallback_color_values(system_high_contrast, Self::read_system_colors);
             if !ui_settings_supported() {
-                return PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Light);
+                return fallback();
             }
 
             // A call of the Windows Runtime that fails is an exception of
             // the reference, which nothing between the call and the caller
-            // of the settings catches. Here it is logged and the values are
-            // the ones of a system without these types.
-            match Self::read_color_values() {
+            // of the settings catches. Here it is logged and the native
+            // contrast palette stays available.
+            match Self::read_color_values(system_high_contrast) {
                 Ok(color_values) => color_values,
                 Err(error) => {
                     if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::WIN32_PLATFORM) {
                         logger.log_with_values(None, "Unable to read the colour values of the system: {0}", &[&error]);
                     }
-                    PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Light)
+                    fallback()
                 }
             }
         }
@@ -309,7 +309,7 @@ mod imp {
             system_colors_from_sys_colors(SYS_COLOR_INDICES.map(|index| unsafe { GetSysColor(index) }))
         }
 
-        fn read_color_values() -> Result<PlatformColorValues, HResult> {
+        fn read_color_values(system_high_contrast: Option<bool>) -> Result<PlatformColorValues, HResult> {
             let ui_settings = ui_settings::<IUISettings3>()?;
             let accent = ui_settings.get_color_value(UIColorType::Accent)?.to_ferro();
             // The shades of the accent, which WinUI reads the same way
@@ -318,19 +318,17 @@ mod imp {
             // then compute the shades.
             let accent_shades = Self::read_accent_shades(&ui_settings).ok();
 
-            let accessibility_settings = NativeWinRTMethods::create_instance::<IAccessibilitySettings>(
-                "Windows.UI.ViewManagement.AccessibilitySettings",
-            )?;
             // High contrast as WinUI reads it, `AccessibilitySettings` where that fails (#560).
-            let high_contrast = match Self::read_system_high_contrast() {
+            let high_contrast = match system_high_contrast {
                 Some(high_contrast) => high_contrast,
-                None => accessibility_settings.high_contrast()? == 1,
+                None => NativeWinRTMethods::create_instance::<IAccessibilitySettings>(
+                    "Windows.UI.ViewManagement.AccessibilitySettings",
+                )
+                .and_then(|settings| settings.high_contrast())
+                .is_ok_and(|value| value == 1),
             };
             if high_contrast {
-                let high_contrast_scheme = HStringInterop::from_handle(accessibility_settings.high_contrast_scheme()?, false);
-                Ok(high_contrast_color_values(high_contrast_scheme.value().as_deref(), accent)
-                    .with_accent_shades(accent_shades)
-                    .with_system_colors(Some(Self::read_system_colors())))
+                Ok(high_contrast_color_values(Self::read_system_colors(), accent).with_accent_shades(accent_shades))
             } else {
                 let background = ui_settings.get_color_value(UIColorType::Background)?.to_ferro();
                 Ok(color_values_from_background(background, accent).with_accent_shades(accent_shades))
@@ -538,14 +536,29 @@ mod tests {
     }
 
     #[test]
-    fn only_the_white_high_contrast_scheme_is_light() {
-        let white = high_contrast_color_values(Some("High Contrast White"), ACCENT);
-        assert_eq!(white.theme_variant(), PlatformThemeVariant::Light);
-        assert_eq!(white.contrast_preference(), ColorContrastPreference::High);
-        assert_eq!(white.accent_color1(), ACCENT);
+    fn high_contrast_variant_follows_the_window_colour() {
+        let dark = SystemColors::high_contrast_black();
+        let light = SystemColors::new(Color::from_rgb(255, 250, 239), Color::from_rgb(61, 61, 61));
+        for (colors, variant) in [(dark, PlatformThemeVariant::Dark), (light, PlatformThemeVariant::Light)] {
+            let values = high_contrast_color_values(colors, ACCENT);
+            assert_eq!(values.theme_variant(), variant);
+            assert_eq!(values.contrast_preference(), ColorContrastPreference::High);
+            assert_eq!(values.accent_color1(), ACCENT);
+            assert_eq!(values.system_colors(), Some(colors));
+        }
+    }
 
-        for scheme in [Some("High Contrast Black"), Some("High Contrast #1"), Some("High Contrast #2"), Some(""), None] {
-            assert_eq!(high_contrast_color_values(scheme, ACCENT).theme_variant(), PlatformThemeVariant::Dark, "{scheme:?}");
+    #[test]
+    fn winrt_colour_failure_preserves_an_active_win32_contrast_palette() {
+        let colors = SystemColors::new(Color::from_rgb(236, 242, 255), Color::from_rgb(15, 27, 61));
+        let values = fallback_color_values(Some(true), || colors);
+        assert!(values.is_high_contrast());
+        assert_eq!(values.system_colors(), Some(colors));
+        assert_eq!(values.theme_variant(), PlatformThemeVariant::Light);
+        for high_contrast in [Some(false), None] {
+            let values = fallback_color_values(high_contrast, || panic!("ordinary theme needs no contrast palette"));
+            assert!(!values.is_high_contrast());
+            assert_eq!(values.system_colors(), None);
         }
     }
 
@@ -573,7 +586,7 @@ mod tests {
         let values = color_values_from_background(Color::new(255, 255, 255, 255), ACCENT).with_accent_shades(Some(shades));
         assert_eq!(values.accent_shades(), Some(shades));
         assert_eq!(values.accent_color1(), ACCENT);
-        let values = high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_accent_shades(Some(shades));
+        let values = high_contrast_color_values(SystemColors::high_contrast_black(), ACCENT).with_accent_shades(Some(shades));
         assert_eq!(values.accent_shades(), Some(shades));
         // Without shades, none are reported.
         assert_eq!(color_values_from_background(Color::new(255, 0, 0, 0), ACCENT).accent_shades(), None);
@@ -634,9 +647,9 @@ mod tests {
         assert_eq!(desert.theme_variant(), PlatformThemeVariant::Light);
 
         // The high contrast values carry them; an unchanged scheme compares equal.
-        let values = high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_system_colors(Some(black));
+        let values = high_contrast_color_values(black, ACCENT);
         assert_eq!(values.system_colors(), Some(SystemColors::high_contrast_black()));
-        let again = high_contrast_color_values(Some("High Contrast Black"), ACCENT).with_system_colors(Some(black));
+        let again = high_contrast_color_values(black, ACCENT);
         assert_eq!(values, again);
         assert_eq!(SYS_COLOR_INDICES.len(), 8);
     }

@@ -110,6 +110,52 @@ pub struct Win32Platform {
     shutdown_requested: HandlerList<dyn Fn(&ShutdownRequestedEventArgs)>,
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::win32_platform_settings::SPI_SETHIGHCONTRAST;
+
+    #[test]
+    fn contrast_notifications_refresh_the_native_settings_cache() {
+        let platform = Win32Platform::instance();
+        let settings = Win32PlatformSettings::new();
+        let previous = platform.win32_platform_settings.replace(Some(settings.clone()));
+        let color_reports = Rc::new(RefCell::new(Vec::new()));
+        let reported_values = color_reports.clone();
+        let _color_subscription = settings.color_values_changed(Rc::new(move |values| {
+            reported_values.borrow_mut().push(*values);
+        }));
+        let accessibility_reports = Rc::new(Cell::new(0));
+        let _accessibility_subscription = settings.accessibility_settings_changed(Rc::new({
+            let reports = accessibility_reports.clone();
+            move || reports.set(reports.get() + 1)
+        }));
+        let hwnd = platform.handle();
+
+        // Send the message to this thread's own window. The desktop settings
+        // are only read during the test.
+        send_message(hwnd, WindowsMessage::WM_SETTINGCHANGE, 0, 0);
+        assert!(color_reports.borrow().is_empty());
+        assert_eq!(accessibility_reports.get(), 0);
+
+        send_message(hwnd, WindowsMessage::WM_SETTINGCHANGE, SPI_SETHIGHCONTRAST, 0);
+        wnd_proc_guard::resume_pending();
+        assert_eq!(color_reports.borrow().len(), 1);
+        assert_eq!(accessibility_reports.get(), 1);
+        let reported = color_reports.borrow()[0];
+        assert_eq!(reported, settings.get_color_values());
+        println!("Native contrast setting after WM_SETTINGCHANGE: {reported:?}");
+
+        send_message(hwnd, WindowsMessage::WM_SYSCOLORCHANGE, 0, 0);
+        send_message(hwnd, WindowsMessage::WM_THEMECHANGED, 0, 0);
+        wnd_proc_guard::resume_pending();
+        let reports = color_reports.borrow();
+        assert!(reports.windows(2).all(|pair| pair[0] != pair[1]), "duplicate snapshots are suppressed");
+        assert_eq!(reports.last().copied(), Some(settings.get_color_values()));
+        platform.win32_platform_settings.replace(previous);
+    }
+}
+
 impl Win32Platform {
     fn new() -> Rc<Win32Platform> {
         let hwnd = Self::create_message_window();
@@ -386,7 +432,7 @@ impl Win32Platform {
             }
         }
 
-        if msg == WindowsMessage::WM_SYSCOLORCHANGE {
+        if msg == WindowsMessage::WM_SYSCOLORCHANGE || msg == WindowsMessage::WM_THEMECHANGED {
             // The system colours changed (a contrast theme was edited or switched, #560): the
             // colour values carry them while high contrast is on.
             let win32_platform_settings = self.win32_platform_settings.borrow().clone();

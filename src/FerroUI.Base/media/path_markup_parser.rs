@@ -6,7 +6,6 @@ use crate::{Point, Size};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Command {
-    #[allow(dead_code)]
     None,
     FillRule,
     Move,
@@ -90,6 +89,7 @@ impl<'a> PathMarkupParser<'a> {
 
         let mut span = path_data;
         self.current_point = Point::default();
+        let mut previous_command = Command::None;
 
         while !span.is_empty() {
             let Some((command, relative)) = read_command(&mut span)? else {
@@ -103,6 +103,20 @@ impl<'a> PathMarkupParser<'a> {
                     span = read_separator(span);
                 }
 
+                let continues_curve = match command {
+                    Command::SmoothCubicBezierCurve => matches!(
+                        previous_command,
+                        Command::CubicBezierCurve | Command::SmoothCubicBezierCurve
+                    ),
+                    Command::SmoothQuadraticBezierCurve => matches!(
+                        previous_command,
+                        Command::QuadraticBezierCurve | Command::SmoothQuadraticBezierCurve
+                    ),
+                    _ => false,
+                };
+                if !continues_curve {
+                    self.previous_control_point = None;
+                }
                 match command {
                     Command::None => {}
                     Command::FillRule => self.set_fill_rule(&mut span)?,
@@ -120,9 +134,10 @@ impl<'a> PathMarkupParser<'a> {
                     Command::Close => self.close_figure(),
                 }
 
+                previous_command = command;
                 initial_command = false;
 
-                if !peek_argument(span) {
+                if command == Command::Close || !peek_argument(span) {
                     break;
                 }
             }
@@ -171,8 +186,6 @@ impl<'a> PathMarkupParser<'a> {
                 self.current_point = begin_figure_point;
             }
         }
-
-        self.previous_control_point = None;
 
         self.is_open = false;
     }
@@ -300,15 +313,14 @@ impl<'a> PathMarkupParser<'a> {
 
         let end = self.read_command_point(span, relative)?;
 
-        if let Some(previous_control_point) = self.previous_control_point {
-            self.previous_control_point = Some(Self::mirror_control_point(previous_control_point, self.current_point));
-        }
-
         if !self.is_open {
             self.create_figure();
         }
 
-        let point1 = self.previous_control_point.unwrap_or(self.current_point);
+        let point1 = self
+            .previous_control_point
+            .map(|point| Self::mirror_control_point(point, self.current_point))
+            .unwrap_or(self.current_point);
         self.context().cubic_bezier_to(point1, point2, end, true);
 
         self.previous_control_point = Some(point2);
@@ -320,17 +332,17 @@ impl<'a> PathMarkupParser<'a> {
     fn add_smooth_quadratic_bezier_curve(&mut self, span: &mut &str, relative: bool) -> Result<(), FormatError> {
         let end = self.read_command_point(span, relative)?;
 
-        if let Some(previous_control_point) = self.previous_control_point {
-            self.previous_control_point = Some(Self::mirror_control_point(previous_control_point, self.current_point));
-        }
-
         if !self.is_open {
             self.create_figure();
         }
 
-        let control_point = self.previous_control_point.unwrap_or(self.current_point);
+        let control_point = self
+            .previous_control_point
+            .map(|point| Self::mirror_control_point(point, self.current_point))
+            .unwrap_or(self.current_point);
         self.context().quadratic_bezier_to(control_point, end, true);
 
+        self.previous_control_point = Some(control_point);
         self.current_point = end;
         Ok(())
     }
@@ -360,8 +372,6 @@ impl<'a> PathMarkupParser<'a> {
         self.context().arc_to(end, size, rotation_angle, is_large_arc, sweep_direction, true);
 
         self.current_point = end;
-
-        self.previous_control_point = None;
         Ok(())
     }
 }
@@ -370,7 +380,7 @@ fn peek_argument(span: &str) -> bool {
     let span = skip_whitespace(span);
 
     match span.chars().next() {
-        Some(c) => c == ',' || c == '-' || c == '.' || c.is_ascii_digit(),
+        Some(c) => matches!(c, ',' | '-' | '+' | '.') || c.is_ascii_digit(),
         None => false,
     }
 }
@@ -384,42 +394,37 @@ fn read_argument<'s>(remaining: &mut &'s str) -> Option<&'s str> {
     }
 
     let bytes = remaining.as_bytes();
-    let mut valid = false;
-    let mut i = 0;
-    if bytes[i] == b'-' {
+    let mut i = usize::from(matches!(bytes[0], b'-' | b'+'));
+    let integer_start = i;
+    while bytes.get(i).is_some_and(u8::is_ascii_digit) {
         i += 1;
     }
-    while i < bytes.len() && bytes[i].is_ascii_digit() {
-        valid = true;
-        i += 1;
-    }
+    let mut has_digits = i != integer_start;
 
-    if i < bytes.len() && bytes[i] == b'.' {
-        valid = false;
+    if bytes.get(i) == Some(&b'.') {
         i += 1;
-    }
-    while i < bytes.len() && bytes[i].is_ascii_digit() {
-        valid = true;
-        i += 1;
-    }
-
-    if i < bytes.len() {
-        // scientific notation
-        if bytes[i] == b'E' || bytes[i] == b'e' {
-            valid = false;
+        let fraction_start = i;
+        while bytes.get(i).is_some_and(u8::is_ascii_digit) {
             i += 1;
-            if i < bytes.len() && (bytes[i] == b'-' || bytes[i] == b'+') {
-                i += 1;
-                while i < bytes.len() && bytes[i].is_ascii_digit() {
-                    valid = true;
-                    i += 1;
-                }
-            }
         }
+        has_digits |= i != fraction_start;
+    }
+    if !has_digits {
+        return None;
     }
 
-    if !valid {
-        return None;
+    if matches!(bytes.get(i), Some(b'E' | b'e')) {
+        i += 1;
+        if matches!(bytes.get(i), Some(b'-' | b'+')) {
+            i += 1;
+        }
+        let exponent_start = i;
+        while bytes.get(i).is_some_and(u8::is_ascii_digit) {
+            i += 1;
+        }
+        if i == exponent_start {
+            return None;
+        }
     }
     let (argument, rest) = remaining.split_at(i);
     *remaining = rest;
@@ -500,7 +505,9 @@ fn read_command(span: &mut &str) -> Result<Option<(Command, bool)>, FormatError>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::media::{ArcSegment, LineSegment, PathFigure, PathGeometry};
+    use crate::media::{
+        ArcSegment, BezierSegment, LineSegment, PathFigure, PathGeometry, QuadraticBezierSegment,
+    };
     use crate::platform::PathGeometryContext;
     use crate::Ref;
 
@@ -520,6 +527,91 @@ mod tests {
 
     fn line_point(figure: &PathFigure, index: usize) -> Point {
         figure.segments().unwrap().get(index).cast::<LineSegment>().expect("line segment").point()
+    }
+
+    #[test]
+    fn parses_signed_coordinates_and_exponents() {
+        for data in [
+            "M+2+2 L2e1+2 L2E1 2e1 L+2 2e1 Z",
+            "M2.,2. H20. V20. H2. Z",
+            "M2e+0,2E-0 H20 V20 H2 Z",
+            "M2,2 L20,2+20,20+2,20 Z",
+        ] {
+            let geometry = parse(data).unwrap();
+            let outline = figure(&geometry, 0);
+            assert_eq!(outline.start_point(), Point::new(2.0, 2.0), "{data}");
+            assert_eq!(line_point(&outline, 0), Point::new(20.0, 2.0), "{data}");
+            assert_eq!(line_point(&outline, 1), Point::new(20.0, 20.0), "{data}");
+            assert_eq!(line_point(&outline, 2), Point::new(2.0, 20.0), "{data}");
+        }
+    }
+
+    #[test]
+    fn rejects_arguments_after_close_and_incomplete_exponents() {
+        for data in [
+            "M2,2 H20 V20 Z1",
+            "M2,2 H2e V20 Z",
+            "M2,2 H2e+ V20 Z",
+            "M2,2 H.e1",
+        ] {
+            assert!(parse(data).is_err(), "{data}");
+        }
+    }
+
+    #[test]
+    fn smooth_cubic_reflects_only_preceding_cubic_controls() {
+        for (data, index, expected) in [
+            (
+                "M2,10 C3,3 7,3 9,10 L13,10 S20,3 22,10",
+                2,
+                Point::new(13.0, 10.0),
+            ),
+            ("M2,10 Q5,2 8,10 S17,2 22,10", 1, Point::new(8.0, 10.0)),
+            (
+                "M2,10 C3,3 7,3 9,10 S14,3 16,10 20,3 22,10",
+                1,
+                Point::new(11.0, 17.0),
+            ),
+            (
+                "M2,10 C3,3 7,3 9,10 S14,3 16,10 20,3 22,10",
+                2,
+                Point::new(18.0, 17.0),
+            ),
+        ] {
+            let geometry = parse(data).unwrap();
+            let segment = figure(&geometry, 0)
+                .segments()
+                .unwrap()
+                .get(index)
+                .cast::<BezierSegment>()
+                .unwrap();
+            assert_eq!(segment.point1(), expected, "{data}");
+        }
+    }
+
+    #[test]
+    fn smooth_quadratic_reflects_only_preceding_quadratic_controls() {
+        for (data, outline, index, expected) in [
+            ("M2,10 C3,3 7,3 9,10 T22,10", 0, 1, Point::new(9.0, 10.0)),
+            (
+                "M2,10 Q5,2 8,10 M12,10 T22,10",
+                1,
+                0,
+                Point::new(12.0, 10.0),
+            ),
+            ("M2,10 Q5,2 8,10 T14,10 20,10", 0, 1, Point::new(11.0, 18.0)),
+            ("M2,10 Q5,2 8,10 T14,10 20,10", 0, 2, Point::new(17.0, 2.0)),
+            ("M2,10 t6,0 6,0", 0, 1, Point::new(14.0, 10.0)),
+        ] {
+            let geometry = parse(data).unwrap();
+            let segment = figure(&geometry, outline)
+                .segments()
+                .unwrap()
+                .get(index)
+                .cast::<QuadraticBezierSegment>()
+                .unwrap();
+            assert_eq!(segment.point1(), expected, "{data}");
+        }
     }
 
     #[test]

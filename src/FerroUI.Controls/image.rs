@@ -1,31 +1,89 @@
-use crate::{Control, ControlImpl};
+use crate::{Control, ControlImpl, TopLevel};
 use ferroui_base::input::InputElementImpl;
-use ferroui_base::interactivity::InteractiveImpl;
+use ferroui_base::interactivity::{
+    IRoutedEventArgs, Interactive, InteractiveImpl, RoutedEvent, RoutedEventArgs,
+    RoutedEventHandlerToken, RoutingStrategies,
+};
 use ferroui_base::layout::{Layoutable, LayoutableImpl};
 use ferroui_base::media::imaging::BitmapBlendingMode;
 use ferroui_base::media::{
-    DrawingContext, DrawingImage, IImage, MediaExtensions, RenderOptions, Stretch, StretchDirection,
+    DrawingContext, DrawingImage, IImage, ImageLoadResult, ImageScaleVariant, ImageVariantContext, MediaExtensions,
+    RenderOptions, Stretch, StretchDirection,
 };
+use ferroui_base::metadata::{MarkupType, MarkupTyped};
+use ferroui_base::platform::IPlatformSettings;
 use ferroui_base::reactive::Subscription;
 use ferroui_base::rendering::composition::{AlphaMask, CompositionBrush};
+use ferroui_base::styling::ThemeVariant;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
-    FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElementImpl, StyledProperty, Upcast, Visual, VisualImpl,
-    VisualImplExt, VisualTreeAttachmentEventArgs,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref,
+    Size, StyledElementImpl, StyledProperty, Upcast, Visual, VisualImpl, VisualImplExt,
+    VisualTreeAttachmentEventArgs, ferro_class, ferro_impl_classes, ferro_property,
+    ferro_routed_event, ferro_routed_event_args, instantiate,
 };
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
+use std::error::Error;
+use std::rc::{Rc, Weak};
+
+/// Data for an [`ImageFailed`](Image::image_failed_event) event.
+#[derive(Clone)]
+pub struct ImageFailedEventArgs {
+    base: RoutedEventArgs,
+    error: Rc<dyn Error>,
+}
+
+ferro_routed_event_args!(ImageFailedEventArgs: RoutedEventArgs);
+
+impl ImageFailedEventArgs {
+    /// The error reported by the current image source.
+    pub fn error(&self) -> &(dyn Error + 'static) {
+        self.error.as_ref()
+    }
+
+    /// The message reported by the current image source.
+    pub fn error_message(&self) -> String {
+        self.error.to_string()
+    }
+}
+
+ferroui_base::ferro_markup_type!(class ImageFailedEventArgs {
+    namespace: "FerroUI.Controls",
+    handles: [ImageFailedEventArgs],
+    this: Rc<dyn IRoutedEventArgs>,
+    base: Rc<dyn IRoutedEventArgs>,
+    properties: [
+        ErrorMessage: String {
+            try_get: |args: &Rc<dyn IRoutedEventArgs>| args.downcast_ref::<ImageFailedEventArgs>()
+                .map(ImageFailedEventArgs::error_message)
+                .ok_or_else(|| "The arguments are not ImageFailedEventArgs.".to_owned())
+        },
+    ],
+});
+
+pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[<ImageFailedEventArgs as MarkupTyped>::MARKUP];
 
 /// Displays an [`IImage`].
 #[repr(C)]
 pub struct Image {
     base: Control,
-    current_drawing_bounds: Cell<Rect>,
+    current_drawing_size: Cell<Size>,
     subscribed_to_drawing_image_source: Cell<bool>,
     source_invalidated_subscription: RefCell<Option<Subscription>>,
+    source_load: RefCell<Option<ImageLoadWatch>>,
+    scale_variant: RefCell<Option<ImageScaleVariant>>,
+    scale_changed: RefCell<Option<Subscription>>,
+    palette_changed: RefCell<Option<Subscription>>,
     /// The alpha mask of [`get_alpha_mask`](Image::get_alpha_mask), created
     /// on the first request.
     alpha_mask: std::cell::OnceCell<Box<AlphaMask>>,
+}
+
+struct ImageLoadWatch {
+    lease: Rc<()>,
+    subscription: Option<Subscription>,
+    pending: Option<ImageLoadResult>,
 }
 
 ferro_class!(Image: Control);
@@ -42,19 +100,17 @@ impl FerroObjectImpl for Image {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Self::source_property().as_property() {
-            let (old_value, new_value) = change.get_old_and_new_value::<Option<Rc<dyn IImage>>>();
-
-            this.current_drawing_bounds.set(Rect::default());
-            if Self::as_drawing_image(old_value.as_ref()).is_some() && this.subscribed_to_drawing_image_source.get() {
-                this.unsubscribe_from_source();
-            }
-
-            if let Some(new_drawing_image) = Self::as_drawing_image(new_value.as_ref()) {
-                if this.is_attached_to_visual_tree() {
-                    this.subscribe_to_source(&new_drawing_image);
-                }
-            }
+        if change.property() == Self::source_property().as_property()
+            && this.source() == change.get_new_value::<Option<Rc<dyn IImage>>>()
+        {
+            this.scale_variant.take();
+            this.select_variant();
+            this.watch_displayed_source();
+            this.watch_variant_context();
+        } else if change.property() == ThemeVariant::actual_theme_variant_property().as_property()
+            && this.scale_variant.borrow().is_some()
+        {
+            this.refresh_variant();
         }
     }
 }
@@ -62,7 +118,7 @@ impl FerroObjectImpl for Image {
 impl VisualImpl for Image {
     /// Renders the control.
     fn render(this: &Self, context: &mut DrawingContext) {
-        let source = this.source();
+        let source = this.displayed_source();
         let bounds = this.bounds();
 
         if let Some(source) = source {
@@ -110,17 +166,30 @@ impl VisualImpl for Image {
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
 
-        if !this.subscribed_to_drawing_image_source.get() {
-            if let Some(drawing_image) = Self::as_drawing_image(this.source().as_ref()) {
+        if this.select_variant() {
+            this.watch_displayed_source();
+            this.invalidate_measure();
+            this.invalidate_visual();
+        } else if !this.subscribed_to_drawing_image_source.get() {
+            if let Some(drawing_image) = Self::as_drawing_image(this.displayed_source().as_ref()) {
                 this.subscribe_to_source(&drawing_image);
             }
+        }
+        this.watch_variant_context();
+        let pending = this.source_load.borrow_mut().as_mut().and_then(|watch| {
+            watch.pending.take().map(|result| (Rc::downgrade(&watch.lease), result))
+        });
+        if let Some((lease, result)) = pending {
+            Self::queue_source_load(this.to_ref().downgrade(), lease, result);
         }
     }
 
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree(this, e);
 
-        if this.subscribed_to_drawing_image_source.get() && Self::as_drawing_image(this.source().as_ref()).is_some() {
+        drop(this.scale_changed.take());
+        drop(this.palette_changed.take());
+        if this.subscribed_to_drawing_image_source.get() {
             this.unsubscribe_from_source();
         }
     }
@@ -129,7 +198,7 @@ impl VisualImpl for Image {
 impl LayoutableImpl for Image {
     /// Measures the control.
     fn measure_override(this: &Self, available_size: Size) -> Size {
-        let source = this.source();
+        let source = this.displayed_source();
         let mut result = Size::default();
 
         if let Some(source) = source {
@@ -145,7 +214,7 @@ impl LayoutableImpl for Image {
     }
 
     fn arrange_override(this: &Self, final_size: Size) -> Size {
-        let source = this.source();
+        let source = this.displayed_source();
 
         if let Some(source) = source {
             let source_size = source.size();
@@ -187,6 +256,20 @@ ferroui_base::ferro_properties! { impl Image {
 } }
 
 impl Image {
+    ferro_routed_event!(
+        /// Defines the `ImageOpened` event.
+        pub fn image_opened_event() -> RoutedEvent<RoutedEventArgs> {
+            RoutedEvent::register::<Image, _>("ImageOpened", RoutingStrategies::DIRECT)
+        }
+    );
+
+    ferro_routed_event!(
+        /// Defines the `ImageFailed` event.
+        pub fn image_failed_event() -> RoutedEvent<ImageFailedEventArgs> {
+            RoutedEvent::register::<Image, _>("ImageFailed", RoutingStrategies::DIRECT)
+        }
+    );
+
     fn static_constructor() {
         Visual::affects_render::<Image>(&[
             Self::source_property().as_property(),
@@ -207,9 +290,13 @@ impl Image {
     pub fn construct() -> Self {
         Self {
             base: Control::construct(),
-            current_drawing_bounds: Cell::new(Rect::default()),
+            current_drawing_size: Cell::new(Size::default()),
             subscribed_to_drawing_image_source: Cell::new(false),
             source_invalidated_subscription: RefCell::new(None),
+            source_load: RefCell::new(None),
+            scale_variant: RefCell::new(None),
+            scale_changed: RefCell::new(None),
+            palette_changed: RefCell::new(None),
             alpha_mask: std::cell::OnceCell::new(),
         }
     }
@@ -235,9 +322,143 @@ impl Image {
         self.get_value(Self::source_property())
     }
 
+    /// Gets the concrete image selected for this control's display scale.
+    pub fn displayed_source(&self) -> Option<Rc<dyn IImage>> {
+        self.scale_variant
+            .borrow()
+            .as_ref()
+            .map(|variant| variant.image.clone())
+            .or_else(|| self.source())
+    }
+
     /// Sets the image that will be displayed.
     pub fn set_source(&self, value: Option<Rc<dyn IImage>>) {
         self.set_value(Self::source_property(), value)
+    }
+
+    /// Observes successful loads of the source displayed by this image.
+    pub fn image_opened(
+        &self,
+        handler: impl Fn(&Interactive, &RoutedEventArgs) + 'static,
+    ) -> RoutedEventHandlerToken {
+        self.add_handler(Self::image_opened_event(), handler)
+    }
+
+    /// Observes failed loads of the source displayed by this image.
+    pub fn image_failed(
+        &self,
+        handler: impl Fn(&Interactive, &ImageFailedEventArgs) + 'static,
+    ) -> RoutedEventHandlerToken {
+        self.add_handler(Self::image_failed_event(), handler)
+    }
+
+    fn watch_source_load(&self, source: Option<&Rc<dyn IImage>>) {
+        drop(self.source_load.take());
+        let Some(source) = source else { return };
+        let lease = Rc::new(());
+        self.source_load.replace(Some(ImageLoadWatch { lease: lease.clone(), subscription: None, pending: None }));
+        let active = Rc::downgrade(&lease);
+        let target = self.to_ref().downgrade();
+        let subscription = source.subscribe_load(Rc::new(move |result| {
+            Self::queue_source_load(target.clone(), active.clone(), result.clone());
+        }));
+        let mut current = self.source_load.borrow_mut();
+        if let Some(watch) = current.as_mut().filter(|watch| Rc::ptr_eq(&watch.lease, &lease)) {
+            watch.subscription = subscription;
+        }
+    }
+
+    fn queue_source_load(target: ferroui_base::WeakRef<Self>, lease: Weak<()>, result: ImageLoadResult) {
+        Dispatcher::ui_thread().post_local(
+            move || {
+                if let (Some(target), Some(lease)) = (target.upgrade(), lease.upgrade()) {
+                    target.report_source_load(&lease, result);
+                }
+            },
+            DispatcherPriority::NORMAL,
+        );
+    }
+
+    fn report_source_load(&self, lease: &Rc<()>, result: ImageLoadResult) {
+        {
+            let mut current = self.source_load.borrow_mut();
+            let Some(watch) = current.as_mut().filter(|watch| Rc::ptr_eq(&watch.lease, lease)) else { return };
+            if !self.is_attached_to_visual_tree() {
+                watch.pending = Some(result);
+                return;
+            }
+        }
+        match result {
+            Ok(()) => self.raise_event(&RoutedEventArgs::with_event(Self::image_opened_event())),
+            Err(error) => self.raise_event(&ImageFailedEventArgs {
+                base: RoutedEventArgs::with_event(Self::image_failed_event()),
+                error,
+            }),
+        }
+    }
+
+    fn render_scaling(&self) -> f64 {
+        TopLevel::get_top_level(Some(self)).map_or(1., |root| root.render_scaling())
+    }
+
+    fn select_variant(&self) -> bool {
+        let Some(source) = self.source() else { return false };
+        let current = self.scale_variant.borrow().as_ref().map(|variant| variant.id);
+        let platform_colors = FerroLocator::current()
+            .get_service::<dyn IPlatformSettings>()
+            .map(|settings| settings.get_color_values())
+            .unwrap_or_default();
+        let context = ImageVariantContext {
+            scaling: self.render_scaling(),
+            theme: self.actual_theme_variant(),
+            platform_colors,
+        };
+        let Some(variant) = source.resolve_for_context(&context, current) else { return false };
+        if self.source().as_ref() != Some(&source) {
+            return false;
+        }
+        self.scale_variant.replace(Some(variant));
+        true
+    }
+
+    fn refresh_variant(&self) {
+        if self.select_variant() {
+            self.watch_displayed_source();
+            self.invalidate_measure();
+            self.invalidate_visual();
+        }
+    }
+
+    fn watch_variant_context(&self) {
+        drop(self.scale_changed.take());
+        drop(self.palette_changed.take());
+        if self.scale_variant.borrow().is_none() || !self.is_attached_to_visual_tree() {
+            return;
+        }
+        let Some(root) = TopLevel::get_top_level(Some(self)) else { return };
+        let target = self.to_ref().downgrade();
+        let refresh = move || {
+            if let Some(image) = target.upgrade().filter(|image| image.is_attached_to_visual_tree()) {
+                image.refresh_variant();
+            }
+        };
+        self.scale_changed.replace(Some(root.scaling_changed(refresh.clone())));
+        if let Some(settings) = FerroLocator::current().get_service::<dyn IPlatformSettings>() {
+            let subscription = settings.color_values_changed(Rc::new(move |_| refresh()));
+            self.palette_changed.replace(Some(Subscription::new(subscription)));
+        }
+    }
+
+    fn watch_displayed_source(&self) {
+        self.unsubscribe_from_source();
+        self.current_drawing_size.set(Size::default());
+        let source = self.displayed_source();
+        if self.is_attached_to_visual_tree() {
+            if let Some(drawing_image) = Self::as_drawing_image(source.as_ref()) {
+                self.subscribe_to_source(&drawing_image);
+            }
+        }
+        self.watch_source_load(source.as_ref());
     }
 
     /// Gets the blend mode for the image.
@@ -279,6 +500,7 @@ impl Image {
 
     fn subscribe_to_source(&self, drawing_image: &Ref<DrawingImage>) {
         self.subscribed_to_drawing_image_source.set(true);
+        self.current_drawing_size.set(drawing_image.size());
 
         let weak = self.to_ref().downgrade();
         let subscription = drawing_image.invalidated(move || {
@@ -307,16 +529,13 @@ impl Image {
             return;
         }
 
-        let Some(drawing_image) = Self::as_drawing_image(self.source().as_ref()) else {
+        let Some(drawing_image) = Self::as_drawing_image(self.displayed_source().as_ref()) else {
             return;
         };
 
-        if let Some(drawing) = drawing_image.drawing() {
-            let bounds = drawing.get_bounds();
-            if bounds != self.current_drawing_bounds.get() {
-                self.invalidate_measure();
-            }
-            self.current_drawing_bounds.set(bounds);
+        let size = drawing_image.size();
+        if self.current_drawing_size.replace(size) != size {
+            self.invalidate_measure();
         }
     }
 }

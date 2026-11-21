@@ -284,7 +284,7 @@ mod menu_item_tests;
 mod path_icon;
 pub use experimental_acrylic_border::ExperimentalAcrylicBorder;
 pub use icon_element::IconElement;
-pub use image::Image;
+pub use image::{Image, ImageFailedEventArgs};
 pub use label::Label;
 pub use path_icon::PathIcon;
 // WinUI's icons (docs/porting/winui-controls.md).

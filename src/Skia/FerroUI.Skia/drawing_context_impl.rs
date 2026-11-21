@@ -1644,6 +1644,19 @@ impl IDrawingContextImpl for DrawingContextImpl {
         self.canvas.get().clear(to_sk_color(color));
     }
 
+    fn draw_color(
+        &mut self,
+        color: Color,
+        blend: ferroui_base::media::imaging::BitmapBlendingMode,
+    ) {
+        self.check_lease();
+        let alpha = (f64::from(color.a) * self.current_opacity) as u8;
+        self.canvas.get().draw_color(
+            sk::Color::from_argb(alpha, color.r, color.g, color.b),
+            to_sk_blend_mode(blend),
+        );
+    }
+
     fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         self.check_lease();
         let drawable_image = try_get_drawable_bitmap(source)

@@ -5,6 +5,7 @@ mod custom_draw_operation;
 mod line_bounds_helper;
 
 pub use custom_draw_operation::ICustomDrawOperation;
+pub(crate) mod color_draw_operation;
 #[allow(unused_imports)]
 pub(crate) use line_bounds_helper::LineBoundsHelper;
 

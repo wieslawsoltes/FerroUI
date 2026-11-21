@@ -217,6 +217,11 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         self.inner.clear(color);
     }
 
+    fn draw_color(&mut self, color: Color, blend: crate::media::imaging::BitmapBlendingMode) {
+        self.flush();
+        self.inner.draw_color(color, blend);
+    }
+
     fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         self.flush();
         self.inner.draw_bitmap(source, opacity, source_rect, dest_rect);

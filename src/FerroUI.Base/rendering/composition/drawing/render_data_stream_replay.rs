@@ -167,10 +167,10 @@ impl IRenderDataVisitor for ReplayVisitor<'_> {
 
     fn on_push_opacity(&mut self, opacity: f64) -> ReplayScope {
         crate::perf_count!(RenderLayersPushed);
-        if opacity != 1.0 {
-            self.context.push_opacity(opacity, None);
-        }
-        ReplayScope::new(ReplayScopeKind::Opacity, opacity != 1.0)
+        // The backend decides whether this is a multiplier or an isolation
+        // layer, including for one, from its effective render options.
+        self.context.push_opacity(opacity, None);
+        ReplayScope::new(ReplayScopeKind::Opacity, true)
     }
 
     fn on_push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> ReplayScope {

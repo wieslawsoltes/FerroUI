@@ -20,6 +20,11 @@ pub trait IDrawingContextImpl {
     /// Clears the render target to the specified color.
     fn clear(&mut self, color: Color);
 
+    /// Composites color over the current clip, independently of transform.
+    /// Drawing opacity and the requested blend apply; isolate destination-
+    /// dependent modes in a layer. Clear keeps its replacement semantics.
+    fn draw_color(&mut self, color: Color, blend: crate::media::imaging::BitmapBlendingMode);
+
     /// Draws a bitmap image.
     fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect);
 
