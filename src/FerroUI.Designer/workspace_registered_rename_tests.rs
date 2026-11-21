@@ -8,11 +8,19 @@ use std::{fs, path::PathBuf};
 
 const VIEW: &str = r#"<TextBlock xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:a="using:Audit" x:DataType="a:Customer" Text="{Binding Street}"/>"#;
 const RUST: &str = r#"// Keep the getter 🪴
+mod builder_metadata;
+mod registry;
+
 pub struct Customer;
 ferro_markup_type!(struct Customer as "Customer" {
     namespace: "Audit",
     properties: [Street: String { get: address_street }],
 });
+"#;
+const BUILDER_KEY: &str = "FerroUI.Designer.Rsx.v1:Audit.Customer";
+const BUILDER: &str = r#"{"path":"crate::Customer","properties":{"Street":"address_street"}}"#;
+const REGISTRY: &str = r#"use crate::builder_metadata::{VIEW_KEY, BUILDER};
+static DESIGN: MarkupAssembly = MarkupAssembly { metadata: &[(VIEW_KEY, BUILDER)] };
 "#;
 
 struct TestProject(PathBuf);
@@ -24,7 +32,7 @@ impl Drop for TestProject {
 }
 
 #[test]
-fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
+fn studio_applies_and_undoes_reviewed_registered_names_with_imported_builder_metadata() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let root = std::env::temp_dir().join(format!(
         "ferroui-studio-registered-property-{}",
@@ -39,17 +47,24 @@ fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
     )
     .unwrap();
     fs::write(files.0.join("lib.rs"), RUST).unwrap();
+    let descriptors = files.0.join("builder_metadata.rs");
+    let constants = format!("pub(crate) const VIEW_KEY: &str = {BUILDER_KEY:?};\n\
+        pub(crate) const BUILDER: &str = r#\"{BUILDER}\"#;\n");
+    fs::write(&descriptors, &constants).unwrap();
+    let registry = files.0.join("registry.rs");
+    fs::write(&registry, REGISTRY).unwrap();
     fs::write(files.0.join("Primary.xaml"), VIEW).unwrap();
     let other = files.0.join("Unopened.xaml");
     fs::write(&other, VIEW).unwrap();
     fs::write(files.0.join("out/audit.xamlmeta"), json!({
-        "format":2,"name":"Audit","crate_name":"audit","types":[{
+        "format":2,"name":"Audit","crate_name":"audit","metadata":[[BUILDER_KEY, BUILDER]],"types":[{
             "name":"Customer","namespace":"Audit","kind":"struct","rust_path":"::audit::Customer",
             "properties":[{"name":"Street","value_type":"String","getter":{}}]
         }]
     }).to_string()).unwrap();
     fs::write(files.0.join("out/xaml-rust-sources.json"), json!({
-        "version":1,"manifest":manifest,"assembly":"Audit","crate_name":"audit","definitions":[
+        "version":1,"manifest":manifest,"assembly":"Audit","crate_name":"audit",
+        "assembly_source":{"file":"registry.rs","item":"DESIGN","crate_root":"lib.rs"},"definitions":[
             {"rust_type":"::audit::Customer","type":"Customer","kind":"markup_type","file":"lib.rs","owner":"Customer"},
             {"rust_type":"::audit::Customer","type":"Customer","kind":"markup_type","file":"lib.rs","owner":"Customer","member":"Street"}
         ]
@@ -83,7 +98,7 @@ fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
             Permissions::default(),
         )
         .unwrap();
-    assert_eq!(plan["documents"].as_array().unwrap().len(), 3);
+    assert_eq!(plan["documents"].as_array().unwrap().len(), 4);
     request["review"] = plan["review"].clone();
     assert!(provider
         .call("designer_rename_property", &request, Permissions::default())
@@ -104,6 +119,10 @@ fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
         )
         .unwrap();
     request["review"] = plan["review"].clone();
+    let changed_constants = constants.replace("address_street", "new_builder_method");
+    fs::write(&descriptors, &changed_constants).unwrap();
+    assert!(provider.call("designer_rename_property", &request, writes).unwrap_err().contains("rename changed"));
+    fs::write(&descriptors, &constants).unwrap();
     provider
         .call("designer_rename_property", &request, writes)
         .unwrap();
@@ -112,6 +131,7 @@ fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
         VIEW.replace("Street", "AddressLine")
     );
     let rust = file_uri(files.0.join("lib.rs")).unwrap();
+    let registry_uri = file_uri(&registry).unwrap();
     let consumer = file_uri(&other).unwrap();
     assert_eq!(
         workspace.project.borrow().tabs[&rust].source(),
@@ -121,11 +141,16 @@ fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
         workspace.project.borrow().tabs[&consumer].source(),
         saved_consumer.replace("Street", "AddressLine")
     );
+    let renamed_builder = BUILDER.replace("\"Street\"", "\"AddressLine\"");
+    assert_eq!(workspace.project.borrow().tabs[&registry_uri].source(),
+        REGISTRY.replace("(VIEW_KEY, BUILDER)", &format!("(VIEW_KEY, r#\"{renamed_builder}\"#)")));
+    assert_eq!(fs::read_to_string(&descriptors).unwrap(), constants);
     workspace.activate_document(&consumer).unwrap();
     workspace.source_history(false).unwrap();
     assert_eq!(session.borrow().authored_source(), saved_consumer);
     assert_eq!(workspace.project.borrow().tabs[&primary].source(), VIEW);
     assert_eq!(workspace.project.borrow().tabs[&rust].source(), RUST);
+    assert_eq!(workspace.project.borrow().tabs[&registry_uri].source(), REGISTRY);
     workspace.source_history(true).unwrap();
     assert_eq!(
         session.borrow().authored_source(),
@@ -140,7 +165,7 @@ fn studio_applies_and_undoes_reviewed_registered_names_across_three_sources() {
     let plan = provider
         .call("designer_plan_type_rename", &rename, Permissions::default())
         .unwrap();
-    assert_eq!(plan["documents"].as_array().unwrap().len(), 3);
+    assert_eq!(plan["documents"].as_array().unwrap().len(), 4);
     rename["review"] = plan["review"].clone();
     provider
         .call("designer_rename_type", &rename, writes)

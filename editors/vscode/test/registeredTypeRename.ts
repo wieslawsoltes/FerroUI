@@ -53,9 +53,10 @@ export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rust
         assert.equal(editedRust.getText(), code.replaceAll(symbol, replacement));
         assert.equal(rust.getText(), originalRust.replaceAll(symbol, replacement));
         assert.equal(styled.getText(), originalStyle.replaceAll(symbol, replacement));
+        const renamedMapping = JSON.stringify({ path: 'crate::OverviewCard', properties: { Caption: 'heading' } });
         assert.equal(registry.getText(), originalRegistry
             .replace('Audit.Controls.AuditCard', 'Audit.Controls.OverviewCard')
-            .replace('crate::AuditCard', 'crate::OverviewCard'));
+            .replace(', MAPPING)', `, r#"${renamedMapping}"#)`));
         await vscode.window.showTextDocument(xaml);
         await vscode.commands.executeCommand('undo');
         await until(() => xaml.getText() === originalXaml && editedXaml.getText() === markup

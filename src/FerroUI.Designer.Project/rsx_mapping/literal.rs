@@ -12,7 +12,9 @@ pub(super) fn replace(
     decoded: Range<usize>,
     replacement: &str,
 ) -> Result<TextPatch> {
-    let written = source.get(operand.literal.clone()).ok_or_else(unmapped)?;
+    let written = operand.imported_literal.as_deref()
+        .or_else(|| source.get(operand.literal.clone()))
+        .ok_or_else(unmapped)?;
     let raw = written.starts_with('r');
     let span = source_range(written, &operand.value, decoded.clone(), raw).ok_or_else(unmapped)?;
     let encoded: String;
@@ -35,7 +37,7 @@ pub(super) fn replace(
         syn::parse_str::<LitStr>(&rewritten).is_ok_and(|literal| literal.value() == expected),
         "The changed RSX metadata needs a valid Rust string literal",
     )?;
-    Ok(if operand.range == operand.literal {
+    Ok(if operand.imported_literal.is_none() && operand.range == operand.literal {
         TextPatch {
             span: SourceSpan::new(
                 operand.range.start + span.start,

@@ -4,7 +4,7 @@ use crate::{
 };
 use ferroui_build_scan::model::AssemblyModel;
 use ferroui_designer_core::SourceSpan;
-use ferroui_designer_project::{file_path, file_uri, rsx_mapping::RsxBuilderMapping, Solution};
+use ferroui_designer_project::{file_path, file_uri, rsx_mapping::RsxBuilderMapping, BuildMetadata, Solution};
 use std::fs;
 
 const VIEW: &str = r#"<ui:Card xmlns:ui="using:Customer.Views" Tone="Blue"/>"#;
@@ -170,6 +170,48 @@ fn property_review_follows_imported_constants_in_an_unsaved_mapping_file() {
             "{key}"
         );
     }
+}
+
+#[test]
+fn property_review_uses_the_build_selected_module_and_its_current_draft() {
+    let (fixture, mut service, uri, registry_uri) = fixture(false);
+    let root = fs::read_to_string(fixture.0.join("app/lib.rs")).unwrap();
+    fixture.write("app/lib.rs", &(root + "\nmod mapping_descriptors;\n"));
+    let descriptors = ASSEMBLY.lines().filter_map(|line| line.strip_prefix("    const "))
+        .map(|text| format!("pub(crate) const {text}\r\n")).collect::<String>();
+    fixture.write("app/mapping_descriptors.rs", &descriptors);
+    let registry = ASSEMBLY.lines().filter(|line| !line.starts_with("    const ")).collect::<Vec<_>>().join("\n")
+        .replace("mod mapping {", "mod mapping {\n    use crate::mapping_descriptors::{KEY as PUBLISHED_KEY, FEATURED};")
+        .replace("(self::KEY, FEATURED)", "(PUBLISHED_KEY, FEATURED)")
+        .replace("(\"Unrelated\"", "(::ferroui_base::metadata::MarkupAssembly::CREATE_SOURCE_INFO, \"True\"),\n            (\"Unrelated\"")
+        .replace('\n', "\r\n");
+    fixture.write("app/registry.rs", &registry);
+    let rebuilt = rebuild(&fixture);
+    assert!(rebuilt.metadata.iter().any(|(key, _)| key.ends_with(":Customer.Views.FeaturedCard")));
+    assert!(rebuilt.metadata.iter().any(|(key, _)| key == ferroui_build_scan::CREATE_SOURCE_INFO));
+    service.set_build_metadata(&BuildMetadata {
+        manifest: fixture.0.join("app/Cargo.toml"),
+        directories: vec![fixture.0.join("output/app"), fixture.0.join("output/dep")],
+        package: Some("customer-app".into()),
+    }).unwrap();
+
+    let descriptor_uri = file_uri(fixture.0.join("app/mapping_descriptors.rs")).unwrap();
+    let draft = FileMoveDraft {
+        uri: descriptor_uri.clone(), version: 6,
+        source: descriptors.replace(r#"\"title\""#, r#"\"caption\""#),
+    };
+    let plan = service.plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[draft]).unwrap();
+    let change = plan.documents.iter().find(|document| document.edit.uri == registry_uri).unwrap();
+    assert_eq!(change.before, registry);
+    assert!(change.after.contains(r#"(PUBLISHED_KEY, "{\"path\": \"crate::builders::Card\", \"properties\": {\"Accent\": \"tone\", \"Title\": \"caption\"}}")"#));
+    assert!(plan.documents.iter().all(|document| document.edit.uri != descriptor_uri));
+
+    let changed = FileMoveDraft {
+        uri: descriptor_uri, version: 7,
+        source: descriptors.replace("Customer.Views.FeaturedCard", "Customer.Views.DifferentCard"),
+    };
+    let error = service.plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[changed]).unwrap_err();
+    assert!(error.0.contains("changed in Rust"), "{error:?}");
 }
 
 #[test]

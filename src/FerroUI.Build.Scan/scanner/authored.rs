@@ -32,6 +32,7 @@ impl Builder {
             file,
             modules,
             item: assembly.item.clone(),
+            crate_root: self.source.files.first().map(|source| source.path.clone()),
         })
     }
 
@@ -111,6 +112,7 @@ impl Scan {
             assembly_source: self.authored_assembly.as_ref().and_then(|source| {
                 Some(AuthoredAssembly {
                     file: relative_file(&source.file, package?)?,
+                    crate_root: source.crate_root.as_deref().and_then(|root| relative_file(root, package?)),
                     ..source.clone()
                 })
             }),

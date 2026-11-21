@@ -3,7 +3,9 @@ import * as vscode from 'vscode';
 import type { RegisteredRename } from '../src/registeredRename';
 import { until } from './wait';
 
-export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, rustUri: vscode.Uri, registryUri: vscode.Uri) {
+export async function verifyRegisteredPropertyRename(
+    xaml: vscode.TextDocument, rustUri: vscode.Uri, registryUri: vscode.Uri, descriptorUri: vscode.Uri,
+) {
     const extension = vscode.extensions.getExtension<{ propertyRename: RegisteredRename }>('FerroUI.ferroui')!;
     const { propertyRename } = await extension.activate();
     const original = xaml.getText();
@@ -48,6 +50,16 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
     assert.equal(xaml.getText(), original);
     assert.equal(rust.getText(), draft);
 
+    const savedMapping = await propertyRename.agent(request, signal);
+    const descriptor = await vscode.workspace.openTextDocument(descriptorUri);
+    const descriptorOriginal = descriptor.getText();
+    const method = descriptorOriginal.indexOf('"heading"');
+    const descriptorEdit = new vscode.WorkspaceEdit();
+    descriptorEdit.replace(descriptorUri, new vscode.Range(descriptor.positionAt(method), descriptor.positionAt(method + '"heading"'.length)), '"headingFromDraft"');
+    assert.ok(await vscode.workspace.applyEdit(descriptorEdit));
+    const descriptorDraft = descriptor.getText();
+    await assert.rejects(propertyRename.agent({ ...request, review: savedMapping.review }, signal), /changed/);
+
     await vscode.window.showTextDocument(xaml, { viewColumn: vscode.ViewColumn.One });
     await propertyRename.openReview(xaml, { version: xaml.version, position }, request.new_name);
     await until(() => vscode.window.tabGroups.activeTabGroup.activeTab?.label.startsWith('Rename Caption → Heading') === true);
@@ -59,7 +71,9 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
         .replace('Property="Caption"', 'Property="Heading"')
         .replace('AuditCard Caption=', 'AuditCard Heading='));
     assert.equal(rust.getText(), draft.replace('Caption: String', 'Heading: String'));
-    assert.equal(registry.getText(), registryDraft.replace('"Caption":"heading"', '"Heading":"heading"'));
+    const renamedMapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Heading: 'headingFromDraft' } });
+    assert.equal(registry.getText(), registryDraft.replace(', MAPPING)', `, r#"${renamedMapping}"#)`));
+    assert.equal(descriptor.getText(), descriptorDraft);
     await vscode.window.showTextDocument(xaml);
     await vscode.commands.executeCommand('undo');
     await until(() => xaml.getText() === original && opened.getText() === nextConsumer
@@ -69,8 +83,11 @@ export async function verifyRegisteredPropertyRename(xaml: vscode.TextDocument, 
         const [definition] = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeDefinitionProvider', opened.uri, selector) ?? [];
         return definition?.uri.toString() === rust.uri.toString() && rust.getText(definition.range) === 'Caption';
     });
+    await vscode.window.showTextDocument(descriptor);
+    await vscode.commands.executeCommand('undo');
+    await until(() => descriptor.getText() === descriptorOriginal);
     await vscode.window.showTextDocument(rust);
     await vscode.commands.executeCommand('undo');
     await until(() => rust.getText() === rustOriginal && registry.getText() === registryOriginal);
-    console.log('VS Code reviewed a property across XAML selectors, Rust, and an unsaved RSX mapping, then undid all four files');
+    console.log('VS Code rejected a changed imported RSX mapping, used its CRLF draft in a property review and undid all four edited files');
 }

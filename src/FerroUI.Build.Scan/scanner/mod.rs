@@ -87,6 +87,21 @@ use modules::{Modules, Target};
 use source::{Located, Site, Source, Text};
 use tokens::{pieces, plain_path, text_of, text_of_pieces, tokens_of, Tokens};
 
+fn framework_text(path: &[String]) -> Option<&'static str> {
+    if path.first()?.as_str() != "ferroui_base" {
+        return None;
+    }
+    match path {
+        [.., name] if name == "FERRO_XML_NAMESPACE" => Some(crate::FERRO_XML_NAMESPACE),
+        [.., owner, name] if owner == "MarkupAssembly" => match name.as_str() {
+            "CREATE_SOURCE_INFO" => Some(crate::CREATE_SOURCE_INFO),
+            "USE_COMPILED_BINDINGS_BY_DEFAULT" => Some(crate::USE_COMPILED_BINDINGS_BY_DEFAULT),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
 /// The names of the declaration macros: the macros whose invocations are counted
 /// ([`ScannedFile::invocations`]) and read.
 pub const DECLARATION_MACRO_NAMES: &[&str] = declarations::DECLARATION_MACROS;
@@ -1224,17 +1239,7 @@ impl Builder {
                 let value = match self.source.modules.resolve(module, segments) {
                     Some(Target::Item { module, name, rest }) if rest.is_empty() => self.source.constants.get(&(module, name)).cloned(),
                     Some(Target::Item { name, rest, .. }) if rest.len() == 1 => self.source.associated_constants.get(&(name, rest[0].clone())).cloned(),
-                    Some(Target::External(segments)) if segments.first().map(String::as_str) == Some("ferroui_base") => {
-                        let last: Vec<&str> = segments.iter().rev().take(2).map(String::as_str).collect();
-                        match last.as_slice() {
-                            ["FERRO_XML_NAMESPACE", ..] => Some(crate::FERRO_XML_NAMESPACE.to_string()),
-                            ["CREATE_SOURCE_INFO", "MarkupAssembly"] => Some(crate::CREATE_SOURCE_INFO.to_string()),
-                            ["USE_COMPILED_BINDINGS_BY_DEFAULT", "MarkupAssembly"] => {
-                                Some(crate::USE_COMPILED_BINDINGS_BY_DEFAULT.to_string())
-                            }
-                            _ => None,
-                        }
-                    }
+                    Some(Target::External(segments)) => framework_text(&segments).map(str::to_owned),
                     _ => None,
                 };
                 value.ok_or(written)

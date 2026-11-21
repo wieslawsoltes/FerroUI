@@ -1,22 +1,47 @@
 //! Re-locate the selected assembly's metadata in the current Rust buffer.
 use super::super::source::{field_of, last_segment_of_type, pair_expressions};
 use super::{module_items, rust_body};
-use crate::authored_symbols::{AuthoredAssembly, AuthoredMetadata, AuthoredText};
-use std::ops::Range;
-use syn::{spanned::Spanned, Expr, Item, Lit, LitStr};
+use crate::authored_symbols::{AuthoredAssembly, AuthoredMetadata, MetadataSource};
+use syn::{spanned::Spanned, Expr, File, Item, Lit, LitStr};
 
 #[path = "metadata_constants.rs"]
 mod constants;
-use constants::MetadataConstants;
+use constants::{source_range, Literal, MetadataConstants};
 
 impl AuthoredAssembly {
     /// Exact tuple operands in the assembly's metadata array. A text constant
     /// in this file can be edited at its use without changing its definition.
     pub fn metadata_in(&self, source: &str) -> Option<Vec<AuthoredMetadata>> {
-        let body = rust_body(source);
-        let offset = source.len() - body.len();
-        let file = syn::parse_str::<syn::File>(body).ok()?;
-        let items = module_items(&file, &self.modules)?;
+        let source = MetadataSource {
+            id: "",
+            text: source,
+        };
+        let file = syn::parse_str::<File>(rust_body(source.text)).ok()?;
+        let constants = MetadataConstants::local(source, &file)?;
+        self.metadata(source, &file, &constants)
+    }
+
+    /// Resolve tuple operands from the inputs of one build-selected crate.
+    /// The caller supplies the verified module edges and current file texts.
+    pub fn metadata_in_project<'a>(
+        &self,
+        assembly: MetadataSource<'a>,
+        root: MetadataSource<'a>,
+        read_module: impl Fn(&str, &[String]) -> Option<MetadataSource<'a>> + 'a,
+    ) -> Option<Vec<AuthoredMetadata>> {
+        let file = syn::parse_str::<File>(rust_body(assembly.text)).ok()?;
+        let constants = MetadataConstants::project(root, &read_module)?;
+        self.metadata(assembly, &file, &constants)
+    }
+
+    fn metadata(
+        &self,
+        source: MetadataSource<'_>,
+        file: &File,
+        constants: &MetadataConstants<'_>,
+    ) -> Option<Vec<AuthoredMetadata>> {
+        let scope = constants.scope(source.id, &self.modules)?;
+        let items = module_items(file, &self.modules)?;
         let mut candidates = items.iter().filter_map(|item| match item {
             Item::Static(item) if item.ident == self.item => Some(item),
             _ => None,
@@ -31,31 +56,25 @@ impl AuthoredAssembly {
             return None;
         };
         let pairs = pair_expressions(field_of(value, "metadata")?)?;
-        let constants = MetadataConstants::new(&file, &self.modules)?;
+        let authored_text = |expr: &Expr| {
+            let operand = ungroup(expr);
+            let range = source_range(source.text, operand.span().byte_range());
+            match operand {
+                Expr::Path(path) => constants.literal(scope, path)?.at_use(source, range),
+                _ => Literal::capture(source, operand)?.at_use(source, range),
+            }
+        };
         Some(
             pairs
                 .into_iter()
                 .map(|(key, value)| AuthoredMetadata {
-                    key: authored_text(&constants, key, offset),
-                    value: authored_text(&constants, value, offset),
+                    key: authored_text(key),
+                    value: authored_text(value),
+                    framework_key: constants.framework_key(scope, key),
                 })
                 .collect(),
         )
     }
-}
-
-fn authored_text(constants: &MetadataConstants<'_>, expr: &Expr, offset: usize) -> Option<AuthoredText> {
-    let operand = ungroup(expr);
-    let literal = match operand {
-        Expr::Path(path) => constants.literal(path)?,
-        other => string_literal(other)?,
-    };
-    let shifted = |range: Range<usize>| (range.start + offset)..(range.end + offset);
-    Some(AuthoredText {
-        value: literal.value(),
-        range: shifted(operand.span().byte_range()),
-        literal: shifted(literal.span().byte_range()),
-    })
 }
 
 fn ungroup(expr: &Expr) -> &Expr {

@@ -1,9 +1,10 @@
 //! Build-scoped Rust definitions and their validated physical source files.
 use super::MarkupCatalog;
+use crate::{file_uri, PreviewSourceBuffer, RustModuleSource, RustModuleSources};
 use ferroui_build_scan::{
     authored_symbols::{
         AuthoredAssembly, AuthoredDefinition, AuthoredMetadata, AuthoredSymbols, DeclarationKind,
-        TypeNameEdit,
+        MetadataSource, TypeNameEdit,
     },
     model::{AssemblyModel, TypeModel},
 };
@@ -38,6 +39,31 @@ impl MarkupAssemblySource {
     pub fn metadata_in(&self, source: &str) -> Option<Vec<AuthoredMetadata>> {
         self.declaration.metadata_in(source)
     }
+
+    /// Resolve imported metadata in the crate root declared by the same Cargo
+    /// schema. Buffers from a different package cannot provide a module.
+    pub fn metadata_with_drafts(&self, source: &str, drafts: &[PreviewSourceBuffer]) -> Option<Vec<AuthoredMetadata>> {
+        let local = self.metadata_in(source)?;
+        if local.iter().all(|entry| entry.framework_key || (entry.key.is_some() && entry.value.is_some())) {
+            return Some(local);
+        }
+        self.metadata_from_modules(source, drafts).or(Some(local))
+    }
+
+    fn metadata_from_modules(&self, source: &str, drafts: &[PreviewSourceBuffer]) -> Option<Vec<AuthoredMetadata>> {
+        let root = resolve_rust_file(&self.package, self.declaration.crate_root.as_deref()?)?;
+        let assembly = file_uri(self.file()?).ok()?;
+        let sources = RustModuleSources::capture(&self.package, &root, &assembly, source, drafts)?;
+        self.declaration.metadata_in_project(
+            metadata_source(sources.active()),
+            metadata_source(sources.target()),
+            |uri, modules| sources.module_file(uri, modules).map(metadata_source),
+        )
+    }
+}
+
+fn metadata_source(file: &RustModuleSource) -> MetadataSource<'_> {
+    MetadataSource { id: &file.uri, text: &file.source }
 }
 
 impl MarkupSource {

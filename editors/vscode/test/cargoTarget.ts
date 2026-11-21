@@ -24,11 +24,13 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     await write('.cargo/config.toml', '[build]\ntarget-dir = "audit-output"\n');
     const mappingKey = 'FerroUI.Designer.Rsx.v1:Audit.Controls.AuditCard';
     const mapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Caption: 'heading' } });
+    const descriptors = await write('src/rsx_mappings.rs', `// Shared builder 🧭\r\npub(crate) const CARD: &str = r#"${mapping}"#;\r\n`);
     const registry = await write('src/registry.rs', [
+        'use crate::rsx_mappings::CARD as MAPPING;',
         'pub struct MarkupAssembly { pub metadata: &\'static [(&\'static str, &\'static str)] }',
         'pub static DESIGN: MarkupAssembly = MarkupAssembly {',
         '    metadata: &[',
-        `        ("${mappingKey}", r#"${mapping}"#),`,
+        `        ("${mappingKey}", MAPPING),`,
         '    ],',
         '};',
         '',
@@ -53,7 +55,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     };
     await write('build.rs', exportMetadata(metadata, {
         manifest, assembly: 'audit_app', crate_name: 'audit_app',
-        assembly_source: { file: 'src/registry.rs', item: 'DESIGN' },
+        assembly_source: { file: 'src/registry.rs', item: 'DESIGN', crate_root: 'src/main.rs' },
         definitions: [
             { ...appSite, kind: 'class', type_declaration: { file: 'src/main.rs', name: 'AuditCard' } },
             { ...appSite, kind: 'class_info', member: 'Caption' },
@@ -73,6 +75,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     }));
     const source = await write('src/main.rs', [
         'pub mod registry;',
+        'mod rsx_mappings;',
         'macro_rules! ferro_class { ($($t:tt)*) => {} }',
         'macro_rules! ferro_class_info { ($($t:tt)*) => {} }',
         'pub struct AuditCard;',
@@ -120,7 +123,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     assert.ok(ready, `The built project schema did not provide the type of AuditCard.Caption in ${xaml.uri}. ` +
         `Hovers: ${JSON.stringify(hovers)}. Diagnostics: ${diagnostics.join(', ')}`);
     await verifyDefinitions(xaml, source, dependencySource);
-    await verifyRegisteredPropertyRename(xaml, source, registry);
+    await verifyRegisteredPropertyRename(xaml, source, registry, descriptors);
     await verifyRegisteredTypeRename(xaml, source, registry);
 
     const view = await write('View.xaml', '<StackPanel xmlns="https://github.com/ferroui" />');

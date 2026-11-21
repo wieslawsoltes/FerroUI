@@ -6,7 +6,7 @@ use ferroui_designer_core::TextPatch;
 use ferroui_designer_project::{
     file_uri,
     rsx_mapping::{rename_key, RsxBuilderMapping, PREFIX},
-    MarkupControl, MarkupSource, RustXamlReferences,
+    MarkupControl, MarkupSource, PreviewSourceBuffer, RustXamlReferences,
 };
 use std::collections::BTreeMap;
 
@@ -36,6 +36,9 @@ impl LanguageService {
         drafts: &BTreeMap<String, &FileMoveDraft>,
         documents: &mut Vec<ReviewedDocument>,
     ) -> Result<()> {
+        let buffers = drafts.values().map(|draft| PreviewSourceBuffer {
+            uri: draft.uri.clone(), source: Some(draft.source.clone()),
+        }).collect::<Vec<_>>();
         for project in self.package_schemas.values() {
             for assembly in project.catalog.models().models() {
                 let edits = rename.in_assembly(project, assembly)?;
@@ -63,14 +66,14 @@ impl LanguageService {
                     ),
                 )?;
                 let source = RustSnapshot::read(&uri, drafts)?;
-                let entries = declaration.metadata_in(&source.text).ok_or_else(|| {
+                let entries = declaration.metadata_with_drafts(&source.text, &buffers).ok_or_else(|| {
                     LanguageError(format!(
                         "Repair the selected Rust assembly metadata before review: {uri}"
                     ))
                 })?;
                 require(
-                    entries.iter().all(|entry| entry.key.is_some()),
-                    format!("The keys in the selected assembly need literals or text constants from this source file before review: {uri}"),
+                    entries.iter().all(|entry| entry.key.is_some() || entry.framework_key),
+                    format!("The keys in the selected assembly need literals or text constants resolved from its Cargo sources before review: {uri}"),
                 )?;
                 let mut patches = Vec::new();
                 for edit in edits {
@@ -217,7 +220,7 @@ impl MappingRename<'_> {
         if edit.property || inspect_builder {
             let value = entry.value.as_ref().ok_or_else(|| {
                 LanguageError(format!(
-                    "Use a literal or a text constant from the assembly source file for the RSX mapping {}",
+                    "Use a literal or a text constant resolved from the Cargo package for the RSX mapping {}",
                     edit.key
                 ))
             })?;

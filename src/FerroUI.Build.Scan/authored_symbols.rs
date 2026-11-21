@@ -19,12 +19,23 @@ pub struct AuthoredAssembly {
     pub file: PathBuf,
     pub modules: Vec<String>,
     pub item: String,
+    /// The package-relative crate root used by the scanner.
+    pub crate_root: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct AuthoredMetadata {
     pub key: Option<AuthoredText>,
     pub value: Option<AuthoredText>,
+    /// A known framework setting with no authorable declaration in this crate.
+    pub framework_key: bool,
+}
+
+/// Source and stable identifier of a file in a captured Rust module tree.
+#[derive(Clone, Copy)]
+pub struct MetadataSource<'a> {
+    pub id: &'a str,
+    pub text: &'a str,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -34,6 +45,8 @@ pub struct AuthoredText {
     pub range: std::ops::Range<usize>,
     /// The source spelling of the literal that supplied this value.
     pub literal: std::ops::Range<usize>,
+    /// The exact Rust literal when it was declared in a different module file.
+    pub imported_literal: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
@@ -155,6 +168,7 @@ impl AuthoredAssembly {
             file: entry.text("file")?.into(),
             modules: entry.list("modules", |value| text_of(value, "inline module"))?,
             item: entry.text("item")?,
+            crate_root: entry.optional_text("crate_root")?.map(PathBuf::from),
         })
     }
 
@@ -163,7 +177,11 @@ impl AuthoredAssembly {
             Members::new()
                 .text("file", &self.file.to_string_lossy())
                 .list("modules", &self.modules, |name| Json::string(name))
-                .text("item", &self.item),
+                .text("item", &self.item)
+                .optional(
+                    "crate_root",
+                    self.crate_root.as_ref().map(|path| Json::string(&path.to_string_lossy())),
+                ),
         )
     }
 }

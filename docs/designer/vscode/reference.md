@@ -220,7 +220,7 @@ After building the owning Cargo schema, call `ferroui_workspace_language` with `
 
 ### Review a registered property rename with MCP
 
-Use the registered property's position in XAML, a typed binding, or a resolved style selector predicate. An affected RSX builder mapping appears as a Rust document in the same review, with current editor text and a version when its buffer is open.
+Use the registered property's position in XAML, a typed binding, or a resolved style selector predicate. An affected RSX builder mapping appears as a Rust document in the same review, with current editor text and a version when its buffer is open. A mapping supplied by a text constant in another Cargo module uses that module's current buffer. The patch edits the assembly tuple, and a change to the imported mapping requires a fresh review.
 
 In VS Code, call `ferroui_workspace_plan_property_rename` with the XAML file in `path`, an optional workspace `folder`, a zero-based UTF-16 `position`, and `new_name`. Inspect each file's `before`, `after`, and `edit` fields, then check any locations listed in `unmapped`. Pass the same arguments and the returned `review` to `ferroui_workspace_rename_property`.
 
