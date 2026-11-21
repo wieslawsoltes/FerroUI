@@ -1372,6 +1372,9 @@ impl Visual {
     }
 
     /// The opacity of the control.
+    // Inlined into its callers, as it was (pinned: the inlining shifted with the typed routes in
+    // the codec, #997; property_subsystem::ControlRead).
+    #[inline]
     pub fn opacity(&self) -> f64 {
         self.get_value(Self::opacity_property())
     }
