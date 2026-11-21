@@ -4,6 +4,14 @@ import type { OutlineNode } from '../src/protocol';
 import type { McpFixture } from './mcp';
 import { until } from './wait';
 
+interface ImageSourceEdit {
+    path: string;
+    source: string;
+    asset: string;
+    expected: string;
+    verifyPreview?: boolean;
+}
+
 export async function verifyProjectImageSource(fixture: McpFixture): Promise<void> {
     const root = vscode.workspace.workspaceFolders![0].uri;
     const projectAsset = 'Assets/Preview Image.png';
@@ -13,7 +21,9 @@ export async function verifyProjectImageSource(fixture: McpFixture): Promise<voi
             source(::ferroui_view::embedded_image(/* credit 🎨 */ ::core::include_bytes!(r#"./Assets/Preview Image.png"#))),
         } } }` },
     ]) {
-        await verifyImageSource(fixture, input.path, input.source, projectAsset, input.source.replace('./Assets/', 'Assets/'));
+        await verifyImageSource(fixture, {
+            ...input, asset: projectAsset, expected: input.source.replace('./Assets/', 'Assets/'),
+        });
     }
 
     const directory = 'CargoImageSource';
@@ -23,26 +33,31 @@ export async function verifyProjectImageSource(fixture: McpFixture): Promise<voi
     try {
         await vscode.workspace.fs.createDirectory(file('Assets'));
         const bytes = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(root, projectAsset));
+        const replacement = Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAYAAAADCAIAAAA/Y+msAAAAEUlEQVR4nGMwDpqKhhiIEgIALo0T1QA/I98AAAAASUVORK5CYII=', 'base64');
         await Promise.all([
             vscode.workspace.fs.writeFile(file('Cargo.toml'), Buffer.from('[package]\nname = "cargo-image-source-review"\nversion = "0.0.0"\nedition = "2021"\n')),
             vscode.workspace.fs.writeFile(file('src/lib.rs'), Buffer.from('mod card;\n')),
             vscode.workspace.fs.writeFile(file('Assets/Card.png'), bytes),
-            vscode.workspace.fs.writeFile(file('Assets/New Photo.png'), bytes),
+            vscode.workspace.fs.writeFile(file('Assets/New Photo.png'), replacement),
         ]);
         const source = `fn view() { rsx! { Image {
             source(::ferroui_view::embedded_image(::std::include_bytes!(concat!(
                 env!("CARGO_MANIFEST_DIR"), /* credit 🎨 */ r#"/Assets/Card.png"#,
             )))),
         } }; }`;
-        await verifyImageSource(fixture, `${directory}/src/card.rs`, source, `${directory}/Assets/New Photo.png`,
-            source.replace('/Assets/Card.png', '/Assets/New Photo.png'));
+        await verifyImageSource(fixture, {
+            path: `${directory}/src/card.rs`, source, asset: `${directory}/Assets/New Photo.png`,
+            expected: source.replace('/Assets/Card.png', '/Assets/New Photo.png'), verifyPreview: true,
+        });
     } finally {
         await vscode.workspace.fs.delete(packageRoot, { recursive: true, useTrash: false });
     }
-    console.log('Project image source changes preserved XAML, relative RSX includes, and Cargo-relative RSX includes with one-step Undo');
+    console.log('Project image source changes preserved XAML and RSX includes, rendered the replacement Cargo asset, and restored the original on Undo');
 }
 
-async function verifyImageSource({ invoke, content }: McpFixture, path: string, source: string, asset: string, expected: string): Promise<void> {
+async function verifyImageSource({ invoke, content }: McpFixture, input: ImageSourceEdit): Promise<void> {
+    const { path, source, asset, expected, verifyPreview } = input;
     const root = vscode.workspace.workspaceFolders![0].uri;
     const uri = vscode.Uri.joinPath(root, path);
     await vscode.workspace.fs.writeFile(uri, Buffer.from(source));
@@ -51,6 +66,13 @@ async function verifyImageSource({ invoke, content }: McpFixture, path: string, 
         const { session } = content<{ session: number }>(await invoke('designer_open', { path }));
         const ready = content<{ status: string }>(await invoke('designer_wait', { session }));
         assert.equal(ready.status, 'Ready');
+        const png = async () => {
+            const result = await invoke('designer_preview_image', { session });
+            const image = result.content.find(item => item.type === 'image')?.data;
+            assert.ok(image, result.content[0]?.text);
+            return image;
+        };
+        const before = verifyPreview ? await png() : undefined;
         const { revision, nodes } = content<{ revision: number; nodes: OutlineNode[] }>(await invoke('designer_outline', { session }));
         const image = nodes.find(node => node.canSetImageSource);
         assert.ok(image, 'The accepted image must offer an authored source edit');
@@ -58,10 +80,12 @@ async function verifyImageSource({ invoke, content }: McpFixture, path: string, 
         content(await invoke('designer_set_image_source', edit));
         assert.equal(document.getText(), expected);
         assert.ok((await invoke('designer_set_image_source', edit)).isError, 'A replaced frame cannot change the source again');
+        if (before) assert.notEqual(await png(), before, 'The accepted native frame should show the replacement image');
         const version = document.version;
         content(await invoke('designer_history', { session, expected_version: version, action: 'undo' }));
         await until(() => document.version !== version);
         assert.equal(document.getText(), source);
+        if (before) assert.equal(await png(), before, 'Undo should restore the original native preview');
     } finally {
         const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
             tab.label === `Design · ${path.split('/').at(-1)}` || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
