@@ -1016,7 +1016,9 @@ impl FerroProperty {
     /// `None` for direct properties and when `T` is not the property's value
     /// type.
     pub fn as_styled<T: crate::PropertyValue>(&'static self) -> Option<&'static StyledProperty<T>> {
-        self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<StyledProperty<T>>())
+        // From the codec directly: one call, as from the typed routes before the routes were shared.
+        // A typed write of the declarative layer asks this for every value it sets.
+        self.styled_codec.get().and_then(|codec| codec.typed().downcast_ref::<StyledProperty<T>>())
     }
 
     /// The property as a direct property with value type `T`: the typed view needed to set it
