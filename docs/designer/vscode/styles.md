@@ -56,3 +56,5 @@ The pickers use the include sources in the current native preview. If an include
 ![The consuming preview reflects an unsaved stylesheet edit while the palette shows the Light and Dark values and their source actions](../images/vscode-included-palette-compare.jpg)
 
 See [Styles and palettes from MCP](reference.md#edit-styles-and-palettes-with-mcp) and [Studio authoring](../native-controls.md#edit-scoped-styles-and-palettes) for the same source operations. When your XAML uses application-registered controls or fixtures, open the [App Preview palette](runtime.md#edit-a-palette-in-app-preview) to work with the previewed scope and the app’s registered theme variants.
+
+Use [Styles & Themes in App Preview](runtime.md#edit-styles-and-control-themes-in-app-preview) to edit included selectors, typed setters, and control-theme inheritance against the app’s accepted native frame.

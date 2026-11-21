@@ -18,6 +18,7 @@ import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
+import type { HostedStyleEdit, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectDefinition } from './projectLibrary';
@@ -231,6 +232,26 @@ export class AgentTools {
             }
             case 'designer_hosted_palette_show':
                 return this.hosted.showPalette(document.uri, args.expected_generation, args.arguments as HostedPalettePresentation | undefined, signal);
+            case 'designer_hosted_styles':
+                return this.hosted.styles(document.uri, (args.arguments as HostedStyleRead | undefined) ?? { action: 'files' }, signal);
+            case 'designer_hosted_style_edit_draft':
+            case 'designer_hosted_style_edit': {
+                const { target, edit } = args.arguments as { target: HostedStyleTarget; edit: HostedStyleEdit };
+                return this.hosted.stylesEdit(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, edit, tool === 'designer_hosted_style_edit', signal);
+            }
+            case 'designer_hosted_style_resources': {
+                const { target, property } = args.arguments as { target: HostedStyleTarget; property: string };
+                return this.hosted.styleResources(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, target, property, signal);
+            }
+            case 'designer_hosted_style_source': {
+                const { address, range } = args.arguments as { address: string; range: Range };
+                return this.hosted.styleSource(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, address, range, signal);
+            }
+            case 'designer_hosted_style_show':
+                return this.hosted.showStyles(document.uri, args.expected_generation, (args.arguments as { target: HostedStyleTarget } | undefined)?.target, signal);
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedAnimationAction, signal);

@@ -2,6 +2,7 @@ import type { FromHosted, HostedFrame, ToHosted } from '../src/hostedProtocol';
 import { element } from './dom';
 import { HostedAnimationView } from './hostedAnimations';
 import { HostedPaletteView } from './hostedPalette';
+import { HostedStylesView } from './hostedStyles';
 
 declare function acquireVsCodeApi(): {
     postMessage(message: FromHosted): void;
@@ -12,6 +13,7 @@ const vscode = acquireVsCodeApi();
 const animations = new HostedAnimationView(message => vscode.postMessage(message), Boolean(vscode.getState()?.compare),
     compare => vscode.setState({ compare }));
 const palettes = new HostedPaletteView(message => vscode.postMessage(message));
+const styles = new HostedStylesView(message => vscode.postMessage(message));
 const canvas = element<HTMLImageElement>('hosted-image');
 const status = element('hosted-status');
 const input = element<HTMLFormElement>('hosted-input');
@@ -34,6 +36,8 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     if (data.type === 'keyframeGroupReply') { animations.keyLanes.receive(data); return; }
     if (data.type === 'paletteReply') { palettes.receive(data); return; }
     if (data.type === 'openPalette') { palettes.open(data); return; }
+    if (data.type === 'stylesReply') { styles.receive(data); return; }
+    if (data.type === 'openStyles') { styles.open(data); return; }
     if (data.type === 'status') {
         if (status.textContent !== data.message) status.textContent = data.message;
         interactive = data.interactive;
@@ -41,6 +45,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
         send.disabled = !interactive;
         const { available, selected, revision, pending } = data.fixtures;
         palettes.setReady(interactive ? revision : undefined);
+        styles.setReady(interactive ? revision : undefined);
         fixtureRevision = revision;
         fixtureLabel.hidden = !available.length;
         if (available.length !== availableFixtures.length || available.some((name, index) => name !== availableFixtures[index])) {
@@ -62,6 +67,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     input.hidden = false;
     animations.rendered(current);
     palettes.rendered(current);
+    styles.rendered(current);
 });
 
 function position(event?: MouseEvent) {

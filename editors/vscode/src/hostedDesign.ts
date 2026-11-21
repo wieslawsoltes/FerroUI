@@ -10,6 +10,10 @@ import { HostedAnimations } from './hostedAnimations';
 import { HostedPalettes } from './hostedPalettes';
 import { runHostedPaletteAction } from './hostedPaletteActions';
 import type { FromHostedPalette, HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
+import { HostedSources } from './hostedSources';
+import { runHostedStyleAction } from './hostedStyleActions';
+import { HostedStyles } from './hostedStyles';
+import type { FromHostedStyles, HostedStyleEdit, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
 import { chooseHostedClipEdit } from './hostedClipActions';
 import { chooseHostedStateAction } from './hostedStateActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
@@ -152,6 +156,43 @@ export class HostedDesign implements vscode.Disposable {
         return session;
     }
 
+    async styles(uri: vscode.Uri, read: HostedStyleRead, signal: AbortSignal) {
+        const session = this.session(uri);
+        const frame = session.styleFrame();
+        return { generation: session.generation, frame, ...await session.styles.read(frame, read, signal) };
+    }
+
+    stylesEdit(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
+        target: HostedStyleTarget, edit: HostedStyleEdit, apply: boolean, signal: AbortSignal) {
+        return this.styleSession(uri, generation).styles.edit(frame, target, edit, apply, signal);
+    }
+
+    styleResources(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, target: HostedStyleTarget, property: string, signal: AbortSignal) {
+        return this.styleSession(uri, generation).styles.resources(frame, target, property, signal);
+    }
+
+    styleSource(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, address: string, range: Range, signal: AbortSignal) {
+        return this.styleSession(uri, generation).styles.sources.locate(frame, address, range, signal);
+    }
+
+    async showStyles(uri: vscode.Uri, generation: number, target: HostedStyleTarget | undefined, signal: AbortSignal) {
+        const session = this.styleSession(uri, generation);
+        const frame = session.styleFrame();
+        if (target) await session.styles.read(frame, { action: 'read', target }, signal);
+        signal.throwIfAborted();
+        if (session.styleFrame().revision !== frame.revision) throw new Error('Read the current App Preview styles.');
+        session.panel.reveal(session.panel.viewColumn, true);
+        session.openStyles(frame.revision, target);
+        return { generation, frame };
+    }
+
+    private styleSession(uri: vscode.Uri, generation: number): HostedSession {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        session.styleFrame();
+        return session;
+    }
+
     async animate(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
         control: HostedAnimationAction, signal: AbortSignal) {
         signal.throwIfAborted();
@@ -246,6 +287,7 @@ export class HostedDesign implements vscode.Disposable {
 class HostedSession {
     readonly animations: HostedAnimations;
     readonly palettes: HostedPalettes;
+    readonly styles: HostedStyles;
     private readonly dependencies = new DesignerDependencies();
     private readonly subscriptions: vscode.Disposable[];
     private readonly startup: Promise<void>;
@@ -275,7 +317,9 @@ class HostedSession {
             state => this.showAnimations(state),
             error => this.report(errorMessage(error), Boolean(this.currentFrame)),
             () => Boolean(this.client?.capabilities.hostedPreviewRanges));
-        this.palettes = new HostedPalettes(editor, (frame, signal, task) => this.withAcceptedFrame(frame, signal, task));
+        const sources = new HostedSources(editor, (frame, signal, task) => this.withAcceptedFrame(frame, signal, task));
+        this.palettes = new HostedPalettes(sources);
+        this.styles = new HostedStyles(sources);
         const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, '**/*.[xX][aA][mM][lL]'));
         const dependencyChanged = (uri: vscode.Uri) => {
             if (uri.toString() !== editor.document.uri.toString() && this.dependencies.change(uri)) this.update();
@@ -412,6 +456,16 @@ class HostedSession {
 
     openPalette(revision: number, presentation?: HostedPalettePresentation): void {
         this.post({ type: 'openPalette', revision, presentation });
+    }
+
+    styleFrame(): HostedAnimationFrame {
+        const frame = this.currentFrame;
+        if (!frame?.stylesAvailable) throw new Error('Open a current XAML App Preview with scoped style support.');
+        return { revision: frame.revision, sequence: frame.sequence };
+    }
+
+    openStyles(revision: number, target?: HostedStyleTarget): void {
+        this.post({ type: 'openStyles', revision, target });
     }
 
     get message(): string { return this.status; }
@@ -676,6 +730,10 @@ class HostedSession {
             await this.receivePalette(message);
             return;
         }
+        if (message.type === 'styles') {
+            await this.receiveStyles(message);
+            return;
+        }
         if (message.type === 'animationIssues') {
             try { await this.revealAnimationIssue(message.frame); }
             catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
@@ -757,6 +815,17 @@ class HostedSession {
         try {
             this.paletteFrame();
             const result = await runHostedPaletteAction(this.palettes, frame, command, () => this.paletteFrame());
+            this.post({ ...reply, result });
+        } catch (error) {
+            this.post({ ...reply, error: errorMessage(error) });
+        }
+    }
+
+    private async receiveStyles({ frame, request, command }: FromHostedStyles): Promise<void> {
+        const reply = { type: 'stylesReply' as const, request, frame };
+        try {
+            this.styleFrame();
+            const result = await runHostedStyleAction(this.styles, frame, command, () => this.styleFrame());
             this.post({ ...reply, result });
         } catch (error) {
             this.post({ ...reply, error: errorMessage(error) });

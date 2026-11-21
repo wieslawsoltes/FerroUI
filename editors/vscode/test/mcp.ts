@@ -119,7 +119,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'palette', 'palette_edit_draft', 'palette_edit',
-            'palette_source', 'palette_references', 'palette_show']) {
+            'palette_source', 'palette_references', 'palette_show', 'styles', 'style_edit_draft', 'style_edit',
+            'style_resources', 'style_source', 'style_show']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
@@ -138,6 +139,12 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_palette_edit', palette)).content[0]?.text ?? '', /allowWrites/);
         const paletteDraft = await invoke('designer_hosted_palette_edit_draft', palette);
         assert.ok(paletteDraft.isError && !paletteDraft.content[0]?.text?.includes('allowWrites'));
+        const style = { ...hostedKey, arguments: {
+            target: { address: 'ferres://sample/View.xaml', node: 2 }, edit: { action: 'setter', property: 'Width', value: '148' },
+        } };
+        assert.match((await invoke('designer_hosted_style_edit', style)).content[0]?.text ?? '', /allowWrites/);
+        const styleDraft = await invoke('designer_hosted_style_edit_draft', style);
+        assert.ok(styleDraft.isError && !styleDraft.content[0]?.text?.includes('allowWrites'));
         const group = { ...hostedKey, arguments: { program: 1, command: {
             action: 'move_keyframes', keyframes: [{ target: 1, property: 'Opacity', time: .5 }], offset: .1,
         } } };

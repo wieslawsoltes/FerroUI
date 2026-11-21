@@ -10,6 +10,9 @@ export type StylesPage = 'styles' | 'palette' | 'comparison';
 export type PaletteEdit = { action: 'set'; node: number; color: string }
     | { action: 'add'; owner: number; layer: PaletteLayer; key: string; kind: PaletteColorKind; color: string; provider?: ContrastProvider };
 
+export type StyleCreation = { action: 'create'; selector: string }
+    | { action: 'create_theme'; key: string; target_type: string };
+
 export interface StyleScope { node: number; label: string }
 export interface StyleHost extends StyleScope { type_name: string; nested: boolean }
 export interface StyleSummary { node: number; name: string; kind: 'Style' | 'ControlTheme'; scope?: string; target?: string }
@@ -37,15 +40,15 @@ export interface AuthoredSetter extends StyleSetter {
     expression: boolean;
     editable: boolean;
 }
-export interface StyleDefinition {
+export interface StyleDefinition<Base extends string | number = number> {
     node: number;
     kind: StyleSummary['kind'];
     name: string;
     target?: string;
     range: Range;
     identity: { kind: 'selector' | 'base'; value?: string; editable: boolean };
-    base?: number;
-    base_choices?: { node: number; name: string; type_name?: string }[];
+    base?: Base;
+    base_choices?: { node: Base; name: string; type_name?: string }[];
     setters: AuthoredSetter[];
     available: StyleSetter[];
     can_remove: boolean;
@@ -82,14 +85,14 @@ export interface StylesState {
     paletteFocus?: Extract<StyleEditorLocation, { page: 'palette' }>;
     consumer?: string;
 }
-export type StylesAction =
+export type StylesAction<Base extends string | number = number> =
     | { type: 'definition' | 'scope' | 'references'; node: number }
     | { type: 'new'; kind: 'style' | 'theme' }
     | { type: 'included-sources'; page: 'styles' | 'palette' }
     | { type: 'included-color'; key: string; theme: CanvasTheme }
     | { type: 'return-to-consumer' }
     | { type: 'selector'; value: string }
-    | { type: 'base'; base: number | null }
+    | { type: 'base'; base: Base | null }
     | { type: 'setter'; property: string; value: string | null }
     | { type: 'setter-resource'; property: string }
     | { type: 'add-setter' | 'preview-definition' | 'remove-style' }

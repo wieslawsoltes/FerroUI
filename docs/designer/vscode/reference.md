@@ -129,6 +129,14 @@ For the main Studio canvas, call `designer_preview_appearance` for the environme
 
 Use `designer_hosted_palette_source` with the accepted frame, file `address`, and reported `range` to reveal a declaration. `designer_hosted_palette_references` reads uses in the selected source. Use `designer_hosted_palette_show` with the current generation to open the toolbar palette. Pass `target`, `layer`, or `compare` in `arguments` to choose the initial presentation. [App Preview palette guide](runtime.md#edit-a-palette-in-app-preview)
 
+### Edit App Preview styles with MCP
+
+1. Open the XAML App Preview and call `designer_hosted_styles` with the design session. The default `files` action returns accepted `address` values. Use `arguments.action: "catalog"` with an `address` to list style hosts, resource scopes, and definitions. Use `action: "read"` with `target: { address, node }` to read one definition.
+2. Use the reported generation, revision, and sequence as `expected_generation`, `expected_revision`, and `expected_sequence`. Use `designer_hosted_style_edit_draft` with `arguments.target` and `arguments.edit` to review a patch, then `designer_hosted_style_edit` to apply it in one Undo step.
+3. For selectors use `selector` with `value`. For setters use `setter` with `property` and the new `value`, or pass `null` to reset it. Use `designer_hosted_style_resources` to read resources for a setter, then use `resource` with the `property`, `key`, and `dynamic` choice. For control-theme inheritance use `base` with a reported `key`, or pass `null` to clear it.
+
+`create` takes a `selector` and a target from `style_hosts`. `create_theme` takes a `key`, `target_type`, and a target from `palette_scopes`. `remove` applies to an unkeyed style. Use `designer_hosted_style_source` with a reported `range` and accepted source `address` to open a declaration. `designer_hosted_style_show` opens the toolbar editor and accepts an optional `arguments.target`. [App Preview styles guide](runtime.md#edit-styles-and-control-themes-in-app-preview)
+
 ### Trace property values with MCP
 
 Call `designer_studio_query` with `tool: "designer_property_trace"` and `arguments: { node, property }`. Use a current source node from `designer_outline`. For an object that exists only in the preview, read `designer_tree` through `designer_studio_query` and pass its inspector ID as `runtime_node` in place of `node`. The report includes the effective value, authored value and referenced resource where available, ordered contributors, and UTF-16 source ranges for mapped declarations. In Designer Studio, call `designer_property_trace` directly with the same arguments.

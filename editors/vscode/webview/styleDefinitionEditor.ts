@@ -2,7 +2,8 @@ import type { AuthoredSetter, StyleDefinition, StylesAction } from '../src/style
 import { create } from './dom';
 import { actionButton } from './propertyEditor';
 
-export function styleDefinition(sheet: StyleDefinition | undefined, send: (action: StylesAction) => void): HTMLElement {
+export function styleDefinition<Base extends string | number>(sheet: StyleDefinition<Base> | undefined,
+    send: (action: StylesAction<Base>) => void, previewAvailable = true): HTMLElement {
     const root = create('div');
     if (!sheet) {
         const empty = create('p');
@@ -20,11 +21,8 @@ export function styleDefinition(sheet: StyleDefinition | undefined, send: (actio
     tools.className = 'style-tools';
     const add = actionButton('add', 'Add setter', () => send({ type: 'add-setter' }));
     add.disabled = !sheet.available.length;
-    tools.append(
-        actionButton('preview', 'Preview definition on canvas', () => send({ type: 'preview-definition' })),
-        actionButton('go-to-file', 'Reveal definition in source', () => send({ type: 'reveal', range: sheet.range })),
-        add,
-    );
+    if (previewAvailable) tools.append(actionButton('preview', 'Preview definition on canvas', () => send({ type: 'preview-definition' })));
+    tools.append(actionButton('go-to-file', 'Reveal definition in source', () => send({ type: 'reveal', range: sheet.range })), add);
     if (sheet.can_remove) tools.append(actionButton('trash', 'Remove style', () => send({ type: 'remove-style' })));
     bar.append(kind, tools);
     root.append(bar, styleIdentity(sheet, send));
@@ -38,28 +36,31 @@ export function styleDefinition(sheet: StyleDefinition | undefined, send: (actio
     return root;
 }
 
-function styleIdentity(sheet: StyleDefinition, send: (action: StylesAction) => void): HTMLElement {
+function styleIdentity<Base extends string | number>(sheet: StyleDefinition<Base>, send: (action: StylesAction<Base>) => void): HTMLElement {
     const row = create('label');
     row.className = 'style-identity';
     if (sheet.identity.kind === 'base') {
         row.append('Based on');
         const choices = sheet.base_choices ?? [];
         const select = create('select');
+        select.id = `style-base-${sheet.node}`;
         select.setAttribute('aria-label', 'Based on control theme');
         select.disabled = !sheet.identity.editable;
         select.append(new Option('None', ''));
-        if (sheet.identity.value && !choices.some(theme => theme.node === sheet.base)) {
+        const selected = choices.findIndex(theme => theme.node === sheet.base);
+        if (sheet.identity.value && selected < 0) {
             const source = new Option(sheet.identity.value, 'source');
             source.disabled = true;
             select.append(source);
         }
-        for (const theme of choices) select.append(new Option(theme.name, String(theme.node)));
-        select.value = choices.some(theme => theme.node === sheet.base) ? String(sheet.base) : sheet.identity.value ? 'source' : '';
-        select.addEventListener('change', () => send({ type: 'base', base: select.value ? Number(select.value) : null }));
+        for (const [index, theme] of choices.entries()) select.append(new Option(theme.name, String(index)));
+        select.value = selected >= 0 ? String(selected) : sheet.identity.value ? 'source' : '';
+        select.addEventListener('change', () => send({ type: 'base', base: select.value ? choices[Number(select.value)]?.node ?? null : null }));
         row.append(select);
     } else {
         row.append('Selector');
         const input = create('input');
+        input.id = `style-selector-${sheet.node}`;
         input.spellcheck = false;
         input.readOnly = !sheet.identity.editable;
         input.setAttribute('aria-label', 'Style selector');
@@ -70,7 +71,7 @@ function styleIdentity(sheet: StyleDefinition, send: (action: StylesAction) => v
     return row;
 }
 
-function setterRow(setter: AuthoredSetter, send: (action: StylesAction) => void): HTMLElement {
+function setterRow<Base extends string | number>(setter: AuthoredSetter, send: (action: StylesAction<Base>) => void): HTMLElement {
     const row = create('div');
     row.className = 'style-setter';
     const name = create('label');

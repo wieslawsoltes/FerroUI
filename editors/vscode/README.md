@@ -146,6 +146,8 @@ Use **Visual state actions** to edit groups, states, setters, and transitions in
 
 Open **App Preview palette** to compare Light, Dark, and High contrast colors in the previewed XAML scope. Choose the owning file to edit an included palette before saving. Each change takes one Undo step. [App Preview palette guide](../../docs/designer/vscode/runtime.md#edit-a-palette-in-app-preview)
 
+Open **App Preview Styles & Themes** to edit included selectors, add typed setters for app-registered controls, and change a control theme's base. The preview follows changes in the owning XAML buffer, and the source button opens the exact declaration. [App Preview styles guide](../../docs/designer/vscode/runtime.md#edit-styles-and-control-themes-in-app-preview)
+
 The [Todo Workbench sample](../../samples/TodoWorkbench/README.md) demonstrates the preview entry point. Enable its `app-preview` Cargo feature in `ferroui.hotReload.targets` to use it with the hosted design command.
 
 **Open Live App** shows actual managed or attached application windows. The visual, logical, and accessibility hierarchies use the existing authenticated runtime inspector. Inspect properties, styles, resources and diagnostics, or use Interact to send native input where the runtime permits it. Hold `Alt` while clicking in Inspect mode to choose from overlapping native visual hits. Runtime property overrides affect the attached app. **Reveal Source** uses compiler locations inside the workspace. Managed debug builds record the source for mounted RSX controls, and compatible hot reloads update those positions. Set `FERROUI_EDITOR_SOURCE=1` when launching a debug build outside VS Code to enable compiled RSX locations for attached inspection.

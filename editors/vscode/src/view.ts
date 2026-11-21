@@ -339,10 +339,20 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <label id="hosted-fixture-label" class="metric" hidden>${icon('database')}<select id="hosted-fixture" aria-label="Preview fixture"></select></label>
     ${tool('hosted-clip-actions', 'ellipsis', 'Animation clip actions', 'hidden')}
     ${tool('hosted-state-actions', 'symbol-enum', 'Visual state actions', 'hidden')}
+    ${tool('hosted-styles-button', 'symbol-property', 'App Preview Styles & Themes', 'popovertarget="hosted-styles" aria-controls="hosted-styles" aria-haspopup="dialog" aria-expanded="false" hidden')}
     ${tool('hosted-palette-button', 'symbol-color', 'App Preview palette', 'popovertarget="hosted-palette" aria-controls="hosted-palette" aria-haspopup="dialog" aria-expanded="false" hidden')}
     ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
     ${tool('hosted-animation-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
 </header>
+<section id="hosted-styles" class="popover" popover role="dialog" aria-label="App Preview Styles & Themes">
+    <div class="hosted-style-controls">
+        <select id="hosted-styles-file" aria-label="Style source file"></select>
+        <select id="hosted-styles-definition" aria-label="Style or control theme"></select>
+        ${tool('hosted-styles-add', 'add', 'New style or control theme')}
+    </div>
+    <p id="hosted-styles-status" class="dock-message" role="status" hidden></p>
+    <fieldset id="hosted-styles-fields" class="styles-fields" aria-label="Style and theme properties" disabled></fieldset>
+</section>
 <section id="hosted-palette" class="popover" popover role="dialog" aria-label="App Preview palette">
     <div class="hosted-palette-controls">
         <select id="hosted-palette-file" aria-label="Palette source file"></select>

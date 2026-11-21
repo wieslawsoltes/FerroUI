@@ -3,6 +3,7 @@ import type { HostedFrame } from '../src/hostedProtocol';
 import { paletteLayerLabels, type PaletteLayer, type PaletteSheet, type StylesAction } from '../src/stylesProtocol';
 import { anchorPopover, element } from './dom';
 import { paletteEditor } from './paletteEditor';
+import { sourceOptions } from './hostedSourceOptions';
 
 type OpenPalette = Extract<ToHostedPalette, { type: 'openPalette' }>;
 
@@ -211,16 +212,4 @@ export class HostedPaletteView {
             }
         }
     }
-}
-
-function sourceOptions(files: HostedPaletteDocument[]): HTMLOptionElement[] {
-    const labels = files.map(file => decodeURI(file.uri).split('/').pop() || file.uri);
-    return files.map((file, index) => {
-        const label = labels[index];
-        const unique = labels.indexOf(label) === labels.lastIndexOf(label);
-        const full = files.some(other => other !== file && other.uri === file.uri) ? file.address : file.uri;
-        const option = new Option(unique ? label : decodeURI(full), file.address);
-        option.title = decodeURI(full);
-        return option;
-    });
 }
