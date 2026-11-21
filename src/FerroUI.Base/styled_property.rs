@@ -11,7 +11,7 @@ use crate::{
     BoxedValue, ObjectType, DoNothingType, FerroObject, FerroProperty, FerroPropertyMetadata,
     FerroPropertyRegistry, PropertyValue, StyledPropertyMetadata, StyledValue, TypeInfo, UnsetValueType,
 };
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::cell::{OnceCell, RefCell};
 use std::ops::Deref;
 use std::rc::Rc;
@@ -64,7 +64,8 @@ impl<T: PropertyValue> StyledProperty<T> {
                 FerroPropertyInit { inherits, is_attached, is_direct: false, is_read_only: false },
                 notifying,
             )
-            .with_members(members),
+            .with_members(members)
+            .with_validation(validate.is_some()),
             routes: StyledRoutes::new(),
             metadata: MetadataTable::new(host_type, metadata),
             single_default_value: RefCell::new(Some(default_value)),
@@ -445,8 +446,8 @@ impl PropertyRoutes for StyledRoutes {
     fn route_get_value(&'static self, o: &FerroObject) -> BoxedValue {
         let property = self.property();
         let values = o.values();
-        if let Some(effective) = values.get_effective_value(property) {
-            return effective.boxed_value();
+        if let Some(value) = values.boxed_effective_value(property) {
+            return value;
         }
         if property.inherits() {
             if let Some(inherited) = values.try_get_inherited_value(property) {
@@ -474,55 +475,64 @@ impl PropertyRoutes for StyledRoutes {
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
         let property = self.property();
-        if value.is::<UnsetValueType>() {
-            if priority == BindingPriority::LocalValue {
-                o.values().clear_value(o, property);
+        // The type of the value, asked once: a value of the value type is the common case, then
+        // the two markers, then a value to convert.
+        let type_id = value.type_id();
+        if type_id != property.property_type() {
+            if type_id == TypeId::of::<UnsetValueType>() {
+                if priority == BindingPriority::LocalValue {
+                    o.values().clear_value(o, property);
+                }
+                return None;
             }
-            return None;
-        }
-        if value.is::<DoNothingType>() {
-            return None;
-        }
-        if value.type_id() != property.property_type() {
+            if type_id == TypeId::of::<DoNothingType>() {
+                return None;
+            }
             let converted = self.converted(value);
             return self.route_set_value(o, converted.as_any(), priority);
         }
         FerroObject::validate_priority(priority);
-        match value_marker_any(value) {
-            Some(ValueMarker::Unset) => {
-                if priority == BindingPriority::LocalValue {
-                    o.values().clear_value(o, property);
+        // A marker in a box is a value of a property of untyped values only.
+        if property.may_hold_marker() {
+            match value_marker_any(value) {
+                Some(ValueMarker::Unset) => {
+                    if priority == BindingPriority::LocalValue {
+                        o.values().clear_value(o, property);
+                    }
+                    return None;
                 }
-                None
-            }
-            Some(ValueMarker::DoNothing) => None,
-            None => {
-                if !self.codec().is_valid_value(value) {
-                    property.value_not_valid();
-                }
-                o.values().set_untyped_value(o, property, value, priority)
+                Some(ValueMarker::DoNothing) => return None,
+                None => {}
             }
         }
+        if property.validates() && !self.codec().is_valid_value(value) {
+            property.value_not_valid();
+        }
+        o.values().set_untyped_value(o, property, value, priority)
     }
 
     fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any) {
         let property = self.property();
-        if value.is::<UnsetValueType>() {
-            o.values().clear_value(o, property);
-            return;
-        }
-        if value.is::<DoNothingType>() {
-            return;
-        }
-        if value.type_id() != property.property_type() {
+        let type_id = value.type_id();
+        if type_id != property.property_type() {
+            if type_id == TypeId::of::<UnsetValueType>() {
+                o.values().clear_value(o, property);
+                return;
+            }
+            if type_id == TypeId::of::<DoNothingType>() {
+                return;
+            }
             let converted = self.converted(value);
             return self.route_set_current_value(o, converted.as_any());
         }
-        match value_marker_any(value) {
-            Some(ValueMarker::Unset) => o.values().clear_value(o, property),
-            Some(ValueMarker::DoNothing) => {}
-            None => o.values().set_untyped_current_value(o, property, value),
+        if property.may_hold_marker() {
+            match value_marker_any(value) {
+                Some(ValueMarker::Unset) => return o.values().clear_value(o, property),
+                Some(ValueMarker::DoNothing) => return,
+                None => {}
+            }
         }
+        o.values().set_untyped_current_value(o, property, value)
     }
 
     fn route_set_direct_value_unchecked(&'static self, _o: &FerroObject, _entry: &dyn IValueEntry) {

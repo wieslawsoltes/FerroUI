@@ -1,5 +1,4 @@
 use super::effective_value::cast_effective_value;
-use super::immediate_value_frame::BorrowedValueEntry;
 use super::{
     entry_ptr_eq, frame_ptr_eq, BindingSource, BoxedLocalValueBindingObserver, DirectBindingObserver,
     DirectBoxedBindingObserver, EffectiveValue, EffectiveValueDyn, FramePriority, FrameType, ImmediateValueFrame,
@@ -608,7 +607,7 @@ impl ValueStore {
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
         if priority != BindingPriority::LocalValue {
-            let boxed = property.routes().route_box_value(value).expect("a value of the type of the property");
+            let boxed = property.styled_codec().box_value(value).expect("a value of the type of the property");
             let frame = self.get_or_create_immediate_value_frame(owner, property, priority);
             let result = frame.add_boxed_value(property, boxed);
             let entry: Rc<dyn IValueEntry> = result.clone();
@@ -631,7 +630,7 @@ impl ValueStore {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         self.record_local_write(property);
         let effective = self.get_or_add_effective_value(owner, property);
-        effective.set_local_value_and_raise_entry(owner, &BorrowedValueEntry { property, value });
+        effective.apply_value_any(owner, value, BindingPriority::LocalValue);
     }
 
     /// The current value of `property` from an untyped value of its value type.
@@ -644,7 +643,7 @@ impl ValueStore {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         self.record_current_write(property);
         let effective = self.get_or_add_effective_value(owner, property);
-        effective.set_current_value_and_raise_entry(owner, &BorrowedValueEntry { property, value });
+        effective.set_current_value_any(owner, value);
     }
 
     pub fn set_current_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
@@ -1535,6 +1534,13 @@ impl ValueStore {
     }
 
     #[inline]
+    /// The value of the effective value of `property` in a box of its own, read where the store
+    /// keeps it (no handle to the effective value is taken).
+    pub(crate) fn boxed_effective_value(&self, property: &FerroProperty) -> Option<BoxedValue> {
+        let values = self.effective_values.borrow();
+        Self::find(&values, property.id()).map(|index| values[index].1.boxed_value())
+    }
+
     pub fn get_effective_value(&self, property: &FerroProperty) -> Option<EffectiveValueRef> {
         let values = self.effective_values.borrow();
         Self::find(&values, property.id()).map(|index| values[index].1.clone())
