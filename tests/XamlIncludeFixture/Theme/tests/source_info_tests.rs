@@ -65,16 +65,20 @@ fn compiled_source_information_is_the_run_time_loaders() {
     let actual = source_infos(&compiled);
     let name = SOURCE_INFO_DOCUMENTS[1].0.trim_start_matches('/');
     let physical_path = Path::new(env!("CARGO_MANIFEST_DIR")).join(name);
-    // The compiled object locations identify workspace files for Apply to Source.
+    let loader_address = format!("ferres://{}/{name}", ASSEMBLY.name);
+    // The compiled object locations retain both the workspace file used for
+    // Apply to Source and the packaged address used for resource resolution.
     for (compiled, loaded) in actual.iter().zip(&expected).take(2) {
         let loaded = loaded.as_ref().unwrap();
         let revision = loaded.source_revision().expect("object source fingerprint");
+        assert_eq!(loaded.loader_uri(), Some(loader_address.as_str()));
         let location = XamlSourceInfo::new(
             loaded.line_number(),
             loaded.line_position(),
             Some(physical_path.to_str().expect("UTF-8 source path")),
         )
-        .with_source_revision(revision);
+        .with_source_revision(revision)
+        .with_loader_uri(loader_address.as_str());
         assert_eq!(compiled.as_ref(), Some(&location));
     }
     assert_eq!(actual[2..], expected[2..]);
