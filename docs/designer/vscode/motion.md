@@ -80,7 +80,7 @@ ferroui_view::animation(ferroui_view::ms(2000))
     ))
 ```
 
-Keep keyframe closures as a single builder expression, as in `|key| key.set(...)`. A checked edit keeps comments and numeric suffixes around constructor arguments. Adding alpha to a `Color::from_rgb` key changes that call to `Color::from_argb` in the same edit.
+Keep keyframe closures as a single builder expression, as in `|key| key.set(...)`. A checked edit keeps comments and numeric suffixes around constructor arguments. Adding alpha to a `Color::from_rgb` key changes that call to `Color::from_argb` in the same edit. Keys authored as `Color::from_uint32(0xFF22_6688u32)` retain the packed ARGB constructor, integer radix, grouping, and suffix. The four literal fields of a `Color` struct can also be edited in place.
 
 Agents can request `"red"`, `"green"`, `"blue"`, or `"alpha"` from `designer_animation_curve` and `designer_hosted_curve` after reading the track’s `curve_channels`. Samples use normalized sRGB components and the color’s own alpha. App Preview reads the app’s native color, including its byte precision.
 

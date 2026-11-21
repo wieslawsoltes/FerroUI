@@ -38,7 +38,7 @@ fn checked_color_edit_targets_the_rust_module_or_the_active_invocation() {
         "application.rs",
         "mod brand; mod screen; pub(crate) use brand::REVIEW as ACCENT;\n",
     );
-    let disk = "use ferroui_base::media::Color as Paint;\r\npub(crate) const KEY: &str = \"Ink\";\r\npub(crate) const REVIEW: Paint = Paint::from_rgb(12u8, /* 🧭 */ 21, 32);\r\n";
+    let disk = "use ferroui_base::media::Color as Paint;\r\npub(crate) const KEY: &str = \"Ink\";\r\npub(crate) const REVIEW: Paint = Paint::from_uint32((/* 🧭 */ 0xFF0C_1520_u32));\r\n";
     let brand = fixture.write("brand.rs", disk);
     let source = r#"
     use super::{ACCENT as INK, brand::KEY};
@@ -52,7 +52,7 @@ fn checked_color_edit_targets_the_rust_module_or_the_active_invocation() {
     "#
     .replace('\n', "\r\n");
     let screen = fixture.write("screen.rs", &source);
-    let draft = disk.replace("12u8", "123u8");
+    let draft = disk.replace("0xFF0C", "0xFF7B");
     let buffers = [PreviewSourceBuffer {
         uri: brand.clone(),
         source: Some(draft.clone()),
@@ -85,7 +85,7 @@ fn checked_color_edit_targets_the_rust_module_or_the_active_invocation() {
     assert_eq!(shared.uri.as_deref(), Some(brand.as_str()));
     assert_eq!(
         &draft[shared.value.range()],
-        "Paint::from_rgb(123u8, /* 🧭 */ 21, 32)"
+        "Paint::from_uint32((/* 🧭 */ 0xFF7B_1520_u32))"
     );
 
     let edit = |mode| RsxStyleEdit::ColorResource {
@@ -102,10 +102,7 @@ fn checked_color_edit_targets_the_rust_module_or_the_active_invocation() {
     let after = TextPatch::apply_all(&draft, plan.patches).unwrap();
     assert_eq!(
         after,
-        draft.replace(
-            "from_rgb(123u8, /* 🧭 */ 21, 32)",
-            "from_argb(160, 24u8, /* 🧭 */ 80, 96)"
-        )
+        draft.replace("0xFF7B_1520_u32", "0xA018_5060_u32")
     );
     assert_eq!(
         fs::read_to_string(fixture.0.join("brand.rs")).unwrap(),

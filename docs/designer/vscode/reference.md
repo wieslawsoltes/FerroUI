@@ -145,6 +145,8 @@ For App Preview, read the Rust file, catalog, and definition with `designer_host
 
 When an App Preview value comes from a separate Rust module, the resource and its comparison cells provide `sourceAddress` and `range`. Use those fields with `designer_hosted_style_source`. Keep the style’s address and node as the edit target. A `color_resource` draft in `declaration` mode returns the owning module’s `uri` and patches. Apply the action with the same accepted frame, then use Undo in the owning editor if needed. [Shared Rust palettes in App Preview](runtime.md#edit-a-shared-rust-palette-in-app-preview)
 
+The `color_resource` action accepts a hex color for mapped Rust constructors and struct literals, including a packed `Color::from_uint32` value. A literal or declaration edit changes the mapped integer tokens in their original source form. [Mapped Rust color forms](styles.md#edit-rust-style-color-resources)
+
 Use `designer_view` with `styles_page: "comparison"` to show the selected inline Rust palette in the dock. In App Preview, use `designer_hosted_style_show` with `arguments.compare: true` and an optional `arguments.target` from the current definition. [App Preview style workflow](runtime.md#edit-styles-and-control-themes-in-app-preview)
 
 ### Edit an App Preview palette with MCP

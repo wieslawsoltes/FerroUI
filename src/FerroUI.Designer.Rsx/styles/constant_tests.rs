@@ -84,6 +84,39 @@ fn resolves_named_imports_and_edits_the_shared_or_local_color_explicitly() {
 }
 
 #[test]
+fn edits_explicit_color_fields_without_reordering_or_reformatting_them() {
+    let literal = "Rgb { r: 0x0C_u8, b: 0b0010_0000, a: 0xFFu8, g: /* 🧭 */ 0o025u8 }";
+    let source = SOURCE
+        .replace("Rgb::from_rgb(5u8, /* brand 🧭 */ 91, 135)", literal)
+        .replace('\n', "\r\n");
+    let projection = project(&source);
+    let style = projection.style_definitions()[0].1;
+    let color = &style.resources[0];
+    assert_eq!(color.color().as_deref(), Some("#FF0C1520"));
+    let plan = projection
+        .plan_style_source(&RsxStyleEdit::ColorResource {
+            style: style.declaration.start,
+            resource: color.declaration.start,
+            value: "#A0185060".into(),
+            mode: ResourceColorMode::Declaration,
+        })
+        .unwrap();
+    let updated = TextPatch::apply_all(&source, plan.patches).unwrap();
+    assert_eq!(
+        updated,
+        source.replace(
+            literal,
+            "Rgb { r: 0x18_u8, b: 0b0110_0000, a: 0xA0u8, g: /* 🧭 */ 0o120u8 }"
+        )
+    );
+    assert!(project(&updated).xaml().contains("#A0185060"));
+    let computed = source.replace("a: 0xFFu8", "a: brand_alpha()");
+    assert!(project(&computed).style_definitions()[0].1.resources[0]
+        .color()
+        .is_none());
+}
+
+#[test]
 fn variant_and_constant_aliases_respect_their_declaring_scopes() {
     let source = SOURCE.replace(
         "fn view() {",

@@ -27,24 +27,44 @@ fn preview() {
 "#;
 
 #[test]
-fn rgb_key_can_add_alpha_and_keep_its_comments_and_byte_suffix() {
-    let source = VIEW
-        .replace("ferroui_base::Visual::opacity_property()", "ferroui_controls::Border::background_property()")
-        .replace("0.2))", r##""#FF000000"))"##)
-        .replace("0.6f64", "ferroui_base::media::Color::from_rgb(/* red 🧭 */ 120u8, 32, 16)")
-        .replace("1.0))", r##""#20808080"))"##)
-        .replace('\n', "\r\n");
-    let caret = source.rfind("rsx!").unwrap();
-    let projection = project_rust(&source, caret).unwrap();
-    let markup = projection.preview_markup();
-    let clip = markup.animations[0].1;
-    let update = KeyframeEdit::Upsert {
-        previous: Some(0.5), time: 0.5, value: "#80E02010", easing: "0.25,-0.5,0.6,1.2",
-    };
-    let patches = clip.patch_keyframe("Background", update).unwrap();
-    let edited = TextPatch::apply_all(&source, patches).unwrap();
-    assert_eq!(edited, source.replace("from_rgb(/* red 🧭 */ 120u8", "from_argb(128, /* red 🧭 */ 224u8"));
-    assert!(project_rust(&edited, caret).unwrap().xaml().contains("#80E02010"));
+fn color_keys_change_alpha_without_reformatting_authored_rust() {
+    for (original, expected) in [
+        (
+            "from_rgb(/* red 🧭 */ 120u8, 32, 16)",
+            "from_argb(128, /* red 🧭 */ 224u8, 32, 16)",
+        ),
+        (
+            "from_uint32(/* ARGB 🧭 */ 0x7F_78_20_10u32)",
+            "from_uint32(/* ARGB 🧭 */ 0x80_E0_20_10u32)",
+        ),
+    ] {
+        let source = VIEW
+            .replace(
+                "ferroui_base::Visual::opacity_property()",
+                "ferroui_controls::Border::background_property()",
+            )
+            .replace("0.2))", r##""#FF000000"))"##)
+            .replace("0.6f64", &format!("ferroui_base::media::Color::{original}"))
+            .replace("1.0))", r##""#20808080"))"##)
+            .replace('\n', "\r\n");
+        let caret = source.rfind("rsx!").unwrap();
+        let projection = project_rust(&source, caret).unwrap();
+        let markup = projection.preview_markup();
+        let clip = markup.animations[0].1;
+        let update = KeyframeEdit::Upsert {
+            previous: Some(0.5),
+            time: 0.5,
+            value: "#80E02010",
+            easing: "0.25,-0.5,0.6,1.2",
+        };
+        let patches = clip.patch_keyframe("Background", update).unwrap();
+        let edited = TextPatch::apply_all(&source, patches).unwrap();
+        assert_eq!(edited, source.replace(original, expected));
+        assert!(project_rust(&edited, caret)
+            .unwrap()
+            .xaml()
+            .contains("#80E02010"));
+    }
 }
 
 #[test]
