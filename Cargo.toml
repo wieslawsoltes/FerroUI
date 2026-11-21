@@ -475,9 +475,9 @@ libc = "0.2"
 # time (nothing is linked), `debug` prints the structures and results.
 ash = { version = "=0.38.0", default-features = false, features = ["loaded", "debug", "std"] }
 # D-Bus for the FreeDesktop services (docs/porting/x11-platform.md, section 3): pure Rust, its own
-# executor thread per connection (the default features), no Tokio. `futures-util` for the streams of
-# signals and for waiting on one of two futures.
-zbus = { version = "=5.19.0" }
+# runtime (`zruntime`, the default features) with a helper thread between calls of `block_on`, no
+# Tokio. `futures-util` for the streams of signals and for waiting on one of two futures.
+zbus = { version = "=6.5.0" }
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
 # The Wayland platform (docs/porting/wayland-platform.md, section 2): the protocol bindings over
 # libwayland-client, which is opened at run time (`dlopen`), because EGL needs the display and the

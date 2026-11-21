@@ -10,7 +10,7 @@ use ferroui_base::reactive::Subscription;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
-use zbus::zvariant::{OwnedValue, Value};
+use zbus::{OwnedVariant, Variant};
 
 const INTERFACE_STATUS: &str = "org.a11y.Status";
 
@@ -56,7 +56,7 @@ impl AtSpiAccessibilityWatcher {
     }
 
     async fn init_core(self: &Rc<Self>) -> zbus::Result<()> {
-        let connection = zbus::blocking::connection::Builder::session()?.build()?.into_inner();
+        let connection = zbus::connection::Builder::session().build().await?;
         self.init_on_connection(connection).await
     }
 
@@ -64,8 +64,8 @@ impl AtSpiAccessibilityWatcher {
     pub(crate) async fn init_on_connection(self: &Rc<Self>, connection: zbus::Connection) -> zbus::Result<()> {
         *self.session_connection.borrow_mut() = Some(connection.clone());
         let proxy = zbus::fdo::PropertiesProxy::builder(&connection)
-            .destination(BUS_NAME_A11Y)?
-            .path(PATH_A11Y)?
+            .destination(BUS_NAME_A11Y)
+            .path(PATH_A11Y)
             .build()
             .await?;
         let interface = zbus::names::InterfaceName::from_static_str_unchecked(INTERFACE_STATUS);
@@ -85,10 +85,10 @@ impl AtSpiAccessibilityWatcher {
             if arguments.interface_name.as_str() != INTERFACE_STATUS {
                 return;
             }
-            let changed: HashMap<String, OwnedValue> = arguments
+            let changed: HashMap<String, OwnedVariant> = arguments
                 .changed_properties
                 .iter()
-                .filter_map(|(name, value)| Some((name.to_string(), OwnedValue::try_from(value).ok()?)))
+                .filter_map(|(name, value)| Some((name.to_string(), OwnedVariant::try_from(value).ok()?)))
                 .collect();
             let enabled = enabled_of(&changed);
             if enabled == this.is_enabled.get() {
@@ -112,8 +112,8 @@ impl AtSpiAccessibilityWatcher {
 /// `IsEnabled || ScreenReaderEnabled` of a set of properties; a property
 /// the set does not have counts as false, as the generated property
 /// structure of the reference has it.
-pub(crate) fn enabled_of(properties: &HashMap<String, OwnedValue>) -> bool {
-    let flag = |name: &str| matches!(properties.get(name).map(|value| &**value), Some(Value::Bool(true)));
+pub(crate) fn enabled_of(properties: &HashMap<String, OwnedVariant>) -> bool {
+    let flag = |name: &str| matches!(properties.get(name).map(|value| &**value), Some(Variant::Bool(true)));
     flag("IsEnabled") || flag("ScreenReaderEnabled")
 }
 
@@ -128,8 +128,8 @@ mod tests {
     // Not from the reference, which has no tests of this project.
     use super::*;
 
-    fn properties(entries: &[(&str, bool)]) -> HashMap<String, OwnedValue> {
-        entries.iter().map(|(name, value)| (name.to_string(), OwnedValue::from(*value))).collect()
+    fn properties(entries: &[(&str, bool)]) -> HashMap<String, OwnedVariant> {
+        entries.iter().map(|(name, value)| (name.to_string(), OwnedVariant::from(*value))).collect()
     }
 
     #[test]
