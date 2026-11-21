@@ -142,7 +142,7 @@ impl DesignerSession {
             .cast::<StyledElement>()
             .is_some_and(|element| !element.is_attached_to_logical_tree())
         {
-            return Err("Attach the preview to a Window before running behavior actions".into());
+            return Err("Attach the preview to a Window or rooted logical tree before running behavior actions".into());
         }
         let behaviors = visual
             .get_value(Interaction::behaviors_property())
