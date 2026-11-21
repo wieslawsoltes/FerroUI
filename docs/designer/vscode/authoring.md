@@ -191,14 +191,31 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | --- | --- |
 | **Properties** | Select a control and search its common and additional fields. Compare measured bounds to authored values. Edit a common field across selected controls, inspect effective values and their sources, or reset an authored value. Use **Edit binding**, **Edit brush**, or **Promote to resource** when available for the property. |
 | **Events** | Assign or clear an XAML handler name or supported RSX expression. Create a Rust code-behind handler for an XAML event with a project registration, or open its declaration. |
+| **Behaviors** | Attach an event or data trigger to an XAML control, edit and order its actions, and run the actions on the native Design canvas. |
 | **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Use the rename icon to review a key and its project references. Extract the containing dictionary into a reusable file, or use **Promote to resource** to replace a literal with a reference. |
 | **Library** | Browse reusable XAML definitions across the project and group the active design’s definitions by kind. Open a scoped native preview or reveal the original declaration. The current document’s Library also exposes references, template creation, and applicable resource actions. |
 | **Assets** | Import and browse images, fonts, media, and markup. Open a file, preview a raster image, or copy a relative path. Drop a raster image on the canvas or Outline, or use **Choose image placement**. XAML inserts a relative URI. Mapped RSX uses `embedded_image` with a relative `include_bytes!` path whose bytes are read at build time. |
-| **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. In **Behaviors**, attach routed-event or data-condition triggers and configure their actions in supported XAML. |
+| **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. Open **Behaviors** to edit the selected XAML control’s triggers. |
 
 To change an authored image, select it in **Design** or **Outline**. Select a raster file in **Assets** and choose **Use as image source**. The action is available for an empty or literal image source. XAML writes the document-relative URI. On an existing mapped RSX source, the edit changes the path inside `include_bytes!` and preserves the surrounding call, comments, and compatible raw-string delimiters. One Undo restores the previous source.
 
 To try the binding inspector, open [BindingWorkbench.xaml](../../../editors/vscode/test/fixtures/BindingWorkbench.xaml), select its bound control, and open the binding on its property. For a gradient, open [CustomerGradient.xaml](../../../editors/vscode/test/fixtures/CustomerGradient.xaml), choose **Edit brush**, and change a stop’s color or position. Review the draft and apply it to author one edit.
+
+### Edit a behavior
+
+1. Open [BehaviorsWorkbench.xaml](../../../editors/vscode/test/fixtures/BehaviorsWorkbench.xaml) in Design. Select **Approve** in **Outline** and choose the lightning icon in **Properties**, or run **FerroUI: Edit Behaviors**.
+2. Expand a trigger to see the actions in execution order. Press Enter on the trigger to edit its event, source, or data condition. Press Enter on an action to select the field you want to edit. Use **Reveal in Source** to open a custom trigger or action, edit a collection supplied by a style or template, or change the trigger type.
+3. Choose the plus icon in the view title to attach a routed event or data condition. Give the trigger its first action. The plus icon on a trigger appends another action. Built-in choices change a property, invoke a command, call a method, add a style class, or remove a style class. Use a control name or binding for an optional source or target. Leaving it empty uses the selected control when the action supports an implicit target.
+4. Drag an action onto another action in the same trigger to change its order. Drop on the trigger to move it to the end. For keyboard ordering, focus an action, press Shift+F10, and choose **Move Action Earlier** or **Move Action Later**. The row menu also removes actions and triggers. One Undo restores the previous XAML after any accepted edit.
+5. Choose **Preview Actions** on the trigger to execute its actions on the Design canvas. **Reset Behavior Preview** restores the authored view. If an action fails, the designer restores the authored view and reports the failure. To test whether an event or data change fires the trigger, use **Interact** and operate the control.
+
+In the sample, the Click trigger grows the Approve button and updates the status. Move the first width action after the second, then preview again to see the different final width. The behavior stays inside its authored `ActionCollection`.
+
+When editing XAML directly, completion recognizes the framework’s trigger and action types, inherited properties, and comparison values.
+
+To wire an event to a visual state, select the control that raises the event. In **Studio → States**, choose the destination state and **Attach event trigger…**. Choose the routed event. The generated XAML actions use the selected state group. [Designer Studio workflow](../native-controls.md#edit-behaviors) · [MCP workflow](reference.md#edit-and-preview-behaviors-with-mcp)
+
+![The Behaviors dock lists the Click trigger and its ordered actions beside the authored XAML and native preview](../images/vscode-behaviors-preview.jpg)
 
 ### Find reusable XAML definitions
 

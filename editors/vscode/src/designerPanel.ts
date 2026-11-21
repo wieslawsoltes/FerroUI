@@ -31,6 +31,7 @@ interface Frame {
     guideCatalog?: GuideCatalog;
     guideAnchor?: GuideAnchor;
     columnAuthoring: boolean;
+    behaviorAuthoring: boolean;
     itemTemplateAuthoring: boolean;
     controlTemplateAuthoring: boolean;
     propertyTrace: boolean;
@@ -231,6 +232,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsSelectionWrapping(): boolean { return Boolean(this.frame?.canvas.wrapAvailable); }
     get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
     get supportsItemTemplates(): boolean { return Boolean(this.frame?.itemTemplateAuthoring); }
+    get supportsBehaviorAuthoring(): boolean { return this.language === 'xaml' && Boolean(this.frame?.behaviorAuthoring); }
     get supportsControlTemplate(): boolean { return Boolean(this.frame?.controlTemplateAuthoring); }
     get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
     get supportsStyleComposition(): boolean { return Boolean(this.frame?.styleComposition); }
@@ -516,7 +518,8 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioTools() {
-        const { tools, xamlEdits, rsxEdits, presentations } = await (await this.getClient()).studioTools();
+        const client = await this.getClient();
+        const { tools, xamlEdits, rsxEdits, presentations } = await client.studioTools();
         const edits = this.language === 'xaml' ? xamlEdits : [
             ...xamlEdits.filter(tool => this.mappedStudioEdit((tool as { name: string }).name)),
             ...(rsxEdits ?? []).filter(tool => {
@@ -526,7 +529,10 @@ export class DesignerPanel implements vscode.Disposable {
                 return this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement;
             }),
         ];
-        return { tools, presentations: presentations ?? [], edits };
+        const availablePresentations = presentations?.filter(tool =>
+            (tool as { name: string }).name !== 'designer_behavior' || (this.language === 'xaml' && client.capabilities.behaviorAuthoring));
+        const queries = this.language === 'xaml' ? tools : tools.filter(tool => (tool as { name: string }).name !== 'designer_behaviors');
+        return { tools: queries, presentations: availablePresentations ?? [], edits };
     }
 
     private mappedStudioEdit(name: string): boolean {
@@ -634,12 +640,13 @@ export class DesignerPanel implements vscode.Disposable {
                     this.timelinePose = presentation.timelinePosition?.pose ?? undefined;
                     if (presentation.timelinePosition?.elapsed !== undefined || !this.timelinePose) this.setAnimationRecording(false);
                 }
-                if (name === 'designer_state' || name === 'designer_definition') {
+                if (name === 'designer_state' || name === 'designer_definition' || name === 'designer_behavior') {
                     this.timelinePose = undefined;
                     this.setAnimationRecording(false);
                 }
                 if (presentation.timelineTargets !== undefined) this.timelineTargets = presentation.timelineTargets;
                 if (presentation.timelineTargets !== undefined || name === 'designer_definition'
+                    || name === 'designer_behavior'
                     || (name === 'designer_state' && (args as { action?: string }).action !== 'advance_preview')) this.animationCatalogEpoch++;
             });
         if (this.language === 'rust' && name === 'designer_item_template' && !presentation?.openRustTemplate) {
@@ -849,6 +856,7 @@ export class DesignerPanel implements vscode.Disposable {
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
                 columnAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxColumnAuthoring : client.capabilities.columnAuthoring),
+                behaviorAuthoring: Boolean(client.capabilities.behaviorAuthoring),
                 itemTemplateAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxItemTemplateAuthoring : client.capabilities.itemTemplateAuthoring),
                 controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),
@@ -960,7 +968,7 @@ export class DesignerPanel implements vscode.Disposable {
             const commands = { outline: 'ferroui.showOutline', properties: 'ferroui.showProperties', toolbox: 'ferroui.showToolbox',
                 events: 'ferroui.showEvents', resources: 'ferroui.showResources', assets: 'ferroui.showAssets',
                 studio: 'ferroui.showStudio', timeline: 'ferroui.showTimeline', data: 'ferroui.showData', library: 'ferroui.showLibrary',
-                columns: 'ferroui.showColumns', styles: 'ferroui.showStyles' } as const;
+                columns: 'ferroui.showColumns', styles: 'ferroui.showStyles', behaviors: 'ferroui.showBehaviors' } as const;
             await vscode.commands.executeCommand(commands[message.view], this.session);
             return;
         }

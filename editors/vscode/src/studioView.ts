@@ -78,7 +78,12 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
             { id: 'focus', label: 'Focus and Labels', icon: 'list-ordered', children: () => focusItems(context) },
             { id: 'timeline', label: 'Timeline', icon: 'history', children: () => timelineItems(context) },
             { id: 'states', label: 'States', icon: 'symbol-enum', children: () => stateItems(context, this.previewTransition) },
-            { id: 'behaviors', label: 'Behaviors', icon: 'run', children: () => behaviorItems(context) },
+            ...(context.panel.supportsBehaviorAuthoring
+                ? [{ id: 'behaviors', label: 'Behaviors', icon: 'zap', run: async () => {
+                    context.ensure();
+                    await vscode.commands.executeCommand('ferroui.showBehaviors');
+                } }]
+                : context.writable ? [{ id: 'behaviors', label: 'Behaviors', icon: 'zap', children: () => behaviorItems(context) }] : []),
         ];
     }
 

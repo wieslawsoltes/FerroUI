@@ -57,6 +57,9 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     if query.name == "designer_open_style_source" && stage.authored_rsx.is_some() {
         return Err("Edit Rust-owned style builders in Rust source.".into());
     }
+    if query.name == "designer_behavior" && stage.authored_rsx.is_some() {
+        return Err("Behavior previews require an authored XAML view".into());
+    }
     let mut arguments = query.arguments;
     let revision = stage.session.borrow().document().revision();
     arguments.as_object_mut().ok_or("arguments must be an object")?
@@ -76,7 +79,11 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     let route_source = if query.name == "designer_state" && arguments["action"] == "preview_transition" {
         stage.authored_rsx.as_ref().and_then(|source| source.state_route_range(&arguments))
     } else { None };
-    let result = stage.sources.run(|| provider.call(&query.name, &arguments, Permissions { allow_property_writes: true, ..Default::default() }))?;
+    let permissions = Permissions {
+        allow_property_writes: true,
+        allow_input: query.name == "designer_behavior" && arguments["action"] == "preview",
+    };
+    let result = stage.sources.run(|| provider.call(&query.name, &arguments, permissions))?;
     let mut presentation = renderer.present(request.next_frame, query.name == "designer_layer")?;
     presentation.timeline_position = result.get("timelinePosition").cloned();
     presentation.timeline_targets = result.get("timelineTargets").cloned();
@@ -96,6 +103,7 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
             Some("preview" | "preview_targets" | "scrub" | "scrub_all" | "play_program" | "play_range" | "advance_program" | "pause_program" | "stop_program" | "play_all")
         ),
         "designer_state" => matches!(action, Some("preview" | "preview_transition" | "advance_preview" | "clear_preview")),
+        "designer_behavior" => matches!(action, Some("preview" | "clear_preview")),
         "designer_definition" => matches!(action, Some("enter" | "enter_included_template" | "exit")),
         "designer_item_template" => action == Some("preview"),
         "designer_open_style_source" => action.is_none(),
@@ -134,6 +142,9 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     if query.name == "designer_preview_checks" {
         return crate::preview_checks::query(stage, &query.arguments);
+    }
+    if query.name == "designer_behaviors" && stage.authored_rsx.is_some() {
+        return Err("Behavior collections use authored XAML".into());
     }
     if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_property_trace") {
         stage.studio.validate(&query.name, &query.arguments)?;
@@ -390,7 +401,9 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
                 "mirror_keyframes" | "paste_keyframes" | "duplicate_keyframes" | "remove_keyframes")
         ),
         "designer_state" => matches!(action, Some("upsert" | "remove")),
-        "designer_behavior" => matches!(action, Some("upsert" | "remove" | "source")),
+        "designer_behavior" => matches!(action, Some(
+            "upsert" | "remove" | "source" | "set_trigger" | "append_action" | "set_action" | "move_action" | "remove_action"
+        )),
         "designer_design_data_edit" => {
             matches!(action, Some("set_value" | "set_object" | "sample_items"))
         }

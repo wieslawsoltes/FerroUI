@@ -19,13 +19,13 @@ For a package built from this checkout, see the [extension build and packaging i
 
 | Task | Where to work |
 | --- | --- |
-| Find a project view, edit source and layout, configure table columns, or work with bindings and resources | [Author views and components](authoring.md) |
+| Find a project view, edit source and layout, configure columns and behaviors, or work with bindings and resources | [Author views and components](authoring.md) |
 | Compose XAML styles and themes or compare Light and Dark resource colors | [Edit styles, control themes, and palettes](styles.md) |
 | Edit a clip or state transition, compare variants, or play a prototype | [Animate and preview variations](motion.md) |
 | Preview with the app’s types and data, inspect a running window, hot reload, or run UI tests | [Run and test a view](runtime.md) |
 | Set up MCP, find a command, or configure the workspace | [Use agents and configure the extension](reference.md) |
 
-The canvas toolbar and its **More designer actions** menu open the workbench views. You can also run their **FerroUI** commands from the Command Palette. Drag a view’s title or use **View: Move View** to place Toolbox, Outline, Properties, Events, Resources, and Assets where you use them. **FerroUI Timeline** opens in the VS Code Panel, below the editor groups in the default workbench layout. Drag the Panel divider to size it or use **Maximize Panel**. [VS Code custom layout](https://code.visualstudio.com/docs/configure/custom-layout)
+The canvas toolbar and its **More designer actions** menu open the workbench views. You can also run their **FerroUI** commands from the Command Palette. Drag a view’s title or use **View: Move View** to place Toolbox, Outline, Properties, Events, Behaviors, Resources, and Assets where you use them. **FerroUI Timeline** opens in the VS Code Panel, below the editor groups in the default workbench layout. Drag the Panel divider to size it or use **Maximize Panel**. [VS Code custom layout](https://code.visualstudio.com/docs/configure/custom-layout)
 
 When a design changes, the last accepted frame stays visible until the replacement is ready. The canvas can decode a replacement while the VS Code window is covered, so zoom and pan use the refreshed artboard when you return to its tab.
 

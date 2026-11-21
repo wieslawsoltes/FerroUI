@@ -207,6 +207,14 @@ Call `designer_studio_query` with `tool: "designer_preview_checks"` and empty `a
 
 In Designer Studio, `designer_preview_checks` reads the current canvas. `designer_preview_stage_checks` takes the current stage model. Studio reports `source` as a byte span in the authored document. [Preview Checks in VS Code](authoring.md#diagnose-a-design-time-issue)
 
+### Edit and preview behaviors with MCP
+
+1. Open a designer for an XAML view. Use `designer_outline` to find the control and `designer_studio_query` with `tool: "designer_behaviors"` and `arguments: { owner }`. The report includes attached triggers, `actionRows` in source order, UTF-16 ranges, editing capabilities, and the active preview ID.
+2. Use `designer_studio_edit` with the current frame revision and `tool: "designer_behavior"`. Use `upsert` to attach a complete trigger and `set_trigger` to change its fields. Use `append_action`, `set_action`, `move_action`, or `remove_action` for a single step. The move index is zero-based in the resulting action order. Read `designer_studio_tools` for the typed values and the `source` and `remove` actions.
+3. Call `designer_studio_present` with `tool: "designer_behavior"`, `action: "preview"`, and the behavior ID. Read the new frame before calling `clear_preview`. These operations execute or reset native actions on the isolated Design canvas without editing the buffer. Use `designer_view` with `view: "behaviors"` to open the dock.
+
+On Studio's MCP server, call `designer_behaviors` and `designer_behavior` directly. Supply the document revision for editing and preview. Running the trigger requires the server's `allow_input` permission. Call `designer_state_actions` to build the actions for a named visual state, then pass them when attaching a trigger. [Behavior workflow](authoring.md#edit-a-behavior)
+
 ## Find a command
 
 Commands are under **FerroUI** in the Command Palette. Some actions also appear in the canvas, a dock’s title menu, or the Project view.
@@ -215,7 +223,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | --- | --- |
 | Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
 | Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Create Rust Event Handler**, **Rename RSX Control** |
-| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Edit Control Template**, **Show Events**, **Edit Command Binding**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
+| Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Edit Control Template**, **Show Events**, **Edit Behaviors**, **Edit Command Binding**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
 | Extract an inline XAML dictionary | **Extract Resource Dictionary…**, **Review New Dictionary**, **Apply Extraction**, **Cancel Extraction** |
 | Review and move an XAML file | **Move XAML File…**, **Apply File Move**, **Cancel File Move** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |

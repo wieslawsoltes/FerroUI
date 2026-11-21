@@ -691,11 +691,10 @@ property getters use the same registry as RSX keyframes. Todo Workbench register
 the **Interactive review** fixture from `app_preview/review_states.rs` for runtime
 state preview. [VS Code motion guide](vscode/motion.md#edit-and-preview-visual-states)
 
-The **Behaviors** panel authors event/data triggers and property, command, method and class actions.
-Custom trigger/action objects retain their raw markup and can be edited in source. The designer
-registers the existing Interactivity, Interactions and Interactions.Custom types. Preview executes
-the real behavior/action implementation; Stop restores the authored view rather than preserving
-behavior-mutated default control values as hot-reload user state.
+The **Behaviors** panel authors event and data triggers and property, command, method, and class
+actions. Edit or reorder one action in its source collection. Use the source icon or **Behavior
+XAML** for custom markup. **Preview actions** runs the native actions. **Reset behavior preview**
+restores the authored view. [Studio workflow](native-controls.md#edit-behaviors) · [VS Code workflow](vscode/authoring.md#edit-a-behavior)
 
 Generated state programs have explicit ownership markers. Updating an endpoint preserves unrelated
 programs, authored intermediate keys/splines, custom animator data, complex Setter.Value objects,

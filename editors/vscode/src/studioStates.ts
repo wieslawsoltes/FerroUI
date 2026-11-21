@@ -1,9 +1,11 @@
 import { action, choose, editText, editTime, type StudioContext, type StudioItem } from './studioContext';
+import { BEHAVIOR_TOOL, pickBehaviorEvent } from './behaviorEditor';
 import { addState, authorSetter, authorTransition, easingText, editMappedSetter, newStateGroup,
     parseMappedEasing, pickSetter, pickTransition, removeState } from './stateAuthoringPrompts';
 import type { StateSetter as Setter, StateTransition as Transition, VisualStateGroup as StateGroup } from './stateGroupProtocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 import type { Range } from './protocol';
+import type { BehaviorAction } from './studioBehaviors';
 
 interface StateSource { owner: number; group: string; range: Range; transitions: Array<Pick<Transition, 'from' | 'to'> & { range: Range }> }
 
@@ -53,6 +55,20 @@ function groupItems(context: StudioContext, group: StateGroup, update: (group: S
             const selected = await pickSetter(state);
             if (selected) await updateSetters(state.setters.filter(setter => setter !== selected.setter));
         } });
+        const behaviorOwner = context.node;
+        if (context.panel.supportsBehaviorAuthoring && behaviorOwner !== undefined) actions.push({
+            label: 'Attach event trigger…',
+            run: async () => {
+                const event = await pickBehaviorEvent(context, behaviorOwner, 'Click');
+                if (!event) return;
+                const { actions } = await context.read<{ actions: BehaviorAction[] }>('designer_state_actions', {
+                    owner: group.owner, group: group.name, from: null, to: state.name,
+                });
+                await context.edit(BEHAVIOR_TOOL, { action: 'upsert', model: {
+                    owner: behaviorOwner, trigger: { Event: { event, source: null } }, actions,
+                } });
+            },
+        });
         if (writable) actions.push({ label: 'Remove state', run: () => update(removeState(group, state)) });
         const selected = await choose(state.name, actions);
         await selected?.run();

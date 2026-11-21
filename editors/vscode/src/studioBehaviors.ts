@@ -1,10 +1,10 @@
 import { action, choose, editText, type StudioContext, type StudioItem } from './studioContext';
 
-type Trigger = { Event: { event: string; source: string | null } }
+export type Trigger = { Event: { event: string; source: string | null } }
     | { Data: { binding: string; comparison: string; value: string; revert_on_false: boolean } }
     | { Custom: { type_name: string } };
-type BehaviorAction = Record<string, unknown>;
-interface Behavior { id: number; owner: number; trigger: Trigger; actions: BehaviorAction[] }
+export type BehaviorAction = Record<string, unknown>;
+export interface Behavior { id: number; owner: number; trigger: Trigger; actions: BehaviorAction[] }
 
 export async function behaviorItems(context: StudioContext): Promise<StudioItem[]> {
     const owner = context.node;
@@ -12,7 +12,7 @@ export async function behaviorItems(context: StudioContext): Promise<StudioItem[
     const { behaviors } = await context.read<{ behaviors: Behavior[] }>('designer_behaviors', { owner });
     const update = (model: Omit<Behavior, 'id'> & { id?: number }) => context.edit('designer_behavior', { action: 'upsert', model });
     const items: StudioItem[] = behaviors.map(behavior => ({
-        id: `behavior:${behavior.id}`, label: label(behavior.trigger), description: `${behavior.actions.length} actions`,
+        id: `behavior:${behavior.id}`, label: triggerLabel(behavior.trigger), description: `${behavior.actions.length} actions`,
         children: async () => {
             const children = behavior.actions.map((item, index) => {
                 const kind = Object.keys(item)[0];
@@ -53,18 +53,20 @@ export async function behaviorItems(context: StudioContext): Promise<StudioItem[
     return items;
 }
 
-function label(trigger: Trigger): string {
+export function triggerLabel(trigger: Trigger): string {
     if ('Event' in trigger) return trigger.Event.event;
     if ('Data' in trigger) return `${trigger.Data.binding} · ${trigger.Data.comparison} · ${trigger.Data.value}`;
     return trigger.Custom.type_name;
 }
 
-async function chooseTrigger(previous?: Trigger): Promise<Trigger | undefined> {
+export async function chooseTrigger(previous?: Trigger, eventPicker?: (current: string) => Promise<string | undefined>): Promise<Trigger | undefined> {
     const kind = await choose('When should this behavior run?', [{ label: 'Routed event', event: true }, { label: 'Data condition', event: false }]);
     if (!kind) return;
     if (kind.event) {
         const current = previous && 'Event' in previous ? previous.Event : undefined;
-        const event = await editText('Routed event name', current?.event ?? 'Click');
+        const event = eventPicker
+            ? await eventPicker(current?.event ?? 'Click')
+            : await editText('Routed event name', current?.event ?? 'Click');
         if (!event) return;
         const source = await editText('Source name or binding. Leave empty for the selected control.', current?.source ?? '');
         if (source !== undefined) return { Event: { event, source: source || null } };
@@ -73,7 +75,6 @@ async function chooseTrigger(previous?: Trigger): Promise<Trigger | undefined> {
     const current = previous && 'Data' in previous ? previous.Data : undefined;
     const binding = await editText('Data binding', current?.binding ?? '{Binding IsReady}');
     if (!binding) return;
-    const comparisons = ['Equal', 'NotEqual', 'LessThan', 'LessThanOrEqual', 'GreaterThan', 'GreaterThanOrEqual'];
     const comparison = await choose('Comparison', comparisons.map(label => ({ label, picked: label === current?.comparison })));
     if (!comparison) return;
     const value = await editText('Compare with', current?.value ?? 'True');
@@ -85,11 +86,15 @@ async function chooseTrigger(previous?: Trigger): Promise<Trigger | undefined> {
     if (revert) return { Data: { binding, comparison: comparison.label, value, revert_on_false: revert.revert } };
 }
 
-function actionLabel(kind: string): string { return kind.replace(/([a-z])([A-Z])/g, '$1 $2'); }
+export const comparisons = ['Equal', 'NotEqual', 'LessThan', 'LessThanOrEqual', 'GreaterThan', 'GreaterThanOrEqual'];
 
-const actionKinds = ['ChangeProperty', 'InvokeCommand', 'CallMethod', 'AddClass', 'RemoveClass'];
+export function actionLabel(kind: string): string {
+    return kind.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/ ([A-Z])/g, (_, letter: string) => ` ${letter.toLowerCase()}`);
+}
 
-async function chooseAction(previous?: BehaviorAction): Promise<BehaviorAction | undefined> {
+export const actionKinds = ['ChangeProperty', 'InvokeCommand', 'CallMethod', 'AddClass', 'RemoveClass'];
+
+export async function chooseAction(previous?: BehaviorAction): Promise<BehaviorAction | undefined> {
     const selection = await choose('What should this behavior do?', actionKinds
         .map(kind => ({ actionKind: kind, label: actionLabel(kind), picked: previous && kind in previous })));
     if (!selection) return;

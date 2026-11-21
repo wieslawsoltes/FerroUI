@@ -202,6 +202,52 @@
         "icon": "$(discard)"
       },
       {
+        "command": "ferroui.showBehaviors",
+        "title": "Edit Behaviors",
+        "category": "FerroUI",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "ferroui.behaviors.attach",
+        "title": "Attach Behavior",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ferroui.behaviors.preview",
+        "title": "Preview Actions",
+        "icon": "$(play)"
+      },
+      {
+        "command": "ferroui.behaviors.clear",
+        "title": "Reset Behavior Preview",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "ferroui.behaviors.append",
+        "title": "Add Action",
+        "icon": "$(add)"
+      },
+      {
+        "command": "ferroui.behaviors.source",
+        "title": "Reveal in Source",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "ferroui.behaviors.earlier",
+        "title": "Move Action Earlier",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "ferroui.behaviors.later",
+        "title": "Move Action Later",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "ferroui.behaviors.remove",
+        "title": "Remove",
+        "icon": "$(trash)"
+      },
+      {
         "command": "ferroui.showToolbox",
         "title": "Show Toolbox",
         "category": "FerroUI",
@@ -642,6 +688,42 @@
         {
           "command": "ferroui.columns.reset",
           "when": "false"
+        },
+        {
+          "command": "ferroui.showBehaviors",
+          "when": "ferroui.hasBehaviorEditor"
+        },
+        {
+          "command": "ferroui.behaviors.attach",
+          "when": "focusedView == ferroui.behaviors && ferroui.canAttachBehavior"
+        },
+        {
+          "command": "ferroui.behaviors.clear",
+          "when": "focusedView == ferroui.behaviors && ferroui.canResetBehavior"
+        },
+        {
+          "command": "ferroui.behaviors.preview",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.append",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.source",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.earlier",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.later",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.behaviors.remove",
+          "when": "false"
         }
       ],
       "editor/title": [
@@ -781,6 +863,21 @@
           "group": "navigation"
         },
         {
+          "command": "ferroui.showBehaviors",
+          "when": "view == ferroui.properties && ferroui.hasBehaviorEditor",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.behaviors.attach",
+          "when": "view == ferroui.behaviors && ferroui.canAttachBehavior",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.behaviors.clear",
+          "when": "view == ferroui.behaviors && ferroui.canResetBehavior",
+          "group": "navigation@2"
+        },
+        {
           "command": "ferroui.revealDesignerSource",
           "when": "view == ferroui.outline",
           "group": "navigation"
@@ -827,6 +924,36 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "ferroui.behaviors.preview",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bpreview\\b/",
+          "group": "inline@1"
+        },
+        {
+          "command": "ferroui.behaviors.append",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bappend\\b/",
+          "group": "inline@2"
+        },
+        {
+          "command": "ferroui.behaviors.source",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bsource\\b/",
+          "group": "inline@3"
+        },
+        {
+          "command": "ferroui.behaviors.earlier",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bearlier\\b/",
+          "group": "1_order@1"
+        },
+        {
+          "command": "ferroui.behaviors.later",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\blater\\b/",
+          "group": "1_order@2"
+        },
+        {
+          "command": "ferroui.behaviors.remove",
+          "when": "view == ferroui.behaviors && viewItem =~ /\\bremove\\b/",
+          "group": "2_edit@1"
+        },
         {
           "command": "ferroui.project.moveXamlFile",
           "when": "view == ferroui.project && viewItem == ferrouiProjectXaml && isWorkspaceTrusted",
@@ -1098,6 +1225,14 @@
           "icon": "dist/icons/table.svg",
           "contextualTitle": "FerroUI Columns",
           "when": "ferroui.hasColumnEditor",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.behaviors",
+          "name": "Behaviors",
+          "icon": "dist/icons/symbol-event.svg",
+          "contextualTitle": "FerroUI Behaviors",
+          "when": "ferroui.hasBehaviorEditor",
           "visibility": "collapsed"
         },
         {
