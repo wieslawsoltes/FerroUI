@@ -614,9 +614,10 @@ impl UiToolProvider for DesignerMcp {
         }
         if item_templates::handles(name) {
             let result = item_templates::call(&mut session, name, args)?;
-            if session.uses_rust_source() && args["action"] == "preview"
-                && let Some(workspace) = self.workspace.as_ref().and_then(Weak::upgrade)
-            {
+            if let (true, Some(workspace)) = (
+                session.uses_rust_source() && args["action"] == "preview",
+                self.workspace.as_ref().and_then(Weak::upgrade),
+            ) {
                 drop(session);
                 workspace.focus_definition_canvas();
                 return Ok(result);
