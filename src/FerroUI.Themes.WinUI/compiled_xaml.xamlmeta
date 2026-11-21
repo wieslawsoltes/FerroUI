@@ -36,11 +36,11 @@
         {
           "name": "ambient",
           "index": 0,
-          "documents": ["WinUITheme.xaml", "DensityStyles/Compact.xaml", "Controls/WinUIControls.xaml", "Controls/AdornerLayer.xaml", "Controls/EmbeddableControlRoot.xaml", "Controls/OverlayPopupHost.xaml", "Controls/PopupRoot.xaml", "Controls/ThemeVariantScope.xaml", "Controls/Window.xaml", "Controls/WindowDrawnDecorations.xaml"],
-          "keys": ["ComboBoxEditableTextPadding", "ComboBoxMinHeight", "ComboBoxPadding", "CompactStyles", "ContentControlFontSize", "ControlContentThemeFontSize", "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", "DatePickerFlyoutPresenterHighlightHeight", "DatePickerFlyoutPresenterItemHeight", "DatePickerFlyoutPresenterItemPadding", "DatePickerFlyoutPresenterMonthPadding", "DatePickerHostMonthPadding", "DatePickerHostPadding", "DefaultTitleBarStyle", "ListViewItemMinHeight", "NavigationViewItemOnLeftMinHeight", "TextControlThemeMinHeight", "TextControlThemePadding", "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", "TimePickerFlyoutPresenterHighlightHeight", "TimePickerFlyoutPresenterItemHeight", "TimePickerFlyoutPresenterItemPadding", "TimePickerHostPadding", "TitleBarBackButtonStyle", "TitleBarPaneToggleButtonStyle", "TreeViewItemMinHeight", "TreeViewItemMultiSelectCheckBoxMinHeight", "TreeViewItemPresenterMargin", "TreeViewItemPresenterPadding", "WindowCaptionButton", "WindowChromeStyle", "WindowDrawnDecorationsCloseButton", "WindowDrawnDecorationsWindowBorderBoxShadow"],
-          "type_keys": ["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "TextBlock", "ThemeVariantScope", "Window", "WindowDrawnDecorations"],
-          "references": ["CaptionTextBlockStyle", "CloseButtonBackgroundPointerOver", "CloseButtonBackgroundPressed", "CloseButtonStrokePointerOver", "CloseButtonStrokePressed", "ContentControlThemeFontFamily", "ControlContentThemeFontSize", "ControlCornerRadius", "DefaultButtonStyle", "DefaultTitleBarStyle", "GlyphGeometryE700", "GlyphGeometryE72B", "GlyphGeometryE73F", "GlyphGeometryE740", "GlyphGeometryE8BB", "GlyphGeometryE921", "GlyphGeometryE922", "GlyphGeometryE923", "PathIconUnscaledTemplate", "SolidBackgroundFillColorBaseBrush", "SurfaceStrokeColorDefaultBrush", "SystemControlFocusVisualPrimaryBrush", "SystemControlFocusVisualSecondaryBrush", "SystemControlTransparentBrush", "TextFillColorPrimaryBrush", "TitleBarBackButtonBackground", "TitleBarBackButtonBackgroundDisabled", "TitleBarBackButtonBackgroundPointerOver", "TitleBarBackButtonBackgroundPressed", "TitleBarBackButtonForeground", "TitleBarBackButtonForegroundDisabled", "TitleBarBackButtonForegroundPointerOver", "TitleBarBackButtonForegroundPressed", "TitleBarBackButtonWidth", "TitleBarForegroundBrush", "TitleBarPaneToggleButtonBackground", "TitleBarPaneToggleButtonBackgroundDisabled", "TitleBarPaneToggleButtonBackgroundPointerOver", "TitleBarPaneToggleButtonBackgroundPressed", "TitleBarPaneToggleButtonForeground", "TitleBarPaneToggleButtonForegroundDisabled", "TitleBarPaneToggleButtonForegroundPointerOver", "TitleBarPaneToggleButtonForegroundPressed", "TitleBarPaneToggleButtonWidth", "WindowCaptionBackground", "WindowCaptionButton", "WindowCaptionButtonBackground", "WindowCaptionButtonBackgroundPointerOver", "WindowCaptionButtonBackgroundPressed", "WindowCaptionForeground", "WindowCaptionForegroundDisabled", "WindowDrawnDecorationsCloseButton", "WindowDrawnDecorationsWindowBorderBoxShadow"],
-          "types": ["AdornerLayer", "Border", "BoxShadows", "Button", "ContentControl", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "LayoutTransformControl", "MergeResourceInclude", "OverlayPopupHost", "Panel", "Path", "PopupRoot", "ResourceDictionary", "ResourceInclude", "Setter", "StackPanel", "Style", "StyleInclude", "Styles", "SystemAccentColors", "SystemColors", "TextBlock", "ThemeVariantScope", "Thickness", "VisualLayerManager", "Window", "WindowDrawnDecorations", "WindowDrawnDecorationsContent", "WindowDrawnDecorationsTemplate"]
+          "documents": ["WinUITheme.xaml", "DensityStyles/Compact.xaml", "Controls/WinUIControls.xaml", "Controls/AdornerLayer.xaml", "Controls/EmbeddableControlRoot.xaml", "Controls/ThemeVariantScope.xaml", "Controls/Window.xaml"],
+          "keys": ["ComboBoxEditableTextPadding", "ComboBoxMinHeight", "ComboBoxPadding", "CompactStyles", "ContentControlFontSize", "ControlContentThemeFontSize", "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", "DatePickerFlyoutPresenterHighlightHeight", "DatePickerFlyoutPresenterItemHeight", "DatePickerFlyoutPresenterItemPadding", "DatePickerFlyoutPresenterMonthPadding", "DatePickerHostMonthPadding", "DatePickerHostPadding", "ListViewItemMinHeight", "NavigationViewItemOnLeftMinHeight", "TextControlThemeMinHeight", "TextControlThemePadding", "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", "TimePickerFlyoutPresenterHighlightHeight", "TimePickerFlyoutPresenterItemHeight", "TimePickerFlyoutPresenterItemPadding", "TimePickerHostPadding", "TreeViewItemMinHeight", "TreeViewItemMultiSelectCheckBoxMinHeight", "TreeViewItemPresenterMargin", "TreeViewItemPresenterPadding"],
+          "type_keys": ["AdornerLayer", "EmbeddableControlRoot", "TextBlock", "ThemeVariantScope", "Window"],
+          "references": ["ContentControlThemeFontFamily", "ControlContentThemeFontSize", "ControlCornerRadius", "PathIconUnscaledTemplate", "SolidBackgroundFillColorBaseBrush", "SystemControlFocusVisualPrimaryBrush", "SystemControlFocusVisualSecondaryBrush", "TextFillColorPrimaryBrush"],
+          "types": ["AdornerLayer", "Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "MergeResourceInclude", "Panel", "ResourceDictionary", "ResourceInclude", "Setter", "Style", "StyleInclude", "Styles", "SystemAccentColors", "SystemColors", "TextBlock", "ThemeVariantScope", "Thickness", "VisualLayerManager", "Window"]
         },
         {
           "name": "Resources/Generic.xaml",
@@ -727,8 +727,26 @@
           "types": ["ResourceDictionary"]
         },
         {
-          "name": "Controls/TextBlock.xaml",
+          "name": "Controls/OverlayPopupHost.xaml",
           "index": 77,
+          "documents": ["Controls/OverlayPopupHost.xaml"],
+          "keys": [],
+          "type_keys": ["OverlayPopupHost"],
+          "references": ["ContentControlThemeFontFamily", "ControlContentThemeFontSize", "TextFillColorPrimaryBrush"],
+          "types": ["ContentPresenter", "ControlTemplate", "ControlTheme", "LayoutTransformControl", "OverlayPopupHost", "ResourceDictionary", "Setter", "VisualLayerManager"]
+        },
+        {
+          "name": "Controls/PopupRoot.xaml",
+          "index": 78,
+          "documents": ["Controls/PopupRoot.xaml"],
+          "keys": [],
+          "type_keys": ["PopupRoot"],
+          "references": ["ContentControlThemeFontFamily", "ControlContentThemeFontSize", "TextFillColorPrimaryBrush"],
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "LayoutTransformControl", "Panel", "PopupRoot", "ResourceDictionary", "Setter", "VisualLayerManager"]
+        },
+        {
+          "name": "Controls/TextBlock.xaml",
+          "index": 79,
           "documents": ["Controls/TextBlock.xaml"],
           "keys": ["BaseTextBlockStyle", "BodyLargeStrongTextBlockStyle", "BodyLargeTextBlockStyle", "BodyStrongTextBlockStyle", "BodyTextBlockStyle", "CaptionTextBlockStyle", "DisplayTextBlockStyle", "HeaderTextBlockStyle", "SubheaderTextBlockStyle", "SubtitleTextBlockStyle", "TitleLargeTextBlockStyle", "TitleTextBlockStyle"],
           "type_keys": [],
@@ -737,7 +755,7 @@
         },
         {
           "name": "Controls/Button.xaml",
-          "index": 78,
+          "index": 80,
           "documents": ["Controls/Button.xaml"],
           "keys": ["AccentButtonStyle", "DefaultButtonStyle", "SubtleButtonStyle", "TextBlockButtonStyle"],
           "type_keys": ["Button"],
@@ -746,7 +764,7 @@
         },
         {
           "name": "Controls/RepeatButton.xaml",
-          "index": 79,
+          "index": 81,
           "documents": ["Controls/RepeatButton.xaml"],
           "keys": ["DefaultRepeatButtonStyle"],
           "type_keys": ["RepeatButton"],
@@ -755,7 +773,7 @@
         },
         {
           "name": "Controls/ToggleButton.xaml",
-          "index": 80,
+          "index": 82,
           "documents": ["Controls/ToggleButton.xaml"],
           "keys": ["DefaultToggleButtonStyle"],
           "type_keys": ["ToggleButton"],
@@ -764,7 +782,7 @@
         },
         {
           "name": "Controls/RevealStyles.xaml",
-          "index": 81,
+          "index": 83,
           "documents": ["Controls/RevealStyles.xaml"],
           "keys": ["ButtonRevealStyle", "RepeatButtonRevealStyle", "ToggleButtonRevealStyle"],
           "type_keys": [],
@@ -773,7 +791,7 @@
         },
         {
           "name": "Controls/HyperlinkButton.xaml",
-          "index": 82,
+          "index": 84,
           "documents": ["Controls/HyperlinkButton.xaml"],
           "keys": ["DefaultHyperlinkButtonStyle"],
           "type_keys": ["HyperlinkButton"],
@@ -782,7 +800,7 @@
         },
         {
           "name": "Controls/CheckBox.xaml",
-          "index": 83,
+          "index": 85,
           "documents": ["Controls/CheckBox.xaml"],
           "keys": ["DefaultCheckBoxStyle"],
           "type_keys": ["CheckBox"],
@@ -791,7 +809,7 @@
         },
         {
           "name": "Controls/RadioButton.xaml",
-          "index": 84,
+          "index": 86,
           "documents": ["Controls/RadioButton.xaml"],
           "keys": ["DefaultRadioButtonStyle"],
           "type_keys": ["RadioButton"],
@@ -800,7 +818,7 @@
         },
         {
           "name": "Controls/Thumb.xaml",
-          "index": 85,
+          "index": 87,
           "documents": ["Controls/Thumb.xaml"],
           "keys": [],
           "type_keys": ["Thumb"],
@@ -809,7 +827,7 @@
         },
         {
           "name": "Controls/ScrollBar.xaml",
-          "index": 86,
+          "index": 88,
           "documents": ["Controls/ScrollBar.xaml"],
           "keys": ["DefaultScrollBarStyle", "ScrollBarHorizontalDecrementTemplate", "ScrollBarHorizontalIncrementTemplate", "ScrollBarHorizontalThumbTemplate", "ScrollBarRepeatButtonTemplate", "ScrollBarTrackCornerRadiusConverter", "ScrollBarVerticalDecrementTemplate", "ScrollBarVerticalIncrementTemplate", "ScrollBarVerticalThumbTemplate"],
           "type_keys": ["ScrollBar"],
@@ -818,7 +836,7 @@
         },
         {
           "name": "Controls/ScrollViewer.xaml",
-          "index": 87,
+          "index": 89,
           "documents": ["Controls/ScrollViewer.xaml"],
           "keys": ["DefaultScrollViewerStyle", "ScrollViewerScrollBarlessTemplate"],
           "type_keys": ["ScrollViewer"],
@@ -827,7 +845,7 @@
         },
         {
           "name": "Controls/TextBox.xaml",
-          "index": 88,
+          "index": 90,
           "documents": ["Controls/TextBox.xaml"],
           "keys": ["DefaultPasswordBoxStyle", "DefaultTextBoxStyle", "PasswordBoxContextFlyout", "PasswordBoxRevealButtonStyle", "TextBoxContextFlyout", "TextBoxDeleteButtonStyle"],
           "type_keys": ["TextBox"],
@@ -836,7 +854,7 @@
         },
         {
           "name": "Controls/ToolTip.xaml",
-          "index": 89,
+          "index": 91,
           "documents": ["Controls/ToolTip.xaml"],
           "keys": ["DefaultToolTipStyle"],
           "type_keys": ["ToolTip"],
@@ -845,7 +863,7 @@
         },
         {
           "name": "Controls/ProgressBar.xaml",
-          "index": 90,
+          "index": 92,
           "documents": ["Controls/ProgressBar.xaml"],
           "keys": ["DefaultProgressBarStyle", "ProgressBarTextFormatConverter"],
           "type_keys": ["ProgressBar"],
@@ -854,7 +872,7 @@
         },
         {
           "name": "Controls/Separator.xaml",
-          "index": 91,
+          "index": 93,
           "documents": ["Controls/Separator.xaml"],
           "keys": [],
           "type_keys": ["Separator"],
@@ -863,7 +881,7 @@
         },
         {
           "name": "Controls/PathIcon.xaml",
-          "index": 92,
+          "index": 94,
           "documents": ["Controls/PathIcon.xaml"],
           "keys": ["PathIconUnscaledTemplate"],
           "type_keys": ["PathIcon"],
@@ -872,7 +890,7 @@
         },
         {
           "name": "Controls/FontIcon.xaml",
-          "index": 93,
+          "index": 95,
           "documents": ["Controls/FontIcon.xaml"],
           "keys": [],
           "type_keys": ["FontIcon"],
@@ -881,7 +899,7 @@
         },
         {
           "name": "Controls/SymbolIcon.xaml",
-          "index": 94,
+          "index": 96,
           "documents": ["Controls/SymbolIcon.xaml"],
           "keys": [],
           "type_keys": ["SymbolIcon"],
@@ -890,7 +908,7 @@
         },
         {
           "name": "Controls/Label.xaml",
-          "index": 95,
+          "index": 97,
           "documents": ["Controls/Label.xaml"],
           "keys": [],
           "type_keys": ["Label"],
@@ -899,7 +917,7 @@
         },
         {
           "name": "Controls/ItemsControl.xaml",
-          "index": 96,
+          "index": 98,
           "documents": ["Controls/ItemsControl.xaml"],
           "keys": [],
           "type_keys": ["ItemsControl"],
@@ -908,7 +926,7 @@
         },
         {
           "name": "Controls/HeaderedContentControl.xaml",
-          "index": 97,
+          "index": 99,
           "documents": ["Controls/HeaderedContentControl.xaml"],
           "keys": [],
           "type_keys": ["HeaderedContentControl"],
@@ -917,7 +935,7 @@
         },
         {
           "name": "Controls/GroupBox.xaml",
-          "index": 98,
+          "index": 100,
           "documents": ["Controls/GroupBox.xaml"],
           "keys": [],
           "type_keys": ["GroupBox"],
@@ -926,7 +944,7 @@
         },
         {
           "name": "Controls/SelectableTextBlock.xaml",
-          "index": 99,
+          "index": 101,
           "documents": ["Controls/SelectableTextBlock.xaml"],
           "keys": [],
           "type_keys": ["SelectableTextBlock"],
@@ -935,7 +953,7 @@
         },
         {
           "name": "Controls/TransitioningContentControl.xaml",
-          "index": 100,
+          "index": 102,
           "documents": ["Controls/TransitioningContentControl.xaml"],
           "keys": [],
           "type_keys": ["TransitioningContentControl"],
@@ -944,7 +962,7 @@
         },
         {
           "name": "Controls/TextSelectionHandle.xaml",
-          "index": 101,
+          "index": 103,
           "documents": ["Controls/TextSelectionHandle.xaml"],
           "keys": [],
           "type_keys": ["TextSelectionHandle"],
@@ -953,7 +971,7 @@
         },
         {
           "name": "Controls/DataValidationErrors.xaml",
-          "index": 102,
+          "index": 104,
           "documents": ["Controls/DataValidationErrors.xaml"],
           "keys": ["TooltipDataValidationErrors"],
           "type_keys": ["DataValidationErrors"],
@@ -962,7 +980,7 @@
         },
         {
           "name": "Controls/GridSplitter.xaml",
-          "index": 103,
+          "index": 105,
           "documents": ["Controls/GridSplitter.xaml"],
           "keys": [],
           "type_keys": ["GridSplitter"],
@@ -971,7 +989,7 @@
         },
         {
           "name": "Controls/DateTimePickerShared.xaml",
-          "index": 104,
+          "index": 106,
           "documents": ["Controls/DateTimePickerShared.xaml"],
           "keys": ["DateTimePickerFlyoutButtonStyle", "DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle", "DateTimePickerLoopingSelectorDownButtonStyle", "DateTimePickerLoopingSelectorItemStyle", "DateTimePickerLoopingSelectorUpButtonStyle"],
           "type_keys": [],
@@ -980,7 +998,7 @@
         },
         {
           "name": "Controls/CalendarDayButton.xaml",
-          "index": 105,
+          "index": 107,
           "documents": ["Controls/CalendarDayButton.xaml"],
           "keys": [],
           "type_keys": ["CalendarDayButton"],
@@ -989,7 +1007,7 @@
         },
         {
           "name": "Controls/CalendarButton.xaml",
-          "index": 106,
+          "index": 108,
           "documents": ["Controls/CalendarButton.xaml"],
           "keys": [],
           "type_keys": ["CalendarButton"],
@@ -998,7 +1016,7 @@
         },
         {
           "name": "Controls/CalendarItem.xaml",
-          "index": 107,
+          "index": 109,
           "documents": ["Controls/CalendarItem.xaml"],
           "keys": ["CalendarItemHeaderNavigationButtonStyle", "CalendarItemNavigationButtonStyle", "CalendarItemWeekDayNameStyle"],
           "type_keys": ["CalendarItem"],
@@ -1007,7 +1025,7 @@
         },
         {
           "name": "Controls/Calendar.xaml",
-          "index": 108,
+          "index": 110,
           "documents": ["Controls/Calendar.xaml"],
           "keys": ["DefaultCalendarViewStyle"],
           "type_keys": ["Calendar"],
@@ -1016,7 +1034,7 @@
         },
         {
           "name": "Controls/CalendarDatePicker.xaml",
-          "index": 109,
+          "index": 111,
           "documents": ["Controls/CalendarDatePicker.xaml"],
           "keys": ["CalendarDatePickerButtonStyle", "CalendarDatePickerTextBoxStyle", "DefaultCalendarDatePicker"],
           "type_keys": ["CalendarDatePicker"],
@@ -1025,7 +1043,7 @@
         },
         {
           "name": "Controls/DatePicker.xaml",
-          "index": 110,
+          "index": 112,
           "documents": ["Controls/DatePicker.xaml"],
           "keys": ["DatePickerFlyoutButtonStyle", "DefaultDatePickerFlyoutPresenterStyle", "DefaultDatePickerStyle"],
           "type_keys": ["DatePicker", "DatePickerPresenter"],
@@ -1034,7 +1052,7 @@
         },
         {
           "name": "Controls/TimePicker.xaml",
-          "index": 111,
+          "index": 113,
           "documents": ["Controls/TimePicker.xaml"],
           "keys": ["TimePickerFlyoutButtonStyle"],
           "type_keys": ["TimePicker", "TimePickerPresenter"],
@@ -1042,8 +1060,17 @@
           "types": ["Border", "Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "DataValidationErrors", "DateTimePickerPanel", "FocusAdornerTemplate", "Grid", "Panel", "Path", "Popup", "Rectangle", "RepeatButton", "ResourceDictionary", "ScrollViewer", "Setter", "Style", "TextBlock", "TimePicker", "TimePickerPresenter"]
         },
         {
+          "name": "Controls/WindowDrawnDecorations.xaml",
+          "index": 114,
+          "documents": ["Controls/WindowDrawnDecorations.xaml"],
+          "keys": ["DefaultTitleBarStyle", "TitleBarBackButtonStyle", "TitleBarPaneToggleButtonStyle", "WindowCaptionButton", "WindowChromeStyle", "WindowDrawnDecorationsCloseButton", "WindowDrawnDecorationsWindowBorderBoxShadow"],
+          "type_keys": ["WindowDrawnDecorations"],
+          "references": ["CaptionTextBlockStyle", "CloseButtonBackgroundPointerOver", "CloseButtonBackgroundPressed", "CloseButtonStrokePointerOver", "CloseButtonStrokePressed", "ControlCornerRadius", "DefaultButtonStyle", "DefaultTitleBarStyle", "GlyphGeometryE700", "GlyphGeometryE72B", "GlyphGeometryE73F", "GlyphGeometryE740", "GlyphGeometryE8BB", "GlyphGeometryE921", "GlyphGeometryE922", "GlyphGeometryE923", "SolidBackgroundFillColorBaseBrush", "SurfaceStrokeColorDefaultBrush", "SystemControlTransparentBrush", "TitleBarBackButtonBackground", "TitleBarBackButtonBackgroundDisabled", "TitleBarBackButtonBackgroundPointerOver", "TitleBarBackButtonBackgroundPressed", "TitleBarBackButtonForeground", "TitleBarBackButtonForegroundDisabled", "TitleBarBackButtonForegroundPointerOver", "TitleBarBackButtonForegroundPressed", "TitleBarBackButtonWidth", "TitleBarForegroundBrush", "TitleBarPaneToggleButtonBackground", "TitleBarPaneToggleButtonBackgroundDisabled", "TitleBarPaneToggleButtonBackgroundPointerOver", "TitleBarPaneToggleButtonBackgroundPressed", "TitleBarPaneToggleButtonForeground", "TitleBarPaneToggleButtonForegroundDisabled", "TitleBarPaneToggleButtonForegroundPointerOver", "TitleBarPaneToggleButtonForegroundPressed", "TitleBarPaneToggleButtonWidth", "WindowCaptionBackground", "WindowCaptionButton", "WindowCaptionButtonBackground", "WindowCaptionButtonBackgroundPointerOver", "WindowCaptionButtonBackgroundPressed", "WindowCaptionForeground", "WindowCaptionForegroundDisabled", "WindowDrawnDecorationsCloseButton", "WindowDrawnDecorationsWindowBorderBoxShadow"],
+          "types": ["Border", "BoxShadows", "Button", "ContentControl", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "Path", "ResourceDictionary", "Setter", "StackPanel", "Style", "TextBlock", "WindowDrawnDecorations", "WindowDrawnDecorationsContent", "WindowDrawnDecorationsTemplate"]
+        },
+        {
           "name": "Controls/NotificationCard.xaml",
-          "index": 112,
+          "index": 115,
           "documents": ["Controls/NotificationCard.xaml"],
           "keys": ["InfoBarCloseButtonStyle"],
           "type_keys": ["NotificationCard"],
@@ -1052,7 +1079,7 @@
         },
         {
           "name": "Controls/InfoBar.xaml",
-          "index": 113,
+          "index": 116,
           "documents": ["Controls/InfoBar.xaml"],
           "keys": [],
           "type_keys": ["InfoBar"],
@@ -1061,7 +1088,7 @@
         },
         {
           "name": "Controls/InfoBadge.xaml",
-          "index": 114,
+          "index": 117,
           "documents": ["Controls/InfoBadge.xaml"],
           "keys": ["AttentionDotInfoBadgeStyle", "AttentionIconInfoBadgeStyle", "AttentionValueInfoBadgeStyle", "CautionDotInfoBadgeStyle", "CautionIconInfoBadgeStyle", "CautionValueInfoBadgeStyle", "CriticalDotInfoBadgeStyle", "CriticalIconInfoBadgeStyle", "CriticalValueInfoBadgeStyle", "DefaultInfoBadgeStyle", "InformationalDotInfoBadgeStyle", "InformationalIconInfoBadgeStyle", "InformationalValueInfoBadgeStyle", "SuccessDotInfoBadgeStyle", "SuccessIconInfoBadgeStyle", "SuccessValueInfoBadgeStyle"],
           "type_keys": ["InfoBadge"],
@@ -1070,7 +1097,7 @@
         },
         {
           "name": "Controls/Pivot.xaml",
-          "index": 115,
+          "index": 118,
           "documents": ["Controls/Pivot.xaml"],
           "keys": ["DefaultPivotHeaderItemStyle", "DefaultPivotItemStyle", "DefaultPivotStyle", "NextTemplate", "PivotNextButtonStyle", "PivotPreviousButtonStyle", "PivotTitleContentControlStyle", "PreviousTemplate", "TitleContentControlStyle"],
           "type_keys": ["Pivot", "PivotHeaderItem", "PivotItem"],
@@ -1079,7 +1106,7 @@
         },
         {
           "name": "Controls/SwipeControl.xaml",
-          "index": 116,
+          "index": 119,
           "documents": ["Controls/SwipeControl.xaml"],
           "keys": ["DefaultSwipeControlStyle", "SwipeItemStyle"],
           "type_keys": ["SwipeControl"],
@@ -1088,7 +1115,7 @@
         },
         {
           "name": "Controls/TitleBar.xaml",
-          "index": 117,
+          "index": 120,
           "documents": ["Controls/TitleBar.xaml"],
           "keys": ["DefaultTitleBarControlStyle"],
           "type_keys": ["TitleBar"],
@@ -1097,7 +1124,7 @@
         },
         {
           "name": "Controls/ProgressRing.xaml",
-          "index": 118,
+          "index": 121,
           "documents": ["Controls/ProgressRing.xaml"],
           "keys": [],
           "type_keys": ["ProgressRing"],
@@ -1106,7 +1133,7 @@
         },
         {
           "name": "Controls/WindowNotificationManager.xaml",
-          "index": 119,
+          "index": 122,
           "documents": ["Controls/WindowNotificationManager.xaml"],
           "keys": [],
           "type_keys": ["WindowNotificationManager"],
@@ -1115,7 +1142,7 @@
         },
         {
           "name": "Controls/TableView.xaml",
-          "index": 120,
+          "index": 123,
           "documents": ["Controls/TableView.xaml"],
           "keys": ["TableViewScrollViewerStyle"],
           "type_keys": ["TableView"],
@@ -1124,7 +1151,7 @@
         },
         {
           "name": "Controls/TableViewCell.xaml",
-          "index": 121,
+          "index": 124,
           "documents": ["Controls/TableViewCell.xaml"],
           "keys": [],
           "type_keys": ["TableViewCell"],
@@ -1133,7 +1160,7 @@
         },
         {
           "name": "Controls/TableViewColumnHeader.xaml",
-          "index": 122,
+          "index": 125,
           "documents": ["Controls/TableViewColumnHeader.xaml"],
           "keys": ["TableViewColumnHeaderResizerStyle"],
           "type_keys": ["TableViewColumnHeader"],
@@ -1142,7 +1169,7 @@
         },
         {
           "name": "Controls/TableViewRow.xaml",
-          "index": 123,
+          "index": 126,
           "documents": ["Controls/TableViewRow.xaml"],
           "keys": [],
           "type_keys": ["TableViewRow"],
@@ -1151,7 +1178,7 @@
         },
         {
           "name": "Controls/ManagedFileChooser.xaml",
-          "index": 124,
+          "index": 127,
           "documents": ["Controls/ManagedFileChooser.xaml"],
           "keys": ["DefaultContentDialogStyle", "ManagedFileChooserListViewItemStyle", "ManagedFileChooserListViewStyle", "StringManagedFileChooserCancelText", "StringManagedFileChooserDateModifiedColumn", "StringManagedFileChooserFileNamePlaceholder", "StringManagedFileChooserNameColumn", "StringManagedFileChooserOkText", "StringManagedFileChooserOverwritePromptCancelText", "StringManagedFileChooserOverwritePromptConfirmText", "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", "StringManagedFileChooserShowHiddenFilesText", "StringManagedFileChooserSizeColumn", "StringManagedFileChooserTypeColumn"],
           "type_keys": ["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"],
@@ -1160,7 +1187,7 @@
         },
         {
           "name": "Controls/TabStrip.xaml",
-          "index": 125,
+          "index": 128,
           "documents": ["Controls/TabStrip.xaml"],
           "keys": ["DefaultSelectorBarStyle"],
           "type_keys": ["TabStrip"],
@@ -1169,7 +1196,7 @@
         },
         {
           "name": "Controls/TabStripItem.xaml",
-          "index": 126,
+          "index": 129,
           "documents": ["Controls/TabStripItem.xaml"],
           "keys": ["DefaultSelectorBarItemStyle"],
           "type_keys": ["TabStripItem"],
@@ -1178,7 +1205,7 @@
         },
         {
           "name": "Controls/TabControl.xaml",
-          "index": 127,
+          "index": 130,
           "documents": ["Controls/TabControl.xaml"],
           "keys": ["DefaultTabViewStyle", "TabScrollViewerStyle", "TabViewButtonStyle", "TabViewCloseButtonStyle", "TabViewScrollButtonStyle"],
           "type_keys": ["TabControl"],
@@ -1187,7 +1214,7 @@
         },
         {
           "name": "Controls/TabItem.xaml",
-          "index": 128,
+          "index": 131,
           "documents": ["Controls/TabItem.xaml"],
           "keys": [],
           "type_keys": ["TabItem"],
@@ -1196,7 +1223,7 @@
         },
         {
           "name": "Controls/SplitView.xaml",
-          "index": 129,
+          "index": 132,
           "documents": ["Controls/SplitView.xaml"],
           "keys": ["DefaultSplitViewStyle"],
           "type_keys": ["SplitView"],
@@ -1205,7 +1232,7 @@
         },
         {
           "name": "Controls/ContentPage.xaml",
-          "index": 130,
+          "index": 133,
           "documents": ["Controls/ContentPage.xaml"],
           "keys": [],
           "type_keys": ["ContentPage"],
@@ -1214,7 +1241,7 @@
         },
         {
           "name": "Controls/TabbedPage.xaml",
-          "index": 131,
+          "index": 134,
           "documents": ["Controls/TabbedPage.xaml"],
           "keys": ["TabbedPageTabControlTheme", "TabbedPageTabItemTheme"],
           "type_keys": ["TabbedPage"],
@@ -1223,7 +1250,7 @@
         },
         {
           "name": "Controls/NavigationPage.xaml",
-          "index": 132,
+          "index": 135,
           "documents": ["Controls/NavigationPage.xaml"],
           "keys": ["NavigationBackButtonNormalStyle", "NavigationBackButtonSmallStyle"],
           "type_keys": ["NavigationPage"],
@@ -1232,7 +1259,7 @@
         },
         {
           "name": "Controls/DrawerPage.xaml",
-          "index": 133,
+          "index": 136,
           "documents": ["Controls/DrawerPage.xaml"],
           "keys": ["DrawerPageNavigationViewItem", "DrawerPageNavigationViewMenu", "DrawerPagePaneToggleButton", "NavigationViewItemHeaderTextStyle", "NavigationViewTitleHeaderContentControlTextStyle", "PaneToggleButtonStyle"],
           "type_keys": ["DrawerPage"],
@@ -1241,7 +1268,7 @@
         },
         {
           "name": "Controls/Frame.xaml",
-          "index": 134,
+          "index": 137,
           "documents": ["Controls/Frame.xaml"],
           "keys": [],
           "type_keys": ["Frame"],
@@ -1250,7 +1277,7 @@
         },
         {
           "name": "Controls/NavigationView.xaml",
-          "index": 135,
+          "index": 138,
           "documents": ["Controls/NavigationView.xaml"],
           "keys": ["NavigationViewPaneSearchButtonStyle"],
           "type_keys": ["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"],
@@ -1259,7 +1286,7 @@
         },
         {
           "name": "Controls/Carousel.xaml",
-          "index": 136,
+          "index": 139,
           "documents": ["Controls/Carousel.xaml"],
           "keys": ["DefaultFlipViewItemStyle", "DefaultFlipViewStyle"],
           "type_keys": ["Carousel"],
@@ -1268,7 +1295,7 @@
         },
         {
           "name": "Controls/CarouselPage.xaml",
-          "index": 137,
+          "index": 140,
           "documents": ["Controls/CarouselPage.xaml"],
           "keys": [],
           "type_keys": ["CarouselPage"],
@@ -1277,7 +1304,7 @@
         },
         {
           "name": "Controls/CommandBar.xaml",
-          "index": 138,
+          "index": 141,
           "documents": ["Controls/CommandBar.xaml"],
           "keys": ["AppBarButtonOverflowStyle", "AppBarToggleButtonOverflowStyle", "DefaultAppBarButtonStyle", "DefaultAppBarSeparatorStyle", "DefaultAppBarToggleButtonStyle", "DefaultCommandBarOverflowPresenterStyle", "DefaultCommandBarStyle", "EllipsisButton"],
           "type_keys": ["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"],
@@ -1286,7 +1313,7 @@
         },
         {
           "name": "Controls/DropDownButton.xaml",
-          "index": 139,
+          "index": 142,
           "documents": ["Controls/DropDownButton.xaml"],
           "keys": ["DefaultDropDownButtonStyle"],
           "type_keys": ["DropDownButton"],
@@ -1295,7 +1322,7 @@
         },
         {
           "name": "Controls/SplitButton.xaml",
-          "index": 140,
+          "index": 143,
           "documents": ["Controls/SplitButton.xaml"],
           "keys": ["SplitButtonCommandBarInnerButtonStyle", "SplitButtonCommandBarStyle", "SplitButtonInnerButtonStyle", "SplitButtonStyle"],
           "type_keys": ["SplitButton"],
@@ -1304,7 +1331,7 @@
         },
         {
           "name": "Controls/ToggleSwitch.xaml",
-          "index": 141,
+          "index": 144,
           "documents": ["Controls/ToggleSwitch.xaml"],
           "keys": ["DefaultToggleSwitchStyle"],
           "type_keys": ["ToggleSwitch"],
@@ -1313,7 +1340,7 @@
         },
         {
           "name": "Controls/Slider.xaml",
-          "index": 142,
+          "index": 145,
           "documents": ["Controls/Slider.xaml"],
           "keys": ["DefaultSliderStyle", "SliderHorizontalDecreaseButtonStyle", "SliderIncreaseButtonStyle", "SliderThumbStyle", "SliderVerticalDecreaseButtonStyle"],
           "type_keys": ["Slider"],
@@ -1322,7 +1349,7 @@
         },
         {
           "name": "Controls/MediaTransportControls.xaml",
-          "index": 143,
+          "index": 146,
           "documents": ["Controls/MediaTransportControls.xaml"],
           "keys": ["DefaultMediaTransportControlsStyle", "MediaTransportControlsAppBarButtonStyle", "MediaTransportControlsAppBarToggleButtonStyle", "MediaTransportControlsFlyoutStyle"],
           "type_keys": ["MediaTransportControls"],
@@ -1331,7 +1358,7 @@
         },
         {
           "name": "Controls/CameraCaptureUI.xaml",
-          "index": 144,
+          "index": 147,
           "documents": ["Controls/CameraCaptureUI.xaml"],
           "keys": [],
           "type_keys": ["CameraCaptureUI"],
@@ -1340,7 +1367,7 @@
         },
         {
           "name": "Controls/NumericUpDown.xaml",
-          "index": 145,
+          "index": 148,
           "documents": ["Controls/NumericUpDown.xaml"],
           "keys": ["NumberBoxPopupSpinButtonStyle", "NumberBoxSpinButtonStyle", "NumberBoxTextBoxStyle", "NumericUpDownButtonSpinnerStyle", "NumericUpDownSpinButtonStyle"],
           "type_keys": ["NumericUpDown"],
@@ -1349,7 +1376,7 @@
         },
         {
           "name": "Controls/NumberBox.xaml",
-          "index": 146,
+          "index": 149,
           "documents": ["Controls/NumberBox.xaml"],
           "keys": ["NumberBoxPopupContentRootButtonStyle"],
           "type_keys": ["NumberBox"],
@@ -1358,7 +1385,7 @@
         },
         {
           "name": "Controls/ButtonSpinner.xaml",
-          "index": 147,
+          "index": 150,
           "documents": ["Controls/ButtonSpinner.xaml"],
           "keys": [],
           "type_keys": ["ButtonSpinner"],
@@ -1367,7 +1394,7 @@
         },
         {
           "name": "Controls/Expander.xaml",
-          "index": 148,
+          "index": 151,
           "documents": ["Controls/Expander.xaml"],
           "keys": ["DefaultExpanderStyle", "ExpanderHeaderDownStyle", "ExpanderHeaderLeftStyle", "ExpanderHeaderRightStyle", "ExpanderHeaderUpStyle"],
           "type_keys": ["Expander"],
@@ -1376,7 +1403,7 @@
         },
         {
           "name": "Controls/PipsPager.xaml",
-          "index": 149,
+          "index": 152,
           "documents": ["Controls/PipsPager.xaml"],
           "keys": ["PipsPagerButtonBaseStyle", "PipsPagerListStyle", "PipsPagerNavigationButtonBaseStyle", "PipsPagerNextPageButtonStyle", "PipsPagerNormalPipButtonStyle", "PipsPagerPipItemStyle", "PipsPagerPreviousPageButtonStyle", "PipsPagerSelectedPipButtonStyle"],
           "type_keys": ["PipsPager"],
@@ -1385,7 +1412,7 @@
         },
         {
           "name": "Controls/RatingControl.xaml",
-          "index": 150,
+          "index": 153,
           "documents": ["Controls/RatingControl.xaml"],
           "keys": [],
           "type_keys": ["RatingControl"],
@@ -1394,7 +1421,7 @@
         },
         {
           "name": "Controls/PersonPicture.xaml",
-          "index": 151,
+          "index": 154,
           "documents": ["Controls/PersonPicture.xaml"],
           "keys": ["DefaultPersonPictureStyle"],
           "type_keys": ["PersonPicture"],
@@ -1403,7 +1430,7 @@
         },
         {
           "name": "Controls/PagerControl.xaml",
-          "index": 152,
+          "index": 155,
           "documents": ["Controls/PagerControl.xaml"],
           "keys": ["PagerControlNumberPanelButtonStyle", "PagerControlPageNavigationButtonStyle"],
           "type_keys": ["PagerControl"],
@@ -1412,7 +1439,7 @@
         },
         {
           "name": "Controls/RefreshContainer.xaml",
-          "index": 153,
+          "index": 156,
           "documents": ["Controls/RefreshContainer.xaml"],
           "keys": ["DefaultRefreshContainerStyle"],
           "type_keys": ["RefreshContainer"],
@@ -1421,7 +1448,7 @@
         },
         {
           "name": "Controls/RefreshVisualizer.xaml",
-          "index": 154,
+          "index": 157,
           "documents": ["Controls/RefreshVisualizer.xaml"],
           "keys": [],
           "type_keys": ["RefreshVisualizer"],
@@ -1430,7 +1457,7 @@
         },
         {
           "name": "Controls/FlyoutPresenter.xaml",
-          "index": 155,
+          "index": 158,
           "documents": ["Controls/FlyoutPresenter.xaml"],
           "keys": ["DefaultFlyoutPresenterStyle"],
           "type_keys": ["FlyoutPresenter"],
@@ -1439,7 +1466,7 @@
         },
         {
           "name": "Controls/MenuScrollViewer.xaml",
-          "index": 156,
+          "index": 159,
           "documents": ["Controls/MenuScrollViewer.xaml"],
           "keys": ["MenuFlyoutPresenterScrollViewer"],
           "type_keys": [],
@@ -1448,7 +1475,7 @@
         },
         {
           "name": "Controls/MenuFlyoutPresenter.xaml",
-          "index": 157,
+          "index": 160,
           "documents": ["Controls/MenuFlyoutPresenter.xaml"],
           "keys": ["DefaultMenuFlyoutPresenterStyle"],
           "type_keys": ["MenuFlyoutPresenter"],
@@ -1457,7 +1484,7 @@
         },
         {
           "name": "Controls/ContextMenu.xaml",
-          "index": 158,
+          "index": 161,
           "documents": ["Controls/ContextMenu.xaml"],
           "keys": [],
           "type_keys": ["ContextMenu"],
@@ -1466,7 +1493,7 @@
         },
         {
           "name": "Controls/MenuItem.xaml",
-          "index": 159,
+          "index": 162,
           "documents": ["Controls/MenuItem.xaml"],
           "keys": ["DefaultMenuFlyoutItemStyle", "DefaultMenuFlyoutSubItemStyle", "DefaultRadioMenuFlyoutItemStyle", "DefaultToggleMenuFlyoutItemStyle", "MenuItemKeyGestureConverter", "RadioMenuFlyoutSubItemStyle"],
           "type_keys": ["MenuItem"],
@@ -1475,7 +1502,7 @@
         },
         {
           "name": "Controls/Menu.xaml",
-          "index": 160,
+          "index": 163,
           "documents": ["Controls/Menu.xaml"],
           "keys": ["DefaultMenuBarItemStyle", "DefaultMenuBarStyle"],
           "type_keys": ["Menu"],
@@ -1484,7 +1511,7 @@
         },
         {
           "name": "Controls/ListBoxItem.xaml",
-          "index": 161,
+          "index": 164,
           "documents": ["Controls/ListBoxItem.xaml"],
           "keys": ["DefaultListBoxItemStyle", "DefaultListViewItemStyle", "ListViewItemExpanded"],
           "type_keys": ["ListBoxItem"],
@@ -1493,7 +1520,7 @@
         },
         {
           "name": "Controls/ListBox.xaml",
-          "index": 162,
+          "index": 165,
           "documents": ["Controls/ListBox.xaml"],
           "keys": ["DefaultListBoxStyle"],
           "type_keys": ["ListBox"],
@@ -1502,7 +1529,7 @@
         },
         {
           "name": "Controls/ListView.xaml",
-          "index": 163,
+          "index": 166,
           "documents": ["Controls/ListView.xaml"],
           "keys": ["DefaultListViewStyle"],
           "type_keys": ["ListView", "ListViewItem"],
@@ -1511,7 +1538,7 @@
         },
         {
           "name": "Controls/GridView.xaml",
-          "index": 164,
+          "index": 167,
           "documents": ["Controls/GridView.xaml"],
           "keys": ["DefaultGridViewItemStyle", "DefaultGridViewStyle"],
           "type_keys": ["GridView", "GridViewItem"],
@@ -1520,7 +1547,7 @@
         },
         {
           "name": "Controls/ComboBoxItem.xaml",
-          "index": 165,
+          "index": 168,
           "documents": ["Controls/ComboBoxItem.xaml"],
           "keys": ["ComboBoxItemPill", "DefaultComboBoxItemStyle"],
           "type_keys": ["ComboBoxItem"],
@@ -1529,7 +1556,7 @@
         },
         {
           "name": "Controls/ComboBox.xaml",
-          "index": 166,
+          "index": 169,
           "documents": ["Controls/ComboBox.xaml"],
           "keys": ["ComboBoxTextBoxStyle", "DefaultComboBoxStyle"],
           "type_keys": ["ComboBox"],
@@ -1538,7 +1565,7 @@
         },
         {
           "name": "Controls/TreeViewItem.xaml",
-          "index": 167,
+          "index": 170,
           "documents": ["Controls/TreeViewItem.xaml"],
           "keys": ["MUX_TreeViewItemStyle", "TreeViewItemExpandCollapseChevron", "TreeViewItemIndentationConverter"],
           "type_keys": ["TreeViewItem"],
@@ -1547,7 +1574,7 @@
         },
         {
           "name": "Controls/TreeView.xaml",
-          "index": 168,
+          "index": 171,
           "documents": ["Controls/TreeView.xaml"],
           "keys": ["DefaultTreeViewStyle"],
           "type_keys": ["TreeView"],
@@ -1556,7 +1583,7 @@
         },
         {
           "name": "Controls/AutoCompleteBox.xaml",
-          "index": 169,
+          "index": 172,
           "documents": ["Controls/AutoCompleteBox.xaml"],
           "keys": ["AutoSuggestBoxDeleteButtonStyle", "AutoSuggestBoxTextBoxStyle", "DefaultAutoSuggestBoxStyle"],
           "type_keys": ["AutoCompleteBox"],
@@ -1565,7 +1592,7 @@
         },
         {
           "name": "Controls/AutoSuggestBox.xaml",
-          "index": 170,
+          "index": 173,
           "documents": ["Controls/AutoSuggestBox.xaml"],
           "keys": ["AutoSuggestBoxQueryButtonStyle", "AutoSuggestBoxQuerySymbolIconTemplate"],
           "type_keys": ["AutoSuggestBox"],
@@ -1574,7 +1601,7 @@
         },
         {
           "name": "Controls/RadioButtons.xaml",
-          "index": 171,
+          "index": 174,
           "documents": ["Controls/RadioButtons.xaml"],
           "keys": ["DefaultRadioButtonsStyle"],
           "type_keys": ["RadioButtons"],
@@ -1583,7 +1610,7 @@
         },
         {
           "name": "Controls/RichEditBox.xaml",
-          "index": 172,
+          "index": 175,
           "documents": ["Controls/RichEditBox.xaml"],
           "keys": ["DefaultRichEditBoxStyle", "StringRichEditBoldText", "StringRichEditItalicText", "StringRichEditUnderlineText", "WinUIRichEditBoxContextFlyout"],
           "type_keys": ["RichEditBox"],
