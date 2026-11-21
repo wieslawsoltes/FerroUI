@@ -8,6 +8,11 @@ use ferroui_controls::{
 };
 use ferroui_designer_animation::{AnimationValue, BehaviorAction, BehaviorTrigger, Easing};
 
+#[path = "workspace_rsx_tests.rs"]
+mod rsx_tests;
+#[path = "workspace_behavior_tests.rs"]
+mod behavior_tests;
+
 fn click(button: &Button) {
     button.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
 }
@@ -65,6 +70,124 @@ fn timeline_key(lane: &crate::TimelineLane, key: ferroui_base::input::Key) {
     event.set_routed_event(Some(ferroui_base::input::InputElement::key_down_event()));
     lane.raise_event(&event);
     assert!(event.handled());
+}
+
+#[test]
+fn studio_rehearses_the_range_from_its_inline_timeline_editor() {
+    use ferroui_base::input::Key;
+    use ferroui_controls::{CheckBox, automation::AutomationProperties};
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let root = workspace.control();
+    click(&root.get_control::<Button>("TimelineClips"));
+    timeline_key(&timeline_ruler(&workspace), Key::End);
+    timeline_key(&timeline_ruler(&workspace), Key::O);
+    click(&root.get_control::<Button>("TimelineRange"));
+    let editor = keyframe_editor(&workspace);
+    assert_eq!(editor.name().as_deref(), Some("TimelineRangeEditor"));
+    let fields = editor.children().to_vec()[0].cast::<StackPanel>().unwrap();
+    let fields = fields.children().to_vec();
+    let field = |name| fields.iter()
+        .find(|control| AutomationProperties::get_name(control).as_deref() == Some(name))
+        .unwrap();
+    assert_eq!(field("Limit playback to preview range").cast::<CheckBox>().unwrap().is_checked(), Some(true));
+    field("In (s)").cast::<TextBox>().unwrap().set_text(Some("0.4"));
+    field("Out (s)").cast::<TextBox>().unwrap().set_text(Some("1.45"));
+    field("Loop range").cast::<CheckBox>().unwrap().set_is_checked(Some(false));
+    click(&field("Apply range").cast::<Button>().unwrap());
+    click(&root.get_control::<Button>("Play"));
+    let session = workspace.session();
+    assert_eq!(session.borrow().time(), 0.4);
+    session.borrow_mut().advance(2.0).unwrap();
+    assert_eq!(session.borrow().time(), 1.45);
+    assert!(!session.borrow().is_playing());
+    assert_eq!(session.borrow().authored_source(), source);
+}
+
+#[test]
+fn studio_adds_and_seeks_marks_from_the_inline_editor() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let root = workspace.control();
+    let session = workspace.session();
+    click(&root.get_control::<Button>("TimelineClips"));
+    session.borrow_mut().scrub_animation_clips(None, 1.25).unwrap();
+    workspace.refresh(false);
+    click(&root.get_control::<Button>("TimelineRange"));
+    let content = keyframe_editor(&workspace).children().to_vec();
+    let bar = content[2].cast::<Grid>().unwrap().children().to_vec();
+    let form = bar[0].cast::<StackPanel>().unwrap();
+    keyframe_input(&form, "TimelineMarkerName").set_text(Some("Review ready"));
+    let add = form.children().to_vec()[1].cast::<Button>().unwrap();
+    click(&add);
+    assert_eq!(session.borrow().preview_markers(None, true).unwrap()[0].time, 1.25);
+    assert!(session.borrow().preview_markers(None, false).unwrap().is_empty());
+    let list = bar[1].cast::<ScrollViewer>().unwrap();
+    let list = Control::from_boxed(&list.content().unwrap()).unwrap().cast::<StackPanel>().unwrap();
+    let actions = list.children().to_vec()[0].cast::<StackPanel>().unwrap().children().to_vec();
+    let time = root.get_control::<TextBox>("Time");
+    time.set_text(Some("0.25"));
+    let mut enter = ferroui_base::input::KeyEventArgs::new();
+    enter.key = ferroui_base::input::Key::Enter;
+    enter.set_routed_event(Some(ferroui_base::input::InputElement::key_down_event()));
+    time.raise_event(&enter);
+    assert_eq!(session.borrow().time(), 0.25);
+    assert_eq!(keyframe_editor(&workspace).name().as_deref(), Some("TimelineRangeEditor"));
+    click(&actions[0].cast::<Button>().unwrap());
+    assert_eq!(session.borrow().time(), 1.25);
+    click(&actions[2].cast::<Button>().unwrap());
+    assert!(session.borrow().preview_markers(None, true).unwrap().is_empty());
+    assert!(list.children().to_vec().is_empty());
+    assert_eq!(session.borrow().authored_source(), source);
+    assert!(!session.borrow().can_undo());
+}
+
+#[test]
+fn clip_comparison_places_both_offsets_in_one_studio_transaction() {
+    use ferroui_base::input::Key;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    click(&workspace.control().get_control::<Button>("TimelineClips"));
+    let tracks = workspace.control().get_control::<StackPanel>("Tracks");
+    for index in 0..2 {
+        let row = tracks.children().to_vec()[index].cast::<Grid>().unwrap();
+        let label = row.children().to_vec()[0].cast::<Button>().unwrap();
+        click(&label);
+    }
+    let inspector = keyframe_editor(&workspace);
+    keyframe_input(&inspector, "ClipStart").set_text(Some("0.5"));
+    keyframe_input(&inspector, "ClipGap").set_text(Some("0.25"));
+    let apply = inspector.children().to_vec().into_iter()
+        .find(|control| control.name().as_deref() == Some("ApplyClipPlacement"))
+        .unwrap().cast::<Button>().unwrap();
+    click(&apply);
+    let session = workspace.session();
+    assert!(session.borrow().document().source().contains("Delay=\"0:0:0.5000000\""));
+    assert!(session.borrow().document().source().contains("Delay=\"0:0:1.5500000\""));
+    timeline_key(&timeline_ruler(&workspace), Key::End);
+    assert!(session.borrow().animation.play_all);
+    assert!((session.borrow().time() - 2.65).abs() < 1e-8);
+    assert!(!session.borrow().is_playing());
+    {
+        // Apply the edited markup with the actual runtime animators as well as the designer sampler.
+        let mut session = session.borrow_mut();
+        let session = &mut *session;
+        let programs = session.animation_programs().to_vec();
+        let targets = programs.iter().map(|clip| session.preview.visual(clip.primary_target()).unwrap()).collect::<Vec<_>>();
+        session.preview.clear_animation();
+        session.animation.native.seek(&programs, &session.preview, 1.0).unwrap();
+        assert!(targets[0].opacity() > 0.2);
+        assert!((targets[1].opacity() - 0.2).abs() < 1e-8);
+        session.animation.native.advance_to(&programs, &session.preview, 2.1).unwrap();
+        assert_eq!(targets[0].opacity(), 1.0);
+        assert!(targets[1].opacity() > 0.2);
+        session.animation.native.stop();
+    }
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().document().source(), source);
 }
 
 fn authoring_row(workspace: &DesignerWorkspace, name: &str) -> Ref<Grid> {

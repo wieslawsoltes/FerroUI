@@ -1,0 +1,198 @@
+use crate::{blocks::keep_comments, RsxProjection};
+use ferroui_designer_core::{SourceSpan, TextPatch};
+use ferroui_view_syntax::snake_case;
+use proc_macro2::{TokenStream, TokenTree};
+use std::collections::BTreeMap;
+
+#[derive(Clone, Copy, Debug)]
+pub struct RsxEvent {
+    pub value: SourceSpan,
+    pub(crate) field: Option<SourceSpan>,
+}
+
+impl RsxEvent {
+    pub fn editable(self) -> bool {
+        self.field.is_some()
+    }
+}
+
+pub fn event_setter(name: &str) -> String {
+    format!("on_{}", snake_case(name))
+}
+
+impl RsxProjection<'_> {
+    pub fn edit_property(
+        &self,
+        index: usize,
+        name: &str,
+        value: Option<&str>,
+    ) -> Result<TextPatch, String> {
+        let node = self.nodes.get(index).ok_or("Unknown RSX element")?;
+        if node.expressions.contains_key(name) {
+            return Err(format!("{name} is a Rust expression; edit it in source"));
+        }
+        if let Some(value) = value {
+            if node.properties.contains_key(name) {
+                return self.set_property(index, name, value);
+            }
+            let replacement = node
+                .class
+                .literal(name)
+                .and_then(|kind| kind.rust(value))
+                .ok_or_else(|| format!("{value:?} is outside the static RSX values for {name}"))?;
+            return Ok(insert_field(
+                self.source,
+                node.open,
+                &format!("{}: {replacement}", node.class.setter(name)),
+            ));
+        }
+        let span = node
+            .fields
+            .get(name)
+            .ok_or("Select an authored literal property")?;
+        reset_field(self.source, *span, node.close)
+    }
+
+    pub fn set_event(
+        &self,
+        index: usize,
+        name: &str,
+        value: Option<&str>,
+    ) -> Result<TextPatch, String> {
+        let node = self.nodes.get(index).ok_or("Unknown RSX element")?;
+        if !node.supports_events() {
+            return Err("Edit this component's event in Rust source".into());
+        }
+        let setter = event_setter(name);
+        let existing = node.events.get(&setter);
+        if existing.is_some_and(|event| !event.editable()) {
+            return Err("Edit this Rust handler in source to preserve its builder call".into());
+        }
+        if let Some(value) = value {
+            let value = value.trim();
+            syn::parse_str::<syn::Expr>(value)
+                .map_err(|error| format!("Invalid handler expression: {error}"))?;
+            return Ok(if let Some(event) = existing {
+                TextPatch {
+                    span: event.value,
+                    replacement: value.into(),
+                }
+            } else {
+                insert_field(self.source, node.open, &format!("{setter}: {value}"))
+            });
+        }
+        let span = existing
+            .and_then(|event| event.field)
+            .ok_or("Select an authored Rust handler")?;
+        Ok(remove_field(self.source, span))
+    }
+}
+
+pub(crate) fn insert_field(source: &str, offset: usize, field: &str) -> TextPatch {
+    let following = &source[offset..];
+    let rest = following.trim_start_matches([' ', '\t']);
+    let replacement = if rest.starts_with(['\n', '\r']) {
+        let eol = if rest.starts_with("\r\n") {
+            "\r\n"
+        } else {
+            "\n"
+        };
+        let indent = line_indent(source, offset);
+        format!("{eol}{indent}    {field},")
+    } else {
+        format!(" {field},{}", if following == rest { " " } else { "" })
+    };
+    TextPatch {
+        span: SourceSpan::new(offset, offset),
+        replacement,
+    }
+}
+
+pub(crate) fn merge_insertions(edits: &mut Vec<TextPatch>) {
+    let mut insertions = BTreeMap::<usize, String>::new();
+    edits.retain(|edit| {
+        if edit.span.is_empty() {
+            insertions
+                .entry(edit.span.start)
+                .or_default()
+                .push_str(&edit.replacement);
+            false
+        } else {
+            true
+        }
+    });
+    edits.extend(
+        insertions
+            .into_iter()
+            .map(|(offset, replacement)| TextPatch {
+                span: SourceSpan::new(offset, offset),
+                replacement,
+            }),
+    );
+}
+
+pub(crate) fn remove_field(source: &str, span: SourceSpan) -> TextPatch {
+    let following = &source[span.end..];
+    let rest = following.trim_start_matches([' ', '\t']);
+    let end = if rest.starts_with(',') {
+        span.end + following.len() - rest.len() + 1
+    } else {
+        span.end
+    };
+    let before = source[..span.start].rsplit('\n').next().unwrap_or("");
+    let after = &source[end..];
+    let suffix = after.trim_start_matches([' ', '\t']);
+    let span = if before.trim().is_empty() && suffix.starts_with(['\n', '\r']) {
+        SourceSpan::new(
+            span.start - before.len(),
+            end + after.len() - suffix.len() + if suffix.starts_with("\r\n") { 2 } else { 1 },
+        )
+    } else {
+        SourceSpan::new(span.start, end)
+    };
+    TextPatch {
+        span,
+        replacement: String::new(),
+    }
+}
+
+pub(crate) fn reset_field(
+    source: &str,
+    field: SourceSpan,
+    close: usize,
+) -> Result<TextPatch, String> {
+    let suffix: TokenStream = source
+        .get(field.end..close)
+        .ok_or("The Rust field changed")?
+        .parse()
+        .map_err(|_| "Invalid Rust tokens after the field")?;
+    let end = match suffix.into_iter().next() {
+        Some(TokenTree::Punct(token)) if token.as_char() == ',' => {
+            field.end + token.span().byte_range().start
+        }
+        _ => field.end,
+    };
+    let mut patch = remove_field(source, SourceSpan::new(field.start, end));
+    patch.replacement = keep_comments(&source[patch.span.range()])?;
+    Ok(patch)
+}
+
+pub(crate) fn line_indent(source: &str, offset: usize) -> &str {
+    let line = source[..offset].rsplit('\n').next().unwrap_or("");
+    &line[..line.len() - line.trim_start_matches([' ', '\t']).len()]
+}
+
+/// Whitespace from the preceding line ending to a token on its own line.
+pub(crate) fn line_prefix(source: &str, offset: Option<usize>) -> &str {
+    let Some(before) = offset.and_then(|offset| source.get(..offset)) else {
+        return "";
+    };
+    let Some(newline) = before.rfind('\n') else {
+        return "";
+    };
+    if !before[newline + 1..].chars().all(|character| matches!(character, ' ' | '\t')) {
+        return "";
+    }
+    let start = newline - usize::from(newline > 0 && before.as_bytes()[newline - 1] == b'\r');
+    &before[start..]
+}

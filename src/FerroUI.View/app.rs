@@ -70,6 +70,7 @@ pub fn launch_themed(
             app.styles().add(theme());
             let window = mount_window(view);
             crate::hot::watch();
+            crate::hot::notify_editor_on_open(&window);
             #[cfg(debug_assertions)]
             crate::inspect::attach_inspector(&window);
             smoke_exit(&window);

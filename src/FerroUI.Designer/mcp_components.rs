@@ -2,7 +2,7 @@
 use super::schema as s;
 use super::{decode, integer, node_id, state, text};
 use crate::{DefinitionPreviewOptions, DesignerSession};
-use ferroui_designer_tools::{ComponentAction, ComponentEntry, component_fragment};
+use ferroui_designer_tools::{ComponentAction, ComponentEntry, component_fragment, component_property_resource_owners};
 use serde_json::{Value, json};
 
 pub(super) fn handles(name: &str) -> bool {
@@ -11,6 +11,7 @@ pub(super) fn handles(name: &str) -> bool {
         "designer_components"
             | "designer_component_resources"
             | "designer_component_references"
+            | "designer_component_promotion"
             | "designer_component"
             | "designer_definition_scope"
             | "designer_definition"
@@ -153,6 +154,12 @@ pub(super) fn tools() -> Vec<Value> {
             false,
         ),
         s::tool(
+            "designer_component_promotion",
+            "Get eligible ancestor resource scopes for one authored XAML literal. Use designer_component extract_property to promote the value.",
+            s::object(json!({"node":s::id(),"property":s::string()}), &["node", "property"]),
+            false,
+        ),
+        s::tool(
             "designer_component_references",
             "Read authored references to a resource, including possible uses across theme variants. This is the same conservative dependency analysis used by rename and deletion.",
             s::object(json!({"resource":s::id()}), &["resource"]),
@@ -175,6 +182,7 @@ pub(super) fn tools() -> Vec<Value> {
                     &["node"],
                     true,
                 ),
+                s::action("enter_included_template", json!({"target":{"type":"object"}}), &["target"], true),
                 s::action(
                     "exit",
                     json!({"expected_scope_epoch":s::revision()}),
@@ -206,6 +214,15 @@ pub(super) fn call(
                 "context":session.component_resource_context(target),
                 "resources":entries(session,session.visible_component_resources(target)?,args["include_source"] == true)?
             }))
+        }
+        "designer_component_promotion" => {
+            let document = session.document();
+            let owners = component_property_resource_owners(document, node_id(args, "node")?, &text(args, "property")?)
+                .map_err(|error| error.to_string())?;
+            let owners: Vec<_> = owners.into_iter().filter_map(|id| document.ast().node(id)).map(|entry| {
+                json!({"id":entry.id,"label":entry.name,"name":entry.xaml_name(),"root":document.ast().roots().contains(&entry.id)})
+            }).collect();
+            Ok(json!({"owners":owners}))
         }
         "designer_component_references" => {
             let resource = node_id(args, "resource")?;
@@ -257,15 +274,26 @@ pub(super) fn call(
                     ));
                 }
             }
-            match text(args, "action")?.as_str() {
+            let action = text(args, "action")?;
+            let consumer = if action == "exit" {
+                session.included_template_consumer().map(str::to_owned)
+            } else {
+                None
+            };
+            match action.as_str() {
                 "enter" => session.enter_definition_scope_with_options(
                     node_id(args, "node")?,
                     preview_options(args)?,
                 )?,
+                "enter_included_template" => session.enter_included_item_template(decode(args, "target")?)?,
                 "exit" => session.exit_definition_scope()?,
                 _ => return Err("Unknown definition-scope action".into()),
             }
-            Ok(json!({"document":state(session),"scope":scope_state(session)}))
+            let mut result = json!({"document":state(session),"scope":scope_state(session)});
+            if let Some(consumer) = consumer {
+                result["returnToConsumer"] = json!(consumer);
+            }
+            Ok(result)
         }
         _ => Err("Unknown component tool".into()),
     }

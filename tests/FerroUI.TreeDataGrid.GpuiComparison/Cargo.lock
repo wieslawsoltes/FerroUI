@@ -1415,6 +1415,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-headless",
  "ferroui-markup",
+ "ferroui-markup-xaml",
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
@@ -1525,6 +1526,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-markup",
+ "ferroui-reload-protocol",
  "quote",
  "roxmltree 0.20.0",
  "syn 2.0.119",
@@ -1549,6 +1551,10 @@ dependencies = [
  "libc",
  "paste",
 ]
+
+[[package]]
+name = "ferroui-reload-protocol"
+version = "0.6.0-preview.1"
 
 [[package]]
 name = "ferroui-remote-protocol"
@@ -1652,6 +1658,17 @@ dependencies = [
 
 [[package]]
 name = "ferroui-view-macros"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-reload-protocol",
+ "ferroui-view-syntax",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferroui-view-syntax"
 version = "0.6.0-preview.1"
 dependencies = [
  "proc-macro2",

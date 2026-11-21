@@ -215,8 +215,25 @@ fn compare_ignore_ascii_case(name: &str, s: &str) -> std::cmp::Ordering {
     name.bytes().cmp(s.bytes().map(|b| b.to_ascii_lowercase()))
 }
 
-/// Lower-cased names, sorted, for the case-insensitive name lookup.
-static BY_NAME: [(&str, KnownColor); 141] = [
+macro_rules! known_color_names {
+    ($(($name:literal, KnownColor::$constant:ident)),+ $(,)?) => {
+        // Lower-cased names, sorted, for the case-insensitive name lookup.
+        static BY_NAME: &[(&str, KnownColor)] = &[$(($name, KnownColor::$constant)),+];
+
+        impl KnownColors {
+            /// Looks up the exact Rust identifier of a swatch shared by
+            /// [`KnownColor`] and [`Colors`](crate::media::Colors), such as `ALICE_BLUE`.
+            pub fn from_constant_name(name: &str) -> Option<KnownColor> {
+                match name {
+                    $(stringify!($constant) => Some(KnownColor::$constant),)+
+                    _ => None,
+                }
+            }
+        }
+    };
+}
+
+known_color_names![
     ("aliceblue", KnownColor::ALICE_BLUE),
     ("antiquewhite", KnownColor::ANTIQUE_WHITE),
     ("aqua", KnownColor::AQUA),
@@ -550,6 +567,16 @@ mod tests {
             let display = KnownColors::get_known_color_name(color.value()).unwrap();
             assert_eq!(KnownColors::get_known_color(display), *color);
         }
+    }
+
+    #[test]
+    fn rust_identifiers_resolve_the_exact_named_constants() {
+        assert_eq!(KnownColors::from_constant_name("BLUE_VIOLET"), Some(KnownColor::BLUE_VIOLET));
+        assert_eq!(KnownColors::from_constant_name("CYAN"), Some(KnownColor::CYAN));
+        assert_eq!(KnownColors::from_constant_name("TRANSPARENT"), Some(KnownColor::TRANSPARENT));
+        assert_eq!(KnownColors::from_constant_name("blue_violet"), None);
+        assert_eq!(KnownColors::from_constant_name("BLUEVIOLET"), None);
+        assert_eq!(KnownColors::from_constant_name("NONE"), None);
     }
 
     #[test]

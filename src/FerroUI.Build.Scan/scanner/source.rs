@@ -79,6 +79,7 @@ pub(crate) enum Text {
 
 /// `static X: MarkupAssembly = MarkupAssembly { .. }`, as written.
 pub(crate) struct RawAssembly {
+    pub item: String,
     pub name: Option<Text>,
     pub crate_name: Option<Text>,
     pub xmlns_definitions: Vec<(Text, Text)>,
@@ -292,7 +293,12 @@ impl Source {
             source.modules.extern_crates.insert(dependency.crate_name.clone());
             source.modules.external_crates.insert(dependency.crate_name.clone());
             for export in &dependency.exports {
-                source.modules.externals.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
+                if let std::collections::btree_map::Entry::Vacant(entry) = source.modules.externals.entry(export.path.clone()) {
+                    entry.insert(export.declared.clone());
+                    if export.explicit_alias {
+                        source.modules.external_aliases.insert(export.path.clone());
+                    }
+                }
             }
             for exported in &dependency.macros {
                 let rules: Option<Vec<(Tokens, Tokens)>> = exported
@@ -520,7 +526,7 @@ impl Source {
                     path.push(name.clone());
                     name
                 };
-                self.modules.modules[module].imports.push(Import { name, path, public });
+                self.modules.modules[module].imports.push(Import { name, path, public, explicit_alias: false });
             }
             syn::UseTree::Rename(rename) => {
                 if rename.rename == "_" {
@@ -531,7 +537,7 @@ impl Source {
                     path.push(rename.ident.to_string());
                 }
                 if !path.is_empty() {
-                    self.modules.modules[module].imports.push(Import { name: rename.rename.to_string(), path, public });
+                    self.modules.modules[module].imports.push(Import { name: rename.rename.to_string(), path, public, explicit_alias: true });
                 }
             }
             syn::UseTree::Glob(_) => {
@@ -615,7 +621,7 @@ impl Source {
                 self.modules.add_item(module, &item.ident.to_string(), ItemKind::Value, is_public(&item.vis));
                 self.read_registrations_of_value(&item.expr, context, &cfg);
                 if last_segment_of_type(&item.ty).as_deref() == Some("MarkupAssembly") {
-                    match assembly_of(&item.expr, site(&item.ident)) {
+                    match assembly_of(item, site(&item.ident)) {
                         Some(assembly) => self.assemblies.push(assembly),
                         None => {
                             let message = "the value of the `MarkupAssembly` is not a struct expression: the assembly is not read".to_string();
@@ -1269,7 +1275,7 @@ fn visibility_of(visibility: &syn::Visibility) -> String {
 }
 
 /// The name of a type that is a path, without its arguments (`Border`, `a::Border<T>`).
-fn last_segment_of_type(type_: &syn::Type) -> Option<String> {
+pub(super) fn last_segment_of_type(type_: &syn::Type) -> Option<String> {
     match type_ {
         syn::Type::Path(path) if path.qself.is_none() => path.path.segments.last().map(|segment| segment.ident.to_string()),
         _ => None,
@@ -1306,10 +1312,16 @@ fn items_of(expression: &syn::Expr) -> Option<Vec<&syn::Expr>> {
 
 /// The pairs of `&[(a, b), ..]`.
 fn pairs_of(expression: &syn::Expr) -> Option<Vec<(Text, Text)>> {
+    Some(pair_expressions(expression)?.into_iter()
+        .map(|(first, second)| (text_of_expression(first), text_of_expression(second)))
+        .collect())
+}
+
+pub(super) fn pair_expressions(expression: &syn::Expr) -> Option<Vec<(&syn::Expr, &syn::Expr)>> {
     items_of(expression)?
         .into_iter()
         .map(|item| match item {
-            syn::Expr::Tuple(tuple) if tuple.elems.len() == 2 => Some((text_of_expression(&tuple.elems[0]), text_of_expression(&tuple.elems[1]))),
+            syn::Expr::Tuple(tuple) if tuple.elems.len() == 2 => Some((&tuple.elems[0], &tuple.elems[1])),
             _ => None,
         })
         .collect()
@@ -1326,14 +1338,15 @@ fn struct_pairs_of(expression: &syn::Expr, first: &str, second: &str) -> Option<
         .collect()
 }
 
-fn field_of<'a>(expression: &'a syn::ExprStruct, name: &str) -> Option<&'a syn::Expr> {
+pub(super) fn field_of<'a>(expression: &'a syn::ExprStruct, name: &str) -> Option<&'a syn::Expr> {
     expression.fields.iter().find(|field| matches!(&field.member, syn::Member::Named(ident) if ident == name)).map(|field| &field.expr)
 }
 
 /// `MarkupAssembly { name: .., crate_name: .., xmlns_definitions: &[..], .. }`.
-fn assembly_of(expression: &syn::Expr, site: Site) -> Option<RawAssembly> {
-    let syn::Expr::Struct(expression) = expression else { return None };
+fn assembly_of(item: &syn::ItemStatic, site: Site) -> Option<RawAssembly> {
+    let syn::Expr::Struct(expression) = item.expr.as_ref() else { return None };
     Some(RawAssembly {
+        item: item.ident.to_string(),
         name: field_of(expression, "name").map(text_of_expression),
         crate_name: field_of(expression, "crate_name").map(text_of_expression),
         xmlns_definitions: field_of(expression, "xmlns_definitions").and_then(|list| struct_pairs_of(list, "xml_namespace", "namespace")).unwrap_or_default(),
@@ -1751,7 +1764,7 @@ struct RegistrationFinder {
 }
 
 /// The names the `use` tree `tree` below `prefix` imports, each with its path.
-fn local_imports(tree: &syn::UseTree, prefix: &mut Vec<String>, imports: &mut LocalImports) {
+pub(super) fn local_imports(tree: &syn::UseTree, prefix: &mut Vec<String>, imports: &mut LocalImports) {
     match tree {
         syn::UseTree::Path(path) => {
             prefix.push(path.ident.to_string());

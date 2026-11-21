@@ -1,0 +1,56 @@
+#timeline-toolbar:has(#timeline-compare[aria-pressed="true"]) :is(.timeline-program-bar, .timeline-tools) { display: none; }
+#timeline-compare[aria-pressed="true"] { background: var(--tool-active); }
+.clip-tools { flex: 1; flex-wrap: wrap; min-inline-size: 0; }
+.clip-zoom { margin-inline-start: auto; }
+.clip-clock { display: flex; align-items: center; gap: 3px; white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+#clip-time { inline-size: 7ch; text-align: end; }
+#clip-time::-webkit-inner-spin-button { appearance: none; }
+.clip-grid {
+    flex: 1;
+    min-block-size: 72px;
+    margin-block-start: 4px;
+    overflow: auto;
+    scroll-padding-block: 35px 17px;
+    --track-label-width: clamp(64px, 25%, 172px);
+    --clip-inset: 12px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: var(--vscode-editor-background);
+}
+.clip-axis, .clip-pan {
+    position: sticky;
+    z-index: 3;
+    padding-inline: calc(var(--track-label-width) + var(--clip-inset)) var(--clip-inset);
+    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+}
+.clip-axis { inset-block-start: 0; border-block-end: 1px solid var(--line); }
+.clip-pan { inset-block-end: 0; border-block-start: 1px solid var(--line); }
+.clip-ruler { position: relative; padding-block-end: 15px; }
+#clip-seek { appearance: none; display: block; inline-size: calc(100% + 10px); min-block-size: 19px; margin: 0 -5px; padding: 0; border: 0; background: transparent; }
+#clip-seek::-webkit-slider-runnable-track { block-size: 1px; background: var(--line); }
+#clip-seek::-webkit-slider-thumb { appearance: none; inline-size: 10px; block-size: 10px; margin-block-start: -4px; border-radius: 2px; border: 1px solid var(--vscode-button-foreground); background: var(--vscode-button-background); }
+.clip-marks { position: absolute; inset: auto 0 0; block-size: 15px; color: var(--muted); font-size: 11px; }
+.clip-marks span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.clip-marks span:first-child { transform: none; }
+.clip-marks span:last-child { transform: translateX(-100%); }
+#clip-rows { list-style: none; padding: 0; margin: 0; }
+.clip-row { display: grid; grid-template-columns: var(--track-label-width) minmax(0, 1fr); min-block-size: 27px; border-block-end: 1px solid var(--line); }
+.clip-label { display: flex; align-items: center; gap: 4px; min-inline-size: 0; margin: 1px 0 1px 2px; text-align: start; }
+.clip-label span:first-child { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.clip-label[aria-pressed="true"] { background: var(--vscode-list-inactiveSelectionBackground, var(--tool-active)); }
+.clip-order { color: var(--muted); font-variant-numeric: tabular-nums; }
+.clip-lane { position: relative; overflow: hidden; margin-inline: var(--clip-inset); background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 25%); }
+.clip-lane::after { content: ''; position: absolute; inset-block: 0; inset-inline-start: var(--clip-head); inline-size: 1px; background: var(--focus); pointer-events: none; }
+.clip-bar { position: absolute; inset-block: 4px; inset-inline-start: var(--clip-left); inline-size: max(5px, var(--clip-width)); min-block-size: 0; padding: 0; border: 1px solid var(--vscode-textLink-foreground, var(--focus)); border-radius: 3px; background: var(--vscode-editor-selectionBackground, var(--tool-active)); touch-action: none; }
+.clip-bar:focus-visible { outline-offset: -2px; }
+.clip-bar[data-editable] { cursor: grab; }
+.clip-bar[data-selected] { background: var(--vscode-list-activeSelectionBackground, var(--focus)); }
+.clip-bar[data-infinite], .clip-bar[data-readonly] { border-style: dashed; }
+.clip-bar[data-dragging] { cursor: grabbing; background: var(--vscode-list-activeSelectionBackground, var(--focus)); }
+#clip-pan { display: block; inline-size: 100%; min-block-size: 16px; margin: 0; accent-color: var(--focus); }
+#clip-placement-form { display: flex; flex-wrap: wrap; gap: 5px; align-items: end; }
+#clip-placement-form label { display: grid; gap: 2px; }
+#clip-placement-form input { inline-size: 8ch; }
+@media (max-width: 480px) {
+    .clip-grid { --track-label-width: clamp(100px, 37%, 144px); }
+}

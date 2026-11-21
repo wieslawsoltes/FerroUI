@@ -3,14 +3,16 @@
 use crate::runtime::RuntimePreview;
 use crate::{
     DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewHostOptions,
-    PreviewPrototype, PreviewPrototypeManifest, PreviewStatus, PreviewTheme, RuntimeNode,
+    PreviewPrototype, PreviewPrototypeManifest, PreviewStatus, RuntimeNode,
 };
-use ferroui_base::media::{FlowDirection, SolidColorBrush};
-use ferroui_base::styling::ThemeVariant;
+use ferroui_base::media::FlowDirection;
+use crate::preview_theme::preview_backing;
 use ferroui_base::utilities::UriRef;
 use ferroui_base::{Point, Ref, Visual, WeakRef};
 use ferroui_controls::{Border, ContentControl, Control, ThemeVariantScope};
-use ferroui_designer_core::{Ast, Document, Node, NodeId};
+use ferroui_designer_core::{Ast, Document, NodeId};
+use crate::PreviewSourceAnchor;
+use ferroui_designer_project::LocalPreviewSources;
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 use serde::{Deserialize, Serialize};
@@ -20,145 +22,28 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 
+#[path = "preview_stage_includes.rs"]
+mod includes;
 #[path = "preview_stage_layout.rs"]
 mod layout;
+#[path = "preview_stage_manifest.rs"]
+mod manifest;
+pub use manifest::{PreviewStageDetails, PreviewStageManifest, PreviewStageSet, PreviewStageSnapshot, PreviewStageSpec};
+#[path = "preview_stage_source_moves.rs"]
+mod source_moves;
+pub use source_moves::PreviewStageSourceMoves;
+#[path = "preview_stage_prototype_elements.rs"]
+mod prototype_elements;
 use layout::StageLayoutHost;
+use includes::{IncludeCatalog, IncludeCatalogs, IncludeSource};
+#[path = "preview_stage_keyboard.rs"]
+mod keyboard;
+pub use keyboard::{PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget};
 
 pub type PreviewStageId = u64;
 pub const MAX_PREVIEW_STAGES: usize = 16;
 const MAX_MANIFEST_BYTES: usize = 1_048_576;
 static NEXT_STAGE: AtomicU64 = AtomicU64::new(1);
-
-/// A namespace-qualified source path. No runtime or session-local numeric node ID
-/// is persisted. Named/keyed paths survive sibling insertion and reordering, while
-/// ambiguous unnamed siblings are rejected instead of guessing which view was meant.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct PreviewSourceAnchor {
-    pub path: Vec<PreviewSourceSegment>,
-}
-
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct PreviewSourceSegment {
-    pub namespace: String,
-    pub type_name: String,
-    pub name: Option<String>,
-    pub key: Option<String>,
-}
-
-impl PreviewSourceSegment {
-    fn from_node(node: &Node) -> Self {
-        Self {
-            namespace: node.namespace_uri.clone().unwrap_or_default(),
-            type_name: node.local_name().into(),
-            name: node.xaml_name().map(str::to_owned),
-            key: node
-                .attributes
-                .iter()
-                .find(|attribute| {
-                    attribute.namespace_uri.as_deref()
-                        == Some("http://schemas.microsoft.com/winfx/2006/xaml")
-                        && attribute.name.rsplit(':').next() == Some("Key")
-                })
-                .map(|attribute| attribute.value.clone()),
-        }
-    }
-
-    fn matches(&self, node: &Node) -> bool {
-        node.is_element() && *self == Self::from_node(node)
-    }
-}
-
-impl PreviewSourceAnchor {
-    pub fn capture(document: &Document, node: NodeId) -> Result<Self, String> {
-        if !document.is_valid() {
-            return Err("Repair the XAML before capturing a preview target".into());
-        }
-        let mut path = Vec::new();
-        let mut current = Some(node);
-        while let Some(id) = current {
-            let node = document
-                .ast()
-                .node(id)
-                .filter(|node| node.is_element())
-                .ok_or("Preview target must be an authored element")?;
-            path.push(PreviewSourceSegment::from_node(node));
-            current = node.parent;
-        }
-        path.reverse();
-        let anchor = Self { path };
-        anchor.validate()?;
-        if anchor.resolve(document)? != node {
-            return Err("Preview target does not have an unambiguous source path".into());
-        }
-        Ok(anchor)
-    }
-
-    pub fn resolve(&self, document: &Document) -> Result<NodeId, String> {
-        self.validate()?;
-        if !document.is_valid() {
-            return Err("The preview target source is invalid".into());
-        }
-        let root = document
-            .ast()
-            .node(document.ast().root())
-            .ok_or("Missing source root")?;
-        if !self.path[0].matches(root) {
-            return Err("The preview target root was replaced or renamed".into());
-        }
-        let mut current = root.id;
-        for segment in self.path.iter().skip(1) {
-            let owner = document
-                .ast()
-                .node(current)
-                .ok_or("Missing preview target ancestor")?;
-            let candidates = owner
-                .children
-                .iter()
-                .filter_map(|id| document.ast().node(*id))
-                .filter(|node| segment.matches(node))
-                .map(|node| node.id)
-                .collect::<Vec<_>>();
-            current = match candidates.as_slice() {
-                [only] => *only,
-                [] => return Err("The preview target was removed, renamed or moved".into()),
-                _ => return Err("The preview target is ambiguous; name the control or use a unique resource key".into()),
-            };
-        }
-        Ok(current)
-    }
-
-    pub fn validate(&self) -> Result<(), String> {
-        if self.path.is_empty() || self.path.len() > 128 {
-            return Err("A preview target path must contain between 1 and 128 elements".into());
-        }
-        for segment in &self.path {
-            bounded(&segment.namespace, 4096, "Target namespace", true)?;
-            bounded(&segment.type_name, 512, "Target type", false)?;
-            for value in [&segment.name, &segment.key].into_iter().flatten() {
-                bounded(value, 4096, "Target name or key", false)?;
-            }
-        }
-        if self.text_size() > 65_536 {
-            return Err("Preview target path text exceeds 64 KiB".into());
-        }
-        Ok(())
-    }
-
-    pub(crate) fn text_size(&self) -> usize {
-        self.path
-            .iter()
-            .map(|segment| {
-                segment.namespace.len()
-                    + segment.type_name.len()
-                    + segment.name.as_ref().map_or(0, String::len)
-                    + segment.key.as_ref().map_or(0, String::len)
-                    + 64
-            })
-            .sum()
-    }
-}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -346,9 +231,9 @@ pub enum PreviewStageStatus {
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
-pub struct PreviewStageInfo {
+pub struct PreviewStageInfo<Configuration = PreviewStageConfiguration> {
     pub id: PreviewStageId,
-    pub configuration: PreviewStageConfiguration,
+    pub configuration: Configuration,
     pub epoch: u64,
     pub status: PreviewStageStatus,
     pub layout_size: PreviewStageSize,
@@ -366,70 +251,13 @@ pub struct PreviewStageSource {
     pub pending: bool,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct PreviewStageManifest {
-    pub version: u32,
-    pub stages: Vec<PreviewStageConfiguration>,
-    pub active: Option<usize>,
-    #[serde(default, skip_serializing_if = "PreviewPrototypeManifest::is_empty")]
-    pub prototype: PreviewPrototypeManifest,
-}
-
-pub type PreviewStageSnapshot = PreviewStageManifest;
-
-impl PreviewStageManifest {
-    pub fn validate(&self) -> Result<(), String> {
-        if !matches!(self.version, 1..=3) {
-            return Err("Unsupported preview-stage manifest version".into());
+impl PreviewStageSource {
+    pub(crate) fn fixture_options(&self) -> Result<Vec<String>, String> {
+        if self.pending || !self.document.is_valid() {
+            return Err("Repair the stage source before choosing design fixtures".into());
         }
-        if self.version < 3 && self.prototype.has_overlay_actions() {
-            return Err("Prototype overlays require preview-stage manifest version 3".into());
-        }
-        if self.version == 1 && !self.prototype.is_empty() {
-            return Err("Prototype interactions require preview-stage manifest version 2".into());
-        }
-        if self.stages.len() > MAX_PREVIEW_STAGES {
-            return Err(format!(
-                "A preview board supports at most {MAX_PREVIEW_STAGES} stages"
-            ));
-        }
-        if self.active.is_some_and(|index| index >= self.stages.len()) {
-            return Err("The active preview-stage index is outside the manifest".into());
-        }
-        for config in &self.stages {
-            config.validate()?;
-        }
-        self.prototype.validate(self.stages.len())?;
-        if self
-            .stages
-            .iter()
-            .map(PreviewStageConfiguration::text_size)
-            .sum::<usize>()
-            + self.prototype.text_size()
-            > MAX_MANIFEST_BYTES
-        {
-            return Err("Preview-stage manifest text exceeds 1 MiB".into());
-        }
-        Ok(())
-    }
-
-    pub fn from_json(source: &str) -> Result<Self, String> {
-        if source.len() > MAX_MANIFEST_BYTES {
-            return Err("Preview-stage manifest exceeds 1 MiB".into());
-        }
-        let manifest: Self = serde_json::from_str(source).map_err(|error| error.to_string())?;
-        manifest.validate()?;
-        Ok(manifest)
-    }
-
-    pub fn to_json(&self) -> Result<String, String> {
-        self.validate()?;
-        let source = serde_json::to_string_pretty(self).map_err(|error| error.to_string())?;
-        if source.len() > MAX_MANIFEST_BYTES {
-            return Err("Preview-stage manifest exceeds 1 MiB".into());
-        }
-        Ok(source)
+        Ok(ferroui_designer_core::design_fixtures::DesignFixtures::from_document(&self.document)?
+            .into_iter().flat_map(|set| set.fixtures).map(|fixture| fixture.name).collect())
     }
 }
 
@@ -482,10 +310,10 @@ struct RenderedStage {
     preview: RuntimePreview,
     scope: Ref<ThemeVariantScope>,
     document: Document,
-    configuration: PreviewStageConfiguration,
+    spec: PreviewStageSpec,
     options_epoch: u64,
     source_snapshot: SourceSnapshot,
-    source_catalog: Rc<BTreeMap<String, SourceStamp>>,
+    source_catalog: Rc<IncludeCatalog>,
 }
 
 impl Drop for RenderedStage {
@@ -496,7 +324,7 @@ impl Drop for RenderedStage {
 
 struct Stage {
     id: PreviewStageId,
-    configuration: PreviewStageConfiguration,
+    spec: PreviewStageSpec,
     control: Ref<StageLayoutHost>,
     // Isolated player presentation only: never serialized or part of the accepted
     // source/configuration epoch. Shared with retained and candidate theme handlers.
@@ -505,7 +333,7 @@ struct Stage {
     status: PreviewStageStatus,
     rendered: Option<RenderedStage>,
     observed: Option<SourceStamp>,
-    observed_dependencies: BTreeMap<String, Option<SourceStamp>>,
+    observed_dependencies: BTreeMap<String, Option<IncludeSource>>,
 }
 
 #[derive(Clone)]
@@ -561,7 +389,7 @@ pub struct PreviewStageBoard {
     active: Option<PreviewStageId>,
     active_uri: String,
     sources: BTreeMap<String, PreviewStageSource>,
-    source_catalog: Rc<BTreeMap<String, SourceStamp>>,
+    includes: IncludeCatalogs,
     options: PreviewHostOptions,
     options_epoch: u64,
     epoch: u64,
@@ -581,7 +409,7 @@ impl PreviewStageBoard {
             active: None,
             active_uri: String::new(),
             sources: BTreeMap::new(),
-            source_catalog: Rc::new(BTreeMap::new()),
+            includes: IncludeCatalogs::default(),
             options: PreviewHostOptions::default(),
             options_epoch: 0,
             epoch: 1,
@@ -611,14 +439,14 @@ impl PreviewStageBoard {
     }
 
     pub fn stages(&self) -> Vec<PreviewStageInfo> {
-        self.stages.iter().map(|stage| self.info(stage)).collect()
+        self.stages.iter().map(|stage| self.info(stage, stage.spec.configuration.clone())).collect()
     }
 
     pub fn stage(&self, id: PreviewStageId) -> Option<PreviewStageInfo> {
         self.stages
             .iter()
             .find(|stage| stage.id == id)
-            .map(|stage| self.info(stage))
+            .map(|stage| self.info(stage, stage.spec.configuration.clone()))
     }
 
     pub fn control(&self, id: PreviewStageId) -> Option<Ref<Control>> {
@@ -645,10 +473,18 @@ impl PreviewStageBoard {
         Ok(())
     }
 
-    fn info(&self, stage: &Stage) -> PreviewStageInfo {
+    pub fn stage_spec(&self, id: PreviewStageId) -> Option<PreviewStageSpec> {
+        self.stages.iter().find(|stage| stage.id == id).map(|stage| stage.spec.clone())
+    }
+
+    pub fn stage_details(&self) -> Vec<PreviewStageDetails> {
+        self.stages.iter().map(|stage| self.info(stage, stage.spec.clone())).collect()
+    }
+
+    fn info<C>(&self, stage: &Stage, configuration: C) -> PreviewStageInfo<C> {
         PreviewStageInfo {
             id: stage.id,
-            configuration: stage.configuration.clone(),
+            configuration,
             epoch: stage.epoch,
             status: stage.status.clone(),
             layout_size: stage.control.layout_size(),
@@ -658,7 +494,7 @@ impl PreviewStageBoard {
                 .map(|rendered| rendered.document.revision()),
             source_revision: self
                 .sources
-                .get(&stage.configuration.source_uri)
+                .get(&stage.spec.configuration.source_uri)
                 .map(|source| source.document.revision()),
             notices: stage
                 .rendered
@@ -674,6 +510,39 @@ impl PreviewStageBoard {
         options: PreviewHostOptions,
         options_epoch: u64,
     ) -> Result<(), String> {
+        self.sync_sources_with_local_includes(active_uri, sources, options, options_epoch, &BTreeMap::new())
+    }
+
+    /// Synchronize authored buffers and the host's scoped literal includes for each view.
+    /// Native include requests determine which cards need a replacement frame.
+    pub fn sync_sources_with_local_includes(
+        &mut self,
+        active_uri: &str,
+        sources: Vec<PreviewStageSource>,
+        options: PreviewHostOptions,
+        options_epoch: u64,
+        local_includes: &BTreeMap<&str, &LocalPreviewSources>,
+    ) -> Result<(), String> {
+        self.sync_sources_after_move(
+            active_uri,
+            sources,
+            options,
+            options_epoch,
+            local_includes,
+            &PreviewStageSourceMoves::default(),
+        )
+    }
+
+    /// Move stage source bindings after validating the next source snapshots.
+    pub fn sync_sources_after_move(
+        &mut self,
+        active_uri: &str,
+        sources: Vec<PreviewStageSource>,
+        options: PreviewHostOptions,
+        options_epoch: u64,
+        local_includes: &BTreeMap<&str, &LocalPreviewSources>,
+        moves: &PreviewStageSourceMoves,
+    ) -> Result<(), String> {
         validate_uri(active_uri)?;
         let mut next = BTreeMap::new();
         for mut source in sources {
@@ -683,16 +552,8 @@ impl PreviewStageBoard {
                 return Err("Duplicate preview source URI".into());
             }
         }
-        let mut catalog = BTreeMap::new();
-        for source in next.values() {
-            let key = native_source_uri(&source.uri)?;
-            if catalog
-                .insert(key, SourceStamp::new(source, options_epoch))
-                .is_some()
-            {
-                return Err("Preview source URIs resolve to the same native document".into());
-            }
-        }
+        let includes = IncludeCatalogs::new(&next, local_includes, options_epoch)?;
+        self.retarget_sources(moves);
         let active_changed = self.active_uri != active_uri;
         let sources_changed = self.sources.len() != next.len()
             || next.iter().any(|(uri, source)| {
@@ -709,7 +570,7 @@ impl PreviewStageBoard {
             });
         let options_changed = self.options_epoch != options_epoch;
         self.sources = next;
-        self.source_catalog = Rc::new(catalog);
+        self.includes = includes;
         self.options = options;
         self.options_epoch = options_epoch;
         self.active_uri = active_uri.into();
@@ -720,14 +581,14 @@ impl PreviewStageBoard {
             .stages
             .iter()
             .filter_map(|stage| {
-                let next = self.sources.get(&stage.configuration.source_uri);
+                let next = self.sources.get(&stage.spec.configuration.source_uri);
                 let changed = match (&stage.observed, &next) {
                     (Some(old), Some(next)) => !old.matches_source(next, options_epoch),
                     (None, None) => !matches!(stage.status, PreviewStageStatus::MissingDocument),
                     _ => true,
                 };
-                (changed || observed_dependencies_changed(stage, &self.source_catalog))
-                    .then_some(stage.id)
+                let catalog = self.includes.for_document(&stage.spec.configuration.source_uri);
+                (changed || observed_dependencies_changed(stage, catalog)).then_some(stage.id)
             })
             .collect::<Vec<_>>();
         for id in ids {
@@ -740,7 +601,12 @@ impl PreviewStageBoard {
         &mut self,
         configuration: PreviewStageConfiguration,
     ) -> Result<PreviewStageId, String> {
-        configuration.validate()?;
+        self.add_spec(configuration.into())
+    }
+
+    pub fn add_spec(&mut self, spec: PreviewStageSpec) -> Result<PreviewStageId, String> {
+        let configuration = &spec.configuration;
+        spec.validate()?;
         if self.stages.len() >= MAX_PREVIEW_STAGES {
             return Err(format!(
                 "A preview board supports at most {MAX_PREVIEW_STAGES} stages"
@@ -750,7 +616,7 @@ impl PreviewStageBoard {
         let control = StageLayoutHost::new(configuration.layout, configuration.environment);
         self.stages.push(Stage {
             id,
-            configuration,
+            spec,
             control,
             prototype_overlay: Rc::new(Cell::new(false)),
             epoch: 1,
@@ -772,15 +638,27 @@ impl PreviewStageBoard {
         id: PreviewStageId,
         configuration: PreviewStageConfiguration,
     ) -> Result<(), String> {
-        configuration.validate()?;
         let index = self.index(id)?;
-        let previous = self.stages[index].configuration.clone();
-        if previous == configuration {
+        let prior = &self.stages[index].spec;
+        let design_fixture = if prior.configuration.source_uri == configuration.source_uri {
+            prior.design_fixture.clone()
+        } else {
+            None
+        };
+        self.update_spec(id, PreviewStageSpec { configuration, design_fixture })
+    }
+
+    pub fn update_spec(&mut self, id: PreviewStageId, spec: PreviewStageSpec) -> Result<(), String> {
+        spec.validate()?;
+        let index = self.index(id)?;
+        let previous = &self.stages[index].spec;
+        if *previous == spec {
             return Ok(());
         }
-        let rendering_changed = !previous.same_rendering(&configuration);
-        let layout_changed = !previous.same_layout(&configuration);
-        self.stages[index].configuration = configuration;
+        let rendering_changed = !previous.same_rendering(&spec);
+        let layout_changed = !previous.configuration.same_layout(&spec.configuration);
+        let was_updating = previous.configuration.auto_update;
+        self.stages[index].spec = spec;
         self.touch(index);
         if rendering_changed {
             let _ = self.reload(id, true);
@@ -789,7 +667,7 @@ impl PreviewStageBoard {
                 self.apply_mode(index);
                 return Ok(());
             }
-            if !self.stages[index].configuration.auto_update {
+            if !self.stages[index].spec.configuration.auto_update {
                 self.stages[index].status = PreviewStageStatus::Paused {
                     revision: self.stages[index]
                         .rendered
@@ -797,7 +675,7 @@ impl PreviewStageBoard {
                         .map(|rendered| rendered.document.revision()),
                 };
                 self.apply_mode(index);
-            } else if !previous.auto_update {
+            } else if !was_updating {
                 let _ = self.reload(id, false);
             } else {
                 self.apply_mode(index);
@@ -816,12 +694,12 @@ impl PreviewStageBoard {
     }
 
     pub fn duplicate(&mut self, id: PreviewStageId) -> Result<PreviewStageId, String> {
-        let mut configuration = self.stages[self.index(id)?].configuration.clone();
-        configuration.name = format!(
+        let mut spec = self.stages[self.index(id)?].spec.clone();
+        spec.configuration.name = format!(
             "{} copy",
-            configuration.name.chars().take(120).collect::<String>()
+            spec.configuration.name.chars().take(120).collect::<String>()
         );
-        self.add(configuration)
+        self.add_spec(spec)
     }
 
     pub fn remove(&mut self, id: PreviewStageId) -> Result<(), String> {
@@ -854,7 +732,7 @@ impl PreviewStageBoard {
     }
 
     pub fn set_paused(&mut self, id: PreviewStageId, paused: bool) -> Result<(), String> {
-        let mut config = self.stages[self.index(id)?].configuration.clone();
+        let mut config = self.stages[self.index(id)?].spec.configuration.clone();
         config.auto_update = !paused;
         self.update(id, config)
     }
@@ -878,19 +756,19 @@ impl PreviewStageBoard {
         id: PreviewStageId,
         variants: Vec<(String, PreviewEnvironment)>,
     ) -> Result<Vec<PreviewStageId>, String> {
-        let source = self.stages[self.index(id)?].configuration.clone();
+        let source = self.stages[self.index(id)?].spec.clone();
         if variants.is_empty() || self.stages.len() + variants.len() > MAX_PREVIEW_STAGES {
             return Err("Choose variants within the board's 16-stage capacity".into());
         }
         let mut configs = Vec::new();
         for (name, environment) in variants {
             let mut configuration = source.clone();
-            configuration.name = name;
-            configuration.environment = environment;
+            configuration.configuration.name = name;
+            configuration.configuration.environment = environment;
             configuration.validate()?;
             configs.push(configuration);
         }
-        self.add_configurations(configs)
+        self.add_specs(configs)
     }
 
     /// Add a bounded comparison batch. Descriptor validation and capacity are
@@ -900,6 +778,10 @@ impl PreviewStageBoard {
         &mut self,
         configurations: Vec<PreviewStageConfiguration>,
     ) -> Result<Vec<PreviewStageId>, String> {
+        self.add_specs(configurations.into_iter().map(PreviewStageSpec::from).collect())
+    }
+
+    pub fn add_specs(&mut self, configurations: Vec<PreviewStageSpec>) -> Result<Vec<PreviewStageId>, String> {
         if configurations.is_empty()
             || configurations.len() > MAX_PREVIEW_STAGES.saturating_sub(self.stages.len())
         {
@@ -910,12 +792,16 @@ impl PreviewStageBoard {
         }
         configurations
             .into_iter()
-            .map(|configuration| self.add(configuration))
+            .map(|spec| self.add_spec(spec))
             .collect()
     }
 
     pub fn manifest(&self) -> PreviewStageManifest {
-        PreviewStageManifest {
+        self.stage_set().into_manifest()
+    }
+
+    pub fn stage_set(&self) -> PreviewStageSet {
+        PreviewStageSet {
             version: if self.prototype.is_empty() {
                 1
             } else if self.prototype.has_overlay_actions() {
@@ -926,7 +812,7 @@ impl PreviewStageBoard {
             stages: self
                 .stages
                 .iter()
-                .map(|stage| stage.configuration.clone())
+                .map(|stage| stage.spec.clone())
                 .collect(),
             active: self
                 .active
@@ -946,15 +832,19 @@ impl PreviewStageBoard {
     /// Imported IDs are freshly allocated so callbacks from a retired board cannot
     /// address a new card. Validation finishes before any old stage is removed.
     pub fn restore_manifest(&mut self, manifest: PreviewStageManifest) -> Result<(), String> {
+        self.restore_stage_set(manifest.into())
+    }
+
+    pub fn restore_stage_set(&mut self, manifest: PreviewStageSet) -> Result<(), String> {
         manifest.validate()?;
         let mut candidate = Self::new();
         candidate.sources = self.sources.clone();
-        candidate.source_catalog = self.source_catalog.clone();
+        candidate.includes = self.includes.clone();
         candidate.options = self.options.clone();
         candidate.options_epoch = self.options_epoch;
         candidate.active_uri = self.active_uri.clone();
-        for configuration in manifest.stages {
-            candidate.add(configuration)?;
+        for spec in manifest.stages {
+            candidate.add_spec(spec)?;
         }
         candidate.prototype = manifest.prototype.restore(
             &candidate
@@ -978,35 +868,6 @@ impl PreviewStageBoard {
         self.restore_manifest(snapshot)
     }
 
-    /// Call after a successful Save As, before synchronizing the new URI snapshots.
-    /// The old graph stays visible but immediately loses source-selection authority.
-    pub fn retarget_source(&mut self, old_uri: &str, new_uri: &str) -> Result<(), String> {
-        validate_uri(new_uri)?;
-        if old_uri == new_uri {
-            return Ok(());
-        }
-        let mut changed = Vec::new();
-        for (index, stage) in self.stages.iter_mut().enumerate() {
-            if stage.configuration.source_uri == old_uri {
-                stage.configuration.source_uri = new_uri.into();
-                stage.observed = None;
-                stage.status = PreviewStageStatus::MissingDocument;
-                stage.epoch = stage
-                    .epoch
-                    .checked_add(1)
-                    .expect("Preview stage epoch exhausted");
-                changed.push(index);
-            }
-        }
-        if !changed.is_empty() {
-            for index in changed {
-                self.apply_mode(index);
-            }
-            self.bump();
-        }
-        Ok(())
-    }
-
     pub fn runtime_tree(
         &self,
         id: PreviewStageId,
@@ -1019,7 +880,7 @@ impl PreviewStageBoard {
                 for node in &mut nodes {
                     node.source_id = None;
                 }
-            } else if matches!(stage.configuration.target, PreviewStageTarget::Document) {
+            } else if matches!(stage.spec.configuration.target, PreviewStageTarget::Document) {
                 for node in &mut nodes {
                     if Inspector::shared()
                         .borrow()
@@ -1034,6 +895,34 @@ impl PreviewStageBoard {
             }
             nodes
         }))
+    }
+
+    /// Inspect only the current native frame for this stage's source and environment.
+    pub fn preview_checks(&self, id: PreviewStageId) -> Result<Vec<crate::PreviewFinding>, String> {
+        let stage = &self.stages[self.index(id)?];
+        let rendered = self.current(stage)?;
+        let viewport = rendered.preview.host.clone().upcast();
+        crate::preview_checks::check_preview(&rendered.document, &rendered.preview, &viewport)
+    }
+
+    /// Read current authored state groups, including when a stage needs repair.
+    pub fn state_options(
+        &self,
+        id: PreviewStageId,
+    ) -> Result<Vec<crate::PreviewStageStateOptions>, String> {
+        let stage = &self.stages[self.index(id)?];
+        let source = self
+            .sources
+            .get(&stage.spec.configuration.source_uri)
+            .ok_or("Open the stage source before choosing states")?;
+        crate::preview_stage_state_options::source_options(source, &stage.spec.configuration.target)
+    }
+
+    pub fn fixture_options(&self, id: PreviewStageId) -> Result<Vec<String>, String> {
+        let stage = &self.stages[self.index(id)?];
+        let source = self.sources.get(&stage.spec.configuration.source_uri)
+            .ok_or("Open the stage source before choosing design fixtures")?;
+        source.fixture_options()
     }
 
     /// Resolve one authored hotspot against the exact accepted native graph. The
@@ -1071,7 +960,7 @@ impl PreviewStageBoard {
             .unique_scenario_visual(node)
             .map_err(|_| "The prototype hotspot has multiple native instances; open a definition stage to target one instance".to_owned())?
             .ok_or("The prototype hotspot has no realized native visual")?;
-        if matches!(stage.configuration.target, PreviewStageTarget::Document)
+        if matches!(stage.spec.configuration.target, PreviewStageTarget::Document)
             && visual.templated_parent().is_some()
         {
             return Err("Open a definition stage to target an instantiated template part".into());
@@ -1208,15 +1097,15 @@ impl PreviewStageBoard {
         };
         !pending
             && document.is_valid()
-            && stage.configuration.source_uri == uri
+            && stage.spec.configuration.source_uri == uri
             && revision == document.revision()
             && rendered.document.revision() == revision
             && rendered.document.source() == document.source()
             && Arc::ptr_eq(&rendered.document.ast_snapshot(), &document.ast_snapshot())
             && rendered.options_epoch == options_epoch
-            && rendered.configuration.same_rendering(&stage.configuration)
-            && rendered.configuration.same_layout(&stage.configuration)
-            && rendered_dependencies_current(rendered, &self.source_catalog)
+            && rendered.spec.same_rendering(&stage.spec)
+            && rendered.spec.configuration.same_layout(&stage.spec.configuration)
+            && rendered_dependencies_current(rendered, self.includes.for_document(uri))
     }
 
     /// Read-only validation against all current host buffers, including native
@@ -1242,8 +1131,8 @@ impl PreviewStageBoard {
             }
         }
         rendered.source_snapshot.requested_uris().iter().all(|uri| {
-            match (rendered.source_catalog.get(uri), current.get(uri)) {
-                (Some(accepted), Some(current)) => accepted.matches_buffer(current),
+            match (rendered.source_catalog.get(uri), current.get(uri).copied()) {
+                (Some(accepted), current) => accepted.matches_open_buffer(current),
                 (None, None) => true,
                 _ => false,
             }
@@ -1273,7 +1162,7 @@ impl PreviewStageBoard {
             return;
         }
         if let Some(rendered) = &mut stage.rendered {
-            let Some(source) = self.sources.get(&stage.configuration.source_uri) else {
+            let Some(source) = self.sources.get(&stage.spec.configuration.source_uri) else {
                 return;
             };
             if !source.pending
@@ -1283,7 +1172,7 @@ impl PreviewStageBoard {
                     &source.document.ast_snapshot(),
                     &rendered.document.ast_snapshot(),
                 )
-                && rendered_dependencies_current(rendered, &self.source_catalog)
+                && rendered_dependencies_current(rendered, self.includes.for_document(&stage.spec.configuration.source_uri))
             {
                 rendered.preview.rebuild_map(&rendered.document);
             }
@@ -1306,7 +1195,7 @@ impl PreviewStageBoard {
             .preview
             .source_id(&visual)
             .ok_or("The visual is generated or belongs to another stage")?;
-        if matches!(stage.configuration.target, PreviewStageTarget::Document)
+        if matches!(stage.spec.configuration.target, PreviewStageTarget::Document)
             && visual.templated_parent().is_some()
         {
             return Err("Open a definition stage to select an instantiated template part".into());
@@ -1347,7 +1236,7 @@ impl PreviewStageBoard {
             let mut current = Some(hit);
             while let Some(visual) = current {
                 if rendered.preview.source_id(&visual).is_some()
-                    && (!matches!(stage.configuration.target, PreviewStageTarget::Document)
+                    && (!matches!(stage.spec.configuration.target, PreviewStageTarget::Document)
                         || visual.templated_parent().is_none())
                 {
                     let inspector_id = Inspector::shared().borrow_mut().node_id(&visual);
@@ -1384,10 +1273,10 @@ impl PreviewStageBoard {
         }
         Ok(PreviewStageSelection {
             stage: stage.id,
-            source_uri: stage.configuration.source_uri.clone(),
+            source_uri: stage.spec.configuration.source_uri.clone(),
             node: token.node,
             anchor: PreviewSourceAnchor::capture(&rendered.document, token.node).ok(),
-            configuration: stage.configuration.clone(),
+            configuration: stage.spec.configuration.clone(),
             revision: rendered.document.revision(),
             ast: token.ast.clone(),
             source: token.source.clone(),
@@ -1404,7 +1293,7 @@ impl PreviewStageBoard {
             .ok_or("The stage has no accepted native graph")?;
         let source = self
             .sources
-            .get(&stage.configuration.source_uri)
+            .get(&stage.spec.configuration.source_uri)
             .ok_or("The stage document is not open")?;
         if source.pending
             || !source.document.is_valid()
@@ -1415,9 +1304,9 @@ impl PreviewStageBoard {
                 &source.document.ast_snapshot(),
             )
             || rendered.options_epoch != self.options_epoch
-            || !rendered.configuration.same_rendering(&stage.configuration)
-            || !rendered.configuration.same_layout(&stage.configuration)
-            || !rendered_dependencies_current(rendered, &self.source_catalog)
+            || !rendered.spec.same_rendering(&stage.spec)
+            || !rendered.spec.configuration.same_layout(&stage.spec.configuration)
+            || !rendered_dependencies_current(rendered, self.includes.for_document(&stage.spec.configuration.source_uri))
         {
             return Err("The stage source or construction services changed".into());
         }
@@ -1426,7 +1315,9 @@ impl PreviewStageBoard {
 
     fn reload(&mut self, id: PreviewStageId, force: bool) -> Result<(), String> {
         let index = self.index(id)?;
-        let config = self.stages[index].configuration.clone();
+        let spec = self.stages[index].spec.clone();
+        let config = &spec.configuration;
+        let catalog = self.includes.for_document(&config.source_uri).clone();
         let Some(source) = self.sources.get(&config.source_uri).cloned() else {
             self.stages[index].observed = None;
             self.stages[index].status = PreviewStageStatus::MissingDocument;
@@ -1437,7 +1328,7 @@ impl PreviewStageBoard {
         self.stages[index].observed = Some(SourceStamp::new(&source, self.options_epoch));
         let dependency_keys = observed_dependency_keys(&self.stages[index]);
         self.stages[index].observed_dependencies =
-            dependency_stamps(&dependency_keys, &self.source_catalog);
+            dependency_stamps(&dependency_keys, &catalog);
         if !source.document.is_valid() {
             self.stages[index].status = PreviewStageStatus::InvalidSource {
                 revision: source.document.revision(),
@@ -1471,14 +1362,14 @@ impl PreviewStageBoard {
             let stage = &mut self.stages[index];
             if let Some(rendered) = stage.rendered.as_mut() {
                 if rendered.options_epoch == self.options_epoch
-                    && rendered.configuration.same_rendering(&config)
-                    && rendered.configuration.same_layout(&config)
+                    && rendered.spec.same_rendering(&spec)
+                    && rendered.spec.configuration.same_layout(config)
                     && rendered.document.source() == source.document.source()
                     && Arc::ptr_eq(
                         &rendered.document.ast_snapshot(),
                         &source.document.ast_snapshot(),
                     )
-                    && rendered_dependencies_current(rendered, &self.source_catalog)
+                    && rendered_dependencies_current(rendered, &catalog)
                 {
                     rendered.document = source.document;
                     rendered.preview.status = PreviewStatus::Ready {
@@ -1493,15 +1384,15 @@ impl PreviewStageBoard {
                 }
             }
         }
-        let source_snapshot = self.new_source_snapshot();
-        let candidate = self.build_candidate(index, &source.document, &source_snapshot);
+        let source_snapshot = includes::snapshot(&catalog);
+        let candidate = self.build_candidate(index, &source.document, &source_snapshot, &catalog);
         let attempted = source_snapshot.requested_uris();
         let mut requested = attempted.clone();
         if candidate.is_err() {
             requested.extend(dependency_keys);
         }
         self.stages[index].observed_dependencies =
-            dependency_stamps(&requested, &self.source_catalog);
+            dependency_stamps(&requested, &catalog);
         match candidate {
             Ok(candidate) => {
                 let stage = &mut self.stages[index];
@@ -1533,8 +1424,7 @@ impl PreviewStageBoard {
                 Ok(())
             }
             Err(message) => {
-                self.stages[index].status = self
-                    .blocked_dependencies(&attempted, source.document.revision())
+                self.stages[index].status = blocked_dependencies(&catalog, &attempted, source.document.revision())
                     .map(|(status, _)| status)
                     .unwrap_or_else(|| PreviewStageStatus::Failed {
                         revision: Some(source.document.revision()),
@@ -1547,60 +1437,16 @@ impl PreviewStageBoard {
         }
     }
 
-    fn new_source_snapshot(&self) -> SourceSnapshot {
-        let mut sources = BTreeMap::new();
-        let mut unavailable = BTreeMap::new();
-        for (uri, source) in self.source_catalog.iter() {
-            if source.pending {
-                unavailable.insert(
-                    uri.clone(),
-                    format!("Apply the pending included source before refreshing: {uri}"),
-                );
-            } else if !source.valid {
-                unavailable.insert(
-                    uri.clone(),
-                    format!("Repair the included XAML before refreshing: {uri}"),
-                );
-            } else {
-                sources.insert(uri.clone(), source.source.clone());
-            }
-        }
-        SourceSnapshot::new(sources, unavailable)
-    }
-
-    fn blocked_dependencies(
-        &self,
-        dependencies: &BTreeSet<String>,
-        revision: u64,
-    ) -> Option<(PreviewStageStatus, String)> {
-        for uri in dependencies {
-            let Some(source) = self.source_catalog.get(uri) else {
-                continue;
-            };
-            if source.pending {
-                return Some((
-                    PreviewStageStatus::PendingSource { revision },
-                    format!("Apply the pending included source before refreshing: {uri}"),
-                ));
-            }
-            if !source.valid {
-                return Some((
-                    PreviewStageStatus::InvalidSource { revision },
-                    format!("Repair the included XAML before refreshing: {uri}"),
-                ));
-            }
-        }
-        None
-    }
-
     fn build_candidate(
         &self,
         index: usize,
         document: &Document,
         source_snapshot: &SourceSnapshot,
+        catalog: &Rc<IncludeCatalog>,
     ) -> Result<RenderedStage, String> {
         let stage = &self.stages[index];
-        let config = &stage.configuration;
+        let spec = &stage.spec;
+        let config = &spec.configuration;
         let definition_scope = match &config.target {
             PreviewStageTarget::Document => None,
             PreviewStageTarget::Definition { anchor, options } => {
@@ -1624,7 +1470,7 @@ impl PreviewStageBoard {
             })
             .collect::<Result<Vec<_>, String>>()?;
         let scope = ThemeVariantScope::new();
-        apply_environment(&scope, config.environment);
+        apply_environment(&scope, config.environment)?;
         apply_scope_layout(&scope, config.layout, config.environment);
         scope.set_opacity(0.0);
         scope.set_is_hit_test_visible(false);
@@ -1634,7 +1480,6 @@ impl PreviewStageBoard {
         let backing = Border::new();
         backing.set_child(Some(host.clone().upcast()));
         scope.set_child(Some(backing.clone().upcast()));
-        apply_stage_backing(&scope, &backing, stage.prototype_overlay.get());
         let weak_scope = scope.downgrade();
         let weak_backing = backing.downgrade();
         let prototype_overlay = stage.prototype_overlay.clone();
@@ -1655,6 +1500,7 @@ impl PreviewStageBoard {
             .control
             .children()
             .add(scope.clone().upcast::<Control>());
+        apply_stage_backing(&scope, &backing, stage.prototype_overlay.get());
         // Application factories and registered constructors are extension points.
         // Match the main development reload driver's panic containment so a bad
         // candidate cannot strand its hidden host or tear down the entire board.
@@ -1667,11 +1513,12 @@ impl PreviewStageBoard {
             source_snapshot.run(|| {
                 let mut options = self.options.clone();
                 options.design_time_data = config.design_time_data;
-                let mut preview = RuntimePreview::new_isolated(
+                let mut preview = RuntimePreview::new_isolated_with_fixture(
                     host,
                     config.source_uri.clone(),
                     document,
                     options,
+                    spec.design_fixture.clone(),
                     definition_scope,
                 )?;
                 match &preview.status {
@@ -1700,8 +1547,11 @@ impl PreviewStageBoard {
                         .map(Some)
                     }
                 })?;
-                if let Some((_, message)) = self
-                    .blocked_dependencies(&source_snapshot.requested_uris(), document.revision())
+                if let Some((_, message)) = blocked_dependencies(
+                    catalog,
+                    &source_snapshot.requested_uris(),
+                    document.revision(),
+                )
                 {
                     return Err(message);
                 }
@@ -1712,10 +1562,10 @@ impl PreviewStageBoard {
                     preview,
                     scope: scope.clone(),
                     document: document.clone(),
-                    configuration: config.clone(),
+                    spec: spec.clone(),
                     options_epoch: self.options_epoch,
                     source_snapshot: source_snapshot.clone(),
-                    source_catalog: self.source_catalog.clone(),
+                    source_catalog: catalog.clone(),
                 })
             })
         }))
@@ -1741,8 +1591,8 @@ impl PreviewStageBoard {
     fn apply_mode(&mut self, index: usize) {
         let stage = &mut self.stages[index];
         if let Some(rendered) = &mut stage.rendered {
-            let live = stage.configuration.mode == PreviewStageMode::Live
-                && stage.configuration.auto_update
+            let live = stage.spec.configuration.mode == PreviewStageMode::Live
+                && stage.spec.configuration.auto_update
                 && matches!(stage.status, PreviewStageStatus::Ready { .. });
             rendered.scope.set_is_hit_test_visible(live);
             if rendered._scenario.is_none() {
@@ -1753,7 +1603,7 @@ impl PreviewStageBoard {
 
     fn apply_layout(&mut self, index: usize) -> Result<(), String> {
         let stage = &mut self.stages[index];
-        let config = &stage.configuration;
+        let config = &stage.spec.configuration;
         // Boundary (#567): the templates, deferred resources and includes the new layout
         // builds, and the layout callbacks of the application that raise their errors on the
         // dispatcher, report to `with_runtime_errors`, without unwinding; what is caught is a
@@ -1768,9 +1618,9 @@ impl PreviewStageBoard {
                 stage.control.update_layout();
                 if let Some(rendered) = &mut stage.rendered {
                     rendered.preview.rebuild_map(&rendered.document);
-                    rendered.configuration.layout = config.layout;
-                    rendered.configuration.environment.width = config.environment.width;
-                    rendered.configuration.environment.height = config.environment.height;
+                    rendered.spec.configuration.layout = config.layout;
+                    rendered.spec.configuration.environment.width = config.environment.width;
+                    rendered.spec.configuration.environment.height = config.environment.height;
                 }
                 Ok(())
             })
@@ -1861,7 +1711,11 @@ fn native_source_uri(uri: &str) -> Result<String, String> {
         .map_err(|_| "Preview source URI must be absolute".into())
 }
 
-fn same_dependency(accepted: Option<&SourceStamp>, current: Option<&SourceStamp>) -> bool {
+fn blocked_dependencies(catalog: &IncludeCatalog, dependencies: &BTreeSet<String>, revision: u64) -> Option<(PreviewStageStatus, String)> {
+    dependencies.iter().find_map(|uri| catalog.get(uri)?.blocked(uri, revision))
+}
+
+fn same_dependency(accepted: Option<&IncludeSource>, current: Option<&IncludeSource>) -> bool {
     match (accepted, current) {
         (Some(accepted), Some(current)) => accepted.same_buffer(current),
         (None, None) => true,
@@ -1871,7 +1725,7 @@ fn same_dependency(accepted: Option<&SourceStamp>, current: Option<&SourceStamp>
 
 fn rendered_dependencies_current(
     rendered: &RenderedStage,
-    current: &BTreeMap<String, SourceStamp>,
+    current: &IncludeCatalog,
 ) -> bool {
     rendered
         .source_snapshot
@@ -1888,7 +1742,7 @@ fn observed_dependency_keys(stage: &Stage) -> BTreeSet<String> {
     keys
 }
 
-fn observed_dependencies_changed(stage: &Stage, current: &BTreeMap<String, SourceStamp>) -> bool {
+fn observed_dependencies_changed(stage: &Stage, current: &IncludeCatalog) -> bool {
     observed_dependency_keys(stage).iter().any(|uri| {
         // A deferred template can discover an include after the graph is accepted.
         // Compare it with the complete source view captured at construction, never
@@ -1909,8 +1763,8 @@ fn observed_dependencies_changed(stage: &Stage, current: &BTreeMap<String, Sourc
 
 fn dependency_stamps(
     dependencies: &BTreeSet<String>,
-    catalog: &BTreeMap<String, SourceStamp>,
-) -> BTreeMap<String, Option<SourceStamp>> {
+    catalog: &IncludeCatalog,
+) -> BTreeMap<String, Option<IncludeSource>> {
     dependencies
         .iter()
         .map(|uri| (uri.clone(), catalog.get(uri).cloned()))
@@ -1918,31 +1772,18 @@ fn dependency_stamps(
 }
 
 fn apply_stage_backing(scope: &ThemeVariantScope, backing: &Border, overlay: bool) {
-    backing.set_background((!overlay).then(|| {
-        SolidColorBrush::parse(
-            if scope.actual_theme_variant() == Some(ThemeVariant::dark()) {
-                "#FF202020"
-            } else {
-                "#FFFFFFFF"
-            },
-        )
-        .unwrap()
-        .into()
-    }));
+    backing.set_background((!overlay).then(|| preview_backing(scope)));
 }
 
-fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnvironment) {
+fn apply_environment(scope: &Ref<ThemeVariantScope>, environment: PreviewEnvironment) -> Result<(), String> {
     scope.set_clip_to_bounds(true);
-    scope.set_requested_theme_variant(match environment.theme {
-        PreviewTheme::Light => Some(ThemeVariant::light()),
-        PreviewTheme::Dark => Some(ThemeVariant::dark()),
-        PreviewTheme::Inherit => None,
-    });
+    scope.set_requested_theme_variant(environment.theme.resolve()?);
     match environment.flow_direction {
         PreviewFlowDirection::Inherit => scope.clear_value(Visual::flow_direction_property()),
         PreviewFlowDirection::LeftToRight => scope.set_flow_direction(FlowDirection::LeftToRight),
         PreviewFlowDirection::RightToLeft => scope.set_flow_direction(FlowDirection::RightToLeft),
     }
+    Ok(())
 }
 
 fn apply_scope_layout(

@@ -106,15 +106,9 @@ impl PreviewStageMatrixEditor {
             })
             .collect();
         section(&body, "Themes");
-        let themes = choices(
-            &body,
-            "MatrixTheme",
-            &[
-                (PreviewTheme::Light, "Light"),
-                (PreviewTheme::Dark, "Dark"),
-                (PreviewTheme::Inherit, "Application theme"),
-            ],
-        );
+        let theme_options = PreviewTheme::available()
+            .into_iter().map(|theme| (theme, theme.label())).collect::<Vec<_>>();
+        let themes = choices(&body, "MatrixTheme", &theme_options);
         section(&body, "Reading directions");
         let directions = choices(
             &body,

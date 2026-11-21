@@ -87,7 +87,7 @@ fn design_projection_maps_unicode_siblings_and_honors_namespace_identity() {
         "<StackPanel {NS} xmlns:app='using:Application'><TextBlock Name='One' Text='Żółć' d:Text='Long sample text'/><TextBlock Name='Two' Text='two' app:Text='custom'/><d:Button Name='Placeholder' Content='Design only'/></StackPanel>"
     );
     let document = Document::new(&source).unwrap();
-    let projection = project(&document, &source, true).unwrap().unwrap();
+    let projection = project(&document, &source, true, None).unwrap().unwrap();
     let one = projection
         .document
         .ast()
@@ -127,7 +127,7 @@ fn design_projection_overrides_property_elements_and_can_disable_all_design_valu
         "<ContentControl {NS} Content='Runtime'><d:ContentControl.Content><TextBlock Name='Sample' Text='Preview'/></d:ContentControl.Content></ContentControl>"
     );
     let document = Document::new(&source).unwrap();
-    let projection = project(&document, &source, true).unwrap().unwrap();
+    let projection = project(&document, &source, true, None).unwrap().unwrap();
     let root = projection
         .document
         .ast()
@@ -140,7 +140,7 @@ fn design_projection_overrides_property_elements_and_can_disable_all_design_valu
             .get(&named(&projection.document, "Sample")),
         Some(&named(&document, "Sample"))
     );
-    let disabled = project(&document, &source, false).unwrap().unwrap();
+    let disabled = project(&document, &source, false, None).unwrap().unwrap();
     assert_eq!(
         disabled
             .document
@@ -158,7 +158,7 @@ fn design_projection_rejects_duplicate_effective_properties_and_fake_sample_exte
     let source = format!("<Grid {NS}><Border d:DesignWidth='200' d:Width='300'/></Grid>");
     let document = Document::new(&source).unwrap();
     assert!(
-        project(&document, &source, true)
+        project(&document, &source, true, None)
             .err()
             .unwrap()
             .contains("more than one")
@@ -167,7 +167,7 @@ fn design_projection_rejects_duplicate_effective_properties_and_fake_sample_exte
         "<ItemsControl {NS} xmlns:app='using:App' d:ItemsSource='{{app:SampleData ItemCount=3}}'/>"
     );
     let document = Document::new(&source).unwrap();
-    let projection = project(&document, &source, true).unwrap().unwrap();
+    let projection = project(&document, &source, true, None).unwrap().unwrap();
     assert!(projection.samples.is_empty());
     assert_eq!(
         projection
@@ -338,6 +338,90 @@ fn native_sample_items_use_requested_count_and_preserve_items_binding() {
         session.preview_notices()
     );
     assert_eq!(session.document().source(), source);
+}
+
+#[test]
+fn named_preview_fixtures_feed_scalars_records_and_items_through_one_source_edit() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = format!(
+        "<StackPanel {NS}><TextBlock Name='Heading' Text='{{Binding Header.Title, FallbackValue=Runtime}}'/><Slider Name='Amount' Value='{{Binding Amount}}'/><ItemsControl Name='Results' ItemsSource='{{Binding Results}}'/></StackPanel>"
+    );
+    let mut session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
+    let root = session.document().ast().root();
+    let fixtures = serde_json::json!({ "default": "Content", "fixtures": [
+        { "name": "Content", "data": { "Header": { "Title": "Alpine & Co." }, "Amount": 48, "Results": [{ "Title": "Alpine" }, { "Title": "Sierra" }] } },
+        { "name": "Loading", "data": { "Header": { "Title": "Loading" }, "Amount": 6.5, "Results": [] } }
+    ] });
+    session
+        .apply_design_time_edits(&[DesignTimeEdit::SetProperty {
+            node: root,
+            property: "Fixtures".into(),
+            value: Some(fixtures.to_string()),
+        }])
+        .unwrap();
+    let authored = session.document().source().to_owned();
+    assert!(authored.contains("Text='{Binding Header.Title, FallbackValue=Runtime}'"));
+    assert!(
+        matches!(session.preview_status(), crate::PreviewStatus::Ready { .. }),
+        "{:?}",
+        session.preview_status()
+    );
+    let read = |session: &DesignerSession, control| {
+        session
+            .preview
+            .visual(named(session.document(), control))
+            .unwrap()
+    };
+    let title =
+        |session: &DesignerSession| read(session, "Heading").cast::<TextBlock>().unwrap().text();
+    let results = |session: &DesignerSession| {
+        read(session, "Results")
+            .cast::<ItemsControl>()
+            .unwrap()
+            .items_source()
+            .unwrap()
+            .count()
+    };
+    assert_eq!(title(&session).as_deref(), Some("Alpine & Co."));
+    assert_eq!(results(&session), 2);
+    assert_eq!(
+        read(&session, "Amount")
+            .cast::<ferroui_controls::Slider>()
+            .unwrap()
+            .value(),
+        48.0
+    );
+    session.set_design_fixture(Some("Loading".into())).unwrap();
+    assert_eq!(title(&session).as_deref(), Some("Loading"));
+    assert_eq!(results(&session), 0);
+    assert!(session.set_design_fixture(Some("Removed".into())).is_err());
+    assert_eq!(title(&session).as_deref(), Some("Loading"));
+    session.set_design_time_enabled(false).unwrap();
+    assert_eq!(title(&session).as_deref(), Some("Runtime"));
+    assert_eq!(session.document().source(), authored);
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), source);
+}
+
+#[test]
+fn fixture_projection_keeps_bindings_below_a_separate_data_context() {
+    let source = format!(
+        "<StackPanel {NS} d:Fixtures='{{\"default\":\"Content\",\"fixtures\":[{{\"name\":\"Content\",\"data\":{{\"Title\":\"Ready\"}}}}]}}'><TextBlock Text='{{CompiledBinding Title}}'/><Border DataContext='Separate'><TextBlock Text='{{CompiledBinding Display}}'/></Border></StackPanel>"
+    );
+    let document = Document::new(&source).unwrap();
+    let preview = project(&document, &source, true, None).unwrap().unwrap();
+    assert!(
+        preview
+            .document
+            .source()
+            .contains("{ReflectionBinding Title}")
+    );
+    assert!(
+        preview
+            .document
+            .source()
+            .contains("{CompiledBinding Display}")
+    );
 }
 
 #[test]
@@ -518,11 +602,16 @@ fn the_preview_of_a_single_view_application_is_a_control_and_makes_no_window() {
 
     let source = format!("<ItemsControl {NS} d:ItemsSource='{{d:SampleData ItemCount=4}}'/>");
     let mut session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
-    let error = session.open_native_preview().expect_err("no window on a single view");
+    let error = session
+        .open_native_preview()
+        .expect_err("no window on a single view");
     assert!(error.contains("single view"), "{error}");
 
     let control = session.open_view_preview().unwrap();
-    assert!(control.parent().is_none(), "the caller shows the control in its own view");
+    assert!(
+        control.parent().is_none(),
+        "the caller shows the control in its own view"
+    );
     let content: ferroui_base::BoxedValue = Rc::new(control);
     let items = ferroui_base::Ref::<ItemsControl>::from_xaml_object(&content).unwrap();
     assert_eq!(items.items_source().unwrap().count(), 4);
@@ -568,7 +657,7 @@ fn preview_factories_observe_scoped_design_mode_and_restore_on_failure() {
         }),
     );
     options
-        .load(source, "ferres://Preview/DesignMode.xaml")
+        .load(source, "ferres://Preview/DesignMode.xaml", None)
         .unwrap();
     assert!(!Design::is_design_mode());
     options.register_root(
@@ -580,7 +669,7 @@ fn preview_factories_observe_scoped_design_mode_and_restore_on_failure() {
     );
     assert!(
         options
-            .load(source, "ferres://Preview/DesignMode.xaml")
+            .load(source, "ferres://Preview/DesignMode.xaml", None)
             .is_err()
     );
     assert!(!Design::is_design_mode());
@@ -594,7 +683,7 @@ fn preview_factories_observe_scoped_design_mode_and_restore_on_failure() {
         }),
     );
     options
-        .load(source, "ferres://Preview/DesignMode.xaml")
+        .load(source, "ferres://Preview/DesignMode.xaml", None)
         .unwrap();
     assert!(Design::is_design_mode());
     Design::set_is_design_mode(false);

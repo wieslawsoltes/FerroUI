@@ -7,9 +7,15 @@
 //! are left to protocols, such as CDP's document node).
 mod frames;
 mod input;
+mod layout_overflow;
+mod layout_values;
 mod logs;
+mod property_trace;
 mod schema;
+mod source;
 pub mod target;
+mod text_contrast;
+mod visual_checks;
 use base64::Engine;
 use ferroui_base::controls::{IResourceHost, ResourceKey};
 use ferroui_base::data::core::{ValueType, ValueTypes};
@@ -22,15 +28,19 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::styling::{ControlTheme, Selector, Style};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
-    BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, PixelSize, Rect, Ref,
+    BoxedValue, FerroObject, FerroProperty, FerroPropertyRegistry, PixelSize, Point, Rect, Ref,
     StyledElement, Thickness, TypeInfo, Vector, Visual, WeakRef,
 };
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::primitives::{AdornerLayer, TemplatedControl};
 use ferroui_controls::{Application, Border, Control, TopLevel};
 use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
+pub use layout_overflow::MeasuredOverflow;
+pub use layout_values::{LayoutValueFinding, check_layout_values};
 pub use logs::{LogCapture, LogEntry, LogGuard};
+pub use property_trace::{InspectedPropertyTrace, PropertyContributor, display_property_value};
 pub use schema::{tools, validate};
+pub use visual_checks::{VisualChecks, VisualFinding, check_visual, check_visual_with_layout};
 use serde_json::{json, Value};
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -762,6 +772,31 @@ impl Inspector {
                 &Self::visual_object(&self.object(args)?),
                 args.get("properties"),
             )),
+            "get_property_trace" => {
+                let object = Self::visual_object(&self.object(args)?);
+                let name = args["property"].as_str().ok_or("property required")?;
+                let trace = Self::property_trace(&object, name)?;
+                Ok(trace.json(|_, entry| entry.source_location()))
+            }
+            "get_element_at" => {
+                let root = Self::visual_object(&self.object(args)?)
+                    .cast::<Visual>().ok_or("The selected object has no visual surface")?;
+                let point = Point::new(args["x"].as_f64().unwrap(), args["y"].as_f64().unwrap());
+                let mut seen = HashSet::new();
+                let mut hits = Vec::new();
+                let root_id = self.node_id(&root);
+                for hit in root.get_visuals_at(point) {
+                    let mut candidate = Some(hit);
+                    while let Some(visual) = candidate {
+                        let id = self.node_id(&visual);
+                        if id == root_id || hits.len() == 32 { break; }
+                        candidate = visual.visual_parent();
+                        if seen.insert(id) { hits.push(self.describe(&visual.upcast(), None)); }
+                    }
+                }
+                Ok(Value::Array(hits))
+            }
+            "get_source" => Ok(source::location(&Self::visual_object(&self.object(args)?)).unwrap_or(Value::Null)),
             "set_property" => {
                 if !permissions.allow_property_writes {
                     return Err("Property writes are disabled".into());
@@ -872,12 +907,14 @@ impl Inspector {
                     windows
                         .iter()
                         .map(|w| {
-                            let t = w.renderer_diagnostics().last_layout_pass_timing();
+                            let layout = w.layout_manager();
+                            let timing = layout.last_pass_timing();
                             let id = self.node_id(w);
                             let mut stats = self.frames[&id].snapshot();
                             stats["node_id"] = json!(id);
-                            stats["layout_pass_count"] = json!(t.pass_counter);
-                            stats["layout_ms"] = json!(t.elapsed.as_secs_f64() * 1000.0);
+                            stats["layout_pass_count"] = json!(layout.total_pass_count());
+                            stats["layout_timing_available"] = json!(timing.is_some());
+                            stats["layout_ms"] = json!(timing.map_or(0.0, |t| t.elapsed.as_secs_f64() * 1000.0));
                             stats
                         })
                         .collect(),

@@ -1,5 +1,5 @@
 //! Document-backed library, reusable definitions and template editing navigation.
-//! Views emit commands; all mutations pass through the shared component planner.
+//! Views route mutations through the shared authoring and source review engines.
 use super::DesignerWorkspace;
 use crate::component_browser::{ComponentLibrary, ComponentLibraryFilter, ComponentLibraryItem};
 use crate::resource_editor::{
@@ -30,6 +30,8 @@ mod control_types;
 mod project_sources;
 #[path = "workspace_component_import.rs"]
 mod source_import;
+#[path = "workspace_style_composition.rs"]
+mod style_composition;
 
 /// Exact XAML supplied by a library or a project. The designer does not reconstruct
 /// a compiled template from live visuals. The source is copied through an AST edit.
@@ -118,6 +120,7 @@ pub(super) struct ComponentUi {
     definitions: BTreeMap<String, DesignerDefinitionAsset>,
     sources: BTreeMap<String, source_import::DefinitionSource>,
     documents: project_sources::ComponentDocumentIndex,
+    style_source_visit: Option<style_composition::StyleSourceVisit>,
 }
 
 impl DesignerWorkspace {
@@ -275,21 +278,29 @@ impl DesignerWorkspace {
         self.session
             .borrow_mut()
             .enter_definition_scope_with_options(node, options)?;
+        self.focus_definition_canvas();
+        Ok(())
+    }
+
+    pub(crate) fn focus_definition_canvas(self: &Rc<Self>) {
         self.components.borrow_mut().editor_open = false;
         self.root
             .get_control::<Button>("CloseAuthoring")
             .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
         self.set_view_mode(crate::WorkspaceViewMode::Design);
         self.refresh(true);
-        Ok(())
     }
 
     pub fn return_to_document(self: &Rc<Self>) -> Result<(), String> {
+        let consumer = self.session.borrow().included_template_consumer().map(str::to_owned);
         self.session.borrow_mut().exit_definition_scope()?;
         self.components.borrow_mut().editor_open = false;
         self.root
             .get_control::<Button>("CloseAuthoring")
             .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+        if let Some(consumer) = consumer {
+            self.show_open_document(&consumer)?;
+        }
         self.refresh(true);
         Ok(())
     }
@@ -467,6 +478,7 @@ impl DesignerWorkspace {
             .map(|entry| library_item(document, entry))
             .collect::<Vec<_>>();
         let scope = session.definition_scope().cloned();
+        let rust_template = session.rust_template_property();
         let scope_epoch = session.definition_scope_epoch();
         let targets = session.selection().to_vec();
         drop(session);
@@ -612,7 +624,10 @@ impl DesignerWorkspace {
                         if let Some(entry) = catalog.entries.iter().find(|entry| entry.node == node)
                         {
                             match self.definition_model(entry, writable, &context) {
-                                Ok(model) => editor.configure(model),
+                                Ok(model) => {
+                                    editor.configure(model);
+                                    self.add_style_composition_tools(&editor, &context, Some(entry), writable);
+                                }
                                 Err(error) => editor.show_error(Some(&error)),
                             }
                         }
@@ -645,9 +660,13 @@ impl DesignerWorkspace {
                     None => editor.configure_create(owners, writable),
                 }
             }
+            if create {
+                self.add_style_composition_tools(&editor, &context, None, writable);
+            }
         }
         let bar = self.root.get_control::<Control>("ComponentScopeBar");
-        bar.set_is_visible(scope.is_some());
+        bar.set_is_visible(scope.is_some() || rust_template.is_some());
+        self.root.get_control::<Button>("ComponentScopeDefinition").set_is_visible(scope.is_some());
         if let Some(scope) = scope {
             self.root
                 .get_control::<TextBlock>("ComponentScopeTitle")
@@ -656,6 +675,8 @@ impl DesignerWorkspace {
                     display_kind(scope.kind),
                     scope.title
                 )));
+        } else if let Some(property) = rust_template {
+            self.root.get_control::<TextBlock>("ComponentScopeTitle").set_text(Some(property.name()));
         }
         self.refresh_component_instance(&catalog);
     }
@@ -743,7 +764,7 @@ impl DesignerWorkspace {
             ComponentKind::ControlTheme | ComponentKind::Style
         );
         let definition_names: &[&str] = match entry.kind {
-            ComponentKind::ControlTheme => &["TargetType", "BasedOn"],
+            ComponentKind::ControlTheme => &["TargetType"],
             ComponentKind::ControlTemplate => &["TargetType"],
             ComponentKind::DataTemplate => &["DataType"],
             ComponentKind::Style => &["Selector"],
@@ -764,30 +785,14 @@ impl DesignerWorkspace {
             .collect::<Result<Vec<_>, String>>()?;
         let mut fields = Vec::new();
         if is_setter {
-            for child in document.ast().element_children(entry.node) {
-                let Some(setter) = document.ast().node(child) else {
-                    continue;
-                };
-                if setter.local_name() != "Setter" {
-                    continue;
-                }
-                let Some(property) = ferroui_designer_tools::component_property_attribute(
-                    document, child, "Property",
-                )
+            for setter in ferroui_designer_tools::component_styles::authored_setters(document, entry.node)
                 .map_err(|error| error.to_string())?
-                .map(|attribute| attribute.value.as_str()) else {
-                    continue;
-                };
-                let object =
-                    ferroui_designer_tools::component_property_object(document, child, "Value")
-                        .map_err(|error| error.to_string())?;
+            {
                 fields.push((
-                    property.to_owned(),
-                    ferroui_designer_tools::component_property_attribute(document, child, "Value")
-                        .map_err(|error| error.to_string())?
-                        .map(|attribute| attribute.value.clone()),
-                    object,
-                    child,
+                    setter.property,
+                    setter.value,
+                    setter.object,
+                    setter.node,
                 ));
             }
         } else {
@@ -977,6 +982,20 @@ impl DesignerWorkspace {
         let commit: crate::PropertyValueCommit = Rc::new(move |edit| {
             let this = weak.upgrade().ok_or("The designer workspace was closed")?;
             guard.check(&this)?;
+            if let PropertyValueEdit::Literal(value) = &edit {
+                if setter {
+                    this.session.borrow_mut().set_style_value(owner, &name, Some(value))?;
+                    this.refresh(true);
+                    return Ok(());
+                }
+                if name == "Selector" {
+                    this.session.borrow_mut().change_style(ferroui_designer_tools::component_styles::StyleChange::SetSelector {
+                        node: owner, selector: value.trim(),
+                    })?;
+                    this.refresh(true);
+                    return Ok(());
+                }
+            }
             let action = match edit {
                 PropertyValueEdit::Literal(value) | PropertyValueEdit::Expression(value) => {
                     if setter {
@@ -1329,6 +1348,12 @@ impl DesignerWorkspace {
                         }
                         return Ok(());
                     }
+                    DefinitionEditorCommand::Rename(key)
+                        if self.project.borrow().workspace.is_some()
+                            && self.session.borrow().document_uri().starts_with("file://") =>
+                    {
+                        return self.show_library_resource_rename(node, &key);
+                    }
                     DefinitionEditorCommand::Rename(key) => ComponentAction::RenameResource {
                         resource: node,
                         key,
@@ -1367,11 +1392,9 @@ impl DesignerWorkspace {
                         }
                     }
                     DefinitionEditorCommand::SetSetter { property, value } => {
-                        ComponentAction::SetSetter {
-                            owner: node,
-                            property,
-                            value: Some(value),
-                        }
+                        self.session.borrow_mut().set_style_value(node, &property, Some(&value))?;
+                        self.refresh(true);
+                        return Ok(());
                     }
                     DefinitionEditorCommand::SetResourceValue(value) => {
                         ComponentAction::SetResourceValue {
@@ -1898,15 +1921,10 @@ fn preview_target_type(entry: &ComponentEntry) -> Option<String> {
 }
 fn definition_type(document: &Document, entry: &ComponentEntry) -> Option<&'static TypeInfo> {
     let node = document.ast().node(entry.node)?;
-    let token = if matches!(
-        entry.kind,
-        ComponentKind::ControlTheme | ComponentKind::Style
-    ) {
-        preview_target_type(entry)?
-    } else {
-        node.name.clone()
-    };
-    control_types::registered_type(document, entry.node, &token)
+    if matches!(entry.kind, ComponentKind::ControlTheme | ComponentKind::Style) {
+        return crate::property_literals::setter_target_type(document, entry.node);
+    }
+    control_types::registered_type(document, entry.node, &node.name)
 }
 
 #[cfg(test)]

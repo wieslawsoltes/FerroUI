@@ -42,6 +42,17 @@ source editing or extension codecs; their preview uses the native framework anim
 running in the designer. The portable timeline does not invent interpolation semantics for
 runtime-specific values.
 
+## Transfer keyframes
+
+`Timeline::copy_keyframes` returns a versioned `KeyframeClipboard` with typed values,
+relative seconds, and incoming easing. Its text representation can travel between hosts.
+Pass it to `Timeline::with_pasted_keyframes` with a distinct existing destination for each
+copied track and the authored playhead time. The planner checks value types, duration,
+and collisions at native 100 ns precision. With `reverse` set, the reflected first key
+lands at the playhead. `Timeline::with_mirrored_keyframes` reflects a selection around an
+authored pivot and leaves unselected keys in place. Both methods return the replacement
+timeline and accepted positions for the host’s source transaction.
+
 ## Native XAML
 
 `to_xaml(target)` writes FerroUI `Animation`, `KeyFrame` and `Setter` markup, including timing,
@@ -149,6 +160,17 @@ Corner-radius two-value shorthand means top/bottom. Relative values retain absol
 units; unlike-unit transitions switch at 50%, matching the native animators. The native session
 uses the live property's type metadata when selecting a value codec. Nonfinite components are
 rejected before preview or source changes.
+
+The curve channels for relative values keep percentages and logical pixels separate. Percent
+channels return percentages, and their velocity returns percentage points per authored second.
+Native sampling retains the registered animator's unit at each time. Each `CurvePoint` with
+`break_before` starts a new run after the other unit was active. Velocity uses only adjacent
+samples within a run. An implicit endpoint can use the live target's underlying units.
+
+`CurveChannel` projects color values into red, green, blue, and alpha on a normalized
+0–1 scale. The native sampler reads the registered animator's `Color` or solid brush
+result, including its byte precision. Velocity uses these same samples. The key plan
+retains the complete typed color.
 
 Global easing accepts native named curves, the default `SplineEasing`, spline property elements
 and parameterized `SpringEasing`. The editor syntax `Spring(mass,stiffness,damping,velocity)`

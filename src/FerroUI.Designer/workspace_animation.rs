@@ -1,11 +1,18 @@
 //! Native program, visual-state and behavior authoring panels.
+#[path = "workspace_animation/behavior_drafts.rs"]
+mod behavior_drafts;
+#[path = "workspace_animation/behaviors.rs"]
+mod behaviors;
+#[path = "workspace_animation/rust_states.rs"]
+mod rust_states;
+
 use super::*;
 use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{ColumnDefinitions, ComboBox, ScrollViewer, ToolTip};
 use ferroui_designer_animation::{
-    BehaviorAction, BehaviorModel, BehaviorTrigger, FillMode, PlaybackDirection, Repeat,
-    StateSetter, StateTransition, VisualState, VisualStateGroup,
+    BehaviorModel, BehaviorTrigger, FillMode, PlaybackBehavior, PlaybackDirection,
+    Repeat, StateSetter, StateTransition, TimelineTimingEdit, VisualState, VisualStateGroup,
 };
 
 #[derive(Default)]
@@ -13,6 +20,9 @@ pub(super) struct AuthoringUi {
     mode: u8,
     group: String,
     state: String,
+    rust_route: Option<(Option<String>, String)>,
+    behavior: Option<NodeId>,
+    behavior_action: Option<NodeId>,
 }
 struct AuthoringField {
     row: Ref<Grid>,
@@ -216,6 +226,14 @@ impl DesignerWorkspace {
                 }
             });
         }
+        let weak = Rc::downgrade(self);
+        self.root.get_control::<Button>("TimelineClips").click(move |_, _| {
+            if let Some(this) = weak.upgrade() { this.toggle_clip_comparison(); }
+        });
+        let weak = Rc::downgrade(self);
+        self.root.get_control::<Button>("TimelineRange").click(move |_, _| {
+            if let Some(this) = weak.upgrade() { this.report(this.show_preview_range()); }
+        });
     }
     fn authoring_command(self: &Rc<Self>, command: &str) -> Result<(), String> {
         let owner = self
@@ -302,10 +320,9 @@ impl DesignerWorkspace {
                 .borrow_mut()
                 .set_animation_program_selector(active.ok_or("Choose an animation")?, &selector),
             "AnimationSource" => {
-                if self.view_mode() == crate::WorkspaceViewMode::Design {
-                    self.set_view_mode(crate::WorkspaceViewMode::Split);
-                }
-                self.reveal_source(active.ok_or("Choose an animation")?);
+                let span = self.session.borrow().authored_span(active.ok_or("Choose an animation")?)
+                    .ok_or("The current clip has no authored source range")?;
+                self.select_source_span(span);
                 Ok(())
             }
             "PlayAll" => {
@@ -333,7 +350,38 @@ impl DesignerWorkspace {
     }
     pub(super) fn refresh_animation_programs(&self) {
         let session = self.session.borrow();
+        let rust = session.uses_rust_source();
+        let clips = self.comparing_animation_clips();
+        for name in [
+            "Record", "CommitAnimation",
+        ] {
+            self.root.get_control::<Button>(name).set_is_visible(!rust && !clips);
+        }
+        for name in ["BehaviorsMode", "SetAnimationSelector"] {
+            self.root.get_control::<Button>(name).set_is_visible(!rust);
+        }
+        self.root.get_control::<Button>("TimelineCurves").set_is_visible(!clips);
+        self.root.get_control::<Button>("PlayAll").set_is_visible(!clips);
+        self.root.get_control::<Button>("TimelineRange").set_is_visible(
+            session.preview_range_limit(session.active_animation_program(), clips).is_ok(),
+        );
+
+        self.root.get_control::<TextBox>("AnimationSelector").set_is_read_only(rust);
+        self.duration.set_is_read_only(rust || clips);
         let picker = self.root.get_control::<ComboBox>("AnimationPrograms");
+        let active = session.animation_programs().iter()
+            .find(|program| Some(program.id) == session.active_animation_program());
+        let owner = session.selection().first().copied().unwrap_or(session.document().ast().root());
+        self.root.get_control::<Button>("StatesMode").set_is_visible(
+            !rust || session.can_create_rust_state_group(owner) || !session.state_groups().is_empty(),
+        );
+        self.root.get_control::<Button>("NewAnimation")
+            .set_is_enabled(!rust || session.can_create_animation_program(owner));
+        for name in ["DuplicateAnimation", "DeleteAnimation", "TimelineDetails"] {
+            self.root.get_control::<Button>(name).set_is_enabled(!rust || active.is_some());
+        }
+        self.root.get_control::<Button>("Keyframe")
+            .set_is_visible(!clips && (!rust || active.is_some_and(|program| program.timeline.is_some())));
         let previous = self.guard.replace(true);
         picker.set_placeholder_text(Some("No animation".into()));
         picker.items().clear();
@@ -357,11 +405,7 @@ impl DesignerWorkspace {
                 .map_or(-1, |index| index as i32),
         );
         picker.set_is_enabled(!ids.is_empty());
-        if let Some(program) = session
-            .animation_programs()
-            .iter()
-            .find(|program| Some(program.id) == session.active_animation_program())
-        {
+        if let Some(program) = active {
             ToolTip::set_tip(
                 &picker,
                 Some(Rc::new(format!(
@@ -384,7 +428,9 @@ impl DesignerWorkspace {
             ToolTip::set_tip(
                 &picker,
                 Some(Rc::new(
-                    "Create an animation or add a keyframe to the selected object".to_owned(),
+                    if rust { "No mapped animation in this RSX invocation" } else {
+                        "Create an animation or add a keyframe to the selected object"
+                    }.to_owned(),
                 )),
             );
         }
@@ -395,7 +441,12 @@ impl DesignerWorkspace {
         let panel = self.root.get_control::<StackPanel>("AuthoringPanel");
         panel.children().clear();
         panel.set_spacing(8.0);
-        let mode = self.authoring.borrow().mode;
+        let mut authoring = self.authoring.borrow_mut();
+        if self.session.borrow().uses_rust_source() && authoring.mode == 2 {
+            authoring.mode = 0;
+        }
+        let mode = authoring.mode;
+        drop(authoring);
         self.root
             .get_control::<Grid>("InspectorDesignPane")
             .set_is_visible(mode == 0);
@@ -438,6 +489,10 @@ impl DesignerWorkspace {
         let Some(id) = self.session.borrow().active_animation_program() else {
             return;
         };
+        if self.session.borrow().uses_rust_source() {
+            self.build_animation_preview_targets(panel, id);
+            return;
+        }
         let timeline = self.session.borrow().timeline().clone();
         section(panel, "Timing");
         description(
@@ -463,10 +518,7 @@ impl DesignerWorkspace {
         let repeat = field(
             panel,
             "Repeat (count or Infinite)",
-            &match timeline.repeat {
-                Repeat::Count(n) => n.to_string(),
-                Repeat::Infinite => "Infinite".into(),
-            },
+            &timeline.repeat.to_string(),
         );
         let direction = choice_field(
             panel,
@@ -488,70 +540,42 @@ impl DesignerWorkspace {
             &timeline.easing.to_xaml(),
         );
         action(panel, "Apply animation settings", self, move |this| {
-            let mut timeline = timeline.clone();
-            let next_duration: f64 = text(&duration).parse().map_err(|_| "Invalid duration")?;
-            if !next_duration.is_finite() || next_duration <= 0.0 {
-                return Err("Duration must be finite and positive".into());
-            }
-            let scale = next_duration / timeline.duration;
-            for track in &mut timeline.tracks {
-                for key in &mut track.keyframes {
-                    key.time *= scale;
-                }
-            }
-            timeline.duration = next_duration;
-            timeline.delay = text(&delay).parse().map_err(|_| "Invalid delay")?;
-            timeline.delay_between_iterations = text(&iteration_delay)
-                .parse()
-                .map_err(|_| "Invalid iteration delay")?;
-            timeline.playback_behavior = match choice(&playback).as_str() {
-                "Auto" => ferroui_designer_animation::PlaybackBehavior::Auto,
-                "Always" => ferroui_designer_animation::PlaybackBehavior::Always,
-                "OnlyIfVisible" => ferroui_designer_animation::PlaybackBehavior::OnlyIfVisible,
+            let behavior = match choice(&playback).as_str() {
+                "Auto" => PlaybackBehavior::Auto,
+                "Always" => PlaybackBehavior::Always,
+                "OnlyIfVisible" => PlaybackBehavior::OnlyIfVisible,
                 _ => return Err("Invalid playback behavior".into()),
             };
-            timeline.speed_ratio = text(&speed).parse().map_err(|_| "Invalid speed")?;
-            timeline.repeat = if text(&repeat).eq_ignore_ascii_case("Infinite") {
-                Repeat::Infinite
-            } else {
-                Repeat::Count(text(&repeat).parse().map_err(|_| "Invalid repeat count")?)
-            };
-            timeline.playback_direction = match choice(&direction).as_str() {
+            let direction = match choice(&direction).as_str() {
                 "Normal" => PlaybackDirection::Normal,
                 "Reverse" => PlaybackDirection::Reverse,
                 "Alternate" => PlaybackDirection::Alternate,
                 "AlternateReverse" => PlaybackDirection::AlternateReverse,
                 _ => return Err("Invalid playback direction".into()),
             };
-            timeline.fill = match choice(&fill).as_str() {
+            let fill = match choice(&fill).as_str() {
                 "None" => FillMode::None,
                 "Forward" => FillMode::Forward,
                 "Backward" => FillMode::Backward,
                 "Both" => FillMode::Both,
                 _ => return Err("Invalid fill mode".into()),
             };
-            timeline.easing = Easing::parse(&text(&easing)).map_err(|e| e.to_string())?;
-            this.session
-                .borrow_mut()
-                .update_animation_program(id, timeline)
+            let changes = TimelineTimingEdit {
+                duration: Some(text(&duration).parse().map_err(|_| "Invalid duration")?),
+                delay: Some(text(&delay).parse().map_err(|_| "Invalid delay")?),
+                delay_between_iterations: Some(text(&iteration_delay)
+                    .parse()
+                    .map_err(|_| "Invalid iteration delay")?),
+                playback_behavior: Some(behavior),
+                speed_ratio: Some(text(&speed).parse().map_err(|_| "Invalid speed")?),
+                repeat: Some(Repeat::parse(&text(&repeat)).map_err(|error| error.to_string())?),
+                playback_direction: Some(direction),
+                fill: Some(fill),
+                easing: Some(Easing::parse(&text(&easing)).map_err(|error| error.to_string())?),
+            };
+            this.session.borrow_mut().edit_animation_timing(id, changes)
         });
-        section(panel, "Preview targets");
-        action(panel, "Preview on current selection", self, move |this| {
-            let targets = this.session.borrow().selection().to_vec();
-            this.session
-                .borrow_mut()
-                .set_animation_program_preview_targets(id, Some(targets))
-        });
-        action(
-            panel,
-            "Restore selector preview targets",
-            self,
-            move |this| {
-                this.session
-                    .borrow_mut()
-                    .set_animation_program_preview_targets(id, None)
-            },
-        );
+        self.build_animation_preview_targets(panel, id);
         let source = self
             .session
             .borrow()
@@ -569,7 +593,22 @@ impl DesignerWorkspace {
                 .set_animation_program_source(id, &text(&editor))
         });
     }
+
+    fn build_animation_preview_targets(self: &Rc<Self>, panel: &StackPanel, id: NodeId) {
+        section(panel, "Preview targets");
+        action(panel, "Preview on current selection", self, move |this| {
+            let targets = this.session.borrow().selection().to_vec();
+            this.session.borrow_mut().set_animation_program_preview_targets(id, Some(targets))
+        });
+        action(panel, "Restore selector preview targets", self, move |this| {
+            this.session.borrow_mut().set_animation_program_preview_targets(id, None)
+        });
+    }
     fn build_state_panel(self: &Rc<Self>, panel: &StackPanel, owner: NodeId) {
+        if self.session.borrow().uses_rust_source() {
+            self.build_rust_states(panel, owner);
+            return;
+        }
         section(panel, "State groups");
         description(
             panel,
@@ -794,221 +833,6 @@ impl DesignerWorkspace {
             .ok_or_else(|| "State group changed".into())
     }
     fn build_behavior_panel(self: &Rc<Self>, panel: &StackPanel, owner: NodeId) {
-        section(panel, "Trigger");
-        description(
-            panel,
-            "Connect an event or condition to an action. Custom trigger and action types remain editable by name.",
-        );
-        let trigger = choice_field(
-            panel,
-            Some("BehaviorTriggerKind"),
-            "When",
-            "Event",
-            &["Event", "Data condition", "Custom"],
-        );
-        let custom_trigger = labeled_field(panel, Some("BehaviorTriggerType"), "Trigger type", "");
-        custom_trigger
-            .input
-            .set_placeholder_text(Some("CustomTrigger"));
-        custom_trigger.row.set_is_visible(false);
-        let event = labeled_field(panel, Some("BehaviorTriggerSource"), "Event", "Click");
-        let comparison = labeled_field(panel, Some("BehaviorComparison"), "Comparison", "Equal");
-        comparison.row.set_is_visible(false);
-        let compare_value = labeled_field(
-            panel,
-            Some("BehaviorComparisonValue"),
-            "Compare value",
-            "True",
-        );
-        compare_value.row.set_is_visible(false);
-        let weak_trigger = trigger.downgrade();
-        let source_label = event.label.clone();
-        let source_input = event.input.clone();
-        let custom_trigger_row = custom_trigger.row.clone();
-        let comparison_row = comparison.row.clone();
-        let compare_value_row = compare_value.row.clone();
-        trigger.selection_changed(move |_, _| {
-            if let Some(trigger) = weak_trigger.upgrade() {
-                let selected = choice(&trigger);
-                let label = match selected.as_str() {
-                    "Data condition" => "Binding",
-                    "Custom" => "Properties JSON",
-                    _ => "Event",
-                };
-                source_label.set_text(Some(label));
-                AutomationProperties::set_name(&source_input, Some(label));
-                custom_trigger_row.set_is_visible(selected == "Custom");
-                comparison_row.set_is_visible(selected == "Data condition");
-                compare_value_row.set_is_visible(selected == "Data condition");
-            }
-        });
-        section(panel, "Action");
-        let kind = choice_field(
-            panel,
-            Some("BehaviorActionKind"),
-            "Do",
-            "Change property",
-            &[
-                "Change property",
-                "Invoke command",
-                "Call method",
-                "Add class",
-                "Remove class",
-                "Custom",
-            ],
-        );
-        let custom_action = labeled_field(panel, Some("BehaviorActionType"), "Action type", "");
-        custom_action
-            .input
-            .set_placeholder_text(Some("CustomAction"));
-        custom_action.row.set_is_visible(false);
-        let target = labeled_field(
-            panel,
-            Some("BehaviorActionTarget"),
-            "Target (Name or binding)",
-            "",
-        );
-        target.input.set_placeholder_text(Some("Selected object"));
-        let property = labeled_field(panel, Some("BehaviorActionMember"), "Property", "Opacity");
-        let value = labeled_field(panel, Some("BehaviorActionValue"), "Value", "0.5");
-        let weak_kind = kind.downgrade();
-        let custom_action_row = custom_action.row.clone();
-        let target_row = target.row.clone();
-        let property_row = property.row.clone();
-        let property_label = property.label.clone();
-        let property_input = property.input.clone();
-        let value_row = value.row.clone();
-        let value_label = value.label.clone();
-        let value_input = value.input.clone();
-        kind.selection_changed(move |_, _| {
-            if let Some(kind) = weak_kind.upgrade() {
-                let selected = choice(&kind);
-                custom_action_row.set_is_visible(selected == "Custom");
-                target_row
-                    .set_is_visible(!matches!(selected.as_str(), "Invoke command" | "Custom"));
-                property_row.set_is_visible(selected != "Custom");
-                let member = match selected.as_str() {
-                    "Invoke command" => "Command",
-                    "Call method" => "Method",
-                    "Add class" | "Remove class" => "Class",
-                    _ => "Property",
-                };
-                property_label.set_text(Some(member));
-                AutomationProperties::set_name(&property_input, Some(member));
-                value_row.set_is_visible(matches!(
-                    selected.as_str(),
-                    "Change property" | "Invoke command" | "Custom"
-                ));
-                let value = match selected.as_str() {
-                    "Invoke command" => "Parameter",
-                    "Custom" => "Properties JSON",
-                    _ => "Value",
-                };
-                value_label.set_text(Some(value));
-                AutomationProperties::set_name(&value_input, Some(value));
-            }
-        });
-        action(panel, "Attach behavior", self, move |this| {
-            let trigger = match choice(&trigger).as_str() {
-                "Event" => BehaviorTrigger::Event {
-                    event: text(&event.input),
-                    source: None,
-                },
-                "Data condition" => BehaviorTrigger::Data {
-                    binding: text(&event.input),
-                    comparison: text(&comparison.input),
-                    value: text(&compare_value.input),
-                    revert_on_false: false,
-                },
-                "Custom" => BehaviorTrigger::Custom {
-                    type_name: text(&custom_trigger.input),
-                    properties: serde_json::from_str(&text(&event.input))
-                        .map_err(|e| e.to_string())?,
-                },
-                _ => return Err("Choose a trigger".into()),
-            };
-            let target = optional(&target.input);
-            let action = match choice(&kind).as_str() {
-                "Change property" => BehaviorAction::ChangeProperty {
-                    target,
-                    property: text(&property.input),
-                    value: text(&value.input),
-                },
-                "Invoke command" => BehaviorAction::InvokeCommand {
-                    command: text(&property.input),
-                    parameter: optional(&value.input),
-                },
-                "Call method" => BehaviorAction::CallMethod {
-                    target,
-                    method: text(&property.input),
-                },
-                "Add class" => BehaviorAction::AddClass {
-                    target,
-                    class: text(&property.input),
-                },
-                "Remove class" => BehaviorAction::RemoveClass {
-                    target,
-                    class: text(&property.input),
-                },
-                "Custom" => BehaviorAction::Custom {
-                    type_name: text(&custom_action.input),
-                    properties: serde_json::from_str(&text(&value.input))
-                        .map_err(|e| e.to_string())?,
-                    children: String::new(),
-                },
-                _ => return Err("Choose an action".into()),
-            };
-            this.session
-                .borrow_mut()
-                .upsert_behavior(BehaviorModel {
-                    id: None,
-                    owner,
-                    trigger,
-                    actions: vec![action],
-                })
-                .map(|_| ())
-        });
-        let behaviors = self.session.borrow().behaviors(owner);
-        if !behaviors.is_empty() {
-            section(panel, "Attached behaviors");
-        }
-        for model in behaviors {
-            let Some(id) = model.id else {
-                continue;
-            };
-            let trigger = match &model.trigger {
-                BehaviorTrigger::Event { event, .. } => format!("On {event}"),
-                BehaviorTrigger::Data { binding, .. } => format!("When {binding}"),
-                BehaviorTrigger::Custom { type_name, .. } => type_name.clone(),
-            };
-            let title = format!(
-                "{trigger} · {} action{}",
-                model.actions.len(),
-                if model.actions.len() == 1 { "" } else { "s" }
-            );
-            let label = TextBlock::new();
-            label.set_text(Some(&title));
-            label.set_font_size(11.0);
-            label.set_font_weight(FontWeight::SemiBold);
-            label.set_text_wrapping(TextWrapping::Wrap);
-            panel.children().add(label.upcast::<Control>());
-            action(panel, "Preview actions", self, move |this| {
-                this.session.borrow_mut().preview_behavior(id)
-            });
-            action(panel, "Remove behavior", self, move |this| {
-                this.session.borrow_mut().remove_behavior(id)
-            });
-            let source = model.to_xaml().unwrap_or_default();
-            let editor = code_field(panel, "Behavior XAML", &source);
-            action(panel, "Apply behavior XAML", self, move |this| {
-                this.session
-                    .borrow_mut()
-                    .set_behavior_source(id, &text(&editor))
-            });
-            action(panel, "Navigate to behavior source", self, move |this| {
-                this.reveal_source(id);
-                Ok(())
-            });
-        }
+        self.build_behavior_controls(panel, owner);
     }
 }

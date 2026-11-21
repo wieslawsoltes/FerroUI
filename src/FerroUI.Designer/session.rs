@@ -1,6 +1,7 @@
 use crate::animation_session::AnimationSession;
 use crate::collaboration::SessionCollaboration;
 use crate::runtime::{PreviewStatus, RuntimeNode, RuntimePreview};
+use crate::rsx_document::RustDocument;
 use ferroui_base::{Rect, Ref, Visual};
 use ferroui_controls::ContentControl;
 use ferroui_designer_collaboration::{
@@ -18,9 +19,11 @@ static NEXT_SESSION: AtomicU64 = AtomicU64::new(1);
 /// runtime load errors preserve both source and the last successfully rendered tree.
 pub struct DesignerSession {
     pub(crate) document: Document,
+    pub(crate) rust: Option<RustDocument>,
     pub(crate) selection: Vec<NodeId>,
     pub(crate) preview: RuntimePreview,
     pub(crate) animation: AnimationSession,
+    pub(crate) animation_markers: crate::animation_markers::AnimationMarkers,
     pub(crate) interactions: crate::interaction_session::InteractionSession,
     pub(crate) generation: u64,
     pub(crate) definition_scope_epoch: u64,
@@ -51,24 +54,68 @@ impl DesignerSession {
         preview_host: Ref<ContentControl>,
         uri: String,
     ) -> Result<Self, String> {
-        let source = source.into();
-        let (document, invalid_source) = match Document::new(source.clone()) {
-            Ok(document) => (document, None),
-            Err(_) => (
-                Document::new(r#"<Canvas xmlns="https://github.com/ferroui" />"#)
-                    .expect("valid neutral document"),
-                Some(source),
-            ),
+        Self::with_preview_options(source, preview_host, uri, Default::default())
+    }
+
+    pub fn with_preview_options(
+        source: impl Into<String>,
+        preview_host: Ref<ContentControl>,
+        uri: String,
+        options: crate::PreviewHostOptions,
+    ) -> Result<Self, String> {
+        Self::with_preview_fixture(source, preview_host, uri, options, None)
+    }
+
+    /// Open a design preview and select a named design-time fixture for this session.
+    pub fn with_preview_fixture(
+        source: impl Into<String>,
+        preview_host: Ref<ContentControl>,
+        uri: String,
+        options: crate::PreviewHostOptions,
+        fixture: Option<String>,
+    ) -> Result<Self, String> {
+        if let Some(name) = &fixture {
+            ferroui_designer_core::design_fixtures::validate_name(name)?;
+        }
+        Self::with_source(source.into(), preview_host, uri, options, fixture, false)
+    }
+
+    /// Open authored Rust and render the first supported RSX invocation.
+    pub fn with_rust_source(
+        source: impl Into<String>, preview_host: Ref<ContentControl>, uri: String,
+    ) -> Result<Self, String> {
+        Self::with_source(source.into(), preview_host, uri, Default::default(), None, true)
+    }
+
+    fn with_source(
+        source: String, preview_host: Ref<ContentControl>, uri: String,
+        options: crate::PreviewHostOptions, fixture: Option<String>, rust_source: bool,
+    ) -> Result<Self, String> {
+        let (document, rust, invalid_source) = if rust_source {
+            let (document, rust) = RustDocument::open(source, None).map_err(|error| error.to_string())?;
+            (document, Some(rust), None)
+        } else {
+            match Document::new(source.clone()) {
+                Ok(document) => (document, None, None),
+                Err(_) => (
+                    Document::new(r#"<Canvas xmlns="https://github.com/ferroui" />"#)
+                        .expect("valid neutral document"),
+                    None,
+                    Some(source),
+                ),
+            }
         };
         ferroui_xaml_interactivity::register_types();
         ferroui_xaml_interactions::register_types();
         ferroui_xaml_interactions_custom::register_types();
-        let preview = RuntimePreview::new(preview_host, uri, &document)?;
+        let preview = RuntimePreview::new_with_fixture(preview_host, uri, &document, options, fixture)?;
         let mut result = Self {
             document,
+            rust,
             preview,
             selection: Vec::new(),
             animation: AnimationSession::new()?,
+            animation_markers: Default::default(),
             interactions: crate::interaction_session::InteractionSession::default(),
             generation: 0,
             definition_scope_epoch: 0,
@@ -80,6 +127,7 @@ impl DesignerSession {
             presence_started: std::time::Instant::now(),
         };
         result.import_animations();
+        result.note_invalid_rust();
         if let Some(source) = invalid_source {
             result.update_source(source);
         }
@@ -115,9 +163,26 @@ impl DesignerSession {
     pub fn document_uri(&self) -> &str {
         self.preview.uri()
     }
+
+    /// Supply authored include locations from the source snapshot used to mount this preview.
+    pub fn set_accepted_preview_includes(&mut self, includes: ferroui_designer_project::PreviewIncludes) {
+        self.preview.set_include_documents(includes);
+    }
+
+    pub(crate) fn set_workspace_preview_root(&mut self, root: std::path::PathBuf) {
+        self.preview.set_workspace_root(root, &self.document);
+    }
+    pub(crate) fn set_workspace_preview_buffers(&mut self, buffers: Vec<ferroui_designer_project::PreviewSourceBuffer>) {
+        self.preview.set_workspace_buffers(buffers);
+    }
+    pub(crate) fn set_workspace_preview_resources(&mut self, resources: Option<std::sync::Arc<ferroui_designer_project::CompiledResources>>, refresh: bool) {
+        if self.preview.set_workspace_resources(resources) && refresh {
+            self.preview.reload(&self.document);
+        }
+    }
     /// Record a successful write of the current authored buffer.
     pub fn mark_saved(&mut self) {
-        self.document.mark_saved();
+        self.mark_saved_source(self.authored_source().to_owned());
         self.generation += 1;
     }
     /// Change the base URI after Save As without replacing source history or collaboration.
@@ -132,6 +197,7 @@ impl DesignerSession {
         self.forget_interaction_preview();
         self.import_animations();
         self.refresh_layer_visuals();
+        self.note_invalid_rust();
         self.generation += 1;
         Ok(())
     }
@@ -139,6 +205,9 @@ impl DesignerSession {
     /// so automation holding a revision from the previous document cannot edit the new one.
     /// Hosts must resolve unsaved work before calling this explicit replacement command.
     pub fn open_document(&mut self, source: String, uri: String) -> Result<(), String> {
+        if RustDocument::for_uri(&uri) {
+            return self.open_rust_document(source, uri, None);
+        }
         let mut candidate = self.document.clone();
         candidate.update_source("Open document", source);
         candidate.set_history_limit(0);
@@ -149,6 +218,7 @@ impl DesignerSession {
         self.preview.replace_document(uri, &candidate)?;
         self.layers.reset();
         self.document = candidate;
+        self.rust = None;
         self.selection.clear();
         self.collaboration = None;
         self.read_only = false;
@@ -162,7 +232,13 @@ impl DesignerSession {
     }
 
     /// Restore a tab buffer, including its undo history, onto this host's revision sequence.
-    pub fn restore_document(&mut self, mut document: Document, uri: String) -> Result<(), String> {
+    pub fn restore_document(&mut self, document: Document, uri: String) -> Result<(), String> {
+        self.restore_authored_document(document, None, uri)
+    }
+
+    pub(crate) fn restore_authored_document(
+        &mut self, mut document: Document, rust: Option<RustDocument>, uri: String,
+    ) -> Result<(), String> {
         let minimum = self
             .document
             .revision()
@@ -176,6 +252,7 @@ impl DesignerSession {
         self.preview.replace_document(uri, &document)?;
         self.layers.reset();
         self.document = document;
+        self.rust = rust;
         self.selection.clear();
         self.collaboration = None;
         self.read_only = false;
@@ -184,6 +261,7 @@ impl DesignerSession {
         self.animation.clear_program_state();
         self.forget_interaction_preview();
         self.import_animations();
+        self.note_invalid_rust();
         self.generation += 1;
         Ok(())
     }
@@ -208,7 +286,7 @@ impl DesignerSession {
             Ok(())
         }
     }
-    fn rejected_source_update(&self) -> SourceUpdate {
+    fn rejected_source_update(&self, message: impl Into<String>) -> SourceUpdate {
         SourceUpdate {
             change: ChangeSet {
                 label: "Rejected source edit".into(),
@@ -218,11 +296,11 @@ impl DesignerSession {
                 removed: Vec::new(),
                 changed: Vec::new(),
                 patches: Vec::new(),
-                valid: self.document.is_valid(),
+                valid: self.authored_is_valid(),
             },
             valid: false,
             diagnostics: vec![ferroui_designer_core::Diagnostic {
-                message: "This collaboration role has read-only access".into(),
+                message: message.into(),
                 line: 1,
                 column: 1,
                 span: ferroui_designer_core::SourceSpan::new(0, 0),
@@ -242,7 +320,7 @@ impl DesignerSession {
     }
     pub fn can_manipulate(&self) -> bool {
         !self.read_only
-            && self.document.is_valid()
+            && self.authored_is_valid()
             && matches!(self.preview.status, PreviewStatus::Ready { revision } if revision == self.document.revision())
     }
     pub fn preview_notices(&self) -> &[String] {
@@ -296,9 +374,16 @@ impl DesignerSession {
         Ok(change)
     }
 
+    pub(crate) fn record_workspace_operation(
+        &mut self, revision: u64, label: String,
+    ) -> Result<(), DesignerError> {
+        self.ensure_writable()?;
+        self.document.record_workspace_operation(revision, label)
+    }
+
     pub fn update_source(&mut self, source: impl Into<String>) -> SourceUpdate {
         if self.read_only {
-            return self.rejected_source_update();
+            return self.rejected_source_update("This collaboration role has read-only access");
         }
         let update = self.stage_source(source);
         let _ = self.apply_staged_preview();
@@ -308,16 +393,26 @@ impl DesignerSession {
     /// Accept source-buffer text immediately; a host can debounce only expensive runtime reload.
     pub fn stage_source(&mut self, source: impl Into<String>) -> SourceUpdate {
         if self.read_only {
-            return self.rejected_source_update();
+            return self.rejected_source_update("This collaboration role has read-only access");
         }
         if let Some(collaboration) = self.collaboration.as_mut() {
             if collaboration.draft_base.is_none() {
                 collaboration.draft_base = Some(collaboration.replica.source().to_owned());
             }
         }
-        let update = self.document.update_source("Edit XAML", source);
+        self.remember_playback_for_reload();
+        let source = source.into();
+        let update = match self.rust.as_mut() {
+            Some(rust) => match rust.update(&mut self.document, source.into(), "Edit Rust", false) {
+                Ok(update) => update,
+                Err(error) => return self.rejected_source_update(error.to_string()),
+            },
+            None => self.document.update_source("Edit XAML", source),
+        };
         self.animation.player.pause();
-        self.animation.native.clear();
+        if !self.uses_rust_source() {
+            self.animation.native.clear();
+        }
         self.selection
             .retain(|id| self.document.ast().node(*id).is_some());
         if !update.valid {
@@ -340,6 +435,10 @@ impl DesignerSession {
         if self.collaboration.is_some() {
             return self.collaborative_history(false);
         }
+        if self.uses_rust_source() {
+            return self.restore_rust_history(false);
+        }
+        self.remember_playback_for_reload();
         let change = self.document.undo()?;
         self.changed(true);
         Ok(change)
@@ -349,6 +448,10 @@ impl DesignerSession {
         if self.collaboration.is_some() {
             return self.collaborative_history(true);
         }
+        if self.uses_rust_source() {
+            return self.restore_rust_history(true);
+        }
+        self.remember_playback_for_reload();
         let change = self.document.redo()?;
         self.changed(true);
         Ok(change)
@@ -359,7 +462,7 @@ impl DesignerSession {
             return false;
         }
         self.collaboration.as_ref().map_or_else(
-            || self.document.can_undo(),
+            || self.rust.as_ref().map_or_else(|| self.document.can_undo(), RustDocument::can_undo),
             |state| state.draft_base.is_none() && !state.undo.is_empty(),
         )
     }
@@ -368,7 +471,7 @@ impl DesignerSession {
             return false;
         }
         self.collaboration.as_ref().map_or_else(
-            || self.document.can_redo(),
+            || self.rust.as_ref().map_or_else(|| self.document.can_redo(), RustDocument::can_redo),
             |state| state.draft_base.is_none() && !state.redo.is_empty(),
         )
     }
@@ -379,16 +482,59 @@ impl DesignerSession {
         edits: Vec<Edit>,
     ) -> Result<ChangeSet, DesignerError> {
         self.ensure_writable()?;
+        if let Some(rust) = &self.rust {
+            let patches = rust.plan_edit(&self.document, &label, edits)?;
+            return self.commit_rust_patches(&label, patches);
+        }
+        self.commit_xaml_candidate(label, |document, label| {
+            let change = document.apply(label, edits.clone())?;
+            Ok((change, Some(edits)))
+        })
+    }
+
+    pub(crate) fn commit_xaml_patches(
+        &mut self, label: String, patches: Vec<ferroui_designer_core::TextPatch>,
+    ) -> Result<ChangeSet, DesignerError> {
+        self.ensure_writable()?;
+        self.commit_xaml_candidate(label, |document, label| {
+            let change = document.apply_text_patches(document.revision(), label, patches)?;
+            Ok((change, None))
+        })
+    }
+
+    /// Stage a local XAML transaction before publishing its workspace changes.
+    /// The callback completes all fallible work before the session accepts the candidate.
+    pub(crate) fn commit_workspace_xaml<T>(
+        &mut self,
+        edit: impl FnOnce(&mut Document) -> Result<T, String>,
+    ) -> Result<T, String> {
+        self.ensure_writable().map_err(|error| error.to_string())?;
+        if self.uses_rust_source() || self.collaboration.is_some() {
+            return Err("Open local XAML to edit related project files".into());
+        }
+        let mut document = self.document.clone();
+        let result = edit(&mut document)?;
+        self.remember_playback_for_reload();
+        self.document = document;
+        self.changed(true);
+        Ok(result)
+    }
+
+    fn commit_xaml_candidate(
+        &mut self, label: String,
+        plan: impl FnOnce(&mut Document, &str) -> Result<(ChangeSet, Option<Vec<Edit>>), DesignerError>,
+    ) -> Result<ChangeSet, DesignerError> {
         self.publish_source_draft()
             .map_err(DesignerError::InvalidEdit)?;
         let mut document = self.document.clone();
-        let change = document.apply(label.clone(), edits.clone())?;
+        let (change, authored_edits) = plan(&mut document, &label)?;
         if change.is_empty() {
             return Ok(change);
         }
         let mut collaboration = self.collaboration.clone();
         if let Some(state) = collaboration.as_mut() {
             let before = self.document.source().to_owned();
+            let edits = authored_edits.unwrap_or_else(|| vec![Edit::ReplaceSource { source: document.source().to_owned() }]);
             let operation = state
                 .replica
                 .submit_document_edits(&self.document, label, edits)
@@ -400,6 +546,7 @@ impl DesignerSession {
             }
             state.local(before, operation);
         }
+        self.remember_playback_for_reload();
         self.document = document;
         self.collaboration = collaboration;
         Ok(change)
@@ -412,6 +559,9 @@ impl DesignerSession {
         actor: impl Into<String>,
         document_id: impl Into<String>,
     ) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return Err("Open an authored XAML document to start a Studio collaboration room".into());
+        }
         if !self.document.is_valid() {
             return Err("Repair the XAML source before creating a collaboration baseline".into());
         }
@@ -430,6 +580,9 @@ impl DesignerSession {
         actor: impl Into<String>,
         snapshot: Snapshot,
     ) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return Err("Open the room's authored XAML document before joining".into());
+        }
         if self.collaboration.is_some() {
             return Err("Collaboration is already enabled".into());
         }
@@ -608,6 +761,7 @@ impl DesignerSession {
                     }],
                 )
                 .map_err(|error| error.to_string())?;
+            self.remember_playback_for_reload();
             self.document = document;
         }
         self.collaboration = Some(candidate);
@@ -624,6 +778,7 @@ impl DesignerSession {
         let source = state.replica.source().to_owned();
         state.draft_base = None;
         state.error = None;
+        self.remember_playback_for_reload();
         let update = self
             .document
             .update_source("Discard local collaboration draft", source);
@@ -648,6 +803,7 @@ impl DesignerSession {
         Document::new(source.clone()).map_err(|error| error.to_string())?;
         state.draft_base = Some(state.replica.source().to_owned());
         state.error = None;
+        self.remember_playback_for_reload();
         self.document
             .update_source("Resolve collaboration source", source);
         self.publish_source_draft()?;
@@ -726,6 +882,7 @@ impl DesignerSession {
             next.expected_version = candidate.replica.version();
         }
         candidate.outgoing.push(operation);
+        self.remember_playback_for_reload();
         self.document = document;
         self.collaboration = Some(candidate);
         self.changed(true);
@@ -838,6 +995,13 @@ impl DesignerSession {
     }
 
     pub(crate) fn changed(&mut self, import_animation: bool) {
+        if self.note_invalid_rust() {
+            self.generation += 1;
+            return;
+        }
+        if self.rust.as_mut().is_some_and(RustDocument::take_scope_change) {
+            self.reset_rust_view_state();
+        }
         self.animation.native.clear();
         self.forget_interaction_preview();
         self.animation.player.pause();
@@ -848,6 +1012,7 @@ impl DesignerSession {
             self.import_animations();
         }
         self.refresh_layer_visuals();
+        self.restore_playback_after_reload();
         self.generation += 1;
     }
 
@@ -964,6 +1129,7 @@ impl DesignerSession {
                                 .ok()
                             })
                         })
+                        .or_else(|| self.measured_animation_baseline(*node, name))
                         .filter(|base| base.kind() == value.kind())
                         .unwrap_or_else(|| value.clone());
                     candidate

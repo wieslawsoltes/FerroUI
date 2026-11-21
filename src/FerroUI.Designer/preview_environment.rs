@@ -2,6 +2,7 @@
 //! changing this model never changes a document or pretends to emulate device hardware.
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
+use crate::PreviewTheme;
 use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_base::{Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
@@ -11,15 +12,6 @@ use ferroui_controls::{
 use serde::{Deserialize, Serialize};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum PreviewTheme {
-    #[default]
-    Light,
-    Dark,
-    Inherit,
-}
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -119,6 +111,7 @@ pub struct PreviewEnvironmentEditor {
     width: Ref<TextBox>,
     height: Ref<TextBox>,
     theme: Ref<ComboBox>,
+    themes: Vec<PreviewTheme>,
     flow: Ref<ComboBox>,
     error: Ref<TextBlock>,
     design_size: Cell<(Option<f64>, Option<f64>)>,
@@ -162,12 +155,10 @@ impl PreviewEnvironmentEditor {
             "From XAML",
             use_design_size.clone().upcast::<Control>(),
         );
-        let theme = choices(&["Light", "Dark", "Application theme"], "Preview theme");
-        theme.set_selected_index(match initial.theme {
-            PreviewTheme::Light => 0,
-            PreviewTheme::Dark => 1,
-            PreviewTheme::Inherit => 2,
-        });
+        let themes = PreviewTheme::options(initial.theme);
+        let labels = themes.iter().map(|theme| theme.label()).collect::<Vec<_>>();
+        let theme = choices(&labels, "Preview theme");
+        theme.set_selected_index(themes.iter().position(|theme| *theme == initial.theme).unwrap_or_default() as i32);
         row(&root, "Theme", theme.clone().upcast::<Control>());
         let flow = choices(
             &["Inherited", "Left to right", "Right to left"],
@@ -198,6 +189,7 @@ impl PreviewEnvironmentEditor {
             width,
             height,
             theme,
+            themes,
             flow,
             error,
             design_size: Cell::new((None, None)),
@@ -306,11 +298,7 @@ impl PreviewEnvironmentEditor {
                 .trim()
                 .parse()
                 .map_err(|_| "Enter a numeric preview height")?,
-            theme: match self.theme.selected_index() {
-                0 => PreviewTheme::Light,
-                1 => PreviewTheme::Dark,
-                _ => PreviewTheme::Inherit,
-            },
+            theme: self.themes.get(self.theme.selected_index() as usize).copied().unwrap_or(PreviewTheme::Inherit),
             flow_direction: match self.flow.selected_index() {
                 1 => PreviewFlowDirection::LeftToRight,
                 2 => PreviewFlowDirection::RightToLeft,

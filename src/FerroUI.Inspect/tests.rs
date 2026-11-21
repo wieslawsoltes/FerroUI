@@ -5,9 +5,13 @@ use ferroui_headless::{
     FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions, HeadlessUnitTestSession,
     HeadlessWindowExtensions,
 };
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_skia::SkiaApplicationExtensions;
 use ferroui_themes_simple::SimpleTheme;
 use std::cell::Cell;
+
+#[path = "property_trace_tests.rs"]
+mod property_trace_tests;
 
 fn app() -> AppBuilder {
     AppBuilder::configure::<Application>()
@@ -286,7 +290,7 @@ fn resources_styles_screenshots_waits_and_stats() {
 }
 #[test]
 fn schemas_reject_invalid_input_before_mutating() {
-    assert_eq!(tools().len(), 16);
+    assert_eq!(tools().len(), 19);
     for args in [
         json!({"node_id":0}),
         json!({"node_id":-1}),
@@ -296,8 +300,42 @@ fn schemas_reject_invalid_input_before_mutating() {
         assert!(validate("click", &args).is_err());
     }
     assert!(validate("get_tree", &json!({"depth":100})).is_err());
+    assert!(validate("get_property_trace", &json!({"node_id":1,"property":false})).is_err());
     assert!(validate("screenshot", &json!({"scale":0})).is_err());
     assert!(validate("unknown", &json!({})).is_err());
+}
+
+#[test]
+fn native_hits_and_compiler_locations_share_runtime_ids() {
+    run(|| {
+        use ferroui_base::diagnostics::{RsxSourceInfo, RsxSourceLocation};
+
+        let (window, button, _, mut inspector) = fixture();
+        let root = inspector.node_id(&window);
+        let id = inspector.node_id(&button);
+        assert!(inspector.execute("get_source", &json!({"node_id":id})).unwrap().is_null());
+        let boxed: BoxedValue = Rc::new(button.clone());
+        let compiled = RsxSourceInfo::new(file!(), env!("CARGO_MANIFEST_DIR"), RsxSourceLocation {
+            element: (11, 19), invocation: (9, 5), index: 2, revision: Some(42),
+        });
+        button.clone().upcast::<FerroObject>().set_value(RsxSourceInfo::location_property(), Some(compiled));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(), json!({
+            "uri":compiled.source_uri().unwrap().as_str(), "language":"rust", "line":11, "column":19,
+            "columnEncoding":"unicodeScalar", "invocation":{"line":9,"column":5,"index":2},
+            "revision":"000000000000002a"
+        }));
+        XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(3, 5, Some("/source/View.xaml"))));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
+            json!({"uri":"file:///source/View.xaml","line":3,"column":5}));
+        XamlSourceInfo::set_xaml_source_info(&boxed, Some(XamlSourceInfo::new(4, 6, Some("/source/View.xaml")).with_source_revision(43)));
+        assert_eq!(inspector.execute("get_source", &json!({"node_id":id})).unwrap(),
+            json!({"uri":"file:///source/View.xaml","line":4,"column":6,"revision":"000000000000002b"}));
+        let local = Point::new(button.bounds().width / 2.0, button.bounds().height / 2.0);
+        let at = button.translate_point(local, &window.clone().upcast()).unwrap();
+        let hits = inspector.execute("get_element_at", &json!({"node_id":root,"x":at.x,"y":at.y})).unwrap();
+        assert!(hits.as_array().unwrap().iter().any(|node| node["node_id"] == id));
+        window.close();
+    });
 }
 #[test]
 fn one_inspector_serves_the_tools_and_the_targets() {

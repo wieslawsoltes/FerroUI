@@ -26,7 +26,13 @@ mod assembly;
 mod bson_stream_transport;
 mod bson_tcp_transport;
 mod default_message_type_resolver;
+mod design_animation_authoring;
+mod design_animation_curve;
+mod design_animation_messages;
+mod design_keyframe_selection;
 mod design_messages;
+mod design_palette_context;
+mod design_template_catalog;
 mod error;
 mod event_stash;
 mod ferro_remote_message_guid_attribute;
@@ -71,7 +77,13 @@ pub mod input {
 
 /// `FerroUI.Remote.Protocol.Designer`.
 pub mod designer {
+    pub use crate::design_animation_authoring::*;
+    pub use crate::design_animation_curve::*;
+    pub use crate::design_animation_messages::*;
+    pub use crate::design_keyframe_selection::*;
     pub use crate::design_messages::*;
+    pub use crate::design_palette_context::*;
+    pub use crate::design_template_catalog::*;
 }
 
 pub use assembly::{Assembly, ExportedType, ASSEMBLY};

@@ -4,7 +4,7 @@ use ferroui_base::styling::Style;
 use ferroui_base::{StyledElement, TypeInfo};
 use ferroui_designer_animation::{
     AnimationCodec, AnimationCodecRegistry, AnimationProgram, AnimationPrograms, AnimationValue,
-    CompiledTimeline, Easing, ImportOptions, Player, Sample, Timeline, ValueKind,
+    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
 use ferroui_markup::markup::parsers::SelectorParser;
@@ -20,11 +20,15 @@ pub(crate) struct AnimationSession {
     codecs: AnimationCodecRegistry,
     active: Option<NodeId>,
     warnings: Vec<String>,
-    play_all: bool,
+    pub(crate) play_all: bool,
+    pub(crate) elapsed_clock: bool,
+    pub(crate) playback_completed: bool,
+    pub(crate) preview_range: Option<PreviewRange>,
+    pub(crate) pending_playback: Option<crate::TimelinePreviewPose>,
     compiled_programs: BTreeMap<NodeId, CompiledTimeline>,
     compiled_targets: BTreeMap<(NodeId, NodeId), CompiledTimeline>,
-    preview_targets: BTreeMap<NodeId, Vec<NodeId>>,
-    target_elapsed: BTreeMap<(NodeId, NodeId), f64>,
+    pub(crate) preview_targets: BTreeMap<NodeId, Vec<NodeId>>,
+    pub(crate) target_elapsed: BTreeMap<(NodeId, NodeId), f64>,
 }
 impl AnimationSession {
     pub(crate) fn clear_program_state(&mut self) {
@@ -33,6 +37,10 @@ impl AnimationSession {
         self.preview_targets.clear();
         self.compiled_targets.clear();
         self.play_all = false;
+        self.elapsed_clock = false;
+        self.playback_completed = false;
+        self.preview_range = None;
+        self.pending_playback = None;
         self.target_elapsed.clear();
     }
     pub(crate) fn new() -> Result<Self, String> {
@@ -49,6 +57,10 @@ impl AnimationSession {
             active: None,
             warnings: Vec::new(),
             play_all: false,
+            elapsed_clock: false,
+            playback_completed: false,
+            preview_range: None,
+            pending_playback: None,
             compiled_programs: BTreeMap::new(),
             compiled_targets: BTreeMap::new(),
             preview_targets: BTreeMap::new(),
@@ -79,7 +91,7 @@ impl DesignerSession {
         self.animation.recording
     }
     pub fn set_recording(&mut self, value: bool) {
-        self.animation.recording = value && !self.is_read_only();
+        self.animation.recording = value && !self.is_read_only() && !self.uses_rust_source();
         self.generation += 1;
     }
     pub fn register_animation_codec(&mut self, codec: Box<dyn AnimationCodec>) {
@@ -95,16 +107,16 @@ impl DesignerSession {
             .iter()
             .find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
-        let timeline = program.timeline.clone().unwrap_or_else(|| {
-            Timeline::new(self.animation.native.duration(id).unwrap_or(3.0))
-                .expect("native duration")
-        });
+        let timeline = self.animation_timing(program);
         self.animation.compiled = timeline.compile().map_err(|error| error.to_string())?;
         self.animation.timeline = timeline;
         self.animation.active = Some(id);
         self.animation.player.stop();
         self.animation.target_elapsed.clear();
         self.animation.play_all = false;
+        self.animation.elapsed_clock = false;
+        self.animation.playback_completed = false;
+        self.animation.preview_range = None;
         self.preview.clear_animation();
         self.generation += 1;
         Ok(())
@@ -116,6 +128,9 @@ impl DesignerSession {
         selector: &str,
         duration: f64,
     ) -> Result<NodeId, String> {
+        if self.uses_rust_source() {
+            return self.create_rust_animation(name, owner, selector, duration);
+        }
         let timeline = Timeline::new(duration).map_err(|error| error.to_string())?;
         let before = self
             .animation
@@ -138,6 +153,9 @@ impl DesignerSession {
         Ok(id)
     }
     pub fn remove_animation_program(&mut self, id: NodeId) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_animation("Remove Rust animation", id, ferroui_designer_rsx::RsxAnimationEdit::Remove).map(|_| ());
+        }
         let edits =
             AnimationPrograms::remove(&self.document, id).map_err(|error| error.to_string())?;
         self.apply("Remove animation program", edits)
@@ -145,6 +163,9 @@ impl DesignerSession {
         Ok(())
     }
     pub fn rename_animation_program(&mut self, id: NodeId, name: &str) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_animation("Rename Rust animation", id, ferroui_designer_rsx::RsxAnimationEdit::Rename(name)).map(|_| ());
+        }
         let edits = AnimationPrograms::rename(&self.document, id, name)
             .map_err(|error| error.to_string())?;
         self.apply("Rename animation program", edits)
@@ -156,6 +177,10 @@ impl DesignerSession {
         id: NodeId,
         name: &str,
     ) -> Result<NodeId, String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_animation("Duplicate Rust animation", id, ferroui_designer_rsx::RsxAnimationEdit::Duplicate(name))?
+                .ok_or_else(|| "The duplicated animation has no selection identity".into());
+        }
         let before = self
             .animation
             .programs
@@ -215,6 +240,11 @@ impl DesignerSession {
         }
         self.preview.clear_animation();
         self.import_animations();
+        self.animation.player.stop();
+        self.animation.play_all = false;
+        self.animation.elapsed_clock = false;
+        self.animation.preview_range = None;
+        self.animation.pending_playback = None;
         self.generation += 1;
         Ok(())
     }
@@ -235,10 +265,31 @@ impl DesignerSession {
         let edits = self.program_edits(id, &timeline)?;
         self.apply("Edit animation program", edits)
             .map_err(|error| error.to_string())?;
-        if active {
+        if active && !self.animation.elapsed_clock {
             self.seek(self.animation.player.time())?;
         }
         Ok(())
+    }
+    /// Edit a program's clock with the same source transaction used by typed track updates.
+    pub fn edit_animation_timing(
+        &mut self,
+        id: NodeId,
+        changes: TimelineTimingEdit,
+    ) -> Result<(), String> {
+        let timeline = self
+            .animation
+            .programs
+            .iter()
+            .find(|program| program.id == id)
+            .ok_or("Unknown animation program")?
+            .timeline
+            .as_ref()
+            .ok_or("Edit an opaque animation through its source or register a codec")?;
+        let next = timeline.with_timing(changes).map_err(|error| error.to_string())?;
+        if &next == timeline {
+            return Ok(());
+        }
+        self.update_animation_program(id, next)
     }
     fn editable_program(&self) -> Result<(), String> {
         if let Some(id) = self.animation.active {
@@ -274,18 +325,28 @@ impl DesignerSession {
             .animation
             .programs
             .iter()
-            .find(|program| Some(program.id) == self.animation.active && program.timeline.is_none())
+            .find(|program| Some(program.id) == self.animation.active && self.requires_native_animation(program))
             .cloned()
         {
+            let elapsed = if self.seeks_animation_elapsed(&program) {
+                time
+            } else {
+                self.animation.compiled.elapsed_at_playhead(time).map_err(|error| error.to_string())?
+            };
             self.preview.clear_animation();
             self.animation
                 .native
-                .seek(&[program], &self.preview, time)?;
+                .seek(&[program], &self.preview, elapsed)?;
             self.animation
                 .player
                 .seek(time)
                 .map_err(|error| error.to_string())?;
             self.preview.host.update_layout();
+            self.animation.target_elapsed.clear();
+            self.animation.elapsed_clock = false;
+            self.animation.playback_completed = false;
+            self.animation.preview_range = None;
+            self.animation.play_all = false;
             self.generation += 1;
             return Ok(());
         }
@@ -298,22 +359,76 @@ impl DesignerSession {
         let samples = self.sample_active_program(self.animation.player.time(), true)?;
         self.preview.preview_samples(&samples)?;
         self.animation.target_elapsed.clear();
+        self.animation.elapsed_clock = false;
+        self.animation.playback_completed = false;
+        self.animation.preview_range = None;
+        self.animation.play_all = false;
         self.generation += 1;
         Ok(())
     }
     pub fn play(&mut self) {
         self.animation.play_all = false;
+        self.animation.preview_range = None;
         self.animation.player.play();
         self.generation += 1;
     }
+    pub(crate) fn start_animation_playback(
+        &mut self,
+        id: NodeId,
+        time: Option<f64>,
+        from_playhead: bool,
+    ) -> Result<(), String> {
+        if self.animation.active != Some(id) {
+            self.select_animation_program(id)?;
+        }
+        let program = self.animation.programs.iter().find(|program| program.id == id).ok_or("Unknown animation program")?;
+        if !self.has_animation_targets(program) {
+            return Err("Choose live preview targets for this animation program".into());
+        }
+        let native = self.requires_native_animation(program);
+        if native && self.animation.native.timing(id).is_none() {
+            return Err("The authored animation is unavailable in the current native preview".into());
+        }
+        if let Some(time) = time.or_else(|| self.animation.play_all.then_some(0.0)) {
+            let elapsed = if from_playhead && !self.seeks_animation_elapsed(program) {
+                self.animation.compiled.elapsed_at_playhead(time).map_err(|error| error.to_string())?
+            } else {
+                time
+            };
+            if self.animation.timeline.total_duration().is_some_and(|end| elapsed > end) {
+                return Err("Choose a time within the total playback duration".into());
+            }
+            self.animation.player.seek(elapsed).map_err(|error| error.to_string())?;
+            self.animation.target_elapsed.clear();
+        }
+        self.play();
+        self.advance(0.0)
+    }
     pub fn play_all_animation_programs(&mut self) {
         self.animation.play_all = true;
+        self.animation.preview_range = None;
         self.animation.player.play();
         self.generation += 1;
+    }
+
+    pub(crate) fn start_combined_playback(&mut self, reference: Option<NodeId>, elapsed: Option<f64>) -> Result<(), String> {
+        if !self.animation.programs.iter().any(|program| self.animation_preview_available(program)) {
+            return Err("Choose live preview targets for an animation before playing all programs".into());
+        }
+        if let Some(id) = reference.filter(|id| self.active_animation_program() != Some(*id)) {
+            self.select_animation_program(id)?;
+        }
+        if let Some(time) = elapsed.or_else(|| (!self.animation.play_all || !self.animation.elapsed_clock).then_some(0.0)) {
+            self.animation.player.seek(time).map_err(|error| error.to_string())?;
+            self.animation.target_elapsed.clear();
+        }
+        self.play_all_animation_programs();
+        self.advance(0.0)
     }
     pub fn set_interactive(&mut self, value: bool) {
         self.animation.player.pause();
         self.animation.native.stop();
+        self.animation.preview_range = None;
         self.preview.set_interactive(value);
         self.generation += 1;
     }
@@ -322,12 +437,20 @@ impl DesignerSession {
         self.generation += 1;
     }
     pub fn stop(&mut self) {
+        self.stop_animation_playback();
+        self.clear_interaction_preview();
+        self.generation += 1;
+    }
+    pub(crate) fn stop_animation_playback(&mut self) {
         self.animation.player.stop();
         self.animation.native.stop();
         self.animation.target_elapsed.clear();
+        self.animation.elapsed_clock = false;
+        self.animation.playback_completed = false;
+        self.animation.preview_range = None;
+        self.animation.play_all = false;
+        self.animation.pending_playback = None;
         self.preview.clear_animation();
-        self.clear_interaction_preview();
-        self.generation += 1;
     }
     pub fn preview_animation_programs(
         &mut self,
@@ -350,25 +473,27 @@ impl DesignerSession {
             .animation
             .programs
             .iter()
-            .filter(|program| selected.contains(&program.id))
+            .filter(|program| selected.contains(&program.id) && self.has_animation_targets(program))
             .cloned()
             .collect::<Vec<_>>();
         if native_programs
             .iter()
-            .any(|program| program.timeline.is_none())
+            .any(|program| self.requires_native_animation(program))
         {
             self.preview.clear_animation();
             self.animation
                 .native
                 .seek(&native_programs, &self.preview, elapsed)?;
             self.preview.host.update_layout();
+            self.animation.player.pause();
+            self.animation.elapsed_clock = false;
             self.generation += 1;
             return Ok(());
         }
         self.animation.native.stop();
         let mut values = BTreeMap::new();
         for program in &self.animation.programs {
-            if !selected.contains(&program.id) {
+            if !selected.contains(&program.id) || !self.has_animation_targets(program) {
                 continue;
             }
             if !self.animation.compiled_programs.contains_key(&program.id) {
@@ -383,6 +508,8 @@ impl DesignerSession {
         }
         self.preview
             .preview_samples(&values.into_values().collect::<Vec<_>>())?;
+        self.animation.player.pause();
+        self.animation.elapsed_clock = false;
         self.generation += 1;
         Ok(())
     }
@@ -393,16 +520,19 @@ impl DesignerSession {
         if !seconds.is_finite() || seconds < 0.0 {
             return Err("Playback delta must be finite and nonnegative".into());
         }
+        if let Some(range) = self.animation.preview_range {
+            return self.advance_preview_range(range, seconds);
+        }
         let native_programs = self
             .animation
             .programs
             .iter()
-            .filter(|program| self.animation.play_all || Some(program.id) == self.animation.active)
+            .filter(|program| (self.animation.play_all || Some(program.id) == self.animation.active) && self.animation_preview_available(program))
             .cloned()
             .collect::<Vec<_>>();
         if native_programs
             .iter()
-            .any(|program| program.timeline.is_none())
+            .any(|program| self.requires_native_animation(program))
         {
             let elapsed = self.animation.player.time() + seconds;
             self.preview.clear_animation();
@@ -418,6 +548,8 @@ impl DesignerSession {
                 self.animation.player.pause();
             }
             self.preview.host.update_layout();
+            self.animation.elapsed_clock = true;
+            self.animation.playback_completed = complete;
             self.generation += 1;
             return Ok(());
         }
@@ -509,6 +641,8 @@ impl DesignerSession {
         if completed {
             self.animation.player.pause();
         }
+        self.animation.elapsed_clock = true;
+        self.animation.playback_completed = completed;
         self.generation += 1;
         Ok(())
     }
@@ -554,19 +688,47 @@ impl DesignerSession {
         }
         Ok(result)
     }
+
+    /// Sample one source-backed scalar curve from the accepted artboard. Native
+    /// clips use the same loaded animator as playback. Typed clips use their
+    /// per-target compiled track, including the target's underlying base value.
+    pub fn animation_curve(
+        &self,
+        id: NodeId,
+        target: NodeId,
+        property: &str,
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>, String> {
+        self.animation_curve_channel(id, target, property, CurveChannel::Value, window)
+    }
+
+    pub fn animation_curve_channel(
+        &self,
+        id: NodeId,
+        target: NodeId,
+        property: &str,
+        channel: CurveChannel,
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>, String> {
+        if !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision()) {
+            return Err("Open the current animation preview to sample its tracks".into());
+        }
+        let program = self.animation.programs.iter().find(|program| program.id == id)
+            .ok_or("Unknown animation program")?;
+        if self.requires_native_animation(program) {
+            return self.animation.native.curve(program, &self.preview, target, property, channel, window);
+        }
+        let compiled = self.animation.compiled_targets.get(&(id, target))
+            .or_else(|| self.animation.compiled_programs.get(&id))
+            .ok_or("Choose a compiled animation program")?;
+        compiled.curve(target, property, channel, window).map_err(|error| error.to_string())
+    }
     pub fn set_duration(&mut self, duration: f64) -> Result<(), String> {
         self.editable_program()?;
-        if !duration.is_finite() || duration <= 0.0 {
-            return Err("Duration must be finite and positive".into());
-        }
-        let mut candidate = self.animation.timeline.clone();
-        let scale = duration / candidate.duration;
-        for track in &mut candidate.tracks {
-            for key in &mut track.keyframes {
-                key.time *= scale;
-            }
-        }
-        candidate.duration = duration;
+        let candidate = self.animation.timeline.with_timing(TimelineTimingEdit {
+            duration: Some(duration),
+            ..Default::default()
+        }).map_err(|error| error.to_string())?;
         self.write_timeline(candidate, "Change animation duration")
     }
     pub fn record_keyframe(
@@ -596,6 +758,90 @@ impl DesignerSession {
             .map_err(|error| error.to_string())?;
         self.write_timeline(candidate, "Add animation keyframe")
     }
+
+    pub(crate) fn record_effective_keyframe(
+        &mut self,
+        target: NodeId,
+        property: &str,
+        time: f64,
+    ) -> Result<(), String> {
+        self.editable_program()?;
+        if self.uses_rust_source() {
+            let program = self.active_animation_program().ok_or("Choose a mapped Rust animation")?;
+            let target = self.recording_target(target);
+            return self.record_rust_keyframe(program, target, property, time);
+        }
+        self.seek(time)?;
+        let visual = self
+            .preview
+            .visual(target)
+            .ok_or("The animation target has no accepted preview")?;
+        let info =
+            ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
+        let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
+        let value = self.animation_value_for_target(target, property, &value)?;
+        self.record_keyframe(target, property, value)?;
+        let mut key = ferroui_designer_animation::KeyframeLocation {
+            target: self.recording_target(target), property: property.into(), time,
+        };
+        key.reconcile_time(self.timeline());
+        self.seek(key.time)
+    }
+
+    pub(crate) fn record_rust_keyframe(
+        &mut self, program: NodeId, target: NodeId, property: &str, time: f64,
+    ) -> Result<(), String> {
+        let sample = self.sample_keyframe(program, target, property, time)?;
+        let pose = self.animation_program_pose(program, sample.time());
+        self.edit_program_keyframe(program, target, property, sample.edit())?;
+        // The source transaction has been committed. A newly rebuilt preview can
+        // lose its target, so restoring the pose is independent of edit success.
+        if let Some(pose) = pose {
+            let _ = self.restore_timeline_preview_pose(&pose);
+        }
+        Ok(())
+    }
+
+    /// Sample an authored iteration without changing selection or the preview pose.
+    pub fn sample_keyframe(
+        &self, id: NodeId, target: NodeId, property: &str, time: f64,
+    ) -> Result<crate::SampledKeyframe, String> {
+        use ferroui_designer_animation::native_key_time;
+        if !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision()) {
+            return Err("Open the current animation preview before adding a keyframe".into());
+        }
+        let program = self.animation_programs().iter().find(|program| program.id == id)
+            .ok_or("Unknown animation program")?;
+        let timeline = program.timeline.as_ref().ok_or("Choose a typed animation program")?;
+        if !(0.0..=timeline.duration).contains(&time) {
+            return Err("Choose a time within the animation duration".into());
+        }
+        let time = native_key_time(time).map_err(|error| error.to_string())?;
+        let track = timeline.track(target, property);
+        let key = track.and_then(|track| track.keyframes.iter().find(|key| key.time == time));
+        let value = if track.is_some() && self.requires_native_animation(program) {
+            let value = self.animation.native.sample_keyframe(program, &self.preview, target, property, time)?;
+            self.animation_value_for_target(target, property, &ferroui_inspect::display_value(Some(&value)))?
+        } else if track.is_some() {
+            self.animation.compiled_targets.get(&(id, target))
+                .ok_or("Choose a compiled animation target")?.scrub(time)
+                .map_err(|error| error.to_string())?.into_iter()
+                .find(|sample| sample.target == target && sample.property == property)
+                .ok_or("The animation did not produce a value for this property")?.value
+        } else {
+            let visual = self.preview.visual(target).ok_or("Choose a live preview target for this property")?;
+            let info = ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
+            let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
+            self.animation_value_for_target(target, property, &value)?
+        };
+        Ok(crate::SampledKeyframe {
+            previous: key.map(|key| key.time),
+            time,
+            value: value.to_xaml(),
+            easing: key.map_or(Easing::Linear.to_xaml(), |key| key.easing.to_xaml()),
+        })
+    }
+
     pub fn move_keyframe(
         &mut self,
         target: NodeId,
@@ -621,6 +867,12 @@ impl DesignerSession {
     ) -> Result<(), String> {
         self.editable_program()?;
         let target = self.recording_target(target);
+        if self.uses_rust_source() {
+            let program = self.active_animation_program().ok_or("Choose a mapped Rust animation")?;
+            return self.edit_program_keyframe(
+                program, target, property, ferroui_designer_animation::KeyframeEdit::Remove(time),
+            );
+        }
         let mut candidate = self.animation.timeline.clone();
         candidate
             .track_mut(target, property)
@@ -654,153 +906,28 @@ impl DesignerSession {
         self.write_timeline_edits(candidate, label, Vec::new())?;
         // Reload replaces the runtime graph. Keep the artboard at its edit position after
         // key/value/curve changes instead of displaying the unanimated base until the next drag.
-        self.seek(self.animation.player.time())
+        if !self.animation.elapsed_clock {
+            self.seek(self.animation.player.time())?;
+        }
+        Ok(())
     }
-    fn program_edits(&self, id: NodeId, timeline: &Timeline) -> Result<Vec<Edit>, String> {
+    pub(crate) fn program_edits(&self, id: NodeId, timeline: &Timeline) -> Result<Vec<Edit>, String> {
+        if self.uses_rust_source() {
+            return Err("Edit the Rust program in source or choose mapped keyframes in Timeline".into());
+        }
         let program = self
             .animation
             .programs
             .iter()
             .find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
-        let original = ferroui_designer_animation::animation_fragment(&self.document, id)
-            .map_err(|error| error.to_string())?;
         let generated = self
             .animation
             .codecs
-            .encode(program, &original, timeline)
+            .encode_for_document(&self.document, program, timeline)
             .map_err(|error| error.to_string())?;
-        let generated =
-            if program.codec.as_deref() == Some("ferroui.native") && !timeline.tracks.is_empty() {
-                let mut generated_document =
-                    Document::new(generated).map_err(|error| error.to_string())?;
-                let root = generated_document.ast().root();
-                let existing = generated_document
-                    .ast()
-                    .node(root)
-                    .expect("root")
-                    .attributes
-                    .iter()
-                    .any(|attribute| {
-                        attribute.namespace_uri.as_deref()
-                            == Some("http://schemas.microsoft.com/winfx/2006/xaml")
-                            && attribute.name.rsplit(':').next() == Some("SetterTargetType")
-                    });
-                if !existing {
-                    let target = self
-                        .document
-                        .ast()
-                        .node(program.primary_target())
-                        .ok_or("Animation target source disappeared")?;
-                    let mut namespaces = generated_document.ast().namespaces(root);
-                    let prefix = namespaces
-                        .iter()
-                        .find(|(prefix, uri)| {
-                            !prefix.is_empty()
-                                && uri.as_str() == "http://schemas.microsoft.com/winfx/2006/xaml"
-                        })
-                        .map(|(prefix, _)| prefix.clone())
-                        .unwrap_or_else(|| {
-                            let mut prefix = "x".to_owned();
-                            while namespaces.contains_key(&prefix) {
-                                prefix.push('_');
-                            }
-                            prefix
-                        });
-                    namespaces.insert(
-                        prefix.clone(),
-                        "http://schemas.microsoft.com/winfx/2006/xaml".into(),
-                    );
-                    let mut edits = vec![Edit::SetAttribute {
-                        node: root,
-                        name: format!("xmlns:{prefix}"),
-                        value: "http://schemas.microsoft.com/winfx/2006/xaml".into(),
-                    }];
-                    let (target_prefix, target_local) = target
-                        .name
-                        .split_once(':')
-                        .unwrap_or(("", target.name.as_str()));
-                    let mut target_type = target.name.clone();
-                    if let Some(namespace) =
-                        self.document.ast().namespaces(target.id).get(target_prefix)
-                    {
-                        if namespaces.get(target_prefix) != Some(namespace) {
-                            let mut alias = "designertarget".to_owned();
-                            while namespaces.contains_key(&alias) {
-                                alias.push('_');
-                            }
-                            edits.push(Edit::SetAttribute {
-                                node: root,
-                                name: format!("xmlns:{alias}"),
-                                value: namespace.clone(),
-                            });
-                            target_type = format!("{alias}:{target_local}");
-                        }
-                    }
-                    edits.push(Edit::SetAttribute {
-                        node: root,
-                        name: format!("{prefix}:SetterTargetType"),
-                        value: target_type,
-                    });
-                    generated_document
-                        .apply("Retain animation setter target type", edits)
-                        .map_err(|error| error.to_string())?;
-                }
-                generated_document.source().to_owned()
-            } else {
-                generated
-            };
-        let source = ferroui_designer_animation::native_fragment(&self.document, id, &generated)
-            .map_err(|error| error.to_string())?;
-        let mut edits = AnimationPrograms::replace_source(&self.document, id, &source)
-            .map_err(|error| error.to_string())?;
-        let mut staged = self.document.clone();
-        staged
-            .apply("Stage animation namespace composition", edits.clone())
-            .map_err(|error| error.to_string())?;
-        let original_start = self
-            .document
-            .ast()
-            .node(id)
-            .ok_or("Program source disappeared")?
-            .span
-            .start;
-        let rewritten = staged
-            .ast()
-            .elements()
-            .find(|node| node.span.start == original_start && node.local_name() == "Animation")
-            .ok_or("Rewritten animation disappeared")?;
-        let parent_scope = rewritten
-            .parent
-            .map(|parent| staged.ast().namespaces(parent))
-            .unwrap_or_default();
-        let root = staged.ast().root();
-        let mut root_scope = staged.ast().namespaces(root);
-        for attribute in rewritten
-            .attributes
-            .iter()
-            .filter(|attribute| attribute.is_namespace())
-        {
-            let prefix = attribute.name.strip_prefix("xmlns:").unwrap_or("");
-            if parent_scope.get(prefix) == Some(&attribute.value) {
-                edits.push(Edit::RemoveAttribute {
-                    node: rewritten.id,
-                    name: attribute.name.clone(),
-                });
-            } else if !prefix.is_empty() && !root_scope.contains_key(prefix) {
-                edits.push(Edit::SetAttribute {
-                    node: root,
-                    name: attribute.name.clone(),
-                    value: attribute.value.clone(),
-                });
-                edits.push(Edit::RemoveAttribute {
-                    node: rewritten.id,
-                    name: attribute.name.clone(),
-                });
-                root_scope.insert(prefix.to_owned(), attribute.value.clone());
-            }
-        }
-        Ok(edits)
+        ferroui_designer_animation::compose_animation_edit(&self.document, id, &generated)
+            .map_err(|error| error.to_string())
     }
     pub(crate) fn write_timeline_edits(
         &mut self,
@@ -809,6 +936,9 @@ impl DesignerSession {
         ordinary: Vec<Edit>,
     ) -> Result<(), String> {
         self.ensure_writable().map_err(|error| error.to_string())?;
+        if self.uses_rust_source() {
+            return Err("Edit the Rust program in source or choose mapped keyframes in Timeline".into());
+        }
         self.editable_program()?;
         candidate.validate().map_err(|error| error.to_string())?;
         let active = self.animation.active;
@@ -1043,22 +1173,25 @@ impl DesignerSession {
             .animation
             .active
             .and_then(|id| programs.iter().find(|program| program.id == id))
-            .and_then(|program| program.timeline.clone())
-            .unwrap_or_else(|| {
-                Timeline::new(
-                    self.animation
-                        .active
-                        .and_then(|id| self.animation.native.duration(id))
-                        .unwrap_or(duration),
-                )
-                .expect("retained duration")
-            });
+            .map(|program| self.animation_timing(program))
+            .unwrap_or_else(|| Timeline::new(duration).expect("retained duration"));
         self.animation.compiled = self
             .animation
             .timeline
             .compile()
             .expect("validated timeline");
         self.animation.programs = programs;
+    }
+
+    fn animation_timing(&self, program: &AnimationProgram) -> Timeline {
+        if self.seeks_animation_elapsed(program) {
+            if let Some(clock) = self.animation.native.timing(program.id) {
+                return clock;
+            }
+        }
+        program.timeline.clone().unwrap_or_else(|| {
+            Timeline::new(self.animation.native.duration(program.id).unwrap_or(3.0)).expect("native duration")
+        })
     }
     pub(crate) fn animation_value_for_target(
         &self,
@@ -1069,32 +1202,33 @@ impl DesignerSession {
         if let Some(kind) = self.animation_kind_for_target(target, property) {
             if kind == ValueKind::Color {
                 if let Some(color) = ferroui_base::media::Color::try_parse(value) {
-                    return Ok(color_value(color));
+                    return Ok(color.into());
                 }
             }
             return AnimationValue::parse(value, kind).map_err(|error| error.to_string());
         }
         animation_value(property, value)
     }
+    /// Whether the current authored node exposes a property supported by the
+    /// native typed animation layer.
+    pub fn can_record_property(&self, target: NodeId, property: &str) -> bool {
+        property != "Name"
+            && self.can_manipulate()
+            && self
+                .preview
+                .visual(target)
+                .and_then(|visual| ferroui_inspect::Inspector::property(&visual, property).ok())
+                .is_some_and(|info| {
+                    !info.is_direct()
+                        && !info.is_read_only()
+                        && (info.property_type_name() == "bool"
+                            || animation_value_kind(info.property_type_name()).is_some())
+                })
+    }
     fn animation_kind_for_target(&self, target: NodeId, property: &str) -> Option<ValueKind> {
         let visual = self.preview.visual(target)?;
         let property = ferroui_inspect::Inspector::property(&visual, property).ok()?;
-        let name = property.property_type_name();
-        if name.contains("Color") || name.contains("Brush") {
-            return Some(ValueKind::Color);
-        }
-        match name.rsplit([':', '.']).next().unwrap_or(name) {
-            "f64" | "f32" => Some(ValueKind::Number),
-            "Point" => Some(ValueKind::Point),
-            "Vector" => Some(ValueKind::Vector),
-            "Size" => Some(ValueKind::Size),
-            "Rect" => Some(ValueKind::Rect),
-            "CornerRadius" => Some(ValueKind::CornerRadius),
-            "RelativePoint" => Some(ValueKind::RelativePoint),
-            "RelativeScalar" => Some(ValueKind::RelativeScalar),
-            "Thickness" => Some(ValueKind::Thickness),
-            _ => None,
-        }
+        animation_value_kind(property.property_type_name())
     }
     fn animation_import_options(&self, program: &AnimationProgram) -> ImportOptions {
         let mut options = ImportOptions::default();
@@ -1234,6 +1368,24 @@ impl DesignerSession {
     }
 }
 
+fn animation_value_kind(name: &str) -> Option<ValueKind> {
+    if name.contains("Color") || name.contains("Brush") {
+        return Some(ValueKind::Color);
+    }
+    match name.rsplit([':', '.']).next().unwrap_or(name) {
+        "f64" | "f32" => Some(ValueKind::Number),
+        "Point" => Some(ValueKind::Point),
+        "Vector" => Some(ValueKind::Vector),
+        "Size" => Some(ValueKind::Size),
+        "Rect" => Some(ValueKind::Rect),
+        "CornerRadius" => Some(ValueKind::CornerRadius),
+        "RelativePoint" => Some(ValueKind::RelativePoint),
+        "RelativeScalar" => Some(ValueKind::RelativeScalar),
+        "Thickness" => Some(ValueKind::Thickness),
+        _ => None,
+    }
+}
+
 pub(crate) fn animation_value(property: &str, value: &str) -> Result<AnimationValue, String> {
     if matches!(
         property.rsplit('.').next().unwrap_or(property),
@@ -1247,21 +1399,13 @@ pub(crate) fn animation_value(property: &str, value: &str) -> Result<AnimationVa
             | "SelectionBrush"
     ) {
         if let Some(color) = ferroui_base::media::Color::try_parse(value) {
-            return Ok(color_value(color));
+            return Ok(color.into());
         }
     }
 
     ferroui_designer_animation::state_value(property, value).map_err(|error| error.to_string())
 }
 
-fn color_value(color: ferroui_base::media::Color) -> AnimationValue {
-    AnimationValue::Color {
-        a: color.a as f64 / 255.0,
-        r: color.r as f64 / 255.0,
-        g: color.g as f64 / 255.0,
-        b: color.b as f64 / 255.0,
-    }
-}
 
 fn subtree_nodes(document: &Document, root: NodeId) -> Vec<NodeId> {
     let mut pending = vec![root];

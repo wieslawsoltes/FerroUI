@@ -1,11 +1,50 @@
+use crate::project_schema::ProjectSchema;
+use ferroui_designer_project::{BuildMetadata, CargoTarget, Solution};
 use crate::{
-    require, FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange,
-    TextEdit,
+    FormattingOptions, LanguageError, LineIndex, Range, Result, Schema, TextChange, TextEdit,
+    TypeInfo, require,
 };
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::{Arc, OnceLock};
+
+mod command_bindings;
+mod definitions;
+mod project_library;
+mod registered_rename;
+mod registered_rsx;
+mod registered_types;
+mod setter_properties;
+mod style_authoring;
+mod style_selectors;
+mod refactoring;
+mod resource_dependencies;
+mod resource_occurrences;
+mod resource_move;
+mod source_review;
+#[path = "handler_service.rs"]
+mod handlers;
+#[path = "dictionary_extraction.rs"]
+mod extraction;
+#[path = "file_move.rs"]
+mod file_moves;
+#[path = "file_move_literals.rs"]
+mod file_move_literals;
+#[path = "asset_move.rs"]
+mod asset_moves;
+pub use file_move_literals::relocate_xaml_fragment;
+pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, DictionaryExtractionTarget, ExtractedDictionary};
+pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRustResolution, GeneratedRustRename};
+pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
+pub use command_bindings::{CommandBindingEdit, CommandBindingModel, CommandBindingRequest, CommandMember, CommandSelection, CommandSlot, CommandValue};
+pub use project_library::{LibraryDefinition, ProjectLibrary, ProjectLibraryEntry, ProjectLibraryRequest, ProjectLibraryResolution};
+pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
+pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};
+pub use refactoring::resource_rename::{ResourceRenamePlan, ResourceRenameTarget, ThemeResourceFamily, ThemeResourceMember};
+pub use resource_move::{ResourceMoveDestination, ResourceMovePlan, ResourceMoveTarget};
+pub use source_review::{ReviewedDocument, RustRenameResolution, RustSymbolRename, SourceRenamePlan, SourceReviewRequest};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Location {
@@ -75,7 +114,7 @@ pub struct SignatureHelp {
     pub active_signature: u32,
     pub active_parameter: u32,
 }
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DocumentEdits {
     pub uri: String,
     pub version: i64,
@@ -92,6 +131,7 @@ struct State {
     symbols: Vec<Occurrence>,
     resource_edges: BTreeMap<u64, Vec<ResourceEdge>>,
     index: LineIndex,
+    library: Arc<OnceLock<Vec<LibraryDefinition>>>,
     version: i64,
     opened: bool,
 }
@@ -102,23 +142,33 @@ impl State {
     fn with_text(&self, index: LineIndex, version: i64, label: &str) -> Self {
         let mut document = self.document.clone();
         document.update_source(label, index.source());
+        Self::indexed(document, index, version, self.opened)
+    }
+
+    fn indexed(document: Document, index: LineIndex, version: i64, opened: bool) -> Self {
         Self {
             symbols: occurrences(&document),
             resource_edges: resource_edges(&document),
             document,
             index,
+            library: Default::default(),
             version,
-            opened: self.opened,
+            opened,
         }
     }
 }
 #[derive(Clone)]
 pub struct LanguageService {
     schema: Schema,
+    overrides: Vec<TypeInfo>,
+    configured_schema: Option<Schema>,
+    package_schemas: BTreeMap<std::path::PathBuf, ProjectSchema>,
     documents: BTreeMap<String, State>,
     workspaces: BTreeMap<std::path::PathBuf, ferroui_designer_project::ProjectWorkspace>,
-    declarations: BTreeMap<String, Vec<(String, Occurrence)>>,
+    declarations: DeclarationIndex,
+    disk_revision: i64,
 }
+type DeclarationIndex = BTreeMap<String, Vec<(String, Occurrence)>>;
 #[derive(Clone, Debug, PartialEq, Eq)]
 enum SymbolKind {
     Name(u64),
@@ -179,15 +229,26 @@ struct Occurrence {
     kind: SymbolKind,
     declaration: bool,
     node: u64,
-    quote: Option<char>,
+    spelling: OccurrenceSpelling,
+}
+#[derive(Clone, Copy)]
+enum OccurrenceSpelling {
+    Attribute,
+    MarkupArgument(Option<char>),
+    Text,
+    CData,
 }
 impl LanguageService {
     pub fn new(schema: Schema) -> Self {
         Self {
             schema,
+            overrides: Vec::new(),
+            configured_schema: None,
+            package_schemas: BTreeMap::new(),
             documents: BTreeMap::new(),
             workspaces: BTreeMap::new(),
             declarations: BTreeMap::new(),
+            disk_revision: 0,
         }
     }
     pub fn schema(&self) -> &Schema {
@@ -195,6 +256,94 @@ impl LanguageService {
     }
     pub fn schema_mut(&mut self) -> &mut Schema {
         &mut self.schema
+    }
+    pub fn schema_for(&self, uri: &str) -> &Schema {
+        self.project_schema_for(uri).map_or_else(
+            || self.configured_schema.as_ref().unwrap_or(&self.schema),
+            |(_, project)| &project.effective,
+        )
+    }
+    fn project_schema_for(&self, uri: &str) -> Option<(&std::path::Path, &ProjectSchema)> {
+        if self.package_schemas.is_empty() { return None; }
+        let path = ferroui_designer_project::file_path(&self.document_uri(uri).ok()?).ok()?;
+        let root = path.ancestors().skip(1).find(|root| {
+            self.package_schemas.contains_key(*root) || root.join("Cargo.toml").is_file()
+        })?;
+        self.package_schemas.get_key_value(root).map(|(root, schema)| (root.as_path(), schema))
+    }
+    fn cargo_package_targets(
+        &self,
+        root: &std::path::Path,
+    ) -> Result<Option<(String, Vec<CargoTarget>)>> {
+        if let Some(project) = self
+            .workspaces
+            .values()
+            .flat_map(|workspace| &workspace.solution.projects)
+            .find(|project| project.root == root && !project.targets.is_empty())
+        {
+            return Ok(Some((project.name.clone(), project.targets.clone())));
+        }
+        // An editor workspace can contain a nested Cargo package that has its own targets.
+        Ok(Solution::discover(root)?
+            .projects
+            .into_iter()
+            .find(|project| project.root == root)
+            .map(|project| (project.name, project.targets)))
+    }
+    pub fn set_type_overrides(&mut self, overrides: Vec<TypeInfo>) {
+        self.overrides = overrides;
+        self.configured_schema = (!self.overrides.is_empty()).then(|| {
+            let mut schema = self.schema.clone();
+            for info in &self.overrides {
+                schema.register(info.clone());
+            }
+            schema
+        });
+        for project in self.package_schemas.values_mut() {
+            project.refresh(&self.schema, &self.overrides);
+        }
+    }
+    pub fn set_project_metadata(
+        &mut self,
+        manifest: &std::path::Path,
+        directories: &[std::path::PathBuf],
+    ) -> Result<()> {
+        self.set_build_metadata(&BuildMetadata {
+            manifest: manifest.into(),
+            directories: directories.to_vec(),
+            package: None,
+        })
+    }
+
+    pub fn set_build_metadata(&mut self, metadata: &BuildMetadata) -> Result<()> {
+        let root = metadata.package_root()?;
+        self.require_package_root(&root)?;
+        self.publish_project_catalog(root, std::sync::Arc::new(metadata.catalog()?));
+        Ok(())
+    }
+
+    pub fn set_project_catalog(&mut self, root: std::path::PathBuf, catalog: std::sync::Arc<ferroui_designer_project::MarkupCatalog>) -> Result<()> {
+        self.require_package_root(&root)?;
+        self.publish_project_catalog(root, catalog);
+        Ok(())
+    }
+    fn require_package_root(&self, root: &std::path::Path) -> Result<()> {
+        require(
+            self.workspaces
+                .values()
+                .any(|workspace| workspace.solution.owns_package_root(root)),
+            "Cargo metadata must belong to an indexed workspace",
+        )
+    }
+    fn publish_project_catalog(&mut self, root: std::path::PathBuf, catalog: std::sync::Arc<ferroui_designer_project::MarkupCatalog>) {
+        // The sidecar is optional for type completion. Move review validates it
+        // separately when it needs authoritative compiled input positions.
+        let resources = catalog.compiled_resources(&root).unwrap_or_default();
+        let schema = ProjectSchema::new(&self.schema, &self.overrides, catalog, resources);
+        self.package_schemas.insert(root, schema);
+    }
+    pub fn compiled_resources(&self, owner: &str) -> Option<std::sync::Arc<ferroui_designer_project::CompiledResources>> {
+        self.project_schema_for(owner).map(|(_, schema)| schema.resources.clone())
     }
     pub fn document(&self, uri: &str) -> Option<&Document> {
         self.state(uri).ok().map(|s| &s.document)
@@ -242,10 +391,23 @@ impl LanguageService {
                 resource_edges: resource_edges(&document),
                 document,
                 index: LineIndex::new(&source),
+                library: Default::default(),
                 version,
                 opened: true,
             }),
         );
+        Ok(())
+    }
+    fn index_disk(&mut self, uri: &str, source: String) -> Result<()> {
+        if self.documents.get(uri).is_some_and(|state| {
+            !state.opened && state.index.source() == source
+        }) {
+            return Ok(());
+        }
+        let version = previous_disk_revision(self.disk_revision)?;
+        self.open(uri, source, version)?;
+        self.documents.get_mut(uri).expect("indexed snapshot").opened = false;
+        self.disk_revision = version;
         Ok(())
     }
     pub fn close(&mut self, uri: &str) -> Result<()> {
@@ -277,8 +439,7 @@ impl LanguageService {
             .transpose()?;
         self.set_state(uri.into(), None);
         if let Some(source) = snapshot {
-            self.open(uri, source, -1)?;
-            self.documents.get_mut(uri).unwrap().opened = false;
+            self.index_disk(uri, source)?;
         }
         Ok(())
     }
@@ -346,12 +507,78 @@ impl LanguageService {
             staged.insert(uri, source);
         }
         for (uri, source) in staged {
-            self.open(&uri, source, -1)?;
-            self.documents.get_mut(&uri).unwrap().opened = false;
+            self.index_disk(&uri, source)?;
             added += 1;
         }
         self.workspaces.insert(root, workspace);
         Ok(added)
+    }
+
+    /// Refresh one project snapshot without disturbing an editor's unsaved buffer.
+    pub fn refresh_project_file(&mut self, uri: &str) -> Result<bool> {
+        use ferroui_designer_project::{DocumentEntry, DocumentKind};
+
+        let uri = self.document_uri(uri)?.into_owned();
+        let path = ferroui_designer_project::file_path(&uri)?;
+        if !path
+            .extension()
+            .is_some_and(|extension| extension.eq_ignore_ascii_case("xaml"))
+        {
+            return Ok(false);
+        }
+        let contains = |project: &ferroui_designer_project::ProjectDescriptor| {
+            path.strip_prefix(&project.root).is_ok_and(|relative| {
+                !relative.iter().any(|part| {
+                    matches!(
+                        part.to_str(),
+                        Some(".git" | "target" | "node_modules" | "bin" | "obj")
+                    )
+                })
+            })
+        };
+        if !self
+            .workspaces
+            .values()
+            .flat_map(|workspace| &workspace.solution.projects)
+            .any(contains)
+        {
+            return Ok(false);
+        }
+
+        let opened = self.documents.get(&uri).is_some_and(|state| state.opened);
+        let present = path.is_file();
+        if !opened {
+            if present {
+                use std::io::Read;
+                const MAX: u64 = 16 * 1024 * 1024;
+                let mut source = String::new();
+                std::fs::File::open(&path)
+                    .and_then(|file| file.take(MAX + 1).read_to_string(&mut source))
+                    .map_err(|error| LanguageError(error.to_string()))?;
+                require(source.len() as u64 <= MAX, "Indexed file exceeds 16 MiB")?;
+                self.index_disk(&uri, source)?;
+            } else {
+                self.set_state(uri.clone(), None);
+            }
+        }
+        for project in self
+            .workspaces
+            .values_mut()
+            .flat_map(|workspace| &mut workspace.solution.projects)
+        {
+            if !contains(project) {
+                continue;
+            }
+            project.documents.retain(|entry| entry.path != path);
+            if present {
+                project.documents.push(DocumentEntry {
+                    uri: uri.clone(),
+                    path: path.clone(),
+                    kind: DocumentKind::Xaml,
+                });
+            }
+        }
+        Ok(true)
     }
     /// Remove a workspace's disk snapshots while preserving open buffers and shared roots.
     pub fn remove_solution(&mut self, root: impl AsRef<std::path::Path>) -> usize {
@@ -362,6 +589,11 @@ impl LanguageService {
         let Some(removed) = self.workspaces.remove(&root) else {
             return 0;
         };
+        self.package_schemas.retain(|root, _| {
+            self.workspaces
+                .values()
+                .any(|workspace| workspace.solution.owns_package_root(root))
+        });
         let retained: BTreeSet<_> = self
             .workspaces
             .values()
@@ -387,6 +619,7 @@ impl LanguageService {
         count
     }
     pub fn diagnostics(&self, uri: &str) -> Result<Vec<Diagnostic>> {
+        let schema = self.schema_for(uri);
         let state = self.state(uri)?;
         let mut out = Vec::new();
         for diagnostic in state.document.diagnostics() {
@@ -404,7 +637,7 @@ impl LanguageService {
         for node in state.document.ast().elements() {
             if node.kind == NodeKind::PropertyElement {
                 if node.namespace_uri.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE) {
-                    if crate::design_support::property_element(&self.schema, &state.document, node)
+                    if crate::design_support::property_element(schema, &state.document, node)
                         .is_none()
                     {
                         out.push(diagnostic_at(
@@ -418,12 +651,10 @@ impl LanguageService {
                     continue;
                 }
                 if let Some((owner, property)) = node.local_name().split_once('.') {
-                    if self
-                        .schema
+                    if schema
                         .type_info(owner, node.namespace_uri.as_deref())
                         .is_some()
-                        && !self
-                            .schema
+                        && !schema
                             .properties(owner, node.namespace_uri.as_deref())
                             .contains_key(property)
                     {
@@ -438,8 +669,7 @@ impl LanguageService {
                 }
                 continue;
             }
-            let known = self
-                .schema
+            let known = schema
                 .type_info(&node.name, node.namespace_uri.as_deref())
                 .is_some();
             if !known
@@ -465,17 +695,50 @@ impl LanguageService {
                 {
                     continue;
                 }
+                if ferroui_designer_core::design_fixtures::is_fixtures(attribute) {
+                    let result = if node.id == state.document.ast().root() {
+                        ferroui_designer_core::design_fixtures::DesignFixtures::parse(&attribute.value).map(|_| ())
+                    } else {
+                        Err("Design fixtures belong on the view root.".into())
+                    };
+                    if let Err(message) = result {
+                        out.push(diagnostic_at(state, attribute.value_span, 1, "design-fixtures", &message)?);
+                    }
+                    continue;
+                }
                 let expression =
                     attribute.value.starts_with('{') && !attribute.value.starts_with("{}");
                 if expression {
-                    if let Err(error) = attribute.markup() {
-                        out.push(diagnostic_at(
+                    match attribute.markup() {
+                        Err(error) => out.push(diagnostic_at(
                             state,
                             attribute.value_span,
                             1,
                             "markup",
                             &error,
-                        )?);
+                        )?),
+                        Ok(MarkupValue::Extension(extension)) => {
+                            if let Some(problem) = crate::binding::case_mismatch(
+                                schema,
+                                &state.document,
+                                node,
+                                attribute.value_span,
+                                &extension,
+                                |name| self.binding_named_element(uri, node.id, name),
+                            ) {
+                                out.push(diagnostic_at(
+                                    state,
+                                    problem.span,
+                                    2,
+                                    "binding-member-case",
+                                    &format!(
+                                        "Binding member {} has a case mismatch. The registered spelling is {}.",
+                                        problem.authored, problem.registered,
+                                    ),
+                                )?);
+                            }
+                        }
+                        Ok(MarkupValue::Literal(_)) => (),
                     }
                     if let Some(message) =
                         crate::design_support::sample_diagnostic(&state.document, node, attribute)
@@ -489,9 +752,7 @@ impl LanguageService {
                         )?);
                     }
                 }
-                if let Some(property) =
-                    self.schema
-                        .attribute_property(&state.document, node, attribute)
+                if let Some(property) = schema.attribute_property(&state.document, node, attribute)
                 {
                     if !expression
                         && !property.values.is_empty()
@@ -586,6 +847,7 @@ impl LanguageService {
         Ok(out)
     }
     pub fn completions(&self, uri: &str, offset: usize) -> Result<Vec<Completion>> {
+        let schema = self.schema_for(uri);
         let uri = self.document_uri(uri)?;
         let uri = uri.as_ref();
         let state = self.state(uri)?;
@@ -637,7 +899,7 @@ impl LanguageService {
                 {
                     let extension = &value[brace + 1..];
                     if !extension.contains(|c: char| c.is_whitespace() || c == ',') {
-                        for item in self.schema.extensions.values() {
+                        for item in schema.extensions.values() {
                             proposals.insert(
                                 item.name.clone(),
                                 (
@@ -674,8 +936,7 @@ impl LanguageService {
                             .unwrap_or("");
                         let extension_namespace =
                             completion_namespace(state, name, open.unwrap(), offset);
-                        if let Some(info) = self
-                            .schema
+                        if let Some(info) = schema
                             .extension(name, extension_namespace.as_deref())
                             .or_else(|| {
                                 crate::design_support::extension(
@@ -734,7 +995,7 @@ impl LanguageService {
                                             .map(|attribute| &source[attribute.value_span.range()])
                                             .unwrap_or(value);
                                         for property in crate::binding::members(
-                                            &self.schema,
+                                            schema,
                                             &state.document,
                                             node,
                                             expression,
@@ -776,7 +1037,7 @@ impl LanguageService {
                             }
                         }
                     }
-                } else if let Some(info) = self.schema.property_in_context(
+                } else if let Some(info) = schema.property_in_context(
                     tag_name,
                     namespace.as_deref(),
                     property,
@@ -812,11 +1073,7 @@ impl LanguageService {
                     }
                 }
             } else if tag.contains(char::is_whitespace) && !tag.ends_with('>') {
-                for property in self
-                    .schema
-                    .properties(tag_name, namespace.as_deref())
-                    .values()
-                {
+                for property in schema.properties(tag_name, namespace.as_deref()).values() {
                     if !property.read_only {
                         proposals.insert(
                             property.name.clone(),
@@ -829,7 +1086,7 @@ impl LanguageService {
                         );
                     }
                 }
-                for info in self.schema.types.values() {
+                for info in schema.types.values() {
                     for property in info.properties.values().filter(|p| p.attached) {
                         let name = format!("{}.{}", info.name, property.name);
                         proposals.insert(
@@ -859,7 +1116,11 @@ impl LanguageService {
                         completion_namespace(state, prefix, open.unwrap(), offset);
                     if member_namespace.as_deref() == Some(crate::design_support::DESIGN_NAMESPACE)
                     {
-                        let mut properties = self.schema.properties(tag_name, namespace.as_deref());
+                        let mut properties = schema.properties(tag_name, namespace.as_deref());
+                        if state.document.ast().element_at(open.unwrap()) == Some(state.document.ast().root()) {
+                            let property = crate::design_support::fixtures_property();
+                            properties.insert(property.name.clone(), property);
+                        }
                         for (alias, native) in
                             [("DesignWidth", "Width"), ("DesignHeight", "Height")]
                         {
@@ -870,7 +1131,7 @@ impl LanguageService {
                         }
                         for member in ["PreviewWith", "DesignStyle"] {
                             if let Some(property) = crate::design_support::property(
-                                &self.schema,
+                                schema,
                                 tag_name,
                                 namespace.as_deref(),
                                 member,
@@ -878,8 +1139,7 @@ impl LanguageService {
                                 properties.insert(member.into(), property);
                             }
                         }
-                        for info in self
-                            .schema
+                        for info in schema
                             .types
                             .values()
                             .filter(|info| info.namespace == crate::schema::FRAMEWORK_NAMESPACE)
@@ -955,8 +1215,7 @@ impl LanguageService {
                     } else {
                         namespace.clone()
                     };
-                    for property in self
-                        .schema
+                    for property in schema
                         .properties(owner, owner_namespace.as_deref())
                         .values()
                         .filter(|property| !property.read_only && !property.event)
@@ -973,10 +1232,10 @@ impl LanguageService {
                         );
                     }
                 }
-                for info in self.schema.types.values().filter(|t| {
+                for info in schema.types.values().filter(|t| {
                     t.constructible
                         && namespace.as_deref().is_none_or(|ns| {
-                            self.schema
+                            schema
                                 .type_info(&t.name, Some(ns))
                                 .is_some_and(|resolved| resolved.namespace == t.namespace)
                         })
@@ -997,7 +1256,7 @@ impl LanguageService {
                 }
             }
         } else {
-            for info in self.schema.types.values().filter(|t| t.constructible) {
+            for info in schema.types.values().filter(|t| t.constructible) {
                 proposals.insert(
                     info.name.clone(),
                     (
@@ -1029,12 +1288,13 @@ impl LanguageService {
         Ok(result)
     }
     pub fn hover(&self, uri: &str, offset: usize) -> Result<Option<Hover>> {
+        let schema = self.schema_for(uri);
         let state = self.state(uri)?;
         state.index.position(offset)?;
         if !state.document.is_valid() {
             return Ok(None);
         }
-        if let Some((property, span)) = crate::binding::at(&self.schema, &state.document, offset) {
+        if let Some((property, span)) = crate::binding::at(schema, &state.document, offset) {
             return Ok(Some(Hover {
                 contents: format!(
                     "{}: {}\n\n{}",
@@ -1051,9 +1311,7 @@ impl LanguageService {
         {
             for attribute in &node.attributes {
                 if attribute.span.contains(offset) {
-                    if let Some(info) =
-                        self.schema
-                            .attribute_property(&state.document, node, attribute)
+                    if let Some(info) = schema.attribute_property(&state.document, node, attribute)
                     {
                         return Ok(Some(Hover {
                             contents: format!(
@@ -1065,10 +1323,7 @@ impl LanguageService {
                     }
                 }
             }
-            if let Some(info) = self
-                .schema
-                .type_info(&node.name, node.namespace_uri.as_deref())
-            {
+            if let Some(info) = schema.type_info(&node.name, node.namespace_uri.as_deref()) {
                 return Ok(Some(Hover {
                     contents: format!("{}\n\n{}", info.name, info.documentation),
                     range: state.index.range(node.name_span)?,
@@ -1078,6 +1333,7 @@ impl LanguageService {
         Ok(None)
     }
     pub fn signature_help(&self, uri: &str, offset: usize) -> Result<Option<SignatureHelp>> {
+        let schema = self.schema_for(uri);
         let state = self.state(uri)?;
         state.index.position(offset)?;
         let Some(prefix) = attribute_prefix(state, offset) else {
@@ -1089,8 +1345,7 @@ impl LanguageService {
         let name = active_extension.name;
         let open = state.index.source()[..offset].rfind('<').unwrap_or(0);
         let namespace = completion_namespace(state, &name, open, offset);
-        let Some(info) = self
-            .schema
+        let Some(info) = schema
             .extension(&name, namespace.as_deref())
             .or_else(|| crate::design_support::extension(&name, namespace.as_deref()))
         else {
@@ -1114,61 +1369,6 @@ impl LanguageService {
             active_signature: 0,
             active_parameter: active as u32,
         }))
-    }
-    pub fn definitions(&self, uri: &str, offset: usize) -> Result<Vec<Location>> {
-        let state = self.state(uri)?;
-        state.index.position(offset)?;
-        if let Some(occurrence) = state
-            .symbols
-            .iter()
-            .find(|o| o.span.contains(offset) || o.span.end == offset)
-            .cloned()
-        {
-            return self
-                .resolve(uri, &occurrence)
-                .into_iter()
-                .map(|(uri, o)| self.location(&uri, o.span))
-                .collect();
-        }
-        if state.document.is_valid() {
-            if let Some((property, _)) = crate::binding::at(&self.schema, &state.document, offset) {
-                return Ok(property.definition.into_iter().collect());
-            }
-            if let Some(node) = state
-                .document
-                .ast()
-                .element_at(offset)
-                .and_then(|id| state.document.ast().node(id))
-            {
-                if node.name_span.contains(offset) {
-                    return Ok(self
-                        .schema
-                        .type_info(&node.name, node.namespace_uri.as_deref())
-                        .and_then(|t| t.definition.clone())
-                        .into_iter()
-                        .collect());
-                }
-                for attribute in &node.attributes {
-                    if attribute.name_span.contains(offset) {
-                        return Ok(self
-                            .schema
-                            .attribute_property(&state.document, node, attribute)
-                            .and_then(|property| property.definition)
-                            .into_iter()
-                            .collect());
-                    }
-                    if attribute.name == "Source" && attribute.value_span.contains(offset) {
-                        if let Ok(target) = self.resource_uri(uri, &attribute.value) {
-                            return Ok(vec![Location {
-                                uri: target,
-                                range: Range::default(),
-                            }]);
-                        }
-                    }
-                }
-            }
-        }
-        Ok(Vec::new())
     }
     pub fn references(&self, uri: &str, offset: usize) -> Result<Vec<Location>> {
         self.references_with_declarations(uri, offset, true)
@@ -1200,121 +1400,42 @@ impl LanguageService {
         }
         Ok(result)
     }
-    pub fn rename(&self, uri: &str, offset: usize, new_name: &str) -> Result<WorkspaceEdit> {
-        let target = self
-            .target(uri, offset)?
-            .ok_or_else(|| LanguageError("No unambiguous symbol at the caret".into()))?;
-        require(
-            match target.1.kind {
-                SymbolKind::Name(_) => crate::references::identifier(new_name),
-                SymbolKind::Resource => {
-                    !new_name.is_empty()
-                        && new_name.chars().all(|c| {
-                            matches!(c, '\t' | '\n' | '\r')
-                                || c >= ' ' && c != '\u{fffe}' && c != '\u{ffff}'
-                        })
-                }
-            },
-            "Names must be XAML identifiers; resource keys must be nonempty XML text",
-        )?;
-        let target_state = self.state(&target.0)?;
-        require(
-            !target_state.symbols.iter().any(|o| {
-                o.declaration
-                    && o.name == new_name
-                    && o.kind == target.1.kind
-                    && o.span != target.1.span
-                    && (o.kind != SymbolKind::Resource
-                        || resource_scope(&target_state.document, o.node)
-                            == resource_scope(&target_state.document, target.1.node))
-            }),
-            "A declaration with this name already exists in scope",
-        )?;
-        let mut grouped = BTreeMap::<String, Vec<TextEdit>>::new();
-        for (uri, state) in &self.documents {
-            for occurrence in &state.symbols {
-                let resolution = self.resolve_with_context(uri, occurrence);
-                let resolved = resolution.matches;
-                require(
-                    target.1.kind != SymbolKind::Resource
-                        || !resolution.themed
-                        || resolved.len() <= 1
-                        || !resolved.iter().any(|candidate| {
-                            candidate.0 == target.0 && candidate.1.span == target.1.span
-                        }),
-                    "This resource has references that select different declarations across themes or providers; rename the resource family together in source",
-                )?;
-                if resolved.len() != 1
-                    || resolved[0].0 != target.0
-                    || resolved[0].1.span != target.1.span
-                {
-                    continue;
-                }
-                let replacement =
-                    if occurrence.kind == SymbolKind::Resource && !occurrence.declaration {
-                        let quote = occurrence.quote.or_else(|| {
-                            new_name
-                                .chars()
-                                .any(|c| {
-                                    c.is_whitespace()
-                                        || matches!(c, '{' | '}' | ',' | '=' | '\'' | '"' | '\\')
-                                })
-                                .then_some('\'')
-                        });
-                        if let Some(quote) = quote {
-                            let value = new_name
-                                .replace('\\', "\\\\")
-                                .replace(quote, &format!("\\{quote}"));
-                            if occurrence.quote.is_some() {
-                                value
-                            } else {
-                                format!("{quote}{value}{quote}")
-                            }
-                        } else {
-                            new_name.into()
-                        }
-                    } else {
-                        new_name.into()
-                    };
-                grouped.entry(uri.clone()).or_default().push(TextEdit {
-                    range: state.index.range(occurrence.span)?,
-                    new_text: escape_xml(&replacement),
-                });
-            }
-        }
-        let document_changes = grouped
-            .into_iter()
-            .map(|(uri, edits)| DocumentEdits {
-                version: self.documents[&uri].version,
-                uri,
-                edits,
-            })
-            .collect();
-        Ok(WorkspaceEdit { document_changes })
-    }
     pub fn apply_workspace_edit(&mut self, edit: &WorkspaceEdit) -> Result<()> {
         let mut staged = Vec::new();
         let mut seen = BTreeSet::new();
+        let mut disk_revision = self.disk_revision;
         for changes in &edit.document_changes {
             let uri = self.document_uri(&changes.uri)?.into_owned();
             require(seen.insert(uri.clone()), "Duplicate document edit")?;
             let state = self.state(&uri)?;
             require(state.version == changes.version, "Workspace edit is stale")?;
             let source = apply_text_edits(state.index.source(), &changes.edits)?;
-            let version = state
-                .version
-                .checked_add(1)
-                .ok_or_else(|| LanguageError("Version exhausted".into()))?;
+            let version = if state.opened {
+                state.version.checked_add(1).ok_or_else(|| LanguageError("Version exhausted".into()))?
+            } else {
+                disk_revision = previous_disk_revision(disk_revision)?;
+                disk_revision
+            };
             let state = state.with_text(LineIndex::new(&source), version, "Workspace refactoring");
             staged.push((uri, state));
         }
         for (uri, state) in staged {
             self.set_state(uri, Some(state));
         }
+        self.disk_revision = disk_revision;
         Ok(())
     }
     pub fn format(&self, uri: &str, options: FormattingOptions) -> Result<Vec<TextEdit>> {
-        crate::formatting::format(&self.state(uri)?.document, options)
+        crate::formatting::format(&self.state(uri)?.document, self.schema_for(uri), options, None)
+    }
+    pub fn format_range(
+        &self,
+        uri: &str,
+        range: Range,
+        options: FormattingOptions,
+    ) -> Result<Vec<TextEdit>> {
+        let state = self.state(uri)?;
+        crate::formatting::format(&state.document, self.schema_for(uri), options, Some(state.index.span(range)?))
     }
     pub fn symbols(&self, uri: &str) -> Result<Vec<DocumentSymbol>> {
         let state = self.state(uri)?;
@@ -1452,8 +1573,21 @@ impl LanguageService {
         Ok(out)
     }
     pub fn resource_uri(&self, base: &str, reference: &str) -> Result<String> {
+        if let Some((_, schema)) = self.project_schema_for(base) {
+            let owner = self.document_uri(base)?;
+            if let Some(uri) = schema.resources.resolve(&owner, reference)? {
+                return Ok(uri.to_owned());
+            }
+        }
         let resolved = ferroui_designer_project::resolve_uri(base, reference)?;
         if resolved.starts_with("ferres://") || resolved.starts_with("resm:") {
+            let owner = self.document_uri(base)?;
+            if let Some(path) = self
+                .workspace_root(&owner)
+                .and_then(|root| self.workspaces[root].resolve_path(&resolved).ok())
+            {
+                return Ok(ferroui_designer_project::file_uri(path)?);
+            }
             let mut matches = BTreeSet::new();
             for workspace in self.workspaces.values() {
                 if let Ok(path) = workspace.resolve_path(&resolved) {
@@ -1521,6 +1655,11 @@ impl LanguageService {
                 "Rename destination is already indexed",
             )?;
         }
+        for schema in self.package_schemas.values_mut() {
+            if mapping.keys().any(|from| schema.resources.contains_source(from)) {
+                std::sync::Arc::make_mut(&mut schema.resources).retarget(&mapping);
+            }
+        }
         let staged: Vec<_> = mapping
             .iter()
             .filter_map(|(old, new)| {
@@ -1560,10 +1699,14 @@ impl LanguageService {
             if !state.document.is_valid() {
                 continue;
             }
+            let resources = self.compiled_resources(uri);
             let mut edits = Vec::new();
             for node in state.document.ast().elements() {
                 for attribute in &node.attributes {
                     if attribute.name == "Source"
+                        && resources.as_ref().is_none_or(|resources| {
+                            matches!(resources.resolve(uri, &attribute.value), Ok(None))
+                        })
                         && self
                             .resource_uri(uri, &attribute.value)
                             .is_ok_and(|target| target == old)
@@ -1593,7 +1736,7 @@ impl LanguageService {
             .get(self.document_uri(uri)?.as_ref())
             .ok_or_else(|| LanguageError(format!("Document is not indexed: {uri}")))
     }
-    fn document_uri<'a>(&self, uri: &'a str) -> Result<Cow<'a, str>> {
+    pub(crate) fn document_uri<'a>(&self, uri: &'a str) -> Result<Cow<'a, str>> {
         if self.documents.contains_key(uri) || !uri.starts_with("file://") {
             Ok(Cow::Borrowed(uri))
         } else {
@@ -1607,6 +1750,25 @@ impl LanguageService {
             uri: uri.into(),
             range: self.state(uri)?.index.range(span)?,
         })
+    }
+    fn workspace_root(&self, uri: &str) -> Option<&std::path::PathBuf> {
+        let path = ferroui_designer_project::file_path(uri).ok()?;
+        self.workspace_root_for_path(&path)
+    }
+    fn workspace_root_for_path(&self, path: &std::path::Path) -> Option<&std::path::PathBuf> {
+        self.workspaces
+            .keys()
+            .filter(|root| path.starts_with(root))
+            .max_by_key(|root| root.as_os_str().len())
+    }
+    pub(crate) fn binding_named_element(&self, uri: &str, anchor: u64, name: &str) -> Option<u64> {
+        let uri = self.document_uri(uri).ok()?;
+        let scope = self.documents.get(uri.as_ref())?.document.ast().name_scope(anchor);
+        let mut targets = self.declarations.get(name)?.iter().filter(|(source, occurrence)| {
+            source == uri.as_ref() && occurrence.kind == SymbolKind::Name(scope)
+        });
+        let node = targets.next()?.1.node;
+        targets.next().is_none().then_some(node)
     }
     fn all_declarations(&self) -> Vec<(String, Occurrence)> {
         self.declarations.values().flatten().cloned().collect()
@@ -1629,6 +1791,24 @@ impl LanguageService {
         self.resolve_with_context(uri, reference).matches
     }
     fn resolve_with_context(&self, uri: &str, reference: &Occurrence) -> ResourceLookup {
+        self.resolve_with_declarations(uri, reference, &DeclarationIndex::new())
+    }
+    fn declarations_for<'a>(
+        &'a self,
+        name: &str,
+        overrides: &'a DeclarationIndex,
+    ) -> &'a [(String, Occurrence)] {
+        overrides
+            .get(name)
+            .or_else(|| self.declarations.get(name))
+            .map_or(&[], Vec::as_slice)
+    }
+    fn resolve_with_declarations(
+        &self,
+        uri: &str,
+        reference: &Occurrence,
+        overrides: &DeclarationIndex,
+    ) -> ResourceLookup {
         let Ok(uri) = self.document_uri(uri) else {
             return ResourceLookup::missing();
         };
@@ -1641,10 +1821,8 @@ impl LanguageService {
             };
         }
         let found: Vec<_> = self
-            .declarations
-            .get(&reference.name)
-            .into_iter()
-            .flatten()
+            .declarations_for(&reference.name, overrides)
+            .iter()
             .filter(|(candidate, o)| {
                 o.name == reference.name
                     && match (&o.kind, &reference.kind) {
@@ -1661,7 +1839,7 @@ impl LanguageService {
             if let Some(state) = self.documents.get(uri) {
                 let mut current = Some(reference.node);
                 while let Some(scope) = current {
-                    result.fallback(self.resources_at(uri, scope, &reference.name, &seen));
+                    result.fallback(self.resources_at(uri, scope, &reference.name, &seen, overrides));
                     if !result.may_be_missing {
                         return result;
                     }
@@ -1673,13 +1851,16 @@ impl LanguageService {
                 }
             }
             // Standalone dictionaries and application resources may provide global resources.
-            // Never expose private resources belonging to another control/view as globals.
+            // Implicit lookup stays in the owning workspace. Explicit imports have
+            // already been resolved through the document's dictionary graph.
+            let home = self.workspace_root(uri);
             let candidates: BTreeSet<_> = found
                 .iter()
                 .filter_map(|(candidate, _)| {
                     let state = self.documents.get(candidate)?;
                     let root = state.document.ast().node(state.document.ast().root())?;
                     (candidate != uri
+                        && self.workspace_root(candidate) == home
                         && matches!(
                             root.local_name(),
                             "ResourceDictionary" | "Application" | "Styles" | "Theme"
@@ -1690,7 +1871,9 @@ impl LanguageService {
             let mut globals = ResourceLookup::missing();
             for candidate in candidates {
                 let root = self.documents[&candidate].document.ast().root();
-                globals.alternative(self.resources_at(&candidate, root, &reference.name, &seen));
+                globals.alternative(self.resources_at(
+                    &candidate, root, &reference.name, &seen, overrides,
+                ));
             }
             result.fallback(globals);
             return result;
@@ -1707,6 +1890,7 @@ impl LanguageService {
         scope: u64,
         name: &str,
         seen: &BTreeSet<(String, u64)>,
+        overrides: &DeclarationIndex,
     ) -> ResourceLookup {
         let mut seen = seen.clone();
         if !seen.insert((uri.into(), scope)) {
@@ -1720,10 +1904,8 @@ impl LanguageService {
             return ResourceLookup::missing();
         };
         let found: Vec<_> = self
-            .declarations
-            .get(name)
-            .into_iter()
-            .flatten()
+            .declarations_for(name, overrides)
+            .iter()
             .filter(|(candidate, occurrence)| {
                 candidate == uri
                     && occurrence.kind == SymbolKind::Resource
@@ -1740,18 +1922,10 @@ impl LanguageService {
         }
         let edges = state.resource_edges.get(&scope).into_iter().flatten();
         let lookup_edge = |edge: &ResourceEdge| {
-            let (target, next) = if let Some(source) = &edge.source {
-                let Ok(target) = self.resource_uri(uri, source) else {
-                    return ResourceLookup::missing();
-                };
-                let Some(imported) = self.documents.get(&target) else {
-                    return ResourceLookup::missing();
-                };
-                (target, imported.document.ast().root())
-            } else {
-                (uri.into(), edge.node)
+            let Some((target, next)) = self.resource_edge_target(uri, edge) else {
+                return ResourceLookup::missing();
             };
-            let mut result = self.resources_at(&target, next, name, &seen);
+            let mut result = self.resources_at(&target, next, name, &seen, overrides);
             if edge.kind != ResourceEdgeKind::Collection && !result.matches.is_empty() {
                 result.themed = true;
             }
@@ -1795,6 +1969,16 @@ impl LanguageService {
         }
         result
     }
+
+    fn resource_edge_target(&self, uri: &str, edge: &ResourceEdge) -> Option<(String, u64)> {
+        if let Some(source) = &edge.source {
+            let target = self.resource_uri(uri, source).ok()?;
+            let root = self.documents.get(&target)?.document.ast().root();
+            Some((target, root))
+        } else {
+            Some((uri.into(), edge.node))
+        }
+    }
     fn set_state(&mut self, uri: String, state: Option<State>) {
         if let Some(old) = self.documents.remove(&uri) {
             for occurrence in old.symbols.iter().filter(|o| o.declaration) {
@@ -1821,6 +2005,11 @@ impl Default for LanguageService {
     fn default() -> Self {
         Self::new(Schema::ferroui())
     }
+}
+fn previous_disk_revision(revision: i64) -> Result<i64> {
+    // Keep server-owned disk identities disjoint from editor versions. LSP
+    // clients receive a null document version for these unopened snapshots.
+    revision.checked_sub(1).ok_or_else(|| LanguageError("Disk revision exhausted".into()))
 }
 fn diagnostic_at(
     state: &State,
@@ -1849,53 +2038,10 @@ fn occurrences(document: &Document) -> Vec<Occurrence> {
             kind: SymbolKind::Name(o.scope),
             declaration: o.declaration,
             node: o.node,
-            quote: None,
+            spelling: OccurrenceSpelling::Attribute,
         })
         .collect();
-    for node in document.ast().elements() {
-        for attribute in &node.attributes {
-            if attribute.name.rsplit(':').next() == Some("Key")
-                && attribute.namespace_uri.as_deref()
-                    == Some("http://schemas.microsoft.com/winfx/2006/xaml")
-                && !theme_provider(document, node)
-            {
-                out.push(Occurrence {
-                    name: attribute.value.clone(),
-                    span: attribute.value_span,
-                    kind: SymbolKind::Resource,
-                    declaration: true,
-                    node: node.id,
-                    quote: None,
-                });
-            }
-            let raw = &document.source()[attribute.value_span.range()];
-            if raw.starts_with("{}") {
-                continue;
-            }
-            for argument in crate::references::markup_arguments(raw) {
-                if matches!(
-                    argument.extension.as_str(),
-                    "StaticResource" | "DynamicResource"
-                ) && argument
-                    .name
-                    .as_deref()
-                    .is_none_or(|name| name == "ResourceKey")
-                {
-                    out.push(Occurrence {
-                        name: argument.value,
-                        span: SourceSpan::new(
-                            attribute.value_span.start + argument.span.start,
-                            attribute.value_span.start + argument.span.end,
-                        ),
-                        kind: SymbolKind::Resource,
-                        declaration: false,
-                        node: node.id,
-                        quote: argument.quote,
-                    });
-                }
-            }
-        }
-    }
+    resource_occurrences::collect(document, &mut out);
     out
 }
 fn resource_scope(document: &Document, node: u64) -> u64 {
@@ -1927,7 +2073,7 @@ fn resource_edges(document: &Document) -> BTreeMap<u64, Vec<ResourceEdge>> {
                     ResourceEdgeKind::Theme
                 },
             ),
-            "ResourceInclude" | "StyleInclude"
+            "ResourceInclude" | "MergeResourceInclude" | "StyleInclude"
                 if native_resource_type(node.local_name(), node.namespace_uri.as_deref()) =>
             {
                 match node.attribute("Source") {

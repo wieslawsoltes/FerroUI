@@ -1,7 +1,10 @@
 //! Native selection commands must preserve curve/value pairs and remain one source edit.
 use super::*;
+use ferroui_base::input::platform::IClipboard;
 use ferroui_base::input::KeyEventArgs;
-use ferroui_controls::testing::{TestServices, UnitTestApplication};
+use ferroui_controls::Window;
+use ferroui_controls::testing::{MockWindowingPlatform, TestClipboardImpl, TestServices, UnitTestApplication};
+use ferroui_designer_animation::{AnimationValue, KeyframeClipboard};
 
 fn workspace() -> (Rc<DesignerWorkspace>, NodeId) {
     let workspace = DesignerWorkspace::new(
@@ -71,12 +74,12 @@ fn times(workspace: &DesignerWorkspace, target: NodeId, property: &str) -> Vec<f
         .collect()
 }
 
-fn key(lane: &TimelineLane, key: Key, modifiers: KeyModifiers) {
+fn key(control: &Control, key: Key, modifiers: KeyModifiers) {
     let mut event = KeyEventArgs::new();
     event.key = key;
     event.key_modifiers = modifiers;
     event.set_routed_event(Some(InputElement::key_down_event()));
-    lane.raise_event(&event);
+    control.raise_event(&event);
     assert!(event.handled());
 }
 
@@ -88,6 +91,107 @@ fn selected_lane(workspace: &DesignerWorkspace) -> Ref<TimelineLane> {
         .filter_map(WeakRef::upgrade)
         .find(|lane| !lane.is_ruler() && !lane.selected_keys().is_empty())
         .unwrap()
+}
+
+#[test]
+fn studio_easing_keyboard_edits_the_draft_before_one_source_commit() {
+    let mut services = TestServices::styled_window();
+    let focus = TestServices::real_focus();
+    services.keyboard_device = focus.keyboard_device;
+    services.keyboard_navigation = focus.keyboard_navigation;
+    services.input_manager = focus.input_manager;
+    let _app = UnitTestApplication::start(services);
+    let (workspace, target) = workspace();
+    let window = Window::new();
+    window.set_width(1280.0);
+    window.set_height(800.0);
+    window.set_content(Some(Control::boxed(&workspace.root)));
+    window.show();
+    workspace.set_timeline_visible(true);
+    workspace.select_keyframes(&[(target, "Opacity".into(), 1.0)]).unwrap();
+    window.update_layout();
+    Dispatcher::ui_thread().run_jobs(None);
+    let graph = || workspace.timeline_inspector().unwrap().children().to_vec().into_iter()
+        .find_map(|child| child.cast::<EasingPreview>()).unwrap();
+    let editor = graph();
+    assert!(editor.focus(), "Focusable {}, attached {}, visible {}, enabled {}",
+        editor.focusable(), editor.is_attached_to_visual_tree(), editor.is_effectively_visible(), editor.is_effectively_enabled());
+    let original = workspace.session.borrow().authored_source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
+    key(&editor, Key::Up, KeyModifiers::SHIFT);
+    key(&editor, Key::Space, KeyModifiers::NONE);
+    key(&editor, Key::Down, KeyModifiers::META);
+    let easing = Easing::CubicBezier { x1: 0.1, y1: 0.3, x2: 0.8, y2: 0.899 };
+    assert_eq!(editor.easing(), Some(easing.clone()));
+    assert_eq!(workspace.session.borrow().authored_source(), original);
+    let combo = workspace.timeline_inspector().unwrap().children().to_vec().into_iter()
+        .find_map(|child| child.cast::<ComboBox>()).unwrap();
+    assert_eq!(combo.selected_index(), keyframe_easing_presets().len() as i32);
+    assert!(editor.is_focused());
+
+    key(&editor, Key::Enter, KeyModifiers::NONE);
+    let session = workspace.session.borrow();
+    assert_eq!(session.timeline().track(target, "Opacity").unwrap().keyframes[1].easing, easing);
+    assert_eq!(session.document().revision(), revision + 1);
+    drop(session);
+    window.update_layout();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(graph().is_focused());
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().authored_source(), original);
+}
+
+#[test]
+fn studio_lane_copies_typed_keys_and_reverse_pastes_with_one_undo() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, target) = workspace();
+    let clipboard = TestClipboardImpl::new();
+    let window_impl = MockWindowingPlatform::create_window_mock();
+    window_impl.setup_feature::<dyn IClipboard>(clipboard.clipboard());
+    let window = Window::with_impl(window_impl);
+    window.set_content(Some(Control::boxed(&workspace.root)));
+    window.show();
+
+    workspace.select_keyframes(&[(target, "Opacity".into(), 1.0), (target, "Opacity".into(), 2.0)]).unwrap();
+    let original = workspace.session.borrow().authored_source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
+    let lane = selected_lane(&workspace);
+    key(&lane, Key::C, KeyModifiers::META);
+    Dispatcher::ui_thread().run_jobs(None);
+    let copied = KeyframeClipboard::from_text(&clipboard.text().unwrap()).unwrap();
+    assert_eq!(copied.tracks[0].property, "Opacity");
+    assert_eq!(copied.tracks[0].keyframes.iter().map(|key| key.time).collect::<Vec<_>>(), [0.0, 1.0]);
+    assert_eq!(workspace.session.borrow().document().revision(), revision);
+
+    workspace.session.borrow_mut().seek(0.5).unwrap();
+    workspace.refresh(false);
+    key(&selected_lane(&workspace), Key::V, KeyModifiers::META | KeyModifiers::SHIFT);
+    Dispatcher::ui_thread().run_jobs(None);
+    let session = workspace.session.borrow();
+    let track = session.timeline().track(target, "Opacity").unwrap();
+    assert_eq!(track.keyframes[1].value, AnimationValue::Number(0.2));
+    assert_eq!(track.keyframes[3].value, AnimationValue::Number(0.1));
+    assert_eq!(session.document().revision(), revision + 1);
+    drop(session);
+    assert_eq!(workspace.selected_keyframes().len(), 2);
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().authored_source(), original);
+}
+
+#[test]
+fn scaling_selected_tracks_from_the_playhead_is_one_source_edit() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, target) = workspace();
+    select(&workspace, target);
+    let original = workspace.session.borrow().document().source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
+    workspace.scale_selected_keyframes(2.0, 0.5).unwrap();
+    for property in ["Width", "Opacity"] {
+        assert_eq!(times(&workspace, target, property), [0.0, 1.5, 2.0, 4.0, 6.0]);
+    }
+    assert_eq!(workspace.session.borrow().document().revision(), revision + 1);
+    workspace.session.borrow_mut().undo().unwrap();
+    assert_eq!(workspace.session.borrow().document().source(), original);
 }
 
 #[test]

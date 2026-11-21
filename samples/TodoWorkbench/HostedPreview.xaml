@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/ferroui"
+        xmlns:app="using:TodoWorkbench.Design"
+        Width="500"
+        Height="295"
+        Background="#EDF2FA"
+        Title="Todo Workbench preview">
+  <Window.Styles>
+    <Style Selector="Border#ReviewCard">
+      <Style.Animations>
+        <Animation Duration="0:0:2" FillMode="Both"><!--ferroui-designer-program:526f756e64207265766965772063617264-->
+          <KeyFrame Cue="0%"><Setter Property="CornerRadius" Value="0" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="CornerRadius" Value="32" /></KeyFrame>
+        </Animation>
+        <Animation Duration="0:0:2" FillMode="Both"><!--ferroui-designer-program:52657669657720736861646f77--><!--todo-workbench-review-shadow-->
+          <KeyFrame Cue="0%"><Setter Property="BoxShadow" Value="0 0 0 0 #00000000" /></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="8 14 24 2 #60244B90" /></KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+  </Window.Styles>
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Write a label for the next task" FontSize="16" />
+    <TextBox Name="LabelInput" Text="Review the project" />
+    <Border Name="ReviewCard" Background="#FFFFFF" BorderBrush="#CEDBED" BorderThickness="1" CornerRadius="0" Padding="21">
+      <StackPanel Spacing="7">
+        <app:PreviewBadge Text="{Binding #LabelInput.Text}" Foreground="#192E54" />
+        <TextBlock Text="{ReflectionBinding ., FallbackValue=Application data}" Foreground="#486386" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</Window>

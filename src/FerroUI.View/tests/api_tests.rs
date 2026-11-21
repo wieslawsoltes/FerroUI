@@ -7,13 +7,16 @@ use crate::{
     animation, ms, rerender, style, transition, transitions, use_resource, use_theme_variant, IntoElement, StyleBuilder,
 };
 use ferroui_base::layout::ILayoutManager;
+use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::media::text_formatting::testing::TextTestScope;
 use ferroui_base::platform::IPlatformRenderInterface;
+use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{BoxedValue, FerroLocator, LocatorExtensions, Ref, Visual};
 use ferroui_controls::primitives::Popup;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Button, Control, TextBlock, Window};
+use std::cell::Cell;
 use std::rc::Rc;
 
 struct App {
@@ -72,6 +75,144 @@ fn styles_of_an_element_apply_to_the_controls_below_it() {
 }
 
 #[test]
+fn style_resources_follow_the_matched_control_and_theme() {
+    use ferroui_base::media::Color;
+    use ferroui_controls::Border;
+
+    let _app = app();
+    let owner = Owner::new_root();
+    let panel = owner.with(|| stack_panel()
+        .styles([style("Border.card")
+            .resource("CardFill", Color::from_rgb(41, 93, 192))
+            .set_resource(Border::background_property(), "CardFill"),
+            style("TextBlock.label")
+                .theme_resource(ThemeVariant::default(), "ThemeInk", Color::from_rgb(34, 78, 124))
+                .theme_resource(ThemeVariant::light(), "OtherInk", Color::from_rgb(0, 0, 0))
+                .theme_resource(ThemeVariant::dark(), "ThemeInk", Color::from_rgb(208, 225, 242))
+                .set_resource(TextBlock::foreground_property(), "ThemeInk")])
+        .child(border().name("Card").class("card"))
+        .child(text_block().class("label").text("Status"))
+        .into_element().mount());
+    let window = window_with(&panel);
+    let card = panel.get_visual_descendants().filter_map(|visual| visual.cast::<Border>())
+        .find(|card| card.name().as_deref() == Some("Card")).unwrap();
+    let label = panel.get_visual_descendants().find_map(|visual| visual.cast::<TextBlock>()).unwrap();
+    let fill = || card.background().expect("active resource setter contributes a brush").as_solid_color_brush().unwrap().color();
+    let ink = || label.foreground().unwrap().as_solid_color_brush().unwrap().color();
+    let current = card.try_find_resource(&"CardFill".into(), card.actual_theme_variant().as_ref()).flatten();
+    assert_eq!(current.as_ref().and_then(|value| value.downcast_ref::<Color>()).copied(), Some(Color::from_rgb(41, 93, 192)));
+    assert_eq!(fill(), Color::from_rgb(41, 93, 192));
+    card.resources().set("CardFill", Some(Rc::new(Color::from_rgb(20, 90, 58))));
+    assert_eq!(fill(), Color::from_rgb(20, 90, 58));
+    card.resources().remove(&"CardFill".into());
+    assert_eq!(fill(), Color::from_rgb(41, 93, 192));
+
+    let contrast = ThemeVariant::new("HighContrast", Some(ThemeVariant::dark()));
+    for (theme, color) in [(ThemeVariant::light(), Color::from_rgb(34, 78, 124)),
+                           (ThemeVariant::dark(), Color::from_rgb(208, 225, 242)),
+                           (contrast, Color::from_rgb(208, 225, 242))] {
+        window.set_value(ThemeVariant::requested_theme_variant_property(), Some(theme));
+        assert_eq!(ink(), color);
+    }
+    window.close();
+    owner.dispose();
+}
+
+#[derive(Default)]
+struct ViewClock {
+    subject: LightweightSubject<SignedDuration>,
+    paused: Cell<bool>,
+}
+
+impl IObservable<SignedDuration> for ViewClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
+        self.subject.subscribe(observer)
+    }
+}
+
+impl IClock for ViewClock {
+    fn play_state(&self) -> PlayState {
+        if self.paused.get() { PlayState::Pause } else { PlayState::Run }
+    }
+    fn set_play_state(&self, value: PlayState) {
+        self.paused.set(value != PlayState::Run);
+    }
+}
+
+#[test]
+fn rsx_visual_states_apply_native_directional_motion_and_restore_the_base_value() {
+    use crate::{set_visual_state, visual_state, visual_state_group};
+    use ferroui_base::layout::Layoutable;
+    use ferroui_controls::{Border, StackPanel};
+    let _app = app();
+    let owner = Owner::new_root();
+    let panel = owner.with(|| crate::rsx! {
+        StackPanel {
+            visual_states: [visual_state_group("Review")
+                .state(visual_state("Idle").set_on("Card", Layoutable::width_property(), 120.0))
+                .state(visual_state("Ready").set_on("Card", Layoutable::width_property(), 260.0)
+                    .set(Visual::opacity_property(), 0.5))
+                .transition(None, "Ready", ms(350), "LinearEasing")
+                .transition(Some("Idle"), "Ready", ms(640), "CubicEaseIn")
+                .transition(Some("Ready"), "Idle", ms(370), "LinearEasing")],
+            Border { name: "Card", width: 100.0, height: 40.0 }
+        }
+    }.mount());
+    let clock = Rc::new(ViewClock::default());
+    panel.set_clock(Some(clock.clone()));
+    let window = window_with(&panel);
+    let card = panel.get_visual_descendants().find_map(|child| child.cast::<Border>()).unwrap();
+    let pulse = |seconds| clock.subject.on_next(SignedDuration::from_seconds(seconds));
+    assert_eq!(card.width(), 100.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), true));
+    pulse(0.0);
+    pulse(0.175);
+    assert!((card.width() - 180.0).abs() < 0.001, "default width was {}", card.width());
+    assert!((panel.opacity() - 0.75).abs() < 0.001);
+    pulse(0.35);
+    assert_eq!(card.width(), 260.0);
+    assert!(set_visual_state(&panel, "Review", Some("Idle"), true));
+    pulse(1.0);
+    pulse(1.185);
+    assert!((card.width() - 190.0).abs() < 0.001, "reverse width was {}", card.width());
+    pulse(1.37);
+    assert_eq!(card.width(), 120.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), true));
+    pulse(2.0);
+    pulse(2.32);
+    assert!((card.width() - 137.5).abs() < 0.001, "forward width was {}", card.width());
+    assert!(!set_visual_state(&panel, "Review", Some("Unknown"), true));
+    assert!(set_visual_state(&panel, "Review", None, false));
+    window.layout_manager().execute_layout_pass();
+    pulse(2.321);
+    assert_eq!(card.width(), 100.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), false));
+    pulse(3.0);
+    pulse(3.001);
+    assert_eq!(card.width(), 260.0);
+    assert!(set_visual_state(&panel, "Review", None, false));
+    assert_eq!(card.width(), 100.0);
+
+    let widths = Rc::new(LightweightSubject::<f64>::new());
+    let property = Layoutable::width_property();
+    let binding = card.bind(property, widths.clone(), ferroui_base::data::BindingPriority::LocalValue);
+    widths.on_next(115.0);
+    assert!(set_visual_state(&panel, "Review", Some("Ready"), true));
+    pulse(4.0);
+    pulse(4.35);
+    assert_eq!(card.width(), 260.0);
+    widths.on_next(135.0);
+    assert_eq!(card.width(), 260.0);
+    assert!(set_visual_state(&panel, "Review", None, false));
+    assert_eq!(card.width(), 135.0);
+    widths.on_next(145.0);
+    assert_eq!(card.width(), 145.0);
+    binding.dispose();
+    window.close();
+    owner.dispose();
+}
+
+#[test]
 #[should_panic(expected = "does not parse")]
 fn a_selector_that_does_not_parse_says_so() {
     let _ = style("Button..");
@@ -124,10 +265,14 @@ fn transitions_and_animations_are_built_for_the_animation_system() {
 
     let built = animation(ms(600))
         .key_frame(0.0, |frame| frame.set(Visual::opacity_property(), 0.0))
-        .key_frame(1.0, |frame| frame.set(Visual::opacity_property(), 1.0))
+        .key_frame(1.0, |frame| frame.set(Visual::opacity_property(), 1.0).key_spline(0.25, 0.0, 0.75, 1.0))
         .build();
     assert_eq!(built.children().count(), 2);
     assert_eq!(built.duration(), ferroui_base::animation::SignedDuration::from(ms(600)));
+    let animated_style = style("Border").animation(animation(ms(600))
+        .key_frame(0.0, |frame| frame.set(Visual::opacity_property(), 0.0)))
+        .build();
+    assert_eq!(animated_style.animations().count(), 1);
     owner.dispose();
 }
 
@@ -157,5 +302,34 @@ fn the_builders_of_other_crates_make_their_controls() {
     let owner = Owner::new_root();
     let control = owner.with(|| crate::generated::treedatagrid::tree_data_grid().into_element().mount());
     assert!(control.cast::<ferroui_controls_treedatagrid::TreeDataGrid>().is_some());
+    owner.dispose();
+}
+
+#[test]
+fn rsx_table_columns_mount_native_bindings_and_values() {
+    use ferroui_base::data::ReflectionBinding;
+    use ferroui_base::layout::HorizontalAlignment;
+    use ferroui_controls::GridLength;
+
+    let _app = app();
+    let owner = Owner::new_root();
+    let table = owner.with(|| crate::rsx! {
+        TableView {
+            columns: crate::table_columns([
+                crate::table_column().header("Account").width(GridLength::from_pixels(156.0))
+                    .binding_path("Name").horizontal_content_alignment(HorizontalAlignment::Right),
+                crate::table_column().header("Status").is_visible(false).can_user_resize(false),
+            ])
+        }
+    }.mount()).cast::<TableView>().unwrap();
+    let columns = table.columns();
+    let account = columns.get(0);
+    assert_eq!(account.header().unwrap().downcast_ref::<String>().unwrap(), "Account");
+    assert_eq!(account.width(), GridLength::from_pixels(156.0));
+    assert_eq!(account.horizontal_content_alignment(), HorizontalAlignment::Right);
+    assert!(account.binding().unwrap().as_any().is_some_and(|binding| binding.is::<ReflectionBinding>()));
+    let status = columns.get(1);
+    assert!(!status.is_visible());
+    assert_eq!(status.can_user_resize(), Some(false));
     owner.dispose();
 }

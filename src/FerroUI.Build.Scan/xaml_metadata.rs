@@ -79,6 +79,9 @@
 
 use std::path::{Path, PathBuf};
 
+#[path = "compiled_index.rs"]
+pub mod compiled_index;
+
 /// A compiled document of a crate (`DocumentModel`).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DocumentModel {
@@ -485,7 +488,7 @@ struct JsonParser<'a> {
 
 impl JsonParser<'_> {
     fn document(mut self) -> Result<JsonValue, String> {
-        let value = self.value()?;
+        let value = self.value(0)?;
         self.whitespace();
         if self.at != self.text.len() {
             return Err(self.error("text after the value"));
@@ -523,7 +526,10 @@ impl JsonParser<'_> {
         }
     }
 
-    fn value(&mut self) -> Result<JsonValue, String> {
+    fn value(&mut self, depth: u8) -> Result<JsonValue, String> {
+        if depth >= 128 {
+            return Err(self.error("JSON is nested too deeply"));
+        }
         self.whitespace();
         match self.text.get(self.at) {
             Some(b'{') => {
@@ -538,7 +544,7 @@ impl JsonParser<'_> {
                     self.whitespace();
                     let key = self.string()?;
                     self.expect(b':')?;
-                    fields.push((key, self.value()?));
+                    fields.push((key, self.value(depth + 1)?));
                     self.whitespace();
                     match self.text.get(self.at) {
                         Some(b',') => self.at += 1,
@@ -559,7 +565,7 @@ impl JsonParser<'_> {
                     return Ok(JsonValue::Array(items));
                 }
                 loop {
-                    items.push(self.value()?);
+                    items.push(self.value(depth + 1)?);
                     self.whitespace();
                     match self.text.get(self.at) {
                         Some(b',') => self.at += 1,

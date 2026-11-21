@@ -1,6 +1,6 @@
 //! Source-preserving edit planning and one-pass patch application.
 
-use super::{parse_snapshot, DesignerError, Edit, Snapshot, TextPatch};
+use super::{DesignerError, Edit, Snapshot, TextPatch, parse_snapshot};
 use crate::{Ast, Node, NodeId, SourceSpan};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -47,6 +47,15 @@ fn apply_attribute_edits(
     edits: Vec<Edit>,
     next_id: &mut NodeId,
 ) -> Result<Snapshot, DesignerError> {
+    let patches = attribute_patches(&old.ast, edits)?;
+    if patches.is_empty() {
+        return Ok(old);
+    }
+    let (source, pins) = patched_source(&old.source, &old.ast, patches, &[])?;
+    parse_snapshot(source, &old, next_id, &pins)
+}
+
+pub(super) fn attribute_patches(ast: &Ast, edits: Vec<Edit>) -> Result<Vec<TextPatch>, DesignerError> {
     let mut values = BTreeMap::<NodeId, Vec<(String, Option<String>)>>::new();
     for edit in edits {
         let (id, name, value) = match edit {
@@ -55,9 +64,9 @@ fn apply_attribute_edits(
                 (node, name, Some(value))
             }
             Edit::RemoveAttribute { node, name } => (node, name, None),
-            _ => unreachable!("caller filters attribute operations"),
+            _ => return Err(DesignerError::InvalidEdit("Expected attribute edits".into())),
         };
-        element(&old.ast, id)?;
+        element(ast, id)?;
         let attributes = values.entry(id).or_default();
         if let Some(attribute) = attributes
             .iter_mut()
@@ -70,7 +79,7 @@ fn apply_attribute_edits(
     }
     let mut patches = Vec::new();
     for (id, values) in values {
-        let node = element(&old.ast, id)?;
+        let node = element(ast, id)?;
         let quote = node.attributes.first().map_or('"', |a| a.quote);
         let mut added = String::new();
         for (name, value) in values {
@@ -100,11 +109,7 @@ fn apply_attribute_edits(
             });
         }
     }
-    if patches.is_empty() {
-        return Ok(old);
-    }
-    let (source, pins) = patched_source(&old.source, &old.ast, patches, &[])?;
-    parse_snapshot(source, &old, next_id, &pins)
+    Ok(patches)
 }
 
 fn apply_edit(old: Snapshot, edit: Edit, next_id: &mut NodeId) -> Result<Snapshot, DesignerError> {
@@ -132,7 +137,7 @@ fn apply_edit(old: Snapshot, edit: Edit, next_id: &mut NodeId) -> Result<Snapsho
                 return Ok(old);
             }
             validate_fragment(&old.ast, parent.id, &source)?;
-            insertion_patches(parent, &old.ast, &children, index, &source)?.0
+            insertion_patches(&old.source, parent, &old.ast, &children, index, &source)?.0
         }
         Edit::RemoveNode { node } => {
             if node == old.ast.root() {
@@ -212,7 +217,7 @@ fn apply_edit(old: Snapshot, edit: Edit, next_id: &mut NodeId) -> Result<Snapsho
                 node.opening_span.end - node.span.start - if node.self_closing { 2 } else { 1 };
             fragment.insert_str(declaration_offset, &declarations);
             let (mut patches, insert_offset, fragment_offset) =
-                insertion_patches(parent, &old.ast, &children, index, &fragment)?;
+                insertion_patches(&old.source, parent, &old.ast, &children, index, &fragment)?;
             patches.push(TextPatch {
                 span: node.span,
                 replacement: String::new(),
@@ -266,6 +271,7 @@ fn validate_fragment(ast: &Ast, parent: NodeId, fragment: &str) -> Result<(), De
 }
 
 fn insertion_patches(
+    source: &str,
     parent: &Node,
     ast: &Ast,
     children: &[NodeId],
@@ -280,26 +286,31 @@ fn insertion_patches(
     }
     if parent.self_closing {
         let start = parent.opening_span.end - 2;
+        let (replacement, fragment_offset) =
+            super::insertion::expanded(source, ast, parent, fragment);
         Ok((
             vec![TextPatch {
                 span: SourceSpan::new(start, parent.opening_span.end),
-                replacement: format!(">{fragment}</{}>", parent.name),
+                replacement,
             }],
             start,
-            1,
+            fragment_offset,
         ))
     } else {
         let offset = children
             .get(index)
             .and_then(|id| ast.node(*id))
             .map_or_else(|| parent.closing_span.unwrap().start, |n| n.span.start);
+        let (replacement, fragment_offset) = super::insertion::inline_or_indented(
+            source, ast, parent, children, index, offset, fragment,
+        );
         Ok((
             vec![TextPatch {
                 span: SourceSpan::new(offset, offset),
-                replacement: fragment.to_owned(),
+                replacement,
             }],
             offset,
-            0,
+            fragment_offset,
         ))
     }
 }
@@ -309,9 +320,50 @@ fn insertion_patches(
 pub(super) fn patched_source(
     source: &str,
     ast: &Ast,
-    mut patches: Vec<TextPatch>,
+    patches: Vec<TextPatch>,
     extra_pins: &[(usize, NodeId)],
 ) -> Result<(String, Vec<(usize, NodeId)>), DesignerError> {
+    let patches = checked_patches(source, patches)?;
+    let result = splice(source, &patches)?;
+    if patches.is_empty() {
+        return Ok((result, Vec::new()));
+    }
+    let mut prefix_deltas = Vec::with_capacity(patches.len() + 1);
+    prefix_deltas.push(0i128);
+    for patch in &patches {
+        prefix_deltas.push(
+            prefix_deltas.last().unwrap() + patch.replacement.len() as i128
+                - patch.span.len() as i128,
+        );
+    }
+    let explicitly_pinned: BTreeSet<_> = extra_pins.iter().map(|(_, id)| *id).collect();
+    let mut pins = Vec::new();
+    for node in ast.nodes() {
+        if explicitly_pinned.contains(&node.id) {
+            continue;
+        }
+        let old_offset = node.span.start;
+        // The first patch ending after this node is the only one that could
+        // replace its start. Empty insertions at the boundary shift the node.
+        let preceding = patches.partition_point(|patch| patch.span.end <= old_offset);
+        if patches
+            .get(preceding)
+            .is_some_and(|patch| patch.span.start <= old_offset)
+        {
+            continue;
+        }
+        let offset = old_offset as i128 + prefix_deltas[preceding];
+        if offset >= 0 {
+            pins.push((offset as usize, node.id));
+        }
+    }
+    Ok((result, pins))
+}
+
+pub(super) fn checked_patches(
+    source: &str,
+    mut patches: Vec<TextPatch>,
+) -> Result<Vec<TextPatch>, DesignerError> {
     patches.sort_by_key(|patch| (patch.span.start, patch.span.end));
     for (index, patch) in patches.iter().enumerate() {
         let span = patch.span;
@@ -336,9 +388,10 @@ pub(super) fn patched_source(
     // Validate the complete request before dropping lexical no-ops: malformed
     // or overlapping ranges must never become valid merely by having no effect.
     patches.retain(|patch| source[patch.span.range()] != patch.replacement);
-    if patches.is_empty() {
-        return Ok((source.to_owned(), Vec::new()));
-    }
+    Ok(patches)
+}
+
+pub(super) fn splice(source: &str, patches: &[TextPatch]) -> Result<String, DesignerError> {
     let removed: usize = patches.iter().map(|patch| patch.span.len()).sum();
     let final_len = patches
         .iter()
@@ -348,42 +401,13 @@ pub(super) fn patched_source(
         })?;
     let mut result = String::with_capacity(final_len);
     let mut cursor = 0;
-    let mut prefix_deltas = Vec::with_capacity(patches.len() + 1);
-    prefix_deltas.push(0i128);
-    for patch in &patches {
+    for patch in patches {
         result.push_str(&source[cursor..patch.span.start]);
         result.push_str(&patch.replacement);
         cursor = patch.span.end;
-        prefix_deltas.push(
-            prefix_deltas.last().unwrap() + patch.replacement.len() as i128
-                - patch.span.len() as i128,
-        );
     }
     result.push_str(&source[cursor..]);
-    let explicitly_pinned: BTreeSet<_> = extra_pins.iter().map(|(_, id)| *id).collect();
-    let mut pins = Vec::new();
-    for node in ast.nodes() {
-        if explicitly_pinned.contains(&node.id) {
-            continue;
-        }
-        let old_offset = node.span.start;
-        // Validated nonoverlapping patches also have nondecreasing ends. The first patch
-        // ending after this node is the only one that could replace its start. Include empty
-        // insertions at the node boundary in the preceding prefix so surviving nodes move
-        // after their inserted siblings. One search replaces two scans per node in a batch.
-        let preceding = patches.partition_point(|patch| patch.span.end <= old_offset);
-        if patches
-            .get(preceding)
-            .is_some_and(|patch| patch.span.start <= old_offset)
-        {
-            continue;
-        }
-        let offset = old_offset as i128 + prefix_deltas[preceding];
-        if offset >= 0 {
-            pins.push((offset as usize, node.id));
-        }
-    }
-    Ok((result, pins))
+    Ok(result)
 }
 
 fn validate_name(name: &str) -> Result<(), DesignerError> {

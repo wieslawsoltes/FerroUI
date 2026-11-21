@@ -1,4 +1,5 @@
 use crate::remote::PreviewerWindowImpl;
+use crate::preview_fixtures::{self, PreviewFixture};
 use ferroui_base::metadata::{from_markup_value, MarkupAssembly};
 use ferroui_base::platform::ASSET_SCHEME;
 use ferroui_base::reactive::IDisposable;
@@ -26,6 +27,24 @@ impl Drop for DesignerMode {
 
 /// Loads the text of a XAML document into the window the previewer shows.
 pub struct DesignWindowLoader;
+
+pub(crate) struct LoadedDesign {
+    pub(crate) window: Ref<Window>,
+    pub(crate) root: Ref<Control>,
+    pub(crate) rust_fixture: bool,
+}
+
+pub(crate) struct DesignLoad<'a> {
+    pub(crate) xaml: &'a str,
+    pub(crate) assembly_path: Option<&'a str>,
+    pub(crate) project_path: Option<&'a str>,
+    pub(crate) render_scaling: f64,
+    pub(crate) fixture: Option<&'a str>,
+    pub(crate) animation_document: Option<&'a str>,
+    pub(crate) create_source_info: bool,
+    pub(crate) freeze_animation_clock: bool,
+    pub(crate) base_uri: Option<url::Url>,
+}
 
 impl DesignWindowLoader {
     /// `LoadDesignerWindow(xaml, assemblyPath, xamlFileProjectPath)`: with a
@@ -57,67 +76,69 @@ impl DesignWindowLoader {
         xaml_file_project_path: Option<&str>,
         render_scaling: f64,
     ) -> Result<Ref<Window>, XamlLoadError> {
-        let window;
+        Self::load(DesignLoad {
+            xaml,
+            assembly_path,
+            project_path: xaml_file_project_path,
+            render_scaling,
+            fixture: None,
+            animation_document: None,
+            create_source_info: false,
+            freeze_animation_clock: false,
+            base_uri: None,
+        }).map(|loaded| loaded.window)
+    }
+
+    pub(crate) fn load(input: DesignLoad<'_>) -> Result<LoadedDesign, XamlLoadError> {
+        let window: Ref<Window>;
+        let control: Ref<Control>;
+        let rust_fixture;
         {
             let _designer_mode = DesignerMode(PlatformManager::designer_mode());
-            let loader = FerroLocator::current().get_required_service::<dyn IRuntimeXamlLoader>();
+            let fixture = input.fixture.map(|name| preview_fixtures::create(input.project_path, name))
+                .transpose().map_err(XamlLoadError::with_message)?;
+            rust_fixture = matches!(fixture, Some(PreviewFixture::RustView(_)));
 
-            let mut base_uri = None;
-            if let Some(assembly_path) = assembly_path {
-                let xaml_file_project_path = xaml_file_project_path.unwrap_or("/Fake.xaml");
-                //Fabricate fake Uri
-                let uri = format!(
-                    "{ASSET_SCHEME}://{}{xaml_file_project_path}",
-                    get_file_name_without_extension(assembly_path)
-                );
-                base_uri = Some(UriRef::parse_absolute(&uri).map_err(|e| {
-                    XamlLoadError::with_inner(format!("Invalid URI: the URI '{uri}' of the document: {e}"), e)
-                })?);
-            }
-
-            // Deviation (DEVIATIONS.md, Designer support): the original
-            // loads the assembly from the path. The application is linked
-            // into the process that previews it, so the assembly is the
-            // registered one of that name, if there is one.
-            let local_asm =
-                assembly_path.and_then(|assembly_path| MarkupAssembly::find(get_file_name_without_extension(assembly_path)));
-
-            let mut configuration = RuntimeXamlLoaderConfiguration::new();
-            configuration.local_assembly = local_asm;
-            configuration.design_mode = true;
-            // Deviation (DEVIATIONS.md, Designer support; #604): `{Binding}` compiles as the
-            // build compiles the documents of the application: compiled bindings, unless the
-            // metadata of its assembly says `FerroUseCompiledBindingsByDefault = False`. Upstream
-            // reads `false` without the entry, which its build always writes; here the entry is
-            // optional and the build compiles bindings by default, also for a document whose
-            // assembly is not registered.
-            configuration.use_compiled_bindings_by_default =
-                local_asm.is_none_or(MarkupAssembly::compiles_bindings_by_default);
-            let loaded = loader.load(RuntimeXamlLoaderDocument::with_base_uri(base_uri, xaml), configuration)?;
-
-            let control = Design::create_preview_with_control(&preview_target(&loaded))
-                .expect("a preview is a control or a message that says why there is none");
-            window = match control.cast::<Window>() {
-                Some(window) => window,
-                None => {
-                    let window = Window::new();
-                    window.set_content(Some(Control::boxed(control.clone())));
-                    window
+            control = if let Some(PreviewFixture::RustView(control)) = &fixture {
+                if control.parent().is_some() || control.visual_parent().is_some()
+                    || control.cast::<ferroui_controls::TopLevel>().is_some()
+                {
+                    return Err(XamlLoadError::with_message("A Rust preview fixture must return a fresh, unattached control."));
                 }
+                control.clone()
+            } else {
+                load_preview_control(&input)?
             };
+
+            let (preview, wrap_content) = match control.cast::<Window>() {
+                Some(window) => (window, false),
+                None => (Window::new(), true),
+            };
+            window = preview;
+            if input.freeze_animation_clock && !rust_fixture {
+                use ferroui_designer_animation::native::FrozenPreviewClock;
+                window.set_clock(Some(Rc::new(FrozenPreviewClock)));
+            }
+            if wrap_content {
+                // Styles can start their animation subscriptions when content is attached.
+                window.set_content(Some(Control::boxed(control.clone())));
+            }
 
             // `window.PlatformImpl is OffscreenTopLevelImplBase offscreenImpl`:
             // the window of the previewer, or another offscreen implementation.
             if let Some(platform_impl) = window.platform_impl() {
                 let platform_impl = platform_impl.as_any();
                 if let Some(previewer_impl) = platform_impl.downcast_ref::<PreviewerWindowImpl>() {
-                    previewer_impl.set_render_scaling(render_scaling);
+                    previewer_impl.set_render_scaling(input.render_scaling);
                 } else if let Some(offscreen_impl) = platform_impl.downcast_ref::<OffscreenTopLevelImplBase>() {
-                    offscreen_impl.set_render_scaling(render_scaling);
+                    offscreen_impl.set_render_scaling(input.render_scaling);
                 }
             }
 
             Design::apply_design_mode_properties(&window, &control);
+            if let Some(PreviewFixture::DataContext(context)) = fixture {
+                control.set_data_context(Some(context));
+            }
 
             if !window.is_set(Window::size_to_content_property()) {
                 if window.width().is_nan() {
@@ -130,8 +151,53 @@ impl DesignWindowLoader {
             }
         }
         window.show();
-        Ok(window)
+        Ok(LoadedDesign { window, root: control, rust_fixture })
     }
+}
+
+fn load_preview_control(input: &DesignLoad<'_>) -> Result<Ref<Control>, XamlLoadError> {
+    let loader = FerroLocator::current().get_required_service::<dyn IRuntimeXamlLoader>();
+    let mut base_uri = input.base_uri.clone();
+    if let (None, Some(assembly_path)) = (&base_uri, input.assembly_path) {
+        let xaml_file_project_path = input.project_path.unwrap_or("/Fake.xaml");
+        let uri = format!(
+            "{ASSET_SCHEME}://{}{xaml_file_project_path}",
+            get_file_name_without_extension(assembly_path)
+        );
+        base_uri = Some(UriRef::parse_absolute(&uri).map_err(|e| {
+            XamlLoadError::with_inner(format!("Invalid URI: the URI '{uri}' of the document: {e}"), e)
+        })?);
+    }
+
+    // Deviation (DEVIATIONS.md, Designer support): the original
+    // loads the assembly from the path. The application is linked
+    // into the process that previews it, so the assembly is the
+    // registered one of that name, if there is one.
+    let local_asm =
+        input.assembly_path.and_then(|assembly_path| MarkupAssembly::find(get_file_name_without_extension(assembly_path)));
+
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = local_asm;
+    configuration.design_mode = true;
+    // Deviation (DEVIATIONS.md, Designer support; #604): `{Binding}` compiles as the
+    // build compiles the documents of the application: compiled bindings, unless the
+    // metadata of its assembly says `FerroUseCompiledBindingsByDefault = False`. Upstream
+    // reads `false` without the entry, which its build always writes; here the entry is
+    // optional and the build compiles bindings by default, also for a document whose
+    // assembly is not registered.
+    configuration.use_compiled_bindings_by_default =
+        local_asm.is_none_or(MarkupAssembly::compiles_bindings_by_default);
+    let mut document = RuntimeXamlLoaderDocument::with_base_uri(base_uri, input.xaml);
+    if input.create_source_info || input.animation_document.is_some() {
+        configuration.set_create_source_info(true);
+    }
+    if let Some(name) = input.animation_document {
+        document.document = Some(name.to_owned());
+    }
+    let loaded = loader.load(document, configuration)?;
+
+    Ok(Design::create_preview_with_control(&preview_target(&loaded))
+        .expect("a preview is a control or a message that says why there is none"))
 }
 
 /// `Path.GetFileNameWithoutExtension`.

@@ -59,6 +59,9 @@ pub mod server;
 pub mod testing;
 pub mod transport;
 
+mod frame_observation;
+pub use frame_observation::CompositionFrameStatus;
+
 mod alpha_mask;
 mod composition_batch;
 mod composition_cache_mode;

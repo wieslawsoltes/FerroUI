@@ -14,6 +14,7 @@ pub(crate) trait EffectiveValueDyn: Any {
     // priorities and subscriptions for every payload type.
     fn state(&self) -> &EffectiveValueState;
     fn boxed_value(&self) -> BoxedValue;
+    fn boxed_base_value(&self) -> Option<BoxedValue>;
     fn end_reevaluation(&self, owner: &FerroObject);
     /// Reads the entry as this property's Rust type, then applies it.
     fn apply_entry(&self, owner: &FerroObject, entry: &dyn IValueEntry, priority: BindingPriority);
@@ -208,6 +209,10 @@ impl dyn EffectiveValueDyn {
 
     pub(crate) fn value_entry(&self) -> Option<Rc<dyn IValueEntry>> {
         self.state().value_entry.get()
+    }
+
+    pub(crate) fn base_value_entry(&self) -> Option<Rc<dyn IValueEntry>> {
+        self.state().base_value_entry.get()
     }
 
     pub(crate) fn is_overriden_current_value(&self) -> bool {
@@ -705,6 +710,10 @@ impl<T: PropertyValue> EffectiveValueDyn for EffectiveValue<T> {
 
     fn boxed_value(&self) -> BoxedValue {
         Rc::new(self.value())
+    }
+
+    fn boxed_base_value(&self) -> Option<BoxedValue> {
+        self.try_get_base_value().map(|value| Rc::new(value) as BoxedValue)
     }
 
     fn end_reevaluation(&self, owner: &FerroObject) {

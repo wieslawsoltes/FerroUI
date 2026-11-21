@@ -3,8 +3,8 @@ use ferroui_base::input::{
     Pointer, PointerPointProperties, PointerType, PointerUpdateKind, RawInputModifiers,
 };
 use ferroui_base::{Size, Vector};
-use ferroui_controls::Window;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
+use ferroui_controls::Window;
 
 fn key(lane: &TimelineLane, key: Key, modifiers: KeyModifiers) -> KeyEventArgs {
     let mut event = KeyEventArgs::new();
@@ -36,19 +36,23 @@ impl PointerDriver {
         }
     }
     fn position(&self, time: f64) -> Point {
-        self.lane
-            .translate_point(Point::new(self.lane.x(time), 17.0), &self.window)
-            .unwrap()
+        Point::new(self.lane.x(time), 17.0)
+    }
+    fn window_position(&self, position: Point) -> Point {
+        self.lane.translate_point(position, &self.window).unwrap()
     }
     fn press(&self, time: f64, count: i32) {
         self.press_with_modifiers(time, count, KeyModifiers::NONE);
     }
     fn press_with_modifiers(&self, time: f64, count: i32, modifiers: KeyModifiers) {
+        self.press_at(self.position(time), count, modifiers);
+    }
+    fn press_at(&self, position: Point, count: i32, modifiers: KeyModifiers) {
         self.lane.raise_event(&PointerPressedEventArgs::new(
             self.lane.to_ref(),
             self.pointer.clone(),
             &self.window,
-            self.position(time),
+            self.window_position(position),
             1,
             PointerPointProperties::new(
                 RawInputModifiers::LEFT_MOUSE_BUTTON,
@@ -59,12 +63,15 @@ impl PointerDriver {
         ));
     }
     fn move_to(&self, time: f64) {
+        self.move_to_point(self.position(time));
+    }
+    fn move_to_point(&self, position: Point) {
         self.lane.raise_event(&PointerEventArgs::new(
             Some(InputElement::pointer_moved_event()),
             self.lane.to_ref(),
             self.pointer.clone(),
             Some(&self.window),
-            self.position(time),
+            self.window_position(position),
             2,
             PointerPointProperties::new(
                 RawInputModifiers::LEFT_MOUSE_BUTTON,
@@ -74,11 +81,14 @@ impl PointerDriver {
         ));
     }
     fn release(&self, time: f64) {
+        self.release_at(self.position(time));
+    }
+    fn release_at(&self, position: Point) {
         self.lane.raise_event(&PointerReleasedEventArgs::new(
             self.lane.to_ref(),
             self.pointer.clone(),
             &self.window,
-            self.position(time),
+            self.window_position(position),
             3,
             PointerPointProperties::new(
                 RawInputModifiers::NONE,
@@ -94,6 +104,95 @@ impl Drop for PointerDriver {
         self.pointer.capture(None);
         self.window.close();
     }
+}
+
+#[test]
+fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
+    use ferroui_designer_animation::CurvePoint;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(2.0, vec![0.0, 0.753, 2.0]);
+    let commits = Rc::new(RefCell::new(Vec::new()));
+    let observed = commits.clone();
+    lane.configure_curve(
+        ferroui_designer_animation::CurveMetric::Value,
+        ferroui_designer_animation::CurveChannel::Value,
+        vec![
+            CurvePoint::new(0.0, 20.0),
+            CurvePoint::new(0.753, 40.0),
+            CurvePoint::new(2.0, 0.0),
+        ],
+        |window| {
+            Ok([window.start, window.end]
+                .map(|time| CurvePoint::new(time, 20.0))
+                .to_vec())
+        },
+        move |from, to, value| observed.borrow_mut().push((from, to, value)),
+    );
+    let driver = PointerDriver::new(lane.clone());
+    let origin = Point::new(lane.x(0.753), lane.key_y(0.753).unwrap());
+    assert_eq!(lane.key_at_position(origin), Some(0.753));
+    assert_eq!(
+        lane.key_at_position(Point::new(origin.x, origin.y + 25.0)),
+        None
+    );
+
+    let destination = Point::new(lane.x(1.2), origin.y + 20.0);
+    driver.press_at(origin, 1, KeyModifiers::NONE);
+    driver.move_to_point(destination);
+    assert!(commits.borrow().is_empty());
+    driver.release_at(destination);
+    assert_eq!(commits.borrow().len(), 1);
+    let (from, to, value) = commits.borrow()[0];
+    assert_eq!(from, 0.753);
+    assert!((to - 1.2).abs() < 1e-10);
+    assert!(value < 40.0 && value > 0.0);
+
+    driver.press_at(origin, 1, KeyModifiers::NONE);
+    driver.release_at(Point::new(origin.x + 1.0, origin.y + 15.0));
+    assert_eq!(
+        commits.borrow()[1].1,
+        0.753,
+        "Keep an off-grid key's time during a value-only drag"
+    );
+    driver.press_at(origin, 1, KeyModifiers::NONE);
+    driver.move_to_point(destination);
+    key(&lane, Key::Escape, KeyModifiers::NONE);
+    driver.release_at(destination);
+    assert_eq!(commits.borrow().len(), 2);
+}
+
+#[test]
+fn velocity_curve_markers_retime_keys_without_editing_their_values() {
+    use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(2.0, vec![0.0, 1.0, 2.0]);
+    lane.configure_curve(
+        CurveMetric::Velocity,
+        CurveChannel::Value,
+        vec![CurvePoint::new(1.0, 40.0)],
+        |window| Ok(vec![CurvePoint::new(window.start, 20.0)]),
+        |_, _, _| panic!("Velocity must not write a derived value into the keyframe"),
+    );
+    let moved = Rc::new(Cell::new(None));
+    let observed = moved.clone();
+    lane.on_move(move |from, to| observed.set(Some((from, to))));
+    let driver = PointerDriver::new(lane.clone());
+    let origin = Point::new(lane.x(1.0), lane.key_y(1.0).unwrap());
+    assert_eq!(lane.key_at_position(origin), Some(1.0));
+    assert!(lane.key_at_position(Point::new(origin.x, origin.y - 16.0)).is_none());
+    driver.press_at(origin, 1, KeyModifiers::NONE);
+    driver.release_at(Point::new(origin.x, origin.y - 16.0));
+    assert_eq!(moved.get(), None);
+
+    let destination = Point::new(lane.x(1.5), origin.y - 16.0);
+    driver.press_at(origin, 1, KeyModifiers::NONE);
+    driver.move_to_point(destination);
+    driver.release_at(destination);
+    assert_eq!(moved.get(), Some((1.0, 1.5)));
 }
 
 #[test]

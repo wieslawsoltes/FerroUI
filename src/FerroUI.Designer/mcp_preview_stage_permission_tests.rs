@@ -1,3 +1,4 @@
+use crate::PreviewStageConfiguration;
 use super::*;
 use crate::mcp::DesignerMcp;
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
@@ -36,6 +37,11 @@ fn presentation_actions_cannot_refresh_another_live_stage_without_input_permissi
     let report = provider
         .call("designer_preview_stages", &json!({}), readonly)
         .unwrap();
+    let input = json!({"stage":live,"expected_model":report["model"],"expected_epoch":epoch,"input":{"kind":"focus"}});
+    assert!(provider
+        .call("designer_preview_stage_input", &input, writer)
+        .unwrap_err()
+        .contains("allow_input"));
     for mut args in [
         json!({"action":"remove","stage":select}),
         json!({"action":"move","stage":select,"index":0}),

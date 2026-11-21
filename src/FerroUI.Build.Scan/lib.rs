@@ -66,12 +66,16 @@
 #![forbid(unsafe_code)]
 
 pub mod call_forms;
+pub mod authored_symbols;
+pub mod compiled_names;
 pub mod export;
 mod json;
+pub use json::{member_ranges as json_member_ranges, MemberRange as JsonMemberRange};
 pub mod model;
 pub mod model_set;
 pub mod scanner;
 pub mod xaml_metadata;
+pub use xaml_metadata::compiled_index;
 
 /// The XML namespace of the framework, as the base crate states it
 /// (`ferroui_base::metadata::FERRO_XML_NAMESPACE`). The scanner reads the

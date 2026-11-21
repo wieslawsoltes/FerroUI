@@ -36,6 +36,7 @@ ferroui-themes-fluent = { workspace = true }
 ferroui-build = { workspace = true }
 
 [dev-dependencies]
+ferroui-reload-protocol.workspace = true
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The emitter checks the output of the build script (`tests/compiled_xaml_tests.rs`); the tests of the

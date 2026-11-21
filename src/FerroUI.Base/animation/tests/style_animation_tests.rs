@@ -23,6 +23,36 @@ fn create_opacity_animation(from: SetterValue, to: SetterValue) -> Ref<Animation
 }
 
 #[test]
+fn brush_curve_samples_match_preview_playback() {
+    use crate::media::{immutable::ImmutableSolidColorBrush, Color};
+
+    let animation = Animation::new();
+    animation.set_duration(seconds(2.0));
+    for (time, color) in [(0.0, Color::from_rgb(0, 0, 0)), (2.0, Color::from_argb(128, 255, 128, 64))] {
+        let brush: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(color));
+        animation.children().add(KeyFrame::with_key_time(
+            seconds(time),
+            [Setter::new(Border::background_property(), Some(brush)) as _],
+        ));
+    }
+    let target = Border::new();
+    let samples = animation
+        .sample_track_for_preview(&target, Border::background_property().as_property(), &[0.5])
+        .unwrap();
+    let brush = samples[0].downcast_ref::<Option<Rc<dyn IBrush>>>().unwrap().as_ref().unwrap();
+    let sampled = brush.as_solid_color_brush().unwrap().color();
+    assert_eq!(sampled, Color::from_argb(192, 188, 92, 44));
+    assert!(target.background().is_none());
+
+    let clock = TestClock::new();
+    let preview = animation.apply_for_preview(&target, Some(clock.as_clock()), None);
+    clock.step(SignedDuration::ZERO);
+    clock.step(seconds(1.0));
+    assert_eq!(target.background().unwrap().as_solid_color_brush().unwrap().color(), sampled);
+    preview.dispose();
+}
+
+#[test]
 fn animation_preview_final_fill_preserves_live_binding_until_disposal() {
     let animation = create_opacity_animation(
         SetterValue::Value(Rc::new(1.0_f64)),

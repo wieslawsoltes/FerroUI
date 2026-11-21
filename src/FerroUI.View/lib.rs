@@ -56,6 +56,7 @@ pub mod error_boundary;
 mod extras;
 pub mod hooks;
 pub mod hot;
+mod image;
 pub mod inspect;
 mod mount;
 pub mod reactive;
@@ -63,7 +64,12 @@ mod register_types;
 pub mod router;
 mod rust_paths;
 mod style;
+mod style_resources;
+mod table_columns;
 mod template;
+#[cfg(feature = "treedatagrid")]
+mod tree_data_grid_columns;
+mod visual_states;
 pub mod xaml;
 
 #[cfg(feature = "desktop")]
@@ -87,6 +93,8 @@ pub mod generated {
 }
 
 pub use builder::{Bind, Builder, El, ElementBuilder, FromValue, IntoProp, IntoValue, TypedProperty, ViewClass};
+#[doc(hidden)]
+pub use ferroui_base::diagnostics::{RsxSourceInfo, RsxSourceLocation};
 pub use control_flow::{dynamic, for_each, show, show_else, NodeRef};
 pub use diagnostics::{clear_diagnostics_handler, set_diagnostics_handler, Diagnostic};
 pub use element::{rerender, ComponentElement, Element, IntoChild, IntoChildren, IntoElement, Key};
@@ -95,16 +103,25 @@ pub use hooks::{
     use_data_context, use_data_context_value, use_effect, use_effect_with, use_hook, use_memo, use_parent_control,
     use_parent_property, use_resource, use_resource_as, use_signal, use_theme_variant,
 };
+pub use image::embedded_image;
 pub use animation::{
     animation, ms, transition, transition_eased, transitions, use_animation, AnimationBuilder, KeyFrameBuilder,
     Transitionable,
 };
 pub use style::{parse_selector, style, style_of, StyleBuilder};
+pub use visual_states::{set_visual_state, visual_state, visual_state_group, ViewState, ViewStateGroup};
 pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedTree, PropertyInfo};
 #[cfg(feature = "desktop")]
 pub use inspect::{attach_inspector, open_inspector};
 pub use mount::{view_stats, ViewStats};
 pub use template::template;
+pub use table_columns::{TableViewColumnBuilder, table_column, table_columns};
+#[cfg(feature = "treedatagrid")]
+pub use tree_data_grid_columns::{
+    TreeDataGridColumnBuilder, tree_data_grid_check_box_column, tree_data_grid_columns,
+    tree_data_grid_expander_column, tree_data_grid_row_header_column, tree_data_grid_template_column,
+    tree_data_grid_text_column,
+};
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
 pub use xaml::{load_xaml, load_xaml_uri, use_xaml};
@@ -123,7 +140,9 @@ pub use ferroui_view_macros::{component, rsx};
 
 /// Everything an application written with the builders or the macro uses.
 pub mod prelude {
+    pub use crate::{table_column, table_columns};
     pub use crate::generated::builders::*;
+    pub use crate::{set_visual_state, visual_state, visual_state_group, ViewState, ViewStateGroup};
     #[cfg(feature = "color-picker")]
     pub use crate::generated::color_picker::*;
     #[cfg(feature = "dialogs")]
@@ -136,6 +155,11 @@ pub mod prelude {
     pub use crate::generated::repeater::*;
     #[cfg(feature = "treedatagrid")]
     pub use crate::generated::treedatagrid::*;
+    #[cfg(feature = "treedatagrid")]
+    pub use crate::{
+        tree_data_grid_check_box_column, tree_data_grid_columns, tree_data_grid_expander_column,
+        tree_data_grid_row_header_column, tree_data_grid_template_column, tree_data_grid_text_column,
+    };
     pub use crate::{
         animation, batch, component, dynamic, effect, for_each, memo, ms, on_cleanup, provide_context, rerender, rsx, show,
         show_else, style, transition, transitions, use_animation, use_resource, use_resource_as, use_theme_variant,

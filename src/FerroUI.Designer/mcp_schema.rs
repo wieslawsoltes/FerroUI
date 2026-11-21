@@ -102,22 +102,28 @@ pub(super) fn easing() -> Value {
         object(json!({"kind":{"const":"Spring"},"value":object(json!({"mass":{"type":"number","exclusiveMinimum":0},"stiffness":{"type":"number","exclusiveMinimum":0},"damping":time(),"initial_velocity":number()}), &["mass","stiffness","damping","initial_velocity"])}), &["kind","value"])
     ]})
 }
-pub(super) fn timeline() -> Value {
-    let keyframe = object(
+fn keyframe() -> Value {
+    object(
         json!({"time":time(),"value":animation_value(),"easing":easing()}),
         &["time", "value", "easing"],
-    );
+    )
+}
+pub(super) fn keyframe_paste() -> Value {
+    let track = object(json!({"property":string(),"keyframes":array(keyframe(),4096)}), &["property","keyframes"]);
+    let clipboard = object(json!({"format":{"const":"ferroui.keyframes.v1"},"tracks":array(track,4096)}), &["format","tracks"]);
+    let destination = object(json!({"target":id(),"property":string()}), &["target","property"]);
+    object(json!({"clipboard":clipboard,"destinations":array(destination,4096),"time":time(),"reverse":{"type":"boolean"}}),
+        &["clipboard","destinations","time"])
+}
+pub(super) fn timeline() -> Value {
     let track = object(
-        json!({"target":id(),"property":string(),"keyframes":array(keyframe,100000),"base_value":nullable(animation_value()),"muted":{"type":"boolean"}}),
+        json!({"target":id(),"property":string(),"keyframes":array(keyframe(),100000),"base_value":nullable(animation_value()),"muted":{"type":"boolean"}}),
         &["target", "property", "keyframes", "muted"],
     );
-    let repeat = json!({"oneOf":[{"const":"Infinite"},object(json!({"Count":{"type":"integer","minimum":1}}), &["Count"])]});
+    let mut properties = timing_properties();
+    properties["tracks"] = array(track, 4096);
     object(
-        json!({
-            "duration":{"type":"number","exclusiveMinimum":0},"delay":time(),"delay_between_iterations":time(),"playback_behavior":{"enum":["Auto","Always","OnlyIfVisible"]},
-            "speed_ratio":{"type":"number","exclusiveMinimum":0},"repeat":repeat,"playback_direction":{"enum":["Normal","Reverse","Alternate","AlternateReverse"]},
-            "fill":{"enum":["None","Forward","Backward","Both"]},"easing":easing(),"tracks":array(track,4096)
-        }),
+        properties,
         &[
             "duration",
             "delay",
@@ -129,6 +135,20 @@ pub(super) fn timeline() -> Value {
             "tracks",
         ],
     )
+}
+fn timing_properties() -> Value {
+    let repeat = json!({"oneOf":[{"const":"Infinite"},object(json!({"Count":{"type":"integer","minimum":1}}), &["Count"])]});
+    json!({
+        "duration":{"type":"number","exclusiveMinimum":0},"delay":time(),"delay_between_iterations":time(),"playback_behavior":{"enum":["Auto","Always","OnlyIfVisible"]},
+        "speed_ratio":{"type":"number","exclusiveMinimum":0},"repeat":repeat,"playback_direction":{"enum":["Normal","Reverse","Alternate","AlternateReverse"]},
+        "fill":{"enum":["None","Forward","Backward","Both"]},"easing":easing()
+    })
+}
+pub(super) fn timing_edit() -> Value {
+    let mut properties = timing_properties();
+    properties["repeat"] = json!({"type":"string","description":"Repeat count as a decimal integer, or Infinite."});
+    properties["easing"] = json!({"type":"string","description":"Native FerroUI easing name, cubic Bézier coordinates, or spring settings."});
+    object(properties, &[])
 }
 pub(super) fn state_group() -> Value {
     let setter = object(
@@ -153,8 +173,8 @@ fn variant(name: &str, fields: Value, required: &[&str]) -> Value {
     properties.insert(name.into(), object(fields, required));
     object(Value::Object(properties), &[name])
 }
-pub(super) fn behavior() -> Value {
-    let action = json!({"oneOf":[
+pub(super) fn behavior_action() -> Value {
+    json!({"oneOf":[
         variant("ChangeProperty",json!({"target":nullable(string()),"property":string(),"value":string()}), &["property","value"]),
         variant("InvokeCommand",json!({"command":string(),"parameter":nullable(string())}), &["command"]),
         variant("CallMethod",json!({"target":nullable(string()),"method":string()}), &["method"]),
@@ -162,31 +182,48 @@ pub(super) fn behavior() -> Value {
         variant("RemoveClass",json!({"target":nullable(string()),"class":string()}), &["class"]),
         variant("Custom",json!({"type_name":string(),"properties":dictionary(string()),"children":string()}), &["type_name","properties","children"]),
         variant("Markup",json!({"source":string()}), &["source"])
-    ]});
-    let trigger = json!({"oneOf":[
+    ]})
+}
+pub(super) fn behavior_trigger() -> Value {
+    json!({"oneOf":[
         variant("Event",json!({"event":string(),"source":nullable(string())}), &["event"]),
         variant("Data",json!({"binding":string(),"comparison":string(),"value":string(),"revert_on_false":{"type":"boolean"}}), &["binding","comparison","value","revert_on_false"]),
         variant("Custom",json!({"type_name":string(),"properties":dictionary(string())}), &["type_name","properties"])
-    ]});
+    ]})
+}
+pub(super) fn behavior() -> Value {
     object(
-        json!({"id":nullable(id()),"owner":id(),"trigger":trigger,"actions":array(action,4096)}),
+        json!({"id":nullable(id()),"owner":id(),"trigger":behavior_trigger(),"actions":array(behavior_action(),4096)}),
         &["owner", "trigger", "actions"],
     )
 }
 pub(super) fn formatting() -> Value {
     object(
-        json!({"tabSize":{"type":"integer","minimum":1,"maximum":16},"insertSpaces":{"type":"boolean"},"trimTrailingWhitespace":{"type":"boolean"},"insertFinalNewline":{"type":"boolean"}}),
+        json!({
+            "tabSize":{"type":"integer","minimum":1,"maximum":16},
+            "insertSpaces":{"type":"boolean"},
+            "trimTrailingWhitespace":{"type":"boolean"},
+            "insertFinalNewline":{"type":"boolean"},
+            "trimFinalNewlines":{"type":"boolean"},
+            "preserveBlankLines":{"type":"boolean"},
+            "attributeLayout":{"enum":["preserve","inline","onePerLine","wrap"]},
+            "wrapColumn":{"type":"integer","minimum":20,"maximum":240},
+            "closingBracketOnNewLine":{"type":"boolean"},
+            "selfClosingSpace":{"enum":["preserve","space","none"]}
+        }),
         &[],
     )
 }
-pub(super) fn workspace_edit() -> Value {
+pub(super) fn source_range() -> Value {
     let position = object(
         json!({"line":revision(),"character":revision()}),
         &["line", "character"],
     );
-    let range = object(json!({"start":position,"end":position}), &["start", "end"]);
+    object(json!({"start":position,"end":position}), &["start", "end"])
+}
+pub(super) fn workspace_edit() -> Value {
     let edit = object(
-        json!({"range":range,"newText":string()}),
+        json!({"range":source_range(),"newText":string()}),
         &["range", "newText"],
     );
     let document = object(

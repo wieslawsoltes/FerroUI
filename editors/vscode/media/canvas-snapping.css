@@ -1,0 +1,23 @@
+#canvas-grid, #canvas-snap-lines { position: absolute; inset: 0; pointer-events: none; }
+#canvas-grid {
+    --grid-ink: color-mix(in srgb, #6d859b 27%, transparent);
+    background-image: linear-gradient(to right, var(--grid-ink) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid-ink) 1px, transparent 1px);
+    background-size: var(--grid-step) var(--grid-step);
+}
+.snap-line {
+    position: absolute;
+    color: var(--vscode-charts-orange, var(--vscode-focusBorder));
+}
+.snap-line[data-axis="x"] { top: 0; bottom: 0; left: var(--snap-position); border-left: 2px dashed currentColor; }
+.snap-line[data-axis="y"] { left: 0; right: 0; top: var(--snap-position); border-top: 2px dashed currentColor; }
+#snapping-button[data-active="true"] { color: var(--vscode-textLink-foreground, var(--focus)); }
+.snap-menu { --popover-width: 290px; padding: 9px; }
+.snap-targets, .snap-grid-visibility { display: flex; align-items: center; gap: 5px; }
+.snap-targets { gap: 12px; padding-block: 6px; border-block-end: 1px solid var(--line); }
+.snap-targets label { display: flex; align-items: center; gap: 2px; }
+.snap-grid-visibility { margin-block-start: 4px; }
+.snap-fields { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+.snap-fields label { display: grid; gap: 3px; min-inline-size: 0; color: var(--muted); font-size: 11px; }
+.snap-fields input { inline-size: 100%; color: var(--vscode-input-foreground); font-size: var(--vscode-font-size); }
+#snapping-error { color: var(--vscode-errorForeground); margin: 5px 0 0; }

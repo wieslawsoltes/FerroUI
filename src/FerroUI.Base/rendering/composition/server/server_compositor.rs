@@ -148,6 +148,7 @@ pub(crate) const DRAW_AHEAD_TICKS: u32 = 120;
 /// bound to the server object it was sent for. It never leaves the render
 /// thread, unlike the [`ServerJob`] of a batch.
 type RenderThreadJob = Box<dyn FnOnce(&ServerCompositor)>;
+type SceneObserver = Box<dyn FnOnce(i64)>;
 
 /// What the readback pass writes for one visual.
 pub(crate) enum ReadbackQueueEntry {
@@ -171,6 +172,7 @@ pub struct ServerCompositor {
     disposed_in_batch: RefCell<Vec<ServerObjectId>>,
     received_post_target_job_queue: RefCell<VecDeque<RenderThreadJob>>,
     last_batch_id: Cell<i64>,
+    scene_observers: RefCell<Vec<SceneObserver>>,
     clock: CompositorClock,
     server_now: Cell<Duration>,
     ui_thread_is_inside_render: Cell<bool>,
@@ -262,6 +264,7 @@ impl ServerCompositor {
             disposed_in_batch: RefCell::new(Vec::new()),
             received_post_target_job_queue: RefCell::new(VecDeque::new()),
             last_batch_id: Cell::new(0),
+            scene_observers: RefCell::new(Vec::new()),
             clock,
             server_now: Cell::new(Duration::ZERO),
             ui_thread_is_inside_render: Cell::new(false),
@@ -617,6 +620,16 @@ impl ServerCompositor {
         // At the end of a tick that unwinds the list may still be borrowed.
         let Ok(targets) = self.active_targets.try_borrow() else { return false };
         targets.iter().any(|target| target.has_pending_frame())
+    }
+
+    pub(crate) fn scene_was_drawn(&self) -> bool {
+        self.active_targets.borrow().iter().any(|target| {
+            target.drew_frame() && !target.only_presented_held_frame()
+        })
+    }
+
+    pub(crate) fn observe_scene(&self, callback: impl FnOnce(i64) + 'static) {
+        self.scene_observers.borrow_mut().push(Box::new(callback));
     }
 
     // --- passes -------------------------------------------------------------
@@ -1086,6 +1099,14 @@ impl ServerCompositor {
         self.visual_readback_update_pass();
 
         self.execute_server_jobs(&self.received_post_target_job_queue);
+
+        if drew_scene && !self.scene_observers.borrow().is_empty() {
+            let observers = std::mem::take(&mut *self.scene_observers.borrow_mut());
+            let batch = self.last_batch_id.get();
+            for observe in observers {
+                observe(batch);
+            }
+        }
 
         // Completion is independent of whether a visual still requests
         // presentation. Retire submitted reads even after the last view detaches.

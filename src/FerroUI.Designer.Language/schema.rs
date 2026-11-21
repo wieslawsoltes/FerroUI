@@ -1,6 +1,14 @@
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
+use ferroui_designer_project::MarkupSource;
 pub const FRAMEWORK_NAMESPACE: &str = "https://github.com/ferroui";
+
+#[derive(Clone, Debug)]
+pub struct ModelType {
+    pub name: String,
+    pub namespace: String,
+}
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct PropertyInfo {
@@ -17,6 +25,13 @@ pub struct PropertyInfo {
     pub event: bool,
     #[serde(default)]
     pub definition: Option<crate::Location>,
+    #[serde(skip)]
+    pub authored: Option<Arc<MarkupSource>>,
+    #[serde(skip)]
+    pub model_type: Option<ModelType>,
+    /// Build metadata distinguishes style setters from direct and CLR properties.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub style_settable: Option<bool>,
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct TypeInfo {
@@ -31,6 +46,10 @@ pub struct TypeInfo {
     pub properties: BTreeMap<String, PropertyInfo>,
     #[serde(default)]
     pub definition: Option<crate::Location>,
+    #[serde(skip)]
+    pub authored: Option<Arc<MarkupSource>>,
+    #[serde(skip)]
+    pub model_base: Option<ModelType>,
 }
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct ExtensionInfo {
@@ -239,6 +258,13 @@ impl Schema {
     }
 
     pub fn type_info(&self, name: &str, namespace: Option<&str>) -> Option<&TypeInfo> {
+        self.exact_type_info(name, namespace).or_else(|| {
+            // XamlX accepts the omitted Extension suffix in object-element syntax too.
+            self.exact_type_info(&format!("{name}Extension"), namespace)
+        })
+    }
+
+    pub(crate) fn exact_type_info(&self, name: &str, namespace: Option<&str>) -> Option<&TypeInfo> {
         let namespace = namespace.unwrap_or(FRAMEWORK_NAMESPACE);
         let namespace = if namespace == crate::design_support::DESIGN_NAMESPACE {
             FRAMEWORK_NAMESPACE
@@ -246,16 +272,12 @@ impl Schema {
             namespace
         };
         let name = name.rsplit(':').next().unwrap_or(name);
-        let resolve = |name: &str| {
-            let key = format!("{namespace}|{name}");
-            self.types.get(&key).or_else(|| {
-                builtin_aliases()
-                    .get(&key)
-                    .and_then(|canonical| self.types.get(canonical))
-            })
-        };
-        // XamlX accepts the omitted Extension suffix in object-element syntax too.
-        resolve(name).or_else(|| resolve(&format!("{name}Extension")))
+        let key = format!("{namespace}|{name}");
+        self.types.get(&key).or_else(|| {
+            builtin_aliases()
+                .get(&key)
+                .and_then(|canonical| self.types.get(canonical))
+        })
     }
     pub fn properties(
         &self,
@@ -274,10 +296,7 @@ impl Schema {
                     .entry(name.clone())
                     .or_insert_with(|| property.clone());
             }
-            next = info.base.as_ref().and_then(|name| {
-                self.type_info(name, Some(&info.namespace))
-                    .or_else(|| self.type_info(name, None))
-            });
+            next = self.base_type(info);
         }
         result
     }
@@ -290,7 +309,42 @@ impl Schema {
         self.property_in_context(owner, namespace, name, namespace)
     }
 
-    pub(crate) fn attribute_property(
+    pub(crate) fn base_type(&self, info: &TypeInfo) -> Option<&TypeInfo> {
+        if let Some(base) = &info.model_base {
+            return self.type_info(&base.name, Some(&base.namespace));
+        }
+        let base = info.base.as_ref()?;
+        self.type_info(base, Some(&info.namespace))
+            .or_else(|| self.type_info(base, None))
+    }
+
+    pub fn type_assignable_to(&self, actual: &TypeInfo, expected: &TypeInfo) -> bool {
+        let mut seen = BTreeSet::new();
+        let mut current = Some(actual);
+        while let Some(info) = current {
+            if info.namespace == expected.namespace && info.name == expected.name { return true; }
+            if !seen.insert((&info.namespace, &info.name)) { return false; }
+            current = self.base_type(info);
+        }
+        false
+    }
+
+    fn member(&self, owner: &str, namespace: Option<&str>, name: &str) -> Option<&PropertyInfo> {
+        let mut next = self.type_info(owner, namespace);
+        let mut seen = BTreeSet::new();
+        while let Some(info) = next {
+            if !seen.insert((&info.namespace, &info.name)) {
+                break;
+            }
+            if let Some(property) = info.properties.get(name) {
+                return Some(property);
+            }
+            next = self.base_type(info);
+        }
+        None
+    }
+
+    pub fn attribute_property(
         &self,
         document: &ferroui_designer_core::Document,
         node: &ferroui_designer_core::Node,
@@ -318,6 +372,20 @@ impl Schema {
         )
     }
 
+    /// Resolve a property element using its own namespace and the target's type.
+    pub fn element_property(
+        &self,
+        owner: &ferroui_designer_core::Node,
+        property: &ferroui_designer_core::Node,
+    ) -> Option<PropertyInfo> {
+        self.property_in_context(
+            &owner.name,
+            owner.namespace_uri.as_deref(),
+            &property.name,
+            property.namespace_uri.as_deref(),
+        )
+    }
+
     /// An attached or owner-qualified member can use a different XML namespace
     /// from the target object, especially on a prefixed custom control.
     pub(crate) fn property_in_context(
@@ -328,6 +396,9 @@ impl Schema {
         member_namespace: Option<&str>,
     ) -> Option<PropertyInfo> {
         if member_namespace == Some(crate::design_support::DESIGN_NAMESPACE) {
+            if name.rsplit(':').next() == Some(ferroui_designer_core::design_fixtures::FIXTURES_ATTRIBUTE) {
+                return Some(crate::design_support::fixtures_property());
+            }
             if name.contains(':')
                 && matches!(
                     name.rsplit(':').next(),
@@ -351,10 +422,7 @@ impl Schema {
         }
         if let Some((declaring, property)) = name.rsplit_once('.') {
             let declaring = self.type_info(declaring, member_namespace)?;
-            let property = self
-                .properties(&declaring.name, Some(&declaring.namespace))
-                .get(property)?
-                .clone();
+            let property = self.member(&declaring.name, Some(&declaring.namespace), property)?;
             let mut next = self.type_info(owner, owner_namespace);
             let mut seen = BTreeSet::new();
             while let Some(info) = next {
@@ -363,16 +431,14 @@ impl Schema {
                 }
                 if property.attached
                     || (declaring.namespace == info.namespace && declaring.name == info.name)
+                    || (declaring.authored.is_some() && declaring.authored == info.authored)
                 {
-                    return Some(property);
+                    return Some(property.clone());
                 }
-                next = info.base.as_ref().and_then(|base| {
-                    self.type_info(base, Some(&info.namespace))
-                        .or_else(|| self.type_info(base, None))
-                });
+                next = self.base_type(info);
             }
             // Attached properties also apply to controls with unregistered metadata.
-            property.attached.then_some(property)
+            property.attached.then(|| property.clone())
         } else {
             if name.contains(':') {
                 let member_owner = self.type_info(owner, member_namespace)?;
@@ -381,8 +447,7 @@ impl Schema {
                     return None;
                 }
             }
-            self.properties(owner, owner_namespace)
-                .get(name.rsplit(':').next().unwrap_or(name))
+            self.member(owner, owner_namespace, name.rsplit(':').next().unwrap_or(name))
                 .cloned()
         }
     }

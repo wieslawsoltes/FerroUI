@@ -7,6 +7,9 @@ use crate::{
     PreviewStageTarget, RuntimeNode,
 };
 use ferroui_designer_animation::VisualStateGroup;
+use ferroui_designer_project::{
+    file_path, local_preview_sources_with_resources, LocalPreviewSources, PreviewSourceBuffer,
+};
 use ferroui_inspect::TreeKind;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
@@ -16,12 +19,43 @@ struct FocusContext {
     definition: Option<(NodeId, DefinitionPreviewOptions)>,
     environment: PreviewEnvironment,
     design_time_data: bool,
+    fixture: Option<String>,
     states: Vec<(NodeId, String, String)>,
     interactive: bool,
     selection: Vec<NodeId>,
 }
 
 impl DesignerWorkspace {
+    pub(super) fn preview_stage_local_includes(
+        &self,
+        sources: &[PreviewStageSource],
+    ) -> std::collections::BTreeMap<String, LocalPreviewSources> {
+        let state = self.project.borrow();
+        let (Some(workspace), Ok(language)) = (&state.workspace, self.try_language_service()) else {
+            return Default::default();
+        };
+        let compiled: Vec<_> = sources.iter().filter_map(|source| {
+            let resources = language.compiled_resources(&source.uri)?;
+            (!resources.is_empty()).then_some((source, resources))
+        }).collect();
+        if compiled.is_empty() {
+            return Default::default();
+        }
+        let buffers: Vec<_> = sources.iter().filter_map(|source| {
+            let path = file_path(&source.uri).ok()?;
+            path.extension()?.eq_ignore_ascii_case("xaml").then(|| PreviewSourceBuffer {
+                uri: source.uri.clone(),
+                source: (!source.pending).then(|| source.document.source().to_owned()),
+            })
+        }).collect();
+        compiled.into_iter().map(|(source, resources)| {
+            let includes = local_preview_sources_with_resources(
+                Some(&workspace.solution.root), &source.uri, &source.document, &buffers, Some(&resources),
+            );
+            (source.uri.clone(), includes)
+        }).collect()
+    }
+
     pub(super) fn preview_stage_sources(&self) -> Vec<PreviewStageSource> {
         let session = self.session.borrow();
         let uri = session.document_uri();
@@ -35,13 +69,13 @@ impl DesignerWorkspace {
             .map(|(_, tab)| PreviewStageSource {
                 uri: tab.preview_uri.clone(),
                 document: tab.document.snapshot_without_history(),
-                pending: false,
+                pending: tab.rust.as_ref().is_some_and(|rust| !rust.diagnostics().is_empty()),
             })
             .collect::<Vec<_>>();
         sources.push(PreviewStageSource {
             uri: uri.into(),
             document: session.document().snapshot_without_history(),
-            pending: self.pending_source.get(),
+            pending: self.pending_source.get() || (session.uses_rust_source() && !session.authored_is_valid()),
         });
         sources
     }
@@ -103,6 +137,61 @@ impl DesignerWorkspace {
             })
     }
 
+    /// Source-linked checks for the stage's current native composition.
+    pub fn preview_stage_checks(
+        &self,
+        id: PreviewStageId,
+    ) -> Result<Vec<crate::PreviewFinding>, String> {
+        if !self.preview_stage_source_is_current(id) {
+            return Err("Refresh this stage before checking its preview".into());
+        }
+        let stage = self.preview_stage(id).ok_or("The preview stage was removed")?;
+        let uri = stage.configuration.source_uri;
+        let mut findings = self.preview_stages.board.borrow().preview_checks(id)?;
+        let session = self.session.borrow();
+        if session.document_uri() == uri {
+            if let Some(map) = session.rust_map() {
+                for finding in &mut findings {
+                    finding.map_rsx_source(session.document(), map);
+                }
+            }
+        } else if let Some(tab) = self.project.borrow().tabs.values().find(|tab| tab.preview_uri == uri) {
+            if let Some(map) = tab.rust.as_ref().and_then(|rust| rust.map()) {
+                for finding in &mut findings {
+                    finding.map_rsx_source(&tab.document, map);
+                }
+            }
+        }
+        Ok(findings)
+    }
+
+    /// State groups available to an accepted source and stage configuration.
+    pub fn preview_stage_state_options(
+        &self,
+        id: PreviewStageId,
+    ) -> Result<Vec<crate::PreviewStageStateOptions>, String> {
+        let stage = self
+            .preview_stage(id)
+            .ok_or("The preview stage was removed")?;
+        let source = self
+            .preview_stage_sources()
+            .into_iter()
+            .find(|source| source.uri == stage.configuration.source_uri)
+            .ok_or("Open the stage source before choosing its states")?;
+        crate::preview_stage_state_options::source_options(&source, &stage.configuration.target)
+    }
+
+    pub fn preview_stage_fixture_options(&self, id: PreviewStageId) -> Result<Vec<String>, String> {
+        let stage = self
+            .preview_stage(id)
+            .ok_or("The preview stage was removed")?;
+        self.preview_stage_sources()
+            .into_iter()
+            .find(|source| source.uri == stage.configuration.source_uri)
+            .ok_or("Open the stage source before choosing design fixtures")?
+            .fixture_options()
+    }
+
     /// Image capture may use a paused frame while its accepted source and all
     /// native include dependencies remain exact. This never enables selection/input.
     pub fn preview_stage_image_source_is_current(&self, id: PreviewStageId) -> bool {
@@ -134,6 +223,7 @@ impl DesignerWorkspace {
     pub(super) fn focus_preview_stage_configuration(
         self: &Rc<Self>,
         configuration: &PreviewStageConfiguration,
+        fixture: Option<String>,
     ) -> Result<(), String> {
         if self.pending_source.get() {
             return Err("Apply or repair the pending XAML before focusing a preview stage".into());
@@ -185,6 +275,7 @@ impl DesignerWorkspace {
             definition,
             environment: configuration.environment,
             design_time_data: configuration.design_time_data,
+            fixture,
             states,
             interactive: configuration.mode == PreviewStageMode::Live,
             selection: Vec::new(),
@@ -223,7 +314,8 @@ impl DesignerWorkspace {
         {
             return Err("The source changed after this preview was accepted; refresh the stage and select again".into());
         }
-        self.focus_preview_stage_configuration(&selection.configuration)?;
+        let fixture = self.preview_stage_spec(selection.stage).and_then(|spec| spec.design_fixture);
+        self.focus_preview_stage_configuration(&selection.configuration, fixture)?;
         {
             let mut session = self.session.borrow_mut();
             if !selection.matches_source(session.document_uri(), session.document())
@@ -248,6 +340,7 @@ impl DesignerWorkspace {
                 .map(|scope| (scope.node, scope.options.clone())),
             environment: self.preview_environment(),
             design_time_data: session.design_time_enabled(),
+            fixture: session.design_fixture().map(str::to_owned),
             states: session.active_preview_states(),
             interactive: self.surface.interactive(),
             selection: session.selection().to_vec(),
@@ -273,8 +366,10 @@ impl DesignerWorkspace {
                     session.exit_definition_scope()?;
                 }
             }
-            if session.design_time_enabled() != context.design_time_data {
-                session.set_design_time_enabled(context.design_time_data)?;
+            if session.design_time_enabled() != context.design_time_data
+                || session.design_fixture() != context.fixture.as_deref()
+            {
+                session.configure_design_data(context.design_time_data, context.fixture.clone())?;
             }
             if !matches!(session.preview_status(), crate::PreviewStatus::Ready { .. }) {
                 return Err("The source could not be loaded in the authoring preview".into());

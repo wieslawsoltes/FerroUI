@@ -62,9 +62,10 @@ jobs:
       # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
       # twice at most; a scene that fails three times in a row fails the job.
       - name: Test (the Vello backend and the render backends compared)
+        # GPU tests share the adapter. Concurrent draws can lose the device or its readback.
         run: |
           for attempt in 1 2 3; do
-            if cargo test --locked -p ferroui-vello -p ferroui-render-backends-comparison --no-fail-fast --lib --tests; then
+            if cargo test --locked -p ferroui-vello -p ferroui-render-backends-comparison --no-fail-fast --lib --tests -- --test-threads=1; then
               exit 0
             fi
             echo "::warning::the tests of the Vello backend or the comparison of the render backends failed in attempt $attempt"

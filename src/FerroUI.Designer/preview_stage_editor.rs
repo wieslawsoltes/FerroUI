@@ -1,9 +1,9 @@
 //! A complete, staged editor for one native preview scenario. Controls edit only a
 //! detached configuration; the host validates the accepted board/source epoch on Apply.
 use crate::{
-    DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewSourceAnchor,
-    PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode, PreviewStageSource,
-    PreviewStageState, PreviewStageTarget, PreviewTheme, PREVIEW_SIZE_PRESETS,
+    DefinitionPreviewOptions, PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewFlowDirection,
+    PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode, PreviewStageSpec,
+    PreviewStageSource, PreviewStageState, PreviewStageTarget, PreviewTheme,
 };
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -15,12 +15,11 @@ use ferroui_controls::{
     Button, CheckBox, ColumnDefinitions, ComboBox, Control, Grid, RowDefinitions, ScrollViewer,
     StackPanel, TextBlock, TextBox,
 };
-use ferroui_designer_animation::VisualStateGroup;
 use ferroui_designer_tools::ComponentCatalog;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
-type Apply = Rc<dyn Fn(PreviewStageConfiguration) -> Result<(), String>>;
+type Apply = Rc<dyn Fn(PreviewStageSpec) -> Result<(), String>>;
 
 struct StateChoice {
     owner: PreviewSourceAnchor,
@@ -51,9 +50,12 @@ pub struct PreviewStageEditor {
     width: Ref<TextBox>,
     height: Ref<TextBox>,
     theme: Ref<ComboBox>,
+    themes: Vec<PreviewTheme>,
     flow: Ref<ComboBox>,
     mode: Ref<ComboBox>,
     design_data: Ref<CheckBox>,
+    design_fixture: Ref<ComboBox>,
+    fixtures: RefCell<Vec<String>>,
     pinned: Ref<CheckBox>,
     auto_update: Ref<CheckBox>,
     state_host: Ref<StackPanel>,
@@ -69,6 +71,11 @@ pub struct PreviewStageEditor {
 
 impl PreviewStageEditor {
     pub fn new(initial: PreviewStageConfiguration, sources: Vec<PreviewStageSource>) -> Rc<Self> {
+        Self::with_spec(initial.into(), sources)
+    }
+
+    pub fn with_spec(initial: PreviewStageSpec, sources: Vec<PreviewStageSource>) -> Rc<Self> {
+        let PreviewStageSpec { configuration: initial, design_fixture: initial_fixture } = initial;
         let root = Grid::new();
         root.set_name(Some("PreviewStageEditor".into()));
         root.classes().add("designer-chrome");
@@ -199,14 +206,11 @@ impl PreviewStageEditor {
         let rotate = action("Swap width and height", "StageRotate");
         row(&body, "Orientation", &rotate);
         let theme = picker("StageTheme", "Stage theme");
-        for value in ["Light", "Dark", "Application theme"] {
-            item(&theme, value);
+        let themes = PreviewTheme::options(initial.environment.theme);
+        for value in &themes {
+            item(&theme, value.label());
         }
-        theme.set_selected_index(match initial.environment.theme {
-            PreviewTheme::Light => 0,
-            PreviewTheme::Dark => 1,
-            PreviewTheme::Inherit => 2,
-        });
+        theme.set_selected_index(themes.iter().position(|value| *value == initial.environment.theme).unwrap_or_default() as i32);
         row(&body, "Theme", &theme);
         let flow = picker("StageDirection", "Stage reading direction");
         for value in ["Inherited", "Left to right", "Right to left"] {
@@ -245,6 +249,8 @@ impl PreviewStageEditor {
         for value in [&design_data, &pinned, &auto_update] {
             body.children().add(value.clone().upcast::<Control>());
         }
+        let design_fixture = picker("StageDesignFixture", "Design fixture");
+        row(&body, "Design fixture", &design_fixture);
         let state_title = label("Visual states");
         state_title.set_font_weight(FontWeight::SemiBold);
         state_title.set_margin(Thickness::new(0.0, 8.0, 0.0, 0.0));
@@ -305,9 +311,12 @@ impl PreviewStageEditor {
             width,
             height,
             theme,
+            themes,
             flow,
             mode,
             design_data,
+            design_fixture,
+            fixtures: RefCell::new(Vec::new()),
             pinned,
             auto_update,
             state_host,
@@ -322,6 +331,7 @@ impl PreviewStageEditor {
         });
         editor.rebuild_targets(Some(&initial.target));
         editor.rebuild_states(&initial.states);
+        editor.rebuild_fixtures(initial_fixture.as_deref());
         editor.refresh_layout_captions();
         editor.guard.set(false);
         let weak = Rc::downgrade(&editor);
@@ -338,6 +348,7 @@ impl PreviewStageEditor {
                     editor.retained_states.borrow_mut().clear();
                     editor.rebuild_targets(None);
                     editor.rebuild_states(&[]);
+                    editor.rebuild_fixtures(None);
                     editor.guard.set(false);
                 }
             }
@@ -497,6 +508,34 @@ impl PreviewStageEditor {
             .set_is_visible(self.target.selected_index() > 0);
     }
 
+    fn rebuild_fixtures(&self, selected: Option<&str>) {
+        let mut fixtures = self
+            .selected_source()
+            .and_then(|source| source.fixture_options().ok())
+            .unwrap_or_default();
+        self.design_fixture.items().clear();
+        item(&self.design_fixture, "View default");
+        for name in &fixtures {
+            item(&self.design_fixture, name);
+        }
+        let index = selected.map_or(0, |name| {
+            fixtures
+                .iter()
+                .position(|candidate| candidate == name)
+                .map_or_else(
+                    || {
+                        item(&self.design_fixture, &format!("{name} (unavailable)"));
+                        fixtures.push(name.into());
+                        fixtures.len()
+                    },
+                    |index| index + 1,
+                )
+        });
+        self.design_fixture.set_selected_index(index as i32);
+        self.design_fixture.set_is_enabled(!fixtures.is_empty());
+        *self.fixtures.borrow_mut() = fixtures;
+    }
+
     fn rebuild_states(&self, selected: &[PreviewStageState]) {
         self.state_host.children().clear();
         self.states.borrow_mut().clear();
@@ -507,49 +546,28 @@ impl PreviewStageEditor {
             );
             return;
         };
-        let target_node = self
+        let target = self
             .targets
             .borrow()
             .get(self.target.selected_index().max(0) as usize)
-            .and_then(|target| match target {
-                PreviewStageTarget::Document => None,
-                PreviewStageTarget::Definition { anchor, .. } => {
-                    anchor.resolve(&source.document).ok()
-                }
-            });
+            .cloned()
+            .unwrap_or_default();
         let mut rows = Vec::new();
-        for group in VisualStateGroup::read(&source.document) {
-            if target_node.is_some_and(|target| {
-                !source
-                    .document
-                    .ast()
-                    .subtree(target)
-                    .any(|node| node.id == group.owner)
-            }) {
-                continue;
-            }
-            let Ok(owner) = PreviewSourceAnchor::capture(&source.document, group.owner) else {
-                continue;
-            };
-            let owner_name = source
-                .document
-                .ast()
-                .node(group.owner)
-                .map(|node| node.xaml_name().unwrap_or(node.local_name()))
-                .unwrap_or("Control");
-            let control = picker("", &format!("{owner_name} · {} visual state", group.name));
+        for options in crate::preview_stage_state_options::options(&source.document, &target) {
+            let crate::PreviewStageStateOptions {
+                owner,
+                owner_name,
+                group,
+                states: mut values,
+            } = options;
+            let control = picker("", &format!("{owner_name} · {group} visual state"));
             item(&control, "Authored appearance");
-            let mut values = group
-                .states
-                .iter()
-                .map(|state| state.name.clone())
-                .collect::<Vec<_>>();
             for value in &values {
                 item(&control, value);
             }
             let selection = selected
                 .iter()
-                .find(|state| state.owner == owner && state.group == group.name);
+                .find(|state| state.owner == owner && state.group == group);
             let index = if let Some(selected) = selection {
                 if let Some(index) = values.iter().position(|value| value == &selected.state) {
                     index + 1
@@ -564,12 +582,12 @@ impl PreviewStageEditor {
             control.set_selected_index(index as i32);
             row(
                 &self.state_host,
-                &format!("{owner_name}\n{}", group.name),
+                &format!("{owner_name}\n{group}"),
                 &control,
             );
             rows.push(StateChoice {
                 owner,
-                group: group.name,
+                group,
                 values,
                 picker: control,
             });
@@ -591,6 +609,10 @@ impl PreviewStageEditor {
     }
 
     pub fn value(&self) -> Result<PreviewStageConfiguration, String> {
+        Ok(self.spec()?.configuration)
+    }
+
+    pub fn spec(&self) -> Result<PreviewStageSpec, String> {
         let source_uri = self
             .source_uris
             .get(
@@ -649,7 +671,7 @@ impl PreviewStageEditor {
                 });
             }
         }
-        let value = PreviewStageConfiguration {
+        let configuration = PreviewStageConfiguration {
             name: self.name.text().unwrap_or_default().trim().to_owned(),
             source_uri,
             target,
@@ -663,11 +685,7 @@ impl PreviewStageEditor {
             environment: PreviewEnvironment {
                 width: number(&self.width, "width")?,
                 height: number(&self.height, "height")?,
-                theme: match self.theme.selected_index() {
-                    0 => PreviewTheme::Light,
-                    1 => PreviewTheme::Dark,
-                    _ => PreviewTheme::Inherit,
-                },
+                theme: self.themes.get(self.theme.selected_index() as usize).copied().unwrap_or(PreviewTheme::Inherit),
                 flow_direction: match self.flow.selected_index() {
                     1 => PreviewFlowDirection::LeftToRight,
                     2 => PreviewFlowDirection::RightToLeft,
@@ -684,6 +702,13 @@ impl PreviewStageEditor {
                 PreviewStageMode::Select
             },
         };
+        let value = PreviewStageSpec {
+            configuration,
+            design_fixture: usize::try_from(self.design_fixture.selected_index())
+                .ok()
+                .and_then(|index| index.checked_sub(1))
+                .and_then(|index| self.fixtures.borrow().get(index).cloned()),
+        };
         value.validate()?;
         Ok(value)
     }
@@ -692,6 +717,10 @@ impl PreviewStageEditor {
         &self,
         callback: impl Fn(PreviewStageConfiguration) -> Result<(), String> + 'static,
     ) {
+        self.on_apply_spec(move |spec| callback(spec.configuration));
+    }
+
+    pub fn on_apply_spec(&self, callback: impl Fn(PreviewStageSpec) -> Result<(), String> + 'static) {
         *self.apply.borrow_mut() = Some(Rc::new(callback));
     }
     pub fn on_close(&self, callback: impl Fn() + 'static) {
@@ -701,7 +730,7 @@ impl PreviewStageEditor {
         if self.retired.get() {
             return Err("This stage editor is closed; reopen it to edit the stage".into());
         }
-        let result = self.value().and_then(|value| {
+        let result = self.spec().and_then(|value| {
             self.apply
                 .borrow()
                 .clone()

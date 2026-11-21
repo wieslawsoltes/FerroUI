@@ -1,6 +1,10 @@
 //! Source-backed independent animation programs. Identity is the document's stable Animation
 //! syntax ID; display names are ordinary XML comments, so generated markup needs no designer
 //! runtime types and unknown payloads remain fully editable.
+mod authoring;
+mod clip_edit;
+pub use clip_edit::{AnimationClipEdit, AnimationClipPlan};
+
 use crate::{require, AnimationError, AnimationImport, ImportOptions, Result, Timeline};
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind, SourceSpan};
 use serde::{Deserialize, Serialize};
@@ -9,6 +13,36 @@ use std::collections::BTreeSet;
 pub const NATIVE_XMLNS: &str = "https://github.com/ferroui";
 const NAME_MARKER: &str = "ferroui-designer-program:";
 const ID_MARKER: &str = "ferroui-designer-program-id:";
+
+/// Source identity shared by named animations in the designer's source codecs.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AnimationProgramIdentity {
+    name: String,
+    key: uuid::Uuid,
+}
+
+impl AnimationProgramIdentity {
+    pub fn new(name: &str, key: Option<&str>) -> Result<Self> {
+        validate_name(name)?;
+        let key = match key {
+            Some(key) => uuid::Uuid::parse_str(key)
+                .map_err(|_| AnimationError("Invalid animation program identity".into()))?,
+            None => uuid::Uuid::new_v4(),
+        };
+        Ok(Self { name: name.into(), key })
+    }
+
+    pub fn name(&self) -> &str { &self.name }
+
+    pub fn key(&self) -> String { self.key.to_string() }
+
+    /// Attach the existing XAML designer annotations to a projected animation.
+    pub fn annotate_xaml(&self, xaml: &mut String) {
+        if let Some(offset) = xaml.find('>') {
+            xaml.insert_str(offset + 1, &format!("<!--{ID_MARKER}{}-->{}", self.key, name_marker(&self.name)));
+        }
+    }
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimationProgram {
@@ -30,6 +64,10 @@ pub struct AnimationProgram {
 impl AnimationProgram {
     pub fn primary_target(&self) -> NodeId {
         self.targets.first().copied().unwrap_or(self.owner)
+    }
+
+    pub fn has_project_codec(&self) -> bool {
+        self.codec.as_deref().is_some_and(|id| id != NativeAnimationCodec.id())
     }
 }
 
@@ -53,7 +91,7 @@ pub struct AnimationCodecRegistry {
 impl Default for AnimationCodecRegistry {
     fn default() -> Self {
         Self {
-            codecs: vec![Box::new(NativeCodec)],
+            codecs: vec![Box::new(NativeAnimationCodec)],
         }
     }
 }
@@ -64,6 +102,9 @@ impl AnimationCodecRegistry {
     }
     pub fn codec_ids(&self) -> impl Iterator<Item = &str> {
         self.codecs.iter().map(|codec| codec.id())
+    }
+    pub fn has_project_codecs(&self) -> bool {
+        self.codecs.iter().any(|codec| codec.id() != NativeAnimationCodec.id())
     }
     pub fn decode(&self, program: &mut AnimationProgram, source: &str, options: &ImportOptions) {
         program.timeline = None;
@@ -96,6 +137,17 @@ impl AnimationCodecRegistry {
         original: &str,
         timeline: &Timeline,
     ) -> Result<String> {
+        self.encode_program(program, original, timeline, false)
+    }
+
+    fn encode_program(
+        &self,
+        program: &AnimationProgram,
+        original: &str,
+        timeline: &Timeline,
+        authored_keys: bool,
+    ) -> Result<String> {
+        timeline.validate()?;
         let id = program.codec.as_deref().ok_or_else(|| {
             AnimationError("Select a codec or edit this opaque program's source".into())
         })?;
@@ -104,7 +156,12 @@ impl AnimationCodecRegistry {
             .iter()
             .find(|codec| codec.id() == id)
             .ok_or_else(|| AnimationError(format!("Animation codec {id} is not registered")))?;
-        let generated = codec.encode(original, timeline, program.primary_target())?;
+        let target = program.primary_target();
+        let generated = if authored_keys && id == NativeAnimationCodec.id() {
+            retain_native_annotations(original, timeline.to_xaml_authored_keys(target)?)?
+        } else {
+            codec.encode(original, timeline, target)?
+        };
         let original_document = Document::new(original).map_err(core_error)?;
         let root = original_document
             .ast()
@@ -150,8 +207,10 @@ impl AnimationCodecRegistry {
         Ok(generated.source().into())
     }
 }
-struct NativeCodec;
-impl AnimationCodec for NativeCodec {
+/// The literal XAML codec. Project codecs can delegate native timing and
+/// namespace handling to it while translating their own value representation.
+pub struct NativeAnimationCodec;
+impl AnimationCodec for NativeAnimationCodec {
     fn id(&self) -> &str {
         "ferroui.native"
     }
@@ -185,42 +244,45 @@ impl AnimationCodec for NativeCodec {
         Timeline::import_xaml(document.source(), target, options)
     }
     fn encode(&self, original: &str, timeline: &Timeline, target: NodeId) -> Result<String> {
-        let mut generated = timeline.to_xaml(target)?;
-        // Timeline edits may normalize keyframe formatting, but authored comments are retained.
-        if let Ok(document) = Document::new(original) {
-            let comments = document
-                .ast()
-                .nodes()
-                .filter(|node| node.kind == NodeKind::Comment)
-                .map(|node| &original[node.span.start..node.span.end])
-                .collect::<Vec<_>>()
-                .join("\n");
-            if !comments.is_empty() {
-                let offset = generated.find('>').expect("generated XML") + 1;
-                generated.insert_str(offset, &format!("\n{comments}"));
-            }
-        }
-        let original_document = Document::new(original).map_err(core_error)?;
-        let original_root = original_document
-            .ast()
-            .node(original_document.ast().root())
-            .expect("root");
-        let mut output = Document::new(generated).map_err(core_error)?;
-        let edits = original_root
-            .attributes
-            .iter()
-            .filter(|attribute| attribute.is_namespace() || xaml_annotation(attribute))
-            .map(|attribute| Edit::SetAttribute {
-                node: output.ast().root(),
-                name: attribute.name.clone(),
-                value: attribute.value.clone(),
-            })
-            .collect::<Vec<_>>();
-        output
-            .apply("Retain animation identity", edits)
-            .map_err(core_error)?;
-        Ok(output.source().into())
+        retain_native_annotations(original, timeline.to_xaml(target)?)
     }
+}
+
+fn retain_native_annotations(original: &str, mut generated: String) -> Result<String> {
+    // Timeline edits may normalize keyframe formatting, but authored comments are retained.
+    if let Ok(document) = Document::new(original) {
+        let comments = document
+            .ast()
+            .nodes()
+            .filter(|node| node.kind == NodeKind::Comment)
+            .map(|node| &original[node.span.start..node.span.end])
+            .collect::<Vec<_>>()
+            .join("\n");
+        if !comments.is_empty() {
+            let offset = generated.find('>').expect("generated XML") + 1;
+            generated.insert_str(offset, &format!("\n{comments}"));
+        }
+    }
+    let original_document = Document::new(original).map_err(core_error)?;
+    let original_root = original_document
+        .ast()
+        .node(original_document.ast().root())
+        .expect("root");
+    let mut output = Document::new(generated).map_err(core_error)?;
+    let edits = original_root
+        .attributes
+        .iter()
+        .filter(|attribute| attribute.is_namespace() || xaml_annotation(attribute))
+        .map(|attribute| Edit::SetAttribute {
+            node: output.ast().root(),
+            name: attribute.name.clone(),
+            value: attribute.value.clone(),
+        })
+        .collect::<Vec<_>>();
+    output
+        .apply("Retain animation identity", edits)
+        .map_err(core_error)?;
+    Ok(output.source().into())
 }
 fn xaml_identity(attribute: &ferroui_designer_core::Attribute) -> bool {
     attribute.namespace_uri.as_deref() == Some("http://schemas.microsoft.com/winfx/2006/xaml")
@@ -236,6 +298,20 @@ fn xaml_annotation(attribute: &ferroui_designer_core::Attribute) -> bool {
 
 pub struct AnimationPrograms;
 impl AnimationPrograms {
+    /// App-hosted ordinary clips. Generated Rust states are exposed as whole
+    /// routes so a seek updates every target of the same transition.
+    pub fn scan_hosted(document: &Document) -> Vec<AnimationProgram> {
+        Self::scan(document)
+            .into_iter()
+            .filter(|program| !crate::states::is_projected_state_animation(document, program.id))
+            .collect()
+    }
+
+    /// XAML programs whose source and playback are owned by a visual state group.
+    pub fn is_state_managed(document: &Document, id: NodeId) -> bool {
+        crate::states::state_program_role(document, id).is_some()
+    }
+
     /// Enumerate every Animation, including resource, nested-style and custom payload programs.
     /// Hosts resolve selectors against their live tree and then invoke the codec registry.
     pub fn scan(document: &Document) -> Vec<AnimationProgram> {
@@ -357,7 +433,7 @@ impl AnimationPrograms {
     pub fn rename(document: &Document, id: NodeId, name: &str) -> Result<Vec<Edit>> {
         validate_name(name)?;
         let node = animation_node(document, id)?;
-        let comment = format!("<!--{NAME_MARKER}{}-->", encode_text(name));
+        let comment = name_marker(name);
         let edit = if let Some(marker) = node
             .children
             .iter()
@@ -761,6 +837,10 @@ pub(crate) fn named_source(source: &str, name: &str) -> Result<String> {
         .apply("Name animation", edits)
         .map_err(core_error)?;
     Ok(document.source().into())
+}
+
+pub(crate) fn name_marker(name: &str) -> String {
+    format!("<!--{NAME_MARKER}{}-->", encode_text(name))
 }
 /// Extract a standalone XML subtree with its inherited namespace declarations intact.
 pub fn fragment(document: &Document, id: NodeId) -> Result<String> {

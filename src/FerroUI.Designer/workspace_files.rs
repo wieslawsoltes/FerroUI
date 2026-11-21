@@ -1,6 +1,7 @@
 //! File commands use the host's existing native storage provider. No file-system or platform
 //! service is created by the embeddable designer.
 use super::*;
+use crate::rsx_document::RustDocument;
 use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerOpenOptions, FilePickerSaveOptions, IStorageFile,
 };
@@ -16,7 +17,7 @@ pub(super) struct PendingDocument {
 
 impl DesignerWorkspace {
     pub fn is_dirty(&self) -> bool {
-        self.session.borrow().document().source() != self.saved_source.borrow().as_str()
+        self.session.borrow().authored_source() != self.saved_source.borrow().as_str()
     }
 
     /// Open source at its URI, retaining the previous tab and its history. A newly opened
@@ -27,14 +28,18 @@ impl DesignerWorkspace {
         self.pending_source.set(false);
         #[cfg(feature = "collaboration-client")]
         self.disconnect_sharing();
-        self.session
-            .borrow_mut()
-            .open_document(source.clone(), uri)?;
+        if RustDocument::for_uri(&uri) {
+            let catalog = self.rust_catalog(&uri);
+            self.session.borrow_mut().open_rust_document(source.clone(), uri, catalog)?;
+        } else {
+            self.session.borrow_mut().open_document(source.clone(), uri)?;
+        }
         self.reset_canvas_guides();
         *self.file.borrow_mut() = None;
         *self.saved_source.borrow_mut() = source;
         self.runtime_selection.set(None);
         self.surface.set_interactive(false);
+        self.refresh_rust_modules()?;
         self.refresh(true);
         self.refresh_file_title();
         Ok(())
@@ -149,7 +154,7 @@ impl DesignerWorkspace {
                     .unwrap_or("Untitled.xaml")
                     .to_owned()
             });
-        let dirty = session.document().source() != self.saved_source.borrow().as_str();
+        let dirty = session.authored_source() != self.saved_source.borrow().as_str();
         self.root
             .get_control::<TextBlock>("DocumentTitle")
             .set_text(Some(&format!("{name}{}", if dirty { "  •" } else { "" })));
@@ -176,9 +181,13 @@ impl DesignerWorkspace {
             );
         }
         let mut options = FilePickerOpenOptions::new();
-        options.set_title(Some("Open FerroUI XAML".into()));
+        options.set_title(Some("Open FerroUI source".into()));
         options.set_allow_multiple(false);
-        options.set_file_type_filter(Some(vec![xaml_type()]));
+        options.set_file_type_filter(Some(vec![
+            FilePickerFileType::new(Some("FerroUI source")).with_patterns(&["*.xaml", "*.rs"]),
+            xaml_type(),
+            rust_type(),
+        ]));
         let files = provider
             .open_file_picker_async(options)
             .await
@@ -253,12 +262,13 @@ impl DesignerWorkspace {
             this.report(result);
         });
     }
-    /// Save the authored buffer, including incomplete XAML. Returns false on picker cancellation.
+    /// Save the authored buffer, including incomplete drafts. Returns false on picker cancellation.
     /// The saved snapshot is tracked independently of later editor changes, so a concurrent
     /// change is never mistakenly marked saved. Existing files are checked for external changes.
     pub async fn save_file(self: &Rc<Self>, save_as: bool) -> Result<bool, String> {
         let previous_preview_uri = self.session.borrow().document_uri().to_owned();
         let previous_uri = super::project::document_identity(self.session.borrow().document_uri())?;
+        let rust = self.session.borrow().uses_rust_source();
         let top = TopLevel::get_top_level(Some(&self.root))
             .ok_or("The designer must be attached to a window to save files")?;
         let provider = top.storage_provider();
@@ -278,13 +288,18 @@ impl DesignerWorkspace {
         let existing = file.is_some();
         if file.is_none() {
             if !provider.can_save() {
-                return Err("This host has no save picker; save DesignerSession::document().source() through the host.".into());
+                return Err("This host has no save picker; save DesignerSession::authored_source() through the host.".into());
             }
             let mut options = FilePickerSaveOptions::new();
-            options.set_title(Some("Save FerroUI XAML".into()));
-            options.set_default_extension(Some("xaml".into()));
-            options.set_suggested_file_name(Some("View.xaml".into()));
-            options.set_file_type_choices(Some(vec![xaml_type()]));
+            let (extension, name, file_type) = if rust {
+                ("rs", "view.rs", rust_type())
+            } else {
+                ("xaml", "View.xaml", xaml_type())
+            };
+            options.set_title(Some("Save FerroUI source".into()));
+            options.set_default_extension(Some(extension.into()));
+            options.set_suggested_file_name(Some(name.into()));
+            options.set_file_type_choices(Some(vec![file_type]));
             options.set_show_overwrite_prompt(Some(true));
             file = provider
                 .save_file_picker_async(options)
@@ -301,6 +316,9 @@ impl DesignerWorkspace {
         } else {
             previous_uri.clone()
         };
+        if saved_uri != previous_uri && RustDocument::for_uri(&saved_uri) != rust {
+            return Err("Keep the authored source extension when saving the file".into());
+        }
         if saved_uri != previous_uri && self.project.borrow().tabs.contains_key(&saved_uri) {
             return Err(
                 "That destination is already open in another tab; close or save that tab first"
@@ -327,7 +345,7 @@ impl DesignerWorkspace {
         let local_path: Option<String> = None;
         let source;
         if let Some(path) = local_path {
-            source = self.session.borrow().document().source().to_owned();
+            source = self.session.borrow().authored_source().to_owned();
             write_local(
                 std::path::Path::new(&path),
                 existing
@@ -340,7 +358,7 @@ impl DesignerWorkspace {
             // Providers may truncate a file while asynchronously opening its write stream.
             // Capture the intended document first; if the user switches tabs during the await,
             // finish that save and update its retained tab rather than saving another buffer.
-            source = self.session.borrow().document().source().to_owned();
+            source = self.session.borrow().authored_source().to_owned();
             let mut output = file.open_write_async().await.map_err(|e| e.to_string())?;
             output
                 .write_all(source.as_bytes())
@@ -350,10 +368,7 @@ impl DesignerWorkspace {
         if super::project::document_identity(self.session.borrow().document_uri())? == previous_uri
         {
             *self.saved_source.borrow_mut() = source.clone();
-            self.session
-                .borrow_mut()
-                .document
-                .mark_saved_snapshot(source.clone());
+            self.session.borrow_mut().mark_saved_source(source.clone());
             if saved_uri != previous_uri {
                 self.session
                     .borrow_mut()
@@ -368,9 +383,8 @@ impl DesignerWorkspace {
                 .tabs
                 .remove(&previous_uri)
                 .ok_or("The document was saved, but its tab was closed while storage was busy")?;
-            tab.saved = source.clone();
+            tab.mark_saved(source.clone());
             tab.file = Some(file);
-            tab.document.mark_saved_snapshot(source.clone());
             tab.preview_uri = saved_uri.clone();
             project.tabs.insert(saved_uri.clone(), tab);
         }
@@ -387,6 +401,9 @@ impl DesignerWorkspace {
             }
         }
         self.acknowledge_provider_save(&previous_uri, &saved_uri, &source)?;
+        if saved_uri != previous_uri && rust {
+            self.refresh_rust_catalog();
+        }
         self.refresh(true);
         self.refresh_file_title();
         Ok(true)
@@ -400,6 +417,10 @@ impl DesignerWorkspace {
 }
 fn xaml_type() -> Rc<FilePickerFileType> {
     FilePickerFileType::new(Some("FerroUI XAML")).with_patterns(&["*.xaml"])
+}
+
+fn rust_type() -> Rc<FilePickerFileType> {
+    FilePickerFileType::new(Some("Rust")).with_patterns(&["*.rs"])
 }
 
 // A local file is replaced only after its full candidate has reached storage. A failed write or

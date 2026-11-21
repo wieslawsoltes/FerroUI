@@ -5,6 +5,8 @@ Model Context Protocol (MCP), with newline-delimited JSON-RPC over stdio or Stre
 Neither crate starts a service merely by being linked. Applications must opt in and retain the
 handle returned by `ferroui_mcp::serve`. Property writes and input are disabled by default.
 
+The [FerroUI VS Code extension](../editors/vscode/README.md#drive-the-designer-with-mcp) publishes its editor designer through the same MCP transport. Its command **FerroUI: Connect to Running MCP Server** also attaches the existing endpoint of Designer Studio or an application, with the permissions chosen by that process.
+
 ## ControlCatalog and Claude Code
 
 Build the optional integration:
@@ -73,14 +75,21 @@ This is available in release builds only when the application includes the depen
 the call; there is no automatic release listener or debug listener. The catalog requires both
 `--features mcp` and a transport switch.
 
-Desktop lifetime windows are discovered on every request. For a custom lifetime, register each
-top level with the shared inspector of the UI thread:
+Classic desktop lifetime windows are discovered on every request. With a custom lifetime
+or the single-window `ferroui_view::launch` helpers, register each top level with the shared
+inspector of the UI thread:
 `ferroui_inspect::Inspector::shared().borrow_mut().register_root(&top_level)`. The MCP server and
 the [Chrome DevTools Protocol endpoint](devtools-cdp.md) use that one inspector, so a node has the
 same ID in both. The inspector holds only weak object/root references. IDs remain stable for the
 life of the object, are never reused, and return a tool error after the object is destroyed. Automation trees retain separate
 peer IDs, including peers without visual owners. Property and input tools map a control peer to
 its owner. A nonvisual peer still supports its automation patterns.
+
+When VS Code launches a debug app with **FerroUI: Run with Hot Reload**, a loopback HTTP
+inspector started through `serve` or `serve_with_tools` is also offered as **FerroUI Managed
+Application**. The extension consumes the private startup record and supplies the bearer
+to its MCP transport. The application still chooses its listener and permissions.
+[FerroUI for VS Code](../editors/vscode/README.md#drive-the-designer-with-mcp)
 
 For stdio, reserve stdout **before platform/application initialization**:
 
@@ -120,9 +129,10 @@ An application adds its own tools to the same transport, permissions, cancellati
   their endpoint across restarts; the provider stays responsible for its own identity and access
   rules.
 
-HTTP binds to loopback only, for these servers as for the inspector. A service server prints
-nothing at startup, so a persisted bearer never reaches a log; only an inspector server prints its
-URL and its fresh token to stderr.
+HTTP binds to loopback only. A service server does not report its bearer at startup. An
+inspector server prints its URL and fresh token to stderr for standalone attachment. When
+managed by VS Code, the extension consumes these values without forwarding them to its
+Hot Reload output.
 
 ## Tools and resources
 
@@ -132,6 +142,7 @@ URL and its fresh token to stderr.
 | `get_tree` | Visual, logical or automation snapshot; optional root, depth and property filters |
 | `find_elements` | Combined type, Name, automation ID, text substring and parsed FerroUI selector filters |
 | `get_properties` | Registered and attached properties, values, types, read-only flags, binding presence, effective priorities |
+| `get_property_trace` | The effective value of one property, its ordered contributors, and available authored source locations. Pass `node_id` and `property`. |
 | `set_property` | Validated local value or clear; booleans, numbers, null, and strings through framework converters |
 | `get_styles` | Applied style/theme/template/local value frames, selectors, active state, priority and setters |
 | `get_resources` | Scoped lookup of specified string keys, or local dictionary keys including type keys |

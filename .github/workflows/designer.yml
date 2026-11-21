@@ -12,17 +12,38 @@ on:
   pull_request:
     paths:
       - 'src/FerroUI.Designer*/**'
+      - 'src/Markup/FerroUI.Markup.Syntax/**'
+      - 'src/FerroUI.View/**'
+      - 'src/FerroUI.View.Macros/**'
+      - 'src/FerroUI.View.Syntax/**'
+      - 'src/FerroUI.ReloadProtocol/**'
+      - 'editors/vscode/**'
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
+      - 'samples/TodoWorkbench/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/designer.yml'
   schedule:
     - cron: '5 4 * * *'
   workflow_dispatch:
+    inputs:
+      installed-vsix:
+        description: Run installed VSIX smoke tests
+        type: boolean
+        default: false
+      installed-vsix-os:
+        description: Select hosts for installed VSIX smoke tests
+        type: choice
+        default: all
+        options:
+          - all
+          - ubuntu-24.04
+          - macos-15
+          - windows-latest
 
 concurrency:
-  group: designer-${{ github.ref }}
+  group: designer-${{ github.ref }}${{ inputs.installed-vsix && format('-vsix-{0}', inputs.installed-vsix-os) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -38,6 +59,7 @@ env:
 jobs:
   portable:
     name: Portable engines (${{ matrix.os }}, Rust ${{ matrix.rust }})
+    if: github.event_name != 'workflow_dispatch' || !inputs.installed-vsix
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -59,21 +81,29 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: clippy
       - name: Source preservation, transaction, language, timeline and convergence regressions
-        run: cargo test --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
+        run: cargo test --locked -p ferroui-markup-syntax -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server
       - name: Portable public APIs are warning-free
-        run: cargo clippy --locked -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
+        run: cargo clippy --locked -p ferroui-markup-syntax -p ferroui-designer-core -p ferroui-designer-project -p ferroui-designer-tools -p ferroui-designer-language -p ferroui-designer-rsx -p ferroui-view-syntax -p ferroui-designer-animation -p ferroui-designer-collaboration -p ferroui-designer-collaboration-host --features ferroui-designer-collaboration-host/client,ferroui-designer-collaboration-host/server --all-targets --no-deps -- -D warnings
 
   native:
     name: Native studio, MCP and render smoke
+    if: github.event_name != 'workflow_dispatch' || !inputs.installed-vsix
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # One native build feeds Studio and both VS Code hosts. Cold runners have
+    # reached 45 minutes while the minimum-version host is still running.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
         with:
           components: clippy
-      - name: Fonts for native rendering
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core
+      - name: Native fonts and the VS Code test display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core \
+            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64 \
+            libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev libxkbcommon-dev \
+            libgl1-mesa-dev libegl1-mesa-dev
       - name: Studio, MCP tools and render-smoke suites
         env:
           FERROUI_DESIGNER_RENDER_OUTPUT: ${{ github.workspace }}/designer-render
@@ -90,10 +120,82 @@ jobs:
           done
       - name: Release build without development hot reload
         run: cargo check --locked -p ferroui-designer --features mcp --release
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode/package-lock.json
+      - name: Build the VS Code backend tools and native fixture
+        run: |
+          cargo build --locked -p ferroui-designer-language -p ferroui-designer-preview \
+            -p todo-workbench --features todo-workbench/app-preview,todo-workbench/hot-reload,todo-workbench/mcp
+      - name: Current VS Code extension host
+        working-directory: editors/vscode
+        env:
+          FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
+        run: |
+          npm ci
+          xvfb-run -a npm test
+      - name: Minimum VS Code extension host (1.102.0)
+        working-directory: editors/vscode
+        env:
+          FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
+          FERROUI_TEST_VSCODE_VERSION: '1.102.0'
+        run: xvfb-run -a node test/run.mjs
       - name: Render evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: designer-native-renders
           path: designer-render
+          if-no-files-found: warn
+
+  packaged-vscode:
+    name: Installed VS Code package (${{ matrix.os }})
+    if: github.event_name == 'workflow_dispatch' && inputs.installed-vsix
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJSON(inputs.installed-vsix-os == 'all' && '["macos-15","ubuntu-24.04","windows-latest"]' || format('["{0}"]', inputs.installed-vsix-os)) }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: editors/vscode/package-lock.json
+      - name: Linux native dependencies and display
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core \
+            xvfb xauth libgtk-3-0t64 libnss3 libasound2t64 \
+            libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev libxkbcommon-dev \
+            libgl1-mesa-dev libegl1-mesa-dev
+      - name: Compile the release helpers for the workspace host
+        run: cargo build --locked --profile dist-unwind -p ferroui-designer-language -p ferroui-designer-preview
+      - name: Package the native VSIX
+        working-directory: editors/vscode
+        run: |
+          npm ci
+          npm run check
+          npm run build
+          npm run package:platform -- ../../target/dist-unwind ferroui-designer.vsix
+      - name: Install and smoke-test minimum and stable VS Code
+        if: runner.os != 'Linux'
+        working-directory: editors/vscode
+        run: npm run test:vsix -- ferroui-designer.vsix
+      - name: Install and smoke-test minimum and stable VS Code under Xvfb
+        if: runner.os == 'Linux'
+        working-directory: editors/vscode
+        run: xvfb-run -a npm run test:vsix -- ferroui-designer.vsix
+      - name: Package evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ferroui-vsix-${{ runner.os }}-${{ runner.arch }}
+          path: editors/vscode/ferroui-designer.vsix
           if-no-files-found: warn

@@ -47,12 +47,26 @@ pub trait Builder {
     type Output;
     /// Starts an element.
     fn builder() -> Self::Output;
+
+    #[doc(hidden)]
+    fn with_editor_source(output: Self::Output, _location: crate::RsxSourceInfo) -> Self::Output {
+        output
+    }
 }
 
 impl<T: ViewClass> Builder for T {
     type Output = El<T>;
     fn builder() -> El<T> {
         El::new()
+    }
+
+    #[inline]
+    fn with_editor_source(output: El<T>, location: crate::RsxSourceInfo) -> El<T> {
+        if crate::hot::record_source_locations() {
+            let location = location.with_resolver(crate::hot::source_location);
+            return output.prop(crate::RsxSourceInfo::location_property(), Some(location));
+        }
+        output
     }
 }
 
@@ -577,6 +591,14 @@ impl<T> El<T> {
             }
         });
         self.element.on_mount.push(attach);
+        self
+    }
+
+    /// Installs locally scoped visual state groups when this control is mounted.
+    pub fn visual_states(mut self, groups: impl IntoIterator<Item = crate::ViewStateGroup>) -> Self {
+        let groups: Vec<_> = groups.into_iter().collect();
+        crate::visual_states::validate(&groups);
+        self.element.on_mount.push(Rc::new(move |control| crate::visual_states::install(control, &groups)));
         self
     }
 

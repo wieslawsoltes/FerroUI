@@ -1,5 +1,6 @@
 //! Reusable staged design-data editor. The host owns acceptance, history and scope.
 use super::{DesignTimeEdit, DesignTimeProperty};
+use crate::design_fixture_editor::{DesignFixtureEditor, DesignFixtureEditorModel};
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::Orientation;
 use ferroui_base::media::{FontWeight, SolidColorBrush, TextWrapping};
@@ -29,6 +30,25 @@ impl DesignTimeEditor {
         apply: impl Fn(bool, Vec<DesignTimeEdit>) -> Result<(), String> + 'static,
         cancel: impl Fn() + 'static,
     ) -> Rc<Self> {
+        Self::build(model, None, move |enabled, _, edits| apply(enabled, edits), cancel)
+    }
+
+    /// Add named fixture editing and return the selected fixture with the accepted draft.
+    pub fn with_fixtures(
+        model: DesignTimeEditorModel,
+        fixtures: DesignFixtureEditorModel,
+        apply: impl Fn(bool, Option<String>, Vec<DesignTimeEdit>) -> Result<(), String> + 'static,
+        cancel: impl Fn() + 'static,
+    ) -> Rc<Self> {
+        Self::build(model, Some(fixtures), apply, cancel)
+    }
+
+    fn build(
+        model: DesignTimeEditorModel,
+        fixtures: Option<DesignFixtureEditorModel>,
+        apply: impl Fn(bool, Option<String>, Vec<DesignTimeEdit>) -> Result<(), String> + 'static,
+        cancel: impl Fn() + 'static,
+    ) -> Rc<Self> {
         let root = StackPanel::new();
         root.set_width(410.0);
         root.set_spacing(10.0);
@@ -51,6 +71,10 @@ impl DesignTimeEditor {
         let fields = StackPanel::new();
         fields.set_spacing(8.0);
         let mut properties = model.properties;
+        properties.retain(|property| {
+            property.name != ferroui_designer_core::design_fixtures::FIXTURES_ATTRIBUTE
+        });
+        let fixtures = fixtures.map(|model_| DesignFixtureEditor::append(&fields, model_, model.writable));
         let authored = properties
             .iter()
             .map(|property| property.name.clone())
@@ -165,6 +189,9 @@ impl DesignTimeEditor {
             let result = (|| {
                 let mut edits = Vec::new();
                 if model.writable {
+                    if let Some(fixtures) = &fixtures {
+                        edits.extend(fixtures.edit());
+                    }
                     for (name, object, checked, value) in &rows {
                         let value = (checked.is_checked() == Some(true))
                             .then(|| value.text().unwrap_or_default());
@@ -216,7 +243,7 @@ impl DesignTimeEditor {
                         edits.push(DesignTimeEdit::SampleItems { node, count: None });
                     }
                 }
-                apply(show.is_checked() == Some(true), edits)
+                apply(show.is_checked() == Some(true), fixtures.as_ref().and_then(|fixtures| fixtures.selected()), edits)
             })();
             if let Err(message) = result {
                 error.set_text(Some(&message));

@@ -1,6 +1,12 @@
 //! Native timeline track and ruler. Both share one time axis, so labels, keyframes
 //! and scrubbing remain aligned while zooming. A drag edits a ghost marker and
 //! commits once on release; capture loss or Escape leaves authored keys intact.
+mod clip;
+mod curve;
+mod easing_preview;
+mod markers;
+pub use easing_preview::EasingPreview;
+
 use ferroui_base::input::{
     IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
     MouseButton, PointerCaptureLostEventArgs, PointerEventArgs, PointerPressedEventArgs,
@@ -14,12 +20,12 @@ use ferroui_base::media::{
 };
 use ferroui_base::utilities::current_locale;
 use ferroui_base::{
-    FerroObjectImpl, Matrix, Point, Rect, Ref, StyledElementImpl, VisualImpl, ferro_class,
-    ferro_class_info, ferro_impl_classes, instantiate,
+    ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Matrix, Point,
+    Rect, Ref, StyledElementImpl, VisualImpl,
 };
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{Control, ControlImpl, ToolTip};
-use ferroui_designer_animation::Easing;
+use ferroui_designer_animation::PreviewMarker;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -36,7 +42,8 @@ enum Drag {
     Key {
         from: f64,
         to: f64,
-        start_x: f64,
+        start: Point,
+        value: Option<curve::ValueDrag>,
         keys: Vec<f64>,
         previous: Vec<f64>,
         previous_primary: Option<f64>,
@@ -61,6 +68,9 @@ pub struct TimelineLane {
     view_start: Cell<f64>,
     view_end: Cell<f64>,
     playhead: Cell<f64>,
+    preview_range: Cell<Option<ferroui_designer_animation::PreviewRange>>,
+    preview_markers: RefCell<Vec<PreviewMarker>>,
+    marker_action: RefCell<Option<markers::MarkerAction>>,
     ruler: Cell<bool>,
     highlighted: Cell<bool>,
     drag: RefCell<Option<Drag>>,
@@ -80,6 +90,8 @@ pub struct TimelineLane {
     insert_key: RefCell<Option<TimeAction>>,
     zoom: RefCell<Option<MoveAction>>,
     pan: RefCell<Option<TimeAction>>,
+    curve: RefCell<Option<curve::Plot>>,
+    clip: Cell<Option<clip::Band>>,
 }
 ferro_class!(TimelineLane:Control);
 ferro_class_info!(TimelineLane {
@@ -95,6 +107,9 @@ impl TimelineLane {
             view_start: Cell::new(0.0),
             view_end: Cell::new(1.0),
             playhead: Cell::new(0.0),
+            preview_range: Cell::new(None),
+            preview_markers: RefCell::new(Vec::new()),
+            marker_action: RefCell::new(None),
             ruler: Cell::new(false),
             highlighted: Cell::new(false),
             drag: RefCell::new(None),
@@ -114,6 +129,8 @@ impl TimelineLane {
             insert_key: RefCell::new(None),
             zoom: RefCell::new(None),
             pan: RefCell::new(None),
+            curve: RefCell::new(None),
+            clip: Cell::new(None),
         });
         this.set_height(36.0);
         this.set_min_width(120.0);
@@ -127,7 +144,7 @@ impl TimelineLane {
         this.ruler.set(true);
         this.set_height(34.0);
         AutomationProperties::set_name(&this, Some("Animation timeline ruler"));
-        ToolTip::set_tip(&this, Some(Rc::new("Drag to scrub. Ctrl+wheel zooms around the pointer; Shift+wheel pans. Home and End seek to timeline boundaries.".to_owned())));
+        ToolTip::set_tip(&this, Some(Rc::new("Click a marker to seek or drag to scrub. Ctrl+wheel zooms, Shift+wheel pans, and Home and End seek to the ruler boundaries.".to_owned())));
         this
     }
     pub fn is_ruler(&self) -> bool {
@@ -162,6 +179,7 @@ impl TimelineLane {
         );
         *self.keys.borrow_mut() = keys;
         self.set_playhead(self.playhead.get());
+        self.refresh_curve();
         self.invalidate_visual();
     }
     pub fn set_view(&self, start: f64, end: f64) {
@@ -174,6 +192,7 @@ impl TimelineLane {
             self.view_start.set(0.0);
             self.view_end.set(duration);
         }
+        self.refresh_curve();
         self.invalidate_visual();
     }
     pub fn set_playhead(&self, time: f64) {
@@ -183,6 +202,11 @@ impl TimelineLane {
             0.0
         };
         if self.playhead.replace(time) != time {
+            self.invalidate_visual();
+        }
+    }
+    pub(crate) fn set_preview_range(&self, range: Option<ferroui_designer_animation::PreviewRange>) {
+        if self.preview_range.replace(range) != range {
             self.invalidate_visual();
         }
     }
@@ -467,13 +491,18 @@ impl InputElementImpl for TimelineLane {
             return;
         }
         this.focus();
-        let x = event.get_position(Some(this)).x;
+        let position = event.get_position(Some(this));
+        let x = position.x;
         let time = this.time(x, event.key_modifiers());
         event.set_handled(true);
         if this.ruler.get() {
+            if let Some(name) = this.marker_at(position) {
+                if let Some(action) = this.marker_action.borrow().clone() { action(&name); }
+                return;
+            }
             this.capture_drag(Drag::Scrub, event.pointer());
             this.activate_time(time);
-        } else if let Some(from) = this.key_at(x) {
+        } else if let Some(from) = this.key_at_position(position) {
             let previous = this.selected_keys();
             let previous_primary = this.selected.get();
             this.select_key(from, event.key_modifiers());
@@ -483,11 +512,15 @@ impl InputElementImpl for TimelineLane {
             } else {
                 Vec::new()
             };
+            let value = (keys.len() == 1)
+                .then(|| this.start_curve_drag(from))
+                .flatten();
             this.capture_drag(
                 Drag::Key {
                     from,
                     to: from,
-                    start_x: x,
+                    start: position,
+                    value,
                     keys,
                     previous,
                     previous_primary,
@@ -528,14 +561,24 @@ impl InputElementImpl for TimelineLane {
         Self::parent_on_pointer_pressed(this, event);
     }
     fn on_pointer_moved(this: &Self, event: &PointerEventArgs) {
-        let x = event.get_position(Some(this)).x;
+        let position = event.get_position(Some(this));
+        let x = position.x;
         let time = this.time(x, event.key_modifiers());
-        this.hover.set(Some(this.time(x, KeyModifiers::ALT)));
+        this.hover.set(this.key_at_position(position));
         let scrub = {
             let mut drag = this.drag.borrow_mut();
             match drag.as_mut().filter(|_| this.owns_pointer(event.pointer())) {
-                Some(Drag::Key { to, .. }) => {
-                    *to = time;
+                Some(Drag::Key {
+                    from,
+                    to,
+                    start,
+                    value,
+                    ..
+                }) => {
+                    *to = this.dragged_time(*from, *start, position, event.key_modifiers());
+                    if let Some(value) = value {
+                        value.update(position.y - start.y, this.bounds().height);
+                    }
                     false
                 }
                 Some(Drag::Marquee { from, to, base, .. }) => {
@@ -578,15 +621,22 @@ impl InputElementImpl for TimelineLane {
         match drag {
             Some(Drag::Key {
                 from,
-                start_x,
+                start,
+                mut value,
                 keys,
                 additive,
                 ..
             }) => {
-                let x = event.get_position(Some(this)).x;
-                let to = this.time(x, event.key_modifiers());
-                if (x - start_x).abs() > 2.0 && (to - from).abs() > MIN_DURATION && !keys.is_empty()
+                let position = event.get_position(Some(this));
+                let to = this.dragged_time(from, start, position, event.key_modifiers());
+                if let Some(value) = &mut value {
+                    value.update(position.y - start.y, this.bounds().height);
+                }
+                if let Some(value) =
+                    value.filter(|value| value.changed() || (to - from).abs() > MIN_DURATION)
                 {
+                    this.commit_curve_drag(from, to, value.current);
+                } else if (to - from).abs() > MIN_DURATION && !keys.is_empty() {
                     this.move_selected(keys, to - from);
                 } else {
                     this.publish_selection(additive);
@@ -745,6 +795,16 @@ impl VisualImpl for TimelineLane {
             &BoxShadows::default(),
         );
         let clip = context.push_clip(bounds);
+        if let Some(range) = this.preview_range.get() {
+            let start = this.x(range.start.max(this.view_start.get()));
+            let end = this.x(range.end.min(this.view_end.get()));
+            if end > start {
+                let color = brush(0xff81b5fd);
+                context.draw_rectangle(Some(&color), None,
+                    Rect::new(start, (bounds.height - 3.0).max(0.0), end - start, 2.0),
+                    0.0, 0.0, &BoxShadows::default());
+            }
+        }
         let interval = tick_interval(this.span(), this.plot_width());
         let major = this.frame_rate.get().map_or(interval, |rate| {
             (interval * f64::from(rate)).ceil().max(1.0) / f64::from(rate)
@@ -772,7 +832,11 @@ impl VisualImpl for TimelineLane {
             let x = this.x(time).round() + 0.5;
             let is_major = (time / major - (time / major).round()).abs() < 0.00001;
             let y = if this.ruler.get() {
-                if is_major { 21.0 } else { 27.0 }
+                if is_major {
+                    21.0
+                } else {
+                    27.0
+                }
             } else {
                 0.0
             };
@@ -796,14 +860,18 @@ impl VisualImpl for TimelineLane {
                 context.draw_text(&text, Point::new(origin, 2.0));
             }
         }
-        if !this.ruler.get() {
+        if this.ruler.get() { this.draw_preview_markers(context, bounds); }
+        if let Some(band) = this.clip.get() {
+            this.draw_clip(context, bounds, band);
+        } else if !this.ruler.get() {
             let center = bounds.height * 0.5;
             let keys = this.keys.borrow();
             let start = keys.partition_point(|key| *key < this.view_start.get());
             let end = keys.partition_point(|key| *key <= this.view_end.get());
             let drag = this.drag.borrow();
             let selected_keys = this.selected_keys.borrow();
-            if let (Some(first), Some(last)) = (keys.first(), keys.last()) {
+            let curve = this.draw_curve(context, bounds);
+            if let Some((first, last)) = keys.first().zip(keys.last()).filter(|_| !curve) {
                 let left = this.x(*first).max(INSET);
                 let right = this.x(*last).min(bounds.width - INSET);
                 if right > left {
@@ -837,18 +905,14 @@ impl VisualImpl for TimelineLane {
                 );
             }
             for time in &keys[start..end] {
+                let y = this.key_y(*time).unwrap_or(center);
                 let selected = selected_keys
                     .binary_search_by(|key| key.total_cmp(time))
                     .is_ok();
                 let color = if matches!(drag.as_ref(), Some(Drag::Key { keys, .. }) if keys.binary_search_by(|key| key.total_cmp(time)).is_ok())
                 {
                     0xff5b526c
-                } else if selected
-                    || this
-                        .hover
-                        .get()
-                        .is_some_and(|hover| (this.x(hover) - this.x(*time)).abs() <= 8.0)
-                {
+                } else if selected || this.hover.get() == Some(*time) {
                     0xffffffff
                 } else {
                     0xffb6a2f6
@@ -856,19 +920,26 @@ impl VisualImpl for TimelineLane {
                 diamond(
                     context,
                     this.x(*time),
-                    center,
+                    y,
                     if selected { 7.0 } else { 5.5 },
                     0xff202126,
                 );
                 diamond(
                     context,
                     this.x(*time),
-                    center,
+                    y,
                     if selected { 5.5 } else { 4.5 },
                     color,
                 );
             }
-            if let Some(Drag::Key { from, to, keys, .. }) = drag.as_ref() {
+            if let Some(Drag::Key {
+                from,
+                to,
+                keys,
+                value,
+                ..
+            }) = drag.as_ref()
+            {
                 let minimum = keys.first().copied().unwrap_or(0.0);
                 let maximum = keys.last().copied().unwrap_or(0.0);
                 let delta = if keys.is_empty() {
@@ -879,11 +950,20 @@ impl VisualImpl for TimelineLane {
                 let start = keys.partition_point(|key| *key + delta < this.view_start.get());
                 let end = keys.partition_point(|key| *key + delta <= this.view_end.get());
                 for key in &keys[start..end] {
-                    diamond(context, this.x(*key + delta), center, 7.0, 0xff202126);
-                    diamond(context, this.x(*key + delta), center, 6.0, 0xffcabaf8);
+                    let y = value
+                        .as_ref()
+                        .and_then(|value| this.curve_y(value.current))
+                        .or_else(|| this.key_y(*key))
+                        .unwrap_or(center);
+                    diamond(context, this.x(*key + delta), y, 7.0, 0xff202126);
+                    diamond(context, this.x(*key + delta), y, 6.0, 0xffcabaf8);
                 }
                 let to = from + delta;
-                let text = text(&format!("{to:.3}s"), 10.0, 0xffffffff);
+                let caption = value.as_ref().map_or_else(
+                    || format!("{to:.3}s"),
+                    |value| format!("{to:.3}s  {}", curve::format_value(value.current)),
+                );
+                let text = text(&caption, 10.0, 0xffffffff);
                 context.draw_text(
                     &text,
                     Point::new(
@@ -926,107 +1006,6 @@ impl VisualImpl for TimelineLane {
     }
 }
 
-/// A small native graph of the incoming keyframe easing. Hosts can embed it beside
-/// their own editor; sampling follows the animation engine, including overshoot.
-#[repr(C)]
-pub struct EasingPreview {
-    base: Control,
-    easing: RefCell<Option<Easing>>,
-    samples: RefCell<Vec<f64>>,
-}
-ferro_class!(EasingPreview:Control);
-ferro_class_info!(EasingPreview {
-    new: EasingPreview::new
-});
-ferro_impl_classes!(EasingPreview:FerroObjectImpl,StyledElementImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl);
-impl EasingPreview {
-    pub fn new() -> Ref<Self> {
-        let this = instantiate(Self {
-            base: Control::construct(),
-            easing: RefCell::new(None),
-            samples: RefCell::new(Vec::new()),
-        });
-        this.set_width(48.0);
-        this.set_height(26.0);
-        this.set_easing(Some(Easing::Linear));
-        this
-    }
-    /// `None` represents an invalid draft and clears the curve, without touching
-    /// the document or silently displaying the previously accepted easing.
-    pub fn set_easing(&self, easing: Option<Easing>) {
-        let sampled = easing.as_ref().and_then(|curve| {
-            (0..=32)
-                .map(|index| curve.sample(f64::from(index) / 32.0))
-                .collect::<Result<Vec<_>, _>>()
-                .ok()
-        });
-        let valid = sampled.is_some();
-        *self.samples.borrow_mut() = sampled.unwrap_or_default();
-        let description = easing.as_ref().filter(|_| valid).map_or_else(
-            || "Invalid easing curve".to_owned(),
-            |curve| format!("Incoming easing: {}", curve.to_xaml()),
-        );
-        *self.easing.borrow_mut() = easing.filter(|_| valid);
-        AutomationProperties::set_name(self, Some(&description));
-        ToolTip::set_tip(self, Some(Rc::new(description)));
-        self.invalidate_visual();
-    }
-    pub fn easing(&self) -> Option<Easing> {
-        self.easing.borrow().clone()
-    }
-}
-impl VisualImpl for EasingPreview {
-    fn render(this: &Self, context: &mut DrawingContext) {
-        let bounds = Rect::from_size(this.bounds().size());
-        let fill = brush(0xff303138);
-        let border: Rc<dyn IPen> = Pen::from_uint32(0xff3b3d46, 1.0).into();
-        context.draw_rectangle(
-            Some(&fill),
-            Some(&border),
-            bounds.deflate(0.5),
-            4.0,
-            4.0,
-            &BoxShadows::default(),
-        );
-        let samples = this.samples.borrow();
-        let left = 5.0;
-        let top = 4.0;
-        let width = (bounds.width - 10.0).max(0.0);
-        let height = (bounds.height - 8.0).max(0.0);
-        if samples.is_empty() {
-            let invalid: Rc<dyn IPen> = Pen::from_uint32(0xffe89595, 1.0).into();
-            context.draw_line(
-                &invalid,
-                Point::new(left, top),
-                Point::new(left + width, top + height),
-            );
-            context.draw_line(
-                &invalid,
-                Point::new(left, top + height),
-                Point::new(left + width, top),
-            );
-            return;
-        }
-        let minimum = samples.iter().copied().fold(0.0, f64::min);
-        let maximum = samples.iter().copied().fold(1.0, f64::max);
-        let point = |index: usize, value: f64| {
-            Point::new(
-                left + width * index as f64 / (samples.len() - 1) as f64,
-                top + height * (1.0 - (value - minimum) / (maximum - minimum)),
-            )
-        };
-        let guide: Rc<dyn IPen> = Pen::from_uint32(0xff575465, 1.0).into();
-        context.draw_line(&guide, point(0, 0.0), point(samples.len() - 1, 1.0));
-        let curve: Rc<dyn IPen> = Pen::from_uint32(0xffb6a2f6, 1.5).into();
-        for index in 1..samples.len() {
-            context.draw_line(
-                &curve,
-                point(index - 1, samples[index - 1]),
-                point(index, samples[index]),
-            );
-        }
-    }
-}
 fn brush(color: u32) -> Rc<dyn IBrush> {
     SolidColorBrush::from_uint32(color).into()
 }

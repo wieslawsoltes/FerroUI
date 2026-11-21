@@ -564,8 +564,12 @@ pub(crate) fn pieces(tokens: &[TokenTree], path: &mut dyn FnMut(&[String]) -> St
                 if is_path_separator(tokens, index) {
                     // `::` after a name or `>` continues what is before it; anywhere else it
                     // starts a path from the crate root of the edition (`::std::rc::Rc`).
-                    let continues = matches!(result.last(), Some(Piece::Word(_)) | Some(Piece::Group(..)))
-                        || matches!(result.last(), Some(Piece::Mark(mark, _)) if *mark == ">");
+                    let continues = match result.last() {
+                        Some(Piece::Word(word)) => !KEYWORDS.contains(&word.as_str()) && !word.starts_with('\''),
+                        Some(Piece::Group(..)) => true,
+                        Some(Piece::Mark(mark, _)) => *mark == ">",
+                        None => false,
+                    };
                     if !continues && matches!(tokens.get(index + 2), Some(TokenTree::Ident(_))) {
                         let (segments, next) = path_segments(tokens, index + 2);
                         let mut rooted = vec![String::new()];
@@ -777,6 +781,8 @@ mod tests {
     fn type_text_is_canonical() {
         for (written, expected) in [
             ("Option < Rc < dyn IBrush > >", "Option<Rc<dyn IBrush>>"),
+            ("::std::rc::Rc<dyn ::library::Event>", "::std::rc::Rc<dyn ::library::Event>"),
+            ("&'static ::library::Event", "&'static ::library::Event"),
             ("& 'static FerroProperty", "&'static FerroProperty"),
             ("&'static [u8]", "&'static [u8]"),
             ("& mut [ T ; 4 ]", "&mut [T; 4]"),

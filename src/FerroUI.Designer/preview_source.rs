@@ -3,6 +3,8 @@
 //! Replacements preserve Unicode character columns and line breaks, including masked chrome
 //! settings, so runtime source locations still identify the original AST elements.
 use ferroui_designer_core::{Document, Node, SourceSpan};
+use ferroui_designer_language::Schema;
+use std::sync::OnceLock;
 
 pub(crate) struct PreviewSource {
     pub source: String,
@@ -44,6 +46,21 @@ pub(crate) fn project(document: &Document) -> Result<PreviewSource, String> {
                 blank(&source[attribute.span.start..attribute.span.end]),
             ));
         }
+    }
+    static SCHEMA: OnceLock<Schema> = OnceLock::new();
+    let schema = SCHEMA.get_or_init(Schema::ferroui);
+    let mut handlers = 0;
+    for node in document.ast().elements().filter(|node| node.kind == ferroui_designer_core::NodeKind::Element) {
+        for attribute in node.attributes.iter().filter(|attribute| !attribute.is_namespace()) {
+            if schema.attribute_property(document, node, attribute).is_some_and(|info| info.event) {
+                let span = attribute.span;
+                patches.push((span, blank(&source[span.range()])));
+                handlers += 1;
+            }
+        }
+    }
+    if handlers > 0 {
+        notices.push("Code-behind event handlers run in the application".into());
     }
     if window {
         rename(root, source, "Border", &mut patches);

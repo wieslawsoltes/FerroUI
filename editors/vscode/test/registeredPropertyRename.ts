@@ -1,0 +1,100 @@
+import { strict as assert } from 'node:assert';
+import * as vscode from 'vscode';
+import type { RegisteredRename } from '../src/registeredRename';
+import { until } from './wait';
+
+export async function verifyRegisteredPropertyRename(
+    xaml: vscode.TextDocument, rustUri: vscode.Uri, registryUri: vscode.Uri, descriptorUri: vscode.Uri,
+) {
+    const extension = vscode.extensions.getExtension<{ propertyRename: RegisteredRename }>('FerroUI.ferroui')!;
+    const { propertyRename } = await extension.activate();
+    const original = xaml.getText();
+    const sibling = vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredPropertyConsumer.xaml');
+    const consumer = [
+        '<StackPanel xmlns="https://github.com/ferroui" xmlns:local="using:Audit.Controls">',
+        '    <StackPanel.Styles>',
+        '        <Style Selector="Border &gt; :is(local|AuditCard).Caption[Caption=Caption]">',
+        '            <Setter Property="Caption" Value="🧭 More details"/>',
+        '        </Style>',
+        '    </StackPanel.Styles>',
+        '    <TextBlock Text="{Binding ((local:AuditCard)Tag)?.Caption}"/>',
+        '    <local:AuditCard Caption="Customer"/>',
+        '</StackPanel>',
+    ].join('\r\n');
+    await vscode.workspace.fs.writeFile(sibling, Buffer.from(consumer));
+    const rust = await vscode.workspace.openTextDocument(rustUri);
+    const registry = await vscode.workspace.openTextDocument(registryUri);
+    const rustOriginal = rust.getText();
+    const registryOriginal = registry.getText();
+    const rustDraft = new vscode.WorkspaceEdit();
+    rustDraft.insert(rust.uri, new vscode.Position(0, 0), '// Unsaved source 🪴\n');
+    rustDraft.insert(registry.uri, new vscode.Position(0, 0), '// The Caption label is still being reviewed. 🧭\n');
+    assert.ok(await vscode.workspace.applyEdit(rustDraft));
+    const draft = rust.getText();
+    const registryDraft = registry.getText();
+    const caret = xaml.positionAt(original.indexOf('Caption') + 1);
+    const position = { line: caret.line, character: caret.character };
+    const request = {
+        path: vscode.workspace.asRelativePath(xaml.uri, false),
+        folder: vscode.workspace.getWorkspaceFolder(xaml.uri)?.uri.toString(),
+        position, new_name: 'Heading',
+    };
+    const signal = AbortSignal.timeout(30_000);
+    const plan = await propertyRename.agent(request, signal);
+    assert.equal(plan.documents.length, 4);
+    assert.deepEqual(plan.unmapped, []);
+    assert.equal(plan.documents.find(document => document.edit.uri === rust.uri.toString())?.before, draft);
+    assert.equal(plan.documents.find(document => document.edit.uri === registry.uri.toString())?.before, registryDraft);
+    const nextConsumer = consumer.replace('More details', 'Full details');
+    await vscode.workspace.fs.writeFile(sibling, Buffer.from(nextConsumer));
+    await assert.rejects(propertyRename.agent({ ...request, review: plan.review }, signal), /changed/);
+    assert.equal(xaml.getText(), original);
+    assert.equal(rust.getText(), draft);
+
+    const savedMapping = await propertyRename.agent(request, signal);
+    const descriptor = await vscode.workspace.openTextDocument(descriptorUri);
+    const descriptorOriginal = descriptor.getText();
+    const method = descriptorOriginal.indexOf('"heading"');
+    const descriptorEdit = new vscode.WorkspaceEdit();
+    descriptorEdit.replace(descriptorUri, new vscode.Range(descriptor.positionAt(method), descriptor.positionAt(method + '"heading"'.length)), '"headingFromDraft"');
+    assert.ok(await vscode.workspace.applyEdit(descriptorEdit));
+    const descriptorDraft = descriptor.getText();
+    await assert.rejects(propertyRename.agent({ ...request, review: savedMapping.review }, signal), /changed/);
+
+    await vscode.window.showTextDocument(xaml, { viewColumn: vscode.ViewColumn.One });
+    await propertyRename.openReview(xaml, { version: xaml.version, position }, request.new_name);
+    await until(() => vscode.window.tabGroups.activeTabGroup.activeTab?.label.startsWith('Rename Caption → Heading') === true);
+    await vscode.commands.executeCommand('ferroui.propertyRenameReview.apply');
+    await until(() => xaml.getText().includes('Heading='));
+    const opened = await vscode.workspace.openTextDocument(sibling);
+    assert.equal(opened.getText(), nextConsumer
+        .replace('[Caption=', '[Heading=')
+        .replace('Property="Caption"', 'Property="Heading"')
+        .replace('?.Caption}', '?.Heading}')
+        .replace('AuditCard Caption=', 'AuditCard Heading='));
+    assert.equal(rust.getText(), draft.replace('Caption: String', 'Heading: String'));
+    const renamedMapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Heading: 'headingFromDraft' } });
+    assert.equal(registry.getText(), registryDraft.replace(', MAPPING)', `, r#"${renamedMapping}"#)`));
+    assert.equal(descriptor.getText(), descriptorDraft);
+    await vscode.window.showTextDocument(xaml);
+    await vscode.commands.executeCommand('undo');
+    await until(() => xaml.getText() === original && opened.getText() === nextConsumer
+        && rust.getText() === draft && registry.getText() === registryDraft);
+    const selector = opened.positionAt(nextConsumer.indexOf('[Caption=') + 2);
+    await until(async () => {
+        const [definition] = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeDefinitionProvider', opened.uri, selector) ?? [];
+        return definition?.uri.toString() === rust.uri.toString() && rust.getText(definition.range) === 'Caption';
+    });
+    const member = opened.positionAt(nextConsumer.indexOf('?.Caption') + 4);
+    const [bindingDefinition] = await vscode.commands.executeCommand<vscode.Location[]>('vscode.executeDefinitionProvider', opened.uri, member) ?? [];
+    assert.ok(bindingDefinition);
+    assert.equal(bindingDefinition.uri.toString(), rust.uri.toString());
+    assert.equal(rust.getText(bindingDefinition.range), 'Caption');
+    await vscode.window.showTextDocument(descriptor);
+    await vscode.commands.executeCommand('undo');
+    await until(() => descriptor.getText() === descriptorOriginal);
+    await vscode.window.showTextDocument(rust);
+    await vscode.commands.executeCommand('undo');
+    await until(() => rust.getText() === rustOriginal && registry.getText() === registryOriginal);
+    console.log('VS Code rejected a changed imported RSX mapping, used its CRLF draft in a property review and undid all four edited files');
+}

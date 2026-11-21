@@ -19,10 +19,13 @@ name = "ferroui-xaml-lsp"
 path = "main.rs"
 
 [dependencies]
+ferroui-build-scan = { workspace = true }
 ferroui-designer-core = { workspace = true }
 ferroui-designer-project = { workspace = true }
+ferroui-designer-tools = { workspace = true }
+ferroui-markup-syntax.workspace = true
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde_json = { workspace = true }
 
 [package.metadata.release]
 group = "tools"

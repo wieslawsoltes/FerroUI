@@ -4,11 +4,23 @@
 //! visual tools and automation. [`DesignerWorkspace`] is an optional embeddable view
 //! of that session. Neither starts a window, server or background transport.
 mod affine_manipulation;
+mod animation_clips;
+mod animation_geometry;
+mod animation_keyframe_authoring;
+mod animation_keyframe_transfer;
+mod animation_markers;
+mod animation_rsx_programs;
+mod animation_preview_pose;
+mod animation_preview_range;
+mod animation_playback_pose;
+mod animation_program_preview;
+#[cfg(test)]
+mod animation_playback_pose_tests;
 mod animation_runtime;
 mod animation_session;
 mod asset_toolbox;
+mod project_controls;
 mod chrome;
-mod canvas_guides;
 mod canvas_guide_overlay;
 mod canvas_guides_editor;
 mod collaboration;
@@ -17,6 +29,8 @@ mod component_session;
 mod definition_manipulation;
 mod definition_projection;
 mod definition_session;
+mod design_fixture_editor;
+mod design_records;
 mod design_time;
 mod native_types;
 mod design_time_samples;
@@ -29,7 +43,22 @@ mod icons;
 mod interaction_session;
 mod layer_state;
 mod layout_helper_renderer;
+mod preview_checks;
+mod column_authoring;
+mod included_source;
+mod item_template_authoring;
+mod rust_template_authoring;
+mod control_template_starter;
+mod item_template_copy;
+mod item_template_project;
+mod item_template_samples;
+mod item_template_scope;
+mod item_template_source;
+mod scoped_control_templates;
+pub use scoped_control_templates::ScopedControlTemplates;
+mod property_trace;
 mod preview_environment;
+mod preview_theme;
 mod preview_host;
 mod preview_prototype;
 mod preview_prototype_editor;
@@ -44,18 +73,40 @@ mod preview_stage_matrix_editor;
 #[cfg(test)]
 mod preview_stage_matrix_ui_tests;
 mod preview_stage_scenarios;
+mod preview_stage_state_options;
 mod preview_stage_editor;
 mod preview_stage_view;
 mod preview_source;
+mod preview_source_anchor;
+#[cfg(feature = "mcp")]
+mod property_binding_session;
 mod property_color_editor;
+mod style_composition;
+mod style_report;
+mod style_palette_comparison;
+mod scoped_palette;
+pub use scoped_palette::{PaletteEdit, ScopedPalette};
+mod scoped_style_fields;
+mod scoped_style_resources;
+mod scoped_styles;
+pub use scoped_styles::{ScopedStyleEdit, ScopedStyles};
+mod style_sources;
 mod property_controls;
 mod property_inspector_view;
 mod property_literals;
 mod property_transfer;
 mod property_transfer_editor;
 mod resource_editor;
+mod rsx_document;
+mod rsx_placement;
+mod rsx_session;
+mod rsx_style_authoring;
+pub use rsx_style_authoring::rust_style_report;
 mod runtime;
+mod runtime_include_sources;
+mod runtime_outline;
 mod selection_layout;
+mod selection_wrap;
 mod session;
 #[cfg(feature = "collaboration-client")]
 pub mod sharing;
@@ -66,9 +117,16 @@ mod workspace;
 
 pub use asset_toolbox::{
     AssetIcon, AssetToolbox, AssetViewMode, DesignerAsset, default_designer_assets,
+    project_designer_assets,
 };
+pub use project_controls::registered_designer_assets;
+pub use item_template_scope::ItemTemplateScopeSnapshot;
 pub use chrome::designer_chrome_style;
-pub use canvas_guides::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};
+pub use animation_keyframe_authoring::SampledKeyframe;
+pub use animation_rsx_programs::validate_rsx_animation_selector;
+pub use animation_preview_pose::TimelinePreviewPose;
+pub use animation_program_preview::TimelineTargetOverrides;
+pub use ferroui_designer_tools::{CanvasGuide, CanvasGuideAxis, CanvasGuideSettings};
 pub use canvas_guides_editor::CanvasGuidesEditor;
 pub use workspace::{CanvasGuideEditSnapshot, CanvasGuideViewSnapshot};
 pub use component_browser::{ComponentLibrary, ComponentLibraryFilter, ComponentLibraryItem};
@@ -78,6 +136,7 @@ pub use design_time::{
     DesignTimeEdit, DesignTimeEditor, DesignTimeEditorModel, DesignTimeProperty,
     DesignTimeSnapshot, plan_design_time_edits,
 };
+pub use design_fixture_editor::DesignFixtureEditorModel;
 pub use editors::{
     PropertyBindingDraft, PropertyBindingEditor, PropertyBindingOption, PropertyBindingSource,
     PropertyEditorContext, PropertyEditorFactory, PropertyEditorKind, PropertyEditorMetadata,
@@ -94,11 +153,12 @@ pub use focus_order::{
 };
 pub use focus_order_editor::FocusOrderEditor;
 pub use grid_track_editor::GridTrackEditor;
-pub use layer_state::{LayerCommand, LayerEditSnapshot, LayerState, LayerViewSnapshot};
+pub use layer_state::{LayerCommand, LayerEditSnapshot, LayerState, LayerViewSnapshot, LayerViewState};
 pub use preview_environment::{
     PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection,
-    PreviewSizePreset, PreviewTheme,
+    PreviewSizePreset,
 };
+pub use preview_theme::PreviewTheme;
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };
@@ -118,11 +178,13 @@ pub use preview_prototype_player::{
     PreviewPrototypePlayerView,
 };
 pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewAction};
+pub use preview_source_anchor::{PreviewSourceAnchor, PreviewSourceSegment};
 pub use preview_stages::{
-    MAX_PREVIEW_STAGES, PreviewSourceAnchor, PreviewSourceSegment, PreviewStageBoard,
-    PreviewStageConfiguration, PreviewStageId, PreviewStageInfo, PreviewStageManifest,
+    MAX_PREVIEW_STAGES, PreviewStageBoard,
+    PreviewStageConfiguration, PreviewStageDetails, PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageSet, PreviewStageSpec,
     PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
-    PreviewStageSource, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
+    PreviewStageSource, PreviewStageSourceMoves, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
+    PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget,
 };
 pub use preview_stage_editor::PreviewStageEditor;
 pub use preview_stage_export::{
@@ -145,13 +207,20 @@ pub use property_transfer::{
     PropertyPastePreview, PropertyTransferIssue,
 };
 pub use property_transfer_editor::PropertyTransferEditor;
+pub use preview_checks::{PreviewFinding, PreviewOverflow};
+pub use preview_stage_state_options::PreviewStageStateOptions;
 pub use resource_editor::{
     DefinitionCreationKind, DefinitionEditorCommand, DefinitionPreviewSettings,
     DefinitionPropertyField, DefinitionReference, ResourceDefinitionEditor,
     ResourceDefinitionModel,
 };
 pub use runtime::{PreviewStatus, RuntimeNode};
+pub use runtime_outline::{RuntimeOutlineMode, RuntimeOutlineRow};
+pub use authoring_placement::{PlacementOrigin, PlacementPlan, PlacementTarget};
+mod canvas_snapping;
+pub use canvas_snapping::{CanvasSnapAdjustment, CanvasSnapQuery};
 pub use selection_layout::{LayoutMatch, LayoutReset};
+pub use ferroui_designer_tools::WrapKind;
 pub use session::DesignerSession;
 pub use surface::{DesignGesture, DesignSurface};
 pub use timeline_lane::{EasingPreview, TimelineLane};
@@ -159,7 +228,7 @@ pub use viewport::{CanvasViewport, CanvasWheelMode};
 pub use workspace::shell::{NavigationPane, WorkspaceViewMode};
 pub use workspace::{
     CanvasLayerChoice, CanvasSelectionSnapshot, DesignerDefinitionAsset, DesignerWorkspace,
-    OutlineCommand, OutlineMode, PreviewPrototypePlaybackInfo,
+    OutlineCommand, OutlineMode, OutlinePlacement, PreviewPrototypePlaybackInfo,
 };
 
 /// The self-contained example opened by Designer Studio and usable by hosts.
@@ -174,6 +243,9 @@ mod tests;
 #[cfg(test)]
 mod workspace_authoring_tests;
 mod workspace_layout_helpers;
+#[cfg(feature = "mcp")]
+mod workspace_spacing;
+mod authoring_placement;
 #[cfg(test)]
 mod workspace_shell_tests;
 #[cfg(test)]
@@ -198,3 +270,5 @@ mod render_tests;
 
 #[cfg(test)]
 mod animation_integration_tests;
+#[cfg(test)]
+mod native_custom_animation_tests;

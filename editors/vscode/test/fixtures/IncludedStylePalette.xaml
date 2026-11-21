@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="StyleConsumer" Background="#FFF2F5FA">
+  <UserControl.Styles>
+    <StyleInclude Source="Styling/Shared Styles.xaml" />
+  </UserControl.Styles>
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Styling/Shared Palette.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <SolidColorBrush x:Key="AccountStatus" Color="#FF526579" />
+    </ResourceDictionary>
+  </UserControl.Resources>
+  <StackPanel Margin="24" Spacing="12">
+    <TextBlock Text="Account workspace" FontSize="24" Foreground="#FF203247" />
+    <Border x:Name="SharedStyleCard" Classes="account" CornerRadius="8" Padding="16">
+      <TextBlock Text="Customer accounts" Foreground="White" />
+    </Border>
+    <Border x:Name="SharedAccentCard" Background="{DynamicResource AccountAccent}" CornerRadius="8" Padding="16">
+      <TextBlock Text="Team accent" Foreground="White" />
+    </Border>
+    <Border x:Name="StatusCard" Background="{DynamicResource AccountStatus}" CornerRadius="8" Padding="16">
+      <TextBlock Text="Account status" Foreground="White" />
+    </Border>
+  </StackPanel>
+</UserControl>

@@ -1,18 +1,23 @@
-use ferroui_base::animation::{IClock, PlayState, SignedDuration};
+use crate::runtime_include_sources::ResourceSources;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
-use ferroui_base::reactive::IDisposable;
-use ferroui_base::reactive::{Disposable, IObservable, IObserver, Subscription};
-use ferroui_base::{BoxedValue, FerroObject, Rect, Ref, StyledElement, Visual, WeakRef};
+use ferroui_base::reactive::Subscription;
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
-use ferroui_designer_animation::Sample;
+use ferroui_designer_animation::{AnimationValue, Sample};
+use ferroui_designer_animation::native::FrozenPreviewClock;
 use ferroui_designer_core::{Document, NodeId};
+use ferroui_designer_project::{CompiledResources, LocalPreviewSources, PreviewIncludes, PreviewSourceBuffer, local_preview_sources_with_resources};
 use ferroui_inspect::{Inspector, TreeKind};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::collections::{BTreeMap, BTreeSet};
-use std::rc::Rc;
+use std::{rc::Rc, sync::Arc};
+
+#[path = "runtime_property_sources.rs"]
+mod property_sources;
+pub(crate) use property_sources::node_at_source_info;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_PREVIEW_OPTIONS: AtomicU64 = AtomicU64::new(1);
@@ -48,8 +53,11 @@ pub(crate) struct RuntimePreview {
     pub host: Ref<ContentControl>,
     uri: String,
     options: crate::preview_host::PreviewHostOptions,
+    fixture: Option<String>,
     options_epoch: u64,
     isolated: bool,
+    workspace: WorkspaceSources,
+    pub(crate) resource_sources: ResourceSources,
     native_window: Option<Ref<ferroui_controls::Window>>,
     window_projection: bool,
     pub(crate) definition_scope: Option<crate::DefinitionScope>,
@@ -65,26 +73,43 @@ pub(crate) struct RuntimePreview {
     reload_driver: Option<ReloadDriver>,
 }
 
+enum SourceMode {
+    Authored(WorkspaceSources),
+    Isolated(Option<crate::DefinitionScope>),
+}
+
+#[derive(Clone, Default)]
+struct WorkspaceSources {
+    root: Option<std::path::PathBuf>,
+    buffers: Vec<PreviewSourceBuffer>,
+    resources: Option<Arc<CompiledResources>>,
+}
+
 impl RuntimePreview {
-    pub fn new(
-        host: Ref<ContentControl>,
-        uri: String,
-        document: &Document,
-    ) -> Result<Self, String> {
-        Self::new_with_options(host, uri, document, Default::default())
-    }
+    #[cfg(test)]
     pub fn new_with_options(
         host: Ref<ContentControl>,
         uri: String,
         document: &Document,
         options: crate::preview_host::PreviewHostOptions,
     ) -> Result<Self, String> {
-        Self::construct(host, uri, document, options, None, false)
+        Self::new_with_fixture(host, uri, document, options, None)
+    }
+
+    pub(crate) fn new_with_fixture(
+        host: Ref<ContentControl>,
+        uri: String,
+        document: &Document,
+        options: crate::preview_host::PreviewHostOptions,
+        fixture: Option<String>,
+    ) -> Result<Self, String> {
+        Self::construct(host, uri, document, options, fixture, SourceMode::Authored(WorkspaceSources::default()))
     }
 
     /// Independent secondary previews never publish a competing source overlay for
     /// the authored URI. They load a complete native candidate with the original
     /// resource base URI and registered factory request, in both debug and release.
+    #[cfg(test)]
     pub(crate) fn new_isolated(
         host: Ref<ContentControl>,
         uri: String,
@@ -92,7 +117,14 @@ impl RuntimePreview {
         options: crate::preview_host::PreviewHostOptions,
         scope: Option<crate::DefinitionScope>,
     ) -> Result<Self, String> {
-        Self::construct(host, uri, document, options, scope, true)
+        Self::new_isolated_with_fixture(host, uri, document, options, None, scope)
+    }
+
+    pub(crate) fn new_isolated_with_fixture(
+        host: Ref<ContentControl>, uri: String, document: &Document,
+        options: crate::preview_host::PreviewHostOptions, fixture: Option<String>, scope: Option<crate::DefinitionScope>,
+    ) -> Result<Self, String> {
+        Self::construct(host, uri, document, options, fixture, SourceMode::Isolated(scope))
     }
 
     fn construct(
@@ -100,17 +132,22 @@ impl RuntimePreview {
         uri: String,
         document: &Document,
         mut options: crate::preview_host::PreviewHostOptions,
-        scope: Option<crate::DefinitionScope>,
-        isolated: bool,
+        fixture: Option<String>,
+        mode: SourceMode,
     ) -> Result<Self, String> {
+        let (isolated, scope, workspace) = match mode {
+            SourceMode::Authored(workspace) => (false, None, workspace),
+            SourceMode::Isolated(scope) => (true, scope, WorkspaceSources::default()),
+        };
         FerroRuntimeXamlLoader::register();
         ferroui_markup_xaml::register_types();
+        ferroui_controls_treedatagrid::register_types();
         for register in &options.register_types {
             register();
         }
         options.configuration.design_mode = true;
         options.configuration.set_create_source_info(true);
-        host.set_clock(Some(Rc::new(DesignClock)));
+        host.set_clock(Some(Rc::new(FrozenPreviewClock)));
         #[cfg(debug_assertions)]
         let reload_driver = if isolated {
             None
@@ -129,6 +166,7 @@ impl RuntimePreview {
                 &host,
                 &uri,
                 options.clone(),
+                fixture.clone(),
                 use_factory.clone(),
             )?);
             let registered: Rc<dyn ferroui_hot_reload::ReloadTarget> = target.clone();
@@ -143,8 +181,11 @@ impl RuntimePreview {
             host,
             uri,
             options,
+            fixture,
             options_epoch: NEXT_PREVIEW_OPTIONS.fetch_add(1, Ordering::Relaxed),
             isolated,
+            workspace,
+            resource_sources: Default::default(),
             native_window: None,
             window_projection: false,
             definition_scope: scope,
@@ -167,7 +208,16 @@ impl RuntimePreview {
     /// A failed factory leaves the accepted graph and previous factory configuration intact.
     pub(crate) fn configure(
         &mut self,
+        options: crate::preview_host::PreviewHostOptions,
+        document: &Document,
+    ) -> Result<(), String> {
+        self.configure_with_fixture(options, self.fixture.clone(), document)
+    }
+
+    fn configure_with_fixture(
+        &mut self,
         mut options: crate::preview_host::PreviewHostOptions,
+        fixture: Option<String>,
         document: &Document,
     ) -> Result<(), String> {
         for register in &options.register_types {
@@ -179,13 +229,15 @@ impl RuntimePreview {
         let previous_target = self.reload_driver.as_ref().map(|driver| {
             driver
                 .target
-                .replace_configuration(&self.host, options.clone())
+                .replace_configuration(&self.host, options.clone(), fixture.clone())
         });
         let previous = std::mem::replace(&mut self.options, options);
+        let previous_fixture = std::mem::replace(&mut self.fixture, fixture);
         self.reload_document(document, true);
         if let PreviewStatus::Failed { message, .. } = &self.status {
             let error = message.clone();
             self.options = previous;
+            self.fixture = previous_fixture;
             #[cfg(debug_assertions)]
             if let (Some(driver), Some(previous_target)) = (&self.reload_driver, previous_target) {
                 driver.target.restore_configuration(previous_target);
@@ -220,8 +272,8 @@ impl RuntimePreview {
             self.definition_projection = None;
             self.reload_document(document, true);
         } else {
-            let mut preview =
-                Self::new_with_options(self.host.clone(), uri, document, self.options.clone())?;
+            let mut preview = Self::construct(self.host.clone(), uri, document, self.options.clone(),
+                self.fixture.clone(), SourceMode::Authored(self.workspace.clone()))?;
             preview.options_epoch = self.options_epoch;
             *self = preview;
         }
@@ -236,12 +288,17 @@ impl RuntimePreview {
         self.options.design_time_data
     }
 
-    pub(crate) fn set_design_time_enabled(
+    pub(crate) fn design_fixture(&self) -> Option<&str> {
+        self.fixture.as_deref()
+    }
+
+    pub(crate) fn configure_design_data(
         &mut self,
         enabled: bool,
+        fixture: Option<String>,
         document: &Document,
     ) -> Result<(), String> {
-        if enabled == self.options.design_time_data {
+        if enabled == self.options.design_time_data && fixture == self.fixture {
             return Ok(());
         }
         let status = self.status.clone();
@@ -249,7 +306,7 @@ impl RuntimePreview {
         let options_epoch = self.options_epoch;
         let mut options = self.options.clone();
         options.design_time_data = enabled;
-        if let Err(error) = self.configure(options, document) {
+        if let Err(error) = self.configure_with_fixture(options, fixture, document) {
             self.status = status;
             self.notices = notices;
             return Err(error);
@@ -293,7 +350,62 @@ impl RuntimePreview {
         Ok(())
     }
 
+    pub(crate) fn set_workspace_root(&mut self, root: std::path::PathBuf, document: &Document) {
+        self.workspace.root = Some(root);
+        if let Some(local) = self.workspace_sources(document) {
+            self.reload_local_sources(document, true, local);
+        } else {
+            self.set_include_documents(PreviewIncludes::default());
+        }
+    }
+
+    pub(crate) fn set_workspace_buffers(&mut self, buffers: Vec<PreviewSourceBuffer>) {
+        self.workspace.buffers = buffers;
+    }
+
+    pub(crate) fn set_workspace_resources(&mut self, resources: Option<Arc<CompiledResources>>) -> bool {
+        let resources = resources.filter(|resources| !resources.is_empty());
+        let changed = match (&self.workspace.resources, &resources) {
+            (Some(current), Some(next)) => !Arc::ptr_eq(current, next),
+            (None, None) => false,
+            _ => true,
+        };
+        self.workspace.resources = resources;
+        changed
+    }
+
     fn reload_document(&mut self, document: &Document, initialize: bool) {
+        if let Some(local) = self.workspace_sources(document) {
+            self.reload_local_sources(document, initialize, local);
+        } else {
+            self.reload_with_sources(document, initialize);
+            if self.workspace.root.is_some() {
+                self.set_include_documents(PreviewIncludes::default());
+            }
+        }
+    }
+
+    fn workspace_sources(&self, document: &Document) -> Option<LocalPreviewSources> {
+        let root = self.workspace.root.as_deref()?;
+        let sources = local_preview_sources_with_resources(
+            Some(root), &self.uri, document, &self.workspace.buffers, self.workspace.resources.as_deref(),
+        );
+        (!sources.accepted.is_empty() || !sources.unavailable.is_empty()).then_some(sources)
+    }
+
+    fn reload_local_sources(&mut self, document: &Document, initialize: bool, local: LocalPreviewSources) {
+        let snapshot = ferroui_markup_xaml::source_overlay::SourceSnapshot::new(local.accepted, local.unavailable);
+        snapshot.run(|| self.reload_with_sources(document, initialize));
+        self.set_include_documents(local.includes);
+    }
+
+    pub(crate) fn set_include_documents(&mut self, includes: PreviewIncludes) {
+        if matches!(self.status, PreviewStatus::Ready { .. }) {
+            self.resource_sources.0 = includes;
+        }
+    }
+
+    fn reload_with_sources(&mut self, document: &Document, initialize: bool) {
         let _design_mode =
             crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         self.clear_animation();
@@ -366,11 +478,19 @@ impl RuntimePreview {
         let mut candidate_design = None;
         let result = if let Some(scope) = self.definition_scope.as_ref().filter(|_| synthetic_scope)
         {
-            crate::definition_projection::project(document, scope).and_then(|projection| {
+            let projection = crate::item_template_samples::definition_fixture(
+                document,
+                scope,
+                self.options.design_time_data,
+                self.design_fixture(),
+            )
+            .and_then(|sample| crate::definition_projection::project(document, scope, sample.as_ref()));
+            projection.and_then(|projection| {
                 let design = crate::design_time::project(
                     &projection.document,
                     projection.document.valid_source(),
                     self.options.design_time_data,
+                    self.design_fixture(),
                 )?;
                 self.apply_source(
                     design
@@ -394,6 +514,7 @@ impl RuntimePreview {
                 document,
                 document.valid_source(),
                 self.options.design_time_data,
+                self.design_fixture(),
             )
             .and_then(|design| {
                 // The factory receives exact authored source. PreviewRequest::populate
@@ -412,6 +533,7 @@ impl RuntimePreview {
                     document,
                     &projection.source,
                     self.options.design_time_data,
+                    self.design_fixture(),
                 )?;
                 self.apply_source(
                     design
@@ -492,7 +614,7 @@ impl RuntimePreview {
         if !allow_root_factories {
             options.root_factories.clear();
         }
-        let candidate = options.control(source, &self.uri)?;
+        let candidate = options.control(source, &self.uri, self.design_fixture())?;
         if self.isolated
             && (candidate.parent().is_some()
                 || candidate.visual_parent().is_some()
@@ -530,12 +652,13 @@ impl RuntimePreview {
             &document,
             &projection.source,
             self.options.design_time_data,
+            self.design_fixture(),
         )?;
         let control = self.options.control(
             design
                 .as_ref()
                 .map_or(projection.source.as_str(), |design| design.document.valid_source()),
-            &self.uri,
+            &self.uri, self.design_fixture(),
         )?;
         if let Some(design) = design {
             let mut state = crate::design_time_samples::SampleState::default();
@@ -556,16 +679,20 @@ impl RuntimePreview {
         let _design_mode =
             crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         let document = Document::new(&source).map_err(|error| error.to_string())?;
-        let design =
-            crate::design_time::project(&document, &source, self.options.design_time_data)?;
-        let loaded = self.options.load(&source, &self.uri)?;
+        let design = crate::design_time::project(
+            &document,
+            &source,
+            self.options.design_time_data,
+            self.design_fixture(),
+        )?;
+        let loaded = self.options.load(&source, &self.uri, self.design_fixture())?;
         let sample_root = Ref::<Control>::from_xaml_object(&loaded);
         let window =
             if let Some(window) = Ref::<ferroui_controls::Window>::from_xaml_object(&loaded) {
                 window
             } else {
                 let control = Ref::<Control>::from_xaml_object(&loaded)
-                    .or_else(|| self.options.control(&source, &self.uri).ok())
+                    .or_else(|| self.options.control(&source, &self.uri, self.design_fixture()).ok())
                     .ok_or("The native preview requires a control or a configured resource view")?;
                 let window = ferroui_controls::Window::new();
                 window.set_content(Some(Control::boxed(control)));
@@ -601,7 +728,7 @@ impl RuntimePreview {
         self.host.set_clock(if interactive {
             None
         } else {
-            Some(Rc::new(DesignClock))
+            Some(Rc::new(FrozenPreviewClock))
         });
     }
 
@@ -707,14 +834,7 @@ impl RuntimePreview {
         // One scan of source positions, followed by indexed lookup for each runtime object.
         let mut names = BTreeMap::new();
         let mut locations: BTreeMap<(String, usize), Vec<(usize, NodeId)>> = BTreeMap::new();
-        let source_document = self.design_projection.as_ref().map_or_else(
-            || {
-                self.definition_projection
-                    .as_ref()
-                    .map_or(document, |projection| &projection.document)
-            },
-            |projection| &projection.document,
-        );
+        let source_document = self.preview_source_document(document);
         let mut elements = source_document.ast().elements().collect::<Vec<_>>();
         elements.sort_by_key(|node| node.span.start);
         let source = source_document.valid_source();
@@ -888,32 +1008,36 @@ impl RuntimePreview {
         rows
     }
 
+    pub(crate) fn prepare_animation_value(
+        &self,
+        target: NodeId,
+        name: &str,
+        value: &AnimationValue,
+    ) -> Result<(Ref<Visual>, &'static FerroProperty, BoxedValue), String> {
+        let object = self.visual(target).ok_or_else(|| format!("No live animation target {target}"))?;
+        let property = Inspector::property(&object, name)?;
+        if property.is_direct() || property.is_read_only() {
+            return Err(format!("{name} does not support an animation value layer"));
+        }
+        let value: BoxedValue = Rc::new(value.to_xaml());
+        let converted = ValueTypes::try_convert(
+            Some(&value),
+            ValueType::new(property.property_type(), property.property_type_name()),
+        )
+        .flatten()
+        .ok_or_else(|| format!("Cannot animate {name} with this value"))?;
+        if !property.is_valid_value(converted.as_any()) {
+            return Err(format!("Invalid animation value for {name}"));
+        }
+        Ok((object, property, converted))
+    }
+
     pub fn preview_samples(&mut self, samples: &[Sample]) -> Result<(), String> {
         // Validate every conversion before replacing the previous preview layer.
-        let mut staged = Vec::new();
-        for sample in samples {
-            let object = self
-                .visual(sample.target)
-                .ok_or_else(|| format!("No live animation target {}", sample.target))?;
-            let property = Inspector::property(&object, &sample.property)?;
-            if property.is_direct() || property.is_read_only() {
-                return Err(format!(
-                    "{} does not support an animation value layer",
-                    sample.property
-                ));
-            }
-            let value: BoxedValue = Rc::new(sample.value.to_xaml());
-            let converted = ValueTypes::try_convert(
-                Some(&value),
-                ValueType::new(property.property_type(), property.property_type_name()),
-            )
-            .flatten()
-            .ok_or_else(|| format!("Cannot animate {} with this value", sample.property))?;
-            if !property.is_valid_value(converted.as_any()) {
-                return Err(format!("Invalid animation value for {}", sample.property));
-            }
-            staged.push((object, property, converted));
-        }
+        let staged = samples
+            .iter()
+            .map(|sample| self.prepare_animation_value(sample.target, &sample.property, &sample.value))
+            .collect::<Result<Vec<_>, _>>()?;
         self.clear_animation();
         for (object, property, value) in staged {
             if let Some(guard) =
@@ -928,6 +1052,10 @@ impl RuntimePreview {
     pub fn clear_animation(&mut self) {
         self.animation_values.clear();
     }
+
+    pub(crate) fn has_animation_layer(&self) -> bool {
+        !self.animation_values.is_empty()
+    }
 }
 
 impl Drop for RuntimePreview {
@@ -935,19 +1063,4 @@ impl Drop for RuntimePreview {
         self.clear_animation();
         self.close_native();
     }
-}
-
-// Design mode owns time. Inherited runtime animations and transitions remain frozen until the
-// host explicitly enables interaction; timeline sampling uses disposable animation layers.
-struct DesignClock;
-impl IObservable<SignedDuration> for DesignClock {
-    fn subscribe(&self, _observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
-        Disposable::empty()
-    }
-}
-impl IClock for DesignClock {
-    fn play_state(&self) -> PlayState {
-        PlayState::Pause
-    }
-    fn set_play_state(&self, _value: PlayState) {}
 }

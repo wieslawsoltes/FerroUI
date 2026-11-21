@@ -66,7 +66,7 @@ impl DesignerSession {
     }
 }
 
-fn registered_type(document: &Document, node: NodeId, token: &str) -> Option<&'static TypeInfo> {
+pub(crate) fn registered_type(document: &Document, node: NodeId, token: &str) -> Option<&'static TypeInfo> {
     let (prefix, name) = token.split_once(':').unwrap_or(("", token));
     let namespaces = document.ast().namespaces(node);
     let uri = match namespaces.get(prefix) {
@@ -89,7 +89,7 @@ fn element_type(document: &Document, node: NodeId) -> Option<&'static TypeInfo> 
     registered_type(document, node, &element.name)
 }
 
-fn property_on_type(
+pub(crate) fn property_on_type(
     document: &Document,
     node: NodeId,
     type_: &'static TypeInfo,
@@ -106,8 +106,11 @@ fn property_on_type(
         .flatten()
 }
 
-fn setter_target_type(document: &Document, owner: NodeId) -> Option<&'static TypeInfo> {
+pub(crate) fn setter_target_type(document: &Document, owner: NodeId) -> Option<&'static TypeInfo> {
     let type_ = element_type(document, owner)?;
+    if ferroui_base::styling::Style::TYPE.is_assignable_from(type_) {
+        return crate::style_composition::selector_target(document, owner);
+    }
     if !ferroui_base::styling::ControlTheme::TYPE.is_assignable_from(type_) {
         return None;
     }

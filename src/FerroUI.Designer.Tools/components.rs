@@ -6,16 +6,41 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 #[path = "component_authoring.rs"]
-mod authoring;
+pub(crate) mod authoring;
 #[path = "component_resource_refs.rs"]
-mod references;
+pub(crate) mod references;
+#[path = "component_resource_graph.rs"]
+mod resource_graph;
+#[path = "component_resource_values.rs"]
+mod resource_values;
+#[path = "component_resource_copy.rs"]
+mod resource_copy;
+#[path = "component_resource_move.rs"]
+mod resource_move;
+#[path = "dictionary_extraction.rs"]
+pub(crate) mod extraction;
+#[path = "dictionary_context.rs"]
+mod dictionary_context;
+#[path = "item_templates.rs"]
+mod item_templates;
 pub use authoring::{
-    plan_component_action, plan_component_action_in_context, plan_property_object,
+    component_property_extractable, component_property_resource_owners, plan_component_action,
+    plan_component_action_in_context, plan_property_object,
 };
 pub use references::{
-    ComponentResourceContext, ComponentResourceResolution, component_resource_references,
-    component_resource_resolution, resolve_component_resource,
-    resolve_component_resource_in_context,
+    ComponentResourceContext, ComponentResourceResolution, ScopedResourceResolution, component_resource_references,
+    component_resource_location, component_resource_resolution, resolve_component_resource,
+    resolve_component_resource_in_context, scoped_resource_resolution,
+};
+pub use resource_graph::{
+    ComponentResourceLocation, ComponentResourceSources, IncludedResourceDocument,
+};
+pub use resource_values::{ResourceValue, ResourceValueStep, ResourceValueTrace};
+pub use resource_copy::ResourceCopySources;
+pub use resource_move::{AuthoredResourceScope, resource_move_entry, resource_move_scope, resource_move_fragment, link_resource_dictionary};
+pub use item_templates::{
+    ControlTemplatePart, ItemTemplateChange, ItemTemplateDeclaration, ItemTemplateMember, ItemTemplateResource,
+    ItemTemplateSlot, ItemTemplateValue, item_template_resources, keyed_item_template, keyed_template, template_resources,
 };
 
 /// Build a scope-qualified StaticResource/DynamicResource expression without treating
@@ -71,6 +96,37 @@ pub struct ComponentCatalog {
 }
 impl ComponentCatalog {
     pub fn from_document(document: &Document) -> Result<Self> {
+        let mut entries = Self::declarations(document)?;
+        let mut usages = BTreeMap::<NodeId, usize>::new();
+        for (_, _, _, resource) in references::all_references(document)? {
+            *usages.entry(resource).or_default() += 1;
+        }
+        for entry in &mut entries {
+            entry.usages = usages.get(&entry.node).copied().unwrap_or(0);
+        }
+        Ok(Self { entries })
+    }
+
+    /// Reusable definitions that can appear in a project Library. A document's
+    /// local Library can also show private styles and ordinary resources.
+    pub fn project_definitions(document: &Document) -> Result<Vec<ComponentEntry>> {
+        let root = document.ast().root();
+        let mut definitions = Self::declarations(document)?;
+        definitions.retain(|entry| match entry.kind {
+            ComponentKind::UserControl | ComponentKind::CustomControl => entry.node == root,
+            ComponentKind::ControlTheme | ComponentKind::DataTemplate => true,
+            ComponentKind::ControlTemplate => entry.target_type.is_some() || entry.key.is_some(),
+            ComponentKind::Style => entry
+                .target_type
+                .as_deref()
+                .is_some_and(|selector| !selector.contains('^')),
+            ComponentKind::Resource | ComponentKind::ResourceDictionary => false,
+        });
+        Ok(definitions)
+    }
+
+    /// Authored definitions without a reference scan. Usage counts are zero.
+    pub fn declarations(document: &Document) -> Result<Vec<ComponentEntry>> {
         valid_document(document)?;
         let mut entries = Vec::new();
         for node in document.ast().nodes_in_source_order() {
@@ -134,14 +190,7 @@ impl ComponentCatalog {
                 usages: 0,
             });
         }
-        let mut usages = BTreeMap::<NodeId, usize>::new();
-        for (_, _, _, resource) in references::all_references(document)? {
-            *usages.entry(resource).or_default() += 1;
-        }
-        for entry in &mut entries {
-            entry.usages = usages.get(&entry.node).copied().unwrap_or(0);
-        }
-        Ok(Self { entries })
+        Ok(entries)
     }
 }
 
@@ -243,17 +292,17 @@ pub fn component_fragment(document: &Document, node: NodeId) -> Result<String> {
         if prefix == "xml" {
             continue;
         }
-        let name = if prefix.is_empty() {
-            "xmlns".to_owned()
-        } else {
-            format!("xmlns:{prefix}")
-        };
+        let name = namespace_attribute(&prefix);
         if element.attribute(&name).is_none() {
             declarations.push_str(&format!(" {name}=\"{}\"", escape(&uri)));
         }
     }
     source.insert_str(element.name_span.end - element.span.start, &declarations);
     Ok(source)
+}
+
+fn namespace_attribute(prefix: &str) -> String {
+    if prefix.is_empty() { "xmlns".into() } else { format!("xmlns:{prefix}") }
 }
 
 /// Export a property's object/collection content with independent namespace closure.

@@ -1,19 +1,46 @@
 //! Schema-aware XAML text editing, navigation, refactoring and stdio LSP.
 mod binding;
+#[cfg(test)]
+mod asset_move_tests;
 mod design_support;
+#[cfg(test)]
+mod dictionary_extraction_tests;
+mod editing;
 mod formatting;
+mod handler_edit;
+#[cfg(test)]
+mod file_move_tests;
+mod handler_project;
+#[cfg(test)]
+mod handler_tests;
 mod line_index;
+mod xaml_locations;
 pub mod lsp;
+#[cfg(test)]
+mod project_library_tests;
+mod project_schema;
+#[cfg(test)]
+mod project_navigation_tests;
+#[cfg(test)]
+mod registered_type_rename_tests;
+#[cfg(test)]
+mod registered_style_rename_tests;
+#[cfg(test)]
+mod registered_rsx_rename_tests;
 mod references;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod rust_analyzer;
 mod schema;
 mod service;
-pub use formatting::FormattingOptions;
+pub use formatting::{AttributeLayout, FormattingOptions, SelfClosingSpace};
+pub use editing::QuickFix;
 pub use line_index::{LineIndex, Position, Range, TextChange, TextEdit};
+pub use xaml_locations::XamlLocations;
 pub use references::{
     identifier as is_xaml_identifier, name_occurrences, rewrite_names, scope_of as name_scope,
     NameOccurrence,
 };
-pub use schema::{ExtensionInfo, PropertyInfo, Schema, TypeInfo};
+pub use schema::{ExtensionInfo, ModelType, PropertyInfo, Schema, TypeInfo, FRAMEWORK_NAMESPACE};
 pub use service::*;
 use std::fmt;
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -50,3 +77,5 @@ mod design_time_tests;
 mod tests;
 #[cfg(test)]
 mod theme_resource_tests;
+mod events;
+pub use events::{event_handler_name, event_object_span, plan_event_handler, routed_events};

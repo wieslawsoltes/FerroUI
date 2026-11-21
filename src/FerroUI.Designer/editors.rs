@@ -18,6 +18,9 @@ mod binding_editor;
 mod metadata;
 #[path = "property_object_draft.rs"]
 mod object_draft;
+#[cfg(feature = "mcp")]
+#[path = "property_brush_draft.rs"]
+pub(crate) mod brush_draft;
 #[path = "property_typed_editors.rs"]
 mod typed;
 #[path = "property_value_workbench.rs"]
@@ -29,6 +32,8 @@ pub use metadata::{
 };
 pub use object_draft::PropertyObjectDraft;
 pub use binding_draft::{PropertyBindingDraft, PropertyBindingOption, PropertyBindingSource};
+#[cfg(feature = "mcp")]
+pub(crate) use binding_draft::{BINDING_MODES, BINDING_TRIGGERS, value_source as binding_value_source};
 pub use binding_editor::PropertyBindingEditor;
 pub use typed::PropertyVectorEditor;
 pub use workbench::binding_expression;

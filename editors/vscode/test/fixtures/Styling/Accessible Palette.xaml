@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:winui="using:FerroUI.Themes.WinUI">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <SolidColorBrush x:Key="PanelSurface" Color="#FFF0F4FB" />
+      <SolidColorBrush x:Key="PanelAccent" Color="#FFDCE7FA" />
+      <SolidColorBrush x:Key="PanelText" Color="#FF182846" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="PanelSurface" Color="#FF171C28" />
+      <SolidColorBrush x:Key="PanelAccent" Color="#FF24334B" />
+      <SolidColorBrush x:Key="PanelText" Color="#FFE4E9F5" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static winui:WinUITheme.HighContrast}">
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="Colors/High Contrast.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

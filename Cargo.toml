@@ -44,8 +44,10 @@ members = [
     "samples/PortableMedia.Browser",
     "src/FerroUI.Designer.Core",
     "src/FerroUI.Designer.Project",
+    "src/FerroUI.Designer.Preview",
     "src/FerroUI.Designer.Tools",
     "src/FerroUI.Designer.Language",
+    "src/FerroUI.Designer.Rsx",
     "src/FerroUI.Designer.Animation",
     "src/FerroUI.Designer.Collaboration",
     "src/FerroUI.Designer.Collaboration.Host",
@@ -85,6 +87,7 @@ members = [
     "src/Pretext/FerroUI.Pretext.Media",
     "samples/HotReload",
     "src/FerroUI.HotReload",
+    "src/FerroUI.ReloadProtocol",
     "src/FerroUI.HotPatch",
     "src/FerroUI.System",
     "src/ProTranslate/FerroUI.ProTranslate.Core",
@@ -104,6 +107,7 @@ members = [
     "src/FerroUI.Controls",
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
+    "src/FerroUI.View.Syntax",
     # The universal C ABI (#636, docs/c-abi.md).
     "src/FerroUI.CApi",
     # An Osprey Native host on FerroUI (docs/osprey-native-host.md).
@@ -119,6 +123,7 @@ members = [
     "src/StaticViewLocator/FerroUI.StaticViewLocator",
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros",
     "src/StaticViewLocator/FerroUI.StaticViewLocator.Build",
+    "src/Markup/FerroUI.Markup.Syntax",
     "src/Markup/FerroUI.Markup",
     "src/Markup/FerroUI.Markup.Xaml",
     "src/Markup/FerroUI.Markup.Xaml.WinUI",
@@ -230,6 +235,7 @@ members = [
     "samples/ViewInterop",
     "samples/ViewGallery",
     "samples/TodoMvc",
+    "samples/TodoWorkbench",
     "samples/CustomEffects",
     "samples/ReactiveDemoComponents",
     "samples/MiniMvvm",
@@ -334,12 +340,14 @@ ferroui-pretext-media = { version = "=0.6.0-preview.1", path = "src/Pretext/Ferr
 ferroui-designer-core = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Core" }
 ferroui-designer-project = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Project" }
 ferroui-designer-tools = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Tools" }
+ferroui-designer-rsx = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Rsx" }
 ferroui-designer-language = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Language" }
 ferroui-designer-animation = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Animation" }
 ferroui-designer-collaboration = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Collaboration" }
 ferroui-designer-collaboration-host = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer.Collaboration.Host" }
 ferroui-designer = { version = "=0.6.0-preview.1", path = "src/FerroUI.Designer", default-features = false }
 ferroui-hot-reload = { version = "=0.6.0-preview.1", path = "src/FerroUI.HotReload" }
+ferroui-reload-protocol = { version = "=0.6.0-preview.1", path = "src/FerroUI.ReloadProtocol", default-features = false }
 ferroui-hot-patch = { version = "=0.6.0-preview.1", path = "src/FerroUI.HotPatch" }
 ferroui-inspect = { version = "=0.6.0-preview.1", path = "src/FerroUI.Inspect" }
 ferroui-devtools = { version = "=0.6.0-preview.1", path = "src/FerroUI.DevTools", default-features = false }
@@ -361,6 +369,7 @@ ferroui-reactiveui-controls = { version = "=0.6.0-preview.1", path = "src/FerroU
 ferroui-base = { version = "=0.6.0-preview.1", path = "src/FerroUI.Base" }
 ferroui-controls = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls" }
 ferroui-view = { version = "=0.6.0-preview.1", path = "src/FerroUI.View" }
+ferroui-view-syntax = { version = "=0.6.0-preview.1", path = "src/FerroUI.View.Syntax" }
 ferroui-view-macros = { version = "=0.6.0-preview.1", path = "src/FerroUI.View.Macros" }
 ferroui-controls-color-picker = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.ColorPicker" }
 ferroui-controls-charts = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Charts" }
@@ -373,6 +382,7 @@ ferroui-controls-treedatagrid = { version = "=0.6.0-preview.1", path = "src/Tree
 ferroui-static-view-locator = { version = "=0.6.0-preview.1", path = "src/StaticViewLocator/FerroUI.StaticViewLocator" }
 ferroui-static-view-locator-macros = { version = "=0.6.0-preview.1", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Macros" }
 ferroui-static-view-locator-build = { version = "=0.6.0-preview.1", path = "src/StaticViewLocator/FerroUI.StaticViewLocator.Build" }
+ferroui-markup-syntax = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Syntax" }
 ferroui-markup = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-winui = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }

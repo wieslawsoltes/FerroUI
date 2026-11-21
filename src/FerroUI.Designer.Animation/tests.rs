@@ -1,4 +1,37 @@
 use super::*;
+
+#[test]
+fn scale_key_times_preserves_ordered_selection_values_and_native_precision() {
+    let mut timeline = numeric();
+    timeline.record(1, "Opacity", 0.5, AnimationValue::Number(0.25)).unwrap();
+    timeline.record(1, "Opacity", 1.0, AnimationValue::Number(0.5)).unwrap();
+    let keys: Vec<_> = [1.0, 0.5].into_iter().map(|time| KeyframeLocation {
+        target: 1, property: "Opacity".into(), time,
+    }).collect();
+    let (scaled, changed) = timeline.with_keyframe_edit(&keys, KeyframeGroupEdit::Scale {
+        pivot: 1.5, factor: 0.5,
+    }).unwrap();
+    assert_eq!(changed.iter().map(|key| key.time).collect::<Vec<_>>(), [1.25, 1.0]);
+    let track = scaled.track(1, "Opacity").unwrap();
+    assert_eq!(track.keyframes.iter().map(|key| key.time).collect::<Vec<_>>(), [0.0, 1.0, 1.25, 2.0]);
+    assert_eq!(track.keyframes[1].value, AnimationValue::Number(0.25));
+    assert_eq!(track.keyframes[2].value, AnimationValue::Number(0.5));
+    for factor in [0.0, -1.0, f64::INFINITY, 1e-9, 8.0] {
+        assert!(timeline.with_keyframe_edit(&keys, KeyframeGroupEdit::Scale { pivot: 1.5, factor }).is_err());
+    }
+}
+
+#[test]
+fn keyframe_presets_use_native_incoming_easing() {
+    let presets = keyframe_easing_presets();
+    assert!(!presets.is_empty());
+    for preset in presets {
+        let easing = Easing::parse(preset.value).unwrap();
+        assert!(matches!(easing, Easing::Linear | Easing::CubicBezier { .. }));
+        assert!(easing.preview_samples().unwrap().iter().all(|v| v.is_finite()));
+    }
+}
+
 fn numeric() -> Timeline {
     let mut timeline = Timeline::new(2.0).unwrap();
     timeline
@@ -40,6 +73,66 @@ fn delay_speed_and_fill_are_respected() {
     timeline.fill = FillMode::Both;
     assert_eq!(number(&timeline, 0.1), 0.0);
     assert_eq!(number(&timeline, 3.0), 1.0);
+}
+#[test]
+fn timing_changes_scale_keys_and_keep_untouched_fields() {
+    let mut original = numeric();
+    original.delay = 0.125;
+    original
+        .record(1, "Opacity", 0.5, AnimationValue::Number(0.33))
+        .unwrap();
+    let next = original
+        .with_timing(TimelineTimingEdit {
+            duration: Some(3.0),
+            repeat: Some(Repeat::Count(2)),
+            playback_direction: Some(PlaybackDirection::Alternate),
+            ..Default::default()
+        })
+        .unwrap();
+    assert_eq!(next.delay, 0.125);
+    assert_eq!(next.total_duration(), Some(6.125));
+    assert_eq!(next.tracks[0].keyframes[0].time, 0.0);
+    assert_eq!(next.tracks[0].keyframes[1].time, 0.75);
+    assert_eq!(next.tracks[0].keyframes[2].time, 3.0);
+    assert_eq!(next.tracks[0].keyframes[1].value, AnimationValue::Number(0.33));
+    assert_eq!(original.tracks[0].keyframes[1].time, 0.5);
+    assert!(next
+        .with_timing(TimelineTimingEdit {
+            duration: Some(0.0),
+            ..Default::default()
+        })
+        .is_err());
+    assert!(next
+        .with_timing(TimelineTimingEdit {
+            repeat: Some(Repeat::parse("9223372036854775808").unwrap()),
+            ..Default::default()
+        })
+        .is_err());
+}
+#[test]
+fn playhead_uses_the_native_clock_and_scrub_stays_in_edit_time() {
+    let timeline = numeric()
+        .with_timing(TimelineTimingEdit {
+            delay: Some(0.25),
+            delay_between_iterations: Some(0.5),
+            speed_ratio: Some(2.0),
+            repeat: Some(Repeat::Count(2)),
+            playback_direction: Some(PlaybackDirection::AlternateReverse),
+            fill: Some(FillMode::None),
+            ..Default::default()
+        })
+        .unwrap();
+    let clock = timeline.compile().unwrap();
+    assert_eq!(clock.total_duration(), Some(2.375));
+    assert_eq!(clock.playback_position(0.0).unwrap(), 2.0);
+    assert!(clock.sample(0.0).unwrap().is_empty());
+    assert_eq!(clock.elapsed_at_playhead(1.5).unwrap(), 0.375);
+    assert_eq!(clock.playback_position(0.375).unwrap(), 1.5);
+    assert_eq!(clock.playback_position(1.25).unwrap(), 0.0);
+    assert_eq!(clock.playback_position(1.625).unwrap(), 0.5);
+    assert_eq!(clock.playback_position(2.375).unwrap(), 2.0);
+    assert!(clock.sample(2.375).unwrap().is_empty());
+    assert_eq!(clock.scrub(0.5).unwrap()[0].value, AnimationValue::Number(0.25));
 }
 #[test]
 fn bezier_solves_x_and_rejects_invalid_controls() {

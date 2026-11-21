@@ -369,6 +369,28 @@ impl FerroXamlIlCompiler {
         self.add_source_info_transformer.set_create_source_info(value);
     }
 
+    #[cfg(any(feature = "runtime", feature = "compiler"))]
+    pub(crate) fn transform_source(
+        &self,
+        document: &mut XamlDocument,
+        source: &str,
+        file_path: Option<String>,
+        base_uri: Option<&str>,
+    ) -> XamlResult<()> {
+        let snapshot = self.create_source_info().then(|| Rc::new(XamlSourceStamp {
+            revision: ferroui_reload_protocol::fingerprint(source.as_bytes()),
+            file_path,
+            loader_uri: base_uri
+                .and_then(|uri| ferroui_base::utilities::UriRef::parse_absolute(uri).ok())
+                .filter(|uri| uri.scheme() == ferroui_base::platform::ASSET_SCHEME)
+                .map(|uri| std::sync::Arc::from(uri.as_str())),
+        }));
+        self.add_source_info_transformer.set_source_snapshot(snapshot);
+        let result = self.transform(document);
+        self.add_source_info_transformer.set_source_snapshot(None);
+        result
+    }
+
     pub fn is_design_mode(&self) -> bool {
         self.design_transformer.is_design_mode()
     }

@@ -28,6 +28,213 @@ impl Drop for Fixture {
         let _ = std::fs::remove_dir_all(&self.0);
     }
 }
+
+#[test]
+fn rust_modules_use_target_paths_and_exact_draft_text() {
+    let fixture = Fixture::new();
+    let root = fixture.write("src/app.rs", "mod shell { #[path = \"colors.rs\"] mod theme; }\r\nmod views;\r\n");
+    let theme = fixture.write("src/shell/colors.rs", "pub const VALUE: u32 = 20;\n");
+    let views = fixture.write("src/views.rs", "mod details;\n");
+    let details = fixture.write("src/views/details.rs", "fn view() {}\n");
+    let authored = "fn view() { /* 🧭 */ }\r\n";
+    let buffers = [PreviewSourceBuffer { uri: theme.clone(), source: Some("pub const VALUE: u32 = 42;\r\n".into()) }];
+    let layout = RustModuleSources::capture(&fixture.0, &fixture.0.join("src/app.rs"), &details, authored, &buffers).unwrap();
+    assert_eq!(layout.target().uri, root);
+    assert_eq!(layout.active().source.as_ref(), authored);
+    assert_eq!(layout.module_file(&root, &["views".into()]).unwrap().uri, views);
+    assert_eq!(layout.module_file(&views, &["details".into()]).unwrap().uri, details);
+    let palette = layout.module_file(&root, &["shell".into(), "theme".into()]).unwrap();
+    assert_eq!(palette.uri, theme);
+    assert_eq!(palette.source.as_ref(), buffers[0].source.as_deref().unwrap());
+    let alternate = file_uri(fixture.0.join("src/views/mod.rs")).unwrap();
+    assert!(layout.dependencies().any(|dependency| dependency == alternate));
+}
+
+#[test]
+fn rust_modules_require_unique_owned_declarations_and_current_sources() {
+    let fixture = Fixture::new();
+    let outside = Fixture::new();
+    let outside_source = outside.write("excluded.rs", "pub const VALUE: u32 = 0;\n");
+    let target = fixture.0.join("src/app.rs");
+    let source = format!("mod colors; #[cfg(feature = \"night\")] mod night; #[path = {:?}] mod outside;", outside.0.join("excluded.rs"));
+    let uri = fixture.write("src/app.rs", &source);
+    let colors = fixture.write("src/colors.rs", "pub const VALUE: u32 = 20;\n");
+    let night = fixture.write("src/night.rs", "pub const VALUE: u32 = 30;\n");
+    assert!(RustModuleSources::capture(&fixture.0, &target, &night, "", &[]).is_none());
+    assert!(RustModuleSources::capture(&fixture.0, &target, &outside_source, "", &[]).is_none());
+    let buffers = [PreviewSourceBuffer { uri: colors.clone(), source: None }];
+    assert!(RustModuleSources::capture(&fixture.0, &target, &uri, &source, &buffers).is_none());
+    fixture.write("src/colors/mod.rs", "pub const VALUE: u32 = 40;\n");
+    assert!(RustModuleSources::capture(&fixture.0, &target, &colors, "", &[]).is_none());
+}
+
+#[test]
+fn rust_palette_project_selects_a_unique_cargo_target() {
+    let fixture = Fixture::new();
+    fixture.write("Cargo.toml", "[package]\nname='review'\n");
+    let active = fixture.write("views.rs", "fn view() {}\n");
+    fixture.write("design.rs", "mod views;\n");
+    fixture.write("worker.rs", "fn main() {}\n");
+    let mut project = RustModuleProject {
+        manifest: fixture.0.join("Cargo.toml"),
+        targets: vec![fixture.0.join("worker.rs"), fixture.0.join("design.rs")],
+    };
+    let capture = |project: &RustModuleProject| project.capture(&fixture.0, &active, "fn view() {}\n", &[]);
+    let design = file_uri(fixture.0.join("design.rs")).unwrap();
+    assert_eq!(capture(&project).unwrap().target().uri, design);
+    project.targets.push(fixture.0.join("design.rs"));
+    assert_eq!(capture(&project).unwrap().target().uri, design);
+    fixture.write("worker.rs", "mod views; fn main() {}\n");
+    assert!(capture(&project).is_none());
+}
+
+#[test]
+fn preview_resources_resolve_transitive_files_with_owned_drafts_and_uri_aliases() {
+    let fixture = Fixture::new();
+    let source = r#"<Grid xmlns="https://github.com/ferroui"><ResourceInclude Source="Resources/Outer.xaml"/></Grid>"#;
+    let uri = fixture.write("View.xaml", source);
+    let outer = fixture.write("Resources/Outer.xaml", r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceInclude><ResourceInclude.Source>Color%20and%20size.xaml</ResourceInclude.Source></ResourceInclude></ResourceDictionary>"#);
+    let values = fixture.write("Resources/Color and size.xaml", "\u{feff}<ResourceDictionary/>");
+    let overrides = [PreviewSourceBuffer { uri: values.clone(), source: Some("<ResourceDictionary><!-- draft --></ResourceDictionary>".into()) }];
+    let document = ferroui_designer_core::Document::new(source).unwrap();
+    let graph = local_preview_sources(Some(&fixture.0), &uri, &document, &overrides);
+    assert_eq!(graph.dependencies.len(), 2);
+    assert!(graph.accepted.contains_key(&outer));
+    assert!(graph.accepted[&values].contains("<!-- draft -->"));
+    assert!(graph.unavailable.is_empty());
+    let include = document.ast().elements().find(|node| node.local_name() == "ResourceInclude").unwrap();
+    let (address, declared) = graph.includes.resolve(&uri, &document, include).unwrap();
+    assert_eq!((address, declared.uri.as_str()), (outer.as_str(), outer.as_str()));
+    let include = declared.document.ast().elements().find(|node| node.local_name() == "ResourceInclude").unwrap();
+    let (_, draft) = graph.includes.resolve(address, &declared.document, include).unwrap();
+    assert_eq!(draft.uri, values);
+    assert_eq!(draft.document.source(), graph.accepted[&values]);
+    let graph = local_preview_sources(Some(&fixture.0), &uri, &document, &[]);
+    assert_eq!(graph.accepted[&values], "<ResourceDictionary/>");
+}
+
+#[test]
+fn preview_resources_fence_cycles_missing_and_out_of_scope_paths() {
+    let fixture = Fixture::new();
+    let outside = Fixture::new();
+    let outside_uri = outside.write("Sensitive.xaml", "<ResourceDictionary/>");
+    let source = format!(r#"<Grid xmlns="https://github.com/ferroui" xmlns:other="urn:vendor"><ResourceInclude Source="A.xaml"/><ResourceInclude Source="Missing.xaml"/><ResourceInclude Source="{outside_uri}"/><other:ResourceInclude Source="Ignored.xaml"/></Grid>"#);
+    let uri = fixture.write("View.xaml", &source);
+    let cyclic = fixture.write("A.xaml", r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceInclude Source="A.xaml"/></ResourceDictionary>"#);
+    let graph = local_preview_sources(Some(&fixture.0), &uri, &ferroui_designer_core::Document::new(source).unwrap(), &[]);
+    assert!(graph.accepted.is_empty());
+    assert_eq!(graph.includes.documents().count(), 0);
+    assert!(graph.unavailable[&cyclic].contains("Circular"));
+    assert!(graph.unavailable[&outside_uri].contains("inside"));
+    let missing = file_uri(fixture.0.join("Missing.xaml")).unwrap();
+    assert!(graph.dependencies.contains(&missing));
+    assert_eq!(graph.unavailable.len(), 3);
+}
+
+#[test]
+fn hosted_preview_uses_runtime_addresses_and_watches_workspace_inputs() {
+    let fixture = Fixture::new();
+    let source = r#"<Border xmlns="https://github.com/ferroui"><ResourceInclude Source="Dictionaries/Outer.xaml"/><ResourceInclude Source="Embedded.xaml"/><ResourceInclude Source="../../Other/Private.xaml"/></Border>"#;
+    let uri = fixture.write("Authoring/View.xaml", source);
+    let outer = fixture.write("Authoring/Dictionaries/Outer.xaml", r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceInclude Source="../Color%20set.xaml"/></ResourceDictionary>"#);
+    let colors = fixture.write("Authoring/Color set.xaml", "<ResourceDictionary/>");
+    let embedded = file_uri(fixture.0.join("Authoring/Embedded.xaml")).unwrap();
+    let document = ferroui_designer_core::Document::new(source).unwrap();
+    let buffers = [PreviewSourceBuffer { uri: colors.clone(), source: Some("<ResourceDictionary><!-- draft --></ResourceDictionary>".into()) }];
+    let base = "ferres://Test/Packaged/View.xaml";
+    let graph = hosted_preview_sources(&fixture.0, &uri, base, &document, &buffers, None);
+    assert_eq!(graph.dependencies, [outer, colors.clone(), embedded].into_iter().collect());
+    assert_eq!(graph.accepted.len(), 2);
+    assert_eq!(graph.accepted["ferres://Test/Packaged/Color%20set.xaml"], buffers[0].source.as_deref().unwrap());
+    assert!(graph.uses_drafts);
+    assert!(graph.unavailable.is_empty());
+    let address = "ferres://Test/Packaged/Color%20set.xaml";
+    let runtime = "ferres://test/Packaged/Color%20set.xaml";
+    let accepted = ferroui_reload_protocol::fingerprint(graph.accepted[address].as_bytes());
+    let saved = ferroui_reload_protocol::fingerprint(b"<ResourceDictionary/>");
+    let (logical, input) = graph.includes.authored_revision(runtime, accepted).unwrap();
+    assert_eq!(logical, address);
+    assert_eq!(input.uri, colors);
+    assert!(graph.includes.authored_revision(address, saved).is_none());
+    assert!(graph.includes.authored_revision("ferres://test/Packaged/color%20set.xaml", accepted).is_none());
+    assert!(graph.includes.authored_revision(&colors, accepted).is_none());
+
+    let invalid = [PreviewSourceBuffer { uri: colors, source: None }];
+    let graph = hosted_preview_sources(&fixture.0, &uri, base, &document, &invalid, None);
+    assert!(!graph.accepted.contains_key(address));
+    assert!(graph.unavailable[address].contains("draft"));
+}
+
+#[test]
+fn toolbox_snippets_overlay_the_active_package_and_ignore_invalid_fragments() {
+    let fixture = Fixture::new();
+    fixture.write(".ferroui/toolbox/Card.xaml", "<Button Content='Shared'/>");
+    fixture.write(".ferroui/toolbox/Invalid.xaml", "<Button");
+    fixture.write(".ferroui/toolbox/Sibling.xaml", "<TextBlock Text='Shared label'/>");
+    fixture.write("app/Cargo.toml", "[package]\nname = 'app'\nversion = '0.1.0'\n");
+    fixture.write("app/.ferroui/toolbox/Card.xaml", "<?xml version='1.0'?><Button Content='App'/>");
+    fixture.write("app/views/Page.xaml", "<Grid/>");
+    let files = toolbox_snippets(&fixture.0, &fixture.0.join("app/views/Page.xaml")).unwrap();
+    assert_eq!(files.len(), 2);
+    assert_eq!(files[0].title, "Card");
+    assert_eq!(files[0].path, PathBuf::from("app/.ferroui/toolbox/Card.xaml"));
+    assert_eq!(files[0].source, "<Button Content='App'/>");
+    assert_eq!(files[1].title, "Sibling");
+}
+#[test]
+fn successful_cargo_task_returns_its_build_script_output() {
+    let fixture = Fixture::new();
+    fixture.write(
+        "Cargo.toml",
+        "[package]\nname='toolbox-fixture'\nversion='0.1.0'\nedition='2021'\n",
+    );
+    fixture.write("src/lib.rs", "");
+    let metadata =
+        ferroui_build_scan::model::AssemblyModel::new("ToolboxFixture", "toolbox_fixture");
+    fixture.write(
+        "build.rs",
+        &format!(
+            r##"
+fn main() {{
+    let out = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    std::fs::write(out.join("toolbox.xamlmeta"), r#"{}"#).unwrap();
+}}
+"##,
+            metadata.to_json()
+        ),
+    );
+    let solution = Solution::discover(&fixture.0).unwrap();
+    let task = BuildTask::cargo(&solution.projects[0], TaskKind::Check, false).unwrap();
+    let mut child = task.start().unwrap();
+    let limit = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    while child.poll() == TaskStatus::Running && std::time::Instant::now() < limit {
+        std::thread::sleep(std::time::Duration::from_millis(10));
+    }
+    let output = child
+        .take_output()
+        .into_iter()
+        .map(|part| part.text)
+        .collect::<String>();
+    assert_eq!(
+        child.poll(),
+        TaskStatus::Exited { code: Some(0) },
+        "{output}"
+    );
+    let build = child.take_build_metadata().unwrap();
+    assert_eq!(build.package.as_deref(), Some("toolbox-fixture"));
+    assert_eq!(build.package_root().unwrap(), fixture.0);
+    assert!(
+        build
+            .catalog()
+            .unwrap()
+            .models()
+            .models()
+            .iter()
+            .any(|model| model.name == "ToolboxFixture")
+    );
+    assert!(child.take_build_metadata().is_none());
+    assert!(!output.contains("build-script-executed"));
+}
 #[test]
 fn paths_roundtrip_unicode_reserved_characters_and_relative_resources() {
     let fixture = Fixture::new();

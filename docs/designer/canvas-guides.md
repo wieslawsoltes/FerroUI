@@ -70,6 +70,8 @@ additional frame guides; the active document or definition canvas is the coordin
 
 `CanvasGuide`, `CanvasGuideAxis` and `CanvasGuideSettings` are public serializable value
 models with finite validation. `CanvasGuidesEditor` is an embeddable staged native editor.
+`ferroui-designer-tools` also exports `CanvasGuideEdit` and the ruler cadence used by the
+Studio canvas and VS Code preview helper. Both editors use logical artboard coordinates.
 
 `DesignerWorkspace` exposes:
 
@@ -77,12 +79,31 @@ models with finite validation. `CanvasGuidesEditor` is an embeddable staged nati
 - `add_canvas_guide`, `move_canvas_guide` and `remove_canvas_guide` for individual edits.
 - `selected_canvas_guide` for local guide selection.
 - `canvas_guide_snapshot` / `apply_canvas_guides` for source- and scope-checked drafts.
+- `apply_canvas_guide_edit` to plan and apply a checked guide action from the same snapshot.
 - `canvas_guide_view_snapshot` / `restore_canvas_guide_view` for a matching document view.
 
 `DesignSurface::set_canvas_guides` installs the same snapping settings for standalone
 hosts, and cancels its pending authored gesture before changing the accepted snap index.
 The older `DesignSurface::set_grid` remains an independent compatibility override accepting
 any finite nonnegative spacing; applying `CanvasGuideSettings` replaces that override.
+
+## Use guides from VS Code or MCP
+
+Use the **Canvas Guides** icon in the VS Code designer for visibility and exact positions.
+The preview helper shares Studio's finite coordinate validation and guide IDs. [VS Code canvas workflow](vscode/authoring.md#measure-and-mark-the-canvas)
+
+In either editor, read `designer_canvas_guides`, then pass its `revision` and `epoch` as
+`expected_revision` and `expected_epoch` to `designer_canvas_guides_edit`. Include `session`
+in VS Code. Use `add` with a `Horizontal` or `Vertical` axis and a logical pixel position,
+or `apply` with the full set of visibility flags and positions. The edit needs MCP write
+permission and applies to the active view scope. [VS Code MCP reference](vscode/reference.md#drive-an-editor-workflow)
+
+For snapping, use `configure_snap` with an `options` object containing the three target
+flags, `grid_visible`, `grid_spacing`, and `snap_tolerance`. In either editor an optional
+`snap` argument activates the current settings for `designer_placement_hint`,
+`designer_place`, `designer_resize_hint`, or `designer_resize`. Pass the current guide
+`epoch`, the numeric `zoom` factor, and optional `bypass`. Both preview and commit use the
+same logical coordinates. [VS Code snapping controls](vscode/authoring.md#snap-controls-to-guides-the-grid-or-other-controls)
 
 ## Reference decisions
 

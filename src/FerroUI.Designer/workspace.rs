@@ -1,6 +1,6 @@
 use crate::{
     DesignGesture, DesignSurface, DesignerSession, PreviewStatus, PropertyEditorContext,
-    PropertyEditorFactory,
+    PropertyEditorFactory, RuntimeOutlineMode,
 };
 use ferroui_base::input::{InputElement, Key, KeyModifiers};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -10,9 +10,9 @@ use ferroui_base::{Ref, Thickness, WeakRef};
 use ferroui_controls::{
     Button, ContentControl, Control, Grid, Slider, StackPanel, TextBlock, TextBox,
 };
-use ferroui_designer_animation::{AnimationValue, Easing};
+use ferroui_designer_animation::Easing;
 use ferroui_designer_core::NodeId;
-use ferroui_inspect::{Inspector, TreeKind};
+use ferroui_inspect::Inspector;
 use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
@@ -23,7 +23,7 @@ use std::time::Duration;
 #[path = "workspace_shell.rs"]
 pub(crate) mod shell;
 
-pub use inspector_drag::OutlineCommand;
+pub use inspector_drag::{OutlineCommand, OutlinePlacement};
 pub use selection_tools::{CanvasLayerChoice, CanvasSelectionSnapshot};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -57,7 +57,7 @@ pub struct DesignerWorkspace {
     last_revision: Cell<u64>,
     last_selection: RefCell<Vec<NodeId>>,
     last_generation: Cell<u64>,
-    outline_mode: Cell<OutlineMode>,
+    runtime_outline_mode: Cell<Option<RuntimeOutlineMode>>,
     runtime_selection: Cell<Option<u64>>,
     navigation: navigation::NavigationUi,
     guides: guides::GuidesUi,
@@ -108,6 +108,9 @@ impl DesignerWorkspace {
         root.styles().add(crate::designer_chrome_style()?);
         let preview = root.get_control::<ContentControl>("Preview");
         let session = Rc::new(RefCell::new(match uri {
+            Some(uri) if crate::rsx_document::RustDocument::for_uri(&uri) => {
+                DesignerSession::with_rust_source(source, preview, uri)?
+            }
             Some(uri) => DesignerSession::with_uri(source, preview, uri)?,
             None => DesignerSession::new(source, preview)?,
         }));
@@ -116,7 +119,7 @@ impl DesignerWorkspace {
         surface.attach(&session);
         artboard.children().add(surface.clone().upcast::<Control>());
         let now = Dispatcher::ui_thread().now();
-        let saved_source = session.borrow().document().source().to_owned();
+        let saved_source = session.borrow().authored_source().to_owned();
         let this = Rc::new(Self {
             source: root.get_control("Source"),
             inspectors: inspectors::InspectorControls::new(&root),
@@ -138,7 +141,7 @@ impl DesignerWorkspace {
             last_revision: Cell::new(u64::MAX),
             last_selection: RefCell::new(Vec::new()),
             last_generation: Cell::new(u64::MAX),
-            outline_mode: Cell::new(OutlineMode::Source),
+            runtime_outline_mode: Cell::new(None),
             runtime_selection: Cell::new(None),
             navigation: navigation::NavigationUi::default(),
             guides: guides::GuidesUi::default(),
@@ -179,6 +182,11 @@ impl DesignerWorkspace {
         this.connect_selection_layout();
         this.connect_property_transfer_commands();
         this.connect_focus_order_commands();
+        this.connect_preview_checks();
+        this.connect_columns();
+        this.connect_rust_styles();
+        this.connect_item_templates();
+        this.connect_command_bindings();
         this.connect_design_time_commands();
         this.refresh(true);
         Ok(this)
@@ -214,12 +222,29 @@ impl DesignerWorkspace {
         }
         Ok(())
     }
+    /// Returns the outline mode available to existing hosts. Combined uses the visual hierarchy.
     pub fn outline_mode(&self) -> OutlineMode {
-        self.outline_mode.get()
+        match self.runtime_outline_mode() {
+            None => OutlineMode::Source,
+            Some(RuntimeOutlineMode::Visual | RuntimeOutlineMode::Combined) => OutlineMode::Visual,
+            Some(RuntimeOutlineMode::Logical) => OutlineMode::Logical,
+        }
     }
     pub fn set_outline_mode(self: &Rc<Self>, mode: OutlineMode) {
-        self.outline_mode.set(mode);
-        if mode == OutlineMode::Source {
+        self.set_runtime_outline_mode(match mode {
+            OutlineMode::Source => None,
+            OutlineMode::Visual => Some(RuntimeOutlineMode::Visual),
+            OutlineMode::Logical => Some(RuntimeOutlineMode::Logical),
+        });
+    }
+    /// The runtime hierarchy shown by the Outline. Source mode returns `None`.
+    pub fn runtime_outline_mode(&self) -> Option<RuntimeOutlineMode> {
+        self.runtime_outline_mode.get()
+    }
+    /// Select the runtime hierarchy or pass `None` to return to the authored outline.
+    pub fn set_runtime_outline_mode(self: &Rc<Self>, mode: Option<RuntimeOutlineMode>) {
+        self.runtime_outline_mode.set(mode);
+        if mode.is_none() {
             self.runtime_selection.set(None);
         }
         self.rebuild_outline();
@@ -267,7 +292,14 @@ impl DesignerWorkspace {
         self.connect_file_commands();
         self.connect_project();
         self.connect_source_tools();
+        self.connect_event_handlers();
+        self.connect_dictionary_extraction();
+        self.connect_file_move();
+        self.connect_registered_rename();
+        self.connect_resource_move();
+        self.connect_rust_source();
         self.connect_authoring();
+        self.connect_timeline_curves();
         self.connect_sharing();
         for (name, action) in [
             ("Undo", Action::Undo),
@@ -284,6 +316,7 @@ impl DesignerWorkspace {
             ("SourceMode", Action::Source),
             ("VisualMode", Action::Visual),
             ("LogicalMode", Action::Logical),
+            ("CombinedMode", Action::Combined),
             ("Play", Action::Play),
             ("Stop", Action::Stop),
             ("Record", Action::Record),
@@ -363,7 +396,7 @@ impl DesignerWorkspace {
         self.scrubber.value_changed(move |_, _| {
             if let Some(this) = weak.upgrade() {
                 if !this.guard.get() {
-                    let result = this.session.borrow_mut().seek(this.scrubber.value());
+                    let result = this.seek_workspace_timeline(this.scrubber.value());
                     this.report(result);
                     this.surface.invalidate_visual();
                 }
@@ -384,13 +417,13 @@ impl DesignerWorkspace {
                         .map_err(|_| "Enter a valid number of seconds".to_string())
                         .and_then(|value| {
                             if is_duration {
-                                this.session.borrow_mut().set_duration(value)
+                                if this.comparing_animation_clips() { Ok(()) } else { this.session.borrow_mut().set_duration(value) }
                             } else {
-                                this.session.borrow_mut().seek(value)
+                                this.seek_workspace_timeline(value)
                             }
                         });
                     this.report(result);
-                    this.refresh(true);
+                    this.refresh(is_duration);
                     event.set_handled(true);
                 }
             });
@@ -524,23 +557,14 @@ impl DesignerWorkspace {
                 | Action::Source
                 | Action::Visual
                 | Action::Logical
+                | Action::Combined
         );
         if self.pending_source.get() && !view_only {
             self.apply_source();
         }
         let result = match action {
-            Action::Undo => self
-                .session
-                .borrow_mut()
-                .undo()
-                .map(|_| ())
-                .map_err(|error| error.to_string()),
-            Action::Redo => self
-                .session
-                .borrow_mut()
-                .redo()
-                .map(|_| ())
-                .map_err(|error| error.to_string()),
+            Action::Undo => self.source_history(false),
+            Action::Redo => self.source_history(true),
             Action::Delete => crate::workspace_tools::delete(&mut self.session.borrow_mut()),
             Action::Duplicate => self.duplicate(),
             Action::ZoomOut => {
@@ -585,10 +609,27 @@ impl DesignerWorkspace {
                 self.set_outline_mode(OutlineMode::Logical);
                 Ok(())
             }
+            Action::Combined => {
+                self.set_runtime_outline_mode(Some(RuntimeOutlineMode::Combined));
+                Ok(())
+            }
             Action::Play => {
                 let mut session = self.session.borrow_mut();
                 if session.is_playing() {
                     session.pause();
+                } else if let Some(range) = self.preview_range_for_view(&session) {
+                    let result = session.start_preview_range(None, self.comparing_animation_clips(), range);
+                    drop(session);
+                    self.refresh(true);
+                    self.report(result);
+                    return;
+                } else if self.comparing_animation_clips() {
+                    let restart = session.animation.playback_completed.then_some(0.0);
+                    let result = session.start_combined_playback(None, restart);
+                    drop(session);
+                    self.refresh(false);
+                    self.report(result);
+                    return;
                 } else {
                     session.play();
                 }
@@ -617,7 +658,7 @@ impl DesignerWorkspace {
     }
     fn apply_source(self: &Rc<Self>) {
         self.pending_source.set(false);
-        let result = self.session.borrow_mut().apply_staged_preview();
+        let result = self.refresh_rust_modules().and_then(|()| self.session.borrow_mut().apply_staged_preview());
         self.report(result);
         self.refresh(false);
     }
@@ -639,13 +680,16 @@ impl DesignerWorkspace {
         }
         self.source.set_is_read_only(session.is_read_only());
         if changed && !self.pending_source.get() {
-            let text = session.document().source();
+            let text = session.authored_source();
             if self.source.text().as_deref() != Some(text) {
                 self.guard.set(true);
                 self.source.set_text(Some(text));
                 self.guard.set(false);
             }
         }
+        let range = self.preview_range_for_view(&session);
+        self.root.get_control::<Button>("TimelineRange").classes().set("active", range.is_some());
+        self.root.get_control::<Button>("TimelineRange").set_is_enabled(!session.is_playing());
         for lane in self
             .timeline_lanes
             .borrow()
@@ -653,17 +697,21 @@ impl DesignerWorkspace {
             .filter_map(WeakRef::upgrade)
         {
             lane.set_playhead(session.time());
+            if lane.is_ruler() {
+                lane.set_preview_range(range);
+            }
         }
         self.guard.set(true);
-        self.scrubber.set_maximum(session.timeline().duration);
+        let duration = self.timeline_view_duration();
+        self.scrubber.set_maximum(duration);
         self.scrubber
-            .set_range_value(session.time().min(session.timeline().duration));
+            .set_range_value(session.time().min(duration));
         if !self.time.is_focused() {
             self.time.set_text(Some(&format!("{:.2}", session.time())));
         }
         if !self.duration.is_focused() {
             self.duration
-                .set_text(Some(&format!("{}", session.timeline().duration)));
+                .set_text(Some(&format!("{duration}")));
         }
         self.guard.set(false);
         self.root
@@ -697,16 +745,16 @@ impl DesignerWorkspace {
                 session.timeline().tracks.len()
             ),
             PreviewStatus::InvalidSource { .. } => session
-                .document()
-                .diagnostics()
+                .authored_diagnostics()
                 .first()
                 .map(|diagnostic| {
                     format!(
-                        "XAML {}:{}  {}  ·  preview retains last accepted document",
+                        "{} {}:{}  {}  ·  preview retains last accepted document",
+                        if session.uses_rust_source() { "Rust" } else { "XAML" },
                         diagnostic.line, diagnostic.column, diagnostic.message
                     )
                 })
-                .unwrap_or_else(|| "Invalid XAML".into()),
+                .unwrap_or_else(|| "Invalid source".into()),
             PreviewStatus::Failed { message, .. } => format!("Preview: {message}"),
         };
         let status = if session.preview_notices().is_empty() {
@@ -728,6 +776,10 @@ impl DesignerWorkspace {
         self.refresh_selection_tools();
         self.refresh_selection_layout();
         self.refresh_property_transfer_commands();
+        self.refresh_columns_command();
+        self.refresh_rust_styles_command();
+        self.refresh_item_template_command();
+        self.refresh_command_binding();
         self.refresh_file_title();
         if changed || generation_changed {
             self.rebuild_outline();
@@ -742,6 +794,7 @@ impl DesignerWorkspace {
             self.refresh_components();
             self.refresh_animation_programs();
         }
+        self.refresh_preview_markers();
         self.surface.invalidate_layout_helpers();
         self.surface.invalidate_visual();
     }
@@ -794,13 +847,10 @@ impl DesignerWorkspace {
 
     fn reveal_source(&self, id: NodeId) {
         let session = self.session.borrow();
-        if !session.document().diagnostics().is_empty() {
-            return;
-        }
-        if let Some(node) = session.document().ast().node(id) {
-            let source = session.document().source();
-            let begin = source[..node.span.start].encode_utf16().count() as i32;
-            let end = source[..node.span.end].encode_utf16().count() as i32;
+        if let Some(span) = session.authored_span(id) {
+            let source = session.authored_source();
+            let begin = source_tools::utf16_from_byte(source, span.start);
+            let end = source_tools::utf16_from_byte(source, span.end);
             self.source.set_selection_start(begin);
             self.source.set_selection_end(end);
         }
@@ -861,6 +911,7 @@ enum Action {
     Source,
     Visual,
     Logical,
+    Combined,
     Play,
     Stop,
     Record,
@@ -882,8 +933,26 @@ pub use components::DesignerDefinitionAsset;
 mod design_time;
 #[path = "workspace_files.rs"]
 mod files;
+#[path = "workspace_rsx.rs"]
+mod rust_source;
 #[path = "workspace_focus_order.rs"]
 mod focus_order;
+#[path = "workspace_preview_checks.rs"]
+mod preview_checks;
+#[path = "workspace_columns.rs"]
+mod columns;
+#[path = "workspace_rust_styles.rs"]
+mod rust_styles;
+#[path = "workspace_rust_modules.rs"]
+mod rust_modules;
+#[path = "workspace_palette_comparison.rs"]
+mod palette_comparison;
+#[path = "inspector_actions.rs"]
+mod inspector_actions;
+#[path = "workspace_property_trace.rs"]
+mod property_trace_view;
+#[path = "workspace_item_templates.rs"]
+mod item_templates;
 #[path = "inspector_drag.rs"]
 mod inspector_drag;
 #[path = "inspector_controls.rs"]
@@ -916,6 +985,31 @@ pub(crate) mod prototype;
 pub use prototype::PreviewPrototypePlaybackInfo;
 #[path = "workspace_project.rs"]
 mod project;
+#[cfg(feature = "mcp")]
+#[path = "workspace_project_library.rs"]
+mod project_library;
+#[path = "workspace_history.rs"]
+mod history;
+#[path = "workspace_event_handlers.rs"]
+mod event_handlers;
+#[path = "workspace_command_bindings.rs"]
+mod command_bindings;
+#[path = "workspace_dictionary_extraction.rs"]
+mod dictionary_extraction;
+#[path = "workspace_file_move.rs"]
+mod file_move;
+#[path = "workspace_reviewed_sources.rs"]
+mod reviewed_sources;
+#[path = "workspace_resource_rename.rs"]
+mod resource_rename;
+#[path = "workspace_resource_move.rs"]
+mod resource_move;
+#[path = "workspace_rust_review.rs"]
+mod rust_review;
+#[path = "workspace_registered_rename.rs"]
+mod registered_rename;
+#[path = "workspace_type_rename.rs"]
+mod type_rename;
 #[cfg(feature = "collaboration-client")]
 #[path = "workspace_sharing.rs"]
 mod sharing;

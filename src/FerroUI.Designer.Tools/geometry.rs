@@ -280,20 +280,23 @@ impl SnapIndex {
 
     /// Reuse the measured geometry after zoom or grid settings change.
     pub fn snap_with(&self, moving: Rect, grid: Option<f64>, tolerance: f64) -> Result<SnapResult> {
+        self.snap_with_axis(moving, grid, tolerance, None)
+    }
+
+    /// Restrict a query to the dimension an axis-aligned handle can actually change.
+    pub fn snap_with_axis(&self, moving: Rect, grid: Option<f64>, tolerance: f64, axis: Option<Axis>) -> Result<SnapResult> {
         moving.validate()?;
         validate_snap_options(grid, tolerance)?;
-        let (dx, gx) = nearest_axis(
-            [moving.x, moving.center().x, moving.right()],
-            &self.x,
-            grid,
-            tolerance,
-        );
-        let (dy, gy) = nearest_axis(
-            [moving.y, moving.center().y, moving.bottom()],
-            &self.y,
-            grid,
-            tolerance,
-        );
+        let (dx, gx) = if axis == Some(Axis::Vertical) {
+            (0.0, None)
+        } else {
+            nearest_axis([moving.x, moving.center().x, moving.right()], &self.x, grid, tolerance)
+        };
+        let (dy, gy) = if axis == Some(Axis::Horizontal) {
+            (0.0, None)
+        } else {
+            nearest_axis([moving.y, moving.center().y, moving.bottom()], &self.y, grid, tolerance)
+        };
         snap_result(moving, Point::new(dx, dy), gx, gy)
     }
 }

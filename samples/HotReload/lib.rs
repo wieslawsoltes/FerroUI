@@ -185,6 +185,7 @@ impl ApplicationImpl for App {
         let initial = session.apply_pending().expect("initial markup revision");
         eprintln!("{initial:?}");
         if initial.status == ferroui_hot_reload::ReloadStatus::Applied {
+            ferroui_hot_reload::notify_editor_on_open(&window);
             if let Some(startup) = startup {
                 let startup = RefCell::new(Some(startup));
                 *this.startup_subscription.borrow_mut() = Some(window.opened(move || {

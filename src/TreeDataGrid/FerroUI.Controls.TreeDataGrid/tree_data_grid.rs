@@ -129,11 +129,6 @@ ferroui_base::ferro_class_info!(TreeDataGrid {
         namespace: "FerroUI.Controls",
         // The declarative columns are the content of the grid (`[Content] ColumnDefinitions`).
         content: ColumnDefinitions,
-        properties: [
-            ColumnDefinitions: crate::TreeDataGridColumns {
-                get: |this: &Ref<TreeDataGrid>| this.column_definitions().clone()
-            },
-        ],
         fields: [
             RowDragStartedEvent: RoutedEvent<crate::TreeDataGridRowDragStartedEventArgs> => || *TreeDataGrid::row_drag_started_event(),
             RowDragOverEvent: RoutedEvent<crate::TreeDataGridRowDragEventArgs> => || *TreeDataGrid::row_drag_over_event(),
@@ -250,6 +245,18 @@ ferro_properties! { impl TreeDataGrid {
         /// Defines the `ItemsSource` property.
         pub fn items_source_property() -> StyledProperty<Option<ItemsSource>> {
             FerroProperty::register::<TreeDataGrid, _>("ItemsSource", None)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the declarative column collection.
+        pub fn column_definitions_property() -> DirectProperty<TreeDataGrid, TreeDataGridColumns> {
+            FerroProperty::register_direct::<TreeDataGrid, _>(
+                "ColumnDefinitions",
+                |o| o.column_definitions().clone(),
+                Some(TreeDataGrid::set_column_definitions),
+                TreeDataGridColumns::new(),
+            )
         }
     );
 

@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="Shared/Ink.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+      <SolidColorBrush x:Key="RowSurface" Color="#FFEDF5F8" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Dark">
+      <SolidColorBrush x:Key="RowSurface" Color="#FF243A48" />
+    </ResourceDictionary>
+  </ResourceDictionary.ThemeDictionaries>
+  <SolidColorBrush x:Key="CustomerInk" Color="{StaticResource InkColor}" />
+  <DataTemplate x:Key="CustomerRow">
+    <!-- 🌱 Preserve the row markup and its binding. -->
+    <Border Name="CopiedRow" Background="{DynamicResource RowSurface}" CornerRadius="8" Padding="12,8">
+      <TextBlock Name="CustomerName" Foreground="{StaticResource CustomerInk}" Text="{Binding Name}" />
+    </Border>
+  </DataTemplate>
+</ResourceDictionary>

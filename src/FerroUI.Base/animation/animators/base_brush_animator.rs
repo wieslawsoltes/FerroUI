@@ -146,6 +146,12 @@ impl Animator for BaseBrushAnimator {
         &self.base
     }
 
+    fn specialized_animator(&self) -> Option<Rc<dyn IAnimator>> {
+        self.try_create_custom_registered_animator()
+            .or_else(|| self.try_create_gradient_animator())
+            .or_else(|| self.try_create_solid_color_brush_animator())
+    }
+
     fn apply(
         this: &Rc<Self>,
         animation: &Animation,
@@ -155,11 +161,7 @@ impl Animator for BaseBrushAnimator {
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
     ) -> Result<Option<Rc<dyn IDisposable>>, crate::animation::AnimationError> {
-        let animator = this
-            .try_create_custom_registered_animator()
-            .or_else(|| this.try_create_gradient_animator())
-            .or_else(|| this.try_create_solid_color_brush_animator());
-        if let Some(animator) = animator {
+        if let Some(animator) = this.specialized_animator() {
             return animator.apply(animation, control, clock, match_, on_complete, should_pause_on_invisible);
         }
 

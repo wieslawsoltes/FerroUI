@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <UserControl.Resources>
+    <SolidColorBrush x:Key="AccountSurface" Color="#FFEAF4FA" />
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Border"><Setter Property="Opacity" Value="0.48" /></Style>
+    <Style Selector="Border.account"><Setter Property="Opacity" Value="0.72" /></Style>
+    <Style Selector="Border.priority"><Setter Property="Opacity" Value="0.72" /></Style>
+    <Style Selector="Border.attention"><Setter Property="Opacity" Value="0.24" /></Style>
+  </UserControl.Styles>
+  <Grid Background="#FFF6F9FB">
+    <StackPanel Spacing="12" Margin="24">
+      <TextBlock Text="Account review" FontSize="26" FontWeight="SemiBold" Foreground="#FF18384D" />
+      <Border Name="StyleCard" Classes="account priority" Background="{StaticResource AccountSurface}"
+              CornerRadius="8" Padding="14">
+        <StackPanel Spacing="3">
+          <TextBlock Text="Alpine &amp; Co." FontSize="17" FontWeight="SemiBold" Foreground="#FF18384D" />
+          <TextBlock Text="Enterprise · Pending review" Foreground="#FF325B75" />
+        </StackPanel>
+      </Border>
+      <Border Name="LocalCard" Classes="account priority" Background="{DynamicResource AccountSurface}"
+              CornerRadius="8" Padding="14" Opacity="0.9">
+        <StackPanel Spacing="3">
+          <TextBlock Text="Cedar Systems" FontSize="17" FontWeight="SemiBold" Foreground="#FF18384D" />
+          <TextBlock Text="Trial · Follow up" Foreground="#FF325B75" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </Grid>
+</UserControl>

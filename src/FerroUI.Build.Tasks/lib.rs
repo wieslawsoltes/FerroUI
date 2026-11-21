@@ -34,6 +34,8 @@
 //! 2. Compiles each group of documents as upstream compiles the documents of
 //!    an assembly (parse, transform, group transformers, emit) and writes
 //!    `$OUT_DIR/xaml/<module>.rs` with its position map.
+//!    A successful build records the entry points and ordered document keys
+//!    in `$OUT_DIR/xaml-symbols.json` for source refactors.
 //! 3. Lists the assets, leaving out the documents it compiled (upstream
 //!    removes a compiled resource from the assembly).
 //! 4. Writes `$OUT_DIR/<crate>.xamlmeta` (the compiled documents of the
@@ -204,7 +206,11 @@
 #![forbid(unsafe_code)]
 
 pub mod deterministic_id_generator;
+mod compiled_index;
+mod document_files;
 mod export_plan;
+pub use document_files::XamlDocumentFile;
+use document_files::{DocumentFiles, GroupDocuments};
 pub use export_plan::ExportPlan;
 mod diagnostics;
 #[cfg(feature = "shader-effects")]
@@ -229,6 +235,8 @@ use std::rc::Rc;
 use std::time::Instant;
 
 use ferroui_base::metadata::MarkupAssembly;
+use ferroui_build_scan::compiled_index::CompiledXamlIndex;
+use ferroui_build_scan::compiled_names::CompiledGroupKind;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
@@ -273,7 +281,7 @@ pub const FULL_THEMES_CFG: &str = "ferroui_full_themes";
 /// upstream compiles the documents of an assembly.
 pub struct XamlGroup {
     module: String,
-    documents: Option<Vec<(String, String)>>,
+    documents: Option<GroupDocuments>,
     create_source_info: Option<bool>,
     exported: bool,
     class_document: Option<String>,
@@ -301,8 +309,9 @@ pub enum TypeSystem {
 
 impl XamlGroup {
     /// A group whose generated file is the body of the module `module` of the crate
-    /// root. Without [`documents`](Self::documents) the group is every `.xaml` file
-    /// below the XAML root of the build.
+    /// root. With no explicit [`documents`](Self::documents) or
+    /// [`document_files`](Self::document_files), it discovers `.xaml` files below
+    /// the XAML root of the build.
     pub fn new(module: &str) -> Self {
         Self {
             module: module.to_string(),
@@ -354,7 +363,14 @@ impl XamlGroup {
     /// (`Views/Main.xaml`), in the order they are compiled. The build script states the
     /// files they come from with [`Build::input`].
     pub fn documents(mut self, documents: &[(&str, &str)]) -> Self {
-        self.documents = Some(documents.iter().map(|(name, xaml)| (name.to_string(), xaml.to_string())).collect());
+        self.documents = Some(GroupDocuments::Inline(documents.iter().map(|(name, xaml)| (name.to_string(), xaml.to_string())).collect()));
+        self
+    }
+
+    /// Compile this ordered set of files and register their paths as Cargo inputs.
+    /// The compiler records their authoring locations for IDE file-move reviews.
+    pub fn document_files(mut self, files: &[XamlDocumentFile<'_>]) -> Self {
+        self.documents = Some(GroupDocuments::from_files(files));
         self
     }
 
@@ -636,7 +652,8 @@ impl Build {
     /// trims).
     fn scan(&self, dependencies: Vec<AssemblyModel>, references: bool) -> Result<Scan, String> {
         let root = ferroui_build_scan::export::source_root(&self.manifest_dir, self.source_root.as_deref())?;
-        let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies).with_source_references(references);
+        let mut options = ScanOptions::new(&self.crate_name, root).with_dependencies(dependencies)
+            .with_source_references(references).with_authored_symbols();
         options.assembly_name = self.assembly.map(|assembly| assembly.name.to_string());
         Ok(scan_crate(&options))
     }
@@ -841,6 +858,7 @@ impl Build {
         // The functions of the inherent `impl` blocks of the crate: what a class whose markup is
         // partitioned into units is checked against for its constructor from units (#849).
         let mut scanned_functions: Vec<InherentFunction> = Vec::new();
+        let mut authored_symbols = None;
 
         // The type model of the crate, from its sources.
         let scanned = self.export_metadata || on_models;
@@ -886,6 +904,7 @@ impl Build {
                         }
                     }
                     scanned_functions = std::mem::take(&mut scan.functions);
+                    authored_symbols = Some(scan.authored_symbols(&manifest));
                     model = Some(scan.model);
                 }
                 Err(error) => {
@@ -901,9 +920,9 @@ impl Build {
             // the type systems name it.
             (None, _) => self.crate_name.clone(),
         };
-        // Whether source information is on for the assembly, as the configuration of the
-        // run-time loader reads it from the metadata of the assembly.
-        let assembly_source_info = model.as_ref().is_some_and(|model| {
+        // Debug builds with a reload manifest identify compiled source for editor inspection.
+        // Assemblies may also opt in for other profiles through their markup metadata.
+        let assembly_source_info = hot_reload || model.as_ref().is_some_and(|model| {
             model.metadata.iter().find(|(key, _)| key == ferroui_build_scan::CREATE_SOURCE_INFO).is_some_and(|(_, value)| value.trim().eq_ignore_ascii_case("true"))
         });
 
@@ -976,6 +995,8 @@ impl Build {
             references: MarkupReferencesModel::default(),
         };
         let mut modules: Vec<Module> = Vec::new();
+        let mut symbols = CompiledXamlIndex::new(self.manifest_dir.join("Cargo.toml"));
+        let mut document_files = DocumentFiles::default();
         let mut compiled_documents: Vec<String> = Vec::new();
         // The option of the emitter for the groups of this build (#603), restored after them.
         use ferroui_markup_xaml_loader::rust_emitter::set_compile_time_declared_properties;
@@ -989,7 +1010,15 @@ impl Build {
                 continue;
             }
             let documents = match &group.documents {
-                Some(documents) => documents.clone(),
+                Some(GroupDocuments::Inline(documents)) => documents.clone(),
+                Some(GroupDocuments::Files(files)) => {
+                    let Some(documents) = document_files.read(&self.manifest_dir, files, &mut lines, &mut errors) else {
+                        continue;
+                    };
+                    symbols.file_inputs.extend(files.iter().map(|(_, input)| input.clone()));
+                    symbols.assembly = Some(assembly_name.clone());
+                    documents
+                }
                 None => {
                     let root = self.manifest_dir.join(&self.xaml_root);
                     rerun(&mut lines, &root);
@@ -1071,6 +1100,12 @@ impl Build {
                         }
                         write_compiled_file(&path, &file.source, &image, &mut errors);
                         let class_metadata = file.metadata(&[]);
+                        if let Some(members) = &in_group {
+                            symbols.groups.push(compiled_index::group(
+                                group, CompiledGroupKind::Class, &root_uri, &self.xaml_root,
+                                members.iter().map(|(key, _)| key.as_str()), &class_metadata.documents,
+                            ));
+                        }
                         // Whether the class can be constructed from selected units of its markup
                         // (#849): only then are its documents rooted through its unit graph in the
                         // applications that construct it; an ordinary class is constructed whole.
@@ -1151,7 +1186,16 @@ impl Build {
                 #[cfg(feature = "runtime-host")]
                 None => {
                     let Some(assembly) = self.assembly else { break };
-                    runtime_host::generate_file(assembly, &root_uri, &borrowed, group.create_source_info, default_compile_bindings, self.backend, &image, &dependencies)
+                    runtime_host::generate_file(
+                        assembly,
+                        &root_uri,
+                        &borrowed,
+                        group.create_source_info.or(hot_reload.then_some(true)),
+                        default_compile_bindings,
+                        self.backend,
+                        &image,
+                        &dependencies,
+                    )
                 }
                 // Reported before the groups: without the feature no group is compiled
                 // against the run-time type system.
@@ -1177,8 +1221,13 @@ impl Build {
             }
             write_compiled_file(&path, &file.source, &image, &mut errors);
             write_if_changed(&xaml_directory.join(format!("{}.map.json", group.module)), &file.position_map, &mut errors);
+            let group_metadata = file.metadata(&self.crate_name, &module_path, &[]);
+            symbols.groups.push(compiled_index::group(
+                group, CompiledGroupKind::Documents, &root_uri, &self.xaml_root,
+                file.documents.iter().map(|(key, _)| key.as_str()), &group_metadata.documents,
+            ));
             if group.exported {
-                metadata.documents.extend(file.metadata(&self.crate_name, &module_path, &[]).documents);
+                metadata.documents.extend(group_metadata.documents);
                 compiled_documents.extend(documents.iter().map(|(name, _)| format!("/{name}")));
             }
             modules.push(Module { name: group.module.clone(), path, exported: group.exported, file: false });
@@ -1471,6 +1520,17 @@ impl Build {
                     write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
                 }
                 Err(plan_errors) => errors.extend(plan_errors),
+            }
+        }
+        if errors.is_empty() {
+            symbols.file_inputs.sort();
+            symbols.file_inputs.dedup();
+            write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &symbols.to_json(), &mut errors);
+            if let Some(mut authored) = authored_symbols {
+                authored.assembly = assembly_name.clone();
+                if let Err(error) = authored.write(&self.out_dir) {
+                    errors.push(error);
+                }
             }
         }
         if !errors.is_empty() {

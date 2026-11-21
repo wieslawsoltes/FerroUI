@@ -79,6 +79,11 @@ cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
     closes the top overlay first. These are FerroUI design-review semantics, not an
     emulation of iOS sheets, macOS windows or Apple's sheet-internal Back behavior.
 
+Choose **High contrast** in the stage’s **Theme** picker or the editing canvas’s **Preview
+environment** when the active theme supplies a native contrast variant. Use it alongside
+a Light or Dark stage and read the same native preview checks. Saving the stage set keeps
+the selected contrast variant on the card. [VS Code and MCP](vscode/motion.md#compare-a-high-contrast-stage)
+
 The sample also contains **ActionPreviewTemplate**. Add a stage, choose that authored
 definition in **View**, and configure its sample content and sample size. This gives a
 component preview alongside the complete document without extracting or rewriting the
@@ -334,8 +339,9 @@ The public components can be embedded independently:
 - `PreviewStageView` renders cards and emits explicit actions. It receives stage controls
   from its host and does not own document or runtime state.
 - `PreviewStageEditor` edits a detached configuration and validates it on Apply.
-- `PreviewStageManifest` validates and serializes a versioned stage set, including its
-  prototype graph. Overlay actions use version 3, Navigate/Back-only graphs use version 2,
+- `PreviewStageSet` validates and serializes a versioned stage set with its prototype
+  graph and per-card design fixtures. `PreviewStageManifest` provides the original
+  configuration API. Overlay actions use version 3, Navigate/Back-only graphs use version 2,
   and an empty graph uses version 1. All three versions load; older versions reject
   overlay actions. JSON parsing rejects unknown fields, invalid dimensions or overlay
   coordinates, malformed source paths, invalid graph references and manifests larger
@@ -351,8 +357,11 @@ The public components can be embedded independently:
 `set_preview_stage_paused`, `refresh_preview_stage`, `refresh_all_preview_stages`,
 `compare_preview_stage`, `compare_preview_stage_matrix`, `set_active_preview_stage` and
 `set_preview_stages_visible`.
-`preview_stage_manifest` and `restore_preview_stage_manifest` provide persistence without
-requiring the native file picker.
+Use `preview_stage_set` and `restore_preview_stage_set` to include each card’s
+fixture choice when saving without a native file picker. Use
+`PreviewStageSet::from_json_with_fixtures` to load both earlier and current stage
+sets. `preview_stage_manifest` and `restore_preview_stage_manifest` remain
+available for callers using the original configuration API.
 `plan_preview_stage_matrix` returns the exact configurations and validates the available
 capacity without constructing controls; `compare_preview_stage_matrix` adds the validated
 set through the same board as the native editor.
@@ -434,6 +443,7 @@ The MCP tools expose the same workspace board and native graphs:
 | --- | --- |
 | `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. Reading does not rebuild a stage or apply source drafts. |
 | `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. |
+| `designer_preview_stage_input` | Focus or send keyboard input to a visible Live stage. Supply `stage`, `expected_model` and `expected_epoch` from the latest board. Returns the focused control's accessible name and role, or `null`. |
 | `designer_preview_matrix` | Plan the exact combinations and return their configurations, count, available capacity and current model without adding native stages. |
 | `designer_preview_image` | Read a current accepted native stage as a PNG with source, graph and size metadata, using `expected_model` from the latest read. Accepts bounded pixel density; does not refresh the stage, apply drafts or write files. |
 
@@ -453,6 +463,8 @@ stage. The model identifies the current documents, pending source text and board
 an optimistic concurrency guard, not an authorization credential. Stage settings remain
 local presentation state and are available to collaboration viewers with the required
 host permissions.
+
+For stage input, send `input: { kind: "focus" }` to enter the stage, `{ kind: "key", key: "Tab" }` or `"Shift+Tab"` to navigate, or `{ kind: "text", text: "Acme" }` to type into the focused field. This requires both write and input permissions. Use the prototype playback commands when a flow is active.
 
 Matrix planning and image capture are read-only tools and do not require those write or
 input permissions. Image capture returns an MCP image content block plus structured

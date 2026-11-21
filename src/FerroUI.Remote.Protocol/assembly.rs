@@ -5,7 +5,13 @@
 //! A crate that declares message classes of its own has such a table and
 //! passes it to [`DefaultMessageTypeResolver::new`](crate::DefaultMessageTypeResolver::new).
 
-use crate::design_messages::{StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage};
+use crate::design_animation_authoring::{DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult};
+use crate::design_animation_curve::{DesignAnimationCurveRequest, DesignAnimationCurveResult};
+use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage};
+use crate::design_keyframe_selection::{DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult};
+use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, StartDesignSourceSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage};
+use crate::design_palette_context::DesignPaletteContextMessage;
+use crate::design_template_catalog::DesignTemplateCatalogMessage;
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 use crate::input_messages::{
     KeyEventMessage, PointerMovedEventMessage, PointerPressedEventMessage, PointerReleasedEventMessage,
@@ -60,13 +66,29 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<UpdateXamlMessage>(),
         ExportedType::of::<UpdateXamlResultMessage>(),
         ExportedType::of::<StartDesignerSessionMessage>(),
+        ExportedType::of::<StartDesignSourceSessionMessage>(),
+        ExportedType::of::<UpdateDesignMessage>(),
+        ExportedType::of::<UpdateDesignSourcesMessage>(),
+        ExportedType::of::<UpdateDesignResultMessage>(),
+        ExportedType::of::<DesignPaletteContextMessage>(),
+        ExportedType::of::<DesignTemplateCatalogMessage>(),
+        ExportedType::of::<DesignFrameMessage>(),
+        ExportedType::of::<DesignFrameReceivedMessage>(),
+        ExportedType::of::<DesignAnimationCatalogMessage>(),
+        ExportedType::of::<DesignAnimationRequestMessage>(),
+        ExportedType::of::<DesignAnimationResultMessage>(),
+        ExportedType::of::<DesignAnimationAuthoringRequest>(),
+        ExportedType::of::<DesignAnimationAuthoringResult>(),
+        ExportedType::of::<DesignKeyframeSelectionRequest>(),
+        ExportedType::of::<DesignKeyframeSelectionResult>(),
+        ExportedType::of::<DesignAnimationCurveRequest>(),
+        ExportedType::of::<DesignAnimationCurveResult>(),
         // TransportMessages
         ExportedType::of::<HtmlTransportStartedMessage>(),
     ],
 };
 
-// Tests of the port: the table stands for what reflection finds in the
-// original, so it is compared with the list of the upstream message classes.
+// Pin both the upstream wire contract and FerroUI's design messages.
 #[cfg(test)]
 mod tests {
     use std::collections::HashSet;
@@ -107,6 +129,25 @@ mod tests {
         ("UpdateXamlResultMessage", "B7A70093-0C5D-47FD-9261-22086D43A2E2"),
         ("StartDesignerSessionMessage", "854887CF-2694-4EB6-B499-7461B6FB96C7"),
         ("HtmlTransportStartedMessage", "53778004-78fa-4381-8ec3-176a6f2328b6"),
+    ];
+    const FERROUI_DESIGN_MESSAGES: &[(&str, &str)] = &[
+        ("StartDesignSourceSessionMessage", "7D76A249-3594-4C51-956D-6E4E8C1CF1F6"),
+        ("UpdateDesignMessage", "58FA5FA8-5669-4C04-80FA-8F573BA45ACD"),
+        ("UpdateDesignSourcesMessage", "408BAE3B-C488-4DAC-9255-E3AD3C99D2C5"),
+        ("UpdateDesignResultMessage", "CB085DBB-7231-4C16-8797-D8D97BCF9341"),
+        ("DesignPaletteContextMessage", "D2C95A63-AF9C-4AA2-958B-8F49D3D61AD6"),
+        ("DesignTemplateCatalogMessage", "5817D3A7-7AC8-47C0-A5A0-76DF2207C5F6"),
+        ("DesignFrameMessage", "F7176EE5-1A68-4ECB-A986-8F461D21C13C"),
+        ("DesignFrameReceivedMessage", "1E9E50A0-F95D-48C0-AB8B-B2C800ACC09C"),
+        ("DesignAnimationCatalogMessage", "C094EFD2-D7FC-467D-AC22-8FA047C4B54B"),
+        ("DesignAnimationRequestMessage", "BCDB99F8-61E0-4E92-A837-F8D18045ABB1"),
+        ("DesignAnimationResultMessage", "2E7AC05A-D953-4211-BC9E-F400AEF993CF"),
+        ("DesignAnimationAuthoringRequest", "D7B9804A-61AD-4BEC-9067-F4901FE7C340"),
+        ("DesignAnimationAuthoringResult", "51B25CB4-4324-4890-B1C0-5B81766D5673"),
+        ("DesignKeyframeSelectionRequest", "98B491F9-0A74-443A-AA95-A07FCEF91C72"),
+        ("DesignKeyframeSelectionResult", "EEE58C45-00F9-40D6-9369-DC72A6919308"),
+        ("DesignAnimationCurveRequest", "29312A91-E412-4881-A469-1B0F1739BC77"),
+        ("DesignAnimationCurveResult", "2D4276FD-9106-4657-9EBA-530413ED4F11"),
     ];
 
     fn modifiers() -> InputEventMessageBase {
@@ -180,10 +221,10 @@ mod tests {
     }
 
     #[test]
-    fn every_upstream_message_class_is_in_the_table_with_its_identifier() {
+    fn every_message_class_is_in_the_table_with_its_wire_identifier() {
         assert_eq!(UPSTREAM_MESSAGES.len(), 17);
-        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len());
-        for (name, guid) in UPSTREAM_MESSAGES {
+        assert_eq!(ASSEMBLY.exported_types.len(), UPSTREAM_MESSAGES.len() + FERROUI_DESIGN_MESSAGES.len());
+        for (name, guid) in UPSTREAM_MESSAGES.iter().chain(FERROUI_DESIGN_MESSAGES) {
             let exported = ASSEMBLY
                 .exported_types
                 .iter()
@@ -192,13 +233,13 @@ mod tests {
             assert_eq!(exported.attribute.unwrap().guid(), Uuid::parse_str(guid).unwrap(), "{}", name);
         }
         let guids: HashSet<Uuid> = ASSEMBLY.exported_types.iter().map(|t| t.attribute.unwrap().guid()).collect();
-        assert_eq!(guids.len(), UPSTREAM_MESSAGES.len());
+        assert_eq!(guids.len(), ASSEMBLY.exported_types.len());
     }
 
     #[test]
     fn the_resolver_maps_every_identifier_to_its_class_and_back() {
         let resolver = DefaultMessageTypeResolver::new(&[]);
-        for (name, guid) in UPSTREAM_MESSAGES {
+        for (name, guid) in UPSTREAM_MESSAGES.iter().chain(FERROUI_DESIGN_MESSAGES) {
             let guid = Uuid::parse_str(guid).unwrap();
             let class = resolver.get_by_guid(guid).unwrap();
             assert_eq!(class.name, *name);
@@ -207,6 +248,37 @@ mod tests {
         assert!(matches!(resolver.get_by_guid(Uuid::nil()), Err(crate::Error::KeyNotFound(_))));
         assert!(matches!(resolver.get_guid(ExceptionDetails::CLASS), Err(crate::Error::KeyNotFound(_))));
         assert_eq!(MeasureViewportMessage::GUID, Uuid::parse_str("6E3C5310-E2B1-4C3D-8688-01183AA48C5B").unwrap());
+    }
+
+    #[test]
+    fn tagged_design_frames_preserve_nested_binary_data_and_revision() {
+        let packet = DesignFrameMessage {
+            revision: 12,
+            frame: FrameMessage { data: Some(vec![1, 2, 3, 4]), sequence_id: 7, ..Default::default() },
+        };
+        let message: Message = Arc::new(packet.clone());
+        let Value::Object(decoded) = round_trip(&message) else { panic!("Expected a design frame") };
+        assert_eq!(decoded.downcast_ref::<DesignFrameMessage>(), Some(&packet));
+    }
+
+    #[test]
+    fn template_catalog_keeps_both_source_stamps_and_full_fingerprints() {
+        use crate::design_template_catalog::{DesignTemplateSource, DesignTemplateUse};
+        let packet = DesignTemplateCatalogMessage {
+            revision: 34,
+            templates: vec![DesignTemplateUse {
+                owner: DesignTemplateSource {
+                    address: "ferres://App/View.xaml".into(), fingerprint: -18, line: 5, column: 9,
+                },
+                type_name: "Button".into(),
+                definition: Some(DesignTemplateSource {
+                    address: "file:///Project/Theme.xaml".into(), fingerprint: 42, line: 17, column: 13,
+                }),
+            }],
+        };
+        let message: Message = Arc::new(packet.clone());
+        let Value::Object(decoded) = round_trip(&message) else { panic!("Expected a template catalog") };
+        assert_eq!(decoded.downcast_ref::<DesignTemplateCatalogMessage>(), Some(&packet));
     }
 
     #[test]

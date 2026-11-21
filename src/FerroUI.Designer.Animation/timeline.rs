@@ -1,4 +1,4 @@
-use crate::{require, AnimationError, AnimationValue, Easing, Result};
+use crate::{require, AnimationError, AnimationValue, CurveChannel, CurvePoint, CurveWindow, Easing, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -27,6 +27,25 @@ pub enum Repeat {
 impl Default for Repeat {
     fn default() -> Self {
         Self::Count(1)
+    }
+}
+impl Repeat {
+    pub fn parse(text: &str) -> Result<Self> {
+        if text.eq_ignore_ascii_case("Infinite") {
+            Ok(Self::Infinite)
+        } else {
+            text.parse()
+                .map(Self::Count)
+                .map_err(|_| AnimationError("Invalid repeat count".into()))
+        }
+    }
+}
+impl std::fmt::Display for Repeat {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Count(count) => write!(formatter, "{count}"),
+            Self::Infinite => formatter.write_str("Infinite"),
+        }
     }
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -275,12 +294,42 @@ pub struct Timeline {
     pub easing: Easing,
     pub tracks: Vec<Track>,
 }
+
+/// Changes to the authored clock. Unspecified fields retain their values.
+#[derive(Clone, Debug, Default, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct TimelineTimingEdit {
+    pub duration: Option<f64>,
+    pub delay: Option<f64>,
+    pub delay_between_iterations: Option<f64>,
+    pub playback_behavior: Option<PlaybackBehavior>,
+    pub speed_ratio: Option<f64>,
+    pub repeat: Option<Repeat>,
+    pub playback_direction: Option<PlaybackDirection>,
+    pub fill: Option<FillMode>,
+    pub easing: Option<Easing>,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Sample {
     pub target: u64,
     pub property: String,
     pub value: AnimationValue,
 }
+
+enum ClockPosition {
+    Delay(f64),
+    Iteration(f64),
+    Complete(f64),
+}
+impl ClockPosition {
+    fn progress(&self) -> f64 {
+        match *self {
+            Self::Delay(progress) | Self::Iteration(progress) | Self::Complete(progress) => progress,
+        }
+    }
+}
+
 impl Timeline {
     pub fn new(duration: f64) -> Result<Self> {
         let result = Self {
@@ -297,6 +346,35 @@ impl Timeline {
         };
         result.validate()?;
         Ok(result)
+    }
+    /// Change timing as a group, preserving each keyframe's position within the iteration.
+    pub fn with_timing(&self, edit: TimelineTimingEdit) -> Result<Self> {
+        let duration = edit.duration.unwrap_or(self.duration);
+        let mut next = Self {
+            duration,
+            delay: edit.delay.unwrap_or(self.delay),
+            delay_between_iterations: edit
+                .delay_between_iterations
+                .unwrap_or(self.delay_between_iterations),
+            playback_behavior: edit.playback_behavior.unwrap_or(self.playback_behavior),
+            speed_ratio: edit.speed_ratio.unwrap_or(self.speed_ratio),
+            repeat: edit.repeat.unwrap_or(self.repeat),
+            playback_direction: edit.playback_direction.unwrap_or(self.playback_direction),
+            fill: edit.fill.unwrap_or(self.fill),
+            easing: edit.easing.unwrap_or_else(|| self.easing.clone()),
+            tracks: self.tracks.clone(),
+        };
+        if duration != self.duration {
+            require(
+                self.duration.is_finite() && self.duration > 0.0,
+                "The original duration must be finite and positive",
+            )?;
+            for key in next.tracks.iter_mut().flat_map(|track| &mut track.keyframes) {
+                key.time = key.time / self.duration * duration;
+            }
+        }
+        next.validate()?;
+        Ok(next)
     }
     pub fn validate(&self) -> Result<()> {
         require(
@@ -429,7 +507,17 @@ impl Timeline {
             Repeat::Infinite => None,
         }
     }
-    fn sample_validated(&self, time: f64) -> Result<Vec<Sample>> {
+    fn directed_progress(&self, iteration: u64, progress: f64) -> f64 {
+        let even = iteration.is_multiple_of(2);
+        let reverse = match self.playback_direction {
+            PlaybackDirection::Normal => false,
+            PlaybackDirection::Reverse => true,
+            PlaybackDirection::Alternate => !even,
+            PlaybackDirection::AlternateReverse => even,
+        };
+        if reverse { 1.0 - progress } else { progress }
+    }
+    fn clock_position(&self, time: f64) -> Result<ClockPosition> {
         require(
             time.is_finite() && time >= 0.0,
             "Playback time must be finite and nonnegative",
@@ -437,21 +525,36 @@ impl Timeline {
         let elapsed = time * self.speed_ratio - self.delay;
         require(elapsed.is_finite(), "Playback time overflow")?;
         if elapsed < 0.0 || (self.delay > 0.0 && elapsed == 0.0) {
+            return Ok(ClockPosition::Delay(self.directed_progress(0, 0.0)));
+        }
+        if let Repeat::Count(count) = self.repeat {
+            if self.total_duration().is_some_and(|end| time >= end) {
+                return Ok(ClockPosition::Complete(self.directed_progress(count - 1, 1.0)));
+            }
+        }
+        let cycle = self.duration + self.delay_between_iterations;
+        let iteration = (elapsed / cycle).floor();
+        require(
+            iteration.is_finite() && iteration < u64::MAX as f64,
+            "Playback iteration exceeds the clock index range",
+        )?;
+        let progress = ((elapsed % cycle) / self.duration).min(1.0);
+        Ok(ClockPosition::Iteration(self.directed_progress(iteration as u64, progress)))
+    }
+    fn sample_validated(&self, time: f64) -> Result<Vec<Sample>> {
+        let position = self.clock_position(time)?;
+        if let ClockPosition::Delay(progress) = position {
             if !matches!(self.fill, FillMode::Backward | FillMode::Both) {
                 return Ok(vec![]);
             }
             // Native initial-delay fill uses the first actual keyframe in playback
             // direction, without applying global easing or an implicit endpoint.
-            let reverse = matches!(
-                self.playback_direction,
-                PlaybackDirection::Reverse | PlaybackDirection::AlternateReverse
-            );
             return Ok(self
                 .tracks
                 .iter()
                 .filter(|track| !track.muted)
                 .filter_map(|track| {
-                    let key = if reverse {
+                    let key = if progress == 1.0 {
                         track.keyframes.last()
                     } else {
                         track.keyframes.first()
@@ -464,40 +567,12 @@ impl Timeline {
                 })
                 .collect());
         }
-        let cycle = self.duration + self.delay_between_iterations;
-        let (iteration, progress) = if let Repeat::Count(count) = self.repeat {
-            let end =
-                self.duration * count as f64 + self.delay_between_iterations * (count - 1) as f64;
-            if elapsed >= end {
-                if !matches!(self.fill, FillMode::Forward | FillMode::Both) {
-                    return Ok(vec![]);
-                }
-                (count - 1, 1.0)
-            } else {
-                (
-                    (elapsed / cycle).floor() as u64,
-                    ((elapsed % cycle) / self.duration).min(1.0),
-                )
-            }
-        } else {
-            let iteration = (elapsed / cycle).floor();
-            require(
-                iteration.is_finite() && iteration < u64::MAX as f64,
-                "Playback iteration exceeds the clock index range",
-            )?;
-            (
-                iteration as u64,
-                ((elapsed % cycle) / self.duration).min(1.0),
-            )
-        };
-        let reverse = match self.playback_direction {
-            PlaybackDirection::Normal => false,
-            PlaybackDirection::Reverse => true,
-            PlaybackDirection::Alternate => iteration % 2 == 1,
-            PlaybackDirection::AlternateReverse => iteration % 2 == 0,
-        };
-        let progress = if reverse { 1.0 - progress } else { progress };
-        self.sample_tracks(self.easing.sample(progress)? * self.duration)
+        if matches!(position, ClockPosition::Complete(_))
+            && !matches!(self.fill, FillMode::Forward | FillMode::Both)
+        {
+            return Ok(vec![]);
+        }
+        self.sample_tracks(self.easing.sample(position.progress())? * self.duration)
     }
     fn sample_tracks(&self, time: f64) -> Result<Vec<Sample>> {
         let mut result = Vec::with_capacity(self.tracks.len());
@@ -525,6 +600,52 @@ impl CompiledTimeline {
     pub fn scrub(&self, time: f64) -> Result<Vec<Sample>> {
         require(time.is_finite(), "Scrub time must be finite")?;
         self.0.sample_tracks(time.clamp(0.0, self.0.duration))
+    }
+
+    /// Plot one scalar track using the same underlying values, fill, and
+    /// interpolation as an authored playhead seek.
+    pub fn scalar_curve(
+        &self,
+        target: u64,
+        property: &str,
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>> {
+        self.curve(target, property, CurveChannel::Value, window)
+    }
+
+    pub fn curve(
+        &self,
+        target: u64,
+        property: &str,
+        channel: CurveChannel,
+        window: CurveWindow,
+    ) -> Result<Vec<CurvePoint>> {
+        let track = self.0.track(target, property)
+            .filter(|track| {
+                !track.muted && track.keyframes.first()
+                    .is_some_and(|key| CurveChannel::for_kind(key.value.kind()).contains(&channel))
+            })
+            .ok_or_else(|| AnimationError("Choose an active track and one of its curve channels".into()))?;
+        let times = window.sample_times(self.0.duration, track.keyframes.iter().map(|key| key.time))?;
+        channel.project_samples(times.into_iter().map(|time| {
+            let value = track.sample_validated(time, self.0.duration, self.0.fill)?
+                .ok_or_else(|| AnimationError("The track has no sample at the selected time".into()))?;
+            Ok((time, value))
+        }))
+    }
+    /// Display position in the authored iteration before global easing is applied.
+    pub fn playback_position(&self, elapsed: f64) -> Result<f64> {
+        Ok(self.0.clock_position(elapsed)?.progress() * self.0.duration)
+    }
+    /// Playback clock time for the authored position in the first iteration.
+    pub fn elapsed_at_playhead(&self, time: f64) -> Result<f64> {
+        let timeline = &self.0;
+        require(
+            (0.0..=timeline.duration).contains(&time),
+            "Playhead time must lie within the timeline",
+        )?;
+        let progress = timeline.directed_progress(0, time / timeline.duration);
+        Ok((timeline.delay + progress * timeline.duration) / timeline.speed_ratio)
     }
     pub fn duration(&self) -> f64 {
         self.0.duration

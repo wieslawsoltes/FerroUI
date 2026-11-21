@@ -42,7 +42,7 @@ repeater = ["dep:ferroui-controls-repeater"]
 inking = ["dep:ferroui-controls-inking"]
 reactiveui = ["dep:ferroui-reactiveui-controls", "dep:ferroui-reactiveui"]
 # Hot reload of the literals of `rsx!` (`hot.rs`): the sources are read again with `proc-macro2`.
-hot-reload = ["dep:proc-macro2", "dep:syn"]
+hot-reload = ["dep:proc-macro2", "dep:syn", "dep:ferroui-view-syntax", "dep:ferroui-reload-protocol"]
 
 [dependencies]
 ferroui-base = { workspace = true }
@@ -50,6 +50,8 @@ ferroui-controls = { workspace = true }
 # The parser of selectors of `style("Button.accent")`.
 ferroui-markup = { workspace = true }
 ferroui-view-macros = { workspace = true }
+ferroui-view-syntax = { workspace = true, optional = true }
+ferroui-reload-protocol = { workspace = true, optional = true, features = ["editor-events"] }
 ferroui-desktop = { workspace = true, optional = true }
 ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }

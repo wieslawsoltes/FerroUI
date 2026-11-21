@@ -22,8 +22,8 @@ const MAX_HOPS: usize = 8;
 /// The models of a set of crates, with what is looked up across them.
 pub struct ModelSet {
     models: Vec<AssemblyModel>,
-    /// Every public path of every model, with the path of the declaring module.
-    exports: HashMap<String, String>,
+    /// Every public path with the declaration it names and whether the spelling is an alias.
+    exports: HashMap<String, (String, bool)>,
     /// Preferred exported spellings for types mentioned inside generated signatures,
     /// including generic collection types with no XAML declaration of their own. A `OnceLock`
     /// keeps the set `Sync` and `RefUnwindSafe`, as it was in 0.5.0.
@@ -44,7 +44,7 @@ impl ModelSet {
         let mut exports = HashMap::new();
         for model in &models {
             for export in &model.exports {
-                exports.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
+                exports.entry(export.path.clone()).or_insert_with(|| (export.declared.clone(), export.explicit_alias));
             }
         }
         let mut set = Self {
@@ -87,7 +87,7 @@ impl ModelSet {
     pub fn exported_path(&self, declared: &str) -> Option<&str> {
         let names = self.public_names.get_or_init(|| {
             let mut names: HashMap<String, String> = HashMap::new();
-            for (path, target) in &self.exports {
+            for (path, (target, _)) in &self.exports {
                 let target = self.canonical_path(target);
                 if path.trim_start_matches("::").split("::").next() != target.trim_start_matches("::").split("::").next() {
                     continue;
@@ -125,10 +125,15 @@ impl ModelSet {
         current
     }
 
+    /// Whether a re-export gives the item an explicit spelling independent of its declaration.
+    pub fn is_explicit_export_alias(&self, path: &str) -> bool {
+        self.exports.get(path).is_some_and(|(_, alias)| *alias)
+    }
+
     fn declared(&self, path: &str) -> Option<String> {
         let mut end = path.len();
         while end > 0 {
-            if let Some(declared) = self.exports.get(&path[..end]) {
+            if let Some((declared, _)) = self.exports.get(&path[..end]) {
                 return Some(format!("{declared}{}", &path[end..]));
             }
             end = path[..end].rfind("::")?;
@@ -144,6 +149,19 @@ impl ModelSet {
             return text.to_string();
         }
         self.map_paths(text, &|path| self.canonical_path(path))
+    }
+
+    /// Spell a build-model type from authored Rust in `crate_name`. Prefer exported
+    /// paths for dependencies and use `crate` for types declared in the application.
+    pub fn source_type(&self, text: &str, crate_name: &str) -> String {
+        let local = format!("::{crate_name}::");
+        self.map_paths(&self.expanded(text), &|path| {
+            if let Some(relative) = path.strip_prefix(&local) {
+                format!("crate::{relative}")
+            } else {
+                self.exported_path(path).unwrap_or(path).to_owned()
+            }
+        })
     }
 
     /// The normalised type text `text` as the one text of its Rust type: canonical
@@ -277,7 +295,7 @@ impl ModelSet {
     /// (`::ferroui_base`, `::ferroui_base::media`), each with the path of the declaring
     /// module: what a glob import of the module brings.
     pub fn exported_names<'a>(&'a self, module: &'a str) -> impl Iterator<Item = (&'a str, &'a str)> + 'a {
-        self.exports.iter().filter_map(move |(path, declared)| {
+        self.exports.iter().filter_map(move |(path, (declared, _))| {
             let name = path.strip_prefix(module)?.strip_prefix("::")?;
             (!name.contains("::")).then_some((name, declared.as_str()))
         })
@@ -327,7 +345,7 @@ mod tests {
     use crate::model::{AliasModel, CallableModel, ExportModel, RegisteredKind, RustType, TypeKind};
 
     fn export(path: &str, declared: &str) -> ExportModel {
-        ExportModel { path: path.to_string(), declared: declared.to_string() }
+        ExportModel { path: path.to_string(), declared: declared.to_string(), explicit_alias: false }
     }
 
     fn registered(name: Option<&str>, accessor: &str, registration: RegistrationModel, source: Option<&str>) -> RegisteredModel {

@@ -1,6 +1,8 @@
 use super::DesignerWorkspace;
 use crate::design_time::{DesignTimeEditor, DesignTimeEditorModel, DesignTimeSnapshot};
+use crate::DesignFixtureEditorModel;
 use ferroui_controls::{Button, Control, Flyout};
+use ferroui_designer_core::design_fixtures::is_fixtures;
 use std::rc::Rc;
 
 impl DesignerWorkspace {
@@ -56,14 +58,22 @@ impl DesignerWorkspace {
                 writable: !session.is_read_only(),
                 sample_count,
             };
+            let fixtures = DesignFixtureEditorModel {
+                root: session.document().ast().root(),
+                source: session.document().ast().node(session.document().ast().root())
+                    .and_then(|node| node.attributes.iter().find(|attribute| is_fixtures(attribute)))
+                    .map(|attribute| attribute.value.clone()),
+                selected: session.design_fixture().map(str::to_owned),
+            };
             let snapshot = DesignTimeSnapshot::capture(&session);
             drop(session);
             let weak = Rc::downgrade(&workspace);
             let accept_flyout = flyout.downgrade();
             let cancel_flyout = flyout.downgrade();
-            let editor = DesignTimeEditor::new(
+            let editor = DesignTimeEditor::with_fixtures(
                 model,
-                move |enabled, edits| {
+                fixtures,
+                move |enabled, fixture, edits| {
                     let workspace = weak.upgrade().ok_or("The designer was closed.")?;
                     if workspace.pending_source.get() {
                         return Err(
@@ -80,7 +90,7 @@ impl DesignerWorkspace {
                         if !edits.is_empty() {
                             snapshot.apply(&mut session, &edits)?;
                         }
-                        session.set_design_time_enabled(enabled)?;
+                        session.configure_design_data(enabled, fixture)?;
                     }
                     workspace.refresh(true);
                     if let Some(flyout) = accept_flyout.upgrade() {

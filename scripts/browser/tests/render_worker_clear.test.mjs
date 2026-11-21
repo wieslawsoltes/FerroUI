@@ -188,7 +188,9 @@ async function measureWaits(page) {
 // new size where the thread reads it, and the thread sizes the canvas it draws to.
 async function expectResize(page, viewport, canvas, marker) {
     await page.resize(viewport[0], viewport[1]);
-    await page.waitFor(`${STATE}.includes(' size=${canvas[0]}x${canvas[1]} ')`, 15000);
+    // The worker reports its new size before the presenter removes the retained resize frame.
+    await page.waitFor(`${STATE}.includes(' size=${canvas[0]}x${canvas[1]} ')
+        && !document.querySelector('#view .ferroui-resize-overlay')`, 15000);
     await expectFrameInCanvas(page, { width: canvas[0], height: canvas[1], animated: true, marker, viewport });
 }
 

@@ -1,0 +1,42 @@
+<Border xmlns="https://github.com/ferroui" Width="680" Height="410"
+        Background="#ECF0F7" Padding="32">
+    <Border.Styles>
+        <Style Selector="Border#Overview">
+            <Style.Animations>
+                <Animation Duration="0:0:0.8" FillMode="Both">
+                    <!--ferroui-designer-program:4F766572766965772072657665616C-->
+                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.2" /></KeyFrame>
+                    <KeyFrame Cue="100%" KeySpline="0.2,0.7,0.3,1"><Setter Property="Opacity" Value="1" /></KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+        <Style Selector="Border#Review">
+            <Style.Animations>
+                <Animation Duration="0:0:1.1" Delay="0:0:0.9" FillMode="Both">
+                    <!--ferroui-designer-program:5265766965772072657665616C-->
+                    <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.2" /></KeyFrame>
+                    <KeyFrame Cue="100%" KeySpline="0.2,0.7,0.3,1"><Setter Property="Opacity" Value="1" /></KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </Border.Styles>
+    <StackPanel Spacing="18">
+        <StackPanel Spacing="5">
+            <TextBlock Text="Client onboarding" FontSize="29" FontWeight="SemiBold" Foreground="#16243B" />
+            <TextBlock Text="Review the account summary and complete the approval." FontSize="14" Foreground="#455773" />
+        </StackPanel>
+        <Border Name="Overview" Background="White" BorderBrush="#CAD5E7" BorderThickness="1"
+                CornerRadius="12" Padding="20">
+            <StackPanel Spacing="5">
+                <TextBlock Text="Account summary" FontSize="18" FontWeight="SemiBold" Foreground="#172A46" />
+                <TextBlock Text="Northwind Studio" FontSize="15" Foreground="#455773" />
+            </StackPanel>
+        </Border>
+        <Border Name="Review" Background="#243B63" CornerRadius="12" Padding="20">
+            <StackPanel Spacing="6">
+                <TextBlock Text="Approval ready" FontSize="18" FontWeight="SemiBold" Foreground="White" />
+                <TextBlock Text="Assign an account owner to continue." FontSize="14" Foreground="#D8E5FA" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</Border>

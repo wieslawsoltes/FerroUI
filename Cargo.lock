@@ -1702,6 +1702,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "bitflags 2.13.2",
  "ferroui-build-scan",
+ "ferroui-markup-syntax",
  "ferroui-system",
  "icu_locale_core",
  "libc",
@@ -1910,6 +1911,7 @@ dependencies = [
  "ferroui-designer-core",
  "ferroui-designer-language",
  "ferroui-designer-project",
+ "ferroui-designer-rsx",
  "ferroui-designer-tools",
  "ferroui-harfbuzz",
  "ferroui-hot-reload",
@@ -1933,7 +1935,9 @@ dependencies = [
 name = "ferroui-designer-animation"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ferroui-base",
  "ferroui-designer-core",
+ "ferroui-markup-xaml",
  "roxmltree 0.20.0",
  "serde",
  "serde_json",
@@ -1978,8 +1982,39 @@ dependencies = [
 name = "ferroui-designer-language"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ferroui-build-scan",
  "ferroui-designer-core",
  "ferroui-designer-project",
+ "ferroui-designer-tools",
+ "ferroui-markup-syntax",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "ferroui-designer-preview"
+version = "0.6.0-preview.1"
+dependencies = [
+ "base64",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-controls-treedatagrid",
+ "ferroui-designer",
+ "ferroui-designer-animation",
+ "ferroui-designer-core",
+ "ferroui-designer-language",
+ "ferroui-designer-project",
+ "ferroui-designer-rsx",
+ "ferroui-designer-tools",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
+ "ferroui-inspect",
+ "ferroui-markup-xaml",
+ "ferroui-mcp",
+ "ferroui-remote-protocol",
+ "ferroui-themes-winui",
+ "ferroui-vello",
+ "png",
  "serde",
  "serde_json",
 ]
@@ -1988,10 +2023,32 @@ dependencies = [
 name = "ferroui-designer-project"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ferroui-build-scan",
  "ferroui-designer-core",
+ "ferroui-reload-protocol",
  "libc",
+ "proc-macro2",
  "serde",
  "serde_json",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferroui-designer-rsx"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-designer-animation",
+ "ferroui-designer-core",
+ "ferroui-designer-language",
+ "ferroui-designer-project",
+ "ferroui-designer-tools",
+ "ferroui-markup",
+ "ferroui-view-syntax",
+ "proc-macro2",
+ "serde",
+ "serde_json",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -2000,11 +2057,14 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-designer-animation",
+ "ferroui-designer-core",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-remote-protocol",
  "ferroui-skia",
  "ferroui-win32",
+ "serde_json",
  "url",
  "uuid",
  "xamlx",
@@ -2032,6 +2092,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-designer-core",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2242,6 +2303,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-reload-protocol",
  "roxmltree 0.20.0",
  "serde_json",
  "url",
@@ -2256,6 +2318,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-headless",
  "ferroui-markup",
+ "ferroui-markup-xaml",
  "ferroui-skia",
  "ferroui-themes-simple",
  "serde_json",
@@ -2348,8 +2411,13 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-markup-syntax",
  "url",
 ]
+
+[[package]]
+name = "ferroui-markup-syntax"
+version = "0.6.0-preview.1"
 
 [[package]]
 name = "ferroui-markup-xaml"
@@ -2370,6 +2438,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "ferroui-reload-protocol",
  "quote",
  "roxmltree 0.20.0",
  "syn 2.0.119",
@@ -2413,6 +2482,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-controls",
  "ferroui-inspect",
+ "ferroui-reload-protocol",
  "filedescriptor",
  "getrandom 0.4.3",
  "serde_json",
@@ -2957,6 +3027,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-reload-protocol"
+version = "0.6.0-preview.1"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-remote-protocol"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -3277,14 +3355,27 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
+ "ferroui-reload-protocol",
  "ferroui-themes-fluent",
  "ferroui-view-macros",
+ "ferroui-view-syntax",
  "proc-macro2",
  "syn 2.0.119",
 ]
 
 [[package]]
 name = "ferroui-view-macros"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-reload-protocol",
+ "ferroui-view-syntax",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.119",
+]
+
+[[package]]
+name = "ferroui-view-syntax"
 version = "0.6.0-preview.1"
 dependencies = [
  "proc-macro2",
@@ -6944,6 +7035,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "todo-workbench"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-designer-animation",
+ "ferroui-designer-support",
+ "ferroui-harfbuzz",
+ "ferroui-inspect",
+ "ferroui-markup-xaml-loader",
+ "ferroui-mcp",
+ "ferroui-skia",
+ "ferroui-themes-winui",
+ "ferroui-view",
+ "ferroui-xaml-interactions-custom",
+ "todo-mvc",
+]
+
+[[package]]
 name = "tokio"
 version = "1.53.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8291,6 +8402,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-reload-protocol",
  "ferroui-themes-fluent",
  "ferroui-themes-simple",
  "url",

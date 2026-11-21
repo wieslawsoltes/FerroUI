@@ -3,7 +3,7 @@
 use crate::{DesignerSession, DesignerWorkspace, Edit, PreviewStatus};
 use ferroui_designer_animation::{AnimationValue, Easing};
 use ferroui_designer_collaboration::{Presence, Snapshot, SyncMessage, VersionVector};
-use ferroui_inspect::TreeKind;
+use crate::RuntimeOutlineMode;
 use ferroui_mcp::UiToolProvider;
 use serde_json::{Value, json};
 use std::cell::RefCell;
@@ -11,45 +11,89 @@ use std::rc::{Rc, Weak};
 
 #[path = "mcp_authoring.rs"]
 mod authoring;
+#[path = "mcp_behaviors.rs"]
+mod behaviors;
+#[path = "mcp_binding.rs"]
+mod binding;
+#[path = "mcp_brush.rs"]
+mod brush;
 #[cfg(test)]
 #[path = "mcp_automation_tests.rs"]
 mod automation_tests;
 #[path = "mcp_components.rs"]
 mod components;
+#[path = "mcp_style_composition.rs"]
+mod style_composition;
+#[path = "mcp_events.rs"]
+mod events;
+#[path = "mcp_grid.rs"]
+mod grid;
+#[path = "mcp_columns.rs"]
+mod columns;
+pub use columns::{columns_report, rust_column_source_plan};
+#[path = "mcp_rsx_style.rs"]
+mod rsx_style;
+pub use rsx_style::{rust_style_source_plan, RSX_STYLES, RSX_STYLE_EDIT};
+#[path = "mcp_item_templates.rs"]
+mod item_templates;
+pub use item_templates::{rust_template_navigation, rust_template_report, rust_template_source_plan};
+#[path = "mcp_property_trace.rs"]
+mod property_trace;
+pub use property_trace::property_trace_report;
 #[cfg(test)]
 #[path = "mcp_components_tests.rs"]
 mod components_tests;
 #[path = "mcp_design_workflows.rs"]
 mod design_workflows;
+#[path = "mcp_design_tokens.rs"]
+mod design_tokens;
 #[cfg(test)]
 #[path = "mcp_design_workflows_tests.rs"]
 mod design_workflows_tests;
 #[path = "mcp_preview_stages.rs"]
 mod preview_stages;
+#[path = "mcp_preview_appearance.rs"]
+mod preview_appearance;
 #[path = "mcp_prototype.rs"]
 mod prototype;
 #[path = "mcp_schema.rs"]
 mod schema;
+#[path = "mcp_timeline_markers.rs"]
+mod timeline_markers;
 #[path = "mcp_selection_workflows.rs"]
 mod selection_workflows;
+#[path = "mcp_spacing.rs"]
+mod spacing;
+#[path = "mcp_wrap.rs"]
+mod wrap;
 #[path = "mcp_workspace.rs"]
 mod workspace_tools;
+#[path = "mcp_placement.rs"]
+mod placement;
 
 pub use ferroui_mcp::{
     Options, Permissions, Transport, UiServerHandle as ServerHandle, reserve_stdout,
 };
+pub use crate::workspace_spacing::SPACING_PROPERTIES;
 
 /// A server-local, UI-thread-owned designer tool provider. It does not keep a closed workspace
 /// alive. Read-only inspector tools remain available beside these document authoring tools.
 pub struct DesignerMcp {
     session: Weak<RefCell<DesignerSession>>,
     workspace: Option<Weak<DesignerWorkspace>>,
+    spacing: spacing::Cache,
 }
 impl DesignerMcp {
+    /// Tool definitions that only need a designer session, without a Studio shell.
+    pub fn session_tool_definitions() -> Vec<Value> {
+        Self { session: Weak::new(), workspace: None, spacing: Default::default() }.tools()
+    }
+
     pub fn new(session: &Rc<RefCell<DesignerSession>>) -> Self {
         Self {
             session: Rc::downgrade(session),
             workspace: None,
+            spacing: Default::default(),
         }
     }
     /// Bind project/editor tools without keeping the workspace or its session alive.
@@ -57,6 +101,7 @@ impl DesignerMcp {
         Self {
             session: Rc::downgrade(&workspace.session()),
             workspace: Some(Rc::downgrade(workspace)),
+            spacing: Default::default(),
         }
     }
     fn session(&self) -> Result<Rc<RefCell<DesignerSession>>, String> {
@@ -149,7 +194,11 @@ fn state(session: &DesignerSession) -> Value {
             json!({"state":"failed","revision":revision,"message":message})
         }
     };
-    json!({"revision":session.document().revision(),"valid":session.document().is_valid(),"dirty":session.document().is_dirty(),"selection":session.selection(),"can_undo":session.can_undo(),"can_redo":session.can_redo(),"preview":preview,"diagnostics":session.document().diagnostics(),"collaboration_error":session.collaboration_error()})
+    let mut state = json!({"revision":session.document().revision(),"valid":session.authored_is_valid(),"dirty":session.authored_is_dirty(),"language":if session.uses_rust_source() { "rust" } else { "xaml" },"selection":session.selection(),"can_undo":session.can_undo(),"can_redo":session.can_redo(),"preview":preview,"diagnostics":session.authored_diagnostics(),"collaboration_error":session.collaboration_error()});
+    if let Some(property) = session.rust_template_property() {
+        state["rust_template"] = json!(property);
+    }
+    state
 }
 
 impl UiToolProvider for DesignerMcp {
@@ -210,9 +259,23 @@ impl UiToolProvider for DesignerMcp {
             ),
             definition(
                 "designer_tree",
-                "Read the live preview visual or logical tree with inspector IDs, source AST IDs and artboard bounds.",
-                json!({"tree":{"enum":["visual","logical"]}}),
+                "Read the visual, logical or combined live preview tree with inspector IDs, source IDs and bounds.",
+                json!({"tree":{"enum":["visual","logical","combined"]}}),
                 &[],
+                false,
+            ),
+            definition(
+                "designer_preview_checks",
+                "Check the current native preview for measured overflow, rectangular clipping, ineffective authored layout values, accessible names, and supported text contrast. Findings link to source. Overflow distances are logical pixels.",
+                json!({}),
+                &[],
+                false,
+            ),
+            definition(
+                "designer_property_trace",
+                "Trace a property on one source or runtime node against the accepted native preview. Read the effective value, contributor precedence, and any authored locations. Pass include_sources to include checked locations in other XAML files.",
+                json!({"node":schema::id(),"runtime_node":schema::id(),"property":{"type":"string","minLength":1,"maxLength":256},"include_sources":{"type":"boolean"}}),
+                &["property"],
                 false,
             ),
             definition(
@@ -252,11 +315,26 @@ impl UiToolProvider for DesignerMcp {
             ),
         ];
         tools.extend(authoring::tools());
+        tools.extend(behaviors::tools());
+        tools.extend(timeline_markers::tools());
+        tools.extend(binding::tools());
+        tools.push(brush::tool());
+        tools.extend(grid::tools());
+        tools.extend(columns::tools());
+        tools.extend(item_templates::tools());
         tools.extend(components::tools());
+        tools.extend(style_composition::tools());
+        tools.extend(rsx_style::tools());
+        tools.extend(events::tools());
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
+        tools.extend(spacing::tools());
+        tools.extend(wrap::tools());
+        tools.extend(placement::tools());
+        tools.push(design_tokens::tool());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
+            tools.extend(preview_appearance::tools());
             tools.extend(preview_stages::tools());
             tools.extend(prototype::tools());
         }
@@ -271,12 +349,28 @@ impl UiToolProvider for DesignerMcp {
             .find(|tool| tool["name"] == name)
             .ok_or("Unknown designer tool")?;
         if authoring::handles(name)
+            || behaviors::handles(name)
+            || timeline_markers::handles(name)
+            || binding::handles(name)
+            || name == brush::NAME
+            || grid::handles(name)
+            || columns::handles(name)
+            || item_templates::handles(name)
+            || name == "designer_property_trace"
             || components::handles(name)
+            || style_composition::handles(name)
+            || rsx_style::handles(name)
+            || events::handles(name)
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
             || selection_workflows::handles(name)
+            || spacing::handles(name)
+            || wrap::handles(name)
+            || preview_appearance::handles(name)
             || preview_stages::handles(name)
+            || placement::handles(name)
             || prototype::handles(name)
+            || name == design_tokens::NAME
         {
             return schema::validate(&definition["inputSchema"], args);
         }
@@ -332,9 +426,9 @@ impl UiToolProvider for DesignerMcp {
             }
             "designer_tree" => {
                 if object.contains_key("tree")
-                    && !matches!(args["tree"].as_str(), Some("visual" | "logical"))
+                    && !matches!(args["tree"].as_str(), Some("visual" | "logical" | "combined"))
                 {
-                    return Err("tree must be visual or logical".into());
+                    return Err("tree must be visual, logical or combined".into());
                 }
             }
             "designer_animation" => match text(args, "action")?.as_str() {
@@ -434,8 +528,16 @@ impl UiToolProvider for DesignerMcp {
         if definition["annotations"]["readOnlyHint"] != true && !permissions.allow_property_writes {
             return Err("Designer authoring requires allow_property_writes".into());
         }
+        if name == design_tokens::NAME {
+            return design_tokens::call(args);
+        }
         let owner = self.session()?;
-        if preview_stages::handles(name) || prototype::handles(name) {
+        if placement::handles(name) {
+            let workspace = self.workspace.as_ref().and_then(Weak::upgrade);
+            let mut session = owner.try_borrow_mut().map_err(|_| "Designer is already processing a transaction")?;
+            return placement::call(&mut session, workspace.as_deref(), name, args);
+        }
+        if preview_appearance::handles(name) || preview_stages::handles(name) || prototype::handles(name) {
             let workspace = self
                 .workspace
                 .as_ref()
@@ -448,6 +550,9 @@ impl UiToolProvider for DesignerMcp {
                     .try_borrow_mut()
                     .map_err(|_| "Designer is already processing a transaction")?,
             );
+            if preview_appearance::handles(name) {
+                return preview_appearance::call(&workspace, name, args);
+            }
             return if prototype::handles(name) {
                 prototype::call(&workspace, name, args, permissions)
             } else {
@@ -455,6 +560,8 @@ impl UiToolProvider for DesignerMcp {
             };
         }
         if selection_workflows::handles(name)
+            || spacing::handles(name)
+            || wrap::handles(name)
             || (name == "designer_layer" && args["action"] == "select_matching_type")
         {
             if let Some(workspace) = &self.workspace {
@@ -464,7 +571,7 @@ impl UiToolProvider for DesignerMcp {
                     .ensure_selection_workflow_context()?;
             }
         }
-        if workspace_tools::handles(name) {
+        if workspace_tools::handles(name) || (self.workspace.is_some() && matches!(name, "designer_undo" | "designer_redo")) {
             let workspace = self
                 .workspace
                 .as_ref()
@@ -484,13 +591,28 @@ impl UiToolProvider for DesignerMcp {
                 }
             }
             drop(workspace.try_language_service()?);
+            if matches!(name, "designer_undo" | "designer_redo") {
+                workspace.source_history(name == "designer_redo")?;
+                workspace.refresh(true);
+                return Ok(state(&owner.borrow()));
+            }
             if name == "designer_project_task"
                 && args["action"] != "cancel"
                 && !permissions.allow_input
             {
                 return Err("Starting project processes requires allow_input".into());
             }
-            return workspace_tools::call(&workspace, name, args);
+            return workspace_tools::call(&workspace, name, args, permissions.allow_input);
+        }
+        let style_workspace = self.workspace.as_ref()
+            .filter(|_| name == RSX_STYLE_EDIT).and_then(Weak::upgrade);
+        if let Some(workspace) = style_workspace {
+            {
+                let session = owner.try_borrow().map_err(|_| "Designer is already processing a transaction")?;
+                ensure_revision(&session, args)?;
+            }
+            workspace.edit_rust_style(&rsx_style::decode_edit(args)?)?;
+            return Ok(state(&owner.borrow()));
         }
         let mut session = owner
             .try_borrow_mut()
@@ -499,10 +621,76 @@ impl UiToolProvider for DesignerMcp {
             ensure_revision(&session, args)?;
         }
         if authoring::handles(name) {
-            return authoring::call(&mut session, name, args, permissions);
+            return authoring::call(&mut session, name, args);
+        }
+        if behaviors::handles(name) {
+            return behaviors::call(&mut session, name, args, permissions);
+        }
+        if timeline_markers::handles(name) {
+            return timeline_markers::call(&mut session, name, args);
+        }
+        if binding::handles(name) {
+            return binding::call(&mut session, name, args);
+        }
+        if name == brush::NAME {
+            return brush::call(&session, args);
+        }
+        if grid::handles(name) {
+            return grid::call(&mut session, name, args);
+        }
+        if columns::handles(name) {
+            return columns::call(&mut session, name, args);
+        }
+        if rsx_style::handles(name) {
+            return rsx_style::call(&mut session, name, args);
+        }
+        if item_templates::handles(name) {
+            let result = item_templates::call(&mut session, name, args)?;
+            if let (true, Some(workspace)) = (
+                session.uses_rust_source() && args["action"] == "preview",
+                self.workspace.as_ref().and_then(Weak::upgrade),
+            ) {
+                drop(session);
+                workspace.focus_definition_canvas();
+                return Ok(result);
+            }
+            if let (Some(workspace), Some(target)) = (
+                self.workspace.as_ref().and_then(Weak::upgrade),
+                result.get("openDefinition"),
+            ) {
+                let target = serde_json::from_value(target.clone()).map_err(|error| error.to_string())?;
+                drop(session);
+                workspace.open_included_template(target)?;
+                return Ok(state(&owner.borrow()));
+            }
+            return Ok(result);
         }
         if components::handles(name) {
-            return components::call(&mut session, name, args);
+            let mut result = components::call(&mut session, name, args)?;
+            if let (Some(workspace), Some(consumer)) = (
+                self.workspace.as_ref().and_then(Weak::upgrade),
+                result["returnToConsumer"].as_str(),
+            ) {
+                drop(session);
+                workspace.show_open_document(consumer)?;
+                result["document"] = state(&owner.borrow());
+            }
+            return Ok(result);
+        }
+        if style_composition::handles(name) {
+            let mut result = style_composition::call(&mut session, name, args)?;
+            if let (Some(workspace), Some(target)) = (
+                self.workspace.as_ref().and_then(Weak::upgrade), result.get("openDefinition"),
+            ) {
+                let target = serde_json::from_value(target.clone()).map_err(|error| error.to_string())?;
+                drop(session);
+                result["editor"] = json!(workspace.open_included_style_source(target)?);
+                result["document"] = state(&owner.borrow());
+            }
+            return Ok(result);
+        }
+        if events::handles(name) {
+            return events::call(&mut session, name, args);
         }
         if design_workflows::handles(name) {
             return design_workflows::call(&mut session, name, args);
@@ -510,11 +698,17 @@ impl UiToolProvider for DesignerMcp {
         if selection_workflows::handles(name) {
             return selection_workflows::call(&mut session, name, args);
         }
+        if spacing::handles(name) {
+            return self.spacing.call(&mut session, name, args);
+        }
+        if wrap::handles(name) {
+            return wrap::call(&mut session, name, args);
+        }
         match name {
             "designer_document" => {
                 let mut result = state(&session);
                 if args["include_source"] != false {
-                    result["source"] = json!(session.document().source());
+                    result["source"] = json!(session.authored_source());
                 }
                 Ok(result)
             }
@@ -538,9 +732,14 @@ impl UiToolProvider for DesignerMcp {
                         break;
                     }
                 }
-                Ok(
-                    json!({"revision":session.document().revision(),"authored_valid":session.document().is_valid(),"nodes":nodes,"truncated":truncated}),
-                )
+                let mut result = json!({"revision":session.document().revision(),"authored_valid":session.authored_is_valid(),"nodes":nodes,"truncated":truncated});
+                if session.uses_rust_source() {
+                    result["coordinateSpace"] = json!("projectedXaml");
+                    result["authoredSpans"] = json!(nodes.iter().filter_map(|node| {
+                        Some((node.id, session.authored_span(node.id)?))
+                    }).collect::<std::collections::BTreeMap<_, _>>());
+                }
+                Ok(result)
             }
             "designer_apply" => {
                 let change = session
@@ -579,14 +778,24 @@ impl UiToolProvider for DesignerMcp {
                 Ok(state(&session))
             }
             "designer_tree" => {
-                let kind = if args["tree"] == "logical" {
-                    TreeKind::Logical
-                } else {
-                    TreeKind::Visual
+                let mode = match args["tree"].as_str() {
+                    Some("logical") => RuntimeOutlineMode::Logical,
+                    Some("combined") => RuntimeOutlineMode::Combined,
+                    _ => RuntimeOutlineMode::Visual,
                 };
-                let rows: Vec<Value> = session.runtime_tree(kind).iter().map(|row| json!({"inspector_id":row.inspector_id,"source_id":row.source_id,"parent":row.parent,"depth":row.depth,"type":row.type_name,"name":row.name,"bounds":row.bounds.map(|b| json!({"x":b.x,"y":b.y,"width":b.width,"height":b.height}))})).collect();
+                let rows: Vec<Value> = session.runtime_outline(mode).into_iter().map(|entry| {
+                    let row = entry.node;
+                    json!({
+                        "inspector_id": row.inspector_id, "source_id": row.source_id, "parent": row.parent,
+                        "depth": row.depth, "type": row.type_name, "name": row.name,
+                        "bounds": row.bounds.map(|b| json!({"x":b.x,"y":b.y,"width":b.width,"height":b.height})),
+                        "visual": entry.visual, "logical": entry.logical, "logical_parent": entry.logical_parent
+                    })
+                }).collect();
                 Ok(json!({"document":state(&session),"nodes":rows}))
             }
+            "designer_preview_checks" => Ok(json!({"revision":session.document().revision(),"findings":session.preview_checks()?})),
+            "designer_property_trace" => property_trace_report(&session, args, None),
             "designer_timeline" => Ok(
                 json!({"timeline":session.timeline(),"time":session.time(),"playing":session.is_playing(),"recording":session.recording(),"warnings":session.animation_warnings()}),
             ),
@@ -692,6 +901,23 @@ mod tests {
             allow_property_writes: true,
             allow_input: false,
         }
+    }
+
+    #[test]
+    fn toolbox_and_placement_share_the_studio_transaction() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (session, provider) = fixture();
+        let assets = provider.call("designer_toolbox", &json!({}), Permissions::default()).unwrap();
+        assert!(assets["assets"].as_array().unwrap().iter().any(|asset| asset["id"] == "Ellipse"));
+        let parent = session.borrow().document().ast().root();
+        let insert = json!({"expected_revision":0,"asset":"Ellipse","anchor":parent,"position":"inside"});
+        assert!(provider.call("designer_place", &insert, Permissions::default()).is_err());
+        let result = provider.call("designer_place", &insert, write()).unwrap();
+        assert_eq!(result["revision"], 1);
+        assert!(session.borrow().document().source().contains("<Ellipse"));
+        assert!(provider.call("designer_place", &insert, write()).is_err());
+        provider.call("designer_undo", &json!({"expected_revision":1}), write()).unwrap();
+        assert_eq!(session.borrow().document().source(), source());
     }
 
     #[test]

@@ -1,0 +1,33 @@
+<Canvas xmlns="https://github.com/ferroui" Width="640" Height="380" UseLayoutRounding="False"
+        Background="#FFF2F5FA">
+    <StackPanel Canvas.Left="36" Canvas.Top="26" Spacing="4">
+        <TextBlock Text="Release review" FontSize="29" FontWeight="SemiBold" Foreground="#FF172B46" />
+        <TextBlock Text="Project Cedar · Desktop release" Foreground="#FF47637C" />
+    </StackPanel>
+    <Canvas Name="ReviewQueue" Canvas.Left="36" Canvas.Top="107" Width="480" Height="135"
+            Background="#FFDCE8F8">
+        <Border Name="CapacityCard" Canvas.Left="18" Canvas.Right="32" Canvas.Top="21"
+                Width="210" MaxWidth="188" Height="92" Padding="15" CornerRadius="10"
+                Background="#FFFFFFFF">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Review capacity" FontSize="17" FontWeight="SemiBold" Foreground="#FF172B46" />
+                <TextBlock Text="3 open approvals" Foreground="#FF47637C" />
+            </StackPanel>
+        </Border>
+        <Border Name="OverhangingCard" Canvas.Left="306" Canvas.Top="21" Width="214" Height="92"
+                Padding="15" CornerRadius="10" Background="#FFFFFFFF">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Final sign-off" FontSize="17" FontWeight="SemiBold" Foreground="#FF172B46" />
+                <TextBlock Text="Design and accessibility" Foreground="#FF47637C" />
+            </StackPanel>
+        </Border>
+    </Canvas>
+    <Grid Name="Actions" Canvas.Left="36" Canvas.Top="265" Width="480" Height="78"
+          RowDefinitions="26,*" ColumnDefinitions="224,*">
+        <TextBlock Text="Next steps" Grid.ColumnSpan="2" FontWeight="SemiBold" Foreground="#FF172B46" />
+        <Button Name="ReviewAction" Grid.Row="7" Grid.Column="0" Width="136" HorizontalAlignment="Left"
+                Content="Review changes" />
+        <Button Name="ApproveAction" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4"
+                Width="120" HorizontalAlignment="Left" Content="Approve" />
+    </Grid>
+</Canvas>

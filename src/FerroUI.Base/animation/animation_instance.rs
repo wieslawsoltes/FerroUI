@@ -101,7 +101,7 @@ pub(crate) struct AnimationInstance<A: Animator> {
     neutral_value: RefCell<A::Value>,
     fill_mode: Cell<FillMode>,
     is_first_frame: Cell<bool>,
-    preview_complete: Cell<bool>,
+    scoped_fill_complete: Cell<bool>,
     is_in_first_initial_delay: Cell<bool>,
     last_interp_value: RefCell<A::Value>,
     initial_kf_value: RefCell<A::Value>,
@@ -162,7 +162,7 @@ impl<A: Animator> AnimationInstance<A> {
             neutral_value: RefCell::new(A::Value::default()),
             fill_mode: Cell::new(FillMode::None),
             is_first_frame: Cell::new(true),
-            preview_complete: Cell::new(false),
+            scoped_fill_complete: Cell::new(false),
             is_in_first_initial_delay: Cell::new(true),
             last_interp_value: RefCell::new(A::Value::default()),
             initial_kf_value: RefCell::new(A::Value::default()),
@@ -229,7 +229,7 @@ impl<A: Animator> AnimationInstance<A> {
         let Some(timer_sub) = timer_sub else { return };
 
         // Animation may have been stopped before it has finished.
-        if self.can_apply_final_fill() && !self.animation.is_preview() {
+        if self.can_apply_final_fill() && !self.animation.keeps_fill_at_animation_priority() {
             let value = self.last_interp_value.borrow().clone();
             self.apply_final_fill(value);
         }
@@ -352,7 +352,8 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn do_complete(&self, stop_as_is: bool) {
-        if self.animation.is_preview() && self.preview_complete.replace(true) {
+        let scoped_fill = self.animation.keeps_fill_at_animation_priority();
+        if scoped_fill && self.scoped_fill_complete.replace(true) {
             return;
         }
         if !stop_as_is {
@@ -369,7 +370,7 @@ impl<A: Animator> AnimationInstance<A> {
             *self.last_interp_value.borrow_mut() = value;
         }
 
-        if self.animation.is_preview() && self.can_apply_final_fill() {
+        if scoped_fill && self.can_apply_final_fill() {
             // Keep the original binding/frame after the clock completes. Creating a new
             // value frame here would incorrectly raise an older program above a newer one.
             self.core
@@ -536,7 +537,7 @@ impl<A: Animator> AnimationInstance<A> {
 
     fn internal_step(&self, time: SignedDuration) -> Result<(), AnimationError> {
         self.do_play_states();
-        if self.preview_complete.get() {
+        if self.scoped_fill_complete.get() {
             return Ok(());
         }
 
@@ -660,16 +661,10 @@ impl<A: Animator> AnimationInstance<A> {
     }
 
     fn update_neutral_value(&self) {
-        let property = self.animator.base().styled_property::<A::Value>();
         let Some(control) = self.target_control.upgrade() else {
             return;
         };
-
-        let value = match control.get_base_value(property) {
-            Some(base_value) => base_value,
-            None => control.get_value(property),
-        };
-        *self.neutral_value.borrow_mut() = value;
+        *self.neutral_value.borrow_mut() = self.animator.neutral_value(&control);
     }
 }
 

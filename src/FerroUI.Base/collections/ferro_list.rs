@@ -427,6 +427,35 @@ impl<T: Clone> FerroList<T> {
         self.notify_remove(&removed, index);
     }
 
+    /// Replaces the contents and publishes one reset after validation succeeds.
+    /// Returns whether the list changed. Existing snapshots retain their items.
+    pub fn replace_all(&self, items: impl IntoIterator<Item = T>) -> bool
+    where
+        T: PartialEq,
+    {
+        let items: Vec<T> = items.into_iter().collect();
+        let old = self.snapshot();
+        if old.as_slice() == items.as_slice() {
+            return false;
+        }
+        for item in &items {
+            self.validate_item(item);
+        }
+        let count_changed = old.len() != items.len();
+        *self.0.items.borrow_mut() = Rc::new(items);
+        self.notify(NotifyCollectionChangedEventArgs {
+            action: NotifyCollectionChangedAction::Reset,
+            new_items: &[],
+            old_items: &[],
+            new_starting_index: -1,
+            old_starting_index: -1,
+        });
+        if count_changed {
+            self.notify_count_changed();
+        }
+        true
+    }
+
     /// Removes all items from the collection.
     pub fn clear(&self) {
         if self.count() > 0 {

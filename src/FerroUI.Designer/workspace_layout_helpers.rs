@@ -145,6 +145,15 @@ impl LayoutEditPreview {
     pub fn is_current(&self, session: &DesignerSession) -> bool {
         self.guard.validate(session).is_ok()
     }
+
+    /// Return the approved transaction to an editor that owns the source buffer.
+    pub fn source_edits(&self, session: &DesignerSession) -> Result<Vec<Edit>, String> {
+        self.guard.validate(session)?;
+        match &self.rejection {
+            Some(reason) => Err(reason.clone()),
+            None => Ok(self.edits.clone()),
+        }
+    }
 }
 
 impl DesignerSession {
@@ -370,10 +379,33 @@ impl DesignerSession {
         position: Point,
         previous: Option<&LayoutEditPreview>,
     ) -> Result<LayoutEditPreview, String> {
+        self.preview_insert(source, position, previous, false)
+    }
+
+    pub(crate) fn preview_layout_insert_nearby(
+        &self,
+        source: &str,
+        position: Point,
+    ) -> Result<LayoutEditPreview, String> {
+        self.preview_insert(source, position, None, true)
+    }
+
+    fn preview_insert(
+        &self,
+        source: &str,
+        position: Point,
+        previous: Option<&LayoutEditPreview>,
+        find_container: bool,
+    ) -> Result<LayoutEditPreview, String> {
         writable(self)?;
         point(position)?;
-        let target = layout_target(self, position, &[])
-            .ok_or("Choose a content holder or panel inside the artboard")?;
+        let (target, position) = if find_container {
+            insertion_target(self, position)?
+        } else {
+            let target = layout_target(self, position, &[])
+                .ok_or("Choose a content holder or panel inside the artboard")?;
+            (target, position)
+        };
         self.ensure_layer_manipulable(target)?;
         let measured = measure(self, target, None)?;
         let helpers = snapshot(self, target, Some(position), &[], &measured)?;
@@ -463,6 +495,40 @@ impl DesignerSession {
         handle_index: usize,
         delta: Point,
     ) -> Result<LayoutEditPreview, String> {
+        self.preview_layout_handle_with(snapshot, handle_index, |handle, transform| {
+            let inverse = transform.inverse().map_err(|error| error.to_string())?;
+            let origin = inverse
+                .transform(LayoutPoint::new(0.0, 0.0))
+                .map_err(|error| error.to_string())?;
+            let end = inverse
+                .transform(point(delta)?)
+                .map_err(|error| error.to_string())?;
+            handle
+                .value_after_delta(LayoutPoint::new(end.x - origin.x, end.y - origin.y))
+                .map_err(|error| error.to_string())
+        })
+    }
+
+    pub(crate) fn preview_layout_handle_value(
+        &self,
+        snapshot: &LayoutHelperSnapshot,
+        handle_index: usize,
+        value: f64,
+    ) -> Result<LayoutEditPreview, String> {
+        self.preview_layout_handle_with(snapshot, handle_index, |handle, _| {
+            if !value.is_finite() || value < handle.minimum || handle.maximum.is_some_and(|max| value > max) {
+                return Err(format!("{} is outside the supported range", handle.label));
+            }
+            Ok(value)
+        })
+    }
+
+    fn preview_layout_handle_with(
+        &self,
+        snapshot: &LayoutHelperSnapshot,
+        handle_index: usize,
+        resolve: impl FnOnce(&ferroui_designer_tools::LayoutHandle, Affine) -> Result<f64, String>,
+    ) -> Result<LayoutEditPreview, String> {
         let guard = snapshot
             .guard
             .as_ref()
@@ -478,20 +544,12 @@ impl DesignerSession {
         }
         ensure_helper_layer_target(self, snapshot.scene.panel, &handle.action)?;
         let frame = snapshot.handle_frames.get(&handle.id);
-        let inverse = frame
-            .map_or(snapshot.to_artboard, |frame| frame.to_artboard)
-            .inverse()
-            .map_err(|error| error.to_string())?;
-        let origin = inverse
-            .transform(LayoutPoint::new(0.0, 0.0))
-            .map_err(|error| error.to_string())?;
-        let end = inverse
-            .transform(point(delta)?)
-            .map_err(|error| error.to_string())?;
-        let local = LayoutPoint::new(end.x - origin.x, end.y - origin.y);
-        let value = handle
-            .value_after_delta(local)
-            .map_err(|error| error.to_string())?;
+        let value = resolve(handle, frame.map_or(snapshot.to_artboard, |frame| frame.to_artboard))?;
+        let intent = PreviewIntent::Handle(handle.id.clone());
+        let label = format!("Adjust {}", handle.label);
+        if value == handle.value {
+            return Ok(accepted(self, snapshot.clone(), intent, Vec::new(), label));
+        }
         let mut helpers = snapshot.clone();
         let visual_handle = &mut helpers.scene.handles[handle_index];
         visual_handle.value = value;
@@ -517,7 +575,6 @@ impl DesignerSession {
                     text: format!("{}  {}", handle.label, compact(value)),
                 },
             });
-        let intent = PreviewIntent::Handle(handle.id.clone());
         let measured = measure(self, snapshot.scene.panel, None)?;
         let result = self
             .layout_tools()
@@ -539,7 +596,7 @@ impl DesignerSession {
             helpers,
             intent,
             edits,
-            format!("Adjust {}", handle.label),
+            label,
         ))
     }
 
@@ -572,6 +629,15 @@ impl DesignerSession {
         }
         if preview.edits.is_empty() {
             return Ok(());
+        }
+        if self.uses_rust_source() && ferroui_designer_rsx::is_child_list_edit(&preview.edits) {
+            let moving: &[NodeId] = match &preview.intent {
+                PreviewIntent::Move(nodes) => nodes,
+                _ => &[],
+            };
+            return self.apply_rust_placement(
+                preview.guard.revision, &preview.label, preview.edits.clone(), None, moving,
+            );
         }
         let change = self
             .apply_at(
@@ -885,6 +951,15 @@ pub(crate) fn layout_target(
     position: Point,
     excluded: &[NodeId],
 ) -> Option<NodeId> {
+    layout_target_where(session, position, excluded, &|_| true)
+}
+
+fn layout_target_where(
+    session: &DesignerSession,
+    position: Point,
+    excluded: &[NodeId],
+    eligible: &impl Fn(NodeId) -> bool,
+) -> Option<NodeId> {
     let root = session.preview.root()?.upcast::<Visual>();
     let artboard = session.preview.host.clone().upcast::<Visual>();
     let moving = excluded;
@@ -896,6 +971,7 @@ pub(crate) fn layout_target(
         position: Point,
         excluded: &BTreeSet<NodeId>,
         moving: &[NodeId],
+        eligible: &impl Fn(NodeId) -> bool,
     ) -> Option<NodeId> {
         if !visual.is_visible() {
             return None;
@@ -919,7 +995,7 @@ pub(crate) fn layout_target(
             if let Some(flow) = source
                 .and_then(|source| flow_edge_parent(session, source, visual, artboard, position))
                 .filter(|owner| {
-                    session
+                    eligible(*owner) && session
                         .ensure_layer_container_context(*owner, moving)
                         .is_ok()
                 })
@@ -936,13 +1012,13 @@ pub(crate) fn layout_target(
             .collect::<Vec<_>>();
         children.sort_by_key(|(index, child)| (child.z_index(), *index));
         for (_, child) in children.iter().rev() {
-            if let Some(target) = visit(session, child, artboard, position, excluded, moving) {
+            if let Some(target) = visit(session, child, artboard, position, excluded, moving, eligible) {
                 return Some(target);
             }
         }
         if inside {
             if let Some(source) = source.filter(|id| {
-                session.ensure_layer_container_context(*id, moving).is_ok()
+                eligible(*id) && session.ensure_layer_container_context(*id, moving).is_ok()
                     && session
                         .runtime_layout_capabilities(*id)
                         .is_some_and(|capabilities| {
@@ -954,7 +1030,40 @@ pub(crate) fn layout_target(
         }
         None
     }
-    visit(session, &root, &artboard, position, &excluded, moving)
+    visit(session, &root, &artboard, position, &excluded, moving, eligible)
+}
+
+pub(crate) fn insertion_target(session: &DesignerSession, position: Point) -> Result<(NodeId, Point), String> {
+    if let Some(target) = layout_target_where(session, position, &[], &|id| {
+        session.validate_content_insertion(id).is_ok()
+    }) {
+        return Ok((target, position));
+    }
+    let hit = layout_target(session, position, &[])
+        .ok_or("Choose a content holder or panel inside the artboard")?;
+    let artboard = session.preview.host.clone().upcast::<Visual>();
+    let mut owner = hit;
+    // Padding on a single-content shell belongs to its authored layout body.
+    // Follow only the content slot so templates, resources and siblings cannot capture it.
+    while let Some(child) = session.wrapped_layout_child(owner) {
+        let Some(visual) = session.preview.visual(child).filter(|visual| visual.is_visible()) else {
+            break;
+        };
+        if session.validate_content_insertion(child).is_ok() {
+            let local = artboard
+                .translate_point(position, &visual)
+                .ok_or("The drop target has no usable transform")?;
+            let bounds = visual.bounds();
+            let nearest = Point::new(local.x.clamp(0.0, bounds.width), local.y.clamp(0.0, bounds.height));
+            let point = visual
+                .translate_point(nearest, &artboard)
+                .ok_or("The drop target has no usable transform")?;
+            return Ok((child, point));
+        }
+        owner = child;
+    }
+    // Retain the occupied target's rejection feedback when there is no eligible layout body.
+    Ok((hit, position))
 }
 
 /// A six-screen-DIP edge band makes zero-gap flow layouts insertable between children.

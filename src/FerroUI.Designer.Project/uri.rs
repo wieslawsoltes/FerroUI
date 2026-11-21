@@ -187,6 +187,24 @@ fn split_uri(uri: &str) -> Result<(&str, &str)> {
     };
     Ok((&uri[..start], &uri[start..]))
 }
+
+/// Compare XAML loader addresses while preserving the authored path spelling.
+/// The native loader canonicalizes the scheme and assembly authority.
+pub fn same_loader_address(left: &str, right: &str) -> bool {
+    if left == right {
+        return true;
+    }
+    let (Ok((left_authority, left_path)), Ok((right_authority, right_path))) =
+        (split_uri(left), split_uri(right))
+    else {
+        return false;
+    };
+    let packaged = "ferres://";
+    left_authority.get(..packaged.len()).is_some_and(|scheme| scheme.eq_ignore_ascii_case(packaged))
+        && left_authority.eq_ignore_ascii_case(right_authority)
+        && left_path == right_path
+}
+
 fn normalize_uri(uri: &str) -> Result<String> {
     let (prefix, path) = split_uri(uri)?;
     let suffix_start = path.find(['?', '#']).unwrap_or(path.len());
@@ -225,6 +243,36 @@ fn normalize_uri(uri: &str) -> Result<String> {
         parts.join("/")
     ))
 }
+/// A document-relative URI for a literal path used by embedded project assets.
+pub fn relative_asset_uri(path: &str) -> Option<String> {
+    valid_asset_path(path).then(|| encode(path))
+}
+
+/// Recover a literal relative path without interpreting a scheme, query or encoded separators.
+pub fn relative_asset_path(reference: &str) -> Option<String> {
+    if reference.starts_with('{') || reference.contains(['#', '?']) || !valid_asset_path(reference) {
+        return None;
+    }
+    let mut segments = Vec::new();
+    for segment in reference.split('/') {
+        let decoded = decode(segment).ok()?;
+        if decoded.contains('/') {
+            return None;
+        }
+        segments.push(decoded);
+    }
+    let path = segments.join("/");
+    valid_asset_path(&path).then_some(path)
+}
+
+fn valid_asset_path(path: &str) -> bool {
+    !path.starts_with('/')
+        && !path.contains([':', '\\'])
+        && !path.chars().any(char::is_control)
+        && path.split('/').all(|segment| !segment.is_empty())
+        && !matches!(path.rsplit('/').next(), Some("." | ".."))
+}
+
 fn encode(value: &str) -> String {
     let mut out = String::new();
     for byte in value.bytes() {

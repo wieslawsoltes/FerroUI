@@ -101,6 +101,11 @@ fn workspace_loads_native_shell_and_selects_source_nodes() {
     assert_eq!(workspace.source_editor().text().as_deref(), Some(source()));
     workspace.set_outline_mode(OutlineMode::Visual);
     workspace.set_outline_mode(OutlineMode::Logical);
+    workspace.set_runtime_outline_mode(Some(RuntimeOutlineMode::Combined));
+    assert_eq!(workspace.runtime_outline_mode(), Some(RuntimeOutlineMode::Combined));
+    assert_eq!(workspace.outline_mode(), OutlineMode::Visual);
+    workspace.set_outline_mode(OutlineMode::Source);
+    assert_eq!(workspace.runtime_outline_mode(), None);
 }
 
 #[test]

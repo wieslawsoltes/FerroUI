@@ -1,0 +1,36 @@
+[package]
+name = "todo-workbench"
+description = "A FerroUI RSX Todo app for the VS Code designer and application MCP server"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "todo-workbench"
+path = "main.rs"
+test = false
+
+[features]
+hot-reload = ["ferroui-view/hot-reload"]
+mcp = ["dep:ferroui-inspect", "dep:ferroui-mcp"]
+app-preview = ["dep:ferroui-build-scan", "dep:ferroui-controls", "dep:ferroui-designer-animation", "dep:ferroui-designer-support", "dep:ferroui-markup-xaml-loader", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "dep:ferroui-xaml-interactions-custom"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-view = { workspace = true, features = ["desktop"] }
+ferroui-themes-winui = { workspace = true }
+ferroui-inspect = { workspace = true, optional = true }
+ferroui-mcp = { workspace = true, optional = true }
+ferroui-controls = { workspace = true, optional = true }
+ferroui-designer-animation = { workspace = true, optional = true }
+ferroui-designer-support = { workspace = true, optional = true }
+ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
+ferroui-skia = { workspace = true, optional = true }
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-xaml-interactions-custom = { workspace = true, optional = true }
+todo-mvc = { path = "../TodoMvc" }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true, optional = true }

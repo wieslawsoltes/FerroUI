@@ -40,7 +40,8 @@ use super::emitter::theme_units::{UnitEmission, TABLE as THEME_UNITS_TABLE};
 use super::emitter::{emit_function, reflection_path_types, reflection_path_types_by_unit, root_value_handle_of, DocumentFunctions};
 use super::theme_unit_graph;
 use super::transform::{transform_group, DocumentSource, TransformOptions};
-use super::source::{allocate_names, function_name_of, rust_string_literal, same_document_uri};
+use super::source::rust_string_literal;
+use ferroui_build_scan::compiled_names::{CompiledGroupKind, same_document_uri, untyped_function_name};
 use crate::compiler_extensions::group_transformers::MergedEntryOrigins;
 use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitsModel, XamlMetadata};
 
@@ -143,11 +144,7 @@ pub fn compile_documents_with(
     // Whether each document is public (`x:ClassModifier`), or why the directive is refused.
     let modifiers: Vec<Result<bool, String>> =
         documents.iter().map(|(_, xaml)| class_modifier_public(xaml).map(|public| public.unwrap_or(true))).collect();
-    // The names of the build functions (#849): the established ones where they are unique, the
-    // others disambiguated from the paths of the documents ([`allocate_names`]).
-    let requests: Vec<(String, &str)> = documents.iter().map(|(name, _)| (function_name_of(name), *name)).collect();
-    let borrowed: Vec<(&str, &str)> = requests.iter().map(|(function, name)| (function.as_str(), *name)).collect();
-    let function_names = allocate_names(&borrowed, functions_collide);
+    let function_names = CompiledGroupKind::Documents.function_names(documents.iter().map(|(name, _)| *name));
     let mut group: Vec<(usize, &str, &str, Option<String>)> = Vec::with_capacity(documents.len());
     for (index, ((name, xaml), function_name)) in documents.iter().zip(function_names).enumerate() {
         let public = match &modifiers[index] {
@@ -515,30 +512,6 @@ fn json_string(text: &str) -> String {
     literal
 }
 
-/// Whether the items `a` and `b` of two documents would have the same name:
-/// the names are equal, or one is the build function of deferred content
-/// (`<function>_deferred_<n>`) or a part of a split function
-/// (`<function>_part_<n>`) of the other.
-fn collides(a: &str, b: &str) -> bool {
-    let is_deferred_of = |deferred: &str, function: &str| {
-        deferred
-            .strip_prefix(function)
-            .and_then(|rest| {
-                rest.strip_prefix("_deferred_").or_else(|| rest.strip_prefix("_part_")).or_else(|| rest.strip_prefix("_unit_"))
-            })
-            .is_some_and(|index| !index.is_empty() && index.chars().all(|c| c.is_ascii_digit()))
-    };
-    a == b || is_deferred_of(a, b) || is_deferred_of(b, a)
-}
-
-/// Whether the build functions `a` and `b` of two documents of a group would give two items one
-/// name ([`collides`]), with the untyped build functions of the loader table
-/// ([`untyped_function_name`]).
-fn functions_collide(a: &str, b: &str) -> bool {
-    let (untyped_a, untyped_b) = (untyped_function_name(a), untyped_function_name(b));
-    collides(a, b) || collides(&untyped_a, b) || collides(a, &untyped_b) || collides(&untyped_a, &untyped_b)
-}
-
 /// Why a public document is refused when the loader table cannot tell it from the public document
 /// `other` (#849): their URIs are equal without regard to case.
 fn ambiguous_uri(other: &str) -> String {
@@ -546,11 +519,6 @@ fn ambiguous_uri(other: &str) -> String {
         "the document is public and its URI is the URI of the public document `{other}` for the loader table, which \
          compares URIs without regard to case: rename one of them, or make one of them internal (`x:ClassModifier`)"
     )
-}
-
-/// The name of the untyped build function that wraps the build function `function_name`.
-fn untyped_function_name(function_name: &str) -> String {
-    format!("{function_name}_untyped")
 }
 
 /// The public constructor of a class that the loader table of its document
@@ -795,18 +763,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         }
     }
 
-    // The names of the functions of the documents (#849): the established ones where they are
-    // unique, the others disambiguated from the paths of the documents ([`allocate_names`]).
-    let requests: Vec<(String, &str)> = documents
-        .iter()
-        .enumerate()
-        .map(|(index, document)| match index {
-            0 => (function_name_of(&document.0).replacen("build_", "populate_", 1), document.0.as_str()),
-            _ => (function_name_of(&document.0), document.0.as_str()),
-        })
-        .collect();
-    let borrowed: Vec<(&str, &str)> = requests.iter().map(|(function, name)| (function.as_str(), *name)).collect();
-    let allocated = allocate_names(&borrowed, collides);
+    let allocated = CompiledGroupKind::Class.function_names(documents.iter().map(|(name, _, _)| name.as_str()));
 
     // The functions of the documents, by their build methods.
     let mut functions = DocumentFunctions::default();

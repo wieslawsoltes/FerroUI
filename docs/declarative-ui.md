@@ -163,6 +163,58 @@ Upstream writes properties and bindings in code with indexers and operators on p
 | `control.Classes.Add("accent")` | `.class("accent")` |
 | `new Style(x => x.OfType<Button>())` | the styles API of the port (`Selectors`, `Style`, `Setter`), unchanged |
 
+### 4.3 Build TableView columns
+
+Use `table_column()` to define a native `TableViewColumn` and `table_columns` to collect the builders for `TableView::Columns`. Give each column a typed `GridLength` and optionally bind it to a property of the row object.
+
+```rust
+use ferroui_view::prelude::*;
+
+fn customer_table() -> Element {
+    rsx! {
+        TableView {
+            columns: ferroui_view::table_columns([
+                ferroui_view::table_column().header("Customer").binding_path("Name")
+                    .width(ferroui_controls::GridLength::from_pixels(156.0)),
+                ferroui_view::table_column().header("Region").binding_path("Region"),
+            ]),
+        }
+    }
+}
+```
+
+Set `items_source` to your row collection. `binding_path` creates a reflection binding for a row property. Use `binding` to pass an existing `AssignedBinding`, or supply a `cell_template` to render the whole row object. The same collection works with the chained `table_view().columns(...)` builder. Fully qualified helpers and an inline array let Designer Studio and the VS Code Columns view edit the original Rust declaration. [Designer workflow](designer/vscode/authoring.md#edit-an-rsx-tableview)
+
+### 4.4 Build TreeDataGrid columns
+
+Enable the `treedatagrid` feature of `ferroui-view` to use `TreeDataGrid`. Give the grid an `items_source` and a `column_definitions` collection. Each column builder's `.build()` creates a native column that can share the collection with different column kinds.
+
+```rust
+use ferroui_controls::ItemsSource;
+use ferroui_view::prelude::*;
+
+fn account_tree(items: ItemsSource) -> Element {
+    rsx! {
+        TreeDataGrid {
+            items_source: items,
+            column_definitions: ::ferroui_view::tree_data_grid_columns([
+                ::ferroui_view::tree_data_grid_row_header_column().build(),
+                ::ferroui_view::tree_data_grid_expander_column(
+                    ::ferroui_view::tree_data_grid_text_column()
+                        .header("Account").binding_path("Name").build()
+                ).children_path("Children").build(),
+                ::ferroui_view::tree_data_grid_check_box_column()
+                    .header("Active").binding_path("Active").build(),
+            ])
+        }
+    }
+}
+```
+
+The native grid builds a hierarchy when it encounters an expander column. Give each row a binding-readable name and children collection, or supply a compiled binding to the builder. Put header and width settings on the expander's inner column. Text, checkbox, template, and row-header columns can also stand on their own. Template columns start with the framework's default text template. Use `.cell_template(ferroui_view::template(...))` or `.cell_editing_template(...)` for a typed row.
+
+If the column definitions change when the view runs again, the grid replaces the collection in one update. For unchanged columns, reuse the collection through a hook or memo. [TreeDataGrid authoring in VS Code](designer/vscode/authoring.md#edit-an-rsx-treedatagrid)
+
 ## 5. The macros
 
 ### 5.1 `rsx!`
@@ -389,6 +441,8 @@ rsx! { ListBox { items_source: source, item_template: item_template } }
 
 Each item container gets a `ComponentHost`. Its component reads the item (the `DataContext` of the container) and runs `view` with it. The template matches data of type `T`.
 
+To author the body on the designer canvas, assign a direct qualified call such as `ferroui_view::template(|person: Person| rsx! { TextBlock { text: person.name } })`. Use the same builder in `.cell_template(...)` on a `table_column()` for a TableView row. The isolated designer projects literal controls from that RSX body. The application evaluates the closure with the typed item. [Designer authoring walkthrough](designer/vscode/authoring.md#edit-a-rust-item-or-cell-template)
+
 **Recycling.** A virtualizing panel realizes only the visible items. When it takes a container away, it clears the container's content, so the presenter builds a new child for the next item: a template that made a new host each time would mount a new component and new controls for every item scrolled into view. The template keeps a pool instead:
 
 1. A host that leaves the visual tree goes to the pool of its template, with its component still mounted. While it has no data context, the component keeps showing its last item, so nothing is taken down.
@@ -479,6 +533,8 @@ stack_panel().styles([
 
 - `style(selector)` parses a selector in the syntax of XAML with the run-time selector parser of the port (`ferroui-markup`), resolving type names among the registered classes. `style_of(selector)` takes a selector built with the selectors API.
 - `.set(property, value)` takes what converts to the value of the property, as the setters of elements do.
+- `.resource(key, value)` adds a native resource to the rule's dictionary. `.set_resource(property, key)` follows the value seen by each matched control, including local overrides and theme variants. A `Color` resource can supply a brush property. For example, `.resource("Accent", Color::from_rgb(0, 99, 177)).set_resource(TemplatedControl::background_property(), "Accent")` uses the same key in the authored rule and the live property binding. [Author color resources in VS Code](designer/vscode/styles.md#edit-rust-style-color-resources)
+- `.theme_resource(variant, key, value)` adds a value in the rule's native theme dictionary. Use `ThemeVariant::default()` for a fallback and `ThemeVariant::light()` or `ThemeVariant::dark()` for an appearance-specific value. A shared `.resource` with the same key takes precedence within the rule. High contrast uses the variant supplied by the active native theme and follows its inheritance chain.
 - `.nested(style("^..."))` adds a nested style; its selector starts with `^`, the selector of the style it is in (`^:pointerover`, `^.selected > TextBlock`). The run-time parser of the port parses `^`, an addition to upstream's, whose run-time parser leaves it to the XAML compiler (DEVIATIONS.md, Parsers of markup).
 - `.styles([..])` of an element (`styles: [..]` in `rsx!`) adds the styles to the `Styles` of the control when it is made.
 

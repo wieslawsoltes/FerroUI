@@ -248,6 +248,7 @@ impl CardPresentation {
                 PreviewTheme::Light => "Light",
                 PreviewTheme::Dark => "Dark",
                 PreviewTheme::Inherit => "App theme",
+                PreviewTheme::HighContrast => "High contrast",
             },
             if self.configuration.pinned {
                 " · Pinned"

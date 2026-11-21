@@ -8,6 +8,7 @@
 //! checked (the compiler checked it), and the names a macro declares are
 //! known only for the macros the scanner reads.
 
+use crate::model::ExportModel;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// A name a `use` item brings into a module.
@@ -18,6 +19,7 @@ pub(crate) struct Import {
     pub path: Vec<String>,
     /// Declared with `pub` (another crate can name it).
     pub public: bool,
+    pub explicit_alias: bool,
 }
 
 /// A glob import of a module (`use a::b::*`).
@@ -68,6 +70,17 @@ pub(crate) enum Target {
     External(Vec<String>),
     /// A name of the language prelude or a primitive type.
     Builtin,
+}
+
+struct Binding {
+    target: Target,
+    explicit_alias: bool,
+}
+
+impl From<Target> for Binding {
+    fn from(target: Target) -> Self {
+        Self { target, explicit_alias: false }
+    }
 }
 
 /// The names every module has without a `use` item: the primitive types and the types of
@@ -123,6 +136,7 @@ pub(crate) struct Modules {
     /// of such a crate (`::ferroui_base::Border`), with the path of the module that
     /// declares it. A name a glob import of a module of such a crate brings is found here.
     pub externals: BTreeMap<String, String>,
+    pub external_aliases: BTreeSet<String>,
     /// The crates whose export table is in [`externals`](Self::externals).
     pub external_crates: BTreeSet<String>,
 }
@@ -134,6 +148,7 @@ impl Modules {
             modules: Vec::new(),
             extern_crates: extern_crates.iter().cloned().collect(),
             externals: BTreeMap::new(),
+            external_aliases: BTreeSet::new(),
             external_crates: BTreeSet::new(),
         };
         modules.modules.push(Module {
@@ -250,7 +265,7 @@ impl Modules {
                 if !is_crate_name(head) {
                     continue;
                 }
-                let names_a_crate = match self.lookup(index, head, None, 0) {
+                let names_a_crate = match self.lookup(index, head, None, 0).map(|binding| binding.target) {
                     None => true,
                     Some(Target::External(segments)) => segments[0] == head,
                     Some(_) => false,
@@ -272,17 +287,17 @@ impl Modules {
 
     /// What `path` names in `module`; nothing when a segment is not known.
     pub fn resolve(&self, module: usize, path: &[String]) -> Option<Target> {
-        self.resolve_at(module, path, None, 0)
+        self.resolve_at(module, path, None, 0).map(|binding| binding.target)
     }
 
     /// `skip` is the import (of `module`) whose path is being resolved: its own name does
     /// not resolve its first segment (`use bitflags::bitflags;`).
-    fn resolve_at(&self, module: usize, path: &[String], skip: Option<usize>, depth: usize) -> Option<Target> {
+    fn resolve_at(&self, module: usize, path: &[String], skip: Option<usize>, depth: usize) -> Option<Binding> {
         if depth > MAX_DEPTH || path.is_empty() {
             return None;
         }
         let (mut current, mut index) = match path[0].as_str() {
-            "" => return (path.len() > 1).then(|| Target::External(path[1..].to_vec())),
+            "" => return (path.len() > 1).then(|| self.external_binding(path[1..].to_vec())),
             "crate" => (0, 1),
             "self" => (module, 1),
             "super" => {
@@ -295,62 +310,77 @@ impl Modules {
                 (current, index)
             }
             first => match self.lookup(module, first, skip, depth) {
-                Some(Target::Module(found)) => (found, 1),
-                Some(Target::Item { module, name, mut rest }) => {
-                    rest.extend(path[1..].iter().cloned());
-                    return Some(Target::Item { module, name, rest });
-                }
-                Some(Target::External(mut segments)) => {
-                    segments.extend(path[1..].iter().cloned());
-                    return Some(Target::External(segments));
-                }
-                Some(Target::Builtin) | None => {
+                Some(Binding { target: Target::Module(found), .. }) => (found, 1),
+                Some(binding) if binding.target != Target::Builtin => return Some(self.with_tail(binding, &path[1..])),
+                _ => {
                     if path.len() == 1 {
-                        return BUILTIN.contains(&first).then_some(Target::Builtin);
+                        return BUILTIN.contains(&first).then(|| Target::Builtin.into());
                     }
                     // A path below a module a glob import of another crate brings
                     // (`media::Brush` next to `use ferroui_base::*`).
                     if let Some(found) = self.external_item(module, &path.join("::")) {
                         return Some(found);
                     }
-                    return self.is_extern(module, first).then(|| Target::External(path.to_vec()));
+                    return self.is_extern(module, first).then(|| self.external_binding(path.to_vec()));
                 }
             },
         };
         while index < path.len() {
             match self.lookup(current, &path[index], None, depth + 1) {
-                Some(Target::Module(found)) => {
+                Some(Binding { target: Target::Module(found), .. }) => {
                     current = found;
                     index += 1;
                 }
-                Some(Target::Item { module, name, mut rest }) => {
-                    rest.extend(path[index + 1..].iter().cloned());
-                    return Some(Target::Item { module, name, rest });
-                }
-                Some(Target::External(mut segments)) => {
-                    segments.extend(path[index + 1..].iter().cloned());
-                    return Some(Target::External(segments));
-                }
+                Some(binding) if binding.target != Target::Builtin => return Some(self.with_tail(binding, &path[index + 1..])),
                 // The module is known and the name is not one the scanner read (a macro
                 // declares it): the path is absolute as it is written.
-                Some(Target::Builtin) | None => {
-                    return Some(Target::Item { module: current, name: path[index].clone(), rest: path[index + 1..].to_vec() });
+                _ => {
+                    return Some(Target::Item { module: current, name: path[index].clone(), rest: path[index + 1..].to_vec() }.into());
                 }
             }
         }
-        Some(Target::Module(current))
+        Some(Target::Module(current).into())
+    }
+
+    /// Alias information describes the final name, never a qualifier.
+    fn with_tail(&self, binding: Binding, tail: &[String]) -> Binding {
+        if tail.is_empty() {
+            return binding;
+        }
+        match binding.target {
+            Target::Item { module, name, mut rest } => {
+                rest.extend_from_slice(tail);
+                Target::Item { module, name, rest }.into()
+            }
+            Target::External(mut segments) => {
+                segments.extend_from_slice(tail);
+                self.external_binding(segments)
+            }
+            _ => unreachable!("only item and external paths have tails"),
+        }
+    }
+
+    fn external_binding(&self, segments: Vec<String>) -> Binding {
+        let explicit_alias = !self.external_aliases.is_empty() && self.external_aliases.contains(&format!("::{}", segments.join("::")));
+        Binding { target: Target::External(segments), explicit_alias }
+    }
+
+    fn import_binding(&self, module: usize, index: usize, import: &Import, depth: usize) -> Option<Binding> {
+        let mut binding = self.resolve_at(module, &import.path, Some(index), depth)?;
+        binding.explicit_alias |= import.explicit_alias;
+        Some(binding)
     }
 
     /// What the name `name` is in `module`: an item of the module, a name one of its `use`
     /// items imports (an explicit import before a glob, as in the language), or a name of
     /// a glob import of a module of the crate.
-    fn lookup(&self, module: usize, name: &str, skip: Option<usize>, depth: usize) -> Option<Target> {
+    fn lookup(&self, module: usize, name: &str, skip: Option<usize>, depth: usize) -> Option<Binding> {
         self.lookup_visiting(module, name, skip, depth, &mut Vec::new())
     }
 
     /// `visited` holds the modules already asked for `name` through glob imports: glob
     /// imports of modules of one crate form cycles (`pub use child::*` and `use super::*`).
-    fn lookup_visiting(&self, module: usize, name: &str, skip: Option<usize>, depth: usize, visited: &mut Vec<usize>) -> Option<Target> {
+    fn lookup_visiting(&self, module: usize, name: &str, skip: Option<usize>, depth: usize, visited: &mut Vec<usize>) -> Option<Binding> {
         if depth > MAX_DEPTH || visited.contains(&module) {
             return None;
         }
@@ -360,16 +390,16 @@ impl Modules {
             return Some(match item.kind {
                 ItemKind::Module(index) => Target::Module(index),
                 ItemKind::Type | ItemKind::Value => Target::Item { module, name: name.to_string(), rest: Vec::new() },
-            });
+            }.into());
         }
         for (index, import) in declared.imports.iter().enumerate() {
             if import.name != name || skip == Some(index) {
                 continue;
             }
-            return match self.resolve_at(module, &import.path, Some(index), depth + 1) {
-                Some(Target::Builtin) | None if import.path.len() == 1 && is_crate_name(&import.path[0]) => Some(Target::External(import.path.clone())),
-                Some(Target::Builtin) => None,
-                found => found,
+            return match self.import_binding(module, index, import, depth + 1) {
+                Some(found) if found.target != Target::Builtin => Some(found),
+                _ if import.path.len() == 1 && is_crate_name(&import.path[0]) => Some(self.external_binding(import.path.clone())),
+                _ => None,
             };
         }
         // A glob import may bring the name as an item its module does not declare: the path
@@ -380,7 +410,7 @@ impl Modules {
         let mut as_written = None;
         for (source, _) in &declared.glob_sources {
             if let Some(found) = self.lookup_visiting(*source, name, None, depth + 1, visited) {
-                if self.is_declared(&found) {
+                if self.is_declared(&found.target) {
                     return Some(found);
                 }
                 as_written.get_or_insert(found);
@@ -402,27 +432,29 @@ impl Modules {
     /// The type of another crate that `path` (a name, or a path below a module) names
     /// through a glob import of `module`, by the export table of that crate: the path of
     /// its declaring module.
-    fn external_item(&self, module: usize, path: &str) -> Option<Target> {
+    fn external_item(&self, module: usize, path: &str) -> Option<Binding> {
         self.modules[module].external_globs.iter().find_map(|glob| {
-            let declared = self.externals.get(&format!("{glob}::{path}"))?;
-            Some(Target::External(declared.split("::").filter(|segment| !segment.is_empty()).map(str::to_string).collect()))
+            let path = format!("{glob}::{path}");
+            let declared = self.externals.get(&path)?;
+            let target = Target::External(declared.split("::").filter(|segment| !segment.is_empty()).map(str::to_string).collect());
+            Some(Binding { target, explicit_alias: self.external_aliases.contains(&path) })
         })
     }
 
     /// The export table of the crate: every path another crate can name a type of the
     /// crate by, with the absolute path of the item in its declaring module (a path into
     /// another crate for a type the crate exports again), in the order of the paths.
-    pub fn export_table(&self) -> Vec<(String, String)> {
+    pub fn export_table(&self) -> Vec<ExportModel> {
         let mut table = BTreeMap::new();
         let path = self.modules[0].path.clone();
         self.export_module(0, &path, &mut vec![0], &mut table);
-        table.into_iter().collect()
+        table.into_values().collect()
     }
 
     /// Adds what `module`, named by `path` from outside, exports. `stack` holds the
     /// modules on the way: a module that exports itself again is entered once.
-    fn export_module(&self, module: usize, path: &[String], stack: &mut Vec<usize>, table: &mut BTreeMap<String, String>) {
-        for (name, target) in self.exports(module, &mut vec![module]) {
+    fn export_module(&self, module: usize, path: &[String], stack: &mut Vec<usize>, table: &mut BTreeMap<String, ExportModel>) {
+        for (name, Binding { target, explicit_alias }) in self.exports(module, &mut vec![module]) {
             let mut named = path.to_vec();
             named.push(name);
             match target {
@@ -444,7 +476,8 @@ impl Modules {
                         }
                     }
                     if let Some(declared) = self.absolute(&item) {
-                        table.insert(format!("::{}", named.join("::")), declared);
+                        let path = format!("::{}", named.join("::"));
+                        table.insert(path.clone(), ExportModel { path, declared, explicit_alias });
                     }
                 }
             }
@@ -475,7 +508,7 @@ impl Modules {
     /// The names a module gives another crate: its public items, the names its public
     /// `use` items import, and the names of its public glob imports of modules of the
     /// crate (an explicit name before a glob).
-    fn exports(&self, module: usize, visiting: &mut Vec<usize>) -> BTreeMap<String, Target> {
+    fn exports(&self, module: usize, visiting: &mut Vec<usize>) -> BTreeMap<String, Binding> {
         let mut names = BTreeMap::new();
         let declared = &self.modules[module];
         for (name, item) in &declared.items {
@@ -484,13 +517,13 @@ impl Modules {
                     ItemKind::Module(index) => Target::Module(index),
                     ItemKind::Type | ItemKind::Value => Target::Item { module, name: name.clone(), rest: Vec::new() },
                 };
-                names.insert(name.clone(), target);
+                names.insert(name.clone(), target.into());
             }
         }
         for (index, import) in declared.imports.iter().enumerate() {
             if import.public && !names.contains_key(&import.name) {
-                if let Some(target) = self.resolve_at(module, &import.path, Some(index), 0) {
-                    names.insert(import.name.clone(), target);
+                if let Some(binding) = self.import_binding(module, index, import, 0) {
+                    names.insert(import.name.clone(), binding);
                 }
             }
         }
@@ -518,7 +551,7 @@ impl Modules {
             if !reached.insert(module) {
                 continue;
             }
-            for (name, target) in self.exports(module, &mut vec![module]) {
+            for (name, Binding { target, .. }) in self.exports(module, &mut vec![module]) {
                 let mut named = path.clone();
                 named.push(name);
                 match target {
@@ -552,7 +585,7 @@ mod tests {
     }
 
     fn import(modules: &mut Modules, module: usize, name: &str, target: &str, public: bool) {
-        modules.modules[module].imports.push(Import { name: name.to_string(), path: path(target), public });
+        modules.modules[module].imports.push(Import { name: name.to_string(), path: path(target), public, explicit_alias: false });
     }
 
     fn glob(modules: &mut Modules, module: usize, target: &str, public: bool) {
@@ -672,7 +705,7 @@ mod tests {
     fn export_table_has_every_public_path() {
         let (mut modules, _, primitives, _) = fixture();
         modules.add_item(primitives, "helper", ItemKind::Value, true);
-        let pair = |path: &str, declared: &str| (path.to_string(), declared.to_string());
+        let pair = |path: &str, declared: &str| ExportModel { path: path.to_string(), declared: declared.to_string(), explicit_alias: false };
         assert_eq!(
             modules.export_table(),
             vec![

@@ -28,7 +28,11 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use crate::xaml_metadata::{ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
+pub use crate::xaml_metadata::{
+    ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel,
+    XamlMetadata,
+};
+use std::collections::BTreeSet;
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;
@@ -1032,6 +1036,8 @@ pub struct ExportModel {
     /// The path of the declaring module and the name (`::ferroui_controls::border::Border`);
     /// a path into another crate for a type the crate exports again.
     pub declared: String,
+    /// The final segment is fixed by a `use … as …` on the re-export chain.
+    pub explicit_alias: bool,
 }
 
 /// A type alias without parameters of a crate (`pub type PageList = FerroList<Ref<Page>>;`):
@@ -1369,6 +1375,11 @@ impl AssemblyModel {
             .list("namespaces", &self.namespaces, |(module, namespace)| pair_to_json(module, namespace))
             .list("types", &self.types, TypeModel::to_json)
             .list("exports", &self.exports, |export| pair_to_json(&export.path, &export.declared))
+            .list(
+                "export_aliases",
+                &self.exports.iter().filter(|export| export.explicit_alias).collect::<Vec<_>>(),
+                |export| Json::string(&export.path),
+            )
             .list("aliases", &self.aliases, |alias| Json::Array(vec![Json::string(&alias.path), alias.target.to_json()]))
             .list("handles", &self.handles, |handle| Json::Array(vec![handle.handle.to_json(), handle.type_.to_json()]))
             .list("casts", &self.casts, |cast| Json::Array(vec![cast.from.to_json(), cast.to.to_json()]))
@@ -1409,6 +1420,10 @@ impl AssemblyModel {
                 public: document.flag("public")?,
             })
         })?;
+        let export_aliases: BTreeSet<_> = fields
+            .list("export_aliases", |value| text_of(value, "an explicit export alias"))?
+            .into_iter()
+            .collect();
         Ok(Self {
             name: fields.text("name")?,
             crate_name: fields.text("crate_name")?,
@@ -1421,7 +1436,10 @@ impl AssemblyModel {
             metadata: fields.list("metadata", |pair| pair_from_json(pair, "an entry of the metadata"))?,
             namespaces: fields.list("namespaces", |pair| pair_from_json(pair, "an entry of the namespace table"))?,
             types: fields.list("types", TypeModel::from_json)?,
-            exports: fields.list("exports", |pair| pair_from_json(pair, "an entry of the export table").map(|(path, declared)| ExportModel { path, declared }))?,
+            exports: fields.list("exports", |pair| {
+                let (path, declared) = pair_from_json(pair, "an entry of the export table")?;
+                Ok(ExportModel { explicit_alias: export_aliases.contains(&path), path, declared })
+            })?,
             aliases: fields.list("aliases", |pair| match pair {
                 Json::Array(pair) if pair.len() == 2 => Ok(AliasModel { path: text_of(&pair[0], "the path of an alias")?, target: RustType::from_json(&pair[1])? }),
                 _ => Err("a type alias is not a pair".to_string()),
@@ -1683,7 +1701,11 @@ mod tests {
         model.metadata = vec![("FerroXamlCreateSourceInfo".to_string(), "true".to_string())];
         model.namespaces = vec![("fixture".to_string(), "Fixture".to_string()), ("fixture::panel".to_string(), "Fixture.Controls".to_string())];
         model.types = vec![type_, TypeModel::new("Dock", TypeKind::Enum, RustType::resolved("::fixture::Dock"), "fixture")];
-        model.exports = vec![ExportModel { path: "::fixture::Panel".to_string(), declared: "::fixture::panel::Panel".to_string() }];
+        model.exports = vec![ExportModel {
+            path: "::fixture::Panel".to_string(),
+            declared: "::fixture::panel::Panel".to_string(),
+            explicit_alias: true,
+        }];
         model.aliases = vec![AliasModel { path: "::fixture::panel::Panels".to_string(), target: RustType::resolved("Vec<::fixture::panel::Panel>") }];
         model.handles = vec![HandleModel {
             handle: RustType { text: "Option<Wrapper>".to_string(), unresolved: vec!["Wrapper".to_string()] },

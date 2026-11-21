@@ -6,6 +6,7 @@ use crate::{
     CopiedPropertyKind, DesignerSession, Edit, LayoutMatch, LayoutReset, PropertyPastePreview,
     PropertyTransferIssue,
 };
+use ferroui_designer_tools::{Alignment, Axis};
 use serde_json::{json, Value};
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
@@ -23,7 +24,9 @@ pub(super) fn handles(name: &str) -> bool {
 pub(super) fn tools() -> Vec<Value> {
     let operation = json!({"enum":[
         "reset_margin", "reset_alignment", "reset_width", "reset_height",
-        "reset_size", "reset_all", "match_width", "match_height", "match_size"
+        "reset_size", "reset_all", "match_width", "match_height", "match_size",
+        "align_left", "align_horizontal_center", "align_right", "align_top", "align_vertical_center", "align_bottom",
+        "distribute_horizontal", "distribute_vertical"
     ]});
     let properties = s::array(s::string(), 64);
     vec![
@@ -64,6 +67,25 @@ fn layout_plan(
     session: &DesignerSession,
     operation: &str,
 ) -> Result<(&'static str, Vec<Edit>), String> {
+    let alignment = match operation {
+        "align_left" => Some(Alignment::Left),
+        "align_horizontal_center" => Some(Alignment::HorizontalCenter),
+        "align_right" => Some(Alignment::Right),
+        "align_top" => Some(Alignment::Top),
+        "align_vertical_center" => Some(Alignment::VerticalCenter),
+        "align_bottom" => Some(Alignment::Bottom),
+        _ => None,
+    };
+    if let Some(alignment) = alignment {
+        return Ok(("Align selection", crate::workspace_tools::plan_alignment(session, alignment)?));
+    }
+    if let Some(axis) = match operation {
+        "distribute_horizontal" => Some(Axis::Horizontal),
+        "distribute_vertical" => Some(Axis::Vertical),
+        _ => None,
+    } {
+        return Ok(("Distribute selection", crate::workspace_tools::plan_distribution(session, axis)?));
+    }
     let reset = match operation {
         "reset_margin" => Some(LayoutReset::Margin),
         "reset_alignment" => Some(LayoutReset::Alignment),
@@ -144,9 +166,18 @@ fn property_plan(
     ))
 }
 
-fn accepted_report(session: &DesignerSession, operation: &str, mut report: Value) -> Value {
+pub(super) fn accepted_report(session: &DesignerSession, operation: &str, report: Value) -> Value {
+    model_report(session, operation, report, true)
+}
+
+/// An explicit authored target uses the same scope guards as a selection
+/// plan. Other views may change selection while its source action is open.
+pub(super) fn accepted_target_report(session: &DesignerSession, operation: &str, report: Value) -> Value {
+    model_report(session, operation, report, false)
+}
+
+fn model_report(session: &DesignerSession, operation: &str, mut report: Value, track_selection: bool) -> Value {
     report["revision"] = json!(session.document().revision());
-    report["selection"] = json!(session.selection());
     report["scope_epoch"] = json!(session.definition_scope_epoch());
     report["layer_epoch"] = json!(session.layer_view_epoch());
     // The token is an optimistic-concurrency check, not a permission or credential.
@@ -155,14 +186,20 @@ fn accepted_report(session: &DesignerSession, operation: &str, mut report: Value
     let mut hash = std::collections::hash_map::DefaultHasher::new();
     operation.hash(&mut hash);
     session.document_uri().hash(&mut hash);
-    session.generation().hash(&mut hash);
+    if track_selection {
+        session.generation().hash(&mut hash);
+        report["selection"] = json!(session.selection());
+    }
     Arc::as_ptr(&session.document().ast_snapshot()).hash(&mut hash);
     report.to_string().hash(&mut hash);
     report["model"] = json!(format!("{:016x}", hash.finish()));
+    if !track_selection {
+        report["selection"] = json!(session.selection());
+    }
     report
 }
 
-fn require_model(args: &Value, report: &Value) -> Result<(), String> {
+pub(super) fn require_model(args: &Value, report: &Value) -> Result<(), String> {
     if args["expected_model"] == report["model"] {
         Ok(())
     } else {

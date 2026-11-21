@@ -13,6 +13,15 @@ impl DesignerSession {
         node: NodeId,
         options: DefinitionPreviewOptions,
     ) -> Result<(), String> {
+        self.enter_definition(node, options, None)
+    }
+
+    pub(crate) fn enter_definition(
+        &mut self,
+        node: NodeId,
+        options: DefinitionPreviewOptions,
+        item_template: Option<crate::item_template_samples::ItemTemplatePreview>,
+    ) -> Result<(), String> {
         if !self.document.is_valid() {
             return Err("Repair the XAML source before opening a definition preview".into());
         }
@@ -20,12 +29,13 @@ impl DesignerSession {
             || self.selection.clone(),
             |scope| scope.return_selection.clone(),
         );
-        let scope = crate::definition_projection::scope_for(
+        let mut scope = crate::definition_projection::scope_for(
             &self.document,
             node,
             options,
             return_selection,
         )?;
+        scope.item_template = item_template;
         self.stop_definition_preview();
         self.preview
             .set_definition_scope(Some(scope), &self.document)?;
@@ -42,6 +52,9 @@ impl DesignerSession {
     }
 
     pub fn exit_definition_scope(&mut self) -> Result<(), String> {
+        if self.rust_template_property().is_some() {
+            return self.exit_rust_template();
+        }
         let Some(scope) = self.preview.definition_scope.as_ref() else {
             return Ok(());
         };

@@ -29,7 +29,7 @@ pub(super) fn diff(
     change.previous_revision = previous_revision;
     change
         .patches
-        .extend(minimal_patch(&before.source, &after.source));
+        .extend(TextPatch::between(&before.source, &after.source));
     if Arc::ptr_eq(&before.ast, &after.ast) {
         return change;
     }
@@ -73,7 +73,7 @@ fn node_changed(before: &Node, after: &Node) -> bool {
                 .map(|attribute| (&attribute.name, &attribute.namespace_uri, &attribute.value)))
 }
 
-fn minimal_patch(before: &str, after: &str) -> Option<TextPatch> {
+pub(super) fn minimal_patch(before: &str, after: &str) -> Option<TextPatch> {
     if before == after {
         return None;
     }

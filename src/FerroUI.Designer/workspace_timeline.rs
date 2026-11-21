@@ -1,18 +1,28 @@
 //! Compact object/property lanes and a single contextual keyframe inspector.
+#[path = "workspace_timeline/clipboard.rs"]
+mod clipboard;
+#[path = "workspace_timeline/clips.rs"]
+mod clips;
+#[path = "workspace_timeline/curves.rs"]
+mod curves;
+#[path = "workspace_timeline/easing.rs"]
+mod easing;
+#[path = "workspace_timeline/markers.rs"]
+mod markers;
+#[path = "workspace_timeline/range.rs"]
+mod range;
+
 use super::*;
 use crate::timeline_lane::{EasingPreview, TimelineLane};
 use ferroui_base::media::{FontWeight, TextTrimming};
 use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::{ColumnDefinitions, ComboBox, PathIcon, ToolTip};
-use ferroui_designer_animation::{Keyframe, Timeline, Track};
+use ferroui_controls::{ColumnDefinitions, ComboBox, Flyout, PathIcon, ToolTip};
+use ferroui_designer_animation::{
+    keyframe_easing_presets, CurveChannel, CurveMetric, Keyframe, KeyframeGroupEdit as KeyframeEdit,
+    KeyframeLocation as SelectedKey, Track,
+};
 
 const TRACK_HEADER: f64 = 240.0;
-#[derive(Clone, Debug, PartialEq)]
-pub(super) struct SelectedKey {
-    target: NodeId,
-    property: String,
-    time: f64,
-}
 #[derive(Default)]
 pub(super) struct TimelineUi {
     document: String,
@@ -23,6 +33,16 @@ pub(super) struct TimelineUi {
     frame_rate: Option<u32>,
     snap_picker: Option<WeakRef<ComboBox>>,
     view: Option<(f64, f64)>,
+    curves: Option<CurveMetric>,
+    curve_channels: std::collections::BTreeMap<(NodeId, String), CurveChannel>,
+    keyframe_paste: Option<Ref<Flyout>>,
+    compare_clips: bool,
+    clip_scope: Option<(String, Option<usize>)>,
+    clip_selection: Vec<NodeId>,
+    clip_focus: Option<NodeId>,
+    clip_duration: f64,
+    ranges: range::WorkAreas,
+    marker_editor: Option<markers::MarkerEditor>,
 }
 #[derive(Clone)]
 struct TimelineContext {
@@ -63,6 +83,7 @@ impl DesignerWorkspace {
             .and_then(|control| control.cast::<StackPanel>())
     }
     pub(super) fn rebuild_tracks(self: &Rc<Self>) {
+        self.close_timeline_paste();
         let focus_was_ruler = self
             .timeline_lanes
             .borrow()
@@ -75,26 +96,33 @@ impl DesignerWorkspace {
             .iter()
             .filter_map(WeakRef::upgrade)
             .any(|lane| lane.is_focused() && !lane.is_ruler());
-        let focused_field = self
+        let inspector_focus = self
             .timeline_inspector()
             .into_iter()
             .flat_map(|row| row.children().to_vec())
-            .filter_map(|control| control.cast::<TextBox>())
-            .find(|input| input.is_focused())
-            .and_then(|input| {
-                input
-                    .name()
-                    .map(|name| (name, input.selection_start(), input.selection_end()))
+            .find(|control| control.is_focused())
+            .and_then(|control| {
+                let name = control.name()?;
+                let selection = control.cast::<TextBox>().map(|input| (input.selection_start(), input.selection_end()));
+                Some((name, selection))
             });
         self.tracks.children().clear();
         self.root
             .get_control::<ContentControl>("TimelineInspectorHost")
             .set_content(None);
+        self.timeline_ui.borrow_mut().marker_editor = None;
         self.timeline_lanes.borrow_mut().clear();
+        if self.comparing_animation_clips() {
+            self.rebuild_clip_tracks(focus_was_ruler);
+            return;
+        }
         let session = self.session.borrow();
-        let tracks = session.timeline().tracks.clone();
+        let timeline = session.timeline();
+        let tracks = timeline.tracks.clone();
+        let authored_duration = timeline.duration;
+        let fill = timeline.fill;
         let warnings = session.animation_warnings().to_vec();
-        let duration = session.timeline().duration;
+        let duration = session.timeline().duration.max(self.preview_range_for_view(&session).map_or(0.0, |range| range.end));
         let context = TimelineContext::new(&session);
         let playhead = session.time();
         let selection = session.selection().to_vec();
@@ -145,6 +173,7 @@ impl DesignerWorkspace {
         }
         let selection_keys = ui.selection.clone();
         let frame_rate = ui.frame_rate;
+        let curves = ui.curves;
         ui.view = ui
             .view
             .filter(|(start, end)| *start >= 0.0 && *end > *start && *end <= duration);
@@ -168,15 +197,17 @@ impl DesignerWorkspace {
         caption.set_vertical_alignment(ferroui_base::layout::VerticalAlignment::Center);
         caption.set_margin(Thickness::new(4.0, 0.0, 4.0, 0.0));
         header.children().add(caption.upcast::<Control>());
-        for (label, path, help, factor) in [
-            ("", Some(crate::icons::REMOVE), "Zoom out timeline", 0.8),
-            ("", Some(crate::icons::ADD), "Zoom in timeline", 1.25),
-            ("Fit", None, "Fit complete animation", 0.0),
+        for (path, help, factor) in [
+            (crate::icons::REMOVE, "Zoom out timeline", 0.8),
+            (crate::icons::ADD, "Zoom in timeline", 1.25),
+            (
+                crate::icons::FIT,
+                "Fit selected keys or complete animation",
+                0.0,
+            ),
         ] {
-            let control = button(label);
-            if let Some(path) = path {
-                control.set_content(Some(Control::boxed(crate::icons::vector_icon(path, 12.0))));
-            }
+            let control = button("");
+            control.set_content(Some(Control::boxed(crate::icons::vector_icon(path, 12.0))));
             control.classes().add("designer-timeline-tool");
             control.classes().add("nav");
             control.set_padding(Thickness::symmetric(5.0, 2.0));
@@ -188,7 +219,7 @@ impl DesignerWorkspace {
             control.click(move |_, _| {
                 if let Some(this) = weak.upgrade() {
                     if factor == 0.0 {
-                        this.set_timeline_view(None);
+                        this.fit_timeline_selection();
                     } else {
                         let pivot = this.session.borrow().time();
                         this.zoom_timeline(factor, pivot);
@@ -249,6 +280,9 @@ impl DesignerWorkspace {
             }
         });
         header.children().add(snap.upcast::<Control>());
+        if context.program.is_some() && !tracks.is_empty() {
+            header.children().add(self.timeline_keyframe_menu(&context, !selection_keys.is_empty()).upcast::<Control>());
+        }
         ruler_row.children().add(header.upcast::<Control>());
         let ruler = TimelineLane::ruler();
         ruler.configure(
@@ -261,15 +295,19 @@ impl DesignerWorkspace {
         ruler.set_frame_rate(frame_rate);
         ruler.set_view(view.0, view.1);
         ruler.set_playhead(playhead);
+        ruler.set_preview_range(self.preview_range_for_view(&self.session.borrow()));
         let weak = Rc::downgrade(self);
         ruler.on_activate(move |time| {
             if let Some(this) = weak.upgrade() {
-                let result = this.session.borrow_mut().seek(time);
+                let result = this.seek_workspace_timeline(time);
                 this.refresh(false);
                 this.report(result);
             }
         });
         self.connect_timeline_zoom(&ruler);
+        self.connect_timeline_clipboard(&ruler, &context, None);
+        self.connect_preview_range(&ruler, &context);
+        self.connect_preview_markers(&ruler, &context, false);
         self.timeline_lanes.borrow_mut().push(ruler.downgrade());
         Grid::set_column(&ruler, 1);
         ruler_row.children().add(ruler.clone().upcast::<Control>());
@@ -337,7 +375,6 @@ impl DesignerWorkspace {
                     this.activate_timeline_key(target, &property, time);
                 }
             });
-            plot.children().add(title.upcast::<Control>());
             let lane = TimelineLane::new();
             lane.configure(
                 duration,
@@ -347,6 +384,7 @@ impl DesignerWorkspace {
             lane.set_playhead(playhead);
             lane.set_highlighted(is_selected);
             lane.set_frame_rate(frame_rate);
+            self.connect_timeline_clipboard(&lane, &context, Some(track));
             lane.set_selected_keys(
                 selection_keys
                     .iter()
@@ -358,9 +396,28 @@ impl DesignerWorkspace {
                     .filter(|key| key.target == target && key.property == track.property)
                     .map(|key| key.time),
             );
+            let choices = curves.map_or_else(Vec::new, |_| CurveChannel::for_track(track, authored_duration, fill));
+            let curve = curves.and_then(|metric| self.timeline_curve_channel(track, &choices).map(|channel| (metric, channel)));
+            if let Some((metric, channel)) = curve {
+                self.attach_timeline_curve(&lane, track, &context, metric, channel);
+                title.set_height(lane.height());
+            }
+            plot.children().add(match curve {
+                Some(active) if choices.len() > 1 => self.timeline_curve_title(title, &lane, track, &context, active, choices),
+                _ => title.upcast::<Control>(),
+            });
             AutomationProperties::set_name(
                 &lane,
-                Some(&format!("{} {} keyframes", target_name, track.property)),
+                Some(&format!(
+                    "{} {} {}",
+                    target_name,
+                    track.property,
+                    match curve {
+                        Some((CurveMetric::Value, _)) => "value curve",
+                        Some((CurveMetric::Velocity, _)) => "velocity curve",
+                        None => "keyframes",
+                    }
+                )),
             );
             let weak = Rc::downgrade(self);
             let property = track.property.clone();
@@ -468,21 +525,28 @@ impl DesignerWorkspace {
         if tracks.is_empty() {
             self.build_timeline_empty_state();
         }
-        if let Some((name, start, end)) = focused_field {
-            if let Some(input) = self
+        if let Some((name, selection)) = inspector_focus {
+            if let Some(control) = self
                 .timeline_inspector()
                 .into_iter()
                 .flat_map(|row| row.children().to_vec())
-                .filter_map(|control| control.cast::<TextBox>())
-                .find(|input| input.name().as_deref() == Some(name.as_str()))
+                .find(|control| control.name().as_deref() == Some(name.as_str()))
             {
-                input.focus();
-                input.set_selection_start(start);
-                input.set_selection_end(end);
+                control.focus();
+                if let (Some((start, end)), Some(input)) = (selection, control.cast::<TextBox>()) {
+                    input.set_selection_start(start);
+                    input.set_selection_end(end);
+                }
             }
         }
     }
     fn build_timeline_empty_state(self: &Rc<Self>) {
+        if self.session.borrow().uses_rust_source() {
+            let label = key_caption("No mapped keyframes");
+            label.set_margin(Thickness::new(8.0, 12.0, 8.0, 8.0));
+            self.tracks.children().add(label.upcast::<Control>());
+            return;
+        }
         let row = Grid::new();
         row.set_column_definitions(ColumnDefinitions::parse("48,*,Auto").unwrap());
         row.set_margin(Thickness::new(14.0, 18.0, 18.0, 14.0));
@@ -542,7 +606,7 @@ impl DesignerWorkspace {
                 if !seconds.is_finite() {
                     return;
                 }
-                let duration = this.session.borrow().timeline().duration;
+                let duration = this.timeline_view_duration();
                 let (start, end) = this
                     .timeline_ui
                     .borrow()
@@ -559,7 +623,7 @@ impl DesignerWorkspace {
         if !factor.is_finite() || factor <= 0.0 || !pivot.is_finite() {
             return;
         }
-        let duration = self.session.borrow().timeline().duration;
+        let duration = self.timeline_view_duration();
         let (start, end) = self
             .timeline_ui
             .borrow()
@@ -572,7 +636,7 @@ impl DesignerWorkspace {
         self.set_timeline_view(Some((start, start + span)));
     }
     fn set_timeline_view(&self, view: Option<(f64, f64)>) {
-        let duration = self.session.borrow().timeline().duration;
+        let duration = self.timeline_view_duration();
         let view = view.filter(|(start, end)| *start >= 0.0 && *end > *start && *end <= duration);
         self.timeline_ui.borrow_mut().view = view;
         let (start, end) = view.unwrap_or((0.0, duration));
@@ -693,6 +757,11 @@ impl DesignerWorkspace {
         self.refresh(true);
         Ok(())
     }
+    pub fn scale_selected_keyframes(self: &Rc<Self>, pivot: f64, factor: f64) -> Result<(), String> {
+        self.edit_selected_keys(KeyframeEdit::Scale { pivot, factor })?;
+        self.refresh(true);
+        Ok(())
+    }
     pub fn duplicate_selected_keyframes(self: &Rc<Self>, delta: f64) -> Result<(), String> {
         self.edit_selected_keys(KeyframeEdit::Duplicate(delta))?;
         self.refresh(true);
@@ -799,112 +868,19 @@ impl DesignerWorkspace {
         let selected = ui.selection.clone();
         let primary = ui.selected.clone();
         drop(ui);
-        if selected.is_empty() {
-            return Err("Select one or more keyframes".into());
-        }
         let id = session
             .active_animation_program()
             .ok_or("Choose an animation")?;
-        let mut timeline = session.timeline().clone();
-        let delta = match operation {
-            KeyframeEdit::Move(delta) | KeyframeEdit::Duplicate(delta) => {
-                if !delta.is_finite() {
-                    return Err("The keyframe offset must be finite".into());
-                }
-                Some(delta)
-            }
-            KeyframeEdit::Remove => None,
-        };
-        let mut groups =
-            std::collections::BTreeMap::<(NodeId, &str), std::collections::BTreeSet<u64>>::new();
-        for key in &selected {
-            groups
-                .entry((key.target, &key.property))
-                .or_default()
-                .insert(key.time.to_bits());
-        }
-        // Each affected track is rebuilt once. Removing selected sources before merging
-        // destinations permits overlapping shifts without quadratic Vec::remove/insert loops.
-        for ((target, property), times) in groups {
-            let duration = timeline.duration;
-            let track = timeline
-                .track_mut(target, property)
-                .ok_or("Animation track no longer exists")?;
-            let mut moving = track
-                .keyframes
-                .iter()
-                .filter(|key| times.contains(&key.time.to_bits()))
-                .cloned()
-                .collect::<Vec<_>>();
-            if moving.len() != times.len() {
-                return Err("A selected keyframe no longer exists".into());
-            }
-            if !matches!(operation, KeyframeEdit::Duplicate(_)) {
-                track
-                    .keyframes
-                    .retain(|key| !times.contains(&key.time.to_bits()));
-            }
-            if let Some(delta) = delta {
-                for key in &mut moving {
-                    key.time += delta;
-                    if !key.time.is_finite() || !(0.0..=duration).contains(&key.time) {
-                        return Err(
-                            "The selected keyframes would leave the animation duration".into()
-                        );
-                    }
-                    if key.time == 0.0 {
-                        key.time = 0.0;
-                    }
-                }
-                let stationary = std::mem::take(&mut track.keyframes);
-                let mut merged = Vec::with_capacity(stationary.len() + moving.len());
-                let mut left = stationary.into_iter().peekable();
-                let mut right = moving.into_iter().peekable();
-                while let (Some(existing), Some(incoming)) = (left.peek(), right.peek()) {
-                    if (existing.time - incoming.time).abs() <= 1e-9 {
-                        return Err(
-                            "A keyframe already occupies a destination time; no keys were changed"
-                                .into(),
-                        );
-                    }
-                    if existing.time < incoming.time {
-                        merged.push(left.next().expect("peeked key"));
-                    } else {
-                        merged.push(right.next().expect("peeked key"));
-                    }
-                }
-                merged.extend(left);
-                merged.extend(right);
-                track.keyframes = merged;
-            }
-        }
-        let mut changed = delta.map_or_else(Vec::new, |delta| {
-            selected
-                .iter()
-                .map(|key| SelectedKey {
-                    time: key.time + delta,
-                    ..key.clone()
-                })
-                .collect()
-        });
-        timeline.tracks.retain(|track| !track.keyframes.is_empty());
-        timeline.validate().map_err(|error| error.to_string())?;
-        session.update_animation_program(id, timeline)?;
-        for key in &mut changed {
-            reconcile_keyframe_time(session.timeline(), key);
-        }
+        let changed = session.edit_program_keyframes(id, &selected, operation)?;
         drop(session);
-        let mut ui = self.timeline_ui.borrow_mut();
-        ui.selected = primary
-            .and_then(|key| {
-                selected
-                    .iter()
-                    .position(|original| *original == key)
-                    .and_then(|index| changed.get(index).cloned())
-            })
-            .or_else(|| changed.last().cloned());
-        ui.selection = changed;
+        let primary = primary.and_then(|key| selected.iter().position(|original| *original == key));
+        self.accept_timeline_key_batch(primary, changed);
         Ok(())
+    }
+    fn accept_timeline_key_batch(&self, primary: Option<usize>, changed: Vec<SelectedKey>) {
+        let mut ui = self.timeline_ui.borrow_mut();
+        ui.selected = primary.and_then(|index| changed.get(index)).or_else(|| changed.last()).cloned();
+        ui.selection = changed;
     }
     fn build_selection_inspector(self: &Rc<Self>, context: TimelineContext) {
         let count = self.timeline_ui.borrow().selection.len();
@@ -916,8 +892,10 @@ impl DesignerWorkspace {
         row.children()
             .add(key_caption(&format!("{count} keyframes selected")).upcast::<Control>());
         let offset = key_field(&row, "Offset", "KeyframeOffset", "0.1", 64.0);
+        let factor = key_field(&row, "Factor", "KeyframeScaleFactor", "2", 56.0);
         for (name, label) in [
             ("MoveKeyframes", "Move"),
+            ("ScaleKeyframes", "Scale from playhead"),
             ("DuplicateKeyframes", "Duplicate"),
             ("RemoveKeyframes", "Delete"),
         ] {
@@ -932,7 +910,7 @@ impl DesignerWorkspace {
             control.set_min_height(26.0);
             control.set_font_size(11.0);
             let weak = Rc::downgrade(self);
-            let weak_offset = offset.downgrade();
+            let field = if name == "ScaleKeyframes" { &factor } else { &offset }.downgrade();
             let context = context.clone();
             control.click(move |_, _| {
                 if let Some(this) = weak.upgrade() {
@@ -940,17 +918,17 @@ impl DesignerWorkspace {
                         let operation = if name == "RemoveKeyframes" {
                             KeyframeEdit::Remove
                         } else {
-                            let delta: f64 = weak_offset
+                            let value: f64 = field
                                 .upgrade()
-                                .ok_or("The offset editor was closed")?
+                                .ok_or("The timing editor was closed")?
                                 .text()
                                 .unwrap_or_default()
                                 .parse()
-                                .map_err(|_| "Enter an offset in seconds")?;
-                            if name == "MoveKeyframes" {
-                                KeyframeEdit::Move(delta)
-                            } else {
-                                KeyframeEdit::Duplicate(delta)
+                                .map_err(|_| "Enter a numeric offset or scale factor")?;
+                            match name {
+                                "MoveKeyframes" => KeyframeEdit::Move(value),
+                                "ScaleKeyframes" => KeyframeEdit::Scale { pivot: this.session.borrow().time(), factor: value },
+                                _ => KeyframeEdit::Duplicate(value),
                             }
                         };
                         this.edit_selected_keys(operation)
@@ -1002,7 +980,7 @@ impl DesignerWorkspace {
     }
     fn remember_keyframe(&self, mut selected: SelectedKey) {
         let session = self.session.borrow();
-        reconcile_keyframe_time(session.timeline(), &mut selected);
+        selected.reconcile_time(session.timeline());
         let mut ui = self.timeline_ui.borrow_mut();
         if ui.document != session.document_uri() || ui.program != session.active_animation_program()
         {
@@ -1020,16 +998,9 @@ impl DesignerWorkspace {
         property: &str,
         time: f64,
     ) -> Result<(), String> {
-        let mut session = self.session.borrow_mut();
-        session.seek(time)?;
-        let visual = session
-            .preview
-            .visual(target)
-            .ok_or("The animation target has no accepted preview")?;
-        let info = Inspector::property(&visual, property).map_err(|error| error.to_string())?;
-        let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
-        let value = session.animation_value_for_target(target, property, &value)?;
-        session.record_keyframe(target, property, value)
+        self.session
+            .borrow_mut()
+            .record_effective_keyframe(target, property, time)
     }
     fn build_keyframe_inspector(
         self: &Rc<Self>,
@@ -1046,69 +1017,7 @@ impl DesignerWorkspace {
             .add(key_caption(&format!("{} keyframe", selected.property)).upcast::<Control>());
         let time = key_field(&row, "Time", "KeyframeTime", &key.time.to_string(), 65.0);
         let value = key_field(&row, "Value", "KeyframeValue", &key.value.to_xaml(), 104.0);
-        let curve = key_field(&row, "Curve", "KeyframeCurve", &key.easing.to_xaml(), 112.0);
-        let preview = EasingPreview::new();
-        preview.set_name(Some("KeyframeEasingPreview".into()));
-        preview.set_easing(Some(key.easing.clone()));
-        row.children().add(preview.clone().upcast::<Control>());
-        let weak_preview = preview.downgrade();
-        let weak_curve = curve.downgrade();
-        curve.text_changing(move |_, _| {
-            if let (Some(preview), Some(curve)) = (weak_preview.upgrade(), weak_curve.upgrade()) {
-                preview.set_easing(Easing::parse(&curve.text().unwrap_or_default()).ok());
-            }
-        });
-        let preset = ComboBox::new();
-        preset.set_name(Some("KeyframeEasingPreset".into()));
-        preset.set_width(108.0);
-        preset.classes().add("designer-field");
-        preset.set_min_height(26.0);
-        preset.set_font_size(11.0);
-        let presets = [
-            ("Linear", "LinearEasing"),
-            ("Ease in", "0.42,0,1,1"),
-            ("Ease out", "0,0,0.58,1"),
-            ("Ease in-out", "0.42,0,0.58,1"),
-            ("Smooth", "0.25,0.1,0.25,1"),
-            ("Back", "0.34,1.56,0.64,1"),
-            ("Custom", ""),
-        ];
-        for (label, _) in presets {
-            preset.items().add(Some(Rc::new(label.to_owned())));
-        }
-        let index = presets
-            .iter()
-            .position(|(_, value)| Easing::parse(value).ok().as_ref() == Some(&key.easing))
-            .unwrap_or(presets.len() - 1);
-        preset.set_selected_index(index as i32);
-        AutomationProperties::set_name(&preset, Some("Incoming keyframe easing preset"));
-        ToolTip::set_tip(
-            &preset,
-            Some(Rc::new(
-                "Choose an easing preset, then Apply keyframe. Custom curves accept x1,y1,x2,y2."
-                    .to_owned(),
-            )),
-        );
-        let weak_preset = preset.downgrade();
-        let weak_curve = curve.downgrade();
-        preset.selection_changed(move |_, _| {
-            if let (Some(preset), Some(curve)) = (weak_preset.upgrade(), weak_curve.upgrade()) {
-                if let Some((_, value)) = presets.get(preset.selected_index().max(0) as usize) {
-                    if !value.is_empty() {
-                        curve.set_text(Some(value));
-                    } else {
-                        curve.focus();
-                    }
-                }
-            }
-        });
-        row.children().add(preset.upcast::<Control>());
-        ToolTip::set_tip(
-            &curve,
-            Some(Rc::new(
-                "LinearEasing or cubic Bézier x1,y1,x2,y2".to_owned(),
-            )),
-        );
+        let (curve, preview) = easing::easing_fields(&row, &key.easing, !self.session.borrow().is_read_only());
         let apply = button("Apply keyframe");
         apply.classes().add("designer-motion");
         apply.set_name(Some("ApplyKeyframe".into()));
@@ -1117,10 +1026,7 @@ impl DesignerWorkspace {
         apply.set_padding(Thickness::symmetric(8.0, 3.0));
         let weak = Rc::downgrade(self);
         let selected = selected.clone();
-        let kind = key.value.kind();
-        let property = selected.property.clone();
-        let target = selected.target;
-        let old_time = selected.time;
+        let editing = selected.clone();
         let weak_time = time.downgrade();
         let weak_value = value.downgrade();
         let weak_curve = curve.downgrade();
@@ -1133,46 +1039,19 @@ impl DesignerWorkspace {
                 weak_curve.upgrade(),
             ) {
                 let result = (|| {
-                    commit_context.check(&this)?;
                     let time: f64 = time
                         .text()
                         .unwrap_or_default()
                         .parse()
                         .map_err(|_| "Invalid keyframe time")?;
-                    let value = AnimationValue::parse(&value.text().unwrap_or_default(), kind)
-                        .map_err(|error| error.to_string())?;
-                    let easing = Easing::parse(&curve.text().unwrap_or_default())
-                        .map_err(|error| error.to_string())?;
-                    let mut session = this.session.borrow_mut();
-                    let id = session
-                        .active_animation_program()
-                        .ok_or("Choose an animation")?;
-                    let mut timeline = session.timeline().clone();
-                    if !time.is_finite() || !(0.0..=timeline.duration).contains(&time) {
-                        return Err("Keyframe is outside the timeline".into());
-                    }
-                    let track = timeline
-                        .track_mut(target, &property)
-                        .ok_or("Animation track is no longer present")?;
-                    if time != old_time {
-                        track
-                            .move_keyframe(old_time, time)
-                            .map_err(|error| error.to_string())?;
-                    }
-                    track
-                        .record(time, value)
-                        .map_err(|error| error.to_string())?;
-                    track
-                        .set_easing(time, easing)
-                        .map_err(|error| error.to_string())?;
-                    session.update_animation_program(id, timeline)?;
-                    drop(session);
-                    this.remember_keyframe(SelectedKey {
-                        target,
-                        property: property.clone(),
+                    this.apply_timeline_keyframe(
+                        &commit_context,
+                        &editing,
                         time,
-                    });
-                    Ok(())
+                        &value.text().unwrap_or_default(),
+                        &curve.text().unwrap_or_default(),
+                    )
+                    .map(|_| ())
                 })();
                 // Keep invalid input available for correction. Accepted changes
                 // rebuild the editor from the single committed source transaction.
@@ -1184,7 +1063,7 @@ impl DesignerWorkspace {
         });
         let click = commit.clone();
         apply.click(move |_, _| click());
-        for input in [&time, &value, &curve] {
+        for input in [time.upcast::<Control>(), value.upcast(), curve.upcast(), preview.upcast()] {
             let commit = commit.clone();
             input.add_handler(InputElement::key_down_event(), move |_, event| {
                 if event.key == Key::Enter {
@@ -1194,6 +1073,9 @@ impl DesignerWorkspace {
             });
         }
         row.children().add(apply.upcast::<Control>());
+        self.root
+            .get_control::<ContentControl>("TimelineInspectorHost")
+            .set_content(Some(Control::boxed(&row)));
         let remove = button("Remove");
         remove.classes().add("nav");
         remove.classes().add("designer-timeline-tool");
@@ -1222,36 +1104,6 @@ impl DesignerWorkspace {
             }
         });
         row.children().add(remove.upcast::<Control>());
-        self.root
-            .get_control::<ContentControl>("TimelineInspectorHost")
-            .set_content(Some(Control::boxed(&row)));
-    }
-}
-// Native KeyTime uses 100 ns ticks. Match accepted source times after every
-// authoring path so fractional frame times retain their selection and editor.
-fn reconcile_keyframe_time(timeline: &Timeline, key: &mut SelectedKey) {
-    if let Some(accepted) = timeline
-        .track(key.target, &key.property)
-        .and_then(|track| {
-            let index = track
-                .keyframes
-                .partition_point(|candidate| candidate.time < key.time);
-            [
-                index.checked_sub(1),
-                (index < track.keyframes.len()).then_some(index),
-            ]
-            .into_iter()
-            .flatten()
-            .map(|index| &track.keyframes[index])
-            .min_by(|left, right| {
-                (left.time - key.time)
-                    .abs()
-                    .total_cmp(&(right.time - key.time).abs())
-            })
-        })
-        .filter(|accepted| (accepted.time - key.time).abs() <= 0.0000001)
-    {
-        key.time = accepted.time;
     }
 }
 fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {
@@ -1361,13 +1213,6 @@ fn key_field(
     AutomationProperties::set_name(&input, Some(&format!("Keyframe {caption}")));
     panel.children().add(input.clone().upcast::<Control>());
     input
-}
-
-#[derive(Clone, Copy)]
-enum KeyframeEdit {
-    Move(f64),
-    Duplicate(f64),
-    Remove,
 }
 
 #[cfg(test)]

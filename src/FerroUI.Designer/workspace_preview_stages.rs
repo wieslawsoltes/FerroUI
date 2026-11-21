@@ -3,7 +3,7 @@
 use super::*;
 use crate::{
     PreviewEnvironment, PreviewFlowDirection, PreviewStageAction, PreviewStageBoard,
-    PreviewStageComparison, PreviewStageConfiguration, PreviewStageEditor, PreviewStageId,
+    PreviewStageComparison, PreviewStageConfiguration, PreviewStageEditor, PreviewStageId, PreviewStageSpec, PreviewStageSet,
     PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageStatus,
     PreviewStageTarget, PreviewStageView, PreviewTheme,
 };
@@ -57,12 +57,37 @@ impl DesignerWorkspace {
     pub fn preview_stage_control(&self, id: PreviewStageId) -> Option<Ref<Control>> {
         self.preview_stages.board.borrow().control(id)
     }
+
+    /// Send input to a native comparison card without changing authored selection.
+    pub fn preview_stage_keyboard(
+        &self,
+        id: PreviewStageId,
+        epoch: u64,
+        action: crate::PreviewStageKeyboardInput,
+    ) -> Result<Option<crate::PreviewStageFocus>, String> {
+        if !self.preview_stages_visible() || self.preview_prototype_playback().is_some() {
+            return Err("Open the Stages board outside prototype playback to use stage input".into());
+        }
+        if !self.preview_stage_source_is_current(id) {
+            return Err("Refresh this stage before using keyboard input".into());
+        }
+        let target = self.preview_stages.board.borrow().keyboard_target(id, epoch)?;
+        target.input(action)
+    }
     pub fn preview_stages_visible(&self) -> bool {
         self.preview_stages.visible.get()
     }
     pub fn preview_stage_manifest(&self) -> PreviewStageManifest {
         self.preview_stages.board.borrow().manifest()
     }
+    pub fn preview_stage_set(&self) -> PreviewStageSet {
+        self.preview_stages.board.borrow().stage_set()
+    }
+
+    pub fn preview_stage_spec(&self, id: PreviewStageId) -> Option<PreviewStageSpec> {
+        self.preview_stages.board.borrow().stage_spec(id)
+    }
+
     pub fn preview_stage_editor(&self) -> Option<Rc<PreviewStageEditor>> {
         self.preview_stages.editor.borrow().clone()
     }
@@ -106,11 +131,11 @@ impl DesignerWorkspace {
     ) -> Result<Vec<PreviewStageId>, String> {
         let configurations = self.plan_preview_stage_matrix(id, &matrix)?;
         self.sync_preview_stage_sources()?;
-        let result = self
-            .preview_stages
-            .board
-            .borrow_mut()
-            .add_configurations(configurations);
+        let fixture = self.preview_stage_spec(id).and_then(|spec| spec.design_fixture);
+        let specs = configurations.into_iter().map(|configuration| PreviewStageSpec {
+            configuration, design_fixture: fixture.clone(),
+        }).collect();
+        let result = self.preview_stages.board.borrow_mut().add_specs(specs);
         self.refresh_preview_stages();
         result
     }
@@ -160,6 +185,20 @@ impl DesignerWorkspace {
         self.refresh_preview_stages();
         result
     }
+    pub fn add_preview_stage_spec(self: &Rc<Self>, spec: PreviewStageSpec) -> Result<PreviewStageId, String> {
+        self.sync_preview_stage_sources()?;
+        let result = self.preview_stages.board.borrow_mut().add_spec(spec);
+        self.refresh_preview_stages();
+        result
+    }
+
+    pub fn update_preview_stage_spec(self: &Rc<Self>, id: PreviewStageId, spec: PreviewStageSpec) -> Result<(), String> {
+        self.sync_preview_stage_sources()?;
+        let result = self.preview_stages.board.borrow_mut().update_spec(id, spec);
+        self.refresh_preview_stages();
+        result
+    }
+
     pub fn update_preview_stage(
         self: &Rc<Self>,
         id: PreviewStageId,
@@ -246,7 +285,8 @@ impl DesignerWorkspace {
         let info = self
             .preview_stage(id)
             .ok_or("The preview stage no longer exists")?;
-        self.focus_preview_stage_configuration(&info.configuration)?;
+        let fixture = self.preview_stage_spec(id).and_then(|spec| spec.design_fixture);
+        self.focus_preview_stage_configuration(&info.configuration, fixture)?;
         self.preview_stages.board.borrow_mut().set_active(id)?;
         self.refresh(true);
         Ok(())
@@ -263,6 +303,13 @@ impl DesignerWorkspace {
         self.refresh_preview_stages();
         Ok(())
     }
+    pub fn restore_preview_stage_set(self: &Rc<Self>, manifest: PreviewStageSet) -> Result<(), String> {
+        self.sync_preview_stage_sources()?;
+        self.preview_stages.board.borrow_mut().restore_stage_set(manifest)?;
+        self.refresh_preview_stages();
+        Ok(())
+    }
+
     pub fn set_preview_stages_visible(self: &Rc<Self>, visible: bool) -> Result<(), String> {
         self.cancel_canvas_navigation();
         self.cancel_canvas_guide_drag();
@@ -274,7 +321,7 @@ impl DesignerWorkspace {
             self.sync_preview_stage_sources()?;
             if self.preview_stages.board.borrow().stages().is_empty() {
                 let configuration = self.current_preview_stage_configuration("Current view")?;
-                self.preview_stages.board.borrow_mut().add(configuration)?;
+                self.preview_stages.board.borrow_mut().add_spec(configuration)?;
             }
         }
         self.preview_stages.visible.set(visible);
@@ -350,11 +397,15 @@ impl DesignerWorkspace {
     pub(super) fn sync_preview_stage_sources(&self) -> Result<(), String> {
         let active = self.session.borrow().document_uri().to_owned();
         let sources = self.preview_stage_sources();
+        let includes = self.preview_stage_local_includes(&sources);
         let (options, epoch) = self.preview_stage_host_options();
         self.preview_stages
             .board
             .borrow_mut()
-            .sync_sources(&active, sources, options, epoch)
+            .sync_sources_with_local_includes(
+                &active, sources, options, epoch,
+                &includes.iter().map(|(uri, set)| (uri.as_str(), set)).collect(),
+            )
     }
 
     /// Called before the regular source/selection refresh early return. Board state
@@ -626,7 +677,7 @@ impl DesignerWorkspace {
     fn current_preview_stage_configuration(
         &self,
         name: &str,
-    ) -> Result<PreviewStageConfiguration, String> {
+    ) -> Result<PreviewStageSpec, String> {
         let session = self.session.borrow();
         let mut configuration = PreviewStageConfiguration::new(
             name,
@@ -656,7 +707,7 @@ impl DesignerWorkspace {
                 options: scope.options.clone(),
             };
         }
-        Ok(configuration)
+        Ok(PreviewStageSpec { configuration, design_fixture: session.design_fixture().map(str::to_owned) })
     }
 
     fn add_preview_stage_comparison(
@@ -761,9 +812,7 @@ impl DesignerWorkspace {
     ) -> Result<(), String> {
         self.sync_preview_stage_sources()?;
         let initial = if let Some(id) = id {
-            self.preview_stage(id)
-                .ok_or("The preview stage was removed")?
-                .configuration
+            self.preview_stage_spec(id).ok_or("The preview stage was removed")?
         } else {
             self.current_preview_stage_configuration("New stage")?
         };
@@ -776,7 +825,7 @@ impl DesignerWorkspace {
         if let Some(flyout) = self.preview_stages.flyout.borrow().as_ref() {
             flyout.hide();
         }
-        let editor = PreviewStageEditor::new(initial, self.preview_stage_sources());
+        let editor = PreviewStageEditor::with_spec(initial, self.preview_stage_sources());
         let flyout = Flyout::new();
         flyout.flyout_presenter_classes().add("designer-chrome");
         flyout
@@ -785,16 +834,16 @@ impl DesignerWorkspace {
         flyout.set_content(Some(Control::boxed(editor.control())));
         let epoch = self.preview_stage_epoch();
         let weak = Rc::downgrade(self);
-        editor.on_apply(move |configuration| {
+        editor.on_apply_spec(move |configuration| {
             let workspace = weak.upgrade().ok_or("The workspace was closed")?;
             workspace.sync_preview_stage_sources()?;
             if workspace.preview_stage_epoch() != epoch {
                 return Err("The sources or stage board changed; reopen this stage editor".into());
             }
             if let Some(id) = id {
-                workspace.update_preview_stage(id, configuration)
+                workspace.update_preview_stage_spec(id, configuration)
             } else {
-                workspace.add_preview_stage(configuration).map(|_| ())
+                workspace.add_preview_stage_spec(configuration).map(|_| ())
             }
         });
         let close = flyout.downgrade();

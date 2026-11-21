@@ -205,9 +205,11 @@ Catalog usage counts and `component_resource_references` include possible uses a
 variants and fallbacks behind external providers. Deletion cannot discard a resource merely
 because no single active variant was selected. Renaming one member of a resource family is
 rejected when a shared reference can select other declarations; edit the whole family in
-source in that case. Template copies compare possible dependencies as well as unique
-resolutions. The portable engine never loads external dictionaries or executes arbitrary
-key expressions while performing these checks.
+source in that case. Included template copies use the host's accepted source graph. A stable
+dependency keeps its declaration or complete theme scope. A shadowed, uniquely authored
+dependency is copied under a collision-free key with its own dependencies. The host rebases
+typed relative paths using the logical loader address. Planning returns one checked source
+transaction and performs no file loading or markup execution.
 
 Resource deletion is limited to explicit string-key entries. It does not remove an entire
 unkeyed dictionary container or infer that an implicit/type-keyed resource is unused; those

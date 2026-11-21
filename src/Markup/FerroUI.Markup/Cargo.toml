@@ -23,6 +23,7 @@ hot-reload = ["ferroui-base/hot-reload"]
 
 [dependencies]
 ferroui-base.workspace = true
+ferroui-markup-syntax.workspace = true
 
 [dev-dependencies]
 # The tests of the upstream suites that need controls: the templates with a tooltip, a popup or a flyout

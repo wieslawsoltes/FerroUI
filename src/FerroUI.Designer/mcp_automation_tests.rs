@@ -21,6 +21,35 @@ fn write() -> Permissions {
         allow_input: false,
     }
 }
+
+#[test]
+fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let session = Rc::new(RefCell::new(DesignerSession::new(original, ContentControl::new()).unwrap()));
+    let provider = DesignerMcp::new(&session);
+    let marker = "designer_timeline_marker_edit";
+    let program = session.borrow().animation_programs()[0].id;
+    let set = json!({"expected_revision":0,"action":"set","program":program,"name":"Review","time":0.6});
+    assert!(provider.call(marker, &set, Permissions::default()).is_err());
+    assert_eq!(provider.call(marker, &set, write()).unwrap()["markers"][0]["time"], 0.6);
+    let shared = json!({"expected_revision":0,"all":true,"action":"set","name":"Review","time":1.25});
+    assert_eq!(provider.call(marker, &shared, write()).unwrap()["markers"][0]["time"], 1.25);
+    assert_eq!(session.borrow().authored_source(), original);
+    assert!(!session.borrow().can_undo());
+    let changed = original.replace("Client onboarding", "Customer onboarding");
+    session.borrow_mut().update_source(&changed);
+    assert!(provider.call(marker, &set, write()).unwrap_err().contains("revision changed"));
+    let revision = session.borrow().document().revision();
+    let program = session.borrow().animation_programs()[0].id;
+    let list = provider.call("designer_timeline_markers", &json!({"expected_revision":revision,"program":program}), Permissions::default()).unwrap();
+    assert_eq!(list["markers"][0]["time"], 0.6);
+    let seek = json!({"expected_revision":revision,"all":true,"action":"seek","name":"Review"});
+    assert_eq!(provider.call(marker, &seek, write()).unwrap()["time"], 1.25);
+    assert_eq!(session.borrow().authored_source(), changed);
+    session.borrow_mut().open_document(original.into(), "memory://unrelated.xaml".into()).unwrap();
+    assert!(session.borrow().preview_markers(None, true).unwrap().is_empty());
+}
 fn call_edit(
     session: &Rc<RefCell<DesignerSession>>,
     provider: &DesignerMcp,
@@ -782,6 +811,40 @@ fn language_tools_rename_across_project_tabs_atomically_with_version_and_revisio
     );
     assert_eq!(session.borrow().document_uri(), usage_uri);
     assert!(session.borrow().can_undo());
+}
+
+#[test]
+fn project_library_tools_open_an_unopened_dictionary_in_its_authored_scope() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = Files::new();
+    let original = r#"<Button xmlns="https://github.com/ferroui" Name="Target"/>"#;
+    let start = files.write("View.xaml", original);
+    let source = concat!(
+        "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\n",
+        "  <DataTemplate x:Key='CustomerCard'><TextBlock Text='Card'/></DataTemplate>\n",
+        "</ResourceDictionary>",
+    );
+    let uri = files.write("Cards.xaml", source);
+    let workspace = DesignerWorkspace::with_uri(original, start.clone()).unwrap();
+    workspace.set_solution(ferroui_designer_project::Solution::discover(&files.0).unwrap()).unwrap();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let page = provider.call("ferroui_project_library", &json!({"query":"customer cards", "limit":1}), Permissions::default()).unwrap();
+    let entry = page["entries"][0].clone();
+    assert_eq!(page["total"], 1);
+    assert_eq!(entry["path"], "Cards.xaml");
+    assert!(!workspace.document_uris().contains(&uri));
+    let mut args = json!({"entry":entry, "destination":"preview"});
+    assert!(provider.call("designer_open_project_definition", &args, Permissions::default()).is_err());
+    args["entry"]["definition"]["name"] = json!("RetiredCard");
+    assert!(provider.call("designer_open_project_definition", &args, write()).is_err());
+    assert_eq!(workspace.session().borrow().document_uri(), start);
+    args["entry"]["definition"]["name"] = json!("CustomerCard");
+    let opened = provider.call("designer_open_project_definition", &args, write()).unwrap();
+    assert_eq!(opened["uri"], uri);
+    let session = workspace.session();
+    assert!(session.borrow().definition_scope().is_some());
+    assert_eq!(session.borrow().document().source(), source);
+    assert!(!session.borrow().can_undo());
 }
 
 #[test]

@@ -1,4 +1,8 @@
-use crate::design_window_loader::DesignWindowLoader;
+use crate::design_window_loader::{DesignLoad, DesignWindowLoader};
+use crate::remote::hosted_animation;
+use crate::remote::hosted_palette;
+use crate::remote::hosted_sources;
+use crate::remote::hosted_templates;
 use crate::remote::file_watcher_transport::FileWatcherTransport;
 use crate::remote::html_transport::HtmlWebSocketTransport;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
@@ -9,7 +13,8 @@ use ferroui_controls::{AppBuilder, Design, Window};
 use ferroui_markup_xaml::xaml_error_scope::with_xaml_errors;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_remote_protocol::designer::{
-    ExceptionDetails, StartDesignerSessionMessage, UpdateXamlMessage, UpdateXamlResultMessage,
+    DesignKeyframeSelectionRequest,
+    DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage,
 };
 use ferroui_remote_protocol::viewport::{
     ClientRenderInfoMessage, ClientSupportedPixelFormatsMessage, ClientViewportAllocatedMessage,
@@ -139,6 +144,14 @@ fn print_usage() -> ! {
 pub struct RemoteDesignerEntryPoint;
 
 impl RemoteDesignerEntryPoint {
+    /// Dispatches the editor's opt-in preview invocation before normal application startup.
+    pub fn run_if_requested(build_app: impl FnOnce() -> AppBuilder) {
+        let mut args = std::env::args().skip(1);
+        if args.next().as_deref() == Some("--ferroui-preview") {
+            Self::main(&args.collect::<Vec<_>>(), build_app);
+        }
+    }
+
     /// `ParseCommandLineArgs`. Where the original prints the usage and
     /// exits, this returns the error; [`main`](Self::main) prints and exits.
     pub fn parse_command_line_args(args: &[String]) -> Result<CommandLineArgs, UsageError> {
@@ -308,13 +321,21 @@ impl RemoteDesignerEntryPoint {
             Ok(transport) => transport,
             Err(error) => die(Some(&error)),
         };
+        hosted_animation::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
+        hosted_palette::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
+        hosted_templates::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
         Self::attach_transport(transport.clone());
         transport.on_exception(exception_handler(|_, e| {
             die(Some(&e.to_string()));
         }));
         transport.start();
-        log("Sending StartDesignerSessionMessage");
-        transport.send(Arc::new(StartDesignerSessionMessage { session_id: Some(args.session_id.clone()) }));
+        log("Sending preview session identity");
+        let session_id = Some(args.session_id);
+        if hosted_sources::requested(args.transport.as_ref(), args.method == methods::FERRO_REMOTE) {
+            transport.send(Arc::new(StartDesignSourceSessionMessage { session_id }));
+        } else {
+            transport.send(Arc::new(StartDesignerSessionMessage { session_id }));
+        }
 
         Dispatcher::ui_thread().main_loop(&CancellationToken::none());
         std::process::exit(0)
@@ -345,6 +366,32 @@ impl RemoteDesignerEntryPoint {
 
     /// The part of `OnTransportMessage` that runs on the UI thread.
     fn on_transport_message(arg: &Message) {
+        if let Some(request) = arg.downcast_ref::<DesignKeyframeSelectionRequest>() {
+            if let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) {
+                transport.send(Arc::new(hosted_animation::plan_keyframe_selection(request)));
+            }
+            return;
+        }
+        if let Some(request) = arg.downcast_ref::<DesignAnimationCurveRequest>() {
+            if let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) {
+                transport.send(Arc::new(hosted_animation::curve(request)));
+            }
+            return;
+        }
+        if let Some(request) = arg.downcast_ref::<DesignAnimationAuthoringRequest>() {
+            if let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) {
+                transport.send(Arc::new(hosted_animation::plan_keyframe(request)));
+            }
+            return;
+        }
+        if let Some(request) = arg.downcast_ref::<DesignAnimationRequestMessage>() {
+            let transport = TRANSPORT.with(|slot| slot.borrow().clone());
+            if let Some(transport) = transport {
+                let window = CURRENT_WINDOW.with(|slot| slot.borrow().clone());
+                transport.send(Arc::new(hosted_animation::sample(request, window.as_deref())));
+            }
+            return;
+        }
         if arg.is::<ClientSupportedPixelFormatsMessage>() {
             SUPPORTED_PIXEL_FORMATS.with(|slot| *slot.borrow_mut() = Some(arg.clone()));
             Self::rebuild_pre_flight();
@@ -357,7 +404,10 @@ impl RemoteDesignerEntryPoint {
             VIEWPORT_ALLOCATED_MESSAGE.with(|slot| *slot.borrow_mut() = Some(arg.clone()));
             Self::rebuild_pre_flight();
         }
-        if let Some(xaml) = arg.downcast_ref::<UpdateXamlMessage>() {
+        let snapshot = arg.downcast_ref::<UpdateDesignSourcesMessage>();
+        let versioned = snapshot.map(|snapshot| &snapshot.update).or_else(|| arg.downcast_ref::<UpdateDesignMessage>());
+        let source = versioned.map(|update| &update.source).or_else(|| arg.downcast_ref::<UpdateXamlMessage>());
+        if let Some(xaml) = source {
             // Keep the last valid preview alive until a replacement was successfully built.
             let current_window = CURRENT_WINDOW.with(|slot| slot.borrow().clone());
             if let Some(current_window) = &current_window {
@@ -366,6 +416,9 @@ impl RemoteDesignerEntryPoint {
             let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) else {
                 return;
             };
+            let revision = versioned.map(|update| update.revision);
+            let pending = PreviewerWindowingPlatform::begin_update(revision);
+            let animations = versioned.and_then(hosted_animation::prepare);
             // `catch (Exception e)`: an error of the document, and whatever
             // else fails while the window is built and shown.
             // The load and the show run in an error scope of the XAML runtime (#567): a
@@ -385,12 +438,23 @@ impl RemoteDesignerEntryPoint {
             let loaded = catch_unwind(AssertUnwindSafe(|| {
                 dispatcher.capture_unhandled_exceptions(|| {
                     with_xaml_errors(|| {
-                        DesignWindowLoader::load_designer_window_with_scaling(
-                            xaml.xaml.as_deref().unwrap_or(""),
-                            xaml.assembly_path.as_deref(),
-                            xaml.xaml_file_project_path.as_deref(),
-                            LAST_RENDER_SCALING.get(),
-                        )
+                        let snapshot = snapshot.map(hosted_sources::prepare).transpose()?;
+                        let create_source_info = snapshot.is_some() && hosted_templates::enabled();
+                        let load = |base_uri| DesignWindowLoader::load(DesignLoad {
+                            xaml: xaml.xaml.as_deref().unwrap_or(""),
+                            assembly_path: xaml.assembly_path.as_deref(),
+                            project_path: xaml.xaml_file_project_path.as_deref(),
+                            render_scaling: LAST_RENDER_SCALING.get(),
+                            fixture: versioned.and_then(|update| update.fixture.as_deref()),
+                            animation_document: animations.as_ref().map(|source| source.identity.as_str()),
+                            create_source_info,
+                            freeze_animation_clock: animations.as_ref().is_some_and(hosted_animation::AnimationSource::freeze_clock),
+                            base_uri,
+                        });
+                        match snapshot {
+                            Some((base, sources)) => sources.run(|| load(Some(base))),
+                            None => load(None),
+                        }
                     })
                 })
             }));
@@ -405,7 +469,11 @@ impl RemoteDesignerEntryPoint {
                     }),
                     ..UpdateXamlResultMessage::default()
                 },
-                Ok(Ok(Ok(window))) => {
+                Ok(Ok(Ok(design))) => {
+                    let catalog = hosted_animation::accept(revision, animations, &design);
+                    let palette = snapshot.and_then(|snapshot| hosted_palette::capture(snapshot.update.revision));
+                    let templates = snapshot.and_then(|snapshot| hosted_templates::capture(snapshot.update.revision, &design));
+                    let window = design.window;
                     if let Some(previous) = current_window {
                         // Boundary (#567): closing the previous preview runs the closing and
                         // closed handlers of the previewed application; a panic of one must
@@ -416,6 +484,16 @@ impl RemoteDesignerEntryPoint {
                     }
                     let handle = window.platform_impl().and_then(|platform_impl| platform_impl.handle());
                     CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = Some(window));
+                    pending.accept();
+                    if let Some(catalog) = catalog {
+                        transport.send(Arc::new(catalog));
+                    }
+                    if let Some(palette) = palette {
+                        transport.send(Arc::new(palette));
+                    }
+                    if let Some(templates) = templates {
+                        transport.send(Arc::new(templates));
+                    }
                     UpdateXamlResultMessage {
                         handle: handle.map(|handle| handle.handle().to_string()),
                         ..UpdateXamlResultMessage::default()
@@ -446,7 +524,14 @@ impl RemoteDesignerEntryPoint {
                     }
                 }
             };
-            transport.send(Arc::new(result));
+            let answer: Message = if let Some(revision) = revision {
+                Arc::new(UpdateDesignResultMessage {
+                    revision,
+                    result,
+                    fixtures: crate::preview_fixtures::names(xaml.xaml_file_project_path.as_deref()),
+                })
+            } else { Arc::new(result) };
+            transport.send(answer);
         }
     }
 
@@ -459,6 +544,8 @@ impl RemoteDesignerEntryPoint {
         RENDER_INFO_MESSAGE.with(|slot| *slot.borrow_mut() = None);
         LAST_RENDER_SCALING.set(1.0);
         TRANSPORT.with(|slot| *slot.borrow_mut() = None);
+        hosted_animation::configure(None, false);
+        hosted_palette::configure(None, false);
         CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = None);
     }
 }

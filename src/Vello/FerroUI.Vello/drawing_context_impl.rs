@@ -685,11 +685,12 @@ impl DrawingContextImpl {
         opacity: f32,
     ) {
         let extend = to_extend(gradient_brush.spread_method());
-        let gradient_stops = gradient_brush.gradient_stops();
-        let mut stop_colors: Vec<AlphaColor<Srgb>> = gradient_stops.iter().map(|s| to_color(s.color())).collect();
-        let mut stop_offsets: Vec<f32> = gradient_stops.iter().map(|s| s.offset() as f32).collect();
-
-        if stop_colors.is_empty() {
+        let mut stops: Vec<_> = gradient_brush
+            .gradient_stops()
+            .iter()
+            .map(|stop| (stop.offset(), to_color(stop.color())))
+            .collect();
+        if stops.is_empty() {
             // A gradient without stops: the Skia backend, which cannot
             // build one, draws with the paint as it is, white at the
             // opacity of the brush.
@@ -697,9 +698,9 @@ impl DrawingContextImpl {
             return;
         }
 
-        let stops = |colors: &[AlphaColor<Srgb>], offsets: &[f32]| -> Vec<(f32, AlphaColor<Srgb>)> {
-            offsets.iter().copied().zip(colors.iter().copied()).collect()
-        };
+        // Vello requires ascending offsets. Preserve the authored order of
+        // equal offsets, which determines the colors on either side of a hard stop.
+        stops.sort_by(|left, right| left.0.total_cmp(&right.0));
 
         // Skia interpolates the colors of the stops before it
         // premultiplies them.
@@ -711,7 +712,7 @@ impl DrawingContextImpl {
 
         let mut underlay = None;
 
-        let (gradient, transform) = if let Some(linear_gradient) = gradient_brush.as_linear_gradient_brush() {
+        let (mut gradient, transform) = if let Some(linear_gradient) = gradient_brush.as_linear_gradient_brush() {
             let start = to_kurbo_point(linear_gradient.start_point().to_pixels_rect(target_rect));
             let end = to_kurbo_point(linear_gradient.end_point().to_pixels_rect(target_rect));
 
@@ -720,8 +721,7 @@ impl DrawingContextImpl {
                 Self::get_absolute_transform(gradient_brush, target_rect),
             );
 
-            let gradient = Gradient::new_linear(start, end).with_stops(&stops(&stop_colors, &stop_offsets)[..]);
-            (finish(gradient, extend), transform)
+            (finish(Gradient::new_linear(start, end), extend), transform)
         } else if let Some(radial_gradient) = gradient_brush.as_radial_gradient_brush() {
             let center_point = radial_gradient.center().to_pixels_rect(target_rect);
             let center = to_kurbo_point(center_point);
@@ -747,9 +747,7 @@ impl DrawingContextImpl {
             if origin_point == center_point {
                 // When the origin is the same as the center the radial
                 // gradient acts the same as D2D.
-                let gradient =
-                    Gradient::new_radial(center, radius_x as f32).with_stops(&stops(&stop_colors, &stop_offsets)[..]);
-                (finish(gradient, extend), transform)
+                (finish(Gradient::new_radial(center, radius_x as f32), extend), transform)
             } else {
                 // When the origin is different to the center use a two point
                 // conical gradient to match the behaviour of D2D.
@@ -771,7 +769,7 @@ impl DrawingContextImpl {
                 let origin_is_outside =
                     origin_offset_x * origin_offset_x + origin_offset_y * origin_offset_y >= radius_x * radius_x;
 
-                let end_offset = stop_offsets[stop_offsets.len() - 1];
+                let end_offset = stops[stops.len() - 1].0 as f32;
 
                 let mut start = origin;
                 let mut radius_start = 0f32;
@@ -784,37 +782,22 @@ impl DrawingContextImpl {
                     // Reverse the order of the stops to match D2D.
                     (start, radius_start, end, radius_end) = (end, radius_end, start, radius_start);
 
-                    let count = stop_offsets.len();
-
-                    let mut reversed_colors = vec![AlphaColor::TRANSPARENT; count];
-                    // And then reverse the reference point of the stops.
-                    let mut reversed_stops = vec![0f32; count];
-
-                    for i in 0..count {
-                        let mut offset = 1.0 - gradient_stops[i].offset();
-
-                        if MathUtilities::is_zero(offset) {
-                            offset = 0.0;
+                    stops.reverse();
+                    for (offset, _) in &mut stops {
+                        *offset = 1.0 - *offset;
+                        if MathUtilities::is_zero(*offset) {
+                            *offset = 0.0;
                         }
-
-                        let reversed_index = count - 1 - i;
-
-                        reversed_stops[reversed_index] = offset as f32;
-                        reversed_colors[reversed_index] = stop_colors[i];
                     }
-
-                    stop_colors = reversed_colors;
-                    stop_offsets = reversed_stops;
                 }
 
                 // Fill that unpainted area with the colour the gradient clamps to, like D2D
                 // does: the gradient is drawn over that color.
                 if origin_is_outside {
-                    underlay = Some(stop_colors[0]);
+                    underlay = Some(stops[0].1);
                 }
 
-                let gradient = Gradient::new_two_point_radial(start, radius_start, end, radius_end)
-                    .with_stops(&stops(&stop_colors, &stop_offsets)[..]);
+                let gradient = Gradient::new_two_point_radial(start, radius_start, end, radius_end);
                 (finish(gradient, extend), transform)
             }
         } else if let Some(conic_gradient) = gradient_brush.as_conic_gradient_brush() {
@@ -834,14 +817,14 @@ impl DrawingContextImpl {
                 ),
             );
 
-            let gradient = Gradient::new_sweep(to_kurbo_point(center_point), 0.0, std::f32::consts::TAU)
-                .with_stops(&stops(&stop_colors, &stop_offsets)[..]);
+            let gradient = Gradient::new_sweep(to_kurbo_point(center_point), 0.0, std::f32::consts::TAU);
             (finish(gradient, Extend::Pad), transform)
         } else {
             // A gradient of a kind the contract does not have draws nothing.
             return;
         };
 
+        gradient.stops.extend(stops.into_iter().map(|(offset, color)| peniko::ColorStop::from((offset as f32, color))));
         let transform = transform.map(to_affine).unwrap_or(Affine::IDENTITY);
 
         match underlay {

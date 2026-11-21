@@ -11,7 +11,7 @@ use ferroui_designer_core::Edit;
 fn source() -> &'static str {
     r#"<Canvas xmlns="https://github.com/ferroui" Name="Owner" Width="400" Height="240"><Button Name="A" Width="100" Height="40" Opacity="1"/><Button Name="B" Width="200" Height="40" Opacity="1" Canvas.Top="60"/></Canvas>"#
 }
-fn attach_preview(session: &DesignerSession) -> ferroui_base::Ref<ferroui_controls::Window> {
+pub(super) fn attach_preview(session: &DesignerSession) -> ferroui_base::Ref<ferroui_controls::Window> {
     let window = ferroui_controls::Window::new();
     window.set_width(400.0);
     window.set_height(240.0);
@@ -52,6 +52,95 @@ fn state_group(owner: u64) -> VisualStateGroup {
         }],
     }
 }
+
+#[test]
+fn timeline_canvas_gestures_share_recording_and_preserve_base_anchors() {
+    use crate::{DesignGesture, workspace_tools};
+    use ferroui_base::{Point, Rect};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = source().replace(
+        "Height=\"40\" Opacity=\"1\"/>",
+        "Height=\"40\" Opacity=\"1\" Canvas.Left=\"24\" Canvas.Right=\"8\" Canvas.Bottom=\"30\"/>",
+    );
+    let mut session = DesignerSession::new(&source, ContentControl::new()).unwrap();
+    let window = attach_preview(&session);
+    let target = session.document().ast().find_name("A").unwrap();
+    let owner = session.document().ast().root();
+    let clip = session
+        .create_animation_program("Card", owner, "Button#A", 2.0)
+        .unwrap();
+    session.scrub_animation_program(clip, 0.999_318_2).unwrap();
+    session.set_recording(true);
+    let authored = session.document().source().to_owned();
+    let host = session.preview.host.clone().upcast();
+    let before = session.preview.bounds(target, &host).unwrap();
+    let after = Rect::new(before.x, before.y, before.width + 24.0, before.height + 16.0);
+    workspace_tools::commit(&mut session, DesignGesture::Resize { node: target, before, after }).unwrap();
+    assert!(session.timeline().track(target, "Width").is_some(), "{}", session.document().source());
+    window.update_layout();
+    assert_eq!(session.preview.bounds(target, &host), Some(after));
+    assert!(session.timeline().track(target, "Canvas.Left").is_none());
+    assert!(session.document().source().contains("Canvas.Left=\"24\" Canvas.Right=\"8\" Canvas.Bottom=\"30\""));
+    let sized = session.document().source().to_owned();
+    workspace_tools::commit(&mut session, DesignGesture::Move { nodes: vec![target], delta: Point::new(26.0, -12.0) }).unwrap();
+    window.update_layout();
+    assert_eq!(
+        session.preview.bounds(target, &host),
+        Some(Rect::new(after.x + 26.0, after.y - 12.0, after.width, after.height))
+    );
+    session.stop();
+    window.update_layout();
+    assert_eq!(session.preview.bounds(target, &host), Some(before));
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), sized);
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), authored);
+}
+
+#[test]
+fn timeline_pose_resolves_a_unique_program_in_a_rebuilt_preview() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut session = DesignerSession::new(source(), ContentControl::new()).unwrap();
+    let owner = session.document().ast().root();
+    let target = session.document().ast().find_name("A").unwrap();
+    let id = session.create_animation_program("Fade", owner, "Button#A", 1.0).unwrap();
+    session.scrub_animation_program(id, 0.5).unwrap();
+    session.record_keyframe(target, "Opacity", AnimationValue::Number(0.625)).unwrap();
+    let pose = session.timeline_preview_pose().unwrap();
+    let program = session.animation_programs().iter().find(|program| program.id == id).unwrap();
+    let mut edited = session.document().source().to_owned();
+    edited.insert_str(program.span.start, "<!-- Design review · Łódź -->");
+    let mut rebuilt = DesignerSession::new(&edited, ContentControl::new()).unwrap();
+    let accepted = rebuilt.restore_timeline_preview_pose(&pose).unwrap().unwrap();
+    assert_eq!(accepted.source_key, pose.source_key);
+    assert_eq!(accepted.time, 0.5);
+    let target = rebuilt.document().ast().find_name("A").unwrap();
+    assert_eq!(rebuilt.preview.visual(target).unwrap().opacity(), 0.625);
+    assert_eq!(rebuilt.document().source(), edited);
+
+    let marker = format!("<!--ferroui-designer-program-id:{}-->", pose.source_key.as_ref().unwrap());
+    let legacy = session.document().source().replacen(&marker, "", 1);
+    assert_ne!(&legacy, session.document().source());
+    let mut undone = DesignerSession::new(&legacy, ContentControl::new()).unwrap();
+    let accepted = undone.restore_timeline_preview_pose(&pose).unwrap().unwrap();
+    assert!(accepted.source_key.is_none());
+    assert_eq!(accepted.time, 0.5);
+    let target = undone.document().ast().find_name("A").unwrap();
+    assert_eq!(undone.preview.visual(target).unwrap().opacity(), 0.625);
+
+    let retargeted = legacy.replace("Button#A", "Button#B");
+    let mut unrelated = DesignerSession::new(&retargeted, ContentControl::new()).unwrap();
+    assert!(unrelated.restore_timeline_preview_pose(&pose).unwrap().is_none());
+
+    let mut duplicated = session.document().source().to_owned();
+    duplicated.insert_str(program.span.end, &program.source);
+    let mut ambiguous = DesignerSession::new(&duplicated, ContentControl::new()).unwrap();
+    assert!(ambiguous.restore_timeline_preview_pose(&pose).unwrap().is_none());
+    let target = ambiguous.document().ast().find_name("A").unwrap();
+    assert_eq!(ambiguous.preview.visual(target).unwrap().opacity(), 1.0);
+}
+
 #[test]
 fn independent_programs_select_edit_and_preview_all_matching_targets() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
@@ -407,7 +496,18 @@ fn native_named_brush_colors_are_interpolated_as_colors_and_preview_stays_source
         session.timeline().tracks[0].keyframes[0].value,
         AnimationValue::Color { .. }
     ));
+    let program = &session.animation_programs()[0];
+    let target = session.document().ast().find_name("A").unwrap();
+    let window = ferroui_designer_animation::CurveWindow { start: 0.0, end: 2.0 };
+    let curve = session.animation_curve_channel(program.id, target, "Background", ferroui_designer_animation::CurveChannel::Red, window).unwrap();
+    assert_eq!((curve[0].value, curve.last().unwrap().value), (1.0, 0.0));
+    let red = curve.iter().find(|point| point.time == 1.0).unwrap().value;
     session.seek(1.0).unwrap();
+    let button = session.preview.visual(target).unwrap().cast::<ferroui_controls::Button>().unwrap();
+    let brush = button.background().unwrap();
+    let color = brush.as_solid_color_brush().unwrap().color();
+    assert_eq!(color.r, (red * 255.0).round_ties_even() as u8);
+    assert_eq!((color.r, color.b), (188, 188));
     assert_eq!(session.document().source(), source);
 }
 
@@ -508,6 +608,51 @@ fn attached_state_clock_samples_literal_and_resource_transitions_through_native_
         assert_eq!(session.preview.visual(a).unwrap().opacity(), 1.0);
         window.close();
     }
+}
+
+#[test]
+fn timeline_transition_seek_reconstructs_native_route_after_visiting_its_endpoint() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = "<Canvas xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' Name='Owner'>
+        <Canvas.Resources>
+            <x:Double x:Key='NormalOpacity'>0.6</x:Double>
+            <x:Double x:Key='MutedOpacity'>0.25</x:Double>
+        </Canvas.Resources>
+        <Button Name='A' Opacity='1' Width='100' Height='40'/>
+    </Canvas>";
+    let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    let _window = attach_preview(&session);
+    let owner = session.document().ast().root();
+    let target = session.document().ast().find_name("A").unwrap();
+    let mut group = state_group(owner);
+    group.states[0].setters[0].value = "{StaticResource NormalOpacity}".into();
+    group.states[1].setters[0].value = "{StaticResource MutedOpacity}".into();
+    group.transitions.extend([
+        StateTransition {
+            from: None, to: "Muted".into(), duration: 0.8, easing: Easing::Linear,
+        },
+        StateTransition {
+            from: None, to: "Normal".into(), duration: 0.8, easing: Easing::Linear,
+        },
+        StateTransition {
+            from: Some("Muted".into()), to: "Normal".into(), duration: 0.2, easing: Easing::Linear,
+        },
+    ]);
+    session.upsert_state_group(group).unwrap();
+    let authored = session.document().source().to_owned();
+    let opacity = |session: &DesignerSession| session.preview.visual(target).unwrap().opacity();
+    session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.2).unwrap();
+    assert!((opacity(&session) - 0.425).abs() < 1e-6, "Directional midpoint opacity was {}", opacity(&session));
+    session.advance_state_preview(5.0).unwrap();
+    assert!((opacity(&session) - 0.25).abs() < 1e-6, "Destination opacity was {}", opacity(&session));
+    session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.1).unwrap();
+    assert!((opacity(&session) - 0.5125).abs() < 1e-6, "Backward seek opacity was {}", opacity(&session));
+    session.preview_state_transition(owner, "Interaction", None, "Muted", 0.4).unwrap();
+    assert!((opacity(&session) - 0.625).abs() < 1e-6, "Default midpoint opacity was {}", opacity(&session));
+    assert!(session.preview_state_transition(owner, "Interaction", Some("Normal"), "Muted", 0.8).is_err());
+    assert_eq!(session.document().source(), authored);
+    session.clear_interaction_preview();
+    assert_eq!(opacity(&session), 1.0);
 }
 
 #[test]

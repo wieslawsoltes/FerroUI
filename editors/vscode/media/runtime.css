@@ -1,0 +1,51 @@
+.runtime-targets { flex: 1 1 220px; display: flex; flex-wrap: wrap; min-inline-size: 0; gap: 5px; }
+.runtime-targets select { flex: 1 1 104px; max-inline-size: 100%; }
+.runtime-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(185px, 28%);
+    gap: 6px;
+    padding: 0 7px 7px;
+}
+.runtime-stage, .runtime-inspect-section {
+    min-inline-size: 0;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    overflow: hidden;
+}
+.runtime-stage { display: flex; flex-direction: column; }
+.runtime-controls { padding: 3px 4px; }
+.runtime-controls .segments button { padding-inline: 6px; }
+.runtime-canvas {
+    flex: 1;
+    display: grid;
+    min-block-size: 126px;
+    place-items: start center;
+    overflow: auto;
+    padding: clamp(8px, 2vw, 22px);
+}
+#runtime-image { max-inline-size: 100%; block-size: auto; box-shadow: 0 0 0 1px var(--line), 0 4px 16px #0003; cursor: crosshair; }
+.runtime-canvas[data-mode=interact] #runtime-image { cursor: default; }
+#runtime-input { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 5px; border-block-start: 1px solid var(--line); }
+#runtime-input-value { flex: 1 1 74px; }
+.runtime-main aside { display: grid; align-content: start; gap: 6px; min-inline-size: 0; }
+.runtime-inspect-section { background: var(--vscode-editorWidget-background, var(--vscode-editor-background)); }
+.runtime-inspect-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 5px; }
+.runtime-inspect-toolbar :is(select, input) { flex: 1 1 88px; }
+#runtime-tree, #runtime-details { min-block-size: 60px; overflow: auto; border-block-start: 1px solid var(--line); }
+#runtime-tree { max-block-size: 31vh; list-style: none; margin: 0; padding: 3px; }
+#runtime-tree button { inline-size: 100%; min-block-size: 23px; text-align: start; text-overflow: ellipsis; overflow: hidden; }
+#runtime-property-filter { inline-size: calc(100% - 10px); margin: 0 5px 5px; }
+#runtime-details { max-block-size: 53vh; }
+#runtime-details pre { margin: 0; padding: 6px; white-space: pre-wrap; overflow-wrap: anywhere; }
+#runtime-details form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 3px;
+    align-items: center;
+    padding: 4px 5px;
+}
+#runtime-details form + form { border-block-start: 1px solid var(--line); }
+#runtime-details label { grid-column: 1 / -1; overflow-wrap: anywhere; }
+#runtime-details small { color: var(--muted); }
+.runtime-property-actions { display: inline-flex; gap: 3px; }
+@media (max-width: 580px) { .runtime-main { grid-template-columns: minmax(0, 1fr); } }

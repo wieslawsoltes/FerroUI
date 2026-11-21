@@ -2,13 +2,22 @@
 use super::schema as s;
 use super::{decode, integer, state, text};
 use crate::DesignerWorkspace;
-use ferroui_designer_language::{FormattingOptions, WorkspaceEdit};
+use ferroui_designer_language::{FormattingOptions, LanguageService, WorkspaceEdit};
 use ferroui_designer_project::{BuildTask, TaskKind};
 use serde_json::{json, Value};
 use std::rc::Rc;
 
+#[path = "mcp_canvas_guides.rs"]
+mod canvas_guides;
+#[path = "mcp_project_library.rs"]
+mod project_library;
+#[path = "mcp_command_bindings.rs"]
+mod command_bindings;
+#[path = "mcp_resource_move.rs"]
+mod resource_move;
+
 pub(super) fn handles(name: &str) -> bool {
-    matches!(
+    canvas_guides::handles(name) || project_library::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -16,6 +25,21 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_project_task"
             | "designer_language"
             | "designer_language_apply"
+            | "designer_event_handler"
+            | "designer_scaffold_handler"
+            | "designer_dictionary_extraction"
+            | "designer_extract_dictionary"
+            | "designer_plan_xaml_move"
+            | "designer_move_xaml"
+            | "designer_plan_property_rename"
+            | "designer_rename_property"
+            | "designer_plan_type_rename"
+            | "designer_rename_type"
+            | "designer_plan_resource_rename"
+            | "designer_rename_resource"
+            | "designer_reveal_rsx_animation_issue"
+            | "designer_reveal_rsx_state"
+            | "designer_rsx_style_source"
     )
 }
 pub(super) fn tools() -> Vec<Value> {
@@ -41,7 +65,7 @@ pub(super) fn tools() -> Vec<Value> {
         }
         queries.push(query(action, fields, &["offset"]));
     }
-    queries.push(query("format", json!({"options":s::formatting()}), &[]));
+    queries.push(query("format", json!({"options":s::formatting(),"range":s::source_range()}), &[]));
     queries.push(query(
         "rename",
         json!({"offset":s::revision(),"new_name":s::string()}),
@@ -61,7 +85,7 @@ pub(super) fn tools() -> Vec<Value> {
     let plans = ["check", "build", "run"]
         .into_iter()
         .map(|kind| {
-            let mut fields = json!({"project":s::revision(),"release":{"type":"boolean"}});
+            let mut fields = json!({"project":s::revision(),"release":{"type":"boolean"},"features":s::string()});
             if kind == "run" {
                 fields["target"] = s::nullable(s::string());
             }
@@ -71,7 +95,7 @@ pub(super) fn tools() -> Vec<Value> {
     let mut tasks: Vec<_> = ["check", "build", "run"]
         .into_iter()
         .map(|kind| {
-            let mut fields = json!({"release":{"type":"boolean"}});
+            let mut fields = json!({"release":{"type":"boolean"},"features":s::string()});
             if kind == "run" {
                 fields["target"] = s::nullable(s::string());
             }
@@ -79,7 +103,13 @@ pub(super) fn tools() -> Vec<Value> {
         })
         .collect();
     tasks.push(s::action("cancel", json!({}), &[], true));
-    vec![
+    let mut tools = vec![
+        s::tool("designer_reveal_rsx_animation_issue", "Reveal a computed or unsupported clip expression from the current Rust Timeline sourceIssues list.",
+            s::object(json!({"index":s::revision(),"expected_revision":s::revision()}), &["index","expected_revision"]), false),
+        s::tool("designer_reveal_rsx_state", "Reveal a mapped Rust state group or its exact route. Pass owner and group from designer_states. Include to and optionally from for a route.",
+            s::object(json!({"owner":s::id(),"group":s::string(),"from":s::nullable(s::string()),"to":s::string(),"expected_revision":s::revision()}), &["owner","group","expected_revision"]), false),
+        s::tool("designer_rsx_style_source", "Open the supplying Rust module at the sourceAddress and UTF-16 range reported by the accepted Rust palette.",
+            s::object(json!({"address":s::string(),"range":s::source_range(),"expected_revision":s::revision()}), &["address","range","expected_revision"]), false),
         s::tool("designer_project","Read the discovered solution, selected project, open document URIs, discovery status and current build task. include_output returns the bounded captured compiler output.",s::object(json!({"include_output":{"type":"boolean"}}),&[]),false),
         s::actions("designer_project_edit","Open a solution asynchronously, select a project, activate/close an editor document, or save all authored buffers. Poll designer_project for discovery completion. close requires an explicit discard choice; saves preserve external-change checks.",vec![
             s::action("open_solution",json!({"path":s::string()}),&["path"],true),
@@ -90,16 +120,58 @@ pub(super) fn tools() -> Vec<Value> {
         ],true),
         s::actions("designer_build_plan","Describe the exact shell-free Cargo task without starting it. Project defaults to the selected project; run validates the binary target.",plans,false),
         s::actions("designer_project_task","Save checked editor buffers and explicitly start a Cargo check/build/run task, or cancel the owned task. Starting a process additionally requires allow_input because builds execute the project's build scripts with host privileges. Poll designer_project for status/output; no shell text is accepted.",tasks,true),
-        s::actions("designer_language","Query the shared XAML language service over open and indexed project files. uri defaults to the active document. Cursor offsets are UTF-8 byte offsets; returned ranges are LSP UTF-16. format returns text edits with the current version; rename returns a versioned WorkspaceEdit for designer_language_apply.",queries,false),
+        s::actions("designer_language","Query the shared XAML language service over open and indexed project files. uri defaults to the active document. Cursor offsets are UTF-8 bytes. Formatting accepts a UTF-16 range and overrides to Studio settings and returns a versioned edit for designer_language_apply.",queries,false),
         s::tool("designer_language_apply","Apply a prepared multi-document language WorkspaceEdit atomically through retained editor tabs and the project version guards. The active document also requires expected_revision; no files are saved automatically.",s::object(json!({"expected_revision":s::revision(),"edit":s::workspace_edit()}),&["expected_revision","edit"]),true),
-    ]
+        s::tool("designer_event_handler","Read the Rust owner, signature, current Rust version and existing declaration for an authored XAML event. Pass handler to preview the checked two-file edits.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision()}),&["node","event","expected_revision"]),false),
+        s::tool("designer_scaffold_handler","Register a Rust handler and assign the authored XAML event in one edit. Use the Rust version reported by designer_event_handler. No files are saved.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision(),"expected_rust_version":s::revision()}),&["node","event","handler","expected_revision","expected_rust_version"]),true),
+        s::tool("designer_dictionary_extraction","Read an inline XAML dictionary size, source range and suggested file. Pass file_name to review the checked patch, new dictionary and review identifier.",s::object(json!({"node":s::id(),"file_name":s::string(),"expected_revision":s::revision()}),&["node","expected_revision"]),false),
+        s::tool("designer_extract_dictionary","Create the reviewed XAML dictionary and update the view in one editor transaction. Pass file_name and review from designer_dictionary_extraction at the current design revision.",s::object(json!({"node":s::id(),"file_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["node","file_name","review","expected_revision"]),true),
+        s::tool("designer_plan_xaml_move","Review a move of the active XAML file. Pass a workspace-relative destination to get edits for XAML, Rust, Cargo builds, saved stage sets, and scenarios. Generated Rust references may return status resolving. Start that analysis with allow_input, then poll with the same destination and revision until the review identifier arrives. Pass cancel to discard the pending or completed review.",s::object(json!({"destination":s::string(),"expected_revision":s::revision(),"cancel":{"type":"boolean"}}),&["destination","expected_revision"]),false),
+        s::tool("designer_move_xaml","Move the active XAML file and change its references in one Studio history step. Pass the destination and review identifier from designer_plan_xaml_move.",s::object(json!({"destination":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["destination","review","expected_revision"]),true),
+        s::tool("designer_plan_property_rename","Review a registered XAML property or typed binding member at a byte offset in the active view. Returns checked Rust and XAML patches and possible unmapped locations.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"expected_revision":s::revision()}),&["offset","new_name","expected_revision"]),false),
+        s::tool("designer_rename_property","Apply the reviewed property rename across Rust and XAML as one Studio history step. Copy review from designer_plan_property_rename.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["offset","new_name","review","expected_revision"]),true),
+        s::tool("designer_plan_type_rename","Review a Cargo-registered XAML type name. At the active XAML byte offset, returns a checked Rust and XAML plan. For an implicit Rust name, start analysis with allow_input and poll with the same offset, name and revision. Pass cancel to discard the review.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"expected_revision":s::revision(),"cancel":{"type":"boolean"}}),&["offset","new_name","expected_revision"]),false),
+        s::tool("designer_rename_type","Apply the registered type rename reviewed by designer_plan_type_rename as one Studio history step. Pass its review identifier.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["offset","new_name","review","expected_revision"]),true),
+        s::tool("designer_plan_resource_rename","Review a XAML resource key and its resolved project references. Pass a UTF-8 offset on its key, the declaration element name, or a resource operand. A matched theme family includes its authored layers.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"expected_revision":s::revision()}),&["offset","new_name","expected_revision"]),false),
+        s::tool("designer_rename_resource","Apply the reviewed project resource rename in one Studio history step. Copy review from designer_plan_resource_rename.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["offset","new_name","review","expected_revision"]),true),
+    ];
+    tools.extend(canvas_guides::tools());
+    tools.extend(project_library::tools());
+    tools.extend(command_bindings::tools());
+    tools.extend(resource_move::tools());
+    tools
 }
 pub(super) fn call(
     workspace: &Rc<DesignerWorkspace>,
     name: &str,
     args: &Value,
+    allow_input: bool,
 ) -> Result<Value, String> {
+    if canvas_guides::handles(name) {
+        return canvas_guides::call(workspace, name, args);
+    }
+    if project_library::handles(name) {
+        return project_library::call(workspace, name, args);
+    }
+    if command_bindings::handles(name) {
+        return command_bindings::call(workspace, name, args);
+    }
+    if resource_move::handles(name) {
+        return resource_move::call(workspace, name, args);
+    }
     match name {
+        "designer_reveal_rsx_animation_issue" => {
+            workspace.reveal_rust_animation_issue(integer(args, "expected_revision")?, index(args, "index")?)?;
+            Ok(state(&workspace.session().borrow()))
+        }
+        "designer_reveal_rsx_state" => {
+            workspace.reveal_rust_state_source(integer(args, "expected_revision")?, integer(args, "owner")?, &text(args, "group")?, args["from"].as_str(), args["to"].as_str())?;
+            Ok(state(&workspace.session().borrow()))
+        }
+        "designer_rsx_style_source" => {
+            workspace.reveal_rust_style_source(&text(args, "address")?, decode(args, "range")?)?;
+            Ok(state(&workspace.session().borrow()))
+        }
         "designer_project" => project(workspace, args["include_output"] == true),
         "designer_project_edit" => {
             match text(args, "action")?.as_str() {
@@ -130,7 +202,8 @@ pub(super) fn call(
                 .projects
                 .get(index)
                 .ok_or("Unknown project index")?;
-            let task = BuildTask::cargo(project, task_kind(args)?, args["release"] == true)
+            let task = BuildTask::cargo_with_features(project, task_kind(args)?, args["release"] == true,
+                args["features"].as_str().unwrap_or_default())
                 .map_err(|error| error.to_string())?;
             Ok(json!({"task":task,"project":index}))
         }
@@ -138,11 +211,52 @@ pub(super) fn call(
             if args["action"] == "cancel" {
                 workspace.cancel_project_task()?;
             } else {
-                workspace.start_project_task(task_kind(args)?, args["release"] == true)?;
+                workspace.start_project_task_with_features(task_kind(args)?, args["release"] == true,
+                    args["features"].as_str().unwrap_or_default())?;
             }
             project(workspace, true)
         }
         "designer_language" => language(workspace, args),
+        "designer_event_handler" => workspace.inspect_event_handler(super::node_id(args, "node")?, &text(args, "event")?, args["handler"].as_str()),
+        "designer_scaffold_handler" => {
+            let version = i64::try_from(integer(args, "expected_rust_version")?).map_err(|_| "Rust version is out of range")?;
+            let plan = workspace.scaffold_event_handler(super::node_id(args, "node")?, &text(args, "event")?, &text(args, "handler")?, version)?;
+            Ok(json!(plan))
+        }
+        "designer_dictionary_extraction" => workspace.inspect_dictionary_extraction(super::node_id(args, "node")?, args["file_name"].as_str()),
+        "designer_extract_dictionary" => {
+            let plan = workspace.extract_reviewed_dictionary(super::node_id(args, "node")?, &text(args, "file_name")?, &text(args, "review")?)?;
+            Ok(json!(plan))
+        }
+        "designer_plan_xaml_move" => {
+            let destination = text(args, "destination")?;
+            if args["cancel"] == true {
+                workspace.cancel_project_file_move_review(&destination)?;
+                return Ok(json!({"status":"cancelled"}));
+            }
+            Ok(match workspace.plan_project_file_move(&destination, allow_input)? {
+                Some(plan) => json!(plan),
+                None => json!({"status":"resolving"}),
+            })
+        }
+        "designer_move_xaml" => Ok(json!(workspace.apply_project_file_move(&text(args, "destination")?, &text(args, "review")?)?)),
+        "designer_plan_property_rename" | "designer_rename_property" => {
+            let review = (name == "designer_rename_property").then(|| text(args, "review")).transpose()?;
+            Ok(json!(workspace.registered_property_rename(
+                index(args, "offset")?, &text(args, "new_name")?, review.as_deref(),
+            )?))
+        }
+        "designer_plan_type_rename" | "designer_rename_type" => {
+            let review = (name == "designer_rename_type").then(|| text(args, "review")).transpose()?;
+            workspace.registered_type_rename(index(args, "offset")?, &text(args, "new_name")?,
+                review.as_deref(), allow_input, args["cancel"] == true)
+        }
+        "designer_plan_resource_rename" | "designer_rename_resource" => {
+            let review = (name == "designer_rename_resource").then(|| text(args, "review")).transpose()?;
+            Ok(json!(workspace.resource_rename(
+                index(args, "offset")?, &text(args, "new_name")?, review.as_deref(),
+            )?))
+        }
         "designer_language_apply" => {
             let edit: WorkspaceEdit = decode(args, "edit")?;
             workspace.apply_language_edits(edit)?;
@@ -196,7 +310,7 @@ fn language(workspace: &Rc<DesignerWorkspace>, args: &Value) -> Result<Value, St
             .hover(uri, index(args, "offset")?)
             .map_err(|error| error.to_string())?),
         "definitions" => json!(language
-            .definitions(uri, index(args, "offset")?)
+            .definitions_with_source(uri, index(args, "offset")?, |rust| workspace.open_rust_source(rust))
             .map_err(|error| error.to_string())?),
         "references" => json!(language
             .references_with_declarations(
@@ -219,20 +333,36 @@ fn language(workspace: &Rc<DesignerWorkspace>, args: &Value) -> Result<Value, St
         "resource_uri" => json!(language
             .resource_uri(uri, &text(args, "reference")?)
             .map_err(|error| error.to_string())?),
-        "format" => {
-            let options = if args.get("options").is_some() {
-                decode(args, "options")?
-            } else {
-                FormattingOptions::default()
-            };
-            json!(language
-                .format(uri, options)
-                .map_err(|error| error.to_string())?)
-        }
+        "format" => return format_preview(workspace, &language, uri, revision, args),
         "rename" => json!(language
             .rename(uri, index(args, "offset")?, &text(args, "new_name")?)
             .map_err(|error| error.to_string())?),
         _ => return Err("Unknown language query".into()),
     };
     Ok(json!({"revision":revision,"uri":uri,"version":language.version(uri),"result":result}))
+}
+
+fn format_preview(
+    workspace: &DesignerWorkspace,
+    language: &LanguageService,
+    uri: &str,
+    revision: u64,
+    args: &Value,
+) -> Result<Value, String> {
+    let mut options = workspace.source_formatting_options()?;
+    if let Some(overrides) = args["options"].as_object() {
+        let mut values = serde_json::to_value(&options).map_err(|error| error.to_string())?;
+        values.as_object_mut().expect("formatting options object").extend(overrides.clone());
+        options = serde_json::from_value::<FormattingOptions>(values).map_err(|error| error.to_string())?;
+    }
+    let edits = if args.get("range").is_some() {
+        language.format_range(uri, decode(args, "range")?, options)
+    } else {
+        language.format(uri, options)
+    }.map_err(|error| error.to_string())?;
+    let version = language.version(uri).ok_or("Read the current XAML buffer before formatting")?;
+    Ok(json!({
+        "revision":revision,"uri":uri,"version":version,"result":edits,
+        "edit":{"document_changes":[{"uri":uri,"version":version,"edits":edits}]}
+    }))
 }

@@ -1,0 +1,5 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- The contrast palette inherits colors declared only in Dark. -->
+  <SolidColorBrush x:Key="PanelSurface" Color="#FF0A0B0D" />
+  <SolidColorBrush x:Key="PanelText" Color="#FFF8FBED" />
+</ResourceDictionary>

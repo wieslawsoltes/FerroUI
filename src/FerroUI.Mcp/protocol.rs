@@ -231,9 +231,7 @@ impl Session {
                             json!({"contents":[{"uri":uri,"mimeType":"application/json","text":value.to_string()}]})
                         } else if tool == "screenshot" && client.service.is_none() {
                             json!({"content":[{"type":"image","mimeType":"image/png","data":value["data"]}],"isError":false})
-                        } else if client.service.is_none()
-                            && value["mimeType"] == "image/png"
-                            && value["data"].is_string()
+                        } else if value["mimeType"] == "image/png" && value["data"].is_string()
                         {
                             native_image_result(value)
                         } else {

@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "active": 0,
+  "stages": [
+    {
+      "name": "Overview", "source_uri": "workspace:/overview", "target": { "kind": "document" },
+      "environment": { "width": 640, "height": 420, "theme": "light", "flow_direction": "inherit" },
+      "design_time_data": true, "states": [], "pinned": false, "auto_update": true, "mode": "select"
+    },
+    {
+      "name": "Details", "source_uri": "workspace:/details", "target": { "kind": "document" },
+      "environment": { "width": 530, "height": 420, "theme": "light", "flow_direction": "inherit" },
+      "design_time_data": true, "states": [], "pinned": false, "auto_update": true, "mode": "select"
+    },
+    {
+      "name": "Notes", "source_uri": "workspace:/notes", "target": { "kind": "document" },
+      "environment": { "width": 320, "height": 190, "theme": "light", "flow_direction": "inherit" },
+      "design_time_data": true, "states": [], "pinned": false, "auto_update": true, "mode": "select"
+    }
+  ],
+  "prototype": {
+    "flows": [{ "name": "Customer review", "start": 0 }],
+    "links": [
+      {
+        "name": "Open details", "source": 0,
+        "trigger": { "path": [
+          { "namespace": "https://github.com/ferroui", "type_name": "UserControl", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "Border", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "Border", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "StackPanel", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "Button", "name": "saveButton", "key": null }
+        ]},
+        "action": { "kind": "navigate", "stage": 1 }
+      },
+      {
+        "name": "Open notes", "source": 1,
+        "trigger": { "path": [
+          { "namespace": "https://github.com/ferroui", "type_name": "UserControl", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "StackPanel", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "Canvas", "name": "FixedActions", "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "Button", "name": "CutOffAction", "key": null }
+        ]},
+        "action": { "kind": "open_overlay", "stage": 2, "options": { "placement": { "kind": "center" }, "dim_background": true } }
+      },
+      {
+        "name": "Close notes", "source": 2,
+        "trigger": { "path": [
+          { "namespace": "https://github.com/ferroui", "type_name": "Border", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "StackPanel", "name": null, "key": null },
+          { "namespace": "https://github.com/ferroui", "type_name": "Button", "name": "CloseNotes", "key": null }
+        ]},
+        "action": { "kind": "close_overlay" }
+      }
+    ]
+  }
+}

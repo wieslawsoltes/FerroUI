@@ -535,6 +535,20 @@ fn prepared_snapping_matches_one_off_queries_and_live_settings() {
 }
 
 #[test]
+fn prepared_snapping_limits_side_handles_to_one_axis() {
+    let index = SnapSettings { grid: None, tolerance: 6.0, guides_x: vec![10.5], guides_y: vec![16.0] }
+        .prepare(&[]).unwrap();
+    let point = Rect::new(8.0, 14.0, 0.0, 0.0);
+    let x = index.snap_with_axis(point, None, 6.0, Some(Axis::Horizontal)).unwrap();
+    assert_eq!(x.delta, Point::new(2.5, 0.0));
+    assert_eq!(x.guides, [SnapGuide { axis: Axis::Horizontal, position: 10.5 }]);
+    let y = index.snap_with_axis(point, None, 6.0, Some(Axis::Vertical)).unwrap();
+    assert_eq!(y.delta, Point::new(0.0, 2.0));
+    assert_eq!(y.guides, [SnapGuide { axis: Axis::Vertical, position: 16.0 }]);
+    assert!(index.snap_with_axis(point, None, 1.5, Some(Axis::Vertical)).unwrap().guides.is_empty());
+}
+
+#[test]
 fn prepared_snapping_rejects_invalid_geometry_at_the_boundary() {
     let settings = SnapSettings::default();
     assert!(settings

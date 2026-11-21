@@ -1,0 +1,19 @@
+{
+  "$description": "Customer workspace design tokens",
+  "brand": {
+    "$type": "color",
+    "accent": { "$value": { "colorSpace": "srgb", "components": [0.1764705882, 0.4156862745, 0.3176470588] } },
+    "card": { "$value": "{brand.accent}" }
+  },
+  "layout": {
+    "$type": "dimension",
+    "cardWidth": { "$value": { "value": 320, "unit": "px" } },
+    "padding": { "$value": { "value": 1.5, "unit": "rem" } }
+  },
+  "motion": {
+    "fade": { "$type": "duration", "$value": { "value": 250, "unit": "ms" } }
+  },
+  "controls": {
+    "title": { "$type": "typography", "$value": { "fontFamily": "Inter", "fontSize": { "value": 20, "unit": "px" }, "fontWeight": 600, "letterSpacing": { "value": 0, "unit": "px" }, "lineHeight": 1.2 } }
+  }
+}

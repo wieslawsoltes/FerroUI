@@ -272,6 +272,28 @@ fn insert_child_expands_self_closing_parent_and_inherits_namespaces() {
 }
 
 #[test]
+fn child_moves_and_insertions_use_the_destination_lines() {
+    let mut doc = Document::new(concat!(
+        "<Grid>\r\n",
+        "  <StackPanel>\r\n    <Button Name='move'/>\r\n  </StackPanel>\r\n",
+        "  <StackPanel Name='destination'>\r\n    <TextBlock/>\r\n  </StackPanel>\r\n",
+        "</Grid>\r\n",
+    )).unwrap();
+    let parent = named(&doc, "destination");
+    let node = named(&doc, "move");
+    doc.apply("Place controls", vec![
+        Edit::InsertChild { parent, index: 0, source: "<Border/>".into() },
+        Edit::MoveNode { node, parent, index: 2 },
+    ]).unwrap();
+    assert!(doc.source().contains("    <Border/>\r\n    <TextBlock/>\r\n    <Button Name='move'/>\r\n  </StackPanel>"));
+    assert_eq!(named(&doc, "move"), node);
+
+    let mut mixed = Document::new("<TextBlock xml:space='preserve'>\nInline\n</TextBlock>").unwrap();
+    mixed.apply("Add inline", vec![Edit::InsertChild { parent: mixed.ast().root(), index: 0, source: "<Run/>".into() }]).unwrap();
+    assert_eq!(mixed.source(), "<TextBlock xml:space='preserve'>\nInline\n<Run/></TextBlock>");
+}
+
+#[test]
 fn child_indices_ignore_comments_and_whitespace() {
     let mut doc =
         Document::new("<Grid>\n<!-- first --><Button/>\n<!-- last --><TextBlock/>\n</Grid>")

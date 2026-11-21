@@ -1,6 +1,10 @@
 # FerroUI Designer Studio
 
-Designer Studio is a native FerroUI XAML authoring workspace and a set of reusable Rust engines.
+Designer Studio is a native authoring workspace for FerroUI XAML and mapped Rust `rsx!` views.
+
+The [VS Code extension](../../editors/vscode/README.md) embeds its native preview and source
+editing tools beside FerroUI XAML and Rust `rsx!` files. The [VS Code user guides](vscode/README.md)
+cover authoring, the animation Timeline, project and runtime tools, and MCP.
 The workspace combines an artboard, synchronized source editor, object hierarchy, live visual and
 logical trees, properties, layout manipulation, and animation tracks. All authored changes pass
 through a document transaction; the artboard renders actual FerroUI controls.
@@ -21,6 +25,11 @@ the existing coverage and the latest additions: [design-time values and sample d
 local layer locking/hiding/isolation, native keyboard-order and label-target authoring, and
 responsive preview environments. Open the [workflow sample](samples/DesignWorkflows.xaml)
 to exercise them together.
+Use **Checks** in the canvas toolbar to review measured overflow, rectangular clipping,
+ineffective layout values, accessible names, and text contrast on supported opaque backgrounds.
+Choose a finding to reveal the authored control or the specific layout value. The
+`designer_preview_checks` MCP tool reads the same native findings.
+`designer_preview_stage_checks` evaluates one current stage and its own environment.
 The [canvas navigation and icon guide](canvas-navigation.md) covers mouse-wheel modes,
 pointer-anchored zoom, hand panning, fit selection, per-tab cameras and compact vector icons.
 The [selection and appearance guide](selection-workflows.md) covers selective property copy/paste,
@@ -55,6 +64,7 @@ cargo run -p designer-studio -- --file docs/designer/samples/SelectionWorkflows.
 cargo run -p designer-studio -- --file docs/designer/samples/PreviewStages.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/PrototypeFlow.xaml
 cargo run -p designer-studio -- --file docs/designer/samples/PrototypeOverlays.xaml
+cargo run -p designer-studio -- --file samples/TodoWorkbench/app_preview/motion.rs --project samples/TodoWorkbench/Cargo.toml
 cargo run -p designer-studio -- --project /absolute/path/to/solution
 ```
 
@@ -116,6 +126,10 @@ visual-state endpoints. Pinning keeps a stage visible across document tabs; Paus
 automatic source updates. **Focus** returns its context to the editing canvas. Stage settings
 remain separate from authored XAML and can be saved as a versioned set. See the
 [preview-stage guide](xcode-previews.md) for exact behavior and platform boundaries.
+Studio's `designer_preview_stage_states` MCP tool lists the scoped authored choices used
+by the stage editor and the VS Code **States…** action.
+The `designer_design_tokens` tool shares the VS Code DTCG import and export planner. It returns
+generated source, token-to-resource mappings and skipped entries for review.
 The stage editor supports fitting either or both axes using native measurement. A resize
 grip applies fixed logical dimensions while preserving Live control state; card zoom
 changes only display scale. **Compare matrix** combines size, theme, direction, design-data
@@ -221,6 +235,29 @@ offsets, values and easing; collisions reject the
 entire edit. Choose seconds or 24/30/60 fps snapping. Double-click a lane to record, or use arrow
 keys to nudge selected keys. Escape and lost pointer capture cancel a drag without authoring it.
 Ctrl+wheel or +/- zooms the timeline; Shift+wheel or PageUp/PageDown pans the visible range.
+Choose **Value curves** from the **Animation graph** icon to graph scalar properties on the
+same ruler and playhead. Each track scales to its visible values, including overshoot. Drag a
+key to edit time and value in one undo step, or select it and edit in the inspector. Choose
+**Velocity curves** to graph signed property units per authored second. Drag a marker beneath
+the trace to retime its key. Change its incoming easing in the inspector to shape the velocity.
+The fit icon frames a selection in either display. `designer_animation_curve` accepts
+`metric: "velocity"` for the same native samples.
+
+Use the picker beside a supported geometry track to see one coordinate, dimension, side, or
+corner. Drag beneath the trace to retime its key or use the inspector to edit the complete
+geometry value. The MCP program catalog lists the same `curve_channels` for a track.
+Relative points and scalars show separate percentage and logical pixel curves. The trace
+leaves a gap while the other unit is active. Velocity uses percentage points or logical
+pixels per authored second. [Inspect a curve that changes units](vscode/motion.md#inspect-a-curve-that-changes-units)
+
+![Studio shows the Y velocity in percentage points per second and the gap around the pixel pose](images/studio-relative-curves.jpg)
+
+For a color or solid brush track, the picker offers red, green, blue, and alpha. The value
+graph keeps a 0–1 scale. The key inspector edits the full hex color in one Undo step.
+[Inspect a color animation](vscode/motion.md#inspect-a-color-animation)
+
+![Studio shows the green curve for a Background track and the native pose at 1.15 seconds](images/studio-color-curves.jpg)
+
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property
 value, with Opacity as the initial fallback for an object without a track. The **Animation name
@@ -406,9 +443,10 @@ content hosts and generated containers continue to enforce their actual ownershi
 The animation model uses FerroUI's native `Animation`, `KeyFrame` and `Setter` markup. It does not
 introduce a second runtime animation dialect. The workspace imports supported animation markup,
 records property changes as keyframes, writes them through the document transaction, and samples
-preview values at animation priority. Disposable preview layers restore ordinary source/style
-values on Stop, preview reload or switching to Interact. Natural playback completion respects
-the animation's fill mode and can retain the final sample.
+preview values at animation priority. Stop restores ordinary source and style values. Source
+reload restores the elapsed playback position when the authored program can be resolved. The
+typed sampler retains per-target visibility clocks. Natural playback completion respects the
+animation's fill mode and can retain the final sample.
 
 The program picker enumerates every Animation in local/shared/nested styles and resources. Each
 program retains its own selector, targets, timing, tracks and persisted UUID. Create, rename,
@@ -416,6 +454,74 @@ duplicate, remove, edit source, select preview targets and play-all operate on i
 Selectors are matched by the native style system; per-target underlying values and visibility clocks
 are retained. Resource programs can be previewed against explicit targets. Graphical track lanes
 support scrubbing, keyframe selection and dragging, with explicit time, easing and removal controls.
+
+### Arrange clips on a shared ruler
+
+Open [ClipSequence.xaml](samples/ClipSequence.xaml) and choose **Compare animation clips** in the
+Timeline toolbar. The ruler and **Time** field seek the elapsed time shared by the visible clips.
+Use Play and Stop to rehearse the arrangement. Use the ruler controls to zoom and fit the clips.
+
+Drag a bar to move its start. For exact placement, select its name and enter **Start (s)** below
+the rows. Select names in sequence order to reveal **Gap / overlap (s)**. Apply zero for adjoining
+clips, a positive gap, or a negative overlap. One Undo restores the original delays together.
+The placement uses native XAML `Delay` or a mapped Rust `.delay(...)` and preserves the keyframes
+and existing triggers. Use the compare icon again to return to the selected program's keys.
+[VS Code workflow and MCP arguments](vscode/motion.md#compare-and-sequence-clips)
+
+App Preview uses the same placement rules with the selected binary’s registered animators and
+resolved timing. It samples the combined pose before displaying a compatible source replacement.
+[App Preview clip workflow](vscode/motion.md#compare-clips-in-app-preview)
+
+### Rehearse a preview range
+
+![Studio holds both clips at the 1.45-second Out pose with its range settings visible below the tracks](images/studio-preview-range.png)
+
+Choose **Preview range** beside Play and Stop to open the settings below the tracks. Enable
+**Limit playback to preview range**, enter **In (s)** and **Out (s)**, and choose **Apply range**.
+With the ruler focused, `I` and `O` set either
+boundary at the playhead. The ruler shows the selected interval and playback starts at In when the
+playhead is outside it. Enable **Loop range** to wrap back to In or clear it to hold the rendered
+pose at Out. Use Pause to inspect the current pose and Stop to restore the base artboard.
+
+Typed tracks use authored seconds in the keyframe view. Clip comparison and the fallback native
+clock for opaque programs use elapsed seconds. The work area is a Timeline view setting. It
+preserves authored timing, keys, and triggers. A compatible source edit retains the native pose
+and fits the work area to the replacement clock. In Studio MCP, use `designer_program` with
+`action: "play_range"` and a `range` containing `start`, `end`, and `loop`. Include `all: true` for
+the shared clip clock. [App Preview range workflow](vscode/motion.md#rehearse-a-range-in-app-preview)
+
+### Bookmark poses in Designer Studio
+
+![Designer Studio shows two saved poses in a compact strip below the clip lanes](images/studio-preview-markers.png)
+
+Pause, seek to the pose, then choose **Preview range**. Enter a **Marker name** below the range settings and press Enter or choose **Add or update marker at playhead**. Click the amber mark on the ruler or the named row to return to the pose. Use the remove icon beside its time to delete it. Set the same name again to move the mark to the current playhead.
+
+The keyframe view and **Compare animation clips** keep their own marker lists. Typed keys use authored seconds, and the shared ruler uses elapsed seconds. Markers stay with their preview scope and are kept out of source and Undo history. In Studio MCP, read `designer_timeline_markers` with the current `expected_revision`. Use `designer_timeline_marker_edit` with `action`, `name`, and `time` for `set`. Use `name` for `seek` or `remove`. Supply `program` for a particular clip or `all: true` for the shared ruler. [VS Code and App Preview marker controls](vscode/motion.md#bookmark-preview-positions)
+
+### Edit tracks and keyframes
+
+Select a key and drag either handle in the incoming easing graph. The graph and **Curve**
+field show the draft together. Handle X is bounded from 0 to 1. Drag Y beyond the start or
+end value to add anticipation or overshoot. Escape cancels a drag. To edit with the
+keyboard, focus the graph, press Space to switch handles, and use the arrow keys. Hold
+Shift for larger steps or Ctrl or Command for finer steps. Press Enter or choose
+**Apply keyframe** to write the checked XAML or mapped Rust edit in one Undo step.
+The graph stays focused when a keyboard apply rebuilds the Timeline.
+
+![Designer Studio shows both incoming Bézier handles beneath the selected Width keyframe](images/designer-easing-handles.png)
+
+To change the spacing of selected keys, set the playhead to the pivot, enter a **Factor** in the
+selection inspector, and choose **Scale from playhead**. For example, `0.5` halves each key's
+distance from the playhead. Studio preserves each key's value and easing and applies the change in
+one Undo step. For a shared Rust cue, include each setter on the cue in the selection.
+
+Use the **Keyframe Actions** icon beside the snap picker to copy, paste, and mirror a
+selection across tracks. **Paste at Playhead** maps the copied tracks to existing compatible
+properties and keeps their relative spacing. **Paste Reversed at Playhead** reverses the
+sequence. **Mirror About Playhead** reflects the selected keys in place. A successful paste
+or mirror is one source transaction. In a focused lane, use Ctrl+C or Command+C to copy
+and Ctrl+V or Command+V to paste. Hold Shift while pasting to reverse the keys. Studio
+and VS Code use the same typed clipboard and authoring tools. [Transfer keys between editors](vscode/motion.md#copy-paste-and-mirror-keyframes)
 
 Supported values include numbers, colors, points, vectors, sizes, rectangles, corner radii,
 relative points/scalars, thicknesses and discrete values. The portable
@@ -430,10 +536,20 @@ validation. Deterministic seek/scrub is independent of a wall clock. The live ru
 system remains authoritative about which property types and converters can actually receive an
 animation value.
 
+The `designer_animation_curve` query plots a scalar track over a range of authored seconds. Typed
+tracks use the same compiled target and underlying value as Studio’s scrubber. Registered scalar
+animators use the loaded native interpolation with temporary setter bindings. The query leaves the
+active playhead and target property unchanged. Studio and VS Code route curve drags through
+the same checked transaction as the keyframe editor. With the negotiated animation curve
+protocol, App Preview also samples its loaded native animator and uses the source document's
+animation codec to plan editable XAML keys.
+
 Programs with native object payloads also use the accepted runtime Animation objects directly.
 Source provenance identifies the matching style or resource program, and an explicit preview clock
 drives the framework's own shadow, gradient, effect, integer, transform-component and registered
 custom animators. This preserves native interpolation for values outside the portable model.
+Studio also uses the registered native animator when it can author a typed track for its property.
+App-hosted design uses the same clock and native animation layer in the Cargo target’s process.
 The additive `Animation::apply_for_preview` retains final fill and generated transforms at animation
 priority; disposal restores underlying values and live bindings. Application `apply` behavior stays
 unchanged. Failed setup unwinds its temporary subscriptions and values before reporting the error.
@@ -445,18 +561,140 @@ typed edits require a codec that represents them faithfully. See the
 [animation crate documentation](../../src/FerroUI.Designer.Animation/README.md) for interchange
 rules and runtime semantic tests.
 
+Register the same codec with `DesignerSession::register_animation_codec` for an embedded Studio
+session and `ferroui_designer_support::register_preview_animation_codec` in the application
+preview's UI-thread setup for VS Code. App Preview offers keyframe editing when the codec can
+decode an accepted XAML clip and round-trip its key values. The authored track can present a
+text value for a native property such as `BoxShadows`. Playback still resolves the property's
+actual native animator. [Todo Workbench shadow codec](../../samples/TodoWorkbench/app_preview/animation_codec.rs)
+
+App Preview uses the same authored program IDs and source paths as Studio when a valid source
+replaces its native tree. The relay resolves the selected clip and assigned controls, then samples
+the application at the retained elapsed time before it sends the replacement image to VS Code.
+
+### RSX style animations
+
+Attach an `AnimationBuilder` to an inline Rust style. The view mounts the same native
+`Animation`, `KeyFrame`, and `KeySpline` objects that FerroUI uses for XAML.
+
+```rust,ignore
+rsx! {
+    StackPanel {
+        styles: [
+            ferroui_view::style("Border#Card").animation(
+                ferroui_view::animation(ferroui_view::ms(800))
+                    .key_frame(0.0, |key| key.set(ferroui_base::Visual::opacity_property(), 0.2))
+                    .key_frame(1.0, |key| key.set(ferroui_base::Visual::opacity_property(), 1.0)
+                        .key_spline(0.25, 0.1, 0.75, 1.0))
+            ),
+        ],
+        Border { name: "Card", width: 180.0, height: 80.0, background: "#1660A0" }
+    }
+}
+```
+
+Studio and the VS Code designer map fully qualified FerroUI builders in the active `rsx!` invocation.
+They support literal selectors, millisecond duration and delay, fill, iteration count, and
+named easing. Keyframes can use scalar values and supported native geometry constructors.
+When several setters share a Rust keyframe, the designer can edit each value. Select all the
+setters on that cue to move them together. Edit a shared easing in Rust. Use the warning icon in Timeline or App Preview
+to see an explanation for each unsupported clip and open its declaration.
+
+Open a `.rs` file in Studio and use the **RSX view** picker in the source pane to switch
+invocations. The canvas renders the selected projection. The editor, Save, and Undo operate
+on the original Rust file. A draft with incomplete tokens keeps the last accepted artboard
+visible. Mapped properties and supported static layout edits use the same checked patches.
+
+### Project animation accessors
+
+A `MarkupAssembly` can declare the correspondence between a fully qualified Rust getter
+in `KeyFrameBuilder::set` and a styled property from the build-generated XAML schema.
+Use the local `crate::` spelling or the dependency crate's qualified path. The getter
+must return the same registered property as the named accessor.
+
+```rust,ignore
+(
+    "FerroUI.Designer.RsxAnimation.v1:crate::app_preview::motion::review_corner_property",
+    "::ferroui_controls::Border::corner_radius_property",
+)
+```
+
+The mapper reads the registered value type from Cargo's `.xamlmeta` outputs. It handles
+`f64`, `CornerRadius`, `Thickness`, `Point`, `Vector`, `Size`, and `Rect` values when the
+authored arguments use supported literal forms, such as `CornerRadius::new` or `uniform`.
+An edit uses the existing constructor shape and patches its numeric arguments in place.
+Use a named selector such as `#ReviewCard` for a project-only control. Open App Preview
+to load the project's registered control and animator. See the [Todo Workbench motion
+example](../../samples/TodoWorkbench/app_preview/motion.rs).
+
+Select a key in Timeline to change its time, value, or incoming spline. Studio checks the
+native track and the helper patches the original Rust tokens in a single undoable edit.
+Click **Add keyframe at playhead** or double-click a property track to record its effective
+value. Use the keyframe actions to move, scale, duplicate, copy, paste, mirror, or delete mapped keys together.
+Duplicating keys preserves their values and easing, and deleting one setter in a shared cue
+leaves the other setters intact. In Studio, select the package in
+**Project**, enter its optional Cargo features, and run **Check** or **Build** to load the
+registry. For Todo Workbench, use the `app-preview` feature.
+Source reveal takes you to the animation declaration in the active invocation. Agents can
+validate `designer_keyframe_draft` or use the shared `designer_program` actions with the
+current designer revision. [Rust Timeline controls and MCP actions](vscode/motion.md#edit-mapped-rust-clips-and-state-routes)
+
+Use **New animation program** in Studio’s Timeline toolbar to add an inline style animation to
+the selected Rust control. **Animation name and target** opens the name field. Rename, copy,
+and delete clips with the existing Timeline controls. A source comment preserves the name and
+identity, and a copy receives its own identity. The selector and timing are available in the Rust
+source. Studio MCP uses the same `designer_program` actions and source history.
+
+App Preview validates the same mapped Rust key against the application's loaded animation and
+codec. It sends a source-checked Rust patch to the editor and keeps the compatible elapsed
+position when the edited invocation renders. An isolated preview uses the native animators
+registered in the designer process. For project-specific motion, use App Preview and its
+`designer_hosted_keyframe_draft` and `designer_hosted_keyframe` tools. Agents can read
+`sourceIssues` in the program catalog and navigate with `designer_animation_issue` or the
+app-hosted animation action `reveal_issue`.
+
 ## Visual states, transitions and behaviors
 
 The **States** panel authors groups, named states, target setters, default/directional transitions,
 durations and easing. Source models emit real FerroUI classes, styles, native Animation objects
 and existing behavior actions. State navigation, seeking and playback use actual runtime values.
 Directional routes use the framework's existing ConditionalAction implementation.
+In VS Code, the States action opens a route in the Timeline. The `designer_state` tool can
+sample the same explicit route at a requested time through `preview_transition`.
 
-The **Behaviors** panel authors event/data triggers and property, command, method and class actions.
-Custom trigger/action objects retain their raw markup and can be edited in source. The designer
-registers the existing Interactivity, Interactions and Interactions.Custom types. Preview executes
-the real behavior/action implementation; Stop restores the authored view rather than preserving
-behavior-mutated default control values as hot-reload user state.
+### Rust visual states
+
+Declare typed state groups inline with `visual_states: [ferroui_view::visual_state_group("Review")…]`.
+Use `visual_state("Queued").set(property, value)` on the group owner or
+`set_on("Card", property, value)` on its named control. Routes use
+`transition(Some("Queued"), "Ready", ferroui_view::ms(640), "CubicEaseIn")`.
+A `None` starting endpoint declares a default route. The compiled view calls
+`ferroui_view::set_visual_state` to enter a state or clear it. State properties use native or
+application-registered animators. Clearing the state restores the underlying values and bindings.
+
+Select the owner and open **States** to add a group. Add states and property setters
+from the group controls. In the Transitions section, choose the endpoints, duration
+in whole milliseconds, and the easing. Use the playhead in Studio or the Timeline
+transport in VS Code to sample a default or directional route. The reveal control
+opens the authored Rust declaration.
+
+App Preview in VS Code can sample eligible mapped routes on the selected Cargo
+binary’s native properties. Use its animation picker and edit icon to change
+duration and easing. The **Interactive review** Rust fixture also runs the
+compiled view’s button handlers on its application clock. [App Preview state routes](vscode/motion.md#scrub-a-rust-state-route-in-app-preview)
+
+Studio, VS Code, and MCP share the source planner for adding and removing inline
+groups, states, setters, and routes. Each action uses one Undo step. Comments,
+unchanged literals, and neighboring expressions retain their source. New sibling
+groups require an inline array with identifiable group names. Cargo-exported
+property getters use the same registry as RSX keyframes. Todo Workbench registers
+the **Interactive review** fixture from `app_preview/review_states.rs` for runtime
+state preview. [VS Code motion guide](vscode/motion.md#edit-and-preview-visual-states)
+
+The **Behaviors** panel authors event and data triggers and property, command, method, and class
+actions. Edit or reorder one action in its source collection. Use the source icon or **Behavior
+XAML** for custom markup. **Preview actions** runs the native actions. **Reset behavior preview**
+restores the authored view. [Studio workflow](native-controls.md#edit-behaviors) · [VS Code workflow](vscode/authoring.md#edit-a-behavior)
 
 Generated state programs have explicit ownership markers. Updating an endpoint preserves unrelated
 programs, authored intermediate keys/splines, custom animator data, complex Setter.Value objects,
@@ -616,14 +854,19 @@ The additional tools are:
 | `designer_apply` / `designer_source` | Atomic structured edits or source editing with a required revision guard |
 | `designer_select` / `designer_undo` / `designer_redo` | Selection and shared authoring history |
 | `designer_tree` | Live visual/logical tree with runtime and source identities |
+| `designer_toolbox` / `designer_place` | List registered Toolbox assets and place or move controls through the same outline and native layout plans used by VS Code |
 | `designer_timeline` / `designer_animation` | Inspect, seek, play, record and edit keyframes |
 | `designer_collaboration_state` / `designer_collaboration` | Snapshots, version summaries, operations and explicit draft resolution |
 | `designer_presence` | Ephemeral peer selection/cursor updates |
 | `designer_programs` / `designer_program` | Independent program inspection, create/edit/targets/timing/source and playback |
+| `designer_rsx_views` / `designer_select_rsx_view` | List and switch Studio's authored Rust invocations |
+| `designer_reveal_rsx_animation_issue` | Reveal an expression from the selected Rust Timeline's source issues |
 | `designer_states` / `designer_state` / `designer_state_actions` | State groups, setters, transitions and native actions |
 | `designer_behaviors` / `designer_behavior` | Behavior/trigger/action authoring and explicit native execution |
 | `designer_properties` / `designer_property` | Runtime-derived property schemas, typed values and transactional edits |
+| `designer_brush_draft` | Draft typed solid and gradient properties and stops. Apply the resulting source with `designer_component` and the current document revision. |
 | `designer_layers` / `designer_layer` | Local layer presentation, hierarchy navigation and exact control-type selection with scope/epoch guards |
+| `designer_focus_order` / `designer_focus_edit` | Inspect native focus scopes and label targets, request measured overlay geometry, and apply guarded tab-order and label edits |
 | `designer_selection_layout` / `designer_selection_layout_edit` | Inspect exact reset/size-match edits and apply the accepted plan in one transaction |
 | `designer_property_transfer` / `designer_property_transfer_edit` | Inspect authored appearance, compatible destination edits and skipped values, then apply the accepted transfer |
 | `designer_components` / `designer_component` | Component catalog and transactional resource/template/theme authoring |

@@ -32,13 +32,39 @@ pub struct ProjectDescriptor {
     pub documents: Vec<DocumentEntry>,
     pub targets: Vec<CargoTarget>,
 }
+
+impl ProjectDescriptor {
+    /// Resolve a nested package when the workspace was opened as a loose folder.
+    pub fn authored_package_root<'a>(&'a self, source: &'a Path) -> &'a Path {
+        source
+            .ancestors()
+            .skip(1)
+            .take_while(|parent| parent.starts_with(&self.root))
+            .find(|parent| parent.join("Cargo.toml").is_file())
+            .unwrap_or(&self.root)
+    }
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Solution {
     pub format_version: u32,
     pub root: PathBuf,
     pub projects: Vec<ProjectDescriptor>,
 }
+
+/// Discover files under an editor workspace without invoking Cargo.
+pub fn workspace_documents(root: &Path) -> Result<Vec<DocumentEntry>> {
+    let root = root.canonicalize()?;
+    require(root.is_dir(), "The workspace must be a directory")?;
+    scan(&root)
+}
+
 impl Solution {
+    /// An explicit build can select a nested Cargo package inside the indexed root.
+    /// Cargo workspace members can also have their own project roots.
+    pub fn owns_package_root(&self, root: &Path) -> bool {
+        root.starts_with(&self.root) || self.projects.iter().any(|project| project.root == root)
+    }
+
     /// Cargo is used as the manifest authority, including workspace membership and target paths.
     /// --locked/--offline prevent discovery from changing the dependency graph or downloading code.
     pub fn discover(path: impl AsRef<Path>) -> Result<Self> {

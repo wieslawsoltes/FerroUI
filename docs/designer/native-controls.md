@@ -51,6 +51,116 @@ the view without generating an authoring callback. `control()` embeds a compound
 another view; a scrubber is itself a native control. Existing `PropertyEditorFactory` extension
 points take precedence over built-ins and are used by the contextual panel editors too.
 
+### Trace property values
+
+Select a control and choose the layers icon beside a property. The flyout shows its effective value and the applied local, style, theme, template, inheritance, and default contributors. An animated property includes its base value when available. A current value override has its own row.
+
+Use a source arrow to reveal an authored property, setter, or resource. When an accepted stylesheet or dictionary supplies the value, the arrow opens the owning XAML tab and selects the declaration. The popup reads the current native preview and leaves source and Undo history intact. [VS Code workflow](vscode/authoring.md#trace-an-effective-property-value) · [MCP arguments](vscode/reference.md#trace-property-values-with-mcp)
+
+![Designer Studio traces a card background to its local resource and shows the inactive style and type default](images/designer-property-value-trace.png)
+
+### Edit scoped styles and palettes
+
+Select a style or theme in **Library** to edit its selector, setters, or base theme in the definition inspector. Choose **New style in this scope** to add a style to the selected host. Use **Edit scoped palette** from a resource owner or dictionary to inspect Shared, Default, Light, Dark, and High contrast declarations. The appearance icons change the native preview. **Compare theme colors** shows each resolved value and adds the High contrast column when the host supplies that theme.
+
+Choose a palette swatch to open the native color editor. Enter a literal or choose a color and apply it. To add a token, choose the layer, fill in the key and color, and use the plus button. When creating a High contrast layer, select the application's theme package in the palette editor. An accepted color or style edit takes one Undo step. Use the source arrow beside a swatch to open its exact declaration. [VS Code guide](vscode/styles.md) · [MCP arguments](vscode/reference.md#edit-styles-and-palettes-with-mcp)
+
+In the consuming view's definition inspector, choose **Open included styles and palettes**. Select an entry and use the source arrow to open its owner in Studio. In the comparison, the source arrow follows keyed aliases and supported brush references to the authored color, including when High contrast inherits its value from Dark. The arrow's tooltip describes the chain. Choose **Edit scoped palette** to edit the supplying layer. Use **Return to consuming view** in the definition inspector to see the unsaved change applied. Undo from the owning tab. [Follow a color alias](vscode/styles.md#follow-a-color-alias)
+
+### Edit Rust styles
+
+Open a Rust view, select its RSX invocation, and choose **Edit Rust styles** in the **Properties** toolbar. Pick a selector, edit its literal or a typed setter, and use Enter or the check icon to apply. The plus actions add a rule, a nested rule, or a setter. Use the source icon beside a computed value to open the expression. Each accepted change uses Studio’s document history. [VS Code and App Preview workflow](vscode/styles.md#edit-inline-rust-styles) · [MCP arguments](vscode/reference.md#edit-rust-styles-with-mcp)
+
+Open the Cargo solution to work with a shared color in a separate Rust module. Choose the color’s source icon in the layer list or comparison to open its initializer in the owning tab. Use the shared color editor to write to the constant’s file or choose **Use a local color** for this registration. A shared declaration edit keeps the view open and updates it from the unsaved module buffer. Undo or Redo from either participating tab to restore the matching view and source together. [Shared Rust colors](vscode/styles.md#edit-a-shared-rust-color)
+
+If the view wraps a shared `u32` in `Color::from_uint32`, the source arrow and **Edit const** follow the integer into its module. Named swatches and literal parsed colors use the same editor. [Rust color source forms](vscode/styles.md#edit-rust-style-color-resources)
+
+Under **Color resources**, choose **Shared**, **Default**, **Light**, **Dark**, or **High contrast** to add or edit an authored swatch. **Compare Rust theme colors** shows the resolved appearances and opens each supplying declaration. Use **Assign color resource** on a compatible setter. **Add color resource setter** creates a typed setter with the selected key. The source icon opens the literal constructor or the setter’s string key. The preview follows the resource seen by the matched control. Packed ARGB constructors and explicit color fields retain their authored shape when you edit the swatch. [Rust color resources guide](vscode/styles.md#edit-rust-style-color-resources)
+
+When a color comes from a same-file constant, choose the diamond icon beside its value. Select **Use a local color** for this style or **Edit the shared constant for all uses**. Apply the color from the popup. Undo restores the exact Rust source and keeps the selected RSX view. [Shared Rust colors](vscode/styles.md#edit-a-shared-rust-color)
+
+### Create an XAML event handler
+
+Open the owning Cargo project and build it from **Project** to load the exported XAML registry. Open the XAML view in **Split** or **Code**. Put the caret on an event attribute such as `Click="OnApply"`, then choose the lightning button **Create Rust event handler** in the source toolbar. Studio adds the typed callback to the view’s Rust class registration and opens its declaration. Use an empty attribute value to accept a generated name. The paired edit participates in Studio Undo and Redo. [VS Code and MCP workflows](vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
+
+### Bind a command and its parameter
+
+Build the owning Cargo project to load its registered properties. Open an XAML view with a typed data context, then select the control in the canvas or Layers. In the inspector header, choose the link icon **Edit command binding**.
+
+Choose an `ICommand` member from the **Command** picker and, where offered, a typed member from **CommandParameter**. **Browse** opens the selected object’s registered members. Use the source icon to open an existing expression or choose **Clear binding** to remove a simple data-context binding. The check icon applies both fields in one Undo step. Source edits or changes to the preview scope retire the open picker. [VS Code workflow](vscode/authoring.md#bind-a-command-and-its-parameter) · [MCP arguments](vscode/reference.md#bind-a-command-with-mcp)
+
+### Follow a Rust declaration from XAML
+
+Build the owning Cargo package from Studio. In **Split** or **Code**, place the caret on a registered control, property, type annotation, typed binding member, or style selector operand and press **F12**. Choose the result to open the source and select the declaration. Open Rust drafts contribute their current text. For a dependency inside the open solution, the result opens its Rust tab. [Supported declarations](vscode/authoring.md#follow-registered-rust-declarations)
+
+### Review a resource rename
+
+Open the owning project. In **Code** or **Split**, place the caret on a keyed resource or reference. Choose the **Rename resource and references** icon, enter the new key, and choose **Review resource rename**. From the **Library** definition editor, enter a key and choose **Rename** to open the same project review.
+
+For each file, compare **Original source** and **Proposed source**. The review follows included dictionaries and uses the current drafts for open views. Use the check icon to apply one history step across the participating buffers. Undo or Redo from any participating tab steps through the complete change. Save when the files are ready. [VS Code workflow](vscode/authoring.md#rename-a-resource-across-xaml-files) · [MCP workflow](vscode/reference.md#review-a-resource-rename-with-mcp)
+
+For a palette key defined in several layers of one dictionary, the review shows the **Theme family** and its participating layers. Open the authored palette or put the caret on a reference to that family. The review includes inline declarations, native High contrast keys, supported included layer files, and consumer references. [Theme resource workflow](vscode/authoring.md#rename-a-key-across-theme-variants)
+
+### Move a resource to another dictionary
+
+Open the owning project. In **Code** or **Split**, place the caret on a keyed resource declaration or a reference that has one authored declaration. Use the arrow icon **Move resource** in the source toolbar. Choose a destination dictionary by scope, file and line, then select the source icon **Review resource move**.
+
+Compare **Original source** and **Proposed source** in each affected file. The review shows any include needed to retain visibility and any updated relative resource paths. Use the check icon to apply the move or the close icon to cancel. Undo or Redo from either participating tab restores both buffers together. Save the changed files when ready. [VS Code workflow](vscode/authoring.md#move-a-resource-to-another-dictionary) · [MCP workflow](vscode/reference.md#move-a-resource-with-mcp)
+
+### Review a registered property rename
+
+Build the owning Cargo package from Studio. In **Code** or **Split**, place the caret on a property name, a typed binding member, or a property inside a style selector. Choose the **Rename registered property** icon, enter its new public name, and choose **Review property rename**. Typed binding paths can name an ancestor, cast a value, or qualify an attached owner. The review follows the resolved registration and retains the rest of the path. [Typed binding examples](vscode/authoring.md#follow-registered-rust-declarations)
+
+Choose a file and compare **Original source** and **Proposed source**. Review any separate Rust assembly file that contains an explicit RSX builder mapping for the property. Studio follows named imports and qualified paths to unconditional text constants in the built crate, including their open drafts. It edits the selected metadata tuple and preserves the shared constant. If Studio shows **Potential references**, choose a location and select the source icon to inspect that usage. Open a new review when ready to apply. Use the check icon to commit the displayed Rust and XAML patches. Undo or Redo from any participating tab moves all the edits together. Save the files and rebuild the package to publish the new schema. [Supported source forms](vscode/authoring.md#rename-a-registered-xaml-property) · [MCP workflow](vscode/reference.md#review-a-registered-property-rename-with-mcp)
+
+### Review a registered type rename
+
+Build the owning Cargo package to index its XAML types and Rust declarations. In **Code** or **Split**, put the caret on a registered control tag, type value, or type inside a style selector. Select the **Rename registered type** icon and enter the new name.
+
+When the XAML name comes from its Rust declaration, Studio resolves Rust references in the background using `rust-analyzer` on `PATH`. Set `FERROUI_RUST_ANALYZER` to an executable path to select a specific copy. For a literal XAML alias, the review opens as soon as the source planner finishes.
+
+Compare **Original source** and **Proposed source** for every file, including any RSX builder metadata. Inspect potential references listed below the comparison. Use the check icon to edit the buffers together. Undo or Redo from a participating document restores the grouped source changes. Save and rebuild the schema to publish the new name. [VS Code workflow](vscode/authoring.md#rename-a-registered-xaml-type) · [MCP workflow](vscode/reference.md#review-a-registered-type-rename-with-mcp)
+
+### Extract an XAML resource dictionary
+
+Open the owning project. In **Split** or **Code**, put the caret on the resource, its inline dictionary, or the control that owns the `Resources` property. Choose the file icon **Extract resource dictionary** in the source toolbar. Enter the sibling filename and choose **Review extraction**. Compare **Original source** and **Source replacement**, then read the new file in its named tab.
+
+Choose **Apply extraction** to create the file and update the view. The original view stays open for review and save. Undo from that view restores the inline resources and removes the generated dictionary while its file and contents match the creation. Use Redo to create it again. If you edit the generated dictionary, undo those edits before reversing the extraction. [VS Code and MCP workflows](vscode/authoring.md#extract-a-resource-dictionary)
+
+### Move an XAML file
+
+Open an XAML file from the owning project. In **Split** or **Code**, choose the file-and-arrow icon **Move XAML file**. Enter the destination relative to the project workspace and choose **Review file move**. Compare **Original source** and **Proposed source** for affected markup, Rust, Cargo build files, saved stage sets, and scenarios.
+
+**Apply file move** transfers the file, writes the reviewed stage sets and scenarios, and updates the participating source buffers. Save the buffers to persist their new references. Undo or Redo from a participating XAML or Rust tab restores the matching location, source edits, and saved reference files as one operation. Studio checks the saved files for external changes when replaying history. [Supported paths and VS Code workflow](vscode/authoring.md#move-an-xaml-file-and-its-references)
+
+An open **Preview Stages** card follows its source through the move, Undo, and Redo. The board keeps its card configuration and prototype links. A paused card holds its image until you refresh it or turn updates on.
+
+For explicit Cargo registrations, the review keeps authored URI aliases and rebases file-derived keys along with their literal XAML and Rust consumers. Build the owning package to load metadata for custom assembly names. [How the planner handles compiled addresses](vscode/authoring.md#move-an-xaml-file-and-its-references)
+
+For an existing group built from `std::fs::read_to_string`, the review can follow a literal file path and immutable Rust bindings into `XamlGroup::documents`. Check the physical path and any changed registration key or class selector in **Proposed source**. [Supported Cargo file reads](vscode/authoring.md#existing-cargo-groups-that-read-files)
+
+For computed groups that use `XamlGroup::document_files`, Studio uses the selected build's input index to find the path declared in Rust. Review that path change in **Proposed source**. The published key and generated Rust names stay stable. Build the owning package again if Studio reports that a declaration shifted. [Declare file-backed Cargo inputs](vscode/authoring.md#computed-cargo-groups-with-file-backed-registrations)
+
+The canvas, Preview Stages, and prototype player use the compiled group's base for relative XAML includes with a recorded source. Apply, Undo, and Redo keep those references attached to the file. Studio reports conflicting targets when a source belongs to several groups that resolve the same include differently. [Relative include workflow](vscode/authoring.md#computed-cargo-groups-with-file-backed-registrations)
+
+For a move that changes a generated Rust build function, build the owning Cargo package from Studio and make `rust-analyzer` available on Studio’s `PATH`. Set `FERROUI_RUST_ANALYZER` before launching Studio to select a different executable. **Review file move** resolves the Rust imports and calls in the background using the build’s Cargo feature and profile settings. The same review includes edits to open Rust drafts. Close the flyout to cancel an in-progress review. Once the changes appear, apply and save them, then rebuild to regenerate the compiled modules. [Review a move with generated Rust references in VS Code](vscode/authoring.md#move-an-xaml-file-and-its-references)
+
+### Rename a control in a Rust view
+
+Choose the `rsx!` invocation and select the control in the canvas or **Layers**. Edit **Name** in Properties to update the literal and any mapped style selectors or visual-state targets. Undo restores them together. If the name has a mapped reference, rename the control or remove the reference before resetting **Name**. [Supported references](vscode/authoring.md#rename-an-rsx-control)
+
+### Edit RSX builder values
+
+Select a control in a Rust view and open **Properties**. Edit a supported literal authored as a field, such as `width: 160.0`, or as a single-argument call, such as `width(160.0)`. The same editor handles mapped layout calls such as `grid_row(1)` and setters registered by the project. **Reset** removes the assignment and retains its comments. Use the source arrow to open a computed value. Each applied edit takes one Undo step. [VS Code workflow](vscode/authoring.md#edit-rsx-builder-values) · [MCP tools](vscode/reference.md#drive-an-editor-workflow)
+
+When Studio has the Cargo target for a Rust view, it can preview embedded raster paths anchored to `CARGO_MANIFEST_DIR`. Edit the image's **Source** relative to the Rust file in Properties. Studio keeps the package-relative constructor and macro in the original source. [Supported embedded paths](vscode/authoring.md#edit-values-actions-and-resources)
+
+### Arrange an inline Rust child collection
+
+Open the outer RSX invocation for a panel whose children come from an inline array or a qualified `::std::vec!` of nested RSX controls. Drag a mapped member in **Layers** or on the canvas. Insert a Toolbox control, move a member to another authored panel, or wrap consecutive members in a panel. Studio keeps their authored expressions and comments and restores the exact Rust in one Undo. Use the Rust editor to change computed entries. [Collection syntax and limits](vscode/authoring.md#arrange-an-inline-rust-child-collection)
+
+Select one or more mapped members and choose **Delete selection** to remove their Rust expressions in one Undo step. Computed siblings retain their original source and order.
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native
@@ -88,6 +198,38 @@ The native TreeDataGrid `RowDragStarted` arguments expose `data_transfer()` and
 `key_modifiers()` so other hosts can attach typed payloads while retaining normal row drag
 behavior. Designer source hierarchy moves continue to use their own guarded move transaction.
 
+## Edit table columns
+
+Select a `TableView` or `TreeDataGrid` in an XAML or RSX view using the canvas or Layers. Use the **Edit columns** icon beside the property search. Choose a column from the list. The arrow icons change its position, and the adjacent icons duplicate, remove, or reveal it in source. To add a column, choose an available type and select the plus icon.
+
+Edit a column’s width, header, binding, or supported type-specific settings. Press Enter in a text field or use the check icon to confirm a value. Reset restores the framework default by removing the authored field. A template, object value, or protected expression links to its authored source. You can also edit the supported inner fields of an XAML hierarchy column.
+
+Each action updates the native design and writes one source transaction. Undo restores the previous collection or value. Use the authored source for collections supplied by runtime code. [VS Code Columns view](vscode/authoring.md#edit-table-columns) · [MCP arguments](vscode/reference.md#edit-table-columns-with-mcp)
+
+For an RSX table, Columns edits an inline `ferroui_view::table_columns` array and starts one when you add the first column. Enter a simple path such as `Customer.Name` in **Binding**. Reveal a computed property in its original Rust expression. If the whole collection is computed, use **Reveal column collection in source** in the flyout. [RSX example](vscode/authoring.md#edit-an-rsx-tableview)
+
+For an RSX TreeDataGrid, the same flyout edits a `ferroui_view::tree_data_grid_columns` array. Edit the header, width, and binding under **Inner column** when working with a hierarchy. Its parent column sets the children and expansion paths. Choose **Edit cell templates** on a template column to open the display or editing body. [RSX TreeDataGrid example](vscode/authoring.md#edit-an-rsx-treedatagrid)
+
+## Edit item and cell templates
+
+Select an items control or an authored table column in Layers. Open **Edit item templates** beside the property search. The popup shows each supported slot and its current assignment. Use the canvas, source, new template, copy, or reset icon for that slot. To assign a resource, choose a visible template and confirm with the check icon.
+
+**Make inline copy** works with an included resource template from the current preview. Stable links keep their resource and theme scope. A dependency that would be shadowed gets a private key in the nearest writable resource owner. Copied dependencies and the template assignment use one Undo step in the consuming document. [Included template copy example](vscode/authoring.md#edit-item-and-cell-templates)
+
+The canvas uses the first item from the selected design fixture when the items binding resolves to an array. Choose **Return to document** to leave a local template preview. Each assignment, inline creation, copy, or reset uses one source transaction. Apply **Make inline copy** to a local resource whose dependencies can be preserved.
+
+For a template supplied by a workspace dictionary include, the canvas and source icons open its owning document tab. The canvas starts with the consuming view's selected fixture. Edit and undo definition changes in the dictionary tab, then use **Return to document** to inspect the consuming view. The picker includes reliably resolved templates and shows their dictionary's filename. [VS Code workflow](vscode/authoring.md#edit-item-and-cell-templates) · [MCP arguments](vscode/reference.md#edit-item-templates-with-mcp)
+
+For Rust, select an items control and open **Edit item templates**. For a TableView column, choose it in **Edit columns** and use **Edit cell template**. The canvas icon opens the mapped `rsx!` returned by its typed closure. Use Properties and the canvas on that original body, then use the back arrow to return to the owning view. For an empty slot, enter the Rust item type and press Enter or choose the plus icon. Reset removes a mapped assignment. For a computed template, use the source icon. [Rust example](vscode/authoring.md#edit-a-rust-item-or-cell-template) · [MCP arguments](vscode/reference.md#edit-item-templates-with-mcp)
+
+## Edit control templates
+
+Select an XAML control with a writable `Template` property. Choose **Edit templates** in the property inspector and use the **Control Template** section. Open the template on the canvas, reveal its source, or choose a visible resource that matches the control's type. Studio shows **Inherited** for a template supplied by a style or theme with a verified source. An included definition opens in its original file and uses its authored resource scope.
+
+When the selected Cargo package has a current XAML schema, Studio can trace an inherited template from a file-backed compiled dictionary to its XAML input. The published `ferres://` address continues to identify the resource, including when its physical filename differs.
+
+**Create inline template** starts a template with the control's type and its registered required parts. **Make inline copy** duplicates the assigned or inherited template. A dependency that would be shadowed keeps its value under a private key in a writable resource scope. **Reset template** removes the local assignment and restores the inherited value. Studio records each source change as one Undo step. [VS Code workflow](vscode/authoring.md#edit-a-control-template) · [MCP workflow](vscode/reference.md#edit-item-templates-with-mcp)
+
 ## Contextual panel layout
 
 The property dock's Layout section shows the selected panel, or the common parent panel of
@@ -117,6 +259,12 @@ Bound cell coordinates/spans, object-valued positions, and definition collection
 entirely by a style or factory are rejected rather than flattened. Structural Grid edits remain
 ordinary source edits even when animation recording is enabled.
 
+### Wrap selected controls
+
+Select one control or consecutive siblings. Open **Arrange** on the canvas shelf, choose **Wrap selection**, then choose a stack, WrapPanel, Grid, Canvas, or Border. The wrapper occupies the original child slot and becomes the selection. **Canvas (keep positions)** uses the measured slots of existing Canvas children. **Border** wraps one child.
+
+Use Undo to restore the original source in one step. Studio applies the same plan to XAML and mapped Rust views, including Rust comments and computed values within the selected controls. [Layout choices in VS Code](vscode/authoring.md#wrap-selected-controls) · [MCP workflow](vscode/reference.md#wrap-controls-with-mcp)
+
 ## Hierarchy and artboard
 
 Layer rows use a single virtualized template column with semantic icons and name/key/type
@@ -133,6 +281,8 @@ Source hierarchy drags preserve source order and selected subtrees. Hovering ove
 collapsed container expands it; native TreeDataGrid scrolling and drop adorners stay active.
 Before/after/inside drops validate content ownership, cycles and the captured source identity.
 Canvas reparenting preserves measured world geometry across affine parent transforms.
+
+In a Rust view, drag mapped controls around loops and conditionals on the artboard or in Layers. The moved blocks keep their comments, handler expressions, and other Rust values. A drop below an authored row places the selection before the next Rust child, which may be a loop or expression. A drop inside a panel appends to its authored child list. Computed single-child slots and explicitly computed child collections are editable in Rust source. A successful drag keeps the moved controls selected and uses one Undo step. [VS Code workflow](vscode/authoring.md#move-and-insert-controls-in-a-partial-rsx-preview)
 
 | Focus / gesture | Behavior |
 | --- | --- |
@@ -196,6 +346,14 @@ own catalog UI or integration tests.
 name/description rows. `view_mode()` reports the current presentation. Switching views preserves
 the query, category, catalog and placement callbacks. `DesignerWorkspace::asset_toolbox()`
 returns `Option<Rc<AssetToolbox>>` for hosts that need these browsing controls.
+
+## Edit behaviors
+
+1. Select an authored XAML control in Design or Layers and choose **Behaviors** in the inspector. When no behavior is attached, the inspector opens the trigger and first action fields.
+2. Choose an existing trigger from **Behavior**. Open **Edit trigger** to set its routed event and source or its binding, comparison, and restore behavior. Use **Action** to choose a step, then open **Edit action** to edit it. The arrow icons move the action within its collection. Use **Add action** to append a step and the check or plus icon to apply the fields.
+3. Use **Preview actions** to execute the native actions on the artboard and **Reset behavior preview** to restore the authored view. The source icon reveals the selected trigger or action. **Behavior XAML** opens the exact subtree for an advanced edit, including custom trigger types and nested objects.
+
+Choose **Attach behavior** to create another trigger. Studio applies each edit as one source transaction. [VS Code workflow](vscode/authoring.md#edit-a-behavior) · [MCP workflow](vscode/reference.md#edit-and-preview-behaviors-with-mcp)
 
 ## Timeline tracks and ruler
 
@@ -273,6 +431,12 @@ Batch hosts use `set_selected_keys`, `selected_keys`, `on_selection_changed`,
 `on_move_selection`, `on_remove_selection` and `on_duplicate_selection`. Existing single-key
 callbacks remain supported. The selection callback includes whether other lanes should retain
 their selection, allowing a workspace to support groups across multiple objects/properties.
+
+## Format XAML in Studio
+
+Open the Source pane and select **XAML formatting options** beside **Format XAML**. Choose the indentation, attribute layout, wrap column, bracket placement, and whitespace preferences for this Studio window. The wrap column controls the **Wrap** attribute layout. With a selection, the format icon or Ctrl+Shift+F on Windows and Linux or Cmd+Shift+F on macOS formats that range. With the caret alone, it formats the whole document. Use Undo to restore the original source in one step.
+
+Studio uses the shared formatter for whitespace-sensitive XAML and protected generated regions. Agents can call `designer_language` with `action: "format"`, an optional UTF-16 `range`, and optional formatter overrides. Review the returned `edit` and apply it with `designer_language_apply` and the returned `revision` as `expected_revision`. [Settings and protected regions](vscode/authoring.md#format-xaml) · [MCP arguments](vscode/reference.md#drive-an-editor-workflow)
 
 ## Workspace authoring
 

@@ -2,20 +2,33 @@
 use crate::DesignerSession;
 use ferroui_base::animation::{IClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
-use ferroui_base::{BoxedValue, StyledElement};
-use ferroui_designer_animation::{BehaviorAction, BehaviorModel, Sample, VisualStateGroup};
+use ferroui_base::StyledElement;
+use ferroui_designer_animation::{BehaviorAction, Sample, VisualStateGroup};
 use ferroui_designer_core::NodeId;
 use std::cell::Cell;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::rc::Rc;
+
+#[path = "behavior_session.rs"]
+mod behaviors;
 
 #[derive(Default)]
 pub(crate) struct InteractionSession {
     original_classes: BTreeMap<(NodeId, String), Vec<String>>,
     active_states: BTreeMap<(NodeId, String), String>,
     behavior_modified: bool,
+    active_behavior: Option<NodeId>,
     clock: Option<Rc<StatePreviewClock>>,
     clock_time: f64,
+    transition: Option<TransitionPreview>,
+}
+
+#[derive(Clone)]
+struct TransitionPreview {
+    owner: NodeId,
+    group: String,
+    to: String,
+    duration: f64,
 }
 impl DesignerSession {
     pub fn state_groups(&self) -> Vec<VisualStateGroup> {
@@ -31,6 +44,9 @@ impl DesignerSession {
             .collect()
     }
     pub fn upsert_state_group(&mut self, group: VisualStateGroup) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_state_group(group.owner, &group.name, Some(&group));
+        }
         let edits = group
             .plan(&self.document)
             .map_err(|error| error.to_string())?;
@@ -39,12 +55,37 @@ impl DesignerSession {
         Ok(())
     }
     pub fn remove_state_group(&mut self, owner: NodeId, name: &str) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return self.edit_rust_state_group(owner, name, None);
+        }
         let edits = VisualStateGroup::remove(&self.document, owner, name)
             .map_err(|error| error.to_string())?;
         self.apply("Remove visual state group", edits)
             .map_err(|error| error.to_string())?;
         Ok(())
     }
+    pub(crate) fn can_create_rust_state_group(&self, owner: NodeId) -> bool {
+        self.can_manipulate()
+            && self.document.ast().node(owner).zip(self.rust_map())
+                .is_some_and(|(node, map)| map.can_create_state_group(node.span.start))
+    }
+
+    fn edit_rust_state_group(
+        &mut self, owner: NodeId, name: &str, model: Option<&VisualStateGroup>,
+    ) -> Result<(), String> {
+        if !self.can_manipulate() {
+            return Err("Open a current, editable Rust view".into());
+        }
+        let rust = self.rust.as_ref().ok_or("Open the current Rust view")?;
+        let patches = rust.edit_state_group(&self.document, owner, name, model)?;
+        if !patches.is_empty() {
+            let label = if model.is_some() { "Edit Rust visual state group" } else { "Remove Rust visual state group" };
+            self.commit_rust_patches(label, patches).map_err(|error| error.to_string())?;
+            self.changed(true);
+        }
+        Ok(())
+    }
+
     pub fn preview_state(
         &mut self,
         owner: NodeId,
@@ -63,9 +104,64 @@ impl DesignerSession {
         state: Option<&str>,
         elapsed: Option<f64>,
     ) -> Result<(), String> {
-        if elapsed.is_some_and(|time| {
-            !time.is_finite() || time < 0.0 || time * 10_000_000.0 >= i64::MAX as f64
-        }) {
+        self.sample_state(owner, name, state, elapsed, None)
+    }
+
+    /// Sample an explicit authored route independently of the currently previewed state.
+    /// Reconstruct the initial endpoint before sampling the destination so backward seeks
+    /// and repeated seeks use the same native starting value and easing.
+    pub fn preview_state_transition(
+        &mut self, owner: NodeId, name: &str, from: Option<&str>, to: &str, elapsed: f64,
+    ) -> Result<(), String> {
+        let groups = self.state_groups();
+        let group = groups.iter().find(|group| group.owner == owner && group.name == name)
+            .ok_or("Unknown visual state group")?;
+        if from == Some(to) || from.is_some_and(|from| !group.states.iter().any(|state| state.name == from))
+            || !group.states.iter().any(|state| state.name == to)
+        {
+            return Err("Choose distinct authored endpoints for this visual state transition".into());
+        }
+        let duration = group.transition(from, to).ok_or("No authored transition connects these states")?.duration;
+        if !valid_state_time(duration) || !valid_state_time(elapsed) || elapsed > duration {
+            return Err("Choose a time within the native state transition duration".into());
+        }
+        if !self.preview.visual(owner).and_then(|visual| visual.cast::<StyledElement>())
+            .is_some_and(|owner| owner.is_attached_to_logical_tree())
+        {
+            return Err("Attach the preview host to a rooted logical tree before sampling state transitions".into());
+        }
+        self.stop_animation_playback();
+        // Resolve the exact starting endpoint without replaying any incoming route
+        // from the state that happened to be visible before this seek.
+        self.sample_state(owner, name, from, None, Some(None))?;
+        let transition = TransitionPreview { owner, group: name.into(), to: to.into(), duration };
+        if elapsed >= duration {
+            return self.finish_state_transition(transition);
+        }
+        self.sample_state(owner, name, Some(to), Some(elapsed), Some(from))?;
+        self.interactions.transition = Some(transition);
+        Ok(())
+    }
+
+    #[cfg(feature = "mcp")]
+    pub(crate) fn state_transition_position(&self) -> Option<(f64, f64)> {
+        Some((self.interactions.clock_time, self.interactions.transition.as_ref()?.duration))
+    }
+
+    fn finish_state_transition(&mut self, transition: TransitionPreview) -> Result<(), String> {
+        // Legacy generated styles can start both the default and the directional
+        // animations. Once the selected route ends, hold the native destination.
+        self.sample_state(transition.owner, &transition.group, Some(&transition.to), None, Some(None))?;
+        self.interactions.clock_time = transition.duration;
+        self.interactions.transition = Some(transition);
+        Ok(())
+    }
+
+    fn sample_state(
+        &mut self, owner: NodeId, name: &str, state: Option<&str>, elapsed: Option<f64>,
+        source_state: Option<Option<&str>>,
+    ) -> Result<(), String> {
+        if elapsed.is_some_and(|time| !valid_state_time(time)) {
             return Err("State preview time is outside the native clock range".into());
         }
         let groups = self.state_groups();
@@ -115,35 +211,20 @@ impl DesignerSession {
         {
             return Err("Attach the preview host to a Window or rooted logical tree before sampling native state transitions, bindings or resources".into());
         }
+        let projected = group.is_projected(&self.document);
         let key = (owner, name.to_owned());
-        let from = group
-            .states
-            .iter()
-            .find(|state| {
-                owner_visual
-                    .classes()
-                    .contains(&group.class_name(&state.name))
-            })
-            .map(|state| state.name.clone())
-            .or_else(|| self.interactions.active_states.get(&key).cloned());
+        let from = source_state.unwrap_or_else(|| {
+            group.states.iter().find(|state| owner_visual.classes().contains(&group.class_name(&state.name)))
+                .map(|state| state.name.as_str()).or_else(|| self.interactions.active_states.get(&key).map(String::as_str))
+        });
         let mut next = self.interactions.active_states.clone();
         if let Some(state) = selected {
             next.insert(key.clone(), state.name.clone());
         } else {
             next.remove(&key);
         }
-        let duration = selected
-            .and_then(|state| {
-                group
-                    .transitions
-                    .iter()
-                    .find(|transition| transition.to == state.name && transition.from == from)
-                    .or_else(|| {
-                        group.transitions.iter().find(|transition| {
-                            transition.to == state.name && transition.from.is_none()
-                        })
-                    })
-            })
+        let transition = selected.and_then(|state| group.transition(from, &state.name));
+        let duration = transition
             .map_or(0.000_000_1, |transition| {
                 transition.duration.max(0.000_000_1)
             });
@@ -204,14 +285,19 @@ impl DesignerSession {
             classes.remove(class);
         }
         if let Some(state) = selected {
-            if let Some(from) = from.filter(|from| {
-                group.transitions.iter().any(|transition| {
-                    transition.from.as_deref() == Some(from.as_str()) && transition.to == state.name
-                })
-            }) {
-                classes.add(&group.transition_class(&from, &state.name));
+            let class = group.class_name(&state.name);
+            let route = transition.and_then(|transition| transition.from.as_deref());
+            if let Some(from) = route.filter(|_| source_state.is_some() && !projected) {
+                // During an explicit seek, start the selected route last. Existing
+                // XAML can match the default style along with the directional style.
+                classes.add(&class);
+                classes.add(&group.transition_class(from, &state.name));
+            } else {
+                if let Some(from) = route {
+                    classes.add(&group.transition_class(from, &state.name));
+                }
+                classes.add(&class);
             }
-            classes.add(&group.class_name(&state.name));
         } else if let Some(original) = self.interactions.original_classes.remove(&key) {
             for class in original {
                 classes.add(&class);
@@ -223,6 +309,7 @@ impl DesignerSession {
         clock.subject.on_next(SignedDuration::from_seconds(time));
         self.interactions.clock = Some(clock);
         self.interactions.clock_time = time;
+        self.interactions.transition = None;
         self.interactions.behavior_modified = true;
         // Literal endpoint overlays remain deterministic even in a disconnected design tree.
         // Intermediate frames use the actual runtime animation to preserve native easing.
@@ -234,14 +321,15 @@ impl DesignerSession {
         Ok(())
     }
     pub fn advance_state_preview(&mut self, seconds: f64) -> Result<(), String> {
-        let time = self.interactions.clock_time + seconds;
-        if !seconds.is_finite()
-            || seconds < 0.0
-            || !time.is_finite()
-            || time * 10_000_000.0 >= i64::MAX as f64
-        {
+        let requested = self.interactions.clock_time + seconds;
+        if !valid_state_time(seconds) || !valid_state_time(requested) {
             return Err("State clock delta is outside the native clock range".into());
         }
+        if let Some(transition) = self.interactions.transition.as_ref().filter(|transition| requested >= transition.duration) {
+            return if self.interactions.clock_time >= transition.duration { Ok(()) }
+                else { self.finish_state_transition(transition.clone()) };
+        }
+        let time = requested;
         let clock = self
             .interactions
             .clock
@@ -269,6 +357,9 @@ impl DesignerSession {
         from: Option<&str>,
         to: &str,
     ) -> Result<Vec<BehaviorAction>, String> {
+        if self.uses_rust_source() {
+            return Err("Use set_visual_state in the Rust handler for this state group".into());
+        }
         let group = self
             .state_groups()
             .into_iter()
@@ -283,119 +374,6 @@ impl DesignerSession {
         group
             .actions(owner_name, to, from)
             .map_err(|error| error.to_string())
-    }
-    pub fn behaviors(&self, owner: NodeId) -> Vec<BehaviorModel> {
-        BehaviorModel::read(&self.document, owner).unwrap_or_default()
-    }
-    pub fn upsert_behavior(&mut self, model: BehaviorModel) -> Result<NodeId, String> {
-        let before = self
-            .behaviors(model.owner)
-            .iter()
-            .filter_map(|model| model.id)
-            .collect::<BTreeSet<_>>();
-        let edits = model
-            .plan(&self.document)
-            .map_err(|error| error.to_string())?;
-        self.apply("Edit behavior", edits)
-            .map_err(|error| error.to_string())?;
-        if let Some(id) = model.id {
-            return Ok(id);
-        }
-        self.behaviors(model.owner)
-            .into_iter()
-            .filter_map(|model| model.id)
-            .find(|id| !before.contains(id))
-            .ok_or_else(|| "Created behavior was not found".into())
-    }
-    pub fn remove_behavior(&mut self, id: NodeId) -> Result<(), String> {
-        let edits = BehaviorModel::remove(&self.document, id).map_err(|error| error.to_string())?;
-        self.apply("Remove behavior", edits)
-            .map_err(|error| error.to_string())?;
-        Ok(())
-    }
-    pub fn set_behavior_source(&mut self, id: NodeId, source: &str) -> Result<(), String> {
-        let owner = self.behavior_owner(id)?;
-        let mut model = BehaviorModel::from_source(source, owner, Some(id))
-            .map_err(|error| error.to_string())?;
-        model.id = Some(id);
-        self.upsert_behavior(model)?;
-        Ok(())
-    }
-    /// Execute the real attached trigger's actions, preserving bindings, name scopes and
-    /// custom IAction implementations. The host must be attached to a rooted logical tree
-    /// so native action styles, bindings and lifecycle hooks have run. Stop/reload restores
-    /// the authored preview afterwards.
-    pub fn preview_behavior(&mut self, id: NodeId) -> Result<(), String> {
-        let owner = self.behavior_owner(id)?;
-        let models = self.behaviors(owner);
-        let index = models
-            .iter()
-            .position(|model| model.id == Some(id))
-            .ok_or("Unknown behavior")?;
-        let visual = self
-            .preview
-            .visual(owner)
-            .ok_or("Behavior owner has no live preview")?;
-        if visual
-            .cast::<StyledElement>()
-            .is_some_and(|element| !element.is_attached_to_logical_tree())
-        {
-            return Err("Attach the preview host to a Window or rooted logical tree before executing behaviors; native action styles and bindings require attachment".into());
-        }
-        let behaviors = ferroui_xaml_interactivity::Interaction::get_behaviors(&visual);
-        let snapshot = behaviors.snapshot();
-        let behavior = snapshot
-            .get(index)
-            .ok_or("The authored behavior is not attached in the current preview")?;
-        let trigger=<dyn ferroui_xaml_interactivity::ITrigger>::of(behavior).ok_or("This behavior is not an action trigger; use Interact to exercise its native event/lifecycle behavior")?;
-        let sender: BoxedValue = Rc::new(visual.clone());
-        ferroui_xaml_interactivity::Interaction::execute_actions(
-            Some(&sender),
-            trigger.actions().as_ref(),
-            None,
-        );
-        self.interactions.behavior_modified = true;
-        for group in self.state_groups() {
-            let Some(owner) = self
-                .preview
-                .visual(group.owner)
-                .and_then(|visual| visual.cast::<StyledElement>())
-            else {
-                continue;
-            };
-            let key = (group.owner, group.name.clone());
-            if let Some(state) = group
-                .states
-                .iter()
-                .find(|state| owner.classes().contains(&group.class_name(&state.name)))
-            {
-                self.interactions
-                    .active_states
-                    .insert(key, state.name.clone());
-            } else {
-                self.interactions.active_states.remove(&key);
-            }
-        }
-        self.import_animations();
-        self.generation += 1;
-        Ok(())
-    }
-    fn behavior_owner(&self, id: NodeId) -> Result<NodeId, String> {
-        let mut current = self.document.ast().node(id).and_then(|node| node.parent);
-        while let Some(id) = current {
-            let node = self
-                .document
-                .ast()
-                .node(id)
-                .ok_or("Unknown behavior ancestor")?;
-            if node.local_name() == "Interaction.Behaviors" {
-                return node
-                    .parent
-                    .ok_or_else(|| "Behavior collection has no owner".into());
-            }
-            current = node.parent;
-        }
-        Err("Source node is not a behavior".into())
     }
     pub fn clear_interaction_preview(&mut self) {
         let reset =
@@ -425,6 +403,10 @@ impl DesignerSession {
         }
         self.interactions = InteractionSession::default();
     }
+}
+
+fn valid_state_time(time: f64) -> bool {
+    time.is_finite() && time >= 0.0 && time * 10_000_000.0 < i64::MAX as f64
 }
 
 struct StatePreviewClock {

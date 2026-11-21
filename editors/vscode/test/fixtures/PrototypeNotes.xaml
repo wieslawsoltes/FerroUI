@@ -1,0 +1,7 @@
+<Border xmlns="https://github.com/ferroui" Background="#FFE9F4EE" Padding="24">
+    <StackPanel Spacing="12">
+        <TextBlock Text="Customer notes" FontSize="24" Foreground="#FF17394F" />
+        <TextBlock Text="Northwind Studio prefers a Friday follow-up." TextWrapping="Wrap" />
+        <Button Name="CloseNotes" Content="Close notes" HorizontalAlignment="Left" />
+    </StackPanel>
+</Border>

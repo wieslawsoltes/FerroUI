@@ -10,10 +10,33 @@ use crate::{
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+
+#[path = "states/projected_routes.rs"]
+mod projected_routes;
+pub use projected_routes::{ProjectedStateGroup, ProjectedStateRoute};
+pub use projected_routes::{StatePreviewGroup, StatePreviewRoute};
 const GROUP_MARKER: &str = "ferroui-designer-state-group:";
+const PROJECTED_GROUP_MARKER: &str = "ferroui-designer-projected-state-group:";
 const STATE_MARKER: &str = "ferroui-designer-state:";
 const TRANSITION_MARKER: &str = "ferroui-designer-transition:";
 pub(crate) const STATE_PROGRAM_MARKER: &str = "ferroui-designer-state-program:";
+
+pub(crate) fn is_projected_state_animation(document: &Document, id: NodeId) -> bool {
+    if state_program_role(document, id).is_none() {
+        return false;
+    }
+    let ast = document.ast();
+    let mut parent = ast.node(id).and_then(|node| node.parent);
+    while let Some(node) = parent.and_then(|id| ast.node(id)) {
+        if node.children.iter().filter_map(|id| ast.node(*id)).any(|child| {
+            child.kind == NodeKind::Comment && child.text.as_deref().is_some_and(|text| text.trim().starts_with(PROJECTED_GROUP_MARKER))
+        }) {
+            return true;
+        }
+        parent = node.parent;
+    }
+    false
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct StateSetter {
     pub target: String,
@@ -39,7 +62,35 @@ pub struct VisualStateGroup {
     pub states: Vec<VisualState>,
     pub transitions: Vec<StateTransition>,
 }
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(tag = "action", rename_all = "snake_case", deny_unknown_fields)]
+pub enum StateGroupEdit {
+    Upsert { model: VisualStateGroup },
+    Remove { owner: NodeId, group: String },
+}
+
+impl StateGroupEdit {
+    pub fn identity(&self) -> (NodeId, &str) {
+        match self {
+            Self::Upsert { model } => (model.owner, &model.name),
+            Self::Remove { owner, group } => (*owner, group),
+        }
+    }
+}
+
 impl VisualStateGroup {
+    /// Directional transitions take precedence over the same destination's default.
+    pub fn transition(&self, from: Option<&str>, to: &str) -> Option<&StateTransition> {
+        self.transitions
+            .iter()
+            .find(|transition| transition.to == to && transition.from.as_deref() == from)
+            .or_else(|| {
+                self.transitions
+                    .iter()
+                    .find(|transition| transition.to == to && transition.from.is_none())
+            })
+    }
+
     pub fn validate(&self) -> Result<()> {
         validate_name(&self.name)?;
         require(self.owner > 0, "State group owner must be nonzero")?;
@@ -215,12 +266,32 @@ impl VisualStateGroup {
     /// Native nested styles own their class scope. Literal state properties also use an
     /// animation layer so an authored local Width/Opacity does not mask the selected state.
     pub fn to_xaml(&self, owner_name: &str) -> Result<String> {
-        self.validate()?;
         require(!owner_name.is_empty(), "State styles require a named owner")?;
+        self.group_markup(GROUP_MARKER, &format!("#{owner_name}"), |target| format!("#{target}"))
+    }
+
+    /// Lower a source-mapped state group using the selectors resolved by its host.
+    pub fn to_xaml_for_selectors(
+        &self,
+        owner_selector: &str,
+        target_selector: impl Fn(&str) -> String,
+    ) -> Result<String> {
+        self.group_markup(PROJECTED_GROUP_MARKER, owner_selector, target_selector)
+    }
+
+    fn group_markup(
+        &self,
+        marker: &str,
+        owner_selector: &str,
+        target_selector: impl Fn(&str) -> String,
+    ) -> Result<String> {
+        self.validate()?;
+        require(!owner_selector.is_empty(), "State styles require an owner selector")?;
         let metadata = serde_json::to_string(self).map_err(core_error)?;
+        let projected = marker == PROJECTED_GROUP_MARKER;
         let mut result = format!(
-            "<Style Selector=\"#{}\"><!--{GROUP_MARKER}{}-->",
-            escape(owner_name),
+            "<Style Selector=\"{}\"><!--{marker}{}-->",
+            escape(owner_selector),
             encode_text(&metadata)
         );
         for state in &self.states {
@@ -235,7 +306,7 @@ impl VisualStateGroup {
                         transition.easing.clone(),
                     )
                 });
-            result.push_str(&self.state_styles(state, None, duration, easing)?);
+            result.push_str(&self.state_styles(state, None, duration, easing, &target_selector, projected)?);
         }
         for transition in self
             .transitions
@@ -252,12 +323,16 @@ impl VisualStateGroup {
                 transition.from.as_deref(),
                 transition.duration.max(0.000_000_1),
                 transition.easing.clone(),
+                &target_selector,
+                projected,
             )?);
         }
         for transition in self
             .transitions
             .iter()
-            .filter(|transition| transition.from.is_some())
+            // Authored XAML behaviors can read the route condition. Rust projections
+            // apply the selected classes directly and can render in apps without interactivity.
+            .filter(|transition| !projected && transition.from.is_some())
         {
             let from = transition.from.as_deref().expect("directional edge");
             result.push_str(&format!("<Style Selector=\"^.{} ConditionalAction.{}\"><!--{TRANSITION_MARKER}route--><Setter Property=\"Condition\" Value=\"True\"/></Style>",self.class_name(from),self.route_class(from,&transition.to)));
@@ -271,23 +346,35 @@ impl VisualStateGroup {
         from: Option<&str>,
         duration: f64,
         easing: Easing,
+        target_selector: &impl Fn(&str) -> String,
+        projected: bool,
     ) -> Result<String> {
         let mut targets = BTreeMap::<&str, Vec<&StateSetter>>::new();
         for setter in &state.setters {
             targets.entry(&setter.target).or_default().push(setter);
         }
         let mut result = String::new();
+        let class = self.class_name(&state.name);
+        let condition = if let Some(from) = from {
+            format!(".{}", self.transition_class(from, &state.name))
+        } else if projected {
+            // The Rust builder selects one rule. Keep its projected endpoint from
+            // starting a second animation and becoming the directional route's base.
+            self.transitions.iter()
+                .filter(|route| route.to == state.name)
+                .filter_map(|route| route.from.as_deref())
+                .map(|from| format!(":not(.{})", self.transition_class(from, &state.name)))
+                .collect::<String>()
+        } else {
+            String::new()
+        };
         for (target, setters) in targets {
-            let class = self.class_name(&state.name);
-            let transition = from
-                .map(|from| format!(".{}", self.transition_class(from, &state.name)))
-                .unwrap_or_default();
             let selector = format!(
-                "^.{class}{transition}{}",
+                "^.{class}{condition}{}",
                 if target.is_empty() {
                     String::new()
                 } else {
-                    format!(" #{target}")
+                    format!(" {}", target_selector(target))
                 }
             );
             let marker = if let Some(from) = from {
@@ -360,6 +447,7 @@ impl VisualStateGroup {
                         state.name,
                         if target.is_empty() { "owner" } else { target }
                     ),
+                    projected,
                 )?);
                 result.push_str("</Style.Animations>");
             }
@@ -382,6 +470,7 @@ impl VisualStateGroup {
                         state.name,
                         if target.is_empty() { "owner" } else { target }
                     ),
+                    projected,
                 )?;
                 // Merge into an existing property collection when literals and bindings coexist.
                 if let Some(end) = result
@@ -397,11 +486,27 @@ impl VisualStateGroup {
         }
         Ok(result)
     }
+    /// Whether the group comes from a native Rust projection.
+    pub fn is_projected(&self, document: &Document) -> bool {
+        group_nodes(document).into_iter().any(|(_, group, projected)| {
+            projected && group.owner == self.owner && group.name == self.name
+        })
+    }
+
     pub fn read(document: &Document) -> Vec<Self> {
+        Self::read_group_styles(document).into_iter().map(|(_, group, _)| group).collect()
+    }
+
+    fn read_group_styles(document: &Document) -> Vec<(NodeId, Self, bool)> {
         group_nodes(document)
             .into_iter()
-            .filter_map(|(style, mut group)| {
+            .filter_map(|(style, mut group, projected)| {
                 document.ast().node(group.owner)?;
+                if projected {
+                    // The generated tracks may contain a minimum native tick for an
+                    // instantaneous state. The Rust declaration owns route timing.
+                    return Some((style, group, projected));
+                }
                 // Native keyframes/setters are authoritative after direct source edits.
                 if let Some(style) = document.ast().node(style).map(|node| node.id) {
                     let mut seen_transitions = BTreeSet::new();
@@ -497,7 +602,7 @@ impl VisualStateGroup {
                             }));
                     }
                 }
-                Some(group)
+                Some((style, group, projected))
             })
             .collect()
     }
@@ -651,16 +756,21 @@ impl VisualStateGroup {
 fn group_node(document: &Document, owner: NodeId, name: &str) -> Option<NodeId> {
     group_nodes(document)
         .into_iter()
-        .find(|(_, group)| group.owner == owner && group.name == name)
-        .map(|(id, _)| id)
+        .find(|(_, group, projected)| !projected && group.owner == owner && group.name == name)
+        .map(|(id, _, _)| id)
 }
-fn group_nodes(document: &Document) -> Vec<(NodeId, VisualStateGroup)> {
+fn group_nodes(document: &Document) -> Vec<(NodeId, VisualStateGroup, bool)> {
     document
         .ast()
         .nodes()
         .filter(|node| node.kind == NodeKind::Comment)
         .filter_map(|node| {
-            let text = node.text.as_deref()?.trim().strip_prefix(GROUP_MARKER)?;
+            let marker = node.text.as_deref()?.trim();
+            let (text, projected) = if let Some(text) = marker.strip_prefix(GROUP_MARKER) {
+                (text, false)
+            } else {
+                (marker.strip_prefix(PROJECTED_GROUP_MARKER)?, true)
+            };
             let mut group: VisualStateGroup = serde_json::from_str(&decode_text(text)?).ok()?;
             let style = node.parent?;
             let mut current = Some(style);
@@ -672,7 +782,7 @@ fn group_nodes(document: &Document) -> Vec<(NodeId, VisualStateGroup)> {
                 }
                 current = parent.parent;
             }
-            Some((style, group))
+            Some((style, group, projected))
         })
         .collect()
 }
@@ -1244,7 +1354,7 @@ fn merge_state_collection(
             old_timing.1 != new_timing.1,
         )?;
         let merged = if state_program_role(&output, id).is_none() {
-            state_program(&merged, role, "State animation")?
+            state_program(&merged, role, "State animation", false)?
         } else {
             merged
         };
@@ -1534,16 +1644,23 @@ fn replace_endpoint(document: &Document, setter: NodeId, value: &str, edits: &mu
     });
 }
 
-fn state_program(source: &str, role: &str, name: &str) -> Result<String> {
-    let mut document =
-        Document::new(crate::programs::named_source(source, name)?).map_err(core_error)?;
+fn state_program(source: &str, role: &str, name: &str, projected: bool) -> Result<String> {
+    let mut marker = format!("<!--{STATE_PROGRAM_MARKER}{role}-->");
+    let mut document = if projected {
+        // Source identity comes from the Rust declaration. Reprojection of the
+        // accepted buffer must produce identical markup for the edit guard.
+        marker.push_str(&crate::programs::name_marker(name));
+        Document::new(source)
+    } else {
+        Document::new(crate::programs::named_source(source, name)?)
+    }.map_err(core_error)?;
     document
         .apply(
             "Identify state-owned program",
             vec![Edit::InsertChild {
                 parent: document.ast().root(),
                 index: 0,
-                source: format!("<!--{STATE_PROGRAM_MARKER}{role}-->"),
+                source: marker,
             }],
         )
         .map_err(core_error)?;

@@ -296,7 +296,7 @@ pub(crate) fn ensure_key_available(
     )
 }
 
-fn resource_container(document: &Document, owner: NodeId) -> Result<Option<NodeId>> {
+pub(crate) fn resource_container(document: &Document, owner: NodeId) -> Result<Option<NodeId>> {
     let node = element(document, owner)?;
     if framework(node) && node.local_name() == "ResourceDictionary" {
         require(
@@ -382,7 +382,12 @@ fn create_resource(
     }
 }
 
-fn keyed_fragment(document: &Document, owner: NodeId, source: &str, key: &str) -> Result<String> {
+pub(crate) fn keyed_fragment(
+    document: &Document,
+    owner: NodeId,
+    source: &str,
+    key: &str,
+) -> Result<String> {
     let mut candidate = context_fragment(document, owner, source)?;
     let roots = candidate.ast().element_children(candidate.ast().root());
     require(
@@ -616,7 +621,7 @@ fn apply_resource(
     Ok(edits)
 }
 
-fn setters(document: &Document, owner: NodeId) -> Result<(NodeId, Vec<NodeId>)> {
+pub(crate) fn setters(document: &Document, owner: NodeId) -> Result<(NodeId, Vec<NodeId>)> {
     let owner = element(document, owner)?;
     require(
         framework(owner) && matches!(owner.local_name(), "ControlTheme" | "Style"),
@@ -869,6 +874,69 @@ fn extract_property(
     owner: NodeId,
     key: &str,
 ) -> Result<Vec<Edit>> {
+    let source = property_resource_source(document, node, property, owner)?;
+    let mut edits = create_resource(document, owner, key, &source)?;
+    // Resolve against the candidate so a nested scope cannot silently shadow the new key.
+    let mut candidate = document.clone();
+    candidate
+        .apply("Stage extracted resource", edits.clone())
+        .map_err(error)?;
+    let resource = resolve_component_resource(&candidate, node, key).ok_or_else(|| {
+        ToolError("The extracted resource would not be visible at this property".into())
+    })?;
+    let container = resource_container(&candidate, owner)?
+        .ok_or_else(|| ToolError("Missing extracted dictionary".into()))?;
+    require(
+        candidate.ast().node(resource).and_then(|node| node.parent) == Some(container),
+        "A nearer resource would shadow the extracted property",
+    )?;
+    // The target keeps its identity across insertion; scalar_property only addresses IDs.
+    edits.extend(scalar_property(
+        &candidate,
+        node,
+        property,
+        Some(&references::reference_expression(
+            &candidate, node, key, false,
+        )?),
+    )?);
+    Ok(edits)
+}
+
+
+/// Whether the authored literal has a type the resource planner can extract.
+pub fn component_property_extractable(document: &Document, node: NodeId, property: &str) -> bool {
+    component_property_attribute(document, node, property).is_ok_and(|value| value.is_some())
+        && property_resource_source(document, node, property, node).is_ok()
+}
+
+/// Offer the selected element and its authored resource scopes in nearest-first order.
+pub fn component_property_resource_owners(
+    document: &Document,
+    node: NodeId,
+    property: &str,
+) -> Result<Vec<NodeId>> {
+    require(component_property_extractable(document, node, property), "Select an authored literal that can move into a resource")?;
+    let mut owners = Vec::new();
+    let mut current = Some(node);
+    while let Some(entry) = current.and_then(|id| document.ast().node(id)) {
+        if entry.kind == NodeKind::Element
+            && !matches!(entry.local_name(), "Setter" | "Style" | "ControlTheme" | "ControlTemplate" | "DataTemplate")
+            && resource_container(document, entry.id).is_ok()
+        {
+            owners.push(entry.id);
+        }
+        current = entry.parent;
+    }
+    require(!owners.is_empty(), "The property has no editable resource scope")?;
+    Ok(owners)
+}
+
+fn property_resource_source(
+    document: &Document,
+    node: NodeId,
+    property: &str,
+    owner: NodeId,
+) -> Result<String> {
     let element = element(document, node)?;
     let object = component_property_object(document, node, property)?;
     let source = if let Some(source) = object {
@@ -922,34 +990,13 @@ fn extract_property(
             }
         }
     };
-    let mut edits = create_resource(document, owner, key, &source)?;
-    // Resolve against the candidate so a nested scope cannot silently shadow the new key.
-    let mut candidate = document.clone();
-    candidate
-        .apply("Stage extracted resource", edits.clone())
-        .map_err(error)?;
-    let resource = resolve_component_resource(&candidate, node, key).ok_or_else(|| {
-        ToolError("The extracted resource would not be visible at this property".into())
-    })?;
-    let container = resource_container(&candidate, owner)?
-        .ok_or_else(|| ToolError("Missing extracted dictionary".into()))?;
-    require(
-        candidate.ast().node(resource).and_then(|node| node.parent) == Some(container),
-        "A nearer resource would shadow the extracted property",
-    )?;
-    // The target keeps its identity across insertion; scalar_property only addresses IDs.
-    edits.extend(scalar_property(
-        &candidate,
-        node,
-        property,
-        Some(&references::reference_expression(
-            &candidate, node, key, false,
-        )?),
-    )?);
-    Ok(edits)
+    Ok(source)
 }
 
-fn creation_namespaces(document: &Document, owner: NodeId) -> (String, String, String) {
+pub(crate) fn creation_namespaces(
+    document: &Document,
+    owner: NodeId,
+) -> (String, String, String) {
     let mut namespaces = document.ast().namespaces(owner);
     let ui = namespaces
         .iter()
@@ -968,7 +1015,7 @@ fn creation_namespaces(document: &Document, owner: NodeId) -> (String, String, S
         format!(" xmlns:{ui}=\"{FRAMEWORK}\" xmlns:{xaml}=\"{XAML}\""),
     )
 }
-fn fresh_prefix(namespaces: &BTreeMap<String, String>, base: &str) -> String {
+pub(crate) fn fresh_prefix(namespaces: &BTreeMap<String, String>, base: &str) -> String {
     if !namespaces.contains_key(base) {
         return base.into();
     }

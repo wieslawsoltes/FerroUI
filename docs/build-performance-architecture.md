@@ -95,8 +95,8 @@ Move these syntax implementations and keep their existing modules as re-exports:
   [`span_string_tokenizer.rs`](../src/FerroUI.Base/utilities/span_string_tokenizer.rs)
   including `FormatError`, and
   [`expression_parse_exception.rs`](../src/FerroUI.Base/data/core/expression_parse_exception.rs).
-- Base [`binding_expression_grammar.rs`](../src/FerroUI.Base/data/core/parsers/binding_expression_grammar.rs),
-  including its `Node` and `SourceMode` types.
+- The binding expression grammar now lives in [Markup.Syntax](../src/Markup/FerroUI.Markup.Syntax/binding_expression_grammar.rs).
+  Base re-exports the parser, `Node`, and `SourceMode` from its existing module.
 - Markup [`selector_grammar.rs`](../src/Markup/FerroUI.Markup/markup/parsers/selector_grammar.rs),
   [`container_query_grammar.rs`](../src/Markup/FerroUI.Markup/markup/parsers/container_query_grammar.rs)
   and [`property_parser.rs`](../src/Markup/FerroUI.Markup/markup/parsers/property_parser.rs).

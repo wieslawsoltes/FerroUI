@@ -21,6 +21,8 @@ pub fn tools() -> Vec<Value> {
         false,
     );
     add("get_tree", "Snapshot a visual, logical or automation tree. Omit node_id for all windows. Depth defaults to 8; at most 10000 nodes.", json!({"node_id":id,"tree":{"enum":["visual","logical","automation"]},"depth":{"type":"integer","minimum":0,"maximum":64},"properties":strings}), &[], false);
+    add("get_element_at", "List native visual hits, front to back, at coordinates relative to the supplied window.", json!({"node_id":id,"x":{"type":"number"},"y":{"type":"number"}}), &["node_id", "x", "y"], false);
+    add("get_source", "Read a live element's XAML or RSX location and source fingerprint when available. RSX includes its invocation and a one-based Unicode scalar column. Returns null when the element has no source location.", json!({"node_id":id}), &["node_id"], false);
     let search = json!({"node_id":id,"selector":string,"type":string,"name":string,"automation_id":string,"text":string,"limit":{"type":"integer","minimum":1,"maximum":10000}});
     add("find_elements", "Find elements by combined filters. Text is a substring; other fields are exact. Selectors use FerroUI syntax.", search.clone(), &[], false);
     add(
@@ -28,6 +30,13 @@ pub fn tools() -> Vec<Value> {
         "Read registered properties, types, read-only flags and effective value priorities.",
         json!({"node_id":id,"properties":strings}),
         &["node_id"],
+        false,
+    );
+    add(
+        "get_property_trace",
+        "Explain the effective value of one live property using its native precedence, current override, animation base, and applied style, theme and inherited contributors.",
+        json!({"node_id":id,"property":{"type":"string","minLength":1,"maxLength":256}}),
+        &["node_id", "property"],
         false,
     );
     add("set_property", "Set a local property value using the framework converters, or clear it. Requires allow_property_writes.", json!({"node_id":id,"property":string,"value":{"type":["boolean","number","string","null"]},"clear":{"type":"boolean"}}), &["node_id","property"], true);
@@ -68,8 +77,8 @@ pub fn tools() -> Vec<Value> {
     );
     add(
         "scroll",
-        "Inject a wheel event at the node center. Deltas are wheel units. Requires allow_input.",
-        json!({"node_id":id,"delta_x":{"type":"number"},"delta_y":{"type":"number"}}),
+        "Inject a wheel event at the node center or local x/y. Deltas are wheel units. Requires allow_input.",
+        json!({"node_id":id,"x":{"type":"number"},"y":{"type":"number"},"delta_x":{"type":"number"},"delta_y":{"type":"number"}}),
         &["node_id", "delta_y"],
         true,
     );
@@ -84,7 +93,7 @@ pub fn tools() -> Vec<Value> {
     let mut wait = search;
     wait.as_object_mut().unwrap().extend(json!({"condition":{"enum":["exists","absent","visible","enabled","property_equals"]},"property":string,"value":{},"timeout_ms":{"type":"integer","minimum":0,"maximum":60000}}).as_object().unwrap().clone());
     add("wait_for", "Wait without blocking the UI for matching elements and a condition (default exists), up to timeout_ms (default 5000).", wait, &[], false);
-    add("get_logs", "Read the bounded diagnostic log, including binding errors. Use after as a sequence cursor.", json!({"after":{"type":"integer","minimum":0}}), &[], false);
+    add("get_logs", "Read the bounded diagnostic log, including binding errors and their authored source when available. Use after as a sequence cursor.", json!({"after":{"type":"integer","minimum":0}}), &[], false);
     add(
         "get_frame_stats",
         "Read observed rendered scene updates, update intervals and latest layout timing for each window.",

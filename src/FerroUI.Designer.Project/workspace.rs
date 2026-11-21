@@ -6,7 +6,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
+mod created_file;
+mod moved_file;
+mod move_references;
 mod storage;
+pub use created_file::CreatedSourceFile;
+pub use moved_file::MovedSourceFile;
+pub use move_references::SavedReferenceEdit;
 use storage::atomic_create;
 pub(crate) use storage::atomic_write;
 
@@ -85,15 +91,15 @@ impl ProjectWorkspace {
         self.active = Some(uri);
         Ok(())
     }
+    /// Read an authorized project file without giving it a XAML document buffer.
+    pub fn read_source(&self, uri: &str) -> Result<String> {
+        read_source(&self.resolve_path(uri)?)
+    }
     pub fn open(&mut self, uri: &str) -> Result<&Buffer> {
         let path = self.resolve_path(uri)?;
         let uri = file_uri(&path)?;
         if !self.buffers.contains_key(&uri) {
-            require(
-                std::fs::metadata(&path)?.len() <= 16 * 1024 * 1024,
-                "Document exceeds 16 MiB",
-            )?;
-            let source = std::fs::read_to_string(&path)?;
+            let source = read_source(&path)?;
             self.buffers.insert(
                 uri.clone(),
                 Buffer {
@@ -341,19 +347,22 @@ impl ProjectWorkspace {
         )?;
         std::fs::rename(&old, &destination)?;
         let old_uri = file_uri(&old)?;
-        if let Some(mut buffer) = self.buffers.remove(&old_uri) {
-            buffer.uri = next.clone();
-            buffer.path = Some(destination.clone());
-            self.buffers.insert(next.clone(), buffer);
+        self.rekey_document(&old_uri, &next, &destination)?;
+        Ok(next)
+    }
+    fn rekey_document(&mut self, old_uri: &str, next: &str, destination: &Path) -> Result<()> {
+        if let Some(mut buffer) = self.buffers.remove(old_uri) {
+            buffer.uri = next.into();
+            buffer.path = Some(destination.into());
+            self.buffers.insert(next.into(), buffer);
         }
-        if self.active.as_deref() == Some(&old_uri) {
-            self.active = Some(next.clone());
+        if self.active.as_deref() == Some(old_uri) {
+            self.active = Some(next.into());
         }
         for project in &mut self.solution.projects {
             project.documents.retain(|entry| entry.uri != old_uri);
         }
-        self.add_entry(&next)?;
-        Ok(next)
+        self.add_entry(next)
     }
     /// Register a host-defined embedded-resource key without allowing it to bypass root checks.
     pub fn register_resource(
@@ -493,6 +502,14 @@ impl ProjectWorkspace {
         Ok(())
     }
 }
+fn read_source(path: &Path) -> Result<String> {
+    require(
+        std::fs::metadata(path)?.len() <= 16 * 1024 * 1024,
+        "Document exceeds 16 MiB",
+    )?;
+    Ok(std::fs::read_to_string(path)?)
+}
+
 fn source_document(source: &str) -> Result<Document> {
     require(source.len() <= 16 * 1024 * 1024, "Document exceeds 16 MiB")?;
     let mut document = match Document::new(source) {

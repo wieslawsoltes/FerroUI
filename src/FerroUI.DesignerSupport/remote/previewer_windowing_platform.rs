@@ -9,7 +9,7 @@ use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop, UiThreadRen
 use ferroui_base::FerroLocator;
 use ferroui_controls::platform::{IPlatformIconLoader, ITopLevelImpl, ITrayIconImpl, IWindowImpl, IWindowingPlatform};
 use ferroui_remote_protocol::{IFerroRemoteTransportConnection, Message};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -21,6 +21,7 @@ ferroui_base::ferro_thread_local! {
     static TRANSPORT: RefCell<Option<Arc<dyn IFerroRemoteTransportConnection>>> = const { RefCell::new(None) };
     static LAST_WINDOW_TRANSPORT: RefCell<Option<Arc<DetachableTransportConnection>>> = const { RefCell::new(None) };
     static LAST_WINDOW: RefCell<Option<Rc<PreviewerWindowImpl>>> = const { RefCell::new(None) };
+    static SOURCE_REVISION: Cell<Option<i64>> = const { Cell::new(None) };
     static PRE_FLIGHT_MESSAGES: RefCell<Vec<Message>> = const { RefCell::new(Vec::new()) };
 }
 
@@ -29,7 +30,46 @@ ferroui_base::ferro_thread_local! {
 /// the connection of the session; every other window is a stub.
 pub(crate) struct PreviewerWindowingPlatform;
 
+pub(crate) struct PreviewUpdate {
+    window: Option<Rc<PreviewerWindowImpl>>,
+    transport: Option<Arc<DetachableTransportConnection>>,
+    prior_revision: Option<i64>,
+    accepted: bool,
+}
+
+impl PreviewUpdate {
+    pub(crate) fn accept(mut self) { self.accepted = true; }
+}
+
+impl Drop for PreviewUpdate {
+    fn drop(&mut self) {
+        SOURCE_REVISION.set(self.prior_revision);
+        if self.accepted {
+            close_window(self.window.take(), self.transport.take());
+        } else {
+            let failed = LAST_WINDOW.with(|slot| slot.replace(self.window.take()));
+            let transport = LAST_WINDOW_TRANSPORT.with(|slot| slot.replace(self.transport.take()));
+            close_window(failed, transport);
+        }
+    }
+}
+
+fn close_window(window: Option<Rc<PreviewerWindowImpl>>, transport: Option<Arc<DetachableTransportConnection>>) {
+    if let Some(transport) = transport { transport.dispose(); }
+    if let Some(window) = window {
+        let _ = catch_unwind(AssertUnwindSafe(|| window.dispose()));
+    }
+}
+
 impl PreviewerWindowingPlatform {
+    pub(crate) fn begin_update(revision: Option<i64>) -> PreviewUpdate {
+        PreviewUpdate {
+            window: LAST_WINDOW.with(|slot| slot.borrow_mut().take()),
+            transport: LAST_WINDOW_TRANSPORT.with(|slot| slot.borrow_mut().take()),
+            prior_revision: SOURCE_REVISION.replace(revision),
+            accepted: false,
+        }
+    }
     /// `PreFlightMessages`: the messages of the client that every new
     /// window is given before anything else (its pixel formats, its
     /// viewport and its render information).
@@ -97,22 +137,13 @@ impl IWindowingPlatform for PreviewerWindowingPlatform {
     /// Panics when the platform was not initialized with a connection.
     fn create_embeddable_window(&self) -> Rc<dyn IWindowImpl> {
         let last_window = LAST_WINDOW.with(|slot| slot.borrow_mut().take());
-        if let Some(last_window) = last_window {
-            let last_window_transport = LAST_WINDOW_TRANSPORT.with(|slot| slot.borrow_mut().take());
-            if let Some(last_window_transport) = last_window_transport {
-                last_window_transport.dispose();
-            }
-            //Ignore
-            // Boundary (#567): the reference ignores an exception of the dispose of the last
-            // preview window, which runs the handlers of the previewed application. Isolating
-            // them needs a build that unwinds (`dev`, `release` or `dist-unwind` profile).
-            let _ = catch_unwind(AssertUnwindSafe(|| last_window.dispose()));
-        }
+        let last_window_transport = LAST_WINDOW_TRANSPORT.with(|slot| slot.borrow_mut().take());
+        close_window(last_window, last_window_transport);
 
         let transport = TRANSPORT
             .with(|slot| slot.borrow().clone())
             .expect("the windowing platform of the previewer is initialized with a connection");
-        let last_window_transport = DetachableTransportConnection::new(transport);
+        let last_window_transport = DetachableTransportConnection::new(transport, SOURCE_REVISION.get());
         let last_window = PreviewerWindowImpl::new(last_window_transport.clone());
         LAST_WINDOW_TRANSPORT.with(|slot| *slot.borrow_mut() = Some(last_window_transport.clone()));
         LAST_WINDOW.with(|slot| *slot.borrow_mut() = Some(last_window.clone()));

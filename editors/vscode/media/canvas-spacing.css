@@ -1,0 +1,49 @@
+.spacing-overlay {
+    --spacing-gap: var(--vscode-charts-blue, #4c92d5);
+    --spacing-inset: var(--vscode-charts-purple, #aa75d7);
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+#spacing-bands { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
+.spacing-grip {
+    --axis: 0rad;
+    --nudge-x: 0px;
+    --nudge-y: 0px;
+    --grip-color: var(--spacing-gap);
+    position: absolute;
+    inline-size: 24px;
+    block-size: 24px;
+    min-block-size: 0;
+    padding: 0;
+    transform: translate(calc(-50% + var(--nudge-x)), calc(-50% + var(--nudge-y)));
+    cursor: var(--grip-cursor);
+    pointer-events: auto;
+    touch-action: none;
+}
+.spacing-grip[data-property=Padding] { --grip-color: var(--spacing-inset); }
+.spacing-grip::before {
+    content: '';
+    position: absolute;
+    inset: 4px 9px;
+    border: 1px solid var(--vscode-editor-background);
+    border-radius: 3px;
+    background: var(--grip-color);
+    transform: rotate(var(--axis));
+    box-shadow: 0 0 0 1px var(--grip-color);
+}
+.spacing-grip[aria-disabled=true] { cursor: default; opacity: .58; }
+.spacing-grip:hover, .spacing-grip:focus-visible { z-index: 1; color: var(--vscode-editor-foreground); }
+.canvas:is([data-pan=ready], [data-pan=dragging]) .spacing-grip { pointer-events: none; }
+#spacing-value {
+    position: absolute;
+    z-index: 2;
+    transform: translate(13px, 12px);
+    padding: 2px 5px;
+    border: 1px solid var(--vscode-widget-border, var(--focus));
+    border-radius: 3px;
+    background: var(--vscode-editorWidget-background);
+    color: var(--vscode-editorWidget-foreground);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}

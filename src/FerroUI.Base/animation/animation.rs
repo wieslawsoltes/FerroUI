@@ -11,7 +11,7 @@ use crate::reactive::{
 };
 use crate::threading::{CancellationToken, Dispatcher};
 use crate::{
-    ferro_class, ferro_impl_classes, ferro_property, instantiate, DirectProperty,
+    ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, DirectProperty,
     DirectPropertyMetadata, FerroObject, FerroObjectImpl, FerroProperty, Ref, Visual, WeakRef,
 };
 use std::any::TypeId;
@@ -58,6 +58,7 @@ pub struct Animation {
     playback_direction: Cell<PlaybackDirection>,
     playback_behavior: Cell<PlaybackBehavior>,
     fill_mode: Cell<FillMode>,
+    fill_at_animation_priority: Cell<bool>,
     easing: RefCell<Easing>,
     delay: Cell<SignedDuration>,
     delay_between_iterations: Cell<SignedDuration>,
@@ -177,6 +178,7 @@ impl Animation {
             playback_direction: Cell::new(PlaybackDirection::Normal),
             playback_behavior: Cell::new(PlaybackBehavior::Auto),
             fill_mode: Cell::new(FillMode::None),
+            fill_at_animation_priority: Cell::new(false),
             easing: RefCell::new(Easing::default()),
             delay: Cell::new(SignedDuration::ZERO),
             delay_between_iterations: Cell::new(SignedDuration::ZERO),
@@ -188,6 +190,16 @@ impl Animation {
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    /// Retain forward fill at animation priority. Cancelling playback or removing
+    /// the animation's style restores the underlying value and its binding.
+    pub fn set_fill_at_animation_priority(&self, retain: bool) {
+        self.fill_at_animation_priority.set(retain);
+    }
+
+    pub(crate) fn keeps_fill_at_animation_priority(&self) -> bool {
+        self.fill_at_animation_priority.get() || self.is_preview()
     }
 
     /// The easing function to be used for this animation.
@@ -217,6 +229,7 @@ impl Animation {
     fn interpret_keyframes(
         &self,
         control: &Animatable,
+        only_property: Option<&'static FerroProperty>,
     ) -> (Vec<Rc<dyn IAnimator>>, Vec<Rc<dyn IDisposable>>, bool) {
         let mut handler_list: Vec<((TypeId, &'static FerroProperty), AnimatorFactory)> = Vec::new();
         let mut animator_key_frames: Vec<Ref<AnimatorKeyFrame>> = Vec::new();
@@ -228,6 +241,9 @@ impl Animation {
                 let Some(property) = setter.property() else {
                     panic!("{NO_SETTER_PROPERTY}");
                 };
+                if only_property.is_some_and(|only| only != property) {
+                    continue;
+                }
 
                 if property == Visual::is_visible_property().as_property() {
                     animates_visibility = true;
@@ -342,7 +358,7 @@ impl Animation {
         on_complete: Option<Rc<dyn Fn()>>,
         is_manually_started: bool,
     ) -> Result<Rc<dyn IDisposable>, AnimationError> {
-        let (animators, mut subscriptions, animates_visibility) = self.interpret_keyframes(control);
+        let (animators, mut subscriptions, animates_visibility) = self.interpret_keyframes(control, None);
         // The steps applied before a rejection are removed with it.
         let reject = |subscriptions: Vec<Rc<dyn IDisposable>>, error: AnimationError| {
             for subscription in subscriptions {
@@ -432,6 +448,50 @@ impl Animation {
         Ok(Rc::new(CompositeDisposable::from_disposables(subscriptions)))
     }
 
+    fn preview_snapshot(&self) -> (Ref<Animation>, Rc<CompositeDisposable>) {
+        let preview = Animation::new();
+        preview.set_duration(self.duration());
+        preview.set_iteration_count(self.iteration_count());
+        preview.set_playback_direction(self.playback_direction());
+        preview.set_playback_behavior(self.playback_behavior());
+        preview.set_fill_mode(self.fill_mode());
+        preview.set_easing(self.easing());
+        preview.set_delay(self.delay());
+        preview.set_delay_between_iterations(self.delay_between_iterations());
+        preview.set_speed_ratio(self.speed_ratio());
+        preview
+            .children()
+            .add_range(self.children().snapshot().iter().cloned());
+        let values = Rc::new(CompositeDisposable::new());
+        *preview.preview_values.borrow_mut() = Some(values.clone());
+        (preview, values)
+    }
+
+    /// Evaluate one property's native animator at normalized positions in the
+    /// authored iteration. Temporary setter bindings read from the target and
+    /// the samples are returned without applying them to the target property.
+    pub fn sample_track_for_preview(
+        &self,
+        control: &Animatable,
+        property: &'static FerroProperty,
+        positions: &[f64],
+    ) -> Result<Vec<BoxedValue>, AnimationError> {
+        if !positions.iter().all(|position| (0.0..=1.0).contains(position)) {
+            return Err(AnimationError("Sample positions must be within the authored iteration".into()));
+        }
+        let (preview, bindings) = self.preview_snapshot();
+        let samples = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let (animators, _, _) = preview.interpret_keyframes(control, Some(property));
+            let [animator] = animators.as_slice() else { return None; };
+            let easing = self.easing();
+            let positions = positions.iter().map(|&position| easing.ease(position)).collect::<Vec<_>>();
+            animator.sample_for_preview(control, &positions)
+        }));
+        bindings.dispose();
+        samples.map_err(|_| AnimationError("The native animator could not sample this track".into()))?
+            .ok_or_else(|| AnimationError("The selected property has no native track sampler".into()))
+    }
+
     /// Applies an isolated snapshot using the framework animators, retaining final fill
     /// and automatically created transforms at animation priority. Disposing the result
     /// restores the control's underlying values and bindings, including after completion.
@@ -455,21 +515,7 @@ impl Animation {
         clock: Option<Rc<dyn IClock>>,
         on_complete: Option<Rc<dyn Fn()>>,
     ) -> Result<Rc<dyn IDisposable>, AnimationError> {
-        let preview = Animation::new();
-        preview.set_duration(self.duration());
-        preview.set_iteration_count(self.iteration_count());
-        preview.set_playback_direction(self.playback_direction());
-        preview.set_playback_behavior(self.playback_behavior());
-        preview.set_fill_mode(self.fill_mode());
-        preview.set_easing(self.easing());
-        preview.set_delay(self.delay());
-        preview.set_delay_between_iterations(self.delay_between_iterations());
-        preview.set_speed_ratio(self.speed_ratio());
-        preview
-            .children()
-            .add_range(self.children().snapshot().iter().cloned());
-        let values = Rc::new(CompositeDisposable::new());
-        *preview.preview_values.borrow_mut() = Some(values.clone());
+        let (preview, values) = self.preview_snapshot();
         // Boundary (#567): a catch that cleans up and raises the same panic again, not an error
         // flow. The setup runs animators and application observers; disposing of the steps
         // after the catch, not in a drop guard, keeps a panic of a disposable from aborting
