@@ -36,12 +36,18 @@ _OT = re.compile(rf'hb_ot_(?:get_)?({_SLOT})(?![a-z0-9_])')
 _ANSI = re.compile(r'\x1b\[[0-9;]*m')
 _LLD_SELECTED = re.compile(r'selected section (\S.*)$')
 _LLD_REMOVED = re.compile(r'removing identical section (\S.*)$')
-_MSVC_MAP = re.compile(r'^\s*([0-9a-fA-F]{4}:[0-9a-fA-F]{8})\s+(\S+)\s+[0-9a-fA-F]{16}')
+# A function of the map of link.exe: the flag `f` after its address. Unwind data has none.
+_MSVC_MAP = re.compile(r'^\s*([0-9a-fA-F]{4}:[0-9a-fA-F]{8})\s+(\S+)\s+[0-9a-fA-F]{16}\s+f\s')
+# A member of `/VERBOSE:ICF`: `"int __cdecl f(void)" (?f@@YAHXZ) from a.lib(b.obj)`, or a name.
+_MSVC_DECORATED = re.compile(r'\((\?[^\s()]+)\)')
 _LLD_MAP = re.compile(r'^\s*([0-9a-f]+)\s+[0-9a-f]+\s+[0-9a-f]+\s+\d+\s+(\S.*)$')
 
 
 def classify(name):
-    """(kind, slot) of a HarfBuzz callback: default, nil or set; None for any other name."""
+    """(kind, slot) of a HarfBuzz callback: default, nil or set; None for any other name, and for
+    the data the linker names after a function (`$unwind$`, `$pdata$`)."""
+    if name.startswith('$'):
+        return None
     match = _FONT.search(name)
     if match:
         return match.group(2), match.group(1)
@@ -49,32 +55,30 @@ def classify(name):
     return ('set', match.group(1)) if match else None
 
 
+def msvc_member(line):
+    """The decorated name of a line of `/VERBOSE:ICF`, or its first word."""
+    decorated = _MSVC_DECORATED.search(line)
+    return decorated.group(1) if decorated else line.split()[0]
+
+
 def groups_msvc(lines):
-    """The groups of `/VERBOSE:ICF`: a selected symbol and the symbols replaced by it."""
-    groups, current, state = [], None, None
+    """The groups of functions of `/VERBOSE:ICF`: a selected symbol and the symbols replaced by
+    it. Data folded the same way (unwind tables, named `$unwind$...`) is left out."""
+    groups, current = [], None
     for raw in lines:
         line = _ANSI.sub('', raw).strip()
         lower = line.lower()
         if lower.startswith('selected symbol'):
-            current, state = [], 'name'
+            current = []
             groups.append(current)
-            rest = line.split(':', 1)[1].strip() if ':' in line else ''
-            if rest:
-                current.append(rest.split()[0])
         elif lower.startswith('replaced symbol'):
-            state = 'name' if current is not None else None
-            rest = line.split(':', 1)[1].strip() if ':' in line else ''
-            if rest and current is not None:
-                current.append(rest.split()[0])
-        elif state == 'name' and line and not line.startswith(('Starting', 'Finished', 'Invoking')):
-            token = line.split()[0]
-            if token.startswith(('?', '_', '.')) or re.match(r'[A-Za-z]', token):
-                current.append(token)
-            else:
-                state = None
-        elif not line:
-            state = None
-    return [group for group in groups if len(group) > 1]
+            continue
+        elif not line or line.startswith(('Starting pass', 'Finished pass', 'Invoking', 'warning:')):
+            current = None
+        elif current is not None:
+            current.append(msvc_member(line))
+    code = ([name for name in group if not name.startswith('$')] for group in groups)
+    return [group for group in code if len(group) > 1]
 
 
 def groups_lld(lines):
@@ -122,19 +126,23 @@ def analyse(groups, callbacks=None):
         if defaults & {slot for kind, slot in known if kind == 'set'}:
             path_change.append(group)
 
-    same_address = []
+    same_address, default_shares = [], []
     defaults_in_map = None
     if callbacks is not None:
         defaults_in_map = sum(1 for kind, _ in callbacks if kind == 'default')
         for (kind, slot), addresses in callbacks.items():
             if kind == 'set' and addresses & callbacks.get(('default', slot), set()):
                 same_address.append(slot)
+            if kind == 'default':
+                default_shares += [f'{slot} = {other_kind} {other_slot}'
+                                   for (other_kind, other_slot), other in callbacks.items()
+                                   if (other_kind, other_slot) != (kind, slot) and addresses & other]
 
     if not groups or defaults_in_map == 0:
         outcome = 'inconclusive'
     elif path_change or same_address:
         outcome = 'path-change'
-    elif with_default:
+    elif with_default or default_shares:
         outcome = 'harmless'
     else:
         outcome = 'none'
@@ -148,6 +156,7 @@ def analyse(groups, callbacks=None):
         'groups_with_a_default': with_default,
         'path_change_groups': path_change,
         'same_address_in_map': sorted(same_address),
+        'default_shares_address_in_map': sorted(default_shares),
     }
 
 
@@ -161,6 +170,7 @@ def report(label, result):
     print(f'groups with a default callback: {len(result["groups_with_a_default"])}')
     print(f'of them with the callback set in the same slot: {len(result["path_change_groups"])}')
     print(f'same address in the map (default and set, same slot): {result["same_address_in_map"]}')
+    print(f'a default at the address of another callback: {result["default_shares_address_in_map"]}')
     for group in result['groups_with_a_default'][:20]:
         print('  ' + ' = '.join(name[:70] for name in group[:6]))
     print('```')
@@ -172,8 +182,9 @@ def self_test():
     nil = '?hb_font_get_glyph_name_nil@@YAHPEAUhb_font_t@@@Z'
     callback = '?hb_ot_get_glyph_name@@YAHPEAUhb_font_t@@@Z'
     other_slot = '?hb_ot_get_glyph_extents@@YAHPEAUhb_font_t@@@Z'
-    msvc = lambda a, b: ['Starting pass 2', '    Selected symbol:', f'        {a} (int f(void))',
-                         '    Replaced symbol(s):', f'        {b} (int g(void))', '']
+    msvc = lambda a, b: ['Starting pass 2\r', '    Selected symbol:\r', f'        {a}\r',
+                         '    Replaced symbol(s):\r',
+                         f'        "int __cdecl g(struct t *)" ({b}) from a.lib(b.obj)\r', '\r']
     assert classify(default) == ('default', 'glyph_name')
     assert classify(nil) == ('nil', 'glyph_name')
     assert classify(callback) == ('set', 'glyph_name')
@@ -187,6 +198,9 @@ def self_test():
     assert analyse(groups_msvc(msvc(default, other_slot)))['outcome'] == 'harmless'
     assert analyse(groups_msvc(msvc(default, callback)))['outcome'] == 'path-change'
     assert analyse([])['outcome'] == 'inconclusive'
+    assert groups_msvc(msvc('?a@@YAHXZ', '?b@@YAHXZ')) == [['?a@@YAHXZ', '?b@@YAHXZ']]
+    assert classify('$unwind$' + default) is None
+    assert groups_msvc(msvc('$unwind$' + default, '$unwind$' + callback)) == []
     lld = ['selected section a.o:(.text._ZL29hb_font_get_glyph_name_defaultP9hb_font_t)',
            '  removing identical section a.o:(.text._ZL20hb_ot_get_glyph_nameP9hb_font_t)']
     assert analyse(groups_lld(lld))['outcome'] == 'path-change'
@@ -196,6 +210,12 @@ def self_test():
     table = map_callbacks([f' 0001:00000010       {default} 0000000140001010 f   a.obj',
                            f' 0001:00000010       {callback} 0000000140001010 f   a.obj'], 'msvc')
     assert analyse(groups_msvc(msvc('?a@@YAHXZ', '?b@@YAHXZ')), table)['outcome'] == 'path-change'
+    # Unwind data at one address is not a folded function (it has no flag `f` in the map).
+    unwind = map_callbacks([f' 0001:00000010       {default} 0000000140001010 f   a.obj',
+                            f' 0001:00000020       {callback} 0000000140001020 f   a.obj',
+                            f' 0002:00000074       $unwind${default} 0000000141000074     a.obj',
+                            f' 0002:00000074       $unwind${callback} 0000000141000074     a.obj'], 'msvc')
+    assert analyse(groups_msvc(msvc('?a@@YAHXZ', '?b@@YAHXZ')), unwind)['outcome'] == 'none'
     print('self-test passed')
 
 
