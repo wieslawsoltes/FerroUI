@@ -719,15 +719,12 @@ impl ValueStore {
     // hot paths for a local value or the default of a non-inheriting property.
     #[inline(never)]
     fn inherited_or_default<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
-        match self.inherited_stored_value::<T::Storage>(property) {
-            Some(value) => T::from_storage(value),
+        // The stored value converted where it is read, with no function of its own between: the
+        // read of an inherited value of a type that is its own storage type is the read of main.
+        match self.try_get_inherited_value(property) {
+            Some(value) => T::from_storage(cast_effective_value::<T::Storage>(&*value).value()),
             None => property.get_default_value_for(owner),
         }
-    }
-
-    /// The value of the nearest inheritance ancestor that holds one, as the store keeps it.
-    fn inherited_stored_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {
-        self.try_get_inherited_value(property).map(|value| cast_effective_value::<S>(&*value).value())
     }
 
     pub fn is_animating(&self, property: &FerroProperty) -> bool {
