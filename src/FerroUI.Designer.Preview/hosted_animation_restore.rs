@@ -1,4 +1,5 @@
 use crate::hosted_states::{HostedStateRoute, HostedStates};
+use crate::hosted_frame::FrameIdentity;
 use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator, AnimationPrograms, ClipClock, PreviewRange};
 use ferroui_designer_core::{Document, NodeId, SourceAnchor};
 use ferroui_remote_protocol::designer::DesignAnimationCatalogMessage;
@@ -19,12 +20,6 @@ mod state_edit;
 pub(crate) struct Restore {
     frame: FrameIdentity,
     presentation: Presentation,
-}
-
-#[derive(Deserialize)]
-pub(crate) struct FrameIdentity {
-    revision: i64,
-    sequence: i64,
 }
 
 #[derive(Default, Deserialize, Serialize)]

@@ -2,14 +2,12 @@
 use super::{decode, node_id, schema as s, state, text};
 use crate::property_literals::setter_target_type;
 use crate::style_composition::{
-    argb, compatible_base, contrast_providers, setter_metadata, setter_property, supports_palette,
-    supports_styles,
+    compatible_base, setter_metadata, setter_property, supports_palette, supports_styles,
 };
 use crate::style_sources::StyleSource;
-use crate::{DesignerSession, PropertyEditorKind};
+use crate::{DesignerSession, PropertyEditorKind, ScopedPalette};
 use ferroui_designer_core::{Document, MarkupValue, NodeId, NodeKind};
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_tools::component_palette::palette_layers;
 use ferroui_designer_tools::component_styles::{authored_setters, base_theme, StyleChange};
 use ferroui_designer_tools::{
     component_property_attribute, component_property_elements, ComponentKind,
@@ -394,7 +392,6 @@ fn editor(document: &Document, node: NodeId, name: &str) -> Value {
 
 fn palette(session: &DesignerSession, owner: NodeId) -> Result<Value, String> {
     let document = session.document();
-    let index = LineIndex::new(document.source());
     let root = document
         .ast()
         .node(owner)
@@ -402,20 +399,5 @@ fn palette(session: &DesignerSession, owner: NodeId) -> Result<Value, String> {
     if !supports_palette(document, root) {
         return Err("Choose an authored resource owner".into());
     }
-    let layers = palette_layers(document, owner).map_err(|error| error.to_string())?;
-    let comparisons = session.compare_palette(owner, &layers)?;
-    let catalog = session.component_catalog()?;
-    let layers = layers.into_iter().map(|layer| {
-        let colors = layer.colors.into_iter().map(|color| {
-            Ok(json!({"node":color.node,"key":color.key,"kind":color.kind,"authored":color.value,"editable":color.editable,
-                "color":color.value.as_deref().and_then(|value| argb(value).ok()),
-                "uses":catalog.entries.iter().find(|entry|entry.node==color.node).map_or(0,|entry|entry.usages),
-                "range":index.range(color.span).map_err(|error|error.to_string())?}))
-        }).collect::<Result<Vec<_>,String>>()?;
-        Ok(json!({"layer":layer.layer,"declaration":layer.declaration,"unavailable":layer.unavailable,"colors":colors}))
-    }).collect::<Result<Vec<_>,String>>()?;
-    Ok(json!({
-        "owner":owner, "layers":layers, "comparison":comparisons.rows,
-        "contrastPreview":comparisons.high_contrast, "contrastProviders":contrast_providers()
-    }))
+    ScopedPalette::for_session(session).report(owner)
 }

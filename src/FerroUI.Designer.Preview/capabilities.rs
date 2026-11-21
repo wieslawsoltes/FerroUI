@@ -5,6 +5,7 @@ pub(crate) fn initialize() -> Value {
         "isolatedDesign",
         "appHostedDesign",
         "hostedSourceSnapshots",
+        "hostedPalette",
         "hostedAnimationRestoration",
         "hostedPreviewRanges",
         "hostedClipAuthoring",

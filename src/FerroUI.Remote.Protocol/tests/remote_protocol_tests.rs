@@ -164,6 +164,10 @@ fn entities() -> Vec<Message> {
             includes: vec![DesignIncludedSource { uri: "ferres://test/Resources/Colors.xaml".into(), xaml: "<ResourceDictionary/>".into() }],
         }),
         Arc::new(ferroui_remote_protocol::designer::UpdateDesignResultMessage { revision: 40, result: UpdateXamlResultMessage::default(), fixtures: Some(vec!["Content".into(), "Loading".into()]) }),
+        Arc::new(ferroui_remote_protocol::designer::DesignPaletteContextMessage {
+            revision: 41, contrast: Some(vec!["HighContrast".into(), "Dark".into()]),
+            assemblies: vec!["FerroUI.Themes.WinUI".into()],
+        }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameMessage { revision: 40, frame: FrameMessage { sequence_id: 8, data: Some(vec![0, 128, 0, 128]), ..Default::default() } }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameReceivedMessage { revision: 40, sequence_id: 8 }),
         Arc::new(DesignAnimationCatalogMessage {

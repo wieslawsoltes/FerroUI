@@ -5,6 +5,8 @@ use ferroui_designer_tools::{ComponentResourceSources, IncludedResourceDocument}
 #[derive(Default)]
 pub(crate) struct ResourceSources(pub PreviewIncludes);
 
+pub(crate) struct IncludeLookup<'a>(pub &'a PreviewIncludes);
+
 impl ComponentResourceSources for ResourceSources {
     fn include(
         &self,
@@ -12,11 +14,27 @@ impl ComponentResourceSources for ResourceSources {
         document: &Document,
         node: &Node,
     ) -> Option<IncludedResourceDocument<'_>> {
-        let (address, source) = self.0.resolve(address, document, node)?;
-        Some(IncludedResourceDocument {
-            address,
-            uri: &source.uri,
-            document: &source.document,
-        })
+        included_document(&self.0, address, document, node)
     }
+}
+
+impl ComponentResourceSources for IncludeLookup<'_> {
+    fn include(
+        &self,
+        address: &str,
+        document: &Document,
+        node: &Node,
+    ) -> Option<IncludedResourceDocument<'_>> {
+        included_document(self.0, address, document, node)
+    }
+}
+
+fn included_document<'a>(
+    includes: &'a PreviewIncludes,
+    address: &str,
+    document: &Document,
+    node: &Node,
+) -> Option<IncludedResourceDocument<'a>> {
+    let (address, source) = includes.resolve(address, document, node)?;
+    Some(IncludedResourceDocument { address, uri: &source.uri, document: &source.document })
 }

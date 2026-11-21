@@ -138,6 +138,7 @@ fn respond(
                 DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
                 DESIGN_STATE_ROUTES_QUERY, DESIGN_KEYFRAME_SELECTION_QUERY, DESIGN_CLIP_AUTHORING_QUERY,
                 DESIGN_STATE_AUTHORING_QUERY,
+                DESIGN_PALETTE_QUERY, DESIGN_PALETTE_VERSION,
                 DESIGN_SOURCE_SNAPSHOT_QUERY, DESIGN_SOURCE_SNAPSHOT_VERSION,
             };
             let port = relay.port();
@@ -155,7 +156,7 @@ fn respond(
             ]
             .map(|key| format!("{key}={DESIGN_ANIMATION_VERSION}"))
             .join("&");
-            let query = format!("{animation}&{DESIGN_SOURCE_SNAPSHOT_QUERY}={DESIGN_SOURCE_SNAPSHOT_VERSION}");
+            let query = format!("{animation}&{DESIGN_SOURCE_SNAPSHOT_QUERY}={DESIGN_SOURCE_SNAPSHOT_VERSION}&{DESIGN_PALETTE_QUERY}={DESIGN_PALETTE_VERSION}");
             json!({"port": port, "animationQuery": query})
         }),
         "hostedRender" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
@@ -163,6 +164,8 @@ fn respond(
         "hostedRenderWorkspace" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|design| serialize(Ok(hosted.as_mut().ok_or("Start an app-hosted session")?.render_workspace(design, projects)))),
         "hostedFrame" => hosted.as_mut().ok_or_else(|| "Start an app-hosted session".into()).and_then(|relay| serialize(relay.frame())),
+        "hostedPalette" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| hosted.as_ref().ok_or("Start an app-hosted session")?.palette(request)),
         "hostedInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|input| serialize(hosted.as_ref().ok_or("Start an app-hosted session")?.input(input))),
         "hostedAnimate" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

@@ -1,7 +1,7 @@
 //! Palette swatches, source navigation, and the native color editor in Studio.
 use super::{text, tool_button, Context, ADD, SOURCE};
 use crate::style_composition::contrast_providers;
-use crate::{PreviewTheme, PropertyColorEditor};
+use crate::{PreviewTheme, PropertyColorEditor, ScopedPalette};
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::media::Color;
 use ferroui_base::{Ref, Thickness};
@@ -35,7 +35,7 @@ pub(super) fn body(
     let document = session.document();
     let model = Rc::new(palette_layers(document, owner).map_err(|error| error.to_string())?);
     let title = super::super::node_title(document, owner);
-    let comparison = session.compare_palette(owner, &model)?;
+    let comparison = ScopedPalette::for_session(&session).compare_palette(owner, &model)?;
     drop(session);
 
     let content = StackPanel::new();

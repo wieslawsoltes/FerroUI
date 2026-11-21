@@ -4,10 +4,11 @@ use crate::{
     hosted_frame,
     hosted_states::HostedStates,
     projects::Projects,
-    protocol::{Image, MAX_SOURCE_BYTES, Source},
+    protocol::{Image, Language, MAX_SOURCE_BYTES, Source},
     rsx_animation::AuthoredRsxFrame,
 };
 use ferroui_remote_protocol::designer::{
+    DesignPaletteContextMessage,
     DesignKeyframeSelectionResult,
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
@@ -35,6 +36,7 @@ use std::sync::{
 use std::time::Duration;
 
 mod animation;
+pub(crate) mod palette;
 mod sources;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
@@ -48,6 +50,7 @@ struct Events {
     fixtures: Option<Vec<String>>,
     outcome: Option<Result<(), String>>,
     latest: Option<DesignFrameMessage>,
+    palette: Option<DesignPaletteContextMessage>,
     animation_supported: bool,
     animation_catalog: Option<DesignAnimationCatalogMessage>,
     animation_request: Option<i64>,
@@ -71,6 +74,7 @@ pub(crate) struct Relay {
     next_animation: i64,
     animation_sources: SourceMaps,
     authored_rsx: Option<AuthoredRsxFrame>,
+    palette: Option<palette::HostedPalette>,
     size: (f64, f64),
 }
 
@@ -119,6 +123,8 @@ pub(crate) struct Frame {
     image: Image,
     fixture: Option<String>,
     fixtures: Option<Vec<String>>,
+    #[serde(rename = "paletteAvailable")]
+    palette_available: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     animations: Option<serde_json::Value>,
     #[serde(rename = "animationPresentation", skip_serializing_if = "Option::is_none")]
@@ -156,6 +162,7 @@ impl Relay {
             next_animation: 0,
             animation_sources: SourceMaps::default(),
             authored_rsx: None,
+            palette: None,
             size: (0.0, 0.0),
         })
     }
@@ -228,6 +235,10 @@ impl Relay {
                 if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
                     state.curve_result = Some(outcome.clone());
                     result.1.notify_all();
+                }
+            } else if let Some(context) = message.downcast_ref::<DesignPaletteContextMessage>() {
+                if state.requested == Some(context.revision) {
+                    state.palette = Some(context.clone());
                 }
             } else if let Some(outcome) = message.downcast_ref::<UpdateDesignResultMessage>() {
                 if state.requested == Some(outcome.revision) {
@@ -339,6 +350,7 @@ impl Relay {
                 ..Events::default()
             };
         }
+        self.palette = None;
         self.animation_sources.retain(design.restore_animation.as_ref());
         let project = projects.source(&design.document)?;
         let document = crate::document::DesignDocument::parse(&design.document, project)?;
@@ -359,9 +371,9 @@ impl Relay {
             xaml_file_project_path: Some(design.project_path),
         };
         let update = UpdateDesignMessage { revision, source, fixture: design.fixture };
-        let message = match prepared {
+        let (message, authored): (Message, _) = match prepared {
             Some(sources) => sources.message(update, self.source_snapshots)?,
-            None => Arc::new(update),
+            None => (Arc::new(update), None),
         };
         send(&connection, message)?;
         let (mut state, _) = self
@@ -382,6 +394,13 @@ impl Relay {
         if !matches!(state.outcome, Some(Ok(()))) || state.latest.is_none() {
             return Err("The application did not render this source revision".into());
         }
+        let palette = if design.document.language == Language::Xaml {
+            state.palette.take().zip(authored).map(|(context, graph)| {
+                palette::HostedPalette::new(document.xaml.clone(), design.document.uri.clone(), graph, context)
+            })
+        } else {
+            None
+        };
         let authored_rsx = AuthoredRsxFrame::capture(&document);
         let states = state.animation_catalog.as_mut().map(|catalog| {
             HostedStates::capture(&document.xaml, catalog, authored_rsx.as_ref())
@@ -420,6 +439,8 @@ impl Relay {
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
         self.authored_rsx = authored_rsx;
+        self.palette = palette;
+        frame.palette_available = self.palette.is_some();
         frame.animation_presentation = presentation;
         Ok(frame)
     }
@@ -451,6 +472,7 @@ impl Relay {
             image,
             fixture,
             fixtures,
+            palette_available: self.palette.is_some(),
             animations: animations.map(hosted_animation::catalog),
             animation_presentation: None,
         }))

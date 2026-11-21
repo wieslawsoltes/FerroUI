@@ -10,6 +10,7 @@ use crate::design_animation_curve::{DesignAnimationCurveRequest, DesignAnimation
 use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage};
 use crate::design_keyframe_selection::{DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult};
 use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, StartDesignSourceSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage};
+use crate::design_palette_context::DesignPaletteContextMessage;
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 use crate::input_messages::{
     KeyEventMessage, PointerMovedEventMessage, PointerPressedEventMessage, PointerReleasedEventMessage,
@@ -68,6 +69,7 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<UpdateDesignMessage>(),
         ExportedType::of::<UpdateDesignSourcesMessage>(),
         ExportedType::of::<UpdateDesignResultMessage>(),
+        ExportedType::of::<DesignPaletteContextMessage>(),
         ExportedType::of::<DesignFrameMessage>(),
         ExportedType::of::<DesignFrameReceivedMessage>(),
         ExportedType::of::<DesignAnimationCatalogMessage>(),
@@ -131,6 +133,7 @@ mod tests {
         ("UpdateDesignMessage", "58FA5FA8-5669-4C04-80FA-8F573BA45ACD"),
         ("UpdateDesignSourcesMessage", "408BAE3B-C488-4DAC-9255-E3AD3C99D2C5"),
         ("UpdateDesignResultMessage", "CB085DBB-7231-4C16-8797-D8D97BCF9341"),
+        ("DesignPaletteContextMessage", "D2C95A63-AF9C-4AA2-958B-8F49D3D61AD6"),
         ("DesignFrameMessage", "F7176EE5-1A68-4ECB-A986-8F461D21C13C"),
         ("DesignFrameReceivedMessage", "1E9E50A0-F95D-48C0-AB8B-B2C800ACC09C"),
         ("DesignAnimationCatalogMessage", "C094EFD2-D7FC-467D-AC22-8FA047C4B54B"),

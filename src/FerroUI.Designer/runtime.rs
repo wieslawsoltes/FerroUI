@@ -1,3 +1,4 @@
+use crate::runtime_include_sources::ResourceSources;
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::Subscription;
@@ -16,8 +17,6 @@ use std::{rc::Rc, sync::Arc};
 
 #[path = "runtime_property_sources.rs"]
 mod property_sources;
-#[path = "runtime_include_sources.rs"]
-mod include_sources;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_PREVIEW_OPTIONS: AtomicU64 = AtomicU64::new(1);
@@ -57,7 +56,7 @@ pub(crate) struct RuntimePreview {
     options_epoch: u64,
     isolated: bool,
     workspace: WorkspaceSources,
-    pub(crate) resource_sources: include_sources::ResourceSources,
+    pub(crate) resource_sources: ResourceSources,
     native_window: Option<Ref<ferroui_controls::Window>>,
     window_projection: bool,
     pub(crate) definition_scope: Option<crate::DefinitionScope>,

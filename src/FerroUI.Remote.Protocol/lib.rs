@@ -31,6 +31,7 @@ mod design_animation_curve;
 mod design_animation_messages;
 mod design_keyframe_selection;
 mod design_messages;
+mod design_palette_context;
 mod error;
 mod event_stash;
 mod ferro_remote_message_guid_attribute;
@@ -80,6 +81,7 @@ pub mod designer {
     pub use crate::design_animation_messages::*;
     pub use crate::design_keyframe_selection::*;
     pub use crate::design_messages::*;
+    pub use crate::design_palette_context::*;
 }
 
 pub use assembly::{Assembly, ExportedType, ASSEMBLY};

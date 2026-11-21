@@ -1,5 +1,6 @@
 use crate::design_window_loader::{DesignLoad, DesignWindowLoader};
 use crate::remote::hosted_animation;
+use crate::remote::hosted_palette;
 use crate::remote::hosted_sources;
 use crate::remote::file_watcher_transport::FileWatcherTransport;
 use crate::remote::html_transport::HtmlWebSocketTransport;
@@ -320,6 +321,7 @@ impl RemoteDesignerEntryPoint {
             Err(error) => die(Some(&error)),
         };
         hosted_animation::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
+        hosted_palette::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
         Self::attach_transport(transport.clone());
         transport.on_exception(exception_handler(|_, e| {
             die(Some(&e.to_string()));
@@ -465,6 +467,7 @@ impl RemoteDesignerEntryPoint {
                 },
                 Ok(Ok(Ok(design))) => {
                     let catalog = hosted_animation::accept(revision, animations, &design);
+                    let palette = snapshot.and_then(|snapshot| hosted_palette::capture(snapshot.update.revision));
                     let window = design.window;
                     if let Some(previous) = current_window {
                         // Boundary (#567): closing the previous preview runs the closing and
@@ -479,6 +482,9 @@ impl RemoteDesignerEntryPoint {
                     pending.accept();
                     if let Some(catalog) = catalog {
                         transport.send(Arc::new(catalog));
+                    }
+                    if let Some(palette) = palette {
+                        transport.send(Arc::new(palette));
                     }
                     UpdateXamlResultMessage {
                         handle: handle.map(|handle| handle.handle().to_string()),
@@ -531,6 +537,7 @@ impl RemoteDesignerEntryPoint {
         LAST_RENDER_SCALING.set(1.0);
         TRANSPORT.with(|slot| *slot.borrow_mut() = None);
         hosted_animation::configure(None, false);
+        hosted_palette::configure(None, false);
         CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = None);
     }
 }

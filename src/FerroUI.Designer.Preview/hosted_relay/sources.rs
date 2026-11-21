@@ -1,6 +1,6 @@
 use super::Design;
 use ferroui_designer_core::Document;
-use ferroui_designer_project::{CompiledResources, PreviewSourceBuffer, hosted_preview_sources};
+use ferroui_designer_project::{CompiledResources, PreviewIncludes, PreviewSourceBuffer, hosted_preview_sources};
 use ferroui_remote_protocol::{
     Message,
     designer::{DesignIncludedSource, UpdateDesignMessage, UpdateDesignSourcesMessage},
@@ -16,9 +16,14 @@ pub(super) struct Workspace {
 }
 
 pub(super) struct Sources {
-    base_uri: String,
-    includes: Vec<DesignIncludedSource>,
+    authored: AuthoredSources,
+    overlays: Vec<DesignIncludedSource>,
     uses_drafts: bool,
+}
+
+pub(super) struct AuthoredSources {
+    pub(super) base_uri: String,
+    pub(super) includes: PreviewIncludes,
 }
 
 impl Workspace {
@@ -43,25 +48,26 @@ impl Workspace {
             return Err(error);
         }
         Ok(Sources {
-            base_uri: base_uri.into(),
-            includes: graph.accepted.into_iter().map(|(uri, xaml)| DesignIncludedSource { uri, xaml }).collect(),
+            authored: AuthoredSources { base_uri: base_uri.into(), includes: graph.includes },
+            overlays: graph.accepted.into_iter().map(|(uri, xaml)| DesignIncludedSource { uri, xaml }).collect(),
             uses_drafts: graph.uses_drafts,
         })
     }
 }
 
 impl Sources {
-    pub(super) fn message(self, update: UpdateDesignMessage, supported: bool) -> Result<Message, String> {
+    pub(super) fn message(self, update: UpdateDesignMessage, supported: bool) -> Result<(Message, Option<AuthoredSources>), String> {
         if supported {
-            return Ok(Arc::new(UpdateDesignSourcesMessage {
+            let message = Arc::new(UpdateDesignSourcesMessage {
                 update,
-                base_uri: self.base_uri,
-                includes: self.includes,
-            }));
+                base_uri: self.authored.base_uri.clone(),
+                includes: self.overlays,
+            });
+            return Ok((message, Some(self.authored)));
         }
         if self.uses_drafts {
             return Err("Rebuild the application with current FerroUI DesignerSupport to preview unsaved XAML includes.".into());
         }
-        Ok(Arc::new(update))
+        Ok((Arc::new(update), None))
     }
 }

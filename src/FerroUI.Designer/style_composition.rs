@@ -2,16 +2,14 @@
 //! with the component inspector. Targets are identified by their authored namespace.
 use crate::property_literals::{property_on_type, registered_type, setter_target_type};
 use crate::{
-    resolve_property_editor_metadata, DesignerSession, PropertyEditorContext,
+    resolve_property_editor_metadata, DesignerSession, PaletteEdit, ScopedPalette, PropertyEditorContext,
     PropertyEditorMetadata,
 };
 use ferroui_base::media::Color;
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_base::{FerroProperty, StyledElement, TypeInfo};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, NodeKind};
-use ferroui_designer_tools::component_palette::{
-    plan_add_palette_color_with_provider, plan_palette_color, PaletteColorKind, PaletteLayer,
-};
+use ferroui_designer_tools::component_palette::{PaletteColorKind, PaletteLayer};
 use ferroui_designer_tools::component_styles::{authored_setters, plan_style_change, StyleChange};
 use ferroui_designer_tools::theme_variants::HighContrastProvider;
 use ferroui_designer_tools::{
@@ -330,8 +328,7 @@ impl DesignerSession {
 
     pub(crate) fn change_palette_color(&mut self, node: NodeId, color: &str) -> Result<(), String> {
         self.ensure_style_edit()?;
-        let edits = plan_palette_color(self.document(), node, &argb(color)?)
-            .map_err(|error| error.to_string())?;
+        let edits = ScopedPalette::for_session(self).plan(&PaletteEdit::Set { node, color: color.into() })?;
         self.apply_style_edits("Edit palette color", edits)
     }
 
@@ -353,18 +350,9 @@ impl DesignerSession {
         if !supports_palette(self.document(), scope) {
             return Err("Choose an authored resource owner".into());
         }
-        if let Some(provider) = provider {
-            if layer != PaletteLayer::HighContrast {
-                return Err("Choose a theme provider for the High contrast layer".into());
-            }
-            if MarkupAssembly::find(provider.assembly()).is_none() {
-                return Err(format!("{} is unavailable in this preview host", provider.label()));
-            }
-        }
-        let edits = plan_add_palette_color_with_provider(
-            self.document(), owner, layer, key, kind, &argb(color)?, provider,
-        )
-        .map_err(|error| error.to_string())?;
+        let edits = ScopedPalette::for_session(self).plan(&PaletteEdit::Add {
+            owner, layer, key: key.into(), kind, color: color.into(), provider,
+        })?;
         self.apply_style_edits("Add palette color", edits)
     }
 

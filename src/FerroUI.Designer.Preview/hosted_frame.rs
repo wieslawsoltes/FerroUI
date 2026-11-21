@@ -1,6 +1,13 @@
 use crate::protocol::Image;
 use base64::{Engine, engine::general_purpose::STANDARD};
 use ferroui_remote_protocol::viewport::{FrameMessage, PixelFormat};
+use serde::Deserialize;
+
+#[derive(Clone, Copy, Deserialize)]
+pub(crate) struct FrameIdentity {
+    pub(crate) revision: i64,
+    pub(crate) sequence: i64,
+}
 
 pub(crate) fn png(frame: &FrameMessage) -> Result<Image, String> {
     let (width, height, stride) = (frame.width, frame.height, frame.stride);

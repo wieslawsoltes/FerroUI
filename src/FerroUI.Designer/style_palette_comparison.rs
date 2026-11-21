@@ -1,8 +1,10 @@
 //! Palette comparison follows the accepted resource graph and native variant chain.
 use crate::included_source::IncludedSourceIndex;
+use crate::runtime_include_sources::IncludeLookup;
+use crate::scoped_palette::ScopedPalette;
 use crate::style_composition::argb;
 use crate::style_sources::{StyleSource, StyleSourceKind};
-use crate::{DesignerSession, PreviewTheme};
+use crate::PreviewTheme;
 use ferroui_designer_core::{NodeId, NodeKind};
 use ferroui_designer_tools::component_palette::{palette_color, PaletteLayer, PaletteLayerModel};
 use ferroui_designer_tools::{
@@ -35,12 +37,12 @@ pub(crate) struct PaletteComparison {
     pub high_contrast: bool,
 }
 
-fn contrast_context() -> Option<ComponentResourceContext> {
+pub(crate) fn contrast_context() -> Option<ComponentResourceContext> {
     let variant = PreviewTheme::HighContrast.resolve().ok()??;
     crate::preview_theme::resource_context(Some(variant))
 }
 
-impl DesignerSession {
+impl ScopedPalette<'_> {
     pub(crate) fn compare_palette(
         &self,
         owner: NodeId,
@@ -50,7 +52,9 @@ impl DesignerSession {
             .iter()
             .flat_map(|layer| layer.colors.iter().map(|color| color.key.clone()))
             .collect::<BTreeSet<_>>();
-        let includes = self.style_include_documents();
+        let includes: BTreeMap<_, _> =
+            self.includes.into_iter().flat_map(|includes| includes.documents())
+                .map(|include| (include.uri.as_str(), include)).collect();
         let mut keys = local.clone();
         for include in includes.values() {
             let document = &include.document;
@@ -67,32 +71,33 @@ impl DesignerSession {
                     }),
             );
         }
-        let document = self.document();
+        let document = self.document;
+        let sources = self.includes.map(IncludeLookup);
         let mut indexes = BTreeMap::new();
         let mut resolve = |key: &str,
                            context: &ComponentResourceContext|
          -> Result<Option<ComparedColor>, String> {
-            let (uri, node) = if includes.is_empty() {
-                let local = component_resource_resolution(document, owner, key, Some(context))
-                    .map_err(|error| error.to_string())?;
-                let Some(node) = local.resolved() else {
-                    return Ok(None);
-                };
-                (None, node)
-            } else {
+            let (uri, node) = if let Some(sources) = &sources {
                 let location = component_resource_location(
                     document,
-                    self.document_uri(),
+                    self.address,
                     owner,
                     key,
                     Some(context),
-                    &self.preview.resource_sources,
+                    sources,
                 )
                 .map_err(|error| error.to_string())?;
                 let Some(location) = location else {
                     return Ok(None);
                 };
                 (location.uri, location.node)
+            } else {
+                let local = component_resource_resolution(document, owner, key, Some(context))
+                    .map_err(|error| error.to_string())?;
+                let Some(node) = local.resolved() else {
+                    return Ok(None);
+                };
+                (None, node)
             };
             let include = uri.and_then(|uri| includes.get(uri).copied());
             let source_doc = include.map_or(document, |include| &include.document);
@@ -132,12 +137,10 @@ impl DesignerSession {
         let mut rows = Vec::new();
         let light_context = PaletteLayer::Light.resource_context();
         let dark_context = PaletteLayer::Dark.resource_context();
-        let contrast = contrast_context();
         for key in keys {
             let light = resolve(&key, &light_context)?;
             let dark = resolve(&key, &dark_context)?;
-            let high_contrast = contrast
-                .as_ref()
+            let high_contrast = self.contrast.as_ref()
                 .map(|context| resolve(&key, context))
                 .transpose()?
                 .flatten();
@@ -150,6 +153,6 @@ impl DesignerSession {
                 });
             }
         }
-        Ok(PaletteComparison { rows, high_contrast: contrast.is_some() })
+        Ok(PaletteComparison { rows, high_contrast: self.contrast.is_some() })
     }
 }
