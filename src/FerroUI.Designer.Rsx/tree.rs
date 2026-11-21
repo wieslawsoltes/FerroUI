@@ -23,7 +23,7 @@ impl Element {
     }
 
     pub(crate) fn xaml(&self) -> String {
-        crate::markup::serialize(self, &BTreeMap::new(), &BTreeMap::new()).source
+        crate::markup::serialize(self, &[], &BTreeMap::new(), &BTreeMap::new()).source
     }
 
     pub(crate) fn rsx_body(&self) -> String {

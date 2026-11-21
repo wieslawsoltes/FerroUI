@@ -1,6 +1,7 @@
 use crate::animation::{AnimationStyle, RsxAnimationIssue, projected_styles};
 use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
+use crate::columns::ColumnSource;
 use crate::literal;
 use crate::markup::{RsxPreviewMarkup, serialize};
 use crate::source_array::ArraySlot;
@@ -33,6 +34,7 @@ pub struct RsxNode {
     pub(crate) computed_child_setter: bool,
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
+    pub(crate) columns: Option<ColumnSource>,
 }
 
 impl RsxNode {
@@ -83,7 +85,7 @@ impl RsxProjection<'_> {
     }
 
     pub fn preview_markup(&self) -> RsxPreviewMarkup<'_> {
-        serialize(&self.tree, &self.styles, &self.states)
+        serialize(&self.tree, &self.nodes, &self.styles, &self.states)
     }
 
     pub fn has_projected_animations(&self) -> bool {
@@ -94,6 +96,10 @@ impl RsxProjection<'_> {
         !self.states.is_empty()
     }
 
+    pub fn has_projected_columns(&self) -> bool {
+        self.nodes.iter().any(|node| node.columns.as_ref().is_some_and(ColumnSource::projected))
+    }
+
     pub fn matches_xaml(&self, source: &str) -> Result<bool, String> {
         let document = Document::new(source).map_err(|error| error.to_string())?;
         Ok(self.tree == XamlTree::parse(&document, self.catalog)?.tree)
@@ -101,7 +107,7 @@ impl RsxProjection<'_> {
 
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
-        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_animations() && !self.has_projected_states()
+        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_animations() && !self.has_projected_states() && !self.has_projected_columns()
     }
 
     pub fn set_property(&self, index: usize, name: &str, value: &str) -> Result<TextPatch, String> {
@@ -122,6 +128,9 @@ impl RsxProjection<'_> {
     /// Apply edited XAML to the selected RSX tree. Changes to existing values keep the
     /// original tokens outside those literals. Structural edits retain the rest of the file.
     pub fn apply_xaml(&self, draft: &str) -> Result<Vec<TextPatch>, String> {
+        if self.has_projected_columns() {
+            return Err("Edit authored Rust column collections in Columns or in source".into());
+        }
         if self.has_projected_states() {
             return Err("Edit mapped Rust state declarations in States or in the source editor".into());
         }
@@ -215,7 +224,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
         return Err("Expected an rsx! expression".into());
     }
     let (tree, state) = parse_body(source, draft.mac.tokens, catalog)?;
-    if !state.styles.is_empty() || !state.states.is_empty() {
+    if !state.styles.is_empty() || !state.states.is_empty() || state.nodes.iter().any(|node| node.columns.as_ref().is_some_and(ColumnSource::projected)) {
         return Err("Edit native animation and state declarations in their Rust source".into());
     }
     if state.omitted_count != 0 {
@@ -290,6 +299,8 @@ impl State {
             } else {
                 ArraySlot::Unavailable
             },
+            columns: matches!(&class, crate::registered::Class::Builtin(name) if name == "TableView")
+                .then_some(ColumnSource::Missing),
         });
         let mut seen = BTreeSet::new();
         let mut state_fields = Vec::new();
@@ -300,6 +311,14 @@ impl State {
                 } => (owner, name, value),
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
+                    if setter == "columns" && self.nodes[index].columns.is_some() && arguments.len() == 1 {
+                        self.read_columns(index, &arguments[0]);
+                        continue;
+                    }
+                    if self.nodes[index].columns.is_some() && matches!(setter.as_str(), "prop" | "set" | "with") {
+                        let range = name.span().byte_range();
+                        self.nodes[index].columns = Some(ColumnSource::Computed(SourceSpan::new(range.start, range.end)));
+                    }
                     self.nodes[index].computed_child_setter |= matches!(
                         setter.as_str(), "children" | "child" | "content" | "items" | "items_source"
                     );
@@ -328,6 +347,10 @@ impl State {
             };
             let setter = name.unraw().to_string();
             let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
+            if owner.is_none() && setter == "columns" && self.nodes[index].columns.is_some() {
+                self.read_columns(index, value);
+                continue;
+            }
             self.nodes[index].computed_child_setter |= owner.is_none()
                 && matches!(setter.as_str(), "children" | "child" | "items" | "items_source");
             if owner.is_none() && setter == "visual_states" && class.xaml_property(None, &setter).is_none() {
@@ -448,6 +471,16 @@ impl State {
             }
         }
         Ok(result)
+    }
+
+    fn read_columns(&mut self, index: usize, value: &syn::Expr) {
+        let node = &mut self.nodes[index];
+        let columns = node.columns.as_mut().expect("TableView column source");
+        let span = value.span().byte_range();
+        node.expressions.insert("Columns".into(), SourceSpan::new(span.start, span.end));
+        if !columns.read(value) {
+            self.omit("TableView.Columns expression".into());
+        }
     }
 }
 

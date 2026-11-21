@@ -514,11 +514,15 @@ export class DesignerPanel implements vscode.Disposable {
     async studioTools() {
         const { tools, xamlEdits, rsxEdits, presentations } = await (await this.getClient()).studioTools();
         const edits = this.language === 'xaml' ? xamlEdits : [
-            ...xamlEdits.filter(tool => mappedStudioEdits.has((tool as { name: string }).name)),
+            ...xamlEdits.filter(tool => this.mappedStudioEdit((tool as { name: string }).name)),
             ...(rsxEdits ?? []).filter(tool => (tool as { name: string }).name === 'designer_state'
                 ? this.supportsRustStates : this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement),
         ];
         return { tools, presentations: presentations ?? [], edits };
+    }
+
+    private mappedStudioEdit(name: string): boolean {
+        return mappedStudioEdits.has(name) || (name === 'designer_columns_edit' && this.supportsColumnAuthoring);
     }
 
     async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {
@@ -544,7 +548,7 @@ export class DesignerPanel implements vscode.Disposable {
         const rustProgram = name === 'designer_program' && this.supportsRustAnimationPrograms
             && action !== undefined && ['create', 'rename', 'duplicate', 'remove'].includes(action);
         const rustPlacement = name === 'designer_program' && action === 'place_clips' && this.supportsTimelineClipPlacement;
-        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !rustPlacement && !mappedStudioEdits.has(name)) {
+        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !rustPlacement && !this.mappedStudioEdit(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');
@@ -787,7 +791,7 @@ export class DesignerPanel implements vscode.Disposable {
             if (snapshot.image) this.timelinePose = snapshot.timelinePose;
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
-                columnAuthoring: Boolean(client.capabilities.columnAuthoring),
+                columnAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxColumnAuthoring : client.capabilities.columnAuthoring),
                 itemTemplateAuthoring: Boolean(client.capabilities.itemTemplateAuthoring),
                 controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),

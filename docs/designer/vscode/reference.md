@@ -86,6 +86,8 @@ On a Studio MCP connection these names are direct tools. Pass Studio’s documen
 
 Indices start at zero. The move index is the column’s place in the resulting list. Read a fresh model after a source or preview change. On Studio’s server call `designer_columns` and `designer_columns_edit` directly, using Studio’s document revision for `expected_revision`. [Authoring guide](authoring.md#edit-table-columns)
 
+For a mapped RSX `TableView`, use the same tools and pass `kind: "table"` to insert. Pass a plain row path such as `Customer.Name` as the `Binding` value. Column and field ranges address the original Rust buffer. Use `sourceRange` to open the collection and each field’s `range` to reveal protected Rust values. [RSX column authoring](authoring.md#edit-an-rsx-tableview)
+
 ### Edit item templates with MCP
 
 1. Call `designer_wait` and use `designer_outline` to find the authored control or column. Read `designer_item_templates` through `designer_studio_query` with `arguments: { node }`. The result includes the current model, slot names and ranges, the assigned `includedDefinition` when resolved, and `includedResources` available for assignment.

@@ -4,6 +4,7 @@
 mod animation;
 mod blocks;
 mod catalog;
+mod columns;
 mod image_source;
 mod language;
 mod layout_edits;

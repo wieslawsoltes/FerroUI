@@ -167,6 +167,11 @@
         "icon": "$(add)"
       },
       {
+        "command": "ferroui.columns.source",
+        "title": "Reveal Column Collection",
+        "icon": "$(go-to-file)"
+      },
+      {
         "command": "ferroui.columns.reveal",
         "title": "Reveal in Source",
         "icon": "$(go-to-file)"
@@ -611,6 +616,10 @@
           "when": "focusedView == ferroui.columns && ferroui.canAddColumn"
         },
         {
+          "command": "ferroui.columns.source",
+          "when": "focusedView == ferroui.columns && ferroui.canRevealColumnSource"
+        },
+        {
           "command": "ferroui.columns.reveal",
           "when": "false"
         },
@@ -764,6 +773,11 @@
         {
           "command": "ferroui.columns.add",
           "when": "view == ferroui.columns && ferroui.canAddColumn",
+          "group": "navigation"
+        },
+        {
+          "command": "ferroui.columns.source",
+          "when": "view == ferroui.columns && ferroui.canRevealColumnSource",
           "group": "navigation"
         },
         {

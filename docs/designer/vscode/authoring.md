@@ -377,11 +377,19 @@ Try [PropertyTraceWorkbench.xaml](../../../editors/vscode/test/fixtures/Property
 4. Use **Add Column** to append a column. `TableView` offers its standard column. `TreeDataGrid` adds text, checkbox, template, row header, and hierarchy columns. A template starts with a cell template you can open in source. A hierarchy column starts with a `Children` binding and an inner text column. Edit the binding to point to your row model’s child collection.
 5. Drag a top-level column onto its destination in **Columns**. Dropping on a property of an expanded column uses that column’s position. Drop below the list to move a column to the end. To reorder with the keyboard, focus the row, press Shift+F10, and choose **Move Column Earlier** or **Move Column Later**. The same menu offers **Duplicate Column** and **Remove Column** when applicable.
 
-Each action updates the unsaved XAML and native preview through one Undo step. Moving a column preserves its bindings, object values, and templates. Edit protected expressions, table sources supplied by the application, and collections constructed in Rust at their source. [Designer Studio workflow](../native-controls.md#edit-table-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
+Each action updates the unsaved XAML and native preview through one Undo step. Moving a column preserves its bindings, object values, and templates. Use **Reveal in Source** to edit protected expressions and object values. [Designer Studio workflow](../native-controls.md#edit-table-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
 
 ![Columns shows the reordered Portfolio beside its XAML and native preview](../images/vscode-table-columns.jpg)
 
 [Keyboard ordering](../images/vscode-column-ordering.jpg) · [Add a column](../images/vscode-add-column.jpg) · [Edit an exact width](../images/vscode-column-width.jpg) · [Inspect a hierarchy column](../images/vscode-hierarchy-column.jpg)
+
+### Edit an RSX TableView
+
+Open the designer for [column_workbench.rs](../../../editors/vscode/test/fixtures/column_workbench.rs) and select **Accounts**. Open **Columns** using the same table icon in **Properties**. Add a column to an empty `TableView`, or declare a collection using `ferroui_view::table_columns` with an inline array of `ferroui_view::table_column` builders.
+
+Edit the header, width, visibility, resizing, alignment, and simple row binding. Enter a binding path such as `Customer.Name`. The editor writes `.binding_path("Customer.Name")` in Rust. For widths it writes the matching `GridLength` value. Drag columns to reorder them, or use the same keyboard and context-menu actions as in XAML. Each change updates the original Rust and takes one Undo step. Reordering retains comments that precede a column and its original builder expression.
+
+Open computed values such as `.cell_template(status_cell())` using the source icon beside the field. Use **Reveal Column Collection** in the **Columns** title bar if the collection is supplied by an expression such as `computed_columns()`. The XAML projection of an authored column collection is read-only. [Rust builders](../../declarative-ui.md#43-build-tableview-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
 
 ## Edit item and cell templates
 

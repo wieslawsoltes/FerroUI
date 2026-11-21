@@ -163,6 +163,28 @@ Upstream writes properties and bindings in code with indexers and operators on p
 | `control.Classes.Add("accent")` | `.class("accent")` |
 | `new Style(x => x.OfType<Button>())` | the styles API of the port (`Selectors`, `Style`, `Setter`), unchanged |
 
+### 4.3 Build TableView columns
+
+Use `table_column()` to define a native `TableViewColumn` and `table_columns` to collect the builders for `TableView::Columns`. Give each column a typed `GridLength` and optionally bind it to a property of the row object.
+
+```rust
+use ferroui_view::prelude::*;
+
+fn customer_table() -> Element {
+    rsx! {
+        TableView {
+            columns: ferroui_view::table_columns([
+                ferroui_view::table_column().header("Customer").binding_path("Name")
+                    .width(ferroui_controls::GridLength::from_pixels(156.0)),
+                ferroui_view::table_column().header("Region").binding_path("Region"),
+            ]),
+        }
+    }
+}
+```
+
+Set `items_source` to your row collection. `binding_path` creates a reflection binding for a row property. Use `binding` to pass an existing `AssignedBinding`, or supply a `cell_template` to render the whole row object. The same collection works with the chained `table_view().columns(...)` builder. Fully qualified helpers and an inline array let Designer Studio and the VS Code Columns view edit the original Rust declaration. [Designer workflow](designer/vscode/authoring.md#edit-an-rsx-tableview)
+
 ## 5. The macros
 
 ### 5.1 `rsx!`

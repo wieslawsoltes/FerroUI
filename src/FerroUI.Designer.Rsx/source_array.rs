@@ -1,6 +1,6 @@
 use crate::source_edits::{insert_field, line_indent, line_prefix};
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use syn::{spanned::Spanned, Expr};
+use syn::{spanned::Spanned, Expr, ExprArray};
 
 /// Anchors for adding a member to an authored RSX inline array.
 pub(crate) enum ArraySlot {
@@ -17,6 +17,10 @@ impl ArraySlot {
         let Expr::Array(array) = expression else {
             return Self::Unavailable;
         };
+        Self::at(array)
+    }
+
+    pub(crate) fn at(array: &ExprArray) -> Self {
         let close = array.bracket_token.span.close().byte_range().start;
         let comma_before = if array.elems.trailing_punct() {
             None

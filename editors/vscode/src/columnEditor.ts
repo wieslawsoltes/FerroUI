@@ -32,6 +32,7 @@ export interface TableColumns {
     columns: AuthoredColumn[];
     available: { kind: ColumnKind; label: string }[];
     reason: string | null;
+    sourceRange?: Range | null;
     model: string;
 }
 
@@ -81,15 +82,15 @@ export class ColumnEditor {
             ? (await choose<QuickPickItem>(label, field.choices.map(option => ({
                 label: option, description: field.value === option ? 'Current' : undefined,
             }))))?.label
-            : await editText(fieldPrompt(field), field.value ?? undefined, undefined, label);
+            : await editText(fieldPrompt(field, this.context.panel.language === 'rust'), field.value ?? undefined, undefined, label);
         if (value !== undefined) {
             await this.change({ action: 'set', column: column.node, field: field.name, value });
         }
     }
 }
 
-function fieldPrompt(field: ColumnField): string {
+function fieldPrompt(field: ColumnField, rust: boolean): string {
     if (field.kind === 'length') return 'Enter Auto, a pixel width, or a star width such as 2*.';
-    if (field.kind === 'binding') return 'Enter a binding expression such as {Binding CustomerName}.';
+    if (field.kind === 'binding') return rust ? 'Enter a row property path such as Account.Name.' : 'Enter a binding expression such as {Binding CustomerName}.';
     return field.name;
 }

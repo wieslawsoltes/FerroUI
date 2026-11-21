@@ -260,3 +260,32 @@ fn the_builders_of_other_crates_make_their_controls() {
     assert!(control.cast::<ferroui_controls_treedatagrid::TreeDataGrid>().is_some());
     owner.dispose();
 }
+
+#[test]
+fn rsx_table_columns_mount_native_bindings_and_values() {
+    use ferroui_base::data::ReflectionBinding;
+    use ferroui_base::layout::HorizontalAlignment;
+    use ferroui_controls::GridLength;
+
+    let _app = app();
+    let owner = Owner::new_root();
+    let table = owner.with(|| crate::rsx! {
+        TableView {
+            columns: crate::table_columns([
+                crate::table_column().header("Account").width(GridLength::from_pixels(156.0))
+                    .binding_path("Name").horizontal_content_alignment(HorizontalAlignment::Right),
+                crate::table_column().header("Status").is_visible(false).can_user_resize(false),
+            ])
+        }
+    }.mount()).cast::<TableView>().unwrap();
+    let columns = table.columns();
+    let account = columns.get(0);
+    assert_eq!(account.header().unwrap().downcast_ref::<String>().unwrap(), "Account");
+    assert_eq!(account.width(), GridLength::from_pixels(156.0));
+    assert_eq!(account.horizontal_content_alignment(), HorizontalAlignment::Right);
+    assert!(account.binding().unwrap().as_any().is_some_and(|binding| binding.is::<ReflectionBinding>()));
+    let status = columns.get(1);
+    assert!(!status.is_visible());
+    assert_eq!(status.can_user_resize(), Some(false));
+    owner.dispose();
+}

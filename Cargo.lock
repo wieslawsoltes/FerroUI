@@ -2040,6 +2040,7 @@ dependencies = [
  "ferroui-designer-core",
  "ferroui-designer-language",
  "ferroui-designer-project",
+ "ferroui-designer-tools",
  "ferroui-markup",
  "ferroui-view-syntax",
  "proc-macro2",

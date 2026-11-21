@@ -137,8 +137,13 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
             &stage.session.borrow(), &query.arguments, Some((rust.source(), &map)),
         ));
     }
-    if query.name == "designer_columns" && stage.authored_rsx.is_some() {
-        return Ok(json!({"table":null,"reason":"Edit Rust-owned column collections in the authored Rust source."}));
+    if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_columns") {
+        stage.studio.validate(&query.name, &query.arguments)?;
+        let node = query.arguments["node"].as_u64().ok_or("Select an authored table")?;
+        let projection = rust.projection()?;
+        return stage.sources.run(|| ferroui_designer::mcp::columns_report(
+            &stage.session.borrow(), node, Some((rust.source(), &projection)),
+        ));
     }
     if query.name == "designer_item_templates" && stage.authored_rsx.is_some() {
         return Ok(json!({"slots":[],"resources":[],"reason":"Edit Rust template expressions in their source."}));
@@ -176,6 +181,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_program = design.rsx.is_some() && rsx_animation::program_edit(&query.name, action);
     let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, action);
     let rust_placement = design.rsx.is_some() && rsx_animation::clip_placement_edit(&query.name, action);
+    let rust_columns = design.rsx.is_some() && query.name == "designer_columns_edit";
     let rust_names = design.rsx.is_some()
         && query.name == "designer_property"
         && query.arguments["property"] == "Name";
@@ -187,6 +193,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         && !rust_state
         && !rust_placement
         && !rust_names
+        && !rust_columns
         && !spacing
         && !wrapping
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
@@ -224,6 +231,23 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     }
     if spacing {
         return crate::spacing::source_edit(stage, &design, &arguments);
+    }
+    if rust_columns {
+        let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
+        let (patches, selection) = {
+            let session = stage.session.borrow();
+            let patches = stage.sources.run(|| ferroui_designer::mcp::rust_column_source_plan(
+                &session, design.source, projection, &arguments,
+            ))?;
+            let selection = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
+            (patches, selection)
+        };
+        let mut result = editor_edits(&design, patches)?;
+        if !result.edits.is_empty() {
+            result.retained_selection = selection;
+            renderer.stage.take();
+        }
+        return Ok(result);
     }
     if rust_names {
         let nodes: Vec<NodeId> = serde_json::from_value(arguments["nodes"].clone())

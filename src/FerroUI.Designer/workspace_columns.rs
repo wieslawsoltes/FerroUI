@@ -45,9 +45,7 @@ impl DesignerWorkspace {
     pub(super) fn refresh_columns_command(&self) {
         let session = self.session.borrow();
         let visible = match session.selection() {
-            [node] if !session.uses_rust_source() => {
-                nearest_table(session.document(), *node).is_some()
-            }
+            [node] => nearest_table(session.document(), *node).is_some(),
             _ => false,
         };
         self.root
@@ -83,16 +81,17 @@ impl ColumnFlyout {
         flyout.set_content(Some(Control::boxed(body.clone())));
         let session = workspace.session.borrow();
         let model = match session.selection() {
-            [node] if !workspace.pending_source.get() => session.authored_columns(*node),
+            [node] if !workspace.pending_source.get() => session.column_authoring(*node, None),
             _ => Err("Select one table in the current preview.".into()),
         };
-        let Ok(Some(model)) = model else {
+        let Ok(Some(columns)) = model else {
             let message = model
                 .err()
                 .unwrap_or_else(|| "Select a TableView or TreeDataGrid.".into());
             body.children().add(text(&message).upcast::<Control>());
             return;
         };
+        let model = columns.model;
         let title = text(model.name.as_deref().unwrap_or(match model.kind {
             ferroui_designer_tools::TableKind::TableView => "TableView",
             ferroui_designer_tools::TableKind::TreeDataGrid => "TreeDataGrid",
@@ -112,6 +111,10 @@ impl ColumnFlyout {
             message: message.downgrade(),
         };
         drop(session);
+        if let Some(source) = columns.source.filter(|_| !scope.writable) {
+            let scope = scope.clone();
+            add_button(&body, SOURCE, "Reveal column collection in source", move || scope.reveal(source));
+        }
         column_list(&body, Rc::new(model), scope);
     }
 }

@@ -1,4 +1,4 @@
-use crate::RsxProjection;
+use crate::{RsxNode, RsxProjection};
 use crate::animation::{AnimationStyle, RsxAnimation, RsxAnimationIssue};
 use crate::states::{ProjectedStates, RsxStateGroup};
 use crate::tree::{Element, escape_xml};
@@ -122,11 +122,12 @@ impl RsxProjection<'_> {
 
 pub(crate) fn serialize<'a>(
     root: &Element,
+    nodes: &[RsxNode],
     styles: &'a BTreeMap<usize, Vec<AnimationStyle>>,
     states: &'a BTreeMap<usize, ProjectedStates>,
 ) -> RsxPreviewMarkup<'a> {
     let mut output = RsxPreviewMarkup::default();
-    output.control(root, styles, states, 0);
+    output.control(root, nodes, styles, states, 0);
     output
 }
 
@@ -134,6 +135,7 @@ impl<'a> RsxPreviewMarkup<'a> {
     fn control(
         &mut self,
         element: &Element,
+        nodes: &[RsxNode],
         styles: &'a BTreeMap<usize, Vec<AnimationStyle>>,
         states: &'a BTreeMap<usize, ProjectedStates>,
         depth: usize,
@@ -145,6 +147,7 @@ impl<'a> RsxPreviewMarkup<'a> {
         let index = self.controls.len();
         let rules = styles.get(&index);
         let groups = states.get(&index);
+        let columns = nodes.get(index).and_then(|node| node.columns.as_ref()).filter(|columns| columns.projected());
         self.source.push_str(&pad);
         let offset = self.source.len();
         self.controls.push(offset);
@@ -169,7 +172,7 @@ impl<'a> RsxPreviewMarkup<'a> {
             let _ = write!(self.source, " Classes=\"{}\"", escape_xml(classes.trim(), Some('"')));
             self.state_groups.extend(groups.groups.iter().map(|group| (offset, group)));
         }
-        if element.children.is_empty() && rules.is_none() && groups.is_none() {
+        if element.children.is_empty() && rules.is_none() && groups.is_none() && columns.is_none() {
             self.source.push_str(" />");
             return;
         }
@@ -179,9 +182,12 @@ impl<'a> RsxPreviewMarkup<'a> {
             let markup = groups.map_or(&[][..], |groups| groups.markup.as_slice());
             self.styles(&tag, animations, markup, depth + 1);
         }
+        if let Some(columns) = columns {
+            columns.render(&mut self.source, &pad);
+        }
         for child in &element.children {
             self.source.push('\n');
-            self.control(child, styles, states, depth + 1);
+            self.control(child, nodes, styles, states, depth + 1);
         }
         let _ = write!(self.source, "\n{pad}</{tag}>");
     }

@@ -22,7 +22,7 @@ pub(crate) fn children(class: &str) -> Option<Children> {
         "Button" | "CheckBox" | "ContentControl" | "RadioButton" | "ScrollViewer"
         | "ToggleButton" | "ToggleSwitch" | "UserControl" | "Window" => Children::Content,
         "ComboBox" | "Ellipse" | "Image" | "ProgressBar" | "Rectangle" | "Separator" | "Slider"
-        | "TextBlock" | "TextBox" => Children::None,
+        | "TableView" | "TextBlock" | "TextBox" => Children::None,
         _ => return None,
     })
 }

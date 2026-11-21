@@ -26,6 +26,7 @@ import { verifyLayerViews } from './layerViewsMcp';
 import { verifyBindingMcp } from './studioBindingMcp';
 import { verifyGridMcp } from './studioGridMcp';
 import { verifyColumnsMcp } from './studioColumnsMcp';
+import { verifyRsxColumns } from './rsxColumnsMcp';
 import { verifyItemTemplatesMcp } from './studioItemTemplatesMcp';
 import { verifyIncludedItemTemplatesMcp } from './includedItemTemplatesMcp';
 import { verifyIncludedTemplateCopiesMcp } from './includedTemplateCopiesMcp';
@@ -195,6 +196,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyAssetImport({ invoke, content });
         await verifyAssetMove({ invoke, content });
         await verifyColumnsMcp({ invoke, content });
+        await verifyRsxColumns({ invoke, content });
         await verifyItemTemplatesMcp({ invoke, content });
         await verifyControlTemplate({ invoke, content });
         await verifyCommandBindings({ invoke, content });

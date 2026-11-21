@@ -240,8 +240,9 @@ impl<'a> ParseTree<'a> {
                 NodeKind::PropertyElement
                     if self.state_classes.is_some()
                         && child.namespace_uri == node.namespace_uri
-                        && child.local_name().split_once('.')
-                            == Some((node.local_name(), "Styles")) =>
+                        && (child.local_name().split_once('.') == Some((node.local_name(), "Styles"))
+                            || matches!(&class, crate::registered::Class::Builtin(name) if name == "TableView")
+                                && child.local_name() == "TableView.Columns") =>
                 {}
                 NodeKind::Text if child.text.as_deref().unwrap_or("").trim().is_empty() => (),
                 NodeKind::Text => {

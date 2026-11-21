@@ -1,7 +1,9 @@
 use super::selection_workflows::{accepted_report, require_model};
 use super::{ensure_revision, node_id, schema as s, state};
 use crate::DesignerSession;
+use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::LineIndex;
+use ferroui_designer_rsx::RsxProjection;
 use ferroui_designer_tools::{AuthoredColumn, ColumnChange, ColumnKind};
 use serde_json::{Value, json};
 
@@ -18,7 +20,7 @@ pub(super) fn tools() -> Vec<Value> {
     vec![
         s::tool(
             QUERY,
-            "Read authored TableView or TreeDataGrid columns, field types, source ranges and the current edit model. Pass the table or one of its authored descendants.",
+            "Read authored XAML table columns or a mapped RSX TableView collection, typed fields, source ranges and the current edit model. Pass the table or an authored descendant.",
             s::object(json!({"node":s::id()}), &["node"]),
             false,
         ),
@@ -74,30 +76,56 @@ pub(super) fn call(
     args: &Value,
 ) -> Result<Value, String> {
     if name == QUERY {
-        return report(session, node_id(args, "node")?);
+        return columns_report(session, node_id(args, "node")?, None);
     }
     ensure_revision(session, args)?;
     let table = node_id(args, "table")?;
-    require_model(args, &report(session, table)?)?;
+    require_model(args, &columns_report(session, table, None)?)?;
     let change: ColumnChange =
         serde_json::from_value(args.clone()).map_err(|error| error.to_string())?;
     session.edit_authored_columns(table, change)?;
     Ok(state(session))
 }
 
-fn report(session: &DesignerSession, node: u64) -> Result<Value, String> {
-    let Some(model) = session.authored_columns(node)? else {
+pub fn columns_report(
+    session: &DesignerSession,
+    node: u64,
+    rust: Option<(&str, &RsxProjection<'_>)>,
+) -> Result<Value, String> {
+    let Some(columns) = session.column_authoring(node, rust.map(|(_, projection)| projection))?
+    else {
         return Ok(json!({"table":null}));
     };
+    let model = columns.model;
     // Keep byte ranges for native navigation and add UTF-16 ranges for editor clients.
-    let index = LineIndex::new(session.document().source());
+    let index =
+        LineIndex::new(rust.map_or_else(|| session.authored_source(), |(source, _)| source));
     let mut report = serde_json::to_value(&model).map_err(|error| error.to_string())?;
+    if let Some(source) = columns.source {
+        report["sourceRange"] = json!(index.range(source).ok());
+    }
     if let Some(rows) = report["columns"].as_array_mut() {
         for (row, column) in rows.iter_mut().zip(&model.columns) {
             ranges(row, column, &index);
         }
     }
     Ok(accepted_report(session, QUERY, report))
+}
+
+pub fn rust_column_source_plan(
+    session: &DesignerSession,
+    source: &str,
+    projection: &RsxProjection<'_>,
+    args: &Value,
+) -> Result<Vec<TextPatch>, String> {
+    ensure_revision(session, args)?;
+    let table = node_id(args, "table")?;
+    require_model(
+        args,
+        &columns_report(session, table, Some((source, projection)))?,
+    )?;
+    let change = serde_json::from_value(args.clone()).map_err(|error| error.to_string())?;
+    session.rust_column_plan(table, projection, &change)
 }
 
 fn ranges(row: &mut Value, column: &AuthoredColumn, index: &LineIndex) {

@@ -28,6 +28,7 @@ mod events;
 mod grid;
 #[path = "mcp_columns.rs"]
 mod columns;
+pub use columns::{columns_report, rust_column_source_plan};
 #[path = "mcp_item_templates.rs"]
 mod item_templates;
 #[path = "mcp_property_trace.rs"]

@@ -128,8 +128,12 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
             }
             let edits = session.plan_resize_handle(*node, *handle, *dx, *dy)?;
             if !edits.is_empty() { selected = Some(*node); }
-            let change = candidate.apply("Resize control", edits).map_err(|error| error.to_string())?;
-            translated_patches(&design, candidate.source(), change.patches)?
+            let change = candidate.apply("Resize control", edits.clone()).map_err(|error| error.to_string())?;
+            if let Some(projection) = design.rsx.as_ref().filter(|projection| projection.has_projected_columns()) {
+                projection.plan_child_edit(&design.xaml, &candidate, &edits, None)?.patches
+            } else {
+                translated_patches(&design, candidate.source(), change.patches)?
+            }
         }
         Operation::Apply { label, edits } => {
             if !design.editable_structure() {

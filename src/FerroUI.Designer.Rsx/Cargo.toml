@@ -19,6 +19,7 @@ ferroui-designer-animation.workspace = true
 ferroui-designer-core.workspace = true
 ferroui-designer-language.workspace = true
 ferroui-designer-project.workspace = true
+ferroui-designer-tools.workspace = true
 ferroui-markup.workspace = true
 ferroui-view-syntax.workspace = true
 proc-macro2 = { version = "1", features = ["span-locations"] }

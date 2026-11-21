@@ -48,6 +48,11 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
                 await this.pending;
                 await this.editor?.add();
             })),
+            vscode.commands.registerCommand(command('source'), () => this.run(async () => {
+                await this.pending;
+                const editor = this.editor;
+                if (editor?.table.sourceRange) await editor.context.revealRange(editor.table.sourceRange);
+            })),
             run('edit', async ({ editor, column, field }) => { if (field) await editor.field(column, field); }),
             run('reveal', ({ editor, column, field }) => editor.context.revealRange(field?.range ?? column.range)),
             run('reset', async ({ editor, column, field }) => {
@@ -84,6 +89,7 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
         const token = panel?.currentToken;
         this.pending = undefined;
         void vscode.commands.executeCommand('setContext', 'ferroui.canAddColumn', false);
+        void vscode.commands.executeCommand('setContext', 'ferroui.canRevealColumnSource', false);
         if (!panel || !node || !this.visible) return;
         this.view.description = node.name ?? node.label;
         const unavailable = panel.snapshot?.renderError ? 'Repair the preview to edit columns.' : panel.status;
@@ -95,6 +101,8 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
             this.editor = data.table === null ? undefined : new ColumnEditor(context, data);
             void vscode.commands.executeCommand('setContext', 'ferroui.canAddColumn',
                 data.table !== null && !data.reason && data.available.length > 0);
+            void vscode.commands.executeCommand('setContext', 'ferroui.canRevealColumnSource',
+                data.table !== null && !!data.sourceRange);
             this.view.message = data.table === null ? 'Select a native FerroUI table.'
                 : data.reason ?? (data.columns.length ? undefined : 'Use Add Column to define the first column.');
             this.changed.fire();
@@ -195,7 +203,7 @@ function rows(columns: AuthoredColumn[], editor: ColumnEditor, parent: string, p
 }
 
 function enclosingTable(panel: DesignerPanel) {
-    if (panel.language !== 'xaml' || !panel.supportsColumnAuthoring || panel.selectedIds.length !== 1) return;
+    if (!panel.supportsColumnAuthoring || panel.selectedIds.length !== 1) return;
     let node = panel.selectedNode;
     while (node) {
         const type = node.label.split(':').at(-1);

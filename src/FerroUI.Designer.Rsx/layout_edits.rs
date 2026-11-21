@@ -173,6 +173,13 @@ impl RsxProjection<'_> {
         if order.len() != actual.nodes.len() {
             return Err("The placed controls have no matching Rust source ranges".into());
         }
+        for (&table, node) in order.iter().zip(&actual.nodes) {
+            if let Some(columns) = &node.columns {
+                if !columns.matches_layout(draft, table)? {
+                    return Err("This placement would change the authored Rust columns".into());
+                }
+            }
+        }
         let controls = order
             .into_iter()
             .zip(actual.nodes.iter().map(|node| node.name))

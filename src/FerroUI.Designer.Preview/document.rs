@@ -114,11 +114,12 @@ impl<'a> DesignDocument<'a> {
         if let Some(rsx) = &self.rsx {
             let animated = rsx.has_projected_animations();
             let states = rsx.has_projected_states();
+            let columns = rsx.has_projected_columns();
             let complete = rsx.omitted_count == 0;
             return Counterpart {
                 source: Some(self.xaml.source().to_owned()),
-                editable: complete && !animated && !states,
-                reason: if states { Some("Edit mapped Rust state declarations in States".into()) } else if animated { Some("Edit mapped animation keys in Timeline".into()) } else { (!complete).then(|| {
+                editable: complete && !animated && !states && !columns,
+                reason: if columns { Some("Edit authored Rust column collections in Columns".into()) } else if states { Some("Edit mapped Rust state declarations in States".into()) } else if animated { Some("Edit mapped animation keys in Timeline".into()) } else { (!complete).then(|| {
                     "Edit mapped literals in the inspector or change the Rust source".into()
                 }) },
             };

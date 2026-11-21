@@ -64,6 +64,7 @@ mod register_types;
 pub mod router;
 mod rust_paths;
 mod style;
+mod table_columns;
 mod template;
 mod visual_states;
 pub mod xaml;
@@ -111,6 +112,7 @@ pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedT
 pub use inspect::{attach_inspector, open_inspector};
 pub use mount::{view_stats, ViewStats};
 pub use template::template;
+pub use table_columns::{TableViewColumnBuilder, table_column, table_columns};
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
 pub use xaml::{load_xaml, load_xaml_uri, use_xaml};
@@ -129,6 +131,7 @@ pub use ferroui_view_macros::{component, rsx};
 
 /// Everything an application written with the builders or the macro uses.
 pub mod prelude {
+    pub use crate::{table_column, table_columns};
     pub use crate::generated::builders::*;
     pub use crate::{set_visual_state, visual_state, visual_state_group, ViewState, ViewStateGroup};
     #[cfg(feature = "color-picker")]
