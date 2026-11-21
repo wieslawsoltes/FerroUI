@@ -166,6 +166,11 @@ jobs:
       matrix:
         tree: [measured, baseline]
         profile: [release, dist]
+    env:
+      # The MSVC standard library of the Windows image (14.52) refuses the libclang of the image
+      # in the build script of the ANGLE binding ("STL1000: Unexpected compiler version"), as in
+      # the Windows job of ci.yml, which passes the check the same way.
+      BINDGEN_EXTRA_CLANG_ARGS: -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
     defaults:
       run:
         shell: bash
