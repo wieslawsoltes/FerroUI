@@ -146,8 +146,16 @@ positions). `rt::add_packed_resource_aliases`, `add_packed_literal_brushes`,
 added or built and do what the builders of the slices do, in the same order, with the same
 errors at the same positions. A run with an offset, a length or a position beyond 16 bits, a
 negative position or a key in a form the emitter does not write keeps its slice of rows. A
-record that does not decode is the error of its table, not a panic. The pool is the table's, so
-a trimmed unit takes its strings with it. The helpers of the slices stay for the plain values.
+record that does not decode is the error of its table, not a panic. The packed tables of one
+unit of a theme share one pool when the unit has two or more of them (`row_tables_in`): the
+constant `{DOCUMENT}_UNIT_{n}_STRINGS`, written before the first table of the unit, which each
+table names in place of its own literal. The tables of the theme dictionaries of a unit (light,
+dark, high contrast) name the same keys and targets, which a pool for each table repeated;
+counted on the WinUI theme, the pools of all its tables are 266,234 bytes with one pool for each
+table and 102,833 with one for each unit, and those of the 15 units hello world keeps 55,257
+and 18,339 (one pool for the whole theme would be 69,411, kept whole by every application). The
+pool is the unit's, so a trimmed unit takes its strings with it; a table whose offsets do not fit
+16 bits in the pool of its unit keeps a pool of its own. The helpers of the slices stay for the plain values.
 It is on because the measurement kept it: on macOS the stripped executables were smaller in
 every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
 34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
@@ -271,7 +279,8 @@ tests fail by design. Design, coverage and measurements:
 `Controls/Button.xaml` and `Resources/Button_themeresources.xaml`. One more unit, the ambient
 unit (index 0), holds what is always needed:
 - the class document;
-- the host documents (`Window`, `PopupRoot`, overlay and adorner hosts);
+- the host documents (`Window`, the adorner and embedding hosts, the theme variant scope); the
+  hosts of popups are units of their own, kept where a popup is live (#994);
 - documents with entries no key can name.
 
 The `.xamlmeta` records each unit's unit graph: the keys and type keys it defines, the keys it
@@ -286,7 +295,11 @@ needs. The build computes the table from the roots:
    base classes;
 2. the keys and key-like tokens of those documents;
 3. the types and keys the compiled documents of its dependencies name (a control library's
-   templates);
+   templates); for the document of an ordinary class of a dependency (a dialog, a window), only
+   when the class is live in the application: the application names it (`AboutFerroDialog::new()`,
+   the builder `about_ferro_dialog()`), or a live class or document constructs it (#1002). A crate
+   whose own code constructs such a class states it (`XamlGroup::constructed_by_its_crate`), and
+   its documents then root the themes whenever the crate is linked;
 4. the class names and string literals in the application's Rust sources that match a type key
    or a key of the theme (`Button::new()`, `"AccentButtonStyle"`), and the functions and
    methods the sources call, read as class names (`text_block()` is `TextBlock`,

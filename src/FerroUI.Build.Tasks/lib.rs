@@ -232,7 +232,7 @@ use ferroui_base::metadata::MarkupAssembly;
 use xamlx::type_system::IXamlTypeSystem;
 
 use crate::export::ScanReport;
-use crate::model::{AssemblyModel, MarkupReferencesModel, ThemeUnitsModel};
+use crate::model::{AssemblyModel, ClassReferencesModel, MarkupReferencesModel, ThemeUnitsModel};
 use crate::model_set::ModelSet;
 use crate::scanner::{scan_crate, InherentFunction, Scan, ScanOptions, Severity, SourceReferences};
 use crate::type_system::{ModelEmitTypes, ModelTypeSystem};
@@ -245,7 +245,7 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     with_xaml_backend,
 };
 use crate::theme_roots::{
-    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, parts_constructor,
+    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, live_class_references, parts_constructor,
     parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
     BuildTarget, Roots, ThemeTrimming, TypeGraph,
 };
@@ -278,6 +278,7 @@ pub struct XamlGroup {
     exported: bool,
     class_document: Option<String>,
     constructor: Option<ClassConstructor>,
+    constructed_by_its_crate: bool,
 }
 
 /// The type system the documents of a build are compiled against ([`Build::type_system`]).
@@ -303,7 +304,15 @@ impl XamlGroup {
     /// root. Without [`documents`](Self::documents) the group is every `.xaml` file
     /// below the XAML root of the build.
     pub fn new(module: &str) -> Self {
-        Self { module: module.to_string(), documents: None, create_source_info: None, exported: true, class_document: None, constructor: None }
+        Self {
+            module: module.to_string(),
+            documents: None,
+            create_source_info: None,
+            exported: true,
+            class_document: None,
+            constructor: None,
+            constructed_by_its_crate: false,
+        }
     }
 
     /// Makes the group the group of a class of the crate: `name` (its path below the root
@@ -318,6 +327,18 @@ impl XamlGroup {
     /// Only with [`TypeSystem::Model`]: the class is a type of the crate being built.
     pub fn class_document(mut self, name: &str) -> Self {
         self.class_document = Some(name.to_string());
+        self
+    }
+
+    /// States that the code of the crate constructs the class of the group itself, beyond what the
+    /// type models record (a window a function of the crate opens, a view its view locator makes):
+    /// what the documents of the class name is then exported as what every document of the crate
+    /// names (`referenced_types`, `referenced_keys`), a root of the themes of every application
+    /// that links the crate. Without it, what the documents of an ordinary class name roots the
+    /// themes of an application only where the class is live in it (#1002): the application
+    /// names it, or a live class constructs it.
+    pub fn constructed_by_its_crate(mut self) -> Self {
+        self.constructed_by_its_crate = true;
         self
     }
 
@@ -815,6 +836,8 @@ impl Build {
         // units roots: what the `.xamlmeta` states for the applications that depend on the crate
         // (#568, #849).
         let mut exported_roots = Roots::default();
+        // What the documents of each ordinary class of the crate name (#1002), exported by class.
+        let mut exported_classes: Vec<ClassReferencesModel> = Vec::new();
         // The functions of the inherent `impl` blocks of the crate: what a class whose markup is
         // partitioned into units is checked against for its constructor from units (#849).
         let mut scanned_functions: Vec<InherentFunction> = Vec::new();
@@ -1062,8 +1085,20 @@ impl Build {
                                 }
                             }
                         }
+                        // What the documents of an ordinary class name roots the themes of an
+                        // application only where the class is live (#1002), unless the crate
+                        // constructs it itself; a class without `x:Class` is exported whole.
                         if !from_units {
-                            exported_roots.extend(group_roots);
+                            match x_class_of(&borrowed, class_document) {
+                                Some(class) if !group.constructed_by_its_crate => {
+                                    exported_classes.push(ClassReferencesModel {
+                                        class,
+                                        types: group_roots.types.iter().cloned().collect(),
+                                        keys: group_roots.keys.iter().cloned().collect(),
+                                    });
+                                }
+                                _ => exported_roots.extend(group_roots),
+                            }
                         }
                         if group.exported {
                             // Every document the compiler consumed for the class, the ones merged
@@ -1240,12 +1275,11 @@ impl Build {
             // the table can name; a library used alone keeps its own table.
             for units in dependencies.iter().flat_map(|metadata| metadata.theme_units.iter()) {
                 let class = units.class.as_str();
-                let local = class.rsplit('.').next().unwrap_or(class);
                 let theme_crate = units.table_path.trim_start_matches("::").split("::").next().unwrap_or_default();
                 let required = dependencies
                     .iter()
                     .filter(|metadata| direct_crates.contains(&metadata.crate_name))
-                    .any(|metadata| metadata.references.types.iter().any(|name| name == class || name == local));
+                    .any(|metadata| metadata.references.names_type(class));
                 let nameable = direct_crates.iter().any(|name| name == theme_crate);
                 let constructed = constructible.iter().any(|known| known == class);
                 if required && nameable && constructed && !used.iter().any(|known| known == class) {
@@ -1266,6 +1300,28 @@ impl Build {
             let themes = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter());
             let from_sources = source_roots(&source_references, themes, &graph);
             roots.extend(from_sources.clone());
+            // What the documents of the ordinary classes of the dependencies name (#1002): roots
+            // only where the class is live (the application names it, or a live class or a root
+            // constructs it), closed over the classes their documents construct.
+            let classes: Vec<&ClassReferencesModel> =
+                dependencies.iter().flat_map(|metadata| metadata.references.classes.iter()).collect();
+            let from_live_classes: Vec<(String, Roots)> =
+                live_class_references(&classes, &roots, &source_references.names, &graph)
+                    .into_iter()
+                    .map(|class| {
+                        let label = format!("referenced by the document of the live class {}", class.class);
+                        let class_roots = Roots {
+                            types: class.types.iter().cloned().collect(),
+                            keys: class.keys.iter().cloned().collect(),
+                            ..Roots::default()
+                        };
+                        (label, class_roots)
+                    })
+                    .collect();
+            for (_, class_roots) in &from_live_classes {
+                roots.types.extend(class_roots.types.iter().cloned());
+                roots.keys.extend(class_roots.keys.iter().cloned());
+            }
             // Which target named each root of the sources (#847), for whoever traces a kept unit to
             // the line that named it: the types and the keys of each production target.
             let mut traced = String::new();
@@ -1321,14 +1377,15 @@ impl Build {
             let mut why = String::new();
             let together = used_units.into_iter().zip(kept_of_themes).zip(&from_other_themes);
             for (((class, units), kept), from_others) in together {
-                let sources: [(&str, &Roots); 6] = [
+                let mut sources: Vec<(&str, &Roots)> = vec![
                     ("manifest", &from_manifest),
                     ("build script", &self.theme_roots),
                     ("documents", &document_roots),
                     ("sources", &from_sources),
                     ("dependencies", &from_dependencies),
-                    ("other themes used together", from_others),
                 ];
+                sources.extend(from_live_classes.iter().map(|(label, class_roots)| (label.as_str(), class_roots)));
+                sources.push(("other themes used together", from_others));
                 let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
                 why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
@@ -1361,9 +1418,11 @@ impl Build {
         // applications that depend on a crate whose code makes controls (#847).
         exported_roots.types.extend(self.theme_roots.names.iter().cloned());
         exported_roots.keys.extend(self.theme_roots.names.iter().cloned());
+        exported_classes.retain(|class| !class.types.is_empty() || !class.keys.is_empty());
         metadata.references = MarkupReferencesModel {
             types: exported_roots.types.iter().cloned().collect(),
             keys: exported_roots.keys.iter().cloned().collect(),
+            classes: exported_classes,
         };
 
         // The documents for the export plan (#857), before the model takes them.
@@ -1513,6 +1572,15 @@ fn document_path(uri: &str) -> Option<String> {
 /// crate: the class is the type the models have for the `x:Class` of the document, and
 /// the group is the document with the documents it includes.
 #[allow(clippy::too_many_arguments)]
+/// The full markup name of the class of the document `name` of `documents` (its `x:Class`), for
+/// the references the crate exports by class (#1002); none when the document is not among them or
+/// states no class.
+fn x_class_of(documents: &[(&str, &str)], name: &str) -> Option<String> {
+    let name = name.trim_start_matches('/');
+    let (_, xaml) = documents.iter().find(|(known, _)| known.trim_start_matches('/') == name)?;
+    class_of_document(xaml).ok().flatten().filter(|class| !class.is_empty())
+}
+
 fn class_group(
     host: &EmitterHost<'_>,
     models: &dyn IXamlTypeSystem,
@@ -2041,7 +2109,7 @@ mod tests {
             documents: Vec::new(),
             dependencies: vec![theme_file.display().to_string()],
             theme_units: Vec::new(),
-            references: MarkupReferencesModel { types: vec!["Theme".to_string()], keys: Vec::new() },
+            references: MarkupReferencesModel { types: vec!["Theme".to_string()], ..MarkupReferencesModel::default() },
         };
         fs::create_dir_all(root.join("library")).expect("a directory");
         let library_file = root.join("library").join("library.xamlmeta");
@@ -2135,6 +2203,80 @@ mod tests {
         let text = fs::read_to_string(out.join("app.xamlmeta")).expect("the .xamlmeta");
         let metadata = XamlMetadata::parse(&text).expect("metadata");
         assert!(metadata.references.types.contains(&"Popup".to_string()), "{:?}", metadata.references);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    /// Not from upstream (#1002): what the documents of an ordinary class of a dependency name
+    /// roots the themes of an application only where the class is live: not where nothing
+    /// constructs it, and where the sources name it, with the class in the reason of the kept unit.
+    #[test]
+    fn the_references_of_an_ordinary_class_root_the_themes_only_where_it_is_live() {
+        use ferroui_build_scan::xaml_metadata::{ClassReferencesModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel};
+        let root = env::temp_dir().join(format!("ferroui-build-class-references-{}", std::process::id()));
+        let unit = |index: u32, name: &str, type_keys: &[&str]| ThemeUnitModel {
+            name: name.to_string(),
+            index,
+            documents: vec![name.to_string()],
+            keys: Vec::new(),
+            type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
+            references: Vec::new(),
+            types: Vec::new(),
+        };
+        let theme = XamlMetadata {
+            name: "Theme".to_string(),
+            crate_name: "theme".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: vec![ThemeUnitsModel {
+                class: "Tests.Theme".to_string(),
+                table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+                units: vec![unit(0, "ambient", &[]), unit(1, "Controls/Button.xaml", &["Button"])],
+            }],
+            references: MarkupReferencesModel::default(),
+        };
+        let library = XamlMetadata {
+            name: "Library".to_string(),
+            crate_name: "library".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: Vec::new(),
+            references: MarkupReferencesModel {
+                classes: vec![ClassReferencesModel {
+                    class: "Library.About".to_string(),
+                    types: vec!["Button".to_string(), "Window".to_string()],
+                    keys: Vec::new(),
+                }],
+                ..MarkupReferencesModel::default()
+            },
+        };
+        fs::create_dir_all(&root).expect("the directory of the test");
+        let theme_file = root.join("theme.xamlmeta");
+        fs::write(&theme_file, theme.to_json()).expect("the .xamlmeta of the theme");
+        let library_file = root.join("library.xamlmeta");
+        fs::write(&library_file, library.to_json()).expect("the .xamlmeta of the library");
+        let build = |name: &str, source: &str| {
+            let crate_dir = root.join(name);
+            fs::create_dir_all(&crate_dir).expect("the directory of the crate");
+            fs::write(crate_dir.join("Cargo.toml"), "[package]\nname = \"app\"\n").expect("a manifest");
+            fs::write(crate_dir.join("lib.rs"), source).expect("the library");
+            let out = root.join(name).join("out");
+            let outcome = Build::new(crate_dir, out.clone(), "app", vec![theme_file.clone(), library_file.clone()])
+                .type_system(TypeSystem::Model)
+                .theme("Theme")
+                .execute();
+            assert_eq!(outcome.errors, Vec::<String>::new());
+            let read = |file: &str| fs::read_to_string(out.join("xaml").join(file)).expect(file);
+            (read("theme_parts.txt"), read("theme_parts_why.txt"))
+        };
+
+        // Nothing constructs the class: its document's Button roots nothing.
+        let (listing, _) = build("unused", "//! Constructs nothing.\npub fn nothing() {}\n");
+        assert!(listing.starts_with("Tests.Theme: 1 of 2 units\n"), "{listing}");
+        // The application constructs the class: its document's Button roots the theme of Button.
+        let (listing, why) = build("used", "pub fn about() {\n    let _ = About::new();\n}\n");
+        assert!(listing.starts_with("Tests.Theme: 2 of 2 units\n"), "{listing}");
+        let reason = "defines the theme of Button: the type Button, referenced by the document of the live class Library.About";
+        assert!(why.contains(reason), "{why}");
         let _ = fs::remove_dir_all(&root);
     }
 

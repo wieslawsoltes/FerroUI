@@ -916,9 +916,12 @@ fn populate_fluenttheme_xaml_unit_5(
     ::core::result::Result::Ok(())
 }
 
+/// The keys and targets of the packed tables of the unit 1 of `FluentTheme.xaml`, each once (#855).
+const POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS: &str = "SystemControlBackgroundAccentBrushSystemAccentColorSystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColorSystemControlDisabledAccentBrushSystemControlDisabledBaseHighBrushSystemControlDisabledBaseLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemControlDisabledListMediumBrushSystemControlDisabledTransparentBrushSystemControlFocusVisualPrimaryBrushSystemControlFocusVisualSecondaryBrushSystemControlRevealFocusVisualBrushSystemControlForegroundAccentBrushSystemControlForegroundAltHighBrushSystemControlForegroundAltMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseLowBrushSystemControlForegroundBaseMediumBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundChromeBlackHighBrushSystemControlForegroundChromeHighBrushSystemControlForegroundChromeMediumBrushSystemControlForegroundChromeDisabledLowBrushSystemControlForegroundChromeWhiteBrushSystemControlForegroundChromeBlackMediumBrushSystemControlForegroundChromeBlackMediumLowBrushSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemControlForegroundListMediumBrushSystemControlForegroundTransparentBrushSystemControlHighlightAccentBrushSystemControlHighlightAltAccentBrushSystemControlHighlightAltAltHighBrushSystemControlHighlightAltBaseHighBrushSystemControlHighlightAltBaseLowBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightAltBaseMediumHighBrushSystemControlHighlightAltAltMediumHighBrushSystemControlHighlightAltBaseMediumLowBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightBaseHighBrushSystemControlHighlightBaseLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightChromeWhiteBrushSystemControlHighlightTransparentBrushSystemControlHyperlinkTextBrushSystemControlHyperlinkBaseHighBrushSystemControlHyperlinkBaseMediumBrushSystemControlHyperlinkBaseMediumHighBrushSystemControlPageBackgroundAltMediumBrushSystemControlPageBackgroundAltHighBrushSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlPageTextBaseHighBrushSystemControlPageTextBaseMediumBrushSystemControlPageTextChromeBlackMediumLowBrushSystemControlErrorTextForegroundBrushSystemErrorTextColorSystemControlHighlightListLowRevealBackgroundBrushSystemControlHighlightListMediumRevealBackgroundBrushSystemControlHighlightAccentRevealBackgroundBrushSystemControlBackgroundChromeWhiteRevealBorderBrushSystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushSystemControlTransientBackgroundBrushSystemControlDescriptionTextForegroundBrushSystemControlTransparentRevealBackgroundBrushSystemControlTransparentRevealBorderBrushSystemRegionBrushSystemRegionColorSystemControlTransparentBrush";
+
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_0: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAccentBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
         0, 34, 34, 17, 1, 122, 8, 122, 67,
@@ -927,315 +930,318 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_0: rt::PackedRows = rt::PackedRows {
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 18, 1, 123, 8, 123, 68,
-        53, 41, 94, 24, 1, 124, 8, 125, 24,
-        118, 37, 155, 20, 1, 126, 8, 126, 70,
-        175, 40, 215, 23, 1, 127, 8, 128, 24,
-        238, 36, 274, 19, 1, 129, 8, 129, 69,
-        293, 35, 328, 18, 1, 130, 8, 130, 68,
-        346, 38, 384, 21, 1, 131, 8, 131, 71,
-        405, 42, 447, 25, 1, 132, 8, 133, 24,
-        472, 41, 513, 24, 1, 134, 8, 135, 24,
-        537, 43, 580, 26, 1, 136, 8, 137, 24,
-        606, 45, 651, 28, 1, 138, 8, 139, 24,
-        679, 42, 721, 25, 1, 140, 8, 141, 24,
-        746, 48, 794, 31, 1, 142, 8, 143, 24,
-        825, 40, 865, 23, 1, 144, 8, 145, 24,
-        888, 43, 931, 26, 1, 146, 8, 147, 24,
-        957, 39, 996, 22, 1, 148, 8, 148, 72,
-        1018, 35, 1053, 18, 1, 149, 8, 149, 68,
-        1071, 38, 1109, 21, 1, 150, 8, 150, 71,
+        51, 35, 86, 18, 1, 123, 8, 123, 68,
+        104, 41, 145, 24, 1, 124, 8, 125, 24,
+        169, 37, 206, 20, 1, 126, 8, 126, 70,
+        226, 40, 266, 23, 1, 127, 8, 128, 24,
+        289, 36, 325, 19, 1, 129, 8, 129, 69,
+        344, 35, 379, 18, 1, 130, 8, 130, 68,
+        397, 38, 435, 21, 1, 131, 8, 131, 71,
+        456, 42, 498, 25, 1, 132, 8, 133, 24,
+        523, 41, 564, 24, 1, 134, 8, 135, 24,
+        588, 43, 631, 26, 1, 136, 8, 137, 24,
+        657, 45, 702, 28, 1, 138, 8, 139, 24,
+        730, 42, 772, 25, 1, 140, 8, 141, 24,
+        797, 48, 845, 31, 1, 142, 8, 143, 24,
+        876, 40, 916, 23, 1, 144, 8, 145, 24,
+        939, 43, 982, 26, 1, 146, 8, 147, 24,
+        1008, 39, 1047, 22, 1, 148, 8, 148, 72,
+        1069, 35, 1104, 18, 1, 149, 8, 149, 68,
+        1122, 38, 1160, 21, 1, 150, 8, 150, 71,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_2: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledAccentBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 32, 32, 17, 1, 151, 8, 151, 65,
+        1181, 32, 34, 17, 1, 151, 8, 151, 65,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledBaseHighBrushSystemBaseHighColorSystemControlDisabledBaseLowBrushSystemBaseLowColorSystemControlDisabledBaseMediumLowBrushSystemBaseMediumLowColorSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemChromeMediumLowColorSystemControlDisabledListMediumBrushSystemListMediumColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 34, 34, 19, 1, 152, 8, 152, 67,
-        53, 33, 86, 18, 1, 153, 8, 153, 66,
-        104, 39, 143, 24, 1, 154, 8, 155, 24,
-        167, 44, 211, 29, 1, 156, 8, 157, 24,
-        240, 43, 283, 28, 1, 158, 8, 159, 24,
-        311, 36, 347, 21, 1, 160, 8, 160, 69,
-        368, 41, 409, 26, 1, 161, 8, 162, 24,
-        435, 36, 471, 21, 1, 163, 8, 163, 69,
+        1213, 34, 325, 19, 1, 152, 8, 152, 67,
+        1247, 33, 379, 18, 1, 153, 8, 153, 66,
+        1280, 39, 564, 24, 1, 154, 8, 155, 24,
+        1319, 44, 1363, 29, 1, 156, 8, 157, 24,
+        1392, 43, 1435, 28, 1, 158, 8, 159, 24,
+        1463, 36, 1499, 21, 1, 160, 8, 160, 69,
+        1520, 41, 982, 26, 1, 161, 8, 162, 24,
+        1561, 36, 1160, 21, 1, 163, 8, 163, 69,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_4: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 65535, 255, 1, 164, 8,
+        1597, 37, 65535, 255, 1, 164, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlFocusVisualPrimaryBrushSystemBaseHighColorSystemControlFocusVisualSecondaryBrushSystemAltMediumColorSystemControlRevealFocusVisualBrushSystemAccentColorSystemControlForegroundAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 36, 36, 19, 1, 165, 8, 165, 69,
-        55, 38, 93, 20, 1, 166, 8, 166, 71,
-        113, 35, 148, 17, 1, 167, 8, 167, 68,
-        165, 34, 148, 17, 1, 168, 8, 168, 67,
+        1634, 36, 325, 19, 1, 165, 8, 165, 69,
+        1670, 38, 206, 20, 1, 166, 8, 166, 71,
+        1708, 35, 34, 17, 1, 167, 8, 167, 68,
+        1743, 34, 34, 17, 1, 168, 8, 168, 67,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundAltHighBrushSystemAltHighColorSystemControlForegroundAltMediumHighBrushSystemAltMediumHighColorSystemControlForegroundBaseHighBrushSystemBaseHighColorSystemControlForegroundBaseLowBrushSystemBaseLowColorSystemControlForegroundBaseMediumBrushSystemBaseMediumColorSystemControlForegroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlForegroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlForegroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlForegroundChromeHighBrushSystemChromeHighColorSystemControlForegroundChromeMediumBrushSystemChromeMediumColorSystemControlForegroundChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlForegroundChromeWhiteBrushSystemChromeWhiteColorSystemControlForegroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlForegroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemListLowColorSystemControlForegroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 18, 1, 169, 8, 169, 68,
-        53, 41, 94, 24, 1, 170, 8, 171, 24,
-        118, 36, 154, 19, 1, 172, 8, 172, 69,
-        173, 35, 208, 18, 1, 173, 8, 173, 68,
-        226, 38, 264, 21, 1, 174, 8, 174, 71,
-        285, 42, 327, 25, 1, 175, 8, 176, 24,
-        352, 41, 393, 24, 1, 177, 8, 178, 24,
-        417, 43, 460, 26, 1, 179, 8, 180, 24,
-        486, 38, 524, 21, 1, 181, 8, 181, 71,
-        545, 40, 585, 23, 1, 182, 8, 183, 24,
-        608, 45, 653, 28, 1, 184, 8, 185, 24,
-        681, 39, 720, 22, 1, 186, 8, 186, 72,
-        742, 45, 787, 28, 1, 187, 8, 188, 24,
-        815, 48, 863, 31, 1, 189, 8, 190, 24,
-        894, 38, 932, 21, 1, 191, 8, 191, 71,
-        953, 35, 988, 18, 1, 192, 8, 192, 68,
-        1006, 38, 1044, 21, 1, 193, 8, 193, 71,
+        1777, 35, 86, 18, 1, 169, 8, 169, 68,
+        1812, 41, 145, 24, 1, 170, 8, 171, 24,
+        1853, 36, 325, 19, 1, 172, 8, 172, 69,
+        1889, 35, 379, 18, 1, 173, 8, 173, 68,
+        1924, 38, 435, 21, 1, 174, 8, 174, 71,
+        1962, 42, 498, 25, 1, 175, 8, 176, 24,
+        2004, 41, 564, 24, 1, 177, 8, 178, 24,
+        2045, 43, 631, 26, 1, 179, 8, 180, 24,
+        2088, 38, 1499, 21, 1, 181, 8, 181, 71,
+        2126, 40, 916, 23, 1, 182, 8, 183, 24,
+        2166, 45, 1435, 28, 1, 184, 8, 185, 24,
+        2211, 39, 1047, 22, 1, 186, 8, 186, 72,
+        2250, 45, 702, 28, 1, 187, 8, 188, 24,
+        2295, 48, 845, 31, 1, 189, 8, 190, 24,
+        2343, 38, 2381, 21, 1, 191, 8, 191, 71,
+        2402, 35, 1104, 18, 1, 192, 8, 192, 68,
+        2437, 38, 1160, 21, 1, 193, 8, 193, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 39, 65535, 255, 1, 194, 8,
+        2475, 39, 65535, 255, 1, 194, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_8: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAccentBrushSystemAccentColorSystemControlHighlightAltAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 33, 33, 17, 1, 195, 8, 195, 66,
-        50, 36, 33, 17, 1, 196, 8, 196, 69,
+        2514, 33, 34, 17, 1, 195, 8, 195, 66,
+        2547, 36, 34, 17, 1, 196, 8, 196, 69,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltAltHighBrushSystemAltHighColorSystemControlHighlightAltBaseHighBrushSystemBaseHighColorSystemControlHighlightAltBaseLowBrushSystemBaseLowColorSystemControlHighlightAltBaseMediumBrushSystemBaseMediumColorSystemControlHighlightAltBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightAltAltMediumHighBrushSystemAltMediumHighColorSystemControlHighlightAltBaseMediumLowBrushSystemBaseMediumLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 37, 18, 1, 197, 8, 197, 70,
-        55, 38, 93, 19, 1, 198, 8, 198, 71,
-        112, 37, 149, 18, 1, 199, 8, 199, 70,
-        167, 40, 207, 21, 1, 200, 8, 200, 73,
-        228, 44, 272, 25, 1, 201, 8, 202, 24,
-        297, 43, 340, 24, 1, 203, 8, 204, 24,
-        364, 43, 407, 24, 1, 205, 8, 206, 24,
+        2583, 37, 86, 18, 1, 197, 8, 197, 70,
+        2620, 38, 325, 19, 1, 198, 8, 198, 71,
+        2658, 37, 379, 18, 1, 199, 8, 199, 70,
+        2695, 40, 435, 21, 1, 200, 8, 200, 73,
+        2735, 44, 498, 25, 1, 201, 8, 202, 24,
+        2779, 43, 145, 24, 1, 203, 8, 204, 24,
+        2822, 43, 564, 24, 1, 205, 8, 206, 24,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 41, 41, 22, 1, 213, 8, 214, 24,
+        2865, 41, 1047, 22, 1, 213, 8, 214, 24,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 41, 65535, 255, 1, 215, 8,
+        2906, 41, 65535, 255, 1, 215, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightBaseHighBrushSystemBaseHighColorSystemControlHighlightBaseLowBrushSystemBaseLowColorSystemControlHighlightBaseMediumBrushSystemBaseMediumColorSystemControlHighlightBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightBaseMediumLowBrushSystemBaseMediumLowColorSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemChromeHighColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 19, 1, 216, 8, 216, 68,
-        54, 34, 88, 18, 1, 217, 8, 217, 67,
-        106, 37, 143, 21, 1, 218, 8, 218, 70,
-        164, 41, 205, 25, 1, 219, 8, 220, 24,
-        230, 40, 270, 24, 1, 221, 8, 222, 24,
-        294, 39, 333, 23, 1, 223, 8, 223, 72,
-        356, 37, 393, 21, 1, 224, 8, 224, 70,
+        2947, 35, 325, 19, 1, 216, 8, 216, 68,
+        2982, 34, 379, 18, 1, 217, 8, 217, 67,
+        3016, 37, 435, 21, 1, 218, 8, 218, 70,
+        3053, 41, 498, 25, 1, 219, 8, 220, 24,
+        3094, 40, 564, 24, 1, 221, 8, 222, 24,
+        3134, 39, 3173, 23, 1, 223, 8, 223, 72,
+        3196, 37, 1499, 21, 1, 224, 8, 224, 70,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightListMediumBrushSystemListMediumColorSystemControlHighlightListLowBrushSystemListLowColorSystemControlHighlightChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 37, 21, 1, 231, 8, 231, 70,
-        58, 34, 92, 18, 1, 232, 8, 232, 67,
-        110, 38, 148, 22, 1, 233, 8, 233, 71,
+        3233, 37, 1160, 21, 1, 231, 8, 231, 70,
+        3270, 34, 1104, 18, 1, 232, 8, 232, 67,
+        3304, 38, 1047, 22, 1, 233, 8, 233, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_14: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 38, 65535, 255, 1, 234, 8,
+        3342, 38, 65535, 255, 1, 234, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_15: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkTextBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 31, 31, 17, 1, 235, 8, 235, 64,
+        3380, 31, 34, 17, 1, 235, 8, 235, 64,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_16: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkBaseHighBrushSystemBaseHighColorSystemControlHyperlinkBaseMediumBrushSystemBaseMediumColorSystemControlHyperlinkBaseMediumHighBrushSystemBaseMediumHighColorSystemControlPageBackgroundAltMediumBrushSystemAltMediumColorSystemControlPageBackgroundAltHighBrushSystemAltHighColorSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemBaseLowColorSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemListLowColorSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemChromeMediumLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 19, 1, 236, 8, 236, 68,
-        54, 37, 91, 21, 1, 237, 8, 237, 70,
-        112, 41, 153, 25, 1, 238, 8, 239, 24,
-        178, 41, 219, 20, 1, 240, 8, 240, 74,
-        239, 39, 278, 18, 1, 241, 8, 241, 72,
-        296, 47, 219, 20, 1, 242, 8, 243, 24,
-        343, 39, 382, 18, 1, 244, 8, 244, 72,
-        400, 42, 91, 21, 1, 245, 8, 246, 24,
-        442, 39, 481, 18, 1, 247, 8, 247, 72,
-        499, 41, 540, 20, 1, 248, 8, 248, 74,
-        560, 47, 607, 26, 1, 249, 8, 250, 24,
+        3411, 35, 325, 19, 1, 236, 8, 236, 68,
+        3446, 37, 435, 21, 1, 237, 8, 237, 70,
+        3483, 41, 498, 25, 1, 238, 8, 239, 24,
+        3524, 41, 206, 20, 1, 240, 8, 240, 74,
+        3565, 39, 86, 18, 1, 241, 8, 241, 72,
+        3604, 47, 206, 20, 1, 242, 8, 243, 24,
+        3651, 39, 379, 18, 1, 244, 8, 244, 72,
+        3690, 42, 435, 21, 1, 245, 8, 246, 24,
+        3732, 39, 1104, 18, 1, 247, 8, 247, 72,
+        3771, 41, 3812, 20, 1, 248, 8, 248, 74,
+        3832, 47, 982, 26, 1, 249, 8, 250, 24,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_17: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageBackgroundTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 43, 65535, 255, 1, 251, 8,
+        3879, 43, 65535, 255, 1, 251, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_18: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageTextBaseHighBrushSystemBaseHighColorSystemControlPageTextBaseMediumBrushSystemBaseMediumColorSystemControlPageTextChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlErrorTextForegroundBrushSystemErrorTextColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 34, 34, 19, 1, 252, 8, 252, 67,
-        53, 36, 89, 21, 1, 253, 8, 253, 69,
-        110, 46, 156, 31, 1, 254, 8, 255, 24,
-        187, 37, 224, 20, 1, 256, 8, 256, 70,
+        3922, 34, 325, 19, 1, 252, 8, 252, 67,
+        3956, 36, 435, 21, 1, 253, 8, 253, 69,
+        3992, 46, 845, 31, 1, 254, 8, 255, 24,
+        4038, 37, 4075, 20, 1, 256, 8, 256, 70,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_19: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightListLowRevealBackgroundBrushSystemListMediumColorSystemControlHighlightListMediumRevealBackgroundBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 50, 50, 21, 1, 258, 8, 259, 24,
-        71, 53, 50, 21, 1, 260, 8, 261, 24,
+        4095, 50, 1160, 21, 1, 258, 8, 259, 24,
+        4145, 53, 1160, 21, 1, 260, 8, 261, 24,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_20: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAccentRevealBackgroundBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 49, 49, 17, 1, 262, 8, 263, 24,
+        4198, 49, 34, 17, 1, 262, 8, 263, 24,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundChromeWhiteRevealBorderBrushSystemChromeWhiteColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 51, 51, 22, 1, 268, 8, 269, 24,
+        4247, 51, 1047, 22, 1, 268, 8, 269, 24,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_22: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 53, 65535, 255, 1, 270, 8,
-        53, 51, 65535, 255, 1, 271, 8,
+        4298, 53, 65535, 255, 1, 270, 8,
+        4351, 51, 65535, 255, 1, 271, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_23: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransientBackgroundBrushSystemChromeMediumLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 37, 26, 1, 272, 8, 273, 24,
+        4402, 37, 982, 26, 1, 272, 8, 273, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_24: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDescriptionTextForegroundBrushSystemControlPageTextBaseMediumBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 43, 43, 36, 1, 274, 8, 274, 8,
+        4439, 43, 3956, 36, 1, 274, 8, 274, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_25: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentRevealBackgroundBrushSystemControlTransparentRevealBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 45, 65535, 255, 1, 277, 8,
-        45, 41, 65535, 255, 1, 278, 8,
+        4482, 45, 65535, 255, 1, 277, 8,
+        4527, 41, 65535, 255, 1, 278, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_26: rt::PackedRows = rt::PackedRows {
-    strings: "SystemRegionBrushSystemRegionColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 17, 17, 17, 1, 280, 8, 280, 50,
+        4568, 17, 4585, 17, 1, 280, 8, 280, 50,
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 2 of `FluentTheme.xaml`, each once (#855).
+const POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS: &str = "AccentButtonBackgroundSystemControlBackgroundAccentBrushAccentButtonBackgroundPointerOverSystemAccentColorLight1AccentButtonBackgroundPressedSystemAccentColorDark1AccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushSystemControlForegroundTransparentBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSystemControlBackgroundBaseMediumLowBrushSystemControlForegroundBaseHighBrushSystemControlHighlightBaseHighBrushRepeatButtonBackgroundRepeatButtonBackgroundPressedRepeatButtonBackgroundDisabledRepeatButtonForegroundRepeatButtonForegroundPointerOverRepeatButtonForegroundPressedRepeatButtonForegroundDisabledRepeatButtonBorderBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedRepeatButtonBorderBrushDisabledToggleButtonBackgroundToggleButtonBackgroundPressedToggleButtonBackgroundDisabledToggleButtonBackgroundCheckedSystemControlHighlightAccentBrushToggleButtonBackgroundCheckedPointerOverToggleButtonBackgroundCheckedPressedSystemControlHighlightBaseMediumLowBrushToggleButtonBackgroundCheckedDisabledToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundToggleButtonForegroundPointerOverToggleButtonForegroundPressedToggleButtonForegroundDisabledToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedToggleButtonBorderBrushDisabledToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedSystemControlTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabledGroupBoxBackgroundGroupBoxBorderBrushSystemControlForegroundBaseMediumBrushGroupBoxHeaderForegroundSystemBaseHighColorHyperlinkVisitedBrushHyperlinkVisitedColorHyperlinkButtonForegroundHyperlinkButtonForegroundPointerOverHyperlinkButtonForegroundPressedHyperlinkButtonForegroundDisabledHyperlinkButtonForegroundVisitedHyperlinkButtonForegroundVisitedPointerOverHyperlinkButtonBackgroundHyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressedHyperlinkButtonBackgroundDisabledHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabledComboBoxItemForegroundComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledComboBoxBackgroundUnfocusedComboBoxBackgroundBorderBrushFocusedComboBoxBackgroundBorderBrushUnfocusedComboBoxForegroundComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxPlaceHolderForegroundSystemControlPageTextBaseHighBrushComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownBackgroundSystemControlTransientBackgroundBrushComboBoxDropDownBorderBrushSystemControlTransientBorderBrushMenuFlyoutItemBackgroundMenuFlyoutItemBackgroundPointerOverMenuFlyoutItemBackgroundPressedMenuFlyoutItemBackgroundDisabledMenuFlyoutItemForegroundMenuFlyoutItemForegroundPointerOverMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledMenuFlyoutSubItemChevronMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledMenuFlyoutPresenterBackgroundMenuFlyoutPresenterBorderBrushTextControlForegroundTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledTextControlBorderBrushFocusedTextControlBorderBrushDisabledTextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledTextControlSelectionHighlightColorTextControlButtonBackgroundTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushPointerOverTextControlForegroundFocusedTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrushAutoCompleteBoxSuggestionsListBackgroundAutoCompleteBoxSuggestionsListBorderBrushCheckBoxForegroundUncheckedCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedPointerOverCheckBoxCheckBackgroundStrokeCheckedPressedCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverCheckBoxCheckBackgroundFillUncheckedPressedCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverSystemControlForegroundChromeWhiteBrushCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCalendarViewSelectedHoverBorderBrushCalendarViewSelectedPressedBorderBrushCalendarViewSelectedBorderBrushCalendarViewHoverBorderBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundCalendarViewBlackoutForegroundCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverCalendarViewNavigationButtonForegroundPressedCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverExpanderHeaderBackgroundSystemAltMediumHighColorExpanderHeaderBackgroundPointerOverExpanderHeaderBackgroundPressedExpanderHeaderBackgroundDisabledExpanderHeaderForegroundExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderForegroundDisabledExpanderHeaderBorderBrushSystemBaseLowColorExpanderHeaderBorderBrushPointerOverExpanderHeaderBorderBrushPressedExpanderHeaderBorderBrushDisabledExpanderChevronBackgroundExpanderChevronBackgroundPressedExpanderChevronBackgroundDisabledExpanderChevronForegroundExpanderChevronForegroundPointerOverExpanderChevronForegroundPressedExpanderChevronForegroundDisabledExpanderChevronBorderBrushExpanderChevronBorderBrushPointerOverExpanderChevronBorderBrushPressedExpanderChevronBorderBrushDisabledExpanderContentBackgroundSystemChromeMediumLowColorExpanderContentBorderBrushNotificationCardBackgroundBrushNotificationCardForegroundBrushNotificationCardProgressBackgroundBrushNotificationCardInformationBackgroundBrushNotificationCardSuccessBackgroundBrushNotificationCardWarningBackgroundBrushNotificationCardErrorBackgroundBrushRadioButtonForegroundRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledRadioButtonBackgroundRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeRadioButtonOuterEllipseStrokePointerOverRadioButtonOuterEllipseStrokePressedRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillRadioButtonOuterEllipseFillPointerOverRadioButtonOuterEllipseFillPressedRadioButtonOuterEllipseFillDisabledRadioButtonOuterEllipseCheckedStrokeRadioButtonOuterEllipseCheckedStrokePointerOverRadioButtonOuterEllipseCheckedStrokePressedRadioButtonOuterEllipseCheckedStrokeDisabledRadioButtonOuterEllipseCheckedFillRadioButtonOuterEllipseCheckedFillPointerOverRadioButtonOuterEllipseCheckedFillPressedRadioButtonOuterEllipseCheckedFillDisabledRadioButtonCheckGlyphFillRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabledSliderContainerBackgroundSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrushSliderThumbBackgroundPointerOverSliderThumbBackgroundPressedSliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderTrackFillSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillToggleSwitchContentForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchFillOffToggleSwitchFillOffPointerOverToggleSwitchFillOffPressedToggleSwitchFillOffDisabledToggleSwitchStrokeOffToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchFillOnToggleSwitchFillOnPointerOverToggleSwitchFillOnPressedToggleSwitchFillOnDisabledToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnToggleSwitchKnobFillOnPointerOverSystemControlHighlightChromeWhiteBrushToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledSystemControlPageBackgroundBaseLowBrushToolTipForegroundToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushDatePickerSpacerFillSystemControlForegroundBaseLowBrushDatePickerSpacerFillDisabledDatePickerButtonBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundDatePickerButtonBackgroundPointerOverDatePickerButtonBackgroundPressedDatePickerButtonBackgroundDisabledDatePickerButtonForegroundDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerFlyoutPresenterBackgroundDatePickerFlyoutPresenterBorderBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFillDateTimePickerFlyoutButtonBackgroundDateTimePickerFlyoutButtonBackgroundPointerOverDateTimePickerFlyoutButtonBackgroundPressedDateTimePickerFlyoutButtonBorderBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverDateTimePickerFlyoutButtonForegroundPressedTimePickerSpacerFillTimePickerSpacerFillDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundTimePickerButtonBackgroundPointerOverTimePickerButtonBackgroundPressedTimePickerButtonBackgroundDisabledTimePickerButtonForegroundTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFillTabControlBackgroundTabItemHeaderBackgroundUnselectedTabItemHeaderBackgroundUnselectedPointerOverTabItemHeaderBackgroundUnselectedPressedTabItemHeaderBackgroundSelectedTabItemHeaderBackgroundSelectedPointerOverTabItemHeaderBackgroundSelectedPressedTabItemHeaderBackgroundDisabledTabItemHeaderForegroundUnselectedTabItemHeaderForegroundUnselectedPointerOverTabItemHeaderForegroundUnselectedPressedTabItemHeaderForegroundSelectedTabItemHeaderForegroundSelectedPointerOverTabItemHeaderForegroundSelectedPressedTabItemHeaderForegroundDisabledTabItemHeaderSelectedPipeFillSystemControlHighlightAltAccentBrushScrollBarBackgroundScrollBarBackgroundPointerOverScrollBarForegroundScrollBarBorderBrushScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverScrollBarButtonArrowForegroundPressedSystemControlForegroundAltHighBrushScrollBarButtonArrowForegroundDisabledScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarThumbBackgroundColorScrollBarPanningThumbBackgroundColorSystemChromeDisabledLowColorTreeViewItemBackgroundTreeViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTreeViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTreeViewItemBackgroundDisabledTreeViewItemBackgroundSelectedSystemControlHighlightAccent3RevealBackgroundBrushTreeViewItemBackgroundSelectedPointerOverSystemControlHighlightAccent2RevealBackgroundBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTreeViewItemForegroundDisabledTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverSystemControlBackgroundTransparentRevealBorderBrushTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledSplitButtonBackgroundSplitButtonBackgroundPressedSplitButtonBackgroundDisabledSplitButtonBackgroundCheckedSplitButtonBackgroundCheckedPointerOverSplitButtonBackgroundCheckedPressedSplitButtonBackgroundCheckedDisabledSplitButtonForegroundSplitButtonForegroundPointerOverSplitButtonForegroundPressedSplitButtonForegroundDisabledSplitButtonForegroundCheckedSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonBorderBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSplitButtonBorderBrushDisabledSplitButtonBorderBrushCheckedSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabledSplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCalendarDatePickerForegroundCalendarDatePickerForegroundDisabledCalendarDatePickerCalendarGlyphForegroundCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerBackgroundCalendarDatePickerBackgroundPointerOverCalendarDatePickerBackgroundPressedCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverCalendarDatePickerBorderBrushPressedCalendarDatePickerBorderBrushDisabledCalendarDatePickerLightDismissOverlayBackgroundFlyoutBorderThemeBrushRefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrushTitleBarBackgroundBrushTableViewColumnHeaderSeparatorBackgroundTableViewRowForegroundDisabledTableViewRowBackgroundPointerOverTableViewRowForegroundPointerOverTableViewRowBackgroundPressedTableViewRowForegroundPressedTableViewRowBackgroundSelectedTableViewRowForegroundSelectedTableViewRowBackgroundSelectedPointerOverTableViewRowForegroundSelectedPointerOverTableViewRowBackgroundSelectedPressedTableViewRowForegroundSelectedPressed";
+
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_27: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundSystemControlBackgroundAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 34, 1, 7, 8, 7, 8,
@@ -1244,141 +1250,141 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_27: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_28: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundPointerOverSystemAccentColorLight1AccentButtonBackgroundPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 23, 1, 8, 8, 8, 66,
-        56, 29, 85, 22, 1, 9, 8, 9, 62,
+        56, 33, 89, 23, 1, 8, 8, 8, 66,
+        112, 29, 141, 22, 1, 9, 8, 9, 62,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_29: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushSystemControlForegroundTransparentBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 35, 1, 10, 8, 10, 8,
-        65, 22, 87, 39, 1, 11, 8, 11, 8,
-        126, 33, 87, 39, 1, 12, 8, 12, 8,
-        159, 29, 87, 39, 1, 13, 8, 13, 8,
-        188, 30, 218, 39, 1, 14, 8, 14, 8,
-        257, 23, 280, 39, 1, 15, 8, 15, 8,
-        319, 34, 280, 39, 1, 16, 8, 16, 8,
-        353, 30, 383, 38, 1, 17, 8, 17, 8,
-        421, 31, 452, 37, 1, 18, 8, 18, 8,
+        163, 30, 193, 35, 1, 10, 8, 10, 8,
+        228, 22, 250, 39, 1, 11, 8, 11, 8,
+        289, 33, 250, 39, 1, 12, 8, 12, 8,
+        322, 29, 250, 39, 1, 13, 8, 13, 8,
+        351, 30, 381, 39, 1, 14, 8, 14, 8,
+        420, 23, 443, 39, 1, 15, 8, 15, 8,
+        482, 34, 443, 39, 1, 16, 8, 16, 8,
+        516, 30, 546, 38, 1, 17, 8, 17, 8,
+        584, 31, 615, 37, 1, 18, 8, 18, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_30: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 16, 16, 35, 1, 20, 8, 20, 8,
+        6, 16, 193, 35, 1, 20, 8, 20, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_31: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushButtonForegroundSystemControlForegroundBaseHighBrushButtonForegroundPointerOverSystemControlHighlightBaseHighBrushButtonForegroundPressedButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushButtonBorderBrushSystemControlForegroundTransparentBrushButtonBorderBrushPointerOverButtonBorderBrushPressedSystemControlHighlightTransparentBrushButtonBorderBrushDisabledSystemControlDisabledTransparentBrushRepeatButtonBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 41, 1, 22, 8, 22, 8,
-        64, 24, 88, 35, 1, 23, 8, 23, 8,
-        123, 16, 139, 36, 1, 24, 8, 24, 8,
-        175, 27, 202, 35, 1, 25, 8, 25, 8,
-        237, 23, 202, 35, 1, 26, 8, 26, 8,
-        260, 24, 284, 39, 1, 27, 8, 27, 8,
-        323, 17, 340, 39, 1, 28, 8, 28, 8,
-        379, 28, 340, 39, 1, 29, 8, 29, 8,
-        407, 24, 431, 38, 1, 30, 8, 30, 8,
-        469, 25, 494, 37, 1, 31, 8, 31, 8,
-        531, 22, 88, 35, 1, 34, 8, 34, 8,
+        118, 23, 652, 41, 1, 22, 8, 22, 8,
+        169, 24, 193, 35, 1, 23, 8, 23, 8,
+        234, 16, 693, 36, 1, 24, 8, 24, 8,
+        295, 27, 729, 35, 1, 25, 8, 25, 8,
+        328, 23, 729, 35, 1, 26, 8, 26, 8,
+        357, 24, 381, 39, 1, 27, 8, 27, 8,
+        426, 17, 443, 39, 1, 28, 8, 28, 8,
+        488, 28, 443, 39, 1, 29, 8, 29, 8,
+        522, 24, 546, 38, 1, 30, 8, 30, 8,
+        590, 25, 615, 37, 1, 31, 8, 31, 8,
+        764, 22, 193, 35, 1, 34, 8, 34, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_32: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushRepeatButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushRepeatButtonForegroundSystemControlForegroundBaseHighBrushRepeatButtonForegroundPointerOverSystemControlHighlightBaseHighBrushRepeatButtonForegroundPressedRepeatButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRepeatButtonBorderBrushSystemControlForegroundTransparentBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedSystemControlHighlightTransparentBrushRepeatButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 41, 1, 37, 8, 37, 8,
-        70, 30, 100, 35, 1, 38, 8, 38, 8,
-        135, 22, 157, 36, 1, 39, 8, 39, 8,
-        193, 33, 226, 35, 1, 40, 8, 40, 8,
-        261, 29, 226, 35, 1, 41, 8, 41, 8,
-        290, 30, 320, 39, 1, 42, 8, 42, 8,
-        359, 23, 382, 39, 1, 43, 8, 43, 8,
-        421, 34, 382, 39, 1, 44, 8, 44, 8,
-        455, 30, 485, 38, 1, 45, 8, 45, 8,
-        523, 31, 554, 37, 1, 46, 8, 46, 8,
+        786, 29, 652, 41, 1, 37, 8, 37, 8,
+        815, 30, 193, 35, 1, 38, 8, 38, 8,
+        845, 22, 693, 36, 1, 39, 8, 39, 8,
+        867, 33, 729, 35, 1, 40, 8, 40, 8,
+        900, 29, 729, 35, 1, 41, 8, 41, 8,
+        929, 30, 381, 39, 1, 42, 8, 42, 8,
+        959, 23, 443, 39, 1, 43, 8, 43, 8,
+        982, 34, 443, 39, 1, 44, 8, 44, 8,
+        1016, 30, 546, 38, 1, 45, 8, 45, 8,
+        1046, 31, 615, 37, 1, 46, 8, 46, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_33: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 35, 1, 50, 8, 50, 8,
+        1077, 22, 193, 35, 1, 50, 8, 50, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_34: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 41, 1, 53, 8, 53, 8,
-        70, 30, 100, 35, 1, 54, 8, 54, 8,
-        135, 29, 164, 33, 1, 55, 8, 55, 8,
+        1099, 29, 652, 41, 1, 53, 8, 53, 8,
+        1128, 30, 193, 35, 1, 54, 8, 54, 8,
+        1158, 29, 1187, 33, 1, 55, 8, 55, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_35: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundCheckedPointerOverSystemAccentColorLight1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 40, 40, 23, 1, 56, 8, 57, 24,
+        1220, 40, 89, 23, 1, 56, 8, 57, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_36: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundCheckedPressedSystemControlHighlightBaseMediumLowBrushToggleButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundSystemControlForegroundBaseHighBrushToggleButtonForegroundPointerOverSystemControlHighlightBaseHighBrushToggleButtonForegroundPressedToggleButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushSystemControlForegroundTransparentBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedSystemControlHighlightTransparentBrushToggleButtonBorderBrushDisabledSystemControlDisabledTransparentBrushToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedSystemControlTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 40, 1, 58, 8, 58, 8,
-        76, 37, 113, 35, 1, 60, 8, 60, 8,
-        148, 35, 113, 35, 1, 61, 8, 61, 8,
-        183, 46, 113, 35, 1, 62, 8, 62, 8,
-        229, 42, 271, 41, 1, 64, 8, 64, 8,
-        312, 43, 113, 35, 1, 66, 8, 66, 8,
-        355, 22, 377, 36, 1, 68, 8, 68, 8,
-        413, 33, 446, 35, 1, 69, 8, 69, 8,
-        481, 29, 446, 35, 1, 70, 8, 70, 8,
-        510, 30, 540, 39, 1, 71, 8, 71, 8,
-        579, 29, 608, 41, 1, 72, 8, 72, 8,
-        649, 40, 608, 41, 1, 73, 8, 73, 8,
-        689, 36, 608, 41, 1, 75, 8, 75, 8,
-        725, 37, 540, 39, 1, 77, 8, 77, 8,
-        762, 35, 377, 36, 1, 79, 8, 79, 8,
-        797, 46, 446, 35, 1, 80, 8, 80, 8,
-        843, 42, 446, 35, 1, 82, 8, 82, 8,
-        885, 43, 540, 39, 1, 84, 8, 84, 8,
-        928, 23, 951, 39, 1, 86, 8, 86, 8,
-        990, 34, 951, 39, 1, 87, 8, 87, 8,
-        1024, 30, 1054, 38, 1, 88, 8, 88, 8,
-        1092, 31, 1123, 37, 1, 89, 8, 89, 8,
-        1160, 30, 1190, 41, 1, 90, 8, 90, 8,
-        1231, 41, 1190, 41, 1, 91, 8, 91, 8,
-        1272, 37, 1309, 29, 1, 93, 8, 93, 8,
-        1338, 38, 1123, 37, 1, 94, 8, 94, 8,
-        1376, 36, 951, 39, 1, 96, 8, 96, 8,
-        1412, 47, 36, 40, 1, 98, 8, 98, 8,
-        1459, 43, 1054, 38, 1, 100, 8, 100, 8,
-        1502, 44, 1123, 37, 1, 102, 8, 102, 8,
+        1260, 36, 1296, 40, 1, 58, 8, 58, 8,
+        1336, 37, 193, 35, 1, 60, 8, 60, 8,
+        1373, 35, 193, 35, 1, 61, 8, 61, 8,
+        1408, 46, 193, 35, 1, 62, 8, 62, 8,
+        1454, 42, 652, 41, 1, 64, 8, 64, 8,
+        1496, 43, 193, 35, 1, 66, 8, 66, 8,
+        1539, 22, 693, 36, 1, 68, 8, 68, 8,
+        1561, 33, 729, 35, 1, 69, 8, 69, 8,
+        1594, 29, 729, 35, 1, 70, 8, 70, 8,
+        1623, 30, 381, 39, 1, 71, 8, 71, 8,
+        1653, 29, 1682, 41, 1, 72, 8, 72, 8,
+        1723, 40, 1682, 41, 1, 73, 8, 73, 8,
+        1763, 36, 1682, 41, 1, 75, 8, 75, 8,
+        1799, 37, 381, 39, 1, 77, 8, 77, 8,
+        1836, 35, 693, 36, 1, 79, 8, 79, 8,
+        1871, 46, 729, 35, 1, 80, 8, 80, 8,
+        1917, 42, 729, 35, 1, 82, 8, 82, 8,
+        1959, 43, 381, 39, 1, 84, 8, 84, 8,
+        2002, 23, 443, 39, 1, 86, 8, 86, 8,
+        2025, 34, 443, 39, 1, 87, 8, 87, 8,
+        2059, 30, 546, 38, 1, 88, 8, 88, 8,
+        2089, 31, 615, 37, 1, 89, 8, 89, 8,
+        2120, 30, 2150, 41, 1, 90, 8, 90, 8,
+        2191, 41, 2150, 41, 1, 91, 8, 91, 8,
+        2232, 37, 2269, 29, 1, 93, 8, 93, 8,
+        2298, 38, 615, 37, 1, 94, 8, 94, 8,
+        2336, 36, 443, 39, 1, 96, 8, 96, 8,
+        2372, 47, 1296, 40, 1, 98, 8, 98, 8,
+        2419, 43, 546, 38, 1, 100, 8, 100, 8,
+        2462, 44, 615, 37, 1, 102, 8, 102, 8,
     ],
 };
 
@@ -1390,91 +1396,91 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_37: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_38: rt::PackedRows = rt::PackedRows {
-    strings: "GroupBoxBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 18, 65535, 255, 1, 110, 8,
+        2506, 18, 65535, 255, 1, 110, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_39: rt::PackedRows = rt::PackedRows {
-    strings: "GroupBoxBorderBrushSystemControlForegroundBaseMediumBrushGroupBoxHeaderForegroundSystemBaseHighColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 38, 1, 111, 8, 111, 8,
-        57, 24, 81, 19, 1, 112, 8, 112, 8,
+        2524, 19, 2543, 38, 1, 111, 8, 111, 8,
+        2581, 24, 2605, 19, 1, 112, 8, 112, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_40: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkVisitedBrushHyperlinkVisitedColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 21, 1, 116, 8, 116, 54,
+        2624, 21, 2645, 21, 1, 116, 8, 116, 54,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_41: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundSystemAccentColorHyperlinkButtonForegroundPointerOverHyperlinkButtonForegroundPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 17, 1, 117, 8, 117, 58,
-        42, 36, 25, 17, 1, 118, 8, 118, 69,
-        78, 32, 110, 22, 1, 119, 8, 119, 65,
+        2666, 25, 89, 17, 1, 117, 8, 117, 58,
+        2691, 36, 89, 17, 1, 118, 8, 118, 69,
+        2727, 32, 141, 22, 1, 119, 8, 119, 65,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_42: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 39, 1, 120, 8, 120, 8,
+        2759, 33, 381, 39, 1, 120, 8, 120, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_43: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundVisitedHyperlinkVisitedColorHyperlinkButtonForegroundVisitedPointerOver",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 21, 1, 121, 8, 121, 65,
-        53, 43, 32, 21, 1, 122, 8, 122, 76,
+        2792, 32, 2645, 21, 1, 121, 8, 121, 65,
+        2824, 43, 2645, 21, 1, 122, 8, 122, 76,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_44: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonBackgroundSystemControlTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 29, 1, 124, 8, 124, 8,
+        2867, 25, 2269, 29, 1, 124, 8, 124, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_45: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressed",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 0, 2304, 1, 125, 8,
-        36, 32, 0, 1536, 1, 126, 8,
+        2892, 36, 0, 2304, 1, 125, 8,
+        2928, 32, 0, 1536, 1, 126, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_46: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonBackgroundDisabledSystemControlTransparentBrushHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 29, 1, 127, 8, 127, 8,
-        62, 26, 33, 29, 1, 128, 8, 128, 8,
-        88, 37, 33, 29, 1, 129, 8, 129, 8,
-        125, 33, 33, 29, 1, 130, 8, 130, 8,
-        158, 34, 33, 29, 1, 131, 8, 131, 8,
+        2960, 33, 2269, 29, 1, 127, 8, 127, 8,
+        2993, 26, 2269, 29, 1, 128, 8, 128, 8,
+        3019, 37, 2269, 29, 1, 129, 8, 129, 8,
+        3056, 33, 2269, 29, 1, 130, 8, 130, 8,
+        3089, 34, 2269, 29, 1, 131, 8, 131, 8,
     ],
 };
 
@@ -1487,55 +1493,55 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_47: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_48: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxItemForegroundSystemControlForegroundBaseHighBrushComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSystemControlTransparentBrushComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledSystemControlBackgroundBaseLowBrushComboBoxBackgroundUnfocusedComboBoxBackgroundBorderBrushFocusedSystemControlHighlightTransparentBrushComboBoxBackgroundBorderBrushUnfocusedSystemControlHighlightBaseMediumLowBrushComboBoxForegroundComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxPlaceHolderForegroundSystemControlPageTextBaseHighBrushComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushSystemControlForegroundBaseMediumBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownBackgroundSystemControlTransientBackgroundBrushComboBoxDropDownBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 36, 1, 139, 8, 139, 8,
-        58, 29, 87, 38, 1, 140, 8, 140, 8,
-        125, 33, 87, 38, 1, 141, 8, 141, 8,
-        158, 30, 188, 39, 1, 142, 8, 142, 8,
-        227, 30, 87, 38, 1, 143, 8, 143, 8,
-        257, 37, 87, 38, 1, 144, 8, 144, 8,
-        294, 41, 87, 38, 1, 146, 8, 146, 8,
-        335, 38, 188, 39, 1, 148, 8, 148, 8,
-        373, 22, 395, 29, 1, 150, 8, 150, 8,
-        424, 29, 453, 37, 1, 151, 8, 151, 8,
-        490, 33, 523, 34, 1, 152, 8, 152, 8,
-        557, 30, 395, 29, 1, 153, 8, 153, 8,
-        587, 30, 617, 40, 1, 154, 8, 154, 8,
-        657, 37, 694, 41, 1, 155, 8, 155, 8,
-        735, 41, 776, 43, 1, 157, 8, 157, 8,
-        819, 38, 395, 29, 1, 159, 8, 159, 8,
-        857, 30, 395, 29, 1, 160, 8, 160, 8,
-        887, 34, 395, 29, 1, 161, 8, 161, 8,
-        921, 31, 395, 29, 1, 162, 8, 162, 8,
-        952, 31, 395, 29, 1, 163, 8, 163, 8,
-        983, 38, 395, 29, 1, 164, 8, 164, 8,
-        1021, 42, 395, 29, 1, 165, 8, 165, 8,
-        1063, 39, 395, 29, 1, 166, 8, 166, 8,
-        1102, 18, 1120, 40, 1, 167, 8, 167, 8,
-        1160, 29, 1189, 41, 1, 168, 8, 168, 8,
-        1230, 25, 1255, 38, 1, 169, 8, 169, 8,
-        1293, 26, 1319, 35, 1, 170, 8, 170, 8,
-        1354, 27, 617, 40, 1, 171, 8, 171, 8,
-        1381, 36, 1417, 38, 1, 172, 8, 172, 8,
-        1455, 38, 1493, 40, 1, 173, 8, 173, 8,
-        1533, 18, 22, 36, 1, 175, 8, 175, 8,
-        1551, 26, 188, 39, 1, 176, 8, 176, 8,
-        1577, 25, 87, 38, 1, 177, 8, 177, 8,
-        1602, 32, 87, 38, 1, 178, 8, 178, 8,
-        1634, 29, 1663, 34, 1, 179, 8, 179, 8,
-        1697, 43, 87, 38, 1, 180, 8, 180, 8,
-        1740, 19, 1759, 38, 1, 182, 8, 182, 8,
-        1797, 30, 1827, 41, 1, 183, 8, 183, 8,
-        1868, 26, 1894, 37, 1, 184, 8, 184, 8,
-        1931, 27, 1958, 33, 1, 185, 8, 185, 8,
-        1991, 31, 2022, 42, 1, 186, 8, 186, 8,
-        2064, 39, 188, 39, 1, 187, 8, 187, 8,
-        2103, 38, 2141, 44, 1, 189, 8, 189, 8,
-        2185, 45, 2141, 44, 1, 191, 8, 191, 8,
-        2230, 26, 2256, 37, 1, 193, 8, 193, 8,
-        2293, 27, 2320, 33, 1, 194, 8, 194, 8,
+        3123, 22, 693, 36, 1, 139, 8, 139, 8,
+        3145, 29, 3174, 38, 1, 140, 8, 140, 8,
+        3212, 33, 3174, 38, 1, 141, 8, 141, 8,
+        3245, 30, 381, 39, 1, 142, 8, 142, 8,
+        3275, 30, 3174, 38, 1, 143, 8, 143, 8,
+        3305, 37, 3174, 38, 1, 144, 8, 144, 8,
+        3342, 41, 3174, 38, 1, 146, 8, 146, 8,
+        3383, 38, 381, 39, 1, 148, 8, 148, 8,
+        3421, 22, 2269, 29, 1, 150, 8, 150, 8,
+        3443, 29, 3472, 37, 1, 151, 8, 151, 8,
+        3509, 33, 3542, 34, 1, 152, 8, 152, 8,
+        3576, 30, 2269, 29, 1, 153, 8, 153, 8,
+        3606, 30, 3636, 40, 1, 154, 8, 154, 8,
+        3676, 37, 3713, 41, 1, 155, 8, 155, 8,
+        3754, 41, 3795, 43, 1, 157, 8, 157, 8,
+        3838, 38, 2269, 29, 1, 159, 8, 159, 8,
+        3876, 30, 2269, 29, 1, 160, 8, 160, 8,
+        3906, 34, 2269, 29, 1, 161, 8, 161, 8,
+        3940, 31, 2269, 29, 1, 162, 8, 162, 8,
+        3971, 31, 2269, 29, 1, 163, 8, 163, 8,
+        4002, 38, 2269, 29, 1, 164, 8, 164, 8,
+        4040, 42, 2269, 29, 1, 165, 8, 165, 8,
+        4082, 39, 2269, 29, 1, 166, 8, 166, 8,
+        4121, 18, 4139, 40, 1, 167, 8, 167, 8,
+        4179, 29, 4208, 41, 1, 168, 8, 168, 8,
+        4249, 25, 4274, 38, 1, 169, 8, 169, 8,
+        4312, 26, 193, 35, 1, 170, 8, 170, 8,
+        4338, 27, 3636, 40, 1, 171, 8, 171, 8,
+        4365, 36, 546, 38, 1, 172, 8, 172, 8,
+        4401, 38, 1296, 40, 1, 173, 8, 173, 8,
+        4439, 18, 693, 36, 1, 175, 8, 175, 8,
+        4457, 26, 381, 39, 1, 176, 8, 176, 8,
+        4483, 25, 3174, 38, 1, 177, 8, 177, 8,
+        4508, 32, 3174, 38, 1, 178, 8, 178, 8,
+        4540, 29, 4569, 34, 1, 179, 8, 179, 8,
+        4603, 43, 3174, 38, 1, 180, 8, 180, 8,
+        4646, 19, 2543, 38, 1, 182, 8, 182, 8,
+        4665, 30, 4695, 41, 1, 183, 8, 183, 8,
+        4736, 26, 4762, 37, 1, 184, 8, 184, 8,
+        4799, 27, 4826, 33, 1, 185, 8, 185, 8,
+        4859, 31, 4890, 42, 1, 186, 8, 186, 8,
+        4932, 39, 381, 39, 1, 187, 8, 187, 8,
+        4971, 38, 5009, 44, 1, 189, 8, 189, 8,
+        5053, 45, 5009, 44, 1, 191, 8, 191, 8,
+        5098, 26, 5124, 37, 1, 193, 8, 193, 8,
+        5161, 27, 5188, 33, 1, 194, 8, 194, 8,
     ],
 };
 
@@ -1561,26 +1567,26 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_51: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_52: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutItemBackgroundSystemControlTransparentBrushMenuFlyoutItemBackgroundPointerOverSystemControlHighlightListLowBrushMenuFlyoutItemBackgroundPressedSystemControlHighlightListMediumBrushMenuFlyoutItemBackgroundDisabledMenuFlyoutItemForegroundSystemControlForegroundBaseHighBrushMenuFlyoutItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushMenuFlyoutSubItemChevronSystemControlForegroundBaseMediumHighBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundSystemControlForegroundBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 24, 24, 29, 1, 211, 8, 211, 8,
-        53, 35, 88, 34, 1, 212, 8, 212, 8,
-        122, 31, 153, 37, 1, 213, 8, 213, 8,
-        190, 32, 24, 29, 1, 214, 8, 214, 8,
-        222, 24, 246, 36, 1, 215, 8, 215, 8,
-        282, 35, 317, 38, 1, 216, 8, 216, 8,
-        355, 31, 317, 38, 1, 217, 8, 217, 8,
-        386, 32, 418, 39, 1, 218, 8, 218, 8,
-        457, 24, 481, 42, 1, 219, 8, 219, 8,
-        523, 35, 317, 38, 1, 220, 8, 220, 8,
-        558, 31, 317, 38, 1, 221, 8, 221, 8,
-        589, 37, 317, 38, 1, 222, 8, 222, 8,
-        626, 32, 418, 39, 1, 224, 8, 224, 8,
-        658, 47, 705, 38, 1, 225, 8, 225, 8,
-        743, 58, 801, 40, 1, 227, 8, 227, 8,
-        841, 54, 801, 40, 1, 229, 8, 229, 8,
-        895, 55, 418, 39, 1, 231, 8, 231, 8,
+        5221, 24, 2269, 29, 1, 211, 8, 211, 8,
+        5245, 35, 3542, 34, 1, 212, 8, 212, 8,
+        5280, 31, 3472, 37, 1, 213, 8, 213, 8,
+        5311, 32, 2269, 29, 1, 214, 8, 214, 8,
+        5343, 24, 693, 36, 1, 215, 8, 215, 8,
+        5367, 35, 3174, 38, 1, 216, 8, 216, 8,
+        5402, 31, 3174, 38, 1, 217, 8, 217, 8,
+        5433, 32, 381, 39, 1, 218, 8, 218, 8,
+        5465, 24, 4890, 42, 1, 219, 8, 219, 8,
+        5489, 35, 3174, 38, 1, 220, 8, 220, 8,
+        5524, 31, 3174, 38, 1, 221, 8, 221, 8,
+        5555, 37, 3174, 38, 1, 222, 8, 222, 8,
+        5592, 32, 381, 39, 1, 224, 8, 224, 8,
+        5624, 47, 2543, 38, 1, 225, 8, 225, 8,
+        5671, 58, 5729, 40, 1, 227, 8, 227, 8,
+        5769, 54, 5729, 40, 1, 229, 8, 229, 8,
+        5823, 55, 381, 39, 1, 231, 8, 231, 8,
     ],
 };
 
@@ -1592,11 +1598,11 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_53: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_54: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushMenuFlyoutPresenterBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 37, 1, 235, 8, 235, 8,
-        66, 30, 96, 33, 1, 236, 8, 236, 8,
+        5878, 29, 5124, 37, 1, 235, 8, 235, 8,
+        5907, 30, 5188, 33, 1, 236, 8, 236, 8,
     ],
 };
 
@@ -1608,209 +1614,209 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_55: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_56: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlForegroundSystemControlForegroundBaseHighBrushTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundSystemControlBackgroundAltMediumLowBrushTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledSystemControlBackgroundBaseLowBrushTextControlBorderBrushFocusedSystemControlHighlightAccentBrushTextControlBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 36, 1, 244, 8, 244, 8,
-        57, 32, 21, 36, 1, 245, 8, 245, 8,
-        89, 29, 118, 43, 1, 246, 8, 246, 8,
-        161, 21, 182, 40, 1, 247, 8, 247, 8,
-        222, 32, 254, 37, 1, 248, 8, 248, 8,
-        291, 29, 320, 35, 1, 249, 8, 249, 8,
-        355, 29, 384, 33, 1, 250, 8, 250, 8,
-        417, 30, 447, 33, 1, 251, 8, 251, 8,
+        5937, 21, 693, 36, 1, 244, 8, 244, 8,
+        5958, 32, 693, 36, 1, 245, 8, 245, 8,
+        5990, 29, 6019, 43, 1, 246, 8, 246, 8,
+        6062, 21, 4139, 40, 1, 247, 8, 247, 8,
+        6083, 32, 6115, 37, 1, 248, 8, 248, 8,
+        6152, 29, 193, 35, 1, 249, 8, 249, 8,
+        6181, 29, 1187, 33, 1, 250, 8, 250, 8,
+        6210, 30, 4826, 33, 1, 251, 8, 251, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_57: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlSelectionHighlightColorSystemControlHighlightAccentBrushTextControlButtonBackgroundSystemControlTransparentBrushTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedSystemControlHighlightAltChromeWhiteBrushTextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushSystemControlForegroundBaseMediumBrushTextControlBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushSystemControlForegroundBaseMediumHighBrushTextControlForegroundFocusedSystemControlForegroundBaseHighBrushTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrushAutoCompleteBoxSuggestionsListBackgroundSystemControlTransientBackgroundBrushAutoCompleteBoxSuggestionsListBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 36, 1, 253, 8, 253, 8,
-        68, 43, 32, 36, 1, 254, 8, 254, 8,
-        111, 40, 151, 43, 1, 256, 8, 256, 8,
-        194, 34, 228, 33, 1, 258, 8, 258, 8,
-        261, 27, 288, 29, 1, 259, 8, 259, 8,
-        317, 38, 288, 29, 1, 260, 8, 260, 8,
-        355, 34, 228, 33, 1, 261, 8, 261, 8,
-        389, 28, 288, 29, 1, 262, 8, 262, 8,
-        417, 39, 288, 29, 1, 263, 8, 263, 8,
-        456, 35, 288, 29, 1, 264, 8, 264, 8,
-        491, 38, 228, 33, 1, 265, 8, 265, 8,
-        529, 34, 563, 41, 1, 266, 8, 266, 8,
-        604, 28, 632, 35, 1, 268, 8, 268, 8,
-        667, 22, 689, 38, 1, 269, 8, 269, 8,
-        727, 33, 760, 41, 1, 270, 8, 270, 8,
-        491, 27, 801, 42, 1, 271, 8, 271, 8,
-        843, 28, 871, 36, 1, 272, 8, 272, 8,
-        907, 39, 946, 41, 1, 273, 8, 273, 8,
-        987, 40, 1027, 37, 1, 277, 8, 277, 8,
-        1064, 41, 1105, 33, 1, 279, 8, 279, 8,
+        6240, 32, 6272, 36, 1, 253, 8, 253, 8,
+        6308, 43, 6272, 36, 1, 254, 8, 254, 8,
+        6351, 40, 6019, 43, 1, 256, 8, 256, 8,
+        6391, 34, 1187, 33, 1, 258, 8, 258, 8,
+        6425, 27, 2269, 29, 1, 259, 8, 259, 8,
+        6452, 38, 2269, 29, 1, 260, 8, 260, 8,
+        6490, 34, 1187, 33, 1, 261, 8, 261, 8,
+        6524, 28, 2269, 29, 1, 262, 8, 262, 8,
+        6552, 39, 2269, 29, 1, 263, 8, 263, 8,
+        6591, 35, 2269, 29, 1, 264, 8, 264, 8,
+        6626, 38, 1187, 33, 1, 265, 8, 265, 8,
+        6664, 34, 1682, 41, 1, 266, 8, 266, 8,
+        6698, 28, 6726, 35, 1, 268, 8, 268, 8,
+        6181, 22, 2543, 38, 1, 269, 8, 269, 8,
+        6761, 33, 4695, 41, 1, 270, 8, 270, 8,
+        6626, 27, 4890, 42, 1, 271, 8, 271, 8,
+        6794, 28, 693, 36, 1, 272, 8, 272, 8,
+        6822, 39, 6861, 41, 1, 273, 8, 273, 8,
+        6902, 40, 5124, 37, 1, 277, 8, 277, 8,
+        6942, 41, 5188, 33, 1, 279, 8, 279, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_58: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxForegroundUncheckedSystemControlForegroundBaseHighBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledSystemControlDisabledBaseMediumLowBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSystemControlTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedSystemControlForegroundBaseMediumBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverSystemControlHighlightBaseMediumHighBrushCheckBoxCheckBackgroundStrokeUncheckedPressedSystemControlHighlightBaseHighBrushCheckBoxCheckBackgroundStrokeUncheckedDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 36, 1, 283, 8, 283, 8,
-        63, 38, 27, 36, 1, 284, 8, 284, 8,
-        101, 34, 27, 36, 1, 285, 8, 285, 8,
-        135, 35, 170, 39, 1, 286, 8, 286, 8,
-        209, 25, 27, 36, 1, 287, 8, 287, 8,
-        234, 36, 27, 36, 1, 288, 8, 288, 8,
-        270, 32, 27, 36, 1, 289, 8, 289, 8,
-        302, 33, 170, 39, 1, 290, 8, 290, 8,
-        335, 31, 27, 36, 1, 291, 8, 291, 8,
-        366, 42, 27, 36, 1, 292, 8, 292, 8,
-        408, 38, 27, 36, 1, 294, 8, 294, 8,
-        446, 39, 170, 39, 1, 295, 8, 295, 8,
-        485, 27, 512, 29, 1, 297, 8, 297, 8,
-        541, 38, 512, 29, 1, 298, 8, 298, 8,
-        579, 34, 512, 29, 1, 299, 8, 299, 8,
-        613, 35, 512, 29, 1, 300, 8, 300, 8,
-        648, 25, 512, 29, 1, 301, 8, 301, 8,
-        673, 36, 512, 29, 1, 302, 8, 302, 8,
-        709, 32, 512, 29, 1, 303, 8, 303, 8,
-        741, 33, 512, 29, 1, 304, 8, 304, 8,
-        774, 31, 512, 29, 1, 305, 8, 305, 8,
-        805, 42, 512, 29, 1, 306, 8, 306, 8,
-        847, 38, 512, 29, 1, 307, 8, 307, 8,
-        885, 39, 512, 29, 1, 308, 8, 308, 8,
-        924, 28, 512, 29, 1, 309, 8, 309, 8,
-        952, 39, 512, 29, 1, 310, 8, 310, 8,
-        991, 35, 512, 29, 1, 311, 8, 311, 8,
-        1026, 36, 512, 29, 1, 312, 8, 312, 8,
-        1062, 26, 512, 29, 1, 313, 8, 313, 8,
-        1088, 37, 512, 29, 1, 314, 8, 314, 8,
-        1125, 33, 512, 29, 1, 315, 8, 315, 8,
-        1158, 34, 512, 29, 1, 316, 8, 316, 8,
-        1192, 32, 512, 29, 1, 317, 8, 317, 8,
-        1224, 43, 512, 29, 1, 318, 8, 318, 8,
-        1267, 39, 512, 29, 1, 319, 8, 319, 8,
-        1306, 40, 512, 29, 1, 320, 8, 320, 8,
-        1346, 38, 1384, 38, 1, 321, 8, 321, 8,
-        1422, 49, 1471, 41, 1, 323, 8, 323, 8,
-        1512, 45, 1557, 35, 1, 325, 8, 325, 8,
-        1592, 46, 170, 39, 1, 327, 8, 327, 8,
+        6983, 27, 693, 36, 1, 283, 8, 283, 8,
+        7010, 38, 693, 36, 1, 284, 8, 284, 8,
+        7048, 34, 693, 36, 1, 285, 8, 285, 8,
+        7082, 35, 381, 39, 1, 286, 8, 286, 8,
+        7117, 25, 693, 36, 1, 287, 8, 287, 8,
+        7142, 36, 693, 36, 1, 288, 8, 288, 8,
+        7178, 32, 693, 36, 1, 289, 8, 289, 8,
+        7210, 33, 381, 39, 1, 290, 8, 290, 8,
+        7243, 31, 693, 36, 1, 291, 8, 291, 8,
+        7274, 42, 693, 36, 1, 292, 8, 292, 8,
+        7316, 38, 693, 36, 1, 294, 8, 294, 8,
+        7354, 39, 381, 39, 1, 295, 8, 295, 8,
+        7393, 27, 2269, 29, 1, 297, 8, 297, 8,
+        7420, 38, 2269, 29, 1, 298, 8, 298, 8,
+        7458, 34, 2269, 29, 1, 299, 8, 299, 8,
+        7492, 35, 2269, 29, 1, 300, 8, 300, 8,
+        7527, 25, 2269, 29, 1, 301, 8, 301, 8,
+        7552, 36, 2269, 29, 1, 302, 8, 302, 8,
+        7588, 32, 2269, 29, 1, 303, 8, 303, 8,
+        7620, 33, 2269, 29, 1, 304, 8, 304, 8,
+        7653, 31, 2269, 29, 1, 305, 8, 305, 8,
+        7684, 42, 2269, 29, 1, 306, 8, 306, 8,
+        7726, 38, 2269, 29, 1, 307, 8, 307, 8,
+        7764, 39, 2269, 29, 1, 308, 8, 308, 8,
+        7803, 28, 2269, 29, 1, 309, 8, 309, 8,
+        7831, 39, 2269, 29, 1, 310, 8, 310, 8,
+        7870, 35, 2269, 29, 1, 311, 8, 311, 8,
+        7905, 36, 2269, 29, 1, 312, 8, 312, 8,
+        7941, 26, 2269, 29, 1, 313, 8, 313, 8,
+        7967, 37, 2269, 29, 1, 314, 8, 314, 8,
+        8004, 33, 2269, 29, 1, 315, 8, 315, 8,
+        8037, 34, 2269, 29, 1, 316, 8, 316, 8,
+        8071, 32, 2269, 29, 1, 317, 8, 317, 8,
+        8103, 43, 2269, 29, 1, 318, 8, 318, 8,
+        8146, 39, 2269, 29, 1, 319, 8, 319, 8,
+        8185, 40, 2269, 29, 1, 320, 8, 320, 8,
+        8225, 38, 2543, 38, 1, 321, 8, 321, 8,
+        8263, 49, 4695, 41, 1, 323, 8, 323, 8,
+        8312, 45, 729, 35, 1, 325, 8, 325, 8,
+        8357, 46, 381, 39, 1, 327, 8, 327, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_59: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeCheckedPointerOverSystemAccentColorLight1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 47, 47, 23, 1, 329, 8, 330, 24,
+        8403, 47, 89, 23, 1, 329, 8, 330, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_60: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeCheckedPressedSystemControlHighlightTransparentBrushCheckBoxCheckBackgroundStrokeCheckedDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundStrokeIndeterminateSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 43, 43, 38, 1, 331, 8, 331, 8,
-        81, 44, 125, 29, 1, 333, 8, 333, 8,
-        154, 42, 196, 33, 1, 334, 8, 334, 8,
+        8450, 43, 546, 38, 1, 331, 8, 331, 8,
+        8493, 44, 2269, 29, 1, 333, 8, 333, 8,
+        8537, 42, 1187, 33, 1, 334, 8, 334, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_61: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundStrokeIndeterminatePressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 53, 53, 23, 1, 336, 8, 337, 24,
-        76, 49, 125, 22, 1, 338, 8, 339, 24,
+        8579, 53, 89, 23, 1, 336, 8, 337, 24,
+        8632, 49, 141, 22, 1, 338, 8, 339, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_62: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeIndeterminateDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverCheckBoxCheckBackgroundFillUncheckedPressedSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 50, 50, 29, 1, 340, 8, 340, 8,
-        79, 36, 50, 29, 1, 342, 8, 342, 8,
-        115, 47, 50, 29, 1, 343, 8, 343, 8,
-        162, 43, 205, 41, 1, 345, 8, 345, 8,
-        246, 44, 50, 29, 1, 347, 8, 347, 8,
-        290, 34, 324, 33, 1, 348, 8, 348, 8,
+        8681, 50, 2269, 29, 1, 340, 8, 340, 8,
+        8731, 36, 2269, 29, 1, 342, 8, 342, 8,
+        8767, 47, 2269, 29, 1, 343, 8, 343, 8,
+        8814, 43, 652, 41, 1, 345, 8, 345, 8,
+        8857, 44, 2269, 29, 1, 347, 8, 347, 8,
+        8901, 34, 1187, 33, 1, 348, 8, 348, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_63: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillCheckedPointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillCheckedPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 23, 1, 349, 8, 350, 24,
-        68, 41, 109, 22, 1, 351, 8, 352, 24,
+        8935, 45, 89, 23, 1, 349, 8, 350, 24,
+        8980, 41, 141, 22, 1, 351, 8, 352, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_64: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillCheckedDisabledSystemControlBackgroundBaseLowBrushCheckBoxCheckBackgroundFillIndeterminateSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 35, 1, 353, 8, 353, 8,
-        77, 40, 117, 33, 1, 355, 8, 355, 8,
+        9021, 42, 193, 35, 1, 353, 8, 353, 8,
+        9063, 40, 1187, 33, 1, 355, 8, 355, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_65: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillIndeterminatePressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 23, 1, 356, 8, 357, 24,
-        74, 47, 121, 22, 1, 358, 8, 359, 24,
+        9103, 51, 89, 23, 1, 356, 8, 357, 24,
+        9154, 47, 141, 22, 1, 358, 8, 359, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_66: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillIndeterminateDisabledSystemControlBackgroundBaseLowBrushCheckBoxCheckGlyphForegroundUncheckedSystemControlHighlightAltChromeWhiteBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverSystemControlForegroundChromeWhiteBrushCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCalendarViewSelectedHoverBorderBrushSystemControlHighlightListAccentMediumBrushCalendarViewSelectedPressedBorderBrushSystemControlHighlightListAccentHighBrushCalendarViewSelectedBorderBrushSystemControlHighlightAccentBrushCalendarViewHoverBorderBrushSystemControlHighlightBaseMediumLowBrushCalendarViewPressedBorderBrushSystemControlHighlightBaseMediumBrushCalendarViewTodayForegroundCalendarViewBlackoutForegroundSystemControlDisabledBaseMediumLowBrushCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundSystemControlForegroundBaseHighBrushCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundSystemControlBackgroundAltHighBrushCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundSystemControlTransparentBrushCalendarViewNavigationButtonForegroundPointerOverCalendarViewNavigationButtonForegroundPressedSystemControlForegroundBaseMediumBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverSystemControlHighlightTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 48, 48, 35, 1, 360, 8, 360, 8,
-        83, 37, 120, 41, 1, 362, 8, 362, 8,
-        161, 48, 120, 41, 1, 364, 8, 364, 8,
-        209, 44, 120, 41, 1, 366, 8, 366, 8,
-        253, 45, 120, 41, 1, 368, 8, 368, 8,
-        298, 35, 120, 41, 1, 370, 8, 370, 8,
-        333, 46, 379, 39, 1, 372, 8, 372, 8,
-        418, 42, 379, 39, 1, 374, 8, 374, 8,
-        460, 43, 379, 39, 1, 376, 8, 376, 8,
-        503, 41, 379, 39, 1, 378, 8, 378, 8,
-        544, 52, 379, 39, 1, 380, 8, 380, 8,
-        596, 48, 379, 39, 1, 382, 8, 382, 8,
-        644, 49, 379, 39, 1, 384, 8, 384, 8,
-        693, 36, 729, 43, 1, 388, 8, 388, 8,
-        772, 38, 810, 41, 1, 390, 8, 390, 8,
-        851, 31, 882, 33, 1, 392, 8, 392, 8,
-        915, 28, 943, 40, 1, 393, 8, 393, 8,
-        983, 30, 1013, 37, 1, 394, 8, 394, 8,
-        1050, 27, 120, 41, 1, 395, 8, 395, 8,
-        1077, 30, 1107, 39, 1, 396, 8, 396, 8,
-        1146, 32, 1178, 35, 1, 397, 8, 397, 8,
-        1213, 34, 1247, 36, 1, 398, 8, 398, 8,
-        1283, 32, 1315, 41, 1, 399, 8, 399, 8,
-        1356, 22, 1378, 41, 1, 400, 8, 400, 8,
-        1419, 22, 1441, 35, 1, 401, 8, 401, 8,
-        1476, 23, 1499, 40, 1, 402, 8, 402, 8,
-        1539, 37, 1107, 39, 1, 403, 8, 403, 8,
-        1576, 38, 1614, 29, 1, 405, 8, 405, 8,
-        1643, 49, 1247, 36, 1, 406, 8, 406, 8,
-        1692, 45, 1737, 38, 1, 408, 8, 408, 8,
-        1775, 40, 1815, 45, 1, 410, 8, 410, 8,
-        1860, 41, 1901, 41, 1, 412, 8, 412, 8,
-        1942, 50, 1992, 38, 1, 414, 8, 414, 8,
-        1942, 39, 1614, 29, 1, 416, 8, 416, 8,
+        9201, 48, 193, 35, 1, 360, 8, 360, 8,
+        9249, 37, 1682, 41, 1, 362, 8, 362, 8,
+        9286, 48, 1682, 41, 1, 364, 8, 364, 8,
+        9334, 44, 1682, 41, 1, 366, 8, 366, 8,
+        9378, 45, 1682, 41, 1, 368, 8, 368, 8,
+        9423, 35, 1682, 41, 1, 370, 8, 370, 8,
+        9458, 46, 9504, 39, 1, 372, 8, 372, 8,
+        9543, 42, 9504, 39, 1, 374, 8, 374, 8,
+        9585, 43, 9504, 39, 1, 376, 8, 376, 8,
+        9628, 41, 9504, 39, 1, 378, 8, 378, 8,
+        9669, 52, 9504, 39, 1, 380, 8, 380, 8,
+        9721, 48, 9504, 39, 1, 382, 8, 382, 8,
+        9769, 49, 9504, 39, 1, 384, 8, 384, 8,
+        9818, 36, 3795, 43, 1, 388, 8, 388, 8,
+        9854, 38, 3713, 41, 1, 390, 8, 390, 8,
+        9892, 31, 1187, 33, 1, 392, 8, 392, 8,
+        9923, 28, 1296, 40, 1, 393, 8, 393, 8,
+        9951, 30, 4762, 37, 1, 394, 8, 394, 8,
+        9981, 27, 1682, 41, 1, 395, 8, 395, 8,
+        10008, 30, 381, 39, 1, 396, 8, 396, 8,
+        10038, 32, 10070, 35, 1, 397, 8, 397, 8,
+        10105, 34, 693, 36, 1, 398, 8, 398, 8,
+        10139, 32, 10171, 41, 1, 399, 8, 399, 8,
+        10212, 22, 10234, 41, 1, 400, 8, 400, 8,
+        10275, 22, 6726, 35, 1, 401, 8, 401, 8,
+        10297, 23, 10320, 40, 1, 402, 8, 402, 8,
+        10360, 37, 381, 39, 1, 403, 8, 403, 8,
+        10397, 38, 2269, 29, 1, 405, 8, 405, 8,
+        10435, 49, 693, 36, 1, 406, 8, 406, 8,
+        10484, 45, 2543, 38, 1, 408, 8, 408, 8,
+        10529, 40, 10569, 45, 1, 410, 8, 410, 8,
+        10614, 41, 10655, 41, 1, 412, 8, 412, 8,
+        10696, 50, 546, 38, 1, 414, 8, 414, 8,
+        10696, 39, 2269, 29, 1, 416, 8, 416, 8,
     ],
 };
 
@@ -1823,181 +1829,181 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_67: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_68: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderHeaderBackgroundSystemAltMediumHighColorExpanderHeaderBackgroundPointerOverExpanderHeaderBackgroundPressedExpanderHeaderBackgroundDisabledExpanderHeaderForegroundSystemBaseHighColorExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushExpanderHeaderBorderBrushSystemBaseLowColorExpanderHeaderBorderBrushPointerOverExpanderHeaderBorderBrushPressedExpanderHeaderBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 24, 24, 24, 1, 424, 8, 424, 8,
-        48, 35, 24, 24, 1, 425, 8, 425, 8,
-        83, 31, 24, 24, 1, 426, 8, 426, 8,
-        114, 32, 24, 24, 1, 427, 8, 427, 8,
-        146, 24, 170, 19, 1, 428, 8, 428, 8,
-        189, 35, 170, 19, 1, 429, 8, 429, 8,
-        224, 31, 170, 19, 1, 430, 8, 430, 8,
-        255, 32, 287, 39, 1, 431, 8, 431, 8,
-        326, 25, 351, 18, 1, 432, 8, 432, 8,
-        369, 36, 351, 18, 1, 433, 8, 433, 8,
-        405, 32, 351, 18, 1, 434, 8, 434, 8,
-        437, 33, 470, 33, 1, 435, 8, 435, 8,
+        10746, 24, 10770, 24, 1, 424, 8, 424, 8,
+        10794, 35, 10770, 24, 1, 425, 8, 425, 8,
+        10829, 31, 10770, 24, 1, 426, 8, 426, 8,
+        10860, 32, 10770, 24, 1, 427, 8, 427, 8,
+        10892, 24, 2605, 19, 1, 428, 8, 428, 8,
+        10916, 35, 2605, 19, 1, 429, 8, 429, 8,
+        10951, 31, 2605, 19, 1, 430, 8, 430, 8,
+        10982, 32, 381, 39, 1, 431, 8, 431, 8,
+        11014, 25, 11039, 18, 1, 432, 8, 432, 8,
+        11057, 36, 11039, 18, 1, 433, 8, 433, 8,
+        11093, 32, 11039, 18, 1, 434, 8, 434, 8,
+        11125, 33, 4826, 33, 1, 435, 8, 435, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_69: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 65535, 255, 1, 437, 8,
+        11158, 25, 65535, 255, 1, 437, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_70: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBackgroundPressedExpanderChevronBackgroundDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 65535, 255, 1, 440, 8,
-        32, 33, 65535, 255, 1, 441, 8,
+        11183, 32, 65535, 255, 1, 440, 8,
+        11215, 33, 65535, 255, 1, 441, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_71: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronForegroundSystemBaseHighColorExpanderChevronForegroundPointerOverExpanderChevronForegroundPressedExpanderChevronForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 19, 1, 442, 8, 442, 8,
-        44, 36, 25, 19, 1, 443, 8, 443, 8,
-        80, 32, 25, 19, 1, 444, 8, 444, 8,
-        112, 33, 145, 39, 1, 445, 8, 445, 8,
+        11248, 25, 2605, 19, 1, 442, 8, 442, 8,
+        11273, 36, 2605, 19, 1, 443, 8, 443, 8,
+        11309, 32, 2605, 19, 1, 444, 8, 444, 8,
+        11341, 33, 381, 39, 1, 445, 8, 445, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_72: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBorderBrushExpanderChevronBorderBrushPointerOverExpanderChevronBorderBrushPressedExpanderChevronBorderBrushDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 65535, 255, 1, 446, 8,
-        26, 37, 65535, 255, 1, 447, 8,
-        63, 33, 65535, 255, 1, 448, 8,
-        96, 34, 65535, 255, 1, 449, 8,
+        11374, 26, 65535, 255, 1, 446, 8,
+        11400, 37, 65535, 255, 1, 447, 8,
+        11437, 33, 65535, 255, 1, 448, 8,
+        11470, 34, 65535, 255, 1, 449, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_73: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderContentBackgroundSystemChromeMediumLowColorExpanderContentBorderBrushSystemBaseLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 26, 1, 452, 8, 452, 8,
-        51, 26, 77, 18, 1, 453, 8, 453, 8,
+        11504, 25, 11529, 26, 1, 452, 8, 452, 8,
+        11555, 26, 11039, 18, 1, 453, 8, 453, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_74: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardBackgroundBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 65535, 65535, 1, 456, 8,
+        11581, 31, 65535, 65535, 1, 456, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_75: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardForegroundBrushSystemControlForegroundBaseHighBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 36, 1, 457, 8, 457, 8,
+        11612, 31, 693, 36, 1, 457, 8, 457, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_76: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardProgressBackgroundBrushNotificationCardInformationBackgroundBrushNotificationCardSuccessBackgroundBrushNotificationCardWarningBackgroundBrushNotificationCardErrorBackgroundBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39578, 65434, 1, 458, 8,
-        39, 42, 30932, 65280, 1, 459, 8,
-        81, 38, 35652, 65298, 1, 460, 8,
-        119, 38, 49942, 65535, 1, 461, 8,
-        157, 36, 14614, 65520, 1, 462, 8,
+        11643, 39, 39578, 65434, 1, 458, 8,
+        11682, 42, 30932, 65280, 1, 459, 8,
+        11724, 38, 35652, 65298, 1, 460, 8,
+        11762, 38, 49942, 65535, 1, 461, 8,
+        11800, 36, 14614, 65520, 1, 462, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_77: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonForegroundSystemControlForegroundBaseHighBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonBackgroundSystemControlTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeSystemControlForegroundBaseMediumBrushRadioButtonOuterEllipseStrokePointerOverSystemControlHighlightBaseMediumHighBrushRadioButtonOuterEllipseStrokePressedSystemControlHighlightBaseHighBrushRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillRadioButtonOuterEllipseFillPointerOverRadioButtonOuterEllipseFillPressedSystemControlBackgroundBaseMediumLowBrushRadioButtonOuterEllipseFillDisabledRadioButtonOuterEllipseCheckedStrokeSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 36, 1, 467, 8, 467, 8,
-        57, 32, 21, 36, 1, 468, 8, 468, 8,
-        89, 28, 21, 36, 1, 469, 8, 469, 8,
-        117, 29, 146, 39, 1, 470, 8, 470, 8,
-        185, 21, 206, 29, 1, 471, 8, 471, 8,
-        235, 32, 206, 29, 1, 472, 8, 472, 8,
-        267, 28, 206, 29, 1, 473, 8, 473, 8,
-        295, 29, 206, 29, 1, 474, 8, 474, 8,
-        324, 22, 206, 29, 1, 475, 8, 475, 8,
-        346, 33, 206, 29, 1, 476, 8, 476, 8,
-        379, 29, 206, 29, 1, 477, 8, 477, 8,
-        408, 30, 206, 29, 1, 478, 8, 478, 8,
-        438, 29, 467, 38, 1, 479, 8, 479, 8,
-        505, 40, 545, 41, 1, 480, 8, 480, 8,
-        586, 36, 622, 35, 1, 482, 8, 482, 8,
-        657, 37, 146, 39, 1, 483, 8, 483, 8,
-        694, 27, 206, 29, 1, 485, 8, 485, 8,
-        721, 38, 206, 29, 1, 486, 8, 486, 8,
-        759, 34, 793, 41, 1, 487, 8, 487, 8,
-        834, 35, 206, 29, 1, 489, 8, 489, 8,
-        869, 36, 905, 33, 1, 490, 8, 490, 8,
+        11836, 21, 693, 36, 1, 467, 8, 467, 8,
+        11857, 32, 693, 36, 1, 468, 8, 468, 8,
+        11889, 28, 693, 36, 1, 469, 8, 469, 8,
+        11917, 29, 381, 39, 1, 470, 8, 470, 8,
+        11946, 21, 2269, 29, 1, 471, 8, 471, 8,
+        11967, 32, 2269, 29, 1, 472, 8, 472, 8,
+        11999, 28, 2269, 29, 1, 473, 8, 473, 8,
+        12027, 29, 2269, 29, 1, 474, 8, 474, 8,
+        12056, 22, 2269, 29, 1, 475, 8, 475, 8,
+        12078, 33, 2269, 29, 1, 476, 8, 476, 8,
+        12111, 29, 2269, 29, 1, 477, 8, 477, 8,
+        12140, 30, 2269, 29, 1, 478, 8, 478, 8,
+        12170, 29, 2543, 38, 1, 479, 8, 479, 8,
+        12199, 40, 4695, 41, 1, 480, 8, 480, 8,
+        12239, 36, 729, 35, 1, 482, 8, 482, 8,
+        12275, 37, 381, 39, 1, 483, 8, 483, 8,
+        12312, 27, 2269, 29, 1, 485, 8, 485, 8,
+        12339, 38, 2269, 29, 1, 486, 8, 486, 8,
+        12377, 34, 652, 41, 1, 487, 8, 487, 8,
+        12411, 35, 2269, 29, 1, 489, 8, 489, 8,
+        12446, 36, 1187, 33, 1, 490, 8, 490, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_78: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedStrokePointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedStrokePressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 47, 47, 23, 1, 491, 8, 492, 24,
-        70, 43, 113, 22, 1, 493, 8, 494, 24,
+        12482, 47, 89, 23, 1, 491, 8, 492, 24,
+        12529, 43, 141, 22, 1, 493, 8, 494, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_79: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedStrokeDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonOuterEllipseCheckedFillSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 39, 1, 495, 8, 495, 8,
-        83, 34, 117, 33, 1, 497, 8, 497, 8,
+        12572, 44, 381, 39, 1, 495, 8, 495, 8,
+        12616, 34, 1187, 33, 1, 497, 8, 497, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_80: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedFillPointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedFillPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 23, 1, 498, 8, 499, 24,
-        68, 41, 109, 22, 1, 500, 8, 501, 24,
+        12650, 45, 89, 23, 1, 498, 8, 499, 24,
+        12695, 41, 141, 22, 1, 500, 8, 501, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_81: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedFillDisabledSystemControlBackgroundBaseMediumLowBrushRadioButtonCheckGlyphFillSystemControlForegroundChromeWhiteBrushRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeSystemControlTransparentBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 41, 1, 502, 8, 502, 8,
-        83, 25, 108, 39, 1, 504, 8, 504, 8,
-        147, 36, 108, 39, 1, 505, 8, 505, 8,
-        183, 32, 108, 39, 1, 507, 8, 507, 8,
-        215, 33, 108, 39, 1, 508, 8, 508, 8,
-        248, 27, 275, 29, 1, 509, 8, 509, 8,
-        304, 38, 275, 29, 1, 510, 8, 510, 8,
-        342, 34, 275, 29, 1, 511, 8, 511, 8,
-        376, 35, 275, 29, 1, 512, 8, 512, 8,
+        12736, 42, 652, 41, 1, 502, 8, 502, 8,
+        12778, 25, 9504, 39, 1, 504, 8, 504, 8,
+        12803, 36, 9504, 39, 1, 505, 8, 505, 8,
+        12839, 32, 9504, 39, 1, 507, 8, 507, 8,
+        12871, 33, 9504, 39, 1, 508, 8, 508, 8,
+        12904, 27, 2269, 29, 1, 509, 8, 509, 8,
+        12931, 38, 2269, 29, 1, 510, 8, 510, 8,
+        12969, 34, 2269, 29, 1, 511, 8, 511, 8,
+        13003, 35, 2269, 29, 1, 512, 8, 512, 8,
     ],
 };
 
@@ -2009,44 +2015,44 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_82: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_83: rt::PackedRows = rt::PackedRows {
-    strings: "SliderContainerBackgroundSystemControlTransparentBrushSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 29, 1, 518, 8, 518, 8,
-        54, 36, 25, 29, 1, 519, 8, 519, 8,
-        90, 32, 25, 29, 1, 520, 8, 520, 8,
-        122, 33, 25, 29, 1, 521, 8, 521, 8,
-        155, 21, 176, 34, 1, 522, 8, 522, 8,
+        13038, 25, 2269, 29, 1, 518, 8, 518, 8,
+        13063, 36, 2269, 29, 1, 519, 8, 519, 8,
+        13099, 32, 2269, 29, 1, 520, 8, 520, 8,
+        13131, 33, 2269, 29, 1, 521, 8, 521, 8,
+        13164, 21, 13185, 34, 1, 522, 8, 522, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_84: rt::PackedRows = rt::PackedRows {
-    strings: "SliderThumbBackgroundPointerOverSystemAccentColorLight1SliderThumbBackgroundPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 23, 1, 523, 8, 523, 65,
-        55, 28, 83, 22, 1, 524, 8, 524, 61,
+        13219, 32, 89, 23, 1, 523, 8, 523, 65,
+        13251, 28, 141, 22, 1, 524, 8, 524, 61,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_85: rt::PackedRows = rt::PackedRows {
-    strings: "SliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderTrackFillSystemControlForegroundBaseMediumLowBrushSliderTrackFillPointerOverSystemControlForegroundBaseMediumBrushSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSystemControlHighlightAccentBrushSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderTickBarFillSliderTickBarFillDisabledSystemControlDisabledBaseMediumLowBrushSliderInlineTickBarFillSystemControlBackgroundAltHighBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 44, 1, 525, 8, 525, 8,
-        73, 15, 88, 41, 1, 526, 8, 526, 8,
-        129, 26, 155, 38, 1, 527, 8, 527, 8,
-        193, 22, 88, 41, 1, 528, 8, 528, 8,
-        215, 23, 29, 44, 1, 529, 8, 529, 8,
-        238, 20, 258, 33, 1, 530, 8, 530, 8,
-        291, 31, 258, 33, 1, 531, 8, 531, 8,
-        322, 27, 258, 33, 1, 532, 8, 532, 8,
-        349, 28, 29, 44, 1, 533, 8, 533, 8,
-        377, 17, 88, 41, 1, 534, 8, 534, 8,
-        394, 25, 419, 39, 1, 535, 8, 535, 8,
-        458, 23, 481, 35, 1, 536, 8, 536, 8,
+        13279, 29, 13308, 44, 1, 525, 8, 525, 8,
+        13352, 15, 6861, 41, 1, 526, 8, 526, 8,
+        13367, 26, 2543, 38, 1, 527, 8, 527, 8,
+        13393, 22, 6861, 41, 1, 528, 8, 528, 8,
+        13415, 23, 13308, 44, 1, 529, 8, 529, 8,
+        13438, 20, 1187, 33, 1, 530, 8, 530, 8,
+        13458, 31, 1187, 33, 1, 531, 8, 531, 8,
+        13489, 27, 1187, 33, 1, 532, 8, 532, 8,
+        13516, 28, 13308, 44, 1, 533, 8, 533, 8,
+        13544, 17, 6861, 41, 1, 534, 8, 534, 8,
+        13561, 25, 381, 39, 1, 535, 8, 535, 8,
+        13586, 23, 6726, 35, 1, 536, 8, 536, 8,
     ],
 };
 
@@ -2058,117 +2064,117 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_86: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_87: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchContentForegroundSystemControlForegroundBaseHighBrushToggleSwitchHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchContainerBackgroundSystemControlTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchFillOffToggleSwitchFillOffPointerOverToggleSwitchFillOffPressedSystemControlHighlightBaseMediumLowBrushToggleSwitchFillOffDisabledToggleSwitchStrokeOffSystemControlForegroundBaseMediumBrushToggleSwitchStrokeOffPointerOverSystemControlHighlightBaseMediumHighBrushToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchFillOnSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 36, 1, 541, 8, 541, 8,
-        65, 36, 101, 39, 1, 542, 8, 542, 8,
-        140, 31, 171, 29, 1, 544, 8, 544, 8,
-        200, 42, 171, 29, 1, 545, 8, 545, 8,
-        242, 38, 171, 29, 1, 546, 8, 546, 8,
-        280, 19, 171, 29, 1, 547, 8, 547, 8,
-        299, 30, 171, 29, 1, 548, 8, 548, 8,
-        329, 26, 355, 40, 1, 549, 8, 549, 8,
-        395, 27, 171, 29, 1, 550, 8, 550, 8,
-        422, 21, 443, 38, 1, 551, 8, 551, 8,
-        481, 32, 513, 41, 1, 552, 8, 552, 8,
-        554, 28, 29, 36, 1, 553, 8, 553, 8,
-        582, 29, 101, 39, 1, 554, 8, 554, 8,
-        611, 18, 629, 33, 1, 555, 8, 555, 8,
+        13609, 29, 693, 36, 1, 541, 8, 541, 8,
+        13638, 36, 381, 39, 1, 542, 8, 542, 8,
+        13674, 31, 2269, 29, 1, 544, 8, 544, 8,
+        13705, 42, 2269, 29, 1, 545, 8, 545, 8,
+        13747, 38, 2269, 29, 1, 546, 8, 546, 8,
+        13785, 19, 2269, 29, 1, 547, 8, 547, 8,
+        13804, 30, 2269, 29, 1, 548, 8, 548, 8,
+        13834, 26, 1296, 40, 1, 549, 8, 549, 8,
+        13860, 27, 2269, 29, 1, 550, 8, 550, 8,
+        13887, 21, 2543, 38, 1, 551, 8, 551, 8,
+        13908, 32, 4695, 41, 1, 552, 8, 552, 8,
+        13940, 28, 693, 36, 1, 553, 8, 553, 8,
+        13968, 29, 381, 39, 1, 554, 8, 554, 8,
+        13997, 18, 1187, 33, 1, 555, 8, 555, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_88: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchFillOnPointerOverSystemAccentColorLight1ToggleSwitchFillOnPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 23, 1, 556, 8, 556, 62,
-        52, 25, 77, 22, 1, 557, 8, 557, 58,
+        14015, 29, 89, 23, 1, 556, 8, 556, 62,
+        14044, 25, 141, 22, 1, 557, 8, 557, 58,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_89: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchFillOnDisabledSystemControlDisabledBaseLowBrushToggleSwitchStrokeOnSystemControlHighlightBaseHighBrushToggleSwitchStrokeOnPointerOverSystemControlHighlightListAccentHighBrushToggleSwitchStrokeOnPressedSystemControlHighlightBaseMediumBrushToggleSwitchStrokeOnDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchKnobFillOffSystemControlForegroundBaseHighBrushToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnSystemControlHighlightAltChromeWhiteBrushToggleSwitchKnobFillOnPointerOverSystemControlHighlightChromeWhiteBrushToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledSystemControlPageBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 26, 33, 1, 558, 8, 558, 8,
-        59, 20, 79, 35, 1, 559, 8, 559, 8,
-        114, 31, 145, 41, 1, 560, 8, 560, 8,
-        186, 27, 213, 37, 1, 561, 8, 561, 8,
-        250, 28, 278, 39, 1, 562, 8, 562, 8,
-        317, 23, 340, 36, 1, 563, 8, 563, 8,
-        376, 34, 79, 35, 1, 564, 8, 564, 8,
-        410, 30, 79, 35, 1, 565, 8, 565, 8,
-        440, 31, 278, 39, 1, 566, 8, 566, 8,
-        471, 22, 493, 41, 1, 567, 8, 567, 8,
-        534, 33, 567, 38, 1, 568, 8, 568, 8,
-        605, 29, 493, 41, 1, 569, 8, 569, 8,
-        634, 30, 664, 39, 1, 570, 8, 570, 8,
+        14069, 26, 4826, 33, 1, 558, 8, 558, 8,
+        14095, 20, 729, 35, 1, 559, 8, 559, 8,
+        14115, 31, 3713, 41, 1, 560, 8, 560, 8,
+        14146, 27, 4762, 37, 1, 561, 8, 561, 8,
+        14173, 28, 381, 39, 1, 562, 8, 562, 8,
+        14201, 23, 693, 36, 1, 563, 8, 563, 8,
+        14224, 34, 729, 35, 1, 564, 8, 564, 8,
+        14258, 30, 729, 35, 1, 565, 8, 565, 8,
+        14288, 31, 381, 39, 1, 566, 8, 566, 8,
+        14319, 22, 1682, 41, 1, 567, 8, 567, 8,
+        14341, 33, 14374, 38, 1, 568, 8, 568, 8,
+        14412, 29, 1682, 41, 1, 569, 8, 569, 8,
+        14441, 30, 14471, 39, 1, 570, 8, 570, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_90: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundSystemControlForegroundBaseHighBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 17, 17, 36, 1, 575, 8, 575, 8,
-        53, 17, 70, 43, 1, 576, 8, 576, 8,
-        113, 18, 131, 33, 1, 577, 8, 577, 8,
+        14510, 17, 693, 36, 1, 575, 8, 575, 8,
+        14527, 17, 14544, 43, 1, 576, 8, 576, 8,
+        14587, 18, 5188, 33, 1, 577, 8, 577, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_91: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerSpacerFillSystemControlForegroundBaseLowBrushDatePickerSpacerFillDisabledSystemControlDisabledBaseLowBrushDatePickerButtonBorderBrushSystemControlForegroundBaseMediumBrushDatePickerButtonBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushDatePickerButtonBorderBrushPressedSystemControlHighlightBaseMediumBrushDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundSystemControlBackgroundAltMediumLowBrushDatePickerButtonBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushDatePickerButtonBackgroundPressedSystemControlBackgroundBaseLowBrushDatePickerButtonBackgroundDisabledDatePickerButtonForegroundSystemControlForegroundBaseHighBrushDatePickerButtonForegroundPointerOverSystemControlHighlightBaseHighBrushDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushDatePickerFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushDatePickerFlyoutPresenterBorderBrushSystemControlTransientBorderBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFillSystemControlHighlightListAccentLowBrushDateTimePickerFlyoutButtonBackgroundSystemControlTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSystemControlHighlightListLowBrushDateTimePickerFlyoutButtonBackgroundPressedSystemControlHighlightListMediumBrushDateTimePickerFlyoutButtonBorderBrushSystemControlForegroundTransparentBrushDateTimePickerFlyoutButtonBorderBrushPointerOverSystemControlHighlightTransparentBrushDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushDateTimePickerFlyoutButtonForegroundPressedTimePickerSpacerFillTimePickerSpacerFillDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundTimePickerButtonBackgroundPointerOverTimePickerButtonBackgroundPressedTimePickerButtonBackgroundDisabledTimePickerButtonForegroundTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFill",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 35, 1, 581, 8, 581, 8,
-        55, 28, 83, 33, 1, 582, 8, 582, 8,
-        116, 27, 143, 38, 1, 583, 8, 583, 8,
-        181, 38, 219, 41, 1, 584, 8, 584, 8,
-        260, 34, 294, 37, 1, 586, 8, 586, 8,
-        331, 35, 83, 33, 1, 587, 8, 587, 8,
-        366, 26, 392, 40, 1, 588, 8, 588, 8,
-        432, 37, 469, 41, 1, 589, 8, 589, 8,
-        510, 33, 543, 35, 1, 591, 8, 591, 8,
-        578, 34, 543, 35, 1, 592, 8, 592, 8,
-        612, 26, 638, 36, 1, 593, 8, 593, 8,
-        674, 37, 711, 35, 1, 594, 8, 594, 8,
-        746, 33, 711, 35, 1, 595, 8, 595, 8,
-        779, 34, 813, 39, 1, 596, 8, 596, 8,
-        852, 35, 887, 37, 1, 597, 8, 597, 8,
-        924, 36, 960, 33, 1, 598, 8, 598, 8,
-        993, 35, 20, 35, 1, 599, 8, 599, 8,
-        1028, 38, 1066, 40, 1, 600, 8, 600, 8,
-        1106, 36, 1142, 29, 1, 603, 8, 603, 8,
-        1171, 47, 1218, 34, 1, 604, 8, 604, 8,
-        1252, 43, 1295, 37, 1, 606, 8, 606, 8,
-        1332, 37, 1369, 39, 1, 608, 8, 608, 8,
-        1408, 48, 1456, 38, 1, 610, 8, 610, 8,
-        1494, 44, 1456, 38, 1, 612, 8, 612, 8,
-        1538, 47, 1585, 38, 1, 614, 8, 614, 8,
-        1623, 43, 1585, 38, 1, 616, 8, 616, 8,
-        1666, 20, 20, 35, 1, 620, 8, 620, 8,
-        1686, 28, 83, 33, 1, 621, 8, 621, 8,
-        1714, 27, 143, 38, 1, 622, 8, 622, 8,
-        1741, 38, 219, 41, 1, 623, 8, 623, 8,
-        1779, 34, 294, 37, 1, 625, 8, 625, 8,
-        1813, 35, 83, 33, 1, 626, 8, 626, 8,
-        1848, 26, 392, 40, 1, 627, 8, 627, 8,
-        1874, 37, 469, 41, 1, 628, 8, 628, 8,
-        1911, 33, 543, 35, 1, 630, 8, 630, 8,
-        1944, 34, 543, 35, 1, 631, 8, 631, 8,
-        1978, 26, 638, 36, 1, 632, 8, 632, 8,
-        2004, 37, 711, 35, 1, 633, 8, 633, 8,
-        2041, 33, 711, 35, 1, 634, 8, 634, 8,
-        2074, 34, 813, 39, 1, 635, 8, 635, 8,
-        2108, 35, 887, 37, 1, 636, 8, 636, 8,
-        2143, 36, 960, 33, 1, 637, 8, 637, 8,
-        2179, 35, 20, 35, 1, 638, 8, 638, 8,
-        2214, 38, 1066, 40, 1, 639, 8, 639, 8,
+        14605, 20, 14625, 35, 1, 581, 8, 581, 8,
+        14660, 28, 4826, 33, 1, 582, 8, 582, 8,
+        14688, 27, 2543, 38, 1, 583, 8, 583, 8,
+        14715, 38, 4695, 41, 1, 584, 8, 584, 8,
+        14753, 34, 4762, 37, 1, 586, 8, 586, 8,
+        14787, 35, 4826, 33, 1, 587, 8, 587, 8,
+        14822, 26, 4139, 40, 1, 588, 8, 588, 8,
+        14848, 37, 4208, 41, 1, 589, 8, 589, 8,
+        14885, 33, 193, 35, 1, 591, 8, 591, 8,
+        14918, 34, 193, 35, 1, 592, 8, 592, 8,
+        14952, 26, 693, 36, 1, 593, 8, 593, 8,
+        14978, 37, 729, 35, 1, 594, 8, 594, 8,
+        15015, 33, 729, 35, 1, 595, 8, 595, 8,
+        15048, 34, 381, 39, 1, 596, 8, 596, 8,
+        15082, 35, 5124, 37, 1, 597, 8, 597, 8,
+        15117, 36, 5188, 33, 1, 598, 8, 598, 8,
+        15153, 35, 14625, 35, 1, 599, 8, 599, 8,
+        15188, 38, 3636, 40, 1, 600, 8, 600, 8,
+        15226, 36, 2269, 29, 1, 603, 8, 603, 8,
+        15262, 47, 3542, 34, 1, 604, 8, 604, 8,
+        15309, 43, 3472, 37, 1, 606, 8, 606, 8,
+        15352, 37, 443, 39, 1, 608, 8, 608, 8,
+        15389, 48, 546, 38, 1, 610, 8, 610, 8,
+        15437, 44, 546, 38, 1, 612, 8, 612, 8,
+        15481, 47, 3174, 38, 1, 614, 8, 614, 8,
+        15528, 43, 3174, 38, 1, 616, 8, 616, 8,
+        15571, 20, 14625, 35, 1, 620, 8, 620, 8,
+        15591, 28, 4826, 33, 1, 621, 8, 621, 8,
+        15619, 27, 2543, 38, 1, 622, 8, 622, 8,
+        15646, 38, 4695, 41, 1, 623, 8, 623, 8,
+        15684, 34, 4762, 37, 1, 625, 8, 625, 8,
+        15718, 35, 4826, 33, 1, 626, 8, 626, 8,
+        15753, 26, 4139, 40, 1, 627, 8, 627, 8,
+        15779, 37, 4208, 41, 1, 628, 8, 628, 8,
+        15816, 33, 193, 35, 1, 630, 8, 630, 8,
+        15849, 34, 193, 35, 1, 631, 8, 631, 8,
+        15883, 26, 693, 36, 1, 632, 8, 632, 8,
+        15909, 37, 729, 35, 1, 633, 8, 633, 8,
+        15946, 33, 729, 35, 1, 634, 8, 634, 8,
+        15979, 34, 381, 39, 1, 635, 8, 635, 8,
+        16013, 35, 5124, 37, 1, 636, 8, 636, 8,
+        16048, 36, 5188, 33, 1, 637, 8, 637, 8,
+        16084, 35, 14625, 35, 1, 638, 8, 638, 8,
+        16119, 38, 3636, 40, 1, 639, 8, 639, 8,
     ],
 };
 
@@ -2180,73 +2186,73 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_92: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_93: rt::PackedRows = rt::PackedRows {
-    strings: "TabControlBackgroundSystemControlTransparentBrushTabItemHeaderBackgroundUnselectedTabItemHeaderBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushTabItemHeaderBackgroundUnselectedPressedTabItemHeaderBackgroundSelectedTabItemHeaderBackgroundSelectedPointerOverTabItemHeaderBackgroundSelectedPressedTabItemHeaderBackgroundDisabledTabItemHeaderForegroundUnselectedSystemControlForegroundBaseMediumBrushTabItemHeaderForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushTabItemHeaderForegroundUnselectedPressedTabItemHeaderForegroundSelectedSystemControlHighlightAltBaseHighBrushTabItemHeaderForegroundSelectedPointerOverTabItemHeaderForegroundSelectedPressedTabItemHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushTabItemHeaderSelectedPipeFillSystemControlHighlightAltAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 29, 1, 647, 8, 647, 8,
-        49, 33, 20, 29, 1, 650, 8, 650, 8,
-        82, 44, 126, 38, 1, 651, 8, 651, 8,
-        164, 40, 126, 38, 1, 653, 8, 653, 8,
-        204, 31, 126, 38, 1, 655, 8, 655, 8,
-        235, 42, 126, 38, 1, 656, 8, 656, 8,
-        277, 38, 126, 38, 1, 658, 8, 658, 8,
-        315, 31, 20, 29, 1, 660, 8, 660, 8,
-        346, 33, 379, 38, 1, 661, 8, 661, 8,
-        417, 44, 461, 44, 1, 662, 8, 662, 8,
-        505, 40, 461, 44, 1, 664, 8, 664, 8,
-        545, 31, 576, 38, 1, 666, 8, 666, 8,
-        614, 42, 461, 44, 1, 667, 8, 667, 8,
-        656, 38, 461, 44, 1, 669, 8, 669, 8,
-        694, 31, 725, 39, 1, 671, 8, 671, 8,
-        764, 29, 793, 36, 1, 672, 8, 672, 8,
+        16157, 20, 2269, 29, 1, 647, 8, 647, 8,
+        16177, 33, 2269, 29, 1, 650, 8, 650, 8,
+        16210, 44, 546, 38, 1, 651, 8, 651, 8,
+        16254, 40, 546, 38, 1, 653, 8, 653, 8,
+        16294, 31, 546, 38, 1, 655, 8, 655, 8,
+        16325, 42, 546, 38, 1, 656, 8, 656, 8,
+        16367, 38, 546, 38, 1, 658, 8, 658, 8,
+        16405, 31, 2269, 29, 1, 660, 8, 660, 8,
+        16436, 33, 2543, 38, 1, 661, 8, 661, 8,
+        16469, 44, 5009, 44, 1, 662, 8, 662, 8,
+        16513, 40, 5009, 44, 1, 664, 8, 664, 8,
+        16553, 31, 3174, 38, 1, 666, 8, 666, 8,
+        16584, 42, 5009, 44, 1, 667, 8, 667, 8,
+        16626, 38, 5009, 44, 1, 669, 8, 669, 8,
+        16664, 31, 381, 39, 1, 671, 8, 671, 8,
+        16695, 29, 16724, 36, 1, 672, 8, 672, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_94: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarBackgroundSystemControlTransparentBrushScrollBarBackgroundPointerOverScrollBarForegroundScrollBarBorderBrushScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundSystemControlForegroundBaseHighBrushScrollBarButtonArrowForegroundPointerOverScrollBarButtonArrowForegroundPressedSystemControlForegroundAltHighBrushScrollBarButtonArrowForegroundDisabledSystemControlForegroundBaseLowBrushScrollBarThumbFillPointerOverSystemControlBackgroundBaseMediumLowBrushScrollBarThumbFillPressedScrollBarThumbFillDisabledSystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 29, 1, 676, 8, 676, 8,
-        48, 30, 19, 29, 1, 677, 8, 677, 8,
-        78, 19, 19, 29, 1, 678, 8, 678, 8,
-        97, 20, 19, 29, 1, 679, 8, 679, 8,
-        117, 25, 19, 29, 1, 680, 8, 680, 8,
-        142, 36, 178, 35, 1, 681, 8, 681, 8,
-        213, 32, 245, 38, 1, 682, 8, 682, 8,
-        283, 33, 19, 29, 1, 683, 8, 683, 8,
-        316, 26, 19, 29, 1, 684, 8, 684, 8,
-        342, 37, 19, 29, 1, 685, 8, 685, 8,
-        379, 33, 19, 29, 1, 686, 8, 686, 8,
-        412, 34, 19, 29, 1, 687, 8, 687, 8,
-        446, 30, 476, 36, 1, 688, 8, 688, 8,
-        512, 41, 476, 36, 1, 689, 8, 689, 8,
-        553, 37, 590, 35, 1, 691, 8, 691, 8,
-        625, 38, 663, 35, 1, 692, 8, 692, 8,
-        698, 29, 727, 41, 1, 693, 8, 693, 8,
-        768, 25, 245, 38, 1, 694, 8, 694, 8,
-        793, 26, 819, 37, 1, 695, 8, 695, 8,
+        16760, 19, 2269, 29, 1, 676, 8, 676, 8,
+        16779, 30, 2269, 29, 1, 677, 8, 677, 8,
+        16809, 19, 2269, 29, 1, 678, 8, 678, 8,
+        16828, 20, 2269, 29, 1, 679, 8, 679, 8,
+        16848, 25, 2269, 29, 1, 680, 8, 680, 8,
+        16873, 36, 16909, 35, 1, 681, 8, 681, 8,
+        16944, 32, 16976, 38, 1, 682, 8, 682, 8,
+        17014, 33, 2269, 29, 1, 683, 8, 683, 8,
+        17047, 26, 2269, 29, 1, 684, 8, 684, 8,
+        17073, 37, 2269, 29, 1, 685, 8, 685, 8,
+        17110, 33, 2269, 29, 1, 686, 8, 686, 8,
+        17143, 34, 2269, 29, 1, 687, 8, 687, 8,
+        17177, 30, 693, 36, 1, 688, 8, 688, 8,
+        17207, 41, 693, 36, 1, 689, 8, 689, 8,
+        17248, 37, 17285, 35, 1, 691, 8, 691, 8,
+        17320, 38, 14625, 35, 1, 692, 8, 692, 8,
+        17358, 29, 652, 41, 1, 693, 8, 693, 8,
+        17387, 25, 16976, 38, 1, 694, 8, 694, 8,
+        17412, 26, 615, 37, 1, 695, 8, 695, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_95: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarTrackStrokeSystemControlForegroundTransparentBrushScrollBarTrackStrokePointerOverScrollBarThumbBackgroundColorSystemBaseLowColorScrollBarPanningThumbBackgroundColorSystemChromeDisabledLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 39, 1, 699, 8, 699, 8,
-        59, 31, 20, 39, 1, 700, 8, 700, 8,
-        90, 29, 119, 18, 1, 701, 8, 701, 8,
-        137, 36, 173, 28, 1, 702, 8, 702, 8,
+        17438, 20, 443, 39, 1, 699, 8, 699, 8,
+        17458, 31, 443, 39, 1, 700, 8, 700, 8,
+        17489, 29, 11039, 18, 1, 701, 8, 701, 8,
+        17518, 36, 17554, 28, 1, 702, 8, 702, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_96: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 36, 1, 703, 8, 704, 24,
+        17518, 31, 17518, 36, 1, 703, 8, 704, 24,
     ],
 };
 
@@ -2258,172 +2264,172 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_97: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_98: rt::PackedRows = rt::PackedRows {
-    strings: "TreeViewItemBackgroundSystemControlTransparentRevealBackgroundBrushTreeViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTreeViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTreeViewItemBackgroundDisabledSystemControlTransparentBrushTreeViewItemBackgroundSelectedSystemControlHighlightAccent3RevealBackgroundBrushTreeViewItemBackgroundSelectedPointerOverSystemControlHighlightAccent2RevealBackgroundBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledSystemControlDisabledBaseMediumLowBrushTreeViewItemForegroundSystemControlForegroundBaseHighBrushTreeViewItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushTreeViewItemForegroundPressedTreeViewItemForegroundDisabledTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverSystemControlBackgroundTransparentRevealBorderBrushTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 45, 1, 709, 8, 709, 8,
-        67, 33, 100, 50, 1, 710, 8, 710, 8,
-        150, 29, 179, 53, 1, 712, 8, 712, 8,
-        232, 30, 262, 29, 1, 714, 8, 714, 8,
-        291, 30, 321, 50, 1, 715, 8, 715, 8,
-        371, 41, 412, 50, 1, 717, 8, 717, 8,
-        462, 37, 179, 53, 1, 719, 8, 719, 8,
-        499, 38, 537, 39, 1, 721, 8, 721, 8,
-        576, 22, 598, 36, 1, 723, 8, 723, 8,
-        634, 33, 667, 38, 1, 724, 8, 724, 8,
-        705, 29, 667, 38, 1, 725, 8, 725, 8,
-        734, 30, 537, 39, 1, 726, 8, 726, 8,
-        764, 30, 667, 38, 1, 727, 8, 727, 8,
-        794, 41, 667, 38, 1, 728, 8, 728, 8,
-        835, 37, 667, 38, 1, 730, 8, 730, 8,
-        872, 38, 537, 39, 1, 732, 8, 732, 8,
-        910, 23, 262, 29, 1, 734, 8, 734, 8,
-        933, 34, 967, 53, 1, 735, 8, 735, 8,
-        1020, 30, 967, 53, 1, 737, 8, 737, 8,
-        1050, 31, 262, 29, 1, 739, 8, 739, 8,
-        1081, 31, 262, 29, 1, 740, 8, 740, 8,
-        1112, 42, 1154, 51, 1, 741, 8, 741, 8,
-        1205, 38, 1154, 51, 1, 743, 8, 743, 8,
-        1243, 39, 262, 29, 1, 745, 8, 745, 8,
+        17582, 22, 10569, 45, 1, 709, 8, 709, 8,
+        17604, 33, 17637, 50, 1, 710, 8, 710, 8,
+        17687, 29, 17716, 53, 1, 712, 8, 712, 8,
+        17769, 30, 2269, 29, 1, 714, 8, 714, 8,
+        17799, 30, 17829, 50, 1, 715, 8, 715, 8,
+        17879, 41, 17920, 50, 1, 717, 8, 717, 8,
+        17970, 37, 17716, 53, 1, 719, 8, 719, 8,
+        18007, 38, 381, 39, 1, 721, 8, 721, 8,
+        18045, 22, 693, 36, 1, 723, 8, 723, 8,
+        18067, 33, 3174, 38, 1, 724, 8, 724, 8,
+        18100, 29, 3174, 38, 1, 725, 8, 725, 8,
+        18129, 30, 381, 39, 1, 726, 8, 726, 8,
+        18159, 30, 3174, 38, 1, 727, 8, 727, 8,
+        18189, 41, 3174, 38, 1, 728, 8, 728, 8,
+        18230, 37, 3174, 38, 1, 730, 8, 730, 8,
+        18267, 38, 381, 39, 1, 732, 8, 732, 8,
+        18305, 23, 2269, 29, 1, 734, 8, 734, 8,
+        18328, 34, 18362, 53, 1, 735, 8, 735, 8,
+        18415, 30, 18362, 53, 1, 737, 8, 737, 8,
+        18445, 31, 2269, 29, 1, 739, 8, 739, 8,
+        18476, 31, 2269, 29, 1, 740, 8, 740, 8,
+        18507, 42, 18549, 51, 1, 741, 8, 741, 8,
+        18600, 38, 18549, 51, 1, 743, 8, 743, 8,
+        18638, 39, 2269, 29, 1, 745, 8, 745, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_99: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 35, 1, 750, 8, 750, 8,
+        18677, 21, 193, 35, 1, 750, 8, 750, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_100: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushSplitButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushSplitButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 41, 1, 753, 8, 753, 8,
-        69, 29, 98, 35, 1, 754, 8, 754, 8,
-        133, 28, 161, 33, 1, 755, 8, 755, 8,
+        18698, 28, 652, 41, 1, 753, 8, 753, 8,
+        18726, 29, 193, 35, 1, 754, 8, 754, 8,
+        18755, 28, 1187, 33, 1, 755, 8, 755, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_101: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundCheckedPointerOverSystemAccentColorLight1SplitButtonBackgroundCheckedPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 23, 1, 756, 8, 757, 24,
-        62, 35, 97, 22, 1, 758, 8, 758, 68,
+        18783, 39, 89, 23, 1, 756, 8, 757, 24,
+        18822, 35, 141, 22, 1, 758, 8, 758, 68,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_102: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushSplitButtonForegroundSystemControlForegroundBaseHighBrushSplitButtonForegroundPointerOverSystemControlHighlightBaseHighBrushSplitButtonForegroundPressedSplitButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushSplitButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonBorderBrushSystemControlForegroundTransparentBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSystemControlHighlightTransparentBrushSplitButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSplitButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 35, 1, 759, 8, 759, 8,
-        71, 21, 92, 36, 1, 760, 8, 760, 8,
-        128, 32, 160, 35, 1, 761, 8, 761, 8,
-        195, 28, 160, 35, 1, 762, 8, 762, 8,
-        223, 29, 252, 39, 1, 763, 8, 763, 8,
-        291, 28, 319, 41, 1, 764, 8, 764, 8,
-        360, 39, 319, 41, 1, 765, 8, 765, 8,
-        399, 35, 319, 41, 1, 767, 8, 767, 8,
-        434, 36, 252, 39, 1, 769, 8, 769, 8,
-        470, 22, 492, 39, 1, 771, 8, 771, 8,
-        531, 33, 492, 39, 1, 772, 8, 772, 8,
-        564, 29, 593, 38, 1, 773, 8, 773, 8,
-        631, 30, 661, 37, 1, 774, 8, 774, 8,
-        698, 29, 727, 41, 1, 775, 8, 775, 8,
-        768, 40, 727, 41, 1, 776, 8, 776, 8,
-        808, 36, 727, 41, 1, 778, 8, 778, 8,
-        844, 37, 661, 37, 1, 780, 8, 780, 8,
+        18857, 36, 193, 35, 1, 759, 8, 759, 8,
+        18893, 21, 693, 36, 1, 760, 8, 760, 8,
+        18914, 32, 729, 35, 1, 761, 8, 761, 8,
+        18946, 28, 729, 35, 1, 762, 8, 762, 8,
+        18974, 29, 381, 39, 1, 763, 8, 763, 8,
+        19003, 28, 1682, 41, 1, 764, 8, 764, 8,
+        19031, 39, 1682, 41, 1, 765, 8, 765, 8,
+        19070, 35, 1682, 41, 1, 767, 8, 767, 8,
+        19105, 36, 381, 39, 1, 769, 8, 769, 8,
+        19141, 22, 443, 39, 1, 771, 8, 771, 8,
+        19163, 33, 443, 39, 1, 772, 8, 772, 8,
+        19196, 29, 546, 38, 1, 773, 8, 773, 8,
+        19225, 30, 615, 37, 1, 774, 8, 774, 8,
+        19255, 29, 2150, 41, 1, 775, 8, 775, 8,
+        19284, 40, 2150, 41, 1, 776, 8, 776, 8,
+        19324, 36, 2150, 41, 1, 778, 8, 778, 8,
+        19360, 37, 615, 37, 1, 780, 8, 780, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_103: rt::PackedRows = rt::PackedRows {
-    strings: "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCalendarDatePickerForegroundSystemControlForegroundBaseHighBrushCalendarDatePickerForegroundDisabledSystemControlDisabledBaseMediumLowBrushCalendarDatePickerCalendarGlyphForegroundSystemControlForegroundBaseMediumHighBrushCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundSystemControlForegroundBaseMediumBrushCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerBackgroundSystemControlBackgroundAltMediumLowBrushCalendarDatePickerBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushCalendarDatePickerBackgroundPressedSystemControlBackgroundBaseLowBrushCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedSystemControlHighlightListAccentLowBrushCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushCalendarDatePickerBorderBrushPressedSystemControlHighlightBaseMediumBrushCalendarDatePickerBorderBrushDisabledSystemControlDisabledBaseLowBrushCalendarDatePickerLightDismissOverlayBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 38, 47, 1, 784, 8, 784, 8,
-        85, 28, 113, 36, 1, 788, 8, 788, 8,
-        149, 36, 185, 39, 1, 789, 8, 789, 8,
-        224, 41, 265, 42, 1, 791, 8, 791, 8,
-        307, 49, 185, 39, 1, 793, 8, 793, 8,
-        356, 32, 388, 38, 1, 795, 8, 795, 8,
-        426, 40, 185, 39, 1, 796, 8, 796, 8,
-        466, 40, 113, 36, 1, 798, 8, 798, 8,
-        506, 28, 534, 40, 1, 800, 8, 800, 8,
-        574, 39, 613, 41, 1, 801, 8, 801, 8,
-        654, 35, 689, 35, 1, 803, 8, 803, 8,
-        724, 36, 689, 35, 1, 804, 8, 804, 8,
-        760, 35, 795, 40, 1, 805, 8, 805, 8,
-        835, 29, 388, 38, 1, 807, 8, 807, 8,
-        864, 40, 904, 41, 1, 808, 8, 808, 8,
-        945, 36, 981, 37, 1, 810, 8, 810, 8,
-        1018, 37, 1055, 33, 1, 811, 8, 811, 8,
-        1088, 47, 38, 47, 1, 812, 8, 812, 8,
+        19397, 38, 19435, 47, 1, 784, 8, 784, 8,
+        19482, 28, 693, 36, 1, 788, 8, 788, 8,
+        19510, 36, 381, 39, 1, 789, 8, 789, 8,
+        19546, 41, 4890, 42, 1, 791, 8, 791, 8,
+        19587, 49, 381, 39, 1, 793, 8, 793, 8,
+        19636, 32, 2543, 38, 1, 795, 8, 795, 8,
+        19668, 40, 381, 39, 1, 796, 8, 796, 8,
+        19708, 40, 693, 36, 1, 798, 8, 798, 8,
+        19748, 28, 4139, 40, 1, 800, 8, 800, 8,
+        19776, 39, 4208, 41, 1, 801, 8, 801, 8,
+        19815, 35, 193, 35, 1, 803, 8, 803, 8,
+        19850, 36, 193, 35, 1, 804, 8, 804, 8,
+        19886, 35, 3636, 40, 1, 805, 8, 805, 8,
+        19921, 29, 2543, 38, 1, 807, 8, 807, 8,
+        19950, 40, 4695, 41, 1, 808, 8, 808, 8,
+        19990, 36, 4762, 37, 1, 810, 8, 810, 8,
+        20026, 37, 4826, 33, 1, 811, 8, 811, 8,
+        20063, 47, 19435, 47, 1, 812, 8, 812, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_104: rt::PackedRows = rt::PackedRows {
-    strings: "FlyoutPresenterBackgroundSystemControlBackgroundChromeMediumLowBrushFlyoutBorderThemeBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 43, 1, 817, 8, 817, 8,
-        68, 22, 90, 33, 1, 818, 8, 818, 8,
+        5882, 25, 14544, 43, 1, 817, 8, 817, 8,
+        20110, 22, 5188, 33, 1, 818, 8, 818, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_105: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 0, 65280, 1, 825, 8,
-        27, 27, 65535, 255, 1, 826, 8,
-        54, 23, 0, 65280, 1, 829, 8,
-        77, 23, 58853, 65509, 1, 830, 8,
-        100, 24, 51914, 65482, 1, 831, 8,
+        20132, 27, 0, 65280, 1, 825, 8,
+        20159, 27, 65535, 255, 1, 826, 8,
+        20186, 23, 0, 65280, 1, 829, 8,
+        20209, 23, 58853, 65509, 1, 830, 8,
+        20232, 24, 51914, 65482, 1, 831, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_106: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarBackgroundBrushSystemControlBackgroundAltHighBrushTableViewColumnHeaderSeparatorBackgroundSystemBaseLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 35, 1, 832, 8, 832, 8,
-        58, 40, 98, 18, 1, 835, 8, 835, 8,
+        20256, 23, 6726, 35, 1, 832, 8, 832, 8,
+        20279, 40, 11039, 18, 1, 835, 8, 835, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_107: rt::PackedRows = rt::PackedRows {
-    strings: "TableViewRowForegroundDisabledSystemControlDisabledBaseMediumLowBrushTableViewRowBackgroundPointerOverSystemControlHighlightListLowBrushTableViewRowForegroundPointerOverSystemControlHighlightAltBaseHighBrushTableViewRowBackgroundPressedSystemControlHighlightListMediumBrushTableViewRowForegroundPressedTableViewRowBackgroundSelectedSystemControlHighlightListAccentLowBrushTableViewRowForegroundSelectedTableViewRowBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushTableViewRowForegroundSelectedPointerOverTableViewRowBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushTableViewRowForegroundSelectedPressed",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 39, 1, 840, 8, 840, 8,
-        69, 33, 102, 34, 1, 841, 8, 841, 8,
-        136, 33, 169, 38, 1, 842, 8, 842, 8,
-        207, 29, 236, 37, 1, 843, 8, 843, 8,
-        273, 29, 169, 38, 1, 844, 8, 844, 8,
-        302, 30, 332, 40, 1, 845, 8, 845, 8,
-        372, 30, 169, 38, 1, 846, 8, 846, 8,
-        402, 41, 443, 43, 1, 847, 8, 847, 8,
-        486, 41, 169, 38, 1, 848, 8, 848, 8,
-        527, 37, 564, 41, 1, 849, 8, 849, 8,
-        605, 37, 169, 38, 1, 850, 8, 850, 8,
+        20319, 30, 381, 39, 1, 840, 8, 840, 8,
+        20349, 33, 3542, 34, 1, 841, 8, 841, 8,
+        20382, 33, 3174, 38, 1, 842, 8, 842, 8,
+        20415, 29, 3472, 37, 1, 843, 8, 843, 8,
+        20444, 29, 3174, 38, 1, 844, 8, 844, 8,
+        20473, 30, 3636, 40, 1, 845, 8, 845, 8,
+        20503, 30, 3174, 38, 1, 846, 8, 846, 8,
+        20533, 41, 3795, 43, 1, 847, 8, 847, 8,
+        20574, 41, 3174, 38, 1, 848, 8, 848, 8,
+        20615, 37, 3713, 41, 1, 849, 8, 849, 8,
+        20652, 37, 3174, 38, 1, 850, 8, 850, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_108: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAccentBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
         0, 34, 34, 17, 1, 283, 8, 283, 67,
@@ -2432,323 +2438,323 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_108: rt::PackedRows = rt::PackedRows {
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_109: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 18, 1, 284, 8, 284, 68,
-        53, 41, 94, 24, 1, 285, 8, 286, 24,
-        118, 37, 155, 20, 1, 287, 8, 287, 70,
-        175, 40, 215, 23, 1, 288, 8, 289, 24,
-        238, 36, 274, 19, 1, 290, 8, 290, 69,
-        293, 35, 328, 18, 1, 291, 8, 291, 68,
-        346, 38, 384, 21, 1, 292, 8, 292, 71,
-        405, 42, 447, 25, 1, 293, 8, 294, 24,
-        472, 41, 513, 24, 1, 295, 8, 296, 24,
-        537, 43, 580, 26, 1, 297, 8, 298, 24,
-        606, 45, 651, 28, 1, 299, 8, 300, 24,
-        679, 42, 721, 25, 1, 301, 8, 302, 24,
-        746, 48, 794, 31, 1, 303, 8, 304, 24,
-        825, 40, 865, 23, 1, 305, 8, 306, 24,
-        888, 43, 931, 26, 1, 307, 8, 308, 24,
-        957, 39, 996, 22, 1, 309, 8, 309, 72,
-        1018, 35, 1053, 18, 1, 310, 8, 310, 68,
-        1071, 38, 1109, 21, 1, 311, 8, 311, 71,
+        51, 35, 86, 18, 1, 284, 8, 284, 68,
+        104, 41, 145, 24, 1, 285, 8, 286, 24,
+        169, 37, 206, 20, 1, 287, 8, 287, 70,
+        226, 40, 266, 23, 1, 288, 8, 289, 24,
+        289, 36, 325, 19, 1, 290, 8, 290, 69,
+        344, 35, 379, 18, 1, 291, 8, 291, 68,
+        397, 38, 435, 21, 1, 292, 8, 292, 71,
+        456, 42, 498, 25, 1, 293, 8, 294, 24,
+        523, 41, 564, 24, 1, 295, 8, 296, 24,
+        588, 43, 631, 26, 1, 297, 8, 298, 24,
+        657, 45, 702, 28, 1, 299, 8, 300, 24,
+        730, 42, 772, 25, 1, 301, 8, 302, 24,
+        797, 48, 845, 31, 1, 303, 8, 304, 24,
+        876, 40, 916, 23, 1, 305, 8, 306, 24,
+        939, 43, 982, 26, 1, 307, 8, 308, 24,
+        1008, 39, 1047, 22, 1, 309, 8, 309, 72,
+        1069, 35, 1104, 18, 1, 310, 8, 310, 68,
+        1122, 38, 1160, 21, 1, 311, 8, 311, 71,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_110: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledAccentBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 32, 32, 17, 1, 312, 8, 312, 65,
+        1181, 32, 34, 17, 1, 312, 8, 312, 65,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_111: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledBaseHighBrushSystemBaseHighColorSystemControlDisabledBaseLowBrushSystemBaseLowColorSystemControlDisabledBaseMediumLowBrushSystemBaseMediumLowColorSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemChromeMediumLowColorSystemControlDisabledListMediumBrushSystemListMediumColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 34, 34, 19, 1, 313, 8, 313, 67,
-        53, 33, 86, 18, 1, 314, 8, 314, 66,
-        104, 39, 143, 24, 1, 315, 8, 316, 24,
-        167, 44, 211, 29, 1, 317, 8, 318, 24,
-        240, 43, 283, 28, 1, 319, 8, 320, 24,
-        311, 36, 347, 21, 1, 321, 8, 321, 69,
-        368, 41, 409, 26, 1, 322, 8, 323, 24,
-        435, 36, 471, 21, 1, 324, 8, 324, 69,
+        1213, 34, 325, 19, 1, 313, 8, 313, 67,
+        1247, 33, 379, 18, 1, 314, 8, 314, 66,
+        1280, 39, 564, 24, 1, 315, 8, 316, 24,
+        1319, 44, 1363, 29, 1, 317, 8, 318, 24,
+        1392, 43, 1435, 28, 1, 319, 8, 320, 24,
+        1463, 36, 1499, 21, 1, 321, 8, 321, 69,
+        1520, 41, 982, 26, 1, 322, 8, 323, 24,
+        1561, 36, 1160, 21, 1, 324, 8, 324, 69,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_112: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 65535, 255, 1, 325, 8,
+        1597, 37, 65535, 255, 1, 325, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_113: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlFocusVisualPrimaryBrushSystemBaseHighColorSystemControlFocusVisualSecondaryBrushSystemAltMediumColorSystemControlRevealFocusVisualBrushSystemAccentColorSystemControlForegroundAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 36, 36, 19, 1, 326, 8, 326, 69,
-        55, 38, 93, 20, 1, 327, 8, 327, 71,
-        113, 35, 148, 17, 1, 328, 8, 328, 68,
-        165, 34, 148, 17, 1, 329, 8, 329, 67,
+        1634, 36, 325, 19, 1, 326, 8, 326, 69,
+        1670, 38, 206, 20, 1, 327, 8, 327, 71,
+        1708, 35, 34, 17, 1, 328, 8, 328, 68,
+        1743, 34, 34, 17, 1, 329, 8, 329, 67,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_114: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundAltHighBrushSystemAltHighColorSystemControlForegroundAltMediumHighBrushSystemAltMediumHighColorSystemControlForegroundBaseHighBrushSystemBaseHighColorSystemControlForegroundBaseLowBrushSystemBaseLowColorSystemControlForegroundBaseMediumBrushSystemBaseMediumColorSystemControlForegroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlForegroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlForegroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlForegroundChromeHighBrushSystemChromeHighColorSystemControlForegroundChromeMediumBrushSystemChromeMediumColorSystemControlForegroundChromeWhiteBrushSystemChromeWhiteColorSystemControlForegroundChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemListLowColorSystemControlForegroundListMediumBrushSystemListMediumColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 18, 1, 330, 8, 330, 68,
-        53, 41, 94, 24, 1, 331, 8, 332, 24,
-        118, 36, 154, 19, 1, 333, 8, 333, 69,
-        173, 35, 208, 18, 1, 334, 8, 334, 68,
-        226, 38, 264, 21, 1, 335, 8, 335, 71,
-        285, 42, 327, 25, 1, 336, 8, 337, 24,
-        352, 41, 393, 24, 1, 338, 8, 339, 24,
-        417, 43, 460, 26, 1, 340, 8, 341, 24,
-        486, 38, 524, 21, 1, 342, 8, 342, 71,
-        545, 40, 585, 23, 1, 343, 8, 344, 24,
-        608, 39, 647, 22, 1, 345, 8, 345, 72,
-        669, 45, 714, 28, 1, 346, 8, 347, 24,
-        742, 38, 780, 21, 1, 348, 8, 348, 71,
-        801, 35, 836, 18, 1, 349, 8, 349, 68,
-        854, 38, 892, 21, 1, 350, 8, 350, 71,
+        1777, 35, 86, 18, 1, 330, 8, 330, 68,
+        1812, 41, 145, 24, 1, 331, 8, 332, 24,
+        1853, 36, 325, 19, 1, 333, 8, 333, 69,
+        1889, 35, 379, 18, 1, 334, 8, 334, 68,
+        1924, 38, 435, 21, 1, 335, 8, 335, 71,
+        1962, 42, 498, 25, 1, 336, 8, 337, 24,
+        2004, 41, 564, 24, 1, 338, 8, 339, 24,
+        2045, 43, 631, 26, 1, 340, 8, 341, 24,
+        2088, 38, 1499, 21, 1, 342, 8, 342, 71,
+        2126, 40, 916, 23, 1, 343, 8, 344, 24,
+        2211, 39, 1047, 22, 1, 345, 8, 345, 72,
+        2166, 45, 1435, 28, 1, 346, 8, 347, 24,
+        2343, 38, 2381, 21, 1, 348, 8, 348, 71,
+        2402, 35, 1104, 18, 1, 349, 8, 349, 68,
+        2437, 38, 1160, 21, 1, 350, 8, 350, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_115: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 39, 65535, 255, 1, 351, 8,
+        2475, 39, 65535, 255, 1, 351, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_116: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlForegroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlForegroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 45, 45, 28, 1, 352, 8, 353, 24,
-        73, 48, 121, 31, 1, 354, 8, 355, 24,
+        2250, 45, 702, 28, 1, 352, 8, 353, 24,
+        2295, 48, 845, 31, 1, 354, 8, 355, 24,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_117: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAccentBrushSystemAccentColorSystemControlHighlightAltAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 33, 33, 17, 1, 356, 8, 356, 66,
-        50, 36, 33, 17, 1, 357, 8, 357, 69,
+        2514, 33, 34, 17, 1, 356, 8, 356, 66,
+        2547, 36, 34, 17, 1, 357, 8, 357, 69,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_118: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltAltHighBrushSystemAltHighColorSystemControlHighlightAltBaseHighBrushSystemBaseHighColorSystemControlHighlightAltBaseLowBrushSystemBaseLowColorSystemControlHighlightAltBaseMediumBrushSystemBaseMediumColorSystemControlHighlightAltBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightAltAltMediumHighBrushSystemAltMediumHighColorSystemControlHighlightAltBaseMediumLowBrushSystemBaseMediumLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 37, 18, 1, 358, 8, 358, 70,
-        55, 38, 93, 19, 1, 359, 8, 359, 71,
-        112, 37, 149, 18, 1, 360, 8, 360, 70,
-        167, 40, 207, 21, 1, 361, 8, 361, 73,
-        228, 44, 272, 25, 1, 362, 8, 363, 24,
-        297, 43, 340, 24, 1, 364, 8, 365, 24,
-        364, 43, 407, 24, 1, 366, 8, 367, 24,
+        2583, 37, 86, 18, 1, 358, 8, 358, 70,
+        2620, 38, 325, 19, 1, 359, 8, 359, 71,
+        2658, 37, 379, 18, 1, 360, 8, 360, 70,
+        2695, 40, 435, 21, 1, 361, 8, 361, 73,
+        2735, 44, 498, 25, 1, 362, 8, 363, 24,
+        2779, 43, 145, 24, 1, 364, 8, 365, 24,
+        2822, 43, 564, 24, 1, 366, 8, 367, 24,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_119: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 41, 41, 22, 1, 374, 8, 375, 24,
+        2865, 41, 1047, 22, 1, 374, 8, 375, 24,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_120: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 41, 65535, 255, 1, 376, 8,
+        2906, 41, 65535, 255, 1, 376, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_121: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightBaseHighBrushSystemBaseHighColorSystemControlHighlightBaseLowBrushSystemBaseLowColorSystemControlHighlightBaseMediumBrushSystemBaseMediumColorSystemControlHighlightBaseMediumHighBrushSystemBaseMediumHighColorSystemControlHighlightBaseMediumLowBrushSystemBaseMediumLowColorSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemChromeHighColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 19, 1, 377, 8, 377, 68,
-        54, 34, 88, 18, 1, 378, 8, 378, 67,
-        106, 37, 143, 21, 1, 379, 8, 379, 70,
-        164, 41, 205, 25, 1, 380, 8, 381, 24,
-        230, 40, 270, 24, 1, 382, 8, 383, 24,
-        294, 39, 333, 23, 1, 384, 8, 384, 72,
-        356, 37, 393, 21, 1, 385, 8, 385, 70,
+        2947, 35, 325, 19, 1, 377, 8, 377, 68,
+        2982, 34, 379, 18, 1, 378, 8, 378, 67,
+        3016, 37, 435, 21, 1, 379, 8, 379, 70,
+        3053, 41, 498, 25, 1, 380, 8, 381, 24,
+        3094, 40, 564, 24, 1, 382, 8, 383, 24,
+        3134, 39, 3173, 23, 1, 384, 8, 384, 72,
+        3196, 37, 1499, 21, 1, 385, 8, 385, 70,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_122: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightListMediumBrushSystemListMediumColorSystemControlHighlightListLowBrushSystemListLowColorSystemControlHighlightChromeWhiteBrushSystemChromeWhiteColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 37, 21, 1, 392, 8, 392, 70,
-        58, 34, 92, 18, 1, 393, 8, 393, 67,
-        110, 38, 148, 22, 1, 394, 8, 394, 71,
+        3233, 37, 1160, 21, 1, 392, 8, 392, 70,
+        3270, 34, 1104, 18, 1, 393, 8, 393, 67,
+        3304, 38, 1047, 22, 1, 394, 8, 394, 71,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_123: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 38, 65535, 255, 1, 395, 8,
+        3342, 38, 65535, 255, 1, 395, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_124: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkTextBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 31, 31, 17, 1, 396, 8, 396, 64,
+        3380, 31, 34, 17, 1, 396, 8, 396, 64,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_125: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHyperlinkBaseHighBrushSystemBaseHighColorSystemControlHyperlinkBaseMediumBrushSystemBaseMediumColorSystemControlHyperlinkBaseMediumHighBrushSystemBaseMediumHighColorSystemControlPageBackgroundAltMediumBrushSystemAltMediumColorSystemControlPageBackgroundAltHighBrushSystemAltHighColorSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemBaseLowColorSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemListLowColorSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemChromeMediumLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 35, 35, 19, 1, 397, 8, 397, 68,
-        54, 37, 91, 21, 1, 398, 8, 398, 70,
-        112, 41, 153, 25, 1, 399, 8, 400, 24,
-        178, 41, 219, 20, 1, 401, 8, 401, 74,
-        239, 39, 278, 18, 1, 402, 8, 402, 72,
-        296, 47, 219, 20, 1, 403, 8, 404, 24,
-        343, 39, 382, 18, 1, 405, 8, 405, 72,
-        400, 42, 91, 21, 1, 406, 8, 407, 24,
-        442, 39, 481, 18, 1, 408, 8, 408, 72,
-        499, 41, 540, 20, 1, 409, 8, 409, 74,
-        560, 47, 607, 26, 1, 410, 8, 411, 24,
+        3411, 35, 325, 19, 1, 397, 8, 397, 68,
+        3446, 37, 435, 21, 1, 398, 8, 398, 70,
+        3483, 41, 498, 25, 1, 399, 8, 400, 24,
+        3524, 41, 206, 20, 1, 401, 8, 401, 74,
+        3565, 39, 86, 18, 1, 402, 8, 402, 72,
+        3604, 47, 206, 20, 1, 403, 8, 404, 24,
+        3651, 39, 379, 18, 1, 405, 8, 405, 72,
+        3690, 42, 435, 21, 1, 406, 8, 407, 24,
+        3732, 39, 1104, 18, 1, 408, 8, 408, 72,
+        3771, 41, 3812, 20, 1, 409, 8, 409, 74,
+        3832, 47, 982, 26, 1, 410, 8, 411, 24,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_126: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageBackgroundTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 43, 65535, 255, 1, 412, 8,
+        3879, 43, 65535, 255, 1, 412, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_127: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlPageTextBaseHighBrushSystemBaseHighColorSystemControlPageTextBaseMediumBrushSystemBaseMediumColorSystemControlPageTextChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlErrorTextForegroundBrushSystemErrorTextColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 34, 34, 19, 1, 413, 8, 413, 67,
-        53, 36, 89, 21, 1, 414, 8, 414, 69,
-        110, 46, 156, 31, 1, 415, 8, 416, 24,
-        187, 37, 224, 20, 1, 417, 8, 417, 70,
+        3922, 34, 325, 19, 1, 413, 8, 413, 67,
+        3956, 36, 435, 21, 1, 414, 8, 414, 69,
+        3992, 46, 845, 31, 1, 415, 8, 416, 24,
+        4038, 37, 4075, 20, 1, 417, 8, 417, 70,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_128: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightListLowRevealBackgroundBrushSystemListMediumColorSystemControlHighlightListMediumRevealBackgroundBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 50, 50, 21, 1, 419, 8, 420, 24,
-        71, 53, 50, 21, 1, 421, 8, 422, 24,
+        4095, 50, 1160, 21, 1, 419, 8, 420, 24,
+        4145, 53, 1160, 21, 1, 421, 8, 422, 24,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_129: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAccentRevealBackgroundBrushSystemAccentColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 49, 49, 17, 1, 423, 8, 424, 24,
+        4198, 49, 34, 17, 1, 423, 8, 424, 24,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_130: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlBackgroundChromeWhiteRevealBorderBrushSystemChromeWhiteColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 51, 51, 22, 1, 429, 8, 430, 24,
+        4247, 51, 1047, 22, 1, 429, 8, 430, 24,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_131: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 53, 65535, 255, 1, 431, 8,
-        53, 51, 65535, 255, 1, 432, 8,
+        4298, 53, 65535, 255, 1, 431, 8,
+        4351, 51, 65535, 255, 1, 432, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_132: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransientBackgroundBrushSystemChromeMediumLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 37, 37, 26, 1, 433, 8, 434, 24,
+        4402, 37, 982, 26, 1, 433, 8, 434, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_133: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlDescriptionTextForegroundBrushSystemControlPageTextBaseMediumBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 43, 43, 36, 1, 435, 8, 435, 8,
+        4439, 43, 3956, 36, 1, 435, 8, 435, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_134: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentRevealBackgroundBrushSystemControlTransparentRevealBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 45, 65535, 255, 1, 437, 8,
-        45, 41, 65535, 255, 1, 438, 8,
+        4482, 45, 65535, 255, 1, 437, 8,
+        4527, 41, 65535, 255, 1, 438, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_135: rt::PackedRows = rt::PackedRows {
-    strings: "SystemRegionBrushSystemRegionColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 17, 17, 17, 1, 440, 8, 440, 50,
+        4568, 17, 4585, 17, 1, 440, 8, 440, 50,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_136: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundSystemControlBackgroundAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
         0, 22, 22, 34, 1, 855, 8, 855, 8,
@@ -2757,141 +2763,141 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_136: rt::PackedRows = rt::PackedRows {
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_137: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundPointerOverSystemAccentColorLight1AccentButtonBackgroundPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 23, 1, 856, 8, 856, 66,
-        56, 29, 85, 22, 1, 857, 8, 857, 62,
+        56, 33, 89, 23, 1, 856, 8, 856, 66,
+        112, 29, 141, 22, 1, 857, 8, 857, 62,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_138: rt::PackedRows = rt::PackedRows {
-    strings: "AccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushSystemControlForegroundTransparentBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 35, 1, 858, 8, 858, 8,
-        65, 22, 87, 39, 1, 859, 8, 859, 8,
-        126, 33, 87, 39, 1, 860, 8, 860, 8,
-        159, 29, 87, 39, 1, 861, 8, 861, 8,
-        188, 30, 218, 39, 1, 862, 8, 862, 8,
-        257, 23, 280, 39, 1, 863, 8, 863, 8,
-        319, 34, 280, 39, 1, 864, 8, 864, 8,
-        353, 30, 383, 38, 1, 865, 8, 865, 8,
-        421, 31, 452, 37, 1, 866, 8, 866, 8,
+        163, 30, 193, 35, 1, 858, 8, 858, 8,
+        228, 22, 250, 39, 1, 859, 8, 859, 8,
+        289, 33, 250, 39, 1, 860, 8, 860, 8,
+        322, 29, 250, 39, 1, 861, 8, 861, 8,
+        351, 30, 381, 39, 1, 862, 8, 862, 8,
+        420, 23, 443, 39, 1, 863, 8, 863, 8,
+        482, 34, 443, 39, 1, 864, 8, 864, 8,
+        516, 30, 546, 38, 1, 865, 8, 865, 8,
+        584, 31, 615, 37, 1, 866, 8, 866, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_139: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 16, 16, 35, 1, 868, 8, 868, 8,
+        6, 16, 193, 35, 1, 868, 8, 868, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_140: rt::PackedRows = rt::PackedRows {
-    strings: "ButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushButtonForegroundSystemControlForegroundBaseHighBrushButtonForegroundPointerOverSystemControlHighlightBaseHighBrushButtonForegroundPressedButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushButtonBorderBrushSystemControlForegroundTransparentBrushButtonBorderBrushPointerOverButtonBorderBrushPressedSystemControlHighlightTransparentBrushButtonBorderBrushDisabledSystemControlDisabledTransparentBrushRepeatButtonBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 41, 1, 870, 8, 870, 8,
-        64, 24, 88, 35, 1, 871, 8, 871, 8,
-        123, 16, 139, 36, 1, 872, 8, 872, 8,
-        175, 27, 202, 35, 1, 873, 8, 873, 8,
-        237, 23, 202, 35, 1, 874, 8, 874, 8,
-        260, 24, 284, 39, 1, 875, 8, 875, 8,
-        323, 17, 340, 39, 1, 876, 8, 876, 8,
-        379, 28, 340, 39, 1, 877, 8, 877, 8,
-        407, 24, 431, 38, 1, 878, 8, 878, 8,
-        469, 25, 494, 37, 1, 879, 8, 879, 8,
-        531, 22, 88, 35, 1, 882, 8, 882, 8,
+        118, 23, 652, 41, 1, 870, 8, 870, 8,
+        169, 24, 193, 35, 1, 871, 8, 871, 8,
+        234, 16, 693, 36, 1, 872, 8, 872, 8,
+        295, 27, 729, 35, 1, 873, 8, 873, 8,
+        328, 23, 729, 35, 1, 874, 8, 874, 8,
+        357, 24, 381, 39, 1, 875, 8, 875, 8,
+        426, 17, 443, 39, 1, 876, 8, 876, 8,
+        488, 28, 443, 39, 1, 877, 8, 877, 8,
+        522, 24, 546, 38, 1, 878, 8, 878, 8,
+        590, 25, 615, 37, 1, 879, 8, 879, 8,
+        764, 22, 193, 35, 1, 882, 8, 882, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_141: rt::PackedRows = rt::PackedRows {
-    strings: "RepeatButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushRepeatButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushRepeatButtonForegroundSystemControlForegroundBaseHighBrushRepeatButtonForegroundPointerOverSystemControlHighlightBaseHighBrushRepeatButtonForegroundPressedRepeatButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRepeatButtonBorderBrushSystemControlForegroundTransparentBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedSystemControlHighlightTransparentBrushRepeatButtonBorderBrushDisabledSystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 41, 1, 885, 8, 885, 8,
-        70, 30, 100, 35, 1, 886, 8, 886, 8,
-        135, 22, 157, 36, 1, 887, 8, 887, 8,
-        193, 33, 226, 35, 1, 888, 8, 888, 8,
-        261, 29, 226, 35, 1, 889, 8, 889, 8,
-        290, 30, 320, 39, 1, 890, 8, 890, 8,
-        359, 23, 382, 39, 1, 891, 8, 891, 8,
-        421, 34, 382, 39, 1, 892, 8, 892, 8,
-        455, 30, 485, 38, 1, 893, 8, 893, 8,
-        523, 31, 554, 37, 1, 894, 8, 894, 8,
+        786, 29, 652, 41, 1, 885, 8, 885, 8,
+        815, 30, 193, 35, 1, 886, 8, 886, 8,
+        845, 22, 693, 36, 1, 887, 8, 887, 8,
+        867, 33, 729, 35, 1, 888, 8, 888, 8,
+        900, 29, 729, 35, 1, 889, 8, 889, 8,
+        929, 30, 381, 39, 1, 890, 8, 890, 8,
+        959, 23, 443, 39, 1, 891, 8, 891, 8,
+        982, 34, 443, 39, 1, 892, 8, 892, 8,
+        1016, 30, 546, 38, 1, 893, 8, 893, 8,
+        1046, 31, 615, 37, 1, 894, 8, 894, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_142: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 35, 1, 898, 8, 898, 8,
+        1077, 22, 193, 35, 1, 898, 8, 898, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_143: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 41, 1, 901, 8, 901, 8,
-        70, 30, 100, 35, 1, 902, 8, 902, 8,
-        135, 29, 164, 33, 1, 903, 8, 903, 8,
+        1099, 29, 652, 41, 1, 901, 8, 901, 8,
+        1128, 30, 193, 35, 1, 902, 8, 902, 8,
+        1158, 29, 1187, 33, 1, 903, 8, 903, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_144: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundCheckedPointerOverSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 40, 40, 22, 1, 904, 8, 905, 24,
+        1220, 40, 141, 22, 1, 904, 8, 905, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_145: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleButtonBackgroundCheckedPressedSystemControlHighlightBaseMediumLowBrushToggleButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedSystemControlBackgroundBaseMediumLowBrushToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundSystemControlForegroundBaseHighBrushToggleButtonForegroundPointerOverSystemControlHighlightBaseHighBrushToggleButtonForegroundPressedToggleButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushSystemControlForegroundTransparentBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedSystemControlHighlightTransparentBrushToggleButtonBorderBrushDisabledSystemControlDisabledTransparentBrushToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedSystemControlTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 40, 1, 906, 8, 906, 8,
-        76, 37, 113, 35, 1, 908, 8, 908, 8,
-        148, 35, 113, 35, 1, 909, 8, 909, 8,
-        183, 46, 113, 35, 1, 910, 8, 910, 8,
-        229, 42, 271, 41, 1, 912, 8, 912, 8,
-        312, 43, 113, 35, 1, 914, 8, 914, 8,
-        355, 22, 377, 36, 1, 916, 8, 916, 8,
-        413, 33, 446, 35, 1, 917, 8, 917, 8,
-        481, 29, 446, 35, 1, 918, 8, 918, 8,
-        510, 30, 540, 39, 1, 919, 8, 919, 8,
-        579, 29, 608, 41, 1, 920, 8, 920, 8,
-        649, 40, 608, 41, 1, 921, 8, 921, 8,
-        689, 36, 608, 41, 1, 923, 8, 923, 8,
-        725, 37, 540, 39, 1, 925, 8, 925, 8,
-        762, 35, 377, 36, 1, 927, 8, 927, 8,
-        797, 46, 446, 35, 1, 928, 8, 928, 8,
-        843, 42, 446, 35, 1, 930, 8, 930, 8,
-        885, 43, 540, 39, 1, 932, 8, 932, 8,
-        928, 23, 951, 39, 1, 934, 8, 934, 8,
-        990, 34, 951, 39, 1, 935, 8, 935, 8,
-        1024, 30, 1054, 38, 1, 936, 8, 936, 8,
-        1092, 31, 1123, 37, 1, 937, 8, 937, 8,
-        1160, 30, 1190, 41, 1, 938, 8, 938, 8,
-        1231, 41, 1190, 41, 1, 939, 8, 939, 8,
-        1272, 37, 1309, 29, 1, 941, 8, 941, 8,
-        1338, 38, 1123, 37, 1, 942, 8, 942, 8,
-        1376, 36, 951, 39, 1, 944, 8, 944, 8,
-        1412, 47, 36, 40, 1, 946, 8, 946, 8,
-        1459, 43, 1054, 38, 1, 948, 8, 948, 8,
-        1502, 44, 1123, 37, 1, 950, 8, 950, 8,
+        1260, 36, 1296, 40, 1, 906, 8, 906, 8,
+        1336, 37, 193, 35, 1, 908, 8, 908, 8,
+        1373, 35, 193, 35, 1, 909, 8, 909, 8,
+        1408, 46, 193, 35, 1, 910, 8, 910, 8,
+        1454, 42, 652, 41, 1, 912, 8, 912, 8,
+        1496, 43, 193, 35, 1, 914, 8, 914, 8,
+        1539, 22, 693, 36, 1, 916, 8, 916, 8,
+        1561, 33, 729, 35, 1, 917, 8, 917, 8,
+        1594, 29, 729, 35, 1, 918, 8, 918, 8,
+        1623, 30, 381, 39, 1, 919, 8, 919, 8,
+        1653, 29, 1682, 41, 1, 920, 8, 920, 8,
+        1723, 40, 1682, 41, 1, 921, 8, 921, 8,
+        1763, 36, 1682, 41, 1, 923, 8, 923, 8,
+        1799, 37, 381, 39, 1, 925, 8, 925, 8,
+        1836, 35, 693, 36, 1, 927, 8, 927, 8,
+        1871, 46, 729, 35, 1, 928, 8, 928, 8,
+        1917, 42, 729, 35, 1, 930, 8, 930, 8,
+        1959, 43, 381, 39, 1, 932, 8, 932, 8,
+        2002, 23, 443, 39, 1, 934, 8, 934, 8,
+        2025, 34, 443, 39, 1, 935, 8, 935, 8,
+        2059, 30, 546, 38, 1, 936, 8, 936, 8,
+        2089, 31, 615, 37, 1, 937, 8, 937, 8,
+        2120, 30, 2150, 41, 1, 938, 8, 938, 8,
+        2191, 41, 2150, 41, 1, 939, 8, 939, 8,
+        2232, 37, 2269, 29, 1, 941, 8, 941, 8,
+        2298, 38, 615, 37, 1, 942, 8, 942, 8,
+        2336, 36, 443, 39, 1, 944, 8, 944, 8,
+        2372, 47, 1296, 40, 1, 946, 8, 946, 8,
+        2419, 43, 546, 38, 1, 948, 8, 948, 8,
+        2462, 44, 615, 37, 1, 950, 8, 950, 8,
     ],
 };
 
@@ -2903,91 +2909,91 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_146: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_147: rt::PackedRows = rt::PackedRows {
-    strings: "GroupBoxBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 18, 65535, 255, 1, 958, 8,
+        2506, 18, 65535, 255, 1, 958, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_148: rt::PackedRows = rt::PackedRows {
-    strings: "GroupBoxBorderBrushSystemControlForegroundBaseMediumBrushGroupBoxHeaderForegroundSystemBaseHighColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 38, 1, 959, 8, 959, 8,
-        57, 24, 81, 19, 1, 960, 8, 960, 8,
+        2524, 19, 2543, 38, 1, 959, 8, 959, 8,
+        2581, 24, 2605, 19, 1, 960, 8, 960, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_149: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkVisitedBrushHyperlinkVisitedColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 21, 1, 964, 8, 964, 54,
+        2624, 21, 2645, 21, 1, 964, 8, 964, 54,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_150: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundSystemAccentColorHyperlinkButtonForegroundPointerOverHyperlinkButtonForegroundPressedSystemAccentColorLight1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 17, 1, 965, 8, 965, 58,
-        42, 36, 25, 17, 1, 966, 8, 966, 69,
-        78, 32, 110, 23, 1, 967, 8, 967, 65,
+        2666, 25, 89, 17, 1, 965, 8, 965, 58,
+        2691, 36, 89, 17, 1, 966, 8, 966, 69,
+        2727, 32, 89, 23, 1, 967, 8, 967, 65,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_151: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 39, 1, 968, 8, 968, 8,
+        2759, 33, 381, 39, 1, 968, 8, 968, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_152: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonForegroundVisitedHyperlinkVisitedColorHyperlinkButtonForegroundVisitedPointerOver",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 21, 1, 969, 8, 969, 65,
-        53, 43, 32, 21, 1, 970, 8, 970, 76,
+        2792, 32, 2645, 21, 1, 969, 8, 969, 65,
+        2824, 43, 2645, 21, 1, 970, 8, 970, 76,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_153: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonBackgroundSystemControlTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 29, 1, 972, 8, 972, 8,
+        2867, 25, 2269, 29, 1, 972, 8, 972, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_154: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressed",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 65535, 4095, 1, 973, 8,
-        36, 32, 65535, 2815, 1, 974, 8,
+        2892, 36, 65535, 4095, 1, 973, 8,
+        2928, 32, 65535, 2815, 1, 974, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_155: rt::PackedRows = rt::PackedRows {
-    strings: "HyperlinkButtonBackgroundDisabledSystemControlTransparentBrushHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 33, 29, 1, 975, 8, 975, 8,
-        62, 26, 33, 29, 1, 976, 8, 976, 8,
-        88, 37, 33, 29, 1, 977, 8, 977, 8,
-        125, 33, 33, 29, 1, 978, 8, 978, 8,
-        158, 34, 33, 29, 1, 979, 8, 979, 8,
+        2960, 33, 2269, 29, 1, 975, 8, 975, 8,
+        2993, 26, 2269, 29, 1, 976, 8, 976, 8,
+        3019, 37, 2269, 29, 1, 977, 8, 977, 8,
+        3056, 33, 2269, 29, 1, 978, 8, 978, 8,
+        3089, 34, 2269, 29, 1, 979, 8, 979, 8,
     ],
 };
 
@@ -3000,55 +3006,55 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_156: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_157: rt::PackedRows = rt::PackedRows {
-    strings: "ComboBoxItemForegroundSystemControlForegroundBaseHighBrushComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSystemControlTransparentBrushComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledSystemControlBackgroundBaseLowBrushComboBoxBackgroundUnfocusedComboBoxBackgroundBorderBrushFocusedSystemControlHighlightTransparentBrushComboBoxBackgroundBorderBrushUnfocusedSystemControlHighlightBaseMediumLowBrushComboBoxForegroundComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxPlaceHolderForegroundSystemControlPageTextBaseHighBrushComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushSystemControlForegroundBaseMediumBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownBackgroundSystemControlTransientBackgroundBrushComboBoxDropDownBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 36, 1, 987, 8, 987, 8,
-        58, 29, 87, 38, 1, 988, 8, 988, 8,
-        125, 33, 87, 38, 1, 989, 8, 989, 8,
-        158, 30, 188, 39, 1, 990, 8, 990, 8,
-        227, 30, 87, 38, 1, 991, 8, 991, 8,
-        257, 37, 87, 38, 1, 992, 8, 992, 8,
-        294, 41, 87, 38, 1, 994, 8, 994, 8,
-        335, 38, 188, 39, 1, 996, 8, 996, 8,
-        373, 22, 395, 29, 1, 998, 8, 998, 8,
-        424, 29, 453, 37, 1, 999, 8, 999, 8,
-        490, 33, 523, 34, 1, 1000, 8, 1000, 8,
-        557, 30, 395, 29, 1, 1001, 8, 1001, 8,
-        587, 30, 617, 40, 1, 1002, 8, 1002, 8,
-        657, 37, 694, 41, 1, 1003, 8, 1003, 8,
-        735, 41, 776, 43, 1, 1005, 8, 1005, 8,
-        819, 38, 395, 29, 1, 1007, 8, 1007, 8,
-        857, 30, 395, 29, 1, 1008, 8, 1008, 8,
-        887, 34, 395, 29, 1, 1009, 8, 1009, 8,
-        921, 31, 395, 29, 1, 1010, 8, 1010, 8,
-        952, 31, 395, 29, 1, 1011, 8, 1011, 8,
-        983, 38, 395, 29, 1, 1012, 8, 1012, 8,
-        1021, 42, 395, 29, 1, 1013, 8, 1013, 8,
-        1063, 39, 395, 29, 1, 1014, 8, 1014, 8,
-        1102, 18, 1120, 40, 1, 1016, 8, 1016, 8,
-        1160, 29, 1189, 41, 1, 1017, 8, 1017, 8,
-        1230, 25, 1255, 38, 1, 1018, 8, 1018, 8,
-        1293, 26, 1319, 35, 1, 1019, 8, 1019, 8,
-        1354, 27, 617, 40, 1, 1020, 8, 1020, 8,
-        1381, 36, 1417, 38, 1, 1021, 8, 1021, 8,
-        1455, 38, 1493, 40, 1, 1022, 8, 1022, 8,
-        1533, 18, 22, 36, 1, 1024, 8, 1024, 8,
-        1551, 26, 188, 39, 1, 1025, 8, 1025, 8,
-        1577, 25, 87, 38, 1, 1026, 8, 1026, 8,
-        1602, 32, 87, 38, 1, 1027, 8, 1027, 8,
-        1634, 29, 1663, 34, 1, 1028, 8, 1028, 8,
-        1697, 43, 87, 38, 1, 1029, 8, 1029, 8,
-        1740, 19, 1759, 38, 1, 1031, 8, 1031, 8,
-        1797, 30, 1827, 41, 1, 1032, 8, 1032, 8,
-        1868, 26, 1894, 37, 1, 1033, 8, 1033, 8,
-        1931, 27, 1958, 33, 1, 1034, 8, 1034, 8,
-        1991, 31, 2022, 42, 1, 1035, 8, 1035, 8,
-        2064, 39, 188, 39, 1, 1036, 8, 1036, 8,
-        2103, 38, 2141, 44, 1, 1038, 8, 1038, 8,
-        2185, 45, 2141, 44, 1, 1040, 8, 1040, 8,
-        2230, 26, 2256, 37, 1, 1042, 8, 1042, 8,
-        2293, 27, 2320, 33, 1, 1043, 8, 1043, 8,
+        3123, 22, 693, 36, 1, 987, 8, 987, 8,
+        3145, 29, 3174, 38, 1, 988, 8, 988, 8,
+        3212, 33, 3174, 38, 1, 989, 8, 989, 8,
+        3245, 30, 381, 39, 1, 990, 8, 990, 8,
+        3275, 30, 3174, 38, 1, 991, 8, 991, 8,
+        3305, 37, 3174, 38, 1, 992, 8, 992, 8,
+        3342, 41, 3174, 38, 1, 994, 8, 994, 8,
+        3383, 38, 381, 39, 1, 996, 8, 996, 8,
+        3421, 22, 2269, 29, 1, 998, 8, 998, 8,
+        3443, 29, 3472, 37, 1, 999, 8, 999, 8,
+        3509, 33, 3542, 34, 1, 1000, 8, 1000, 8,
+        3576, 30, 2269, 29, 1, 1001, 8, 1001, 8,
+        3606, 30, 3636, 40, 1, 1002, 8, 1002, 8,
+        3676, 37, 3713, 41, 1, 1003, 8, 1003, 8,
+        3754, 41, 3795, 43, 1, 1005, 8, 1005, 8,
+        3838, 38, 2269, 29, 1, 1007, 8, 1007, 8,
+        3876, 30, 2269, 29, 1, 1008, 8, 1008, 8,
+        3906, 34, 2269, 29, 1, 1009, 8, 1009, 8,
+        3940, 31, 2269, 29, 1, 1010, 8, 1010, 8,
+        3971, 31, 2269, 29, 1, 1011, 8, 1011, 8,
+        4002, 38, 2269, 29, 1, 1012, 8, 1012, 8,
+        4040, 42, 2269, 29, 1, 1013, 8, 1013, 8,
+        4082, 39, 2269, 29, 1, 1014, 8, 1014, 8,
+        4121, 18, 4139, 40, 1, 1016, 8, 1016, 8,
+        4179, 29, 4208, 41, 1, 1017, 8, 1017, 8,
+        4249, 25, 4274, 38, 1, 1018, 8, 1018, 8,
+        4312, 26, 193, 35, 1, 1019, 8, 1019, 8,
+        4338, 27, 3636, 40, 1, 1020, 8, 1020, 8,
+        4365, 36, 546, 38, 1, 1021, 8, 1021, 8,
+        4401, 38, 1296, 40, 1, 1022, 8, 1022, 8,
+        4439, 18, 693, 36, 1, 1024, 8, 1024, 8,
+        4457, 26, 381, 39, 1, 1025, 8, 1025, 8,
+        4483, 25, 3174, 38, 1, 1026, 8, 1026, 8,
+        4508, 32, 3174, 38, 1, 1027, 8, 1027, 8,
+        4540, 29, 4569, 34, 1, 1028, 8, 1028, 8,
+        4603, 43, 3174, 38, 1, 1029, 8, 1029, 8,
+        4646, 19, 2543, 38, 1, 1031, 8, 1031, 8,
+        4665, 30, 4695, 41, 1, 1032, 8, 1032, 8,
+        4736, 26, 4762, 37, 1, 1033, 8, 1033, 8,
+        4799, 27, 4826, 33, 1, 1034, 8, 1034, 8,
+        4859, 31, 4890, 42, 1, 1035, 8, 1035, 8,
+        4932, 39, 381, 39, 1, 1036, 8, 1036, 8,
+        4971, 38, 5009, 44, 1, 1038, 8, 1038, 8,
+        5053, 45, 5009, 44, 1, 1040, 8, 1040, 8,
+        5098, 26, 5124, 37, 1, 1042, 8, 1042, 8,
+        5161, 27, 5188, 33, 1, 1043, 8, 1043, 8,
     ],
 };
 
@@ -3074,26 +3080,26 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_160: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_161: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutItemBackgroundSystemControlTransparentBrushMenuFlyoutItemBackgroundPointerOverSystemControlHighlightListLowBrushMenuFlyoutItemBackgroundPressedSystemControlHighlightListMediumBrushMenuFlyoutItemBackgroundDisabledMenuFlyoutItemForegroundSystemControlForegroundBaseHighBrushMenuFlyoutItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushMenuFlyoutSubItemChevronSystemControlForegroundBaseMediumHighBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundSystemControlForegroundBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 24, 24, 29, 1, 1060, 8, 1060, 8,
-        53, 35, 88, 34, 1, 1061, 8, 1061, 8,
-        122, 31, 153, 37, 1, 1062, 8, 1062, 8,
-        190, 32, 24, 29, 1, 1063, 8, 1063, 8,
-        222, 24, 246, 36, 1, 1064, 8, 1064, 8,
-        282, 35, 317, 38, 1, 1065, 8, 1065, 8,
-        355, 31, 317, 38, 1, 1066, 8, 1066, 8,
-        386, 32, 418, 39, 1, 1067, 8, 1067, 8,
-        457, 24, 481, 42, 1, 1068, 8, 1068, 8,
-        523, 35, 317, 38, 1, 1069, 8, 1069, 8,
-        558, 31, 317, 38, 1, 1070, 8, 1070, 8,
-        589, 37, 317, 38, 1, 1071, 8, 1071, 8,
-        626, 32, 418, 39, 1, 1073, 8, 1073, 8,
-        658, 47, 705, 38, 1, 1074, 8, 1074, 8,
-        743, 58, 801, 40, 1, 1076, 8, 1076, 8,
-        841, 54, 801, 40, 1, 1078, 8, 1078, 8,
-        895, 55, 418, 39, 1, 1080, 8, 1080, 8,
+        5221, 24, 2269, 29, 1, 1060, 8, 1060, 8,
+        5245, 35, 3542, 34, 1, 1061, 8, 1061, 8,
+        5280, 31, 3472, 37, 1, 1062, 8, 1062, 8,
+        5311, 32, 2269, 29, 1, 1063, 8, 1063, 8,
+        5343, 24, 693, 36, 1, 1064, 8, 1064, 8,
+        5367, 35, 3174, 38, 1, 1065, 8, 1065, 8,
+        5402, 31, 3174, 38, 1, 1066, 8, 1066, 8,
+        5433, 32, 381, 39, 1, 1067, 8, 1067, 8,
+        5465, 24, 4890, 42, 1, 1068, 8, 1068, 8,
+        5489, 35, 3174, 38, 1, 1069, 8, 1069, 8,
+        5524, 31, 3174, 38, 1, 1070, 8, 1070, 8,
+        5555, 37, 3174, 38, 1, 1071, 8, 1071, 8,
+        5592, 32, 381, 39, 1, 1073, 8, 1073, 8,
+        5624, 47, 2543, 38, 1, 1074, 8, 1074, 8,
+        5671, 58, 5729, 40, 1, 1076, 8, 1076, 8,
+        5769, 54, 5729, 40, 1, 1078, 8, 1078, 8,
+        5823, 55, 381, 39, 1, 1080, 8, 1080, 8,
     ],
 };
 
@@ -3105,11 +3111,11 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_162: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_163: rt::PackedRows = rt::PackedRows {
-    strings: "MenuFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushMenuFlyoutPresenterBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 37, 1, 1084, 8, 1084, 8,
-        66, 30, 96, 33, 1, 1085, 8, 1085, 8,
+        5878, 29, 5124, 37, 1, 1084, 8, 1084, 8,
+        5907, 30, 5188, 33, 1, 1085, 8, 1085, 8,
     ],
 };
 
@@ -3121,209 +3127,209 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_164: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_165: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlForegroundSystemControlForegroundBaseHighBrushTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundSystemControlBackgroundAltMediumLowBrushTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledSystemControlBackgroundBaseLowBrushTextControlBorderBrushFocusedSystemControlHighlightAccentBrushTextControlBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 36, 1, 1094, 8, 1094, 8,
-        57, 32, 21, 36, 1, 1095, 8, 1095, 8,
-        89, 29, 118, 43, 1, 1096, 8, 1096, 8,
-        161, 21, 182, 40, 1, 1097, 8, 1097, 8,
-        222, 32, 254, 37, 1, 1098, 8, 1098, 8,
-        291, 29, 320, 35, 1, 1099, 8, 1099, 8,
-        355, 29, 384, 33, 1, 1100, 8, 1100, 8,
-        417, 30, 447, 33, 1, 1101, 8, 1101, 8,
+        5937, 21, 693, 36, 1, 1094, 8, 1094, 8,
+        5958, 32, 693, 36, 1, 1095, 8, 1095, 8,
+        5990, 29, 6019, 43, 1, 1096, 8, 1096, 8,
+        6062, 21, 4139, 40, 1, 1097, 8, 1097, 8,
+        6083, 32, 6115, 37, 1, 1098, 8, 1098, 8,
+        6152, 29, 193, 35, 1, 1099, 8, 1099, 8,
+        6181, 29, 1187, 33, 1, 1100, 8, 1100, 8,
+        6210, 30, 4826, 33, 1, 1101, 8, 1101, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_166: rt::PackedRows = rt::PackedRows {
-    strings: "TextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlSelectionHighlightColorSystemControlHighlightAccentBrushTextControlButtonBackgroundSystemControlTransparentBrushTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedSystemControlHighlightAltChromeWhiteBrushTextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushSystemControlForegroundBaseMediumBrushTextControlBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushSystemControlForegroundBaseMediumHighBrushTextControlForegroundFocusedSystemControlForegroundBaseHighBrushTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrushAutoCompleteBoxSuggestionsListBackgroundSystemControlTransientBackgroundBrushAutoCompleteBoxSuggestionsListBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 36, 1, 1103, 8, 1103, 8,
-        68, 43, 32, 36, 1, 1104, 8, 1104, 8,
-        111, 40, 151, 43, 1, 1106, 8, 1106, 8,
-        194, 34, 228, 33, 1, 1108, 8, 1108, 8,
-        261, 27, 288, 29, 1, 1109, 8, 1109, 8,
-        317, 38, 288, 29, 1, 1110, 8, 1110, 8,
-        355, 34, 228, 33, 1, 1111, 8, 1111, 8,
-        389, 28, 288, 29, 1, 1112, 8, 1112, 8,
-        417, 39, 288, 29, 1, 1113, 8, 1113, 8,
-        456, 35, 288, 29, 1, 1114, 8, 1114, 8,
-        491, 38, 228, 33, 1, 1115, 8, 1115, 8,
-        529, 34, 563, 41, 1, 1116, 8, 1116, 8,
-        604, 28, 632, 35, 1, 1118, 8, 1118, 8,
-        667, 22, 689, 38, 1, 1119, 8, 1119, 8,
-        727, 33, 760, 41, 1, 1120, 8, 1120, 8,
-        491, 27, 801, 42, 1, 1121, 8, 1121, 8,
-        843, 28, 871, 36, 1, 1122, 8, 1122, 8,
-        907, 39, 946, 41, 1, 1123, 8, 1123, 8,
-        987, 40, 1027, 37, 1, 1128, 8, 1128, 8,
-        1064, 41, 1105, 33, 1, 1130, 8, 1130, 8,
+        6240, 32, 6272, 36, 1, 1103, 8, 1103, 8,
+        6308, 43, 6272, 36, 1, 1104, 8, 1104, 8,
+        6351, 40, 6019, 43, 1, 1106, 8, 1106, 8,
+        6391, 34, 1187, 33, 1, 1108, 8, 1108, 8,
+        6425, 27, 2269, 29, 1, 1109, 8, 1109, 8,
+        6452, 38, 2269, 29, 1, 1110, 8, 1110, 8,
+        6490, 34, 1187, 33, 1, 1111, 8, 1111, 8,
+        6524, 28, 2269, 29, 1, 1112, 8, 1112, 8,
+        6552, 39, 2269, 29, 1, 1113, 8, 1113, 8,
+        6591, 35, 2269, 29, 1, 1114, 8, 1114, 8,
+        6626, 38, 1187, 33, 1, 1115, 8, 1115, 8,
+        6664, 34, 1682, 41, 1, 1116, 8, 1116, 8,
+        6698, 28, 6726, 35, 1, 1118, 8, 1118, 8,
+        6181, 22, 2543, 38, 1, 1119, 8, 1119, 8,
+        6761, 33, 4695, 41, 1, 1120, 8, 1120, 8,
+        6626, 27, 4890, 42, 1, 1121, 8, 1121, 8,
+        6794, 28, 693, 36, 1, 1122, 8, 1122, 8,
+        6822, 39, 6861, 41, 1, 1123, 8, 1123, 8,
+        6902, 40, 5124, 37, 1, 1128, 8, 1128, 8,
+        6942, 41, 5188, 33, 1, 1130, 8, 1130, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_167: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxForegroundUncheckedSystemControlForegroundBaseHighBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledSystemControlDisabledBaseMediumLowBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSystemControlTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedSystemControlForegroundBaseMediumBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverSystemControlHighlightBaseMediumHighBrushCheckBoxCheckBackgroundStrokeUncheckedPressedSystemControlHighlightBaseHighBrushCheckBoxCheckBackgroundStrokeUncheckedDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 27, 36, 1, 1134, 8, 1134, 8,
-        63, 38, 27, 36, 1, 1135, 8, 1135, 8,
-        101, 34, 27, 36, 1, 1136, 8, 1136, 8,
-        135, 35, 170, 39, 1, 1137, 8, 1137, 8,
-        209, 25, 27, 36, 1, 1138, 8, 1138, 8,
-        234, 36, 27, 36, 1, 1139, 8, 1139, 8,
-        270, 32, 27, 36, 1, 1140, 8, 1140, 8,
-        302, 33, 170, 39, 1, 1141, 8, 1141, 8,
-        335, 31, 27, 36, 1, 1142, 8, 1142, 8,
-        366, 42, 27, 36, 1, 1143, 8, 1143, 8,
-        408, 38, 27, 36, 1, 1145, 8, 1145, 8,
-        446, 39, 170, 39, 1, 1146, 8, 1146, 8,
-        485, 27, 512, 29, 1, 1148, 8, 1148, 8,
-        541, 38, 512, 29, 1, 1149, 8, 1149, 8,
-        579, 34, 512, 29, 1, 1150, 8, 1150, 8,
-        613, 35, 512, 29, 1, 1151, 8, 1151, 8,
-        648, 25, 512, 29, 1, 1152, 8, 1152, 8,
-        673, 36, 512, 29, 1, 1153, 8, 1153, 8,
-        709, 32, 512, 29, 1, 1154, 8, 1154, 8,
-        741, 33, 512, 29, 1, 1155, 8, 1155, 8,
-        774, 31, 512, 29, 1, 1156, 8, 1156, 8,
-        805, 42, 512, 29, 1, 1157, 8, 1157, 8,
-        847, 38, 512, 29, 1, 1158, 8, 1158, 8,
-        885, 39, 512, 29, 1, 1159, 8, 1159, 8,
-        924, 28, 512, 29, 1, 1160, 8, 1160, 8,
-        952, 39, 512, 29, 1, 1161, 8, 1161, 8,
-        991, 35, 512, 29, 1, 1162, 8, 1162, 8,
-        1026, 36, 512, 29, 1, 1163, 8, 1163, 8,
-        1062, 26, 512, 29, 1, 1164, 8, 1164, 8,
-        1088, 37, 512, 29, 1, 1165, 8, 1165, 8,
-        1125, 33, 512, 29, 1, 1166, 8, 1166, 8,
-        1158, 34, 512, 29, 1, 1167, 8, 1167, 8,
-        1192, 32, 512, 29, 1, 1168, 8, 1168, 8,
-        1224, 43, 512, 29, 1, 1169, 8, 1169, 8,
-        1267, 39, 512, 29, 1, 1170, 8, 1170, 8,
-        1306, 40, 512, 29, 1, 1171, 8, 1171, 8,
-        1346, 38, 1384, 38, 1, 1172, 8, 1172, 8,
-        1422, 49, 1471, 41, 1, 1174, 8, 1174, 8,
-        1512, 45, 1557, 35, 1, 1176, 8, 1176, 8,
-        1592, 46, 170, 39, 1, 1178, 8, 1178, 8,
+        6983, 27, 693, 36, 1, 1134, 8, 1134, 8,
+        7010, 38, 693, 36, 1, 1135, 8, 1135, 8,
+        7048, 34, 693, 36, 1, 1136, 8, 1136, 8,
+        7082, 35, 381, 39, 1, 1137, 8, 1137, 8,
+        7117, 25, 693, 36, 1, 1138, 8, 1138, 8,
+        7142, 36, 693, 36, 1, 1139, 8, 1139, 8,
+        7178, 32, 693, 36, 1, 1140, 8, 1140, 8,
+        7210, 33, 381, 39, 1, 1141, 8, 1141, 8,
+        7243, 31, 693, 36, 1, 1142, 8, 1142, 8,
+        7274, 42, 693, 36, 1, 1143, 8, 1143, 8,
+        7316, 38, 693, 36, 1, 1145, 8, 1145, 8,
+        7354, 39, 381, 39, 1, 1146, 8, 1146, 8,
+        7393, 27, 2269, 29, 1, 1148, 8, 1148, 8,
+        7420, 38, 2269, 29, 1, 1149, 8, 1149, 8,
+        7458, 34, 2269, 29, 1, 1150, 8, 1150, 8,
+        7492, 35, 2269, 29, 1, 1151, 8, 1151, 8,
+        7527, 25, 2269, 29, 1, 1152, 8, 1152, 8,
+        7552, 36, 2269, 29, 1, 1153, 8, 1153, 8,
+        7588, 32, 2269, 29, 1, 1154, 8, 1154, 8,
+        7620, 33, 2269, 29, 1, 1155, 8, 1155, 8,
+        7653, 31, 2269, 29, 1, 1156, 8, 1156, 8,
+        7684, 42, 2269, 29, 1, 1157, 8, 1157, 8,
+        7726, 38, 2269, 29, 1, 1158, 8, 1158, 8,
+        7764, 39, 2269, 29, 1, 1159, 8, 1159, 8,
+        7803, 28, 2269, 29, 1, 1160, 8, 1160, 8,
+        7831, 39, 2269, 29, 1, 1161, 8, 1161, 8,
+        7870, 35, 2269, 29, 1, 1162, 8, 1162, 8,
+        7905, 36, 2269, 29, 1, 1163, 8, 1163, 8,
+        7941, 26, 2269, 29, 1, 1164, 8, 1164, 8,
+        7967, 37, 2269, 29, 1, 1165, 8, 1165, 8,
+        8004, 33, 2269, 29, 1, 1166, 8, 1166, 8,
+        8037, 34, 2269, 29, 1, 1167, 8, 1167, 8,
+        8071, 32, 2269, 29, 1, 1168, 8, 1168, 8,
+        8103, 43, 2269, 29, 1, 1169, 8, 1169, 8,
+        8146, 39, 2269, 29, 1, 1170, 8, 1170, 8,
+        8185, 40, 2269, 29, 1, 1171, 8, 1171, 8,
+        8225, 38, 2543, 38, 1, 1172, 8, 1172, 8,
+        8263, 49, 4695, 41, 1, 1174, 8, 1174, 8,
+        8312, 45, 729, 35, 1, 1176, 8, 1176, 8,
+        8357, 46, 381, 39, 1, 1178, 8, 1178, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_168: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeCheckedPointerOverSystemAccentColorDark1CheckBoxCheckBackgroundStrokeCheckedPressedSystemAccentColorLight1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 47, 47, 22, 1, 1180, 8, 1181, 24,
-        69, 43, 112, 23, 1, 1182, 8, 1183, 24,
+        8403, 47, 141, 22, 1, 1180, 8, 1181, 24,
+        8450, 43, 89, 23, 1, 1182, 8, 1183, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_169: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeCheckedDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundStrokeIndeterminateSystemControlForegroundAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 29, 1, 1184, 8, 1184, 8,
-        73, 42, 115, 34, 1, 1185, 8, 1185, 8,
+        8493, 44, 2269, 29, 1, 1184, 8, 1184, 8,
+        8537, 42, 13185, 34, 1, 1185, 8, 1185, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_170: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundStrokeIndeterminatePressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 53, 53, 23, 1, 1187, 8, 1188, 24,
-        76, 49, 125, 22, 1, 1189, 8, 1190, 24,
+        8579, 53, 89, 23, 1, 1187, 8, 1188, 24,
+        8632, 49, 141, 22, 1, 1189, 8, 1190, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_171: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundStrokeIndeterminateDisabledSystemControlTransparentBrushCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverCheckBoxCheckBackgroundFillUncheckedPressedSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 50, 50, 29, 1, 1191, 8, 1191, 8,
-        79, 36, 50, 29, 1, 1193, 8, 1193, 8,
-        115, 47, 50, 29, 1, 1194, 8, 1194, 8,
-        162, 43, 205, 41, 1, 1196, 8, 1196, 8,
-        246, 44, 50, 29, 1, 1198, 8, 1198, 8,
-        290, 34, 324, 33, 1, 1199, 8, 1199, 8,
+        8681, 50, 2269, 29, 1, 1191, 8, 1191, 8,
+        8731, 36, 2269, 29, 1, 1193, 8, 1193, 8,
+        8767, 47, 2269, 29, 1, 1194, 8, 1194, 8,
+        8814, 43, 652, 41, 1, 1196, 8, 1196, 8,
+        8857, 44, 2269, 29, 1, 1198, 8, 1198, 8,
+        8901, 34, 1187, 33, 1, 1199, 8, 1199, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_172: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillCheckedPointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillCheckedPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 23, 1, 1200, 8, 1201, 24,
-        68, 41, 109, 22, 1, 1202, 8, 1203, 24,
+        8935, 45, 89, 23, 1, 1200, 8, 1201, 24,
+        8980, 41, 141, 22, 1, 1202, 8, 1203, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_173: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillCheckedDisabledSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckBackgroundFillIndeterminateSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 41, 1, 1204, 8, 1204, 8,
-        83, 40, 123, 33, 1, 1206, 8, 1206, 8,
+        9021, 42, 652, 41, 1, 1204, 8, 1204, 8,
+        9063, 40, 1187, 33, 1, 1206, 8, 1206, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_174: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillIndeterminatePointerOverSystemAccentColorLight1CheckBoxCheckBackgroundFillIndeterminatePressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 51, 51, 23, 1, 1207, 8, 1208, 24,
-        74, 47, 121, 22, 1, 1209, 8, 1210, 24,
+        9103, 51, 89, 23, 1, 1207, 8, 1208, 24,
+        9154, 47, 141, 22, 1, 1209, 8, 1210, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_175: rt::PackedRows = rt::PackedRows {
-    strings: "CheckBoxCheckBackgroundFillIndeterminateDisabledSystemControlBackgroundBaseMediumLowBrushCheckBoxCheckGlyphForegroundUncheckedSystemControlHighlightAltChromeWhiteBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCalendarViewSelectedHoverBorderBrushSystemControlHighlightListAccentMediumBrushCalendarViewSelectedPressedBorderBrushSystemControlHighlightListAccentHighBrushCalendarViewSelectedBorderBrushSystemControlHighlightAccentBrushCalendarViewHoverBorderBrushSystemControlHighlightBaseMediumLowBrushCalendarViewPressedBorderBrushSystemControlHighlightBaseMediumBrushCalendarViewTodayForegroundCalendarViewBlackoutForegroundSystemControlDisabledBaseMediumLowBrushCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundSystemControlForegroundBaseHighBrushCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundSystemControlBackgroundAltHighBrushCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundSystemControlTransparentBrushCalendarViewNavigationButtonForegroundPointerOverCalendarViewNavigationButtonForegroundPressedSystemControlForegroundBaseMediumBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverSystemControlHighlightTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 48, 48, 41, 1, 1211, 8, 1211, 8,
-        89, 37, 126, 41, 1, 1213, 8, 1213, 8,
-        167, 48, 126, 41, 1, 1215, 8, 1215, 8,
-        215, 44, 126, 41, 1, 1217, 8, 1217, 8,
-        259, 45, 126, 41, 1, 1219, 8, 1219, 8,
-        304, 35, 126, 41, 1, 1221, 8, 1221, 8,
-        339, 46, 126, 41, 1, 1223, 8, 1223, 8,
-        385, 42, 126, 41, 1, 1225, 8, 1225, 8,
-        427, 43, 126, 41, 1, 1227, 8, 1227, 8,
-        470, 41, 126, 41, 1, 1229, 8, 1229, 8,
-        511, 52, 126, 41, 1, 1231, 8, 1231, 8,
-        563, 48, 126, 41, 1, 1233, 8, 1233, 8,
-        611, 49, 126, 41, 1, 1235, 8, 1235, 8,
-        660, 36, 696, 43, 1, 1239, 8, 1239, 8,
-        739, 38, 777, 41, 1, 1241, 8, 1241, 8,
-        818, 31, 849, 33, 1, 1243, 8, 1243, 8,
-        882, 28, 910, 40, 1, 1244, 8, 1244, 8,
-        950, 30, 980, 37, 1, 1245, 8, 1245, 8,
-        1017, 27, 126, 41, 1, 1246, 8, 1246, 8,
-        1044, 30, 1074, 39, 1, 1247, 8, 1247, 8,
-        1113, 32, 1145, 35, 1, 1248, 8, 1248, 8,
-        1180, 34, 1214, 36, 1, 1249, 8, 1249, 8,
-        1250, 32, 1282, 41, 1, 1250, 8, 1250, 8,
-        1323, 22, 1345, 41, 1, 1251, 8, 1251, 8,
-        1386, 22, 1408, 35, 1, 1252, 8, 1252, 8,
-        1443, 23, 1466, 40, 1, 1253, 8, 1253, 8,
-        1506, 37, 1074, 39, 1, 1254, 8, 1254, 8,
-        1543, 38, 1581, 29, 1, 1256, 8, 1256, 8,
-        1610, 49, 1214, 36, 1, 1257, 8, 1257, 8,
-        1659, 45, 1704, 38, 1, 1259, 8, 1259, 8,
-        1742, 40, 1782, 45, 1, 1261, 8, 1261, 8,
-        1827, 41, 1868, 41, 1, 1263, 8, 1263, 8,
-        1909, 50, 1959, 38, 1, 1265, 8, 1265, 8,
-        1909, 39, 1581, 29, 1, 1267, 8, 1267, 8,
+        9201, 48, 652, 41, 1, 1211, 8, 1211, 8,
+        9249, 37, 1682, 41, 1, 1213, 8, 1213, 8,
+        9286, 48, 1682, 41, 1, 1215, 8, 1215, 8,
+        9334, 44, 1682, 41, 1, 1217, 8, 1217, 8,
+        9378, 45, 1682, 41, 1, 1219, 8, 1219, 8,
+        9423, 35, 1682, 41, 1, 1221, 8, 1221, 8,
+        9458, 46, 1682, 41, 1, 1223, 8, 1223, 8,
+        9543, 42, 1682, 41, 1, 1225, 8, 1225, 8,
+        9585, 43, 1682, 41, 1, 1227, 8, 1227, 8,
+        9628, 41, 1682, 41, 1, 1229, 8, 1229, 8,
+        9669, 52, 1682, 41, 1, 1231, 8, 1231, 8,
+        9721, 48, 1682, 41, 1, 1233, 8, 1233, 8,
+        9769, 49, 1682, 41, 1, 1235, 8, 1235, 8,
+        9818, 36, 3795, 43, 1, 1239, 8, 1239, 8,
+        9854, 38, 3713, 41, 1, 1241, 8, 1241, 8,
+        9892, 31, 1187, 33, 1, 1243, 8, 1243, 8,
+        9923, 28, 1296, 40, 1, 1244, 8, 1244, 8,
+        9951, 30, 4762, 37, 1, 1245, 8, 1245, 8,
+        9981, 27, 1682, 41, 1, 1246, 8, 1246, 8,
+        10008, 30, 381, 39, 1, 1247, 8, 1247, 8,
+        10038, 32, 10070, 35, 1, 1248, 8, 1248, 8,
+        10105, 34, 693, 36, 1, 1249, 8, 1249, 8,
+        10139, 32, 10171, 41, 1, 1250, 8, 1250, 8,
+        10212, 22, 10234, 41, 1, 1251, 8, 1251, 8,
+        10275, 22, 6726, 35, 1, 1252, 8, 1252, 8,
+        10297, 23, 10320, 40, 1, 1253, 8, 1253, 8,
+        10360, 37, 381, 39, 1, 1254, 8, 1254, 8,
+        10397, 38, 2269, 29, 1, 1256, 8, 1256, 8,
+        10435, 49, 693, 36, 1, 1257, 8, 1257, 8,
+        10484, 45, 2543, 38, 1, 1259, 8, 1259, 8,
+        10529, 40, 10569, 45, 1, 1261, 8, 1261, 8,
+        10614, 41, 10655, 41, 1, 1263, 8, 1263, 8,
+        10696, 50, 546, 38, 1, 1265, 8, 1265, 8,
+        10696, 39, 2269, 29, 1, 1267, 8, 1267, 8,
     ],
 };
 
@@ -3336,177 +3342,177 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_176: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_177: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderHeaderBackgroundSystemAltMediumHighColorExpanderHeaderBackgroundPointerOverExpanderHeaderBackgroundPressedExpanderHeaderBackgroundDisabledExpanderHeaderForegroundSystemBaseHighColorExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushExpanderHeaderBorderBrushSystemBaseLowColorExpanderHeaderBorderBrushPointerOverExpanderHeaderBorderBrushPressedExpanderHeaderBorderBrushDisabledSystemControlDisabledBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 24, 24, 24, 1, 1275, 8, 1275, 8,
-        48, 35, 24, 24, 1, 1276, 8, 1276, 8,
-        83, 31, 24, 24, 1, 1277, 8, 1277, 8,
-        114, 32, 24, 24, 1, 1278, 8, 1278, 8,
-        146, 24, 170, 19, 1, 1279, 8, 1279, 8,
-        189, 35, 170, 19, 1, 1280, 8, 1280, 8,
-        224, 31, 170, 19, 1, 1281, 8, 1281, 8,
-        255, 32, 287, 39, 1, 1282, 8, 1282, 8,
-        326, 25, 351, 18, 1, 1283, 8, 1283, 8,
-        369, 36, 351, 18, 1, 1284, 8, 1284, 8,
-        405, 32, 351, 18, 1, 1285, 8, 1285, 8,
-        437, 33, 470, 33, 1, 1286, 8, 1286, 8,
+        10746, 24, 10770, 24, 1, 1275, 8, 1275, 8,
+        10794, 35, 10770, 24, 1, 1276, 8, 1276, 8,
+        10829, 31, 10770, 24, 1, 1277, 8, 1277, 8,
+        10860, 32, 10770, 24, 1, 1278, 8, 1278, 8,
+        10892, 24, 2605, 19, 1, 1279, 8, 1279, 8,
+        10916, 35, 2605, 19, 1, 1280, 8, 1280, 8,
+        10951, 31, 2605, 19, 1, 1281, 8, 1281, 8,
+        10982, 32, 381, 39, 1, 1282, 8, 1282, 8,
+        11014, 25, 11039, 18, 1, 1283, 8, 1283, 8,
+        11057, 36, 11039, 18, 1, 1284, 8, 1284, 8,
+        11093, 32, 11039, 18, 1, 1285, 8, 1285, 8,
+        11125, 33, 4826, 33, 1, 1286, 8, 1286, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_178: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 65535, 255, 1, 1288, 8,
+        11158, 25, 65535, 255, 1, 1288, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_179: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBackgroundPressedExpanderChevronBackgroundDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 65535, 255, 1, 1291, 8,
-        32, 33, 65535, 255, 1, 1292, 8,
+        11183, 32, 65535, 255, 1, 1291, 8,
+        11215, 33, 65535, 255, 1, 1292, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_180: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronForegroundSystemBaseHighColorExpanderChevronForegroundPointerOverExpanderChevronForegroundPressedExpanderChevronForegroundDisabledSystemControlDisabledBaseMediumLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 19, 1, 1293, 8, 1293, 8,
-        44, 36, 25, 19, 1, 1294, 8, 1294, 8,
-        80, 32, 25, 19, 1, 1295, 8, 1295, 8,
-        112, 33, 145, 39, 1, 1296, 8, 1296, 8,
+        11248, 25, 2605, 19, 1, 1293, 8, 1293, 8,
+        11273, 36, 2605, 19, 1, 1294, 8, 1294, 8,
+        11309, 32, 2605, 19, 1, 1295, 8, 1295, 8,
+        11341, 33, 381, 39, 1, 1296, 8, 1296, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_181: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderChevronBorderBrushExpanderChevronBorderBrushPointerOverExpanderChevronBorderBrushPressedExpanderChevronBorderBrushDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 65535, 255, 1, 1297, 8,
-        26, 37, 65535, 255, 1, 1298, 8,
-        63, 33, 65535, 255, 1, 1299, 8,
-        96, 34, 65535, 255, 1, 1300, 8,
+        11374, 26, 65535, 255, 1, 1297, 8,
+        11400, 37, 65535, 255, 1, 1298, 8,
+        11437, 33, 65535, 255, 1, 1299, 8,
+        11470, 34, 65535, 255, 1, 1300, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_182: rt::PackedRows = rt::PackedRows {
-    strings: "ExpanderContentBackgroundSystemChromeMediumLowColorExpanderContentBorderBrushSystemBaseLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 26, 1, 1303, 8, 1303, 8,
-        51, 26, 77, 18, 1, 1304, 8, 1304, 8,
+        11504, 25, 11529, 26, 1, 1303, 8, 1303, 8,
+        11555, 26, 11039, 18, 1, 1304, 8, 1304, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_183: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardBackgroundBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 17476, 65348, 1, 1307, 8,
+        11581, 31, 17476, 65348, 1, 1307, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardForegroundBrushSystemControlForegroundBaseHighBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 36, 1, 1308, 8, 1308, 8,
+        11612, 31, 693, 36, 1, 1308, 8, 1308, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
-    strings: "NotificationCardProgressBackgroundBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39578, 65434, 1, 1309, 8,
+        11643, 39, 39578, 65434, 1, 1309, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_186: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonForegroundSystemControlForegroundBaseHighBrushRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonBackgroundSystemControlTransparentBrushRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeSystemControlForegroundBaseMediumBrushRadioButtonOuterEllipseStrokePointerOverSystemControlHighlightBaseMediumHighBrushRadioButtonOuterEllipseStrokePressedSystemControlHighlightBaseHighBrushRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillRadioButtonOuterEllipseFillPointerOverRadioButtonOuterEllipseFillPressedSystemControlBackgroundBaseMediumLowBrushRadioButtonOuterEllipseFillDisabledRadioButtonOuterEllipseCheckedStrokeSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 36, 1, 1318, 8, 1318, 8,
-        57, 32, 21, 36, 1, 1319, 8, 1319, 8,
-        89, 28, 21, 36, 1, 1320, 8, 1320, 8,
-        117, 29, 146, 39, 1, 1321, 8, 1321, 8,
-        185, 21, 206, 29, 1, 1322, 8, 1322, 8,
-        235, 32, 206, 29, 1, 1323, 8, 1323, 8,
-        267, 28, 206, 29, 1, 1324, 8, 1324, 8,
-        295, 29, 206, 29, 1, 1325, 8, 1325, 8,
-        324, 22, 206, 29, 1, 1326, 8, 1326, 8,
-        346, 33, 206, 29, 1, 1327, 8, 1327, 8,
-        379, 29, 206, 29, 1, 1328, 8, 1328, 8,
-        408, 30, 206, 29, 1, 1329, 8, 1329, 8,
-        438, 29, 467, 38, 1, 1330, 8, 1330, 8,
-        505, 40, 545, 41, 1, 1331, 8, 1331, 8,
-        586, 36, 622, 35, 1, 1333, 8, 1333, 8,
-        657, 37, 146, 39, 1, 1334, 8, 1334, 8,
-        694, 27, 206, 29, 1, 1336, 8, 1336, 8,
-        721, 38, 206, 29, 1, 1337, 8, 1337, 8,
-        759, 34, 793, 41, 1, 1338, 8, 1338, 8,
-        834, 35, 206, 29, 1, 1340, 8, 1340, 8,
-        869, 36, 905, 33, 1, 1341, 8, 1341, 8,
+        11836, 21, 693, 36, 1, 1318, 8, 1318, 8,
+        11857, 32, 693, 36, 1, 1319, 8, 1319, 8,
+        11889, 28, 693, 36, 1, 1320, 8, 1320, 8,
+        11917, 29, 381, 39, 1, 1321, 8, 1321, 8,
+        11946, 21, 2269, 29, 1, 1322, 8, 1322, 8,
+        11967, 32, 2269, 29, 1, 1323, 8, 1323, 8,
+        11999, 28, 2269, 29, 1, 1324, 8, 1324, 8,
+        12027, 29, 2269, 29, 1, 1325, 8, 1325, 8,
+        12056, 22, 2269, 29, 1, 1326, 8, 1326, 8,
+        12078, 33, 2269, 29, 1, 1327, 8, 1327, 8,
+        12111, 29, 2269, 29, 1, 1328, 8, 1328, 8,
+        12140, 30, 2269, 29, 1, 1329, 8, 1329, 8,
+        12170, 29, 2543, 38, 1, 1330, 8, 1330, 8,
+        12199, 40, 4695, 41, 1, 1331, 8, 1331, 8,
+        12239, 36, 729, 35, 1, 1333, 8, 1333, 8,
+        12275, 37, 381, 39, 1, 1334, 8, 1334, 8,
+        12312, 27, 2269, 29, 1, 1336, 8, 1336, 8,
+        12339, 38, 2269, 29, 1, 1337, 8, 1337, 8,
+        12377, 34, 652, 41, 1, 1338, 8, 1338, 8,
+        12411, 35, 2269, 29, 1, 1340, 8, 1340, 8,
+        12446, 36, 1187, 33, 1, 1341, 8, 1341, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedStrokePointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedStrokePressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 47, 47, 23, 1, 1342, 8, 1343, 24,
-        70, 43, 113, 22, 1, 1344, 8, 1345, 24,
+        12482, 47, 89, 23, 1, 1342, 8, 1343, 24,
+        12529, 43, 141, 22, 1, 1344, 8, 1345, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_188: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedStrokeDisabledSystemControlDisabledBaseMediumLowBrushRadioButtonOuterEllipseCheckedFillSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 44, 44, 39, 1, 1346, 8, 1346, 8,
-        83, 34, 117, 33, 1, 1348, 8, 1348, 8,
+        12572, 44, 381, 39, 1, 1346, 8, 1346, 8,
+        12616, 34, 1187, 33, 1, 1348, 8, 1348, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_189: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedFillPointerOverSystemAccentColorLight1RadioButtonOuterEllipseCheckedFillPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 45, 45, 23, 1, 1349, 8, 1350, 24,
-        68, 41, 109, 22, 1, 1351, 8, 1352, 24,
+        12650, 45, 89, 23, 1, 1349, 8, 1350, 24,
+        12695, 41, 141, 22, 1, 1351, 8, 1352, 24,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
-    strings: "RadioButtonOuterEllipseCheckedFillDisabledSystemControlBackgroundBaseMediumLowBrushRadioButtonCheckGlyphFillSystemControlForegroundChromeWhiteBrushRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeSystemControlTransparentBrushRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 42, 42, 41, 1, 1353, 8, 1353, 8,
-        83, 25, 108, 39, 1, 1355, 8, 1355, 8,
-        147, 36, 108, 39, 1, 1356, 8, 1356, 8,
-        183, 32, 108, 39, 1, 1358, 8, 1358, 8,
-        215, 33, 108, 39, 1, 1359, 8, 1359, 8,
-        248, 27, 275, 29, 1, 1360, 8, 1360, 8,
-        304, 38, 275, 29, 1, 1361, 8, 1361, 8,
-        342, 34, 275, 29, 1, 1362, 8, 1362, 8,
-        376, 35, 275, 29, 1, 1363, 8, 1363, 8,
+        12736, 42, 652, 41, 1, 1353, 8, 1353, 8,
+        12778, 25, 9504, 39, 1, 1355, 8, 1355, 8,
+        12803, 36, 9504, 39, 1, 1356, 8, 1356, 8,
+        12839, 32, 9504, 39, 1, 1358, 8, 1358, 8,
+        12871, 33, 9504, 39, 1, 1359, 8, 1359, 8,
+        12904, 27, 2269, 29, 1, 1360, 8, 1360, 8,
+        12931, 38, 2269, 29, 1, 1361, 8, 1361, 8,
+        12969, 34, 2269, 29, 1, 1362, 8, 1362, 8,
+        13003, 35, 2269, 29, 1, 1363, 8, 1363, 8,
     ],
 };
 
@@ -3518,44 +3524,44 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_191: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
-    strings: "SliderContainerBackgroundSystemControlTransparentBrushSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 29, 1, 1369, 8, 1369, 8,
-        54, 36, 25, 29, 1, 1370, 8, 1370, 8,
-        90, 32, 25, 29, 1, 1371, 8, 1371, 8,
-        122, 33, 25, 29, 1, 1372, 8, 1372, 8,
-        155, 21, 176, 34, 1, 1373, 8, 1373, 8,
+        13038, 25, 2269, 29, 1, 1369, 8, 1369, 8,
+        13063, 36, 2269, 29, 1, 1370, 8, 1370, 8,
+        13099, 32, 2269, 29, 1, 1371, 8, 1371, 8,
+        13131, 33, 2269, 29, 1, 1372, 8, 1372, 8,
+        13164, 21, 13185, 34, 1, 1373, 8, 1373, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
-    strings: "SliderThumbBackgroundPointerOverSystemAccentColorLight1SliderThumbBackgroundPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 32, 32, 23, 1, 1374, 8, 1374, 65,
-        55, 28, 83, 22, 1, 1375, 8, 1375, 61,
+        13219, 32, 89, 23, 1, 1374, 8, 1374, 65,
+        13251, 28, 141, 22, 1, 1375, 8, 1375, 61,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_194: rt::PackedRows = rt::PackedRows {
-    strings: "SliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderTrackFillSystemControlForegroundBaseMediumLowBrushSliderTrackFillPointerOverSystemControlForegroundBaseMediumBrushSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSystemControlHighlightAccentBrushSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderTickBarFillSliderTickBarFillDisabledSystemControlDisabledBaseMediumLowBrushSliderInlineTickBarFillSystemControlBackgroundAltHighBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 44, 1, 1376, 8, 1376, 8,
-        73, 15, 88, 41, 1, 1377, 8, 1377, 8,
-        129, 26, 155, 38, 1, 1378, 8, 1378, 8,
-        193, 22, 88, 41, 1, 1379, 8, 1379, 8,
-        215, 23, 29, 44, 1, 1380, 8, 1380, 8,
-        238, 20, 258, 33, 1, 1381, 8, 1381, 8,
-        291, 31, 258, 33, 1, 1382, 8, 1382, 8,
-        322, 27, 258, 33, 1, 1383, 8, 1383, 8,
-        349, 28, 29, 44, 1, 1384, 8, 1384, 8,
-        377, 17, 88, 41, 1, 1385, 8, 1385, 8,
-        394, 25, 419, 39, 1, 1386, 8, 1386, 8,
-        458, 23, 481, 35, 1, 1387, 8, 1387, 8,
+        13279, 29, 13308, 44, 1, 1376, 8, 1376, 8,
+        13352, 15, 6861, 41, 1, 1377, 8, 1377, 8,
+        13367, 26, 2543, 38, 1, 1378, 8, 1378, 8,
+        13393, 22, 6861, 41, 1, 1379, 8, 1379, 8,
+        13415, 23, 13308, 44, 1, 1380, 8, 1380, 8,
+        13438, 20, 1187, 33, 1, 1381, 8, 1381, 8,
+        13458, 31, 1187, 33, 1, 1382, 8, 1382, 8,
+        13489, 27, 1187, 33, 1, 1383, 8, 1383, 8,
+        13516, 28, 13308, 44, 1, 1384, 8, 1384, 8,
+        13544, 17, 6861, 41, 1, 1385, 8, 1385, 8,
+        13561, 25, 381, 39, 1, 1386, 8, 1386, 8,
+        13586, 23, 6726, 35, 1, 1387, 8, 1387, 8,
     ],
 };
 
@@ -3567,133 +3573,133 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_195: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchContentForegroundSystemControlForegroundBaseHighBrushToggleSwitchHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchContainerBackgroundSystemControlTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchFillOffToggleSwitchFillOffPointerOverToggleSwitchFillOffPressedSystemControlHighlightBaseMediumLowBrushToggleSwitchFillOffDisabledToggleSwitchStrokeOffSystemControlForegroundBaseMediumBrushToggleSwitchStrokeOffPointerOverSystemControlHighlightBaseMediumHighBrushToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchFillOnSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 36, 1, 1392, 8, 1392, 8,
-        65, 36, 101, 39, 1, 1393, 8, 1393, 8,
-        140, 31, 171, 29, 1, 1395, 8, 1395, 8,
-        200, 42, 171, 29, 1, 1396, 8, 1396, 8,
-        242, 38, 171, 29, 1, 1397, 8, 1397, 8,
-        280, 19, 171, 29, 1, 1398, 8, 1398, 8,
-        299, 30, 171, 29, 1, 1399, 8, 1399, 8,
-        329, 26, 355, 40, 1, 1400, 8, 1400, 8,
-        395, 27, 171, 29, 1, 1401, 8, 1401, 8,
-        422, 21, 443, 38, 1, 1402, 8, 1402, 8,
-        481, 32, 513, 41, 1, 1403, 8, 1403, 8,
-        554, 28, 29, 36, 1, 1404, 8, 1404, 8,
-        582, 29, 101, 39, 1, 1405, 8, 1405, 8,
-        611, 18, 629, 33, 1, 1406, 8, 1406, 8,
+        13609, 29, 693, 36, 1, 1392, 8, 1392, 8,
+        13638, 36, 381, 39, 1, 1393, 8, 1393, 8,
+        13674, 31, 2269, 29, 1, 1395, 8, 1395, 8,
+        13705, 42, 2269, 29, 1, 1396, 8, 1396, 8,
+        13747, 38, 2269, 29, 1, 1397, 8, 1397, 8,
+        13785, 19, 2269, 29, 1, 1398, 8, 1398, 8,
+        13804, 30, 2269, 29, 1, 1399, 8, 1399, 8,
+        13834, 26, 1296, 40, 1, 1400, 8, 1400, 8,
+        13860, 27, 2269, 29, 1, 1401, 8, 1401, 8,
+        13887, 21, 2543, 38, 1, 1402, 8, 1402, 8,
+        13908, 32, 4695, 41, 1, 1403, 8, 1403, 8,
+        13940, 28, 693, 36, 1, 1404, 8, 1404, 8,
+        13968, 29, 381, 39, 1, 1405, 8, 1405, 8,
+        13997, 18, 1187, 33, 1, 1406, 8, 1406, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_197: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchFillOnPointerOverSystemAccentColorLight1ToggleSwitchFillOnPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 29, 29, 23, 1, 1407, 8, 1407, 62,
-        52, 25, 77, 22, 1, 1408, 8, 1408, 58,
+        14015, 29, 89, 23, 1, 1407, 8, 1407, 62,
+        14044, 25, 141, 22, 1, 1408, 8, 1408, 58,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_198: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchFillOnDisabledSystemControlDisabledBaseLowBrushToggleSwitchStrokeOnSystemControlHighlightBaseHighBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 26, 26, 33, 1, 1409, 8, 1409, 8,
-        59, 20, 79, 35, 1, 1410, 8, 1410, 8,
+        14069, 26, 4826, 33, 1, 1409, 8, 1409, 8,
+        14095, 20, 729, 35, 1, 1410, 8, 1410, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchStrokeOnPointerOverSystemAccentColorLight1ToggleSwitchStrokeOnPressedSystemAccentColorDark1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 23, 1, 1411, 8, 1411, 64,
-        54, 27, 81, 22, 1, 1412, 8, 1412, 60,
+        14115, 31, 89, 23, 1, 1411, 8, 1411, 64,
+        14146, 27, 141, 22, 1, 1412, 8, 1412, 60,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
-    strings: "ToggleSwitchStrokeOnDisabledSystemControlDisabledBaseMediumLowBrushToggleSwitchKnobFillOffSystemControlHighlightBaseHighBrushToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnSystemControlHighlightAltChromeWhiteBrushToggleSwitchKnobFillOnPointerOverSystemControlHighlightChromeWhiteBrushToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledSystemControlPageBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 39, 1, 1413, 8, 1413, 8,
-        67, 23, 90, 35, 1, 1414, 8, 1414, 8,
-        125, 34, 90, 35, 1, 1415, 8, 1415, 8,
-        159, 30, 90, 35, 1, 1416, 8, 1416, 8,
-        189, 31, 28, 39, 1, 1417, 8, 1417, 8,
-        220, 22, 242, 41, 1, 1418, 8, 1418, 8,
-        283, 33, 316, 38, 1, 1419, 8, 1419, 8,
-        354, 29, 242, 41, 1, 1420, 8, 1420, 8,
-        383, 30, 413, 39, 1, 1421, 8, 1421, 8,
+        14173, 28, 381, 39, 1, 1413, 8, 1413, 8,
+        14201, 23, 729, 35, 1, 1414, 8, 1414, 8,
+        14224, 34, 729, 35, 1, 1415, 8, 1415, 8,
+        14258, 30, 729, 35, 1, 1416, 8, 1416, 8,
+        14288, 31, 381, 39, 1, 1417, 8, 1417, 8,
+        14319, 22, 1682, 41, 1, 1418, 8, 1418, 8,
+        14341, 33, 14374, 38, 1, 1419, 8, 1419, 8,
+        14412, 29, 1682, 41, 1, 1420, 8, 1420, 8,
+        14441, 30, 14471, 39, 1, 1421, 8, 1421, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_201: rt::PackedRows = rt::PackedRows {
-    strings: "ToolTipForegroundSystemControlForegroundBaseHighBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 17, 17, 36, 1, 1426, 8, 1426, 8,
-        53, 17, 70, 43, 1, 1427, 8, 1427, 8,
-        113, 18, 131, 33, 1, 1428, 8, 1428, 8,
+        14510, 17, 693, 36, 1, 1426, 8, 1426, 8,
+        14527, 17, 14544, 43, 1, 1427, 8, 1427, 8,
+        14587, 18, 5188, 33, 1, 1428, 8, 1428, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_202: rt::PackedRows = rt::PackedRows {
-    strings: "DatePickerSpacerFillSystemControlForegroundBaseLowBrushDatePickerSpacerFillDisabledSystemControlDisabledBaseLowBrushDatePickerButtonBorderBrushSystemControlForegroundBaseMediumBrushDatePickerButtonBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushDatePickerButtonBorderBrushPressedSystemControlHighlightBaseMediumBrushDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundSystemControlBackgroundAltMediumLowBrushDatePickerButtonBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushDatePickerButtonBackgroundPressedSystemControlBackgroundBaseLowBrushDatePickerButtonBackgroundDisabledDatePickerButtonForegroundSystemControlForegroundBaseHighBrushDatePickerButtonForegroundPointerOverSystemControlHighlightBaseHighBrushDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushDatePickerFlyoutPresenterBackgroundSystemControlTransientBackgroundBrushDatePickerFlyoutPresenterBorderBrushSystemControlTransientBorderBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFillSystemControlHighlightListAccentLowBrushDateTimePickerFlyoutButtonBackgroundSystemControlTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSystemControlHighlightListLowBrushDateTimePickerFlyoutButtonBackgroundPressedSystemControlHighlightListMediumBrushDateTimePickerFlyoutButtonBorderBrushSystemControlForegroundTransparentBrushDateTimePickerFlyoutButtonBorderBrushPointerOverSystemControlHighlightTransparentBrushDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverSystemControlHighlightAltBaseHighBrushDateTimePickerFlyoutButtonForegroundPressedTimePickerSpacerFillTimePickerSpacerFillDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundTimePickerButtonBackgroundPointerOverTimePickerButtonBackgroundPressedTimePickerButtonBackgroundDisabledTimePickerButtonForegroundTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFill",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 35, 1, 1432, 8, 1432, 8,
-        55, 28, 83, 33, 1, 1433, 8, 1433, 8,
-        116, 27, 143, 38, 1, 1434, 8, 1434, 8,
-        181, 38, 219, 41, 1, 1435, 8, 1435, 8,
-        260, 34, 294, 37, 1, 1437, 8, 1437, 8,
-        331, 35, 83, 33, 1, 1438, 8, 1438, 8,
-        366, 26, 392, 40, 1, 1439, 8, 1439, 8,
-        432, 37, 469, 41, 1, 1440, 8, 1440, 8,
-        510, 33, 543, 35, 1, 1442, 8, 1442, 8,
-        578, 34, 543, 35, 1, 1443, 8, 1443, 8,
-        612, 26, 638, 36, 1, 1444, 8, 1444, 8,
-        674, 37, 711, 35, 1, 1445, 8, 1445, 8,
-        746, 33, 711, 35, 1, 1446, 8, 1446, 8,
-        779, 34, 813, 39, 1, 1447, 8, 1447, 8,
-        852, 35, 887, 37, 1, 1448, 8, 1448, 8,
-        924, 36, 960, 33, 1, 1449, 8, 1449, 8,
-        993, 35, 20, 35, 1, 1450, 8, 1450, 8,
-        1028, 38, 1066, 40, 1, 1451, 8, 1451, 8,
-        1106, 36, 1142, 29, 1, 1454, 8, 1454, 8,
-        1171, 47, 1218, 34, 1, 1455, 8, 1455, 8,
-        1252, 43, 1295, 37, 1, 1457, 8, 1457, 8,
-        1332, 37, 1369, 39, 1, 1459, 8, 1459, 8,
-        1408, 48, 1456, 38, 1, 1461, 8, 1461, 8,
-        1494, 44, 1456, 38, 1, 1463, 8, 1463, 8,
-        1538, 47, 1585, 38, 1, 1465, 8, 1465, 8,
-        1623, 43, 1585, 38, 1, 1467, 8, 1467, 8,
-        1666, 20, 20, 35, 1, 1472, 8, 1472, 8,
-        1686, 28, 83, 33, 1, 1473, 8, 1473, 8,
-        1714, 27, 143, 38, 1, 1474, 8, 1474, 8,
-        1741, 38, 219, 41, 1, 1475, 8, 1475, 8,
-        1779, 34, 294, 37, 1, 1477, 8, 1477, 8,
-        1813, 35, 83, 33, 1, 1478, 8, 1478, 8,
-        1848, 26, 392, 40, 1, 1479, 8, 1479, 8,
-        1874, 37, 469, 41, 1, 1480, 8, 1480, 8,
-        1911, 33, 543, 35, 1, 1482, 8, 1482, 8,
-        1944, 34, 543, 35, 1, 1483, 8, 1483, 8,
-        1978, 26, 638, 36, 1, 1484, 8, 1484, 8,
-        2004, 37, 711, 35, 1, 1485, 8, 1485, 8,
-        2041, 33, 711, 35, 1, 1486, 8, 1486, 8,
-        2074, 34, 813, 39, 1, 1487, 8, 1487, 8,
-        2108, 35, 887, 37, 1, 1488, 8, 1488, 8,
-        2143, 36, 960, 33, 1, 1489, 8, 1489, 8,
-        2179, 35, 20, 35, 1, 1490, 8, 1490, 8,
-        2214, 38, 1066, 40, 1, 1491, 8, 1491, 8,
+        14605, 20, 14625, 35, 1, 1432, 8, 1432, 8,
+        14660, 28, 4826, 33, 1, 1433, 8, 1433, 8,
+        14688, 27, 2543, 38, 1, 1434, 8, 1434, 8,
+        14715, 38, 4695, 41, 1, 1435, 8, 1435, 8,
+        14753, 34, 4762, 37, 1, 1437, 8, 1437, 8,
+        14787, 35, 4826, 33, 1, 1438, 8, 1438, 8,
+        14822, 26, 4139, 40, 1, 1439, 8, 1439, 8,
+        14848, 37, 4208, 41, 1, 1440, 8, 1440, 8,
+        14885, 33, 193, 35, 1, 1442, 8, 1442, 8,
+        14918, 34, 193, 35, 1, 1443, 8, 1443, 8,
+        14952, 26, 693, 36, 1, 1444, 8, 1444, 8,
+        14978, 37, 729, 35, 1, 1445, 8, 1445, 8,
+        15015, 33, 729, 35, 1, 1446, 8, 1446, 8,
+        15048, 34, 381, 39, 1, 1447, 8, 1447, 8,
+        15082, 35, 5124, 37, 1, 1448, 8, 1448, 8,
+        15117, 36, 5188, 33, 1, 1449, 8, 1449, 8,
+        15153, 35, 14625, 35, 1, 1450, 8, 1450, 8,
+        15188, 38, 3636, 40, 1, 1451, 8, 1451, 8,
+        15226, 36, 2269, 29, 1, 1454, 8, 1454, 8,
+        15262, 47, 3542, 34, 1, 1455, 8, 1455, 8,
+        15309, 43, 3472, 37, 1, 1457, 8, 1457, 8,
+        15352, 37, 443, 39, 1, 1459, 8, 1459, 8,
+        15389, 48, 546, 38, 1, 1461, 8, 1461, 8,
+        15437, 44, 546, 38, 1, 1463, 8, 1463, 8,
+        15481, 47, 3174, 38, 1, 1465, 8, 1465, 8,
+        15528, 43, 3174, 38, 1, 1467, 8, 1467, 8,
+        15571, 20, 14625, 35, 1, 1472, 8, 1472, 8,
+        15591, 28, 4826, 33, 1, 1473, 8, 1473, 8,
+        15619, 27, 2543, 38, 1, 1474, 8, 1474, 8,
+        15646, 38, 4695, 41, 1, 1475, 8, 1475, 8,
+        15684, 34, 4762, 37, 1, 1477, 8, 1477, 8,
+        15718, 35, 4826, 33, 1, 1478, 8, 1478, 8,
+        15753, 26, 4139, 40, 1, 1479, 8, 1479, 8,
+        15779, 37, 4208, 41, 1, 1480, 8, 1480, 8,
+        15816, 33, 193, 35, 1, 1482, 8, 1482, 8,
+        15849, 34, 193, 35, 1, 1483, 8, 1483, 8,
+        15883, 26, 693, 36, 1, 1484, 8, 1484, 8,
+        15909, 37, 729, 35, 1, 1485, 8, 1485, 8,
+        15946, 33, 729, 35, 1, 1486, 8, 1486, 8,
+        15979, 34, 381, 39, 1, 1487, 8, 1487, 8,
+        16013, 35, 5124, 37, 1, 1488, 8, 1488, 8,
+        16048, 36, 5188, 33, 1, 1489, 8, 1489, 8,
+        16084, 35, 14625, 35, 1, 1490, 8, 1490, 8,
+        16119, 38, 3636, 40, 1, 1491, 8, 1491, 8,
     ],
 };
 
@@ -3705,73 +3711,73 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_203: &[rt::ValueRow<[f64; 4]>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_204: rt::PackedRows = rt::PackedRows {
-    strings: "TabControlBackgroundSystemControlTransparentBrushTabItemHeaderBackgroundUnselectedTabItemHeaderBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushTabItemHeaderBackgroundUnselectedPressedTabItemHeaderBackgroundSelectedTabItemHeaderBackgroundSelectedPointerOverTabItemHeaderBackgroundSelectedPressedTabItemHeaderBackgroundDisabledTabItemHeaderForegroundUnselectedSystemControlForegroundBaseMediumBrushTabItemHeaderForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushTabItemHeaderForegroundUnselectedPressedTabItemHeaderForegroundSelectedSystemControlHighlightAltBaseHighBrushTabItemHeaderForegroundSelectedPointerOverTabItemHeaderForegroundSelectedPressedTabItemHeaderForegroundDisabledSystemControlDisabledBaseMediumLowBrushTabItemHeaderSelectedPipeFillSystemControlHighlightAltAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 29, 1, 1499, 8, 1499, 8,
-        49, 33, 20, 29, 1, 1502, 8, 1502, 8,
-        82, 44, 126, 38, 1, 1503, 8, 1503, 8,
-        164, 40, 126, 38, 1, 1505, 8, 1505, 8,
-        204, 31, 126, 38, 1, 1507, 8, 1507, 8,
-        235, 42, 126, 38, 1, 1508, 8, 1508, 8,
-        277, 38, 126, 38, 1, 1510, 8, 1510, 8,
-        315, 31, 20, 29, 1, 1512, 8, 1512, 8,
-        346, 33, 379, 38, 1, 1513, 8, 1513, 8,
-        417, 44, 461, 44, 1, 1514, 8, 1514, 8,
-        505, 40, 461, 44, 1, 1516, 8, 1516, 8,
-        545, 31, 576, 38, 1, 1518, 8, 1518, 8,
-        614, 42, 461, 44, 1, 1519, 8, 1519, 8,
-        656, 38, 461, 44, 1, 1521, 8, 1521, 8,
-        694, 31, 725, 39, 1, 1523, 8, 1523, 8,
-        764, 29, 793, 36, 1, 1524, 8, 1524, 8,
+        16157, 20, 2269, 29, 1, 1499, 8, 1499, 8,
+        16177, 33, 2269, 29, 1, 1502, 8, 1502, 8,
+        16210, 44, 546, 38, 1, 1503, 8, 1503, 8,
+        16254, 40, 546, 38, 1, 1505, 8, 1505, 8,
+        16294, 31, 546, 38, 1, 1507, 8, 1507, 8,
+        16325, 42, 546, 38, 1, 1508, 8, 1508, 8,
+        16367, 38, 546, 38, 1, 1510, 8, 1510, 8,
+        16405, 31, 2269, 29, 1, 1512, 8, 1512, 8,
+        16436, 33, 2543, 38, 1, 1513, 8, 1513, 8,
+        16469, 44, 5009, 44, 1, 1514, 8, 1514, 8,
+        16513, 40, 5009, 44, 1, 1516, 8, 1516, 8,
+        16553, 31, 3174, 38, 1, 1518, 8, 1518, 8,
+        16584, 42, 5009, 44, 1, 1519, 8, 1519, 8,
+        16626, 38, 5009, 44, 1, 1521, 8, 1521, 8,
+        16664, 31, 381, 39, 1, 1523, 8, 1523, 8,
+        16695, 29, 16724, 36, 1, 1524, 8, 1524, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_205: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarBackgroundSystemControlTransparentBrushScrollBarBackgroundPointerOverScrollBarForegroundScrollBarBorderBrushScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundSystemControlForegroundBaseHighBrushScrollBarButtonArrowForegroundPointerOverScrollBarButtonArrowForegroundPressedSystemControlForegroundAltHighBrushScrollBarButtonArrowForegroundDisabledSystemControlForegroundBaseLowBrushScrollBarThumbFillPointerOverSystemControlBackgroundBaseMediumLowBrushScrollBarThumbFillPressedScrollBarThumbFillDisabledSystemControlDisabledTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 19, 29, 1, 1529, 8, 1529, 8,
-        48, 30, 19, 29, 1, 1530, 8, 1530, 8,
-        78, 19, 19, 29, 1, 1531, 8, 1531, 8,
-        97, 20, 19, 29, 1, 1532, 8, 1532, 8,
-        117, 25, 19, 29, 1, 1533, 8, 1533, 8,
-        142, 36, 178, 35, 1, 1534, 8, 1534, 8,
-        213, 32, 245, 38, 1, 1535, 8, 1535, 8,
-        283, 33, 19, 29, 1, 1536, 8, 1536, 8,
-        316, 26, 19, 29, 1, 1537, 8, 1537, 8,
-        342, 37, 19, 29, 1, 1538, 8, 1538, 8,
-        379, 33, 19, 29, 1, 1539, 8, 1539, 8,
-        412, 34, 19, 29, 1, 1540, 8, 1540, 8,
-        446, 30, 476, 36, 1, 1541, 8, 1541, 8,
-        512, 41, 476, 36, 1, 1542, 8, 1542, 8,
-        553, 37, 590, 35, 1, 1544, 8, 1544, 8,
-        625, 38, 663, 35, 1, 1545, 8, 1545, 8,
-        698, 29, 727, 41, 1, 1546, 8, 1546, 8,
-        768, 25, 245, 38, 1, 1547, 8, 1547, 8,
-        793, 26, 819, 37, 1, 1548, 8, 1548, 8,
+        16760, 19, 2269, 29, 1, 1529, 8, 1529, 8,
+        16779, 30, 2269, 29, 1, 1530, 8, 1530, 8,
+        16809, 19, 2269, 29, 1, 1531, 8, 1531, 8,
+        16828, 20, 2269, 29, 1, 1532, 8, 1532, 8,
+        16848, 25, 2269, 29, 1, 1533, 8, 1533, 8,
+        16873, 36, 16909, 35, 1, 1534, 8, 1534, 8,
+        16944, 32, 16976, 38, 1, 1535, 8, 1535, 8,
+        17014, 33, 2269, 29, 1, 1536, 8, 1536, 8,
+        17047, 26, 2269, 29, 1, 1537, 8, 1537, 8,
+        17073, 37, 2269, 29, 1, 1538, 8, 1538, 8,
+        17110, 33, 2269, 29, 1, 1539, 8, 1539, 8,
+        17143, 34, 2269, 29, 1, 1540, 8, 1540, 8,
+        17177, 30, 693, 36, 1, 1541, 8, 1541, 8,
+        17207, 41, 693, 36, 1, 1542, 8, 1542, 8,
+        17248, 37, 17285, 35, 1, 1544, 8, 1544, 8,
+        17320, 38, 14625, 35, 1, 1545, 8, 1545, 8,
+        17358, 29, 652, 41, 1, 1546, 8, 1546, 8,
+        17387, 25, 16976, 38, 1, 1547, 8, 1547, 8,
+        17412, 26, 615, 37, 1, 1548, 8, 1548, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_206: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarTrackStrokeSystemControlForegroundTransparentBrushScrollBarTrackStrokePointerOverScrollBarThumbBackgroundColorSystemBaseLowColorScrollBarPanningThumbBackgroundColorSystemChromeDisabledLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 39, 1, 1552, 8, 1552, 8,
-        59, 31, 20, 39, 1, 1553, 8, 1553, 8,
-        90, 29, 119, 18, 1, 1554, 8, 1554, 8,
-        137, 36, 173, 28, 1, 1555, 8, 1555, 8,
+        17438, 20, 443, 39, 1, 1552, 8, 1552, 8,
+        17458, 31, 443, 39, 1, 1553, 8, 1553, 8,
+        17489, 29, 11039, 18, 1, 1554, 8, 1554, 8,
+        17518, 36, 17554, 28, 1, 1555, 8, 1555, 8,
     ],
 };
 
 /// The brushes whose colour is a static resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_static_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_207: rt::PackedRows = rt::PackedRows {
-    strings: "ScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 36, 1, 1556, 8, 1557, 24,
+        17518, 31, 17518, 36, 1, 1556, 8, 1557, 24,
     ],
 };
 
@@ -3783,175 +3789,175 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_208: &[rt::ValueRow<f64>] = &[
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
-    strings: "TreeViewItemBackgroundSystemControlTransparentRevealBackgroundBrushTreeViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTreeViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTreeViewItemBackgroundDisabledSystemControlTransparentBrushTreeViewItemBackgroundSelectedSystemControlHighlightAccent3RevealBackgroundBrushTreeViewItemBackgroundSelectedPointerOverSystemControlHighlightAccent2RevealBackgroundBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledSystemControlDisabledBaseMediumLowBrushTreeViewItemForegroundSystemControlForegroundBaseHighBrushTreeViewItemForegroundPointerOverSystemControlHighlightAltBaseHighBrushTreeViewItemForegroundPressedTreeViewItemForegroundDisabledTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverSystemControlBackgroundTransparentRevealBorderBrushTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 22, 45, 1, 1562, 8, 1562, 8,
-        67, 33, 100, 50, 1, 1563, 8, 1563, 8,
-        150, 29, 179, 53, 1, 1565, 8, 1565, 8,
-        232, 30, 262, 29, 1, 1567, 8, 1567, 8,
-        291, 30, 321, 50, 1, 1568, 8, 1568, 8,
-        371, 41, 412, 50, 1, 1570, 8, 1570, 8,
-        462, 37, 179, 53, 1, 1572, 8, 1572, 8,
-        499, 38, 537, 39, 1, 1574, 8, 1574, 8,
-        576, 22, 598, 36, 1, 1576, 8, 1576, 8,
-        634, 33, 667, 38, 1, 1577, 8, 1577, 8,
-        705, 29, 667, 38, 1, 1578, 8, 1578, 8,
-        734, 30, 537, 39, 1, 1579, 8, 1579, 8,
-        764, 30, 667, 38, 1, 1580, 8, 1580, 8,
-        794, 41, 667, 38, 1, 1581, 8, 1581, 8,
-        835, 37, 667, 38, 1, 1583, 8, 1583, 8,
-        872, 38, 537, 39, 1, 1585, 8, 1585, 8,
-        910, 23, 262, 29, 1, 1587, 8, 1587, 8,
-        933, 34, 967, 53, 1, 1588, 8, 1588, 8,
-        1020, 30, 967, 53, 1, 1590, 8, 1590, 8,
-        1050, 31, 262, 29, 1, 1592, 8, 1592, 8,
-        1081, 31, 262, 29, 1, 1593, 8, 1593, 8,
-        1112, 42, 1154, 51, 1, 1594, 8, 1594, 8,
-        1205, 38, 1154, 51, 1, 1596, 8, 1596, 8,
-        1243, 39, 262, 29, 1, 1598, 8, 1598, 8,
+        17582, 22, 10569, 45, 1, 1562, 8, 1562, 8,
+        17604, 33, 17637, 50, 1, 1563, 8, 1563, 8,
+        17687, 29, 17716, 53, 1, 1565, 8, 1565, 8,
+        17769, 30, 2269, 29, 1, 1567, 8, 1567, 8,
+        17799, 30, 17829, 50, 1, 1568, 8, 1568, 8,
+        17879, 41, 17920, 50, 1, 1570, 8, 1570, 8,
+        17970, 37, 17716, 53, 1, 1572, 8, 1572, 8,
+        18007, 38, 381, 39, 1, 1574, 8, 1574, 8,
+        18045, 22, 693, 36, 1, 1576, 8, 1576, 8,
+        18067, 33, 3174, 38, 1, 1577, 8, 1577, 8,
+        18100, 29, 3174, 38, 1, 1578, 8, 1578, 8,
+        18129, 30, 381, 39, 1, 1579, 8, 1579, 8,
+        18159, 30, 3174, 38, 1, 1580, 8, 1580, 8,
+        18189, 41, 3174, 38, 1, 1581, 8, 1581, 8,
+        18230, 37, 3174, 38, 1, 1583, 8, 1583, 8,
+        18267, 38, 381, 39, 1, 1585, 8, 1585, 8,
+        18305, 23, 2269, 29, 1, 1587, 8, 1587, 8,
+        18328, 34, 18362, 53, 1, 1588, 8, 1588, 8,
+        18415, 30, 18362, 53, 1, 1590, 8, 1590, 8,
+        18445, 31, 2269, 29, 1, 1592, 8, 1592, 8,
+        18476, 31, 2269, 29, 1, 1593, 8, 1593, 8,
+        18507, 42, 18549, 51, 1, 1594, 8, 1594, 8,
+        18600, 38, 18549, 51, 1, 1596, 8, 1596, 8,
+        18638, 39, 2269, 29, 1, 1598, 8, 1598, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundSystemControlBackgroundBaseLowBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 21, 21, 35, 1, 1603, 8, 1603, 8,
+        18677, 21, 193, 35, 1, 1603, 8, 1603, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundPressedSystemControlBackgroundBaseMediumLowBrushSplitButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushSplitButtonBackgroundCheckedSystemControlHighlightAccentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 41, 1, 1606, 8, 1606, 8,
-        69, 29, 98, 35, 1, 1607, 8, 1607, 8,
-        133, 28, 161, 33, 1, 1608, 8, 1608, 8,
+        18698, 28, 652, 41, 1, 1606, 8, 1606, 8,
+        18726, 29, 193, 35, 1, 1607, 8, 1607, 8,
+        18755, 28, 1187, 33, 1, 1608, 8, 1608, 8,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundCheckedPointerOverSystemAccentColorDark1SplitButtonBackgroundCheckedPressedSystemAccentColorLight1",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 39, 39, 22, 1, 1609, 8, 1609, 72,
-        61, 35, 96, 23, 1, 1610, 8, 1610, 68,
+        18783, 39, 141, 22, 1, 1609, 8, 1609, 72,
+        18822, 35, 89, 23, 1, 1610, 8, 1610, 68,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
-    strings: "SplitButtonBackgroundCheckedDisabledSystemControlBackgroundBaseLowBrushSplitButtonForegroundSystemControlForegroundBaseHighBrushSplitButtonForegroundPointerOverSystemControlHighlightBaseHighBrushSplitButtonForegroundPressedSplitButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushSplitButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonBorderBrushSystemControlForegroundTransparentBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSystemControlHighlightTransparentBrushSplitButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSplitButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabled",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 35, 1, 1611, 8, 1611, 8,
-        71, 21, 92, 36, 1, 1612, 8, 1612, 8,
-        128, 32, 160, 35, 1, 1613, 8, 1613, 8,
-        195, 28, 160, 35, 1, 1614, 8, 1614, 8,
-        223, 29, 252, 39, 1, 1615, 8, 1615, 8,
-        291, 28, 319, 41, 1, 1616, 8, 1616, 8,
-        360, 39, 319, 41, 1, 1617, 8, 1617, 8,
-        399, 35, 319, 41, 1, 1619, 8, 1619, 8,
-        434, 36, 252, 39, 1, 1621, 8, 1621, 8,
-        470, 22, 492, 39, 1, 1623, 8, 1623, 8,
-        531, 33, 492, 39, 1, 1624, 8, 1624, 8,
-        564, 29, 593, 38, 1, 1625, 8, 1625, 8,
-        631, 30, 661, 37, 1, 1626, 8, 1626, 8,
-        698, 29, 727, 41, 1, 1627, 8, 1627, 8,
-        768, 40, 727, 41, 1, 1628, 8, 1628, 8,
-        808, 36, 727, 41, 1, 1630, 8, 1630, 8,
-        844, 37, 661, 37, 1, 1632, 8, 1632, 8,
+        18857, 36, 193, 35, 1, 1611, 8, 1611, 8,
+        18893, 21, 693, 36, 1, 1612, 8, 1612, 8,
+        18914, 32, 729, 35, 1, 1613, 8, 1613, 8,
+        18946, 28, 729, 35, 1, 1614, 8, 1614, 8,
+        18974, 29, 381, 39, 1, 1615, 8, 1615, 8,
+        19003, 28, 1682, 41, 1, 1616, 8, 1616, 8,
+        19031, 39, 1682, 41, 1, 1617, 8, 1617, 8,
+        19070, 35, 1682, 41, 1, 1619, 8, 1619, 8,
+        19105, 36, 381, 39, 1, 1621, 8, 1621, 8,
+        19141, 22, 443, 39, 1, 1623, 8, 1623, 8,
+        19163, 33, 443, 39, 1, 1624, 8, 1624, 8,
+        19196, 29, 546, 38, 1, 1625, 8, 1625, 8,
+        19225, 30, 615, 37, 1, 1626, 8, 1626, 8,
+        19255, 29, 2150, 41, 1, 1627, 8, 1627, 8,
+        19284, 40, 2150, 41, 1, 1628, 8, 1628, 8,
+        19324, 36, 2150, 41, 1, 1630, 8, 1630, 8,
+        19360, 37, 615, 37, 1, 1632, 8, 1632, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
-    strings: "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCalendarDatePickerForegroundSystemControlForegroundBaseHighBrushCalendarDatePickerForegroundDisabledSystemControlDisabledBaseMediumLowBrushCalendarDatePickerCalendarGlyphForegroundSystemControlForegroundBaseMediumHighBrushCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundSystemControlForegroundBaseMediumBrushCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerBackgroundSystemControlBackgroundAltMediumLowBrushCalendarDatePickerBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushCalendarDatePickerBackgroundPressedSystemControlBackgroundBaseLowBrushCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedSystemControlHighlightListAccentLowBrushCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushCalendarDatePickerBorderBrushPressedSystemControlHighlightBaseMediumBrushCalendarDatePickerBorderBrushDisabledSystemControlDisabledBaseLowBrushCalendarDatePickerLightDismissOverlayBackground",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 38, 47, 1, 1636, 8, 1636, 8,
-        85, 28, 113, 36, 1, 1640, 8, 1640, 8,
-        149, 36, 185, 39, 1, 1641, 8, 1641, 8,
-        224, 41, 265, 42, 1, 1643, 8, 1643, 8,
-        307, 49, 185, 39, 1, 1645, 8, 1645, 8,
-        356, 32, 388, 38, 1, 1647, 8, 1647, 8,
-        426, 40, 185, 39, 1, 1648, 8, 1648, 8,
-        466, 40, 113, 36, 1, 1650, 8, 1650, 8,
-        506, 28, 534, 40, 1, 1652, 8, 1652, 8,
-        574, 39, 613, 41, 1, 1653, 8, 1653, 8,
-        654, 35, 689, 35, 1, 1655, 8, 1655, 8,
-        724, 36, 689, 35, 1, 1656, 8, 1656, 8,
-        760, 35, 795, 40, 1, 1657, 8, 1657, 8,
-        835, 29, 388, 38, 1, 1659, 8, 1659, 8,
-        864, 40, 904, 41, 1, 1660, 8, 1660, 8,
-        945, 36, 981, 37, 1, 1662, 8, 1662, 8,
-        1018, 37, 1055, 33, 1, 1663, 8, 1663, 8,
-        1088, 47, 38, 47, 1, 1664, 8, 1664, 8,
+        19397, 38, 19435, 47, 1, 1636, 8, 1636, 8,
+        19482, 28, 693, 36, 1, 1640, 8, 1640, 8,
+        19510, 36, 381, 39, 1, 1641, 8, 1641, 8,
+        19546, 41, 4890, 42, 1, 1643, 8, 1643, 8,
+        19587, 49, 381, 39, 1, 1645, 8, 1645, 8,
+        19636, 32, 2543, 38, 1, 1647, 8, 1647, 8,
+        19668, 40, 381, 39, 1, 1648, 8, 1648, 8,
+        19708, 40, 693, 36, 1, 1650, 8, 1650, 8,
+        19748, 28, 4139, 40, 1, 1652, 8, 1652, 8,
+        19776, 39, 4208, 41, 1, 1653, 8, 1653, 8,
+        19815, 35, 193, 35, 1, 1655, 8, 1655, 8,
+        19850, 36, 193, 35, 1, 1656, 8, 1656, 8,
+        19886, 35, 3636, 40, 1, 1657, 8, 1657, 8,
+        19921, 29, 2543, 38, 1, 1659, 8, 1659, 8,
+        19950, 40, 4695, 41, 1, 1660, 8, 1660, 8,
+        19990, 36, 4762, 37, 1, 1662, 8, 1662, 8,
+        20026, 37, 4826, 33, 1, 1663, 8, 1663, 8,
+        20063, 47, 19435, 47, 1, 1664, 8, 1664, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
-    strings: "FlyoutPresenterBackgroundSystemControlBackgroundChromeMediumLowBrushFlyoutBorderThemeBrushSystemControlTransientBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 25, 43, 1, 1669, 8, 1669, 8,
-        68, 22, 90, 33, 1, 1670, 8, 1670, 8,
+        5882, 25, 14544, 43, 1, 1669, 8, 1669, 8,
+        20110, 22, 5188, 33, 1, 1670, 8, 1670, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
-    strings: "RefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 27, 65535, 65535, 1, 1677, 8,
-        27, 27, 65535, 255, 1, 1678, 8,
-        54, 23, 65535, 65535, 1, 1681, 8,
-        77, 23, 5903, 65309, 1, 1682, 8,
-        100, 24, 51914, 65482, 1, 1683, 8,
+        20132, 27, 65535, 65535, 1, 1677, 8,
+        20159, 27, 65535, 255, 1, 1678, 8,
+        20186, 23, 65535, 65535, 1, 1681, 8,
+        20209, 23, 5903, 65309, 1, 1682, 8,
+        20232, 24, 51914, 65482, 1, 1683, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
-    strings: "TitleBarBackgroundBrushSystemControlBackgroundAltHighBrushTableViewColumnHeaderSeparatorBackgroundSystemBaseLowColor",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 23, 23, 35, 1, 1684, 8, 1684, 8,
-        58, 40, 98, 18, 1, 1687, 8, 1687, 8,
+        20256, 23, 6726, 35, 1, 1684, 8, 1684, 8,
+        20279, 40, 11039, 18, 1, 1687, 8, 1687, 8,
     ],
 };
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
-    strings: "TableViewRowForegroundDisabledSystemControlDisabledBaseMediumLowBrushTableViewRowBackgroundPointerOverSystemControlHighlightListLowBrushTableViewRowForegroundPointerOverSystemControlHighlightAltBaseHighBrushTableViewRowBackgroundPressedSystemControlHighlightListMediumBrushTableViewRowForegroundPressedTableViewRowBackgroundSelectedSystemControlHighlightListAccentLowBrushTableViewRowForegroundSelectedTableViewRowBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushTableViewRowForegroundSelectedPointerOverTableViewRowBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushTableViewRowForegroundSelectedPressed",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 30, 30, 39, 1, 1692, 8, 1692, 8,
-        69, 33, 102, 34, 1, 1693, 8, 1693, 8,
-        136, 33, 169, 38, 1, 1694, 8, 1694, 8,
-        207, 29, 236, 37, 1, 1695, 8, 1695, 8,
-        273, 29, 169, 38, 1, 1696, 8, 1696, 8,
-        302, 30, 332, 40, 1, 1697, 8, 1697, 8,
-        372, 30, 169, 38, 1, 1698, 8, 1698, 8,
-        402, 41, 443, 43, 1, 1699, 8, 1699, 8,
-        486, 41, 169, 38, 1, 1700, 8, 1700, 8,
-        527, 37, 564, 41, 1, 1701, 8, 1701, 8,
-        605, 37, 169, 38, 1, 1702, 8, 1702, 8,
+        20319, 30, 381, 39, 1, 1692, 8, 1692, 8,
+        20349, 33, 3542, 34, 1, 1693, 8, 1693, 8,
+        20382, 33, 3174, 38, 1, 1694, 8, 1694, 8,
+        20415, 29, 3472, 37, 1, 1695, 8, 1695, 8,
+        20444, 29, 3174, 38, 1, 1696, 8, 1696, 8,
+        20473, 30, 3636, 40, 1, 1697, 8, 1697, 8,
+        20503, 30, 3174, 38, 1, 1698, 8, 1698, 8,
+        20533, 41, 3795, 43, 1, 1699, 8, 1699, 8,
+        20574, 41, 3174, 38, 1, 1700, 8, 1700, 8,
+        20615, 37, 3713, 41, 1, 1701, 8, 1701, 8,
+        20652, 37, 3174, 38, 1, 1702, 8, 1702, 8,
     ],
 };
 
 /// The brushes with a literal colour of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
-    strings: "SystemControlTransparentBrush",
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_0],
     records: &[
-        0, 29, 65535, 255, 1, 9, 4,
+        4602, 29, 65535, 255, 1, 9, 4,
     ],
 };
 
@@ -4992,23 +4998,24 @@ pub fn build_controls_fluentcontrols_xaml(
     let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 36, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_2);
-    rt::apply_theme_unit(active_theme_units(), 0, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 37, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 38, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 39, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 41, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 51, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 44, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 53, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 56, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 60, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 65, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 1, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 63, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 75, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 2, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 73, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 76, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 0, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 74, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 0, 4, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 5, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 8, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 9, 0, &context, &resource_dictionary_0)?;
@@ -5050,7 +5057,7 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(264,6) Key
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 264, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 264, 6)?);
-    rt::apply_theme_unit(active_theme_units(), 38, 0, &context, &resource_dictionary_1)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_1)?;
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 264, 6)?), 264, 6)?;
     // Controls/FluentControls.xaml(293,6) ThemeDictionaries
     let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
@@ -5065,7 +5072,7 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(293,6) Key
     let value_3 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 293, 6)?, rt::cast(::core::clone::Clone::clone(&value_3), 293, 6)?);
-    rt::apply_theme_unit(active_theme_units(), 38, 1, &context, &resource_dictionary_2)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 1, &context, &resource_dictionary_2)?;
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_2), rt::cast(resource_dictionary_2.clone(), 293, 6)?), 293, 6)?;
     // Controls/FluentControls.xaml(322,6) ThemeDictionaries
     let theme_dictionaries_collection_2 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
@@ -5080,53 +5087,53 @@ pub fn build_controls_fluentcontrols_xaml(
     // Controls/FluentControls.xaml(322,6) Key
     let value_5 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_3.clone(), 322, 6)?, rt::cast(::core::clone::Clone::clone(&value_5), 322, 6)?);
-    rt::apply_theme_unit(active_theme_units(), 38, 2, &context, &resource_dictionary_3)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 2, &context, &resource_dictionary_3)?;
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_2, ::core::clone::Clone::clone(&value_4), rt::cast(resource_dictionary_3.clone(), 322, 6)?), 322, 6)?;
-    rt::apply_theme_unit(active_theme_units(), 38, 3, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 40, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 40, 3, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 42, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(active_theme_units(), 43, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 45, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_8);
     let namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
-    rt::apply_theme_unit(active_theme_units(), 44, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_9);
-    rt::apply_theme_unit(active_theme_units(), 45, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 46, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_9);
     rt::apply_theme_unit(active_theme_units(), 47, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 48, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 49, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 50, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 51, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 52, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 53, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 54, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 55, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 57, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_10 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
-    rt::apply_theme_unit(active_theme_units(), 56, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 58, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_10);
     let namespace_scope_11 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(active_theme_units(), 59, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_11);
     rt::apply_theme_unit(active_theme_units(), 61, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_11);
+    rt::apply_theme_unit(active_theme_units(), 63, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_12 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
-    rt::apply_theme_unit(active_theme_units(), 62, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_12);
     rt::apply_theme_unit(active_theme_units(), 64, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7);
-    rt::apply_theme_unit(active_theme_units(), 65, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_13);
+    ::core::mem::drop(namespace_scope_12);
     rt::apply_theme_unit(active_theme_units(), 66, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    let namespace_scope_13 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_7);
     rt::apply_theme_unit(active_theme_units(), 67, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_13);
     rt::apply_theme_unit(active_theme_units(), 68, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_14);
+    let namespace_scope_14 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
     rt::apply_theme_unit(active_theme_units(), 69, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
     rt::apply_theme_unit(active_theme_units(), 70, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_14);
+    rt::apply_theme_unit(active_theme_units(), 71, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_15 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_4);
+    rt::apply_theme_unit(active_theme_units(), 72, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_15);
     let namespace_scope_16 = rt::push_namespace_scope(&context, BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8);
-    rt::apply_theme_unit(active_theme_units(), 71, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 73, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_16);
-    rt::apply_theme_unit(active_theme_units(), 72, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 75, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 74, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 77, 0, &context, &resource_dictionary_0)?;
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 7, 10)?), 7, 10)?;
     context.pop_parent();
@@ -5328,7 +5335,7 @@ fn build_controls_fluentcontrols_xaml_unit_14(
     ::core::result::Result::Ok(())
 }
 
-/// Run 15 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+/// Run 15 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/OverlayPopupHost.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_unit_15(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
@@ -5338,14 +5345,24 @@ fn build_controls_fluentcontrols_xaml_unit_15(
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_15 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_31, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_15) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 16 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PopupRoot.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_16(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,4) Content (resource)
     let deferred_16 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_33, 4, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_16) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 4, 4)?;
     ::core::result::Result::Ok(())
 }
 
-/// Run 16 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PathIcon.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_16(
+/// Run 17 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PathIcon.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_17(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5357,8 +5374,8 @@ fn build_controls_fluentcontrols_xaml_unit_16(
     ::core::result::Result::Ok(())
 }
 
-/// Run 17 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RepeatButton.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_17(
+/// Run 18 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RepeatButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_18(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5370,8 +5387,8 @@ fn build_controls_fluentcontrols_xaml_unit_17(
     ::core::result::Result::Ok(())
 }
 
-/// Run 18 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_18(
+/// Run 19 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_19(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5383,8 +5400,8 @@ fn build_controls_fluentcontrols_xaml_unit_18(
     ::core::result::Result::Ok(())
 }
 
-/// Run 19 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_19(
+/// Run 20 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_20(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5396,8 +5413,8 @@ fn build_controls_fluentcontrols_xaml_unit_19(
     ::core::result::Result::Ok(())
 }
 
-/// Run 20 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabStrip.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_20(
+/// Run 21 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabStrip.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_21(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5409,8 +5426,8 @@ fn build_controls_fluentcontrols_xaml_unit_20(
     ::core::result::Result::Ok(())
 }
 
-/// Run 21 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToggleButton.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_21(
+/// Run 22 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToggleButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_22(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5422,8 +5439,8 @@ fn build_controls_fluentcontrols_xaml_unit_21(
     ::core::result::Result::Ok(())
 }
 
-/// Run 22 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_22(
+/// Run 23 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_23(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5435,8 +5452,8 @@ fn build_controls_fluentcontrols_xaml_unit_22(
     ::core::result::Result::Ok(())
 }
 
-/// Run 23 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_23(
+/// Run 24 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_24(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5448,8 +5465,8 @@ fn build_controls_fluentcontrols_xaml_unit_23(
     ::core::result::Result::Ok(())
 }
 
-/// Run 24 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_24(
+/// Run 25 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_25(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5461,8 +5478,8 @@ fn build_controls_fluentcontrols_xaml_unit_24(
     ::core::result::Result::Ok(())
 }
 
-/// Run 25 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_fluentcontrols_xaml_unit_25(
+/// Run 26 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_26(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5474,8 +5491,8 @@ fn build_controls_fluentcontrols_xaml_unit_25(
     ::core::result::Result::Ok(())
 }
 
-/// Run 26 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ComboBoxItem.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_26(
+/// Run 27 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ComboBoxItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_27(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5487,8 +5504,8 @@ fn build_controls_fluentcontrols_xaml_unit_26(
     ::core::result::Result::Ok(())
 }
 
-/// Run 27 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_fluentcontrols_xaml_unit_27(
+/// Run 28 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_28(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5500,8 +5517,8 @@ fn build_controls_fluentcontrols_xaml_unit_27(
     ::core::result::Result::Ok(())
 }
 
-/// Run 28 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_28(
+/// Run 29 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_29(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5513,8 +5530,8 @@ fn build_controls_fluentcontrols_xaml_unit_28(
     ::core::result::Result::Ok(())
 }
 
-/// Run 29 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_fluentcontrols_xaml_unit_29(
+/// Run 30 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_30(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5529,8 +5546,8 @@ fn build_controls_fluentcontrols_xaml_unit_29(
     ::core::result::Result::Ok(())
 }
 
-/// Run 30 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_30(
+/// Run 31 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_31(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5542,8 +5559,8 @@ fn build_controls_fluentcontrols_xaml_unit_30(
     ::core::result::Result::Ok(())
 }
 
-/// Run 31 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
-fn build_controls_fluentcontrols_xaml_unit_31(
+/// Run 32 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_fluentcontrols_xaml_unit_32(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5557,8 +5574,8 @@ fn build_controls_fluentcontrols_xaml_unit_31(
     ::core::result::Result::Ok(())
 }
 
-/// Run 32 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_32(
+/// Run 33 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_33(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5579,8 +5596,8 @@ fn build_controls_fluentcontrols_xaml_unit_32(
     ::core::result::Result::Ok(())
 }
 
-/// Run 33 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_33(
+/// Run 34 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_34(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5598,8 +5615,8 @@ fn build_controls_fluentcontrols_xaml_unit_33(
     ::core::result::Result::Ok(())
 }
 
-/// Run 34 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_34(
+/// Run 35 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_35(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5619,8 +5636,8 @@ fn build_controls_fluentcontrols_xaml_unit_34(
     ::core::result::Result::Ok(())
 }
 
-/// Run 35 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_35(
+/// Run 36 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_36(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5672,8 +5689,8 @@ fn build_controls_fluentcontrols_xaml_unit_35(
     ::core::result::Result::Ok(())
 }
 
-/// Run 36 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RadioButton.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_36(
+/// Run 37 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/RadioButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_37(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5687,8 +5704,8 @@ fn build_controls_fluentcontrols_xaml_unit_36(
     ::core::result::Result::Ok(())
 }
 
-/// Run 37 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_37(
+/// Run 38 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_38(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5722,8 +5739,8 @@ fn build_controls_fluentcontrols_xaml_unit_37(
     ::core::result::Result::Ok(())
 }
 
-/// Run 38 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_38(
+/// Run 39 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_39(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5737,8 +5754,8 @@ fn build_controls_fluentcontrols_xaml_unit_38(
     ::core::result::Result::Ok(())
 }
 
-/// Run 39 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_39(
+/// Run 40 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_40(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5760,8 +5777,8 @@ fn build_controls_fluentcontrols_xaml_unit_39(
     ::core::result::Result::Ok(())
 }
 
-/// Run 40 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_40(
+/// Run 41 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_41(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5777,8 +5794,8 @@ fn build_controls_fluentcontrols_xaml_unit_40(
     ::core::result::Result::Ok(())
 }
 
-/// Run 41 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_41(
+/// Run 42 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_42(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5792,8 +5809,8 @@ fn build_controls_fluentcontrols_xaml_unit_41(
     ::core::result::Result::Ok(())
 }
 
-/// Run 42 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CheckBox.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_42(
+/// Run 43 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/CheckBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_43(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5809,8 +5826,8 @@ fn build_controls_fluentcontrols_xaml_unit_42(
     ::core::result::Result::Ok(())
 }
 
-/// Run 43 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/FlyoutPresenter.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_43(
+/// Run 44 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/FlyoutPresenter.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_44(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5824,8 +5841,8 @@ fn build_controls_fluentcontrols_xaml_unit_43(
     ::core::result::Result::Ok(())
 }
 
-/// Run 44 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_44(
+/// Run 45 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_45(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5839,8 +5856,8 @@ fn build_controls_fluentcontrols_xaml_unit_44(
     ::core::result::Result::Ok(())
 }
 
-/// Run 45 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/HyperlinkButton.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_45(
+/// Run 46 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/HyperlinkButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_46(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5854,8 +5871,8 @@ fn build_controls_fluentcontrols_xaml_unit_45(
     ::core::result::Result::Ok(())
 }
 
-/// Run 46 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ListBoxItem.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_46(
+/// Run 47 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ListBoxItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_47(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5869,8 +5886,8 @@ fn build_controls_fluentcontrols_xaml_unit_46(
     ::core::result::Result::Ok(())
 }
 
-/// Run 47 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_47(
+/// Run 48 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_48(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5886,8 +5903,8 @@ fn build_controls_fluentcontrols_xaml_unit_47(
     ::core::result::Result::Ok(())
 }
 
-/// Run 48 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_48(
+/// Run 49 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_49(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5911,8 +5928,8 @@ fn build_controls_fluentcontrols_xaml_unit_48(
     ::core::result::Result::Ok(())
 }
 
-/// Run 49 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/MenuFlyoutPresenter.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_49(
+/// Run 50 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/MenuFlyoutPresenter.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_50(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5926,8 +5943,8 @@ fn build_controls_fluentcontrols_xaml_unit_49(
     ::core::result::Result::Ok(())
 }
 
-/// Run 50 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_50(
+/// Run 51 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_51(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5938,8 +5955,8 @@ fn build_controls_fluentcontrols_xaml_unit_50(
     ::core::result::Result::Ok(())
 }
 
-/// Run 51 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_51(
+/// Run 52 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_52(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5950,8 +5967,8 @@ fn build_controls_fluentcontrols_xaml_unit_51(
     ::core::result::Result::Ok(())
 }
 
-/// Run 52 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_52(
+/// Run 53 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_53(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5962,8 +5979,8 @@ fn build_controls_fluentcontrols_xaml_unit_52(
     ::core::result::Result::Ok(())
 }
 
-/// Run 53 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_53(
+/// Run 54 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_54(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -5991,8 +6008,8 @@ fn build_controls_fluentcontrols_xaml_unit_53(
     ::core::result::Result::Ok(())
 }
 
-/// Run 54 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_54(
+/// Run 55 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_55(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6014,8 +6031,8 @@ fn build_controls_fluentcontrols_xaml_unit_54(
     ::core::result::Result::Ok(())
 }
 
-/// Run 55 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_55(
+/// Run 56 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_56(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6037,8 +6054,8 @@ fn build_controls_fluentcontrols_xaml_unit_55(
     ::core::result::Result::Ok(())
 }
 
-/// Run 56 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_56(
+/// Run 57 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_57(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6060,8 +6077,8 @@ fn build_controls_fluentcontrols_xaml_unit_56(
     ::core::result::Result::Ok(())
 }
 
-/// Run 57 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabControl.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_57(
+/// Run 58 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabControl.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_58(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6075,8 +6092,8 @@ fn build_controls_fluentcontrols_xaml_unit_57(
     ::core::result::Result::Ok(())
 }
 
-/// Run 58 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabItem.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_58(
+/// Run 59 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_59(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6090,8 +6107,8 @@ fn build_controls_fluentcontrols_xaml_unit_58(
     ::core::result::Result::Ok(())
 }
 
-/// Run 59 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_59(
+/// Run 60 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_60(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6105,8 +6122,8 @@ fn build_controls_fluentcontrols_xaml_unit_59(
     ::core::result::Result::Ok(())
 }
 
-/// Run 60 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_60(
+/// Run 61 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_61(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6120,8 +6137,8 @@ fn build_controls_fluentcontrols_xaml_unit_60(
     ::core::result::Result::Ok(())
 }
 
-/// Run 61 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_61(
+/// Run 62 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_62(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6139,8 +6156,8 @@ fn build_controls_fluentcontrols_xaml_unit_61(
     ::core::result::Result::Ok(())
 }
 
-/// Run 62 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_62(
+/// Run 63 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_63(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6154,8 +6171,8 @@ fn build_controls_fluentcontrols_xaml_unit_62(
     ::core::result::Result::Ok(())
 }
 
-/// Run 63 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabStripItem.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_63(
+/// Run 64 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TabStripItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_64(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6169,8 +6186,8 @@ fn build_controls_fluentcontrols_xaml_unit_63(
     ::core::result::Result::Ok(())
 }
 
-/// Run 64 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_64(
+/// Run 65 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_65(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6198,8 +6215,8 @@ fn build_controls_fluentcontrols_xaml_unit_64(
     ::core::result::Result::Ok(())
 }
 
-/// Run 65 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_65(
+/// Run 66 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_66(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6219,8 +6236,8 @@ fn build_controls_fluentcontrols_xaml_unit_65(
     ::core::result::Result::Ok(())
 }
 
-/// Run 66 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToolTip.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_66(
+/// Run 67 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ToolTip.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_67(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6234,8 +6251,8 @@ fn build_controls_fluentcontrols_xaml_unit_66(
     ::core::result::Result::Ok(())
 }
 
-/// Run 67 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_67(
+/// Run 68 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_68(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6257,8 +6274,8 @@ fn build_controls_fluentcontrols_xaml_unit_67(
     ::core::result::Result::Ok(())
 }
 
-/// Run 68 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/WindowDrawnDecorations.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_68(
+/// Run 69 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/WindowDrawnDecorations.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_69(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6279,8 +6296,8 @@ fn build_controls_fluentcontrols_xaml_unit_68(
     ::core::result::Result::Ok(())
 }
 
-/// Run 69 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ComboBox.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_69(
+/// Run 70 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ComboBox.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_70(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6302,8 +6319,8 @@ fn build_controls_fluentcontrols_xaml_unit_69(
     ::core::result::Result::Ok(())
 }
 
-/// Run 70 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_70(
+/// Run 71 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_71(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6317,8 +6334,8 @@ fn build_controls_fluentcontrols_xaml_unit_70(
     ::core::result::Result::Ok(())
 }
 
-/// Run 71 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DataValidationErrors.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_71(
+/// Run 72 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DataValidationErrors.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_72(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6332,8 +6349,8 @@ fn build_controls_fluentcontrols_xaml_unit_71(
     ::core::result::Result::Ok(())
 }
 
-/// Run 72 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_72(
+/// Run 73 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_73(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6350,8 +6367,8 @@ fn build_controls_fluentcontrols_xaml_unit_72(
     ::core::result::Result::Ok(())
 }
 
-/// Run 73 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_73(
+/// Run 74 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_74(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6374,8 +6391,8 @@ fn build_controls_fluentcontrols_xaml_unit_73(
     ::core::result::Result::Ok(())
 }
 
-/// Run 74 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_74(
+/// Run 75 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_75(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6400,8 +6417,8 @@ fn build_controls_fluentcontrols_xaml_unit_74(
     ::core::result::Result::Ok(())
 }
 
-/// Run 75 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DropDownButton.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_75(
+/// Run 76 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/DropDownButton.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_76(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6415,8 +6432,8 @@ fn build_controls_fluentcontrols_xaml_unit_75(
     ::core::result::Result::Ok(())
 }
 
-/// Run 76 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_76(
+/// Run 77 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_77(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6446,8 +6463,8 @@ fn build_controls_fluentcontrols_xaml_unit_76(
     ::core::result::Result::Ok(())
 }
 
-/// Run 77 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_77(
+/// Run 78 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_78(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6465,8 +6482,8 @@ fn build_controls_fluentcontrols_xaml_unit_77(
     ::core::result::Result::Ok(())
 }
 
-/// Run 78 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SelectableTextBlock.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_78(
+/// Run 79 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/SelectableTextBlock.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_79(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6480,8 +6497,8 @@ fn build_controls_fluentcontrols_xaml_unit_78(
     ::core::result::Result::Ok(())
 }
 
-/// Run 79 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
-fn build_controls_fluentcontrols_xaml_unit_79(
+/// Run 80 of `build_controls_fluentcontrols_xaml` (`Controls/FluentControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
+fn build_controls_fluentcontrols_xaml_unit_80(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -6529,9 +6546,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_2: rt::PackedRows = rt::PackedRow
     ],
 };
 
+/// The keys and targets of the packed tables of the unit 10 of `Controls/FluentControls.xaml`, each once (#855).
+const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS: &str = "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelectedTabbedPageTabItemHeaderBackgroundUnselectedPointerOverSystemListLowColorTabbedPageTabItemHeaderBackgroundSelectedPointerOverTabbedPageTabItemHeaderBackgroundUnselectedPressedSystemListMediumColorTabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabledTabbedPageTabItemHeaderForegroundUnselectedSystemBaseMediumColorTabbedPageTabItemHeaderForegroundSelectedSystemAccentColorTabbedPageTabItemHeaderForegroundDisabledSystemBaseLowColorTabbedPageTabStripBackgroundTabbedPageTabStripBorderBrush";
+
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelected",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
         0, 43, 65535, 255, 0, 21, 4,
@@ -6541,49 +6561,49 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3: rt::PackedRows = rt::PackedRow
 
 /// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_4: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPointerOverSystemListLowColor",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        0, 54, 54, 18, 0, 23, 4, 23, 83,
+        84, 54, 138, 18, 0, 23, 4, 23, 83,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundSelectedPointerOver",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        0, 52, 65535, 255, 0, 24, 4,
+        156, 52, 65535, 255, 0, 24, 4,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundUnselectedPressedSystemListMediumColor",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        0, 50, 50, 21, 0, 25, 4, 25, 79,
+        208, 50, 258, 21, 0, 25, 4, 25, 79,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabled",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        0, 48, 65535, 255, 0, 26, 4,
-        48, 41, 65535, 255, 0, 27, 4,
+        279, 48, 65535, 255, 0, 26, 4,
+        327, 41, 65535, 255, 0, 27, 4,
     ],
 };
 
 /// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_8: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabItemHeaderForegroundUnselectedSystemBaseMediumColorTabbedPageTabItemHeaderForegroundSelectedSystemAccentColorTabbedPageTabItemHeaderForegroundDisabledSystemBaseLowColor",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        0, 43, 43, 21, 0, 30, 4, 30, 72,
-        64, 41, 105, 17, 0, 31, 4, 31, 70,
-        122, 41, 163, 18, 0, 32, 4, 32, 70,
+        368, 43, 411, 21, 0, 30, 4, 30, 72,
+        432, 41, 473, 17, 0, 31, 4, 31, 70,
+        490, 41, 531, 18, 0, 32, 4, 32, 70,
     ],
 };
 
@@ -6608,19 +6628,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_11: &[rt::ValueRow<f64>] = &[
 
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabStripBackground",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        0, 28, 65535, 255, 0, 51, 4,
+        549, 28, 65535, 255, 0, 51, 4,
     ],
 };
 
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
-    strings: "TabbedPageTabStripBorderBrush",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        0, 29, 65535, 255, 0, 54, 4,
+        577, 29, 65535, 255, 0, 54, 4,
     ],
 };
 
@@ -6659,9 +6679,12 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_18: &[rt::ValueRow<[f64; 4]>] = &
     rt::ValueRow { key: "MenuInputGestureTextMargin", value: [24.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 55, position: 49 },
 ];
 
+/// The keys and targets of the packed tables of the unit 40 of `Controls/FluentControls.xaml`, each once (#855).
+const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_40_STRINGS: &str = "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled";
+
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_19: rt::PackedRows = rt::PackedRows {
-    strings: "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_40_STRINGS,
     namespaces: &[],
     records: &[
         0, 37, 65535, 255, 0, 265, 8,
@@ -6696,7 +6719,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_19: rt::PackedRows = rt::PackedRo
 
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_20: rt::PackedRows = rt::PackedRows {
-    strings: "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_40_STRINGS,
     namespaces: &[],
     records: &[
         0, 37, 65535, 255, 0, 294, 8,
@@ -6731,7 +6754,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_20: rt::PackedRows = rt::PackedRo
 
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
-    strings: "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled",
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_40_STRINGS,
     namespaces: &[],
     records: &[
         0, 37, 65535, 255, 0, 323, 8,
@@ -42011,7 +42034,7 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_15, build_controls_fluentcontrols_xaml_unit_25, build_controls_fluentcontrols_xaml_unit_27, build_controls_fluentcontrols_xaml_unit_29, build_controls_fluentcontrols_xaml_unit_31] };
+pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_26, build_controls_fluentcontrols_xaml_unit_28, build_controls_fluentcontrols_xaml_unit_30, build_controls_fluentcontrols_xaml_unit_32] };
 
 /// The unit `Accents/BaseResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Accents/BaseResources.xaml", index: 1, runs: &[populate_fluenttheme_xaml_unit_0, populate_fluenttheme_xaml_unit_2, populate_fluenttheme_xaml_unit_4] };
@@ -42026,7 +42049,7 @@ pub static THEME_UNIT_3: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/Invarian
 pub static THEME_UNIT_4: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 4, runs: &[build_controls_fluentcontrols_xaml_unit_0] };
 
 /// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 5, runs: &[build_controls_fluentcontrols_xaml_unit_32] };
+pub static THEME_UNIT_5: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 5, runs: &[build_controls_fluentcontrols_xaml_unit_33] };
 
 /// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 6, runs: &[build_controls_fluentcontrols_xaml_unit_1] };
@@ -42035,28 +42058,28 @@ pub static THEME_UNIT_6: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carouse
 pub static THEME_UNIT_7: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 7, runs: &[build_controls_fluentcontrols_xaml_unit_2] };
 
 /// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 8, runs: &[build_controls_fluentcontrols_xaml_unit_33] };
+pub static THEME_UNIT_8: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 8, runs: &[build_controls_fluentcontrols_xaml_unit_34] };
 
 /// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 9, runs: &[build_controls_fluentcontrols_xaml_unit_34] };
+pub static THEME_UNIT_9: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 9, runs: &[build_controls_fluentcontrols_xaml_unit_35] };
 
 /// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 10, runs: &[build_controls_fluentcontrols_xaml_unit_35] };
+pub static THEME_UNIT_10: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 10, runs: &[build_controls_fluentcontrols_xaml_unit_36] };
 
 /// The unit `Controls/RadioButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 11, runs: &[build_controls_fluentcontrols_xaml_unit_36] };
+pub static THEME_UNIT_11: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 11, runs: &[build_controls_fluentcontrols_xaml_unit_37] };
 
 /// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 12, runs: &[build_controls_fluentcontrols_xaml_unit_37] };
+pub static THEME_UNIT_12: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 12, runs: &[build_controls_fluentcontrols_xaml_unit_38] };
 
 /// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 13, runs: &[build_controls_fluentcontrols_xaml_unit_38] };
+pub static THEME_UNIT_13: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 13, runs: &[build_controls_fluentcontrols_xaml_unit_39] };
 
 /// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_14: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 14, runs: &[build_controls_fluentcontrols_xaml_unit_3] };
 
 /// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 15, runs: &[build_controls_fluentcontrols_xaml_unit_39] };
+pub static THEME_UNIT_15: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 15, runs: &[build_controls_fluentcontrols_xaml_unit_40] };
 
 /// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 16, runs: &[build_controls_fluentcontrols_xaml_unit_4] };
@@ -42065,31 +42088,31 @@ pub static THEME_UNIT_16: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calend
 pub static THEME_UNIT_17: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 17, runs: &[build_controls_fluentcontrols_xaml_unit_5] };
 
 /// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 18, runs: &[build_controls_fluentcontrols_xaml_unit_40] };
+pub static THEME_UNIT_18: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 18, runs: &[build_controls_fluentcontrols_xaml_unit_41] };
 
 /// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_19: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 19, runs: &[build_controls_fluentcontrols_xaml_unit_6] };
 
 /// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 20, runs: &[build_controls_fluentcontrols_xaml_unit_41] };
+pub static THEME_UNIT_20: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 20, runs: &[build_controls_fluentcontrols_xaml_unit_42] };
 
 /// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_21: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 21, runs: &[build_controls_fluentcontrols_xaml_unit_7] };
 
 /// The unit `Controls/CheckBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 22, runs: &[build_controls_fluentcontrols_xaml_unit_42] };
+pub static THEME_UNIT_22: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 22, runs: &[build_controls_fluentcontrols_xaml_unit_43] };
 
 /// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 23, runs: &[build_controls_fluentcontrols_xaml_unit_43] };
+pub static THEME_UNIT_23: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 23, runs: &[build_controls_fluentcontrols_xaml_unit_44] };
 
 /// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 24, runs: &[build_controls_fluentcontrols_xaml_unit_44] };
+pub static THEME_UNIT_24: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 24, runs: &[build_controls_fluentcontrols_xaml_unit_45] };
 
 /// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_25: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 25, runs: &[build_controls_fluentcontrols_xaml_unit_8] };
 
 /// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 26, runs: &[build_controls_fluentcontrols_xaml_unit_45] };
+pub static THEME_UNIT_26: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 26, runs: &[build_controls_fluentcontrols_xaml_unit_46] };
 
 /// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_27: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 27, runs: &[build_controls_fluentcontrols_xaml_unit_9] };
@@ -42101,19 +42124,19 @@ pub static THEME_UNIT_28: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.
 pub static THEME_UNIT_29: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 29, runs: &[build_controls_fluentcontrols_xaml_unit_11] };
 
 /// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 30, runs: &[build_controls_fluentcontrols_xaml_unit_46] };
+pub static THEME_UNIT_30: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 30, runs: &[build_controls_fluentcontrols_xaml_unit_47] };
 
 /// The unit `Controls/MenuScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_31: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 31, runs: &[build_controls_fluentcontrols_xaml_unit_12] };
 
 /// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 32, runs: &[build_controls_fluentcontrols_xaml_unit_47] };
+pub static THEME_UNIT_32: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 32, runs: &[build_controls_fluentcontrols_xaml_unit_48] };
 
 /// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 33, runs: &[build_controls_fluentcontrols_xaml_unit_48] };
+pub static THEME_UNIT_33: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 33, runs: &[build_controls_fluentcontrols_xaml_unit_49] };
 
 /// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 34, runs: &[build_controls_fluentcontrols_xaml_unit_49] };
+pub static THEME_UNIT_34: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 34, runs: &[build_controls_fluentcontrols_xaml_unit_50] };
 
 /// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 35, runs: &[build_controls_fluentcontrols_xaml_unit_13] };
@@ -42121,126 +42144,132 @@ pub static THEME_UNIT_35: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Notifi
 /// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_36: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 36, runs: &[build_controls_fluentcontrols_xaml_unit_14] };
 
+/// The unit `Controls/OverlayPopupHost.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/OverlayPopupHost.xaml", index: 37, runs: &[build_controls_fluentcontrols_xaml_unit_15] };
+
+/// The unit `Controls/PopupRoot.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PopupRoot.xaml", index: 38, runs: &[build_controls_fluentcontrols_xaml_unit_16] };
+
 /// The unit `Controls/PathIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_37: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 37, runs: &[build_controls_fluentcontrols_xaml_unit_16] };
+pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 39, runs: &[build_controls_fluentcontrols_xaml_unit_17] };
 
 /// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_38: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 38, runs: &[build_controls_fluentcontrols_xaml_unit_50, build_controls_fluentcontrols_xaml_unit_51, build_controls_fluentcontrols_xaml_unit_52, build_controls_fluentcontrols_xaml_unit_53] };
+pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 40, runs: &[build_controls_fluentcontrols_xaml_unit_51, build_controls_fluentcontrols_xaml_unit_52, build_controls_fluentcontrols_xaml_unit_53, build_controls_fluentcontrols_xaml_unit_54] };
 
 /// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_39: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 39, runs: &[build_controls_fluentcontrols_xaml_unit_17] };
+pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 41, runs: &[build_controls_fluentcontrols_xaml_unit_18] };
 
 /// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_40: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 40, runs: &[build_controls_fluentcontrols_xaml_unit_54] };
+pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 42, runs: &[build_controls_fluentcontrols_xaml_unit_55] };
 
 /// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_41: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 41, runs: &[build_controls_fluentcontrols_xaml_unit_18] };
+pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 43, runs: &[build_controls_fluentcontrols_xaml_unit_19] };
 
 /// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_42: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 42, runs: &[build_controls_fluentcontrols_xaml_unit_19] };
+pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 44, runs: &[build_controls_fluentcontrols_xaml_unit_20] };
 
 /// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_43: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 43, runs: &[build_controls_fluentcontrols_xaml_unit_55] };
+pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 45, runs: &[build_controls_fluentcontrols_xaml_unit_56] };
 
 /// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_44: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 44, runs: &[build_controls_fluentcontrols_xaml_unit_56] };
+pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 46, runs: &[build_controls_fluentcontrols_xaml_unit_57] };
 
 /// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_45: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 45, runs: &[build_controls_fluentcontrols_xaml_unit_57] };
+pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 47, runs: &[build_controls_fluentcontrols_xaml_unit_58] };
 
 /// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_46: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 46, runs: &[build_controls_fluentcontrols_xaml_unit_58] };
+pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 48, runs: &[build_controls_fluentcontrols_xaml_unit_59] };
 
 /// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_47: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 47, runs: &[build_controls_fluentcontrols_xaml_unit_59] };
+pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 49, runs: &[build_controls_fluentcontrols_xaml_unit_60] };
 
 /// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_48: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 48, runs: &[build_controls_fluentcontrols_xaml_unit_60] };
+pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 50, runs: &[build_controls_fluentcontrols_xaml_unit_61] };
 
 /// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_49: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 49, runs: &[build_controls_fluentcontrols_xaml_unit_61] };
+pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 51, runs: &[build_controls_fluentcontrols_xaml_unit_62] };
 
 /// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_50: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 50, runs: &[build_controls_fluentcontrols_xaml_unit_62] };
+pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 52, runs: &[build_controls_fluentcontrols_xaml_unit_63] };
 
 /// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_51: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 51, runs: &[build_controls_fluentcontrols_xaml_unit_20] };
+pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 53, runs: &[build_controls_fluentcontrols_xaml_unit_21] };
 
 /// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_52: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 52, runs: &[build_controls_fluentcontrols_xaml_unit_63] };
+pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 54, runs: &[build_controls_fluentcontrols_xaml_unit_64] };
 
 /// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_53: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 53, runs: &[build_controls_fluentcontrols_xaml_unit_64] };
+pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 55, runs: &[build_controls_fluentcontrols_xaml_unit_65] };
 
 /// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_54: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 54, runs: &[build_controls_fluentcontrols_xaml_unit_21] };
+pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 56, runs: &[build_controls_fluentcontrols_xaml_unit_22] };
 
 /// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_55: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 55, runs: &[build_controls_fluentcontrols_xaml_unit_65] };
+pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 57, runs: &[build_controls_fluentcontrols_xaml_unit_66] };
 
 /// The unit `Controls/ToolTip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_56: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 56, runs: &[build_controls_fluentcontrols_xaml_unit_66] };
+pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 58, runs: &[build_controls_fluentcontrols_xaml_unit_67] };
 
 /// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_57: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 57, runs: &[build_controls_fluentcontrols_xaml_unit_22] };
+pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 59, runs: &[build_controls_fluentcontrols_xaml_unit_23] };
 
 /// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_58: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 58, runs: &[build_controls_fluentcontrols_xaml_unit_23] };
+pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 60, runs: &[build_controls_fluentcontrols_xaml_unit_24] };
 
 /// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_59: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 59, runs: &[build_controls_fluentcontrols_xaml_unit_67] };
+pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 61, runs: &[build_controls_fluentcontrols_xaml_unit_68] };
 
 /// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_60: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 60, runs: &[build_controls_fluentcontrols_xaml_unit_24] };
+pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 62, runs: &[build_controls_fluentcontrols_xaml_unit_25] };
 
 /// The unit `Controls/WindowDrawnDecorations.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_61: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 61, runs: &[build_controls_fluentcontrols_xaml_unit_68] };
+pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 63, runs: &[build_controls_fluentcontrols_xaml_unit_69] };
 
 /// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_62: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 62, runs: &[build_controls_fluentcontrols_xaml_unit_69] };
+pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 64, runs: &[build_controls_fluentcontrols_xaml_unit_70] };
 
 /// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_63: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 63, runs: &[build_controls_fluentcontrols_xaml_unit_26] };
+pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 65, runs: &[build_controls_fluentcontrols_xaml_unit_27] };
 
 /// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_64: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 64, runs: &[build_controls_fluentcontrols_xaml_unit_70] };
+pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 66, runs: &[build_controls_fluentcontrols_xaml_unit_71] };
 
 /// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_65: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 65, runs: &[build_controls_fluentcontrols_xaml_unit_71] };
+pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 67, runs: &[build_controls_fluentcontrols_xaml_unit_72] };
 
 /// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_66: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 66, runs: &[build_controls_fluentcontrols_xaml_unit_72] };
+pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 68, runs: &[build_controls_fluentcontrols_xaml_unit_73] };
 
 /// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_67: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 67, runs: &[build_controls_fluentcontrols_xaml_unit_73] };
+pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 69, runs: &[build_controls_fluentcontrols_xaml_unit_74] };
 
 /// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_68: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 68, runs: &[build_controls_fluentcontrols_xaml_unit_74] };
+pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 70, runs: &[build_controls_fluentcontrols_xaml_unit_75] };
 
 /// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_69: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 69, runs: &[build_controls_fluentcontrols_xaml_unit_75] };
+pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 71, runs: &[build_controls_fluentcontrols_xaml_unit_76] };
 
 /// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_70: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 70, runs: &[build_controls_fluentcontrols_xaml_unit_76] };
+pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 72, runs: &[build_controls_fluentcontrols_xaml_unit_77] };
 
 /// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_71: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 71, runs: &[build_controls_fluentcontrols_xaml_unit_77] };
+pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 73, runs: &[build_controls_fluentcontrols_xaml_unit_78] };
 
 /// The unit `Controls/SelectableTextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_72: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 72, runs: &[build_controls_fluentcontrols_xaml_unit_78] };
+pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 74, runs: &[build_controls_fluentcontrols_xaml_unit_79] };
 
 /// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_73: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 73, runs: &[build_controls_fluentcontrols_xaml_unit_28] };
+pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 75, runs: &[build_controls_fluentcontrols_xaml_unit_29] };
 
 /// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_74: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 74, runs: &[build_controls_fluentcontrols_xaml_unit_30] };
+pub static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 76, runs: &[build_controls_fluentcontrols_xaml_unit_31] };
 
 /// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 75, runs: &[build_controls_fluentcontrols_xaml_unit_79] };
+pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 77, runs: &[build_controls_fluentcontrols_xaml_unit_80] };
 
 /// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors
 /// of the full theme name it, so that an application that keeps some units links only those.
-pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74, &THEME_UNIT_75];
+pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74, &THEME_UNIT_75, &THEME_UNIT_76, &THEME_UNIT_77];
 
 /// The ambient unit alone: what a load by URI applies when the application registered no
 /// parts and constructed no full theme (#568, step 3).
@@ -42274,7 +42303,7 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
 /// theme (#568, step 3). Debug builds only: release builds carry no names.
 #[cfg(debug_assertions)]
-pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "RefreshVisualizer", "ThemeVariantScope", "Window"], &[], &[], &[], &["Button"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["CarouselPage"], &["ContentPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["RadioButton"], &["Expander"], &["ProgressBar"], &["AutoCompleteBox"], &["ButtonSpinner"], &["Calendar"], &["CalendarButton"], &["CalendarDatePicker"], &["CalendarDayButton"], &["CalendarItem"], &["Carousel"], &["CheckBox"], &["FlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["Label"], &["ListBox"], &["ListBoxItem"], &[], &["Menu"], &["MenuItem"], &["MenuFlyoutPresenter"], &["NotificationCard"], &["NumericUpDown"], &["PathIcon"], &["PipsPager"], &["RepeatButton"], &["ScrollBar"], &["ScrollViewer"], &["Separator"], &["SplitButton"], &["SplitView"], &["TabControl"], &["TabItem"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["TabStrip"], &["TabStripItem"], &["TextBox"], &["ToggleButton"], &["ToggleSwitch"], &["ToolTip"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["WindowNotificationManager"], &["WindowDrawnDecorations"], &["ComboBox"], &["ComboBoxItem"], &["ContextMenu"], &["DataValidationErrors"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["DropDownButton"], &["Slider"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SelectableTextBlock"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"]];
+pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "RefreshVisualizer", "ThemeVariantScope", "Window"], &[], &[], &[], &["Button"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["CarouselPage"], &["ContentPage"], &["DrawerPage"], &["NavigationPage"], &["TabbedPage"], &["RadioButton"], &["Expander"], &["ProgressBar"], &["AutoCompleteBox"], &["ButtonSpinner"], &["Calendar"], &["CalendarButton"], &["CalendarDatePicker"], &["CalendarDayButton"], &["CalendarItem"], &["Carousel"], &["CheckBox"], &["FlyoutPresenter"], &["GroupBox"], &["GridSplitter"], &["HyperlinkButton"], &["ItemsControl"], &["Label"], &["ListBox"], &["ListBoxItem"], &[], &["Menu"], &["MenuItem"], &["MenuFlyoutPresenter"], &["NotificationCard"], &["NumericUpDown"], &["OverlayPopupHost"], &["PopupRoot"], &["PathIcon"], &["PipsPager"], &["RepeatButton"], &["ScrollBar"], &["ScrollViewer"], &["Separator"], &["SplitButton"], &["SplitView"], &["TabControl"], &["TabItem"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["TabStrip"], &["TabStripItem"], &["TextBox"], &["ToggleButton"], &["ToggleSwitch"], &["ToolTip"], &["TransitioningContentControl"], &["TreeView"], &["TreeViewItem"], &["WindowNotificationManager"], &["WindowDrawnDecorations"], &["ComboBox"], &["ComboBoxItem"], &["ContextMenu"], &["DataValidationErrors"], &[], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["DropDownButton"], &["Slider"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["SelectableTextBlock"], &["RefreshContainer"], &["HeaderedContentControl"], &["TextSelectionHandle"]];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,

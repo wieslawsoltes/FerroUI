@@ -551,11 +551,28 @@ python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
 python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
 python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own regression benchmarks
 python3 scripts/perf/gate.py --only window --window-scenes text,wall
+python3 scripts/perf/gate.py --quick --only frames,framework --frames-filter 'start_of_*' \
+    --framework-filter styling_subsystem::ControlThemeApply   # tier 1: only what the change can move
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
 python3 scripts/perf/gate.py --only counters                   # the counter checks alone
 python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
+
+**Which gate a change gets.** A gate run is mostly the build of both sides (about 14 minutes)
+and, per round, the framework classes (about 4.5 minutes a side with a subsystem filter) and the
+frame scenes (about 1.5 minutes a side). Instructions decide, and they move little between rounds,
+so a narrow change needs few rounds of what it can move:
+
+| Tier | For | Run | About |
+|---|---|---|---|
+| 0 | docs, scripts, CI, a change whose runtime code is byte-equal (a build-time decision that only removes unreached code: compare the generated files or the executables) | no gate; the size run | 0 |
+| 1 | a narrow change, a part of a stack | `--quick` (2 rounds, a third only for a metric within the spread of its rounds; 120 frames a scene) with `--frames-filter` (scene names or prefixes ending in `*`; a filter that names no scene stops the gate) and a `--framework-filter` of the classes it can move | 15 to 20 minutes |
+| 2 | the top of a stack, a batch of changes, a change of a hot path everywhere (the property store, layout, rendering) | every scene and class, 3 rounds (`--rounds 3 --max-rounds 4`) | 50 to 60 minutes |
+| 3 | a release | tier 2 with `window` and `tdg`, on every platform (section 8.3) | hours |
+
+A regression that a tier 1 gate did not look for is found by the tier 2 gate of its stack before
+the stack is merged.
 
 The script checks the base out, detached, in a git worktree of its own under the scratch folder
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
