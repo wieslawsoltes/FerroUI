@@ -1286,14 +1286,17 @@ test of the property store, which now runs on the shared storage type for its en
   |---|---|---|---|---:|
   | Shared, with fixes (the type asked once, no marker check for a typed property, the value given to the effective value directly, the read boxed in place) | +14.2, +7.8, +0.1 to 0.9 % | +16.5, +1.7 to 2.9 % | +9.3, +1.9 % | about +50 kB |
   | Shared, the write and read of an enumeration typed | +7.8, +8.4, +0.5 to 1.4 % | +7.4, +2.1 to 3.3 % | +8.1, +2.3 % | +115 kB |
-  | Typed in the codec (`StyledCodec::set_value`, `set_current_value`, `get_value_boxed`, `set_local_boxed`), reached in one call | see the gate of the stack | | | the routes of main, in the codec |
+  | Typed in the codec (`StyledCodec::set_value`, `set_current_value`, `get_value_boxed`, `set_local_boxed`), reached in one call | +2.9, +0.5, -0.3 to +0.6 % | +1.0, -1.2 to +0.8 % | -1.0, +0.6 % | the routes of main, in the codec |
 
   The rest of an untyped write of a shared route (a call into the codec, the downcast it
   repeats, the static members of the notification) is 40 to 50 instructions on an operation of
   about 600, over the tolerance of the gate (2 %). The write and read of a value of the value
   type are therefore what the typed routes were, in the codec, and `FerroObject::get_value_untyped`,
   `set_value_untyped` and the write of an untyped binding call the codec directly; the markers,
-  the conversion of a value of another type and the other routes stay shared.
+  the conversion of a value of another type and the other routes stay shared. The +2.9 % of the
+  set of an enumeration is the shared storage of the enumeration (its typed write,
+  `ControlWrite.enum_changed`, is +1.6 %). Against #989, the XAML hello world of the whole stack is
+  243 kB smaller (20,331,176 to 20,088,152 B); the routes shared in this form are a small part of it.
 - *The conversion of an untyped value shared*: a value of another type is converted, copied into
   a box of its own through the codec and the temporary released before the write, as the typed
   routes did (`StyledCodec::set_converted`, 157 instances, 54 kB, is gone).
