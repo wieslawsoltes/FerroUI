@@ -28,7 +28,7 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use crate::xaml_metadata::{ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
+pub use crate::xaml_metadata::{ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeEntryModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;
@@ -1477,7 +1477,7 @@ impl AssemblyModel {
 fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
     let strings = |items: &[String]| Json::Array(items.iter().map(|item| Json::string(item)).collect());
     let unit = |unit: &ThemeUnitModel| {
-        Json::Object(vec![
+        let mut members = vec![
             ("name".to_string(), Json::string(&unit.name)),
             ("index".to_string(), Json::Integer(i64::from(unit.index))),
             ("documents".to_string(), strings(&unit.documents)),
@@ -1485,7 +1485,21 @@ fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
             ("type_keys".to_string(), strings(&unit.type_keys)),
             ("references".to_string(), strings(&unit.references)),
             ("types".to_string(), strings(&unit.types)),
-        ])
+        ];
+        // What each entry and the rest of the unit name (#852, step 2), when the unit has them.
+        if !(unit.entries.is_empty() && unit.body_references.is_empty() && unit.body_types.is_empty()) {
+            let entry = |entry: &ThemeEntryModel| {
+                Json::Object(vec![
+                    ("key".to_string(), Json::string(&entry.key)),
+                    ("references".to_string(), strings(&entry.references)),
+                    ("types".to_string(), strings(&entry.types)),
+                ])
+            };
+            members.push(("entries".to_string(), Json::Array(unit.entries.iter().map(entry).collect())));
+            members.push(("body_references".to_string(), strings(&unit.body_references)));
+            members.push(("body_types".to_string(), strings(&unit.body_types)));
+        }
+        Json::Object(members)
     };
     Json::Object(vec![
         ("class".to_string(), Json::string(&units.class)),
@@ -1530,6 +1544,16 @@ fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
             type_keys: strings("type_keys")?,
             references: strings("references")?,
             types: strings("types")?,
+            entries: unit.list("entries", |entry| {
+                let entry = Fields::of(entry, "an entry")?;
+                Ok(ThemeEntryModel {
+                    key: entry.text("key")?,
+                    references: entry.list("references", |item| text_of(item, "references"))?,
+                    types: entry.list("types", |item| text_of(item, "types"))?,
+                })
+            })?,
+            body_references: strings("body_references")?,
+            body_types: strings("body_types")?,
         })
     })?;
     Ok(ThemeUnitsModel { class: fields.text("class")?, table_path: fields.text("table_path")?, units })
@@ -1721,6 +1745,7 @@ mod tests {
                     type_keys: vec!["Panel".to_string()],
                     references: vec!["Accent".to_string()],
                     types: vec!["Border".to_string(), "Panel".to_string()],
+                    ..ThemeUnitModel::default()
                 },
             ],
         }];
