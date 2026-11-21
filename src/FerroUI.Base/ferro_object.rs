@@ -1037,7 +1037,7 @@ impl FerroObject {
         self.raise_property_changed(property, Some(old_value), new_value, BindingPriority::LocalValue, true);
     }
 
-    fn validate_priority(priority: BindingPriority) {
+    pub(crate) fn validate_priority(priority: BindingPriority) {
         if priority < BindingPriority::Animation || priority >= BindingPriority::Inherited {
             panic!("Invalid priority {priority:?}");
         }
