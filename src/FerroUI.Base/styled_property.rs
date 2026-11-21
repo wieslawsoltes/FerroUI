@@ -54,7 +54,7 @@ impl<T: PropertyValue> StyledProperty<T> {
         let default_value = metadata.default_value().clone();
         if let Some(validate) = &validate {
             if !validate(&default_value) {
-                panic!("default value is not valid for property '{name}'");
+                default_not_valid(name);
             }
         }
         Self {
@@ -176,7 +176,7 @@ impl<T: PropertyValue> StyledProperty<T> {
     /// Overrides the metadata for the property on the specified type.
     pub fn override_metadata_for(&self, type_: &'static TypeInfo, metadata: StyledPropertyMetadata<T>) {
         if metadata.has_default_value() && !self.is_valid(metadata.default_value()) {
-            panic!("default value is not valid for property '{}'", self.name());
+            default_not_valid(self.name());
         }
         let new_default = metadata.has_default_value().then(|| metadata.default_value().clone());
         self.metadata.override_metadata(self.name(), type_, metadata);
@@ -192,6 +192,21 @@ impl<T: PropertyValue> StyledProperty<T> {
     pub fn unregister(&self, type_: &'static TypeInfo) {
         self.metadata.unregister(type_);
     }
+}
+
+// The failures of the registration of a property, compiled once instead of once for each value
+// type.
+
+#[cold]
+#[inline(never)]
+fn default_not_valid(name: &str) -> ! {
+    panic!("default value is not valid for property '{name}'")
+}
+
+#[cold]
+#[inline(never)]
+fn routes_already_set() -> ! {
+    panic!("property routes are already set")
 }
 
 /// Interprets a value of an untyped binding of a styled property: a value of
@@ -257,13 +272,20 @@ impl<T: StyledValue> StyledProperty<T> {
     }
 
     /// Gives the property its routes and its codec, once it has its address.
+    #[inline]
     pub(crate) fn install_routes(&'static self) {
-        if self.routes.property.set(&self.base).is_err() {
-            panic!("property routes are already set");
-        }
-        self.base.set_styled_codec(self);
-        self.base.set_routes(&self.routes);
+        install_styled_routes(&self.base, &self.routes, self);
     }
+}
+
+/// [`StyledProperty::install_routes`], compiled once.
+#[inline(never)]
+fn install_styled_routes(base: &'static FerroProperty, routes: &'static StyledRoutes, codec: &'static dyn StyledCodec) {
+    if routes.property.set(base).is_err() {
+        routes_already_set();
+    }
+    base.set_styled_codec(codec);
+    base.set_routes(routes);
 }
 
 /// A stored value of a property whose value type is `T`, as a `T`.
