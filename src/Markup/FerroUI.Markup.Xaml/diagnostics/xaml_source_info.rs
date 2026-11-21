@@ -13,6 +13,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 use url::Url;
 
 mod value_identity;
@@ -24,6 +25,7 @@ mod value_identity;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct XamlSourceInfo {
     source_uri: Option<Url>,
+    loader_uri: Option<Arc<str>>,
     line_number: i32,
     line_position: i32,
     source_revision: Option<u64>,
@@ -75,6 +77,7 @@ impl XamlSourceInfo {
             line_number: line,
             line_position: column,
             source_uri: file_path.and_then(file_uri),
+            loader_uri: None,
             source_revision: None,
         }
     }
@@ -88,6 +91,17 @@ impl XamlSourceInfo {
     /// The source text's development reload fingerprint, when emitted by the compiler.
     pub fn source_revision(&self) -> Option<u64> {
         self.source_revision
+    }
+
+    /// Associate the location with the resource address used to load the document.
+    pub fn with_loader_uri(mut self, uri: impl Into<Arc<str>>) -> Self {
+        self.loader_uri = Some(uri.into());
+        self
+    }
+
+    /// The packaged loader address, when the source was loaded as a resource.
+    pub fn loader_uri(&self) -> Option<&str> {
+        self.loader_uri.as_deref()
     }
 
     /// The full path of the source file containing the XAML element: the

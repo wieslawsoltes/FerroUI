@@ -309,7 +309,8 @@ pub fn transform_group(
         let source = document.xaml.strip_prefix('\u{feff}').unwrap_or(document.xaml);
         let mut parsed: XamlDocument = compiler.parse(source, document.root_type.clone())?;
         parsed.document = Some(document.name.to_string());
-        compiler.transform_source(&mut parsed, source, None).map_err(|error| described_error(&diagnostics, error))?;
+        compiler.transform_source(&mut parsed, source, None, document.base_uri.as_deref())
+            .map_err(|error| described_error(&diagnostics, error))?;
 
         let root = parsed.root()?;
         let root_type = root

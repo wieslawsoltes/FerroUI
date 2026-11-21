@@ -2,6 +2,7 @@
 
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::Arc;
 
 use xamlx::ast::{
     IXamlAstManipulationNode, IXamlAstNode, XamlAstExtensions, XamlAstNewClrObjectNode,
@@ -13,6 +14,12 @@ use xamlx::{xaml_ast_node_members, xaml_line_info_impl};
 
 use super::{FerroXamlIlWellKnownTypes, FerroXamlIlWellKnownTypesExtensions};
 
+pub(crate) struct XamlSourceStamp {
+    pub revision: u64,
+    pub file_path: Option<String>,
+    pub loader_uri: Option<Arc<str>>,
+}
+
 /// An AST transformer that injects `XamlSourceInfo` metadata into the generated XAML code.
 ///
 /// This transformer wraps object creation nodes with a manipulation node that adds source
@@ -23,7 +30,7 @@ use super::{FerroXamlIlWellKnownTypes, FerroXamlIlWellKnownTypesExtensions};
 #[derive(Default)]
 pub struct FerroXamlIlAddSourceInfoTransformer {
     create_source_info: Cell<bool>,
-    source_snapshot: RefCell<Option<(u64, Option<String>)>>,
+    source_snapshot: RefCell<Option<Rc<XamlSourceStamp>>>,
 }
 
 impl FerroXamlIlAddSourceInfoTransformer {
@@ -42,7 +49,7 @@ impl FerroXamlIlAddSourceInfoTransformer {
     }
 
     #[cfg(any(feature = "runtime", feature = "compiler"))]
-    pub(crate) fn set_source_snapshot(&self, snapshot: Option<(u64, Option<String>)>) {
+    pub(crate) fn set_source_snapshot(&self, snapshot: Option<Rc<XamlSourceStamp>>) {
         self.source_snapshot.replace(snapshot);
     }
 }
@@ -75,15 +82,17 @@ impl IXamlAstTransformer for FerroXamlIlAddSourceInfoTransformer {
 
         let ferro_types = context.try_get_ferro_types()?;
         let snapshot = self.source_snapshot.borrow();
-        let document = snapshot.as_ref().and_then(|(_, path)| path.clone()).or_else(|| context.current_document());
+        let document = snapshot.as_ref()
+            .and_then(|stamp| stamp.file_path.clone())
+            .or_else(|| context.current_document());
         Ok(XamlValueWithManipulationNode::new(
             &*obj_node,
             obj_node.clone(),
-            Some(XamlSourceInfoValueManipulation::with_revision(
+            Some(XamlSourceInfoValueManipulation::with_source(
                 ferro_types,
                 &obj_node,
                 document,
-                snapshot.as_ref().map(|(revision, _)| *revision),
+                snapshot.clone(),
             )),
         ))
     }
@@ -107,8 +116,7 @@ pub struct XamlSourceInfoValueManipulation {
     base: XamlAstNode,
     pub types: Rc<FerroXamlIlWellKnownTypes>,
     pub document: Option<String>,
-    /// Fingerprint of the document text used by this transform.
-    source_revision: Option<u64>,
+    source: Option<Rc<XamlSourceStamp>>,
 }
 
 impl XamlSourceInfoValueManipulation {
@@ -117,24 +125,24 @@ impl XamlSourceInfoValueManipulation {
         obj_node: &Rc<XamlAstNewClrObjectNode>,
         document: Option<String>,
     ) -> Rc<Self> {
-        Self::with_revision(ferro_types, obj_node, document, None)
+        Self::with_source(ferro_types, obj_node, document, None)
     }
 
-    pub(crate) fn source_revision(&self) -> Option<u64> {
-        self.source_revision
+    pub(crate) fn source_stamp(&self) -> Option<&XamlSourceStamp> {
+        self.source.as_deref()
     }
 
-    fn with_revision(
+    fn with_source(
         ferro_types: Rc<FerroXamlIlWellKnownTypes>,
         obj_node: &Rc<XamlAstNewClrObjectNode>,
         document: Option<String>,
-        source_revision: Option<u64>,
+        source: Option<Rc<XamlSourceStamp>>,
     ) -> Rc<Self> {
         Rc::new(Self {
             base: XamlAstNode::new(&**obj_node),
             types: ferro_types,
             document,
-            source_revision,
+            source,
         })
     }
 }

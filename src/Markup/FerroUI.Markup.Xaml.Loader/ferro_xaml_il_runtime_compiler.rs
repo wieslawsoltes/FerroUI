@@ -353,7 +353,7 @@ impl FerroXamlIlRuntimeCompiler {
             parsed.document = Some(document.name.clone());
             let start = std::time::Instant::now();
             let file_path = document.base_uri.as_deref().and_then(source_file_path);
-            compiler.transform_source(&mut parsed, source, file_path)?;
+            compiler.transform_source(&mut parsed, source, file_path, document.base_uri.as_deref())?;
             transform_time += start.elapsed();
 
             let root = parsed.root()?;
@@ -529,6 +529,26 @@ mod cache_tests {
         assert_eq!(info.line_number(), 1);
         assert_eq!(info.line_position(), 2);
         assert_eq!(info.source_revision(), Some(ferroui_reload_protocol::fingerprint(source.as_bytes())));
+    }
+
+    #[test]
+    fn runtime_source_info_distinguishes_packaged_addresses_with_identical_text() {
+        use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
+
+        let source = "<SolidColorBrush xmlns='https://github.com/ferroui' Color='Blue'/>";
+        let revision = ferroui_reload_protocol::fingerprint(source.as_bytes());
+        let mut configuration = RuntimeXamlLoaderConfiguration::new();
+        configuration.set_create_source_info(true);
+        for address in ["ferres://Sample/Themes/Primary.xaml", "ferres://Sample/Other/Primary.xaml"] {
+            let uri = url::Url::parse(address).unwrap();
+            let object = FerroXamlIlRuntimeCompiler::load(
+                RuntimeXamlLoaderDocument::with_base_uri(Some(uri.clone()), source),
+                &configuration,
+            ).unwrap();
+            let info = XamlSourceInfo::get_xaml_source_info(&object).unwrap();
+            assert_eq!(info.loader_uri(), Some(uri.as_str()));
+            assert_eq!(info.source_revision(), Some(revision));
+        }
     }
 
     #[test]

@@ -465,11 +465,15 @@ fn source_info(node: &Rc<XamlSourceInfoValueManipulation>, context: &mut EvalCon
         context,
         &**node,
     )?;
-    let info = if let Some((revision, info)) = node.source_revision().zip(info.as_ref()) {
+    let info = if let Some((stamp, info)) = node.source_stamp().zip(info.as_ref()) {
         use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
         let info = info.downcast_ref::<XamlSourceInfo>()
             .ok_or_else(|| runtime_error("InvalidCastException", "Expected XAML source information", &**node))?;
-        boxed(info.clone().with_source_revision(revision))
+        let mut info = info.clone().with_source_revision(stamp.revision);
+        if let Some(uri) = &stamp.loader_uri {
+            info = info.with_loader_uri(uri.clone());
+        }
+        boxed(info)
     } else {
         info
     };

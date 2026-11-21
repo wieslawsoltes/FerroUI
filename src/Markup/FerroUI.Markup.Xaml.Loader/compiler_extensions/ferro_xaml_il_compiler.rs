@@ -375,10 +375,13 @@ impl FerroXamlIlCompiler {
         document: &mut XamlDocument,
         source: &str,
         file_path: Option<String>,
+        base_uri: Option<&str>,
     ) -> XamlResult<()> {
-        let snapshot = self.create_source_info().then(|| {
-            (ferroui_reload_protocol::fingerprint(source.as_bytes()), file_path)
-        });
+        let snapshot = self.create_source_info().then(|| Rc::new(XamlSourceStamp {
+            revision: ferroui_reload_protocol::fingerprint(source.as_bytes()),
+            file_path,
+            loader_uri: base_uri.filter(|uri| uri.starts_with("ferres://")).map(std::sync::Arc::from),
+        }));
         self.add_source_info_transformer.set_source_snapshot(snapshot);
         let result = self.transform(document);
         self.add_source_info_transformer.set_source_snapshot(None);
