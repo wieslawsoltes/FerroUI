@@ -119,6 +119,91 @@ pub struct ThemeUnitModel {
     /// The types the unit constructs or selects (elements, `TargetType`, selectors, `{x:Type}`),
     /// by their local names.
     pub types: Vec<String>,
+    /// What each text-keyed entry of the unit names (#852, step 2), by key, sorted: the closure of
+    /// an application over keys. Empty in a file without it.
+    pub entries: Vec<ThemeEntryModel>,
+    /// The keys the rest of the unit names (its control themes by type, its styles, its unkeyed
+    /// entries), which a kept unit applies whatever keys are live (#852, step 2).
+    pub body_references: Vec<String>,
+}
+
+/// What the entries of one text key of a unit name (#852, step 2): the entry of the key in each
+/// theme dictionary of the unit together.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ThemeEntryModel {
+    /// The key.
+    pub key: String,
+    /// The keys of the group the entries name.
+    pub references: Vec<String>,
+}
+
+/// A name of the compact form of the entry graph of a unit in a `.xamlmeta` (#852, step 2): its
+/// index in the sorted list of the unit it belongs to (`keys` for the key of an entry, `references`
+/// for what it names), which every name of a compiled theme has, or the name itself.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum IndexedName {
+    Index(u32),
+    Name(String),
+}
+
+impl IndexedName {
+    fn of(names: &[String], name: &str) -> Self {
+        match names.binary_search_by(|known| known.as_str().cmp(name)) {
+            Ok(index) => Self::Index(index as u32),
+            Err(_) => Self::Name(name.to_string()),
+        }
+    }
+
+    fn resolve(self, names: &[String]) -> Result<String, String> {
+        match self {
+            Self::Name(name) => Ok(name),
+            Self::Index(index) => {
+                names.get(index as usize).cloned().ok_or_else(|| format!("the index {index} of the entry graph of a unit is out of range"))
+            }
+        }
+    }
+}
+
+impl ThemeUnitModel {
+    /// Whether the unit states its entry graph.
+    pub(crate) fn has_entry_graph(&self) -> bool {
+        !self.entries.is_empty() || !self.body_references.is_empty()
+    }
+
+    /// The entries that name something, each as its key and what it names: the compact form the
+    /// `.xamlmeta` holds. An entry that names nothing is not written.
+    pub(crate) fn entry_rows(&self) -> Vec<Vec<IndexedName>> {
+        self.entries
+            .iter()
+            .filter(|entry| !entry.references.is_empty())
+            .map(|entry| {
+                std::iter::once(IndexedName::of(&self.keys, &entry.key))
+                    .chain(entry.references.iter().map(|name| IndexedName::of(&self.references, name)))
+                    .collect()
+            })
+            .collect()
+    }
+
+    /// What the rest of the unit names, in the compact form.
+    pub(crate) fn body_row(&self) -> Vec<IndexedName> {
+        self.body_references.iter().map(|name| IndexedName::of(&self.references, name)).collect()
+    }
+
+    /// Reads the entry graph back from its compact form: an entry for each key of the unit, with
+    /// what `rows` says it names.
+    pub(crate) fn read_entry_graph(&mut self, rows: Vec<Vec<IndexedName>>, body: Vec<IndexedName>) -> Result<(), String> {
+        let mut entries: std::collections::BTreeMap<String, Vec<String>> =
+            self.keys.iter().map(|key| (key.clone(), Vec::new())).collect();
+        for row in rows {
+            let mut row = row.into_iter();
+            let key = row.next().ok_or("an empty row of the entry graph of a unit")?.resolve(&self.keys)?;
+            let references = row.map(|name| name.resolve(&self.references)).collect::<Result<Vec<_>, _>>()?;
+            entries.insert(key, references);
+        }
+        self.entries = entries.into_iter().map(|(key, references)| ThemeEntryModel { key, references }).collect();
+        self.body_references = body.into_iter().map(|name| name.resolve(&self.references)).collect::<Result<_, _>>()?;
+        Ok(())
+    }
 }
 
 /// What the compiled documents of a crate without theme units name that can root the units of
@@ -357,7 +442,25 @@ fn write_theme_units(text: &mut String, units: &ThemeUnitsModel) {
         text.push_str(&format!("          \"keys\": {},\n", list(&unit.keys)));
         text.push_str(&format!("          \"type_keys\": {},\n", list(&unit.type_keys)));
         text.push_str(&format!("          \"references\": {},\n", list(&unit.references)));
-        text.push_str(&format!("          \"types\": {}\n", list(&unit.types)));
+        match unit.has_entry_graph() {
+            false => text.push_str(&format!("          \"types\": {}\n", list(&unit.types))),
+            true => {
+                let row = |names: &[IndexedName]| {
+                    let names: Vec<String> = names
+                        .iter()
+                        .map(|name| match name {
+                            IndexedName::Index(index) => index.to_string(),
+                            IndexedName::Name(name) => json_string(name),
+                        })
+                        .collect();
+                    format!("[{}]", names.join(", "))
+                };
+                text.push_str(&format!("          \"types\": {},\n", list(&unit.types)));
+                let rows: Vec<String> = unit.entry_rows().iter().map(|names| row(names)).collect();
+                text.push_str(&format!("          \"entry_references\": [{}],\n", rows.join(", ")));
+                text.push_str(&format!("          \"body_references\": {}\n", row(&unit.body_row())));
+            }
+        }
         text.push_str("        }");
     }
     text.push_str(if units.units.is_empty() { "]\n" } else { "\n      ]\n" });
@@ -375,7 +478,7 @@ fn read_theme_units(value: &JsonValue) -> Result<ThemeUnitsModel, String> {
         .iter()
         .map(|unit| {
             let unit = unit.object("a unit")?;
-            Ok(ThemeUnitModel {
+            let mut read = ThemeUnitModel {
                 name: field(unit, "name")?.string("name")?.to_string(),
                 index: field(unit, "index")?.integer("index")?,
                 documents: strings(unit, "documents")?,
@@ -383,7 +486,24 @@ fn read_theme_units(value: &JsonValue) -> Result<ThemeUnitsModel, String> {
                 type_keys: strings(unit, "type_keys")?,
                 references: strings(unit, "references")?,
                 types: strings(unit, "types")?,
-            })
+                ..ThemeUnitModel::default()
+            };
+            if let Some((_, rows)) = unit.iter().find(|(key, _)| key == "entry_references") {
+                let names = |value: &JsonValue| -> Result<Vec<IndexedName>, String> {
+                    value
+                        .array("a row of the entry graph")?
+                        .iter()
+                        .map(|name| match name {
+                            JsonValue::Number(_) => name.integer("an index of the entry graph").map(IndexedName::Index),
+                            _ => name.string("a name of the entry graph").map(|name| IndexedName::Name(name.to_string())),
+                        })
+                        .collect()
+                };
+                let rows = rows.array("entry_references")?.iter().map(names).collect::<Result<Vec<_>, String>>()?;
+                let body = names(field(unit, "body_references")?)?;
+                read.read_entry_graph(rows, body)?;
+            }
+            Ok(read)
         })
         .collect::<Result<Vec<_>, String>>()?;
     Ok(ThemeUnitsModel {
@@ -697,6 +817,7 @@ mod tests {
             type_keys: vec!["Button".to_string()],
             references: vec!["ButtonBackground".to_string()],
             types: vec!["Border".to_string(), "Button".to_string()],
+            ..ThemeUnitModel::default()
         };
         let metadata = XamlMetadata {
             name: "Fixture".to_string(),
@@ -743,6 +864,46 @@ mod tests {
         assert_eq!(XamlMetadata::parse(&text), Ok(metadata));
         let plain = XamlMetadata::parse(r#"{"name": "A", "crate_name": "a", "documents": [], "dependencies": []}"#).expect("a file without references");
         assert!(plain.references.is_empty());
+    }
+
+    /// Not from upstream (#852, step 2): what the entries and the rest of a unit name is read back
+    /// as it was written, and a unit without it has none.
+    #[test]
+    fn the_entries_of_a_unit_round_trip_through_the_text() {
+        let units = ThemeUnitsModel {
+            class: "Fixture.Theme".to_string(),
+            table_path: "::fixture::compiled_xaml::THEME_UNITS".to_string(),
+            units: vec![
+                ThemeUnitModel { name: "ambient".to_string(), ..ThemeUnitModel::default() },
+                ThemeUnitModel {
+                    name: "Resources/Base.xaml".to_string(),
+                    index: 1,
+                    keys: vec!["Accent".to_string(), "AccentBrush".to_string()],
+                    entries: vec![
+                        ThemeEntryModel { key: "Accent".to_string(), ..ThemeEntryModel::default() },
+                        ThemeEntryModel { key: "AccentBrush".to_string(), references: vec!["Accent".to_string()] },
+                    ],
+                    references: vec!["Accent".to_string(), "Other".to_string()],
+                    body_references: vec!["Other".to_string()],
+                    ..ThemeUnitModel::default()
+                },
+            ],
+        };
+        let metadata = XamlMetadata {
+            name: "Fixture".to_string(),
+            crate_name: "fixture".to_string(),
+            documents: Vec::new(),
+            dependencies: Vec::new(),
+            theme_units: vec![units],
+            references: MarkupReferencesModel::default(),
+        };
+        let text = metadata.to_json();
+        assert_eq!(XamlMetadata::parse(&text), Ok(metadata.clone()));
+        // The names are indices in the lists of the unit.
+        assert!(text.contains("\"entry_references\": [[1, 0]],"), "{text}");
+        assert!(text.contains("\"body_references\": [1]"), "{text}");
+        let model = crate::model::AssemblyModel::from_metadata(metadata.clone());
+        assert_eq!(crate::model::AssemblyModel::parse(&model.to_json()).map(|read| read.theme_units), Ok(metadata.theme_units));
     }
 
     /// Not from upstream (#1002): what the documents of an ordinary class name is read back as it

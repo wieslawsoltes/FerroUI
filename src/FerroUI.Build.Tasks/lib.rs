@@ -245,7 +245,8 @@ use ferroui_markup_xaml_loader::rust_emitter::{
     with_xaml_backend,
 };
 use crate::theme_roots::{
-    binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, live_class_references, parts_constructor,
+    binary_roots, compile_bindings_from_manifest, explain_kept_units, keys_listing, keys_live_by_entry, kept_units_across,
+    live_class_references, parts_constructor,
     parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
     BuildTarget, Roots, ThemeTrimming, TypeGraph,
 };
@@ -1375,6 +1376,7 @@ impl Build {
                 })
                 .collect();
             let mut why = String::new();
+            let mut keys_text = String::new();
             let together = used_units.into_iter().zip(kept_of_themes).zip(&from_other_themes);
             for (((class, units), kept), from_others) in together {
                 let mut sources: Vec<(&str, &Roots)> = vec![
@@ -1388,6 +1390,8 @@ impl Build {
                 sources.push(("other themes used together", from_others));
                 let explained = explain_kept_units(units, &sources, &graph, self.full_themes);
                 why.push_str(&why_kept_listing(&class, &explained, units.units.len()));
+                // The keys of the kept units that are live by key (#852, step 2, a count).
+                keys_text.push_str(&keys_listing(&class, &keys_live_by_entry(units, &kept, &roots)));
                 let name_of = |index: u32| units.units.iter().find(|unit| unit.index == index).map_or(String::new(), |unit| unit.name.clone());
                 parts_tables.push(PartsTable {
                     static_name: static_name_of(class.as_str()).unwrap_or_else(|| parts_static_name(&class)),
@@ -1406,6 +1410,7 @@ impl Build {
                 .collect();
             write_if_changed(&xaml_directory.join("theme_parts.txt"), &listing, &mut errors);
             write_if_changed(&xaml_directory.join("theme_parts_why.txt"), &why, &mut errors);
+            write_if_changed(&xaml_directory.join("theme_keys.txt"), &keys_text, &mut errors);
         }
         // A crate whose compiled markup has units is built with the `cfg` of `full-themes` when
         // the base crate has it (#568, step 3).
@@ -2010,6 +2015,7 @@ mod tests {
             type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
             references: Vec::new(),
             types: Vec::new(),
+            ..ThemeUnitModel::default()
         };
         let theme = XamlMetadata {
             name: "Theme".to_string(),
@@ -2078,6 +2084,7 @@ mod tests {
             type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
             references: Vec::new(),
             types: Vec::new(),
+            ..ThemeUnitModel::default()
         };
         // The theme: a class with units and `with_parts`.
         let mut theme = AssemblyModel::new("Theme", "theme");
@@ -2163,6 +2170,7 @@ mod tests {
             type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
             references: Vec::new(),
             types: Vec::new(),
+            ..ThemeUnitModel::default()
         };
         let theme = XamlMetadata {
             name: "Theme".to_string(),
@@ -2221,6 +2229,7 @@ mod tests {
             type_keys: type_keys.iter().map(|key| key.to_string()).collect(),
             references: Vec::new(),
             types: Vec::new(),
+            ..ThemeUnitModel::default()
         };
         let theme = XamlMetadata {
             name: "Theme".to_string(),

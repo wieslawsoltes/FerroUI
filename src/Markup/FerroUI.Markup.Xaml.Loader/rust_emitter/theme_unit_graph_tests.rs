@@ -349,3 +349,23 @@ fn names_in_a_template_of_the_drawn_decorations_do_not_make_a_document_ambient()
     let units = plan(&named, &merged).expect("units");
     assert!(unit(&units, AMBIENT).documents.contains(&"Controls/WindowDrawnDecorations.xaml".to_string()));
 }
+
+/// What each text-keyed entry of a unit names, its entries in every theme dictionary together,
+/// and what the rest of the unit names (#852, step 2).
+#[test]
+fn a_unit_records_what_each_of_its_entries_names() {
+    let units = plan(&theme(), &merged()).expect("units");
+    let base = unit(&units, "Resources/Base.xaml");
+    let keys: Vec<&str> = base.entries.iter().map(|entry| entry.key.as_str()).collect();
+    assert_eq!(keys, ["Accent", "AccentBrush", "Default", "Unscaled"]);
+    let entry = |key: &str| base.entries.iter().find(|entry| entry.key == key).expect(key);
+    // The brush of the light dictionary names the colour; the style names the brush.
+    assert_eq!(entry("AccentBrush").references, strings(&["Accent"]));
+    assert_eq!(entry("Default").references, strings(&["AccentBrush"]));
+    assert!(entry("Unscaled").references.is_empty(), "{:?}", entry("Unscaled"));
+    // The button's document: its control theme by type is the rest of the unit; the keyed theme
+    // based on it is an entry.
+    let button = unit(&units, "Controls/Button.xaml");
+    assert_eq!(button.entries.iter().map(|entry| entry.key.as_str()).collect::<Vec<_>>(), ["AccentButtonStyle"]);
+    assert!(button.body_references.contains(&"Default".to_string()), "{:?}", button.body_references);
+}

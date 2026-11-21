@@ -1891,3 +1891,42 @@ create one).
   sorted, and an unknown class is an error.
 - `ferroui-controls` (`primitives::popup_hosts::tests`): the table is in step with the code that
   creates the hosts.
+
+## 26. Keys inside the kept units (#852, step 2)
+
+A unit is a whole document, and keeping it keeps every key of the document. Of the 336 keys of
+`Resources/Generic.xaml`, hello world names a few dozen. The closure over units also counts every
+reference of every entry of a kept unit, so an entry nothing needs still keeps the units it names.
+
+### 26.1 What each entry names
+
+The unit graph records, for each text-keyed entry of a unit, the keys it names
+(`ThemeUnitModel::entries`, `ThemeEntryModel`). The entries of one key in the theme dictionaries of
+the unit are one entry. `body_references` holds what the rest of the unit names: its control
+themes by type, its styles, its unkeyed entries and its structure. A kept unit applies all of
+that whatever keys are live. The rules of a reference are those of the unit: a token that spells
+a key of the group, and the argument of a resource extension.
+
+### 26.2 The form in the `.xamlmeta`
+
+With the name of every key, the graph made the metadata of the WinUI theme 2.8 times as large
+(325,502 to 914,887 bytes), and an application build reads that file. So an entry is a row of
+indices in the sorted lists the unit already has:
+
+```json
+"keys": ["Accent", "AccentBrush"],
+"references": ["Accent", "Other"],
+"entry_references": [[1, 0]],
+"body_references": [1]
+```
+
+The first index of a row is the key of the entry in `keys`, and the others are what it names in
+`references`. An entry that names nothing has no row. A name that is not in its list is written
+as text. A unit without `entry_references` (a file of an earlier build) has no entry graph, and
+every key of it counts as live.
+
+### 26.3 The count
+
+An application build writes `$OUT_DIR/xaml/theme_keys.txt`: for each kept unit, its keys, the
+keys live by key and the dead keys. A key is live when it is a root, when the rest of a kept unit
+names it, or when a live entry names it. The listing changes nothing in the application.

@@ -33,7 +33,7 @@
 use std::collections::{BTreeSet, HashMap};
 
 use ferroui_base::metadata::FERRO_XML_NAMESPACE;
-use ferroui_build_scan::xaml_metadata::ThemeUnitModel;
+use ferroui_build_scan::xaml_metadata::{ThemeEntryModel, ThemeUnitModel};
 use roxmltree::{Document, Node};
 use xamlx::XamlNamespaces;
 
@@ -249,10 +249,47 @@ fn skipped_attribute(element: Node<'_, '_>, attribute: &roxmltree::Attribute<'_,
 }
 
 fn facts_of(xml: &Document<'_>) -> DocumentFacts {
+    facts_of_nodes(xml.descendants())
+}
+
+/// What the outermost text-keyed entries of a document name, each by its key (#852, step 2): the
+/// facts of every entry of the key (one in each theme dictionary of the document), and the facts
+/// of the rest of the document (its control themes by type, its styles, its unkeyed entries and
+/// its structure), which a kept unit applies whatever keys are live.
+struct EntryFacts {
+    entries: std::collections::BTreeMap<String, DocumentFacts>,
+    body: DocumentFacts,
+}
+
+fn entry_facts_of(xml: &Document<'_>) -> EntryFacts {
+    let mut entries: std::collections::BTreeMap<String, DocumentFacts> = std::collections::BTreeMap::new();
+    let mut ranges: Vec<std::ops::Range<usize>> = Vec::new();
+    let mut entry_end = 0;
+    for node in xml.descendants().filter(|node| node.is_element()) {
+        let start = node.range().start;
+        if start < entry_end || !is_entry(node) {
+            continue;
+        }
+        entry_end = node.range().end;
+        let Key::Text(key) = key_of(node) else { continue };
+        ranges.push(node.range());
+        let facts = facts_of_nodes(node.descendants());
+        let entry = entries.entry(key.to_string()).or_default();
+        entry.tokens.extend(facts.tokens);
+        entry.extension_keys.extend(facts.extension_keys);
+        entry.types.extend(facts.types);
+        entry.local_keys.extend(facts.local_keys);
+    }
+    let outside = |node: &Node<'_, '_>| !ranges.iter().any(|range| range.start <= node.range().start && node.range().start < range.end);
+    let body = facts_of_nodes(xml.descendants().filter(outside));
+    EntryFacts { entries, body }
+}
+
+fn facts_of_nodes<'a, 'i: 'a>(nodes: impl Iterator<Item = Node<'a, 'i>>) -> DocumentFacts {
     let mut facts = DocumentFacts::default();
     let mut entry_end = 0;
     let mut design_end = 0;
-    for node in xml.descendants() {
+    for node in nodes {
         let start = node.range().start;
         if start < design_end {
             continue;
@@ -374,9 +411,11 @@ pub(crate) fn plan(documents: &[(String, String, Option<String>)], merged: &[Str
         return None;
     }
     let mut facts = Vec::with_capacity(documents.len());
+    let mut entry_facts = Vec::with_capacity(documents.len());
     for (_, xaml, _) in documents {
         let xml = Document::parse(xaml).ok()?;
         facts.push(facts_of(&xml));
+        entry_facts.push(entry_facts_of(&xml));
     }
 
     // The units: the ambient one, then each merged document that is not ambient, in order.
@@ -438,6 +477,27 @@ pub(crate) fn plan(documents: &[(String, String, Option<String>)], merged: &[Str
             unit.type_keys = type_keys.into_iter().collect();
             unit.references = references.into_iter().collect();
             unit.types = types.into_iter().collect();
+            // What each text-keyed entry of the unit names, and what the rest of it names (#852,
+            // step 2), with the rules of the unit: for the closure of an application over keys.
+            let named = |facts: &DocumentFacts, local: &BTreeSet<String>| -> Vec<String> {
+                let mut found: BTreeSet<String> = facts.tokens.iter().filter(|token| keys.contains(token.as_str())).cloned().collect();
+                found.extend(facts.extension_keys.iter().filter(|key| keys.contains(key.as_str()) || !local.contains(*key)).cloned());
+                found.into_iter().collect()
+            };
+            let mut entries: std::collections::BTreeMap<String, BTreeSet<String>> = std::collections::BTreeMap::new();
+            let mut body_references = BTreeSet::new();
+            for &member in members {
+                let local = &facts[member].local_keys;
+                for (key, entry) in &entry_facts[member].entries {
+                    entries.entry(key.clone()).or_default().extend(named(entry, local));
+                }
+                body_references.extend(named(&entry_facts[member].body, local));
+            }
+            unit.entries = entries
+                .into_iter()
+                .map(|(key, references)| ThemeEntryModel { key, references: references.into_iter().collect() })
+                .collect();
+            unit.body_references = body_references.into_iter().collect();
             unit
         })
         .collect();

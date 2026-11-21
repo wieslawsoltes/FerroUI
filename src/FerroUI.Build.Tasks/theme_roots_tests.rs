@@ -24,6 +24,7 @@ fn unit(index: u32, name: &str, keys: &[&str], type_keys: &[&str], references: &
         type_keys: strings(type_keys),
         references: strings(references),
         types: strings(types),
+        ..ThemeUnitModel::default()
     }
 }
 
@@ -641,4 +642,32 @@ fn a_class_not_created_on_the_target_is_not_live_through_its_creates_edges() {
     // A condition that is not one of the target holds for no target.
     assert!(!target("macos", "aarch64").matches("feature = \"macos\""));
     assert!(target("macos", "aarch64").matches("target_os=\"macos\""));
+}
+
+/// The count of the keys of the kept units that are live by key (#852, step 2): a root key, what
+/// the rest of a kept unit names, and what a live entry names are live; an entry nothing names
+/// is dead, though its unit is kept.
+#[test]
+fn the_keys_of_kept_units_are_live_by_entry() {
+    use ferroui_build_scan::xaml_metadata::ThemeEntryModel;
+    let entry = |key: &str, references: &[&str]| ThemeEntryModel { key: key.to_string(), references: strings(references) };
+    let mut resources = unit(1, "Resources/Base.xaml", &["Accent", "AccentBrush", "Other", "Unused"], &[], &[], &[]);
+    resources.entries = vec![entry("Accent", &[]), entry("AccentBrush", &["Accent"]), entry("Other", &[]), entry("Unused", &["Other"])];
+    let mut button = unit(2, "Controls/Button.xaml", &["AccentButtonStyle"], &["Button"], &[], &[]);
+    button.entries = vec![entry("AccentButtonStyle", &[])];
+    button.body_references = strings(&["AccentBrush"]);
+    let theme = ThemeUnitsModel {
+        class: "Tests.Theme".to_string(),
+        table_path: "::theme::compiled_xaml::THEME_UNITS".to_string(),
+        units: vec![unit(0, "ambient", &[], &[], &[], &[]), resources, button],
+    };
+    let lines = keys_live_by_entry(&theme, &[0, 1, 2], &Roots::default());
+    assert_eq!(lines[1], ("Resources/Base.xaml".to_string(), 4, 2, strings(&["Other", "Unused"])));
+    assert_eq!(lines[2], ("Controls/Button.xaml".to_string(), 1, 0, strings(&["AccentButtonStyle"])));
+    let roots = Roots { keys: set(&["Unused"]), ..Roots::default() };
+    let lines = keys_live_by_entry(&theme, &[0, 1, 2], &roots);
+    assert_eq!(lines[1].2, 4);
+    let listing = keys_listing("Tests.Theme", &lines);
+    assert!(listing.starts_with("Tests.Theme: 4 of 5 keys of the kept units are live by key\n"), "{listing}");
+    assert!(listing.contains("Controls/Button.xaml\t0 of 1 keys live by key\tAccentButtonStyle\n"), "{listing}");
 }

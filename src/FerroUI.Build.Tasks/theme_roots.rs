@@ -34,7 +34,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use ferroui_build_scan::model::{AssemblyModel, TypeKind};
 use ferroui_build_scan::scanner::{InherentFunction, SourceReferences};
-use ferroui_build_scan::xaml_metadata::{ClassReferencesModel, ThemeUnitsModel};
+use ferroui_build_scan::xaml_metadata::{ClassReferencesModel, ThemeUnitModel, ThemeUnitsModel};
 use ferroui_markup_xaml_loader::rust_emitter::{allocate_names, PARTS_CONSTRUCTOR};
 
 /// The key of the manifest table the trimming is read from.
@@ -411,6 +411,59 @@ impl BuildTarget {
             _ => false,
         }
     }
+}
+
+/// The keys of each kept unit of `theme` that are live by key (#852, step 2, the count): the
+/// closure over the entries of the kept units, from the keys of `roots` (keys and names) and what
+/// the rest of each kept unit names (its control themes by type, its styles, its unkeyed entries),
+/// through what each live entry names. Unlike the closure over units, an entry of a kept unit that
+/// no live entry and no root names is dead. The result is one line for each kept unit, in
+/// canonical order: its name, its keys, the keys live by key, and the dead keys. A unit whose
+/// metadata has no entries (an older file) is listed with every key live.
+///
+/// A count, not a selection: keys the code of the framework looks up by text are not among the
+/// roots of an application, so the dead keys are an estimate from above.
+pub fn keys_live_by_entry(theme: &ThemeUnitsModel, kept: &[u32], roots: &Roots) -> Vec<(String, usize, usize, Vec<String>)> {
+    let units: Vec<&ThemeUnitModel> = theme.units.iter().filter(|unit| kept.contains(&unit.index)).collect();
+    let mut live: BTreeSet<String> = roots.keys.iter().chain(&roots.names).cloned().collect();
+    for unit in &units {
+        live.extend(unit.body_references.iter().cloned());
+        if unit.entries.is_empty() {
+            live.extend(unit.keys.iter().cloned());
+        }
+    }
+    loop {
+        let before = live.len();
+        let named: Vec<String> = units
+            .iter()
+            .flat_map(|unit| unit.entries.iter())
+            .filter(|entry| live.contains(&entry.key))
+            .flat_map(|entry| entry.references.iter().cloned())
+            .collect();
+        live.extend(named);
+        if live.len() == before {
+            break;
+        }
+    }
+    units
+        .iter()
+        .map(|unit| {
+            let dead: Vec<String> = unit.keys.iter().filter(|key| !live.contains(*key)).cloned().collect();
+            (unit.name.clone(), unit.keys.len(), unit.keys.len() - dead.len(), dead)
+        })
+        .collect()
+}
+
+/// The text of `theme_keys.txt` for the theme `class` (#852, step 2): its totals, then for each
+/// kept unit its keys live by key and the dead keys.
+pub fn keys_listing(class: &str, lines: &[(String, usize, usize, Vec<String>)]) -> String {
+    let keys: usize = lines.iter().map(|(_, keys, ..)| keys).sum();
+    let live: usize = lines.iter().map(|(_, _, live, _)| live).sum();
+    let mut text = format!("{class}: {live} of {keys} keys of the kept units are live by key\n");
+    for (name, keys, live, dead) in lines {
+        text.push_str(&format!("{name}\t{live} of {keys} keys live by key\t{}\n", dead.join(" ")));
+    }
+    text
 }
 
 /// The roots the Rust sources of an application state (#568, step 4): its names that are a type

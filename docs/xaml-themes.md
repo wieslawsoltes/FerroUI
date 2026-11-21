@@ -314,7 +314,8 @@ needs. The build computes the table from the roots:
 6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
-`$OUT_DIR/xaml/theme_parts.txt`. `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
+`$OUT_DIR/xaml/theme_parts.txt`, and the keys of those units that are live by key in
+`$OUT_DIR/xaml/theme_keys.txt` (#852). `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
 first reason, whether that reason is conservative or exact, and how many of its keys are live.
 See docs/porting/theme-trimming.md, section 19.
 

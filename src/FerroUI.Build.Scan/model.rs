@@ -28,7 +28,8 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use crate::xaml_metadata::{ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
+use crate::xaml_metadata::IndexedName;
+pub use crate::xaml_metadata::{ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeEntryModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;
@@ -1477,7 +1478,7 @@ impl AssemblyModel {
 fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
     let strings = |items: &[String]| Json::Array(items.iter().map(|item| Json::string(item)).collect());
     let unit = |unit: &ThemeUnitModel| {
-        Json::Object(vec![
+        let mut members = vec![
             ("name".to_string(), Json::string(&unit.name)),
             ("index".to_string(), Json::Integer(i64::from(unit.index))),
             ("documents".to_string(), strings(&unit.documents)),
@@ -1485,7 +1486,24 @@ fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
             ("type_keys".to_string(), strings(&unit.type_keys)),
             ("references".to_string(), strings(&unit.references)),
             ("types".to_string(), strings(&unit.types)),
-        ])
+        ];
+        // What each entry and the rest of the unit name (#852, step 2), when the unit has them.
+        if unit.has_entry_graph() {
+            let row = |names: &[IndexedName]| {
+                Json::Array(
+                    names
+                        .iter()
+                        .map(|name| match name {
+                            IndexedName::Index(index) => Json::Integer(i64::from(*index)),
+                            IndexedName::Name(name) => Json::string(name),
+                        })
+                        .collect(),
+                )
+            };
+            members.push(("entry_references".to_string(), Json::Array(unit.entry_rows().iter().map(|names| row(names)).collect())));
+            members.push(("body_references".to_string(), row(&unit.body_row())));
+        }
+        Json::Object(members)
     };
     Json::Object(vec![
         ("class".to_string(), Json::string(&units.class)),
@@ -1522,7 +1540,7 @@ fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
         let unit = Fields::of(unit, "a unit")?;
         let strings = |name: &str| unit.list(name, |item| text_of(item, name));
         let index = unit.optional_integer("index")?.ok_or_else(|| "\"index\" is missing in a unit".to_string())?;
-        Ok(ThemeUnitModel {
+        let mut read = ThemeUnitModel {
             name: unit.text("name")?,
             index: u32::try_from(index).map_err(|_| "the index of a unit is not an unsigned integer".to_string())?,
             documents: strings("documents")?,
@@ -1530,7 +1548,28 @@ fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
             type_keys: strings("type_keys")?,
             references: strings("references")?,
             types: strings("types")?,
-        })
+            ..ThemeUnitModel::default()
+        };
+        if unit.optional("entry_references", |_| Ok(()))?.is_some() {
+            let names = |value: &Json| -> Result<Vec<IndexedName>, String> {
+                match value {
+                    Json::Array(names) => names
+                        .iter()
+                        .map(|name| match name {
+                            Json::Integer(index) => u32::try_from(*index)
+                                .map(IndexedName::Index)
+                                .map_err(|_| "an index of the entry graph is not an unsigned integer".to_string()),
+                            _ => text_of(name, "a name of the entry graph").map(IndexedName::Name),
+                        })
+                        .collect(),
+                    _ => Err("a row of the entry graph is not an array".to_string()),
+                }
+            };
+            let rows = unit.list("entry_references", names)?;
+            let body = unit.optional("body_references", names)?.unwrap_or_default();
+            read.read_entry_graph(rows, body)?;
+        }
+        Ok(read)
     })?;
     Ok(ThemeUnitsModel { class: fields.text("class")?, table_path: fields.text("table_path")?, units })
 }
@@ -1721,6 +1760,7 @@ mod tests {
                     type_keys: vec!["Panel".to_string()],
                     references: vec!["Accent".to_string()],
                     types: vec!["Border".to_string(), "Panel".to_string()],
+                    ..ThemeUnitModel::default()
                 },
             ],
         }];
