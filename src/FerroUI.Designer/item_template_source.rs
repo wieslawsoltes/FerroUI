@@ -1,11 +1,10 @@
 //! Resolve an inherited template from the native value in the accepted preview.
 use crate::{runtime::node_at_source_info, DesignerSession};
 use ferroui_designer_core::{Document, NodeId};
-use ferroui_designer_project::{file_path, PreviewInclude};
+use ferroui_designer_project::PreviewInclude;
 use ferroui_designer_tools::{
     ComponentResourceLocation, ItemTemplateMember, ItemTemplateSlot, ItemTemplateValue,
 };
-use ferroui_reload_protocol::fingerprint;
 
 pub(crate) struct EffectiveControlTemplate<'a> {
     pub(crate) location: ComponentResourceLocation<'a>,
@@ -47,20 +46,8 @@ impl DesignerSession {
             });
         }
 
-        let uri = info.source_uri()?.as_str();
-        let path = file_path(uri).ok()?;
-        let revision = info.source_revision()?;
-        let mut matches = includes.authored_sources().filter(|(address, include)| {
-            if *address != uri && file_path(address).ok().as_ref() != Some(&path) {
-                return false;
-            }
-            let source = include.document.valid_source();
-            fingerprint(source.strip_prefix('\u{feff}').unwrap_or(source).as_bytes()) == revision
-        });
-        let (address, include) = matches.next()?;
-        if matches.next().is_some() {
-            return None;
-        }
+        let uri = info.loader_uri().or_else(|| info.source_uri().map(|source| source.as_str()))?;
+        let (address, include) = includes.authored_revision(uri, info.source_revision()?)?;
         let node = node_at_source_info(&include.document, &info, "ControlTemplate")?;
         self.compatible_template_at(slot.owner, &include.document, node)
             .then_some(EffectiveControlTemplate {

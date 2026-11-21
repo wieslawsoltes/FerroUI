@@ -214,6 +214,8 @@ For Rust, select an items control and open **Edit item templates**. For a TableV
 
 Select an XAML control with a writable `Template` property. Choose **Edit templates** in the property inspector and use the **Control Template** section. Open the template on the canvas, reveal its source, or choose a visible resource that matches the control's type. Studio shows **Inherited** for a template supplied by a style or theme with a verified source. An included definition opens in its original file and uses its authored resource scope.
 
+When the selected Cargo package has a current XAML schema, Studio can trace an inherited template from a file-backed compiled dictionary to its XAML input. The published `ferres://` address continues to identify the resource, including when its physical filename differs.
+
 **Create inline template** starts a template with the control's type and its registered required parts. **Make inline copy** duplicates the assigned or inherited template. A dependency that would be shadowed keeps its value under a private key in a writable resource scope. **Reset template** removes the local assignment and restores the inherited value. Studio records each source change as one Undo step. [VS Code workflow](vscode/authoring.md#edit-a-control-template) · [MCP workflow](vscode/reference.md#edit-item-templates-with-mcp)
 
 ## Contextual panel layout

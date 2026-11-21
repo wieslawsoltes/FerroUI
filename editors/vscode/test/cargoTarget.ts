@@ -4,6 +4,10 @@ import * as vscode from 'vscode';
 import { describeCargoTarget, discoverCargoTargets, selectCargoTarget } from '../src/cargoTarget';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 import { buildCargo } from '../src/reloadProcess';
+import {
+    compiledTemplateAddress, compiledTemplateKey, compiledTemplatePath, compiledTemplateSource,
+    verifyCompiledControlTemplate,
+} from './compiledControlTemplate';
 import { verifyRegisteredPropertyRename } from './registeredPropertyRename';
 import { verifyRegisteredTypeRename } from './registeredTypeRename';
 import { until } from './wait';
@@ -30,21 +34,31 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
         '',
     ].join('\n'));
     const metadata = JSON.stringify({
-        format: 2, name: 'Audit Application', crate_name: 'audit_app',
+        format: 2, name: 'audit_app', crate_name: 'audit_app',
         metadata: [[mappingKey, mapping]],
+        documents: [{ uri: compiledTemplateAddress, root_type: 'FerroUI.Controls.ResourceDictionary', class_rust_path: null,
+            build_path: '::audit_app::published_theme::build_customer_theme', populate_path: null, public: true }],
         types: [{ name: 'AuditCard', namespace: 'Audit.Controls', kind: 'class', rust_path: '::audit_app::AuditCard',
             object_model: true, base: '::audit_widgets::Meter', default_constructor: {},
             properties: [{ name: 'Caption', value_type: 'String', setter: {} }] }],
     });
     const appSite = { rust_type: '::audit_app::AuditCard', type: 'AuditCard', file: 'src/main.rs', owner: 'AuditCard' };
+    const manifest = vscode.Uri.joinPath(project, 'Cargo.toml').fsPath;
+    const theme = await write(compiledTemplatePath, compiledTemplateSource);
+    const compiledIndex = {
+        version: 1, manifest, assembly: 'audit_app', groups: [{
+            module: 'published_theme', kind: 'documents', discovery_root: null, file_backed: true,
+            members: [{ key: compiledTemplateKey, symbol: 'build_customer_theme', public: true, source_path: compiledTemplatePath }],
+        }],
+    };
     await write('build.rs', exportMetadata(metadata, {
-        manifest: vscode.Uri.joinPath(project, 'Cargo.toml').fsPath, assembly: 'Audit Application', crate_name: 'audit_app',
+        manifest, assembly: 'audit_app', crate_name: 'audit_app',
         assembly_source: { file: 'src/registry.rs', item: 'DESIGN' },
         definitions: [
             { ...appSite, kind: 'class', type_declaration: { file: 'src/main.rs', name: 'AuditCard' } },
             { ...appSite, kind: 'class_info', member: 'Caption' },
         ],
-    }));
+    }, compiledIndex));
     await write('widgets/Cargo.toml', '[package]\nname = "audit-widgets"\nversion = "0.1.0"\nedition = "2024"\n');
     const dependencySource = await write('widgets/src/lib.rs', 'macro_rules! ferro_class { ($($t:tt)*) => {} }\npub struct Meter;\nferro_class!(Meter: Control);\n');
     await write('widgets/build.rs', exportMetadata(JSON.stringify({
@@ -141,6 +155,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     });
     assert.equal(rustPanel.document.getText(), rustDraft.replace('🦀 First', 'Updated'));
     console.log('VS Code used the nested Cargo registry for XAML, dependency Toolbox placement, and mapped RSX completion and literal editing');
+    await verifyCompiledControlTemplate(designer, theme, write);
 }
 
 async function verifyDefinitions(xaml: vscode.TextDocument, source: vscode.Uri, dependency: vscode.Uri) {
@@ -172,10 +187,11 @@ async function verifyDefinitions(xaml: vscode.TextDocument, source: vscode.Uri, 
     console.log('VS Code resolved live Rust declarations and dependency controls from the Cargo source index');
 }
 
-function exportMetadata(metadata: string, sourceIndex: object): string {
+function exportMetadata(metadata: string, sourceIndex: object, compiledIndex?: object): string {
+    const compiled = compiledIndex ? `\n        std::fs::write(directory.join("xaml-symbols.json"), r#"${JSON.stringify(compiledIndex)}"#).unwrap();` : '';
     return `fn main() {
         let directory = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
         std::fs::write(directory.join("audit.xamlmeta"), r#"${metadata}"#).unwrap();
-        std::fs::write(directory.join("xaml-rust-sources.json"), r#"${JSON.stringify({version: 1, ...sourceIndex})}"#).unwrap();
+        std::fs::write(directory.join("xaml-rust-sources.json"), r#"${JSON.stringify({version: 1, ...sourceIndex})}"#).unwrap();${compiled}
     }\n`;
 }

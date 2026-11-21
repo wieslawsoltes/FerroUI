@@ -477,7 +477,9 @@ Use Undo in the owning XAML buffer to revert an edit. If the control assigns a t
 
 In the workbench example, **SharedAction** opens a template in its included dictionary. Select **LocalAction** and choose **Make Inline Copy** to duplicate a template from the same document. The copy receives its own brush key because the button already shadows the template’s original brush key. **SecondLocalAction** keeps using the shared template. Use Undo once to remove the private template and its brush together. **PlainAction** can start an inline template. [Control template workbench](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml)
 
-In the same workbench, **InheritedAction** gets its template from a local style. **ThemedAction** gets its template from a control theme in the included dictionary. Use **Reveal Template Source** to see the supplying setter, or take a private copy before changing just the selected control. Compiled or programmatic templates may need a source mapping before the designer can open them. [Control template workbench](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml)
+In the same workbench, **InheritedAction** gets its template from a local style. **ThemedAction** gets its template from a control theme in the included dictionary. Use **Reveal Template Source** to see the supplying setter, or take a private copy before changing just the selected control. [Control template workbench](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml)
+
+For a file-backed compiled dictionary, run **FerroUI: Build Project XAML Schema** for the consuming Cargo package. The designer follows the published `ferres://` address to the authored XAML file from the build metadata. **Make Inline Copy** preserves that address and keeps supported relative resource references pointed at their original targets. [Build metadata and XAML file mappings](#move-an-xaml-file-and-its-references)
 
 The isolated template renders the current fixture on the native canvas. [Customers fixture](../images/native-item-template-customers.png) · [Trial fixture](../images/native-item-template-trial.png)
 

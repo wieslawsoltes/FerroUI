@@ -34,7 +34,7 @@ impl RuntimePreview {
         let info = XamlSourceInfo::for_object(object)?;
         let root = self.root()?;
         let root = XamlSourceInfo::for_object(&root)?;
-        if info.source_uri() != root.source_uri() {
+        if info.source_uri() != root.source_uri() || info.loader_uri() != root.loader_uri() {
             return None;
         }
         let projected = self.preview_source_document(document);
@@ -58,6 +58,7 @@ impl RuntimePreview {
         let root = self.root()?;
         let root = XamlSourceInfo::for_object(&root)?;
         if info.source_uri() != root.source_uri()
+            || info.loader_uri() != root.loader_uri()
             || info.source_revision()? != root.source_revision()?
         {
             return None;

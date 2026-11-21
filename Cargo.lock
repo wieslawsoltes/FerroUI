@@ -1920,7 +1920,6 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-mcp",
- "ferroui-reload-protocol",
  "ferroui-themes-winui",
  "ferroui-treedatagrid-core",
  "ferroui-vello",
@@ -2026,6 +2025,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-build-scan",
  "ferroui-designer-core",
+ "ferroui-reload-protocol",
  "libc",
  "proc-macro2",
  "serde",

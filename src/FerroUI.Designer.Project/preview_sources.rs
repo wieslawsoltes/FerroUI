@@ -1,6 +1,7 @@
 //! Build an immutable, workspace-scoped view of literal XAML includes.
 use crate::{file_path, file_uri, resolve_uri, CompiledResources};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind};
+use ferroui_reload_protocol::fingerprint;
 use serde::Deserialize;
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -54,6 +55,28 @@ impl PreviewIncludes {
 
     pub fn authored_source(&self, address: &str) -> Option<&PreviewInclude> {
         self.documents.get(address)
+    }
+
+    /// Match a native source stamp to the accepted include that supplied it.
+    /// Packaged addresses retain their exact loader scope. File URLs may have
+    /// different escaping, so an equivalent file path can match uniquely.
+    pub fn authored_revision(
+        &self,
+        address: &str,
+        revision: u64,
+    ) -> Option<(&str, &PreviewInclude)> {
+        let matches = |include: &PreviewInclude| {
+            fingerprint(include.document.valid_source().as_bytes()) == revision
+        };
+        if let Some((address, source)) = self.documents.get_key_value(address) {
+            return matches(source).then_some((address.as_str(), source));
+        }
+        let path = file_path(address).ok()?;
+        let mut equivalent = self.authored_sources().filter(|(uri, source)| {
+            file_path(uri).ok().as_ref() == Some(&path) && matches(source)
+        });
+        let included = equivalent.next()?;
+        equivalent.next().is_none().then_some(included)
     }
 
     pub fn resolve(
