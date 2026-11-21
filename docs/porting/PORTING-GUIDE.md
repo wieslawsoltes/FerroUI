@@ -229,7 +229,7 @@ ferro_properties! {
   enumeration; `styled_enum!(Type { A, B })` for one without markup metadata), handles
   (`Ref<T>`, kept as `Ref<FerroObject>`), `Option<T>` and the standard types have it, and any
   other type states `ferroui_base::styled_value!(Type);` where it is declared (docs/binary-size.md,
-  section 4.27).
+  section 4.31).
 - `GetValue(P)` → `self.get_value(Self::p_property())`; `SetValue` → `set_value`; `SetCurrentValue` → `set_current_value`; `ClearValue` → `clear_value`; direct properties use `set_and_raise(property, &self.field, value)`.
 - `OnPropertyChanged(change)` override → `impl FerroObjectImpl for X { fn on_property_changed(this, change) { Self::parent_on_property_changed(this, change); if change.property() == Self::foo_property().as_property() { let (old, new) = change.get_old_and_new_value::<T>(); .. } } }`.
 - `FooProperty.Changed.AddClassHandler<X>((x, e) => ..)` → `Self::foo_property().changed().add_class_handler::<X>(|x, e| ..).detach()`. `add_class_handler` and `subscribe` return a `Subscription` guard that removes the handler when it is dropped; `detach()` keeps a class handler registered once for the life of the property.
