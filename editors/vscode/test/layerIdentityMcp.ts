@@ -57,8 +57,11 @@ async function verifyReorder({ invoke, content }: McpFixture, path: string, sour
         assert.equal(original.buttons.length, 2);
         await present({ action: 'set_hidden', nodes: [original.buttons[1].id], hidden: true });
         await present({ action: 'isolate', nodes: [original.buttons[0].id] });
+        const isolated = await outline();
+        await select(isolated.buttons[0].id, isolated.revision);
         const { revision, buttons } = await outline();
-        await select(buttons[0].id, revision);
+        assert.deepEqual(buttons.map(node => node.id), isolated.buttons.map(node => node.id),
+            'Revealing a nested Rust builder keeps the enclosing designer view');
         const move = { session, expected_revision: revision, node: buttons[0].id, anchor: buttons[1].id, position: 'after' };
         const version = document.version;
         content(await invoke('designer_place', move));
@@ -97,6 +100,11 @@ async function verifyReorder({ invoke, content }: McpFixture, path: string, sour
         await check([false, false], [false, false]);
         await history('undo', source);
         await check([false, false], [false, false]);
+        if (path.endsWith('.rs')) {
+            const { revision } = await outline();
+            content(await invoke('designer_block', { session, expected_revision: revision, index: 1 }));
+            assert.equal((await outline()).buttons.length, 1, 'The invocation picker opens the nested view explicitly');
+        }
         assert.equal(document.eol, vscode.EndOfLine.CRLF);
     } finally {
         if (document.isDirty) await document.save();

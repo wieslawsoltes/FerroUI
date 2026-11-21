@@ -129,6 +129,8 @@ Undo restores a removed control's hidden or locked state while its layer history
 
 Choose an RSX invocation in **Design** and switch Outline to **Source**. Move one mapped control or a selection in the canvas or Outline, or insert a compatible Toolbox item. The move preserves source order and keeps the moved controls selected. Their Rust blocks retain handler expressions, comments, and computed values. A placement can update the mapped layout literals needed by the new parent.
 
+Selecting a child built by a nested `rsx!` highlights its builder in source while Design stays on the enclosing view. Choose a nested invocation from the **RSX** picker or move the caret there in the source editor to preview it directly.
+
 In Outline, **After** inserts immediately after the chosen authored control, before the next loop, conditional, expression, or control in that Rust child list. **Before** inserts ahead of the chosen control and **Inside** appends to the chosen container. Dynamic siblings keep their order. A panel with only loops or expression children in its RSX body accepts an **Inside** drop. Edit computed single-child slots in the Rust editor. If the preview was updated during a drag, start it again. One Undo restores all controls and layout values changed by the gesture. [Studio workflow](../native-controls.md#hierarchy-and-artboard) · [MCP arguments](reference.md#drive-an-editor-workflow)
 
 ### Arrange an inline Rust child collection

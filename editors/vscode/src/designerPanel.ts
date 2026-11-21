@@ -89,6 +89,8 @@ export class DesignerPanel implements vscode.Disposable {
     private animationCatalogEpoch = 0;
     private animationRecording = false;
     private retainedSelection?: { version: number } & ({ ranges: Range[] } | { starts: number[] });
+    // VS Code can report several queued source reveals after the designer selects a control.
+    private readonly revealedSelections = new WeakMap<vscode.TextEditor, { version: number; selections: vscode.Selection[] }>();
     private timelineProgramSelection?: { version: number; key: string };
     private inspected = false;
     private readers = 0;
@@ -160,9 +162,7 @@ export class DesignerPanel implements vscode.Disposable {
                 if (closed === this.document) void this.sourceClosed(closed);
                 else if (closed.isDirty || this.language === 'rust') this.dependencyChanged(closed.uri);
             }),
-            vscode.window.onDidChangeTextEditorSelection(event => {
-                if (event.textEditor.document === this.document && event.selections[0]) this.updateCaret(event.selections[0].active);
-            }),
+            vscode.window.onDidChangeTextEditorSelection(event => this.editorSelectionChanged(event)),
             vscode.workspace.onDidChangeConfiguration(event => {
                 if (event.affectsConfiguration('ferroui.preview.path')) { this.stopClient(); this.schedule(0); }
                 if (this.language === 'rust' && event.affectsConfiguration('ferroui.hotReload.cargoPath', this.document.uri)) {
@@ -832,17 +832,34 @@ export class DesignerPanel implements vscode.Disposable {
         this.changed.fire();
     }
 
-    private updateCaret(caret: vscode.Position): void {
+    private editorSelectionChanged(event: vscode.TextEditorSelectionChangeEvent): void {
+        const { textEditor, kind, selections: [selection] } = event;
+        if (textEditor.document !== this.document || !selection) return;
+        const revealed = this.revealedSelections.get(textEditor);
+        if (revealed?.version === this.document.version && kind !== vscode.TextEditorSelectionChangeKind.Mouse
+            && kind !== vscode.TextEditorSelectionChangeKind.Keyboard) {
+            const match = revealed.selections.findIndex(range => range.isEqual(selection));
+            if (match !== -1) {
+                revealed.selections.splice(0, match + 1);
+                return;
+            }
+        }
+        this.revealedSelections.delete(textEditor);
+        this.updateCaret(selection.active);
+    }
+
+    private updateCaret(caret: vscode.Position, keepInvocation = false): void {
         this.caret = caret;
         const frame = this.frame;
         if (!frame || frame.version !== this.document.version) return;
-        const block = frame.snapshot.blocks.reduce<vscode.Range | undefined>((best, span) => {
+        const active = frame.snapshot.activeBlock ? asRange(frame.snapshot.activeBlock) : undefined;
+        const block = keepInvocation && active?.contains(caret) ? undefined : frame.snapshot.blocks.reduce<vscode.Range | undefined>((best, span) => {
             const range = asRange(span);
             return range.contains(caret) && (!best || best.contains(range)) ? range : best;
         }, undefined);
         if (block) {
             this.blockOffset = this.document.offsetAt(block.start);
-            if (!frame.snapshot.activeBlock || !asRange(frame.snapshot.activeBlock).isEqual(block)) {
+            if (!active?.isEqual(block)) {
                 this.templateScopes.clear();
                 this.schedule(0);
                 return;
@@ -1190,9 +1207,20 @@ export class DesignerPanel implements vscode.Disposable {
             });
         }
         if (!editor || this.disposed || version !== this.document.version) return;
-        editor.selection = new vscode.Selection(range.start, range.end);
+        const selection = new vscode.Selection(range.start, range.end);
+        if (editor.selections.length !== 1 || !editor.selection.isEqual(selection)) {
+            if (this.language === 'rust') {
+                let revealed = this.revealedSelections.get(editor);
+                if (revealed?.version !== version) {
+                    revealed = { version, selections: [] };
+                    this.revealedSelections.set(editor, revealed);
+                }
+                revealed.selections.push(selection);
+            }
+            editor.selection = selection;
+        }
         editor.revealRange(range, vscode.TextEditorRevealType.InCenterIfOutsideViewport);
-        this.updateCaret(range.start);
+        this.updateCaret(range.start, true);
     }
 
     private syncCanvas(): void {
