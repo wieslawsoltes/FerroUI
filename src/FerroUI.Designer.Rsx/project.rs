@@ -92,6 +92,13 @@ impl RsxProjection<'_> {
         self.modules
     }
 
+    pub(crate) fn draft_module_sources(&self, source: &str) -> Result<Option<RustModuleSources>, String> {
+        self.modules.map(|modules| {
+            modules.with_file_text(&modules.active().uri, source)
+                .ok_or_else(|| "The Rust edit changes the accepted Cargo module layout".into())
+        }).transpose()
+    }
+
     /// Carry the active invocation's start across checked edits to this file.
     pub fn invocation_start_after(&self, patches: &[TextPatch]) -> Result<usize, String> {
         let before = self.invocation.start;

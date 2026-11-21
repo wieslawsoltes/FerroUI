@@ -69,6 +69,26 @@ fn rust_modules_require_unique_owned_declarations_and_current_sources() {
 }
 
 #[test]
+fn rust_palette_project_selects_a_unique_cargo_target() {
+    let fixture = Fixture::new();
+    fixture.write("Cargo.toml", "[package]\nname='review'\n");
+    let active = fixture.write("views.rs", "fn view() {}\n");
+    fixture.write("design.rs", "mod views;\n");
+    fixture.write("worker.rs", "fn main() {}\n");
+    let mut project = RustModuleProject {
+        manifest: fixture.0.join("Cargo.toml"),
+        targets: vec![fixture.0.join("worker.rs"), fixture.0.join("design.rs")],
+    };
+    let capture = |project: &RustModuleProject| project.capture(&fixture.0, &active, "fn view() {}\n", &[]);
+    let design = file_uri(fixture.0.join("design.rs")).unwrap();
+    assert_eq!(capture(&project).unwrap().target().uri, design);
+    project.targets.push(fixture.0.join("design.rs"));
+    assert_eq!(capture(&project).unwrap().target().uri, design);
+    fixture.write("worker.rs", "mod views; fn main() {}\n");
+    assert!(capture(&project).is_none());
+}
+
+#[test]
 fn preview_resources_resolve_transitive_files_with_owned_drafts_and_uri_aliases() {
     let fixture = Fixture::new();
     let source = r#"<Grid xmlns="https://github.com/ferroui"><ResourceInclude Source="Resources/Outer.xaml"/></Grid>"#;

@@ -143,7 +143,8 @@ impl RsxProjection<'_> {
         patches.extend(values.into_values().flatten());
         let edited = TextPatch::apply_all(self.source, patches.clone())
             .map_err(|error| error.to_string())?;
-        let actual = self.catalog.project(&edited, self.invocation.start)?;
+        let modules = self.draft_module_sources(&edited)?;
+        let actual = self.catalog.project_with_modules(&edited, self.invocation.start, modules.as_ref())?;
         if actual.invocation.start != self.invocation.start
             || actual.omitted_count != self.omitted_count
             || actual.animation_issues.len() != self.animation_issues.len()

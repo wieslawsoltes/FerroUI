@@ -1,6 +1,9 @@
 //! Authored module files belonging to one selected Cargo target.
 mod paths;
+mod project;
 mod revision;
+
+pub use project::RustModuleProject;
 
 use crate::uri::canonical_path;
 use crate::{PreviewSourceBuffer, file_path, file_uri};
@@ -18,7 +21,7 @@ const MAX_TOTAL_BYTES: usize = 8 * MAX_FILE_BYTES;
 
 /// Captured text may include unsaved buffers. A module's ranges always refer to
 /// its own file and may be used only while that text is still current.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RustModuleSource {
     pub uri: String,
     pub source: Arc<str>,
@@ -26,7 +29,7 @@ pub struct RustModuleSource {
 
 /// The explicit, unconditional source tree of a Cargo target. No Cargo command
 /// or application code runs during discovery.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RustModuleSources {
     target: String,
     active: String,

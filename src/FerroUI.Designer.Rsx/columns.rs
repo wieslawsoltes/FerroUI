@@ -245,7 +245,8 @@ impl RsxProjection<'_> {
         }
         let candidate = TextPatch::apply_all(self.source, patches.clone())
             .map_err(|error| error.to_string())?;
-        let next = self.catalog.project(&candidate, self.invocation.start)?;
+        let modules = self.draft_module_sources(&candidate)?;
+        let next = self.catalog.project_with_modules(&candidate, self.invocation.start, modules.as_ref())?;
         if next.invocation.start != self.invocation.start
             || !next
                 .nodes

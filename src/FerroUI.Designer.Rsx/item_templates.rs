@@ -227,7 +227,8 @@ impl RsxProjection<'_> {
         };
         let candidate = TextPatch::apply_all(self.source, vec![patch.clone()])
             .map_err(|error| error.to_string())?;
-        let next = self.catalog.project(&candidate, self.invocation.start)?;
+        let modules = self.draft_module_sources(&candidate)?;
+        let next = self.catalog.project_with_modules(&candidate, self.invocation.start, modules.as_ref())?;
         let next_binding = next
             .template_binding(owner)
             .ok_or("The template owner changed")?;
@@ -313,7 +314,7 @@ impl RsxProjection<'_> {
             .filter(|body| self.blocks.contains(body))
             .filter(|body| {
                 self.catalog
-                    .project(self.source, body.start)
+                    .project_with_modules(self.source, body.start, self.modules)
                     .is_ok_and(|projection| projection.invocation == *body)
             });
         RsxItemTemplate {

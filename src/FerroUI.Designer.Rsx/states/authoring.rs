@@ -86,7 +86,8 @@ impl RsxProjection<'_> {
         patches.sort_by_key(|patch| (patch.span.start, patch.span.end));
         let draft =
             TextPatch::apply_all(self.source, patches.clone()).map_err(|err| err.to_string())?;
-        let projected = self.catalog.project(&draft, self.invocation.start)?;
+        let modules = self.draft_module_sources(&draft)?;
+        let projected = self.catalog.project_with_modules(&draft, self.invocation.start, modules.as_ref())?;
         let error =
             || "The state group change does not round-trip in the active Rust view".to_owned();
         if projected.tree != self.tree {

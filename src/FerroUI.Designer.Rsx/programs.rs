@@ -131,7 +131,8 @@ impl RsxProjection<'_> {
         });
         let candidate = TextPatch::apply_all(self.source, patches.clone())
             .map_err(|error| error.to_string())?;
-        let draft = self.catalog.project(&candidate, self.invocation.start)?;
+        let modules = self.draft_module_sources(&candidate)?;
+        let draft = self.catalog.project_with_modules(&candidate, self.invocation.start, modules.as_ref())?;
         if draft.tree != self.tree
             || self.clips().count().checked_add_signed(change) != Some(draft.clips().count())
             || selected_key.as_ref().is_some_and(|key| {
