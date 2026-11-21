@@ -3,8 +3,8 @@ use crate::data::{BindingPriority, BindingValueType};
 use crate::ferro_property::value_equals;
 use crate::ferro_property_metadata::{CoerceValueCallback, CoercionOperations, DefaultCoercionOperations};
 use crate::utilities::OptionCell;
-use crate::{BoxedValue, FerroObject, FerroProperty, StyledPropertyMetadata, StyledValue};
-use std::any::Any;
+use crate::{BoxedValue, EnumValue, FerroObject, FerroProperty, StyledPropertyMetadata, StyledValue};
+use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -645,10 +645,8 @@ impl<T: StyledValue> EffectiveValue<T> {
                 // marker. A value of a type that is not its own storage type
                 // is converted by the property.
                 if T::SHARED_STORAGE {
-                    if self.state.property.styled_codec().copy_value(boxed.as_any(), &mut out) {
-                        if let Some(v) = out {
-                            return v;
-                        }
+                    if let Some(v) = self.stored_from_value(boxed.as_any()) {
+                        return v;
                     }
                 } else if let Some(v) = boxed.downcast_ref::<T>() {
                     return v.clone();
@@ -656,6 +654,21 @@ impl<T: StyledValue> EffectiveValue<T> {
             }
         }
         self.metadata.default_value().clone()
+    }
+
+    /// `value`, of the value type of the property, as this shared storage type.
+    #[inline]
+    fn stored_from_value(&self, value: &dyn Any) -> Option<T> {
+        let codec = self.state.property.styled_codec();
+        // Decided when the function is compiled: an enumeration is converted with one check of
+        // its type.
+        if TypeId::of::<T>() == TypeId::of::<EnumValue>() {
+            let stored = codec.enum_storage(value)?;
+            return (&stored as &dyn Any).downcast_ref::<T>().cloned();
+        }
+        let mut out = None;
+        codec.copy_value(value, &mut out);
+        out
     }
 
     fn set_and_raise_core(

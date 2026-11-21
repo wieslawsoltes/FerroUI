@@ -874,6 +874,7 @@ impl FerroObject {
     // --- untyped access ---------------------------------------------------
 
     /// Gets a property value as an untyped value.
+    #[inline]
     pub fn get_value_untyped(&self, property: &'static FerroProperty) -> BoxedValue {
         // A styled property is read by its codec directly: one call, as the typed route of its
         // value type was (#997).
@@ -885,14 +886,17 @@ impl FerroObject {
 
     /// Sets a property from an untyped value, which must hold exactly the
     /// property's value type or the unset marker.
+    #[inline]
     pub fn set_value_untyped(
         &self,
         property: &'static FerroProperty,
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
+        // A styled property is written by its codec directly: one call, as the typed route of its
+        // value type was (#997).
         match property.styled_codec_if_any() {
-            Some(codec) => crate::styled_property::set_styled_value(property, codec, self, value, priority),
+            Some(codec) => codec.set_value(self, value, priority),
             None => property.routes().route_set_value(self, value, priority),
         }
     }
