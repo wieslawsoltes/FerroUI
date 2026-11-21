@@ -1,6 +1,7 @@
-//! Style selector grammar and text parsing shared by the runtime and authoring tools.
+//! Selector and binding syntax shared by the runtime and authoring tools.
 
 pub mod argument_list_parser;
+pub mod binding_expression_grammar;
 pub mod character_reader;
 mod expression_parse_exception;
 pub mod identifier_parser;
