@@ -63,7 +63,7 @@ impl Relay {
                     .filter(|entry| entry.can_copy)
                     .ok_or("Choose an inherited template from the accepted application preview")?;
                 let address = &authored.sources.base_uri;
-                let planner = authored.template_planner()?;
+                let planner = authored.template_planner();
                 let mut plan = authored.plan(address, &source, |_| {
                     planner.plan_copy(
                         owner,
@@ -86,12 +86,8 @@ impl Templates {
         catalog: DesignTemplateCatalogMessage,
     ) -> Self {
         let address = authored.sources.base_uri.as_str();
-        let Ok((_, document)) = authored.source_at(address) else {
-            return Self(Vec::new());
-        };
-        let Ok(planner) = authored.template_planner() else {
-            return Self(Vec::new());
-        };
+        let document = &authored.document;
+        let planner = authored.template_planner();
         let mut sources = Sources {
             authored,
             cache: BTreeMap::new(),
@@ -141,15 +137,13 @@ impl Templates {
 }
 
 impl AuthoredPreview {
-    fn template_planner(&self) -> Result<ScopedControlTemplates<'_>, String> {
-        let address = &self.sources.base_uri;
-        let (_, document) = self.source_at(address)?;
-        Ok(ScopedControlTemplates::new(
-            document,
-            address,
+    fn template_planner(&self) -> ScopedControlTemplates<'_> {
+        ScopedControlTemplates::new(
+            &self.document,
+            &self.sources.base_uri,
             &self.sources.includes,
             &self.schema,
-        ))
+        )
     }
 }
 

@@ -14,6 +14,7 @@ import { HostedSources } from './hostedSources';
 import { runHostedStyleAction } from './hostedStyleActions';
 import { HostedStyles } from './hostedStyles';
 import type { FromHostedStyles, HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
+import { HostedTemplates } from './hostedTemplates';
 import { chooseHostedClipEdit } from './hostedClipActions';
 import { chooseHostedStateAction } from './hostedStateActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
@@ -194,6 +195,21 @@ export class HostedDesign implements vscode.Disposable {
         return session;
     }
 
+    async templates(uri: vscode.Uri, signal: AbortSignal) {
+        const session = this.session(uri);
+        const frame = session.templateFrame();
+        return { generation: session.generation, frame, ...await session.templates.catalog(frame, signal) };
+    }
+
+    templateAction(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, owner: number,
+        action: 'source' | 'draft' | 'apply', signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        session.templateFrame();
+        if (action === 'source') return session.templates.locate(frame, owner, signal);
+        return session.templates.copy(frame, owner, action === 'apply', signal);
+    }
+
     async animate(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame,
         control: HostedAnimationAction, signal: AbortSignal) {
         signal.throwIfAborted();
@@ -289,6 +305,7 @@ class HostedSession {
     readonly animations: HostedAnimations;
     readonly palettes: HostedPalettes;
     readonly styles: HostedStyles;
+    readonly templates: HostedTemplates;
     private readonly dependencies: DesignerDependencies;
     private readonly subscriptions: vscode.Disposable[];
     private readonly startup: Promise<void>;
@@ -323,6 +340,7 @@ class HostedSession {
         const sources = new HostedSources(editor, (frame, signal, task) => this.withAcceptedFrame(frame, signal, task));
         this.palettes = new HostedPalettes(sources);
         this.styles = new HostedStyles(sources);
+        this.templates = new HostedTemplates(sources);
         const rust = language === 'rust';
         this.dependencies = new DesignerDependencies(rust);
         const pattern = rust ? '**/*.{[rR][sS],[xX][aA][mM][lL]}' : '**/*.[xX][aA][mM][lL]';
@@ -473,6 +491,12 @@ class HostedSession {
     styleFrame(): HostedAnimationFrame {
         const frame = this.currentFrame;
         if (!frame?.stylesAvailable) throw new Error('Wait for an App Preview frame with scoped style support.');
+        return { revision: frame.revision, sequence: frame.sequence };
+    }
+
+    templateFrame(): HostedAnimationFrame {
+        const frame = this.currentFrame;
+        if (!frame?.templatesAvailable) throw new Error('Wait for an XAML App Preview frame from an application built with template support.');
         return { revision: frame.revision, sequence: frame.sequence };
     }
 
@@ -765,6 +789,14 @@ class HostedSession {
         }
         if (message.type === 'styles') {
             await this.receiveStyles(message);
+            return;
+        }
+        if (message.type === 'templates') {
+            try {
+                await this.templates.choose(message.frame, () => this.templateFrame(), new AbortController().signal);
+            } catch (error) {
+                void vscode.window.showErrorMessage(errorMessage(error));
+            }
             return;
         }
         if (message.type === 'animationIssues') {

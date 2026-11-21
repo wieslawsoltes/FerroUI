@@ -123,7 +123,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'palette', 'palette_edit_draft', 'palette_edit',
             'palette_source', 'palette_references', 'palette_show', 'styles', 'style_edit_draft', 'style_edit',
-            'style_resources', 'style_source', 'style_show']) {
+            'style_resources', 'style_source', 'style_show', 'templates', 'template_source', 'template_copy_draft', 'template_copy']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
@@ -148,6 +148,10 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_style_edit', style)).content[0]?.text ?? '', /allowWrites/);
         const styleDraft = await invoke('designer_hosted_style_edit_draft', style);
         assert.ok(styleDraft.isError && !styleDraft.content[0]?.text?.includes('allowWrites'));
+        const template = { session: 1, expected_generation: 1, expected_revision: 1, expected_sequence: 1, node: 2 };
+        assert.match((await invoke('designer_hosted_template_copy', template)).content[0]?.text ?? '', /allowWrites/);
+        const templateDraft = await invoke('designer_hosted_template_copy_draft', template);
+        assert.ok(templateDraft.isError && !templateDraft.content[0]?.text?.includes('allowWrites'));
         const group = { ...hostedKey, arguments: { program: 1, command: {
             action: 'move_keyframes', keyframes: [{ target: 1, property: 'Opacity', time: .5 }], offset: .1,
         } } };

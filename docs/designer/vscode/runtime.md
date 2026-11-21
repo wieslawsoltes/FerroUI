@@ -54,6 +54,14 @@ The palette follows workspace and mapped compiled includes from the accepted fra
 
 The same toolbar opens inline Rust styles when App Preview is rendering an RSX invocation. Edit selectors and typed setters or create a nested rule in the Rust buffer. Under **Color resources**, choose a layer to edit, assign a compatible color key, or compare the resolved Light, Dark, and High contrast colors. The source icon opens the supplying Rust declaration. After each accepted edit the app draws the new frame without a Cargo rebuild. [Edit inline Rust styles](styles.md#edit-inline-rust-styles) · [Edit Rust style colors](styles.md#edit-rust-style-color-resources) · [App Preview screenshot](../images/vscode-app-preview-rust-style.jpg)
 
+### Open and copy App Preview control templates
+
+Open an XAML view with **FerroUI: Open App-Hosted Design**, then choose the **App Preview Templates** icon in its toolbar. The picker shows controls whose templates were identified when the application loaded the accepted XAML snapshot. Choose a control, then choose **Open Template Source**. VS Code opens the supplying XAML beside the preview, including an included theme with a separate packaged resource address.
+
+Choose **Make Inline Copy** to customize an inherited template on that control only. FerroUI checks resource references in the original and destination scopes, carries over required definitions, and applies the copy to the previewed buffer in one Undo step. The shared template stays in place. If the template or its dependencies cannot be resolved from the accepted XAML, use **Open Template Source** where available and inspect the shared definition.
+
+Rebuild the preview binary with the current `ferroui-designer-support` to enable this toolbar action. The picker covers controls in the previewed XAML and template definitions from that file or the accepted workspace includes. Compiled Rust fixtures, programmatic templates, and repeated instances that resolve to different templates have no source action. Use the running app inspector for changes during interaction. [App Preview template tools](reference.md#inspect-app-preview-templates-with-mcp)
+
 ### Edit a shared Rust palette in App Preview
 
 1. Use a `const` initialized with a supported color constructor in a module of the selected Cargo binary or its package library. For example, declare `mod brand;` in the crate root and reference `crate::brand::ACCENT` from an inline `.resource("Accent", crate::brand::ACCENT)` call. Named imports and re-exports also work.

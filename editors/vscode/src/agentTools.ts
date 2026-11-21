@@ -254,6 +254,14 @@ export class AgentTools {
             }
             case 'designer_hosted_style_show':
                 return this.hosted.showStyles(document.uri, args.expected_generation, args.arguments as HostedStylePresentation | undefined, signal);
+            case 'designer_hosted_templates':
+                return this.hosted.templates(document.uri, signal);
+            case 'designer_hosted_template_source':
+            case 'designer_hosted_template_copy_draft':
+            case 'designer_hosted_template_copy':
+                return this.hosted.templateAction(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.node!,
+                    tool === 'designer_hosted_template_source' ? 'source' : tool === 'designer_hosted_template_copy_draft' ? 'draft' : 'apply', signal);
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedAnimationAction, signal);

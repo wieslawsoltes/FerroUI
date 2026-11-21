@@ -13,6 +13,7 @@ import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, Hos
 import type { HostedAnimationSample, HostedFrame, HostedInput, HostedSource, HostedWorkspaceFrame, HostedWorkspaceSources } from './hostedProtocol';
 import type { NativePaletteRequest } from './hostedPaletteProtocol';
 import type { NativeStyleRequest } from './hostedStylesProtocol';
+import type { NativeTemplateRequest } from './hostedTemplates';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
@@ -41,6 +42,7 @@ export class NativePreview implements vscode.Disposable {
     canvasGuides?: GuideCatalog;
     capabilities: {
         isolatedDesign?: boolean; appHostedDesign?: boolean; hostedSourceSnapshots?: boolean; hostedPalette?: boolean; hostedStyles?: boolean;
+        hostedTemplates?: boolean;
         hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
         stages?: boolean; stageKeyboard?: boolean; prototypeEditing?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; canvasHighContrast?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
@@ -155,6 +157,10 @@ export class NativePreview implements vscode.Disposable {
     hostedStyles<T>(frame: HostedAnimationFrame, request: NativeStyleRequest): Promise<T> {
         if (!this.capabilities.hostedStyles) throw new Error('Update the FerroUI helper to edit styles in App Preview.');
         return this.send('hostedStyles', { ...frame, ...request });
+    }
+    hostedTemplates<T>(frame: HostedAnimationFrame, request: NativeTemplateRequest): Promise<T> {
+        if (!this.capabilities.hostedTemplates) throw new Error('Update the FerroUI helper to use App Preview templates.');
+        return this.send('hostedTemplates', { ...frame, ...request });
     }
     hostedInput(input: HostedInput): Promise<void> { return this.send('hostedInput', input); }
     sampleHostedAnimation(request: HostedAnimationRequest): Promise<HostedAnimationSample> {

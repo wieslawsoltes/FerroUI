@@ -1,37 +1,51 @@
 import { strict as assert } from 'node:assert';
 import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import * as vscode from 'vscode';
 import type { BuiltProject } from '../src/builtProjects';
 import type { HostedFrame, HostedSource } from '../src/hostedProtocol';
 import type { HostedPaletteCatalog, HostedPaletteLocation, HostedPalettePlan, HostedPaletteReport } from '../src/hostedPaletteProtocol';
 import type { NativePreview } from '../src/nativePreview';
 import type { PreviewSourceBuffer } from '../src/protocol';
+import { verifyHostedTemplateEditor } from './hostedTemplateEditor';
 
 export async function verifyHostedWorkspaceSources(preview: NativePreview, update: (revision: number, xaml: string) => HostedSource) {
-    const directory = await mkdtemp(path.join(tmpdir(), 'ferroui-hosted-sources-'));
+    const directory = await mkdtemp(path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, 'ferroui-hosted-sources-'));
     const dictionary = (content: string) => `<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">${content}</ResourceDictionary>`;
     const palette = (color: string) => '\uFEFF' + dictionary(`\r\n  <!-- 🙂 --> <SolidColorBrush x:Key="PanelBrush" Color="${color}"/>\r\n`);
     const view = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design" Width="380" Height="220">
       <Window.Resources>${dictionary('<ResourceDictionary.MergedDictionaries><ResourceInclude Source="Dictionaries/Outer.xaml"/></ResourceDictionary.MergedDictionaries>')}</Window.Resources>
-      <Border Background="{StaticResource PanelAlias}" Padding="20"><app:PreviewBadge Text="Workspace draft"/></Border>
+      <StackPanel Spacing="8">
+        <Border Background="{StaticResource PanelAlias}" Padding="20"><app:PreviewBadge Text="Workspace draft"/></Border>
+        <Button Name="ReviewAction" Theme="{StaticResource HostedActionTheme}" Content="Approve"/>
+      </StackPanel>
     </Window>`;
     try {
         const root = await realpath(directory);
         const outer = path.join(root, 'Dictionaries', 'Outer.xaml');
         const palettePath = path.join(root, 'Dictionaries', 'Color Set.xaml');
         const paletteUri = pathToFileURL(palettePath).toString();
-        const viewPath = path.join(root, 'Test.xaml');
+        const viewPath = path.join(directory, 'Test.xaml');
         const uri = pathToFileURL(viewPath).toString();
         await mkdir(path.dirname(outer));
-        await writeFile(outer, dictionary(`<ResourceDictionary.MergedDictionaries><ResourceInclude Source="Color%20Set.xaml"/></ResourceDictionary.MergedDictionaries>
-            <StaticResource x:Key="PanelAlias" ResourceKey="PanelBrush"/>`));
+        const theme = dictionary(`<ResourceDictionary.MergedDictionaries><ResourceInclude Source="Color%20Set.xaml"/></ResourceDictionary.MergedDictionaries>
+            <StaticResource x:Key="PanelAlias" ResourceKey="PanelBrush"/>
+            <ControlTheme x:Key="HostedActionTheme" TargetType="Button">
+              <Setter Property="Template">
+                <ControlTemplate TargetType="Button">
+                  <Border Background="{StaticResource PanelBrush}" Padding="10,4">
+                    <ContentPresenter Content="{TemplateBinding Content}" Foreground="White"/>
+                  </Border>
+                </ControlTemplate>
+              </Setter>
+            </ControlTheme>`);
+        await writeFile(outer, theme);
         await writeFile(palettePath, palette('#FF162137'));
         await writeFile(viewPath, view);
         const project = await compiledPaletteProject(root);
-        const render = async (revision: number, localSources: PreviewSourceBuffer[] = []) => {
-            const { document, ...request } = update(revision, view);
+        const render = async (revision: number, localSources: PreviewSourceBuffer[] = [], sourceText = view) => {
+            const { document, ...request } = update(revision, sourceText);
             const source = await preview.inProject({ ...document, uri }, project);
             return preview.renderHostedWorkspace({ ...request, document: source }, { root, localSources });
         };
@@ -57,7 +71,16 @@ export async function verifyHostedWorkspaceSources(preview: NativePreview, updat
         await assert.rejects(preview.hostedInput({ type: 'click', x: .5, y: .5, revision: changed.frame.revision, sequence: changed.frame.sequence }), /frame changed/i);
         const restored = await render(2003);
         assert.equal(restored.error, null);
-        assert.equal(restored.frame?.image.png, initial.frame.image.png);
+        assert.ok(restored.frame);
+        assert.equal(restored.frame.image.png, initial.frame.image.png);
+
+        const inline = await verifyHostedTemplateEditor(preview, restored.frame, vscode.Uri.file(viewPath),
+            pathToFileURL(outer).toString(), view, theme);
+        const copied = await render(2004, [], inline);
+        assert.equal(copied.error, null);
+        assert.equal(copied.frame?.image.png, restored.frame.image.png);
+        await assert.rejects(preview.hostedTemplates(restored.frame, { action: 'catalog' }), /current app-hosted preview frame/);
+        console.log('App Preview opened the native template in its file-backed compiled source, copied it with matching pixels and restored the source with Undo');
     } finally {
         await rm(directory, { recursive: true, force: true });
     }

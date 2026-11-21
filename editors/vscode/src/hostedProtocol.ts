@@ -24,6 +24,7 @@ export interface HostedFrame {
     fixtures?: string[] | null;
     paletteAvailable?: boolean;
     stylesAvailable?: boolean;
+    templatesAvailable?: boolean;
     rustScope?: { active: Range; blocks: Range[] };
     animations?: HostedAnimationCatalog;
     animationPresentation?: HostedAnimationPresentation;
@@ -59,6 +60,7 @@ export type HostedInput = { revision: number; sequence: number; x: number; y: nu
     { type: 'click' } | { type: 'scroll'; delta: number } | { type: 'text'; text: string });
 
 export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | { type: 'ready' | 'refresh' }
+    | { type: 'templates'; frame: HostedAnimationFrame }
     | { type: 'animation'; request: number; frame: HostedAnimationFrame; control: HostedAnimationControl }
     | { type: 'clipPlacement'; request: number; frame: HostedAnimationFrame; draft: HostedClipDraft }
     | { type: 'clipActions'; request: number; frame: HostedAnimationFrame; program?: number }

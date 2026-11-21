@@ -340,6 +340,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     ${tool('hosted-clip-actions', 'ellipsis', 'Animation clip actions', 'hidden')}
     ${tool('hosted-state-actions', 'symbol-enum', 'Visual state actions', 'hidden')}
     ${tool('hosted-styles-button', 'symbol-property', 'App Preview Styles & Themes', 'popovertarget="hosted-styles" aria-controls="hosted-styles" aria-haspopup="dialog" aria-expanded="false" hidden')}
+    ${tool('hosted-templates-button', 'symbol-snippet', 'App Preview Templates', 'aria-haspopup="listbox" hidden disabled')}
     ${tool('hosted-palette-button', 'symbol-color', 'App Preview palette', 'popovertarget="hosted-palette" aria-controls="hosted-palette" aria-haspopup="dialog" aria-expanded="false" hidden')}
     ${tool('hosted-refresh', 'refresh', 'Refresh Source')}
     ${tool('hosted-animation-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}

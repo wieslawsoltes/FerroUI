@@ -5,6 +5,7 @@ import { applyHostedSourcePatches } from './hostedSourceEdit';
 import { previewSourceUri } from './includedSource';
 import type { NativePreview } from './nativePreview';
 import type { Range } from './protocol';
+import { revision } from './reloadProcess';
 import type { HostedSourceRequest } from './hostedStylesProtocol';
 import { asRange, languageOf } from './textDocument';
 
@@ -13,6 +14,7 @@ type FrameAccess = <T>(frame: HostedAnimationFrame, signal: AbortSignal,
 
 export interface HostedSourceLocation { uri: string; range: Range }
 export interface HostedAuthoredPlan extends HostedSourcePlan { uri: string }
+export interface HostedIncludeRevision { uri: string; sourceRevision: string }
 
 export class HostedSources {
     constructor(private readonly editor: vscode.TextEditor, private readonly withFrame: FrameAccess) {}
@@ -25,10 +27,13 @@ export class HostedSources {
         });
     }
 
-    edit(frame: HostedAnimationFrame, address: string, apply: boolean, signal: AbortSignal,
+    edit(frame: HostedAnimationFrame, address: string | undefined, apply: boolean, signal: AbortSignal,
         plan: (client: NativePreview, source: string) => Promise<HostedAuthoredPlan>) {
         return this.withFrame(frame, signal, async (client, ensure) => {
-            const original = await this.source(client, frame, address);
+            const primary = this.editor.document;
+            const original = address === undefined
+                ? { uri: pathToFileURL(primary.uri.fsPath).toString(), document: primary }
+                : await this.source(client, frame, address);
             const originalVersion = original.document.version;
             const edit = await plan(client, original.document.getText());
             let target = original;
@@ -65,6 +70,21 @@ export class HostedSources {
             });
             return location;
         });
+    }
+
+    async verifyIncludes(includes: readonly HostedIncludeRevision[]): Promise<void> {
+        await Promise.all(includes.map(async include => {
+            const uri = await previewSourceUri(this.editor.document.uri, include.uri);
+            const open = () => vscode.workspace.textDocuments.find(document => document.uri.toString() === uri.toString());
+            const disk = open()?.isDirty ? undefined : await vscode.workspace.fs.readFile(uri);
+            const current = open();
+            const bytes = current?.isDirty ? Buffer.from(current.getText()) : disk;
+            if (!bytes) throw new Error('An included XAML buffer changed. Wait for App Preview to update.');
+            const offset = bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf ? 3 : 0;
+            if (revision(Buffer.from(bytes.subarray(offset))) !== include.sourceRevision) {
+                throw new Error('An included XAML buffer changed. Wait for App Preview to update.');
+            }
+        }));
     }
 
     private async source(client: NativePreview, frame: HostedAnimationFrame, address: string) {

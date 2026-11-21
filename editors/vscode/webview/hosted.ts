@@ -21,6 +21,7 @@ const text = element<HTMLInputElement>('hosted-text');
 const send = input.querySelector<HTMLButtonElement>('button[type=submit]')!;
 const fixtureLabel = element('hosted-fixture-label');
 const fixture = element<HTMLSelectElement>('hosted-fixture');
+const templates = element<HTMLButtonElement>('hosted-templates-button');
 let fixtureRevision = 0;
 let availableFixtures: string[] = [];
 let current: HostedFrame | undefined;
@@ -47,6 +48,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
         palettes.setReady(interactive ? revision : undefined);
         styles.setReady(interactive ? revision : undefined);
         fixtureRevision = revision;
+        updateTemplates();
         fixtureLabel.hidden = !available.length;
         if (available.length !== availableFixtures.length || available.some((name, index) => name !== availableFixtures[index])) {
             availableFixtures = available;
@@ -68,7 +70,13 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     animations.rendered(current);
     palettes.rendered(current);
     styles.rendered(current);
+    updateTemplates();
 });
+
+function updateTemplates(): void {
+    templates.hidden = !current?.templatesAvailable;
+    templates.disabled = !interactive || current?.revision !== fixtureRevision;
+}
 
 function position(event?: MouseEvent) {
     if (!current || !interactive) return undefined;
@@ -95,5 +103,11 @@ input.onsubmit = event => {
     }
 };
 element('hosted-refresh').onclick = () => vscode.postMessage({ type: 'refresh' });
+templates.onclick = () => {
+    if (current && !templates.disabled) {
+        const { revision, sequence } = current;
+        vscode.postMessage({ type: 'templates', frame: { revision, sequence } });
+    }
+};
 fixture.onchange = () => vscode.postMessage({ type: 'fixture', revision: fixtureRevision, name: fixture.value || null });
 vscode.postMessage({ type: 'ready' });

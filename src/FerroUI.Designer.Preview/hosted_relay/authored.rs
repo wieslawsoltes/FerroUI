@@ -19,7 +19,7 @@ pub(crate) struct Request<T> {
 }
 
 pub(super) struct AuthoredPreview {
-    document: Document,
+    pub(super) document: Document,
     uri: String,
     pub(super) sources: AuthoredSources,
     pub(super) contrast: Option<ComponentResourceContext>,
