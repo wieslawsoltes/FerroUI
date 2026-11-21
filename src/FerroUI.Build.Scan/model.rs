@@ -1248,6 +1248,9 @@ pub struct AssemblyModel {
     pub theme_units: Vec<ThemeUnitsModel>,
     /// What the compiled documents of the crate name, for a crate without theme units (#568).
     pub references: MarkupReferencesModel,
+    /// The string literals of the code of the crate that can spell a resource key (#852, step 2,
+    /// `SourceReferences::key_strings`): what it may look up by text. Absent in a file: none.
+    pub key_strings: Vec<String>,
 }
 
 impl AssemblyModel {
@@ -1273,6 +1276,7 @@ impl AssemblyModel {
             dependencies: Vec::new(),
             theme_units: Vec::new(),
             references: MarkupReferencesModel::default(),
+            key_strings: Vec::new(),
         }
     }
 
@@ -1386,7 +1390,8 @@ impl AssemblyModel {
             .list("theme_units", &self.theme_units, theme_units_to_json)
             .list("referenced_types", &self.references.types, |name| Json::string(name))
             .list("referenced_keys", &self.references.keys, |name| Json::string(name))
-            .list("class_references", &self.references.classes, class_references_to_json);
+            .list("class_references", &self.references.classes, class_references_to_json)
+            .list("key_strings", &self.key_strings, |text| Json::string(text));
         Json::object(members).to_text()
     }
 
@@ -1467,6 +1472,7 @@ impl AssemblyModel {
                 keys: fields.list("referenced_keys", |name| text_of(name, "a referenced key"))?,
                 classes: fields.list("class_references", class_references_from_json)?,
             },
+            key_strings: fields.list("key_strings", |text| text_of(text, "a key string"))?,
         })
     }
 }
@@ -1489,11 +1495,16 @@ fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
         // What each entry and the rest of the unit name (#852, step 2), when the unit has them.
         if !(unit.entries.is_empty() && unit.body_references.is_empty() && unit.body_types.is_empty()) {
             let entry = |entry: &ThemeEntryModel| {
-                Json::Object(vec![
+                let mut members = vec![
                     ("key".to_string(), Json::string(&entry.key)),
                     ("references".to_string(), strings(&entry.references)),
                     ("types".to_string(), strings(&entry.types)),
-                ])
+                ];
+                if !entry.slots.is_empty() {
+                    let slots = entry.slots.iter().map(|slot| Json::Integer(i64::from(*slot))).collect();
+                    members.push(("slots".to_string(), Json::Array(slots)));
+                }
+                Json::Object(members)
             };
             members.push(("entries".to_string(), Json::Array(unit.entries.iter().map(entry).collect())));
             members.push(("body_references".to_string(), strings(&unit.body_references)));
@@ -1550,6 +1561,10 @@ fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
                     key: entry.text("key")?,
                     references: entry.list("references", |item| text_of(item, "references"))?,
                     types: entry.list("types", |item| text_of(item, "types"))?,
+                    slots: entry.list("slots", |slot| match slot {
+                        Json::Integer(slot) => u32::try_from(*slot).map_err(|_| "a slot is not an unsigned integer".to_string()),
+                        _ => Err("a slot is not an integer".to_string()),
+                    })?,
                 })
             })?,
             body_references: strings("body_references")?,

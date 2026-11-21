@@ -990,10 +990,12 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
             source.push('\n');
             let type_keys: Vec<Vec<String>> = plan.units.iter().map(|unit| unit.type_keys.clone()).collect();
             source.push_str(&units.table(&class.full_name(), &type_keys));
+            let mut model_units = plan.units;
+            units.record_slots(&mut model_units);
             Some(ThemeUnitsModel {
                 class: class.full_name(),
                 table_path: format!("{module_path}::{THEME_UNITS_TABLE}"),
-                units: plan.units,
+                units: model_units,
             })
         }
         _ => None,

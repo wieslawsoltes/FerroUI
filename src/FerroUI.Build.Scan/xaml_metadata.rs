@@ -138,6 +138,9 @@ pub struct ThemeEntryModel {
     pub references: Vec<String>,
     /// The types the entries construct.
     pub types: Vec<String>,
+    /// The numbers of the statics (`THEME_ENTRY_<n>`) of the entries of the key an application
+    /// selects; empty when the entries of the key stay in the runs of the unit.
+    pub slots: Vec<u32>,
 }
 
 /// What the compiled documents of a crate without theme units name that can root the units of
@@ -383,8 +386,15 @@ fn write_theme_units(text: &mut String, units: &ThemeUnitsModel) {
                 text.push_str("          \"entries\": [");
                 for (index, entry) in unit.entries.iter().enumerate() {
                     text.push_str(if index == 0 { "\n" } else { ",\n" });
+                    let slots = match entry.slots.is_empty() {
+                        true => String::new(),
+                        false => {
+                            let slots: Vec<String> = entry.slots.iter().map(u32::to_string).collect();
+                            format!(", \"slots\": [{}]", slots.join(", "))
+                        }
+                    };
                     text.push_str(&format!(
-                        "            {{\"key\": {}, \"references\": {}, \"types\": {}}}",
+                        "            {{\"key\": {}, \"references\": {}, \"types\": {}{slots}}}",
                         json_string(&entry.key),
                         list(&entry.references),
                         list(&entry.types)
@@ -436,6 +446,12 @@ fn read_theme_units(value: &JsonValue) -> Result<ThemeUnitsModel, String> {
                                 key: field(entry, "key")?.string("key")?.to_string(),
                                 references: strings(entry, "references")?,
                                 types: strings(entry, "types")?,
+                                slots: match entry.iter().find(|(key, _)| key == "slots") {
+                                    Some((_, value)) => {
+                                        value.array("slots")?.iter().map(|slot| slot.integer("slots")).collect::<Result<_, _>>()?
+                                    }
+                                    None => Vec::new(),
+                                },
                             })
                         })
                         .collect::<Result<Vec<_>, String>>()?,
@@ -825,6 +841,7 @@ mod tests {
                             key: "AccentBrush".to_string(),
                             references: vec!["Accent".to_string()],
                             types: vec!["SolidColorBrush".to_string()],
+                            slots: vec![3, 7],
                         },
                     ],
                     body_references: vec!["Other".to_string()],

@@ -650,7 +650,7 @@ fn a_class_not_created_on_the_target_is_not_live_through_its_creates_edges() {
 #[test]
 fn the_keys_of_kept_units_are_live_by_entry() {
     use ferroui_build_scan::xaml_metadata::ThemeEntryModel;
-    let entry = |key: &str, references: &[&str]| ThemeEntryModel { key: key.to_string(), references: strings(references), types: Vec::new() };
+    let entry = |key: &str, references: &[&str]| ThemeEntryModel { key: key.to_string(), references: strings(references), ..ThemeEntryModel::default() };
     let mut resources = unit(1, "Resources/Base.xaml", &["Accent", "AccentBrush", "Unused", "Other"], &[], &[], &[]);
     resources.entries = vec![entry("Accent", &[]), entry("AccentBrush", &["Accent"]), entry("Other", &[]), entry("Unused", &["Other"])];
     let mut button = unit(2, "Controls/Button.xaml", &["AccentButtonStyle"], &["Button"], &[], &[]);
@@ -670,4 +670,20 @@ fn the_keys_of_kept_units_are_live_by_entry() {
     let listing = keys_listing("Tests.Theme", &lines);
     assert!(listing.starts_with("Tests.Theme: 4 of 5 keys of the kept units are live by key\n"), "{listing}");
     assert!(listing.contains("Controls/Button.xaml\t0 of 1 keys live by key\tAccentButtonStyle\n"), "{listing}");
+}
+
+/// The entries an application selects in a kept unit (#852, step 2): the statics of its live keys
+/// in the order of their runs, and none when every selectable entry is live, where the unit is
+/// kept by its own static. A key whose entries stay in the runs has no static to leave out.
+#[test]
+fn a_unit_selects_the_statics_of_its_live_keys() {
+    use ferroui_build_scan::xaml_metadata::ThemeEntryModel;
+    let entry = |key: &str, slots: &[u32]| ThemeEntryModel { key: key.to_string(), slots: slots.to_vec(), ..ThemeEntryModel::default() };
+    let mut resources = unit(1, "Resources/Base.xaml", &["Accent", "Brush", "Inline", "Unused"], &[], &[], &[]);
+    resources.entries = vec![entry("Accent", &[7]), entry("Brush", &[2, 9]), entry("Inline", &[]), entry("Unused", &[4])];
+    assert_eq!(selected_slots(&resources, &set(&["Brush", "Accent"])), Some(vec![2, 7, 9]));
+    assert_eq!(selected_slots(&resources, &set(&["Brush", "Accent", "Unused"])), None);
+    // A dead key without a static leaves the unit whole.
+    assert_eq!(selected_slots(&resources, &set(&["Accent", "Brush", "Unused"])), None);
+    assert_eq!(selected_slots(&resources, &BTreeSet::new()), Some(Vec::new()));
 }

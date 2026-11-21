@@ -413,20 +413,14 @@ impl BuildTarget {
     }
 }
 
-/// The keys of each kept unit of `theme` that are live by key (#852, step 2, the count): the
-/// closure over the entries of the kept units, from the keys of `roots` (keys and names) and what
-/// the rest of each kept unit names (its control themes by type, its styles, its unkeyed entries),
-/// through what each live entry names. Unlike the closure over units, an entry of a kept unit that
-/// no live entry and no root names is dead. The result is one line for each kept unit, in
-/// canonical order: its name, its keys, the keys live by key, and the dead keys. A unit whose
-/// metadata has no entries (an older file) is listed with every key live.
-///
-/// A count, not a selection: keys the code of the framework looks up by text are not among the
-/// roots of an application, so the dead keys are an estimate from above.
-pub fn keys_live_by_entry(theme: &ThemeUnitsModel, kept: &[u32], roots: &Roots) -> Vec<(String, usize, usize, Vec<String>)> {
-    let units: Vec<&ThemeUnitModel> = theme.units.iter().filter(|unit| kept.contains(&unit.index)).collect();
-    let mut live: BTreeSet<String> = roots.keys.iter().chain(&roots.names).cloned().collect();
-    for unit in &units {
+/// The keys that are live by key in the kept units `units` (#852, step 2), which may be of several
+/// themes used together: `seeds` (the keys and names of the roots, and what the code of the crates
+/// names as a string), what the rest of each unit names (its control themes by type, its styles,
+/// its unkeyed entries), every key of a unit whose metadata has no entries (an older file), and,
+/// transitively, what a live entry names.
+pub fn live_keys(units: &[&ThemeUnitModel], seeds: impl IntoIterator<Item = String>) -> BTreeSet<String> {
+    let mut live: BTreeSet<String> = seeds.into_iter().collect();
+    for unit in units {
         live.extend(unit.body_references.iter().cloned());
         if unit.entries.is_empty() {
             live.extend(unit.keys.iter().cloned());
@@ -434,22 +428,50 @@ pub fn keys_live_by_entry(theme: &ThemeUnitsModel, kept: &[u32], roots: &Roots) 
     }
     loop {
         let before = live.len();
-        for unit in &units {
+        for unit in units {
             for entry in unit.entries.iter().filter(|entry| live.contains(&entry.key)) {
                 live.extend(entry.references.iter().cloned());
             }
         }
         if live.len() == before {
-            break;
+            return live;
         }
     }
-    units
+}
+
+/// The entries of `unit` an application selects (#852, step 2): the numbers of the statics of the
+/// entries of its live keys, ascending (the order of their runs), when some entry of the unit is
+/// dead; `None` when the unit is kept whole, by its own static.
+pub fn selected_slots(unit: &ThemeUnitModel, live: &BTreeSet<String>) -> Option<Vec<u32>> {
+    let dead = unit.entries.iter().any(|entry| !entry.slots.is_empty() && !live.contains(&entry.key));
+    dead.then(|| {
+        let mut slots: Vec<u32> =
+            unit.entries.iter().filter(|entry| live.contains(&entry.key)).flat_map(|entry| entry.slots.iter().copied()).collect();
+        slots.sort_unstable();
+        slots
+    })
+}
+
+/// The keys of each kept unit of `theme` by the set `live` ([`live_keys`]), one line for each
+/// kept unit in canonical order: its name, its keys, the keys live by key, and the dead keys.
+pub fn keys_by_entry(theme: &ThemeUnitsModel, kept: &[u32], live: &BTreeSet<String>) -> Vec<(String, usize, usize, Vec<String>)> {
+    theme
+        .units
         .iter()
+        .filter(|unit| kept.contains(&unit.index))
         .map(|unit| {
             let dead: Vec<String> = unit.keys.iter().filter(|key| !live.contains(*key)).cloned().collect();
             (unit.name.clone(), unit.keys.len(), unit.keys.len() - dead.len(), dead)
         })
         .collect()
+}
+
+/// [`keys_by_entry`] of the closure over the kept units of `theme` alone, from the keys and the
+/// names of `roots`.
+pub fn keys_live_by_entry(theme: &ThemeUnitsModel, kept: &[u32], roots: &Roots) -> Vec<(String, usize, usize, Vec<String>)> {
+    let units: Vec<&ThemeUnitModel> = theme.units.iter().filter(|unit| kept.contains(&unit.index)).collect();
+    let live = live_keys(&units, roots.keys.iter().chain(&roots.names).cloned());
+    keys_by_entry(theme, kept, &live)
 }
 
 /// The text of `theme_keys.txt` for the theme `class` (#852, step 2): its totals, then for each

@@ -32,21 +32,52 @@ use ferroui_base::controls::{ResourceDictionary, ResourceKey};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::Ref;
 
+use super::compiled::{add_deferred_resource, DeferredBuild};
 use super::XamlIlContext;
 use crate::XamlLoadError;
+use ferroui_base::data::core::ValueType;
 
 /// A run of a unit: adds the entries of the unit at one place of the build to `dictionary`, in
 /// order, with the context of the build at that place; the first failure is the error.
 pub type ThemeUnitRun = fn(&Rc<XamlIlContext>, &Ref<ResourceDictionary>) -> Result<(), XamlLoadError>;
 
+/// A deferred resource of a unit that an application selects by its key (#852, step 2): a static
+/// of its own, which only the units that keep the key name, so that the linker removes the build
+/// of a key no application table names. Added to the dictionary of the run `run` of the unit, after
+/// the statements of that run.
+#[derive(Clone, Copy)]
+pub struct ThemeEntry {
+    /// The index of the run among the runs of the unit.
+    pub run: u16,
+    pub key: &'static str,
+    pub build: DeferredBuild,
+    pub line: i32,
+    pub position: i32,
+}
+
 /// A unit of a compiled theme: its name (the path of its document below the root of the
-/// assembly, or `ambient`), its canonical index and its runs, in the order the build applies
-/// them.
+/// assembly, or `ambient`), its canonical index, its runs, in the order the build applies them,
+/// and the entries selected by key (#852, step 2), ordered by run.
 #[derive(Clone, Copy)]
 pub struct ThemeUnit {
     pub name: &'static str,
     pub index: u32,
     pub runs: &'static [ThemeUnitRun],
+    pub entries: &'static [&'static ThemeEntry],
+}
+
+impl ThemeUnit {
+    /// Applies the run `run` to `dictionary`: its function, then the entries of the unit of that
+    /// run. A run the unit does not have adds nothing.
+    fn apply(&self, run: usize, context: &Rc<XamlIlContext>, dictionary: &Ref<ResourceDictionary>) -> Result<(), XamlLoadError> {
+        let Some(apply) = self.runs.get(run) else { return Ok(()) };
+        apply(context, dictionary)?;
+        let start = self.entries.partition_point(|entry| usize::from(entry.run) < run);
+        for entry in self.entries[start..].iter().take_while(|entry| usize::from(entry.run) == run) {
+            add_deferred_resource(dictionary, entry.key, ValueType::object(), context, entry.build, entry.line, entry.position)?;
+        }
+        Ok(())
+    }
 }
 
 impl std::fmt::Debug for ThemeUnit {
@@ -69,10 +100,7 @@ pub fn apply_theme_unit(
     let Ok(found) = units.binary_search_by_key(&index, |unit| unit.index) else {
         return Ok(());
     };
-    match units[found].runs.get(run) {
-        Some(apply) => apply(context, dictionary),
-        None => Ok(()),
-    }
+    units[found].apply(run, context, dictionary)
 }
 
 /// Applies the runs of a region of a build (#853) to `dictionary`, in the order of `region`:
@@ -102,9 +130,7 @@ pub fn apply_theme_region(
         let Some(found) = units.get(position).filter(|found| found.index == unit) else {
             continue;
         };
-        if let Some(apply) = found.runs.get(usize::from(run)) {
-            apply(context, dictionary)?;
-        }
+        found.apply(usize::from(run), context, dictionary)?;
     }
     Ok(())
 }
@@ -169,27 +195,33 @@ pub fn register_theme_parts_if_absent(class: &'static str, parts: ThemeParts) {
     }
 }
 
-/// [`register_theme_parts`] unless the parts registered for the class already have as many units
-/// (#846): what the generated `register()` of a crate calls. A library that constructs a theme
+/// [`register_theme_parts`] unless the parts registered for the class already keep as much (#846;
+/// its units, then its entries): what the generated `register()` of a crate calls. A library that constructs a theme
 /// registers the table of its own documents, and the application the table it computed with the
 /// references of every dependency; whichever crate registers first, the wider table stays.
 pub fn register_wider_theme_parts(class: &'static str, parts: ThemeParts) {
     let mut registered = REGISTERED.write().unwrap_or_else(|error| error.into_inner());
     match registered.iter_mut().find(|(known, _)| *known == class) {
-        Some(entry) if entry.1.len() >= parts.len() => {}
+        Some(entry) if parts_width(entry.1) >= parts_width(parts) => {}
         Some(entry) => entry.1 = parts,
         None => registered.push((class, parts)),
     }
 }
 
+/// How much of a theme `parts` keeps, to compare two tables of one theme: its units, then the
+/// entries selected by key in them (#852, step 2).
+fn parts_width(parts: ThemeParts) -> (usize, usize) {
+    (parts.len(), parts.iter().map(|unit| unit.entries.len()).sum())
+}
+
 /// The parts a compiled construction of the theme `class` applies (#846): the parts registered for
-/// the class when they have more units than `own`, the table of the crate that writes the
+/// the class when they keep more units or entries than `own`, the table of the crate that writes the
 /// construction, else `own`. A library compiled with `<WinUITheme />` thus constructs the theme with
 /// the table of the application that uses it (which roots what the application's documents and
 /// sources name), and with its own table when it is used alone.
 pub fn wider_theme_parts(class: &str, own: ThemeParts) -> ThemeParts {
     match registered_theme_parts(class) {
-        Some(registered) if registered.len() > own.len() => registered,
+        Some(registered) if parts_width(registered) > parts_width(own) => registered,
         _ => own,
     }
 }

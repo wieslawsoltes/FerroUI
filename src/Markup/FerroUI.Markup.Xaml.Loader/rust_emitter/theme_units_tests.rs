@@ -262,11 +262,11 @@ fn the_table_lists_every_unit_with_its_runs() {
     assert!(
         table.starts_with(
             "/// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.\n\
-             pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: \"ambient\", index: 0, runs: &[] };\n\n\
+             pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: \"ambient\", index: 0, runs: &[], entries: &[] };\n\n\
              /// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.\n\
-             pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: \"Controls/Button.xaml\", index: 1, runs: &[] };\n\n\
+             pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: \"Controls/Button.xaml\", index: 1, runs: &[], entries: &[] };\n\n\
              /// The unit `Resources/Base.xaml` of the theme (#568): its runs, in the order the builds apply them.\n\
-             pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: \"Resources/Base.xaml\", index: 2, runs: &[populate_t_xaml_unit_0, populate_t_xaml_unit_3] };\n\n"
+             pub static THEME_UNIT_2: rt::ThemeUnit = rt::ThemeUnit { name: \"Resources/Base.xaml\", index: 2, runs: &[populate_t_xaml_unit_0, populate_t_xaml_unit_3], entries: &[] };\n\n"
         ),
         "{table}"
     );
@@ -431,4 +431,51 @@ fn a_key_assigned_again_joins_the_run_of_its_unit() {
     );
     assert!(functions[0].contains(&joined), "{}", functions[0]);
     assert!(functions[1].contains(&second), "{}", functions[1]);
+}
+
+/// #852, step 2: with entries selected by key, a deferred resource that is the only statement of
+/// its run naming its key leaves the run for a static the unit names, with the runs in a static
+/// an application can name; a key another statement names stays in the run. The graph of the unit
+/// gets the number of each static.
+#[test]
+fn the_deferred_resources_of_a_run_are_entries_selected_by_key() {
+    let add = |key: &str, build: &str, line: i32| {
+        format!("rt::add_deferred_resource(&resource_dictionary_1, \"{key}\", ::ferroui_base::data::core::ValueType::object(), &context, {build}, {line}, 8)?;")
+    };
+    let lines = body(&[
+        &begin(2),
+        "// t.xaml(3,8) Content (resource)",
+        &add("One", "build_t_xaml_deferred_0", 3),
+        "// t.xaml(4,8) Content (resource)",
+        &add("Two", "build_t_xaml_deferred_1", 4),
+        "// t.xaml(5,8) Content (resource)",
+        "rt::replace_value(&resource_dictionary_1, \"Two\")?;",
+        END_MARKER,
+    ]);
+    let declared = body(&["let resource_dictionary_1 = make();"]);
+    let lines: Vec<String> = declared.into_iter().chain(lines).collect();
+    let units = units();
+    let (_, functions) = with_theme_unit_plan(ThemeUnitPlan::OFF.with_entries(true), || extract(lines, &units));
+    assert_eq!(functions.len(), 1);
+    assert!(!functions[0].contains("\"One\"") && !functions[0].contains("t.xaml(3,8)"), "{}", functions[0]);
+    assert!(functions[0].contains("\"Two\", ::ferroui_base") && functions[0].contains("t.xaml(4,8)"), "{}", functions[0]);
+    let table = units.table("Tests.Theme", &[Vec::new(), Vec::new(), Vec::new()]);
+    assert!(
+        table.contains(
+            "pub static THEME_ENTRY_0: rt::ThemeEntry = rt::ThemeEntry { run: 0, key: \"One\", build: build_t_xaml_deferred_0, line: 3, position: 8 };"
+        ),
+        "{table}"
+    );
+    assert!(table.contains("pub static THEME_UNIT_2_RUNS: [rt::ThemeUnitRun; 1] = [build_t_xaml_unit_0];"), "{table}");
+    assert!(table.contains("index: 2, runs: &THEME_UNIT_2_RUNS, entries: &[&THEME_ENTRY_0] };"), "{table}");
+    let mut graph = vec![ThemeUnitModel::default(), ThemeUnitModel::default(), ThemeUnitModel {
+        references: vec!["Other".to_string()],
+        entries: vec![ThemeEntryModel { key: "Two".to_string(), ..ThemeEntryModel::default() }],
+        ..ThemeUnitModel::default()
+    }];
+    units.record_slots(&mut graph);
+    let keys: Vec<(&str, &[u32])> = graph[2].entries.iter().map(|entry| (entry.key.as_str(), entry.slots.as_slice())).collect();
+    assert_eq!(keys, [("One", &[0u32][..]), ("Two", &[][..])]);
+    // A key the graph did not list keeps what the unit names.
+    assert_eq!(graph[2].entries[0].references, ["Other"]);
 }

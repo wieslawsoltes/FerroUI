@@ -1651,3 +1651,14 @@ fn media_controls_publish_their_public_xaml_namespaces() {
         assert!(scan.model.namespaces.iter().any(|(module, name)| module == crate_name && name == namespace));
     }
 }
+
+/// #852, step 2: the literals that can spell a resource key are an upper-case letter, then
+/// letters, digits, `_` and `.`, at least three characters long.
+#[test]
+fn key_strings_are_the_literals_that_can_spell_a_key() {
+    let mut references = SourceReferences::default();
+    for text in ["AccentBrush", "Theme.Key_2", "lower", "Ab", "Has space", "Two-Part", ""] {
+        references.add_string(text);
+    }
+    assert_eq!(references.key_strings(), ["AccentBrush", "Theme.Key_2"]);
+}

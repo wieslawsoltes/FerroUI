@@ -858,7 +858,7 @@ mod tests {
             dictionary.add("selected", super::super::compiled::to_value(1_i32));
             Ok(())
         }
-        static SELECTED: ThemeUnit = ThemeUnit { index: 7, name: "selected", runs: &[apply] };
+        static SELECTED: ThemeUnit = ThemeUnit { index: 7, name: "selected", runs: &[apply], entries: &[] };
         static PARTS: super::super::compiled::ThemeParts = &[&SELECTED];
         const IMPORTS: ConstructionImports = ConstructionImports {
             strings: &[],
