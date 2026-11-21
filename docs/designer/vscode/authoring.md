@@ -74,6 +74,8 @@ Review both sides of each diff, then choose the check icon **Apply Property Rena
 
 If the property appears in an explicit RSX builder mapping, the review edits its public key in the assembly metadata. This applies to inherited properties on mapped builders too. The mapping can use a literal or an unconditional text constant reached by a qualified path or named import. For a constant in another file, rebuild the schema so it records the selected Cargo crate root. The review uses the saved module or its open draft and writes a private literal into the selected metadata tuple. Other consumers keep using the shared constant, and existing RSX fields keep their builder methods. If you change the imported mapping, open a fresh review before applying. Save the reviewed buffers and rebuild the schema. [Studio workflow](../native-controls.md#review-a-registered-property-rename) · [MCP workflow](reference.md#review-a-registered-property-rename-with-mcp) · [RSX builder mappings](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
 
+![Property rename review across XAML attributes, a selector, a typed cast, a Rust registration, and an imported RSX mapping](../images/vscode-registered-property-review.png)
+
 ### Rename a registered XAML type
 
 Run **Build Project XAML Schema**, then place the caret on a registered control tag or a type reference such as `x:DataType="local:Customer"` or `ui|Card` in a style selector. Choose **FerroUI: Rename Registered Type…** and enter the new name.
@@ -83,6 +85,8 @@ For an explicit `as "Name"` registration, the review edits the public alias. Whe
 The Changes editor includes mapped start and end tags, qualified property owners, `x:Class`, type arguments, and explicit type values such as `{x:Type local:Customer}`. It also includes resolved type names in `Selector` attributes and single-text `Style.Selector` elements, including `:is`, `:not`, and attached property owners. Class names, control names, and comparison values keep their original spelling. Use **Show Locations** to inspect uncertain references, then apply with the check icon. Undo restores the group.
 
 The review also renames the public type key in explicit RSX builder metadata. For a Rust-backed name, the metadata follows the renamed declaration and its implicit public re-exports. An explicit re-export such as `pub use controls::Card as Card` retains its alias. Keep the assembly source in the workspace, and rebuild the Cargo schema after changing Rust imports or saving the reviewed rename. [Studio workflow](../native-controls.md#review-a-registered-type-rename) · [MCP workflow](reference.md#review-a-registered-type-rename-with-mcp)
+
+![Six-file type rename review with XAML tags, a binding cast, Rust references, and the updated RSX builder path](../images/vscode-registered-type-review.png)
 
 ### Rename an RSX control
 
