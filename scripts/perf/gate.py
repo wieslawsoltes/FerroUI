@@ -22,7 +22,15 @@ machine; the side that goes first changes from round to round (base, candidate; 
 rounds. When a
 metric is over its tolerance by less than the spread of its own rounds on either side (one
 disturbed round can move a median of three that far), the gate measures more rounds, alternately
-again, up to `--max-rounds`, before it decides.
+again, up to `--max-rounds`, before it decides; that round measures only the scenes and the
+classes of benchmarks of those metrics.
+
+With `--batch` (the gate of a batch of stacks, docs/porting/desktop-performance.md, section 8.1)
+the frame scenes are timed in 3 rounds and the micro-benchmarks are measured once, because their
+instructions decide: a line that takes more is measured again alone, up to 3 rounds, and a time
+that moved with the same instructions is reported and does not fail the gate. The first round of
+the base's micro-benchmarks is kept by commit and toolchain under `<scratch>/base-cache`, and the
+next batch on that base does not measure it again.
 
 What is measured (see docs/porting/desktop-performance.md, section 8.1):
 
@@ -114,7 +122,7 @@ GATE_SAMPLE = Path("samples/GauntletBenchmark")
 GATE_TEST = GATE_SAMPLE / "tests" / "frame_gate.rs"
 TDG_PACKAGE = "ferroui-treedatagrid-benchmarks"
 # FerroUI's own regression benchmarks, apart from the ports of other frameworks' benchmarks (the
-# gauntlet follows the Cranpose benchmark and is synced with it): the scenes of the frame
+# gauntlet follows the comparison's benchmark and is synced with it): the scenes of the frame
 # benchmarks, timed headless and in a desktop window, and the micro-benchmarks of the framework's
 # tree mechanics (category `trees` of `tests/FerroUI.Benchmarks`), of element construction, of
 # text blocks measured and arranged at two widths, of text blocks whose text changes and of the
@@ -148,6 +156,10 @@ BENCH_CLASS = "FERROUI_BENCH_CLASS"
 # that had run the hundred and more before it (`trees::Propagation.font_family`: 1.82 and 1.40 ms)
 # where it is within a few percent after the benchmarks of its class alone.
 HARNESS_SUITES = ("framework", "tdg")
+# `--batch`: the rounds a line of these suites is measured in before more instructions, or a time
+# that has no count of instructions, stop the gate. The first round is the only one of a suite
+# whose lines all agree; a line is measured again alone (the benchmarks of its class).
+BATCH_CONFIRM_ROUNDS = 3
 
 # The tests of the frame benchmarks (`cargo test ... -- --list --ignored`). Each runs in a process
 # of its own: a start is the start of a process that has built nothing yet, and a scene leaves
@@ -695,6 +707,34 @@ def kept_output(side: Side, args: list[str], env: dict[str, str], log: Path) -> 
     return RESUME / f"{log.stem}-{hashlib.sha256(identity.encode()).hexdigest()[:12]}.out"
 
 
+def shared_output(folder: Path | None, args: list[str], env: dict[str, str]) -> Path | None:
+    """Where the output of this run of the base is kept for the next gates on the same base
+    (`--batch`): `folder` belongs to one commit and one toolchain."""
+    if folder is None:
+        return None
+    identity = "\n".join([*args, *(f"{name}={value}" for name, value in sorted(env.items()))])
+    return folder / f"{hashlib.sha256(identity.encode()).hexdigest()[:16]}.out"
+
+
+def keep_output(path: Path, output: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(output, encoding="utf-8")
+    temporary.replace(path)
+
+
+def base_cache_folder(scratch: Path, base: Side, base_sha: str) -> Path | None:
+    """The folder of the base's micro-benchmark runs: by its commit and the compiler that builds
+    it, which is what the instructions they count depend on."""
+    try:
+        result = subprocess.run(["rustc", "-vV"], cwd=base.root, capture_output=True, text=True)
+    except OSError:
+        return None
+    if result.returncode != 0:
+        return None
+    return scratch / "base-cache" / hashlib.sha256(f"{base_sha}\n{result.stdout}".encode()).hexdigest()[:16]
+
+
 def wait_for_drive(side: Side, error: OSError) -> None:
     print(f"[{side.name}] {error}: waiting for {side.root} to be there again", flush=True)
     until = time.monotonic() + DRIVE_WAIT_SECONDS
@@ -710,17 +750,33 @@ def wait_for_drive(side: Side, error: OSError) -> None:
     raise GateError(f"[{side.name}] {side.root} did not come back in {DRIVE_WAIT_SECONDS / 60:g} minutes ({error})")
 
 
-def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo: bool, measuring: bool = False) -> str:
+def run_cargo(
+    side: Side,
+    args: list[str],
+    env: dict[str, str],
+    log: Path,
+    echo: bool,
+    measuring: bool = False,
+    shared: Path | None = None,
+) -> str:
     """Runs cargo for `side`. A run that measures (`measuring`) and prints nothing for
     `STALL_SECONDS` is stopped and run once more, and one whose files cannot be read waits for
     them and runs again; a build is given the time it takes. With `--resume` the output of a
-    measuring run is kept, and a run that was kept is not made again."""
+    measuring run is kept, and a run that was kept is not made again. `shared` is the folder of
+    the runs of this base that later gates reuse (`base_cache_folder`)."""
     if not measuring:
         return run_cargo_once(side, args, env, log, echo, None)
     kept = kept_output(side, args, env, log)
     if kept is not None and kept.is_file():
         print(f"[{side.name}] kept from the run before: {log.name}", flush=True)
         return kept.read_text(encoding="utf-8")
+    reused = shared_output(shared, args, env)
+    if reused is not None and reused.is_file():
+        print(f"[{side.name}] measured before on this commit: {log.name}", flush=True)
+        output = reused.read_text(encoding="utf-8")
+        log.parent.mkdir(parents=True, exist_ok=True)
+        log.write_text(output, encoding="utf-8")
+        return output
     stalls = 0
     faults = 0
     while True:
@@ -745,10 +801,9 @@ def run_cargo(side: Side, args: list[str], env: dict[str, str], log: Path, echo:
                 raise GateError(f"[{side.name}] cargo {' '.join(args)}: {error}; the log is {log}") from None
             wait_for_drive(side, error)
     if kept is not None:
-        kept.parent.mkdir(parents=True, exist_ok=True)
-        temporary = kept.with_suffix(".tmp")
-        temporary.write_text(output, encoding="utf-8")
-        temporary.replace(kept)
+        keep_output(kept, output)
+    if reused is not None:
+        keep_output(reused, output)
     return output
 
 
@@ -805,15 +860,23 @@ def benchmark_classes(side: Side, suite: str, env: dict[str, str], log: Path, ec
     return list(dict.fromkeys(classes))
 
 
-def run_benchmarks(side: Side, suite: str, classes: list[str] | None, env: dict[str, str], log: Path, echo: bool) -> str:
+def run_benchmarks(
+    side: Side,
+    suite: str,
+    classes: list[str] | None,
+    env: dict[str, str],
+    log: Path,
+    echo: bool,
+    shared: Path | None = None,
+) -> str:
     """The benchmarks of `suite`: each of `classes` in a process of its own, or all of them in
     one when there is no list of classes."""
     if classes is None:
-        return run_cargo(side, SUITES[suite]["run"], env, log, echo, measuring=True)
+        return run_cargo(side, SUITES[suite]["run"], env, log, echo, measuring=True, shared=shared)
     output = ""
     for name in classes:
         class_log = log.with_name(f"{log.stem}-{name.replace('::', '-')}{log.suffix}")
-        output += run_cargo(side, SUITES[suite]["run"], {**env, BENCH_CLASS: name}, class_log, echo, measuring=True)
+        output += run_cargo(side, SUITES[suite]["run"], {**env, BENCH_CLASS: name}, class_log, echo, measuring=True, shared=shared)
     return output
 
 
@@ -1503,6 +1566,18 @@ def main() -> int:
         "can move. Instructions decide; the full gate runs on the top of the stack",
     )
     parser.add_argument(
+        "--batch",
+        action="store_true",
+        help="the gate of a batch of stacks merged together: frames and framework, 3 timed rounds of the "
+        "frame scenes at 120 frames, 1 round of the micro-benchmarks; a micro-benchmark line that takes more "
+        "instructions is measured again alone, one that moved in time alone does not fail the gate",
+    )
+    parser.add_argument(
+        "--no-base-cache",
+        action="store_true",
+        help="with --batch: measure the base's micro-benchmarks although a gate on the same commit kept them",
+    )
+    parser.add_argument(
         "--frames-filter",
         help="comma-separated scenes of the frame gate to measure (a name, or a prefix ending in *: "
         "startup*,cards); default: every scene. For a narrow change; a full gate runs every scene",
@@ -1520,6 +1595,18 @@ def main() -> int:
             options.rounds = 2
         if "--max-rounds" not in given:
             options.max_rounds = 3
+        if options.frames is None:
+            options.frames = 120
+    if options.batch:
+        if options.quick:
+            parser.error("--batch and --quick are two different gates")
+        given = set(sys.argv[1:])
+        if "--only" not in given:
+            options.only = "frames,framework"
+        if "--rounds" not in given:
+            options.rounds = 3
+        if "--max-rounds" not in given:
+            options.max_rounds = options.rounds + BATCH_CONFIRM_ROUNDS - 1
         if options.frames is None:
             options.frames = 120
     if options.rounds < 1:
@@ -1607,7 +1694,11 @@ def gate(options: argparse.Namespace) -> int:
     if browser and not options.browser_base_site:
         suites = [suite for suite in suites if suite != "browser"]
     timed = [suite for suite in suites if suite != "counters"]
-    what = [f"{options.rounds} rounds of {', '.join(timed)}"] if timed else []
+    once = [suite for suite in timed if options.batch and suite in HARNESS_SUITES]
+    repeated = [suite for suite in timed if suite not in once]
+    what = [f"{options.rounds} rounds of {', '.join(repeated)}"] if repeated else []
+    if once:
+        what.append(f"1 round of {', '.join(once)} (its instructions decide)")
     if browser:
         what.insert(0, "the budget of the page switches in a browser")
     if "counters" in suites:
@@ -1718,8 +1809,17 @@ def gate(options: argparse.Namespace) -> int:
             )
 
     suite_of: dict[str, str] = {}
+    # The test of the frame benchmarks each of their metrics came from.
+    scene_of: dict[str, str] = {}
+    # What gates on the same base reuse: only the first round of its micro-benchmarks, and only of
+    # a base that runs its own benchmark code.
+    base_cache = None
+    if options.batch and not options.no_base_cache and base_dir is None and not copied:
+        base_cache = base_cache_folder(scratch, base, base_sha)
 
-    def measure(round_index: int, measured: list[str], of: int) -> None:
+    def measure(round_index: int, measured: list[str], of: int, only: set[str] | None = None) -> None:
+        """A round of the suites `measured`, or with `only` the scenes and the benchmark classes
+        of those metrics."""
         # The side that goes first changes with the round: what a run leaves behind (the caches
         # of the system, the heat of the machine) is then not always the other side's start.
         sides = (base, candidate) if round_index % 2 == 0 else (candidate, base)
@@ -1746,20 +1846,31 @@ def gate(options: argparse.Namespace) -> int:
                         suite_of.update((metric.key, suite) for metric, _ in found)
                     continue
                 if suite == "frames":
-                    output = run_frames(side, frames[side.name], env[suite], log, options.verbose)
+                    wanted = None if only is None else {scene_of[key] for key in only if key in scene_of}
+                    output = ""
+                    for test in frames[side.name]:
+                        if wanted is None or test in wanted:
+                            ran = run_frames(side, [test], env[suite], log, options.verbose)
+                            scene_of.update((metric.key, test) for metric, _ in parse_gate(ran))
+                            output += ran
                 elif suite in HARNESS_SUITES:
-                    output = run_benchmarks(side, suite, classes[suite, side.name], env[suite], log, options.verbose)
+                    names = classes[suite, side.name]
+                    if only is not None and names is not None:
+                        wanted = {key.split(".", 1)[0] for key in only if suite_of.get(key) == suite}
+                        names = [name for name in names if name in wanted]
+                    shared = base_cache if side is base and round_index == 0 else None
+                    output = run_benchmarks(side, suite, names, env[suite], log, options.verbose, shared)
                 else:
                     output = run_cargo(side, SUITES[suite]["run"], env[suite], log, options.verbose, measuring=True)
                 if suite in ("gauntlet", "frames"):
                     found = parse_gate(output)
-                    if not found:
+                    if not found and only is None:
                         raise GateError(f"[{side.name}] the {suite} run printed no GATE line; the log is {log}")
                     record(side, found, parse_gate_instructions(output))
                     suite_of.update((metric.key, suite) for metric, _ in found)
                 else:
                     found, failed, instructions = parse_tdg(output)
-                    if not found and not failed:
+                    if not found and not failed and only is None:
                         raise GateError(f"[{side.name}] the {suite} run printed no result; the log is {log}")
                     record(side, found, instructions)
                     suite_of.update((metric.key, suite) for metric, _ in found)
@@ -1769,8 +1880,10 @@ def gate(options: argparse.Namespace) -> int:
     # first round takes more of them after the last. The gate says so then, and not an hour later.
     stopped_early: list[str] = []
     for round_index in range(options.rounds):
-        measure(round_index, suites, options.rounds)
-        if round_index == 0 and options.rounds > 1 and not options.keep_going:
+        this_round = [s for s in suites if round_index == 0 or not (options.batch and s in HARNESS_SUITES)]
+        if this_round:
+            measure(round_index, this_round, options.rounds)
+        if round_index == 0 and options.rounds > 1 and not options.keep_going and not options.batch:
             counted = [*compare(base, candidate, options.tolerance), *scaling_rows(base, candidate)]
             stopped_early = [
                 row.key for row in counted if row.regressed and ("instructions" in row.verdict or "scaling" in row.verdict)
@@ -1783,17 +1896,30 @@ def gate(options: argparse.Namespace) -> int:
                 )
                 break
 
+    def is_doubtful(row: Row) -> bool:
+        if options.batch and suite_of.get(row.key) in HARNESS_SUITES:
+            if row.verdict not in ("REGRESSED", "REGRESSED (instructions)"):
+                return False
+            return min(len(base.values.get(row.key, [])), len(candidate.values.get(row.key, []))) < BATCH_CONFIRM_ROUNDS
+        return row.measured and is_within_spread(base, candidate, row.key)
+
     rounds = options.rounds
     while rounds < options.max_rounds and not stopped_early:
-        doubtful = [row.key for row in compare(base, candidate, options.tolerance) if row.measured and is_within_spread(base, candidate, row.key)]
+        doubtful = [row.key for row in compare(base, candidate, options.tolerance) if is_doubtful(row)]
         if not doubtful:
             break
         measured = [suite for suite in suites if any(suite_of.get(key) == suite for key in doubtful)]
-        print(f"over the tolerance by less than the spread of their rounds: {', '.join(doubtful)}; measuring another round", flush=True)
-        measure(rounds, measured, rounds + 1)
+        print(f"not decided yet: {', '.join(doubtful)}; measuring their scenes and classes again", flush=True)
+        measure(rounds, measured, rounds + 1, set(doubtful))
         rounds += 1
 
     rows = [*check_rows, *compare(base, candidate, options.tolerance), *scaling_rows(base, candidate)]
+    not_blocking = 0
+    if options.batch:
+        for row in rows:
+            if row.verdict == "REGRESSED (time alone)" and suite_of.get(row.key) in HARNESS_SUITES:
+                row.verdict, row.regressed = "time alone (does not block)", False
+                not_blocking += 1
     regressions = [row for row in rows if row.regressed]
     time_alone = sum(row.verdict == "REGRESSED (time alone)" for row in regressions)
     summary = (
@@ -1802,6 +1928,8 @@ def gate(options: argparse.Namespace) -> int:
         if regressions
         else f"{len(rows)} metrics, none regressed beyond its tolerance"
     )
+    if not_blocking:
+        summary += f"; {not_blocking} micro-benchmark lines moved in time alone and do not block"
     if stopped_early:
         summary += "; stopped after the first round: the lines that take more instructions take them in every round"
     print()
@@ -1813,6 +1941,11 @@ def gate(options: argparse.Namespace) -> int:
     if options.markdown:
         machine = f"{platform.system()} {platform.machine()}, Python {platform.python_version()}"
         notes = []
+        if options.batch:
+            notes.append(
+                "Batch gate: the frame scenes in timed rounds, the micro-benchmarks in one round decided by their "
+                "instructions (a line that takes more is measured again; a time alone does not block)."
+            )
         if device is not None:
             notes.append(f"The window suite ran on {device}.")
         if copied:

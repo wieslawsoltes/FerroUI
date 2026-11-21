@@ -407,6 +407,8 @@ fn a_table_lists_its_rows_in_order() {
         ],
         slots: Vec::new(),
         packed: None,
+        fields: None,
+        unit: None,
         program: None,
     };
     assert_eq!(
@@ -564,4 +566,36 @@ fn typed_resource_runs_keep_units_local_and_encode_singleton_values_and_scopes()
     let number = row_table("BLOCK_2", "test.xaml", &tables[1].1);
     assert!(number.contains(r#"b"\x01\x05\x01\x00\x06\x08\xff\x00\x00\x00\x00\x00\x00\x00\x80", &["NegativeZero"], &[]"#), "{number}");
     assert!(!number.contains("SCOPED"));
+}
+
+/// #855: the packed tables of one unit of a theme share one pool of strings, written once before
+/// the first of them, while a table of no unit, or the only table of its unit, keeps its own.
+#[test]
+fn the_packed_tables_of_a_unit_share_one_pool() {
+    let packed = |rows: &[(&str, &str, i32)], targets: &[&str], name: &str, unit: Option<u32>| {
+        let lines = packed_body(rows);
+        let rows: Vec<(&str, usize, DeferredRow)> =
+            rows.iter().zip(targets).enumerate().map(|(slot, ((_, build, _), target))| (*build, slot, alias(target))).collect();
+        let statements = recorded(&lines, &rows);
+        let (_, mut tables) =
+            with_packed_theme_rows(true, || row_runs(lines, &statements, "BUILD_T_DOCUMENT", || name.to_string()));
+        let (name, mut run) = tables.remove(0);
+        run.unit = unit;
+        (name, "t.xaml".to_string(), run)
+    };
+    let light = packed(&[("AccentBrush", "build_t_deferred_0", 1), ("OtherBrush", "build_t_deferred_1", 2)], &["Accent", "Other"], "BUILD_T_ROWS_0", Some(3));
+    let dark = packed(&[("AccentBrush", "build_t_deferred_2", 3), ("OtherBrush", "build_t_deferred_3", 4)], &["Accent", "Dark"], "BUILD_T_ROWS_1", Some(3));
+    let alone = packed(&[("AccentBrush", "build_t_deferred_4", 5), ("OtherBrush", "build_t_deferred_5", 6)], &["Accent", "Other"], "BUILD_T_ROWS_2", None);
+    let texts = row_tables_in("BUILD_T", &[light, dark, alone], &Default::default());
+    assert_eq!(texts.len(), 4, "{texts:#?}");
+    assert_eq!(
+        texts[0],
+        "/// The keys and targets of the packed tables of the unit 3 of `t.xaml`, each once (#855).\n\
+         const BUILD_T_UNIT_3_STRINGS: &str = \"AccentBrushOtherBrushDark\";\n"
+    );
+    assert!(texts[1].contains("static BUILD_T_ROWS_0: rt::PackedRows = rt::PackedRows {\n    strings: BUILD_T_UNIT_3_STRINGS,\n"), "{}", texts[1]);
+    // The table of the dark theme finds the keys and the shared target in the pool.
+    assert!(texts[2].contains("    strings: BUILD_T_UNIT_3_STRINGS,\n    namespaces: &[],\n    records: &[\n        0, 11, 0, 6, 0, 3, 8, 9, 9,\n        11, 10, 21, 4, 0, 4, 8, 9, 9,\n"), "{}", texts[2]);
+    // A table of no unit keeps its own pool.
+    assert!(texts[3].contains("    strings: \"AccentBrushOtherBrush\",\n"), "{}", texts[3]);
 }

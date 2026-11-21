@@ -284,6 +284,33 @@ ferro_markup_type!(class Setter {
     ],
 });
 
+/// `Setter.Value` on its own: the member of the declaration above, with the same accessors,
+/// as a static of its own. Compiled markup describes the target property of a markup extension
+/// that gives a setter its value with it (`setter_value_property` of the runtime library of
+/// compiled markup); naming the whole declaration there kept every member of the setter, the
+/// target property path among them, in every application with a theme (#612).
+static SETTER_VALUE: crate::metadata::MarkupProperty = crate::metadata::MarkupProperty {
+    name: "Value",
+    type_: crate::data::core::ValueType::of::<Option<BoxedValue>>,
+    get: crate::__ferro_markup_getter!(Rc<Setter>, Option<BoxedValue>; get: setter_value, set: set_setter_value),
+    set: crate::__ferro_markup_setter!(Rc<Setter>, Option<BoxedValue>; get: setter_value, set: set_setter_value),
+    attributes: crate::__ferro_markup_attributes!([] AssignBinding, DependsOn("Property")),
+    typed_path_element: None,
+    emit_get: crate::__ferro_compiler_metadata!(@value None),
+    emit_set: crate::__ferro_compiler_metadata!(@value None),
+    value_markup: || None,
+};
+
+impl Setter {
+    /// The declared member `Value` of the setter, without the rest of the declaration: its
+    /// name, its type and its accessors are those of
+    /// `<Setter as MarkupTyped>::MARKUP.find_property("Value")`.
+    #[doc(hidden)]
+    pub fn __value_markup_property() -> &'static crate::metadata::MarkupProperty {
+        &SETTER_VALUE
+    }
+}
+
 // WinUI's `TargetPropertyPath` (an addition): the element of a setter of a visual state,
 // resolved by name in the name scope of the document or the template.
 ferro_markup_type!(class TargetPropertyPath {
