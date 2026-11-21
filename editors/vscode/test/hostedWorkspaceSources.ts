@@ -65,6 +65,9 @@ export async function verifyHostedWorkspaceSources(preview: NativePreview, updat
 async function compiledPaletteProject(root: string): Promise<BuiltProject> {
     const manifest = path.join(root, 'Cargo.toml');
     await writeFile(manifest, '[package]\nname = "todo-workbench"\nversion = "0.0.0"\n');
+    await writeFile(path.join(root, 'preview.xamlmeta'), JSON.stringify({
+        format: 2, name: 'todo-workbench', crate_name: 'todo_workbench',
+    }));
     const member = (source_path: string, key: string) => ({ source_path, key: `/Exported/${key}`, public: false, symbol: null });
     await writeFile(path.join(root, 'xaml-symbols.json'), JSON.stringify({
         version: 1, manifest, assembly: 'todo-workbench',

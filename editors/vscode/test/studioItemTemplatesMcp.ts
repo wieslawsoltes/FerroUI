@@ -41,12 +41,14 @@ export async function verifyItemTemplatesMcp({ invoke, content }: McpFixture): P
     const definition = async () => content<{ scope: { definition: { title: string } | null } }>(
         await invoke('designer_studio_query', { session, tool: 'designer_definition_scope', arguments: {} }));
 
+    const directoryNode = (await frame()).nodes.find(node => node.name === 'Directory');
+    assert.ok(directoryNode);
+    const { itemTemplates } = content<{ itemTemplates: boolean }>(
+        await invoke('designer_inspect', { session, node: directoryNode.id }));
+    assert.equal(itemTemplates, true);
     const directory = await read('Directory');
     assert.equal(directory.model.slots[0].value.key, 'CustomerRow');
     assert.ok(directory.model.slots[0].canCopyInline);
-    const { itemTemplates } = content<{ itemTemplates: boolean }>(
-        await invoke('designer_inspect', { session, node: directory.node }));
-    assert.equal(itemTemplates, true);
     content(await run(directory, { action: 'preview' }, true));
     assert.equal((await definition()).scope.definition?.title, 'CustomerRow');
     assert.equal(document.getText(), original);
