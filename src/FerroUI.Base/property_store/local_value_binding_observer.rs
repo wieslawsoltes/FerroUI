@@ -14,6 +14,7 @@ pub(super) struct LocalBindingState {
     subscription: RefCell<Option<Subscription>>,
     pub(super) owner: WeakRef<FerroObject>,
     has_data_validation: bool,
+    stopped: Cell<bool>,
 }
 
 pub(super) enum ClearValidation {
@@ -24,15 +25,26 @@ pub(super) enum ClearValidation {
 
 impl LocalBindingState {
     pub(super) fn new(owner: &FerroObject, has_data_validation: bool) -> Self {
-        Self { subscription: RefCell::new(None), owner: owner.to_weak(), has_data_validation }
+        Self { subscription: RefCell::new(None), owner: owner.to_weak(), has_data_validation, stopped: Cell::new(false) }
     }
 
     pub(super) fn started(&self, subscription: Rc<dyn IDisposable>) {
-        self.subscription.replace(Some(Subscription::new(subscription)));
+        let subscription = Subscription::new(subscription);
+        if !self.is_stopped() {
+            self.subscription.replace(Some(subscription));
+        }
     }
 
-    pub(super) fn detach(&self) {
+    pub(super) fn is_stopped(&self) -> bool {
+        self.stopped.get()
+    }
+
+    pub(super) fn stop(&self, property: &'static FerroProperty, this: &dyn IDisposable, clear: ClearValidation) {
+        let was_stopped = self.stopped.replace(true);
         drop(self.subscription.take());
+        if !was_stopped {
+            self.complete_core(property, this, clear);
+        }
     }
 
     pub(super) fn validate(
@@ -42,19 +54,25 @@ impl LocalBindingState {
         kind: BindingValueType,
         error: Option<BindingError>,
     ) {
-        if self.has_data_validation {
+        if self.has_data_validation && !self.is_stopped() {
             owner.on_update_data_validation(property, kind, error);
         }
     }
 
     pub(super) fn completed(&self, property: &'static FerroProperty, this: &dyn IDisposable, clear: ClearValidation) {
+        if !self.stopped.replace(true) {
+            self.complete_core(property, this, clear);
+        }
+    }
+
+    fn complete_core(&self, property: &'static FerroProperty, this: &dyn IDisposable, clear: ClearValidation) {
         let Some(owner) = self.owner.upgrade() else { return };
-        if matches!(clear, ClearValidation::BeforeRemoval) {
-            self.validate(&owner, property, BindingValueType::UNSET_VALUE, None);
+        if self.has_data_validation && matches!(clear, ClearValidation::BeforeRemoval) {
+            owner.on_update_data_validation(property, BindingValueType::UNSET_VALUE, None);
         }
         owner.values().on_local_value_binding_completed(&owner, property, this);
-        if matches!(clear, ClearValidation::AfterRemoval) {
-            self.validate(&owner, property, BindingValueType::UNSET_VALUE, None);
+        if self.has_data_validation && matches!(clear, ClearValidation::AfterRemoval) {
+            owner.on_update_data_validation(property, BindingValueType::UNSET_VALUE, None);
         }
     }
 }
@@ -90,6 +108,7 @@ impl<T: StyledValue> LocalValueBindingObserver<T> {
     }
 
     fn next(&self, mut value: T) {
+        if self.state.is_stopped() { return; }
         let Some(owner) = self.state.owner.upgrade() else { return };
         if !self.property.is_valid(&value) {
             value = self.property.binding_default(&owner, &self.default_value);
@@ -100,7 +119,7 @@ impl<T: StyledValue> LocalValueBindingObserver<T> {
 
     fn next_value(&self, value: BindingValue<T>) {
         let kind = value.value_type();
-        if kind == BindingValueType::DO_NOTHING {
+        if self.state.is_stopped() || kind == BindingValueType::DO_NOTHING {
             return;
         }
         let Some(owner) = self.state.owner.upgrade() else { return };
@@ -119,8 +138,7 @@ impl<T: StyledValue> LocalValueBindingObserver<T> {
 
 impl<T: StyledValue> IDisposable for LocalValueBindingObserver<T> {
     fn dispose(&self) {
-        self.state.detach();
-        self.completed();
+        self.state.stop(self.property, self, ClearValidation::BeforeRemoval);
     }
 }
 
@@ -187,7 +205,7 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
     }
 
     fn next_value(&self, value: BindingValue<T>) {
-        if value.value_type() == BindingValueType::DO_NOTHING {
+        if self.state.is_stopped() || value.value_type() == BindingValueType::DO_NOTHING {
             return;
         }
         if let Some(owner) = self.state.owner.upgrade() {
@@ -198,8 +216,7 @@ impl<T: PropertyValue> DirectBindingObserver<T> {
 
 impl<T: PropertyValue> IDisposable for DirectBindingObserver<T> {
     fn dispose(&self) {
-        self.state.detach();
-        self.completed();
+        self.state.stop(self.property.as_property(), self, ClearValidation::AfterRemoval);
     }
 }
 
@@ -296,7 +313,7 @@ impl DirectBoxedBindingObserver {
     }
 
     fn next_value(&self, value: BindingValue<BoxedValue>) {
-        if value.value_type() == BindingValueType::DO_NOTHING {
+        if self.state.is_stopped() || value.value_type() == BindingValueType::DO_NOTHING {
             return;
         }
         if let Some(owner) = self.state.owner.upgrade() {
@@ -307,8 +324,7 @@ impl DirectBoxedBindingObserver {
 
 impl IDisposable for DirectBoxedBindingObserver {
     fn dispose(&self) {
-        self.state.detach();
-        self.completed(true);
+        self.state.stop(self.property, self, ClearValidation::AfterRemoval);
     }
 }
 

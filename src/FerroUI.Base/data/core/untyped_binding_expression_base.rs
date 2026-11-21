@@ -372,10 +372,29 @@ impl UntypedBindingExpressionBase {
 
     /// Publishes a new value and/or error state to the target.
     pub fn publish_value(&self, value: Publish, error: Option<ExpressionError>, force_update: bool) {
+        self.publish_value_core(value, error, force_update, true);
+    }
+
+    /// Keeps source/error state current while a binding deliberately suppresses
+    /// a synchronous target echo. A later source reset must compare against the
+    /// latest source value, not the value preceding the writeback.
+    pub(crate) fn cache_value(&self, value: Publish, error: Option<ExpressionError>) {
+        self.publish_value_core(value, error, false, false);
+    }
+
+    fn publish_value_core(
+        &self,
+        value: Publish,
+        error: Option<ExpressionError>,
+        force_update: bool,
+        notify_sink: bool,
+    ) {
         if !self.is_running() {
             return;
         }
-        crate::perf_count!(BindingValuesPublished);
+        if notify_sink {
+            crate::perf_count!(BindingValuesPublished);
+        }
 
         // When binding to the data context and the expression results in a
         // binding error, the expression produces null rather than the unset
@@ -409,7 +428,7 @@ impl UntypedBindingExpressionBase {
         }
         self.set_error(error);
 
-        if !self.produce_value.get() {
+        if !notify_sink || !self.produce_value.get() {
             return;
         }
         #[cfg(all(debug_assertions, feature = "hot-reload"))]

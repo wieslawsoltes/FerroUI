@@ -25,6 +25,8 @@ impl<T: crate::StyledValue> EffectiveValue<T> {
                 coerce: coerce.clone(),
                 uncoerced_value: RefCell::new(value.clone()),
                 uncoerced_base_value: RefCell::new(value.clone()),
+                coerced_value_valid: Cell::new(false),
+                coerced_base_valid: Cell::new(false),
                 set: EffectiveValue::<T>::set_and_raise_coerced,
                 operations: crate::ferro_property_metadata::CoercionOperations {
                     equals: crate::ferro_property::value_equals::<T>,
@@ -35,7 +37,7 @@ impl<T: crate::StyledValue> EffectiveValue<T> {
         });
         Self {
             metadata,
-            state: EffectiveValueState::new(property),
+            state: EffectiveValueState::new(property, false),
             value: RefCell::new(value),
             base_value: OptionCell::new(),
             uncommon,

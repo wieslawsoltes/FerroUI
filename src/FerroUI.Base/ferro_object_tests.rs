@@ -405,3 +405,34 @@ mod borrowed_values {
         assert_eq!(object.with_value(Class1::foo_property(), String::len), 5);
     }
 }
+
+#[test]
+fn instance_data_preserves_slots_identity_and_reentrant_old_value_drops() {
+    use std::{cell::Cell, rc::Rc};
+    struct Slot {
+        owner: crate::WeakRef<FerroObject>,
+        drops: Rc<Cell<usize>>,
+    }
+    impl Drop for Slot {
+        fn drop(&mut self) {
+            let owner = self.owner.upgrade().unwrap();
+            assert_eq!(*owner.instance_data::<usize>().unwrap(), 27);
+            owner.set_instance_data(Some(Rc::new(31_i32)));
+            self.drops.set(self.drops.get() + 1);
+        }
+    }
+    let owner = FerroObject::new();
+    let drops = Rc::new(Cell::new(0));
+    owner.set_instance_data(Some(Rc::new(27_usize)));
+    owner.set_instance_data(Some(Rc::new(Slot {
+        owner: owner.to_weak(),
+        drops: drops.clone(),
+    })));
+    owner.set_instance_data::<Slot>(None);
+    assert_eq!(drops.get(), 1);
+    assert_eq!(*owner.instance_data::<i32>().unwrap(), 31);
+    assert!(owner.instance_data::<Slot>().is_none());
+    owner.set_instance_data::<usize>(None);
+    owner.set_instance_data::<i32>(None);
+    assert_eq!(drops.get(), 1);
+}

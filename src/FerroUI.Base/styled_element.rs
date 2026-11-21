@@ -761,6 +761,18 @@ impl StyledElement {
 
     // --- initialization and styling ---------------------------------------
 
+    /// Updates native style frames in one reevaluation scope.
+    ///
+    /// Reusable controls can replace a contributing theme without exposing an
+    /// intermediate fallback value. Scopes nest, return the closure's result,
+    /// and end during unwinding. Explicit local writes and coercion retain
+    /// their usual immediate behavior; this is not a notification suspension.
+    pub fn with_styling_update<T>(&self, update: impl FnOnce() -> T) -> T {
+        self.values().begin_styling();
+        let _end_styling = EndStyling(self);
+        update()
+    }
+
     /// Applies styling to the control if the control is initialized and
     /// styling is not already applied.
     ///

@@ -21,7 +21,7 @@ use crate::{
 };
 use crate::collections::FerroList;
 use std::cell::{Cell, OnceCell, RefCell};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 /// Implements input-related functionality for a control.
 ///

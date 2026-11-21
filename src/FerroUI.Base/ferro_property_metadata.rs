@@ -12,11 +12,17 @@ pub struct FerroPropertyMetadata {
     default_binding_mode: BindingMode,
     enable_data_validation: Option<bool>,
     is_read_only: bool,
+    binding_writeback_uses_change_value: Option<bool>,
 }
 
 impl FerroPropertyMetadata {
     pub fn new(default_binding_mode: BindingMode, enable_data_validation: Option<bool>) -> Self {
-        Self { default_binding_mode, enable_data_validation, is_read_only: false }
+        Self {
+            default_binding_mode,
+            enable_data_validation,
+            is_read_only: false,
+            binding_writeback_uses_change_value: None,
+        }
     }
 
     /// The default binding mode for the property.
@@ -37,6 +43,16 @@ impl FerroPropertyMetadata {
         self.enable_data_validation
     }
 
+    /// Selects the value used by immediate PropertyChanged binding writeback.
+    /// `Some(true)` uses the triggering notification's snapshot, even when a
+    /// reentrant handler has changed the target again. `Some(false)` rereads
+    /// the effective target value. `None` retains the binding implementation's
+    /// existing policy (typed notifications, untyped effective target values).
+    /// Delayed, explicit and lost-focus updates always read the target.
+    pub fn binding_writeback_uses_change_value(&self) -> Option<bool> {
+        self.binding_writeback_uses_change_value
+    }
+
     /// Whether the metadata has been frozen.
     pub fn is_read_only(&self) -> bool {
         self.is_read_only
@@ -50,6 +66,9 @@ impl FerroPropertyMetadata {
         }
         if self.enable_data_validation.is_none() {
             self.enable_data_validation = base.enable_data_validation;
+        }
+        if self.binding_writeback_uses_change_value.is_none() {
+            self.binding_writeback_uses_change_value = base.binding_writeback_uses_change_value;
         }
     }
 
@@ -303,6 +322,7 @@ pub struct StyledPropertyMetadata<T> {
     base: FerroPropertyMetadata,
     default_value: Option<T>,
     coerce: Option<Coercion<T>>,
+    coerce_on_reevaluation: Option<bool>,
     /// The metadata of the storage type of a value type that is not its own storage type
     /// ([`StyledValue::Storage`]): what the property store reads, made the first time it is
     /// asked for (`for_storage`). Empty for a type that is its own storage type.
@@ -323,6 +343,7 @@ impl<T: Clone> Clone for StyledPropertyMetadata<T> {
             base: self.base.clone(),
             default_value: self.default_value.clone(),
             coerce: self.coerce.clone(),
+            coerce_on_reevaluation: self.coerce_on_reevaluation,
             storage: OnceCell::new(),
         }
     }
@@ -343,6 +364,7 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
             base: FerroPropertyMetadata::new(BindingMode::Default, Some(false)),
             default_value,
             coerce: None,
+            coerce_on_reevaluation: None,
             storage: OnceCell::new(),
         }
     }
@@ -361,8 +383,30 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
         self
     }
 
+    /// Whether frame reevaluation recalculates coercion for an unchanged input.
+    /// Defaults to true. A control returning false must explicitly coerce when
+    /// its external dependencies change. Explicit writes, changed bindings and
+    /// changed winning frame entries still coerce. Removing a winning frame
+    /// restores the default without automatically coercing that fallback.
+    /// Clearing an input also resets its coercion output without a callback.
+    pub fn with_coerce_on_reevaluation(mut self, value: bool) -> Self {
+        self.coerce_on_reevaluation = Some(value);
+        self
+    }
+
+    pub fn coerce_on_reevaluation(&self) -> bool {
+        self.coerce_on_reevaluation.unwrap_or(true)
+    }
+
     pub fn with_enable_data_validation(mut self, enable: bool) -> Self {
         self.base.enable_data_validation = Some(enable);
+        self
+    }
+
+    /// Selects immediate binding writeback from the change snapshot (`true`)
+    /// or from the target's current effective value (`false`).
+    pub fn with_binding_writeback_uses_change_value(mut self, value: bool) -> Self {
+        self.base.binding_writeback_uses_change_value = Some(value);
         self
     }
 
@@ -431,6 +475,7 @@ impl<T: StyledValue> StyledPropertyMetadata<T> {
                 base: self.base.clone(),
                 default_value: self.default_value.clone().map(T::into_storage),
                 coerce,
+                coerce_on_reevaluation: self.coerce_on_reevaluation,
                 storage: OnceCell::new(),
             }) as Rc<dyn Any>;
             match copy.downcast() {
@@ -467,6 +512,13 @@ impl<T: Clone + 'static> DirectPropertyMetadata<T> {
 
     pub fn with_enable_data_validation(mut self, enable: bool) -> Self {
         self.base.enable_data_validation = Some(enable);
+        self
+    }
+
+    /// Selects immediate binding writeback from the change snapshot (`true`)
+    /// or from the target's current effective value (`false`).
+    pub fn with_binding_writeback_uses_change_value(mut self, value: bool) -> Self {
+        self.base.binding_writeback_uses_change_value = Some(value);
         self
     }
 
@@ -523,6 +575,9 @@ impl<T: Clone + 'static> PropertyMetadata for StyledPropertyMetadata<T> {
         if self.coerce.is_none() {
             self.coerce = base.coerce.clone();
         }
+        if self.coerce_on_reevaluation.is_none() {
+            self.coerce_on_reevaluation = base.coerce_on_reevaluation;
+        }
     }
 
     fn freeze(&mut self) {
@@ -536,6 +591,8 @@ impl<T: Clone + 'static> PropertyMetadata for StyledPropertyMetadata<T> {
         let mut copy = StyledPropertyMetadata::new(this.default_value.clone())
             .with_default_binding_mode(this.default_binding_mode())
             .with_enable_data_validation(this.enable_data_validation().unwrap_or(false));
+        copy.base.binding_writeback_uses_change_value = this.base.binding_writeback_uses_change_value;
+        copy.coerce_on_reevaluation = this.coerce_on_reevaluation;
         copy.freeze();
         Rc::new(copy)
     }

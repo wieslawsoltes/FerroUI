@@ -8,13 +8,20 @@ use crate::{
     BoxedValue, DirectPropertyBase, FerroProperty, FerroPropertyChangedEventArgs, FerroPropertyRegistry,
     Nullable, ObjectType, PropertyValue, Ref, StaticType, StyledProperty, Subclassable, TypeIdentity, TypeInfo, Upcast, WeakRef,
 };
-use std::any::Any;
+use std::any::{Any, TypeId};
+use std::collections::HashMap;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::fmt;
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
+type InstanceDataMap = HashMap<TypeId, Rc<dyn Any>>;
+
 type PropertyChangedHandler = dyn Fn(&FerroPropertyChangedEventArgs<'_>);
+type SuppressedLocalValueHandler = dyn Fn(&FerroObject, &'static FerroProperty);
+
+#[derive(Default)]
+struct SuppressedLocalValueHandlers(HandlerList<SuppressedLocalValueHandler>);
 
 /// The virtual table of [`FerroObject`].
 #[derive(Clone, Copy)]
@@ -33,6 +40,7 @@ pub struct FerroObject {
     this: OnceCell<Weak<dyn Any>>,
     vtable: Cell<Option<&'static FerroObjectVTable>>,
     values: ValueStore,
+    instance_data: RefCell<Option<Box<InstanceDataMap>>>,
     // Not upstream (docs/porting/desktop-performance.md, section 9.67): read by upgrading and
     // written whole, so a cell without a borrow flag.
     inheritance_parent: OptionCell<WeakRef<FerroObject>>,
@@ -261,11 +269,55 @@ impl FerroObject {
             this: OnceCell::new(),
             vtable: Cell::new(None),
             values: ValueStore::new(),
+            instance_data: RefCell::new(None),
             inheritance_parent: OptionCell::new(),
             inheritance_children: RefCell::new(std::collections::VecDeque::new()),
             property_changed: HandlerList::new(),
             dispatcher: OnceCell::new(),
         }
+    }
+
+    /// Returns object-owned data of the declared slot type, without reading a
+    /// property, binding, resource or user-visible Tag. Use a distinct newtype for
+    /// each independent library slot. The original Rc allocation is retained.
+    pub fn instance_data<T: Any>(&self) -> Option<Rc<T>> {
+        self.verify_access();
+        self.instance_data
+            .borrow()
+            .as_ref()?
+            .get(&TypeId::of::<T>())?
+            .clone()
+            .downcast::<T>()
+            .ok()
+    }
+
+    /// Replaces or removes one object-owned data slot and returns the old value.
+    /// No property notifications are raised. The map is allocated on first write
+    /// and freed when its last slot is removed. Old values are returned after the
+    /// store borrow ends, so their destructors can reenter this object safely.
+    ///
+    /// This is explicit object ownership, not a tracing-GC ephemeron: values must
+    /// not strongly retain the owner through a cycle. Use WeakRef for back-links.
+    pub fn set_instance_data<T: Any>(&self, value: Option<Rc<T>>) -> Option<Rc<T>> {
+        self.verify_access();
+        let previous = {
+            let mut storage = self.instance_data.borrow_mut();
+            match value {
+                Some(value) => storage
+                    .get_or_insert_with(|| Box::new(HashMap::new()))
+                    .insert(TypeId::of::<T>(), value),
+                None => {
+                    let previous = storage
+                        .as_mut()
+                        .and_then(|map| map.remove(&TypeId::of::<T>()));
+                    if storage.as_ref().is_some_and(|map| map.is_empty()) {
+                        *storage = None;
+                    }
+                    previous
+                }
+            }
+        };
+        previous.and_then(|value| value.downcast::<T>().ok())
     }
 
     /// Returns the [`Dispatcher`] that this object is associated with: the
@@ -572,6 +624,40 @@ impl FerroObject {
         self.values.get_base_value(property)
     }
 
+    /// Gets the input currently held at local priority for a styled or attached
+    /// property, before animation and coercion. Styles, inheritance and defaults
+    /// are not local values. `None` means no local input; a nullable property's
+    /// explicit local null is `Some(None)`. A local binding's last supplied value
+    /// is included, but a binding with no supplied value creates no local input.
+    ///
+    /// Unlike diagnostics or `get_base_value`, this distinguishes a local input
+    /// hidden by animation from a style value. Reading does not install a binding,
+    /// evaluate a getter, coerce a value, raise notifications or mutate the store.
+    /// Direct properties do not have this styled-value precedence storage.
+    pub fn get_local_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
+        self.values.get_local_value(property)
+    }
+
+    /// Clears a styled/attached local input even when an animation hides it.
+    /// Existing style/animation frames remain active. Unlike `clear_value`, this
+    /// explicitly addresses the local base input rather than its effective slot.
+    /// Native binding installation/removal semantics are unchanged: a retained
+    /// local binding may supply another value later unless separately disposed.
+    pub fn clear_local_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>) {
+        self.values.clear_local_value(self, property.as_property());
+    }
+
+    /// Removes the local binding and local input of a styled/attached property.
+    /// Style and animation bindings are retained. The detached local binding is
+    /// disposed before the local input is cleared, so source subscriptions end
+    /// before the resulting property notification. A property-change callback
+    /// can install another value or binding without a second clear erasing it.
+    /// Unlike [`clear_local_value`](Self::clear_local_value), later publications
+    /// from the removed binding cannot restore its value.
+    pub fn clear_local_value_and_binding<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>) {
+        self.values.clear_local_value_and_binding(self, property.as_property());
+    }
+
     /// Checks whether a property is animating.
     pub fn is_animating(&self, property: &FerroProperty) -> bool {
         self.values.is_animating(property)
@@ -589,6 +675,16 @@ impl FerroObject {
     /// at style/template priorities.
     pub fn has_local_value_binding(&self, property: &FerroProperty) -> bool {
         self.values.has_local_value_binding(property)
+    }
+
+    /// Whether the currently installed local binding expression is inside its
+    /// synchronous attach/start call. This read does not evaluate a binding or
+    /// change property values. Nested starts are tracked by expression identity;
+    /// a replacement that has finished initializing is not mistaken for an
+    /// outer expression that is still starting. The state resets on unwind.
+    /// Style/animation expressions and plain observable bindings return false.
+    pub fn is_local_binding_expression_initializing(&self, property: &FerroProperty) -> bool {
+        self.values.is_local_binding_expression_initializing(property)
     }
 
     /// Sets a property value with local value priority.
@@ -711,6 +807,10 @@ impl FerroObject {
         self.values.get_expression(property)
     }
 
+    pub(crate) fn get_local_expression(&self, property: &'static FerroProperty) -> Option<Rc<dyn BindingExpressionBase>> {
+        self.values.get_local_expression(property)
+    }
+
     /// Binds a property to an observable.
     pub fn bind<T: crate::StyledValue>(
         &self,
@@ -751,6 +851,14 @@ impl FerroObject {
     /// Coerces the specified property.
     pub fn coerce_value(&self, property: &'static FerroProperty) {
         self.values.coerce_value(self, property);
+    }
+
+    /// Restores a styled property's current uncoerced inputs without invoking
+    /// its coercion callback or replacing local values, bindings or style frames.
+    /// Raises the usual effective/base notifications when their values change.
+    /// An unset property or a property without coercion needs no change.
+    pub fn reset_coercion(&self, property: &'static FerroProperty) {
+        self.values.reset_coercion(self, property);
     }
 
     // --- direct properties ------------------------------------------------
@@ -976,6 +1084,46 @@ impl FerroObject {
     /// Ends a subscription of [`add_property_changed_handler`](Self::add_property_changed_handler).
     pub fn remove_property_changed_handler(&self, token: u64) -> bool {
         self.property_changed.remove(token)
+    }
+
+    /// Observes writes of a changed local input to a styled property when
+    /// coercion preserves the effective value. The input is already stored
+    /// when the handler runs. Ordinary effective changes use
+    /// [`property_changed`](Self::property_changed).
+    pub fn suppressed_local_value_changed(
+        &self,
+        property: &'static FerroProperty,
+        handler: impl Fn(&FerroObject) + 'static,
+    ) -> Rc<dyn IDisposable> {
+        let handlers = self.instance_data::<SuppressedLocalValueHandlers>().unwrap_or_else(|| {
+            let handlers = Rc::new(SuppressedLocalValueHandlers::default());
+            self.set_instance_data(Some(handlers.clone()));
+            handlers
+        });
+        let token = handlers.0.add(Rc::new(move |owner, changed| {
+            if changed == property {
+                handler(owner);
+            }
+        }));
+        let handlers = Rc::downgrade(&handlers);
+        Disposable::create(move || {
+            if let Some(handlers) = handlers.upgrade() {
+                handlers.0.remove(token);
+            }
+        })
+    }
+
+    pub(crate) fn has_suppressed_local_value_handlers(&self) -> bool {
+        self.instance_data::<SuppressedLocalValueHandlers>()
+            .is_some_and(|handlers| !handlers.0.is_empty())
+    }
+
+    pub(crate) fn notify_suppressed_local_value_changed(&self, property: &'static FerroProperty) {
+        if let Some(handlers) = self.instance_data::<SuppressedLocalValueHandlers>() {
+            for (_, handler) in handlers.0.snapshot().iter() {
+                handler(self, property);
+            }
+        }
     }
 
     /// The number of subscribers to property changes on this object (a

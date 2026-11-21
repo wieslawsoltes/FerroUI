@@ -994,6 +994,169 @@ fn match_negative_sign(text: &str, pos: usize, info: &NumberFormatInfo) -> Optio
     }
 }
 
+// Float grammar adapted from .NET Runtime v10.0.13, Number.Parsing.cs.
+// Copyright (c) .NET Foundation and Contributors. MIT; full notice in
+// docs/porting/float-number-runtime-LICENSE.txt.
+/// Parses the precise `NumberStyles.Float` grammar with explicit number conventions.
+/// This excludes group separators, currency, trailing signs and parentheses. Numeric
+/// conversion uses System's invariant double parser after culture-aware tokenization.
+/// Special values use ordinal-ignore-case comparison and Unicode surrounding white
+/// space, as .NET does even when its numeric scanner rejects those characters.
+pub fn try_parse_double_float(text: Option<&str>, info: &NumberFormatInfo) -> Option<f64> {
+    let text = text?;
+    if let Some(value) = parse_float_numeric(text, info) {
+        return Some(value);
+    }
+    let text = text.trim_matches(is_float_symbol_white);
+    let eq = |a: &str, b: &str| super::StringComparison::OrdinalIgnoreCase.equals(Some(a), Some(b));
+    // Keep the source order: custom symbols may overlap each other or numbers.
+    if eq(text, info.positive_infinity_symbol()) {
+        return Some(f64::INFINITY);
+    }
+    if eq(text, info.negative_infinity_symbol()) {
+        return Some(f64::NEG_INFINITY);
+    }
+    // .NET Double.NaN's canonical IEEE payload is negative, including signed spellings.
+    let nan = f64::from_bits(0xfff8_0000_0000_0000);
+    if eq(text, info.nan_symbol()) {
+        return Some(nan);
+    }
+    if let Some(rest) = strip_float_symbol_prefix(text, info.positive_sign()) {
+        if eq(rest, info.positive_infinity_symbol()) {
+            return Some(f64::INFINITY);
+        }
+        if eq(rest, info.nan_symbol()) {
+            return Some(nan);
+        }
+        return None;
+    }
+    if let Some(rest) = strip_float_symbol_prefix(text, info.negative_sign()) {
+        if eq(rest, info.nan_symbol()) {
+            return Some(nan);
+        }
+        // Preserve the original conditional placement of the hyphen compatibility
+        // check, even when a different arrangement might accept more spellings.
+        if allows_float_hyphen(info) && text.strip_prefix('-').is_some_and(|rest| eq(rest, info.nan_symbol())) {
+            return Some(nan);
+        }
+    }
+    None
+}
+fn is_float_symbol_white(c: char) -> bool {
+    matches!(c, '\u{0009}'..='\u{000d}' | '\u{0020}' | '\u{0085}' | '\u{00a0}' | '\u{1680}' | '\u{2000}'..='\u{200a}' | '\u{2028}' | '\u{2029}' | '\u{202f}' | '\u{205f}' | '\u{3000}')
+}
+fn strip_float_symbol_prefix<'a>(text: &'a str, prefix: &str) -> Option<&'a str> {
+    if !super::StringComparison::OrdinalIgnoreCase.starts_with(text, prefix) {
+        return None;
+    }
+    // Ordinal matching reports UTF16 lengths. Equal prefixes can occupy different
+    // UTF8 byte counts (for example a supplementary or non-ASCII case equivalent).
+    let mut remaining = prefix.encode_utf16().count();
+    let mut bytes = 0;
+    for c in text.chars() {
+        if remaining == 0 {
+            break;
+        }
+        remaining = remaining.checked_sub(c.len_utf16())?;
+        bytes += c.len_utf8();
+    }
+    (remaining == 0).then(|| &text[bytes..])
+}
+fn allows_float_hyphen(info: &NumberFormatInfo) -> bool {
+    matches!(
+        info.negative_sign(),
+        "\u{2012}" | "\u{207b}" | "\u{208b}" | "\u{2212}" | "\u{2796}" | "\u{fe63}" | "\u{ff0d}"
+    )
+}
+// The runtime scanner uses zero-terminated numeric tokens, unlike the special-
+// value span comparisons. Preserve that observable embedded-NUL distinction.
+fn match_float_chars(text: &str, pos: usize, pattern: &str) -> Option<usize> {
+    match_chars(text, pos, pattern.split('\0').next().unwrap())
+}
+fn match_float_negative_sign(text: &str, pos: usize, info: &NumberFormatInfo) -> Option<usize> {
+    match_float_chars(text, pos, info.negative_sign())
+        .or_else(|| (allows_float_hyphen(info) && text.as_bytes().get(pos) == Some(&b'-')).then_some(pos + 1))
+}
+fn parse_float_numeric(text: &str, info: &NumberFormatInfo) -> Option<f64> {
+    let mut pos = 0;
+    let mut sign = false;
+    let mut negative = false;
+    loop {
+        let (ch, size) = char_at(text, pos);
+        if is_white(ch) && (!sign || info.number_negative_pattern() == 2) {
+            pos += size;
+            continue;
+        }
+        if !sign {
+            if let Some(next) = match_float_chars(text, pos, info.positive_sign()) {
+                sign = true;
+                pos = next;
+                continue;
+            }
+            if let Some(next) = match_float_negative_sign(text, pos, info) {
+                sign = true;
+                negative = true;
+                pos = next;
+                continue;
+            }
+        }
+        break;
+    }
+    let mut normal = String::new();
+    if negative {
+        normal.push('-');
+    }
+    let mut digits = false;
+    let mut decimal = false;
+    loop {
+        let (ch, size) = char_at(text, pos);
+        if ch.is_ascii_digit() {
+            digits = true;
+            normal.push(ch);
+            pos += size;
+        } else if let Some(next) = (!decimal)
+            .then(|| match_float_chars(text, pos, info.number_decimal_separator()))
+            .flatten()
+        {
+            decimal = true;
+            normal.push('.');
+            pos = next;
+        } else {
+            break;
+        }
+    }
+    if !digits {
+        return None;
+    }
+    let (ch, _) = char_at(text, pos);
+    if matches!(ch, 'e' | 'E') {
+        normal.push('e');
+        pos += 1;
+        if let Some(next) = match_float_chars(text, pos, info.positive_sign()) {
+            normal.push('+');
+            pos = next;
+        } else if let Some(next) = match_float_negative_sign(text, pos, info) {
+            normal.push('-');
+            pos = next;
+        }
+        let start = pos;
+        while let (ch @ '0'..='9', size) = char_at(text, pos) {
+            normal.push(ch);
+            pos += size;
+        }
+        if pos == start {
+            return None;
+        }
+    }
+    while is_white(char_at(text, pos).0) {
+        pos += char_at(text, pos).1;
+    }
+    if text[pos..].bytes().any(|b| b != 0) {
+        return None;
+    }
+    ferroui_system::invariant_numbers::try_parse_double(&normal, ferroui_system::invariant_numbers::NumberStyles::FLOAT)
+}
+
 /// Parses a decimal with the given styles and format information.
 pub fn parse_decimal(text: &str, styles: NumberStyles, info: &NumberFormatInfo) -> Result<Decimal, NumberParseError> {
     let undefined = styles.bits() & !NumberStyles::all().bits() != 0;
