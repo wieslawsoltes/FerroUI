@@ -694,6 +694,25 @@ impl IDrawingContextImpl for DrawingContext {
             ffi::d2_clear(ctx, size.width as f64, size.height as f64, r, g, b, a)
         })
     }
+    fn draw_color(&mut self, c: Color, mode: BitmapBlendingMode) {
+        // Destination keeps what is already there, so nothing is composed.
+        if blend(mode).is_none() {
+            return;
+        }
+        let [r, g, b, a] = color(c, 1.);
+        let size = self.bitmap.pixel_size();
+        let (w, h) = (size.width as f64, size.height as f64);
+        // The fill covers the current clip whatever the transform is.
+        let transform = std::mem::replace(&mut self.transform, Matrix::IDENTITY);
+        if self.try_push_compositing_layer(mode, 1., Rect::new(0., 0., w, h)) {
+            if self.prepare() {
+                self.bitmap
+                    .context(|ctx| unsafe { ffi::d2_clear(ctx, w, h, r, g, b, a) });
+            }
+            self.pop_compositing_layer();
+        }
+        self.transform = transform;
+    }
     fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, src: Rect, dst: Rect) {
         let converted = source
             .as_any()
