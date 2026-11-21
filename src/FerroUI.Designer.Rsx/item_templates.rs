@@ -9,7 +9,7 @@ use crate::{
     blocks::keep_comments,
     columns::ColumnPosition,
     registered::Class,
-    source_edits::{insert_field, remove_field},
+    source_edits::{insert_field, reset_field},
 };
 use ferroui_designer_core::{Document, NodeId, SourceSpan, TextPatch};
 use ferroui_designer_tools::{ColumnKind, ItemTemplateChange, ItemTemplateMember};
@@ -74,17 +74,15 @@ impl TemplateFields {
 
     pub(crate) fn record_call(
         &mut self,
-        source: &str,
         setter: &str,
-        start: usize,
-        close: usize,
+        field: Option<SourceSpan>,
         argument: Option<&Expr>,
     ) {
         if self.member(setter).is_none() {
             return;
         }
         if let Some(argument) = argument {
-            self.record(setter, argument, syntax::call_span(source, start, close));
+            self.record(setter, argument, field);
         } else {
             self.opaque_setter = true;
         }
@@ -209,19 +207,15 @@ impl RsxProjection<'_> {
                     .existing
                     .and_then(|source| source.removal)
                     .ok_or("The template declaration changed")?;
-                let mut patch = match owner {
+                match owner {
                     TemplateOwner::Column(..) => TextPatch {
                         span: removal,
-                        replacement: String::new(),
+                        replacement: keep_comments(&self.source[removal.range()])?,
                     },
                     TemplateOwner::Control(index, _) => {
-                        let removal =
-                            syntax::before_comma(self.source, removal, self.nodes[index].close)?;
-                        remove_field(self.source, removal)
+                        reset_field(self.source, removal, self.nodes[index].close)?
                     }
-                };
-                patch.replacement = keep_comments(&self.source[patch.span.range()])?;
-                patch
+                }
             }
             _ => return Err("Choose an empty slot or a mapped template assignment to edit".into()),
         };

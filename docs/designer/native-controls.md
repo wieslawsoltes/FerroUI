@@ -149,6 +149,10 @@ For a move that changes a generated Rust build function, build the owning Cargo 
 
 Choose the `rsx!` invocation and select the control in the canvas or **Layers**. Edit **Name** in Properties to update the literal and any mapped style selectors or visual-state targets. Undo restores them together. If the name has a mapped reference, rename the control or remove the reference before resetting **Name**. [Supported references](vscode/authoring.md#rename-an-rsx-control)
 
+### Edit RSX builder values
+
+Select a control in a Rust view and open **Properties**. Edit a supported literal authored as a field, such as `width: 160.0`, or as a single-argument call, such as `width(160.0)`. The same editor handles mapped layout calls such as `grid_row(1)` and setters registered by the project. **Reset** removes the assignment and retains its comments. Use the source arrow to open a computed value. Each applied edit takes one Undo step. [VS Code workflow](vscode/authoring.md#edit-rsx-builder-values) · [MCP tools](vscode/reference.md#drive-an-editor-workflow)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

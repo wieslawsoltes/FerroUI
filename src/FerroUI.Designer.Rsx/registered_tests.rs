@@ -221,6 +221,42 @@ fn registered_literally_mapped_component_keeps_other_invocations_and_dynamic_chi
 }
 
 #[test]
+fn registered_builder_call_round_trips_the_argument_and_reveals_computed_values() {
+    use ferroui_designer_core::TextPatch;
+
+    let catalog = Fixture::catalog();
+    let source = concat!(
+        "fn other() { rsx! { Button { width(42.0) } }; }\r\n",
+        "fn view() { rsx! { StackPanel {\r\n",
+        "    crate::views::ReviewCard { heading /* 🧭 retain */ (/* caption */ \"Ready\",) }\r\n",
+        "    ::widgets::Meter { text(customer.label()) }\r\n",
+        "}}; }\r\n",
+    );
+    let caret = source.find("heading").unwrap();
+    let projection = catalog.project(source, caret).unwrap();
+    assert_eq!(projection.omitted_count, 1);
+    assert!(projection.xaml().contains("Caption=\"Ready\""));
+    assert_eq!(&source[projection.nodes[2].expressions["Text"].range()], "customer.label()");
+    assert!(projection.edit_property(2, "Text", Some("Assigned")).is_err());
+    let change = projection.edit_property(1, "Caption", Some("Reviewed")).unwrap();
+    assert_eq!(
+        TextPatch::apply_all(source, vec![change]).unwrap(),
+        source.replace("\"Ready\"", "\"Reviewed\""),
+    );
+    let static_source = source.replace("text(customer.label())", "text(\"Loaded\")");
+    let projection = catalog.project(&static_source, caret).unwrap();
+    assert_eq!(projection.blocks.len(), 2);
+    let draft = projection.xaml().replace("Caption=\"Ready\"", "Caption=\"Reviewed\"");
+    assert_eq!(
+        TextPatch::apply_all(&static_source, projection.apply_xaml(&draft).unwrap()).unwrap(),
+        static_source.replace("\"Ready\"", "\"Reviewed\""),
+    );
+    let language = serde_json::to_value(catalog.analyze(&static_source)).unwrap();
+    assert_eq!(language["nodes"][2]["fields"][0]["property"]["xamlName"], "Caption");
+    assert_eq!(language["nodes"][2]["fields"][0]["literal"], true);
+}
+
+#[test]
 fn registered_round_trip_uses_qualified_rust_paths_and_retains_authored_xaml_aliases() {
     let catalog = Fixture::catalog();
     let document =

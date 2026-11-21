@@ -82,11 +82,7 @@ impl RsxLanguageDocument {
                             .entry(key.clone())
                             .or_insert_with(|| supported(&class));
                         self.nodes.push(ControlSpan {
-                            fields: node
-                                .attributes
-                                .iter()
-                                .filter_map(|attr| field(index, &class, attr))
-                                .collect(),
+                            fields: fields(index, &class, &node.attributes),
                             class: class.name().to_owned(),
                             key,
                             name,
@@ -107,22 +103,49 @@ impl RsxLanguageDocument {
     }
 }
 
+fn fields(index: &LineIndex, class: &Class, attributes: &[Attribute]) -> Vec<FieldSpan> {
+    let mut fields: Vec<_> = attributes
+        .iter()
+        .filter_map(|attr| field(index, class, attr))
+        .collect();
+    let mut count = BTreeMap::new();
+    for property in fields.iter().filter_map(|field| field.property.as_ref()) {
+        *count.entry(property.xaml_name.clone()).or_insert(0) += 1;
+    }
+    for field in &mut fields {
+        if field
+            .property
+            .as_ref()
+            .is_some_and(|property| count[&property.xaml_name] > 1)
+        {
+            field.literal = false;
+        }
+    }
+    fields
+}
+
 fn field(index: &LineIndex, class: &Class, attr: &Attribute) -> Option<FieldSpan> {
-    let Attribute::Value {
-        owner, name, value, ..
-    } = attr
-    else {
-        return None;
+    let (owner, name, value) = match attr {
+        Attribute::Value { owner, name, value, .. } => (owner.as_ref(), name, Some(value.as_ref())),
+        Attribute::Call { name, arguments } => (
+            None,
+            name,
+            arguments.first().filter(|_| arguments.len() == 1),
+        ),
     };
-    let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
+    let owner = owner.map(|owner| owner.unraw().to_string());
     let setter = name.unraw().to_string();
-    let property = class
-        .xaml_property(owner.as_deref(), &setter)
-        .map(|name| property(class, name));
+    let mapped = class.xaml_property(owner.as_deref(), &setter);
+    let attached = owner.is_some() || mapped.as_ref().is_some_and(|name| name.contains('.'));
+    let property = mapped.map(|name| property(class, name));
+    if matches!(attr, Attribute::Call { .. }) && property.is_none() {
+        return None;
+    }
     let literal = property.as_ref().is_some_and(|property| {
         class
             .literal(&property.xaml_name)
-            .is_some_and(|codec| codec.read_rust(value).is_some())
+            .and_then(|codec| codec.read_rust(value?))
+            .is_some()
     });
     let name_range = range(index, name.span())?;
     Some(FieldSpan {
@@ -130,9 +153,10 @@ fn field(index: &LineIndex, class: &Class, attr: &Attribute) -> Option<FieldSpan
         range: name_range,
         property,
         literal,
-        shorthand: matches!(value.as_ref(), Expr::Path(_))
-            && range(index, value.span()) == Some(name_range),
-        attached: owner.is_some(),
+        shorthand: value.is_some_and(|value| {
+            matches!(value, Expr::Path(_)) && range(index, value.span()) == Some(name_range)
+        }),
+        attached,
     })
 }
 

@@ -99,6 +99,19 @@ pub(crate) fn from_setter(class: &str, owner: Option<&str>, setter: &str) -> Opt
     })
 }
 
+pub(crate) fn from_attached_setter(
+    class: &str,
+    owner: Option<&str>,
+    setter: &str,
+) -> Option<String> {
+    if owner.is_some() {
+        return None;
+    }
+    [("grid_", "Grid"), ("canvas_", "Canvas"), ("dock_panel_", "DockPanel")]
+        .into_iter()
+        .find_map(|(prefix, owner)| from_setter(class, Some(owner), setter.strip_prefix(prefix)?))
+}
+
 pub(crate) fn setter(name: &str) -> String {
     let (owner, property) = name.split_once('.').unwrap_or(("", name));
     let mut property = snake_case(property);

@@ -1,5 +1,5 @@
 use crate::animation::RsxAnimationIssue;
-use crate::blocks::{blocks, contains_trivia};
+use crate::blocks::{blocks, call_spans, contains_trivia, keep_comments};
 use crate::catalog::Children;
 use crate::columns::{ColumnSource, collection_member, table_kind};
 use crate::item_templates::TemplateFields;
@@ -21,6 +21,9 @@ use proc_macro2::TokenStream;
 use std::collections::{BTreeMap, BTreeSet};
 use syn::ext::IdentExt;
 use syn::spanned::Spanned;
+
+mod property_fields;
+use property_fields::PropertyField;
 
 /// The original source ranges of one projected control, in XAML element order.
 pub struct RsxNode {
@@ -158,7 +161,12 @@ impl RsxProjection<'_> {
         if codec == literal::Literal::EmbeddedImage {
             return crate::image_source::edit(self.source, span, value).ok_or_else(outside_static_values);
         }
-        let replacement = codec.rust(value).ok_or_else(outside_static_values)?;
+        let mut replacement = codec.rust(value).ok_or_else(outside_static_values)?;
+        let original = &self.source[span.range()];
+        if original.contains('/') {
+            let comments = keep_comments(original)?;
+            replacement.insert_str(0, &comments);
+        }
         Ok(TextPatch { span, replacement })
     }
 
@@ -296,6 +304,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
 #[derive(Default)]
 struct State<'a> {
     nodes: Vec<RsxNode>,
+    calls: BTreeMap<usize, SourceSpan>,
     omissions: Vec<String>,
     omitted_count: usize,
     styles: BTreeMap<usize, Vec<RsxStyle>>,
@@ -393,19 +402,20 @@ impl State<'_> {
                 } => (owner, name, value),
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
-                    if setter == "styles" && class.xaml_property(None, "styles").is_none() && arguments.len() == 1 {
-                        self.project_styles(source, index, &arguments[0], catalog);
+                    let argument = arguments.first().filter(|_| arguments.len() == 1);
+                    let name = crate::animation::syntax::span(name);
+                    let field = self.calls.get(&name.start).copied();
+                    if let Some(styles) = argument.filter(|_| {
+                        setter == "styles" && class.xaml_property(None, "styles").is_none()
+                    }) {
+                        self.project_styles(source, index, styles, catalog);
                         continue;
                     }
                     let templates = &mut self.nodes[index].templates;
                     templates.note_setter(&setter, false);
-                    templates.record_call(
-                        source, &setter, name.span().byte_range().start, node.braces.close().byte_range().start,
-                        arguments.first().filter(|_| arguments.len() == 1),
-                    );
+                    templates.record_call(&setter, field, argument);
                     if let Some(table) = table {
-                        let range = crate::animation::syntax::span(name);
-                        if self.project_columns(index, table, &setter, false, arguments.first().filter(|_| arguments.len() == 1), range) {
+                        if self.project_columns(index, table, &setter, false, argument, name) {
                             continue;
                         }
                     }
@@ -419,17 +429,20 @@ impl State<'_> {
                         self.nodes[index].style_slot = ArraySlot::Unavailable;
                     }
                     if setter.starts_with("on_") {
-                        let span = arguments
-                            .first()
-                            .map_or_else(|| name.span(), Spanned::span)
-                            .byte_range();
+                        let value = arguments.first().map_or(name, crate::animation::syntax::span);
                         self.nodes[index].events.insert(
                             setter,
                             RsxEvent {
-                                value: SourceSpan::new(span.start, span.end),
+                                value,
                                 field: None,
                             },
                         );
+                    } else if let Some(key) = class.xaml_property(None, &setter) {
+                        self.project_property(
+                            index, &mut result, &mut seen, key,
+                            PropertyField { field, fallback: field.unwrap_or(name), expression: argument },
+                        );
+                        continue;
                     }
                     self.omit(format!("{class} builder call"));
                     continue;
@@ -483,33 +496,18 @@ impl State<'_> {
                 self.omit(format!("{class}.{setter}"));
                 continue;
             };
-            if !seen.insert(key.clone()) {
-                result.properties.remove(&key);
-                self.nodes[index].properties.remove(&key);
-                self.nodes[index]
-                    .expressions
-                    .insert(key.clone(), value_span);
-                self.omit(format!("Repeated {class}.{key}"));
-                continue;
-            }
-            if let Some(text) = class.literal(&key).and_then(|kind| kind.read_rust(value)) {
-                let start = match attribute {
-                    Attribute::Value {
-                        owner: Some(owner), ..
-                    } => owner.span().byte_range().start,
-                    _ => field.start,
-                };
-                self.nodes[index]
-                    .fields
-                    .insert(key.clone(), SourceSpan::new(start, field.end));
-                self.nodes[index].properties.insert(key.clone(), value_span);
-                result.properties.insert(key, text);
-            } else {
-                self.nodes[index]
-                    .expressions
-                    .insert(key.clone(), value_span);
-                self.omit(format!("{class}.{key} expression"));
-            }
+            let start = match attribute {
+                Attribute::Value { owner: Some(owner), .. } => owner.span().byte_range().start,
+                _ => field.start,
+            };
+            self.project_property(
+                index, &mut result, &mut seen, key,
+                PropertyField {
+                    field: Some(SourceSpan::new(start, field.end)),
+                    fallback: field,
+                    expression: Some(value),
+                },
+            );
         }
         let placement = class.children();
         let text_property = class
@@ -609,11 +607,15 @@ fn parse_body<'a>(
     catalog: &RsxCatalog,
     modules: Option<&'a RustModuleSources>,
 ) -> Result<(Element, State<'a>), String> {
-    let nodes = ferroui_view_syntax::parse(tokens).map_err(|e| format!("Invalid RSX: {e}"))?;
+    let nodes = ferroui_view_syntax::parse(tokens.clone()).map_err(|e| format!("Invalid RSX: {e}"))?;
     let [root] = nodes.as_slice() else {
         return Err("RSX preview needs one root control; wrap fragments in a panel".into());
     };
-    let mut state = State { modules, ..State::default() };
+    let mut state = State {
+        modules,
+        calls: call_spans(tokens),
+        ..State::default()
+    };
     let tree = state.element(source, root, 0, catalog)?;
     Ok((tree, state))
 }

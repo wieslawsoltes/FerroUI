@@ -98,6 +98,7 @@ The packaged README links to the user guides and examples at the source checkout
 - In Rust source that includes handlers, computed values, control flow, or custom components, the preview shows the supported controls and literals and lists omitted items. The inspector can edit mapped literals and routed handler expressions. Insertions and moves preserve comments and expressions when the edited container has a fully mapped child list. Dynamic child lists are edited in the Rust editor. The alternate tab is read-only for a partial preview.
 - XAML with bindings, styles, resource objects, application directives or property elements remains editable in XAML. The RSX tab explains whichever construct prevents conversion. Value-only counterpart edits preserve unrelated bytes in both formats. A structural conversion regenerates the selected tree in the authored language and requires a tree where it can preserve comments. The Rust file outside the selected tree stays intact.
 - FerroUI adds mapped RSX property completion and hover using the macro's own grammar. Enable `ferroui.rsx.inlayHints` to see types beside mapped literal fields.
+- **Properties** edits supported RSX fields and single-argument builder calls in place. Mapped Grid, Canvas, and DockPanel attached calls and registered setters use the same property editors. A fully mapped view can apply the value from its **XAML** tab. [Edit RSX builder values](../../docs/designer/vscode/authoring.md#edit-rsx-builder-values)
 
 ### Map an application control to RSX
 

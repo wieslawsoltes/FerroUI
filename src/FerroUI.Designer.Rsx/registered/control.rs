@@ -93,7 +93,9 @@ impl Class {
             });
             if let Some((name, _)) = explicit { return Some(name.clone()); }
         }
-        let name = catalog::from_setter(self.base()?, owner, setter)?;
+        let base = self.base()?;
+        let name = catalog::from_setter(base, owner, setter)
+            .or_else(|| catalog::from_attached_setter(base, owner, setter))?;
         (self.mapped_property(&name).is_none()).then_some(name)
     }
 

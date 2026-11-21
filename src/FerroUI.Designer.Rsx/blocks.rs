@@ -1,5 +1,6 @@
 use ferroui_designer_core::SourceSpan;
-use proc_macro2::{Group, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
+use std::collections::BTreeMap;
 
 pub(crate) struct Block {
     pub(crate) span: SourceSpan,
@@ -42,6 +43,33 @@ fn scan(stream: TokenStream, found: &mut Vec<Block>, depth: usize) {
 
 pub(crate) fn contains_trivia(source: &str, stream: TokenStream, span: SourceSpan) -> bool {
     visit_comments(source, stream, span, &mut |_, _| true)
+}
+
+/// Locate builder call delimiters in the original token stream. The shared
+/// RSX parser retains the method and arguments, including their source spans.
+pub(crate) fn call_spans(stream: TokenStream) -> BTreeMap<usize, SourceSpan> {
+    let mut result = BTreeMap::new();
+    scan_calls(stream, &mut result, 0);
+    result
+}
+
+fn scan_calls(stream: TokenStream, result: &mut BTreeMap<usize, SourceSpan>, depth: usize) {
+    if depth > super::tree::MAX_DEPTH {
+        return;
+    }
+    let mut name = None;
+    for token in stream {
+        if let TokenTree::Group(group) = &token {
+            if let Some(start) = name.filter(|_| group.delimiter() == Delimiter::Parenthesis) {
+                result.insert(start, SourceSpan::new(start, group.span_close().byte_range().end));
+            }
+            scan_calls(group.stream(), result, depth + 1);
+        }
+        name = match token {
+            TokenTree::Ident(name) => Some(name.span().byte_range().start),
+            _ => None,
+        };
+    }
 }
 
 /// Preserve comments, including the newline that terminates a line comment.

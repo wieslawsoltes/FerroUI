@@ -24,6 +24,14 @@ For a partial Rust preview, the designer can still edit supported literals and m
 
 Project metadata can expose a custom control in the source Outline and Properties even when the isolated preview cannot render it. Select the control in Outline to edit a mapped value. Use App Preview for a native frame with your app’s registered controls. [Open App Preview](runtime.md#render-with-your-app-in-app-preview)
 
+### Edit RSX builder values
+
+Choose the invocation in **Design**, select a control in the canvas or **Outline**, and edit a mapped value in **Properties**. Both `width: 160.0` and `width(160.0)` map to **Width**. A Grid child can use `Grid.row: 1` or `grid_row(1)`. The matching Canvas and DockPanel attached setters work the same way. For an application control, the build's RSX mapping identifies its supported setters.
+
+The edit changes the existing argument and keeps the builder call and adjacent Rust. **Reset** removes the assignment and retains its comments. If the view is fully mapped, edit the same value on the **XAML** tab and choose **Apply**. Undo restores the original buffer in one step. Hover over a mapped call in Rust to see the XAML property and type. Enable `ferroui.rsx.inlayHints` to show the type beside a mapped literal.
+
+Use the source arrow in **Properties** for a computed argument or a repeated assignment. **Assets → Use as image source** also works with a mapped `source(::ferroui_view::embedded_image(...))` call. Saving a builder call to a managed app uses the Cargo rebuild path when that call has no runtime patch slot. [Studio workflow](../native-controls.md#edit-rsx-builder-values) · [MCP workflow](reference.md#drive-an-editor-workflow) · [Embedded images](#edit-values-actions-and-resources)
+
 ### Format XAML
 
 Open a FerroUI XAML file and run **Format Document**. Select a range and run **Format Selection** to change the formatting inside that range. Select **FerroUI** in **Format Document With…** when several formatters are available. The same settings apply when VS Code runs formatting on save or paste.

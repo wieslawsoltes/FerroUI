@@ -1,6 +1,7 @@
-use crate::RsxProjection;
+use crate::{blocks::keep_comments, RsxProjection};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_view_syntax::snake_case;
+use proc_macro2::{TokenStream, TokenTree};
 
 #[derive(Clone, Copy, Debug)]
 pub struct RsxEvent {
@@ -48,7 +49,7 @@ impl RsxProjection<'_> {
             .fields
             .get(name)
             .ok_or("Select an authored literal property")?;
-        Ok(remove_field(self.source, *span))
+        reset_field(self.source, *span, node.close)
     }
 
     pub fn set_event(
@@ -129,6 +130,27 @@ pub(crate) fn remove_field(source: &str, span: SourceSpan) -> TextPatch {
         span,
         replacement: String::new(),
     }
+}
+
+pub(crate) fn reset_field(
+    source: &str,
+    field: SourceSpan,
+    close: usize,
+) -> Result<TextPatch, String> {
+    let suffix: TokenStream = source
+        .get(field.end..close)
+        .ok_or("The Rust field changed")?
+        .parse()
+        .map_err(|_| "Invalid Rust tokens after the field")?;
+    let end = match suffix.into_iter().next() {
+        Some(TokenTree::Punct(token)) if token.as_char() == ',' => {
+            field.end + token.span().byte_range().start
+        }
+        _ => field.end,
+    };
+    let mut patch = remove_field(source, SourceSpan::new(field.start, end));
+    patch.replacement = keep_comments(&source[patch.span.range()])?;
+    Ok(patch)
 }
 
 pub(crate) fn line_indent(source: &str, offset: usize) -> &str {
