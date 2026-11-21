@@ -177,12 +177,20 @@ fn property_review_uses_the_build_selected_module_and_its_current_draft() {
     let (fixture, mut service, uri, registry_uri) = fixture(false);
     let root = fs::read_to_string(fixture.0.join("app/lib.rs")).unwrap();
     fixture.write("app/lib.rs", &(root + "\nmod mapping_descriptors;\n"));
-    let descriptors = ASSEMBLY.lines().filter_map(|line| line.strip_prefix("    const "))
-        .map(|text| format!("pub(crate) const {text}\r\n")).collect::<String>();
+    let key = ASSEMBLY.lines().find(|line| line.starts_with("    const KEY:")).unwrap().trim();
+    let featured = ASSEMBLY.lines().find(|line| line.starts_with("    const FEATURED:")).unwrap().trim();
+    let descriptors = [
+        format!("pub(crate) {key}"),
+        "pub(crate) struct ControlMappings;".into(),
+        "impl ControlMappings {".into(),
+        format!("    pub(crate) {featured}"),
+        "}".into(),
+        String::new(),
+    ].join("\r\n");
     fixture.write("app/mapping_descriptors.rs", &descriptors);
     let registry = ASSEMBLY.lines().filter(|line| !line.starts_with("    const ")).collect::<Vec<_>>().join("\n")
-        .replace("mod mapping {", "mod mapping {\n    use crate::mapping_descriptors::{KEY as PUBLISHED_KEY, FEATURED};")
-        .replace("(self::KEY, FEATURED)", "(PUBLISHED_KEY, FEATURED)")
+        .replace("mod mapping {", "mod mapping {\n    use crate::mapping_descriptors::{KEY as PUBLISHED_KEY, ControlMappings as BuilderSet};")
+        .replace("(self::KEY, FEATURED)", "(PUBLISHED_KEY, BuilderSet::FEATURED)")
         .replace("(\"Unrelated\"", "(::ferroui_base::metadata::MarkupAssembly::CREATE_SOURCE_INFO, \"True\"),\n            (\"Unrelated\"")
         .replace('\n', "\r\n");
     fixture.write("app/registry.rs", &registry);
@@ -206,8 +214,15 @@ fn property_review_uses_the_build_selected_module_and_its_current_draft() {
     assert!(change.after.contains(r#"(PUBLISHED_KEY, "{\"path\": \"crate::builders::Card\", \"properties\": {\"Accent\": \"tone\", \"Title\": \"caption\"}}")"#));
     assert!(plan.documents.iter().all(|document| document.edit.uri != descriptor_uri));
 
+    let ambiguous = FileMoveDraft {
+        uri: descriptor_uri.clone(), version: 7,
+        source: format!("{descriptors}#[cfg(test)]\r\nimpl ControlMappings {{ {featured} }}\r\n"),
+    };
+    let error = service.plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[ambiguous]).unwrap_err();
+    assert!(error.0.contains("Use a literal or a text constant"), "{error:?}");
+
     let changed = FileMoveDraft {
-        uri: descriptor_uri, version: 7,
+        uri: descriptor_uri, version: 8,
         source: descriptors.replace("Customer.Views.FeaturedCard", "Customer.Views.DifferentCard"),
     };
     let error = service.plan_registered_property_rename_with_drafts(&uri, &request("Tone"), "Accent", &[changed]).unwrap_err();

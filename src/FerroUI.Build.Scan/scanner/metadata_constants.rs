@@ -8,12 +8,15 @@ use crate::scanner::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 use std::ops::Range;
-use syn::{Attribute, Expr, ExprPath, File, Item};
+use syn::{Attribute, Expr, ExprPath, File, ImplItem, Item, ItemImpl, Type};
+
+type LiteralSlot<'a> = Option<Literal<'a>>;
 
 pub(super) struct MetadataConstants<'a> {
     tree: Modules,
     files: BTreeMap<&'a str, usize>,
-    literals: BTreeMap<(usize, String), Option<Literal<'a>>>,
+    literals: BTreeMap<(usize, String), LiteralSlot<'a>>,
+    associated: BTreeMap<(usize, String, String), LiteralSlot<'a>>,
 }
 
 pub(super) struct Literal<'a> {
@@ -82,6 +85,7 @@ impl<'a> MetadataConstants<'a> {
             tree: Modules::new("", &[]),
             files: BTreeMap::new(),
             literals: BTreeMap::new(),
+            associated: BTreeMap::new(),
         }
     }
 
@@ -100,10 +104,20 @@ impl<'a> MetadataConstants<'a> {
         let Target::Item { module, name, rest } = self.target(scope, path)? else {
             return None;
         };
-        if !rest.is_empty() {
-            return None;
+        match rest.as_slice() {
+            [] => self.literals.get(&(module, name))?.as_ref(),
+            [member]
+                if matches!(
+                    self.tree.modules[module].items.get(&name)?.kind,
+                    ItemKind::Type
+                ) =>
+            {
+                self.associated
+                    .get(&(module, name, member.clone()))?
+                    .as_ref()
+            }
+            _ => None,
         }
-        self.literals.get(&(module, name))?.as_ref()
     }
 
     pub(super) fn framework_key(&self, scope: usize, expr: &Expr) -> bool {
@@ -185,6 +199,15 @@ impl<'a> MetadataConstants<'a> {
                         .or_insert(body);
                 }
                 Item::Use(item) => collect_imports(item, &mut imports, &mut uncertain),
+                Item::Struct(item) if !conditional(&item.attrs) => {
+                    self.tree
+                        .add_item(scope, &item.ident.to_string(), ItemKind::Type, false)
+                }
+                Item::Enum(item) if !conditional(&item.attrs) => {
+                    self.tree
+                        .add_item(scope, &item.ident.to_string(), ItemKind::Type, false)
+                }
+                Item::Impl(item) => self.index_inherent(source, scope, item),
                 _ => {}
             }
         }
@@ -216,6 +239,30 @@ impl<'a> MetadataConstants<'a> {
             inline.pop();
         }
         Some(())
+    }
+
+    fn index_inherent(&mut self, source: MetadataSource<'a>, scope: usize, item: &ItemImpl) {
+        let Type::Path(owner) = item.self_ty.as_ref() else {
+            return;
+        };
+        if item.trait_.is_some() || owner.qself.is_some() || !item.generics.params.is_empty() {
+            return;
+        }
+        let Some(owner) = owner.path.get_ident() else {
+            return;
+        };
+        for member in &item.items {
+            let ImplItem::Const(member) = member else {
+                continue;
+            };
+            let literal = (!conditional(&item.attrs) && !conditional(&member.attrs))
+                .then(|| Literal::capture(source, &member.expr))
+                .flatten();
+            self.associated
+                .entry((scope, owner.to_string(), member.ident.to_string()))
+                .and_modify(|previous| *previous = None)
+                .or_insert(literal);
+        }
     }
 }
 
