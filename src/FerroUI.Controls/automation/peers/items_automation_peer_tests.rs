@@ -240,6 +240,20 @@ fn items_control_peer_reports_no_scrolling_without_a_scroll_provider() {
 }
 
 #[test]
+fn an_items_control_that_is_no_list_box_has_no_element_to_scroll() {
+    let _scope = test_scope();
+    let target = ItemsControl::new();
+    let root = TestRoot::new();
+    root.set_child(target.clone());
+    root.execute_initial_layout_pass();
+    // `ListBox.Scroll` is read from a list box only (#612); the peer of another items control finds
+    // no element to scroll and reports no scrolling.
+    let provider = create_peer(&target).get_provider::<dyn IScrollProvider>().expect("the scroll provider");
+    assert!(!provider.horizontally_scrollable());
+    assert!(!provider.vertically_scrollable());
+}
+
+#[test]
 fn scroll_viewer_peer_scrolls_its_owner() {
     let _scope = test_scope();
     let content = crate::Border::new();
