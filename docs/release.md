@@ -346,7 +346,7 @@ A release is made only after the performance gate (`scripts/perf/gate.py`; `docs
 
 | Platform | Where | What runs |
 |---|---|---|
-| macOS | the machine of the release | every suite: `python3 scripts/perf/gate.py --base <base> --copy-gate --markdown <file>` |
+| macOS | the machine of the release | every suite on the build that ships: `python3 scripts/perf/gate.py --profile dist --base <base> --copy-gate --markdown <file>` |
 | Linux | a machine or a virtual machine with a display (`xvfb-run -a`) | every suite, the same command; with a copy of the sources, `--base-dir <copy of the base>` |
 | Windows | a machine or a virtual machine, in the session of a signed-in user | every suite, the same command; with a copy of the sources, `--base-dir <copy of the base>` |
 | Android | an emulator, or a device | the window suite: `--only window --window-device android` |
