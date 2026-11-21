@@ -1279,9 +1279,12 @@ impl Visual {
 
     /// Sets the bounds of the control. Called by the layout system.
     pub fn set_bounds(&self, value: Rect) {
-        if self.bounds.get() != value {
-            bump_geometry_version();
+        // A layout pass sets this for every child, mostly to what it is: unchanged bounds do not
+        // read the property, whose accessor may be a call (it depends on the inlining).
+        if self.bounds.get() == value {
+            return;
         }
+        bump_geometry_version();
         self.set_and_raise_cell(Self::bounds_property(), &self.bounds, value);
     }
 
