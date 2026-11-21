@@ -718,15 +718,24 @@ pub fn clr_property_info(
 /// The description of `Setter.Value` ([`clr_property_info`]) as a value:
 /// the provide-value target property of a markup extension that gives a
 /// setter its value.
+///
+/// It is made from the declared member alone (`Setter::__value_markup_property`), with the
+/// accessors and the name of the owner [`clr_property_info`] gives it: naming the whole
+/// declaration of the setter here kept every member of it, and what they reach, in every
+/// application with a theme (#612).
 #[inline(never)]
 pub fn setter_value_property() -> MarkupValue {
-    boxed(clr_property_info(
-        <Setter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-        "Value",
-        false,
-        ValueType::object(),
-        false,
-    ))
+    ferroui_base::ferro_thread_local! {
+        static INFO: Rc<dyn IPropertyInfo> = new_clr_property_info(
+            "FerroUI.Styling.Setter".to_string(),
+            Setter::__value_markup_property(),
+            "Value",
+            false,
+            ValueType::object(),
+            false,
+        );
+    }
+    boxed(INFO.with(Rc::clone))
 }
 
 /// The Rust type the declaration of the plain property `name` of `markup` states for its
@@ -802,13 +811,13 @@ fn cached_clr_property_info(
         return info;
     }
     let declared = declared_property(markup, index, name, is_static);
-    let info = new_clr_property_info(markup, declared, name, is_static, property_type, cached_boxed_boolean);
+    let info = new_clr_property_info(markup.full_name(), declared, name, is_static, property_type, cached_boxed_boolean);
     INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
     info
 }
 
 fn new_clr_property_info(
-    markup: &'static MarkupType,
+    owner: String,
     declared: &'static MarkupProperty,
     name: &str,
     is_static: bool,
@@ -816,7 +825,7 @@ fn new_clr_property_info(
     cached_boxed_boolean: bool,
 ) -> Rc<dyn IPropertyInfo> {
     let accessors = Rc::new(DeclaredAccessors {
-        owner: markup.full_name(),
+        owner,
         property: declared,
         is_static,
         cached_boxed_boolean,
@@ -2226,6 +2235,47 @@ mod tests {
         let elsewhere = declared_clr_property_info(markup, index + 1000, "Value", false, ValueType::object(), false);
         assert!(std::rc::Rc::ptr_eq(&by_name, &elsewhere));
         assert_eq!(at_index.name(), "Value");
+    }
+
+    /// Not from upstream (#612): the target property a setter's markup extension sees is made
+    /// from the declared member alone and behaves as the description of `Setter.Value` found
+    /// in the declaration: the same name, type and accessors, the value read back as written.
+    #[test]
+    fn the_setter_value_target_property_is_the_declared_member() {
+        use super::{clr_property_info, setter_value_property};
+        use ferroui_base::data::core::{IPropertyInfo, ValueType};
+        use ferroui_base::metadata::MarkupTyped;
+        use ferroui_base::styling::Setter;
+        use std::rc::Rc;
+
+        let declared = <Setter as MarkupTyped>::MARKUP.find_property("Value").expect("Setter.Value");
+        let alone = Setter::__value_markup_property();
+        assert_eq!(alone.name, declared.name);
+        assert_eq!((alone.type_)(), (declared.type_)());
+        assert_eq!(alone.get.is_some(), declared.get.is_some());
+        assert_eq!(alone.set.is_some(), declared.set.is_some());
+        assert_eq!(
+            alone.attributes.iter().map(|attribute| attribute.name).collect::<Vec<_>>(),
+            declared.attributes.iter().map(|attribute| attribute.name).collect::<Vec<_>>()
+        );
+
+        let value = setter_value_property().expect("a property description");
+        let info = value.downcast_ref::<Rc<dyn IPropertyInfo>>().expect("an IPropertyInfo").clone();
+        let by_name = clr_property_info(<Setter as MarkupTyped>::MARKUP, "Value", false, ValueType::object(), false);
+        assert_eq!(info.name(), by_name.name());
+        assert_eq!(info.property_type(), by_name.property_type());
+        assert_eq!((info.can_get(), info.can_set()), (by_name.can_get(), by_name.can_set()));
+        // One description per thread.
+        let again = setter_value_property().expect("a property description");
+        assert!(Rc::ptr_eq(&info, again.downcast_ref::<Rc<dyn IPropertyInfo>>().unwrap()));
+
+        let setter: ferroui_base::BoxedValue = Rc::new(Setter::empty());
+        let written: ferroui_base::BoxedValue = Rc::new(2.5f64);
+        info.set_boxed(&setter, Some(&written)).unwrap();
+        let read = info.get_boxed(&setter).expect("the value");
+        assert_eq!(read.downcast_ref::<f64>(), Some(&2.5));
+        let read = by_name.get_boxed(&setter).expect("the value");
+        assert_eq!(read.downcast_ref::<f64>(), Some(&2.5));
     }
 
     /// Not from upstream: the comparison of `string.Equals(.., StringComparison.OrdinalIgnoreCase)`.
