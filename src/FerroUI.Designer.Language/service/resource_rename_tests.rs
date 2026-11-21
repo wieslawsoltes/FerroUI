@@ -258,3 +258,69 @@ fn theme_family_stops_when_a_variant_has_an_unrelated_fallback() {
     assert!(error.0.contains("change the resolution"), "{error}");
     assert_eq!(service.document(&owner).unwrap().source(), palette);
 }
+
+#[test]
+fn scoped_theme_family_rename_reaches_nested_contrast_colors() {
+    let project = Project::new();
+    let palette = format!(
+        r#"<ResourceDictionary {NS} xmlns:t="using:FerroUI.Themes.WinUI">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default"><Color x:Key="Accent">Gray</Color></ResourceDictionary>
+    <ResourceDictionary x:Key="Dark"><Color x:Key="Accent">Black</Color></ResourceDictionary>
+    <ResourceInclude x:Key="{{x:Static t:WinUITheme.HighContrast}}" Source="Contrast.xaml"/>
+  </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>"#,
+    );
+    let contrast = format!(
+        "<ResourceDictionary {NS}><ResourceDictionary.MergedDictionaries><ResourceInclude Source='ContrastColors.xaml'/></ResourceDictionary.MergedDictionaries></ResourceDictionary>"
+    );
+    let colors = format!(
+        "<ResourceDictionary {NS}><Color x:Key='Accent'>Yellow</Color></ResourceDictionary>"
+    );
+    let consumer = format!(
+        "<Grid {NS}>\r\n<Grid.Resources><ResourceInclude Source='Palette.xaml'/></Grid.Resources>\r\n<!-- 🧭 --> <Border Background='{{DynamicResource Accent}}'/>\r\n<Border><Border.Resources><Color x:Key='Accent'>Purple</Color></Border.Resources><Button Background='{{StaticResource Accent}}'/></Border>\r\n</Grid>"
+    );
+    let owner = project.write("Palette.xaml", &palette);
+    let include = project.write("Contrast.xaml", &contrast);
+    let contrast_colors = project.write("ContrastColors.xaml", &colors);
+    let view = project.write("Review.xaml", &consumer);
+    let mut service = LanguageService::default();
+    project.index(&mut service);
+    service.open(&view, &consumer, 1).unwrap();
+    let origin = request(&consumer, "Accent", 1);
+    let family = service
+        .resource_rename_target(&view, &origin)
+        .unwrap()
+        .theme_family
+        .unwrap();
+    assert_eq!(family.owner.uri, owner);
+    assert_eq!(family.members.len(), 3);
+    assert!(family.members.iter().any(|entry| {
+        entry.layers == ["HighContrast"] && entry.declaration.uri == contrast_colors
+    }));
+    let plan = service
+        .plan_resource_rename(&view, &origin, "Review Accent 🧭")
+        .unwrap();
+    assert_eq!(plan.documents.len(), 3);
+    assert!(plan.documents.iter().all(|draft| draft.edit.uri != include));
+    let view_edit = plan
+        .documents
+        .iter()
+        .find(|draft| draft.edit.uri == view)
+        .unwrap();
+    assert_eq!(
+        view_edit.after,
+        consumer.replace(
+            "DynamicResource Accent",
+            "DynamicResource &apos;Review Accent 🧭&apos;"
+        )
+    );
+    service
+        .apply_workspace_edit(&crate::WorkspaceEdit {
+            document_changes: plan.documents.into_iter().map(|entry| entry.edit).collect(),
+        })
+        .unwrap();
+    let updated = service.document(&view).unwrap().source();
+    let key = updated.find("Review Accent 🧭").unwrap();
+    assert_eq!(service.definitions(&view, key).unwrap().len(), 3);
+}

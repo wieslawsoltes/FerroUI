@@ -279,7 +279,7 @@ The planner renames authored string keys. It follows includes, static and dynami
 
 Run **Rename Resource and References** from a member of a palette or from a resource reference that resolves to that palette. When the declarations belong to one theme family, **Rename Theme Resource** shows its layers. Review the owning dictionary, supported included layer files, and consuming views together.
 
-The review covers an authored key shared by **Shared**, **Default**, **Light**, and **Dark** layers in one owning dictionary. It preserves local shadows and checks whether the new key would overlap a declaration or change where a consumer resolves the key. If a reference can fall back to another owner, use its definition links to inspect the competing providers. [Compare theme colors](styles.md) · [MCP workflow](reference.md#review-a-resource-rename-with-mcp)
+The review covers an authored key shared across **Shared**, **Default**, **Light**, **Dark**, and native **High contrast** layers in one owning dictionary. For High contrast, use the theme package's static member, such as `{x:Static winui:WinUITheme.HighContrast}` with `xmlns:winui="using:FerroUI.Themes.WinUI"`. The review follows literal includes inside that layer. It preserves local shadows and checks whether the new key would overlap a declaration or change where a consumer resolves the key. If a reference can fall back to another owner, use its definition links to inspect the competing providers. [Compare theme colors](styles.md) · [MCP workflow](reference.md#review-a-resource-rename-with-mcp)
 
 ## Move a resource to another dictionary
 

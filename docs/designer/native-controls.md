@@ -87,7 +87,7 @@ Open the owning project. In **Code** or **Split**, place the caret on a keyed re
 
 For each file, compare **Original source** and **Proposed source**. The review follows included dictionaries and uses the current drafts for open views. Use the check icon to apply one history step across the participating buffers. Undo or Redo from any participating tab steps through the complete change. Save when the files are ready. [VS Code workflow](vscode/authoring.md#rename-a-resource-across-xaml-files) · [MCP workflow](vscode/reference.md#review-a-resource-rename-with-mcp)
 
-For a palette key defined in several layers of one dictionary, the review shows the **Theme family** and its participating layers. Open the authored palette or put the caret on a reference to that family. The same comparisons include inline declarations, supported included layer files, and consumer references. [Theme resource workflow](vscode/authoring.md#rename-a-key-across-theme-variants)
+For a palette key defined in several layers of one dictionary, the review shows the **Theme family** and its participating layers. Open the authored palette or put the caret on a reference to that family. The review includes inline declarations, native High contrast keys, supported included layer files, and consumer references. [Theme resource workflow](vscode/authoring.md#rename-a-key-across-theme-variants)
 
 ### Move a resource to another dictionary
 

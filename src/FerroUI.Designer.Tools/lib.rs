@@ -14,6 +14,7 @@ mod layout_helpers;
 mod layout_wrap;
 mod properties;
 mod selection;
+pub mod theme_variants;
 pub mod token_handoff;
 
 pub use canvas_guide_edit::{CanvasGuideDraft, CanvasGuideEdit, CanvasGuideUpdate};

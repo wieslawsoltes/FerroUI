@@ -478,7 +478,11 @@ fn lookup_dictionary<'a>(
 
 /// Decode an authored theme layer using the same rules as palette and resource lookup.
 pub fn theme_key(document: &Document, node: &Node) -> Option<String> {
+    use crate::theme_variants::{HIGH_CONTRAST_KEY, HighContrastProvider};
     if let Some(key) = literal_key(node) {
+        if key.trim() == HIGH_CONTRAST_KEY {
+            return None;
+        }
         // The runtime's built-in ThemeVariant converter trims surrounding whitespace.
         return Some(if matches!(key.trim(), "Default" | "Light" | "Dark") {
             key.trim().into()
@@ -509,14 +513,15 @@ pub fn theme_key(document: &Document, node: &Node) -> Option<String> {
     };
     let (owner, value) = member.rsplit_once('.')?;
     let (prefix, owner) = owner.rsplit_once(':').unwrap_or(("", owner));
-    if owner != "ThemeVariant"
-        || !namespaces
-            .get(prefix)
-            .is_some_and(|namespace| framework_type_namespace(owner, namespace))
-    {
-        return None;
+    let namespace = namespaces.get(prefix)?;
+    if owner == "ThemeVariant" && framework_type_namespace(owner, namespace) {
+        return matches!(value, "Default" | "Light" | "Dark").then(|| value.into());
     }
-    matches!(value, "Default" | "Light" | "Dark").then(|| value.into())
+    (value == HIGH_CONTRAST_KEY
+        && HighContrastProvider::ALL.iter().any(|provider| {
+            provider.theme_class() == owner && provider.matches_namespace(namespace)
+        }))
+    .then(|| HIGH_CONTRAST_KEY.into())
 }
 
 pub fn component_resource_references(

@@ -5,6 +5,7 @@ use super::super::super::{
 use super::super::same_declaration;
 use crate::{Location, Result, require};
 use ferroui_designer_tools::component_theme_key;
+use ferroui_designer_tools::theme_variants::known_theme_key;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
@@ -123,9 +124,7 @@ impl LanguageService {
                     .map(|edge| {
                         let provider = state.document.ast().node(edge.node)?;
                         let label = component_theme_key(&state.document, provider)?;
-                        if !matches!(label.as_str(), "Default" | "Light" | "Dark")
-                            || !labels.insert(label.clone())
-                        {
+                        if !known_theme_key(&label) || !labels.insert(label.clone()) {
                             return None;
                         }
                         let scope = self.resource_edge_target(file, edge)?;

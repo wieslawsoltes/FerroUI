@@ -2,6 +2,7 @@
 use super::{Entry, LanguageService, Occurrence, SymbolKind, source::Draft, tool_error};
 use crate::{LanguageError, Result, require};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeId};
+use ferroui_designer_tools::theme_variants::HIGH_CONTRAST_KEY;
 use ferroui_designer_tools::{
     ComponentResourceContext, ComponentResourceSources, IncludedResourceDocument,
     ScopedResourceResolution, component_property_attribute, component_theme_key,
@@ -126,7 +127,8 @@ pub(super) fn validate(
         }
     }
     let root = original.workspace_root(&entry.uri);
-    let mut themes = BTreeSet::from(["Default".to_owned(), "Light".to_owned(), "Dark".to_owned()]);
+    let mut themes =
+        BTreeSet::from(["Default", "Light", "Dark", HIGH_CONTRAST_KEY].map(str::to_owned));
     for (uri, state) in &original.documents {
         if original.workspace_root(uri) != root {
             continue;
@@ -148,12 +150,11 @@ pub(super) fn validate(
         }
     }
     let contexts = std::iter::once(None)
-        .chain(themes.into_iter().map(|theme| {
-            Some(ComponentResourceContext {
-                theme: Some(theme),
-                inherited_themes: Vec::new(),
-            })
-        }))
+        .chain(
+            themes
+                .iter()
+                .map(|theme| Some(ComponentResourceContext::for_authored_theme(theme))),
+        )
         .collect::<Vec<_>>();
     let proof = Proof {
         original: Sources(original),
