@@ -50,6 +50,7 @@ impl<T: PropertyValue> StyledProperty<T> {
         notifying: Option<NotifyingCallback>,
         is_attached: bool,
         members: &'static [(i64, &'static dyn Any)],
+        shared_storage: bool,
     ) -> Self {
         let default_value = metadata.default_value().clone();
         if let Some(validate) = &validate {
@@ -65,7 +66,8 @@ impl<T: PropertyValue> StyledProperty<T> {
                 notifying,
             )
             .with_members(members)
-            .with_validation(validate.is_some()),
+            .with_validation(validate.is_some())
+            .with_shared_storage(shared_storage),
             routes: StyledRoutes::new(),
             metadata: MetadataTable::new(host_type, metadata),
             single_default_value: RefCell::new(Some(default_value)),
@@ -252,6 +254,7 @@ impl<T: StyledValue> StyledProperty<T> {
     ) -> &'static Self {
         let property: &'static Self = Box::leak(Box::new(Self::new(
             name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached, T::MEMBERS,
+            <T::Storage as StyledValue>::SHARED_STORAGE,
         )));
         property.install_routes();
         property
@@ -280,6 +283,19 @@ fn stored_value<T: StyledValue>(value: &dyn Any) -> T {
 /// by `StyledProperty<T>`, one table for each value type. Everything else the routes do is in
 /// [`StyledRoutes`], compiled once (#997).
 pub(crate) trait StyledCodec {
+    /// The typed write of `value` with `priority` (the write of a typed route), `None` when it is
+    /// not a value of the value type. Asked for a value type kept as a shared storage type and for
+    /// a property with a validation callback, where the untyped write would convert or check the
+    /// value once more.
+    fn set_typed(
+        &'static self,
+        o: &FerroObject,
+        value: &dyn Any,
+        priority: BindingPriority,
+    ) -> Option<Option<Rc<dyn IDisposable>>>;
+    /// The value of the property on `o` in a box, read typed, for a value type kept as a shared
+    /// storage type (`None` for any other: decided when the function is compiled).
+    fn get_boxed_typed(&'static self, o: &FerroObject) -> Option<BoxedValue>;
     /// A new effective value of the property on `o`.
     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
     /// Coerces the default value of the property on `o`.
@@ -322,6 +338,24 @@ pub(crate) trait StyledCodec {
 }
 
 impl<T: StyledValue> StyledCodec for StyledProperty<T> {
+    fn set_typed(
+        &'static self,
+        o: &FerroObject,
+        value: &dyn Any,
+        priority: BindingPriority,
+    ) -> Option<Option<Rc<dyn IDisposable>>> {
+        let value = value.downcast_ref::<T>()?;
+        Some(o.set_value_with_priority(self, value.clone(), priority))
+    }
+
+    fn get_boxed_typed(&'static self, o: &FerroObject) -> Option<BoxedValue> {
+        if <T::Storage as StyledValue>::SHARED_STORAGE {
+            Some(Rc::new(o.get_value(self)))
+        } else {
+            None
+        }
+    }
+
     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
         o.values().create_effective_value(o, self)
     }
@@ -454,6 +488,11 @@ impl PropertyRoutes for StyledRoutes {
 
     fn route_get_value(&'static self, o: &FerroObject) -> BoxedValue {
         let property = self.property();
+        if property.shared_storage() {
+            if let Some(value) = self.codec().get_boxed_typed(o) {
+                return value;
+            }
+        }
         let values = o.values();
         if let Some(value) = values.boxed_effective_value(property) {
             return value;
@@ -514,6 +553,13 @@ impl PropertyRoutes for StyledRoutes {
                 }
                 Some(ValueMarker::DoNothing) => return None,
                 None => {}
+            }
+        }
+        // A value to convert to a shared storage type or to validate: the typed write, which does
+        // either with the value it has.
+        if property.shared_storage() || property.validates() {
+            if let Some(result) = self.codec().set_typed(o, value, priority) {
+                return result;
             }
         }
         if property.validates() && !self.codec().is_valid_value(value) {
@@ -606,6 +652,10 @@ impl PropertyRoutes for StyledRoutes {
     fn route_set_local_value(&'static self, o: &FerroObject, value: BoxedValue) {
         let property = self.property();
         if value.value_type_id() == property.property_type() {
+            if property.shared_storage() {
+                self.codec().set_typed(o, value.as_any(), BindingPriority::LocalValue);
+                return;
+            }
             o.values().set_untyped_local_value(o, property, value.as_any());
         }
     }
@@ -638,6 +688,7 @@ impl<T: StyledValue> AttachedProperty<T> {
         let property: &'static Self = Box::leak(Box::new(Self {
             base: StyledProperty::new(
                 name, owner_type, host_type, metadata, inherits, validate, notifying, true, T::MEMBERS,
+                <T::Storage as StyledValue>::SHARED_STORAGE,
             ),
         }));
         property.base.install_routes();
