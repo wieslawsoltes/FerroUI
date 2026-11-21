@@ -44,6 +44,11 @@ on:
         type: boolean
         required: false
         default: false
+      symbols:
+        description: With samples, the generic families of the builders hello world and the catalog from their symbols, in release and dist (dist linked again with its symbols), and on macOS the link line and what the linker deduplicates (#1001)
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -413,8 +418,9 @@ jobs:
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
           mkdir -p measured
-          for app in hello_window hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks todo-mvc winui-theme-gallery control-catalog-desktop; do
+          for app in hello_window hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks todo-mvc winui-theme-gallery winui-gallery control-catalog-desktop; do
             case "$app" in
+              winui-gallery) cargo build --locked --profile "$PROFILE" -p winui-gallery --features winui-gallery/desktop --bin winui-gallery; file="target/$PROFILE/winui-gallery" ;;
               hello_window) cargo build --locked --profile "$PROFILE" -p ferroui-desktop --example hello_window; file="target/$PROFILE/examples/hello_window" ;;
               *) cargo build --locked --profile "$PROFILE" -p "$app" --bin "$app"; file="target/$PROFILE/$app" ;;
             esac
@@ -426,6 +432,51 @@ jobs:
               "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
           done
           echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      # The generic families from the symbols (#1001): the release executables have them; the dist
+      # executables are linked again without stripping, with the link line and the list of what
+      # ld64 deduplicates, so that the option is shown to reach the linker.
+      - name: Generic instances and the deduplication of the linker
+        if: inputs.symbols && env.MEASURE == 'true'
+        env:
+          CARGO_TERM_COLOR: never
+          PROFILE: ${{ matrix.profile }}
+          SIDE: ${{ matrix.side }}
+        run: |
+          out="symbols-$PROFILE-$SIDE"
+          mkdir -p "$out"
+          ld -v > "$out/ld-version.txt" 2>&1 || true
+          verbose=(-C "link-arg=-Wl,-verbose_deduplicate")
+          if ld -verbose_deduplicate 2>&1 | grep -q 'unknown option'; then verbose=(); fi
+          for app in hello-world-builders control-catalog-desktop; do
+            binary="measured/$app"
+            if [ "$PROFILE" = dist ]; then
+              if ! cargo rustc --locked --profile dist -p "$app" --bin "$app" -- -C strip=none "${verbose[@]}" \
+                --print=link-args -W linker-messages -W linker-info > "$out/$app.log" 2>&1; then
+                tail -n 40 "$out/$app.log"
+                exit 1
+              fi
+              binary="target/dist/$app"
+            fi
+            python3 scripts/generic_instances.py "$binary" --top 60 --json "$out/$app.json" > "$out/$app.txt"
+            {
+              echo "### $app, $PROFILE, $SIDE: generic families"
+              echo
+              echo '```'
+              head -n 2 "$out/$app.txt"
+              sed -n '/instances .*family/,$p' "$out/$app.txt" | head -n 26 | cut -c1-120
+              if [ "$PROFILE" = dist ]; then
+                echo "the link line names -verbose_deduplicate: $(grep -c -- '-verbose_deduplicate' "$out/$app.log")"
+              fi
+              echo '```'
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Keep the generic families
+        if: always() && inputs.symbols && env.MEASURE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: symbols-${{ matrix.profile }}-${{ matrix.side }}
+          path: symbols-${{ matrix.profile }}-${{ matrix.side }}
+          retention-days: 7
       # Identical code folding (#1001): ld64 folds some duplicates by default; the dist build of
       # the ref linked again without it (-no_deduplicate), in a target folder of its own.
       - name: Without the deduplication of the linker
