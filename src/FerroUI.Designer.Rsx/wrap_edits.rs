@@ -1,6 +1,7 @@
 //! Wrap a mapped child run while retaining the original Rust token spans.
 use crate::{
     blocks::{comment_starts, keep_comments},
+    catalog::Children,
     xaml::XamlTree,
     RsxProjection,
 };
@@ -28,6 +29,7 @@ impl RsxProjection<'_> {
         let parent = self
             .nodes
             .get(request.parent)
+            .filter(|node| node.editable_children())
             .ok_or("Choose a mapped Rust container")?;
         if request.children.is_empty()
             || !parent
@@ -54,7 +56,7 @@ impl RsxProjection<'_> {
             }
         }
         if !children.windows(2).all(|pair| {
-            self.source[pair[0].span.end..pair[1].span.start]
+            self.source[pair[0].child_span().end..pair[1].child_span().start]
                 .parse::<TokenStream>()
                 .is_ok_and(|tokens| {
                     tokens.into_iter().all(
@@ -66,14 +68,21 @@ impl RsxProjection<'_> {
                 "A dynamic Rust child interrupts the selected run. Wrap it in source.".into(),
             );
         }
-        let first = children[0].span.start;
-        let last = children.last().unwrap().span.end;
+        let first = children[0].child_span().start;
+        let last = children.last().unwrap().child_span().end;
         let wrapper = Document::new(request.fragment).map_err(|error| error.to_string())?;
-        let wrapper = XamlTree::parse(&wrapper, self.catalog)?.tree.rsx_body();
+        let tree = XamlTree::parse(&wrapper, self.catalog)?.tree;
+        let collection = parent.child_collection.is_some();
+        if collection && tree.class.children() != Children::Panel {
+            return Err("Choose a panel to wrap Rust collection members".into());
+        }
+        let wrapper = tree.rsx_body();
         let open = wrapper
             .strip_suffix('}')
             .ok_or("The wrapper has no Rust constructor")?
             .trim_end();
+        let invocation = if collection { "::ferroui_view::rsx! { " } else { "" };
+        let open = if collection { format!("{invocation}{open}\nchildren: [") } else { open.to_owned() };
         let mut patches = self.wrap_attributes(&request)?;
         if let Some(indent) = line_indent(self.source, first) {
             let unit = line_indent(self.source, parent.span.start)
@@ -89,6 +98,7 @@ impl RsxProjection<'_> {
                 "\n"
             };
             let inner = format!("{eol}{indent}{unit}");
+            let member_indent = if collection { unit.repeat(2) } else { unit.to_owned() };
             let opening = open
                 .lines()
                 .enumerate()
@@ -116,11 +126,12 @@ impl RsxProjection<'_> {
                             .iter()
                             .any(|patch| patch.span.start <= offset && offset < patch.span.end)
                 })
-                .map(|offset| insert(offset, unit.to_owned()))
+                .map(|offset| insert(offset, member_indent.clone()))
                 .collect();
             patches.extend(indents);
-            patches.push(insert(first, format!("{opening}{inner}")));
-            patches.push(insert(last, format!("{eol}{indent}}}")));
+            patches.push(insert(first, format!("{opening}{eol}{indent}{member_indent}")));
+            let close = if collection { format!("{inner}]{eol}{indent}}} }}") } else { format!("{eol}{indent}}}") };
+            patches.push(insert(last, close));
         } else {
             patches.push(insert(
                 first,
@@ -129,7 +140,7 @@ impl RsxProjection<'_> {
                     open.lines().map(str::trim).collect::<Vec<_>>().join(" ")
                 ),
             ));
-            patches.push(insert(last, " }".into()));
+            patches.push(insert(last, if collection { " ] } }" } else { " }" }.into()));
         }
         let candidate = TextPatch::apply_all(self.source, patches.clone())
             .map_err(|error| error.to_string())?;
@@ -138,7 +149,7 @@ impl RsxProjection<'_> {
         let added = parsed
             .nodes
             .iter()
-            .find(|node| node.span.start == first)
+            .find(|node| node.span.start == first + invocation.len())
             .ok_or("The wrapper has no accepted Rust mapping")?;
         if parsed.nodes.len() != self.nodes.len() + 1
             || parsed.omitted_count != self.omitted_count

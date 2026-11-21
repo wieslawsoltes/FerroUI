@@ -1,6 +1,7 @@
 use ferroui_designer_core::SourceSpan;
 use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
 use std::collections::BTreeMap;
+use syn::{Expr, Macro, Stmt};
 
 pub(crate) struct Block {
     pub(crate) span: SourceSpan,
@@ -45,30 +46,68 @@ pub(crate) fn contains_trivia(source: &str, stream: TokenStream, span: SourceSpa
     visit_comments(source, stream, span, &mut |_, _| true)
 }
 
-/// Locate builder call delimiters in the original token stream. The shared
-/// RSX parser retains the method and arguments, including their source spans.
-pub(crate) fn call_spans(stream: TokenStream) -> BTreeMap<usize, SourceSpan> {
-    let mut result = BTreeMap::new();
-    scan_calls(stream, &mut result, 0);
-    result
+/// A literal macro expression, optionally enclosed in parentheses or a Rust
+/// block whose sole statement is the macro returned from that block.
+pub(crate) fn expression_macro(expression: &Expr) -> Option<&Macro> {
+    let mut current = expression;
+    for _ in 0..super::tree::MAX_DEPTH {
+        match current {
+            Expr::Macro(body) if body.attrs.is_empty() => return Some(&body.mac),
+            Expr::Paren(group) if group.attrs.is_empty() => current = &group.expr,
+            Expr::Block(body) if body.attrs.is_empty() && body.label.is_none() => {
+                match body.block.stmts.as_slice() {
+                    [Stmt::Expr(tail, None)] => current = tail,
+                    [Stmt::Macro(tail)] if tail.semi_token.is_none() && tail.attrs.is_empty() => return Some(&tail.mac),
+                    _ => return None,
+                }
+            }
+            _ => return None,
+        }
+    }
+    None
 }
 
-fn scan_calls(stream: TokenStream, result: &mut BTreeMap<usize, SourceSpan>, depth: usize) {
-    if depth > super::tree::MAX_DEPTH {
-        return;
+/// Delimiters of builder calls and wrapped Rust children in the original stream.
+#[derive(Default)]
+pub(crate) struct SourceDelimiters {
+    pub(crate) calls: BTreeMap<usize, SourceSpan>,
+    pub(crate) blocks: BTreeMap<usize, SourceSpan>,
+}
+
+impl SourceDelimiters {
+    pub(crate) fn read(stream: TokenStream) -> Self {
+        let mut result = Self::default();
+        result.scan(stream, 0);
+        result
     }
-    let mut name = None;
-    for token in stream {
-        if let TokenTree::Group(group) = &token {
-            if let Some(start) = name.filter(|_| group.delimiter() == Delimiter::Parenthesis) {
-                result.insert(start, SourceSpan::new(start, group.span_close().byte_range().end));
-            }
-            scan_calls(group.stream(), result, depth + 1);
+
+    fn scan(&mut self, stream: TokenStream, depth: usize) {
+        if depth > super::tree::MAX_DEPTH {
+            return;
         }
-        name = match token {
-            TokenTree::Ident(name) => Some(name.span().byte_range().start),
-            _ => None,
-        };
+        let mut name = None;
+        for token in stream {
+            if let TokenTree::Group(group) = &token {
+                let end = group.span_close().byte_range().end;
+                match group.delimiter() {
+                    Delimiter::Parenthesis => {
+                        if let Some(start) = name {
+                            self.calls.insert(start, SourceSpan::new(start, end));
+                        }
+                    }
+                    Delimiter::Brace => {
+                        let start = group.span_open().byte_range().start;
+                        self.blocks.insert(start, SourceSpan::new(start, end));
+                    }
+                    _ => {}
+                }
+                self.scan(group.stream(), depth + 1);
+            }
+            name = match token {
+                TokenTree::Ident(name) => Some(name.span().byte_range().start),
+                _ => None,
+            };
+        }
     }
 }
 

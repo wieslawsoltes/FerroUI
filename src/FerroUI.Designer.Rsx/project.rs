@@ -1,6 +1,7 @@
 use crate::animation::RsxAnimationIssue;
-use crate::blocks::{blocks, call_spans, contains_trivia, keep_comments};
+use crate::blocks::{blocks, contains_trivia, keep_comments, SourceDelimiters};
 use crate::catalog::Children;
+use crate::child_collection::{ChildEnvelope, CollectionSource, InlineChildren, control_expression};
 use crate::columns::{ColumnSource, collection_member, table_kind};
 use crate::item_templates::TemplateFields;
 use crate::literal;
@@ -22,6 +23,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use syn::ext::IdentExt;
 use syn::spanned::Spanned;
 
+mod children;
 mod property_fields;
 use property_fields::PropertyField;
 
@@ -40,6 +42,8 @@ pub struct RsxNode {
     /// Token starts of children omitted from the static projection, in source order.
     pub(crate) opaque_children: Vec<usize>,
     pub(crate) computed_child_setter: bool,
+    pub(crate) child_collection: Option<CollectionSource>,
+    pub(crate) envelope: Option<ChildEnvelope>,
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
     pub(crate) columns: Option<ColumnSource>,
@@ -67,6 +71,10 @@ impl RsxNode {
             && (slot == Children::Panel || self.opaque_children.is_empty())
             && !self.expressions.contains_key("Content")
             && !self.computed_child_setter
+    }
+
+    pub(crate) fn child_span(&self) -> SourceSpan {
+        self.envelope.map_or(self.span, ChildEnvelope::span)
     }
 }
 
@@ -148,6 +156,7 @@ impl RsxProjection<'_> {
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
         self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_styles() && !self.has_projected_states() && !self.has_projected_columns()
+            && !self.has_explicit_child_lists()
     }
 
     pub fn set_property(&self, index: usize, name: &str, value: &str) -> Result<TextPatch, String> {
@@ -206,6 +215,9 @@ impl RsxProjection<'_> {
                 .map(|value| self.set_property(value.index, value.name, value.value))
                 .collect();
         }
+        if self.has_explicit_child_lists() {
+            return Err("Use the canvas or Outline to edit the authored Rust child list".into());
+        }
         if self.inner_trivia {
             return Err("Edit RSX structure in the Rust editor to keep its comments".into());
         }
@@ -214,6 +226,11 @@ impl RsxProjection<'_> {
             self.nodes[0].span,
             &draft.tree.rsx_body(),
         )])
+    }
+
+    /// Whether structural edits must keep explicit Rust child expressions or collections.
+    pub fn has_explicit_child_lists(&self) -> bool {
+        self.nodes.iter().any(|node| node.child_collection.is_some() || node.envelope.is_some())
     }
 }
 
@@ -304,7 +321,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
 #[derive(Default)]
 struct State<'a> {
     nodes: Vec<RsxNode>,
-    calls: BTreeMap<usize, SourceSpan>,
+    delimiters: SourceDelimiters,
     omissions: Vec<String>,
     omitted_count: usize,
     styles: BTreeMap<usize, Vec<RsxStyle>>,
@@ -366,6 +383,7 @@ impl State<'_> {
             .ok_or("Use a FerroUI control or a registered RSX mapping")?;
         let mut result = Element::new(class.clone());
         let table = table_kind(&class);
+        let collection = InlineChildren::read(node, &class);
         let index = self.nodes.len();
         self.nodes.push(RsxNode {
             span: SourceSpan::new(name.start, node.braces.close().byte_range().end),
@@ -380,6 +398,8 @@ impl State<'_> {
             child_indices: Vec::new(),
             opaque_children: Vec::new(),
             computed_child_setter: false,
+            child_collection: None,
+            envelope: None,
             state_slot: if class.xaml_property(None, "visual_states").is_none() {
                 ArraySlot::Missing
             } else {
@@ -395,7 +415,12 @@ impl State<'_> {
         });
         let mut seen = BTreeSet::new();
         let mut state_fields = Vec::new();
-        for attribute in &node.attributes {
+        for (attribute_index, attribute) in node.attributes.iter().enumerate() {
+            if collection.as_ref().is_some_and(|list| {
+                list.attribute == attribute_index && self.set_child_collection(index, list, attribute)
+            }) {
+                continue;
+            }
             let (owner, name, value) = match attribute {
                 Attribute::Value {
                     owner, name, value, ..
@@ -404,7 +429,7 @@ impl State<'_> {
                     let setter = name.unraw().to_string();
                     let argument = arguments.first().filter(|_| arguments.len() == 1);
                     let name = crate::animation::syntax::span(name);
-                    let field = self.calls.get(&name.start).copied();
+                    let field = self.delimiters.calls.get(&name.start).copied();
                     if let Some(styles) = argument.filter(|_| {
                         setter == "styles" && class.xaml_property(None, "styles").is_none()
                     }) {
@@ -510,6 +535,9 @@ impl State<'_> {
             );
         }
         let placement = class.children();
+        if let Some(collection) = collection.filter(|_| self.nodes[index].child_collection.is_some()) {
+            self.project_child_collection(source, index, &mut result, collection, depth, catalog)?;
+        }
         let text_property = class
             .text_property()
             .filter(|name| node.children.len() == 1 && !seen.contains(*name));
@@ -524,16 +552,23 @@ impl State<'_> {
                     .insert(name.into(), literal::text_value(&value.value()));
                 continue;
             }
-            match child {
-                Node::Element(element)
-                    if catalog.rust(&element.path).is_some()
-                        && accepts_control(placement, &result) =>
-                {
+            let static_expression = match child {
+                Node::Expr(value, start) => self.delimiters.blocks.get(&start.byte_range().start)
+                    .copied()
+                    .zip(control_expression(value)),
+                _ => None,
+            };
+            match static_expression.as_ref().map_or(child, |(_, control)| control) {
+                control @ Node::Element(element) if catalog.rust(&element.path).is_some()
+                    && accepts_control(placement, &result) => {
                     let child_index = self.nodes.len();
                     result
                         .children
-                        .push(self.element(source, child, depth + 1, catalog)?);
+                        .push(self.element(source, control, depth + 1, catalog)?);
                     self.nodes[index].child_indices.push(child_index);
+                    if let Some((span, _)) = static_expression {
+                        self.nodes[child_index].envelope = Some(ChildEnvelope::Block(span));
+                    }
                 }
                 _ => {
                     self.nodes[index].opaque_children.push(child_start(child));
@@ -613,7 +648,7 @@ fn parse_body<'a>(
     };
     let mut state = State {
         modules,
-        calls: call_spans(tokens),
+        delimiters: SourceDelimiters::read(tokens),
         ..State::default()
     };
     let tree = state.element(source, root, 0, catalog)?;

@@ -10,7 +10,7 @@ export async function verifyProjectImageSource({ invoke, content }: McpFixture):
     for (const fixture of [
         { path: 'ImageSourceReview.xaml', source: '<Image xmlns="https://github.com/ferroui" Source="./Assets/Preview%20Image.png"/>' },
         { path: 'image_source_review.rs', source: `fn view() { rsx! { Image {
-            source: ::ferroui_view::embedded_image(/* credit 🎨 */ ::core::include_bytes!(r#"./Assets/Preview Image.png"#)),
+            source(::ferroui_view::embedded_image(/* credit 🎨 */ ::core::include_bytes!(r#"./Assets/Preview Image.png"#))),
         } } }` },
     ]) {
         const uri = vscode.Uri.joinPath(root, fixture.path);

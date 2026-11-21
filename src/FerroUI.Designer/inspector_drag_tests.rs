@@ -101,6 +101,64 @@ fn mixed_rsx_outline_placement_keeps_source_selection_and_one_undo() {
 }
 
 #[test]
+fn inline_rsx_collection_move_uses_the_same_source_in_layers_and_mcp() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"rsx! { StackPanel {
+        StackPanel { name("Source"),
+            children: [
+                rsx! { TextBlock { name("Row"), text(/* Keep 🧭 */ "Customers") } },
+            ],
+        }
+        StackPanel { name("Destination"),
+            children([
+                rsx! { Button { name("Anchor"), content("Inspect") } },
+                current_selection(),
+                rsx! { Button { name("Tail"), content("Next") } },
+            ]),
+        }
+    } }"#;
+    let mut session = DesignerSession::with_rust_source(
+        source, ContentControl::new(), "file:///CollectionPlacement.rs".into(),
+    ).unwrap();
+    let row = named(&session, "Row");
+    let anchor = named(&session, "Anchor");
+    let drag = OutlineDrag::capture(&session, [row]).unwrap();
+    assert!(drag.can_drop(&session, anchor, DropPosition::After));
+    drag.commit(&mut session, anchor, DropPosition::After).unwrap();
+    let moved = session.authored_source().to_owned();
+    assert_eq!(session.selection(), &[named(&session, "Row")]);
+    assert!(content_children(&session, named(&session, "Source")).is_empty());
+    assert!(moved.find("name(\"Anchor\")") < moved.find("name(\"Row\")"));
+    assert!(moved.find("name(\"Row\")") < moved.find("current_selection()"));
+    assert!(moved.contains("text(/* Keep 🧭 */ \"Customers\")"));
+    session.undo().unwrap();
+    assert_eq!(session.authored_source(), source);
+    assert!(!session.can_undo());
+
+    #[cfg(feature = "mcp")]
+    {
+        use ferroui_mcp::{Permissions, UiToolProvider};
+        use serde_json::json;
+
+        let args = json!({
+            "expected_revision": session.document().revision(),
+            "node": named(&session, "Row"),
+            "anchor": named(&session, "Anchor"),
+            "position": "after",
+        });
+        let session = Rc::new(RefCell::new(session));
+        let mcp = crate::mcp::DesignerMcp::new(&session);
+        mcp.call("designer_placement_hint", &args, Permissions::default()).unwrap();
+        let write = Permissions { allow_property_writes: true, allow_input: false };
+        mcp.call("designer_place", &args, write).unwrap();
+        assert_eq!(session.borrow().authored_source(), moved);
+        assert!(mcp.call("designer_place", &args, write).is_err());
+        session.borrow_mut().undo().unwrap();
+        assert_eq!(session.borrow().authored_source(), source);
+    }
+}
+
+#[test]
 fn outline_reparent_preserves_source_order_namespace_identity_preview_and_single_undo() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let mut session = new_session(SOURCE);

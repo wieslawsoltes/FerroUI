@@ -4,6 +4,7 @@
 mod animation;
 mod blocks;
 mod catalog;
+mod child_collection;
 mod columns;
 mod image_source;
 mod item_templates;

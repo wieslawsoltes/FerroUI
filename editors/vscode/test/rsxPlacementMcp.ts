@@ -3,21 +3,35 @@ import * as vscode from 'vscode';
 import type { OutlineNode } from '../src/protocol';
 import type { McpFixture } from './mcp';
 
-export async function verifyRsxPlacement({ invoke, content }: McpFixture): Promise<void> {
-    const path = 'review_placement.rs';
+export async function verifyRsxPlacement(fixture: McpFixture): Promise<void> {
+    await verifyPlacement(fixture, false);
+    await verifyPlacement(fixture, true);
+}
+
+async function verifyPlacement({ invoke, content }: McpFixture, collection: boolean): Promise<void> {
+    const path = collection ? 'review_collection_placement.rs' : 'review_placement.rs';
     const uri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders![0].uri, path);
+    const computed = collection ? 'computed_children()' : 'for item in rows()';
     const source = [
         'fn heading() { rsx! { TextBlock { text: "Heading 🧭" } }; }',
         'fn review() { rsx! { StackPanel {',
         '    StackPanel { name: "Origin",',
         '        Button { name: "Moved", content: "Move", /* keep 🦀 */ on_click: save() }',
-        '        Border { width: 44.0 }',
+        '        Border { width(44.0) }',
         '        { computed_origin_child() }',
         '    }',
         '    StackPanel { name: "Destination",',
-        '        TextBlock { name: "Anchor", text: "Anchor" }',
-        '        for item in rows() { TextBlock { text: item.title } }',
-        '        TextBlock { name: "Tail", text: message() }',
+        ...(collection ? [
+            '        children([',
+            '            rsx! { TextBlock { name: "Anchor", text("Anchor") } },',
+            '            computed_children(),',
+            '            rsx! { TextBlock { name: "Tail", text(message()) } },',
+            '        ]),',
+        ] : [
+            '        TextBlock { name: "Anchor", text: "Anchor" }',
+            '        for item in rows() { TextBlock { text: item.title } }',
+            '        TextBlock { name: "Tail", text: message() }',
+        ]),
         '    }',
         '    Border { name: "Computed", { body() } }',
         '} }; }',
@@ -50,11 +64,12 @@ export async function verifyRsxPlacement({ invoke, content }: McpFixture): Promi
     content(await invoke('designer_place', request));
     const placed = document.getText();
     const first = placed.indexOf('name: "Moved"');
-    const second = placed.indexOf('width: 44.0');
+    const second = placed.indexOf('width(44.0)');
     assert.ok(placed.indexOf('name: "Anchor"') < first && first < second);
-    assert.ok(second < placed.indexOf('for item in rows()'));
+    assert.ok(second < placed.indexOf(computed));
     assert.match(placed, /\/\* keep 🦀 \*\/ on_click: save\(\)/);
     assert.ok(placed.includes('{ computed_origin_child() }'));
+    if (collection) assert.match(placed, /::ferroui_view::rsx! \{ Button \{ name: "Moved"/);
     assert.equal(placed.split('\r\n')[0], source.split('\r\n')[0]);
     frame = await outline();
     const { selection } = content<{ selection: number[] }>(await invoke('designer_wait', { session }));
@@ -78,8 +93,8 @@ export async function verifyRsxPlacement({ invoke, content }: McpFixture): Promi
     await undo(source);
     assert.equal(document.eol, vscode.EndOfLine.CRLF);
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
-        tab.label === 'Design · review_placement.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
+        tab.label === `Design · ${path}` || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(tabs);
     await vscode.workspace.fs.delete(uri, { useTrash: false });
-    console.log('Moved a mapped RSX selection across panels and inserted a Toolbox control in VS Code with checked revisions, retained selection, and individual Undo steps');
+    console.log(`Moved an RSX selection into ${collection ? 'an explicit child collection' : 'an authored panel'} and inserted a Toolbox control in VS Code with checked revisions, retained selection, and individual Undo steps`);
 }

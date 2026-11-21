@@ -153,6 +153,10 @@ Choose the `rsx!` invocation and select the control in the canvas or **Layers**.
 
 Select a control in a Rust view and open **Properties**. Edit a supported literal authored as a field, such as `width: 160.0`, or as a single-argument call, such as `width(160.0)`. The same editor handles mapped layout calls such as `grid_row(1)` and setters registered by the project. **Reset** removes the assignment and retains its comments. Use the source arrow to open a computed value. Each applied edit takes one Undo step. [VS Code workflow](vscode/authoring.md#edit-rsx-builder-values) · [MCP tools](vscode/reference.md#drive-an-editor-workflow)
 
+### Arrange an inline Rust child collection
+
+Open the outer RSX invocation for a panel whose children come from an inline array or a qualified `::std::vec!` of nested RSX controls. Drag a mapped member in **Layers** or on the canvas. Insert a Toolbox control, move a member to another authored panel, or wrap consecutive members in a panel. Studio keeps their authored expressions and comments and restores the exact Rust in one Undo. Use the Rust editor to change computed entries. [Collection syntax and limits](vscode/authoring.md#arrange-an-inline-rust-child-collection)
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

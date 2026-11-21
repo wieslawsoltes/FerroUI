@@ -1,6 +1,6 @@
 //! Source-preserving placement. Native layout supplies the intended projected tree,
 //! while the Rust parser supplies the original child slots and opaque boundaries.
-use crate::{RsxProjection, placement::ChildBoundary, source_edits::remove_field, xaml::XamlTree};
+use crate::{RsxProjection, placement::ChildBoundary, xaml::XamlTree};
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind, SourceSpan, TextPatch};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -42,6 +42,7 @@ impl RsxProjection<'_> {
         };
         let mut destinations = BTreeSet::new();
         let mut moving = BTreeSet::new();
+        let mut departures = BTreeMap::<NodeId, Vec<usize>>::new();
         let mut values = BTreeMap::<usize, Vec<TextPatch>>::new();
         for edit in edits {
             match edit {
@@ -56,7 +57,10 @@ impl RsxProjection<'_> {
                             "Edit the source container's computed child slot in Rust".into()
                         );
                     }
-                    moving.insert(index(*node)?);
+                    let moving_index = index(*node)?;
+                    if moving.insert(moving_index) {
+                        departures.entry(source_parent).or_default().push(moving_index);
+                    }
                     destinations.insert(
                         draft
                             .ast()
@@ -123,12 +127,14 @@ impl RsxProjection<'_> {
                 let mut items = Vec::new();
                 for &node in &children[start..at] {
                     if let Some(&index) = indices.get(&node) {
-                        let span = self.nodes[index].span;
                         items.push((
-                            self.moved_child(span, values.remove(&index).unwrap_or_default())?,
+                            self.moved_child(
+                                index,
+                                parent_index,
+                                values.remove(&index).unwrap_or_default(),
+                            )?,
                             false,
                         ));
-                        patches.push(remove_field(self.source, span));
                         relocated.insert(index);
                     } else {
                         items.push((XamlTree::fragment(draft, self.catalog, node)?, true));
@@ -139,6 +145,13 @@ impl RsxProjection<'_> {
         }
         if relocated != moving {
             return Err("The placement lost an authored Rust control".into());
+        }
+        for (parent, removed) in departures {
+            patches.extend(self.detach_children(
+                index(parent)?,
+                &removed,
+                control_children(draft, parent).next().is_none(),
+            )?);
         }
         patches.extend(values.into_values().flatten());
         let edited = TextPatch::apply_all(self.source, patches.clone())

@@ -1,6 +1,7 @@
 use super::literals::rewrite_literal;
 use crate::{
     animation::syntax::{argument, chain, span, view_argument},
+    child_collection::{InlineChildren, control_expression},
     tree::MAX_DEPTH,
     RsxCatalog,
 };
@@ -76,6 +77,11 @@ impl<'a> NameReferences<'a> {
                             self.inspect_field(owner, &setter, value)?;
                         }
                     }
+                    if let Some(collection) = class.as_ref().and_then(|class| InlineChildren::read(node, class)) {
+                        for entry in collection.members.into_iter().filter_map(|entry| entry.control) {
+                            self.visit(std::slice::from_ref(&entry), depth + 1)?;
+                        }
+                    }
                     self.visit(&node.children, depth + 1)?;
                 }
                 Node::For(_, _, body, _) => self.visit(body, depth + 1)?,
@@ -85,7 +91,12 @@ impl<'a> NameReferences<'a> {
                         self.visit(otherwise, depth + 1)?;
                     }
                 }
-                Node::Expr(..) | Node::Text(..) => {}
+                Node::Expr(value, _) => {
+                    if let Some(child) = control_expression(value) {
+                        self.visit(std::slice::from_ref(&child), depth + 1)?;
+                    }
+                }
+                Node::Text(..) => {}
             }
         }
         Ok(())

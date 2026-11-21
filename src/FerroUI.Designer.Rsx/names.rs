@@ -4,7 +4,7 @@ mod references;
 
 use self::literals::rewrite_literal;
 use self::references::NameReferences;
-use crate::{blocks::blocks, blocks::keep_comments, RsxProjection};
+use crate::{blocks::blocks, RsxProjection};
 use ferroui_designer_core::TextPatch;
 use ferroui_markup::markup::parsers::selector_grammar::SelectorGrammar;
 use ferroui_view_syntax::Node;
@@ -80,13 +80,7 @@ impl RsxProjection<'_> {
                 )?);
             }
             (None, _, None) => {}
-            (_, _, name) => {
-                let mut patch = self.edit_property(index, "Name", name)?;
-                if name.is_none() {
-                    patch.replacement = keep_comments(&self.source[patch.span.range()])?;
-                }
-                patches.push(patch);
-            }
+            (_, _, name) => patches.push(self.edit_property(index, "Name", name)?),
         }
         Ok(patches)
     }

@@ -117,7 +117,29 @@ Use the size button to change logical width, height, preset, or theme. With the 
 
 Choose an RSX invocation in **Design** and switch Outline to **Source**. Move one mapped control or a selection in the canvas or Outline, or insert a compatible Toolbox item. The move preserves source order and keeps the moved controls selected. Their Rust blocks retain handler expressions, comments, and computed values. A placement can update the mapped layout literals needed by the new parent.
 
-In Outline, **After** inserts immediately after the chosen authored control, before the next loop, conditional, expression, or control in that Rust child list. **Before** inserts ahead of the chosen control and **Inside** appends to the chosen container. Dynamic siblings keep their order. For a panel with only computed children visible in Rust, drop **Inside** to append a mapped control. Edit computed single-child slots and explicit computed child collections in the Rust editor. If the preview was updated during a drag, start it again. One Undo restores all controls and layout values changed by the gesture. [Studio workflow](../native-controls.md#hierarchy-and-artboard) · [MCP arguments](reference.md#drive-an-editor-workflow)
+In Outline, **After** inserts immediately after the chosen authored control, before the next loop, conditional, expression, or control in that Rust child list. **Before** inserts ahead of the chosen control and **Inside** appends to the chosen container. Dynamic siblings keep their order. A panel with only loops or expression children in its RSX body accepts an **Inside** drop. Edit computed single-child slots in the Rust editor. If the preview was updated during a drag, start it again. One Undo restores all controls and layout values changed by the gesture. [Studio workflow](../native-controls.md#hierarchy-and-artboard) · [MCP arguments](reference.md#drive-an-editor-workflow)
+
+### Arrange an inline Rust child collection
+
+Choose the panel's outer RSX invocation in **Design**. A single `children: [rsx! { … }, …]` assignment or `children(::std::vec![rsx! { … }, …])` call can supply its child list. The designer maps a nested invocation that returns one supported control. Computed entries stay in their original order and are evaluated by the app.
+
+```rust
+rsx! {
+    StackPanel {
+        children([
+            rsx! { TextBlock { text("Daily results") } },
+            status_row(),
+            rsx! { Button { content("Inspect") } },
+        ]),
+    }
+}
+```
+
+Here `status_row()` returns a FerroUI `Element`. The designer can show and move the text and button around that expression.
+
+Select a mapped member in **Outline** or on the canvas. Drag to reorder it, move it to another mapped panel, or drop a Toolbox control into the collection. Use **Wrap Selection** with a panel for consecutive mapped members. The source edit carries the original member expression and its comments. Moving every member to another panel removes the empty assignment. Undo restores the exact source in one step. Edit lists built by a function and panels with competing child slots in the Rust editor.
+
+**Properties** edits supported values inside the original member. A fully mapped collection also accepts value changes from **XAML**. Use the canvas or Outline for structural authoring so the original Rust collection stays in place. [Studio workflow](../native-controls.md#arrange-an-inline-rust-child-collection) · [MCP placement](reference.md#drive-an-editor-workflow)
 
 ## Wrap selected controls
 
