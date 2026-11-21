@@ -20,6 +20,7 @@ use ferroui_designer_tools::TableKind;
 use ferroui_view_syntax::{Attribute, Node};
 use proc_macro2::TokenStream;
 use std::collections::{BTreeMap, BTreeSet};
+use std::cell::OnceCell;
 use syn::ext::IdentExt;
 use syn::spanned::Spanned;
 
@@ -178,7 +179,8 @@ impl RsxProjection<'_> {
         let outside_static_values = || format!("{value:?} is outside the static RSX values for {name}");
         let codec = node.class.literal(name).ok_or_else(outside_static_values)?;
         if codec == literal::Literal::EmbeddedImage {
-            return crate::image_source::edit(self.source, span, value).ok_or_else(outside_static_values);
+            return crate::image_source::edit(self.source, span, value, self.modules)
+                .ok_or_else(outside_static_values);
         }
         let mut replacement = codec.rust(value).ok_or_else(outside_static_values)?;
         let original = &self.source[span.range()];
@@ -355,6 +357,7 @@ struct State<'a> {
     style_issues: Vec<RsxStyleIssue>,
     local_rust: Option<LocalRust>,
     modules: Option<&'a RustModuleSources>,
+    image_includes: OnceCell<Option<ferroui_designer_project::RustIncludeSyntax>>,
 }
 
 impl State<'_> {
@@ -493,7 +496,7 @@ impl State<'_> {
                         );
                     } else if let Some(key) = class.xaml_property(None, &setter) {
                         self.project_property(
-                            index, &mut result, &mut seen, key,
+                            index, &mut result, &mut seen, key, source,
                             PropertyField { field, fallback: field.unwrap_or(name), expression: argument },
                         );
                         continue;
@@ -555,7 +558,7 @@ impl State<'_> {
                 _ => field.start,
             };
             self.project_property(
-                index, &mut result, &mut seen, key,
+                index, &mut result, &mut seen, key, source,
                 PropertyField {
                     field: Some(SourceSpan::new(start, field.end)),
                     fallback: field,

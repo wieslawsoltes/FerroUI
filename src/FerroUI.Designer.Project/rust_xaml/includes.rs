@@ -3,6 +3,24 @@ use crate::{ProjectError, Result};
 use proc_macro2::{TokenStream, TokenTree};
 use syn::{Expr, Macro, visit::Visit};
 
+/// Context for checking standard include macros in an authored Rust file.
+pub struct RustIncludeSyntax(MacroSyntax);
+
+impl RustIncludeSyntax {
+    pub fn parse(source: &str) -> Result<Self> {
+        let file = syn::parse_str::<syn::File>(rust_body(source))
+            .map_err(|error| ProjectError(error.to_string()))?;
+        Ok(Self(MacroSyntax::new(&file)))
+    }
+
+    /// The include must come from the captured file. The literal range uses
+    /// the same coordinates as the supplied macro tokens.
+    pub fn include_bytes(&self, expression: &Macro) -> Option<RustFilePath> {
+        let (literal, anchor, prefix) = self.0.include_operand(expression, "include_bytes")?;
+        RustFilePath::from_literal(&literal, anchor, prefix, 0)
+    }
+}
+
 /// Find literal standard `include_bytes!` and `include_str!` operands. RSX macro
 /// bodies are searched for embedded Rust expressions using the same include parser.
 pub fn rust_file_includes(source: &str) -> Result<Vec<RustFilePath>> {

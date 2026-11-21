@@ -1,0 +1,75 @@
+use crate::{project_rust, RsxCatalog};
+use ferroui_designer_core::TextPatch;
+use ferroui_designer_project::{file_uri, RustModuleSources};
+use std::fs;
+use std::path::PathBuf;
+
+struct Package(PathBuf);
+
+impl Drop for Package {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.0);
+    }
+}
+
+#[test]
+fn cargo_include_projects_a_document_uri_and_keeps_its_authored_package_anchor() {
+    let package = Package(std::env::temp_dir().join(format!(
+        "ferroui-rsx-image-package-{}-{:?}",
+        std::process::id(),
+        std::thread::current().id(),
+    )));
+    fs::create_dir_all(package.0.join("src")).unwrap();
+    let target = package.0.join("src/lib.rs");
+    fs::write(&target, "mod screen;").unwrap();
+    let screen = package.0.join("src/screen.rs");
+    let source = r##"fn view() { rsx! {
+        Image {
+            source(::ferroui_view::embedded_image(::std::include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"), /* keep 🎨 */ r#"/Assets/Łódź #%.png"#,
+            )))),
+        }
+    }; }"##
+        .replace('\n', "\r\n");
+    fs::write(&screen, &source).unwrap();
+    let uri = file_uri(&screen).unwrap();
+    let modules = RustModuleSources::capture(&package.0, &target, &uri, &source, &[]).unwrap();
+    let catalog = RsxCatalog::built_in();
+    let projection = catalog
+        .project_with_modules(&source, 0, Some(&modules))
+        .unwrap();
+    assert_eq!(projection.omitted_count, 0);
+    assert!(projection.nodes[0].can_set_image_source());
+    let xaml = projection.xaml();
+    let previous = "../Assets/%C5%81%C3%B3d%C5%BA%20%23%25.png";
+    let replacement = "../Assets/New%20photo.png";
+    assert!(xaml.contains(previous));
+    let draft = xaml.replace(previous, replacement);
+    let patches = projection.apply_xaml(&draft).unwrap();
+    assert_eq!(patches.len(), 1);
+    assert_eq!(
+        TextPatch::apply_all(&source, patches).unwrap(),
+        source.replace("/Assets/Łódź #%.png", "/Assets/New photo.png"),
+    );
+    assert!(!project_rust(&source, 0).unwrap().nodes[0].can_set_image_source());
+}
+
+#[test]
+fn inferred_standard_relative_include_uses_the_verified_file_scope() {
+    let source = r#"fn view() { rsx! {
+        Image { source(::ferroui_view::embedded_image(include_bytes!("../assets/card.png"))) }
+    }; }"#;
+    let projection = project_rust(source, 0).unwrap();
+    assert!(projection.nodes[0].can_set_image_source());
+    let patch = projection
+        .edit_property(0, "Source", Some("../assets/other.png"))
+        .unwrap();
+    assert_eq!(
+        TextPatch::apply_all(source, vec![patch]).unwrap(),
+        source.replace("card.png", "other.png"),
+    );
+    let shadowed =
+        format!("macro_rules! include_bytes {{ ($path:literal) => {{ &[] }} }}\n{source}");
+    let projection = project_rust(&shadowed, 0).unwrap();
+    assert!(!projection.nodes[0].can_set_image_source());
+}

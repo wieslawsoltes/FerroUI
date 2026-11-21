@@ -3,7 +3,7 @@ mod build_script;
 mod includes;
 mod macros;
 mod tokens;
-pub use includes::rust_file_includes;
+pub use includes::{rust_file_includes, RustIncludeSyntax};
 pub use tokens::check_rust_rename_tokens;
 
 use self::build_script::{BuildScript, DocumentInput, DocumentKey, Site};

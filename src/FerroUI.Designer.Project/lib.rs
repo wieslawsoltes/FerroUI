@@ -30,7 +30,7 @@ pub use rust_imports::visit_rust_imports;
 pub use rust_modules::{RustModuleProject, RustModuleSource, RustModuleSources};
 pub use rust_xaml::{
     check_rust_rename_tokens, RustPathAnchor, RustXamlFileInput, RustXamlPath, RustXamlReferences,
-    RustFilePath, RustXamlRegistration, rust_file_includes, rust_string_like,
+    RustFilePath, RustIncludeSyntax, RustXamlRegistration, rust_file_includes, rust_string_like,
 };
 pub use preview_sources::{
     hosted_preview_sources, local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,

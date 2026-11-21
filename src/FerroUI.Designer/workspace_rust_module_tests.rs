@@ -28,6 +28,66 @@ impl Drop for Files {
 }
 
 #[test]
+fn studio_replaces_a_cargo_relative_rsx_image_through_the_authored_source() {
+    use base64::Engine;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let root = std::env::temp_dir().join(format!("ferroui-studio-rust-image-{}", std::process::id()));
+    fs::create_dir_all(root.join("src")).unwrap();
+    let files = Files(root.canonicalize().unwrap());
+    fs::create_dir_all(files.0.join("Assets")).unwrap();
+    let manifest = files.0.join("Cargo.toml");
+    fs::write(&manifest, "[package]\nname='review-image'\nversion='0.0.0'\n").unwrap();
+    let target = files.0.join("src/lib.rs");
+    fs::write(&target, "mod review;").unwrap();
+    let view = files.0.join("src/review.rs");
+    let source = r##"fn view() { rsx! { Image {
+        source(::ferroui_view::embedded_image(::core::include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"), /* paint 🧭 */ r#"/Assets/Card.png"#,
+        )))),
+    } }; }"##;
+    fs::write(&view, source).unwrap();
+    let image = base64::engine::general_purpose::STANDARD.decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGNMjb3OAANMcBZeDgBQdAGhOsFZtwAAAABJRU5ErkJggg==",
+    ).unwrap();
+    for path in ["Assets/Card.png", "Assets/Next Image.png"] {
+        fs::write(files.0.join(path), &image).unwrap();
+    }
+    let workspace = DesignerWorkspace::with_uri(source, file_uri(&view).unwrap()).unwrap();
+    workspace.set_solution(Solution {
+        format_version: 1,
+        root: files.0.clone(),
+        projects: vec![ProjectDescriptor {
+            id: "review-image".into(),
+            name: "review-image".into(),
+            root: files.0.clone(),
+            manifest_path: manifest,
+            documents: Vec::new(),
+            targets: vec![CargoTarget {
+                name: "review-image".into(), kind: vec!["lib".into()], source: target,
+            }],
+        }],
+    }).unwrap();
+    workspace.refresh(true);
+    let session = workspace.session();
+    let (node, revision) = {
+        let session = session.borrow();
+        assert!(session.document().source().contains("Source=\"../Assets/Card.png\""));
+        (session.document().ast().root(), session.document().revision())
+    };
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let writes = Permissions { allow_property_writes: true, ..Default::default() };
+    provider.call("designer_apply", &json!({
+        "label": "Replace image", "expected_revision": revision,
+        "edits": [{"SetAttribute":{"node": node, "name": "Source", "value": "../Assets/Next%20Image.png"}}],
+    }), writes).unwrap();
+    assert_eq!(session.borrow().authored_source(), source.replace("/Assets/Card.png", "/Assets/Next Image.png"));
+    let revision = session.borrow().document().revision();
+    provider.call("designer_undo", &json!({"expected_revision": revision}), writes).unwrap();
+    assert_eq!(session.borrow().authored_source(), source);
+}
+
+#[test]
 fn studio_edits_and_undoes_a_palette_module_from_either_tab() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let root =

@@ -31,6 +31,7 @@ pub struct RustModuleSource {
 /// or application code runs during discovery.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RustModuleSources {
+    package_root: PathBuf,
     target: String,
     active: String,
     files: BTreeMap<String, RustModuleSource>,
@@ -72,16 +73,17 @@ impl RustModuleSources {
         }
         drafts.insert(active, Some(active_source));
         let mut builder = Builder {
-            root,
-            drafts,
-            remaining: MAX_TOTAL_BYTES,
             sources: Self {
+                package_root: root.clone(),
                 target: target_uri.clone(),
                 active: active_uri.clone(),
                 files: BTreeMap::new(),
                 edges: BTreeMap::new(),
                 dependencies: BTreeSet::new(),
             },
+            root,
+            drafts,
+            remaining: MAX_TOTAL_BYTES,
         };
         builder.file(&target, &target_uri, directory)?;
         builder
@@ -93,6 +95,11 @@ impl RustModuleSources {
 
     pub fn target(&self) -> &RustModuleSource {
         &self.files[&self.target]
+    }
+
+    /// The canonical directory whose Cargo manifest defines the captured target.
+    pub fn package_root(&self) -> &Path {
+        &self.package_root
     }
 
     pub fn active(&self) -> &RustModuleSource {

@@ -68,9 +68,16 @@ impl MacroSyntax {
         &self,
         expression: &Macro,
     ) -> Option<(LitStr, RustPathAnchor, &'static str)> {
-        let args = self
-            .arguments(expression, "include_str")
-            .or_else(|| self.arguments(expression, "include_bytes"))?;
+        self.include_operand(expression, "include_str")
+            .or_else(|| self.include_operand(expression, "include_bytes"))
+    }
+
+    pub(super) fn include_operand(
+        &self,
+        expression: &Macro,
+        name: &str,
+    ) -> Option<(LitStr, RustPathAnchor, &'static str)> {
+        let args = self.arguments(expression, name)?;
         if args.len() != 1 {
             return None;
         }

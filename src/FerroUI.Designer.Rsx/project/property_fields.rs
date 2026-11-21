@@ -1,4 +1,5 @@
 use super::State;
+use crate::{image_source, literal::Literal};
 use crate::tree::Element;
 use ferroui_designer_core::SourceSpan;
 use std::collections::BTreeSet;
@@ -17,6 +18,7 @@ impl State<'_> {
         result: &mut Element,
         seen: &mut BTreeSet<String>,
         key: String,
+        text: &str,
         source: PropertyField<'_>,
     ) {
         let operand = source.expression.map_or(source.fallback, |value| {
@@ -32,7 +34,15 @@ impl State<'_> {
         } else if let Some((field, text)) = source.field.zip(
             node.class
                 .literal(&key)
-                .and_then(|kind| kind.read_rust(source.expression?)),
+                .and_then(|kind| {
+                    let expression = source.expression?;
+                    match kind {
+                        Literal::EmbeddedImage => image_source::projected_reference(
+                            expression, text, self.modules, &self.image_includes,
+                        ),
+                        _ => kind.read_rust(expression),
+                    }
+                }),
         ) {
             node.properties.insert(key.clone(), operand);
             node.fields.insert(key.clone(), field);

@@ -239,6 +239,8 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 
 To change an authored image, select it in **Design** or **Outline**. Select a raster file in **Assets** and choose **Use as image source**. The action is available for an empty or literal image source. XAML writes the document-relative URI. On an existing mapped RSX source, the edit changes the path inside `include_bytes!` and preserves the surrounding call, comments, and compatible raw-string delimiters. One Undo restores the previous source.
 
+For an RSX image with `include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/Assets/Card.png"))` inside `::ferroui_view::embedded_image`, the preview uses the Cargo package that owns the Rust target. Open the package or build its XAML schema so the designer can resolve that target. Replacing the image updates the package-relative suffix and keeps the manifest expression. Computed paths and shadowed macros remain editable in Rust.
+
 To try the binding inspector, open [BindingWorkbench.xaml](../../../editors/vscode/test/fixtures/BindingWorkbench.xaml), select its bound control, and open the binding on its property. For a gradient, open [CustomerGradient.xaml](../../../editors/vscode/test/fixtures/CustomerGradient.xaml), choose **Edit brush**, and change a stop’s color or position. Review the draft and apply it to author one edit.
 
 ### Edit a behavior
