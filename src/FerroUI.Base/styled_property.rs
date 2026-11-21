@@ -623,7 +623,7 @@ fn set_other_styled_value(
         return None;
     }
     let converted = converted_value(property, codec, value);
-    set_styled_value(property, codec, o, converted.as_any(), priority)
+    codec.set_value(o, converted.as_any(), priority)
 }
 
 /// [`StyledRoutes::converted`] of `property`.
