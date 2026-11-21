@@ -1466,7 +1466,7 @@ The same trace on the applications of the declarative layer, at section 4.29 (re
   in `alloc`, `std` and `hashbrown`, about 40 kB. The builders link no class, no unit of the
   theme and no part of the framework that the XAML version does not: there is nothing of the
   framework to cut there.
-- **`samples/TodoMvc`.** 22,221,960 bytes stripped, 18,598,960 in `dist` (19.58 MB on main), 189
+- **`samples/TodoMvc`.** 22,221,960 bytes stripped, 18,598,960 in `dist`, 189
   class initialisers. Most of what it links beyond hello world are its controls and their units
   of the theme (the text box with the menu flyout of its context menu, the check box, the grid,
   the scroll bars) and units of the WinUI theme (reveal and acrylic brushes, theme shadows, the
