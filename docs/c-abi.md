@@ -13,7 +13,8 @@ from each language and which path is the fastest for each kind of work.
 Phase 1 is the "full" build of #636: the tables of types are on, so any registered type,
 property and routed event can be found by name, and there is no markup. The by-use mode links
 only the classes a program registers with their entries, and the units of the theme they need
-(section 16); a library built for one application is phase 2 (section 11).
+(section 16), and a library built for one application exports only what its manifest selects
+(section 17).
 
 ## 1. Building the library
 
@@ -343,10 +344,10 @@ machine: the numbers say how large the overhead is, not its exact value.
 
 ## 11. Phase 2 and later
 
-- **Selection and generation (#636, step 2):** a manifest of the controls, properties, events
-  and features an application uses (written by hand or collected from its sources), and a
-  generator of a per-application library from it (#977): only those exports, the Cargo features
-  that go with them, the class entries and theme units of section 16, `type-tables` off.
+- **Selection and generation (#636, step 2):** the manifest of the classes and groups of calls
+  of an application and the generator of a library for it are section 17; still to come: a
+  manifest collected from the sources of the application, and properties and events in the
+  selection of the library (today it selects classes and groups of calls).
 - **Bindings:** a header-only C++ wrapper with RAII handles and typed accessors generated from
   the selection; Go (cgo, `runtime.LockOSThread` for the UI thread); Dart and Flutter
   (`dart:ffi`, `ffigen`); C#, Python, Swift and Zig as demand shows.
@@ -855,4 +856,72 @@ By crate (`scripts/capi/size_by_crate.py` over the link map, MB of symbols):
 
 A dynamic library exports every entry, so it keeps every class whatever the program calls: the
 by-use mode pays off where the program is linked statically, or with a library built for one
-application with the exports of its selection only (#977).
+application with the exports of its selection only (#977). The workflow `Performance` measures
+the C samples in both modes, statically and dynamically, against a baseline (`capi`,
+docs/binary-size.md, section 3.7); the flags of each toolchain for a static link are in
+docs/c-abi-languages.md, section 7.
+
+## 17. A library for one application
+
+A dynamic library exports every entry and every call, so it keeps every class (section 16.3). An
+application that ships a dynamic library (every language that loads one: Python, C#, Java, Dart,
+Osprey) ships one built for it instead: `scripts/capi/app_library.py` reads the manifest of the
+application, the `ferroui.json` its bindings are generated from, and writes the inputs of that
+library and, on macOS, builds it.
+
+```sh
+python3 scripts/capi/app_library.py app/ferroui.json --out app/ferroui-library --build
+```
+
+The manifest names the classes (`classes`) and, optionally, the groups of calls the application
+uses (`abi`: any of `frames`, `signals`, `controls`; all three when it is left out; the core calls
+are always there). The generator writes:
+
+| File | For | What |
+| --- | --- | --- |
+| `exports.txt` | macOS (ld64) | the exported symbols list: `-Wl,-exported_symbols_list,exports.txt` |
+| `exports.map` | Linux and other ELF systems | the version script: `-Wl,--version-script=exports.map` |
+| `ferroui_capi.def` | Windows | the module definition: `/DEF:ferroui_capi.def` |
+| `ferroui_app.h` | C and C++ | `ferro_app_register_types()` (the entries of the classes), `FERRO_APP_SELECTION_FINGERPRINT`, `ferro_app_check()` |
+| `selection.json` | the build | the classes, their entries, the theme units they keep, the exports, the fingerprint, the Cargo features and the commands for each platform |
+
+The library is the crate built by use (`--no-default-features --features desktop`, section 16) as
+a static library, with `FERROUI_CAPI_SELECTION` set to the fingerprint of the selection; the
+shared library is linked from it with the exports of the selection and dead stripping, each
+export also named as an undefined symbol so that the linker loads what defines it. The linker
+then keeps the classes of the selection, the theme units they root, and the calls; the other
+classes, their markup metadata and their theme units go.
+
+**Checked against the bindings.** `ferro_selection_fingerprint()` returns the fingerprint the
+library was built for, `0` for the full and the by-use builds of the crate. The fingerprint is a
+hash of the fingerprint of the API model, the classes of the manifest and its groups of calls
+(`scripts/ferroui_selection.py`, which the generators of the library and of the bindings share).
+A binding accepts a library whose value is `0` or its own: the Osprey runtime checks it in
+`checkApi()` (`selectionFingerprint()` of the generated `abi.osp`), and a C program calls
+`ferro_app_check()` of `ferroui_app.h`. A library built for another manifest is an error at start
+with both values, not a class missing later.
+
+What it saves (macOS arm64, release, stripped; the full library 36.41 MB):
+
+| Program (its manifest) | Classes | Library for it | Program |
+| --- | --- | ---: | ---: |
+| `hello_world.c` (`samples/CApi/hello_world.ferroui.json`) | Window, StackPanel, TextBlock, Button | 19.83 MB | 0.04 MB |
+| `gauge.c` (`gauge.ferroui.json`, calls: `controls`) | Window, StackPanel, a class written in C | 19.77 MB | 0.04 MB |
+| Osprey `hello_world`, `hello_world_view` | Window, StackPanel, TextBlock, Button | 19.83 MB | 0.10 MB |
+| Osprey `counter`, `counter_view` | with a TextBox | 22.46 MB | 0.12 MB |
+| Osprey `temperature_signals`, `temperature_view` | with a TextBox | 22.46 MB | 0.12 MB |
+| Osprey `gauge_control` | Window, StackPanel, a class written in Osprey | 19.83 MB | 0.12 MB |
+| Osprey `benchmark` | Border, StackPanel, TextBlock, Button | 19.78 MB | 0.12 MB |
+
+Every sample runs against the library of its manifest and against the full library (which
+returns `0`); the Osprey `hello_world` against the library of a manifest with one class more stops
+in `checkApi()` with both fingerprints. Start-up, the same program with the full and with its own
+library (the wall time of 11 interleaved runs that close the window 200 ms after the start
+callback, less those 200 ms; the machine was heavily loaded, load 45 to 65, so only a large
+difference would show): Osprey `hello_world` 236.7 against 236.6 ms, Osprey `counter` 239.6
+against 221.2 ms, `hello_world.c` 231.9 against 217.1 ms, `gauge.c` 229.0 against 234.9 ms (the
+medians; the minimums 200 to 216 ms for all). The groups of calls matter little (`gauge.c` with
+the controls group alone is 0.06 MB smaller than with all three): the classes and the theme are
+what a library keeps.
+
+How to ship the library in each language is docs/c-abi-languages.md, section 8.

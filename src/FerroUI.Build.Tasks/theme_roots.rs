@@ -16,7 +16,9 @@
 //!   and the roots a build script adds ([`Roots::extend`]). `theme-roots = "all"` and a build with
 //!   `ferroui-base/full-themes` (`DEP_FERROUI_BASE_XAML_FULL_THEMES`: the run-time loader, hot
 //!   reload, the designer, DevTools, Inspect) keep every unit. What the compiled documents of the
-//!   dependencies name is a root too (the `references` of their `.xamlmeta`).
+//!   dependencies name is a root too (the `references` of their `.xamlmeta`), but what the
+//!   documents of an ordinary class of a dependency name only where the class is live
+//!   ([`live_class_references`], #1002).
 //! - **Live types.** A live type makes its base classes live, and the classes its code creates
 //!   (the creates edges of the type models, `TypeModel::creates`: `ListBox` creates
 //!   `ListBoxItem`), transitively ([`TypeGraph::live`]).
@@ -32,7 +34,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use ferroui_build_scan::model::{AssemblyModel, TypeKind};
 use ferroui_build_scan::scanner::{InherentFunction, SourceReferences};
-use ferroui_build_scan::xaml_metadata::ThemeUnitsModel;
+use ferroui_build_scan::xaml_metadata::{ClassReferencesModel, ThemeUnitsModel};
 use ferroui_markup_xaml_loader::rust_emitter::{allocate_names, PARTS_CONSTRUCTOR};
 
 /// The key of the manifest table the trimming is read from.
@@ -316,6 +318,52 @@ impl TypeGraph {
     }
 }
 
+/// The ordinary classes of the dependencies that are live in an application (#1002), whose
+/// documents' references root its themes: a class is live when its local or full name is a name
+/// of the sources of the application (`AboutFerroDialog::new()`, the builder
+/// `about_ferro_dialog()`, which the scan records in the case of the type), or when the types
+/// that are live with the roots (the types and the names of `roots`, with their base classes and
+/// created classes, [`TypeGraph::live`]) include it; and what a live class's documents construct
+/// is live with it, so a class its document constructs is live too (a fixpoint). The result is in
+/// the order of `classes`.
+///
+/// A class that only the code of its own crate constructs, outside what the type models record,
+/// is not one of `classes`: its crate exports its references whole (`XamlGroup::constructed_by_its_crate`).
+pub fn live_class_references<'c>(
+    classes: &[&'c ClassReferencesModel],
+    roots: &Roots,
+    source_names: &BTreeSet<String>,
+    graph: &TypeGraph,
+) -> Vec<&'c ClassReferencesModel> {
+    let mut live: BTreeSet<String> = BTreeSet::new();
+    for type_ in roots.types.iter().chain(&roots.names) {
+        live.extend(graph.live(type_));
+    }
+    let mut found = vec![false; classes.len()];
+    loop {
+        let mut changed = false;
+        for (position, class) in classes.iter().enumerate() {
+            if found[position] {
+                continue;
+            }
+            let local = markup_local_name(&class.class);
+            let named = source_names.contains(local) || source_names.contains(&class.class);
+            if !(named || live.contains(local)) {
+                continue;
+            }
+            found[position] = true;
+            changed = true;
+            for type_ in &class.types {
+                live.extend(graph.live(type_));
+            }
+        }
+        if !changed {
+            break;
+        }
+    }
+    classes.iter().zip(found).filter(|(_, found)| *found).map(|(class, _)| *class).collect()
+}
+
 /// The roots the Rust sources of an application state (#568, step 4): its names that are a type
 /// key of a unit of `themes` or a class of `graph` (`CalendarView::new()`, `Ref<ListBox>`, a
 /// `use` of `CalendarView`), and its string literals that are a key a unit of `themes` defines
@@ -456,7 +504,14 @@ pub fn explain_kept_units(
     graph: &TypeGraph,
     full_themes: bool,
 ) -> Vec<KeptUnit> {
-    let conservative_source = |label: &str| matches!(label, "documents" | "sources" | "dependencies");
+    // A source of a live class (#1002) is labelled with its reason, `referenced by the document
+    // of the live class ..`: tokens of a document, as the documents are.
+    let conservative_source =
+        |label: &str| matches!(label, "documents" | "sources" | "dependencies") || label.starts_with("referenced by ");
+    let root_of = |label: &str| match label.starts_with("referenced by ") {
+        true => label.to_string(),
+        false => format!("a root of the {label}"),
+    };
     let all = full_themes || sources.iter().any(|(_, roots)| roots.all);
     let mut reasons: Vec<Option<(String, bool)>> = vec![None; theme.units.len()];
     // What made each key and type live, first reason first.
@@ -474,11 +529,11 @@ pub fn explain_kept_units(
     };
     for (label, roots) in sources {
         for type_ in &roots.types {
-            let why = format!("the type {type_}, a root of the {label}");
+            let why = format!("the type {type_}, {}", root_of(label));
             make_live(&mut live_types, type_, &why, conservative_source(label));
         }
         for key in &roots.keys {
-            let why = format!("the key {key}, a root of the {label}");
+            let why = format!("the key {key}, {}", root_of(label));
             live_keys.entry(key.clone()).or_insert((why, conservative_source(label)));
         }
         for name in &roots.names {
@@ -490,7 +545,7 @@ pub fn explain_kept_units(
                     }
                 }
                 None => {
-                    let why = format!("the name {name}, a root of the {label}");
+                    let why = format!("the name {name}, {}", root_of(label));
                     live_keys.entry(name.clone()).or_insert((why.clone(), false));
                     make_live(&mut live_types, name, &why, false);
                 }

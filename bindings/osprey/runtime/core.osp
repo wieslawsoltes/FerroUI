@@ -32,14 +32,27 @@ fn failure() -> Result<string, string> = match toInt(ferro_last_error_code()) ==
 fn readResult<T>(value: T) -> Result<T, string> =
     if toInt(ferro_last_error_code()) == 0 { Success { value: value } } else { Error { message: "${ferro_last_error()}" } }
 
-// Compares the library with the bindings: the ABI version and the fingerprint of the API model
-// whose IDs the bindings call it with.
+// Compares the library with the bindings: the ABI version, the fingerprint of the API model
+// whose IDs the bindings call it with, and the selection a library built for one application has.
 fn checkApi() -> Result<string, string> =
     if toInt(ferro_abi_version()) != abiVersion() {
         Error { message: "the library implements ABI version ${ferro_abi_version()}; the bindings need ${abiVersion()}" }
     } else {
         if ferro_api_fingerprint() != apiFingerprint() {
             Error { message: "the library was built from another API model (fingerprint ${ferro_api_fingerprint()}, the bindings ${apiFingerprint()}): generate the bindings again" }
+        } else {
+            checkSelection(ferro_selection_fingerprint())
+        }
+    }
+
+// A library built for one application (scripts/capi/app_library.py) has the classes and calls of
+// its manifest: it serves the bindings of the same manifest. A library of every class returns 0.
+fn checkSelection(library: int) -> Result<string, string> =
+    if library == 0 {
+        Success { value: "ok" }
+    } else {
+        if library != selectionFingerprint() {
+            Error { message: "the library was built for another selection (fingerprint ${library}, the bindings ${selectionFingerprint()}): build it from the manifest of these bindings" }
         } else {
             Success { value: "ok" }
         }

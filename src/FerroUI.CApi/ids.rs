@@ -177,6 +177,43 @@ pub extern "C" fn ferro_api_fingerprint() -> i64 {
     api_ids::API_FINGERPRINT
 }
 
+/// The fingerprint of the selection of classes and calls the library was built for
+/// (`scripts/capi/app_library.py`, docs/c-abi.md, section 17): `0` for a library of every class
+/// and call (the full and the by-use builds of the crate). A binding generated from the same
+/// selection has the same value (`selectionFingerprint()` of the Osprey bindings,
+/// `FERRO_APP_SELECTION_FINGERPRINT` of the C header the generator writes); a binding accepts a
+/// library whose value is `0` or its own. Any thread.
+#[no_mangle]
+pub extern "C" fn ferro_selection_fingerprint() -> i64 {
+    SELECTION_FINGERPRINT
+}
+
+/// The value of `FERROUI_CAPI_SELECTION` when the crate was compiled (the generator of a
+/// per-application library sets it), else `0`.
+const SELECTION_FINGERPRINT: i64 = match option_env!("FERROUI_CAPI_SELECTION") {
+    Some(text) => parse_i64(text.as_bytes()),
+    None => 0,
+};
+
+/// A decimal `i64` at compile time; an invalid text fails the build.
+pub(crate) const fn parse_i64(text: &[u8]) -> i64 {
+    let (negative, mut index) = if !text.is_empty() && text[0] == b'-' { (true, 1) } else { (false, 0) };
+    assert!(index < text.len(), "FERROUI_CAPI_SELECTION is not a number");
+    let mut value: i64 = 0;
+    while index < text.len() {
+        let digit = text[index];
+        assert!(digit.is_ascii_digit(), "FERROUI_CAPI_SELECTION is not a number");
+        // Accumulated negatively, so that i64::MIN parses.
+        value = value * 10 - (digit - b'0') as i64;
+        index += 1;
+    }
+    if negative {
+        value
+    } else {
+        -value
+    }
+}
+
 /// Finds a class by its name (`Button`) or by its namespace and name (`FerroUI.Controls.Button`).
 pub(crate) fn find_type(name: &str) -> Result<&'static TypeInfo> {
     ferroui_controls::register_types();
