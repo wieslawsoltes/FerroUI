@@ -258,6 +258,17 @@ fn ui() -> Ui {
 }
 
 #[test]
+fn selection_items_without_a_container_belong_to_the_provider_they_are_under() {
+    use super::at_spi_node::AtSpiNode;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let group = ControlAutomationPeer::create_peer_for_element(&Button::new());
+    let other = ControlAutomationPeer::create_peer_for_element(&Button::new());
+    assert!(AtSpiNode::selection_item_belongs(None, &group));
+    assert!(AtSpiNode::selection_item_belongs(Some(&group), &group));
+    assert!(!AtSpiNode::selection_item_belongs(Some(&other), &group));
+}
+
+#[test]
 fn dbus_selection_container_keeps_its_command_and_select_by_accessible_child_index() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let fixture = Fixture::new(&[]);

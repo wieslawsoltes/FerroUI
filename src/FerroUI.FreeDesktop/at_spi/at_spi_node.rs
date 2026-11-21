@@ -389,7 +389,16 @@ impl AtSpiNode {
     }
 
     fn owns_selection_item(&self, item: &dyn ISelectionItemProvider) -> bool {
-        item.selection_container_peer().as_ref() == Some(self.peer())
+        Self::selection_item_belongs(item.selection_container_peer().as_ref(), self.peer())
+    }
+
+    /// An item that names no container (a radio button of a group) belongs to the selection
+    /// provider it is under; an item that names one belongs to that container only.
+    pub(crate) fn selection_item_belongs(
+        container: Option<&Ref<AutomationPeer>>,
+        peer: &Ref<AutomationPeer>,
+    ) -> bool {
+        container.is_none_or(|container| container == peer)
     }
 
     pub(crate) fn ensure_children(&self) -> Vec<Rc<AtSpiNode>> {
