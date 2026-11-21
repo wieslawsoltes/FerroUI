@@ -5,7 +5,7 @@
 use super::Layoutable;
 use crate::reactive::IDisposable;
 use crate::visual::geometry_version;
-use crate::{FerroObject, FerroProperty, Rect, Size, Visual};
+use crate::{FerroObject, FerroProperty, FerroPropertyRegistry, Rect, Size, Visual};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -80,4 +80,28 @@ fn a_desired_size_raises_a_change_and_a_nan_but_not_an_unchanged_value() {
     layoutable.set_desired_size(nan);
     assert_eq!(changes.get(), 4);
     assert!(layoutable.desired_size().width.is_nan());
+}
+
+/// An unchanged write no longer reads the accessor of the property, which would register it on
+/// first use. The object it writes to has registered it: `instantiate` runs the registration of
+/// the class and its bases on the thread, whose `ferro_properties!` block calls every accessor.
+#[test]
+fn an_unchanged_write_on_a_fresh_thread_finds_its_property_registered() {
+    std::thread::spawn(|| {
+        let registry = FerroPropertyRegistry::instance();
+        assert!(!registry.has_registered_name(Visual::TYPE, "Bounds"));
+        assert!(!registry.has_registered_name(Layoutable::TYPE, "DesiredSize"));
+
+        let layoutable = Layoutable::new();
+        // By the construction alone: no accessor of the two properties has been called here.
+        assert!(registry.has_registered_name(Visual::TYPE, "Bounds"));
+        assert!(registry.has_registered_name(Layoutable::TYPE, "DesiredSize"));
+
+        layoutable.set_bounds(layoutable.bounds());
+        layoutable.set_desired_size(layoutable.desired_size());
+        assert!(registry.has_registered_name(Visual::TYPE, "Bounds"));
+        assert!(registry.has_registered_name(Layoutable::TYPE, "DesiredSize"));
+    })
+    .join()
+    .expect("the test thread");
 }

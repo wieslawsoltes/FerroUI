@@ -116,6 +116,13 @@ impl FerroPropertyRegistry {
         true
     }
 
+    /// Whether a property of this name is registered on exactly `type_`, without running the
+    /// static initialisation of the type, which the other look-ups do.
+    #[cfg(test)]
+    pub(crate) fn has_registered_name(&self, type_: &'static TypeInfo, name: &str) -> bool {
+        self.inner.borrow().registered.get(&key(type_)).is_some_and(|props| props.values().any(|p| p.name() == name))
+    }
+
     /// Gets all non-attached properties registered on a type (and its bases).
     pub fn get_registered(&self, type_: &'static TypeInfo) -> PropertyList {
         if let Some(result) = self.inner.borrow().registered_cache.get(&key(type_)) {
