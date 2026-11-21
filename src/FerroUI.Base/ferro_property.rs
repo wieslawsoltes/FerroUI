@@ -447,26 +447,21 @@ impl Hearing {
         self.forget();
     }
 
-    /// The answer for a class: one comparison when it sits at its first place.
+    /// The answer for a class: one comparison when it sits at its first place, a second one
+    /// when it sits at the next. Both stay inline, since a walk over a tree whose classes share
+    /// a place finds one of them at its second place at every step.
     #[inline]
     fn of_class(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
         let place = recent_place(class);
         let (recent, heard) = self.recent[place].get();
         if std::ptr::eq(recent, class) {
-            heard
-        } else {
-            self.past_first_place(place, class, property)
+            return heard;
         }
-    }
-
-    #[inline(never)]
-    fn past_first_place(&self, place: usize, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
         let (recent, heard) = self.recent[second_recent_place(place)].get();
         if std::ptr::eq(recent, class) {
-            heard
-        } else {
-            self.past_recent(place, class, property)
+            return heard;
         }
+        self.past_recent(place, class, property)
     }
 
     #[cold]
