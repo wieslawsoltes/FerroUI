@@ -1265,6 +1265,45 @@ own (`route_take_value`, the value moved), so that it keeps `T: PropertyValue`.
 Tests: the conversions (`styled_value` tests of `ferroui-system` and `ferroui-base`), and every
 test of the property store, which now runs on the shared storage type for its enumerations.
 
+**The parts that follow** (one stack, each a pull request of its own):
+
+- *The routes shared, a codec per value type* (#997): one implementation of the routes of a
+  styled and an attached property for every value type (`StyledRoutes`), with what depends on the
+  value type in `StyledCodec`, implemented by `StyledProperty<T>` (the effective value, the coerced
+  default, the default boxed, the metadata, validation, the copy into the storage type, boxing, the
+  values of a notification, data validation, binding values). The untyped paths (markup, bindings,
+  setters, resources, the C ABI) read and write the store through its untyped interface; the typed
+  paths are unchanged. The 20 routes of `StyledProperty<T>` (157 copies of about 3.6 kB in the
+  builders hello world) are one.
+- *The conversion of an untyped value shared*: a value of another type is converted, copied into
+  a box of its own through the codec and the temporary released before the write, as the typed
+  routes did (`StyledCodec::set_converted`, 157 instances, 54 kB, is gone).
+- *The failures compiled once*: the panics of the direct accessors, of the registry look-up of a
+  direct property and of the registration of a styled property are cold functions compiled once,
+  and the setter of a direct property is called from one place.
+
+Two lines of the gate of the first part were fixed in it: the read of an inherited value converts
+the stored value where it reads it (as main did), `TextBlock::set_font_size` is pinned as a call
+of its own (inlined into a caller, the caller copied the text block it had just made,
+`trees::Text.create_and_measure`), and the storage metadata of an enumeration is held as what it
+is, so that the store reads it without a call through a vtable. The rest of
+`ControlWrite.enum_style_priority_set_and_dispose` (+1.65 % instructions) is the static member
+looked up for the two values of a change and of an unset, and the storage metadata of a new
+effective value.
+
+| Release, macOS ARM64, stripped | Before | After the stack |
+|---|---:|---:|
+| `hello-world-builders` | 20,610,240 B | 19,800,832 B (-0.81 MB, -3.9 %) |
+| `hello-world` (XAML) | 20,529,096 B | 19,719,208 B (-0.81 MB, -3.9 %) |
+| `winui-gallery` | 57,201,768 B | 55,175,480 B (-2.03 MB, -3.5 %) |
+| `control-catalog-desktop` | 75,508,096 B | 73,252,880 B (-2.26 MB, -3.0 %) |
+
+The gallery and the catalog are measured against main at the base of the stack (a3b7a45bf), the
+hello worlds against the base of the first part. The gallery is built with its feature `desktop`
+(`cargo build --release -p winui-gallery --features winui-gallery/desktop --bin winui-gallery`):
+without it, cargo builds the library alone and the binary in the target folder is whatever was
+built there last.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
