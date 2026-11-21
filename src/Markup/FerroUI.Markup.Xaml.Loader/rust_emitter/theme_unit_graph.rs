@@ -484,28 +484,20 @@ pub(crate) fn plan(documents: &[(String, String, Option<String>)], merged: &[Str
                 found.extend(facts.extension_keys.iter().filter(|key| keys.contains(key.as_str()) || !local.contains(*key)).cloned());
                 found.into_iter().collect()
             };
-            let mut entries: std::collections::BTreeMap<String, (BTreeSet<String>, BTreeSet<String>)> = std::collections::BTreeMap::new();
-            let (mut body_references, mut body_types) = (BTreeSet::new(), BTreeSet::new());
+            let mut entries: std::collections::BTreeMap<String, BTreeSet<String>> = std::collections::BTreeMap::new();
+            let mut body_references = BTreeSet::new();
             for &member in members {
                 let local = &facts[member].local_keys;
                 for (key, entry) in &entry_facts[member].entries {
-                    let (references, types) = entries.entry(key.clone()).or_default();
-                    references.extend(named(entry, local));
-                    types.extend(entry.types.iter().cloned());
+                    entries.entry(key.clone()).or_default().extend(named(entry, local));
                 }
                 body_references.extend(named(&entry_facts[member].body, local));
-                body_types.extend(entry_facts[member].body.types.iter().cloned());
             }
             unit.entries = entries
                 .into_iter()
-                .map(|(key, (references, types))| ThemeEntryModel {
-                    key,
-                    references: references.into_iter().collect(),
-                    types: types.into_iter().collect(),
-                })
+                .map(|(key, references)| ThemeEntryModel { key, references: references.into_iter().collect() })
                 .collect();
             unit.body_references = body_references.into_iter().collect();
-            unit.body_types = body_types.into_iter().collect();
             unit
         })
         .collect();
