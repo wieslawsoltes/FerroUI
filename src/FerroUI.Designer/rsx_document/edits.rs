@@ -75,7 +75,7 @@ impl RustDocument {
         let node = document.ast().node(owner).ok_or("Choose an authored Rust control")?;
         let map = self.map().ok_or("Open the current Rust view")?;
         let (ordinal, _) = map.control(node.span.start).ok_or("Choose a mapped Rust control")?;
-        self.catalog().project(&self.source, map.invocation.start)?
+        self.projection()?
             .create_animation(ordinal, name, selector, duration)
     }
 
@@ -83,19 +83,17 @@ impl RustDocument {
         &self, document: &Document, program: NodeId, edit: RsxAnimationEdit<'_>,
     ) -> Result<RsxAnimationPlan, String> {
         let declaration = self.animation(document, program)?.declaration;
-        let map = self.map().ok_or("Open the current Rust view")?;
-        self.catalog().project(&self.source, map.invocation.start)?
+        self.projection()?
             .edit_animation(declaration, edit)
     }
 
     pub(crate) fn place_animation_clips(
         &self, document: &Document, placements: &[(NodeId, f64)],
     ) -> Result<Vec<TextPatch>, String> {
-        let map = self.map().ok_or("Open the current Rust view")?;
         let placements = placements.iter().map(|&(program, delay)| {
             Ok((self.animation(document, program)?.declaration, delay))
         }).collect::<Result<Vec<_>, String>>()?;
-        self.catalog().project(&self.source, map.invocation.start)?.place_animation_clips(&placements)
+        self.projection()?.place_animation_clips(&placements)
     }
 
     pub(crate) fn edit_state_group(
@@ -104,7 +102,7 @@ impl RustDocument {
         let node = document.ast().node(owner).ok_or("Choose an authored Rust control")?;
         let map = self.map().ok_or("Open the current Rust view")?;
         let (ordinal, _) = map.control(node.span.start).ok_or("Choose a mapped Rust control")?;
-        let projection = self.catalog().project(&self.source, map.invocation.start)?;
+        let projection = self.projection()?;
         match model {
             Some(model) => projection.upsert_state_group(ordinal, model),
             None => projection.remove_state_group(ordinal, name),
@@ -118,11 +116,7 @@ impl RustDocument {
         edits: Vec<Edit>,
         after: Option<NodeId>,
     ) -> Result<(RsxChildEdit, Vec<NodeId>), DesignerError> {
-        let invocation = self.map().ok_or_else(|| {
-            DesignerError::InvalidEdit("Repair the Rust buffer before placing controls".into())
-        })?.invocation;
-        let projection = self.catalog().project(self.source(), invocation.start)
-            .map_err(DesignerError::InvalidEdit)?;
+        let projection = self.projection().map_err(DesignerError::InvalidEdit)?;
         let mut draft = document.snapshot_without_history();
         let change = draft.apply(label, edits.clone())?;
         if change.is_empty() {
@@ -150,10 +144,7 @@ impl RustDocument {
         let map = self
             .map()
             .ok_or_else(|| invalid("Repair the Rust buffer before making visual edits"))?;
-        let projection = self
-            .catalog()
-            .project(&self.source, map.invocation.start)
-            .map_err(invalid)?;
+        let projection = self.projection().map_err(invalid)?;
         if edits.iter().all(|edit| {
             matches!(
                 edit,

@@ -21,9 +21,16 @@ const THEMES: [PreviewTheme; 3] = [
 
 pub(super) const COMPARE: &str = "F1 M1,2 H15 V14 H1 Z M2,3 V13 H7 V3 Z M9,3 V13 H14 V3 Z";
 
+#[derive(Clone)]
+pub(super) enum Declaration {
+    Local(SourceSpan),
+    Included(StyleSource),
+    RustModule { uri: String, span: SourceSpan },
+}
+
 pub(super) fn panel(
     comparison: &PaletteComparison,
-    reveal: impl Fn(Option<StyleSource>, SourceSpan) + Clone + 'static,
+    reveal: impl Fn(Declaration) + Clone + 'static,
 ) -> Ref<Control> {
     let count = if comparison.high_contrast { 3 } else { 2 };
     let content = StackPanel::new();
@@ -72,7 +79,7 @@ fn color_cell(
     key: &str,
     theme: PreviewTheme,
     color: Option<&ComparedColor>,
-    reveal: impl Fn(Option<StyleSource>, SourceSpan) + 'static,
+    reveal: impl Fn(Declaration) + 'static,
 ) -> Ref<Control> {
     let cell = StackPanel::new();
     cell.set_orientation(Orientation::Horizontal);
@@ -117,9 +124,14 @@ fn color_cell(
         ToolTip::set_tip(&label, Some(Rc::new(details.clone())));
         ToolTip::set_tip(&open, Some(Rc::new(details.clone())));
         AutomationProperties::set_name(&open, Some(&details));
-        let source = color.source.clone();
-        let span = color.span;
-        open.click(move |_, _| reveal(source.clone(), span));
+        let declaration = if let Some(source) = &color.source {
+            Declaration::Included(source.clone())
+        } else if let Some(uri) = &color.source_address {
+            Declaration::RustModule { uri: uri.clone(), span: color.span }
+        } else {
+            Declaration::Local(color.span)
+        };
+        open.click(move |_, _| reveal(declaration.clone()));
         cell.children().add(open.upcast::<Control>());
     }
     cell.upcast()

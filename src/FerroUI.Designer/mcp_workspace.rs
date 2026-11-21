@@ -39,6 +39,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_rename_resource"
             | "designer_reveal_rsx_animation_issue"
             | "designer_reveal_rsx_state"
+            | "designer_rsx_style_source"
     )
 }
 pub(super) fn tools() -> Vec<Value> {
@@ -107,6 +108,8 @@ pub(super) fn tools() -> Vec<Value> {
             s::object(json!({"index":s::revision(),"expected_revision":s::revision()}), &["index","expected_revision"]), false),
         s::tool("designer_reveal_rsx_state", "Reveal a mapped Rust state group or its exact route. Pass owner and group from designer_states. Include to and optionally from for a route.",
             s::object(json!({"owner":s::id(),"group":s::string(),"from":s::nullable(s::string()),"to":s::string(),"expected_revision":s::revision()}), &["owner","group","expected_revision"]), false),
+        s::tool("designer_rsx_style_source", "Open the supplying Rust module at the sourceAddress and UTF-16 range reported by the accepted Rust palette.",
+            s::object(json!({"address":s::string(),"range":s::source_range(),"expected_revision":s::revision()}), &["address","range","expected_revision"]), false),
         s::tool("designer_project","Read the discovered solution, selected project, open document URIs, discovery status and current build task. include_output returns the bounded captured compiler output.",s::object(json!({"include_output":{"type":"boolean"}}),&[]),false),
         s::actions("designer_project_edit","Open a solution asynchronously, select a project, activate/close an editor document, or save all authored buffers. Poll designer_project for discovery completion. close requires an explicit discard choice; saves preserve external-change checks.",vec![
             s::action("open_solution",json!({"path":s::string()}),&["path"],true),
@@ -163,6 +166,10 @@ pub(super) fn call(
         }
         "designer_reveal_rsx_state" => {
             workspace.reveal_rust_state_source(integer(args, "expected_revision")?, integer(args, "owner")?, &text(args, "group")?, args["from"].as_str(), args["to"].as_str())?;
+            Ok(state(&workspace.session().borrow()))
+        }
+        "designer_rsx_style_source" => {
+            workspace.reveal_rust_style_source(&text(args, "address")?, decode(args, "range")?)?;
             Ok(state(&workspace.session().borrow()))
         }
         "designer_project" => project(workspace, args["include_output"] == true),

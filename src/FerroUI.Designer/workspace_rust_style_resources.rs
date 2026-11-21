@@ -77,7 +77,7 @@ pub(super) fn section(
     body.children().add(colors.clone().upcast::<Control>());
     let comparison = (!comparison.rows.is_empty()).then(|| {
         let active = scope.clone();
-        let comparison = palette_comparison::panel(comparison, move |_, span| active.reveal(span));
+        let comparison = palette_comparison::panel(comparison, move |source| active.reveal_declaration(source));
         comparison.set_is_visible(display.compare.get());
         colors.set_is_visible(!display.compare.get());
         body.children().add(comparison.clone());
@@ -169,13 +169,15 @@ fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteL
         } else {
             fields::source_row(body, &resource.key)
         };
-        let span = resource.color_source();
+        let declaration = resource.shared.as_ref().and_then(|constant| {
+            constant.uri.clone().map(|uri| palette_comparison::Declaration::RustModule { uri, span: constant.value })
+        }).unwrap_or_else(|| palette_comparison::Declaration::Local(resource.color_source()));
         let active = scope.clone();
         add_button(
             &row,
             SOURCE,
             &format!("Reveal {} resource", resource.key),
-            move || active.reveal(span),
+            move || active.reveal_declaration(declaration.clone()),
         );
     }
     if body.children().is_empty() {
@@ -193,9 +195,14 @@ fn edit_shared(
     color: &str,
 ) {
     let pane = fields::prompt(&format!("Change {} from const {constant}", resource.key));
+    let owner = resource.shared.as_ref().and_then(|color| color.uri.as_deref())
+        .and_then(|uri| ferroui_designer_project::file_path(uri).ok())
+        .and_then(|path| path.file_name()?.to_str().map(str::to_owned));
+    let shared = owner.map_or_else(|| "Edit the shared constant for all uses".to_owned(),
+        |name| format!("Edit the shared constant in {name}"));
     let target = picker(
         "Rust color edit scope",
-        ["Use a local color", "Edit the shared constant for all uses"],
+        ["Use a local color", shared.as_str()],
         0,
     );
     pane.children().add(target.clone().upcast::<Control>());

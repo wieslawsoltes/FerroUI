@@ -63,7 +63,7 @@ fn cell(index: &LineIndex, modules: Option<&RustModuleSources>, resource: &RsxSt
         source: None,
         source_address: address.map(str::to_owned),
         range,
-        span: resource.color_source(),
+        span: resource.shared.as_ref().map_or(resource.source, |constant| constant.value),
         path: resource
             .shared
             .iter()

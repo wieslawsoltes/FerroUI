@@ -1,7 +1,7 @@
 //! Shared report and source transaction for Rust style editors.
 use crate::DesignerSession;
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit, RsxStyleField};
+use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit, RsxStyleField, RsxStylePlan};
 use serde_json::{json, Value};
 
 #[path = "rsx_style_palette.rs"]
@@ -20,6 +20,10 @@ impl DesignerSession {
 
     pub(crate) fn edit_rust_style(&mut self, edit: &RsxStyleEdit) -> Result<(), String> {
         let plan = self.rust_style_projection()?.plan_style_source(edit)?;
+        self.apply_rust_style_plan(plan)
+    }
+
+    pub(crate) fn apply_rust_style_plan(&mut self, plan: RsxStylePlan) -> Result<(), String> {
         if !plan.patches.is_empty() {
             self.commit_rust_style_plan(plan)
                 .map_err(|error| error.to_string())?;

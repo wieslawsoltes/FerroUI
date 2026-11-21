@@ -1,6 +1,7 @@
 use crate::rsx_document::RustDocument;
 use crate::{DesignerSession, PreviewStatus};
 use ferroui_designer_core::{ChangeSet, DesignerError, Diagnostic, NodeId, SourceSpan, TextPatch};
+use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_rsx::{RsxCatalog, RsxSourceMap};
 use std::sync::Arc;
 
@@ -95,6 +96,44 @@ impl DesignerSession {
             self.document = document;
             self.changed(true);
         }
+        Ok(())
+    }
+
+    pub(crate) fn set_rust_modules(&mut self, modules: Option<Arc<RustModuleSources>>) -> Result<(), String> {
+        let Some(rust) = &self.rust else { return Ok(()) };
+        let mut rust = rust.clone();
+        let mut document = self.document.snapshot_without_history();
+        if rust.set_modules(&mut document, modules).map_err(|error| error.to_string())? {
+            self.remember_playback_for_reload();
+            self.rust = Some(rust);
+            self.document = document;
+            self.changed(true);
+        }
+        Ok(())
+    }
+
+    pub(crate) fn invalidate_rust_modules(&mut self) -> Result<(), String> {
+        if let Some(rust) = self.rust.as_mut()
+            && rust.invalidate_modules(&mut self.document).map_err(|error| error.to_string())?
+        {
+            self.changed(true);
+        }
+        Ok(())
+    }
+
+    pub(crate) fn commit_rust_module_edit(&mut self, label: String, modules: Arc<RustModuleSources>) -> Result<(), String> {
+        self.ensure_writable().map_err(|error| error.to_string())?;
+        if !self.can_manipulate() || self.collaboration_actor().is_some() {
+            return Err("Wait for an editable local Rust preview".into());
+        }
+        let mut rust = self.rust.clone().ok_or("Open a mapped Rust view")?;
+        let mut document = self.document.snapshot_without_history();
+        rust.set_modules(&mut document, Some(modules)).map_err(|error| error.to_string())?;
+        rust.record_module_edit(label);
+        self.remember_playback_for_reload();
+        self.rust = Some(rust);
+        self.document = document;
+        self.changed(true);
         Ok(())
     }
 

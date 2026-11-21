@@ -1,5 +1,6 @@
 //! Studio's compact editor for the same Rust style transactions exposed in VS Code.
 use super::inspector_actions::{add_button, icon_button, picker, text, RESET, SOURCE};
+use super::palette_comparison::Declaration;
 use super::DesignerWorkspace;
 use crate::icons;
 use crate::style_palette_comparison::PaletteComparison;
@@ -39,7 +40,14 @@ impl DesignerWorkspace {
             flyout: flyout.downgrade(),
             palette: Rc::new(PaletteDisplay::default()),
         };
-        flyout.opening(move |_| pane.render(0, None)).detach();
+        flyout.opening(move |_| {
+            if let Some(workspace) = pane.workspace.upgrade().filter(|workspace| !workspace.pending_source.get()) {
+                let result = workspace.refresh_rust_modules();
+                workspace.refresh(false);
+                workspace.report(result);
+            }
+            pane.render(0, None);
+        }).detach();
         anchor.set_flyout(Some(flyout.upcast()));
     }
 
@@ -263,8 +271,7 @@ impl Scope {
 
     fn apply(&self, edit: RsxStyleEdit, preferred: Option<&str>) {
         let result = self.current().and_then(|workspace| {
-            workspace.session.borrow_mut().edit_rust_style(&edit)?;
-            workspace.refresh(true);
+            workspace.edit_rust_style(&edit)?;
             self.pane.render(self.selection, preferred);
             Ok(())
         });
@@ -279,6 +286,20 @@ impl Scope {
             workspace.select_source_span(span);
         });
         self.report(result);
+    }
+
+    fn reveal_declaration(&self, source: Declaration) {
+        match source {
+            Declaration::Local(span) => self.reveal(span),
+            Declaration::RustModule { uri, span } => {
+                let result = self.current().and_then(|workspace| workspace.reveal_rust_style_module_span(&uri, span));
+                if result.is_ok() && let Some(flyout) = self.pane.flyout.upgrade() {
+                    flyout.hide();
+                }
+                self.report(result);
+            }
+            Declaration::Included(_) => self.report(Err("Choose a Rust declaration".into())),
+        }
     }
 
     fn report(&self, result: Result<(), String>) {

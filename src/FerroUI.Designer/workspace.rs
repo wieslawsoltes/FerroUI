@@ -658,7 +658,7 @@ impl DesignerWorkspace {
     }
     fn apply_source(self: &Rc<Self>) {
         self.pending_source.set(false);
-        let result = self.session.borrow_mut().apply_staged_preview();
+        let result = self.refresh_rust_modules().and_then(|()| self.session.borrow_mut().apply_staged_preview());
         self.report(result);
         self.refresh(false);
     }
@@ -943,6 +943,8 @@ mod preview_checks;
 mod columns;
 #[path = "workspace_rust_styles.rs"]
 mod rust_styles;
+#[path = "workspace_rust_modules.rs"]
+mod rust_modules;
 #[path = "workspace_palette_comparison.rs"]
 mod palette_comparison;
 #[path = "inspector_actions.rs"]

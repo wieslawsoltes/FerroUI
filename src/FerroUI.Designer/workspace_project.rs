@@ -171,6 +171,7 @@ impl DesignerWorkspace {
             self.rust_catalog(session.document_uri())
         };
         let result = self.session.borrow_mut().set_rust_catalog(catalog);
+        let result = result.and_then(|()| self.refresh_rust_modules());
         self.refresh(false);
         self.report(result);
     }
@@ -297,6 +298,12 @@ impl DesignerWorkspace {
     pub(super) fn present_project_tab(self: &Rc<Self>, uri: &str, mut tab: Tab) -> Result<(), String> {
         if let Some(rust) = tab.rust.as_mut() {
             rust.set_catalog(&mut tab.document, self.rust_catalog(uri)).map_err(|error| error.to_string())?;
+            let modules = rust.map().and_then(|_| self.capture_rust_modules(uri, rust.source()));
+            if modules.is_none() && rust.module_sources().is_some() {
+                rust.invalidate_modules(&mut tab.document).map_err(|error| error.to_string())?;
+            } else {
+                rust.set_modules(&mut tab.document, modules).map_err(|error| error.to_string())?;
+            }
         }
         #[cfg(feature = "collaboration-client")]
         self.disconnect_sharing();
@@ -363,6 +370,8 @@ impl DesignerWorkspace {
             }
         }
         drop(state);
+        self.refresh_rust_modules()?;
+        self.refresh(false);
         self.rebuild_document_tabs();
         self.refresh_components();
         Ok(())

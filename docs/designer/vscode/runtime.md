@@ -56,11 +56,11 @@ The same toolbar opens inline Rust styles when App Preview is rendering an RSX i
 
 ### Edit a shared Rust palette in App Preview
 
-1. Use a `const` initialized with a supported color constructor in a module of the selected Cargo binary. For example, declare `mod brand;` in the binary crate root and reference `crate::brand::ACCENT` from an inline `.resource("Accent", crate::brand::ACCENT)` call. Named imports and re-exports also work.
+1. Use a `const` initialized with a supported color constructor in a module of the selected Cargo binary or its package library. For example, declare `mod brand;` in the crate root and reference `crate::brand::ACCENT` from an inline `.resource("Accent", crate::brand::ACCENT)` call. Named imports and re-exports also work.
 2. Open **App Preview Styles & Themes** and select the rule. Choose the color’s source icon to open the initializer in its module. **Compare Rust theme colors** follows the same source for each appearance.
 3. Use the change-color icon. Choose **Edit const** with the owning file shown in the picker to update the shared declaration. Choose **Use a local color** to change only the selected registration. Check the updated frame and use Undo in the edited buffer to restore it.
 
-App Preview follows explicit module declarations in the selected binary, including literal `#[path]` declarations in that package. It reads open drafts before the saved module. An invalid draft in the accepted module tree retains the previous frame while you repair it. Conditional and computed providers use Rust source navigation. [Rust color authoring](styles.md#edit-a-shared-rust-color) · [MCP actions](reference.md#edit-rust-styles-with-mcp)
+App Preview follows explicit module declarations in the owning Cargo target, including literal `#[path]` declarations in that package. It reads open drafts before the saved module. An invalid draft in the accepted module tree retains the previous frame while you repair it. Conditional and computed providers use Rust source navigation. [Rust color authoring](styles.md#edit-a-shared-rust-color) · [MCP actions](reference.md#edit-rust-styles-with-mcp)
 
 ## Hot reload and debug the running application
 

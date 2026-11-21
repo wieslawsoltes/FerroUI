@@ -134,6 +134,7 @@ impl DesignerWorkspace {
         } else {
             self.step_active_history(redo)?;
         }
+        self.refresh_rust_modules()?;
         Ok(())
     }
 

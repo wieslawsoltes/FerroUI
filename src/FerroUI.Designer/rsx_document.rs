@@ -1,5 +1,6 @@
 //! Authored Rust text and its editable native projection have separate coordinates.
 mod edits;
+mod modules;
 mod templates;
 
 use ferroui_designer_core::{
@@ -7,6 +8,7 @@ use ferroui_designer_core::{
     TextPatch,
 };
 use ferroui_designer_language::LineIndex;
+use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_rsx::{RsxCatalog, RsxSourceMap};
 use std::sync::Arc;
 
@@ -19,6 +21,8 @@ pub(crate) struct RustDocument {
     saved: Arc<str>,
     caret: usize,
     catalog: Option<Arc<RsxCatalog>>,
+    modules: Option<Arc<RustModuleSources>>,
+    module_error: bool,
     map: Option<Arc<RsxSourceMap>>,
     scope_changed: bool,
     template_scopes: Vec<templates::TemplateScope>,
@@ -44,6 +48,8 @@ impl RustDocument {
             saved: source.clone(),
             caret: 0,
             catalog,
+            modules: None,
+            module_error: false,
             map: None,
             scope_changed: false,
             template_scopes: Vec::new(),
@@ -94,7 +100,7 @@ impl RustDocument {
 
     pub(crate) fn projection(&self) -> Result<ferroui_designer_rsx::RsxProjection<'_>, String> {
         let map = self.map().ok_or("Repair the Rust buffer before editing its layout")?;
-        self.catalog().project(&self.source, map.invocation.start)
+        self.catalog().project_with_modules(&self.source, map.invocation.start, self.modules.as_deref())
     }
 
     pub(crate) fn update(
@@ -213,9 +219,10 @@ impl RustDocument {
             .checked_add(1)
             .ok_or_else(|| invalid("Document revision exhausted"))?;
         let mut candidate = document.snapshot_without_history();
+        let modules = self.modules_for(&source);
         let projection = if source.len() <= MAX_SOURCE_BYTES {
             self.catalog()
-                .project(&source, caret)
+                .project_with_modules(&source, caret, modules.as_deref())
                 .map(|projection| projection.mapped_markup())
         } else {
             Err("The RSX designer supports up to 1 MiB of source".into())
@@ -247,7 +254,11 @@ impl RustDocument {
         self.caret = map.as_ref().map_or(caret, |map| map.invocation.start);
         self.scope_changed |= map.is_some() && self.caret != caret;
         self.map = map;
+        if modules.is_some() {
+            self.modules = modules;
+        }
         self.diagnostics = diagnostics;
+        self.module_error = false;
         change.previous_revision = previous;
         change.revision = candidate.revision();
         change.patches = TextPatch::between(&self.source, &source)

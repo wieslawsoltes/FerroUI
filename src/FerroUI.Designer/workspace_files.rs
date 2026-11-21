@@ -39,6 +39,7 @@ impl DesignerWorkspace {
         *self.saved_source.borrow_mut() = source;
         self.runtime_selection.set(None);
         self.surface.set_interactive(false);
+        self.refresh_rust_modules()?;
         self.refresh(true);
         self.refresh_file_title();
         Ok(())

@@ -101,10 +101,13 @@ pub(super) fn body(
     let comparison = palette_comparison::panel(&comparison, {
         let context = context.clone();
         let status = status.downgrade();
-        move |source, span| {
-            let result = match source {
-                Some(source) => context.open_source(source),
-                None => context.workspace().map(|workspace| workspace.select_source_span(span)),
+        move |declaration| {
+            use palette_comparison::Declaration;
+            let result = match declaration {
+                Declaration::Included(source) => context.open_source(source),
+                Declaration::Local(span) => context.workspace().map(|workspace| workspace.select_source_span(span)),
+                Declaration::RustModule { uri, span } => context.workspace()
+                    .and_then(|workspace| workspace.reveal_rust_style_module_span(&uri, span)),
             };
             report(status.upgrade().as_ref(), result);
         }

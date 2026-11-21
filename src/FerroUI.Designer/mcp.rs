@@ -604,6 +604,14 @@ impl UiToolProvider for DesignerMcp {
             }
             return workspace_tools::call(&workspace, name, args, permissions.allow_input);
         }
+        if name == RSX_STYLE_EDIT && let Some(workspace) = self.workspace.as_ref().and_then(Weak::upgrade) {
+            {
+                let session = owner.try_borrow().map_err(|_| "Designer is already processing a transaction")?;
+                ensure_revision(&session, args)?;
+            }
+            workspace.edit_rust_style(&rsx_style::decode_edit(args)?)?;
+            return Ok(state(&owner.borrow()));
+        }
         let mut session = owner
             .try_borrow_mut()
             .map_err(|_| "Designer is already processing a transaction")?;
