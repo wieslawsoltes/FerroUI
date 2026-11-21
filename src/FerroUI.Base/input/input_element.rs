@@ -43,7 +43,6 @@ pub struct InputElement {
     /// the guards of its handlers (#455, E7; `input_element_effects.rs`).
     // In a box: few elements have an interactive effect.
     pub(super) effect_input: RefCell<Option<Box<super::input_element_effects::EffectInputAttachment>>>,
-    pointer_captures: RefCell<Vec<Weak<dyn super::IPointer>>>,
 }
 
 ferro_class! {
@@ -700,7 +699,6 @@ impl InputElement {
             key_bindings: OnceCell::new(),
             gesture_recognizers: OnceCell::new(),
             effect_input: RefCell::new(None),
-            pointer_captures: RefCell::new(Vec::new()),
         }
     }
 
@@ -725,8 +723,11 @@ impl InputElement {
     /// `Pointer::capture` also participates, even when called directly.
     /// Tracking is weak and does not extend a pointer's lifetime.
     pub fn pointer_captures(&self) -> Vec<Rc<dyn super::IPointer>> {
+        let Some(captures) = self.instance_data::<PointerCaptures>() else {
+            return Vec::new();
+        };
         let snapshot = {
-            let mut captures = self.pointer_captures.borrow_mut();
+            let mut captures = captures.0.borrow_mut();
             captures.retain(|p| p.strong_count() != 0);
             captures.clone()
         };
@@ -755,8 +756,13 @@ impl InputElement {
     }
 
     pub(crate) fn register_pointer_capture(&self, pointer: &Rc<dyn super::IPointer>) {
+        let captures = self.instance_data::<PointerCaptures>().unwrap_or_else(|| {
+            let captures = Rc::new(PointerCaptures::default());
+            self.set_instance_data(Some(captures.clone()));
+            captures
+        });
         let weak = Rc::downgrade(pointer);
-        let mut captures = self.pointer_captures.borrow_mut();
+        let mut captures = captures.0.borrow_mut();
         captures.retain(|p| p.strong_count() != 0);
         if !captures.iter().any(|p| p.ptr_eq(&weak)) {
             captures.push(weak);
@@ -764,10 +770,16 @@ impl InputElement {
     }
 
     pub(crate) fn unregister_pointer_capture(&self, pointer: &Rc<dyn super::IPointer>) {
+        let Some(captures) = self.instance_data::<PointerCaptures>() else { return };
         let weak = Rc::downgrade(pointer);
-        self.pointer_captures
-            .borrow_mut()
-            .retain(|p| p.strong_count() != 0 && !p.ptr_eq(&weak));
+        let empty = {
+            let mut captures = captures.0.borrow_mut();
+            captures.retain(|p| p.strong_count() != 0 && !p.ptr_eq(&weak));
+            captures.is_empty()
+        };
+        if empty {
+            self.set_instance_data::<PointerCaptures>(None);
+        }
     }
 
     // --- events -------------------------------------------------------------
@@ -1270,3 +1282,8 @@ impl IInputElement for InputElement {
         InputElement::focus_with(self, method, key_modifiers)
     }
 }
+
+/// The pointers captured by an element, held weakly. Instance data rather than a field: few
+/// elements ever capture a pointer, and the slot is removed with the last capture.
+#[derive(Default)]
+struct PointerCaptures(RefCell<Vec<Weak<dyn super::IPointer>>>);
