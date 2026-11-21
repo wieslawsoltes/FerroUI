@@ -97,6 +97,8 @@ pub use text_rendering_settings::{TextRenderingSettings, TextRenderingSource, GR
 pub use skia_platform::SkiaPlatform;
 pub use skia_region_impl::SkiaRegionImpl;
 pub use skia_typeface::SkiaTypeface;
+#[cfg(feature = "media3d")]
+pub use scene3d::{scene3d_counters, SkiaScene3DCounters};
 pub use simple_geometry_impl::SimpleGeometryImpl;
 pub use stream_geometry_builder::StreamGeometryBuilder;
 pub use surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};

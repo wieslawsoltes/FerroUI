@@ -93,6 +93,36 @@ pub fn write_mesh(mesh: &ferroui_base::rendering::scene3d::MeshData, out: &mut V
     indices.len() - start
 }
 
+/// The shader in the Metal Shading Language (feature `msl`, step D5,
+/// `docs/porting/media3d.md`, section 3.19): [`SCENE3D_WGSL`] translated by naga at build time
+/// (`build.rs`), for the Metal executor of `ferroui-metal` that the Skia backend draws with on
+/// Graphite. The device compiles [`msl::SOURCE`] once (`newLibraryWithSource`); nothing of naga
+/// is linked.
+///
+/// Every function binds its resources at the same slots of the argument tables: the uniform
+/// buffers at [`msl::FRAME_BUFFER_INDEX`], [`msl::DRAW_BUFFER_INDEX`] and
+/// [`msl::BRUSH_BUFFER_INDEX`] (the dynamic offsets of the wgpu executor are buffer offsets
+/// there), the vertices at [`msl::VERTEX_BUFFER_INDEX`], the texture of a brush at
+/// [`msl::BRUSH_TEXTURE_INDEX`] and the resolved colour of the resolve at
+/// [`msl::RESOLVED_TEXTURE_INDEX`]. The sampler of the brush textures (linear, the edges clamped,
+/// no mipmaps) is inlined into the functions, so no sampler is bound.
+#[cfg(feature = "msl")]
+pub mod msl {
+    use crate::brush::BrushShader;
+
+    include!(concat!(env!("OUT_DIR"), "/scene3d_msl.rs"));
+
+    /// The fragment function of the draws of a brush shader.
+    pub fn fragment_function(shader: BrushShader) -> &'static str {
+        match shader {
+            BrushShader::Solid => FRAGMENT_FUNCTION,
+            BrushShader::Gradient => GRADIENT_FRAGMENT_FUNCTION,
+            BrushShader::GradientTexture => GRADIENT_TEXTURE_FRAGMENT_FUNCTION,
+            BrushShader::Image => IMAGE_FRAGMENT_FUNCTION,
+        }
+    }
+}
+
 #[cfg(test)]
 #[path = "shader_tests.rs"]
 mod tests;

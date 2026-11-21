@@ -10,8 +10,12 @@ on:
     paths:
       - 'src/Vello/**'
       - 'tests/FerroUI.RenderBackends.Comparison/**'
-      # The renderer of 3D scenes, whose wgpu executor the GPU modes of Vello draw with.
+      # The renderer of 3D scenes, whose wgpu executor the GPU modes of Vello draw with, and the Metal
+      # executor Skia draws them with on Graphite (step D5 of #608).
       - 'src/FerroUI.Rendering3D/**'
+      - 'src/FerroUI.Metal/**'
+      - 'src/Skia/FerroUI.Skia/scene3d.rs'
+      - 'src/Skia/FerroUI.Skia/gpu/metal/scene3d_tests.rs'
       - 'src/FerroUI.Themes.Fluent/**'
       - 'src/FerroUI.Themes.Simple/**'
       - 'samples/ControlCatalog/ClassicShell/**'
@@ -57,6 +61,12 @@ jobs:
       # the settings page that switches between the three themes, with the feature.
       - name: Test (the ControlCatalog with its feature classic-themes)
         run: cargo test --locked -p control-catalog --features classic-themes --lib -- classic_themes the_settings_page
+      # The Metal executor of 3D scenes (step D5 of #608, docs/porting/media3d.md, section 3.19) on the
+      # device of the runner, and the Skia backend drawing 3D scenes with it on Graphite.
+      - name: Test (the Metal executor of 3D scenes, Skia on Graphite)
+        run: |
+          cargo test --locked -p ferroui-metal --features scene3d --lib scene3d
+          cargo test --locked -p ferroui-skia --features media3d --lib scene3d
       # The tests of the Vello backend and its comparison with the Skia backend, apart from the other tests: on
       # the runner one scene of a GPU mode now and then comes out wholly different or differs
       # between two draws (docs/porting/vello-backend.md, section 13). A failure is tried again,
