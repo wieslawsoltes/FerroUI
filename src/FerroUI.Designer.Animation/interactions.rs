@@ -6,6 +6,9 @@ use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+mod source;
+pub use source::{BehaviorActionSource, BehaviorEdit, BehaviorSource};
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum BehaviorTrigger {
     Event {
@@ -130,12 +133,11 @@ impl BehaviorAction {
         object_xml(name, &properties, &children)
     }
 }
-impl BehaviorModel {
-    pub fn to_xaml(&self) -> Result<String> {
-        require(self.actions.len() <= 4096, "Too many behavior actions")?;
+impl BehaviorTrigger {
+    fn attributes(&self) -> Result<(&str, BTreeMap<String, String>)> {
         let mut properties = BTreeMap::new();
-        let name = match &self.trigger {
-            BehaviorTrigger::Event { event, source } => {
+        let name = match self {
+            Self::Event { event, source } => {
                 require(
                     !event.trim().is_empty(),
                     "Event trigger requires an event name",
@@ -144,7 +146,7 @@ impl BehaviorModel {
                 optional(&mut properties, "SourceObject", source);
                 "EventTriggerBehavior"
             }
-            BehaviorTrigger::Data {
+            Self::Data {
                 binding,
                 comparison,
                 value,
@@ -175,7 +177,7 @@ impl BehaviorModel {
                 );
                 "DataTriggerBehavior"
             }
-            BehaviorTrigger::Custom {
+            Self::Custom {
                 type_name,
                 properties: values,
             } => {
@@ -183,6 +185,13 @@ impl BehaviorModel {
                 type_name
             }
         };
+        Ok((name, properties))
+    }
+}
+impl BehaviorModel {
+    pub fn to_xaml(&self) -> Result<String> {
+        require(self.actions.len() <= 4096, "Too many behavior actions")?;
+        let (name, properties) = self.trigger.attributes()?;
         object_xml(
             name,
             &properties,
@@ -313,7 +322,7 @@ impl BehaviorModel {
             .node(self.owner)
             .ok_or_else(|| AnimationError("Unknown behavior owner".into()))?;
         require(
-            owner.attribute("Interaction.Behaviors").is_none(),
+            BehaviorSource::can_attach(document, self.owner),
             "The behavior collection is bound; edit that expression explicitly",
         )?;
         let source = self.to_xaml()?;

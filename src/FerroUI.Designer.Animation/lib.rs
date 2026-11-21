@@ -30,7 +30,9 @@ pub use curve::{CurvePoint, CurveWindow};
 pub use curve_channel::CurveChannel;
 pub use curve_metric::CurveMetric;
 pub use easing::{keyframe_easing_presets, Easing, KeyframeEasingPreset};
-pub use interactions::{BehaviorAction, BehaviorModel, BehaviorTrigger};
+pub use interactions::{
+    BehaviorAction, BehaviorActionSource, BehaviorEdit, BehaviorModel, BehaviorSource, BehaviorTrigger,
+};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
 pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDestination, KeyframePaste};
