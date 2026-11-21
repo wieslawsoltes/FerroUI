@@ -25,6 +25,11 @@ autotests = false
 [lib]
 path = "lib.rs"
 
+# Built as an application links the crate: without the tables of types of `cfg(test)`.
+[[test]]
+name = "class_init_without_tables"
+path = "tests/no_tables/class_init.rs"
+
 [features]
 # Development-only tracking of explicit writes to reload-owned root properties.
 hot-reload = []

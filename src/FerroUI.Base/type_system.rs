@@ -352,8 +352,17 @@ impl TypeInfo {
     /// of types ([`register_all`](Self::register_all)) has it on every thread,
     /// initialised or not, because a property of another class may hold the
     /// null of its handle before anything creates an instance of it.
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     pub const fn with_handle_registration(mut self, handle_registration: fn()) -> Self {
         self.handle_registration = Some(handle_registration);
+        self
+    }
+
+    /// Without the tables of types the initialisation of the class registers its handle
+    /// ([`__register_class`]), and the runtime type does not name the registration.
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
+    pub const fn with_handle_registration(self, handle_registration: fn()) -> Self {
+        let _ = handle_registration;
         self
     }
 
@@ -929,6 +938,8 @@ pub trait DefaultConstructible: ObjectType {
 #[cold]
 pub fn __register_class<T: ObjectType>() {
     TypeInfo::register(T::TYPE);
+    // On every thread, as the registration the runtime type names does with the tables of types.
+    crate::data::core::ValueTypes::register_global(crate::data::core::ValueTypes::register_object::<T>);
     crate::data::core::ValueTypes::register_deferred(crate::data::core::ValueTypes::register_object::<T>);
 }
 
