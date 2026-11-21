@@ -78,21 +78,25 @@ pub fn color_view() -> El<ferroui_controls_color_picker::ColorView> {
 /// The properties and routed events of [`ColorPicker`](ferroui_controls_color_picker::ColorPicker).
 pub trait ColorPickerProps: ElementBuilder {
     /// Sets [`ColorPicker::content_property`](ferroui_controls_color_picker::ColorPicker::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorPicker>::content_property(), value)
     }
 
     /// Sets [`ColorPicker::content_template_property`](ferroui_controls_color_picker::ColorPicker::content_template_property).
+    #[inline(always)]
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorPicker>::content_template_property(), value)
     }
 
     /// Sets [`ColorPicker::horizontal_content_alignment_property`](ferroui_controls_color_picker::ColorPicker::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorPicker>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`ColorPicker::vertical_content_alignment_property`](ferroui_controls_color_picker::ColorPicker::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorPicker>::vertical_content_alignment_property(), value)
     }
@@ -102,11 +106,13 @@ impl<T: ObjectType + Upcast<ferroui_controls_color_picker::ColorPicker>> ColorPi
 /// The properties and routed events of [`ColorPreviewer`](ferroui_controls_color_picker::primitives::ColorPreviewer).
 pub trait ColorPreviewerProps: ElementBuilder {
     /// Sets [`ColorPreviewer::hsv_color_property`](ferroui_controls_color_picker::primitives::ColorPreviewer::hsv_color_property).
+    #[inline(always)]
     fn hsv_color<M>(self, value: impl IntoProp<ferroui_base::media::HsvColor, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorPreviewer>::hsv_color_property(), value)
     }
 
     /// Sets [`ColorPreviewer::is_accent_colors_visible_property`](ferroui_controls_color_picker::primitives::ColorPreviewer::is_accent_colors_visible_property).
+    #[inline(always)]
     fn is_accent_colors_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorPreviewer>::is_accent_colors_visible_property(), value)
     }
@@ -116,36 +122,43 @@ impl<T: ObjectType + Upcast<ferroui_controls_color_picker::primitives::ColorPrev
 /// The properties and routed events of [`ColorSlider`](ferroui_controls_color_picker::primitives::ColorSlider).
 pub trait ColorSliderProps: ElementBuilder {
     /// Sets [`ColorSlider::color_property`](ferroui_controls_color_picker::primitives::ColorSlider::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::color_property(), value)
     }
 
     /// Sets [`ColorSlider::color_component_property`](ferroui_controls_color_picker::primitives::ColorSlider::color_component_property).
+    #[inline(always)]
     fn color_component<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorComponent, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::color_component_property(), value)
     }
 
     /// Sets [`ColorSlider::color_model_property`](ferroui_controls_color_picker::primitives::ColorSlider::color_model_property).
+    #[inline(always)]
     fn color_model<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorModel, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::color_model_property(), value)
     }
 
     /// Sets [`ColorSlider::hsv_color_property`](ferroui_controls_color_picker::primitives::ColorSlider::hsv_color_property).
+    #[inline(always)]
     fn hsv_color<M>(self, value: impl IntoProp<ferroui_base::media::HsvColor, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::hsv_color_property(), value)
     }
 
     /// Sets [`ColorSlider::is_alpha_visible_property`](ferroui_controls_color_picker::primitives::ColorSlider::is_alpha_visible_property).
+    #[inline(always)]
     fn is_alpha_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::is_alpha_visible_property(), value)
     }
 
     /// Sets [`ColorSlider::is_perceptive_property`](ferroui_controls_color_picker::primitives::ColorSlider::is_perceptive_property).
+    #[inline(always)]
     fn is_perceptive<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::is_perceptive_property(), value)
     }
 
     /// Sets [`ColorSlider::is_rounding_enabled_property`](ferroui_controls_color_picker::primitives::ColorSlider::is_rounding_enabled_property).
+    #[inline(always)]
     fn is_rounding_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSlider>::is_rounding_enabled_property(), value)
     }
@@ -155,51 +168,61 @@ impl<T: ObjectType + Upcast<ferroui_controls_color_picker::primitives::ColorSlid
 /// The properties and routed events of [`ColorSpectrum`](ferroui_controls_color_picker::primitives::ColorSpectrum).
 pub trait ColorSpectrumProps: ElementBuilder {
     /// Sets [`ColorSpectrum::color_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::color_property(), value)
     }
 
     /// Sets [`ColorSpectrum::components_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::components_property).
+    #[inline(always)]
     fn components<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorSpectrumComponents, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::components_property(), value)
     }
 
     /// Sets [`ColorSpectrum::hsv_color_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::hsv_color_property).
+    #[inline(always)]
     fn hsv_color<M>(self, value: impl IntoProp<ferroui_base::media::HsvColor, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::hsv_color_property(), value)
     }
 
     /// Sets [`ColorSpectrum::max_hue_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::max_hue_property).
+    #[inline(always)]
     fn max_hue<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::max_hue_property(), value)
     }
 
     /// Sets [`ColorSpectrum::max_saturation_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::max_saturation_property).
+    #[inline(always)]
     fn max_saturation<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::max_saturation_property(), value)
     }
 
     /// Sets [`ColorSpectrum::max_value_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::max_value_property).
+    #[inline(always)]
     fn max_value<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::max_value_property(), value)
     }
 
     /// Sets [`ColorSpectrum::min_hue_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::min_hue_property).
+    #[inline(always)]
     fn min_hue<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::min_hue_property(), value)
     }
 
     /// Sets [`ColorSpectrum::min_saturation_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::min_saturation_property).
+    #[inline(always)]
     fn min_saturation<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::min_saturation_property(), value)
     }
 
     /// Sets [`ColorSpectrum::min_value_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::min_value_property).
+    #[inline(always)]
     fn min_value<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::min_value_property(), value)
     }
 
     /// Sets [`ColorSpectrum::shape_property`](ferroui_controls_color_picker::primitives::ColorSpectrum::shape_property).
+    #[inline(always)]
     fn shape<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorSpectrumShape, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::primitives::ColorSpectrum>::shape_property(), value)
     }
@@ -209,141 +232,169 @@ impl<T: ObjectType + Upcast<ferroui_controls_color_picker::primitives::ColorSpec
 /// The properties and routed events of [`ColorView`](ferroui_controls_color_picker::ColorView).
 pub trait ColorViewProps: ElementBuilder {
     /// Sets [`ColorView::color_property`](ferroui_controls_color_picker::ColorView::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::color_property(), value)
     }
 
     /// Sets [`ColorView::color_model_property`](ferroui_controls_color_picker::ColorView::color_model_property).
+    #[inline(always)]
     fn color_model<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorModel, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::color_model_property(), value)
     }
 
     /// Sets [`ColorView::color_spectrum_components_property`](ferroui_controls_color_picker::ColorView::color_spectrum_components_property).
+    #[inline(always)]
     fn color_spectrum_components<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorSpectrumComponents, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::color_spectrum_components_property(), value)
     }
 
     /// Sets [`ColorView::color_spectrum_shape_property`](ferroui_controls_color_picker::ColorView::color_spectrum_shape_property).
+    #[inline(always)]
     fn color_spectrum_shape<M>(self, value: impl IntoProp<ferroui_controls_color_picker::ColorSpectrumShape, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::color_spectrum_shape_property(), value)
     }
 
     /// Sets [`ColorView::hex_input_alpha_position_property`](ferroui_controls_color_picker::ColorView::hex_input_alpha_position_property).
+    #[inline(always)]
     fn hex_input_alpha_position<M>(self, value: impl IntoProp<ferroui_controls_color_picker::AlphaComponentPosition, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::hex_input_alpha_position_property(), value)
     }
 
     /// Sets [`ColorView::hsv_color_property`](ferroui_controls_color_picker::ColorView::hsv_color_property).
+    #[inline(always)]
     fn hsv_color<M>(self, value: impl IntoProp<ferroui_base::media::HsvColor, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::hsv_color_property(), value)
     }
 
     /// Sets [`ColorView::is_accent_colors_visible_property`](ferroui_controls_color_picker::ColorView::is_accent_colors_visible_property).
+    #[inline(always)]
     fn is_accent_colors_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_accent_colors_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_alpha_enabled_property`](ferroui_controls_color_picker::ColorView::is_alpha_enabled_property).
+    #[inline(always)]
     fn is_alpha_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_alpha_enabled_property(), value)
     }
 
     /// Sets [`ColorView::is_alpha_visible_property`](ferroui_controls_color_picker::ColorView::is_alpha_visible_property).
+    #[inline(always)]
     fn is_alpha_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_alpha_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_color_components_visible_property`](ferroui_controls_color_picker::ColorView::is_color_components_visible_property).
+    #[inline(always)]
     fn is_color_components_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_color_components_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_color_model_visible_property`](ferroui_controls_color_picker::ColorView::is_color_model_visible_property).
+    #[inline(always)]
     fn is_color_model_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_color_model_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_color_palette_visible_property`](ferroui_controls_color_picker::ColorView::is_color_palette_visible_property).
+    #[inline(always)]
     fn is_color_palette_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_color_palette_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_color_preview_visible_property`](ferroui_controls_color_picker::ColorView::is_color_preview_visible_property).
+    #[inline(always)]
     fn is_color_preview_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_color_preview_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_color_spectrum_visible_property`](ferroui_controls_color_picker::ColorView::is_color_spectrum_visible_property).
+    #[inline(always)]
     fn is_color_spectrum_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_color_spectrum_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_color_spectrum_slider_visible_property`](ferroui_controls_color_picker::ColorView::is_color_spectrum_slider_visible_property).
+    #[inline(always)]
     fn is_color_spectrum_slider_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_color_spectrum_slider_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_component_slider_visible_property`](ferroui_controls_color_picker::ColorView::is_component_slider_visible_property).
+    #[inline(always)]
     fn is_component_slider_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_component_slider_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_component_text_input_visible_property`](ferroui_controls_color_picker::ColorView::is_component_text_input_visible_property).
+    #[inline(always)]
     fn is_component_text_input_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_component_text_input_visible_property(), value)
     }
 
     /// Sets [`ColorView::is_hex_input_visible_property`](ferroui_controls_color_picker::ColorView::is_hex_input_visible_property).
+    #[inline(always)]
     fn is_hex_input_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::is_hex_input_visible_property(), value)
     }
 
     /// Sets [`ColorView::max_hue_property`](ferroui_controls_color_picker::ColorView::max_hue_property).
+    #[inline(always)]
     fn max_hue<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::max_hue_property(), value)
     }
 
     /// Sets [`ColorView::max_saturation_property`](ferroui_controls_color_picker::ColorView::max_saturation_property).
+    #[inline(always)]
     fn max_saturation<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::max_saturation_property(), value)
     }
 
     /// Sets [`ColorView::max_value_property`](ferroui_controls_color_picker::ColorView::max_value_property).
+    #[inline(always)]
     fn max_value<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::max_value_property(), value)
     }
 
     /// Sets [`ColorView::min_hue_property`](ferroui_controls_color_picker::ColorView::min_hue_property).
+    #[inline(always)]
     fn min_hue<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::min_hue_property(), value)
     }
 
     /// Sets [`ColorView::min_saturation_property`](ferroui_controls_color_picker::ColorView::min_saturation_property).
+    #[inline(always)]
     fn min_saturation<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::min_saturation_property(), value)
     }
 
     /// Sets [`ColorView::min_value_property`](ferroui_controls_color_picker::ColorView::min_value_property).
+    #[inline(always)]
     fn min_value<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::min_value_property(), value)
     }
 
     /// Sets [`ColorView::palette_colors_property`](ferroui_controls_color_picker::ColorView::palette_colors_property).
+    #[inline(always)]
     fn palette_colors<M>(self, value: impl IntoProp<Option<ferroui_base::collections::FerroList<ferroui_base::media::Color>>, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::palette_colors_property(), value)
     }
 
     /// Sets [`ColorView::palette_column_count_property`](ferroui_controls_color_picker::ColorView::palette_column_count_property).
+    #[inline(always)]
     fn palette_column_count<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::palette_column_count_property(), value)
     }
 
     /// Sets [`ColorView::palette_property`](ferroui_controls_color_picker::ColorView::palette_property).
+    #[inline(always)]
     fn palette<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_color_picker::IColorPalette>>, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::palette_property(), value)
     }
 
     /// Sets [`ColorView::selected_index_property`](ferroui_controls_color_picker::ColorView::selected_index_property).
+    #[inline(always)]
     fn selected_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_color_picker::ColorView>::selected_index_property(), value)
     }

@@ -179,6 +179,7 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
                 continue
             members.append(
                 f"    /// Sets [`{holder}::{prop}_property`]({holder_path}::{prop}_property).\n"
+                f"    #[inline(always)]\n"
                 f"    fn {ident(prop)}<M>(self, value: impl IntoProp<{resolved}, M>) -> Self {{\n"
                 f"        self.prop(<{holder_path}>::{prop}_property(), value)\n    }}\n"
             )
@@ -219,6 +220,7 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
             method = f"{snake(owner)}_{prop}"
             attached.append(
                 f"    /// Sets the attached [`{holder}::{prop}_property`]({holder_path}::{prop}_property).\n"
+                f"    #[inline(always)]\n"
                 f"    fn {ident(method)}<M>(self, value: impl IntoProp<{resolved}, M>) -> Self {{\n"
                 f"        self.prop(<{holder_path}>::{prop}_property(), value)\n    }}\n"
             )

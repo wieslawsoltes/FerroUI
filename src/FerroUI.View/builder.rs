@@ -406,6 +406,20 @@ impl<T: ViewClass> Default for El<T> {
 /// The values the list of an element has room for when it gets its first.
 const PROPS_AT_FIRST: usize = 8;
 
+/// Gives a property of `element` a value, replacing the value it had: compiled once, for every
+/// class of element, property and form of value.
+#[inline(never)]
+fn put_prop(element: &mut ControlElement, property: &'static ferroui_base::FerroProperty, value: PropValue) {
+    let props = &mut element.props;
+    if props.capacity() == 0 {
+        // Room for the values an element usually has, taken once: a list that grows from
+        // nothing asks for room three times on the way to eight values.
+        props.reserve(PROPS_AT_FIRST);
+    }
+    props.retain(|entry| !std::ptr::eq(entry.property, property));
+    props.push(PropEntry { property, value });
+}
+
 /// The part of a builder the generated setters use.
 pub trait ElementBuilder: Sized {
     /// The element being built.
@@ -413,17 +427,11 @@ pub trait ElementBuilder: Sized {
 
     /// Gives a property a value (the indexer `control[Property] = value`
     /// upstream).
+    #[inline(always)]
     fn prop<P: TypedProperty + ?Sized, M>(mut self, property: &'static P, value: impl IntoProp<P::Value, M>) -> Self {
         let property = property.untyped();
         let value = value.into_prop();
-        let props = &mut self.element_mut().props;
-        if props.capacity() == 0 {
-            // Room for the values an element usually has, taken once: a list that grows from
-            // nothing asks for room three times on the way to eight values.
-            props.reserve(PROPS_AT_FIRST);
-        }
-        props.retain(|entry| !std::ptr::eq(entry.property, property));
-        props.push(PropEntry { property, value });
+        put_prop(self.element_mut(), property, value);
         self
     }
 

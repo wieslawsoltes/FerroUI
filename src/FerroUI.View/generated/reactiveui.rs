@@ -65,6 +65,7 @@ pub fn view_model_view_host() -> El<ferroui_reactiveui_controls::ViewModelViewHo
 /// The properties and routed events of [`ReactiveUserControlBase`](ferroui_reactiveui_controls::ReactiveUserControlBase).
 pub trait ReactiveUserControlBaseProps: ElementBuilder {
     /// Sets [`ReactiveUserControlBase::view_model_property`](ferroui_reactiveui_controls::ReactiveUserControlBase::view_model_property).
+    #[inline(always)]
     fn view_model<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::ReactiveUserControlBase>::view_model_property(), value)
     }
@@ -74,6 +75,7 @@ impl<T: ObjectType + Upcast<ferroui_reactiveui_controls::ReactiveUserControlBase
 /// The properties and routed events of [`ReactiveWindowBase`](ferroui_reactiveui_controls::ReactiveWindowBase).
 pub trait ReactiveWindowBaseProps: ElementBuilder {
     /// Sets [`ReactiveWindowBase::view_model_property`](ferroui_reactiveui_controls::ReactiveWindowBase::view_model_property).
+    #[inline(always)]
     fn view_model<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::ReactiveWindowBase>::view_model_property(), value)
     }
@@ -83,16 +85,19 @@ impl<T: ObjectType + Upcast<ferroui_reactiveui_controls::ReactiveWindowBase>> Re
 /// The properties and routed events of [`RoutedViewHost`](ferroui_reactiveui_controls::RoutedViewHost).
 pub trait RoutedViewHostProps: ElementBuilder {
     /// Sets [`RoutedViewHost::router_property`](ferroui_reactiveui_controls::RoutedViewHost::router_property).
+    #[inline(always)]
     fn router<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_reactiveui::routing::RoutingState>>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::RoutedViewHost>::router_property(), value)
     }
 
     /// Sets [`RoutedViewHost::view_contract_property`](ferroui_reactiveui_controls::RoutedViewHost::view_contract_property).
+    #[inline(always)]
     fn view_contract<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::RoutedViewHost>::view_contract_property(), value)
     }
 
     /// Sets [`RoutedViewHost::default_content_property`](ferroui_reactiveui_controls::RoutedViewHost::default_content_property).
+    #[inline(always)]
     fn default_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::RoutedViewHost>::default_content_property(), value)
     }
@@ -102,16 +107,19 @@ impl<T: ObjectType + Upcast<ferroui_reactiveui_controls::RoutedViewHost>> Routed
 /// The properties and routed events of [`ViewModelViewHost`](ferroui_reactiveui_controls::ViewModelViewHost).
 pub trait ViewModelViewHostProps: ElementBuilder {
     /// Sets [`ViewModelViewHost::view_model_property`](ferroui_reactiveui_controls::ViewModelViewHost::view_model_property).
+    #[inline(always)]
     fn view_model<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::ViewModelViewHost>::view_model_property(), value)
     }
 
     /// Sets [`ViewModelViewHost::view_contract_property`](ferroui_reactiveui_controls::ViewModelViewHost::view_contract_property).
+    #[inline(always)]
     fn view_contract<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::ViewModelViewHost>::view_contract_property(), value)
     }
 
     /// Sets [`ViewModelViewHost::default_content_property`](ferroui_reactiveui_controls::ViewModelViewHost::default_content_property).
+    #[inline(always)]
     fn default_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_reactiveui_controls::ViewModelViewHost>::default_content_property(), value)
     }

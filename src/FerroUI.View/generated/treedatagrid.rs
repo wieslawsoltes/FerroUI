@@ -143,56 +143,67 @@ pub fn tree_data_grid_text_cell() -> El<ferroui_controls_treedatagrid::primitive
 /// The properties and routed events of [`TreeDataGrid`](ferroui_controls_treedatagrid::TreeDataGrid).
 pub trait TreeDataGridProps: ElementBuilder {
     /// Sets [`TreeDataGrid::auto_drag_drop_rows_property`](ferroui_controls_treedatagrid::TreeDataGrid::auto_drag_drop_rows_property).
+    #[inline(always)]
     fn auto_drag_drop_rows<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::auto_drag_drop_rows_property(), value)
     }
 
     /// Sets [`TreeDataGrid::can_user_resize_columns_property`](ferroui_controls_treedatagrid::TreeDataGrid::can_user_resize_columns_property).
+    #[inline(always)]
     fn can_user_resize_columns<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::can_user_resize_columns_property(), value)
     }
 
     /// Sets [`TreeDataGrid::can_user_sort_columns_property`](ferroui_controls_treedatagrid::TreeDataGrid::can_user_sort_columns_property).
+    #[inline(always)]
     fn can_user_sort_columns<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::can_user_sort_columns_property(), value)
     }
 
     /// Sets [`TreeDataGrid::element_factory_property`](ferroui_controls_treedatagrid::TreeDataGrid::element_factory_property).
+    #[inline(always)]
     fn element_factory<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls_treedatagrid::primitives::TreeDataGridElementFactory>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::element_factory_property(), value)
     }
 
     /// Sets [`TreeDataGrid::rows_property`](ferroui_controls_treedatagrid::TreeDataGrid::rows_property).
+    #[inline(always)]
     fn rows<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_treedatagrid::models::ITreeDataGridRows>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::rows_property(), value)
     }
 
     /// Sets [`TreeDataGrid::show_column_headers_property`](ferroui_controls_treedatagrid::TreeDataGrid::show_column_headers_property).
+    #[inline(always)]
     fn show_column_headers<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::show_column_headers_property(), value)
     }
 
     /// Sets [`TreeDataGrid::source_property`](ferroui_controls_treedatagrid::TreeDataGrid::source_property).
+    #[inline(always)]
     fn source<M>(self, value: impl IntoProp<Option<ferroui_controls_treedatagrid::TreeDataGridSourceRef>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::source_property(), value)
     }
 
     /// Sets [`TreeDataGrid::model_property`](ferroui_controls_treedatagrid::TreeDataGrid::model_property).
+    #[inline(always)]
     fn model<M>(self, value: impl IntoProp<Option<ferroui_controls_treedatagrid::TreeDataGridSourceRef>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::model_property(), value)
     }
 
     /// Sets [`TreeDataGrid::presentation_options_property`](ferroui_controls_treedatagrid::TreeDataGrid::presentation_options_property).
+    #[inline(always)]
     fn presentation_options<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_treedatagrid::presentation::ITreeDataGridPresentationOptions>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::presentation_options_property(), value)
     }
 
     /// Sets [`TreeDataGrid::items_source_property`](ferroui_controls_treedatagrid::TreeDataGrid::items_source_property).
+    #[inline(always)]
     fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::items_source_property(), value)
     }
 
     /// Sets [`TreeDataGrid::selection_mode_property`](ferroui_controls_treedatagrid::TreeDataGrid::selection_mode_property).
+    #[inline(always)]
     fn selection_mode<M>(self, value: impl IntoProp<ferroui_controls_treedatagrid::TreeDataGridSelectionMode, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGrid>::selection_mode_property(), value)
     }
@@ -217,6 +228,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::TreeDataGrid>> TreeDa
 /// The properties and routed events of [`TreeDataGridBindingProbe`](ferroui_controls_treedatagrid::TreeDataGridBindingProbe).
 pub trait TreeDataGridBindingProbeProps: ElementBuilder {
     /// Sets [`TreeDataGridBindingProbe::value_property`](ferroui_controls_treedatagrid::TreeDataGridBindingProbe::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::TreeDataGridBindingProbe>::value_property(), value)
     }
@@ -226,16 +238,19 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::TreeDataGridBindingPr
 /// The properties and routed events of [`TreeDataGridCellsPresenter`](ferroui_controls_treedatagrid::primitives::TreeDataGridCellsPresenter).
 pub trait TreeDataGridCellsPresenterProps: ElementBuilder {
     /// Sets [`TreeDataGridCellsPresenter::element_factory_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridCellsPresenter::element_factory_property).
+    #[inline(always)]
     fn element_factory<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls_treedatagrid::primitives::TreeDataGridElementFactory>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridCellsPresenter>::element_factory_property(), value)
     }
 
     /// Sets [`TreeDataGridCellsPresenter::items_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridCellsPresenter::items_property).
+    #[inline(always)]
     fn items<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_treedatagrid::models::IColumns>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridCellsPresenter>::items_property(), value)
     }
 
     /// Sets [`TreeDataGridCellsPresenter::rows_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridCellsPresenter::rows_property).
+    #[inline(always)]
     fn rows<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_treedatagrid::models::ITreeDataGridRows>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridCellsPresenter>::rows_property(), value)
     }
@@ -245,16 +260,19 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::primitives::TreeDataG
 /// The properties and routed events of [`TreeDataGridCheckBoxCell`](ferroui_controls_treedatagrid::primitives::TreeDataGridCheckBoxCell).
 pub trait TreeDataGridCheckBoxCellProps: ElementBuilder {
     /// Sets [`TreeDataGridCheckBoxCell::is_read_only_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridCheckBoxCell::is_read_only_property).
+    #[inline(always)]
     fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridCheckBoxCell>::is_read_only_property(), value)
     }
 
     /// Sets [`TreeDataGridCheckBoxCell::is_three_state_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridCheckBoxCell::is_three_state_property).
+    #[inline(always)]
     fn is_three_state<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridCheckBoxCell>::is_three_state_property(), value)
     }
 
     /// Sets [`TreeDataGridCheckBoxCell::value_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridCheckBoxCell::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridCheckBoxCell>::value_property(), value)
     }
@@ -264,11 +282,13 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::primitives::TreeDataG
 /// The properties and routed events of [`TreeDataGridColumnHeadersPresenter`](ferroui_controls_treedatagrid::primitives::TreeDataGridColumnHeadersPresenter).
 pub trait TreeDataGridColumnHeadersPresenterProps: ElementBuilder {
     /// Sets [`TreeDataGridColumnHeadersPresenter::element_factory_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridColumnHeadersPresenter::element_factory_property).
+    #[inline(always)]
     fn element_factory<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls_treedatagrid::primitives::TreeDataGridElementFactory>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridColumnHeadersPresenter>::element_factory_property(), value)
     }
 
     /// Sets [`TreeDataGridColumnHeadersPresenter::items_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridColumnHeadersPresenter::items_property).
+    #[inline(always)]
     fn items<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_treedatagrid::models::IColumns>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridColumnHeadersPresenter>::items_property(), value)
     }
@@ -278,6 +298,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::primitives::TreeDataG
 /// The properties and routed events of [`TreeDataGridExpanderCell`](ferroui_controls_treedatagrid::primitives::TreeDataGridExpanderCell).
 pub trait TreeDataGridExpanderCellProps: ElementBuilder {
     /// Sets [`TreeDataGridExpanderCell::is_expanded_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridExpanderCell::is_expanded_property).
+    #[inline(always)]
     fn is_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridExpanderCell>::is_expanded_property(), value)
     }
@@ -287,6 +308,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::primitives::TreeDataG
 /// The properties and routed events of [`TreeDataGridRow`](ferroui_controls_treedatagrid::primitives::TreeDataGridRow).
 pub trait TreeDataGridRowProps: ElementBuilder {
     /// Sets [`TreeDataGridRow::element_factory_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridRow::element_factory_property).
+    #[inline(always)]
     fn element_factory<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls_treedatagrid::primitives::TreeDataGridElementFactory>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridRow>::element_factory_property(), value)
     }
@@ -296,21 +318,25 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::primitives::TreeDataG
 /// The properties and routed events of [`TreeDataGridRowsPresenter`](ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter).
 pub trait TreeDataGridRowsPresenterProps: ElementBuilder {
     /// Sets [`TreeDataGridRowsPresenter::cache_length_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter::cache_length_property).
+    #[inline(always)]
     fn cache_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter>::cache_length_property(), value)
     }
 
     /// Sets [`TreeDataGridRowsPresenter::columns_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter::columns_property).
+    #[inline(always)]
     fn columns<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_treedatagrid::models::IColumns>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter>::columns_property(), value)
     }
 
     /// Sets [`TreeDataGridRowsPresenter::element_factory_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter::element_factory_property).
+    #[inline(always)]
     fn element_factory<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls_treedatagrid::primitives::TreeDataGridElementFactory>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter>::element_factory_property(), value)
     }
 
     /// Sets [`TreeDataGridRowsPresenter::items_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter::items_property).
+    #[inline(always)]
     fn items<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls_treedatagrid::models::ITreeDataGridRows>>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridRowsPresenter>::items_property(), value)
     }
@@ -320,11 +346,13 @@ impl<T: ObjectType + Upcast<ferroui_controls_treedatagrid::primitives::TreeDataG
 /// The properties and routed events of [`TreeDataGridTextCell`](ferroui_controls_treedatagrid::primitives::TreeDataGridTextCell).
 pub trait TreeDataGridTextCellProps: ElementBuilder {
     /// Sets [`TreeDataGridTextCell::value_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridTextCell::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridTextCell>::value_property(), value)
     }
 
     /// Sets [`TreeDataGridTextCell::text_alignment_property`](ferroui_controls_treedatagrid::primitives::TreeDataGridTextCell::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls_treedatagrid::primitives::TreeDataGridTextCell>::text_alignment_property(), value)
     }

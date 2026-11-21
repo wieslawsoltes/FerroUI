@@ -65,6 +65,7 @@ pub fn managed_file_chooser_overwrite_prompt() -> El<ferroui_dialogs::ManagedFil
 /// The properties and routed events of [`ManagedFileChooserOverwritePrompt`](ferroui_dialogs::ManagedFileChooserOverwritePrompt).
 pub trait ManagedFileChooserOverwritePromptProps: ElementBuilder {
     /// Sets [`ManagedFileChooserOverwritePrompt::file_name_property`](ferroui_dialogs::ManagedFileChooserOverwritePrompt::file_name_property).
+    #[inline(always)]
     fn file_name<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_dialogs::ManagedFileChooserOverwritePrompt>::file_name_property(), value)
     }

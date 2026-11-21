@@ -247,61 +247,73 @@ pub fn ink_toolbar_tool_button() -> El<ferroui_controls_inking::InkToolbarToolBu
 /// The properties and routed events of [`InkToolbar`](ferroui_controls_inking::InkToolbar).
 pub trait InkToolbarProps: ElementBuilder {
     /// Sets [`InkToolbar::initial_controls_property`](ferroui_controls_inking::InkToolbar::initial_controls_property).
+    #[inline(always)]
     fn initial_controls<M>(self, value: impl IntoProp<ferroui_controls_inking::InkToolbarInitialControls, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::initial_controls_property(), value)
     }
 
     /// Sets [`InkToolbar::active_tool_property`](ferroui_controls_inking::InkToolbar::active_tool_property).
+    #[inline(always)]
     fn active_tool<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls_inking::InkToolbarToolButton>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::active_tool_property(), value)
     }
 
     /// Sets [`InkToolbar::is_ruler_button_checked_property`](ferroui_controls_inking::InkToolbar::is_ruler_button_checked_property).
+    #[inline(always)]
     fn is_ruler_button_checked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::is_ruler_button_checked_property(), value)
     }
 
     /// Sets [`InkToolbar::target_ink_canvas_property`](ferroui_controls_inking::InkToolbar::target_ink_canvas_property).
+    #[inline(always)]
     fn target_ink_canvas<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls_inking::InkCanvas>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::target_ink_canvas_property(), value)
     }
 
     /// Sets [`InkToolbar::is_stencil_button_checked_property`](ferroui_controls_inking::InkToolbar::is_stencil_button_checked_property).
+    #[inline(always)]
     fn is_stencil_button_checked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::is_stencil_button_checked_property(), value)
     }
 
     /// Sets [`InkToolbar::button_flyout_placement_property`](ferroui_controls_inking::InkToolbar::button_flyout_placement_property).
+    #[inline(always)]
     fn button_flyout_placement<M>(self, value: impl IntoProp<ferroui_controls_inking::InkToolbarButtonFlyoutPlacement, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::button_flyout_placement_property(), value)
     }
 
     /// Sets [`InkToolbar::target_ink_presenter_property`](ferroui_controls_inking::InkToolbar::target_ink_presenter_property).
+    #[inline(always)]
     fn target_ink_presenter<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls_inking::InkPresenter>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::target_ink_presenter_property(), value)
     }
 
     /// Sets [`InkToolbar::border_brush_property`](ferroui_controls_inking::InkToolbar::border_brush_property).
+    #[inline(always)]
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::border_brush_property(), value)
     }
 
     /// Sets [`InkToolbar::border_thickness_property`](ferroui_controls_inking::InkToolbar::border_thickness_property).
+    #[inline(always)]
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::border_thickness_property(), value)
     }
 
     /// Sets [`InkToolbar::corner_radius_property`](ferroui_controls_inking::InkToolbar::corner_radius_property).
+    #[inline(always)]
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::corner_radius_property(), value)
     }
 
     /// Sets [`InkToolbar::background_sizing_property`](ferroui_controls_inking::InkToolbar::background_sizing_property).
+    #[inline(always)]
     fn background_sizing<M>(self, value: impl IntoProp<ferroui_base::media::BackgroundSizing, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::background_sizing_property(), value)
     }
 
     /// Sets [`InkToolbar::padding_property`](ferroui_controls_inking::InkToolbar::padding_property).
+    #[inline(always)]
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::padding_property(), value)
     }
@@ -311,11 +323,13 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbar>> InkToolbarProp
 /// The properties and routed events of [`InkToolbarCustomPenButton`](ferroui_controls_inking::InkToolbarCustomPenButton).
 pub trait InkToolbarCustomPenButtonProps: ElementBuilder {
     /// Sets [`InkToolbarCustomPenButton::custom_pen_property`](ferroui_controls_inking::InkToolbarCustomPenButton::custom_pen_property).
+    #[inline(always)]
     fn custom_pen<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls_inking::InkToolbarCustomPen>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarCustomPenButton>::custom_pen_property(), value)
     }
 
     /// Sets [`InkToolbarCustomPenButton::configuration_content_property`](ferroui_controls_inking::InkToolbarCustomPenButton::configuration_content_property).
+    #[inline(always)]
     fn configuration_content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarCustomPenButton>::configuration_content_property(), value)
     }
@@ -325,6 +339,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarCustomPenButton>>
 /// The properties and routed events of [`InkToolbarCustomToolButton`](ferroui_controls_inking::InkToolbarCustomToolButton).
 pub trait InkToolbarCustomToolButtonProps: ElementBuilder {
     /// Sets [`InkToolbarCustomToolButton::configuration_content_property`](ferroui_controls_inking::InkToolbarCustomToolButton::configuration_content_property).
+    #[inline(always)]
     fn configuration_content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarCustomToolButton>::configuration_content_property(), value)
     }
@@ -334,6 +349,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarCustomToolButton>
 /// The properties and routed events of [`InkToolbarEraserButton`](ferroui_controls_inking::InkToolbarEraserButton).
 pub trait InkToolbarEraserButtonProps: ElementBuilder {
     /// Sets [`InkToolbarEraserButton::is_clear_all_visible_property`](ferroui_controls_inking::InkToolbarEraserButton::is_clear_all_visible_property).
+    #[inline(always)]
     fn is_clear_all_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarEraserButton>::is_clear_all_visible_property(), value)
     }
@@ -343,6 +359,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarEraserButton>> In
 /// The properties and routed events of [`InkToolbarFlyoutItem`](ferroui_controls_inking::InkToolbarFlyoutItem).
 pub trait InkToolbarFlyoutItemProps: ElementBuilder {
     /// Sets [`InkToolbarFlyoutItem::kind_property`](ferroui_controls_inking::InkToolbarFlyoutItem::kind_property).
+    #[inline(always)]
     fn kind<M>(self, value: impl IntoProp<ferroui_controls_inking::InkToolbarFlyoutItemKind, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarFlyoutItem>::kind_property(), value)
     }
@@ -352,6 +369,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarFlyoutItem>> InkT
 /// The properties and routed events of [`InkToolbarMenuButton`](ferroui_controls_inking::InkToolbarMenuButton).
 pub trait InkToolbarMenuButtonProps: ElementBuilder {
     /// Sets [`InkToolbarMenuButton::is_extension_glyph_shown_property`](ferroui_controls_inking::InkToolbarMenuButton::is_extension_glyph_shown_property).
+    #[inline(always)]
     fn is_extension_glyph_shown<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarMenuButton>::is_extension_glyph_shown_property(), value)
     }
@@ -361,26 +379,31 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarMenuButton>> InkT
 /// The properties and routed events of [`InkToolbarPenButton`](ferroui_controls_inking::InkToolbarPenButton).
 pub trait InkToolbarPenButtonProps: ElementBuilder {
     /// Sets [`InkToolbarPenButton::palette_property`](ferroui_controls_inking::InkToolbarPenButton::palette_property).
+    #[inline(always)]
     fn palette<M>(self, value: impl IntoProp<ferroui_base::collections::FerroList<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenButton>::palette_property(), value)
     }
 
     /// Sets [`InkToolbarPenButton::min_stroke_width_property`](ferroui_controls_inking::InkToolbarPenButton::min_stroke_width_property).
+    #[inline(always)]
     fn min_stroke_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenButton>::min_stroke_width_property(), value)
     }
 
     /// Sets [`InkToolbarPenButton::max_stroke_width_property`](ferroui_controls_inking::InkToolbarPenButton::max_stroke_width_property).
+    #[inline(always)]
     fn max_stroke_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenButton>::max_stroke_width_property(), value)
     }
 
     /// Sets [`InkToolbarPenButton::selected_brush_index_property`](ferroui_controls_inking::InkToolbarPenButton::selected_brush_index_property).
+    #[inline(always)]
     fn selected_brush_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenButton>::selected_brush_index_property(), value)
     }
 
     /// Sets [`InkToolbarPenButton::selected_stroke_width_property`](ferroui_controls_inking::InkToolbarPenButton::selected_stroke_width_property).
+    #[inline(always)]
     fn selected_stroke_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenButton>::selected_stroke_width_property(), value)
     }
@@ -390,26 +413,31 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarPenButton>> InkTo
 /// The properties and routed events of [`InkToolbarPenConfigurationControl`](ferroui_controls_inking::InkToolbarPenConfigurationControl).
 pub trait InkToolbarPenConfigurationControlProps: ElementBuilder {
     /// Sets [`InkToolbarPenConfigurationControl::border_brush_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::border_brush_property).
+    #[inline(always)]
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::border_brush_property(), value)
     }
 
     /// Sets [`InkToolbarPenConfigurationControl::border_thickness_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::border_thickness_property).
+    #[inline(always)]
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::border_thickness_property(), value)
     }
 
     /// Sets [`InkToolbarPenConfigurationControl::corner_radius_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::corner_radius_property).
+    #[inline(always)]
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::corner_radius_property(), value)
     }
 
     /// Sets [`InkToolbarPenConfigurationControl::background_sizing_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::background_sizing_property).
+    #[inline(always)]
     fn background_sizing<M>(self, value: impl IntoProp<ferroui_base::media::BackgroundSizing, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::background_sizing_property(), value)
     }
 
     /// Sets [`InkToolbarPenConfigurationControl::padding_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::padding_property).
+    #[inline(always)]
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::padding_property(), value)
     }
@@ -419,16 +447,19 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarPenConfigurationC
 /// The properties and routed events of [`InkToolbarStencilButton`](ferroui_controls_inking::InkToolbarStencilButton).
 pub trait InkToolbarStencilButtonProps: ElementBuilder {
     /// Sets [`InkToolbarStencilButton::selected_stencil_property`](ferroui_controls_inking::InkToolbarStencilButton::selected_stencil_property).
+    #[inline(always)]
     fn selected_stencil<M>(self, value: impl IntoProp<ferroui_controls_inking::InkToolbarStencilKind, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarStencilButton>::selected_stencil_property(), value)
     }
 
     /// Sets [`InkToolbarStencilButton::is_ruler_item_visible_property`](ferroui_controls_inking::InkToolbarStencilButton::is_ruler_item_visible_property).
+    #[inline(always)]
     fn is_ruler_item_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarStencilButton>::is_ruler_item_visible_property(), value)
     }
 
     /// Sets [`InkToolbarStencilButton::is_protractor_item_visible_property`](ferroui_controls_inking::InkToolbarStencilButton::is_protractor_item_visible_property).
+    #[inline(always)]
     fn is_protractor_item_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarStencilButton>::is_protractor_item_visible_property(), value)
     }
@@ -438,6 +469,7 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarStencilButton>> I
 /// The properties and routed events of [`InkToolbarToolButton`](ferroui_controls_inking::InkToolbarToolButton).
 pub trait InkToolbarToolButtonProps: ElementBuilder {
     /// Sets [`InkToolbarToolButton::is_extension_glyph_shown_property`](ferroui_controls_inking::InkToolbarToolButton::is_extension_glyph_shown_property).
+    #[inline(always)]
     fn is_extension_glyph_shown<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarToolButton>::is_extension_glyph_shown_property(), value)
     }

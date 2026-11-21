@@ -2236,6 +2236,7 @@ pub fn wrap_panel() -> El<ferroui_controls::WrapPanel> {
 /// The properties and routed events of [`AccessText`](ferroui_controls::primitives::AccessText).
 pub trait AccessTextProps: ElementBuilder {
     /// Sets [`AccessText::show_access_key_property`](ferroui_controls::primitives::AccessText::show_access_key_property).
+    #[inline(always)]
     fn show_access_key<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::AccessText>::show_access_key_property(), value)
     }
@@ -2245,31 +2246,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::AccessText>> AccessTex
 /// The properties and routed events of [`AcrylicBrush`](ferroui_base::media::AcrylicBrush).
 pub trait AcrylicBrushProps: ElementBuilder {
     /// Sets [`AcrylicBrush::tint_color_property`](ferroui_base::media::AcrylicBrush::tint_color_property).
+    #[inline(always)]
     fn tint_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::AcrylicBrush>::tint_color_property(), value)
     }
 
     /// Sets [`AcrylicBrush::tint_opacity_property`](ferroui_base::media::AcrylicBrush::tint_opacity_property).
+    #[inline(always)]
     fn tint_opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::AcrylicBrush>::tint_opacity_property(), value)
     }
 
     /// Sets [`AcrylicBrush::tint_luminosity_opacity_property`](ferroui_base::media::AcrylicBrush::tint_luminosity_opacity_property).
+    #[inline(always)]
     fn tint_luminosity_opacity<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
         self.prop(<ferroui_base::media::AcrylicBrush>::tint_luminosity_opacity_property(), value)
     }
 
     /// Sets [`AcrylicBrush::tint_transition_duration_property`](ferroui_base::media::AcrylicBrush::tint_transition_duration_property).
+    #[inline(always)]
     fn tint_transition_duration<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_base::media::AcrylicBrush>::tint_transition_duration_property(), value)
     }
 
     /// Sets [`AcrylicBrush::background_source_property`](ferroui_base::media::AcrylicBrush::background_source_property).
+    #[inline(always)]
     fn background_source<M>(self, value: impl IntoProp<ferroui_base::media::AcrylicBrushBackgroundSource, M>) -> Self {
         self.prop(<ferroui_base::media::AcrylicBrush>::background_source_property(), value)
     }
 
     /// Sets [`AcrylicBrush::always_use_fallback_property`](ferroui_base::media::AcrylicBrush::always_use_fallback_property).
+    #[inline(always)]
     fn always_use_fallback<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::AcrylicBrush>::always_use_fallback_property(), value)
     }
@@ -2279,11 +2286,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::AcrylicBrush>> AcrylicBrushProp
 /// The properties and routed events of [`AdaptiveTrigger`](ferroui_controls::AdaptiveTrigger).
 pub trait AdaptiveTriggerProps: ElementBuilder {
     /// Sets [`AdaptiveTrigger::min_window_width_property`](ferroui_controls::AdaptiveTrigger::min_window_width_property).
+    #[inline(always)]
     fn min_window_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::AdaptiveTrigger>::min_window_width_property(), value)
     }
 
     /// Sets [`AdaptiveTrigger::min_window_height_property`](ferroui_controls::AdaptiveTrigger::min_window_height_property).
+    #[inline(always)]
     fn min_window_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::AdaptiveTrigger>::min_window_height_property(), value)
     }
@@ -2293,16 +2302,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::AdaptiveTrigger>> AdaptiveTriggerP
 /// The properties and routed events of [`AdornerLayer`](ferroui_controls::primitives::AdornerLayer).
 pub trait AdornerLayerProps: ElementBuilder {
     /// Sets [`AdornerLayer::is_clip_enabled_property`](ferroui_controls::primitives::AdornerLayer::is_clip_enabled_property).
+    #[inline(always)]
     fn is_clip_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::AdornerLayer>::is_clip_enabled_property(), value)
     }
 
     /// Sets [`AdornerLayer::adorner_property`](ferroui_controls::primitives::AdornerLayer::adorner_property).
+    #[inline(always)]
     fn adorner<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::AdornerLayer>::adorner_property(), value)
     }
 
     /// Sets [`AdornerLayer::default_focus_adorner_property`](ferroui_controls::primitives::AdornerLayer::default_focus_adorner_property).
+    #[inline(always)]
     fn default_focus_adorner<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::ITemplateOf<Option<ferroui_base::Ref<ferroui_controls::Control>>>>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::AdornerLayer>::default_focus_adorner_property(), value)
     }
@@ -2312,11 +2324,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::AdornerLayer>> Adorner
 /// The properties and routed events of [`Animatable`](ferroui_base::animation::Animatable).
 pub trait AnimatableProps: ElementBuilder {
     /// Sets [`Animatable::clock_property`](ferroui_base::animation::Animatable::clock_property).
+    #[inline(always)]
     fn clock<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IClock>>, M>) -> Self {
         self.prop(<ferroui_base::animation::Animatable>::clock_property(), value)
     }
 
     /// Sets [`Animatable::transitions_property`](ferroui_base::animation::Animatable::transitions_property).
+    #[inline(always)]
     fn transitions<M>(self, value: impl IntoProp<Option<ferroui_base::animation::Transitions>, M>) -> Self {
         self.prop(<ferroui_base::animation::Animatable>::transitions_property(), value)
     }
@@ -2326,11 +2340,13 @@ impl<T: ObjectType + Upcast<ferroui_base::animation::Animatable>> AnimatableProp
 /// The properties and routed events of [`Animation`](ferroui_base::animation::Animation).
 pub trait AnimationProps: ElementBuilder {
     /// Sets [`Animation::easing_property`](ferroui_base::animation::Animation::easing_property).
+    #[inline(always)]
     fn easing<M>(self, value: impl IntoProp<ferroui_base::animation::easings::Easing, M>) -> Self {
         self.prop(<ferroui_base::animation::Animation>::easing_property(), value)
     }
 
     /// Sets [`Animation::speed_ratio_property`](ferroui_base::animation::Animation::speed_ratio_property).
+    #[inline(always)]
     fn speed_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::animation::Animation>::speed_ratio_property(), value)
     }
@@ -2340,6 +2356,7 @@ impl<T: ObjectType + Upcast<ferroui_base::animation::Animation>> AnimationProps 
 /// The properties and routed events of [`AnimatorKeyFrame`](ferroui_base::animation::AnimatorKeyFrame).
 pub trait AnimatorKeyFrameProps: ElementBuilder {
     /// Sets [`AnimatorKeyFrame::value_property`](ferroui_base::animation::AnimatorKeyFrame::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_base::animation::AnimatorKeyFrame>::value_property(), value)
     }
@@ -2349,16 +2366,19 @@ impl<T: ObjectType + Upcast<ferroui_base::animation::AnimatorKeyFrame>> Animator
 /// The properties and routed events of [`Application`](ferroui_controls::Application).
 pub trait ApplicationProps: ElementBuilder {
     /// Sets [`Application::data_context_property`](ferroui_controls::Application::data_context_property).
+    #[inline(always)]
     fn data_context<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Application>::data_context_property(), value)
     }
 
     /// Sets [`Application::actual_theme_variant_property`](ferroui_controls::Application::actual_theme_variant_property).
+    #[inline(always)]
     fn actual_theme_variant<M>(self, value: impl IntoProp<Option<ferroui_base::styling::ThemeVariant>, M>) -> Self {
         self.prop(<ferroui_controls::Application>::actual_theme_variant_property(), value)
     }
 
     /// Sets [`Application::requested_theme_variant_property`](ferroui_controls::Application::requested_theme_variant_property).
+    #[inline(always)]
     fn requested_theme_variant<M>(self, value: impl IntoProp<Option<ferroui_base::styling::ThemeVariant>, M>) -> Self {
         self.prop(<ferroui_controls::Application>::requested_theme_variant_property(), value)
     }
@@ -2368,11 +2388,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::Application>> ApplicationProps for
 /// The properties and routed events of [`Arc`](ferroui_controls::shapes::Arc).
 pub trait ArcProps: ElementBuilder {
     /// Sets [`Arc::start_angle_property`](ferroui_controls::shapes::Arc::start_angle_property).
+    #[inline(always)]
     fn start_angle<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Arc>::start_angle_property(), value)
     }
 
     /// Sets [`Arc::sweep_angle_property`](ferroui_controls::shapes::Arc::sweep_angle_property).
+    #[inline(always)]
     fn sweep_angle<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Arc>::sweep_angle_property(), value)
     }
@@ -2382,26 +2404,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Arc>> ArcProps for El<T> {
 /// The properties and routed events of [`ArcSegment`](ferroui_base::media::ArcSegment).
 pub trait ArcSegmentProps: ElementBuilder {
     /// Sets [`ArcSegment::is_large_arc_property`](ferroui_base::media::ArcSegment::is_large_arc_property).
+    #[inline(always)]
     fn is_large_arc<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::ArcSegment>::is_large_arc_property(), value)
     }
 
     /// Sets [`ArcSegment::point_property`](ferroui_base::media::ArcSegment::point_property).
+    #[inline(always)]
     fn point<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::ArcSegment>::point_property(), value)
     }
 
     /// Sets [`ArcSegment::rotation_angle_property`](ferroui_base::media::ArcSegment::rotation_angle_property).
+    #[inline(always)]
     fn rotation_angle<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::ArcSegment>::rotation_angle_property(), value)
     }
 
     /// Sets [`ArcSegment::size_property`](ferroui_base::media::ArcSegment::size_property).
+    #[inline(always)]
     fn size<M>(self, value: impl IntoProp<ferroui_base::Size, M>) -> Self {
         self.prop(<ferroui_base::media::ArcSegment>::size_property(), value)
     }
 
     /// Sets [`ArcSegment::sweep_direction_property`](ferroui_base::media::ArcSegment::sweep_direction_property).
+    #[inline(always)]
     fn sweep_direction<M>(self, value: impl IntoProp<ferroui_base::media::SweepDirection, M>) -> Self {
         self.prop(<ferroui_base::media::ArcSegment>::sweep_direction_property(), value)
     }
@@ -2411,86 +2438,103 @@ impl<T: ObjectType + Upcast<ferroui_base::media::ArcSegment>> ArcSegmentProps fo
 /// The properties and routed events of [`AutoCompleteBox`](ferroui_controls::AutoCompleteBox).
 pub trait AutoCompleteBoxProps: ElementBuilder {
     /// Sets [`AutoCompleteBox::caret_index_property`](ferroui_controls::AutoCompleteBox::caret_index_property).
+    #[inline(always)]
     fn caret_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::caret_index_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::placeholder_text_property`](ferroui_controls::AutoCompleteBox::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::placeholder_text_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::placeholder_foreground_property`](ferroui_controls::AutoCompleteBox::placeholder_foreground_property).
+    #[inline(always)]
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::placeholder_foreground_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::minimum_prefix_length_property`](ferroui_controls::AutoCompleteBox::minimum_prefix_length_property).
+    #[inline(always)]
     fn minimum_prefix_length<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::minimum_prefix_length_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::minimum_populate_delay_property`](ferroui_controls::AutoCompleteBox::minimum_populate_delay_property).
+    #[inline(always)]
     fn minimum_populate_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::minimum_populate_delay_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::max_drop_down_height_property`](ferroui_controls::AutoCompleteBox::max_drop_down_height_property).
+    #[inline(always)]
     fn max_drop_down_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::max_drop_down_height_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::is_text_completion_enabled_property`](ferroui_controls::AutoCompleteBox::is_text_completion_enabled_property).
+    #[inline(always)]
     fn is_text_completion_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::is_text_completion_enabled_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::item_template_property`](ferroui_controls::AutoCompleteBox::item_template_property).
+    #[inline(always)]
     fn item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::item_template_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::clear_selection_on_lost_focus_property`](ferroui_controls::AutoCompleteBox::clear_selection_on_lost_focus_property).
+    #[inline(always)]
     fn clear_selection_on_lost_focus<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::clear_selection_on_lost_focus_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::is_drop_down_open_property`](ferroui_controls::AutoCompleteBox::is_drop_down_open_property).
+    #[inline(always)]
     fn is_drop_down_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::is_drop_down_open_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::selected_item_property`](ferroui_controls::AutoCompleteBox::selected_item_property).
+    #[inline(always)]
     fn selected_item<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::selected_item_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::text_property`](ferroui_controls::AutoCompleteBox::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::text_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::filter_mode_property`](ferroui_controls::AutoCompleteBox::filter_mode_property).
+    #[inline(always)]
     fn filter_mode<M>(self, value: impl IntoProp<ferroui_controls::AutoCompleteFilterMode, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::filter_mode_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::items_source_property`](ferroui_controls::AutoCompleteBox::items_source_property).
+    #[inline(always)]
     fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::items_source_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::max_length_property`](ferroui_controls::AutoCompleteBox::max_length_property).
+    #[inline(always)]
     fn max_length<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::max_length_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::inner_left_content_property`](ferroui_controls::AutoCompleteBox::inner_left_content_property).
+    #[inline(always)]
     fn inner_left_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::inner_left_content_property(), value)
     }
 
     /// Sets [`AutoCompleteBox::inner_right_content_property`](ferroui_controls::AutoCompleteBox::inner_right_content_property).
+    #[inline(always)]
     fn inner_right_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::inner_right_content_property(), value)
     }
@@ -2510,41 +2554,49 @@ impl<T: ObjectType + Upcast<ferroui_controls::AutoCompleteBox>> AutoCompleteBoxP
 /// The properties and routed events of [`AutoSuggestBox`](ferroui_controls::AutoSuggestBox).
 pub trait AutoSuggestBoxProps: ElementBuilder {
     /// Sets [`AutoSuggestBox::text_property`](ferroui_controls::AutoSuggestBox::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::text_property(), value)
     }
 
     /// Sets [`AutoSuggestBox::text_member_path_property`](ferroui_controls::AutoSuggestBox::text_member_path_property).
+    #[inline(always)]
     fn text_member_path<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::text_member_path_property(), value)
     }
 
     /// Sets [`AutoSuggestBox::placeholder_text_property`](ferroui_controls::AutoSuggestBox::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::placeholder_text_property(), value)
     }
 
     /// Sets [`AutoSuggestBox::update_text_on_select_property`](ferroui_controls::AutoSuggestBox::update_text_on_select_property).
+    #[inline(always)]
     fn update_text_on_select<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::update_text_on_select_property(), value)
     }
 
     /// Sets [`AutoSuggestBox::is_suggestion_list_open_property`](ferroui_controls::AutoSuggestBox::is_suggestion_list_open_property).
+    #[inline(always)]
     fn is_suggestion_list_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::is_suggestion_list_open_property(), value)
     }
 
     /// Sets [`AutoSuggestBox::max_suggestion_list_height_property`](ferroui_controls::AutoSuggestBox::max_suggestion_list_height_property).
+    #[inline(always)]
     fn max_suggestion_list_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::max_suggestion_list_height_property(), value)
     }
 
     /// Sets [`AutoSuggestBox::query_icon_property`](ferroui_controls::AutoSuggestBox::query_icon_property).
+    #[inline(always)]
     fn query_icon<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::query_icon_property(), value)
     }
 
     /// Sets [`AutoSuggestBox::description_property`](ferroui_controls::AutoSuggestBox::description_property).
+    #[inline(always)]
     fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::AutoSuggestBox>::description_property(), value)
     }
@@ -2554,6 +2606,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::AutoSuggestBox>> AutoSuggestBoxPro
 /// The properties and routed events of [`BackEase`](ferroui_controls::animation::BackEase).
 pub trait BackEaseProps: ElementBuilder {
     /// Sets [`BackEase::amplitude_property`](ferroui_controls::animation::BackEase::amplitude_property).
+    #[inline(always)]
     fn amplitude<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::animation::BackEase>::amplitude_property(), value)
     }
@@ -2563,16 +2616,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::BackEase>> BackEaseProp
 /// The properties and routed events of [`BezierSegment`](ferroui_base::media::BezierSegment).
 pub trait BezierSegmentProps: ElementBuilder {
     /// Sets [`BezierSegment::point1_property`](ferroui_base::media::BezierSegment::point1_property).
+    #[inline(always)]
     fn point1<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::BezierSegment>::point1_property(), value)
     }
 
     /// Sets [`BezierSegment::point2_property`](ferroui_base::media::BezierSegment::point2_property).
+    #[inline(always)]
     fn point2<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::BezierSegment>::point2_property(), value)
     }
 
     /// Sets [`BezierSegment::point3_property`](ferroui_base::media::BezierSegment::point3_property).
+    #[inline(always)]
     fn point3<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::BezierSegment>::point3_property(), value)
     }
@@ -2582,6 +2638,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::BezierSegment>> BezierSegmentPr
 /// The properties and routed events of [`BindingEvaluator`](ferroui_controls::utils::BindingEvaluator).
 pub trait BindingEvaluatorProps: ElementBuilder {
     /// Sets [`BindingEvaluator::value_property`](ferroui_controls::utils::BindingEvaluator::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::utils::BindingEvaluator>::value_property(), value)
     }
@@ -2591,16 +2648,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::utils::BindingEvaluator>> BindingE
 /// The properties and routed events of [`BitmapCache`](ferroui_base::media::BitmapCache).
 pub trait BitmapCacheProps: ElementBuilder {
     /// Sets [`BitmapCache::render_at_scale_property`](ferroui_base::media::BitmapCache::render_at_scale_property).
+    #[inline(always)]
     fn render_at_scale<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::BitmapCache>::render_at_scale_property(), value)
     }
 
     /// Sets [`BitmapCache::snaps_to_device_pixels_property`](ferroui_base::media::BitmapCache::snaps_to_device_pixels_property).
+    #[inline(always)]
     fn snaps_to_device_pixels<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::BitmapCache>::snaps_to_device_pixels_property(), value)
     }
 
     /// Sets [`BitmapCache::enable_clear_type_property`](ferroui_base::media::BitmapCache::enable_clear_type_property).
+    #[inline(always)]
     fn enable_clear_type<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::BitmapCache>::enable_clear_type_property(), value)
     }
@@ -2610,26 +2670,31 @@ impl<T: ObjectType + Upcast<ferroui_base::media::BitmapCache>> BitmapCacheProps 
 /// The properties and routed events of [`Block`](ferroui_controls::documents::Block).
 pub trait BlockProps: ElementBuilder {
     /// Sets [`Block::text_alignment_property`](ferroui_controls::documents::Block::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::documents::Block>::text_alignment_property(), value)
     }
 
     /// Sets [`Block::line_height_property`](ferroui_controls::documents::Block::line_height_property).
+    #[inline(always)]
     fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::Block>::line_height_property(), value)
     }
 
     /// Sets [`Block::line_stacking_strategy_property`](ferroui_controls::documents::Block::line_stacking_strategy_property).
+    #[inline(always)]
     fn line_stacking_strategy<M>(self, value: impl IntoProp<ferroui_controls::documents::LineStackingStrategy, M>) -> Self {
         self.prop(<ferroui_controls::documents::Block>::line_stacking_strategy_property(), value)
     }
 
     /// Sets [`Block::margin_property`](ferroui_controls::documents::Block::margin_property).
+    #[inline(always)]
     fn margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::documents::Block>::margin_property(), value)
     }
 
     /// Sets [`Block::flow_direction_property`](ferroui_controls::documents::Block::flow_direction_property).
+    #[inline(always)]
     fn flow_direction<M>(self, value: impl IntoProp<ferroui_base::media::FlowDirection, M>) -> Self {
         self.prop(<ferroui_controls::documents::Block>::flow_direction_property(), value)
     }
@@ -2639,6 +2704,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::Block>> BlockProps for 
 /// The properties and routed events of [`BlurEffect`](ferroui_base::media::BlurEffect).
 pub trait BlurEffectProps: ElementBuilder {
     /// Sets [`BlurEffect::radius_property`](ferroui_base::media::BlurEffect::radius_property).
+    #[inline(always)]
     fn radius<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::BlurEffect>::radius_property(), value)
     }
@@ -2648,31 +2714,37 @@ impl<T: ObjectType + Upcast<ferroui_base::media::BlurEffect>> BlurEffectProps fo
 /// The properties and routed events of [`Border`](ferroui_controls::Border).
 pub trait BorderProps: ElementBuilder {
     /// Sets [`Border::background_property`](ferroui_controls::Border::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Border>::background_property(), value)
     }
 
     /// Sets [`Border::background_sizing_property`](ferroui_controls::Border::background_sizing_property).
+    #[inline(always)]
     fn background_sizing<M>(self, value: impl IntoProp<ferroui_base::media::BackgroundSizing, M>) -> Self {
         self.prop(<ferroui_controls::Border>::background_sizing_property(), value)
     }
 
     /// Sets [`Border::border_brush_property`](ferroui_controls::Border::border_brush_property).
+    #[inline(always)]
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Border>::border_brush_property(), value)
     }
 
     /// Sets [`Border::border_thickness_property`](ferroui_controls::Border::border_thickness_property).
+    #[inline(always)]
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::Border>::border_thickness_property(), value)
     }
 
     /// Sets [`Border::corner_radius_property`](ferroui_controls::Border::corner_radius_property).
+    #[inline(always)]
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::Border>::corner_radius_property(), value)
     }
 
     /// Sets [`Border::box_shadow_property`](ferroui_controls::Border::box_shadow_property).
+    #[inline(always)]
     fn box_shadow<M>(self, value: impl IntoProp<ferroui_base::media::BoxShadows, M>) -> Self {
         self.prop(<ferroui_controls::Border>::box_shadow_property(), value)
     }
@@ -2682,11 +2754,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::Border>> BorderProps for El<T> {}
 /// The properties and routed events of [`BounceEase`](ferroui_controls::animation::BounceEase).
 pub trait BounceEaseProps: ElementBuilder {
     /// Sets [`BounceEase::bounces_property`](ferroui_controls::animation::BounceEase::bounces_property).
+    #[inline(always)]
     fn bounces<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::animation::BounceEase>::bounces_property(), value)
     }
 
     /// Sets [`BounceEase::bounciness_property`](ferroui_controls::animation::BounceEase::bounciness_property).
+    #[inline(always)]
     fn bounciness<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::animation::BounceEase>::bounciness_property(), value)
     }
@@ -2696,21 +2770,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::BounceEase>> BounceEase
 /// The properties and routed events of [`Brush`](ferroui_base::media::Brush).
 pub trait BrushProps: ElementBuilder {
     /// Sets [`Brush::opacity_property`](ferroui_base::media::Brush::opacity_property).
+    #[inline(always)]
     fn opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Brush>::opacity_property(), value)
     }
 
     /// Sets [`Brush::transform_property`](ferroui_base::media::Brush::transform_property).
+    #[inline(always)]
     fn transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_base::media::Brush>::transform_property(), value)
     }
 
     /// Sets [`Brush::transform_origin_property`](ferroui_base::media::Brush::transform_origin_property).
+    #[inline(always)]
     fn transform_origin<M>(self, value: impl IntoProp<ferroui_base::RelativePoint, M>) -> Self {
         self.prop(<ferroui_base::media::Brush>::transform_origin_property(), value)
     }
 
     /// Sets [`Brush::relative_transform_property`](ferroui_base::media::Brush::relative_transform_property).
+    #[inline(always)]
     fn relative_transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_base::media::Brush>::relative_transform_property(), value)
     }
@@ -2720,36 +2798,43 @@ impl<T: ObjectType + Upcast<ferroui_base::media::Brush>> BrushProps for El<T> {}
 /// The properties and routed events of [`Button`](ferroui_controls::Button).
 pub trait ButtonProps: ElementBuilder {
     /// Sets [`Button::click_mode_property`](ferroui_controls::Button::click_mode_property).
+    #[inline(always)]
     fn click_mode<M>(self, value: impl IntoProp<ferroui_controls::ClickMode, M>) -> Self {
         self.prop(<ferroui_controls::Button>::click_mode_property(), value)
     }
 
     /// Sets [`Button::command_property`](ferroui_controls::Button::command_property).
+    #[inline(always)]
     fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::Button>::command_property(), value)
     }
 
     /// Sets [`Button::hot_key_property`](ferroui_controls::Button::hot_key_property).
+    #[inline(always)]
     fn hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::Button>::hot_key_property(), value)
     }
 
     /// Sets [`Button::command_parameter_property`](ferroui_controls::Button::command_parameter_property).
+    #[inline(always)]
     fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Button>::command_parameter_property(), value)
     }
 
     /// Sets [`Button::is_default_property`](ferroui_controls::Button::is_default_property).
+    #[inline(always)]
     fn is_default<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Button>::is_default_property(), value)
     }
 
     /// Sets [`Button::is_cancel_property`](ferroui_controls::Button::is_cancel_property).
+    #[inline(always)]
     fn is_cancel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Button>::is_cancel_property(), value)
     }
 
     /// Sets [`Button::flyout_property`](ferroui_controls::Button::flyout_property).
+    #[inline(always)]
     fn flyout<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::FlyoutBase>>, M>) -> Self {
         self.prop(<ferroui_controls::Button>::flyout_property(), value)
     }
@@ -2764,16 +2849,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::Button>> ButtonProps for El<T> {}
 /// The properties and routed events of [`ButtonSpinner`](ferroui_controls::ButtonSpinner).
 pub trait ButtonSpinnerProps: ElementBuilder {
     /// Sets [`ButtonSpinner::allow_spin_property`](ferroui_controls::ButtonSpinner::allow_spin_property).
+    #[inline(always)]
     fn allow_spin<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ButtonSpinner>::allow_spin_property(), value)
     }
 
     /// Sets [`ButtonSpinner::show_button_spinner_property`](ferroui_controls::ButtonSpinner::show_button_spinner_property).
+    #[inline(always)]
     fn show_button_spinner<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ButtonSpinner>::show_button_spinner_property(), value)
     }
 
     /// Sets [`ButtonSpinner::button_spinner_location_property`](ferroui_controls::ButtonSpinner::button_spinner_location_property).
+    #[inline(always)]
     fn button_spinner_location<M>(self, value: impl IntoProp<ferroui_controls::Location, M>) -> Self {
         self.prop(<ferroui_controls::ButtonSpinner>::button_spinner_location_property(), value)
     }
@@ -2783,61 +2871,73 @@ impl<T: ObjectType + Upcast<ferroui_controls::ButtonSpinner>> ButtonSpinnerProps
 /// The properties and routed events of [`Calendar`](ferroui_controls::Calendar).
 pub trait CalendarProps: ElementBuilder {
     /// Sets [`Calendar::first_day_of_week_property`](ferroui_controls::Calendar::first_day_of_week_property).
+    #[inline(always)]
     fn first_day_of_week<M>(self, value: impl IntoProp<ferroui_base::utilities::DayOfWeek, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::first_day_of_week_property(), value)
     }
 
     /// Sets [`Calendar::is_today_highlighted_property`](ferroui_controls::Calendar::is_today_highlighted_property).
+    #[inline(always)]
     fn is_today_highlighted<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::is_today_highlighted_property(), value)
     }
 
     /// Sets [`Calendar::header_background_property`](ferroui_controls::Calendar::header_background_property).
+    #[inline(always)]
     fn header_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::header_background_property(), value)
     }
 
     /// Sets [`Calendar::is_week_number_visible_property`](ferroui_controls::Calendar::is_week_number_visible_property).
+    #[inline(always)]
     fn is_week_number_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::is_week_number_visible_property(), value)
     }
 
     /// Sets [`Calendar::week_number_rule_property`](ferroui_controls::Calendar::week_number_rule_property).
+    #[inline(always)]
     fn week_number_rule<M>(self, value: impl IntoProp<ferroui_base::utilities::CalendarWeekRule, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::week_number_rule_property(), value)
     }
 
     /// Sets [`Calendar::display_mode_property`](ferroui_controls::Calendar::display_mode_property).
+    #[inline(always)]
     fn display_mode<M>(self, value: impl IntoProp<ferroui_controls::CalendarMode, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::display_mode_property(), value)
     }
 
     /// Sets [`Calendar::selection_mode_property`](ferroui_controls::Calendar::selection_mode_property).
+    #[inline(always)]
     fn selection_mode<M>(self, value: impl IntoProp<ferroui_controls::CalendarSelectionMode, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::selection_mode_property(), value)
     }
 
     /// Sets [`Calendar::allow_tap_range_selection_property`](ferroui_controls::Calendar::allow_tap_range_selection_property).
+    #[inline(always)]
     fn allow_tap_range_selection<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::allow_tap_range_selection_property(), value)
     }
 
     /// Sets [`Calendar::selected_date_property`](ferroui_controls::Calendar::selected_date_property).
+    #[inline(always)]
     fn selected_date<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTime>, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::selected_date_property(), value)
     }
 
     /// Sets [`Calendar::display_date_property`](ferroui_controls::Calendar::display_date_property).
+    #[inline(always)]
     fn display_date<M>(self, value: impl IntoProp<ferroui_base::utilities::DateTime, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::display_date_property(), value)
     }
 
     /// Sets [`Calendar::display_date_start_property`](ferroui_controls::Calendar::display_date_start_property).
+    #[inline(always)]
     fn display_date_start<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTime>, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::display_date_start_property(), value)
     }
 
     /// Sets [`Calendar::display_date_end_property`](ferroui_controls::Calendar::display_date_end_property).
+    #[inline(always)]
     fn display_date_end<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTime>, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::display_date_end_property(), value)
     }
@@ -2847,91 +2947,109 @@ impl<T: ObjectType + Upcast<ferroui_controls::Calendar>> CalendarProps for El<T>
 /// The properties and routed events of [`CalendarDatePicker`](ferroui_controls::CalendarDatePicker).
 pub trait CalendarDatePickerProps: ElementBuilder {
     /// Sets [`CalendarDatePicker::display_date_property`](ferroui_controls::CalendarDatePicker::display_date_property).
+    #[inline(always)]
     fn display_date<M>(self, value: impl IntoProp<ferroui_base::utilities::DateTime, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::display_date_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::display_date_start_property`](ferroui_controls::CalendarDatePicker::display_date_start_property).
+    #[inline(always)]
     fn display_date_start<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTime>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::display_date_start_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::display_date_end_property`](ferroui_controls::CalendarDatePicker::display_date_end_property).
+    #[inline(always)]
     fn display_date_end<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTime>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::display_date_end_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::first_day_of_week_property`](ferroui_controls::CalendarDatePicker::first_day_of_week_property).
+    #[inline(always)]
     fn first_day_of_week<M>(self, value: impl IntoProp<ferroui_base::utilities::DayOfWeek, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::first_day_of_week_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::is_drop_down_open_property`](ferroui_controls::CalendarDatePicker::is_drop_down_open_property).
+    #[inline(always)]
     fn is_drop_down_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::is_drop_down_open_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::is_today_highlighted_property`](ferroui_controls::CalendarDatePicker::is_today_highlighted_property).
+    #[inline(always)]
     fn is_today_highlighted<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::is_today_highlighted_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::selected_date_property`](ferroui_controls::CalendarDatePicker::selected_date_property).
+    #[inline(always)]
     fn selected_date<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTime>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::selected_date_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::selected_date_format_property`](ferroui_controls::CalendarDatePicker::selected_date_format_property).
+    #[inline(always)]
     fn selected_date_format<M>(self, value: impl IntoProp<ferroui_controls::CalendarDatePickerFormat, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::selected_date_format_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::custom_date_format_string_property`](ferroui_controls::CalendarDatePicker::custom_date_format_string_property).
+    #[inline(always)]
     fn custom_date_format_string<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::custom_date_format_string_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::text_converter_property`](ferroui_controls::CalendarDatePicker::text_converter_property).
+    #[inline(always)]
     fn text_converter<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::text_converter_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::text_property`](ferroui_controls::CalendarDatePicker::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::text_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::placeholder_text_property`](ferroui_controls::CalendarDatePicker::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::placeholder_text_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::use_floating_placeholder_property`](ferroui_controls::CalendarDatePicker::use_floating_placeholder_property).
+    #[inline(always)]
     fn use_floating_placeholder<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::use_floating_placeholder_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::placeholder_foreground_property`](ferroui_controls::CalendarDatePicker::placeholder_foreground_property).
+    #[inline(always)]
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::placeholder_foreground_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::horizontal_content_alignment_property`](ferroui_controls::CalendarDatePicker::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::vertical_content_alignment_property`](ferroui_controls::CalendarDatePicker::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::is_week_number_visible_property`](ferroui_controls::CalendarDatePicker::is_week_number_visible_property).
+    #[inline(always)]
     fn is_week_number_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::is_week_number_visible_property(), value)
     }
 
     /// Sets [`CalendarDatePicker::week_number_rule_property`](ferroui_controls::CalendarDatePicker::week_number_rule_property).
+    #[inline(always)]
     fn week_number_rule<M>(self, value: impl IntoProp<ferroui_base::utilities::CalendarWeekRule, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::week_number_rule_property(), value)
     }
@@ -2941,11 +3059,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::CalendarDatePicker>> CalendarDateP
 /// The properties and routed events of [`CalendarItem`](ferroui_controls::primitives::CalendarItem).
 pub trait CalendarItemProps: ElementBuilder {
     /// Sets [`CalendarItem::header_background_property`](ferroui_controls::primitives::CalendarItem::header_background_property).
+    #[inline(always)]
     fn header_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::CalendarItem>::header_background_property(), value)
     }
 
     /// Sets [`CalendarItem::day_title_template_property`](ferroui_controls::primitives::CalendarItem::day_title_template_property).
+    #[inline(always)]
     fn day_title_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::ITemplateOf<Option<ferroui_base::Ref<ferroui_controls::Control>>>>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::CalendarItem>::day_title_template_property(), value)
     }
@@ -2955,21 +3075,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::CalendarItem>> Calenda
 /// The properties and routed events of [`Canvas`](ferroui_controls::Canvas).
 pub trait CanvasProps: ElementBuilder {
     /// Sets [`Canvas::left_property`](ferroui_controls::Canvas::left_property).
+    #[inline(always)]
     fn left<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::left_property(), value)
     }
 
     /// Sets [`Canvas::top_property`](ferroui_controls::Canvas::top_property).
+    #[inline(always)]
     fn top<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::top_property(), value)
     }
 
     /// Sets [`Canvas::right_property`](ferroui_controls::Canvas::right_property).
+    #[inline(always)]
     fn right<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::right_property(), value)
     }
 
     /// Sets [`Canvas::bottom_property`](ferroui_controls::Canvas::bottom_property).
+    #[inline(always)]
     fn bottom<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::bottom_property(), value)
     }
@@ -2979,16 +3103,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::Canvas>> CanvasProps for El<T> {}
 /// The properties and routed events of [`Carousel`](ferroui_controls::Carousel).
 pub trait CarouselProps: ElementBuilder {
     /// Sets [`Carousel::page_transition_property`](ferroui_controls::Carousel::page_transition_property).
+    #[inline(always)]
     fn page_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::Carousel>::page_transition_property(), value)
     }
 
     /// Sets [`Carousel::is_swipe_enabled_property`](ferroui_controls::Carousel::is_swipe_enabled_property).
+    #[inline(always)]
     fn is_swipe_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Carousel>::is_swipe_enabled_property(), value)
     }
 
     /// Sets [`Carousel::viewport_fraction_property`](ferroui_controls::Carousel::viewport_fraction_property).
+    #[inline(always)]
     fn viewport_fraction<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Carousel>::viewport_fraction_property(), value)
     }
@@ -2998,21 +3125,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::Carousel>> CarouselProps for El<T>
 /// The properties and routed events of [`CarouselPage`](ferroui_controls::CarouselPage).
 pub trait CarouselPageProps: ElementBuilder {
     /// Sets [`CarouselPage::items_panel_property`](ferroui_controls::CarouselPage::items_panel_property).
+    #[inline(always)]
     fn items_panel<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_controls::ITemplateOf<Option<ferroui_base::Ref<ferroui_controls::Panel>>>>, M>) -> Self {
         self.prop(<ferroui_controls::CarouselPage>::items_panel_property(), value)
     }
 
     /// Sets [`CarouselPage::page_transition_property`](ferroui_controls::CarouselPage::page_transition_property).
+    #[inline(always)]
     fn page_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::CarouselPage>::page_transition_property(), value)
     }
 
     /// Sets [`CarouselPage::is_gesture_enabled_property`](ferroui_controls::CarouselPage::is_gesture_enabled_property).
+    #[inline(always)]
     fn is_gesture_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CarouselPage>::is_gesture_enabled_property(), value)
     }
 
     /// Sets [`CarouselPage::is_keyboard_navigation_enabled_property`](ferroui_controls::CarouselPage::is_keyboard_navigation_enabled_property).
+    #[inline(always)]
     fn is_keyboard_navigation_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CarouselPage>::is_keyboard_navigation_enabled_property(), value)
     }
@@ -3022,26 +3153,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::CarouselPage>> CarouselPageProps f
 /// The properties and routed events of [`ColorAnimation`](ferroui_controls::animation::ColorAnimation).
 pub trait ColorAnimationProps: ElementBuilder {
     /// Sets [`ColorAnimation::from_property`](ferroui_controls::animation::ColorAnimation::from_property).
+    #[inline(always)]
     fn from<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::from_property(), value)
     }
 
     /// Sets [`ColorAnimation::to_property`](ferroui_controls::animation::ColorAnimation::to_property).
+    #[inline(always)]
     fn to<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::to_property(), value)
     }
 
     /// Sets [`ColorAnimation::by_property`](ferroui_controls::animation::ColorAnimation::by_property).
+    #[inline(always)]
     fn by<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::by_property(), value)
     }
 
     /// Sets [`ColorAnimation::easing_function_property`](ferroui_controls::animation::ColorAnimation::easing_function_property).
+    #[inline(always)]
     fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::easing_function_property(), value)
     }
 
     /// Sets [`ColorAnimation::enable_dependent_animation_property`](ferroui_controls::animation::ColorAnimation::enable_dependent_animation_property).
+    #[inline(always)]
     fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::enable_dependent_animation_property(), value)
     }
@@ -3051,6 +3187,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::ColorAnimation>> ColorA
 /// The properties and routed events of [`ColorAnimationUsingKeyFrames`](ferroui_controls::animation::ColorAnimationUsingKeyFrames).
 pub trait ColorAnimationUsingKeyFramesProps: ElementBuilder {
     /// Sets [`ColorAnimationUsingKeyFrames::enable_dependent_animation_property`](ferroui_controls::animation::ColorAnimationUsingKeyFrames::enable_dependent_animation_property).
+    #[inline(always)]
     fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimationUsingKeyFrames>::enable_dependent_animation_property(), value)
     }
@@ -3060,11 +3197,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::ColorAnimationUsingKeyF
 /// The properties and routed events of [`ColorKeyFrame`](ferroui_controls::animation::ColorKeyFrame).
 pub trait ColorKeyFrameProps: ElementBuilder {
     /// Sets [`ColorKeyFrame::key_time_property`](ferroui_controls::animation::ColorKeyFrame::key_time_property).
+    #[inline(always)]
     fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorKeyFrame>::key_time_property(), value)
     }
 
     /// Sets [`ColorKeyFrame::value_property`](ferroui_controls::animation::ColorKeyFrame::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorKeyFrame>::value_property(), value)
     }
@@ -3074,16 +3213,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::ColorKeyFrame>> ColorKe
 /// The properties and routed events of [`ColumnDefinition`](ferroui_controls::ColumnDefinition).
 pub trait ColumnDefinitionProps: ElementBuilder {
     /// Sets [`ColumnDefinition::max_width_property`](ferroui_controls::ColumnDefinition::max_width_property).
+    #[inline(always)]
     fn max_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ColumnDefinition>::max_width_property(), value)
     }
 
     /// Sets [`ColumnDefinition::min_width_property`](ferroui_controls::ColumnDefinition::min_width_property).
+    #[inline(always)]
     fn min_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ColumnDefinition>::min_width_property(), value)
     }
 
     /// Sets [`ColumnDefinition::width_property`](ferroui_controls::ColumnDefinition::width_property).
+    #[inline(always)]
     fn width<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::ColumnDefinition>::width_property(), value)
     }
@@ -3093,16 +3235,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::ColumnDefinition>> ColumnDefinitio
 /// The properties and routed events of [`CombinedGeometry`](ferroui_base::media::CombinedGeometry).
 pub trait CombinedGeometryProps: ElementBuilder {
     /// Sets [`CombinedGeometry::geometry1_property`](ferroui_base::media::CombinedGeometry::geometry1_property).
+    #[inline(always)]
     fn geometry1<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::CombinedGeometry>::geometry1_property(), value)
     }
 
     /// Sets [`CombinedGeometry::geometry2_property`](ferroui_base::media::CombinedGeometry::geometry2_property).
+    #[inline(always)]
     fn geometry2<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::CombinedGeometry>::geometry2_property(), value)
     }
 
     /// Sets [`CombinedGeometry::geometry_combine_mode_property`](ferroui_base::media::CombinedGeometry::geometry_combine_mode_property).
+    #[inline(always)]
     fn geometry_combine_mode<M>(self, value: impl IntoProp<ferroui_base::media::GeometryCombineMode, M>) -> Self {
         self.prop(<ferroui_base::media::CombinedGeometry>::geometry_combine_mode_property(), value)
     }
@@ -3112,46 +3257,55 @@ impl<T: ObjectType + Upcast<ferroui_base::media::CombinedGeometry>> CombinedGeom
 /// The properties and routed events of [`ComboBox`](ferroui_controls::ComboBox).
 pub trait ComboBoxProps: ElementBuilder {
     /// Sets [`ComboBox::is_drop_down_open_property`](ferroui_controls::ComboBox::is_drop_down_open_property).
+    #[inline(always)]
     fn is_drop_down_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::is_drop_down_open_property(), value)
     }
 
     /// Sets [`ComboBox::is_editable_property`](ferroui_controls::ComboBox::is_editable_property).
+    #[inline(always)]
     fn is_editable<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::is_editable_property(), value)
     }
 
     /// Sets [`ComboBox::max_drop_down_height_property`](ferroui_controls::ComboBox::max_drop_down_height_property).
+    #[inline(always)]
     fn max_drop_down_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::max_drop_down_height_property(), value)
     }
 
     /// Sets [`ComboBox::placeholder_text_property`](ferroui_controls::ComboBox::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::placeholder_text_property(), value)
     }
 
     /// Sets [`ComboBox::placeholder_foreground_property`](ferroui_controls::ComboBox::placeholder_foreground_property).
+    #[inline(always)]
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::placeholder_foreground_property(), value)
     }
 
     /// Sets [`ComboBox::horizontal_content_alignment_property`](ferroui_controls::ComboBox::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`ComboBox::vertical_content_alignment_property`](ferroui_controls::ComboBox::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`ComboBox::text_property`](ferroui_controls::ComboBox::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::text_property(), value)
     }
 
     /// Sets [`ComboBox::selection_box_item_template_property`](ferroui_controls::ComboBox::selection_box_item_template_property).
+    #[inline(always)]
     fn selection_box_item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::selection_box_item_template_property(), value)
     }
@@ -3161,46 +3315,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::ComboBox>> ComboBoxProps for El<T>
 /// The properties and routed events of [`CommandBar`](ferroui_controls::CommandBar).
 pub trait CommandBarProps: ElementBuilder {
     /// Sets [`CommandBar::content_property`](ferroui_controls::CommandBar::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::content_property(), value)
     }
 
     /// Sets [`CommandBar::default_label_position_property`](ferroui_controls::CommandBar::default_label_position_property).
+    #[inline(always)]
     fn default_label_position<M>(self, value: impl IntoProp<ferroui_controls::CommandBarDefaultLabelPosition, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::default_label_position_property(), value)
     }
 
     /// Sets [`CommandBar::is_dynamic_overflow_enabled_property`](ferroui_controls::CommandBar::is_dynamic_overflow_enabled_property).
+    #[inline(always)]
     fn is_dynamic_overflow_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::is_dynamic_overflow_enabled_property(), value)
     }
 
     /// Sets [`CommandBar::overflow_button_visibility_property`](ferroui_controls::CommandBar::overflow_button_visibility_property).
+    #[inline(always)]
     fn overflow_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::CommandBarOverflowButtonVisibility, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::overflow_button_visibility_property(), value)
     }
 
     /// Sets [`CommandBar::is_open_property`](ferroui_controls::CommandBar::is_open_property).
+    #[inline(always)]
     fn is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::is_open_property(), value)
     }
 
     /// Sets [`CommandBar::is_sticky_property`](ferroui_controls::CommandBar::is_sticky_property).
+    #[inline(always)]
     fn is_sticky<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::is_sticky_property(), value)
     }
 
     /// Sets [`CommandBar::item_width_bottom_property`](ferroui_controls::CommandBar::item_width_bottom_property).
+    #[inline(always)]
     fn item_width_bottom<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::item_width_bottom_property(), value)
     }
 
     /// Sets [`CommandBar::item_width_right_property`](ferroui_controls::CommandBar::item_width_right_property).
+    #[inline(always)]
     fn item_width_right<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::item_width_right_property(), value)
     }
 
     /// Sets [`CommandBar::item_width_collapsed_property`](ferroui_controls::CommandBar::item_width_collapsed_property).
+    #[inline(always)]
     fn item_width_collapsed<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::CommandBar>::item_width_collapsed_property(), value)
     }
@@ -3230,31 +3393,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::CommandBar>> CommandBarProps for E
 /// The properties and routed events of [`CommandBarButton`](ferroui_controls::CommandBarButton).
 pub trait CommandBarButtonProps: ElementBuilder {
     /// Sets [`CommandBarButton::label_property`](ferroui_controls::CommandBarButton::label_property).
+    #[inline(always)]
     fn label<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarButton>::label_property(), value)
     }
 
     /// Sets [`CommandBarButton::icon_property`](ferroui_controls::CommandBarButton::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarButton>::icon_property(), value)
     }
 
     /// Sets [`CommandBarButton::is_compact_property`](ferroui_controls::CommandBarButton::is_compact_property).
+    #[inline(always)]
     fn is_compact<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarButton>::is_compact_property(), value)
     }
 
     /// Sets [`CommandBarButton::dynamic_overflow_order_property`](ferroui_controls::CommandBarButton::dynamic_overflow_order_property).
+    #[inline(always)]
     fn dynamic_overflow_order<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarButton>::dynamic_overflow_order_property(), value)
     }
 
     /// Sets [`CommandBarButton::label_position_property`](ferroui_controls::CommandBarButton::label_position_property).
+    #[inline(always)]
     fn label_position<M>(self, value: impl IntoProp<ferroui_controls::CommandBarDefaultLabelPosition, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarButton>::label_position_property(), value)
     }
 
     /// Sets [`CommandBarButton::is_in_overflow_property`](ferroui_controls::CommandBarButton::is_in_overflow_property).
+    #[inline(always)]
     fn is_in_overflow<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarButton>::is_in_overflow_property(), value)
     }
@@ -3264,11 +3433,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::CommandBarButton>> CommandBarButto
 /// The properties and routed events of [`CommandBarSeparator`](ferroui_controls::CommandBarSeparator).
 pub trait CommandBarSeparatorProps: ElementBuilder {
     /// Sets [`CommandBarSeparator::is_compact_property`](ferroui_controls::CommandBarSeparator::is_compact_property).
+    #[inline(always)]
     fn is_compact<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarSeparator>::is_compact_property(), value)
     }
 
     /// Sets [`CommandBarSeparator::is_in_overflow_property`](ferroui_controls::CommandBarSeparator::is_in_overflow_property).
+    #[inline(always)]
     fn is_in_overflow<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarSeparator>::is_in_overflow_property(), value)
     }
@@ -3278,31 +3449,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::CommandBarSeparator>> CommandBarSe
 /// The properties and routed events of [`CommandBarToggleButton`](ferroui_controls::CommandBarToggleButton).
 pub trait CommandBarToggleButtonProps: ElementBuilder {
     /// Sets [`CommandBarToggleButton::label_property`](ferroui_controls::CommandBarToggleButton::label_property).
+    #[inline(always)]
     fn label<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarToggleButton>::label_property(), value)
     }
 
     /// Sets [`CommandBarToggleButton::icon_property`](ferroui_controls::CommandBarToggleButton::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarToggleButton>::icon_property(), value)
     }
 
     /// Sets [`CommandBarToggleButton::is_compact_property`](ferroui_controls::CommandBarToggleButton::is_compact_property).
+    #[inline(always)]
     fn is_compact<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarToggleButton>::is_compact_property(), value)
     }
 
     /// Sets [`CommandBarToggleButton::dynamic_overflow_order_property`](ferroui_controls::CommandBarToggleButton::dynamic_overflow_order_property).
+    #[inline(always)]
     fn dynamic_overflow_order<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarToggleButton>::dynamic_overflow_order_property(), value)
     }
 
     /// Sets [`CommandBarToggleButton::label_position_property`](ferroui_controls::CommandBarToggleButton::label_position_property).
+    #[inline(always)]
     fn label_position<M>(self, value: impl IntoProp<ferroui_controls::CommandBarDefaultLabelPosition, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarToggleButton>::label_position_property(), value)
     }
 
     /// Sets [`CommandBarToggleButton::is_in_overflow_property`](ferroui_controls::CommandBarToggleButton::is_in_overflow_property).
+    #[inline(always)]
     fn is_in_overflow<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::CommandBarToggleButton>::is_in_overflow_property(), value)
     }
@@ -3312,11 +3489,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::CommandBarToggleButton>> CommandBa
 /// The properties and routed events of [`ConicGradientBrush`](ferroui_base::media::ConicGradientBrush).
 pub trait ConicGradientBrushProps: ElementBuilder {
     /// Sets [`ConicGradientBrush::center_property`](ferroui_base::media::ConicGradientBrush::center_property).
+    #[inline(always)]
     fn center<M>(self, value: impl IntoProp<ferroui_base::RelativePoint, M>) -> Self {
         self.prop(<ferroui_base::media::ConicGradientBrush>::center_property(), value)
     }
 
     /// Sets [`ConicGradientBrush::angle_property`](ferroui_base::media::ConicGradientBrush::angle_property).
+    #[inline(always)]
     fn angle<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::ConicGradientBrush>::angle_property(), value)
     }
@@ -3326,41 +3505,49 @@ impl<T: ObjectType + Upcast<ferroui_base::media::ConicGradientBrush>> ConicGradi
 /// The properties and routed events of [`Contact`](ferroui_controls::Contact).
 pub trait ContactProps: ElementBuilder {
     /// Sets [`Contact::id_property`](ferroui_controls::Contact::id_property).
+    #[inline(always)]
     fn id<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::id_property(), value)
     }
 
     /// Sets [`Contact::first_name_property`](ferroui_controls::Contact::first_name_property).
+    #[inline(always)]
     fn first_name<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::first_name_property(), value)
     }
 
     /// Sets [`Contact::last_name_property`](ferroui_controls::Contact::last_name_property).
+    #[inline(always)]
     fn last_name<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::last_name_property(), value)
     }
 
     /// Sets [`Contact::display_name_override_property`](ferroui_controls::Contact::display_name_override_property).
+    #[inline(always)]
     fn display_name_override<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::display_name_override_property(), value)
     }
 
     /// Sets [`Contact::small_display_picture_property`](ferroui_controls::Contact::small_display_picture_property).
+    #[inline(always)]
     fn small_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::small_display_picture_property(), value)
     }
 
     /// Sets [`Contact::large_display_picture_property`](ferroui_controls::Contact::large_display_picture_property).
+    #[inline(always)]
     fn large_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::large_display_picture_property(), value)
     }
 
     /// Sets [`Contact::source_display_picture_property`](ferroui_controls::Contact::source_display_picture_property).
+    #[inline(always)]
     fn source_display_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::source_display_picture_property(), value)
     }
 
     /// Sets [`Contact::thumbnail_property`](ferroui_controls::Contact::thumbnail_property).
+    #[inline(always)]
     fn thumbnail<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
         self.prop(<ferroui_controls::Contact>::thumbnail_property(), value)
     }
@@ -3370,21 +3557,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::Contact>> ContactProps for El<T> {
 /// The properties and routed events of [`ContentControl`](ferroui_controls::ContentControl).
 pub trait ContentControlProps: ElementBuilder {
     /// Sets [`ContentControl::content_property`](ferroui_controls::ContentControl::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ContentControl>::content_property(), value)
     }
 
     /// Sets [`ContentControl::content_template_property`](ferroui_controls::ContentControl::content_template_property).
+    #[inline(always)]
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ContentControl>::content_template_property(), value)
     }
 
     /// Sets [`ContentControl::horizontal_content_alignment_property`](ferroui_controls::ContentControl::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ContentControl>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`ContentControl::vertical_content_alignment_property`](ferroui_controls::ContentControl::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ContentControl>::vertical_content_alignment_property(), value)
     }
@@ -3394,36 +3585,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::ContentControl>> ContentControlPro
 /// The properties and routed events of [`ContentPage`](ferroui_controls::ContentPage).
 pub trait ContentPageProps: ElementBuilder {
     /// Sets [`ContentPage::content_property`](ferroui_controls::ContentPage::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ContentPage>::content_property(), value)
     }
 
     /// Sets [`ContentPage::content_template_property`](ferroui_controls::ContentPage::content_template_property).
+    #[inline(always)]
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ContentPage>::content_template_property(), value)
     }
 
     /// Sets [`ContentPage::automatically_apply_safe_area_padding_property`](ferroui_controls::ContentPage::automatically_apply_safe_area_padding_property).
+    #[inline(always)]
     fn automatically_apply_safe_area_padding<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ContentPage>::automatically_apply_safe_area_padding_property(), value)
     }
 
     /// Sets [`ContentPage::top_command_bar_property`](ferroui_controls::ContentPage::top_command_bar_property).
+    #[inline(always)]
     fn top_command_bar<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ContentPage>::top_command_bar_property(), value)
     }
 
     /// Sets [`ContentPage::bottom_command_bar_property`](ferroui_controls::ContentPage::bottom_command_bar_property).
+    #[inline(always)]
     fn bottom_command_bar<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ContentPage>::bottom_command_bar_property(), value)
     }
 
     /// Sets [`ContentPage::horizontal_content_alignment_property`](ferroui_controls::ContentPage::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ContentPage>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`ContentPage::vertical_content_alignment_property`](ferroui_controls::ContentPage::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ContentPage>::vertical_content_alignment_property(), value)
     }
@@ -3433,121 +3631,145 @@ impl<T: ObjectType + Upcast<ferroui_controls::ContentPage>> ContentPageProps for
 /// The properties and routed events of [`ContentPresenter`](ferroui_controls::presenters::ContentPresenter).
 pub trait ContentPresenterProps: ElementBuilder {
     /// Sets [`ContentPresenter::background_property`](ferroui_controls::presenters::ContentPresenter::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::background_property(), value)
     }
 
     /// Sets [`ContentPresenter::background_sizing_property`](ferroui_controls::presenters::ContentPresenter::background_sizing_property).
+    #[inline(always)]
     fn background_sizing<M>(self, value: impl IntoProp<ferroui_base::media::BackgroundSizing, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::background_sizing_property(), value)
     }
 
     /// Sets [`ContentPresenter::border_brush_property`](ferroui_controls::presenters::ContentPresenter::border_brush_property).
+    #[inline(always)]
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::border_brush_property(), value)
     }
 
     /// Sets [`ContentPresenter::border_thickness_property`](ferroui_controls::presenters::ContentPresenter::border_thickness_property).
+    #[inline(always)]
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::border_thickness_property(), value)
     }
 
     /// Sets [`ContentPresenter::corner_radius_property`](ferroui_controls::presenters::ContentPresenter::corner_radius_property).
+    #[inline(always)]
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::corner_radius_property(), value)
     }
 
     /// Sets [`ContentPresenter::box_shadow_property`](ferroui_controls::presenters::ContentPresenter::box_shadow_property).
+    #[inline(always)]
     fn box_shadow<M>(self, value: impl IntoProp<ferroui_base::media::BoxShadows, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::box_shadow_property(), value)
     }
 
     /// Sets [`ContentPresenter::foreground_property`](ferroui_controls::presenters::ContentPresenter::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::foreground_property(), value)
     }
 
     /// Sets [`ContentPresenter::font_family_property`](ferroui_controls::presenters::ContentPresenter::font_family_property).
+    #[inline(always)]
     fn font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::font_family_property(), value)
     }
 
     /// Sets [`ContentPresenter::font_size_property`](ferroui_controls::presenters::ContentPresenter::font_size_property).
+    #[inline(always)]
     fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::font_size_property(), value)
     }
 
     /// Sets [`ContentPresenter::font_style_property`](ferroui_controls::presenters::ContentPresenter::font_style_property).
+    #[inline(always)]
     fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::font_style_property(), value)
     }
 
     /// Sets [`ContentPresenter::font_weight_property`](ferroui_controls::presenters::ContentPresenter::font_weight_property).
+    #[inline(always)]
     fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::font_weight_property(), value)
     }
 
     /// Sets [`ContentPresenter::font_stretch_property`](ferroui_controls::presenters::ContentPresenter::font_stretch_property).
+    #[inline(always)]
     fn font_stretch<M>(self, value: impl IntoProp<ferroui_base::media::FontStretch, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::font_stretch_property(), value)
     }
 
     /// Sets [`ContentPresenter::text_alignment_property`](ferroui_controls::presenters::ContentPresenter::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::text_alignment_property(), value)
     }
 
     /// Sets [`ContentPresenter::text_wrapping_property`](ferroui_controls::presenters::ContentPresenter::text_wrapping_property).
+    #[inline(always)]
     fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::text_wrapping_property(), value)
     }
 
     /// Sets [`ContentPresenter::text_trimming_property`](ferroui_controls::presenters::ContentPresenter::text_trimming_property).
+    #[inline(always)]
     fn text_trimming<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_base::media::TextTrimming>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::text_trimming_property(), value)
     }
 
     /// Sets [`ContentPresenter::line_height_property`](ferroui_controls::presenters::ContentPresenter::line_height_property).
+    #[inline(always)]
     fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::line_height_property(), value)
     }
 
     /// Sets [`ContentPresenter::letter_spacing_property`](ferroui_controls::presenters::ContentPresenter::letter_spacing_property).
+    #[inline(always)]
     fn letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::letter_spacing_property(), value)
     }
 
     /// Sets [`ContentPresenter::max_lines_property`](ferroui_controls::presenters::ContentPresenter::max_lines_property).
+    #[inline(always)]
     fn max_lines<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::max_lines_property(), value)
     }
 
     /// Sets [`ContentPresenter::content_property`](ferroui_controls::presenters::ContentPresenter::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::content_property(), value)
     }
 
     /// Sets [`ContentPresenter::content_template_property`](ferroui_controls::presenters::ContentPresenter::content_template_property).
+    #[inline(always)]
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::content_template_property(), value)
     }
 
     /// Sets [`ContentPresenter::horizontal_content_alignment_property`](ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`ContentPresenter::vertical_content_alignment_property`](ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`ContentPresenter::padding_property`](ferroui_controls::presenters::ContentPresenter::padding_property).
+    #[inline(always)]
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::padding_property(), value)
     }
 
     /// Sets [`ContentPresenter::recognizes_access_key_property`](ferroui_controls::presenters::ContentPresenter::recognizes_access_key_property).
+    #[inline(always)]
     fn recognizes_access_key<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::recognizes_access_key_property(), value)
     }
@@ -3557,46 +3779,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::presenters::ContentPresenter>> Con
 /// The properties and routed events of [`ContextMenu`](ferroui_controls::ContextMenu).
 pub trait ContextMenuProps: ElementBuilder {
     /// Sets [`ContextMenu::horizontal_offset_property`](ferroui_controls::ContextMenu::horizontal_offset_property).
+    #[inline(always)]
     fn horizontal_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::horizontal_offset_property(), value)
     }
 
     /// Sets [`ContextMenu::vertical_offset_property`](ferroui_controls::ContextMenu::vertical_offset_property).
+    #[inline(always)]
     fn vertical_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::vertical_offset_property(), value)
     }
 
     /// Sets [`ContextMenu::placement_anchor_property`](ferroui_controls::ContextMenu::placement_anchor_property).
+    #[inline(always)]
     fn placement_anchor<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupAnchor, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::placement_anchor_property(), value)
     }
 
     /// Sets [`ContextMenu::placement_constraint_adjustment_property`](ferroui_controls::ContextMenu::placement_constraint_adjustment_property).
+    #[inline(always)]
     fn placement_constraint_adjustment<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupPositionerConstraintAdjustment, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::placement_constraint_adjustment_property(), value)
     }
 
     /// Sets [`ContextMenu::placement_gravity_property`](ferroui_controls::ContextMenu::placement_gravity_property).
+    #[inline(always)]
     fn placement_gravity<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupGravity, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::placement_gravity_property(), value)
     }
 
     /// Sets [`ContextMenu::placement_property`](ferroui_controls::ContextMenu::placement_property).
+    #[inline(always)]
     fn placement<M>(self, value: impl IntoProp<ferroui_controls::PlacementMode, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::placement_property(), value)
     }
 
     /// Sets [`ContextMenu::placement_rect_property`](ferroui_controls::ContextMenu::placement_rect_property).
+    #[inline(always)]
     fn placement_rect<M>(self, value: impl IntoProp<Option<ferroui_base::Rect>, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::placement_rect_property(), value)
     }
 
     /// Sets [`ContextMenu::window_manager_add_shadow_hint_property`](ferroui_controls::ContextMenu::window_manager_add_shadow_hint_property).
+    #[inline(always)]
     fn window_manager_add_shadow_hint<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::window_manager_add_shadow_hint_property(), value)
     }
 
     /// Sets [`ContextMenu::custom_popup_placement_callback_property`](ferroui_controls::ContextMenu::custom_popup_placement_callback_property).
+    #[inline(always)]
     fn custom_popup_placement_callback<M>(self, value: impl IntoProp<Option<ferroui_controls::primitives::CustomPopupPlacementCallbackValue>, M>) -> Self {
         self.prop(<ferroui_controls::ContextMenu>::custom_popup_placement_callback_property(), value)
     }
@@ -3606,21 +3837,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::ContextMenu>> ContextMenuProps for
 /// The properties and routed events of [`Control`](ferroui_controls::Control).
 pub trait ControlProps: ElementBuilder {
     /// Sets [`Control::focus_adorner_property`](ferroui_controls::Control::focus_adorner_property).
+    #[inline(always)]
     fn focus_adorner<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::ITemplateOf<Option<ferroui_base::Ref<ferroui_controls::Control>>>>>, M>) -> Self {
         self.prop(<ferroui_controls::Control>::focus_adorner_property(), value)
     }
 
     /// Sets [`Control::tag_property`](ferroui_controls::Control::tag_property).
+    #[inline(always)]
     fn tag<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Control>::tag_property(), value)
     }
 
     /// Sets [`Control::context_menu_property`](ferroui_controls::Control::context_menu_property).
+    #[inline(always)]
     fn context_menu<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::ContextMenu>>, M>) -> Self {
         self.prop(<ferroui_controls::Control>::context_menu_property(), value)
     }
 
     /// Sets [`Control::context_flyout_property`](ferroui_controls::Control::context_flyout_property).
+    #[inline(always)]
     fn context_flyout<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::FlyoutBase>>, M>) -> Self {
         self.prop(<ferroui_controls::Control>::context_flyout_property(), value)
     }
@@ -3650,11 +3885,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::Control>> ControlProps for El<T> {
 /// The properties and routed events of [`CroppedBitmap`](ferroui_base::media::imaging::CroppedBitmap).
 pub trait CroppedBitmapProps: ElementBuilder {
     /// Sets [`CroppedBitmap::source_property`](ferroui_base::media::imaging::CroppedBitmap::source_property).
+    #[inline(always)]
     fn source<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_base::media::imaging::CroppedBitmap>::source_property(), value)
     }
 
     /// Sets [`CroppedBitmap::source_rect_property`](ferroui_base::media::imaging::CroppedBitmap::source_rect_property).
+    #[inline(always)]
     fn source_rect<M>(self, value: impl IntoProp<ferroui_base::PixelRect, M>) -> Self {
         self.prop(<ferroui_base::media::imaging::CroppedBitmap>::source_rect_property(), value)
     }
@@ -3664,11 +3901,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::imaging::CroppedBitmap>> Croppe
 /// The properties and routed events of [`DashStyle`](ferroui_base::media::DashStyle).
 pub trait DashStyleProps: ElementBuilder {
     /// Sets [`DashStyle::dashes_property`](ferroui_base::media::DashStyle::dashes_property).
+    #[inline(always)]
     fn dashes<M>(self, value: impl IntoProp<Option<ferroui_base::media::MediaCollection<f64>>, M>) -> Self {
         self.prop(<ferroui_base::media::DashStyle>::dashes_property(), value)
     }
 
     /// Sets [`DashStyle::offset_property`](ferroui_base::media::DashStyle::offset_property).
+    #[inline(always)]
     fn offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DashStyle>::offset_property(), value)
     }
@@ -3678,16 +3917,19 @@ impl<T: ObjectType + Upcast<ferroui_base::media::DashStyle>> DashStyleProps for 
 /// The properties and routed events of [`DataValidationErrors`](ferroui_controls::DataValidationErrors).
 pub trait DataValidationErrorsProps: ElementBuilder {
     /// Sets [`DataValidationErrors::errors_property`](ferroui_controls::DataValidationErrors::errors_property).
+    #[inline(always)]
     fn errors<M>(self, value: impl IntoProp<Option<Vec<ferroui_base::BoxedValue>>, M>) -> Self {
         self.prop(<ferroui_controls::DataValidationErrors>::errors_property(), value)
     }
 
     /// Sets [`DataValidationErrors::has_errors_property`](ferroui_controls::DataValidationErrors::has_errors_property).
+    #[inline(always)]
     fn has_errors<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DataValidationErrors>::has_errors_property(), value)
     }
 
     /// Sets [`DataValidationErrors::error_template_property`](ferroui_controls::DataValidationErrors::error_template_property).
+    #[inline(always)]
     fn error_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::DataValidationErrors>::error_template_property(), value)
     }
@@ -3697,51 +3939,61 @@ impl<T: ObjectType + Upcast<ferroui_controls::DataValidationErrors>> DataValidat
 /// The properties and routed events of [`DatePicker`](ferroui_controls::DatePicker).
 pub trait DatePickerProps: ElementBuilder {
     /// Sets [`DatePicker::day_format_property`](ferroui_controls::DatePicker::day_format_property).
+    #[inline(always)]
     fn day_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::day_format_property(), value)
     }
 
     /// Sets [`DatePicker::day_visible_property`](ferroui_controls::DatePicker::day_visible_property).
+    #[inline(always)]
     fn day_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::day_visible_property(), value)
     }
 
     /// Sets [`DatePicker::max_year_property`](ferroui_controls::DatePicker::max_year_property).
+    #[inline(always)]
     fn max_year<M>(self, value: impl IntoProp<ferroui_base::utilities::DateTimeOffset, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::max_year_property(), value)
     }
 
     /// Sets [`DatePicker::min_year_property`](ferroui_controls::DatePicker::min_year_property).
+    #[inline(always)]
     fn min_year<M>(self, value: impl IntoProp<ferroui_base::utilities::DateTimeOffset, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::min_year_property(), value)
     }
 
     /// Sets [`DatePicker::month_format_property`](ferroui_controls::DatePicker::month_format_property).
+    #[inline(always)]
     fn month_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::month_format_property(), value)
     }
 
     /// Sets [`DatePicker::month_visible_property`](ferroui_controls::DatePicker::month_visible_property).
+    #[inline(always)]
     fn month_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::month_visible_property(), value)
     }
 
     /// Sets [`DatePicker::year_format_property`](ferroui_controls::DatePicker::year_format_property).
+    #[inline(always)]
     fn year_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::year_format_property(), value)
     }
 
     /// Sets [`DatePicker::year_visible_property`](ferroui_controls::DatePicker::year_visible_property).
+    #[inline(always)]
     fn year_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::year_visible_property(), value)
     }
 
     /// Sets [`DatePicker::vertical_content_alignment_property`](ferroui_controls::DatePicker::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`DatePicker::selected_date_property`](ferroui_controls::DatePicker::selected_date_property).
+    #[inline(always)]
     fn selected_date<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::DateTimeOffset>, M>) -> Self {
         self.prop(<ferroui_controls::DatePicker>::selected_date_property(), value)
     }
@@ -3751,46 +4003,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::DatePicker>> DatePickerProps for E
 /// The properties and routed events of [`DatePickerPresenter`](ferroui_controls::DatePickerPresenter).
 pub trait DatePickerPresenterProps: ElementBuilder {
     /// Sets [`DatePickerPresenter::date_property`](ferroui_controls::DatePickerPresenter::date_property).
+    #[inline(always)]
     fn date<M>(self, value: impl IntoProp<ferroui_base::utilities::DateTimeOffset, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::date_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::day_format_property`](ferroui_controls::DatePickerPresenter::day_format_property).
+    #[inline(always)]
     fn day_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::day_format_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::day_visible_property`](ferroui_controls::DatePickerPresenter::day_visible_property).
+    #[inline(always)]
     fn day_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::day_visible_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::max_year_property`](ferroui_controls::DatePickerPresenter::max_year_property).
+    #[inline(always)]
     fn max_year<M>(self, value: impl IntoProp<ferroui_base::utilities::DateTimeOffset, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::max_year_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::min_year_property`](ferroui_controls::DatePickerPresenter::min_year_property).
+    #[inline(always)]
     fn min_year<M>(self, value: impl IntoProp<ferroui_base::utilities::DateTimeOffset, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::min_year_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::month_format_property`](ferroui_controls::DatePickerPresenter::month_format_property).
+    #[inline(always)]
     fn month_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::month_format_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::month_visible_property`](ferroui_controls::DatePickerPresenter::month_visible_property).
+    #[inline(always)]
     fn month_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::month_visible_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::year_format_property`](ferroui_controls::DatePickerPresenter::year_format_property).
+    #[inline(always)]
     fn year_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::year_format_property(), value)
     }
 
     /// Sets [`DatePickerPresenter::year_visible_property`](ferroui_controls::DatePickerPresenter::year_visible_property).
+    #[inline(always)]
     fn year_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DatePickerPresenter>::year_visible_property(), value)
     }
@@ -3800,21 +4061,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::DatePickerPresenter>> DatePickerPr
 /// The properties and routed events of [`DateTimePickerPanel`](ferroui_controls::date_time_pickers::DateTimePickerPanel).
 pub trait DateTimePickerPanelProps: ElementBuilder {
     /// Sets [`DateTimePickerPanel::item_height_property`](ferroui_controls::date_time_pickers::DateTimePickerPanel::item_height_property).
+    #[inline(always)]
     fn item_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::date_time_pickers::DateTimePickerPanel>::item_height_property(), value)
     }
 
     /// Sets [`DateTimePickerPanel::panel_type_property`](ferroui_controls::date_time_pickers::DateTimePickerPanel::panel_type_property).
+    #[inline(always)]
     fn panel_type<M>(self, value: impl IntoProp<ferroui_controls::date_time_pickers::DateTimePickerPanelType, M>) -> Self {
         self.prop(<ferroui_controls::date_time_pickers::DateTimePickerPanel>::panel_type_property(), value)
     }
 
     /// Sets [`DateTimePickerPanel::item_format_property`](ferroui_controls::date_time_pickers::DateTimePickerPanel::item_format_property).
+    #[inline(always)]
     fn item_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::date_time_pickers::DateTimePickerPanel>::item_format_property(), value)
     }
 
     /// Sets [`DateTimePickerPanel::should_loop_property`](ferroui_controls::date_time_pickers::DateTimePickerPanel::should_loop_property).
+    #[inline(always)]
     fn should_loop<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::date_time_pickers::DateTimePickerPanel>::should_loop_property(), value)
     }
@@ -3824,6 +4089,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::date_time_pickers::DateTimePickerP
 /// The properties and routed events of [`Decorator`](ferroui_controls::Decorator).
 pub trait DecoratorProps: ElementBuilder {
     /// Sets [`Decorator::padding_property`](ferroui_controls::Decorator::padding_property).
+    #[inline(always)]
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::Decorator>::padding_property(), value)
     }
@@ -3833,6 +4099,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Decorator>> DecoratorProps for El<
 /// The properties and routed events of [`DefinitionBase`](ferroui_controls::DefinitionBase).
 pub trait DefinitionBaseProps: ElementBuilder {
     /// Sets [`DefinitionBase::shared_size_group_property`](ferroui_controls::DefinitionBase::shared_size_group_property).
+    #[inline(always)]
     fn shared_size_group<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::DefinitionBase>::shared_size_group_property(), value)
     }
@@ -3842,21 +4109,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::DefinitionBase>> DefinitionBasePro
 /// The properties and routed events of [`DockPanel`](ferroui_controls::DockPanel).
 pub trait DockPanelProps: ElementBuilder {
     /// Sets [`DockPanel::dock_property`](ferroui_controls::DockPanel::dock_property).
+    #[inline(always)]
     fn dock<M>(self, value: impl IntoProp<ferroui_controls::Dock, M>) -> Self {
         self.prop(<ferroui_controls::DockPanel>::dock_property(), value)
     }
 
     /// Sets [`DockPanel::last_child_fill_property`](ferroui_controls::DockPanel::last_child_fill_property).
+    #[inline(always)]
     fn last_child_fill<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DockPanel>::last_child_fill_property(), value)
     }
 
     /// Sets [`DockPanel::horizontal_spacing_property`](ferroui_controls::DockPanel::horizontal_spacing_property).
+    #[inline(always)]
     fn horizontal_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::DockPanel>::horizontal_spacing_property(), value)
     }
 
     /// Sets [`DockPanel::vertical_spacing_property`](ferroui_controls::DockPanel::vertical_spacing_property).
+    #[inline(always)]
     fn vertical_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::DockPanel>::vertical_spacing_property(), value)
     }
@@ -3866,26 +4137,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::DockPanel>> DockPanelProps for El<
 /// The properties and routed events of [`DoubleAnimation`](ferroui_controls::animation::DoubleAnimation).
 pub trait DoubleAnimationProps: ElementBuilder {
     /// Sets [`DoubleAnimation::from_property`](ferroui_controls::animation::DoubleAnimation::from_property).
+    #[inline(always)]
     fn from<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleAnimation>::from_property(), value)
     }
 
     /// Sets [`DoubleAnimation::to_property`](ferroui_controls::animation::DoubleAnimation::to_property).
+    #[inline(always)]
     fn to<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleAnimation>::to_property(), value)
     }
 
     /// Sets [`DoubleAnimation::by_property`](ferroui_controls::animation::DoubleAnimation::by_property).
+    #[inline(always)]
     fn by<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleAnimation>::by_property(), value)
     }
 
     /// Sets [`DoubleAnimation::easing_function_property`](ferroui_controls::animation::DoubleAnimation::easing_function_property).
+    #[inline(always)]
     fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleAnimation>::easing_function_property(), value)
     }
 
     /// Sets [`DoubleAnimation::enable_dependent_animation_property`](ferroui_controls::animation::DoubleAnimation::enable_dependent_animation_property).
+    #[inline(always)]
     fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleAnimation>::enable_dependent_animation_property(), value)
     }
@@ -3895,6 +4171,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::DoubleAnimation>> Doubl
 /// The properties and routed events of [`DoubleAnimationUsingKeyFrames`](ferroui_controls::animation::DoubleAnimationUsingKeyFrames).
 pub trait DoubleAnimationUsingKeyFramesProps: ElementBuilder {
     /// Sets [`DoubleAnimationUsingKeyFrames::enable_dependent_animation_property`](ferroui_controls::animation::DoubleAnimationUsingKeyFrames::enable_dependent_animation_property).
+    #[inline(always)]
     fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleAnimationUsingKeyFrames>::enable_dependent_animation_property(), value)
     }
@@ -3904,11 +4181,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::DoubleAnimationUsingKey
 /// The properties and routed events of [`DoubleKeyFrame`](ferroui_controls::animation::DoubleKeyFrame).
 pub trait DoubleKeyFrameProps: ElementBuilder {
     /// Sets [`DoubleKeyFrame::key_time_property`](ferroui_controls::animation::DoubleKeyFrame::key_time_property).
+    #[inline(always)]
     fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleKeyFrame>::key_time_property(), value)
     }
 
     /// Sets [`DoubleKeyFrame::value_property`](ferroui_controls::animation::DoubleKeyFrame::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::animation::DoubleKeyFrame>::value_property(), value)
     }
@@ -3918,136 +4197,163 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::DoubleKeyFrame>> Double
 /// The properties and routed events of [`DrawerPage`](ferroui_controls::DrawerPage).
 pub trait DrawerPageProps: ElementBuilder {
     /// Sets [`DrawerPage::drawer_property`](ferroui_controls::DrawerPage::drawer_property).
+    #[inline(always)]
     fn drawer<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_property(), value)
     }
 
     /// Sets [`DrawerPage::content_property`](ferroui_controls::DrawerPage::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::content_property(), value)
     }
 
     /// Sets [`DrawerPage::is_open_property`](ferroui_controls::DrawerPage::is_open_property).
+    #[inline(always)]
     fn is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::is_open_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_length_property`](ferroui_controls::DrawerPage::drawer_length_property).
+    #[inline(always)]
     fn drawer_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_length_property(), value)
     }
 
     /// Sets [`DrawerPage::compact_drawer_length_property`](ferroui_controls::DrawerPage::compact_drawer_length_property).
+    #[inline(always)]
     fn compact_drawer_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::compact_drawer_length_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_breakpoint_length_property`](ferroui_controls::DrawerPage::drawer_breakpoint_length_property).
+    #[inline(always)]
     fn drawer_breakpoint_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_breakpoint_length_property(), value)
     }
 
     /// Sets [`DrawerPage::is_gesture_enabled_property`](ferroui_controls::DrawerPage::is_gesture_enabled_property).
+    #[inline(always)]
     fn is_gesture_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::is_gesture_enabled_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_behavior_property`](ferroui_controls::DrawerPage::drawer_behavior_property).
+    #[inline(always)]
     fn drawer_behavior<M>(self, value: impl IntoProp<ferroui_controls::DrawerBehavior, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_behavior_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_layout_behavior_property`](ferroui_controls::DrawerPage::drawer_layout_behavior_property).
+    #[inline(always)]
     fn drawer_layout_behavior<M>(self, value: impl IntoProp<ferroui_controls::DrawerLayoutBehavior, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_layout_behavior_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_placement_property`](ferroui_controls::DrawerPage::drawer_placement_property).
+    #[inline(always)]
     fn drawer_placement<M>(self, value: impl IntoProp<ferroui_controls::DrawerPlacement, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_placement_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_header_property`](ferroui_controls::DrawerPage::drawer_header_property).
+    #[inline(always)]
     fn drawer_header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_header_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_footer_property`](ferroui_controls::DrawerPage::drawer_footer_property).
+    #[inline(always)]
     fn drawer_footer<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_footer_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_header_template_property`](ferroui_controls::DrawerPage::drawer_header_template_property).
+    #[inline(always)]
     fn drawer_header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_header_template_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_footer_template_property`](ferroui_controls::DrawerPage::drawer_footer_template_property).
+    #[inline(always)]
     fn drawer_footer_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_footer_template_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_icon_property`](ferroui_controls::DrawerPage::drawer_icon_property).
+    #[inline(always)]
     fn drawer_icon<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_icon_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_icon_template_property`](ferroui_controls::DrawerPage::drawer_icon_template_property).
+    #[inline(always)]
     fn drawer_icon_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_icon_template_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_template_property`](ferroui_controls::DrawerPage::drawer_template_property).
+    #[inline(always)]
     fn drawer_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_template_property(), value)
     }
 
     /// Sets [`DrawerPage::content_template_property`](ferroui_controls::DrawerPage::content_template_property).
+    #[inline(always)]
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::content_template_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_background_property`](ferroui_controls::DrawerPage::drawer_background_property).
+    #[inline(always)]
     fn drawer_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_background_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_header_background_property`](ferroui_controls::DrawerPage::drawer_header_background_property).
+    #[inline(always)]
     fn drawer_header_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_header_background_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_header_foreground_property`](ferroui_controls::DrawerPage::drawer_header_foreground_property).
+    #[inline(always)]
     fn drawer_header_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_header_foreground_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_footer_background_property`](ferroui_controls::DrawerPage::drawer_footer_background_property).
+    #[inline(always)]
     fn drawer_footer_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_footer_background_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_footer_foreground_property`](ferroui_controls::DrawerPage::drawer_footer_foreground_property).
+    #[inline(always)]
     fn drawer_footer_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_footer_foreground_property(), value)
     }
 
     /// Sets [`DrawerPage::backdrop_brush_property`](ferroui_controls::DrawerPage::backdrop_brush_property).
+    #[inline(always)]
     fn backdrop_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::backdrop_brush_property(), value)
     }
 
     /// Sets [`DrawerPage::horizontal_content_alignment_property`](ferroui_controls::DrawerPage::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`DrawerPage::vertical_content_alignment_property`](ferroui_controls::DrawerPage::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`DrawerPage::display_mode_property`](ferroui_controls::DrawerPage::display_mode_property).
+    #[inline(always)]
     fn display_mode<M>(self, value: impl IntoProp<ferroui_controls::SplitViewDisplayMode, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::display_mode_property(), value)
     }
@@ -4067,6 +4373,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::DrawerPage>> DrawerPageProps for E
 /// The properties and routed events of [`DrawingBrush`](ferroui_base::media::DrawingBrush).
 pub trait DrawingBrushProps: ElementBuilder {
     /// Sets [`DrawingBrush::drawing_property`](ferroui_base::media::DrawingBrush::drawing_property).
+    #[inline(always)]
     fn drawing<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Drawing>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingBrush>::drawing_property(), value)
     }
@@ -4076,26 +4383,31 @@ impl<T: ObjectType + Upcast<ferroui_base::media::DrawingBrush>> DrawingBrushProp
 /// The properties and routed events of [`DrawingGroup`](ferroui_base::media::DrawingGroup).
 pub trait DrawingGroupProps: ElementBuilder {
     /// Sets [`DrawingGroup::opacity_property`](ferroui_base::media::DrawingGroup::opacity_property).
+    #[inline(always)]
     fn opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::opacity_property(), value)
     }
 
     /// Sets [`DrawingGroup::transform_property`](ferroui_base::media::DrawingGroup::transform_property).
+    #[inline(always)]
     fn transform<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Transform>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::transform_property(), value)
     }
 
     /// Sets [`DrawingGroup::clip_geometry_property`](ferroui_base::media::DrawingGroup::clip_geometry_property).
+    #[inline(always)]
     fn clip_geometry<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::clip_geometry_property(), value)
     }
 
     /// Sets [`DrawingGroup::opacity_mask_property`](ferroui_base::media::DrawingGroup::opacity_mask_property).
+    #[inline(always)]
     fn opacity_mask<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::opacity_mask_property(), value)
     }
 
     /// Sets [`DrawingGroup::effect_property`](ferroui_base::media::DrawingGroup::effect_property).
+    #[inline(always)]
     fn effect<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IEffect>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::effect_property(), value)
     }
@@ -4105,11 +4417,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::DrawingGroup>> DrawingGroupProp
 /// The properties and routed events of [`DrawingImage`](ferroui_base::media::DrawingImage).
 pub trait DrawingImageProps: ElementBuilder {
     /// Sets [`DrawingImage::drawing_property`](ferroui_base::media::DrawingImage::drawing_property).
+    #[inline(always)]
     fn drawing<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Drawing>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingImage>::drawing_property(), value)
     }
 
     /// Sets [`DrawingImage::viewbox_property`](ferroui_base::media::DrawingImage::viewbox_property).
+    #[inline(always)]
     fn viewbox<M>(self, value: impl IntoProp<Option<ferroui_base::Rect>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingImage>::viewbox_property(), value)
     }
@@ -4119,11 +4433,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::DrawingImage>> DrawingImageProp
 /// The properties and routed events of [`DropShadowDirectionEffect`](ferroui_base::media::DropShadowDirectionEffect).
 pub trait DropShadowDirectionEffectProps: ElementBuilder {
     /// Sets [`DropShadowDirectionEffect::shadow_depth_property`](ferroui_base::media::DropShadowDirectionEffect::shadow_depth_property).
+    #[inline(always)]
     fn shadow_depth<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowDirectionEffect>::shadow_depth_property(), value)
     }
 
     /// Sets [`DropShadowDirectionEffect::direction_property`](ferroui_base::media::DropShadowDirectionEffect::direction_property).
+    #[inline(always)]
     fn direction<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowDirectionEffect>::direction_property(), value)
     }
@@ -4133,11 +4449,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::DropShadowDirectionEffect>> Dro
 /// The properties and routed events of [`DropShadowEffect`](ferroui_base::media::DropShadowEffect).
 pub trait DropShadowEffectProps: ElementBuilder {
     /// Sets [`DropShadowEffect::offset_x_property`](ferroui_base::media::DropShadowEffect::offset_x_property).
+    #[inline(always)]
     fn offset_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowEffect>::offset_x_property(), value)
     }
 
     /// Sets [`DropShadowEffect::offset_y_property`](ferroui_base::media::DropShadowEffect::offset_y_property).
+    #[inline(always)]
     fn offset_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowEffect>::offset_y_property(), value)
     }
@@ -4147,16 +4465,19 @@ impl<T: ObjectType + Upcast<ferroui_base::media::DropShadowEffect>> DropShadowEf
 /// The properties and routed events of [`DropShadowEffectBase`](ferroui_base::media::DropShadowEffectBase).
 pub trait DropShadowEffectBaseProps: ElementBuilder {
     /// Sets [`DropShadowEffectBase::blur_radius_property`](ferroui_base::media::DropShadowEffectBase::blur_radius_property).
+    #[inline(always)]
     fn blur_radius<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowEffectBase>::blur_radius_property(), value)
     }
 
     /// Sets [`DropShadowEffectBase::color_property`](ferroui_base::media::DropShadowEffectBase::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowEffectBase>::color_property(), value)
     }
 
     /// Sets [`DropShadowEffectBase::opacity_property`](ferroui_base::media::DropShadowEffectBase::opacity_property).
+    #[inline(always)]
     fn opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowEffectBase>::opacity_property(), value)
     }
@@ -4166,6 +4487,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::DropShadowEffectBase>> DropShad
 /// The properties and routed events of [`EasingColorKeyFrame`](ferroui_controls::animation::EasingColorKeyFrame).
 pub trait EasingColorKeyFrameProps: ElementBuilder {
     /// Sets [`EasingColorKeyFrame::easing_function_property`](ferroui_controls::animation::EasingColorKeyFrame::easing_function_property).
+    #[inline(always)]
     fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::EasingColorKeyFrame>::easing_function_property(), value)
     }
@@ -4175,6 +4497,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingColorKeyFrame>> E
 /// The properties and routed events of [`EasingDoubleKeyFrame`](ferroui_controls::animation::EasingDoubleKeyFrame).
 pub trait EasingDoubleKeyFrameProps: ElementBuilder {
     /// Sets [`EasingDoubleKeyFrame::easing_function_property`](ferroui_controls::animation::EasingDoubleKeyFrame::easing_function_property).
+    #[inline(always)]
     fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::EasingDoubleKeyFrame>::easing_function_property(), value)
     }
@@ -4184,6 +4507,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingDoubleKeyFrame>> 
 /// The properties and routed events of [`EasingFunctionBase`](ferroui_controls::animation::EasingFunctionBase).
 pub trait EasingFunctionBaseProps: ElementBuilder {
     /// Sets [`EasingFunctionBase::easing_mode_property`](ferroui_controls::animation::EasingFunctionBase::easing_mode_property).
+    #[inline(always)]
     fn easing_mode<M>(self, value: impl IntoProp<ferroui_controls::animation::EasingMode, M>) -> Self {
         self.prop(<ferroui_controls::animation::EasingFunctionBase>::easing_mode_property(), value)
     }
@@ -4193,6 +4517,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingFunctionBase>> Ea
 /// The properties and routed events of [`EasingPointKeyFrame`](ferroui_controls::animation::EasingPointKeyFrame).
 pub trait EasingPointKeyFrameProps: ElementBuilder {
     /// Sets [`EasingPointKeyFrame::easing_function_property`](ferroui_controls::animation::EasingPointKeyFrame::easing_function_property).
+    #[inline(always)]
     fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::EasingPointKeyFrame>::easing_function_property(), value)
     }
@@ -4202,11 +4527,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::EasingPointKeyFrame>> E
 /// The properties and routed events of [`ElasticEase`](ferroui_controls::animation::ElasticEase).
 pub trait ElasticEaseProps: ElementBuilder {
     /// Sets [`ElasticEase::oscillations_property`](ferroui_controls::animation::ElasticEase::oscillations_property).
+    #[inline(always)]
     fn oscillations<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::animation::ElasticEase>::oscillations_property(), value)
     }
 
     /// Sets [`ElasticEase::springiness_property`](ferroui_controls::animation::ElasticEase::springiness_property).
+    #[inline(always)]
     fn springiness<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::animation::ElasticEase>::springiness_property(), value)
     }
@@ -4216,21 +4543,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::ElasticEase>> ElasticEa
 /// The properties and routed events of [`EllipseGeometry`](ferroui_base::media::EllipseGeometry).
 pub trait EllipseGeometryProps: ElementBuilder {
     /// Sets [`EllipseGeometry::rect_property`](ferroui_base::media::EllipseGeometry::rect_property).
+    #[inline(always)]
     fn rect<M>(self, value: impl IntoProp<ferroui_base::Rect, M>) -> Self {
         self.prop(<ferroui_base::media::EllipseGeometry>::rect_property(), value)
     }
 
     /// Sets [`EllipseGeometry::radius_x_property`](ferroui_base::media::EllipseGeometry::radius_x_property).
+    #[inline(always)]
     fn radius_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::EllipseGeometry>::radius_x_property(), value)
     }
 
     /// Sets [`EllipseGeometry::radius_y_property`](ferroui_base::media::EllipseGeometry::radius_y_property).
+    #[inline(always)]
     fn radius_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::EllipseGeometry>::radius_y_property(), value)
     }
 
     /// Sets [`EllipseGeometry::center_property`](ferroui_base::media::EllipseGeometry::center_property).
+    #[inline(always)]
     fn center<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::EllipseGeometry>::center_property(), value)
     }
@@ -4240,16 +4571,19 @@ impl<T: ObjectType + Upcast<ferroui_base::media::EllipseGeometry>> EllipseGeomet
 /// The properties and routed events of [`Expander`](ferroui_controls::Expander).
 pub trait ExpanderProps: ElementBuilder {
     /// Sets [`Expander::content_transition_property`](ferroui_controls::Expander::content_transition_property).
+    #[inline(always)]
     fn content_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::Expander>::content_transition_property(), value)
     }
 
     /// Sets [`Expander::expand_direction_property`](ferroui_controls::Expander::expand_direction_property).
+    #[inline(always)]
     fn expand_direction<M>(self, value: impl IntoProp<ferroui_controls::ExpandDirection, M>) -> Self {
         self.prop(<ferroui_controls::Expander>::expand_direction_property(), value)
     }
 
     /// Sets [`Expander::is_expanded_property`](ferroui_controls::Expander::is_expanded_property).
+    #[inline(always)]
     fn is_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Expander>::is_expanded_property(), value)
     }
@@ -4269,11 +4603,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::Expander>> ExpanderProps for El<T>
 /// The properties and routed events of [`ExperimentalAcrylicBorder`](ferroui_controls::ExperimentalAcrylicBorder).
 pub trait ExperimentalAcrylicBorderProps: ElementBuilder {
     /// Sets [`ExperimentalAcrylicBorder::corner_radius_property`](ferroui_controls::ExperimentalAcrylicBorder::corner_radius_property).
+    #[inline(always)]
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::ExperimentalAcrylicBorder>::corner_radius_property(), value)
     }
 
     /// Sets [`ExperimentalAcrylicBorder::material_property`](ferroui_controls::ExperimentalAcrylicBorder::material_property).
+    #[inline(always)]
     fn material<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::ExperimentalAcrylicMaterial>>, M>) -> Self {
         self.prop(<ferroui_controls::ExperimentalAcrylicBorder>::material_property(), value)
     }
@@ -4283,31 +4619,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::ExperimentalAcrylicBorder>> Experi
 /// The properties and routed events of [`ExperimentalAcrylicMaterial`](ferroui_base::media::ExperimentalAcrylicMaterial).
 pub trait ExperimentalAcrylicMaterialProps: ElementBuilder {
     /// Sets [`ExperimentalAcrylicMaterial::tint_color_property`](ferroui_base::media::ExperimentalAcrylicMaterial::tint_color_property).
+    #[inline(always)]
     fn tint_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::tint_color_property(), value)
     }
 
     /// Sets [`ExperimentalAcrylicMaterial::background_source_property`](ferroui_base::media::ExperimentalAcrylicMaterial::background_source_property).
+    #[inline(always)]
     fn background_source<M>(self, value: impl IntoProp<ferroui_base::media::AcrylicBackgroundSource, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::background_source_property(), value)
     }
 
     /// Sets [`ExperimentalAcrylicMaterial::tint_opacity_property`](ferroui_base::media::ExperimentalAcrylicMaterial::tint_opacity_property).
+    #[inline(always)]
     fn tint_opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::tint_opacity_property(), value)
     }
 
     /// Sets [`ExperimentalAcrylicMaterial::material_opacity_property`](ferroui_base::media::ExperimentalAcrylicMaterial::material_opacity_property).
+    #[inline(always)]
     fn material_opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::material_opacity_property(), value)
     }
 
     /// Sets [`ExperimentalAcrylicMaterial::platform_transparency_compensation_level_property`](ferroui_base::media::ExperimentalAcrylicMaterial::platform_transparency_compensation_level_property).
+    #[inline(always)]
     fn platform_transparency_compensation_level<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::platform_transparency_compensation_level_property(), value)
     }
 
     /// Sets [`ExperimentalAcrylicMaterial::fallback_color_property`](ferroui_base::media::ExperimentalAcrylicMaterial::fallback_color_property).
+    #[inline(always)]
     fn fallback_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::fallback_color_property(), value)
     }
@@ -4317,6 +4659,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::ExperimentalAcrylicMaterial>> E
 /// The properties and routed events of [`ExponentialEase`](ferroui_controls::animation::ExponentialEase).
 pub trait ExponentialEaseProps: ElementBuilder {
     /// Sets [`ExponentialEase::exponent_property`](ferroui_controls::animation::ExponentialEase::exponent_property).
+    #[inline(always)]
     fn exponent<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::animation::ExponentialEase>::exponent_property(), value)
     }
@@ -4326,36 +4669,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::ExponentialEase>> Expon
 /// The properties and routed events of [`FlexPanel`](ferroui_controls::FlexPanel).
 pub trait FlexPanelProps: ElementBuilder {
     /// Sets [`FlexPanel::direction_property`](ferroui_controls::FlexPanel::direction_property).
+    #[inline(always)]
     fn direction<M>(self, value: impl IntoProp<ferroui_controls::FlexDirection, M>) -> Self {
         self.prop(<ferroui_controls::FlexPanel>::direction_property(), value)
     }
 
     /// Sets [`FlexPanel::justify_content_property`](ferroui_controls::FlexPanel::justify_content_property).
+    #[inline(always)]
     fn justify_content<M>(self, value: impl IntoProp<ferroui_controls::FlexJustifyContent, M>) -> Self {
         self.prop(<ferroui_controls::FlexPanel>::justify_content_property(), value)
     }
 
     /// Sets [`FlexPanel::align_items_property`](ferroui_controls::FlexPanel::align_items_property).
+    #[inline(always)]
     fn align_items<M>(self, value: impl IntoProp<ferroui_controls::FlexAlignItems, M>) -> Self {
         self.prop(<ferroui_controls::FlexPanel>::align_items_property(), value)
     }
 
     /// Sets [`FlexPanel::align_content_property`](ferroui_controls::FlexPanel::align_content_property).
+    #[inline(always)]
     fn align_content<M>(self, value: impl IntoProp<ferroui_controls::FlexAlignContent, M>) -> Self {
         self.prop(<ferroui_controls::FlexPanel>::align_content_property(), value)
     }
 
     /// Sets [`FlexPanel::wrap_property`](ferroui_controls::FlexPanel::wrap_property).
+    #[inline(always)]
     fn wrap<M>(self, value: impl IntoProp<ferroui_controls::FlexWrap, M>) -> Self {
         self.prop(<ferroui_controls::FlexPanel>::wrap_property(), value)
     }
 
     /// Sets [`FlexPanel::column_spacing_property`](ferroui_controls::FlexPanel::column_spacing_property).
+    #[inline(always)]
     fn column_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::FlexPanel>::column_spacing_property(), value)
     }
 
     /// Sets [`FlexPanel::row_spacing_property`](ferroui_controls::FlexPanel::row_spacing_property).
+    #[inline(always)]
     fn row_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::FlexPanel>::row_spacing_property(), value)
     }
@@ -4365,16 +4715,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::FlexPanel>> FlexPanelProps for El<
 /// The properties and routed events of [`Flyout`](ferroui_controls::Flyout).
 pub trait FlyoutProps: ElementBuilder {
     /// Sets [`Flyout::content_property`](ferroui_controls::Flyout::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Flyout>::content_property(), value)
     }
 
     /// Sets [`Flyout::content_template_property`](ferroui_controls::Flyout::content_template_property).
+    #[inline(always)]
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::Flyout>::content_template_property(), value)
     }
 
     /// Sets [`Flyout::flyout_presenter_theme_property`](ferroui_controls::Flyout::flyout_presenter_theme_property).
+    #[inline(always)]
     fn flyout_presenter_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::Flyout>::flyout_presenter_theme_property(), value)
     }
@@ -4384,11 +4737,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::Flyout>> FlyoutProps for El<T> {}
 /// The properties and routed events of [`FlyoutBase`](ferroui_controls::primitives::FlyoutBase).
 pub trait FlyoutBaseProps: ElementBuilder {
     /// Sets [`FlyoutBase::is_open_property`](ferroui_controls::primitives::FlyoutBase::is_open_property).
+    #[inline(always)]
     fn is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::FlyoutBase>::is_open_property(), value)
     }
 
     /// Sets [`FlyoutBase::attached_flyout_property`](ferroui_controls::primitives::FlyoutBase::attached_flyout_property).
+    #[inline(always)]
     fn attached_flyout<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::FlyoutBase>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::FlyoutBase>::attached_flyout_property(), value)
     }
@@ -4398,11 +4753,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::FlyoutBase>> FlyoutBas
 /// The properties and routed events of [`FontIcon`](ferroui_controls::FontIcon).
 pub trait FontIconProps: ElementBuilder {
     /// Sets [`FontIcon::glyph_property`](ferroui_controls::FontIcon::glyph_property).
+    #[inline(always)]
     fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::FontIcon>::glyph_property(), value)
     }
 
     /// Sets [`FontIcon::mirrored_when_right_to_left_property`](ferroui_controls::FontIcon::mirrored_when_right_to_left_property).
+    #[inline(always)]
     fn mirrored_when_right_to_left<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::FontIcon>::mirrored_when_right_to_left_property(), value)
     }
@@ -4412,31 +4769,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::FontIcon>> FontIconProps for El<T>
 /// The properties and routed events of [`FontIconSource`](ferroui_controls::FontIconSource).
 pub trait FontIconSourceProps: ElementBuilder {
     /// Sets [`FontIconSource::glyph_property`](ferroui_controls::FontIconSource::glyph_property).
+    #[inline(always)]
     fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::FontIconSource>::glyph_property(), value)
     }
 
     /// Sets [`FontIconSource::font_family_property`](ferroui_controls::FontIconSource::font_family_property).
+    #[inline(always)]
     fn font_family<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFamily>, M>) -> Self {
         self.prop(<ferroui_controls::FontIconSource>::font_family_property(), value)
     }
 
     /// Sets [`FontIconSource::font_size_property`](ferroui_controls::FontIconSource::font_size_property).
+    #[inline(always)]
     fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::FontIconSource>::font_size_property(), value)
     }
 
     /// Sets [`FontIconSource::font_style_property`](ferroui_controls::FontIconSource::font_style_property).
+    #[inline(always)]
     fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
         self.prop(<ferroui_controls::FontIconSource>::font_style_property(), value)
     }
 
     /// Sets [`FontIconSource::font_weight_property`](ferroui_controls::FontIconSource::font_weight_property).
+    #[inline(always)]
     fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
         self.prop(<ferroui_controls::FontIconSource>::font_weight_property(), value)
     }
 
     /// Sets [`FontIconSource::mirrored_when_right_to_left_property`](ferroui_controls::FontIconSource::mirrored_when_right_to_left_property).
+    #[inline(always)]
     fn mirrored_when_right_to_left<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::FontIconSource>::mirrored_when_right_to_left_property(), value)
     }
@@ -4446,11 +4809,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::FontIconSource>> FontIconSourcePro
 /// The properties and routed events of [`Frame`](ferroui_controls::Frame).
 pub trait FrameProps: ElementBuilder {
     /// Sets [`Frame::cache_size_property`](ferroui_controls::Frame::cache_size_property).
+    #[inline(always)]
     fn cache_size<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Frame>::cache_size_property(), value)
     }
 
     /// Sets [`Frame::is_navigation_stack_enabled_property`](ferroui_controls::Frame::is_navigation_stack_enabled_property).
+    #[inline(always)]
     fn is_navigation_stack_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Frame>::is_navigation_stack_enabled_property(), value)
     }
@@ -4460,6 +4825,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Frame>> FrameProps for El<T> {}
 /// The properties and routed events of [`FramePage`](ferroui_controls::FramePage).
 pub trait FramePageProps: ElementBuilder {
     /// Sets [`FramePage::navigation_cache_mode_property`](ferroui_controls::FramePage::navigation_cache_mode_property).
+    #[inline(always)]
     fn navigation_cache_mode<M>(self, value: impl IntoProp<ferroui_controls::navigation::NavigationCacheMode, M>) -> Self {
         self.prop(<ferroui_controls::FramePage>::navigation_cache_mode_property(), value)
     }
@@ -4469,6 +4835,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::FramePage>> FramePageProps for El<
 /// The properties and routed events of [`Geometry`](ferroui_base::media::Geometry).
 pub trait GeometryProps: ElementBuilder {
     /// Sets [`Geometry::transform_property`](ferroui_base::media::Geometry::transform_property).
+    #[inline(always)]
     fn transform<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Transform>>, M>) -> Self {
         self.prop(<ferroui_base::media::Geometry>::transform_property(), value)
     }
@@ -4478,16 +4845,19 @@ impl<T: ObjectType + Upcast<ferroui_base::media::Geometry>> GeometryProps for El
 /// The properties and routed events of [`GeometryDrawing`](ferroui_base::media::GeometryDrawing).
 pub trait GeometryDrawingProps: ElementBuilder {
     /// Sets [`GeometryDrawing::geometry_property`](ferroui_base::media::GeometryDrawing::geometry_property).
+    #[inline(always)]
     fn geometry<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::GeometryDrawing>::geometry_property(), value)
     }
 
     /// Sets [`GeometryDrawing::brush_property`](ferroui_base::media::GeometryDrawing::brush_property).
+    #[inline(always)]
     fn brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::GeometryDrawing>::brush_property(), value)
     }
 
     /// Sets [`GeometryDrawing::pen_property`](ferroui_base::media::GeometryDrawing::pen_property).
+    #[inline(always)]
     fn pen<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IPen>>, M>) -> Self {
         self.prop(<ferroui_base::media::GeometryDrawing>::pen_property(), value)
     }
@@ -4497,6 +4867,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GeometryDrawing>> GeometryDrawi
 /// The properties and routed events of [`GeometryGroup`](ferroui_base::media::GeometryGroup).
 pub trait GeometryGroupProps: ElementBuilder {
     /// Sets [`GeometryGroup::fill_rule_property`](ferroui_base::media::GeometryGroup::fill_rule_property).
+    #[inline(always)]
     fn fill_rule<M>(self, value: impl IntoProp<ferroui_base::media::FillRule, M>) -> Self {
         self.prop(<ferroui_base::media::GeometryGroup>::fill_rule_property(), value)
     }
@@ -4506,6 +4877,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GeometryGroup>> GeometryGroupPr
 /// The properties and routed events of [`GlyphRunDrawing`](ferroui_base::media::GlyphRunDrawing).
 pub trait GlyphRunDrawingProps: ElementBuilder {
     /// Sets [`GlyphRunDrawing::foreground_property`](ferroui_base::media::GlyphRunDrawing::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::GlyphRunDrawing>::foreground_property(), value)
     }
@@ -4515,11 +4887,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GlyphRunDrawing>> GlyphRunDrawi
 /// The properties and routed events of [`GradientBrush`](ferroui_base::media::GradientBrush).
 pub trait GradientBrushProps: ElementBuilder {
     /// Sets [`GradientBrush::spread_method_property`](ferroui_base::media::GradientBrush::spread_method_property).
+    #[inline(always)]
     fn spread_method<M>(self, value: impl IntoProp<ferroui_base::media::GradientSpreadMethod, M>) -> Self {
         self.prop(<ferroui_base::media::GradientBrush>::spread_method_property(), value)
     }
 
     /// Sets [`GradientBrush::gradient_stops_property`](ferroui_base::media::GradientBrush::gradient_stops_property).
+    #[inline(always)]
     fn gradient_stops<M>(self, value: impl IntoProp<Option<ferroui_base::media::GradientStops>, M>) -> Self {
         self.prop(<ferroui_base::media::GradientBrush>::gradient_stops_property(), value)
     }
@@ -4529,11 +4903,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GradientBrush>> GradientBrushPr
 /// The properties and routed events of [`GradientStop`](ferroui_base::media::GradientStop).
 pub trait GradientStopProps: ElementBuilder {
     /// Sets [`GradientStop::offset_property`](ferroui_base::media::GradientStop::offset_property).
+    #[inline(always)]
     fn offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::GradientStop>::offset_property(), value)
     }
 
     /// Sets [`GradientStop::color_property`](ferroui_base::media::GradientStop::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::GradientStop>::color_property(), value)
     }
@@ -4543,41 +4919,49 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GradientStop>> GradientStopProp
 /// The properties and routed events of [`Grid`](ferroui_controls::Grid).
 pub trait GridProps: ElementBuilder {
     /// Sets [`Grid::show_grid_lines_property`](ferroui_controls::Grid::show_grid_lines_property).
+    #[inline(always)]
     fn show_grid_lines<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::show_grid_lines_property(), value)
     }
 
     /// Sets [`Grid::row_spacing_property`](ferroui_controls::Grid::row_spacing_property).
+    #[inline(always)]
     fn row_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::row_spacing_property(), value)
     }
 
     /// Sets [`Grid::column_spacing_property`](ferroui_controls::Grid::column_spacing_property).
+    #[inline(always)]
     fn column_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::column_spacing_property(), value)
     }
 
     /// Sets [`Grid::column_property`](ferroui_controls::Grid::column_property).
+    #[inline(always)]
     fn column<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::column_property(), value)
     }
 
     /// Sets [`Grid::row_property`](ferroui_controls::Grid::row_property).
+    #[inline(always)]
     fn row<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::row_property(), value)
     }
 
     /// Sets [`Grid::column_span_property`](ferroui_controls::Grid::column_span_property).
+    #[inline(always)]
     fn column_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::column_span_property(), value)
     }
 
     /// Sets [`Grid::row_span_property`](ferroui_controls::Grid::row_span_property).
+    #[inline(always)]
     fn row_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::row_span_property(), value)
     }
 
     /// Sets [`Grid::is_shared_size_scope_property`](ferroui_controls::Grid::is_shared_size_scope_property).
+    #[inline(always)]
     fn is_shared_size_scope<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::is_shared_size_scope_property(), value)
     }
@@ -4587,31 +4971,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::Grid>> GridProps for El<T> {}
 /// The properties and routed events of [`GridSplitter`](ferroui_controls::GridSplitter).
 pub trait GridSplitterProps: ElementBuilder {
     /// Sets [`GridSplitter::resize_direction_property`](ferroui_controls::GridSplitter::resize_direction_property).
+    #[inline(always)]
     fn resize_direction<M>(self, value: impl IntoProp<ferroui_controls::GridResizeDirection, M>) -> Self {
         self.prop(<ferroui_controls::GridSplitter>::resize_direction_property(), value)
     }
 
     /// Sets [`GridSplitter::resize_behavior_property`](ferroui_controls::GridSplitter::resize_behavior_property).
+    #[inline(always)]
     fn resize_behavior<M>(self, value: impl IntoProp<ferroui_controls::GridResizeBehavior, M>) -> Self {
         self.prop(<ferroui_controls::GridSplitter>::resize_behavior_property(), value)
     }
 
     /// Sets [`GridSplitter::shows_preview_property`](ferroui_controls::GridSplitter::shows_preview_property).
+    #[inline(always)]
     fn shows_preview<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::GridSplitter>::shows_preview_property(), value)
     }
 
     /// Sets [`GridSplitter::keyboard_increment_property`](ferroui_controls::GridSplitter::keyboard_increment_property).
+    #[inline(always)]
     fn keyboard_increment<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::GridSplitter>::keyboard_increment_property(), value)
     }
 
     /// Sets [`GridSplitter::drag_increment_property`](ferroui_controls::GridSplitter::drag_increment_property).
+    #[inline(always)]
     fn drag_increment<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::GridSplitter>::drag_increment_property(), value)
     }
 
     /// Sets [`GridSplitter::preview_content_property`](ferroui_controls::GridSplitter::preview_content_property).
+    #[inline(always)]
     fn preview_content<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::ITemplateOf<ferroui_base::Ref<ferroui_controls::Control>>>>, M>) -> Self {
         self.prop(<ferroui_controls::GridSplitter>::preview_content_property(), value)
     }
@@ -4621,11 +5011,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::GridSplitter>> GridSplitterProps f
 /// The properties and routed events of [`HeaderedContentControl`](ferroui_controls::primitives::HeaderedContentControl).
 pub trait HeaderedContentControlProps: ElementBuilder {
     /// Sets [`HeaderedContentControl::header_property`](ferroui_controls::primitives::HeaderedContentControl::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::HeaderedContentControl>::header_property(), value)
     }
 
     /// Sets [`HeaderedContentControl::header_template_property`](ferroui_controls::primitives::HeaderedContentControl::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::HeaderedContentControl>::header_template_property(), value)
     }
@@ -4635,11 +5027,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::HeaderedContentControl
 /// The properties and routed events of [`HeaderedItemsControl`](ferroui_controls::primitives::HeaderedItemsControl).
 pub trait HeaderedItemsControlProps: ElementBuilder {
     /// Sets [`HeaderedItemsControl::header_property`](ferroui_controls::primitives::HeaderedItemsControl::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::HeaderedItemsControl>::header_property(), value)
     }
 
     /// Sets [`HeaderedItemsControl::header_template_property`](ferroui_controls::primitives::HeaderedItemsControl::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::HeaderedItemsControl>::header_template_property(), value)
     }
@@ -4649,11 +5043,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::HeaderedItemsControl>>
 /// The properties and routed events of [`HeaderedSelectingItemsControl`](ferroui_controls::primitives::HeaderedSelectingItemsControl).
 pub trait HeaderedSelectingItemsControlProps: ElementBuilder {
     /// Sets [`HeaderedSelectingItemsControl::header_property`](ferroui_controls::primitives::HeaderedSelectingItemsControl::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::HeaderedSelectingItemsControl>::header_property(), value)
     }
 
     /// Sets [`HeaderedSelectingItemsControl::header_template_property`](ferroui_controls::primitives::HeaderedSelectingItemsControl::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::HeaderedSelectingItemsControl>::header_template_property(), value)
     }
@@ -4663,36 +5059,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::HeaderedSelectingItems
 /// The properties and routed events of [`Hyperlink`](ferroui_controls::documents::Hyperlink).
 pub trait HyperlinkProps: ElementBuilder {
     /// Sets [`Hyperlink::navigate_uri_property`](ferroui_controls::documents::Hyperlink::navigate_uri_property).
+    #[inline(always)]
     fn navigate_uri<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::documents::Hyperlink>::navigate_uri_property(), value)
     }
 
     /// Sets [`Hyperlink::target_name_property`](ferroui_controls::documents::Hyperlink::target_name_property).
+    #[inline(always)]
     fn target_name<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::documents::Hyperlink>::target_name_property(), value)
     }
 
     /// Sets [`Hyperlink::is_enabled_property`](ferroui_controls::documents::Hyperlink::is_enabled_property).
+    #[inline(always)]
     fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Hyperlink>::is_enabled_property(), value)
     }
 
     /// Sets [`Hyperlink::is_tab_stop_property`](ferroui_controls::documents::Hyperlink::is_tab_stop_property).
+    #[inline(always)]
     fn is_tab_stop<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Hyperlink>::is_tab_stop_property(), value)
     }
 
     /// Sets [`Hyperlink::tab_index_property`](ferroui_controls::documents::Hyperlink::tab_index_property).
+    #[inline(always)]
     fn tab_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::documents::Hyperlink>::tab_index_property(), value)
     }
 
     /// Sets [`Hyperlink::is_visited_property`](ferroui_controls::documents::Hyperlink::is_visited_property).
+    #[inline(always)]
     fn is_visited<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Hyperlink>::is_visited_property(), value)
     }
 
     /// Sets [`Hyperlink::underline_style_property`](ferroui_controls::documents::Hyperlink::underline_style_property).
+    #[inline(always)]
     fn underline_style<M>(self, value: impl IntoProp<ferroui_controls::documents::UnderlineStyle, M>) -> Self {
         self.prop(<ferroui_controls::documents::Hyperlink>::underline_style_property(), value)
     }
@@ -4702,11 +5105,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::Hyperlink>> HyperlinkPr
 /// The properties and routed events of [`HyperlinkButton`](ferroui_controls::HyperlinkButton).
 pub trait HyperlinkButtonProps: ElementBuilder {
     /// Sets [`HyperlinkButton::is_visited_property`](ferroui_controls::HyperlinkButton::is_visited_property).
+    #[inline(always)]
     fn is_visited<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::HyperlinkButton>::is_visited_property(), value)
     }
 
     /// Sets [`HyperlinkButton::navigate_uri_property`](ferroui_controls::HyperlinkButton::navigate_uri_property).
+    #[inline(always)]
     fn navigate_uri<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::UriRef>, M>) -> Self {
         self.prop(<ferroui_controls::HyperlinkButton>::navigate_uri_property(), value)
     }
@@ -4716,6 +5121,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::HyperlinkButton>> HyperlinkButtonP
 /// The properties and routed events of [`IconSource`](ferroui_controls::IconSource).
 pub trait IconSourceProps: ElementBuilder {
     /// Sets [`IconSource::foreground_property`](ferroui_controls::IconSource::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::IconSource>::foreground_property(), value)
     }
@@ -4725,21 +5131,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::IconSource>> IconSourceProps for E
 /// The properties and routed events of [`Image`](ferroui_controls::Image).
 pub trait ImageProps: ElementBuilder {
     /// Sets [`Image::source_property`](ferroui_controls::Image::source_property).
+    #[inline(always)]
     fn source<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_controls::Image>::source_property(), value)
     }
 
     /// Sets [`Image::blend_mode_property`](ferroui_controls::Image::blend_mode_property).
+    #[inline(always)]
     fn blend_mode<M>(self, value: impl IntoProp<ferroui_base::media::imaging::BitmapBlendingMode, M>) -> Self {
         self.prop(<ferroui_controls::Image>::blend_mode_property(), value)
     }
 
     /// Sets [`Image::stretch_property`](ferroui_controls::Image::stretch_property).
+    #[inline(always)]
     fn stretch<M>(self, value: impl IntoProp<ferroui_base::media::Stretch, M>) -> Self {
         self.prop(<ferroui_controls::Image>::stretch_property(), value)
     }
 
     /// Sets [`Image::stretch_direction_property`](ferroui_controls::Image::stretch_direction_property).
+    #[inline(always)]
     fn stretch_direction<M>(self, value: impl IntoProp<ferroui_base::media::StretchDirection, M>) -> Self {
         self.prop(<ferroui_controls::Image>::stretch_direction_property(), value)
     }
@@ -4749,6 +5159,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Image>> ImageProps for El<T> {}
 /// The properties and routed events of [`ImageBrush`](ferroui_base::media::ImageBrush).
 pub trait ImageBrushProps: ElementBuilder {
     /// Sets [`ImageBrush::source_property`](ferroui_base::media::ImageBrush::source_property).
+    #[inline(always)]
     fn source<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
         self.prop(<ferroui_base::media::ImageBrush>::source_property(), value)
     }
@@ -4758,11 +5169,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::ImageBrush>> ImageBrushProps fo
 /// The properties and routed events of [`ImageDrawing`](ferroui_base::media::ImageDrawing).
 pub trait ImageDrawingProps: ElementBuilder {
     /// Sets [`ImageDrawing::image_source_property`](ferroui_base::media::ImageDrawing::image_source_property).
+    #[inline(always)]
     fn image_source<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_base::media::ImageDrawing>::image_source_property(), value)
     }
 
     /// Sets [`ImageDrawing::rect_property`](ferroui_base::media::ImageDrawing::rect_property).
+    #[inline(always)]
     fn rect<M>(self, value: impl IntoProp<ferroui_base::Rect, M>) -> Self {
         self.prop(<ferroui_base::media::ImageDrawing>::rect_property(), value)
     }
@@ -4772,11 +5185,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::ImageDrawing>> ImageDrawingProp
 /// The properties and routed events of [`InfoBadge`](ferroui_controls::InfoBadge).
 pub trait InfoBadgeProps: ElementBuilder {
     /// Sets [`InfoBadge::value_property`](ferroui_controls::InfoBadge::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::InfoBadge>::value_property(), value)
     }
 
     /// Sets [`InfoBadge::icon_source_property`](ferroui_controls::InfoBadge::icon_source_property).
+    #[inline(always)]
     fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
         self.prop(<ferroui_controls::InfoBadge>::icon_source_property(), value)
     }
@@ -4786,11 +5201,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::InfoBadge>> InfoBadgeProps for El<
 /// The properties and routed events of [`InfoBadgeTemplateSettings`](ferroui_controls::primitives::InfoBadgeTemplateSettings).
 pub trait InfoBadgeTemplateSettingsProps: ElementBuilder {
     /// Sets [`InfoBadgeTemplateSettings::info_badge_corner_radius_property`](ferroui_controls::primitives::InfoBadgeTemplateSettings::info_badge_corner_radius_property).
+    #[inline(always)]
     fn info_badge_corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBadgeTemplateSettings>::info_badge_corner_radius_property(), value)
     }
 
     /// Sets [`InfoBadgeTemplateSettings::icon_element_property`](ferroui_controls::primitives::InfoBadgeTemplateSettings::icon_element_property).
+    #[inline(always)]
     fn icon_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBadgeTemplateSettings>::icon_element_property(), value)
     }
@@ -4800,56 +5217,67 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::InfoBadgeTemplateSetti
 /// The properties and routed events of [`InfoBar`](ferroui_controls::InfoBar).
 pub trait InfoBarProps: ElementBuilder {
     /// Sets [`InfoBar::is_open_property`](ferroui_controls::InfoBar::is_open_property).
+    #[inline(always)]
     fn is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::is_open_property(), value)
     }
 
     /// Sets [`InfoBar::title_property`](ferroui_controls::InfoBar::title_property).
+    #[inline(always)]
     fn title<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::title_property(), value)
     }
 
     /// Sets [`InfoBar::message_property`](ferroui_controls::InfoBar::message_property).
+    #[inline(always)]
     fn message<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::message_property(), value)
     }
 
     /// Sets [`InfoBar::severity_property`](ferroui_controls::InfoBar::severity_property).
+    #[inline(always)]
     fn severity<M>(self, value: impl IntoProp<ferroui_controls::InfoBarSeverity, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::severity_property(), value)
     }
 
     /// Sets [`InfoBar::icon_source_property`](ferroui_controls::InfoBar::icon_source_property).
+    #[inline(always)]
     fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::icon_source_property(), value)
     }
 
     /// Sets [`InfoBar::is_icon_visible_property`](ferroui_controls::InfoBar::is_icon_visible_property).
+    #[inline(always)]
     fn is_icon_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::is_icon_visible_property(), value)
     }
 
     /// Sets [`InfoBar::is_closable_property`](ferroui_controls::InfoBar::is_closable_property).
+    #[inline(always)]
     fn is_closable<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::is_closable_property(), value)
     }
 
     /// Sets [`InfoBar::close_button_style_property`](ferroui_controls::InfoBar::close_button_style_property).
+    #[inline(always)]
     fn close_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::close_button_style_property(), value)
     }
 
     /// Sets [`InfoBar::close_button_command_property`](ferroui_controls::InfoBar::close_button_command_property).
+    #[inline(always)]
     fn close_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::close_button_command_property(), value)
     }
 
     /// Sets [`InfoBar::close_button_command_parameter_property`](ferroui_controls::InfoBar::close_button_command_parameter_property).
+    #[inline(always)]
     fn close_button_command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::close_button_command_parameter_property(), value)
     }
 
     /// Sets [`InfoBar::action_button_property`](ferroui_controls::InfoBar::action_button_property).
+    #[inline(always)]
     fn action_button<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Button>>, M>) -> Self {
         self.prop(<ferroui_controls::InfoBar>::action_button_property(), value)
     }
@@ -4859,21 +5287,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::InfoBar>> InfoBarProps for El<T> {
 /// The properties and routed events of [`InfoBarPanel`](ferroui_controls::primitives::InfoBarPanel).
 pub trait InfoBarPanelProps: ElementBuilder {
     /// Sets [`InfoBarPanel::horizontal_orientation_padding_property`](ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property).
+    #[inline(always)]
     fn horizontal_orientation_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::horizontal_orientation_padding_property(), value)
     }
 
     /// Sets [`InfoBarPanel::vertical_orientation_padding_property`](ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property).
+    #[inline(always)]
     fn vertical_orientation_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::vertical_orientation_padding_property(), value)
     }
 
     /// Sets [`InfoBarPanel::horizontal_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property).
+    #[inline(always)]
     fn horizontal_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::horizontal_orientation_margin_property(), value)
     }
 
     /// Sets [`InfoBarPanel::vertical_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property).
+    #[inline(always)]
     fn vertical_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::vertical_orientation_margin_property(), value)
     }
@@ -4883,6 +5315,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::InfoBarPanel>> InfoBar
 /// The properties and routed events of [`InfoBarTemplateSettings`](ferroui_controls::primitives::InfoBarTemplateSettings).
 pub trait InfoBarTemplateSettingsProps: ElementBuilder {
     /// Sets [`InfoBarTemplateSettings::icon_element_property`](ferroui_controls::primitives::InfoBarTemplateSettings::icon_element_property).
+    #[inline(always)]
     fn icon_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarTemplateSettings>::icon_element_property(), value)
     }
@@ -4892,11 +5325,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::InfoBarTemplateSetting
 /// The properties and routed events of [`Inline`](ferroui_controls::documents::Inline).
 pub trait InlineProps: ElementBuilder {
     /// Sets [`Inline::text_decorations_property`](ferroui_controls::documents::Inline::text_decorations_property).
+    #[inline(always)]
     fn text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
         self.prop(<ferroui_controls::documents::Inline>::text_decorations_property(), value)
     }
 
     /// Sets [`Inline::baseline_alignment_property`](ferroui_controls::documents::Inline::baseline_alignment_property).
+    #[inline(always)]
     fn baseline_alignment<M>(self, value: impl IntoProp<ferroui_base::media::BaselineAlignment, M>) -> Self {
         self.prop(<ferroui_controls::documents::Inline>::baseline_alignment_property(), value)
     }
@@ -4906,36 +5341,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::Inline>> InlineProps fo
 /// The properties and routed events of [`InputElement`](ferroui_base::input::InputElement).
 pub trait InputElementProps: ElementBuilder {
     /// Sets [`InputElement::focusable_property`](ferroui_base::input::InputElement::focusable_property).
+    #[inline(always)]
     fn focusable<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::focusable_property(), value)
     }
 
     /// Sets [`InputElement::allow_focus_on_interaction_property`](ferroui_base::input::InputElement::allow_focus_on_interaction_property).
+    #[inline(always)]
     fn allow_focus_on_interaction<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::allow_focus_on_interaction_property(), value)
     }
 
     /// Sets [`InputElement::is_enabled_property`](ferroui_base::input::InputElement::is_enabled_property).
+    #[inline(always)]
     fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::is_enabled_property(), value)
     }
 
     /// Sets [`InputElement::cursor_property`](ferroui_base::input::InputElement::cursor_property).
+    #[inline(always)]
     fn cursor<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_base::input::Cursor>>, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::cursor_property(), value)
     }
 
     /// Sets [`InputElement::is_hit_test_visible_property`](ferroui_base::input::InputElement::is_hit_test_visible_property).
+    #[inline(always)]
     fn is_hit_test_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::is_hit_test_visible_property(), value)
     }
 
     /// Sets [`InputElement::is_tab_stop_property`](ferroui_base::input::InputElement::is_tab_stop_property).
+    #[inline(always)]
     fn is_tab_stop<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::is_tab_stop_property(), value)
     }
 
     /// Sets [`InputElement::tab_index_property`](ferroui_base::input::InputElement::tab_index_property).
+    #[inline(always)]
     fn tab_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_base::input::InputElement>::tab_index_property(), value)
     }
@@ -5110,6 +5552,7 @@ impl<T: ObjectType + Upcast<ferroui_base::input::InputElement>> InputElementProp
 /// The properties and routed events of [`InputPaneAwareDecorator`](ferroui_controls::InputPaneAwareDecorator).
 pub trait InputPaneAwareDecoratorProps: ElementBuilder {
     /// Sets [`InputPaneAwareDecorator::behavior_property`](ferroui_controls::InputPaneAwareDecorator::behavior_property).
+    #[inline(always)]
     fn behavior<M>(self, value: impl IntoProp<ferroui_controls::InputPaneAwareBehavior, M>) -> Self {
         self.prop(<ferroui_controls::InputPaneAwareDecorator>::behavior_property(), value)
     }
@@ -5119,6 +5562,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::InputPaneAwareDecorator>> InputPan
 /// The properties and routed events of [`InputScopeName`](ferroui_base::input::InputScopeName).
 pub trait InputScopeNameProps: ElementBuilder {
     /// Sets [`InputScopeName::name_value_property`](ferroui_base::input::InputScopeName::name_value_property).
+    #[inline(always)]
     fn name_value<M>(self, value: impl IntoProp<ferroui_base::input::InputScopeNameValue, M>) -> Self {
         self.prop(<ferroui_base::input::InputScopeName>::name_value_property(), value)
     }
@@ -5128,21 +5572,25 @@ impl<T: ObjectType + Upcast<ferroui_base::input::InputScopeName>> InputScopeName
 /// The properties and routed events of [`ItemsControl`](ferroui_controls::ItemsControl).
 pub trait ItemsControlProps: ElementBuilder {
     /// Sets [`ItemsControl::item_container_theme_property`](ferroui_controls::ItemsControl::item_container_theme_property).
+    #[inline(always)]
     fn item_container_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::ItemsControl>::item_container_theme_property(), value)
     }
 
     /// Sets [`ItemsControl::items_panel_property`](ferroui_controls::ItemsControl::items_panel_property).
+    #[inline(always)]
     fn items_panel<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_controls::ITemplateOf<Option<ferroui_base::Ref<ferroui_controls::Panel>>>>, M>) -> Self {
         self.prop(<ferroui_controls::ItemsControl>::items_panel_property(), value)
     }
 
     /// Sets [`ItemsControl::items_source_property`](ferroui_controls::ItemsControl::items_source_property).
+    #[inline(always)]
     fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls::ItemsControl>::items_source_property(), value)
     }
 
     /// Sets [`ItemsControl::item_template_property`](ferroui_controls::ItemsControl::item_template_property).
+    #[inline(always)]
     fn item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ItemsControl>::item_template_property(), value)
     }
@@ -5152,6 +5600,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::ItemsControl>> ItemsControlProps f
 /// The properties and routed events of [`ItemsPresenter`](ferroui_controls::presenters::ItemsPresenter).
 pub trait ItemsPresenterProps: ElementBuilder {
     /// Sets [`ItemsPresenter::items_panel_property`](ferroui_controls::presenters::ItemsPresenter::items_panel_property).
+    #[inline(always)]
     fn items_panel<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_controls::ITemplateOf<Option<ferroui_base::Ref<ferroui_controls::Panel>>>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ItemsPresenter>::items_panel_property(), value)
     }
@@ -5161,21 +5610,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::presenters::ItemsPresenter>> Items
 /// The properties and routed events of [`ItemsStackPanel`](ferroui_controls::ItemsStackPanel).
 pub trait ItemsStackPanelProps: ElementBuilder {
     /// Sets [`ItemsStackPanel::items_updating_scroll_mode_property`](ferroui_controls::ItemsStackPanel::items_updating_scroll_mode_property).
+    #[inline(always)]
     fn items_updating_scroll_mode<M>(self, value: impl IntoProp<ferroui_controls::ItemsUpdatingScrollMode, M>) -> Self {
         self.prop(<ferroui_controls::ItemsStackPanel>::items_updating_scroll_mode_property(), value)
     }
 
     /// Sets [`ItemsStackPanel::group_padding_property`](ferroui_controls::ItemsStackPanel::group_padding_property).
+    #[inline(always)]
     fn group_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::ItemsStackPanel>::group_padding_property(), value)
     }
 
     /// Sets [`ItemsStackPanel::group_header_placement_property`](ferroui_controls::ItemsStackPanel::group_header_placement_property).
+    #[inline(always)]
     fn group_header_placement<M>(self, value: impl IntoProp<ferroui_controls::GroupHeaderPlacement, M>) -> Self {
         self.prop(<ferroui_controls::ItemsStackPanel>::group_header_placement_property(), value)
     }
 
     /// Sets [`ItemsStackPanel::are_sticky_group_headers_enabled_property`](ferroui_controls::ItemsStackPanel::are_sticky_group_headers_enabled_property).
+    #[inline(always)]
     fn are_sticky_group_headers_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ItemsStackPanel>::are_sticky_group_headers_enabled_property(), value)
     }
@@ -5185,6 +5638,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::ItemsStackPanel>> ItemsStackPanelP
 /// The properties and routed events of [`ItemsWrapGrid`](ferroui_controls::ItemsWrapGrid).
 pub trait ItemsWrapGridProps: ElementBuilder {
     /// Sets [`ItemsWrapGrid::maximum_rows_or_columns_property`](ferroui_controls::ItemsWrapGrid::maximum_rows_or_columns_property).
+    #[inline(always)]
     fn maximum_rows_or_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::ItemsWrapGrid>::maximum_rows_or_columns_property(), value)
     }
@@ -5194,16 +5648,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::ItemsWrapGrid>> ItemsWrapGridProps
 /// The properties and routed events of [`KeyBinding`](ferroui_base::input::KeyBinding).
 pub trait KeyBindingProps: ElementBuilder {
     /// Sets [`KeyBinding::command_property`](ferroui_base::input::KeyBinding::command_property).
+    #[inline(always)]
     fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_base::input::KeyBinding>::command_property(), value)
     }
 
     /// Sets [`KeyBinding::command_parameter_property`](ferroui_base::input::KeyBinding::command_parameter_property).
+    #[inline(always)]
     fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_base::input::KeyBinding>::command_parameter_property(), value)
     }
 
     /// Sets [`KeyBinding::gesture_property`](ferroui_base::input::KeyBinding::gesture_property).
+    #[inline(always)]
     fn gesture<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_base::input::KeyBinding>::gesture_property(), value)
     }
@@ -5213,11 +5670,13 @@ impl<T: ObjectType + Upcast<ferroui_base::input::KeyBinding>> KeyBindingProps fo
 /// The properties and routed events of [`LayoutTransformControl`](ferroui_controls::LayoutTransformControl).
 pub trait LayoutTransformControlProps: ElementBuilder {
     /// Sets [`LayoutTransformControl::layout_transform_property`](ferroui_controls::LayoutTransformControl::layout_transform_property).
+    #[inline(always)]
     fn layout_transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_controls::LayoutTransformControl>::layout_transform_property(), value)
     }
 
     /// Sets [`LayoutTransformControl::use_render_transform_property`](ferroui_controls::LayoutTransformControl::use_render_transform_property).
+    #[inline(always)]
     fn use_render_transform<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::LayoutTransformControl>::use_render_transform_property(), value)
     }
@@ -5227,51 +5686,61 @@ impl<T: ObjectType + Upcast<ferroui_controls::LayoutTransformControl>> LayoutTra
 /// The properties and routed events of [`Layoutable`](ferroui_base::layout::Layoutable).
 pub trait LayoutableProps: ElementBuilder {
     /// Sets [`Layoutable::width_property`](ferroui_base::layout::Layoutable::width_property).
+    #[inline(always)]
     fn width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::width_property(), value)
     }
 
     /// Sets [`Layoutable::height_property`](ferroui_base::layout::Layoutable::height_property).
+    #[inline(always)]
     fn height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::height_property(), value)
     }
 
     /// Sets [`Layoutable::min_width_property`](ferroui_base::layout::Layoutable::min_width_property).
+    #[inline(always)]
     fn min_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::min_width_property(), value)
     }
 
     /// Sets [`Layoutable::max_width_property`](ferroui_base::layout::Layoutable::max_width_property).
+    #[inline(always)]
     fn max_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::max_width_property(), value)
     }
 
     /// Sets [`Layoutable::min_height_property`](ferroui_base::layout::Layoutable::min_height_property).
+    #[inline(always)]
     fn min_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::min_height_property(), value)
     }
 
     /// Sets [`Layoutable::max_height_property`](ferroui_base::layout::Layoutable::max_height_property).
+    #[inline(always)]
     fn max_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::max_height_property(), value)
     }
 
     /// Sets [`Layoutable::margin_property`](ferroui_base::layout::Layoutable::margin_property).
+    #[inline(always)]
     fn margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::margin_property(), value)
     }
 
     /// Sets [`Layoutable::horizontal_alignment_property`](ferroui_base::layout::Layoutable::horizontal_alignment_property).
+    #[inline(always)]
     fn horizontal_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::horizontal_alignment_property(), value)
     }
 
     /// Sets [`Layoutable::vertical_alignment_property`](ferroui_base::layout::Layoutable::vertical_alignment_property).
+    #[inline(always)]
     fn vertical_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::vertical_alignment_property(), value)
     }
 
     /// Sets [`Layoutable::use_layout_rounding_property`](ferroui_base::layout::Layoutable::use_layout_rounding_property).
+    #[inline(always)]
     fn use_layout_rounding<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::use_layout_rounding_property(), value)
     }
@@ -5281,11 +5750,13 @@ impl<T: ObjectType + Upcast<ferroui_base::layout::Layoutable>> LayoutableProps f
 /// The properties and routed events of [`Line`](ferroui_controls::shapes::Line).
 pub trait LineProps: ElementBuilder {
     /// Sets [`Line::start_point_property`](ferroui_controls::shapes::Line::start_point_property).
+    #[inline(always)]
     fn start_point<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Line>::start_point_property(), value)
     }
 
     /// Sets [`Line::end_point_property`](ferroui_controls::shapes::Line::end_point_property).
+    #[inline(always)]
     fn end_point<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Line>::end_point_property(), value)
     }
@@ -5295,11 +5766,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Line>> LineProps for El<T>
 /// The properties and routed events of [`LineGeometry`](ferroui_base::media::LineGeometry).
 pub trait LineGeometryProps: ElementBuilder {
     /// Sets [`LineGeometry::start_point_property`](ferroui_base::media::LineGeometry::start_point_property).
+    #[inline(always)]
     fn start_point<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::LineGeometry>::start_point_property(), value)
     }
 
     /// Sets [`LineGeometry::end_point_property`](ferroui_base::media::LineGeometry::end_point_property).
+    #[inline(always)]
     fn end_point<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::LineGeometry>::end_point_property(), value)
     }
@@ -5309,6 +5782,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::LineGeometry>> LineGeometryProp
 /// The properties and routed events of [`LineSegment`](ferroui_base::media::LineSegment).
 pub trait LineSegmentProps: ElementBuilder {
     /// Sets [`LineSegment::point_property`](ferroui_base::media::LineSegment::point_property).
+    #[inline(always)]
     fn point<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::LineSegment>::point_property(), value)
     }
@@ -5318,11 +5792,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::LineSegment>> LineSegmentProps 
 /// The properties and routed events of [`LinearGradientBrush`](ferroui_base::media::LinearGradientBrush).
 pub trait LinearGradientBrushProps: ElementBuilder {
     /// Sets [`LinearGradientBrush::start_point_property`](ferroui_base::media::LinearGradientBrush::start_point_property).
+    #[inline(always)]
     fn start_point<M>(self, value: impl IntoProp<ferroui_base::RelativePoint, M>) -> Self {
         self.prop(<ferroui_base::media::LinearGradientBrush>::start_point_property(), value)
     }
 
     /// Sets [`LinearGradientBrush::end_point_property`](ferroui_base::media::LinearGradientBrush::end_point_property).
+    #[inline(always)]
     fn end_point<M>(self, value: impl IntoProp<ferroui_base::RelativePoint, M>) -> Self {
         self.prop(<ferroui_base::media::LinearGradientBrush>::end_point_property(), value)
     }
@@ -5332,6 +5808,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::LinearGradientBrush>> LinearGra
 /// The properties and routed events of [`ListBoxItem`](ferroui_controls::ListBoxItem).
 pub trait ListBoxItemProps: ElementBuilder {
     /// Sets [`ListBoxItem::is_selected_property`](ferroui_controls::ListBoxItem::is_selected_property).
+    #[inline(always)]
     fn is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListBoxItem>::is_selected_property(), value)
     }
@@ -5341,81 +5818,97 @@ impl<T: ObjectType + Upcast<ferroui_controls::ListBoxItem>> ListBoxItemProps for
 /// The properties and routed events of [`ListViewBase`](ferroui_controls::ListViewBase).
 pub trait ListViewBaseProps: ElementBuilder {
     /// Sets [`ListViewBase::list_view_selection_mode_property`](ferroui_controls::ListViewBase::list_view_selection_mode_property).
+    #[inline(always)]
     fn list_view_selection_mode<M>(self, value: impl IntoProp<ferroui_controls::ListViewSelectionMode, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::list_view_selection_mode_property(), value)
     }
 
     /// Sets [`ListViewBase::is_item_click_enabled_property`](ferroui_controls::ListViewBase::is_item_click_enabled_property).
+    #[inline(always)]
     fn is_item_click_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::is_item_click_enabled_property(), value)
     }
 
     /// Sets [`ListViewBase::header_property`](ferroui_controls::ListViewBase::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::header_property(), value)
     }
 
     /// Sets [`ListViewBase::header_template_property`](ferroui_controls::ListViewBase::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::header_template_property(), value)
     }
 
     /// Sets [`ListViewBase::footer_property`](ferroui_controls::ListViewBase::footer_property).
+    #[inline(always)]
     fn footer<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::footer_property(), value)
     }
 
     /// Sets [`ListViewBase::footer_template_property`](ferroui_controls::ListViewBase::footer_template_property).
+    #[inline(always)]
     fn footer_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::footer_template_property(), value)
     }
 
     /// Sets [`ListViewBase::single_selection_follows_focus_property`](ferroui_controls::ListViewBase::single_selection_follows_focus_property).
+    #[inline(always)]
     fn single_selection_follows_focus<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::single_selection_follows_focus_property(), value)
     }
 
     /// Sets [`ListViewBase::is_multi_select_check_box_enabled_property`](ferroui_controls::ListViewBase::is_multi_select_check_box_enabled_property).
+    #[inline(always)]
     fn is_multi_select_check_box_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::is_multi_select_check_box_enabled_property(), value)
     }
 
     /// Sets [`ListViewBase::shows_scrolling_placeholders_property`](ferroui_controls::ListViewBase::shows_scrolling_placeholders_property).
+    #[inline(always)]
     fn shows_scrolling_placeholders<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::shows_scrolling_placeholders_property(), value)
     }
 
     /// Sets [`ListViewBase::is_swipe_enabled_property`](ferroui_controls::ListViewBase::is_swipe_enabled_property).
+    #[inline(always)]
     fn is_swipe_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::is_swipe_enabled_property(), value)
     }
 
     /// Sets [`ListViewBase::can_drag_items_property`](ferroui_controls::ListViewBase::can_drag_items_property).
+    #[inline(always)]
     fn can_drag_items<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::can_drag_items_property(), value)
     }
 
     /// Sets [`ListViewBase::can_reorder_items_property`](ferroui_controls::ListViewBase::can_reorder_items_property).
+    #[inline(always)]
     fn can_reorder_items<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::can_reorder_items_property(), value)
     }
 
     /// Sets [`ListViewBase::reorder_mode_property`](ferroui_controls::ListViewBase::reorder_mode_property).
+    #[inline(always)]
     fn reorder_mode<M>(self, value: impl IntoProp<ferroui_controls::ListViewReorderMode, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::reorder_mode_property(), value)
     }
 
     /// Sets [`ListViewBase::incremental_loading_trigger_property`](ferroui_controls::ListViewBase::incremental_loading_trigger_property).
+    #[inline(always)]
     fn incremental_loading_trigger<M>(self, value: impl IntoProp<ferroui_controls::IncrementalLoadingTrigger, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::incremental_loading_trigger_property(), value)
     }
 
     /// Sets [`ListViewBase::incremental_loading_threshold_property`](ferroui_controls::ListViewBase::incremental_loading_threshold_property).
+    #[inline(always)]
     fn incremental_loading_threshold<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::incremental_loading_threshold_property(), value)
     }
 
     /// Sets [`ListViewBase::data_fetch_size_property`](ferroui_controls::ListViewBase::data_fetch_size_property).
+    #[inline(always)]
     fn data_fetch_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ListViewBase>::data_fetch_size_property(), value)
     }
@@ -5425,36 +5918,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::ListViewBase>> ListViewBaseProps f
 /// The properties and routed events of [`MaskedTextBox`](ferroui_controls::MaskedTextBox).
 pub trait MaskedTextBoxProps: ElementBuilder {
     /// Sets [`MaskedTextBox::ascii_only_property`](ferroui_controls::MaskedTextBox::ascii_only_property).
+    #[inline(always)]
     fn ascii_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MaskedTextBox>::ascii_only_property(), value)
     }
 
     /// Sets [`MaskedTextBox::culture_property`](ferroui_controls::MaskedTextBox::culture_property).
+    #[inline(always)]
     fn culture<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::CultureInfo>, M>) -> Self {
         self.prop(<ferroui_controls::MaskedTextBox>::culture_property(), value)
     }
 
     /// Sets [`MaskedTextBox::hide_prompt_on_leave_property`](ferroui_controls::MaskedTextBox::hide_prompt_on_leave_property).
+    #[inline(always)]
     fn hide_prompt_on_leave<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MaskedTextBox>::hide_prompt_on_leave_property(), value)
     }
 
     /// Sets [`MaskedTextBox::mask_property`](ferroui_controls::MaskedTextBox::mask_property).
+    #[inline(always)]
     fn mask<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::MaskedTextBox>::mask_property(), value)
     }
 
     /// Sets [`MaskedTextBox::prompt_char_property`](ferroui_controls::MaskedTextBox::prompt_char_property).
+    #[inline(always)]
     fn prompt_char<M>(self, value: impl IntoProp<char, M>) -> Self {
         self.prop(<ferroui_controls::MaskedTextBox>::prompt_char_property(), value)
     }
 
     /// Sets [`MaskedTextBox::reset_on_prompt_property`](ferroui_controls::MaskedTextBox::reset_on_prompt_property).
+    #[inline(always)]
     fn reset_on_prompt<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MaskedTextBox>::reset_on_prompt_property(), value)
     }
 
     /// Sets [`MaskedTextBox::reset_on_space_property`](ferroui_controls::MaskedTextBox::reset_on_space_property).
+    #[inline(always)]
     fn reset_on_space<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MaskedTextBox>::reset_on_space_property(), value)
     }
@@ -5464,6 +5964,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::MaskedTextBox>> MaskedTextBoxProps
 /// The properties and routed events of [`MatrixTransform`](ferroui_base::media::MatrixTransform).
 pub trait MatrixTransformProps: ElementBuilder {
     /// Sets [`MatrixTransform::matrix_property`](ferroui_base::media::MatrixTransform::matrix_property).
+    #[inline(always)]
     fn matrix<M>(self, value: impl IntoProp<ferroui_base::Matrix, M>) -> Self {
         self.prop(<ferroui_base::media::MatrixTransform>::matrix_property(), value)
     }
@@ -5487,21 +5988,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::MenuBase>> MenuBaseProps for El<T>
 /// The properties and routed events of [`MenuFlyout`](ferroui_controls::MenuFlyout).
 pub trait MenuFlyoutProps: ElementBuilder {
     /// Sets [`MenuFlyout::items_source_property`](ferroui_controls::MenuFlyout::items_source_property).
+    #[inline(always)]
     fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls::MenuFlyout>::items_source_property(), value)
     }
 
     /// Sets [`MenuFlyout::item_template_property`](ferroui_controls::MenuFlyout::item_template_property).
+    #[inline(always)]
     fn item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::MenuFlyout>::item_template_property(), value)
     }
 
     /// Sets [`MenuFlyout::item_container_theme_property`](ferroui_controls::MenuFlyout::item_container_theme_property).
+    #[inline(always)]
     fn item_container_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::MenuFlyout>::item_container_theme_property(), value)
     }
 
     /// Sets [`MenuFlyout::flyout_presenter_theme_property`](ferroui_controls::MenuFlyout::flyout_presenter_theme_property).
+    #[inline(always)]
     fn flyout_presenter_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::MenuFlyout>::flyout_presenter_theme_property(), value)
     }
@@ -5511,51 +6016,61 @@ impl<T: ObjectType + Upcast<ferroui_controls::MenuFlyout>> MenuFlyoutProps for E
 /// The properties and routed events of [`MenuItem`](ferroui_controls::MenuItem).
 pub trait MenuItemProps: ElementBuilder {
     /// Sets [`MenuItem::command_property`](ferroui_controls::MenuItem::command_property).
+    #[inline(always)]
     fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::command_property(), value)
     }
 
     /// Sets [`MenuItem::hot_key_property`](ferroui_controls::MenuItem::hot_key_property).
+    #[inline(always)]
     fn hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::hot_key_property(), value)
     }
 
     /// Sets [`MenuItem::command_parameter_property`](ferroui_controls::MenuItem::command_parameter_property).
+    #[inline(always)]
     fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::command_parameter_property(), value)
     }
 
     /// Sets [`MenuItem::icon_property`](ferroui_controls::MenuItem::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::icon_property(), value)
     }
 
     /// Sets [`MenuItem::input_gesture_property`](ferroui_controls::MenuItem::input_gesture_property).
+    #[inline(always)]
     fn input_gesture<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::input_gesture_property(), value)
     }
 
     /// Sets [`MenuItem::is_sub_menu_open_property`](ferroui_controls::MenuItem::is_sub_menu_open_property).
+    #[inline(always)]
     fn is_sub_menu_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::is_sub_menu_open_property(), value)
     }
 
     /// Sets [`MenuItem::stays_open_on_click_property`](ferroui_controls::MenuItem::stays_open_on_click_property).
+    #[inline(always)]
     fn stays_open_on_click<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::stays_open_on_click_property(), value)
     }
 
     /// Sets [`MenuItem::toggle_type_property`](ferroui_controls::MenuItem::toggle_type_property).
+    #[inline(always)]
     fn toggle_type<M>(self, value: impl IntoProp<ferroui_controls::MenuItemToggleType, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::toggle_type_property(), value)
     }
 
     /// Sets [`MenuItem::is_checked_property`](ferroui_controls::MenuItem::is_checked_property).
+    #[inline(always)]
     fn is_checked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::is_checked_property(), value)
     }
 
     /// Sets [`MenuItem::group_name_property`](ferroui_controls::MenuItem::group_name_property).
+    #[inline(always)]
     fn group_name<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::group_name_property(), value)
     }
@@ -5585,6 +6100,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::MenuItem>> MenuItemProps for El<T>
 /// The properties and routed events of [`MicaBackdrop`](ferroui_controls::media::MicaBackdrop).
 pub trait MicaBackdropProps: ElementBuilder {
     /// Sets [`MicaBackdrop::kind_property`](ferroui_controls::media::MicaBackdrop::kind_property).
+    #[inline(always)]
     fn kind<M>(self, value: impl IntoProp<ferroui_base::rendering::composition::system_backdrops::MicaKind, M>) -> Self {
         self.prop(<ferroui_controls::media::MicaBackdrop>::kind_property(), value)
     }
@@ -5594,11 +6110,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::media::MicaBackdrop>> MicaBackdrop
 /// The properties and routed events of [`MultiPage`](ferroui_controls::MultiPage).
 pub trait MultiPageProps: ElementBuilder {
     /// Sets [`MultiPage::items_source_property`](ferroui_controls::MultiPage::items_source_property).
+    #[inline(always)]
     fn items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls::MultiPage>::items_source_property(), value)
     }
 
     /// Sets [`MultiPage::page_template_property`](ferroui_controls::MultiPage::page_template_property).
+    #[inline(always)]
     fn page_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::MultiPage>::page_template_property(), value)
     }
@@ -5608,56 +6126,67 @@ impl<T: ObjectType + Upcast<ferroui_controls::MultiPage>> MultiPageProps for El<
 /// The properties and routed events of [`NativeMenuItem`](ferroui_controls::NativeMenuItem).
 pub trait NativeMenuItemProps: ElementBuilder {
     /// Sets [`NativeMenuItem::menu_property`](ferroui_controls::NativeMenuItem::menu_property).
+    #[inline(always)]
     fn menu<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::NativeMenu>>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::menu_property(), value)
     }
 
     /// Sets [`NativeMenuItem::icon_property`](ferroui_controls::NativeMenuItem::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::imaging::IBitmap>>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::icon_property(), value)
     }
 
     /// Sets [`NativeMenuItem::header_property`](ferroui_controls::NativeMenuItem::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::header_property(), value)
     }
 
     /// Sets [`NativeMenuItem::tool_tip_property`](ferroui_controls::NativeMenuItem::tool_tip_property).
+    #[inline(always)]
     fn tool_tip<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::tool_tip_property(), value)
     }
 
     /// Sets [`NativeMenuItem::gesture_property`](ferroui_controls::NativeMenuItem::gesture_property).
+    #[inline(always)]
     fn gesture<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::gesture_property(), value)
     }
 
     /// Sets [`NativeMenuItem::is_checked_property`](ferroui_controls::NativeMenuItem::is_checked_property).
+    #[inline(always)]
     fn is_checked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::is_checked_property(), value)
     }
 
     /// Sets [`NativeMenuItem::toggle_type_property`](ferroui_controls::NativeMenuItem::toggle_type_property).
+    #[inline(always)]
     fn toggle_type<M>(self, value: impl IntoProp<ferroui_controls::MenuItemToggleType, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::toggle_type_property(), value)
     }
 
     /// Sets [`NativeMenuItem::command_property`](ferroui_controls::NativeMenuItem::command_property).
+    #[inline(always)]
     fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::command_property(), value)
     }
 
     /// Sets [`NativeMenuItem::command_parameter_property`](ferroui_controls::NativeMenuItem::command_parameter_property).
+    #[inline(always)]
     fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::command_parameter_property(), value)
     }
 
     /// Sets [`NativeMenuItem::is_enabled_property`](ferroui_controls::NativeMenuItem::is_enabled_property).
+    #[inline(always)]
     fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::is_enabled_property(), value)
     }
 
     /// Sets [`NativeMenuItem::is_visible_property`](ferroui_controls::NativeMenuItem::is_visible_property).
+    #[inline(always)]
     fn is_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::is_visible_property(), value)
     }
@@ -5667,76 +6196,91 @@ impl<T: ObjectType + Upcast<ferroui_controls::NativeMenuItem>> NativeMenuItemPro
 /// The properties and routed events of [`NavigationPage`](ferroui_controls::NavigationPage).
 pub trait NavigationPageProps: ElementBuilder {
     /// Sets [`NavigationPage::content_property`](ferroui_controls::NavigationPage::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::content_property(), value)
     }
 
     /// Sets [`NavigationPage::page_transition_property`](ferroui_controls::NavigationPage::page_transition_property).
+    #[inline(always)]
     fn page_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::page_transition_property(), value)
     }
 
     /// Sets [`NavigationPage::modal_transition_property`](ferroui_controls::NavigationPage::modal_transition_property).
+    #[inline(always)]
     fn modal_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::modal_transition_property(), value)
     }
 
     /// Sets [`NavigationPage::bar_layout_behavior_property`](ferroui_controls::NavigationPage::bar_layout_behavior_property).
+    #[inline(always)]
     fn bar_layout_behavior<M>(self, value: impl IntoProp<Option<ferroui_controls::BarLayoutBehavior>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::bar_layout_behavior_property(), value)
     }
 
     /// Sets [`NavigationPage::has_shadow_property`](ferroui_controls::NavigationPage::has_shadow_property).
+    #[inline(always)]
     fn has_shadow<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::has_shadow_property(), value)
     }
 
     /// Sets [`NavigationPage::bar_height_property`](ferroui_controls::NavigationPage::bar_height_property).
+    #[inline(always)]
     fn bar_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::bar_height_property(), value)
     }
 
     /// Sets [`NavigationPage::bar_height_override_property`](ferroui_controls::NavigationPage::bar_height_override_property).
+    #[inline(always)]
     fn bar_height_override<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::bar_height_override_property(), value)
     }
 
     /// Sets [`NavigationPage::back_button_content_property`](ferroui_controls::NavigationPage::back_button_content_property).
+    #[inline(always)]
     fn back_button_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::back_button_content_property(), value)
     }
 
     /// Sets [`NavigationPage::has_back_button_property`](ferroui_controls::NavigationPage::has_back_button_property).
+    #[inline(always)]
     fn has_back_button<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::has_back_button_property(), value)
     }
 
     /// Sets [`NavigationPage::is_back_button_visible_property`](ferroui_controls::NavigationPage::is_back_button_visible_property).
+    #[inline(always)]
     fn is_back_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::is_back_button_visible_property(), value)
     }
 
     /// Sets [`NavigationPage::top_command_bar_property`](ferroui_controls::NavigationPage::top_command_bar_property).
+    #[inline(always)]
     fn top_command_bar<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::top_command_bar_property(), value)
     }
 
     /// Sets [`NavigationPage::bottom_command_bar_property`](ferroui_controls::NavigationPage::bottom_command_bar_property).
+    #[inline(always)]
     fn bottom_command_bar<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::bottom_command_bar_property(), value)
     }
 
     /// Sets [`NavigationPage::has_navigation_bar_property`](ferroui_controls::NavigationPage::has_navigation_bar_property).
+    #[inline(always)]
     fn has_navigation_bar<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::has_navigation_bar_property(), value)
     }
 
     /// Sets [`NavigationPage::is_gesture_enabled_property`](ferroui_controls::NavigationPage::is_gesture_enabled_property).
+    #[inline(always)]
     fn is_gesture_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::is_gesture_enabled_property(), value)
     }
 
     /// Sets [`NavigationPage::is_back_button_enabled_property`](ferroui_controls::NavigationPage::is_back_button_enabled_property).
+    #[inline(always)]
     fn is_back_button_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::is_back_button_enabled_property(), value)
     }
@@ -5746,136 +6290,163 @@ impl<T: ObjectType + Upcast<ferroui_controls::NavigationPage>> NavigationPagePro
 /// The properties and routed events of [`NavigationView`](ferroui_controls::NavigationView).
 pub trait NavigationViewProps: ElementBuilder {
     /// Sets [`NavigationView::is_pane_open_property`](ferroui_controls::NavigationView::is_pane_open_property).
+    #[inline(always)]
     fn is_pane_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::is_pane_open_property(), value)
     }
 
     /// Sets [`NavigationView::compact_mode_threshold_width_property`](ferroui_controls::NavigationView::compact_mode_threshold_width_property).
+    #[inline(always)]
     fn compact_mode_threshold_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::compact_mode_threshold_width_property(), value)
     }
 
     /// Sets [`NavigationView::expanded_mode_threshold_width_property`](ferroui_controls::NavigationView::expanded_mode_threshold_width_property).
+    #[inline(always)]
     fn expanded_mode_threshold_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::expanded_mode_threshold_width_property(), value)
     }
 
     /// Sets [`NavigationView::is_settings_visible_property`](ferroui_controls::NavigationView::is_settings_visible_property).
+    #[inline(always)]
     fn is_settings_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::is_settings_visible_property(), value)
     }
 
     /// Sets [`NavigationView::is_pane_toggle_button_visible_property`](ferroui_controls::NavigationView::is_pane_toggle_button_visible_property).
+    #[inline(always)]
     fn is_pane_toggle_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::is_pane_toggle_button_visible_property(), value)
     }
 
     /// Sets [`NavigationView::always_show_header_property`](ferroui_controls::NavigationView::always_show_header_property).
+    #[inline(always)]
     fn always_show_header<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::always_show_header_property(), value)
     }
 
     /// Sets [`NavigationView::compact_pane_length_property`](ferroui_controls::NavigationView::compact_pane_length_property).
+    #[inline(always)]
     fn compact_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::compact_pane_length_property(), value)
     }
 
     /// Sets [`NavigationView::open_pane_length_property`](ferroui_controls::NavigationView::open_pane_length_property).
+    #[inline(always)]
     fn open_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::open_pane_length_property(), value)
     }
 
     /// Sets [`NavigationView::is_pane_visible_property`](ferroui_controls::NavigationView::is_pane_visible_property).
+    #[inline(always)]
     fn is_pane_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::is_pane_visible_property(), value)
     }
 
     /// Sets [`NavigationView::is_back_enabled_property`](ferroui_controls::NavigationView::is_back_enabled_property).
+    #[inline(always)]
     fn is_back_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::is_back_enabled_property(), value)
     }
 
     /// Sets [`NavigationView::is_back_button_visible_property`](ferroui_controls::NavigationView::is_back_button_visible_property).
+    #[inline(always)]
     fn is_back_button_visible<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewBackButtonVisible, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::is_back_button_visible_property(), value)
     }
 
     /// Sets [`NavigationView::pane_display_mode_property`](ferroui_controls::NavigationView::pane_display_mode_property).
+    #[inline(always)]
     fn pane_display_mode<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewPaneDisplayMode, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::pane_display_mode_property(), value)
     }
 
     /// Sets [`NavigationView::selection_follows_focus_property`](ferroui_controls::NavigationView::selection_follows_focus_property).
+    #[inline(always)]
     fn selection_follows_focus<M>(self, value: impl IntoProp<ferroui_controls::NavigationViewSelectionFollowsFocus, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::selection_follows_focus_property(), value)
     }
 
     /// Sets [`NavigationView::pane_title_property`](ferroui_controls::NavigationView::pane_title_property).
+    #[inline(always)]
     fn pane_title<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::pane_title_property(), value)
     }
 
     /// Sets [`NavigationView::header_property`](ferroui_controls::NavigationView::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::header_property(), value)
     }
 
     /// Sets [`NavigationView::header_template_property`](ferroui_controls::NavigationView::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::header_template_property(), value)
     }
 
     /// Sets [`NavigationView::selected_item_property`](ferroui_controls::NavigationView::selected_item_property).
+    #[inline(always)]
     fn selected_item<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::selected_item_property(), value)
     }
 
     /// Sets [`NavigationView::pane_header_property`](ferroui_controls::NavigationView::pane_header_property).
+    #[inline(always)]
     fn pane_header<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::pane_header_property(), value)
     }
 
     /// Sets [`NavigationView::pane_footer_property`](ferroui_controls::NavigationView::pane_footer_property).
+    #[inline(always)]
     fn pane_footer<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::pane_footer_property(), value)
     }
 
     /// Sets [`NavigationView::pane_custom_content_property`](ferroui_controls::NavigationView::pane_custom_content_property).
+    #[inline(always)]
     fn pane_custom_content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::pane_custom_content_property(), value)
     }
 
     /// Sets [`NavigationView::content_overlay_property`](ferroui_controls::NavigationView::content_overlay_property).
+    #[inline(always)]
     fn content_overlay<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::content_overlay_property(), value)
     }
 
     /// Sets [`NavigationView::auto_suggest_box_property`](ferroui_controls::NavigationView::auto_suggest_box_property).
+    #[inline(always)]
     fn auto_suggest_box<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::AutoSuggestBox>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::auto_suggest_box_property(), value)
     }
 
     /// Sets [`NavigationView::menu_items_source_property`](ferroui_controls::NavigationView::menu_items_source_property).
+    #[inline(always)]
     fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::menu_items_source_property(), value)
     }
 
     /// Sets [`NavigationView::footer_menu_items_source_property`](ferroui_controls::NavigationView::footer_menu_items_source_property).
+    #[inline(always)]
     fn footer_menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::footer_menu_items_source_property(), value)
     }
 
     /// Sets [`NavigationView::menu_item_template_property`](ferroui_controls::NavigationView::menu_item_template_property).
+    #[inline(always)]
     fn menu_item_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::menu_item_template_property(), value)
     }
 
     /// Sets [`NavigationView::pane_toggle_button_style_property`](ferroui_controls::NavigationView::pane_toggle_button_style_property).
+    #[inline(always)]
     fn pane_toggle_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::pane_toggle_button_style_property(), value)
     }
 
     /// Sets [`NavigationView::menu_item_container_style_property`](ferroui_controls::NavigationView::menu_item_container_style_property).
+    #[inline(always)]
     fn menu_item_container_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationView>::menu_item_container_style_property(), value)
     }
@@ -5885,36 +6456,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::NavigationView>> NavigationViewPro
 /// The properties and routed events of [`NavigationViewItem`](ferroui_controls::NavigationViewItem).
 pub trait NavigationViewItemProps: ElementBuilder {
     /// Sets [`NavigationViewItem::icon_property`](ferroui_controls::NavigationViewItem::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::icon_property(), value)
     }
 
     /// Sets [`NavigationViewItem::info_badge_property`](ferroui_controls::NavigationViewItem::info_badge_property).
+    #[inline(always)]
     fn info_badge<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::InfoBadge>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::info_badge_property(), value)
     }
 
     /// Sets [`NavigationViewItem::selects_on_invoked_property`](ferroui_controls::NavigationViewItem::selects_on_invoked_property).
+    #[inline(always)]
     fn selects_on_invoked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::selects_on_invoked_property(), value)
     }
 
     /// Sets [`NavigationViewItem::is_expanded_property`](ferroui_controls::NavigationViewItem::is_expanded_property).
+    #[inline(always)]
     fn is_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::is_expanded_property(), value)
     }
 
     /// Sets [`NavigationViewItem::has_unrealized_children_property`](ferroui_controls::NavigationViewItem::has_unrealized_children_property).
+    #[inline(always)]
     fn has_unrealized_children<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::has_unrealized_children_property(), value)
     }
 
     /// Sets [`NavigationViewItem::is_child_selected_property`](ferroui_controls::NavigationViewItem::is_child_selected_property).
+    #[inline(always)]
     fn is_child_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::is_child_selected_property(), value)
     }
 
     /// Sets [`NavigationViewItem::menu_items_source_property`](ferroui_controls::NavigationViewItem::menu_items_source_property).
+    #[inline(always)]
     fn menu_items_source<M>(self, value: impl IntoProp<Option<ferroui_controls::ItemsSource>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItem>::menu_items_source_property(), value)
     }
@@ -5924,6 +6502,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::NavigationViewItem>> NavigationVie
 /// The properties and routed events of [`NavigationViewItemBase`](ferroui_controls::NavigationViewItemBase).
 pub trait NavigationViewItemBaseProps: ElementBuilder {
     /// Sets [`NavigationViewItemBase::is_selected_property`](ferroui_controls::NavigationViewItemBase::is_selected_property).
+    #[inline(always)]
     fn is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationViewItemBase>::is_selected_property(), value)
     }
@@ -5933,51 +6512,61 @@ impl<T: ObjectType + Upcast<ferroui_controls::NavigationViewItemBase>> Navigatio
 /// The properties and routed events of [`NavigationViewTemplateSettings`](ferroui_controls::primitives::NavigationViewTemplateSettings).
 pub trait NavigationViewTemplateSettingsProps: ElementBuilder {
     /// Sets [`NavigationViewTemplateSettings::top_padding_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::top_padding_property).
+    #[inline(always)]
     fn top_padding<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::top_padding_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::overflow_button_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::overflow_button_visibility_property).
+    #[inline(always)]
     fn overflow_button_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::overflow_button_visibility_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::pane_toggle_button_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::pane_toggle_button_visibility_property).
+    #[inline(always)]
     fn pane_toggle_button_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::pane_toggle_button_visibility_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::back_button_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::back_button_visibility_property).
+    #[inline(always)]
     fn back_button_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::back_button_visibility_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::top_pane_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::top_pane_visibility_property).
+    #[inline(always)]
     fn top_pane_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::top_pane_visibility_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::left_pane_visibility_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::left_pane_visibility_property).
+    #[inline(always)]
     fn left_pane_visibility<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::left_pane_visibility_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::single_selection_follows_focus_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::single_selection_follows_focus_property).
+    #[inline(always)]
     fn single_selection_follows_focus<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::single_selection_follows_focus_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::pane_toggle_button_width_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::pane_toggle_button_width_property).
+    #[inline(always)]
     fn pane_toggle_button_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::pane_toggle_button_width_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::smaller_pane_toggle_button_width_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::smaller_pane_toggle_button_width_property).
+    #[inline(always)]
     fn smaller_pane_toggle_button_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::smaller_pane_toggle_button_width_property(), value)
     }
 
     /// Sets [`NavigationViewTemplateSettings::open_pane_length_property`](ferroui_controls::primitives::NavigationViewTemplateSettings::open_pane_length_property).
+    #[inline(always)]
     fn open_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::NavigationViewTemplateSettings>::open_pane_length_property(), value)
     }
@@ -5987,16 +6576,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::NavigationViewTemplate
 /// The properties and routed events of [`NotificationCard`](ferroui_controls::NotificationCard).
 pub trait NotificationCardProps: ElementBuilder {
     /// Sets [`NotificationCard::is_closed_property`](ferroui_controls::NotificationCard::is_closed_property).
+    #[inline(always)]
     fn is_closed<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NotificationCard>::is_closed_property(), value)
     }
 
     /// Sets [`NotificationCard::notification_type_property`](ferroui_controls::NotificationCard::notification_type_property).
+    #[inline(always)]
     fn notification_type<M>(self, value: impl IntoProp<ferroui_controls::NotificationType, M>) -> Self {
         self.prop(<ferroui_controls::NotificationCard>::notification_type_property(), value)
     }
 
     /// Sets [`NotificationCard::close_on_click_property`](ferroui_controls::NotificationCard::close_on_click_property).
+    #[inline(always)]
     fn close_on_click<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NotificationCard>::close_on_click_property(), value)
     }
@@ -6011,76 +6603,91 @@ impl<T: ObjectType + Upcast<ferroui_controls::NotificationCard>> NotificationCar
 /// The properties and routed events of [`NumberBox`](ferroui_controls::NumberBox).
 pub trait NumberBoxProps: ElementBuilder {
     /// Sets [`NumberBox::minimum_property`](ferroui_controls::NumberBox::minimum_property).
+    #[inline(always)]
     fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::minimum_property(), value)
     }
 
     /// Sets [`NumberBox::maximum_property`](ferroui_controls::NumberBox::maximum_property).
+    #[inline(always)]
     fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::maximum_property(), value)
     }
 
     /// Sets [`NumberBox::value_property`](ferroui_controls::NumberBox::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::value_property(), value)
     }
 
     /// Sets [`NumberBox::small_change_property`](ferroui_controls::NumberBox::small_change_property).
+    #[inline(always)]
     fn small_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::small_change_property(), value)
     }
 
     /// Sets [`NumberBox::large_change_property`](ferroui_controls::NumberBox::large_change_property).
+    #[inline(always)]
     fn large_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::large_change_property(), value)
     }
 
     /// Sets [`NumberBox::text_property`](ferroui_controls::NumberBox::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::text_property(), value)
     }
 
     /// Sets [`NumberBox::header_property`](ferroui_controls::NumberBox::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::header_property(), value)
     }
 
     /// Sets [`NumberBox::header_template_property`](ferroui_controls::NumberBox::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::header_template_property(), value)
     }
 
     /// Sets [`NumberBox::placeholder_text_property`](ferroui_controls::NumberBox::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::placeholder_text_property(), value)
     }
 
     /// Sets [`NumberBox::text_alignment_property`](ferroui_controls::NumberBox::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::text_alignment_property(), value)
     }
 
     /// Sets [`NumberBox::description_property`](ferroui_controls::NumberBox::description_property).
+    #[inline(always)]
     fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::description_property(), value)
     }
 
     /// Sets [`NumberBox::validation_mode_property`](ferroui_controls::NumberBox::validation_mode_property).
+    #[inline(always)]
     fn validation_mode<M>(self, value: impl IntoProp<ferroui_controls::NumberBoxValidationMode, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::validation_mode_property(), value)
     }
 
     /// Sets [`NumberBox::spin_button_placement_mode_property`](ferroui_controls::NumberBox::spin_button_placement_mode_property).
+    #[inline(always)]
     fn spin_button_placement_mode<M>(self, value: impl IntoProp<ferroui_controls::NumberBoxSpinButtonPlacementMode, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::spin_button_placement_mode_property(), value)
     }
 
     /// Sets [`NumberBox::is_wrap_enabled_property`](ferroui_controls::NumberBox::is_wrap_enabled_property).
+    #[inline(always)]
     fn is_wrap_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::is_wrap_enabled_property(), value)
     }
 
     /// Sets [`NumberBox::accepts_expression_property`](ferroui_controls::NumberBox::accepts_expression_property).
+    #[inline(always)]
     fn accepts_expression<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumberBox>::accepts_expression_property(), value)
     }
@@ -6090,121 +6697,145 @@ impl<T: ObjectType + Upcast<ferroui_controls::NumberBox>> NumberBoxProps for El<
 /// The properties and routed events of [`NumericUpDown`](ferroui_controls::NumericUpDown).
 pub trait NumericUpDownProps: ElementBuilder {
     /// Sets [`NumericUpDown::allow_spin_property`](ferroui_controls::NumericUpDown::allow_spin_property).
+    #[inline(always)]
     fn allow_spin<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::allow_spin_property(), value)
     }
 
     /// Sets [`NumericUpDown::button_spinner_location_property`](ferroui_controls::NumericUpDown::button_spinner_location_property).
+    #[inline(always)]
     fn button_spinner_location<M>(self, value: impl IntoProp<ferroui_controls::Location, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::button_spinner_location_property(), value)
     }
 
     /// Sets [`NumericUpDown::show_button_spinner_property`](ferroui_controls::NumericUpDown::show_button_spinner_property).
+    #[inline(always)]
     fn show_button_spinner<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::show_button_spinner_property(), value)
     }
 
     /// Sets [`NumericUpDown::clip_value_to_min_max_property`](ferroui_controls::NumericUpDown::clip_value_to_min_max_property).
+    #[inline(always)]
     fn clip_value_to_min_max<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::clip_value_to_min_max_property(), value)
     }
 
     /// Sets [`NumericUpDown::accepts_expression_property`](ferroui_controls::NumericUpDown::accepts_expression_property).
+    #[inline(always)]
     fn accepts_expression<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::accepts_expression_property(), value)
     }
 
     /// Sets [`NumericUpDown::large_change_property`](ferroui_controls::NumericUpDown::large_change_property).
+    #[inline(always)]
     fn large_change<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::Decimal>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::large_change_property(), value)
     }
 
     /// Sets [`NumericUpDown::is_wrap_enabled_property`](ferroui_controls::NumericUpDown::is_wrap_enabled_property).
+    #[inline(always)]
     fn is_wrap_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::is_wrap_enabled_property(), value)
     }
 
     /// Sets [`NumericUpDown::number_format_property`](ferroui_controls::NumericUpDown::number_format_property).
+    #[inline(always)]
     fn number_format<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_base::utilities::NumberFormatInfo>>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::number_format_property(), value)
     }
 
     /// Sets [`NumericUpDown::format_string_property`](ferroui_controls::NumericUpDown::format_string_property).
+    #[inline(always)]
     fn format_string<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::format_string_property(), value)
     }
 
     /// Sets [`NumericUpDown::increment_property`](ferroui_controls::NumericUpDown::increment_property).
+    #[inline(always)]
     fn increment<M>(self, value: impl IntoProp<ferroui_base::utilities::Decimal, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::increment_property(), value)
     }
 
     /// Sets [`NumericUpDown::is_read_only_property`](ferroui_controls::NumericUpDown::is_read_only_property).
+    #[inline(always)]
     fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::is_read_only_property(), value)
     }
 
     /// Sets [`NumericUpDown::maximum_property`](ferroui_controls::NumericUpDown::maximum_property).
+    #[inline(always)]
     fn maximum<M>(self, value: impl IntoProp<ferroui_base::utilities::Decimal, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::maximum_property(), value)
     }
 
     /// Sets [`NumericUpDown::minimum_property`](ferroui_controls::NumericUpDown::minimum_property).
+    #[inline(always)]
     fn minimum<M>(self, value: impl IntoProp<ferroui_base::utilities::Decimal, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::minimum_property(), value)
     }
 
     /// Sets [`NumericUpDown::parsing_number_style_property`](ferroui_controls::NumericUpDown::parsing_number_style_property).
+    #[inline(always)]
     fn parsing_number_style<M>(self, value: impl IntoProp<ferroui_base::utilities::NumberStyles, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::parsing_number_style_property(), value)
     }
 
     /// Sets [`NumericUpDown::text_property`](ferroui_controls::NumericUpDown::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::text_property(), value)
     }
 
     /// Sets [`NumericUpDown::text_converter_property`](ferroui_controls::NumericUpDown::text_converter_property).
+    #[inline(always)]
     fn text_converter<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::data::converters::IValueConverter>>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::text_converter_property(), value)
     }
 
     /// Sets [`NumericUpDown::value_property`](ferroui_controls::NumericUpDown::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<Option<ferroui_base::utilities::Decimal>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::value_property(), value)
     }
 
     /// Sets [`NumericUpDown::placeholder_text_property`](ferroui_controls::NumericUpDown::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::placeholder_text_property(), value)
     }
 
     /// Sets [`NumericUpDown::placeholder_foreground_property`](ferroui_controls::NumericUpDown::placeholder_foreground_property).
+    #[inline(always)]
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::placeholder_foreground_property(), value)
     }
 
     /// Sets [`NumericUpDown::horizontal_content_alignment_property`](ferroui_controls::NumericUpDown::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`NumericUpDown::vertical_content_alignment_property`](ferroui_controls::NumericUpDown::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`NumericUpDown::text_alignment_property`](ferroui_controls::NumericUpDown::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::text_alignment_property(), value)
     }
 
     /// Sets [`NumericUpDown::inner_left_content_property`](ferroui_controls::NumericUpDown::inner_left_content_property).
+    #[inline(always)]
     fn inner_left_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::inner_left_content_property(), value)
     }
 
     /// Sets [`NumericUpDown::inner_right_content_property`](ferroui_controls::NumericUpDown::inner_right_content_property).
+    #[inline(always)]
     fn inner_right_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::inner_right_content_property(), value)
     }
@@ -6214,11 +6845,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::NumericUpDown>> NumericUpDownProps
 /// The properties and routed events of [`ObjectKeyFrame`](ferroui_controls::animation::ObjectKeyFrame).
 pub trait ObjectKeyFrameProps: ElementBuilder {
     /// Sets [`ObjectKeyFrame::key_time_property`](ferroui_controls::animation::ObjectKeyFrame::key_time_property).
+    #[inline(always)]
     fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_controls::animation::ObjectKeyFrame>::key_time_property(), value)
     }
 
     /// Sets [`ObjectKeyFrame::value_property`](ferroui_controls::animation::ObjectKeyFrame::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ObjectKeyFrame>::value_property(), value)
     }
@@ -6228,6 +6861,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::ObjectKeyFrame>> Object
 /// The properties and routed events of [`OverlayPopupHost`](ferroui_controls::primitives::OverlayPopupHost).
 pub trait OverlayPopupHostProps: ElementBuilder {
     /// Sets [`OverlayPopupHost::transform_property`](ferroui_controls::primitives::OverlayPopupHost::transform_property).
+    #[inline(always)]
     fn transform<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Transform>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::OverlayPopupHost>::transform_property(), value)
     }
@@ -6237,36 +6871,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::OverlayPopupHost>> Ove
 /// The properties and routed events of [`Page`](ferroui_controls::Page).
 pub trait PageProps: ElementBuilder {
     /// Sets [`Page::safe_area_padding_property`](ferroui_controls::Page::safe_area_padding_property).
+    #[inline(always)]
     fn safe_area_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::Page>::safe_area_padding_property(), value)
     }
 
     /// Sets [`Page::header_property`](ferroui_controls::Page::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Page>::header_property(), value)
     }
 
     /// Sets [`Page::header_template_property`](ferroui_controls::Page::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::Page>::header_template_property(), value)
     }
 
     /// Sets [`Page::icon_property`](ferroui_controls::Page::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Page>::icon_property(), value)
     }
 
     /// Sets [`Page::icon_template_property`](ferroui_controls::Page::icon_template_property).
+    #[inline(always)]
     fn icon_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::Page>::icon_template_property(), value)
     }
 
     /// Sets [`Page::current_page_property`](ferroui_controls::Page::current_page_property).
+    #[inline(always)]
     fn current_page<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Page>>, M>) -> Self {
         self.prop(<ferroui_controls::Page>::current_page_property(), value)
     }
 
     /// Sets [`Page::is_in_navigation_page_property`](ferroui_controls::Page::is_in_navigation_page_property).
+    #[inline(always)]
     fn is_in_navigation_page<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Page>::is_in_navigation_page_property(), value)
     }
@@ -6281,6 +6922,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Page>> PageProps for El<T> {}
 /// The properties and routed events of [`PageNavigationHost`](ferroui_controls::PageNavigationHost).
 pub trait PageNavigationHostProps: ElementBuilder {
     /// Sets [`PageNavigationHost::page_property`](ferroui_controls::PageNavigationHost::page_property).
+    #[inline(always)]
     fn page<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Page>>, M>) -> Self {
         self.prop(<ferroui_controls::PageNavigationHost>::page_property(), value)
     }
@@ -6290,101 +6932,121 @@ impl<T: ObjectType + Upcast<ferroui_controls::PageNavigationHost>> PageNavigatio
 /// The properties and routed events of [`PagerControl`](ferroui_controls::PagerControl).
 pub trait PagerControlProps: ElementBuilder {
     /// Sets [`PagerControl::display_mode_property`](ferroui_controls::PagerControl::display_mode_property).
+    #[inline(always)]
     fn display_mode<M>(self, value: impl IntoProp<ferroui_controls::PagerControlDisplayMode, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::display_mode_property(), value)
     }
 
     /// Sets [`PagerControl::number_of_pages_property`](ferroui_controls::PagerControl::number_of_pages_property).
+    #[inline(always)]
     fn number_of_pages<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::number_of_pages_property(), value)
     }
 
     /// Sets [`PagerControl::selected_page_index_property`](ferroui_controls::PagerControl::selected_page_index_property).
+    #[inline(always)]
     fn selected_page_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::selected_page_index_property(), value)
     }
 
     /// Sets [`PagerControl::first_button_visibility_property`](ferroui_controls::PagerControl::first_button_visibility_property).
+    #[inline(always)]
     fn first_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::first_button_visibility_property(), value)
     }
 
     /// Sets [`PagerControl::previous_button_visibility_property`](ferroui_controls::PagerControl::previous_button_visibility_property).
+    #[inline(always)]
     fn previous_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::previous_button_visibility_property(), value)
     }
 
     /// Sets [`PagerControl::next_button_visibility_property`](ferroui_controls::PagerControl::next_button_visibility_property).
+    #[inline(always)]
     fn next_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::next_button_visibility_property(), value)
     }
 
     /// Sets [`PagerControl::last_button_visibility_property`](ferroui_controls::PagerControl::last_button_visibility_property).
+    #[inline(always)]
     fn last_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PagerControlButtonVisibility, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::last_button_visibility_property(), value)
     }
 
     /// Sets [`PagerControl::first_button_command_property`](ferroui_controls::PagerControl::first_button_command_property).
+    #[inline(always)]
     fn first_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::first_button_command_property(), value)
     }
 
     /// Sets [`PagerControl::previous_button_command_property`](ferroui_controls::PagerControl::previous_button_command_property).
+    #[inline(always)]
     fn previous_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::previous_button_command_property(), value)
     }
 
     /// Sets [`PagerControl::next_button_command_property`](ferroui_controls::PagerControl::next_button_command_property).
+    #[inline(always)]
     fn next_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::next_button_command_property(), value)
     }
 
     /// Sets [`PagerControl::last_button_command_property`](ferroui_controls::PagerControl::last_button_command_property).
+    #[inline(always)]
     fn last_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::last_button_command_property(), value)
     }
 
     /// Sets [`PagerControl::pager_input_command_property`](ferroui_controls::PagerControl::pager_input_command_property).
+    #[inline(always)]
     fn pager_input_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::pager_input_command_property(), value)
     }
 
     /// Sets [`PagerControl::first_button_style_property`](ferroui_controls::PagerControl::first_button_style_property).
+    #[inline(always)]
     fn first_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::first_button_style_property(), value)
     }
 
     /// Sets [`PagerControl::previous_button_style_property`](ferroui_controls::PagerControl::previous_button_style_property).
+    #[inline(always)]
     fn previous_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::previous_button_style_property(), value)
     }
 
     /// Sets [`PagerControl::next_button_style_property`](ferroui_controls::PagerControl::next_button_style_property).
+    #[inline(always)]
     fn next_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::next_button_style_property(), value)
     }
 
     /// Sets [`PagerControl::last_button_style_property`](ferroui_controls::PagerControl::last_button_style_property).
+    #[inline(always)]
     fn last_button_style<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::last_button_style_property(), value)
     }
 
     /// Sets [`PagerControl::button_panel_always_show_first_last_page_index_property`](ferroui_controls::PagerControl::button_panel_always_show_first_last_page_index_property).
+    #[inline(always)]
     fn button_panel_always_show_first_last_page_index<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::button_panel_always_show_first_last_page_index_property(), value)
     }
 
     /// Sets [`PagerControl::prefix_text_property`](ferroui_controls::PagerControl::prefix_text_property).
+    #[inline(always)]
     fn prefix_text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::prefix_text_property(), value)
     }
 
     /// Sets [`PagerControl::suffix_text_property`](ferroui_controls::PagerControl::suffix_text_property).
+    #[inline(always)]
     fn suffix_text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::suffix_text_property(), value)
     }
 
     /// Sets [`PagerControl::template_settings_property`](ferroui_controls::PagerControl::template_settings_property).
+    #[inline(always)]
     fn template_settings<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::PagerControlTemplateSettings>>, M>) -> Self {
         self.prop(<ferroui_controls::PagerControl>::template_settings_property(), value)
     }
@@ -6394,6 +7056,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::PagerControl>> PagerControlProps f
 /// The properties and routed events of [`Panel`](ferroui_controls::Panel).
 pub trait PanelProps: ElementBuilder {
     /// Sets [`Panel::background_property`](ferroui_controls::Panel::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Panel>::background_property(), value)
     }
@@ -6403,36 +7066,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::Panel>> PanelProps for El<T> {}
 /// The properties and routed events of [`Paragraph`](ferroui_controls::documents::Paragraph).
 pub trait ParagraphProps: ElementBuilder {
     /// Sets [`Paragraph::tab_stops_property`](ferroui_controls::documents::Paragraph::tab_stops_property).
+    #[inline(always)]
     fn tab_stops<M>(self, value: impl IntoProp<ferroui_base::media::text_formatting::TextTabStops, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::tab_stops_property(), value)
     }
 
     /// Sets [`Paragraph::default_tab_stop_property`](ferroui_controls::documents::Paragraph::default_tab_stop_property).
+    #[inline(always)]
     fn default_tab_stop<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::default_tab_stop_property(), value)
     }
 
     /// Sets [`Paragraph::text_indent_property`](ferroui_controls::documents::Paragraph::text_indent_property).
+    #[inline(always)]
     fn text_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::text_indent_property(), value)
     }
 
     /// Sets [`Paragraph::line_spacing_rule_property`](ferroui_controls::documents::Paragraph::line_spacing_rule_property).
+    #[inline(always)]
     fn line_spacing_rule<M>(self, value: impl IntoProp<ferroui_controls::documents::LineSpacingRule, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::line_spacing_rule_property(), value)
     }
 
     /// Sets [`Paragraph::line_spacing_property`](ferroui_controls::documents::Paragraph::line_spacing_property).
+    #[inline(always)]
     fn line_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::line_spacing_property(), value)
     }
 
     /// Sets [`Paragraph::left_indent_property`](ferroui_controls::documents::Paragraph::left_indent_property).
+    #[inline(always)]
     fn left_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::left_indent_property(), value)
     }
 
     /// Sets [`Paragraph::right_indent_property`](ferroui_controls::documents::Paragraph::right_indent_property).
+    #[inline(always)]
     fn right_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::Paragraph>::right_indent_property(), value)
     }
@@ -6442,6 +7112,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::Paragraph>> ParagraphPr
 /// The properties and routed events of [`Path`](ferroui_controls::shapes::Path).
 pub trait PathProps: ElementBuilder {
     /// Sets [`Path::data_property`](ferroui_controls::shapes::Path::data_property).
+    #[inline(always)]
     fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Path>::data_property(), value)
     }
@@ -6451,21 +7122,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Path>> PathProps for El<T>
 /// The properties and routed events of [`PathFigure`](ferroui_base::media::PathFigure).
 pub trait PathFigureProps: ElementBuilder {
     /// Sets [`PathFigure::is_closed_property`](ferroui_base::media::PathFigure::is_closed_property).
+    #[inline(always)]
     fn is_closed<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::PathFigure>::is_closed_property(), value)
     }
 
     /// Sets [`PathFigure::is_filled_property`](ferroui_base::media::PathFigure::is_filled_property).
+    #[inline(always)]
     fn is_filled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::PathFigure>::is_filled_property(), value)
     }
 
     /// Sets [`PathFigure::segments_property`](ferroui_base::media::PathFigure::segments_property).
+    #[inline(always)]
     fn segments<M>(self, value: impl IntoProp<Option<ferroui_base::media::PathSegments>, M>) -> Self {
         self.prop(<ferroui_base::media::PathFigure>::segments_property(), value)
     }
 
     /// Sets [`PathFigure::start_point_property`](ferroui_base::media::PathFigure::start_point_property).
+    #[inline(always)]
     fn start_point<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::PathFigure>::start_point_property(), value)
     }
@@ -6475,11 +7150,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PathFigure>> PathFigureProps fo
 /// The properties and routed events of [`PathGeometry`](ferroui_base::media::PathGeometry).
 pub trait PathGeometryProps: ElementBuilder {
     /// Sets [`PathGeometry::figures_property`](ferroui_base::media::PathGeometry::figures_property).
+    #[inline(always)]
     fn figures<M>(self, value: impl IntoProp<Option<ferroui_base::media::PathFigures>, M>) -> Self {
         self.prop(<ferroui_base::media::PathGeometry>::figures_property(), value)
     }
 
     /// Sets [`PathGeometry::fill_rule_property`](ferroui_base::media::PathGeometry::fill_rule_property).
+    #[inline(always)]
     fn fill_rule<M>(self, value: impl IntoProp<ferroui_base::media::FillRule, M>) -> Self {
         self.prop(<ferroui_base::media::PathGeometry>::fill_rule_property(), value)
     }
@@ -6489,6 +7166,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PathGeometry>> PathGeometryProp
 /// The properties and routed events of [`PathIcon`](ferroui_controls::PathIcon).
 pub trait PathIconProps: ElementBuilder {
     /// Sets [`PathIcon::data_property`](ferroui_controls::PathIcon::data_property).
+    #[inline(always)]
     fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_controls::PathIcon>::data_property(), value)
     }
@@ -6498,6 +7176,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::PathIcon>> PathIconProps for El<T>
 /// The properties and routed events of [`PathIconSource`](ferroui_controls::PathIconSource).
 pub trait PathIconSourceProps: ElementBuilder {
     /// Sets [`PathIconSource::data_property`](ferroui_controls::PathIconSource::data_property).
+    #[inline(always)]
     fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_controls::PathIconSource>::data_property(), value)
     }
@@ -6507,6 +7186,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::PathIconSource>> PathIconSourcePro
 /// The properties and routed events of [`PathSegment`](ferroui_base::media::PathSegment).
 pub trait PathSegmentProps: ElementBuilder {
     /// Sets [`PathSegment::is_stroked_property`](ferroui_base::media::PathSegment::is_stroked_property).
+    #[inline(always)]
     fn is_stroked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::PathSegment>::is_stroked_property(), value)
     }
@@ -6516,31 +7196,37 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PathSegment>> PathSegmentProps 
 /// The properties and routed events of [`Pen`](ferroui_base::media::Pen).
 pub trait PenProps: ElementBuilder {
     /// Sets [`Pen::brush_property`](ferroui_base::media::Pen::brush_property).
+    #[inline(always)]
     fn brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::Pen>::brush_property(), value)
     }
 
     /// Sets [`Pen::thickness_property`](ferroui_base::media::Pen::thickness_property).
+    #[inline(always)]
     fn thickness<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Pen>::thickness_property(), value)
     }
 
     /// Sets [`Pen::dash_style_property`](ferroui_base::media::Pen::dash_style_property).
+    #[inline(always)]
     fn dash_style<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IDashStyle>>, M>) -> Self {
         self.prop(<ferroui_base::media::Pen>::dash_style_property(), value)
     }
 
     /// Sets [`Pen::line_cap_property`](ferroui_base::media::Pen::line_cap_property).
+    #[inline(always)]
     fn line_cap<M>(self, value: impl IntoProp<ferroui_base::media::PenLineCap, M>) -> Self {
         self.prop(<ferroui_base::media::Pen>::line_cap_property(), value)
     }
 
     /// Sets [`Pen::line_join_property`](ferroui_base::media::Pen::line_join_property).
+    #[inline(always)]
     fn line_join<M>(self, value: impl IntoProp<ferroui_base::media::PenLineJoin, M>) -> Self {
         self.prop(<ferroui_base::media::Pen>::line_join_property(), value)
     }
 
     /// Sets [`Pen::miter_limit_property`](ferroui_base::media::Pen::miter_limit_property).
+    #[inline(always)]
     fn miter_limit<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Pen>::miter_limit_property(), value)
     }
@@ -6550,56 +7236,67 @@ impl<T: ObjectType + Upcast<ferroui_base::media::Pen>> PenProps for El<T> {}
 /// The properties and routed events of [`PersonPicture`](ferroui_controls::PersonPicture).
 pub trait PersonPictureProps: ElementBuilder {
     /// Sets [`PersonPicture::badge_number_property`](ferroui_controls::PersonPicture::badge_number_property).
+    #[inline(always)]
     fn badge_number<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::badge_number_property(), value)
     }
 
     /// Sets [`PersonPicture::badge_glyph_property`](ferroui_controls::PersonPicture::badge_glyph_property).
+    #[inline(always)]
     fn badge_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::badge_glyph_property(), value)
     }
 
     /// Sets [`PersonPicture::badge_image_source_property`](ferroui_controls::PersonPicture::badge_image_source_property).
+    #[inline(always)]
     fn badge_image_source<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::badge_image_source_property(), value)
     }
 
     /// Sets [`PersonPicture::badge_text_property`](ferroui_controls::PersonPicture::badge_text_property).
+    #[inline(always)]
     fn badge_text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::badge_text_property(), value)
     }
 
     /// Sets [`PersonPicture::is_group_property`](ferroui_controls::PersonPicture::is_group_property).
+    #[inline(always)]
     fn is_group<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::is_group_property(), value)
     }
 
     /// Sets [`PersonPicture::contact_property`](ferroui_controls::PersonPicture::contact_property).
+    #[inline(always)]
     fn contact<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Contact>>, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::contact_property(), value)
     }
 
     /// Sets [`PersonPicture::display_name_property`](ferroui_controls::PersonPicture::display_name_property).
+    #[inline(always)]
     fn display_name<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::display_name_property(), value)
     }
 
     /// Sets [`PersonPicture::initials_property`](ferroui_controls::PersonPicture::initials_property).
+    #[inline(always)]
     fn initials<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::initials_property(), value)
     }
 
     /// Sets [`PersonPicture::prefer_small_image_property`](ferroui_controls::PersonPicture::prefer_small_image_property).
+    #[inline(always)]
     fn prefer_small_image<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::prefer_small_image_property(), value)
     }
 
     /// Sets [`PersonPicture::profile_picture_property`](ferroui_controls::PersonPicture::profile_picture_property).
+    #[inline(always)]
     fn profile_picture<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImageBrushSource>>, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::profile_picture_property(), value)
     }
 
     /// Sets [`PersonPicture::template_settings_property`](ferroui_controls::PersonPicture::template_settings_property).
+    #[inline(always)]
     fn template_settings<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::PersonPictureTemplateSettings>>, M>) -> Self {
         self.prop(<ferroui_controls::PersonPicture>::template_settings_property(), value)
     }
@@ -6609,11 +7306,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::PersonPicture>> PersonPictureProps
 /// The properties and routed events of [`PersonPictureTemplateSettings`](ferroui_controls::primitives::PersonPictureTemplateSettings).
 pub trait PersonPictureTemplateSettingsProps: ElementBuilder {
     /// Sets [`PersonPictureTemplateSettings::actual_initials_property`](ferroui_controls::primitives::PersonPictureTemplateSettings::actual_initials_property).
+    #[inline(always)]
     fn actual_initials<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PersonPictureTemplateSettings>::actual_initials_property(), value)
     }
 
     /// Sets [`PersonPictureTemplateSettings::actual_image_brush_property`](ferroui_controls::primitives::PersonPictureTemplateSettings::actual_image_brush_property).
+    #[inline(always)]
     fn actual_image_brush<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::ImageBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PersonPictureTemplateSettings>::actual_image_brush_property(), value)
     }
@@ -6623,41 +7322,49 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::PersonPictureTemplateS
 /// The properties and routed events of [`PipsPager`](ferroui_controls::PipsPager).
 pub trait PipsPagerProps: ElementBuilder {
     /// Sets [`PipsPager::max_visible_pips_property`](ferroui_controls::PipsPager::max_visible_pips_property).
+    #[inline(always)]
     fn max_visible_pips<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::max_visible_pips_property(), value)
     }
 
     /// Sets [`PipsPager::is_next_button_visible_property`](ferroui_controls::PipsPager::is_next_button_visible_property).
+    #[inline(always)]
     fn is_next_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::is_next_button_visible_property(), value)
     }
 
     /// Sets [`PipsPager::number_of_pages_property`](ferroui_controls::PipsPager::number_of_pages_property).
+    #[inline(always)]
     fn number_of_pages<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::number_of_pages_property(), value)
     }
 
     /// Sets [`PipsPager::orientation_property`](ferroui_controls::PipsPager::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::orientation_property(), value)
     }
 
     /// Sets [`PipsPager::is_previous_button_visible_property`](ferroui_controls::PipsPager::is_previous_button_visible_property).
+    #[inline(always)]
     fn is_previous_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::is_previous_button_visible_property(), value)
     }
 
     /// Sets [`PipsPager::selected_page_index_property`](ferroui_controls::PipsPager::selected_page_index_property).
+    #[inline(always)]
     fn selected_page_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::selected_page_index_property(), value)
     }
 
     /// Sets [`PipsPager::previous_button_theme_property`](ferroui_controls::PipsPager::previous_button_theme_property).
+    #[inline(always)]
     fn previous_button_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::previous_button_theme_property(), value)
     }
 
     /// Sets [`PipsPager::next_button_theme_property`](ferroui_controls::PipsPager::next_button_theme_property).
+    #[inline(always)]
     fn next_button_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::next_button_theme_property(), value)
     }
@@ -6667,56 +7374,67 @@ impl<T: ObjectType + Upcast<ferroui_controls::PipsPager>> PipsPagerProps for El<
 /// The properties and routed events of [`Pivot`](ferroui_controls::Pivot).
 pub trait PivotProps: ElementBuilder {
     /// Sets [`Pivot::title_property`](ferroui_controls::Pivot::title_property).
+    #[inline(always)]
     fn title<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::title_property(), value)
     }
 
     /// Sets [`Pivot::title_template_property`](ferroui_controls::Pivot::title_template_property).
+    #[inline(always)]
     fn title_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::title_template_property(), value)
     }
 
     /// Sets [`Pivot::left_header_property`](ferroui_controls::Pivot::left_header_property).
+    #[inline(always)]
     fn left_header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::left_header_property(), value)
     }
 
     /// Sets [`Pivot::left_header_template_property`](ferroui_controls::Pivot::left_header_template_property).
+    #[inline(always)]
     fn left_header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::left_header_template_property(), value)
     }
 
     /// Sets [`Pivot::right_header_property`](ferroui_controls::Pivot::right_header_property).
+    #[inline(always)]
     fn right_header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::right_header_property(), value)
     }
 
     /// Sets [`Pivot::right_header_template_property`](ferroui_controls::Pivot::right_header_template_property).
+    #[inline(always)]
     fn right_header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::right_header_template_property(), value)
     }
 
     /// Sets [`Pivot::header_template_property`](ferroui_controls::Pivot::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::header_template_property(), value)
     }
 
     /// Sets [`Pivot::is_locked_property`](ferroui_controls::Pivot::is_locked_property).
+    #[inline(always)]
     fn is_locked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::is_locked_property(), value)
     }
 
     /// Sets [`Pivot::is_header_items_carousel_enabled_property`](ferroui_controls::Pivot::is_header_items_carousel_enabled_property).
+    #[inline(always)]
     fn is_header_items_carousel_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::is_header_items_carousel_enabled_property(), value)
     }
 
     /// Sets [`Pivot::header_focus_visual_placement_property`](ferroui_controls::Pivot::header_focus_visual_placement_property).
+    #[inline(always)]
     fn header_focus_visual_placement<M>(self, value: impl IntoProp<ferroui_controls::PivotHeaderFocusVisualPlacement, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::header_focus_visual_placement_property(), value)
     }
 
     /// Sets [`Pivot::slide_in_animation_group_property`](ferroui_controls::Pivot::slide_in_animation_group_property).
+    #[inline(always)]
     fn slide_in_animation_group<M>(self, value: impl IntoProp<ferroui_controls::PivotSlideInAnimationGroup, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::slide_in_animation_group_property(), value)
     }
@@ -6726,6 +7444,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Pivot>> PivotProps for El<T> {}
 /// The properties and routed events of [`PivotItem`](ferroui_controls::PivotItem).
 pub trait PivotItemProps: ElementBuilder {
     /// Sets [`PivotItem::header_property`](ferroui_controls::PivotItem::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::PivotItem>::header_property(), value)
     }
@@ -6749,26 +7468,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::PivotPanel>> PivotPanelProps for E
 /// The properties and routed events of [`PointAnimation`](ferroui_controls::animation::PointAnimation).
 pub trait PointAnimationProps: ElementBuilder {
     /// Sets [`PointAnimation::from_property`](ferroui_controls::animation::PointAnimation::from_property).
+    #[inline(always)]
     fn from<M>(self, value: impl IntoProp<Option<ferroui_base::Point>, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointAnimation>::from_property(), value)
     }
 
     /// Sets [`PointAnimation::to_property`](ferroui_controls::animation::PointAnimation::to_property).
+    #[inline(always)]
     fn to<M>(self, value: impl IntoProp<Option<ferroui_base::Point>, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointAnimation>::to_property(), value)
     }
 
     /// Sets [`PointAnimation::by_property`](ferroui_controls::animation::PointAnimation::by_property).
+    #[inline(always)]
     fn by<M>(self, value: impl IntoProp<Option<ferroui_base::Point>, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointAnimation>::by_property(), value)
     }
 
     /// Sets [`PointAnimation::easing_function_property`](ferroui_controls::animation::PointAnimation::easing_function_property).
+    #[inline(always)]
     fn easing_function<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::animation::EasingFunctionBase>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointAnimation>::easing_function_property(), value)
     }
 
     /// Sets [`PointAnimation::enable_dependent_animation_property`](ferroui_controls::animation::PointAnimation::enable_dependent_animation_property).
+    #[inline(always)]
     fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointAnimation>::enable_dependent_animation_property(), value)
     }
@@ -6778,6 +7502,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::PointAnimation>> PointA
 /// The properties and routed events of [`PointAnimationUsingKeyFrames`](ferroui_controls::animation::PointAnimationUsingKeyFrames).
 pub trait PointAnimationUsingKeyFramesProps: ElementBuilder {
     /// Sets [`PointAnimationUsingKeyFrames::enable_dependent_animation_property`](ferroui_controls::animation::PointAnimationUsingKeyFrames::enable_dependent_animation_property).
+    #[inline(always)]
     fn enable_dependent_animation<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointAnimationUsingKeyFrames>::enable_dependent_animation_property(), value)
     }
@@ -6787,11 +7512,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::PointAnimationUsingKeyF
 /// The properties and routed events of [`PointKeyFrame`](ferroui_controls::animation::PointKeyFrame).
 pub trait PointKeyFrameProps: ElementBuilder {
     /// Sets [`PointKeyFrame::key_time_property`](ferroui_controls::animation::PointKeyFrame::key_time_property).
+    #[inline(always)]
     fn key_time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointKeyFrame>::key_time_property(), value)
     }
 
     /// Sets [`PointKeyFrame::value_property`](ferroui_controls::animation::PointKeyFrame::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_controls::animation::PointKeyFrame>::value_property(), value)
     }
@@ -6801,6 +7528,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::PointKeyFrame>> PointKe
 /// The properties and routed events of [`PolyBezierSegment`](ferroui_base::media::PolyBezierSegment).
 pub trait PolyBezierSegmentProps: ElementBuilder {
     /// Sets [`PolyBezierSegment::points_property`](ferroui_base::media::PolyBezierSegment::points_property).
+    #[inline(always)]
     fn points<M>(self, value: impl IntoProp<Option<ferroui_base::media::Points>, M>) -> Self {
         self.prop(<ferroui_base::media::PolyBezierSegment>::points_property(), value)
     }
@@ -6810,6 +7538,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PolyBezierSegment>> PolyBezierS
 /// The properties and routed events of [`PolyLineSegment`](ferroui_base::media::PolyLineSegment).
 pub trait PolyLineSegmentProps: ElementBuilder {
     /// Sets [`PolyLineSegment::points_property`](ferroui_base::media::PolyLineSegment::points_property).
+    #[inline(always)]
     fn points<M>(self, value: impl IntoProp<Option<ferroui_base::media::Points>, M>) -> Self {
         self.prop(<ferroui_base::media::PolyLineSegment>::points_property(), value)
     }
@@ -6819,11 +7548,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PolyLineSegment>> PolyLineSegme
 /// The properties and routed events of [`Polygon`](ferroui_controls::shapes::Polygon).
 pub trait PolygonProps: ElementBuilder {
     /// Sets [`Polygon::points_property`](ferroui_controls::shapes::Polygon::points_property).
+    #[inline(always)]
     fn points<M>(self, value: impl IntoProp<Option<ferroui_base::media::Points>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Polygon>::points_property(), value)
     }
 
     /// Sets [`Polygon::fill_rule_property`](ferroui_controls::shapes::Polygon::fill_rule_property).
+    #[inline(always)]
     fn fill_rule<M>(self, value: impl IntoProp<ferroui_base::media::FillRule, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Polygon>::fill_rule_property(), value)
     }
@@ -6833,11 +7564,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Polygon>> PolygonProps for
 /// The properties and routed events of [`Polyline`](ferroui_controls::shapes::Polyline).
 pub trait PolylineProps: ElementBuilder {
     /// Sets [`Polyline::points_property`](ferroui_controls::shapes::Polyline::points_property).
+    #[inline(always)]
     fn points<M>(self, value: impl IntoProp<Option<ferroui_base::media::Points>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Polyline>::points_property(), value)
     }
 
     /// Sets [`Polyline::fill_rule_property`](ferroui_controls::shapes::Polyline::fill_rule_property).
+    #[inline(always)]
     fn fill_rule<M>(self, value: impl IntoProp<ferroui_base::media::FillRule, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Polyline>::fill_rule_property(), value)
     }
@@ -6847,11 +7580,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Polyline>> PolylineProps f
 /// The properties and routed events of [`PolylineGeometry`](ferroui_base::media::PolylineGeometry).
 pub trait PolylineGeometryProps: ElementBuilder {
     /// Sets [`PolylineGeometry::points_property`](ferroui_base::media::PolylineGeometry::points_property).
+    #[inline(always)]
     fn points<M>(self, value: impl IntoProp<Option<ferroui_base::media::Points>, M>) -> Self {
         self.prop(<ferroui_base::media::PolylineGeometry>::points_property(), value)
     }
 
     /// Sets [`PolylineGeometry::is_filled_property`](ferroui_base::media::PolylineGeometry::is_filled_property).
+    #[inline(always)]
     fn is_filled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::media::PolylineGeometry>::is_filled_property(), value)
     }
@@ -6861,81 +7596,97 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PolylineGeometry>> PolylineGeom
 /// The properties and routed events of [`Popup`](ferroui_controls::primitives::Popup).
 pub trait PopupProps: ElementBuilder {
     /// Sets [`Popup::window_manager_add_shadow_hint_property`](ferroui_controls::primitives::Popup::window_manager_add_shadow_hint_property).
+    #[inline(always)]
     fn window_manager_add_shadow_hint<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::window_manager_add_shadow_hint_property(), value)
     }
 
     /// Sets [`Popup::inherits_transform_property`](ferroui_controls::primitives::Popup::inherits_transform_property).
+    #[inline(always)]
     fn inherits_transform<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::inherits_transform_property(), value)
     }
 
     /// Sets [`Popup::is_open_property`](ferroui_controls::primitives::Popup::is_open_property).
+    #[inline(always)]
     fn is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::is_open_property(), value)
     }
 
     /// Sets [`Popup::placement_anchor_property`](ferroui_controls::primitives::Popup::placement_anchor_property).
+    #[inline(always)]
     fn placement_anchor<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupAnchor, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::placement_anchor_property(), value)
     }
 
     /// Sets [`Popup::placement_constraint_adjustment_property`](ferroui_controls::primitives::Popup::placement_constraint_adjustment_property).
+    #[inline(always)]
     fn placement_constraint_adjustment<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupPositionerConstraintAdjustment, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::placement_constraint_adjustment_property(), value)
     }
 
     /// Sets [`Popup::placement_gravity_property`](ferroui_controls::primitives::Popup::placement_gravity_property).
+    #[inline(always)]
     fn placement_gravity<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupGravity, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::placement_gravity_property(), value)
     }
 
     /// Sets [`Popup::placement_property`](ferroui_controls::primitives::Popup::placement_property).
+    #[inline(always)]
     fn placement<M>(self, value: impl IntoProp<ferroui_controls::PlacementMode, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::placement_property(), value)
     }
 
     /// Sets [`Popup::placement_rect_property`](ferroui_controls::primitives::Popup::placement_rect_property).
+    #[inline(always)]
     fn placement_rect<M>(self, value: impl IntoProp<Option<ferroui_base::Rect>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::placement_rect_property(), value)
     }
 
     /// Sets [`Popup::custom_popup_placement_callback_property`](ferroui_controls::primitives::Popup::custom_popup_placement_callback_property).
+    #[inline(always)]
     fn custom_popup_placement_callback<M>(self, value: impl IntoProp<Option<ferroui_controls::primitives::CustomPopupPlacementCallbackValue>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::custom_popup_placement_callback_property(), value)
     }
 
     /// Sets [`Popup::overlay_dismiss_event_pass_through_property`](ferroui_controls::primitives::Popup::overlay_dismiss_event_pass_through_property).
+    #[inline(always)]
     fn overlay_dismiss_event_pass_through<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::overlay_dismiss_event_pass_through_property(), value)
     }
 
     /// Sets [`Popup::horizontal_offset_property`](ferroui_controls::primitives::Popup::horizontal_offset_property).
+    #[inline(always)]
     fn horizontal_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::horizontal_offset_property(), value)
     }
 
     /// Sets [`Popup::is_light_dismiss_enabled_property`](ferroui_controls::primitives::Popup::is_light_dismiss_enabled_property).
+    #[inline(always)]
     fn is_light_dismiss_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::is_light_dismiss_enabled_property(), value)
     }
 
     /// Sets [`Popup::vertical_offset_property`](ferroui_controls::primitives::Popup::vertical_offset_property).
+    #[inline(always)]
     fn vertical_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::vertical_offset_property(), value)
     }
 
     /// Sets [`Popup::topmost_property`](ferroui_controls::primitives::Popup::topmost_property).
+    #[inline(always)]
     fn topmost<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::topmost_property(), value)
     }
 
     /// Sets [`Popup::takes_focus_from_native_control_property`](ferroui_controls::primitives::Popup::takes_focus_from_native_control_property).
+    #[inline(always)]
     fn takes_focus_from_native_control<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::takes_focus_from_native_control_property(), value)
     }
 
     /// Sets [`Popup::should_use_overlay_layer_property`](ferroui_controls::primitives::Popup::should_use_overlay_layer_property).
+    #[inline(always)]
     fn should_use_overlay_layer<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::should_use_overlay_layer_property(), value)
     }
@@ -6945,46 +7696,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::Popup>> PopupProps for
 /// The properties and routed events of [`PopupFlyoutBase`](ferroui_controls::primitives::PopupFlyoutBase).
 pub trait PopupFlyoutBaseProps: ElementBuilder {
     /// Sets [`PopupFlyoutBase::placement_property`](ferroui_controls::primitives::PopupFlyoutBase::placement_property).
+    #[inline(always)]
     fn placement<M>(self, value: impl IntoProp<ferroui_controls::PlacementMode, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::placement_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::horizontal_offset_property`](ferroui_controls::primitives::PopupFlyoutBase::horizontal_offset_property).
+    #[inline(always)]
     fn horizontal_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::horizontal_offset_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::vertical_offset_property`](ferroui_controls::primitives::PopupFlyoutBase::vertical_offset_property).
+    #[inline(always)]
     fn vertical_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::vertical_offset_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::placement_anchor_property`](ferroui_controls::primitives::PopupFlyoutBase::placement_anchor_property).
+    #[inline(always)]
     fn placement_anchor<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupAnchor, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::placement_anchor_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::placement_gravity_property`](ferroui_controls::primitives::PopupFlyoutBase::placement_gravity_property).
+    #[inline(always)]
     fn placement_gravity<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupGravity, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::placement_gravity_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::custom_popup_placement_callback_property`](ferroui_controls::primitives::PopupFlyoutBase::custom_popup_placement_callback_property).
+    #[inline(always)]
     fn custom_popup_placement_callback<M>(self, value: impl IntoProp<Option<ferroui_controls::primitives::CustomPopupPlacementCallbackValue>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::custom_popup_placement_callback_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::show_mode_property`](ferroui_controls::primitives::PopupFlyoutBase::show_mode_property).
+    #[inline(always)]
     fn show_mode<M>(self, value: impl IntoProp<ferroui_controls::FlyoutShowMode, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::show_mode_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::overlay_dismiss_event_pass_through_property`](ferroui_controls::primitives::PopupFlyoutBase::overlay_dismiss_event_pass_through_property).
+    #[inline(always)]
     fn overlay_dismiss_event_pass_through<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::overlay_dismiss_event_pass_through_property(), value)
     }
 
     /// Sets [`PopupFlyoutBase::placement_constraint_adjustment_property`](ferroui_controls::primitives::PopupFlyoutBase::placement_constraint_adjustment_property).
+    #[inline(always)]
     fn placement_constraint_adjustment<M>(self, value: impl IntoProp<ferroui_controls::primitives::popup_positioning::PopupPositionerConstraintAdjustment, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupFlyoutBase>::placement_constraint_adjustment_property(), value)
     }
@@ -6994,11 +7754,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::PopupFlyoutBase>> Popu
 /// The properties and routed events of [`PopupRoot`](ferroui_controls::primitives::PopupRoot).
 pub trait PopupRootProps: ElementBuilder {
     /// Sets [`PopupRoot::transform_property`](ferroui_controls::primitives::PopupRoot::transform_property).
+    #[inline(always)]
     fn transform<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Transform>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupRoot>::transform_property(), value)
     }
 
     /// Sets [`PopupRoot::window_manager_add_shadow_hint_property`](ferroui_controls::primitives::PopupRoot::window_manager_add_shadow_hint_property).
+    #[inline(always)]
     fn window_manager_add_shadow_hint<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::PopupRoot>::window_manager_add_shadow_hint_property(), value)
     }
@@ -7008,6 +7770,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::PopupRoot>> PopupRootP
 /// The properties and routed events of [`PowerEase`](ferroui_controls::animation::PowerEase).
 pub trait PowerEaseProps: ElementBuilder {
     /// Sets [`PowerEase::power_property`](ferroui_controls::animation::PowerEase::power_property).
+    #[inline(always)]
     fn power<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::animation::PowerEase>::power_property(), value)
     }
@@ -7017,21 +7780,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::PowerEase>> PowerEasePr
 /// The properties and routed events of [`ProgressBar`](ferroui_controls::ProgressBar).
 pub trait ProgressBarProps: ElementBuilder {
     /// Sets [`ProgressBar::is_indeterminate_property`](ferroui_controls::ProgressBar::is_indeterminate_property).
+    #[inline(always)]
     fn is_indeterminate<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBar>::is_indeterminate_property(), value)
     }
 
     /// Sets [`ProgressBar::show_progress_text_property`](ferroui_controls::ProgressBar::show_progress_text_property).
+    #[inline(always)]
     fn show_progress_text<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBar>::show_progress_text_property(), value)
     }
 
     /// Sets [`ProgressBar::progress_text_format_property`](ferroui_controls::ProgressBar::progress_text_format_property).
+    #[inline(always)]
     fn progress_text_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBar>::progress_text_format_property(), value)
     }
 
     /// Sets [`ProgressBar::orientation_property`](ferroui_controls::ProgressBar::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBar>::orientation_property(), value)
     }
@@ -7041,41 +7808,49 @@ impl<T: ObjectType + Upcast<ferroui_controls::ProgressBar>> ProgressBarProps for
 /// The properties and routed events of [`ProgressBarTemplateSettings`](ferroui_controls::ProgressBarTemplateSettings).
 pub trait ProgressBarTemplateSettingsProps: ElementBuilder {
     /// Sets [`ProgressBarTemplateSettings::container_animation_start_position_property`](ferroui_controls::ProgressBarTemplateSettings::container_animation_start_position_property).
+    #[inline(always)]
     fn container_animation_start_position<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::container_animation_start_position_property(), value)
     }
 
     /// Sets [`ProgressBarTemplateSettings::container_animation_end_position_property`](ferroui_controls::ProgressBarTemplateSettings::container_animation_end_position_property).
+    #[inline(always)]
     fn container_animation_end_position<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::container_animation_end_position_property(), value)
     }
 
     /// Sets [`ProgressBarTemplateSettings::container2_animation_start_position_property`](ferroui_controls::ProgressBarTemplateSettings::container2_animation_start_position_property).
+    #[inline(always)]
     fn container2_animation_start_position<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::container2_animation_start_position_property(), value)
     }
 
     /// Sets [`ProgressBarTemplateSettings::container2_animation_end_position_property`](ferroui_controls::ProgressBarTemplateSettings::container2_animation_end_position_property).
+    #[inline(always)]
     fn container2_animation_end_position<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::container2_animation_end_position_property(), value)
     }
 
     /// Sets [`ProgressBarTemplateSettings::container2_width_property`](ferroui_controls::ProgressBarTemplateSettings::container2_width_property).
+    #[inline(always)]
     fn container2_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::container2_width_property(), value)
     }
 
     /// Sets [`ProgressBarTemplateSettings::container_width_property`](ferroui_controls::ProgressBarTemplateSettings::container_width_property).
+    #[inline(always)]
     fn container_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::container_width_property(), value)
     }
 
     /// Sets [`ProgressBarTemplateSettings::indeterminate_starting_offset_property`](ferroui_controls::ProgressBarTemplateSettings::indeterminate_starting_offset_property).
+    #[inline(always)]
     fn indeterminate_starting_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::indeterminate_starting_offset_property(), value)
     }
 
     /// Sets [`ProgressBarTemplateSettings::indeterminate_ending_offset_property`](ferroui_controls::ProgressBarTemplateSettings::indeterminate_ending_offset_property).
+    #[inline(always)]
     fn indeterminate_ending_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBarTemplateSettings>::indeterminate_ending_offset_property(), value)
     }
@@ -7085,26 +7860,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::ProgressBarTemplateSettings>> Prog
 /// The properties and routed events of [`ProgressRing`](ferroui_controls::ProgressRing).
 pub trait ProgressRingProps: ElementBuilder {
     /// Sets [`ProgressRing::is_active_property`](ferroui_controls::ProgressRing::is_active_property).
+    #[inline(always)]
     fn is_active<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ProgressRing>::is_active_property(), value)
     }
 
     /// Sets [`ProgressRing::is_indeterminate_property`](ferroui_controls::ProgressRing::is_indeterminate_property).
+    #[inline(always)]
     fn is_indeterminate<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ProgressRing>::is_indeterminate_property(), value)
     }
 
     /// Sets [`ProgressRing::value_property`](ferroui_controls::ProgressRing::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressRing>::value_property(), value)
     }
 
     /// Sets [`ProgressRing::minimum_property`](ferroui_controls::ProgressRing::minimum_property).
+    #[inline(always)]
     fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressRing>::minimum_property(), value)
     }
 
     /// Sets [`ProgressRing::maximum_property`](ferroui_controls::ProgressRing::maximum_property).
+    #[inline(always)]
     fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ProgressRing>::maximum_property(), value)
     }
@@ -7114,6 +7894,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::ProgressRing>> ProgressRingProps f
 /// The properties and routed events of [`PullGestureRecognizer`](ferroui_base::input::gesture_recognizers::PullGestureRecognizer).
 pub trait PullGestureRecognizerProps: ElementBuilder {
     /// Sets [`PullGestureRecognizer::pull_direction_property`](ferroui_base::input::gesture_recognizers::PullGestureRecognizer::pull_direction_property).
+    #[inline(always)]
     fn pull_direction<M>(self, value: impl IntoProp<ferroui_base::input::PullDirection, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::PullGestureRecognizer>::pull_direction_property(), value)
     }
@@ -7123,11 +7904,13 @@ impl<T: ObjectType + Upcast<ferroui_base::input::gesture_recognizers::PullGestur
 /// The properties and routed events of [`QuadraticBezierSegment`](ferroui_base::media::QuadraticBezierSegment).
 pub trait QuadraticBezierSegmentProps: ElementBuilder {
     /// Sets [`QuadraticBezierSegment::point1_property`](ferroui_base::media::QuadraticBezierSegment::point1_property).
+    #[inline(always)]
     fn point1<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::QuadraticBezierSegment>::point1_property(), value)
     }
 
     /// Sets [`QuadraticBezierSegment::point2_property`](ferroui_base::media::QuadraticBezierSegment::point2_property).
+    #[inline(always)]
     fn point2<M>(self, value: impl IntoProp<ferroui_base::Point, M>) -> Self {
         self.prop(<ferroui_base::media::QuadraticBezierSegment>::point2_property(), value)
     }
@@ -7137,21 +7920,25 @@ impl<T: ObjectType + Upcast<ferroui_base::media::QuadraticBezierSegment>> Quadra
 /// The properties and routed events of [`RadialGradientBrush`](ferroui_base::media::RadialGradientBrush).
 pub trait RadialGradientBrushProps: ElementBuilder {
     /// Sets [`RadialGradientBrush::center_property`](ferroui_base::media::RadialGradientBrush::center_property).
+    #[inline(always)]
     fn center<M>(self, value: impl IntoProp<ferroui_base::RelativePoint, M>) -> Self {
         self.prop(<ferroui_base::media::RadialGradientBrush>::center_property(), value)
     }
 
     /// Sets [`RadialGradientBrush::gradient_origin_property`](ferroui_base::media::RadialGradientBrush::gradient_origin_property).
+    #[inline(always)]
     fn gradient_origin<M>(self, value: impl IntoProp<ferroui_base::RelativePoint, M>) -> Self {
         self.prop(<ferroui_base::media::RadialGradientBrush>::gradient_origin_property(), value)
     }
 
     /// Sets [`RadialGradientBrush::radius_x_property`](ferroui_base::media::RadialGradientBrush::radius_x_property).
+    #[inline(always)]
     fn radius_x<M>(self, value: impl IntoProp<ferroui_base::RelativeScalar, M>) -> Self {
         self.prop(<ferroui_base::media::RadialGradientBrush>::radius_x_property(), value)
     }
 
     /// Sets [`RadialGradientBrush::radius_y_property`](ferroui_base::media::RadialGradientBrush::radius_y_property).
+    #[inline(always)]
     fn radius_y<M>(self, value: impl IntoProp<ferroui_base::RelativeScalar, M>) -> Self {
         self.prop(<ferroui_base::media::RadialGradientBrush>::radius_y_property(), value)
     }
@@ -7161,6 +7948,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::RadialGradientBrush>> RadialGra
 /// The properties and routed events of [`RadioButton`](ferroui_controls::RadioButton).
 pub trait RadioButtonProps: ElementBuilder {
     /// Sets [`RadioButton::group_name_property`](ferroui_controls::RadioButton::group_name_property).
+    #[inline(always)]
     fn group_name<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::RadioButton>::group_name_property(), value)
     }
@@ -7170,6 +7958,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::RadioButton>> RadioButtonProps for
 /// The properties and routed events of [`RadioButtons`](ferroui_controls::RadioButtons).
 pub trait RadioButtonsProps: ElementBuilder {
     /// Sets [`RadioButtons::max_columns_property`](ferroui_controls::RadioButtons::max_columns_property).
+    #[inline(always)]
     fn max_columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RadioButtons>::max_columns_property(), value)
     }
@@ -7179,11 +7968,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::RadioButtons>> RadioButtonsProps f
 /// The properties and routed events of [`RadioButtonsPanel`](ferroui_controls::primitives::RadioButtonsPanel).
 pub trait RadioButtonsPanelProps: ElementBuilder {
     /// Sets [`RadioButtonsPanel::column_spacing_property`](ferroui_controls::primitives::RadioButtonsPanel::column_spacing_property).
+    #[inline(always)]
     fn column_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::RadioButtonsPanel>::column_spacing_property(), value)
     }
 
     /// Sets [`RadioButtonsPanel::row_spacing_property`](ferroui_controls::primitives::RadioButtonsPanel::row_spacing_property).
+    #[inline(always)]
     fn row_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::RadioButtonsPanel>::row_spacing_property(), value)
     }
@@ -7193,26 +7984,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::RadioButtonsPanel>> Ra
 /// The properties and routed events of [`RangeBase`](ferroui_controls::primitives::RangeBase).
 pub trait RangeBaseProps: ElementBuilder {
     /// Sets [`RangeBase::minimum_property`](ferroui_controls::primitives::RangeBase::minimum_property).
+    #[inline(always)]
     fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::RangeBase>::minimum_property(), value)
     }
 
     /// Sets [`RangeBase::maximum_property`](ferroui_controls::primitives::RangeBase::maximum_property).
+    #[inline(always)]
     fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::RangeBase>::maximum_property(), value)
     }
 
     /// Sets [`RangeBase::value_property`](ferroui_controls::primitives::RangeBase::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::RangeBase>::value_property(), value)
     }
 
     /// Sets [`RangeBase::small_change_property`](ferroui_controls::primitives::RangeBase::small_change_property).
+    #[inline(always)]
     fn small_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::RangeBase>::small_change_property(), value)
     }
 
     /// Sets [`RangeBase::large_change_property`](ferroui_controls::primitives::RangeBase::large_change_property).
+    #[inline(always)]
     fn large_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::RangeBase>::large_change_property(), value)
     }
@@ -7227,41 +8023,49 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::RangeBase>> RangeBaseP
 /// The properties and routed events of [`RatingControl`](ferroui_controls::RatingControl).
 pub trait RatingControlProps: ElementBuilder {
     /// Sets [`RatingControl::caption_property`](ferroui_controls::RatingControl::caption_property).
+    #[inline(always)]
     fn caption<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::caption_property(), value)
     }
 
     /// Sets [`RatingControl::initial_set_value_property`](ferroui_controls::RatingControl::initial_set_value_property).
+    #[inline(always)]
     fn initial_set_value<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::initial_set_value_property(), value)
     }
 
     /// Sets [`RatingControl::is_clear_enabled_property`](ferroui_controls::RatingControl::is_clear_enabled_property).
+    #[inline(always)]
     fn is_clear_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::is_clear_enabled_property(), value)
     }
 
     /// Sets [`RatingControl::is_read_only_property`](ferroui_controls::RatingControl::is_read_only_property).
+    #[inline(always)]
     fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::is_read_only_property(), value)
     }
 
     /// Sets [`RatingControl::max_rating_property`](ferroui_controls::RatingControl::max_rating_property).
+    #[inline(always)]
     fn max_rating<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::max_rating_property(), value)
     }
 
     /// Sets [`RatingControl::placeholder_value_property`](ferroui_controls::RatingControl::placeholder_value_property).
+    #[inline(always)]
     fn placeholder_value<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::placeholder_value_property(), value)
     }
 
     /// Sets [`RatingControl::item_info_property`](ferroui_controls::RatingControl::item_info_property).
+    #[inline(always)]
     fn item_info<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::RatingItemInfo>>, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::item_info_property(), value)
     }
 
     /// Sets [`RatingControl::value_property`](ferroui_controls::RatingControl::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RatingControl>::value_property(), value)
     }
@@ -7271,31 +8075,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::RatingControl>> RatingControlProps
 /// The properties and routed events of [`RatingItemFontInfo`](ferroui_controls::RatingItemFontInfo).
 pub trait RatingItemFontInfoProps: ElementBuilder {
     /// Sets [`RatingItemFontInfo::glyph_property`](ferroui_controls::RatingItemFontInfo::glyph_property).
+    #[inline(always)]
     fn glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemFontInfo>::glyph_property(), value)
     }
 
     /// Sets [`RatingItemFontInfo::disabled_glyph_property`](ferroui_controls::RatingItemFontInfo::disabled_glyph_property).
+    #[inline(always)]
     fn disabled_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemFontInfo>::disabled_glyph_property(), value)
     }
 
     /// Sets [`RatingItemFontInfo::pointer_over_glyph_property`](ferroui_controls::RatingItemFontInfo::pointer_over_glyph_property).
+    #[inline(always)]
     fn pointer_over_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemFontInfo>::pointer_over_glyph_property(), value)
     }
 
     /// Sets [`RatingItemFontInfo::pointer_over_placeholder_glyph_property`](ferroui_controls::RatingItemFontInfo::pointer_over_placeholder_glyph_property).
+    #[inline(always)]
     fn pointer_over_placeholder_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemFontInfo>::pointer_over_placeholder_glyph_property(), value)
     }
 
     /// Sets [`RatingItemFontInfo::placeholder_glyph_property`](ferroui_controls::RatingItemFontInfo::placeholder_glyph_property).
+    #[inline(always)]
     fn placeholder_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemFontInfo>::placeholder_glyph_property(), value)
     }
 
     /// Sets [`RatingItemFontInfo::unset_glyph_property`](ferroui_controls::RatingItemFontInfo::unset_glyph_property).
+    #[inline(always)]
     fn unset_glyph<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemFontInfo>::unset_glyph_property(), value)
     }
@@ -7305,31 +8115,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::RatingItemFontInfo>> RatingItemFon
 /// The properties and routed events of [`RatingItemImageInfo`](ferroui_controls::RatingItemImageInfo).
 pub trait RatingItemImageInfoProps: ElementBuilder {
     /// Sets [`RatingItemImageInfo::image_property`](ferroui_controls::RatingItemImageInfo::image_property).
+    #[inline(always)]
     fn image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemImageInfo>::image_property(), value)
     }
 
     /// Sets [`RatingItemImageInfo::disabled_image_property`](ferroui_controls::RatingItemImageInfo::disabled_image_property).
+    #[inline(always)]
     fn disabled_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemImageInfo>::disabled_image_property(), value)
     }
 
     /// Sets [`RatingItemImageInfo::pointer_over_image_property`](ferroui_controls::RatingItemImageInfo::pointer_over_image_property).
+    #[inline(always)]
     fn pointer_over_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemImageInfo>::pointer_over_image_property(), value)
     }
 
     /// Sets [`RatingItemImageInfo::pointer_over_placeholder_image_property`](ferroui_controls::RatingItemImageInfo::pointer_over_placeholder_image_property).
+    #[inline(always)]
     fn pointer_over_placeholder_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemImageInfo>::pointer_over_placeholder_image_property(), value)
     }
 
     /// Sets [`RatingItemImageInfo::placeholder_image_property`](ferroui_controls::RatingItemImageInfo::placeholder_image_property).
+    #[inline(always)]
     fn placeholder_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemImageInfo>::placeholder_image_property(), value)
     }
 
     /// Sets [`RatingItemImageInfo::unset_image_property`](ferroui_controls::RatingItemImageInfo::unset_image_property).
+    #[inline(always)]
     fn unset_image<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IImage>>, M>) -> Self {
         self.prop(<ferroui_controls::RatingItemImageInfo>::unset_image_property(), value)
     }
@@ -7339,11 +8155,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::RatingItemImageInfo>> RatingItemIm
 /// The properties and routed events of [`Rectangle`](ferroui_controls::shapes::Rectangle).
 pub trait RectangleProps: ElementBuilder {
     /// Sets [`Rectangle::radius_x_property`](ferroui_controls::shapes::Rectangle::radius_x_property).
+    #[inline(always)]
     fn radius_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Rectangle>::radius_x_property(), value)
     }
 
     /// Sets [`Rectangle::radius_y_property`](ferroui_controls::shapes::Rectangle::radius_y_property).
+    #[inline(always)]
     fn radius_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Rectangle>::radius_y_property(), value)
     }
@@ -7353,16 +8171,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Rectangle>> RectangleProps
 /// The properties and routed events of [`RectangleGeometry`](ferroui_base::media::RectangleGeometry).
 pub trait RectangleGeometryProps: ElementBuilder {
     /// Sets [`RectangleGeometry::radius_x_property`](ferroui_base::media::RectangleGeometry::radius_x_property).
+    #[inline(always)]
     fn radius_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::RectangleGeometry>::radius_x_property(), value)
     }
 
     /// Sets [`RectangleGeometry::radius_y_property`](ferroui_base::media::RectangleGeometry::radius_y_property).
+    #[inline(always)]
     fn radius_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::RectangleGeometry>::radius_y_property(), value)
     }
 
     /// Sets [`RectangleGeometry::rect_property`](ferroui_base::media::RectangleGeometry::rect_property).
+    #[inline(always)]
     fn rect<M>(self, value: impl IntoProp<ferroui_base::Rect, M>) -> Self {
         self.prop(<ferroui_base::media::RectangleGeometry>::rect_property(), value)
     }
@@ -7372,16 +8193,19 @@ impl<T: ObjectType + Upcast<ferroui_base::media::RectangleGeometry>> RectangleGe
 /// The properties and routed events of [`RefreshContainer`](ferroui_controls::RefreshContainer).
 pub trait RefreshContainerProps: ElementBuilder {
     /// Sets [`RefreshContainer::visualizer_property`](ferroui_controls::RefreshContainer::visualizer_property).
+    #[inline(always)]
     fn visualizer<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::RefreshVisualizer>>, M>) -> Self {
         self.prop(<ferroui_controls::RefreshContainer>::visualizer_property(), value)
     }
 
     /// Sets [`RefreshContainer::pull_direction_property`](ferroui_controls::RefreshContainer::pull_direction_property).
+    #[inline(always)]
     fn pull_direction<M>(self, value: impl IntoProp<ferroui_base::input::PullDirection, M>) -> Self {
         self.prop(<ferroui_controls::RefreshContainer>::pull_direction_property(), value)
     }
 
     /// Sets [`RefreshContainer::is_mouse_enabled_property`](ferroui_controls::RefreshContainer::is_mouse_enabled_property).
+    #[inline(always)]
     fn is_mouse_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RefreshContainer>::is_mouse_enabled_property(), value)
     }
@@ -7396,6 +8220,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::RefreshContainer>> RefreshContaine
 /// The properties and routed events of [`RefreshVisualizer`](ferroui_controls::RefreshVisualizer).
 pub trait RefreshVisualizerProps: ElementBuilder {
     /// Sets [`RefreshVisualizer::orientation_property`](ferroui_controls::RefreshVisualizer::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_controls::RefreshVisualizerOrientation, M>) -> Self {
         self.prop(<ferroui_controls::RefreshVisualizer>::orientation_property(), value)
     }
@@ -7410,81 +8235,97 @@ impl<T: ObjectType + Upcast<ferroui_controls::RefreshVisualizer>> RefreshVisuali
 /// The properties and routed events of [`RelativePanel`](ferroui_controls::RelativePanel).
 pub trait RelativePanelProps: ElementBuilder {
     /// Sets [`RelativePanel::above_property`](ferroui_controls::RelativePanel::above_property).
+    #[inline(always)]
     fn above<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::above_property(), value)
     }
 
     /// Sets [`RelativePanel::align_bottom_with_panel_property`](ferroui_controls::RelativePanel::align_bottom_with_panel_property).
+    #[inline(always)]
     fn align_bottom_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_bottom_with_panel_property(), value)
     }
 
     /// Sets [`RelativePanel::align_bottom_with_property`](ferroui_controls::RelativePanel::align_bottom_with_property).
+    #[inline(always)]
     fn align_bottom_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_bottom_with_property(), value)
     }
 
     /// Sets [`RelativePanel::align_horizontal_center_with_panel_property`](ferroui_controls::RelativePanel::align_horizontal_center_with_panel_property).
+    #[inline(always)]
     fn align_horizontal_center_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_horizontal_center_with_panel_property(), value)
     }
 
     /// Sets [`RelativePanel::align_horizontal_center_with_property`](ferroui_controls::RelativePanel::align_horizontal_center_with_property).
+    #[inline(always)]
     fn align_horizontal_center_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_horizontal_center_with_property(), value)
     }
 
     /// Sets [`RelativePanel::align_left_with_panel_property`](ferroui_controls::RelativePanel::align_left_with_panel_property).
+    #[inline(always)]
     fn align_left_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_left_with_panel_property(), value)
     }
 
     /// Sets [`RelativePanel::align_left_with_property`](ferroui_controls::RelativePanel::align_left_with_property).
+    #[inline(always)]
     fn align_left_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_left_with_property(), value)
     }
 
     /// Sets [`RelativePanel::align_right_with_panel_property`](ferroui_controls::RelativePanel::align_right_with_panel_property).
+    #[inline(always)]
     fn align_right_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_right_with_panel_property(), value)
     }
 
     /// Sets [`RelativePanel::align_right_with_property`](ferroui_controls::RelativePanel::align_right_with_property).
+    #[inline(always)]
     fn align_right_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_right_with_property(), value)
     }
 
     /// Sets [`RelativePanel::align_top_with_panel_property`](ferroui_controls::RelativePanel::align_top_with_panel_property).
+    #[inline(always)]
     fn align_top_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_top_with_panel_property(), value)
     }
 
     /// Sets [`RelativePanel::align_top_with_property`](ferroui_controls::RelativePanel::align_top_with_property).
+    #[inline(always)]
     fn align_top_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_top_with_property(), value)
     }
 
     /// Sets [`RelativePanel::align_vertical_center_with_panel_property`](ferroui_controls::RelativePanel::align_vertical_center_with_panel_property).
+    #[inline(always)]
     fn align_vertical_center_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_vertical_center_with_panel_property(), value)
     }
 
     /// Sets [`RelativePanel::align_vertical_center_with_property`](ferroui_controls::RelativePanel::align_vertical_center_with_property).
+    #[inline(always)]
     fn align_vertical_center_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_vertical_center_with_property(), value)
     }
 
     /// Sets [`RelativePanel::below_property`](ferroui_controls::RelativePanel::below_property).
+    #[inline(always)]
     fn below<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::below_property(), value)
     }
 
     /// Sets [`RelativePanel::left_of_property`](ferroui_controls::RelativePanel::left_of_property).
+    #[inline(always)]
     fn left_of<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::left_of_property(), value)
     }
 
     /// Sets [`RelativePanel::right_of_property`](ferroui_controls::RelativePanel::right_of_property).
+    #[inline(always)]
     fn right_of<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::right_of_property(), value)
     }
@@ -7494,11 +8335,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::RelativePanel>> RelativePanelProps
 /// The properties and routed events of [`RepeatButton`](ferroui_controls::RepeatButton).
 pub trait RepeatButtonProps: ElementBuilder {
     /// Sets [`RepeatButton::interval_property`](ferroui_controls::RepeatButton::interval_property).
+    #[inline(always)]
     fn interval<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RepeatButton>::interval_property(), value)
     }
 
     /// Sets [`RepeatButton::delay_property`](ferroui_controls::RepeatButton::delay_property).
+    #[inline(always)]
     fn delay<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RepeatButton>::delay_property(), value)
     }
@@ -7508,26 +8351,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::RepeatButton>> RepeatButtonProps f
 /// The properties and routed events of [`RevealBrush`](ferroui_controls::media::RevealBrush).
 pub trait RevealBrushProps: ElementBuilder {
     /// Sets [`RevealBrush::color_property`](ferroui_controls::media::RevealBrush::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::color_property(), value)
     }
 
     /// Sets [`RevealBrush::target_theme_property`](ferroui_controls::media::RevealBrush::target_theme_property).
+    #[inline(always)]
     fn target_theme<M>(self, value: impl IntoProp<ferroui_controls::media::ApplicationTheme, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::target_theme_property(), value)
     }
 
     /// Sets [`RevealBrush::always_use_fallback_property`](ferroui_controls::media::RevealBrush::always_use_fallback_property).
+    #[inline(always)]
     fn always_use_fallback<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::always_use_fallback_property(), value)
     }
 
     /// Sets [`RevealBrush::state_property`](ferroui_controls::media::RevealBrush::state_property).
+    #[inline(always)]
     fn state<M>(self, value: impl IntoProp<ferroui_controls::media::RevealBrushState, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::state_property(), value)
     }
 
     /// Sets [`RevealBrush::is_container_property`](ferroui_controls::media::RevealBrush::is_container_property).
+    #[inline(always)]
     fn is_container<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::is_container_property(), value)
     }
@@ -7537,6 +8385,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::media::RevealBrush>> RevealBrushPr
 /// The properties and routed events of [`ReversibleStackPanel`](ferroui_controls::ReversibleStackPanel).
 pub trait ReversibleStackPanelProps: ElementBuilder {
     /// Sets [`ReversibleStackPanel::reverse_order_property`](ferroui_controls::ReversibleStackPanel::reverse_order_property).
+    #[inline(always)]
     fn reverse_order<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ReversibleStackPanel>::reverse_order_property(), value)
     }
@@ -7546,166 +8395,199 @@ impl<T: ObjectType + Upcast<ferroui_controls::ReversibleStackPanel>> ReversibleS
 /// The properties and routed events of [`RichEditBox`](ferroui_controls::RichEditBox).
 pub trait RichEditBoxProps: ElementBuilder {
     /// Sets [`RichEditBox::rich_document_property`](ferroui_controls::RichEditBox::rich_document_property).
+    #[inline(always)]
     fn rich_document<M>(self, value: impl IntoProp<ferroui_controls::documents::RichTextDocument, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::rich_document_property(), value)
     }
 
     /// Sets [`RichEditBox::selection_start_property`](ferroui_controls::RichEditBox::selection_start_property).
+    #[inline(always)]
     fn selection_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_start_property(), value)
     }
 
     /// Sets [`RichEditBox::selection_end_property`](ferroui_controls::RichEditBox::selection_end_property).
+    #[inline(always)]
     fn selection_end<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_end_property(), value)
     }
 
     /// Sets [`RichEditBox::selected_text_property`](ferroui_controls::RichEditBox::selected_text_property).
+    #[inline(always)]
     fn selected_text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selected_text_property(), value)
     }
 
     /// Sets [`RichEditBox::is_text_selection_enabled_property`](ferroui_controls::RichEditBox::is_text_selection_enabled_property).
+    #[inline(always)]
     fn is_text_selection_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::is_text_selection_enabled_property(), value)
     }
 
     /// Sets [`RichEditBox::selection_highlight_color_property`](ferroui_controls::RichEditBox::selection_highlight_color_property).
+    #[inline(always)]
     fn selection_highlight_color<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_highlight_color_property(), value)
     }
 
     /// Sets [`RichEditBox::selection_highlight_color_when_not_focused_property`](ferroui_controls::RichEditBox::selection_highlight_color_when_not_focused_property).
+    #[inline(always)]
     fn selection_highlight_color_when_not_focused<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_highlight_color_when_not_focused_property(), value)
     }
 
     /// Sets [`RichEditBox::selection_foreground_brush_property`](ferroui_controls::RichEditBox::selection_foreground_brush_property).
+    #[inline(always)]
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`RichEditBox::caret_brush_property`](ferroui_controls::RichEditBox::caret_brush_property).
+    #[inline(always)]
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::caret_brush_property(), value)
     }
 
     /// Sets [`RichEditBox::text_alignment_property`](ferroui_controls::RichEditBox::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::text_alignment_property(), value)
     }
 
     /// Sets [`RichEditBox::text_wrapping_property`](ferroui_controls::RichEditBox::text_wrapping_property).
+    #[inline(always)]
     fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::text_wrapping_property(), value)
     }
 
     /// Sets [`RichEditBox::line_height_property`](ferroui_controls::RichEditBox::line_height_property).
+    #[inline(always)]
     fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::line_height_property(), value)
     }
 
     /// Sets [`RichEditBox::text_indent_property`](ferroui_controls::RichEditBox::text_indent_property).
+    #[inline(always)]
     fn text_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::text_indent_property(), value)
     }
 
     /// Sets [`RichEditBox::line_stacking_strategy_property`](ferroui_controls::RichEditBox::line_stacking_strategy_property).
+    #[inline(always)]
     fn line_stacking_strategy<M>(self, value: impl IntoProp<ferroui_controls::documents::LineStackingStrategy, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::line_stacking_strategy_property(), value)
     }
 
     /// Sets [`RichEditBox::text_decorations_property`](ferroui_controls::RichEditBox::text_decorations_property).
+    #[inline(always)]
     fn text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::text_decorations_property(), value)
     }
 
     /// Sets [`RichEditBox::is_read_only_property`](ferroui_controls::RichEditBox::is_read_only_property).
+    #[inline(always)]
     fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::is_read_only_property(), value)
     }
 
     /// Sets [`RichEditBox::accepts_return_property`](ferroui_controls::RichEditBox::accepts_return_property).
+    #[inline(always)]
     fn accepts_return<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::accepts_return_property(), value)
     }
 
     /// Sets [`RichEditBox::accepts_tab_property`](ferroui_controls::RichEditBox::accepts_tab_property).
+    #[inline(always)]
     fn accepts_tab<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::accepts_tab_property(), value)
     }
 
     /// Sets [`RichEditBox::caret_blink_interval_property`](ferroui_controls::RichEditBox::caret_blink_interval_property).
+    #[inline(always)]
     fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::caret_blink_interval_property(), value)
     }
 
     /// Sets [`RichEditBox::max_length_property`](ferroui_controls::RichEditBox::max_length_property).
+    #[inline(always)]
     fn max_length<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::max_length_property(), value)
     }
 
     /// Sets [`RichEditBox::clipboard_copy_format_property`](ferroui_controls::RichEditBox::clipboard_copy_format_property).
+    #[inline(always)]
     fn clipboard_copy_format<M>(self, value: impl IntoProp<ferroui_controls::rich_text::RichEditClipboardFormat, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::clipboard_copy_format_property(), value)
     }
 
     /// Sets [`RichEditBox::disabled_formatting_accelerators_property`](ferroui_controls::RichEditBox::disabled_formatting_accelerators_property).
+    #[inline(always)]
     fn disabled_formatting_accelerators<M>(self, value: impl IntoProp<ferroui_controls::DisabledFormattingAccelerators, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::disabled_formatting_accelerators_property(), value)
     }
 
     /// Sets [`RichEditBox::character_casing_property`](ferroui_controls::RichEditBox::character_casing_property).
+    #[inline(always)]
     fn character_casing<M>(self, value: impl IntoProp<ferroui_controls::RichEditCharacterCasing, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::character_casing_property(), value)
     }
 
     /// Sets [`RichEditBox::is_text_prediction_enabled_property`](ferroui_controls::RichEditBox::is_text_prediction_enabled_property).
+    #[inline(always)]
     fn is_text_prediction_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::is_text_prediction_enabled_property(), value)
     }
 
     /// Sets [`RichEditBox::input_scope_property`](ferroui_controls::RichEditBox::input_scope_property).
+    #[inline(always)]
     fn input_scope<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::input::InputScope>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::input_scope_property(), value)
     }
 
     /// Sets [`RichEditBox::placeholder_text_property`](ferroui_controls::RichEditBox::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::placeholder_text_property(), value)
     }
 
     /// Sets [`RichEditBox::placeholder_foreground_property`](ferroui_controls::RichEditBox::placeholder_foreground_property).
+    #[inline(always)]
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::placeholder_foreground_property(), value)
     }
 
     /// Sets [`RichEditBox::header_property`](ferroui_controls::RichEditBox::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::header_property(), value)
     }
 
     /// Sets [`RichEditBox::header_template_property`](ferroui_controls::RichEditBox::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::header_template_property(), value)
     }
 
     /// Sets [`RichEditBox::description_property`](ferroui_controls::RichEditBox::description_property).
+    #[inline(always)]
     fn description<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::description_property(), value)
     }
 
     /// Sets [`RichEditBox::is_undo_enabled_property`](ferroui_controls::RichEditBox::is_undo_enabled_property).
+    #[inline(always)]
     fn is_undo_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::is_undo_enabled_property(), value)
     }
 
     /// Sets [`RichEditBox::undo_limit_property`](ferroui_controls::RichEditBox::undo_limit_property).
+    #[inline(always)]
     fn undo_limit<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::undo_limit_property(), value)
     }
 
     /// Sets [`RichEditBox::text_property`](ferroui_controls::RichEditBox::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::text_property(), value)
     }
@@ -7770,131 +8652,157 @@ impl<T: ObjectType + Upcast<ferroui_controls::RichEditBox>> RichEditBoxProps for
 /// The properties and routed events of [`RichTextBlock`](ferroui_controls::RichTextBlock).
 pub trait RichTextBlockProps: ElementBuilder {
     /// Sets [`RichTextBlock::rich_document_property`](ferroui_controls::RichTextBlock::rich_document_property).
+    #[inline(always)]
     fn rich_document<M>(self, value: impl IntoProp<ferroui_controls::documents::RichTextDocument, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::rich_document_property(), value)
     }
 
     /// Sets [`RichTextBlock::selection_start_property`](ferroui_controls::RichTextBlock::selection_start_property).
+    #[inline(always)]
     fn selection_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::selection_start_property(), value)
     }
 
     /// Sets [`RichTextBlock::selection_end_property`](ferroui_controls::RichTextBlock::selection_end_property).
+    #[inline(always)]
     fn selection_end<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::selection_end_property(), value)
     }
 
     /// Sets [`RichTextBlock::is_text_selection_enabled_property`](ferroui_controls::RichTextBlock::is_text_selection_enabled_property).
+    #[inline(always)]
     fn is_text_selection_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::is_text_selection_enabled_property(), value)
     }
 
     /// Sets [`RichTextBlock::selection_highlight_color_property`](ferroui_controls::RichTextBlock::selection_highlight_color_property).
+    #[inline(always)]
     fn selection_highlight_color<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::selection_highlight_color_property(), value)
     }
 
     /// Sets [`RichTextBlock::selection_foreground_brush_property`](ferroui_controls::RichTextBlock::selection_foreground_brush_property).
+    #[inline(always)]
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`RichTextBlock::caret_brush_property`](ferroui_controls::RichTextBlock::caret_brush_property).
+    #[inline(always)]
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::caret_brush_property(), value)
     }
 
     /// Sets [`RichTextBlock::background_property`](ferroui_controls::RichTextBlock::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::background_property(), value)
     }
 
     /// Sets [`RichTextBlock::padding_property`](ferroui_controls::RichTextBlock::padding_property).
+    #[inline(always)]
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::padding_property(), value)
     }
 
     /// Sets [`RichTextBlock::font_family_property`](ferroui_controls::RichTextBlock::font_family_property).
+    #[inline(always)]
     fn font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::font_family_property(), value)
     }
 
     /// Sets [`RichTextBlock::font_size_property`](ferroui_controls::RichTextBlock::font_size_property).
+    #[inline(always)]
     fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::font_size_property(), value)
     }
 
     /// Sets [`RichTextBlock::font_style_property`](ferroui_controls::RichTextBlock::font_style_property).
+    #[inline(always)]
     fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::font_style_property(), value)
     }
 
     /// Sets [`RichTextBlock::font_weight_property`](ferroui_controls::RichTextBlock::font_weight_property).
+    #[inline(always)]
     fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::font_weight_property(), value)
     }
 
     /// Sets [`RichTextBlock::font_stretch_property`](ferroui_controls::RichTextBlock::font_stretch_property).
+    #[inline(always)]
     fn font_stretch<M>(self, value: impl IntoProp<ferroui_base::media::FontStretch, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::font_stretch_property(), value)
     }
 
     /// Sets [`RichTextBlock::font_features_property`](ferroui_controls::RichTextBlock::font_features_property).
+    #[inline(always)]
     fn font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::font_features_property(), value)
     }
 
     /// Sets [`RichTextBlock::foreground_property`](ferroui_controls::RichTextBlock::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::foreground_property(), value)
     }
 
     /// Sets [`RichTextBlock::letter_spacing_property`](ferroui_controls::RichTextBlock::letter_spacing_property).
+    #[inline(always)]
     fn letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::letter_spacing_property(), value)
     }
 
     /// Sets [`RichTextBlock::text_alignment_property`](ferroui_controls::RichTextBlock::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::text_alignment_property(), value)
     }
 
     /// Sets [`RichTextBlock::line_height_property`](ferroui_controls::RichTextBlock::line_height_property).
+    #[inline(always)]
     fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::line_height_property(), value)
     }
 
     /// Sets [`RichTextBlock::text_indent_property`](ferroui_controls::RichTextBlock::text_indent_property).
+    #[inline(always)]
     fn text_indent<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::text_indent_property(), value)
     }
 
     /// Sets [`RichTextBlock::line_stacking_strategy_property`](ferroui_controls::RichTextBlock::line_stacking_strategy_property).
+    #[inline(always)]
     fn line_stacking_strategy<M>(self, value: impl IntoProp<ferroui_controls::documents::LineStackingStrategy, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::line_stacking_strategy_property(), value)
     }
 
     /// Sets [`RichTextBlock::text_line_bounds_property`](ferroui_controls::RichTextBlock::text_line_bounds_property).
+    #[inline(always)]
     fn text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::text_line_bounds_property(), value)
     }
 
     /// Sets [`RichTextBlock::text_decorations_property`](ferroui_controls::RichTextBlock::text_decorations_property).
+    #[inline(always)]
     fn text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::text_decorations_property(), value)
     }
 
     /// Sets [`RichTextBlock::text_trimming_property`](ferroui_controls::RichTextBlock::text_trimming_property).
+    #[inline(always)]
     fn text_trimming<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_base::media::TextTrimming>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::text_trimming_property(), value)
     }
 
     /// Sets [`RichTextBlock::text_wrapping_property`](ferroui_controls::RichTextBlock::text_wrapping_property).
+    #[inline(always)]
     fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::text_wrapping_property(), value)
     }
 
     /// Sets [`RichTextBlock::max_lines_property`](ferroui_controls::RichTextBlock::max_lines_property).
+    #[inline(always)]
     fn max_lines<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::max_lines_property(), value)
     }
@@ -7919,36 +8827,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::RichTextBlock>> RichTextBlockProps
 /// The properties and routed events of [`Rotate3DTransform`](ferroui_base::media::Rotate3DTransform).
 pub trait Rotate3DTransformProps: ElementBuilder {
     /// Sets [`Rotate3DTransform::angle_x_property`](ferroui_base::media::Rotate3DTransform::angle_x_property).
+    #[inline(always)]
     fn angle_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Rotate3DTransform>::angle_x_property(), value)
     }
 
     /// Sets [`Rotate3DTransform::angle_y_property`](ferroui_base::media::Rotate3DTransform::angle_y_property).
+    #[inline(always)]
     fn angle_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Rotate3DTransform>::angle_y_property(), value)
     }
 
     /// Sets [`Rotate3DTransform::angle_z_property`](ferroui_base::media::Rotate3DTransform::angle_z_property).
+    #[inline(always)]
     fn angle_z<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Rotate3DTransform>::angle_z_property(), value)
     }
 
     /// Sets [`Rotate3DTransform::center_x_property`](ferroui_base::media::Rotate3DTransform::center_x_property).
+    #[inline(always)]
     fn center_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Rotate3DTransform>::center_x_property(), value)
     }
 
     /// Sets [`Rotate3DTransform::center_y_property`](ferroui_base::media::Rotate3DTransform::center_y_property).
+    #[inline(always)]
     fn center_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Rotate3DTransform>::center_y_property(), value)
     }
 
     /// Sets [`Rotate3DTransform::center_z_property`](ferroui_base::media::Rotate3DTransform::center_z_property).
+    #[inline(always)]
     fn center_z<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Rotate3DTransform>::center_z_property(), value)
     }
 
     /// Sets [`Rotate3DTransform::depth_property`](ferroui_base::media::Rotate3DTransform::depth_property).
+    #[inline(always)]
     fn depth<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::Rotate3DTransform>::depth_property(), value)
     }
@@ -7958,16 +8873,19 @@ impl<T: ObjectType + Upcast<ferroui_base::media::Rotate3DTransform>> Rotate3DTra
 /// The properties and routed events of [`RotateTransform`](ferroui_base::media::RotateTransform).
 pub trait RotateTransformProps: ElementBuilder {
     /// Sets [`RotateTransform::angle_property`](ferroui_base::media::RotateTransform::angle_property).
+    #[inline(always)]
     fn angle<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::RotateTransform>::angle_property(), value)
     }
 
     /// Sets [`RotateTransform::center_x_property`](ferroui_base::media::RotateTransform::center_x_property).
+    #[inline(always)]
     fn center_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::RotateTransform>::center_x_property(), value)
     }
 
     /// Sets [`RotateTransform::center_y_property`](ferroui_base::media::RotateTransform::center_y_property).
+    #[inline(always)]
     fn center_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::RotateTransform>::center_y_property(), value)
     }
@@ -7977,16 +8895,19 @@ impl<T: ObjectType + Upcast<ferroui_base::media::RotateTransform>> RotateTransfo
 /// The properties and routed events of [`RowDefinition`](ferroui_controls::RowDefinition).
 pub trait RowDefinitionProps: ElementBuilder {
     /// Sets [`RowDefinition::max_height_property`](ferroui_controls::RowDefinition::max_height_property).
+    #[inline(always)]
     fn max_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RowDefinition>::max_height_property(), value)
     }
 
     /// Sets [`RowDefinition::min_height_property`](ferroui_controls::RowDefinition::min_height_property).
+    #[inline(always)]
     fn min_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::RowDefinition>::min_height_property(), value)
     }
 
     /// Sets [`RowDefinition::height_property`](ferroui_controls::RowDefinition::height_property).
+    #[inline(always)]
     fn height<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::RowDefinition>::height_property(), value)
     }
@@ -7996,6 +8917,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::RowDefinition>> RowDefinitionProps
 /// The properties and routed events of [`Run`](ferroui_controls::documents::Run).
 pub trait RunProps: ElementBuilder {
     /// Sets [`Run::text_property`](ferroui_controls::documents::Run::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::documents::Run>::text_property(), value)
     }
@@ -8005,11 +8927,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::Run>> RunProps for El<T
 /// The properties and routed events of [`ScaleTransform`](ferroui_base::media::ScaleTransform).
 pub trait ScaleTransformProps: ElementBuilder {
     /// Sets [`ScaleTransform::scale_x_property`](ferroui_base::media::ScaleTransform::scale_x_property).
+    #[inline(always)]
     fn scale_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::ScaleTransform>::scale_x_property(), value)
     }
 
     /// Sets [`ScaleTransform::scale_y_property`](ferroui_base::media::ScaleTransform::scale_y_property).
+    #[inline(always)]
     fn scale_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::ScaleTransform>::scale_y_property(), value)
     }
@@ -8019,31 +8943,37 @@ impl<T: ObjectType + Upcast<ferroui_base::media::ScaleTransform>> ScaleTransform
 /// The properties and routed events of [`ScrollBar`](ferroui_controls::primitives::ScrollBar).
 pub trait ScrollBarProps: ElementBuilder {
     /// Sets [`ScrollBar::viewport_size_property`](ferroui_controls::primitives::ScrollBar::viewport_size_property).
+    #[inline(always)]
     fn viewport_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::viewport_size_property(), value)
     }
 
     /// Sets [`ScrollBar::visibility_property`](ferroui_controls::primitives::ScrollBar::visibility_property).
+    #[inline(always)]
     fn visibility<M>(self, value: impl IntoProp<ferroui_controls::primitives::ScrollBarVisibility, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::visibility_property(), value)
     }
 
     /// Sets [`ScrollBar::orientation_property`](ferroui_controls::primitives::ScrollBar::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::orientation_property(), value)
     }
 
     /// Sets [`ScrollBar::allow_auto_hide_property`](ferroui_controls::primitives::ScrollBar::allow_auto_hide_property).
+    #[inline(always)]
     fn allow_auto_hide<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::allow_auto_hide_property(), value)
     }
 
     /// Sets [`ScrollBar::hide_delay_property`](ferroui_controls::primitives::ScrollBar::hide_delay_property).
+    #[inline(always)]
     fn hide_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::hide_delay_property(), value)
     }
 
     /// Sets [`ScrollBar::show_delay_property`](ferroui_controls::primitives::ScrollBar::show_delay_property).
+    #[inline(always)]
     fn show_delay<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ScrollBar>::show_delay_property(), value)
     }
@@ -8053,51 +8983,61 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::ScrollBar>> ScrollBarP
 /// The properties and routed events of [`ScrollContentPresenter`](ferroui_controls::presenters::ScrollContentPresenter).
 pub trait ScrollContentPresenterProps: ElementBuilder {
     /// Sets [`ScrollContentPresenter::can_horizontally_scroll_property`](ferroui_controls::presenters::ScrollContentPresenter::can_horizontally_scroll_property).
+    #[inline(always)]
     fn can_horizontally_scroll<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::can_horizontally_scroll_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::can_vertically_scroll_property`](ferroui_controls::presenters::ScrollContentPresenter::can_vertically_scroll_property).
+    #[inline(always)]
     fn can_vertically_scroll<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::can_vertically_scroll_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::extent_property`](ferroui_controls::presenters::ScrollContentPresenter::extent_property).
+    #[inline(always)]
     fn extent<M>(self, value: impl IntoProp<ferroui_base::Size, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::extent_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::offset_property`](ferroui_controls::presenters::ScrollContentPresenter::offset_property).
+    #[inline(always)]
     fn offset<M>(self, value: impl IntoProp<ferroui_base::Vector, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::offset_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::viewport_property`](ferroui_controls::presenters::ScrollContentPresenter::viewport_property).
+    #[inline(always)]
     fn viewport<M>(self, value: impl IntoProp<ferroui_base::Size, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::viewport_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::horizontal_snap_points_type_property`](ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property).
+    #[inline(always)]
     fn horizontal_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::horizontal_snap_points_type_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::vertical_snap_points_type_property`](ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_type_property).
+    #[inline(always)]
     fn vertical_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::vertical_snap_points_type_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::horizontal_snap_points_alignment_property`](ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_alignment_property).
+    #[inline(always)]
     fn horizontal_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::horizontal_snap_points_alignment_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::vertical_snap_points_alignment_property`](ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_alignment_property).
+    #[inline(always)]
     fn vertical_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::vertical_snap_points_alignment_property(), value)
     }
 
     /// Sets [`ScrollContentPresenter::is_scroll_chaining_enabled_property`](ferroui_controls::presenters::ScrollContentPresenter::is_scroll_chaining_enabled_property).
+    #[inline(always)]
     fn is_scroll_chaining_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::is_scroll_chaining_enabled_property(), value)
     }
@@ -8107,36 +9047,43 @@ impl<T: ObjectType + Upcast<ferroui_controls::presenters::ScrollContentPresenter
 /// The properties and routed events of [`ScrollGestureRecognizer`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer).
 pub trait ScrollGestureRecognizerProps: ElementBuilder {
     /// Sets [`ScrollGestureRecognizer::can_horizontally_scroll_property`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_horizontally_scroll_property).
+    #[inline(always)]
     fn can_horizontally_scroll<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>::can_horizontally_scroll_property(), value)
     }
 
     /// Sets [`ScrollGestureRecognizer::can_vertically_scroll_property`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::can_vertically_scroll_property).
+    #[inline(always)]
     fn can_vertically_scroll<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>::can_vertically_scroll_property(), value)
     }
 
     /// Sets [`ScrollGestureRecognizer::is_scroll_inertia_enabled_property`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::is_scroll_inertia_enabled_property).
+    #[inline(always)]
     fn is_scroll_inertia_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>::is_scroll_inertia_enabled_property(), value)
     }
 
     /// Sets [`ScrollGestureRecognizer::scroll_start_distance_property`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::scroll_start_distance_property).
+    #[inline(always)]
     fn scroll_start_distance<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>::scroll_start_distance_property(), value)
     }
 
     /// Sets [`ScrollGestureRecognizer::offset_property`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::offset_property).
+    #[inline(always)]
     fn offset<M>(self, value: impl IntoProp<Option<ferroui_base::Vector>, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>::offset_property(), value)
     }
 
     /// Sets [`ScrollGestureRecognizer::extent_property`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::extent_property).
+    #[inline(always)]
     fn extent<M>(self, value: impl IntoProp<Option<ferroui_base::Size>, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>::extent_property(), value)
     }
 
     /// Sets [`ScrollGestureRecognizer::viewport_property`](ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer::viewport_property).
+    #[inline(always)]
     fn viewport<M>(self, value: impl IntoProp<Option<ferroui_base::Size>, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::ScrollGestureRecognizer>::viewport_property(), value)
     }
@@ -8146,81 +9093,97 @@ impl<T: ObjectType + Upcast<ferroui_base::input::gesture_recognizers::ScrollGest
 /// The properties and routed events of [`ScrollViewer`](ferroui_controls::ScrollViewer).
 pub trait ScrollViewerProps: ElementBuilder {
     /// Sets [`ScrollViewer::bring_into_view_on_focus_change_property`](ferroui_controls::ScrollViewer::bring_into_view_on_focus_change_property).
+    #[inline(always)]
     fn bring_into_view_on_focus_change<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::bring_into_view_on_focus_change_property(), value)
     }
 
     /// Sets [`ScrollViewer::offset_property`](ferroui_controls::ScrollViewer::offset_property).
+    #[inline(always)]
     fn offset<M>(self, value: impl IntoProp<ferroui_base::Vector, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::offset_property(), value)
     }
 
     /// Sets [`ScrollViewer::zoom_mode_property`](ferroui_controls::ScrollViewer::zoom_mode_property).
+    #[inline(always)]
     fn zoom_mode<M>(self, value: impl IntoProp<ferroui_controls::ZoomMode, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::zoom_mode_property(), value)
     }
 
     /// Sets [`ScrollViewer::min_zoom_factor_property`](ferroui_controls::ScrollViewer::min_zoom_factor_property).
+    #[inline(always)]
     fn min_zoom_factor<M>(self, value: impl IntoProp<f32, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::min_zoom_factor_property(), value)
     }
 
     /// Sets [`ScrollViewer::max_zoom_factor_property`](ferroui_controls::ScrollViewer::max_zoom_factor_property).
+    #[inline(always)]
     fn max_zoom_factor<M>(self, value: impl IntoProp<f32, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::max_zoom_factor_property(), value)
     }
 
     /// Sets [`ScrollViewer::horizontal_scroll_bar_visibility_property`](ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property).
+    #[inline(always)]
     fn horizontal_scroll_bar_visibility<M>(self, value: impl IntoProp<ferroui_controls::primitives::ScrollBarVisibility, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::horizontal_scroll_bar_visibility_property(), value)
     }
 
     /// Sets [`ScrollViewer::horizontal_snap_points_type_property`](ferroui_controls::ScrollViewer::horizontal_snap_points_type_property).
+    #[inline(always)]
     fn horizontal_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::horizontal_snap_points_type_property(), value)
     }
 
     /// Sets [`ScrollViewer::vertical_snap_points_type_property`](ferroui_controls::ScrollViewer::vertical_snap_points_type_property).
+    #[inline(always)]
     fn vertical_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::vertical_snap_points_type_property(), value)
     }
 
     /// Sets [`ScrollViewer::horizontal_snap_points_alignment_property`](ferroui_controls::ScrollViewer::horizontal_snap_points_alignment_property).
+    #[inline(always)]
     fn horizontal_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::horizontal_snap_points_alignment_property(), value)
     }
 
     /// Sets [`ScrollViewer::vertical_snap_points_alignment_property`](ferroui_controls::ScrollViewer::vertical_snap_points_alignment_property).
+    #[inline(always)]
     fn vertical_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::vertical_snap_points_alignment_property(), value)
     }
 
     /// Sets [`ScrollViewer::vertical_scroll_bar_visibility_property`](ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property).
+    #[inline(always)]
     fn vertical_scroll_bar_visibility<M>(self, value: impl IntoProp<ferroui_controls::primitives::ScrollBarVisibility, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::vertical_scroll_bar_visibility_property(), value)
     }
 
     /// Sets [`ScrollViewer::is_expanded_property`](ferroui_controls::ScrollViewer::is_expanded_property).
+    #[inline(always)]
     fn is_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::is_expanded_property(), value)
     }
 
     /// Sets [`ScrollViewer::allow_auto_hide_property`](ferroui_controls::ScrollViewer::allow_auto_hide_property).
+    #[inline(always)]
     fn allow_auto_hide<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::allow_auto_hide_property(), value)
     }
 
     /// Sets [`ScrollViewer::is_scroll_chaining_enabled_property`](ferroui_controls::ScrollViewer::is_scroll_chaining_enabled_property).
+    #[inline(always)]
     fn is_scroll_chaining_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::is_scroll_chaining_enabled_property(), value)
     }
 
     /// Sets [`ScrollViewer::is_scroll_inertia_enabled_property`](ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property).
+    #[inline(always)]
     fn is_scroll_inertia_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::is_scroll_inertia_enabled_property(), value)
     }
 
     /// Sets [`ScrollViewer::is_deferred_scrolling_enabled_property`](ferroui_controls::ScrollViewer::is_deferred_scrolling_enabled_property).
+    #[inline(always)]
     fn is_deferred_scrolling_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::is_deferred_scrolling_enabled_property(), value)
     }
@@ -8235,11 +9198,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::ScrollViewer>> ScrollViewerProps f
 /// The properties and routed events of [`Sector`](ferroui_controls::shapes::Sector).
 pub trait SectorProps: ElementBuilder {
     /// Sets [`Sector::start_angle_property`](ferroui_controls::shapes::Sector::start_angle_property).
+    #[inline(always)]
     fn start_angle<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Sector>::start_angle_property(), value)
     }
 
     /// Sets [`Sector::sweep_angle_property`](ferroui_controls::shapes::Sector::sweep_angle_property).
+    #[inline(always)]
     fn sweep_angle<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Sector>::sweep_angle_property(), value)
     }
@@ -8249,26 +9214,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Sector>> SectorProps for E
 /// The properties and routed events of [`SelectableTextBlock`](ferroui_controls::SelectableTextBlock).
 pub trait SelectableTextBlockProps: ElementBuilder {
     /// Sets [`SelectableTextBlock::selection_start_property`](ferroui_controls::SelectableTextBlock::selection_start_property).
+    #[inline(always)]
     fn selection_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_start_property(), value)
     }
 
     /// Sets [`SelectableTextBlock::selection_end_property`](ferroui_controls::SelectableTextBlock::selection_end_property).
+    #[inline(always)]
     fn selection_end<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_end_property(), value)
     }
 
     /// Sets [`SelectableTextBlock::selection_brush_property`](ferroui_controls::SelectableTextBlock::selection_brush_property).
+    #[inline(always)]
     fn selection_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_brush_property(), value)
     }
 
     /// Sets [`SelectableTextBlock::selection_foreground_brush_property`](ferroui_controls::SelectableTextBlock::selection_foreground_brush_property).
+    #[inline(always)]
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`SelectableTextBlock::can_copy_property`](ferroui_controls::SelectableTextBlock::can_copy_property).
+    #[inline(always)]
     fn can_copy<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::can_copy_property(), value)
     }
@@ -8283,46 +9253,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::SelectableTextBlock>> SelectableTe
 /// The properties and routed events of [`SelectingItemsControl`](ferroui_controls::primitives::SelectingItemsControl).
 pub trait SelectingItemsControlProps: ElementBuilder {
     /// Sets [`SelectingItemsControl::auto_scroll_to_selected_item_property`](ferroui_controls::primitives::SelectingItemsControl::auto_scroll_to_selected_item_property).
+    #[inline(always)]
     fn auto_scroll_to_selected_item<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::auto_scroll_to_selected_item_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::selected_index_property`](ferroui_controls::primitives::SelectingItemsControl::selected_index_property).
+    #[inline(always)]
     fn selected_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::selected_index_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::selected_item_property`](ferroui_controls::primitives::SelectingItemsControl::selected_item_property).
+    #[inline(always)]
     fn selected_item<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::selected_item_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::selected_value_property`](ferroui_controls::primitives::SelectingItemsControl::selected_value_property).
+    #[inline(always)]
     fn selected_value<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::selected_value_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::selection_property`](ferroui_controls::primitives::SelectingItemsControl::selection_property).
+    #[inline(always)]
     fn selection<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::selection::ISelectionModel>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::selection_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::selection_mode_property`](ferroui_controls::primitives::SelectingItemsControl::selection_mode_property).
+    #[inline(always)]
     fn selection_mode<M>(self, value: impl IntoProp<ferroui_controls::SelectionMode, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::selection_mode_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::is_selected_property`](ferroui_controls::primitives::SelectingItemsControl::is_selected_property).
+    #[inline(always)]
     fn is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::is_selected_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::is_text_search_enabled_property`](ferroui_controls::primitives::SelectingItemsControl::is_text_search_enabled_property).
+    #[inline(always)]
     fn is_text_search_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::is_text_search_enabled_property(), value)
     }
 
     /// Sets [`SelectingItemsControl::wrap_selection_property`](ferroui_controls::primitives::SelectingItemsControl::wrap_selection_property).
+    #[inline(always)]
     fn wrap_selection<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::wrap_selection_property(), value)
     }
@@ -8342,6 +9321,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::SelectingItemsControl>
 /// The properties and routed events of [`SelectingMultiPage`](ferroui_controls::SelectingMultiPage).
 pub trait SelectingMultiPageProps: ElementBuilder {
     /// Sets [`SelectingMultiPage::selected_index_property`](ferroui_controls::SelectingMultiPage::selected_index_property).
+    #[inline(always)]
     fn selected_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::SelectingMultiPage>::selected_index_property(), value)
     }
@@ -8356,46 +9336,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::SelectingMultiPage>> SelectingMult
 /// The properties and routed events of [`Shape`](ferroui_controls::shapes::Shape).
 pub trait ShapeProps: ElementBuilder {
     /// Sets [`Shape::fill_property`](ferroui_controls::shapes::Shape::fill_property).
+    #[inline(always)]
     fn fill<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::fill_property(), value)
     }
 
     /// Sets [`Shape::stretch_property`](ferroui_controls::shapes::Shape::stretch_property).
+    #[inline(always)]
     fn stretch<M>(self, value: impl IntoProp<ferroui_base::media::Stretch, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stretch_property(), value)
     }
 
     /// Sets [`Shape::stroke_property`](ferroui_controls::shapes::Shape::stroke_property).
+    #[inline(always)]
     fn stroke<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_property(), value)
     }
 
     /// Sets [`Shape::stroke_dash_array_property`](ferroui_controls::shapes::Shape::stroke_dash_array_property).
+    #[inline(always)]
     fn stroke_dash_array<M>(self, value: impl IntoProp<Option<ferroui_base::media::MediaCollection<f64>>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_dash_array_property(), value)
     }
 
     /// Sets [`Shape::stroke_dash_offset_property`](ferroui_controls::shapes::Shape::stroke_dash_offset_property).
+    #[inline(always)]
     fn stroke_dash_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_dash_offset_property(), value)
     }
 
     /// Sets [`Shape::stroke_thickness_property`](ferroui_controls::shapes::Shape::stroke_thickness_property).
+    #[inline(always)]
     fn stroke_thickness<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_thickness_property(), value)
     }
 
     /// Sets [`Shape::stroke_line_cap_property`](ferroui_controls::shapes::Shape::stroke_line_cap_property).
+    #[inline(always)]
     fn stroke_line_cap<M>(self, value: impl IntoProp<ferroui_base::media::PenLineCap, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_line_cap_property(), value)
     }
 
     /// Sets [`Shape::stroke_join_property`](ferroui_controls::shapes::Shape::stroke_join_property).
+    #[inline(always)]
     fn stroke_join<M>(self, value: impl IntoProp<ferroui_base::media::PenLineJoin, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_join_property(), value)
     }
 
     /// Sets [`Shape::stroke_miter_limit_property`](ferroui_controls::shapes::Shape::stroke_miter_limit_property).
+    #[inline(always)]
     fn stroke_miter_limit<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_miter_limit_property(), value)
     }
@@ -8405,11 +9394,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::shapes::Shape>> ShapeProps for El<
 /// The properties and routed events of [`SkewTransform`](ferroui_base::media::SkewTransform).
 pub trait SkewTransformProps: ElementBuilder {
     /// Sets [`SkewTransform::angle_x_property`](ferroui_base::media::SkewTransform::angle_x_property).
+    #[inline(always)]
     fn angle_x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::SkewTransform>::angle_x_property(), value)
     }
 
     /// Sets [`SkewTransform::angle_y_property`](ferroui_base::media::SkewTransform::angle_y_property).
+    #[inline(always)]
     fn angle_y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::SkewTransform>::angle_y_property(), value)
     }
@@ -8419,31 +9410,37 @@ impl<T: ObjectType + Upcast<ferroui_base::media::SkewTransform>> SkewTransformPr
 /// The properties and routed events of [`Slider`](ferroui_controls::Slider).
 pub trait SliderProps: ElementBuilder {
     /// Sets [`Slider::orientation_property`](ferroui_controls::Slider::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::Slider>::orientation_property(), value)
     }
 
     /// Sets [`Slider::is_direction_reversed_property`](ferroui_controls::Slider::is_direction_reversed_property).
+    #[inline(always)]
     fn is_direction_reversed<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Slider>::is_direction_reversed_property(), value)
     }
 
     /// Sets [`Slider::is_snap_to_tick_enabled_property`](ferroui_controls::Slider::is_snap_to_tick_enabled_property).
+    #[inline(always)]
     fn is_snap_to_tick_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Slider>::is_snap_to_tick_enabled_property(), value)
     }
 
     /// Sets [`Slider::tick_frequency_property`](ferroui_controls::Slider::tick_frequency_property).
+    #[inline(always)]
     fn tick_frequency<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Slider>::tick_frequency_property(), value)
     }
 
     /// Sets [`Slider::tick_placement_property`](ferroui_controls::Slider::tick_placement_property).
+    #[inline(always)]
     fn tick_placement<M>(self, value: impl IntoProp<ferroui_controls::TickPlacement, M>) -> Self {
         self.prop(<ferroui_controls::Slider>::tick_placement_property(), value)
     }
 
     /// Sets [`Slider::ticks_property`](ferroui_controls::Slider::ticks_property).
+    #[inline(always)]
     fn ticks<M>(self, value: impl IntoProp<Option<ferroui_controls::TickList>, M>) -> Self {
         self.prop(<ferroui_controls::Slider>::ticks_property(), value)
     }
@@ -8453,6 +9450,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Slider>> SliderProps for El<T> {}
 /// The properties and routed events of [`SolidColorBrush`](ferroui_base::media::SolidColorBrush).
 pub trait SolidColorBrushProps: ElementBuilder {
     /// Sets [`SolidColorBrush::color_property`](ferroui_base::media::SolidColorBrush::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::SolidColorBrush>::color_property(), value)
     }
@@ -8462,6 +9460,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::SolidColorBrush>> SolidColorBru
 /// The properties and routed events of [`Span`](ferroui_controls::documents::Span).
 pub trait SpanProps: ElementBuilder {
     /// Sets [`Span::inlines_property`](ferroui_controls::documents::Span::inlines_property).
+    #[inline(always)]
     fn inlines<M>(self, value: impl IntoProp<Option<ferroui_controls::documents::InlineCollection>, M>) -> Self {
         self.prop(<ferroui_controls::documents::Span>::inlines_property(), value)
     }
@@ -8471,6 +9470,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::Span>> SpanProps for El
 /// The properties and routed events of [`Spinner`](ferroui_controls::Spinner).
 pub trait SpinnerProps: ElementBuilder {
     /// Sets [`Spinner::valid_spin_direction_property`](ferroui_controls::Spinner::valid_spin_direction_property).
+    #[inline(always)]
     fn valid_spin_direction<M>(self, value: impl IntoProp<ferroui_controls::ValidSpinDirections, M>) -> Self {
         self.prop(<ferroui_controls::Spinner>::valid_spin_direction_property(), value)
     }
@@ -8485,6 +9485,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Spinner>> SpinnerProps for El<T> {
 /// The properties and routed events of [`SplineColorKeyFrame`](ferroui_controls::animation::SplineColorKeyFrame).
 pub trait SplineColorKeyFrameProps: ElementBuilder {
     /// Sets [`SplineColorKeyFrame::key_spline_property`](ferroui_controls::animation::SplineColorKeyFrame::key_spline_property).
+    #[inline(always)]
     fn key_spline<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::animation::KeySpline>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::SplineColorKeyFrame>::key_spline_property(), value)
     }
@@ -8494,6 +9495,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::SplineColorKeyFrame>> S
 /// The properties and routed events of [`SplineDoubleKeyFrame`](ferroui_controls::animation::SplineDoubleKeyFrame).
 pub trait SplineDoubleKeyFrameProps: ElementBuilder {
     /// Sets [`SplineDoubleKeyFrame::key_spline_property`](ferroui_controls::animation::SplineDoubleKeyFrame::key_spline_property).
+    #[inline(always)]
     fn key_spline<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::animation::KeySpline>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::SplineDoubleKeyFrame>::key_spline_property(), value)
     }
@@ -8503,6 +9505,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::SplineDoubleKeyFrame>> 
 /// The properties and routed events of [`SplinePointKeyFrame`](ferroui_controls::animation::SplinePointKeyFrame).
 pub trait SplinePointKeyFrameProps: ElementBuilder {
     /// Sets [`SplinePointKeyFrame::key_spline_property`](ferroui_controls::animation::SplinePointKeyFrame::key_spline_property).
+    #[inline(always)]
     fn key_spline<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::animation::KeySpline>>, M>) -> Self {
         self.prop(<ferroui_controls::animation::SplinePointKeyFrame>::key_spline_property(), value)
     }
@@ -8512,21 +9515,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::SplinePointKeyFrame>> S
 /// The properties and routed events of [`SplitButton`](ferroui_controls::SplitButton).
 pub trait SplitButtonProps: ElementBuilder {
     /// Sets [`SplitButton::command_property`](ferroui_controls::SplitButton::command_property).
+    #[inline(always)]
     fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::SplitButton>::command_property(), value)
     }
 
     /// Sets [`SplitButton::command_parameter_property`](ferroui_controls::SplitButton::command_parameter_property).
+    #[inline(always)]
     fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::SplitButton>::command_parameter_property(), value)
     }
 
     /// Sets [`SplitButton::flyout_property`](ferroui_controls::SplitButton::flyout_property).
+    #[inline(always)]
     fn flyout<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::FlyoutBase>>, M>) -> Self {
         self.prop(<ferroui_controls::SplitButton>::flyout_property(), value)
     }
 
     /// Sets [`SplitButton::hot_key_property`](ferroui_controls::SplitButton::hot_key_property).
+    #[inline(always)]
     fn hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::SplitButton>::hot_key_property(), value)
     }
@@ -8541,46 +9548,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::SplitButton>> SplitButtonProps for
 /// The properties and routed events of [`SplitView`](ferroui_controls::SplitView).
 pub trait SplitViewProps: ElementBuilder {
     /// Sets [`SplitView::compact_pane_length_property`](ferroui_controls::SplitView::compact_pane_length_property).
+    #[inline(always)]
     fn compact_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::compact_pane_length_property(), value)
     }
 
     /// Sets [`SplitView::display_mode_property`](ferroui_controls::SplitView::display_mode_property).
+    #[inline(always)]
     fn display_mode<M>(self, value: impl IntoProp<ferroui_controls::SplitViewDisplayMode, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::display_mode_property(), value)
     }
 
     /// Sets [`SplitView::is_pane_open_property`](ferroui_controls::SplitView::is_pane_open_property).
+    #[inline(always)]
     fn is_pane_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::is_pane_open_property(), value)
     }
 
     /// Sets [`SplitView::open_pane_length_property`](ferroui_controls::SplitView::open_pane_length_property).
+    #[inline(always)]
     fn open_pane_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::open_pane_length_property(), value)
     }
 
     /// Sets [`SplitView::pane_background_property`](ferroui_controls::SplitView::pane_background_property).
+    #[inline(always)]
     fn pane_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::pane_background_property(), value)
     }
 
     /// Sets [`SplitView::pane_placement_property`](ferroui_controls::SplitView::pane_placement_property).
+    #[inline(always)]
     fn pane_placement<M>(self, value: impl IntoProp<ferroui_controls::SplitViewPanePlacement, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::pane_placement_property(), value)
     }
 
     /// Sets [`SplitView::pane_property`](ferroui_controls::SplitView::pane_property).
+    #[inline(always)]
     fn pane<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::pane_property(), value)
     }
 
     /// Sets [`SplitView::pane_template_property`](ferroui_controls::SplitView::pane_template_property).
+    #[inline(always)]
     fn pane_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::pane_template_property(), value)
     }
 
     /// Sets [`SplitView::use_light_dismiss_overlay_mode_property`](ferroui_controls::SplitView::use_light_dismiss_overlay_mode_property).
+    #[inline(always)]
     fn use_light_dismiss_overlay_mode<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::use_light_dismiss_overlay_mode_property(), value)
     }
@@ -8600,21 +9616,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::SplitView>> SplitViewProps for El<
 /// The properties and routed events of [`SplitViewTemplateSettings`](ferroui_controls::primitives::SplitViewTemplateSettings).
 pub trait SplitViewTemplateSettingsProps: ElementBuilder {
     /// Sets [`SplitViewTemplateSettings::closed_pane_width_property`](ferroui_controls::primitives::SplitViewTemplateSettings::closed_pane_width_property).
+    #[inline(always)]
     fn closed_pane_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SplitViewTemplateSettings>::closed_pane_width_property(), value)
     }
 
     /// Sets [`SplitViewTemplateSettings::pane_column_grid_length_property`](ferroui_controls::primitives::SplitViewTemplateSettings::pane_column_grid_length_property).
+    #[inline(always)]
     fn pane_column_grid_length<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SplitViewTemplateSettings>::pane_column_grid_length_property(), value)
     }
 
     /// Sets [`SplitViewTemplateSettings::closed_pane_height_property`](ferroui_controls::primitives::SplitViewTemplateSettings::closed_pane_height_property).
+    #[inline(always)]
     fn closed_pane_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SplitViewTemplateSettings>::closed_pane_height_property(), value)
     }
 
     /// Sets [`SplitViewTemplateSettings::pane_row_grid_length_property`](ferroui_controls::primitives::SplitViewTemplateSettings::pane_row_grid_length_property).
+    #[inline(always)]
     fn pane_row_grid_length<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SplitViewTemplateSettings>::pane_row_grid_length_property(), value)
     }
@@ -8624,21 +9644,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::SplitViewTemplateSetti
 /// The properties and routed events of [`StackPanel`](ferroui_controls::StackPanel).
 pub trait StackPanelProps: ElementBuilder {
     /// Sets [`StackPanel::spacing_property`](ferroui_controls::StackPanel::spacing_property).
+    #[inline(always)]
     fn spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::StackPanel>::spacing_property(), value)
     }
 
     /// Sets [`StackPanel::orientation_property`](ferroui_controls::StackPanel::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::StackPanel>::orientation_property(), value)
     }
 
     /// Sets [`StackPanel::are_horizontal_snap_points_regular_property`](ferroui_controls::StackPanel::are_horizontal_snap_points_regular_property).
+    #[inline(always)]
     fn are_horizontal_snap_points_regular<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::StackPanel>::are_horizontal_snap_points_regular_property(), value)
     }
 
     /// Sets [`StackPanel::are_vertical_snap_points_regular_property`](ferroui_controls::StackPanel::are_vertical_snap_points_regular_property).
+    #[inline(always)]
     fn are_vertical_snap_points_regular<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::StackPanel>::are_vertical_snap_points_regular_property(), value)
     }
@@ -8658,6 +9682,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::StackPanel>> StackPanelProps for E
 /// The properties and routed events of [`StateTrigger`](ferroui_controls::StateTrigger).
 pub trait StateTriggerProps: ElementBuilder {
     /// Sets [`StateTrigger::is_active_property`](ferroui_controls::StateTrigger::is_active_property).
+    #[inline(always)]
     fn is_active<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::StateTrigger>::is_active_property(), value)
     }
@@ -8667,11 +9692,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::StateTrigger>> StateTriggerProps f
 /// The properties and routed events of [`Storyboard`](ferroui_controls::animation::Storyboard).
 pub trait StoryboardProps: ElementBuilder {
     /// Sets [`Storyboard::target_name_property`](ferroui_controls::animation::Storyboard::target_name_property).
+    #[inline(always)]
     fn target_name<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::animation::Storyboard>::target_name_property(), value)
     }
 
     /// Sets [`Storyboard::target_property_property`](ferroui_controls::animation::Storyboard::target_property_property).
+    #[inline(always)]
     fn target_property<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::animation::Storyboard>::target_property_property(), value)
     }
@@ -8681,21 +9708,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::Storyboard>> Storyboard
 /// The properties and routed events of [`StyledElement`](ferroui_base::StyledElement).
 pub trait StyledElementProps: ElementBuilder {
     /// Sets [`StyledElement::data_context_property`](ferroui_base::StyledElement::data_context_property).
+    #[inline(always)]
     fn data_context<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_base::StyledElement>::data_context_property(), value)
     }
 
     /// Sets [`StyledElement::theme_property`](ferroui_base::StyledElement::theme_property).
+    #[inline(always)]
     fn theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_base::StyledElement>::theme_property(), value)
     }
 
     /// Sets [`ThemeVariant::actual_theme_variant_property`](ferroui_base::styling::ThemeVariant::actual_theme_variant_property).
+    #[inline(always)]
     fn actual_theme_variant<M>(self, value: impl IntoProp<Option<ferroui_base::styling::ThemeVariant>, M>) -> Self {
         self.prop(<ferroui_base::styling::ThemeVariant>::actual_theme_variant_property(), value)
     }
 
     /// Sets [`ThemeVariant::requested_theme_variant_property`](ferroui_base::styling::ThemeVariant::requested_theme_variant_property).
+    #[inline(always)]
     fn requested_theme_variant<M>(self, value: impl IntoProp<Option<ferroui_base::styling::ThemeVariant>, M>) -> Self {
         self.prop(<ferroui_base::styling::ThemeVariant>::requested_theme_variant_property(), value)
     }
@@ -8705,21 +9736,25 @@ impl<T: ObjectType + Upcast<ferroui_base::StyledElement>> StyledElementProps for
 /// The properties and routed events of [`SwipeControl`](ferroui_controls::SwipeControl).
 pub trait SwipeControlProps: ElementBuilder {
     /// Sets [`SwipeControl::left_items_property`](ferroui_controls::SwipeControl::left_items_property).
+    #[inline(always)]
     fn left_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeControl>::left_items_property(), value)
     }
 
     /// Sets [`SwipeControl::right_items_property`](ferroui_controls::SwipeControl::right_items_property).
+    #[inline(always)]
     fn right_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeControl>::right_items_property(), value)
     }
 
     /// Sets [`SwipeControl::top_items_property`](ferroui_controls::SwipeControl::top_items_property).
+    #[inline(always)]
     fn top_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeControl>::top_items_property(), value)
     }
 
     /// Sets [`SwipeControl::bottom_items_property`](ferroui_controls::SwipeControl::bottom_items_property).
+    #[inline(always)]
     fn bottom_items<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::SwipeItems>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeControl>::bottom_items_property(), value)
     }
@@ -8729,26 +9764,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::SwipeControl>> SwipeControlProps f
 /// The properties and routed events of [`SwipeGestureRecognizer`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer).
 pub trait SwipeGestureRecognizerProps: ElementBuilder {
     /// Sets [`SwipeGestureRecognizer::can_horizontally_swipe_property`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer::can_horizontally_swipe_property).
+    #[inline(always)]
     fn can_horizontally_swipe<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>::can_horizontally_swipe_property(), value)
     }
 
     /// Sets [`SwipeGestureRecognizer::can_vertically_swipe_property`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer::can_vertically_swipe_property).
+    #[inline(always)]
     fn can_vertically_swipe<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>::can_vertically_swipe_property(), value)
     }
 
     /// Sets [`SwipeGestureRecognizer::threshold_property`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer::threshold_property).
+    #[inline(always)]
     fn threshold<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>::threshold_property(), value)
     }
 
     /// Sets [`SwipeGestureRecognizer::is_mouse_enabled_property`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer::is_mouse_enabled_property).
+    #[inline(always)]
     fn is_mouse_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>::is_mouse_enabled_property(), value)
     }
 
     /// Sets [`SwipeGestureRecognizer::is_enabled_property`](ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer::is_enabled_property).
+    #[inline(always)]
     fn is_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer>::is_enabled_property(), value)
     }
@@ -8758,36 +9798,43 @@ impl<T: ObjectType + Upcast<ferroui_base::input::gesture_recognizers::SwipeGestu
 /// The properties and routed events of [`SwipeItem`](ferroui_controls::SwipeItem).
 pub trait SwipeItemProps: ElementBuilder {
     /// Sets [`SwipeItem::text_property`](ferroui_controls::SwipeItem::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::text_property(), value)
     }
 
     /// Sets [`SwipeItem::icon_source_property`](ferroui_controls::SwipeItem::icon_source_property).
+    #[inline(always)]
     fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::icon_source_property(), value)
     }
 
     /// Sets [`SwipeItem::background_property`](ferroui_controls::SwipeItem::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::background_property(), value)
     }
 
     /// Sets [`SwipeItem::foreground_property`](ferroui_controls::SwipeItem::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::foreground_property(), value)
     }
 
     /// Sets [`SwipeItem::command_property`](ferroui_controls::SwipeItem::command_property).
+    #[inline(always)]
     fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::command_property(), value)
     }
 
     /// Sets [`SwipeItem::command_parameter_property`](ferroui_controls::SwipeItem::command_parameter_property).
+    #[inline(always)]
     fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::command_parameter_property(), value)
     }
 
     /// Sets [`SwipeItem::behavior_on_invoked_property`](ferroui_controls::SwipeItem::behavior_on_invoked_property).
+    #[inline(always)]
     fn behavior_on_invoked<M>(self, value: impl IntoProp<ferroui_controls::SwipeBehaviorOnInvoked, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::behavior_on_invoked_property(), value)
     }
@@ -8797,6 +9844,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::SwipeItem>> SwipeItemProps for El<
 /// The properties and routed events of [`SwipeItems`](ferroui_controls::SwipeItems).
 pub trait SwipeItemsProps: ElementBuilder {
     /// Sets [`SwipeItems::mode_property`](ferroui_controls::SwipeItems::mode_property).
+    #[inline(always)]
     fn mode<M>(self, value: impl IntoProp<ferroui_controls::SwipeMode, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItems>::mode_property(), value)
     }
@@ -8806,6 +9854,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::SwipeItems>> SwipeItemsProps for E
 /// The properties and routed events of [`SymbolIcon`](ferroui_controls::SymbolIcon).
 pub trait SymbolIconProps: ElementBuilder {
     /// Sets [`SymbolIcon::symbol_property`](ferroui_controls::SymbolIcon::symbol_property).
+    #[inline(always)]
     fn symbol<M>(self, value: impl IntoProp<ferroui_controls::Symbol, M>) -> Self {
         self.prop(<ferroui_controls::SymbolIcon>::symbol_property(), value)
     }
@@ -8815,6 +9864,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::SymbolIcon>> SymbolIconProps for E
 /// The properties and routed events of [`SymbolIconSource`](ferroui_controls::SymbolIconSource).
 pub trait SymbolIconSourceProps: ElementBuilder {
     /// Sets [`SymbolIconSource::symbol_property`](ferroui_controls::SymbolIconSource::symbol_property).
+    #[inline(always)]
     fn symbol<M>(self, value: impl IntoProp<ferroui_controls::Symbol, M>) -> Self {
         self.prop(<ferroui_controls::SymbolIconSource>::symbol_property(), value)
     }
@@ -8824,31 +9874,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::SymbolIconSource>> SymbolIconSourc
 /// The properties and routed events of [`TabControl`](ferroui_controls::TabControl).
 pub trait TabControlProps: ElementBuilder {
     /// Sets [`TabControl::tab_strip_placement_property`](ferroui_controls::TabControl::tab_strip_placement_property).
+    #[inline(always)]
     fn tab_strip_placement<M>(self, value: impl IntoProp<ferroui_controls::Dock, M>) -> Self {
         self.prop(<ferroui_controls::TabControl>::tab_strip_placement_property(), value)
     }
 
     /// Sets [`TabControl::horizontal_content_alignment_property`](ferroui_controls::TabControl::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TabControl>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`TabControl::vertical_content_alignment_property`](ferroui_controls::TabControl::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TabControl>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`TabControl::content_template_property`](ferroui_controls::TabControl::content_template_property).
+    #[inline(always)]
     fn content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::TabControl>::content_template_property(), value)
     }
 
     /// Sets [`TabControl::page_transition_property`](ferroui_controls::TabControl::page_transition_property).
+    #[inline(always)]
     fn page_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::TabControl>::page_transition_property(), value)
     }
 
     /// Sets [`TabControl::indicator_template_property`](ferroui_controls::TabControl::indicator_template_property).
+    #[inline(always)]
     fn indicator_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::TabControl>::indicator_template_property(), value)
     }
@@ -8858,21 +9914,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::TabControl>> TabControlProps for E
 /// The properties and routed events of [`TabItem`](ferroui_controls::TabItem).
 pub trait TabItemProps: ElementBuilder {
     /// Sets [`TabItem::is_selected_property`](ferroui_controls::TabItem::is_selected_property).
+    #[inline(always)]
     fn is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TabItem>::is_selected_property(), value)
     }
 
     /// Sets [`TabItem::icon_property`](ferroui_controls::TabItem::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::TabItem>::icon_property(), value)
     }
 
     /// Sets [`TabItem::icon_template_property`](ferroui_controls::TabItem::icon_template_property).
+    #[inline(always)]
     fn icon_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::TabItem>::icon_template_property(), value)
     }
 
     /// Sets [`TabItem::indicator_template_property`](ferroui_controls::TabItem::indicator_template_property).
+    #[inline(always)]
     fn indicator_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::TabItem>::indicator_template_property(), value)
     }
@@ -8882,31 +9942,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::TabItem>> TabItemProps for El<T> {
 /// The properties and routed events of [`TabbedPage`](ferroui_controls::TabbedPage).
 pub trait TabbedPageProps: ElementBuilder {
     /// Sets [`TabbedPage::tab_placement_property`](ferroui_controls::TabbedPage::tab_placement_property).
+    #[inline(always)]
     fn tab_placement<M>(self, value: impl IntoProp<ferroui_controls::TabPlacement, M>) -> Self {
         self.prop(<ferroui_controls::TabbedPage>::tab_placement_property(), value)
     }
 
     /// Sets [`TabbedPage::is_keyboard_navigation_enabled_property`](ferroui_controls::TabbedPage::is_keyboard_navigation_enabled_property).
+    #[inline(always)]
     fn is_keyboard_navigation_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TabbedPage>::is_keyboard_navigation_enabled_property(), value)
     }
 
     /// Sets [`TabbedPage::is_gesture_enabled_property`](ferroui_controls::TabbedPage::is_gesture_enabled_property).
+    #[inline(always)]
     fn is_gesture_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TabbedPage>::is_gesture_enabled_property(), value)
     }
 
     /// Sets [`TabbedPage::page_transition_property`](ferroui_controls::TabbedPage::page_transition_property).
+    #[inline(always)]
     fn page_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::TabbedPage>::page_transition_property(), value)
     }
 
     /// Sets [`TabbedPage::indicator_template_property`](ferroui_controls::TabbedPage::indicator_template_property).
+    #[inline(always)]
     fn indicator_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::TabbedPage>::indicator_template_property(), value)
     }
 
     /// Sets [`TabbedPage::is_tab_enabled_property`](ferroui_controls::TabbedPage::is_tab_enabled_property).
+    #[inline(always)]
     fn is_tab_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TabbedPage>::is_tab_enabled_property(), value)
     }
@@ -8916,11 +9982,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::TabbedPage>> TabbedPageProps for E
 /// The properties and routed events of [`TableView`](ferroui_controls::TableView).
 pub trait TableViewProps: ElementBuilder {
     /// Sets [`TableView::columns_property`](ferroui_controls::TableView::columns_property).
+    #[inline(always)]
     fn columns<M>(self, value: impl IntoProp<Option<ferroui_base::collections::FerroList<ferroui_base::Ref<ferroui_controls::TableViewColumn>>>, M>) -> Self {
         self.prop(<ferroui_controls::TableView>::columns_property(), value)
     }
 
     /// Sets [`TableView::can_user_resize_columns_property`](ferroui_controls::TableView::can_user_resize_columns_property).
+    #[inline(always)]
     fn can_user_resize_columns<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TableView>::can_user_resize_columns_property(), value)
     }
@@ -8930,46 +9998,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::TableView>> TableViewProps for El<
 /// The properties and routed events of [`TableViewColumn`](ferroui_controls::TableViewColumn).
 pub trait TableViewColumnProps: ElementBuilder {
     /// Sets [`TableViewColumn::is_visible_property`](ferroui_controls::TableViewColumn::is_visible_property).
+    #[inline(always)]
     fn is_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::is_visible_property(), value)
     }
 
     /// Sets [`TableViewColumn::header_theme_property`](ferroui_controls::TableViewColumn::header_theme_property).
+    #[inline(always)]
     fn header_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::header_theme_property(), value)
     }
 
     /// Sets [`TableViewColumn::header_template_property`](ferroui_controls::TableViewColumn::header_template_property).
+    #[inline(always)]
     fn header_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::header_template_property(), value)
     }
 
     /// Sets [`TableViewColumn::header_property`](ferroui_controls::TableViewColumn::header_property).
+    #[inline(always)]
     fn header<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::header_property(), value)
     }
 
     /// Sets [`TableViewColumn::width_property`](ferroui_controls::TableViewColumn::width_property).
+    #[inline(always)]
     fn width<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::width_property(), value)
     }
 
     /// Sets [`TableViewColumn::cell_theme_property`](ferroui_controls::TableViewColumn::cell_theme_property).
+    #[inline(always)]
     fn cell_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::cell_theme_property(), value)
     }
 
     /// Sets [`TableViewColumn::cell_template_property`](ferroui_controls::TableViewColumn::cell_template_property).
+    #[inline(always)]
     fn cell_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::cell_template_property(), value)
     }
 
     /// Sets [`TableViewColumn::can_user_resize_property`](ferroui_controls::TableViewColumn::can_user_resize_property).
+    #[inline(always)]
     fn can_user_resize<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::can_user_resize_property(), value)
     }
 
     /// Sets [`TableViewColumn::horizontal_content_alignment_property`](ferroui_controls::TableViewColumn::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::horizontal_content_alignment_property(), value)
     }
@@ -8979,81 +10056,97 @@ impl<T: ObjectType + Upcast<ferroui_controls::TableViewColumn>> TableViewColumnP
 /// The properties and routed events of [`TemplatedControl`](ferroui_controls::primitives::TemplatedControl).
 pub trait TemplatedControlProps: ElementBuilder {
     /// Sets [`TemplatedControl::background_property`](ferroui_controls::primitives::TemplatedControl::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::background_property(), value)
     }
 
     /// Sets [`TemplatedControl::background_sizing_property`](ferroui_controls::primitives::TemplatedControl::background_sizing_property).
+    #[inline(always)]
     fn background_sizing<M>(self, value: impl IntoProp<ferroui_base::media::BackgroundSizing, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::background_sizing_property(), value)
     }
 
     /// Sets [`TemplatedControl::border_brush_property`](ferroui_controls::primitives::TemplatedControl::border_brush_property).
+    #[inline(always)]
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::border_brush_property(), value)
     }
 
     /// Sets [`TemplatedControl::border_thickness_property`](ferroui_controls::primitives::TemplatedControl::border_thickness_property).
+    #[inline(always)]
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::border_thickness_property(), value)
     }
 
     /// Sets [`TemplatedControl::corner_radius_property`](ferroui_controls::primitives::TemplatedControl::corner_radius_property).
+    #[inline(always)]
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::corner_radius_property(), value)
     }
 
     /// Sets [`TemplatedControl::font_family_property`](ferroui_controls::primitives::TemplatedControl::font_family_property).
+    #[inline(always)]
     fn font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_family_property(), value)
     }
 
     /// Sets [`TemplatedControl::font_features_property`](ferroui_controls::primitives::TemplatedControl::font_features_property).
+    #[inline(always)]
     fn font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_features_property(), value)
     }
 
     /// Sets [`TemplatedControl::font_size_property`](ferroui_controls::primitives::TemplatedControl::font_size_property).
+    #[inline(always)]
     fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_size_property(), value)
     }
 
     /// Sets [`TemplatedControl::font_style_property`](ferroui_controls::primitives::TemplatedControl::font_style_property).
+    #[inline(always)]
     fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_style_property(), value)
     }
 
     /// Sets [`TemplatedControl::font_weight_property`](ferroui_controls::primitives::TemplatedControl::font_weight_property).
+    #[inline(always)]
     fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_weight_property(), value)
     }
 
     /// Sets [`TemplatedControl::font_stretch_property`](ferroui_controls::primitives::TemplatedControl::font_stretch_property).
+    #[inline(always)]
     fn font_stretch<M>(self, value: impl IntoProp<ferroui_base::media::FontStretch, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_stretch_property(), value)
     }
 
     /// Sets [`TemplatedControl::foreground_property`](ferroui_controls::primitives::TemplatedControl::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::foreground_property(), value)
     }
 
     /// Sets [`TemplatedControl::letter_spacing_property`](ferroui_controls::primitives::TemplatedControl::letter_spacing_property).
+    #[inline(always)]
     fn letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::letter_spacing_property(), value)
     }
 
     /// Sets [`TemplatedControl::padding_property`](ferroui_controls::primitives::TemplatedControl::padding_property).
+    #[inline(always)]
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::padding_property(), value)
     }
 
     /// Sets [`TemplatedControl::template_property`](ferroui_controls::primitives::TemplatedControl::template_property).
+    #[inline(always)]
     fn template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IControlTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::template_property(), value)
     }
 
     /// Sets [`TemplatedControl::is_template_focus_target_property`](ferroui_controls::primitives::TemplatedControl::is_template_focus_target_property).
+    #[inline(always)]
     fn is_template_focus_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::is_template_focus_target_property(), value)
     }
@@ -9068,111 +10161,133 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::TemplatedControl>> Tem
 /// The properties and routed events of [`TextBlock`](ferroui_controls::TextBlock).
 pub trait TextBlockProps: ElementBuilder {
     /// Sets [`TextBlock::background_property`](ferroui_controls::TextBlock::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::background_property(), value)
     }
 
     /// Sets [`TextBlock::padding_property`](ferroui_controls::TextBlock::padding_property).
+    #[inline(always)]
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::padding_property(), value)
     }
 
     /// Sets [`TextBlock::font_family_property`](ferroui_controls::TextBlock::font_family_property).
+    #[inline(always)]
     fn font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::font_family_property(), value)
     }
 
     /// Sets [`TextBlock::font_size_property`](ferroui_controls::TextBlock::font_size_property).
+    #[inline(always)]
     fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::font_size_property(), value)
     }
 
     /// Sets [`TextBlock::font_style_property`](ferroui_controls::TextBlock::font_style_property).
+    #[inline(always)]
     fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::font_style_property(), value)
     }
 
     /// Sets [`TextBlock::font_weight_property`](ferroui_controls::TextBlock::font_weight_property).
+    #[inline(always)]
     fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::font_weight_property(), value)
     }
 
     /// Sets [`TextBlock::font_stretch_property`](ferroui_controls::TextBlock::font_stretch_property).
+    #[inline(always)]
     fn font_stretch<M>(self, value: impl IntoProp<ferroui_base::media::FontStretch, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::font_stretch_property(), value)
     }
 
     /// Sets [`TextBlock::foreground_property`](ferroui_controls::TextBlock::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::foreground_property(), value)
     }
 
     /// Sets [`TextBlock::baseline_offset_property`](ferroui_controls::TextBlock::baseline_offset_property).
+    #[inline(always)]
     fn baseline_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::baseline_offset_property(), value)
     }
 
     /// Sets [`TextBlock::text_line_bounds_property`](ferroui_controls::TextBlock::text_line_bounds_property).
+    #[inline(always)]
     fn text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_line_bounds_property(), value)
     }
 
     /// Sets [`TextBlock::layout_rounding_placement_property`](ferroui_controls::TextBlock::layout_rounding_placement_property).
+    #[inline(always)]
     fn layout_rounding_placement<M>(self, value: impl IntoProp<ferroui_controls::TextLayoutRoundingPlacement, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::layout_rounding_placement_property(), value)
     }
 
     /// Sets [`TextBlock::line_height_property`](ferroui_controls::TextBlock::line_height_property).
+    #[inline(always)]
     fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::line_height_property(), value)
     }
 
     /// Sets [`TextBlock::line_spacing_property`](ferroui_controls::TextBlock::line_spacing_property).
+    #[inline(always)]
     fn line_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::line_spacing_property(), value)
     }
 
     /// Sets [`TextBlock::letter_spacing_property`](ferroui_controls::TextBlock::letter_spacing_property).
+    #[inline(always)]
     fn letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::letter_spacing_property(), value)
     }
 
     /// Sets [`TextBlock::max_lines_property`](ferroui_controls::TextBlock::max_lines_property).
+    #[inline(always)]
     fn max_lines<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::max_lines_property(), value)
     }
 
     /// Sets [`TextBlock::text_property`](ferroui_controls::TextBlock::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_property(), value)
     }
 
     /// Sets [`TextBlock::text_alignment_property`](ferroui_controls::TextBlock::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_alignment_property(), value)
     }
 
     /// Sets [`TextBlock::text_wrapping_property`](ferroui_controls::TextBlock::text_wrapping_property).
+    #[inline(always)]
     fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_wrapping_property(), value)
     }
 
     /// Sets [`TextBlock::text_trimming_property`](ferroui_controls::TextBlock::text_trimming_property).
+    #[inline(always)]
     fn text_trimming<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_base::media::TextTrimming>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_trimming_property(), value)
     }
 
     /// Sets [`TextBlock::text_decorations_property`](ferroui_controls::TextBlock::text_decorations_property).
+    #[inline(always)]
     fn text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_decorations_property(), value)
     }
 
     /// Sets [`TextBlock::font_features_property`](ferroui_controls::TextBlock::font_features_property).
+    #[inline(always)]
     fn font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::font_features_property(), value)
     }
 
     /// Sets [`TextBlock::inlines_property`](ferroui_controls::TextBlock::inlines_property).
+    #[inline(always)]
     fn inlines<M>(self, value: impl IntoProp<Option<ferroui_controls::documents::InlineCollection>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::inlines_property(), value)
     }
@@ -9182,156 +10297,187 @@ impl<T: ObjectType + Upcast<ferroui_controls::TextBlock>> TextBlockProps for El<
 /// The properties and routed events of [`TextBox`](ferroui_controls::TextBox).
 pub trait TextBoxProps: ElementBuilder {
     /// Sets [`TextBox::is_inactive_selection_highlight_enabled_property`](ferroui_controls::TextBox::is_inactive_selection_highlight_enabled_property).
+    #[inline(always)]
     fn is_inactive_selection_highlight_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::is_inactive_selection_highlight_enabled_property(), value)
     }
 
     /// Sets [`TextBox::clear_selection_on_lost_focus_property`](ferroui_controls::TextBox::clear_selection_on_lost_focus_property).
+    #[inline(always)]
     fn clear_selection_on_lost_focus<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::clear_selection_on_lost_focus_property(), value)
     }
 
     /// Sets [`TextBox::accepts_return_property`](ferroui_controls::TextBox::accepts_return_property).
+    #[inline(always)]
     fn accepts_return<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::accepts_return_property(), value)
     }
 
     /// Sets [`TextBox::accepts_tab_property`](ferroui_controls::TextBox::accepts_tab_property).
+    #[inline(always)]
     fn accepts_tab<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::accepts_tab_property(), value)
     }
 
     /// Sets [`TextBox::caret_index_property`](ferroui_controls::TextBox::caret_index_property).
+    #[inline(always)]
     fn caret_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::caret_index_property(), value)
     }
 
     /// Sets [`TextBox::is_read_only_property`](ferroui_controls::TextBox::is_read_only_property).
+    #[inline(always)]
     fn is_read_only<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::is_read_only_property(), value)
     }
 
     /// Sets [`TextBox::password_char_property`](ferroui_controls::TextBox::password_char_property).
+    #[inline(always)]
     fn password_char<M>(self, value: impl IntoProp<char, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::password_char_property(), value)
     }
 
     /// Sets [`TextBox::selection_brush_property`](ferroui_controls::TextBox::selection_brush_property).
+    #[inline(always)]
     fn selection_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::selection_brush_property(), value)
     }
 
     /// Sets [`TextBox::selection_foreground_brush_property`](ferroui_controls::TextBox::selection_foreground_brush_property).
+    #[inline(always)]
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`TextBox::caret_brush_property`](ferroui_controls::TextBox::caret_brush_property).
+    #[inline(always)]
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::caret_brush_property(), value)
     }
 
     /// Sets [`TextBox::caret_blink_interval_property`](ferroui_controls::TextBox::caret_blink_interval_property).
+    #[inline(always)]
     fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::caret_blink_interval_property(), value)
     }
 
     /// Sets [`TextBox::selection_start_property`](ferroui_controls::TextBox::selection_start_property).
+    #[inline(always)]
     fn selection_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::selection_start_property(), value)
     }
 
     /// Sets [`TextBox::selection_end_property`](ferroui_controls::TextBox::selection_end_property).
+    #[inline(always)]
     fn selection_end<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::selection_end_property(), value)
     }
 
     /// Sets [`TextBox::max_length_property`](ferroui_controls::TextBox::max_length_property).
+    #[inline(always)]
     fn max_length<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::max_length_property(), value)
     }
 
     /// Sets [`TextBox::max_lines_property`](ferroui_controls::TextBox::max_lines_property).
+    #[inline(always)]
     fn max_lines<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::max_lines_property(), value)
     }
 
     /// Sets [`TextBox::min_lines_property`](ferroui_controls::TextBox::min_lines_property).
+    #[inline(always)]
     fn min_lines<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::min_lines_property(), value)
     }
 
     /// Sets [`TextBox::text_property`](ferroui_controls::TextBox::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::text_property(), value)
     }
 
     /// Sets [`TextBox::text_alignment_property`](ferroui_controls::TextBox::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::text_alignment_property(), value)
     }
 
     /// Sets [`TextBox::horizontal_content_alignment_property`](ferroui_controls::TextBox::horizontal_content_alignment_property).
+    #[inline(always)]
     fn horizontal_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::HorizontalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::horizontal_content_alignment_property(), value)
     }
 
     /// Sets [`TextBox::vertical_content_alignment_property`](ferroui_controls::TextBox::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`TextBox::text_wrapping_property`](ferroui_controls::TextBox::text_wrapping_property).
+    #[inline(always)]
     fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::text_wrapping_property(), value)
     }
 
     /// Sets [`TextBox::line_height_property`](ferroui_controls::TextBox::line_height_property).
+    #[inline(always)]
     fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::line_height_property(), value)
     }
 
     /// Sets [`TextBox::placeholder_text_property`](ferroui_controls::TextBox::placeholder_text_property).
+    #[inline(always)]
     fn placeholder_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::placeholder_text_property(), value)
     }
 
     /// Sets [`TextBox::use_floating_placeholder_property`](ferroui_controls::TextBox::use_floating_placeholder_property).
+    #[inline(always)]
     fn use_floating_placeholder<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::use_floating_placeholder_property(), value)
     }
 
     /// Sets [`TextBox::placeholder_foreground_property`](ferroui_controls::TextBox::placeholder_foreground_property).
+    #[inline(always)]
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::placeholder_foreground_property(), value)
     }
 
     /// Sets [`TextBox::new_line_property`](ferroui_controls::TextBox::new_line_property).
+    #[inline(always)]
     fn new_line<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::new_line_property(), value)
     }
 
     /// Sets [`TextBox::inner_left_content_property`](ferroui_controls::TextBox::inner_left_content_property).
+    #[inline(always)]
     fn inner_left_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::inner_left_content_property(), value)
     }
 
     /// Sets [`TextBox::inner_right_content_property`](ferroui_controls::TextBox::inner_right_content_property).
+    #[inline(always)]
     fn inner_right_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::inner_right_content_property(), value)
     }
 
     /// Sets [`TextBox::reveal_password_property`](ferroui_controls::TextBox::reveal_password_property).
+    #[inline(always)]
     fn reveal_password<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::reveal_password_property(), value)
     }
 
     /// Sets [`TextBox::is_undo_enabled_property`](ferroui_controls::TextBox::is_undo_enabled_property).
+    #[inline(always)]
     fn is_undo_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::is_undo_enabled_property(), value)
     }
 
     /// Sets [`TextBox::undo_limit_property`](ferroui_controls::TextBox::undo_limit_property).
+    #[inline(always)]
     fn undo_limit<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::undo_limit_property(), value)
     }
@@ -9366,46 +10512,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::TextBox>> TextBoxProps for El<T> {
 /// The properties and routed events of [`TextDecoration`](ferroui_base::media::TextDecoration).
 pub trait TextDecorationProps: ElementBuilder {
     /// Sets [`TextDecoration::location_property`](ferroui_base::media::TextDecoration::location_property).
+    #[inline(always)]
     fn location<M>(self, value: impl IntoProp<ferroui_base::media::TextDecorationLocation, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::location_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_property`](ferroui_base::media::TextDecoration::stroke_property).
+    #[inline(always)]
     fn stroke<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_thickness_unit_property`](ferroui_base::media::TextDecoration::stroke_thickness_unit_property).
+    #[inline(always)]
     fn stroke_thickness_unit<M>(self, value: impl IntoProp<ferroui_base::media::TextDecorationUnit, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_thickness_unit_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_dash_array_property`](ferroui_base::media::TextDecoration::stroke_dash_array_property).
+    #[inline(always)]
     fn stroke_dash_array<M>(self, value: impl IntoProp<Option<ferroui_base::media::MediaCollection<f64>>, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_dash_array_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_dash_offset_property`](ferroui_base::media::TextDecoration::stroke_dash_offset_property).
+    #[inline(always)]
     fn stroke_dash_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_dash_offset_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_thickness_property`](ferroui_base::media::TextDecoration::stroke_thickness_property).
+    #[inline(always)]
     fn stroke_thickness<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_thickness_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_line_cap_property`](ferroui_base::media::TextDecoration::stroke_line_cap_property).
+    #[inline(always)]
     fn stroke_line_cap<M>(self, value: impl IntoProp<ferroui_base::media::PenLineCap, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_line_cap_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_offset_property`](ferroui_base::media::TextDecoration::stroke_offset_property).
+    #[inline(always)]
     fn stroke_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_offset_property(), value)
     }
 
     /// Sets [`TextDecoration::stroke_offset_unit_property`](ferroui_base::media::TextDecoration::stroke_offset_unit_property).
+    #[inline(always)]
     fn stroke_offset_unit<M>(self, value: impl IntoProp<ferroui_base::media::TextDecorationUnit, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_offset_unit_property(), value)
     }
@@ -9415,51 +10570,61 @@ impl<T: ObjectType + Upcast<ferroui_base::media::TextDecoration>> TextDecoration
 /// The properties and routed events of [`TextElement`](ferroui_controls::documents::TextElement).
 pub trait TextElementProps: ElementBuilder {
     /// Sets [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
+    #[inline(always)]
     fn language<M>(self, value: impl IntoProp<ferroui_base::utilities::Locale, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
     }
 
     /// Sets [`TextElement::background_property`](ferroui_controls::documents::TextElement::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::background_property(), value)
     }
 
     /// Sets [`TextElement::font_family_property`](ferroui_controls::documents::TextElement::font_family_property).
+    #[inline(always)]
     fn font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_family_property(), value)
     }
 
     /// Sets [`TextElement::font_features_property`](ferroui_controls::documents::TextElement::font_features_property).
+    #[inline(always)]
     fn font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_features_property(), value)
     }
 
     /// Sets [`TextElement::font_size_property`](ferroui_controls::documents::TextElement::font_size_property).
+    #[inline(always)]
     fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_size_property(), value)
     }
 
     /// Sets [`TextElement::font_style_property`](ferroui_controls::documents::TextElement::font_style_property).
+    #[inline(always)]
     fn font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_style_property(), value)
     }
 
     /// Sets [`TextElement::font_weight_property`](ferroui_controls::documents::TextElement::font_weight_property).
+    #[inline(always)]
     fn font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_weight_property(), value)
     }
 
     /// Sets [`TextElement::font_stretch_property`](ferroui_controls::documents::TextElement::font_stretch_property).
+    #[inline(always)]
     fn font_stretch<M>(self, value: impl IntoProp<ferroui_base::media::FontStretch, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_stretch_property(), value)
     }
 
     /// Sets [`TextElement::foreground_property`](ferroui_controls::documents::TextElement::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::foreground_property(), value)
     }
 
     /// Sets [`TextElement::letter_spacing_property`](ferroui_controls::documents::TextElement::letter_spacing_property).
+    #[inline(always)]
     fn letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::letter_spacing_property(), value)
     }
@@ -9469,11 +10634,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::TextElement>> TextEleme
 /// The properties and routed events of [`TextHighlighter`](ferroui_controls::documents::TextHighlighter).
 pub trait TextHighlighterProps: ElementBuilder {
     /// Sets [`TextHighlighter::foreground_property`](ferroui_controls::documents::TextHighlighter::foreground_property).
+    #[inline(always)]
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextHighlighter>::foreground_property(), value)
     }
 
     /// Sets [`TextHighlighter::background_property`](ferroui_controls::documents::TextHighlighter::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextHighlighter>::background_property(), value)
     }
@@ -9483,91 +10650,109 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::TextHighlighter>> TextH
 /// The properties and routed events of [`TextPresenter`](ferroui_controls::presenters::TextPresenter).
 pub trait TextPresenterProps: ElementBuilder {
     /// Sets [`TextPresenter::show_selection_highlight_property`](ferroui_controls::presenters::TextPresenter::show_selection_highlight_property).
+    #[inline(always)]
     fn show_selection_highlight<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::show_selection_highlight_property(), value)
     }
 
     /// Sets [`TextPresenter::caret_index_property`](ferroui_controls::presenters::TextPresenter::caret_index_property).
+    #[inline(always)]
     fn caret_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::caret_index_property(), value)
     }
 
     /// Sets [`TextPresenter::reveal_password_property`](ferroui_controls::presenters::TextPresenter::reveal_password_property).
+    #[inline(always)]
     fn reveal_password<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::reveal_password_property(), value)
     }
 
     /// Sets [`TextPresenter::password_char_property`](ferroui_controls::presenters::TextPresenter::password_char_property).
+    #[inline(always)]
     fn password_char<M>(self, value: impl IntoProp<char, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::password_char_property(), value)
     }
 
     /// Sets [`TextPresenter::selection_brush_property`](ferroui_controls::presenters::TextPresenter::selection_brush_property).
+    #[inline(always)]
     fn selection_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::selection_brush_property(), value)
     }
 
     /// Sets [`TextPresenter::selection_foreground_brush_property`](ferroui_controls::presenters::TextPresenter::selection_foreground_brush_property).
+    #[inline(always)]
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`TextPresenter::caret_brush_property`](ferroui_controls::presenters::TextPresenter::caret_brush_property).
+    #[inline(always)]
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::caret_brush_property(), value)
     }
 
     /// Sets [`TextPresenter::caret_blink_interval_property`](ferroui_controls::presenters::TextPresenter::caret_blink_interval_property).
+    #[inline(always)]
     fn caret_blink_interval<M>(self, value: impl IntoProp<std::time::Duration, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::caret_blink_interval_property(), value)
     }
 
     /// Sets [`TextPresenter::selection_start_property`](ferroui_controls::presenters::TextPresenter::selection_start_property).
+    #[inline(always)]
     fn selection_start<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::selection_start_property(), value)
     }
 
     /// Sets [`TextPresenter::selection_end_property`](ferroui_controls::presenters::TextPresenter::selection_end_property).
+    #[inline(always)]
     fn selection_end<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::selection_end_property(), value)
     }
 
     /// Sets [`TextPresenter::text_property`](ferroui_controls::presenters::TextPresenter::text_property).
+    #[inline(always)]
     fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::text_property(), value)
     }
 
     /// Sets [`TextPresenter::preedit_text_property`](ferroui_controls::presenters::TextPresenter::preedit_text_property).
+    #[inline(always)]
     fn preedit_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::preedit_text_property(), value)
     }
 
     /// Sets [`TextPresenter::preedit_text_cursor_position_property`](ferroui_controls::presenters::TextPresenter::preedit_text_cursor_position_property).
+    #[inline(always)]
     fn preedit_text_cursor_position<M>(self, value: impl IntoProp<Option<i32>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::preedit_text_cursor_position_property(), value)
     }
 
     /// Sets [`TextPresenter::text_alignment_property`](ferroui_controls::presenters::TextPresenter::text_alignment_property).
+    #[inline(always)]
     fn text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::text_alignment_property(), value)
     }
 
     /// Sets [`TextPresenter::text_wrapping_property`](ferroui_controls::presenters::TextPresenter::text_wrapping_property).
+    #[inline(always)]
     fn text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::text_wrapping_property(), value)
     }
 
     /// Sets [`TextPresenter::line_height_property`](ferroui_controls::presenters::TextPresenter::line_height_property).
+    #[inline(always)]
     fn line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::line_height_property(), value)
     }
 
     /// Sets [`TextPresenter::letter_spacing_property`](ferroui_controls::presenters::TextPresenter::letter_spacing_property).
+    #[inline(always)]
     fn letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::letter_spacing_property(), value)
     }
 
     /// Sets [`TextPresenter::background_property`](ferroui_controls::presenters::TextPresenter::background_property).
+    #[inline(always)]
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::background_property(), value)
     }
@@ -9577,46 +10762,55 @@ impl<T: ObjectType + Upcast<ferroui_controls::presenters::TextPresenter>> TextPr
 /// The properties and routed events of [`TickBar`](ferroui_controls::TickBar).
 pub trait TickBarProps: ElementBuilder {
     /// Sets [`TickBar::fill_property`](ferroui_controls::TickBar::fill_property).
+    #[inline(always)]
     fn fill<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::fill_property(), value)
     }
 
     /// Sets [`TickBar::minimum_property`](ferroui_controls::TickBar::minimum_property).
+    #[inline(always)]
     fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::minimum_property(), value)
     }
 
     /// Sets [`TickBar::maximum_property`](ferroui_controls::TickBar::maximum_property).
+    #[inline(always)]
     fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::maximum_property(), value)
     }
 
     /// Sets [`TickBar::tick_frequency_property`](ferroui_controls::TickBar::tick_frequency_property).
+    #[inline(always)]
     fn tick_frequency<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::tick_frequency_property(), value)
     }
 
     /// Sets [`TickBar::orientation_property`](ferroui_controls::TickBar::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::orientation_property(), value)
     }
 
     /// Sets [`TickBar::ticks_property`](ferroui_controls::TickBar::ticks_property).
+    #[inline(always)]
     fn ticks<M>(self, value: impl IntoProp<Option<ferroui_controls::TickList>, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::ticks_property(), value)
     }
 
     /// Sets [`TickBar::is_direction_reversed_property`](ferroui_controls::TickBar::is_direction_reversed_property).
+    #[inline(always)]
     fn is_direction_reversed<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::is_direction_reversed_property(), value)
     }
 
     /// Sets [`TickBar::placement_property`](ferroui_controls::TickBar::placement_property).
+    #[inline(always)]
     fn placement<M>(self, value: impl IntoProp<ferroui_controls::TickBarPlacement, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::placement_property(), value)
     }
 
     /// Sets [`TickBar::reserved_space_property`](ferroui_controls::TickBar::reserved_space_property).
+    #[inline(always)]
     fn reserved_space<M>(self, value: impl IntoProp<ferroui_base::Rect, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::reserved_space_property(), value)
     }
@@ -9626,31 +10820,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::TickBar>> TickBarProps for El<T> {
 /// The properties and routed events of [`TileBrush`](ferroui_base::media::TileBrush).
 pub trait TileBrushProps: ElementBuilder {
     /// Sets [`TileBrush::alignment_x_property`](ferroui_base::media::TileBrush::alignment_x_property).
+    #[inline(always)]
     fn alignment_x<M>(self, value: impl IntoProp<ferroui_base::media::AlignmentX, M>) -> Self {
         self.prop(<ferroui_base::media::TileBrush>::alignment_x_property(), value)
     }
 
     /// Sets [`TileBrush::alignment_y_property`](ferroui_base::media::TileBrush::alignment_y_property).
+    #[inline(always)]
     fn alignment_y<M>(self, value: impl IntoProp<ferroui_base::media::AlignmentY, M>) -> Self {
         self.prop(<ferroui_base::media::TileBrush>::alignment_y_property(), value)
     }
 
     /// Sets [`TileBrush::destination_rect_property`](ferroui_base::media::TileBrush::destination_rect_property).
+    #[inline(always)]
     fn destination_rect<M>(self, value: impl IntoProp<ferroui_base::RelativeRect, M>) -> Self {
         self.prop(<ferroui_base::media::TileBrush>::destination_rect_property(), value)
     }
 
     /// Sets [`TileBrush::source_rect_property`](ferroui_base::media::TileBrush::source_rect_property).
+    #[inline(always)]
     fn source_rect<M>(self, value: impl IntoProp<ferroui_base::RelativeRect, M>) -> Self {
         self.prop(<ferroui_base::media::TileBrush>::source_rect_property(), value)
     }
 
     /// Sets [`TileBrush::stretch_property`](ferroui_base::media::TileBrush::stretch_property).
+    #[inline(always)]
     fn stretch<M>(self, value: impl IntoProp<ferroui_base::media::Stretch, M>) -> Self {
         self.prop(<ferroui_base::media::TileBrush>::stretch_property(), value)
     }
 
     /// Sets [`TileBrush::tile_mode_property`](ferroui_base::media::TileBrush::tile_mode_property).
+    #[inline(always)]
     fn tile_mode<M>(self, value: impl IntoProp<ferroui_base::media::TileMode, M>) -> Self {
         self.prop(<ferroui_base::media::TileBrush>::tile_mode_property(), value)
     }
@@ -9660,31 +10860,37 @@ impl<T: ObjectType + Upcast<ferroui_base::media::TileBrush>> TileBrushProps for 
 /// The properties and routed events of [`TimePicker`](ferroui_controls::TimePicker).
 pub trait TimePickerProps: ElementBuilder {
     /// Sets [`TimePicker::minute_increment_property`](ferroui_controls::TimePicker::minute_increment_property).
+    #[inline(always)]
     fn minute_increment<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TimePicker>::minute_increment_property(), value)
     }
 
     /// Sets [`TimePicker::second_increment_property`](ferroui_controls::TimePicker::second_increment_property).
+    #[inline(always)]
     fn second_increment<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TimePicker>::second_increment_property(), value)
     }
 
     /// Sets [`TimePicker::clock_identifier_property`](ferroui_controls::TimePicker::clock_identifier_property).
+    #[inline(always)]
     fn clock_identifier<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::TimePicker>::clock_identifier_property(), value)
     }
 
     /// Sets [`TimePicker::vertical_content_alignment_property`](ferroui_controls::TimePicker::vertical_content_alignment_property).
+    #[inline(always)]
     fn vertical_content_alignment<M>(self, value: impl IntoProp<ferroui_base::layout::VerticalAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TimePicker>::vertical_content_alignment_property(), value)
     }
 
     /// Sets [`TimePicker::use_seconds_property`](ferroui_controls::TimePicker::use_seconds_property).
+    #[inline(always)]
     fn use_seconds<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TimePicker>::use_seconds_property(), value)
     }
 
     /// Sets [`TimePicker::selected_time_property`](ferroui_controls::TimePicker::selected_time_property).
+    #[inline(always)]
     fn selected_time<M>(self, value: impl IntoProp<Option<ferroui_base::animation::SignedDuration>, M>) -> Self {
         self.prop(<ferroui_controls::TimePicker>::selected_time_property(), value)
     }
@@ -9694,26 +10900,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::TimePicker>> TimePickerProps for E
 /// The properties and routed events of [`TimePickerPresenter`](ferroui_controls::TimePickerPresenter).
 pub trait TimePickerPresenterProps: ElementBuilder {
     /// Sets [`TimePickerPresenter::minute_increment_property`](ferroui_controls::TimePickerPresenter::minute_increment_property).
+    #[inline(always)]
     fn minute_increment<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TimePickerPresenter>::minute_increment_property(), value)
     }
 
     /// Sets [`TimePickerPresenter::second_increment_property`](ferroui_controls::TimePickerPresenter::second_increment_property).
+    #[inline(always)]
     fn second_increment<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TimePickerPresenter>::second_increment_property(), value)
     }
 
     /// Sets [`TimePickerPresenter::clock_identifier_property`](ferroui_controls::TimePickerPresenter::clock_identifier_property).
+    #[inline(always)]
     fn clock_identifier<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::TimePickerPresenter>::clock_identifier_property(), value)
     }
 
     /// Sets [`TimePickerPresenter::use_seconds_property`](ferroui_controls::TimePickerPresenter::use_seconds_property).
+    #[inline(always)]
     fn use_seconds<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TimePickerPresenter>::use_seconds_property(), value)
     }
 
     /// Sets [`TimePickerPresenter::time_property`](ferroui_controls::TimePickerPresenter::time_property).
+    #[inline(always)]
     fn time<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_controls::TimePickerPresenter>::time_property(), value)
     }
@@ -9723,31 +10934,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::TimePickerPresenter>> TimePickerPr
 /// The properties and routed events of [`Timeline`](ferroui_controls::animation::Timeline).
 pub trait TimelineProps: ElementBuilder {
     /// Sets [`Timeline::begin_time_property`](ferroui_controls::animation::Timeline::begin_time_property).
+    #[inline(always)]
     fn begin_time<M>(self, value: impl IntoProp<Option<ferroui_base::animation::SignedDuration>, M>) -> Self {
         self.prop(<ferroui_controls::animation::Timeline>::begin_time_property(), value)
     }
 
     /// Sets [`Timeline::duration_property`](ferroui_controls::animation::Timeline::duration_property).
+    #[inline(always)]
     fn duration<M>(self, value: impl IntoProp<ferroui_base::animation::TimelineDuration, M>) -> Self {
         self.prop(<ferroui_controls::animation::Timeline>::duration_property(), value)
     }
 
     /// Sets [`Timeline::auto_reverse_property`](ferroui_controls::animation::Timeline::auto_reverse_property).
+    #[inline(always)]
     fn auto_reverse<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::animation::Timeline>::auto_reverse_property(), value)
     }
 
     /// Sets [`Timeline::repeat_behavior_property`](ferroui_controls::animation::Timeline::repeat_behavior_property).
+    #[inline(always)]
     fn repeat_behavior<M>(self, value: impl IntoProp<ferroui_base::animation::RepeatBehavior, M>) -> Self {
         self.prop(<ferroui_controls::animation::Timeline>::repeat_behavior_property(), value)
     }
 
     /// Sets [`Timeline::speed_ratio_property`](ferroui_controls::animation::Timeline::speed_ratio_property).
+    #[inline(always)]
     fn speed_ratio<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::animation::Timeline>::speed_ratio_property(), value)
     }
 
     /// Sets [`Timeline::fill_behavior_property`](ferroui_controls::animation::Timeline::fill_behavior_property).
+    #[inline(always)]
     fn fill_behavior<M>(self, value: impl IntoProp<ferroui_base::animation::FillBehavior, M>) -> Self {
         self.prop(<ferroui_controls::animation::Timeline>::fill_behavior_property(), value)
     }
@@ -9757,56 +10974,67 @@ impl<T: ObjectType + Upcast<ferroui_controls::animation::Timeline>> TimelineProp
 /// The properties and routed events of [`TitleBar`](ferroui_controls::TitleBar).
 pub trait TitleBarProps: ElementBuilder {
     /// Sets [`TitleBar::title_property`](ferroui_controls::TitleBar::title_property).
+    #[inline(always)]
     fn title<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::title_property(), value)
     }
 
     /// Sets [`TitleBar::subtitle_property`](ferroui_controls::TitleBar::subtitle_property).
+    #[inline(always)]
     fn subtitle<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::subtitle_property(), value)
     }
 
     /// Sets [`TitleBar::icon_source_property`](ferroui_controls::TitleBar::icon_source_property).
+    #[inline(always)]
     fn icon_source<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconSource>>, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::icon_source_property(), value)
     }
 
     /// Sets [`TitleBar::left_header_property`](ferroui_controls::TitleBar::left_header_property).
+    #[inline(always)]
     fn left_header<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::left_header_property(), value)
     }
 
     /// Sets [`TitleBar::content_property`](ferroui_controls::TitleBar::content_property).
+    #[inline(always)]
     fn content<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::content_property(), value)
     }
 
     /// Sets [`TitleBar::right_header_property`](ferroui_controls::TitleBar::right_header_property).
+    #[inline(always)]
     fn right_header<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::right_header_property(), value)
     }
 
     /// Sets [`TitleBar::is_back_button_visible_property`](ferroui_controls::TitleBar::is_back_button_visible_property).
+    #[inline(always)]
     fn is_back_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::is_back_button_visible_property(), value)
     }
 
     /// Sets [`TitleBar::is_back_button_enabled_property`](ferroui_controls::TitleBar::is_back_button_enabled_property).
+    #[inline(always)]
     fn is_back_button_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::is_back_button_enabled_property(), value)
     }
 
     /// Sets [`TitleBar::is_pane_toggle_button_visible_property`](ferroui_controls::TitleBar::is_pane_toggle_button_visible_property).
+    #[inline(always)]
     fn is_pane_toggle_button_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::is_pane_toggle_button_visible_property(), value)
     }
 
     /// Sets [`TitleBar::auto_refresh_drag_regions_property`](ferroui_controls::TitleBar::auto_refresh_drag_regions_property).
+    #[inline(always)]
     fn auto_refresh_drag_regions<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::auto_refresh_drag_regions_property(), value)
     }
 
     /// Sets [`TitleBar::is_drag_region_property`](ferroui_controls::TitleBar::is_drag_region_property).
+    #[inline(always)]
     fn is_drag_region<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::is_drag_region_property(), value)
     }
@@ -9816,6 +11044,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::TitleBar>> TitleBarProps for El<T>
 /// The properties and routed events of [`TitleBarTemplateSettings`](ferroui_controls::primitives::TitleBarTemplateSettings).
 pub trait TitleBarTemplateSettingsProps: ElementBuilder {
     /// Sets [`TitleBarTemplateSettings::icon_element_property`](ferroui_controls::primitives::TitleBarTemplateSettings::icon_element_property).
+    #[inline(always)]
     fn icon_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TitleBarTemplateSettings>::icon_element_property(), value)
     }
@@ -9825,11 +11054,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::TitleBarTemplateSettin
 /// The properties and routed events of [`ToggleButton`](ferroui_controls::primitives::ToggleButton).
 pub trait ToggleButtonProps: ElementBuilder {
     /// Sets [`ToggleButton::is_checked_property`](ferroui_controls::primitives::ToggleButton::is_checked_property).
+    #[inline(always)]
     fn is_checked<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ToggleButton>::is_checked_property(), value)
     }
 
     /// Sets [`ToggleButton::is_three_state_property`](ferroui_controls::primitives::ToggleButton::is_three_state_property).
+    #[inline(always)]
     fn is_three_state<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::ToggleButton>::is_three_state_property(), value)
     }
@@ -9844,6 +11075,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::ToggleButton>> ToggleB
 /// The properties and routed events of [`ToggleSplitButton`](ferroui_controls::ToggleSplitButton).
 pub trait ToggleSplitButtonProps: ElementBuilder {
     /// Sets [`ToggleSplitButton::is_checked_property`](ferroui_controls::ToggleSplitButton::is_checked_property).
+    #[inline(always)]
     fn is_checked<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToggleSplitButton>::is_checked_property(), value)
     }
@@ -9858,26 +11090,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::ToggleSplitButton>> ToggleSplitBut
 /// The properties and routed events of [`ToggleSwitch`](ferroui_controls::ToggleSwitch).
 pub trait ToggleSwitchProps: ElementBuilder {
     /// Sets [`ToggleSwitch::off_content_property`](ferroui_controls::ToggleSwitch::off_content_property).
+    #[inline(always)]
     fn off_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ToggleSwitch>::off_content_property(), value)
     }
 
     /// Sets [`ToggleSwitch::off_content_template_property`](ferroui_controls::ToggleSwitch::off_content_template_property).
+    #[inline(always)]
     fn off_content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ToggleSwitch>::off_content_template_property(), value)
     }
 
     /// Sets [`ToggleSwitch::on_content_property`](ferroui_controls::ToggleSwitch::on_content_property).
+    #[inline(always)]
     fn on_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ToggleSwitch>::on_content_property(), value)
     }
 
     /// Sets [`ToggleSwitch::on_content_template_property`](ferroui_controls::ToggleSwitch::on_content_template_property).
+    #[inline(always)]
     fn on_content_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::ToggleSwitch>::on_content_template_property(), value)
     }
 
     /// Sets [`ToggleSwitch::knob_transitions_property`](ferroui_controls::ToggleSwitch::knob_transitions_property).
+    #[inline(always)]
     fn knob_transitions<M>(self, value: impl IntoProp<Option<ferroui_base::animation::Transitions>, M>) -> Self {
         self.prop(<ferroui_controls::ToggleSwitch>::knob_transitions_property(), value)
     }
@@ -9887,61 +11124,73 @@ impl<T: ObjectType + Upcast<ferroui_controls::ToggleSwitch>> ToggleSwitchProps f
 /// The properties and routed events of [`ToolTip`](ferroui_controls::ToolTip).
 pub trait ToolTipProps: ElementBuilder {
     /// Sets [`ToolTip::tip_property`](ferroui_controls::ToolTip::tip_property).
+    #[inline(always)]
     fn tip<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::tip_property(), value)
     }
 
     /// Sets [`ToolTip::is_open_property`](ferroui_controls::ToolTip::is_open_property).
+    #[inline(always)]
     fn is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::is_open_property(), value)
     }
 
     /// Sets [`ToolTip::placement_property`](ferroui_controls::ToolTip::placement_property).
+    #[inline(always)]
     fn placement<M>(self, value: impl IntoProp<ferroui_controls::PlacementMode, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::placement_property(), value)
     }
 
     /// Sets [`ToolTip::horizontal_offset_property`](ferroui_controls::ToolTip::horizontal_offset_property).
+    #[inline(always)]
     fn horizontal_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::horizontal_offset_property(), value)
     }
 
     /// Sets [`ToolTip::vertical_offset_property`](ferroui_controls::ToolTip::vertical_offset_property).
+    #[inline(always)]
     fn vertical_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::vertical_offset_property(), value)
     }
 
     /// Sets [`ToolTip::custom_popup_placement_callback_property`](ferroui_controls::ToolTip::custom_popup_placement_callback_property).
+    #[inline(always)]
     fn custom_popup_placement_callback<M>(self, value: impl IntoProp<Option<ferroui_controls::primitives::CustomPopupPlacementCallbackValue>, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::custom_popup_placement_callback_property(), value)
     }
 
     /// Sets [`ToolTip::show_delay_property`](ferroui_controls::ToolTip::show_delay_property).
+    #[inline(always)]
     fn show_delay<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::show_delay_property(), value)
     }
 
     /// Sets [`ToolTip::between_show_delay_property`](ferroui_controls::ToolTip::between_show_delay_property).
+    #[inline(always)]
     fn between_show_delay<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::between_show_delay_property(), value)
     }
 
     /// Sets [`ToolTip::show_on_disabled_property`](ferroui_controls::ToolTip::show_on_disabled_property).
+    #[inline(always)]
     fn show_on_disabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::show_on_disabled_property(), value)
     }
 
     /// Sets [`ToolTip::service_enabled_property`](ferroui_controls::ToolTip::service_enabled_property).
+    #[inline(always)]
     fn service_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::service_enabled_property(), value)
     }
 
     /// Sets [`ToolTip::should_use_overlay_layer_property`](ferroui_controls::ToolTip::should_use_overlay_layer_property).
+    #[inline(always)]
     fn should_use_overlay_layer<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::should_use_overlay_layer_property(), value)
     }
 
     /// Sets [`ToolTip::tool_tip_property`](ferroui_controls::ToolTip::tool_tip_property).
+    #[inline(always)]
     fn tool_tip<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::ToolTip>>, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::tool_tip_property(), value)
     }
@@ -9956,21 +11205,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::ToolTip>> ToolTipProps for El<T> {
 /// The properties and routed events of [`TopLevel`](ferroui_controls::TopLevel).
 pub trait TopLevelProps: ElementBuilder {
     /// Sets [`TopLevel::transparency_level_hint_property`](ferroui_controls::TopLevel::transparency_level_hint_property).
+    #[inline(always)]
     fn transparency_level_hint<M>(self, value: impl IntoProp<ferroui_controls::WindowTransparencyLevelCollection, M>) -> Self {
         self.prop(<ferroui_controls::TopLevel>::transparency_level_hint_property(), value)
     }
 
     /// Sets [`TopLevel::transparency_background_fallback_property`](ferroui_controls::TopLevel::transparency_background_fallback_property).
+    #[inline(always)]
     fn transparency_background_fallback<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TopLevel>::transparency_background_fallback_property(), value)
     }
 
     /// Sets [`TopLevel::system_bar_color_property`](ferroui_controls::TopLevel::system_bar_color_property).
+    #[inline(always)]
     fn system_bar_color<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::SolidColorBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TopLevel>::system_bar_color_property(), value)
     }
 
     /// Sets [`TopLevel::auto_safe_area_padding_property`](ferroui_controls::TopLevel::auto_safe_area_padding_property).
+    #[inline(always)]
     fn auto_safe_area_padding<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TopLevel>::auto_safe_area_padding_property(), value)
     }
@@ -9985,56 +11238,67 @@ impl<T: ObjectType + Upcast<ferroui_controls::TopLevel>> TopLevelProps for El<T>
 /// The properties and routed events of [`Track`](ferroui_controls::primitives::Track).
 pub trait TrackProps: ElementBuilder {
     /// Sets [`Track::minimum_property`](ferroui_controls::primitives::Track::minimum_property).
+    #[inline(always)]
     fn minimum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::minimum_property(), value)
     }
 
     /// Sets [`Track::maximum_property`](ferroui_controls::primitives::Track::maximum_property).
+    #[inline(always)]
     fn maximum<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::maximum_property(), value)
     }
 
     /// Sets [`Track::value_property`](ferroui_controls::primitives::Track::value_property).
+    #[inline(always)]
     fn value<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::value_property(), value)
     }
 
     /// Sets [`Track::viewport_size_property`](ferroui_controls::primitives::Track::viewport_size_property).
+    #[inline(always)]
     fn viewport_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::viewport_size_property(), value)
     }
 
     /// Sets [`Track::orientation_property`](ferroui_controls::primitives::Track::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::orientation_property(), value)
     }
 
     /// Sets [`Track::thumb_property`](ferroui_controls::primitives::Track::thumb_property).
+    #[inline(always)]
     fn thumb<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::Thumb>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::thumb_property(), value)
     }
 
     /// Sets [`Track::increase_button_property`](ferroui_controls::primitives::Track::increase_button_property).
+    #[inline(always)]
     fn increase_button<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Button>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::increase_button_property(), value)
     }
 
     /// Sets [`Track::decrease_button_property`](ferroui_controls::primitives::Track::decrease_button_property).
+    #[inline(always)]
     fn decrease_button<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Button>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::decrease_button_property(), value)
     }
 
     /// Sets [`Track::is_direction_reversed_property`](ferroui_controls::primitives::Track::is_direction_reversed_property).
+    #[inline(always)]
     fn is_direction_reversed<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::is_direction_reversed_property(), value)
     }
 
     /// Sets [`Track::ignore_thumb_drag_property`](ferroui_controls::primitives::Track::ignore_thumb_drag_property).
+    #[inline(always)]
     fn ignore_thumb_drag<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::ignore_thumb_drag_property(), value)
     }
 
     /// Sets [`Track::defer_thumb_drag_property`](ferroui_controls::primitives::Track::defer_thumb_drag_property).
+    #[inline(always)]
     fn defer_thumb_drag<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Track>::defer_thumb_drag_property(), value)
     }
@@ -10044,16 +11308,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::Track>> TrackProps for
 /// The properties and routed events of [`TransitionBase`](ferroui_base::animation::TransitionBase).
 pub trait TransitionBaseProps: ElementBuilder {
     /// Sets [`TransitionBase::duration_property`](ferroui_base::animation::TransitionBase::duration_property).
+    #[inline(always)]
     fn duration<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_base::animation::TransitionBase>::duration_property(), value)
     }
 
     /// Sets [`TransitionBase::delay_property`](ferroui_base::animation::TransitionBase::delay_property).
+    #[inline(always)]
     fn delay<M>(self, value: impl IntoProp<ferroui_base::animation::SignedDuration, M>) -> Self {
         self.prop(<ferroui_base::animation::TransitionBase>::delay_property(), value)
     }
 
     /// Sets [`TransitionBase::easing_property`](ferroui_base::animation::TransitionBase::easing_property).
+    #[inline(always)]
     fn easing<M>(self, value: impl IntoProp<ferroui_base::animation::easings::Easing, M>) -> Self {
         self.prop(<ferroui_base::animation::TransitionBase>::easing_property(), value)
     }
@@ -10063,11 +11330,13 @@ impl<T: ObjectType + Upcast<ferroui_base::animation::TransitionBase>> Transition
 /// The properties and routed events of [`TransitioningContentControl`](ferroui_controls::TransitioningContentControl).
 pub trait TransitioningContentControlProps: ElementBuilder {
     /// Sets [`TransitioningContentControl::page_transition_property`](ferroui_controls::TransitioningContentControl::page_transition_property).
+    #[inline(always)]
     fn page_transition<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::animation::IPageTransition>>, M>) -> Self {
         self.prop(<ferroui_controls::TransitioningContentControl>::page_transition_property(), value)
     }
 
     /// Sets [`TransitioningContentControl::is_transition_reversed_property`](ferroui_controls::TransitioningContentControl::is_transition_reversed_property).
+    #[inline(always)]
     fn is_transition_reversed<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TransitioningContentControl>::is_transition_reversed_property(), value)
     }
@@ -10082,11 +11351,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::TransitioningContentControl>> Tran
 /// The properties and routed events of [`TranslateTransform`](ferroui_base::media::TranslateTransform).
 pub trait TranslateTransformProps: ElementBuilder {
     /// Sets [`TranslateTransform::x_property`](ferroui_base::media::TranslateTransform::x_property).
+    #[inline(always)]
     fn x<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::TranslateTransform>::x_property(), value)
     }
 
     /// Sets [`TranslateTransform::y_property`](ferroui_base::media::TranslateTransform::y_property).
+    #[inline(always)]
     fn y<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::media::TranslateTransform>::y_property(), value)
     }
@@ -10096,36 +11367,43 @@ impl<T: ObjectType + Upcast<ferroui_base::media::TranslateTransform>> TranslateT
 /// The properties and routed events of [`TrayIcon`](ferroui_controls::TrayIcon).
 pub trait TrayIconProps: ElementBuilder {
     /// Sets [`TrayIcon::command_property`](ferroui_controls::TrayIcon::command_property).
+    #[inline(always)]
     fn command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::command_property(), value)
     }
 
     /// Sets [`TrayIcon::command_parameter_property`](ferroui_controls::TrayIcon::command_parameter_property).
+    #[inline(always)]
     fn command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::command_parameter_property(), value)
     }
 
     /// Sets [`TrayIcon::icons_property`](ferroui_controls::TrayIcon::icons_property).
+    #[inline(always)]
     fn icons<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls::TrayIcons>>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::icons_property(), value)
     }
 
     /// Sets [`TrayIcon::menu_property`](ferroui_controls::TrayIcon::menu_property).
+    #[inline(always)]
     fn menu<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::NativeMenu>>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::menu_property(), value)
     }
 
     /// Sets [`TrayIcon::icon_property`](ferroui_controls::TrayIcon::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls::WindowIcon>>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::icon_property(), value)
     }
 
     /// Sets [`TrayIcon::tool_tip_text_property`](ferroui_controls::TrayIcon::tool_tip_text_property).
+    #[inline(always)]
     fn tool_tip_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::tool_tip_text_property(), value)
     }
 
     /// Sets [`TrayIcon::is_visible_property`](ferroui_controls::TrayIcon::is_visible_property).
+    #[inline(always)]
     fn is_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::is_visible_property(), value)
     }
@@ -10135,16 +11413,19 @@ impl<T: ObjectType + Upcast<ferroui_controls::TrayIcon>> TrayIconProps for El<T>
 /// The properties and routed events of [`TreeView`](ferroui_controls::TreeView).
 pub trait TreeViewProps: ElementBuilder {
     /// Sets [`TreeView::auto_scroll_to_selected_item_property`](ferroui_controls::TreeView::auto_scroll_to_selected_item_property).
+    #[inline(always)]
     fn auto_scroll_to_selected_item<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TreeView>::auto_scroll_to_selected_item_property(), value)
     }
 
     /// Sets [`TreeView::selected_item_property`](ferroui_controls::TreeView::selected_item_property).
+    #[inline(always)]
     fn selected_item<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::TreeView>::selected_item_property(), value)
     }
 
     /// Sets [`TreeView::selection_mode_property`](ferroui_controls::TreeView::selection_mode_property).
+    #[inline(always)]
     fn selection_mode<M>(self, value: impl IntoProp<ferroui_controls::SelectionMode, M>) -> Self {
         self.prop(<ferroui_controls::TreeView>::selection_mode_property(), value)
     }
@@ -10154,11 +11435,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::TreeView>> TreeViewProps for El<T>
 /// The properties and routed events of [`TreeViewItem`](ferroui_controls::TreeViewItem).
 pub trait TreeViewItemProps: ElementBuilder {
     /// Sets [`TreeViewItem::is_expanded_property`](ferroui_controls::TreeViewItem::is_expanded_property).
+    #[inline(always)]
     fn is_expanded<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TreeViewItem>::is_expanded_property(), value)
     }
 
     /// Sets [`TreeViewItem::is_selected_property`](ferroui_controls::TreeViewItem::is_selected_property).
+    #[inline(always)]
     fn is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TreeViewItem>::is_selected_property(), value)
     }
@@ -10178,26 +11461,31 @@ impl<T: ObjectType + Upcast<ferroui_controls::TreeViewItem>> TreeViewItemProps f
 /// The properties and routed events of [`UniformGrid`](ferroui_controls::primitives::UniformGrid).
 pub trait UniformGridProps: ElementBuilder {
     /// Sets [`UniformGrid::rows_property`](ferroui_controls::primitives::UniformGrid::rows_property).
+    #[inline(always)]
     fn rows<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::primitives::UniformGrid>::rows_property(), value)
     }
 
     /// Sets [`UniformGrid::columns_property`](ferroui_controls::primitives::UniformGrid::columns_property).
+    #[inline(always)]
     fn columns<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::primitives::UniformGrid>::columns_property(), value)
     }
 
     /// Sets [`UniformGrid::first_column_property`](ferroui_controls::primitives::UniformGrid::first_column_property).
+    #[inline(always)]
     fn first_column<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::primitives::UniformGrid>::first_column_property(), value)
     }
 
     /// Sets [`UniformGrid::row_spacing_property`](ferroui_controls::primitives::UniformGrid::row_spacing_property).
+    #[inline(always)]
     fn row_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::UniformGrid>::row_spacing_property(), value)
     }
 
     /// Sets [`UniformGrid::column_spacing_property`](ferroui_controls::primitives::UniformGrid::column_spacing_property).
+    #[inline(always)]
     fn column_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::UniformGrid>::column_spacing_property(), value)
     }
@@ -10207,11 +11495,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::UniformGrid>> UniformG
 /// The properties and routed events of [`Viewbox`](ferroui_controls::Viewbox).
 pub trait ViewboxProps: ElementBuilder {
     /// Sets [`Viewbox::stretch_property`](ferroui_controls::Viewbox::stretch_property).
+    #[inline(always)]
     fn stretch<M>(self, value: impl IntoProp<ferroui_base::media::Stretch, M>) -> Self {
         self.prop(<ferroui_controls::Viewbox>::stretch_property(), value)
     }
 
     /// Sets [`Viewbox::stretch_direction_property`](ferroui_controls::Viewbox::stretch_direction_property).
+    #[inline(always)]
     fn stretch_direction<M>(self, value: impl IntoProp<ferroui_base::media::StretchDirection, M>) -> Self {
         self.prop(<ferroui_controls::Viewbox>::stretch_direction_property(), value)
     }
@@ -10221,21 +11511,25 @@ impl<T: ObjectType + Upcast<ferroui_controls::Viewbox>> ViewboxProps for El<T> {
 /// The properties and routed events of [`VirtualizingStackPanel`](ferroui_controls::VirtualizingStackPanel).
 pub trait VirtualizingStackPanelProps: ElementBuilder {
     /// Sets [`VirtualizingStackPanel::orientation_property`](ferroui_controls::VirtualizingStackPanel::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::VirtualizingStackPanel>::orientation_property(), value)
     }
 
     /// Sets [`VirtualizingStackPanel::are_horizontal_snap_points_regular_property`](ferroui_controls::VirtualizingStackPanel::are_horizontal_snap_points_regular_property).
+    #[inline(always)]
     fn are_horizontal_snap_points_regular<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::VirtualizingStackPanel>::are_horizontal_snap_points_regular_property(), value)
     }
 
     /// Sets [`VirtualizingStackPanel::are_vertical_snap_points_regular_property`](ferroui_controls::VirtualizingStackPanel::are_vertical_snap_points_regular_property).
+    #[inline(always)]
     fn are_vertical_snap_points_regular<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::VirtualizingStackPanel>::are_vertical_snap_points_regular_property(), value)
     }
 
     /// Sets [`VirtualizingStackPanel::cache_length_property`](ferroui_controls::VirtualizingStackPanel::cache_length_property).
+    #[inline(always)]
     fn cache_length<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::VirtualizingStackPanel>::cache_length_property(), value)
     }
@@ -10255,56 +11549,67 @@ impl<T: ObjectType + Upcast<ferroui_controls::VirtualizingStackPanel>> Virtualiz
 /// The properties and routed events of [`Visual`](ferroui_base::Visual).
 pub trait VisualProps: ElementBuilder {
     /// Sets [`Visual::clip_to_bounds_property`](ferroui_base::Visual::clip_to_bounds_property).
+    #[inline(always)]
     fn clip_to_bounds<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::Visual>::clip_to_bounds_property(), value)
     }
 
     /// Sets [`Visual::clip_property`](ferroui_base::Visual::clip_property).
+    #[inline(always)]
     fn clip<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::clip_property(), value)
     }
 
     /// Sets [`Visual::cache_mode_property`](ferroui_base::Visual::cache_mode_property).
+    #[inline(always)]
     fn cache_mode<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::CacheMode>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::cache_mode_property(), value)
     }
 
     /// Sets [`Visual::effect_property`](ferroui_base::Visual::effect_property).
+    #[inline(always)]
     fn effect<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IEffect>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::effect_property(), value)
     }
 
     /// Sets [`Visual::opacity_mask_property`](ferroui_base::Visual::opacity_mask_property).
+    #[inline(always)]
     fn opacity_mask<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::opacity_mask_property(), value)
     }
 
     /// Sets [`Visual::render_transform_property`](ferroui_base::Visual::render_transform_property).
+    #[inline(always)]
     fn render_transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::render_transform_property(), value)
     }
 
     /// Sets [`Visual::render_transform_origin_property`](ferroui_base::Visual::render_transform_origin_property).
+    #[inline(always)]
     fn render_transform_origin<M>(self, value: impl IntoProp<ferroui_base::RelativePoint, M>) -> Self {
         self.prop(<ferroui_base::Visual>::render_transform_origin_property(), value)
     }
 
     /// Sets [`Visual::is_visible_property`](ferroui_base::Visual::is_visible_property).
+    #[inline(always)]
     fn is_visible<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::Visual>::is_visible_property(), value)
     }
 
     /// Sets [`Visual::opacity_property`](ferroui_base::Visual::opacity_property).
+    #[inline(always)]
     fn opacity<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_base::Visual>::opacity_property(), value)
     }
 
     /// Sets [`Visual::flow_direction_property`](ferroui_base::Visual::flow_direction_property).
+    #[inline(always)]
     fn flow_direction<M>(self, value: impl IntoProp<ferroui_base::media::FlowDirection, M>) -> Self {
         self.prop(<ferroui_base::Visual>::flow_direction_property(), value)
     }
 
     /// Sets [`Visual::z_index_property`](ferroui_base::Visual::z_index_property).
+    #[inline(always)]
     fn z_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_base::Visual>::z_index_property(), value)
     }
@@ -10314,6 +11619,7 @@ impl<T: ObjectType + Upcast<ferroui_base::Visual>> VisualProps for El<T> {}
 /// The properties and routed events of [`VisualBrush`](ferroui_base::media::VisualBrush).
 pub trait VisualBrushProps: ElementBuilder {
     /// Sets [`VisualBrush::visual_property`](ferroui_base::media::VisualBrush::visual_property).
+    #[inline(always)]
     fn visual<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::Visual>>, M>) -> Self {
         self.prop(<ferroui_base::media::VisualBrush>::visual_property(), value)
     }
@@ -10323,6 +11629,7 @@ impl<T: ObjectType + Upcast<ferroui_base::media::VisualBrush>> VisualBrushProps 
 /// The properties and routed events of [`VisualStateManager`](ferroui_controls::VisualStateManager).
 pub trait VisualStateManagerProps: ElementBuilder {
     /// Sets [`VisualStateManager::custom_visual_state_manager_property`](ferroui_controls::VisualStateManager::custom_visual_state_manager_property).
+    #[inline(always)]
     fn custom_visual_state_manager<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::VisualStateManager>>, M>) -> Self {
         self.prop(<ferroui_controls::VisualStateManager>::custom_visual_state_manager_property(), value)
     }
@@ -10332,76 +11639,91 @@ impl<T: ObjectType + Upcast<ferroui_controls::VisualStateManager>> VisualStateMa
 /// The properties and routed events of [`Window`](ferroui_controls::Window).
 pub trait WindowProps: ElementBuilder {
     /// Sets [`Window::size_to_content_property`](ferroui_controls::Window::size_to_content_property).
+    #[inline(always)]
     fn size_to_content<M>(self, value: impl IntoProp<ferroui_controls::SizeToContent, M>) -> Self {
         self.prop(<ferroui_controls::Window>::size_to_content_property(), value)
     }
 
     /// Sets [`Window::extend_client_area_to_decorations_hint_property`](ferroui_controls::Window::extend_client_area_to_decorations_hint_property).
+    #[inline(always)]
     fn extend_client_area_to_decorations_hint<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Window>::extend_client_area_to_decorations_hint_property(), value)
     }
 
     /// Sets [`Window::extend_client_area_title_bar_height_hint_property`](ferroui_controls::Window::extend_client_area_title_bar_height_hint_property).
+    #[inline(always)]
     fn extend_client_area_title_bar_height_hint<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Window>::extend_client_area_title_bar_height_hint_property(), value)
     }
 
     /// Sets [`Window::window_decorations_property`](ferroui_controls::Window::window_decorations_property).
+    #[inline(always)]
     fn window_decorations<M>(self, value: impl IntoProp<ferroui_controls::WindowDecorations, M>) -> Self {
         self.prop(<ferroui_controls::Window>::window_decorations_property(), value)
     }
 
     /// Sets [`Window::window_decorations_theme_property`](ferroui_controls::Window::window_decorations_theme_property).
+    #[inline(always)]
     fn window_decorations_theme<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::styling::ControlTheme>>, M>) -> Self {
         self.prop(<ferroui_controls::Window>::window_decorations_theme_property(), value)
     }
 
     /// Sets [`Window::show_activated_property`](ferroui_controls::Window::show_activated_property).
+    #[inline(always)]
     fn show_activated<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Window>::show_activated_property(), value)
     }
 
     /// Sets [`Window::show_in_taskbar_property`](ferroui_controls::Window::show_in_taskbar_property).
+    #[inline(always)]
     fn show_in_taskbar<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Window>::show_in_taskbar_property(), value)
     }
 
     /// Sets [`Window::closing_behavior_property`](ferroui_controls::Window::closing_behavior_property).
+    #[inline(always)]
     fn closing_behavior<M>(self, value: impl IntoProp<ferroui_controls::WindowClosingBehavior, M>) -> Self {
         self.prop(<ferroui_controls::Window>::closing_behavior_property(), value)
     }
 
     /// Sets [`Window::window_state_property`](ferroui_controls::Window::window_state_property).
+    #[inline(always)]
     fn window_state<M>(self, value: impl IntoProp<ferroui_controls::WindowState, M>) -> Self {
         self.prop(<ferroui_controls::Window>::window_state_property(), value)
     }
 
     /// Sets [`Window::title_property`](ferroui_controls::Window::title_property).
+    #[inline(always)]
     fn title<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::Window>::title_property(), value)
     }
 
     /// Sets [`Window::icon_property`](ferroui_controls::Window::icon_property).
+    #[inline(always)]
     fn icon<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls::WindowIcon>>, M>) -> Self {
         self.prop(<ferroui_controls::Window>::icon_property(), value)
     }
 
     /// Sets [`Window::window_startup_location_property`](ferroui_controls::Window::window_startup_location_property).
+    #[inline(always)]
     fn window_startup_location<M>(self, value: impl IntoProp<ferroui_controls::WindowStartupLocation, M>) -> Self {
         self.prop(<ferroui_controls::Window>::window_startup_location_property(), value)
     }
 
     /// Sets [`Window::can_resize_property`](ferroui_controls::Window::can_resize_property).
+    #[inline(always)]
     fn can_resize<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Window>::can_resize_property(), value)
     }
 
     /// Sets [`Window::can_minimize_property`](ferroui_controls::Window::can_minimize_property).
+    #[inline(always)]
     fn can_minimize<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Window>::can_minimize_property(), value)
     }
 
     /// Sets [`Window::can_maximize_property`](ferroui_controls::Window::can_maximize_property).
+    #[inline(always)]
     fn can_maximize<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Window>::can_maximize_property(), value)
     }
@@ -10421,6 +11743,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::Window>> WindowProps for El<T> {}
 /// The properties and routed events of [`WindowBase`](ferroui_controls::WindowBase).
 pub trait WindowBaseProps: ElementBuilder {
     /// Sets [`WindowBase::topmost_property`](ferroui_controls::WindowBase::topmost_property).
+    #[inline(always)]
     fn topmost<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::WindowBase>::topmost_property(), value)
     }
@@ -10430,31 +11753,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::WindowBase>> WindowBaseProps for E
 /// The properties and routed events of [`WindowDrawnDecorations`](ferroui_controls::chrome::WindowDrawnDecorations).
 pub trait WindowDrawnDecorationsProps: ElementBuilder {
     /// Sets [`WindowDrawnDecorations::template_property`](ferroui_controls::chrome::WindowDrawnDecorations::template_property).
+    #[inline(always)]
     fn template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::chrome::IWindowDrawnDecorationsTemplate>>, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::template_property(), value)
     }
 
     /// Sets [`WindowDrawnDecorations::default_title_bar_height_property`](ferroui_controls::chrome::WindowDrawnDecorations::default_title_bar_height_property).
+    #[inline(always)]
     fn default_title_bar_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::default_title_bar_height_property(), value)
     }
 
     /// Sets [`WindowDrawnDecorations::default_frame_thickness_property`](ferroui_controls::chrome::WindowDrawnDecorations::default_frame_thickness_property).
+    #[inline(always)]
     fn default_frame_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::default_frame_thickness_property(), value)
     }
 
     /// Sets [`WindowDrawnDecorations::default_shadow_thickness_property`](ferroui_controls::chrome::WindowDrawnDecorations::default_shadow_thickness_property).
+    #[inline(always)]
     fn default_shadow_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::default_shadow_thickness_property(), value)
     }
 
     /// Sets [`WindowDrawnDecorations::title_property`](ferroui_controls::chrome::WindowDrawnDecorations::title_property).
+    #[inline(always)]
     fn title<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::title_property(), value)
     }
 
     /// Sets [`WindowDrawnDecorations::title_bar_decorations_property`](ferroui_controls::chrome::WindowDrawnDecorations::title_bar_decorations_property).
+    #[inline(always)]
     fn title_bar_decorations<M>(self, value: impl IntoProp<ferroui_controls::chrome::TitleBarDecorations, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::title_bar_decorations_property(), value)
     }
@@ -10464,11 +11793,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::chrome::WindowDrawnDecorations>> W
 /// The properties and routed events of [`WindowNotificationManager`](ferroui_controls::WindowNotificationManager).
 pub trait WindowNotificationManagerProps: ElementBuilder {
     /// Sets [`WindowNotificationManager::position_property`](ferroui_controls::WindowNotificationManager::position_property).
+    #[inline(always)]
     fn position<M>(self, value: impl IntoProp<ferroui_controls::NotificationPosition, M>) -> Self {
         self.prop(<ferroui_controls::WindowNotificationManager>::position_property(), value)
     }
 
     /// Sets [`WindowNotificationManager::max_items_property`](ferroui_controls::WindowNotificationManager::max_items_property).
+    #[inline(always)]
     fn max_items<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::WindowNotificationManager>::max_items_property(), value)
     }
@@ -10478,31 +11809,37 @@ impl<T: ObjectType + Upcast<ferroui_controls::WindowNotificationManager>> Window
 /// The properties and routed events of [`WrapPanel`](ferroui_controls::WrapPanel).
 pub trait WrapPanelProps: ElementBuilder {
     /// Sets [`WrapPanel::item_spacing_property`](ferroui_controls::WrapPanel::item_spacing_property).
+    #[inline(always)]
     fn item_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::item_spacing_property(), value)
     }
 
     /// Sets [`WrapPanel::line_spacing_property`](ferroui_controls::WrapPanel::line_spacing_property).
+    #[inline(always)]
     fn line_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::line_spacing_property(), value)
     }
 
     /// Sets [`WrapPanel::orientation_property`](ferroui_controls::WrapPanel::orientation_property).
+    #[inline(always)]
     fn orientation<M>(self, value: impl IntoProp<ferroui_base::layout::Orientation, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::orientation_property(), value)
     }
 
     /// Sets [`WrapPanel::items_alignment_property`](ferroui_controls::WrapPanel::items_alignment_property).
+    #[inline(always)]
     fn items_alignment<M>(self, value: impl IntoProp<ferroui_controls::WrapPanelItemsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::items_alignment_property(), value)
     }
 
     /// Sets [`WrapPanel::item_width_property`](ferroui_controls::WrapPanel::item_width_property).
+    #[inline(always)]
     fn item_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::item_width_property(), value)
     }
 
     /// Sets [`WrapPanel::item_height_property`](ferroui_controls::WrapPanel::item_height_property).
+    #[inline(always)]
     fn item_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::item_height_property(), value)
     }
@@ -10512,11 +11849,13 @@ impl<T: ObjectType + Upcast<ferroui_controls::WrapPanel>> WrapPanelProps for El<
 /// The properties and routed events of [`XamlAmbientLight`](ferroui_controls::media::XamlAmbientLight).
 pub trait XamlAmbientLightProps: ElementBuilder {
     /// Sets [`XamlAmbientLight::color_property`](ferroui_controls::media::XamlAmbientLight::color_property).
+    #[inline(always)]
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls::media::XamlAmbientLight>::color_property(), value)
     }
 
     /// Sets [`XamlAmbientLight::is_target_property`](ferroui_controls::media::XamlAmbientLight::is_target_property).
+    #[inline(always)]
     fn is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
     }
@@ -10526,6 +11865,7 @@ impl<T: ObjectType + Upcast<ferroui_controls::media::XamlAmbientLight>> XamlAmbi
 /// The properties and routed events of [`XamlCompositionBrushBase`](ferroui_base::media::XamlCompositionBrushBase).
 pub trait XamlCompositionBrushBaseProps: ElementBuilder {
     /// Sets [`XamlCompositionBrushBase::fallback_color_property`](ferroui_base::media::XamlCompositionBrushBase::fallback_color_property).
+    #[inline(always)]
     fn fallback_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::XamlCompositionBrushBase>::fallback_color_property(), value)
     }
@@ -10535,1091 +11875,1309 @@ impl<T: ObjectType + Upcast<ferroui_base::media::XamlCompositionBrushBase>> Xaml
 /// The attached properties of FerroUI.Base and FerroUI.Controls, named after their owner.
 pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`AccessKeyHandler::show_access_key_property`](ferroui_base::input::AccessKeyHandler::show_access_key_property).
+    #[inline(always)]
     fn access_key_handler_show_access_key<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::AccessKeyHandler>::show_access_key_property(), value)
     }
 
     /// Sets the attached [`AccessText::show_access_key_property`](ferroui_controls::primitives::AccessText::show_access_key_property).
+    #[inline(always)]
     fn access_text_show_access_key<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::AccessText>::show_access_key_property(), value)
     }
 
     /// Sets the attached [`AdornerLayer::is_clip_enabled_property`](ferroui_controls::primitives::AdornerLayer::is_clip_enabled_property).
+    #[inline(always)]
     fn adorner_layer_is_clip_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::AdornerLayer>::is_clip_enabled_property(), value)
     }
 
     /// Sets the attached [`AdornerLayer::adorner_property`](ferroui_controls::primitives::AdornerLayer::adorner_property).
+    #[inline(always)]
     fn adorner_layer_adorner<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::AdornerLayer>::adorner_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::accelerator_key_property`](ferroui_controls::automation::AutomationProperties::accelerator_key_property).
+    #[inline(always)]
     fn automation_properties_accelerator_key<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::accelerator_key_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::accessibility_view_property`](ferroui_controls::automation::AutomationProperties::accessibility_view_property).
+    #[inline(always)]
     fn automation_properties_accessibility_view<M>(self, value: impl IntoProp<ferroui_controls::automation::AccessibilityView, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::accessibility_view_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::access_key_property`](ferroui_controls::automation::AutomationProperties::access_key_property).
+    #[inline(always)]
     fn automation_properties_access_key<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::access_key_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::automation_id_property`](ferroui_controls::automation::AutomationProperties::automation_id_property).
+    #[inline(always)]
     fn automation_properties_automation_id<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::automation_id_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::control_type_override_property`](ferroui_controls::automation::AutomationProperties::control_type_override_property).
+    #[inline(always)]
     fn automation_properties_control_type_override<M>(self, value: impl IntoProp<Option<ferroui_controls::automation::peers::AutomationControlType>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::control_type_override_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::class_name_override_property`](ferroui_controls::automation::AutomationProperties::class_name_override_property).
+    #[inline(always)]
     fn automation_properties_class_name_override<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::class_name_override_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::is_control_element_override_property`](ferroui_controls::automation::AutomationProperties::is_control_element_override_property).
+    #[inline(always)]
     fn automation_properties_is_control_element_override<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::is_control_element_override_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::help_text_property`](ferroui_controls::automation::AutomationProperties::help_text_property).
+    #[inline(always)]
     fn automation_properties_help_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::help_text_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::landmark_type_property`](ferroui_controls::automation::AutomationProperties::landmark_type_property).
+    #[inline(always)]
     fn automation_properties_landmark_type<M>(self, value: impl IntoProp<Option<ferroui_controls::automation::peers::AutomationLandmarkType>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::landmark_type_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::heading_level_property`](ferroui_controls::automation::AutomationProperties::heading_level_property).
+    #[inline(always)]
     fn automation_properties_heading_level<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::heading_level_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::is_column_header_property`](ferroui_controls::automation::AutomationProperties::is_column_header_property).
+    #[inline(always)]
     fn automation_properties_is_column_header<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::is_column_header_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::is_required_for_form_property`](ferroui_controls::automation::AutomationProperties::is_required_for_form_property).
+    #[inline(always)]
     fn automation_properties_is_required_for_form<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::is_required_for_form_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::is_row_header_property`](ferroui_controls::automation::AutomationProperties::is_row_header_property).
+    #[inline(always)]
     fn automation_properties_is_row_header<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::is_row_header_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::is_offscreen_behavior_property`](ferroui_controls::automation::AutomationProperties::is_offscreen_behavior_property).
+    #[inline(always)]
     fn automation_properties_is_offscreen_behavior<M>(self, value: impl IntoProp<ferroui_controls::automation::IsOffscreenBehavior, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::is_offscreen_behavior_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::item_status_property`](ferroui_controls::automation::AutomationProperties::item_status_property).
+    #[inline(always)]
     fn automation_properties_item_status<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::item_status_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::item_type_property`](ferroui_controls::automation::AutomationProperties::item_type_property).
+    #[inline(always)]
     fn automation_properties_item_type<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::item_type_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::live_setting_property`](ferroui_controls::automation::AutomationProperties::live_setting_property).
+    #[inline(always)]
     fn automation_properties_live_setting<M>(self, value: impl IntoProp<ferroui_controls::automation::AutomationLiveSetting, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::live_setting_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::name_property`](ferroui_controls::automation::AutomationProperties::name_property).
+    #[inline(always)]
     fn automation_properties_name<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::name_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::position_in_set_property`](ferroui_controls::automation::AutomationProperties::position_in_set_property).
+    #[inline(always)]
     fn automation_properties_position_in_set<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::position_in_set_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::size_of_set_property`](ferroui_controls::automation::AutomationProperties::size_of_set_property).
+    #[inline(always)]
     fn automation_properties_size_of_set<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::size_of_set_property(), value)
     }
 
     /// Sets the attached [`Canvas::left_property`](ferroui_controls::Canvas::left_property).
+    #[inline(always)]
     fn canvas_left<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::left_property(), value)
     }
 
     /// Sets the attached [`Canvas::top_property`](ferroui_controls::Canvas::top_property).
+    #[inline(always)]
     fn canvas_top<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::top_property(), value)
     }
 
     /// Sets the attached [`Canvas::right_property`](ferroui_controls::Canvas::right_property).
+    #[inline(always)]
     fn canvas_right<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::right_property(), value)
     }
 
     /// Sets the attached [`Canvas::bottom_property`](ferroui_controls::Canvas::bottom_property).
+    #[inline(always)]
     fn canvas_bottom<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Canvas>::bottom_property(), value)
     }
 
     /// Sets the attached [`Container::name_property`](ferroui_base::styling::Container::name_property).
+    #[inline(always)]
     fn container_name<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_base::styling::Container>::name_property(), value)
     }
 
     /// Sets the attached [`Container::sizing_property`](ferroui_base::styling::Container::sizing_property).
+    #[inline(always)]
     fn container_sizing<M>(self, value: impl IntoProp<ferroui_base::styling::ContainerSizing, M>) -> Self {
         self.prop(<ferroui_base::styling::Container>::sizing_property(), value)
     }
 
     /// Sets the attached [`DataValidationErrors::errors_property`](ferroui_controls::DataValidationErrors::errors_property).
+    #[inline(always)]
     fn data_validation_errors_errors<M>(self, value: impl IntoProp<Option<Vec<ferroui_base::BoxedValue>>, M>) -> Self {
         self.prop(<ferroui_controls::DataValidationErrors>::errors_property(), value)
     }
 
     /// Sets the attached [`DataValidationErrors::has_errors_property`](ferroui_controls::DataValidationErrors::has_errors_property).
+    #[inline(always)]
     fn data_validation_errors_has_errors<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::DataValidationErrors>::has_errors_property(), value)
     }
 
     /// Sets the attached [`DefinitionBase::shared_size_group_property`](ferroui_controls::DefinitionBase::shared_size_group_property).
+    #[inline(always)]
     fn definition_base_shared_size_group<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::DefinitionBase>::shared_size_group_property(), value)
     }
 
     /// Sets the attached [`Design::height_property`](ferroui_controls::Design::height_property).
+    #[inline(always)]
     fn design_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Design>::height_property(), value)
     }
 
     /// Sets the attached [`Design::width_property`](ferroui_controls::Design::width_property).
+    #[inline(always)]
     fn design_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Design>::width_property(), value)
     }
 
     /// Sets the attached [`Design::data_context_property`](ferroui_controls::Design::data_context_property).
+    #[inline(always)]
     fn design_data_context<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::Design>::data_context_property(), value)
     }
 
     /// Sets the attached [`Design::preview_with_property`](ferroui_controls::Design::preview_with_property).
+    #[inline(always)]
     fn design_preview_with<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::Design>::preview_with_property(), value)
     }
 
     /// Sets the attached [`DockPanel::dock_property`](ferroui_controls::DockPanel::dock_property).
+    #[inline(always)]
     fn dock_panel_dock<M>(self, value: impl IntoProp<ferroui_controls::Dock, M>) -> Self {
         self.prop(<ferroui_controls::DockPanel>::dock_property(), value)
     }
 
     /// Sets the attached [`DragDrop::allow_drop_property`](ferroui_base::input::DragDrop::allow_drop_property).
+    #[inline(always)]
     fn drag_drop_allow_drop<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::DragDrop>::allow_drop_property(), value)
     }
 
     /// Sets the attached [`Flex::align_self_property`](ferroui_controls::Flex::align_self_property).
+    #[inline(always)]
     fn flex_align_self<M>(self, value: impl IntoProp<Option<ferroui_controls::FlexAlignItems>, M>) -> Self {
         self.prop(<ferroui_controls::Flex>::align_self_property(), value)
     }
 
     /// Sets the attached [`Flex::order_property`](ferroui_controls::Flex::order_property).
+    #[inline(always)]
     fn flex_order<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Flex>::order_property(), value)
     }
 
     /// Sets the attached [`Flex::shrink_property`](ferroui_controls::Flex::shrink_property).
+    #[inline(always)]
     fn flex_shrink<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Flex>::shrink_property(), value)
     }
 
     /// Sets the attached [`Flex::grow_property`](ferroui_controls::Flex::grow_property).
+    #[inline(always)]
     fn flex_grow<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Flex>::grow_property(), value)
     }
 
     /// Sets the attached [`FlyoutBase::attached_flyout_property`](ferroui_controls::primitives::FlyoutBase::attached_flyout_property).
+    #[inline(always)]
     fn flyout_base_attached_flyout<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::primitives::FlyoutBase>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::FlyoutBase>::attached_flyout_property(), value)
     }
 
     /// Sets the attached [`Grid::column_property`](ferroui_controls::Grid::column_property).
+    #[inline(always)]
     fn grid_column<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::column_property(), value)
     }
 
     /// Sets the attached [`Grid::row_property`](ferroui_controls::Grid::row_property).
+    #[inline(always)]
     fn grid_row<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::row_property(), value)
     }
 
     /// Sets the attached [`Grid::column_span_property`](ferroui_controls::Grid::column_span_property).
+    #[inline(always)]
     fn grid_column_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::column_span_property(), value)
     }
 
     /// Sets the attached [`Grid::row_span_property`](ferroui_controls::Grid::row_span_property).
+    #[inline(always)]
     fn grid_row_span<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::row_span_property(), value)
     }
 
     /// Sets the attached [`Grid::is_shared_size_scope_property`](ferroui_controls::Grid::is_shared_size_scope_property).
+    #[inline(always)]
     fn grid_is_shared_size_scope<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::is_shared_size_scope_property(), value)
     }
 
     /// Sets the attached [`HotKeyManager::hot_key_property`](ferroui_controls::HotKeyManager::hot_key_property).
+    #[inline(always)]
     fn hot_key_manager_hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::HotKeyManager>::hot_key_property(), value)
     }
 
     /// Sets the attached [`InfoBarPanel::horizontal_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property).
+    #[inline(always)]
     fn info_bar_panel_horizontal_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::horizontal_orientation_margin_property(), value)
     }
 
     /// Sets the attached [`InfoBarPanel::vertical_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property).
+    #[inline(always)]
     fn info_bar_panel_vertical_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::vertical_orientation_margin_property(), value)
     }
 
     /// Sets the attached [`Inline::text_decorations_property`](ferroui_controls::documents::Inline::text_decorations_property).
+    #[inline(always)]
     fn inline_text_decorations<M>(self, value: impl IntoProp<Option<ferroui_base::media::TextDecorationCollection>, M>) -> Self {
         self.prop(<ferroui_controls::documents::Inline>::text_decorations_property(), value)
     }
 
     /// Sets the attached [`InputMethod::is_input_method_enabled_property`](ferroui_base::input::InputMethod::is_input_method_enabled_property).
+    #[inline(always)]
     fn input_method_is_input_method_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::InputMethod>::is_input_method_enabled_property(), value)
     }
 
     /// Sets the attached [`KeyboardNavigation::tab_index_property`](ferroui_base::input::KeyboardNavigation::tab_index_property).
+    #[inline(always)]
     fn keyboard_navigation_tab_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_base::input::KeyboardNavigation>::tab_index_property(), value)
     }
 
     /// Sets the attached [`KeyboardNavigation::tab_navigation_property`](ferroui_base::input::KeyboardNavigation::tab_navigation_property).
+    #[inline(always)]
     fn keyboard_navigation_tab_navigation<M>(self, value: impl IntoProp<ferroui_base::input::KeyboardNavigationMode, M>) -> Self {
         self.prop(<ferroui_base::input::KeyboardNavigation>::tab_navigation_property(), value)
     }
 
     /// Sets the attached [`KeyboardNavigation::tab_once_active_element_property`](ferroui_base::input::KeyboardNavigation::tab_once_active_element_property).
+    #[inline(always)]
     fn keyboard_navigation_tab_once_active_element<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::input::InputElement>>, M>) -> Self {
         self.prop(<ferroui_base::input::KeyboardNavigation>::tab_once_active_element_property(), value)
     }
 
     /// Sets the attached [`KeyboardNavigation::is_tab_stop_property`](ferroui_base::input::KeyboardNavigation::is_tab_stop_property).
+    #[inline(always)]
     fn keyboard_navigation_is_tab_stop<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::KeyboardNavigation>::is_tab_stop_property(), value)
     }
 
     /// Sets the attached [`MacOSProperties::is_template_icon_property`](ferroui_controls::MacOSProperties::is_template_icon_property).
+    #[inline(always)]
     fn mac_os_properties_is_template_icon<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::MacOSProperties>::is_template_icon_property(), value)
     }
 
     /// Sets the attached [`NativeDock::menu_property`](ferroui_controls::NativeDock::menu_property).
+    #[inline(always)]
     fn native_dock_menu<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::NativeMenu>>, M>) -> Self {
         self.prop(<ferroui_controls::NativeDock>::menu_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::bar_layout_behavior_property`](ferroui_controls::NavigationPage::bar_layout_behavior_property).
+    #[inline(always)]
     fn navigation_page_bar_layout_behavior<M>(self, value: impl IntoProp<Option<ferroui_controls::BarLayoutBehavior>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::bar_layout_behavior_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::bar_height_override_property`](ferroui_controls::NavigationPage::bar_height_override_property).
+    #[inline(always)]
     fn navigation_page_bar_height_override<M>(self, value: impl IntoProp<Option<f64>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::bar_height_override_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::back_button_content_property`](ferroui_controls::NavigationPage::back_button_content_property).
+    #[inline(always)]
     fn navigation_page_back_button_content<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::back_button_content_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::has_back_button_property`](ferroui_controls::NavigationPage::has_back_button_property).
+    #[inline(always)]
     fn navigation_page_has_back_button<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::has_back_button_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::top_command_bar_property`](ferroui_controls::NavigationPage::top_command_bar_property).
+    #[inline(always)]
     fn navigation_page_top_command_bar<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::top_command_bar_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::bottom_command_bar_property`](ferroui_controls::NavigationPage::bottom_command_bar_property).
+    #[inline(always)]
     fn navigation_page_bottom_command_bar<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::Control>>, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::bottom_command_bar_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::has_navigation_bar_property`](ferroui_controls::NavigationPage::has_navigation_bar_property).
+    #[inline(always)]
     fn navigation_page_has_navigation_bar<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::has_navigation_bar_property(), value)
     }
 
     /// Sets the attached [`NavigationPage::is_back_button_enabled_property`](ferroui_controls::NavigationPage::is_back_button_enabled_property).
+    #[inline(always)]
     fn navigation_page_is_back_button_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NavigationPage>::is_back_button_enabled_property(), value)
     }
 
     /// Sets the attached [`NotificationCard::close_on_click_property`](ferroui_controls::NotificationCard::close_on_click_property).
+    #[inline(always)]
     fn notification_card_close_on_click<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::NotificationCard>::close_on_click_property(), value)
     }
 
     /// Sets the attached [`NumericUpDown::text_alignment_property`](ferroui_controls::NumericUpDown::text_alignment_property).
+    #[inline(always)]
     fn numeric_up_down_text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::text_alignment_property(), value)
     }
 
     /// Sets the attached [`Pivot::slide_in_animation_group_property`](ferroui_controls::Pivot::slide_in_animation_group_property).
+    #[inline(always)]
     fn pivot_slide_in_animation_group<M>(self, value: impl IntoProp<ferroui_controls::PivotSlideInAnimationGroup, M>) -> Self {
         self.prop(<ferroui_controls::Pivot>::slide_in_animation_group_property(), value)
     }
 
     /// Sets the attached [`PlatformFeedback::feedback_type_property`](ferroui_controls::PlatformFeedback::feedback_type_property).
+    #[inline(always)]
     fn platform_feedback_feedback_type<M>(self, value: impl IntoProp<ferroui_controls::FeedbackType, M>) -> Self {
         self.prop(<ferroui_controls::PlatformFeedback>::feedback_type_property(), value)
     }
 
     /// Sets the attached [`Popup::takes_focus_from_native_control_property`](ferroui_controls::primitives::Popup::takes_focus_from_native_control_property).
+    #[inline(always)]
     fn popup_takes_focus_from_native_control<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::Popup>::takes_focus_from_native_control_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::above_property`](ferroui_controls::RelativePanel::above_property).
+    #[inline(always)]
     fn relative_panel_above<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::above_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_bottom_with_panel_property`](ferroui_controls::RelativePanel::align_bottom_with_panel_property).
+    #[inline(always)]
     fn relative_panel_align_bottom_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_bottom_with_panel_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_bottom_with_property`](ferroui_controls::RelativePanel::align_bottom_with_property).
+    #[inline(always)]
     fn relative_panel_align_bottom_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_bottom_with_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_horizontal_center_with_panel_property`](ferroui_controls::RelativePanel::align_horizontal_center_with_panel_property).
+    #[inline(always)]
     fn relative_panel_align_horizontal_center_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_horizontal_center_with_panel_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_horizontal_center_with_property`](ferroui_controls::RelativePanel::align_horizontal_center_with_property).
+    #[inline(always)]
     fn relative_panel_align_horizontal_center_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_horizontal_center_with_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_left_with_panel_property`](ferroui_controls::RelativePanel::align_left_with_panel_property).
+    #[inline(always)]
     fn relative_panel_align_left_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_left_with_panel_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_left_with_property`](ferroui_controls::RelativePanel::align_left_with_property).
+    #[inline(always)]
     fn relative_panel_align_left_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_left_with_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_right_with_panel_property`](ferroui_controls::RelativePanel::align_right_with_panel_property).
+    #[inline(always)]
     fn relative_panel_align_right_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_right_with_panel_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_right_with_property`](ferroui_controls::RelativePanel::align_right_with_property).
+    #[inline(always)]
     fn relative_panel_align_right_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_right_with_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_top_with_panel_property`](ferroui_controls::RelativePanel::align_top_with_panel_property).
+    #[inline(always)]
     fn relative_panel_align_top_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_top_with_panel_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_top_with_property`](ferroui_controls::RelativePanel::align_top_with_property).
+    #[inline(always)]
     fn relative_panel_align_top_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_top_with_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_vertical_center_with_panel_property`](ferroui_controls::RelativePanel::align_vertical_center_with_panel_property).
+    #[inline(always)]
     fn relative_panel_align_vertical_center_with_panel<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_vertical_center_with_panel_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::align_vertical_center_with_property`](ferroui_controls::RelativePanel::align_vertical_center_with_property).
+    #[inline(always)]
     fn relative_panel_align_vertical_center_with<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::align_vertical_center_with_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::below_property`](ferroui_controls::RelativePanel::below_property).
+    #[inline(always)]
     fn relative_panel_below<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::below_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::left_of_property`](ferroui_controls::RelativePanel::left_of_property).
+    #[inline(always)]
     fn relative_panel_left_of<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::left_of_property(), value)
     }
 
     /// Sets the attached [`RelativePanel::right_of_property`](ferroui_controls::RelativePanel::right_of_property).
+    #[inline(always)]
     fn relative_panel_right_of<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::RelativePanel>::right_of_property(), value)
     }
 
     /// Sets the attached [`RevealBrush::state_property`](ferroui_controls::media::RevealBrush::state_property).
+    #[inline(always)]
     fn reveal_brush_state<M>(self, value: impl IntoProp<ferroui_controls::media::RevealBrushState, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::state_property(), value)
     }
 
     /// Sets the attached [`RevealBrush::is_container_property`](ferroui_controls::media::RevealBrush::is_container_property).
+    #[inline(always)]
     fn reveal_brush_is_container<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::is_container_property(), value)
     }
 
     /// Sets the attached [`ScrollContentPresenter::horizontal_snap_points_type_property`](ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_type_property).
+    #[inline(always)]
     fn scroll_content_presenter_horizontal_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::horizontal_snap_points_type_property(), value)
     }
 
     /// Sets the attached [`ScrollContentPresenter::vertical_snap_points_type_property`](ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_type_property).
+    #[inline(always)]
     fn scroll_content_presenter_vertical_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::vertical_snap_points_type_property(), value)
     }
 
     /// Sets the attached [`ScrollContentPresenter::horizontal_snap_points_alignment_property`](ferroui_controls::presenters::ScrollContentPresenter::horizontal_snap_points_alignment_property).
+    #[inline(always)]
     fn scroll_content_presenter_horizontal_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::horizontal_snap_points_alignment_property(), value)
     }
 
     /// Sets the attached [`ScrollContentPresenter::vertical_snap_points_alignment_property`](ferroui_controls::presenters::ScrollContentPresenter::vertical_snap_points_alignment_property).
+    #[inline(always)]
     fn scroll_content_presenter_vertical_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::vertical_snap_points_alignment_property(), value)
     }
 
     /// Sets the attached [`ScrollContentPresenter::is_scroll_chaining_enabled_property`](ferroui_controls::presenters::ScrollContentPresenter::is_scroll_chaining_enabled_property).
+    #[inline(always)]
     fn scroll_content_presenter_is_scroll_chaining_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ScrollContentPresenter>::is_scroll_chaining_enabled_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::bring_into_view_on_focus_change_property`](ferroui_controls::ScrollViewer::bring_into_view_on_focus_change_property).
+    #[inline(always)]
     fn scroll_viewer_bring_into_view_on_focus_change<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::bring_into_view_on_focus_change_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::horizontal_scroll_bar_visibility_property`](ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property).
+    #[inline(always)]
     fn scroll_viewer_horizontal_scroll_bar_visibility<M>(self, value: impl IntoProp<ferroui_controls::primitives::ScrollBarVisibility, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::horizontal_scroll_bar_visibility_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::horizontal_snap_points_type_property`](ferroui_controls::ScrollViewer::horizontal_snap_points_type_property).
+    #[inline(always)]
     fn scroll_viewer_horizontal_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::horizontal_snap_points_type_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::vertical_snap_points_type_property`](ferroui_controls::ScrollViewer::vertical_snap_points_type_property).
+    #[inline(always)]
     fn scroll_viewer_vertical_snap_points_type<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsType, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::vertical_snap_points_type_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::horizontal_snap_points_alignment_property`](ferroui_controls::ScrollViewer::horizontal_snap_points_alignment_property).
+    #[inline(always)]
     fn scroll_viewer_horizontal_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::horizontal_snap_points_alignment_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::vertical_snap_points_alignment_property`](ferroui_controls::ScrollViewer::vertical_snap_points_alignment_property).
+    #[inline(always)]
     fn scroll_viewer_vertical_snap_points_alignment<M>(self, value: impl IntoProp<ferroui_controls::primitives::SnapPointsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::vertical_snap_points_alignment_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::vertical_scroll_bar_visibility_property`](ferroui_controls::ScrollViewer::vertical_scroll_bar_visibility_property).
+    #[inline(always)]
     fn scroll_viewer_vertical_scroll_bar_visibility<M>(self, value: impl IntoProp<ferroui_controls::primitives::ScrollBarVisibility, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::vertical_scroll_bar_visibility_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::allow_auto_hide_property`](ferroui_controls::ScrollViewer::allow_auto_hide_property).
+    #[inline(always)]
     fn scroll_viewer_allow_auto_hide<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::allow_auto_hide_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::is_scroll_chaining_enabled_property`](ferroui_controls::ScrollViewer::is_scroll_chaining_enabled_property).
+    #[inline(always)]
     fn scroll_viewer_is_scroll_chaining_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::is_scroll_chaining_enabled_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::is_scroll_inertia_enabled_property`](ferroui_controls::ScrollViewer::is_scroll_inertia_enabled_property).
+    #[inline(always)]
     fn scroll_viewer_is_scroll_inertia_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::is_scroll_inertia_enabled_property(), value)
     }
 
     /// Sets the attached [`ScrollViewer::is_deferred_scrolling_enabled_property`](ferroui_controls::ScrollViewer::is_deferred_scrolling_enabled_property).
+    #[inline(always)]
     fn scroll_viewer_is_deferred_scrolling_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ScrollViewer>::is_deferred_scrolling_enabled_property(), value)
     }
 
     /// Sets the attached [`SelectingItemsControl::is_selected_property`](ferroui_controls::primitives::SelectingItemsControl::is_selected_property).
+    #[inline(always)]
     fn selecting_items_control_is_selected<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SelectingItemsControl>::is_selected_property(), value)
     }
 
     /// Sets the attached [`Storyboard::target_name_property`](ferroui_controls::animation::Storyboard::target_name_property).
+    #[inline(always)]
     fn storyboard_target_name<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::animation::Storyboard>::target_name_property(), value)
     }
 
     /// Sets the attached [`Storyboard::target_property_property`](ferroui_controls::animation::Storyboard::target_property_property).
+    #[inline(always)]
     fn storyboard_target_property<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::animation::Storyboard>::target_property_property(), value)
     }
 
     /// Sets the attached [`TabbedPage::is_tab_enabled_property`](ferroui_controls::TabbedPage::is_tab_enabled_property).
+    #[inline(always)]
     fn tabbed_page_is_tab_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TabbedPage>::is_tab_enabled_property(), value)
     }
 
     /// Sets the attached [`TemplatedControl::is_template_focus_target_property`](ferroui_controls::primitives::TemplatedControl::is_template_focus_target_property).
+    #[inline(always)]
     fn templated_control_is_template_focus_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::is_template_focus_target_property(), value)
     }
 
     /// Sets the attached [`TextBlock::baseline_offset_property`](ferroui_controls::TextBlock::baseline_offset_property).
+    #[inline(always)]
     fn text_block_baseline_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::baseline_offset_property(), value)
     }
 
     /// Sets the attached [`TextBlock::text_line_bounds_property`](ferroui_controls::TextBlock::text_line_bounds_property).
+    #[inline(always)]
     fn text_block_text_line_bounds<M>(self, value: impl IntoProp<ferroui_base::media::TextLineBounds, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_line_bounds_property(), value)
     }
 
     /// Sets the attached [`TextBlock::layout_rounding_placement_property`](ferroui_controls::TextBlock::layout_rounding_placement_property).
+    #[inline(always)]
     fn text_block_layout_rounding_placement<M>(self, value: impl IntoProp<ferroui_controls::TextLayoutRoundingPlacement, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::layout_rounding_placement_property(), value)
     }
 
     /// Sets the attached [`TextBlock::line_height_property`](ferroui_controls::TextBlock::line_height_property).
+    #[inline(always)]
     fn text_block_line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::line_height_property(), value)
     }
 
     /// Sets the attached [`TextBlock::line_spacing_property`](ferroui_controls::TextBlock::line_spacing_property).
+    #[inline(always)]
     fn text_block_line_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::line_spacing_property(), value)
     }
 
     /// Sets the attached [`TextBlock::max_lines_property`](ferroui_controls::TextBlock::max_lines_property).
+    #[inline(always)]
     fn text_block_max_lines<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::max_lines_property(), value)
     }
 
     /// Sets the attached [`TextBlock::text_alignment_property`](ferroui_controls::TextBlock::text_alignment_property).
+    #[inline(always)]
     fn text_block_text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_alignment_property(), value)
     }
 
     /// Sets the attached [`TextBlock::text_wrapping_property`](ferroui_controls::TextBlock::text_wrapping_property).
+    #[inline(always)]
     fn text_block_text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_wrapping_property(), value)
     }
 
     /// Sets the attached [`TextBlock::text_trimming_property`](ferroui_controls::TextBlock::text_trimming_property).
+    #[inline(always)]
     fn text_block_text_trimming<M>(self, value: impl IntoProp<std::rc::Rc<dyn ferroui_base::media::TextTrimming>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::text_trimming_property(), value)
     }
 
     /// Sets the attached [`TextBox::text_alignment_property`](ferroui_controls::TextBox::text_alignment_property).
+    #[inline(always)]
     fn text_box_text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::text_alignment_property(), value)
     }
 
     /// Sets the attached [`TextBox::text_wrapping_property`](ferroui_controls::TextBox::text_wrapping_property).
+    #[inline(always)]
     fn text_box_text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::text_wrapping_property(), value)
     }
 
     /// Sets the attached [`TextBox::line_height_property`](ferroui_controls::TextBox::line_height_property).
+    #[inline(always)]
     fn text_box_line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::line_height_property(), value)
     }
 
     /// Sets the attached [`TextElement::language_property`](ferroui_controls::documents::TextElement::language_property).
+    #[inline(always)]
     fn text_element_language<M>(self, value: impl IntoProp<ferroui_base::utilities::Locale, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::language_property(), value)
     }
 
     /// Sets the attached [`TextElement::font_family_property`](ferroui_controls::documents::TextElement::font_family_property).
+    #[inline(always)]
     fn text_element_font_family<M>(self, value: impl IntoProp<ferroui_base::media::FontFamily, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_family_property(), value)
     }
 
     /// Sets the attached [`TextElement::font_features_property`](ferroui_controls::documents::TextElement::font_features_property).
+    #[inline(always)]
     fn text_element_font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_features_property(), value)
     }
 
     /// Sets the attached [`TextElement::font_size_property`](ferroui_controls::documents::TextElement::font_size_property).
+    #[inline(always)]
     fn text_element_font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_size_property(), value)
     }
 
     /// Sets the attached [`TextElement::font_style_property`](ferroui_controls::documents::TextElement::font_style_property).
+    #[inline(always)]
     fn text_element_font_style<M>(self, value: impl IntoProp<ferroui_base::media::FontStyle, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_style_property(), value)
     }
 
     /// Sets the attached [`TextElement::font_weight_property`](ferroui_controls::documents::TextElement::font_weight_property).
+    #[inline(always)]
     fn text_element_font_weight<M>(self, value: impl IntoProp<ferroui_base::media::FontWeight, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_weight_property(), value)
     }
 
     /// Sets the attached [`TextElement::font_stretch_property`](ferroui_controls::documents::TextElement::font_stretch_property).
+    #[inline(always)]
     fn text_element_font_stretch<M>(self, value: impl IntoProp<ferroui_base::media::FontStretch, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_stretch_property(), value)
     }
 
     /// Sets the attached [`TextElement::foreground_property`](ferroui_controls::documents::TextElement::foreground_property).
+    #[inline(always)]
     fn text_element_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::foreground_property(), value)
     }
 
     /// Sets the attached [`TextElement::letter_spacing_property`](ferroui_controls::documents::TextElement::letter_spacing_property).
+    #[inline(always)]
     fn text_element_letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::letter_spacing_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::input_scope_names_property`](ferroui_base::input::text_input::TextInputOptions::input_scope_names_property).
+    #[inline(always)]
     fn text_input_options_input_scope_names<M>(self, value: impl IntoProp<Option<std::rc::Rc<[ferroui_base::input::InputScopeNameValue]>>, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::input_scope_names_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::content_type_property`](ferroui_base::input::text_input::TextInputOptions::content_type_property).
+    #[inline(always)]
     fn text_input_options_content_type<M>(self, value: impl IntoProp<ferroui_base::input::text_input::TextInputContentType, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::content_type_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::return_key_type_property`](ferroui_base::input::text_input::TextInputOptions::return_key_type_property).
+    #[inline(always)]
     fn text_input_options_return_key_type<M>(self, value: impl IntoProp<ferroui_base::input::text_input::TextInputReturnKeyType, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::return_key_type_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::multiline_property`](ferroui_base::input::text_input::TextInputOptions::multiline_property).
+    #[inline(always)]
     fn text_input_options_multiline<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::multiline_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::lowercase_property`](ferroui_base::input::text_input::TextInputOptions::lowercase_property).
+    #[inline(always)]
     fn text_input_options_lowercase<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::lowercase_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::uppercase_property`](ferroui_base::input::text_input::TextInputOptions::uppercase_property).
+    #[inline(always)]
     fn text_input_options_uppercase<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::uppercase_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::auto_capitalization_property`](ferroui_base::input::text_input::TextInputOptions::auto_capitalization_property).
+    #[inline(always)]
     fn text_input_options_auto_capitalization<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::auto_capitalization_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::is_sensitive_property`](ferroui_base::input::text_input::TextInputOptions::is_sensitive_property).
+    #[inline(always)]
     fn text_input_options_is_sensitive<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::is_sensitive_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::show_suggestions_property`](ferroui_base::input::text_input::TextInputOptions::show_suggestions_property).
+    #[inline(always)]
     fn text_input_options_show_suggestions<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::show_suggestions_property(), value)
     }
 
     /// Sets the attached [`TextInputOptions::locale_hints_property`](ferroui_base::input::text_input::TextInputOptions::locale_hints_property).
+    #[inline(always)]
     fn text_input_options_locale_hints<M>(self, value: impl IntoProp<Option<std::rc::Rc<[String]>>, M>) -> Self {
         self.prop(<ferroui_base::input::text_input::TextInputOptions>::locale_hints_property(), value)
     }
 
     /// Sets the attached [`TextPresenter::text_alignment_property`](ferroui_controls::presenters::TextPresenter::text_alignment_property).
+    #[inline(always)]
     fn text_presenter_text_alignment<M>(self, value: impl IntoProp<ferroui_base::media::TextAlignment, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::text_alignment_property(), value)
     }
 
     /// Sets the attached [`TextPresenter::text_wrapping_property`](ferroui_controls::presenters::TextPresenter::text_wrapping_property).
+    #[inline(always)]
     fn text_presenter_text_wrapping<M>(self, value: impl IntoProp<ferroui_base::media::TextWrapping, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::text_wrapping_property(), value)
     }
 
     /// Sets the attached [`TextPresenter::line_height_property`](ferroui_controls::presenters::TextPresenter::line_height_property).
+    #[inline(always)]
     fn text_presenter_line_height<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::line_height_property(), value)
     }
 
     /// Sets the attached [`TextPresenter::letter_spacing_property`](ferroui_controls::presenters::TextPresenter::letter_spacing_property).
+    #[inline(always)]
     fn text_presenter_letter_spacing<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::letter_spacing_property(), value)
     }
 
     /// Sets the attached [`TextSearch::text_property`](ferroui_controls::primitives::TextSearch::text_property).
+    #[inline(always)]
     fn text_search_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TextSearch>::text_property(), value)
     }
 
     /// Sets the attached [`TitleBar::is_drag_region_property`](ferroui_controls::TitleBar::is_drag_region_property).
+    #[inline(always)]
     fn title_bar_is_drag_region<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_controls::TitleBar>::is_drag_region_property(), value)
     }
 
     /// Sets the attached [`ToolTip::tip_property`](ferroui_controls::ToolTip::tip_property).
+    #[inline(always)]
     fn tool_tip_tip<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::tip_property(), value)
     }
 
     /// Sets the attached [`ToolTip::is_open_property`](ferroui_controls::ToolTip::is_open_property).
+    #[inline(always)]
     fn tool_tip_is_open<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::is_open_property(), value)
     }
 
     /// Sets the attached [`ToolTip::placement_property`](ferroui_controls::ToolTip::placement_property).
+    #[inline(always)]
     fn tool_tip_placement<M>(self, value: impl IntoProp<ferroui_controls::PlacementMode, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::placement_property(), value)
     }
 
     /// Sets the attached [`ToolTip::horizontal_offset_property`](ferroui_controls::ToolTip::horizontal_offset_property).
+    #[inline(always)]
     fn tool_tip_horizontal_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::horizontal_offset_property(), value)
     }
 
     /// Sets the attached [`ToolTip::vertical_offset_property`](ferroui_controls::ToolTip::vertical_offset_property).
+    #[inline(always)]
     fn tool_tip_vertical_offset<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::vertical_offset_property(), value)
     }
 
     /// Sets the attached [`ToolTip::custom_popup_placement_callback_property`](ferroui_controls::ToolTip::custom_popup_placement_callback_property).
+    #[inline(always)]
     fn tool_tip_custom_popup_placement_callback<M>(self, value: impl IntoProp<Option<ferroui_controls::primitives::CustomPopupPlacementCallbackValue>, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::custom_popup_placement_callback_property(), value)
     }
 
     /// Sets the attached [`ToolTip::show_delay_property`](ferroui_controls::ToolTip::show_delay_property).
+    #[inline(always)]
     fn tool_tip_show_delay<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::show_delay_property(), value)
     }
 
     /// Sets the attached [`ToolTip::between_show_delay_property`](ferroui_controls::ToolTip::between_show_delay_property).
+    #[inline(always)]
     fn tool_tip_between_show_delay<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::between_show_delay_property(), value)
     }
 
     /// Sets the attached [`ToolTip::show_on_disabled_property`](ferroui_controls::ToolTip::show_on_disabled_property).
+    #[inline(always)]
     fn tool_tip_show_on_disabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::show_on_disabled_property(), value)
     }
 
     /// Sets the attached [`ToolTip::service_enabled_property`](ferroui_controls::ToolTip::service_enabled_property).
+    #[inline(always)]
     fn tool_tip_service_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::service_enabled_property(), value)
     }
 
     /// Sets the attached [`ToolTip::should_use_overlay_layer_property`](ferroui_controls::ToolTip::should_use_overlay_layer_property).
+    #[inline(always)]
     fn tool_tip_should_use_overlay_layer<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::should_use_overlay_layer_property(), value)
     }
 
     /// Sets the attached [`ToolTip::tool_tip_property`](ferroui_controls::ToolTip::tool_tip_property).
+    #[inline(always)]
     fn tool_tip_tool_tip<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::ToolTip>>, M>) -> Self {
         self.prop(<ferroui_controls::ToolTip>::tool_tip_property(), value)
     }
 
     /// Sets the attached [`TopLevel::system_bar_color_property`](ferroui_controls::TopLevel::system_bar_color_property).
+    #[inline(always)]
     fn top_level_system_bar_color<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::SolidColorBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TopLevel>::system_bar_color_property(), value)
     }
 
     /// Sets the attached [`TopLevel::auto_safe_area_padding_property`](ferroui_controls::TopLevel::auto_safe_area_padding_property).
+    #[inline(always)]
     fn top_level_auto_safe_area_padding<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TopLevel>::auto_safe_area_padding_property(), value)
     }
 
     /// Sets the attached [`TrayIcon::icons_property`](ferroui_controls::TrayIcon::icons_property).
+    #[inline(always)]
     fn tray_icon_icons<M>(self, value: impl IntoProp<Option<std::rc::Rc<ferroui_controls::TrayIcons>>, M>) -> Self {
         self.prop(<ferroui_controls::TrayIcon>::icons_property(), value)
     }
 
     /// Sets the attached [`Typography::annotation_alternates_property`](ferroui_controls::documents::Typography::annotation_alternates_property).
+    #[inline(always)]
     fn typography_annotation_alternates<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::annotation_alternates_property(), value)
     }
 
     /// Sets the attached [`Typography::east_asian_expert_forms_property`](ferroui_controls::documents::Typography::east_asian_expert_forms_property).
+    #[inline(always)]
     fn typography_east_asian_expert_forms<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::east_asian_expert_forms_property(), value)
     }
 
     /// Sets the attached [`Typography::east_asian_language_property`](ferroui_controls::documents::Typography::east_asian_language_property).
+    #[inline(always)]
     fn typography_east_asian_language<M>(self, value: impl IntoProp<ferroui_base::media::FontEastAsianLanguage, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::east_asian_language_property(), value)
     }
 
     /// Sets the attached [`Typography::east_asian_widths_property`](ferroui_controls::documents::Typography::east_asian_widths_property).
+    #[inline(always)]
     fn typography_east_asian_widths<M>(self, value: impl IntoProp<ferroui_base::media::FontEastAsianWidths, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::east_asian_widths_property(), value)
     }
 
     /// Sets the attached [`Typography::standard_ligatures_property`](ferroui_controls::documents::Typography::standard_ligatures_property).
+    #[inline(always)]
     fn typography_standard_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::standard_ligatures_property(), value)
     }
 
     /// Sets the attached [`Typography::contextual_ligatures_property`](ferroui_controls::documents::Typography::contextual_ligatures_property).
+    #[inline(always)]
     fn typography_contextual_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::contextual_ligatures_property(), value)
     }
 
     /// Sets the attached [`Typography::discretionary_ligatures_property`](ferroui_controls::documents::Typography::discretionary_ligatures_property).
+    #[inline(always)]
     fn typography_discretionary_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::discretionary_ligatures_property(), value)
     }
 
     /// Sets the attached [`Typography::historical_ligatures_property`](ferroui_controls::documents::Typography::historical_ligatures_property).
+    #[inline(always)]
     fn typography_historical_ligatures<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::historical_ligatures_property(), value)
     }
 
     /// Sets the attached [`Typography::standard_swashes_property`](ferroui_controls::documents::Typography::standard_swashes_property).
+    #[inline(always)]
     fn typography_standard_swashes<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::standard_swashes_property(), value)
     }
 
     /// Sets the attached [`Typography::contextual_swashes_property`](ferroui_controls::documents::Typography::contextual_swashes_property).
+    #[inline(always)]
     fn typography_contextual_swashes<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::contextual_swashes_property(), value)
     }
 
     /// Sets the attached [`Typography::contextual_alternates_property`](ferroui_controls::documents::Typography::contextual_alternates_property).
+    #[inline(always)]
     fn typography_contextual_alternates<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::contextual_alternates_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_alternates_property`](ferroui_controls::documents::Typography::stylistic_alternates_property).
+    #[inline(always)]
     fn typography_stylistic_alternates<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_alternates_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set1_property`](ferroui_controls::documents::Typography::stylistic_set1_property).
+    #[inline(always)]
     fn typography_stylistic_set1<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set1_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set2_property`](ferroui_controls::documents::Typography::stylistic_set2_property).
+    #[inline(always)]
     fn typography_stylistic_set2<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set2_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set3_property`](ferroui_controls::documents::Typography::stylistic_set3_property).
+    #[inline(always)]
     fn typography_stylistic_set3<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set3_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set4_property`](ferroui_controls::documents::Typography::stylistic_set4_property).
+    #[inline(always)]
     fn typography_stylistic_set4<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set4_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set5_property`](ferroui_controls::documents::Typography::stylistic_set5_property).
+    #[inline(always)]
     fn typography_stylistic_set5<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set5_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set6_property`](ferroui_controls::documents::Typography::stylistic_set6_property).
+    #[inline(always)]
     fn typography_stylistic_set6<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set6_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set7_property`](ferroui_controls::documents::Typography::stylistic_set7_property).
+    #[inline(always)]
     fn typography_stylistic_set7<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set7_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set8_property`](ferroui_controls::documents::Typography::stylistic_set8_property).
+    #[inline(always)]
     fn typography_stylistic_set8<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set8_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set9_property`](ferroui_controls::documents::Typography::stylistic_set9_property).
+    #[inline(always)]
     fn typography_stylistic_set9<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set9_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set10_property`](ferroui_controls::documents::Typography::stylistic_set10_property).
+    #[inline(always)]
     fn typography_stylistic_set10<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set10_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set11_property`](ferroui_controls::documents::Typography::stylistic_set11_property).
+    #[inline(always)]
     fn typography_stylistic_set11<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set11_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set12_property`](ferroui_controls::documents::Typography::stylistic_set12_property).
+    #[inline(always)]
     fn typography_stylistic_set12<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set12_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set13_property`](ferroui_controls::documents::Typography::stylistic_set13_property).
+    #[inline(always)]
     fn typography_stylistic_set13<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set13_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set14_property`](ferroui_controls::documents::Typography::stylistic_set14_property).
+    #[inline(always)]
     fn typography_stylistic_set14<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set14_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set15_property`](ferroui_controls::documents::Typography::stylistic_set15_property).
+    #[inline(always)]
     fn typography_stylistic_set15<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set15_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set16_property`](ferroui_controls::documents::Typography::stylistic_set16_property).
+    #[inline(always)]
     fn typography_stylistic_set16<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set16_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set17_property`](ferroui_controls::documents::Typography::stylistic_set17_property).
+    #[inline(always)]
     fn typography_stylistic_set17<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set17_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set18_property`](ferroui_controls::documents::Typography::stylistic_set18_property).
+    #[inline(always)]
     fn typography_stylistic_set18<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set18_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set19_property`](ferroui_controls::documents::Typography::stylistic_set19_property).
+    #[inline(always)]
     fn typography_stylistic_set19<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set19_property(), value)
     }
 
     /// Sets the attached [`Typography::stylistic_set20_property`](ferroui_controls::documents::Typography::stylistic_set20_property).
+    #[inline(always)]
     fn typography_stylistic_set20<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::stylistic_set20_property(), value)
     }
 
     /// Sets the attached [`Typography::capitals_property`](ferroui_controls::documents::Typography::capitals_property).
+    #[inline(always)]
     fn typography_capitals<M>(self, value: impl IntoProp<ferroui_base::media::FontCapitals, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::capitals_property(), value)
     }
 
     /// Sets the attached [`Typography::capital_spacing_property`](ferroui_controls::documents::Typography::capital_spacing_property).
+    #[inline(always)]
     fn typography_capital_spacing<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::capital_spacing_property(), value)
     }
 
     /// Sets the attached [`Typography::kerning_property`](ferroui_controls::documents::Typography::kerning_property).
+    #[inline(always)]
     fn typography_kerning<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::kerning_property(), value)
     }
 
     /// Sets the attached [`Typography::case_sensitive_forms_property`](ferroui_controls::documents::Typography::case_sensitive_forms_property).
+    #[inline(always)]
     fn typography_case_sensitive_forms<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::case_sensitive_forms_property(), value)
     }
 
     /// Sets the attached [`Typography::historical_forms_property`](ferroui_controls::documents::Typography::historical_forms_property).
+    #[inline(always)]
     fn typography_historical_forms<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::historical_forms_property(), value)
     }
 
     /// Sets the attached [`Typography::fraction_property`](ferroui_controls::documents::Typography::fraction_property).
+    #[inline(always)]
     fn typography_fraction<M>(self, value: impl IntoProp<ferroui_base::media::FontFraction, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::fraction_property(), value)
     }
 
     /// Sets the attached [`Typography::numeral_style_property`](ferroui_controls::documents::Typography::numeral_style_property).
+    #[inline(always)]
     fn typography_numeral_style<M>(self, value: impl IntoProp<ferroui_base::media::FontNumeralStyle, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::numeral_style_property(), value)
     }
 
     /// Sets the attached [`Typography::numeral_alignment_property`](ferroui_controls::documents::Typography::numeral_alignment_property).
+    #[inline(always)]
     fn typography_numeral_alignment<M>(self, value: impl IntoProp<ferroui_base::media::FontNumeralAlignment, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::numeral_alignment_property(), value)
     }
 
     /// Sets the attached [`Typography::slashed_zero_property`](ferroui_controls::documents::Typography::slashed_zero_property).
+    #[inline(always)]
     fn typography_slashed_zero<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::slashed_zero_property(), value)
     }
 
     /// Sets the attached [`Typography::mathematical_greek_property`](ferroui_controls::documents::Typography::mathematical_greek_property).
+    #[inline(always)]
     fn typography_mathematical_greek<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::mathematical_greek_property(), value)
     }
 
     /// Sets the attached [`Typography::variants_property`](ferroui_controls::documents::Typography::variants_property).
+    #[inline(always)]
     fn typography_variants<M>(self, value: impl IntoProp<ferroui_base::media::FontVariants, M>) -> Self {
         self.prop(<ferroui_controls::documents::Typography>::variants_property(), value)
     }
 
     /// Sets the attached [`Visual::flow_direction_property`](ferroui_base::Visual::flow_direction_property).
+    #[inline(always)]
     fn visual_flow_direction<M>(self, value: impl IntoProp<ferroui_base::media::FlowDirection, M>) -> Self {
         self.prop(<ferroui_base::Visual>::flow_direction_property(), value)
     }
 
     /// Sets the attached [`VisualStateManager::custom_visual_state_manager_property`](ferroui_controls::VisualStateManager::custom_visual_state_manager_property).
+    #[inline(always)]
     fn visual_state_manager_custom_visual_state_manager<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::VisualStateManager>>, M>) -> Self {
         self.prop(<ferroui_controls::VisualStateManager>::custom_visual_state_manager_property(), value)
     }
 
     /// Sets the attached [`Win32Properties::non_client_hit_test_result_property`](ferroui_controls::Win32Properties::non_client_hit_test_result_property).
+    #[inline(always)]
     fn win32_properties_non_client_hit_test_result<M>(self, value: impl IntoProp<ferroui_controls::platform::Win32HitTestValue, M>) -> Self {
         self.prop(<ferroui_controls::Win32Properties>::non_client_hit_test_result_property(), value)
     }
 
     /// Sets the attached [`Win32Properties::window_corner_preference_property`](ferroui_controls::Win32Properties::window_corner_preference_property).
+    #[inline(always)]
     fn win32_properties_window_corner_preference<M>(self, value: impl IntoProp<ferroui_controls::platform::WindowCornerPreference, M>) -> Self {
         self.prop(<ferroui_controls::Win32Properties>::window_corner_preference_property(), value)
     }
 
     /// Sets the attached [`WindowDecorationProperties::element_role_property`](ferroui_controls::chrome::WindowDecorationProperties::element_role_property).
+    #[inline(always)]
     fn window_decoration_properties_element_role<M>(self, value: impl IntoProp<ferroui_base::input::WindowDecorationsElementRole, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDecorationProperties>::element_role_property(), value)
     }
 
     /// Sets the attached [`WindowDrawnDecorations::title_bar_decorations_property`](ferroui_controls::chrome::WindowDrawnDecorations::title_bar_decorations_property).
+    #[inline(always)]
     fn window_drawn_decorations_title_bar_decorations<M>(self, value: impl IntoProp<ferroui_controls::chrome::TitleBarDecorations, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::title_bar_decorations_property(), value)
     }
 
     /// Sets the attached [`X11Properties::net_wm_window_type_property`](ferroui_controls::X11Properties::net_wm_window_type_property).
+    #[inline(always)]
     fn x11_properties_net_wm_window_type<M>(self, value: impl IntoProp<ferroui_controls::platform::X11NetWmWindowType, M>) -> Self {
         self.prop(<ferroui_controls::X11Properties>::net_wm_window_type_property(), value)
     }
 
     /// Sets the attached [`X11Properties::wm_class_property`](ferroui_controls::X11Properties::wm_class_property).
+    #[inline(always)]
     fn x11_properties_wm_class<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
         self.prop(<ferroui_controls::X11Properties>::wm_class_property(), value)
     }
 
     /// Sets the attached [`XYFocus::navigation_modes_property`](ferroui_base::input::XYFocus::navigation_modes_property).
+    #[inline(always)]
     fn xy_focus_navigation_modes<M>(self, value: impl IntoProp<ferroui_base::input::XYFocusNavigationModes, M>) -> Self {
         self.prop(<ferroui_base::input::XYFocus>::navigation_modes_property(), value)
     }
 
     /// Sets the attached [`XamlAmbientLight::is_target_property`](ferroui_controls::media::XamlAmbientLight::is_target_property).
+    #[inline(always)]
     fn xaml_ambient_light_is_target<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::media::XamlAmbientLight>::is_target_property(), value)
     }
 
     /// Sets the attached [`XamlBindingHelper::data_template_component_property`](ferroui_controls::templates::XamlBindingHelper::data_template_component_property).
+    #[inline(always)]
     fn xaml_binding_helper_data_template_component<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplateComponent>>, M>) -> Self {
         self.prop(<ferroui_controls::templates::XamlBindingHelper>::data_template_component_property(), value)
     }
