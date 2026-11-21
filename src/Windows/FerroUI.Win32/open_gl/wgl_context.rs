@@ -174,9 +174,6 @@ impl IPlatformGraphicsContext for WglContext {
         self.is_lost.set(true);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IGlContext for WglContext {

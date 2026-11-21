@@ -30,7 +30,7 @@ impl ServerObjectId {
 
 /// The base contract of every server-side object (upstream
 /// `SimpleServerObject`).
-pub trait IServerObject: 'static {
+pub trait IServerObject: 'static + std::any::Any {
     /// Reads the changes of the object from a batch.
     fn deserialize_changes_core(&self, _reader: &mut BatchStreamReader<'_>, _committed_at: Duration) {}
 
@@ -95,9 +95,16 @@ pub trait IServerObject: 'static {
         None
     }
 
-    fn as_any(&self) -> &dyn Any;
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any>;
+}
+
+impl dyn IServerObject {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// A server object that supports animated properties: what upstream's

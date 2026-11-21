@@ -328,9 +328,6 @@ impl IGlyphRunImpl for HeadlessGlyphRunStub {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 // --- geometries -----------------------------------------------------------------------------
@@ -567,9 +564,6 @@ impl IGeometryImpl for HeadlessGeometryStub {
         base_get_fill_intersection_result(self.bounds, geometry)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// `HeadlessTransformedGeometryStub`.
@@ -679,9 +673,6 @@ impl IGeometryImpl for HeadlessTransformedGeometryStub {
         Some(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ITransformedGeometryImpl for HeadlessTransformedGeometryStub {
@@ -820,9 +811,6 @@ impl IGeometryImpl for HeadlessSimpleGeometryStub {
         base_get_fill_intersection_result(self.bounds, geometry)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// `HeadlessStreamGeometryBuilder`: the points of the source geometry and
@@ -939,9 +927,6 @@ impl IBitmapImpl for HeadlessBitmapStub {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(self)

@@ -197,7 +197,4 @@ impl IServerVisualContent for ServerIndicator {
     fn dispose(&self, visual: &ServerCompositionVisual) {
         self.draw_list.dispose(visual);
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

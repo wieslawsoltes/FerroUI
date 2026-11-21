@@ -346,9 +346,6 @@ impl<T: FontCollectionBaseImpl> IFontCollection for T {
         Some(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl Default for FontCollectionBase {

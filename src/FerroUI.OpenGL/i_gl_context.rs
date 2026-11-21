@@ -112,6 +112,14 @@ pub trait IGlContext: IPlatformGraphicsContext {
     ) -> Option<Rc<dyn IGlContext>>;
 }
 
+impl dyn IGlContext {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 /// Lets a context render to surfaces that are not OpenGL surfaces
 /// themselves.
 ///

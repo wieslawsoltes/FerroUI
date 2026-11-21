@@ -648,9 +648,6 @@ impl IBitmapImpl for MockDrawingContextLayerImpl {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
@@ -750,9 +747,6 @@ impl IBitmapImpl for MockRenderTargetBitmapImpl {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(self)

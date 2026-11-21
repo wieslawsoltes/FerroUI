@@ -156,9 +156,6 @@ impl IFontCollection for StubFontCollection {
         self.is_disposed.set(true);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 fn same(a: &Rc<dyn IFontCollection>, b: &Rc<dyn IFontCollection>) -> bool {

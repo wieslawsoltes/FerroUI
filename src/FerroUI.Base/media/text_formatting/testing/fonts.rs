@@ -281,9 +281,6 @@ impl IPlatformTypeface for TestPlatformTypeface {
         None
     }
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 }
 
 /// A font manager backend that serves synthetic fonts. The first font is the

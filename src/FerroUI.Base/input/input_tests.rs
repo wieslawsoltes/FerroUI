@@ -506,9 +506,6 @@ struct TestCursorImpl;
 
 impl ICursorImpl for TestCursorImpl {
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 }
 
 struct TestCursorFactory;
@@ -5365,9 +5362,6 @@ impl crate::platform::IBitmapImpl for TestBitmapImpl {
         Ok(())
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 }
 
 struct RecordingCursorFactory(RefCell<Vec<(PixelSize, PixelPoint)>>);

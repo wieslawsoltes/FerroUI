@@ -6,9 +6,15 @@ use std::rc::Rc;
 /// draws it in, made once and drawn again in later frames without the
 /// commands that drew it. Only the backend that made a fragment knows what
 /// it holds.
-pub trait IDrawingFragment: Any {
-    /// Lets the backend recover its concrete type.
-    fn as_any(&self) -> &dyn Any;
+pub trait IDrawingFragment: Any + std::any::Any {
+}
+
+impl dyn IDrawingFragment {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// A drawing context that can keep what is drawn between two calls as a

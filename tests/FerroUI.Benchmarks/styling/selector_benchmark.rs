@@ -113,9 +113,6 @@ impl SelectorNode for AlwaysMatchSelector {
         None
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 pub fn register(registry: &mut Registry) {

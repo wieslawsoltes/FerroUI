@@ -32,9 +32,6 @@ impl IPlatformGraphicsContext for Device {
         Rc::new(Nothing)
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 impl ferroui_metal::IMetalDevice for Device {
     fn device(&self) -> *mut c_void {

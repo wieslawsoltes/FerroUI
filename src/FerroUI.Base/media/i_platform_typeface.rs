@@ -5,7 +5,7 @@ use crate::media::{FontSimulations, FontStretch, FontStyle, FontVariationSetting
 
 /// Represents a platform-specific typeface: a font face as loaded by the
 /// font backend, exposing its identity and raw table data.
-pub trait IPlatformTypeface: IFontMemory {
+pub trait IPlatformTypeface: IFontMemory + std::any::Any {
     /// Gets the family name of the font.
     fn family_name(&self) -> String;
 
@@ -41,7 +41,12 @@ pub trait IPlatformTypeface: IFontMemory {
     /// Attempts to obtain a stream over the raw font data.
     fn try_get_stream(&self) -> Option<Box<dyn Read>>;
 
-    /// Lets the backend that created the typeface recover its concrete type
-    /// (C#'s type test `PlatformTypeface is SkiaTypeface`).
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn IPlatformTypeface {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

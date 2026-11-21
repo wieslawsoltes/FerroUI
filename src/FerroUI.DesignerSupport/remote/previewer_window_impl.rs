@@ -249,9 +249,6 @@ impl ITopLevelImpl for PreviewerWindowImpl {
         self.top_level_impl().set_frame_theme_variant(theme_variant)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_window_base_impl(&self) -> Option<&dyn IWindowBaseImpl> {
         Some(self)

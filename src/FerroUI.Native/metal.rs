@@ -193,9 +193,6 @@ impl IPlatformGraphicsContext for MetalDevice {
         drop(native);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IMetalDevice for MetalDevice {
@@ -277,7 +274,8 @@ impl IMetalPlatformSurface for MetalPlatformSurface {
             panic!("The render target is not ready.");
         };
 
-        let Some(dev) = device.as_any().downcast_ref::<MetalDevice>() else {
+        let device_any: &dyn std::any::Any = &*device;
+        let Some(dev) = device_any.downcast_ref::<MetalDevice>() else {
             panic!("The Metal device belongs to a different platform backend.");
         };
         let native_device = dev.native();

@@ -11,13 +11,20 @@ use std::rc::Rc;
 
 /// A UI-thread composition object as other composition objects refer to
 /// it: something with a server-side counterpart.
-pub trait ICompositionObject: 'static {
+pub trait ICompositionObject: 'static + std::any::Any {
     /// The id of the server-side counterpart of the object.
     fn server(&self) -> ServerObjectId;
 
-    fn as_any(&self) -> &dyn Any;
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any>;
+}
+
+impl dyn ICompositionObject {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// The animation instances created on the UI thread (as their factories)

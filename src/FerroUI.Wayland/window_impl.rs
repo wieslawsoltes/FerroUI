@@ -675,9 +675,6 @@ impl ITopLevelImpl for WindowImpl {
 
     fn set_frame_theme_variant(&self, _theme_variant: Option<PlatformThemeVariant>) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_window_base_impl(&self) -> Option<&dyn IWindowBaseImpl> {
         Some(self)

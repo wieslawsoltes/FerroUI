@@ -37,9 +37,6 @@ impl BrowserNativeControlHost {
 }
 
 impl INativeControlHostImpl for BrowserNativeControlHost {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn create_default_child(
         &self,

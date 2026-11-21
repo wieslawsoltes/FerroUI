@@ -361,9 +361,6 @@ impl IGeometryImpl for Geometry {
             stroke: Some(export(&self.stroke)),
         })
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_transformed_geometry(&self) -> Option<&dyn ITransformedGeometryImpl> {
         self.source
             .as_ref()

@@ -530,9 +530,6 @@ impl IPointer for FakePointer {
         true
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 fn create_pressed(source: &Ref<Control>) -> PointerPressedEventArgs {

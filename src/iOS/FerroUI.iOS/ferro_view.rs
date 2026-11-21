@@ -923,7 +923,4 @@ impl ITopLevelImpl for TopLevelImpl {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

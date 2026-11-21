@@ -205,9 +205,6 @@ impl IPlatformGraphicsContext for GlxContext {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IGlContext for GlxContext {

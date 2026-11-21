@@ -168,9 +168,6 @@ impl<C: ClientBlock> ICompositionObject for TestClient<C> {
         self.server
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
@@ -236,9 +233,6 @@ impl<S: ServerBlock> IServerObject for TestServer<S> {
         self.props.find(type_id)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self

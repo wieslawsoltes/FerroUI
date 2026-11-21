@@ -163,9 +163,6 @@ impl TextRun for DummyRun {
         self.length
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
@@ -1465,9 +1462,6 @@ impl TextRun for CustomDrawableRun {
         Some(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
@@ -1503,9 +1497,6 @@ impl TextRun for EmbeddedTextLineRun {
         Some(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
@@ -1648,9 +1639,6 @@ impl TextRun for RectangleRun {
         Some(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
@@ -1688,9 +1676,6 @@ impl TextRun for InvisibleRun {
         self.length
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self

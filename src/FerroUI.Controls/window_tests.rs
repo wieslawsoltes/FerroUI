@@ -140,7 +140,8 @@ fn is_rendering(target: &Window) -> bool {
 /// The calls recorded by the mock implementation of a window.
 fn calls(target: &Window) -> Vec<MockCall> {
     let platform_impl = target.platform_impl().expect("the window is open");
-    platform_impl.as_any().downcast_ref::<MockWindowImpl>().expect("the implementation is the mock").calls()
+    let platform_impl: &dyn std::any::Any = &*platform_impl;
+    platform_impl.downcast_ref::<MockWindowImpl>().expect("the implementation is the mock").calls()
 }
 
 fn resized(target: &Window, size: Size, reason: WindowResizeReason) {

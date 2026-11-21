@@ -1443,9 +1443,6 @@ fn geometries_of_another_backend_are_not_recognized() {
         fn contour_length(&self) -> f64 {
             0.0
         }
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
         fn get_render_bounds(&self, _: Option<&dyn IPen>) -> Rect {
             Rect::default()
         }

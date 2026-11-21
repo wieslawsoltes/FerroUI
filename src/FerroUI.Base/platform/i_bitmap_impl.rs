@@ -6,7 +6,7 @@ use std::io::Write;
 use std::rc::Rc;
 
 /// Defines the platform-specific interface for a bitmap.
-pub trait IBitmapImpl {
+pub trait IBitmapImpl: std::any::Any {
     /// The dots per inch (DPI) of the image.
     fn dpi(&self) -> Vector;
 
@@ -22,13 +22,27 @@ pub trait IBitmapImpl {
     /// Releases the bitmap's resources.
     fn dispose(&self);
 
-    /// Lets the backend recover its concrete type.
-    fn as_any(&self) -> &dyn Any;
 
     /// The bitmap viewed as [`IReadableBitmapImpl`], when its pixels can be
     /// read.
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         None
+    }
+}
+
+impl dyn IBitmapImpl + Send + Sync {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+impl dyn IBitmapImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 

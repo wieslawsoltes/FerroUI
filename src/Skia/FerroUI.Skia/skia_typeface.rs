@@ -146,7 +146,4 @@ impl IPlatformTypeface for SkiaTypeface {
         Some(Box::new(Cursor::new(bytes)))
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

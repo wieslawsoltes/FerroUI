@@ -85,9 +85,6 @@ impl IPlatformTypeface for Typeface {
             .clone()
             .map(|v| Box::new(std::io::Cursor::new(v)) as Box<dyn Read>)
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 /// A face loaded from application data, with the attributes it is selected by.
 #[derive(Clone)]
@@ -339,9 +336,6 @@ impl IFontManagerImpl for FontManager {
 struct ShaperTypeface;
 impl ITextShaperTypeface for ShaperTypeface {
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 pub struct TextShaper;
 impl ITextShaperImpl for TextShaper {

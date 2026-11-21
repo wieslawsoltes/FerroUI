@@ -8,7 +8,7 @@ use std::fmt;
 use std::rc::Rc;
 
 /// The behaviour of one kind of selector.
-pub trait SelectorNode: 'static {
+pub trait SelectorNode: 'static + std::any::Any {
     /// Whether this selector is in a template.
     fn in_template(&self) -> bool;
 
@@ -43,7 +43,7 @@ pub trait SelectorNode: 'static {
             if !self.in_template() && self.is_combinator() {
                 panic!("ControlTheme style may not directly contain a child or descendent selector.");
             }
-            if self.as_any().is::<TemplateSelector>() {
+            if Any::type_id(self) == std::any::TypeId::of::<TemplateSelector>() {
                 let count = template_count;
                 template_count += 1;
                 if count > 0 {
@@ -54,7 +54,7 @@ pub trait SelectorNode: 'static {
 
         match self.move_previous_or_parent() {
             None => {
-                if !self.as_any().is::<NestingSelector>() {
+                if Any::type_id(self) != std::any::TypeId::of::<NestingSelector>() {
                     panic!("Child styles must have a nesting selector.");
                 }
             }
@@ -62,7 +62,14 @@ pub trait SelectorNode: 'static {
         }
     }
 
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn SelectorNode {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// A selector in a [`Style`].

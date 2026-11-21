@@ -67,9 +67,6 @@ impl IPlatformRenderInterfaceImportedObject for ImportedSemaphore {
 }
 
 impl IPlatformRenderInterfaceImportedSemaphore for ImportedSemaphore {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// The imported semaphore behind the contract (the cast of the original).

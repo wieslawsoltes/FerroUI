@@ -193,9 +193,6 @@ impl ferroui_base::platform::IBitmapImpl for PixelBitmap {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 
     fn as_readable_bitmap(&self) -> Option<&dyn ferroui_base::platform::IReadableBitmapImpl> {
         Some(self)

@@ -21,7 +21,7 @@ use crate::utilities::Locale;
 /// [`count`]: IFontCollection::count
 /// [`get`]: IFontCollection::get
 /// [`font_families`]: IFontCollection::font_families
-pub trait IFontCollection: 'static {
+pub trait IFontCollection: 'static + std::any::Any {
     /// Gets the unique identifier for the font collection: a URL of the
     /// `fonts:` scheme for a collection added to the font manager
     /// (`fonts:SystemFonts`, `fonts:Inter`).
@@ -98,8 +98,14 @@ pub trait IFontCollection: 'static {
         None
     }
 
-    /// Lets callers recover the concrete collection type.
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn IFontCollection {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// Font collections compare by reference, so that a handle can be an untyped

@@ -25,9 +25,6 @@ impl CursorImpl {
 impl ICursorImpl for CursorImpl {
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ICursorFactory for CursorFactory {

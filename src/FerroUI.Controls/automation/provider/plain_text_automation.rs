@@ -397,9 +397,6 @@ impl PlainTextAutomationRange {
 }
 
 impl ITextRangeProvider for PlainTextAutomationRange {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn peer(&self) -> Result<Ref<AutomationPeer>, ProviderError> {
         self.context.peer()

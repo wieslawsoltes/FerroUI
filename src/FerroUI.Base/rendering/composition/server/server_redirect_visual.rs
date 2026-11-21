@@ -139,7 +139,4 @@ impl IServerVisualContent for ServerRedirectVisual {
         ServerCompositionContainerVisualProps::get_composition_property(name)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

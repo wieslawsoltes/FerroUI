@@ -39,9 +39,6 @@ impl IBitmapImpl for TrackingBitmapImpl {
         self.is_disposed.store(true, std::sync::atomic::Ordering::SeqCst)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 #[derive(Default)]
@@ -419,9 +416,6 @@ impl ICompositionImportableSharedGpuContextImage for FakeSharedImage {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// A compositor in the render-thread mode, with the scopes it lives in.

@@ -72,9 +72,6 @@ impl IBitmapImpl for TestBitmap {
     fn dispose(&self) {
         self.disposed.store(true, Ordering::SeqCst);
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(self)
     }

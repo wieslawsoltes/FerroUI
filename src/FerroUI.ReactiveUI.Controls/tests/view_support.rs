@@ -139,9 +139,6 @@ impl ControlledLifetime {
 }
 
 impl IApplicationLifetime for ControlledLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_controlled_application_lifetime(&self) -> Option<&dyn IControlledApplicationLifetime> {
         Some(self)
@@ -174,7 +171,4 @@ impl IControlledApplicationLifetime for ControlledLifetime {
 pub struct UnsupportedLifetime;
 
 impl IApplicationLifetime for UnsupportedLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

@@ -43,7 +43,10 @@ impl KeyboardDevice {
     pub fn instance() -> Option<Rc<KeyboardDevice>> {
         FerroLocator::current()
             .get_service::<dyn IKeyboardDevice>()
-            .and_then(|device| device.as_any().downcast_ref::<KeyboardDevice>().and_then(|d| d.this.upgrade()))
+            .and_then(|device| {
+                let device: &dyn Any = &*device;
+                device.downcast_ref::<KeyboardDevice>().and_then(|d| d.this.upgrade())
+            })
     }
 
     /// The input manager registered with the locator.
@@ -413,9 +416,6 @@ impl IInputDevice for KeyboardDevice {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IKeyboardDevice for KeyboardDevice {}

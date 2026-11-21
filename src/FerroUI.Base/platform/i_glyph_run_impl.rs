@@ -1,7 +1,7 @@
 use crate::{Point, Rect};
 
 /// Actual implementation of a glyph run that stores platform dependent resources.
-pub trait IGlyphRunImpl: Send + Sync + 'static {
+pub trait IGlyphRunImpl: Send + Sync + 'static + std::any::Any {
     /// Gets the em size used for rendering the glyph run.
     fn font_rendering_em_size(&self) -> f64;
 
@@ -17,6 +17,12 @@ pub trait IGlyphRunImpl: Send + Sync + 'static {
     /// Releases the platform resources (C# `IDisposable.Dispose`).
     fn dispose(&self);
 
-    /// Lets the backend recover its concrete type when drawing.
-    fn as_any(&self) -> &dyn std::any::Any;
+}
+
+impl dyn IGlyphRunImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

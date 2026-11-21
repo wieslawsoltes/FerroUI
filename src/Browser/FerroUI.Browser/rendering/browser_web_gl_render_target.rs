@@ -408,9 +408,6 @@ impl IPlatformGraphicsContext for WebGlContext {
         // No-op, destroyed with the render target
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IGlContext for WebGlContext {

@@ -104,9 +104,6 @@ macro_rules! composition_object_impls {
                 self.object.required_server()
             }
 
-            fn as_any(&self) -> &dyn ::std::any::Any {
-                self
-            }
 
             fn into_any_rc(self: ::std::rc::Rc<Self>) -> ::std::rc::Rc<dyn ::std::any::Any> {
                 self

@@ -26,7 +26,7 @@ pub type RenderSurfaces = std::sync::Arc<dyn Fn() -> Vec<std::sync::Arc<dyn IPla
 
 /// The renderer of a top-level: the renderer contract and the members of
 /// its composition target that the top-level layer sets.
-pub trait ITopLevelRenderer: IRenderer {
+pub trait ITopLevelRenderer: IRenderer + std::any::Any {
     /// Sets the visual whose composition visual is the root of the
     /// renderer's composition target; `None` detaches the tree.
     fn set_root(&self, _root: Option<Ref<Visual>>) {}
@@ -43,8 +43,14 @@ pub trait ITopLevelRenderer: IRenderer {
         None
     }
 
-    /// Lets callers recover the concrete renderer type.
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn ITopLevelRenderer {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// The compositing renderer is the renderer of a top-level, as upstream.
@@ -65,9 +71,6 @@ impl ITopLevelRenderer for CompositingRenderer {
         CompositingRenderer::hit_tester(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// Creates the renderers of presentation sources. Registered in the service

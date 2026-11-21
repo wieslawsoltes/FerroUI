@@ -4,7 +4,7 @@ use std::any::Any;
 
 /// Identifies a specific input pointer, e.g. a mouse, a touch contact or a
 /// pen.
-pub trait IPointer {
+pub trait IPointer: std::any::Any {
     /// The unique identifier of the pointer.
     fn id(&self) -> i32;
 
@@ -24,8 +24,14 @@ pub trait IPointer {
     /// Whether the pointer is the primary pointer of its type.
     fn is_primary(&self) -> bool;
 
-    /// The pointer as [`Any`], for downcasting to the concrete pointer.
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn IPointer {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// Enumerates the types of pointer devices.

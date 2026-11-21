@@ -226,9 +226,6 @@ impl IGlyphRunImpl for GlyphRun {
         merged.into_iter().flat_map(|(a, b)| [a, b]).collect()
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 fn color(c: Color, opacity: f64) -> [f64; 4] {
     [

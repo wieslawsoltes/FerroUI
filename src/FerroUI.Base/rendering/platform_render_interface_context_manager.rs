@@ -343,9 +343,6 @@ mod tests {
             record(&self.log, format!("gpu{}.dispose", self.id));
         }
 
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     struct ReadyState {

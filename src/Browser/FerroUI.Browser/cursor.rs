@@ -88,9 +88,6 @@ impl CssCursor {
 impl ICursorImpl for CssCursor {
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// Creates CSS cursors.

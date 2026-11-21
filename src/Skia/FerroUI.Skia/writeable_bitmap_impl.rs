@@ -135,9 +135,6 @@ impl IBitmapImpl for WriteableBitmapImpl {
         pixels.bitmap.take();
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(self)

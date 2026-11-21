@@ -83,9 +83,6 @@ impl IServerObject for ServerCompositionBitmapCache {
         Some(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self

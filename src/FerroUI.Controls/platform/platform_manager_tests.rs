@@ -153,9 +153,6 @@ impl ITopLevelImpl for TestWindowImpl {
 
     fn set_frame_theme_variant(&self, _theme_variant: Option<PlatformThemeVariant>) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_window_base_impl(&self) -> Option<&dyn IWindowBaseImpl> {
         Some(self)
@@ -434,7 +431,8 @@ fn callback_members_round_trip_and_defaults_apply() {
     window.set_shadow_extents(Thickness::default());
 
     window.dispose();
-    assert!(window.as_any().downcast_ref::<TestWindowImpl>().unwrap().disposed.get());
+    let any: &dyn std::any::Any = &*window;
+    assert!(any.downcast_ref::<TestWindowImpl>().unwrap().disposed.get());
 }
 
 #[test]

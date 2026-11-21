@@ -757,7 +757,4 @@ impl ITopLevelImpl for TopLevelImpl {
         // mode (docs/porting/android-platform.md, section 3.3).
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

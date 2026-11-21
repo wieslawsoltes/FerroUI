@@ -1,11 +1,16 @@
 use std::any::Any;
 
 /// Represents a platform implementation of a mouse cursor.
-pub trait ICursorImpl {
+pub trait ICursorImpl: std::any::Any {
     /// Releases the platform resources of the cursor.
     fn dispose(&self);
 
-    /// Lets the backend that created the cursor recover its concrete type
-    /// (the reference backends cast the cursor they are handed back).
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn ICursorImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

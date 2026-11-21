@@ -209,9 +209,6 @@ impl IPlatformRenderInterfaceImportedObject for ImportedFence {
     fn dispose(&self) {}
 }
 impl IPlatformRenderInterfaceImportedSemaphore for ImportedFence {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 impl ImportedImage {
     fn snapshot(
@@ -459,9 +456,6 @@ impl IBitmapImpl for SharedFrameBitmap {
         state.texture = None;
         state.frame = None;
         state.converted = None;
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }
 #[cfg(feature = "media-controls")]

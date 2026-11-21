@@ -643,9 +643,6 @@ impl RichTextAutomationRange {
 }
 
 impl ITextRangeProvider for RichTextAutomationRange {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn peer(&self) -> Result<Ref<AutomationPeer>, ProviderError> {
         self.view()?;

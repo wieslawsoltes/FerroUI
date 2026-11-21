@@ -115,9 +115,6 @@ impl IPlatformGraphicsContext for VulkanContext {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IVulkanPlatformGraphicsContext for VulkanContext {

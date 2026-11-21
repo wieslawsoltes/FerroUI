@@ -367,9 +367,6 @@ macro_rules! impl_geometry_impl {
                 self.geometry_bounds()
             }
 
-            fn as_any(&self) -> &dyn std::any::Any {
-                self
-            }
 
             fn contour_length(&self) -> f64 {
                 $crate::geometry_impl::contour_length(self)

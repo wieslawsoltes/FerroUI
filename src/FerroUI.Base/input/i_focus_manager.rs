@@ -3,7 +3,7 @@ use crate::Ref;
 use std::any::Any;
 
 /// Manages focus for the application.
-pub trait IFocusManager {
+pub trait IFocusManager: std::any::Any {
     /// Gets the currently focused element.
     fn get_focused_element(&self) -> Option<Ref<InputElement>>;
 
@@ -41,6 +41,12 @@ pub trait IFocusManager {
         options: Option<&FindNextElementOptions>,
     ) -> Option<Ref<InputElement>>;
 
-    /// The focus manager as [`Any`], for downcasting to the concrete type.
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn IFocusManager {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

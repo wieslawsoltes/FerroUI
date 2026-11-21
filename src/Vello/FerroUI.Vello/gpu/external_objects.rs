@@ -56,9 +56,6 @@ impl IPlatformRenderInterfaceImportedObject for VelloImportedSemaphore {
 }
 
 impl IPlatformRenderInterfaceImportedSemaphore for VelloImportedSemaphore {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// An image of another device or process, imported as a texture of the Metal device and wrapped

@@ -197,9 +197,6 @@ impl ICursorImpl for CursorImpl {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 #[cfg(test)]

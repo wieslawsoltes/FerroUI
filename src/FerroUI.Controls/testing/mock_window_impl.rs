@@ -576,9 +576,6 @@ impl ITopLevelImpl for MockWindowImpl {
         self.record(MockCall::SetFrameThemeVariant(theme_variant));
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_window_base_impl(&self) -> Option<&dyn IWindowBaseImpl> {
         (self.kind != MockImplKind::TopLevel).then_some(self as &dyn IWindowBaseImpl)

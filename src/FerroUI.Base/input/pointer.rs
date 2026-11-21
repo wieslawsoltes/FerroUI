@@ -340,7 +340,4 @@ impl IPointer for Pointer {
         self.is_primary
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

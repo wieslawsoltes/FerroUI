@@ -63,7 +63,4 @@ impl SelectorNode for ChildSelector {
         Some(&self.parent)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

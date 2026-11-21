@@ -139,9 +139,13 @@ pub trait IPlatformRenderInterfaceImportedImage: IPlatformRenderInterfaceImporte
 
 /// A GPU semaphore imported into the render context.
 pub trait IPlatformRenderInterfaceImportedSemaphore:
-    IPlatformRenderInterfaceImportedObject
-{
-    /// Lets the backend that imported the semaphore recover its concrete
-    /// type (the cast upstream performs on the semaphores of a snapshot).
-    fn as_any(&self) -> &dyn std::any::Any;
+    IPlatformRenderInterfaceImportedObject + std::any::Any {
+}
+
+impl dyn IPlatformRenderInterfaceImportedSemaphore {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

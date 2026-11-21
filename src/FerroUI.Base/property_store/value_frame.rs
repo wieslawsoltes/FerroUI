@@ -121,7 +121,7 @@ impl ValueFrameBase {
 /// A set of values for properties that share a priority and an activation
 /// state: an immediate (non-local) value set on an object, or an instance of a
 /// style or theme.
-pub(crate) trait ValueFrame: Any {
+pub(crate) trait ValueFrame: Any + std::any::Any {
     fn base(&self) -> &ValueFrameBase;
 
     /// Returns whether the frame is active and whether that state has changed
@@ -133,7 +133,14 @@ pub(crate) trait ValueFrame: Any {
         self.base().unsubscribe_all();
     }
 
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn ValueFrame {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 impl dyn ValueFrame {

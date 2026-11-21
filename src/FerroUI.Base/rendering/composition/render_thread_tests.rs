@@ -328,9 +328,6 @@ impl IPlatformGraphicsContext for ConfinedGraphicsContext {
         self.log.touch("the graphics context is disposed");
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl Drop for ConfinedGraphicsContext {
@@ -1028,9 +1025,6 @@ impl IPlatformGraphicsContext for LosableGraphicsContext {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// A backend context with one public feature.

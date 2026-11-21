@@ -246,7 +246,4 @@ impl ValueFrame for StyleInstance {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

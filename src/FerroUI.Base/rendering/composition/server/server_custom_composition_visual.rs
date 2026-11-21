@@ -170,7 +170,4 @@ impl IServerVisualContent for ServerCompositionCustomVisual {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

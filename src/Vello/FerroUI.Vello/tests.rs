@@ -1350,9 +1350,6 @@ fn geometries_of_another_backend_are_not_recognized() {
         fn contour_length(&self) -> f64 {
             0.0
         }
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
         fn get_render_bounds(&self, _: Option<&dyn IPen>) -> Rect {
             Rect::default()
         }
@@ -1493,7 +1490,7 @@ fn bitmap_round_trips_through_encode_and_decode() {
         context.pop_render_options();
     });
 
-    let source = target.bitmap.as_any().downcast_ref::<RenderTargetBitmapImpl>().unwrap();
+    let source = (&*target.bitmap as &dyn std::any::Any).downcast_ref::<RenderTargetBitmapImpl>().unwrap();
     let mut encoded = Vec::new();
     IBitmapImpl::save(source, &mut encoded, &png()).unwrap();
 
@@ -1780,7 +1777,7 @@ fn software_context_creates_render_targets_for_framebuffer_surfaces() {
     assert_eq!(TRANSPARENT, target.pixel(15, 15));
 
     // A surface render target can be saved.
-    let layer = offscreen.as_any().downcast_ref::<SurfaceRenderTarget>().unwrap();
+    let layer = (&*offscreen as &dyn std::any::Any).downcast_ref::<SurfaceRenderTarget>().unwrap();
     assert!(!layer.has_render_context_affinity());
     let mut encoded = Vec::new();
     layer.save(&mut encoded, &png()).unwrap();

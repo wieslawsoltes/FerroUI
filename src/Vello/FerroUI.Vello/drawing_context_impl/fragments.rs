@@ -52,9 +52,6 @@ struct VelloDrawingFragment {
 }
 
 impl IDrawingFragment for VelloDrawingFragment {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl DrawingContextImpl {

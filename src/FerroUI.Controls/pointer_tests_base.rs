@@ -41,9 +41,6 @@ impl IPointer for MockPointer {
         false
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// Upstream `CreatePointerDeviceMock`: a device that answers its pointer. It does nothing with a raw event
@@ -73,9 +70,6 @@ impl IInputDevice for MockPointerDevice {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_pointer_device(&self) -> Option<&dyn IPointerDevice> {
         Some(self)

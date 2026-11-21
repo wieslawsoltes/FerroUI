@@ -54,9 +54,6 @@ impl IBitmapImpl for LeasedGpuBitmap {
         let frame = self.frame.lock().unwrap().take();
         drop(frame);
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 impl IDrawableBitmapImpl for LeasedGpuBitmap {
     fn draw(

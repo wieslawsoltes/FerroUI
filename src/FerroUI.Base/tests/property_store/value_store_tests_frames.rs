@@ -39,9 +39,6 @@ impl ValueFrame for TestFrame {
         (true, false)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// The stand-in for a setter with a constant value.

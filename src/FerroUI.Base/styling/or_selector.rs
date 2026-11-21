@@ -116,7 +116,4 @@ impl SelectorNode for OrSelector {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

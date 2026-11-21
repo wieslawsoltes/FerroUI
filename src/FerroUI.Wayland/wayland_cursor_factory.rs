@@ -56,9 +56,6 @@ impl ICursorImpl for WaylandCursorImpl {
         self.cursor.destroy();
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// A framebuffer over pixels of the UI thread: what the reference makes with a locked

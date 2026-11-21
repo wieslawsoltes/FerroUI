@@ -158,3 +158,11 @@ pub trait IWindowImpl: IWindowBaseImpl {
     /// Sets the extents of the shadow the toolkit draws around the window.
     fn set_shadow_extents(&self, _extents: Thickness) {}
 }
+
+impl dyn IWindowImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

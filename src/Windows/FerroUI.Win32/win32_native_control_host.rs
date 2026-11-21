@@ -79,9 +79,6 @@ mod imp {
     }
 
     impl INativeControlHostImpl for Win32NativeControlHost {
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
 
         fn create_default_child(&self, parent: Rc<dyn IPlatformHandle>) -> Rc<dyn INativeControlHostDestroyableControlHandle> {
             self.assert_compatible(&*parent);

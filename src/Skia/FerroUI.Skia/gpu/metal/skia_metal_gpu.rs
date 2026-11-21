@@ -181,9 +181,6 @@ impl IPlatformGraphicsContext for SkiaMetalGpu {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ISkiaGpu for SkiaMetalGpu {

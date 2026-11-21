@@ -552,9 +552,6 @@ struct SingleLifetime {
     view: RefCell<Option<Ref<Control>>>,
 }
 impl IApplicationLifetime for SingleLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_single_view_application_lifetime(&self) -> Option<&dyn ISingleViewApplicationLifetime> {
         Some(self)
     }
@@ -782,9 +779,6 @@ impl DesktopTestLifetime {
     }
 }
 impl IApplicationLifetime for DesktopTestLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_controlled_application_lifetime(
         &self,
     ) -> Option<&dyn ferroui_controls::application_lifetimes::IControlledApplicationLifetime> {

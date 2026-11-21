@@ -92,7 +92,4 @@ impl IPlatformRenderInterfaceRegion for SkiaRegionImpl {
         *self.region.borrow_mut() = None;
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

@@ -46,9 +46,6 @@ impl AndroidNativeControlHostImpl {
 }
 
 impl INativeControlHostImpl for AndroidNativeControlHostImpl {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn create_default_child(&self, _parent: Rc<dyn IPlatformHandle>) -> Rc<dyn INativeControlHostDestroyableControlHandle> {
         let frame_layout = new_object(

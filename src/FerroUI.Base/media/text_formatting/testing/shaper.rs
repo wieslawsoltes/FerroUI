@@ -166,7 +166,4 @@ struct TestTextShaperTypeface;
 impl ITextShaperTypeface for TestTextShaperTypeface {
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

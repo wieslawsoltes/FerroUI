@@ -652,9 +652,6 @@ macro_rules! impl_untyped_binding_expression {
 
             $crate::__impl_binding_reload_members!();
 
-            fn as_any(&self) -> &dyn ::std::any::Any {
-                self
-            }
         }
     };
 }

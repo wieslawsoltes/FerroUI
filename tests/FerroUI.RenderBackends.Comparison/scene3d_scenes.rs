@@ -1264,9 +1264,6 @@ impl IBitmapImpl for VersionedBitmap {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(&self.0)
@@ -1308,9 +1305,6 @@ impl IBitmapImpl for PixelBitmap {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(self)

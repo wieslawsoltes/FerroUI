@@ -404,9 +404,6 @@ impl Drop for ShutdownScope<'_> {
 }
 
 impl IApplicationLifetime for ClassicDesktopStyleApplicationLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_controlled_application_lifetime(&self) -> Option<&dyn IControlledApplicationLifetime> {
         Some(self)

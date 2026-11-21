@@ -118,9 +118,6 @@ impl IBitmapImpl for VelloSharedFrameBitmap {
         state.converted = None;
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl crate::i_drawable_bitmap_impl::IDrawableBitmapImpl for VelloSharedFrameBitmap {

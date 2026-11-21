@@ -193,9 +193,6 @@ impl IBitmapImpl for DeviceSurfaceRenderTarget {
         surface.image = None;
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IDrawingContextLayerImpl for DeviceSurfaceRenderTarget {

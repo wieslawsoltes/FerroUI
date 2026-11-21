@@ -134,7 +134,4 @@ impl SelectorNode for PropertyEqualsSelector {
         self.previous.as_ref()
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

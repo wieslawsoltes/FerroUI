@@ -339,9 +339,6 @@ pub(crate) mod tests {
             Vec::new()
         }
         fn dispose(&self) {}
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
     }
 
     /// The glyph run of a shaped text; the mock drawing context logs it with
@@ -362,9 +359,6 @@ pub(crate) mod tests {
             Vec::new()
         }
         fn dispose(&self) {}
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
     }
 
     /// Every glyph is 6 wide and 10 high, except `'|'` (3 x 14); the line

@@ -137,7 +137,4 @@ impl IServerVisualContent for ServerCompositionDrawListVisual {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

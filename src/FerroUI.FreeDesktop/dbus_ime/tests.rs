@@ -433,9 +433,6 @@ struct TestDevice;
 impl IInputDevice for TestDevice {
     fn process_raw_event(&self, _ev: &dyn IRawInputEventArgs) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 struct TestRoot;

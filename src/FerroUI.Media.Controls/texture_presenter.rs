@@ -408,7 +408,6 @@ mod tests {
         fn version(&self) -> i32 { 1 }
         fn save(&self, _: &mut dyn std::io::Write, _: &BitmapEncoderOptions) -> std::io::Result<()> { unreachable!() }
         fn dispose(&self) {}
-        fn as_any(&self) -> &dyn Any { self }
     }
     struct Imported;
     impl IPlatformRenderInterfaceImportedObject for Imported { fn dispose(&self) {} }

@@ -132,9 +132,6 @@ impl IGeometryImpl for TestGeometryImpl {
     ) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// `Mock.Of<IBitmapImpl>()`, held as `RefCountable.Create(..)` is: the
@@ -156,9 +153,6 @@ impl IBitmapImpl for TestBitmapImpl {
         Ok(())
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// `Mock<ICustomDrawOperation>`: the bounds and the hit points it was set up

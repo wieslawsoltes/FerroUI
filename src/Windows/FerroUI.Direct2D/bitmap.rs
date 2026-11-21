@@ -405,9 +405,6 @@ impl IBitmapImpl for Bitmap {
         stream.write_all(&encoded.bytes())
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(self)
     }

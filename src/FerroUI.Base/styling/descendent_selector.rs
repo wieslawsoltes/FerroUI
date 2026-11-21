@@ -70,7 +70,4 @@ impl SelectorNode for DescendantSelector {
         Some(&self.parent)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

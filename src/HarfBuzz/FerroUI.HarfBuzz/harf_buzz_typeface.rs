@@ -53,7 +53,4 @@ impl ITextShaperTypeface for HarfBuzzTypeface {
         self.face.borrow_mut().take();
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

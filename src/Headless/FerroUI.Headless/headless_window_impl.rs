@@ -437,9 +437,6 @@ impl ITopLevelImpl for HeadlessWindowImpl {
 
     fn set_frame_theme_variant(&self, _theme_variant: Option<PlatformThemeVariant>) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     // The class implements the window and the popup interface, whatever it was created as.
     fn as_window_base_impl(&self) -> Option<&dyn IWindowBaseImpl> {

@@ -50,7 +50,7 @@ use std::time::Duration;
 
 /// What a concrete server visual class adds to [`ServerCompositionVisual`]:
 /// its own properties and its overrides of the virtual members.
-pub trait IServerVisualContent: 'static {
+pub trait IServerVisualContent: 'static + std::any::Any {
     /// `DeserializeChangesCore` of the class; the default is the one of the
     /// container visual.
     fn deserialize_changes_core(
@@ -132,7 +132,14 @@ pub trait IServerVisualContent: 'static {
     /// The visual has been disposed on the UI thread.
     fn dispose(&self, _visual: &ServerCompositionVisual) {}
 
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn IServerVisualContent {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// Server-side `CompositionVisual` counterpart. Is responsible for
@@ -655,9 +662,6 @@ impl IServerObject for ServerCompositionVisual {
         Some(self)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
@@ -668,7 +672,4 @@ impl IServerObject for ServerCompositionVisual {
 pub struct ServerCompositionContainerVisual;
 
 impl IServerVisualContent for ServerCompositionContainerVisual {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

@@ -280,7 +280,4 @@ impl SelectorNode for TypeNameAndClassSelector {
         self.previous.as_ref()
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

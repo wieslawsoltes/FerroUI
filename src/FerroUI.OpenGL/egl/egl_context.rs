@@ -438,9 +438,6 @@ impl IPlatformGraphicsContext for EglContext {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IGlContext for EglContext {

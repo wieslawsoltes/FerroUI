@@ -498,9 +498,6 @@ pub(crate) mod tests {
             self.rects.borrow().iter().any(|r| pixel_rect_to_ltrb_rect_unscaled(*r).contains(pt.x, pt.y))
         }
         fn dispose(&self) {}
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     /// A stream geometry built by a [`MockStreamGeometryBuilder`], with the
@@ -549,9 +546,6 @@ pub(crate) mod tests {
     }
 
     impl IGeometryImpl for MockStreamGeometry {
-        fn as_any(&self) -> &dyn std::any::Any {
-            self
-        }
         fn bounds(&self) -> Rect {
             Rect::default()
         }

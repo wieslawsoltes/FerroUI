@@ -247,9 +247,6 @@ impl ITopLevelImpl for SwapChainTopLevelImpl {
 
     fn set_frame_theme_variant(&self, _theme_variant: Option<PlatformThemeVariant>) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 #[cfg(test)]

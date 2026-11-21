@@ -109,8 +109,7 @@ impl std::error::Error for TextProviderError {}
 /// A live range of text exposed to accessibility. Range operations change the
 /// range object; only selection methods change the control's selection. Ranges
 /// follow edits and become unavailable when their host displays another document.
-pub trait ITextRangeProvider {
-    fn as_any(&self) -> &dyn Any;
+pub trait ITextRangeProvider: std::any::Any {
     /// The text-pattern owner, also used by platform bridges for screen transforms.
     fn peer(&self) -> Result<Ref<AutomationPeer>, ProviderError>;
     fn clone_range(&self) -> Result<Rc<dyn ITextRangeProvider>, ProviderError>;
@@ -160,4 +159,12 @@ pub trait ITextRangeProvider {
     fn remove_from_selection(&self) -> Result<(), ProviderError>;
     fn scroll_into_view(&self, align_to_top: bool) -> Result<(), ProviderError>;
     fn get_children(&self) -> Result<Vec<Ref<AutomationPeer>>, ProviderError>;
+}
+
+impl dyn ITextRangeProvider {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

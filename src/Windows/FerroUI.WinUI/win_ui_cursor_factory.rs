@@ -40,9 +40,6 @@ mod imp {
             // InputSystemCursor instances are cached — never disposed.
         }
 
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     /// `InputSystemCursor.Create(shape)`, as an `InputCursor`; none when the

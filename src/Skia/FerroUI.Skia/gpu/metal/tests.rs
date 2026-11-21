@@ -157,9 +157,6 @@ impl IPlatformGraphicsContext for TestMetalDevice {
         Disposable::empty()
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IMetalDevice for TestMetalDevice {
@@ -1082,9 +1079,6 @@ mod external_objects {
             Disposable::empty()
         }
         fn dispose(&self) {}
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     impl IMetalDevice for ExternalObjectsDevice {

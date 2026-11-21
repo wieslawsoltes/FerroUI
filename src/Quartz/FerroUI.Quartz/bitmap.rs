@@ -297,9 +297,6 @@ impl IBitmapImpl for Bitmap {
         }
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         Some(self)
     }

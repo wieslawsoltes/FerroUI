@@ -1417,9 +1417,6 @@ fn visual_brush_as_background_is_drawn_through_its_server_side_counterpart() {
 struct InertServerObject;
 
 impl super::server::IServerObject for InertServerObject {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn std::any::Any> {
         self

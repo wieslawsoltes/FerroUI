@@ -402,9 +402,6 @@ fn data_templates_are_created_lazily() {
 struct TestLifetime;
 
 impl IApplicationLifetime for TestLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 #[test]

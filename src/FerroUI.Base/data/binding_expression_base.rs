@@ -10,7 +10,7 @@ use std::rc::Weak;
 /// object. It is also the value entry through which the target's value store
 /// reads the binding's value.
 #[allow(private_bounds, private_interfaces)]
-pub trait BindingExpressionBase: IDisposable + IValueEntry + Any {
+pub trait BindingExpressionBase: IDisposable + IValueEntry + Any + std::any::Any {
     /// The priority of the binding expression.
     fn priority(&self) -> BindingPriority;
 
@@ -76,7 +76,14 @@ pub trait BindingExpressionBase: IDisposable + IValueEntry + Any {
     #[doc(hidden)]
     fn resume_after_reload(&self) {}
 
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn BindingExpressionBase {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// Handles compare by identity (reference equality), so that the expression

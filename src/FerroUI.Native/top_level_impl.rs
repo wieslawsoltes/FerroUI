@@ -1429,9 +1429,6 @@ macro_rules! impl_top_level_contract {
                 $crate::top_level_impl::TopLevelParent::set_frame_theme_variant_core(self, theme_variant)
             }
 
-            fn as_any(&self) -> &dyn std::any::Any {
-                self
-            }
 
             $($extra)*
         }

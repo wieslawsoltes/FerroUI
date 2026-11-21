@@ -4,7 +4,7 @@ use crate::{Matrix, Point, Rect};
 use std::sync::Arc;
 
 /// Defines the platform-specific interface for a geometry.
-pub trait IGeometryImpl: Send + Sync + 'static {
+pub trait IGeometryImpl: Send + Sync + 'static + std::any::Any {
     /// The geometry's bounding rectangle.
     fn bounds(&self) -> Rect;
 
@@ -64,11 +64,17 @@ pub trait IGeometryImpl: Send + Sync + 'static {
         None
     }
 
-    /// Lets the backend recover its concrete type.
-    fn as_any(&self) -> &dyn std::any::Any;
 
     /// The geometry viewed as [`ITransformedGeometryImpl`], when it is one.
     fn as_transformed_geometry(&self) -> Option<&dyn ITransformedGeometryImpl> {
         None
+    }
+}
+
+impl dyn IGeometryImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }

@@ -57,9 +57,6 @@ struct NullCursor;
 impl ICursorImpl for NullCursor {
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ICursorFactory for NullCursorFactory {

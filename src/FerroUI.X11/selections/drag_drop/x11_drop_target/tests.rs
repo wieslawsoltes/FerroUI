@@ -187,9 +187,6 @@ impl IInputDevice for RecordingDevice {
         drag.set_effects(self.answer.get());
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IDragDropDevice for RecordingDevice {}

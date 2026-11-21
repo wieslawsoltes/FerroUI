@@ -422,9 +422,6 @@ impl IInputDevice for MouseDevice {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_pointer_device(&self) -> Option<&dyn IPointerDevice> {
         Some(self)

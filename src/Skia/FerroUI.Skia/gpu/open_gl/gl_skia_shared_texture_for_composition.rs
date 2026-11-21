@@ -102,9 +102,6 @@ impl ICompositionImportableSharedGpuContextImage for GlSkiaSharedTextureForCompo
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ICompositionImportableOpenGlSharedTexture for GlSkiaSharedTextureForComposition {
@@ -224,9 +221,6 @@ mod tests {
 
         fn dispose(&self) {}
 
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     impl IGlContext for FakeGlContext {

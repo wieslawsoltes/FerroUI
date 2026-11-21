@@ -280,7 +280,4 @@ impl IGlyphRunImpl for GlyphRunImpl {
         self.text_blob_cache.lock().unwrap().clear_and_dispose();
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

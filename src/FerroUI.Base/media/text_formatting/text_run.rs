@@ -14,7 +14,7 @@ pub const DEFAULT_TEXT_SOURCE_LENGTH: i32 = 1;
 /// recovered with [`dyn TextRun::downcast_ref`] / [`dyn TextRun::downcast_rc`],
 /// or with the `as_*` hooks for the open base classes (`DrawableTextRun`,
 /// `TextEndOfLine`).
-pub trait TextRun: 'static {
+pub trait TextRun: 'static + std::any::Any {
     /// Gets the text source length (UTF-16 code units).
     fn length(&self) -> i32 {
         DEFAULT_TEXT_SOURCE_LENGTH
@@ -46,11 +46,17 @@ pub trait TextRun: 'static {
         None
     }
 
-    /// The run as [`Any`], for downcasting to a concrete run type.
-    fn as_any(&self) -> &dyn Any;
 
     /// The run handle as [`Any`], for downcasting to a concrete run handle.
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any>;
+}
+
+impl dyn TextRun {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 impl dyn TextRun {
@@ -76,16 +82,11 @@ impl dyn TextRun {
     }
 }
 
-/// Implements the two `Any` accessors of [`TextRun`] inside an `impl TextRun for T` block.
+/// Implements the `Any` accessor of [`TextRun`] that takes the handle, inside an `impl TextRun for T` block.
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __text_run_any {
     () => {
-        #[inline]
-        fn as_any(&self) -> &dyn ::std::any::Any {
-            self
-        }
-
         #[inline]
         fn into_any_rc(self: ::std::rc::Rc<Self>) -> ::std::rc::Rc<dyn ::std::any::Any> {
             self

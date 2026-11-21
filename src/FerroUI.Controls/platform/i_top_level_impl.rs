@@ -23,7 +23,7 @@ use std::rc::Rc;
 /// Optional features are queried through the
 /// [`IOptionalFeatureProvider`] supertrait:
 /// `(top_level as &dyn IOptionalFeatureProvider).try_get::<dyn IInputPane>()`.
-pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
+pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable + std::any::Any {
     /// Gets the scaling factor for window positioning and sizing.
     fn desktop_scaling(&self) -> f64;
 
@@ -172,8 +172,6 @@ pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
     /// applied; `None` follows the system.
     fn set_frame_theme_variant(&self, theme_variant: Option<PlatformThemeVariant>);
 
-    /// Lets callers recover the concrete implementation type.
-    fn as_any(&self) -> &dyn Any;
 
     /// The toplevel as a window base implementation, if it is one.
     fn as_window_base_impl(&self) -> Option<&dyn IWindowBaseImpl> {
@@ -193,5 +191,13 @@ pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
     /// The toplevel as the Win32-specific options of a toplevel, if it has them.
     fn as_win32_options_top_level_impl(&self) -> Option<&dyn IWin32OptionsTopLevelImpl> {
         None
+    }
+}
+
+impl dyn ITopLevelImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }

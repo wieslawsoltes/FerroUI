@@ -84,9 +84,6 @@ impl IBitmapImpl for MockBitmap {
     fn dispose(&self) {
         self.disposed.set(true);
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
         self.format.map(|_| self as &dyn IReadableBitmapImpl)
     }

@@ -74,7 +74,4 @@ impl IServerVisualContent for ServerCompositionSolidColorVisual {
             .or_else(|| ServerCompositionContainerVisualProps::get_composition_property(name))
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

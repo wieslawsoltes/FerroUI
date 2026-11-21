@@ -299,9 +299,6 @@ impl IPlatformGraphicsContext for GlContext {
         drop(context);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IGlContext for GlContext {

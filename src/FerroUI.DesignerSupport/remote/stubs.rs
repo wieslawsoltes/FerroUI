@@ -293,9 +293,6 @@ impl ITopLevelImpl for WindowStub {
 
     fn set_frame_theme_variant(&self, _theme_variant: Option<PlatformThemeVariant>) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_window_base_impl(&self) -> Option<&dyn IWindowBaseImpl> {
         Some(self)
@@ -510,9 +507,6 @@ struct CursorStub;
 impl ICursorImpl for CursorStub {
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ICursorFactory for CursorFactoryStub {

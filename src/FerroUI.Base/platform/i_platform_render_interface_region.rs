@@ -2,7 +2,7 @@ use super::{LtrbPixelRect, LtrbRect};
 use crate::Point;
 
 /// A platform region: a set of pixel rectangles.
-pub trait IPlatformRenderInterfaceRegion {
+pub trait IPlatformRenderInterfaceRegion: std::any::Any {
     fn add_rect(&self, rect: LtrbPixelRect);
     fn reset(&self);
     fn is_empty(&self) -> bool;
@@ -11,6 +11,12 @@ pub trait IPlatformRenderInterfaceRegion {
     fn intersects(&self, rect: LtrbRect) -> bool;
     fn contains(&self, pt: Point) -> bool;
     fn dispose(&self);
-    /// Lets the backend recover its concrete type.
-    fn as_any(&self) -> &dyn std::any::Any;
+}
+
+impl dyn IPlatformRenderInterfaceRegion {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

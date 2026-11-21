@@ -64,9 +64,6 @@ impl DesktopLifetimeProxy {
 }
 
 impl IApplicationLifetime for DesktopLifetimeProxy {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_controlled_application_lifetime(&self) -> Option<&dyn IControlledApplicationLifetime> {
         Some(self)
@@ -156,9 +153,6 @@ impl SingleViewLifetimeProxy {
 }
 
 impl IApplicationLifetime for SingleViewLifetimeProxy {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_single_view_application_lifetime(&self) -> Option<&dyn ISingleViewApplicationLifetime> {
         Some(self)

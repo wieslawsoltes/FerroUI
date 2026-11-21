@@ -74,9 +74,6 @@ mod uikit {
     }
 
     impl INativeControlHostImpl for NativeControlHostImpl {
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
 
         fn create_default_child(
             &self,

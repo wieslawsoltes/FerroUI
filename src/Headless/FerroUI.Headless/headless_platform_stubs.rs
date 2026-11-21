@@ -95,9 +95,6 @@ struct CursorStub;
 impl ICursorImpl for CursorStub {
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ICursorFactory for HeadlessCursorFactoryStub {
@@ -216,9 +213,6 @@ impl IFontMemory for IdentityProbeTypeface {
 }
 
 impl IPlatformTypeface for IdentityProbeTypeface {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn family_name(&self) -> String {
         String::new()
@@ -298,9 +292,6 @@ impl IFontMemory for HeadlessPlatformTypeface {
 }
 
 impl IPlatformTypeface for HeadlessPlatformTypeface {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn family_name(&self) -> String {
         self.family_name.clone()

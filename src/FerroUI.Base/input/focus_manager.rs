@@ -1150,7 +1150,4 @@ impl IFocusManager for FocusManager {
         FocusManager::find_next_element(self, direction, options)
     }
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 }

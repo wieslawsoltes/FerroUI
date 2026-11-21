@@ -97,9 +97,6 @@ impl INativeControlHostDestroyableControlHandle for DestroyableNSView {
 }
 
 impl INativeControlHostImpl for NativeControlHostImpl {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn create_default_child(&self, _parent: Rc<dyn IPlatformHandle>) -> Rc<dyn INativeControlHostDestroyableControlHandle> {
         Rc::new(DestroyableNSView::new(self.host()))

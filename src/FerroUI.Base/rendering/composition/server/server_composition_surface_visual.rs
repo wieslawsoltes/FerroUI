@@ -114,7 +114,4 @@ impl IServerVisualContent for ServerCompositionSurfaceVisual {
         self.props.find_props(type_id)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

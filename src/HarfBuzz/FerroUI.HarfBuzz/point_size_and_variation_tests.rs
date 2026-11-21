@@ -102,9 +102,6 @@ impl IPlatformTypeface for TestTypeface {
         self.inner.try_get_stream()
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 fn start() -> (Rc<HarfBuzzTextShaper>, UnitTestApplicationScope) {

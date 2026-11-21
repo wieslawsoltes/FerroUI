@@ -389,9 +389,6 @@ fn application_overload_attaches_only_current_desktop_windows_and_ignores_future
 #[derive(Default)]
 struct SingleLifetime(std::cell::RefCell<Option<Ref<Control>>>);
 impl ferroui_controls::application_lifetimes::IApplicationLifetime for SingleLifetime {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
     fn as_single_view_application_lifetime(
         &self,
     ) -> Option<&dyn ferroui_controls::application_lifetimes::ISingleViewApplicationLifetime> {

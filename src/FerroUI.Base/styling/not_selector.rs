@@ -63,7 +63,4 @@ impl SelectorNode for NotSelector {
         self.previous.as_ref()
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

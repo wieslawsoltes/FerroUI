@@ -147,13 +147,18 @@ pub trait ICompositionImportableSharedGpuContextObject {
 /// is a plain value or is behind a lock, and what belongs to the context of
 /// the caller (the context itself) is bound to its thread inside the
 /// implementation and is not touched from the other one.
-pub trait ICompositionImportableSharedGpuContextImage: Send + Sync {
+pub trait ICompositionImportableSharedGpuContextImage: Send + Sync + std::any::Any {
     /// Releases the image. Either thread may call it, more than once.
     fn dispose(&self);
 
-    /// Lets the backend that made the image recover its concrete type (the
-    /// cast upstream performs on the image it is asked to import).
-    fn as_any(&self) -> &dyn std::any::Any;
+}
+
+impl dyn ICompositionImportableSharedGpuContextImage {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// An GPU semaphore descriptor obtained from a context from the same share group as one used by the compositor

@@ -210,9 +210,6 @@ impl IInputDevice for DragDropDevice {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IDragDropDevice for DragDropDevice {}

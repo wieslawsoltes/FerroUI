@@ -140,7 +140,4 @@ impl IServerVisualContent for ServerBorderVisual {
         self.draw_list.dispose(visual);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

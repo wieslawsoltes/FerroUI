@@ -170,9 +170,6 @@ macro_rules! server_simple_brush {
                 $find
             }
 
-            fn as_any(&self) -> &dyn Any {
-                self
-            }
 
             fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
                 self

@@ -87,9 +87,6 @@ impl IPlatformGraphicsContext for MetalDevice {
         drop(queue);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IMetalDevice for MetalDevice {

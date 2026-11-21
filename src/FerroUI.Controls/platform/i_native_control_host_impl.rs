@@ -5,10 +5,7 @@ use std::any::Any;
 use std::rc::Rc;
 
 /// Hosts native controls inside a top-level.
-pub trait INativeControlHostImpl {
-    /// Lets backends recover the concrete host type (C# `host is
-    /// BrowserNativeControlHost`).
-    fn as_any(&self) -> &dyn Any;
+pub trait INativeControlHostImpl: std::any::Any {
 
     /// Creates the default native child of `parent`.
     fn create_default_child(&self, parent: Rc<dyn IPlatformHandle>) -> Rc<dyn INativeControlHostDestroyableControlHandle>;
@@ -25,6 +22,14 @@ pub trait INativeControlHostImpl {
 
     /// Whether the host can host the native control behind `handle`.
     fn is_compatible_with(&self, handle: &dyn IPlatformHandle) -> bool;
+}
+
+impl dyn INativeControlHostImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// A native control handle that can be destroyed.

@@ -54,7 +54,7 @@ const _: fn() = || {
 };
 
 /// A context of a platform GPU API.
-pub trait IPlatformGraphicsContext: IOptionalFeatureProvider {
+pub trait IPlatformGraphicsContext: IOptionalFeatureProvider + std::any::Any {
     /// Polls asynchronous GPU retirement on the owning render thread. Never
     /// waits for the GPU. `true` requests another render-loop tick, including
     /// when all presentation targets have detached.
@@ -76,8 +76,14 @@ pub trait IPlatformGraphicsContext: IOptionalFeatureProvider {
     /// Releases the context.
     fn dispose(&self);
 
-    /// Lets the backend recover the concrete context type.
-    fn as_any(&self) -> &dyn std::any::Any;
+}
+
+impl dyn IPlatformGraphicsContext {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// The graphics context a GPU object belongs to was lost.

@@ -69,9 +69,6 @@ struct CursorStub;
 impl ferroui_base::platform::ICursorImpl for CursorStub {
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 }
 
 impl ferroui_base::platform::ICursorFactory for HeadlessCursorFactoryStub {

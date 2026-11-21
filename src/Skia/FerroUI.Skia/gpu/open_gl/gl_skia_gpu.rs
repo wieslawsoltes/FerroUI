@@ -334,9 +334,6 @@ impl IPlatformGraphicsContext for GlSkiaGpu {
         }
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ISkiaGpu for GlSkiaGpu {

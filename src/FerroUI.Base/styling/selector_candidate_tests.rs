@@ -346,9 +346,6 @@ impl SelectorNode for MutableSelectorType {
     fn move_previous_or_parent(&self) -> Option<&Selector> {
         None
     }
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 }
 
 #[test]

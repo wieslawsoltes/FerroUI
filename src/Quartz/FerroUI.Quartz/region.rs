@@ -155,7 +155,4 @@ impl IPlatformRenderInterfaceRegion for QuartzRegionImpl {
         *self.rects.borrow_mut() = None;
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

@@ -510,7 +510,4 @@ impl IPlatformTypeface for VelloTypeface {
         Some(Box::new(Cursor::new(bytes.to_vec())))
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

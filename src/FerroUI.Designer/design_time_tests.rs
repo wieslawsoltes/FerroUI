@@ -485,9 +485,6 @@ fn native_top_level_preview_uses_the_same_sample_data_as_the_artboard() {
 pub(crate) struct SingleView;
 
 impl ferroui_controls::application_lifetimes::IApplicationLifetime for SingleView {
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
 
     fn as_single_view_application_lifetime(
         &self,

@@ -403,9 +403,16 @@ pub(crate) fn read_only(property: &FerroProperty) -> ! {
 }
 
 /// Type-erased view of a direct property used by the registry.
-pub(crate) trait DirectPropertyDyn: 'static {
+pub(crate) trait DirectPropertyDyn: 'static + std::any::Any {
     fn as_property(&self) -> &FerroProperty;
-    fn as_any(&self) -> &dyn Any;
+}
+
+impl dyn DirectPropertyDyn {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 impl<T: PropertyValue> DirectPropertyDyn for DirectPropertyBase<T> {
@@ -413,7 +420,4 @@ impl<T: PropertyValue> DirectPropertyDyn for DirectPropertyBase<T> {
         &self.base
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

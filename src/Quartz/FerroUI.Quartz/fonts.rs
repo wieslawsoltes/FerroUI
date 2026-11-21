@@ -155,9 +155,6 @@ impl IPlatformTypeface for Typeface {
             .clone()
             .map(|v| Box::new(std::io::Cursor::new(v)) as Box<dyn Read>)
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 // CSS font selection prefers weights directionally rather than by absolute distance.
 fn weight_cost(desired: i32, actual: i32) -> i32 {
@@ -371,9 +368,6 @@ impl IFontManagerImpl for FontManager {
 struct ShaperTypeface;
 impl ITextShaperTypeface for ShaperTypeface {
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 pub struct TextShaper;
 impl ITextShaperImpl for TextShaper {

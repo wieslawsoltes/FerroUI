@@ -117,9 +117,6 @@ impl ICompositionImportableSharedGpuContextImage for SharedMetalImage {
     fn dispose(&self) {
         self.source.lock().unwrap().take();
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 struct RetainedTexture {
     source: std::cell::RefCell<Option<ffi::Owned>>,
@@ -160,9 +157,6 @@ impl IPlatformRenderInterfaceImportedObject for ImportedSemaphore {
 }
 
 impl IPlatformRenderInterfaceImportedSemaphore for ImportedSemaphore {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// An image of another device or process, imported as a texture of the Metal device and wrapped
@@ -500,9 +494,6 @@ impl ferroui_base::platform::IBitmapImpl for SharedFrameBitmap {
         state.source = None;
         state.frame = None;
         state.converted = None;
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
     }
 }
 

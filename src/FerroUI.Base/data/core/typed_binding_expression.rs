@@ -706,9 +706,6 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingExpressionBase
         self.produce_value.set(true);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl<TSource: PartialEq + 'static, TValue: PropertyValue> Drop for TypedBindingExpression<TSource, TValue> {

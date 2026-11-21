@@ -436,9 +436,6 @@ pub(crate) mod tests {
             fn try_get_point_and_tangent_at_distance(&self, _distance: f64) -> Option<(Point, Point)> {
                 None
             }
-            fn as_any(&self) -> &dyn std::any::Any {
-                self
-            }
             fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
                 None
             }

@@ -78,9 +78,6 @@ impl ValueFrame for ImmediateValueFrame {
         (true, false)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// A constant value in an [`ImmediateValueFrame`], kept as the store keeps the

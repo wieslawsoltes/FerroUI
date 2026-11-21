@@ -306,9 +306,6 @@ impl IPlatformRenderInterfaceImportedObject for GlSkiaImportedSemaphore {
 }
 
 impl IPlatformRenderInterfaceImportedSemaphore for GlSkiaImportedSemaphore {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// What an imported image is backed by: the two fields of the original, of

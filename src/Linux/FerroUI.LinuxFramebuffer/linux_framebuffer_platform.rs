@@ -270,9 +270,6 @@ impl LinuxFramebufferLifetime {
 }
 
 impl IApplicationLifetime for LinuxFramebufferLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_controlled_application_lifetime(&self) -> Option<&dyn IControlledApplicationLifetime> {
         Some(self)

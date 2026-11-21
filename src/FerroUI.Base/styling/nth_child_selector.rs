@@ -153,7 +153,4 @@ impl SelectorNode for NthChildSelector {
         builder
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

@@ -48,9 +48,6 @@ impl ICursorImpl for FerroNativeCursor {
         drop(cursor);
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// Creates the cursors of the macOS backend.
@@ -107,9 +104,6 @@ mod tests {
     struct OtherCursor;
     impl ICursorImpl for OtherCursor {
         fn dispose(&self) {}
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     #[test]

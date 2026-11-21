@@ -1773,7 +1773,7 @@ fn embedded_font_collection_loads_a_single_font_file_and_a_file_pattern() {
     assert_eq!(single.count(), 1);
     assert_eq!(single.get(0).name(), "Inter");
     assert!(single.as_font_collection_base().is_some());
-    assert!(single.as_any().is::<EmbeddedFontCollection>());
+    assert!((&single as &dyn std::any::Any).is::<EmbeddedFontCollection>());
 
     let pattern = EmbeddedFontCollection::new(uri("fonts:pattern"), uri(&test_fonts::asset_uri("NotoSans*.ttf")));
 

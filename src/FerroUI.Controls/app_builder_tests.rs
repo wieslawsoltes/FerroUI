@@ -62,9 +62,6 @@ impl NewApplication for TestApp {
 struct TestLifetime;
 
 impl IApplicationLifetime for TestLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_setup_application_lifetime(&self) -> Option<&dyn ISetupApplicationLifetime> {
         Some(self)

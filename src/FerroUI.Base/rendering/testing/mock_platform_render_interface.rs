@@ -242,9 +242,6 @@ impl IGeometryImpl for MockGeometryImpl {
     fn as_transformed_geometry(&self) -> Option<&dyn ITransformedGeometryImpl> {
         self.source.as_ref().map(|_| self as &dyn ITransformedGeometryImpl)
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl ITransformedGeometryImpl for MockGeometryImpl {
@@ -364,9 +361,6 @@ impl IGeometryImpl for MockStreamGeometryImpl {
     fn try_get_segment(&self, _start: f64, _stop: f64, _begin: bool) -> Option<Arc<dyn IGeometryImpl>> {
         None
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// Builds a [`MockStreamGeometryImpl`] from the points of its source
@@ -464,9 +458,6 @@ impl IPlatformRenderInterfaceRegion for MockRegion {
         })
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// A render target whose drawing contexts record to a [`DrawingLog`].
@@ -659,9 +650,6 @@ impl crate::platform::IGlyphRunImpl for MockGlyphRunImpl {
         Vec::new()
     }
     fn dispose(&self) {}
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IPlatformRenderInterface for MockPlatformRenderInterface {

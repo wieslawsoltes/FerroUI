@@ -466,9 +466,6 @@ macro_rules! impl_geometry_impl {
                 Some($crate::geometry_impl::path_data(self))
             }
 
-            fn as_any(&self) -> &dyn std::any::Any {
-                self
-            }
 
             fn contour_length(&self) -> f64 {
                 $crate::geometry_impl::contour_length(self)

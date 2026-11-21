@@ -480,9 +480,6 @@ impl TestNativeControlHostImpl {
 }
 
 impl INativeControlHostImpl for TestNativeControlHostImpl {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn create_default_child(&self, _parent: Rc<dyn IPlatformHandle>) -> Rc<dyn INativeControlHostDestroyableControlHandle> {
         let handle = Rc::new(TestHandle { destroyed: Cell::new(false) });

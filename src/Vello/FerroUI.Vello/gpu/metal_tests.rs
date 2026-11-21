@@ -76,9 +76,6 @@ impl IPlatformGraphicsContext for TestMetalDevice {
 
     fn dispose(&self) {}
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IMetalDevice for TestMetalDevice {

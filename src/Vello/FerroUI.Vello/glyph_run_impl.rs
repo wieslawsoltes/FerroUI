@@ -311,7 +311,4 @@ impl IGlyphRunImpl for GlyphRunImpl {
         // The run holds values and a shared font: nothing to release.
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

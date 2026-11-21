@@ -5,10 +5,15 @@ use std::time::Duration;
 
 /// Base class for connected animation configurations that control the
 /// visual style and physics of the transition.
-pub trait ConnectedAnimationConfiguration: Any {
-    /// The configuration as [`Any`], for the class checks of
-    /// [`ConnectedAnimation`](super::ConnectedAnimation).
-    fn as_any(&self) -> &dyn Any;
+pub trait ConnectedAnimationConfiguration: Any + std::any::Any {
+}
+
+impl dyn ConnectedAnimationConfiguration {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 /// Configurations compare by reference.
@@ -55,9 +60,6 @@ impl GravityConnectedAnimationConfiguration {
 }
 
 impl ConnectedAnimationConfiguration for GravityConnectedAnimationConfiguration {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// Produces a direct, linear translation suitable for back navigation. No
@@ -97,9 +99,6 @@ impl DirectConnectedAnimationConfiguration {
 }
 
 impl ConnectedAnimationConfiguration for DirectConnectedAnimationConfiguration {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 /// Produces a simple ease-in-out transition between the source and
@@ -116,7 +115,4 @@ impl BasicConnectedAnimationConfiguration {
 }
 
 impl ConnectedAnimationConfiguration for BasicConnectedAnimationConfiguration {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

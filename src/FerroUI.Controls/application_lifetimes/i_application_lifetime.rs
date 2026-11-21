@@ -10,9 +10,7 @@ use std::any::Any;
 /// The more specific lifetime contracts are reached through the `as_*`
 /// methods, which a lifetime overrides for every contract it implements, or
 /// through [`as_any`](Self::as_any) for a concrete lifetime type.
-pub trait IApplicationLifetime {
-    /// The lifetime as its concrete type.
-    fn as_any(&self) -> &dyn Any;
+pub trait IApplicationLifetime: std::any::Any {
 
     /// The lifetime as a controlled lifetime, if it is one.
     fn as_controlled_application_lifetime(&self) -> Option<&dyn IControlledApplicationLifetime> {
@@ -45,6 +43,14 @@ pub trait IApplicationLifetime {
         &self,
     ) -> Option<&dyn super::IClassicDesktopStyleApplicationLifetime> {
         None
+    }
+}
+
+impl dyn IApplicationLifetime {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 

@@ -94,15 +94,22 @@ pub struct ServerKeyFrame<T> {
 }
 
 /// The key frames of a key frame animation, whatever their value type.
-pub trait IKeyFrames: Any {
+pub trait IKeyFrames: Any + std::any::Any {
     fn insert_expression_key_frame(&mut self, normalized_progress_key: f32, value: &str, easing_function: Rc<dyn IEasing>);
 
     /// The number of key frames.
     fn key_frame_count(&self) -> usize;
 
-    fn as_any(&self) -> &dyn Any;
 
     fn as_any_mut(&mut self) -> &mut dyn Any;
+}
+
+impl dyn IKeyFrames {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 impl<T: Copy + Default + 'static> IKeyFrames for KeyFrames<T> {
@@ -114,9 +121,6 @@ impl<T: Copy + Default + 'static> IKeyFrames for KeyFrames<T> {
         self.count()
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self

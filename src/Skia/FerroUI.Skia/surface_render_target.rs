@@ -263,9 +263,6 @@ impl IBitmapImpl for SurfaceRenderTarget {
         self.surface.dispose();
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl IDrawingContextLayerImpl for SurfaceRenderTarget {

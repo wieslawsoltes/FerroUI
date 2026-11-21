@@ -166,7 +166,4 @@ impl ITopLevelRenderer for NullRenderer {
         *self.platform_specific_scene_info.borrow_mut() = info;
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }

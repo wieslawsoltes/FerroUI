@@ -636,9 +636,6 @@ impl IServerObject for ServerVisualUnorderedCollection {
         self.props.find_props(type_id)
     }
 
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
@@ -1005,9 +1002,6 @@ macro_rules! server_light {
                 self.props.find_props(type_id)
             }
 
-            fn as_any(&self) -> &dyn Any {
-                self
-            }
 
             fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
                 self

@@ -7,17 +7,21 @@ use std::rc::Rc;
 /// A value usable as a resource key: anything with value equality and a hash.
 ///
 /// Implemented for every `Eq + Hash + 'static` type.
-pub trait ResourceKeyObject: Any {
-    fn as_any(&self) -> &dyn Any;
+pub trait ResourceKeyObject: Any + std::any::Any {
     fn dyn_eq(&self, other: &dyn ResourceKeyObject) -> bool;
     fn dyn_hash(&self, state: &mut dyn Hasher);
     fn key_type_name(&self) -> &'static str;
 }
 
-impl<T: Eq + Hash + 'static> ResourceKeyObject for T {
-    fn as_any(&self) -> &dyn Any {
+impl dyn ResourceKeyObject {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
         self
     }
+}
+
+impl<T: Eq + Hash + 'static> ResourceKeyObject for T {
 
     fn dyn_eq(&self, other: &dyn ResourceKeyObject) -> bool {
         other.as_any().downcast_ref::<T>().is_some_and(|other| self == other)
