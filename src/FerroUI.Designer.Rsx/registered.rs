@@ -111,11 +111,12 @@ impl RsxCatalog {
             .collect::<Vec<_>>()
             .join("::");
         let module = text.rsplit_once("::").map_or("", |(module, _)| module);
-        if matches!(
+        let built_in_module = matches!(
             module,
             "" | "ferroui_controls" | "ferroui_view::prelude" | "ferroui_view::generated::builders"
-        ) && catalog::children(&class).is_some()
-        {
+        ) || (class == "TreeDataGrid"
+            && matches!(module, "ferroui_controls_treedatagrid" | "ferroui_view::generated::treedatagrid"));
+        if built_in_module && catalog::children(&class).is_some() {
             return Some(Class::Builtin(class));
         }
         self.registered

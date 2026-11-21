@@ -7,14 +7,17 @@ use crate::{
     RsxProjection,
     animation::syntax::span,
     blocks::keep_comments,
+    columns::ColumnPosition,
     registered::Class,
     source_edits::{insert_field, remove_field},
 };
 use ferroui_designer_core::{Document, NodeId, SourceSpan, TextPatch};
-use ferroui_designer_tools::{ItemTemplateChange, ItemTemplateMember};
+use ferroui_designer_tools::{ColumnKind, ItemTemplateChange, ItemTemplateMember};
 use syn::Expr;
 
-use ItemTemplateMember::{CellTemplate, ItemTemplate, MenuItemTemplate, SelectionBoxItemTemplate};
+use ItemTemplateMember::{
+    CellEditingTemplate, CellTemplate, ItemTemplate, MenuItemTemplate, SelectionBoxItemTemplate,
+};
 
 /// One item or cell template member, in coordinates of the original Rust buffer.
 pub struct RsxItemTemplate {
@@ -130,13 +133,14 @@ fn members_for_class(name: &str) -> &'static [(ItemTemplateMember, &'static str)
 
 /// A projected native element type that can own a mapped RSX data template.
 pub fn is_item_template_owner(name: &str) -> bool {
-    name == "TableViewColumn" || !members_for_class(name).is_empty()
+    matches!(name, "TableViewColumn" | "TreeDataGridTemplateColumn")
+        || !members_for_class(name).is_empty()
 }
 
 #[derive(Clone, Copy)]
 enum TemplateOwner {
     Control(usize, ItemTemplateMember),
-    Column(usize, usize),
+    Column(usize, ColumnPosition, ItemTemplateMember),
 }
 
 struct TemplateSlotSource {
@@ -177,9 +181,15 @@ impl RsxProjection<'_> {
         let patch = match change {
             ItemTemplateChange::CreateInline if slot.can_create => {
                 let row_type = syntax::type_path(row_type)?;
-                let text = if column { "Cell" } else { "Item" };
+                let starter = if property == CellEditingTemplate {
+                    r#"TextBox { placeholder_text: "Enter a value", width: 240.0, height: 34.0 }"#
+                        .to_owned()
+                } else {
+                    let text = if column { "Cell" } else { "Item" };
+                    format!("TextBlock {{ text: {text:?} }}")
+                };
                 let expression = format!(
-                    "::ferroui_view::template::<{row_type}, _>(|_item| ::ferroui_view::rsx! {{ TextBlock {{ text: {text:?} }} }})"
+                    "::ferroui_view::template::<{row_type}, _>(|_item| ::ferroui_view::rsx! {{ {starter} }})"
                 );
                 if column {
                     TextPatch {
@@ -243,9 +253,17 @@ impl RsxProjection<'_> {
                 .map(|(property, _)| TemplateOwner::Control(index, *property))
                 .collect();
         }
-        self.template_column(document, node)
-            .map(|(table, column)| TemplateOwner::Column(table, column))
-            .into_iter()
+        let Some((table, column, kind)) = self.template_column(document, node) else {
+            return Vec::new();
+        };
+        let properties: &[_] = if kind == ColumnKind::Template {
+            &[CellTemplate, CellEditingTemplate]
+        } else {
+            &[CellTemplate]
+        };
+        properties
+            .iter()
+            .map(|property| TemplateOwner::Column(table, column, *property))
             .collect()
     }
 
@@ -269,14 +287,19 @@ impl RsxProjection<'_> {
                     writable: !blocked,
                 })
             }
-            TemplateOwner::Column(table, column) => {
-                let (insert_at, existing) = self.column_template(table, column)?;
+            TemplateOwner::Column(table, column, property) => {
+                let (insert_at, existing, writable) =
+                    self.column_template(table, column, property)?;
                 Some(TemplateSlotSource {
-                    property: CellTemplate,
+                    property,
                     existing,
                     insert_at,
-                    setter: "cell_template",
-                    writable: true,
+                    setter: if property == CellTemplate {
+                        "cell_template"
+                    } else {
+                        "cell_editing_template"
+                    },
+                    writable,
                 })
             }
         }

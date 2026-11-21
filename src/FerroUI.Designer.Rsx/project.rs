@@ -1,7 +1,7 @@
 use crate::animation::{AnimationStyle, RsxAnimationIssue, projected_styles};
 use crate::blocks::{blocks, contains_trivia};
 use crate::catalog::Children;
-use crate::columns::ColumnSource;
+use crate::columns::{ColumnSource, collection_member, table_kind};
 use crate::item_templates::TemplateFields;
 use crate::literal;
 use crate::markup::{RsxPreviewMarkup, serialize};
@@ -12,6 +12,7 @@ use crate::states::{self, ProjectedStates};
 use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
 use ferroui_designer_core::{Document, NodeKind, SourceSpan, TextPatch};
+use ferroui_designer_tools::TableKind;
 use ferroui_view_syntax::{Attribute, Node};
 use proc_macro2::TokenStream;
 use std::collections::{BTreeMap, BTreeSet};
@@ -277,6 +278,7 @@ impl State {
             .rust(&node.path)
             .ok_or("Use a FerroUI control or a registered RSX mapping")?;
         let mut result = Element::new(class.clone());
+        let table = table_kind(&class);
         let index = self.nodes.len();
         self.nodes.push(RsxNode {
             span: SourceSpan::new(name.start, node.braces.close().byte_range().end),
@@ -301,8 +303,7 @@ impl State {
             } else {
                 ArraySlot::Unavailable
             },
-            columns: matches!(&class, crate::registered::Class::Builtin(name) if name == "TableView")
-                .then_some(ColumnSource::Missing),
+            columns: table.map(|_| ColumnSource::Missing),
             templates: TemplateFields::for_class(&class),
         });
         let mut seen = BTreeSet::new();
@@ -320,13 +321,11 @@ impl State {
                         source, &setter, name.span().byte_range().start, node.braces.close().byte_range().start,
                         arguments.first().filter(|_| arguments.len() == 1),
                     );
-                    if setter == "columns" && self.nodes[index].columns.is_some() && arguments.len() == 1 {
-                        self.read_columns(index, &arguments[0]);
-                        continue;
-                    }
-                    if self.nodes[index].columns.is_some() && matches!(setter.as_str(), "prop" | "set" | "with") {
-                        let range = name.span().byte_range();
-                        self.nodes[index].columns = Some(ColumnSource::Computed(SourceSpan::new(range.start, range.end)));
+                    if let Some(table) = table {
+                        let range = crate::animation::syntax::span(name);
+                        if self.project_columns(index, table, &setter, false, arguments.first().filter(|_| arguments.len() == 1), range) {
+                            continue;
+                        }
                     }
                     self.nodes[index].computed_child_setter |= matches!(
                         setter.as_str(), "children" | "child" | "content" | "items" | "items_source"
@@ -356,9 +355,10 @@ impl State {
             };
             let setter = name.unraw().to_string();
             let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
-            if owner.is_none() && setter == "columns" && self.nodes[index].columns.is_some() {
-                self.read_columns(index, value);
-                continue;
+            if let Some(table) = table {
+                if self.project_columns(index, table, &setter, owner.is_some(), Some(value), crate::animation::syntax::span(name)) {
+                    continue;
+                }
             }
             self.nodes[index].computed_child_setter |= owner.is_none()
                 && matches!(setter.as_str(), "children" | "child" | "items" | "items_source");
@@ -488,14 +488,34 @@ impl State {
         Ok(result)
     }
 
-    fn read_columns(&mut self, index: usize, value: &syn::Expr) {
+    fn project_columns(
+        &mut self, index: usize, table: TableKind, setter: &str, qualified: bool,
+        value: Option<&syn::Expr>, name: SourceSpan,
+    ) -> bool {
+        let (member, property) = collection_member(table);
         let node = &mut self.nodes[index];
-        let columns = node.columns.as_mut().expect("TableView column source");
-        let span = value.span().byte_range();
-        node.expressions.insert("Columns".into(), SourceSpan::new(span.start, span.end));
-        if !columns.read(value) {
-            self.omit("TableView.Columns expression".into());
+        let columns = node.columns.as_mut().expect("Mapped native table");
+        let source = value.map_or(name, crate::animation::syntax::span);
+        if setter == member {
+            node.expressions.insert(property.into(), source);
+            let projected = if let (false, Some(value)) = (qualified, value) {
+                columns.read(table, value)
+            } else {
+                *columns = ColumnSource::Computed(source);
+                false
+            };
+            if !projected {
+                let message = format!("{}.{property} expression", node.class);
+                self.omit(message);
+            }
+            return true;
         }
+        if matches!(setter, "prop" | "set" | "with")
+            || (table == TableKind::TreeDataGrid && matches!(setter, "source" | "model"))
+        {
+            *columns = ColumnSource::Computed(source);
+        }
+        false
     }
 }
 

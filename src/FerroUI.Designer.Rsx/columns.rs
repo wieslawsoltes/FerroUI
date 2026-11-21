@@ -1,20 +1,26 @@
-//! Source-owned TableView columns from the typed FerroUI View builders.
+//! Source-owned columns from the typed FerroUI View builders.
 mod array;
 mod fields;
+mod row;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod tree_tests;
 
-use self::{array::ColumnArray, fields::SourceField};
+use self::{array::ColumnArray, row::Column};
 use crate::{
     RsxProjection,
-    animation::syntax::{chain, path, span, view_argument},
+    animation::syntax::{span, view_argument},
     item_templates::TemplateSource,
+    registered::Class,
     source_edits::insert_field,
-    tree::escape_xml,
 };
 use ferroui_designer_core::{Document, NodeId, SourceSpan, TextPatch};
-use ferroui_designer_tools::{AuthoredColumn, ColumnChange, ColumnKind, TableColumns};
-use std::{collections::BTreeMap, fmt::Write};
+use ferroui_designer_tools::{
+    ColumnChange, ColumnKind, ItemTemplateMember, TableColumns, TableKind,
+};
+pub(crate) use row::ColumnPosition;
+use std::fmt::Write;
 use syn::Expr;
 
 pub(crate) enum ColumnSource {
@@ -25,25 +31,46 @@ pub(crate) enum ColumnSource {
 
 pub(crate) struct InlineColumns {
     source: SourceSpan,
+    kind: TableKind,
     array: ColumnArray,
     rows: Vec<Column>,
 }
 
-struct Column {
-    source: SourceSpan,
-    fields: BTreeMap<&'static str, SourceField>,
+pub(crate) fn table_kind(class: &Class) -> Option<TableKind> {
+    match class {
+        Class::Builtin(name) if name == "TableView" => Some(TableKind::TableView),
+        Class::Builtin(name) if name == "TreeDataGrid" => Some(TableKind::TreeDataGrid),
+        _ => None,
+    }
+}
+
+pub(crate) fn collection_member(kind: TableKind) -> (&'static str, &'static str) {
+    match kind {
+        TableKind::TableView => ("columns", "Columns"),
+        TableKind::TreeDataGrid => ("column_definitions", "ColumnDefinitions"),
+    }
+}
+
+fn builder(kind: TableKind) -> &'static str {
+    match kind {
+        TableKind::TableView => "table_columns",
+        TableKind::TreeDataGrid => "tree_data_grid_columns",
+    }
 }
 
 impl ColumnSource {
-    pub(crate) fn read(&mut self, expression: &Expr) -> bool {
+    pub(crate) fn read(&mut self, kind: TableKind, expression: &Expr) -> bool {
+        if matches!(self, Self::Computed(_)) {
+            return false;
+        }
         let parsed = if matches!(self, Self::Missing) {
-            InlineColumns::read(expression)
+            InlineColumns::read(kind, expression)
         } else {
             None
         };
         *self = parsed.map_or_else(|| Self::Computed(span(expression)), Self::Inline);
         match self {
-            Self::Inline(columns) => columns.rows.iter().all(Column::can_duplicate),
+            Self::Inline(columns) => columns.rows.iter().all(Column::projects_values),
             _ => false,
         }
     }
@@ -67,17 +94,23 @@ impl ColumnSource {
         if columns.rows.is_empty() {
             return;
         }
-        let _ = write!(output, "\n{padding}    <TableView.Columns>");
-        for column in &columns.rows {
-            let _ = write!(output, "\n{padding}        <TableViewColumn");
-            for (name, field) in &column.fields {
-                if let Some(value) = field.render_value() {
-                    let _ = write!(output, " {name}=\"{}\"", escape_xml(&value, Some('"')));
-                }
+        let wrapper = match columns.kind {
+            TableKind::TableView => "TableView.Columns",
+            TableKind::TreeDataGrid => {
+                // An empty source realizes the real headers without evaluating Rust rows.
+                let _ = write!(
+                    output,
+                    "\n{padding}    <TreeDataGrid.ItemsSource><collections:ArrayList xmlns:collections=\"using:System.Collections\" /></TreeDataGrid.ItemsSource>"
+                );
+                "TreeDataGrid.ColumnDefinitions"
             }
-            output.push_str(" />");
+        };
+        let _ = write!(output, "\n{padding}    <{wrapper}>");
+        let indent = format!("{padding}        ");
+        for column in &columns.rows {
+            column.render(output, &indent);
         }
-        let _ = write!(output, "\n{padding}    </TableView.Columns>");
+        let _ = write!(output, "\n{padding}    </{wrapper}>");
     }
 
     pub(crate) fn matches_layout(
@@ -91,29 +124,16 @@ impl ColumnSource {
         };
         let model = ferroui_designer_tools::table_columns(document, table)
             .map_err(|error| error.to_string())?;
-        Ok(model.reason.is_none()
-            && model.columns.len() == rows.len()
-            && model.columns.iter().zip(rows).all(|(column, row)| {
-                column.fields.iter().all(|field| {
-                    let projected = row.fields.get(field.name).and_then(|source| {
-                        if field.name == "Header" {
-                            source.value.clone()
-                        } else {
-                            source.render_value()
-                        }
-                    });
-                    field.value == projected
-                })
-            }))
+        Ok(matches_model(rows, &model))
     }
 }
 
 impl InlineColumns {
-    fn read(expression: &Expr) -> Option<Self> {
+    fn read(kind: TableKind, expression: &Expr) -> Option<Self> {
         let Expr::Call(call) = expression else {
             return None;
         };
-        let Expr::Array(array) = view_argument(call, "table_columns")? else {
+        let Expr::Array(array) = view_argument(call, builder(kind))? else {
             return None;
         };
         if array.elems.len() > 256 {
@@ -122,53 +142,32 @@ impl InlineColumns {
         let rows = array
             .elems
             .iter()
-            .map(Column::read)
-            .collect::<Option<_>>()?;
+            .map(|column| Column::read(column, kind))
+            .collect::<Option<Vec<_>>>()?;
+        if rows
+            .iter()
+            .filter(|column| column.kind == ColumnKind::Expander)
+            .count()
+            > 1
+        {
+            return None;
+        }
         Some(Self {
             source: span(expression),
+            kind,
             array: ColumnArray::read(array),
             rows,
         })
     }
 }
 
-impl Column {
-    fn read(expression: &Expr) -> Option<Self> {
-        let (factory, methods) = chain(expression)?;
-        if !factory.args.is_empty()
-            || !matches!(
-                path(&factory.func)?.as_str(),
-                "ferroui_view::table_column" | "ferroui_view::prelude::table_column"
-            )
-        {
-            return None;
-        }
-        let mut fields = BTreeMap::new();
-        for method in methods {
-            let field = SourceField::read(method)?;
-            if fields.insert(field.name(), field).is_some() {
-                return None;
-            }
-        }
-        Some(Self {
-            source: span(expression),
-            fields,
-        })
-    }
-
-    fn can_duplicate(&self) -> bool {
-        self.fields.values().all(|field| field.value.is_some())
-    }
-
-    fn describe(&self, column: &mut AuthoredColumn) {
-        column.source = self.source;
-        column.can_duplicate = self.can_duplicate();
-        for field in &mut column.fields {
-            if let Some(source) = self.fields.get(field.name) {
-                source.describe(field);
-            }
-        }
-    }
+fn matches_model(rows: &[Column], model: &TableColumns) -> bool {
+    model.reason.is_none()
+        && model.columns.len() == rows.len()
+        && rows
+            .iter()
+            .zip(&model.columns)
+            .all(|(source, projected)| source.matches(projected))
 }
 
 impl RsxProjection<'_> {
@@ -183,9 +182,9 @@ impl RsxProjection<'_> {
             .and_then(|index| self.nodes[index].columns.as_ref());
         match source {
             Some(ColumnSource::Missing) if model.columns.is_empty() => {}
-            Some(ColumnSource::Inline(columns)) if columns.rows.len() == model.columns.len() => {
+            Some(ColumnSource::Inline(columns)) if matches_model(&columns.rows, model) => {
                 for (row, column) in columns.rows.iter().zip(&mut model.columns) {
-                    row.describe(column);
+                    row.describe(column, true);
                     column.can_duplicate &= columns.rows.len() < 256;
                 }
                 if columns.rows.len() >= 256 {
@@ -217,18 +216,23 @@ impl RsxProjection<'_> {
             .control_index(document, model.table)
             .ok_or("Select an authored RSX table")?;
         let owner = &self.nodes[index];
+        let kind = table_kind(&owner.class)
+            .filter(|kind| *kind == model.kind)
+            .ok_or("The selected table changed")?;
         let patches = match owner.columns.as_ref() {
             Some(ColumnSource::Missing) => match change {
                 ColumnChange::Insert {
                     index: 0,
-                    kind: ColumnKind::Table,
+                    kind: column,
                     header,
-                } => {
-                    let column = column_fragment(header.as_deref())?;
+                } if model.available.iter().any(|choice| choice.kind == *column) => {
+                    let column = row::fragment(*column, header.as_deref())?;
+                    let (field, _) = collection_member(kind);
+                    let builder = builder(kind);
                     vec![insert_field(
                         self.source,
                         owner.open,
-                        &format!("columns: ::ferroui_view::table_columns([{column}])"),
+                        &format!("{field}: ::ferroui_view::{builder}([{column}])"),
                     )]
                 }
                 _ => return Err("Choose Add Column to create the authored Rust collection".into()),
@@ -274,15 +278,19 @@ impl RsxProjection<'_> {
         match change {
             ColumnChange::Insert {
                 index,
-                kind: ColumnKind::Table,
+                kind,
                 header,
-            } if columns.rows.len() < 256 => {
-                columns
-                    .array
-                    .insert(self.source, *index, &column_fragment(header.as_deref())?)
+            } if columns.rows.len() < 256
+                && model.available.iter().any(|choice| choice.kind == *kind) =>
+            {
+                columns.array.insert(
+                    self.source,
+                    *index,
+                    &row::fragment(*kind, header.as_deref())?,
+                )
             }
             ColumnChange::Insert { .. } => {
-                Err("Choose a TableView column in a list with fewer than 256 entries".into())
+                Err("Choose an available column type in a list with fewer than 256 entries".into())
             }
             ColumnChange::Move { column, index } => {
                 columns
@@ -301,9 +309,13 @@ impl RsxProjection<'_> {
                     .insert(self.source, index + 1, &self.source[row.source.range()])
             }
             ColumnChange::Set { column, field, .. } | ColumnChange::Clear { column, field } => {
-                let index = index_of(*column)?;
-                let owner = &columns.rows[index];
-                let field = model.columns[index]
+                let (position, column) =
+                    ColumnPosition::find(model, *column).ok_or("The selected column changed")?;
+                let owner = position
+                    .at(&columns.rows)
+                    .filter(|row| row.kind == column.kind)
+                    .ok_or("The selected column changed")?;
+                let field = column
                     .fields
                     .iter()
                     .find(|entry| entry.name == field)
@@ -314,8 +326,9 @@ impl RsxProjection<'_> {
                 };
                 Ok(fields::change(
                     self.source,
+                    owner.kind,
                     owner.fields.get(field.name),
-                    owner.source.end,
+                    owner.append_at,
                     field,
                     value,
                 )?
@@ -333,8 +346,15 @@ impl RsxProjection<'_> {
             .ok()
     }
 
-    pub(crate) fn template_column(&self, document: &Document, node: NodeId) -> Option<(usize, usize)> {
-        if document.ast().node(node)?.local_name() != "TableViewColumn" {
+    pub(crate) fn template_column(
+        &self,
+        document: &Document,
+        node: NodeId,
+    ) -> Option<(usize, ColumnPosition, ColumnKind)> {
+        if !matches!(
+            document.ast().node(node)?.local_name(),
+            "TableViewColumn" | "TreeDataGridTemplateColumn"
+        ) {
             return None;
         }
         let table = ferroui_designer_tools::nearest_table(document, node)?;
@@ -346,23 +366,31 @@ impl RsxProjection<'_> {
         if model.reason.is_some() || columns.rows.len() != model.columns.len() {
             return None;
         }
-        let column = model.columns.iter().position(|column| column.node == node)?;
-        Some((index, column))
+        let (position, column) = ColumnPosition::find(&model, node)?;
+        (position.at(&columns.rows)?.kind == column.kind).then_some((index, position, column.kind))
     }
 
-    pub(crate) fn column_template(&self, table: usize, column: usize) -> Option<(usize, Option<TemplateSource>)> {
+    pub(crate) fn column_template(
+        &self,
+        table: usize,
+        column: ColumnPosition,
+        property: ItemTemplateMember,
+    ) -> Option<(usize, Option<TemplateSource>, bool)> {
         let ColumnSource::Inline(columns) = self.nodes.get(table)?.columns.as_ref()? else {
             return None;
         };
-        let row = columns.rows.get(column)?;
-        Some((row.source.end, row.fields.get("CellTemplate").and_then(|field| field.template)))
+        let row = column.at(&columns.rows)?;
+        let key = match property {
+            ItemTemplateMember::CellTemplate => "CellTemplateResourceKey",
+            ItemTemplateMember::CellEditingTemplate => "CellEditingTemplateResourceKey",
+            _ => return None,
+        };
+        Some((
+            row.append_at,
+            row.fields
+                .get(property.name())
+                .and_then(|field| field.template),
+            !row.fields.contains_key(key) && !row.fields.contains_key("CellTemplateResourceKey"),
+        ))
     }
-}
-
-fn column_fragment(header: Option<&str>) -> Result<String, String> {
-    let header = header.unwrap_or("Column");
-    if header.len() > 4096 || !fields::column_text(header) {
-        return Err("Enter a single-line column header of up to 4096 bytes".into());
-    }
-    Ok(format!("::ferroui_view::table_column().header({header:?})"))
 }

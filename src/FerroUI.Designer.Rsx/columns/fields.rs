@@ -1,3 +1,5 @@
+mod properties;
+
 use crate::{
     animation::syntax::{method_suffix, path, span},
     blocks::keep_comments,
@@ -5,10 +7,9 @@ use crate::{
     literal::{self, Literal},
 };
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use ferroui_designer_tools::{ColumnField, GridLength};
+use ferroui_designer_tools::{ColumnField, ColumnKind, GridLength};
 use syn::{Expr, ExprMethodCall, Lit};
 
-const ALIGNMENT: &str = "ferroui_base::layout::HorizontalAlignment";
 const LENGTH: &str = "ferroui_controls::GridLength";
 const UNIT: &str = "ferroui_controls::GridUnitType";
 
@@ -17,7 +18,7 @@ enum ValueCodec {
     Text,
     Length,
     Boolean,
-    Alignment,
+    Choice(&'static str),
     BindingPath,
     Expression,
 }
@@ -30,63 +31,6 @@ struct Property {
 }
 
 use ValueCodec::*;
-const PROPERTIES: &[Property] = &[
-    Property {
-        name: "Header",
-        setter: "header",
-        encoding: Text,
-    },
-    Property {
-        name: "Width",
-        setter: "width",
-        encoding: Length,
-    },
-    Property {
-        name: "IsVisible",
-        setter: "is_visible",
-        encoding: Boolean,
-    },
-    Property {
-        name: "CanUserResize",
-        setter: "can_user_resize",
-        encoding: Boolean,
-    },
-    Property {
-        name: "HorizontalContentAlignment",
-        setter: "horizontal_content_alignment",
-        encoding: Alignment,
-    },
-    Property {
-        name: "Binding",
-        setter: "binding_path",
-        encoding: BindingPath,
-    },
-    Property {
-        name: "Binding",
-        setter: "binding",
-        encoding: Expression,
-    },
-    Property {
-        name: "CellTemplate",
-        setter: "cell_template",
-        encoding: Expression,
-    },
-    Property {
-        name: "HeaderTemplate",
-        setter: "header_template",
-        encoding: Expression,
-    },
-    Property {
-        name: "CellTheme",
-        setter: "cell_theme",
-        encoding: Expression,
-    },
-    Property {
-        name: "HeaderTheme",
-        setter: "header_theme",
-        encoding: Expression,
-    },
-];
 
 pub(super) struct SourceField {
     property: Property,
@@ -97,18 +41,19 @@ pub(super) struct SourceField {
 }
 
 impl SourceField {
-    pub(super) fn read(method: &ExprMethodCall) -> Option<Self> {
-        let property = *PROPERTIES
-            .iter()
-            .find(|property| method.method == property.setter)?;
+    pub(super) fn read(kind: ColumnKind, method: &ExprMethodCall) -> Option<Self> {
+        let property = properties::of(kind).find(|property| method.method == property.setter)?;
         if method.args.len() != 1 {
             return None;
         }
         let expr = method.args.first()?;
-        let value = property.encoding.read(expr);
+        let value = property
+            .encoding
+            .read(expr, kind.field_choices(property.name));
         let argument = span(expr);
         let method = method_suffix(method);
-        let template = (property.name == "CellTemplate").then(|| TemplateSource::read(expr, Some(method)));
+        let template = matches!(property.name, "CellTemplate" | "CellEditingTemplate")
+            .then(|| TemplateSource::read(expr, Some(method)));
         Some(Self {
             property,
             value,
@@ -126,7 +71,7 @@ impl SourceField {
         let value = self.value.as_ref()?;
         Some(match self.property.encoding {
             Text => literal::text_value(value),
-            BindingPath => format!("{{ReflectionBinding {value}}}"),
+            BindingPath => reflection_binding(value),
             _ => value.clone(),
         })
     }
@@ -144,6 +89,7 @@ impl SourceField {
 
 pub(super) fn change(
     source: &str,
+    kind: ColumnKind,
     authored: Option<&SourceField>,
     end: usize,
     field: &ColumnField,
@@ -152,9 +98,9 @@ pub(super) fn change(
     let Some(value) = value else {
         return match authored {
             None => Ok(None),
-            Some(field) if field.value.is_some() => Ok(Some(TextPatch {
-                span: field.method,
-                replacement: keep_comments(&source[field.method.range()])?,
+            Some(authored) if field.can_clear => Ok(Some(TextPatch {
+                span: authored.method,
+                replacement: keep_comments(&source[authored.method.range()])?,
             })),
             Some(_) => Err("Reveal this Rust expression to edit it in source".into()),
         };
@@ -165,16 +111,16 @@ pub(super) fn change(
     if value.len() > 4096 || !column_text(value) {
         return Err("Enter a single-line column value of up to 4096 bytes".into());
     }
-    let property = PROPERTIES
-        .iter()
+    let property = properties::of(kind)
         .find(|property| property.name == field.name)
         .ok_or("Choose a mapped column property")?;
     let argument = property.encoding.rust(value, field.choices)?;
     if let Some(authored) = authored {
         if authored.value
-            == property
-                .encoding
-                .read(&syn::parse_str::<Expr>(&argument).map_err(|error| error.to_string())?)
+            == property.encoding.read(
+                &syn::parse_str::<Expr>(&argument).map_err(|error| error.to_string())?,
+                field.choices,
+            )
         {
             return Ok(None);
         }
@@ -193,7 +139,7 @@ pub(super) fn change(
 }
 
 impl ValueCodec {
-    fn read(self, expression: &Expr) -> Option<String> {
+    fn read(self, expression: &Expr, choices: &[&str]) -> Option<String> {
         match self {
             Text | BindingPath => {
                 let Expr::Lit(literal) = expression else {
@@ -214,10 +160,10 @@ impl ValueCodec {
             Boolean => Literal::Bool
                 .read_rust(expression)
                 .map(|value| if value == "true" { "True" } else { "False" }.into()),
-            Alignment => {
+            Choice(rust_type) => {
                 let name = path(expression)?;
-                let value = name.strip_prefix(&format!("{ALIGNMENT}::"))?;
-                matches!(value, "Left" | "Center" | "Right" | "Stretch").then(|| value.into())
+                let value = name.strip_prefix(&format!("{rust_type}::"))?;
+                choices.contains(&value).then(|| value.into())
             }
             Expression => None,
         }
@@ -238,15 +184,23 @@ impl ValueCodec {
             Boolean => Literal::Bool
                 .rust(value)
                 .ok_or_else(|| "Choose True or False".into()),
-            Alignment => choices
+            Choice(rust_type) => choices
                 .iter()
                 .find(|choice| choice.eq_ignore_ascii_case(value.trim()))
-                .map(|choice| format!("::{ALIGNMENT}::{choice}"))
-                .ok_or_else(|| "Choose a column alignment".into()),
+                .map(|choice| format!("::{rust_type}::{choice}"))
+                .ok_or_else(|| "Choose a supported column value".into()),
             BindingPath if binding_path(value.trim()) => Ok(format!("{:?}", value.trim())),
             BindingPath => Err("Enter a row property path such as Account.Name".into()),
             Expression => Err("Edit this Rust expression in source".into()),
         }
+    }
+}
+
+pub(super) fn reflection_binding(value: &str) -> String {
+    if value.is_empty() {
+        "{ReflectionBinding}".into()
+    } else {
+        format!("{{ReflectionBinding {value}}}")
     }
 }
 
@@ -282,11 +236,12 @@ fn width(expression: &Expr) -> Option<GridLength> {
 }
 
 fn binding_path(value: &str) -> bool {
-    value.split('.').all(|component| {
-        let mut chars = component.chars();
-        chars.next().is_some_and(|c| c.is_alphabetic() || c == '_')
-            && chars.all(|c| c.is_alphanumeric() || c == '_')
-    })
+    value.is_empty()
+        || value.split('.').all(|component| {
+            let mut chars = component.chars();
+            chars.next().is_some_and(|c| c.is_alphabetic() || c == '_')
+                && chars.all(|c| c.is_alphanumeric() || c == '_')
+        })
 }
 
 pub(super) fn column_text(value: &str) -> bool {

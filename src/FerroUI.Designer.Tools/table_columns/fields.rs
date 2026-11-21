@@ -102,6 +102,15 @@ fn definitions(kind: ColumnKind) -> impl Iterator<Item = Field> {
     COMMON.iter().chain(specific).chain(tree).copied()
 }
 
+impl ColumnKind {
+    /// Literal choices supported by the native column inspector.
+    pub fn field_choices(self, name: &str) -> &'static [&'static str] {
+        definitions(self)
+            .find_map(|(field, _, choices)| (name == field).then_some(choices))
+            .unwrap_or_default()
+    }
+}
+
 pub(super) fn describe(
     document: &Document,
     node: &Node,
