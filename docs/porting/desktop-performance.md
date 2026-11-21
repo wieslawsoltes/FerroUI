@@ -553,26 +553,39 @@ python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own r
 python3 scripts/perf/gate.py --only window --window-scenes text,wall
 python3 scripts/perf/gate.py --quick --only frames,framework --frames-filter 'start_of_*' \
     --framework-filter styling_subsystem::ControlThemeApply   # tier 1: only what the change can move
+python3 scripts/perf/gate.py --batch --base origin/main        # tier 2: a batch of stacks
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
 python3 scripts/perf/gate.py --only counters                   # the counter checks alone
 python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
 
-**Which gate a change gets.** A gate run is mostly the build of both sides (about 14 minutes)
-and, per round, the framework classes (about 4.5 minutes a side with a subsystem filter) and the
-frame scenes (about 1.5 minutes a side). Instructions decide, and they move little between rounds,
-so a narrow change needs few rounds of what it can move:
+**Which gate a change gets.** A gate run is the build of both sides (up to about 14 minutes) and,
+per round of both sides together, the framework classes (about 12 minutes) and the frame scenes
+(under 2 minutes). Instructions decide for the micro-benchmarks, and they move little between
+rounds, so a part of a stack gets CI and its size run, and the stacks that are ready are gated
+together:
 
 | Tier | For | Run | About |
 |---|---|---|---|
 | 0 | docs, scripts, CI, a change whose runtime code is byte-equal (a build-time decision that only removes unreached code: compare the generated files or the executables) | no gate; the size run | 0 |
 | 1 | a narrow change, a part of a stack | `--quick` (2 rounds, a third only for a metric within the spread of its rounds; 120 frames a scene) with `--frames-filter` (scene names or prefixes ending in `*`; a filter that names no scene stops the gate) and a `--framework-filter` of the classes it can move | 15 to 20 minutes |
-| 2 | the top of a stack, a batch of changes, a change of a hot path everywhere (the property store, layout, rendering) | every scene and class, 3 rounds (`--rounds 3 --max-rounds 4`) | 50 to 60 minutes |
-| 3 | a release | tier 2 with `window` and `tdg`, on every platform (section 8.3) | hours |
+| 2 | the stacks that are ready, merged into one temporary branch; a change of a hot path everywhere (the property store, layout, rendering) | `--batch`: every scene in 3 timed rounds, every class in 1 round | about 25 minutes |
+| 3 | a release | every scene and class in 3 timed rounds (`--rounds 3 --max-rounds 4`) with `window` and `tdg`, on every platform (section 8.3) | hours |
 
-A regression that a tier 1 gate did not look for is found by the tier 2 gate of its stack before
-the stack is merged.
+A regression that a tier 1 gate did not look for is found by the tier 2 gate of its batch before
+the stacks are merged. When a batch fails, the failing lines are measured on each stack alone
+(tier 1, with their scenes and classes as filters) to find the one that adds them.
+
+**The batch gate.** A micro-benchmark line is decided by its instructions. One that takes more is
+measured again alone, up to 3 rounds, so that a benchmark whose count differs from one process to
+the next does not stop the gate; if it still takes more it fails. A time that moved with the same
+instructions is reported as `time alone (does not block)`. Instructions do not see the memory
+caches, a contended lock or the GPU, so the frame scenes stay timed and can fail the gate on time,
+and the tier 3 gate before a release decides on the time of every line. The first round of the
+base's micro-benchmarks is kept under `<scratch>/base-cache`, by commit and compiler, and the next
+batch on the same base does not measure it again (`--no-base-cache` measures it; a base that runs
+the candidate's copy of the benchmarks never reuses it).
 
 The script checks the base out, detached, in a git worktree of its own under the scratch folder
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
@@ -583,7 +596,7 @@ candidate in the first, candidate then base in the second): what a run leaves be
 of the system and the heat of the machine, is then not always the start of the same side. A metric over its tolerance by less than the
 spread of its own rounds on either side is not decided yet: one disturbed round can move a median
 of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
-only). The gate then measures another round of that suite, alternately again, until the change is
+only). The gate then measures another round of the scenes and classes of those metrics, alternately again, until the change is
 larger than the spread or `--max-rounds` (default 9) is reached, and decides on the medians of all
 the rounds. Two things end a run sooner than its rounds. A line that takes more instructions, or a
 scaling pair over its limit, after the first round takes them in every round: the gate stops there
