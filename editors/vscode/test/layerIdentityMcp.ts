@@ -85,7 +85,14 @@ async function verifyReorder({ invoke, content }: McpFixture, path: string, sour
         await history('undo', edited);
         await check([true, false], [false, true]);
         await history('redo', removed);
+        if (path.endsWith('.rs')) {
+            const prefix = new vscode.WorkspaceEdit();
+            prefix.insert(uri, new vscode.Position(0, 0), '// Move the view down 🧭\r\n');
+            assert.equal(await vscode.workspace.applyEdit(prefix), true);
+            await check([false], [true]);
+        }
         await present({ action: 'reset' });
+        if (path.endsWith('.rs')) await history('undo', removed);
         await history('undo', edited);
         await check([false, false], [false, false]);
         await history('undo', source);

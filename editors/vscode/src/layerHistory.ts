@@ -13,6 +13,7 @@ interface HistorySide extends Scope {
     detached?: LayerFlags;
 }
 interface Step {
+    scope: symbol;
     before: HistorySide;
     after: HistorySide;
     positions: Uint32Array;
@@ -23,6 +24,7 @@ interface Step {
 interface SourceChange { beforeSource: string; afterSource: string }
 type Entry = Step | SourceChange;
 interface Pending {
+    scope: symbol;
     version: number;
     text: string;
     change: LayerChange;
@@ -46,12 +48,15 @@ export class LayerHistory {
     private source?: string;
     private readonly undo: Entry[] = [];
     private readonly redo: Entry[] = [];
+    private scopes = new Map<number, symbol>();
 
     constructor(private readonly document: vscode.TextDocument) {}
 
     clearDetached(start: number): void {
+        const scope = this.scopes.get(start);
+        if (scope === undefined) return;
         for (const step of [...this.undo, ...this.redo]) {
-            if ('positions' in step && (step.before.start === start || step.after.start === start)) {
+            if ('positions' in step && step.scope === scope) {
                 step.before.detached = undefined;
                 step.after.detached = undefined;
             }
@@ -74,7 +79,8 @@ export class LayerHistory {
             start: document.offsetAt(asPosition(change.block.start)),
             end: document.offsetAt(asPosition(change.block.end)),
         } : { start: documentScope, end: documentScope };
-        const pending = { version: document.version, text, change, expectedSource,
+        const pending = { scope: this.scopes.get(before.start) ?? Symbol(),
+            version: document.version, text, change, expectedSource,
             before: { ...before, stamp: change.beforeStamp, source: original },
             signature: original === expectedSource ? signature(changes) : undefined };
         this.source = original;
@@ -89,6 +95,7 @@ export class LayerHistory {
         const pending = this.pending;
         this.pending = undefined;
         const { contentChanges: changes, reason } = event;
+        this.rebaseScopes(changes);
         if (reason === undefined) {
             this.redo.length = 0;
             if (!pending || event.document.version !== pending.version + 1
@@ -100,7 +107,8 @@ export class LayerHistory {
                 start: offsetAfterChanges(pending.before.start, changes),
                 end: offsetAfterChanges(pending.before.end, changes),
             };
-            const step = {
+            const step: Step = {
+                scope: pending.scope,
                 before: pending.before,
                 after: { start: after.start, end: after.end, stamp: pending.change.afterStamp, source: this.source },
                 positions: Uint32Array.from(pending.change.positions.flat()),
@@ -109,6 +117,7 @@ export class LayerHistory {
                 reverseSignature: pending.signature && signature(inverseChanges(pending.text, changes)),
             };
             this.record(step);
+            this.rememberScope(after.start, step.scope);
             return transfer(step, false);
         }
         const undo = reason === vscode.TextDocumentChangeReason.Undo;
@@ -128,7 +137,28 @@ export class LayerHistory {
             || !matchesSignature(undo ? step.reverseSignature : step.forwardSignature, changes)) return;
         stack.pop();
         next.push(step);
+        this.rememberScope(to.start, step.scope);
         return transfer(step, undo);
+    }
+
+    private rebaseScopes(changes: readonly vscode.TextDocumentContentChangeEvent[]): void {
+        if (!this.scopes.size || this.scopes.has(documentScope)) return;
+        const next = new Map<number, symbol>();
+        for (const [start, scope] of this.scopes) {
+            if (changes.some(change => change.rangeOffset <= start
+                && change.rangeOffset + change.rangeLength > start)) continue;
+            next.set(offsetAfterChanges(start, changes), scope);
+        }
+        this.scopes = next;
+    }
+
+    private rememberScope(start: number, scope: symbol): void {
+        this.scopes.delete(start);
+        this.scopes.set(start, scope);
+        if (this.scopes.size > historyLimit) {
+            const oldest = this.scopes.keys().next().value;
+            if (oldest !== undefined) this.scopes.delete(oldest);
+        }
     }
 
     private record(entry: Entry): void {

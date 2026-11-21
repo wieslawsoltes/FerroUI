@@ -19,6 +19,7 @@ import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
 import type { HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
+import { filterOutline } from './outlineFilter';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectDefinition } from './projectLibrary';
@@ -59,6 +60,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     include_source?: boolean;
     include_counterpart?: boolean;
     node?: number;
+    filter?: string;
     offset?: number;
     limit?: number;
     view?: DesignerView;
@@ -311,12 +313,12 @@ export class AgentTools {
             }
             case 'designer_outline': {
                 const snapshot = await panel.waitForSnapshot(signal);
-                const nodes = snapshot.nodes;
                 if (args.node !== undefined) {
-                    const selected = nodes.find(node => node.id === args.node);
+                    const selected = snapshot.nodes.find(node => node.id === args.node);
                     if (!selected) throw new Error('Read the current outline for valid node IDs.');
                     return { revision: panel.currentToken, node: selected };
                 }
+                const nodes = filterOutline(snapshot.nodes, args.filter ?? '');
                 const offset = args.offset ?? 0;
                 return { revision: panel.currentToken, total: nodes.length, offset,
                     nodes: nodes.slice(offset, offset + (args.limit ?? 100)).map(({ properties, addableProperties, ...node }) => node) };

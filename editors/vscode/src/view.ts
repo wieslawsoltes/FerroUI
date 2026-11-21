@@ -188,13 +188,18 @@ export function designerHtml(webview: vscode.Webview, root: vscode.Uri, language
 export function outlineHtml(webview: vscode.Webview, root: vscode.Uri): string {
     return page(webview, root, 'outline', 'FerroUI Outline', `
 <main class="outline">
-    <div class="toolbar outline-toolbar">
-        <select id="outline-mode" aria-label="Hierarchy">
-            <option value="source">Source</option><option value="combined">Combined</option>
-            <option value="visual">Visual</option><option value="logical">Logical</option>
-        </select>
-        ${tool('outline-layout', 'layout', 'Arrange selection…', 'disabled')}
-    </div>
+    <header class="outline-header" id="outline-header">
+        <div class="toolbar outline-toolbar">
+            <select id="outline-mode" aria-label="Hierarchy">
+                <option value="source">Source</option><option value="combined">Combined</option>
+                <option value="visual">Visual</option><option value="logical">Logical</option>
+            </select>
+            ${tool('outline-layout', 'layout', 'Arrange selection…', 'disabled')}
+        </div>
+        <div class="outline-search">
+            ${icon('search')}<input type="search" id="outline-search" aria-label="Filter controls by type or name" placeholder="Filter controls" disabled>
+        </div>
+    </header>
     <p class="dock-message" id="outline-message" role="status"></p>
     <ul id="outline-tree" role="tree" aria-label="Control hierarchy"></ul>
 </main>`);

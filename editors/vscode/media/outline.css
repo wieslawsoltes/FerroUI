@@ -1,5 +1,15 @@
+.outline-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    padding-block-end: 2px;
+    background: var(--vscode-sideBar-background, var(--vscode-editor-background));
+}
 .outline-toolbar { flex-wrap: nowrap; }
 .outline-toolbar select { flex: 1; }
+.outline-search { position: relative; display: flex; align-items: center; margin: 5px 8px 2px; }
+.outline-search > .codicon { position: absolute; inset-inline-start: 7px; color: var(--muted); pointer-events: none; }
+.outline-search input { inline-size: 100%; padding-inline-start: 26px; }
 #outline-tree { list-style: none; margin: 0; padding: 2px 0; }
 #outline-tree li {
     display: flex;
@@ -8,6 +18,7 @@
     position: relative;
     min-block-size: 24px;
     padding-inline: calc(5px + var(--level) * 13px) 8px;
+    scroll-margin-block-start: 66px;
     overflow: hidden;
     white-space: nowrap;
     cursor: default;

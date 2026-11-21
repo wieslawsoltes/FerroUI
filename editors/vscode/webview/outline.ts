@@ -1,24 +1,34 @@
+import { filterOutline } from '../src/outlineFilter';
 import type { DragGesture, FromOutline, OutlineMode, OutlinePosition, OutlineRow, OutlineState, ToOutline } from '../src/protocol';
 import { create, element } from './dom';
 import { DragSource, finishDrop, matchDrag } from './drag';
 
+interface OutlineSettings { mode?: OutlineMode; filter?: string }
 declare function acquireVsCodeApi(): {
     postMessage(message: FromOutline): void;
-    getState(): { mode: OutlineMode } | undefined;
-    setState(state: { mode: OutlineMode }): void;
+    getState(): OutlineSettings | undefined;
+    setState(state: OutlineSettings): void;
 };
 const vscode = acquireVsCodeApi();
+const settings = vscode.getState();
 const tree = element<HTMLUListElement>('outline-tree');
+const header = element('outline-header');
 const status = element('outline-message');
 const mode = element<HTMLSelectElement>('outline-mode');
 const layout = element<HTMLButtonElement>('outline-layout');
+const search = element<HTMLInputElement>('outline-search');
+search.value = settings?.filter ?? '';
 let state: OutlineState = { nodes: [] };
 let rows = new Map<string, OutlineRow>();
 let children = new Map<string | null, OutlineRow[]>();
+let shown = children;
+let query = search.value.trim();
 let elements = new Map<string, HTMLLIElement>();
 const collapsed = new Set<string>();
+const collapsedMatches = new Set<string>();
 let key = '';
 let structureKey = '';
+let renderedRows: typeof shown | undefined;
 let drag: DragGesture | undefined;
 let marker: HTMLLIElement | undefined;
 let expansion: ReturnType<typeof setTimeout> | undefined;
@@ -53,43 +63,34 @@ window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
     if (data.type === 'state') {
         if (state.session !== data.state.session || state.mode !== data.state.mode) {
             collapsed.clear();
+            collapsedMatches.clear();
             error = undefined;
         }
         const picked = state.selected !== data.state.selected || state.session !== data.state.session;
         state = data.state;
         mode.value = state.mode ?? 'source';
+        search.disabled = state.session === undefined;
+        tree.setAttribute('aria-multiselectable', String(state.mode === 'source'));
         layout.disabled = !state.frame || !state.selectedRows?.length;
         const next = JSON.stringify(state.nodes);
         if (next !== key) {
             key = next;
             rows = new Map(state.nodes.map(row => [row.id, row]));
-            children = new Map();
-            for (const row of state.nodes) {
-                const siblings = children.get(row.parent) ?? [];
-                siblings.push(row);
-                children.set(row.parent, siblings);
-            }
+            children = groupChildren(state.nodes);
+            refreshFilter();
         }
         if (picked) expandTo(state.selected);
-        const openKey = `${state.session}:${key}:${[...collapsed].join(',')}`;
-        if (structureKey !== openKey) {
-            structureKey = openKey;
-            render();
-        }
+        renderStructure();
         syncRows();
         if (picked && state.selected !== undefined && !drag) elements.get(state.selected)?.scrollIntoView({ block: 'nearest' });
     } else error = data.error;
-    const text = error ?? state.message ?? (state.nodes.length ? '' : state.session === undefined
-        ? 'Open a FerroUI designer to browse its controls.' : 'This preview has no controls in this hierarchy.');
-    status.textContent = text;
-    status.hidden = !text;
-    status.classList.toggle('error', Boolean(error));
+    updateStatus();
 });
 
 tree.addEventListener('click', event => {
     const item = rowAt(event);
     if (!item) return;
-    if ((event.target as Element).closest('.twisty') && children.has(item.row.id)) {
+    if ((event.target as Element).closest('.twisty') && shown.has(item.row.id)) {
         toggle(item.row.id);
         return;
     }
@@ -124,8 +125,8 @@ tree.addEventListener('keydown', event => {
         case 'ArrowUp': next = visible[index - 1]; break;
         case 'Home': next = visible[0]; break;
         case 'End': next = visible.at(-1); break;
-        case 'ArrowLeft': if (children.has(id) && !collapsed.has(id)) toggle(id); else next = parent ?? undefined; break;
-        case 'ArrowRight': if (collapsed.has(id)) toggle(id); else next = children.get(id)?.[0]?.id; break;
+        case 'ArrowLeft': if (shown.has(id) && !collapsedRows().has(id)) toggle(id); else next = parent ?? undefined; break;
+        case 'ArrowRight': if (collapsedRows().has(id)) toggle(id); else next = shown.get(id)?.[0]?.id; break;
         case 'Enter': select(id, true); break;
         case ' ': select(id, false, event.ctrlKey || event.metaKey || event.shiftKey); break;
         default: return;
@@ -146,12 +147,12 @@ tree.addEventListener('pointermove', event => {
         clearMarker();
         marker = target.item;
         marker.dataset.drop = target.position;
-        if (target.position === 'inside' && collapsed.has(target.id)) {
-            expansion = setTimeout(() => { collapsed.delete(target.id); render(); }, 480);
+        if (target.position === 'inside' && collapsedRows().has(target.id)) {
+            expansion = setTimeout(() => { collapsedRows().delete(target.id); renderStructure(); }, 480);
         }
     }
     cancelAnimationFrame(hoverScroll);
-    const step = event.clientY < 28 ? -18 : event.clientY > innerHeight - 28 ? 18 : 0;
+    const step = event.clientY < header.getBoundingClientRect().bottom + 24 ? -18 : event.clientY > innerHeight - 24 ? 18 : 0;
     if (step) hoverScroll = requestAnimationFrame(() => window.scrollBy(0, step));
 });
 tree.addEventListener('pointerleave', clearMarker);
@@ -162,25 +163,87 @@ tree.addEventListener('pointerup', event => {
 });
 mode.addEventListener('change', () => {
     const value = mode.value as OutlineMode;
-    vscode.setState({ mode: value });
+    saveSettings();
     vscode.postMessage({ type: 'mode', mode: value });
 });
-const savedMode = vscode.getState()?.mode;
-if (savedMode) vscode.postMessage({ type: 'mode', mode: savedMode });
+search.addEventListener('input', filterChanged);
+search.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && search.value) {
+        event.preventDefault();
+        search.value = '';
+        filterChanged();
+    } else if (event.key === 'ArrowDown' || event.key === 'Enter') {
+        event.preventDefault();
+        tree.querySelector<HTMLElement>('[tabindex="0"]')?.focus();
+    }
+});
+if (settings?.mode) vscode.postMessage({ type: 'mode', mode: settings.mode });
 vscode.postMessage({ type: 'ready' });
+
+function saveSettings(): void {
+    vscode.setState({ mode: mode.value as OutlineMode, filter: search.value });
+}
+
+function filterChanged(): void {
+    saveSettings();
+    const next = search.value.trim();
+    if (next === query) return;
+    query = next;
+    collapsedMatches.clear();
+    clearMarker();
+    refreshFilter();
+    renderStructure();
+    updateStatus();
+}
+
+function groupChildren(nodes: readonly OutlineRow[]): Map<string | null, OutlineRow[]> {
+    const groups = new Map<string | null, OutlineRow[]>();
+    for (const row of nodes) {
+        const siblings = groups.get(row.parent) ?? [];
+        siblings.push(row);
+        groups.set(row.parent, siblings);
+    }
+    return groups;
+}
+
+function refreshFilter(): void {
+    shown = query ? groupChildren(filterOutline(state.nodes, query)) : children;
+}
+
+function collapsedRows(): Set<string> {
+    return query ? collapsedMatches : collapsed;
+}
+
+function renderStructure(): void {
+    const openKey = `${state.session}:${[...collapsedRows()].join(',')}`;
+    if (structureKey === openKey && renderedRows === shown) return;
+    structureKey = openKey;
+    renderedRows = shown;
+    render();
+}
+
+function updateStatus(): void {
+    const empty = state.session === undefined ? 'Open a FerroUI designer to browse its controls.'
+        : state.nodes.length === 0 ? 'This preview has no controls in this hierarchy.'
+        : query && !shown.size ? 'No controls match the filter.' : '';
+    const text = error ?? state.message ?? empty;
+    status.textContent = text;
+    status.hidden = !text;
+    status.classList.toggle('error', Boolean(error));
+}
 
 function render(focus = (document.activeElement as HTMLElement | null)?.dataset.node): void {
     elements = new Map();
     const visible: HTMLLIElement[] = [];
     function add(parent: string | null, level: number): void {
-        for (const row of children.get(parent) ?? []) {
+        for (const row of shown.get(parent) ?? []) {
             const item = create('li');
             item.setAttribute('role', 'treeitem');
             item.setAttribute('aria-level', String(level + 1));
             item.dataset.node = row.id;
             item.style.setProperty('--level', String(level));
-            const branch = children.has(row.id);
-            const open = !collapsed.has(row.id);
+            const branch = shown.has(row.id);
+            const open = !collapsedRows().has(row.id);
             const twisty = glyph(branch ? (open ? 'chevron-down' : 'chevron-right') : '', 'twisty');
             if (branch) item.setAttribute('aria-expanded', String(open));
             item.append(twisty, glyph(row.canInsert || branch ? 'symbol-structure' : 'symbol-field'), create('span', row.label));
@@ -233,14 +296,16 @@ function select(id: string, openSource = false, extend = false): void {
 }
 
 function toggle(id: string): void {
-    if (!collapsed.delete(id)) collapsed.add(id);
-    render(String(id));
+    const hidden = collapsedRows();
+    if (!hidden.delete(id)) hidden.add(id);
+    renderStructure();
+    elements.get(id)?.focus({ preventScroll: true });
 }
 
 function expandTo(node?: string): void {
     let row = node === undefined ? undefined : rows.get(node);
     while (row && row.parent !== null) {
-        collapsed.delete(row.parent);
+        collapsedRows().delete(row.parent);
         row = rows.get(row.parent);
     }
 }

@@ -1,5 +1,6 @@
 import { strict as assert } from 'node:assert';
 import type * as vscode from 'vscode';
+import type { OutlineNode } from '../src/protocol';
 import type { McpFixture } from './mcp';
 
 export async function verifyLayerViews({ invoke, content }: McpFixture, session: number, document: vscode.TextDocument): Promise<void> {
@@ -21,6 +22,16 @@ export async function verifyLayerViews({ invoke, content }: McpFixture, session:
         } }));
     };
     const node = layer(await catalog()).node;
+    const outline = async (filter?: string) => content<{ total: number; nodes: OutlineNode[] }>(
+        await invoke('designer_outline', { session, filter }));
+    const full = new Map((await outline()).nodes.map(row => [row.id, row]));
+    const path: number[] = [];
+    for (let row = full.get(node); row; row = row.parent === null ? undefined : full.get(row.parent)) path.unshift(row.id);
+    const matches = await outline('  bUtToN SaVeBuTtOn  ');
+    assert.ok(path.length > 1);
+    assert.equal(matches.total, path.length);
+    assert.deepEqual(matches.nodes.map(row => row.id), path);
+    assert.deepEqual((await outline('No such layer')).nodes, []);
     await present({ action: 'set_locked', nodes: [node], locked: true });
     await present({ action: 'set_hidden', nodes: [node], hidden: true });
     assert.equal(document.getText(), source);
@@ -32,5 +43,5 @@ export async function verifyLayerViews({ invoke, content }: McpFixture, session:
     assert.equal(layer(await catalog()).canvas_selectable, true);
     content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
     assert.equal(document.getText(), source);
-    console.log('VS Code MCP preserved named layer flags across an authored edit and reset them without a source change');
+    console.log('VS Code MCP filtered the authored hierarchy with its ancestor path and preserved named layer flags across an edit');
 }

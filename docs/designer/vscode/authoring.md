@@ -115,11 +115,15 @@ Use the size button to change logical width, height, preset, or theme. With the 
 
 ### Keep layer state during edits
 
+Use **Filter controls** in **Outline** to find a control by type or name in the current hierarchy. Outline expands a result's ancestors so you can see where it belongs. Press Down or Enter in the search box to move focus into the results. Escape clears the filter and restores the previous expansion. Filtering keeps the shared canvas selection. Drag and keyboard placement still use the authored sibling order.
+
+![VS Code Outline shows the SaveAccount button and its ancestors while the same button is selected in Design](../images/vscode-outline-filter.png)
+
 Open **Studio → Layers** to hide, lock, or isolate an authored control. Hide keeps its layout space. Lock protects it from canvas and Outline manipulation while you can still inspect and edit its source deliberately. The canvas, Source Outline, and Properties use the same ordered selection.
 
 When you move, wrap, or remove controls through the designer, surviving controls keep their layer flags. This includes XAML and mapped RSX siblings with identical markup. Move a visible sibling beside a hidden row in Source Outline to see the flag follow the original control. Use VS Code **Undo** and **Redo** to reverse or repeat the source gesture. A checked reorder of identical markup still has one Undo step.
 
-Undo restores a removed control's hidden or locked state while its layer history is available in the open view. **Reset layers** clears those flags and isolation for the current view. Layer actions use local view state and leave source values intact. [Studio Layers](../native-controls.md#hierarchy-and-artboard) · [MCP actions](reference.md#drive-an-editor-workflow)
+Undo restores a removed control's hidden or locked state while its layer history is available in the open view. **Reset layers** clears those flags and isolation for the current view, including flags saved for removed controls. When text above an `rsx!` invocation moves it, Reset layers still applies to that invocation. Layer actions use local view state and leave source values intact. [Studio Layers](../native-controls.md#hierarchy-and-artboard) · [MCP actions](reference.md#drive-an-editor-workflow)
 
 ### Move and insert controls in a partial RSX preview
 
