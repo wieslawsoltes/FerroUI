@@ -2,7 +2,7 @@ use crate::document::DesignDocument;
 use crate::edits::editable_attribute;
 use ferroui_designer_core::{Node, NodeKind, SourceSpan};
 use ferroui_designer_language::{PropertyInfo, Range};
-use ferroui_designer_tools::{PropertyDescriptor, PropertyKind, PropertyRegistry};
+use ferroui_designer_tools::{PropertyComponentType, PropertyComponents, PropertyDescriptor, PropertyKind, PropertyRegistry};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::sync::OnceLock;
@@ -26,6 +26,8 @@ pub(crate) struct PropertyField {
     can_record: bool,
     can_trace: bool,
     mixed: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    components: Option<PropertyComponents>,
 }
 
 impl PropertyField {
@@ -47,6 +49,7 @@ impl PropertyField {
             can_record: false,
             can_trace: true,
             mixed: false,
+            components: None,
         }
     }
 }
@@ -65,6 +68,15 @@ pub(crate) fn intersect(properties: &mut Vec<PropertyField>, other: Vec<Property
         field.can_record &= other.can_record;
         field.can_trace = false;
         field.range = None;
+        match (&mut field.components, &other.components) {
+            (Some(left), Some(right)) if left.shape == right.shape && left.labels == right.labels => {
+                if field.mixed {
+                    left.values = None;
+                    left.percent = false;
+                }
+            }
+            _ => field.components = None,
+        }
         if field.mixed {
             field.authored = None;
             field.effective = None;
@@ -167,13 +179,18 @@ pub(crate) fn property_fields(
             let authored = expression
                 .and_then(|span| design.source.get(span.range()).map(str::to_owned))
                 .or_else(|| attribute.map(|attr| attr.value.clone()));
+            let effective = runtime.and_then(|info| ferroui_inspect::display_property_value(&info.value));
+            let components = editable.then(|| {
+                PropertyComponentType::for_type(&info.type_name)?
+                    .describe_components(authored.as_deref(), effective.as_deref())
+            }).flatten();
             Some(PropertyField {
                 group: category(&name, descriptors.get(&name)),
                 name,
                 kind,
                 options,
                 authored,
-                effective: runtime.and_then(|info| ferroui_inspect::display_property_value(&info.value)),
+                effective,
                 range: span.and_then(|span| design.range(span).ok()),
                 origin,
                 editable,
@@ -184,6 +201,7 @@ pub(crate) fn property_fields(
                 can_record,
                 can_trace: runtime.is_some(),
                 mixed: false,
+                components,
             })
         })
         .collect()
@@ -246,6 +264,15 @@ fn member(design: &DesignDocument<'_>, node: &Node, name: &str) -> Option<Proper
     design.schema().property(node.local_name(), node.namespace_uri.as_deref(), name)
 }
 
+pub(crate) fn validate_property_components(design: &DesignDocument<'_>, node: &Node, name: &str, value: &str) -> Result<(), String> {
+    if let Some(shape) = member(design, node, name)
+        .and_then(|info| PropertyComponentType::for_type(&info.type_name))
+    {
+        shape.validate_markup(name, value).map_err(|error| error.to_string())?;
+    }
+    Ok(())
+}
+
 fn object_fields(design: &DesignDocument<'_>, node: &Node) -> BTreeMap<String, SourceSpan> {
     node.children
         .iter()
@@ -288,6 +315,7 @@ fn editor_kind(
             "Option<BoxedValue>" if matches!(name, "Content" | "Header") => plain("text"),
             "Option<Rc<dyn IImage>>" if name == "Source" => plain("text"),
             _ if !info.values.is_empty() => ("enum", info.values.clone()),
+            _ if PropertyComponentType::for_type(&info.type_name).is_some() => plain("text"),
             _ => plain("object"),
         },
     }

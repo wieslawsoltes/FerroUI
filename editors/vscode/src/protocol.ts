@@ -86,6 +86,13 @@ export interface RuntimeRow {
     logical_parent: number | null;
 }
 export interface Property { name: string; value: string; editable: boolean }
+export interface PropertyComponents {
+    labels: string[];
+    values: number[] | null;
+    relative: boolean;
+    percent: boolean;
+    linkable: boolean;
+}
 export interface PropertyField {
     name: string;
     group: string;
@@ -103,6 +110,7 @@ export interface PropertyField {
     canRecord?: boolean;
     canTrace?: boolean;
     mixed?: boolean;
+    components?: PropertyComponents;
 }
 export interface EventField {
     name: string;

@@ -426,6 +426,16 @@ If the review flags different targets across compiled groups, inspect the report
 
 ![The Changes editor previews the moved XAML file, its saved stage address, and the updated source remap in an unsaved scenario](../images/vscode-saved-file-move.jpg)
 
+## Edit compound property values
+
+Select a control and find **Padding**, **Margin**, **CornerRadius**, or another compound property in **Properties**. Choose the chevron beside the value to open its component fields. Enter values in the labeled fields and press Enter or choose the check icon to apply them together. Press Escape to close the editor and discard the draft. The source edit takes one Undo step.
+
+Thickness uses left, top, right, and bottom. Corner radii use top left, top right, bottom right, and bottom left. A two-value corner radius such as `4,8` gives both top corners a radius of 4 and both bottom corners a radius of 8. Use the link icon to apply one value to all four fields. For multiple selected controls with different values, enter every component or link the fields and enter one value for all four.
+
+XAML properties such as **RenderTransformOrigin** let you choose pixels or percentages for the entire value. The property editor validates units, finite values, and the dimensions that require nonnegative values. Mapped RSX properties support thickness and per-corner radii. Custom Rust expressions and XAML bindings keep their source links. [Designer Studio fields](../native-controls.md#compact-property-inspector) · [MCP property edits](reference.md#edit-compound-properties-with-mcp)
+
+![The Properties dock shows four padding fields beside the edited XAML and the selected account card in Design](../images/vscode-property-components.png)
+
 ## Trace an effective property value
 
 Select one control in **Design** or **Outline**. In **Properties**, choose the layers icon beside a property to open its value trace. The title shows the effective value from the current native preview. An authored value or expression appears when the editor can map it to XAML or RSX.

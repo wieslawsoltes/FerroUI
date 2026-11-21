@@ -59,7 +59,7 @@ pub use layout_helpers::{
     LayoutHelperRequest, LayoutHelperScene, LayoutPlacement,
 };
 pub use properties::{
-    EditorRegistry, ExpressionPolicy, PropertyDescriptor, PropertyKind, PropertyRegistry,
+    EditorRegistry, ExpressionPolicy, PropertyComponentType, PropertyComponents, PropertyDescriptor, PropertyKind, PropertyRegistry,
     PropertyState, PropertyValueShape, ValueEditor,
 };
 pub use selection::{MoveGesture, Selection, SelectionMode, outermost};

@@ -376,9 +376,11 @@ pub(super) fn call(
                     .property_tools()
                     .state(session.document(), &[node], &descriptor.name)
                     .map_err(|error| error.to_string())?;
+                let components = session.authored_component_shape(node, &descriptor.name)
+                    .and_then(|shape| shape.describe_components(authored.value.as_deref(), None));
                 properties.push(json!({"descriptor":descriptor,"value_schema":property_schema(&descriptor.kind),
                     "value":authored.value,"expression":authored.expression,"authored":authored.authored,
-                    "can_record":session.can_record_property(node, &descriptor.name)}));
+                    "can_record":session.can_record_property(node, &descriptor.name),"components":components}));
             }
             return Ok(
                 json!({"revision":session.document().revision(),"node":node,"properties":properties}),
@@ -401,6 +403,10 @@ pub(super) fn call(
                         // Application properties may only be registered in the live preview.
                         continue;
                     }
+                    if !recording && session.authored_component_shape(*node, &property).is_some() {
+                        // A declared compound property can be authored for the first time.
+                        continue;
+                    }
                     return Err(format!("Property {property} is not registered on node {node}"));
                 };
                 if descriptor.read_only {
@@ -413,21 +419,7 @@ pub(super) fn call(
             if args["action"] == "reset" {
                 session.reset_property(&nodes, &property)?;
             } else {
-                let value = if let Some(value) = args["value"].as_str() {
-                    value.to_owned()
-                } else if let Some(value) = args["value"].as_bool() {
-                    if value {
-                        "True".into()
-                    } else {
-                        "False".into()
-                    }
-                } else if args["value"].is_number() {
-                    args["value"].to_string()
-                } else {
-                    let value: AnimationValue = decode(args, "value")?;
-                    value.validate().map_err(|error| error.to_string())?;
-                    value.to_xaml()
-                };
+                let value = property_value(args)?;
                 if recording {
                     session.record_property_at(node_id(args, "program")?, number(args, "time")?, &nodes, &property, &value)?;
                     return Ok(json!({"document":state(session),"timelinePose":session.timeline_preview_pose()}));
@@ -438,6 +430,22 @@ pub(super) fn call(
         _ => return Err("Unknown designer authoring tool".into()),
     }
     Ok(json!({"document":state(session)}))
+}
+
+pub fn property_value(args: &Value) -> Result<String, String> {
+    let value = &args["value"];
+    if let Some(text) = value.as_str() {
+        return Ok(text.to_owned());
+    }
+    if let Some(boolean) = value.as_bool() {
+        return Ok(if boolean { "True" } else { "False" }.into());
+    }
+    if value.is_number() {
+        return Ok(value.to_string());
+    }
+    let typed: AnimationValue = decode(args, "value")?;
+    typed.validate().map_err(|error| error.to_string())?;
+    Ok(typed.to_xaml())
 }
 fn playback_position(session: &DesignerSession) -> Value {
     let elapsed = session.time();

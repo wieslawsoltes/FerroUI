@@ -4,7 +4,7 @@ import { runEditorHistory } from '../src/editorHistory';
 import { NativePreview } from '../src/nativePreview';
 import { applyTextEdits, sourceOf } from '../src/textDocument';
 import { verifyMcp } from './mcp';
-import { verifyMultiSelection, verifyStudioPresentations, verifyWorkbenchFeatures } from './workbenchFeatures';
+import { verifyMultiSelection, verifyPropertyComponents, verifyStudioPresentations, verifyWorkbenchFeatures } from './workbenchFeatures';
 import { verifyCargoTarget } from './cargoTarget';
 import { verifyDrag, verifyRsxImageDrag } from './drag';
 import { verifyColumnsDrag } from './studioColumnsDrag';
@@ -178,6 +178,7 @@ export async function run(): Promise<void> {
         assert.match(collection.counterpart.reason ?? '', /mapped properties.*Outline/);
         await verifyWorkbenchFeatures(preview, xamlInput.uri, rustInput.uri);
         await verifyMultiSelection(preview, xamlInput.uri, rustInput.uri);
+        await verifyPropertyComponents(preview, xamlInput.uri, rustInput.uri);
         await verifyStudioPresentations(preview, xamlInput.uri);
         await verifyHostedPreview(preview, xamlInput.uri);
         await verifyLiveApp();

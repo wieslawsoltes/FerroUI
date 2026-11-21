@@ -1,8 +1,9 @@
-use crate::{blocks::keep_comments, RsxProjection};
+use crate::{blocks::keep_comments, literal::Literal, RsxProjection};
 use ferroui_designer_core::{SourceSpan, TextPatch};
+use ferroui_designer_tools::PropertyComponentType;
 use ferroui_view_syntax::snake_case;
 use proc_macro2::{TokenStream, TokenTree};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Clone, Copy, Debug)]
 pub struct RsxEvent {
@@ -21,6 +22,33 @@ pub fn event_setter(name: &str) -> String {
 }
 
 impl RsxProjection<'_> {
+    /// Plan a single literal or reset for distinct controls in the accepted invocation.
+    pub fn edit_properties(&self, indices: &[usize], name: &str, value: Option<&str>) -> Result<Vec<TextPatch>, String> {
+        if indices.is_empty() || indices.iter().copied().collect::<BTreeSet<_>>().len() != indices.len() {
+            return Err("Select distinct authored RSX controls".into());
+        }
+        let mut patches = Vec::new();
+        for &index in indices {
+            let node = self.nodes.get(index).ok_or("Unknown RSX element")?;
+            if value.is_none() && !node.fields.contains_key(name) && !node.expressions.contains_key(name) {
+                if !node.supports_literal(name) {
+                    return Err(format!("{name} has no literal mapping on a selected RSX control"));
+                }
+                continue;
+            }
+            patches.push(self.edit_property(index, name, value)?);
+        }
+        if !patches.is_empty() {
+            let candidate = TextPatch::apply_all(self.source, patches.clone()).map_err(|error| error.to_string())?;
+            let modules = self.draft_module_sources(&candidate)?;
+            let next = self.catalog.project_with_modules(&candidate, self.invocation.start, modules.as_ref())?;
+            if next.invocation.start != self.invocation.start || next.nodes.len() != self.nodes.len() {
+                return Err("The property edit changed the selected RSX structure".into());
+            }
+        }
+        Ok(patches)
+    }
+
     pub fn edit_property(
         &self,
         index: usize,
@@ -32,6 +60,10 @@ impl RsxProjection<'_> {
             return Err(format!("{name} is a Rust expression; edit it in source"));
         }
         if let Some(value) = value {
+            if node.class.literal(name) == Some(Literal::Thickness) {
+                PropertyComponentType::Thickness.validate_markup(name, value)
+                    .map_err(|error| error.to_string())?;
+            }
             if node.properties.contains_key(name) {
                 return self.set_property(index, name, value);
             }

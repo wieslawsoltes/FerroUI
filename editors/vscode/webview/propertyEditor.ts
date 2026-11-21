@@ -1,5 +1,6 @@
 import type { PropertyField, Range } from '../src/protocol';
 import { create } from './dom';
+import { propertyComponents } from './propertyComponents';
 
 interface Actions {
     set(value: string): void;
@@ -12,14 +13,14 @@ interface Actions {
 }
 
 export function propertyEditor(property: PropertyField, actions: Actions): HTMLElement {
-    const row = create('form');
+    const row = create('div');
     row.className = 'property';
     row.dataset.attribute = property.name;
     const label = create('label');
     label.textContent = property.name === 'HorizontalAlignment' ? 'Align horizontal'
         : property.name === 'VerticalAlignment' ? 'Align vertical' : property.name;
     label.title = property.origin ? `${property.name} · ${property.origin}` : property.name;
-    const value = create('div');
+    const value = create('form');
     value.className = 'property-value';
     const initial = property.authored ?? '';
     const effective = property.effective ?? '';
@@ -29,6 +30,10 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
     input.dataset.property = property.name;
     input.setAttribute('aria-label', property.name);
     value.append(input);
+
+    const components = property.editable && property.components
+        ? propertyComponents(property.name, property.components, Boolean(property.mixed), actions.set) : undefined;
+    if (components) value.append(components.disclosure);
 
     if (property.kind === 'color' && property.editable) {
         const pick = create('input');
@@ -61,9 +66,10 @@ export function propertyEditor(property: PropertyField, actions: Actions): HTMLE
     const commit = () => {
         if (property.editable && input.value !== initial) actions.set(input.value);
     };
-    row.addEventListener('submit', event => { event.preventDefault(); commit(); });
+    value.addEventListener('submit', event => { event.preventDefault(); commit(); });
     input.addEventListener('change', commit);
     row.append(label, value);
+    if (components) row.append(components.panel);
     return row;
 }
 

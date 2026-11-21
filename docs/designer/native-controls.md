@@ -43,6 +43,8 @@ value to all four. Padding, border thickness and corner radii enforce nonnegativ
 margins may be negative. Alignment editors provide four vector choices with native keyboard
 activation and automation names; orientation uses explicit horizontal/vertical flow icons.
 
+Relative points and rectangles share one units selector for all coordinates. A matrix with perspective retains its three additional fields when edited. Mapped Rust thickness and corner radii use the same component order in Studio and VS Code. [VS Code compound fields](vscode/authoring.md#edit-compound-property-values)
+
 Custom hosts construct a scrubber with `PropertyNumberScrubber::new()`, call `configure`
 with an accepted label/value/options, and handle `on_commit`. Construct a compound editor
 with `PropertyComponentsEditor::new(PropertyComponentsKind::Thickness, false)`, call

@@ -5,6 +5,9 @@ use std::collections::{BTreeMap, BTreeSet};
 
 #[path = "property_values.rs"]
 mod values;
+#[path = "property_components.rs"]
+mod property_components;
+pub use property_components::{PropertyComponentType, PropertyComponents};
 pub use values::PropertyValueShape;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

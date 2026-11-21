@@ -152,7 +152,8 @@ export class Inspector {
     private field(field: PropertyField, node?: number): HTMLElement {
         const recording = this.recording && field.canRecord;
         const displayed = recording ? { ...field, authored: field.effective, editable: true, canReset: false,
-            origin: field.authored ? `Animation keyframe · Base value ${field.authored}` : 'Animation keyframe' } : field;
+            origin: field.authored ? `Animation keyframe · Base value ${field.authored}` : 'Animation keyframe',
+            components: undefined } : field;
         return propertyEditor(displayed, {
             set: value => { if (node !== undefined) this.edit({ type: 'setProperty', node, name: field.name, value }); },
             reset: () => { if (node !== undefined) this.edit({ type: 'resetProperty', node, name: field.name }); },

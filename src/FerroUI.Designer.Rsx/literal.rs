@@ -1,3 +1,5 @@
+use crate::animation::{rust_literal, ValueShape};
+use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_language::PropertyInfo;
 use syn::{Expr, Lit, UnOp};
 
@@ -21,7 +23,7 @@ pub(crate) enum Literal {
     Bool,
     Integer,
     Number,
-    UniformRadius,
+    CornerRadius,
     Thickness,
     EmbeddedImage,
     Enum {
@@ -56,7 +58,8 @@ impl Literal {
                 _ => None,
             },
             Self::Integer => Some(integer(expr)?.to_string()),
-            Self::Number | Self::UniformRadius => Some(number(expr)?.to_string()),
+            Self::Number => Some(number(expr)?.to_string()),
+            Self::CornerRadius => read_radius(expr),
             Self::EmbeddedImage => crate::image_source::read(expr),
             Self::Thickness => match expr {
                 Expr::Tuple(tuple) if matches!(tuple.elems.len(), 2 | 4) => Some(
@@ -109,7 +112,8 @@ impl Literal {
                 _ => return None,
             },
             Self::Integer => value.trim().parse::<i32>().ok()?.to_string(),
-            Self::Number | Self::UniformRadius => format!("{:?}", parse_number(value.trim())?),
+            Self::Number => format!("{:?}", parse_number(value.trim())?),
+            Self::CornerRadius => rust_radius(value)?,
             Self::EmbeddedImage => crate::image_source::rust(value)?,
             Self::Thickness => {
                 let values = value
@@ -192,4 +196,39 @@ fn number(expr: &Expr) -> Option<f64> {
 fn parse_number(value: &str) -> Option<f64> {
     let value: f64 = value.parse().ok()?;
     value.is_finite().then_some(value)
+}
+
+fn read_radius(expr: &Expr) -> Option<String> {
+    if let Some(radius) = number(expr) {
+        return Some(radius.to_string());
+    }
+    let Expr::Call(call) = expr else { return None };
+    let Expr::Path(function) = call.func.as_ref() else {
+        return None;
+    };
+    if !call.attrs.is_empty() || !function.attrs.is_empty() || function.path.leading_colon.is_none()
+    {
+        return None;
+    }
+    ValueShape::CORNER_RADIUS
+        .read(expr)
+        .map(|source| source.value.to_xaml())
+}
+
+fn rust_radius(value: &str) -> Option<String> {
+    // Keep existing scalar declarations compatible with the Rust builder conversion.
+    if let Some(radius) = parse_number(value.trim()) {
+        return Some(format!("{radius:?}"));
+    }
+    match AnimationValue::parse(value, ValueKind::CornerRadius).ok()? {
+        AnimationValue::CornerRadius {
+            top_left,
+            top_right,
+            bottom_right,
+            bottom_left,
+        } if top_left == top_right && top_left == bottom_right && top_left == bottom_left => {
+            Some(format!("{top_left:?}"))
+        }
+        radius => rust_literal(&radius).ok(),
+    }
 }

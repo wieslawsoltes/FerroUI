@@ -1,8 +1,10 @@
-//! Native literal serialization shared by direct session edits and component commands.
+//! Native literal validation and serialization for session edits and component commands.
 //! Portable property descriptors cannot prove that an application's `Width` is a number.
 use crate::{DesignerSession, Document, NodeId, PropertyEditorContext};
 use ferroui_base::{FerroObject, FerroProperty, TypeInfo};
 use ferroui_designer_core::MarkupValue;
+#[cfg(feature = "mcp")]
+use ferroui_designer_tools::PropertyComponentType;
 use ferroui_inspect::Inspector;
 use std::rc::Rc;
 
@@ -17,32 +19,22 @@ impl DesignerSession {
         value: &str,
         setter: bool,
     ) -> Result<Option<&'static str>, String> {
-        if value.strip_prefix("{}").unwrap_or(value).trim() != "Auto" {
+        if value.starts_with('{') && !value.starts_with("{}") {
             return Ok(None);
         }
-        let property = if setter {
-            setter_target_type(self.document(), node)
-                .and_then(|type_| property_on_type(self.document(), node, type_, name))
-        } else {
-            // A retained preview can describe an older document after a failed reload.
-            let live = if matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision())
-                && !name.contains(':')
-            {
-                self.preview.visual(node).and_then(|visual| {
-                    Inspector::property(&visual.upcast::<FerroObject>(), name).ok()
-                })
-            } else {
-                None
-            };
-            live.or_else(|| {
-                element_type(self.document(), node)
-                    .and_then(|type_| property_on_type(self.document(), node, type_, name))
-            })
-        };
-        let Some(property) = property else {
+        let Some(property) = self.literal_property(node, name, setter) else {
             // Unknown application types retain their own serializer and authored spelling.
             return Ok(None);
         };
+        if let Some(shape) = crate::editors::property_component_shape(property.property_type_name()) {
+            if property.is_read_only() {
+                return Err(format!("{name} is read-only"));
+            }
+            shape.validate_markup(name, value).map_err(|error| error.to_string())?;
+        }
+        if value.strip_prefix("{}").unwrap_or(value).trim() != "Auto" {
+            return Ok(None);
+        }
         if ![
             std::any::TypeId::of::<f32>(),
             std::any::TypeId::of::<f64>(),
@@ -63,6 +55,35 @@ impl DesignerSession {
         };
         crate::resolve_property_editor_metadata(&context, Some(property))
             .prepare_literal(&context, value)
+    }
+
+    #[cfg(feature = "mcp")]
+    pub(crate) fn authored_component_shape(&self, node: NodeId, name: &str) -> Option<PropertyComponentType> {
+        let property = self.literal_property(node, name, false)?;
+        if property.is_read_only() {
+            return None;
+        }
+        crate::editors::property_component_shape(property.property_type_name())
+    }
+
+    fn literal_property(&self, node: NodeId, name: &str, setter: bool) -> Option<&'static FerroProperty> {
+        if setter {
+            return setter_target_type(self.document(), node)
+                .and_then(|type_| property_on_type(self.document(), node, type_, name));
+        }
+        // A retained preview can describe an older document after a failed reload.
+        if matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision())
+            && !name.contains(':')
+        {
+            let live = self.preview.visual(node).and_then(|visual| {
+                Inspector::property(&visual.upcast::<FerroObject>(), name).ok()
+            });
+            if live.is_some() {
+                return live;
+            }
+        }
+        element_type(self.document(), node)
+            .and_then(|type_| property_on_type(self.document(), node, type_, name))
     }
 }
 

@@ -69,7 +69,7 @@ pub(crate) fn property_codec(info: &PropertyInfo) -> Option<Literal> {
         "bool" | "Option<bool>" => Literal::Bool,
         "i32" => Literal::Integer,
         "f64" => Literal::Number,
-        "CornerRadius" => Literal::UniformRadius,
+        "CornerRadius" => Literal::CornerRadius,
         "Thickness" => Literal::Thickness,
         "Option<Rc<dyn IImage>>" => Literal::EmbeddedImage,
         "HorizontalAlignment" | "VerticalAlignment" | "Orientation" => {

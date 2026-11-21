@@ -175,6 +175,12 @@ Call `designer_hosted_templates` with the design `session` after opening XAML in
 
 When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same fields to review the checked patch. Call `designer_hosted_template_copy` with write access to install the copy as one Undo step. Read a fresh catalog after a source or frame change. [App Preview template workflow](runtime.md#open-and-copy-app-preview-control-templates)
 
+### Edit compound properties with MCP
+
+Call `designer_inspect` for a selected control. An editable compound property reports `components` with its ordered `labels`, numeric `values`, and the current coordinate unit if applicable. The `relative` flag indicates whether percentages are available. The `percent` flag indicates the accepted value's unit. `linkable` identifies four-sided values that can share one number. The property row still reports the authored and effective text.
+
+Use `designer_edit_property` with `action: "set"` and a source value such as `"12, 8, 12, 8"` for padding or `"25%, 50%"` for a relative point. For a group, use `designer_studio_edit` with `tool: "designer_property"`, `action: "set"`, and the array of authored `nodes` in the arguments. Both use the current designer revision. Studio offers `designer_properties` and `designer_property` for its native session. A grouped edit applies as one Undo step. [Component fields in Properties](authoring.md#edit-compound-property-values)
+
 ### Trace property values with MCP
 
 Call `designer_studio_query` with `tool: "designer_property_trace"` and `arguments: { node, property }`. Use a current source node from `designer_outline`. For an object that exists only in the preview, read `designer_tree` through `designer_studio_query` and pass its inspector ID as `runtime_node` in place of `node`. The report includes the effective value, authored value and referenced resource where available, ordered contributors, and UTF-16 source ranges for mapped declarations. In Designer Studio, call `designer_property_trace` directly with the same arguments.

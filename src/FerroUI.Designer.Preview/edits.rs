@@ -1,6 +1,6 @@
 use crate::document::DesignDocument;
 use crate::projects::Projects;
-use crate::property_fields::{can_add_property, registry};
+use crate::property_fields::{can_add_property, registry, validate_property_components};
 use crate::protocol::{EditRequest, EditResult, Operation, RustModuleEdit, MAX_SOURCE_BYTES};
 use crate::renderer::Renderer;
 use ferroui_designer_core::{Edit, Node, NodeId, NodeKind, TextPatch};
@@ -67,8 +67,11 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
                 return if name == "Name" {
                     rust_name_edit(&design, &[*node], value)
                 } else {
-                    rust_edit(&design, rsx.edit_property(i, name, value)?)
+                    editor_edits(&design, rsx.edit_properties(&[i], name, value)?)
                 };
+            }
+            if let Some(value) = value {
+                validate_property_components(&design, target, name, value)?;
             }
             let edits = registry()
                 .plan(

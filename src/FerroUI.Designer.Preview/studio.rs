@@ -233,9 +233,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_columns = design.rsx.is_some() && query.name == "designer_columns_edit";
     let rust_style = design.rsx.is_some() && query.name == RSX_STYLE_EDIT;
     let rust_template = design.rsx.is_some() && rust_template_edit(&query.name, action);
-    let rust_names = design.rsx.is_some()
-        && query.name == "designer_property"
-        && query.arguments["property"] == "Name";
+    let rust_property = design.rsx.is_some() && query.name == "designer_property";
     let spacing = query.name == "designer_spacing_edit";
     let wrapping = query.name == "designer_wrap_selection_edit";
     if design.rsx.is_some()
@@ -243,13 +241,13 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         && !rust_program
         && !rust_state
         && !rust_placement
-        && !rust_names
+        && !rust_property
         && !rust_columns
         && !rust_style
         && !rust_template
         && !spacing
         && !wrapping
-        && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
+        && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_grid_track_edit")
             || !design.editable_structure())
     {
         return Err("This Studio operation requires XAML or a fully mapped RSX layout.".into());
@@ -314,23 +312,43 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         }
         return Ok(result);
     }
-    if rust_names {
+    if rust_property {
         let nodes: Vec<NodeId> = serde_json::from_value(arguments["nodes"].clone())
             .map_err(|error| error.to_string())?;
+        let name = arguments["property"].as_str().ok_or("Choose an authored property")?;
         let value = match arguments["action"].as_str() {
             Some("reset") => None,
-            Some("set") => Some(
-                arguments["value"]
-                    .as_str()
-                    .ok_or("Enter a text control name")?,
-            ),
-            _ => return Err("Choose set or reset for the control name".into()),
+            Some("set") if name == "Name" => Some(arguments["value"].as_str()
+                .ok_or("Enter a text control name")?.to_owned()),
+            Some("set") => Some(ferroui_designer::mcp::property_value(&arguments)?),
+            _ => return Err("Choose set or reset for the property".into()),
         };
-        let edit = rust_name_edit(&design, &nodes, value)?;
+        let edit = if name == "Name" {
+            rust_name_edit(&design, &nodes, value.as_deref())?
+        } else {
+            let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
+            let indices = nodes.iter().map(|&id| design.rsx_node(id).map(|(index, _)| index)
+                .ok_or("The selected control has no Rust source mapping")).collect::<Result<Vec<_>, _>>()?;
+            let patches = projection.edit_properties(&indices, name, value.as_deref())?;
+            let selection = crate::edit_selection::rsx_control_ranges(&design, &patches, &nodes)?;
+            let mut edit = editor_edits(&design, patches)?;
+            edit.retained_selection = selection;
+            edit
+        };
         if !edit.edits.is_empty() {
             renderer.stage.take();
         }
         return Ok(edit);
+    }
+    if query.name == "designer_property" && arguments["action"] == "set" {
+        let nodes: Vec<NodeId> = serde_json::from_value(arguments["nodes"].clone())
+            .map_err(|error| error.to_string())?;
+        let name = arguments["property"].as_str().ok_or("Choose an authored property")?;
+        let value = ferroui_designer::mcp::property_value(&arguments)?;
+        for id in nodes {
+            let node = design.xaml.ast().node(id).ok_or("The selected control changed")?;
+            crate::property_fields::validate_property_components(&design, node, name, &value)?;
+        }
     }
     if wrapping {
         use ferroui_designer::WrapSourceChange;

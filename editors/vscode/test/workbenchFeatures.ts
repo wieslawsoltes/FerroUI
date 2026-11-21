@@ -117,6 +117,69 @@ fn view() { rsx! {
     console.log('VS Code native hierarchy, grouped properties, resources, image drops in XAML and RSX, and expression-preserving placement passed');
 }
 
+export async function verifyPropertyComponents(preview: NativePreview, xamlUri: string, rustUri: string): Promise<void> {
+    const xaml: Source = { language: 'xaml', uri: xamlUri, caret, source: `<StackPanel xmlns="https://github.com/ferroui">
+    <Border Name="Card" Width="120" Height="44" CornerRadius="4,8" Padding="7,3" RenderTransformOrigin="25%, 40%" />
+    <Border Name="Other" Width="120" Height="44" Padding="9" />
+    <Line Name="Rule" EndPoint="30, 48" Stroke="Black" />
+</StackPanel>` };
+    const xamlFrame = await preview.render(xaml, viewport, 41);
+    assert.ok(xamlFrame.image, xamlFrame.renderError ?? undefined);
+    const id = (frame: typeof xamlFrame, name: string) => frame.nodes.find(node => node.name === name)!.id;
+    const card = id(xamlFrame, 'Card');
+    const other = id(xamlFrame, 'Other');
+    const { properties } = await preview.inspect(xaml, 41, { type: 'source', node: card });
+    const radius = properties.find(field => field.name === 'CornerRadius')!;
+    assert.deepEqual(radius.components?.values, [4, 4, 8, 8]);
+    assert.equal(radius.effective, '4,4,8,8');
+    assert.equal(radius.components?.linkable, true);
+    const origin = properties.find(field => field.name === 'RenderTransformOrigin')!;
+    assert.deepEqual(origin.components?.values, [25, 40]);
+    assert.equal(origin.components?.percent, true);
+    const rule = await preview.inspect(xaml, 41, { type: 'source', node: id(xamlFrame, 'Rule') });
+    const start = rule.properties.find(field => field.name === 'StartPoint');
+    assert.deepEqual(start?.components?.labels, ['X', 'Y']);
+    assert.equal(start?.editable, true);
+    await assert.rejects(preview.edit(xaml, {
+        type: 'setProperty', node: card, name: 'RenderTransformOrigin', value: '25%, 40',
+    }), /same unit/);
+    const selected = await preview.inspect(xaml, 41, { type: 'selection', nodes: [card, other] });
+    const padding = selected.properties.find(field => field.name === 'Padding')!;
+    assert.equal(padding.mixed, true);
+    assert.equal(padding.components?.values, null);
+    await assert.rejects(preview.studioEdit(xaml, 41, 'designer_property', {
+        action: 'set', nodes: [card, other], property: 'Padding', value: '12, -8, 12, 8',
+    }, [card, other]), /nonnegative/);
+    const xamlEdit = await preview.studioEdit(xaml, 41, 'designer_property', {
+        action: 'set', nodes: [card, other], property: 'Padding', value: '12, 8, 12, 8',
+    }, [card, other]);
+    assert.equal(apply(xaml.source, xamlEdit.edits), xaml.source.replace('Padding="7,3"', 'Padding="12, 8, 12, 8"')
+        .replace('Padding="9"', 'Padding="12, 8, 12, 8"'));
+
+    const rust: Source = { language: 'rust', uri: rustUri, caret, source: `fn view() { let _ = rsx! {
+    StackPanel {
+        Border { name: "Card", corner_radius: 5.0, width: 120.0, height: 44.0, }
+        {build_dynamic_child()}
+        Border { name: "Other", corner_radius: /* keep this comment 🧭 */ 9.0, width: 120.0, height: 44.0, }
+    }
+}; }`.replaceAll('\n', '\r\n') };
+    const rustFrame = await preview.render(rust, viewport, 42);
+    assert.ok(rustFrame.image, rustFrame.renderError ?? undefined);
+    const ids = [id(rustFrame, 'Card'), id(rustFrame, 'Other')];
+    const change = { action: 'set', nodes: ids, property: 'CornerRadius', value: '4, 8, 12, 16' };
+    const rustEdit = await preview.studioEdit(rust, 42, 'designer_property', change, ids);
+    const edited = apply(rust.source, rustEdit.edits);
+    const expression = '::ferroui_base::CornerRadius::new(4.0, 8.0, 12.0, 16.0)';
+    assert.equal(edited, rust.source.replace('5.0', expression).replace('9.0', expression));
+    await assert.rejects(preview.studioEdit(rust, 42, 'designer_property', change, ids), /preview/);
+    const nextSource = { ...rust, source: edited };
+    const next = await preview.render(nextSource, viewport, 43);
+    assert.ok(next.image, next.renderError ?? undefined);
+    const mapped = await preview.inspect(nextSource, 43, { type: 'source', node: id(next, 'Other') });
+    assert.deepEqual(mapped.properties.find(field => field.name === 'CornerRadius')?.components?.values, [4, 8, 12, 16]);
+    console.log('XAML and partial RSX property components used checked native edits, mixed selection, and preserved source');
+}
+
 export async function verifyMultiSelection(preview: NativePreview, xamlUri: string, rustUri: string): Promise<void> {
     for (const design of [
         { language: 'xaml', uri: xamlUri, caret, source: `<StackPanel xmlns="https://github.com/ferroui"><Button Name="First" Width="120"/><Button Name="Second" Width="72"/><Button Name="Third" Width="92"/></StackPanel>` },

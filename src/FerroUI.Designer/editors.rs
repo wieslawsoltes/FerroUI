@@ -25,7 +25,7 @@ pub(crate) mod brush_draft;
 mod typed;
 #[path = "property_value_workbench.rs"]
 mod workbench;
-pub(crate) use metadata::{markup_type_for_node, resource_is_compatible};
+pub(crate) use metadata::{markup_type_for_node, property_component_shape, resource_is_compatible};
 pub use metadata::{
     PropertyEditorKind, PropertyEditorMetadata, PropertyLiteralValidator, PropertyResourceChoice,
     PropertyValueCommit, PropertyValueEdit, PropertyValueSource, resolve_property_editor_metadata,

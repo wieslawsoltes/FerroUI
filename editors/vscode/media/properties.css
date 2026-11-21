@@ -35,18 +35,39 @@ body { background: var(--vscode-sideBar-background, var(--vscode-editor-backgrou
 .extra-properties[open] summary { margin-block-end: 4px; }
 .property-list { display: grid; gap: 3px; }
 .property { display: grid; grid-template-columns: minmax(0, 38%) minmax(0, 1fr); gap: 5px; align-items: center; }
+.property:has(> .property-components) { grid-template-columns: clamp(58px, 28%, 120px) minmax(0, 1fr); }
 .property label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
 .property-value { display: flex; align-items: center; gap: 3px; min-inline-size: 0; }
-.property-value > [data-property] { flex: 1; inline-size: 100%; font-variant-numeric: tabular-nums; }
-.property-value > [data-property]::placeholder { color: var(--muted); opacity: 1; }
+.property-value > :is(input, select)[data-property] { flex: 1; inline-size: 100%; font-variant-numeric: tabular-nums; }
+.property-value > input[data-property]::placeholder { color: var(--muted); opacity: 1; }
 .property-value .property-color { flex: 0 0 24px; inline-size: 24px; padding: 2px; cursor: pointer; }
 .property-color[data-unset]::-webkit-color-swatch { background: transparent !important; border-style: dashed; }
 .property .row-action { display: inline-grid; place-items: center; inline-size: 23px; flex: 0 0 auto; padding: 0; }
 .property.read-only input { border-color: transparent; background: transparent; }
+.property-components {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 4px;
+    padding: 5px 6px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+}
+.component-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.component-fields[data-linked] { grid-template-columns: minmax(0, 1fr); }
+.component-fields label { display: flex; align-items: center; gap: 3px; min-inline-size: 0; font-size: .9em; }
+.component-fields input { inline-size: 100%; min-inline-size: 0; font-size: 1.1em; font-variant-numeric: tabular-nums; }
+.component-actions { display: flex; justify-content: end; gap: 4px; }
+.component-actions .component-link { margin-inline-end: auto; }
+.component-link[aria-pressed="true"] { background: var(--vscode-toolbar-activeBackground, var(--vscode-toolbar-hoverBackground)); }
+.component-error { color: var(--vscode-errorForeground); overflow-wrap: anywhere; }
+.component-error:empty { display: none; }
 .structure { display: flex; flex-wrap: wrap; gap: 5px; margin-block-start: 5px; }
 @media (min-width: 260px) {
     .size-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 8px; }
     .size-grid .property { grid-template-columns: minmax(0, 36%) minmax(0, 1fr); }
+}
+@media (max-width: 240px) {
+    .property:has(> .property-components) { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 205px) {
     .inspector { padding-inline: 7px; }

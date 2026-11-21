@@ -93,21 +93,6 @@ impl PropertyVectorEditor {
     ) -> Self {
         let root = Grid::new();
         root.classes().add("property-vector-editor");
-        let count = shape.components().len();
-        if count == 0 {
-            root.children().add(text(context, metadata));
-            return Self {
-                root,
-                fields: Vec::new(),
-                units: None,
-            };
-        }
-        let columns = if count == 6 { 2 } else { count.min(2) };
-        let rows = count.div_ceil(columns);
-        root.set_column_definitions(
-            ColumnDefinitions::parse(if shape.relative() { "*,*,42" } else { "*,*" }).unwrap(),
-        );
-        root.set_row_definitions(RowDefinitions::parse(&vec!["Auto"; rows].join(",")).unwrap());
         let parsed = (!context.mixed)
             .then(|| {
                 context
@@ -116,8 +101,24 @@ impl PropertyVectorEditor {
                     .and_then(|value| shape.parse_components(value).ok())
             })
             .flatten();
+        let labels = shape.component_labels(parsed.as_ref().map_or(0, |(values, _)| values.len()));
+        let count = labels.len();
+        if count == 0 {
+            root.children().add(text(context, metadata));
+            return Self {
+                root,
+                fields: Vec::new(),
+                units: None,
+            };
+        }
+        let columns = count.min(2);
+        let rows = count.div_ceil(columns);
+        root.set_column_definitions(
+            ColumnDefinitions::parse(if shape.relative() { "*,*,42" } else { "*,*" }).unwrap(),
+        );
+        root.set_row_definitions(RowDefinitions::parse(&vec!["Auto"; rows].join(",")).unwrap());
         let mut fields = Vec::new();
-        for (index, label) in shape.components().iter().enumerate() {
+        for (index, label) in labels.iter().enumerate() {
             let pair = Grid::new();
             pair.set_column_definitions(
                 ColumnDefinitions::parse(if label.len() > 2 { "29,*" } else { "21,*" }).unwrap(),
