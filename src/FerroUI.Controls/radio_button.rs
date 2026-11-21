@@ -116,6 +116,7 @@ ferroui_base::ferro_properties! { impl RadioButton {
 
 impl RadioButton {
     fn static_constructor() {
+        crate::visual_state::state_mappers::register::<RadioButton>(crate::visual_state::state_mappers::radio_button);
         register_radio_button::<RadioButton>(|radio_button| Rc::new(RadioButtonHandle(radio_button)));
     }
 
