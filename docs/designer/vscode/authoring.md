@@ -382,9 +382,9 @@ Select one control in **Design** or **Outline**. In **Properties**, choose the l
 | **Animation base** | The value under the animation. The animated value appears as the effective contributor. |
 | **Current value override** | A value applied through the framework’s current-value API. The authored declaration remains visible. |
 | **Overridden**, **Inactive**, or **Unset** | A lower-priority entry, an inactive selector, or a local binding without a current contribution. |
-| **Referenced resource** | A resource key that resolves unambiguously inside the current authored XAML document and theme. |
+| **Referenced resource** | A resource key that resolves to a declaration in the preview’s accepted document or include graph for the active theme. |
 
-Choose a source arrow or press Enter on a linked row to reveal its declaration. Preview-only controls and sources supplied by an external file may have entries without an authored range. Opening the trace leaves source and Undo history intact.
+Choose a source arrow or press Enter on a linked row to reveal its declaration. When an included stylesheet or dictionary supplies a value, the trace shows its file and opens the exact declaration in the source editor. It checks the buffer against the native preview before navigating, including unsaved edits. Opening the trace leaves source and Undo history intact.
 
 Try [PropertyTraceWorkbench.xaml](../../../editors/vscode/test/fixtures/PropertyTraceWorkbench.xaml). **StyleCard → Opacity** shows the winning `Border.priority` setter and the overridden `Border.account` setter, both with value `0.72`. **LocalCard → Opacity** shows its local `0.9` value. Trace **Background** to reach the `AccountSurface` resource. [Studio workflow](../native-controls.md#trace-property-values) · [MCP workflow](reference.md#trace-property-values-with-mcp)
 

@@ -164,7 +164,7 @@ export async function run(): Promise<void> {
         assert.ok(styleCard?.bounds);
         const trace = await native.studioQuery(25, 'designer_property_trace', { node: styleCard.id, property: 'Opacity' }) as PropertyTrace<DesignTraceSource>;
         assert.equal(trace.contributors[0].label, 'Style Border.priority');
-        assert.ok(trace.contributors[0].source);
+        assert.ok(trace.contributors[0].source && !trace.contributors[0].source.included);
         assert.equal(tracesDocument.getText(asRange(trace.contributors[0].source.range)), '0.72');
         assert.ok(native.capabilities.styleComposition, 'The installed preview negotiates scoped style composition');
         const stylesDocument = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(workspace.uri, 'StylePalette.xaml'));

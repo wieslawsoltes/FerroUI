@@ -121,7 +121,11 @@ export class DesignerWorkbench implements vscode.Disposable {
                 const context = new StudioContext(panel, frame.token, current);
                 const args = target.type === 'runtime' ? { runtime_node: target.id, property } : { node: target.node, property };
                 const trace = await context.read<PropertyTrace<DesignTraceSource>>('designer_property_trace', args);
-                await showPropertyTrace(trace, source => context.revealRange(source.range), source => source.text);
+                await showPropertyTrace(trace, source => source.included
+                    ? context.revealIncludedRange(source.included, source.sourceRevision)
+                    : context.revealRange(source.range), source => source.included
+                    ? [vscode.Uri.parse(source.included.uri).path.split('/').at(-1), source.text].filter(Boolean).join(' · ')
+                    : source.text);
             });
         this.timeline = new TimelineView(context.extensionUri, changed);
         this.studio = new StudioView(changed, (context, route) => this.timeline.openTransition(context, route));

@@ -2,6 +2,8 @@ import { strict as assert } from 'node:assert';
 import { realpath } from 'node:fs/promises';
 import * as vscode from 'vscode';
 import type { OutlineNode } from '../src/protocol';
+import type { DesignTraceSource, PropertyTrace } from '../src/propertyTrace';
+import { revision } from '../src/reloadProcess';
 import type { LocatedStyleSource, PaletteSheet, StyleCatalog, StyleDefinition, StyleSource } from '../src/stylesProtocol';
 import { asRange } from '../src/textDocument';
 import type { McpFixture } from './mcp';
@@ -46,13 +48,14 @@ export async function verifyIncludedStylesMcp({ invoke, content }: McpFixture): 
         assert.equal(document.getText(), expected);
         await frame(session);
     };
-    const effective = async (name: string) => {
+    const trace = async (name: string) => {
         await frame(session);
         const { nodes } = content<{ nodes: OutlineNode[] }>(await invoke('designer_outline', { session }));
         const node = nodes.find(node => node.name === name)?.id;
         assert.ok(node);
-        return (await read<{ effective: string }>(session, 'designer_property_trace', { node, property: 'Background' })).effective;
+        return read<PropertyTrace<DesignTraceSource>>(session, 'designer_property_trace', { node, property: 'Background' });
     };
+    const effective = async (name: string) => (await trace(name)).effective;
     const theme = async (dark: boolean) => {
         content(await invoke('designer_view', { session, dark }));
         await frame(session);
@@ -74,8 +77,20 @@ export async function verifyIncludedStylesMcp({ invoke, content }: McpFixture): 
     assert.equal(accent?.dark?.node, undefined, 'a foreign node ID must not be usable in the consumer');
     assert.equal(sheet.comparison.find(color => color.key === 'AccountStatus')?.dark?.value, '#FF526579');
     assert.equal(sheet.comparison.find(color => color.key === 'AccountStatus')?.dark?.source, undefined, 'the local brush shadows the include');
-    assert.equal(await effective('SharedStyleCard'), '#FF3D567D', 'the include graph uses the unsaved style buffer');
-    assert.equal(await effective('SharedAccentCard'), '#FF3468AC');
+    const activeStyle = await trace('SharedStyleCard');
+    assert.equal(activeStyle.effective, '#FF3D567D', 'the include graph uses the unsaved style buffer');
+    const winner = activeStyle.contributors.find(entry => entry.state === 'effective')?.source;
+    assert.ok(winner?.included);
+    assert.equal(winner.included.uri, style.uri);
+    assert.equal(stylesheet.getText(asRange(winner.included.range)), '#FF3D567D');
+    assert.equal(winner.sourceRevision, revision(Buffer.from(dirtyStyle)));
+    const activeResource = await trace('SharedAccentCard');
+    assert.equal(activeResource.effective, '#FF3468AC');
+    const resource = activeResource.resource?.included;
+    assert.ok(resource);
+    const values = await document('Styling/Shared Palette.xaml');
+    assert.equal(resource.uri, vscode.Uri.file(await realpath(values.uri.fsPath)).toString());
+    assert.match(values.lineAt(resource.range.start.line).text, /x:Key="AccountAccent"/);
     const styleSession = await open(style);
     assert.ok(designColumn(consumerPath));
     assert.equal(designColumn('Shared Styles.xaml'), designColumn(consumerPath));

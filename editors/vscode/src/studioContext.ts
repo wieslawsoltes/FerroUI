@@ -1,8 +1,10 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
+import { sourceColumn } from './editorHistory';
 import type { EditResult, Range } from './protocol';
-import { includedSourceUri } from './includedSource';
+import { includedSourceUri, type IncludedSource } from './includedSource';
 import type { IncludedTemplateSource } from './includedTemplate';
+import { revision } from './reloadProcess';
 import { exactRange } from './textDocument';
 
 export class StudioContext {
@@ -53,6 +55,24 @@ export class StudioContext {
     async revealRange(range: Range): Promise<void> {
         this.ensure();
         await this.panel.revealSource({ session: this.panel.session, token: this.token }, range);
+    }
+
+    async revealIncludedRange(source: IncludedSource, acceptedRevision: string): Promise<void> {
+        this.ensure();
+        const uri = await includedSourceUri(this.panel.document.uri, source);
+        const document = await vscode.workspace.openTextDocument(uri);
+        this.ensure();
+        const text = document.getText();
+        const bom = text.startsWith('\uFEFF');
+        const normalized = bom ? text.slice(1) : text;
+        if (revision(Buffer.from(normalized)) !== acceptedRevision) {
+            throw new Error('The included source changed. Reopen the value trace.');
+        }
+        const withBom = ({ line, character }: Range['start']) => ({ line, character: character + Number(bom && line === 0) });
+        const selection = exactRange(document, { start: withBom(source.range.start), end: withBom(source.range.end) });
+        const viewColumn = sourceColumn(this.panel.document)
+            ?? (this.panel.panel.viewColumn === vscode.ViewColumn.One ? vscode.ViewColumn.Beside : vscode.ViewColumn.One);
+        await vscode.window.showTextDocument(document, { selection, viewColumn, preview: false });
     }
 
     async revealIncludedTemplate(source: IncludedTemplateSource): Promise<void> {

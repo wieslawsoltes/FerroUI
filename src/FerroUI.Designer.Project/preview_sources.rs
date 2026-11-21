@@ -44,6 +44,12 @@ pub struct PreviewInclude {
     pub document: Document,
 }
 
+impl PreviewInclude {
+    pub fn source_revision(&self) -> u64 {
+        fingerprint(self.document.valid_source().as_bytes())
+    }
+}
+
 impl PreviewIncludes {
     pub fn documents(&self) -> impl Iterator<Item = &PreviewInclude> {
         self.documents.values()
@@ -65,9 +71,7 @@ impl PreviewIncludes {
         address: &str,
         revision: u64,
     ) -> Option<(&str, &PreviewInclude)> {
-        let matches = |include: &PreviewInclude| {
-            fingerprint(include.document.valid_source().as_bytes()) == revision
-        };
+        let matches = |include: &PreviewInclude| include.source_revision() == revision;
         if let Some((address, source)) = self.documents.get_key_value(address) {
             return matches(source).then_some((address.as_str(), source));
         }

@@ -1,10 +1,9 @@
 import * as vscode from 'vscode';
+import type { IncludedSource } from './includedSource';
 import type { Range } from './protocol';
 
-export interface DesignTraceSource {
-    range: Range;
-    text: string | null;
-}
+export type DesignTraceSource = { range: Range; text: string | null; included?: undefined }
+    | { included: IncludedSource; sourceRevision: string; text: string | null };
 
 type TraceState = 'effective' | 'base' | 'overridden' | 'inactive' | 'unset';
 
@@ -51,6 +50,7 @@ export async function showPropertyTrace<T>(
     }
     if (trace.resource) {
         items.push({ label: '$(library) Referenced resource', source: trace.resource,
+            detail: sourceText(trace.resource) ?? undefined,
             buttons: [{ iconPath: new vscode.ThemeIcon('go-to-file'), tooltip: 'Reveal in source' }] });
     }
     const source = await new Promise<T | undefined>(resolve => {

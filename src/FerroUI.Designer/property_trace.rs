@@ -7,10 +7,15 @@ use ferroui_designer_core::{
 #[cfg(feature = "mcp")]
 use ferroui_designer_language::LineIndex;
 use ferroui_designer_rsx::RsxSourceMap;
-use ferroui_designer_tools::{component_property_attribute, component_property_elements};
+use ferroui_designer_tools::{component_property_attribute, component_property_elements, component_resource_location, ComponentResourceLocation};
 use ferroui_inspect::{InspectedPropertyTrace, Inspector, PropertyContributor};
+use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 #[cfg(feature = "mcp")]
 use serde_json::{Value, json};
+
+#[path = "property_trace_source.rs"]
+mod source;
+pub(crate) use source::{TraceNavigation, TraceSource};
 
 #[derive(Clone, Copy)]
 pub(crate) enum TraceTarget {
@@ -21,8 +26,8 @@ pub(crate) enum TraceTarget {
 pub(crate) struct PropertyTrace {
     pub native: InspectedPropertyTrace,
     pub authored: Option<TraceLocation>,
-    pub sources: Vec<Option<TraceLocation>>,
-    pub resource: Option<TraceLocation>,
+    pub sources: Vec<Option<TraceSource>>,
+    pub resource: Option<TraceSource>,
 }
 
 pub(crate) struct TraceLocation {
@@ -102,11 +107,11 @@ impl PropertyTrace {
         map: Option<&RsxSourceMap>,
     ) -> Value {
         let index = LineIndex::new(source);
-        let locate = |location: &TraceLocation| location.json(document, source, map, &index);
+        let locate = |location: &TraceSource| location.json(document, source, map, &index);
         let mut result = self
             .native
             .json(|index, _| self.sources[index].as_ref().and_then(locate));
-        result["authored"] = json!(self.authored.as_ref().and_then(locate));
+        result["authored"] = json!(self.authored.as_ref().and_then(|location| location.json(document, source, map, &index)));
         result["resource"] = json!(self.resource.as_ref().and_then(locate));
         result
     }
@@ -154,20 +159,29 @@ impl DesignerSession {
         &self,
         contributor: &PropertyContributor,
         property: &str,
-    ) -> Option<TraceLocation> {
+    ) -> Option<TraceSource> {
         let object = contributor.source.as_ref()?;
         let document = self.document();
-        let node = self.preview.authored_object(document, object)?;
+        let (document, node, include) = if let Some(node) = self.preview.authored_object(document, object) {
+            (document, node, None)
+        } else {
+            let stamp = XamlSourceInfo::for_object(object)?;
+            let (_, include, node) = self.included_source_node(&stamp, object.get_type().name())?;
+            (&include.document, node, Some(include))
+        };
         let node = document.ast().node(node)?;
-        if matches!(
+        let location = if matches!(
             contributor.kind,
             ValueContributorKind::Style | ValueContributorKind::Theme
         ) {
-            return setter_location(document, node, property)
-                .or_else(|| Some(TraceLocation::element(node)));
+            setter_location(document, node, property)
+        } else {
+            property_location(document, node.id, property)
+        }.unwrap_or_else(|| TraceLocation::element(node));
+        match include {
+            Some(include) => TraceSource::included(include, location),
+            None => Some(TraceSource::Local(location)),
         }
-        property_location(document, node.id, property)
-            .or_else(|| Some(TraceLocation::element(node)))
     }
 }
 
@@ -241,7 +255,7 @@ fn resource_location(
     session: &DesignerSession,
     node: NodeId,
     property: &str,
-) -> Option<TraceLocation> {
+) -> Option<TraceSource> {
     let document = session.document();
     let attribute = component_property_attribute(document, node, property)
         .ok()
@@ -249,8 +263,13 @@ fn resource_location(
     let MarkupValue::Extension(extension) = attribute.markup().ok()? else {
         return None;
     };
-    let target = resolve_property_resource(session, node, &extension).ok()?;
-    document.ast().node(target).map(TraceLocation::element)
+    let target = referenced_resource(session, node, &extension).ok()?;
+    if target.uri.is_some() {
+        let include = session.accepted_preview_includes()?.authored_source(target.address)?;
+        let node = include.document.ast().node(target.node)?;
+        return TraceSource::included(include, TraceLocation::element(node));
+    }
+    document.ast().node(target.node).map(|node| TraceSource::Local(TraceLocation::element(node)))
 }
 
 pub(crate) fn resolve_property_resource(
@@ -258,6 +277,16 @@ pub(crate) fn resolve_property_resource(
     node: NodeId,
     extension: &MarkupExtension,
 ) -> Result<NodeId, String> {
+    let target = referenced_resource(session, node, extension)?;
+    target.uri.is_none().then_some(target.node)
+        .ok_or_else(|| "The resource is outside this authored document".into())
+}
+
+fn referenced_resource<'a>(
+    session: &'a DesignerSession,
+    node: NodeId,
+    extension: &MarkupExtension,
+) -> Result<ComponentResourceLocation<'a>, String> {
     let document = session.document();
     if !matches!(
         crate::property_inspector_view::framework_extension(document, node, &extension.name),
@@ -281,9 +310,8 @@ pub(crate) fn resolve_property_resource(
         return Err("An application resource key must be inspected in XAML".into());
     };
     let context = session.component_resource_context(node);
-    ferroui_designer_tools::component_resource_resolution(document, node, key, context.as_ref())
+    component_resource_location(document, session.document_uri(), node, key, context.as_ref(), &session.preview.resource_sources)
         .map_err(|error| error.to_string())?
-        .resolved()
         .ok_or_else(|| {
             "The resource is external, missing or ambiguous in this preview context".into()
         })

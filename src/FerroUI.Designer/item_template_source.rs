@@ -1,5 +1,5 @@
 //! Resolve an inherited template from the native value in the accepted preview.
-use crate::{runtime::node_at_source_info, DesignerSession};
+use crate::DesignerSession;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_designer_project::PreviewInclude;
 use ferroui_designer_tools::{
@@ -28,7 +28,7 @@ impl DesignerSession {
         {
             return None;
         }
-        let includes = self.accepted_preview_includes()?;
+        self.accepted_preview_includes()?;
         let info = self.preview.control_template_source(slot.owner)?;
         let document = self.document();
         if let Some(node) = self
@@ -46,9 +46,7 @@ impl DesignerSession {
             });
         }
 
-        let uri = info.loader_uri().or_else(|| info.source_uri().map(|source| source.as_str()))?;
-        let (address, include) = includes.authored_revision(uri, info.source_revision()?)?;
-        let node = node_at_source_info(&include.document, &info, "ControlTemplate")?;
+        let (address, include, node) = self.included_source_node(&info, "ControlTemplate")?;
         self.compatible_template_at(slot.owner, &include.document, node)
             .then_some(EffectiveControlTemplate {
                 location: ComponentResourceLocation {

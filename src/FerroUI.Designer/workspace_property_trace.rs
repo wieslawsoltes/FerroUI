@@ -5,7 +5,7 @@ use super::{
 };
 use crate::{
     design_time::DesignTimeSnapshot,
-    property_trace::{TraceLocation, TraceTarget},
+    property_trace::{TraceNavigation, TraceTarget},
 };
 use ferroui_base::{
     Ref, WeakRef,
@@ -14,7 +14,6 @@ use ferroui_base::{
 use ferroui_controls::{
     Button, ColumnDefinitions, Control, Flyout, Grid, PlacementMode, ScrollViewer, StackPanel,
 };
-use ferroui_designer_core::SourceSpan;
 use std::rc::{Rc, Weak};
 
 #[cfg(test)]
@@ -93,9 +92,6 @@ impl TraceContext {
         let document = session.document();
         let source = session.authored_source();
         let map = session.rust_map();
-        let span = |location: Option<&TraceLocation>| {
-            location.and_then(|location| location.span(document, map))
-        };
         let body = StackPanel::new();
         body.set_width(336.0);
         body.set_spacing(6.0);
@@ -115,10 +111,10 @@ impl TraceContext {
                 flyout,
                 "Authored value",
                 display,
-                span(Some(location)),
+                location.span(document, map).map(TraceNavigation::Local),
             );
         }
-        if let Some(reference) = span(trace.resource.as_ref()) {
+        if let Some(reference) = trace.resource.as_ref().and_then(|source| source.navigation(document, map)) {
             self.add_row(&body, flyout, "Referenced resource", "", Some(reference));
         }
         for (entry, location) in trace.native.contributors.iter().zip(&trace.sources) {
@@ -138,7 +134,7 @@ impl TraceContext {
                 flyout,
                 &entry.label,
                 &detail,
-                span(location.as_ref()),
+                location.as_ref().and_then(|source| source.navigation(document, map)),
             );
         }
         let scroll = ScrollViewer::new();
@@ -153,7 +149,7 @@ impl TraceContext {
         flyout: &Ref<Flyout>,
         label: &str,
         detail: &str,
-        source: Option<SourceSpan>,
+        source: Option<TraceNavigation>,
     ) {
         let row = Grid::new();
         row.set_column_definitions(ColumnDefinitions::parse("*,Auto").expect("trace columns"));
@@ -172,7 +168,7 @@ impl TraceContext {
             let context = self.clone();
             let popup = flyout.downgrade();
             let reveal = icon_button(SOURCE, &format!("Reveal {label} in source"), move || {
-                context.reveal(&popup, source)
+                context.reveal(&popup, &source)
             });
             Grid::set_column(&reveal, 1);
             row.children().add(reveal.upcast::<Control>());
@@ -180,19 +176,32 @@ impl TraceContext {
         body.children().add(row.upcast::<Control>());
     }
 
-    fn reveal(&self, flyout: &WeakRef<Flyout>, span: SourceSpan) {
+    fn reveal(&self, flyout: &WeakRef<Flyout>, source: &TraceNavigation) {
         let Some(workspace) = self.workspace.upgrade() else {
             return;
         };
         if let Some(flyout) = flyout.upgrade() {
             flyout.hide();
         }
-        if self.current(&workspace, &workspace.session.borrow()) {
-            workspace.select_source_span(span);
-        } else {
+        if !self.current(&workspace, &workspace.session.borrow()) {
             workspace.report(Err(
                 "The document or selection changed. Reopen the value trace.".into(),
             ));
+            return;
+        }
+        match source {
+            TraceNavigation::Local(span) => workspace.select_source_span(*span),
+            TraceNavigation::Included(source) => {
+                let result = workspace.visit_source_document(&source.uri, |workspace| {
+                    let span = {
+                        let session = workspace.session.borrow();
+                        source.span_in(session.document(), session.document_uri())?
+                    };
+                    workspace.select_source_span(span);
+                    Ok(())
+                });
+                workspace.report(result);
+            }
         }
     }
 }

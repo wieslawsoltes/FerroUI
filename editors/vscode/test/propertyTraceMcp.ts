@@ -40,7 +40,7 @@ export async function verifyPropertyTraceMcp({ invoke, content }: McpFixture): P
     assert.deepEqual(style.contributors.filter(row => row.state === 'effective').map(row => row.label), ['Style Border.priority']);
     const winner = style.contributors[0];
     assert.equal(winner.priority, 'StyleTrigger');
-    assert.ok(winner.source);
+    assert.ok(winner.source && !winner.source.included);
     assert.equal(xaml.document.getText(asRange(winner.source.range)), '0.72');
     assert.match(xaml.document.lineAt(winner.source.range.start.line).text, /Border\.priority/);
     assert.ok(style.contributors.some(row => row.label === 'Style Border.account' && row.value === '0.72' && row.state === 'overridden'));
@@ -54,7 +54,7 @@ export async function verifyPropertyTraceMcp({ invoke, content }: McpFixture): P
     assert.equal(background.effective, '#FFEAF4FA');
     assert.equal(background.authored?.text, '{DynamicResource AccountSurface}');
     assert.ok(background.contributors[0].binding);
-    assert.ok(background.resource);
+    assert.ok(background.resource && !background.resource.included);
     assert.match(xaml.document.lineAt(background.resource.range.start.line).text, /x:Key="AccountSurface"/);
     const card = xaml.nodes.find(node => node.name === 'LocalCard')!;
     const { properties } = content<{ properties: PropertyField[] }>(await invoke('designer_inspect', { session: xaml.session, node: card.id }));
@@ -68,7 +68,7 @@ export async function verifyPropertyTraceMcp({ invoke, content }: McpFixture): P
     const rust = await open('views.rs', 'saveButton');
     const contentValue = await rust.read('saveButton', 'Content');
     assert.equal(contentValue.effective, 'Save changes');
-    assert.ok(contentValue.authored);
+    assert.ok(contentValue.authored && !contentValue.authored.included);
     assert.equal(rust.document.getText(asRange(contentValue.authored.range)), '"Save changes"');
     assert.equal(contentValue.contributors[0].source?.text, '"Save changes"');
     await rust.finish();
