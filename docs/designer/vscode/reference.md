@@ -94,6 +94,8 @@ For a mapped RSX `TableView`, use the same tools and pass `kind: "table"` to ins
 
 For an RSX `TreeDataGrid`, the model offers `text`, `checkBox`, `template`, `rowHeader`, and `expander` where the selected collection supports them. Use the child node ID from `children` to edit an expander's inner column. Send a plain row path for `Binding`, `ChildrenBinding`, `HasChildrenBinding`, `IsExpandedBinding`, or `TextSearchBinding`. Move and remove actions use the top-level column ID. For an application-supplied `source` or `model`, the query explains why edits are unavailable and returns its Rust range. [TreeDataGrid workbench](authoring.md#edit-an-rsx-treedatagrid)
 
+For a shared Rust column collection, `factory` names the function that returns the array. If `sourceUri` is present, `sourceRange` and all column and field ranges use that companion module’s UTF-16 coordinates. Send edits with the same table ID, revision, and model. VS Code includes the changed module’s URI and editor version in `edited_source`. Undo in the owning editor, or call `ferroui_workspace_read` and then `ferroui_workspace_file` with `action: "undo"`. In Studio, use `designer_undo` or `designer_redo` from either tab. [Shared Rust columns](authoring.md#edit-shared-rust-column-definitions)
+
 ### Edit item templates with MCP
 
 1. Call `designer_wait` and use `designer_outline` to find the authored control or column. Read `designer_item_templates` through `designer_studio_query` with `arguments: { node }`. The result includes the current model, slot names and ranges, the assigned `includedDefinition` when resolved, and `includedResources` available for assignment.

@@ -161,6 +161,59 @@ fn create_first_column_and_protect_computed_collection_values() {
 }
 
 #[test]
+fn named_column_builder_keeps_the_active_invocation_and_shared_callers() {
+    let source = r#"
+use ::ferroui_view::{table_columns as collection, table_column as column};
+fn shared_columns() -> Columns {
+    let columns = collection([
+        // Account in both views 🧭
+        column().header("Account").binding_path("Customer.Name"),
+    ]);
+    columns
+}
+fn selected() { rsx! { TableView { columns: shared_columns() } }; }
+fn other() { rsx! { TableView { columns: shared_columns() } }; }
+"#
+    .replace('\n', "\r\n");
+    let updated = change(&source, |model| ColumnChange::Set {
+        column: model.columns[0].node,
+        field: "Header".into(),
+        value: "Customer account".into(),
+    })
+    .unwrap();
+    assert_eq!(
+        updated,
+        source.replace("header(\"Account\")", "header(\"Customer account\")")
+    );
+    let views = updated.match_indices("TableView {");
+    for (start, _) in views {
+        let projection = project_rust(&updated, start).unwrap();
+        assert!(projection.xaml().contains("Header=\"Customer account\""));
+    }
+    let insert = |_: &ferroui_designer_tools::TableColumns| ColumnChange::Insert {
+        index: 0,
+        kind: ColumnKind::Table,
+        header: None,
+    };
+    for computed in [
+        source.replace(
+            "fn shared_columns()",
+            "#[cfg(feature = \"crm\")]\nfn shared_columns()",
+        ),
+        source.replace("let columns =", "record_request(); let columns ="),
+        source.replace("let columns =", "let mut columns ="),
+        source.replace(
+            "fn selected() {",
+            "fn selected() { let shared_columns = runtime_builder();",
+        ),
+    ] {
+        assert!(change(&computed, insert)
+            .unwrap_err()
+            .contains("defined by Rust"));
+    }
+}
+
+#[test]
 fn moving_a_table_on_the_canvas_retains_the_exact_column_source() {
     use ferroui_designer_core::Edit;
 

@@ -286,22 +286,23 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
         let (patches, selection) = {
             let session = stage.session.borrow();
-            let patches = if rust_style {
+            let (patches, uri) = if rust_style {
                 let plan = stage.sources.run(|| ferroui_designer::mcp::rust_style_source_plan(&session, projection, &arguments))?;
-                if let Some(uri) = plan.source_uri {
-                    let source = stage.authored_rsx.as_ref().and_then(|rust| rust.module_source(&uri))
-                        .ok_or("The supplying Rust module is outside the accepted frame")?;
-                    return module_edits(uri, source, plan.patches);
-                }
-                plan.patches
+                (plan.patches, plan.source_uri)
+            } else if rust_columns {
+                let plan = stage.sources.run(|| ferroui_designer::mcp::rust_column_declaration_plan(
+                    &session, design.source, projection, &arguments))?;
+                (plan.patches, plan.source.uri)
             } else {
-                let plan = if rust_columns {
-                    ferroui_designer::mcp::rust_column_source_plan
-                } else {
-                    ferroui_designer::mcp::rust_template_source_plan
-                };
-                stage.sources.run(|| plan(&session, design.source, projection, &arguments))?
+                let patches = stage.sources.run(|| ferroui_designer::mcp::rust_template_source_plan(
+                    &session, design.source, projection, &arguments))?;
+                (patches, None)
             };
+            if let Some(uri) = uri {
+                let source = stage.authored_rsx.as_ref().and_then(|rust| rust.module_source(&uri))
+                    .ok_or("The supplying Rust module is outside the accepted frame")?;
+                return module_edits(uri, source, patches);
+            }
             let selection = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
             (patches, selection)
         };

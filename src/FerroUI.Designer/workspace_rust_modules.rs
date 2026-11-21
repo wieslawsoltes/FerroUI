@@ -1,11 +1,11 @@
-//! Studio's workspace adapter for Rust palette module transactions.
+//! Studio's workspace adapter for checked Rust module source transactions.
 use super::{DesignerWorkspace, project::document_identity, reviewed_sources::check_saved};
 use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::{LineIndex, Range};
 use ferroui_designer_project::{
     PreviewSourceBuffer, RustModuleProject, RustModuleSources, file_path,
 };
-use ferroui_designer_rsx::{RsxStyleEdit, RsxStylePlan};
+use ferroui_designer_rsx::RsxStyleEdit;
 use std::{rc::Rc, sync::Arc};
 
 impl DesignerWorkspace {
@@ -77,10 +77,12 @@ impl DesignerWorkspace {
             }
             (projection.plan_style_source(edit)?, modules)
         };
-        if plan.source_uri.is_some() && !plan.patches.is_empty() {
-            self.apply_shared_module_color(
-                plan,
+        if let Some(uri) = plan.source_uri.as_deref().filter(|_| !plan.patches.is_empty()) {
+            self.apply_rust_module_patches(
+                uri,
+                plan.patches,
                 modules.ok_or("The Rust module source is unavailable")?,
+                "Edit shared Rust color",
             )?;
         } else {
             self.session.borrow_mut().apply_rust_style_plan(plan)?;
@@ -89,7 +91,7 @@ impl DesignerWorkspace {
         Ok(())
     }
 
-    fn require_rust_module_snapshot(
+    pub(super) fn require_rust_module_snapshot(
         &self,
         active: &str,
         modules: &RustModuleSources,
@@ -97,48 +99,47 @@ impl DesignerWorkspace {
         let draft = self.capture_rust_modules(active, &modules.active().source);
         if draft.as_deref() != Some(modules) {
             return Err(
-                "The Rust module sources changed. Reopen Styles & Themes for the current preview"
+                "The Rust module sources changed. Reopen the inspector for the current preview"
                     .into(),
             );
         }
         Ok(())
     }
 
-    fn apply_shared_module_color(
+    pub(super) fn apply_rust_module_patches(
         self: &Rc<Self>,
-        plan: RsxStylePlan,
+        uri: &str,
+        patches: Vec<TextPatch>,
         modules: Arc<RustModuleSources>,
+        operation: &str,
     ) -> Result<(), String> {
-        let uri = plan
-            .source_uri
-            .ok_or("Choose a shared color in an authored Rust module")?;
         let captured = modules
-            .source(&uri)
+            .source(uri)
             .ok_or("The supplying Rust module is outside the accepted snapshot")?;
         let mut staged = self.stage_reviewed_sources()?;
-        let mut tab = staged.tab(self, &uri)?;
-        check_saved(&staged.workspace, &uri, &tab)?;
+        let mut tab = staged.tab(self, uri)?;
+        check_saved(&staged.workspace, uri, &tab)?;
         if tab.source() != captured.source.as_ref() {
-            return Err("The supplying Rust buffer changed before applying the color".into());
+            return Err("The supplying Rust buffer changed before applying the edit".into());
         }
         let after =
-            TextPatch::apply_all(tab.source(), plan.patches).map_err(|error| error.to_string())?;
+            TextPatch::apply_all(tab.source(), patches).map_err(|error| error.to_string())?;
         let updated = modules
-            .with_file_text(&uri, &after)
-            .ok_or("The color edit changes the module layout")?;
+            .with_file_text(uri, &after)
+            .ok_or("The edit changes the module layout")?;
         let label = self
             .project
             .borrow_mut()
             .linked_history
-            .label("Edit shared Rust color")?;
+            .label(operation)?;
         let rust = tab
             .rust
             .as_mut()
             .ok_or("The supplying document is no longer Rust source")?;
         rust.update(&mut tab.document, after.into(), &label, false)
             .map_err(|error| error.to_string())?;
-        staged.tabs.insert(uri.clone(), tab);
-        let participants = vec![staged.active.clone(), uri];
+        staged.tabs.insert(uri.to_owned(), tab);
+        let participants = vec![staged.active.clone(), uri.to_owned()];
         staged.prepare_edits(&participants)?;
         self.session
             .borrow_mut()
@@ -163,7 +164,7 @@ impl DesignerWorkspace {
         })
     }
 
-    pub(super) fn reveal_rust_style_module_span(
+    pub(super) fn reveal_rust_module_span(
         self: &Rc<Self>,
         uri: &str,
         span: ferroui_designer_core::SourceSpan,
@@ -186,7 +187,10 @@ impl DesignerWorkspace {
         }
         let source = {
             let session = self.session.borrow();
-            let projection = session.rust_style_projection()?;
+            if !session.authored_is_valid() {
+                return Err("Repair the Rust draft before revealing a declaration".into());
+            }
+            let projection = session.rust.as_ref().ok_or("Open a mapped RSX design")?.projection()?;
             let modules = projection
                 .module_sources()
                 .ok_or("The Rust module source is unavailable")?;

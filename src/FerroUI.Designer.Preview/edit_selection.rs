@@ -58,7 +58,8 @@ pub(crate) fn rsx_control_ranges(
     let Some(rsx) = design.rsx.as_ref().filter(|_| !selection.is_empty() && !patches.is_empty())
     else { return Ok(Vec::new()); };
     let edited = TextPatch::apply_all(design.source, patches.to_vec()).map_err(|error| error.to_string())?;
-    let projection = design.rsx_catalog().project(&edited, rsx.invocation_start_after(patches)?)?;
+    let modules = rsx.draft_module_sources(&edited)?;
+    let projection = design.rsx_catalog().project_with_modules(&edited, rsx.invocation_start_after(patches)?, modules.as_ref())?;
     let index = LineIndex::new(&edited);
     Ok(selection.iter().filter_map(|&id| {
         let (ordinal, _) = design.rsx_node(id)?;

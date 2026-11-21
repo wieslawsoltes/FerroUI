@@ -200,13 +200,21 @@ impl DesignerSession {
         self.commit_scoped_rust_patches(label, plan.patches, plan.shared_color)
     }
 
+    pub(crate) fn commit_rust_declaration(&mut self, label: &str,
+        edit: ferroui_designer_rsx::RsxSourceEdit) -> Result<ChangeSet, DesignerError> {
+        if edit.source.uri.is_some() {
+            return Err(DesignerError::InvalidEdit("Apply this edit to its owning Rust module".into()));
+        }
+        self.commit_scoped_rust_patches(label, edit.patches, Some(edit.source.span))
+    }
+
     fn commit_scoped_rust_patches(
         &mut self,
         label: &str,
         patches: Vec<TextPatch>,
-        shared_color: Option<SourceSpan>,
+        declaration: Option<SourceSpan>,
     ) -> Result<ChangeSet, DesignerError> {
-        self.commit_rust_edit(|rust, document| rust.apply(document, label, patches, shared_color))
+        self.commit_rust_edit(|rust, document| rust.apply(document, label, patches, declaration))
     }
 
     pub(crate) fn commit_rust_child_edit(

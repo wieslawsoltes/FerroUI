@@ -1,6 +1,6 @@
 use super::fields::{self, SourceField, reflection_binding};
 use crate::{
-    animation::syntax::{chain, method_suffix, path, span},
+    animation::syntax::{chain, method_suffix, span},
     tree::escape_xml,
 };
 use ferroui_designer_core::{NodeId, SourceSpan};
@@ -56,13 +56,25 @@ impl ColumnPosition {
 }
 
 impl Column {
-    pub(super) fn read(expression: &Expr, table: TableKind) -> Option<Self> {
-        Self::parse(expression, table, false)
+    pub(super) fn read(
+        expression: &Expr,
+        table: TableKind,
+        resolve: &dyn Fn(&Expr) -> Option<String>,
+    ) -> Option<Self> {
+        Self::parse(expression, table, false, resolve)
     }
 
-    fn parse(expression: &Expr, table: TableKind, nested: bool) -> Option<Self> {
+    fn parse(
+        expression: &Expr,
+        table: TableKind,
+        nested: bool,
+        resolve: &dyn Fn(&Expr) -> Option<String>,
+    ) -> Option<Self> {
         let (factory, mut methods) = chain(expression)?;
-        let qualified = path(&factory.func)?;
+        if !factory.attrs.is_empty() || methods.iter().any(|method| !method.attrs.is_empty()) {
+            return None;
+        }
+        let qualified = resolve(&factory.func)?;
         let parent = qualified.strip_prefix("ferroui_view::")?;
         let name = parent.strip_prefix("prelude::").unwrap_or(parent);
         let kind = match (table, name) {
@@ -79,7 +91,12 @@ impl Column {
             _ => return None,
         };
         let inner = if kind == ColumnKind::Expander && factory.args.len() == 1 {
-            Some(Box::new(Self::parse(&factory.args[0], table, true)?))
+            Some(Box::new(Self::parse(
+                &factory.args[0],
+                table,
+                true,
+                resolve,
+            )?))
         } else if kind != ColumnKind::Expander && factory.args.is_empty() {
             None
         } else {

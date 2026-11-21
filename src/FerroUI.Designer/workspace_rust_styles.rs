@@ -292,7 +292,7 @@ impl Scope {
         match source {
             Declaration::Local(span) => self.reveal(span),
             Declaration::RustModule { uri, span } => {
-                let result = self.current().and_then(|workspace| workspace.reveal_rust_style_module_span(&uri, span));
+                let result = self.current().and_then(|workspace| workspace.reveal_rust_module_span(&uri, span));
                 if let Some(flyout) = self.pane.flyout.upgrade().filter(|_| result.is_ok()) {
                     flyout.hide();
                 }

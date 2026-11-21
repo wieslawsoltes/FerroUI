@@ -52,10 +52,10 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
             vscode.commands.registerCommand(command('source'), () => this.run(async () => {
                 await this.pending;
                 const editor = this.editor;
-                if (editor?.table.sourceRange) await editor.context.revealRange(editor.table.sourceRange);
+                if (editor?.table.sourceRange) await editor.reveal(editor.table.sourceRange);
             })),
             run('edit', async ({ editor, column, field }) => { if (field) await editor.field(column, field); }),
-            run('reveal', ({ editor, column, field }) => editor.context.revealRange(field?.range ?? column.range)),
+            run('reveal', ({ editor, column, field }) => editor.reveal(field?.range ?? column.range)),
             run('reset', async ({ editor, column, field }) => {
                 if (field) await editor.change({ action: 'clear', column: column.node, field: field.name });
             }),
@@ -100,6 +100,9 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
         this.pending = context.read<TableColumns | { table: null }>('designer_columns', { node: node.id }).then(data => {
             if (this.key !== key) return;
             this.editor = data.table === null ? undefined : new ColumnEditor(context, data);
+            if (data.table !== null && data.factory) {
+                this.view.description = `${data.name ?? node.name ?? node.label} · ${data.factory}()`;
+            }
             void vscode.commands.executeCommand('setContext', 'ferroui.canAddColumn',
                 data.table !== null && !data.reason && data.available.length > 0);
             void vscode.commands.executeCommand('setContext', 'ferroui.canRevealColumnSource',

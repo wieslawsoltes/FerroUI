@@ -44,7 +44,7 @@ export async function verifyRsxColumns({ invoke, content }: McpFixture): Promise
 
     const computed = await read('Computed');
     assert.match(computed.model.reason ?? '', /defined by Rust/);
-    assert.equal(document.getText(asRange(computed.model.sourceRange!)), 'computed_columns()');
+    assert.equal(document.getText(asRange(computed.model.sourceRange!)), 'computed_columns("Computed")');
     assert.ok((await edit(computed, { action: 'insert', index: 0, kind: 'table' })).isError);
     const initial = await read();
     assert.equal(initial.model.reason, null);

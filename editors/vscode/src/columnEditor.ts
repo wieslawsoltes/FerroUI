@@ -34,6 +34,8 @@ export interface TableColumns {
     available: { kind: ColumnKind; label: string }[];
     reason: string | null;
     sourceRange?: Range | null;
+    sourceUri?: string;
+    factory?: string;
     model: string;
 }
 
@@ -55,6 +57,10 @@ export const columnKinds: Record<ColumnKind, { label: string; icon: string }> = 
 
 export class ColumnEditor {
     constructor(readonly context: StudioContext, readonly table: TableColumns) {}
+
+    reveal(range: Range): Promise<void> {
+        return this.context.revealRustRange(range, this.table.sourceUri);
+    }
 
     async change(change: Change): Promise<void> {
         if (this.table.reason) throw new Error(this.table.reason);
@@ -80,7 +86,7 @@ export class ColumnEditor {
             return;
         }
         if (!field.editable || this.table.reason) {
-            if (field.range) await this.context.revealRange(field.range);
+            if (field.range) await this.reveal(field.range);
             return;
         }
         const label = `${column.label} · ${field.name}`;
@@ -95,7 +101,7 @@ export class ColumnEditor {
     }
 
     rustTemplate(field: ColumnField): 'CellTemplate' | 'CellEditingTemplate' | undefined {
-        if (this.context.panel.language === 'rust' && this.context.panel.supportsItemTemplates
+        if (!this.table.factory && this.context.panel.language === 'rust' && this.context.panel.supportsItemTemplates
             && (field.name === 'CellTemplate' || field.name === 'CellEditingTemplate')) {
             return field.name;
         }

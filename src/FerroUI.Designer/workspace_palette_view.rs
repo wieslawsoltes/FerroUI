@@ -107,7 +107,7 @@ pub(super) fn body(
                 Declaration::Included(source) => context.open_source(source),
                 Declaration::Local(span) => context.workspace().map(|workspace| workspace.select_source_span(span)),
                 Declaration::RustModule { uri, span } => context.workspace()
-                    .and_then(|workspace| workspace.reveal_rust_style_module_span(&uri, span)),
+                    .and_then(|workspace| workspace.reveal_rust_module_span(&uri, span)),
             };
             report(status.upgrade().as_ref(), result);
         }

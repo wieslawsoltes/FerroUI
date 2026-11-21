@@ -57,6 +57,13 @@ export class StudioContext {
         await this.panel.revealSource({ session: this.panel.session, token: this.token }, range);
     }
 
+    async revealRustRange(range: Range, uri?: string): Promise<void> {
+        if (!uri) return this.revealRange(range);
+        this.ensure();
+        await this.panel.revealRustModule({ session: this.panel.session, token: this.token }, uri, range,
+            AbortSignal.timeout(15_000), () => this.ensure());
+    }
+
     async revealIncludedRange(source: IncludedSource, acceptedRevision: string): Promise<void> {
         this.ensure();
         const uri = await includedSourceUri(this.panel.document.uri, source);

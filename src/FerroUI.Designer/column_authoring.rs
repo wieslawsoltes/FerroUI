@@ -2,15 +2,14 @@
 use crate::{DesignerSession, NodeId, PreviewStatus};
 use ferroui_controls::TableView;
 use ferroui_controls_treedatagrid::TreeDataGrid;
-use ferroui_designer_core::{SourceSpan, TextPatch};
-use ferroui_designer_rsx::RsxProjection;
+use ferroui_designer_rsx::{RsxColumnDeclaration, RsxProjection, RsxSourceEdit};
 use ferroui_designer_tools::{
     ColumnChange, TableColumns, TableKind, nearest_table, plan_column_change, table_columns,
 };
 
 pub(crate) struct ColumnAuthoring {
     pub(crate) model: TableColumns,
-    pub(crate) source: Option<SourceSpan>,
+    pub(crate) source: Option<RsxColumnDeclaration>,
 }
 
 impl DesignerSession {
@@ -39,7 +38,7 @@ impl DesignerSession {
         let mut model = table_columns(self.document(), table).map_err(|error| error.to_string())?;
         let source = projection
             .or(authored.as_ref())
-            .and_then(|projection| projection.map_column_model(self.document(), &mut model));
+            .and_then(|projection| projection.map_column_declaration(self.document(), &mut model));
         let reason = if !matches!(self.preview_status(), PreviewStatus::Ready { revision } if *revision == self.document().revision())
         {
             Some("Wait for the current native preview before editing columns.")
@@ -65,13 +64,8 @@ impl DesignerSession {
     ) -> Result<(), String> {
         self.ensure_writable().map_err(|error| error.to_string())?;
         if let Some(rust) = &self.rust {
-            let patches = self.rust_column_plan(table, &rust.projection()?, &change)?;
-            if !patches.is_empty() {
-                self.commit_rust_patches(change.label(), patches)
-                    .map_err(|error| error.to_string())?;
-                self.changed(true);
-            }
-            return Ok(());
+            let edit = self.rust_column_plan(table, &rust.projection()?, &change)?;
+            return self.apply_rust_column_plan(change.label(), edit);
         }
         let model = self
             .authored_columns(table)?
@@ -94,13 +88,21 @@ impl DesignerSession {
         table: NodeId,
         projection: &RsxProjection<'_>,
         change: &ColumnChange,
-    ) -> Result<Vec<TextPatch>, String> {
+    ) -> Result<RsxSourceEdit, String> {
         self.ensure_writable().map_err(|error| error.to_string())?;
         let columns = self
             .column_authoring(table, Some(projection))?
             .filter(|columns| columns.model.table == table)
             .ok_or("The selected table changed")?;
-        projection.edit_columns(self.document(), &columns.model, change)
+        projection.plan_columns(self.document(), &columns.model, change)
+    }
+
+    pub(crate) fn apply_rust_column_plan(&mut self, label: &str, edit: RsxSourceEdit) -> Result<(), String> {
+        if !edit.patches.is_empty() {
+            self.commit_rust_declaration(label, edit).map_err(|error| error.to_string())?;
+            self.changed(true);
+        }
+        Ok(())
     }
 
     fn has_authored_columns(&self, model: &TableColumns) -> bool {

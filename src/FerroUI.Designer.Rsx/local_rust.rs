@@ -1,11 +1,12 @@
 //! Resolve explicit names and constant initializers in authored Rust sources.
 mod collect;
+mod returned_builder;
 
 use crate::animation::syntax as rust;
 use ferroui_designer_core::SourceSpan;
 use ferroui_designer_project::RustModuleSources;
 use std::collections::BTreeMap;
-use syn::{ext::IdentExt, Expr};
+use syn::{Expr, ext::IdentExt};
 
 const MAX_INDIRECTION: usize = 32;
 
@@ -30,6 +31,7 @@ enum Binding {
     Import { absolute: bool, path: Vec<String> },
     Module(usize),
     Constant(Box<syn::ItemConst>),
+    Builder(Box<Expr>),
     Opaque,
 }
 
@@ -40,7 +42,14 @@ enum Resolved<'a> {
         item: &'a syn::ItemConst,
         scope: usize,
     },
+    Builder {
+        name: &'a str,
+        expression: &'a Expr,
+        scope: usize,
+    },
 }
+
+pub(crate) use returned_builder::ReturnedBuilder;
 
 pub(crate) struct Value<'a> {
     pub(crate) expression: &'a Expr,
@@ -84,7 +93,7 @@ impl LocalRust {
     fn path_in(&self, scope: usize, expression: &Expr) -> Option<String> {
         match self.resolve(scope, expression)? {
             Resolved::External(path) => Some(path),
-            Resolved::Constant { .. } => None,
+            Resolved::Constant { .. } | Resolved::Builder { .. } => None,
         }
     }
 
@@ -232,6 +241,11 @@ impl LocalRust {
             Binding::Constant(item) if tail.is_empty() => {
                 Some(Resolved::Constant { name, item, scope })
             }
+            Binding::Builder(expression) if tail.is_empty() => Some(Resolved::Builder {
+                name,
+                expression,
+                scope,
+            }),
             Binding::Module(module) => self.member(*module, tail, depth + 1),
             Binding::Import { absolute, path } => {
                 let parts: Vec<_> = path

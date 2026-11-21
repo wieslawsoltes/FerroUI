@@ -1,6 +1,8 @@
 //! Source-owned columns from the typed FerroUI View builders.
 mod array;
 mod fields;
+#[cfg(test)]
+mod module_tests;
 mod row;
 #[cfg(test)]
 mod tests;
@@ -9,9 +11,10 @@ mod tree_tests;
 
 use self::{array::ColumnArray, row::Column};
 use crate::{
-    RsxProjection,
-    animation::syntax::{span, view_argument},
+    RsxProjection, RsxSourceEdit, RsxSourceLocation,
+    animation::syntax::{path, span},
     item_templates::TemplateSource,
+    local_rust::ReturnedBuilder,
     registered::Class,
     source_edits::insert_field,
 };
@@ -26,14 +29,20 @@ use syn::Expr;
 pub(crate) enum ColumnSource {
     Missing,
     Computed(SourceSpan),
-    Inline(InlineColumns),
+    Mapped(MappedColumns),
 }
 
-pub(crate) struct InlineColumns {
-    source: SourceSpan,
+pub(crate) struct MappedColumns {
+    declaration: RsxColumnDeclaration,
     kind: TableKind,
     array: ColumnArray,
     rows: Vec<Column>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RsxColumnDeclaration {
+    pub location: RsxSourceLocation,
+    pub factory: Option<String>,
 }
 
 pub(crate) fn table_kind(class: &Class) -> Option<TableKind> {
@@ -59,36 +68,49 @@ fn builder(kind: TableKind) -> &'static str {
 }
 
 impl ColumnSource {
-    pub(crate) fn read(&mut self, kind: TableKind, expression: &Expr) -> bool {
+    pub(crate) fn read(
+        &mut self,
+        kind: TableKind,
+        expression: &Expr,
+        returned: Option<ReturnedBuilder<'_>>,
+    ) -> bool {
         if matches!(self, Self::Computed(_)) {
             return false;
         }
         let parsed = if matches!(self, Self::Missing) {
-            InlineColumns::read(kind, expression)
+            MappedColumns::read(kind, expression, None, &path).or_else(|| {
+                let returned = returned?;
+                MappedColumns::read(kind, returned.expression, Some(&returned), &|expression| {
+                    returned.path(expression)
+                })
+            })
         } else {
             None
         };
-        *self = parsed.map_or_else(|| Self::Computed(span(expression)), Self::Inline);
+        *self = parsed.map_or_else(|| Self::Computed(span(expression)), Self::Mapped);
         match self {
-            Self::Inline(columns) => columns.rows.iter().all(Column::projects_values),
+            Self::Mapped(columns) => columns.rows.iter().all(Column::projects_values),
             _ => false,
         }
     }
 
-    fn source(&self) -> Option<SourceSpan> {
+    fn declaration(&self) -> Option<RsxColumnDeclaration> {
         match self {
             Self::Missing => None,
-            Self::Computed(span) => Some(*span),
-            Self::Inline(columns) => Some(columns.source),
+            Self::Computed(span) => Some(RsxColumnDeclaration {
+                location: RsxSourceLocation::local(*span),
+                factory: None,
+            }),
+            Self::Mapped(columns) => Some(columns.declaration.clone()),
         }
     }
 
     pub(crate) fn projected(&self) -> bool {
-        matches!(self, Self::Inline(_))
+        matches!(self, Self::Mapped(_))
     }
 
     pub(crate) fn render(&self, output: &mut String, padding: &str) {
-        let Self::Inline(columns) = self else {
+        let Self::Mapped(columns) = self else {
             return;
         };
         if columns.rows.is_empty() {
@@ -119,7 +141,7 @@ impl ColumnSource {
         table: NodeId,
     ) -> Result<bool, String> {
         let rows = match self {
-            Self::Inline(inline) => inline.rows.as_slice(),
+            Self::Mapped(columns) => columns.rows.as_slice(),
             _ => &[],
         };
         let model = ferroui_designer_tools::table_columns(document, table)
@@ -128,21 +150,32 @@ impl ColumnSource {
     }
 }
 
-impl InlineColumns {
-    fn read(kind: TableKind, expression: &Expr) -> Option<Self> {
+impl MappedColumns {
+    fn read(
+        kind: TableKind,
+        expression: &Expr,
+        returned: Option<&ReturnedBuilder<'_>>,
+        resolve: &dyn Fn(&Expr) -> Option<String>,
+    ) -> Option<Self> {
         let Expr::Call(call) = expression else {
             return None;
         };
-        let Expr::Array(array) = view_argument(call, builder(kind))? else {
+        let qualified = resolve(&call.func)?;
+        let name = qualified.strip_prefix("ferroui_view::")?;
+        let name = name.strip_prefix("prelude::").unwrap_or(name);
+        if name != builder(kind) || call.args.len() != 1 || !call.attrs.is_empty() {
+            return None;
+        }
+        let Expr::Array(array) = call.args.first()? else {
             return None;
         };
-        if array.elems.len() > 256 {
+        if array.elems.len() > 256 || !array.attrs.is_empty() {
             return None;
         }
         let rows = array
             .elems
             .iter()
-            .map(|column| Column::read(column, kind))
+            .map(|column| Column::read(column, kind, resolve))
             .collect::<Option<Vec<_>>>()?;
         if rows
             .iter()
@@ -153,7 +186,13 @@ impl InlineColumns {
             return None;
         }
         Some(Self {
-            source: span(expression),
+            declaration: RsxColumnDeclaration {
+                location: RsxSourceLocation {
+                    uri: returned.and_then(ReturnedBuilder::uri).map(str::to_owned),
+                    span: span(expression),
+                },
+                factory: returned.map(|definition| definition.name.to_owned()),
+            },
             kind,
             array: ColumnArray::read(array),
             rows,
@@ -177,12 +216,28 @@ impl RsxProjection<'_> {
         document: &Document,
         model: &mut TableColumns,
     ) -> Option<SourceSpan> {
+        let source = self.map_column_declaration(document, model)?;
+        if source.location.uri.is_some() {
+            model.columns.clear();
+            model.available.clear();
+            model.reason = Some("Open the supplying Rust module to edit its columns.".into());
+            return None;
+        }
+        Some(source.location.span)
+    }
+
+    /// Map writable fields to their declaration, which can be in a different Cargo module.
+    pub fn map_column_declaration(
+        &self,
+        document: &Document,
+        model: &mut TableColumns,
+    ) -> Option<RsxColumnDeclaration> {
         let source = self
             .control_index(document, model.table)
             .and_then(|index| self.nodes[index].columns.as_ref());
         match source {
             Some(ColumnSource::Missing) if model.columns.is_empty() => {}
-            Some(ColumnSource::Inline(columns)) if matches_model(&columns.rows, model) => {
+            Some(ColumnSource::Mapped(columns)) if matches_model(&columns.rows, model) => {
                 for (row, column) in columns.rows.iter().zip(&mut model.columns) {
                     row.describe(column, true);
                     column.can_duplicate &= columns.rows.len() < 256;
@@ -199,7 +254,7 @@ impl RsxProjection<'_> {
                 );
             }
         }
-        source.and_then(ColumnSource::source)
+        source.and_then(ColumnSource::declaration)
     }
 
     /// Reparse the draft before allowing either editor host to commit its original Rust patches.
@@ -209,6 +264,20 @@ impl RsxProjection<'_> {
         model: &TableColumns,
         change: &ColumnChange,
     ) -> Result<Vec<TextPatch>, String> {
+        let edit = self.plan_columns(document, model, change)?;
+        if edit.source.uri.is_some() {
+            return Err("Apply the column edit to its owning Rust module".into());
+        }
+        Ok(edit.patches)
+    }
+
+    /// Plan a checked edit to the active buffer or the companion module supplying the columns.
+    pub fn plan_columns(
+        &self,
+        document: &Document,
+        model: &TableColumns,
+        change: &ColumnChange,
+    ) -> Result<RsxSourceEdit, String> {
         if let Some(reason) = &model.reason {
             return Err(reason.clone());
         }
@@ -219,7 +288,7 @@ impl RsxProjection<'_> {
         let kind = table_kind(&owner.class)
             .filter(|kind| *kind == model.kind)
             .ok_or("The selected table changed")?;
-        let patches = match owner.columns.as_ref() {
+        let edit = match owner.columns.as_ref() {
             Some(ColumnSource::Missing) => match change {
                 ColumnChange::Insert {
                     index: 0,
@@ -229,41 +298,55 @@ impl RsxProjection<'_> {
                     let column = row::fragment(*column, header.as_deref())?;
                     let (field, _) = collection_member(kind);
                     let builder = builder(kind);
-                    vec![insert_field(
+                    let patches = vec![insert_field(
                         self.source,
                         owner.open,
                         &format!("{field}: ::ferroui_view::{builder}([{column}])"),
-                    )]
+                    )];
+                    RsxSourceEdit {
+                        source: RsxSourceLocation::local(owner.span),
+                        patches,
+                    }
                 }
                 _ => return Err("Choose Add Column to create the authored Rust collection".into()),
             },
-            Some(ColumnSource::Inline(columns)) => self.column_patches(model, columns, change)?,
+            Some(ColumnSource::Mapped(columns)) => {
+                let source = columns.declaration.location.clone();
+                let before = self
+                    .declaration_source(&source)
+                    .ok_or("The column declaration changed")?;
+                let patches = Self::column_patches(before, model, columns, change)?;
+                RsxSourceEdit { source, patches }
+            }
             _ => return Err("Edit the Rust column collection in its source".into()),
         };
-        if patches.is_empty() {
-            return Ok(patches);
+        if edit.patches.is_empty() {
+            return Ok(edit);
         }
-        let candidate = TextPatch::apply_all(self.source, patches.clone())
-            .map_err(|error| error.to_string())?;
-        let modules = self.draft_module_sources(&candidate)?;
-        let next = self.catalog.project_with_modules(&candidate, self.invocation.start, modules.as_ref())?;
-        if next.invocation.start != self.invocation.start
+        let (candidate, caret, modules) = self.declaration_draft(&edit)?;
+        let next = self
+            .catalog
+            .project_with_modules(&candidate, caret, modules.as_ref())?;
+        if next.invocation.start != caret
             || !next
                 .nodes
                 .get(index)
                 .and_then(|node| node.columns.as_ref())
-                .is_some_and(ColumnSource::projected)
+                .is_some_and(|columns| {
+                    matches!(columns, ColumnSource::Mapped(columns)
+                    if columns.declaration.location.uri == edit.source.uri)
+                })
         {
             return Err("The edit could not preserve the authored Rust column collection".into());
         }
         Document::new(next.xaml()).map_err(|error| error.to_string())?;
-        Ok(patches)
+        Ok(edit)
     }
 
     fn column_patches(
-        &self,
+        source: &str,
         model: &TableColumns,
-        columns: &InlineColumns,
+        columns: &MappedColumns,
         change: &ColumnChange,
     ) -> Result<Vec<TextPatch>, String> {
         if columns.rows.len() != model.columns.len() {
@@ -284,11 +367,9 @@ impl RsxProjection<'_> {
             } if columns.rows.len() < 256
                 && model.available.iter().any(|choice| choice.kind == *kind) =>
             {
-                columns.array.insert(
-                    self.source,
-                    *index,
-                    &row::fragment(*kind, header.as_deref())?,
-                )
+                columns
+                    .array
+                    .insert(source, *index, &row::fragment(*kind, header.as_deref())?)
             }
             ColumnChange::Insert { .. } => {
                 Err("Choose an available column type in a list with fewer than 256 entries".into())
@@ -296,7 +377,7 @@ impl RsxProjection<'_> {
             ColumnChange::Move { column, index } => {
                 columns
                     .array
-                    .move_member(self.source, index_of(*column)?, *index)
+                    .move_member(source, index_of(*column)?, *index)
             }
             ColumnChange::Remove { column } => Ok(columns.array.remove(index_of(*column)?)),
             ColumnChange::Duplicate { column } => {
@@ -307,7 +388,7 @@ impl RsxProjection<'_> {
                 }
                 columns
                     .array
-                    .insert(self.source, index + 1, &self.source[row.source.range()])
+                    .insert(source, index + 1, &source[row.source.range()])
             }
             ColumnChange::Set { column, field, .. } | ColumnChange::Clear { column, field } => {
                 let (position, column) =
@@ -326,7 +407,7 @@ impl RsxProjection<'_> {
                     _ => None,
                 };
                 Ok(fields::change(
-                    self.source,
+                    source,
                     owner.kind,
                     owner.fields.get(field.name),
                     owner.append_at,
@@ -360,9 +441,12 @@ impl RsxProjection<'_> {
         }
         let table = ferroui_designer_tools::nearest_table(document, node)?;
         let index = self.control_index(document, table)?;
-        let ColumnSource::Inline(columns) = self.nodes[index].columns.as_ref()? else {
+        let ColumnSource::Mapped(columns) = self.nodes[index].columns.as_ref()? else {
             return None;
         };
+        if columns.declaration.factory.is_some() {
+            return None;
+        }
         let model = ferroui_designer_tools::table_columns(document, table).ok()?;
         if model.reason.is_some() || columns.rows.len() != model.columns.len() {
             return None;
@@ -377,7 +461,7 @@ impl RsxProjection<'_> {
         column: ColumnPosition,
         property: ItemTemplateMember,
     ) -> Option<(usize, Option<TemplateSource>, bool)> {
-        let ColumnSource::Inline(columns) = self.nodes.get(table)?.columns.as_ref()? else {
+        let ColumnSource::Mapped(columns) = self.nodes.get(table)?.columns.as_ref()? else {
             return None;
         };
         let row = column.at(&columns.rows)?;

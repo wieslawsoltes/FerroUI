@@ -6,7 +6,7 @@ use ferroui_designer_tools::ColumnField;
 
 pub(super) fn add_fields(panel: &StackPanel, column: &AuthoredColumn, scope: &ColumnScope) {
     for field in &column.fields {
-        if scope.rust && matches!(field.name, "CellTemplate" | "CellEditingTemplate") {
+        if scope.rust_templates && matches!(field.name, "CellTemplate" | "CellEditingTemplate") {
             continue;
         }
         let editable = scope.writable && field.editable;

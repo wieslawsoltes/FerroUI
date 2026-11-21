@@ -19,6 +19,42 @@ mod fields;
 mod tests;
 
 impl DesignerWorkspace {
+    pub(crate) fn edit_workspace_columns(
+        self: &Rc<Self>,
+        table: NodeId,
+        change: ColumnChange,
+    ) -> Result<(), String> {
+        if self.pending_source.get() {
+            return Err("Apply the current source draft before editing columns".into());
+        }
+        if !self.session.borrow().uses_rust_source() {
+            return self.session.borrow_mut().edit_authored_columns(table, change);
+        }
+        let (plan, modules) = {
+            let session = self.session.borrow();
+            let rust = session.rust.as_ref().ok_or("Open a mapped Rust view")?;
+            let projection = rust.projection()?;
+            let modules = rust.module_sources().cloned();
+            if let Some(modules) = &modules {
+                self.require_rust_module_snapshot(session.document_uri(), modules)?;
+            }
+            (session.rust_column_plan(table, &projection, &change)?, modules)
+        };
+        if plan.patches.is_empty() {
+            return Ok(());
+        }
+        if let Some(uri) = &plan.source.uri {
+            self.apply_rust_module_patches(
+                uri,
+                plan.patches,
+                modules.ok_or("The Rust module source is unavailable")?,
+                change.label(),
+            )
+        } else {
+            self.session.borrow_mut().apply_rust_column_plan(change.label(), plan)
+        }
+    }
+
     pub(super) fn connect_columns(self: &Rc<Self>) {
         let button = self.root.get_control::<Button>("EditColumns");
         let flyout = Flyout::new();
@@ -67,7 +103,8 @@ struct ColumnScope {
     table: NodeId,
     selected: usize,
     writable: bool,
-    rust: bool,
+    rust_templates: bool,
+    source_uri: Option<String>,
     message: WeakRef<TextBlock>,
 }
 
@@ -93,10 +130,18 @@ impl ColumnFlyout {
             return;
         };
         let model = columns.model;
-        let title = text(model.name.as_deref().unwrap_or(match model.kind {
+        let name = model.name.as_deref().unwrap_or(match model.kind {
             ferroui_designer_tools::TableKind::TableView => "TableView",
             ferroui_designer_tools::TableKind::TreeDataGrid => "TreeDataGrid",
-        }));
+        });
+        let factory = columns
+            .source
+            .as_ref()
+            .and_then(|source| source.factory.as_deref());
+        let title = match factory {
+            Some(factory) => text(&format!("{name} · {factory}()")),
+            None => text(name),
+        };
         title.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
         body.children().add(title.upcast::<Control>());
         let message = text(model.reason.as_deref().unwrap_or(""));
@@ -109,13 +154,14 @@ impl ColumnFlyout {
             table: model.table,
             selected: preferred.min(model.columns.len().saturating_sub(1)),
             writable: model.reason.is_none(),
-            rust: session.uses_rust_source(),
+            rust_templates: session.uses_rust_source() && factory.is_none(),
+            source_uri: columns.source.as_ref().and_then(|source| source.location.uri.clone()),
             message: message.downgrade(),
         };
         drop(session);
-        if let Some(source) = columns.source.filter(|_| !scope.writable) {
+        if let Some(source) = columns.source.filter(|source| !scope.writable || source.factory.is_some()) {
             let scope = scope.clone();
-            add_button(&body, SOURCE, "Reveal column collection in source", move || scope.reveal(source));
+            add_button(&body, SOURCE, "Reveal column collection in source", move || scope.reveal(source.location.span));
         }
         column_list(&body, Rc::new(model), scope);
     }
@@ -134,10 +180,7 @@ impl ColumnScope {
 
     fn apply(&self, change: ColumnChange, selected: usize) {
         let result = self.current().and_then(|workspace| {
-            workspace
-                .session
-                .borrow_mut()
-                .edit_authored_columns(self.table, change)?;
+            workspace.edit_workspace_columns(self.table, change)?;
             workspace.refresh(true);
             if let Some(flyout) = self.ui.flyout.upgrade() {
                 self.ui.render(&flyout, selected);
@@ -148,11 +191,16 @@ impl ColumnScope {
     }
 
     fn reveal(&self, span: SourceSpan) {
-        let result = self.current().map(|workspace| {
+        let result = self.current().and_then(|workspace| {
+            if let Some(uri) = &self.source_uri {
+                workspace.reveal_rust_module_span(uri, span)?;
+            } else {
+                workspace.select_source_span(span);
+            }
             if let Some(flyout) = self.ui.flyout.upgrade() {
                 flyout.hide();
             }
-            workspace.select_source_span(span);
+            Ok(())
         });
         self.show_error(result);
     }
@@ -282,7 +330,7 @@ fn column_details(host: &ContentControl, model: &TableColumns, scope: ColumnScop
 }
 
 fn add_template_action(panel: &StackPanel, column: &AuthoredColumn, scope: &ColumnScope) {
-    if scope.rust && matches!(column.kind, ColumnKind::Table | ColumnKind::Template) {
+    if scope.rust_templates && matches!(column.kind, ColumnKind::Table | ColumnKind::Template) {
         let scope = scope.clone();
         let node = column.node;
         let label = if column.kind == ColumnKind::Table { "Edit cell template" } else { "Edit cell templates" };

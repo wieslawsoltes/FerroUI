@@ -114,7 +114,8 @@ impl RsxProjection<'_> {
         self.modules
     }
 
-    pub(crate) fn draft_module_sources(&self, source: &str) -> Result<Option<RustModuleSources>, String> {
+    /// Revalidate the captured Cargo target against a draft of the active buffer.
+    pub fn draft_module_sources(&self, source: &str) -> Result<Option<RustModuleSources>, String> {
         self.modules.map(|modules| {
             modules.with_file_text(&modules.active().uri, source)
                 .ok_or_else(|| "The Rust edit changes the accepted Cargo module layout".into())
@@ -347,6 +348,7 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
 
 #[derive(Default)]
 struct State<'a> {
+    source: &'a str,
     nodes: Vec<RsxNode>,
     delimiters: SourceDelimiters,
     omissions: Vec<String>,
@@ -639,7 +641,15 @@ impl State<'_> {
         if setter == member {
             node.expressions.insert(property.into(), source);
             let projected = if let (false, Some(value)) = (qualified, value) {
-                columns.read(table, value)
+                let source = self.source;
+                let modules = self.modules;
+                let returned = if LocalRust::can_resolve_builder(value) {
+                    self.local_rust.get_or_insert_with(|| LocalRust::parse(source, value.span().byte_range().start, modules))
+                        .returned_builder(value)
+                } else {
+                    None
+                };
+                columns.read(table, value, returned)
             } else {
                 *columns = ColumnSource::Computed(source);
                 false
@@ -675,7 +685,7 @@ pub(crate) fn accepts_control(placement: Children, element: &Element) -> bool {
 }
 
 fn parse_body<'a>(
-    source: &str,
+    source: &'a str,
     tokens: TokenStream,
     catalog: &RsxCatalog,
     modules: Option<&'a RustModuleSources>,
@@ -685,6 +695,7 @@ fn parse_body<'a>(
         return Err("RSX preview needs one root control; wrap fragments in a panel".into());
     };
     let mut state = State {
+        source,
         modules,
         delimiters: SourceDelimiters::read(tokens),
         ..State::default()

@@ -212,6 +212,8 @@ For an RSX table, Columns edits an inline `ferroui_view::table_columns` array an
 
 For an RSX TreeDataGrid, the same flyout edits a `ferroui_view::tree_data_grid_columns` array. Edit the header, width, and binding under **Inner column** when working with a hierarchy. Its parent column sets the children and expansion paths. Choose **Edit cell templates** on a template column to open the display or editing body. [RSX TreeDataGrid example](vscode/authoring.md#edit-an-rsx-treedatagrid)
 
+An RSX table can also call a named function that returns a static column array. **Edit columns** shows the supplying function beside the table name. Use the source icon to reveal the array or a field in its owning file. Changes to a shared collection apply to its other consumers. When the collection comes from a companion Cargo module, undo or redo the edit from either the view tab or the module tab. [Shared Rust columns](vscode/authoring.md#edit-shared-rust-column-definitions)
+
 ## Edit item and cell templates
 
 Select an items control or an authored table column in Layers. Open **Edit item templates** beside the property search. The popup shows each supported slot and its current assignment. Use the canvas, source, new template, copy, or reset icon for that slot. To assign a resource, choose a visible template and confirm with the check icon.

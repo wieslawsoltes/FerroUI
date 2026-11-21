@@ -1,14 +1,15 @@
 use super::selection_workflows::{accepted_report, require_model};
 use super::{ensure_revision, node_id, schema as s, state};
-use crate::DesignerSession;
+use crate::{DesignerSession, DesignerWorkspace};
 use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::LineIndex;
-use ferroui_designer_rsx::RsxProjection;
+use ferroui_designer_rsx::{RsxProjection, RsxSourceEdit};
 use ferroui_designer_tools::{AuthoredColumn, ColumnChange, ColumnKind};
 use serde_json::{Value, json};
+use std::rc::Rc;
 
 const QUERY: &str = "designer_columns";
-const EDIT: &str = "designer_columns_edit";
+pub(super) const EDIT: &str = "designer_columns_edit";
 
 pub(super) fn handles(name: &str) -> bool {
     matches!(name, QUERY | EDIT)
@@ -87,6 +88,26 @@ pub(super) fn call(
     Ok(state(session))
 }
 
+pub(super) fn call_workspace(
+    workspace: &Rc<DesignerWorkspace>,
+    args: &Value,
+) -> Result<Value, String> {
+    let table = node_id(args, "table")?;
+    let session = workspace.session();
+    {
+        let session = session
+            .try_borrow()
+            .map_err(|_| "Designer is already processing a transaction")?;
+        ensure_revision(&session, args)?;
+        require_model(args, &columns_report(&session, table, None)?)?;
+    }
+    let change = serde_json::from_value(args.clone()).map_err(|error| error.to_string())?;
+    workspace.edit_workspace_columns(table, change)?;
+    workspace.refresh(true);
+    let session = session.borrow();
+    Ok(state(&session))
+}
+
 pub fn columns_report(
     session: &DesignerSession,
     node: u64,
@@ -98,11 +119,37 @@ pub fn columns_report(
     };
     let model = columns.model;
     // Keep byte ranges for native navigation and add UTF-16 ranges for editor clients.
-    let index =
-        LineIndex::new(rust.map_or_else(|| session.authored_source(), |(source, _)| source));
+    let modules = rust
+        .and_then(|(_, projection)| projection.module_sources())
+        .or_else(|| {
+            session
+                .rust
+                .as_ref()?
+                .module_sources()
+                .map(|modules| modules.as_ref())
+        });
+    let uri = columns
+        .source
+        .as_ref()
+        .and_then(|source| source.location.uri.as_deref());
+    let source = match uri {
+        Some(uri) => modules
+            .and_then(|modules| modules.source(uri))
+            .ok_or("The Rust column module changed")?
+            .source
+            .as_ref(),
+        None => rust.map_or_else(|| session.authored_source(), |(source, _)| source),
+    };
+    let index = LineIndex::new(source);
     let mut report = serde_json::to_value(&model).map_err(|error| error.to_string())?;
     if let Some(source) = columns.source {
-        report["sourceRange"] = json!(index.range(source).ok());
+        report["sourceRange"] = json!(index.range(source.location.span).ok());
+        if let Some(uri) = source.location.uri {
+            report["sourceUri"] = json!(uri);
+        }
+        if let Some(factory) = source.factory {
+            report["factory"] = json!(factory);
+        }
     }
     if let Some(rows) = report["columns"].as_array_mut() {
         for (row, column) in rows.iter_mut().zip(&model.columns) {
@@ -118,6 +165,19 @@ pub fn rust_column_source_plan(
     projection: &RsxProjection<'_>,
     args: &Value,
 ) -> Result<Vec<TextPatch>, String> {
+    let plan = rust_column_declaration_plan(session, source, projection, args)?;
+    if plan.source.uri.is_some() {
+        return Err("Apply this edit to its owning Rust module".into());
+    }
+    Ok(plan.patches)
+}
+
+pub fn rust_column_declaration_plan(
+    session: &DesignerSession,
+    source: &str,
+    projection: &RsxProjection<'_>,
+    args: &Value,
+) -> Result<RsxSourceEdit, String> {
     ensure_revision(session, args)?;
     let table = node_id(args, "table")?;
     require_model(

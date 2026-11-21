@@ -31,7 +31,7 @@ mod events;
 mod grid;
 #[path = "mcp_columns.rs"]
 mod columns;
-pub use columns::{columns_report, rust_column_source_plan};
+pub use columns::{columns_report, rust_column_declaration_plan, rust_column_source_plan};
 #[path = "mcp_rsx_style.rs"]
 mod rsx_style;
 pub use rsx_style::{rust_style_source_plan, RSX_STYLES, RSX_STYLE_EDIT};
@@ -604,6 +604,11 @@ impl UiToolProvider for DesignerMcp {
                 return Err("Starting project processes requires allow_input".into());
             }
             return workspace_tools::call(&workspace, name, args, permissions.allow_input);
+        }
+        if name == columns::EDIT {
+            if let Some(workspace) = self.workspace.as_ref().and_then(Weak::upgrade) {
+                return columns::call_workspace(&workspace, args);
+            }
         }
         let style_workspace = self.workspace.as_ref()
             .filter(|_| name == RSX_STYLE_EDIT).and_then(Weak::upgrade);

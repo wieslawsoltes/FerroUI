@@ -261,3 +261,71 @@ fn studio_edits_and_undoes_a_palette_module_from_either_tab() {
     assert_eq!(color(), "#FF254A70");
     window.close();
 }
+
+#[test]
+fn studio_column_edit_changes_the_companion_buffer_and_links_undo() {
+    const VIEW: &str = r#"use crate::account_columns::shared;
+fn view() { rsx! { TableView { name: "Accounts", columns: shared() } }; }
+"#;
+    const COLUMNS: &str = r#"use ferroui_view::{table_columns as list, table_column};
+pub fn shared() -> Columns {
+    list([table_column().header(/* 🧭 */ "Account")])
+}
+"#;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let root = std::env::temp_dir().join(format!("ferroui-studio-rust-columns-{}", std::process::id()));
+    fs::create_dir_all(&root).unwrap();
+    let files = Files(root.canonicalize().unwrap());
+    let manifest = files.0.join("Cargo.toml");
+    let main = files.0.join("main.rs");
+    let view_path = files.0.join("review.rs");
+    let column_path = files.0.join("account_columns.rs");
+    fs::write(&manifest, "[package]\nname='review'\nversion='0.0.0'\n").unwrap();
+    fs::write(&main, "mod account_columns; mod review; fn main() {}\n").unwrap();
+    fs::write(&view_path, VIEW).unwrap();
+    fs::write(&column_path, COLUMNS).unwrap();
+    let view_uri = file_uri(&view_path).unwrap();
+    let column_uri = file_uri(&column_path).unwrap();
+    let workspace = DesignerWorkspace::with_uri(VIEW, view_uri.clone()).unwrap();
+    workspace.set_solution(Solution {
+        format_version: 1, root: files.0.clone(),
+        projects: vec![ProjectDescriptor {
+            id: "review".into(), name: "review".into(), root: files.0.clone(), manifest_path: manifest,
+            documents: Vec::new(),
+            targets: vec![CargoTarget { name: "review".into(), kind: vec!["bin".into()], source: main }],
+        }],
+    }).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || {
+        let table = session.borrow().document().ast().find_name("Accounts").unwrap();
+        provider.call("designer_columns", &json!({"node": table}), Permissions::default()).unwrap()
+    };
+    let writes = Permissions { allow_property_writes: true, ..Default::default() };
+    let columns = read();
+    assert_eq!(columns["sourceUri"], column_uri);
+    assert_eq!(columns["factory"], "shared");
+    assert_eq!(columns["columns"][0]["label"], "Account");
+    let edit = json!({
+        "table": columns["table"], "column": columns["columns"][0]["node"],
+        "expected_model": columns["model"], "expected_revision": columns["revision"],
+        "action": "set", "field": "Header", "value": "Customer",
+    });
+    provider.call("designer_columns_edit", &edit, writes).unwrap();
+    assert!(provider.call("designer_columns_edit", &edit, writes).is_err());
+    assert_eq!(session.borrow().authored_source(), VIEW);
+    assert_eq!(read()["columns"][0]["label"], "Customer");
+    workspace.activate_document(&column_uri).unwrap();
+    assert_eq!(session.borrow().authored_source(), COLUMNS.replace("\"Account\"", "\"Customer\""));
+    assert_eq!(fs::read_to_string(&column_path).unwrap(), COLUMNS);
+    let revision = session.borrow().document().revision();
+    provider.call("designer_undo", &json!({"expected_revision": revision}), writes).unwrap();
+    assert_eq!(session.borrow().authored_source(), COLUMNS);
+    workspace.activate_document(&view_uri).unwrap();
+    assert_eq!(read()["columns"][0]["label"], "Account");
+    window.close();
+}

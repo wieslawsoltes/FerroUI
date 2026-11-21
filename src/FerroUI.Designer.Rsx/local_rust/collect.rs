@@ -108,7 +108,13 @@ impl<'ast> Visit<'ast> for Collector<'_> {
     fn visit_item(&mut self, item: &'ast Item) {
         match item {
             Item::Enum(item) => self.add(&item.ident, Binding::Opaque),
-            Item::Fn(item) => self.add(&item.sig.ident, Binding::Opaque),
+            Item::Fn(item) => {
+                let binding = super::returned_builder::definition(item)
+                    .map_or(Binding::Opaque, |expression| {
+                        Binding::Builder(Box::new(expression.clone()))
+                    });
+                self.add(&item.sig.ident, binding);
+            }
             Item::Static(item) => self.add(&item.ident, Binding::Opaque),
             Item::Struct(item) => self.add(&item.ident, Binding::Opaque),
             Item::Trait(item) => self.add(&item.ident, Binding::Opaque),

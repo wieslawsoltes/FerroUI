@@ -474,7 +474,7 @@ Open the designer for [column_workbench.rs](../../../editors/vscode/test/fixture
 
 Edit the header, width, visibility, resizing, alignment, and simple row binding. Enter a binding path such as `Customer.Name`. The editor writes `.binding_path("Customer.Name")` in Rust. For widths it writes the matching `GridLength` value. Drag columns to reorder them, or use the same keyboard and context-menu actions as in XAML. Each change updates the original Rust and takes one Undo step. Reordering retains comments that precede a column and its original builder expression.
 
-Open **Cell template** under the column to create or edit an inline RSX template. For a computed assignment such as `.cell_template(status_cell())`, choose **Reveal Template Assignment**. Use **Reveal Column Collection** in the **Columns** title bar if the collection is supplied by an expression such as `computed_columns()`. The XAML projection of an authored column collection is read-only. [Rust builders](../../declarative-ui.md#43-build-tableview-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
+Open **Cell template** under the column to create or edit an inline RSX template. For a computed assignment such as `.cell_template(status_cell())`, choose **Reveal Template Assignment**. Use **Reveal Column Collection** in the **Columns** title bar if the collection is supplied by an expression such as `computed_columns(account)`. The XAML projection of an authored column collection is read-only. [Rust builders](../../declarative-ui.md#43-build-tableview-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
 
 ### Edit an RSX TreeDataGrid
 
@@ -488,6 +488,31 @@ The isolated canvas shows the native headers. Launch the application to see the 
 ![Columns shows the RSX hierarchy, row header, text, checkbox, and template columns beside the grid preview](../images/vscode-rsx-tree-grid-columns.jpg)
 
 ![The designer isolates a TreeDataGrid cell editing template and selects its TextBox in Rust](../images/vscode-rsx-tree-grid-editing-template.jpg)
+
+### Edit shared Rust column definitions
+
+A view can call a named function to share a column collection across several tables.
+
+```rust
+use ferroui_base::{Ref, collections::FerroList};
+use ferroui_controls::TableViewColumn;
+use ferroui_view::prelude::*;
+
+fn account_columns() -> FerroList<Ref<TableViewColumn>> {
+    ferroui_view::table_columns([
+        ferroui_view::table_column().header("Account").binding_path("Customer.Name"),
+        ferroui_view::table_column().header("Region").binding_path("Region"),
+    ])
+}
+
+fn accounts() -> Element {
+    rsx! { TableView { name: "Accounts", columns: account_columns() } }
+}
+```
+
+Select the table and open **Columns**. Its title shows `account_columns()`. Use **Reveal Column Collection** to open the array in its owning Rust file. Edit or reorder columns in the same way as an inline collection. The change applies to every view that calls the function. If the definition comes from a companion module, use Undo in that module’s editor.
+
+Use a function with no parameters that returns a static `table_columns` or `tree_data_grid_columns` array directly. A single immutable local returned unchanged and explicit imports or aliases in the selected Cargo target are supported. For computed collections or cell-template expressions inside a shared collection, use **Reveal in Source** to edit Rust. [Studio workflow](../native-controls.md#edit-table-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
 
 ## Edit item and cell templates
 

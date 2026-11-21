@@ -15,7 +15,7 @@ fn accounts() -> Element {
                     ferroui_view::table_column().header("Status").cell_template(status_cell())
                 ]),
             }
-            TableView { name: "Computed", height: 90.0, columns: computed_columns() }
+            TableView { name: "Computed", height: 90.0, columns: computed_columns("Computed") }
         }
     }
 }
@@ -28,6 +28,6 @@ fn status_cell() -> std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate> 
     ferroui_view::template::<String, _>(|text| text_block().text(text))
 }
 
-fn computed_columns() -> ferroui_base::collections::FerroList<ferroui_base::Ref<ferroui_controls::TableViewColumn>> {
-    ferroui_view::table_columns([ferroui_view::table_column().header("Computed")])
+fn computed_columns(title: &'static str) -> ferroui_base::collections::FerroList<ferroui_base::Ref<ferroui_controls::TableViewColumn>> {
+    ferroui_view::table_columns([ferroui_view::table_column().header(title)])
 }
