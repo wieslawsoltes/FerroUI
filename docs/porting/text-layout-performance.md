@@ -7,9 +7,9 @@ to change the algorithms (not to tune the current ones). Part of #644. The measu
 ## 1. The case
 
 The gauntlet (`samples/GauntletBenchmark`) lays out about 5,100 texts a frame and changes the
-content width in every frame, so every wrapped text wraps again. Cranpose and egui draw it at 55
-and 53 frames a second on the same machine; FerroUI at about 20. Text layout is about 20 % of the
-UI thread there, and making and drawing glyph runs a large part of the render thread.
+content width in every frame, so every wrapped text wraps again. The comparison and egui draw it
+at 55 and 53 frames a second on the same machine; FerroUI at about 20. Text layout is about 20 % of
+the UI thread there, and making and drawing glyph runs a large part of the render thread.
 
 ## 2. The stages, measured
 
@@ -63,7 +63,7 @@ again at every new width.
 
 ## 3. How the others do it
 
-### Cranpose (`crates/cranpose-text`, `crates/cranpose-ui`)
+### The comparison
 
 Its own engine on HarfRust, `icu_segmenter` and `unicode-bidi`. It wins mostly by not doing the
 work when the width changes.
@@ -164,7 +164,7 @@ changes behavior upstream defines.
    runs, so the renderer's caches keyed by a run's identity keep hitting while the width moves.
 6. **A shared text service.** The prepared paragraphs and their caches (key: text, properties
    and paragraph properties; admission of a changed text on its second use; ageing by layout
-   pass) as a service any control or application uses, as Cranpose's layout cache is.
+   pass) as a service any control or application uses, as the comparison's layout cache is.
 
 7. **Edits.** A text that is set again with a small change (a word of a paragraph replaced, a
    message that grows as it streams) is laid out again whole: one frame of the `paragraph` scene

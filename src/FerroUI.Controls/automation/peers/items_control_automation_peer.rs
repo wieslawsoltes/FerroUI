@@ -31,9 +31,14 @@ impl ControlAutomationPeerImpl for ItemsControlAutomationPeer {}
 impl ItemsControlAutomationPeerImpl for ItemsControlAutomationPeer {
     fn scroller(this: &Self) -> Option<Rc<dyn IScrollProvider>> {
         if !this.searched_for_scrollable.get() {
+            // The element a list box scrolls its items with (`ListBox.Scroll`), read from the list
+            // box itself: a type check names the identity of the class, the property accessor would
+            // initialise it and keep the list box in every application with an items control (#612).
+            // An owner of another class has no such element.
             let scrollable = this
                 .owner()
-                .get_direct_value(ListBox::scroll_property())
+                .downcast_ref::<ListBox>()
+                .and_then(ListBox::scroll)
                 .and_then(|scrollable| scrollable.cast::<Control>());
             if let Some(scrollable) = scrollable {
                 let scroller = this.get_or_create(&scrollable).get_provider::<dyn IScrollProvider>();

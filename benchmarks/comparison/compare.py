@@ -15,7 +15,7 @@ it by itself). `local` is `ferroui-local/Cargo.toml`, which names the crates of 
 Both are built in one target folder (`CARGO_TARGET_DIR`, else `benchmarks/comparison/target`)
 and with the cargo of `FERROUI_CARGO` (else `cargo`).
 
-`run` starts the comparison's desktop harness (`upstream/benchmarks/compose-vs-cranpose/desktop.py`)
+`run` starts the comparison's desktop harness (`upstream/.../desktop.py`)
 once a side, with that side's program in the place of its `ferro` application, and prints the
 two beside each other: for a first start and a second start of each scenario, the frames a
 second over the run, the time to the first frame and the CPU a frame. The harness needs macOS,
