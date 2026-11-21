@@ -23131,10 +23131,11 @@ pub fn build_controls_winuicontrols_xaml(
         ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 12, 6)?, count_0.wrapping_add(330_i32));
     }
     rt::apply_theme_unit(active_theme_units(), 0, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 85, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 91, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 77, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 78, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 0, 1, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 87, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 93, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 94, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 95, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 96, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 97, 0, &context, &resource_dictionary_0)?;
@@ -23142,112 +23143,114 @@ pub fn build_controls_winuicontrols_xaml(
     rt::apply_theme_unit(active_theme_units(), 99, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 100, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 101, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 102, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 103, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 105, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 106, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 114, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 119, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 107, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 108, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 116, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 121, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_0 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_0);
-    rt::apply_theme_unit(active_theme_units(), 120, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_0);
     rt::apply_theme_unit(active_theme_units(), 122, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_0);
     rt::apply_theme_unit(active_theme_units(), 124, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 129, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 126, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 131, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 135, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 138, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 133, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 137, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 140, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_1 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_1);
-    rt::apply_theme_unit(active_theme_units(), 145, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 147, 0, &context, &resource_dictionary_0)?;
     ::core::mem::drop(namespace_scope_1);
-    rt::apply_theme_unit(active_theme_units(), 148, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 151, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 155, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 150, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 153, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 157, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 159, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 77, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 78, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 161, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 79, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 80, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 81, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 82, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 83, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 84, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
+    rt::apply_theme_unit(active_theme_units(), 85, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 86, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_2);
-    rt::apply_theme_unit(active_theme_units(), 87, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_2 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 88, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_2);
     rt::apply_theme_unit(active_theme_units(), 89, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 90, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_3);
+    rt::apply_theme_unit(active_theme_units(), 91, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_3 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 92, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_3);
+    rt::apply_theme_unit(active_theme_units(), 94, 0, &context, &resource_dictionary_0)?;
     let namespace_scope_4 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_3);
-    rt::apply_theme_unit(active_theme_units(), 102, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_4);
     rt::apply_theme_unit(active_theme_units(), 104, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 107, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 108, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_4);
+    rt::apply_theme_unit(active_theme_units(), 106, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 109, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 110, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 111, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 112, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 113, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 114, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 115, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 116, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 117, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 118, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 121, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 119, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 120, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 123, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4);
     rt::apply_theme_unit(active_theme_units(), 125, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_5);
-    rt::apply_theme_unit(active_theme_units(), 126, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_5 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_4);
     rt::apply_theme_unit(active_theme_units(), 127, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5);
+    ::core::mem::drop(namespace_scope_5);
     rt::apply_theme_unit(active_theme_units(), 128, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_6);
+    rt::apply_theme_unit(active_theme_units(), 129, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_6 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_5);
     rt::apply_theme_unit(active_theme_units(), 130, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_6);
     rt::apply_theme_unit(active_theme_units(), 132, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 133, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 134, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 135, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 136, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 137, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 138, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 139, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 140, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 141, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 142, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 143, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6);
     rt::apply_theme_unit(active_theme_units(), 144, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_7);
+    rt::apply_theme_unit(active_theme_units(), 145, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_7 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_6);
     rt::apply_theme_unit(active_theme_units(), 146, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 147, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_7);
+    rt::apply_theme_unit(active_theme_units(), 148, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 149, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 150, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 151, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 152, 0, &context, &resource_dictionary_0)?;
-    rt::apply_theme_unit(active_theme_units(), 153, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 154, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 155, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 156, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 158, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 160, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_8);
-    rt::apply_theme_unit(active_theme_units(), 161, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_8 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 162, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_8);
     rt::apply_theme_unit(active_theme_units(), 163, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 164, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 165, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 166, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 167, 0, &context, &resource_dictionary_0)?;
-    let namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 168, 0, &context, &resource_dictionary_0)?;
-    ::core::mem::drop(namespace_scope_9);
     rt::apply_theme_unit(active_theme_units(), 169, 0, &context, &resource_dictionary_0)?;
+    let namespace_scope_9 = rt::push_namespace_scope(&context, BUILD_CONTROLS_WINUICONTROLS_XAML_XML_NAMESPACES_2);
     rt::apply_theme_unit(active_theme_units(), 170, 0, &context, &resource_dictionary_0)?;
+    ::core::mem::drop(namespace_scope_9);
     rt::apply_theme_unit(active_theme_units(), 171, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 172, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 173, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 174, 0, &context, &resource_dictionary_0)?;
+    rt::apply_theme_unit(active_theme_units(), 175, 0, &context, &resource_dictionary_0)?;
     context.pop_parent();
     rt::invoked(::ferroui_base::styling::Styles::__markup_set_Resources(&styles_0, rt::cast(resource_dictionary_0.clone(), 12, 6)?), 12, 6)?;
     // Controls/WinUIControls.xaml(144,4) Content
@@ -23289,12 +23292,42 @@ fn build_controls_winuicontrols_xaml_unit_0(
     // Controls/WinUIControls.xaml(13,4) Content (resource)
     let deferred_1 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_2, 13, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::embedding::EmbeddableControlRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_1) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 1 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/OverlayPopupHost.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_1(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/WinUIControls.xaml(12,4) Content (resource)
     let deferred_2 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_4, 12, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::OverlayPopupHost as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_2) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 12, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 2 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PopupRoot.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_2(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/WinUIControls.xaml(14,4) Content (resource)
     let deferred_3 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_6, 14, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::PopupRoot as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_3) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
+    ::core::result::Result::Ok(())
+}
+
+/// Run 3 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `ambient` (#568).
+fn build_controls_winuicontrols_xaml_unit_3(
+    context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
+    dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
+) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
+    let context = ::core::clone::Clone::clone(context);
+    let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/WinUIControls.xaml(11,4) Content (resource)
     let deferred_4 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_8, 11, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ThemeVariantScope as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_4) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 11, 4)?;
@@ -23304,8 +23337,8 @@ fn build_controls_winuicontrols_xaml_unit_0(
     ::core::result::Result::Ok(())
 }
 
-/// Run 1 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Thumb.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_1(
+/// Run 4 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Thumb.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_4(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23317,8 +23350,8 @@ fn build_controls_winuicontrols_xaml_unit_1(
     ::core::result::Result::Ok(())
 }
 
-/// Run 2 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_2(
+/// Run 5 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Separator.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_5(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23330,8 +23363,8 @@ fn build_controls_winuicontrols_xaml_unit_2(
     ::core::result::Result::Ok(())
 }
 
-/// Run 3 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/FontIcon.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_3(
+/// Run 6 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/FontIcon.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_6(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23343,8 +23376,8 @@ fn build_controls_winuicontrols_xaml_unit_3(
     ::core::result::Result::Ok(())
 }
 
-/// Run 4 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SymbolIcon.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_4(
+/// Run 7 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SymbolIcon.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_7(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23356,8 +23389,8 @@ fn build_controls_winuicontrols_xaml_unit_4(
     ::core::result::Result::Ok(())
 }
 
-/// Run 5 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Label.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_5(
+/// Run 8 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Label.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_8(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23369,8 +23402,8 @@ fn build_controls_winuicontrols_xaml_unit_5(
     ::core::result::Result::Ok(())
 }
 
-/// Run 6 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ItemsControl.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_6(
+/// Run 9 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ItemsControl.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_9(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23382,8 +23415,8 @@ fn build_controls_winuicontrols_xaml_unit_6(
     ::core::result::Result::Ok(())
 }
 
-/// Run 7 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_7(
+/// Run 10 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/HeaderedContentControl.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_10(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23395,8 +23428,8 @@ fn build_controls_winuicontrols_xaml_unit_7(
     ::core::result::Result::Ok(())
 }
 
-/// Run 8 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_8(
+/// Run 11 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/GroupBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_11(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23408,8 +23441,8 @@ fn build_controls_winuicontrols_xaml_unit_8(
     ::core::result::Result::Ok(())
 }
 
-/// Run 9 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SelectableTextBlock.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_9(
+/// Run 12 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SelectableTextBlock.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_12(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23421,8 +23454,8 @@ fn build_controls_winuicontrols_xaml_unit_9(
     ::core::result::Result::Ok(())
 }
 
-/// Run 10 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_10(
+/// Run 13 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TransitioningContentControl.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_13(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23434,8 +23467,8 @@ fn build_controls_winuicontrols_xaml_unit_10(
     ::core::result::Result::Ok(())
 }
 
-/// Run 11 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_11(
+/// Run 14 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TextSelectionHandle.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_14(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23447,8 +23480,8 @@ fn build_controls_winuicontrols_xaml_unit_11(
     ::core::result::Result::Ok(())
 }
 
-/// Run 12 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/GridSplitter.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_12(
+/// Run 15 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/GridSplitter.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_15(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23460,8 +23493,8 @@ fn build_controls_winuicontrols_xaml_unit_12(
     ::core::result::Result::Ok(())
 }
 
-/// Run 13 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarDayButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_13(
+/// Run 16 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarDayButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_16(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23473,8 +23506,8 @@ fn build_controls_winuicontrols_xaml_unit_13(
     ::core::result::Result::Ok(())
 }
 
-/// Run 14 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_14(
+/// Run 17 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_17(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23486,8 +23519,8 @@ fn build_controls_winuicontrols_xaml_unit_14(
     ::core::result::Result::Ok(())
 }
 
-/// Run 15 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/InfoBar.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_15(
+/// Run 18 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/InfoBar.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_18(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23499,8 +23532,8 @@ fn build_controls_winuicontrols_xaml_unit_15(
     ::core::result::Result::Ok(())
 }
 
-/// Run 16 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ProgressRing.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_16(
+/// Run 19 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ProgressRing.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_19(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23512,8 +23545,8 @@ fn build_controls_winuicontrols_xaml_unit_16(
     ::core::result::Result::Ok(())
 }
 
-/// Run 17 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_17(
+/// Run 20 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/WindowNotificationManager.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_20(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23525,8 +23558,8 @@ fn build_controls_winuicontrols_xaml_unit_17(
     ::core::result::Result::Ok(())
 }
 
-/// Run 18 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_18(
+/// Run 21 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableViewCell.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_21(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23538,8 +23571,8 @@ fn build_controls_winuicontrols_xaml_unit_18(
     ::core::result::Result::Ok(())
 }
 
-/// Run 19 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_19(
+/// Run 22 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableViewRow.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_22(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23551,8 +23584,8 @@ fn build_controls_winuicontrols_xaml_unit_19(
     ::core::result::Result::Ok(())
 }
 
-/// Run 20 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabItem.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_20(
+/// Run 23 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabItem.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_23(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23564,8 +23597,8 @@ fn build_controls_winuicontrols_xaml_unit_20(
     ::core::result::Result::Ok(())
 }
 
-/// Run 21 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ContentPage.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_21(
+/// Run 24 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ContentPage.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_24(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23577,8 +23610,8 @@ fn build_controls_winuicontrols_xaml_unit_21(
     ::core::result::Result::Ok(())
 }
 
-/// Run 22 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Frame.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_22(
+/// Run 25 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Frame.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_25(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23590,8 +23623,8 @@ fn build_controls_winuicontrols_xaml_unit_22(
     ::core::result::Result::Ok(())
 }
 
-/// Run 23 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CarouselPage.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_23(
+/// Run 26 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CarouselPage.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_26(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23603,8 +23636,8 @@ fn build_controls_winuicontrols_xaml_unit_23(
     ::core::result::Result::Ok(())
 }
 
-/// Run 24 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CameraCaptureUI.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_24(
+/// Run 27 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CameraCaptureUI.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_27(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23616,8 +23649,8 @@ fn build_controls_winuicontrols_xaml_unit_24(
     ::core::result::Result::Ok(())
 }
 
-/// Run 25 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_25(
+/// Run 28 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ButtonSpinner.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_28(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23629,8 +23662,8 @@ fn build_controls_winuicontrols_xaml_unit_25(
     ::core::result::Result::Ok(())
 }
 
-/// Run 26 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RatingControl.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_26(
+/// Run 29 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RatingControl.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_29(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23642,8 +23675,8 @@ fn build_controls_winuicontrols_xaml_unit_26(
     ::core::result::Result::Ok(())
 }
 
-/// Run 27 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RefreshVisualizer.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_27(
+/// Run 30 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RefreshVisualizer.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_30(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23655,8 +23688,8 @@ fn build_controls_winuicontrols_xaml_unit_27(
     ::core::result::Result::Ok(())
 }
 
-/// Run 28 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MenuScrollViewer.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_28(
+/// Run 31 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MenuScrollViewer.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_31(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23667,8 +23700,8 @@ fn build_controls_winuicontrols_xaml_unit_28(
     ::core::result::Result::Ok(())
 }
 
-/// Run 29 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_29(
+/// Run 32 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ContextMenu.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_32(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23680,8 +23713,8 @@ fn build_controls_winuicontrols_xaml_unit_29(
     ::core::result::Result::Ok(())
 }
 
-/// Run 30 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TextBlock.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_30(
+/// Run 33 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TextBlock.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_33(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23714,8 +23747,8 @@ fn build_controls_winuicontrols_xaml_unit_30(
     ::core::result::Result::Ok(())
 }
 
-/// Run 31 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Button.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_31(
+/// Run 34 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Button.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_34(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23735,8 +23768,8 @@ fn build_controls_winuicontrols_xaml_unit_31(
     ::core::result::Result::Ok(())
 }
 
-/// Run 32 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RepeatButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_32(
+/// Run 35 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RepeatButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_35(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23750,8 +23783,8 @@ fn build_controls_winuicontrols_xaml_unit_32(
     ::core::result::Result::Ok(())
 }
 
-/// Run 33 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ToggleButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_33(
+/// Run 36 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ToggleButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_36(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23765,8 +23798,8 @@ fn build_controls_winuicontrols_xaml_unit_33(
     ::core::result::Result::Ok(())
 }
 
-/// Run 34 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RevealStyles.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_34(
+/// Run 37 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RevealStyles.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_37(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23781,8 +23814,8 @@ fn build_controls_winuicontrols_xaml_unit_34(
     ::core::result::Result::Ok(())
 }
 
-/// Run 35 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/HyperlinkButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_35(
+/// Run 38 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/HyperlinkButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_38(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23796,8 +23829,8 @@ fn build_controls_winuicontrols_xaml_unit_35(
     ::core::result::Result::Ok(())
 }
 
-/// Run 36 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CheckBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_36(
+/// Run 39 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CheckBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_39(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23811,8 +23844,8 @@ fn build_controls_winuicontrols_xaml_unit_36(
     ::core::result::Result::Ok(())
 }
 
-/// Run 37 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RadioButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_37(
+/// Run 40 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RadioButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_40(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23826,8 +23859,8 @@ fn build_controls_winuicontrols_xaml_unit_37(
     ::core::result::Result::Ok(())
 }
 
-/// Run 38 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_38(
+/// Run 41 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ScrollBar.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_41(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23857,8 +23890,8 @@ fn build_controls_winuicontrols_xaml_unit_38(
     ::core::result::Result::Ok(())
 }
 
-/// Run 39 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_39(
+/// Run 42 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ScrollViewer.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_42(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23874,8 +23907,8 @@ fn build_controls_winuicontrols_xaml_unit_39(
     ::core::result::Result::Ok(())
 }
 
-/// Run 40 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_40(
+/// Run 43 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TextBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_43(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23899,8 +23932,8 @@ fn build_controls_winuicontrols_xaml_unit_40(
     ::core::result::Result::Ok(())
 }
 
-/// Run 41 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ToolTip.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_41(
+/// Run 44 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ToolTip.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_44(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23914,8 +23947,8 @@ fn build_controls_winuicontrols_xaml_unit_41(
     ::core::result::Result::Ok(())
 }
 
-/// Run 42 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_42(
+/// Run 45 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ProgressBar.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_45(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23931,8 +23964,8 @@ fn build_controls_winuicontrols_xaml_unit_42(
     ::core::result::Result::Ok(())
 }
 
-/// Run 43 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PathIcon.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_43(
+/// Run 46 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PathIcon.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_46(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23946,8 +23979,8 @@ fn build_controls_winuicontrols_xaml_unit_43(
     ::core::result::Result::Ok(())
 }
 
-/// Run 44 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DataValidationErrors.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_44(
+/// Run 47 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DataValidationErrors.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_47(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23961,8 +23994,8 @@ fn build_controls_winuicontrols_xaml_unit_44(
     ::core::result::Result::Ok(())
 }
 
-/// Run 45 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_45(
+/// Run 48 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DateTimePickerShared.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_48(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -23981,8 +24014,8 @@ fn build_controls_winuicontrols_xaml_unit_45(
     ::core::result::Result::Ok(())
 }
 
-/// Run 46 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_46(
+/// Run 49 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarItem.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_49(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24000,8 +24033,8 @@ fn build_controls_winuicontrols_xaml_unit_46(
     ::core::result::Result::Ok(())
 }
 
-/// Run 47 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Calendar.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_47(
+/// Run 50 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Calendar.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_50(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24015,8 +24048,8 @@ fn build_controls_winuicontrols_xaml_unit_47(
     ::core::result::Result::Ok(())
 }
 
-/// Run 48 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_48(
+/// Run 51 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CalendarDatePicker.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_51(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24034,8 +24067,8 @@ fn build_controls_winuicontrols_xaml_unit_48(
     ::core::result::Result::Ok(())
 }
 
-/// Run 49 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_49(
+/// Run 52 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DatePicker.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_52(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24056,8 +24089,8 @@ fn build_controls_winuicontrols_xaml_unit_49(
     ::core::result::Result::Ok(())
 }
 
-/// Run 50 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_50(
+/// Run 53 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TimePicker.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_53(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24074,8 +24107,8 @@ fn build_controls_winuicontrols_xaml_unit_50(
     ::core::result::Result::Ok(())
 }
 
-/// Run 51 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/WindowDrawnDecorations.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_51(
+/// Run 54 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/WindowDrawnDecorations.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_54(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24102,8 +24135,8 @@ fn build_controls_winuicontrols_xaml_unit_51(
     ::core::result::Result::Ok(())
 }
 
-/// Run 52 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NotificationCard.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_52(
+/// Run 55 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NotificationCard.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_55(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24117,8 +24150,8 @@ fn build_controls_winuicontrols_xaml_unit_52(
     ::core::result::Result::Ok(())
 }
 
-/// Run 53 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/InfoBadge.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_53(
+/// Run 56 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/InfoBadge.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_56(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24162,8 +24195,8 @@ fn build_controls_winuicontrols_xaml_unit_53(
     ::core::result::Result::Ok(())
 }
 
-/// Run 54 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Pivot.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_54(
+/// Run 57 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Pivot.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_57(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24199,8 +24232,8 @@ fn build_controls_winuicontrols_xaml_unit_54(
     ::core::result::Result::Ok(())
 }
 
-/// Run 55 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SwipeControl.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_55(
+/// Run 58 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SwipeControl.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_58(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24216,8 +24249,8 @@ fn build_controls_winuicontrols_xaml_unit_55(
     ::core::result::Result::Ok(())
 }
 
-/// Run 56 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TitleBar.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_56(
+/// Run 59 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TitleBar.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_59(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24231,8 +24264,8 @@ fn build_controls_winuicontrols_xaml_unit_56(
     ::core::result::Result::Ok(())
 }
 
-/// Run 57 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_57(
+/// Run 60 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableView.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_60(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24246,8 +24279,8 @@ fn build_controls_winuicontrols_xaml_unit_57(
     ::core::result::Result::Ok(())
 }
 
-/// Run 58 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_58(
+/// Run 61 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TableViewColumnHeader.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_61(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24261,8 +24294,8 @@ fn build_controls_winuicontrols_xaml_unit_58(
     ::core::result::Result::Ok(())
 }
 
-/// Run 59 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_59(
+/// Run 62 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ManagedFileChooser.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_62(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24285,8 +24318,8 @@ fn build_controls_winuicontrols_xaml_unit_59(
     ::core::result::Result::Ok(())
 }
 
-/// Run 60 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabStrip.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_60(
+/// Run 63 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabStrip.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_63(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24300,8 +24333,8 @@ fn build_controls_winuicontrols_xaml_unit_60(
     ::core::result::Result::Ok(())
 }
 
-/// Run 61 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabStripItem.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_61(
+/// Run 64 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabStripItem.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_64(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24315,8 +24348,8 @@ fn build_controls_winuicontrols_xaml_unit_61(
     ::core::result::Result::Ok(())
 }
 
-/// Run 62 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabControl.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_62(
+/// Run 65 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabControl.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_65(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24338,8 +24371,8 @@ fn build_controls_winuicontrols_xaml_unit_62(
     ::core::result::Result::Ok(())
 }
 
-/// Run 63 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_63(
+/// Run 66 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SplitView.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_66(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24353,8 +24386,8 @@ fn build_controls_winuicontrols_xaml_unit_63(
     ::core::result::Result::Ok(())
 }
 
-/// Run 64 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_64(
+/// Run 67 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TabbedPage.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_67(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24370,8 +24403,8 @@ fn build_controls_winuicontrols_xaml_unit_64(
     ::core::result::Result::Ok(())
 }
 
-/// Run 65 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_65(
+/// Run 68 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NavigationPage.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_68(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24387,8 +24420,8 @@ fn build_controls_winuicontrols_xaml_unit_65(
     ::core::result::Result::Ok(())
 }
 
-/// Run 66 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_66(
+/// Run 69 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DrawerPage.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_69(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24412,8 +24445,8 @@ fn build_controls_winuicontrols_xaml_unit_66(
     ::core::result::Result::Ok(())
 }
 
-/// Run 67 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NavigationView.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_67(
+/// Run 70 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NavigationView.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_70(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24436,8 +24469,8 @@ fn build_controls_winuicontrols_xaml_unit_67(
     ::core::result::Result::Ok(())
 }
 
-/// Run 68 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Carousel.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_68(
+/// Run 71 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Carousel.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_71(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24453,8 +24486,8 @@ fn build_controls_winuicontrols_xaml_unit_68(
     ::core::result::Result::Ok(())
 }
 
-/// Run 69 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_69(
+/// Run 72 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/CommandBar.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_72(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24491,8 +24524,8 @@ fn build_controls_winuicontrols_xaml_unit_69(
     ::core::result::Result::Ok(())
 }
 
-/// Run 70 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DropDownButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_70(
+/// Run 73 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/DropDownButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_73(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24506,8 +24539,8 @@ fn build_controls_winuicontrols_xaml_unit_70(
     ::core::result::Result::Ok(())
 }
 
-/// Run 71 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_71(
+/// Run 74 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/SplitButton.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_74(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24527,8 +24560,8 @@ fn build_controls_winuicontrols_xaml_unit_71(
     ::core::result::Result::Ok(())
 }
 
-/// Run 72 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_72(
+/// Run 75 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ToggleSwitch.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_75(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24542,8 +24575,8 @@ fn build_controls_winuicontrols_xaml_unit_72(
     ::core::result::Result::Ok(())
 }
 
-/// Run 73 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_73(
+/// Run 76 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Slider.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_76(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24565,8 +24598,8 @@ fn build_controls_winuicontrols_xaml_unit_73(
     ::core::result::Result::Ok(())
 }
 
-/// Run 74 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MediaTransportControls.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_74(
+/// Run 77 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MediaTransportControls.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_77(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24586,8 +24619,8 @@ fn build_controls_winuicontrols_xaml_unit_74(
     ::core::result::Result::Ok(())
 }
 
-/// Run 75 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NumericUpDown.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_75(
+/// Run 78 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NumericUpDown.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_78(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24609,8 +24642,8 @@ fn build_controls_winuicontrols_xaml_unit_75(
     ::core::result::Result::Ok(())
 }
 
-/// Run 76 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NumberBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_76(
+/// Run 79 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/NumberBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_79(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24624,8 +24657,8 @@ fn build_controls_winuicontrols_xaml_unit_76(
     ::core::result::Result::Ok(())
 }
 
-/// Run 77 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_77(
+/// Run 80 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Expander.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_80(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24647,8 +24680,8 @@ fn build_controls_winuicontrols_xaml_unit_77(
     ::core::result::Result::Ok(())
 }
 
-/// Run 78 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_78(
+/// Run 81 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PipsPager.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_81(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24676,8 +24709,8 @@ fn build_controls_winuicontrols_xaml_unit_78(
     ::core::result::Result::Ok(())
 }
 
-/// Run 79 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PersonPicture.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_79(
+/// Run 82 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PersonPicture.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_82(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24691,8 +24724,8 @@ fn build_controls_winuicontrols_xaml_unit_79(
     ::core::result::Result::Ok(())
 }
 
-/// Run 80 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PagerControl.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_80(
+/// Run 83 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/PagerControl.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_83(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24708,8 +24741,8 @@ fn build_controls_winuicontrols_xaml_unit_80(
     ::core::result::Result::Ok(())
 }
 
-/// Run 81 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_81(
+/// Run 84 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RefreshContainer.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_84(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24723,8 +24756,8 @@ fn build_controls_winuicontrols_xaml_unit_81(
     ::core::result::Result::Ok(())
 }
 
-/// Run 82 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/FlyoutPresenter.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_82(
+/// Run 85 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/FlyoutPresenter.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_85(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24738,8 +24771,8 @@ fn build_controls_winuicontrols_xaml_unit_82(
     ::core::result::Result::Ok(())
 }
 
-/// Run 83 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MenuFlyoutPresenter.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_83(
+/// Run 86 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MenuFlyoutPresenter.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_86(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24753,8 +24786,8 @@ fn build_controls_winuicontrols_xaml_unit_83(
     ::core::result::Result::Ok(())
 }
 
-/// Run 84 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_84(
+/// Run 87 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/MenuItem.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_87(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24778,8 +24811,8 @@ fn build_controls_winuicontrols_xaml_unit_84(
     ::core::result::Result::Ok(())
 }
 
-/// Run 85 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_85(
+/// Run 88 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/Menu.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_88(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24795,8 +24828,8 @@ fn build_controls_winuicontrols_xaml_unit_85(
     ::core::result::Result::Ok(())
 }
 
-/// Run 86 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ListBoxItem.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_86(
+/// Run 89 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ListBoxItem.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_89(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24814,8 +24847,8 @@ fn build_controls_winuicontrols_xaml_unit_86(
     ::core::result::Result::Ok(())
 }
 
-/// Run 87 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ListBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_87(
+/// Run 90 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ListBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_90(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24829,8 +24862,8 @@ fn build_controls_winuicontrols_xaml_unit_87(
     ::core::result::Result::Ok(())
 }
 
-/// Run 88 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ListView.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_88(
+/// Run 91 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ListView.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_91(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24847,8 +24880,8 @@ fn build_controls_winuicontrols_xaml_unit_88(
     ::core::result::Result::Ok(())
 }
 
-/// Run 89 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/GridView.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_89(
+/// Run 92 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/GridView.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_92(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24867,8 +24900,8 @@ fn build_controls_winuicontrols_xaml_unit_89(
     ::core::result::Result::Ok(())
 }
 
-/// Run 90 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ComboBoxItem.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_90(
+/// Run 93 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ComboBoxItem.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_93(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24884,8 +24917,8 @@ fn build_controls_winuicontrols_xaml_unit_90(
     ::core::result::Result::Ok(())
 }
 
-/// Run 91 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ComboBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_91(
+/// Run 94 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/ComboBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_94(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24901,8 +24934,8 @@ fn build_controls_winuicontrols_xaml_unit_91(
     ::core::result::Result::Ok(())
 }
 
-/// Run 92 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_92(
+/// Run 95 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TreeViewItem.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_95(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24920,8 +24953,8 @@ fn build_controls_winuicontrols_xaml_unit_92(
     ::core::result::Result::Ok(())
 }
 
-/// Run 93 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_93(
+/// Run 96 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/TreeView.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_96(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24935,8 +24968,8 @@ fn build_controls_winuicontrols_xaml_unit_93(
     ::core::result::Result::Ok(())
 }
 
-/// Run 94 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/AutoCompleteBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_94(
+/// Run 97 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/AutoCompleteBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_97(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24954,8 +24987,8 @@ fn build_controls_winuicontrols_xaml_unit_94(
     ::core::result::Result::Ok(())
 }
 
-/// Run 95 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/AutoSuggestBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_95(
+/// Run 98 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/AutoSuggestBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_98(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24971,8 +25004,8 @@ fn build_controls_winuicontrols_xaml_unit_95(
     ::core::result::Result::Ok(())
 }
 
-/// Run 96 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RadioButtons.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_96(
+/// Run 99 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RadioButtons.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_99(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -24986,8 +25019,8 @@ fn build_controls_winuicontrols_xaml_unit_96(
     ::core::result::Result::Ok(())
 }
 
-/// Run 97 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RichEditBox.xaml` (#568).
-fn build_controls_winuicontrols_xaml_unit_97(
+/// Run 100 of `build_controls_winuicontrols_xaml` (`Controls/WinUIControls.xaml`): entries of the unit `Controls/RichEditBox.xaml` (#568).
+fn build_controls_winuicontrols_xaml_unit_100(
     context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
     dictionary: &::ferroui_base::Ref<::ferroui_base::controls::ResourceDictionary>,
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
@@ -91969,7 +92002,7 @@ fn build_densitystyles_compact_xaml_deferred_0(
 }
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_winuicontrols_xaml_unit_0] };
+pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_winuicontrols_xaml_unit_0, build_controls_winuicontrols_xaml_unit_3] };
 
 /// The unit `Resources/Generic.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_1: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Generic.xaml", index: 1, runs: &[populate_winuitheme_xaml_unit_11, populate_winuitheme_xaml_unit_80, populate_winuitheme_xaml_unit_149, populate_winuitheme_xaml_unit_218] };
@@ -92199,300 +92232,306 @@ pub static THEME_UNIT_75: rt::ThemeUnit = rt::ThemeUnit { name: "Resources/Glyph
 /// The unit `Strings/InvariantResources.xaml` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_76: rt::ThemeUnit = rt::ThemeUnit { name: "Strings/InvariantResources.xaml", index: 76, runs: &[populate_winuitheme_xaml_unit_262] };
 
+/// The unit `Controls/OverlayPopupHost.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/OverlayPopupHost.xaml", index: 77, runs: &[build_controls_winuicontrols_xaml_unit_1] };
+
+/// The unit `Controls/PopupRoot.xaml` of the theme (#568): its runs, in the order the builds apply them.
+pub static THEME_UNIT_78: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PopupRoot.xaml", index: 78, runs: &[build_controls_winuicontrols_xaml_unit_2] };
+
 /// The unit `Controls/TextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_77: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBlock.xaml", index: 77, runs: &[build_controls_winuicontrols_xaml_unit_30] };
+pub static THEME_UNIT_79: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBlock.xaml", index: 79, runs: &[build_controls_winuicontrols_xaml_unit_33] };
 
 /// The unit `Controls/Button.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_78: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 78, runs: &[build_controls_winuicontrols_xaml_unit_31] };
+pub static THEME_UNIT_80: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Button.xaml", index: 80, runs: &[build_controls_winuicontrols_xaml_unit_34] };
 
 /// The unit `Controls/RepeatButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_79: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 79, runs: &[build_controls_winuicontrols_xaml_unit_32] };
+pub static THEME_UNIT_81: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RepeatButton.xaml", index: 81, runs: &[build_controls_winuicontrols_xaml_unit_35] };
 
 /// The unit `Controls/ToggleButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_80: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 80, runs: &[build_controls_winuicontrols_xaml_unit_33] };
+pub static THEME_UNIT_82: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleButton.xaml", index: 82, runs: &[build_controls_winuicontrols_xaml_unit_36] };
 
 /// The unit `Controls/RevealStyles.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_81: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RevealStyles.xaml", index: 81, runs: &[build_controls_winuicontrols_xaml_unit_34] };
+pub static THEME_UNIT_83: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RevealStyles.xaml", index: 83, runs: &[build_controls_winuicontrols_xaml_unit_37] };
 
 /// The unit `Controls/HyperlinkButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_82: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 82, runs: &[build_controls_winuicontrols_xaml_unit_35] };
+pub static THEME_UNIT_84: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HyperlinkButton.xaml", index: 84, runs: &[build_controls_winuicontrols_xaml_unit_38] };
 
 /// The unit `Controls/CheckBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_83: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 83, runs: &[build_controls_winuicontrols_xaml_unit_36] };
+pub static THEME_UNIT_85: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CheckBox.xaml", index: 85, runs: &[build_controls_winuicontrols_xaml_unit_39] };
 
 /// The unit `Controls/RadioButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_84: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 84, runs: &[build_controls_winuicontrols_xaml_unit_37] };
+pub static THEME_UNIT_86: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButton.xaml", index: 86, runs: &[build_controls_winuicontrols_xaml_unit_40] };
 
 /// The unit `Controls/Thumb.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_85: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Thumb.xaml", index: 85, runs: &[build_controls_winuicontrols_xaml_unit_1] };
+pub static THEME_UNIT_87: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Thumb.xaml", index: 87, runs: &[build_controls_winuicontrols_xaml_unit_4] };
 
 /// The unit `Controls/ScrollBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_86: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 86, runs: &[build_controls_winuicontrols_xaml_unit_38] };
+pub static THEME_UNIT_88: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollBar.xaml", index: 88, runs: &[build_controls_winuicontrols_xaml_unit_41] };
 
 /// The unit `Controls/ScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_87: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 87, runs: &[build_controls_winuicontrols_xaml_unit_39] };
+pub static THEME_UNIT_89: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ScrollViewer.xaml", index: 89, runs: &[build_controls_winuicontrols_xaml_unit_42] };
 
 /// The unit `Controls/TextBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_88: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 88, runs: &[build_controls_winuicontrols_xaml_unit_40] };
+pub static THEME_UNIT_90: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextBox.xaml", index: 90, runs: &[build_controls_winuicontrols_xaml_unit_43] };
 
 /// The unit `Controls/ToolTip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_89: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 89, runs: &[build_controls_winuicontrols_xaml_unit_41] };
+pub static THEME_UNIT_91: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToolTip.xaml", index: 91, runs: &[build_controls_winuicontrols_xaml_unit_44] };
 
 /// The unit `Controls/ProgressBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_90: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 90, runs: &[build_controls_winuicontrols_xaml_unit_42] };
+pub static THEME_UNIT_92: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressBar.xaml", index: 92, runs: &[build_controls_winuicontrols_xaml_unit_45] };
 
 /// The unit `Controls/Separator.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_91: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 91, runs: &[build_controls_winuicontrols_xaml_unit_2] };
+pub static THEME_UNIT_93: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Separator.xaml", index: 93, runs: &[build_controls_winuicontrols_xaml_unit_5] };
 
 /// The unit `Controls/PathIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_92: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 92, runs: &[build_controls_winuicontrols_xaml_unit_43] };
+pub static THEME_UNIT_94: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PathIcon.xaml", index: 94, runs: &[build_controls_winuicontrols_xaml_unit_46] };
 
 /// The unit `Controls/FontIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_93: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FontIcon.xaml", index: 93, runs: &[build_controls_winuicontrols_xaml_unit_3] };
+pub static THEME_UNIT_95: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FontIcon.xaml", index: 95, runs: &[build_controls_winuicontrols_xaml_unit_6] };
 
 /// The unit `Controls/SymbolIcon.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_94: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SymbolIcon.xaml", index: 94, runs: &[build_controls_winuicontrols_xaml_unit_4] };
+pub static THEME_UNIT_96: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SymbolIcon.xaml", index: 96, runs: &[build_controls_winuicontrols_xaml_unit_7] };
 
 /// The unit `Controls/Label.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_95: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 95, runs: &[build_controls_winuicontrols_xaml_unit_5] };
+pub static THEME_UNIT_97: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Label.xaml", index: 97, runs: &[build_controls_winuicontrols_xaml_unit_8] };
 
 /// The unit `Controls/ItemsControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_96: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 96, runs: &[build_controls_winuicontrols_xaml_unit_6] };
+pub static THEME_UNIT_98: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ItemsControl.xaml", index: 98, runs: &[build_controls_winuicontrols_xaml_unit_9] };
 
 /// The unit `Controls/HeaderedContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_97: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 97, runs: &[build_controls_winuicontrols_xaml_unit_7] };
+pub static THEME_UNIT_99: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/HeaderedContentControl.xaml", index: 99, runs: &[build_controls_winuicontrols_xaml_unit_10] };
 
 /// The unit `Controls/GroupBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_98: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 98, runs: &[build_controls_winuicontrols_xaml_unit_8] };
+pub static THEME_UNIT_100: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GroupBox.xaml", index: 100, runs: &[build_controls_winuicontrols_xaml_unit_11] };
 
 /// The unit `Controls/SelectableTextBlock.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_99: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 99, runs: &[build_controls_winuicontrols_xaml_unit_9] };
+pub static THEME_UNIT_101: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SelectableTextBlock.xaml", index: 101, runs: &[build_controls_winuicontrols_xaml_unit_12] };
 
 /// The unit `Controls/TransitioningContentControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_100: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 100, runs: &[build_controls_winuicontrols_xaml_unit_10] };
+pub static THEME_UNIT_102: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TransitioningContentControl.xaml", index: 102, runs: &[build_controls_winuicontrols_xaml_unit_13] };
 
 /// The unit `Controls/TextSelectionHandle.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_101: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 101, runs: &[build_controls_winuicontrols_xaml_unit_11] };
+pub static THEME_UNIT_103: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TextSelectionHandle.xaml", index: 103, runs: &[build_controls_winuicontrols_xaml_unit_14] };
 
 /// The unit `Controls/DataValidationErrors.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_102: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 102, runs: &[build_controls_winuicontrols_xaml_unit_44] };
+pub static THEME_UNIT_104: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DataValidationErrors.xaml", index: 104, runs: &[build_controls_winuicontrols_xaml_unit_47] };
 
 /// The unit `Controls/GridSplitter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_103: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 103, runs: &[build_controls_winuicontrols_xaml_unit_12] };
+pub static THEME_UNIT_105: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridSplitter.xaml", index: 105, runs: &[build_controls_winuicontrols_xaml_unit_15] };
 
 /// The unit `Controls/DateTimePickerShared.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_104: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 104, runs: &[build_controls_winuicontrols_xaml_unit_45] };
+pub static THEME_UNIT_106: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DateTimePickerShared.xaml", index: 106, runs: &[build_controls_winuicontrols_xaml_unit_48] };
 
 /// The unit `Controls/CalendarDayButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_105: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 105, runs: &[build_controls_winuicontrols_xaml_unit_13] };
+pub static THEME_UNIT_107: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDayButton.xaml", index: 107, runs: &[build_controls_winuicontrols_xaml_unit_16] };
 
 /// The unit `Controls/CalendarButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_106: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 106, runs: &[build_controls_winuicontrols_xaml_unit_14] };
+pub static THEME_UNIT_108: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarButton.xaml", index: 108, runs: &[build_controls_winuicontrols_xaml_unit_17] };
 
 /// The unit `Controls/CalendarItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_107: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 107, runs: &[build_controls_winuicontrols_xaml_unit_46] };
+pub static THEME_UNIT_109: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarItem.xaml", index: 109, runs: &[build_controls_winuicontrols_xaml_unit_49] };
 
 /// The unit `Controls/Calendar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_108: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 108, runs: &[build_controls_winuicontrols_xaml_unit_47] };
+pub static THEME_UNIT_110: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Calendar.xaml", index: 110, runs: &[build_controls_winuicontrols_xaml_unit_50] };
 
 /// The unit `Controls/CalendarDatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_109: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 109, runs: &[build_controls_winuicontrols_xaml_unit_48] };
+pub static THEME_UNIT_111: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CalendarDatePicker.xaml", index: 111, runs: &[build_controls_winuicontrols_xaml_unit_51] };
 
 /// The unit `Controls/DatePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_110: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 110, runs: &[build_controls_winuicontrols_xaml_unit_49] };
+pub static THEME_UNIT_112: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DatePicker.xaml", index: 112, runs: &[build_controls_winuicontrols_xaml_unit_52] };
 
 /// The unit `Controls/TimePicker.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_111: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 111, runs: &[build_controls_winuicontrols_xaml_unit_50] };
+pub static THEME_UNIT_113: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TimePicker.xaml", index: 113, runs: &[build_controls_winuicontrols_xaml_unit_53] };
 
 /// The unit `Controls/WindowDrawnDecorations.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_112: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 112, runs: &[build_controls_winuicontrols_xaml_unit_51] };
+pub static THEME_UNIT_114: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowDrawnDecorations.xaml", index: 114, runs: &[build_controls_winuicontrols_xaml_unit_54] };
 
 /// The unit `Controls/NotificationCard.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_113: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 113, runs: &[build_controls_winuicontrols_xaml_unit_52] };
+pub static THEME_UNIT_115: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NotificationCard.xaml", index: 115, runs: &[build_controls_winuicontrols_xaml_unit_55] };
 
 /// The unit `Controls/InfoBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_114: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBar.xaml", index: 114, runs: &[build_controls_winuicontrols_xaml_unit_15] };
+pub static THEME_UNIT_116: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBar.xaml", index: 116, runs: &[build_controls_winuicontrols_xaml_unit_18] };
 
 /// The unit `Controls/InfoBadge.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_115: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBadge.xaml", index: 115, runs: &[build_controls_winuicontrols_xaml_unit_53] };
+pub static THEME_UNIT_117: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/InfoBadge.xaml", index: 117, runs: &[build_controls_winuicontrols_xaml_unit_56] };
 
 /// The unit `Controls/Pivot.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_116: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Pivot.xaml", index: 116, runs: &[build_controls_winuicontrols_xaml_unit_54] };
+pub static THEME_UNIT_118: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Pivot.xaml", index: 118, runs: &[build_controls_winuicontrols_xaml_unit_57] };
 
 /// The unit `Controls/SwipeControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_117: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SwipeControl.xaml", index: 117, runs: &[build_controls_winuicontrols_xaml_unit_55] };
+pub static THEME_UNIT_119: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SwipeControl.xaml", index: 119, runs: &[build_controls_winuicontrols_xaml_unit_58] };
 
 /// The unit `Controls/TitleBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_118: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TitleBar.xaml", index: 118, runs: &[build_controls_winuicontrols_xaml_unit_56] };
+pub static THEME_UNIT_120: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TitleBar.xaml", index: 120, runs: &[build_controls_winuicontrols_xaml_unit_59] };
 
 /// The unit `Controls/ProgressRing.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_119: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressRing.xaml", index: 119, runs: &[build_controls_winuicontrols_xaml_unit_16] };
+pub static THEME_UNIT_121: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ProgressRing.xaml", index: 121, runs: &[build_controls_winuicontrols_xaml_unit_19] };
 
 /// The unit `Controls/WindowNotificationManager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_120: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 120, runs: &[build_controls_winuicontrols_xaml_unit_17] };
+pub static THEME_UNIT_122: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/WindowNotificationManager.xaml", index: 122, runs: &[build_controls_winuicontrols_xaml_unit_20] };
 
 /// The unit `Controls/TableView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_121: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 121, runs: &[build_controls_winuicontrols_xaml_unit_57] };
+pub static THEME_UNIT_123: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableView.xaml", index: 123, runs: &[build_controls_winuicontrols_xaml_unit_60] };
 
 /// The unit `Controls/TableViewCell.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_122: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 122, runs: &[build_controls_winuicontrols_xaml_unit_18] };
+pub static THEME_UNIT_124: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewCell.xaml", index: 124, runs: &[build_controls_winuicontrols_xaml_unit_21] };
 
 /// The unit `Controls/TableViewColumnHeader.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_123: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 123, runs: &[build_controls_winuicontrols_xaml_unit_58] };
+pub static THEME_UNIT_125: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewColumnHeader.xaml", index: 125, runs: &[build_controls_winuicontrols_xaml_unit_61] };
 
 /// The unit `Controls/TableViewRow.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_124: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 124, runs: &[build_controls_winuicontrols_xaml_unit_19] };
+pub static THEME_UNIT_126: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TableViewRow.xaml", index: 126, runs: &[build_controls_winuicontrols_xaml_unit_22] };
 
 /// The unit `Controls/ManagedFileChooser.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_125: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 125, runs: &[build_controls_winuicontrols_xaml_unit_59] };
+pub static THEME_UNIT_127: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ManagedFileChooser.xaml", index: 127, runs: &[build_controls_winuicontrols_xaml_unit_62] };
 
 /// The unit `Controls/TabStrip.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_126: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 126, runs: &[build_controls_winuicontrols_xaml_unit_60] };
+pub static THEME_UNIT_128: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStrip.xaml", index: 128, runs: &[build_controls_winuicontrols_xaml_unit_63] };
 
 /// The unit `Controls/TabStripItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_127: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 127, runs: &[build_controls_winuicontrols_xaml_unit_61] };
+pub static THEME_UNIT_129: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabStripItem.xaml", index: 129, runs: &[build_controls_winuicontrols_xaml_unit_64] };
 
 /// The unit `Controls/TabControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_128: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 128, runs: &[build_controls_winuicontrols_xaml_unit_62] };
+pub static THEME_UNIT_130: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabControl.xaml", index: 130, runs: &[build_controls_winuicontrols_xaml_unit_65] };
 
 /// The unit `Controls/TabItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_129: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 129, runs: &[build_controls_winuicontrols_xaml_unit_20] };
+pub static THEME_UNIT_131: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabItem.xaml", index: 131, runs: &[build_controls_winuicontrols_xaml_unit_23] };
 
 /// The unit `Controls/SplitView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_130: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 130, runs: &[build_controls_winuicontrols_xaml_unit_63] };
+pub static THEME_UNIT_132: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitView.xaml", index: 132, runs: &[build_controls_winuicontrols_xaml_unit_66] };
 
 /// The unit `Controls/ContentPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_131: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 131, runs: &[build_controls_winuicontrols_xaml_unit_21] };
+pub static THEME_UNIT_133: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContentPage.xaml", index: 133, runs: &[build_controls_winuicontrols_xaml_unit_24] };
 
 /// The unit `Controls/TabbedPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_132: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 132, runs: &[build_controls_winuicontrols_xaml_unit_64] };
+pub static THEME_UNIT_134: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TabbedPage.xaml", index: 134, runs: &[build_controls_winuicontrols_xaml_unit_67] };
 
 /// The unit `Controls/NavigationPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_133: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 133, runs: &[build_controls_winuicontrols_xaml_unit_65] };
+pub static THEME_UNIT_135: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationPage.xaml", index: 135, runs: &[build_controls_winuicontrols_xaml_unit_68] };
 
 /// The unit `Controls/DrawerPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_134: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 134, runs: &[build_controls_winuicontrols_xaml_unit_66] };
+pub static THEME_UNIT_136: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DrawerPage.xaml", index: 136, runs: &[build_controls_winuicontrols_xaml_unit_69] };
 
 /// The unit `Controls/Frame.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_135: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Frame.xaml", index: 135, runs: &[build_controls_winuicontrols_xaml_unit_22] };
+pub static THEME_UNIT_137: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Frame.xaml", index: 137, runs: &[build_controls_winuicontrols_xaml_unit_25] };
 
 /// The unit `Controls/NavigationView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_136: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationView.xaml", index: 136, runs: &[build_controls_winuicontrols_xaml_unit_67] };
+pub static THEME_UNIT_138: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NavigationView.xaml", index: 138, runs: &[build_controls_winuicontrols_xaml_unit_70] };
 
 /// The unit `Controls/Carousel.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_137: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 137, runs: &[build_controls_winuicontrols_xaml_unit_68] };
+pub static THEME_UNIT_139: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Carousel.xaml", index: 139, runs: &[build_controls_winuicontrols_xaml_unit_71] };
 
 /// The unit `Controls/CarouselPage.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_138: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 138, runs: &[build_controls_winuicontrols_xaml_unit_23] };
+pub static THEME_UNIT_140: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CarouselPage.xaml", index: 140, runs: &[build_controls_winuicontrols_xaml_unit_26] };
 
 /// The unit `Controls/CommandBar.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_139: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 139, runs: &[build_controls_winuicontrols_xaml_unit_69] };
+pub static THEME_UNIT_141: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CommandBar.xaml", index: 141, runs: &[build_controls_winuicontrols_xaml_unit_72] };
 
 /// The unit `Controls/DropDownButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_140: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 140, runs: &[build_controls_winuicontrols_xaml_unit_70] };
+pub static THEME_UNIT_142: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/DropDownButton.xaml", index: 142, runs: &[build_controls_winuicontrols_xaml_unit_73] };
 
 /// The unit `Controls/SplitButton.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_141: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 141, runs: &[build_controls_winuicontrols_xaml_unit_71] };
+pub static THEME_UNIT_143: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/SplitButton.xaml", index: 143, runs: &[build_controls_winuicontrols_xaml_unit_74] };
 
 /// The unit `Controls/ToggleSwitch.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_142: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 142, runs: &[build_controls_winuicontrols_xaml_unit_72] };
+pub static THEME_UNIT_144: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ToggleSwitch.xaml", index: 144, runs: &[build_controls_winuicontrols_xaml_unit_75] };
 
 /// The unit `Controls/Slider.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_143: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 143, runs: &[build_controls_winuicontrols_xaml_unit_73] };
+pub static THEME_UNIT_145: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Slider.xaml", index: 145, runs: &[build_controls_winuicontrols_xaml_unit_76] };
 
 /// The unit `Controls/MediaTransportControls.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_144: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MediaTransportControls.xaml", index: 144, runs: &[build_controls_winuicontrols_xaml_unit_74] };
+pub static THEME_UNIT_146: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MediaTransportControls.xaml", index: 146, runs: &[build_controls_winuicontrols_xaml_unit_77] };
 
 /// The unit `Controls/CameraCaptureUI.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_145: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CameraCaptureUI.xaml", index: 145, runs: &[build_controls_winuicontrols_xaml_unit_24] };
+pub static THEME_UNIT_147: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/CameraCaptureUI.xaml", index: 147, runs: &[build_controls_winuicontrols_xaml_unit_27] };
 
 /// The unit `Controls/NumericUpDown.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_146: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 146, runs: &[build_controls_winuicontrols_xaml_unit_75] };
+pub static THEME_UNIT_148: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumericUpDown.xaml", index: 148, runs: &[build_controls_winuicontrols_xaml_unit_78] };
 
 /// The unit `Controls/NumberBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_147: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumberBox.xaml", index: 147, runs: &[build_controls_winuicontrols_xaml_unit_76] };
+pub static THEME_UNIT_149: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/NumberBox.xaml", index: 149, runs: &[build_controls_winuicontrols_xaml_unit_79] };
 
 /// The unit `Controls/ButtonSpinner.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_148: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 148, runs: &[build_controls_winuicontrols_xaml_unit_25] };
+pub static THEME_UNIT_150: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ButtonSpinner.xaml", index: 150, runs: &[build_controls_winuicontrols_xaml_unit_28] };
 
 /// The unit `Controls/Expander.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_149: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 149, runs: &[build_controls_winuicontrols_xaml_unit_77] };
+pub static THEME_UNIT_151: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Expander.xaml", index: 151, runs: &[build_controls_winuicontrols_xaml_unit_80] };
 
 /// The unit `Controls/PipsPager.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_150: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 150, runs: &[build_controls_winuicontrols_xaml_unit_78] };
+pub static THEME_UNIT_152: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PipsPager.xaml", index: 152, runs: &[build_controls_winuicontrols_xaml_unit_81] };
 
 /// The unit `Controls/RatingControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_151: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RatingControl.xaml", index: 151, runs: &[build_controls_winuicontrols_xaml_unit_26] };
+pub static THEME_UNIT_153: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RatingControl.xaml", index: 153, runs: &[build_controls_winuicontrols_xaml_unit_29] };
 
 /// The unit `Controls/PersonPicture.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_152: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PersonPicture.xaml", index: 152, runs: &[build_controls_winuicontrols_xaml_unit_79] };
+pub static THEME_UNIT_154: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PersonPicture.xaml", index: 154, runs: &[build_controls_winuicontrols_xaml_unit_82] };
 
 /// The unit `Controls/PagerControl.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_153: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PagerControl.xaml", index: 153, runs: &[build_controls_winuicontrols_xaml_unit_80] };
+pub static THEME_UNIT_155: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/PagerControl.xaml", index: 155, runs: &[build_controls_winuicontrols_xaml_unit_83] };
 
 /// The unit `Controls/RefreshContainer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_154: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 154, runs: &[build_controls_winuicontrols_xaml_unit_81] };
+pub static THEME_UNIT_156: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshContainer.xaml", index: 156, runs: &[build_controls_winuicontrols_xaml_unit_84] };
 
 /// The unit `Controls/RefreshVisualizer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_155: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshVisualizer.xaml", index: 155, runs: &[build_controls_winuicontrols_xaml_unit_27] };
+pub static THEME_UNIT_157: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RefreshVisualizer.xaml", index: 157, runs: &[build_controls_winuicontrols_xaml_unit_30] };
 
 /// The unit `Controls/FlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_156: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 156, runs: &[build_controls_winuicontrols_xaml_unit_82] };
+pub static THEME_UNIT_158: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/FlyoutPresenter.xaml", index: 158, runs: &[build_controls_winuicontrols_xaml_unit_85] };
 
 /// The unit `Controls/MenuScrollViewer.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_157: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 157, runs: &[build_controls_winuicontrols_xaml_unit_28] };
+pub static THEME_UNIT_159: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuScrollViewer.xaml", index: 159, runs: &[build_controls_winuicontrols_xaml_unit_31] };
 
 /// The unit `Controls/MenuFlyoutPresenter.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_158: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 158, runs: &[build_controls_winuicontrols_xaml_unit_83] };
+pub static THEME_UNIT_160: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuFlyoutPresenter.xaml", index: 160, runs: &[build_controls_winuicontrols_xaml_unit_86] };
 
 /// The unit `Controls/ContextMenu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_159: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 159, runs: &[build_controls_winuicontrols_xaml_unit_29] };
+pub static THEME_UNIT_161: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ContextMenu.xaml", index: 161, runs: &[build_controls_winuicontrols_xaml_unit_32] };
 
 /// The unit `Controls/MenuItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_160: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 160, runs: &[build_controls_winuicontrols_xaml_unit_84] };
+pub static THEME_UNIT_162: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/MenuItem.xaml", index: 162, runs: &[build_controls_winuicontrols_xaml_unit_87] };
 
 /// The unit `Controls/Menu.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_161: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 161, runs: &[build_controls_winuicontrols_xaml_unit_85] };
+pub static THEME_UNIT_163: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/Menu.xaml", index: 163, runs: &[build_controls_winuicontrols_xaml_unit_88] };
 
 /// The unit `Controls/ListBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_162: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 162, runs: &[build_controls_winuicontrols_xaml_unit_86] };
+pub static THEME_UNIT_164: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBoxItem.xaml", index: 164, runs: &[build_controls_winuicontrols_xaml_unit_89] };
 
 /// The unit `Controls/ListBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_163: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 163, runs: &[build_controls_winuicontrols_xaml_unit_87] };
+pub static THEME_UNIT_165: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListBox.xaml", index: 165, runs: &[build_controls_winuicontrols_xaml_unit_90] };
 
 /// The unit `Controls/ListView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_164: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListView.xaml", index: 164, runs: &[build_controls_winuicontrols_xaml_unit_88] };
+pub static THEME_UNIT_166: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ListView.xaml", index: 166, runs: &[build_controls_winuicontrols_xaml_unit_91] };
 
 /// The unit `Controls/GridView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_165: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridView.xaml", index: 165, runs: &[build_controls_winuicontrols_xaml_unit_89] };
+pub static THEME_UNIT_167: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/GridView.xaml", index: 167, runs: &[build_controls_winuicontrols_xaml_unit_92] };
 
 /// The unit `Controls/ComboBoxItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_166: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 166, runs: &[build_controls_winuicontrols_xaml_unit_90] };
+pub static THEME_UNIT_168: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBoxItem.xaml", index: 168, runs: &[build_controls_winuicontrols_xaml_unit_93] };
 
 /// The unit `Controls/ComboBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_167: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 167, runs: &[build_controls_winuicontrols_xaml_unit_91] };
+pub static THEME_UNIT_169: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/ComboBox.xaml", index: 169, runs: &[build_controls_winuicontrols_xaml_unit_94] };
 
 /// The unit `Controls/TreeViewItem.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_168: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 168, runs: &[build_controls_winuicontrols_xaml_unit_92] };
+pub static THEME_UNIT_170: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeViewItem.xaml", index: 170, runs: &[build_controls_winuicontrols_xaml_unit_95] };
 
 /// The unit `Controls/TreeView.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_169: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 169, runs: &[build_controls_winuicontrols_xaml_unit_93] };
+pub static THEME_UNIT_171: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/TreeView.xaml", index: 171, runs: &[build_controls_winuicontrols_xaml_unit_96] };
 
 /// The unit `Controls/AutoCompleteBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_170: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 170, runs: &[build_controls_winuicontrols_xaml_unit_94] };
+pub static THEME_UNIT_172: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoCompleteBox.xaml", index: 172, runs: &[build_controls_winuicontrols_xaml_unit_97] };
 
 /// The unit `Controls/AutoSuggestBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_171: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoSuggestBox.xaml", index: 171, runs: &[build_controls_winuicontrols_xaml_unit_95] };
+pub static THEME_UNIT_173: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/AutoSuggestBox.xaml", index: 173, runs: &[build_controls_winuicontrols_xaml_unit_98] };
 
 /// The unit `Controls/RadioButtons.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_172: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButtons.xaml", index: 172, runs: &[build_controls_winuicontrols_xaml_unit_96] };
+pub static THEME_UNIT_174: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RadioButtons.xaml", index: 174, runs: &[build_controls_winuicontrols_xaml_unit_99] };
 
 /// The unit `Controls/RichEditBox.xaml` of the theme (#568): its runs, in the order the builds apply them.
-pub static THEME_UNIT_173: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RichEditBox.xaml", index: 173, runs: &[build_controls_winuicontrols_xaml_unit_97] };
+pub static THEME_UNIT_175: rt::ThemeUnit = rt::ThemeUnit { name: "Controls/RichEditBox.xaml", index: 175, runs: &[build_controls_winuicontrols_xaml_unit_100] };
 
 /// Every unit of the theme, in canonical order: the full theme (#568). Only the constructors
 /// of the full theme name it, so that an application that keeps some units links only those.
-pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74, &THEME_UNIT_75, &THEME_UNIT_76, &THEME_UNIT_77, &THEME_UNIT_78, &THEME_UNIT_79, &THEME_UNIT_80, &THEME_UNIT_81, &THEME_UNIT_82, &THEME_UNIT_83, &THEME_UNIT_84, &THEME_UNIT_85, &THEME_UNIT_86, &THEME_UNIT_87, &THEME_UNIT_88, &THEME_UNIT_89, &THEME_UNIT_90, &THEME_UNIT_91, &THEME_UNIT_92, &THEME_UNIT_93, &THEME_UNIT_94, &THEME_UNIT_95, &THEME_UNIT_96, &THEME_UNIT_97, &THEME_UNIT_98, &THEME_UNIT_99, &THEME_UNIT_100, &THEME_UNIT_101, &THEME_UNIT_102, &THEME_UNIT_103, &THEME_UNIT_104, &THEME_UNIT_105, &THEME_UNIT_106, &THEME_UNIT_107, &THEME_UNIT_108, &THEME_UNIT_109, &THEME_UNIT_110, &THEME_UNIT_111, &THEME_UNIT_112, &THEME_UNIT_113, &THEME_UNIT_114, &THEME_UNIT_115, &THEME_UNIT_116, &THEME_UNIT_117, &THEME_UNIT_118, &THEME_UNIT_119, &THEME_UNIT_120, &THEME_UNIT_121, &THEME_UNIT_122, &THEME_UNIT_123, &THEME_UNIT_124, &THEME_UNIT_125, &THEME_UNIT_126, &THEME_UNIT_127, &THEME_UNIT_128, &THEME_UNIT_129, &THEME_UNIT_130, &THEME_UNIT_131, &THEME_UNIT_132, &THEME_UNIT_133, &THEME_UNIT_134, &THEME_UNIT_135, &THEME_UNIT_136, &THEME_UNIT_137, &THEME_UNIT_138, &THEME_UNIT_139, &THEME_UNIT_140, &THEME_UNIT_141, &THEME_UNIT_142, &THEME_UNIT_143, &THEME_UNIT_144, &THEME_UNIT_145, &THEME_UNIT_146, &THEME_UNIT_147, &THEME_UNIT_148, &THEME_UNIT_149, &THEME_UNIT_150, &THEME_UNIT_151, &THEME_UNIT_152, &THEME_UNIT_153, &THEME_UNIT_154, &THEME_UNIT_155, &THEME_UNIT_156, &THEME_UNIT_157, &THEME_UNIT_158, &THEME_UNIT_159, &THEME_UNIT_160, &THEME_UNIT_161, &THEME_UNIT_162, &THEME_UNIT_163, &THEME_UNIT_164, &THEME_UNIT_165, &THEME_UNIT_166, &THEME_UNIT_167, &THEME_UNIT_168, &THEME_UNIT_169, &THEME_UNIT_170, &THEME_UNIT_171, &THEME_UNIT_172, &THEME_UNIT_173];
+pub static THEME_UNITS: &[&rt::ThemeUnit] = &[&THEME_UNIT_0, &THEME_UNIT_1, &THEME_UNIT_2, &THEME_UNIT_3, &THEME_UNIT_4, &THEME_UNIT_5, &THEME_UNIT_6, &THEME_UNIT_7, &THEME_UNIT_8, &THEME_UNIT_9, &THEME_UNIT_10, &THEME_UNIT_11, &THEME_UNIT_12, &THEME_UNIT_13, &THEME_UNIT_14, &THEME_UNIT_15, &THEME_UNIT_16, &THEME_UNIT_17, &THEME_UNIT_18, &THEME_UNIT_19, &THEME_UNIT_20, &THEME_UNIT_21, &THEME_UNIT_22, &THEME_UNIT_23, &THEME_UNIT_24, &THEME_UNIT_25, &THEME_UNIT_26, &THEME_UNIT_27, &THEME_UNIT_28, &THEME_UNIT_29, &THEME_UNIT_30, &THEME_UNIT_31, &THEME_UNIT_32, &THEME_UNIT_33, &THEME_UNIT_34, &THEME_UNIT_35, &THEME_UNIT_36, &THEME_UNIT_37, &THEME_UNIT_38, &THEME_UNIT_39, &THEME_UNIT_40, &THEME_UNIT_41, &THEME_UNIT_42, &THEME_UNIT_43, &THEME_UNIT_44, &THEME_UNIT_45, &THEME_UNIT_46, &THEME_UNIT_47, &THEME_UNIT_48, &THEME_UNIT_49, &THEME_UNIT_50, &THEME_UNIT_51, &THEME_UNIT_52, &THEME_UNIT_53, &THEME_UNIT_54, &THEME_UNIT_55, &THEME_UNIT_56, &THEME_UNIT_57, &THEME_UNIT_58, &THEME_UNIT_59, &THEME_UNIT_60, &THEME_UNIT_61, &THEME_UNIT_62, &THEME_UNIT_63, &THEME_UNIT_64, &THEME_UNIT_65, &THEME_UNIT_66, &THEME_UNIT_67, &THEME_UNIT_68, &THEME_UNIT_69, &THEME_UNIT_70, &THEME_UNIT_71, &THEME_UNIT_72, &THEME_UNIT_73, &THEME_UNIT_74, &THEME_UNIT_75, &THEME_UNIT_76, &THEME_UNIT_77, &THEME_UNIT_78, &THEME_UNIT_79, &THEME_UNIT_80, &THEME_UNIT_81, &THEME_UNIT_82, &THEME_UNIT_83, &THEME_UNIT_84, &THEME_UNIT_85, &THEME_UNIT_86, &THEME_UNIT_87, &THEME_UNIT_88, &THEME_UNIT_89, &THEME_UNIT_90, &THEME_UNIT_91, &THEME_UNIT_92, &THEME_UNIT_93, &THEME_UNIT_94, &THEME_UNIT_95, &THEME_UNIT_96, &THEME_UNIT_97, &THEME_UNIT_98, &THEME_UNIT_99, &THEME_UNIT_100, &THEME_UNIT_101, &THEME_UNIT_102, &THEME_UNIT_103, &THEME_UNIT_104, &THEME_UNIT_105, &THEME_UNIT_106, &THEME_UNIT_107, &THEME_UNIT_108, &THEME_UNIT_109, &THEME_UNIT_110, &THEME_UNIT_111, &THEME_UNIT_112, &THEME_UNIT_113, &THEME_UNIT_114, &THEME_UNIT_115, &THEME_UNIT_116, &THEME_UNIT_117, &THEME_UNIT_118, &THEME_UNIT_119, &THEME_UNIT_120, &THEME_UNIT_121, &THEME_UNIT_122, &THEME_UNIT_123, &THEME_UNIT_124, &THEME_UNIT_125, &THEME_UNIT_126, &THEME_UNIT_127, &THEME_UNIT_128, &THEME_UNIT_129, &THEME_UNIT_130, &THEME_UNIT_131, &THEME_UNIT_132, &THEME_UNIT_133, &THEME_UNIT_134, &THEME_UNIT_135, &THEME_UNIT_136, &THEME_UNIT_137, &THEME_UNIT_138, &THEME_UNIT_139, &THEME_UNIT_140, &THEME_UNIT_141, &THEME_UNIT_142, &THEME_UNIT_143, &THEME_UNIT_144, &THEME_UNIT_145, &THEME_UNIT_146, &THEME_UNIT_147, &THEME_UNIT_148, &THEME_UNIT_149, &THEME_UNIT_150, &THEME_UNIT_151, &THEME_UNIT_152, &THEME_UNIT_153, &THEME_UNIT_154, &THEME_UNIT_155, &THEME_UNIT_156, &THEME_UNIT_157, &THEME_UNIT_158, &THEME_UNIT_159, &THEME_UNIT_160, &THEME_UNIT_161, &THEME_UNIT_162, &THEME_UNIT_163, &THEME_UNIT_164, &THEME_UNIT_165, &THEME_UNIT_166, &THEME_UNIT_167, &THEME_UNIT_168, &THEME_UNIT_169, &THEME_UNIT_170, &THEME_UNIT_171, &THEME_UNIT_172, &THEME_UNIT_173, &THEME_UNIT_174, &THEME_UNIT_175];
 
 /// The ambient unit alone: what a load by URI applies when the application registered no
 /// parts and constructed no full theme (#568, step 3).
@@ -92526,7 +92565,7 @@ pub fn registered_theme_units() -> rt::ThemeParts {
 /// The type keys of each unit, by its index: the names of the diagnostic of a trimmed control
 /// theme (#568, step 3). Debug builds only: release builds carry no names.
 #[cfg(debug_assertions)]
-pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "OverlayPopupHost", "PopupRoot", "TextBlock", "ThemeVariantScope", "Window"], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &["Button"], &["RepeatButton"], &["ToggleButton"], &[], &["HyperlinkButton"], &["CheckBox"], &["RadioButton"], &["Thumb"], &["ScrollBar"], &["ScrollViewer"], &["TextBox"], &["ToolTip"], &["ProgressBar"], &["Separator"], &["PathIcon"], &["FontIcon"], &["SymbolIcon"], &["Label"], &["ItemsControl"], &["HeaderedContentControl"], &["GroupBox"], &["SelectableTextBlock"], &["TransitioningContentControl"], &["TextSelectionHandle"], &["DataValidationErrors"], &["GridSplitter"], &[], &["CalendarDayButton"], &["CalendarButton"], &["CalendarItem"], &["Calendar"], &["CalendarDatePicker"], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["WindowDrawnDecorations"], &["NotificationCard"], &["InfoBar"], &["InfoBadge"], &["Pivot", "PivotHeaderItem", "PivotItem"], &["SwipeControl"], &["TitleBar"], &["ProgressRing"], &["WindowNotificationManager"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["TabStrip"], &["TabStripItem"], &["TabControl"], &["TabItem"], &["SplitView"], &["ContentPage"], &["TabbedPage"], &["NavigationPage"], &["DrawerPage"], &["Frame"], &["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"], &["Carousel"], &["CarouselPage"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["DropDownButton"], &["SplitButton"], &["ToggleSwitch"], &["Slider"], &["MediaTransportControls"], &["CameraCaptureUI"], &["NumericUpDown"], &["NumberBox"], &["ButtonSpinner"], &["Expander"], &["PipsPager"], &["RatingControl"], &["PersonPicture"], &["PagerControl"], &["RefreshContainer"], &["RefreshVisualizer"], &["FlyoutPresenter"], &[], &["MenuFlyoutPresenter"], &["ContextMenu"], &["MenuItem"], &["Menu"], &["ListBoxItem"], &["ListBox"], &["ListView", "ListViewItem"], &["GridView", "GridViewItem"], &["ComboBoxItem"], &["ComboBox"], &["TreeViewItem"], &["TreeView"], &["AutoCompleteBox"], &["AutoSuggestBox"], &["RadioButtons"], &["RichEditBox"]];
+pub static THEME_UNIT_TYPE_KEYS: &[&[&str]] = &[&["AdornerLayer", "EmbeddableControlRoot", "TextBlock", "ThemeVariantScope", "Window"], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &[], &["OverlayPopupHost"], &["PopupRoot"], &[], &["Button"], &["RepeatButton"], &["ToggleButton"], &[], &["HyperlinkButton"], &["CheckBox"], &["RadioButton"], &["Thumb"], &["ScrollBar"], &["ScrollViewer"], &["TextBox"], &["ToolTip"], &["ProgressBar"], &["Separator"], &["PathIcon"], &["FontIcon"], &["SymbolIcon"], &["Label"], &["ItemsControl"], &["HeaderedContentControl"], &["GroupBox"], &["SelectableTextBlock"], &["TransitioningContentControl"], &["TextSelectionHandle"], &["DataValidationErrors"], &["GridSplitter"], &[], &["CalendarDayButton"], &["CalendarButton"], &["CalendarItem"], &["Calendar"], &["CalendarDatePicker"], &["DatePicker", "DatePickerPresenter"], &["TimePicker", "TimePickerPresenter"], &["WindowDrawnDecorations"], &["NotificationCard"], &["InfoBar"], &["InfoBadge"], &["Pivot", "PivotHeaderItem", "PivotItem"], &["SwipeControl"], &["TitleBar"], &["ProgressRing"], &["WindowNotificationManager"], &["TableView"], &["TableViewCell"], &["TableViewColumnHeader"], &["TableViewRow"], &["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"], &["TabStrip"], &["TabStripItem"], &["TabControl"], &["TabItem"], &["SplitView"], &["ContentPage"], &["TabbedPage"], &["NavigationPage"], &["DrawerPage"], &["Frame"], &["NavigationView", "NavigationViewItem", "NavigationViewItemHeader", "NavigationViewItemSeparator"], &["Carousel"], &["CarouselPage"], &["CommandBar", "CommandBarButton", "CommandBarSeparator", "CommandBarToggleButton"], &["DropDownButton"], &["SplitButton"], &["ToggleSwitch"], &["Slider"], &["MediaTransportControls"], &["CameraCaptureUI"], &["NumericUpDown"], &["NumberBox"], &["ButtonSpinner"], &["Expander"], &["PipsPager"], &["RatingControl"], &["PersonPicture"], &["PagerControl"], &["RefreshContainer"], &["RefreshVisualizer"], &["FlyoutPresenter"], &[], &["MenuFlyoutPresenter"], &["ContextMenu"], &["MenuItem"], &["Menu"], &["ListBoxItem"], &["ListBox"], &["ListView", "ListViewItem"], &["GridView", "GridViewItem"], &["ComboBoxItem"], &["ComboBox"], &["TreeViewItem"], &["TreeView"], &["AutoCompleteBox"], &["AutoSuggestBox"], &["RadioButtons"], &["RichEditBox"]];
 
 /// The loader of the compiled documents of this file (`!XamlLoader.TryLoad`): the object of the
 /// public document with the URI `uri` (compared as upstream's `OrdinalIgnoreCase`,
