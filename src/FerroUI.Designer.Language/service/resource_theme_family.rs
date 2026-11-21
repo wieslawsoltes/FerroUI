@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 
 type Declaration = (String, Occurrence);
-type Dictionary = (String, u64);
+type ThemeDictionarySite = (String, u64);
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ThemeResourceFamily {
@@ -24,8 +24,8 @@ pub struct ThemeResourceMember {
 }
 
 pub(super) struct ThemeFamily {
-    owner: Dictionary,
-    layers: Vec<(String, Dictionary)>,
+    owner: ThemeDictionarySite,
+    layers: Vec<(String, ThemeDictionarySite)>,
     members: Vec<(Declaration, Vec<String>)>,
 }
 

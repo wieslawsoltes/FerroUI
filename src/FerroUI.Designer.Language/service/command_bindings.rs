@@ -84,7 +84,7 @@ impl LanguageService {
         let slots = schema
             .properties(&owner.name, owner.namespace_uri.as_deref())
             .into_values()
-            .filter(|property| writable_command(property))
+            .filter(writable_command)
             .map(|property| {
                 let binding =
                     AuthoredValue::read(schema, document, owner, &property.name)?.model(index)?;
