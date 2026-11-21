@@ -26,12 +26,19 @@ pub(crate) struct AuthoredRsxFrame {
     pub(crate) uri: String,
     source: Box<str>,
     invocation: SourceSpan,
+    pub(crate) scope: AuthoredRustScope,
     clips: BTreeMap<NodeId, RsxAnimation>,
     catalog: RsxCatalog,
     states: BTreeMap<(NodeId, String), RsxStateGroup>,
     state_owners: BTreeMap<NodeId, StateOwnerMapping>,
     clip_owners: BTreeMap<NodeId, (usize, u32)>,
     issues: Vec<RsxAnimationIssue>,
+}
+
+#[derive(Clone, serde::Serialize)]
+pub(crate) struct AuthoredRustScope {
+    active: ferroui_designer_language::Range,
+    blocks: Vec<ferroui_designer_language::Range>,
 }
 
 impl AuthoredRsxFrame {
@@ -47,6 +54,10 @@ impl AuthoredRsxFrame {
             uri: uri.into(),
             source: design.source.into(),
             invocation: rsx.invocation,
+            scope: AuthoredRustScope {
+                active: design.index.range(rsx.invocation).ok()?,
+                blocks: rsx.blocks.iter().filter_map(|span| design.index.range(*span).ok()).collect(),
+            },
             clips: design.rsx_animations.clone(),
             catalog: design.rsx_catalog().clone(),
             states: design.rsx_states.clone(),

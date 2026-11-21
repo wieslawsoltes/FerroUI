@@ -204,6 +204,7 @@ impl RustDocument {
         document: &mut Document,
         label: &str,
         patches: Vec<TextPatch>,
+        shared_color: Option<SourceSpan>,
     ) -> Result<ChangeSet, DesignerError> {
         let invocation = self
             .map()
@@ -211,7 +212,10 @@ impl RustDocument {
             .invocation;
         if patches
             .iter()
-            .any(|patch| patch.span.start < invocation.start || patch.span.end > invocation.end)
+            .any(|patch| {
+                let contains = |range: SourceSpan| range.start <= patch.span.start && patch.span.end <= range.end;
+                !contains(invocation) && !shared_color.is_some_and(contains)
+            })
         {
             return Err(invalid(
                 "A visual edit must stay within the active RSX invocation",

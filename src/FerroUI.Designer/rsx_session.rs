@@ -144,6 +144,27 @@ impl DesignerSession {
         label: &str,
         patches: Vec<TextPatch>,
     ) -> Result<ChangeSet, DesignerError> {
+        self.commit_scoped_rust_patches(label, patches, None)
+    }
+
+    pub(crate) fn commit_rust_style_plan(
+        &mut self,
+        plan: ferroui_designer_rsx::RsxStylePlan,
+    ) -> Result<ChangeSet, DesignerError> {
+        let label = if plan.shared_color.is_some() {
+            "Edit shared Rust color"
+        } else {
+            "Edit Rust style"
+        };
+        self.commit_scoped_rust_patches(label, plan.patches, plan.shared_color)
+    }
+
+    fn commit_scoped_rust_patches(
+        &mut self,
+        label: &str,
+        patches: Vec<TextPatch>,
+        shared_color: Option<SourceSpan>,
+    ) -> Result<ChangeSet, DesignerError> {
         self.ensure_writable()?;
         if !self.can_manipulate() {
             return Err(DesignerError::InvalidEdit(
@@ -152,7 +173,7 @@ impl DesignerSession {
         }
         let mut rust = self.rust.clone().expect("Rust source is active");
         let mut document = self.document.snapshot_without_history();
-        let change = rust.apply(&mut document, label, patches)?;
+        let change = rust.apply(&mut document, label, patches, shared_color)?;
         if !change.is_empty() {
             self.remember_playback_for_reload();
             self.rust = Some(rust);

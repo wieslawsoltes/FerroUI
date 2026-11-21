@@ -32,6 +32,7 @@ export type HostedStyleCommand = HostedStyleRead
     | { action: 'issues'; address: string }
     | { action: 'addSetter'; target: HostedStyleTarget }
     | { action: 'addColorResource'; target: HostedStyleTarget; layer: PaletteLayer }
+    | { action: 'editSharedColor'; target: HostedStyleTarget; resource: number }
     | { action: 'addNested'; target: HostedStyleTarget }
     | { action: 'chooseResource'; target: HostedStyleTarget; property: string; setter: number };
 export type HostedStyleResult = HostedStyleFiles | HostedStyleCatalog | HostedStyleDefinition;

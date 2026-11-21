@@ -23,6 +23,9 @@ mod resource_setters;
 #[cfg(all(test, feature = "mcp"))]
 #[path = "workspace_rust_styles_tests.rs"]
 mod tests;
+#[cfg(all(test, feature = "mcp"))]
+#[path = "workspace_rust_shared_colors_tests.rs"]
+mod shared_tests;
 
 impl DesignerWorkspace {
     pub(super) fn connect_rust_styles(self: &Rc<Self>) {

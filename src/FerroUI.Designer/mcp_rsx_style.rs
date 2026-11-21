@@ -28,7 +28,8 @@ pub(super) fn tools() -> Vec<Value> {
                 s::action("set_resource", json!({"style":offset,"key":s::string(),"setter":offset,"getter":s::string()}), &["style","key"], true),
                 s::action("add_color_resource", json!({"style":offset,"key":s::string(),"value":s::string(),
                     "layer":{"type":"string","enum":["shared","default","light","dark","high_contrast"]}}), &["style","key","value"], true),
-                s::action("color_resource", json!({"style":offset,"resource":offset,"value":s::string()}), &["style","resource","value"], true),
+                s::action("color_resource", json!({"style":offset,"resource":offset,"value":s::string(),
+                    "mode":{"type":"string","enum":["literal","declaration","local"]}}), &["style","resource","value"], true),
                 s::action("remove", json!({"style":offset}), &["style"], true),
             ], true),
     ]

@@ -73,6 +73,8 @@ Open a Rust view, select its RSX invocation, and choose **Edit Rust styles** in 
 
 Under **Color resources**, choose **Shared**, **Default**, **Light**, **Dark**, or **High contrast** to add or edit an authored swatch. **Compare Rust theme colors** shows the resolved appearances and opens each supplying declaration. Use **Assign color resource** on a compatible setter. **Add color resource setter** creates a typed setter with the selected key. The source icon opens the literal constructor or the setter’s string key. The preview follows the resource seen by the matched control. [Rust color resources guide](vscode/styles.md#edit-rust-style-color-resources)
 
+When a color comes from a same-file constant, choose the diamond icon beside its value. Select **Use a local color** for this style or **Edit the shared constant for all uses**. Apply the color from the popup. Undo restores the exact Rust source and keeps the selected RSX view. [Shared Rust colors](vscode/styles.md#edit-a-shared-rust-color)
+
 ### Create an XAML event handler
 
 Open the owning Cargo project and build it from **Project** to load the exported XAML registry. Open the XAML view in **Split** or **Code**. Put the caret on an event attribute such as `Click="OnApply"`, then choose the lightning button **Create Rust event handler** in the source toolbar. Studio adds the typed callback to the view’s Rust class registration and opens its declaration. Use an empty attribute value to accept a generated name. The paired edit participates in Studio Undo and Redo. [VS Code and MCP workflows](vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)

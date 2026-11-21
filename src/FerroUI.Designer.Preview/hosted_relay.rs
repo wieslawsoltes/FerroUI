@@ -130,6 +130,8 @@ pub(crate) struct Frame {
     palette_available: bool,
     #[serde(rename = "stylesAvailable")]
     styles_available: bool,
+    #[serde(rename = "rustScope", skip_serializing_if = "Option::is_none")]
+    rust_scope: Option<crate::rsx_animation::AuthoredRustScope>,
     #[serde(skip_serializing_if = "Option::is_none")]
     animations: Option<serde_json::Value>,
     #[serde(rename = "animationPresentation", skip_serializing_if = "Option::is_none")]
@@ -448,6 +450,7 @@ impl Relay {
         self.authored = authored;
         frame.palette_available = self.authored.is_some();
         frame.styles_available = self.authored.is_some() || self.authored_rsx.is_some();
+        frame.rust_scope = self.authored_rsx.as_ref().map(|source| source.scope.clone());
         frame.animation_presentation = presentation;
         Ok(frame)
     }
@@ -481,6 +484,7 @@ impl Relay {
             fixtures,
             palette_available: self.authored.is_some(),
             styles_available: self.authored.is_some() || self.authored_rsx.is_some(),
+            rust_scope: self.authored_rsx.as_ref().map(|source| source.scope.clone()),
             animations: animations.map(hosted_animation::catalog),
             animation_presentation: None,
         }))

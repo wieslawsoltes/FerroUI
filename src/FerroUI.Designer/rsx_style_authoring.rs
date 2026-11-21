@@ -19,9 +19,9 @@ impl DesignerSession {
     }
 
     pub(crate) fn edit_rust_style(&mut self, edit: &RsxStyleEdit) -> Result<(), String> {
-        let patches = self.rust_style_projection()?.plan_style(edit)?;
-        if !patches.is_empty() {
-            self.commit_rust_patches("Edit Rust style", patches)
+        let plan = self.rust_style_projection()?.plan_style_source(edit)?;
+        if !plan.patches.is_empty() {
+            self.commit_rust_style_plan(plan)
                 .map_err(|error| error.to_string())?;
             self.changed(true);
         }
@@ -50,7 +50,7 @@ pub fn rust_style_report(
             let resource = setter.resource_key().map(|key| {
                 let declaration = choices.iter().find(|entry| entry.key == key)
                     .and_then(|family| family.common_declaration())
-                    .and_then(|entry| index.range(entry.source).ok());
+                    .and_then(|entry| index.range(entry.color_source()).ok());
                 json!({"key":key,"declaration":declaration})
             });
             json!({"node":setter.declaration.start,

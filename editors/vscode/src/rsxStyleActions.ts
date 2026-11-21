@@ -1,12 +1,12 @@
 import { editText, type StudioContext } from './studioContext';
-import { chooseNewSetter, chooseNewStyle, chooseRustColorResource, promptRustColorResource } from './stylePrompts';
+import { chooseNewSetter, chooseNewStyle, chooseRustColorResource, promptRustColorResource, promptRustSharedColor } from './stylePrompts';
 import type { RustStyleEdit, StylesAction, StylesContent } from './stylesProtocol';
 
 export const RSX_STYLES = 'designer_rsx_styles';
 export const RSX_STYLE_EDIT = 'designer_rsx_style_edit';
 
 const editActions = new Set(['new', 'selector', 'setter', 'setter-resource', 'add-setter', 'add-nested-style', 'remove-style',
-    'add-color-resource', 'rust-resource-color']);
+    'add-color-resource', 'rust-resource-color', 'rust-shared-color']);
 
 export function isRustStyleAction(action: StylesAction): boolean { return editActions.has(action.type); }
 
@@ -52,6 +52,11 @@ export async function editRustStyle(context: StudioContext, content: StylesConte
         case 'rust-resource-color':
             await edit({ action: 'color_resource', style, resource: action.node, value: action.color });
             break;
+        case 'rust-shared-color': {
+            const result = await promptRustSharedColor(definition.color_resources?.find(color => color.node === action.node));
+            if (result) await edit({ action: 'color_resource', style, resource: action.node, ...result });
+            break;
+        }
         case 'add-nested-style': {
             const selector = await editText('Selector', '^:pointerover', undefined, 'New Nested Rust Style');
             if (selector === undefined) break;

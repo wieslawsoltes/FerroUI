@@ -10,7 +10,8 @@ const member = { type: 'string', maxLength: 512 };
 const rustEdit = record({ action: choice('create', 'create_nested', 'selector', 'setter', 'add_setter', 'remove',
     'set_resource', 'add_color_resource', 'color_resource'), owner: integer(0), style: integer(0), setter: integer(0),
     resource: integer(0), key: member, selector: address, getter: member, value: {},
-    layer: choice('shared', 'default', 'light', 'dark', 'high_contrast') }, ['action']);
+    layer: choice('shared', 'default', 'light', 'dark', 'high_contrast'),
+    mode: choice('literal', 'declaration', 'local') }, ['action']);
 const edit = record({ action: choice('create', 'create_theme', 'selector', 'base', 'setter', 'resource', 'remove', 'rust'),
     selector: address, target_type: member, key: {}, property: member, value: {}, dynamic: truth, edit: rustEdit }, ['action']);
 const editArgs = { ...frame, arguments: record({ target, edit }) };

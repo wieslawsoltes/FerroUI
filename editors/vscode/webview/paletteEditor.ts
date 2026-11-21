@@ -29,7 +29,7 @@ export function paletteEditor(sheet: PaletteSheet | undefined, layer: PaletteCol
 }
 
 export function paletteColorRow(color: { key: string; id: string; value?: string; color?: string; description: string },
-    actions: { change?: (value: string) => void; reveal: () => void; references?: () => void }): HTMLElement {
+    actions: { change?: (value: string) => void; reveal: () => void; references?: () => void; edit?: { label: string; apply: () => void } }): HTMLElement {
     const row = create('div');
     row.className = 'palette-row';
     const title = create('label');
@@ -46,6 +46,7 @@ export function paletteColorRow(color: { key: string; id: string; value?: string
     const sample = actions.change ? colorPicker(color.key, color.color, actions.change) : swatch(color.color);
     const controls = create('div');
     controls.className = 'style-tools';
+    if (actions.edit) controls.append(actionButton('edit', actions.edit.label, actions.edit.apply));
     if (actions.references) controls.append(actionButton('references', `Find ${color.key} references`, actions.references));
     controls.append(actionButton('go-to-file', `Reveal ${color.key} in source`, actions.reveal));
     row.append(sample, title, value, controls);

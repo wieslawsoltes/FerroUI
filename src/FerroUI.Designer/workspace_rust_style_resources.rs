@@ -6,7 +6,10 @@ use crate::{PropertyColorEditor, icons};
 use ferroui_base::layout::Orientation;
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::{Control, Grid, StackPanel};
-use ferroui_designer_rsx::{RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleResourceFamily};
+use ferroui_designer_rsx::{
+    ResourceColorMode, RsxStyle, RsxStyleEdit, RsxStyleField, RsxStyleResource,
+    RsxStyleResourceFamily,
+};
 use ferroui_designer_tools::component_palette::PaletteLayer;
 
 pub(super) fn section(
@@ -131,8 +134,11 @@ fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteL
         .filter(|entry| entry.layer == Some(layer))
     {
         let resource_id = resource.declaration.start;
-        let row = if let (Some(color), Ok(editor)) = (resource.color(), PropertyColorEditor::new())
-        {
+        let row = if let Some((constant, color)) = resource.shared.as_ref().zip(resource.color()) {
+            let row = fields::read_only_row(body, &resource.key, &color);
+            edit_shared(&row, scope, style, resource, &constant.name, &color);
+            row
+        } else if let (Some(color), Ok(editor)) = (resource.color(), PropertyColorEditor::new()) {
             let (row, tools) = fields::row(body, &resource.key);
             let _ = editor.configure(Some(&color), false);
             let label = if layer == PaletteLayer::Shared {
@@ -151,6 +157,7 @@ fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteL
                         style,
                         resource: resource_id,
                         value,
+                        mode: ResourceColorMode::Literal,
                     },
                     None,
                 );
@@ -162,7 +169,7 @@ fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteL
         } else {
             fields::source_row(body, &resource.key)
         };
-        let span = resource.source;
+        let span = resource.color_source();
         let active = scope.clone();
         add_button(
             &row,
@@ -175,4 +182,45 @@ fn color_rows(body: &StackPanel, scope: &Scope, rule: &RsxStyle, layer: PaletteL
         body.children()
             .add(text("No colors in this layer.").upcast::<Control>());
     }
+}
+
+fn edit_shared(
+    row: &StackPanel,
+    scope: &Scope,
+    style: usize,
+    resource: &RsxStyleResource,
+    constant: &str,
+    color: &str,
+) {
+    let pane = fields::prompt(&format!("Change {} from const {constant}", resource.key));
+    let target = picker(
+        "Rust color edit scope",
+        ["Use a local color", "Edit the shared constant for all uses"],
+        0,
+    );
+    pane.children().add(target.clone().upcast::<Control>());
+    let active = scope.clone();
+    let resource = resource.declaration.start;
+    fields::value_row(&pane, "Color value", color, &[], move |value| {
+        let mode = if target.selected_index() == 1 {
+            ResourceColorMode::Declaration
+        } else {
+            ResourceColorMode::Local
+        };
+        active.apply(
+            RsxStyleEdit::ColorResource {
+                style,
+                resource,
+                value,
+                mode,
+            },
+            None,
+        );
+    });
+    fields::flyout_button(
+        row,
+        icons::EXPRESSION,
+        &format!("Change color from const {constant}"),
+        pane,
+    );
 }

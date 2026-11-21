@@ -199,6 +199,9 @@ export class HostedStylesView {
             case 'rust-resource-color':
                 if (rust) rustEdit({ action: 'color_resource', style: target.node, resource: action.node, value: action.color });
                 break;
+            case 'rust-shared-color':
+                if (rust) this.send({ action: 'editSharedColor', target, resource: action.node });
+                break;
             case 'reveal': this.send({ action: 'locate', address: target.address, range: action.range }); break;
         }
     }

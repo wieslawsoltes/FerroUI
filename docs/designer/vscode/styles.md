@@ -87,7 +87,7 @@ The editor maps explicit `ferroui_view::style` builders, typed property getters,
 3. Change the color with the swatch or hex field. The preview updates each styled control that resolves that key. Use the source icon to reveal the original color constructor. **Trace value** in Properties reveals the exact winning setter operand, including the referenced key.
 4. Choose **Compare Rust theme colors** to see the resolved Light, Dark, and High contrast values from the authored style dictionaries. Open any cell's source icon to find the color supplying that appearance. For example, a High contrast cell opens the Dark declaration when it inherits that value. Choose an appearance in the Design canvas toolbar to see the native result. High contrast preview appears when the host has a registered variant.
 
-The color editor maps literal `Color::new`, `Color::from_rgb`, and `Color::from_argb` declarations in inline Rust styles. It recognizes the qualified `ferroui_base::styling::ThemeVariant` constructors for Default, Light, and Dark, and the known High contrast variant from WinUI, Material, or macOS. A High contrast declaration created by the editor uses the same string key and Dark inheritance with `ThemeVariant::new`. Use the warning icon to open a computed variant or other unmapped Rust expression.
+The color editor maps literal `Color::new`, `Color::from_rgb`, and `Color::from_argb` declarations in inline Rust styles. It recognizes the `ferroui_base::styling::ThemeVariant` constructors for Default, Light, and Dark, and the known High contrast variant from WinUI, Material, or macOS. Use qualified paths or named imports such as `use ferroui_base::styling::ThemeVariant as Appearance;`. A High contrast declaration created by the editor uses the same string key and Dark inheritance with `ThemeVariant::new`. Use the warning icon to open a computed variant or other unmapped Rust expression.
 
 Resource choices and comparison values come from the style host and its authored ancestors. A closer resource on the matched control can change the effective value at runtime. The same color edits, layer comparison, and source navigation are available in App Preview. Each accepted edit takes one Undo step. [View resource API](../../declarative-ui.md#102-styles) · [MCP arguments](reference.md#edit-rust-styles-with-mcp)
 
@@ -96,3 +96,11 @@ Resource choices and comparison values come from the style host and its authored
 ![The Rust palette shows Light, Dark, and High contrast colors beside the selected Dark declaration and its native preview](../images/vscode-rust-theme-palette.jpg)
 
 [Compare the same layers in App Preview](../images/vscode-app-preview-rust-theme-palette.jpg)
+
+### Edit a shared Rust color
+
+1. Open the review view in [rust_shared_colors.rs](../../../editors/vscode/test/fixtures/rust_shared_colors.rs). In **Styles & Themes**, select the rule and choose **Default** in **Color resources**. `ReviewInk` comes from `const DEFAULT_INK` through a named import and a constant alias.
+2. Use the source icon to open the supplying constructor. The canvas stays on the selected RSX invocation while you inspect the declaration. The source icon in **Compare Rust theme colors** opens the constructor for that appearance.
+3. Choose **Change color from const DEFAULT_INK**. **Use a local color** writes a literal for this resource while preserving its key and comments. **Edit const DEFAULT_INK** changes the shared initializer and updates every reference to the constant. Enter the hex color and use Undo to reverse the source edit.
+
+The designer resolves named imports and constant chains it can verify in the same Rust file, including inline modules. Use Rust source navigation for external or computed declarations. The same actions are available in Studio and App Preview. [MCP actions](reference.md#edit-rust-styles-with-mcp)

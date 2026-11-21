@@ -34,7 +34,7 @@ pub(super) fn change_setter(
         .find(|entry| Some(entry.key) == current)
         .and_then(RsxStyleResourceFamily::common_declaration)
     {
-        let span = source.source;
+        let span = source.color_source();
         let active = scope.clone();
         add_button(
             row,

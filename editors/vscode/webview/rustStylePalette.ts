@@ -46,8 +46,10 @@ export function rustStylePalette<Base extends string | number>(resources: readon
         const layerResources = resources.filter(entry => (entry.layer === undefined ? 'shared' : entry.layer) === selected);
         content.replaceChildren(...layerResources.map(entry => paletteColorRow({ id: `rust-color-${entry.node}`, key: entry.key,
             value: entry.color ?? 'Rust expression', color: entry.color ?? undefined, description: paletteLayerLabels[selected] }, {
-            change: entry.color ? color => send({ type: 'rust-resource-color', node: entry.node, color }) : undefined,
+            change: entry.color && !entry.shared_constant ? color => send({ type: 'rust-resource-color', node: entry.node, color }) : undefined,
             reveal: () => send({ type: 'reveal', range: entry.range }),
+            edit: entry.shared_constant ? { label: `Change color from const ${entry.shared_constant}`,
+                apply: () => send({ type: 'rust-shared-color', node: entry.node }) } : undefined,
         })));
         if (!layerResources.length) {
             const empty = create('p');

@@ -135,7 +135,7 @@ Call `designer_rsx_style_edit` through `designer_studio_edit` with the current s
 | `setter` | `style`, the setter's `node` as `setter`, and the typed `value`. Pass `null` to remove it. |
 | `add_setter` | `style`, a `getter` from `available`, and the typed `value`. |
 | `add_color_resource` | `style`, a `key` unique within the selected layer, a hex `value`, and optional `layer`. Use `shared` (default), `default`, `light`, `dark`, or `high_contrast`. |
-| `color_resource` | `style`, the declaration's `node` from `color_resources` as `resource`, and the new hex `value`. |
+| `color_resource` | `style`, the declaration's `node` from `color_resources` as `resource`, and the new hex `value`. Use the default `mode: "literal"` for a direct color. If the resource reports `shared_constant`, use `mode: "declaration"` to change all references to the constant or `mode: "local"` for a literal in this rule. |
 | `set_resource` | `style`, a `key` from `resource_choices`, and exactly one of `setter` or `getter`. Use `setter` to link an existing value and `getter` to add a compatible property. |
 | `remove` | `style` with `can_remove` enabled. |
 

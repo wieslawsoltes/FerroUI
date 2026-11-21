@@ -12,13 +12,14 @@ export type PaletteEdit = { action: 'set'; node: number; color: string }
 
 export type StyleCreation = { action: 'create'; selector: string }
     | { action: 'create_theme'; key: string; target_type: string };
+export type RustColorMode = 'literal' | 'declaration' | 'local';
 export type RustStyleEdit = { action: 'create'; owner: number; selector: string }
     | { action: 'create_nested' | 'selector'; style: number; selector: string }
     | { action: 'setter'; style: number; setter: number; value: string | null }
     | { action: 'add_setter'; style: number; getter: string; value: string }
     | { action: 'set_resource'; style: number; key: string } & ({ setter: number } | { getter: string })
     | { action: 'add_color_resource'; style: number; key: string; value: string; layer?: PaletteLayer }
-    | { action: 'color_resource'; style: number; resource: number; value: string }
+    | { action: 'color_resource'; style: number; resource: number; value: string; mode?: RustColorMode }
     | { action: 'remove'; style: number };
 
 export interface StyleScope { node: number; label: string }
@@ -53,7 +54,7 @@ export interface AuthoredSetter extends StyleSetter {
     resource?: { key: string; declaration?: Range | null } | null;
 }
 export interface RustColorChoice { key: string; color?: string | null }
-export interface RustColorResource extends RustColorChoice { node: number; range: Range; layer?: PaletteLayer | null }
+export interface RustColorResource extends RustColorChoice { node: number; range: Range; layer?: PaletteLayer | null; shared_constant?: string | null }
 export interface StyleDefinition<Base extends string | number = number> {
     node: number;
     kind: StyleSummary['kind'];
@@ -125,6 +126,7 @@ export type StylesAction<Base extends string | number = number> =
     | { type: 'setter-resource'; property: string; node: number }
     | { type: 'add-color-resource'; layer: PaletteLayer }
     | { type: 'rust-resource-color'; node: number; color: string }
+    | { type: 'rust-shared-color'; node: number }
     | { type: 'add-setter' | 'preview-definition' | 'remove-style' }
     | { type: 'add-nested-style' | 'style-issues' }
     | { type: 'palette-add'; layer: PaletteLayer }

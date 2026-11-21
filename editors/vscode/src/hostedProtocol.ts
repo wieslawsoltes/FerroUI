@@ -1,4 +1,4 @@
-import type { PreviewSourceBuffer, Source } from './protocol';
+import type { PreviewSourceBuffer, Range, Source } from './protocol';
 import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
     HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupAction, HostedKeyframeSelection } from './hostedAnimationProtocol';
 import type { CurvePoint, KeyframeDraftPreview, KeyframeLocation } from './timelineProtocol';
@@ -23,6 +23,7 @@ export interface HostedFrame {
     fixtures?: string[] | null;
     paletteAvailable?: boolean;
     stylesAvailable?: boolean;
+    rustScope?: { active: Range; blocks: Range[] };
     animations?: HostedAnimationCatalog;
     animationPresentation?: HostedAnimationPresentation;
 }

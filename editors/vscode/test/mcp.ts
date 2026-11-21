@@ -40,6 +40,7 @@ import { verifyIncludedStylesMcp } from './includedStylesMcp';
 import { verifyPropertyTraceMcp } from './propertyTraceMcp';
 import { verifyStylesMcp } from './stylesMcp';
 import { verifyRustStylesMcp } from './rsxStylesMcp';
+import { verifyRsxSharedColorsMcp } from './rsxSharedColorsMcp';
 import { verifyHighContrastPalette } from './highContrastPalette';
 import { verifyPreviewChecks } from './previewChecksMcp';
 import { verifyStageStates } from './stageStateMcp';
@@ -228,6 +229,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyPropertyTraceMcp({ invoke, content });
         await verifyStylesMcp({ invoke, content });
         await verifyRustStylesMcp({ invoke, content });
+        await verifyRsxSharedColorsMcp({ invoke, content });
         await verifyIncludedStylesMcp({ invoke, content });
         await verifyHighContrastPalette({ invoke, content });
         await verifyThemeResourceRename({ invoke, content });

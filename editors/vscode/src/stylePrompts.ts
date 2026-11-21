@@ -1,5 +1,5 @@
 import { choose, editText } from './studioContext';
-import { paletteLayerLabels, type PaletteLayer, type RustColorChoice, type StyleCatalog, type StyleCreation, type StyleSetter } from './stylesProtocol';
+import { paletteLayerLabels, type PaletteLayer, type RustColorChoice, type RustColorResource, type StyleCatalog, type StyleCreation, type StyleSetter } from './stylesProtocol';
 
 export async function chooseNewStyle(catalog: StyleCatalog, kind: 'style' | 'theme', suggestedType?: string): Promise<{ node: number; edit: StyleCreation } | undefined> {
     const scopes = kind === 'theme' ? catalog.palette_scopes : catalog.style_hosts;
@@ -55,6 +55,18 @@ export async function promptRustColorResource(layer: PaletteLayer): Promise<{ ke
     if (key === undefined) return;
     const value = await editText('Color value', '#FF4C82D0', undefined, title);
     if (value !== undefined) return { key: key.trim(), value, ...(layer === 'shared' ? {} : { layer }) };
+}
+
+export async function promptRustSharedColor(resource: RustColorResource | undefined) {
+    if (!resource?.shared_constant || !resource.color) throw new Error('Choose a current color backed by a Rust constant.');
+    const title = `Change ${resource.key} from const ${resource.shared_constant}`;
+    const scope = await choose(title, [
+        { label: 'Use a local color', description: 'Change this style resource', mode: 'local' as const },
+        { label: `Edit const ${resource.shared_constant}`, description: 'Change every use of the constant', mode: 'declaration' as const },
+    ]);
+    if (!scope) return;
+    const value = await editText(scope.label, resource.color, undefined, title);
+    if (value !== undefined) return { mode: scope.mode, value };
 }
 
 export async function chooseStyleResource<T extends { key: string; type_name: string }>(property: string, resources: readonly T[]) {

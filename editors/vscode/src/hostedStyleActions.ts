@@ -3,7 +3,7 @@ import type { HostedStyles } from './hostedStyles';
 import type { HostedStyleCatalog, HostedStyleCommand, HostedStyleDefinition, HostedStyleResult, HostedStyleTarget } from './hostedStylesProtocol';
 import { choose, editText } from './studioContext';
 import type { RustStyleEdit } from './stylesProtocol';
-import { chooseNewSetter, chooseNewStyle, chooseRustColorResource, chooseStyleIssue, chooseStyleResource, promptRustColorResource } from './stylePrompts';
+import { chooseNewSetter, chooseNewStyle, chooseRustColorResource, chooseStyleIssue, chooseStyleResource, promptRustColorResource, promptRustSharedColor } from './stylePrompts';
 
 export async function runHostedStyleAction(styles: HostedStyles, frame: HostedAnimationFrame,
     command: HostedStyleCommand, current: () => HostedAnimationFrame): Promise<HostedStyleResult | undefined> {
@@ -71,6 +71,12 @@ export async function runHostedStyleAction(styles: HostedStyles, frame: HostedAn
         case 'addColorResource': {
             const input = await promptRustColorResource(command.layer);
             if (input) await rustEdit(command.target, { action: 'add_color_resource', style: command.target.node, ...input });
+            return;
+        }
+        case 'editSharedColor': {
+            const { definition } = await styles.read(frame, { action: 'read', target: command.target }, signal()) as HostedStyleDefinition;
+            const result = await promptRustSharedColor(definition.color_resources?.find(color => color.node === command.resource));
+            if (result) await rustEdit(command.target, { action: 'color_resource', style: command.target.node, resource: command.resource, ...result });
             return;
         }
         case 'chooseResource': {

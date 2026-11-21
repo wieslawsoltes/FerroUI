@@ -26,7 +26,7 @@ import { NativePreview } from './nativePreview';
 import { errorMessage, type Language, type Range } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
 import { chooseAnimationIssue } from './studioPrograms';
-import { asRange, languageOf, sourceOf } from './textDocument';
+import { asPosition, asRange, languageOf, offsetAfterChanges, sourceOf } from './textDocument';
 import { writeTimelineClipboard } from './timelineKeyframeClipboard';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
@@ -299,6 +299,8 @@ class HostedSession {
     private client?: NativePreview;
     private project?: BuiltProject;
     private frame?: HostedFrame;
+    private rustBlockOffset?: number;
+    private pendingRustCaret?: { version: number; position: vscode.Position };
     private fixture: string | null = null;
     private clipSelection?: { version: number; key: string };
     private failed?: { revision: number; message: string };
@@ -329,12 +331,14 @@ class HostedSession {
             watcher, watcher.onDidCreate(dependencyChanged), watcher.onDidChange(dependencyChanged), watcher.onDidDelete(dependencyChanged),
             vscode.workspace.onDidChangeTextDocument(event => {
                 if (!event.contentChanges.length) return;
-                if (event.document === editor.document) this.update();
-                else dependencyChanged(event.document.uri);
+                if (event.document === editor.document) {
+                    if (this.rustBlockOffset !== undefined) this.rustBlockOffset = offsetAfterChanges(this.rustBlockOffset, event.contentChanges);
+                    this.update();
+                } else dependencyChanged(event.document.uri);
             }),
             vscode.workspace.onDidCloseTextDocument(document => dependencyChanged(document.uri)),
             vscode.window.onDidChangeTextEditorSelection(event => {
-                if (language === 'rust' && event.textEditor === editor) this.update();
+                if (language === 'rust' && event.textEditor === editor) this.updateRustCaret(event.selections[0]?.active);
             }),
             panel.onDidChangeViewState(() => this.schedule(0)),
             panel.onDidDispose(() => remove(this.dispose())),
@@ -417,7 +421,8 @@ class HostedSession {
             let frame: HostedFrame | null;
             if (update) {
                 this.dependencies.start();
-                const source = await client.inProject(sourceOf(document, this.language, this.editor.selection.active), this.project);
+                const caret = this.rustBlockOffset === undefined ? this.editor.selection.active : document.positionAt(this.rustBlockOffset);
+                const source = await client.inProject(sourceOf(document, this.language, caret), this.project);
                 if (this.disposed || revision !== this.revision) return;
                 const result = await client.renderHostedWorkspace({ revision, assembly, projectPath, document: source, fixture: this.fixture,
                     restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined,
@@ -471,11 +476,32 @@ class HostedSession {
 
     get message(): string { return this.status; }
 
+    private updateRustCaret(caret: vscode.Position | undefined): void {
+        if (!caret) return;
+        const scope = this.currentFrame?.rustScope;
+        if (!scope) {
+            if (this.frame?.rustScope) this.pendingRustCaret = { version: this.editor.document.version, position: caret };
+            else this.update();
+            return;
+        }
+        const block = scope.blocks.map(asRange).reduce<vscode.Range | undefined>((nearest, candidate) => {
+            return candidate.contains(caret) && (!nearest || nearest.contains(candidate)) ? candidate : nearest;
+        }, undefined);
+        if (block && !block.isEqual(asRange(scope.active))) {
+            this.rustBlockOffset = this.editor.document.offsetAt(block.start);
+            this.update();
+        }
+    }
+
     private accept(frame: HostedFrame): void {
         this.frame = frame;
+        this.rustBlockOffset = frame.rustScope ? this.editor.document.offsetAt(asPosition(frame.rustScope.active.start)) : undefined;
         this.post({ type: 'frame', frame });
         this.animations.accept(frame);
         this.report(`${this.target.label} · App-hosted design${frame.fixture ? ` · ${frame.fixture}` : ''}`, true);
+        const caret = this.pendingRustCaret;
+        this.pendingRustCaret = undefined;
+        if (frame.rustScope && caret?.version === this.editor.document.version) this.updateRustCaret(caret.position);
     }
 
     private async sampleAnimation(request: HostedAnimationRequest, signal: AbortSignal): Promise<HostedAnimationSample> {
