@@ -2366,7 +2366,6 @@ mod tests {
         let entry = |key: &str, references: &[&str], slots: &[u32]| ThemeEntryModel {
             key: key.to_string(),
             references: references.iter().map(|key| key.to_string()).collect(),
-            types: Vec::new(),
             slots: slots.to_vec(),
         };
         let ambient = ThemeUnitModel {

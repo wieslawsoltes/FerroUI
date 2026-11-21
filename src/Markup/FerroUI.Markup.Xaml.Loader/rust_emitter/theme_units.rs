@@ -237,7 +237,6 @@ impl UnitEmission {
                     let added = ThemeEntryModel {
                         key: entry.key.clone(),
                         references: unit.references.clone(),
-                        types: unit.types.clone(),
                         slots: Vec::new(),
                     };
                     unit.entries.insert(position, added);

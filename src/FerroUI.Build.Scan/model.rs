@@ -28,6 +28,7 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
+use crate::xaml_metadata::IndexedName;
 pub use crate::xaml_metadata::{ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeEntryModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
@@ -1493,22 +1494,24 @@ fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
             ("types".to_string(), strings(&unit.types)),
         ];
         // What each entry and the rest of the unit name (#852, step 2), when the unit has them.
-        if !(unit.entries.is_empty() && unit.body_references.is_empty() && unit.body_types.is_empty()) {
-            let entry = |entry: &ThemeEntryModel| {
-                let mut members = vec![
-                    ("key".to_string(), Json::string(&entry.key)),
-                    ("references".to_string(), strings(&entry.references)),
-                    ("types".to_string(), strings(&entry.types)),
-                ];
-                if !entry.slots.is_empty() {
-                    let slots = entry.slots.iter().map(|slot| Json::Integer(i64::from(*slot))).collect();
-                    members.push(("slots".to_string(), Json::Array(slots)));
-                }
-                Json::Object(members)
+        if unit.has_entry_graph() {
+            let row = |names: &[IndexedName]| {
+                Json::Array(
+                    names
+                        .iter()
+                        .map(|name| match name {
+                            IndexedName::Index(index) => Json::Integer(i64::from(*index)),
+                            IndexedName::Name(name) => Json::string(name),
+                        })
+                        .collect(),
+                )
             };
-            members.push(("entries".to_string(), Json::Array(unit.entries.iter().map(entry).collect())));
-            members.push(("body_references".to_string(), strings(&unit.body_references)));
-            members.push(("body_types".to_string(), strings(&unit.body_types)));
+            members.push(("entry_references".to_string(), Json::Array(unit.entry_rows().iter().map(|names| row(names)).collect())));
+            members.push(("body_references".to_string(), row(&unit.body_row())));
+            let slots = unit.slot_rows();
+            if !slots.is_empty() {
+                members.push(("entry_slots".to_string(), Json::Array(slots.iter().map(|names| row(names)).collect())));
+            }
         }
         Json::Object(members)
     };
@@ -1547,7 +1550,7 @@ fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
         let unit = Fields::of(unit, "a unit")?;
         let strings = |name: &str| unit.list(name, |item| text_of(item, name));
         let index = unit.optional_integer("index")?.ok_or_else(|| "\"index\" is missing in a unit".to_string())?;
-        Ok(ThemeUnitModel {
+        let mut read = ThemeUnitModel {
             name: unit.text("name")?,
             index: u32::try_from(index).map_err(|_| "the index of a unit is not an unsigned integer".to_string())?,
             documents: strings("documents")?,
@@ -1555,21 +1558,29 @@ fn theme_units_from_json(value: &Json) -> Result<ThemeUnitsModel, String> {
             type_keys: strings("type_keys")?,
             references: strings("references")?,
             types: strings("types")?,
-            entries: unit.list("entries", |entry| {
-                let entry = Fields::of(entry, "an entry")?;
-                Ok(ThemeEntryModel {
-                    key: entry.text("key")?,
-                    references: entry.list("references", |item| text_of(item, "references"))?,
-                    types: entry.list("types", |item| text_of(item, "types"))?,
-                    slots: entry.list("slots", |slot| match slot {
-                        Json::Integer(slot) => u32::try_from(*slot).map_err(|_| "a slot is not an unsigned integer".to_string()),
-                        _ => Err("a slot is not an integer".to_string()),
-                    })?,
-                })
-            })?,
-            body_references: strings("body_references")?,
-            body_types: strings("body_types")?,
-        })
+            ..ThemeUnitModel::default()
+        };
+        if unit.optional("entry_references", |_| Ok(()))?.is_some() {
+            let names = |value: &Json| -> Result<Vec<IndexedName>, String> {
+                match value {
+                    Json::Array(names) => names
+                        .iter()
+                        .map(|name| match name {
+                            Json::Integer(index) => u32::try_from(*index)
+                                .map(IndexedName::Index)
+                                .map_err(|_| "an index of the entry graph is not an unsigned integer".to_string()),
+                            _ => text_of(name, "a name of the entry graph").map(IndexedName::Name),
+                        })
+                        .collect(),
+                    _ => Err("a row of the entry graph is not an array".to_string()),
+                }
+            };
+            let rows = unit.list("entry_references", names)?;
+            let body = unit.optional("body_references", names)?.unwrap_or_default();
+            let slots = unit.list("entry_slots", names)?;
+            read.read_entry_graph(rows, body, slots)?;
+        }
+        Ok(read)
     })?;
     Ok(ThemeUnitsModel { class: fields.text("class")?, table_path: fields.text("table_path")?, units })
 }

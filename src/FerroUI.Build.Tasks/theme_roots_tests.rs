@@ -651,7 +651,7 @@ fn a_class_not_created_on_the_target_is_not_live_through_its_creates_edges() {
 fn the_keys_of_kept_units_are_live_by_entry() {
     use ferroui_build_scan::xaml_metadata::ThemeEntryModel;
     let entry = |key: &str, references: &[&str]| ThemeEntryModel { key: key.to_string(), references: strings(references), ..ThemeEntryModel::default() };
-    let mut resources = unit(1, "Resources/Base.xaml", &["Accent", "AccentBrush", "Unused", "Other"], &[], &[], &[]);
+    let mut resources = unit(1, "Resources/Base.xaml", &["Accent", "AccentBrush", "Other", "Unused"], &[], &[], &[]);
     resources.entries = vec![entry("Accent", &[]), entry("AccentBrush", &["Accent"]), entry("Other", &[]), entry("Unused", &["Other"])];
     let mut button = unit(2, "Controls/Button.xaml", &["AccentButtonStyle"], &["Button"], &[], &[]);
     button.entries = vec![entry("AccentButtonStyle", &[])];
