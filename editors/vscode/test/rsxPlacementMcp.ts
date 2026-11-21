@@ -91,6 +91,30 @@ async function verifyPlacement({ invoke, content }: McpFixture, collection: bool
     assert.deepEqual(active.selection, [inserted.id]);
     await undo(placed);
     await undo(source);
+    if (collection) {
+        frame = await outline();
+        const tail = find('Tail');
+        assert.equal(tail.canRemove, true);
+        const removal = { session, expected_revision: frame.revision, node: tail.id };
+        content(await invoke('designer_remove', removal));
+        assert.equal(document.getText(),
+            source.replace('            rsx! { TextBlock { name: "Tail", text(message()) } },\r\n', ''));
+        assert.equal((await invoke('designer_remove', removal)).isError, true);
+        await undo(source);
+        frame = await outline();
+        const origin = find('Origin');
+        const retainedBorder = frame.nodes.find(node => node.parent === origin.id && node.label === 'Border');
+        assert.ok(retainedBorder);
+        const edits = [
+            ...['Anchor', 'Tail'].map(name => ({ RemoveNode: { node: find(name).id } })),
+            { SetAttribute: { node: retainedBorder.id, name: 'Width', value: '128' } },
+        ];
+        content(await invoke('designer_apply', { session, expected_revision: frame.revision,
+            label: 'Remove visible children', edits }));
+        assert.match(document.getText(), /children\(\[\r\n {12}computed_children\(\),\r\n {8}\]\)/);
+        assert.match(document.getText(), /Border \{ width\(128\.0\) \}/);
+        await undo(source);
+    }
     assert.equal(document.eol, vscode.EndOfLine.CRLF);
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === `Design · ${path}` || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));

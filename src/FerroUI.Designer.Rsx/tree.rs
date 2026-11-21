@@ -69,21 +69,24 @@ impl Element {
         index: &mut usize,
         changes: &mut Vec<ValueChange<'a>>,
     ) -> bool {
-        if self.class != target.class
-            || self.children.len() != target.children.len()
-            || !self.properties.keys().eq(target.properties.keys())
-        {
+        if self.class != target.class || self.children.len() != target.children.len() {
             return false;
         }
-        for ((name, value), next) in self.properties.iter().zip(target.properties.values()) {
-            if value != next {
+        for (name, next) in &target.properties {
+            if self.properties.get(name) != Some(next) {
                 changes.push(ValueChange {
                     index: *index,
                     name,
-                    value: next,
+                    value: Some(next),
                 });
             }
         }
+        changes.extend(
+            self.properties
+                .keys()
+                .filter(|name| !target.properties.contains_key(*name))
+                .map(|name| ValueChange { index: *index, name, value: None }),
+        );
         self.children
             .iter()
             .zip(&target.children)
@@ -97,7 +100,7 @@ impl Element {
 pub(crate) struct ValueChange<'a> {
     pub(crate) index: usize,
     pub(crate) name: &'a str,
-    pub(crate) value: &'a str,
+    pub(crate) value: Option<&'a str>,
 }
 
 pub(crate) fn replacement(source: &str, span: SourceSpan, output: &str) -> TextPatch {

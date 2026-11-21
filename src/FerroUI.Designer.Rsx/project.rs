@@ -48,6 +48,16 @@ pub struct RsxNode {
     pub(crate) state_slot: ArraySlot,
     pub(crate) columns: Option<ColumnSource>,
     pub(crate) templates: TemplateFields,
+    pub(crate) subtree: ProjectedSubtree,
+}
+
+#[derive(Default)]
+pub(crate) struct ProjectedSubtree {
+    /// Exclusive end of this control's subtree in the projection's preorder.
+    pub(crate) end: usize,
+    pub(crate) omitted: usize,
+    pub(crate) animation_issues: usize,
+    pub(crate) style_issues: usize,
 }
 
 impl RsxNode {
@@ -179,8 +189,8 @@ impl RsxProjection<'_> {
         Ok(TextPatch { span, replacement })
     }
 
-    /// Apply edited XAML to the selected RSX tree. Changes to existing values keep the
-    /// original tokens outside those literals. Structural edits retain the rest of the file.
+    /// Apply edited XAML to the selected RSX tree. Changes to mapped properties keep
+    /// the original child declarations. Structural edits retain the rest of the file.
     pub fn apply_xaml(&self, draft: &str) -> Result<Vec<TextPatch>, String> {
         if self.has_projected_columns() {
             return Err("Edit authored Rust column collections in Columns or in source".into());
@@ -210,10 +220,25 @@ impl RsxProjection<'_> {
         }
         let draft = XamlTree::parse(&document, self.catalog)?;
         if let Some(changes) = self.tree.changes(&draft.tree) {
-            return changes
+            let mut patches = changes
                 .iter()
-                .map(|value| self.set_property(value.index, value.name, value.value))
-                .collect();
+                .map(|change| self.edit_property(change.index, change.name, change.value))
+                .collect::<Result<Vec<_>, _>>()?;
+            crate::source_edits::merge_insertions(&mut patches);
+            if !patches.is_empty() {
+                let source = TextPatch::apply_all(self.source, patches.clone())
+                    .map_err(|error| error.to_string())?;
+                let modules = self.draft_module_sources(&source)?;
+                let projected = self.catalog.project_with_modules(
+                    &source,
+                    self.invocation.start,
+                    modules.as_ref(),
+                )?;
+                if projected.omitted_count != 0 || projected.tree != draft.tree {
+                    return Err("The property edits do not match the authored Rust view".into());
+                }
+            }
+            return Ok(patches);
         }
         if self.has_explicit_child_lists() {
             return Err("Use the canvas or Outline to edit the authored Rust child list".into());
@@ -385,6 +410,9 @@ impl State<'_> {
         let table = table_kind(&class);
         let collection = InlineChildren::read(node, &class);
         let index = self.nodes.len();
+        let omitted_before = self.omitted_count;
+        let animation_issues_before = self.animation_issues.len();
+        let style_issues_before = self.style_issues.len();
         self.nodes.push(RsxNode {
             span: SourceSpan::new(name.start, node.braces.close().byte_range().end),
             name: SourceSpan::new(name.start, name.end),
@@ -412,6 +440,7 @@ impl State<'_> {
             },
             columns: table.map(|_| ColumnSource::Missing),
             templates: TemplateFields::for_class(&class),
+            subtree: ProjectedSubtree::default(),
         });
         let mut seen = BTreeSet::new();
         let mut state_fields = Vec::new();
@@ -587,6 +616,12 @@ impl State<'_> {
                 self.omit(format!("{class}.visual_states expression"));
             }
         }
+        self.nodes[index].subtree = ProjectedSubtree {
+            end: self.nodes.len(),
+            omitted: self.omitted_count - omitted_before,
+            animation_issues: self.animation_issues.len() - animation_issues_before,
+            style_issues: self.style_issues.len() - style_issues_before,
+        };
         Ok(result)
     }
 

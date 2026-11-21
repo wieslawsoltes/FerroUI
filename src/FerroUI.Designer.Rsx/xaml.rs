@@ -1,9 +1,11 @@
 use crate::project::{accepts_control, parse_draft};
 use crate::registered::RsxCatalog;
-use crate::tree::{Element, MAX_DEPTH, escape_xml, inline_content, replacement};
+use crate::tree::{Element, MAX_DEPTH, inline_content, replacement};
 use ferroui_designer_core::design_fixtures::DESIGN_NAMESPACE;
 use ferroui_designer_core::{Document, Node, NodeId, NodeKind, SourceSpan, TextPatch};
 use std::collections::BTreeMap;
+
+mod counterpart_properties;
 
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 const COMPATIBILITY: &str = "http://schemas.openxmlformats.org/markup-compatibility/2006";
@@ -29,23 +31,16 @@ impl RsxCatalog {
         let current = XamlTree::authored(document, self)?;
         let next = parse_draft(draft, self)?;
         if let Some(changes) = current.tree.changes(&next) {
-            return changes
-                .iter()
-                .map(|change| {
-                    let origin = current.origins[change.index][change.name];
-                    let value = if origin.quote.is_none() {
-                        inline_content(change.value).ok_or_else(|| {
-                            format!("Use a {} attribute for this value", change.name)
-                        })?
-                    } else {
-                        change.value.to_owned()
-                    };
-                    Ok(TextPatch {
-                        span: origin.span,
-                        replacement: escape_xml(&value, origin.quote),
-                    })
-                })
-                .collect();
+            let patches = current.plan_properties(document, changes)?;
+            if !patches.is_empty() {
+                let source = TextPatch::apply_all(document.source(), patches.clone())
+                    .map_err(|error| error.to_string())?;
+                let edited = Document::new(source).map_err(|error| error.to_string())?;
+                if XamlTree::authored(&edited, self)?.tree != next {
+                    return Err("The property edits do not match the authored XAML view".into());
+                }
+            }
+            return Ok(patches);
         }
         if current.preserve_structure {
             return Err("Edit the structure in the XAML editor to keep its comments, processing instructions, and design metadata".into());
@@ -65,10 +60,15 @@ struct Origin {
     quote: Option<char>,
 }
 
+struct ControlOrigins {
+    node: NodeId,
+    properties: BTreeMap<String, Origin>,
+}
+
 pub(crate) struct XamlTree {
     pub(crate) tree: Element,
     preserve_structure: bool,
-    origins: Vec<BTreeMap<String, Origin>>,
+    origins: Vec<ControlOrigins>,
 }
 
 impl XamlTree {
@@ -127,7 +127,7 @@ impl XamlTree {
 struct ParseTree<'a> {
     document: &'a Document,
     catalog: &'a RsxCatalog,
-    origins: Vec<BTreeMap<String, Origin>>,
+    origins: Vec<ControlOrigins>,
     authored: bool,
     state_classes: Option<&'a BTreeMap<NodeId, (&'a str, bool)>>,
     preserve_structure: bool,
@@ -218,7 +218,7 @@ impl<'a> ParseTree<'a> {
             }
         }
         let index = self.origins.len();
-        self.origins.push(origins);
+        self.origins.push(ControlOrigins { node: node.id, properties: origins });
         let placement = class.children();
         let text_property = class.text_property();
         for child in node
@@ -262,7 +262,7 @@ impl<'a> ParseTree<'a> {
                                 format!("Use a {name} attribute to convert mixed or multiline text")
                             })?;
                     element.properties.insert(name.into(), value);
-                    self.origins[index].insert(
+                    self.origins[index].properties.insert(
                         name.into(),
                         Origin {
                             span: child.span,

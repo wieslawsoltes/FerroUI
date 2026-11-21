@@ -81,6 +81,35 @@ fn xaml_edits_preserve_comments_lexical_names_and_inline_content() {
 }
 
 #[test]
+fn alternate_rsx_inserts_and_resets_xaml_properties_in_their_original_tree() {
+    let source = r#"<StackPanel xmlns='https://github.com/ferroui'
+    xmlns:key='http://schemas.microsoft.com/winfx/2006/xaml'
+    xmlns:d='http://schemas.microsoft.com/expression/blend/2008'
+    d:DesignWidth='580'>
+    <!-- preserve 🧭 -->
+    <Button key:Name='review' Width='90'>Open</Button>
+    <TextBlock Text='Reference' d:Text='Sample'/>
+</StackPanel>"#.replace('\n', "\r\n");
+    let xaml = Document::new(&source).unwrap();
+    let draft = r#"rsx! { StackPanel {
+        Button { max_width(180.0), content("One\nTwo") }
+        TextBlock { text("Reference") }
+    } }"#;
+    let edits = apply_rsx(&xaml, draft).unwrap();
+    let updated = TextPatch::apply_all(&source, edits).unwrap();
+    assert!(updated.contains("xmlns:key='http://schemas.microsoft.com/winfx/2006/xaml'"));
+    assert!(updated.contains("d:DesignWidth='580'>\r\n    <!-- preserve 🧭 -->"));
+    assert!(updated.contains("<TextBlock Text='Reference' d:Text='Sample'/>"));
+    assert!(updated.contains("MaxWidth='180'"));
+    assert!(updated.contains("Content='One&#10;Two'"));
+    assert!(!updated.contains("key:Name='review'"));
+    assert!(!updated.contains("Width='90'"));
+    assert!(!updated.contains(">Open<"));
+    let next = Document::new(updated).unwrap();
+    assert!(apply_rsx(&next, draft).unwrap().is_empty());
+}
+
+#[test]
 fn structural_conversion_replaces_only_the_selected_view() {
     let source = "pub fn view() -> Element {\n    rsx! {\n        StackPanel { /* retired elsewhere */ }\n    }\n}\n";
     let source = source.replace(" /* retired elsewhere */ ", "");

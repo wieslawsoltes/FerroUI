@@ -134,6 +134,14 @@ fn inline_rsx_collection_move_uses_the_same_source_in_layers_and_mcp() {
     session.undo().unwrap();
     assert_eq!(session.authored_source(), source);
     assert!(!session.can_undo());
+    session.select([named(&session, "Row"), named(&session, "Tail")]);
+    crate::workspace_tools::delete(&mut session).unwrap();
+    assert!(content_children(&session, named(&session, "Source")).is_empty());
+    assert!(session.authored_source().contains("current_selection(),"));
+    assert!(!session.authored_source().contains("name(\"Tail\")"));
+    session.undo().unwrap();
+    assert_eq!(session.authored_source(), source);
+    assert!(!session.can_undo());
 
     #[cfg(feature = "mcp")]
     {

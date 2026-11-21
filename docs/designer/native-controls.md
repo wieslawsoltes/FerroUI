@@ -157,6 +157,8 @@ Select a control in a Rust view and open **Properties**. Edit a supported litera
 
 Open the outer RSX invocation for a panel whose children come from an inline array or a qualified `::std::vec!` of nested RSX controls. Drag a mapped member in **Layers** or on the canvas. Insert a Toolbox control, move a member to another authored panel, or wrap consecutive members in a panel. Studio keeps their authored expressions and comments and restores the exact Rust in one Undo. Use the Rust editor to change computed entries. [Collection syntax and limits](vscode/authoring.md#arrange-an-inline-rust-child-collection)
 
+Select one or more mapped members and choose **Delete selection** to remove their Rust expressions in one Undo step. Computed siblings retain their original source and order.
+
 ### Solid color editor
 
 `PropertyColorEditor::new() -> Result<Self, String>` creates a swatch, source field and native

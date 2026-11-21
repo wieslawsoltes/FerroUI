@@ -2,6 +2,7 @@ use crate::{blocks::keep_comments, RsxProjection};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use ferroui_view_syntax::snake_case;
 use proc_macro2::{TokenStream, TokenTree};
+use std::collections::BTreeMap;
 
 #[derive(Clone, Copy, Debug)]
 pub struct RsxEvent {
@@ -105,6 +106,29 @@ pub(crate) fn insert_field(source: &str, offset: usize, field: &str) -> TextPatc
         span: SourceSpan::new(offset, offset),
         replacement,
     }
+}
+
+pub(crate) fn merge_insertions(edits: &mut Vec<TextPatch>) {
+    let mut insertions = BTreeMap::<usize, String>::new();
+    edits.retain(|edit| {
+        if edit.span.is_empty() {
+            insertions
+                .entry(edit.span.start)
+                .or_default()
+                .push_str(&edit.replacement);
+            false
+        } else {
+            true
+        }
+    });
+    edits.extend(
+        insertions
+            .into_iter()
+            .map(|(offset, replacement)| TextPatch {
+                span: SourceSpan::new(offset, offset),
+                replacement,
+            }),
+    );
 }
 
 pub(crate) fn remove_field(source: &str, span: SourceSpan) -> TextPatch {

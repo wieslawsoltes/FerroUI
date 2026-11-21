@@ -104,10 +104,15 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
             if !can_remove(&design, target) {
                 return Err("Select a removable child control".into());
             }
+            let edit = Edit::RemoveNode { node: *node };
             let change = candidate
-                .apply("Remove control", vec![Edit::RemoveNode { node: *node }])
+                .apply("Remove control", vec![edit.clone()])
                 .map_err(|e| e.to_string())?;
-            translated_patches(&design, candidate.source(), change.patches)?
+            if let Some(projection) = &design.rsx {
+                projection.plan_child_edit(&design.xaml, &candidate, &[edit], None)?.patches
+            } else {
+                change.patches
+            }
         }
         Operation::Place { frame, placement } => {
             let stage = renderer.ok_or("Render the design before placing controls")?.stage(*frame)?;
@@ -146,7 +151,8 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
             }
         }
         Operation::Apply { label, edits } => {
-            if !design.editable_structure() {
+            let child_list = design.rsx.as_ref().filter(|_| ferroui_designer_rsx::is_child_list_edit(edits));
+            if !design.editable_structure() && child_list.is_none() {
                 return Err("Author this Rust block directly to preserve its expressions and comments".into());
             }
             if edits.is_empty() || edits.len() > 4096 || label.len() > 256 {
@@ -156,7 +162,11 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
                 return Err("Use the versioned source buffer tool to write raw source".into());
             }
             let change = candidate.apply(label, edits.clone()).map_err(|error| error.to_string())?;
-            translated_patches(&design, candidate.source(), change.patches)?
+            if let Some(projection) = child_list {
+                projection.plan_child_edit(&design.xaml, &candidate, edits, None)?.patches
+            } else {
+                translated_patches(&design, candidate.source(), change.patches)?
+            }
         }
     };
     let selection = selected.and_then(|node| crate::edit_selection::authored_range(&design, &candidate, &patches, node));
@@ -256,7 +266,9 @@ fn editable_node<'a>(design: &'a DesignDocument<'_>, id: NodeId) -> Result<&'a N
 }
 
 pub(crate) fn can_remove(design: &DesignDocument<'_>, node: &Node) -> bool {
-    design.editable_structure() && node.kind == NodeKind::Element && node.parent.is_some()
+    node.kind == NodeKind::Element && node.parent.is_some_and(|parent| {
+        design.rsx.is_none() || design.rsx_node(node.id).is_some() && design.editable_children(parent)
+    })
 }
 
 pub(crate) fn editable_attribute(design: &DesignDocument<'_>, node: &Node, name: &str) -> bool {

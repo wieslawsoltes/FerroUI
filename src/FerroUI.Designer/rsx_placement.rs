@@ -2,21 +2,6 @@ use crate::DesignerSession;
 use ferroui_designer_core::{Edit, NodeId};
 use std::collections::{HashMap, HashSet};
 
-pub(crate) fn is_child_placement(edits: &[Edit]) -> bool {
-    edits
-        .iter()
-        .any(|edit| matches!(edit, Edit::InsertChild { .. } | Edit::MoveNode { .. }))
-        && edits.iter().all(|edit| {
-            matches!(
-                edit,
-                Edit::InsertChild { .. }
-                    | Edit::MoveNode { .. }
-                    | Edit::SetAttribute { .. }
-                    | Edit::RemoveAttribute { .. }
-            )
-        })
-}
-
 impl DesignerSession {
     pub(crate) fn apply_rust_placement(
         &mut self,

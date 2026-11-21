@@ -138,7 +138,7 @@ impl RustDocument {
         label: &str,
         edits: Vec<Edit>,
     ) -> Result<Vec<TextPatch>, DesignerError> {
-        if crate::rsx_placement::is_child_placement(&edits) {
+        if ferroui_designer_rsx::is_child_list_edit(&edits) {
             return self.plan_child_placement(document, label, edits, None).map(|(plan, _)| plan.patches);
         }
         let map = self

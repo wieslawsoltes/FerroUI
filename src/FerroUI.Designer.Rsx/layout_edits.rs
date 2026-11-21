@@ -1,13 +1,30 @@
 //! Source-preserving placement. Native layout supplies the intended projected tree,
 //! while the Rust parser supplies the original child slots and opaque boundaries.
-use crate::{RsxProjection, placement::ChildBoundary, xaml::XamlTree};
+mod removals;
+
+use crate::{RsxProjection, placement::ChildBoundary, source_edits::merge_insertions, xaml::XamlTree};
 use ferroui_designer_core::{Document, Edit, NodeId, NodeKind, SourceSpan, TextPatch};
+use removals::RemovedSubtrees;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub struct RsxChildEdit {
     pub patches: Vec<TextPatch>,
     /// New authored tag-name ranges for the projected node identities in the edit draft.
     pub controls: BTreeMap<NodeId, SourceSpan>,
+}
+
+/// A child-list transaction can combine placements and removals with mapped
+/// layout values on the affected controls.
+pub fn is_child_list_edit(edits: &[Edit]) -> bool {
+    edits.iter().any(|edit| {
+        matches!(edit, Edit::InsertChild { .. } | Edit::MoveNode { .. } | Edit::RemoveNode { .. })
+    }) && edits.iter().all(|edit| {
+        matches!(
+            edit,
+            Edit::InsertChild { .. } | Edit::MoveNode { .. } | Edit::RemoveNode { .. }
+                | Edit::SetAttribute { .. } | Edit::RemoveAttribute { .. }
+        )
+    })
 }
 
 impl RsxProjection<'_> {
@@ -42,11 +59,12 @@ impl RsxProjection<'_> {
         };
         let mut destinations = BTreeSet::new();
         let mut moving = BTreeSet::new();
+        let mut removals = BTreeMap::new();
         let mut departures = BTreeMap::<NodeId, Vec<usize>>::new();
         let mut values = BTreeMap::<usize, Vec<TextPatch>>::new();
         for edit in edits {
             match edit {
-                Edit::MoveNode { node, .. } => {
+                Edit::MoveNode { node, .. } | Edit::RemoveNode { node } => {
                     let source_parent = current
                         .ast()
                         .node(*node)
@@ -58,6 +76,10 @@ impl RsxProjection<'_> {
                         );
                     }
                     let moving_index = index(*node)?;
+                    if matches!(edit, Edit::RemoveNode { .. }) {
+                        removals.insert(moving_index, source_parent);
+                        continue;
+                    }
                     if moving.insert(moving_index) {
                         departures.entry(source_parent).or_default().push(moving_index);
                     }
@@ -88,9 +110,14 @@ impl RsxProjection<'_> {
                         .push(self.layout_value(index, name, None)?);
                 }
                 Edit::SetAttribute { .. } => {}
-                _ => return Err("Choose a child insertion, move, or mapped layout value".into()),
+                _ => return Err("Choose a child insertion, move, removal, or mapped layout value".into()),
             }
         }
+        let removed = RemovedSubtrees::record(self, removals, &mut departures);
+        if !moving.is_disjoint(&removed.indices) {
+            return Err("Move the Rust control before removing its source subtree".into());
+        }
+        let departing = moving.union(&removed.indices).copied().collect();
         for edits in values.values_mut() {
             merge_insertions(edits);
         }
@@ -140,7 +167,7 @@ impl RsxProjection<'_> {
                         items.push((XamlTree::fragment(draft, self.catalog, node)?, true));
                     }
                 }
-                patches.push(self.insert_elements(parent_index, boundary, &items, &moving)?);
+                patches.push(self.insert_elements(parent_index, boundary, &items, &departing)?);
             }
         }
         if relocated != moving {
@@ -159,10 +186,11 @@ impl RsxProjection<'_> {
         let modules = self.draft_module_sources(&edited)?;
         let actual = self.catalog.project_with_modules(&edited, self.invocation.start, modules.as_ref())?;
         if actual.invocation.start != self.invocation.start
-            || actual.omitted_count != self.omitted_count
-            || actual.animation_issues.len() != self.animation_issues.len()
+            || actual.omitted_count != self.omitted_count - removed.omitted
+            || actual.animation_issues.len() != self.animation_issues.len() - removed.animation_issues
+            || actual.style_issues.len() != self.style_issues.len() - removed.style_issues
         {
-            return Err("This placement would change an unmapped Rust child or declaration".into());
+            return Err("This edit would change an unmapped Rust child or declaration outside the edited controls".into());
         }
         let state_classes = indices
             .iter()
@@ -178,7 +206,7 @@ impl RsxProjection<'_> {
             })
             .collect();
         if actual.tree != XamlTree::layout(draft, self.catalog, &state_classes)?.tree
-            || program_count(self) != program_count(&actual)
+            || program_count(self, &removed.indices) != program_count(&actual, &BTreeSet::new())
         {
             return Err("This placement cannot preserve the authored Rust layout".into());
         }
@@ -222,18 +250,20 @@ impl RsxProjection<'_> {
     }
 }
 
-fn program_count(projection: &RsxProjection<'_>) -> (usize, usize) {
+fn program_count(projection: &RsxProjection<'_>, removed: &BTreeSet<usize>) -> (usize, usize) {
     (
         projection
             .styles
-            .values()
-            .flatten()
+            .iter()
+            .filter(|(index, _)| !removed.contains(*index))
+            .flat_map(|(_, styles)| styles)
             .map(|style| style.clips.len())
             .sum(),
         projection
             .states
-            .values()
-            .map(|states| states.groups.len())
+            .iter()
+            .filter(|(index, _)| !removed.contains(*index))
+            .map(|(_, states)| states.groups.len())
             .sum(),
     )
 }
@@ -260,27 +290,4 @@ fn layout_order(document: &Document, node: NodeId, order: &mut Vec<NodeId>) {
     for child in control_children(document, node) {
         layout_order(document, child, order);
     }
-}
-
-fn merge_insertions(edits: &mut Vec<TextPatch>) {
-    let mut insertions = BTreeMap::<usize, String>::new();
-    edits.retain(|edit| {
-        if edit.span.is_empty() {
-            insertions
-                .entry(edit.span.start)
-                .or_default()
-                .push_str(&edit.replacement);
-            false
-        } else {
-            true
-        }
-    });
-    edits.extend(
-        insertions
-            .into_iter()
-            .map(|(offset, replacement)| TextPatch {
-                span: SourceSpan::new(offset, offset),
-                replacement,
-            }),
-    );
 }

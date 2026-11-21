@@ -30,7 +30,7 @@ mod xaml;
 pub use animation::{RsxAnimation, RsxAnimationIssue};
 pub use item_templates::{RsxItemTemplate, is_item_template_owner};
 pub use language::{RsxLanguageDocument, analyze_rsx};
-pub use layout_edits::RsxChildEdit;
+pub use layout_edits::{is_child_list_edit, RsxChildEdit};
 pub use markup::{RsxPreviewMarkup, RsxSourceMap};
 pub use programs::{RsxAnimationEdit, RsxAnimationPlan};
 pub use project::{RsxNode, RsxProjection, project_rust};

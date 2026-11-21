@@ -128,11 +128,13 @@ export async function run(): Promise<void> {
         const xamlVersion = liveXaml.version;
         const liveInput = sourceOf(liveXaml, 'xaml', editorPosition());
         const liveFrame = await preview.render(liveInput, viewport);
-        const draft = liveFrame.counterpart.source?.replace('Save changes', 'Apply settings');
+        const draft = liveFrame.counterpart.source?.replace(
+            'content: "Save changes",', 'content: "Apply settings", max_width(330.0),');
         assert.ok(liveFrame.counterpart.editable && draft);
         const { edits: rsxEdits } = await preview.edit(liveInput, { type: 'applyCounterpart', source: draft });
         await applyTextEdits(liveXaml, xamlVersion, rsxEdits);
         assert.ok(liveXaml.getText().includes(`x:Name="saveButton" Content="Apply settings"`));
+        assert.ok(liveXaml.getText().includes('MaxWidth="330"'));
 
         const rust = await vscode.workspace.openTextDocument(rustUri);
         await vscode.window.showTextDocument(rust, { preview: false });
@@ -147,10 +149,12 @@ export async function run(): Promise<void> {
         assert.equal(rustFrame.blocks.length, 2);
         assert.ok(rustFrame.image, rustFrame.renderError ?? 'Expected a rendered RSX tree');
         assert.ok(rustFrame.counterpart.editable && rustFrame.counterpart.source);
-        const xamlDraft = rustFrame.counterpart.source.replace('Workspace settings', 'Project settings');
+        const xamlDraft = rustFrame.counterpart.source.replace('Workspace settings', 'Project settings')
+            .replace('<TextBlock FontSize="26"', '<TextBlock MaxWidth="620" FontSize="26"');
         const { edits: rustEdits } = await preview.edit(rustInput, { type: 'applyCounterpart', source: xamlDraft });
         await applyTextEdits(rust, rustVersion, rustEdits);
-        assert.equal(rust.getText(), rustInput.source.replace('Workspace settings', 'Project settings'));
+        assert.equal(rust.getText(), rustInput.source.replace('Workspace settings', 'Project settings')
+            .replace('TextBlock { font_size: 26.0', 'TextBlock { max_width: 620.0, font_size: 26.0'));
         const rustPanel = rustFrame.nodes.find(node => node.label === 'StackPanel');
         assert.ok(rustPanel?.canInsert);
         const latestVersion = rust.version;
