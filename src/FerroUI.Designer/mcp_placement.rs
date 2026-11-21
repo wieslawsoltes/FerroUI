@@ -130,7 +130,7 @@ pub(super) fn call(
     if name == "designer_placement_hint" {
         return Ok(json!({"bounds":adjustment.bounds.or(plan.bounds),"description":plan.description,"snapLines":adjustment.guides}));
     }
-    if session.uses_rust_source() && crate::rsx_placement::is_child_placement(&plan.edits) {
+    if session.uses_rust_source() && ferroui_designer_rsx::is_child_list_edit(&plan.edits) {
         session.apply_rust_placement(revision, &plan.description, plan.edits, after, &moving)?;
     } else {
         session.apply_visual(&plan.description, plan.edits)?;

@@ -630,7 +630,7 @@ impl DesignerSession {
         if preview.edits.is_empty() {
             return Ok(());
         }
-        if self.uses_rust_source() && crate::rsx_placement::is_child_placement(&preview.edits) {
+        if self.uses_rust_source() && ferroui_designer_rsx::is_child_list_edit(&preview.edits) {
             let moving: &[NodeId] = match &preview.intent {
                 PreviewIntent::Move(nodes) => nodes,
                 _ => &[],
