@@ -22,11 +22,9 @@ fn customer() {
 }"##;
 
 fn project(source: &str) -> RsxProjection<'_> {
-    project_rust(
-        source,
-        source.find("fn customer").unwrap() + "fn customer() {".len() + 6,
-    )
-    .unwrap()
+    let function = source.find("fn customer").unwrap();
+    let invocation = function + source[function..].find("rsx!").unwrap();
+    project_rust(source, invocation).unwrap()
 }
 
 #[test]
