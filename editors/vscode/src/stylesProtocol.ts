@@ -12,6 +12,11 @@ export type PaletteEdit = { action: 'set'; node: number; color: string }
 
 export type StyleCreation = { action: 'create'; selector: string }
     | { action: 'create_theme'; key: string; target_type: string };
+export type RustStyleEdit = { action: 'create'; owner: number; selector: string }
+    | { action: 'create_nested' | 'selector'; style: number; selector: string }
+    | { action: 'setter'; style: number; setter: number; value: string | null }
+    | { action: 'add_setter'; style: number; getter: string; value: string }
+    | { action: 'remove'; style: number };
 
 export interface StyleScope { node: number; label: string }
 export interface StyleHost extends StyleScope { type_name: string; nested: boolean }
@@ -23,15 +28,17 @@ export type StyleEditorLocation = { page: 'styles'; node: number }
     | { page: 'palette'; owner: number; layer: PaletteLayer; color: number | null };
 export interface LocatedStyleSource { editor: StyleEditorLocation; range: Range }
 export interface StyleCatalog {
+    source_kind?: 'rust';
     definitions: StyleSummary[];
     style_hosts: StyleHost[];
     palette_scopes: StyleScope[];
     palette_owner?: number;
     included_sources?: StyleSourceChoice[];
     theme?: string;
+    issues?: { reason: string; range: Range }[];
 }
-export interface SetterField { kind: 'text' | 'number' | 'color' | 'boolean' | 'choice'; options: string[]; resources: boolean; type_name?: string }
-export interface StyleSetter { property: string; field: SetterField }
+export interface SetterField { kind: 'text' | 'number' | 'color' | 'boolean' | 'choice'; options: string[]; resources: boolean; type_name?: string; owner?: string }
+export interface StyleSetter { property: string; field: SetterField; getter?: string }
 export interface AuthoredSetter extends StyleSetter {
     node: number;
     value?: string;
@@ -39,6 +46,7 @@ export interface AuthoredSetter extends StyleSetter {
     object: boolean;
     expression: boolean;
     editable: boolean;
+    can_remove?: boolean;
 }
 export interface StyleDefinition<Base extends string | number = number> {
     node: number;
@@ -52,6 +60,7 @@ export interface StyleDefinition<Base extends string | number = number> {
     setters: AuthoredSetter[];
     available: StyleSetter[];
     can_remove: boolean;
+    nested_allowed?: boolean;
 }
 export interface PaletteColor {
     node: number;
@@ -93,9 +102,10 @@ export type StylesAction<Base extends string | number = number> =
     | { type: 'return-to-consumer' }
     | { type: 'selector'; value: string }
     | { type: 'base'; base: Base | null }
-    | { type: 'setter'; property: string; value: string | null }
+    | { type: 'setter'; property: string; value: string | null; node: number }
     | { type: 'setter-resource'; property: string }
     | { type: 'add-setter' | 'preview-definition' | 'remove-style' }
+    | { type: 'add-nested-style' | 'style-issues' }
     | { type: 'palette-add'; layer: PaletteLayer }
     | { type: 'palette-color'; node: number; color: string }
     | { type: 'preview-theme'; theme: CanvasTheme }

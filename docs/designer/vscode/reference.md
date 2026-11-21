@@ -121,6 +121,23 @@ Use the owning session for edits and Undo. In VS Code, return with `designer_vie
 
 For the main Studio canvas, call `designer_preview_appearance` for the environment and supported themes. Call `designer_preview_set_theme` with `theme`, `expected_uri`, and `expected_revision` from that response. The same command switches the native canvas while preserving the document and its Undo history.
 
+### Edit Rust styles with MCP
+
+Use `designer_rsx_styles` through `designer_studio_query` for the selected RSX invocation. Omit arguments for the catalog or pass a style `node` to read its selector, setters, typed getter choices, and source ranges. Studio exposes the same tool directly. Computed expressions have source ranges.
+
+Call `designer_rsx_style_edit` through `designer_studio_edit` with the current session and `expected_revision`. In Studio, call it directly with the document revision. Use IDs from the current catalog and definition.
+
+| Action | Arguments |
+| --- | --- |
+| `create` | `owner` from `style_hosts` and `selector`. |
+| `create_nested` | `style` and a nested `selector`, such as `^:pointerover`. |
+| `selector` | `style` and the new `selector`. |
+| `setter` | `style`, the setter's `node` as `setter`, and the typed `value`. Pass `null` to remove it. |
+| `add_setter` | `style`, a `getter` from `available`, and the typed `value`. |
+| `remove` | `style` with `can_remove` enabled. |
+
+For App Preview, read the Rust file, catalog, and definition with `designer_hosted_styles`. Use `designer_hosted_style_edit_draft` or `designer_hosted_style_edit` with the accepted generation, revision, and sequence. In `arguments.edit`, pass the action above as a nested edit, such as `{"action":"rust","edit":{"action":"setter","style":220,"setter":289,"value":"26"}}`. The target's `node` must match the reported style or owner. Use `designer_hosted_style_source` with a reported range to reopen the literal or expression. [Rust styles guide](styles.md#edit-inline-rust-styles)
+
 ### Edit an App Preview palette with MCP
 
 1. Open the XAML view in App Preview with `designer_hosted_open`. Use `designer_hosted_palette` with the design session to read the accepted source addresses and scope IDs. Repeat with `arguments.target` containing the `address` and `owner` to read the palette and compare theme resolution.

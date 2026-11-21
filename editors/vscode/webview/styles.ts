@@ -3,6 +3,7 @@ import { paletteLayerLabels, type FromStyles, type PaletteLayer, type StylesActi
 import { element } from './dom';
 import { paletteEditor } from './paletteEditor';
 import { styleDefinition } from './styleDefinitionEditor';
+import { actionButton } from './propertyEditor';
 
 declare function acquireVsCodeApi(): {
     getState(): { page: 'styles' | 'palette'; layer: PaletteLayer; compare: boolean } | undefined;
@@ -125,7 +126,12 @@ function renderData(): void {
     definitions.replaceChildren(...entries.map(entry => new Option(
         [entry.name, entry.scope].filter(Boolean).join(' · '), String(entry.node))));
     definitions.value = content.definition ? String(content.definition.node) : '';
-    details.replaceChildren(styleDefinition(content.definition, send));
+    const rust = content.catalog.source_kind === 'rust';
+    details.replaceChildren(styleDefinition(content.definition, send, !rust));
+    if (content.catalog.issues?.length) {
+        details.append(actionButton('warning', 'Reveal Rust styles and values without a preview mapping',
+            () => send({ type: 'style-issues' })));
+    }
     scope.replaceChildren(...content.catalog.palette_scopes.map(entry => new Option(entry.label, String(entry.node))));
     if (content.palette) scope.value = String(content.palette.owner);
     const available = content.palette?.layers ?? [];
@@ -140,9 +146,11 @@ function renderData(): void {
 
 function render(): void {
     const unavailable = !state.content || state.busy || !!state.message;
+    const rust = state.content?.catalog.source_kind === 'rust';
     for (const page of ['styles', 'palette'] as const) {
-        const selected = page === settings.page;
+        const selected = page === (rust ? 'styles' : settings.page);
         tabs[page].setAttribute('aria-pressed', String(selected));
+        tabs[page].hidden = rust;
         sheets[page].hidden = tools[page].hidden = !selected;
     }
     fields.hidden = !state.content;
@@ -152,6 +160,7 @@ function render(): void {
     status.hidden = !status.textContent;
     createStyle.disabled = unavailable || !state.content?.catalog.style_hosts.length;
     createTheme.disabled = unavailable || !state.content?.catalog.palette_scopes.length;
+    createTheme.hidden = rust;
     addStyle.disabled = createStyle.disabled && createTheme.disabled;
     const sources = state.content?.catalog.included_sources ?? [];
     includedStyles.hidden = !sources.some(choice => choice.source.kind !== 'palette');

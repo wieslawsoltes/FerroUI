@@ -1,6 +1,6 @@
 import type { HostedAnimationFrame } from './hostedAnimationProtocol';
 import type { Range } from './protocol';
-import type { StyleCatalog, StyleCreation, StyleDefinition } from './stylesProtocol';
+import type { RustStyleEdit, StyleCatalog, StyleCreation, StyleDefinition } from './stylesProtocol';
 
 export interface HostedStyleFile { address: string; uri: string }
 export interface HostedStyleTarget { address: string; node: number }
@@ -14,18 +14,23 @@ export type HostedStyleEdit = StyleCreation
     | { action: 'base'; key: string | null }
     | { action: 'setter'; property: string; value: string | null }
     | { action: 'resource'; property: string; key: string; dynamic: boolean }
-    | { action: 'remove' };
+    | { action: 'remove' }
+    | { action: 'rust'; edit: RustStyleEdit };
 
 export type HostedStyleRead = { action: 'files' } | { action: 'catalog'; address: string }
     | { action: 'read'; target: HostedStyleTarget };
 export type NativeStyleRequest = HostedStyleRead
     | { action: 'resources'; target: HostedStyleTarget; property: string }
-    | { action: 'plan'; target: HostedStyleTarget; edit: HostedStyleEdit; source: string };
+    | { action: 'plan'; target: HostedStyleTarget; edit: HostedStyleEdit; source: string }
+    | HostedSourceRequest;
+export type HostedSourceRequest = { action: 'source'; address: string } | { action: 'locate'; address: string; range: Range; source: string };
 export type HostedStyleCommand = HostedStyleRead
     | { action: 'edit'; target: HostedStyleTarget; edit: HostedStyleEdit }
     | { action: 'locate'; address: string; range: Range }
     | { action: 'create'; address: string }
+    | { action: 'issues'; address: string }
     | { action: 'addSetter'; target: HostedStyleTarget }
+    | { action: 'addNested'; target: HostedStyleTarget }
     | { action: 'chooseResource'; target: HostedStyleTarget; property: string };
 export type HostedStyleResult = HostedStyleFiles | HostedStyleCatalog | HostedStyleDefinition;
 export type FromHostedStyles = { type: 'styles'; request: number; frame: HostedAnimationFrame; command: HostedStyleCommand };

@@ -3,8 +3,10 @@ import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { errorMessage, viewportTheme, withViewportTheme } from './protocol';
 import { addPaletteColor, addStyleSetter, assignStyleResource, createStyle } from './stylesActions';
+import { chooseStyleIssue } from './stylePrompts';
 import { choose, StudioContext } from './studioContext';
 import { previewDefinition, showResourceReferences } from './studioLibrary';
+import { editRustStyle, isRustStyleAction, RSX_STYLES } from './rsxStyleActions';
 import type { FromStyles, PaletteSheet, StyleCatalog, StyleDefinition, StyleEditorLocation, StyleScope, StyleSummary, StylesAction, StylesPage, StylesState, ToStyles } from './stylesProtocol';
 import { stylesHtml } from './view';
 
@@ -77,16 +79,15 @@ export class StylesView {
         this.file = file;
         if (!this.view.visible) return;
         const token = panel?.currentToken;
-        const available = panel && panel.language === 'xaml' && token !== undefined && !panel.status;
+        const available = panel && token !== undefined && !panel.status;
         const key = panel ? `${panel.session}:${token}:${panel.status ?? ''}:${panel.selectedIds.join(',')}` : 'empty';
         if (key === this.key) return;
         this.key = key;
         const stamp = ++this.stamp;
-        if (!available || !panel.supportsStyleComposition) {
-            const message = !panel ? 'Open a FerroUI XAML design.' : panel.language !== 'xaml'
-                ? 'Edit Rust style builders in the Rust source.' : !available
-                    ? panel.status ?? 'Rendering the current design…' : 'Use a FerroUI helper with style composition support.';
-            this.publish({ stamp, message, busy: Boolean(panel && panel.language === 'xaml' && !available),
+        if (!available || !(panel.language === 'xaml' ? panel.supportsStyleComposition : panel.supportsRustStyles)) {
+            const message = !panel ? 'Open an XAML or RSX design.' : !available
+                ? panel.status ?? 'Rendering the current design…' : 'Use a FerroUI helper with style composition support.';
+            this.publish({ stamp, message, busy: Boolean(panel && !available),
                 content: changedPanel ? undefined : this.state.content });
             return;
         }
@@ -105,18 +106,20 @@ export class StylesView {
     private async read(context: StudioContext, stamp: number, selection: Selection): Promise<void> {
         try {
             const panel = context.panel;
-            const catalog = await context.read<StyleCatalog>('designer_style_catalog', context.node === undefined ? {} : { target: context.node });
+            const rust = panel.language === 'rust';
+            const catalog = rust ? await context.read<StyleCatalog>(RSX_STYLES)
+                : await context.read<StyleCatalog>('designer_style_catalog', context.node === undefined ? {} : { target: context.node });
             const named = selection.nextName ? catalog.definitions.filter(entry => entry.name === selection.nextName) : [];
             const definition = catalog.definitions.find(entry => entry.node === selection.requestedDefinition)
                 ?? (named.length === 1 ? named[0] : undefined)
                 ?? matching(catalog.definitions, selection.definition, (left, right) =>
                     left.name === right.name && left.kind === right.kind && left.scope === right.scope)
-                ?? catalog.definitions.find(entry => entry.node === context.node) ?? catalog.definitions[0];
+                ?? (!rust ? catalog.definitions.find(entry => entry.node === context.node) : undefined) ?? catalog.definitions[0];
             const scope = catalog.palette_scopes.find(scope => scope.node === selection.paletteFocus?.owner)
                 ?? matching(catalog.palette_scopes, selection.scope, (left, right) => left.label === right.label)
                 ?? catalog.palette_scopes.find(scope => scope.node === catalog.palette_owner) ?? catalog.palette_scopes[0];
             const [style, palette] = await Promise.all([
-                definition && context.read<StyleDefinition>('designer_style_definition', { node: definition.node }),
+                definition && context.read<StyleDefinition>(rust ? RSX_STYLES : 'designer_style_definition', { node: definition.node }),
                 scope && context.read<PaletteSheet>('designer_palette', { owner: scope.node }),
             ]);
             context.ensure();
@@ -131,7 +134,7 @@ export class StylesView {
             selection.paletteFocus = undefined;
             selection.page = undefined;
             selection.compare = undefined;
-            this.publish({ stamp, content: { catalog, definition: style, palette }, theme: viewportTheme(panel.dimensions), preview: true, page, compare, paletteFocus,
+            this.publish({ stamp, content: { catalog, definition: style, palette }, theme: viewportTheme(panel.dimensions), preview: !rust, page, compare, paletteFocus,
                 consumer: consumer && !consumer.isDisposed ? vscode.workspace.asRelativePath(consumer.document.uri) : undefined });
         } catch (error) {
             if (this.stamp === stamp) {
@@ -153,6 +156,11 @@ export class StylesView {
         const context = new StudioContext(panel, token, current);
         try {
             context.ensure();
+            if (panel.language === 'rust' && isRustStyleAction(action)) {
+                const name = await editRustStyle(context, content, action);
+                if (name) { selection.nextName = name; this.refresh(panel); }
+                return;
+            }
             const definition = content.definition;
             const palette = content.palette;
             switch (action.type) {
@@ -187,6 +195,12 @@ export class StylesView {
                     this.refresh(panel);
                     return;
                 case 'reveal': await context.revealRange(action.range); return;
+                case 'style-issues': {
+                    const range = await chooseStyleIssue(content.catalog.issues ?? []);
+                    if (range) await context.revealRange(range);
+                    return;
+                }
+                case 'add-nested-style': return;
                 case 'references': await showResourceReferences(context, action.node); return;
                 case 'preview-theme':
                     if (action.theme === 'high_contrast' && !panel.supportsHighContrastTheme) return;

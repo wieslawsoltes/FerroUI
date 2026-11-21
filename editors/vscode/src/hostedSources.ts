@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
+import { pathToFileURL } from 'node:url';
 import type { HostedAnimationFrame, HostedSourcePlan } from './hostedAnimationProtocol';
 import { applyHostedSourcePatches } from './hostedSourceEdit';
 import { previewSourceUri } from './includedSource';
 import type { NativePreview } from './nativePreview';
 import type { Range } from './protocol';
+import type { HostedSourceRequest } from './hostedStylesProtocol';
 import { asRange } from './textDocument';
 
 type FrameAccess = <T>(frame: HostedAnimationFrame, signal: AbortSignal,
@@ -30,7 +32,7 @@ export class HostedSources {
             const version = document.version;
             const edit = await plan(client, document.getText());
             ensure();
-            if (edit.uri !== uri || document.version !== version) throw new Error('The XAML source changed while preparing the edit.');
+            if (edit.uri !== uri || document.version !== version) throw new Error('The source changed while preparing the edit.');
             if (apply && edit.patches.length) await applyHostedSourcePatches(document, version, edit.patches);
             return { ...edit, applied: apply && edit.patches.length > 0, version: document.version };
         });
@@ -40,7 +42,7 @@ export class HostedSources {
         return this.withFrame(frame, signal, async (client, ensure) => {
             const { uri, document } = await this.source(client, frame, address);
             const version = document.version;
-            const location = await client.hostedPalette<HostedSourceLocation>(frame, {
+            const location = await this.request<HostedSourceLocation>(client, frame, {
                 action: 'locate', address, range, source: document.getText(),
             });
             ensure();
@@ -54,8 +56,14 @@ export class HostedSources {
     }
 
     private async source(client: NativePreview, frame: HostedAnimationFrame, address: string) {
-        const { uri } = await client.hostedPalette<{ uri: string }>(frame, { action: 'source', address });
-        const source = await previewSourceUri(this.editor.document.uri, uri);
+        const { uri } = await this.request<{ uri: string }>(client, frame, { action: 'source', address });
+        const primary = this.editor.document.uri;
+        const source = uri === pathToFileURL(primary.fsPath).toString() ? primary : await previewSourceUri(primary, uri);
         return { uri, document: await vscode.workspace.openTextDocument(source) };
+    }
+
+    private request<T>(client: NativePreview, frame: HostedAnimationFrame, request: HostedSourceRequest): Promise<T> {
+        return client.capabilities.hostedRustStyles
+            ? client.hostedStyles<T>(frame, request) : client.hostedPalette<T>(frame, request);
     }
 }

@@ -67,6 +67,10 @@ Choose a palette swatch to open the native color editor. Enter a literal or choo
 
 In the consuming view's definition inspector, choose **Open included styles and palettes**. Select an entry and use the source arrow to open its owner in Studio. In the comparison, the source arrow beside a color follows the actual declaration, even when High contrast inherits its value from Dark. Choose **Edit scoped palette** to edit that layer. Use **Return to consuming view** in the definition inspector to see the unsaved change applied. Undo from the owning tab.
 
+### Edit Rust styles
+
+Open a Rust view, select its RSX invocation, and choose **Edit Rust styles** in the **Properties** toolbar. Pick a selector, edit its literal or a typed setter, and use Enter or the check icon to apply. The plus actions add a rule, a nested rule, or a setter. Use the source icon beside a computed value to open the expression. Each accepted change uses Studio’s document history. [VS Code and App Preview workflow](vscode/styles.md#edit-inline-rust-styles) · [MCP arguments](vscode/reference.md#edit-rust-styles-with-mcp)
+
 ### Create an XAML event handler
 
 Open the owning Cargo project and build it from **Project** to load the exported XAML registry. Open the XAML view in **Split** or **Code**. Put the caret on an event attribute such as `Click="OnApply"`, then choose the lightning button **Create Rust event handler** in the source toolbar. Studio adds the typed callback to the view’s Rust class registration and opens its declaration. Use an empty attribute value to accept a generated name. The paired edit participates in Studio Undo and Redo. [VS Code and MCP workflows](vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)

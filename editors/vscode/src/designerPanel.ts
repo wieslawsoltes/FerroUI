@@ -36,6 +36,7 @@ interface Frame {
     controlTemplateAuthoring: boolean;
     propertyTrace: boolean;
     styleComposition: boolean;
+    rustStyleComposition: boolean;
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
@@ -237,6 +238,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsControlTemplate(): boolean { return Boolean(this.frame?.controlTemplateAuthoring); }
     get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
     get supportsStyleComposition(): boolean { return Boolean(this.frame?.styleComposition); }
+    get supportsRustStyles(): boolean { return Boolean(this.frame?.rustStyleComposition); }
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
@@ -527,17 +529,23 @@ export class DesignerPanel implements vscode.Disposable {
                 const { name } = tool as { name: string };
                 if (name === 'designer_state') return this.supportsRustStates;
                 if (name === 'designer_item_template') return this.supportsItemTemplates;
+                if (name === 'designer_rsx_style_edit') return this.supportsRustStyles;
                 return this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement;
             }),
         ];
         const availablePresentations = presentations?.filter(tool =>
             (tool as { name: string }).name !== 'designer_behavior' || (this.language === 'xaml' && client.capabilities.behaviorAuthoring));
-        const queries = this.language === 'xaml' ? tools : tools.filter(tool => (tool as { name: string }).name !== 'designer_behaviors');
+        const queries = tools.filter(tool => {
+            const { name } = tool as { name: string };
+            if (name === 'designer_rsx_styles') return this.language === 'rust' && this.supportsRustStyles;
+            return this.language === 'xaml' || name !== 'designer_behaviors';
+        });
         return { tools: queries, presentations: availablePresentations ?? [], edits };
     }
 
     private mappedStudioEdit(name: string): boolean {
-        return mappedStudioEdits.has(name) || (name === 'designer_columns_edit' && this.supportsColumnAuthoring);
+        return mappedStudioEdits.has(name) || (name === 'designer_columns_edit' && this.supportsColumnAuthoring)
+            || (name === 'designer_rsx_style_edit' && this.supportsRustStyles);
     }
 
     async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {
@@ -865,6 +873,7 @@ export class DesignerPanel implements vscode.Disposable {
                 controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),
                 styleComposition: Boolean(client.capabilities.styleComposition),
+                rustStyleComposition: Boolean(client.capabilities.rustStyleComposition),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),

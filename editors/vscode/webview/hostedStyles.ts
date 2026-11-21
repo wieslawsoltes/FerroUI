@@ -1,6 +1,6 @@
 import type { HostedFrame } from '../src/hostedProtocol';
 import type { FromHostedStyles, HostedStyleCommand, ToHostedStyles } from '../src/hostedStylesProtocol';
-import type { StyleCatalog, StyleDefinition, StylesAction } from '../src/stylesProtocol';
+import type { RustStyleEdit, StyleCatalog, StyleDefinition, StylesAction } from '../src/stylesProtocol';
 import { anchorPopover, element } from './dom';
 import { sourceOptions } from './hostedSourceOptions';
 import { styleDefinition } from './styleDefinitionEditor';
@@ -13,6 +13,7 @@ export class HostedStylesView {
     private readonly file = element<HTMLSelectElement>('hosted-styles-file');
     private readonly list = element<HTMLSelectElement>('hosted-styles-definition');
     private readonly create = element<HTMLButtonElement>('hosted-styles-add');
+    private readonly issues = element<HTMLButtonElement>('hosted-style-issues');
     private readonly status = element('hosted-styles-status');
     private readonly fields = element<HTMLFieldSetElement>('hosted-styles-fields');
     private frame?: HostedFrame;
@@ -25,6 +26,7 @@ export class HostedStylesView {
     private refresh = true;
     private error?: string;
     private focusAfterEdit?: string;
+    private nextName?: string;
 
     constructor(private readonly post: (message: FromHostedStyles) => void) {
         anchorPopover(this.toggle, this.popup);
@@ -38,11 +40,13 @@ export class HostedStylesView {
             } else {
                 this.opening = undefined;
                 this.focusAfterEdit = undefined;
+                this.nextName = undefined;
             }
         });
         this.file.onchange = () => this.readCatalog();
         this.list.onchange = () => this.readDefinition();
         this.create.onclick = () => this.send({ action: 'create', address: this.file.value });
+        this.issues.onclick = () => this.send({ action: 'issues', address: this.file.value });
     }
 
     setReady(revision: number | undefined): void { this.readyRevision = revision; this.sync(); }
@@ -70,6 +74,7 @@ export class HostedStylesView {
         this.pending = undefined;
         if (!this.popup.matches(':popover-open')) return;
         this.error = message.error;
+        if (message.error) this.nextName = undefined;
         const result = message.result;
         if (result && 'documents' in result) {
             const address = this.opening?.target?.address ?? this.file.value;
@@ -80,10 +85,13 @@ export class HostedStylesView {
             this.catalog = { address: this.file.value, revision: message.frame.revision, model: result.catalog };
             const definitions = result.catalog.definitions;
             const previous = this.definition;
+            const renamed = definitions.filter(entry => entry.name === this.nextName);
             const matching = previous ? definitions.filter(entry => entry.kind === previous.kind && entry.name === previous.name) : [];
             const selected = definitions.find(entry => entry.node === this.opening?.target?.node)
+                ?? (renamed.length === 1 ? renamed[0] : undefined)
                 ?? (matching.length === 1 ? matching[0] : definitions[0]);
             this.opening = undefined;
+            this.nextName = undefined;
             this.list.replaceChildren(...definitions.map(entry => new Option(
                 [entry.name, entry.scope].filter(Boolean).join(' · '), String(entry.node))));
             if (selected) this.list.value = String(selected.node);
@@ -138,6 +146,8 @@ export class HostedStylesView {
         this.file.disabled = !idle || this.file.options.length < 2;
         this.list.disabled = !idle || !catalog || this.list.options.length < 2;
         this.create.disabled = !idle || !catalog || !(catalog.style_hosts.length || catalog.palette_scopes.length);
+        this.issues.hidden = !catalog?.issues?.length;
+        this.issues.disabled = !idle;
         this.fields.disabled = !idle || !catalog || !this.definition;
         const message = this.error ?? (idle ? '' : 'Waiting for the current styles…');
         if (this.status.textContent !== message) this.status.textContent = message;
@@ -160,12 +170,25 @@ export class HostedStylesView {
         if (!this.definition || this.fields.disabled) return;
         const target = { address: this.file.value, node: this.definition.node };
         if (this.fields.contains(document.activeElement)) this.focusAfterEdit = document.activeElement?.id;
+        const rust = this.catalog?.model.source_kind === 'rust';
+        const rustEdit = (edit: RustStyleEdit) => this.send({ action: 'edit', target, edit: { action: 'rust', edit } });
         switch (action.type) {
-            case 'selector': this.send({ action: 'edit', target, edit: { action: 'selector', value: action.value } }); break;
-            case 'setter': this.send({ action: 'edit', target, edit: { action: 'setter', property: action.property, value: action.value } }); break;
+            case 'selector':
+                this.nextName = action.value.trim();
+                if (rust) rustEdit({ action: 'selector', style: target.node, selector: action.value });
+                else this.send({ action: 'edit', target, edit: { action: 'selector', value: action.value } });
+                break;
+            case 'setter':
+                if (rust) rustEdit({ action: 'setter', style: target.node, setter: action.node, value: action.value });
+                else this.send({ action: 'edit', target, edit: { action: 'setter', property: action.property, value: action.value } });
+                break;
             case 'base': this.send({ action: 'edit', target, edit: { action: 'base', key: action.base } }); break;
-            case 'remove-style': this.send({ action: 'edit', target, edit: { action: 'remove' } }); break;
+            case 'remove-style':
+                if (rust) rustEdit({ action: 'remove', style: target.node });
+                else this.send({ action: 'edit', target, edit: { action: 'remove' } });
+                break;
             case 'add-setter': this.send({ action: 'addSetter', target }); break;
+            case 'add-nested-style': this.send({ action: 'addNested', target }); break;
             case 'setter-resource': this.send({ action: 'chooseResource', target, property: action.property }); break;
             case 'reveal': this.send({ action: 'locate', address: target.address, range: action.range }); break;
         }

@@ -1,6 +1,6 @@
 ---
 title: "Edit styles, control themes, and palettes"
-description: "Compose scoped XAML styles, work with control theme inheritance, and compare theme colors in the native preview."
+description: "Compose scoped XAML and Rust styles, work with control theme inheritance, and compare theme colors in the native preview."
 ---
 
 Open an XAML view in **Design** and run **FerroUI: Show Styles & Themes**. You can also expand a style or control theme in **Library** and choose **Edit Style or Theme**. The dock follows the current design. Drag its title to move it beside your canvas. Try [StylePalette.xaml](../../../editors/vscode/test/fixtures/StylePalette.xaml) to follow these steps.
@@ -25,7 +25,7 @@ Each accepted action takes one Undo step. For a keyed style or control theme, us
 2. Switch the native canvas with the appearance icons in the palette toolbar. **Preview High contrast theme** appears when the helper supports it. On an XAML or RSX canvas, you can also open the size button and choose the **Appearance** before selecting **Apply**. Controls with an explicit theme retain their authored setting.
 3. Choose **Compare theme colors** to see each key's resolved values side by side. The comparison follows local entries, included dictionaries, and native variant fallbacks. Use the filter to find a key. Add cards in **Stages** for a side-by-side comparison of the entire view. [Compare stage environments](motion.md)
 4. Return to a layer and edit a color field or choose its swatch. The text field accepts native color names and hex values, including `#AARRGGBB` for alpha. The swatch changes RGB while retaining the existing alpha. Use **Add palette color** to create a `Color` or `SolidColorBrush`. Adding a color to a missing theme layer creates its dictionary in the same Undo step.
-5. Use the source arrow to open the exact declaration, or the references icon to find uses. A computed value opens in the source editor. Author Rust-owned style builders in the Rust source.
+5. Use the source arrow to open the exact declaration, or the references icon to find uses. A computed value opens in the source editor.
 
 On the sample, compare `ActionSurface` in Light and Dark. Change its Dark value and switch the canvas between themes. The **Apply palette** button updates when Dark is active. Undo restores the original color.
 
@@ -58,3 +58,16 @@ The pickers use the include sources in the current native preview. If an include
 See [Styles and palettes from MCP](reference.md#edit-styles-and-palettes-with-mcp) and [Studio authoring](../native-controls.md#edit-scoped-styles-and-palettes) for the same source operations. When your XAML uses application-registered controls or fixtures, open the [App Preview palette](runtime.md#edit-a-palette-in-app-preview) to work with the previewed scope and the app’s registered theme variants.
 
 Use [Styles & Themes in App Preview](runtime.md#edit-styles-and-control-themes-in-app-preview) to edit included selectors, typed setters, and control-theme inheritance against the app’s accepted native frame.
+
+## Edit inline Rust styles
+
+1. Open a Rust file in **Design**, choose an RSX invocation, and run **FerroUI: Show Styles & Themes**. Choose the selector and owner in the dock. Try [rust_style_workbench.rs](../../../editors/vscode/test/fixtures/rust_style_workbench.rs).
+2. Change **Selector** or one of the typed setter values and press Enter. **Add setter** lists mapped writable property accessors. A Cargo build supplies additional accessors for registered controls. Use the source arrow to select a Rust literal or an expression.
+3. Choose **New Style** and an owner to add a builder to its inline `styles` array. Choose **Add nested style** on a rule and enter a selector such as `^:pointerover`. Remove an authored setter with its discard icon. The trash icon removes a rule whose builder calls all have source mappings.
+4. Check the native canvas. A rule can combine typed setters, nested styles, and animation clips. Each applied change edits the owning Rust buffer in one Undo step. The Timeline still uses the original clip and key source.
+
+The editor maps explicit `ferroui_view::style` builders, typed property getters, and supported values such as numbers, colors, text, booleans, enum variants, and geometry constructors. The warning icon opens computed collections, getters, and selector expressions in source. Use the same **Styles & Themes** icon in App Preview to work against the application’s accepted frame. [Studio workflow](../native-controls.md#edit-rust-styles) · [MCP arguments](reference.md#edit-rust-styles-with-mcp)
+
+![VS Code shows the selected Rust FontSize literal, the Styles & Themes dock, and the updated native canvas](../images/vscode-rust-style-edit.jpg)
+
+[See the same Rust style workflow in App Preview](../images/vscode-app-preview-rust-style.jpg)

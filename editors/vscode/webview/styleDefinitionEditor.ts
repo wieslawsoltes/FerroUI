@@ -23,6 +23,7 @@ export function styleDefinition<Base extends string | number>(sheet: StyleDefini
     add.disabled = !sheet.available.length;
     if (previewAvailable) tools.append(actionButton('preview', 'Preview definition on canvas', () => send({ type: 'preview-definition' })));
     tools.append(actionButton('go-to-file', 'Reveal definition in source', () => send({ type: 'reveal', range: sheet.range })), add);
+    if (sheet.nested_allowed) tools.append(actionButton('list-tree', 'Add nested style', () => send({ type: 'add-nested-style' })));
     if (sheet.can_remove) tools.append(actionButton('trash', 'Remove style', () => send({ type: 'remove-style' })));
     bar.append(kind, tools);
     root.append(bar, styleIdentity(sheet, send));
@@ -82,13 +83,14 @@ function setterRow<Base extends string | number>(setter: AuthoredSetter, send: (
     field.id = `setter-${setter.node}`;
     field.setAttribute('aria-label', `${setter.property} setter value`);
     name.htmlFor = field.id;
-    if (setter.editable) submitValue(field, value, value => send({ type: 'setter', property: setter.property, value }));
+    if (setter.editable) submitValue(field, value, value => send({ type: 'setter', node: setter.node, property: setter.property, value }));
     const buttons = create('div');
     buttons.className = 'style-tools';
     if (setter.field.resources) buttons.append(actionButton('link', `Assign resource to ${setter.property}`,
         () => send({ type: 'setter-resource', property: setter.property })));
-    buttons.append(actionButton('go-to-file', `Reveal ${setter.property} setter`, () => send({ type: 'reveal', range: setter.range })),
-        actionButton('discard', `Remove ${setter.property} setter`, () => send({ type: 'setter', property: setter.property, value: null })));
+    buttons.append(actionButton('go-to-file', `Reveal ${setter.property} setter`, () => send({ type: 'reveal', range: setter.range })));
+    if (setter.can_remove !== false) buttons.append(actionButton('discard', `Remove ${setter.property} setter`,
+        () => send({ type: 'setter', node: setter.node, property: setter.property, value: null })));
     row.append(name, field, buttons);
     return row;
 }

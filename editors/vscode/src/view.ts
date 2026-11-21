@@ -348,6 +348,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <div class="hosted-style-controls">
         <select id="hosted-styles-file" aria-label="Style source file"></select>
         <select id="hosted-styles-definition" aria-label="Style or control theme"></select>
+        ${tool('hosted-style-issues', 'warning', 'Reveal Rust styles and values without a preview mapping', 'hidden')}
         ${tool('hosted-styles-add', 'add', 'New style or control theme')}
     </div>
     <p id="hosted-styles-status" class="dock-message" role="status" hidden></p>

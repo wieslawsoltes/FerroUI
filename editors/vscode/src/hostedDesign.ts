@@ -460,7 +460,7 @@ class HostedSession {
 
     styleFrame(): HostedAnimationFrame {
         const frame = this.currentFrame;
-        if (!frame?.stylesAvailable) throw new Error('Open a current XAML App Preview with scoped style support.');
+        if (!frame?.stylesAvailable) throw new Error('Wait for an App Preview frame with scoped style support.');
         return { revision: frame.revision, sequence: frame.sequence };
     }
 
