@@ -13,12 +13,15 @@ use super::at_spi_constants::*;
 use super::at_spi_server::AtSpiServer;
 use super::at_spi_state::AtSpiState;
 use crate::test_support::{expect_calls, log, peer_call, pump_until, show, Log, TestConnections};
+use ferroui_base::data::{BindingMode, IndexerBinding};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Button, CheckBox, Control, StackPanel, TextBox, Window};
+use ferroui_controls::presenters::ItemsPresenter;
+use ferroui_controls::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
+use ferroui_controls::{Button, CheckBox, Control, ItemsControl, ListBox, ListBoxItem, StackPanel, TextBox, Window};
 use futures_util::StreamExt;
 use std::cell::Cell;
 use std::collections::HashMap;
@@ -252,6 +255,75 @@ fn ui() -> Ui {
     window.show();
     window.layout_manager().execute_initial_layout_pass();
     Ui { window, text_box, check_box, clicks }
+}
+
+#[test]
+fn dbus_selection_container_keeps_its_command_and_select_by_accessible_child_index() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = Fixture::new(&[]);
+    let list = ListBox::new();
+    list.set_template(Some(FuncControlTemplate::for_type::<ListBox>(|parent, scope| {
+        let presenter = ItemsPresenter::new();
+        presenter.set_name(Some("PART_ItemsPresenter".to_string()));
+        let property = ItemsControl::items_panel_property().as_property();
+        presenter.bind_binding(property, &IndexerBinding::new(parent.clone().upcast(), property, BindingMode::OneWay));
+
+        let command = Button::new();
+        command.set_content(Some(Rc::new("Open".to_string())));
+
+        let panel = StackPanel::new();
+        panel.children().add(command);
+        panel.children().add(presenter.register_in_name_scope(&**scope));
+        panel.upcast()
+    })));
+    for label in ["A", "B"] {
+        let item = ListBoxItem::new();
+        item.set_content(Some(Rc::new(label.to_string())));
+        list.items().add(Some(Control::boxed(&item)));
+    }
+    list.set_selected_index(0);
+
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&list)));
+    window.show();
+    window.layout_manager().execute_initial_layout_pass();
+    fixture.add_window(&window);
+
+    let path = fixture.find(ROOT_PATH, "list").expect("list");
+    let children = fixture.children(&path);
+    let roles: Vec<String> = children
+        .iter()
+        .map(|child| fixture.accessible(child, "GetRoleName"))
+        .collect();
+    assert_eq!(roles, ["push button", "list item", "list item"]);
+    assert_eq!(
+        fixture.property(&children[0], IFACE_ACCESSIBLE, "Name"),
+        "Open"
+    );
+    assert_eq!(
+        fixture.accessible::<i32>(&children[2], "GetIndexInParent"),
+        2
+    );
+
+    let select = |index: i32| {
+        fixture
+            .call(&path, IFACE_SELECTION, "SelectChild", index)
+            .unwrap()
+            .body()
+            .deserialize::<bool>()
+            .unwrap()
+    };
+    assert!(!select(0), "a command index cannot select the first item");
+    assert!(select(2), "the second item's accessible index selects it");
+    assert_eq!(list.selected_index(), 1);
+    assert!(fixture.has_state(&children[2], AtSpiState::Selected));
+    let (_, selected): (String, OwnedObjectPath) = fixture
+        .call(&path, IFACE_SELECTION, "GetSelectedChild", 0i32)
+        .unwrap()
+        .body()
+        .deserialize()
+        .unwrap();
+    assert_eq!(selected.as_str(), children[2]);
 }
 
 #[test]

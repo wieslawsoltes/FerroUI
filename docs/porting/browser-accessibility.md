@@ -28,7 +28,7 @@ A screen reader activates an element by clicking it. The framework then invokes 
 
 ## On demand, always or never
 
-A page cannot tell whether a screen reader runs. By default the tree is built on demand, as Flutter and Uno Platform do on the web. The host holds a visually hidden "Enable accessibility" button (`button.ferroui-enable-accessibility`). It is out of the Tab order, so Tab stays the view's, and it is the first element of the view, so a screen reader's reading cursor finds it first. Activating it builds the tree; until then nothing is followed and nothing costs time.
+A page cannot tell whether a screen reader runs. By default the tree is built on demand, as Flutter and Uno Platform do on the web. The host holds a visually hidden "Enable accessibility" button (`button.ferroui-enable-accessibility`). It is out of the Tab order, so Tab stays the view's, and it is the first element of the view, so a screen reader's reading cursor finds it first. Activating it builds the tree and gives keyboard focus to the view without scrolling the page. If the reading cursor puts browser focus on the button, Enter and Space activate it as an HTML button. The view observes its peers once the tree is enabled.
 
 Applications choose with `BrowserPlatformOptions::accessibility`:
 

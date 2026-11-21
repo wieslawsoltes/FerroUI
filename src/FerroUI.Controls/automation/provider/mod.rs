@@ -22,6 +22,7 @@ mod i_text_edit_provider;
 mod i_text_range_provider;
 mod i_toggle_provider;
 mod i_value_provider;
+mod i_window_provider;
 mod plain_text_automation;
 #[cfg(test)]
 mod plain_text_automation_tests;
@@ -48,6 +49,7 @@ pub use i_text_range_provider::{
 };
 pub use i_toggle_provider::{IToggleProvider, ToggleState};
 pub use i_value_provider::{IValueProvider, ProviderError};
+pub use i_window_provider::{IWindowProvider, WindowInteractionState, WindowVisualState};
 pub(crate) use rich_text_automation::{RichTextAutomationHost, RichTextAutomationPeer, RichTextAutomationState};
 
 use ferroui_base::{ObjectType, Ref};
@@ -93,4 +95,5 @@ conversions! {
     as_text_edit_provider: ITextEditProvider,
     as_toggle_provider: IToggleProvider,
     as_value_provider: IValueProvider,
+    as_window_provider: IWindowProvider,
 }

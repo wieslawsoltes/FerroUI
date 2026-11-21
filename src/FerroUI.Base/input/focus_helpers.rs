@@ -31,7 +31,10 @@ impl FocusHelpers {
         for child in children.iter() {
             let Some(child) = child.downcast_ref::<InputElement>() else { continue };
 
-            if Self::is_visible(child) && (child.focusable() || Self::can_have_focusable_children(Some(child))) {
+            if Self::is_visible(child)
+                && child.is_effectively_enabled()
+                && (child.focusable() || Self::can_have_focusable_children(Some(child)))
+            {
                 return true;
             }
         }
@@ -60,7 +63,7 @@ impl FocusHelpers {
     }
 
     pub fn is_focusable(element: Option<&InputElement>) -> bool {
-        element.is_some_and(InputElement::focusable)
+        element.is_some_and(|e| e.focusable() && e.is_effectively_enabled() && Self::is_visible(e))
     }
 
     #[allow(dead_code)]

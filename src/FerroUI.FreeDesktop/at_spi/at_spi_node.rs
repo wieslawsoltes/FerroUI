@@ -345,31 +345,51 @@ impl AtSpiNode {
         }
     }
 
-    // Present a selection container's realized item containers as its direct
-    // AT-SPI children so SelectChild-by-index and parent lookups work.
+    // Keep a selection container's items addressable by child index. Promote
+    // only branches containing its items, keeping other controls in tree order.
     fn get_child_peers(&self) -> Vec<Ref<AutomationPeer>> {
         let children = self.peer.get_children();
         if self.peer.get_provider::<dyn ISelectionProvider>().is_none() {
             return children.to_vec();
         }
 
-        let mut items = Vec::new();
-        Self::collect_selection_item_peers(&children, &mut items);
-        if items.is_empty() {
-            children.to_vec()
-        } else {
-            items
-        }
+        let mut projected = Vec::new();
+        self.project_selection_children(&children, &mut projected);
+        projected
     }
 
-    fn collect_selection_item_peers(peers: &[Ref<AutomationPeer>], result: &mut Vec<Ref<AutomationPeer>>) {
-        for peer in peers {
-            if peer.get_provider::<dyn ISelectionItemProvider>().is_some() {
-                result.push(peer.clone());
-            } else {
-                Self::collect_selection_item_peers(&peer.get_children(), result);
+    fn project_selection_children(
+        &self,
+        children: &[Ref<AutomationPeer>],
+        projected: &mut Vec<Ref<AutomationPeer>>,
+    ) -> bool {
+        let mut has_items = false;
+        for child in children {
+            if let Some(item) = child.get_provider::<dyn ISelectionItemProvider>() {
+                has_items |= self.owns_selection_item(&*item);
+            } else if child.get_provider::<dyn ISelectionProvider>().is_none() {
+                let start = projected.len();
+                if self.project_selection_children(&child.get_children(), projected) {
+                    has_items = true;
+                    continue;
+                }
+                projected.truncate(start);
             }
+            projected.push(child.clone());
         }
+        has_items
+    }
+
+    pub(crate) fn selection_item(
+        &self,
+        peer: &AutomationPeer,
+    ) -> Option<Rc<dyn ISelectionItemProvider>> {
+        peer.get_provider::<dyn ISelectionItemProvider>()
+            .filter(|item| self.owns_selection_item(&**item))
+    }
+
+    fn owns_selection_item(&self, item: &dyn ISelectionItemProvider) -> bool {
+        item.selection_container_peer().as_ref() == Some(self.peer())
     }
 
     pub(crate) fn ensure_children(&self) -> Vec<Rc<AtSpiNode>> {

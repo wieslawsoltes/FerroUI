@@ -83,6 +83,7 @@ mod pen_device;
 mod physical_key;
 mod physical_key_extensions;
 mod pinch_event_args;
+mod platform_wheel_delta;
 mod pointer;
 mod pointer_delta_event_args;
 mod pointer_event_args;
@@ -171,6 +172,7 @@ pub use mouse_device::MouseDevice;
 pub use navigation_method::NavigationMethod;
 pub use physical_key::{ParsePhysicalKeyError, PhysicalKey};
 pub use pinch_event_args::{PinchEndedEventArgs, PinchEventArgs};
+pub use platform_wheel_delta::PlatformWheelDelta;
 pub use pointer::{CaptureSource, Pointer};
 pub use pointer_delta_event_args::PointerDeltaEventArgs;
 pub use pointer_event_args::{

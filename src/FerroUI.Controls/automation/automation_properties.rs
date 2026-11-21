@@ -112,6 +112,11 @@ ferro_properties! {
             FerroProperty::register_attached::<AutomationProperties, StyledElement, _>("IsColumnHeader", false)
         }
 
+        /// Identifies the element as a dialog in the accessibility tree.
+        pub fn is_dialog_property() -> AttachedProperty<bool> {
+            FerroProperty::register_attached::<AutomationProperties, StyledElement, _>("IsDialog", false)
+        }
+
         /// Defines the AutomationProperties.IsRequiredForForm attached property.
         ///
         /// This property currently has no effect.
@@ -298,6 +303,16 @@ impl AutomationProperties {
     /// Helper for reading the value of the [`heading_level_property`](Self::heading_level_property) on a StyledElement.
     pub fn get_heading_level(element: &StyledElement) -> i32 {
         element.get_value(Self::heading_level_property())
+    }
+
+    /// Sets the value of the [IsDialog property](Self::is_dialog_property).
+    pub fn set_is_dialog(element: &StyledElement, value: bool) {
+        element.set_value(Self::is_dialog_property(), value);
+    }
+
+    /// Reads the value of the [IsDialog property](Self::is_dialog_property).
+    pub fn get_is_dialog(element: &StyledElement) -> bool {
+        element.get_value(Self::is_dialog_property())
     }
 
     /// Helper for setting the value of the [`is_column_header_property`](Self::is_column_header_property) on a StyledElement.

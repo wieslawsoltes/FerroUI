@@ -2,6 +2,7 @@
 //! top-levels, its native handle and the receiver of the native top-level
 //! events.
 
+use ferroui_base::input::PlatformWheelDelta;
 use crate::clipboard_data_transfer::ClipboardDataTransfer;
 use crate::clipboard_read_session::ClipboardReadSession;
 use crate::cursor::FerroNativeCursor;
@@ -515,6 +516,25 @@ impl TopLevelImpl {
         args.handled()
     }
 
+    pub(crate) fn raw_mouse_wheel_event(
+        &self,
+        time_stamp: u64,
+        modifiers: FrnInputModifiers,
+        point: FrnPoint,
+        delta: FrnVector,
+        platform_delta: FrnVector,
+        is_precise: bool,
+    ) {
+        let Some(input_root) = self.input_root() else { return };
+        Self::run_jobs_before_input();
+        self.invoke_input(Rc::new(RawMouseWheelEventArgs::new(
+            self.mouse.clone(), time_stamp, input_root, to_ferro_point(point),
+            Vector::new(delta.x, delta.y), to_raw_input_modifiers(modifiers),
+        ).with_platform_delta(PlatformWheelDelta::MacOS {
+            delta: Vector::new(platform_delta.x, platform_delta.y), is_precise,
+        })));
+    }
+
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn raw_mouse_event(
         &self,
@@ -618,6 +638,12 @@ impl TopLevelImpl {
             Some(native) => to_ferro_pixel_point(native.point_to_screen(to_frn_point(point)).check()),
             None => PixelPoint::default(),
         }
+    }
+
+    pub fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+        let native = self.native()?;
+        let origin = to_ferro_point(native.point_to_screen(to_frn_point(Point::default())).check());
+        Some(ferroui_base::Matrix::new(1.0, 0.0, 0.0, 1.0, origin.x, origin.y))
     }
 
     pub fn set_cursor(&self, cursor: Option<Rc<dyn ICursorImpl>>) {
@@ -1141,6 +1167,17 @@ fn c_str_to_string(s: Option<&CStr>) -> Option<String> {
     s.map(|s| s.to_string_lossy().into_owned())
 }
 
+impl<P: TopLevelParent> IFrnTopLevelWheelEventsImpl for TopLevelEvents<P> {
+    fn raw_mouse_wheel_event(
+        &self, time_stamp: u64, modifiers: FrnInputModifiers, point: FrnPoint,
+        delta: FrnVector, platform_delta: FrnVector, is_precise: bool,
+    ) {
+        crate::callback_base::guard((), || self.0.top_level().raw_mouse_wheel_event(
+            time_stamp, modifiers, point, delta, platform_delta, is_precise,
+        ));
+    }
+}
+
 impl<P: TopLevelParent> IFrnTopLevelEventsImpl for TopLevelEvents<P> {
     fn closed(&self) {
         crate::callback_base::guard((), || {
@@ -1378,6 +1415,10 @@ macro_rules! impl_top_level_contract {
                 $crate::top_level_impl::TopLevelParent::top_level(self).point_to_screen(point)
             }
 
+            fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+                $crate::top_level_impl::TopLevelParent::top_level(self).client_to_screen_transform()
+            }
+
             fn set_cursor(&self, cursor: Option<std::rc::Rc<dyn ferroui_base::platform::ICursorImpl>>) {
                 $crate::top_level_impl::TopLevelParent::top_level(self).set_cursor(cursor)
             }
@@ -1552,6 +1593,54 @@ mod tests {
     }
 
     #[test]
+    fn platform_wheel_extension_preserves_bits_and_emits_once() {
+        let _dispatcher = Dispatcher::unit_test_scope();
+        let _scope = FerroLocator::enter_scope();
+        let (top_level, received) = top_level(true);
+        struct Parent(Rc<TopLevelImpl>);
+        impl TopLevelParent for Parent {
+            fn top_level(&self) -> &Rc<TopLevelImpl> { &self.0 }
+            fn create_popup_core(&self) -> Option<Rc<dyn IPopupImpl>> { None }
+        }
+        let callbacks: ComPtr<IFrnTopLevelEvents> = ferroui_microcom::make_com_with(
+            TopLevelEvents(Rc::new(Parent(top_level))),
+            [ferroui_microcom::InterfaceEntry::of::<IFrnTopLevelWheelEvents>()],
+        );
+        let extension = callbacks.cast::<IFrnTopLevelWheelEvents>().expect("optional wheel extension");
+        let below = f64::from_bits(15.0_f64.to_bits() - 1);
+        for (index, (y, precise)) in [(15.0, true), (below, true), (-2.25, false)].into_iter().enumerate() {
+            let speed = if precise { 50.0 } else { 5.0 };
+            extension.raw_mouse_wheel_event(
+                index as u64, FrnInputModifiers::Shift, FrnPoint { x: 1.5, y: 2.5 },
+                FrnVector { x: 1.0 / speed, y: y / speed },
+                FrnVector { x: 1.0, y }, precise,
+            );
+        }
+        let received = received.borrow();
+        assert_eq!(received.len(), 3);
+        for (index, (y, precise)) in [(15.0, true), (below, true), (-2.25, false)].into_iter().enumerate() {
+            let e = received[index].downcast_ref::<RawMouseWheelEventArgs>().expect("wheel event");
+            let speed = if precise { 50.0 } else { 5.0 };
+            assert_eq!(e.delta(), Vector::new(1.0 / speed, y / speed));
+            assert_eq!(e.platform_delta(), Some(PlatformWheelDelta::MacOS { delta: Vector::new(1.0, y), is_precise: precise }));
+            assert_eq!(e.timestamp(), index as u64);
+            assert_eq!(e.position(), Point::new(1.5, 2.5));
+            assert_eq!(e.input_modifiers(), RawInputModifiers::SHIFT);
+        }
+    }
+
+    #[test]
+    fn platform_wheel_extension_ignores_missing_input_root() {
+        let _dispatcher = Dispatcher::unit_test_scope();
+        let _scope = FerroLocator::enter_scope();
+        let (top_level, received) = top_level(false);
+        top_level.raw_mouse_wheel_event(0, FrnInputModifiers(0),
+            FrnPoint { x: 0.0, y: 0.0 }, FrnVector { x: 0.3, y: 0.3 },
+            FrnVector { x: 15.0, y: 15.0 }, true);
+        assert!(received.borrow().is_empty());
+    }
+
+    #[test]
     fn wheel_and_gesture_events_carry_their_delta() {
         let _dispatcher = Dispatcher::unit_test_scope();
         let _scope = FerroLocator::enter_scope();
@@ -1567,6 +1656,7 @@ mod tests {
         assert_eq!(received.len(), 4);
         let wheel = received[0].downcast_ref::<RawMouseWheelEventArgs>().expect("wheel args");
         assert_eq!(wheel.delta(), Vector::new(1.0, -2.0));
+        assert_eq!(wheel.platform_delta(), None);
         assert_eq!(wheel.position(), Point::new(10.5, 20.25));
         for (index, type_) in
             [(1, RawPointerEventType::Magnify), (2, RawPointerEventType::Rotate), (3, RawPointerEventType::Swipe)]

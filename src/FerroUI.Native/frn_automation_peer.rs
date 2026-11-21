@@ -16,7 +16,7 @@ use ferroui_controls::automation::provider::{
     ISelectionItemProvider, IToggleProvider, IValueProvider,
 };
 use ferroui_controls::automation::{
-    AutomationElementIdentifiers, AutomationProperty, AutomationPropertyChangedEventArgs,
+    AutomationElementIdentifiers, AutomationProperty, AutomationPropertyChangedEventArgs, ElementNotEnabledError,
     ExpandCollapsePatternIdentifiers, ExpandCollapseState,
     RangeValuePatternIdentifiers, SelectionItemPatternIdentifiers, SelectionPatternIdentifiers,
     TogglePatternIdentifiers, ValuePatternIdentifiers,
@@ -32,16 +32,34 @@ use std::rc::{Rc, Weak};
 /// the identifier native code knows them by.
 fn property_map() -> [(&'static AutomationProperty, FrnAutomationProperty); 10] {
     [
-        (AutomationElementIdentifiers::automation_id_property(), FrnAutomationProperty::AutomationPeer_AutomationId),
+        (
+            AutomationElementIdentifiers::automation_id_property(),
+            FrnAutomationProperty::AutomationPeer_AutomationId,
+        ),
         (
             AutomationElementIdentifiers::bounding_rectangle_property(),
             FrnAutomationProperty::AutomationPeer_BoundingRectangle,
         ),
-        (AutomationElementIdentifiers::class_name_property(), FrnAutomationProperty::AutomationPeer_ClassName),
-        (AutomationElementIdentifiers::name_property(), FrnAutomationProperty::AutomationPeer_Name),
-        (RangeValuePatternIdentifiers::value_property(), FrnAutomationProperty::RangeValueProvider_Value),
-        (ValuePatternIdentifiers::value_property(), FrnAutomationProperty::ValueProvider_Value),
-        (TogglePatternIdentifiers::toggle_state_property(), FrnAutomationProperty::ToggleProvider_ToggleState),
+        (
+            AutomationElementIdentifiers::class_name_property(),
+            FrnAutomationProperty::AutomationPeer_ClassName,
+        ),
+        (
+            AutomationElementIdentifiers::name_property(),
+            FrnAutomationProperty::AutomationPeer_Name,
+        ),
+        (
+            RangeValuePatternIdentifiers::value_property(),
+            FrnAutomationProperty::RangeValueProvider_Value,
+        ),
+        (
+            ValuePatternIdentifiers::value_property(),
+            FrnAutomationProperty::ValueProvider_Value,
+        ),
+        (
+            TogglePatternIdentifiers::toggle_state_property(),
+            FrnAutomationProperty::ToggleProvider_ToggleState,
+        ),
         (
             ExpandCollapsePatternIdentifiers::expand_collapse_state_property(),
             FrnAutomationProperty::ExpandCollapseProvider_ExpandCollapseState,
@@ -50,7 +68,10 @@ fn property_map() -> [(&'static AutomationProperty, FrnAutomationProperty); 10] 
             SelectionItemPatternIdentifiers::is_selected_property(),
             FrnAutomationProperty::SelectionItemProvider_IsSelected,
         ),
-        (SelectionPatternIdentifiers::selection_property(), FrnAutomationProperty::SelectionProvider_Selection),
+        (
+            SelectionPatternIdentifiers::selection_property(),
+            FrnAutomationProperty::SelectionProvider_Selection,
+        ),
     ]
 }
 
@@ -64,15 +85,11 @@ ferroui_base::ferro_thread_local! {
     /// whole life, so a peer that has a node always maps to the same
     /// wrapper, and with it to the same node.
     ///
-    /// Once native code has set a node, the wrapper is part of a reference
-    /// cycle, as in the reference: the wrapper holds its node, the node holds
-    /// its element strongly (`FrnAutomationNode` in `FrnAutomationNode.h`)
-    /// and the element holds the wrapper (`FrnAccessibilityElement` in
-    /// `automation.mm`). Such a wrapper is therefore never dropped and its
-    /// node never disposed; the native window holds the wrapper of its root
-    /// peer the same way, which keeps the peers of the whole tree alive after
-    /// the window is closed. The reference has the same cycle through the
-    /// object the managed runtime hands to native code.
+    /// The native notification node holds its ARC element weakly. The element
+    /// owns a counted node reference and clears the wrapper's cache when it is
+    /// released. Neither the node nor this weak table creates an ownership
+    /// cycle; external accessibility references may outlive the control, which
+    /// callbacks handle as an unavailable element.
     static WRAPPERS: RefCell<HashMap<usize, Weak<FrnAutomationPeer>>> = RefCell::new(HashMap::new());
 }
 
@@ -118,7 +135,11 @@ impl FrnAutomationPeer {
                 }))));
             }
 
-            Self { inner, node: RefCell::new(None), subscriptions }
+            Self {
+                inner,
+                node: RefCell::new(None),
+                subscriptions,
+            }
         })
     }
 
@@ -170,12 +191,34 @@ impl FrnAutomationPeer {
         })
     }
 
+    /// AppKit can retain an accessibility element after its control has gone.
+    /// Such a node is unavailable, not an exception in the dispatcher's loop.
+    /// A live owner is retained only for this callback, including reentrant
+    /// user code; keeping it in the wrapper would form a control/peer cycle.
+    fn guard_live<R>(&self, unavailable: R, body: impl FnOnce() -> R) -> R {
+        let owner = if let Some(peer) = self.inner.cast::<ControlAutomationPeer>() {
+            match peer.try_owner() {
+                Some(owner) => Some(owner),
+                None => return unavailable,
+            }
+        } else {
+            None
+        };
+        crate::callback_base::guard(unavailable, move || {
+            let _owner = owner;
+            body()
+        })
+    }
+
     fn is_provider<T: ?Sized + 'static>(&self) -> bool {
         self.inner.get_provider::<T>().is_some()
     }
 
     fn on_peer_property_changed(&self, e: &AutomationPropertyChangedEventArgs) {
-        let property = property_map().into_iter().find(|(key, _)| *key == e.property()).map(|(_, value)| value);
+        let property = property_map()
+            .into_iter()
+            .find(|(key, _)| *key == e.property())
+            .map(|(_, value)| value);
         if let Some(property) = property {
             if let Some(node) = self.node() {
                 node.property_changed(property);
@@ -195,10 +238,8 @@ impl Drop for FrnAutomationPeer {
                 }
             }
         });
-        // The finalizer of the reference. Only a wrapper whose node was never
-        // set, or was set by something other than a native element, gets
-        // here: an element keeps the wrapper of its node alive (see
-        // `WRAPPERS`).
+        // Normally the native element clears this cache before releasing its
+        // wrapper. Also dispose nodes supplied by other platform clients.
         if let Some(node) = self.node.get_mut().take() {
             node.dispose();
         }
@@ -249,16 +290,15 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
 
     fn set_node(&self, node: Option<&IFrnAutomationNode>) {
         crate::callback_base::guard((), || {
-            if self.node.borrow().is_some() {
+            if node.is_some() && self.node.borrow().is_some() {
                 panic!("The FrnAutomationPeer already has a node.");
             }
-            // A counted reference, as in the reference. The element that owns
-            // the node deletes it in its `dealloc` without regard to its
-            // reference count (`automation.mm`), so the pointer would dangle
-            // if the element were ever deallocated while the wrapper lives;
-            // the reference cycle described at `WRAPPERS` keeps that from
-            // happening, in the reference as here.
-            *self.node.borrow_mut() = node.map(ComPtr::from_ref);
+            // The native element releases counted references rather than
+            // deleting a node retained by another client. Clearing on element
+            // release allows an externally retained live peer to be acquired
+            // again, without replacing a still-active platform node.
+            let previous = self.node.replace(node.map(ComPtr::from_ref));
+            drop(previous);
         })
     }
 
@@ -589,7 +629,12 @@ pub(crate) struct FrnAutomationPeerArray {
 
 impl FrnAutomationPeerArray {
     pub(crate) fn new(items: &[Ref<AutomationPeer>]) -> Self {
-        Self { items: items.iter().filter_map(|x| FrnAutomationPeer::wrap(Some(x.clone()))).collect() }
+        Self {
+            items: items
+                .iter()
+                .filter_map(|x| FrnAutomationPeer::wrap(Some(x.clone())))
+                .collect(),
+        }
     }
 }
 
@@ -638,7 +683,7 @@ mod tests {
     use crate::frn_string::frn_string_to_string;
     use ferroui_base::threading::Dispatcher;
     use ferroui_controls::automation::AutomationProperties;
-    use ferroui_controls::{Border, Button, CheckBox, Expander, Panel};
+    use ferroui_controls::{Border, Button, CheckBox, Expander, Panel, TextBlock};
     use std::cell::Cell;
 
     struct TestScope {
@@ -647,7 +692,9 @@ mod tests {
 
     fn test_scope() -> TestScope {
         Control::reset_loaded_queue_for_unit_tests();
-        TestScope { _dispatcher: Dispatcher::unit_test_scope() }
+        TestScope {
+            _dispatcher: Dispatcher::unit_test_scope(),
+        }
     }
 
     impl Drop for TestScope {
@@ -694,6 +741,194 @@ mod tests {
 
     fn text(s: Option<ComPtr<IFrnString>>) -> Option<String> {
         s.and_then(|s| frn_string_to_string(&s))
+    }
+
+    /// A single native callback inside the real dispatcher's managed frame.
+    /// No window server or Ribbon library is involved in this regression.
+    struct QueryThreading(Box<dyn Fn()>);
+
+    impl IFrnPlatformThreadingInterfaceImpl for QueryThreading {
+        fn get_current_thread_is_loop_thread(&self) -> bool {
+            true
+        }
+        fn set_events(&self, _: Option<&IFrnPlatformThreadingInterfaceEvents>) {}
+        fn create_loop_cancellation(&self) -> Option<ComPtr<IFrnLoopCancellation>> {
+            None
+        }
+        fn run_loop(&self, _: Option<&IFrnLoopCancellation>) {
+            (self.0)();
+        }
+        fn signal(&self) {}
+        fn update_timer(&self, _: i32) {}
+        fn request_background_processing(&self) {}
+    }
+
+    #[test]
+    fn released_control_is_unavailable_to_native_queries_without_dispatcher_panic() {
+        use crate::dispatcher_impl::DispatcherImpl;
+        use ferroui_base::threading::{CancellationToken, IControlledDispatcherImpl};
+        let _scope = test_scope();
+        let control = TextBlock::new();
+        control.set_text(Some("temporary tab label"));
+        let owner = control.downgrade();
+        let bridge = native(&control);
+        assert_eq!(text(bridge.get_name()).as_deref(), Some("temporary tab label"));
+        drop(control);
+        assert!(
+            owner.upgrade().is_none(),
+            "the native bridge must not keep the control alive"
+        );
+        let threading = IFrnPlatformThreadingInterface::from_impl(QueryThreading(Box::new(move || {
+            assert_eq!(bridge.get_automation_control_type().0, 0);
+            assert!(bridge.get_name().is_none());
+            assert!(!bridge.is_control_element());
+            assert!(!bridge.is_enabled());
+            assert!(bridge.get_parent().is_none());
+        })));
+        let dispatcher = DispatcherImpl::new(threading);
+        // Before the correction, each query appears to return an unavailable
+        // value but queues the expired-owner panic. The real dispatcher then
+        // rethrows it here, just as it ended the native application's run loop.
+        dispatcher.run_loop(CancellationToken::none());
+    }
+
+    #[test]
+    fn live_provider_errors_still_reach_the_dispatcher() {
+        use crate::dispatcher_impl::DispatcherImpl;
+        use ferroui_base::threading::{CancellationToken, IControlledDispatcherImpl};
+        let _scope = test_scope();
+        let button = Button::new();
+        button.set_is_enabled(false);
+        let bridge = native(&button);
+        assert!(bridge.is_invoke_provider());
+        let threading = IFrnPlatformThreadingInterface::from_impl(QueryThreading(Box::new(move || {
+            bridge.invoke_provider_invoke();
+        })));
+        let dispatcher = DispatcherImpl::new(threading);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            dispatcher.run_loop(CancellationToken::none());
+        }));
+        assert!(result.unwrap_err().is::<ElementNotEnabledError>());
+    }
+
+    struct NativePool(*mut c_void);
+
+    #[link(name = "objc")]
+    unsafe extern "C" {
+        fn objc_getClass(name: *const std::ffi::c_char) -> *mut c_void;
+        fn sel_registerName(name: *const std::ffi::c_char) -> *mut c_void;
+        fn objc_msgSend();
+        fn objc_autoreleasePoolPush() -> *mut c_void;
+        fn objc_autoreleasePoolPop(pool: *mut c_void);
+    }
+
+    impl NativePool {
+        fn new() -> Self {
+            // SAFETY: this thread creates and pops its own nested ARC pool.
+            Self(unsafe { objc_autoreleasePoolPush() })
+        }
+    }
+
+    impl Drop for NativePool {
+        fn drop(&mut self) {
+            // SAFETY: this pool is popped exactly once, on its creating thread.
+            unsafe { objc_autoreleasePoolPop(self.0) }
+        }
+    }
+
+    fn acquire_native_element(peer: &IFrnAutomationPeer) -> *mut c_void {
+        // SAFETY: the linked native backend defines this class and selector.
+        // The function pointer matches +acquire:'s exact pointer signature;
+        // the borrowed COM peer lives throughout the synchronous call.
+        unsafe {
+            let class = objc_getClass(c"FrnAccessibilityElement".as_ptr());
+            assert!(!class.is_null());
+            let selector = sel_registerName(c"acquire:".as_ptr());
+            let send: unsafe extern "C" fn(*mut c_void, *mut c_void, *const IFrnAutomationPeer) -> *mut c_void =
+                std::mem::transmute(objc_msgSend as unsafe extern "C" fn());
+            send(class, selector, peer)
+        }
+    }
+
+    #[test]
+    fn native_title_query_is_safe_after_control_release() {
+        use crate::dispatcher_impl::DispatcherImpl;
+        use ferroui_base::threading::{CancellationToken, IControlledDispatcherImpl};
+        let _scope = test_scope();
+        let _pool = NativePool::new();
+        let control = TextBlock::new();
+        let owner = control.downgrade();
+        let bridge = native(&control);
+        let element = acquire_native_element(&bridge);
+        assert!(!element.is_null());
+        drop(control);
+        assert!(owner.upgrade().is_none());
+        let threading = IFrnPlatformThreadingInterface::from_impl(QueryThreading(Box::new(move || {
+            // SAFETY: this live, pool-owned element implements both selectors.
+            // These signatures match AppKit's pointer and BOOL return values.
+            unsafe {
+                let send_id: unsafe extern "C" fn(*mut c_void, *mut c_void) -> *mut c_void =
+                    std::mem::transmute(objc_msgSend as unsafe extern "C" fn());
+                let send_bool: unsafe extern "C" fn(*mut c_void, *mut c_void) -> bool =
+                    std::mem::transmute(objc_msgSend as unsafe extern "C" fn());
+                assert!(send_id(element, sel_registerName(c"accessibilityTitle".as_ptr())).is_null());
+                assert!(!send_bool(
+                    element,
+                    sel_registerName(c"isAccessibilityElement".as_ptr())
+                ));
+                assert!(!send_bool(
+                    element,
+                    sel_registerName(c"isAccessibilityEnabled".as_ptr())
+                ));
+            }
+        })));
+        let dispatcher = DispatcherImpl::new(threading);
+        dispatcher.run_loop(CancellationToken::none());
+    }
+
+    #[test]
+    fn native_element_releases_its_bridge_after_the_last_native_reference() {
+        let _scope = test_scope();
+        let control = TextBlock::new();
+        let wrapper = FrnAutomationPeer::wrap(Some(peer_of(&control))).unwrap();
+        let weak = Rc::downgrade(&wrapper);
+        let bridge = IFrnAutomationPeer::from_impl(wrapper.clone());
+        {
+            let _pool = NativePool::new();
+            assert!(!acquire_native_element(&bridge).is_null());
+            drop(bridge);
+            drop(wrapper);
+            assert!(
+                weak.upgrade().is_some(),
+                "the native element retains its bridge while alive"
+            );
+        }
+        assert!(
+            weak.upgrade().is_none(),
+            "the platform node must not form a permanent ARC/COM/Rust cycle"
+        );
+    }
+
+    #[test]
+    fn released_native_element_clears_its_node_and_can_be_recreated() {
+        let _scope = test_scope();
+        let control = TextBlock::new();
+        let wrapper = FrnAutomationPeer::wrap(Some(peer_of(&control))).unwrap();
+        let bridge = IFrnAutomationPeer::from_impl(wrapper.clone());
+        for _ in 0..2 {
+            let pool = NativePool::new();
+            assert!(!acquire_native_element(&bridge).is_null());
+            let node = bridge.get_node().expect("an active native element has a node");
+            drop(pool);
+            assert!(
+                bridge.get_node().is_none(),
+                "the released element must clear the wrapper cache"
+            );
+            // A retained COM node is safe after its former ARC owner dies.
+            node.children_changed();
+            node.property_changed(FrnAutomationProperty::AutomationPeer_Name);
+            node.focus_changed();
+        }
     }
 
     /// Native code finds the accessibility element of a peer through the
@@ -762,7 +997,10 @@ mod tests {
 
         assert_eq!(
             *events.properties.borrow(),
-            vec![FrnAutomationProperty::AutomationPeer_AutomationId, FrnAutomationProperty::AutomationPeer_Name]
+            vec![
+                FrnAutomationProperty::AutomationPeer_AutomationId,
+                FrnAutomationProperty::AutomationPeer_Name
+            ]
         );
     }
 
@@ -826,8 +1064,9 @@ mod tests {
         let children = native(&panel).get_children().expect("children");
 
         assert_eq!(children.get_count(), 2);
-        let names: Vec<_> =
-            (0..2).map(|i| text(children.get(i).unwrap().unwrap().get_name()).unwrap_or_default()).collect();
+        let names: Vec<_> = (0..2)
+            .map(|i| text(children.get(i).unwrap().unwrap().get_name()).unwrap_or_default())
+            .collect();
         assert_eq!(names, ["first", "second"]);
         assert_eq!(children.get(2).err(), Some(HResult::INVALIDARG));
 
@@ -844,7 +1083,10 @@ mod tests {
         AutomationProperties::set_help_text(&button, Some("Confirms"));
         let peer = native(&button);
 
-        assert_eq!(peer.get_automation_control_type(), FrnAutomationControlType::AutomationButton);
+        assert_eq!(
+            peer.get_automation_control_type(),
+            FrnAutomationControlType::AutomationButton
+        );
         assert_eq!(text(peer.get_automation_id()), Some("ok-button".to_string()));
         assert_eq!(text(peer.get_name()), Some("OK".to_string()));
         assert_eq!(text(peer.get_help_text()), Some("Confirms".to_string()));
@@ -909,7 +1151,10 @@ mod tests {
 
         assert_eq!(check_box.is_checked(), Some(true));
         assert_eq!(peer.toggle_provider_get_toggle_state(), 1);
-        assert!(events.properties.borrow().contains(&FrnAutomationProperty::ToggleProvider_ToggleState));
+        assert!(events
+            .properties
+            .borrow()
+            .contains(&FrnAutomationProperty::ToggleProvider_ToggleState));
     }
 
     #[test]

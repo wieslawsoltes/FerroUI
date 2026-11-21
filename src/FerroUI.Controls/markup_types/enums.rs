@@ -289,6 +289,12 @@ ferro_markup_enum!(
 );
 ferro_markup_enum!(SnapPointsAlignment { Near, Center, Far }, { namespace: "FerroUI.Controls.Primitives" });
 ferro_markup_enum!(SnapPointsType { None, Mandatory, MandatorySingle }, { namespace: "FerroUI.Controls.Primitives" });
+ferro_markup_enum!(
+    ThumbDragStartPolicy {
+        AnyPress, PrimaryPressWhenIdle,
+    },
+    { namespace: "FerroUI.Controls.Primitives" }
+);
 
 // FerroUI.Controls.Primitives.PopupPositioning
 ferro_markup_enum!(flags PopupAnchor {
@@ -397,6 +403,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <ScrollEventType as MarkupTyped>::MARKUP,
     <SnapPointsAlignment as MarkupTyped>::MARKUP,
     <SnapPointsType as MarkupTyped>::MARKUP,
+    <ThumbDragStartPolicy as MarkupTyped>::MARKUP,
     <PopupAnchor as MarkupTyped>::MARKUP,
     <PopupGravity as MarkupTyped>::MARKUP,
     <PopupPositionerConstraintAdjustment as MarkupTyped>::MARKUP,
@@ -473,6 +480,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<ScrollEventType>();
     ValueTypes::register_used::<SnapPointsAlignment>();
     ValueTypes::register_used::<SnapPointsType>();
+    ValueTypes::register_used::<ThumbDragStartPolicy>();
     ValueTypes::register_used::<PopupAnchor>();
     ValueTypes::register_used::<PopupGravity>();
     ValueTypes::register_used::<PopupPositionerConstraintAdjustment>();
@@ -904,3 +912,8 @@ impl ferroui_base::data::core::ValueTypeRegistration for PopupPositionerConstrai
     }
 }
 
+impl ferroui_base::data::core::ValueTypeRegistration for ThumbDragStartPolicy {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ThumbDragStartPolicy>();
+    }
+}

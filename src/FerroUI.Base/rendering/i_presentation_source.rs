@@ -2,7 +2,7 @@ use super::{IHitTester, IRenderer};
 use crate::input::IInputRoot;
 use crate::layout::ILayoutRoot;
 use crate::platform::IPlatformSettings;
-use crate::{PixelPoint, Point, Ref, Size, Visual};
+use crate::{Matrix, PixelPoint, Point, Ref, Size, Visual};
 use std::rc::Rc;
 
 /// The host of a visual tree: connects the tree to its renderer, layout root
@@ -42,6 +42,14 @@ pub trait IPresentationSource {
 
     /// The input root of the tree.
     fn input_root(&self) -> Rc<dyn IInputRoot>;
+
+    /// Continuous root-client DIP to the same desktop coordinate space as
+    /// `point_to_screen`, without integer pixel quantization. Logical-desktop
+    /// platforms use logical screen units, independently of render scaling.
+    /// `None` explicitly reports an unsupported conversion capability.
+    fn client_to_screen_transform(&self) -> Option<Matrix> {
+        None
+    }
 
     /// Converts a point from client to screen coordinates, if the host is
     /// on a screen.

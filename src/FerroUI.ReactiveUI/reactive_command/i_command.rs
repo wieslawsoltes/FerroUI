@@ -23,6 +23,22 @@ pub trait ICommand {
     /// Adds `handler`, which runs when what [`can_execute`](Self::can_execute) answers may have
     /// changed (`CanExecuteChanged`); disposing the result removes it.
     fn can_execute_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable>;
+
+    /// Registers an enablement handler and publishes its removal handle.
+    ///
+    /// The default implementation publishes after the legacy registration
+    /// returns. Implementors whose add accessor can run application code
+    /// can override this method to publish immediately after inserting the
+    /// handler, so a reentrant caller can remove it during that accessor.
+    /// Call `publish` once, synchronously. It may dispose the handle immediately,
+    /// so release any borrows of the handler list before calling it.
+    fn register_can_execute_changed(
+        &self,
+        handler: Rc<dyn Fn()>,
+        publish: &mut dyn FnMut(Rc<dyn IDisposable>),
+    ) {
+        publish(self.can_execute_changed(handler));
+    }
 }
 
 /// Two commands are equal when they are the same object, as the default equality of .NET
@@ -47,5 +63,13 @@ impl<C: ICommand + ?Sized> ICommand for Rc<C> {
 
     fn can_execute_changed(&self, handler: Rc<dyn Fn()>) -> Rc<dyn IDisposable> {
         (**self).can_execute_changed(handler)
+    }
+
+    fn register_can_execute_changed(
+        &self,
+        handler: Rc<dyn Fn()>,
+        publish: &mut dyn FnMut(Rc<dyn IDisposable>),
+    ) {
+        (**self).register_can_execute_changed(handler, publish)
     }
 }

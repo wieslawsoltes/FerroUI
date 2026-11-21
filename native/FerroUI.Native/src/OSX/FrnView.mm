@@ -429,7 +429,18 @@ static void ConvertTilt(NSPoint tilt, float* xTilt, float* yTilt)
     auto parent = _parent.tryGet();
     if(parent != nullptr)
     {
-        parent->TopLevelEvents->RawMouseEvent(type, pointerType, timestamp, modifiers, point, delta, pressure, xTilt, yTilt);
+        ComPtr<IFrnTopLevelWheelEvents> wheelEvents;
+        if(type == Wheel && parent->TopLevelEvents->QueryInterface(
+            &IID_IFrnTopLevelWheelEvents, reinterpret_cast<void**>(wheelEvents.getPPV())) == S_OK)
+        {
+            FrnVector platformDelta = { [event scrollingDeltaX], [event scrollingDeltaY] };
+            wheelEvents->RawMouseWheelEvent(timestamp, modifiers, point, delta,
+                platformDelta, [event hasPreciseScrollingDeltas]);
+        }
+        else
+        {
+            parent->TopLevelEvents->RawMouseEvent(type, pointerType, timestamp, modifiers, point, delta, pressure, xTilt, yTilt);
+        }
     }
 
     // This handler is shared by all mouse event types. Only real mouse-moved
@@ -1177,7 +1188,7 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
 
     auto clientPoint = [window convertPointFromScreen:point];
     auto localPoint = [self translateLocalPoint:ToFrnPoint(clientPoint)];
-    auto hit = peer->RootProvider_GetPeerFromPoint(localPoint);
+    ComPtr<IFrnAutomationPeer> hit(peer->RootProvider_GetPeerFromPoint(localPoint), true);
     return [FrnAccessibilityElement acquire:hit];
 }
 
@@ -1213,19 +1224,20 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
     {
         return;
     }
-    auto childPeers = peer->GetChildren();
+    ComPtr<IFrnAutomationPeerArray> childPeers(peer->GetChildren(), true);
     auto childCount = childPeers != nullptr ? childPeers->GetCount() : 0;
 
     if (childCount > 0)
     {
         for (int i = 0; i < childCount; ++i)
         {
-            IFrnAutomationPeer* child;
+            ComPtr<IFrnAutomationPeer> child;
 
-            if (childPeers->Get(i, &child) == S_OK)
+            if (childPeers->Get(i, child.getPPV()) == S_OK)
             {
                 id element = [FrnAccessibilityElement acquire:child];
-                [_accessibilityChildren addObject:element];
+                if (element != nil)
+                    [_accessibilityChildren addObject:element];
             }
         }
     }

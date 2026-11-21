@@ -182,6 +182,7 @@ struct TestHost {
     input_manager: Rc<InputManager>,
     pointer_over: RefCell<Option<Rc<PointerOverPreProcessor>>>,
     screen_offset: Cell<PixelPoint>,
+    continuous_screen_transform: Cell<Option<Matrix>>,
     input_method: RefCell<Option<Rc<dyn text_input::ITextInputMethodImpl>>>,
 }
 
@@ -200,6 +201,7 @@ impl TestHost {
             input_manager: Rc::new(InputManager::new()),
             pointer_over: RefCell::new(None),
             screen_offset: Cell::new(PixelPoint::new(0, 0)),
+            continuous_screen_transform: Cell::new(None),
             input_method: RefCell::new(None),
         });
 
@@ -274,6 +276,9 @@ impl Drop for TestHost {
 }
 
 impl IPresentationSource for TestHost {
+    fn client_to_screen_transform(&self) -> Option<Matrix> {
+        self.continuous_screen_transform.get()
+    }
     fn root_visual(&self) -> Option<Ref<Visual>> {
         Some(self.root.clone().upcast())
     }
@@ -1198,6 +1203,111 @@ fn wheel_is_routed_to_element_under_pointer() {
     tree.root.host.input(args);
 
     assert_eq!(*deltas.borrow(), [(Vector::new(0.0, 1.0), 42)]);
+}
+
+#[test]
+fn platform_wheel_delta_survives_routing_capture_and_clone() {
+    let device = MouseDevice::new();
+    let tree = pointer_tree();
+    device
+        .pointer()
+        .capture(Some(&tree.canvas.clone().upcast()));
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let sink = received.clone();
+    tree.canvas.pointer_wheel_changed(move |_, e| {
+        sink.borrow_mut().push(e.clone());
+        e.set_handled(true);
+    });
+    let normalized = Vector::new(0.0, 0.3);
+    // Normalization maps these distinct raw values to the same double.
+    let below = f64::from_bits(15.0_f64.to_bits() - 1);
+    assert_eq!(below / 50.0, 15.0 / 50.0);
+    for (index, raw_y) in [15.0, below].into_iter().enumerate() {
+        let original = PlatformWheelDelta::MacOS {
+            delta: Vector::new(2.25, raw_y),
+            is_precise: true,
+        };
+        let args = Rc::new(
+            RawMouseWheelEventArgs::new(
+                device.clone(),
+                index as u64,
+                tree.root.host.as_input_root(),
+                OVER_DECORATOR,
+                normalized,
+                RawInputModifiers::SHIFT,
+            )
+            .with_platform_delta(original),
+        );
+        tree.root.host.input(args.clone());
+        assert!(args.handled());
+        assert_eq!(args.delta(), normalized);
+        assert_eq!(args.platform_delta(), Some(original));
+    }
+    device.pointer().capture(None);
+    let received = received.borrow();
+    assert_eq!(received.len(), 2);
+    for (index, raw_y) in [15.0, below].into_iter().enumerate() {
+        let e = &received[index];
+        assert_eq!(e.delta(), normalized);
+        assert_eq!(e.timestamp(), index as u64);
+        assert_eq!(e.key_modifiers(), KeyModifiers::SHIFT);
+        assert_eq!(
+            e.platform_delta(),
+            Some(PlatformWheelDelta::MacOS {
+                delta: Vector::new(2.25, raw_y),
+                is_precise: true,
+            })
+        );
+    }
+}
+
+#[test]
+fn win32_wheel_data_retains_protocol_scalar_through_device_routing() {
+    let device = MouseDevice::new();
+    let tree = pointer_tree();
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let sink = received.clone();
+    tree.border.pointer_wheel_changed(move |_, e| {
+        sink.borrow_mut().push(e.clone());
+        e.set_handled(true);
+    });
+    for value in [120.0, -120.0] {
+        let original = PlatformWheelDelta::Win32 { delta: Vector::new(value, 0.0) };
+        let args = Rc::new(RawMouseWheelEventArgs::new(
+            device.clone(), 42, tree.root.host.as_input_root(), OVER_DECORATOR,
+            Vector::new(-1.0, 0.0), RawInputModifiers::NONE,
+        ).with_platform_delta(original));
+        tree.root.host.input(args.clone());
+        assert!(args.handled());
+    }
+    let received = received.borrow();
+    assert_eq!(received.len(), 2);
+    for (e, value) in received.iter().zip([120.0, -120.0]) {
+        assert_eq!(e.delta(), Vector::new(-1.0, 0.0));
+        assert_eq!(e.platform_delta(), Some(PlatformWheelDelta::Win32 { delta: Vector::new(value, 0.0) }));
+    }
+}
+
+#[test]
+fn platform_wheel_delta_is_optional_for_existing_backends() {
+    let device = MouseDevice::new();
+    let tree = pointer_tree();
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let sink = received.clone();
+    tree.border
+        .pointer_wheel_changed(move |_, e| sink.borrow_mut().push(e.platform_delta()));
+    let args = Rc::new(RawMouseWheelEventArgs::new(
+        device,
+        42,
+        tree.root.host.as_input_root(),
+        OVER_DECORATOR,
+        Vector::new(-1.0, 0.0),
+        RawInputModifiers::NONE,
+    ));
+    assert_eq!(args.platform_delta(), None);
+    tree.root.host.input(args.clone());
+    assert!(!args.handled());
+    assert_eq!(*received.borrow(), [None]);
 }
 
 #[test]
@@ -5482,3 +5592,107 @@ fn geometry_hit_test_finds_the_elements_intersecting_a_region() {
 
 #[path = "effect_input_tests.rs"]
 mod effect_input_tests;
+
+#[test]
+fn ferro_precise_pointer_position_crosses_roots_without_pixel_quantization() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let a = TestRoot::new();
+    let b = TestRoot::new();
+    a.host.screen_offset.set(PixelPoint::new(80, 90));
+    a.host
+        .continuous_screen_transform
+        .set(Some(Matrix::new(1., 0., 0., 1., 80., 90.)));
+    b.host
+        .continuous_screen_transform
+        .set(Some(Matrix::IDENTITY));
+    let e = PointerEventArgs::new(
+        Some(InputElement::pointer_moved_event()),
+        a.root.clone(),
+        Pointer::new(31, PointerType::Mouse, true),
+        Some(&a.root),
+        Point::new(10.25, 15.75),
+        0,
+        PointerPointProperties::NONE,
+        KeyModifiers::NONE,
+    );
+    assert_eq!(
+        e.try_get_position_precise(Some(&b.root)),
+        Some(Point::new(90.25, 105.75))
+    );
+    assert_eq!(e.get_position(Some(&b.root)), Point::new(90., 105.)); // existing API unchanged
+    assert_eq!(
+        e.try_get_position_precise(None),
+        Some(Point::new(10.25, 15.75))
+    );
+}
+#[test]
+fn ferro_precise_pointer_position_respects_both_desktop_scales_and_local_transforms() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    for from in [1., 1.25, 1.5, 2., 3.] {
+        for to in [1., 1.25, 1.5, 2., 3.] {
+            let a = TestRoot::new();
+            let child = TestControl::new("target").at(2.5, 3.25, 40., 40.);
+            let b = TestRoot::with_child(&child);
+            a.host
+                .continuous_screen_transform
+                .set(Some(Matrix::new(from, 0., 0., from, 100.5, -50.25)));
+            b.host
+                .continuous_screen_transform
+                .set(Some(Matrix::new(to, 0., 0., to, -20.25, 40.5)));
+            let e = PointerEventArgs::new(
+                Some(InputElement::pointer_moved_event()),
+                a.root.clone(),
+                Pointer::new(32, PointerType::Mouse, true),
+                Some(&a.root),
+                Point::new(10.25, 15.75),
+                0,
+                PointerPointProperties::NONE,
+                KeyModifiers::NONE,
+            );
+            let result = e.try_get_position_precise(Some(&child)).unwrap();
+            let expected = Point::new(
+                (10.25 * from + 100.5 + 20.25) / to - 2.5,
+                (15.75 * from - 50.25 - 40.5) / to - 3.25,
+            );
+            assert!(
+                (result.x - expected.x).abs() < 1e-12 && (result.y - expected.y).abs() < 1e-12,
+                "{from} -> {to}: {result:?} != {expected:?}"
+            );
+        }
+    }
+}
+#[test]
+fn ferro_precise_pointer_position_reports_unsupported_detached_and_singular_roots() {
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let a = TestRoot::new();
+    let b = TestRoot::new();
+    let e = PointerEventArgs::new(
+        Some(InputElement::pointer_moved_event()),
+        a.root.clone(),
+        Pointer::new(33, PointerType::Mouse, true),
+        Some(&a.root),
+        Point::new(10.25, 15.75),
+        0,
+        PointerPointProperties::NONE,
+        KeyModifiers::NONE,
+    );
+    assert!(e.try_get_position_precise(Some(&b.root)).is_none());
+    assert_eq!(
+        e.try_get_position_precise(Some(&a.root)),
+        Some(Point::new(10.25, 15.75))
+    );
+    a.host
+        .continuous_screen_transform
+        .set(Some(Matrix::IDENTITY));
+    b.host
+        .continuous_screen_transform
+        .set(Some(Matrix::create_scale(0., 0.)));
+    assert!(e.try_get_position_precise(Some(&b.root)).is_none());
+    assert!(
+        e.try_get_position_precise(Some(&TestControl::new("detached")))
+            .is_none()
+    );
+}
+
+#[path = "focus_eligibility_tests.rs"]
+mod focus_eligibility_tests;

@@ -32,11 +32,13 @@ mod macos {
     use ferroui_controls::automation::AutomationProperties;
     use ferroui_controls::presenters::ContentPresenter;
     use ferroui_controls::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
-    use ferroui_controls::{AppBuilder, Application, Button, CheckBox, ContentControl, Control, StackPanel, Window};
+    use ferroui_controls::{
+        AppBuilder, Application, Button, CheckBox, ContentControl, Control, StackPanel, TextBlock, Window,
+    };
+    use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
     use ferroui_native::{
         FerroNativePlatformExtensions, FerroNativePlatformOptions, FerroNativeRenderingMode, MacOSTopLevelHandle,
     };
-    use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
     use ferroui_skia::SkiaApplicationExtensions;
     use std::cell::Cell;
     use std::process::ExitCode;
@@ -149,7 +151,9 @@ mod macos {
             if array.is_null() {
                 return Vec::new();
             }
-            (0..send_usize(array, "count")).map(|i| object_at_index(array, i)).collect()
+            (0..send_usize(array, "count"))
+                .map(|i| object_at_index(array, i))
+                .collect()
         }
 
         /// Runs `body` inside an autorelease pool.
@@ -188,7 +192,9 @@ mod macos {
     }
 
     fn find<'a>(elements: &'a [Element], role: &str, title: &str) -> Option<&'a Element> {
-        elements.iter().find(|e| e.role.as_deref() == Some(role) && e.title.as_deref() == Some(title))
+        elements
+            .iter()
+            .find(|e| e.role.as_deref() == Some(role) && e.title.as_deref() == Some(title))
     }
 
     /// Whether the accessibility parent chain of `object` reaches `target`.
@@ -258,22 +264,33 @@ mod macos {
         let check_box = CheckBox::new();
         AutomationProperties::set_name(&check_box, Some("Remember"));
 
+        let temporary_label = TextBlock::new();
+        temporary_label.set_text(Some("Temporary label"));
+        AutomationProperties::set_automation_id(&temporary_label, Some("temporary-label"));
+        let released_label = temporary_label.downgrade();
+
         let panel = StackPanel::new();
         panel.children().add(button.clone());
         panel.children().add(check_box.clone());
+        panel.children().add(temporary_label.clone());
 
         let window: Ref<Window> = Window::new();
         window.set_template(Some(window_template()));
         AutomationProperties::set_automation_id(&window, Some("main-window"));
         window.set_width(320.0);
         window.set_height(200.0);
-        window.set_content(Some(Control::boxed(panel)));
+        window.set_content(Some(Control::boxed(panel.clone())));
 
         // A window that is not shown has no frame: the size of its frame is unknown, not empty
         // (`Window.SetWindowStartupLocation` then centres the client size; with an empty frame
         // a centred window was placed half its size off the centre).
-        let platform_impl = window.platform_impl().expect("the platform implementation of the window");
-        checks.check(platform_impl.frame_size().is_none(), "a window that is not shown has no frame size");
+        let platform_impl = window
+            .platform_impl()
+            .expect("the platform implementation of the window");
+        checks.check(
+            platform_impl.frame_size().is_none(),
+            "a window that is not shown has no frame size",
+        );
 
         window.show();
         Dispatcher::ui_thread().run_jobs(None);
@@ -284,11 +301,19 @@ mod macos {
             &format!("a shown window has the size of its frame: {frame:?}"),
         );
 
-        let handle = window.try_get_platform_handle().expect("the platform handle of the window");
-        let handle = handle.as_any().downcast_ref::<MacOSTopLevelHandle>().expect("a handle of this backend");
+        let handle = window
+            .try_get_platform_handle()
+            .expect("the platform handle of the window");
+        let handle = handle
+            .as_any()
+            .downcast_ref::<MacOSTopLevelHandle>()
+            .expect("a handle of this backend");
         let ns_window = handle.ns_window() as Id;
         let ns_view = handle.ns_view() as Id;
-        checks.check(!ns_window.is_null() && !ns_view.is_null(), "the window has a native window and view");
+        checks.check(
+            !ns_window.is_null() && !ns_view.is_null(),
+            "the window has a native window and view",
+        );
 
         objc::autorelease_pool(|| {
             checks.check(
@@ -310,7 +335,10 @@ mod macos {
             }
 
             let button_element = find(&elements, "AXButton", "OK");
-            checks.check(button_element.is_some(), "the button is in the tree as AXButton titled OK");
+            checks.check(
+                button_element.is_some(),
+                "the button is in the tree as AXButton titled OK",
+            );
             checks.check(
                 button_element.is_some_and(|e| e.identifier.as_deref() == Some("ok-button")),
                 "the button reports its automation id",
@@ -329,7 +357,10 @@ mod macos {
             checks.check(clicks.get() == 1, "pressing the button element clicks the button");
 
             let check_box_element = find(&elements, "AXCheckBox", "Remember");
-            checks.check(check_box_element.is_some(), "the check box is in the tree as AXCheckBox titled Remember");
+            checks.check(
+                check_box_element.is_some(),
+                "the check box is in the tree as AXCheckBox titled Remember",
+            );
             if let Some(e) = check_box_element {
                 let usable = objc::responds_to(e.object, "accessibilityValue")
                     && objc::responds_to(e.object, "accessibilityPerformPress");
@@ -346,6 +377,34 @@ mod macos {
                 }
             }
             checks.check(check_box.is_checked() == Some(true), "the check box is checked");
+
+            // The enclosing pool retains the native element while the real
+            // control is removed, as an external accessibility client can.
+            let old_label = elements
+                .iter()
+                .find(|e| e.identifier.as_deref() == Some("temporary-label"));
+            checks.check(
+                old_label.is_some(),
+                "the temporary label has a native accessibility element",
+            );
+            panel.children().remove(&temporary_label);
+            drop(temporary_label);
+            Dispatcher::ui_thread().run_jobs(None);
+            checks.check(
+                released_label.upgrade().is_none(),
+                "native accessibility does not retain the removed control",
+            );
+            if let Some(e) = old_label {
+                checks.check(
+                    objc::string_attribute(e.object, "accessibilityTitle").is_none(),
+                    "a retained native element has no title after its control is released",
+                );
+                checks.check(
+                    !objc::send_bool(e.object, "isAccessibilityElement")
+                        && !objc::send_bool(e.object, "isAccessibilityEnabled"),
+                    "a released control's native element is unavailable",
+                );
+            }
         });
 
         window.close();

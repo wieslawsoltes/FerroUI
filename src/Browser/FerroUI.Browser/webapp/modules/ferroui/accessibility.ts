@@ -91,6 +91,7 @@ export class FerroAccessibility {
                 event.preventDefault();
                 event.stopPropagation();
                 FerroExports.AccessibilityHelper?.OnAction(state.topLevelId, 0, "enable");
+                state.container.focus({ preventScroll: true });
                 return;
             }
             const id = Number(target.dataset.ferrouiId);
@@ -158,6 +159,14 @@ export class FerroAccessibility {
         button.className = "ferroui-enable-accessibility";
         button.tabIndex = -1;
         button.textContent = "Enable accessibility";
+        const keepNativeActivation = (event: KeyboardEvent): void => {
+            if (event.key === "Enter" || event.key === " ") {
+                // Let the browser activate its button without forwarding the key to the view.
+                event.stopPropagation();
+            }
+        };
+        button.addEventListener("keydown", keepNativeActivation);
+        button.addEventListener("keyup", keepNativeActivation);
         // Visually hidden and out of the Tab order (Tab stays the view's): a screen reader reaches it
         // with its reading cursor, which finds it first, and activates it.
         button.style.cssText =

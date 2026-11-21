@@ -1,3 +1,4 @@
+use super::PlatformWheelDelta;
 use super::raw::{
     IRawInputEventArgs, RawMouseWheelEventArgs, RawPointerEventArgs, RawPointerEventType, RawPointerGestureEventArgs,
 };
@@ -162,11 +163,12 @@ impl MouseDevice {
                 e.set_handled(handled);
             }
             RawPointerEventType::Wheel => {
-                let delta = raw
+                let wheel = raw
                     .downcast_ref::<RawMouseWheelEventArgs>()
-                    .expect("a raw wheel event must be a RawMouseWheelEventArgs")
-                    .delta();
-                let handled = self.mouse_wheel(e.timestamp(), root, e.position(), props, delta, key_modifiers, hit_test);
+                    .expect("a raw wheel event must be a RawMouseWheelEventArgs");
+                let handled = self.mouse_wheel(
+                    e.timestamp(), root, e.position(), props, wheel.delta(), wheel.platform_delta(), key_modifiers, hit_test,
+                );
                 e.set_handled(handled);
             }
             RawPointerEventType::Magnify | RawPointerEventType::Rotate | RawPointerEventType::Swipe => {
@@ -347,6 +349,7 @@ impl MouseDevice {
         p: Point,
         props: PointerPointProperties,
         delta: Vector,
+        platform_delta: Option<PlatformWheelDelta>,
         input_modifiers: KeyModifiers,
         hit_test: Option<Ref<InputElement>>,
     ) -> bool {
@@ -364,6 +367,10 @@ impl MouseDevice {
             delta,
         );
 
+        let e = match platform_delta {
+            Some(delta) => e.with_platform_delta(delta),
+            None => e,
+        };
         source.raise_event(&e);
         e.handled()
     }

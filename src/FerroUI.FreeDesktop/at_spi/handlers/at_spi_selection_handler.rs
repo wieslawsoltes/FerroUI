@@ -7,8 +7,6 @@ use crate::at_spi::at_spi_server::AtSpiServer;
 use crate::at_spi::dbus::descriptions::SELECTION;
 use crate::at_spi::dbus::interface::{args, reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use crate::at_spi::dbus::types::AtSpiObjectReference;
-use ferroui_base::Ref;
-use ferroui_controls::automation::peers::AutomationPeer;
 use ferroui_controls::automation::provider::{ISelectionItemProvider, ISelectionProvider};
 use std::rc::{Rc, Weak};
 use zbus::Variant;
@@ -51,28 +49,38 @@ impl AtSpiSelectionHandler {
     }
 
     fn select_child_async(node: &AtSpiNode, child_index: i32) -> Result<bool, DBusError> {
-        let items = Self::collect_selectable_items(node.peer());
-        let Some(item) = item_at(&items, child_index) else { return Ok(false) };
+        let Some(item) = Self::selection_item_at(node, child_index) else {
+            return Ok(false);
+        };
         item.add_to_selection().map_err(DBusError::failed)?;
         Ok(true)
     }
 
-    fn deselect_selected_child_async(node: &AtSpiNode, selected_child_index: i32) -> Result<bool, DBusError> {
-        let Some(provider) = Self::provider(node) else { return Ok(false) };
-
-        let selection = provider.get_selection();
-        let Some(selected_peer) = item_at(&selection, selected_child_index) else { return Ok(false) };
-        let Some(selection_item) = selected_peer.get_provider::<dyn ISelectionItemProvider>() else {
+    fn deselect_selected_child_async(
+        node: &AtSpiNode,
+        selected_child_index: i32,
+    ) -> Result<bool, DBusError> {
+        let Some(provider) = Self::provider(node) else {
             return Ok(false);
         };
 
-        selection_item.remove_from_selection().map_err(DBusError::failed)?;
+        let selection = provider.get_selection();
+        let Some(selected_peer) = item_at(&selection, selected_child_index) else {
+            return Ok(false);
+        };
+        let Some(selection_item) = selected_peer.get_provider::<dyn ISelectionItemProvider>()
+        else {
+            return Ok(false);
+        };
+
+        selection_item
+            .remove_from_selection()
+            .map_err(DBusError::failed)?;
         Ok(true)
     }
 
     fn is_child_selected_async(node: &AtSpiNode, child_index: i32) -> bool {
-        let items = Self::collect_selectable_items(node.peer());
-        item_at(&items, child_index).is_some_and(|item| item.is_selected())
+        Self::selection_item_at(node, child_index).is_some_and(|item| item.is_selected())
     }
 
     fn select_all_async(node: &AtSpiNode) -> Result<bool, DBusError> {
@@ -80,46 +88,42 @@ impl AtSpiSelectionHandler {
             return Ok(false);
         }
 
-        for item in Self::collect_selectable_items(node.peer()) {
-            item.add_to_selection().map_err(DBusError::failed)?;
+        for child in node.ensure_children() {
+            if let Some(item) = node.selection_item(child.peer()) {
+                item.add_to_selection().map_err(DBusError::failed)?;
+            }
         }
         Ok(true)
     }
 
     fn clear_selection_async(node: &AtSpiNode) -> Result<bool, DBusError> {
-        let Some(provider) = Self::provider(node) else { return Ok(false) };
+        let Some(provider) = Self::provider(node) else {
+            return Ok(false);
+        };
 
         for selected_peer in provider.get_selection() {
-            if let Some(selection_item) = selected_peer.get_provider::<dyn ISelectionItemProvider>() {
-                selection_item.remove_from_selection().map_err(DBusError::failed)?;
+            if let Some(selection_item) = selected_peer.get_provider::<dyn ISelectionItemProvider>()
+            {
+                selection_item
+                    .remove_from_selection()
+                    .map_err(DBusError::failed)?;
             }
         }
         Ok(true)
     }
 
     fn deselect_child_async(node: &AtSpiNode, child_index: i32) -> Result<bool, DBusError> {
-        let items = Self::collect_selectable_items(node.peer());
-        let Some(item) = item_at(&items, child_index) else { return Ok(false) };
+        let Some(item) = Self::selection_item_at(node, child_index) else {
+            return Ok(false);
+        };
         item.remove_from_selection().map_err(DBusError::failed)?;
         Ok(true)
     }
 
-    fn collect_selectable_items(peer: &AutomationPeer) -> Vec<Rc<dyn ISelectionItemProvider>> {
-        let mut result = Vec::new();
-        Self::collect_selectable_items_core(&peer.get_children(), &mut result);
-        result
-    }
-
-    fn collect_selectable_items_core(
-        children: &[Ref<AutomationPeer>],
-        result: &mut Vec<Rc<dyn ISelectionItemProvider>>,
-    ) {
-        for child in children {
-            match child.get_provider::<dyn ISelectionItemProvider>() {
-                Some(item) => result.push(item),
-                None => Self::collect_selectable_items_core(&child.get_children(), result),
-            }
-        }
+    fn selection_item_at(node: &AtSpiNode, index: i32) -> Option<Rc<dyn ISelectionItemProvider>> {
+        let children = node.ensure_children();
+        let child = item_at(&children, index)?;
+        node.selection_item(child.peer())
     }
 }
 

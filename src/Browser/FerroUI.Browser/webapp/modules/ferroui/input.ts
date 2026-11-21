@@ -672,10 +672,19 @@ export class InputHelper {
             if (isForNativeControl(args)) {
                 return;
             }
+            const root = element.getRootNode();
+            const focusScope = root instanceof ShadowRoot ? root : element.ownerDocument;
+            const focused = focusScope.activeElement;
             const [x, y] = positionOf(args);
             FerroExports.InputHelper?.OnPointerDown(
                 topLevelId, args.pointerType, args.pointerId, args.button, x, y,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args), eventAge(args));
+            // Canceling the pointer event also cancels the browser's focus assignment.
+            // A press on non-focusable canvas content still enters the view.
+            if (args.isPrimary && args.button === 0 &&
+                focusScope.activeElement === focused && !element.contains(focused)) {
+                element.focus({ preventScroll: true });
+            }
             args.preventDefault();
         };
 

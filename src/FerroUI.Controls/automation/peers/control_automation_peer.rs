@@ -162,6 +162,10 @@ impl AutomationPeerImpl for ControlAutomationPeer {
         AutomationProperties::get_heading_level(&this.owner())
     }
 
+    fn is_dialog_core(this: &Self) -> bool {
+        AutomationProperties::get_is_dialog(&this.owner())
+    }
+
     fn get_parent_core(this: &Self) -> Option<Ref<AutomationPeer>> {
         this.ensure_connected();
         this.parent.borrow().as_ref().and_then(|parent| parent.upgrade())

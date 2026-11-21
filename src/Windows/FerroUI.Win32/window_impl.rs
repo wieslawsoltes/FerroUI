@@ -2299,6 +2299,13 @@ mod imp {
             self.point_to_screen_impl(point)
         }
 
+        fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+            if self.hwnd.get() == 0 { return None; }
+            let origin = self.point_to_screen_impl(Point::default());
+            let scale = self.scaling.get();
+            Some(ferroui_base::Matrix::new(scale, 0.0, 0.0, scale, f64::from(origin.x), f64::from(origin.y)))
+        }
+
         fn set_cursor(&self, cursor: Option<Rc<dyn ICursorImpl>>) {
             let h_cursor = cursor
                 .as_ref()

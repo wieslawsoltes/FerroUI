@@ -568,6 +568,7 @@ ferroui_base::ferro_rust_paths! {
         crate::primitives::SnapPointsAlignment,
         crate::primitives::SnapPointsType,
         crate::primitives::TemplateAppliedEventArgs,
+        crate::primitives::ThumbDragStartPolicy,
         crate::primitives::popup_positioning::CustomPopupPlacement,
         crate::primitives::popup_positioning::PopupAnchor,
         crate::primitives::popup_positioning::PopupGravity,

@@ -10,11 +10,12 @@ use super::automation_node::{AutomationNode, SendProvider};
 use super::interop::{
     IRawElementProviderFragment, IRawElementProviderFragmentRoot, IRawElementProviderSimple, UiaCoreProviderApi,
 };
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::{input::KeyboardDevice, reactive::IDisposable};
 use ferroui_base::{PixelPoint, Ref};
-use ferroui_controls::automation::peers::AutomationPeer;
+use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::automation::provider::IRootProvider;
 use ferroui_controls::platform::ITopLevelImpl;
+use ferroui_controls::{Control, TopLevel, primitives::PopupRoot};
 use ferroui_microcom::{ComPtr, HResult};
 use std::rc::Rc;
 
@@ -75,10 +76,30 @@ impl RootAutomationNode {
     /// The node of the element that has the focus.
     pub fn get_focus(node: &AutomationNode) -> Result<Option<ComPtr<IRawElementProviderFragment>>, HResult> {
         let result = node.invoke_sync(|peer| {
-            let focus = Self::peer(peer)?.get_focus();
+            let focus = Self::peer(peer)?.get_focus().or_else(|| Self::owned_popup_focus(peer).map(|(_, focus)| focus));
             AutomationNode::get_or_create(focus.as_ref()).map(SendProvider)
         })?;
         Ok(result.and_then(|focus| focus.into_inner().cast::<IRawElementProviderFragment>().ok()))
+    }
+
+    // Win32 keeps the owner HWND active for a popup. The system asks that
+    // HWND's provider for focus while FerroUI routes keyboard input to a
+    // control in the separate popup tree.
+    fn owned_popup_focus(peer: &Ref<AutomationPeer>) -> Option<(Ref<PopupRoot>, Ref<AutomationPeer>)> {
+        let owner = peer.cast::<ControlAutomationPeer>()?.try_owner()?.cast::<TopLevel>()?;
+        let focus = KeyboardDevice::instance()?.focused_element()?.cast::<Control>()?;
+        let focus_root = TopLevel::get_top_level(Some(&focus))?.cast::<PopupRoot>()?;
+        let mut popup = focus_root.clone();
+        loop {
+            if !popup.is_visible() {
+                return None;
+            }
+            let parent = popup.parent_top_level()?;
+            if parent.ptr_eq(&owner) {
+                return Some((focus_root, ControlAutomationPeer::create_peer_for_element(&focus)));
+            }
+            popup = parent.cast::<PopupRoot>()?;
+        }
     }
 
     /// The provider of the system for the window of the root: the node
@@ -96,9 +117,24 @@ impl RootAutomationNode {
     }
 
     fn on_root_focus_changed(id: i32) {
-        let Some(root) = AutomationNode::peer_of(id).and_then(|peer| Self::peer(&peer)) else {
+        let Some(peer) = AutomationNode::peer_of(id) else {
             return;
         };
-        AutomationNode::raise_focus_changed(AutomationNode::get_or_create(root.get_focus().as_ref()).as_ref());
+        let Some(root) = Self::peer(&peer) else { return };
+        let mut focus = root.get_focus();
+        if focus.is_none() {
+            if let Some((popup, popup_focus)) = Self::owned_popup_focus(&peer) {
+                let popup = ControlAutomationPeer::create_peer_for_element(&popup);
+                if AutomationNode::existing(&popup).is_some() {
+                    // The popup's own focus tracker reports the change.
+                    return;
+                }
+                // Follow later changes inside the popup as well. Its tracker
+                // starts with the current focus before the node subscribes.
+                AutomationNode::get_or_create(Some(&popup));
+                focus = Some(popup_focus);
+            }
+        }
+        AutomationNode::raise_focus_changed(AutomationNode::get_or_create(focus.as_ref()).as_ref());
     }
 }

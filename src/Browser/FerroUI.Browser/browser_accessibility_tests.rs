@@ -28,6 +28,19 @@ fn the_roles_of_the_common_control_types() {
 }
 
 #[test]
+fn a_dialog_has_a_named_dialog_role() {
+    let control = Control::new();
+    AutomationProperties::set_name(&control, Some("More Colors"));
+    AutomationProperties::set_control_type_override(&control, Some(AutomationControlType::Window));
+    assert_eq!(state_of(&control).role, "region");
+
+    AutomationProperties::set_is_dialog(&control, true);
+    let state = state_of(&control);
+    assert_eq!(state.role, "dialog");
+    assert_eq!(state.name, "More Colors");
+}
+
+#[test]
 fn a_button_has_its_role_name_and_type() {
     let button = Button::new();
     AutomationProperties::set_name(&button, Some("Save"));

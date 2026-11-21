@@ -17,13 +17,15 @@ use super::interop::{
     StructureChangeType, TextEditChangeType, UiaControlTypeId, UiaCoreProviderApi, UiaEventId, UiaPatternId, UiaPropertyId,
 };
 use super::marshalling::{free_bstr, ptr_to_string_bstr, SafeArrayMarshaller, SafeArrayRef, VariantArray, VariantValue};
+use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::automation::RangeValuePatternIdentifiers;
 use ferroui_controls::automation::provider::ToggleState;
-use ferroui_controls::testing::{TestServices, UnitTestApplication};
+use ferroui_controls::primitives::PopupRoot;
+use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication};
 use ferroui_controls::{
     Button, CheckBox, Control, MenuItem, MenuItemToggleType, ProgressBar, Slider, StackPanel, TextBox, Window,
 };
@@ -280,6 +282,21 @@ fn control_type(node: &IRawElementProviderSimple) -> UiaControlTypeId {
     }
 }
 
+#[test]
+fn the_provider_exposes_the_dialog_flag() {
+    use ferroui_controls::automation::AutomationProperties;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let ui = ui();
+    let node = ui.node_of(&ui.panel);
+    assert!(!flag(&ui.root, UiaPropertyId::IsDialog));
+    assert!(!flag(&node, UiaPropertyId::IsDialog));
+
+    AutomationProperties::set_is_dialog(&ui.panel, true);
+    assert!(flag(&node, UiaPropertyId::IsDialog));
+    assert!(!flag(&ui.root, UiaPropertyId::IsDialog));
+}
+
 fn navigate(node: &IRawElementProviderSimple, direction: NavigateDirection) -> Option<ComPtr<IRawElementProviderSimple>> {
     let fragment = ComPtr::from_ref(node).cast::<IRawElementProviderFragment>().unwrap();
     fragment.navigate(direction).unwrap().map(|found| found.cast::<IRawElementProviderSimple>().unwrap())
@@ -315,6 +332,51 @@ fn find(root: &IRawElementProviderSimple, wanted: UiaControlTypeId) -> ComPtr<IR
 
 fn has_pattern(node: &IRawElementProviderSimple, pattern: UiaPatternId) -> bool {
     node.get_pattern_provider(pattern.0).unwrap().is_some()
+}
+
+#[test]
+fn the_owner_hwnd_reports_focus_in_its_separate_popup_tree() {
+    let _app = UnitTestApplication::start(
+        TestServices::styled_window().with_keyboard_device(|| Some(KeyboardDevice::new() as Rc<dyn IKeyboardDevice>)),
+    );
+    let ui = ui();
+    let owner = ui.root.cast::<IRawElementProviderFragmentRoot>().unwrap();
+    let unrelated = Window::new();
+    unrelated.show();
+    let peer = ControlAutomationPeer::create_peer_for_element(&unrelated);
+    let unrelated_root = AutomationNode::get_or_create(Some(&peer))
+        .unwrap()
+        .cast::<IRawElementProviderFragmentRoot>()
+        .unwrap();
+
+    ui.window.activate();
+    assert!(ui.button.focus());
+    let opener = ui.node_of(&ui.button).cast::<IRawElementProviderFragment>().unwrap();
+    assert_eq!(owner.get_focus().unwrap().unwrap().as_ptr(), opener.as_ptr());
+
+    let popup_impl = MockWindowingPlatform::create_popup_mock(ui.window.platform_impl().unwrap());
+    let popup = PopupRoot::new(&ui.window.clone().upcast(), popup_impl);
+    let host = popup.to_popup_host();
+    let entry = TextBox::new();
+    host.set_child(Some(entry.clone().upcast()));
+    host.show();
+    popup.layout_manager().execute_initial_layout_pass();
+    ui.take_calls();
+    assert!(entry.focus());
+    let peer = ControlAutomationPeer::create_peer_for_element(&entry);
+    let entry_node = AutomationNode::get_or_create(Some(&peer))
+        .unwrap()
+        .cast::<IRawElementProviderFragment>()
+        .unwrap();
+    assert_eq!(owner.get_focus().unwrap().unwrap().as_ptr(), entry_node.as_ptr());
+    assert!(unrelated_root.get_focus().unwrap().is_none());
+    let simple = entry_node.cast::<IRawElementProviderSimple>().unwrap();
+    let event = format!("event {} AutomationFocusChanged", number(Some(&simple)));
+    assert_eq!(ui.take_calls().iter().filter(|call| **call == event).count(), 1);
+
+    host.hide();
+    assert!(ui.button.focus());
+    assert_eq!(owner.get_focus().unwrap().unwrap().as_ptr(), opener.as_ptr());
 }
 
 #[test]

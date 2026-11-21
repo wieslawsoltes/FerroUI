@@ -9,7 +9,7 @@
 @implementation FrnAccessibilityElement
 {
     ComPtr<IFrnAutomationPeer> _peer;
-    FrnAutomationNode* _node;
+    ComPtr<FrnAutomationNode> _node;
     NSMutableArray* _children;
     NSArray<NSString*>* _attributeNames;
 }
@@ -19,10 +19,10 @@
     if (peer == nullptr)
         return nil;
     
-    auto instance = peer->GetNode();
+    ComPtr<IFrnAutomationNode> instance(peer->GetNode(), true);
     
     if (instance != nullptr)
-        return dynamic_cast<FrnAutomationNode*>(instance)->GetOwner();
+        return dynamic_cast<FrnAutomationNode*>(instance.getRaw())->GetOwner();
     
     if (peer->IsInteropPeer())
     {
@@ -31,7 +31,7 @@
     }
     else if (peer->IsRootProvider())
     {
-        auto window = peer->RootProvider_GetWindow();
+        ComPtr<IFrnWindowBase> window(peer->RootProvider_GetWindow(), true);
         
         if (window == nullptr)
         {
@@ -39,7 +39,7 @@
             return nil;
         }
         
-        auto holder = dynamic_cast<INSViewHolder*>(window);
+        auto holder = dynamic_cast<INSViewHolder*>(window.getRaw());
         auto view = holder->GetNSView();
         return (NSAccessibilityElement*)[view window];
     }
@@ -53,16 +53,19 @@
 {
     self = [super init];
     _peer = peer;
-    _node = new FrnAutomationNode(self);
+    _node.setNoAddRef(new FrnAutomationNode(self));
     _peer->SetNode(_node);
     return self;
 }
 
 - (void)dealloc
 {
-    if (_node)
-        delete _node;
+    if (_node != nullptr)
+        _node->Dispose();
+    if (_peer != nullptr)
+        _peer->SetNode(nullptr);
     _node = nullptr;
+    _peer = nullptr;
 }
 
 - (NSString *)description
@@ -335,7 +338,7 @@
 
 - (id)accessibilityParent
 {
-    auto parentPeer = _peer->GetParent();
+    ComPtr<IFrnAutomationPeer> parentPeer(_peer->GetParent(), true);
 
     if (parentPeer == nullptr)
         return [NSApplication sharedApplication];
@@ -350,10 +353,10 @@
     // FrnView instead of the target FrnAccessibilityElement.
     if (parentPeer->IsRootProvider())
     {
-        auto window = parentPeer->RootProvider_GetWindow();
+        ComPtr<IFrnWindowBase> window(parentPeer->RootProvider_GetWindow(), true);
         if (window != nullptr)
         {
-            auto holder = dynamic_cast<INSViewHolder*>(window);
+            auto holder = dynamic_cast<INSViewHolder*>(window.getRaw());
             if (holder != nullptr)
                 return holder->GetNSView();
         }
@@ -364,13 +367,13 @@
 
 - (id)accessibilityTopLevelUIElement
 {
-    auto rootPeer = _peer->GetRootPeer();
+    ComPtr<IFrnAutomationPeer> rootPeer(_peer->GetRootPeer(), true);
     return [FrnAccessibilityElement acquire:rootPeer];
 }
 
 - (id)accessibilityWindow
 {
-    auto rootPeer = _peer->GetVisualRoot();
+    ComPtr<IFrnAutomationPeer> rootPeer(_peer->GetVisualRoot(), true);
     return [FrnAccessibilityElement acquire:rootPeer];
 }
 
@@ -378,14 +381,16 @@
 {
     if (_peer == nullptr)
         return nil;
-    return [FrnAccessibilityElement acquire:_peer->ScrollProvider_GetHorizontalScrollBar()];
+    ComPtr<IFrnAutomationPeer> peer(_peer->ScrollProvider_GetHorizontalScrollBar(), true);
+    return [FrnAccessibilityElement acquire:peer];
 }
 
 - (id)accessibilityVerticalScrollBar
 {
     if (_peer == nullptr)
         return nil;
-    return [FrnAccessibilityElement acquire:_peer->ScrollProvider_GetVerticalScrollBar()];
+    ComPtr<IFrnAutomationPeer> peer(_peer->ScrollProvider_GetVerticalScrollBar(), true);
+    return [FrnAccessibilityElement acquire:peer];
 }
 
 - (BOOL)isAccessibilityExpanded
@@ -628,7 +633,7 @@
     NSAccessibilityPostNotification(self, @"AXLiveRegionChanged" /* kAXLiveRegionChangedNotification */);
 
     // Announce the new string
-    auto name = _peer->GetName();
+    ComPtr<IFrnString> name(_peer->GetName(), true);
     if (name != nullptr)
     {
         NSAccessibilityPriorityLevel priority = NSAccessibilityPriorityLow;
@@ -645,7 +650,7 @@
         }
 
         NSDictionary <NSString *, id> *userInfo = @{
-            NSAccessibilityAnnouncementKey: GetNSStringAndRelease(name),
+            NSAccessibilityAnnouncementKey: GetNSStringWithoutRelease(name),
             NSAccessibilityPriorityKey: @(priority)
         };
 
@@ -665,7 +670,7 @@
 
 - (void)recalculateChildren
 {
-    auto childPeers = _peer->GetChildren();
+    ComPtr<IFrnAutomationPeerArray> childPeers(_peer->GetChildren(), true);
     auto childCount = childPeers != nullptr ? childPeers->GetCount() : 0;
 
     if (childCount > 0)
@@ -674,12 +679,13 @@
         
         for (int i = 0; i < childCount; ++i)
         {
-            IFrnAutomationPeer* child;
+            ComPtr<IFrnAutomationPeer> child;
             
-            if (childPeers->Get(i, &child) == S_OK)
+            if (childPeers->Get(i, child.getPPV()) == S_OK)
             {
                 id element = [FrnAccessibilityElement acquire:child];
-                [_children addObject:element];
+                if (element != nil)
+                    [_children addObject:element];
             }
         }
     }

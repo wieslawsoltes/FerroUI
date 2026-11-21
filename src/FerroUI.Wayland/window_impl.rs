@@ -637,6 +637,11 @@ impl ITopLevelImpl for WindowImpl {
         self.base.point_to_screen(point)
     }
 
+    fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+        let origin = self.base.point_to_screen(Point::default());
+        Some(ferroui_base::Matrix::new(1.0, 0.0, 0.0, 1.0, f64::from(origin.x), f64::from(origin.y)))
+    }
+
     fn set_cursor(&self, cursor: Option<Rc<dyn ICursorImpl>>) {
         let proxy = self.surface_proxy();
         self.base.set_cursor(cursor, proxy.as_ref().map(WXdgTopLevelProxy::as_shell_surface));

@@ -48,7 +48,7 @@ impl ISelectionItemProviderImpl for AutomationNode {
         let node = self.invoke_sync_provider(|x: &Rc<dyn ISelectionItemProvider>| {
             // The container is a provider of a peer: its node is the node
             // of that peer.
-            let peer = x.selection_container().map(|container| container.peer());
+            let peer = x.selection_container_peer();
             Ok(AutomationNode::get_or_create(peer.as_ref()).map(SendProvider))
         })?;
         Ok(node.map(SendProvider::into_inner))

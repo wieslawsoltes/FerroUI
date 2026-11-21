@@ -5,6 +5,7 @@ use super::{
     IPopupHost, LightDismissOverlayLayer, OverlayPopupHost, PopupRoot, TemplateAppliedEventArgs, TemplatedControl,
 };
 use crate::diagnostics::IPopupHostProvider;
+use std::sync::atomic::{AtomicU64, Ordering};
 use crate::presenters::ContentPresenter;
 use ferroui_base::input::text_input::TransformTrackingHelper;
 use ferroui_base::data::core::ValueTypes;
@@ -56,6 +57,7 @@ pub struct Popup {
     closing_request: Cell<Option<u64>>,
     ignore_is_open_changed: Cell<Option<bool>>,
     is_using_overlay_layer: Cell<bool>,
+    use_winui_light_dismiss_overlay: Cell<bool>,
     open_state: RefCell<Option<Rc<PopupOpenState>>>,
     popup_host_changed_handler: HandlerList<dyn Fn(Option<&Rc<dyn IPopupHost>>)>,
     opened_popups: RefCell<Vec<Ref<Popup>>>,
@@ -389,6 +391,7 @@ impl Popup {
             closing_request: Cell::new(None),
             ignore_is_open_changed: Cell::new(None),
             is_using_overlay_layer: Cell::new(false),
+            use_winui_light_dismiss_overlay: Cell::new(false),
             open_state: RefCell::new(None),
             popup_host_changed_handler: HandlerList::new(),
             opened_popups: RefCell::new(Vec::new()),
@@ -466,6 +469,16 @@ impl Popup {
         self.opened_popups.borrow().clone()
     }
 
+    /// The order of this opening among successfully hosted popup openings.
+    ///
+    /// Stable until the popup closes, including during `Opened` callbacks. A
+    /// reopened popup receives a new sequence. Closed or merely requested
+    /// openings return `None`. Consumers can sort popups collected from multiple
+    /// hosts without changing the per-parent `opened_popups` collection contract.
+    pub fn opening_sequence(&self) -> Option<u64> {
+        self.open_state().map(|state| state.opening_sequence)
+    }
+
     /// A hint to the window manager that a shadow should be added to the
     /// popup.
     pub fn window_manager_add_shadow_hint(&self) -> bool {
@@ -518,6 +531,14 @@ impl Popup {
 
     pub fn set_is_light_dismiss_enabled(&self, value: bool) {
         self.set_value(Self::is_light_dismiss_enabled_property(), value)
+    }
+
+    /// Makes the pointer light-dismiss overlay use the value of
+    /// `IsLightDismissEnabled` at opening, as in WinUI.
+    ///
+    /// Set this before opening. Other dismissal triggers use the current value.
+    pub fn set_use_winui_light_dismiss_overlay(&self, value: bool) {
+        self.use_winui_light_dismiss_overlay.set(value);
     }
 
     /// Whether the popup is currently open.
@@ -874,11 +895,12 @@ impl Popup {
             if let Some(dismiss_layer) = dismiss_layer {
                 handler_cleanup.add(dismiss_layer.register(self.overlay_input_pass_through_element().as_ref()));
 
+                let use_opening_value = self.use_winui_light_dismiss_overlay.get();
                 let token = dismiss_layer.add_handler(InputElement::pointer_pressed_event(), {
                     let weak = weak.clone();
                     move |_, e: &PointerPressedEventArgs| {
                         if let Some(this) = weak.upgrade() {
-                            this.pointer_pressed_dismiss_overlay(e);
+                            this.pointer_pressed_dismiss_overlay(e, generation, use_opening_value);
                         }
                     }
                 });
@@ -1406,8 +1428,10 @@ impl Popup {
         }
     }
 
-    fn pointer_pressed_dismiss_overlay(&self, e: &PointerPressedEventArgs) {
-        if !self.is_light_dismiss_enabled() {
+    fn pointer_pressed_dismiss_overlay(&self, e: &PointerPressedEventArgs, generation: u64, use_opening_value: bool) {
+        if !self.is_current_lifecycle_request(generation)
+            || (!use_opening_value && !self.is_light_dismiss_enabled())
+        {
             return;
         }
         let Some(v) = e.source().and_then(|source| source.cast::<Visual>()) else { return };
@@ -1418,7 +1442,7 @@ impl Popup {
             }
 
             // Ensure the popup is closed if it was not closed by a pass-through event handler
-            if self.is_open() {
+            if self.is_open() && self.is_current_lifecycle_request(generation) {
                 self.close_core();
             }
         }
@@ -1649,6 +1673,7 @@ fn placement_target_rect_in_root(placement_target: &Ref<Control>) -> Option<Rect
 
 /// The state of an open popup.
 struct PopupOpenState {
+    opening_sequence: u64,
     cleanup: Rc<dyn IDisposable>,
     presenter_cleanup: RefCell<Option<Rc<dyn IDisposable>>>,
     template_applied_subscription: Rc<dyn IDisposable>,
@@ -1668,7 +1693,12 @@ impl PopupOpenState {
         parent_popup: Option<&Ref<Popup>>,
         template_applied_subscription: Rc<dyn IDisposable>,
     ) -> Self {
+        static NEXT_OPENING: AtomicU64 = AtomicU64::new(1);
+        let opening_sequence = NEXT_OPENING
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |value| value.checked_add(1))
+            .expect("popup opening sequence exhausted");
         Self {
+            opening_sequence,
             cleanup,
             presenter_cleanup: RefCell::new(None),
             template_applied_subscription,

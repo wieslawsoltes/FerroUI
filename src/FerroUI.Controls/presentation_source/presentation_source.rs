@@ -332,6 +332,10 @@ impl IPresentationSource for PresentationSource {
         self.rc()
     }
 
+    fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+        self.platform_impl().and_then(|platform| platform.client_to_screen_transform())
+    }
+
     fn point_to_screen(&self, point: Point) -> Option<PixelPoint> {
         self.platform_impl().map(|platform_impl| platform_impl.point_to_screen(point))
     }

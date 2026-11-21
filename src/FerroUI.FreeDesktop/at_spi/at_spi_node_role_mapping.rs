@@ -7,6 +7,9 @@ use ferroui_controls::automation::provider::IToggleProvider;
 
 impl AtSpiNode {
     pub(crate) fn to_at_spi_role(control_type: AutomationControlType, peer: Option<&AutomationPeer>) -> AtSpiRole {
+        if peer.is_some_and(AutomationPeer::is_dialog) {
+            return AtSpiRole::Dialog;
+        }
         if peer.is_some_and(|peer| peer.get_heading_level() > 0) {
             return AtSpiRole::Heading;
         }
@@ -116,6 +119,7 @@ impl AtSpiNode {
             AtSpiRole::Link => "link",
             AtSpiRole::Calendar => "calendar",
             AtSpiRole::Window => "window",
+            AtSpiRole::Dialog => "dialog",
             AtSpiRole::Unknown => "unknown",
             _ => "unknown",
         }
@@ -129,6 +133,18 @@ mod tests {
 
     fn role(control_type: AutomationControlType) -> AtSpiRole {
         AtSpiNode::to_at_spi_role_with(control_type, || false)
+    }
+
+    #[test]
+    fn a_dialog_is_distinct_from_its_top_level_window() {
+        use ferroui_controls::automation::{AutomationProperties, peers::ControlAutomationPeer};
+        use ferroui_controls::Control;
+
+        let control = Control::new();
+        let peer = ControlAutomationPeer::create_peer_for_element(&control);
+        assert_eq!(AtSpiNode::to_at_spi_role(AutomationControlType::Window, Some(&peer)), AtSpiRole::Frame);
+        AutomationProperties::set_is_dialog(&control, true);
+        assert_eq!(AtSpiNode::to_at_spi_role(AutomationControlType::Window, Some(&peer)), AtSpiRole::Dialog);
     }
 
     #[test]
@@ -171,6 +187,6 @@ mod tests {
         assert_eq!(AtSpiNode::to_at_spi_role_name(AtSpiRole::Document), "document frame");
         assert_eq!(AtSpiNode::to_at_spi_role_name(AtSpiRole::Entry), "entry");
         // A role the reference gives no name.
-        assert_eq!(AtSpiNode::to_at_spi_role_name(AtSpiRole::Dialog), "unknown");
+        assert_eq!(AtSpiNode::to_at_spi_role_name(AtSpiRole::Dialog), "dialog");
     }
 }

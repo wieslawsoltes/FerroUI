@@ -47,7 +47,10 @@ impl PopupImpl {
             popup_positioner: RefCell::new(None),
         });
 
-        let e = IFrnWindowEvents::from_impl(TopLevelEvents(this.clone()));
+        let e: ComPtr<IFrnWindowEvents> = ferroui_microcom::make_com_with(
+            TopLevelEvents(this.clone()),
+            [ferroui_microcom::InterfaceEntry::of::<IFrnTopLevelWheelEvents>()],
+        );
         let native = factory.create_popup(Some(&e)).check().expect("the native popup");
         *this.native.borrow_mut() = Some(native.clone());
         this.base.init(MacOSTopLevelHandle::from_window_base(ComPtr::<IFrnWindowBase>::from_ref(&native)));

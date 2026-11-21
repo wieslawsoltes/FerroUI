@@ -1,3 +1,4 @@
+use crate::input::PlatformWheelDelta;
 use super::raw_input_event_args::raw_input_event_args;
 use super::{RawPointerEventArgs, RawPointerEventType};
 use crate::input::{IInputDevice, IInputRoot, RawInputModifiers};
@@ -8,6 +9,7 @@ use std::rc::Rc;
 pub struct RawMouseWheelEventArgs {
     base: RawPointerEventArgs,
     delta: Vector,
+    platform_delta: Option<PlatformWheelDelta>,
 }
 
 raw_input_event_args!(RawMouseWheelEventArgs: RawPointerEventArgs);
@@ -25,6 +27,7 @@ impl RawMouseWheelEventArgs {
         Self {
             base: RawPointerEventArgs::new(device, timestamp, root, RawPointerEventType::Wheel, position, input_modifiers),
             delta,
+            platform_delta: None,
         }
     }
 
@@ -33,4 +36,16 @@ impl RawMouseWheelEventArgs {
     pub fn delta(&self) -> Vector {
         self.delta
     }
+
+    /// Original platform wheel data, when the backend supplies it.
+    pub fn platform_delta(&self) -> Option<PlatformWheelDelta> {
+        self.platform_delta
+    }
+
+    /// Adds original platform wheel data without changing the normalized delta.
+    pub fn with_platform_delta(mut self, delta: PlatformWheelDelta) -> Self {
+        self.platform_delta = Some(delta);
+        self
+    }
+
 }

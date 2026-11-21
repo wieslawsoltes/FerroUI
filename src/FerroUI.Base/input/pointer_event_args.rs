@@ -135,6 +135,25 @@ impl PointerEventArgs {
         self.get_position_of(self.presentation_source_position, relative_to)
     }
 
+    /// Gets a continuous pointer position without crossing integer `PixelPoint`.
+    /// Unlike `get_position`, unsupported, detached or non-invertible cross-root
+    /// conversions return `None`. A position in this event's own root requires
+    /// no platform conversion. Existing pixel-based APIs retain their behavior.
+    pub fn try_get_position_precise(&self, relative_to: Option<&Visual>) -> Option<Point> {
+        let Some(relative_to) = relative_to else {
+            return Some(self.presentation_source_position);
+        };
+        let event_source = self.event_presentation_source.as_ref()?;
+        let target_source = relative_to.presentation_source()?;
+        let target_root = target_source.root_visual()?;
+        let mut point = self.presentation_source_position;
+        if !std::ptr::addr_eq(Rc::as_ptr(&target_source), Rc::as_ptr(event_source)) {
+            let screen = point.transform(event_source.client_to_screen_transform()?);
+            point = screen.transform(target_source.client_to_screen_transform()?.try_invert()?);
+        }
+        target_root.translate_point(point, relative_to)
+    }
+
     /// Returns the pointer point associated with the current event,
     /// positioned relative to a control.
     pub fn get_current_point(&self, relative_to: Option<&Visual>) -> PointerPoint {

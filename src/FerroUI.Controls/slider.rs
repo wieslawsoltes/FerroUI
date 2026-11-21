@@ -66,6 +66,16 @@ ferro_class! {
         fn on_thumb_drag_started(this, e: &VectorEventArgs);
         /// Called when the user stops dragging the thumb.
         fn on_thumb_drag_completed(this, e: &VectorEventArgs);
+        /// Called for a thumb delta before the slider's instance handlers.
+        /// The default slider uses absolute pointer motion; its delta policy is empty.
+        fn on_thumb_drag_delta(this, e: &VectorEventArgs);
+        /// Applies keyboard increments. The default preserves native tick behavior.
+        fn move_to_next_tick(this, direction: f64);
+        /// Applies tick snapping. The default preserves the native grid and tie policy.
+        fn snap_to_tick(this, value: f64) -> f64;
+        /// Applies track/drag input using the original routed arguments.
+        /// Adapters can use precise coordinates; the default retains legacy pixel reads.
+        fn move_to_pointer(this, e: &PointerEventArgs);
     }
 }
 ferroui_base::ferro_class_info!(Slider { new: Slider::new });
@@ -242,6 +252,20 @@ impl InputElementImpl for Slider {
 }
 
 impl SliderImpl for Slider {
+    fn on_thumb_drag_delta(_this: &Self, _e: &VectorEventArgs) {}
+
+    fn move_to_next_tick(this: &Self, direction: f64) {
+        this.move_to_next_tick_core(direction);
+    }
+
+    fn snap_to_tick(this: &Self, value: f64) -> f64 {
+        this.snap_to_tick_core(value)
+    }
+
+    fn move_to_pointer(this: &Self, e: &PointerEventArgs) {
+        this.move_to_point(e.get_current_point(this.track_visual().as_deref()));
+    }
+
     fn on_thumb_drag_started(this: &Self, _e: &VectorEventArgs) {
         this.is_dragging.set(true);
     }
@@ -316,6 +340,11 @@ impl Slider {
         Self::orientation_property().override_default_value::<Slider>(Orientation::Horizontal);
         Thumb::drag_started_event().add_class_handler_with::<Slider>(
             |x, e| x.on_thumb_drag_started(e),
+            RoutingStrategies::BUBBLE,
+            false,
+        ).detach();
+        Thumb::drag_delta_event().add_class_handler_with::<Slider>(
+            |x, e| x.on_thumb_drag_delta(e),
             RoutingStrategies::BUBBLE,
             false,
         ).detach();
@@ -422,7 +451,7 @@ impl Slider {
     }
 
 
-    fn move_to_next_tick(&self, direction: f64) {
+    fn move_to_next_tick_core(&self, direction: f64) {
         if direction == 0.0 {
             return;
         }
@@ -495,7 +524,7 @@ impl Slider {
         }
 
         if self.is_dragging.get() {
-            self.move_to_point(e.get_current_point(self.track_visual().as_deref()));
+            self.move_to_pointer(e);
         }
     }
 
@@ -505,7 +534,7 @@ impl Slider {
 
     fn track_pressed(&self, e: &PointerPressedEventArgs) {
         if e.get_current_point(Some(self)).properties.is_left_button_pressed {
-            self.move_to_point(e.get_current_point(self.track_visual().as_deref()));
+            self.move_to_pointer(e);
             self.is_dragging.set(true);
         }
     }
@@ -535,7 +564,7 @@ impl Slider {
     }
 
     /// Snaps the input value to the closest tick.
-    fn snap_to_tick(&self, mut value: f64) -> f64 {
+    fn snap_to_tick_core(&self, mut value: f64) -> f64 {
         if self.is_snap_to_tick_enabled() {
             let mut previous = self.minimum();
             let mut next = self.maximum();

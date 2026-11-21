@@ -10,8 +10,8 @@ use crate::interop::unmanaged_methods::{
     WindowStyles, WindowsMessage, MINMAXINFO, MOUSEMOVEPOINT, POINTER_INFO, RECT,
 };
 use ferroui_base::input::raw::RawPointerEventType;
-use ferroui_base::input::RawInputModifiers;
-use ferroui_base::{PixelPoint, PixelRect, Point, Rect, Size, Thickness};
+use ferroui_base::input::{PlatformWheelDelta, RawInputModifiers};
+use ferroui_base::{PixelPoint, PixelRect, Point, Rect, Size, Thickness, Vector};
 use ferroui_controls::WindowState;
 
 /// One notch of a mouse wheel.
@@ -86,7 +86,20 @@ pub(crate) fn dpi_from_w_param(w_param: usize) -> u32 {
 
 /// The scrolled distance of a wheel message, in notches.
 pub(crate) fn wheel_delta_from_w_param(w_param: usize) -> f64 {
-    f64::from(to_int32(w_param as isize) >> 16) / WHEEL_DELTA
+    f64::from(raw_wheel_delta_from_w_param(w_param)) / WHEEL_DELTA
+}
+
+/// The signed high-word value before normalization.
+pub(crate) fn raw_wheel_delta_from_w_param(w_param: usize) -> i32 {
+    to_int32(w_param as isize) >> 16
+}
+
+/// Preserves original message direction for both Win32 wheel protocols.
+pub(crate) fn platform_wheel_delta_from_w_param(w_param: usize, horizontal: bool) -> PlatformWheelDelta {
+    let raw = f64::from(raw_wheel_delta_from_w_param(w_param));
+    PlatformWheelDelta::Win32 {
+        delta: if horizontal { Vector::new(raw, 0.0) } else { Vector::new(0.0, raw) },
+    }
 }
 
 /// The modifiers of a mouse message: the keyboard modifiers and the mouse
@@ -475,7 +488,6 @@ mod imp {
     use ferroui_base::input::{IInputDevice, IntermediatePoints, Key, KeyDeviceType, PhysicalKey};
     use std::cell::LazyCell;
     use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-    use ferroui_base::Vector;
     use ferroui_controls::automation::peers::ControlAutomationPeer;
     use ferroui_controls::platform::{IScreenImpl, ScreensBaseImplExt};
     use ferroui_controls::Control;
@@ -897,6 +909,7 @@ mod imp {
                             timestamp,
                             self.point_to_client_impl(point_from_l_param(l_param)),
                             Vector::new(0.0, wheel_delta_from_w_param(w_param)),
+                            false,
                             w_param,
                         ));
                     }
@@ -908,6 +921,7 @@ mod imp {
                             timestamp,
                             self.point_to_client_impl(point_from_l_param(l_param)),
                             Vector::new(-wheel_delta_from_w_param(w_param), 0.0),
+                            true,
                             w_param,
                         ));
                     }
@@ -1065,7 +1079,9 @@ mod imp {
                             pointer.point.position,
                             delta,
                             pointer.modifiers,
-                        );
+                        ).with_platform_delta(platform_wheel_delta_from_w_param(
+                            w_param, message == WindowsMessage::WM_POINTERHWHEEL,
+                        ));
                         args.set_raw_pointer_id(i64::from(pointer.info.pointer_id));
                         e = Some(RawEvent::Other(Rc::new(args)));
                     }
@@ -1578,7 +1594,7 @@ mod imp {
             )))
         }
 
-        fn wheel_event(&self, timestamp: u64, position: Point, delta: Vector, w_param: usize) -> RawEvent {
+        fn wheel_event(&self, timestamp: u64, position: Point, delta: Vector, horizontal: bool, w_param: usize) -> RawEvent {
             RawEvent::Other(Rc::new(RawMouseWheelEventArgs::new(
                 self.mouse_input_device(),
                 timestamp,
@@ -1586,7 +1602,7 @@ mod imp {
                 position,
                 delta,
                 get_mouse_modifiers(w_param, WindowsKeyboardDevice::modifiers()),
-            )))
+            ).with_platform_delta(platform_wheel_delta_from_w_param(w_param, horizontal))))
         }
 
         fn try_create_raw_key_event_args(
@@ -1715,9 +1731,39 @@ mod tests {
         assert_eq!(dpi_from_w_param((96 << 16) | 96), 96);
     }
 
+    fn w_param(delta: i16, keys: u16) -> usize {
+        ((u32::from(delta as u16) << 16) | u32::from(keys)) as usize
+    }
+
+    #[test]
+    fn original_wheel_word_survives_all_signed_values_and_parameter_bits() {
+        for raw in i16::MIN..=i16::MAX {
+            for low in [0_u16, 8, u16::MAX] {
+                let packed = w_param(raw, low) | ((0x9abc_def0_u64 << 32) as usize);
+                assert_eq!(raw_wheel_delta_from_w_param(packed), i32::from(raw));
+                for horizontal in [false, true] {
+                    let raw = f64::from(raw);
+                    let expected = if horizontal { Vector::new(raw, 0.0) } else { Vector::new(0.0, raw) };
+                    assert_eq!(platform_wheel_delta_from_w_param(packed, horizontal),
+                        PlatformWheelDelta::Win32 { delta: expected });
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn original_horizontal_data_distinguishes_equal_normalized_protocol_values() {
+        let mouse = w_param(120, 0);
+        let pointer = w_param(-120, 0);
+        assert_eq!(-wheel_delta_from_w_param(mouse), wheel_delta_from_w_param(pointer));
+        assert_eq!(platform_wheel_delta_from_w_param(mouse, true),
+            PlatformWheelDelta::Win32 { delta: Vector::new(120.0, 0.0) });
+        assert_eq!(platform_wheel_delta_from_w_param(pointer, true),
+            PlatformWheelDelta::Win32 { delta: Vector::new(-120.0, 0.0) });
+    }
+
     #[test]
     fn a_wheel_notch_is_one() {
-        let w_param = |delta: i16, keys: u16| ((u32::from(delta as u16) << 16) | u32::from(keys)) as usize;
         assert_eq!(wheel_delta_from_w_param(w_param(120, 0)), 1.0);
         assert_eq!(wheel_delta_from_w_param(w_param(-120, 0x0008)), -1.0);
         assert_eq!(wheel_delta_from_w_param(w_param(30, 0)), 0.25);

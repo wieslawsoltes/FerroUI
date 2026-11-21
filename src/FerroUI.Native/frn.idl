@@ -813,6 +813,15 @@ interface IFrnWindow : IFrnWindowBase
      HRESULT GetWindowZOrder(long*ret);
 }
 
+// Optional wheel-data extension. The original top-level callback ABI is unchanged.
+[uuid(2d952a1b-7ecd-4af0-b132-6371f7b65ec6)]
+interface IFrnTopLevelWheelEvents : IUnknown
+{
+    void RawMouseWheelEvent(u_int64_t timeStamp, FrnInputModifiers modifiers,
+                            FrnPoint point, FrnVector delta,
+                            FrnVector platformDelta, bool isPrecise);
+}
+
 [uuid(fda9c1b3-69e0-43d7-9459-8cc97cb41f6a)]
 interface IFrnTopLevelEvents : IUnknown
 {

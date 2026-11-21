@@ -103,6 +103,56 @@ fn popup_uses_dedicated_top_level() {
 }
 ferro_fact!(popup_uses_dedicated_top_level);
 
+fn popup_opening_sequence_tracks_hosted_open_close_reopen() {
+    let target = sized_border(20.0, 20.0);
+    let popup = popup_below(&target);
+    assert_eq!(popup.opening_sequence(), None);
+    // A request before attachment has no displayed host or opening sequence.
+    popup.set_is_open(true);
+    assert_eq!(popup.opening_sequence(), None);
+    popup.set_is_open(false);
+    let window = window_with(&target, &popup);
+    window.show();
+    Dispatcher::ui_thread().run_jobs(None);
+    popup.open();
+    let first = popup.opening_sequence().expect("hosted opening");
+    popup.open();
+    assert_eq!(popup.opening_sequence(), Some(first));
+    popup.close();
+    assert_eq!(popup.opening_sequence(), None);
+    popup.open();
+    assert!(popup.opening_sequence().unwrap() > first);
+    popup.close();
+    window.close();
+}
+ferro_fact!(popup_opening_sequence_tracks_hosted_open_close_reopen);
+
+fn popup_opening_sequence_precedes_reentrant_opened_callback() {
+    let target = sized_border(20.0, 20.0);
+    let first = popup_below(&target);
+    let second = popup_below(&target);
+    let window = window_with(&target, &first);
+    let panel = Control::from_boxed(&window.content().unwrap()).unwrap().cast::<Panel>().unwrap();
+    panel.children().add(second.clone());
+    window.show();
+    Dispatcher::ui_thread().run_jobs(None);
+    let second_weak = second.downgrade();
+    let first_weak = first.downgrade();
+    let subscription = first.opened(move || {
+        let first = first_weak.upgrade().unwrap();
+        let second = second_weak.upgrade().unwrap();
+        let first_order = first.opening_sequence().expect("set before callback");
+        second.open();
+        assert!(second.opening_sequence().unwrap() > first_order);
+    });
+    first.open();
+    subscription.dispose();
+    second.close();
+    first.close();
+    window.close();
+}
+ferro_fact!(popup_opening_sequence_precedes_reentrant_opened_callback);
+
 fn popup_placement_respects_window_position() {
     let target = sized_border(20.0, 20.0);
     target.set_horizontal_alignment(HorizontalAlignment::Left);
@@ -351,3 +401,60 @@ pub(crate) fn get_popup_top_level(popup: &Popup) -> Option<Ref<TopLevel>> {
     let visual: &Visual = &child;
     TopLevel::get_top_level(Some(visual))
 }
+
+fn ferro_precise_pointer_popup_preserves_fractional_physical_and_logical_desktop_coordinates() {
+    use ferroui_base::input::{
+        InputElement, KeyModifiers, Pointer, PointerEventArgs, PointerPointProperties, PointerType,
+    };
+    for logical in [false, true] {
+        let _scope = TestApplication::reconfigure(HeadlessRuntimeOptions {
+            use_logical_desktop_coordinates: Some(logical),
+            ..HeadlessRuntimeOptions::default()
+        });
+        for scaling in [1.0, 1.5, 2.0] {
+            let target = placed_border(30.0, 40.0, Brushes::red());
+            let popup = popup_below(&target);
+            let window = window_with(&target, &popup);
+            window.set_position(PixelPoint::new(100, 200));
+            window.show();
+            window.set_render_scaling(scaling);
+            Dispatcher::ui_thread().run_jobs(None);
+            popup.open();
+            Dispatcher::ui_thread().run_jobs(None);
+            let popup_root = get_popup_top_level(&popup).expect("dedicated popup top level");
+            let position = Point::new(10.25, 15.75);
+            let event = PointerEventArgs::new(
+                Some(InputElement::pointer_moved_event()),
+                popup_root.clone(),
+                Pointer::new(41, PointerType::Mouse, true),
+                Some(&popup_root),
+                position,
+                0,
+                PointerPointProperties::NONE,
+                KeyModifiers::NONE,
+            );
+            let popup_origin = popup_root.point_to_screen(Point::default());
+            let window_origin = window.point_to_screen(Point::default());
+            let desktop_scaling = if logical { 1.0 } else { scaling };
+            let expected = Point::new(
+                position.x + f64::from(popup_origin.x - window_origin.x) / desktop_scaling,
+                position.y + f64::from(popup_origin.y - window_origin.y) / desktop_scaling,
+            );
+            let actual = event
+                .try_get_position_precise(Some(&window))
+                .expect("backend continuous transform");
+            assert!(
+                (actual.x - expected.x).abs() < 1e-10 && (actual.y - expected.y).abs() < 1e-10,
+                "logical={logical}, scaling={scaling}, {actual:?} != {expected:?}"
+            );
+            assert_eq!(
+                event.try_get_position_precise(Some(&popup_root)),
+                Some(position)
+            );
+            window.close();
+        }
+    }
+}
+ferro_fact!(
+    ferro_precise_pointer_popup_preserves_fractional_physical_and_logical_desktop_coordinates
+);

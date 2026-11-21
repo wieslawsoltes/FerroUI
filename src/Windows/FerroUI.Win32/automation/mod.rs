@@ -22,6 +22,7 @@ mod automation_node_selection;
 mod automation_node_text;
 mod automation_node_toggle;
 mod automation_node_value;
+mod automation_node_window;
 mod interop_automation_node;
 mod root_automation_node;
 mod text_pattern_marshalling;

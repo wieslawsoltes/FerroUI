@@ -43,6 +43,7 @@ pub struct InputElement {
     /// the guards of its handlers (#455, E7; `input_element_effects.rs`).
     // In a box: few elements have an interactive effect.
     pub(super) effect_input: RefCell<Option<Box<super::input_element_effects::EffectInputAttachment>>>,
+    pointer_captures: RefCell<Vec<Weak<dyn super::IPointer>>>,
 }
 
 ferro_class! {
@@ -699,11 +700,74 @@ impl InputElement {
             key_bindings: OnceCell::new(),
             gesture_recognizers: OnceCell::new(),
             effect_input: RefCell::new(None),
+            pointer_captures: RefCell::new(Vec::new()),
         }
     }
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    /// Captures a pointer to this element and returns whether capture succeeded.
+    /// Custom `IPointer` implementations should use this entry point so that
+    /// element-wide capture operations can observe them as well.
+    pub fn capture_pointer(&self, pointer: &Rc<dyn super::IPointer>) -> bool {
+        pointer.capture(Some(&self.to_ref()));
+        if pointer.captured().is_some_and(|p| p.ptr_eq(&self.to_ref())) {
+            self.register_pointer_capture(pointer);
+            true
+        } else {
+            false
+        }
+    }
+
+    /// A snapshot of the pointers currently captured by this element. Native
+    /// `Pointer::capture` also participates, even when called directly.
+    /// Tracking is weak and does not extend a pointer's lifetime.
+    pub fn pointer_captures(&self) -> Vec<Rc<dyn super::IPointer>> {
+        let snapshot = {
+            let mut captures = self.pointer_captures.borrow_mut();
+            captures.retain(|p| p.strong_count() != 0);
+            captures.clone()
+        };
+        let this = self.to_ref();
+        snapshot
+            .into_iter()
+            .filter_map(|p| p.upgrade())
+            .filter(|p| p.captured().is_some_and(|c| c.ptr_eq(&this)))
+            .collect()
+    }
+
+    /// Releases the current snapshot of captures, respecting capture-changing
+    /// cancellation. A handler may transfer another pointer before it is
+    /// visited; that pointer is not released from its new owner. A new capture
+    /// installed during notification is outside this snapshot.
+    pub fn release_pointer_captures(&self) {
+        let this = self.to_ref();
+        for pointer in self.pointer_captures() {
+            if pointer.captured().is_some_and(|c| c.ptr_eq(&this)) {
+                pointer.capture(None);
+            }
+            if pointer.captured().is_none_or(|c| !c.ptr_eq(&this)) {
+                self.unregister_pointer_capture(&pointer);
+            }
+        }
+    }
+
+    pub(crate) fn register_pointer_capture(&self, pointer: &Rc<dyn super::IPointer>) {
+        let weak = Rc::downgrade(pointer);
+        let mut captures = self.pointer_captures.borrow_mut();
+        captures.retain(|p| p.strong_count() != 0);
+        if !captures.iter().any(|p| p.ptr_eq(&weak)) {
+            captures.push(weak);
+        }
+    }
+
+    pub(crate) fn unregister_pointer_capture(&self, pointer: &Rc<dyn super::IPointer>) {
+        let weak = Rc::downgrade(pointer);
+        self.pointer_captures
+            .borrow_mut()
+            .retain(|p| p.strong_count() != 0 && !p.ptr_eq(&weak));
     }
 
     // --- events -------------------------------------------------------------

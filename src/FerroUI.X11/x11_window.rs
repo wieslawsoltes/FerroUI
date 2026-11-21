@@ -2104,6 +2104,12 @@ impl ITopLevelImpl for X11Window {
         self.mode.point_to_screen(self, point)
     }
 
+    fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+        let origin = self.mode.point_to_screen(self, Point::default());
+        let scale = self.scaling();
+        Some(ferroui_base::Matrix::new(scale, 0.0, 0.0, scale, f64::from(origin.x), f64::from(origin.y)))
+    }
+
     fn set_cursor(&self, cursor: Option<Rc<dyn ICursorImpl>>) {
         match cursor {
             None => {

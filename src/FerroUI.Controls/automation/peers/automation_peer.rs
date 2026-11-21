@@ -118,6 +118,7 @@ ferro_class! {
         fn has_keyboard_focus_core(this) -> bool;
         fn is_content_element_core(this) -> bool;
         fn is_control_element_core(this) -> bool;
+        fn is_dialog_core(this) -> bool;
         fn is_enabled_core(this) -> bool;
         fn is_keyboard_focusable_core(this) -> bool;
         fn is_offscreen_core(this) -> bool;
@@ -269,6 +270,10 @@ impl AutomationPeerImpl for AutomationPeer {
 
     fn is_control_element_core(_this: &Self) -> bool {
         abstract_member("is_control_element_core")
+    }
+
+    fn is_dialog_core(_this: &Self) -> bool {
+        false
     }
 
     fn is_enabled_core(_this: &Self) -> bool {
@@ -573,6 +578,11 @@ impl AutomationPeer {
             return false;
         }
         self.is_control_element_override_core()
+    }
+
+    /// Gets whether the element represents a dialog.
+    pub fn is_dialog(&self) -> bool {
+        self.is_element_available() && self.is_dialog_core()
     }
 
     /// Gets a value indicating whether the control is enabled for user interaction.

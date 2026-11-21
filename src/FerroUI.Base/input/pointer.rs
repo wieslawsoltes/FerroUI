@@ -205,6 +205,18 @@ impl Pointer {
         drop(self.captured_gesture_recognizer.replace(gesture_recognizer));
         self.capture_source.set(source);
 
+        // Publish membership before platform callbacks and CaptureLost handlers
+        // can inspect or reenter capture. The element holds only weak pointers.
+        if old_capture != control {
+            if let Some(old) = &old_capture {
+                old.unregister_pointer_capture(&this);
+            }
+            if let Some(new) = &control {
+                new.register_pointer_capture(&this);
+            }
+        }
+
+
         // However, we still want to notify the platform only if the captured
         // element actually changed.
         let effective_capturer = self.effective_capturer();

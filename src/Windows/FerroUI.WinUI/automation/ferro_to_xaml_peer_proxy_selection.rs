@@ -56,9 +56,9 @@ mod imp {
         }
 
         fn selection_container(&self) -> Result<Option<ComPtr<IIRawElementProviderSimple>>, HResult> {
-            let container = self.peer.get_provider::<dyn FerroSelectionItem>().and_then(|p| p.selection_container());
+            let container = self.peer.get_provider::<dyn FerroSelectionItem>().and_then(|p| p.selection_container_peer());
             if let (Some(container), Some(host)) = (container, self.host.upgrade()) {
-                let container_peer = container.peer();
+                let container_peer = container;
                 let proxy = FerroToXamlPeerProxy::get_or_create(&container_peer, &host)?;
                 return Ok(self.provider_from_peer(&proxy));
             }
