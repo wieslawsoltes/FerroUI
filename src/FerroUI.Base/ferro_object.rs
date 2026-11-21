@@ -781,18 +781,22 @@ impl FerroObject {
     ) {
         let state = value.value_type();
         let error = value.error().cloned();
-        match state {
-            BindingValueType::UNSET_VALUE | BindingValueType::BINDING_ERROR => {
-                let fallback =
-                    if value.has_value() { value } else { value.with_value(property.get_unset_value_for(self)) };
-                property.invoke_setter(self, fallback);
+        // The value the setter is called with: one call of the setter for every state that sets.
+        let value = match state {
+            BindingValueType::UNSET_VALUE | BindingValueType::BINDING_ERROR if !value.has_value() => {
+                Some(value.with_value(property.get_unset_value_for(self)))
             }
-            BindingValueType::VALUE
+            BindingValueType::UNSET_VALUE
+            | BindingValueType::BINDING_ERROR
+            | BindingValueType::VALUE
             | BindingValueType::BINDING_ERROR_WITH_FALLBACK
             | BindingValueType::DATA_VALIDATION_ERROR
-            | BindingValueType::DATA_VALIDATION_ERROR_WITH_FALLBACK => property.invoke_setter(self, value),
+            | BindingValueType::DATA_VALIDATION_ERROR_WITH_FALLBACK => Some(value),
             // Do nothing, and the flag combinations that no binding value has.
-            _ => {}
+            _ => None,
+        };
+        if let Some(value) = value {
+            property.invoke_setter(self, value);
         }
         if property.get_metadata_for(self).enable_data_validation() == Some(true) {
             self.on_update_data_validation(property, state, error);
@@ -834,7 +838,9 @@ impl FerroObject {
         property: &'static DirectPropertyBase<T>,
     ) -> &'static DirectPropertyBase<T> {
         let property = FerroPropertyRegistry::instance().get_registered_direct_for(self, property);
-        assert!(!property.is_read_only(), "The property {} is readonly.", property.name());
+        if property.is_read_only() {
+            crate::direct_property::read_only(property);
+        }
         property
     }
 
