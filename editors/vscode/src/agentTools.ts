@@ -442,6 +442,7 @@ export class AgentTools {
                 if (presentation?.openDefinition) return { ...describe(panel), opened_definition: presentation.openDefinition.source,
                     opened_session: presentation.navigationSession };
                 if (presentation?.returnToConsumer) return { ...describe(panel), returned_to: presentation.returnToConsumer };
+                if (presentation?.openRustTemplate) return { ...describe(panel), opened_template: presentation.openRustTemplate };
                 break;
             }
             case 'designer_timeline_control':
@@ -505,7 +506,8 @@ function describe(panel: DesignerPanel) {
     return { session: panel.session, uri: panel.document.uri.toString(), language: panel.language, version: panel.document.version,
         revision: panel.currentToken ?? null, selected: panel.selectedNode?.id ?? null, selection: panel.selectedIds,
         inspected: panel.runtimeSelection?.inspector_id ?? null, dirty: panel.document.isDirty,
-        viewport: panel.dimensions, status: panel.status ?? snapshot?.renderError ?? 'Ready', notices: snapshot?.notices ?? [], blocks };
+        viewport: panel.dimensions, status: panel.status ?? snapshot?.renderError ?? 'Ready', notices: snapshot?.notices ?? [], blocks,
+        ...(snapshot?.rustTemplate && { rust_template: snapshot.rustTemplate }) };
 }
 
 function assertVersion(document: vscode.TextDocument, version: number): void {

@@ -8,6 +8,7 @@ import { DesignerSnapping, snappedPlacement, snappedResize } from './designerSna
 import { GuideViews, type GuideAnchor } from './guideViews';
 import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
+import { RustTemplateScopes } from './rustTemplateScopes';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
 import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } from './textDocument';
 import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
@@ -55,6 +56,7 @@ type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetPropert
 export class DesignerPanel implements vscode.Disposable {
     private readonly canvasRequests = new CanvasRequests();
     private readonly dependencies = new DesignerDependencies();
+    private readonly templateScopes = new RustTemplateScopes();
     private layers: LayerViews;
     private guides: GuideViews;
     private readonly snapping = new DesignerSnapping(() => this.canvasGuides, frame => this.canUse(frame), () => this.getClient());
@@ -137,6 +139,7 @@ export class DesignerPanel implements vscode.Disposable {
                 if (this.blockOffset !== undefined) {
                     this.blockOffset = offsetAfterChanges(this.blockOffset, event.contentChanges);
                 }
+                this.templateScopes.sourceChanged(event.contentChanges);
                 this.layers.sourceChanged(event.contentChanges);
                 this.guides.sourceChanged(event.contentChanges);
                 this.schedule();
@@ -294,6 +297,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (!this.canUse(target)) throw new Error('Read the current RSX invocations before selecting one.');
         const block = this.frame?.snapshot.blocks[index];
         if (!block) throw new Error('Choose an RSX invocation from the current preview.');
+        this.templateScopes.clear();
         this.caret = asPosition(block.start);
         this.blockOffset = this.document.offsetAt(this.caret);
         this.schedule(0);
@@ -515,8 +519,12 @@ export class DesignerPanel implements vscode.Disposable {
         const { tools, xamlEdits, rsxEdits, presentations } = await (await this.getClient()).studioTools();
         const edits = this.language === 'xaml' ? xamlEdits : [
             ...xamlEdits.filter(tool => this.mappedStudioEdit((tool as { name: string }).name)),
-            ...(rsxEdits ?? []).filter(tool => (tool as { name: string }).name === 'designer_state'
-                ? this.supportsRustStates : this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement),
+            ...(rsxEdits ?? []).filter(tool => {
+                const { name } = tool as { name: string };
+                if (name === 'designer_state') return this.supportsRustStates;
+                if (name === 'designer_item_template') return this.supportsItemTemplates;
+                return this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement;
+            }),
         ];
         return { tools, presentations: presentations ?? [], edits };
     }
@@ -548,7 +556,9 @@ export class DesignerPanel implements vscode.Disposable {
         const rustProgram = name === 'designer_program' && this.supportsRustAnimationPrograms
             && action !== undefined && ['create', 'rename', 'duplicate', 'remove'].includes(action);
         const rustPlacement = name === 'designer_program' && action === 'place_clips' && this.supportsTimelineClipPlacement;
-        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !rustPlacement && !this.mappedStudioEdit(name)) {
+        const rustTemplate = name === 'designer_item_template' && this.supportsItemTemplates
+            && (action === 'create_inline' || action === 'reset');
+        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !rustPlacement && !rustTemplate && !this.mappedStudioEdit(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');
@@ -608,6 +618,15 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     async studioPresent(token: number, name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<CanvasPresentation | undefined> {
+        const action = args as { action?: string; node?: number };
+        const view = this.snapshot;
+        if (name === 'designer_definition' && action.action === 'exit' && view?.rustTemplate) {
+            if (!this.canUse({ session: this.session, token })) throw new Error('Read the current Rust template preview before returning.');
+            signal.throwIfAborted();
+            const scope = this.templateScopes.leave(this.document, view);
+            await this.switchTemplateView(scope.consumer, scope.owner, signal);
+            return;
+        }
         const presentation = await this.present(token, signal, (client, next) => client.studioPresent(token, next, name, args, this.studioSelection(selection)), true,
             presentation => {
                 if (name === 'designer_design_data_edit') this.rememberDesignData(args);
@@ -623,6 +642,20 @@ export class DesignerPanel implements vscode.Disposable {
                 if (presentation.timelineTargets !== undefined || name === 'designer_definition'
                     || (name === 'designer_state' && (args as { action?: string }).action !== 'advance_preview')) this.animationCatalogEpoch++;
             });
+        if (this.language === 'rust' && name === 'designer_item_template' && !presentation?.openRustTemplate) {
+            throw new Error('Read the current Rust template slot before opening it.');
+        }
+        if (presentation?.openRustTemplate) {
+            const frame = this.snapshot;
+            if (!frame || !this.canUse({ session: this.session, token: token + 1 })) {
+                throw new Error('The Rust view changed before opening the template.');
+            }
+            signal.throwIfAborted();
+            const owner = frame.nodes.some(node => node.id === action.node) ? action.node : this.selected;
+            const body = this.templateScopes.enter(this.document, frame, presentation.openRustTemplate, owner);
+            await this.switchTemplateView(body, undefined, signal);
+            return presentation;
+        }
         const navigation = presentation?.openDefinition ?? presentation?.returnToConsumer;
         if (navigation && presentation) {
             const navigationSession = await this.onDefinitionNavigation(token + 1, navigation, signal);
@@ -631,6 +664,28 @@ export class DesignerPanel implements vscode.Disposable {
                 : { ...presentation, navigationSession };
         }
         return presentation;
+    }
+
+    private async switchTemplateView(offset: number, owner: number | undefined, signal: AbortSignal): Promise<void> {
+        const document = this.document;
+        const version = document.version;
+        const start = document.positionAt(offset);
+        this.caret = start;
+        this.blockOffset = offset;
+        this.timelinePose = undefined;
+        this.timelineTargets = undefined;
+        this.animationCatalogEpoch++;
+        this.setAnimationRecording(false);
+        this.schedule(0);
+        const snapshot = await this.waitForSnapshot(signal);
+        if (document !== this.document || version !== document.version || !snapshot.image || !snapshot.activeBlock
+            || !asPosition(snapshot.activeBlock.start).isEqual(start)) {
+            throw new Error('The selected Rust view changed while rendering.');
+        }
+        if (owner !== undefined) {
+            const node = snapshot.nodes.find(node => document.offsetAt(asPosition(node.nameRange.start)) === owner);
+            if (node) this.setSelection(node.id);
+        }
     }
 
     async interact(token: number, action: CanvasInteraction, signal: AbortSignal): Promise<void> {
@@ -731,6 +786,7 @@ export class DesignerPanel implements vscode.Disposable {
         if (block) {
             this.blockOffset = this.document.offsetAt(block.start);
             if (!frame.snapshot.activeBlock || !asRange(frame.snapshot.activeBlock).isEqual(block)) {
+                this.templateScopes.clear();
                 this.schedule(0);
                 return;
             }
@@ -782,6 +838,7 @@ export class DesignerPanel implements vscode.Disposable {
             });
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             if (this.dependencies.accept(snapshot.dependencies ?? [])) { this.schedule(0); return; }
+            snapshot.rustTemplate = this.templateScopes.accept(this.document, snapshot);
             const anchor = snapshot.activeBlock?.start;
             const previousAnchor = this.frame?.snapshot.activeBlock?.start;
             const sameView = this.frame?.version === version && previousAnchor?.line === anchor?.line
@@ -792,7 +849,7 @@ export class DesignerPanel implements vscode.Disposable {
             this.frame = { token, version, viewport, source: input, snapshot, timelineRecording: Boolean(client.capabilities.timelineRecording),
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
                 columnAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxColumnAuthoring : client.capabilities.columnAuthoring),
-                itemTemplateAuthoring: Boolean(client.capabilities.itemTemplateAuthoring),
+                itemTemplateAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxItemTemplateAuthoring : client.capabilities.itemTemplateAuthoring),
                 controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),
                 styleComposition: Boolean(client.capabilities.styleComposition),
@@ -891,7 +948,8 @@ export class DesignerPanel implements vscode.Disposable {
             return;
         }
         if (message.type === 'leaveDefinition') {
-            if (this.currentToken === message.token && this.frame?.snapshot.definitionScope !== undefined) {
+            const snapshot = this.snapshot;
+            if (this.currentToken === message.token && (snapshot?.definitionScope !== undefined || snapshot?.rustTemplate)) {
                 try {
                     await this.studioPresent(message.token, 'designer_definition', { action: 'exit' }, undefined, AbortSignal.timeout(15_000));
                 } catch (error) { this.post({ type: 'edit', error: errorMessage(error) }); }

@@ -1,9 +1,9 @@
 import type { QuickPickItem } from 'vscode';
 import type { Range } from './protocol';
 import type { IncludedTemplateSource } from './includedTemplate';
-import { choose, type StudioContext } from './studioContext';
+import { templateLabels, type TemplateProperty } from './itemTemplateLabels';
+import { choose, editText, type StudioContext } from './studioContext';
 
-type TemplateProperty = keyof typeof templateLabels;
 type TemplateValue = { kind: 'unset' | 'expression' }
     | { kind: 'inline'; definition: number }
     | { kind: 'resource'; key: string; dynamic: boolean; definition: number | null };
@@ -16,6 +16,8 @@ interface TemplateSlot {
     canCopyInline: boolean;
     copyReason?: string | null;
     canReset: boolean;
+    canCreate?: boolean;
+    rustBody?: Range | null;
     includedDefinition?: IncludedTemplateSource | null;
 }
 
@@ -30,25 +32,17 @@ interface TemplateAction extends QuickPickItem {
     run: () => Promise<void>;
 }
 
-const templateLabels = {
-    ItemTemplate: 'Item template',
-    SelectionBoxItemTemplate: 'Selection box template',
-    MenuItemTemplate: 'Menu item template',
-    CellTemplate: 'Cell template',
-    CellEditingTemplate: 'Cell editing template',
-    Template: 'Control template',
-};
 const tool = 'designer_item_template';
 
-export async function editItemTemplates(context: StudioContext, node: number, member?: 'Template'): Promise<void> {
-    if (!context.writable) throw new Error('Open the template closure in its Rust source.');
-    if (member ? !context.panel.supportsControlTemplate : !context.panel.supportsItemTemplates) {
+export async function editItemTemplates(context: StudioContext, node: number, member?: 'Template' | 'CellTemplate'): Promise<void> {
+    if (member === 'Template' ? !context.panel.supportsControlTemplate : !context.panel.supportsItemTemplates) {
         throw new Error('Update the FerroUI preview helper to edit this template.');
     }
-    const model = await context.read<TemplateModel>('designer_item_templates', member ? { node, property: member } : { node });
-    if (!model.slots.length) throw new Error('Select a control or column with a supported template property.');
-    const slot = model.slots.length === 1 ? model.slots[0] : (await choose('Choose an Item Template', model.slots.map(slot => ({
-        label: `$(symbol-structure) ${templateLabels[slot.property]}`, description: description(slot.value), slot,
+    const model = await context.read<TemplateModel>('designer_item_templates', member === 'Template' ? { node, property: member } : { node });
+    const slots = model.slots.filter(slot => !member || slot.property === member);
+    if (!slots.length) throw new Error('Select a control or column with a supported template property.');
+    const slot = slots.length === 1 ? slots[0] : (await choose('Choose an Item Template', slots.map(slot => ({
+        label: `$(symbol-structure) ${templateLabels[slot.property]}`, description: description(slot), slot,
     }))))?.slot;
     if (!slot) return;
 
@@ -57,23 +51,33 @@ export async function editItemTemplates(context: StudioContext, node: number, me
     const available: TemplateAction[] = [];
     const definition = slot.value.kind === 'inline' || slot.value.kind === 'resource' ? slot.value.definition : null;
     const included = slot.includedDefinition;
-    if (definition !== null || included) {
+    if (definition !== null || included || slot.rustBody) {
         available.push({
             label: '$(preview) Edit Template on Canvas',
             run: async () => {
                 await context.present(tool, { ...args, action: 'preview' });
                 if (!included && !context.panel.isDisposed) context.panel.panel.reveal(undefined, true);
             },
-        }, { label: '$(go-to-file) Reveal Template Source', detail: slot.copyReason ?? undefined,
+        });
+    }
+    if (definition !== null || included) {
+        available.push({ label: '$(go-to-file) Reveal Template Source', detail: slot.copyReason ?? undefined,
             run: () => included ? context.revealIncludedTemplate(included) : context.reveal(definition!) });
     } else if (slot.range) {
         const range = slot.range;
-        available.push({ label: '$(go-to-file) Reveal Template Assignment', detail: slot.copyReason ?? undefined,
+        available.push({ label: '$(go-to-file) Reveal Template Assignment', detail: slot.copyReason ?? slot.reason ?? undefined,
             run: () => context.revealRange(range) });
     }
     if (!slot.reason) {
-        if (slot.value.kind === 'unset') {
+        if (slot.value.kind === 'unset' && context.writable) {
             available.push({ label: '$(add) Create Inline Template', run: () => edit('create_inline') });
+        }
+        if (slot.canCreate && !context.writable) {
+            available.push({ label: '$(add) Create Inline Rust Template…', run: async () => {
+                const rowType = await editText('Rust item type, such as crate::Customer or String', undefined,
+                    input => input.trim() ? undefined : 'Enter the type of one item.', templateLabels[slot.property]);
+                if (rowType !== undefined) await context.edit(tool, { ...args, action: 'create_inline', rust_type: rowType });
+            } });
         }
         const resources = [
             ...model.resources.map(resource => ({
@@ -99,11 +103,12 @@ export async function editItemTemplates(context: StudioContext, node: number, me
         if (slot.canReset) available.push({ label: '$(discard) Reset Template', run: () => edit('reset') });
     }
     if (!available.length) throw new Error(slot.reason ?? 'The current template has no local definition.');
-    const action = await choose(`${templateLabels[slot.property]} · ${description(slot.value)}`, available);
+    const action = await choose(`${templateLabels[slot.property]} · ${description(slot)}`, available);
     await action?.run();
 }
 
-function description(value: TemplateValue): string {
+function description({ value, rustBody }: TemplateSlot): string {
+    if (rustBody) return 'Inline RSX';
     switch (value.kind) {
         case 'unset': return 'Default';
         case 'inline': return 'Inline';

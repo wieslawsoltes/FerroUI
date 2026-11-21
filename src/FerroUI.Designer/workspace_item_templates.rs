@@ -16,6 +16,8 @@ use ferroui_designer_tools::{
 };
 use std::rc::{Rc, Weak};
 
+#[path = "workspace_rust_templates.rs"]
+mod rust;
 #[cfg(test)]
 #[path = "workspace_item_templates_tests.rs"]
 mod tests;
@@ -44,7 +46,9 @@ impl DesignerWorkspace {
         self.root
             .get_control::<Button>("EditItemTemplates")
             .set_is_visible(matches!(
-                session.selection(), [node] if session.has_control_template(*node) || !session.item_template_members(*node).is_empty()
+                session.selection(), [node] if session.has_control_template(*node)
+                    || !session.item_template_members(*node).is_empty()
+                    || session.has_rust_template_owner(*node)
             ));
     }
 
@@ -193,6 +197,19 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     body.children().add(status.clone().upcast::<Control>());
     let session = workspace.session.borrow();
     let [owner] = session.selection() else { return };
+    let actions = TemplateActions {
+        workspace: Rc::downgrade(workspace),
+        flyout: flyout.downgrade(),
+        snapshot: DesignTimeSnapshot::capture(&session),
+        status: status.downgrade(),
+        owner: *owner,
+    };
+    if session.uses_rust_source() {
+        for slot in session.rust_item_templates(*owner) {
+            rust::add_slot(&body, actions.clone(), slot);
+        }
+        return;
+    }
     let result = session.item_template_slots(*owner).and_then(|mut slots| {
         if session.has_control_template(*owner) {
             slots.push(session.item_template_slot(*owner, ItemTemplateMember::Template)?);
@@ -210,13 +227,6 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
             status.set_is_visible(true);
             return;
         }
-    };
-    let actions = TemplateActions {
-        workspace: Rc::downgrade(workspace),
-        flyout: flyout.downgrade(),
-        snapshot: DesignTimeSnapshot::capture(&session),
-        status: status.downgrade(),
-        owner: *owner,
     };
     for (slot, included, resources) in slots {
         let span = slot
@@ -238,25 +248,11 @@ fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     }
 }
 
-fn add_slot(
-    body: &StackPanel,
-    actions: TemplateActions,
-    slot: &ItemTemplateSlot,
-    source: Option<SourceSpan>,
-    included: Option<IncludedItemTemplate>,
-    copy: Option<Result<Vec<Edit>, String>>,
-    resources: &[TemplateChoice],
-) {
+fn slot_toolbar(body: &StackPanel, label: &str, value: &str) -> Ref<StackPanel> {
     let title = StackPanel::new();
-    let label = text(if slot.property == ItemTemplateMember::Template { "Control Template" } else { slot.property.name() });
+    let label = text(label);
     label.set_font_weight(ferroui_base::media::FontWeight::SemiBold);
     title.children().add(label.upcast::<Control>());
-    let value = match &slot.value {
-        ItemTemplateValue::Unset => "Default",
-        ItemTemplateValue::Inline { .. } => "Inline",
-        ItemTemplateValue::Resource { key, .. } => key,
-        ItemTemplateValue::Expression => "Authored expression",
-    };
     let value = text(value);
     value.set_font_size(11.0);
     value.set_text_trimming(<dyn ferroui_base::media::TextTrimming>::character_ellipsis());
@@ -270,6 +266,26 @@ fn add_slot(
     Grid::set_column(&tools, 1);
     bar.children().add(tools.clone().upcast::<Control>());
     body.children().add(bar.upcast::<Control>());
+    tools
+}
+
+fn add_slot(
+    body: &StackPanel,
+    actions: TemplateActions,
+    slot: &ItemTemplateSlot,
+    source: Option<SourceSpan>,
+    included: Option<IncludedItemTemplate>,
+    copy: Option<Result<Vec<Edit>, String>>,
+    resources: &[TemplateChoice],
+) {
+    let label = if slot.property == ItemTemplateMember::Template { "Control Template" } else { slot.property.name() };
+    let value = match &slot.value {
+        ItemTemplateValue::Unset => "Default",
+        ItemTemplateValue::Inline { .. } => "Inline",
+        ItemTemplateValue::Resource { key, .. } => key,
+        ItemTemplateValue::Expression => "Authored expression",
+    };
+    let tools = slot_toolbar(body, label, value);
     let property = slot.property;
     if slot.value.definition().is_some() || included.is_some() {
         let action = actions.clone();

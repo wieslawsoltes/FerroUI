@@ -98,6 +98,8 @@ On Studio’s server, call `designer_item_templates` and `designer_item_template
 
 For a control template, pass `property: "Template"` in the query and in each action. The query returns the control's authored assignment and the compatible resources. Use the same `preview`, assignment, copy, creation, reset, and stale-model checks. [Control template workflow](authoring.md#edit-a-control-template)
 
+For RSX, the query returns a `rustBody` range when the template opens on the native canvas. The `range` points to its Rust assignment. Use the column's node ID from `designer_columns` for `property: "CellTemplate"`. For `create_inline`, pass `rust_type` with the type of one item. The report's `canCreate` and `canReset` fields identify available edits. For `preview`, VS Code reports `opened_template` with the original range and sets `rust_template` for the active view. Studio selects the same invocation. Use `designer_definition` with `action: "exit"` to return to the owning Rust view in either host. [Rust workflow](authoring.md#edit-a-rust-item-or-cell-template)
+
 ### Edit styles and palettes with MCP
 
 Use these tools directly in Designer Studio. In VS Code, pass the tool name and arguments through `designer_studio_query` for reads or `designer_studio_edit` for writes. Pass the current editor revision to VS Code and the current document revision to a direct Studio write.

@@ -389,7 +389,7 @@ Open the designer for [column_workbench.rs](../../../editors/vscode/test/fixture
 
 Edit the header, width, visibility, resizing, alignment, and simple row binding. Enter a binding path such as `Customer.Name`. The editor writes `.binding_path("Customer.Name")` in Rust. For widths it writes the matching `GridLength` value. Drag columns to reorder them, or use the same keyboard and context-menu actions as in XAML. Each change updates the original Rust and takes one Undo step. Reordering retains comments that precede a column and its original builder expression.
 
-Open computed values such as `.cell_template(status_cell())` using the source icon beside the field. Use **Reveal Column Collection** in the **Columns** title bar if the collection is supplied by an expression such as `computed_columns()`. The XAML projection of an authored column collection is read-only. [Rust builders](../../declarative-ui.md#43-build-tableview-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
+Open **Cell template** under the column to create or edit an inline RSX template. For a computed assignment such as `.cell_template(status_cell())`, choose **Reveal Template Assignment**. Use **Reveal Column Collection** in the **Columns** title bar if the collection is supplied by an expression such as `computed_columns()`. The XAML projection of an authored column collection is read-only. [Rust builders](../../declarative-ui.md#43-build-tableview-columns) · [MCP workflow](reference.md#edit-table-columns-with-mcp)
 
 ## Edit item and cell templates
 
@@ -414,9 +414,22 @@ Try [IncludedItemTemplates.xaml](../../../editors/vscode/test/fixtures/IncludedI
 
 Try **Make Inline Copy** on **Directory** in [IncludedTemplateCopies.xaml](../../../editors/vscode/test/fixtures/IncludedTemplateCopies.xaml). The copy keeps resource links that resolve to the same declarations and theme scope. If a nearer key would shadow a dependency, the designer copies its proven resource and any required dependencies under unique keys in the nearest writable scope. Relative asset and include paths continue to point to their original targets. Edit the private template on the canvas, then return to the consuming preview. The review queue keeps its assignment to the shared template. Undo the copy from **IncludedTemplateCopies.xaml** to restore the assignment and remove the private resources together.
 
-The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Included templates need a literal, workspace-local dictionary include that the preview can resolve. The action picker explains when an authored resource scope cannot be preserved. Open Rust template closures and application-supplied XAML expressions at their source. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+The contextual editor covers authored XAML item, selection box, menu item, cell, and cell editing templates on controls that expose those properties. Included templates need a literal, workspace-local dictionary include that the preview can resolve. The action picker explains when an authored resource scope cannot be preserved. For an application-supplied XAML expression, reveal its assignment. [Designer Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
 ![The VS Code item-template actions beside the source and the native customer directory](../images/vscode-item-template-actions.jpg)
+
+### Edit a Rust item or cell template
+
+1. Open Design for [template_workbench.rs](../../../editors/vscode/test/fixtures/template_workbench.rs). Select **Directory** in **Outline**, then choose the item-template icon in **Properties** or run **FerroUI: Edit Item Templates**.
+2. Choose **Edit Template on Canvas**. The view picker names the template. Hover over it to see the line in the original Rust source. Select **CustomerTitle** and change **Text** or **FontSize** in **Properties**. The change updates the Rust buffer, including when it is unsaved. The surrounding closure, data access, and other invocations keep their original source.
+3. Use the back arrow in Design to return to the owning view. To edit a table cell, select **Accounts**, open **Columns**, expand **Status**, and choose **Cell template**.
+4. To add a template to the **Account** column or another empty slot, choose **Create Inline Rust Template** and enter the Rust type of one item, such as `Customer` or `crate::model::Customer`. The editor adds a typed `ferroui_view::template` with a starter text control. **Reset Template** removes a mapped local assignment. Each creation, reset, or canvas edit has its own Undo step.
+
+The isolated canvas renders the supported static controls and literals of a direct `ferroui_view::template` closure. Use the running app to see computed content with its real data. A template supplied by a variable, a function call, or another builder remains editable in the Rust source through **Reveal Template Assignment**. The template picker supports inline item templates on ItemsControl, ListBox, TreeView and ComboBox, the ComboBox selection box template, NavigationView menu items, and cell templates on mapped TableView columns. [Rust data templates](../../declarative-ui.md#92-data-templates-whose-items-are-components) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
+
+![The item template canvas and its original Rust with CustomerTitle selected](../images/vscode-rsx-item-template.jpg)
+
+![The Columns cell template actions beside the authored Account column](../images/vscode-rsx-cell-template-actions.jpg)
 
 ![Native artboard with the shared template in Directory and the compact resource in Review queue](../images/native-item-template-resource.png)
 

@@ -23,6 +23,7 @@ pub(crate) fn initialize() -> Value {
         "columnAuthoring",
         "rsxColumnAuthoring",
         "itemTemplateAuthoring",
+        "rsxItemTemplateAuthoring",
         "controlTemplateAuthoring",
         "propertyTrace",
         "styleComposition",

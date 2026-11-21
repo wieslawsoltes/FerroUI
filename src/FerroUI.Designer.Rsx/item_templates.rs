@@ -259,14 +259,14 @@ impl RsxProjection<'_> {
                     .authored
                     .iter()
                     .find_map(|(name, source)| (*name == property).then_some(*source));
-                let writable = !fields.opaque_setter
-                    && !(property == ItemTemplate && fields.display_member_binding);
+                let blocked = fields.opaque_setter
+                    || (property == ItemTemplate && fields.display_member_binding);
                 Some(TemplateSlotSource {
                     property,
                     existing,
                     insert_at: node.open,
                     setter,
-                    writable,
+                    writable: !blocked,
                 })
             }
             TemplateOwner::Column(table, column) => {

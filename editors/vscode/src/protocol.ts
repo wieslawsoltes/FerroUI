@@ -167,6 +167,7 @@ export interface Snapshot {
     timelinePose?: TimelinePreviewPose;
     definitionScope?: number;
     definitionSelection?: number[];
+    rustTemplate?: import('./itemTemplateLabels').TemplateProperty;
 }
 export type NodeOperation =
     | { type: 'setProperty'; node: number; name: string; value: string }
@@ -286,9 +287,11 @@ export interface CanvasPresentation {
     timelineTargets?: TimelineTargetOverrides;
     transitionPosition?: NativeTransitionPosition;
     openDefinition?: import('./includedTemplate').IncludedTemplatePreview | import('./stylesProtocol').StyleNavigation;
+    openRustTemplate?: RustTemplateNavigation;
     navigationSession?: number;
     returnToConsumer?: string;
 }
+export interface RustTemplateNavigation { property: import('./itemTemplateLabels').TemplateProperty; range: Range }
 export type CanvasSnapshot = Omit<Snapshot, 'nodes'> & { nodes: CanvasNode[]; interactive?: boolean;
     focusOrderAvailable?: boolean; spacingAvailable?: boolean; wrapAvailable?: boolean };
 export interface CanvasFocusOrder {

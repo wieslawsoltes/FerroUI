@@ -67,6 +67,7 @@ struct ColumnScope {
     table: NodeId,
     selected: usize,
     writable: bool,
+    rust: bool,
     message: WeakRef<TextBlock>,
 }
 
@@ -108,6 +109,7 @@ impl ColumnFlyout {
             table: model.table,
             selected: preferred.min(model.columns.len().saturating_sub(1)),
             writable: model.reason.is_none(),
+            rust: session.uses_rust_source(),
             message: message.downgrade(),
         };
         drop(session);
@@ -160,6 +162,27 @@ impl ColumnScope {
             message.set_text(Some(&error));
             message.set_is_visible(true);
         }
+    }
+
+    fn open_template(&self, column: NodeId) {
+        let result = self.current().and_then(|workspace| {
+            let mut session = workspace.session.borrow_mut();
+            if session.rust_item_templates(column).is_empty() {
+                return Err("Choose a mapped Rust table column".into());
+            }
+            session.select([column]);
+            drop(session);
+            if let Some(flyout) = self.ui.flyout.upgrade() {
+                flyout.hide();
+            }
+            workspace.refresh(true);
+            let anchor = workspace.root.get_control::<Button>("EditItemTemplates");
+            let flyout = anchor.flyout().and_then(|flyout| flyout.cast::<Flyout>())
+                .ok_or("The item template editor is unavailable")?;
+            flyout.show_at(&anchor);
+            Ok(())
+        });
+        self.show_error(result);
     }
 }
 
@@ -243,6 +266,11 @@ fn column_details(host: &ContentControl, model: &TableColumns, scope: ColumnScop
     add_button(&actions, SOURCE, "Reveal column in source", move || {
         source.reveal(span)
     });
+    if scope.rust {
+        let template = scope.clone();
+        let node = column.node;
+        add_button(&actions, icons::FIT, "Edit cell template", move || template.open_template(node));
+    }
     if scope.writable {
         add_reorder_buttons(&actions, column, model.columns.len(), &scope);
     }

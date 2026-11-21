@@ -6,6 +6,10 @@ use ferroui_designer_tools::{ItemTemplateChange, ItemTemplateMember};
 use serde_json::{Value, json};
 use std::hash::{DefaultHasher, Hash, Hasher};
 
+#[path = "mcp_rust_templates.rs"]
+mod rust;
+pub use rust::{rust_template_navigation, rust_template_report, rust_template_source_plan};
+
 const QUERY: &str = "designer_item_templates";
 const ACTION: &str = "designer_item_template";
 
@@ -20,6 +24,8 @@ pub(super) fn tools() -> Vec<Value> {
     assign["resource"] = s::id();
     let mut included = arguments.clone();
     included["key"] = s::string();
+    let mut create = arguments.clone();
+    create["rust_type"] = json!({"type":"string","minLength":1,"maxLength":512});
     let required = ["node", "property", "expected_model"];
     vec![
         s::tool(
@@ -30,10 +36,10 @@ pub(super) fn tools() -> Vec<Value> {
         ),
         s::actions(
             ACTION,
-            "Open a native template preview or create, assign, copy or reset an authored XAML template. Use property Template for a control template. Each source edit is one undo step and checks the accepted model and revision.",
+            "Open a native template preview or edit a source-owned XAML or mapped RSX template. Supply rust_type when creating an empty Rust slot. Resource assignment and copies apply to XAML. Each source edit is one undo step and checks the accepted model and revision.",
             vec![
                 s::action("preview", arguments.clone(), &required, true),
-                s::action("create_inline", arguments.clone(), &required, true),
+                s::action("create_inline", create, &required, true),
                 s::action("copy_inline", arguments.clone(), &required, true),
                 s::action("reset", arguments, &required, true),
                 s::action(
@@ -54,6 +60,9 @@ pub(super) fn call(
     name: &str,
     args: &Value,
 ) -> Result<Value, String> {
+    if session.uses_rust_source() {
+        return rust::call(session, name, args);
+    }
     let node = node_id(args, "node")?;
     let control = args["property"] == "Template";
     let report = report(session, node, control)?;

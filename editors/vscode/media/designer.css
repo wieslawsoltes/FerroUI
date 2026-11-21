@@ -21,6 +21,7 @@ body {
 #zoom-value { min-inline-size: 27px; }
 .zoom-menu .compact-action { display: none; }
 #blocks { max-inline-size: 133px; color: var(--vscode-dropdown-foreground); background: var(--vscode-dropdown-background); }
+#blocks[data-template] { max-inline-size: min(175px, 56vw); }
 
 .designer-content { position: relative; display: flex; flex: 1; flex-direction: column; min-block-size: 0; }
 .status {

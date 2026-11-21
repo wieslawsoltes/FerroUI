@@ -55,8 +55,10 @@ pub(crate) fn inspect(
                 properties: property_fields(&design, element, effective,
                     |property| session.as_ref().is_some_and(|session| session.can_record_property(node, property))),
                 events: event_fields(&design, element)?,
-                item_templates: design.rsx.is_none() && session.as_ref()
-                    .is_some_and(|session| !session.item_template_members(node).is_empty()),
+                item_templates: design.rsx.as_ref().map_or_else(
+                    || session.as_ref().is_some_and(|session| !session.item_template_members(node).is_empty()),
+                    |rsx| !rsx.item_templates(&design.xaml, node).is_empty(),
+                ),
                 control_template: design.rsx.is_none() && session.as_ref().is_some_and(|session| session.has_control_template(node)),
             })
         }

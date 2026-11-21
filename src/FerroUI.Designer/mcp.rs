@@ -31,6 +31,7 @@ mod columns;
 pub use columns::{columns_report, rust_column_source_plan};
 #[path = "mcp_item_templates.rs"]
 mod item_templates;
+pub use item_templates::{rust_template_navigation, rust_template_report, rust_template_source_plan};
 #[path = "mcp_property_trace.rs"]
 mod property_trace;
 pub use property_trace::property_trace_report;
@@ -186,7 +187,11 @@ fn state(session: &DesignerSession) -> Value {
             json!({"state":"failed","revision":revision,"message":message})
         }
     };
-    json!({"revision":session.document().revision(),"valid":session.authored_is_valid(),"dirty":session.authored_is_dirty(),"language":if session.uses_rust_source() { "rust" } else { "xaml" },"selection":session.selection(),"can_undo":session.can_undo(),"can_redo":session.can_redo(),"preview":preview,"diagnostics":session.authored_diagnostics(),"collaboration_error":session.collaboration_error()})
+    let mut state = json!({"revision":session.document().revision(),"valid":session.authored_is_valid(),"dirty":session.authored_is_dirty(),"language":if session.uses_rust_source() { "rust" } else { "xaml" },"selection":session.selection(),"can_undo":session.can_undo(),"can_redo":session.can_redo(),"preview":preview,"diagnostics":session.authored_diagnostics(),"collaboration_error":session.collaboration_error()});
+    if let Some(property) = session.rust_template_property() {
+        state["rust_template"] = json!(property);
+    }
+    state
 }
 
 impl UiToolProvider for DesignerMcp {
@@ -609,6 +614,13 @@ impl UiToolProvider for DesignerMcp {
         }
         if item_templates::handles(name) {
             let result = item_templates::call(&mut session, name, args)?;
+            if session.uses_rust_source() && args["action"] == "preview"
+                && let Some(workspace) = self.workspace.as_ref().and_then(Weak::upgrade)
+            {
+                drop(session);
+                workspace.focus_definition_canvas();
+                return Ok(result);
+            }
             if let (Some(workspace), Some(target)) = (
                 self.workspace.as_ref().and_then(Weak::upgrade),
                 result.get("openDefinition"),

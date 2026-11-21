@@ -114,18 +114,19 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
     getTreeItem(row: ColumnRow): vscode.TreeItem {
         const { id, editor, column, field, index, topLevel } = row;
         const writable = !editor.table.reason;
-        const item = new vscode.TreeItem(field?.name ?? column.label, field
+        const template = field && editor.rustTemplate(field);
+        const item = new vscode.TreeItem(template ? 'Cell template' : field?.name ?? column.label, field
             ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed);
         item.id = id;
         if (field) {
             item.description = field.value ?? (field.range ? 'Object' : undefined);
-            const accessible = [field.name, item.description].filter(Boolean).join(' ');
+            const accessible = [template ? 'Cell template' : field.name, item.description].filter(Boolean).join(' ');
             item.accessibilityInformation = { label: accessible };
             item.tooltip = accessible;
             const editable = field.editable && writable;
             item.iconPath = new vscode.ThemeIcon(field.kind === 'binding' ? 'link' : field.kind === 'object' ? 'symbol-structure' : 'symbol-property');
             item.contextValue = ['field', field.range && 'source', writable && field.canClear && 'reset'].filter(Boolean).join(' ');
-            if (editable || field.range) item.command = { command: command('edit'), title: field.name, arguments: [row] };
+            if (editable || field.range || template) item.command = { command: command('edit'), title: template ? 'Edit Cell Template' : field.name, arguments: [row] };
         } else {
             const kind = columnKinds[column.kind];
             item.iconPath = new vscode.ThemeIcon(kind.icon);
@@ -141,7 +142,7 @@ export class ColumnsView implements vscode.TreeDataProvider<ColumnRow>, vscode.T
     async getChildren(row?: ColumnRow): Promise<ColumnRow[]> {
         if (row) return row.field ? [] : [
             ...rows(row.column.children, row.editor, row.id, row.index),
-            ...row.column.fields.filter(field => field.editable || field.range).map(field => ({
+            ...row.column.fields.filter(field => field.editable || field.range || row.editor.rustTemplate(field)).map(field => ({
                 ...row, id: `${row.id}/field:${field.name}`, topLevel: false, field,
             })),
         ];

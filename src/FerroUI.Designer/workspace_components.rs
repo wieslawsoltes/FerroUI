@@ -282,7 +282,7 @@ impl DesignerWorkspace {
         Ok(())
     }
 
-    pub(super) fn focus_definition_canvas(self: &Rc<Self>) {
+    pub(crate) fn focus_definition_canvas(self: &Rc<Self>) {
         self.components.borrow_mut().editor_open = false;
         self.root
             .get_control::<Button>("CloseAuthoring")
@@ -478,6 +478,7 @@ impl DesignerWorkspace {
             .map(|entry| library_item(document, entry))
             .collect::<Vec<_>>();
         let scope = session.definition_scope().cloned();
+        let rust_template = session.rust_template_property();
         let scope_epoch = session.definition_scope_epoch();
         let targets = session.selection().to_vec();
         drop(session);
@@ -664,7 +665,8 @@ impl DesignerWorkspace {
             }
         }
         let bar = self.root.get_control::<Control>("ComponentScopeBar");
-        bar.set_is_visible(scope.is_some());
+        bar.set_is_visible(scope.is_some() || rust_template.is_some());
+        self.root.get_control::<Button>("ComponentScopeDefinition").set_is_visible(scope.is_some());
         if let Some(scope) = scope {
             self.root
                 .get_control::<TextBlock>("ComponentScopeTitle")
@@ -673,6 +675,8 @@ impl DesignerWorkspace {
                     display_kind(scope.kind),
                     scope.title
                 )));
+        } else if let Some(property) = rust_template {
+            self.root.get_control::<TextBlock>("ComponentScopeTitle").set_text(Some(property.name()));
         }
         self.refresh_component_instance(&catalog);
     }

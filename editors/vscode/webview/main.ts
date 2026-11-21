@@ -1,4 +1,5 @@
 import type { CanvasAction, CanvasSnapshot, DesignerViewState, FrameTarget, FromDesigner, RuntimeRow, ToDesigner } from '../src/protocol';
+import { templateLabels } from '../src/itemTemplateLabels';
 import { Artboard } from './artboard';
 import { CanvasDrag } from './canvasDrag';
 import { ResizeHandles } from './resizeHandles';
@@ -101,7 +102,7 @@ wrapSelection.addEventListener('click', () => {
     vscode.postMessage({ type: 'wrapSelection', token });
 });
 returnDocument.addEventListener('click', () => {
-    if (current && snapshot?.definitionScope !== undefined) vscode.postMessage({ type: 'leaveDefinition', token });
+    if (current && (snapshot?.definitionScope !== undefined || snapshot?.rustTemplate)) vscode.postMessage({ type: 'leaveDefinition', token });
 });
 focusOverlay.toggle.addEventListener('click', () => {
     focusOverlay.setEnabled(!focusOverlay.enabled);
@@ -213,8 +214,11 @@ function updateSelection(): void {
     const selecting = interaction.mode === 'select';
     const image = artboard.isCurrent ? snapshot?.image : undefined;
     wrapSelection.hidden = !snapshot?.wrapAvailable;
-    returnDocument.hidden = snapshot?.definitionScope === undefined;
+    returnDocument.hidden = snapshot?.definitionScope === undefined && !snapshot?.rustTemplate;
     returnDocument.disabled = !enabled;
+    const returnLabel = snapshot?.rustTemplate ? 'Return to the owning Rust view' : 'Return to document preview';
+    returnDocument.title = returnLabel;
+    returnDocument.setAttribute('aria-label', returnLabel);
     wrapSelection.disabled = !enabled || !image || !selecting || !selection.length || Boolean(runtime);
     guides.setAvailable(Boolean(enabled && image), selecting);
     focusOverlay.update(Boolean(snapshot?.focusOrderAvailable), selecting, enabled && image
@@ -315,10 +319,16 @@ function presentSnapshot(message: SnapshotMessage, bitmap?: ImageBitmap | null):
     drag.setFrame(hasImage ? message.frame : undefined);
     size.show(message.viewport);
     counterpart.show(snapshot.counterpart, message.sourceKey);
-    blocks.replaceChildren(...snapshot.blocks.map((span, index) => new Option(`RSX · line ${span.start.line + 1}`, String(index))));
-    blocks.hidden = snapshot.blocks.length <= 1;
     const active = snapshot.activeBlock?.start;
-    blocks.selectedIndex = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);
+    const selectedBlock = snapshot.blocks.findIndex(({ start }) => start.line === active?.line && start.character === active?.character);
+    const template = snapshot.rustTemplate && templateLabels[snapshot.rustTemplate];
+    blocks.replaceChildren(...snapshot.blocks.map((span, index) => {
+        return new Option(index === selectedBlock && template ? template : `RSX · line ${span.start.line + 1}`, String(index));
+    }));
+    blocks.hidden = snapshot.blocks.length <= 1;
+    blocks.selectedIndex = selectedBlock;
+    blocks.title = template && active ? `${template} · line ${active.line + 1}` : 'RSX invocations';
+    blocks.toggleAttribute('data-template', Boolean(template));
     const error = snapshot.renderError ?? (snapshot.image && !hasImage ? 'The preview image could not be decoded.' : undefined);
     if (error) showPreviewError(error);
     else showCurrentStatus();

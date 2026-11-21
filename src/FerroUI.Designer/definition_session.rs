@@ -52,6 +52,9 @@ impl DesignerSession {
     }
 
     pub fn exit_definition_scope(&mut self) -> Result<(), String> {
+        if self.rust_template_property().is_some() {
+            return self.exit_rust_template();
+        }
         let Some(scope) = self.preview.definition_scope.as_ref() else {
             return Ok(());
         };

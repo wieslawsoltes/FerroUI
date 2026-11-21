@@ -1,5 +1,6 @@
 //! Authored Rust text and its editable native projection have separate coordinates.
 mod edits;
+mod templates;
 
 use ferroui_designer_core::{
     ChangeSet, DesignerError, Diagnostic, Document, SourceHistory, SourceSpan, SourceUpdate,
@@ -20,6 +21,7 @@ pub(crate) struct RustDocument {
     catalog: Option<Arc<RsxCatalog>>,
     map: Option<Arc<RsxSourceMap>>,
     scope_changed: bool,
+    template_scopes: Vec<templates::TemplateScope>,
     diagnostics: Vec<Diagnostic>,
     history: SourceHistory<Arc<str>>,
 }
@@ -44,6 +46,7 @@ impl RustDocument {
             catalog,
             map: None,
             scope_changed: false,
+            template_scopes: Vec::new(),
             diagnostics: Vec::new(),
             history: SourceHistory::default(),
         };
@@ -135,6 +138,19 @@ impl RustDocument {
     }
 
     pub(crate) fn select_invocation(
+        &mut self,
+        document: &mut Document,
+        start: usize,
+    ) -> Result<(), DesignerError> {
+        if self.map().is_some_and(|map| map.invocation.start == start) {
+            return Ok(());
+        }
+        self.navigate_to_invocation(document, start)?;
+        self.template_scopes.clear();
+        Ok(())
+    }
+
+    fn navigate_to_invocation(
         &mut self,
         document: &mut Document,
         start: usize,
@@ -237,6 +253,9 @@ impl RustDocument {
         change.patches = TextPatch::between(&self.source, &source)
             .into_iter()
             .collect();
+        if let Some(patch) = change.patches.first() {
+            self.carry_template_scopes(patch);
+        }
         change.valid = self.map.is_some();
         self.source = source;
         *document = candidate;
@@ -265,6 +284,10 @@ fn carry_caret(before: &str, after: &str, caret: usize) -> (usize, bool) {
     let Some(patch) = TextPatch::between(before, after) else {
         return (caret, false);
     };
+    carry_anchor(&patch, caret)
+}
+
+fn carry_anchor(patch: &TextPatch, caret: usize) -> (usize, bool) {
     if caret >= patch.span.end {
         (caret - patch.span.len() + patch.replacement.len(), false)
     } else {

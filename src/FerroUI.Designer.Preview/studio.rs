@@ -39,10 +39,10 @@ pub(crate) fn catalog() -> Value {
         .into_iter()
         .partition(is_query);
     let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
-    let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state"))).cloned()
+    let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state" | "designer_item_template"))).cloned()
         .filter_map(|tool| action_definition(tool, |name, action| rsx_animation::program_edit(name, action)
             || rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)
-            || rsx_animation::clip_placement_edit(name, action)))
+            || rsx_animation::clip_placement_edit(name, action) || rust_template_edit(name, action)))
         .collect::<Vec<_>>();
     json!({"tools":tools,"presentations":presentations,"rsxEdits":rsx_edits,
         "xamlEdits":edits.into_iter().filter_map(|tool| action_definition(tool, source_action)).collect::<Vec<_>>()})
@@ -54,9 +54,6 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
         return Err("Choose a current Studio presentation action".into());
     }
     let stage = renderer.stage(query.frame)?;
-    if query.name == "designer_item_template" && stage.authored_rsx.is_some() {
-        return Err("Open Rust template expressions from their source.".into());
-    }
     if query.name == "designer_open_style_source" && stage.authored_rsx.is_some() {
         return Err("Edit Rust-owned style builders in Rust source.".into());
     }
@@ -67,6 +64,15 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     let provider = DesignerMcp::new(&stage.session);
     provider.validate(&query.name, &arguments)?;
     if let Some(selection) = &query.selection { select(stage, selection)?; }
+    if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_item_template") {
+        let projection = rust.projection()?;
+        let navigation = stage.sources.run(|| ferroui_designer::mcp::rust_template_navigation(
+            &stage.session.borrow(), rust.source(), &projection, &arguments,
+        ))?;
+        let mut result = renderer.present(request.next_frame, false)?;
+        result.open_rust_template = Some(navigation);
+        return Ok(result);
+    }
     let route_source = if query.name == "designer_state" && arguments["action"] == "preview_transition" {
         stage.authored_rsx.as_ref().and_then(|source| source.state_route_range(&arguments))
     } else { None };
@@ -145,8 +151,12 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
             &stage.session.borrow(), node, Some((rust.source(), &projection)),
         ));
     }
-    if query.name == "designer_item_templates" && stage.authored_rsx.is_some() {
-        return Ok(json!({"slots":[],"resources":[],"reason":"Edit Rust template expressions in their source."}));
+    if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_item_templates") {
+        stage.studio.validate(&query.name, &query.arguments)?;
+        let projection = rust.projection()?;
+        return stage.sources.run(|| ferroui_designer::mcp::rust_template_report(
+            &stage.session.borrow(), rust.source(), &projection, &query.arguments,
+        ));
     }
     if stage.authored_rsx.is_some() && matches!(query.name.as_str(),
         "designer_style_catalog" | "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette")
@@ -182,6 +192,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_state = design.rsx.is_some() && rsx_animation::state_edit(&query.name, action);
     let rust_placement = design.rsx.is_some() && rsx_animation::clip_placement_edit(&query.name, action);
     let rust_columns = design.rsx.is_some() && query.name == "designer_columns_edit";
+    let rust_template = design.rsx.is_some() && rust_template_edit(&query.name, action);
     let rust_names = design.rsx.is_some()
         && query.name == "designer_property"
         && query.arguments["property"] == "Name";
@@ -194,6 +205,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         && !rust_placement
         && !rust_names
         && !rust_columns
+        && !rust_template
         && !spacing
         && !wrapping
         && (!matches!(query.name.as_str(), "designer_selection_layout_edit" | "designer_property" | "designer_grid_track_edit")
@@ -232,13 +244,16 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     if spacing {
         return crate::spacing::source_edit(stage, &design, &arguments);
     }
-    if rust_columns {
+    if rust_columns || rust_template {
         let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
         let (patches, selection) = {
             let session = stage.session.borrow();
-            let patches = stage.sources.run(|| ferroui_designer::mcp::rust_column_source_plan(
-                &session, design.source, projection, &arguments,
-            ))?;
+            let plan = if rust_columns {
+                ferroui_designer::mcp::rust_column_source_plan
+            } else {
+                ferroui_designer::mcp::rust_template_source_plan
+            };
+            let patches = stage.sources.run(|| plan(&session, design.source, projection, &arguments))?;
             let selection = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
             (patches, selection)
         };
@@ -360,6 +375,10 @@ fn select(stage: &Stage, selection: &[NodeId]) -> Result<(), String> {
         session.select(selection.iter().copied());
     }
     Ok(())
+}
+
+fn rust_template_edit(tool: &str, action: Option<&str>) -> bool {
+    tool == "designer_item_template" && matches!(action, Some("create_inline" | "reset"))
 }
 
 fn source_action(tool: &str, action: Option<&str>) -> bool {

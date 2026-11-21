@@ -9,6 +9,85 @@ use ferroui_markup_xaml::FromXamlObject;
 
 const SOURCE: &str = include_str!("../../editors/vscode/test/fixtures/ItemTemplatesWorkbench.xaml");
 
+#[cfg(feature = "mcp")]
+#[test]
+fn rust_template_canvas_and_column_actions_use_original_source() {
+    use crate::mcp::DesignerMcp;
+    use ferroui_controls::TextBox;
+    use ferroui_mcp::{Permissions, UiToolProvider};
+    use serde_json::json;
+
+    const RUST: &str = include_str!("../../editors/vscode/test/fixtures/template_workbench.rs");
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let uri = ferroui_designer_project::file_uri(std::env::temp_dir().join("template_workbench.rs")).unwrap();
+    let workspace = DesignerWorkspace::with_uri(RUST, uri).unwrap();
+    let window = Window::new();
+    window.set_width(1240.0);
+    window.set_height(840.0);
+    window.set_content(Some(Control::boxed(workspace.control())));
+    window.show();
+    window.update_layout();
+    let session = workspace.session();
+
+    let flyout = |command| {
+        let anchor = workspace.control().get_control::<Button>(command);
+        assert!(anchor.is_visible());
+        let flyout = anchor.flyout().and_then(|value| value.cast::<Flyout>()).unwrap();
+        flyout.show_at(&anchor);
+        flyout
+    };
+    let content = |flyout: &Flyout| Ref::<Control>::from_xaml_object(&flyout.content().unwrap()).unwrap();
+    let click = |body: &Ref<Control>, name| {
+        let control = body.get_logical_descendants().find(|control| {
+            AutomationProperties::get_name(control).as_deref() == Some(name)
+        }).and_then(|control| control.cast::<Button>()).unwrap();
+        control.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    };
+
+    let owner = session.borrow().document().ast().find_name("Directory").unwrap();
+    session.borrow_mut().select([owner]);
+    workspace.refresh(true);
+    click(&content(&flyout("EditItemTemplates")), "Edit template on canvas");
+    assert_eq!(session.borrow().rust_template_property(), Some(ItemTemplateMember::ItemTemplate));
+    assert!(workspace.control().get_control::<Control>("ComponentScopeBar").is_visible());
+    let text = session.borrow().document().ast().find_name("CustomerTitle").unwrap();
+    session.borrow_mut().set_property(&[text], "Text", "Account profile 🧭").unwrap();
+    assert_eq!(session.borrow().authored_source(), RUST.replace("Customer profile 🧭", "Account profile 🧭"));
+    session.borrow_mut().undo().unwrap();
+    workspace.return_to_document().unwrap();
+    let active = session.borrow();
+    assert_eq!(active.authored_source(), RUST);
+    assert_eq!(active.selection(), &[active.document().ast().find_name("Directory").unwrap()]);
+    let table = active.document().ast().find_name("Accounts").unwrap();
+    drop(active);
+
+    session.borrow_mut().select([table]);
+    workspace.refresh(true);
+    click(&content(&flyout("EditColumns")), "Edit cell template");
+    let anchor = workspace.control().get_control::<Button>("EditItemTemplates");
+    let popup = anchor.flyout().and_then(|value| value.cast::<Flyout>()).unwrap();
+    let body = content(&popup);
+    let input = body.get_logical_descendants().find_map(|node| node.cast::<TextBox>()).unwrap();
+    input.set_text(Some("Customer"));
+    click(&body, "Create inline Rust template");
+    assert!(session.borrow().authored_source().contains(".cell_template(::ferroui_view::template::<Customer, _>"));
+
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let column = ferroui_designer_tools::table_columns(session.borrow().document(), table).unwrap().columns[0].node;
+    let report = provider.call("designer_item_templates", &json!({"node":column}), Permissions::default()).unwrap();
+    assert_eq!(report["slots"][0]["canReset"], true);
+    let args = json!({"node":column,"property":"CellTemplate","action":"reset",
+        "expected_model":report["model"],"expected_revision":report["revision"]});
+    let write = Permissions { allow_property_writes: true, ..Default::default() };
+    provider.call("designer_item_template", &args, write).unwrap();
+    assert!(provider.call("designer_item_template", &args, write).is_err());
+    assert_eq!(session.borrow().authored_source(), RUST);
+    session.borrow_mut().undo().unwrap();
+    session.borrow_mut().undo().unwrap();
+    assert_eq!(session.borrow().authored_source(), RUST);
+    window.close();
+}
+
 #[test]
 fn studio_control_template_actions_use_the_selected_control_and_compatible_resources() {
     let _app = UnitTestApplication::start(TestServices::styled_window());

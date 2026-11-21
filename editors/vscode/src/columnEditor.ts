@@ -1,6 +1,7 @@
 import type { QuickPickItem } from 'vscode';
 import type { Range } from './protocol';
 import { choose, editText, type StudioContext } from './studioContext';
+import { editItemTemplates } from './studioItemTemplates';
 
 type ColumnKind = 'table' | 'text' | 'checkBox' | 'template' | 'rowHeader' | 'expander';
 type ColumnFieldKind = 'text' | 'length' | 'boolean' | 'choice' | 'binding' | 'object';
@@ -73,6 +74,10 @@ export class ColumnEditor {
 
     async field(column: AuthoredColumn, field: ColumnField): Promise<void> {
         this.context.ensure();
+        if (this.rustTemplate(field)) {
+            await editItemTemplates(this.context, column.node, 'CellTemplate');
+            return;
+        }
         if (!field.editable || this.table.reason) {
             if (field.range) await this.context.revealRange(field.range);
             return;
@@ -86,6 +91,10 @@ export class ColumnEditor {
         if (value !== undefined) {
             await this.change({ action: 'set', column: column.node, field: field.name, value });
         }
+    }
+
+    rustTemplate(field: ColumnField): boolean {
+        return field.name === 'CellTemplate' && this.context.panel.language === 'rust' && this.context.panel.supportsItemTemplates;
     }
 }
 
