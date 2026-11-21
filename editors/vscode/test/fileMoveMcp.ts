@@ -35,6 +35,11 @@ export async function verifyFileMoveMcp({ invoke, content }: McpFixture): Promis
         write(uri('Base.xaml'), `${root}<Color x:Key="Ink">#143965</Color></ResourceDictionary>`)]);
     const doc = await vscode.workspace.openTextDocument(view);
     const relative = (file: vscode.Uri) => vscode.workspace.asRelativePath(file, false).replaceAll('\\', '/');
+    const history = async (file: vscode.Uri, action: 'undo' | 'redo') => {
+        const path = relative(file);
+        const { revision } = content<{ revision: string }>(await invoke('ferroui_workspace_read', { path }));
+        content(await invoke('ferroui_workspace_file', { path, action, expected_revision: revision }));
+    };
     const { session } = content<{ session: number }>(await invoke('designer_open', { path: relative(view) }));
     const snapshot = async () => {
         const result = await invoke('designer_preview_image', { session });
@@ -108,12 +113,11 @@ export async function verifyFileMoveMcp({ invoke, content }: McpFixture): Promis
     assert.equal(await snapshot(), before);
     const movedViewer = await vscode.workspace.openTextDocument(renamedView);
     assert.match(movedViewer.getText(), /ResourceInclude Source="\.\.\/Palette\.xaml"/);
-    await vscode.window.showTextDocument(movedViewer);
-    await vscode.commands.executeCommand('undo');
+    await vscode.commands.executeCommand('workbench.action.findInFiles', { query: 'Customer accounts' });
+    await history(renamedView, 'undo');
     await until(async () => await missing(renamedView) && titled('Customers.xaml'));
     assert.equal(await snapshot(), before);
-    await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(view));
-    await vscode.commands.executeCommand('redo');
+    await history(view, 'redo');
     await until(async () => await missing(view) && titled('Customers (Moved).xaml'));
     assert.equal(await snapshot(), before);
     await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(renamedView));
