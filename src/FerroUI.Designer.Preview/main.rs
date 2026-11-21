@@ -111,10 +111,8 @@ fn respond(
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan().map_err(|error| error.to_string()))),
         "configureProject" => serde_json::from_value(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| {
-                let retired = projects.register(request)?;
-                if let Some(renderer) = renderer.as_mut().filter(|renderer| retired.is_some()
-                    && renderer.stage.as_ref().is_some_and(|stage| stage.project == retired)) {
-                    renderer.stage = None;
+                if let (Some(project), Some(renderer)) = (projects.register(request)?, renderer.as_mut()) {
+                    renderer.retire_project(project);
                 }
                 Ok(Value::Null)
             }),

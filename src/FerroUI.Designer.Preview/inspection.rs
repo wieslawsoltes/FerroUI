@@ -43,7 +43,9 @@ pub(crate) fn inspect(
     let stage = renderer.and_then(|renderer| renderer.stage(input.frame).ok());
     match input.target {
         InspectionTarget::Source { node } => {
-            let modules = stage.and_then(|stage| stage.rust_modules(&input.source));
+            let modules = renderer.and_then(|renderer| {
+                renderer.rust_modules_for_edit(input.frame, &input.source).ok().flatten()
+            });
             let design = DesignDocument::parse_with_rust_modules(
                 &input.source,
                 projects.source(&input.source)?,

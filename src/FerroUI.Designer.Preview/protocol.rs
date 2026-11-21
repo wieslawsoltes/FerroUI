@@ -11,7 +11,7 @@ pub(crate) enum Language {
     Rust,
 }
 
-#[derive(PartialEq, Deserialize)]
+#[derive(Clone, PartialEq, Deserialize)]
 pub(crate) struct Source {
     pub(crate) language: Language,
     pub(crate) uri: String,

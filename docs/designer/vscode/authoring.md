@@ -22,6 +22,8 @@ Start with a view you can render, then use the same source buffer for text edits
 
 For a partial Rust preview, the designer can still edit supported literals and mapped handler expressions, move mapped controls, and wrap consecutive mapped children. Edit the loop, conditional, or computed child itself in the Rust editor. In XAML with bindings, style objects, or property elements that have no static counterpart, edit the authored XAML. Existing XAML design data survives supported counterpart value edits. [Language service](../../../src/FerroUI.Designer.Language/README.md) · [Mapping project controls to RSX](../../../editors/vscode/README.md#map-an-application-control-to-rsx)
 
+Project metadata can expose a custom control in the source Outline and Properties even when the isolated preview cannot render it. Select the control in Outline to edit a mapped value. Use App Preview for a native frame with your app’s registered controls. [Open App Preview](runtime.md#render-with-your-app-in-app-preview)
+
 ### Format XAML
 
 Open a FerroUI XAML file and run **Format Document**. Select a range and run **Format Selection** to change the formatting inside that range. Select **FerroUI** in **Format Document With…** when several formatters are available. The same settings apply when VS Code runs formatting on save or paste.

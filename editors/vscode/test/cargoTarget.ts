@@ -129,6 +129,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     const rustPanel = await designer.openDocument(rust);
     const rustSnapshot = await rustPanel.waitForSnapshot(AbortSignal.timeout(15_000));
     assert.ok(rustSnapshot.counterpart.source?.includes('Caption="🦀 First"'));
+    assert.ok(!rustSnapshot.image, 'registered source metadata alone does not load custom controls into the preview host');
     const position = rustPanel.document.positionAt(rustDraft.indexOf('heading') + 1);
     const completion = await vscode.commands.executeCommand<vscode.CompletionList>('vscode.executeCompletionItemProvider', rust, position);
     assert.ok(completion?.items.some(item => item.label === 'heading' && item.detail?.includes('AuditCard.Caption')));

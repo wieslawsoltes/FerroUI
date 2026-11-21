@@ -1,4 +1,4 @@
-use crate::protocol::{Bounds, Image, Render};
+use crate::protocol::{Bounds, Image, Render, Source};
 use crate::rsx_animation::AuthoredRsxFrame;
 use crate::rsx_placement::PlacementPolicy;
 use base64::{engine::general_purpose::STANDARD, Engine};
@@ -26,8 +26,17 @@ use std::rc::Rc;
 pub(crate) struct Renderer {
     app: Ref<Application>,
     pub(crate) stage: Option<Stage>,
+    source_only: Option<SourceFrame>,
     item_template_scope: Option<RetainedItemTemplate>,
     pub(crate) accepted_rust_module_document: Option<String>,
+}
+
+/// The native renderer can lack a registered custom control while the
+/// language projection still supplies a valid source edit model.
+struct SourceFrame {
+    token: u64,
+    document: Source,
+    modules: Option<Rc<RustModuleSources>>,
 }
 
 struct RetainedItemTemplate {
@@ -131,6 +140,7 @@ impl Renderer {
         Self {
             app,
             stage: None,
+            source_only: None,
             item_template_scope: None,
             accepted_rust_module_document: None,
         }
@@ -153,12 +163,42 @@ impl Renderer {
 
     pub(crate) fn retire_frame(&mut self, input: &Render) {
         self.take_stage();
+        self.source_only = None;
         if self.item_template_scope.as_ref().is_some_and(|saved| {
             saved.uri != input.document.uri
                 || saved.project != input.document.project
                 || input.document.language != crate::protocol::Language::Xaml
         }) {
             self.item_template_scope = None;
+        }
+    }
+
+    pub(crate) fn retain_source_frame(&mut self, input: &Render, modules: Option<RustModuleSources>) {
+        self.source_only = Some(SourceFrame {
+            token: input.frame,
+            document: input.document.clone(),
+            modules: modules.map(Rc::new),
+        });
+    }
+
+    pub(crate) fn rust_modules_for_edit(
+        &self, token: u64, source: &Source,
+    ) -> Result<Option<Rc<RustModuleSources>>, String> {
+        match self.stage(token) {
+            Ok(stage) => Ok(stage.rust_modules(source)),
+            Err(error) => self.source_only.as_ref()
+                .filter(|accepted| accepted.token == token && &accepted.document == source)
+                .map(|accepted| accepted.modules.clone())
+                .ok_or(error),
+        }
+    }
+
+    pub(crate) fn retire_project(&mut self, project: u64) {
+        if self.stage.as_ref().is_some_and(|stage| stage.project == Some(project)) {
+            self.stage = None;
+        }
+        if self.source_only.as_ref().is_some_and(|frame| frame.document.project == Some(project)) {
+            self.source_only = None;
         }
     }
 

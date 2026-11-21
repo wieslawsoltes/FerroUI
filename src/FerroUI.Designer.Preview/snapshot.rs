@@ -75,9 +75,6 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         stage.rsx_spacing = crate::spacing::RsxOwners::capture(&design);
         stage.project_assets = assets;
     }
-    if image.is_some() {
-        renderer.accepted_rust_module_document = rust.as_ref().map(|_| input.document.uri.clone());
-    }
     let nodes = design
         .xaml
         .ast()
@@ -128,7 +125,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         let selection = if scope.is_some() { session.selection().to_vec() } else { Vec::new() };
         (scope, selection)
     });
-    Ok(Snapshot {
+    let snapshot = Snapshot {
         nodes,
         blocks,
         active_block,
@@ -143,7 +140,12 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         timeline_pose,
         definition_scope,
         definition_selection,
-    })
+    };
+    renderer.accepted_rust_module_document = rust.as_ref().map(|_| input.document.uri.clone());
+    if snapshot.image.is_none() {
+        renderer.retain_source_frame(input, rust);
+    }
+    Ok(snapshot)
 }
 
 fn element_parent(design: &DesignDocument<'_>, mut parent: Option<u64>) -> Option<u64> {

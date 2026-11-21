@@ -30,7 +30,7 @@ const COMMON_PROPERTIES: &[&str] = &[
 
 pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects: &Projects) -> Result<EditResult, String> {
     let modules = match (request.frame, renderer) {
-        (Some(frame), Some(renderer)) => renderer.stage(frame)?.rust_modules(&request.document),
+        (Some(frame), Some(renderer)) => renderer.rust_modules_for_edit(frame, &request.document)?,
         _ => None,
     };
     let design = DesignDocument::parse_with_rust_modules(
