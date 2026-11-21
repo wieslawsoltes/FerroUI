@@ -39,6 +39,11 @@ on:
         type: boolean
         required: false
         default: false
+      folding:
+        description: Identical code folding at link time (#1001) - Linux (x86-64, dist) with and without lld's --icf=safe and --icf=all, and, with samples and windows, macOS dist without ld64's deduplication and Windows without /OPT:ICF, plus the link line rustc passes and whether the linker folds a HarfBuzz callback with its default
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -161,6 +166,11 @@ jobs:
       matrix:
         tree: [measured, baseline]
         profile: [release, dist]
+    env:
+      # The MSVC standard library of the Windows image (14.52) refuses the libclang of the image
+      # in the build script of the ANGLE binding ("STL1000: Unexpected compiler version"), as in
+      # the Windows job of ci.yml, which passes the check the same way.
+      BINDGEN_EXTRA_CLANG_ARGS: -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
     defaults:
       run:
         shell: bash
@@ -236,6 +246,82 @@ jobs:
             echo "$sample: $(stat -c %s "$file") bytes" | tee -a "$GITHUB_STEP_SUMMARY"
           done
           echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      # Identical code folding and HarfBuzz (#1001): `hb_font_t::has_func_set` compares callback
+      # addresses with the defaults, so a callback folded with the default of its slot changes the
+      # shaping path. The executables are linked again as shipped, with the list of what the
+      # linker folded (`/VERBOSE:ICF`, shown by the lints of the linker's output) and its map.
+      - name: Check out the folding report
+        if: inputs.folding && matrix.tree == 'measured'
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: scripts/perf/icf_harfbuzz.py
+          sparse-checkout-cone-mode: false
+      - name: What the linker folds of the HarfBuzz callbacks
+        if: inputs.folding && matrix.tree == 'measured'
+        working-directory: tree
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          CARGO_TERM_COLOR: never
+          # The options of link.exe start with a slash: the shell must not take them for paths.
+          MSYS_NO_PATHCONV: "1"
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          out="$GITHUB_WORKSPACE/icf-windows-$PROFILE"
+          mkdir -p "$out"
+          for app in hello-world control-catalog-desktop; do
+            if ! cargo rustc --locked --profile "$PROFILE" -p "$app" --bin "$app" -- \
+              -C link-arg=/VERBOSE:ICF -C "link-arg=/MAP:$out/$app.map" -W linker-messages -W linker-info \
+              > "$out/$app.log" 2>&1; then
+              tail -n 40 "$out/$app.log"
+              exit 1
+            fi
+            python "$GITHUB_WORKSPACE/tools/scripts/perf/icf_harfbuzz.py" --format msvc \
+              --label "Windows x86-64, $PROFILE, $app" --log "$out/$app.log" --map "$out/$app.map" \
+              --json "$out/$app.json" | tee -a "$GITHUB_STEP_SUMMARY"
+            grep -m 5 -i -E 'selected symbol|replaced symbol' "$out/$app.log" || echo "no folding lines in the log of $app"
+          done
+      - name: Keep what the linker folded
+        if: always() && inputs.folding && matrix.tree == 'measured'
+        uses: actions/upload-artifact@v4
+        with:
+          name: icf-windows-${{ matrix.profile }}
+          path: icf-windows-${{ matrix.profile }}
+          retention-days: 7
+      # Identical code folding (#1001): the link line rustc passes for the profile (does it ask for
+      # /OPT:ICF?), then the catalog and hello world linked again with /OPT:NOICF, in a target
+      # folder of their own, for what folding gives.
+      - name: Identical code folding (link line, /OPT:NOICF)
+        if: inputs.folding && matrix.tree == 'measured'
+        working-directory: tree
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          export CARGO_TARGET_DIR="$GITHUB_WORKSPACE/target-noicf"
+          # One build for both: the link line shows the options of rustc, then /OPT:NOICF last.
+          export RUSTFLAGS="-C link-arg=/OPT:NOICF"
+          {
+            echo "## Windows x86-64: identical code folding, profile \`$PROFILE\`"
+            echo
+            echo "The options of the link line of hello-world (those of rustc, then the /OPT:NOICF of this step):"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo rustc --locked --profile "$PROFILE" -p hello-world --bin hello-world -- --print=link-args 2>/dev/null \
+            | tr ' ' '\n' | grep -i -E '^"?/(OPT|DEBUG|INCREMENTAL|LTCG)' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo build --locked --profile "$PROFILE" -p control-catalog-desktop --bin control-catalog-desktop
+          cargo build --locked --profile "$PROFILE" -p hello-world --bin hello-world
+          {
+            echo
+            echo "Linked with /OPT:NOICF:"
+            echo
+            echo '```'
+            for app in control-catalog-desktop hello-world; do
+              echo "$app: $(stat -c %s "$CARGO_TARGET_DIR/$PROFILE/$app.exe") bytes"
+            done
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       # What the executable of the catalog is made of, by library: the measured tree with the
       # release profile is linked once more with a map of the linker (`/MAP`), and the code and
       # data of each symbol (the distance to the next one) are summed by the library or the object
@@ -336,6 +422,31 @@ jobs:
             strip -o "measured/$app.stripped" "measured/$app"
             raw=$(stat -f %z "measured/$app"); stripped=$(stat -f %z "measured/$app.stripped")
             text=$(size -m "measured/$app" | awk '/Section __text:/ { print $3; exit }')
+            printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
+              "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      # Identical code folding (#1001): ld64 folds some duplicates by default; the dist build of
+      # the ref linked again without it (-no_deduplicate), in a target folder of its own.
+      - name: Without the deduplication of the linker
+        if: inputs.folding && matrix.side == 'ref' && matrix.profile == 'dist'
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          export CARGO_TARGET_DIR="$PWD/target-nodedup"
+          export RUSTFLAGS="-C link-arg=-Wl,-no_deduplicate"
+          {
+            echo "## macOS, ref, profile \`$PROFILE\`, linked with -no_deduplicate (MB: as written, stripped, \`__TEXT,__text\`)"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p nodedup
+          for app in hello-world hello-world-builders winui-theme-gallery control-catalog-desktop; do
+            cargo build --locked --profile "$PROFILE" -p "$app" --bin "$app"
+            cp "$CARGO_TARGET_DIR/$PROFILE/$app" "nodedup/$app"
+            strip -o "nodedup/$app.stripped" "nodedup/$app"
+            raw=$(stat -f %z "nodedup/$app"); stripped=$(stat -f %z "nodedup/$app.stripped")
+            text=$(size -m "nodedup/$app" | awk '/Section __text:/ { print $3; exit }')
             printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
               "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
           done
@@ -442,3 +553,100 @@ jobs:
                 "capi-size-baseline-$profile.json" --markdown "$GITHUB_STEP_SUMMARY"
             fi
           done
+
+  # Identical code folding at link time on Linux (#1001): the HelloWorld samples, the WinUI theme
+  # gallery and the catalog of the ref with the dist profile, linked as rustc links them, with
+  # lld's --icf=safe (functions whose address is taken are kept) and with --icf=all (for
+  # reference), each in a job of its own. The sizes are those of the executable as written,
+  # stripped, and of its machine code (.text).
+  linux-folding:
+    name: Identical code folding (Linux x86-64, dist, ${{ matrix.folding }})
+    if: inputs.folding
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        folding: [none, safe, all]
+    steps:
+      - name: Check out the folding report
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: scripts/perf/icf_harfbuzz.py
+          sparse-checkout-cone-mode: false
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          path: tree
+      - uses: dtolnay/rust-toolchain@stable
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev libicu-dev pkg-config \
+            libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev clang lld \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpipewire-0.3-dev libgles-dev
+      - name: Build and measure
+        working-directory: tree
+        env:
+          FOLDING: ${{ matrix.folding }}
+          REF: ${{ inputs.ref }}
+        run: |
+          case "$FOLDING" in
+            none) export RUSTFLAGS="-C link-arg=-fuse-ld=lld" ;;
+            *) export RUSTFLAGS="-C link-arg=-fuse-ld=lld -C link-arg=-Wl,--icf=$FOLDING" ;;
+          esac
+          {
+            echo "## Linux x86-64, \`$REF\` at \`$(git rev-parse HEAD)\`, dist, folding \`$FOLDING\` (RUSTFLAGS \`$RUSTFLAGS\`)"
+            echo
+            echo "The options of the link line of hello-world:"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          cargo rustc --locked --profile dist -p hello-world --bin hello-world -- --print=link-args 2>/dev/null \
+            | tr ' ' '\n' | grep -E '^"?-(Wl|fuse-ld|B)' | sort -u | tee -a "$GITHUB_STEP_SUMMARY"
+          {
+            echo '```'
+            echo
+            echo "MB: as written, stripped, .text"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p measured
+          for app in hello-world hello-world-builders winui-theme-gallery control-catalog-desktop; do
+            cargo build --locked --profile dist -p "$app" --bin "$app"
+            cp "target/dist/$app" "measured/$app"
+            strip -o "measured/$app.stripped" "measured/$app"
+            raw=$(stat -c %s "measured/$app"); stripped=$(stat -c %s "measured/$app.stripped")
+            text=$(size -A "measured/$app" | awk '$1 == ".text" { print $2; exit }')
+            printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
+              "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+          # What the linker folds of the HarfBuzz callbacks (`hb_font_t::has_func_set` compares
+          # their addresses): the two executables linked again with the list of folded sections.
+          if [ "$FOLDING" != none ]; then
+            out="$GITHUB_WORKSPACE/icf-linux-$FOLDING"
+            mkdir -p "$out"
+            for app in hello-world control-catalog-desktop; do
+              if ! CARGO_TERM_COLOR=never cargo rustc --locked --profile dist -p "$app" --bin "$app" -- \
+                -C link-arg=-Wl,--print-icf-sections "-Clink-arg=-Wl,-Map=$out/$app.map" \
+                -W linker-messages -W linker-info > "$out/$app.log" 2>&1; then
+                tail -n 40 "$out/$app.log"
+                exit 1
+              fi
+              python3 -I "$GITHUB_WORKSPACE/tools/scripts/perf/icf_harfbuzz.py" --format lld \
+                --label "Linux x86-64, dist, --icf=$FOLDING, $app" --log "$out/$app.log" \
+                --map "$out/$app.map" --json "$out/$app.json" | tee -a "$GITHUB_STEP_SUMMARY"
+            done
+          fi
+      - name: Keep what the linker folded
+        if: always() && matrix.folding != 'none'
+        uses: actions/upload-artifact@v4
+        with:
+          name: icf-linux-${{ matrix.folding }}
+          path: icf-linux-${{ matrix.folding }}
+          retention-days: 7

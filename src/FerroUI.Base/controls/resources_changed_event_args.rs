@@ -27,9 +27,14 @@ impl ResourcesChangedEventArgs {
     }
 
     /// Creates event arguments with the next sequence number.
+    #[inline]
     pub fn create() -> Self {
-        let next = LAST_SEQUENCE_NUMBER.get().wrapping_add(1);
-        LAST_SEQUENCE_NUMBER.set(next);
+        // One access of the thread-local: this runs for every child added to a parent.
+        let next = LAST_SEQUENCE_NUMBER.with(|last| {
+            let next = last.get().wrapping_add(1);
+            last.set(next);
+            next
+        });
         Self { sequence_number: next }
     }
 

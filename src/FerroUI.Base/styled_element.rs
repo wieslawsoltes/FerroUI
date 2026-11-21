@@ -835,8 +835,15 @@ impl StyledElement {
     ///
     /// You should not usually need to call this method: it is called when an
     /// element is added to or removed from a logical children collection.
+    #[inline]
     pub fn set_parent(&self, parent: impl Into<Nullable<StyledElement>>) {
-        let parent = parent.into().0;
+        self.set_parent_core(parent.into().0);
+    }
+
+    // One body for every argument type of `set_parent`, compiled in this crate. A copy per argument
+    // type, made in the crate that calls it, can lose the inlined thread-local access of
+    // `ResourcesChangedEventArgs::create`, which this path runs for every child added to a parent.
+    fn set_parent_core(&self, parent: Option<Ref<StyledElement>>) {
         let old = self.parent();
         if parent == old {
             return;
