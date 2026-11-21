@@ -4,13 +4,12 @@ section on the C ABI; #976, #978).
 
     python3 scripts/capi/size_by_crate.py <map> [--top N] [--json]
 
-Reads the symbol table of an ld64 map (`-Wl,-map,<file>`, Apple) or a GNU ld / lld map
-(`-Wl,-Map=<file>`), and adds the size of each symbol in a text or data section to the crate the
-symbol belongs to: the first path component of a Rust symbol (legacy `_ZN` or v0 `_R` mangling,
-the crate that defines the item, also for generic code instantiated elsewhere), `C` for the
-program's own symbols and `system` for symbols without a crate (C and C++ libraries such as Skia
-and HarfBuzz are named after their object files where the map has them). Prints MB per crate,
-largest first.
+Reads the symbol table of an ld64 map (`-Wl,-map,<file>`, Apple) and adds the size of each
+symbol to the crate it belongs to: the crate of a Rust symbol (legacy `_ZN` or v0 `_R` mangling,
+the first path component, also for generic code instantiated elsewhere), else the crate of the
+object file that defines it (`native (Skia, HarfBuzz, codecs)` for the C and C++ objects of the
+static library, `C` for the program's own objects). Prints MB per crate, largest first; `--json`
+writes the sizes in bytes.
 """
 
 import argparse

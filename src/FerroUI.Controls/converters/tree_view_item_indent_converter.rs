@@ -7,14 +7,22 @@ use std::rc::Rc;
 
 /// Converts the level of a tree item and an indent to the left margin of the
 /// item.
-#[derive(Default)]
+// Made only through `default` (`non_exhaustive`), which registers the casts of the converter.
+#[non_exhaustive]
 pub struct TreeViewItemIndentConverter;
+
+impl Default for TreeViewItemIndentConverter {
+    fn default() -> Self {
+        register_casts!(Self);
+        Self
+    }
+}
 
 impl TreeViewItemIndentConverter {
     /// The shared instance of the converter.
     pub fn instance() -> Rc<TreeViewItemIndentConverter> {
         ferroui_base::ferro_thread_local! {
-            static INSTANCE: Rc<TreeViewItemIndentConverter> = Rc::new(TreeViewItemIndentConverter);
+            static INSTANCE: Rc<TreeViewItemIndentConverter> = Rc::new(TreeViewItemIndentConverter::default());
         }
         INSTANCE.with(Rc::clone)
     }
