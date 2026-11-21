@@ -455,7 +455,11 @@ impl TopLevel {
                 top_level.invalidate_child_insets_padding();
             }
         }).detach();
+    }
 
+    /// Follows `ToolTip.ServiceEnabled`, from the initialisation of the tool tip class on the
+    /// thread (no element has the property before it): called by its static constructor.
+    pub(crate) fn tool_tips_in_use() {
         // The subscription lives as long as the property.
         ToolTip::service_enabled_property().changed().subscribe(Self::on_tool_tip_service_enabled_changed).detach();
     }
