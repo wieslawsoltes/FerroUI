@@ -1302,6 +1302,7 @@ impl Visual {
     }
 
     /// The geometry clip for this visual.
+    #[inline]
     pub fn clip(&self) -> Option<Ref<Geometry>> {
         self.get_value(Self::clip_property())
     }

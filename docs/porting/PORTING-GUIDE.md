@@ -223,7 +223,13 @@ ferro_properties! {
 - All registered properties of a type (styled, direct, attached, added owners) are declared in its one `ferro_properties!` block, in the order of the upstream static fields. The block generates the same accessors as `ferro_property!` and registers all of them when the class is initialised, so a property is found by name (`find_registered`, string-path bindings, markup) whether or not its accessor ever ran and whether or not an instance exists. A lone `ferro_property!` outside a block still works but registers only when first called: do not use it for new code.
 - Properties declared in a second place (an upstream partial class in another file, or accessors separated by other items) use `ferro_properties! { impl X, fn register_more_properties { .. } }`, and the main block names that function: `impl X, also [X::register_more_properties] { .. }`.
 - `[AssignBinding]` on the upstream property → `StyledPropertyOptions::new(..).assign_binding(true)` (or `property.set_assign_binding(true)` for a direct property); read with `FerroProperty::assign_binding()`.
-- Value types must be `Clone + PartialEq + 'static`.
+- Value types must be `Clone + PartialEq + 'static`. The value type of a styled or attached
+  property also implements `StyledValue`, which names the type the value store keeps it as: an
+  enumeration declared with `ferro_markup_enum!` has it (kept as an `EnumValue` with every other
+  enumeration; `styled_enum!(Type { A, B })` for one without markup metadata), handles
+  (`Ref<T>`, kept as `Ref<FerroObject>`), `Option<T>` and the standard types have it, and any
+  other type states `ferroui_base::styled_value!(Type);` where it is declared (docs/binary-size.md,
+  section 4.27).
 - `GetValue(P)` → `self.get_value(Self::p_property())`; `SetValue` → `set_value`; `SetCurrentValue` → `set_current_value`; `ClearValue` → `clear_value`; direct properties use `set_and_raise(property, &self.field, value)`.
 - `OnPropertyChanged(change)` override → `impl FerroObjectImpl for X { fn on_property_changed(this, change) { Self::parent_on_property_changed(this, change); if change.property() == Self::foo_property().as_property() { let (old, new) = change.get_old_and_new_value::<T>(); .. } } }`.
 - `FooProperty.Changed.AddClassHandler<X>((x, e) => ..)` → `Self::foo_property().changed().add_class_handler::<X>(|x, e| ..).detach()`. `add_class_handler` and `subscribe` return a `Subscription` guard that removes the handler when it is dropped; `detach()` keeps a class handler registered once for the life of the property.

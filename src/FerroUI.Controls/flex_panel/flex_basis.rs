@@ -14,6 +14,8 @@ pub struct FlexBasis {
     kind: FlexBasisKind,
 }
 
+ferroui_base::styled_value!(FlexBasis);
+
 impl FlexBasis {
     /// A basis that represents the "auto" value, which means the size of the
     /// flex item is determined by its content or other factors.

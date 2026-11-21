@@ -1365,6 +1365,84 @@ Tests: `a_page_transition_made_in_code_is_assignable_to_its_contract` (`ferroui-
 `a_converter_made_in_code_is_assignable_to_its_contract` (`ferroui-controls`), with the tests that
 create both through their markup constructors.
 
+### 4.27 One property store per storage type (#986)
+
+The property store was compiled once for every value type of a styled property:
+`EffectiveValue<T>` (its write, `set_and_raise_core`, 1.2 to 2.8 kB a copy), the typed paths of
+`ValueStore`, the immediate value entries, about 6 kB for each of the 157 value types of the
+builders hello world (section 5.6).
+
+**The change.** `StyledValue` (declared in `ferroui-system`, re-exported by `ferroui-base`) names
+the type the store keeps a value type as, its storage type, and the two conversions:
+
+- every enumeration declared with `ferro_markup_enum!` (or `styled_enum!`) is kept as one
+  `EnumValue`, its numeric value; the macro lists the members, and the conversions are a `match`
+  each way, which does not compile when a variant is missing;
+- an `Option<T>` is kept as an `Option` of the storage type of `T`;
+- every other type (handles `Ref<T>`, sets of flags, `ElementRef<T>`, `Rc<dyn ..>`, the other
+  structures) is its own storage type (`styled_value!(Type)` where the type is declared).
+
+Two forms were measured and left out after their gates: handles kept as `Ref<FerroObject>` (the
+checked downcast of every read of a handle, +45 % instructions for the read of a handle, and the
+conversion of a change notification; it saved 0.11 MB, 19 handle types in one store) and points,
+sizes, vectors, thicknesses, rectangles and corner radii kept as `[f64; 2]` and `[f64; 4]` (13.5
+kB for +2.7 to 3.7 % instructions in the reads of inherited values, the moves of a line and the
+start of the tiles).
+
+The store is compiled per storage type: a read is `T::from_storage` of the stored value, a write
+`T::into_storage` and the store's write. What a property hands out still holds its value type: a
+boxed value, a binding value, a setter value and a change notification (a storage type that
+other types share converts the two values back through the routes of the property, one call
+where a value changed; a member of an enumeration is handed out as the static member the macro
+lists, `StyledValue::MEMBERS`, with no call). The metadata the store reads is the typed metadata
+itself for a type that is its own storage type; for the others a copy made once, with the
+default converted and a coercion callback wrapped. The typed API of `StyledProperty<T>` and its
+routes stay per value type.
+
+| Release, macOS ARM64 | Before | After |
+|---|---:|---:|
+| `hello-world-builders` stripped | 20,610,240 B | 20,463,376 B (-0.71 %) |
+| `hello-world-builders` `__TEXT,__text` | 16,336,672 B | 16,213,900 B |
+| `hello-world-builders` Rust code in families of two or more instances | 7.00 of 11.60 MB (60.3 %) | 6.84 of 11.49 MB (59.6 %) |
+| `hello-world` (XAML) stripped | 20,529,096 B | 20,381,928 B (-0.72 %) |
+| `hello-world` (XAML) `__TEXT,__text` | 16,256,708 B | 16,134,144 B |
+
+The first form (handles shared too, `try_set_value_typed` through the untyped route) was
+20,310,896 B: the handles, 0.11 MB, and the typed route of `try_set_value_typed`
+(`route_take_value`, 40.7 kB, which moves the value instead of copying it) are the difference.
+
+`scripts/generic_instances.py`, the families of the store in the builders hello world (instances,
+kB, measured with handles shared; with handles their own storage type the engine families have
+116 instances instead of 97):
+
+| Family | Before | After |
+|---|---:|---:|
+| `EffectiveValue<T>::set_and_raise_core` | 202, 318.3 | 125, 206.1 |
+| `ValueStore::set_value` | 201, 114.9 | 115, 59.2 |
+| `ValueStore::get_base_value` | 169, 99.8 | 99, 56.7 |
+| `EffectiveValue<T>::new` | 157, 78.6 | 97, 45.5 |
+| `raise_unset`, `apply_entry`, `notify_value_changed`, `notify_base_value_changed` | 157 each, 252.0 | 97 each, 163.3 |
+| `ValueStore::create_effective_value` | 157, 38.8 | 89, 27.5 |
+| `ImmediateValueEntry<T>::try_get_value` | 201, 34.6 | 126, 23.1 |
+| New: `route_with_values`, the storage metadata (`storage_copy`) | | 76, 30.8; 137, 24.9 |
+
+157 value types reach the store through 116 storage types. What stays per value type is what
+handles a `T` itself: the routes of `StyledProperty<T>` (about 3.6 kB a type), the typed
+`ValueStore::get_value` and `inherited_or_default` (their default value comes from the typed
+metadata), the class registrations of handles. A storage-typed default (the cache of the single
+default and the metadata of the store kept beside the typed metadata) would move the reads of a
+default to the storage type as well: the next step, about 1.2 kB for each value type that shares
+a storage type.
+
+Breaking: the value type of a styled or attached property implements `StyledValue`
+(`styled_value!(Type)` for a type of an application, `styled_enum!` for an enumeration without
+markup metadata); `StyledProperty<T>` and `AttachedProperty<T>` read and write values only where
+`T: StyledValue`. `FerroObject::try_set_value_typed` sets a styled property through a route of its
+own (`route_take_value`, the value moved), so that it keeps `T: PropertyValue`.
+
+Tests: the conversions (`styled_value` tests of `ferroui-system` and `ferroui-base`), and every
+test of the property store, which now runs on the shared storage type for its enumerations.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
