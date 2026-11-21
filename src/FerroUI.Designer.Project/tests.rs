@@ -30,6 +30,45 @@ impl Drop for Fixture {
 }
 
 #[test]
+fn rust_modules_use_target_paths_and_exact_draft_text() {
+    let fixture = Fixture::new();
+    let root = fixture.write("src/app.rs", "mod shell { #[path = \"colors.rs\"] mod theme; }\r\nmod views;\r\n");
+    let theme = fixture.write("src/shell/colors.rs", "pub const VALUE: u32 = 20;\n");
+    let views = fixture.write("src/views.rs", "mod details;\n");
+    let details = fixture.write("src/views/details.rs", "fn view() {}\n");
+    let authored = "fn view() { /* 🧭 */ }\r\n";
+    let buffers = [PreviewSourceBuffer { uri: theme.clone(), source: Some("pub const VALUE: u32 = 42;\r\n".into()) }];
+    let layout = RustModuleSources::capture(&fixture.0, &fixture.0.join("src/app.rs"), &details, authored, &buffers).unwrap();
+    assert_eq!(layout.target().uri, root);
+    assert_eq!(layout.active().source.as_ref(), authored);
+    assert_eq!(layout.module_file(&root, &["views".into()]).unwrap().uri, views);
+    assert_eq!(layout.module_file(&views, &["details".into()]).unwrap().uri, details);
+    let palette = layout.module_file(&root, &["shell".into(), "theme".into()]).unwrap();
+    assert_eq!(palette.uri, theme);
+    assert_eq!(palette.source.as_ref(), buffers[0].source.as_deref().unwrap());
+    let alternate = file_uri(fixture.0.join("src/views/mod.rs")).unwrap();
+    assert!(layout.dependencies().any(|dependency| dependency == alternate));
+}
+
+#[test]
+fn rust_modules_require_unique_owned_declarations_and_current_sources() {
+    let fixture = Fixture::new();
+    let outside = Fixture::new();
+    let outside_source = outside.write("excluded.rs", "pub const VALUE: u32 = 0;\n");
+    let target = fixture.0.join("src/app.rs");
+    let source = format!("mod colors; #[cfg(feature = \"night\")] mod night; #[path = {:?}] mod outside;", outside.0.join("excluded.rs"));
+    let uri = fixture.write("src/app.rs", &source);
+    let colors = fixture.write("src/colors.rs", "pub const VALUE: u32 = 20;\n");
+    let night = fixture.write("src/night.rs", "pub const VALUE: u32 = 30;\n");
+    assert!(RustModuleSources::capture(&fixture.0, &target, &night, "", &[]).is_none());
+    assert!(RustModuleSources::capture(&fixture.0, &target, &outside_source, "", &[]).is_none());
+    let buffers = [PreviewSourceBuffer { uri: colors.clone(), source: None }];
+    assert!(RustModuleSources::capture(&fixture.0, &target, &uri, &source, &buffers).is_none());
+    fixture.write("src/colors/mod.rs", "pub const VALUE: u32 = 40;\n");
+    assert!(RustModuleSources::capture(&fixture.0, &target, &colors, "", &[]).is_none());
+}
+
+#[test]
 fn preview_resources_resolve_transitive_files_with_owned_drafts_and_uri_aliases() {
     let fixture = Fixture::new();
     let source = r#"<Grid xmlns="https://github.com/ferroui"><ResourceInclude Source="Resources/Outer.xaml"/></Grid>"#;
