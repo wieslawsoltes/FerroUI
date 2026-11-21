@@ -41,11 +41,12 @@ use xamlx::XamlNamespaces;
 pub(crate) const AMBIENT: &str = "ambient";
 
 /// The local names of the types whose instances the framework creates itself (the hosts of
-/// windows, popups, adorners and embedding, and the scope of a theme variant): a document that
-/// defines the theme of one of them belongs to the ambient unit, since no application has to
-/// name them to need them.
-pub(crate) const FRAMEWORK_HOSTS: &[&str] =
-    &["Window", "PopupRoot", "OverlayPopupHost", "AdornerLayer", "EmbeddableControlRoot", "ThemeVariantScope"];
+/// windows, adorners and embedding, and the scope of a theme variant): a document that defines
+/// the theme of one of them belongs to the ambient unit, since no application has to name them to
+/// need them. The hosts of popups (`PopupRoot`, `OverlayPopupHost`) are not among them (#994):
+/// only a `Popup` creates them, an edge its crate states (`Export::creates`), so their themes are
+/// units of their own, kept where something constructs a popup.
+pub(crate) const FRAMEWORK_HOSTS: &[&str] = &["Window", "AdornerLayer", "EmbeddableControlRoot", "ThemeVariantScope"];
 
 /// The attached properties whose value makes the framework construct an instance of their owner:
 /// `ToolTip.Tip` on any element shows a `ToolTip`, which no element of the document is. A document

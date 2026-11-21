@@ -13,9 +13,15 @@
 // the crate keeps in step with its window backends.
 #[path = "chrome/drawn_decorations_targets.rs"]
 mod drawn_decorations_targets;
+// The hosts a popup creates through a factory function the scan does not read (#994).
+#[path = "primitives/popup_hosts.rs"]
+mod popup_hosts;
 
 fn main() {
-    ferroui_build_scan::export::Export::from_env()
-        .not_created_on(drawn_decorations_targets::CLASS, drawn_decorations_targets::NOT_CREATED_ON)
-        .run();
+    let mut export = ferroui_build_scan::export::Export::from_env()
+        .not_created_on(drawn_decorations_targets::CLASS, drawn_decorations_targets::NOT_CREATED_ON);
+    for (class, created) in popup_hosts::CREATES {
+        export = export.creates(class, created);
+    }
+    export.run();
 }
