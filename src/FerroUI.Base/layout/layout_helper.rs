@@ -62,7 +62,8 @@ impl LayoutHelper {
     /// Measures a child with padding, returning the desired size including
     /// the padding.
     pub fn measure_child(control: Option<&Layoutable>, available_size: Size, mut padding: Thickness) -> Size {
-        if let Some((scale, _)) = Self::parent_layout_rounding(control) {
+        // WinUI lays padding out at its authored size (`layout_border_insets`).
+        if let Some((scale, false)) = Self::parent_layout_rounding(control) {
             padding = Self::round_layout_thickness(padding, scale);
         }
 
@@ -88,7 +89,7 @@ impl LayoutHelper {
 
     /// Arranges a child inside padding.
     pub fn arrange_child(child: Option<&Layoutable>, available_size: Size, mut padding: Thickness) -> Size {
-        if let Some((scale, _)) = Self::parent_layout_rounding(child) {
+        if let Some((scale, false)) = Self::parent_layout_rounding(child) {
             padding = Self::round_layout_thickness(padding, scale);
         }
         Self::arrange_child_internal(child, available_size, padding)

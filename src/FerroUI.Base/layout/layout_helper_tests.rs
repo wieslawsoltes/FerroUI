@@ -52,6 +52,10 @@ fn winui_measure_constraint_rounding_follows_the_inherited_layout_option() {
         Some(&child), Size::INFINITY, Thickness::new(4.0, 3.0, 4.0, 3.0), Thickness::default(),
     );
     assert_eq!(padded.height, 78.8);
+    let decorated = LayoutHelper::measure_child(
+        Some(&child), Size::INFINITY, Thickness::new(4.0, 3.0, 4.0, 3.0),
+    );
+    assert_eq!(decorated.height, 78.8, "padding keeps its authored size on the decorator path");
     child.set_height(17.0);
     child.measure(available);
     assert_eq!(child.available.get().height, 16.8);
