@@ -1,9 +1,10 @@
 //! Styles in the form of the element builders ([`style`]).
 
 use crate::{AnimationBuilder, builder::{IntoValue, TypedProperty}};
+use crate::style_resources::{StyleResource, StyleResources};
 use ferroui_base::controls::ResourceKey;
-use ferroui_base::styling::{Selector, Setter, SetterValue, Style};
-use ferroui_base::{BoxedValue, FerroProperty, PropertyValue, Ref, TypeInfo};
+use ferroui_base::styling::{Selector, Setter, SetterValue, Style, ThemeVariant};
+use ferroui_base::{FerroProperty, PropertyValue, Ref, TypeInfo};
 use std::rc::Rc;
 
 /// A style being built: a selector, setters, animations and nested styles. Turns into a
@@ -19,7 +20,7 @@ use std::rc::Rc;
 pub struct StyleBuilder {
     selector: Selector,
     setters: Vec<(&'static FerroProperty, SetterValue)>,
-    resources: Vec<(ResourceKey, BoxedValue)>,
+    resources: StyleResources,
     animations: Vec<AnimationBuilder>,
     nested: Vec<StyleBuilder>,
 }
@@ -38,7 +39,7 @@ pub fn style(selector: &str) -> StyleBuilder {
 /// A style of a selector built with the selectors API of the port
 /// (`Selectors::of_type::<Button>().class("accent")`).
 pub fn style_of(selector: Selector) -> StyleBuilder {
-    StyleBuilder { selector, setters: Vec::new(), resources: Vec::new(), animations: Vec::new(), nested: Vec::new() }
+    StyleBuilder { selector, setters: Vec::new(), resources: StyleResources::default(), animations: Vec::new(), nested: Vec::new() }
 }
 
 /// Parses a selector in the syntax of XAML, nested selectors (`^.selected`,
@@ -69,14 +70,21 @@ impl StyleBuilder {
 
     /// Adds a value to this style's native resource dictionary.
     pub fn resource<T: PropertyValue>(mut self, key: impl Into<ResourceKey>, value: T) -> Self {
-        self.resources.push((key.into(), Rc::new(value)));
+        self.resources.add(None, key.into(), Rc::new(value));
+        self
+    }
+
+    /// Adds a value to a theme dictionary of this style. Native lookup checks
+    /// shared values, the active and inherited variants, and then Default.
+    pub fn theme_resource<T: PropertyValue>(mut self, variant: ThemeVariant, key: impl Into<ResourceKey>, value: T) -> Self {
+        self.resources.add(Some(variant), key.into(), Rc::new(value));
         self
     }
 
     /// Applies a resource as resolved by each matched control. The setter follows
     /// resource and theme changes. A missing resource produces an unset binding.
     pub fn set_resource<P: TypedProperty + ?Sized>(mut self, property: &'static P, key: impl Into<ResourceKey>) -> Self {
-        let binding = super::style_resources::StyleResource(key.into());
+        let binding = StyleResource(key.into());
         self.setters.push((property.untyped(), SetterValue::BindingBase(Rc::new(binding))));
         self
     }
@@ -98,12 +106,7 @@ impl StyleBuilder {
     pub fn build(self) -> Ref<Style> {
         let setters = self.setters.into_iter().map(|(property, value)| Setter::with_value(property, value));
         let style = Style::with_setters(self.selector, setters);
-        if !self.resources.is_empty() {
-            let resources = style.resources();
-            for (key, value) in self.resources {
-                resources.set(key, Some(value));
-            }
-        }
+        self.resources.apply(&style);
         for animation in self.animations {
             style.add_animation(animation.build());
         }

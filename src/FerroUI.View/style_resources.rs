@@ -1,10 +1,51 @@
 //! Per-control resource subscriptions for the declarative style builder.
-use ferroui_base::controls::{ResourceConverter, ResourceHostRef, ResourceKey};
+use ferroui_base::controls::{ResourceConverter, ResourceDictionary, ResourceHostRef, ResourceKey};
 use ferroui_base::data::core::{UntypedObservableBindingExpression, ValueType, ValueTypes};
 use ferroui_base::data::{BindingBase, BindingExpressionBase, BindingPriority};
 use ferroui_base::media::{Color, IBrush, immutable::ImmutableSolidColorBrush};
+use ferroui_base::styling::{Style, ThemeVariant};
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, UnsetValueType};
 use std::rc::Rc;
+
+#[derive(Default)]
+pub(super) struct StyleResources(Vec<ResourceEntry>);
+
+struct ResourceEntry {
+    theme: Option<ThemeVariant>,
+    key: ResourceKey,
+    value: BoxedValue,
+}
+
+impl StyleResources {
+    pub(super) fn add(&mut self, theme: Option<ThemeVariant>, key: ResourceKey, value: BoxedValue) {
+        self.0.push(ResourceEntry { theme, key, value });
+    }
+
+    pub(super) fn apply(self, style: &Style) {
+        if self.0.is_empty() {
+            return;
+        }
+        let resources = style.resources();
+        let mut variants = Vec::<(ThemeVariant, Ref<ResourceDictionary>)>::new();
+        for ResourceEntry { theme, key, value } in self.0 {
+            let dictionary = match theme {
+                None => resources.clone(),
+                Some(theme) => variants
+                    .iter()
+                    .find(|(variant, _)| *variant == theme)
+                    .map(|(_, dictionary)| dictionary.clone())
+                    .unwrap_or_else(|| {
+                        let dictionary = ResourceDictionary::new();
+                        dictionary.set_key(Some(theme.clone()));
+                        resources.add_theme_dictionary(theme.clone(), &dictionary);
+                        variants.push((theme, dictionary.clone()));
+                        dictionary
+                    }),
+            };
+            dictionary.set(key, Some(value));
+        }
+    }
+}
 
 pub(super) struct StyleResource(pub ResourceKey);
 

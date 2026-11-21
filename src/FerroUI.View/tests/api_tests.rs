@@ -76,7 +76,6 @@ fn styles_of_an_element_apply_to_the_controls_below_it() {
 
 #[test]
 fn style_resources_follow_the_matched_control_and_theme() {
-    use ferroui_base::controls::ResourceDictionary;
     use ferroui_base::media::Color;
     use ferroui_controls::Border;
 
@@ -86,7 +85,11 @@ fn style_resources_follow_the_matched_control_and_theme() {
         .styles([style("Border.card")
             .resource("CardFill", Color::from_rgb(41, 93, 192))
             .set_resource(Border::background_property(), "CardFill"),
-            style("TextBlock.label").set_resource(TextBlock::foreground_property(), "ThemeInk")])
+            style("TextBlock.label")
+                .theme_resource(ThemeVariant::default(), "ThemeInk", Color::from_rgb(34, 78, 124))
+                .theme_resource(ThemeVariant::light(), "OtherInk", Color::from_rgb(0, 0, 0))
+                .theme_resource(ThemeVariant::dark(), "ThemeInk", Color::from_rgb(208, 225, 242))
+                .set_resource(TextBlock::foreground_property(), "ThemeInk")])
         .child(border().name("Card").class("card"))
         .child(text_block().class("label").text("Status"))
         .into_element().mount());
@@ -104,11 +107,10 @@ fn style_resources_follow_the_matched_control_and_theme() {
     card.resources().remove(&"CardFill".into());
     assert_eq!(fill(), Color::from_rgb(41, 93, 192));
 
-    for (theme, color) in [(ThemeVariant::light(), Color::from_rgb(17, 43, 62)),
-                           (ThemeVariant::dark(), Color::from_rgb(208, 225, 242))] {
-        let dictionary = ResourceDictionary::new();
-        dictionary.set("ThemeInk", Some(Rc::new(color)));
-        window.resources().set_theme_dictionary(theme.clone(), dictionary);
+    let contrast = ThemeVariant::new("HighContrast", Some(ThemeVariant::dark()));
+    for (theme, color) in [(ThemeVariant::light(), Color::from_rgb(34, 78, 124)),
+                           (ThemeVariant::dark(), Color::from_rgb(208, 225, 242)),
+                           (contrast, Color::from_rgb(208, 225, 242))] {
         window.set_value(ThemeVariant::requested_theme_variant_property(), Some(theme));
         assert_eq!(ink(), color);
     }
