@@ -483,6 +483,12 @@ impl DesignerSession {
     ) -> Result<ChangeSet, DesignerError> {
         self.ensure_writable()?;
         if let Some(rust) = &self.rust {
+            if ferroui_designer_rsx::is_child_list_edit(&edits) {
+                return match rust.plan_child_placement(&self.document, &label, edits, None)? {
+                    Some((plan, basis, _)) => self.commit_rust_child_edit(&label, plan, &basis),
+                    None => self.commit_rust_patches(&label, Vec::new()),
+                };
+            }
             let patches = rust.plan_edit(&self.document, &label, edits)?;
             return self.commit_rust_patches(&label, patches);
         }

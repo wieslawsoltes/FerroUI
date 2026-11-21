@@ -282,6 +282,8 @@ collapsed container expands it; native TreeDataGrid scrolling and drop adorners 
 Before/after/inside drops validate content ownership, cycles and the captured source identity.
 Canvas reparenting preserves measured world geometry across affine parent transforms.
 
+Layer visibility, locking, and selection follow a control through checked source edits. Identical XAML siblings and mapped Rust child lists retain their own identities through moves and wrapping. Use **Undo** and **Redo** for the source gesture. A hidden control keeps its layout space. [VS Code workflow](vscode/authoring.md#keep-layer-state-during-edits)
+
 In a Rust view, drag mapped controls around loops and conditionals on the artboard or in Layers. The moved blocks keep their comments, handler expressions, and other Rust values. A drop below an authored row places the selection before the next Rust child, which may be a loop or expression. A drop inside a panel appends to its authored child list. Computed single-child slots and explicitly computed child collections are editable in Rust source. A successful drag keeps the moved controls selected and uses one Undo step. [VS Code workflow](vscode/authoring.md#move-and-insert-controls-in-a-partial-rsx-preview)
 
 | Focus / gesture | Behavior |

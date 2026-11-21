@@ -1,10 +1,10 @@
-use super::{RustDocument, invalid};
+use super::{ProjectedIdentity, RustDocument, invalid};
 use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Timeline, VisualStateGroup};
 use ferroui_designer_core::{
     ChangeSet, DesignerError, Document, Edit, NodeId, NodeKind, SourceSpan, TextPatch,
 };
 use ferroui_designer_rsx::{RsxAnimation, RsxAnimationEdit, RsxAnimationPlan, RsxChildEdit};
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 
 impl RustDocument {
     pub(crate) fn source_span(&self, document: &Document, node: NodeId) -> Option<SourceSpan> {
@@ -115,12 +115,12 @@ impl RustDocument {
         label: &str,
         edits: Vec<Edit>,
         after: Option<NodeId>,
-    ) -> Result<(RsxChildEdit, Vec<NodeId>), DesignerError> {
+    ) -> Result<Option<(RsxChildEdit, Document, Vec<NodeId>)>, DesignerError> {
         let projection = self.projection().map_err(DesignerError::InvalidEdit)?;
         let mut draft = document.snapshot_without_history();
         let change = draft.apply(label, edits.clone())?;
         if change.is_empty() {
-            return Ok((RsxChildEdit { patches: Vec::new(), controls: BTreeMap::new() }, Vec::new()));
+            return Ok(None);
         }
         let inserted: BTreeSet<_> = change.inserted.into_iter().collect();
         let roots = draft.ast().nodes_in_source_order().filter(|node| {
@@ -129,7 +129,7 @@ impl RustDocument {
         }).map(|node| node.id).collect();
         let plan = projection.plan_child_edit(document, &draft, &edits, after)
             .map_err(DesignerError::InvalidEdit)?;
-        Ok((plan, roots))
+        Ok(Some((plan, draft, roots)))
     }
 
     pub(crate) fn plan_edit(
@@ -138,9 +138,6 @@ impl RustDocument {
         label: &str,
         edits: Vec<Edit>,
     ) -> Result<Vec<TextPatch>, DesignerError> {
-        if ferroui_designer_rsx::is_child_list_edit(&edits) {
-            return self.plan_child_placement(document, label, edits, None).map(|(plan, _)| plan.patches);
-        }
         let map = self
             .map()
             .ok_or_else(|| invalid("Repair the Rust buffer before making visual edits"))?;
@@ -215,5 +212,28 @@ impl RustDocument {
         let source = TextPatch::apply_all(&self.source, patches)?;
         self.update(document, source.into(), label, true)
             .map(|update| update.change)
+    }
+
+    pub(crate) fn apply_child_edit(
+        &mut self,
+        document: &mut Document,
+        label: &str,
+        plan: RsxChildEdit,
+        basis: &Document,
+    ) -> Result<ChangeSet, DesignerError> {
+        let invocation = self.map().ok_or_else(|| invalid("Repair the Rust buffer before editing"))?.invocation;
+        if plan.patches.iter().any(|patch| patch.span.start < invocation.start || patch.span.end > invocation.end)
+            || TextPatch::apply_all(&self.source, plan.patches)? != plan.authored_source
+        {
+            return Err(invalid("The authored Rust view changed before the placement"));
+        }
+        let before = self.history_revision(document);
+        let identity = ProjectedIdentity::Edit {
+            expected: &plan.projected_source, basis, locations: &plan.projected_starts,
+        };
+        let update = self.project_into(document, plan.authored_source.into(), invocation.start, label, true, Some(identity))?;
+        let after = self.history_revision(document);
+        self.history.commit(label.to_owned(), before, after);
+        Ok(update.change)
     }
 }

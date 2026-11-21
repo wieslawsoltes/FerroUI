@@ -450,6 +450,39 @@ fn layer_locked_siblings_remain_valid_positional_anchors_for_outline_ordering() 
 }
 
 #[test]
+fn rust_moves_and_history_keep_flags_on_identical_authored_children() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"rsx! { StackPanel { children([
+        rsx! { Button { content("Review 🧭") } },
+        rsx! { Button { content("Review 🧭") } },
+    ]), } }"#;
+    let mut session = DesignerSession::with_rust_source(
+        source, ContentControl::new(), "file:///LayerIdentity.rs".into(),
+    ).unwrap();
+    let root = session.document().ast().root();
+    let children = session.document().ast().element_children(root);
+    session.set_layers_hidden(&[children[1]], true).unwrap();
+    session.select([children[0]]);
+    session.edit_outline(crate::OutlineCommand::MoveLast).unwrap();
+    let order = [children[1], children[0]];
+    assert_eq!(session.document().ast().element_children(root), order);
+    assert_eq!(session.selection(), &[children[0]]);
+    assert!(session.layer_state(children[1]).hidden);
+    let edited = session.authored_source().to_owned();
+    session.set_layers_locked(&[children[0]], true).unwrap();
+    session.undo().unwrap();
+    assert_eq!(session.authored_source(), source);
+    assert_eq!(session.document().ast().element_children(root), children);
+    assert!(session.layer_state(children[0]).locked);
+    assert!(session.layer_state(children[1]).hidden);
+    session.redo().unwrap();
+    assert_eq!(session.authored_source(), edited);
+    assert_eq!(session.document().ast().element_children(root), order);
+    assert!(session.layer_state(children[0]).locked);
+    assert!(session.layer_state(children[1]).hidden);
+}
+
+#[test]
 fn layer_workspace_tabs_restore_their_own_view_without_leaking_reused_node_ids() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let workspace = crate::DesignerWorkspace::with_uri(SOURCE, URI.into()).unwrap();

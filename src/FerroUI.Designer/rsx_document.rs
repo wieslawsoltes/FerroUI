@@ -1,5 +1,6 @@
 //! Authored Rust text and its editable native projection have separate coordinates.
 mod edits;
+mod history;
 mod modules;
 mod templates;
 
@@ -10,6 +11,7 @@ use ferroui_designer_core::{
 use ferroui_designer_language::LineIndex;
 use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_rsx::{RsxCatalog, RsxSourceMap};
+use history::{update_markup, ProjectedIdentity, RustRevision};
 use std::sync::Arc;
 
 const MAX_SOURCE_BYTES: usize = 1024 * 1024;
@@ -27,7 +29,7 @@ pub(crate) struct RustDocument {
     scope_changed: bool,
     template_scopes: Vec<templates::TemplateScope>,
     diagnostics: Vec<Diagnostic>,
-    history: SourceHistory<Arc<str>>,
+    history: SourceHistory<RustRevision>,
 }
 
 impl RustDocument {
@@ -58,7 +60,7 @@ impl RustDocument {
         };
         let mut document = Document::new(EMPTY_PREVIEW)?;
         document.set_history_limit(0);
-        rust.project_into(&mut document, source, 0, "Open Rust view", false)?;
+        rust.project_into(&mut document, source, 0, "Open Rust view", false, None)?;
         rust.scope_changed = false;
         Ok((document, rust))
     }
@@ -117,30 +119,12 @@ impl RustDocument {
                 diagnostics: self.diagnostics.clone(),
             });
         }
-        let before = self.source.clone();
+        let before = self.history_revision(document);
         let (caret, anchor_replaced) = carry_caret(&self.source, &source, self.caret);
-        let update = self.project_into(document, source.clone(), caret, label, require_valid)?;
+        let update = self.project_into(document, source, caret, label, require_valid, None)?;
         self.scope_changed |= anchor_replaced;
-        self.history.commit(label.to_owned(), before, source);
+        self.history.commit(label.to_owned(), before, self.history_revision(document));
         Ok(update)
-    }
-
-    pub(crate) fn restore_history(
-        &mut self,
-        document: &mut Document,
-        redo: bool,
-    ) -> Result<ChangeSet, DesignerError> {
-        let mut history = self.history.clone();
-        let (label, source) = if redo {
-            history.redo().ok_or(DesignerError::NothingToRedo)?
-        } else {
-            history.undo().ok_or(DesignerError::NothingToUndo)?
-        };
-        let (caret, anchor_replaced) = carry_caret(&self.source, &source, self.caret);
-        let update = self.project_into(document, source, caret, &label, false)?;
-        self.scope_changed |= anchor_replaced;
-        self.history = history;
-        Ok(update.change)
     }
 
     pub(crate) fn select_invocation(
@@ -176,6 +160,7 @@ impl RustDocument {
             start,
             "Select Rust view",
             true,
+            None,
         )?;
         Ok(())
     }
@@ -199,6 +184,7 @@ impl RustDocument {
             self.caret,
             "Refresh Rust registry",
             false,
+            None,
         ) {
             self.catalog = previous;
             return Err(error);
@@ -213,6 +199,7 @@ impl RustDocument {
         caret: usize,
         label: &str,
         require_valid: bool,
+        identity: Option<ProjectedIdentity<'_>>,
     ) -> Result<SourceUpdate, DesignerError> {
         let previous = document.revision();
         let next = previous
@@ -229,11 +216,11 @@ impl RustDocument {
         };
         let (map, diagnostics, mut change) = match projection {
             Ok((markup, map)) if !require_valid || map.invocation.start == caret => {
-                let update = candidate.try_update_source(label, markup)?;
-                if !update.valid {
-                    return Err(invalid("The RSX projection produced invalid markup"));
-                }
-                (Some(Arc::new(map)), Vec::new(), update.change)
+                let change = match identity {
+                    Some(identity) => identity.apply(&mut candidate, label, markup)?,
+                    None => update_markup(&mut candidate, label, markup)?,
+                };
+                (Some(Arc::new(map)), Vec::new(), change)
             }
             Ok(_) => return Err(invalid("The edit would change the selected RSX invocation")),
             Err(error) if require_valid => return Err(invalid(error)),

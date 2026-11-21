@@ -1,9 +1,10 @@
 //! Native layout measurement and one-step placement for Studio and editor hosts.
 use crate::workspace_tools::{is_custom_panel, measure, parent, Measurement};
 use crate::DesignerSession;
-use ferroui_designer_core::{Edit, NodeId, SourceSpan, TextPatch};
-use ferroui_designer_rsx::{RsxProjection, RsxWrap};
+use ferroui_designer_core::{Document, Edit, NodeId, SourceSpan, TextPatch};
+use ferroui_designer_rsx::{RsxChildEdit, RsxProjection, RsxWrap};
 use ferroui_designer_tools::{plan_selection_wrap, SelectionWrap, WrapKind};
+use std::collections::BTreeMap;
 
 pub(crate) struct WrapContext<'a> {
     session: &'a DesignerSession,
@@ -12,10 +13,25 @@ pub(crate) struct WrapContext<'a> {
     rsx: Option<RsxProjection<'a>>,
 }
 
-pub(crate) struct PreparedWrap {
+pub struct PreparedWrap {
     pub(crate) layout: SelectionWrap,
-    pub(crate) patches: Vec<TextPatch>,
-    pub(crate) wrapper: SourceSpan,
+    pub basis: Document,
+    pub change: WrapSourceChange,
+    pub wrapper: SourceSpan,
+}
+
+pub enum WrapSourceChange {
+    Xaml(Vec<TextPatch>),
+    Rust(RsxChildEdit),
+}
+
+impl WrapSourceChange {
+    pub fn patches(&self) -> &[TextPatch] {
+        match self {
+            Self::Xaml(patches) => patches,
+            Self::Rust(edit) => &edit.patches,
+        }
+    }
 }
 
 impl<'a> WrapContext<'a> {
@@ -76,7 +92,20 @@ impl<'a> WrapContext<'a> {
     pub(crate) fn prepare(&self, kind: WrapKind) -> Result<PreparedWrap, String> {
         let document = self.session.document();
         let layout = self.layout(kind)?;
-        let (patches, wrapper) = if let Some(rsx) = &self.rsx {
+        let xaml_patches = layout.xaml_patches(document).map_err(|error| error.to_string())?;
+        let mut basis = document.snapshot_without_history();
+        basis.apply_text_patches(document.revision(), kind.label(), xaml_patches.clone())
+            .map_err(|error| error.to_string())?;
+        let ast = basis.ast();
+        let wrapper = ast.node(layout.children[0])
+            .and_then(|child| child.parent)
+            .and_then(|parent| ast.node(parent))
+            .filter(|node| node.parent == Some(layout.container))
+            .ok_or("The selected controls could not retain their source identity")?;
+        if ast.element_children(wrapper.id) != layout.children {
+            return Err("The generated wrapper did not retain the selected controls in source order".into());
+        }
+        let (change, wrapper) = if let Some(rsx) = &self.rsx {
             let mapping = rsx.preview_markup();
             let ordinal = |node| {
                 let start = document
@@ -115,33 +144,33 @@ impl<'a> WrapContext<'a> {
                 guarded_properties: &layout.guarded_properties,
                 attributes: &attributes,
             })?;
-            (planned.patches, planned.wrapper)
-        } else {
-            let patches = layout
-                .xaml_patches(document)
-                .map_err(|error| error.to_string())?;
-            let mut candidate = document.snapshot_without_history();
-            candidate
-                .apply_text_patches(document.revision(), kind.label(), patches.clone())
-                .map_err(|error| error.to_string())?;
-            let ast = candidate.ast();
-            let wrapper = ast
-                .node(layout.children[0])
-                .and_then(|child| child.parent)
-                .and_then(|parent| ast.node(parent))
-                .filter(|node| node.parent == Some(layout.container))
-                .ok_or("The selected controls could not retain their source identity")?;
-            if ast.element_children(wrapper.id) != layout.children {
-                return Err(
-                    "The generated wrapper did not retain the selected controls in source order"
-                        .into(),
-                );
+            let original_ids: BTreeMap<_, _> = document.ast().elements().map(|node| (node.span.start, node.id)).collect();
+            let mut originals = mapping.controls.iter().map(|offset| {
+                original_ids.get(offset).copied().ok_or("A wrapped control no longer has an original identity")
+            });
+            let mut controls = BTreeMap::new();
+            let mut projected_starts = BTreeMap::new();
+            for (name, start) in planned.controls {
+                let id = if name == planned.wrapper {
+                    wrapper.id
+                } else {
+                    originals.next().ok_or("The wrapped controls changed identity")??
+                };
+                controls.insert(id, name);
+                projected_starts.insert(id, start);
             }
-            (patches, wrapper.name_span)
+            let edit = RsxChildEdit {
+                patches: planned.patches, authored_source: planned.authored_source,
+                projected_source: planned.projected_source, controls, projected_starts,
+            };
+            (WrapSourceChange::Rust(edit), planned.wrapper)
+        } else {
+            (WrapSourceChange::Xaml(xaml_patches), wrapper.name_span)
         };
         Ok(PreparedWrap {
             layout,
-            patches,
+            basis,
+            change,
             wrapper,
         })
     }
@@ -156,10 +185,9 @@ impl DesignerSession {
 
     pub(crate) fn commit_wrap(&mut self, plan: PreparedWrap) -> Result<NodeId, String> {
         let label = format!("Wrap in {}", plan.layout.kind.label());
-        if self.uses_rust_source() {
-            self.commit_rust_patches(&label, plan.patches)
-        } else {
-            self.commit_xaml_patches(label, plan.patches)
+        match plan.change {
+            WrapSourceChange::Rust(edit) => self.commit_rust_child_edit(&label, edit, &plan.basis),
+            WrapSourceChange::Xaml(patches) => self.commit_xaml_patches(label, patches),
         }
         .map_err(|error| error.to_string())?;
         self.changed(true);

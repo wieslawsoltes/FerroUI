@@ -9,8 +9,14 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub struct RsxChildEdit {
     pub patches: Vec<TextPatch>,
+    /// The result of applying the checked patches to the authored Rust buffer.
+    pub authored_source: String,
     /// New authored tag-name ranges for the projected node identities in the edit draft.
     pub controls: BTreeMap<NodeId, SourceSpan>,
+    /// Canonical native markup after validating the authored Rust candidate.
+    pub projected_source: String,
+    /// New element starts in the canonical markup, keyed by the edit draft's identities.
+    pub projected_starts: BTreeMap<NodeId, usize>,
 }
 
 /// A child-list transaction can combine placements and removals with mapped
@@ -223,10 +229,19 @@ impl RsxProjection<'_> {
             }
         }
         let controls = order
-            .into_iter()
+            .iter()
+            .copied()
             .zip(actual.nodes.iter().map(|node| node.name))
             .collect();
-        Ok(RsxChildEdit { patches, controls })
+        let crate::RsxPreviewMarkup { source: projected_source, controls: starts, .. } = actual.preview_markup();
+        let projected_starts = order.into_iter().zip(starts).collect();
+        Ok(RsxChildEdit {
+            patches,
+            authored_source: edited,
+            controls,
+            projected_source,
+            projected_starts,
+        })
     }
 
     fn layout_value(

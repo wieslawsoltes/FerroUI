@@ -1,6 +1,6 @@
 use crate::rsx_document::RustDocument;
 use crate::{DesignerSession, PreviewStatus};
-use ferroui_designer_core::{ChangeSet, DesignerError, Diagnostic, NodeId, SourceSpan, TextPatch};
+use ferroui_designer_core::{ChangeSet, DesignerError, Diagnostic, Document, NodeId, SourceSpan, TextPatch};
 use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_rsx::{RsxCatalog, RsxSourceMap};
 use std::sync::Arc;
@@ -128,7 +128,7 @@ impl DesignerSession {
         let mut rust = self.rust.clone().ok_or("Open a mapped Rust view")?;
         let mut document = self.document.snapshot_without_history();
         rust.set_modules(&mut document, Some(modules)).map_err(|error| error.to_string())?;
-        rust.record_module_edit(label);
+        rust.record_module_edit(label, &document);
         self.remember_playback_for_reload();
         self.rust = Some(rust);
         self.document = document;
@@ -206,6 +206,22 @@ impl DesignerSession {
         patches: Vec<TextPatch>,
         shared_color: Option<SourceSpan>,
     ) -> Result<ChangeSet, DesignerError> {
+        self.commit_rust_edit(|rust, document| rust.apply(document, label, patches, shared_color))
+    }
+
+    pub(crate) fn commit_rust_child_edit(
+        &mut self,
+        label: &str,
+        plan: ferroui_designer_rsx::RsxChildEdit,
+        basis: &Document,
+    ) -> Result<ChangeSet, DesignerError> {
+        self.commit_rust_edit(|rust, document| rust.apply_child_edit(document, label, plan, basis))
+    }
+
+    fn commit_rust_edit(
+        &mut self,
+        update: impl FnOnce(&mut RustDocument, &mut Document) -> Result<ChangeSet, DesignerError>,
+    ) -> Result<ChangeSet, DesignerError> {
         self.ensure_writable()?;
         if !self.can_manipulate() {
             return Err(DesignerError::InvalidEdit(
@@ -214,7 +230,7 @@ impl DesignerSession {
         }
         let mut rust = self.rust.clone().expect("Rust source is active");
         let mut document = self.document.snapshot_without_history();
-        let change = rust.apply(&mut document, label, patches, shared_color)?;
+        let change = update(&mut rust, &mut document)?;
         if !change.is_empty() {
             self.remember_playback_for_reload();
             self.rust = Some(rust);

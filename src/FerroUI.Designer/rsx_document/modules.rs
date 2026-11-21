@@ -34,6 +34,7 @@ impl RustDocument {
             self.caret,
             "Refresh Rust module sources",
             false,
+            None,
         ) {
             self.modules = previous;
             return Err(error);
@@ -41,9 +42,9 @@ impl RustDocument {
         Ok(true)
     }
 
-    pub(crate) fn record_module_edit(&mut self, label: String) {
-        self.history
-            .commit(label, self.source.clone(), self.source.clone());
+    pub(crate) fn record_module_edit(&mut self, label: String, document: &Document) {
+        let revision = self.history_revision(document);
+        self.history.commit(label, revision.clone(), revision);
     }
 
     pub(crate) fn invalidate_modules(

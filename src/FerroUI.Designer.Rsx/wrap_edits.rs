@@ -22,6 +22,10 @@ pub struct RsxWrapResult {
     pub patches: Vec<TextPatch>,
     /// Name of the new wrapper in the authored source after applying the patches.
     pub wrapper: SourceSpan,
+    pub authored_source: String,
+    pub projected_source: String,
+    /// Name spans and markup starts in the validated control order.
+    pub controls: Vec<(SourceSpan, usize)>,
 }
 
 impl RsxProjection<'_> {
@@ -157,9 +161,15 @@ impl RsxProjection<'_> {
         {
             return Err("Wrapping would change an unmapped Rust child or property".into());
         }
+        let wrapper = added.name;
+        let crate::RsxPreviewMarkup { source: projected_source, controls: starts, .. } = parsed.preview_markup();
+        let controls = parsed.nodes.iter().map(|node| node.name).zip(starts).collect();
         Ok(RsxWrapResult {
             patches,
-            wrapper: added.name,
+            wrapper,
+            authored_source: candidate,
+            projected_source,
+            controls,
         })
     }
 

@@ -1,6 +1,7 @@
 mod changes;
 mod editing;
 mod insertion;
+mod projection;
 
 use crate::{Ast, NodeId, SourceHistory, SourceSpan};
 use changes::{diff, unchanged};
@@ -183,6 +184,7 @@ struct Snapshot {
 #[derive(Clone)]
 pub struct Document {
     current: Snapshot,
+    lineage: Arc<()>,
     revision: u64,
     next_id: NodeId,
     history: SourceHistory<Snapshot>,
@@ -197,6 +199,7 @@ impl Document {
         let source: Arc<str> = source.into();
         Ok(Self {
             saved_source: source.clone(),
+            lineage: Arc::new(()),
             current: Snapshot {
                 source: source.clone(),
                 valid_source: source,
@@ -224,6 +227,7 @@ impl Document {
     pub fn snapshot_without_history(&self) -> Self {
         Self {
             current: self.current.clone(),
+            lineage: self.lineage.clone(),
             revision: self.revision,
             next_id: self.next_id,
             history: self.history.without_entries(),

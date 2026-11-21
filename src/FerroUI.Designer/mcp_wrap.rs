@@ -85,7 +85,7 @@ fn report(session: &DesignerSession, plan: &PreparedWrap) -> Value {
         json!({
             "layout":plan.layout,
             "wrapper":plan.wrapper,
-            "patches":plan.patches,
+            "patches":plan.change.patches(),
         }),
     )
 }
@@ -111,12 +111,21 @@ impl DesignerMcp {
         args: &Value,
         projection: Option<RsxProjection<'_>>,
     ) -> Result<(Vec<TextPatch>, SourceSpan), String> {
+        let prepared = self.prepare_wrap_edit(args, projection)?;
+        Ok((prepared.change.patches().to_vec(), prepared.wrapper))
+    }
+
+    /// Return the checked syntax and authored source edits for an editor transaction.
+    pub fn prepare_wrap_edit(
+        &self,
+        args: &Value,
+        projection: Option<RsxProjection<'_>>,
+    ) -> Result<PreparedWrap, String> {
         self.validate(EDIT, args)?;
         let owner = self.session()?;
         let session = owner
             .try_borrow()
             .map_err(|_| "Designer is already processing a transaction")?;
-        let prepared = checked(&session, args, projection)?;
-        Ok((prepared.patches, prepared.wrapper))
+        checked(&session, args, projection)
     }
 }
