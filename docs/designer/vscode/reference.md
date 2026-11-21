@@ -131,6 +131,14 @@ In VS Code, call `ferroui_workspace_plan_resource_rename` with `path`, a zero-ba
 
 Call `ferroui_workspace_rename_resource` with the same fields and the returned `review`. The write requires `ferroui.mcp.allowWrites` and applies all changes in one editor Undo step. In Studio, use `designer_plan_resource_rename` and `designer_rename_resource` with the active XAML UTF-8 byte `offset`, `new_name`, and `expected_revision`. Pass the `review` on apply. Use Undo from a participating tab to restore all buffers. [Authoring workflow](authoring.md#rename-a-resource-across-xaml-files)
 
+### Move a resource with MCP
+
+Call `ferroui_workspace_resource_move_targets` with the XAML `path` and a zero-based UTF-16 `position` on the resource declaration or one of its references. Pass `folder` to identify the workspace root when needed. Each destination includes its dictionary label, range, and versioned address.
+
+Pass the same source fields and `destination: {"uri": "…", "request": {"version": -1, "position": {"line": 0, "character": 1}}}` to `ferroui_workspace_plan_resource_move`. Copy the actual `uri` and `request` from the selected destination. An unopened dictionary can have a negative version. Review each document’s `before`, versioned `edit`, and `after` text. `linkedDestination` indicates a new include in the original scope. Call `ferroui_workspace_move_resource` with the same arguments and the returned `review` to apply in one Undo step. Writes require `ferroui.mcp.allowWrites`.
+
+In Studio, use `designer_resource_move_targets`, `designer_plan_resource_move`, and `designer_move_resource`. Replace the source path and position with the active XAML UTF-8 byte `offset` and `expected_revision`. Use the same returned `destination` and `review` fields. Discovery or edits that change a reviewed document require a fresh review. [Authoring workflow](authoring.md#move-a-resource-to-another-dictionary)
+
 ### Extract a resource dictionary with MCP
 
 Call `designer_dictionary_extraction` with an authored `node` and the current `expected_revision`. Use the `session` from `designer_open` in VS Code. The result includes the source range, entry count, and suggested sibling filename. Pass `file_name` to preview the versioned `edit`, the `file` to create, and the `review` identifier.

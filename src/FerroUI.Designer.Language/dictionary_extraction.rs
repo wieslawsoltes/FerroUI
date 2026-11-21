@@ -207,7 +207,7 @@ impl LanguageService {
         Ok(())
     }
 
-    fn check_moved_context(
+    pub(super) fn check_moved_context(
         &self,
         uri: &str,
         document: &Document,

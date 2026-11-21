@@ -1,10 +1,9 @@
 use super::{
-    reviewed_sources::{check_saved, patched},
+    reviewed_sources::SourceReviewAnchor,
     DesignerWorkspace,
 };
-use ferroui_designer_core::Edit;
 use ferroui_designer_language::{
-    RegisteredPropertyPlan, RegisteredPropertyTarget, ReviewedDocument, SourceReviewRequest,
+    RegisteredPropertyPlan, RegisteredPropertyTarget,
 };
 use std::rc::Rc;
 
@@ -14,54 +13,10 @@ mod tests;
 #[path = "workspace_registered_rename_ui.rs"]
 mod ui;
 
-#[derive(Clone, PartialEq, Eq)]
-pub(super) struct RenameAnchor {
-    pub(super) uri: String,
-    pub(super) revision: u64,
-    pub(super) request: SourceReviewRequest,
-}
-
 impl DesignerWorkspace {
-    pub(super) fn source_rename_anchor(
-        self: &Rc<Self>,
-        offset: usize,
-    ) -> Result<RenameAnchor, String> {
-        if self.pending_source.get() {
-            return Err("Apply the current source draft before reviewing the rename".into());
-        }
-        let uri = self.current_xaml_file()?;
-        self.synchronize_language_service()?;
-        let revision = self.session.borrow().document().revision();
-        let tool = self.try_language_service()?;
-        let request = SourceReviewRequest {
-            version: tool
-                .version(&uri)
-                .ok_or("Index the active XAML file before reviewing")?,
-            position: tool
-                .index(&uri)
-                .and_then(|index| index.position(offset))
-                .map_err(|e| e.to_string())?,
-        };
-        Ok(RenameAnchor {
-            uri,
-            request,
-            revision,
-        })
-    }
-
-    pub(super) fn require_rename_anchor(&self, anchor: &RenameAnchor) -> Result<(), String> {
-        if self.pending_source.get()
-            || self.current_xaml_file()? != anchor.uri
-            || self.session.borrow().document().revision() != anchor.revision
-        {
-            return Err("The XAML source changed. Prepare the rename review again".into());
-        }
-        Ok(())
-    }
-
     fn registered_property_target(
         &self,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
     ) -> Result<RegisteredPropertyTarget, String> {
         self.try_language_service()?
             .registered_property_target(&anchor.uri, &anchor.request)
@@ -70,10 +25,10 @@ impl DesignerWorkspace {
 
     fn review_registered_property(
         &self,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         new_name: &str,
     ) -> Result<RegisteredPropertyPlan, String> {
-        self.require_rename_anchor(anchor)?;
+        self.require_source_review_anchor(anchor)?;
         let drafts = self.refresh_move_drafts(&anchor.uri)?;
         self.try_language_service()?
             .plan_registered_property_rename_with_drafts(&anchor.uri, &anchor.request, new_name, &drafts)
@@ -82,7 +37,7 @@ impl DesignerWorkspace {
 
     fn apply_registered_property(
         self: &Rc<Self>,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         new_name: &str,
         review: &str,
     ) -> Result<RegisteredPropertyPlan, String> {
@@ -93,69 +48,8 @@ impl DesignerWorkspace {
                     .into(),
             );
         }
-        self.apply_reviewed_rename(anchor, "Rename registered property", &plan.documents)?;
+        self.apply_reviewed_source_edits(anchor, "Rename registered property", &plan.documents)?;
         Ok(plan)
-    }
-
-    pub(super) fn apply_reviewed_rename(
-        self: &Rc<Self>,
-        anchor: &RenameAnchor,
-        label: &str,
-        documents: &[ReviewedDocument],
-    ) -> Result<(), String> {
-        self.require_rename_anchor(anchor)?;
-        {
-            let session = self.session.borrow();
-            session
-                .ensure_writable()
-                .map_err(|error| error.to_string())?;
-            if session.collaboration_actor().is_some() {
-                return Err(
-                    "Open the local project for source edits spanning files".into(),
-                );
-            }
-        }
-        let mut staged = self.stage_reviewed_sources()?;
-        let label = self.project.borrow_mut().linked_history.label(label)?;
-        let mut participants = Vec::new();
-        for change in documents {
-            let uri = &change.edit.uri;
-            let tab = staged.tab(self, uri)?;
-            check_saved(&staged.workspace, uri, &tab)?;
-            staged
-                .tabs
-                .insert(uri.clone(), patched(tab, change, &label)?);
-            participants.push(uri.clone());
-        }
-        staged.prepare_edits(&participants)?;
-        if let Some(source) = documents
-            .iter()
-            .find(|change| change.edit.uri == anchor.uri)
-        {
-            self.session
-                .borrow_mut()
-                .apply_at(
-                    anchor.revision,
-                    &label,
-                    vec![Edit::ReplaceSource {
-                        source: source.after.clone(),
-                    }],
-                )
-                .map_err(|error| error.to_string())?;
-        } else {
-            self.session
-                .borrow_mut()
-                .record_workspace_operation(anchor.revision, label.clone())
-                .map_err(|error| error.to_string())?;
-            participants.push(anchor.uri.clone());
-        }
-        self.publish_reviewed_sources(staged, &participants)?;
-        self.project
-            .borrow_mut()
-            .linked_history
-            .link(label, participants);
-        self.refresh(true);
-        Ok(())
     }
 
     #[cfg(feature = "mcp")]
@@ -165,7 +59,7 @@ impl DesignerWorkspace {
         new_name: &str,
         review: Option<&str>,
     ) -> Result<RegisteredPropertyPlan, String> {
-        let anchor = self.source_rename_anchor(offset)?;
+        let anchor = self.source_review_anchor(offset)?;
         match review {
             Some(review) => self.apply_registered_property(&anchor, new_name, review),
             None => self.review_registered_property(&anchor, new_name),

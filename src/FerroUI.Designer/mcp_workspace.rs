@@ -13,9 +13,11 @@ mod canvas_guides;
 mod project_library;
 #[path = "mcp_command_bindings.rs"]
 mod command_bindings;
+#[path = "mcp_resource_move.rs"]
+mod resource_move;
 
 pub(super) fn handles(name: &str) -> bool {
-    canvas_guides::handles(name) || project_library::handles(name) || command_bindings::handles(name) || matches!(
+    canvas_guides::handles(name) || project_library::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -133,6 +135,7 @@ pub(super) fn tools() -> Vec<Value> {
     tools.extend(canvas_guides::tools());
     tools.extend(project_library::tools());
     tools.extend(command_bindings::tools());
+    tools.extend(resource_move::tools());
     tools
 }
 pub(super) fn call(
@@ -149,6 +152,9 @@ pub(super) fn call(
     }
     if command_bindings::handles(name) {
         return command_bindings::call(workspace, name, args);
+    }
+    if resource_move::handles(name) {
+        return resource_move::call(workspace, name, args);
     }
     match name {
         "designer_reveal_rsx_animation_issue" => {

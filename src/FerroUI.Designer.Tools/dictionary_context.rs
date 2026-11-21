@@ -80,14 +80,14 @@ pub(super) fn inherit(
     Ok(())
 }
 
-fn attribute<'a>(node: &'a Node, namespace: &str, local: &str) -> Option<&'a Attribute> {
+pub(super) fn attribute<'a>(node: &'a Node, namespace: &str, local: &str) -> Option<&'a Attribute> {
     node.attributes.iter().find(|attribute| {
         attribute.namespace_uri.as_deref() == Some(namespace)
             && attribute.name.rsplit(':').next() == Some(local)
     })
 }
 
-fn add_ignorable(source: &Document, node: &Node, ignored: &mut BTreeSet<String>) {
+pub(super) fn add_ignorable(source: &Document, node: &Node, ignored: &mut BTreeSet<String>) {
     if let Some(ignorable) = attribute(node, COMPATIBILITY, "Ignorable") {
         let namespaces = source.ast().namespaces(node.id);
         ignored.extend(

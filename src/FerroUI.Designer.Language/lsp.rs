@@ -251,6 +251,21 @@ impl LspServer {
                     uri, &request, text(params, "newName")?,
                 )?))
             }
+            "ferroui/resourceMoveTarget" | "ferroui/planResourceMove" => {
+                let source = uri(params)?;
+                let request = decode(&params["request"])?;
+                if method == "ferroui/resourceMoveTarget" {
+                    Ok(json!(self.service.resource_move_target(source, &request)?))
+                } else {
+                    let destination = &params["destination"];
+                    Ok(json!(self.service.plan_resource_move(
+                        source,
+                        &request,
+                        text(destination, "uri")?,
+                        &decode(&destination["request"])?,
+                    )?))
+                }
+            }
             "ferroui/registeredPropertyTarget" | "ferroui/planRegisteredPropertyRename" => {
                 let uri = uri(params)?;
                 let request = decode(&params["request"])?;
@@ -550,7 +565,7 @@ impl LspServer {
                 "codeActionProvider": { "codeActionKinds": if self.extraction_commands { vec!["quickfix", "refactor.extract"] } else { vec!["quickfix"] } },
                 "documentSymbolProvider": true, "foldingRangeProvider": true, "workspaceSymbolProvider": true,
                 "signatureHelpProvider": { "triggerCharacters": ["{", ",", "="] },
-                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiProjectLibrary": true, "ferrouiAssetMove": true, "ferrouiResourceRename": true, "ferrouiRegisteredPropertyRename": true, "ferrouiRegisteredTypeRename": true, "ferrouiEventHandlers": true, "ferrouiCommandBindings": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
+                "experimental": { "ferrouiProjectMetadata": true, "ferrouiProjectNavigation": true, "ferrouiProjectLibrary": true, "ferrouiAssetMove": true, "ferrouiResourceRename": true, "ferrouiResourceMove": true, "ferrouiRegisteredPropertyRename": true, "ferrouiRegisteredTypeRename": true, "ferrouiEventHandlers": true, "ferrouiCommandBindings": true, "ferrouiDictionaryExtraction": true, "ferrouiFileMove": true, "ferrouiFileMoveRust": true, "ferrouiFileMoveSaved": true, "ferrouiFileMoveRustSymbols": true },
                 "semanticTokensProvider": {
                     "legend": { "tokenTypes": ["type", "property", "string", "comment", "variable", "keyword", "number", "namespace"], "tokenModifiers": [] },
                     "full": { "delta": true }

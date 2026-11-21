@@ -1,11 +1,11 @@
 //! Keep Rust analysis off the Studio dispatcher during a type rename review.
-use super::{registered_rename::RenameAnchor, rust_review::RustReview, DesignerWorkspace};
+use super::{reviewed_sources::SourceReviewAnchor, rust_review::RustReview, DesignerWorkspace};
 use ferroui_designer_language::{RegisteredTypePlan, RustRenameResolution};
 use std::rc::Rc;
 
 #[derive(PartialEq, Eq)]
 pub(super) struct TypeRenameTarget {
-    anchor: RenameAnchor,
+    anchor: SourceReviewAnchor,
     name: String,
 }
 
@@ -22,7 +22,7 @@ impl DesignerWorkspace {
         cancel: bool,
     ) -> Result<serde_json::Value, String> {
         use serde_json::json;
-        let anchor = self.source_rename_anchor(offset)?;
+        let anchor = self.source_review_anchor(offset)?;
         if let Some(review) = review {
             return Ok(json!(self.apply_registered_type(&anchor, name, review)?));
         }
@@ -40,11 +40,11 @@ impl DesignerWorkspace {
 
     pub(super) fn review_registered_type(
         &self,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         name: &str,
         allow_analysis: bool,
     ) -> Result<Option<RegisteredTypePlan>, String> {
-        self.require_rename_anchor(anchor)?;
+        self.require_source_review_anchor(anchor)?;
         let target = TypeRenameTarget {
             anchor: anchor.clone(),
             name: name.into(),
@@ -113,7 +113,7 @@ impl DesignerWorkspace {
 
     pub(super) fn apply_registered_type(
         self: &Rc<Self>,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         name: &str,
         review: &str,
     ) -> Result<RegisteredTypePlan, String> {
@@ -126,12 +126,12 @@ impl DesignerWorkspace {
                     .into(),
             );
         }
-        self.apply_reviewed_rename(anchor, "Rename registered type", &plan.documents)?;
+        self.apply_reviewed_source_edits(anchor, "Rename registered type", &plan.documents)?;
         self.cancel_registered_type(anchor, name);
         Ok(plan)
     }
 
-    pub(super) fn cancel_registered_type(&self, anchor: &RenameAnchor, name: &str) {
+    pub(super) fn cancel_registered_type(&self, anchor: &SourceReviewAnchor, name: &str) {
         let target = TypeRenameTarget {
             anchor: anchor.clone(),
             name: name.into(),

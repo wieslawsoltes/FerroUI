@@ -293,6 +293,24 @@
         "icon": "$(close)"
       },
       {
+        "command": "ferroui.moveResource",
+        "title": "Move Resource…",
+        "category": "FerroUI",
+        "icon": "$(arrow-right)"
+      },
+      {
+        "command": "ferroui.resourceMoveReview.apply",
+        "title": "Apply Resource Move",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.resourceMoveReview.cancel",
+        "title": "Cancel Resource Move",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
         "command": "ferroui.renameRegisteredProperty",
         "title": "Rename Registered Property…",
         "category": "FerroUI",
@@ -541,6 +559,18 @@
           "when": "ferroui.reviewingResourceRename"
         },
         {
+          "command": "ferroui.moveResource",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.resourceMoveReview.apply",
+          "when": "ferroui.reviewingResourceMove"
+        },
+        {
+          "command": "ferroui.resourceMoveReview.cancel",
+          "when": "ferroui.reviewingResourceMove"
+        },
+        {
           "command": "ferroui.renameRegisteredProperty",
           "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted"
         },
@@ -657,6 +687,16 @@
           "group": "navigation@2"
         },
         {
+          "command": "ferroui.resourceMoveReview.apply",
+          "when": "ferroui.reviewingResourceMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-resource-move-review)",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.resourceMoveReview.cancel",
+          "when": "ferroui.reviewingResourceMove && (activeEditor == multiDiffEditor || resourceScheme == ferroui-resource-move-review)",
+          "group": "navigation@2"
+        },
+        {
           "command": "ferroui.propertyRenameReview.apply",
           "when": "ferroui.reviewingPropertyRename && (activeEditor == multiDiffEditor || resourceScheme == ferroui-property-rename-review)",
           "group": "navigation@1"
@@ -682,6 +722,11 @@
           "command": "ferroui.renameResource",
           "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted",
           "group": "1_modification@42"
+        },
+        {
+          "command": "ferroui.moveResource",
+          "when": "editorLangId == ferroui-xaml && resourceScheme == file && isWorkspaceTrusted",
+          "group": "1_modification@43"
         },
         {
           "command": "ferroui.renameRegisteredProperty",

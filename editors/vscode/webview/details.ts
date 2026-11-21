@@ -139,7 +139,10 @@ function resourceRow(resource: ResourceRow): HTMLElement {
     heading.className = 'detail-heading';
     heading.append(name);
     if (state.reviewResources) {
-        if (resource.key) heading.append(actionButton('rename', `Rename ${resource.name} and references`, () => review('renameResource', resource)));
+        if (resource.key) {
+            heading.append(actionButton('rename', `Rename ${resource.name} and references`, () => review('renameResource', resource)));
+            heading.append(actionButton('arrow-right', `Move ${resource.name} to another dictionary`, () => review('moveResource', resource)));
+        }
         heading.append(actionButton('file-code', `Extract the dictionary containing ${resource.name}`, () => review('extractDictionary', resource)));
     }
     heading.append(actionButton('go-to-file', `Reveal ${resource.name} declaration`, () => reveal(resource.range)));
@@ -205,12 +208,12 @@ function reveal(range: Range): void {
     if (state.frame) vscode.postMessage({ type: 'reveal', frame: state.frame, range });
 }
 
-function review(type: 'extractDictionary' | 'renameResource', resource: ResourceRow): void {
+function review(type: 'extractDictionary' | 'renameResource' | 'moveResource', resource: ResourceRow): void {
     if (!state.frame || pending !== undefined) return;
     pending = ++request;
     error = undefined;
     const message = { request: pending, frame: state.frame };
-    vscode.postMessage(type === 'renameResource' ? { ...message, type, range: resource.range }
-        : { ...message, type, resource: resource.id });
+    vscode.postMessage(type === 'extractDictionary' ? { ...message, type, resource: resource.id }
+        : { ...message, type, range: resource.range });
     applyFilter();
 }

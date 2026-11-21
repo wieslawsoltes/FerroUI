@@ -1,5 +1,5 @@
 use super::super::reviewed_sources::ui::{panel, relative, source_diffs, toolbar};
-use super::{DesignerWorkspace, RenameAnchor};
+use super::{DesignerWorkspace, SourceReviewAnchor};
 use crate::{
     icons,
     workspace::inspector_actions::{add_button, text, SOURCE},
@@ -36,7 +36,7 @@ impl Subject {
     fn target_name(
         self,
         workspace: &DesignerWorkspace,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
     ) -> Result<String, String> {
         match self {
             Self::Property => workspace
@@ -58,7 +58,7 @@ impl Subject {
     fn review(
         self,
         workspace: &DesignerWorkspace,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         name: &str,
     ) -> Result<Option<SourceRenamePlan>, String> {
         match self {
@@ -71,7 +71,7 @@ impl Subject {
     fn apply(
         self,
         workspace: &Rc<DesignerWorkspace>,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         name: &str,
         review: &str,
     ) -> Result<SourceRenamePlan, String> {
@@ -112,7 +112,7 @@ impl DesignerWorkspace {
     ) -> Result<(), String> {
         let offset = self.session.borrow().document().ast().node(resource)
             .ok_or("The resource definition changed")?.name_span.start;
-        let anchor = Rc::new(self.source_rename_anchor(offset)?);
+        let anchor = Rc::new(self.source_review_anchor(offset)?);
         let plan = self.review_resource_rename(&anchor, new_key)?;
         let flyout = rename_flyout();
         show_plan(self, &flyout, Subject::Resource, anchor, plan);
@@ -142,7 +142,7 @@ fn choose_name(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>, subject:
     let offset = crate::workspace::source_tools::byte_from_utf16(source.authored_source(), caret);
     drop(source);
     let (anchor, target) = match workspace
-        .source_rename_anchor(offset)
+        .source_review_anchor(offset)
         .and_then(|anchor| {
             subject
                 .target_name(workspace, &anchor)
@@ -222,7 +222,7 @@ fn poll_type_review(
     popup: &Ref<Flyout>,
     name: &Ref<TextBox>,
     message: &Ref<TextBlock>,
-    anchor: Rc<RenameAnchor>,
+    anchor: Rc<SourceReviewAnchor>,
     new_name: String,
     busy: Rc<Cell<bool>>,
 ) {
@@ -271,7 +271,7 @@ fn show_plan(
     workspace: &Rc<DesignerWorkspace>,
     flyout: &Ref<Flyout>,
     subject: Subject,
-    anchor: Rc<RenameAnchor>,
+    anchor: Rc<SourceReviewAnchor>,
     plan: SourceRenamePlan,
 ) {
     let body = panel(workspace);

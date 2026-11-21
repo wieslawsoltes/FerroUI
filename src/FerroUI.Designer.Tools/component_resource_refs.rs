@@ -26,6 +26,13 @@ pub struct ComponentResourceResolution {
     /// An external provider, unsupported key, or invalid dictionary is unresolved.
     pub external: bool,
 }
+
+/// The authored results of a lookup across local and referenced dictionaries.
+pub struct ScopedResourceResolution<'a> {
+    pub candidates: Vec<ComponentResourceLocation<'a>>,
+    pub may_be_missing: bool,
+    pub external: bool,
+}
 impl ComponentResourceResolution {
     /// A single declaration only when every possible lookup path resolves to it.
     pub fn resolved(&self) -> Option<NodeId> {
@@ -140,6 +147,23 @@ pub fn component_resource_location<'a>(
 ) -> Result<Option<ComponentResourceLocation<'a>>> {
     let result = resolve(ResourceScope::root(document, address, Some(sources)), target, key, context)?;
     Ok(result.unique())
+}
+
+/// Resolve a scope through the same include graph and theme rules as the native inspector.
+pub fn scoped_resource_resolution<'a>(
+    document: &'a Document,
+    address: &'a str,
+    target: NodeId,
+    key: &str,
+    context: Option<&ComponentResourceContext>,
+    sources: &'a dyn ComponentResourceSources,
+) -> Result<ScopedResourceResolution<'a>> {
+    let result = resolve(ResourceScope::root(document, address, Some(sources)), target, key, context)?;
+    Ok(ScopedResourceResolution {
+        candidates: result.candidates.into_iter().collect(),
+        may_be_missing: result.may_be_missing,
+        external: result.external,
+    })
 }
 
 type Visited<'a> = BTreeSet<(&'a str, NodeId)>;

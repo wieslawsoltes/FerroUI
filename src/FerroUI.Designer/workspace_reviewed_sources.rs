@@ -4,8 +4,8 @@ use super::{
     project::{Tab, document_identity},
 };
 use crate::rsx_document::RustDocument;
-use ferroui_designer_core::TextPatch;
-use ferroui_designer_language::{LanguageService, LineIndex, ReviewedDocument};
+use ferroui_designer_core::{Edit, TextPatch};
+use ferroui_designer_language::{LanguageService, LineIndex, ReviewedDocument, SourceReviewRequest};
 use ferroui_designer_project::ProjectWorkspace;
 use std::collections::BTreeMap;
 use std::rc::Rc;
@@ -20,7 +20,112 @@ pub(super) struct ReviewedSources {
     pub(super) active: String,
 }
 
+#[derive(Clone, PartialEq, Eq)]
+pub(super) struct SourceReviewAnchor {
+    pub(super) uri: String,
+    pub(super) revision: u64,
+    pub(super) request: SourceReviewRequest,
+}
+
 impl DesignerWorkspace {
+    pub(super) fn source_review_anchor(
+        self: &Rc<Self>,
+        offset: usize,
+    ) -> Result<SourceReviewAnchor, String> {
+        if self.pending_source.get() {
+            return Err("Apply the current source draft before reviewing changes".into());
+        }
+        let uri = self.current_xaml_file()?;
+        self.synchronize_language_service()?;
+        let revision = self.session.borrow().document().revision();
+        let tool = self.try_language_service()?;
+        let request = SourceReviewRequest {
+            version: tool
+                .version(&uri)
+                .ok_or("Index the active XAML file before reviewing")?,
+            position: tool
+                .index(&uri)
+                .and_then(|index| index.position(offset))
+                .map_err(|e| e.to_string())?,
+        };
+        Ok(SourceReviewAnchor {
+            uri,
+            request,
+            revision,
+        })
+    }
+
+    pub(super) fn require_source_review_anchor(&self, anchor: &SourceReviewAnchor) -> Result<(), String> {
+        if self.pending_source.get()
+            || self.current_xaml_file()? != anchor.uri
+            || self.session.borrow().document().revision() != anchor.revision
+        {
+            return Err("The XAML source changed. Start a new source review".into());
+        }
+        Ok(())
+    }
+
+    pub(super) fn apply_reviewed_source_edits(
+        self: &Rc<Self>,
+        anchor: &SourceReviewAnchor,
+        label: &str,
+        documents: &[ReviewedDocument],
+    ) -> Result<(), String> {
+        self.require_source_review_anchor(anchor)?;
+        {
+            let session = self.session.borrow();
+            session
+                .ensure_writable()
+                .map_err(|error| error.to_string())?;
+            if session.collaboration_actor().is_some() {
+                return Err(
+                    "Open the local project for source edits spanning files".into(),
+                );
+            }
+        }
+        let mut staged = self.stage_reviewed_sources()?;
+        let label = self.project.borrow_mut().linked_history.label(label)?;
+        let mut participants = Vec::new();
+        for change in documents {
+            let uri = &change.edit.uri;
+            let tab = staged.tab(self, uri)?;
+            check_saved(&staged.workspace, uri, &tab)?;
+            staged
+                .tabs
+                .insert(uri.clone(), patched(tab, change, &label)?);
+            participants.push(uri.clone());
+        }
+        staged.prepare_edits(&participants)?;
+        if let Some(source) = documents
+            .iter()
+            .find(|change| change.edit.uri == anchor.uri)
+        {
+            self.session
+                .borrow_mut()
+                .apply_at(
+                    anchor.revision,
+                    &label,
+                    vec![Edit::ReplaceSource {
+                        source: source.after.clone(),
+                    }],
+                )
+                .map_err(|error| error.to_string())?;
+        } else {
+            self.session
+                .borrow_mut()
+                .record_workspace_operation(anchor.revision, label.clone())
+                .map_err(|error| error.to_string())?;
+            participants.push(anchor.uri.clone());
+        }
+        self.publish_reviewed_sources(staged, &participants)?;
+        self.project
+            .borrow_mut()
+            .linked_history
+            .link(label, participants);
+        self.refresh(true);
+        Ok(())
+    }
+
     pub(super) fn sync_xaml_review_drafts(&self, active: &str) -> Result<(), String> {
         let project = self.project.borrow();
         let mut language = self.try_language_service()?;

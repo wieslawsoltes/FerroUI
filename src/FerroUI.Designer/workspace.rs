@@ -295,6 +295,7 @@ impl DesignerWorkspace {
         self.connect_dictionary_extraction();
         self.connect_file_move();
         self.connect_registered_rename();
+        self.connect_resource_move();
         self.connect_rust_source();
         self.connect_authoring();
         self.connect_timeline_curves();
@@ -993,6 +994,8 @@ mod file_move;
 mod reviewed_sources;
 #[path = "workspace_resource_rename.rs"]
 mod resource_rename;
+#[path = "workspace_resource_move.rs"]
+mod resource_move;
 #[path = "workspace_rust_review.rs"]
 mod rust_review;
 #[path = "workspace_registered_rename.rs"]

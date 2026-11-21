@@ -13,8 +13,12 @@ pub(crate) mod references;
 mod resource_graph;
 #[path = "component_resource_copy.rs"]
 mod resource_copy;
+#[path = "component_resource_move.rs"]
+mod resource_move;
 #[path = "dictionary_extraction.rs"]
 pub(crate) mod extraction;
+#[path = "dictionary_context.rs"]
+mod dictionary_context;
 #[path = "item_templates.rs"]
 mod item_templates;
 pub use authoring::{
@@ -22,14 +26,15 @@ pub use authoring::{
     plan_component_action_in_context, plan_property_object,
 };
 pub use references::{
-    ComponentResourceContext, ComponentResourceResolution, component_resource_references,
+    ComponentResourceContext, ComponentResourceResolution, ScopedResourceResolution, component_resource_references,
     component_resource_location, component_resource_resolution, resolve_component_resource,
-    resolve_component_resource_in_context,
+    resolve_component_resource_in_context, scoped_resource_resolution,
 };
 pub use resource_graph::{
     ComponentResourceLocation, ComponentResourceSources, IncludedResourceDocument,
 };
 pub use resource_copy::ResourceCopySources;
+pub use resource_move::{AuthoredResourceScope, resource_move_entry, resource_move_scope, resource_move_fragment, link_resource_dictionary};
 pub use item_templates::{
     ControlTemplatePart, ItemTemplateChange, ItemTemplateDeclaration, ItemTemplateMember, ItemTemplateResource,
     ItemTemplateSlot, ItemTemplateValue, item_template_resources, keyed_item_template, keyed_template, template_resources,

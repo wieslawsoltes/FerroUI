@@ -71,6 +71,12 @@ The plan retains each file’s version, original text, exact changes, and propos
 
 If the target belongs to one authored theme family, the service verifies the shared and per-layer declarations through the existing resource graph. Target and preview responses include `themeFamily` with the owner and each declaration’s layer and range. The planner checks existing and proposed resolution for references to both keys, including references using a merged, ancestor, or theme fallback. [User guide](../../docs/designer/vscode/authoring.md#rename-a-key-across-theme-variants)
 
+## Reviewed resource move
+
+Discover `ferroui/resourceMoveTarget` and `ferroui/planResourceMove` through `experimental.ferrouiResourceMove`. Both take `textDocument.uri` and the current `request` with `version` and UTF-16 `position`. The target lists indexed authored dictionary scopes with their versioned requests. Pass the selected scope’s `uri` and `request` as `destination` to the planner.
+
+The planner resolves the authored resource, checks affected references through the native resource resolver, and returns the original and new declaration locations and reviewed document patches. The review can include an import and rebased typed resource paths. Hosts replan on Apply, compare the identifier and document versions, and apply the source patches together. Studio calls the same planner directly. [User guide](../../docs/designer/vscode/authoring.md#move-a-resource-to-another-dictionary)
+
 ## Registered property rename
 
 Clients use `experimental.ferrouiRegisteredPropertyRename` to discover two review requests. Send `textDocument.uri` and a `request` containing the current `version` and UTF-16 `position` to `ferroui/registeredPropertyTarget`. The result identifies the public name, selected range, and Rust source URI. Send the same fields, `newName`, and the relevant open Rust `sourceDrafts` to `ferroui/planRegisteredPropertyRename`. Each draft supplies `uri`, `version`, and `source`. The single `rust` draft argument remains supported for clients that supply only the registration source.

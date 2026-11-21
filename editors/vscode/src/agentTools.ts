@@ -12,6 +12,7 @@ import { runEditorHistory } from './editorHistory';
 import type { FileMoveRequest, FileMoves } from './fileMoves';
 import type { RegisteredRename } from './registeredRename';
 import type { ResourceRename } from './resourceRename';
+import type { ResourceMove, ResourceMoveInput } from './resourceMove';
 import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
@@ -111,8 +112,8 @@ export class AgentTools {
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
         private readonly runtimeSource: RuntimeSourceTools, private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold,
         private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
-        private readonly renames: {
-            property: RegisteredRename; type: RegisteredRename; resource: ResourceRename;
+        private readonly sourceReviews: {
+            property: RegisteredRename; type: RegisteredRename; resource: ResourceRename; resourceMove: ResourceMove;
         }) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
@@ -136,13 +137,16 @@ export class AgentTools {
             return this.fileMoves.agent(request, signal, request.review);
         }
         if (tool === 'ferroui_workspace_plan_property_rename' || tool === 'ferroui_workspace_rename_property') {
-            return this.renames.property.agent(input as SourceRenameAgentRequest, signal);
+            return this.sourceReviews.property.agent(input as SourceRenameAgentRequest, signal);
         }
         if (tool === 'ferroui_workspace_plan_type_rename' || tool === 'ferroui_workspace_rename_type') {
-            return this.renames.type.agent(input as SourceRenameAgentRequest, signal);
+            return this.sourceReviews.type.agent(input as SourceRenameAgentRequest, signal);
         }
         if (tool === 'ferroui_workspace_plan_resource_rename' || tool === 'ferroui_workspace_rename_resource') {
-            return this.renames.resource.agent(input as SourceRenameAgentRequest, signal);
+            return this.sourceReviews.resource.agent(input as SourceRenameAgentRequest, signal);
+        }
+        if (tool === 'ferroui_workspace_resource_move_targets' || tool === 'ferroui_workspace_plan_resource_move' || tool === 'ferroui_workspace_move_resource') {
+            return this.sourceReviews.resourceMove.agent(input as ResourceMoveInput, signal);
         }
         if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
         if (tool === 'ferroui_project_plan_asset_import' || tool === 'ferroui_project_import_asset') {

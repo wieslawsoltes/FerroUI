@@ -10,6 +10,7 @@ import { DesignerPanel, type DesignerCanvasState } from './designerPanel';
 import { DesignerDrag } from './designerDrag';
 import type { DictionaryExtraction, DictionarySite } from './dictionaryExtraction';
 import type { ResourceRename } from './resourceRename';
+import type { ResourceMove } from './resourceMove';
 import { DESIGNER_VIEW, restoredDesigner } from './designerViewState';
 import { DockView } from './dockView';
 import { sourceColumn } from './editorHistory';
@@ -85,6 +86,7 @@ export class DesignerWorkbench implements vscode.Disposable {
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects, assets: ProjectAssets, readonly handlers: EventHandlers,
         readonly dictionaryExtraction: DictionaryExtraction, private readonly resourceRename: ResourceRename,
+        private readonly resourceMove: ResourceMove,
         readonly projectLibrary: ProjectLibrary, readonly commandBindings: CommandBindings) {
         const changed = () => this.updateDocks();
         this.inspection = new SelectionInspection(changed);
@@ -608,14 +610,16 @@ export class DesignerWorkbench implements vscode.Disposable {
                 this.details.events.post({ type: 'edit', request: message.request });
                 return;
             }
-            if (message.type === 'extractDictionary' || message.type === 'renameResource') {
+            if (message.type === 'extractDictionary' || message.type === 'renameResource' || message.type === 'moveResource') {
                 if (view !== 'resources') throw new Error('Use the Resources view to review project resources.');
                 const panel = this.panelFor(message.frame);
                 if (message.type === 'extractDictionary') {
                     await this.dictionaryExtraction.openReview(await this.dictionarySite(panel, message.frame, message.resource));
-                } else {
+                } else if (message.type === 'renameResource') {
                     const document = panel.document;
                     await this.resourceRename.open({ document, request: { version: document.version, position: message.range.start } });
+                } else {
+                    await this.resourceMove.open(panel.document, message.range.start);
                 }
                 this.details.resources.post({ type: 'edit', request: message.request });
                 return;

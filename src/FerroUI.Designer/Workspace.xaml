@@ -304,6 +304,9 @@
             <Button Name="RenameResource" Classes="icon" AutomationProperties.Name="Rename resource and references" ToolTip.Tip="Review a resource key and its project references">
               <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 1H8L15 8L8 15L1 8Z M2.5 2.5V7.4L8 12.9L12.9 8L7.4 2.5Z M4 4H6V6H4Z" />
             </Button>
+            <Button Name="MoveResource" Classes="icon" AutomationProperties.Name="Move resource" ToolTip.Tip="Review moving the resource at the caret to another dictionary">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 7H11.8L7.7 2.9L9 1.6L15.4 8L9 14.4L7.7 13.1L11.8 9H1Z" />
+            </Button>
             <Button Name="SourceReferences" Classes="nav" Content="References" />
             <Button Name="SourceDiagnostics" Classes="nav" Content="Problems" />
             <Button Name="FormatSource" Classes="icon" AutomationProperties.Name="Format XAML" ToolTip.Tip="Format the XAML selection or document">

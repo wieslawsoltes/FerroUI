@@ -264,6 +264,15 @@ Run **Rename Resource and References** from a member of a palette or from a reso
 
 The review covers an authored key shared by **Shared**, **Default**, **Light**, and **Dark** layers in one owning dictionary. It preserves local shadows and checks whether the new key would overlap a declaration or change where a consumer resolves the key. If a reference can fall back to another owner, use its definition links to inspect the competing providers. [Compare theme colors](styles.md) · [MCP workflow](reference.md#review-a-resource-rename-with-mcp)
 
+## Move a resource to another dictionary
+
+1. Open the owning project in a trusted workspace. In **Resources**, select the arrow beside a keyed resource. In an XAML editor, place the caret on the declaration or a reference that resolves to one declaration and run **FerroUI: Move Resource…**.
+2. Choose an existing dictionary in the picker. The file path and line identify each scope, including named theme layers and dictionaries in unopened files. To move a specific theme variant, start from its declaration.
+3. Inspect the before and after source in **Changes**. The review includes a dictionary import when it is needed to preserve visibility. It updates typed relative asset and include paths so they point to the same targets from the new file.
+4. Select the check icon **Apply Resource Move** or the close icon **Cancel Resource Move**. Undo and Redo from a participating source editor step through the whole change. Save both buffers when the changes are ready.
+
+The key stays the same. The planner checks authored static and dynamic references, including shadowed keys and theme variants. A move that changes an affected reference, adds an include cycle, or depends on an unresolved provider stops before review. Choose a different destination or resolve the reported dictionary, path, or draft and start a new review. [Designer Studio](../native-controls.md#move-a-resource-to-another-dictionary) · [MCP workflow](reference.md#move-a-resource-with-mcp)
+
 ## Extract a resource dictionary
 
 1. Open the XAML view in a trusted workspace. Place the caret on the owning control, its `Resources` property, or a resource in the dictionary. Choose **Refactor…** and **Extract Resource Dictionary…**. In the **Resources** dock, the file icon beside a resource offers the same action for its dictionary.

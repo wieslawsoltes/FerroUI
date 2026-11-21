@@ -130,6 +130,24 @@ export class XamlServer implements vscode.Disposable {
         return client.sendRequest<T>(`ferroui/${method}`, params);
     }
 
+    async resourceMoveRequest<T>(method: 'resourceMoveTarget' | 'planResourceMove', params: object, signal?: AbortSignal): Promise<T> {
+        await this.start();
+        signal?.throwIfAborted();
+        const client = this.client;
+        if (client?.initializeResult?.capabilities.experimental?.ferrouiResourceMove !== true) {
+            throw new Error('Update the FerroUI XAML language server to review resource moves.');
+        }
+        const cancellation = new vscode.CancellationTokenSource();
+        const abort = () => cancellation.cancel();
+        signal?.addEventListener('abort', abort);
+        try {
+            return await client.sendRequest<T>(`ferroui/${method}`, params, cancellation.token);
+        } finally {
+            signal?.removeEventListener('abort', abort);
+            cancellation.dispose();
+        }
+    }
+
     async projectLibraryRequest<T>(method: 'projectLibrary' | 'resolveProjectLibrary', params: object, signal: AbortSignal): Promise<T> {
         await this.start();
         signal.throwIfAborted();

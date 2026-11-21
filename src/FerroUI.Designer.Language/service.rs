@@ -20,6 +20,7 @@ mod setter_properties;
 mod style_selectors;
 mod refactoring;
 mod resource_occurrences;
+mod resource_move;
 mod source_review;
 #[path = "handler_service.rs"]
 mod handlers;
@@ -40,6 +41,7 @@ pub use project_library::{LibraryDefinition, ProjectLibrary, ProjectLibraryEntry
 pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
 pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};
 pub use refactoring::resource_rename::{ResourceRenamePlan, ResourceRenameTarget, ThemeResourceFamily, ThemeResourceMember};
+pub use resource_move::{ResourceMoveDestination, ResourceMovePlan, ResourceMoveTarget};
 pub use source_review::{ReviewedDocument, RustRenameResolution, RustSymbolRename, SourceRenamePlan, SourceReviewRequest};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -138,6 +140,10 @@ impl State {
     fn with_text(&self, index: LineIndex, version: i64, label: &str) -> Self {
         let mut document = self.document.clone();
         document.update_source(label, index.source());
+        Self::indexed(document, index, version, self.opened)
+    }
+
+    fn indexed(document: Document, index: LineIndex, version: i64, opened: bool) -> Self {
         Self {
             symbols: occurrences(&document),
             resource_edges: resource_edges(&document),
@@ -145,7 +151,7 @@ impl State {
             index,
             library: Default::default(),
             version,
-            opened: self.opened,
+            opened,
         }
     }
 }
@@ -2065,7 +2071,7 @@ fn resource_edges(document: &Document) -> BTreeMap<u64, Vec<ResourceEdge>> {
                     ResourceEdgeKind::Theme
                 },
             ),
-            "ResourceInclude" | "StyleInclude"
+            "ResourceInclude" | "MergeResourceInclude" | "StyleInclude"
                 if native_resource_type(node.local_name(), node.namespace_uri.as_deref()) =>
             {
                 match node.attribute("Source") {

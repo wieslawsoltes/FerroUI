@@ -43,6 +43,20 @@ export const fileMoveCatalog = {
         { ...location, destination: path, review: revision }, ['path', 'destination', 'review'], true),
 };
 
+const resourceMove = { ...location, position: at };
+const resourceMoveRequired = ['path', 'position'];
+const destination = record({ uri: path, request: record({
+    version: { type: 'integer' }, position: at,
+}, ['version', 'position']) }, ['uri', 'request']);
+export const resourceMoveCatalog = {
+    ferroui_workspace_resource_move_targets: tool('Find the authored resource at a UTF-16 position and list destination dictionaries in the same workspace.',
+        resourceMove, resourceMoveRequired),
+    ferroui_workspace_plan_resource_move: tool('Review the exact patches for moving one XAML resource. Copy the uri and request fields of a destination from ferroui_workspace_resource_move_targets.',
+        { ...resourceMove, destination }, [...resourceMoveRequired, 'destination']),
+    ferroui_workspace_move_resource: tool('Apply a reviewed XAML resource move in one Undo step. Use the same destination and copy the review identifier from ferroui_workspace_plan_resource_move.',
+        { ...resourceMove, destination, review: revision }, [...resourceMoveRequired, 'destination', 'review'], true),
+};
+
 const rename = { ...location, position: at, new_name: { type: 'string', maxLength: 256 } };
 export const renameCatalog = {
     ferroui_workspace_plan_resource_rename: tool('Review a XAML resource key and its resolved project references. Pass a UTF-16 location on the declaration, element name, or resource operand. A matched theme family includes its authored layers. Returns exact patches and a review identifier.',

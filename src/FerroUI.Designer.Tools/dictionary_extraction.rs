@@ -7,8 +7,7 @@ use crate::{Result, ToolError, error, require};
 use ferroui_designer_core::{Document, Node, NodeId, NodeKind, SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 
-#[path = "dictionary_context.rs"]
-mod context;
+use super::dictionary_context as context;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DictionarySite {
@@ -252,7 +251,7 @@ pub fn plan_dictionary_extraction(
     })
 }
 
-fn framework_prefix(namespaces: &BTreeMap<String, String>) -> (String, bool) {
+pub(super) fn framework_prefix(namespaces: &BTreeMap<String, String>) -> (String, bool) {
     if let Some((prefix, _)) = namespaces.iter().find(|(_, uri)| *uri == FRAMEWORK) {
         return (prefix.clone(), false);
     }

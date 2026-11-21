@@ -24,6 +24,7 @@ import { errorMessage } from './protocol';
 import { RegisteredRename } from './registeredRename';
 import type { ProjectMetadata } from './reloadProcess';
 import { ResourceRename, type ResourceRenameRequest } from './resourceRename';
+import { ResourceMove } from './resourceMove';
 import { RuntimeConnections } from './runtimeConnections';
 import { RuntimePanel } from './runtimePanel';
 import { RuntimeSourceEditor } from './runtimeSource';
@@ -55,9 +56,10 @@ export function activate(context: vscode.ExtensionContext) {
     const handlers = new EventHandlers(server);
     const extraction = new DictionaryExtraction(server);
     const resourceRename = new ResourceRename(server);
+    const resourceMove = new ResourceMove(server);
     server.eventDefinition = (document, position, token) => projects.forDocument(document.uri)
         ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
-    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction, resourceRename, new ProjectLibrary(server), new CommandBindings(server));
+    const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction, resourceRename, resourceMove, new ProjectLibrary(server), new CommandBindings(server));
     const fileMoves = new FileMoves(server, from => designer.cancelFileMove(from));
     const propertyRename = new RegisteredRename(server, 'property');
     const typeRename = new RegisteredRename(server, 'type');
@@ -72,13 +74,13 @@ export function activate(context: vscode.ExtensionContext) {
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
     const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds, scenarios, hosted, fileMoves, {
-        property: propertyRename, type: typeRename, resource: resourceRename,
+        property: propertyRename, type: typeRename, resource: resourceRename, resourceMove,
     }), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
@@ -118,6 +120,12 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
         }),
+        vscode.commands.registerCommand('ferroui.moveResource', async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) return;
+            try { await resourceMove.open(editor.document, editor.selection.active); }
+            catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+        }),
         vscode.workspace.onDidGrantWorkspaceTrust(() => { if (vscode.workspace.textDocuments.some(document => document.languageId === xamlLanguage)) void server.start(true); }),
         vscode.commands.registerCommand('ferroui.extractResourceDictionary', async (action?: { uri: string; request: DictionaryRequest }) => {
             try {
@@ -143,7 +151,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.textDocuments.forEach(startForXaml);
     if (context.extensionMode === vscode.ExtensionMode.Test) {
         context.subscriptions.push(vscode.commands.registerCommand('ferroui.test.mcpDefinitions', () => mcp.provideMcpServerDefinitions()));
-        return { designer, runtimeSource, fileMoves, propertyRename, typeRename, resourceRename, publishProjectMetadata: publish };
+        return { designer, runtimeSource, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, publishProjectMetadata: publish };
     }
 }
 

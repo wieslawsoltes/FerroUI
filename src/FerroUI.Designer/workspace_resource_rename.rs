@@ -1,4 +1,4 @@
-use super::{registered_rename::RenameAnchor, DesignerWorkspace};
+use super::{reviewed_sources::SourceReviewAnchor, DesignerWorkspace};
 use ferroui_designer_language::ResourceRenamePlan;
 use std::rc::Rc;
 
@@ -9,10 +9,10 @@ mod tests;
 impl DesignerWorkspace {
     pub(super) fn review_resource_rename(
         &self,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         new_key: &str,
     ) -> Result<ResourceRenamePlan, String> {
-        self.require_rename_anchor(anchor)?;
+        self.require_source_review_anchor(anchor)?;
         self.sync_xaml_review_drafts(&anchor.uri)?;
         self.try_language_service()?
             .plan_resource_rename(&anchor.uri, &anchor.request, new_key)
@@ -21,7 +21,7 @@ impl DesignerWorkspace {
 
     pub(super) fn apply_resource_rename(
         self: &Rc<Self>,
-        anchor: &RenameAnchor,
+        anchor: &SourceReviewAnchor,
         new_key: &str,
         review: &str,
     ) -> Result<ResourceRenamePlan, String> {
@@ -29,7 +29,7 @@ impl DesignerWorkspace {
         if plan.review != review {
             return Err("The resource rename changed. Review the source patches again.".into());
         }
-        self.apply_reviewed_rename(anchor, "Rename resource and references", &plan.documents)?;
+        self.apply_reviewed_source_edits(anchor, "Rename resource and references", &plan.documents)?;
         Ok(plan)
     }
 
@@ -40,7 +40,7 @@ impl DesignerWorkspace {
         new_key: &str,
         review: Option<&str>,
     ) -> Result<ResourceRenamePlan, String> {
-        let anchor = self.source_rename_anchor(offset)?;
+        let anchor = self.source_review_anchor(offset)?;
         match review {
             Some(review) => self.apply_resource_rename(&anchor, new_key, review),
             None => self.review_resource_rename(&anchor, new_key),

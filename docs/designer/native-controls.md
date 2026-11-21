@@ -89,6 +89,12 @@ For each file, compare **Original source** and **Proposed source**. The review f
 
 For a palette key defined in several layers of one dictionary, the review shows the **Theme family** and its participating layers. Open the authored palette or put the caret on a reference to that family. The same comparisons include inline declarations, supported included layer files, and consumer references. [Theme resource workflow](vscode/authoring.md#rename-a-key-across-theme-variants)
 
+### Move a resource to another dictionary
+
+Open the owning project. In **Code** or **Split**, place the caret on a keyed resource declaration or a reference that has one authored declaration. Use the arrow icon **Move resource** in the source toolbar. Choose a destination dictionary by scope, file and line, then select the source icon **Review resource move**.
+
+Compare **Original source** and **Proposed source** in each affected file. The review shows any include needed to retain visibility and any updated relative resource paths. Use the check icon to apply the move or the close icon to cancel. Undo or Redo from either participating tab restores both buffers together. Save the changed files when ready. [VS Code workflow](vscode/authoring.md#move-a-resource-to-another-dictionary) · [MCP workflow](vscode/reference.md#move-a-resource-with-mcp)
+
 ### Review a registered property rename
 
 Build the owning Cargo package from Studio. In **Code** or **Split**, place the caret on a property name, a typed binding member, or a property inside a style selector. Choose the **Rename registered property** icon, enter its new public name, and choose **Review property rename**.
