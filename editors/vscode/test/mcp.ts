@@ -46,6 +46,7 @@ import { verifyRsxAnimation } from './rsxAnimationMcp';
 import { verifyRsxPrograms } from './rsxProgramsMcp';
 import { verifyRsxStates } from './rsxStatesMcp';
 import { verifyRsxControlRename } from './rsxRenameMcp';
+import { verifyRsxPlacement } from './rsxPlacementMcp';
 import { verifyProjectImageSource } from './projectImageSourceMcp';
 import { verifyProjectLibrary } from './projectLibraryMcp';
 import { verifyAssetImport } from './assetImportMcp';
@@ -185,6 +186,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });
         await verifyRsxControlRename({ invoke, content });
+        await verifyRsxPlacement({ invoke, content });
         await verifyProjectImageSource({ invoke, content });
         await verifyProjectLibrary({ invoke, content });
         await verifyAssetImport({ invoke, content });

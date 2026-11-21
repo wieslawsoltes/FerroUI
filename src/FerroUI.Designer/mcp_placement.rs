@@ -117,11 +117,24 @@ pub(super) fn call(
         _ if args.get("snap").is_some() => return Err("Snapping applies to canvas placement".into()),
         _ => (target, Default::default()),
     };
+    let after = match target {
+        PlacementTarget::Outline { node, position: OutlinePlacement::After } => Some(node),
+        _ => None,
+    };
+    let moving = match &origin {
+        PlacementOrigin::Asset(_) => Vec::new(),
+        PlacementOrigin::Node { node, .. } => vec![*node],
+        PlacementOrigin::Nodes { nodes, .. } => nodes.to_vec(),
+    };
     let plan = session.plan_placement(origin, target)?;
     if name == "designer_placement_hint" {
         return Ok(json!({"bounds":adjustment.bounds.or(plan.bounds),"description":plan.description,"snapLines":adjustment.guides}));
     }
-    session.apply_visual(&plan.description, plan.edits)?;
+    if session.uses_rust_source() && crate::rsx_placement::is_child_placement(&plan.edits) {
+        session.apply_rust_placement(revision, &plan.description, plan.edits, after, &moving)?;
+    } else {
+        session.apply_visual(&plan.description, plan.edits)?;
+    }
     Ok(super::state(session))
 }
 

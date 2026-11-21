@@ -233,8 +233,12 @@ impl Renderer {
             .map(|node| PresentedNode {
                 id: node.id,
                 bounds: frame.bounds.get(&node.id).copied(),
-                can_move: session.can_move_outline_node(node.id),
-                can_insert: session.can_insert_outline_child(node.id),
+                can_move: session.can_move_outline_node(node.id)
+                    && stage.placement_policy.as_ref().is_none_or(|policy| {
+                        node.parent.is_some_and(|parent| policy.editable_children(parent))
+                    }),
+                can_insert: session.can_insert_outline_child(node.id)
+                    && stage.placement_policy.as_ref().is_none_or(|policy| policy.editable_children(node.id)),
                 selectable: session.can_canvas_select(node.id),
             })
             .collect();

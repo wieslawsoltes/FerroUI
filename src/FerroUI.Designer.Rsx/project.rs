@@ -28,7 +28,9 @@ pub struct RsxNode {
     pub(crate) open: usize,
     pub(crate) close: usize,
     pub(crate) child_indices: Vec<usize>,
-    pub(crate) complete_children: bool,
+    /// Token starts of children omitted from the static projection, in source order.
+    pub(crate) opaque_children: Vec<usize>,
+    pub(crate) computed_child_setter: bool,
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
 }
@@ -49,9 +51,11 @@ impl RsxNode {
     }
 
     pub fn editable_children(&self) -> bool {
-        self.class.children() != Children::None
-            && self.complete_children
+        let slot = self.class.children();
+        slot != Children::None
+            && (slot == Children::Panel || self.opaque_children.is_empty())
             && !self.expressions.contains_key("Content")
+            && !self.computed_child_setter
     }
 }
 
@@ -274,7 +278,8 @@ impl State {
             open: node.braces.open().byte_range().end,
             close: node.braces.close().byte_range().start,
             child_indices: Vec::new(),
-            complete_children: true,
+            opaque_children: Vec::new(),
+            computed_child_setter: false,
             state_slot: if class.xaml_property(None, "visual_states").is_none() {
                 ArraySlot::Missing
             } else {
@@ -295,6 +300,9 @@ impl State {
                 } => (owner, name, value),
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
+                    self.nodes[index].computed_child_setter |= matches!(
+                        setter.as_str(), "children" | "child" | "content" | "items" | "items_source"
+                    );
                     if setter == "visual_states" {
                         self.nodes[index].state_slot = ArraySlot::Unavailable;
                     }
@@ -320,6 +328,8 @@ impl State {
             };
             let setter = name.unraw().to_string();
             let owner = owner.as_ref().map(|owner| owner.unraw().to_string());
+            self.nodes[index].computed_child_setter |= owner.is_none()
+                && matches!(setter.as_str(), "children" | "child" | "items" | "items_source");
             if owner.is_none() && setter == "visual_states" && class.xaml_property(None, &setter).is_none() {
                 let slot = &mut self.nodes[index].state_slot;
                 *slot = if matches!(slot, ArraySlot::Missing) {
@@ -421,7 +431,7 @@ impl State {
                     self.nodes[index].child_indices.push(child_index);
                 }
                 _ => {
-                    self.nodes[index].complete_children = false;
+                    self.nodes[index].opaque_children.push(child_start(child));
                     self.omit(format!("{class} child"));
                 }
             }
@@ -439,6 +449,14 @@ impl State {
         }
         Ok(result)
     }
+}
+
+fn child_start(child: &Node) -> usize {
+    match child {
+        Node::Element(element) => element.path.span(),
+        Node::Text(value, _) => value.span(),
+        Node::Expr(_, open) | Node::If(_, _, _, open) | Node::For(_, _, _, open) => *open,
+    }.byte_range().start
 }
 
 pub(crate) fn accepts_control(placement: Children, element: &Element) -> bool {

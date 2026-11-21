@@ -1,10 +1,10 @@
 use super::{RustDocument, invalid};
 use ferroui_designer_animation::{KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Timeline, VisualStateGroup};
 use ferroui_designer_core::{
-    ChangeSet, DesignerError, Document, Edit, NodeId, SourceSpan, TextPatch,
+    ChangeSet, DesignerError, Document, Edit, NodeId, NodeKind, SourceSpan, TextPatch,
 };
-use ferroui_designer_rsx::{RsxAnimation, RsxAnimationEdit, RsxAnimationPlan};
-use std::collections::BTreeSet;
+use ferroui_designer_rsx::{RsxAnimation, RsxAnimationEdit, RsxAnimationPlan, RsxChildEdit};
+use std::collections::{BTreeMap, BTreeSet};
 
 impl RustDocument {
     pub(crate) fn source_span(&self, document: &Document, node: NodeId) -> Option<SourceSpan> {
@@ -111,12 +111,42 @@ impl RustDocument {
         }
     }
 
+    pub(crate) fn plan_child_placement(
+        &self,
+        document: &Document,
+        label: &str,
+        edits: Vec<Edit>,
+        after: Option<NodeId>,
+    ) -> Result<(RsxChildEdit, Vec<NodeId>), DesignerError> {
+        let invocation = self.map().ok_or_else(|| {
+            DesignerError::InvalidEdit("Repair the Rust buffer before placing controls".into())
+        })?.invocation;
+        let projection = self.catalog().project(self.source(), invocation.start)
+            .map_err(DesignerError::InvalidEdit)?;
+        let mut draft = document.snapshot_without_history();
+        let change = draft.apply(label, edits.clone())?;
+        if change.is_empty() {
+            return Ok((RsxChildEdit { patches: Vec::new(), controls: BTreeMap::new() }, Vec::new()));
+        }
+        let inserted: BTreeSet<_> = change.inserted.into_iter().collect();
+        let roots = draft.ast().nodes_in_source_order().filter(|node| {
+            node.kind == NodeKind::Element && inserted.contains(&node.id)
+                && node.parent.is_none_or(|parent| !inserted.contains(&parent))
+        }).map(|node| node.id).collect();
+        let plan = projection.plan_child_edit(document, &draft, &edits, after)
+            .map_err(DesignerError::InvalidEdit)?;
+        Ok((plan, roots))
+    }
+
     pub(crate) fn plan_edit(
         &self,
         document: &Document,
         label: &str,
         edits: Vec<Edit>,
     ) -> Result<Vec<TextPatch>, DesignerError> {
+        if crate::rsx_placement::is_child_placement(&edits) {
+            return self.plan_child_placement(document, label, edits, None).map(|(plan, _)| plan.patches);
+        }
         let map = self
             .map()
             .ok_or_else(|| invalid("Repair the Rust buffer before making visual edits"))?;

@@ -2,7 +2,7 @@ use crate::project::{accepts_control, parse_draft};
 use crate::registered::RsxCatalog;
 use crate::tree::{Element, MAX_DEPTH, escape_xml, inline_content, replacement};
 use ferroui_designer_core::design_fixtures::DESIGN_NAMESPACE;
-use ferroui_designer_core::{Document, Node, NodeKind, SourceSpan, TextPatch};
+use ferroui_designer_core::{Document, Node, NodeId, NodeKind, SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
@@ -73,14 +73,40 @@ pub(crate) struct XamlTree {
 
 impl XamlTree {
     pub(crate) fn parse(document: &Document, catalog: &RsxCatalog) -> Result<Self, String> {
-        Self::read(document, catalog, false)
+        Self::read(document, catalog, false, None)
+    }
+
+    pub(crate) fn fragment(
+        document: &Document,
+        catalog: &RsxCatalog,
+        node: NodeId,
+    ) -> Result<String, String> {
+        let root = document
+            .ast()
+            .node(node)
+            .ok_or("Expected an inserted XAML control")?;
+        let tree = ParseTree::new(document, catalog, false, None).element(root, 0)?;
+        Ok(tree.rsx_body())
+    }
+
+    pub(crate) fn layout(
+        document: &Document,
+        catalog: &RsxCatalog,
+        state_classes: &BTreeMap<NodeId, (&str, bool)>,
+    ) -> Result<Self, String> {
+        Self::read(document, catalog, false, Some(state_classes))
     }
 
     fn authored(document: &Document, catalog: &RsxCatalog) -> Result<Self, String> {
-        Self::read(document, catalog, true)
+        Self::read(document, catalog, true, None)
     }
 
-    fn read(document: &Document, catalog: &RsxCatalog, authored: bool) -> Result<Self, String> {
+    fn read(
+        document: &Document,
+        catalog: &RsxCatalog,
+        authored: bool,
+        state_classes: Option<&BTreeMap<NodeId, (&str, bool)>>,
+    ) -> Result<Self, String> {
         if !document.is_valid() {
             return Err("Repair the XAML syntax before converting the view".into());
         }
@@ -88,13 +114,7 @@ impl XamlTree {
             .ast()
             .node(document.ast().root())
             .ok_or("Expected a XAML root")?;
-        let mut state = ParseTree {
-            document,
-            catalog,
-            origins: Vec::new(),
-            authored,
-            preserve_structure: false,
-        };
+        let mut state = ParseTree::new(document, catalog, authored, state_classes);
         let tree = state.element(root, 0)?;
         Ok(Self {
             tree,
@@ -109,10 +129,27 @@ struct ParseTree<'a> {
     catalog: &'a RsxCatalog,
     origins: Vec<BTreeMap<String, Origin>>,
     authored: bool,
+    state_classes: Option<&'a BTreeMap<NodeId, (&'a str, bool)>>,
     preserve_structure: bool,
 }
 
-impl ParseTree<'_> {
+impl<'a> ParseTree<'a> {
+    fn new(
+        document: &'a Document,
+        catalog: &'a RsxCatalog,
+        authored: bool,
+        state_classes: Option<&'a BTreeMap<NodeId, (&'a str, bool)>>,
+    ) -> Self {
+        Self {
+            document,
+            catalog,
+            origins: Vec::new(),
+            authored,
+            state_classes,
+            preserve_structure: false,
+        }
+    }
+
     fn element(&mut self, node: &Node, depth: usize) -> Result<Element, String> {
         if depth > MAX_DEPTH || self.origins.len() >= 2000 {
             return Err("RSX conversion supports up to 2000 controls and 96 levels".into());
@@ -148,9 +185,23 @@ impl ParseTree<'_> {
                 Some(XAML) if attr.name.ends_with(":Name") => "Name",
                 _ => return Err(format!("{} has no static RSX conversion", attr.name)),
             };
+            let mut value = attr.value.as_str();
+            if name == "Classes" {
+                if let Some(&(marker, authored)) =
+                    self.state_classes.and_then(|classes| classes.get(&node.id))
+                {
+                    value = value
+                        .strip_suffix(marker)
+                        .ok_or("The generated state scope changed")?
+                        .trim_end();
+                    if !authored && value.is_empty() {
+                        continue;
+                    }
+                }
+            }
             let value = class
                 .literal(name)
-                .and_then(|kind| kind.normalize(&attr.value))
+                .and_then(|kind| kind.normalize(value))
                 .ok_or_else(|| format!("{class}.{name} needs a supported static RSX literal"))?;
             element.properties.insert(name.into(), value);
             if origins
@@ -186,6 +237,12 @@ impl ParseTree<'_> {
                 NodeKind::Comment | NodeKind::ProcessingInstruction => {
                     self.preserve_structure = true
                 }
+                NodeKind::PropertyElement
+                    if self.state_classes.is_some()
+                        && child.namespace_uri == node.namespace_uri
+                        && child.local_name().split_once('.')
+                            == Some((node.local_name(), "Styles")) =>
+                {}
                 NodeKind::Text if child.text.as_deref().unwrap_or("").trim().is_empty() => (),
                 NodeKind::Text => {
                     let name = text_property

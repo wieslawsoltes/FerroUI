@@ -34,6 +34,73 @@ fn content_children(session: &DesignerSession, owner: NodeId) -> Vec<NodeId> {
 }
 
 #[test]
+fn mixed_rsx_outline_placement_keeps_source_selection_and_one_undo() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"rsx! { StackPanel {
+        StackPanel { name: "Origin",
+            Button { name: "Moved", content: "Move", /* keep 🦀 */ on_click: save() }
+            Border { width: 44.0 }
+            { computed_origin_child() }
+        }
+        StackPanel { name: "Destination",
+            TextBlock { name: "Anchor", text: "Anchor" }
+            if visible() { TextBlock { text: "Conditional" } }
+            TextBlock { text: "Tail" }
+        }
+        Border { name: "Computed", { body() } }
+    } }"#;
+    let mut session = DesignerSession::with_rust_source(
+        source, ContentControl::new(), "file:///Placement.rs".into(),
+    ).unwrap();
+    assert!(!session.can_insert_outline_child(named(&session, "Computed")));
+    let origin = named(&session, "Origin");
+    let children = content_children(&session, origin);
+    let anchor = named(&session, "Anchor");
+    let drag = OutlineDrag::capture(&session, children.iter().rev().copied()).unwrap();
+    assert!(drag.can_drop(&session, anchor, DropPosition::After));
+    drag.commit(&mut session, anchor, DropPosition::After).unwrap();
+    let moved = session.authored_source().to_owned();
+    let destination = named(&session, "Destination");
+    let children = content_children(&session, destination);
+    assert_eq!(session.selection(), &children[1..3]);
+    assert!(content_children(&session, named(&session, "Origin")).is_empty());
+    assert!(moved.find("name: \"Anchor\"").unwrap() < moved.find("name: \"Moved\"").unwrap());
+    assert!(moved.find("width: 44.0").unwrap() < moved.find("if visible()").unwrap());
+    assert!(moved.contains("/* keep 🦀 */ on_click: save()"));
+    assert!(moved.contains("{ computed_origin_child() }"));
+    assert!(drag.commit(&mut session, anchor, DropPosition::After).is_err());
+    session.undo().unwrap();
+    assert_eq!(session.authored_source(), source);
+    assert!(!session.can_undo());
+    session.redo().unwrap();
+    assert_eq!(session.authored_source(), moved);
+
+    #[cfg(feature = "mcp")]
+    {
+        use ferroui_mcp::{Permissions, UiToolProvider};
+        use serde_json::json;
+
+        session.undo().unwrap();
+        let origin = named(&session, "Origin");
+        let children = content_children(&session, origin);
+        let args = json!({
+            "expected_revision": session.document().revision(), "selection": children,
+            "anchor": named(&session, "Anchor"), "position": "after",
+        });
+        let session = Rc::new(RefCell::new(session));
+        let mcp = crate::mcp::DesignerMcp::new(&session);
+        mcp.call("designer_placement_hint", &args, Permissions::default()).unwrap();
+        let write = Permissions { allow_property_writes: true, allow_input: false };
+        mcp.call("designer_place", &args, write).unwrap();
+        assert_eq!(session.borrow().authored_source(), moved);
+        assert!(mcp.call("designer_place", &args, write).is_err());
+        session.borrow_mut().undo().unwrap();
+        assert_eq!(session.borrow().authored_source(), source);
+        assert!(!session.borrow().can_undo());
+    }
+}
+
+#[test]
 fn outline_reparent_preserves_source_order_namespace_identity_preview_and_single_undo() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let mut session = new_session(SOURCE);

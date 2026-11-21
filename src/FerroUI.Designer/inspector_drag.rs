@@ -287,6 +287,12 @@ impl OutlineDrag {
     ) -> Result<(), String> {
         let edits = self.plan(session, target, position)?;
         if !edits.is_empty() {
+            if session.uses_rust_source() {
+                let after = (position == DropPosition::After).then_some(target);
+                return session.apply_rust_placement(
+                    self.revision, "Move outline selection", edits, after, &self.nodes,
+                );
+            }
             session
                 .apply_at(self.revision, "Move outline selection", edits)
                 .map_err(|error| error.to_string())?;
@@ -494,6 +500,9 @@ impl DesignerSession {
         let snapshot = OutlineDrag::capture(self, self.selection().iter().copied())?;
         let edits = snapshot.plan_command(self, command)?;
         if !edits.is_empty() {
+            if self.uses_rust_source() {
+                return self.apply_rust_placement(snapshot.revision, command.label(), edits, None, &snapshot.nodes);
+            }
             self.apply_at(snapshot.revision, command.label(), edits)
                 .map_err(|error| error.to_string())?;
             self.select(snapshot.nodes);
@@ -539,6 +548,9 @@ impl ContentHost {
             .ok_or("The content host no longer exists")?;
         if element.kind != NodeKind::Element {
             return Err("A property declaration is not a content host".into());
+        }
+        if session.rust_map().is_some_and(|map| !map.editable_children(element.span.start)) {
+            return Err("Edit this computed Rust child slot in source".into());
         }
         let capabilities = session
             .runtime_layout_capabilities(owner)

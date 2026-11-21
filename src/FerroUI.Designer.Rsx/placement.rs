@@ -1,6 +1,13 @@
 use crate::source_edits::remove_field;
 use crate::{RsxProjection, xaml::XamlTree};
 use ferroui_designer_core::{Document, SourceSpan, TextPatch};
+use std::collections::BTreeSet;
+
+pub(crate) enum ChildBoundary {
+    Before(usize),
+    After(usize),
+    End,
+}
 
 impl RsxProjection<'_> {
     pub fn insert_child(
@@ -9,9 +16,13 @@ impl RsxProjection<'_> {
         before: Option<usize>,
         fragment: &str,
     ) -> Result<TextPatch, String> {
-        let document = Document::new(fragment).map_err(|error| error.to_string())?;
-        let tree = XamlTree::parse(&document, self.catalog)?;
-        self.insert_element(parent, before, &tree.tree.rsx_body(), true)
+        let element = self.child_fragment(fragment)?;
+        self.insert_elements(
+            parent,
+            before.map_or(ChildBoundary::End, ChildBoundary::Before),
+            &[(element, true)],
+            &BTreeSet::new(),
+        )
     }
 
     /// Move the original subtree tokens. Layout authoring may update literals on
@@ -21,25 +32,16 @@ impl RsxProjection<'_> {
         index: usize,
         parent: usize,
         before: Option<usize>,
-        mut values: Vec<TextPatch>,
+        values: Vec<TextPatch>,
     ) -> Result<Vec<TextPatch>, String> {
         let span = self.nodes.get(index).ok_or("Unknown RSX element")?.span;
-        let mut element = self
-            .source
-            .get(span.range())
-            .ok_or("Unknown RSX source span")?
-            .to_owned();
-        values.sort_by_key(|patch| std::cmp::Reverse(patch.span.start));
-        for patch in values {
-            if patch.span.start < span.start || patch.span.end > span.end {
-                return Err("A layout change escaped the moved Rust element".into());
-            }
-            element.replace_range(
-                patch.span.start - span.start..patch.span.end - span.start,
-                &patch.replacement,
-            );
-        }
-        let insertion = self.insert_element(parent, before, &element, false)?;
+        let element = self.moved_child(span, values)?;
+        let insertion = self.insert_elements(
+            parent,
+            before.map_or(ChildBoundary::End, ChildBoundary::Before),
+            &[(element, false)],
+            &BTreeSet::new(),
+        )?;
         let removal = remove_field(self.source, span);
         if removal.span.start <= insertion.span.start && insertion.span.start < removal.span.end {
             return Err("The move destination overlaps its Rust element".into());
@@ -47,53 +49,95 @@ impl RsxProjection<'_> {
         Ok(vec![removal, insertion])
     }
 
-    fn insert_element(
+    pub(crate) fn child_fragment(&self, fragment: &str) -> Result<String, String> {
+        let document = Document::new(fragment).map_err(|error| error.to_string())?;
+        Ok(XamlTree::parse(&document, self.catalog)?.tree.rsx_body())
+    }
+
+    pub(crate) fn moved_child(
+        &self,
+        span: SourceSpan,
+        mut edits: Vec<TextPatch>,
+    ) -> Result<String, String> {
+        for edit in &mut edits {
+            if edit.span.start < span.start || edit.span.end > span.end {
+                return Err("A layout change escaped the moved Rust element".into());
+            }
+            edit.span.start -= span.start;
+            edit.span.end -= span.start;
+        }
+        TextPatch::apply_all(&self.source[span.range()], edits).map_err(|error| error.to_string())
+    }
+
+    pub(crate) fn insert_elements(
         &self,
         parent: usize,
-        before: Option<usize>,
-        element: &str,
-        generated: bool,
+        boundary: ChildBoundary,
+        elements: &[(String, bool)],
+        moving: &BTreeSet<usize>,
     ) -> Result<TextPatch, String> {
         let parent = self
             .nodes
             .get(parent)
             .filter(|node| node.editable_children())
-            .ok_or("Choose a Rust container with fully mapped children")?;
-        let offset = match before {
-            Some(before) => {
-                self.nodes
-                    .get(before)
-                    .ok_or("Unknown Rust insertion anchor")?
-                    .span
-                    .start
-            }
-            None => parent.close,
+            .ok_or("Choose an authored Rust container with an editable child slot")?;
+        let child = |index: usize| {
+            parent
+                .child_indices
+                .contains(&index)
+                .then(|| &self.nodes[index])
+                .ok_or("The Rust anchor is outside its child list")
         };
-        if !(parent.open..=parent.close).contains(&offset) {
-            return Err("The Rust insertion anchor is outside its container".into());
-        }
+        let offset = match boundary {
+            ChildBoundary::Before(index) => child(index)?.span.start,
+            ChildBoundary::After(index) => {
+                let end = child(index)?.span.end;
+                parent
+                    .child_indices
+                    .iter()
+                    .filter(|index| !moving.contains(index))
+                    .map(|index| self.nodes[*index].span.start)
+                    .chain(parent.opaque_children.iter().copied())
+                    .filter(|start| *start >= end)
+                    .min()
+                    .unwrap_or(parent.close)
+            }
+            ChildBoundary::End => parent.close,
+        };
         let line = self.source[..offset].rsplit('\n').next().unwrap_or("");
-        let replacement = if line.trim().is_empty() {
-            let eol = if self.source.contains("\r\n") {
-                "\r\n"
-            } else {
-                "\n"
-            };
-            let indent = if before.is_some() {
-                line.to_owned()
-            } else {
-                format!("{line}    ")
-            };
-            let prefix = if before.is_none() { "    " } else { "" };
-            let element = if generated {
-                element.replace('\n', &format!("{eol}{indent}"))
-            } else {
-                // Preserve literals and comments inside the moved block byte for byte.
-                element.to_owned()
-            };
-            format!("{prefix}{element}{eol}{line}")
+        let eol = if self.source.contains("\r\n") {
+            "\r\n"
         } else {
-            format!(" {element}, ")
+            "\n"
+        };
+        let replacement = if line.trim().is_empty() {
+            let extra = if offset == parent.close { "    " } else { "" };
+            let next_line = format!("{eol}{line}{extra}");
+            let items = elements
+                .iter()
+                .map(|(element, generated)| {
+                    if *generated {
+                        element.replace('\n', &next_line)
+                    } else {
+                        element.clone()
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join(&next_line);
+            format!("{extra}{items}{eol}{line}")
+        } else {
+            let elements = elements
+                .iter()
+                .map(|(element, generated)| {
+                    if *generated {
+                        element.replace('\n', eol)
+                    } else {
+                        element.clone()
+                    }
+                })
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!(" {elements}, ")
         };
         Ok(TextPatch {
             span: SourceSpan::new(offset, offset),

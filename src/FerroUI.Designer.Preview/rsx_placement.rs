@@ -1,6 +1,7 @@
 use crate::document::DesignDocument;
-use crate::protocol::DragOrigin;
+use crate::protocol::{DragOrigin, DropPosition, DropTarget, EditResult, Placement};
 use ferroui_designer_core::{Document, Edit, NodeId, TextPatch};
+use ferroui_designer_language::LineIndex;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub(crate) struct PlacementPolicy {
@@ -30,6 +31,10 @@ impl PlacementPolicy {
         Some(result)
     }
 
+    pub(crate) fn editable_children(&self, node: NodeId) -> bool {
+        self.containers.contains(&node)
+    }
+
     pub(crate) fn validate(
         &self,
         origin: &DragOrigin,
@@ -43,18 +48,16 @@ impl PlacementPolicy {
         };
         for node in moving {
             let parent = document.ast().node(*node).and_then(|node| node.parent);
-            if !parent.is_some_and(|parent| self.containers.contains(&parent)) {
-                return Err(
-                    "The dragged control has dynamic Rust siblings. Move it in source.".into(),
-                );
+            if !parent.is_some_and(|parent| self.editable_children(parent)) {
+                return Err("Edit the source container's computed child slot in Rust".into());
             }
         }
         for edit in edits {
             match edit {
                 Edit::InsertChild { parent, .. } | Edit::MoveNode { parent, .. }
-                    if !self.containers.contains(parent) =>
+                    if !self.editable_children(*parent) =>
                 {
-                    return Err("Drop into a Rust container with fully mapped children".into());
+                    return Err("Drop into a Rust container with an authored child slot".into());
                 }
                 Edit::SetAttribute { node, name, .. } | Edit::RemoveAttribute { node, name }
                     if self
@@ -73,120 +76,48 @@ impl PlacementPolicy {
     }
 }
 
-pub(crate) fn patches(
+pub(crate) fn edit(
     design: &DesignDocument<'_>,
     draft: &Document,
-    id: NodeId,
-    origin: &DragOrigin,
-    planned: &[Edit],
-) -> Result<Vec<TextPatch>, String> {
-    let rsx = design.rsx.as_ref().ok_or("Open an RSX design")?;
-    if matches!(origin, DragOrigin::Nodes { .. }) {
-        return rsx.apply_xaml(draft.source());
-    }
-    let (parent, before) = boundary(draft, id)?;
-    let parent = design
-        .rsx_node(parent)
-        .ok_or("Select an authored Rust container")?
-        .0;
-    let before = before
-        .map(|next| {
-            design
-                .rsx_node(next)
-                .map(|entry| entry.0)
-                .ok_or("The Rust insertion anchor changed")
-        })
-        .transpose()?;
-    let patches = match origin {
-        DragOrigin::Asset { .. } | DragOrigin::Image { .. } => {
-            let fragment = ferroui_designer_tools::component_fragment(draft, id)
-                .map_err(|error| error.to_string())?;
-            vec![rsx.insert_child(parent, before, &fragment)?]
-        }
-        DragOrigin::Node { node, .. } => {
-            let (index, _) = design
-                .rsx_node(*node)
-                .ok_or("Select an authored Rust control")?;
-            let (original_parent, original_before) = boundary(&design.xaml, *node)?;
-            let original = design
-                .rsx_node(original_parent)
-                .ok_or("Select an authored Rust container")?;
-            if !original.1.editable_children() {
-                return Err(
-                    "Move controls in the Rust editor when their siblings contain dynamic children"
-                        .into(),
-                );
-            }
-            let original_before =
-                original_before.and_then(|node| design.rsx_node(node).map(|entry| entry.0));
-            let mut values = Vec::new();
-            for edit in planned {
-                match edit {
-                    Edit::SetAttribute {
-                        node: target,
-                        name,
-                        value,
-                    } if *target == *node => {
-                        values.push(rsx.edit_property(index, name, Some(value))?)
-                    }
-                    Edit::RemoveAttribute { node: target, name } if *target == *node => {
-                        values.push(rsx.edit_property(index, name, None)?)
-                    }
-                    Edit::MoveNode { node: target, .. } if *target == *node => (),
-                    _ => {
-                        return Err(
-                            "This placement requires editing the Rust layout expressions".into(),
-                        );
-                    }
-                }
-            }
-            if parent == original.0 && before == original_before {
-                merge_insertions(values)
-            } else {
-                rsx.move_child(index, parent, before, merge_insertions(values))?
-            }
-        }
-        DragOrigin::Nodes { .. } => unreachable!("group placement handled above"),
+    selected: Option<NodeId>,
+    placement: &Placement,
+    edits: &[Edit],
+) -> Result<EditResult, String> {
+    let Some(selected) = selected else {
+        return crate::edits::editor_edits(design, Vec::new());
     };
-    let mut draft_source = design.source.to_owned();
-    let mut ordered: Vec<_> = patches.iter().collect();
-    ordered.sort_by_key(|patch| std::cmp::Reverse(patch.span.start));
-    for patch in ordered {
-        draft_source.replace_range(patch.span.range(), &patch.replacement);
-    }
-    let reparsed = design.rsx_catalog().project(&draft_source, rsx.invocation.start)?;
-    if !reparsed.matches_xaml(draft.source())? {
-        return Err("This placement cannot preserve the authored Rust layout".into());
-    }
-    Ok(patches)
-}
-
-fn boundary(document: &Document, id: NodeId) -> Result<(NodeId, Option<NodeId>), String> {
-    let parent = document
-        .ast()
-        .node(id)
-        .and_then(|node| node.parent)
-        .ok_or("The control has no authored container")?;
-    let siblings = document.ast().element_children(parent);
-    let index = siblings
+    let projection = design.rsx.as_ref().ok_or("Open an RSX design")?;
+    let after = match placement.target {
+        DropTarget::Outline {
+            node,
+            position: DropPosition::After,
+        } => Some(node),
+        _ => None,
+    };
+    let plan = projection.plan_child_edit(&design.xaml, draft, edits, after)?;
+    let source = TextPatch::apply_all(design.source, plan.patches.clone())
+        .map_err(|error| error.to_string())?;
+    let index = LineIndex::new(&source);
+    let range = |id| {
+        let span = plan
+            .controls
+            .get(&id)
+            .ok_or("The placed control has no Rust source range")?;
+        index.range(*span).map_err(|error| error.to_string())
+    };
+    let nodes = match &placement.origin {
+        DragOrigin::Nodes { nodes, .. } => nodes.as_slice(),
+        _ => &[],
+    };
+    let retained = nodes
         .iter()
-        .position(|node| *node == id)
-        .ok_or("The control has no authored sibling order")?;
-    Ok((parent, siblings.get(index + 1).copied()))
-}
-
-fn merge_insertions(mut values: Vec<TextPatch>) -> Vec<TextPatch> {
-    values.sort_by_key(|patch| (patch.span.start, patch.span.end));
-    let mut merged: Vec<TextPatch> = Vec::new();
-    for patch in values {
-        if let Some(previous) = merged
-            .last_mut()
-            .filter(|item| item.span == patch.span && patch.span.is_empty())
-        {
-            previous.replacement.push_str(&patch.replacement);
-        } else {
-            merged.push(patch);
-        }
-    }
-    merged
+        .copied()
+        .filter(|node| *node != selected)
+        .chain(std::iter::once(selected))
+        .map(range)
+        .collect::<Result<Vec<_>, _>>()?;
+    let mut result = crate::edits::editor_edits(design, plan.patches)?;
+    result.selection = retained.last().cloned();
+    result.retained_selection = retained;
+    Ok(result)
 }

@@ -630,6 +630,15 @@ impl DesignerSession {
         if preview.edits.is_empty() {
             return Ok(());
         }
+        if self.uses_rust_source() && crate::rsx_placement::is_child_placement(&preview.edits) {
+            let moving: &[NodeId] = match &preview.intent {
+                PreviewIntent::Move(nodes) => nodes,
+                _ => &[],
+            };
+            return self.apply_rust_placement(
+                preview.guard.revision, &preview.label, preview.edits.clone(), None, moving,
+            );
+        }
         let change = self
             .apply_at(
                 preview.guard.revision,

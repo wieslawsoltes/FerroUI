@@ -35,11 +35,17 @@ struct ControlSource {
     offset: usize,
     name: SourceSpan,
     properties: BTreeMap<String, SourceSpan>,
+    editable_children: bool,
     can_create_animation: bool,
     can_create_state_group: bool,
 }
 
 impl RsxSourceMap {
+    pub fn editable_children(&self, offset: usize) -> bool {
+        self.control(offset)
+            .is_some_and(|(index, _)| self.controls[index].editable_children)
+    }
+
     pub fn control(&self, offset: usize) -> Option<(usize, SourceSpan)> {
         let index = self
             .controls
@@ -92,6 +98,7 @@ impl RsxProjection<'_> {
                 .map(|(index, (offset, node))| ControlSource {
                     offset,
                     name: node.name,
+                    editable_children: node.editable_children(),
                     can_create_animation: self.can_create_animation(index),
                     can_create_state_group: self.can_create_state_group(index),
                     properties: node

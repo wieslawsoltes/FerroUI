@@ -6,6 +6,7 @@ mod blocks;
 mod catalog;
 mod image_source;
 mod language;
+mod layout_edits;
 mod literal;
 mod markup;
 mod names;
@@ -23,6 +24,7 @@ mod xaml;
 
 pub use animation::{RsxAnimation, RsxAnimationIssue};
 pub use language::{RsxLanguageDocument, analyze_rsx};
+pub use layout_edits::RsxChildEdit;
 pub use markup::{RsxPreviewMarkup, RsxSourceMap};
 pub use programs::{RsxAnimationEdit, RsxAnimationPlan};
 pub use project::{RsxNode, RsxProjection, project_rust};
@@ -44,6 +46,8 @@ pub fn invocation_count(source: &str) -> usize {
 mod tests;
 #[cfg(test)]
 mod animation_tests;
+#[cfg(test)]
+mod layout_edit_tests;
 #[cfg(test)]
 mod program_tests;
 #[cfg(test)]

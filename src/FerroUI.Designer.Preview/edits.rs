@@ -116,10 +116,9 @@ pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects:
                 selected = crate::edit_selection::dropped_node(&candidate, &change, &placement.origin);
             }
             if design.rsx.is_some() {
-                selected.map_or_else(|| Ok(Vec::new()), |node| {
-                    crate::rsx_placement::patches(&design, &candidate, node, &placement.origin, &edits)
-                })?
-            } else { change.patches }
+                return crate::rsx_placement::edit(&design, &candidate, selected, placement, &edits);
+            }
+            change.patches
         }
         Operation::Resize { frame, node, handle, dx, dy } => {
             let stage = renderer.ok_or("Render the design before resizing")?.stage(*frame)?;

@@ -87,6 +87,7 @@ mod property_transfer;
 mod property_transfer_editor;
 mod resource_editor;
 mod rsx_document;
+mod rsx_placement;
 mod rsx_session;
 mod runtime;
 mod runtime_outline;
