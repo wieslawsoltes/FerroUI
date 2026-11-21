@@ -1421,6 +1421,40 @@ easing functions, the adaptive and state triggers, the content page and the page
 Test: `the_manager_is_named_by_the_mappers_once_an_element_has_groups`
 (`visual_state/state_mapper_tests.rs`, on a thread of its own).
 
+### 4.29 The tool tips are followed from the initialisation of their class (#612)
+
+The tool tip service, which the application creates at start-up as upstream does, subscribed to
+`ToolTip.ServiceEnabled` and `ToolTip.Tip`; the static constructor of the top-level subscribed to
+`ToolTip.ServiceEnabled`; and the help text of an automation peer read `ToolTip.Tip`. An accessor
+of an attached property initialises its owner, so every application initialised the tool tip
+class at start-up and linked it, the popup it opens and the automation peers of both. A control
+has a tip only once the class is initialised on its thread: the tip is the class's attached
+property.
+
+The class's static constructor now subscribes the services made before it and the top-level (in
+the order of before: the services, then the top-level), and states what the service does with
+tool tips on raw input and on an update for the control under the pointer, and how others read
+a tip (`tool_tip::tip_if_any`). Before that the service has no tip control and nothing to do; a
+service made later subscribes at once.
+
+| `samples/HelloWorld`, macOS | 4.28 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 17,897,688 bytes | 17,758,584 bytes | -139,104 bytes (-0.8 %) |
+| release, `__TEXT,__text` | 14,017,584 bytes | 13,895,200 bytes | -122,384 bytes (-0.9 %) |
+| Class initialisers linked | 123 | 120 | -3 (the tool tip and the automation peers of the tool tip and the popup) |
+| `dist`, file | 15,368,416 bytes | 15,268,688 bytes | -99,728 bytes (-0.6 %) |
+| `dist`, `__TEXT,__text` | 12,535,144 bytes | 12,438,468 bytes | -96,676 bytes (-0.8 %) |
+
+Without the automation peer's read, the first step alone gave 17 kB: one reader of the property
+is enough to keep the class. With sections 4.25 to 4.28, hello world is 13.5 % smaller than main
+in release (20,529,288 bytes) and 12.5 % in `dist` (17,446,112 bytes).
+
+Tests: the 395 tool tip, top-level and automation tests of `ferroui-controls`, each on a thread of
+its own, so each goes through the service made before the class's initialisation.
+
+The catalog and the WinUI gallery show tool tips and keep the class; they grow by the stated
+functions (release: the catalog +15.8 kB, the gallery -0.9 kB).
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
