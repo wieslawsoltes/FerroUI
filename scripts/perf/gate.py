@@ -122,7 +122,7 @@ GATE_SAMPLE = Path("samples/GauntletBenchmark")
 GATE_TEST = GATE_SAMPLE / "tests" / "frame_gate.rs"
 TDG_PACKAGE = "ferroui-treedatagrid-benchmarks"
 # FerroUI's own regression benchmarks, apart from the ports of other frameworks' benchmarks (the
-# gauntlet follows the Cranpose benchmark and is synced with it): the scenes of the frame
+# gauntlet follows the comparison's benchmark and is synced with it): the scenes of the frame
 # benchmarks, timed headless and in a desktop window, and the micro-benchmarks of the framework's
 # tree mechanics (category `trees` of `tests/FerroUI.Benchmarks`), of element construction, of
 # text blocks measured and arranged at two widths, of text blocks whose text changes and of the
