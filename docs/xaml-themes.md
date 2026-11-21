@@ -146,8 +146,16 @@ positions). `rt::add_packed_resource_aliases`, `add_packed_literal_brushes`,
 added or built and do what the builders of the slices do, in the same order, with the same
 errors at the same positions. A run with an offset, a length or a position beyond 16 bits, a
 negative position or a key in a form the emitter does not write keeps its slice of rows. A
-record that does not decode is the error of its table, not a panic. The pool is the table's, so
-a trimmed unit takes its strings with it. The helpers of the slices stay for the plain values.
+record that does not decode is the error of its table, not a panic. The packed tables of one
+unit of a theme share one pool when the unit has two or more of them (`row_tables_in`): the
+constant `{DOCUMENT}_UNIT_{n}_STRINGS`, written before the first table of the unit, which each
+table names in place of its own literal. The tables of the theme dictionaries of a unit (light,
+dark, high contrast) name the same keys and targets, which a pool for each table repeated;
+counted on the WinUI theme, the pools of all its tables are 266,234 bytes with one pool for each
+table and 102,833 with one for each unit, and those of the 15 units hello world keeps 55,257
+and 18,339 (one pool for the whole theme would be 69,411, kept whole by every application). The
+pool is the unit's, so a trimmed unit takes its strings with it; a table whose offsets do not fit
+16 bits in the pool of its unit keeps a pool of its own. The helpers of the slices stay for the plain values.
 It is on because the measurement kept it: on macOS the stripped executables were smaller in
 every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
 34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
