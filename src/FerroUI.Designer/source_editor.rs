@@ -1,10 +1,11 @@
 //! Native text interaction backed by the shared XAML language service.
 use super::*;
 use ferroui_designer_core::{Edit, SourceSpan};
-use ferroui_designer_language::{
-    FormattingOptions, LanguageService, LineIndex, Location, Schema, TextEdit, WorkspaceEdit,
-};
+use ferroui_designer_language::{LanguageService, LineIndex, Location, Schema, TextEdit, WorkspaceEdit};
 use std::collections::{BTreeMap, BTreeSet};
+
+#[path = "source_formatting.rs"]
+mod formatting;
 
 pub(super) struct SourceTools {
     pub service: LanguageService,
@@ -274,24 +275,7 @@ impl DesignerWorkspace {
                 self.refresh_source_tools();
             }
             "FormatSource" => {
-                self.session
-                    .borrow()
-                    .ensure_writable()
-                    .map_err(|error| error.to_string())?;
-                let edits = self
-                    .source_tools
-                    .borrow()
-                    .service
-                    .format(&uri, FormattingOptions::default())
-                    .map_err(|e| e.to_string())?;
-                let source = apply_text_edits(&source, &edits)?;
-                {
-                    let mut session = self.session.borrow_mut();
-                    session.stage_source(source);
-                    session.apply_staged_preview()?;
-                }
-                self.pending_source.set(false);
-                self.refresh(true);
+                self.format_source(&uri, &source, revision)?;
             }
             "RenameSource" => {
                 let name = self

@@ -9,6 +9,13 @@ const record = (properties: Record<string, Schema>, required: string[]): Schema 
 const at = record({ line: integer(0), character: integer(0) }, ['line', 'character']);
 const range = record({ start: at, end: at }, ['start', 'end']);
 const edit = record({ range, newText: text }, ['range', 'newText']);
+const formatting = record({
+    tabSize: integer(1, 16), insertSpaces: truth, trimTrailingWhitespace: truth,
+    insertFinalNewline: truth, trimFinalNewlines: truth, preserveBlankLines: truth,
+    attributeLayout: choice('preserve', 'inline', 'onePerLine', 'wrap'),
+    wrapColumn: integer(20, 240), closingBracketOnNewLine: truth,
+    selfClosingSpace: choice('preserve', 'space', 'none'),
+}, []);
 
 export const workspaceCatalog = {
     ferroui_workspace_files: tool('List local workspace roots and matching project files. Use the returned folder name or URI to resolve paths in a multi-root window.',
@@ -23,8 +30,9 @@ export const workspaceCatalog = {
     ferroui_workspace_edit: tool('Apply one undoable, atomic text edit across project buffers. Use each current revision and either replacement source or non-overlapping UTF-16 edits per file.',
         { files: { type: 'array', maxItems: 32, items: record({ ...checked, source: text,
             edits: { type: 'array', maxItems: 2048, items: edit } }, ['path', 'expected_revision']) } }, ['files'], true),
-    ferroui_workspace_file: tool('Open, save, format, undo, redo, rename, or delete a project file. Changes require its current revision. Rename uses new_path in the same workspace folder.',
-        { ...checked, action: choice('open', 'save', 'format', 'undo', 'redo', 'rename', 'delete'), new_path: path, position: at },
+    ferroui_workspace_file: tool('Open, save, format, undo, redo, rename, or delete a project file. Changes require its current revision. Format accepts a UTF-16 range and optional FerroUI XAML formatting overrides. Rename uses new_path in the same workspace folder.',
+        { ...checked, action: choice('open', 'save', 'format', 'undo', 'redo', 'rename', 'delete'),
+            new_path: path, position: at, range, options: formatting },
         ['path', 'action'], true),
 };
 

@@ -7,6 +7,7 @@ import { errorMessage } from './protocol';
 import { projectDefinition } from './projectNavigation';
 import type { ProjectMetadata } from './reloadProcess';
 import { commandFor } from './tools';
+import { xamlFormattingEdits } from './xamlFormatting';
 
 export const xamlLanguage = 'ferroui-xaml';
 
@@ -39,6 +40,10 @@ export class XamlServer implements vscode.Disposable {
                     ferrouiHandlerCommands: true, ferrouiExtractionCommands: vscode.workspace.isTrusted, ferrouiProjectLibrary: true,
                 },
                 middleware: {
+                    provideDocumentFormattingEdits: (document, options, token) =>
+                        xamlFormattingEdits(client, document, options, token),
+                    provideDocumentRangeFormattingEdits: (document, range, options, token) =>
+                        xamlFormattingEdits(client, document, options, token, range),
                     workspace: {
                         willRenameFiles: (event, next) => {
                             const [file] = event.files;

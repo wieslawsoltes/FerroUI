@@ -2,7 +2,7 @@
 use super::schema as s;
 use super::{decode, integer, state, text};
 use crate::DesignerWorkspace;
-use ferroui_designer_language::{FormattingOptions, WorkspaceEdit};
+use ferroui_designer_language::{FormattingOptions, LanguageService, WorkspaceEdit};
 use ferroui_designer_project::{BuildTask, TaskKind};
 use serde_json::{json, Value};
 use std::rc::Rc;
@@ -62,7 +62,7 @@ pub(super) fn tools() -> Vec<Value> {
         }
         queries.push(query(action, fields, &["offset"]));
     }
-    queries.push(query("format", json!({"options":s::formatting()}), &[]));
+    queries.push(query("format", json!({"options":s::formatting(),"range":s::source_range()}), &[]));
     queries.push(query(
         "rename",
         json!({"offset":s::revision(),"new_name":s::string()}),
@@ -115,7 +115,7 @@ pub(super) fn tools() -> Vec<Value> {
         ],true),
         s::actions("designer_build_plan","Describe the exact shell-free Cargo task without starting it. Project defaults to the selected project; run validates the binary target.",plans,false),
         s::actions("designer_project_task","Save checked editor buffers and explicitly start a Cargo check/build/run task, or cancel the owned task. Starting a process additionally requires allow_input because builds execute the project's build scripts with host privileges. Poll designer_project for status/output; no shell text is accepted.",tasks,true),
-        s::actions("designer_language","Query the shared XAML language service over open and indexed project files. uri defaults to the active document. Cursor offsets are UTF-8 byte offsets; returned ranges are LSP UTF-16. format returns text edits with the current version; rename returns a versioned WorkspaceEdit for designer_language_apply.",queries,false),
+        s::actions("designer_language","Query the shared XAML language service over open and indexed project files. uri defaults to the active document. Cursor offsets are UTF-8 bytes. Formatting accepts a UTF-16 range and overrides to Studio settings and returns a versioned edit for designer_language_apply.",queries,false),
         s::tool("designer_language_apply","Apply a prepared multi-document language WorkspaceEdit atomically through retained editor tabs and the project version guards. The active document also requires expected_revision; no files are saved automatically.",s::object(json!({"expected_revision":s::revision(),"edit":s::workspace_edit()}),&["expected_revision","edit"]),true),
         s::tool("designer_event_handler","Read the Rust owner, signature, current Rust version and existing declaration for an authored XAML event. Pass handler to preview the checked two-file edits.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision()}),&["node","event","expected_revision"]),false),
         s::tool("designer_scaffold_handler","Register a Rust handler and assign the authored XAML event in one edit. Use the Rust version reported by designer_event_handler. No files are saved.",s::object(json!({"node":s::id(),"event":s::string(),"handler":s::string(),"expected_revision":s::revision(),"expected_rust_version":s::revision()}),&["node","event","handler","expected_revision","expected_rust_version"]),true),
@@ -320,20 +320,36 @@ fn language(workspace: &Rc<DesignerWorkspace>, args: &Value) -> Result<Value, St
         "resource_uri" => json!(language
             .resource_uri(uri, &text(args, "reference")?)
             .map_err(|error| error.to_string())?),
-        "format" => {
-            let options = if args.get("options").is_some() {
-                decode(args, "options")?
-            } else {
-                FormattingOptions::default()
-            };
-            json!(language
-                .format(uri, options)
-                .map_err(|error| error.to_string())?)
-        }
+        "format" => return format_preview(workspace, &language, uri, revision, args),
         "rename" => json!(language
             .rename(uri, index(args, "offset")?, &text(args, "new_name")?)
             .map_err(|error| error.to_string())?),
         _ => return Err("Unknown language query".into()),
     };
     Ok(json!({"revision":revision,"uri":uri,"version":language.version(uri),"result":result}))
+}
+
+fn format_preview(
+    workspace: &DesignerWorkspace,
+    language: &LanguageService,
+    uri: &str,
+    revision: u64,
+    args: &Value,
+) -> Result<Value, String> {
+    let mut options = workspace.source_formatting_options()?;
+    if let Some(overrides) = args["options"].as_object() {
+        let mut values = serde_json::to_value(&options).map_err(|error| error.to_string())?;
+        values.as_object_mut().expect("formatting options object").extend(overrides.clone());
+        options = serde_json::from_value::<FormattingOptions>(values).map_err(|error| error.to_string())?;
+    }
+    let edits = if args.get("range").is_some() {
+        language.format_range(uri, decode(args, "range")?, options)
+    } else {
+        language.format(uri, options)
+    }.map_err(|error| error.to_string())?;
+    let version = language.version(uri).ok_or("Read the current XAML buffer before formatting")?;
+    Ok(json!({
+        "revision":revision,"uri":uri,"version":version,"result":edits,
+        "edit":{"document_changes":[{"uri":uri,"version":version,"edits":edits}]}
+    }))
 }

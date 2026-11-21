@@ -1418,7 +1418,7 @@ impl LanguageService {
         Ok(())
     }
     pub fn format(&self, uri: &str, options: FormattingOptions) -> Result<Vec<TextEdit>> {
-        crate::formatting::format(&self.state(uri)?.document, options, None)
+        crate::formatting::format(&self.state(uri)?.document, self.schema_for(uri), options, None)
     }
     pub fn format_range(
         &self,
@@ -1427,7 +1427,7 @@ impl LanguageService {
         options: FormattingOptions,
     ) -> Result<Vec<TextEdit>> {
         let state = self.state(uri)?;
-        crate::formatting::format(&state.document, options, Some(state.index.span(range)?))
+        crate::formatting::format(&state.document, self.schema_for(uri), options, Some(state.index.span(range)?))
     }
     pub fn symbols(&self, uri: &str) -> Result<Vec<DocumentSymbol>> {
         let state = self.state(uri)?;

@@ -31,7 +31,7 @@ mod references;
 pub mod rust_analyzer;
 mod schema;
 mod service;
-pub use formatting::FormattingOptions;
+pub use formatting::{AttributeLayout, FormattingOptions, SelfClosingSpace};
 pub use editing::QuickFix;
 pub use line_index::{LineIndex, Position, Range, TextChange, TextEdit};
 pub use references::{

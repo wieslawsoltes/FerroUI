@@ -306,7 +306,48 @@
             </Button>
             <Button Name="SourceReferences" Classes="nav" Content="References" />
             <Button Name="SourceDiagnostics" Classes="nav" Content="Problems" />
-            <Button Name="FormatSource" Classes="nav" Content="Format" />
+            <Button Name="FormatSource" Classes="icon" AutomationProperties.Name="Format XAML" ToolTip.Tip="Format the XAML selection or document">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 2H15V3.5H1Z M5 5.5H15V7H5Z M5 9H15V10.5H5Z M1 12.5H15V14H1Z" />
+            </Button>
+            <Button Name="SourceFormattingOptions" Classes="icon" AutomationProperties.Name="XAML formatting options" ToolTip.Tip="XAML formatting options">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F1 M1 3H4V4.5H1Z M8 3H15V4.5H8Z M4 1.5H8V6H4Z M1 10.5H8V12H1Z M12 10.5H15V12H12Z M8 9H12V13.5H8Z" />
+              <Button.Flyout>
+                <Flyout>
+                  <StackPanel Width="288" Spacing="8">
+                    <TextBlock Text="XAML formatting" FontWeight="SemiBold" />
+                    <Grid ColumnDefinitions="*,140" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="4" ColumnSpacing="8">
+                      <TextBlock Text="Indent with" VerticalAlignment="Center" />
+                      <ComboBox Name="SourceFormatIndent" Grid.Column="1" SelectedIndex="0" HorizontalAlignment="Stretch" AutomationProperties.Name="Indent with">
+                        <ComboBoxItem Content="Spaces" />
+                        <ComboBoxItem Content="Tabs" />
+                      </ComboBox>
+                      <TextBlock Grid.Row="1" Text="Tab size" VerticalAlignment="Center" />
+                      <TextBox Name="SourceFormatTabSize" Grid.Row="1" Grid.Column="1" Text="4" AutomationProperties.Name="Tab size" />
+                      <TextBlock Grid.Row="2" Text="Attribute layout" VerticalAlignment="Center" />
+                      <ComboBox Name="SourceFormatAttributes" Grid.Row="2" Grid.Column="1" SelectedIndex="0" HorizontalAlignment="Stretch" AutomationProperties.Name="Attribute layout">
+                        <ComboBoxItem Content="Preserve" />
+                        <ComboBoxItem Content="Inline" />
+                        <ComboBoxItem Content="One per line" />
+                        <ComboBoxItem Content="Wrap" />
+                      </ComboBox>
+                      <TextBlock Grid.Row="3" Text="Wrap column" VerticalAlignment="Center" />
+                      <TextBox Name="SourceFormatWrapColumn" Grid.Row="3" Grid.Column="1" Text="100" AutomationProperties.Name="Wrap column" />
+                      <TextBlock Grid.Row="4" Text="Space before /&gt;" VerticalAlignment="Center" />
+                      <ComboBox Name="SourceFormatClosingSpace" Grid.Row="4" Grid.Column="1" SelectedIndex="0" HorizontalAlignment="Stretch" AutomationProperties.Name="Space before self-closing bracket">
+                        <ComboBoxItem Content="Preserve" />
+                        <ComboBoxItem Content="One space" />
+                        <ComboBoxItem Content="None" />
+                      </ComboBox>
+                    </Grid>
+                    <CheckBox Name="SourceFormatBracketLine" Content="Closing bracket on its own line" />
+                    <CheckBox Name="SourceFormatBlankLines" Content="Keep blank lines between elements" />
+                    <CheckBox Name="SourceFormatTrailingWhitespace" Content="Trim trailing whitespace" IsChecked="True" />
+                    <CheckBox Name="SourceFormatFinalNewline" Content="Insert final newline" IsChecked="True" />
+                    <CheckBox Name="SourceFormatFinalBlankLines" Content="Trim final blank lines" IsChecked="True" />
+                  </StackPanel>
+                </Flyout>
+              </Button.Flyout>
+            </Button>
             <TextBox Name="RenameSymbol" Width="100" PlaceholderText="New name" />
             <Button Name="RenameSource" Classes="nav" Content="Rename" />
             <Button Name="ApplySource" Content="Apply" ToolTip.Tip="Apply the current source buffer" />

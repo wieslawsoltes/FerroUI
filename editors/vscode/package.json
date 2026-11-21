@@ -813,6 +813,46 @@
     "configuration": {
       "title": "FerroUI",
       "properties": {
+        "ferroui.xaml.formatting.attributeLayout": {
+          "type": "string",
+          "enum": ["preserve", "inline", "onePerLine", "wrap"],
+          "enumDescriptions": [
+            "Keep the original attribute separators.",
+            "Place attributes on the same line as the element name.",
+            "Place each attribute on its own line.",
+            "Place attributes on separate lines when the start tag exceeds Wrap Column."
+          ],
+          "default": "preserve",
+          "scope": "resource",
+          "description": "Choose how Format Document and Format Selection lay out XAML attributes."
+        },
+        "ferroui.xaml.formatting.wrapColumn": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 20,
+          "maximum": 240,
+          "scope": "resource",
+          "description": "Start-tag width for the Wrap attribute layout, including its indentation."
+        },
+        "ferroui.xaml.formatting.closingBracketOnNewLine": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "description": "Place the closing bracket of a wrapped start tag on its own line."
+        },
+        "ferroui.xaml.formatting.selfClosingSpace": {
+          "type": "string",
+          "enum": ["preserve", "space", "none"],
+          "default": "preserve",
+          "scope": "resource",
+          "description": "Choose spacing before a self-closing XAML bracket on the same line."
+        },
+        "ferroui.xaml.formatting.preserveBlankLines": {
+          "type": "boolean",
+          "default": false,
+          "scope": "resource",
+          "description": "Keep existing blank lines between XAML elements."
+        },
         "ferroui.mcp.enableDesigner": {
           "type": "boolean",
           "default": true,

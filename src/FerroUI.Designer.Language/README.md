@@ -6,7 +6,7 @@ The built-in schema is generated from the existing `scripts/generate_view_builde
 
 `index_solution` indexes unopened XAML without replacing open editor buffers. Resource navigation and rename cross indexed project documents; named references respect template namescopes. The shared `name_occurrences` grammar also supports duplication tools, including Binding ElementName/#name, x:Reference, selectors, relative panels and behavior/storyboard target attributes. Plain string properties and unresolved external references are not rewritten. Multi-document edits carry expected versions and apply atomically; stale refactorings cannot partially update the service.
 
-Formatting changes inter-element whitespace while preserving attribute spelling, comments, mixed text content and inherited `xml:space="preserve"`. Runtime type loading and custom markup execution remain the host runtime's responsibility; schema diagnostics identify unknown registrations instead of executing application code.
+Formatting uses the source tree to adjust whitespace between elements and attributes. It preserves attribute tokens, comments, inline text collections, inherited `xml:space`, and generated regions. `LanguageService::format` and `format_range` accept the same `FormattingOptions`. LSP clients can send `attributeLayout`, `wrapColumn`, `closingBracketOnNewLine`, `selfClosingSpace`, and `preserveBlankLines` alongside the standard indentation and file options. The service returns UTF-16 patches inside the requested selection for range formatting. [Formatting guide](../../docs/designer/vscode/authoring.md#format-xaml) · [LSP document formatting](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_formatting)
 
 ## LSP process
 

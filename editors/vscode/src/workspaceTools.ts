@@ -7,6 +7,7 @@ import { asPosition, exactRange, wireRange } from './textDocument';
 import type { WorkspaceTool } from './workspaceCatalog';
 import { queryLanguage, type LanguageQuery } from './workspaceLanguage';
 import { localFolders, newWorkspaceFile, resolveWorkspaceFile, workspaceFolders } from './workspacePaths';
+import { xamlLanguage } from './xamlServer';
 
 const maxSource = 1024 * 1024;
 const excludedDirectories = '**/{.git,node_modules,target}/**';
@@ -18,6 +19,8 @@ interface FileAction extends Location {
     expected_revision?: string;
     new_path?: string;
     position?: Position;
+    range?: Range;
+    options?: Record<string, boolean | number | string>;
 }
 
 export class WorkspaceTools {
@@ -114,6 +117,9 @@ export class WorkspaceTools {
     private async file(request: FileAction, signal: AbortSignal) {
         const document = await this.open(request);
         const { action } = request;
+        if (action !== 'format' && (request.range || request.options)) {
+            throw new Error('Range and formatting options apply to the format action.');
+        }
         if (action !== 'open') requireRevision(document, request.expected_revision);
         signal.throwIfAborted();
         if (action === 'open') {
@@ -124,9 +130,20 @@ export class WorkspaceTools {
         } else if (action === 'undo' || action === 'redo') {
             await runEditorHistory(document, action, () => requireRevision(document, request.expected_revision), signal);
         } else if (action === 'format') {
-            const config = vscode.workspace.getConfiguration('editor', document.uri);
-            const options = { tabSize: config.get('tabSize', 4), insertSpaces: config.get('insertSpaces', true) };
-            const edits = await vscode.commands.executeCommand<vscode.TextEdit[]>('vscode.executeFormatDocumentProvider', document.uri, options);
+            if (request.options && document.languageId !== xamlLanguage) {
+                throw new Error('FerroUI formatting overrides require an XAML document.');
+            }
+            const config = vscode.workspace.getConfiguration('editor', document);
+            const editor = vscode.window.visibleTextEditors.find(editor => editor.document === document)?.options;
+            const options = {
+                tabSize: typeof editor?.tabSize === 'number' ? editor.tabSize : config.get('tabSize', 4),
+                insertSpaces: typeof editor?.insertSpaces === 'boolean' ? editor.insertSpaces : config.get('insertSpaces', true),
+                ...request.options,
+            };
+            const edits = request.range
+                ? await vscode.commands.executeCommand<vscode.TextEdit[]>('vscode.executeFormatRangeProvider',
+                    document.uri, exactRange(document, request.range), options)
+                : await vscode.commands.executeCommand<vscode.TextEdit[]>('vscode.executeFormatDocumentProvider', document.uri, options);
             requireRevision(document, request.expected_revision);
             if (edits?.length) {
                 const edit = new vscode.WorkspaceEdit();

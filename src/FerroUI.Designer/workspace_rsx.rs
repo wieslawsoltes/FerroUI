@@ -9,6 +9,7 @@ const XAML_TOOLS: &[&str] = &[
     "SourceReferences",
     "SourceDiagnostics",
     "FormatSource",
+    "SourceFormattingOptions",
     "RenameSource",
 ];
 

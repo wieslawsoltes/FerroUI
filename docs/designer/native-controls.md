@@ -386,6 +386,12 @@ Batch hosts use `set_selected_keys`, `selected_keys`, `on_selection_changed`,
 callbacks remain supported. The selection callback includes whether other lanes should retain
 their selection, allowing a workspace to support groups across multiple objects/properties.
 
+## Format XAML in Studio
+
+Open the Source pane and select **XAML formatting options** beside **Format XAML**. Choose the indentation, attribute layout, wrap column, bracket placement, and whitespace preferences for this Studio window. The wrap column controls the **Wrap** attribute layout. With a selection, the format icon or Ctrl+Shift+F on Windows and Linux or Cmd+Shift+F on macOS formats that range. With the caret alone, it formats the whole document. Use Undo to restore the original source in one step.
+
+Studio uses the shared formatter for whitespace-sensitive XAML and protected generated regions. Agents can call `designer_language` with `action: "format"`, an optional UTF-16 `range`, and optional formatter overrides. Review the returned `edit` and apply it with `designer_language_apply` and the returned `revision` as `expected_revision`. [Settings and protected regions](vscode/authoring.md#format-xaml) · [MCP arguments](vscode/reference.md#drive-an-editor-workflow)
+
 ## Workspace authoring
 
 The workspace shows compact object/property lanes and a contextual editor for a single selected

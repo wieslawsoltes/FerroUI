@@ -195,18 +195,31 @@ pub(super) fn behavior() -> Value {
 }
 pub(super) fn formatting() -> Value {
     object(
-        json!({"tabSize":{"type":"integer","minimum":1,"maximum":16},"insertSpaces":{"type":"boolean"},"trimTrailingWhitespace":{"type":"boolean"},"insertFinalNewline":{"type":"boolean"}}),
+        json!({
+            "tabSize":{"type":"integer","minimum":1,"maximum":16},
+            "insertSpaces":{"type":"boolean"},
+            "trimTrailingWhitespace":{"type":"boolean"},
+            "insertFinalNewline":{"type":"boolean"},
+            "trimFinalNewlines":{"type":"boolean"},
+            "preserveBlankLines":{"type":"boolean"},
+            "attributeLayout":{"enum":["preserve","inline","onePerLine","wrap"]},
+            "wrapColumn":{"type":"integer","minimum":20,"maximum":240},
+            "closingBracketOnNewLine":{"type":"boolean"},
+            "selfClosingSpace":{"enum":["preserve","space","none"]}
+        }),
         &[],
     )
 }
-pub(super) fn workspace_edit() -> Value {
+pub(super) fn source_range() -> Value {
     let position = object(
         json!({"line":revision(),"character":revision()}),
         &["line", "character"],
     );
-    let range = object(json!({"start":position,"end":position}), &["start", "end"]);
+    object(json!({"start":position,"end":position}), &["start", "end"])
+}
+pub(super) fn workspace_edit() -> Value {
     let edit = object(
-        json!({"range":range,"newText":string()}),
+        json!({"range":source_range(),"newText":string()}),
         &["range", "newText"],
     );
     let document = object(
