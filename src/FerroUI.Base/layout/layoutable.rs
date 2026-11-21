@@ -906,7 +906,10 @@ impl Layoutable {
     /// Whether to use WinUI's physical-pixel rounding rules during layout.
     /// This inherited option applies when layout rounding is enabled.
     pub fn use_winui_measure_rounding(&self) -> bool {
-        self.get_value(Self::use_winui_measure_rounding_property())
+        // Read for every element in every layout pass: until one element sets the option, no
+        // store holds it and the answer is the default.
+        let property = Self::use_winui_measure_rounding_property();
+        property.as_property().holders() != 0 && self.get_value(property)
     }
 
     pub fn set_use_winui_measure_rounding(&self, value: bool) {
