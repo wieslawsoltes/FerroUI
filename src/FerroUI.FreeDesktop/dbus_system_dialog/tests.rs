@@ -13,7 +13,7 @@ use zbus::Structure;
 struct Answer {
     version: u32,
     response: u32,
-    results: Vec<(String, OwnedValue)>,
+    results: Vec<(String, OwnedVariant)>,
     /// Answers with the path of another request than the one that was asked for.
     wrong_path: bool,
 }
@@ -29,7 +29,7 @@ impl Portal {
         method: &str,
         parent_window: &str,
         title: &str,
-        options: HashMap<String, OwnedValue>,
+        options: HashMap<String, OwnedVariant>,
         header: zbus::message::Header<'_>,
         connection: &zbus::Connection,
     ) -> OwnedObjectPath {
@@ -61,7 +61,7 @@ impl Portal {
             .unwrap_or_default();
         let (response, results, wrong_path) = {
             let answer = self.answer.lock().unwrap();
-            let results: HashMap<String, OwnedValue> =
+            let results: HashMap<String, OwnedVariant> =
                 answer.results.iter().map(|(key, value)| (key.clone(), value.try_clone().unwrap())).collect();
             (answer.response, results, answer.wrong_path)
         };
@@ -78,7 +78,7 @@ impl Portal {
         &self,
         parent_window: &str,
         title: &str,
-        options: HashMap<String, OwnedValue>,
+        options: HashMap<String, OwnedVariant>,
         #[zbus(header)] header: zbus::message::Header<'_>,
         #[zbus(connection)] connection: &zbus::Connection,
     ) -> OwnedObjectPath {
@@ -89,7 +89,7 @@ impl Portal {
         &self,
         parent_window: &str,
         title: &str,
-        options: HashMap<String, OwnedValue>,
+        options: HashMap<String, OwnedVariant>,
         #[zbus(header)] header: zbus::message::Header<'_>,
         #[zbus(connection)] connection: &zbus::Connection,
     ) -> OwnedObjectPath {
@@ -108,17 +108,17 @@ struct Fixture {
     log: Log,
 }
 
-fn uris(uris: &[&str]) -> (String, OwnedValue) {
+fn uris(uris: &[&str]) -> (String, OwnedVariant) {
     let uris: Vec<String> = uris.iter().map(|uri| uri.to_string()).collect();
-    ("uris".to_string(), OwnedValue::try_from(Value::from(uris)).unwrap())
+    ("uris".to_string(), OwnedVariant::try_from(Variant::from(uris)).unwrap())
 }
 
-fn filter_value(name: &str, extensions: &[(u32, &str)]) -> OwnedValue {
+fn filter_value(name: &str, extensions: &[(u32, &str)]) -> OwnedVariant {
     let extensions: Vec<(u32, String)> = extensions.iter().map(|(style, value)| (*style, value.to_string())).collect();
-    OwnedValue::try_from(Value::from(Structure::from((name.to_string(), extensions)))).unwrap()
+    OwnedVariant::try_from(Variant::from(Structure::from((name.to_string(), extensions)))).unwrap()
 }
 
-fn fixture(version: u32, results: Vec<(String, OwnedValue)>) -> Fixture {
+fn fixture(version: u32, results: Vec<(String, OwnedVariant)>) -> Fixture {
     let log: Log = Arc::default();
     let answer = Arc::new(Mutex::new(Answer { version, response: 0, results, wrong_path: false }));
     let portal = Portal { answer: answer.clone(), log: log.clone() };
@@ -218,7 +218,7 @@ fn the_chosen_filter_is_the_file_type_of_the_options_when_it_matches_one() {
     assert_eq!((made.name(), made.patterns().unwrap().len(), made.mime_types().unwrap().len()), ("All", 1, 1));
 
     // Not a filter.
-    assert_eq!(parse_current_filter(&Value::from("Text")), None);
+    assert_eq!(parse_current_filter(&Variant::from("Text")), None);
 }
 
 #[test]
@@ -230,7 +230,7 @@ fn without_a_portal_there_is_no_provider() {
         // other tests need.
         return;
     }
-    let connections = TestConnections::new("/org/freedesktop/DBus", Ok);
+    let connections = TestConnections::new("/org/freedesktop/DBus", |builder| builder);
     assert!(wait(DBusSystemDialog::try_create_with_connection_async(connections.client.clone(), None)).is_none());
 }
 

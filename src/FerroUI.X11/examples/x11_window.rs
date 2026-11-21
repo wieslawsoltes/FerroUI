@@ -3095,16 +3095,15 @@ mod app {
             let activated = {
                 let name = name.clone();
                 answer_of(desktop_double::ask(move |connection| {
-                    connection
-                        .call_method(
-                            Some(name.as_str()),
-                            desktop_double::ITEM_PATH,
-                            Some(desktop_double::ITEM_INTERFACE),
-                            "Activate",
-                            &(0i32, 0i32),
-                        )
-                        .map(|_| ())
-                        .map_err(|error| error.to_string())
+                    zbus::block_on(connection.call_method(
+                        Some(name.as_str()),
+                        desktop_double::ITEM_PATH,
+                        Some(desktop_double::ITEM_INTERFACE),
+                        "Activate",
+                        &(0i32, 0i32),
+                    ))
+                    .map(|_| ())
+                    .map_err(|error| error.to_string())
                 }))
                 .await
             };

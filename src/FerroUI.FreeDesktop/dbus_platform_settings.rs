@@ -563,7 +563,7 @@ mod tests {
             return;
         }
         // The connection is there and nobody answers for the portal.
-        let connections = TestConnections::new("/org/freedesktop/DBus", Ok);
+        let connections = TestConnections::new("/org/freedesktop/DBus", |builder| builder);
         let settings = DBusPlatformSettings::with_connection(Some(connections.client.clone()));
         let (changes, _subscription) = recorded(&settings);
         for _ in 0..3 {
