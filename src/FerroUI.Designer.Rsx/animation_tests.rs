@@ -30,12 +30,20 @@ fn preview() {
 fn color_keys_change_alpha_without_reformatting_authored_rust() {
     for (original, expected) in [
         (
-            "from_rgb(/* red 🧭 */ 120u8, 32, 16)",
-            "from_argb(128, /* red 🧭 */ 224u8, 32, 16)",
+            "ferroui_base::media::Color::from_rgb(/* red 🧭 */ 120u8, 32, 16)",
+            "ferroui_base::media::Color::from_argb(128, /* red 🧭 */ 224u8, 32, 16)",
         ),
         (
-            "from_uint32(/* ARGB 🧭 */ 0x7F_78_20_10u32)",
-            "from_uint32(/* ARGB 🧭 */ 0x80_E0_20_10u32)",
+            "ferroui_base::media::Color::from_uint32(/* ARGB 🧭 */ 0x7F_78_20_10u32)",
+            "ferroui_base::media::Color::from_uint32(/* ARGB 🧭 */ 0x80_E0_20_10u32)",
+        ),
+        (
+            "ferroui_base::media::Colors::TEAL",
+            "::ferroui_base::media::Color::from_uint32(0x80E02010)",
+        ),
+        (
+            r##"ferroui_base::media::Color::parse(r#"Teal"#).unwrap()"##,
+            r##"ferroui_base::media::Color::parse(r#"#80E02010"#).unwrap()"##,
         ),
     ] {
         let source = VIEW
@@ -44,7 +52,7 @@ fn color_keys_change_alpha_without_reformatting_authored_rust() {
                 "ferroui_controls::Border::background_property()",
             )
             .replace("0.2))", r##""#FF000000"))"##)
-            .replace("0.6f64", &format!("ferroui_base::media::Color::{original}"))
+            .replace("0.6f64", original)
             .replace("1.0))", r##""#20808080"))"##)
             .replace('\n', "\r\n");
         let caret = source.rfind("rsx!").unwrap();

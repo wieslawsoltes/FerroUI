@@ -49,17 +49,16 @@ impl RsxStyleResource {
         } else {
             return None;
         };
-        let initializer = bindings.value(value);
-        let color = initializer.as_ref().and_then(|value| {
-            ValueSource::read_color(value.expression, |path| bindings.value_path(value, path))
-        });
-        let shared = initializer.filter(|_| color.is_some()).and_then(|value| {
-            Some(SharedRustColor {
-                name: value.constant?.into(),
-                value: rust::span(value.expression),
-                uri: bindings.value_uri(&value).map(str::to_owned),
+        let (color, shared) = ValueSource::read_resource_color(value, bindings)
+            .map(|(color, value)| {
+                let shared = value.constant.map(|constant| SharedRustColor {
+                    name: constant.into(),
+                    value: rust::span(value.expression),
+                    uri: bindings.value_uri(&value).map(str::to_owned),
+                });
+                (Some(color), shared)
             })
-        });
+            .unwrap_or_default();
         Some(Self {
             declaration: rust::method_suffix(call),
             source: rust::span(value),

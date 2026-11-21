@@ -73,9 +73,9 @@ impl RsxStyleField {
         catalog.style_field(&path).cloned()
     }
 
-    pub(super) fn read(&self, source: &str, expression: &Expr) -> Option<SetterValue> {
+    pub(super) fn read(&self, source: &str, expression: &Expr, bindings: &crate::local_rust::LocalRust) -> Option<SetterValue> {
         match &self.codec {
-            Codec::Native(shape) => shape.read(expression).map(SetterValue::Native),
+            Codec::Native(shape) => shape.read_with(expression, |path| bindings.path(path)).map(SetterValue::Native),
             Codec::Literal(codec) => {
                 let span = syntax::span(expression);
                 let text = codec.read_rust(expression)?;

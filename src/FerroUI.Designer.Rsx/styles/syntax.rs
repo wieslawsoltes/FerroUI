@@ -114,7 +114,7 @@ impl ProjectedStyles {
                 let value = if call.method == "set_resource" {
                     field.as_ref().and_then(|_| resource_key(expression, bindings)).map(SetterValue::Resource)
                 } else {
-                    field.as_ref().and_then(|field| field.read(source, expression))
+                    field.as_ref().and_then(|field| field.read(source, expression, bindings))
                 };
                 if value.is_none() {
                     self.issue(

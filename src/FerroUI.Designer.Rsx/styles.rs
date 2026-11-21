@@ -20,6 +20,7 @@ pub use resources::{RsxStyleResource, RsxStyleResourceFamily, SharedRustColor};
 pub(crate) use syntax::projected_styles;
 
 use crate::animation::RsxAnimation;
+use crate::literal::string_literal;
 use crate::RsxProjection;
 use ferroui_designer_core::SourceSpan;
 
@@ -120,18 +121,4 @@ fn collect_styles<'a>(owner: usize, style: &'a RsxStyle, styles: &mut Vec<(usize
     for child in &style.children {
         collect_styles(owner, child, styles);
     }
-}
-
-fn string_literal(original: &str, value: &str) -> String {
-    if let Some((prefix, _)) = original.split_once('"') {
-        if let Some(hashes) = prefix.strip_prefix('r') {
-            if hashes.chars().all(|character| character == '#')
-                && !value.contains(&format!("\"{hashes}"))
-                && !value.contains('\r')
-            {
-                return format!("{prefix}\"{value}\"{hashes}");
-            }
-        }
-    }
-    format!("{value:?}")
 }

@@ -2,6 +2,7 @@
 
 mod color;
 mod color_integer;
+mod color_text;
 mod keyframe;
 pub(crate) mod program_comment;
 mod relative;

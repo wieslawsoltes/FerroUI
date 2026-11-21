@@ -1,7 +1,7 @@
 use super::{ResourceColorMode, RsxStyleEdit};
 use crate::RsxCatalog;
 use ferroui_designer_core::TextPatch;
-use ferroui_designer_project::{PreviewSourceBuffer, RustModuleSources, file_uri};
+use ferroui_designer_project::{file_uri, PreviewSourceBuffer, RustModuleSources};
 use std::fs;
 use std::path::PathBuf;
 
@@ -29,6 +29,89 @@ impl Drop for Fixture {
     fn drop(&mut self) {
         let _ = fs::remove_dir_all(&self.0);
     }
+}
+
+#[test]
+fn resolves_the_packed_integer_through_a_color_constructor_in_another_module() {
+    let fixture = Fixture::create();
+    fixture.write("application.rs", "mod tokens; mod brand; mod screen;\n");
+    let disk = "pub(crate) const INK: u32 = 0xFF0C_1520;\r\n";
+    let tokens = fixture.write("tokens.rs", disk);
+    let brand = "use ferroui_base::media::Color;\r\nuse crate::tokens::INK as PACKED;\r\npub(crate) const PANEL: Color = Color::from_uint32(PACKED);\r\n";
+    fixture.write("brand.rs", brand);
+    let screen = r#"use crate::brand::PANEL;
+    fn view() { rsx! { StackPanel {
+        styles: [ferroui_view::style("TextBlock")
+            .resource("Ink", (/* use 🧭 */ PANEL))
+            .set_resource(ferroui_controls::TextBlock::foreground_property(), "Ink")],
+        TextBlock { text: "Review" },
+    } }; }"#;
+    let uri = fixture.write("screen.rs", screen);
+    let draft = "pub(crate) const INK: u32 = /* warm 🧭 */ 0xA012_3456_u32;\r\n";
+    let modules = RustModuleSources::capture(
+        &fixture.0,
+        &fixture.0.join("application.rs"),
+        &uri,
+        screen,
+        &[PreviewSourceBuffer {
+            uri: tokens.clone(),
+            source: Some(draft.into()),
+        }],
+    )
+    .unwrap();
+    let catalog = RsxCatalog::built_in();
+    let caret = screen.find("StackPanel").unwrap();
+    let projection = catalog
+        .project_with_modules(screen, caret, Some(&modules))
+        .unwrap();
+    let style = projection.style_definitions()[0].1;
+    let resource = &style.resources[0];
+    assert_eq!(resource.color().as_deref(), Some("#A0123456"));
+    let shared = resource.shared.as_ref().unwrap();
+    assert_eq!(shared.name, "INK");
+    assert_eq!(shared.uri.as_deref(), Some(tokens.as_str()));
+    assert_eq!(&draft[shared.value.range()], "0xA012_3456_u32");
+    let edit = |mode| RsxStyleEdit::ColorResource {
+        style: style.declaration.start,
+        resource: resource.declaration.start,
+        value: "#D0102030".into(),
+        mode,
+    };
+    let plan = projection
+        .plan_style_source(&edit(ResourceColorMode::Declaration))
+        .unwrap();
+    assert_eq!(plan.source_uri.as_deref(), Some(tokens.as_str()));
+    assert_eq!(
+        TextPatch::apply_all(draft, plan.patches).unwrap(),
+        draft.replace("0xA012_3456_u32", "0xD010_2030_u32"),
+    );
+    let local = projection
+        .plan_style_source(&edit(ResourceColorMode::Local))
+        .unwrap();
+    assert!(local.source_uri.is_none());
+    let after = TextPatch::apply_all(screen, local.patches).unwrap();
+    assert!(after.contains("/* use 🧭 */"));
+    assert!(after.contains("Color::from_argb(208, 16, 32, 48)"));
+    assert_eq!(
+        fs::read_to_string(fixture.0.join("brand.rs")).unwrap(),
+        brand
+    );
+    assert_eq!(
+        fs::read_to_string(fixture.0.join("tokens.rs")).unwrap(),
+        disk
+    );
+
+    let other_type = draft.replace("INK: u32", "INK: i64");
+    let modules = modules.with_file_text(&tokens, &other_type).unwrap();
+    let projection = catalog
+        .project_with_modules(screen, caret, Some(&modules))
+        .unwrap();
+    let resource = &projection.style_definitions()[0].1.resources[0];
+    assert!(resource.shared.is_none());
+    assert!(resource.color().is_none());
+    assert!(projection
+        .plan_style_source(&edit(ResourceColorMode::Declaration))
+        .is_err());
 }
 
 #[test]
@@ -100,10 +183,7 @@ fn checked_color_edit_targets_the_rust_module_or_the_active_invocation() {
     assert_eq!(plan.source_uri.as_deref(), Some(brand.as_str()));
     assert_eq!(plan.shared_color, Some(shared.value));
     let after = TextPatch::apply_all(&draft, plan.patches).unwrap();
-    assert_eq!(
-        after,
-        draft.replace("0xFF7B_1520_u32", "0xA018_5060_u32")
-    );
+    assert_eq!(after, draft.replace("0xFF7B_1520_u32", "0xA018_5060_u32"));
     assert_eq!(
         fs::read_to_string(fixture.0.join("brand.rs")).unwrap(),
         disk

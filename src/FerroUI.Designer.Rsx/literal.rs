@@ -1,6 +1,20 @@
 use ferroui_designer_language::PropertyInfo;
 use syn::{Expr, Lit, UnOp};
 
+pub(crate) fn string_literal(original: &str, value: &str) -> String {
+    if let Some((prefix, _)) = original.split_once('"') {
+        if let Some(hashes) = prefix.strip_prefix('r') {
+            if hashes.chars().all(|character| character == '#')
+                && !value.contains(&format!("\"{hashes}"))
+                && !value.contains('\r')
+            {
+                return format!("{prefix}\"{value}\"{hashes}");
+            }
+        }
+    }
+    format!("{value:?}")
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Literal {
     Text,

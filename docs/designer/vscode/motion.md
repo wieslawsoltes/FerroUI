@@ -82,6 +82,8 @@ ferroui_view::animation(ferroui_view::ms(2000))
 
 Keep keyframe closures as a single builder expression, as in `|key| key.set(...)`. A checked edit keeps comments and numeric suffixes around constructor arguments. Adding alpha to a `Color::from_rgb` key changes that call to `Color::from_argb` in the same edit. Keys authored as `Color::from_uint32(0xFF22_6688u32)` retain the packed ARGB constructor, integer radix, grouping, and suffix. The four literal fields of a `Color` struct can also be edited in place.
 
+Color keys also accept qualified FerroUI swatches such as `ferroui_base::media::Colors::TEAL`, qualified `Color` parse calls with literal input, and native color strings for brush tracks. Editing a parsed color updates its string argument and keeps its Rust error handling. Editing a swatch writes an explicit color at that key.
+
 Agents can request `"red"`, `"green"`, `"blue"`, or `"alpha"` from `designer_animation_curve` and `designer_hosted_curve` after reading the track’s `curve_channels`. Samples use normalized sRGB components and the color’s own alpha. App Preview reads the app’s native color, including its byte precision.
 
 ![App Preview shows the blue velocity of a mapped Rust brush animation and the live application at the retained playhead](../images/vscode-app-preview-color-curves.jpg)

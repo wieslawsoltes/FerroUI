@@ -2036,6 +2036,7 @@ dependencies = [
 name = "ferroui-designer-rsx"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ferroui-base",
  "ferroui-designer-animation",
  "ferroui-designer-core",
  "ferroui-designer-language",

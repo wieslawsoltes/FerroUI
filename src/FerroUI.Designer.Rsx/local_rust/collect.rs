@@ -138,7 +138,7 @@ impl<'ast> Visit<'ast> for Collector<'_> {
         let binding = if conditional(&item.attrs) || !item.generics.params.is_empty() {
             Binding::Opaque
         } else {
-            Binding::Constant(item.expr.clone())
+            Binding::Constant(Box::new(item.clone()))
         };
         self.add(&item.ident, binding);
         visit::visit_item_const(self, item);

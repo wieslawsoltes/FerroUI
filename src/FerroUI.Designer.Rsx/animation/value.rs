@@ -1,6 +1,7 @@
-use super::color::ColorSource;
+use super::color::{packed_argument, ColorSource};
 use super::relative::RelativeSource;
 use super::{syntax, FloatSource};
+use crate::local_rust::{LocalRust, Value};
 use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_core::TextPatch;
 use syn::Expr;
@@ -61,13 +62,18 @@ impl ValueShape {
     }
 
     pub(crate) fn read(self, expression: &Expr) -> Option<ValueSource> {
+        self.read_with(expression, syntax::path)
+    }
+
+    pub(crate) fn read_with(
+        self,
+        expression: &Expr,
+        resolve: impl Fn(&Expr) -> Option<String>,
+    ) -> Option<ValueSource> {
         let kind = self.kind;
         if kind == ValueKind::Color {
-            let (value, source) = ColorSource::read(expression, self.brush)?;
-            return Some(ValueSource {
-                value,
-                source: ValueSyntax::Color(source),
-            });
+            return ColorSource::read_with(expression, self.brush, resolve)
+                .map(ValueSource::color);
         }
         if matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar) {
             let (value, source) = RelativeSource::read(expression, kind)?;
@@ -123,9 +129,37 @@ impl ValueShape {
 }
 
 impl ValueSource {
-    pub(crate) fn read_color(expression: &Expr, resolve: impl Fn(&Expr) -> Option<String>) -> Option<Self> {
-        let (value, source) = ColorSource::read_with(expression, false, resolve)?;
-        Some(Self { value, source: ValueSyntax::Color(source) })
+    pub(crate) fn read_resource_color<'a>(
+        expression: &'a Expr,
+        bindings: &'a LocalRust,
+    ) -> Option<(Self, Value<'a>)> {
+        let initializer = bindings.value(expression)?;
+        let resolve = |path: &Expr| bindings.value_path(&initializer, path);
+        let packed = match initializer.expression {
+            Expr::Call(call) => resolve(&call.func).and_then(|factory| packed_argument(call, &factory)),
+            _ => None,
+        };
+        if let Some(argument) = packed {
+            let operand = bindings.operand(&initializer, argument)?;
+            let value = Self::color(ColorSource::read_packed(operand.expression)?);
+            if operand.constant.is_none() {
+                return Some((value, initializer));
+            }
+            return matches!(
+                bindings.value_type_path(&operand).as_deref(),
+                Some("u32" | "core::primitive::u32" | "std::primitive::u32")
+            )
+            .then_some((value, operand));
+        }
+        let value = Self::color(ColorSource::read_with(initializer.expression, false, resolve)?);
+        Some((value, initializer))
+    }
+
+    fn color((value, source): (AnimationValue, ColorSource)) -> Self {
+        Self {
+            value,
+            source: ValueSyntax::Color(source),
+        }
     }
 
     pub(crate) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {

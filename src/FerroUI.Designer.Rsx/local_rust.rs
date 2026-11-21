@@ -5,7 +5,7 @@ use crate::animation::syntax as rust;
 use ferroui_designer_core::SourceSpan;
 use ferroui_designer_project::RustModuleSources;
 use std::collections::BTreeMap;
-use syn::{Expr, ext::IdentExt};
+use syn::{ext::IdentExt, Expr};
 
 const MAX_INDIRECTION: usize = 32;
 
@@ -29,7 +29,7 @@ struct Scope {
 enum Binding {
     Import { absolute: bool, path: Vec<String> },
     Module(usize),
-    Constant(Box<Expr>),
+    Constant(Box<syn::ItemConst>),
     Opaque,
 }
 
@@ -37,7 +37,7 @@ enum Resolved<'a> {
     External(String),
     Constant {
         name: &'a str,
-        value: &'a Expr,
+        item: &'a syn::ItemConst,
         scope: usize,
     },
 }
@@ -45,6 +45,7 @@ enum Resolved<'a> {
 pub(crate) struct Value<'a> {
     pub(crate) expression: &'a Expr,
     pub(crate) constant: Option<&'a str>,
+    ty: Option<&'a syn::Type>,
     scope: usize,
 }
 
@@ -66,6 +67,20 @@ impl LocalRust {
         (file != self.active).then(|| self.files[file].as_str())
     }
 
+    pub(crate) fn value_type_path(&self, value: &Value<'_>) -> Option<String> {
+        let syn::Type::Path(ty) = value.ty? else {
+            return None;
+        };
+        self.path_in(
+            value.scope,
+            &Expr::Path(syn::ExprPath {
+                attrs: Vec::new(),
+                qself: ty.qself.clone(),
+                path: ty.path.clone(),
+            }),
+        )
+    }
+
     fn path_in(&self, scope: usize, expression: &Expr) -> Option<String> {
         match self.resolve(scope, expression)? {
             Resolved::External(path) => Some(path),
@@ -73,33 +88,43 @@ impl LocalRust {
         }
     }
 
-    pub(crate) fn value<'a>(&'a self, mut expression: &'a Expr) -> Option<Value<'a>> {
-        let mut constant = None;
-        let mut scope = self.active_scope(expression)?;
+    pub(crate) fn value<'a>(&'a self, expression: &'a Expr) -> Option<Value<'a>> {
+        self.value_in(self.active_scope(expression)?, expression)
+    }
+
+    pub(crate) fn operand<'a>(
+        &'a self,
+        owner: &Value<'a>,
+        expression: &'a Expr,
+    ) -> Option<Value<'a>> {
+        self.value_in(owner.scope, expression)
+    }
+
+    fn value_in<'a>(&'a self, scope: usize, expression: &'a Expr) -> Option<Value<'a>> {
+        let mut value = Value {
+            expression,
+            constant: None,
+            ty: None,
+            scope,
+        };
         for _ in 0..MAX_INDIRECTION {
-            match expression {
-                Expr::Paren(group) => expression = &group.expr,
-                Expr::Group(group) => expression = &group.expr,
-                Expr::Path(_) => {
-                    let Resolved::Constant {
-                        name,
-                        value,
-                        scope: owner,
-                    } = self.resolve(scope, expression)?
+            match value.expression {
+                Expr::Paren(group) if group.attrs.is_empty() => value.expression = &group.expr,
+                Expr::Group(group) if group.attrs.is_empty() => value.expression = &group.expr,
+                Expr::Path(path) if path.attrs.is_empty() => {
+                    let Resolved::Constant { name, item, scope } =
+                        self.resolve(value.scope, value.expression)?
                     else {
-                        return None;
+                        return Some(value);
                     };
-                    expression = value;
-                    constant = Some(name);
-                    scope = owner;
-                }
-                _ => {
-                    return Some(Value {
-                        expression,
-                        constant,
+                    value = Value {
+                        expression: &item.expr,
+                        constant: Some(name),
+                        ty: Some(item.ty.as_ref()),
                         scope,
-                    });
+                    };
                 }
+                _ => return Some(value),
             }
         }
         None
@@ -204,8 +229,8 @@ impl LocalRust {
             return None;
         }
         match binding {
-            Binding::Constant(value) if tail.is_empty() => {
-                Some(Resolved::Constant { name, value, scope })
+            Binding::Constant(item) if tail.is_empty() => {
+                Some(Resolved::Constant { name, item, scope })
             }
             Binding::Module(module) => self.member(*module, tail, depth + 1),
             Binding::Import { absolute, path } => {

@@ -1,12 +1,15 @@
 use super::color_integer::ColorInteger;
-use super::syntax::{path, span};
-use ferroui_designer_animation::{AnimationValue, ValueKind};
+use super::color_text::TextColor;
+use super::syntax::span;
+use ferroui_designer_animation::AnimationValue;
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use syn::{Expr, Lit};
+use syn::{Expr, ExprCall};
+
+const PACKED_FACTORY: &str = "ferroui_base::media::Color::from_uint32";
 
 #[derive(Clone, Debug)]
 pub(super) enum ColorSource {
-    BrushText(SourceSpan),
+    Text(TextColor),
     Packed(ColorInteger),
     Components {
         parts: Vec<ColorInteger>,
@@ -21,25 +24,13 @@ pub(super) struct RgbSource {
 }
 
 impl ColorSource {
-    pub(super) fn read(expr: &Expr, brush: bool) -> Option<(AnimationValue, Self)> {
-        Self::read_with(expr, brush, path)
-    }
-
     pub(super) fn read_with(
         expr: &Expr,
         brush: bool,
         resolve: impl Fn(&Expr) -> Option<String>,
     ) -> Option<(AnimationValue, Self)> {
-        if let (
-            true,
-            Expr::Lit(syn::ExprLit {
-                lit: Lit::Str(text),
-                ..
-            }),
-        ) = (brush, expr)
-        {
-            let value = AnimationValue::parse(&text.value(), ValueKind::Color).ok()?;
-            return Some((value, Self::BrushText(span(text))));
+        if let Some((value, source)) = TextColor::read(expr, brush, &resolve) {
+            return Some((value, Self::Text(source)));
         }
         if let Expr::Struct(color) = expr {
             return Self::read_struct(color, resolve);
@@ -48,12 +39,10 @@ impl ColorSource {
             return None;
         };
         let factory = resolve(&call.func)?;
-        let method = factory.strip_prefix("ferroui_base::media::Color::")?;
-        if method == "from_uint32" && call.args.len() == 1 {
-            let packed = ColorInteger::read(&call.args[0], "u32", u32::MAX)?;
-            let value = AnimationValue::from_argb8(packed.value.to_be_bytes());
-            return Some((value, Self::Packed(packed)));
+        if let Some(argument) = packed_argument(call, &factory) {
+            return Self::read_packed(argument);
         }
+        let method = factory.strip_prefix("ferroui_base::media::Color::")?;
         let count = match method {
             "new" | "from_argb" => 4,
             "from_rgb" => 3,
@@ -83,6 +72,12 @@ impl ColorSource {
             None
         };
         Some(Self::components(parts, rgb))
+    }
+
+    pub(super) fn read_packed(argument: &Expr) -> Option<(AnimationValue, Self)> {
+        let packed = ColorInteger::read(argument, "u32", u32::MAX)?;
+        let value = AnimationValue::from_argb8(packed.value.to_be_bytes());
+        Some((value, Self::Packed(packed)))
     }
 
     fn read_struct(
@@ -139,10 +134,7 @@ impl ColorSource {
         }
         let bytes = value.argb8().ok_or("Enter a hexadecimal color value")?;
         match self {
-            Self::BrushText(span) => patches.push(TextPatch {
-                span: *span,
-                replacement: format!("{:?}", value.to_xaml()),
-            }),
+            Self::Text(text) => patches.push(text.patch(value, bytes)),
             Self::Packed(packed) => patches.extend(packed.patch(u32::from_be_bytes(bytes))),
             Self::Components { parts, rgb } => {
                 if let Some(rgb) = rgb.filter(|_| bytes[0] != 255) {
@@ -169,4 +161,9 @@ impl ColorSource {
 
 fn read_channel(expression: &Expr) -> Option<ColorInteger> {
     ColorInteger::read(expression, "u8", u32::from(u8::MAX))
+}
+
+pub(super) fn packed_argument<'a>(call: &'a ExprCall, factory: &str) -> Option<&'a Expr> {
+    (factory == PACKED_FACTORY && call.attrs.is_empty() && call.args.len() == 1)
+        .then(|| &call.args[0])
 }

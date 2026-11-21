@@ -77,6 +77,49 @@ fn mixed_styles_project_setters_nested_rules_and_animation_with_exact_edit_range
 }
 
 #[test]
+fn resolves_named_and_parsed_brush_values_with_the_native_color_parser() {
+    let imports = "use ferroui_base::media::{Color as Paint, Colors as Palette};\n";
+    for (authored, before, after) in [
+        ("\"Teal\"", "#FF008080", "\"#80124568\""),
+        (
+            r##"Paint::try_parse(/* typed 🧭 */ r#"rgba(16,32,64,0.5)"#).expect("ink")"##,
+            "#80102040",
+            r##"Paint::try_parse(/* typed 🧭 */ r#"#80124568"#).expect("ink")"##,
+        ),
+        (
+            "Palette:: /* swatch 🧭 */ BLUE_VIOLET",
+            "#FF8A2BE2",
+            " /* swatch 🧭 */ ::ferroui_base::media::Color::from_uint32(0x80124568)",
+        ),
+    ] {
+        let source = format!("{imports}{}", VIEW.replace("color_from(model)", authored))
+            .replace('\n', "\r\n");
+        let projection = project(&source);
+        let rule = projection.style_definitions()[0].1;
+        assert_eq!(rule.setters[1].value().as_deref(), Some(before));
+        let patches = projection
+            .plan_style(&RsxStyleEdit::Setter {
+                style: rule.declaration.start,
+                setter: rule.setters[1].declaration.start,
+                value: Some("#80124568".into()),
+            })
+            .unwrap();
+        let updated = TextPatch::apply_all(&source, patches).unwrap();
+        assert_eq!(updated, source.replace(authored, after));
+        assert!(project(&updated).xaml().contains("#80124568"));
+    }
+
+    let shadowed = VIEW.replace(
+        "fn customer() {",
+        "fn customer() {\n    use other_module::Colors as Palette;",
+    );
+    let shadowed = shadowed.replace("color_from(model)", "Palette::TEAL");
+    assert!(project(&shadowed).style_definitions()[0].1.setters[1]
+        .value()
+        .is_none());
+}
+
+#[test]
 fn scoped_style_structure_preserves_other_arrays_and_literal_spelling() {
     let projection = project(VIEW);
     let style = projection.style_definitions()[0].1;
