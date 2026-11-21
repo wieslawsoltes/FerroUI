@@ -54,18 +54,6 @@ impl ImmediateValueFrame {
         entry
     }
 
-    /// Adds a value of `property` that is boxed (an untyped write with a priority, through the
-    /// routes of the property): one entry for every value type.
-    pub(crate) fn add_boxed_value(
-        &self,
-        property: &'static FerroProperty,
-        value: BoxedValue,
-    ) -> Rc<BoxedImmediateValueEntry> {
-        let entry = Rc::new(BoxedImmediateValueEntry { owner: self.this.clone(), property, value });
-        self.base.add(entry.clone());
-        entry
-    }
-
     /// Adds a binding expression as an entry of the frame.
     pub(crate) fn add_binding_expression(&self, source: Rc<dyn crate::data::BindingExpressionBase>) {
         let entry: Rc<dyn IValueEntry> = source;
@@ -131,42 +119,6 @@ impl<T: StyledValue> IValueEntry for ImmediateValueEntry<T> {
 }
 
 impl<T: StyledValue> IDisposable for ImmediateValueEntry<T> {
-    fn dispose(&self) {
-        if let Some(owner) = self.owner.upgrade() {
-            owner.on_entry_disposed(self.property);
-        }
-    }
-}
-
-/// A constant boxed value in an [`ImmediateValueFrame`], of any value type: what an untyped write
-/// with a priority adds (#997). Disposing it removes the value.
-pub(crate) struct BoxedImmediateValueEntry {
-    owner: Weak<ImmediateValueFrame>,
-    property: &'static FerroProperty,
-    value: BoxedValue,
-}
-
-impl IValueEntry for BoxedImmediateValueEntry {
-    fn property(&self) -> &'static FerroProperty {
-        self.property
-    }
-
-    fn has_value(&self) -> bool {
-        true
-    }
-
-    fn try_get_value(&self, out: &mut dyn Any) -> bool {
-        self.property.routes().route_copy_value(self.value.as_any(), out)
-    }
-
-    fn get_value_boxed(&self) -> Option<BoxedValue> {
-        Some(self.value.clone())
-    }
-
-    fn unsubscribe(&self) {}
-}
-
-impl IDisposable for BoxedImmediateValueEntry {
     fn dispose(&self) {
         if let Some(owner) = self.owner.upgrade() {
             owner.on_entry_disposed(self.property);

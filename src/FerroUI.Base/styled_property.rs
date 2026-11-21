@@ -1,9 +1,8 @@
 use crate::data::{BindingError, BindingNotification, BindingPriority, BindingValue, BindingValueType};
 use crate::ferro_property::{
-    convert_property_value, copy_converted_property_value, unpack_binding_value, BoxedPayloadSlot,
+    convert_property_value, copy_converted_property_value, take_boxed_value, unpack_binding_value, BoxedPayloadSlot,
     FerroPropertyInit, NotifyingCallback, PayloadSlot, PropertyRoutes,
 };
-use crate::ferro_object::{value_marker_any, ValueMarker};
 use crate::ferro_property_metadata::MetadataTable;
 use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
@@ -50,7 +49,6 @@ impl<T: PropertyValue> StyledProperty<T> {
         notifying: Option<NotifyingCallback>,
         is_attached: bool,
         members: &'static [(i64, &'static dyn Any)],
-        shared_storage: bool,
     ) -> Self {
         let default_value = metadata.default_value().clone();
         if let Some(validate) = &validate {
@@ -66,8 +64,7 @@ impl<T: PropertyValue> StyledProperty<T> {
                 notifying,
             )
             .with_members(members)
-            .with_validation(validate.is_some())
-            .with_shared_storage(shared_storage),
+            .with_validation(validate.is_some()),
             routes: StyledRoutes::new(),
             metadata: MetadataTable::new(host_type, metadata),
             single_default_value: RefCell::new(Some(default_value)),
@@ -254,7 +251,6 @@ impl<T: StyledValue> StyledProperty<T> {
     ) -> &'static Self {
         let property: &'static Self = Box::leak(Box::new(Self::new(
             name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached, T::MEMBERS,
-            <T::Storage as StyledValue>::SHARED_STORAGE,
         )));
         property.install_routes();
         property
@@ -283,19 +279,24 @@ fn stored_value<T: StyledValue>(value: &dyn Any) -> T {
 /// by `StyledProperty<T>`, one table for each value type. Everything else the routes do is in
 /// [`StyledRoutes`], compiled once (#997).
 pub(crate) trait StyledCodec {
-    /// The typed write of `value` with `priority` (the write of a typed route) for a value type
-    /// kept as a shared storage type, where the untyped write would convert the value through the
-    /// codec once more; `None` for any other value type (decided when the function is compiled)
-    /// and for a value of another type.
-    fn set_typed(
+    // The untyped write and read of a value of the value type are typed, as the routes of each
+    // value type were: a shared route cost an untyped write or read of an enumeration 7 to 8 %
+    // more instructions (docs/binary-size.md, section 4.25).
+
+    /// The write of `value`, a value of the value type, with `priority`; `None` for a value of
+    /// another type.
+    fn set_value(
         &'static self,
         o: &FerroObject,
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Option<Rc<dyn IDisposable>>>;
-    /// The value of the property on `o` in a box, read typed, for a value type kept as a shared
-    /// storage type (`None` for any other: decided when the function is compiled).
-    fn get_boxed_typed(&'static self, o: &FerroObject) -> Option<BoxedValue>;
+    /// The current value from `value`, a value of the value type; whether it was one.
+    fn set_current_value(&'static self, o: &FerroObject, value: &dyn Any) -> bool;
+    /// The value of the property on `o` in a box of its own.
+    fn get_value_boxed(&'static self, o: &FerroObject) -> BoxedValue;
+    /// The local value from a box of a value of the value type (the value of a binding).
+    fn set_local_boxed(&'static self, o: &FerroObject, value: BoxedValue);
     /// A new effective value of the property on `o`.
     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
     /// Coerces the default value of the property on `o`.
@@ -344,20 +345,27 @@ impl<T: StyledValue> StyledCodec for StyledProperty<T> {
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Option<Rc<dyn IDisposable>>> {
-        // Only a value type kept as a shared storage type has a typed write here; any other is
-        // written by the untyped path (decided when the function is compiled).
-        if !<T::Storage as StyledValue>::SHARED_STORAGE {
-            return None;
-        }
         let value = value.downcast_ref::<T>()?;
         Some(o.set_value_with_priority(self, value.clone(), priority))
     }
 
-    fn get_boxed_typed(&'static self, o: &FerroObject) -> Option<BoxedValue> {
-        if <T::Storage as StyledValue>::SHARED_STORAGE {
-            Some(Rc::new(o.get_value(self)))
-        } else {
-            None
+    fn set_current_value(&'static self, o: &FerroObject, value: &dyn Any) -> bool {
+        match value.downcast_ref::<T>() {
+            Some(value) => {
+                o.set_current_value(self, value.clone());
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn get_value_boxed(&'static self, o: &FerroObject) -> BoxedValue {
+        Rc::new(o.get_value(self))
+    }
+
+    fn set_local_boxed(&'static self, o: &FerroObject, value: BoxedValue) {
+        if let Some(value) = take_boxed_value::<T>(value) {
+            o.values().set_local_value(o, self, value);
         }
     }
 
@@ -492,22 +500,7 @@ impl PropertyRoutes for StyledRoutes {
     }
 
     fn route_get_value(&'static self, o: &FerroObject) -> BoxedValue {
-        let property = self.property();
-        if property.shared_storage() {
-            if let Some(value) = self.codec().get_boxed_typed(o) {
-                return value;
-            }
-        }
-        let values = o.values();
-        if let Some(value) = values.boxed_effective_value(property) {
-            return value;
-        }
-        if property.inherits() {
-            if let Some(inherited) = values.try_get_inherited_value(property) {
-                return inherited.boxed_value();
-            }
-        }
-        self.codec().default_value_boxed(o.get_type())
+        self.codec().get_value_boxed(o)
     }
 
     fn route_get_base_value(&'static self, o: &FerroObject) -> BoxedValue {
@@ -546,31 +539,10 @@ impl PropertyRoutes for StyledRoutes {
                 None => property.invalid_value_type(),
             };
         }
-        FerroObject::validate_priority(priority);
-        // A marker in a box is a value of a property of untyped values only.
-        if property.may_hold_marker() {
-            match value_marker_any(value) {
-                Some(ValueMarker::Unset) => {
-                    if priority == BindingPriority::LocalValue {
-                        o.values().clear_value(o, property);
-                    }
-                    return None;
-                }
-                Some(ValueMarker::DoNothing) => return None,
-                None => {}
-            }
+        match self.codec().set_value(o, value, priority) {
+            Some(result) => result,
+            None => property.invalid_value_type(),
         }
-        // A value to convert to a shared storage type: the typed write, which converts the value
-        // it has.
-        if property.shared_storage() {
-            if let Some(result) = self.codec().set_typed(o, value, priority) {
-                return result;
-            }
-        }
-        if property.validates() && !self.codec().is_valid_value(value) {
-            property.value_not_valid();
-        }
-        o.values().set_untyped_value(o, property, value, priority)
     }
 
     fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any) {
@@ -589,14 +561,9 @@ impl PropertyRoutes for StyledRoutes {
             }
             return;
         }
-        if property.may_hold_marker() {
-            match value_marker_any(value) {
-                Some(ValueMarker::Unset) => return o.values().clear_value(o, property),
-                Some(ValueMarker::DoNothing) => return,
-                None => {}
-            }
+        if !self.codec().set_current_value(o, value) {
+            property.invalid_value_type();
         }
-        o.values().set_untyped_current_value(o, property, value)
     }
 
     fn route_set_direct_value_unchecked(&'static self, _o: &FerroObject, _entry: &dyn IValueEntry) {
@@ -655,14 +622,7 @@ impl PropertyRoutes for StyledRoutes {
     }
 
     fn route_set_local_value(&'static self, o: &FerroObject, value: BoxedValue) {
-        let property = self.property();
-        if value.value_type_id() == property.property_type() {
-            if property.shared_storage() {
-                self.codec().set_typed(o, value.as_any(), BindingPriority::LocalValue);
-                return;
-            }
-            o.values().set_untyped_local_value(o, property, value.as_any());
-        }
+        self.codec().set_local_boxed(o, value);
     }
 }
 
@@ -693,7 +653,6 @@ impl<T: StyledValue> AttachedProperty<T> {
         let property: &'static Self = Box::leak(Box::new(Self {
             base: StyledProperty::new(
                 name, owner_type, host_type, metadata, inherits, validate, notifying, true, T::MEMBERS,
-                <T::Storage as StyledValue>::SHARED_STORAGE,
             ),
         }));
         property.base.install_routes();
