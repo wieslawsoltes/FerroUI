@@ -785,6 +785,12 @@ impl FerroProperty {
 
     /// The codec of a styled property ([`StyledCodec`](crate::styled_property::StyledCodec)).
     #[inline]
+    /// The codec of a styled property, `None` for a direct property.
+    #[inline]
+    pub(crate) fn styled_codec_if_any(&self) -> Option<&'static dyn crate::styled_property::StyledCodec> {
+        self.styled_codec.get().copied()
+    }
+
     pub(crate) fn styled_codec(&self) -> &'static dyn crate::styled_property::StyledCodec {
         *self.styled_codec.get().expect("a styled property has a codec")
     }
