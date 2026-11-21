@@ -1,8 +1,8 @@
 use std::env;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
-/// Three things depend on the target:
+/// Four things depend on the target:
 ///
 /// - Which GPU back end of Skia the build has. The Skia dependency is built
 ///   with Ganesh on OpenGL where the manifest of this crate asks for it; the
@@ -16,6 +16,8 @@ use std::process::Command;
 ///   the compiler runtime (`__isPlatformVersionAtLeast`). Rust links without
 ///   the default libraries, so the clang runtime has to be named explicitly
 ///   on Apple targets.
+/// - Which tables of ordinary drawing the crate carries for the kind of device of the target
+///   (`tables_of_the_target`).
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     println!("cargo:rustc-check-cfg=cfg(ferro_skia_ganesh_gl)");
@@ -27,6 +29,8 @@ fn main() {
     // Graphite Metal ownership fix (#622; `graphite_metal_ownership.rs`). Cargo gives the value to
     // the direct dependents of the binding, which this crate is on Apple targets with Graphite.
     println!("cargo:rustc-check-cfg=cfg(ferro_skia_graphite_ownership_fixed)");
+    println!("cargo:rustc-check-cfg=cfg(ferro_skia_ordinary_metal_libraries)");
+    println!("cargo:rustc-check-cfg=cfg(ferro_skia_ordinary_pipeline_record)");
     if env::var("DEP_SKIA_GRAPHITE_METAL_OWNERSHIP").as_deref() == Ok("fixed") {
         println!("cargo:rustc-cfg=ferro_skia_graphite_ownership_fixed");
     } else if env::var("CARGO_CFG_TARGET_VENDOR").as_deref() == Ok("apple")
@@ -71,6 +75,8 @@ fn main() {
         return;
     }
 
+    tables_of_the_target();
+
     println!("cargo:rerun-if-changed=gpu/metal/frame_completion.m");
     let mut frame_build = cc::Build::new();
     if env::var_os("CARGO_FEATURE_NATIVE_FRAME_TESTS").is_some() {
@@ -102,12 +108,9 @@ fn main() {
 
     // The runtime of the iOS simulator is a library of its own: the one of
     // the devices has no slice for it, and the linker refuses the archive.
-    let simulator = env::var("CARGO_CFG_TARGET_ABI").as_deref() == Ok("sim")
-        || env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("sim")
-        || env::var("TARGET").is_ok_and(|target| target == "x86_64-apple-ios");
     let runtime = match env::var("CARGO_CFG_TARGET_OS").as_deref() {
         Ok("macos") => "clang_rt.osx",
-        Ok("ios") if simulator => "clang_rt.iossim",
+        Ok("ios") if simulator() => "clang_rt.iossim",
         Ok("ios") => "clang_rt.ios",
         _ => return,
     };
@@ -132,6 +135,63 @@ fn main() {
             println!("cargo:rustc-link-lib=static={runtime}");
         } else {
             println!("cargo:rustc-link-lib=static:-bundle={runtime}");
+        }
+    }
+}
+
+/// Whether the target is the iOS simulator.
+fn simulator() -> bool {
+    env::var("CARGO_CFG_TARGET_ABI").as_deref() == Ok("sim")
+        || env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("sim")
+        || env::var("TARGET").is_ok_and(|target| target == "x86_64-apple-ios")
+}
+
+/// The kind of device the tables of ordinary drawing of the crate are made for, by the name of
+/// their files (`ordinary-<name>.<extension>`), when the target is one: macOS on Apple silicon,
+/// iOS on a device and in its simulator, which loads only Metal libraries made for it. Keep the
+/// names in step with `PLATFORMS` of `scripts/perf/metal-libraries.py`.
+fn table_platform() -> Option<&'static str> {
+    if env::var("CARGO_CFG_TARGET_ARCH").as_deref() != Ok("aarch64") {
+        return None;
+    }
+    match env::var("CARGO_CFG_TARGET_OS").as_deref() {
+        Ok("macos") => Some("macos-apple"),
+        // Mac Catalyst draws with the GPU of the Mac and loads libraries of its own platform.
+        Ok("ios") if env::var("CARGO_CFG_TARGET_ABI").as_deref() == Ok("macabi") => None,
+        Ok("ios") if simulator() => Some("ios-simulator"),
+        Ok("ios") => Some("ios-apple"),
+        _ => None,
+    }
+}
+
+/// The tables of ordinary drawing the crate carries for the kind of device of the target
+/// (docs/porting/gpu-rendering.md, "Pipelines made ahead of their first draw"): the Metal
+/// libraries made when the crate was built (`gpu/metal/libraries/ordinary-<platform>.fmz`,
+/// `metal_libraries.rs`) and the record of the pipelines of Graphite
+/// (`gpu/graphite/records/ordinary-<platform>.fpr`, `gpu/graphite/pipeline_record.rs`). A table is
+/// taken when its file is there: the configuration names that it is, and the variable where it
+/// is, for `include_bytes!`. A table for another kind of device is a file and a name in
+/// `table_platform`. Neither is taken with Ganesh, whose shader texts are others and which makes
+/// no pipelines from a record.
+fn tables_of_the_target() {
+    println!("cargo:rerun-if-changed=gpu/metal/libraries");
+    println!("cargo:rerun-if-changed=gpu/graphite/records");
+    if env::var("CARGO_CFG_FERRO_SKIA_APPLE_GANESH").is_ok() {
+        return;
+    }
+    let Some(platform) = table_platform() else {
+        return;
+    };
+    let manifest = PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("cargo names the folder of the manifest"));
+    let tables = [
+        ("gpu/metal/libraries", "fmz", "ferro_skia_ordinary_metal_libraries", "FERROUI_SKIA_ORDINARY_METAL_LIBRARIES"),
+        ("gpu/graphite/records", "fpr", "ferro_skia_ordinary_pipeline_record", "FERROUI_SKIA_ORDINARY_PIPELINE_RECORD"),
+    ];
+    for (folder, extension, configuration, variable) in tables {
+        let file = manifest.join(folder).join(format!("ordinary-{platform}.{extension}"));
+        if file.is_file() {
+            println!("cargo:rustc-cfg={configuration}");
+            println!("cargo:rustc-env={variable}={}", file.display());
         }
     }
 }

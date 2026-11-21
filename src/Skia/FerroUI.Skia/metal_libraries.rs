@@ -9,10 +9,11 @@
 //! have, as before. The pictures are the same either way: a library of the table is what Metal
 //! makes of that very text.
 //!
-//! The crate carries the table of ordinary drawing for macOS on Apple silicon (`ORDINARY`): an
-//! application gets it without doing anything, and adds the libraries of its own screens with
-//! [`register_metal_libraries`]. A table is read when the device is first given a text, on the
-//! thread that gives it, not when it is registered.
+//! The crate carries a table of ordinary drawing for each kind of device it has one for
+//! (`ORDINARY`: macOS on Apple silicon, iOS on a device and in its simulator; `build.rs`,
+//! `tables_of_the_target`): an application gets it without doing anything, and adds the
+//! libraries of its own screens with [`register_metal_libraries`]. A table is read when the
+//! device is first given a text, on the thread that gives it, not when it is registered.
 //!
 //! - `FERROUI_METAL_LIBRARY_RECORD=<folder>` writes every text the device is given to the
 //!   folder (`<key>.metal`), which is what the script compiles.
@@ -41,12 +42,14 @@ const LANGUAGE_VERSION: u64 = (2 << 16) + 3;
 /// A library of a table: the length of the text it was made from, and the library.
 type Library = (u32, &'static [u8]);
 
-/// The libraries of ordinary drawing, where they were made: macOS on Apple silicon. Another
-/// kind of device writes other texts, finds none of these and compiles its own.
-/// `scripts/perf/metal-libraries.py` says how the table is made again.
-#[cfg(all(target_os = "macos", target_arch = "aarch64", not(ferro_skia_apple_ganesh)))]
-const ORDINARY: Option<&[u8]> = Some(include_bytes!("gpu/metal/libraries/ordinary-macos-apple.fmz"));
-#[cfg(not(all(target_os = "macos", target_arch = "aarch64", not(ferro_skia_apple_ganesh))))]
+/// The libraries of ordinary drawing for the kind of device of the target
+/// (`gpu/metal/libraries/ordinary-<platform>.fmz`, which `build.rs` names when the crate has
+/// one): compiled for that platform from the texts Skia writes for the GPUs of the Apple family.
+/// Another kind of device writes other texts, finds none of these and compiles its own.
+/// `scripts/perf/metal-libraries.py` says how a table is made again.
+#[cfg(ferro_skia_ordinary_metal_libraries)]
+const ORDINARY: Option<&[u8]> = Some(include_bytes!(env!("FERROUI_SKIA_ORDINARY_METAL_LIBRARIES")));
+#[cfg(not(ferro_skia_ordinary_metal_libraries))]
 const ORDINARY: Option<&[u8]> = None;
 
 /// The table this crate carries for this kind of device, unpacked, if it has one (tests).
@@ -389,5 +392,103 @@ mod tests {
         assert!(libraries.iter().all(|(_, (text_length, library))| *text_length > 0 && library.starts_with(b"MTLB")));
         let keys: std::collections::HashSet<u64> = libraries.iter().map(|(key, _)| *key).collect();
         assert_eq!(keys.len(), libraries.len());
+    }
+
+    /// The device of this process loads every library of the table the crate carries for its
+    /// kind of device: the libraries were made for this platform (the simulator refuses a library
+    /// made for a device, and a device one made for the simulator).
+    #[cfg(target_vendor = "apple")]
+    #[test]
+    fn the_device_loads_every_library_of_the_table_of_ordinary_drawing() {
+        let Some(table) = ordinary_table() else { return };
+        let Some(device) = device::Device::system_default() else {
+            eprintln!("skipped: no Metal device");
+            return;
+        };
+        let refused: Vec<String> = parse(table)
+            .into_iter()
+            .filter(|(_, (_, library))| !device.loads(library))
+            .map(|(key, _)| format!("{key:016x}"))
+            .collect();
+        assert!(refused.is_empty(), "the device refused the libraries of {refused:?}");
+    }
+
+    /// The little of Metal the test above needs, through the Objective-C runtime.
+    #[cfg(target_vendor = "apple")]
+    mod device {
+        use std::ffi::{c_char, c_void};
+
+        type Id = *mut c_void;
+        type Sel = *mut c_void;
+
+        #[link(name = "Metal", kind = "framework")]
+        unsafe extern "C" {
+            fn MTLCreateSystemDefaultDevice() -> Id;
+        }
+
+        #[link(name = "objc")]
+        unsafe extern "C" {
+            fn sel_registerName(name: *const c_char) -> Sel;
+            fn objc_msgSend();
+        }
+
+        // libdispatch, part of the system library.
+        unsafe extern "C" {
+            fn dispatch_data_create(buffer: *const c_void, size: usize, queue: Id, destructor: Id) -> Id;
+            fn dispatch_release(object: Id);
+        }
+
+        fn sel(name: &'static [u8]) -> Sel {
+            assert!(name.ends_with(b"\0"));
+            // SAFETY: `name` is a NUL-terminated string.
+            unsafe { sel_registerName(name.as_ptr().cast()) }
+        }
+
+        fn release(object: Id) {
+            // SAFETY: `object` is an object this module holds one reference to.
+            let send: unsafe extern "C" fn(Id, Sel) =
+                unsafe { std::mem::transmute(objc_msgSend as unsafe extern "C" fn()) };
+            unsafe { send(object, sel(b"release\0")) };
+        }
+
+        /// The system's default `id<MTLDevice>`, one reference held.
+        pub struct Device(Id);
+
+        impl Device {
+            pub fn system_default() -> Option<Self> {
+                // SAFETY: a plain framework call; nil when there is no device.
+                let device = unsafe { MTLCreateSystemDefaultDevice() };
+                (!device.is_null()).then_some(Self(device))
+            }
+
+            /// Whether `newLibraryWithData:error:` gives a library for `library`.
+            pub fn loads(&self, library: &[u8]) -> bool {
+                // SAFETY: the buffer is live for the call; with no destructor the data is a copy.
+                let (queue, destructor) = (std::ptr::null_mut(), std::ptr::null_mut());
+                let data = unsafe { dispatch_data_create(library.as_ptr().cast(), library.len(), queue, destructor) };
+                if data.is_null() {
+                    return false;
+                }
+                let mut error: Id = std::ptr::null_mut();
+                // SAFETY: `objc_msgSend` through the C signature of the method; the device and the
+                // data are live objects.
+                let new_library: unsafe extern "C" fn(Id, Sel, Id, *mut Id) -> Id =
+                    unsafe { std::mem::transmute(objc_msgSend as unsafe extern "C" fn()) };
+                let loaded = unsafe { new_library(self.0, sel(b"newLibraryWithData:error:\0"), data, &mut error) };
+                // SAFETY: the data was made above; the library is returned with one reference.
+                unsafe { dispatch_release(data) };
+                if loaded.is_null() {
+                    return false;
+                }
+                release(loaded);
+                true
+            }
+        }
+
+        impl Drop for Device {
+            fn drop(&mut self) {
+                release(self.0);
+            }
+        }
     }
 }
