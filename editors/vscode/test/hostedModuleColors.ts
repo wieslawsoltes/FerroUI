@@ -27,11 +27,13 @@ export async function verifyHostedModuleColors(preview: NativePreview): Promise<
         const root = await realpath(directory);
         const manifest = join(root, 'Cargo.toml');
         const rustTarget = join(root, 'main.rs');
+        const library = join(root, 'lib.rs');
         const address = pathToFileURL(join(root, 'review.rs')).toString();
         const brand = pathToFileURL(join(root, 'brand.rs')).toString();
         await Promise.all([
             writeFile(manifest, '[package]\nname = "todo-workbench"\nversion = "0.0.0"\n'),
-            writeFile(rustTarget, 'mod brand; mod review; fn main() {}'),
+            writeFile(rustTarget, 'fn main() {}'),
+            writeFile(library, 'mod brand; mod review;'),
             writeFile(join(root, 'review.rs'), view),
             writeFile(join(root, 'brand.rs'), colors),
         ]);
@@ -39,7 +41,7 @@ export async function verifyHostedModuleColors(preview: NativePreview): Promise<
             { workspaceRoot: root, metadata: { manifest, directories: [], package: 'todo-workbench' } });
         const render = (revision: number, draft?: string) => preview.renderHostedWorkspace({
             revision, assembly: 'todo-workbench', projectPath: '/review.rs', document,
-        }, { root, rustTarget, localSources: draft === undefined ? [] : [{ uri: brand, source: draft }] });
+        }, { root, rustProject: { manifest, targets: [rustTarget, library] }, localSources: draft === undefined ? [] : [{ uri: brand, source: draft }] });
         const accept = async (revision: number, draft?: string) => {
             const result = await render(revision, draft);
             assert.equal(result.error, null);

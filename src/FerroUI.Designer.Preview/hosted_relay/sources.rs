@@ -1,7 +1,7 @@
 use super::Design;
 use crate::{projects::Project, protocol::Language};
 use ferroui_designer_core::Document;
-use ferroui_designer_project::{CompiledResources, PreviewIncludes, PreviewSourceBuffer, RustModuleSources, hosted_preview_sources};
+use ferroui_designer_project::{CompiledResources, PreviewIncludes, PreviewSourceBuffer, RustModuleProject, RustModuleSources, hosted_preview_sources};
 use ferroui_remote_protocol::{
     Message,
     designer::{DesignIncludedSource, UpdateDesignMessage, UpdateDesignSourcesMessage},
@@ -14,7 +14,7 @@ use std::{path::PathBuf, sync::Arc};
 pub(super) struct Workspace {
     root: PathBuf,
     local_sources: Vec<PreviewSourceBuffer>,
-    rust_target: Option<PathBuf>,
+    rust_project: Option<RustModuleProject>,
 }
 
 pub(super) struct Sources {
@@ -30,13 +30,13 @@ pub(super) struct AuthoredSources {
 
 impl Workspace {
     pub(super) fn rust_sources(&self, design: &Design, project: Option<&Project>) -> Option<RustModuleSources> {
-        let target = self.rust_target.as_ref()?;
+        let rust = self.rust_project.as_ref()?;
         let project = project?;
-        let root = self.root.canonicalize().ok()?;
-        if design.document.language != Language::Rust || !project.root.starts_with(root) {
+        let manifest = rust.manifest.canonicalize().ok()?;
+        if design.document.language != Language::Rust || manifest.parent()? != project.root.as_path() {
             return None;
         }
-        RustModuleSources::capture(&project.root, target, &design.document.uri, &design.document.source, &self.local_sources)
+        rust.capture(&self.root, &design.document.uri, &design.document.source, &self.local_sources)
     }
 
     pub(super) fn prepare(

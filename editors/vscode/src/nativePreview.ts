@@ -16,12 +16,14 @@ import type { NativeStyleRequest } from './hostedStylesProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
+import type { RustModuleProject } from './cargoTarget';
 
 const timelineActions = new Set(['scrub', 'play_program', 'play_range', 'advance_program', 'pause_program', 'stop_program']);
 
 interface RenderContext {
     workspaceRoot?: string;
     localSources?: PreviewSourceBuffer[];
+    rustProject?: RustModuleProject;
     designData?: DesignDataPresentation;
     layerView?: LayerViewInput;
     timelinePose?: TimelinePreviewPose;
@@ -45,7 +47,7 @@ export class NativePreview implements vscode.Disposable {
         columnAuthoring?: boolean; rsxColumnAuthoring?: boolean; itemTemplateAuthoring?: boolean; rsxItemTemplateAuthoring?: boolean;
         behaviorAuthoring?: boolean;
         controlTemplateAuthoring?: boolean; propertyTrace?: boolean; styleComposition?: boolean; rustStyleComposition?: boolean;
-        hostedRustStyles?: boolean; hostedRustModules?: boolean;
+        hostedRustStyles?: boolean; hostedRustModules?: boolean; rustModuleSources?: boolean;
         projectInventory?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
         timelineKeyframeDrafts?: boolean; timelineKeyframeScale?: boolean; timelineCurves?: boolean; timelineCurveVelocity?: boolean;
@@ -283,8 +285,13 @@ export class NativePreview implements vscode.Disposable {
         return this.send('canvasInput', { frame, nextFrame, action });
     }
 
-    edit(source: Source, operation: Operation): Promise<EditResult> {
-        return this.send('edit', { ...source, operation });
+    edit(source: Source, operation: Operation, frame?: number): Promise<EditResult> {
+        return this.send('edit', { ...source, operation, frame });
+    }
+
+    verifyRustModule(frame: number, uri: string, source: string): Promise<void> {
+        if (!this.capabilities.rustModuleSources) throw new Error('Update the FerroUI preview helper to use Rust module sources.');
+        return this.send('rustModuleSource', { frame, uri, source });
     }
 
     private async send<T>(method: string, params?: object, timeoutMs = 20_000): Promise<T> {

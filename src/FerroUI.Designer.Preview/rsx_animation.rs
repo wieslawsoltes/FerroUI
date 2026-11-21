@@ -50,6 +50,13 @@ impl AuthoredRsxFrame {
         Some(self.modules.as_ref()?.source(uri)?.source.as_ref())
     }
 
+    pub(crate) fn require_module_source(&self, uri: &str, source: &str) -> Result<(), String> {
+        if self.module_source(uri) != Some(source) {
+            return Err("The Rust module changed after the accepted preview".into());
+        }
+        Ok(())
+    }
+
     pub(crate) fn module_sources(&self) -> Option<&RustModuleSources> {
         self.modules.as_ref()
     }

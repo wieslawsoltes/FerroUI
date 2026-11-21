@@ -1,10 +1,10 @@
 use crate::document::DesignDocument;
 use crate::projects::Projects;
 use crate::property_fields::{can_add_property, registry};
-use crate::protocol::{EditRequest, EditResult, Operation, MAX_SOURCE_BYTES};
+use crate::protocol::{EditRequest, EditResult, Operation, RustModuleEdit, MAX_SOURCE_BYTES};
 use crate::renderer::Renderer;
 use ferroui_designer_core::{Edit, Node, NodeId, NodeKind, TextPatch};
-use ferroui_designer_language::{TextEdit, plan_event_handler, routed_events};
+use ferroui_designer_language::{LineIndex, TextEdit, plan_event_handler, routed_events};
 use ferroui_designer_tools::ExpressionPolicy;
 
 const COMMON_PROPERTIES: &[&str] = &[
@@ -29,7 +29,11 @@ const COMMON_PROPERTIES: &[&str] = &[
 ];
 
 pub(crate) fn edit(request: &EditRequest, renderer: Option<&Renderer>, projects: &Projects) -> Result<EditResult, String> {
-    let design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
+    let modules = match (request.frame, renderer) {
+        (Some(frame), Some(renderer)) => renderer.stage(frame)?.rust_modules(&request.document),
+        _ => None,
+    };
+    let design = DesignDocument::parse_with_rust_modules(&request.document, projects.source(&request.document)?, modules)?;
     let mut candidate = design.xaml.snapshot_without_history();
     let mut selected = None;
     let patches = match &request.operation {
@@ -205,25 +209,35 @@ pub(crate) fn editor_edits(
     design: &DesignDocument<'_>,
     patches: Vec<TextPatch>,
 ) -> Result<EditResult, String> {
+    let edits = text_edits(design.source, &design.index, patches)?;
+    Ok(EditResult { edits, ..EditResult::default() })
+}
+
+pub(crate) fn module_edits(uri: String, source: &str, patches: Vec<TextPatch>) -> Result<EditResult, String> {
+    let edits = text_edits(source, &LineIndex::new(source), patches)?;
+    let module_edit = (!edits.is_empty()).then_some(RustModuleEdit { uri, edits });
+    Ok(EditResult { module_edit, ..EditResult::default() })
+}
+
+fn text_edits(source: &str, index: &LineIndex, patches: Vec<TextPatch>) -> Result<Vec<TextEdit>, String> {
     let final_size = patches
         .iter()
-        .fold(design.source.len() as i64, |size, patch| {
+        .fold(source.len() as i64, |size, patch| {
             size - patch.span.len() as i64 + patch.replacement.len() as i64
         });
     if final_size > MAX_SOURCE_BYTES as i64 {
         return Err("Designer source exceeds 1 MiB".into());
     }
-    let edits = patches
+    patches
         .into_iter()
-        .filter(|patch| design.source.get(patch.span.range()) != Some(patch.replacement.as_str()))
+        .filter(|patch| source.get(patch.span.range()) != Some(patch.replacement.as_str()))
         .map(|patch| {
             Ok(TextEdit {
-                range: design.range(patch.span)?,
+                range: index.range(patch.span).map_err(|error| error.to_string())?,
                 new_text: patch.replacement,
             })
         })
-        .collect::<Result<_, String>>()?;
-    Ok(EditResult { edits, selection: None, timeline_pose: None, timeline_program_key: None, timeline_keys: None, retained_selection: Vec::new() })
+        .collect()
 }
 
 fn editable_node<'a>(design: &'a DesignDocument<'_>, id: NodeId) -> Result<&'a Node, String> {

@@ -141,6 +141,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.behaviors = new BehaviorsView(changed);
         const snippets = vscode.workspace.createFileSystemWatcher('**/.ferroui/toolbox/*.xaml');
         const xaml = vscode.workspace.createFileSystemWatcher('**/*.[xX][aA][mM][lL]');
+        const rust = vscode.workspace.createFileSystemWatcher('**/{Cargo.toml,*.[rR][sS]}');
         const refreshResources = (uri: vscode.Uri) => {
             for (const panel of this.panels.values()) panel.dependencyChanged(uri);
         };
@@ -164,6 +165,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.subscriptions = [
             snippets, snippets.onDidCreate(refreshToolbox), snippets.onDidChange(refreshToolbox), snippets.onDidDelete(refreshToolbox),
             xaml, xaml.onDidCreate(refreshResources), xaml.onDidChange(refreshResources), xaml.onDidDelete(refreshResources),
+            rust, rust.onDidCreate(refreshResources), rust.onDidChange(refreshResources), rust.onDidDelete(refreshResources),
             vscode.window.registerWebviewPanelSerializer(DESIGNER_VIEW, {
                 deserializeWebviewPanel: (panel, state) => this.restore(panel, state),
             }),

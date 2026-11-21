@@ -94,6 +94,8 @@ interface Arguments extends CanvasAction, CargoSelection {
     edit?: GuideEdit;
     snap?: CanvasSnapInput;
     source: string;
+    address: string;
+    range: Range;
     action: string;
     tool: string;
     arguments: object;
@@ -490,9 +492,13 @@ export class AgentTools {
             case 'designer_studio_tools': return panel.studioTools();
             case 'designer_studio_query': return panel.studioQuery(args.tool, args.arguments, args.selection, signal);
             case 'designer_studio_edit': {
-                const { timelineKeys } = await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
-                return { ...describe(panel), ...(timelineKeys && { keyframes: timelineKeys }) };
+                const { timelineKeys, moduleEdit } = await panel.studioEdit(args.expected_revision, args.tool, args.arguments, args.selection, signal);
+                return { ...describe(panel), ...(timelineKeys && { keyframes: timelineKeys }),
+                    ...(moduleEdit && { edited_source: { uri: moduleEdit.uri, version: moduleEdit.version } }) };
             }
+            case 'designer_rsx_style_source':
+                await panel.revealRustModule({ session: panel.session, token: args.expected_revision }, args.address, args.range, signal);
+                break;
             case 'designer_studio_present': {
                 const presentation = await panel.studioPresent(args.expected_revision, args.tool, args.arguments, args.selection, signal);
                 if (presentation?.openDefinition) return { ...describe(panel), opened_definition: presentation.openDefinition.source,

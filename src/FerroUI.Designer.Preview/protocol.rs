@@ -33,6 +33,8 @@ pub(crate) struct Render {
     pub(crate) workspace_root: Option<std::path::PathBuf>,
     #[serde(default, rename = "localSources")]
     pub(crate) local_sources: Vec<ferroui_designer_project::PreviewSourceBuffer>,
+    #[serde(rename = "rustProject")]
+    pub(crate) rust_project: Option<ferroui_designer_project::RustModuleProject>,
     #[serde(rename = "designData")]
     pub(crate) design_data: Option<DesignData>,
     #[serde(rename = "layerView")]
@@ -59,6 +61,7 @@ pub(crate) struct DesignData {
 pub(crate) struct EditRequest {
     #[serde(flatten)]
     pub(crate) document: Source,
+    pub(crate) frame: Option<u64>,
     pub(crate) operation: Operation,
 }
 
@@ -130,7 +133,7 @@ pub(crate) struct DropHint {
     pub(crate) description: String,
 }
 
-#[derive(Serialize)]
+#[derive(Default, Serialize)]
 pub(crate) struct EditResult {
     pub(crate) edits: Vec<ferroui_designer_language::TextEdit>,
     pub(crate) selection: Option<Range>,
@@ -142,6 +145,14 @@ pub(crate) struct EditResult {
     pub(crate) timeline_keys: Option<Vec<ferroui_designer_animation::KeyframeLocation>>,
     #[serde(rename = "retainedSelection", skip_serializing_if = "Vec::is_empty")]
     pub(crate) retained_selection: Vec<Range>,
+    #[serde(rename = "moduleEdit", skip_serializing_if = "Option::is_none")]
+    pub(crate) module_edit: Option<RustModuleEdit>,
+}
+
+#[derive(Serialize)]
+pub(crate) struct RustModuleEdit {
+    pub(crate) uri: String,
+    pub(crate) edits: Vec<ferroui_designer_language::TextEdit>,
 }
 
 #[derive(Clone, Serialize)]

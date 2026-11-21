@@ -427,11 +427,13 @@ class HostedSession {
                 const caret = this.rustBlockOffset === undefined ? this.editor.selection.active : document.positionAt(this.rustBlockOffset);
                 const source = await client.inProject(sourceOf(document, this.language, caret), this.project);
                 if (this.disposed || revision !== this.revision) return;
-                const rustTarget = this.language === 'rust' && client.capabilities.hostedRustModules ? this.target.crateRoot : undefined;
+                const rustProject = this.language === 'rust' && client.capabilities.hostedRustModules && this.target.crateRoot
+                    ? { manifest: this.target.manifest, targets: [this.target.crateRoot, ...(this.target.libraryRoots ?? [])] }
+                    : undefined;
                 const result = await client.renderHostedWorkspace({ revision, assembly, projectPath, document: source, fixture: this.fixture,
                     restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined,
                     selectClipKey: this.clipSelection?.version === document.version ? this.clipSelection.key : undefined },
-                { root: this.target.folder.uri.fsPath, rustTarget, localSources: dirtyPreviewSources([document.uri], document, Boolean(rustTarget)) });
+                { root: this.target.folder.uri.fsPath, rustProject, localSources: dirtyPreviewSources([document.uri], document, Boolean(rustProject)) });
                 if (this.disposed || client !== this.client || revision !== this.revision) return;
                 if (result.dependencies && this.dependencies.accept(result.dependencies)) { this.update(); return; }
                 if (result.error) throw new Error(result.error);

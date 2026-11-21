@@ -1,21 +1,25 @@
+import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { recordedGeometry, recordedMove } from './animationGeometry';
 import type { BuiltProject, BuiltProjects } from './builtProjects';
 import type { GuideCatalog, GuideEdit } from './canvasGuidesProtocol';
 import { CanvasRequests } from './canvasRequests';
+import { rustModuleProject, type RustModuleProject } from './cargoTarget';
 import { DesignerDependencies, dirtyPreviewSources } from './designerDependencies';
 import { DesignerSnapping, snappedPlacement, snappedResize } from './designerSnapping';
 import { GuideViews, type GuideAnchor } from './guideViews';
+import { previewSourceUri } from './includedSource';
 import { LayerViews } from './layerViews';
 import { NativePreview } from './nativePreview';
 import { RustTemplateScopes } from './rustTemplateScopes';
 import { DEFAULT_VIEWPORT, errorMessage, isViewport, withViewportTheme, type Asset, type CanvasSnapshot, type DragMessage, type DropHint, type FrameTarget, type FromDesigner, type Language, type NodeOperation, type NodeTarget, type Operation, type Placement, type Snapshot, type Source, type ToDesigner, type Viewport } from './protocol';
-import { applyTextEdits, asPosition, asRange, offsetAfterChanges, sourceOf } from './textDocument';
+import { applyTextEdits, asPosition, asRange, exactRange, offsetAfterChanges, sourceOf } from './textDocument';
 import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { SpacingCatalog, SpacingDraft, SpacingRequest, SpacingResponse } from './spacingProtocol';
 import { designerHtml, webviewOptions } from './view';
 import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DesignerViewState, ResizeGesture } from './protocol';
+import { isInside } from './workspacePaths';
 
 const mappedStudioEdits = new Set(['designer_selection_layout_edit', 'designer_property', 'designer_grid_track_edit',
     'designer_spacing_edit', 'designer_wrap_selection_edit']);
@@ -57,7 +61,7 @@ type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetPropert
 
 export class DesignerPanel implements vscode.Disposable {
     private readonly canvasRequests = new CanvasRequests();
-    private readonly dependencies = new DesignerDependencies();
+    private readonly dependencies: DesignerDependencies;
     private readonly templateScopes = new RustTemplateScopes();
     private layers: LayerViews;
     private guides: GuideViews;
@@ -93,6 +97,7 @@ export class DesignerPanel implements vscode.Disposable {
     private runtime?: RuntimeRow;
     private blockOffset?: number;
     private project?: BuiltProject;
+    private rustProject?: Promise<RustModuleProject | undefined>;
     assets: readonly Asset[] = [];
 
     constructor(
@@ -111,6 +116,7 @@ export class DesignerPanel implements vscode.Disposable {
         restored?: DesignerCanvasState,
     ) {
         const document = this.document;
+        this.dependencies = new DesignerDependencies(language === 'rust');
         this.caret = caret;
         this.viewport = restored?.viewport ?? DEFAULT_VIEWPORT;
         this.designData = restored?.designData;
@@ -133,6 +139,7 @@ export class DesignerPanel implements vscode.Disposable {
                 const project = projects.forDocument(this.document.uri);
                 if (project === this.project) return;
                 this.project = project;
+                this.rustProject = undefined;
                 this.schedule(0);
             }),
             vscode.workspace.onDidChangeTextDocument(event => {
@@ -148,13 +155,20 @@ export class DesignerPanel implements vscode.Disposable {
             }),
             vscode.workspace.onDidCloseTextDocument(closed => {
                 if (closed === this.document) void this.sourceClosed(closed);
-                else if (closed.isDirty) this.dependencyChanged(closed.uri);
+                else if (closed.isDirty || this.language === 'rust') this.dependencyChanged(closed.uri);
             }),
             vscode.window.onDidChangeTextEditorSelection(event => {
                 if (event.textEditor.document === this.document && event.selections[0]) this.updateCaret(event.selections[0].active);
             }),
             vscode.workspace.onDidChangeConfiguration(event => {
                 if (event.affectsConfiguration('ferroui.preview.path')) { this.stopClient(); this.schedule(0); }
+                if (this.language === 'rust' && event.affectsConfiguration('ferroui.hotReload.cargoPath', this.document.uri)) {
+                    this.rustProject = undefined;
+                    this.schedule(0);
+                }
+            }),
+            vscode.workspace.onDidGrantWorkspaceTrust(() => {
+                if (this.language === 'rust') { this.rustProject = undefined; this.schedule(0); }
             }),
         );
         panel.webview.options = webviewOptions(context.extensionUri);
@@ -176,6 +190,7 @@ export class DesignerPanel implements vscode.Disposable {
             this.layers = new LayerViews(document, this.language, this.layers.saved);
             this.guides = new GuideViews(document, this.guides.saved);
             this.sourceDocument = document;
+            this.rustProject = undefined;
             this.caret = document.validatePosition(this.caret);
             this.project = this.projects.forDocument(document.uri);
             this.panel.title = `Design · ${document.uri.path.split('/').at(-1)}`;
@@ -366,6 +381,27 @@ export class DesignerPanel implements vscode.Disposable {
 
     async revealSource(frame: FrameTarget, range: Range): Promise<void> {
         if (this.canUse(frame)) await this.reveal(this.document.validateRange(asRange(range)), true);
+    }
+
+    async revealRustModule(frame: FrameTarget, uri: string, range: Range, signal?: AbortSignal, validate?: () => void): Promise<void> {
+        if (!this.canUse(frame)) throw new Error('Read the current Rust preview before opening a module.');
+        const { document } = await this.checkRustModule(await this.getClient(), frame.token, uri);
+        signal?.throwIfAborted();
+        validate?.();
+        const source = vscode.window.visibleTextEditors.find(editor => editor.document === this.document);
+        await vscode.window.showTextDocument(document, { selection: exactRange(document, range),
+            viewColumn: source?.viewColumn ?? vscode.ViewColumn.One, preview: false, preserveFocus: true });
+    }
+
+    private async checkRustModule(client: NativePreview, token: number, uri: string) {
+        if (this.language !== 'rust') throw new Error('Open a mapped Rust preview to use a companion module.');
+        const document = await vscode.workspace.openTextDocument(await previewSourceUri(this.document.uri, uri, 'rust'));
+        const version = document.version;
+        await client.verifyRustModule(token, uri, document.getText());
+        if (this.currentToken !== token || document.version !== version || document.isClosed) {
+            throw new Error('The Rust source changed. Use the current preview to retry.');
+        }
+        return { document, version };
     }
 
     async selectRuntime(target: FrameTarget, runtime: RuntimeRow, openSource: boolean): Promise<void> {
@@ -825,7 +861,12 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     dependencyChanged(uri: vscode.Uri): void {
-        if (!this.disposed && this.dependencies.change(uri)) this.schedule();
+        if (this.disposed) return;
+        if (this.language === 'rust' && uri.scheme === 'file' && path.basename(uri.fsPath) === 'Cargo.toml'
+            && isInside(path.dirname(uri.fsPath), this.document.uri.fsPath)) {
+            this.rustProject = undefined;
+            this.schedule();
+        } else if (this.dependencies.change(uri)) this.schedule();
     }
 
     private async render(): Promise<void> {
@@ -847,10 +888,16 @@ export class DesignerPanel implements vscode.Disposable {
             const viewport = requested.theme && !highContrastTheme ? withViewportTheme(requested, 'dark') : requested;
             const input = await client.inProject(source, project);
             const folder = vscode.workspace.getWorkspaceFolder(this.document.uri);
+            const rustProject = this.language === 'rust' && client.capabilities.rustModuleSources && vscode.workspace.isTrusted
+                ? await (this.rustProject ??= rustModuleProject(this.document.uri).catch(error => {
+                    this.output.appendLine(`Rust module discovery: ${errorMessage(error)}`);
+                    return undefined;
+                })) : undefined;
             if (this.disposed || token !== this.generation || version !== this.document.version) return;
             const snapshot = await client.render(input, viewport, token, {
                 workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined,
-                localSources: dirtyPreviewSources([this.document.uri], this.document),
+                rustProject,
+                localSources: dirtyPreviewSources([this.document.uri], this.document, Boolean(rustProject)),
                 designData: this.designData, layerView: this.layers.input(caret), timelinePose: this.timelinePose,
                 timelineTargets: this.timelineTargets,
             });
@@ -1053,7 +1100,7 @@ export class DesignerPanel implements vscode.Disposable {
                 targets, signal ?? AbortSignal.timeout(15_000), validate);
             return;
         }
-        await this.commitEdit(frame, client => client.edit(frame.source, operation), signal, validate);
+        await this.commitEdit(frame, client => client.edit(frame.source, operation, frame.token), signal, validate);
     }
 
     private recordingGeometryPose(): TimelinePreviewPose | undefined {
@@ -1066,11 +1113,20 @@ export class DesignerPanel implements vscode.Disposable {
         this.editing = true;
         this.changed.fire();
         try {
-            const result = await plan(await this.getClient());
-            const { edits, selection, timelinePose, timelineProgramKey, retainedSelection } = result;
+            const client = await this.getClient();
+            const result = await plan(client);
+            const { edits, selection, timelinePose, timelineProgramKey, retainedSelection, moduleEdit } = result;
             signal?.throwIfAborted();
             if (this.currentToken !== frame.token) throw new Error('The preview changed. Use the current preview to retry.');
             validate?.();
+            if (moduleEdit) {
+                const { document, version } = await this.checkRustModule(client, frame.token, moduleEdit.uri);
+                signal?.throwIfAborted();
+                validate?.();
+                await applyTextEdits(document, version, moduleEdit.edits);
+                moduleEdit.version = document.version;
+                return result;
+            }
             const previous = this.timelinePose;
             const previousProgram = this.timelineProgramSelection;
             if (timelinePose) this.timelinePose = timelinePose;

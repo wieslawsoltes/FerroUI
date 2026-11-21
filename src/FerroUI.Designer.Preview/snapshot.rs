@@ -1,6 +1,6 @@
 use crate::document::DesignDocument;
 use crate::edits::{addable_properties, can_remove, editable_attribute};
-use crate::protocol::{OutlineNode, Property, Render, Snapshot};
+use crate::protocol::{Language, OutlineNode, Property, Render, Snapshot};
 use crate::projects::Project;
 use crate::renderer::Renderer;
 use ferroui_designer_project::local_preview_sources_with_resources;
@@ -8,7 +8,16 @@ use ferroui_markup_xaml::source_overlay::SourceSnapshot;
 
 pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&Project>) -> Result<Snapshot, String> {
     renderer.retire_frame(input);
-    let design = DesignDocument::parse(&input.document, project)?;
+    let rust = match (input.document.language, &input.workspace_root, &input.rust_project) {
+        (Language::Rust, Some(root), Some(rust)) => rust.capture(root, &input.document.uri, &input.document.source, &input.local_sources),
+        _ => None,
+    };
+    if rust.is_none() && input.rust_project.is_some()
+        && renderer.accepted_rust_module_document.as_deref() == Some(input.document.uri.as_str())
+    {
+        return Err("Repair the Rust module sources to update Design".into());
+    }
+    let design = DesignDocument::parse_with_rust_modules(&input.document, project, rust.as_ref())?;
     let counterpart = design.counterpart();
     let mut notices = Vec::new();
     let (blocks, active_block) = if let Some(rsx) = &design.rsx {
@@ -30,7 +39,10 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         (Vec::new(), None)
     };
     let local = local_preview_sources_with_resources(input.workspace_root.as_deref(), &input.document.uri, &design.xaml, &input.local_sources, project.map(|project| &project.resources));
-    let dependencies = local.dependencies.into_iter().collect();
+    let mut dependencies = local.dependencies;
+    if let Some(rust) = &rust {
+        dependencies.extend(rust.dependencies().map(str::to_owned));
+    }
     let snapshot = SourceSnapshot::new(local.accepted, local.unavailable);
     let layers = input.layer_view.as_ref().filter(|layers| layers.block.as_ref() == active_block.as_ref().map(|range| &range.start))
         .and_then(|input| serde_json::from_value(input.state.clone()).ok());
@@ -62,6 +74,9 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         stage.authored_rsx = crate::rsx_animation::AuthoredRsxFrame::capture(&design, &input.document.uri);
         stage.rsx_spacing = crate::spacing::RsxOwners::capture(&design);
         stage.project_assets = assets;
+    }
+    if image.is_some() {
+        renderer.accepted_rust_module_document = rust.as_ref().map(|_| input.document.uri.clone());
     }
     let nodes = design
         .xaml
@@ -121,7 +136,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         image,
         render_error,
         notices,
-        dependencies,
+        dependencies: dependencies.into_iter().collect(),
         project_assets,
         mapped_rust_animations: !design.rsx_animations.is_empty(),
         rust_animation_owners,

@@ -113,6 +113,7 @@ fn run(path: &Path, workspace: &Path, artifacts: &Path, accept: bool) -> Result<
         ),
         None => {
             let input = Render {
+                rust_project: None,
                 document,
                 width: scenario.viewport.width,
                 height: scenario.viewport.height,

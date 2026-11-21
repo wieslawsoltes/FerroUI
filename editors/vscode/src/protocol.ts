@@ -11,6 +11,7 @@ export interface TextEdit { range: Range; newText: string }
 export interface EditResult {
     edits: TextEdit[];
     selection: Range | null;
+    moduleEdit?: { uri: string; edits: TextEdit[]; version?: number };
     timelinePose?: TimelinePreviewPose;
     timelineProgramKey?: string;
     timelineKeys?: KeyframeLocation[];

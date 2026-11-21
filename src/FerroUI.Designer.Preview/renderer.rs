@@ -26,6 +26,7 @@ pub(crate) struct Renderer {
     app: Ref<Application>,
     pub(crate) stage: Option<Stage>,
     item_template_scope: Option<RetainedItemTemplate>,
+    pub(crate) accepted_rust_module_document: Option<String>,
 }
 
 struct RetainedItemTemplate {
@@ -48,6 +49,16 @@ pub(crate) struct Stage {
     pub(crate) sources: SourceSnapshot,
     pub(crate) canvas_snap: RefCell<Option<crate::canvas_snap::PreparedSnap>>,
     _window: PreviewWindow,
+}
+
+impl Stage {
+    pub(crate) fn rust_modules(&self, source: &crate::protocol::Source) -> Option<&ferroui_designer_project::RustModuleSources> {
+        let rust = self.authored_rsx.as_ref()?;
+        if rust.uri != source.uri || rust.source() != source.source || self.project != source.project {
+            return None;
+        }
+        rust.module_sources()
+    }
 }
 
 pub(crate) struct Frame {
@@ -117,6 +128,7 @@ impl Renderer {
             app,
             stage: None,
             item_template_scope: None,
+            accepted_rust_module_document: None,
         }
     }
 

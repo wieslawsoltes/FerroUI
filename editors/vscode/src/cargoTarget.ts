@@ -24,6 +24,17 @@ interface CargoPackage {
     targets: { name: string; kind: string[]; src_path: string }[];
 }
 
+interface CargoMetadata {
+    packages: CargoPackage[];
+    workspace_members: string[];
+    target_directory: string;
+}
+
+export interface RustModuleProject {
+    manifest: string;
+    targets: string[];
+}
+
 export interface CargoTarget {
     label: string;
     folder: vscode.WorkspaceFolder;
@@ -35,6 +46,7 @@ export interface CargoTarget {
     packageName: string;
     binary: string;
     crateRoot?: string;
+    libraryRoots?: string[];
     features: string[];
     args: string[];
     targetDirectory: string;
@@ -116,6 +128,39 @@ async function targetsIn(folder: vscode.WorkspaceFolder, manifest?: string) {
 async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target: ConfiguredTarget): Promise<CargoTarget[]> {
     const root = folder.uri.fsPath;
     const manifest = path.resolve(root, target.manifestPath || 'Cargo.toml');
+    const { metadata, physicalRoot } = await readMetadata(folder, cargo, manifest);
+    const cwd = path.dirname(manifest);
+    return metadata.packages.filter(pkg => metadata.workspace_members.includes(pkg.id)
+        && (isInside(root, pkg.manifest_path) || isInside(physicalRoot, pkg.manifest_path))
+        && (!target.package || target.package === pkg.name))
+        .flatMap(pkg => pkg.targets.filter(bin => bin.kind.includes('bin') && (!target.binary || target.binary === bin.name)).map(bin => ({
+            label: target.label ?? bin.name,
+            folder, cargo, cargoDirectory: cwd, discoveryManifest: manifest, manifest: pkg.manifest_path,
+            packageId: pkg.id, packageName: pkg.name, binary: bin.name, crateRoot: bin.src_path,
+            libraryRoots: pkg.targets.filter(target => target.kind.some(kind => libraryKinds.has(kind))).map(target => target.src_path),
+            features: target.features ?? (Object.hasOwn(pkg.features, 'hot-reload') ? ['hot-reload'] : []),
+            args: target.args ?? [], targetDirectory: metadata.target_directory,
+        })));
+}
+
+const libraryKinds = new Set(['lib', 'rlib', 'dylib', 'cdylib', 'staticlib', 'proc-macro']);
+
+export async function rustModuleProject(uri: vscode.Uri): Promise<RustModuleProject | undefined> {
+    if (!vscode.workspace.isTrusted || uri.scheme !== 'file') return;
+    const folder = vscode.workspace.getWorkspaceFolder(uri);
+    if (folder?.uri.scheme !== 'file') return;
+    const relative = await nearestManifest(folder, uri.fsPath);
+    if (relative === undefined) return;
+    const manifest = path.resolve(folder.uri.fsPath, relative);
+    const cargo = vscode.workspace.getConfiguration('ferroui.hotReload', folder.uri).get<string>('cargoPath') || 'cargo';
+    const { metadata, physicalManifest } = await readMetadata(folder, cargo, manifest, true);
+    const owner = metadata.packages.find(pkg => metadata.workspace_members.includes(pkg.id)
+        && (pkg.manifest_path === physicalManifest || pkg.manifest_path === manifest));
+    if (owner) return { manifest: owner.manifest_path, targets: [...new Set(owner.targets.map(target => target.src_path))] };
+}
+
+async function readMetadata(folder: vscode.WorkspaceFolder, cargo: string, manifest: string, offline = false) {
+    const root = folder.uri.fsPath;
     if (!isInside(root, manifest)) throw new Error('The Cargo manifest must be inside the selected workspace folder.');
     const [physicalRoot, physicalManifest] = await Promise.all([realpath(root), realpath(manifest).catch(error => {
         if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -124,21 +169,11 @@ async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target
         throw error;
     })]);
     if (!isInside(physicalRoot, physicalManifest)) throw new Error('The Cargo manifest must resolve inside this workspace.');
-    const cwd = path.dirname(manifest);
-    const { stdout } = await exec(cargo, ['metadata', '--manifest-path', manifest, '--no-deps', '--format-version', '1'], {
-        cwd, windowsHide: true, timeout: 20_000, maxBuffer: 16 * 1024 * 1024,
+    const options = offline ? ['--locked', '--offline'] : [];
+    const { stdout } = await exec(cargo, ['metadata', '--manifest-path', manifest, '--no-deps', '--format-version', '1', ...options], {
+        cwd: path.dirname(manifest), windowsHide: true, timeout: 20_000, maxBuffer: 16 * 1024 * 1024,
     });
-    const metadata = JSON.parse(stdout) as { packages: CargoPackage[]; workspace_members: string[]; target_directory: string };
-    return metadata.packages.filter(pkg => metadata.workspace_members.includes(pkg.id)
-        && (isInside(root, pkg.manifest_path) || isInside(physicalRoot, pkg.manifest_path))
-        && (!target.package || target.package === pkg.name))
-        .flatMap(pkg => pkg.targets.filter(bin => bin.kind.includes('bin') && (!target.binary || target.binary === bin.name)).map(bin => ({
-            label: target.label ?? bin.name,
-            folder, cargo, cargoDirectory: cwd, discoveryManifest: manifest, manifest: pkg.manifest_path,
-            packageId: pkg.id, packageName: pkg.name, binary: bin.name, crateRoot: bin.src_path,
-            features: target.features ?? (Object.hasOwn(pkg.features, 'hot-reload') ? ['hot-reload'] : []),
-            args: target.args ?? [], targetDirectory: metadata.target_directory,
-        })));
+    return { metadata: JSON.parse(stdout) as CargoMetadata, physicalRoot, physicalManifest };
 }
 
 async function nearestManifest(folder: vscode.WorkspaceFolder, file?: string): Promise<string | undefined> {

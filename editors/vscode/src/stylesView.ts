@@ -195,7 +195,12 @@ export class StylesView {
                     selection.scope = content.catalog.palette_scopes.find(scope => scope.node === action.node);
                     this.refresh(panel);
                     return;
-                case 'reveal': await context.revealRange(action.range); return;
+                case 'reveal':
+                    if (action.sourceAddress) {
+                        await panel.revealRustModule({ session: panel.session, token }, action.sourceAddress, action.range,
+                            AbortSignal.timeout(15_000), () => context.ensure());
+                    } else await context.revealRange(action.range);
+                    return;
                 case 'style-issues': {
                     const range = await chooseStyleIssue(content.catalog.issues ?? []);
                     if (range) await context.revealRange(range);

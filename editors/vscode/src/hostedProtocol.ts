@@ -4,6 +4,7 @@ import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFra
 import type { CurvePoint, KeyframeDraftPreview, KeyframeLocation } from './timelineProtocol';
 import type { FromHostedPalette, ToHostedPalette } from './hostedPaletteProtocol';
 import type { FromHostedStyles, ToHostedStyles } from './hostedStylesProtocol';
+import type { RustModuleProject } from './cargoTarget';
 
 export interface HostedSource {
     document: Source;
@@ -31,7 +32,7 @@ export interface HostedFrame {
 export interface HostedWorkspaceSources {
     root: string;
     localSources: PreviewSourceBuffer[];
-    rustTarget?: string;
+    rustProject?: RustModuleProject;
 }
 
 export interface HostedWorkspaceFrame {

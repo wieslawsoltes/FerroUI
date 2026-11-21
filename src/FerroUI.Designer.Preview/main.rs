@@ -222,6 +222,9 @@ fn respond(
         "edit" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| serialize(edits::edit(&input, renderer.as_ref(), projects))),
+        "rustModuleSource" => serde_json::from_value(message["params"].clone())
+            .map_err(|error| error.to_string())
+            .and_then(|check| serialize(studio::verify_rust_module_source(renderer.as_ref().ok_or("Render the current Rust invocation first")?, check))),
         "inspect" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input| serialize(inspection::inspect(&input, renderer.as_ref(), projects))),

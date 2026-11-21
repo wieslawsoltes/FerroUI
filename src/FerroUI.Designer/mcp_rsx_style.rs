@@ -1,7 +1,6 @@
 use super::{ensure_revision, schema as s, state};
 use crate::{rust_style_report, DesignerSession};
-use ferroui_designer_core::TextPatch;
-use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit};
+use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit, RsxStylePlan};
 use serde_json::{json, Value};
 
 pub const RSX_STYLES: &str = "designer_rsx_styles";
@@ -58,12 +57,12 @@ pub fn rust_style_source_plan(
     session: &DesignerSession,
     projection: &RsxProjection<'_>,
     args: &Value,
-) -> Result<Vec<TextPatch>, String> {
+) -> Result<RsxStylePlan, String> {
     ensure_revision(session, args)?;
-    projection.plan_style(&decode_edit(args)?)
+    projection.plan_style_source(&decode_edit(args)?)
 }
 
-fn decode_edit(args: &Value) -> Result<RsxStyleEdit, String> {
+pub(super) fn decode_edit(args: &Value) -> Result<RsxStyleEdit, String> {
     let mut args = args
         .as_object()
         .ok_or("arguments must be an object")?

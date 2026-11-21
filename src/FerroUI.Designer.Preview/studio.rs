@@ -1,5 +1,5 @@
 use crate::document::DesignDocument;
-use crate::edits::{editor_edits, rust_name_edit};
+use crate::edits::{editor_edits, module_edits, rust_name_edit};
 use crate::protocol::{EditResult, Source};
 use crate::renderer::{Presentation, Renderer, Stage};
 use crate::rsx_animation;
@@ -24,6 +24,19 @@ pub(crate) struct Edit {
     document: Source,
     #[serde(flatten)]
     query: Query,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct RustModuleSourceCheck {
+    frame: u64,
+    uri: String,
+    source: String,
+}
+
+pub(crate) fn verify_rust_module_source(renderer: &Renderer, check: RustModuleSourceCheck) -> Result<(), String> {
+    renderer.stage(check.frame)?.authored_rsx.as_ref()
+        .ok_or("Render the current Rust invocation first")?
+        .require_module_source(&check.uri, &check.source)
 }
 
 #[derive(Deserialize)]
@@ -202,8 +215,11 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
 }
 
 pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::projects::Projects) -> Result<EditResult, String> {
-    let mut design = DesignDocument::parse(&request.document, projects.source(&request.document)?)?;
     let query = request.query;
+    let stage = renderer.stage(query.frame)?;
+    let mut design = DesignDocument::parse_with_rust_modules(
+        &request.document, projects.source(&request.document)?, stage.rust_modules(&request.document),
+    )?;
     let action = query.arguments["action"].as_str();
     let rust_keyframe = design.rsx.is_some() && rsx_animation::keyframe_edit(&query.name, action);
     let rust_program = design.rsx.is_some() && rsx_animation::program_edit(&query.name, action);
@@ -233,7 +249,6 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     {
         return Err("This Studio operation requires XAML or a fully mapped RSX layout.".into());
     }
-    let stage = renderer.stage(query.frame)?;
     if let Some(rsx) = &stage.authored_rsx {
         rsx.require_source(&design)?;
     }
@@ -268,18 +283,22 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
         let (patches, selection) = {
             let session = stage.session.borrow();
-            let patches = stage.sources.run(|| {
-                if rust_style {
-                    ferroui_designer::mcp::rust_style_source_plan(&session, projection, &arguments)
-                } else {
-                    let plan = if rust_columns {
-                        ferroui_designer::mcp::rust_column_source_plan
-                    } else {
-                        ferroui_designer::mcp::rust_template_source_plan
-                    };
-                    plan(&session, design.source, projection, &arguments)
+            let patches = if rust_style {
+                let plan = stage.sources.run(|| ferroui_designer::mcp::rust_style_source_plan(&session, projection, &arguments))?;
+                if let Some(uri) = plan.source_uri {
+                    let source = stage.authored_rsx.as_ref().and_then(|rust| rust.module_source(&uri))
+                        .ok_or("The supplying Rust module is outside the accepted frame")?;
+                    return module_edits(uri, source, plan.patches);
                 }
-            })?;
+                plan.patches
+            } else {
+                let plan = if rust_columns {
+                    ferroui_designer::mcp::rust_column_source_plan
+                } else {
+                    ferroui_designer::mcp::rust_template_source_plan
+                };
+                stage.sources.run(|| plan(&session, design.source, projection, &arguments))?
+            };
             let selection = crate::edit_selection::rsx_control_ranges(&design, &patches, session.selection())?;
             (patches, selection)
         };
