@@ -656,6 +656,10 @@ impl<T: StyledValue> EffectiveValue<T> {
         self.metadata.default_value().clone()
     }
 
+    // A call of its own, as it was: inlined into the local write of the store, the write grew
+    // and was no longer inlined into the typed set of a value (pinned: the inlining shifted with
+    // the property store per storage type, #986).
+    #[inline(never)]
     fn set_and_raise_core(
         &self,
         owner: &FerroObject,
