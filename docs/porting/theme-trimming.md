@@ -1957,6 +1957,8 @@ letter, then letters, digits, `_` and `.`; `AssemblyModel::key_strings`). What s
 - every entry, when the build keeps every unit (`theme-roots = "all"`, `full-themes`).
 
 A key that reaches the code only at run time (read from a file, or built from parts) is not seen,
-and needs `theme-roots`. In a debug build, a lookup that misses a key the full theme defines and no
-kept unit still defines logs once `the <theme> resource <key> was trimmed: add it to theme-roots`
-(`rt::trimmed_keys`, the debug statics `THEME_UNIT_TEXT_KEYS` and `THEME_UNIT_ENTRY_KEYS`).
+and needs `theme-roots`. In a debug build, a lookup that misses a key the selection removed from a
+kept unit logs once `the <theme> resource <key> was trimmed: add it to theme-roots`
+(`rt::trimmed_keys`, the debug static `THEME_UNIT_ENTRY_KEYS`). A key of a unit left out whole is
+not reported: a control may probe a resource of a unit its application does not keep, and do
+without it.

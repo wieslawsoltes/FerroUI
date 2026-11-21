@@ -248,45 +248,36 @@ pub fn trimmed_type_keys(type_keys: &'static [&'static [&'static str]], parts: &
 }
 
 /// What a table of units leaves out of a theme, for the diagnostic of a lookup that misses it:
-/// the type keys of the control themes and the text keys of the resources (#852, step 2).
+/// the type keys of the control themes, and the text keys the selection by key removed (#852,
+/// step 2).
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct TrimmedKeys {
     /// The type keys, sorted.
     pub types: Vec<&'static str>,
-    /// The text keys no unit of the table defines any more, sorted.
+    /// The keys whose entries a kept unit of the table does not name, sorted.
     pub texts: Vec<&'static str>,
 }
 
-/// What `parts` leaves out of a theme. `type_keys` and `text_keys` hold the keys of every unit, by
-/// its index, and `entry_keys` the keys of each unit an application selects (the statics the
-/// generated file has in debug builds). A text key is left out when no kept unit still defines it:
-/// a unit of `parts` defines its keys, but for a selectable key whose entry its static does not name.
+/// What `parts` leaves out of a theme. `type_keys` holds the type keys of every unit, by its index,
+/// and `entry_keys` the keys of each unit an application selects (the statics the generated file
+/// has in debug builds). The text keys are only those the selection removed from a unit `parts`
+/// keeps. A key of a unit left out whole is not among them: a control may probe a resource of a
+/// unit its application does not keep and do without it, and that is no diagnostic.
 pub fn trimmed_keys(
     type_keys: &'static [&'static [&'static str]],
-    text_keys: &'static [&'static [&'static str]],
     entry_keys: &'static [&'static [&'static str]],
     parts: &[&ThemeUnit],
 ) -> TrimmedKeys {
-    let mut kept: Vec<&'static str> = Vec::new();
-    let mut gone: Vec<&'static str> = Vec::new();
-    for (index, keys) in text_keys.iter().enumerate() {
-        let Ok(found) = parts.binary_search_by_key(&(index as u32), |unit| unit.index) else {
-            gone.extend(keys.iter().copied());
-            continue;
-        };
-        let selectable = entry_keys.get(index).copied().unwrap_or_default();
-        for key in keys.iter().copied() {
-            match selectable.contains(&key) && !parts[found].entries.iter().any(|entry| entry.key == key) {
-                true => gone.push(key),
-                false => kept.push(key),
-            }
-        }
-    }
-    kept.sort_unstable();
-    gone.sort_unstable();
-    gone.dedup();
-    gone.retain(|key| kept.binary_search(key).is_err());
-    TrimmedKeys { types: trimmed_type_keys(type_keys, parts), texts: gone }
+    let mut texts: Vec<&'static str> = parts
+        .iter()
+        .flat_map(|unit| {
+            let selectable = entry_keys.get(unit.index as usize).copied().unwrap_or_default();
+            selectable.iter().copied().filter(|key| !unit.entries.iter().any(|entry| entry.key == *key))
+        })
+        .collect();
+    texts.sort_unstable();
+    texts.dedup();
+    TrimmedKeys { types: trimmed_type_keys(type_keys, parts), texts }
 }
 
 ferroui_base::ferro_thread_local! {

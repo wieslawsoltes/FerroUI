@@ -989,8 +989,7 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         (Some(units), Some(plan)) => {
             source.push('\n');
             let type_keys: Vec<Vec<String>> = plan.units.iter().map(|unit| unit.type_keys.clone()).collect();
-            let text_keys: Vec<Vec<String>> = plan.units.iter().map(|unit| unit.keys.clone()).collect();
-            source.push_str(&units.table(&class.full_name(), &type_keys, &text_keys));
+            source.push_str(&units.table(&class.full_name(), &type_keys));
             let mut model_units = plan.units;
             units.record_slots(&mut model_units);
             Some(ThemeUnitsModel {

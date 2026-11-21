@@ -122,11 +122,10 @@ fn only_trimmed_type_keys_are_reported() {
     assert!(!report_trimmed_theme("Tests", &ResourceKey::Type(<ResourceDictionary as StaticType>::TYPE), &TrimmedKeys::default()));
 }
 
-/// #852, step 2: a text key is left out when no kept unit still defines it: the keys of a unit the
-/// table does not have and the selectable keys whose entries its static does not name, but not a
-/// key another kept unit defines, and such a key is reported as a trimmed resource.
+/// #852, step 2: the text keys reported are those the selection removed from a kept unit. A key of
+/// a unit left out whole is not: a control may probe it and do without it.
 #[test]
-fn trimmed_text_keys_are_those_no_kept_unit_defines() {
+fn trimmed_text_keys_are_those_the_selection_removed() {
     fn build(_provider: &Rc<dyn ferroui_base::metadata::IServiceProvider>) -> Result<ferroui_base::metadata::MarkupValue, XamlLoadError> {
         Ok(None)
     }
@@ -134,16 +133,14 @@ fn trimmed_text_keys_are_those_no_kept_unit_defines() {
     static SELECTED: ThemeUnit = ThemeUnit { name: "Resources/Base.xaml", index: 1, runs: &[first_run], entries: &[&LIVE] };
     static PARTS: &[&ThemeUnit] = &[&AMBIENT, &SELECTED];
     static TYPE_KEYS: &[&[&str]] = &[&[], &[], &["Button"]];
-    static TEXT_KEYS: &[&[&str]] = &[&["Shared"], &["Dead", "Inline", "Live", "Shared"], &["OfALeftOutUnit", "Inline"]];
-    static ENTRY_KEYS: &[&[&str]] = &[&[], &["Dead", "Live", "Shared"], &[]];
-    let trimmed = trimmed_keys(TYPE_KEYS, TEXT_KEYS, ENTRY_KEYS, PARTS);
+    static ENTRY_KEYS: &[&[&str]] = &[&[], &["Dead", "Live"], &["OfALeftOutUnit"]];
+    let trimmed = trimmed_keys(TYPE_KEYS, ENTRY_KEYS, PARTS);
     assert_eq!(trimmed.types, ["Button"]);
-    // `Shared` is defined by the ambient unit, and `Inline` by a run of the kept unit.
-    assert_eq!(trimmed.texts, ["Dead", "OfALeftOutUnit"]);
+    assert_eq!(trimmed.texts, ["Dead"]);
     assert!(report_trimmed_theme("Tests", &ResourceKey::from("Dead"), &trimmed));
     assert!(report_trimmed_theme("Tests", &ResourceKey::from("Dead"), &trimmed));
     assert!(!report_trimmed_theme("Tests", &ResourceKey::from("Live"), &trimmed));
-    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("Unknown"), &trimmed));
+    assert!(!report_trimmed_theme("Tests", &ResourceKey::from("OfALeftOutUnit"), &trimmed));
 }
 
 ferroui_base::ferro_thread_local! {
