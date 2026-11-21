@@ -29,6 +29,10 @@ impl ComponentResourceSources for Graph {
 const VIEW: &str = include_str!("../../editors/vscode/test/fixtures/IncludedTemplateCopies.xaml");
 const ROWS: &str = include_str!("../../editors/vscode/test/fixtures/Templates/Copy Rows.xaml");
 const INK: &str = include_str!("../../editors/vscode/test/fixtures/Templates/Shared/Ink.xaml");
+const CONTROL_VIEW: &str =
+    include_str!("../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml");
+const CONTROL_DICTIONARY: &str =
+    include_str!("../../editors/vscode/test/fixtures/Templates/ControlTemplates.xaml");
 
 fn fixture_graph() -> Graph {
     Graph(BTreeMap::from([
@@ -173,6 +177,49 @@ fn a_cell_template_uses_the_table_as_its_private_resource_owner() {
     assert!(!document
         .source()
         .contains("<TreeDataGridTemplateColumn.Resources>"));
+    document.undo().unwrap();
+    assert_eq!(document.source(), source);
+}
+
+#[test]
+fn a_local_control_template_copies_the_dependency_shadowed_by_its_consumer() {
+    let graph = Graph(BTreeMap::from([(
+        "Templates/ControlTemplates.xaml",
+        Document::new(CONTROL_DICTIONARY).unwrap(),
+    )]));
+    let includes = graph.sources();
+    let sources = ResourceCopySources {
+        address: "ControlTemplateWorkbench.xaml",
+        graph: &graph,
+        includes: &includes,
+    };
+    let source = CONTROL_VIEW.replace('\n', "\r\n");
+    let mut document = Document::new(&source).unwrap();
+    let owner = document.ast().find_name("LocalAction").unwrap();
+    let slot = ItemTemplateSlot::read(
+        &document,
+        owner,
+        ItemTemplateMember::Template,
+        ItemTemplateDeclaration::Attribute("Template".into()),
+        None,
+    )
+    .unwrap();
+    assert!(slot.can_copy_inline(&document));
+    let edits = slot
+        .plan_resource_copy(&document, &sources, &[owner], &|_, _| {
+            panic!("the template and its dependency keep their original document address")
+        })
+        .unwrap();
+    document.apply("Make inline copy", edits).unwrap();
+    let after = document.source();
+    assert!(after.contains("<Button.Template>"));
+    assert!(after.contains("x:Key=\"LocalButton_LocalInk\" Color=\"#FF20657B\""));
+    assert!(after.contains("StaticResource 'LocalButton_LocalInk'"));
+    assert!(after.contains("Color=\"#FFF39776\""));
+    assert!(after.contains(
+        "Name=\"SecondLocalAction\" Height=\"48\" Template=\"{StaticResource LocalButton}\""
+    ));
+    assert!(!after.replace("\r\n", "").contains('\n'));
     document.undo().unwrap();
     assert_eq!(document.source(), source);
 }

@@ -33,14 +33,14 @@ impl DesignerSession {
                 return Err("Choose a compatible control template before making an inline copy".into());
             }
         }
-        if slot.can_copy_inline(document) {
-            return slot
-                .plan(document, ItemTemplateChange::CopyInline)
-                .map_err(|error| error.to_string());
-        }
-        let includes = self
-            .accepted_preview_includes()
-            .ok_or("Wait for the current preview before copying a template.")?;
+        let Some(includes) = self.accepted_preview_includes() else {
+            if slot.can_copy_inline(document) {
+                return slot
+                    .plan(document, ItemTemplateChange::CopyInline)
+                    .map_err(|error| error.to_string());
+            }
+            return Err("Wait for the current preview before copying a template.".into());
+        };
         let documents = includes
             .authored_sources()
             .map(|(address, include)| IncludedResourceDocument {
@@ -65,7 +65,7 @@ impl DesignerSession {
             }
             current = node.parent;
         }
-        slot.plan_included_copy(document, &sources, &owners, &|address, fragment| {
+        slot.plan_resource_copy(document, &sources, &owners, &|address, fragment| {
             relocate_xaml_fragment(fragment, property_schema(), address, self.document_uri())
                 .map_err(|error| ToolError(error.to_string()))
         })

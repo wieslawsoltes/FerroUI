@@ -16,7 +16,14 @@ impl<'a> ResourceCopySources<'a> {
         ResourceScope::root(document, self.address, Some(self.graph))
     }
 
-    fn origin(&self, location: ComponentResourceLocation<'a>) -> Result<ResourceScope<'a>> {
+    pub(super) fn origin(
+        &self,
+        original: &'a Document,
+        location: ComponentResourceLocation<'a>,
+    ) -> Result<ResourceScope<'a>> {
+        if location.uri.is_none() && location.address == self.address {
+            return Ok(ResourceScope::root(original, self.address, Some(self.graph)));
+        }
         self.includes
             .iter()
             .find(|document| {
@@ -30,6 +37,7 @@ impl<'a> ResourceCopySources<'a> {
 type Relocate<'a> = dyn Fn(&str, &Document) -> Result<String> + 'a;
 
 pub(super) struct ResourceCopyPlanner<'a> {
+    original: &'a Document,
     sources: &'a ResourceCopySources<'a>,
     relocate: &'a Relocate<'a>,
     reserved: BTreeSet<String>,
@@ -60,7 +68,7 @@ enum CopiedTarget<'a> {
 
 impl<'a> ResourceCopyPlanner<'a> {
     pub(super) fn new(
-        document: &Document,
+        document: &'a Document,
         sources: &'a ResourceCopySources<'a>,
         copied_key: &str,
         relocate: &'a Relocate<'a>,
@@ -90,6 +98,7 @@ impl<'a> ResourceCopyPlanner<'a> {
             prefix
         };
         Self {
+            original: document,
             sources,
             relocate,
             reserved,
@@ -101,9 +110,12 @@ impl<'a> ResourceCopyPlanner<'a> {
     }
 
     pub(super) fn fragment(&self, root: ComponentResourceLocation<'a>) -> Result<Document> {
-        let origin = self.sources.origin(root)?;
+        let origin = self.sources.origin(self.original, root)?;
         let fragment =
             Document::new(component_fragment(origin.document, root.node)?).map_err(error)?;
+        if root.uri.is_none() {
+            return Ok(fragment);
+        }
         Document::new((self.relocate)(origin.address, &fragment)?).map_err(error)
     }
 
@@ -113,7 +125,7 @@ impl<'a> ResourceCopyPlanner<'a> {
         mut fragment: Document,
         destination: Option<(&Document, NodeId)>,
     ) -> Result<CopiedDefinition<'a>> {
-        let origin = self.sources.origin(root)?;
+        let origin = self.sources.origin(self.original, root)?;
         let nodes = subtree(origin.document, root.node);
         let targets = destination.map(|(document, root)| subtree(document, root));
         let fragment_nodes = subtree(&fragment, fragment.ast().root());
@@ -191,7 +203,7 @@ impl<'a> ResourceCopyPlanner<'a> {
             self.active.insert(resource),
             "A cyclic resource dependency cannot be copied independently.",
         )?;
-        let origin = self.sources.origin(resource)?;
+        let origin = self.sources.origin(self.original, resource)?;
         let key = literal_key(element(origin.document, resource.node)?).ok_or_else(|| {
             ToolError("A copied resource must have an authored string key.".into())
         })?;

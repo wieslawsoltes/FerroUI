@@ -9,12 +9,35 @@ use ferroui_designer_core::TextPatch;
 mod tests;
 
 impl ItemTemplateSlot {
+    /// Copy the assigned template and retain the meaning of its resource uses
+    /// in the new scope. The source may be local or in an accepted include.
+    pub fn plan_resource_copy(
+        &self,
+        document: &Document,
+        sources: &ResourceCopySources<'_>,
+        resource_owners: &[NodeId],
+        relocate: &impl Fn(&str, &Document) -> Result<String>,
+    ) -> Result<Vec<Edit>> {
+        self.plan_scoped_copy(document, sources, resource_owners, relocate, false)
+    }
+
     pub fn plan_included_copy(
         &self,
         document: &Document,
         sources: &ResourceCopySources<'_>,
         resource_owners: &[NodeId],
         relocate: &impl Fn(&str, &Document) -> Result<String>,
+    ) -> Result<Vec<Edit>> {
+        self.plan_scoped_copy(document, sources, resource_owners, relocate, true)
+    }
+
+    fn plan_scoped_copy(
+        &self,
+        document: &Document,
+        sources: &ResourceCopySources<'_>,
+        resource_owners: &[NodeId],
+        relocate: &impl Fn(&str, &Document) -> Result<String>,
+        included_only: bool,
     ) -> Result<Vec<Edit>> {
         self.ensure_editable()?;
         let ItemTemplateValue::Resource { key, .. } = &self.value else {
@@ -28,22 +51,16 @@ impl ItemTemplateSlot {
         let scope = sources.scope(document);
         let root = references::resolve(scope, self.owner, key, None)?
             .unique()
-            .filter(|location| location.uri.is_some())
+            .filter(|location| !included_only || location.uri.is_some())
             .ok_or_else(|| {
                 ToolError(
-                    "Choose an included template with one authored definition across themes."
+                    "Choose a template resource with one authored definition across themes."
                         .into(),
                 )
             })?;
-        let include = sources
-            .includes
-            .iter()
-            .find(|include| include.address == root.address && Some(include.uri) == root.uri)
-            .ok_or_else(|| {
-                ToolError("Open the accepted template source before copying it.".into())
-            })?;
+        let original = sources.origin(document, root)?.document;
         require(
-            keyed_template(element(include.document, root.node)?, self.property).as_ref() == Some(key),
+            keyed_template(element(original, root.node)?, self.property).as_ref() == Some(key),
             "The assigned source is no longer a template.",
         )?;
 

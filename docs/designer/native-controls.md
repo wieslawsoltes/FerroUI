@@ -214,7 +214,7 @@ For Rust, select an items control and open **Edit item templates**. For a TableV
 
 Select an XAML control with a writable `Template` property. Choose **Edit templates** in the property inspector and use the **Control Template** section. Open the assigned template on the canvas, reveal its source, or choose a visible resource that matches the control's type. An included definition opens in its original dictionary and uses its authored resource scope.
 
-**Create inline template** starts a template with the control's type and its registered required parts. **Make inline copy** duplicates the assigned template and carries across the resources needed by the copy. **Reset template** removes the local assignment. Studio records each source change as one Undo step. [VS Code workflow](vscode/authoring.md#edit-a-control-template) · [MCP workflow](vscode/reference.md#edit-item-templates-with-mcp)
+**Create inline template** starts a template with the control's type and its registered required parts. **Make inline copy** duplicates a local or included template. A dependency that would be shadowed keeps its value under a private key in a writable resource scope. **Reset template** removes the local assignment. Studio records each source change as one Undo step. [VS Code workflow](vscode/authoring.md#edit-a-control-template) · [MCP workflow](vscode/reference.md#edit-item-templates-with-mcp)
 
 ## Contextual panel layout
 

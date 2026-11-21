@@ -61,10 +61,27 @@ export async function verifyControlTemplate({ invoke, content }: McpFixture): Pr
     assert.match(source.getText(), /TemplateBinding Content/);
     assert.ok(!source.getText().includes('Template="{StaticResource SharedButton}"'));
     await undo();
+    const nativeImage = async () => {
+        const frame = content<{ status: string }>(await invoke('designer_wait', { session }));
+        assert.equal(frame.status, 'Ready');
+        const image = (await invoke('designer_preview_image', { session })).content
+            .find(item => item.type === 'image')?.data;
+        assert.ok(image);
+        return image;
+    };
+    const local = await read('LocalAction');
+    assert.equal(local.model.slots[0].canCopyInline, true);
+    const before = await nativeImage();
+    content(await apply(local, { action: 'copy_inline' }));
+    assert.match(source.getText(), /x:Key="LocalButton_LocalInk" Color="#FF20657B"/);
+    assert.match(source.getText(), /StaticResource 'LocalButton_LocalInk'/);
+    assert.match(source.getText(), /Name="SecondLocalAction"[^>]+Template="\{StaticResource LocalButton\}"/);
+    assert.equal(await nativeImage(), before);
+    await undo();
     const unset = await read('PlainAction');
     content(await apply(unset, { action: 'create_inline' }));
     assert.match(source.getText(), /<ControlTemplate TargetType="Button"><Border \/><\/ControlTemplate>/);
     assert.ok((await apply(unset, { action: 'reset' })).isError);
     await undo();
-    console.log('Control template authoring opened the dictionary scope, copied a shared template, and restored source with Undo');
+    console.log('Control template authoring copied included and local templates, retained the local native frame, and restored source with Undo');
 }

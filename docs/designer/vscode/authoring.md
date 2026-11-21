@@ -473,7 +473,7 @@ The isolated canvas renders the supported static controls and literals of a dire
 
 Use Undo in the owning XAML buffer to revert an edit. If the control assigns a template with an authored expression, **Reveal Template Assignment** opens the expression in source. [Designer Studio workflow](../native-controls.md#edit-control-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
-Try **SharedAction** and **PlainAction** in [ControlTemplateWorkbench.xaml](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml). The shared button opens its dictionary's template. The plain button can start an inline template.
+In the workbench example, **SharedAction** opens a template in its included dictionary. Select **LocalAction** and choose **Make Inline Copy** to duplicate a template from the same document. The copy receives its own brush key because the button already shadows the template’s original brush key. **SecondLocalAction** keeps using the shared template. Use Undo once to remove the private template and its brush together. **PlainAction** can start an inline template. [Control template workbench](../../../editors/vscode/test/fixtures/ControlTemplateWorkbench.xaml)
 
 The isolated template renders the current fixture on the native canvas. [Customers fixture](../images/native-item-template-customers.png) · [Trial fixture](../images/native-item-template-trial.png)
 
