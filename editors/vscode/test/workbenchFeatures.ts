@@ -169,7 +169,7 @@ export async function verifyPropertyComponents(preview: NativePreview, xamlUri: 
     const change = { action: 'set', nodes: ids, property: 'CornerRadius', value: '4, 8, 12, 16' };
     const rustEdit = await preview.studioEdit(rust, 42, 'designer_property', change, ids);
     const edited = apply(rust.source, rustEdit.edits);
-    const expression = '::ferroui_base::CornerRadius::new(4.0, 8.0, 12.0, 16.0)';
+    const expression = '(4.0, 8.0, 12.0, 16.0)';
     assert.equal(edited, rust.source.replace('5.0', expression).replace('9.0', expression));
     await assert.rejects(preview.studioEdit(rust, 42, 'designer_property', change, ids), /preview/);
     const nextSource = { ...rust, source: edited };

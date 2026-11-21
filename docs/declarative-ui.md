@@ -148,7 +148,9 @@ A setter of a property whose value is `T` takes what converts to it (`IntoProp<T
 | `Bind(binding)` | is bound by the property system |
 | an element, for a property that holds an object (`content`, `header`, `tag`) | holds its control |
 
-The conversions of values: `T` to `Option<T>`; text to `String` and `Option<String>`; numbers to `f64` and to text; `f64` and tuples to `Thickness`; `f64` to `CornerRadius`; a `Color`, a color name or `#rgb` text to a brush.
+Setters convert `T` to `Option<T>`, text to `String` or `Option<String>`, and numbers to `f64` or text. They also convert a `Color`, color name, or `#rgb` value to a brush.
+
+For `Thickness` and `CornerRadius`, a single `f64` applies to all sides or corners. A thickness tuple uses `(horizontal, vertical)` or `(left, top, right, bottom)`. A corner radius tuple uses `(top, bottom)` or `(top_left, top_right, bottom_right, bottom_left)`. For example, `Border { corner_radius: (8.0, 16.0) }` applies 8 to both top corners and 16 to both bottom corners.
 
 ### 4.2 The forms of upstream's code-first API
 

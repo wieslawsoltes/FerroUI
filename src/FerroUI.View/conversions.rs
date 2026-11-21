@@ -9,7 +9,7 @@
 //! | an integer, `f64`             | `Option<String>` (its text)        |
 //! | an integer, `f32`             | `f64`                              |
 //! | `f64`, `(f64, f64)`, `(f64, f64, f64, f64)` | `Thickness`          |
-//! | `f64`                         | `CornerRadius`                     |
+//! | `f64`, `(f64, f64)`, `(f64, f64, f64, f64)` | `CornerRadius`       |
 //! | `Color`, a color name or `#rgb` text | `Option<Rc<dyn IBrush>>`    |
 //! | `&str`                        | `Option<BoxedValue>` (text content)|
 //!
@@ -161,6 +161,18 @@ impl IntoValue<CornerRadius> for f64 {
 impl IntoValue<CornerRadius> for i32 {
     fn into_value(self) -> CornerRadius {
         CornerRadius::uniform(f64::from(self))
+    }
+}
+
+impl IntoValue<CornerRadius> for (f64, f64) {
+    fn into_value(self) -> CornerRadius {
+        CornerRadius::top_bottom(self.0, self.1)
+    }
+}
+
+impl IntoValue<CornerRadius> for (f64, f64, f64, f64) {
+    fn into_value(self) -> CornerRadius {
+        CornerRadius::new(self.0, self.1, self.2, self.3)
     }
 }
 

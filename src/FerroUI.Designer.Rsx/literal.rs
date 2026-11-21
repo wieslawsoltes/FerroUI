@@ -1,4 +1,4 @@
-use crate::animation::{rust_literal, ValueShape};
+use crate::animation::ValueShape;
 use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_language::PropertyInfo;
 use syn::{Expr, Lit, UnOp};
@@ -202,6 +202,14 @@ fn read_radius(expr: &Expr) -> Option<String> {
     if let Some(radius) = number(expr) {
         return Some(radius.to_string());
     }
+    if let Expr::Tuple(tuple) = expr {
+        if !tuple.attrs.is_empty() || !matches!(tuple.elems.len(), 2 | 4) {
+            return None;
+        }
+        let values = tuple.elems.iter().map(|value| number(value).map(|value| value.to_string()))
+            .collect::<Option<Vec<_>>>()?;
+        return Some(values.join(","));
+    }
     let Expr::Call(call) = expr else { return None };
     let Expr::Path(function) = call.func.as_ref() else {
         return None;
@@ -229,6 +237,14 @@ fn rust_radius(value: &str) -> Option<String> {
         } if top_left == top_right && top_left == bottom_right && top_left == bottom_left => {
             Some(format!("{top_left:?}"))
         }
-        radius => rust_literal(&radius).ok(),
+        AnimationValue::CornerRadius {
+            top_left, top_right, bottom_right, bottom_left,
+        } if top_left == top_right && bottom_right == bottom_left => {
+            Some(format!("({top_left:?}, {bottom_right:?})"))
+        }
+        AnimationValue::CornerRadius { top_left, top_right, bottom_right, bottom_left } => {
+            Some(format!("({top_left:?}, {top_right:?}, {bottom_right:?}, {bottom_left:?})"))
+        }
+        _ => None,
     }
 }
