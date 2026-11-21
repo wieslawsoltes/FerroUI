@@ -617,7 +617,9 @@ impl ValueStore {
         self.set_local_stored_value(owner, property.as_property(), value.into_storage());
     }
 
-    #[inline]
+    // Inlined into the typed set (pinned: not inlined, it was a call more for every local write
+    // through the codec, property_subsystem::UntypedRoutes.set_untyped, #997).
+    #[inline(always)]
     fn set_local_stored_value<S: StyledValue>(
         &self,
         owner: &FerroObject,
