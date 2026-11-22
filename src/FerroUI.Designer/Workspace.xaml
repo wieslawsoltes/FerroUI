@@ -117,7 +117,11 @@
         </ContentControl>
         <Grid Name="ProjectPane" Grid.Row="1" IsVisible="False" RowDefinitions="Auto,Auto,*" Margin="12,12,12,8">
           <StackPanel Spacing="8">
-            <TextBlock Text="Project" Classes="designer-section-title" />
+            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+              <TextBlock Text="Project" Classes="designer-section-title" VerticalAlignment="Center" />
+              <Button Name="NewCargoProject" Grid.Column="1" Classes="designer-icon-button" ToolTip.Tip="New FerroUI project" AutomationProperties.Name="New FerroUI project" />
+              <Button Name="ProjectToolchain" Grid.Column="2" Classes="designer-icon-button" ToolTip.Tip="Check project toolchain" AutomationProperties.Name="Check project toolchain" />
+            </Grid>
             <TextBox Name="ProjectPath" PlaceholderText="Folder or Cargo.toml path" ToolTip.Tip="Enter a path and choose Check to load the solution" />
             <ComboBox Name="RunTarget" PlaceholderText="Choose a binary target" HorizontalAlignment="Stretch" />
             <TextBox Name="ProjectFeatures" PlaceholderText="Cargo features" AutomationProperties.Name="Cargo features for the next task" ToolTip.Tip="Optional features for Cargo Check, Build, and Run" />

@@ -848,6 +848,35 @@ fn project_library_tools_open_an_unopened_dictionary_in_its_authored_scope() {
 }
 
 #[test]
+fn project_setup_creates_the_reviewed_files_only_with_write_permission() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let files = Files::new();
+    let source = "<Button xmlns=\"https://github.com/ferroui\" />";
+    let uri = files.write("Existing.xaml", source);
+    let workspace = DesignerWorkspace::with_uri(source, uri.clone()).unwrap();
+    workspace.set_solution(ferroui_designer_project::Solution::discover(&files.0).unwrap()).unwrap();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let catalog = provider.call("ferroui_project_templates", &json!({}), Permissions::default()).unwrap();
+    assert_eq!(catalog["templates"].as_array().unwrap().len(), 2);
+    let mut args = json!({"template":"desktopXaml","name":"customer-starter"});
+    let plan = provider.call("ferroui_project_plan_new", &args, Permissions::default()).unwrap();
+    assert_eq!(plan["entry"], "Views/MainView.xaml");
+    assert!(!files.0.join("customer-starter").exists());
+    args["review"] = plan["review"].clone();
+    assert!(provider.call("ferroui_project_create", &args, Permissions::default()).is_err());
+    let created = provider.call("ferroui_project_create", &args, write()).unwrap();
+    let root = std::path::PathBuf::from(created["root"].as_str().unwrap());
+    for file in plan["files"].as_array().unwrap() {
+        assert_eq!(std::fs::read_to_string(root.join(file["path"].as_str().unwrap())).unwrap(),
+            file["source"].as_str().unwrap());
+    }
+    assert!(provider.call("ferroui_project_create", &args, write()).is_err());
+    assert!(provider.call("ferroui_project_plan_new", &json!({"template":"desktopRsx","name":"outside","checkout":".."}),
+        Permissions::default()).is_err());
+    assert_eq!(workspace.session().borrow().document_uri(), uri);
+}
+
+#[test]
 fn language_queries_share_editor_schema_and_build_plans_never_start_processes() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let files = Files::new();

@@ -5,6 +5,7 @@ import type { AssetMoves } from './assetMoves';
 import type { TokenRequest } from './designTokenProtocol';
 import { NativePreview } from './nativePreview';
 import type { ProjectAssets } from './projectAssets';
+import type { ProjectTemplateRequest, ProjectToolchainRequest } from './projectSetupProtocol';
 import { isWorkspaceFile, workspaceFolders } from './workspacePaths';
 
 interface NativeProjectFile { path: string; kind: 'cargo' | 'rsx' | 'xaml' | 'stages' | 'scenario'; invocations?: number }
@@ -70,6 +71,32 @@ export class ProjectInventory implements vscode.Disposable {
         const plan = await client.designTokens(request);
         signal.throwIfAborted();
         return plan;
+    }
+
+    async templateCatalog(signal: AbortSignal) {
+        const client = await this.getClient();
+        signal.throwIfAborted();
+        return client.projectTemplateCatalog();
+    }
+
+    async templatePlan(parent: string, request: ProjectTemplateRequest, signal: AbortSignal) {
+        const client = await this.getClient();
+        signal.throwIfAborted();
+        return client.projectTemplatePlan(parent, request);
+    }
+
+    async templateCreate(parent: string, request: ProjectTemplateRequest, review: string, signal: AbortSignal) {
+        const client = await this.getClient();
+        signal.throwIfAborted();
+        const project = await client.projectTemplateCreate(parent, request, review);
+        this.refresh();
+        return project;
+    }
+
+    async toolchain(request: ProjectToolchainRequest, signal: AbortSignal) {
+        const client = await this.getClient();
+        signal.throwIfAborted();
+        return client.projectToolchain(request);
     }
 
     refresh(): void { this.roots.clear(); this.schedule(); }

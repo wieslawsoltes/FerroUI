@@ -21,6 +21,7 @@ mod inventory;
 mod placement;
 mod preview_checks;
 mod projects;
+mod project_setup;
 mod published_assets;
 mod property_fields;
 mod protocol;
@@ -134,6 +135,9 @@ fn respond(
         "projectInventory" => message["params"]["workspaceRoot"].as_str()
             .ok_or_else(|| "Select a local workspace folder".to_owned())
             .and_then(|root| serialize(inventory::scan(std::path::Path::new(root)))),
+        "projectTemplateCatalog" => Ok(ferroui_designer_project::project_templates::catalog()),
+        "projectTemplatePlan" | "projectTemplateCreate" => project_setup::template(method, message["params"].clone()),
+        "projectToolchain" => project_setup::toolchain(message["params"].clone()),
         "hostedListen" => hosted_relay::Relay::listen(message["params"]["nonce"].as_str().unwrap_or("")).map(|relay| {
             use ferroui_remote_protocol::designer::{
                 DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,

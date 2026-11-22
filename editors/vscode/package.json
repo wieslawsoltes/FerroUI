@@ -37,6 +37,16 @@
     "onWebviewPanel:ferroui.stages"
   ],
   "contributes": {
+    "taskDefinitions": [
+      {
+        "type": "ferroui",
+        "required": ["manifest", "binary"],
+        "properties": {
+          "manifest": { "type": "string", "description": "Cargo manifest path" },
+          "binary": { "type": "string", "description": "Cargo binary name" }
+        }
+      }
+    ],
     "mcpServerDefinitionProviders": [
       {
         "id": "ferroui.mcp",
@@ -127,6 +137,34 @@
         "title": "New View",
         "category": "FerroUI",
         "icon": "$(new-file)"
+      },
+      {
+        "command": "ferroui.project.newProject",
+        "title": "New Project",
+        "category": "FerroUI",
+        "icon": "$(new-folder)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.checkToolchain",
+        "title": "Check Project Toolchain",
+        "category": "FerroUI",
+        "icon": "$(checklist)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.checkTarget",
+        "title": "Check Cargo Target",
+        "category": "FerroUI",
+        "icon": "$(checklist)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.project.runCargo",
+        "title": "Run Cargo Binary",
+        "category": "FerroUI",
+        "icon": "$(debug-start)",
+        "enablement": "isWorkspaceTrusted"
       },
       {
         "command": "ferroui.project.newComponent",
@@ -574,6 +612,14 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "ferroui.project.runCargo",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.project.checkTarget",
+          "when": "false"
+        },
+        {
           "command": "ferroui.diagnostics.profileSource",
           "when": "false"
         },
@@ -871,6 +917,16 @@
       ],
       "view/title": [
         {
+          "command": "ferroui.project.newProject",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.project.checkToolchain",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
           "command": "ferroui.importAsset",
           "when": "view == ferroui.assets",
           "group": "navigation"
@@ -952,6 +1008,16 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "ferroui.project.runCargo",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
+          "group": "ferroui@1"
+        },
+        {
+          "command": "ferroui.project.checkTarget",
+          "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
         {
           "command": "ferroui.diagnostics.recordProfile",
           "when": "view == ferroui.diagnostics && viewItem == profileReady",

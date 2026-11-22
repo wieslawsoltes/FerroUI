@@ -563,6 +563,7 @@ impl DesignerWorkspace {
         self.poll_project();
     }
     pub(super) fn connect_project(self: &Rc<Self>) {
+        self.connect_project_setup();
         for name in [
             "OpenProject",
             "SaveAll",

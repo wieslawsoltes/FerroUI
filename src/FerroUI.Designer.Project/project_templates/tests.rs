@@ -1,5 +1,8 @@
 use super::*;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{
+    fs,
+    sync::atomic::{AtomicU64, Ordering},
+};
 
 struct Fixture(PathBuf);
 impl Fixture {

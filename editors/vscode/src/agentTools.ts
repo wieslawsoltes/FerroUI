@@ -24,6 +24,8 @@ import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectDefinition } from './projectLibrary';
 import type { ProjectScaffold } from './projectScaffold';
+import type { ProjectSetup } from './projectSetup';
+import type { ProjectTemplateRequest } from './projectSetupProtocol';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
 import type { RuntimeProfiles } from './runtimeProfiles';
 import type { ScenarioRunner } from './scenarioRunner';
@@ -129,7 +131,7 @@ export class AgentTools {
 
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
         private readonly runtimeSource: RuntimeSourceTools, private readonly runtimeProfiles: RuntimeProfiles,
-        private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold,
+        private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold, private readonly projectSetup: ProjectSetup,
         private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
         private readonly sourceReviews: {
             property: RegisteredRename; type: RegisteredRename; resource: ResourceRename; resourceMove: ResourceMove;
@@ -168,6 +170,14 @@ export class AgentTools {
             return this.sourceReviews.resourceMove.agent(input as ResourceMoveInput, signal);
         }
         if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
+        if (tool === 'ferroui_project_templates') return this.projectSetup.catalog(signal);
+        if (tool === 'ferroui_project_plan_new' || tool === 'ferroui_project_create') {
+            return this.projectSetup.agentTemplate(input as ProjectTemplateRequest & { folder?: string; review?: string }, signal);
+        }
+        if (tool === 'ferroui_project_check_toolchain') return this.projectSetup.agentToolchain(input as CargoSelection & { target?: string }, signal);
+        if (tool === 'ferroui_project_run_cargo') return this.projectSetup.agentRunCargo(input as CargoSelection, signal);
+        if (tool === 'ferroui_project_cargo_tasks') return this.projectSetup.cargoTasks.list();
+        if (tool === 'ferroui_project_stop_cargo') return this.projectSetup.cargoTasks.stop((input as { id: number }).id);
         if (tool === 'ferroui_project_plan_asset_import' || tool === 'ferroui_project_import_asset') {
             const request = input as AssetImportRequest & { review?: string };
             return this.project.assetImport.agent(request, request.review, signal);

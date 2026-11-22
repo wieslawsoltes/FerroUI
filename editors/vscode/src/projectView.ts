@@ -4,6 +4,7 @@ import type { BuiltProjects } from './builtProjects';
 import { describeCargoTarget, discoverCargoTargets, type CargoTarget } from './cargoTarget';
 import type { HotReload } from './hotReload';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
+import type { ProjectSetup } from './projectSetup';
 import { errorMessage } from './protocol';
 import { localFolders } from './workspacePaths';
 
@@ -25,7 +26,7 @@ export class ProjectView implements vscode.TreeDataProvider<Item>, vscode.Dispos
     readonly onDidChangeTreeData = this.changed.event;
     private readonly subscriptions: vscode.Disposable[];
 
-    constructor(private readonly inventory: ProjectInventory, private readonly projects: BuiltProjects, private readonly reload: HotReload) {
+    constructor(private readonly inventory: ProjectInventory, private readonly projects: BuiltProjects, private readonly reload: HotReload, setup: ProjectSetup) {
         this.subscriptions = [vscode.window.createTreeView(viewId, { treeDataProvider: this, showCollapseAll: true }),
             inventory.onDidChange(() => this.changed.fire()), projects.onDidChange(() => this.changed.fire()),
             vscode.workspace.onDidGrantWorkspaceTrust(() => this.changed.fire()),
@@ -37,6 +38,12 @@ export class ProjectView implements vscode.TreeDataProvider<Item>, vscode.Dispos
                 await vscode.commands.executeCommand('ferroui.moveXamlFile', await inventory.resolve(item.folder, item.file));
             })),
             vscode.commands.registerCommand('ferroui.project.runTarget', (item: Item) => this.command(() => this.runTarget(item))),
+            vscode.commands.registerCommand('ferroui.project.runCargo', (item: Item) => this.command(async () => {
+                if (item?.type === 'target') await setup.cargoTasks.run(item.target);
+            })),
+            vscode.commands.registerCommand('ferroui.project.checkTarget', (item: Item) => this.command(async () => {
+                if (item?.type === 'target') await setup.showToolchain(item.target);
+            })),
         ];
     }
 

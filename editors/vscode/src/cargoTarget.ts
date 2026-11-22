@@ -20,6 +20,7 @@ interface CargoPackage {
     id: string;
     name: string;
     manifest_path: string;
+    rust_version?: string | null;
     features: Record<string, string[]>;
     targets: { name: string; kind: string[]; src_path: string }[];
 }
@@ -46,6 +47,7 @@ export interface CargoTarget {
     packageId: string;
     packageName: string;
     binary: string;
+    rustVersion?: string;
     crateRoot?: string;
     libraryRoots?: string[];
     features: string[];
@@ -138,6 +140,7 @@ async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target
             label: target.label ?? bin.name,
             folder, cargo, cargoDirectory: cwd, discoveryManifest: manifest, manifest: pkg.manifest_path,
             packageId: pkg.id, packageName: pkg.name, binary: bin.name, crateRoot: bin.src_path,
+            rustVersion: pkg.rust_version ?? undefined,
             libraryRoots: pkg.targets.filter(target => target.kind.some(kind => libraryKinds.has(kind))).map(target => target.src_path),
             features: target.features ?? (Object.hasOwn(pkg.features, 'hot-reload') ? ['hot-reload'] : []),
             args: target.args ?? [], targetDirectory: metadata.target_directory,

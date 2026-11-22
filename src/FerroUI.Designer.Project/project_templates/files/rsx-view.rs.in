@@ -1,9 +1,10 @@
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_view::prelude::*;
 
-#[component]
+#[component(rerender)]
 pub fn TaskCounter() -> Element {
-    let completed = signal(0);
+    let completed = use_signal(|| 0);
+    let count = completed.get();
     rsx! {
         Border { background: "#EDF3F8", padding: 32.0,
             Border { background: "#FFFFFF", border_brush: "#D5E1EA",
@@ -14,7 +15,7 @@ pub fn TaskCounter() -> Element {
                     TextBlock { text: "__APP_TITLE__", font_size: 28.0, foreground: "#142C40" }
                     TextBlock { text: "Keep track of your completed tasks.", foreground: "#37546D" }
                     TextBlock { name: "TaskCount", foreground: "#087A6A", font_size: 20.0,
-                        text: move || format!("{} tasks completed", completed.get()) }
+                        text: format!("{count} tasks completed") }
                     Button { name: "CompleteTask", on_click: move |_| completed.update(|count| *count += 1),
                         "Complete a task"
                     }

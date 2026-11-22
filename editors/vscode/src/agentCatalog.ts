@@ -5,6 +5,7 @@ import { hostedTemplateCatalog } from './hostedTemplateCatalog';
 import { fileMoveCatalog, renameCatalog, resourceMoveCatalog, workspaceCatalog } from './workspaceCatalog';
 import { prototypeInput, stageContactInput, stageKeyboardInput } from './stageInputCatalog';
 import { runtimeProfileCatalog } from './runtimeProfileCatalog';
+import { projectSetupCatalog } from './projectSetupCatalog';
 
 const node = integer(1);
 const session = { session: integer(1) };
@@ -320,6 +321,7 @@ export const agentCatalog = {
     ferroui_reload_history: tool('Read managed save outcomes, application acknowledgements, and native compositor frame receipts by process generation.',
         { limit: integer(1, 200) }),
     ...runtimeProfileCatalog,
+    ...projectSetupCatalog,
     ferroui_runtime_source: tool('Resolve a node from the managed or attached runtime inspector to a workspace location. Returns the connection generation and editor buffer version.',
         { node, runtime: { enum: ['managed', 'attached'] } }, ['node']),
     ferroui_runtime_templates: tool('Read the live templates of an element. Use the returned generation and template ID to open a verified source location.',

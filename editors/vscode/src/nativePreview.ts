@@ -7,6 +7,7 @@ import type { TokenPlan, TokenRequest } from './designTokenProtocol';
 import type { LayerViewInput } from './layerViews';
 import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeProjectInventory } from './projectInventory';
+import type { CreatedProject, ProjectTemplateCatalog, ProjectTemplatePlan, ProjectTemplateRequest, ProjectToolchainReport, ProjectToolchainRequest } from './projectSetupProtocol';
 import type { Asset, CanvasInteraction, CanvasPresentation, DesignDataPresentation, DropHint, EditResult, Inspection, InspectionTarget, Operation, Placement, PreviewSourceBuffer, PublishedAsset, PublishedAssetInput, ResourceRow, Snapshot, Source, Viewport } from './protocol';
 import type { RsxLanguageDocument } from './rsxLanguageTypes';
 import type { HostedAnimationFrame, HostedAnimationRequest, HostedClipDraft, HostedClipEdit, HostedClipPlan, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedKeyframeGroupPlan, HostedKeyframePlan, HostedSourcePatch, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
@@ -52,7 +53,7 @@ export class NativePreview implements vscode.Disposable {
         controlTemplateAuthoring?: boolean; propertyTrace?: boolean; includedPropertyTrace?: boolean;
         styleComposition?: boolean; rustStyleComposition?: boolean;
         hostedRustStyles?: boolean; hostedRustModules?: boolean; rustModuleSources?: boolean;
-        projectInventory?: boolean; tokenHandoff?: boolean;
+        projectInventory?: boolean; projectSetup?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
         timelineKeyframeDrafts?: boolean; timelineKeyframeScale?: boolean; timelineCurves?: boolean; timelineCurveVelocity?: boolean;
         timelineCurveChannels?: boolean; timelineCombinedPlayback?: boolean; timelineClipPlacement?: boolean;
@@ -136,6 +137,27 @@ export class NativePreview implements vscode.Disposable {
     projectInventory(workspaceRoot: string): Promise<NativeProjectInventory> {
         if (!this.capabilities.projectInventory) throw new Error('Update the FerroUI preview helper to browse project files.');
         return this.send('projectInventory', { workspaceRoot });
+    }
+
+    projectTemplateCatalog(): Promise<ProjectTemplateCatalog> {
+        return this.projectRequest('projectTemplateCatalog');
+    }
+
+    projectTemplatePlan(parent: string, request: ProjectTemplateRequest): Promise<ProjectTemplatePlan> {
+        return this.projectRequest('projectTemplatePlan', { parent, request });
+    }
+
+    projectTemplateCreate(parent: string, request: ProjectTemplateRequest, review: string): Promise<CreatedProject> {
+        return this.projectRequest('projectTemplateCreate', { parent, request, review });
+    }
+
+    projectToolchain(request: ProjectToolchainRequest): Promise<ProjectToolchainReport> {
+        return this.projectRequest('projectToolchain', request);
+    }
+
+    private projectRequest<T>(method: string, params?: object): Promise<T> {
+        if (!this.capabilities.projectSetup) throw new Error('Update the FerroUI preview helper for project setup.');
+        return this.send(method, params);
     }
 
     designTokens(request: TokenRequest): Promise<TokenPlan> {

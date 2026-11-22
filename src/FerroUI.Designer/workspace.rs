@@ -999,6 +999,8 @@ pub(crate) mod prototype;
 pub use prototype::PreviewPrototypePlaybackInfo;
 #[path = "workspace_project.rs"]
 mod project;
+#[path = "workspace_project_setup.rs"]
+mod project_setup;
 #[cfg(feature = "mcp")]
 #[path = "workspace_project_library.rs"]
 mod project_library;

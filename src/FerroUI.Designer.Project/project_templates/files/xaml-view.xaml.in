@@ -6,7 +6,7 @@
       <StackPanel Spacing="14">
         <TextBlock Text="__APP_TITLE__" FontSize="28" Foreground="#142C40" />
         <TextBlock Text="Name a task to see the binding update." Foreground="#37546D" />
-        <TextBox x:Name="TaskName" Watermark="Task name" Text="Review the project" />
+        <TextBox x:Name="TaskName" AutomationProperties.Name="Task name" Text="Review the project" />
         <TextBlock x:Name="TaskPreview" Text="{Binding #TaskName.Text}" FontSize="20" Foreground="#087A6A" />
       </StackPanel>
     </Border>

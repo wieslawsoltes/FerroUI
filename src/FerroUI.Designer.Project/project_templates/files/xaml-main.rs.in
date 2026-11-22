@@ -4,13 +4,16 @@ use ferroui_view::prelude::*;
 
 ferroui_markup_xaml::include_compiled_xaml!();
 
+fn main_view_uri() -> String {
+    format!("ferres://{}/Views/MainView.xaml", compiled_markup::ASSEMBLY_NAME)
+}
+
 fn main() {
     launch_themed(
         || ferroui_themes_winui::WinUITheme::new().as_style(),
         || {
-            let markup = compiled_markup::try_load(
-                None, concat!("ferres://", env!("CARGO_PKG_NAME"), "/Views/MainView.xaml"),
-            ).expect("load the compiled main view");
+            let markup = compiled_markup::try_load(None, &main_view_uri())
+                .expect("load the compiled main view");
             let view: ferroui_base::Ref<UserControl> =
                 from_markup_value(&markup).expect("the main view is a UserControl");
             window().title("__APP_TITLE__").width(640.0).height(420.0).child(view).into()

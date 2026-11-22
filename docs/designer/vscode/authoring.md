@@ -5,6 +5,21 @@ description: "Find Cargo views, use XAML and RSX editing, arrange controls, and 
 
 Start with a view you can render, then use the same source buffer for text edits and visual authoring. Try [DesignWorkflows.xaml](../samples/DesignWorkflows.xaml) for XAML or [views.rs](../../../editors/vscode/test/fixtures/views.rs) for several RSX invocations.
 
+## Start a FerroUI project
+
+1. Choose the new-folder icon in **FerroUI → Project**, or run **FerroUI: New Project**. Choose **Desktop app with RSX** for an interactive task counter, or **Desktop app with XAML** for a compiled view with a live text binding.
+2. Choose a parent folder and enter the Cargo package name. The extension creates a folder with that name. Select the published FerroUI version or choose the root of a local FerroUI source checkout for Cargo path dependencies.
+3. Open any entry under **Generated Files** to read its source. The review includes the Cargo manifest, build script, view, entry point, and README. Choose **Create Project** when the reviewed destination and dependencies are correct.
+4. Open the starter view in **Design**. Right-click its binary in **Project → Cargo** and choose **Run Cargo Binary**, or run `cargo run` from the generated folder. A project created inside the current workspace opens directly in Design. A project created elsewhere opens in its own VS Code window.
+
+![Review the generated files for a new XAML project in VS Code](../images/vscode-project-review.png)
+
+Starters generated against a current source checkout register hot reload with the extension. Use **Run Target** for the managed process. In the XAML starter, the generated `src/reload.rs` watches the compiled view and reloads changes inside its existing window. [Run a managed app](runtime.md#hot-reload-and-debug-the-running-application)
+
+Use **FerroUI: Check Project Toolchain** to check Cargo, the active compiler, the Rust version required by the starter, and installed target libraries. For an existing package, right-click its binary under **Project → Cargo** and choose **Check Cargo Target**. That check reads the package’s Rust requirement and configured Cargo executable. [Project setup with MCP](reference.md#create-a-project-with-mcp)
+
+![Cargo, Rust compiler, and target library checks alongside the new XAML design](../images/vscode-project-toolchain.png)
+
 ## Find or create the view
 
 1. Open **FerroUI → Project**. Expand a workspace folder to browse its Cargo manifests, XAML and RSX views, assets, stage sets, and test scenarios. Expand a Cargo manifest to see its binaries. Refresh the view after changes outside VS Code if its list is out of date.

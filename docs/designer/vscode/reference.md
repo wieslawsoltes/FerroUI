@@ -48,10 +48,22 @@ Editor and Studio authoring reuse the same native planning and validation. The e
 | Run, inspect, and test | `ferroui_reload_targets`, `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history` drive managed Cargo and report outcomes. `ferroui_runtime_source` and `ferroui_runtime_apply_source` work with a mapped runtime value. `ferroui_scenario_run` runs a saved native scenario. |
 | Open a running app’s template | `ferroui_runtime_templates` reads the selected element’s templates. Pass its generation and a template ID to `ferroui_runtime_template_source`. [Live App template tools](#inspect-live-app-templates-with-mcp) |
 | Profile a running window | Use `ferroui_runtime_profile_windows`, `ferroui_runtime_profile_start`, `ferroui_runtime_profile_read`, `ferroui_runtime_profile_stop`, and `ferroui_runtime_profile_source`. [Runtime profiler](#profile-a-runtime-with-mcp) |
+| Create a project | Use `ferroui_project_templates`, `ferroui_project_plan_new`, `ferroui_project_create`, and `ferroui_project_check_toolchain`. [Project setup](#create-a-project-with-mcp) |
 
 For example, ask an agent to open the current design, inspect its animation programs, and seek to one keyframe. It should read the active document and RSX invocation, wait for the accepted frame, read the program ID and its keys, then call the native seek with the current frame. Ask it to capture the resulting frame or report the current position. To update a key, validate the time, value, and easing together before applying the edit.
 
 Read the new buffer revision, frame token, stage epoch, or connection generation after the corresponding change. Text locations are UTF-16. A stale source edit is rejected. Re-read the current state before retrying the edit. The advertised tool schemas specify which identity each tool needs.
+
+### Create a project with MCP
+
+1. Call `ferroui_project_templates` to choose `desktopRsx` or `desktopXaml`. The catalog reports the published FerroUI version and minimum Rust version used by the starter.
+2. Call `ferroui_project_plan_new` with `template` and `name`. In VS Code, pass the workspace `folder` when several are open. The optional `checkout` is a relative directory inside that folder. The plan includes the destination, opening view, generated source, and review ID.
+3. Pass the same inputs and `review` to `ferroui_project_create`. The folder must still be available. Creation uses the existing MCP write permission and returns the project root, view, and manifest paths.
+4. Call `ferroui_project_check_toolchain` for the folder or pass `manifest_path`, `package`, and `binary` from the Cargo target list. Pass a Rust target triple to check its installed libraries.
+
+Designer Studio exposes the same tools under the open solution. Its `designer_project_edit` and `designer_project_task` open the resulting project and run its Cargo binary. [Create from the VS Code Project view](authoring.md#start-a-ferroui-project)
+
+In VS Code, call `ferroui_project_run_cargo` with a target’s folder, manifest, package, and binary. The Cargo output appears in the task terminal. Use `ferroui_project_cargo_tasks` and `ferroui_project_stop_cargo` to find and stop a running task. For a binary registered for hot reload, use `ferroui_reload_control`.
 
 ### Choose a stage theme with MCP
 
@@ -370,7 +382,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Task | Commands |
 | --- | --- |
 | Open or position the design | **Open Designer**, **Reveal Selected Control in Source**, **Arrange Selection**, **Wrap Selection**, **Edit Grid Tracks** |
-| Set up the source project | **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Create Rust Event Handler**, **Rename RSX Control** |
+| Set up the source project | **New Project**, **Check Project Toolchain**, **Restart XAML Language Server**, **Build Project XAML Schema**, **Refresh Project**, **Find Project View**, **New View**, **New Component**, **Create Rust Event Handler**, **Rename RSX Control** |
 | Open editing views | **Show Toolbox**, **Show Outline**, **Show Properties**, **Edit Columns**, **Edit Item Templates**, **Edit Control Template**, **Show Events**, **Edit Behaviors**, **Edit Command Binding**, **Show Resources**, **Show Styles & Themes**, **Show Assets**, **Show Studio Tools**, **Show Library**, **Find Definition in Designer** |
 | Extract an inline XAML dictionary | **Extract Resource Dictionary…**, **Review New Dictionary**, **Apply Extraction**, **Cancel Extraction** |
 | Review and move an XAML file | **Move XAML File…**, **Apply File Move**, **Cancel File Move** |

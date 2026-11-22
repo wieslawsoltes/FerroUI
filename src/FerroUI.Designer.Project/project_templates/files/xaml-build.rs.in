@@ -7,6 +7,6 @@ fn main() {
         .compile_group(XamlGroup::new("main_view").documents(&[
             ("Views/MainView.xaml", include_str!("Views/MainView.xaml")),
         ]))
-        .export_metadata()
+        .export_metadata()__RELOAD_MANIFEST__
         .run();
 }

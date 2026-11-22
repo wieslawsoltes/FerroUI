@@ -2,7 +2,7 @@
 use crate::{require, ProjectError, Result};
 use serde::{Deserialize, Serialize};
 use std::{
-    fs, io,
+    io,
     path::{Path, PathBuf},
 };
 
@@ -140,6 +140,14 @@ pub fn plan(parent: &Path, request: &Request) -> Result<Plan> {
                     "reload::start"
                 } else {
                     "|_| {}"
+                },
+            )
+            .replace(
+                "__RELOAD_MANIFEST__",
+                if managed_xaml {
+                    "\n        .hot_reload_manifest(true)"
+                } else {
+                    ""
                 },
             ),
     };

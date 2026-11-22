@@ -76,6 +76,14 @@ is available for automated hosts:
 cargo check -p designer-studio --no-default-features --features headless,mcp
 ```
 
+### Start a project in Studio
+
+1. Open **Project** and choose the plus icon beside its title. Choose the RSX task counter or the compiled XAML binding starter.
+2. Enter the package name and parent folder. Leave the dependency field empty to use the published FerroUI release, or enter the root of a source checkout.
+3. Choose **Review project files** and inspect the generated sources in the tabs. The checkmark creates the project, opens the view, and loads its Cargo package. Use **Run** in the Project pane to launch it.
+
+The checkmark beside the Project title reports the active Cargo and Rust versions and the installed target libraries. The same starter plans and toolchain checks are available through Studio and VS Code MCP. [Project setup tools](vscode/reference.md#create-a-project-with-mcp)
+
 The workspace supports Window, UserControl and other Control roots. Register application-specific
 control types and resource providers before loading their documents, just as an ordinary FerroUI
 application does. Use `DesignerWorkspace::with_uri` when relative includes and resources need the

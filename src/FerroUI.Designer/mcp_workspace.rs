@@ -11,13 +11,15 @@ use std::rc::Rc;
 mod canvas_guides;
 #[path = "mcp_project_library.rs"]
 mod project_library;
+#[path = "mcp_project_setup.rs"]
+mod project_setup;
 #[path = "mcp_command_bindings.rs"]
 mod command_bindings;
 #[path = "mcp_resource_move.rs"]
 mod resource_move;
 
 pub(super) fn handles(name: &str) -> bool {
-    canvas_guides::handles(name) || project_library::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || matches!(
+    canvas_guides::handles(name) || project_library::handles(name) || project_setup::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -141,6 +143,7 @@ pub(super) fn tools() -> Vec<Value> {
     ];
     tools.extend(canvas_guides::tools());
     tools.extend(project_library::tools());
+    tools.extend(project_setup::tools());
     tools.extend(command_bindings::tools());
     tools.extend(resource_move::tools());
     tools
@@ -156,6 +159,9 @@ pub(super) fn call(
     }
     if project_library::handles(name) {
         return project_library::call(workspace, name, args);
+    }
+    if project_setup::handles(name) {
+        return project_setup::call(workspace, name, args);
     }
     if command_bindings::handles(name) {
         return command_bindings::call(workspace, name, args);

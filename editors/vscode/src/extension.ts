@@ -19,6 +19,7 @@ import { ProjectInventory } from './projectInventory';
 import { ProjectLibrary } from './projectLibrary';
 import { ProjectScaffold } from './projectScaffold';
 import { ProjectSchemaBuild } from './projectSchemaBuild';
+import { ProjectSetup } from './projectSetup';
 import { ProjectView } from './projectView';
 import { errorMessage } from './protocol';
 import { RegisteredRename } from './registeredRename';
@@ -54,6 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
     const inventory = new ProjectInventory(context, previewOutput, assets, assetMoves);
     const designTokens = new DesignTokenCommands(inventory);
     const scaffolds = new ProjectScaffold();
+    const projectSetup = new ProjectSetup(inventory);
     const handlers = new EventHandlers(server);
     const extraction = new DictionaryExtraction(server);
     const resourceRename = new ResourceRename(server);
@@ -67,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
     const hosted = new HostedDesign(context, previewOutput, publish);
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
-    const projectView = new ProjectView(inventory, projects, reload);
+    const projectView = new ProjectView(inventory, projects, reload, projectSetup);
     stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose()]); };
     const runtimes = new RuntimeConnections(reload);
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
@@ -75,14 +77,14 @@ export function activate(context: vscode.ExtensionContext) {
     const runtimeProfiles = new RuntimeProfiles(runtimes, runtimeSource);
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer, runtimeProfiles);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, runtimeProfiles, inventory, scaffolds, scenarios, hosted, fileMoves, {
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, runtimeProfiles, inventory, scaffolds, projectSetup, scenarios, hosted, fileMoves, {
         property: propertyRename, type: typeRename, resource: resourceRename, resourceMove,
     }), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {

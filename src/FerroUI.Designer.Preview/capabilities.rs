@@ -43,6 +43,7 @@ pub(crate) fn initialize() -> Value {
         "hostedRustStyles",
         "hostedRustModules",
         "projectInventory",
+        "projectSetup",
         "tokenHandoff",
         "designFixtures",
         "timelineTransport",
