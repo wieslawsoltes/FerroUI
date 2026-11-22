@@ -65,6 +65,7 @@ pub mod router;
 mod rust_paths;
 mod style;
 mod template;
+mod values;
 pub mod xaml;
 
 #[cfg(feature = "desktop")]
@@ -113,6 +114,11 @@ pub use inspect::{attach_inspector, open_inspector};
 pub use mount::{view_stats, ViewStats};
 pub use path_data::{path_data, PathBuilder, PathData};
 pub use template::template;
+pub use ferroui_base::input::Key as KeyCode;
+pub use values::{
+    alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
+    BoxShadowOptions, KeyGestureModifiers, LinearGradient, Transforms,
+};
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
 pub use xaml::{load_xaml, load_xaml_uri, use_xaml};
@@ -165,6 +171,10 @@ pub mod prelude {
     };
     pub use crate::{auto, px, star, GridDefinitionSizes, GridLength, GridLengths, IntoGridLengths};
     pub use crate::{path, path_data, PathBuilder, PathData};
+    pub use crate::{
+        alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
+        BoxShadowOptions, KeyCode, KeyGestureModifiers, LinearGradient, Transforms,
+    };
     pub use crate::{
         error_boundary, route, router, sleep, suspense, try_use_router, use_future, use_router, AsyncState, ErrorInfo, RouteDef,
         RouteMatch, Router,

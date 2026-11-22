@@ -100,7 +100,7 @@ fn Page(dark: Signal<bool>) -> Element {
             StackPanel { spacing: 12.0,
                 styles: [
                     style(of::<Button>().class("accent"))
-                        .set(TemplatedControl::background_property(), "#0063B1")
+                        .set(TemplatedControl::background_property(), rgb(0x0063B1))
                         .set(TemplatedControl::foreground_property(), "White")
                         .nested(style(nesting().pointer_over()).set(Visual::opacity_property(), 0.85)),
                 ],
@@ -114,7 +114,7 @@ fn Page(dark: Signal<bool>) -> Element {
                         context_menu: rsx! { ContextMenu { MenuItem { header: "Copy" } MenuItem { header: "Paste" } } },
                         "Animate the bar (right-click: a context menu)" }
                 }
-                Border { name: "Bar", height: 12.0, corner_radius: 6.0, background: "#0063B1",
+                Border { name: "Bar", height: 12.0, corner_radius: 6.0, background: rgb(0x0063B1),
                     horizontal_alignment: ferroui_base::layout::HorizontalAlignment::Left,
                     width: if wide.get() { 480.0 } else { 120.0 }, transitions: bar_transitions }
                 Grid { column_definitions: [auto(), star(1.0)], height: 330.0,

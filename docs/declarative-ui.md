@@ -168,6 +168,24 @@ Upstream writes properties and bindings in code with indexers and operators on p
 | `control.Classes.Add("accent")` | `.class("accent")` |
 | `new Style(x => x.OfType<Button>())` | the styles API of the port (`Selectors`, `Style`, `Setter`), unchanged |
 
+### 4.3 Short typed values
+
+The values that have a text form also have a short typed one, which setters take through `IntoValue`. A typed value cannot be misspelled and links no parser. Text stays the form for a value that comes from data, or one copied from XAML.
+
+| Value | Text | Typed |
+|---|---|---|
+| Key gesture | `KeyGesture::parse("Ctrl+Shift+S")` | `ctrl(KeyCode::S).shift()`; `shift`, `alt`, `meta` start one too, and a `KeyCode` alone is the gesture of that key |
+| Transform | `TransformOperations::parse("translate(10px, 5px) rotate(45deg)")` | `translate(10.0, 5.0).rotate(45.0)`, with `scale`, `skew` and `.matrix(..)`; angles in degrees |
+| Box shadow | `BoxShadows::parse("0 2 4 1 Black")` | `shadow(0.0, 2.0, 4.0, Colors::BLACK).spread(1.0)`, `.inset()`; an array gives several |
+| Effect | `Effect::parse("blur(5)")` | `blur(5.0)`, `drop_shadow(x, y, radius, color)` |
+| Solid brush | `"#1E293B"` | `rgb(0x1E293B)`, `argb(0x801E293B)` |
+| Gradient brush | XAML | `linear_gradient(&[(0.0, a), (1.0, b)])`, with `.horizontal()`, `.vertical()`, `.points(..)`, `.opacity(..)`, `.spread_method(..)` |
+
+- The keyboard key is `KeyCode` in the prelude, because `Key` there is the key of an element among its siblings.
+- Every element that names one color shares one brush, whichever form names it, and the same holds for one gradient. Both tables are bounded, and a value past the bound gets a brush of its own.
+- `rgb` refuses a value of more than 24 bits, so a color with alpha is not silently cut. In a `const` this is a compile error.
+- A transform or an effect is a new object each time it is converted. A component that runs again with one gives the control a new value, as it does with one parsed from text.
+
 ## 5. The macros
 
 ### 5.1 `rsx!`

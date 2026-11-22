@@ -198,7 +198,7 @@ fn result_item(krate: CrateSearchMetadata, browser: Browser, router: Router) -> 
 fn badge(name: &str, size: f64) -> Element {
     let letter: String = name.chars().next().map(|first| first.to_uppercase().collect()).unwrap_or_default();
     rsx! {
-        Border { margin: 6.0, width: size, height: size, corner_radius: 8.0, background: "#B7410E",
+        Border { margin: 6.0, width: size, height: size, corner_radius: 8.0, background: rgb(0xB7410E),
             horizontal_alignment: HorizontalAlignment::Center, vertical_alignment: VerticalAlignment::Center,
             TextBlock { text: letter, font_size: size * 0.45, font_weight: FontWeight::SemiBold, foreground: "White",
                 horizontal_alignment: HorizontalAlignment::Center, vertical_alignment: VerticalAlignment::Center }

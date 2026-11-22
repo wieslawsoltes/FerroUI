@@ -41,8 +41,8 @@ pub fn Cells(#[prop(default = Sheet::with_example())] sheet: Sheet) -> Element {
 #[component]
 fn Header(text: String, row: i32, column: i32) -> Element {
     rsx! {
-        Border { Grid.row: row, Grid.column: column, background: "#EEEEEE",
-            border_brush: "#CCCCCC", border_thickness: (0.0, 0.0, 1.0, 1.0),
+        Border { Grid.row: row, Grid.column: column, background: rgb(0xEEEEEE),
+            border_brush: rgb(0xCCCCCC), border_thickness: (0.0, 0.0, 1.0, 1.0),
             TextBlock { text, horizontal_alignment: HorizontalAlignment::Center,
                 vertical_alignment: VerticalAlignment::Center }
         }
@@ -82,7 +82,7 @@ fn Cell(sheet: Sheet, cell: CellRef) -> Element {
     };
     rsx! {
         Border { name: cell.to_string(), Grid.row: cell.row as i32 + 1, Grid.column: cell.column as i32 + 1,
-            border_brush: "#DDDDDD", border_thickness: (0.0, 0.0, 1.0, 1.0), background: "White",
+            border_brush: rgb(0xDDDDDD), border_thickness: (0.0, 0.0, 1.0, 1.0), background: "White",
             on_double_tapped: move |_| editing.set(Some(cell)),
             { show_else(move || editing.get() == Some(cell), editor, value) }
         }

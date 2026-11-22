@@ -13,6 +13,9 @@
 //! | `Color`, a color name or `#rgb` text | `Option<Rc<dyn IBrush>>`    |
 //! | `&str`                        | `Option<BoxedValue>` (text content)|
 //!
+//! The short typed values (`rgb`, `ctrl`, `translate`, `shadow`, `blur`, `linear_gradient`, and
+//! the lengths of a grid) add their conversions beside their types.
+//!
 //! A color text that does not parse panics with the text: it is a mistake
 //! in the source, like an attribute XAML does not compile.
 //!

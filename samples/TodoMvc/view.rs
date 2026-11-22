@@ -37,7 +37,7 @@ pub fn App(todos: Option<Signal<Todos>>, #[prop(default = String::from("/"))] pa
         Border { padding: (16.0, 24.0),
             StackPanel { max_width: 560.0, spacing: 8.0,
                 TextBlock { name: "Header", text: "todos", font_size: 64.0, font_weight: FontWeight::Thin,
-                    foreground: "#B83F45", horizontal_alignment: HorizontalAlignment::Center }
+                    foreground: rgb(0xB83F45), horizontal_alignment: HorizontalAlignment::Center }
                 TextBox { name: "NewTodo", placeholder_text: "What needs to be done?", font_size: 18.0,
                     text: draft.two_way(),
                     // Enter adds the todo (trimmed; an empty title adds nothing) and empties the field.
