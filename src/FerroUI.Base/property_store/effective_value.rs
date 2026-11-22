@@ -536,11 +536,11 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         let mut v = value.clone();
         let mut bv = base_value.clone();
 
-        // Each slot keeps the input of its own priority, so a later reset restores it.
         if let Some(uncommon) = &self.uncommon {
             uncommon.coerced_value_valid.set(false);
             uncommon.coerced_base_valid.set(false);
             v = (uncommon.coerce)(owner, value.clone());
+            // The base value is coerced from its own input. At one priority it is the value.
             if priority != base_priority {
                 bv = (uncommon.coerce)(owner, base_value.clone());
             } else {
@@ -552,24 +552,30 @@ impl<T: Clone + 'static> EffectiveValue<T> {
             owner.values().advance_value_generation();
             self.set_value_alone(v.clone());
             value_changed = true;
+            if let Some(uncommon) = &self.uncommon {
+                uncommon.uncoerced_value.replace(value);
+            }
         }
 
         if !self.with_base_value(|base| base.is_some_and(|base| (operations.equals)(base, &bv))) {
+            // A base value under an animation keeps its own value and its own input.
             if priority == base_priority {
                 self.set_base_to_value();
             } else {
                 self.set_base_value(bv);
             }
             base_value_changed = true;
+            if let Some(uncommon) = &self.uncommon {
+                uncommon.uncoerced_base_value.replace(base_value);
+            }
         }
 
         self.state.priority.set(priority);
         self.state.base_priority.set(base_priority);
-        let previous_inputs = self.uncommon.as_ref().map(|uncommon| {
+        if let Some(uncommon) = &self.uncommon {
             uncommon.coerced_value_valid.set(true);
             uncommon.coerced_base_valid.set(true);
-            (uncommon.uncoerced_value.replace(value), uncommon.uncoerced_base_value.replace(base_value))
-        });
+        }
 
         if value_changed {
             (operations.notify_value_changed)(self, owner, old_value);
@@ -577,7 +583,6 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         if base_value_changed {
             (operations.notify_base_value_changed)(self, owner);
         }
-        drop(previous_inputs);
     }
 }
 
