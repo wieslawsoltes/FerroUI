@@ -605,9 +605,6 @@ impl TextDocument {
         guard.scope.take();
         Ok(())
     }
-    pub fn run_update(&self) -> Result<UpdateGuard, DocumentError> {
-        self.begin_update()
-    }
     pub fn begin_continued_update(&self) -> Result<UpdateGuard, DocumentError> {
         self.begin_update_impl(true)
     }
