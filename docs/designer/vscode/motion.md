@@ -94,6 +94,8 @@ Agents can request `"red"`, `"green"`, `"blue"`, or `"alpha"` from `designer_ani
 2. Choose **Blur radius** for a blur. For a drop shadow, choose **Blur radius**, **Offset X**, **Offset Y**, or a tint channel (**Red**, **Green**, **Blue**, **Alpha**). Radius and offsets use logical pixels. Velocity uses pixels per authored second. Tint values use a 0–1 scale, with velocity in normalized units per authored second. Scrub to compare the curve with the rendered effect. The graph leaves a gap where the target has no compatible effect.
 3. Select a key marker to edit the whole value, such as `blur(12)` or `drop-shadow(6 -2 16 #A036587C)`. Drag the marker to change its time. To capture the current native sample inside the track, use **Add keyframe at playhead** in Timeline or **Add Key at Playhead** in App Preview. Review the draft and apply it in one Undo step.
 
+![VS Code shows the Offset X curve and its rendered drop shadow at 1.5 seconds](../images/vscode-timeline-effect-curves.png)
+
 A XAML shadow key can use a hex color, a named color, or a functional color. The number after the two offsets is the blur radius. `#AARRGGBB` puts the tint alpha first.
 
 ```xml
