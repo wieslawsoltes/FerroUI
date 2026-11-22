@@ -68,7 +68,11 @@ Rebuild the preview binary with the current `ferroui-designer-support` to enable
 2. In **App Preview Templates**, choose a control or column and its template property. Choose **Open Template Source** to open the effective inline or shared definition. XAML definitions can come from accepted workspace dictionaries.
 3. For a mapped Rust template, use **Open Template Assignment** to see where the control or column received it. Choose **Open Template in Design** to edit the RSX body using the existing canvas and source tools.
 
+![The App Preview template picker shows a shared list template, two combo box templates, and the account table cell beside the running fixture](../images/vscode-app-preview-templates.png)
+
 Rust source actions use the active debug build's source records. App Preview follows the Cargo features reported for the selected executable and checks the control and template against the accepted frame. For a template in a separate Rust module, use fixture data that renders an item so the app can identify the declaration. After a source change, save and rebuild the app-hosted fixture when required. Reopen the picker after the frame updates. [Register app preview fixtures](#render-with-your-app-in-app-preview) · [App Preview template tools](reference.md#inspect-app-preview-templates-with-mcp)
+
+[See the shared Rust template selected in source beside the retained app frame](../images/vscode-app-preview-template-source.png).
 
 ### Edit a shared Rust palette in App Preview
 
