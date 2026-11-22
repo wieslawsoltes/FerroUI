@@ -1,97 +1,89 @@
-//! Compare the decoded native output. Keep the actual and the visual diff for review.
+//! Compare decoded native output and keep the visual evidence.
+use ferroui_designer_tools::scenario::{BaselineComparison, ComparisonStatus, ImageSize};
 use png::{BitDepth, ColorType, Decoder, Encoder, Transformations};
 use std::fs;
-use std::io::{Cursor, Write};
+use std::io::Cursor;
 use std::path::{Path, PathBuf};
 
-pub(crate) struct ImageResult {
-    pub(crate) message: String,
-    pub(crate) failure: bool,
-    pub(crate) artifacts: Vec<PathBuf>,
+pub(super) struct ComparedImage {
+    pub(super) summary: BaselineComparison,
+    pub(super) difference: Option<Vec<u8>>,
 }
 
-pub(crate) fn check(
+impl ComparedImage {
+    pub(super) fn message(&self, baseline: &Path) -> String {
+        let comparison = self.summary;
+        match comparison.status {
+            ComparisonStatus::Missing => {
+                format!("Baseline does not exist at {}", baseline.display())
+            }
+            ComparisonStatus::Resized => {
+                let expected = comparison.expected.expect("resized baseline");
+                format!(
+                    "Expected {} × {}, rendered {} × {}",
+                    expected.width,
+                    expected.height,
+                    comparison.actual.width,
+                    comparison.actual.height
+                )
+            }
+            _ => format!(
+                "{} pixels changed, with {} allowed",
+                comparison.changed_pixels.unwrap_or_default(),
+                comparison.max_changed_pixels
+            ),
+        }
+    }
+}
+
+pub(super) fn compare(
     actual: &[u8],
-    baseline: &Path,
-    artifacts: &Path,
-    step: usize,
+    expected: Option<&[u8]>,
     tolerance: u8,
     maximum: u32,
-) -> Result<ImageResult, String> {
-    let reference = match read_png(baseline) {
-        Ok(reference) => reference,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            let actual = record(artifacts, step, "actual", actual)?;
-            return Ok(ImageResult {
-                message: format!("Baseline does not exist at {}", baseline.display()),
-                failure: true,
-                artifacts: vec![actual],
-            });
-        }
-        Err(error) => return Err(format!("{}: {error}", baseline.display())),
-    };
-    let expected = Pixels::decode(&reference)?;
+) -> Result<ComparedImage, String> {
     let current = Pixels::decode(actual)?;
-    if (expected.width, expected.height) != (current.width, current.height) {
-        return Ok(ImageResult {
-            message: format!(
-                "Expected {} × {}, rendered {} × {}",
-                expected.width, expected.height, current.width, current.height
-            ),
-            failure: true,
-            artifacts: vec![
-                baseline.to_owned(),
-                record(artifacts, step, "actual", actual)?,
-            ],
-        });
+    let mut summary = BaselineComparison {
+        status: ComparisonStatus::Missing,
+        actual: current.size(),
+        expected: None,
+        changed_pixels: None,
+        max_changed_pixels: maximum,
+    };
+    let mut difference = None;
+    if let Some(expected) = expected {
+        let reference = Pixels::decode(expected)?;
+        summary.expected = Some(reference.size());
+        if current.size() != reference.size() {
+            summary.status = ComparisonStatus::Resized;
+        } else if actual == expected {
+            summary.status = ComparisonStatus::Match;
+            summary.changed_pixels = Some(0);
+        } else {
+            let (changed, diff) = current.diff(&reference, tolerance);
+            summary.changed_pixels = Some(changed);
+            summary.status = if changed > maximum {
+                ComparisonStatus::Changed
+            } else {
+                ComparisonStatus::Match
+            };
+            if changed > 0 {
+                difference = Some(diff.encode()?);
+            }
+        }
     }
-    let (changed, diff) = current.diff(&expected, tolerance);
-    let mut evidence = Vec::new();
-    if changed > maximum {
-        evidence.push(baseline.to_owned());
-        evidence.push(record(artifacts, step, "actual", actual)?);
-        evidence.push(record(artifacts, step, "diff", &diff.encode()?)?);
-    }
-    Ok(ImageResult {
-        message: format!("{changed} pixels changed, with {maximum} allowed"),
-        failure: changed > maximum,
-        artifacts: evidence,
+    Ok(ComparedImage {
+        summary,
+        difference,
     })
 }
 
-fn read_png(path: &Path) -> std::io::Result<Vec<u8>> {
-    use std::io::{Error, Read};
-    let file = fs::File::open(path)?;
-    let maximum = 16 * 1024 * 1024;
-    let mut bytes = Vec::new();
-    file.take(maximum + 1).read_to_end(&mut bytes)?;
-    if bytes.len() as u64 > maximum {
-        return Err(Error::other("Baseline PNG exceeds 16 MiB"));
-    }
-    Ok(bytes)
-}
-
-pub(crate) fn write_baseline(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
-    let filename = path.file_name().ok_or(std::io::ErrorKind::InvalidInput)?;
-    let parent = path.parent().ok_or(std::io::ErrorKind::InvalidInput)?;
-    fs::create_dir_all(parent)?;
-    let mut temporary_name = filename.to_os_string();
-    temporary_name.push(format!(".{}.tmp", std::process::id()));
-    let temporary = parent.join(temporary_name);
-    let mut file = fs::File::options()
-        .write(true)
-        .create_new(true)
-        .open(&temporary)?;
-    let result = file.write_all(bytes);
-    drop(file);
-    let result = result.and_then(|()| fs::rename(&temporary, path));
-    if result.is_err() {
-        let _ = fs::remove_file(temporary);
-    }
-    result
-}
-
-fn record(directory: &Path, step: usize, kind: &str, bytes: &[u8]) -> Result<PathBuf, String> {
+pub(super) fn record(
+    directory: &Path,
+    step: usize,
+    kind: &str,
+    bytes: &[u8],
+) -> Result<PathBuf, String> {
     fs::create_dir_all(directory).map_err(|error| error.to_string())?;
     let path = directory.join(format!("{}-{step:03}-{kind}.png", std::process::id()));
     fs::write(&path, bytes).map_err(|error| error.to_string())?;
@@ -105,6 +97,13 @@ struct Pixels {
 }
 
 impl Pixels {
+    fn size(&self) -> ImageSize {
+        ImageSize {
+            width: self.width,
+            height: self.height,
+        }
+    }
+
     fn decode(bytes: &[u8]) -> Result<Self, String> {
         let mut decoder = Decoder::new(Cursor::new(bytes));
         decoder.set_transformations(Transformations::EXPAND | Transformations::STRIP_16);

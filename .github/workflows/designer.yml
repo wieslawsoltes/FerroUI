@@ -129,6 +129,11 @@ jobs:
         run: |
           cargo build --locked -p ferroui-designer-language -p ferroui-designer-preview \
             -p todo-workbench --features todo-workbench/app-preview,todo-workbench/hot-reload,todo-workbench/mcp
+      - name: Native scenario render, accessibility and interaction gate
+        run: |
+          mkdir -p designer-render/scenarios
+          target/debug/ferroui-designer-preview --scenario-suite docs/designer/samples/scenarios \
+            --workspace "$GITHUB_WORKSPACE" --artifacts designer-render/scenarios > designer-render/scenarios/report.json
       - name: Current VS Code extension host
         working-directory: editors/vscode
         env:

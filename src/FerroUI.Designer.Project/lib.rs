@@ -12,6 +12,8 @@ mod toolbox;
 mod uri;
 mod workspace;
 pub mod project_templates;
+pub mod scenario_baselines;
+pub mod scenario_process;
 pub mod toolchain;
 
 pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution, workspace_documents};

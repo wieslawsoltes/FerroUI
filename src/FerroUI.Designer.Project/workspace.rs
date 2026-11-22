@@ -17,6 +17,7 @@ pub use moved_file::MovedSourceFile;
 pub use move_references::SavedReferenceEdit;
 pub(crate) use storage::atomic_create;
 pub(crate) use storage::atomic_write;
+pub(crate) use storage::publish_bytes;
 
 #[derive(Clone)]
 pub struct Buffer {

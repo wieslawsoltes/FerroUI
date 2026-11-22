@@ -76,6 +76,7 @@ pub struct DesignerWorkspace {
     pending_close: RefCell<Option<Rc<dyn Fn()>>>,
     file_busy: Cell<bool>,
     project: RefCell<project::ProjectUi>,
+    scenarios: RefCell<scenarios::ScenarioRuns>,
     source_tools: RefCell<source_tools::SourceTools>,
     authoring: RefCell<authoring::AuthoringUi>,
     components: RefCell<components::ComponentUi>,
@@ -160,6 +161,7 @@ impl DesignerWorkspace {
             pending_close: RefCell::new(None),
             file_busy: Cell::new(false),
             project: RefCell::new(Default::default()),
+            scenarios: RefCell::new(Default::default()),
             source_tools: RefCell::new(Default::default()),
             authoring: RefCell::new(Default::default()),
             components: RefCell::new(Default::default()),
@@ -999,6 +1001,10 @@ pub(crate) mod prototype;
 pub use prototype::PreviewPrototypePlaybackInfo;
 #[path = "workspace_project.rs"]
 mod project;
+#[path = "workspace_scenarios.rs"]
+pub(crate) mod scenarios;
+#[path = "workspace_scenario_review.rs"]
+pub(crate) mod scenario_review;
 #[path = "workspace_project_setup.rs"]
 mod project_setup;
 #[cfg(feature = "mcp")]

@@ -12,7 +12,7 @@ pub(crate) fn atomic_create(path: &Path, source: &str) -> Result<()> {
 }
 
 pub(super) fn atomic_create_with_metadata(path: &Path, source: &str) -> Result<fs::Metadata> {
-    publish(path, source, false, || Ok(()))
+    publish_bytes(path, source.as_bytes(), false, || Ok(()))
 }
 
 pub(crate) fn atomic_write(path: &Path, source: &str) -> Result<()> {
@@ -24,7 +24,7 @@ pub(super) fn atomic_write_checked(
     source: &str,
     check: impl FnOnce() -> Result<()>,
 ) -> Result<fs::Metadata> {
-    publish(path, source, true, check)
+    publish_bytes(path, source.as_bytes(), true, check)
 }
 
 pub(super) fn backup_file(path: &Path) -> Result<PathBuf> {
@@ -51,9 +51,9 @@ fn candidates(path: &Path) -> Result<impl Iterator<Item = PathBuf> + '_> {
     }))
 }
 
-fn publish(
+pub(crate) fn publish_bytes(
     path: &Path,
-    source: &str,
+    source: &[u8],
     replace: bool,
     check: impl FnOnce() -> Result<()>,
 ) -> Result<fs::Metadata> {
@@ -61,7 +61,7 @@ fn publish(
     // Only the successfully reserved candidate belongs to us. In particular a
     // stale PID/counter collision must never delete another candidate's bytes.
     let result = (|| -> Result<fs::Metadata> {
-        file.write_all(source.as_bytes())?;
+        file.write_all(source)?;
         if replace {
             if let Ok(metadata) = fs::metadata(path) {
                 file.set_permissions(metadata.permissions())?;

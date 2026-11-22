@@ -142,9 +142,19 @@ impl TaskHandle {
         metadata: Option<BuildMetadata>,
         config: CargoBuildConfiguration,
     ) -> Result<Self> {
+        Self::spawn_with_output_limit(command, metadata, config, 1024 * 1024)
+    }
+
+    pub(crate) fn spawn_with_output_limit(
+        command: &mut Command,
+        metadata: Option<BuildMetadata>,
+        config: CargoBuildConfiguration,
+        limit: usize,
+    ) -> Result<Self> {
         let mut child = spawn_project_process(command)?;
         let output = Arc::new(Mutex::new(OutputBuffer {
             readers: 2,
+            limit,
             ..Default::default()
         }));
         for (stream, reader) in [
@@ -199,6 +209,7 @@ pub enum TaskStatus {
 struct OutputBuffer {
     chunks: VecDeque<TaskOutput>,
     bytes: usize,
+    limit: usize,
     dropped: usize,
     readers: usize,
     directories: BTreeSet<PathBuf>,
@@ -328,7 +339,7 @@ fn push_output(buffer: &Mutex<OutputBuffer>, chunk: TaskOutput) {
     let mut output = buffer.lock().unwrap_or_else(|e| e.into_inner());
     output.bytes += chunk.text.len();
     output.chunks.push_back(chunk);
-    while output.bytes > 1024 * 1024 {
+    while output.bytes > output.limit {
         if let Some(old) = output.chunks.pop_front() {
             output.bytes -= old.text.len();
             output.dropped += old.text.len();

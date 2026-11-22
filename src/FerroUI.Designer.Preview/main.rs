@@ -31,9 +31,12 @@ mod resources;
 mod rsx_animation;
 mod rsx_placement;
 mod scenario;
+mod scenario_cli;
 mod scenario_images;
 mod scenario_input;
+mod scenario_review;
 mod scenario_stages;
+mod scenario_suite_report;
 mod snapshot;
 mod stages;
 mod stages_prototype;
@@ -52,7 +55,8 @@ fn main() -> ExitCode {
     let result = match std::env::args().nth(1).as_deref() {
         None => serve(),
         Some("--mcp-editor") => editor_mcp::serve(),
-        Some("--scenario") => scenario::command(),
+        Some("--scenario") => scenario_cli::command(false),
+        Some("--scenario-suite") => scenario_cli::command(true),
         Some(_) => Err(io::Error::new(io::ErrorKind::InvalidInput, "Unknown preview mode")),
     };
     match result {

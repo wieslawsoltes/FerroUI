@@ -2,6 +2,13 @@
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
+#[path = "scenario/report.rs"]
+mod report;
+pub use report::{
+    BaselineComparison, BaselineReference, ComparisonStatus, ImageSize, ScenarioReport,
+    ScenarioStepReport, ScenarioSuiteEntry, ScenarioSuiteReport, VisualReview,
+};
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Scenario {
