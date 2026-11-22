@@ -5,6 +5,7 @@ mod capabilities;
 mod document;
 mod canvas_guides;
 mod canvas_snap;
+mod collaboration;
 mod editor_mcp;
 mod edit_selection;
 mod edits;
@@ -55,6 +56,7 @@ fn main() -> ExitCode {
     let result = match std::env::args().nth(1).as_deref() {
         None => serve(),
         Some("--mcp-editor") => editor_mcp::serve(),
+        Some("--collaboration") => collaboration::serve(),
         Some("--scenario") => scenario_cli::command(false),
         Some("--scenario-suite") => scenario_cli::command(true),
         Some(_) => Err(io::Error::new(io::ErrorKind::InvalidInput, "Unknown preview mode")),

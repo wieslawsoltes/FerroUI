@@ -20,5 +20,8 @@ mod service;
 #[cfg(feature = "server")]
 pub use service::{CollaborationService, HostedServer};
 
+#[cfg(all(feature = "client", feature = "server"))]
+pub mod editor;
+
 #[cfg(test)]
 mod tests;

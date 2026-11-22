@@ -1812,6 +1812,7 @@ dependencies = [
  "ferroui-controls-treedatagrid",
  "ferroui-designer",
  "ferroui-designer-animation",
+ "ferroui-designer-collaboration-host",
  "ferroui-designer-core",
  "ferroui-designer-language",
  "ferroui-designer-project",

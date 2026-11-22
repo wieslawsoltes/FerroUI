@@ -393,6 +393,33 @@ impl ReconnectingPeer {
     pub fn last_error(&self) -> Option<&HostError> {
         self.last_error.as_ref()
     }
+    /// A bounded exchange can leave either an upload or a download page outstanding.
+    pub fn is_synchronized(&self) -> bool {
+        self.pending_operations() == 0 && self.replica.version() == self.server_version
+    }
+
+    #[cfg(feature = "server")]
+    pub(crate) fn request_room<T: serde::de::DeserializeOwned>(
+        &mut self,
+        request: impl FnOnce(Credentials) -> Request,
+    ) -> Result<T> {
+        let response = self.transport.request(request(self.credentials.clone()))?;
+        serde_json::from_value(response).map_err(HostError::invalid)
+    }
+
+    pub fn epoch(&self) -> u64 {
+        self.epoch
+    }
+
+    #[cfg(feature = "server")]
+    pub(crate) fn endpoint(&self) -> &Endpoint {
+        &self.endpoint
+    }
+
+    #[cfg(feature = "server")]
+    pub(crate) fn room_id(&self) -> &str {
+        &self.credentials.room
+    }
     pub fn submit(&mut self, label: impl Into<String>, edits: Vec<SharedEdit>) -> Result<()> {
         self.check_available()?;
         ensure(

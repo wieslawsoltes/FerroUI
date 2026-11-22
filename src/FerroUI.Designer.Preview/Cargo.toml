@@ -22,6 +22,7 @@ ferroui-controls.workspace = true
 ferroui-controls-treedatagrid.workspace = true
 ferroui-designer = { workspace = true, features = ["mcp"] }
 ferroui-designer-animation.workspace = true
+ferroui-designer-collaboration-host = { workspace = true, features = ["client", "server"] }
 ferroui-designer-core.workspace = true
 ferroui-designer-language.workspace = true
 ferroui-designer-project.workspace = true

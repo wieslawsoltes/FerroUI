@@ -115,6 +115,15 @@ pub(crate) fn write<T: Serialize>(path: &Path, value: &T, fence: &dyn CommitFenc
     result
 }
 pub(crate) fn open_directory(path: &Path) -> Result<(PathBuf, File)> {
+    open_locked_directory(path, "server.lock")
+}
+
+#[cfg(all(feature = "client", feature = "server"))]
+pub(crate) fn open_client_directory(path: &Path) -> Result<(PathBuf, File)> {
+    open_locked_directory(path, "client.lock")
+}
+
+fn open_locked_directory(path: &Path, lock_name: &str) -> Result<(PathBuf, File)> {
     fs::create_dir_all(path).map_err(HostError::storage)?;
     let metadata = fs::symlink_metadata(path).map_err(HostError::storage)?;
     ensure(
@@ -128,7 +137,7 @@ pub(crate) fn open_directory(path: &Path) -> Result<(PathBuf, File)> {
         fs::set_permissions(path, fs::Permissions::from_mode(0o700)).map_err(HostError::storage)?;
     }
     let root = fs::canonicalize(path).map_err(HostError::storage)?;
-    let lock_path = root.join("server.lock");
+    let lock_path = root.join(lock_name);
     let lock = if lock_path.exists() {
         ensure(
             !fs::symlink_metadata(&lock_path)
