@@ -10,7 +10,11 @@
 //!   value starts a new generation of the inherited lookups (section 9.3);
 //! - `style_priority_set_and_dispose`: `Opacity` set with the priority of a style and taken back:
 //!   such a value is an entry of a value frame of its own, beside the values of the styles;
-//! - `set_and_clear`: `Opacity` set and cleared again: the value is created and destroyed.
+//! - `set_and_clear`: `Opacity` set and cleared again: the value is created and destroyed;
+//! - `enum_changed`: `HorizontalAlignment` set to another member of the enumeration;
+//! - `handle_changed`: `Clip` set to another geometry: a handle to an object;
+//! - `enum_style_priority_set_and_dispose`: `HorizontalAlignment` set with the priority of a style
+//!   and taken back.
 //!
 //! `local_changed` and `local_changed_affects_measure` are measured on a border and on a button,
 //! whose hierarchy is three classes deeper. The controls are in no tree, so a write costs what the
@@ -20,8 +24,10 @@
 use crate::harness::Registry;
 use crate::trees::fixture::Fixture;
 use ferroui_base::data::BindingPriority;
+use ferroui_base::layout::{HorizontalAlignment, Layoutable};
+use ferroui_base::media::{Geometry, RectangleGeometry};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::{Ref, Visual};
+use ferroui_base::{Rect, Ref, Visual};
 use ferroui_controls::documents::TextElement;
 use ferroui_controls::{Border, Button, Canvas, Control};
 
@@ -30,6 +36,8 @@ const OBJECTS: usize = 1_000;
 pub struct ControlWrite {
     fixture: Fixture,
     controls: Vec<Ref<Control>>,
+    /// The two geometries `handle_changed` writes in turn.
+    clips: [Ref<Geometry>; 2],
     /// Which of the two values the next invocation writes.
     flip: bool,
 }
@@ -38,7 +46,9 @@ impl ControlWrite {
     fn of(create: impl Fn() -> Ref<Control>) -> Self {
         let fixture = Fixture::new();
         let controls = (0..OBJECTS).map(|_| create()).collect();
-        let mut this = Self { fixture, controls, flip: false };
+        let clip = |width| RectangleGeometry::with_rect(Rect::new(0.0, 0.0, width, 4.0)).upcast();
+        let clips = [clip(8.0), clip(16.0)];
+        let mut this = Self { fixture, controls, clips, flip: false };
         // Every property the benchmarks write has a value before the first measurement, so that a
         // write changes a value and does not create one.
         this.opacity();
@@ -50,6 +60,14 @@ impl ControlWrite {
 
     fn borders() -> Self {
         Self::of(|| Border::new().upcast())
+    }
+
+    /// Borders that also hold a horizontal alignment and a clip before the first measurement.
+    fn borders_with_kinds() -> Self {
+        let mut this = Self::borders();
+        this.horizontal_alignment();
+        this.clip();
+        this
     }
 
     fn buttons() -> Self {
@@ -108,6 +126,32 @@ impl ControlWrite {
         }
     }
 
+    fn horizontal_alignment(&mut self) {
+        self.flip = !self.flip;
+        let value = if self.flip { HorizontalAlignment::Left } else { HorizontalAlignment::Right };
+        for control in &self.controls {
+            control.set_horizontal_alignment(value);
+        }
+    }
+
+    fn clip(&mut self) {
+        self.flip = !self.flip;
+        let clip = &self.clips[usize::from(self.flip)];
+        for control in &self.controls {
+            control.set_clip(clip.clone());
+        }
+    }
+
+    fn horizontal_alignment_with_style_priority(&mut self) {
+        let property = Layoutable::horizontal_alignment_property();
+        for control in &self.controls {
+            let entry = control.set_value_with_priority(property, HorizontalAlignment::Left, BindingPriority::Style);
+            if let Some(entry) = entry {
+                entry.dispose();
+            }
+        }
+    }
+
     fn opacity_with_style_priority(&mut self) {
         for control in &self.controls {
             let entry = control.set_value_with_priority(Visual::opacity_property(), 0.5, BindingPriority::Style);
@@ -138,7 +182,7 @@ impl ControlWrite {
 type Setup = fn() -> ControlWrite;
 type Body = fn(&mut ControlWrite);
 
-const WRITERS: [(&str, &str, Setup, Body); 10] = [
+const WRITERS: [(&str, &str, Setup, Body); 13] = [
     ("local_changed", "Border", ControlWrite::borders, ControlWrite::opacity),
     ("local_changed", "Button", ControlWrite::buttons, ControlWrite::opacity),
     ("local_unchanged", "Border", ControlWrite::borders, ControlWrite::opacity_unchanged),
@@ -154,6 +198,14 @@ const WRITERS: [(&str, &str, Setup, Body); 10] = [
         ControlWrite::opacity_with_style_priority,
     ),
     ("set_and_clear", "Border", || ControlWrite::borders().without_opacity(), ControlWrite::opacity_set_and_clear),
+    ("enum_changed", "Border", ControlWrite::borders_with_kinds, ControlWrite::horizontal_alignment),
+    ("handle_changed", "Border", ControlWrite::borders_with_kinds, ControlWrite::clip),
+    (
+        "enum_style_priority_set_and_dispose",
+        "Border",
+        ControlWrite::borders,
+        ControlWrite::horizontal_alignment_with_style_priority,
+    ),
 ];
 
 pub fn register(registry: &mut Registry) {

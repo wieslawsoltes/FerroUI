@@ -7,7 +7,7 @@ use crate::type_system::{ChangeHandlerLayer, InheritedReaction};
 use crate::{
     AttachedProperty, DirectProperty, DirectPropertyMetadata, FerroObject, FerroPropertyChangedEventArgs,
     FerroPropertyMetadata, FerroPropertyRegistry, ObjectType, StaticType, StyledProperty, StyledPropertyMetadata,
-    TypeIdentity, TypeInfo,
+    StyledValue, TypeIdentity, TypeInfo,
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
@@ -303,9 +303,24 @@ pub(crate) trait PropertyRoutes {
     /// The typed property behind the routes, for downcasting.
     fn as_any(&'static self) -> &'static dyn Any;
     /// Clones `value`, which must hold exactly the property's value type `T`,
-    /// into `out`, which must be an `&mut Option<T>`. Returns false if either
-    /// has a different type.
+    /// into `out`, which must be an `&mut Option<S>`: `S` is the type the value
+    /// store keeps values of `T` as ([`StyledValue::Storage`](crate::StyledValue::Storage)),
+    /// `T` itself for a direct property. Returns false if either has a
+    /// different type.
     fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool;
+    /// Calls `f` with `old` and `new`, values of the type the value store
+    /// keeps values of the property as, as values of the property's value
+    /// type: the values of a change notification of a styled property whose
+    /// value type is kept as a value of another type
+    /// ([`StyledValue::SHARED_STORAGE`](crate::StyledValue::SHARED_STORAGE)).
+    fn route_with_values(
+        &'static self,
+        old: Option<&dyn Any>,
+        new: &dyn Any,
+        f: &mut dyn FnMut(Option<&dyn Any>, &dyn Any),
+    ) {
+        f(old, new)
+    }
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
@@ -758,6 +773,17 @@ pub struct FerroProperty {
     notifying: Option<Rc<dyn Fn(&FerroObject, bool)>>,
     changed: Rc<PropertyChangedObservable>,
     routes: OnceCell<&'static dyn PropertyRoutes>,
+    /// The operations of a styled property that depend on its value type
+    /// ([`StyledCodec`](crate::styled_property::StyledCodec)): what its routes and the store ask
+    /// of the typed property. Empty for a direct property.
+    styled_codec: OnceCell<&'static dyn crate::styled_property::StyledCodec>,
+    /// The members of the value type when it is an enumeration the store keeps as an
+    /// [`EnumValue`](crate::EnumValue) ([`StyledValue::MEMBERS`]): what a change notification
+    /// hands out for a stored member. Empty otherwise.
+    members: &'static [(i64, &'static dyn Any)],
+    /// Whether the property validates its values (a styled property with a validation callback):
+    /// [`is_valid_value`](Self::is_valid_value) asks its routes only then.
+    validates: bool,
 }
 
 pub(crate) struct FerroPropertyInit {
@@ -806,7 +832,29 @@ impl FerroProperty {
             notifying: notifying.map(Rc::from),
             changed: Rc::new(PropertyChangedObservable::new(init.inherits)),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
+            members: &[],
+            validates: false,
         }
+    }
+
+    /// The property with the members of its value type ([`StyledValue::MEMBERS`]).
+    pub(crate) fn with_members(mut self, members: &'static [(i64, &'static dyn Any)]) -> Self {
+        self.members = members;
+        self
+    }
+
+    /// The property with a validation callback or without.
+    pub(crate) fn with_validation(mut self, validates: bool) -> Self {
+        self.validates = validates;
+        self
+    }
+
+    /// The members of the value type, when it is an enumeration kept as an
+    /// [`EnumValue`](crate::EnumValue).
+    #[inline]
+    pub(crate) fn members(&self) -> &'static [(i64, &'static dyn Any)] {
+        self.members
     }
 
     /// Creates the base of a property that shares its identity with `source`
@@ -829,7 +877,28 @@ impl FerroProperty {
             notifying: source.notifying.clone(),
             changed: source.changed.clone(),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
+            members: source.members,
+            validates: source.validates,
         }
+    }
+
+    pub(crate) fn set_styled_codec(&self, codec: &'static dyn crate::styled_property::StyledCodec) {
+        if self.styled_codec.set(codec).is_err() {
+            panic!("the codec of the property is already set");
+        }
+    }
+
+    /// The codec of a styled property ([`StyledCodec`](crate::styled_property::StyledCodec)).
+    #[inline]
+    /// The codec of a styled property, `None` for a direct property.
+    #[inline]
+    pub(crate) fn styled_codec_if_any(&self) -> Option<&'static dyn crate::styled_property::StyledCodec> {
+        self.styled_codec.get().copied()
+    }
+
+    pub(crate) fn styled_codec(&self) -> &'static dyn crate::styled_property::StyledCodec {
+        *self.styled_codec.get().expect("a styled property has a codec")
     }
 
     pub(crate) fn set_routes(&self, routes: &'static dyn PropertyRoutes) {
@@ -1040,6 +1109,11 @@ impl FerroProperty {
     /// Checks whether `value` is valid for the property: of the property's
     /// value type and accepted by its validation callback.
     pub fn is_valid_value(&self, value: &dyn Any) -> bool {
+        // Without a validation callback a value is valid when it is of the value type, which is
+        // what the routes would answer.
+        if !self.validates {
+            return value.type_id() == self.property_type;
+        }
         self.routes().route_is_valid_value(value)
     }
 
@@ -1048,7 +1122,9 @@ impl FerroProperty {
     /// `None` for direct properties and when `T` is not the property's value
     /// type.
     pub fn as_styled<T: crate::PropertyValue>(&'static self) -> Option<&'static StyledProperty<T>> {
-        self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<StyledProperty<T>>())
+        // From the codec directly: one call, as from the typed routes before the routes were shared.
+        // A typed write of the declarative layer asks this for every value it sets.
+        self.styled_codec.get().and_then(|codec| codec.typed().downcast_ref::<StyledProperty<T>>())
     }
 
     /// The property as a direct property with value type `T`: the typed view needed to set it
@@ -1067,7 +1143,7 @@ impl FerroProperty {
     }
 
     /// Registers a styled property with a default value.
-    pub fn register<TOwner: ObjectType, TValue: PropertyValue>(
+    pub fn register<TOwner: ObjectType, TValue: StyledValue>(
         name: &str,
         default_value: TValue,
     ) -> &'static StyledProperty<TValue> {
@@ -1076,7 +1152,7 @@ impl FerroProperty {
 
     /// Registers a styled property.
     #[inline]
-    pub fn register_with<TOwner: ObjectType, TValue: PropertyValue>(
+    pub fn register_with<TOwner: ObjectType, TValue: StyledValue>(
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static StyledProperty<TValue> {
@@ -1087,7 +1163,7 @@ impl FerroProperty {
     // coercion specialize this installation path; every owner of that value
     // type shares it without changing the typed read/write implementation.
     #[inline(never)]
-    fn register_with_core<TValue: PropertyValue>(
+    fn register_with_core<TValue: StyledValue>(
         owner_type: &'static TypeInfo,
         name: &str,
         options: StyledPropertyOptions<TValue>,
@@ -1106,7 +1182,7 @@ impl FerroProperty {
     ///
     /// `TOwner` is the class that registers the property and `THost` the class
     /// of objects the property can be set on.
-    pub fn register_attached<TOwner: StaticType, THost: ObjectType, TValue: PropertyValue>(
+    pub fn register_attached<TOwner: StaticType, THost: ObjectType, TValue: StyledValue>(
         name: &str,
         default_value: TValue,
     ) -> &'static AttachedProperty<TValue> {
@@ -1115,7 +1191,7 @@ impl FerroProperty {
 
     /// Registers an attached property.
     #[inline]
-    pub fn register_attached_with<TOwner: StaticType, THost: ObjectType, TValue: PropertyValue>(
+    pub fn register_attached_with<TOwner: StaticType, THost: ObjectType, TValue: StyledValue>(
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static AttachedProperty<TValue> {
@@ -1123,7 +1199,7 @@ impl FerroProperty {
     }
 
     #[inline(never)]
-    fn register_attached_with_core<TValue: PropertyValue>(
+    fn register_attached_with_core<TValue: StyledValue>(
         owner_type: &'static TypeInfo,
         host_type: &'static TypeInfo,
         name: &str,
@@ -1206,7 +1282,7 @@ pub struct StyledPropertyOptions<T> {
     notifying: Option<NotifyingCallback>,
 }
 
-impl<T: PropertyValue> StyledPropertyOptions<T> {
+impl<T: StyledValue> StyledPropertyOptions<T> {
     pub fn new(default_value: T) -> Self {
         Self {
             default_value,
@@ -1225,7 +1301,7 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
     pub fn inherits(mut self, inherits: bool) -> Self {
         self.inherits = inherits;
         self.inherited_value_changed = if inherits {
-            Some(EffectiveValue::<T>::notify_inherited_value_changed)
+            Some(EffectiveValue::<T::Storage>::notify_inherited_value_changed)
         } else {
             None
         };

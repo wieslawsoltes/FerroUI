@@ -157,7 +157,7 @@ impl NavigationViewTemplateSettings {
 
     /// Sets a value that the navigation view computes; a value equal to the current one raises
     /// nothing.
-    pub(crate) fn set<T: ferroui_base::PropertyValue + PartialEq>(&self, property: &'static StyledProperty<T>, value: T) {
+    pub(crate) fn set<T: ferroui_base::StyledValue + PartialEq>(&self, property: &'static StyledProperty<T>, value: T) {
         if self.get_value(property) != value {
             self.set_value(property, value);
         }

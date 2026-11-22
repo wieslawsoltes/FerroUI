@@ -96,10 +96,29 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
           CHANGED: ${{ github.event.pull_request.changed_files }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" \
-            -q '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/files.txt"
-          if [ "${CHANGED:-0}" -ge 3000 ]; then echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"; fi
+          if [ "$BASE_REF" != "$DEFAULT_BRANCH" ]; then
+            # A part of a stack. The checks of the top part decide for the whole stack, so the jobs
+            # follow every file the stack changes up to this part, not only this part's own diff.
+            # The comparison lists at most 300 files: a larger stack, or one the API cannot
+            # compare, runs every job.
+            if gh api "repos/$GITHUB_REPOSITORY/compare/$DEFAULT_BRANCH...$HEAD_SHA" > "$RUNNER_TEMP/compare.json"; then
+              jq -r '.files[] | .filename, (.previous_filename // empty)' "$RUNNER_TEMP/compare.json" > "$RUNNER_TEMP/files.txt"
+              if [ "$(jq '.files | length' "$RUNNER_TEMP/compare.json")" -ge 300 ]; then
+                echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"
+              fi
+            else
+              echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" \
+              -q '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/files.txt"
+            if [ "${CHANGED:-0}" -ge 3000 ]; then echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"; fi
+          fi
+          touch "$RUNNER_TEMP/files.txt"
           wc -l < "$RUNNER_TEMP/files.txt"
       # A part of a stack with a part above it: the head of the top part contains this code, and
       # its checks decide when the stack lands (scripts/stack/stack.py, docs/ci.md). A pull request

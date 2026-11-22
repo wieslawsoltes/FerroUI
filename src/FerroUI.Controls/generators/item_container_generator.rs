@@ -17,6 +17,8 @@ pub enum RecycleKey {
     Id(u64),
 }
 
+ferroui_base::styled_value!(RecycleKey);
+
 impl RecycleKey {
     /// Allocates a key that is different from every other key on the
     /// current thread.

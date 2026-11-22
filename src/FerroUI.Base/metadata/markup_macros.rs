@@ -308,10 +308,16 @@ macro_rules! __ferro_value_types {
 /// The members of a plain enumeration are its variants (their numeric value
 /// is the discriminant); the members of a flags type are constants with a
 /// `bits()` method. The untyped form of a member is a value of the type
-/// itself. Implements [`MarkupTyped`](super::MarkupTyped).
+/// itself. Implements [`MarkupTyped`](super::MarkupTyped) and
+/// [`StyledValue`](crate::StyledValue): the property store keeps a member of a plain enumeration
+/// as an [`EnumValue`](crate::EnumValue) (the members are then listed exhaustively) and a set of
+/// flags as it is.
 #[macro_export]
 macro_rules! ferro_markup_enum {
     ($type_:ident { $($member:ident $(= $variant:ident)?),* $(,)? } $(, { $($body:tt)* })?) => {
+        // The property store keeps the members of every enumeration in one form.
+        $crate::__styled_enum!($type_ { $($member $(= $variant)?),* });
+
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
                 static MARKUP: $crate::metadata::MarkupType = {
@@ -364,6 +370,10 @@ macro_rules! ferro_markup_enum {
         }
     };
     (flags $type_:ident { $($member:ident = $value:expr),* $(,)? } $(, { $($body:tt)* })?) => {
+        // A set of flags is kept as it is: a value may hold bits no member names, which only the
+        // type itself keeps.
+        $crate::styled_value!($type_);
+
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
                 static MARKUP: $crate::metadata::MarkupType = {
