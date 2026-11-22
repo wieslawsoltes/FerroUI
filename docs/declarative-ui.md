@@ -470,16 +470,38 @@ The classes of a group derive from the classes of `ferroui-controls`, so their e
 
 ```rust
 stack_panel().styles([
-    style("Button.accent")
+    style(of::<Button>().class("accent"))
         .set(TemplatedControl::background_property(), "#0063B1")
         .set(TemplatedControl::foreground_property(), "White")
-        .nested(style("^:pointerover").set(Visual::opacity_property(), 0.85)),
+        .nested(style(nesting().pointer_over()).set(Visual::opacity_property(), 0.85)),
 ])
 ```
 
-- `style(selector)` parses a selector in the syntax of XAML with the run-time selector parser of the port (`ferroui-markup`), resolving type names among the registered classes. `style_of(selector)` takes a selector built with the selectors API.
+`style(..)` takes a typed selector or text. The typed form is the default: a misspelled class or pseudo-class does not compile, and the application links no selector parser. Text is the form for a selector that comes from data at run time, or one copied from XAML.
+
+| Text | Typed |
+|---|---|
+| `Button` | `of::<Button>()` |
+| `:is(Control)` | `is_type::<Control>()` |
+| `.accent` | `any().class("accent")` |
+| `#title` | `any().name("title")` |
+| `:pressed` | `any().pressed()` |
+| `Button.accent:focus` | `of::<Button>().class("accent").focus()` |
+| `StackPanel > TextBlock` | `of::<StackPanel>().child().of::<TextBlock>()` |
+| `StackPanel TextBlock` | `of::<StackPanel>().descendant().of::<TextBlock>()` |
+| `Button /template/ ContentPresenter` | `of::<Button>().template().of::<ContentPresenter>()` |
+| `Button:not(.accent)` | `of::<Button>().not(any().class("accent"))` |
+| `:nth-child(2n+1)`, `:nth-last-child(2)` | `any().nth_child(2, 1)`, `any().nth_last_child(0, 2)` |
+| `Button[IsEnabled=False]` | `of::<Button>().property_equals(InputElement::is_enabled_property(), false)` |
+| `Button, TextBlock` | `any_of([of::<Button>(), of::<TextBlock>()])` |
+| `^:pointerover` | `nesting().pointer_over()` |
+
+- `of::<T>()` and `is_type::<T>()` name the class by its identity: a selector does not keep a class in the executable that the application never makes. They chain too (`.of::<T>()`, `.is_type::<T>()`).
+- Every pseudo-class a class of the framework declares is a method (`PseudoClassSelectors`, generated into `generated/pseudo_classes.rs` by `scripts/generate_view_builders.py`). `:pointerover` is `pointer_over()`, `:focus-within` is `focus_within()`. A pseudo-class of an application's own control is written `.class(":name")`.
+- One prefix can start several selectors with the pseudo-class methods and `with_class`, which leave other handles of the selector as they were. `.class(..)` extends the node it is called on, as upstream's selectors do, so a clone of the selector gets the class too.
+- `style(text)` parses a selector in the syntax of XAML with the run-time selector parser of the port (`ferroui-markup`), resolving type names among the registered classes. A name that is not registered is matched by name, so a misspelled type never applies. A syntax error panics when the style is built. `style_of(selector)` takes a `Selector`.
 - `.set(property, value)` takes what converts to the value of the property, as the setters of elements do.
-- `.nested(style("^..."))` adds a nested style; its selector starts with `^`, the selector of the style it is in (`^:pointerover`, `^.selected > TextBlock`). The run-time parser of the port parses `^`, an addition to upstream's, whose run-time parser leaves it to the XAML compiler (DEVIATIONS.md, Parsers of markup).
+- `.nested(style(nesting()...))` adds a nested style; its selector starts with the selector of the style it is in. In text that is `^` (`^:pointerover`, `^.selected > TextBlock`). The run-time parser of the port parses `^`, an addition to upstream's, whose run-time parser leaves it to the XAML compiler (DEVIATIONS.md, Parsers of markup).
 - `.styles([..])` of an element (`styles: [..]` in `rsx!`) adds the styles to the `Styles` of the control when it is made.
 
 ### 10.3 The theme variant and resources

@@ -100,6 +100,21 @@ impl TypeNameAndClassSelector {
         result
     }
 
+    /// A node with the same conditions that shares no state with this one.
+    pub(super) fn duplicate(&self) -> Self {
+        Self {
+            previous: self.previous.clone(),
+            classes: RefCell::new(self.classes.borrow().clone()),
+            target_type: self.target_type,
+            target_identity: self.target_identity,
+            target_name: self.target_name,
+            identity_type: Cell::new(self.identity_type.get()),
+            is_concrete_type: Cell::new(self.is_concrete_type.get()),
+            name: RefCell::new(self.name.borrow().clone()),
+            selector_string: OnceCell::new(),
+        }
+    }
+
     /// The type this node itself requires, if it requires one.
     pub(super) fn own_candidate_type(&self) -> Option<CandidateType> {
         self.target_identity

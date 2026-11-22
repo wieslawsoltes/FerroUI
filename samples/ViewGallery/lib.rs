@@ -1,7 +1,7 @@
 //! A gallery of phase 3 of the declarative API (`docs/declarative-ui.md`, section 10): a
 //! component that runs again, under a theme variant it switches, with
 //!
-//! - styles of an element (`styles: [style("Button.accent")...]`) with a nested style;
+//! - styles of an element (`styles: [style(of::<Button>().class("accent"))...]`) with a nested style;
 //! - the theme variant and resources of the theme ([`use_theme_variant`], [`use_resource_as`]);
 //! - a transition of a width ([`transition`]);
 //! - a context menu given as an element;
@@ -99,10 +99,10 @@ fn Page(dark: Signal<bool>) -> Element {
         Border { background: background, padding: 16.0,
             StackPanel { spacing: 12.0,
                 styles: [
-                    style("Button.accent")
+                    style(of::<Button>().class("accent"))
                         .set(TemplatedControl::background_property(), "#0063B1")
                         .set(TemplatedControl::foreground_property(), "White")
-                        .nested(style("^:pointerover").set(Visual::opacity_property(), 0.85)),
+                        .nested(style(nesting().pointer_over()).set(Visual::opacity_property(), 0.85)),
                 ],
                 TextBlock { font_size: 20.0,
                     text: format!("Theme variant: {} (use_theme_variant), accent: {accent_name} (use_resource_as)",

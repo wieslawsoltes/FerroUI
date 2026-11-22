@@ -78,6 +78,7 @@ pub mod generated {
     pub mod dialogs;
     #[cfg(feature = "inking")]
     pub mod inking;
+    pub mod pseudo_classes;
     #[cfg(feature = "reactiveui")]
     pub mod reactiveui;
     #[cfg(feature = "repeater")]
@@ -99,7 +100,12 @@ pub use animation::{
     animation, ms, transition, transition_eased, transitions, use_animation, AnimationBuilder, KeyFrameBuilder,
     Transitionable,
 };
-pub use style::{parse_selector, style, style_of, StyleBuilder};
+pub use ferroui_base::styling::{Selector, Selectors};
+pub use generated::pseudo_classes::PseudoClassSelectors;
+pub use style::{
+    any, any_of, is_type, nesting, of, parse_selector, style, style_of, AnySelector, IntoSelector, StyleBuilder,
+    TypedSelector,
+};
 pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedTree, PropertyInfo};
 #[cfg(feature = "desktop")]
 pub use inspect::{attach_inspector, open_inspector};
@@ -142,6 +148,10 @@ pub mod prelude {
         signal, template, untrack, use_context, use_data_context, use_effect, use_effect_with, use_hook, use_memo,
         use_signal, Bind, ComponentHost, El, Element, ElementBuilder, GridDefinitions, GridDefinitionsText, IntoChild, IntoChildren, IntoElement, Key, Memo,
         NodeRef, Owner, Signal, TwoWay,
+    };
+    pub use crate::{
+        any, any_of, is_type, nesting, of, style_of, AnySelector, IntoSelector, PseudoClassSelectors, Selector, Selectors,
+        TypedSelector,
     };
     pub use crate::{
         error_boundary, route, router, sleep, suspense, try_use_router, use_future, use_router, AsyncState, ErrorInfo, RouteDef,

@@ -30,6 +30,8 @@ setter by running the script again:
                          in the `impl` of the owner
     routed events        `pub fn x_event() -> RoutedEvent<Args>`
     paths of types       the `rust_paths.rs` of the two crates
+    pseudo-classes       `PC_X` constants, `PseudoClasses(..)`, `pseudo_classes().set(":x", ..)`,
+                         written to `generated/pseudo_classes.rs` as methods of a selector
 
 Two public types with the same simple name in one crate (the upstream
 `ferroui_controls::NavigationEventArgs` of the pages and WinUI's
@@ -52,6 +54,7 @@ How to run (from the repository root; Python 3, standard library only):
 
 import argparse
 import os
+import re
 import sys
 
 from ferroui_metadata import (  # noqa: F401 (the tests of the script use these names)
@@ -62,6 +65,7 @@ from ferroui_metadata import (  # noqa: F401 (the tests of the script use these 
 )
 
 OUTPUT = os.path.join(ROOT, "src", "FerroUI.View", "generated", "builders.rs")
+PSEUDO_CLASSES_OUTPUT = os.path.join(ROOT, "src", "FerroUI.View", "generated", "pseudo_classes.rs")
 
 # The other crates of controls: (feature of ferroui-view, output file, the
 # crates read for the group). Each file has the classes of its crates only;
@@ -233,6 +237,108 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
     return "\n".join(lines)
 
 
+# The pseudo-classes whose text runs its words together: text -> method.
+PSEUDO_CLASS_WORDS = {
+    "badgeimage": "badge_image", "bottomcenter": "bottom_center", "bottomleft": "bottom_left",
+    "bottomright": "bottom_right", "btnfocused": "button_focused", "calendardisabled": "calendar_disabled",
+    "combobox": "combo_box", "compactinline": "compact_inline", "compactoverlay": "compact_overlay",
+    "dayfocused": "day_focused", "downspinbuttondisabled": "down_spin_button_disabled",
+    "dropdownopen": "drop_down_open", "firstcollapsed": "first_collapsed", "firstdisabled": "first_disabled",
+    "firsthidden": "first_hidden", "hasnodate": "has_no_date", "hasnotime": "has_no_time",
+    "hasweeknumbers": "has_week_numbers", "lastcollapsed": "last_collapsed", "lastdisabled": "last_disabled",
+    "lasthidden": "last_hidden", "nextcollapsed": "next_collapsed", "nextdisabled": "next_disabled",
+    "nexthidden": "next_hidden", "nophotoorinitials": "no_photo_or_initials", "numberbox": "number_box",
+    "numberpanel": "number_panel", "pointerover": "pointer_over",
+    "pointeroverplaceholder": "pointer_over_placeholder", "pointeroverset": "pointer_over_set",
+    "pointeroverunselected": "pointer_over_unselected", "previouscollapsed": "previous_collapsed",
+    "previousdisabled": "previous_disabled", "previoushidden": "previous_hidden", "singleitem": "single_item",
+    "spinbuttonspopup": "spin_buttons_popup", "spinbuttonsvisible": "spin_buttons_visible",
+    "topcenter": "top_center", "topleft": "top_left", "topright": "top_right",
+    "upspinbuttondisabled": "up_spin_button_disabled",
+}
+
+# The methods of `Selector`, which a method of a pseudo-class would not reach.
+SELECTOR_METHODS = {
+    "child", "class", "descendant", "is", "is_type", "is_type_info", "name", "nesting", "not", "not_with",
+    "nth_child", "nth_last_child", "of", "of_type", "of_type_info", "property_equals",
+    "property_equals_untyped", "target_type", "template", "with_class", "with_pseudo_class", "clone",
+}
+
+
+def read_pseudo_classes(directories):
+    """The pseudo-classes the classes of `directories` declare or set, with their colon."""
+    found = set()
+    for directory in directories:
+        for path in rust_files(os.path.join(ROOT, directory)):
+            text = strip_comments(read(path))
+            found.update(re.findall(r"""const\s+PC_\w+\s*:\s*&(?:'static\s+)?str\s*=\s*"(:[^"]+)\"""", text))
+            for declared in re.findall(r"PseudoClasses\(([^)]*)\)", text):
+                found.update(re.findall(r'"(:[^"]+)"', declared))
+            for declared in re.findall(r"PseudoClassesAttribute::new\(&\[([^\]]*)\]", text):
+                found.update(re.findall(r'"(:[^"]+)"', declared))
+            found.update(re.findall(r'pseudo_classes(?:\(\))?\s*\.\s*(?:set|add|add_pseudo)\(\s*"(:[^"]+)"', text))
+    return found
+
+
+def pseudo_class_method(pseudo_class):
+    """The method of a pseudo-class: `:focus-within` is `focus_within`."""
+    text = pseudo_class[1:]
+    if text in PSEUDO_CLASS_WORDS:
+        return PSEUDO_CLASS_WORDS[text]
+    return re.sub(r"(?<=[a-z0-9])([A-Z])", r"_\1", text).replace("-", "_").lower()
+
+
+def generate_pseudo_classes(pseudo_classes):
+    """The trait with a method per pseudo-class."""
+    methods = {}
+    for pseudo_class in sorted(pseudo_classes):
+        method = pseudo_class_method(pseudo_class)
+        if method in SELECTOR_METHODS:
+            raise SystemExit(f"{pseudo_class}: `{method}` is a method of Selector; add it to PSEUDO_CLASS_WORDS")
+        if method in methods:
+            raise SystemExit(f"{pseudo_class} and {methods[method]} both become `{method}`")
+        methods[method] = pseudo_class
+    lines = [
+        "// @generated by scripts/generate_view_builders.py — do not edit",
+        "//! The pseudo-classes that the classes of the framework declare, as methods of a",
+        "//! selector, so that a misspelled one does not compile. See",
+        "//! `scripts/generate_view_builders.py`.",
+        "",
+        "use ferroui_base::styling::Selector;",
+        "",
+        "/// A method per pseudo-class that a class of the framework declares:",
+        "/// `of::<Button>().pressed()` is the selector `Button:pressed`.",
+        "///",
+        "/// A method leaves other handles of the selector as they were, so one prefix can start",
+        "/// several selectors.",
+        "pub trait PseudoClassSelectors: Sized {",
+        "    /// Adds the pseudo-class `name`, with its colon.",
+        "    #[doc(hidden)]",
+        "    fn with_pseudo_class(self, name: &'static str) -> Selector;",
+    ]
+    for method, pseudo_class in sorted(methods.items()):
+        lines += [
+            "",
+            f"    /// The pseudo-class `{pseudo_class}`.",
+            "    #[inline]",
+            f"    fn {ident(method)}(self) -> Selector {{",
+            f'        self.with_pseudo_class("{pseudo_class}")',
+            "    }",
+        ]
+    lines += [
+        "}",
+        "",
+        "impl PseudoClassSelectors for Selector {",
+        "    #[inline]",
+        "    fn with_pseudo_class(self, name: &'static str) -> Selector {",
+        "        self.with_class(name)",
+        "    }",
+        "}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--check", action="store_true")
@@ -262,6 +368,10 @@ def main():
         trait = "".join(part.capitalize() for part in feature.split("-")) + "AttachedProps"
         text = generate(group_model, crates, title, trait)
         outputs.append((os.path.join(os.path.dirname(OUTPUT), file_name), text, group_model))
+
+    directories = [directory for directory, _ in CRATES]
+    directories += [directory for _, _, group, _ in GROUPS for directory, _ in group]
+    outputs.append((PSEUDO_CLASSES_OUTPUT, generate_pseudo_classes(read_pseudo_classes(directories)), model))
 
     if options.report:
         lines = sorted({line for _, _, m in outputs for line in m.left_out})
