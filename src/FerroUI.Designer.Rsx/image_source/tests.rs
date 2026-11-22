@@ -29,7 +29,7 @@ fn badge() {{ rsx! {{ Image {{ source(texture(/* selected 🧭 */ r#"{first}"#,)
     .unwrap();
     assert_eq!(projection.omitted_count, 0);
     assert!(projection.xaml().contains(first));
-    let xaml = ferroui_designer_core::Document::new(&projection.xaml()).unwrap();
+    let xaml = ferroui_designer_core::Document::new(projection.xaml()).unwrap();
     let rust = crate::xaml_to_rsx(&xaml).unwrap();
     assert!(rust.contains(&format!("::ferroui_view::asset_image({first:?})")));
     let patches = projection
