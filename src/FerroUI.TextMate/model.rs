@@ -279,11 +279,15 @@ impl TokenizationModel {
                 options,
                 cancelled,
             )?;
-            if result.stopped_early {
+            // Cancellation publishes nothing. A line that used up its work budget keeps the
+            // tokens it reached, so that one expensive line cannot stop the lines after it.
+            if result.stopped_early && cancelled.is_some_and(|cancelled| cancelled()) {
                 stopped_early = true;
                 break;
             }
-            let converged = index >= self.invalid_until
+            stopped_early |= result.stopped_early;
+            let converged = !result.stopped_early
+                && index >= self.invalid_until
                 && self.cache[index].as_ref().is_some_and(|old| {
                     old.end_state == result.rule_stack && old.tokens == result.tokens
                 });
@@ -306,9 +310,12 @@ impl TokenizationModel {
                 return Ok(TokenizationUpdate {
                     lines: start..index,
                     pending: self.invalid_from.is_some(),
-                    stopped_early: false,
+                    stopped_early,
                 });
             }
+            // The cached lines after this one were made from another state: a later pass can
+            // only converge past them.
+            self.invalid_until = self.invalid_until.max(index);
         }
         self.invalid_from = (index < self.lines.len()).then_some(index);
         if self.invalid_from.is_none() {
