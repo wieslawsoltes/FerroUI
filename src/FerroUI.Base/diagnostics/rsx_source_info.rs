@@ -30,6 +30,8 @@ pub struct RsxSourceInfo {
     resolve: fn(Self) -> RsxSourceLocation,
 }
 
+crate::styled_value!(RsxSourceInfo);
+
 impl PartialEq for RsxSourceInfo {
     fn eq(&self, other: &Self) -> bool {
         self.file == other.file
