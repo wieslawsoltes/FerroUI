@@ -44,6 +44,16 @@ on:
         type: boolean
         required: false
         default: false
+      symbols:
+        description: With samples, the generic families of the builders hello world and the catalog from their symbols, in release and dist (dist linked again with its symbols), and on macOS the link line and what the linker deduplicates (#1001)
+        type: boolean
+        required: false
+        default: false
+      platforms:
+        description: Identical code folding elsewhere (#1001) - Android arm64 dist with --icf=safe and --icf=all, the link lines of iOS and macOS, and the wasm-opt passes of the browser catalog
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -413,8 +423,9 @@ jobs:
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
           mkdir -p measured
-          for app in hello_window hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks todo-mvc winui-theme-gallery control-catalog-desktop; do
+          for app in hello_window hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks todo-mvc winui-theme-gallery winui-gallery control-catalog-desktop; do
             case "$app" in
+              winui-gallery) cargo build --locked --profile "$PROFILE" -p winui-gallery --features winui-gallery/desktop --bin winui-gallery; file="target/$PROFILE/winui-gallery" ;;
               hello_window) cargo build --locked --profile "$PROFILE" -p ferroui-desktop --example hello_window; file="target/$PROFILE/examples/hello_window" ;;
               *) cargo build --locked --profile "$PROFILE" -p "$app" --bin "$app"; file="target/$PROFILE/$app" ;;
             esac
@@ -424,8 +435,77 @@ jobs:
             text=$(size -m "measured/$app" | awk '/Section __text:/ { print $3; exit }')
             printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
               "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+            printf '%s\t%s\t%s\n' "$app" "$stripped" "${text:-0}" >> "exact-sizes-$PROFILE-$SIDE.tsv"
           done
           echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Keep the exact sizes
+        if: always() && env.MEASURE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: exact-sizes-${{ matrix.profile }}-${{ matrix.side }}
+          path: exact-sizes-${{ matrix.profile }}-${{ matrix.side }}.tsv
+          retention-days: 7
+          if-no-files-found: ignore
+      # The generic families from the symbols (#1001): the release executables have them; the dist
+      # executables are linked again without stripping, with the link line and the list of what
+      # ld64 deduplicates, so that the option is shown to reach the linker.
+      - name: Check out the report of the generic families
+        if: inputs.symbols && env.MEASURE == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          sparse-checkout: |
+            scripts/generic_instances.py
+            scripts/symsize.py
+          sparse-checkout-cone-mode: false
+      - name: Generic instances and the deduplication of the linker
+        if: inputs.symbols && env.MEASURE == 'true'
+        env:
+          CARGO_TERM_COLOR: never
+          PROFILE: ${{ matrix.profile }}
+          SIDE: ${{ matrix.side }}
+        run: |
+          out="symbols-$PROFILE-$SIDE"
+          mkdir -p "$out"
+          ld -v > "$out/ld-version.txt" 2>&1 || true
+          verbose=(-C "link-arg=-Wl,-verbose_deduplicate")
+          if ld -verbose_deduplicate 2>&1 | grep -q 'unknown option'; then verbose=(); fi
+          for app in hello-world-builders control-catalog-desktop; do
+            binary="measured/$app"
+            if [ "$PROFILE" = dist ]; then
+              if ! cargo rustc --locked --profile dist -p "$app" --bin "$app" -- -C strip=none "${verbose[@]}" \
+                --print=link-args -W linker-messages -W linker-info > "$out/$app.log" 2>&1; then
+                tail -n 40 "$out/$app.log"
+                exit 1
+              fi
+              binary="target/dist/$app"
+            fi
+            python3 -I tools/scripts/generic_instances.py "$binary" --top 60 --json "$out/$app.json" > "$out/$app.txt"
+            {
+              echo "### $app, $PROFILE, $SIDE: generic families"
+              echo
+              echo '```'
+              head -n 2 "$out/$app.txt"
+              sed -n '/instances .*family/,$p' "$out/$app.txt" | head -n 26 | cut -c1-120
+              if [ "$PROFILE" = dist ]; then
+                echo "the link line names -verbose_deduplicate: $(grep -c -- '-verbose_deduplicate' "$out/$app.log")"
+                # What ld64 says it deduplicated, without the link line itself.
+                grep -v -- '-verbose_deduplicate' "$out/$app.log" | grep -i -E 'dedup|merged|saving' > "$out/$app.dedup" || true
+                echo "lines of the linker about deduplication: $(wc -l < "$out/$app.dedup" | tr -d ' ')"
+                head -n 4 "$out/$app.dedup" | cut -c1-140
+                tail -n 3 "$out/$app.dedup" | cut -c1-140
+              fi
+              echo '```'
+            } | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+      - name: Keep the generic families
+        if: always() && inputs.symbols && env.MEASURE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: symbols-${{ matrix.profile }}-${{ matrix.side }}
+          path: symbols-${{ matrix.profile }}-${{ matrix.side }}
+          retention-days: 7
       # Identical code folding (#1001): ld64 folds some duplicates by default; the dist build of
       # the ref linked again without it (-no_deduplicate), in a target folder of its own.
       - name: Without the deduplication of the linker
@@ -474,6 +554,31 @@ jobs:
             measured/todo-mvc
           retention-days: 7
           if-no-files-found: ignore
+
+  # The exact bytes of the stripped executables and of their code, of the ref and the baseline side
+  # by side with the signed difference (`scripts/perf/exact_sizes.py` of the workflow's own commit,
+  # so that a tree from before the script is compared too). The tables in MB above stay as they are.
+  macos-samples-exact:
+    name: Exact sizes (macOS)
+    if: always() && inputs.samples
+    needs: macos-samples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the report script
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: |
+            scripts/perf/exact_sizes.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exact-sizes-*
+          merge-multiple: true
+          path: exact-sizes
+      - name: Compare
+        shell: bash
+        run: python3 -I tools/scripts/perf/exact_sizes.py exact-sizes | tee -a "$GITHUB_STEP_SUMMARY"
 
   # The C samples of the C ABI (docs/binary-size.md, section 3.7; #978): `hello_world.c` and
   # `gauge.c` linked against `ferroui-capi` in the full mode and, where the tree has it, by use
@@ -553,6 +658,163 @@ jobs:
                 "capi-size-baseline-$profile.json" --markdown "$GITHUB_STEP_SUMMARY"
             fi
           done
+
+  # Identical code folding on Android (#1001): the catalog's library for arm64 in dist, linked again
+  # with lld's --icf=safe and --icf=all. Only the final crate is linked again.
+  android-folding:
+    name: Identical code folding (Android arm64, dist)
+    if: inputs.platforms
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out the link report
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          sparse-checkout: scripts/perf/link_flags.py
+          sparse-checkout-cone-mode: false
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          path: tree
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - name: The NDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_HOME" "ndk;28.2.13676358" > /dev/null
+      - name: Build, link and measure
+        working-directory: tree
+        shell: bash
+        env:
+          REF: ${{ inputs.ref }}
+          CARGO_TERM_COLOR: never
+        run: |
+          . scripts/android/env.sh
+          target=aarch64-linux-android
+          file="target/$target/dist/libcontrol_catalog_android.so"
+          link() {
+            cargo rustc --locked --profile dist -p control-catalog-android --lib --target "$target" -- "$@"
+          }
+          link --print=link-args > "$RUNNER_TEMP/android-link.txt"
+          {
+            echo "## Android arm64, \`$REF\` at \`$(git rev-parse HEAD)\`, dist, \`control-catalog-android\`"
+            echo
+            echo "The options of the link line:"
+            echo
+            echo '```'
+            python3 -I ../tools/scripts/perf/link_flags.py "$RUNNER_TEMP/android-link.txt"
+            echo '```'
+            echo
+            echo '```'
+            printf '%-10s %12s %12s\n' folding 'bytes' '.text'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          measure() {
+            printf '%-10s %12s %12s\n' "$1" "$(stat -c %s "$file")" \
+              "$("$FERROUI_ANDROID_TOOLCHAIN/llvm-size" -A "$file" | awk '$1 == ".text" { print $2 }')" | tee -a "$GITHUB_STEP_SUMMARY"
+          }
+          measure none
+          link -C link-arg=-Wl,--icf=safe > /dev/null
+          measure safe
+          link -C link-arg=-Wl,--icf=all > /dev/null
+          measure all
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # How iOS is linked against macOS (#1001), dist: the options of the two link lines.
+  ios-link-line:
+    name: The link lines of iOS and macOS (dist)
+    if: inputs.platforms
+    runs-on: macos-15
+    timeout-minutes: 150
+    steps:
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Check out the link report
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          sparse-checkout: scripts/perf/link_flags.py
+          sparse-checkout-cone-mode: false
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios-sim
+      - name: The two link lines
+        env:
+          REF: ${{ inputs.ref }}
+          CARGO_TERM_COLOR: never
+        run: |
+          cargo rustc --locked --profile dist -p ferroui-desktop --example hello_window -- --print=link-args \
+            > "$RUNNER_TEMP/macos.txt"
+          cargo rustc --locked --profile dist -p ferroui-ios --features example --example ios_view \
+            --target aarch64-apple-ios-sim -- --print=link-args > "$RUNNER_TEMP/ios.txt"
+          {
+            echo "## The link lines of macOS (hello_window) and iOS (ios_view, simulator), \`$REF\` at \`$(git rev-parse HEAD)\`, dist"
+            echo
+            echo '```'
+            ld -v 2>&1 | head -n 2
+            (cd "$RUNNER_TEMP" && python3 -I "$GITHUB_WORKSPACE/tools/scripts/perf/link_flags.py" macos.txt ios.txt)
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # Which passes wasm-opt runs on the browser catalog (#1001). Duplicate function elimination is
+  # measured only if the link does not already run it.
+  browser-wasm-passes:
+    name: The wasm-opt passes of the browser catalog
+    if: inputs.platforms
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: ./.github/actions/browser-toolchain
+        with:
+          cache-key: browser
+      - name: Link with the passes logged
+        env:
+          REF: ${{ inputs.ref }}
+          CARGO_TERM_COLOR: never
+        run: |
+          log="$RUNNER_TEMP/emcc.log"
+          real="$(command -v em++)"
+          mkdir -p "$RUNNER_TEMP/linker"
+          cat > "$RUNNER_TEMP/linker/em++" <<EOF
+          #!/bin/bash
+          EMCC_VERBOSE=1 BINARYEN_PASS_DEBUG=1 "$real" "\$@" >> "$log" 2>&1
+          EOF
+          chmod +x "$RUNNER_TEMP/linker/em++"
+          export CARGO_TARGET_WASM32_UNKNOWN_EMSCRIPTEN_LINKER="$RUNNER_TEMP/linker/em++"
+          if ! cargo build --locked --profile browser --target wasm32-unknown-emscripten \
+            -p control-catalog-browser --bin control-catalog-browser; then
+            tail -n 40 "$log"
+            exit 1
+          fi
+          wasm=target/wasm32-unknown-emscripten/browser/control_catalog_browser.wasm
+          sizes() {
+            node -e 'const z = require("zlib"), b = require("fs").readFileSync(process.argv[1]);
+              console.log(process.argv[2].padEnd(30), "raw", b.length, "gzip -9", z.gzipSync(b, { level: 9 }).length,
+                "brotli 11", z.brotliCompressSync(b).length);' "$1" "$2"
+          }
+          {
+            echo "## The browser catalog, \`$REF\` at \`$(git rev-parse HEAD)\`, profile \`browser\`"
+            echo
+            echo '```'
+            echo "wasm-opt commands of the link: $(grep -c -E '/wasm-opt( |")' "$log")"
+            grep -E '/wasm-opt( |")' "$log" | sed -E 's#[^ ]*/##g' | cut -c1-220 | head -n 6
+            echo "duplicate-function-elimination runs: $(grep -c 'running pass: duplicate-function-elimination' "$log")"
+            echo "passes run: $(grep -o 'running pass: [a-z0-9-]*' "$log" | wc -l)"
+            sizes "$wasm" "as linked"
+            if ! grep -q 'running pass: duplicate-function-elimination' "$log"; then
+              "$EMSDK/upstream/bin/wasm-opt" --all-features --duplicate-function-elimination "$wasm" -o "$RUNNER_TEMP/dfe.wasm"
+              sizes "$RUNNER_TEMP/dfe.wasm" "with the pass"
+            fi
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
   # Identical code folding at link time on Linux (#1001): the HelloWorld samples, the WinUI theme
   # gallery and the catalog of the ref with the dist profile, linked as rustc links them, with

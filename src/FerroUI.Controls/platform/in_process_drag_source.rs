@@ -253,6 +253,11 @@ impl State {
     }
 
     fn process_key_events(&self, e: &RawKeyEventArgs) {
+        // More input can arrive before the completed future disposes its subscription.
+        if self.result.effect.get().is_some() {
+            return;
+        }
+
         if e.type_() == RawKeyEventType::KeyDown && e.key() == Key::Escape {
             if let Some(last_source) = self.last_root() {
                 self.raise_event_and_update_cursor(
@@ -298,6 +303,10 @@ impl State {
     }
 
     fn process_mouse_events(&self, e: &RawPointerEventArgs) {
+        if self.result.effect.get().is_some() {
+            return;
+        }
+
         if self.initial_input_modifiers.get().is_none() {
             self.initial_input_modifiers.set(Some(e.input_modifiers() & MOUSE_INPUTMODIFIERS));
         }
