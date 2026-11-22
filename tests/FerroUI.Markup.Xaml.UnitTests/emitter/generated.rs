@@ -71,6 +71,11 @@ const XML_NAMESPACES_7: rt::XmlNamespaceTable = &[
     ("p", &[("Wrong.Scope", "", &[])]),
 ];
 
+/// The XML namespaces of documents of this file, as the compiler resolved them.
+const XML_NAMESPACES_8: rt::XmlNamespaceTable = &[
+    ("", &[("FerroUI", "FerroUI.Base", &[]), ("FerroUI.Animation", "FerroUI.Base", &[]), ("FerroUI.Animation.Easings", "FerroUI.Base", &[]), ("FerroUI.Controls", "FerroUI.Base", &[]), ("FerroUI.Data", "FerroUI.Base", &[]), ("FerroUI.Data.Converters", "FerroUI.Base", &[]), ("FerroUI.Input", "FerroUI.Base", &[]), ("FerroUI.Input.GestureRecognizers", "FerroUI.Base", &[]), ("FerroUI.Input.TextInput", "FerroUI.Base", &[]), ("FerroUI.Layout", "FerroUI.Base", &[]), ("FerroUI.LogicalTree", "FerroUI.Base", &[]), ("FerroUI.Media", "FerroUI.Base", &[]), ("FerroUI.Media.Imaging", "FerroUI.Base", &[]), ("FerroUI.Media.Transformation", "FerroUI.Base", &[]), ("FerroUI.Styling", "FerroUI.Base", &[]), ("FerroUI", "FerroUI.Controls", &[]), ("FerroUI.Automation", "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Controls.Embedding", "FerroUI.Controls", &[]), ("FerroUI.Controls.Presenters", "FerroUI.Controls", &[]), ("FerroUI.Controls.Primitives", "FerroUI.Controls", &[]), ("FerroUI.Controls.Shapes", "FerroUI.Controls", &[]), ("FerroUI.Controls.Templates", "FerroUI.Controls", &[]), ("FerroUI.Controls.Notifications", "FerroUI.Controls", &[]), ("FerroUI.Controls.Chrome", "FerroUI.Controls", &[]), ("FerroUI.Controls.Documents", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Controls", &[]), ("FerroUI.Markup.Xaml.MarkupExtensions", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Styling", "FerroUI.Markup.Xaml", &[]), ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml", &[])]),
+];
+
 /// The base URI and the XML namespaces of `border_empty.xaml`.
 static BUILD_BORDER_EMPTY_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/border_empty.xaml"), namespaces: XML_NAMESPACES_0 };
 
@@ -5715,6 +5720,137 @@ fn build_scoped_namespace_bindings_xaml_untyped(
     ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
 }
 
+/// The base URI and the XML namespaces of `static_resource_collection.xaml`.
+static BUILD_STATIC_RESOURCE_COLLECTION_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_collection.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `static_resource_collection.xaml`.
+pub fn build_static_resource_collection_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    // static_resource_collection.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_COLLECTION_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    rt::push_parent(&context, &stack_panel_0);
+    // static_resource_collection.xaml(2,25) Resources (resource)
+    let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_static_resource_collection_xaml_deferred_0, 2, 25)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 2, 25)?, rt::string_object("Shared"), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 2, 25)?;
+    // static_resource_collection.xaml(3,3) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
+    // static_resource_collection.xaml(3,18) ResourceKey
+    ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::string_object("Shared"));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), "Children", false, rt::markup_handle(<::ferroui_controls::Controls as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 3, 3)?;
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), "FerroUI.Controls.Control", 3, 3)?, "FerroUI.Controls.Controls.Add", 0, 3, 3)?);
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+/// Builds the deferred content at `static_resource_collection.xaml(2,25)` (a template or a deferred resource).
+fn build_static_resource_collection_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let _context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_COLLECTION_XAML_DOCUMENT);
+    // static_resource_collection.xaml(2,25) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    border_0.begin_init();
+    // static_resource_collection.xaml(2,25) Width
+    border_0.set_value(::ferroui_base::layout::Layoutable::width_property(), 17.0_f64);
+    rt::end_init(&border_0, 2, 25)?;
+    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
+}
+
+fn build_static_resource_collection_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_static_resource_collection_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `static_resource_collection_invalid.xaml`.
+static BUILD_STATIC_RESOURCE_COLLECTION_INVALID_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_collection_invalid.xaml"), namespaces: XML_NAMESPACES_0 };
+
+/// Generated from `static_resource_collection_invalid.xaml`.
+pub fn build_static_resource_collection_invalid_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    // static_resource_collection_invalid.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_COLLECTION_INVALID_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    rt::push_parent(&context, &stack_panel_0);
+    // static_resource_collection_invalid.xaml(2,25) Resources (resource)
+    let dictionary_0 = ::ferroui_base::StyledElement::__markup_get_Resources(stack_panel_0.upcast_ref::<::ferroui_base::StyledElement>());
+    let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_static_resource_collection_invalid_xaml_deferred_0, 2, 25)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&rt::argument(dictionary_0.clone(), "FerroUI.Controls.ResourceDictionary.AddDeferred", 0, 2, 25)?, rt::string_object("Shared"), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 2, 25)?;
+    // static_resource_collection_invalid.xaml(3,3) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
+    // static_resource_collection_invalid.xaml(3,18) ResourceKey
+    ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::string_object("Shared"));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), "Children", false, rt::markup_handle(<::ferroui_controls::Controls as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 3, 3)?;
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), "FerroUI.Controls.Control", 3, 3)?, "FerroUI.Controls.Controls.Add", 0, 3, 3)?);
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+/// Builds the deferred content at `static_resource_collection_invalid.xaml(2,25)` (a template or a deferred resource).
+fn build_static_resource_collection_invalid_xaml_deferred_0(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let _context = rt::deferred_context(service_provider, &BUILD_STATIC_RESOURCE_COLLECTION_INVALID_XAML_DOCUMENT);
+    // static_resource_collection_invalid.xaml(2,25) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // static_resource_collection_invalid.xaml(2,25) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294901760_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+fn build_static_resource_collection_invalid_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_static_resource_collection_invalid_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
+/// The base URI and the XML namespaces of `static_resource_collection_missing.xaml`.
+static BUILD_STATIC_RESOURCE_COLLECTION_MISSING_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://FerroUI.Markup.Xaml.UnitTests/Emitter/static_resource_collection_missing.xaml"), namespaces: XML_NAMESPACES_8 };
+
+/// Generated from `static_resource_collection_missing.xaml`.
+pub fn build_static_resource_collection_missing_xaml(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::Ref<::ferroui_controls::StackPanel>, ::ferroui_markup_xaml::XamlLoadError> {
+    // static_resource_collection_missing.xaml(1,2) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    let context = rt::populate_context(service_provider, &BUILD_STATIC_RESOURCE_COLLECTION_MISSING_XAML_DOCUMENT, rt::to_value(stack_panel_0.clone()));
+    let name_scope = context.name_scope_field();
+    stack_panel_0.begin_init();
+    rt::push_parent(&context, &stack_panel_0);
+    // static_resource_collection_missing.xaml(2,3) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_0();
+    // static_resource_collection_missing.xaml(2,18) ResourceKey
+    ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_set_ResourceKey(&static_resource_extension_0, rt::string_object("Missing"));
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_controls::Panel as ::ferroui_base::StaticType>::TYPE), "Children", false, rt::markup_handle(<::ferroui_controls::Controls as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 2, 3)?;
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), "FerroUI.Controls.Control", 2, 3)?, "FerroUI.Controls.Controls.Add", 0, 2, 3)?);
+    rt::pop_parent_end_init(&context, &stack_panel_0, 1, 2)?;
+    rt::complete_root_name_scope(::core::option::Option::Some(&stack_panel_0), name_scope.as_ref(), 1, 2)?;
+    ::core::result::Result::Ok(stack_panel_0)
+}
+
+fn build_static_resource_collection_missing_xaml_untyped(
+    service_provider: ::core::option::Option<::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,
+) -> ::core::result::Result<::ferroui_base::BoxedValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let root = build_static_resource_collection_missing_xaml(service_provider)?;
+    ::core::result::Result::Ok(::std::rc::Rc::new(root) as ::ferroui_base::BoxedValue)
+}
+
 /// The build function of every eligible public document, by document name.
 pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("border_empty.xaml", build_border_empty_xaml_untyped as BuildDocument),
@@ -5848,6 +5984,9 @@ pub const DOCUMENTS: &[(&str, BuildDocument)] = &[
     ("items_source_indexer.xaml", build_items_source_indexer_xaml_untyped as BuildDocument),
     ("scoped_namespace_types.xaml", build_scoped_namespace_types_xaml_untyped as BuildDocument),
     ("scoped_namespace_bindings.xaml", build_scoped_namespace_bindings_xaml_untyped as BuildDocument),
+    ("static_resource_collection.xaml", build_static_resource_collection_xaml_untyped as BuildDocument),
+    ("static_resource_collection_invalid.xaml", build_static_resource_collection_invalid_xaml_untyped as BuildDocument),
+    ("static_resource_collection_missing.xaml", build_static_resource_collection_missing_xaml_untyped as BuildDocument),
 ];
 
 /// The loader of the compiled markup of the assembly: builds the document with the URI
