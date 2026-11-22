@@ -19,6 +19,7 @@ import { verifyHostedStyles } from './hostedStyles';
 import { verifyHostedRustStyles } from './hostedRustStyles';
 import { verifyHostedSharedColors } from './hostedSharedColors';
 import { verifyHostedModuleColors } from './hostedModuleColors';
+import { verifyHostedRustTemplates } from './hostedRustTemplates';
 import { reviewStateSource } from './rsxStatesMcp';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
@@ -29,7 +30,9 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
     const endpoint = new URL(`tcp-bson://127.0.0.1:${port}/`);
     if (animationQuery) endpoint.search = animationQuery;
     const child = spawn(app, ['--ferroui-preview', '--transport', endpoint.toString(),
-        '--session-id', nonce, '--method', 'ferroui-remote', app], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
+        '--session-id', nonce, '--method', 'ferroui-remote', app], { stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+        env: { ...process.env, FERROUI_EDITOR_SOURCE: '1' },
+    });
     let log = '';
     child.stdout.on('data', chunk => { log = (log + chunk).slice(-10000); });
     child.stderr.on('data', chunk => { log = (log + chunk).slice(-10000); });
@@ -104,6 +107,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedRustStyles(preview, uri);
         await verifyHostedSharedColors(preview, uri);
         await verifyHostedModuleColors(preview);
+        await verifyHostedRustTemplates(preview);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

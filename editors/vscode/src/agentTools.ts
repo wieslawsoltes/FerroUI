@@ -60,6 +60,8 @@ interface Arguments extends CanvasAction, CargoSelection {
     include_source?: boolean;
     include_counterpart?: boolean;
     node?: number;
+    member?: string;
+    template_destination?: import('./hostedTemplates').HostedTemplateSelection['destination'];
     filter?: string;
     offset?: number;
     limit?: number;
@@ -269,7 +271,8 @@ export class AgentTools {
             case 'designer_hosted_template_copy':
                 return this.hosted.templateAction(document.uri, args.expected_generation,
                     { revision: args.expected_revision, sequence: args.expected_sequence }, args.node!,
-                    tool === 'designer_hosted_template_source' ? 'source' : tool === 'designer_hosted_template_copy_draft' ? 'draft' : 'apply', signal);
+                    tool === 'designer_hosted_template_source' ? 'source' : tool === 'designer_hosted_template_copy_draft' ? 'draft' : 'apply', signal,
+                    { member: args.member, destination: args.template_destination });
             case 'designer_hosted_animation':
                 return this.hosted.animate(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedAnimationAction, signal);

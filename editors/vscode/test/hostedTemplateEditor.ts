@@ -27,6 +27,13 @@ export async function verifyHostedTemplateEditor(preview: NativePreview, frame: 
     assert.equal(uri, themeUri);
     assert.equal(address, 'ferres://todo-workbench/Exported/Dictionaries/Outer.xaml');
     assert.equal(theme.split('\n')[range.start.line].slice(range.start.character, range.end.character), 'ControlTemplate');
+    const row = catalog.templates.find(template => template.label === 'ReviewQueue' && template.member === 'ItemTemplate');
+    assert.ok(row, 'The native items control retains the included data template identity');
+    assert.equal(row.definition.uri, themeUri);
+    assert.equal(row.canCopy, false);
+    await templates.locate(frame, row.owner, signal, { member: row.member });
+    const rowEditor = vscode.window.activeTextEditor;
+    assert.equal(rowEditor?.document.getText(rowEditor.selection), 'DataTemplate');
     assert.deepEqual(await templates.locate(frame, selected.owner, signal), { uri, range });
     const sourceEditor = vscode.window.activeTextEditor;
     assert.ok(sourceEditor);

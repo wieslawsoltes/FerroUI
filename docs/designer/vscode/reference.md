@@ -176,7 +176,9 @@ Use `designer_hosted_palette_source` with the accepted frame, the comparison cel
 
 ### Inspect App Preview templates with MCP
 
-Call `designer_hosted_templates` with the design `session` after opening XAML in App Preview. Each result includes its `owner`, `definition` with file URI and UTF-16 range, and `canCopy`. Pass the `owner` as `node` to `designer_hosted_template_source`. Pass the catalog's `generation` and `frame` as `expected_generation`, `expected_revision`, and `expected_sequence`.
+Call `designer_hosted_templates` with the design `session` after opening XAML or a registered Rust fixture in App Preview. Each result includes its `owner`, the template `member`, a `definition` with file URI and UTF-16 range, and `canCopy`. A mapped Rust template also reports its `assignment`. Pass the `owner` as `node` and the reported `member` to `designer_hosted_template_source`. Pass the catalog's `generation` and `frame` as `expected_generation`, `expected_revision`, and `expected_sequence`.
+
+The source tool opens the definition by default. For Rust, use `template_destination` with `assignment` to open the reference or `design` to open the mapped template body in Design.
 
 When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same fields to review the checked patch. Call `designer_hosted_template_copy` with write access to install the copy as one Undo step. Read a fresh catalog after a source or frame change. [App Preview template workflow](runtime.md#open-and-copy-app-preview-control-templates)
 

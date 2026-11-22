@@ -74,7 +74,7 @@ export class ReloadProcess {
     }
 }
 
-export interface ProjectMetadata { manifest: string; directories: string[]; package?: string }
+export interface ProjectMetadata { manifest: string; directories: string[]; package?: string; features?: string[] }
 
 export function buildCargo(target: CargoTarget, output: ProcessOutput): { process: ReloadProcess; artifact: Promise<string>; metadata(): ProjectMetadata } {
     const args = ['build', '--manifest-path', target.manifest, '--package', target.packageName,
@@ -83,13 +83,18 @@ export function buildCargo(target: CargoTarget, output: ProcessOutput): { proces
     const child = spawn(target.cargo, args, { ...options(target), cwd: target.cargoDirectory });
     const proc = new ReloadProcess(child);
     let artifact: string | undefined;
+    let features: string[] | undefined;
     const directories = new Set<string>();
     lines(child.stdout, line => {
         try {
             const message = JSON.parse(line);
             if (message.reason === 'compiler-artifact' && message.package_id === target.packageId
                 && message.target?.name === target.binary && message.target.kind.includes('bin')
-                && typeof message.executable === 'string') artifact = message.executable;
+                && typeof message.executable === 'string') {
+                artifact = message.executable;
+                features = Array.isArray(message.features) && message.features.every((feature: unknown) => typeof feature === 'string')
+                    ? message.features : undefined;
+            }
             if (message.reason === 'build-script-executed' && typeof message.out_dir === 'string' && path.isAbsolute(message.out_dir)) {
                 directories.add(message.out_dir);
             }
@@ -97,7 +102,7 @@ export function buildCargo(target: CargoTarget, output: ProcessOutput): { proces
         } catch { output.appendLine(line); }
     });
     lines(child.stderr, line => output.appendLine(line));
-    return { process: proc, metadata: () => ({ manifest: target.manifest, directories: [...directories], package: target.packageName }), artifact: proc.closed.then(code => {
+    return { process: proc, metadata: () => ({ manifest: target.manifest, directories: [...directories], package: target.packageName, features }), artifact: proc.closed.then(code => {
         if (code !== 0) throw new Error(`Cargo build failed${code === null ? '' : ` with exit code ${code}`}.`);
         if (!artifact) throw new Error('Cargo did not report an executable for the selected binary.');
         return artifact;

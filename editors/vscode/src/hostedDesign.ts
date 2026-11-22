@@ -14,7 +14,7 @@ import { HostedSources } from './hostedSources';
 import { runHostedStyleAction } from './hostedStyleActions';
 import { HostedStyles } from './hostedStyles';
 import type { FromHostedStyles, HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
-import { HostedTemplates } from './hostedTemplates';
+import { HostedTemplates, type HostedTemplateSelection } from './hostedTemplates';
 import { chooseHostedClipEdit } from './hostedClipActions';
 import { chooseHostedStateAction } from './hostedStateActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
@@ -202,11 +202,11 @@ export class HostedDesign implements vscode.Disposable {
     }
 
     templateAction(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, owner: number,
-        action: 'source' | 'draft' | 'apply', signal: AbortSignal) {
+        action: 'source' | 'draft' | 'apply', signal: AbortSignal, selection?: HostedTemplateSelection) {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         session.templateFrame();
-        if (action === 'source') return session.templates.locate(frame, owner, signal);
+        if (action === 'source') return session.templates.locate(frame, owner, signal, selection);
         return session.templates.copy(frame, owner, action === 'apply', signal);
     }
 
@@ -446,7 +446,8 @@ class HostedSession {
                 const source = await client.inProject(sourceOf(document, this.language, caret), this.project);
                 if (this.disposed || revision !== this.revision) return;
                 const rustProject = this.language === 'rust' && client.capabilities.hostedRustModules && this.target.crateRoot
-                    ? { manifest: this.target.manifest, targets: [this.target.crateRoot, ...(this.target.libraryRoots ?? [])] }
+                    ? { manifest: this.target.manifest, targets: [this.target.crateRoot, ...(this.target.libraryRoots ?? [])],
+                        features: this.project?.metadata.features }
                     : undefined;
                 const result = await client.renderHostedWorkspace({ revision, assembly, projectPath, document: source, fixture: this.fixture,
                     restoreAnimation: client.capabilities.hostedAnimationRestoration ? this.animations.restore : undefined,
@@ -496,7 +497,7 @@ class HostedSession {
 
     templateFrame(): HostedAnimationFrame {
         const frame = this.currentFrame;
-        if (!frame?.templatesAvailable) throw new Error('Wait for an XAML App Preview frame from an application built with template support.');
+        if (!frame?.templatesAvailable) throw new Error('Wait for an App Preview frame from an application built with template support.');
         return { revision: frame.revision, sequence: frame.sequence };
     }
 

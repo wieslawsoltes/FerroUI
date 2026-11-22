@@ -102,8 +102,9 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     assert.deepEqual(await discoverCargoTargets({ ...selection, features: [] }), []);
     const output = vscode.window.createOutputChannel('Cargo target test');
     try {
-        const { artifact } = buildCargo(target, output);
+        const { artifact, metadata } = buildCargo(target, output);
         assert.equal(path.basename(path.dirname(path.dirname(await artifact))), 'audit-output');
+        assert.deepEqual(metadata().features, ['hot-reload']);
     } finally {
         output.dispose();
     }

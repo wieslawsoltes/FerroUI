@@ -60,7 +60,15 @@ Open an XAML view with **FerroUI: Open App-Hosted Design**, then choose the **Ap
 
 Choose **Make Inline Copy** to customize an inherited template at the control's declaration. FerroUI checks resource references in the original and destination scopes, carries over required definitions, and applies the copy to the previewed buffer in one Undo step. Other declarations continue to use the shared template. Use **Open Template Source** to inspect a shared definition or a template with dependencies that need attention.
 
-Rebuild the preview binary with the current `ferroui-designer-support` to enable this toolbar action. The picker covers controls in the previewed XAML and template definitions from that file or the accepted workspace includes. Compiled Rust fixtures, programmatic templates, and repeated instances that resolve to different templates have no source action. Use the running app inspector for changes during interaction. [App Preview template tools](reference.md#inspect-app-preview-templates-with-mcp)
+Rebuild the preview binary with the current `ferroui-designer-support` to enable this toolbar action. The picker covers controls in the previewed XAML and template definitions from that file or the accepted workspace includes. [App Preview template tools](reference.md#inspect-app-preview-templates-with-mcp)
+
+### Trace item and cell templates in App Preview
+
+1. Open the XAML view or the Rust file that owns the RSX invocation. For Rust, choose the app's registered design fixture and select the invocation it mounts.
+2. In **App Preview Templates**, choose a control or column and its template property. Choose **Open Template Source** to open the effective inline or shared definition. XAML definitions can come from accepted workspace dictionaries.
+3. For a mapped Rust template, use **Open Template Assignment** to see where the control or column received it. Choose **Open Template in Design** to edit the RSX body using the existing canvas and source tools.
+
+Rust source actions use the active debug build's source records. App Preview follows the Cargo features reported for the selected executable and checks the control and template against the accepted frame. For a template in a separate Rust module, use fixture data that renders an item so the app can identify the declaration. After a source change, save and rebuild the app-hosted fixture when required. Reopen the picker after the frame updates. [Register app preview fixtures](#render-with-your-app-in-app-preview) · [App Preview template tools](reference.md#inspect-app-preview-templates-with-mcp)
 
 ### Edit a shared Rust palette in App Preview
 

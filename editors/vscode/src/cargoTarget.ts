@@ -33,6 +33,7 @@ interface CargoMetadata {
 export interface RustModuleProject {
     manifest: string;
     targets: string[];
+    features?: string[];
 }
 
 export interface CargoTarget {

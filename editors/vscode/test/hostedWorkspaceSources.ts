@@ -19,6 +19,7 @@ export async function verifyHostedWorkspaceSources(preview: NativePreview, updat
       <StackPanel Spacing="8">
         <Border Background="{StaticResource PanelAlias}" Padding="20"><app:PreviewBadge Text="Workspace draft"/></Border>
         <Button Name="ReviewAction" Theme="{StaticResource HostedActionTheme}" Content="Approve"/>
+        <ListBox Name="ReviewQueue" ItemTemplate="{StaticResource QueueRow}"/>
       </StackPanel>
     </Window>`;
     try {
@@ -31,6 +32,7 @@ export async function verifyHostedWorkspaceSources(preview: NativePreview, updat
         await mkdir(path.dirname(outer));
         const theme = dictionary(`<ResourceDictionary.MergedDictionaries><ResourceInclude Source="Color%20Set.xaml"/></ResourceDictionary.MergedDictionaries>
             <StaticResource x:Key="PanelAlias" ResourceKey="PanelBrush"/>
+            <DataTemplate x:Key="QueueRow"><TextBlock Text="{ReflectionBinding .}"/></DataTemplate>
             <ControlTheme x:Key="HostedActionTheme" TargetType="Button">
               <Setter Property="Template">
                 <ControlTemplate TargetType="Button">

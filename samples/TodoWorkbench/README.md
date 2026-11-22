@@ -78,6 +78,12 @@ native XAML registration. The **Empty queue** and **One task** fixtures mount
 Rust views from the built binary. **Source preview** follows the current editor
 buffer. A Cargo build updates the Rust fixture factories.
 
+Open [template_review.rs](app_preview/template_review.rs) in App Preview and
+choose **Review queue**. From **App Preview Templates**, select **Queue** and
+open its shared template in [template_rows.rs](app_preview/template_rows.rs).
+Use **Open Template Assignment** to return to the list's Rust expression. The
+picker also shows the priority selector and the table's account cell.
+
 Open [review_states.rs](app_preview/review_states.rs) in App Preview and choose
 **Interactive review**. Select **Review · Queued → Ready** in the animation
 picker. Scrub the live card's width and corner radius, or use the pencil to
