@@ -1,4 +1,5 @@
 //! Authored module files belonging to one selected Cargo target.
+mod features;
 mod paths;
 mod project;
 mod revision;
@@ -27,8 +28,8 @@ pub struct RustModuleSource {
     pub source: Arc<str>,
 }
 
-/// The explicit, unconditional source tree of a Cargo target. No Cargo command
-/// or application code runs during discovery.
+/// The explicit source tree of a Cargo target, including supported gates
+/// when Cargo reported its enabled features.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RustModuleSources {
     package_root: PathBuf,
@@ -37,6 +38,7 @@ pub struct RustModuleSources {
     files: BTreeMap<String, RustModuleSource>,
     edges: BTreeMap<String, BTreeMap<Vec<String>, String>>,
     dependencies: BTreeSet<String>,
+    features: Option<Vec<String>>,
 }
 
 impl RustModuleSources {
@@ -48,6 +50,17 @@ impl RustModuleSources {
         active_uri: &str,
         active_source: &str,
         buffers: &[PreviewSourceBuffer],
+    ) -> Option<Self> {
+        Self::capture_with_features(package, target, active_uri, active_source, buffers, None)
+    }
+
+    fn capture_with_features(
+        package: &Path,
+        target: &Path,
+        active_uri: &str,
+        active_source: &str,
+        buffers: &[PreviewSourceBuffer],
+        features: Option<&[String]>,
     ) -> Option<Self> {
         let root = package.canonicalize().ok()?;
         let directory = ModuleDirectory::file(target, true)?;
@@ -80,9 +93,11 @@ impl RustModuleSources {
                 files: BTreeMap::new(),
                 edges: BTreeMap::new(),
                 dependencies: BTreeSet::new(),
+                features: features.map(<[String]>::to_vec),
             },
             root,
             drafts,
+            features,
             remaining: MAX_TOTAL_BYTES,
         };
         builder.file(&target, &target_uri, directory)?;
@@ -115,6 +130,11 @@ impl RustModuleSources {
         self.source(self.edges.get(owner)?.get(modules)?)
     }
 
+    /// Resolve conditional module gates against this source capture's Cargo build.
+    pub fn module_enabled(&self, attributes: &[syn::Attribute]) -> Option<bool> {
+        features::enabled(attributes, self.features.as_deref())
+    }
+
     /// Includes both filename conventions for observed declarations. A newly
     /// created alternate file can make a previously accepted module ambiguous.
     pub fn dependencies(&self) -> impl Iterator<Item = &str> {
@@ -127,6 +147,7 @@ struct Builder<'a> {
     drafts: BTreeMap<PathBuf, Option<&'a str>>,
     remaining: usize,
     sources: RustModuleSources,
+    features: Option<&'a [String]>,
 }
 
 impl Builder<'_> {
@@ -145,7 +166,7 @@ impl Builder<'_> {
         // `parse_str` uses offsets into the unmodified text including CRLF. A
         // parser that strips a BOM or a shebang would shift those offsets.
         let syntax = syn::parse_str::<syn::File>(&source).ok()?;
-        if conditional(&syntax.attrs) {
+        if features::enabled(&syntax.attrs, self.features) != Some(true) {
             return None;
         }
         self.remaining -= source.len();
@@ -168,19 +189,20 @@ impl Builder<'_> {
         names: &mut Vec<String>,
     ) -> Option<()> {
         use syn::ext::IdentExt;
+        let declarations: Vec<_> = items.iter().filter_map(|item| {
+            let Item::Mod(item) = item else { return None };
+            let enabled = features::enabled(&item.attrs, self.features);
+            (enabled != Some(false)).then(|| (item, item.ident.unraw().to_string(), enabled))
+        }).collect();
         let mut counts = BTreeMap::new();
-        for item in items {
-            if let Item::Mod(item) = item {
-                *counts.entry(item.ident.unraw().to_string()).or_insert(0) += 1;
-            }
+        for (_, name, _) in &declarations {
+            *counts.entry(name.as_str()).or_insert(0) += 1;
         }
-        for item in items {
-            let Item::Mod(item) = item else { continue };
-            let name = item.ident.unraw().to_string();
-            if counts[&name] != 1 || conditional(&item.attrs) {
+        for (item, name, enabled) in &declarations {
+            if counts[name.as_str()] != 1 || *enabled != Some(true) {
                 continue;
             }
-            names.push(name);
+            names.push(name.clone());
             if let Some((_, items)) = &item.content {
                 self.modules(owner, &directory.inline(item)?, items, names)?;
             } else if let Some((path, directory)) = self.outline(directory, item) {
@@ -225,12 +247,6 @@ impl Builder<'_> {
         let directory = ModuleDirectory::file(&module.path, module.own_directory)?;
         Some((self.drafts.contains_key(&path) || path.is_file()).then_some((path, directory)))
     }
-}
-
-fn conditional(attributes: &[syn::Attribute]) -> bool {
-    attributes
-        .iter()
-        .any(|attribute| attribute.path().is_ident("cfg") || attribute.path().is_ident("cfg_attr"))
 }
 
 fn contained_file(root: &Path, path: &Path) -> Option<PathBuf> {

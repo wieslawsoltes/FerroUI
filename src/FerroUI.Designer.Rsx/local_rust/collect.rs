@@ -152,7 +152,14 @@ impl<'ast> Visit<'ast> for Collector<'_> {
 
     fn visit_item_mod(&mut self, item: &'ast syn::ItemMod) {
         let parent = self.current;
-        let indexed = self.scopes[parent].indexed && !conditional(&item.attrs);
+        let enabled = match self.modules {
+            Some(modules) => modules.module_enabled(&item.attrs),
+            None => (!conditional(&item.attrs)).then_some(true),
+        };
+        if enabled == Some(false) {
+            return;
+        }
+        let indexed = self.scopes[parent].indexed && enabled == Some(true);
         let parent_file = self.scopes[parent].file;
         self.names.push(item.ident.unraw().to_string());
         let external = if item.content.is_none() && indexed {
@@ -185,10 +192,10 @@ impl<'ast> Visit<'ast> for Collector<'_> {
             return;
         };
         let module = self.scopes.len();
-        let attached = if conditional(&item.attrs) {
-            Binding::Opaque
-        } else {
+        let attached = if enabled == Some(true) {
             Binding::Module(module)
+        } else {
+            Binding::Opaque
         };
         self.add(&item.ident, attached);
         self.scopes.push(Scope {

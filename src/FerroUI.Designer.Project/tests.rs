@@ -78,6 +78,7 @@ fn rust_palette_project_selects_a_unique_cargo_target() {
     let mut project = RustModuleProject {
         manifest: fixture.0.join("Cargo.toml"),
         targets: vec![fixture.0.join("worker.rs"), fixture.0.join("design.rs")],
+        features: None,
     };
     let capture = |project: &RustModuleProject| project.capture(&fixture.0, &active, "fn view() {}\n", &[]);
     let design = file_uri(fixture.0.join("design.rs")).unwrap();
@@ -85,6 +86,35 @@ fn rust_palette_project_selects_a_unique_cargo_target() {
     project.targets.push(fixture.0.join("design.rs"));
     assert_eq!(capture(&project).unwrap().target().uri, design);
     fixture.write("worker.rs", "mod views; fn main() {}\n");
+    assert!(capture(&project).is_none());
+}
+
+#[test]
+fn rust_modules_follow_the_built_features_and_reject_an_unknown_competitor() {
+    let fixture = Fixture::new();
+    fixture.write("Cargo.toml", "[package]\nname='review'\n");
+    let design = r#"
+#[cfg(all(feature = "app-preview", not(feature = "headless")))]
+#[path = "views.rs"]
+mod preview;
+#[cfg(any(feature = "headless", feature = "old-preview"))]
+#[path = "legacy.rs"]
+mod preview;
+"#;
+    fixture.write("main.rs", design);
+    fixture.write("legacy.rs", "");
+    let view = fixture.write("views.rs", "fn display() {}\r\n");
+    let mut project = RustModuleProject {
+        manifest: fixture.0.join("Cargo.toml"),
+        targets: vec![fixture.0.join("main.rs")],
+        features: Some(vec!["app-preview".into()]),
+    };
+    let capture = |project: &RustModuleProject| project.capture(&fixture.0, &view, "fn display() {}\r\n", &[]);
+    assert!(capture(&project).is_some());
+    project.features = None;
+    assert!(capture(&project).is_none());
+    project.features = Some(vec!["app-preview".into()]);
+    fixture.write("main.rs", &format!("{design}\n#[cfg(custom_cfg)] mod preview;"));
     assert!(capture(&project).is_none());
 }
 

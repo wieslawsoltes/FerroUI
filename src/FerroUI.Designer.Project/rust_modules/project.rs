@@ -9,6 +9,9 @@ use std::path::{Path, PathBuf};
 pub struct RustModuleProject {
     pub manifest: PathBuf,
     pub targets: Vec<PathBuf>,
+    /// Enabled features from the selected Cargo compiler artifact.
+    #[serde(default)]
+    pub features: Option<Vec<String>>,
 }
 
 impl From<&ProjectDescriptor> for RustModuleProject {
@@ -20,6 +23,7 @@ impl From<&ProjectDescriptor> for RustModuleProject {
                 .iter()
                 .map(|target| target.source.clone())
                 .collect(),
+            features: None,
         }
     }
 }
@@ -64,8 +68,9 @@ impl RustModuleProject {
             if !visited.insert(identity) {
                 continue;
             }
-            if let Some(sources) =
-                RustModuleSources::capture(package, target, active_uri, source, drafts)
+            if let Some(sources) = RustModuleSources::capture_with_features(
+                package, target, active_uri, source, drafts, self.features.as_deref(),
+            )
             {
                 if chosen.is_some() {
                     return None;
