@@ -136,6 +136,16 @@ pub(crate) fn intern_type(type_: &'static TypeInfo) -> Option<i64> {
     Some(i64::from(id))
 }
 
+/// Makes `type_` the class of the model ID `id` (a class entry of `api_types.rs`): the ID
+/// resolves with no lookup by name, also without the tables of types.
+pub(crate) fn register_model_type(id: i64, type_: &'static TypeInfo) {
+    if let Ok(id) = u32::try_from(id) {
+        if id > 0 {
+            lock(&TYPES).fill(id, type_);
+        }
+    }
+}
+
 /// The class of a type ID.
 pub(crate) fn type_info(id: i64) -> Result<&'static TypeInfo> {
     let not_found = || Error::new(FERRO_NOT_FOUND, format!("{id} is not a type ID"));
@@ -167,6 +177,43 @@ pub extern "C" fn ferro_api_fingerprint() -> i64 {
     api_ids::API_FINGERPRINT
 }
 
+/// The fingerprint of the selection of classes and calls the library was built for
+/// (`scripts/capi/app_library.py`, docs/c-abi.md, section 17): `0` for a library of every class
+/// and call (the full and the by-use builds of the crate). A binding generated from the same
+/// selection has the same value (`selectionFingerprint()` of the Osprey bindings,
+/// `FERRO_APP_SELECTION_FINGERPRINT` of the C header the generator writes); a binding accepts a
+/// library whose value is `0` or its own. Any thread.
+#[no_mangle]
+pub extern "C" fn ferro_selection_fingerprint() -> i64 {
+    SELECTION_FINGERPRINT
+}
+
+/// The value of `FERROUI_CAPI_SELECTION` when the crate was compiled (the generator of a
+/// per-application library sets it), else `0`.
+const SELECTION_FINGERPRINT: i64 = match option_env!("FERROUI_CAPI_SELECTION") {
+    Some(text) => parse_i64(text.as_bytes()),
+    None => 0,
+};
+
+/// A decimal `i64` at compile time; an invalid text fails the build.
+pub(crate) const fn parse_i64(text: &[u8]) -> i64 {
+    let (negative, mut index) = if !text.is_empty() && text[0] == b'-' { (true, 1) } else { (false, 0) };
+    assert!(index < text.len(), "FERROUI_CAPI_SELECTION is not a number");
+    let mut value: i64 = 0;
+    while index < text.len() {
+        let digit = text[index];
+        assert!(digit.is_ascii_digit(), "FERROUI_CAPI_SELECTION is not a number");
+        // Accumulated negatively, so that i64::MIN parses.
+        value = value * 10 - (digit - b'0') as i64;
+        index += 1;
+    }
+    if negative {
+        value
+    } else {
+        -value
+    }
+}
+
 /// Finds a class by its name (`Button`) or by its namespace and name (`FerroUI.Controls.Button`).
 pub(crate) fn find_type(name: &str) -> Result<&'static TypeInfo> {
     ferroui_controls::register_types();
@@ -178,10 +225,15 @@ pub(crate) fn find_type(name: &str) -> Result<&'static TypeInfo> {
             return Ok(found);
         }
     }
-    Err(Error::new(
-        FERRO_NOT_FOUND,
-        format!("no type is named {name}, or more than one is (give its namespace: FerroUI.Controls.{name})"),
-    ))
+    // Without the tables of types a class is known once it is registered (docs/c-abi.md, section 16).
+    #[cfg(not(feature = "type-tables"))]
+    let message = format!(
+        "no registered type is named {name}: this library knows a class once its entry is called \
+         (ferro_type_<class>(), which the generated bindings call) or the framework creates one"
+    );
+    #[cfg(feature = "type-tables")]
+    let message = format!("no type is named {name}, or more than one is (give its namespace: FerroUI.Controls.{name})");
+    Err(Error::new(FERRO_NOT_FOUND, message))
 }
 
 /// The type ID of the class named `name` (`Button`, or `FerroUI.Controls.Button` where two

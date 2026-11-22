@@ -2,7 +2,26 @@
 
 This experiment changes one FerroUI.Base source file in a disposable checkout. The Catalog retains its normal XAML, Skia backend, runtime metadata hooks and production Cargo profile.
 
-## Measured Catalog results
+## What landed
+
+PR #1023 landed a narrower form of this experiment. It shares the cold operations of a binding: start, stop, disposal, the data context change and error logging, with source resolution in `SourceSlot<S>` and the unboxed cache in `TypedValueSlot<V>`. The path that produces a value stays compiled for each expression, from the change notification of the source to the sink.
+
+The experiment's candidate shared that path too. On the benchmark gate it took 6.3% more instructions for each value a typed binding produces and 2.6% more for its setup, so it was not landed in that form.
+
+Stripped macOS executables in MB, PR #1022 and PR #1023 together against `44a5f9094`. PR #1022 (the casts of compiled markup) was not measured alone, so these figures are not the saving of the binding change by itself.
+
+| Application | `release` | Saved | `dist` | Saved |
+| --- | ---: | ---: | ---: | ---: |
+| Control catalog | 75.25 -> 74.25 | 1.00 | 61.29 -> 60.24 | 1.05 |
+| WinUI theme gallery | 33.92 -> 33.79 | 0.13 | 26.82 -> 26.67 | 0.15 |
+| TodoMvc | 22.79 -> 22.70 | 0.09 | 18.73 -> 18.67 | 0.06 |
+| Hello world | 18.49 -> 18.46 | 0.03 | 15.62 -> 15.60 | 0.02 |
+
+Measured the same way against the same baseline, the two PRs with the experiment's candidate saved 2.16 MB of the catalog in `release` and 1.72 MB in `dist`.
+
+## Measured Catalog results of the experiment's candidate
+
+Everything from here on describes the candidate that shared the value path as well, on its own Catalog revision. **These are not the figures of what landed.**
 
 | Binding implementation | Complete executable bytes | Typed binding instructions | Total machine instructions |
 | --- | ---: | ---: | ---: |
@@ -10,7 +29,7 @@ This experiment changes one FerroUI.Base source file in a disposable checkout. T
 | PR #496 tip binding file | 65,132,000 | 3,887,880 | 50,624,376 |
 | Separate model and value operations | 63,839,040 | 2,684,244 | 49,303,800 |
 
-The candidate saves **2,020,464 bytes (3.07%) against the matched stock build**, including **1,292,960 bytes beyond the PR-tip binding file**. The relocatable constant section grows by 55,904 bytes against stock. The archived 65,876,016-byte Catalog has identical stock instruction totals. Its extra 16,512 file bytes come from one 16,384-byte text-segment page and 128 bytes of link/signing data. The only section-length difference is 2,066 C-string bytes.
+The experiment's candidate saves **2,020,464 bytes (3.07%) against the matched stock build**, including **1,292,960 bytes beyond the PR-tip binding file**. The relocatable constant section grows by 55,904 bytes against stock. The archived 65,876,016-byte Catalog has identical stock instruction totals. Its extra 16,512 file bytes come from one 16,384-byte text-segment page and 128 bytes of link/signing data. The only section-length difference is 2,066 C-string bytes.
 
 On the linked 64-pair fixture, stock measures 3,643,008 bytes, PR tip 3,610,016, historical controller 3,460,576 and candidate 3,394,432. That is 66,144 bytes beyond the older controller on this probe. Restoring per-pair source subscription replacement increases the candidate fixture to 3,410,960 bytes.
 

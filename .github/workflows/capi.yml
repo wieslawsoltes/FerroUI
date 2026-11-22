@@ -60,7 +60,7 @@ jobs:
       - name: Rust tests of the ABI and the header check
         run: cargo test --locked -p ferroui-capi --no-default-features --lib
       - name: C tests of the ABI
-        run: make -C samples/CApi test CARGO_FLAGS=--no-default-features
+        run: make -C samples/CApi test CARGO_FLAGS="--no-default-features --features type-tables"
       # The cost of a call through the ABI against Rust (docs/c-abi.md, section 8): informative,
       # a shared runner is not a quiet machine.
       - name: Call overhead (informative)
@@ -123,6 +123,16 @@ jobs:
             echo "::endgroup::"
           done
           exit $failed
+      # Last, since it rebuilds the library of the steps above: the by-use mode (docs/c-abi.md,
+      # section 16): the library without the tables of types knows
+      # the classes the samples register with their entries, and the theme has their units.
+      - name: The samples with the library built by use
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+          FERROUI_SAMPLE_SCRIPT: 1
+        run: |
+          make -C samples/CApi run CARGO_FLAGS="--no-default-features --features desktop"
+          make -C samples/CApi run-gauge CARGO_FLAGS="--no-default-features --features desktop"
 
   sample-linux:
     name: C hello world (Linux, X11 under Xvfb)

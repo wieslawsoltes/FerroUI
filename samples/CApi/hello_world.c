@@ -13,6 +13,11 @@
 static int64_t content_id;
 static int64_t clicks;
 
+/* The classes the program uses, registered by their entries before the application starts
+ * (docs/c-abi.md, section 16): a library built without the tables of types knows only those, and
+ * a statically linked program keeps only those and the units of the theme they need. */
+static int64_t window_type, panel_type, text_type, button_type;
+
 /* Ends the program with the message of the last failure. */
 static void check(FerroStatus status, const char *what) {
     if (status != FERRO_OK) {
@@ -21,10 +26,10 @@ static void check(FerroStatus status, const char *what) {
     }
 }
 
-static FerroHandle create(const char *type) {
-    FerroHandle object = ferro_create(ferro_type_id(type, -1));
+static FerroHandle create(int64_t type) {
+    FerroHandle object = ferro_create(type);
     if (object == 0) {
-        fprintf(stderr, "ferro_create(%s) failed: %s\n", type, ferro_last_error());
+        fprintf(stderr, "ferro_create(%lld) failed: %s\n", (long long)type, ferro_last_error());
         exit(1);
     }
     return object;
@@ -49,21 +54,21 @@ static int64_t on_start(int64_t token) {
     (void)token;
     content_id = property("Content");
 
-    FerroHandle window = create("Window");
+    FerroHandle window = create(window_type);
     check(ferro_set_str(window, property("Title"), "Hello, World!", -1), "Title");
     check(ferro_set_f64(window, property("Width"), 400), "Width");
     check(ferro_set_f64(window, property("Height"), 240), "Height");
 
-    FerroHandle panel = create("StackPanel");
+    FerroHandle panel = create(panel_type);
     check(ferro_set_str(panel, property("HorizontalAlignment"), "Center", -1), "HorizontalAlignment");
     check(ferro_set_str(panel, property("VerticalAlignment"), "Center", -1), "VerticalAlignment");
     check(ferro_set_f64(panel, property("Spacing"), 12), "Spacing");
 
-    FerroHandle text = create("TextBlock");
+    FerroHandle text = create(text_type);
     check(ferro_set_str(text, property("Text"), "Hello, World!", -1), "Text");
     check(ferro_set_f64(text, property("FontSize"), 28), "FontSize");
 
-    FerroHandle button = create("Button");
+    FerroHandle button = create(button_type);
     check(ferro_set_str(button, property("HorizontalAlignment"), "Center", -1), "HorizontalAlignment");
     check(ferro_set_str(button, content_id, "Click me", -1), "Content");
     if (ferro_subscribe(button, ferro_event_id("Click", -1), on_click, 0) < 0) {
@@ -88,6 +93,10 @@ int main(void) {
         fprintf(stderr, "the library implements ABI %d, this program needs %d\n", ferro_abi_version(), FERRO_ABI_VERSION);
         return 1;
     }
+    window_type = ferro_type_window();
+    panel_type = ferro_type_stack_panel();
+    text_type = ferro_type_text_block();
+    button_type = ferro_type_button();
     FerroStatus status = ferro_app_run(NULL, on_start, 0);
     if (status != FERRO_OK) {
         fprintf(stderr, "ferro_app_run failed (%d): %s\n", status, ferro_last_error());

@@ -455,7 +455,11 @@ impl TopLevel {
                 top_level.invalidate_child_insets_padding();
             }
         }).detach();
+    }
 
+    /// Follows `ToolTip.ServiceEnabled`, from the initialisation of the tool tip class on the
+    /// thread (no element has the property before it): called by its static constructor.
+    pub(crate) fn tool_tips_in_use() {
         // The subscription lives as long as the property.
         ToolTip::service_enabled_property().changed().subscribe(Self::on_tool_tip_service_enabled_changed).detach();
     }
@@ -1009,7 +1013,7 @@ impl TopLevel {
     /// Calls `on_value` with the value of `property` now and whenever the
     /// property changes, for as long as the top-level has a platform
     /// implementation (private protected upstream: for derived classes).
-    pub fn create_platform_impl_binding<T: ferroui_base::PropertyValue>(
+    pub fn create_platform_impl_binding<T: ferroui_base::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         on_value: impl Fn(T) + 'static,

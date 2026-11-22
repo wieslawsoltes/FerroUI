@@ -100,6 +100,8 @@ fn untyped_conversion_temporary_drops_before_validation_or_coercion() {
         dropped: Rc<Cell<bool>>,
         writes: Rc<Cell<usize>>,
     }
+
+    crate::styled_value!(Output);
     impl Default for Output {
         fn default() -> Self {
             Self { number: 0, temporary: false, dropped: Rc::new(Cell::new(false)), writes: Rc::new(Cell::new(0)) }
@@ -211,6 +213,8 @@ fn untyped_conversion_releases_its_temporary_when_value_clone_panics() {
         drops: Rc<Cell<usize>>,
         writes: Rc<Cell<usize>>,
     }
+
+    crate::styled_value!(Output);
     impl Default for Output {
         fn default() -> Self {
             Self { temporary: false, drops: Rc::new(Cell::new(0)), writes: Rc::new(Cell::new(0)) }

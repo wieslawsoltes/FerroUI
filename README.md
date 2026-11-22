@@ -126,6 +126,7 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 
 | Crate | Description | Version | Downloads | Documentation |
 |---|---|---|---|---|
+| [`ferroui-ident-macros`](https://crates.io/crates/ferroui-ident-macros) | The macro that joins identifiers inside the declarative macros of FerroUI | [![version](https://img.shields.io/crates/v/ferroui-ident-macros.svg)](https://crates.io/crates/ferroui-ident-macros) | [![downloads](https://img.shields.io/crates/d/ferroui-ident-macros.svg)](https://crates.io/crates/ferroui-ident-macros) | [![docs.rs](https://img.shields.io/docsrs/ferroui-ident-macros)](https://docs.rs/ferroui-ident-macros) |
 | [`ferroui-protranslate-core`](https://crates.io/crates/ferroui-protranslate-core) | Framework-independent translation, culture and globalization services for FerroUI | [![version](https://img.shields.io/crates/v/ferroui-protranslate-core.svg)](https://crates.io/crates/ferroui-protranslate-core) | [![downloads](https://img.shields.io/crates/d/ferroui-protranslate-core.svg)](https://crates.io/crates/ferroui-protranslate-core) | [![docs.rs](https://img.shields.io/docsrs/ferroui-protranslate-core)](https://docs.rs/ferroui-protranslate-core) |
 | [`ferroui-protranslate-formats`](https://crates.io/crates/ferroui-protranslate-formats) | Loss-aware localization catalog import and export for ProTranslate | [![version](https://img.shields.io/crates/v/ferroui-protranslate-formats.svg)](https://crates.io/crates/ferroui-protranslate-formats) | [![downloads](https://img.shields.io/crates/d/ferroui-protranslate-formats.svg)](https://crates.io/crates/ferroui-protranslate-formats) | [![docs.rs](https://img.shields.io/docsrs/ferroui-protranslate-formats)](https://docs.rs/ferroui-protranslate-formats) |
 | [`ferroui-system`](https://crates.io/crates/ferroui-system) | The parts of the .NET base class library that FerroUI and its reusable libraries share: thread-local variables for every target, events, property and collection change notification, cancellation | [![version](https://img.shields.io/crates/v/ferroui-system.svg)](https://crates.io/crates/ferroui-system) | [![downloads](https://img.shields.io/crates/d/ferroui-system.svg)](https://crates.io/crates/ferroui-system) | [![docs.rs](https://img.shields.io/docsrs/ferroui-system)](https://docs.rs/ferroui-system) |
@@ -509,7 +510,7 @@ FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one cra
 
 ### C and other languages
 
-The crate `ferroui-capi` is a C ABI for every language: integer handles, type, property and event IDs looked up once by name, scalar setters and getters, callbacks with an integer token or user data, and the UI thread rule, with a C header generated from its sources. The guide [docs/c-abi.md](docs/c-abi.md) has the rules and a hello world in C (`make -C samples/CApi run`); bindings for C++, Go, Dart, C# and other languages are built on it (#636).
+The crate `ferroui-capi` is a C ABI for every language: integer handles, type, property and event IDs looked up once by name, scalar setters and getters, callbacks with an integer token or user data, and the UI thread rule, with a C header generated from its sources. The guide [docs/c-abi.md](docs/c-abi.md) has the rules and a hello world in C (`make -C samples/CApi run`), and [docs/c-abi-languages.md](docs/c-abi-languages.md) how to use it from your language (the fastest path for each kind of work, callbacks, the signal table, controls written in your language); bindings for C++, Go, Dart, C# and other languages are built on it (#636).
 
 ### Developer tools
 
@@ -566,6 +567,7 @@ Using the framework:
 - [x:Bind](docs/porting/x-bind.md): compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML in the run-time loader and the Rust emitter, its lifecycle, hot reload and the migration from `{Binding}` and the former WinUI adapter.
 - [Compiled XAML themes](docs/xaml-themes.md): how themes are compiled and trimmed, and the rules for writing or porting theme markup without reflection, extra size or start-up cost (compiled bindings, units, tables).
 - [The C ABI](docs/c-abi.md): `ferroui-capi` and its generated header, the rules of handles, IDs, values, errors, threads and callbacks, and a hello world in C.
+- [Using FerroUI from your language](docs/c-abi-languages.md): the fastest path for each kind of work, the FFI and the callbacks of each language, the signal table, and controls written in your language.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
 - [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the developer tools attached with F12, member by member.
 - [Binary size](docs/binary-size.md): what an executable is made of, the `dist` profile to ship with, and the settings that make it smaller.

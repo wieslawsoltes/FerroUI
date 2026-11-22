@@ -196,6 +196,11 @@ impl ToolTip {
     fn static_constructor() {
         // The subscription lives as long as the property.
         Self::is_open_property().changed().subscribe(Self::is_open_changed).detach();
+        // What follows the properties of the tool tips from outside the class, subscribed when
+        // the class is initialised rather than when the services and the top-level are (#612).
+        crate::tool_tip_service::tool_tips_in_use();
+        crate::top_level::TopLevel::tool_tips_in_use();
+        TIP_OF.set(Some(Self::get_tip));
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -631,4 +636,16 @@ impl IPopupHostProvider for ToolTipPopupHostProvider {
     fn popup_host_changed(&self, handler: Rc<dyn Fn(Option<&Rc<dyn IPopupHost>>)>) -> Rc<dyn IDisposable> {
         self.0.popup_host_changed(move |host| handler(host)).detach()
     }
+}
+
+ferroui_base::ferro_thread_local! {
+    /// [`ToolTip::get_tip`], stated by the static constructor of the class.
+    static TIP_OF: std::cell::Cell<Option<fn(&Control) -> Option<BoxedValue>>> = const { std::cell::Cell::new(None) };
+}
+
+/// The tip of `control` for code outside the class that only reads it (the help text of an
+/// automation peer): `None` before the class is initialised on the thread, as no control has a
+/// tip then, and without naming the class, so that such code does not link it (#612).
+pub(crate) fn tip_if_any(control: &Control) -> Option<BoxedValue> {
+    TIP_OF.get().and_then(|tip| tip(control))
 }

@@ -36,6 +36,9 @@ Everything here is measured unless a sentence says otherwise. Sizes are in MB of
 - **Direct3D 12 is not used.** On Windows Skia draws with OpenGL ES through ANGLE, which runs on
   Direct3D 11 (as upstream does), with software rendering as the fallback; ANGLE is linked into the
   executable instead of being shipped as a DLL beside it, and is about 4 % of it (section 7).
+- **A C program** linked statically against the C ABI is 36.7 MB with the full library and
+  20.4 MB with the library built by use, which links only the classes it registers (macOS,
+  release, the C hello world; section 3.7).
 
 No functionality was removed, no executable packer is used, and the panic strategy is unchanged.
 
@@ -251,6 +254,48 @@ What the numbers say:
   `ferroui_themes_winui` 15.6, `treedatagrid_demo` 7.4, the colour picker 5.2, Skia 5.1, the
   TreeDataGrid 5.0, ANGLE 6.6 (`libGLESv2` 4.6, `libmozangle` 2.0), the runtime library of
   markup 2.0, the dialogs 1.9, the Windows backend 1.4, HarfBuzz 0.8.
+
+### 3.7 The C ABI: the C samples
+
+A program in another language links `ferroui-capi` (docs/c-abi.md). Its size depends on the mode
+of the library and on the link: the full library (the default features) has the tables of types,
+so every class and the whole Fluent theme are reachable from it; the library built by use
+(`--no-default-features --features desktop`, docs/c-abi.md, section 16) links the classes the
+program registers with their entries and the theme units they need. Linked statically with dead
+stripping, a program keeps what it reaches; a dynamic library keeps every export.
+
+The workflow `Performance` measures `samples/CApi/hello_world.c` and `gauge.c` when it is
+dispatched with `capi` (and a `baseline` to compare with):
+`scripts/capi/size_report.py` builds the library of the tree with `cargo rustc --lib` (all its
+crate types, as `cargo build` writes them) in each mode, links each sample statically
+(`libferroui_capi.a`, the native libraries of `--print native-static-libs`, `-Wl,-dead_strip`, a
+link map) and dynamically, and records the sizes as written and stripped, `size -m` of the static
+program, the stripped dynamic library, and the static program by crate from the link map
+(`scripts/capi/size_by_crate.py`). A tree without the by-use mode is measured in the full mode.
+
+macOS arm64, release, stripped, MB (`size_report.py` on the branch of #978; a library built as a
+static library alone, as in docs/c-abi.md section 16.3, gives programs within 1.5 % of these):
+
+| Program | Static, full | Static, by use | `__TEXT`, full / by use | Dynamic program + library, full / by use |
+| --- | ---: | ---: | ---: | ---: |
+| `hello_world.c` | 36.69 | 20.35 | 31.39 / 17.65 | 36.04 / 31.75 |
+| `gauge.c` | 36.71 | 20.37 | 31.41 / 17.66 | 36.04 / 31.75 |
+| a Rust hello world on main (the range #976 targets) | 16.7 to 20.4 | | | |
+
+`hello_world.c` linked statically, by crate (MB of symbols), full against by use: `ferroui_base`
+14.70 / 8.11, `ferroui_controls` 5.87 / 1.58, native (Skia, HarfBuzz, codecs) 4.65 / 4.65, `core`
+3.74 / 1.79, `ferroui_themes_fluent` 2.01 / 0.38, `ferroui_markup_xaml` 0.54 / 0.27; total 34.44 /
+19.05.
+
+- **By use halves a static program**: the tables of types keep every class (with its metadata and
+  its markup support), and the whole theme keeps every control theme; without them the program
+  keeps the four classes of the hello world, the window, and the units of the theme they root.
+- **A dynamic library does not shrink with the program**: it exports every entry and every call,
+  so it keeps every class; the by-use library is smaller only by the tables (36.00 to 31.72 MB
+  stripped). An application that ships a dynamic library ships one built for it, with the exports
+  of its selection (#977).
+- **The static flags of each toolchain** (`-dead_strip`, `--gc-sections`, `/OPT:REF /OPT:ICF`,
+  SwiftPM, cgo) are in docs/c-abi-languages.md, section 7.
 
 ## 4. The changes
 
@@ -1187,6 +1232,496 @@ trimmed already (the kept units of eight samples, docs/porting/theme-trimming.md
 Tests: `source_references_are_the_names_and_strings_of_the_code` (the scanner),
 `a_theme_the_code_constructs_is_trimmed_by_what_the_sources_call` (`ferroui-build`).
 
+### 4.25 The initialisation of a class is reached through the class's own use (#612)
+
+A `TypeInfo` names the static initialisation of its class (`class_init`, which registers the
+properties of the class and runs its static constructor). #612 estimated in 2026-11 that this
+pointer kept about 1.5 MB in the bare window: every `TypeInfo` an application reaches would link
+the initialisation of its class. The estimate was measured again on main (`bf8e5e2f5`,
+`samples/HelloWorld`, release, macOS) before anything was changed.
+
+**What the pointer keeps today.** Hello world links the initialisation of 173 classes and types
+(`register_class::init` and `TYPE::class_init` in the symbol table); a smoke run
+(`FERROUI_SMOKE_EXIT_MS=1` under `lldb`, a breakpoint on each) runs 42 of them. On the
+whole-program module of section 2, `scripts/ircut.py --edges` with the references from every
+`TYPE` static to its initialiser removed loses 11.6 kB and no class: the initialisers themselves
+in their outer form. Every class whose initialisation never runs is reached by its own code
+(a property accessor, a constructor, a method) from a path that is linked but not taken. The
+gain the estimate described was taken by the earlier steps (sections 4.12, 4.13, 4.15 and 4.18
+to 4.21), which removed the references that reached a `TypeInfo` without its class.
+
+Taking the pointer out without the tables of types would not be free either: a compiled binding
+path to an attached property (`(local:Owner.Property)`) resolves the owner by its `TypeInfo` and
+looks the property up by name, which initialises an owner that nothing else initialised. That
+needs the generated code to initialise the owner itself, a change of the markup compiler, for
+about 12 kB. The pointer is left as it is.
+
+**What keeps the classes that never run.** Cutting the initialisers of the 130 classes that
+hello world links and its smoke run does not initialise loses at most 674 kB of the module (an
+initialiser inlined into its caller is not seen by the breakpoints, so the root class and the
+focus manager, which always run, are left out of the 130). One root kept most of it:
+
+- **The visual state mappers.** `TemplatedControl::apply_template` asks for the state mapper of
+  the control (the ports of WinUI's `ChangeVisualState`), which was found by downcasts to the six
+  families: button, toggle button, check box, radio button, list box item and text box. The
+  mappers name their classes' properties (`ListBoxItem::is_selected_property`,
+  `TextBox::text_property`), and an accessor initialises its class: every application with a
+  templated control linked the list box item and its selecting items control, the items
+  control, the text box and its presenter, the toggle button, and the panels their
+  initialisations name. Each class of a family now states its mapper from its static
+  constructor (`state_mappers::register`), and a control takes the mapper of its class or of its
+  nearest base class: the answers of the downcasts, as a control of a class exists only after
+  the class is initialised on its thread. `ircut.py` predicted 443 kB and 9 classes from the 5
+  references; the build gives:
+
+| `samples/HelloWorld`, release, macOS | main | after | Change |
+|---|---:|---:|---:|
+| Stripped file | 20,529,288 bytes | 19,949,824 bytes | -579,464 bytes (-2.8 %) |
+| `__TEXT,__text` | 16,257,332 bytes | 15,784,532 bytes | -472,800 bytes (-2.9 %) |
+| Class initialisers linked | 173 | 164 | -9 |
+| Fat LTO `__text` (the build of the trace) | 14,888,284 bytes | 14,477,240 bytes | -411,044 bytes |
+| `dist` file (stripped) | 17,446,112 bytes | 16,980,368 bytes | -465,744 bytes (-2.7 %) |
+| `dist` `__TEXT,__text` | 14,391,440 bytes | 13,975,444 bytes | -415,996 bytes (-2.9 %) |
+
+The catalog and the WinUI gallery use every family, so they link the same classes (built
+together in one invocation, section 2):
+
+| Stripped file / `__TEXT,__text`, macOS | main | after |
+|---|---:|---:|
+| `control-catalog-desktop`, release | 80,675,136 / 60,846,200 | 80,659,088 / 60,829,068 |
+| `control-catalog-desktop`, `dist` | 66,542,192 / 51,418,280 | 66,542,192 / 51,421,796 |
+| `winui-gallery`, release | 57,368,984 / 40,124,248 | 57,368,968 / 40,118,076 |
+| `winui-gallery`, `dist` | 47,339,720 / 33,483,900 | 47,339,712 / 33,484,580 |
+
+What is left after the change, by what each initialiser keeps alone (`ircut.py`, the
+candidate's module): 363 kB over 121 classes, none above 93 kB. The largest are real uses on
+paths hello world does not take: the key-frame animation (93 kB), the adorner layer of the focus
+adorner (34 kB), the visual state manager (33 kB; the button's mapper, which the class of the
+caption buttons states, names it), the data validation errors (24 kB) and the page (24 kB). Two roots of another kind, for later: the cast of
+`BorderGapMaskConverter` that `ferroui-controls` registers at start-up (section 4.16) keeps the
+grid it builds in its conversion (125 kB), and the tool tip service, created at start-up as
+upstream does, initialises the tool tip class to follow `ToolTip.Tip` (57 kB).
+
+Tests: `a_class_with_no_mapper_of_its_own_takes_the_one_of_its_family`,
+`a_family_has_its_mapper_once_its_class_is_initialised_on_the_thread`
+(`visual_state/state_mapper_tests.rs`), with the mapper tests of every family.
+
+### 4.26 An interface cast is registered by the construction of its implementation (#612, #566)
+
+Section 4.16 left some registrations at start-up: the casts of the types that members of markup
+types hold, because compiled markup casts such a value before it sets it
+(`rt::cast::<Option<Rc<dyn IValueConverter>>, _>`) and setting a member registers nothing. A
+cast of a concrete type to an interface names the interface table of the type, and through it
+everything its methods call. The dominator tree of the whole-program module of hello world
+(each symbol under the one every path from `main` to it passes through) put two of these
+families at the top of what hello world links and never runs:
+
+- **The page transitions of `ferroui-base`** (`CrossFade`, `PageSlide`, `Rotate3DTransition`,
+  `CompositePageTransition`, cast to `IPageTransition`): their `start` runs key-frame
+  animations, which bring the animation classes, an animator and an animation instance per
+  value type, and the 3D rotation transform. `ircut.py --edges` predicted 893 kB for the four
+  casts.
+- **The converters of `ferroui-controls`** (nine, cast to `IValueConverter` or
+  `IMultiValueConverter`): `BorderGapMaskConverter`, the gap in the border of a group box in the
+  Simple and Fluent themes, builds a grid in its conversion, which kept the grid's layout in an
+  application in the WinUI theme. Predicted 259 kB, 232 kB of it this one cast.
+
+Each of these types now registers its value conversions from its constructor, once per process
+(a `std::sync::Once` around `ValueTypes::register_used::<Self>()`), and its casts moved from the
+start-up list into its `ValueTypeRegistration`. Every value of the type is made there: the
+transitions have private fields, and the converters that were unit structs are
+`#[non_exhaustive]`, made with `new()`, `default()` or `instance()` outside their crate (a
+breaking change of 0.6). Compiled markup makes them through their markup constructors, which
+call these; with the tables of types every type registers at start-up as before. A converter
+or a transition that exists has its casts on every thread. The easings' casts to `Easing`
+stay at start-up: 1.2 kB together.
+
+| `samples/HelloWorld`, release, macOS | 4.25 | after | Change |
+|---|---:|---:|---:|
+| Stripped file | 19,949,824 bytes | 18,563,848 bytes | -1,385,976 bytes (-6.9 %) |
+| `__TEXT,__text` | 15,784,532 bytes | 14,551,128 bytes | -1,233,404 bytes (-7.8 %) |
+| Class initialisers linked | 164 | 150 | -14 |
+| `dist` file (stripped) | 16,980,368 bytes | 15,917,456 bytes | -1,062,912 bytes (-6.3 %) |
+| `dist` `__TEXT,__text` | 13,975,444 bytes | 13,007,668 bytes | -967,776 bytes (-6.9 %) |
+
+With section 4.25, hello world is 9.6 % smaller than on main in release (20,529,288 bytes)
+and 8.8 % in `dist` (17,446,112 bytes). The smoke run prints the same output.
+
+The catalog and the WinUI gallery make transitions and converters, so they keep the code;
+what changes is where the registrations are (one `Once` per constructor instead of one list):
+
+| Stripped file / `__TEXT,__text`, macOS | 4.25 | after |
+|---|---:|---:|
+| `control-catalog-desktop`, release | 80,659,088 / 60,829,068 | 80,591,664 / 60,758,972 |
+| `control-catalog-desktop`, `dist` | 66,542,192 / 51,421,796 | 66,542,272 / 51,431,696 |
+| `winui-gallery`, release | 57,368,968 / 40,118,076 | 57,351,336 / 40,089,864 |
+| `winui-gallery`, `dist` | 47,339,712 / 33,484,580 | 47,356,320 / 33,490,164 |
+
+Start-up of hello world (`FERROUI_SMOKE_EXIT_MS=1`, 11 launches of each build, alternating,
+release): main 159 ms, section 4.25 165 ms, this section 161 ms at the median, 147 ms at the
+minimum for all three; within the noise of a machine that was building at the same time.
+
+Tests: `a_page_transition_made_in_code_is_assignable_to_its_contract` (`ferroui-base`) and
+`a_converter_made_in_code_is_assignable_to_its_contract` (`ferroui-controls`), with the tests that
+create both through their markup constructors.
+
+### 4.27 A setter's markup extension describes `Setter.Value` alone (#612)
+
+A markup extension in the value of a setter (`<Setter Property=".." Value="{StaticResource
+..}" />`) asks for its target property; compiled markup gives it the description of
+`Setter.Value` (`rt::setter_value_property()`), which the runtime library built from the markup
+declaration of the setter. Naming the declaration keeps all of it: every member of the setter
+and what the members reach, the target property path of the setters of visual states and its
+typed bindings among them. `ircut.py` on the whole-program module after section 4.26: 93.6 kB
+reachable only through `setter_value_property`.
+
+`Setter.Value` is now also a `MarkupProperty` of its own in `ferroui-base`, built with the
+accessor forms of the declaration macros from the same functions and attributes as the member
+of the declaration (`Setter::__value_markup_property`), and the runtime library describes the
+target property from it, with the owner name the declaration gives for the messages of its
+accessors. The description is one per thread, as it was.
+
+| `samples/HelloWorld`, macOS | 4.26 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 18,563,848 bytes | 18,461,208 bytes | -102,640 bytes (-0.6 %) |
+| release, `__TEXT,__text` | 14,551,128 bytes | 14,473,576 bytes | -77,552 bytes (-0.5 %) |
+| `dist`, file | 15,917,456 bytes | 15,834,272 bytes | -83,184 bytes (-0.5 %) |
+| `dist`, `__TEXT,__text` | 13,007,668 bytes | 12,933,984 bytes | -73,684 bytes (-0.6 %) |
+
+Test: `the_setter_value_target_property_is_the_declared_member`
+(`ferroui-markup-xaml`, `xaml_il/runtime/compiled.rs`).
+
+### 4.28 The state mappers reach the visual state manager through what it states (#612)
+
+The state mappers of section 4.25 named `VisualStateManager::implementation_root` and
+`go_to_state`, so an application with a button linked the visual state manager and everything a
+change of state can run: the storyboards, the key-frame animations of its transitions, the
+easing functions, the adaptive and state triggers, and the content page and page classes that
+the root of the visual states is looked up through. An element has groups of visual states only
+once the manager is initialised on its thread (the groups are its attached property, whose
+accessor initialises the class), and hello world's templates have none.
+
+The manager's static constructor now states the two functions the mappers call
+(`state_mappers::states_in_use`); before that no mapper is installed, which is what happened
+anyway, as no element can have groups. The mappers name nothing of the manager. `ircut.py
+--edges` predicted 74 kB; the classes behind the manager made it more:
+
+| `samples/HelloWorld`, macOS | 4.27 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 18,461,208 bytes | 17,897,688 bytes | -563,520 bytes (-3.1 %) |
+| release, `__TEXT,__text` | 14,473,576 bytes | 14,017,584 bytes | -455,992 bytes (-3.2 %) |
+| Class initialisers linked | 150 | 123 | -27 |
+| `dist`, file | 15,834,272 bytes | 15,368,416 bytes | -465,856 bytes (-2.9 %) |
+| `dist`, `__TEXT,__text` | 12,933,984 bytes | 12,535,144 bytes | -398,840 bytes (-3.1 %) |
+
+The classes that left: the visual state manager, the storyboard and timeline, the double,
+color, point and object animations and their key frames (plain, easing and spline), the
+easing functions, the adaptive and state triggers, the content page and the page.
+
+Test: `the_manager_is_named_by_the_mappers_once_an_element_has_groups`
+(`visual_state/state_mapper_tests.rs`, on a thread of its own).
+
+### 4.29 The tool tips are followed from the initialisation of their class (#612)
+
+The tool tip service, which the application creates at start-up as upstream does, subscribed to
+`ToolTip.ServiceEnabled` and `ToolTip.Tip`; the static constructor of the top-level subscribed to
+`ToolTip.ServiceEnabled`; and the help text of an automation peer read `ToolTip.Tip`. An accessor
+of an attached property initialises its owner, so every application initialised the tool tip
+class at start-up and linked it, the popup it opens and the automation peers of both. A control
+has a tip only once the class is initialised on its thread: the tip is the class's attached
+property.
+
+The class's static constructor now subscribes the services made before it and the top-level (in
+the order of before: the services, then the top-level), and states what the service does with
+tool tips on raw input and on an update for the control under the pointer, and how others read
+a tip (`tool_tip::tip_if_any`). Before that the service has no tip control and nothing to do; a
+service made later subscribes at once.
+
+| `samples/HelloWorld`, macOS | 4.28 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 17,897,688 bytes | 17,758,584 bytes | -139,104 bytes (-0.8 %) |
+| release, `__TEXT,__text` | 14,017,584 bytes | 13,895,200 bytes | -122,384 bytes (-0.9 %) |
+| Class initialisers linked | 123 | 120 | -3 (the tool tip and the automation peers of the tool tip and the popup) |
+| `dist`, file | 15,368,416 bytes | 15,268,688 bytes | -99,728 bytes (-0.6 %) |
+| `dist`, `__TEXT,__text` | 12,535,144 bytes | 12,438,468 bytes | -96,676 bytes (-0.8 %) |
+
+Without the automation peer's read, the first step alone gave 17 kB: one reader of the property
+is enough to keep the class. With sections 4.25 to 4.28, hello world is 13.5 % smaller than main
+in release (20,529,288 bytes) and 12.5 % in `dist` (17,446,112 bytes).
+
+Tests: the 395 tool tip, top-level and automation tests of `ferroui-controls`, each on a thread of
+its own, so each goes through the service made before the class's initialisation.
+
+The catalog and the WinUI gallery show tool tips and keep the class; they grow by the stated
+functions (release: the catalog +15.8 kB, the gallery -0.9 kB).
+
+### 4.30 The declarative applications (#612, #570)
+
+The same trace on the applications of the declarative layer, at section 4.29 (release, macOS):
+
+- **`hello-world-builders` against the XAML hello world.** 17,856,464 against 17,758,584 bytes
+  stripped (+97,880 bytes), 118 against 120 class initialisers (the XAML application has its
+  `App` and `MainWindow` classes). The difference is the declarative layer itself: `ferroui_view`
+  80 kB (the reactive runtime, mounting and the builders) and the generic code it instantiates
+  in `alloc`, `std` and `hashbrown`, about 40 kB. The builders link no class, no unit of the
+  theme and no part of the framework that the XAML version does not: there is nothing of the
+  framework to cut there.
+- **`samples/TodoMvc`.** 22,221,960 bytes stripped, 18,598,960 in `dist`, 189
+  class initialisers. Most of what it links beyond hello world are its controls and their units
+  of the theme (the text box with the menu flyout of its context menu, the check box, the grid,
+  the scroll bars) and units of the WinUI theme (reveal and acrylic brushes, theme shadows, the
+  lights); those belong to theme trimming. One root is outside the theme:
+
+**The automation peer of an items control read `ListBox.Scroll`.** `ItemsControlAutomationPeer`
+looked for the element that scrolls the items with `get_direct_value(ListBox::scroll_property())`;
+the accessor initialises the list box class, so every application with an items control linked
+the list box and its virtualizing panel. In TodoMvc the items control is the presenter of the
+menu flyout of the text box's context menu. The peer now reads the element from the list box
+itself (`downcast_ref::<ListBox>().and_then(ListBox::scroll)`, the getter the property is
+registered with); for an items control of another class the property is not registered, and the
+read panicked (`Property 'ListBox.Scroll' not registered on 'ItemsControl'`, the new test run on
+the code before the change): the peer now finds no element to scroll.
+
+| `samples/TodoMvc`, macOS | 4.29 | after | Change |
+|---|---:|---:|---:|
+| release, stripped | 22,221,960 bytes | 22,133,560 bytes | -88,400 bytes (-0.4 %) |
+| release, `__TEXT,__text` | 17,549,496 bytes | 17,458,504 bytes | -90,992 bytes (-0.5 %) |
+| Class initialisers linked | 189 | 187 | -2 (the list box, the virtualizing stack panel) |
+| `dist`, file | 18,598,960 bytes | 18,499,472 bytes | -99,488 bytes (-0.5 %) |
+| `dist`, `__TEXT,__text` | 15,232,428 bytes | 15,154,576 bytes | -77,852 bytes (-0.5 %) |
+
+Hello world, the catalog and the WinUI gallery are unchanged (they have no items control, or
+use the list box).
+
+Test: `the_peer_of_an_items_control_scrolls_with_the_element_of_a_list_box_only`
+(`automation/peers/items_automation_peer_tests.rs`).
+
+### 4.31 One property store per storage type (#986)
+
+The property store was compiled once for every value type of a styled property:
+`EffectiveValue<T>` (its write, `set_and_raise_core`, 1.2 to 2.8 kB a copy), the typed paths of
+`ValueStore`, the immediate value entries, about 6 kB for each of the 157 value types of the
+builders hello world (section 5.6).
+
+**The change.** `StyledValue` (declared in `ferroui-system`, re-exported by `ferroui-base`) names
+the type the store keeps a value type as, its storage type, and the two conversions:
+
+- every enumeration declared with `ferro_markup_enum!` (or `styled_enum!`) is kept as one
+  `EnumValue`, its numeric value; the macro lists the members, and the conversions are a `match`
+  each way, which does not compile when a variant is missing;
+- an `Option<T>` is kept as an `Option` of the storage type of `T`;
+- every other type (handles `Ref<T>`, sets of flags, `ElementRef<T>`, `Rc<dyn ..>`, the other
+  structures) is its own storage type (`styled_value!(Type)` where the type is declared).
+
+Two forms were measured and left out after their gates: handles kept as `Ref<FerroObject>` (the
+checked downcast of every read of a handle, +45 % instructions for the read of a handle, and the
+conversion of a change notification; it saved 0.11 MB, 19 handle types in one store) and points,
+sizes, vectors, thicknesses, rectangles and corner radii kept as `[f64; 2]` and `[f64; 4]` (13.5
+kB for +2.7 to 3.7 % instructions in the reads of inherited values, the moves of a line and the
+start of the tiles).
+
+The store is compiled per storage type: a read is `T::from_storage` of the stored value, a write
+`T::into_storage` and the store's write. What a property hands out still holds its value type: a
+boxed value, a binding value, a setter value and a change notification (a storage type that
+other types share converts the two values back through the routes of the property, one call
+where a value changed; a member of an enumeration is handed out as the static member the macro
+lists, `StyledValue::MEMBERS`, with no call). The metadata the store reads is the typed metadata
+itself for a type that is its own storage type; for the others a copy made once, with the
+default converted and a coercion callback wrapped. The typed API of `StyledProperty<T>` and its
+routes stay per value type.
+
+The first part alone, on the `main` of that time:
+
+| Release, macOS ARM64 | Before | After |
+|---|---:|---:|
+| `hello-world-builders` stripped | 20,610,240 B | 20,463,376 B (-0.71 %) |
+| `hello-world-builders` `__TEXT,__text` | 16,336,672 B | 16,213,900 B |
+| `hello-world-builders` Rust code in families of two or more instances | 7.00 of 11.60 MB (60.3 %) | 6.84 of 11.49 MB (59.6 %) |
+| `hello-world` (XAML) stripped | 20,529,096 B | 20,381,928 B (-0.72 %) |
+| `hello-world` (XAML) `__TEXT,__text` | 16,256,708 B | 16,134,144 B |
+
+The first form (handles shared too, `try_set_value_typed` through the untyped route) was
+20,310,896 B: the handles, 0.11 MB, and the typed route of `try_set_value_typed`
+(`route_take_value`, 40.7 kB, which moves the value instead of copying it) are the difference.
+
+`scripts/generic_instances.py`, the families of the store in the builders hello world (instances,
+kB, measured with handles shared; with handles their own storage type the engine families have
+116 instances instead of 97):
+
+| Family | Before | After |
+|---|---:|---:|
+| `EffectiveValue<T>::set_and_raise_core` | 202, 318.3 | 125, 206.1 |
+| `ValueStore::set_value` | 201, 114.9 | 115, 59.2 |
+| `ValueStore::get_base_value` | 169, 99.8 | 99, 56.7 |
+| `EffectiveValue<T>::new` | 157, 78.6 | 97, 45.5 |
+| `raise_unset`, `apply_entry`, `notify_value_changed`, `notify_base_value_changed` | 157 each, 252.0 | 97 each, 163.3 |
+| `ValueStore::create_effective_value` | 157, 38.8 | 89, 27.5 |
+| `ImmediateValueEntry<T>::try_get_value` | 201, 34.6 | 126, 23.1 |
+| New: `route_with_values`, the storage metadata (`storage_copy`) | | 76, 30.8; 137, 24.9 |
+
+157 value types reach the store through 116 storage types. What stays per value type is what
+handles a `T` itself: the routes of `StyledProperty<T>` (about 3.6 kB a type), the typed
+`ValueStore::get_value` and `inherited_or_default` (their default value comes from the typed
+metadata), the class registrations of handles. A storage-typed default (the cache of the single
+default and the metadata of the store kept beside the typed metadata) would move the reads of a
+default to the storage type as well: the next step, about 1.2 kB for each value type that shares
+a storage type.
+
+Breaking: the value type of a styled or attached property implements `StyledValue`
+(`styled_value!(Type)` for a type of an application, `styled_enum!` for an enumeration without
+markup metadata); `StyledProperty<T>` and `AttachedProperty<T>` read and write values only where
+`T: StyledValue`, and so does `FerroObject::try_set_value_typed`, which is inlined into its caller.
+
+Tests: the conversions (`styled_value` tests of `ferroui-system` and `ferroui-base`), and every
+test of the property store, which now runs on the shared storage type for its enumerations.
+
+**The parts that follow** (one stack, each a pull request of its own):
+
+- *The routes shared, a codec per value type* (#997): one implementation of the routes of a
+  styled and an attached property for every value type (`StyledRoutes`), with what depends on the
+  value type in `StyledCodec`, implemented by `StyledProperty<T>` (the effective value, the coerced
+  default, the default boxed, the metadata, validation, the copy into the storage type, boxing, the
+  values of a notification, data validation, binding values). The untyped paths (markup, bindings,
+  setters, resources, the C ABI) read and write the store through its untyped interface; the typed
+  paths are unchanged. The routes of `StyledProperty<T>` (157 copies of about 3.6 kB in the
+  builders hello world) are one, but for the untyped write and read of a value (below).
+- *Why the untyped write and read stay typed*: the first form of #997 also shared the untyped
+  write, read and binding write. Its gate (base b5e58185d) found the untyped set of a number
+  +36 %, of an enumeration +41 %, of a structure +36 %, the read of an enumeration +19 % and the
+  binding write +14 to 21 % (instructions). Three forms were measured against the base
+  (`property_subsystem::UntypedRoutes`, own binaries, instructions of an operation), the first
+  two kept on the branch `size/property-routes-shared`:
+
+  | Form | Set: enumeration, structure, others | Read: enumeration, others | Binding write: enumeration, structure | Builders hello world |
+  |---|---|---|---|---:|
+  | Shared, with fixes (the type asked once, no marker check for a typed property, the value given to the effective value directly, the read boxed in place) | +14.2, +7.8, +0.1 to 0.9 % | +16.5, +1.7 to 2.9 % | +9.3, +1.9 % | about +50 kB |
+  | Shared, the write and read of an enumeration typed | +7.8, +8.4, +0.5 to 1.4 % | +7.4, +2.1 to 3.3 % | +8.1, +2.3 % | +115 kB |
+  | Typed in the codec (`StyledCodec::set_value`, `set_current_value`, `get_value_boxed`, `set_local_boxed`), reached in one call | +2.7, +0.5, -0.04 to +0.6 % | +1.6, -1.3 to +0.6 % | -1.2, +0.6 % | the routes of main, in the codec |
+
+  The rest of an untyped write of a shared route (a call into the codec, the downcast it
+  repeats, the static members of the notification) is 40 to 50 instructions on an operation of
+  about 600, over the tolerance of the gate (2 %). The write and read of a value of the value
+  type are therefore what the typed routes were, in the codec, and `FerroObject::get_value_untyped`,
+  `set_value_untyped` and the write of an untyped binding call the codec directly; the markers,
+  the conversion of a value of another type and the other routes stay shared. Part of the +2.7 %
+  of the set of an enumeration is the shared storage of the enumeration (its typed write,
+  `ControlWrite.enum_changed`, is +1.5 %).
+- *The conversion of an untyped value shared*: a value of another type is converted, copied into
+  a box of its own through the codec and the temporary released before the write, as the typed
+  routes did (`StyledCodec::set_converted`, 157 instances, 54 kB, is gone).
+- *The failures compiled once*: the panics of the direct accessors, of the registry look-up of a
+  direct property and of the registration of a styled property are cold functions compiled once,
+  and the setter of a direct property is called from one place.
+
+Two lines of the gate of the first part were fixed in it: the read of an inherited value converts
+the stored value where it reads it (as main did), `TextBlock::set_font_size` is pinned as a call
+of its own (inlined into a caller, the caller copied the text block it had just made,
+`trees::Text.create_and_measure`), and the storage metadata of an enumeration is held as what it
+is, so that the store reads it without a call through a vtable. The rest of
+`ControlWrite.enum_style_priority_set_and_dispose` (+1.7 % instructions) is the static member
+looked up for the two values of a change and of an unset, and the storage metadata of a new
+effective value.
+
+The whole stack as merged (#989, #1010, #1013, #1015), from one run of `perf.yml` (44991194138):
+`2f22d5a22` against the commit before it, `938fccd18`, on macOS ARM64. The sizes are in MB
+(10^6 bytes) with two decimals, as the run prints them, so a difference can be off by 0.01. A
+`dist` executable is already stripped.
+
+| Release, MB | Stripped, before | After | Change | `__text`, before | After | Change |
+|---|---:|---:|---:|---:|---:|---:|
+| `hello_window` | 14.99 | 14.71 | -0.28 (-1.9 %) | 11.83 | 11.60 | -0.23 (-1.9 %) |
+| `hello-world` | 16.71 | 16.43 | -0.28 (-1.7 %) | 13.10 | 12.84 | -0.26 (-2.0 %) |
+| `hello-world-component-host` | 17.45 | 17.12 | -0.33 (-1.9 %) | 13.68 | 13.41 | -0.27 (-2.0 %) |
+| `hello-world-builders` | 17.36 | 17.04 | -0.32 (-1.8 %) | 13.62 | 13.34 | -0.28 (-2.1 %) |
+| `hello-world-macros` | 17.36 | 17.04 | -0.32 (-1.8 %) | 13.62 | 13.34 | -0.28 (-2.1 %) |
+| `hello-world-hooks` | 17.34 | 17.04 | -0.30 (-1.7 %) | 13.61 | 13.34 | -0.27 (-2.0 %) |
+| `winui-theme-gallery` | 33.08 | 32.24 | -0.84 (-2.5 %) | 26.00 | 25.26 | -0.74 (-2.8 %) |
+| `control-catalog-desktop` | 73.99 | 72.63 | -1.36 (-1.8 %) | 54.93 | 53.77 | -1.16 (-2.1 %) |
+
+| Dist, MB | Stripped, before | After | Change | `__text`, before | After | Change |
+|---|---:|---:|---:|---:|---:|---:|
+| `hello_window` | 13.10 | 12.89 | -0.21 (-1.6 %) | 10.80 | 10.59 | -0.21 (-1.9 %) |
+| `hello-world` | 14.35 | 14.12 | -0.23 (-1.6 %) | 11.77 | 11.55 | -0.22 (-1.9 %) |
+| `hello-world-component-host` | 14.88 | 14.64 | -0.24 (-1.6 %) | 12.23 | 12.00 | -0.23 (-1.9 %) |
+| `hello-world-builders` | 14.82 | 14.57 | -0.25 (-1.7 %) | 12.17 | 11.94 | -0.23 (-1.9 %) |
+| `hello-world-macros` | 14.82 | 14.57 | -0.25 (-1.7 %) | 12.17 | 11.94 | -0.23 (-1.9 %) |
+| `hello-world-hooks` | 14.80 | 14.57 | -0.23 (-1.6 %) | 12.17 | 11.94 | -0.23 (-1.9 %) |
+| `winui-theme-gallery` | 26.12 | 25.56 | -0.56 (-2.1 %) | 21.30 | 20.74 | -0.56 (-2.6 %) |
+| `control-catalog-desktop` | 60.04 | 59.14 | -0.90 (-1.5 %) | 46.14 | 45.29 | -0.85 (-1.8 %) |
+
+### 4.32 The rows of the theme tables, by kind (#855)
+
+Counted on `fcac7548c` from the checked-in generated themes. The rows an application keeps are
+those reachable in the generated code from the runs of the units in its `theme_parts.txt`, so they
+are a count of the source and not of the linked file. The gallery keeps the whole WinUI theme.
+
+**The WinUI theme, by kind.**
+
+| Kind | Rows | Packed | Bytes a row | Bytes |
+|---|---:|---|---:|---:|
+| Resource alias | 3,865 | all | 18 | 69,570 |
+| Literal brush | 766 | all | 14 | 10,724 |
+| Dynamic brush | 761 | all | 18 | 13,698 |
+| Static brush | 338 | all | 18 | 6,084 |
+| Value, `f64` | 496 | none | 32 | 15,872 |
+| Value, `[f64; 4]` | 508 | none | 56 | 28,448 |
+| Value, `u32` | 435 | none | 32 | 13,920 |
+| Value, text | 69 | none | 40 | 2,760 |
+| Style member, setter | 3,581 | none | 56 | 200,536 |
+| Style member, nested style | 1,579 | none | 56 | 88,424 |
+| Style member, target type | 301 | none | 56 | 16,856 |
+| Style member, based on | 138 | none | 56 | 7,728 |
+| Selector step | 3,268 | none | 24 | 78,432 |
+| Resource choice | 615 | none | 72 | 44,280 |
+| Template binding | 1,351 | none | 24 | 32,424 |
+| Dynamic resource binding | 438 | none | 32 | 14,016 |
+
+The four packed kinds are 5,730 rows: 100,076 bytes of records, 23,280 of table headers and
+102,833 of string pools. The twelve kinds that are not packed are 12,779 rows and 543,696 bytes.
+The other themes have 1,417 packed and 5,216 other rows (Fluent, 211,576 bytes), 5,681 and 11,953
+(macOS, 499,136 bytes), and 70 and 3,878 (Simple, 146,880 bytes). The sizes of the rows that are
+not packed are those measured when this work was proposed, except `ValueRow<u32>`, `ValueRow<&str>`,
+`DynamicResourceRow` and `ResourceChoice`, which follow from their fields.
+
+**The most a packed form could save.** A ceiling, not an estimate of a result: every field fits 16
+bits, every string is already in a pool at no cost, one pool of values, functions and types for the
+whole set (a trimmed application needs one per unit, which costs more), no code to read the
+records, and 1.45 bytes of rebase information saved for each pointer (the ratio measured on the
+entry tables of #852). Bytes, and the share of the `dist` file:
+
+| Kind | Hello world | TodoMvc | Gallery | Catalog |
+|---|---:|---:|---:|---:|
+| Value rows | 13,069 (0.091 %) | 20,423 (0.113 %) | 41,844 (0.091 %) | 41,844 (0.069 %) |
+| Style members | 1,246 (0.009 %) | 44,808 (0.249 %) | 266,005 (0.581 %) | 266,005 (0.441 %) |
+| Selector steps | 41 (0.000 %) | 12,805 (0.071 %) | 67,868 (0.148 %) | 67,868 (0.112 %) |
+| Resource choices | 707 (0.005 %) | 17,662 (0.098 %) | 36,850 (0.080 %) | 36,850 (0.061 %) |
+| Template bindings | 57 (0.000 %) | 3,118 (0.017 %) | 23,394 (0.051 %) | 23,394 (0.039 %) |
+| Dynamic bindings | 81 (0.001 %) | 1,903 (0.011 %) | 10,517 (0.023 %) | 10,517 (0.017 %) |
+| All | 15,201 (0.106 %) | 100,718 (0.559 %) | 446,478 (0.975 %) | 446,478 (0.740 %) |
+
+A packed table of value rows also has a header of 48 bytes where a slice has none, which takes the
+ceiling of the value rows to 11,629 bytes in hello world, 16,391 in TodoMvc and 29,844 in the
+gallery and the catalog.
+
+**Each kind.**
+
+- Resource aliases and the three brushes: packed.
+- Value rows: worth an experiment first. They are most of what a small application could save,
+  need no pool of functions, and can follow the form of the packed tables.
+- Style members: worth an experiment only after the value rows. They have the largest ceiling in
+  large applications, but need a tagged record, pools of functions and types for each unit so that
+  trimming still works, and a reader on the path of theme construction.
+- Selector steps: left as they are, unless the style members are packed, since they are read with
+  them.
+- Resource choices, template bindings and dynamic bindings: left as they are. Their ceilings are
+  at most 0.1 % of any of the four files before the cost of a reader.
+
+**What a decision needs.** The stripped file and its sections for each pair, on one toolchain, in
+hello world and one larger application, since a form that shrinks one section can grow the file;
+the code of the reader; and the time of theme construction and first templates. Timed start-up
+lines can move with the amount of static data alone (#1069), so a change of this kind needs its
+timing read against a base measured in the same batch.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
@@ -1364,6 +1899,75 @@ animation per animator type, and the `core`/`alloc` generics (one sort and one t
 size). Each step is measured by size and by the local gate (section 8.4); the shared setter and
 handler functions of the builders (#956) are the example of a step left out: 40 to 50 kB for
 +3.9 % instructions on a re-run.
+
+**Generic code in `release` and `dist` (#1001).** From `perf.yml` run 45004519904, the property
+store stack as merged (`2f22d5a22`) against the commit before it (`938fccd18`), macOS ARM64. Sizes
+are of the symbols, in MiB (2^20 bytes); the `dist` executables were linked again with symbols.
+
+| | Profile | Rust before | After | In families of 2+, before | After |
+|---|---|---:|---:|---:|---:|
+| `hello-world-builders` | `release` | 9.06 | 8.80 | 5.16 (56.9 %) | 4.90 (55.7 %) |
+| `hello-world-builders` | `dist` | 7.66 | 7.44 | 4.09 (53.3 %) | 3.85 (51.8 %) |
+| `control-catalog-desktop` | `release` | 48.43 | 47.32 | 28.16 (58.2 %) | 27.00 (57.1 %) |
+| `control-catalog-desktop` | `dist` | 39.95 | 39.14 | 21.71 (54.4 %) | 20.84 (53.3 %) |
+
+The runners' toolchain mangles with v0, so these counts use the reader of v0 names added in #1033.
+They agree with the binary: Rust and other code add up to the symbols, and the symbols of the
+`dist` executables cover their `__text`. Between 1.4 and 3.6 % of the Rust functions have a v0 name
+the reader does not parse. Those count as families of one, so the shares are lower bounds.
+
+Of the size the stack saves in `release`, 66 to 82 % ships in `dist` (section 4.31, the same two
+commits). Why the rest does not has not been measured.
+
+**LLVM IR lines per family (#1001).** Unoptimised IR (`-C no-prepopulate-passes`), `release`, one
+codegen unit per crate, of `ferroui-base`, `ferroui-controls`, `ferroui-markup-xaml` and
+`ferroui-themes-winui` on `ae7462b47`, before the stack: 16.52 million lines in 372,978 functions.
+
+| Family | Instances | Lines | Share |
+|---|---:|---:|---:|
+| `ferro_property::both_not_a_number` | 2,825 | 1,192,150 | 7.2 % |
+| `drop` (the largest group) | 5,440 | 502,940 | 3.0 % |
+| `call_once` | 27,012 | 282,898 | 1.7 % |
+| `new` | 11,140 | 242,635 | 1.5 % |
+| `set_and_raise_core` | 395 | 219,693 | 1.3 % |
+| `nullable_operation` | 1,099 | 196,483 | 1.2 % |
+
+How much of `both_not_a_number` survives optimisation, and what it costs in compile time, has not
+been measured.
+
+**Identical code folding by platform (#1001).** No default was changed.
+
+| Platform | Folding today | Measured | Run, commit |
+|---|---|---|---|
+| Windows x86-64 | On: rustc passes `/OPT:REF,ICF` | What it saves in `dist`: hello world 1.57 MB (5.7 %), catalog 3.29 MB (4.5 %) | 44889928913, `707791323` |
+| Linux x86-64, lld | None | `dist`: `--icf=safe` -0.6 % (hello world), -0.2 % (catalog); `--icf=all` -2.7 %, -2.1 % | 44889928913, `707791323` |
+| Android arm64, lld | None | `dist`, catalog library: `--icf=safe` 0 bytes; `--icf=all` -1,711,872 bytes (-2.26 %), `.text` -2.67 % | 45004519904, `2f22d5a22` |
+| macOS ARM64, ld64 | Its default deduplication | `dist` with `-no_deduplicate` has the same size | 44859088556, 44889928913 |
+| iOS simulator | As macOS: the two `dist` link lines have the same options for folding | Not measured, since those options match. The device target was not read | 45004519904, `2f22d5a22` |
+| Browser | Already on: `duplicate-function-elimination` runs in both `wasm-opt` commands of the link | Catalog as linked: 38.60 MB, 13.86 MB gzip, 9.29 MB brotli | 45004519904, `2f22d5a22` |
+
+`hb_font_t::has_func_set` of HarfBuzz compares callback addresses, so a folded default callback
+could change a code path. Run 44907900542 on `ae7462b47` checked eight links (hello world and the
+catalog; Windows `release` and `dist`, Linux `--icf=safe` and `--icf=all`): no default callback is
+folded with anything. This holds for those builds, not for another compiler version.
+
+A read of the Rust code for what compares function addresses found one explicit comparison:
+`install_current_culture_provider` in FerroBoard (`fn_addr_eq`), where two identical providers
+folded together would be accepted as one, with the same behaviour. No function is a map key and no
+callback is removed by its address, and the compiler's lint on function pointer comparisons has no
+hit in the log of the Linux workspace build.
+
+`--icf=all` is not on, on Linux or on Android. On Linux, Skia and the other C++ code have not been
+reviewed for comparisons of addresses, and start-up with it has not been measured.
+
+Not measured or not established:
+
+- start-up with `--icf=all` on Linux and Android;
+- the C++ code other than the HarfBuzz check above, Skia included, for comparisons of addresses;
+- ld64's deduplication output, which is still not shown: `-verbose_deduplicate` reaches the link
+  line of `ld-1167.5`, but the log has no line about it; `ld64.lld --icf` was not tried;
+- the link line of the iOS device target;
+- why `--icf=safe` folds nothing on Android.
 
 ## 6. The settings applications should use
 

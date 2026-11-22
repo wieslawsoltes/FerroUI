@@ -40,6 +40,8 @@ use crate::scene::{Outline, Paint, Primitive, Scene, Step, Tint};
 #[derive(Clone, Default)]
 pub struct SceneData(pub Rc<Scene>);
 
+ferroui_base::styled_value!(SceneData);
+
 impl PartialEq for SceneData {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
@@ -49,6 +51,8 @@ impl PartialEq for SceneData {
 /// Where the scene's input goes: the scene's binding in its region's current revision.
 #[derive(Clone)]
 pub struct SceneLink(pub Rc<dyn Fn(Value)>);
+
+ferroui_base::styled_value!(SceneLink);
 
 impl PartialEq for SceneLink {
     fn eq(&self, other: &Self) -> bool {

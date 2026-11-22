@@ -64,6 +64,8 @@ import json
 import os
 import sys
 
+from ferroui_selection import AppSelection
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL = os.path.join(ROOT, "bindings", "model", "ferroui-api.json")
 OUT = os.path.join(ROOT, "bindings", "osprey", "full")
@@ -97,6 +99,8 @@ RESERVED = {
     "memo", "bound", "signalsInit", "signalText", "signalNumber", "signalInteger", "signalBool", "signalSetText",
     "signalSetNumber", "signalSetInteger", "signalSetBool", "signalReadText", "signalReadNumber", "signalReadInteger",
     "signalReadBool", "signalVersion", "signalBind", "signalWatch", "signalsApply",
+    "baseControl", "basePanel", "baseDecorator", "baseContentControl", "affectsMeasure", "affectsArrange",
+    "affectsRender", "controlClass", "numberProperty", "textProperty", "layoutResult",
 }
 
 # Osprey types of the C types of the model, for `extern fn` (#950: scalars, NUL-terminated
@@ -115,6 +119,16 @@ EXTERN_TYPES = {
     "callback:FerroEventFn": "fn(int, int, int) -> int",
     "callback:FerroStartFn": "fn(int) -> int",
     "callback:FerroPostFn": "fn(int) -> int",
+    # The callbacks of a control class (docs/c-abi.md, section 15): the data pointer of the
+    # instance (unused by Osprey, whose controls keep their state in registered properties), the
+    # handle, scalars, and the two `double *` of a layout result, which Osprey answers with
+    # `ferro_layout_result`.
+    "callback:FerroCreateFn": "fn(Ptr, int) -> int32",
+    "callback:FerroLayoutFn": "fn(Ptr, int, float, float, Ptr, Ptr) -> int32",
+    "callback:FerroRenderFn": "fn(Ptr, int, int) -> int32",
+    "callback:FerroNotifyFn": "fn(Ptr, int, int) -> int32",
+    "callback:FerroPointerFn": "fn(Ptr, int, int32, float, float, int) -> int32",
+    "callback:FerroKeyFn": "fn(Ptr, int, int32, int, int) -> int32",
 }
 
 # Functions whose `const char *` result can be NULL: Osprey strings cannot, so the binding
@@ -278,6 +292,9 @@ class Selection:
                     self.classes.add(name)
                     name = bases.get(name)
         self.named = set(manifest.get("classes", [])) if manifest else set(bases)
+        # What a library built for the manifest returns (`ferro_selection_fingerprint`); 0 for the
+        # full bindings, which need the library of every class.
+        self.fingerprint = 0 if manifest is None else AppSelection(model, manifest).fingerprint
         self.properties = {p["name"] for p in model["properties"]
                            if self.full or any(d["owner"] in self.classes for d in p["declarations"])}
         self.events = {e["name"] for e in model["events"]
@@ -319,6 +336,9 @@ def generate_abi(model, names, selection):
     lines.append(f"// apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format"
                  f" {model['format']}.")
     lines.append(f"fn apiFingerprint() = {model['fingerprint']}")
+    lines.append("// selectionFingerprint() -> int: the fingerprint of the selection of these bindings, which a")
+    lines.append("// library built for the same manifest returns (ferro_selection_fingerprint); 0 for every class.")
+    lines.append(f"fn selectionFingerprint() = {selection.fingerprint}")
     lines.append(f"// abiVersion() -> int: the version of the ABI the bindings were generated for.")
     lines.append(f"fn abiVersion() = {model['abi_version']}")
     lines.append("")
@@ -369,6 +389,7 @@ def generate_abi(model, names, selection):
         result = f" -> {returns}" if returns else ""
         lines += comment(function["doc"])
         lines.append(f"extern fn {function['name']}({', '.join(params)}){result}")
+    lines += generate_entries(model, selection)
     lines.append("// A null pointer, for the reserved options of ferro_app_run (from the runtime of Osprey).")
     lines.append("extern fn osprey_ffi_null() -> Ptr")
     lines.append("")
@@ -392,6 +413,30 @@ def generate_abi(model, names, selection):
         lines.append("}")
         lines.append("")
     return "\n".join(lines).rstrip() + "\n", len(skipped)
+
+
+def generate_entries(model, selection):
+    """The entries of the classes the selection names (docs/c-abi.md, section 16) and
+    `registerTypes()`, which calls them: a library built without the tables of types knows the
+    classes registered by their entries, and an application linked to it keeps those alone. The
+    full bindings register nothing: the full library knows every class by name."""
+    lines = ["// registerTypes() -> int: registers the classes of the selection, with the units of the theme they",
+             "// need, before the application starts (`run` calls it): what a library built for the",
+             "// selection (without the tables of types) knows. A class that failed fails where it is created."]
+    entries = [] if selection.full else [cls["entry"] for cls in model["classes"]
+                                         if cls.get("entry") and selection.cls(cls)]
+    for entry in entries:
+        lines.append(f"extern fn {entry}() -> int")
+    if not entries:
+        lines.append("fn registerTypes() = 0")
+    else:
+        lines.append("fn registerTypes() = {")
+        for index, entry in enumerate(entries):
+            lines.append(f"    let id{index} = {entry}()")
+        lines.append("    0")
+        lines.append("}")
+    lines.append("")
+    return lines
 
 
 # ---- objects.osp (layer 1) --------------------------------------------------------------------

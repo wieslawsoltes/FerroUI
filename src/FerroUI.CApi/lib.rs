@@ -43,9 +43,12 @@
 mod app;
 // The stable IDs of the API model, generated (scripts/generate_api_model.py).
 mod api_ids;
+// The entries of the classes of the model, generated (tests/types_tests.rs).
+mod api_types;
 mod error;
 mod event_data;
 mod events;
+mod foreign;
 mod frame;
 mod handles;
 mod ids;
@@ -54,12 +57,14 @@ mod strings;
 mod thread;
 mod timer;
 mod tree;
+mod types;
 mod values;
 
 pub use app::{ferro_app_run, ferro_close, ferro_quit, ferro_show};
 pub use error::{ferro_clear_error, ferro_last_error, ferro_last_error_code};
 pub use event_data::{ferro_event_button, ferro_event_key, ferro_event_x, ferro_event_y, ferro_focus};
 pub use events::{ferro_raise, ferro_subscribe, ferro_subscribe_data, ferro_subscribe_dispatch, ferro_unsubscribe};
+pub use foreign::*;
 pub use frame::{
     ferro_frame_begin, ferro_frame_bind, ferro_frame_bool, ferro_frame_clear, ferro_frame_close, ferro_frame_commit,
     ferro_frame_commit_bytes, ferro_frame_dispatch, ferro_frame_dispatcher, ferro_frame_event_f64,
@@ -67,7 +72,7 @@ pub use frame::{
     ferro_frame_on, ferro_frame_open, ferro_frame_reuse, ferro_frame_str, ferro_frame_str16,
 };
 pub use handles::{ferro_create, ferro_release, ferro_retain, ferro_type_of, handle_of, object_of};
-pub use ids::{ferro_api_fingerprint, ferro_event_id, ferro_property_id, ferro_type_id};
+pub use ids::{ferro_api_fingerprint, ferro_event_id, ferro_property_id, ferro_selection_fingerprint, ferro_type_id};
 pub use signals::{
     ferro_signal_bind, ferro_signal_free, ferro_signal_get_bool, ferro_signal_get_cstr, ferro_signal_get_f64,
     ferro_signal_get_i64, ferro_signal_new, ferro_signal_set_bool, ferro_signal_set_f64, ferro_signal_set_handle,
@@ -79,6 +84,7 @@ pub use signals::{
 pub use thread::{ferro_init, ferro_is_ui_thread, ferro_post, ferro_post_data, ferro_run_jobs};
 pub use timer::{ferro_timer_start, ferro_timer_stop};
 pub use tree::{ferro_add_child, ferro_remove_child};
+pub use api_types::*;
 pub use values::{
     ferro_clear, ferro_get_bool, ferro_get_bool_or, ferro_get_cstr, ferro_get_cstr_or, ferro_get_f64, ferro_get_f64_or,
     ferro_get_handle, ferro_get_i64, ferro_get_i64_or, ferro_get_str, ferro_set_bool, ferro_set_f64, ferro_set_handle,
