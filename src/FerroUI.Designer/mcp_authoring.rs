@@ -4,7 +4,7 @@ use super::{decode, node_id, number, state, text};
 use crate::DesignerSession;
 use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_animation::{
-    AnimationValue, CurveChannel, CurveMetric, Easing, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Repeat, Timeline,
+    AnimationValue, CurveMetric, Easing, KeyframeGroupEdit, KeyframeLocation, KeyframePaste, Repeat, Timeline, TrackCurveChannel,
     TimelineTimingEdit, VisualStateGroup,
 };
 use ferroui_designer_tools::PropertyKind;
@@ -54,7 +54,7 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_select_rsx_view", "Select an RSX invocation by its authored UTF-8 starting offset.",
             s::object(json!({"start":s::revision(),"expected_revision":s::revision()}), &["start","expected_revision"]), true),
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
-        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored track. Read curve_channels from designer_programs. Percent channels use percentages and percentage points per second. Absolute distances use logical pixels and shadow direction uses degrees. Color channels use normalized values. break_before marks a new segment after a gap or unit change.",
+        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored track. Use the channel ID from designer_programs for properties or registered effect parameters. Percent channels use percentages and percentage points per second. Absolute distances use logical pixels and shadow direction uses degrees. Color channels use normalized values. break_before marks a new segment after a gap or unit change.",
             s::object(json!({"program":s::id(),"target":s::id(),"property":s::string(),
                 "metric":{"type":"string","enum":["value","velocity"]},
                 "channel":s::string(),
@@ -153,7 +153,7 @@ pub(super) fn call(
         }
         "designer_animation_curve" => {
             let metric: CurveMetric = args.get("metric").map(|_| decode(args, "metric")).transpose()?.unwrap_or_default();
-            let channel: CurveChannel = args.get("channel").map(|_| decode(args, "channel")).transpose()?.unwrap_or_default();
+            let channel: TrackCurveChannel = args.get("channel").map(|_| decode(args, "channel")).transpose()?.unwrap_or_default();
             let points = session.animation_curve_channel(node_id(args, "program")?, node_id(args, "target")?,
                 &text(args, "property")?, channel, decode(args, "window")?)?;
             let points = metric.measure(points).map_err(|error| error.to_string())?;
@@ -480,7 +480,7 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
         if let Some(timeline) = &program.timeline {
             for (track, authored) in timeline.tracks.iter().enumerate() {
                 let track_model = &mut model["timeline"]["tracks"][track];
-                track_model["curve_channels"] = json!(CurveChannel::for_track(authored, timeline.duration, timeline.fill));
+                track_model["curve_channels"] = json!(TrackCurveChannel::for_track(authored, timeline.duration, timeline.fill));
                 if args["include_keyframe_text"] == true {
                     for (key, authored) in authored.keyframes.iter().enumerate() {
                         let model = &mut track_model["keyframes"][key];

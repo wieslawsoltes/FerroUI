@@ -104,16 +104,16 @@ impl AnimationEffect {
         Ok(effect)
     }
 
-    pub(super) fn object_xaml(self) -> String {
+    pub(super) fn object_xaml(&self) -> String {
         self.write_object("")
     }
 
-    pub(crate) fn setter_object_xaml(self) -> String {
+    pub(crate) fn setter_object_xaml(&self) -> String {
         self.write_object(r#" xmlns="https://github.com/ferroui""#)
     }
 
-    fn write_object(self, namespace: &str) -> String {
-        let (tag, fields) = match self {
+    fn write_object(&self, namespace: &str) -> String {
+        let (tag, fields) = match *self {
             Self::Blur { radius, .. } => ("BlurEffect", format!(r#"Radius="{radius}""#)),
             Self::DropShadow {
                 offset_x,
@@ -143,6 +143,7 @@ impl AnimationEffect {
                     u32::from_be_bytes(argb)
                 ),
             ),
+            Self::Registered { ref source } => return source.clone(),
         };
         let object = format!("<{tag}{namespace} {fields} />");
         if self.form() == EffectForm::PropertyElement {

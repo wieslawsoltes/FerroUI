@@ -24,7 +24,7 @@ impl EffectForm {
 }
 
 /// Built-in effect values whose components the Timeline can edit and sample.
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum AnimationEffect {
     Blur {
@@ -50,6 +50,8 @@ pub enum AnimationEffect {
         opacity: f64,
         form: EffectForm,
     },
+    /// The registered host owns the parameter types and interpolation.
+    Registered { source: String },
 }
 
 fn opaque() -> f64 {
@@ -105,7 +107,7 @@ impl AnimationEffect {
         Ok(effect)
     }
 
-    pub(crate) fn validate(self) -> Result<()> {
+    pub(crate) fn validate(&self) -> Result<()> {
         match self {
             Self::Blur { radius, .. } => require(radius.is_finite(), "Blur radius must be finite"),
             Self::DropShadow {
@@ -118,8 +120,8 @@ impl AnimationEffect {
             } => require(
                 [offset_x, offset_y, blur_radius, opacity]
                     .into_iter()
-                    .all(f64::is_finite)
-                    && (form != EffectForm::Literal || (blur_radius >= 0.0 && opacity == 1.0)),
+                    .all(|value| value.is_finite())
+                    && (*form != EffectForm::Literal || (*blur_radius >= 0.0 && *opacity == 1.0)),
                 "Use finite shadow values and an effect object for independent opacity",
             ),
             Self::DirectionalDropShadow {
@@ -132,18 +134,26 @@ impl AnimationEffect {
             } => require(
                 [direction, shadow_depth, blur_radius, opacity]
                     .into_iter()
-                    .all(f64::is_finite)
-                    && form != EffectForm::Literal,
+                    .all(|value| value.is_finite())
+                    && *form != EffectForm::Literal,
                 "A directional shadow requires an effect object with finite values",
+            ),
+            Self::Registered { source } => require(
+                source.split_once('(').is_some_and(|(name, _)| {
+                    !name.trim().is_empty()
+                        && name.trim().chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_')
+                }) && source.ends_with(')'),
+                "A registered effect requires a named invocation",
             ),
         }
     }
 
-    pub fn form(self) -> EffectForm {
+    pub fn form(&self) -> EffectForm {
         match self {
             Self::Blur { form, .. }
             | Self::DropShadow { form, .. }
-            | Self::DirectionalDropShadow { form, .. } => form,
+            | Self::DirectionalDropShadow { form, .. } => *form,
+            Self::Registered { .. } => EffectForm::Literal,
         }
     }
 
@@ -167,14 +177,14 @@ impl AnimationEffect {
         self
     }
 
-    pub(crate) fn argb(self) -> Option<[u8; 4]> {
+    pub(crate) fn argb(&self) -> Option<[u8; 4]> {
         match self {
-            Self::Blur { .. } => None,
-            Self::DropShadow { argb, .. } | Self::DirectionalDropShadow { argb, .. } => Some(argb),
+            Self::Blur { .. } | Self::Registered { .. } => None,
+            Self::DropShadow { argb, .. } | Self::DirectionalDropShadow { argb, .. } => Some(*argb),
         }
     }
 
-    pub fn to_xaml(self) -> String {
+    pub fn to_xaml(&self) -> String {
         if self.form() != EffectForm::Literal {
             return self.object_xaml();
         }
@@ -188,9 +198,10 @@ impl AnimationEffect {
                 ..
             } => format!(
                 "drop-shadow({offset_x} {offset_y} {blur_radius} #{:08X})",
-                u32::from_be_bytes(argb)
+                u32::from_be_bytes(*argb)
             ),
             Self::DirectionalDropShadow { .. } => self.object_xaml(),
+            Self::Registered { source } => source.clone(),
         }
     }
 
@@ -237,7 +248,7 @@ impl AnimationEffect {
                 opacity: mix(opacity, alpha),
                 form,
             },
-            (from, to) if from.argb().is_some() && to.argb().is_some() => {
+            (ref from, ref to) if from.argb().is_some() && to.argb().is_some() => {
                 let (offset_x, offset_y, blur_radius, argb, opacity) =
                     from.offset_shadow().expect("shadow pair");
                 let (x, y, radius, end, alpha) = to.offset_shadow().expect("shadow pair");
@@ -251,14 +262,14 @@ impl AnimationEffect {
                 };
                 value.with_form(from.form())
             }
-            _ if progress >= 0.5 => to,
-            _ => self,
+            (_, to) if progress >= 0.5 => to,
+            (from, _) => from,
         }
     }
 
-    fn offset_shadow(self) -> Option<(f64, f64, f64, [u8; 4], f64)> {
-        match self {
-            Self::Blur { .. } => None,
+    fn offset_shadow(&self) -> Option<(f64, f64, f64, [u8; 4], f64)> {
+        match *self {
+            Self::Blur { .. } | Self::Registered { .. } => None,
             Self::DropShadow {
                 offset_x,
                 offset_y,

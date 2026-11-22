@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 
 /// Host converter for named and functional effect colors.
 pub type EffectColorResolver = fn(&str) -> Option<[u8; 4]>;
+pub type EffectLiteralResolver = fn(&str) -> Result<AnimationEffect>;
 
 /// Runtime properties are typed. Hosts should supply hints for custom properties and the live
 /// underlying values of tracks whose endpoints are omitted. Without an underlying value,
@@ -23,6 +24,8 @@ pub struct ImportOptions {
     pub native_effect_endpoints: bool,
     /// Resolve named and functional colors in a statically authored effect object.
     pub effect_color: Option<EffectColorResolver>,
+    /// Resolve a literal with the application that owns the native effect registry.
+    pub effect_literal: Option<EffectLiteralResolver>,
     pub strict: bool,
 }
 impl Default for ImportOptions {
@@ -34,6 +37,7 @@ impl Default for ImportOptions {
             interpolation_errors: BTreeMap::new(),
             native_effect_endpoints: false,
             effect_color: None,
+            effect_literal: None,
             strict: true,
         }
     }
@@ -388,6 +392,9 @@ fn read_key_value(setter: roxmltree::Node<'_, '_>, property: &str, options: &Imp
         value.validate()?;
         require(value.kind() == kind, "Resolved literal differs from the property type")?;
         return Ok(value.clone());
+    }
+    if let (ValueKind::Effect, Some(resolve)) = (kind, options.effect_literal) {
+        return resolve(source).map(AnimationValue::Effect);
     }
     AnimationValue::parse(source, kind)
 }

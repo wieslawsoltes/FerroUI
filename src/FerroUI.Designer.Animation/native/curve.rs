@@ -1,11 +1,16 @@
 use super::curve_value;
-use crate::{AnimationEffect, AnimationError, AnimationValue, CurveChannel, CurvePoint, CurveWindow};
+use crate::{value::registered_effect, AnimationEffect, AnimationError, AnimationValue, CurveChannel, CurvePoint, CurveWindow, TrackCurveChannel};
 use ferroui_base::animation::{Animatable, Animation};
+use ferroui_base::media::IEffect;
 use ferroui_base::{BoxedValue, FerroProperty};
+use std::rc::Rc;
 
 #[cfg(test)]
 #[path = "effect_curve_tests.rs"]
 mod effect_tests;
+#[cfg(test)]
+#[path = "registered_effect_tests.rs"]
+mod registered_effect_tests;
 
 /// Read the same scalar animator used by native playback. Resolve against the
 /// loaded setters so the curve uses the exact registered property.
@@ -22,7 +27,7 @@ pub fn sample_curve_track(
     animation: &Animation,
     target: &Animatable,
     name: &str,
-    channel: CurveChannel,
+    channel: impl Into<TrackCurveChannel>,
     window: CurveWindow,
 ) -> Result<Vec<CurvePoint>, String> {
     let duration = animation.duration().total_seconds();
@@ -34,14 +39,30 @@ pub fn sample_curve_track(
     let values = animation
         .sample_track_for_preview(target, property, &positions)
         .map_err(|error| error.to_string())?;
+    let channel = channel.into();
     let effect = AnimationEffect::is_effect_property(property);
-    channel.project_samples(times.into_iter().zip(values).map(|(time, value)| {
-        let value = curve_value::value(&value);
+    let component = channel.component();
+    component.project_samples(times.into_iter().zip(values).map(|(time, sample)| {
+        let value = match &channel {
+            TrackCurveChannel::Property(_) => curve_value::value(&sample),
+            TrackCurveChannel::EffectParameter { effect, parameter, .. } => {
+                effect_parameter(&sample, effect, parameter)
+                    .filter(|value| CurveChannel::for_kind(value.kind()).contains(&component))
+            }
+        };
         if value.is_none() && !effect {
             return Err(AnimationError("The native animation does not produce a sample for the selected channel".into()));
         }
         Ok((time, value))
     })).map_err(|error| error.to_string())
+}
+
+fn effect_parameter(sample: &BoxedValue, effect: &str, parameter: &str) -> Option<AnimationValue> {
+    let sample = sample.downcast_ref::<Option<Rc<dyn IEffect>>>()?.as_deref()?.as_custom_effect()?;
+    if sample.name() != effect {
+        return None;
+    }
+    sample.parameter(parameter).and_then(registered_effect::numeric_value)
 }
 
 /// Read one effective value from the same native animator used to draw the curve.

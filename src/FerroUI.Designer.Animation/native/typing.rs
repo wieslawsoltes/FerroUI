@@ -47,6 +47,7 @@ pub fn native_keyframe_options(
     let mut options = ImportOptions {
         native_effect_endpoints: true,
         effect_color: Some(AnimationEffect::resolve_color),
+        effect_literal: Some(AnimationEffect::parse_native),
         ..ImportOptions::default()
     };
     for (name, values) in setters {

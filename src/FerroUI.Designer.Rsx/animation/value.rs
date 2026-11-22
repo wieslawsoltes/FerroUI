@@ -83,8 +83,7 @@ impl ValueShape {
             return Some(ValueSource { value, source: ValueSyntax::Relative(source) });
         }
         if kind == ValueKind::Effect {
-            let (value, source) = EffectSource::read(expression, &resolve)?;
-            return Some(ValueSource { value: AnimationValue::Effect(value), source: ValueSyntax::Effect(source) });
+            return self.read_effect(expression, resolve, false);
         }
         let parts = if kind == ValueKind::Number
             || matches!(kind, ValueKind::CornerRadius | ValueKind::Thickness)
@@ -133,6 +132,18 @@ impl ValueShape {
             source: ValueSyntax::Numbers(parts),
         })
     }
+
+    pub(super) fn read_keyframe(self, expression: &Expr, project_effects: bool) -> Option<ValueSource> {
+        if self.kind == ValueKind::Effect {
+            return self.read_effect(expression, syntax::path, project_effects);
+        }
+        self.read(expression)
+    }
+
+    fn read_effect(self, expression: &Expr, resolve: impl Fn(&Expr) -> Option<String>, project_effects: bool) -> Option<ValueSource> {
+        let (value, source) = EffectSource::read(expression, &resolve, project_effects)?;
+        Some(ValueSource { value: AnimationValue::Effect(value), source: ValueSyntax::Effect(source) })
+    }
 }
 
 impl ValueSource {
@@ -170,16 +181,15 @@ impl ValueSource {
     }
 
     pub(crate) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {
+        if let (ValueSyntax::Effect(source), AnimationValue::Effect(old)) = (&self.source, &self.value) {
+            return source.plan(old, text, patches);
+        }
         let kind = self.value.kind();
         let value = AnimationValue::parse_native_literal(text, kind).map_err(|error| error.to_string())?;
         let parts = match &self.source {
             ValueSyntax::Color(source) => return source.plan(&self.value, &value, patches),
             ValueSyntax::Relative(source) => return source.plan(&value, patches),
-            ValueSyntax::Effect(source) => {
-                let (AnimationValue::Effect(old), AnimationValue::Effect(next)) = (&self.value, value)
-                    else { return Err("The key requires an effect".into()) };
-                return source.plan(*old, next, text, patches);
-            }
+            ValueSyntax::Effect(_) => return Err("The key requires an effect".into()),
             ValueSyntax::Numbers(parts) => parts,
         };
         let values = numeric_parts(&value)?;
@@ -205,7 +215,7 @@ impl ValueSource {
 
 pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
     if let AnimationValue::Effect(effect) = value {
-        return Ok(super::effect_constructor::literal(*effect));
+        return super::effect_constructor::literal(effect);
     }
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));

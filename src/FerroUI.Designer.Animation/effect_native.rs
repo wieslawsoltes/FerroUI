@@ -1,6 +1,6 @@
 use super::{AnimationEffect, AnimationError, AnimationValue, EffectForm, Result, ValueKind};
 use ferroui_base::media::{
-    Color, Effect, IEffect, ImmutableBlurEffect, ImmutableDropShadowDirectionEffect,
+    Color, CustomEffectRegistry, Effect, IEffect, ImmutableBlurEffect, ImmutableDropShadowDirectionEffect,
     ImmutableDropShadowEffect,
 };
 use ferroui_base::{BoxedValue, FerroProperty};
@@ -34,8 +34,12 @@ impl AnimationEffect {
             return Self::parse_object(source, Some(Self::resolve_color));
         }
         let native = Effect::parse(source).map_err(|error| AnimationError(error.to_string()))?;
+        if let Some(custom) = native.as_custom_effect() {
+            crate::value::registered_effect::validate_parameters(custom)?;
+            return Ok(Self::Registered { source: source.trim().to_owned() });
+        }
         let value = Self::from_native(&*native)
-            .ok_or_else(|| AnimationError("Choose a literal blur or offset drop shadow".into()))?;
+            .ok_or_else(|| AnimationError("Choose a supported effect literal".into()))?;
         value.validate()?;
         Ok(value)
     }
@@ -44,8 +48,19 @@ impl AnimationEffect {
         Color::try_parse(source).map(|color| color.to_uint32().to_be_bytes())
     }
 
-    pub fn to_native(self) -> Rc<dyn IEffect> {
-        match self {
+    /// Forward a literal for validation by the project host when the effect is
+    /// unregistered in this process. Known effects still use the native parser.
+    pub fn parse_for_project_host(source: &str) -> Result<Self> {
+        if let Some(name) = CustomEffectRegistry::invocation_name(source) {
+            if !CustomEffectRegistry::is_registered(name) {
+                return Ok(Self::Registered { source: source.trim().to_owned() });
+            }
+        }
+        Self::parse_native(source)
+    }
+
+    pub fn to_native(&self) -> Result<Rc<dyn IEffect>> {
+        Ok(match *self {
             Self::Blur { radius, .. } => Rc::new(ImmutableBlurEffect::new(radius)),
             Self::DropShadow {
                 offset_x,
@@ -75,10 +90,18 @@ impl AnimationEffect {
                 Color::from_uint32(u32::from_be_bytes(argb)),
                 opacity,
             )),
-        }
+            Self::Registered { ref source } => Effect::parse(source)
+                .map_err(|error| AnimationError(error.to_string()))?,
+        })
     }
 
     pub fn from_native(effect: &dyn IEffect) -> Option<Self> {
+        if let Some(custom) = effect.as_custom_effect() {
+            crate::value::registered_effect::validate_parameters(custom).ok()?;
+            let source = custom.to_string();
+            let restored = CustomEffectRegistry::parse(&source)?.ok()?;
+            return (&restored == custom).then_some(Self::Registered { source });
+        }
         if let Some(blur) = effect.as_blur_effect() {
             return Some(Self::Blur {
                 radius: blur.radius(),

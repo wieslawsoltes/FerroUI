@@ -13,6 +13,7 @@ pub(crate) struct DesignDocument<'a> {
     pub(crate) rsx: Option<RsxProjection<'a>>,
     pub(crate) index: LineIndex,
     pub(crate) project: Option<&'a Project>,
+    rsx_catalog: &'a RsxCatalog,
     pub(crate) rsx_animations: BTreeMap<NodeId, RsxAnimation>,
     pub(crate) rsx_states: BTreeMap<(NodeId, String), RsxStateGroup>,
     rsx_nodes: BTreeMap<NodeId, usize>,
@@ -28,6 +29,15 @@ impl<'a> DesignDocument<'a> {
         project: Option<&'a Project>,
         modules: Option<&'a RustModuleSources>,
     ) -> Result<Self, String> {
+        Self::parse_with_catalog(input, project, modules, rsx_catalog(project))
+    }
+
+    pub(crate) fn parse_with_catalog(
+        input: &'a Source,
+        project: Option<&'a Project>,
+        modules: Option<&'a RustModuleSources>,
+        rsx_catalog: &'a RsxCatalog,
+    ) -> Result<Self, String> {
         if input.source.len() > MAX_SOURCE_BYTES {
             return Err("Designer source exceeds 1 MiB".into());
         }
@@ -37,7 +47,7 @@ impl<'a> DesignDocument<'a> {
         let index = LineIndex::new(&input.source);
         let rsx = match input.language {
             Language::Xaml => None,
-            Language::Rust => Some(rsx_catalog(project).project_with_modules(
+            Language::Rust => Some(rsx_catalog.project_with_modules(
                 &input.source,
                 index.offset(input.caret).map_err(|e| e.to_string())?,
                 modules,
@@ -80,6 +90,7 @@ impl<'a> DesignDocument<'a> {
             rsx,
             index,
             project,
+            rsx_catalog,
             rsx_nodes,
             rsx_animations,
             rsx_states,
@@ -103,7 +114,7 @@ impl<'a> DesignDocument<'a> {
         match self.project { Some(project) => &project.schema, None => schema() }
     }
 
-    pub(crate) fn rsx_catalog(&self) -> &RsxCatalog { rsx_catalog(self.project) }
+    pub(crate) fn rsx_catalog(&self) -> &RsxCatalog { self.rsx_catalog }
 
     pub(crate) fn rsx_node(&self, id: NodeId) -> Option<(usize, &RsxNode)> {
         let index = *self.rsx_nodes.get(&id)?;
@@ -163,7 +174,7 @@ impl<'a> DesignDocument<'a> {
     }
 }
 
-fn rsx_catalog(project: Option<&Project>) -> &RsxCatalog {
+pub(crate) fn rsx_catalog(project: Option<&Project>) -> &RsxCatalog {
     match project { Some(project) => &project.rsx, None => RsxCatalog::built_in() }
 }
 

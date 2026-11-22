@@ -1,5 +1,5 @@
 use crate::hosted_relay::Frame;
-use ferroui_designer_animation::{AnimationClipEdit, ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection, StateGroupEdit};
+use ferroui_designer_animation::{AnimationClipEdit, ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection, StateGroupEdit, TrackCurveChannel};
 use ferroui_designer_core::TextPatch;
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationClipBinding,
@@ -113,7 +113,7 @@ pub(crate) struct CurveRequest {
     #[serde(default)]
     pub(crate) metric: CurveMetric,
     #[serde(default)]
-    pub(crate) channel: CurveChannel,
+    pub(crate) channel: TrackCurveChannel,
 }
 
 fn tracks(tracks: Vec<DesignAnimationTrack>) -> Vec<Value> {

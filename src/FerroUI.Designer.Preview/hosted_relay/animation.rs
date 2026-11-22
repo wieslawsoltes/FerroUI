@@ -5,7 +5,7 @@ mod keyframe_selection;
 
 use super::{send, Connection, Relay, FRAME_TIMEOUT};
 use crate::{hosted_animation, hosted_animation_restore::Presentation};
-use ferroui_designer_animation::{CurveChannel, CurvePoint};
+use ferroui_designer_animation::CurvePoint;
 use ferroui_remote_protocol::designer::{
     DesignAnimationClipBinding, DesignAnimationCurveRequest, DesignAnimationRequestMessage,
     DesignAnimationResultMessage,
@@ -173,7 +173,7 @@ impl Relay {
         &mut self,
         query: hosted_animation::CurveRequest,
     ) -> Result<Vec<CurvePoint>, String> {
-        let channel = if query.channel == CurveChannel::Value {
+        let channel = if query.channel.is_scalar() {
             None
         } else {
             serde_json::to_value(query.channel).map_err(|error| error.to_string())?.as_str().map(str::to_owned)

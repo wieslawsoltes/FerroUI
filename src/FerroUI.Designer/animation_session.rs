@@ -4,11 +4,12 @@ use ferroui_base::styling::Style;
 use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use ferroui_designer_animation::{
     AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationValue,
-    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, ValueKind,
+    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
 use ferroui_markup::markup::parsers::SelectorParser;
 use std::collections::{BTreeMap, BTreeSet};
+use std::rc::Rc;
 
 pub(crate) struct AnimationSession {
     pub(crate) native: crate::animation_runtime::NativeAnimations,
@@ -707,7 +708,7 @@ impl DesignerSession {
         id: NodeId,
         target: NodeId,
         property: &str,
-        channel: CurveChannel,
+        channel: impl Into<TrackCurveChannel>,
         window: CurveWindow,
     ) -> Result<Vec<CurvePoint>, String> {
         if !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document().revision()) {
@@ -715,12 +716,16 @@ impl DesignerSession {
         }
         let program = self.animation.programs.iter().find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
+        let channel = channel.into();
         if self.requires_native_animation(program) {
             return self.animation.native.curve(program, &self.preview, target, property, channel, window);
         }
         let compiled = self.animation.compiled_targets.get(&(id, target))
             .or_else(|| self.animation.compiled_programs.get(&id))
             .ok_or("Choose a compiled animation program")?;
+        let TrackCurveChannel::Property(channel) = channel else {
+            return Err("A registered effect curve requires the native animator".into());
+        };
         compiled.curve(target, property, channel, window).map_err(|error| error.to_string())
     }
     pub fn set_duration(&mut self, duration: f64) -> Result<(), String> {
@@ -1213,8 +1218,9 @@ impl DesignerSession {
     }
 
     fn animation_value_from_preview(&self, target: NodeId, property: &str, value: &BoxedValue) -> Result<AnimationValue, String> {
-        if let Some(effect) = AnimationEffect::from_boxed(value) {
-            return Ok(AnimationValue::Effect(effect));
+        if let Some(effect) = value.downcast_ref::<Option<Rc<dyn ferroui_base::media::IEffect>>>() {
+            return effect.as_deref().and_then(AnimationEffect::from_native).map(AnimationValue::Effect)
+                .ok_or_else(|| "Choose a native effect that the source can represent as a keyframe".into());
         }
         self.animation_value_for_target(target, property, &ferroui_inspect::display_value(Some(value)))
     }
@@ -1243,6 +1249,7 @@ impl DesignerSession {
         let mut options = ImportOptions {
             native_effect_endpoints: true,
             effect_color: Some(AnimationEffect::resolve_color),
+            effect_literal: Some(AnimationEffect::parse_native),
             ..ImportOptions::default()
         };
         let target = program.primary_target();

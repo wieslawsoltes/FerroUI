@@ -112,6 +112,14 @@ impl CustomEffectRegistry {
         Self::registry().iter().map(|registration| registration.name).collect()
     }
 
+    /// The name in a custom-effect invocation, without resolving it in this process.
+    /// A designer can forward an invocation to the application that owns its registry.
+    pub fn invocation_name(s: &str) -> Option<&str> {
+        let (name, _) = parse_invocation(s)?;
+        let key = normalize_identifier(name);
+        (!key.is_empty() && !RESERVED_NAMES.contains(&key.as_str())).then_some(name)
+    }
+
     /// Parses an effect string that names a registered custom effect:
     /// `name(parameter=value, ...)`, with the parameters of the effect in
     /// any order (a missing one keeps its default) and their values in the

@@ -74,7 +74,7 @@ impl DesignerWorkspace {
         track: &Track,
         context: &TimelineContext,
         metric: CurveMetric,
-        channel: CurveChannel,
+        channel: TrackCurveChannel,
     ) {
         let Some(program) = context.program else {
             return;
@@ -99,7 +99,7 @@ impl DesignerWorkspace {
         let property = track.property.clone();
         lane.configure_curve(
             metric,
-            channel,
+            channel.clone(),
             keys,
             move |window| {
                 let workspace = query.upgrade().ok_or("The Timeline closed")?;
@@ -109,7 +109,7 @@ impl DesignerWorkspace {
                     program,
                     target,
                     &query_property,
-                    channel,
+                    channel.clone(),
                     window,
                 )?;
                 metric.measure(points).map_err(|error| error.to_string())

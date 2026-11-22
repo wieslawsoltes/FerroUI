@@ -134,6 +134,13 @@ editable even when no portable codec can decode them. Native previews use elapse
 time, including delays, easing, repeat and fill. Typed timeline scrubbing uses its iteration
 edit position as described above.
 
+The native codec also accepts registered effect strings when the host provides its effect
+resolver. The portable timeline preserves the source literal. The native animator supplies
+interpolation and the registered value supplies its parameter types. The catalog adds named
+channels in the form `effect_parameter/<type>/<parameter>/<component>` alongside the existing
+property channels. An app-hosted Rust projection can forward a mapped effect string to the
+app's registry and apply its checked response to the original literal.
+
 `Animation::apply_for_preview` isolates playback metadata and retains native final fill and
 automatically created transforms at disposable animation priority. Stop, program selection,
 source reload and failed source acceptance dispose the runs and restore underlying values

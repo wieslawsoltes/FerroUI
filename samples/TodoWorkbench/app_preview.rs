@@ -22,6 +22,7 @@ use std::rc::Rc;
 mod animation_codec;
 mod motion;
 mod review_states;
+mod shader;
 mod template_review;
 mod template_rows;
 mod tree_templates;
@@ -120,6 +121,7 @@ fn register_fixtures() {
 
 fn register_markup() {
     FerroRuntimeXamlLoader::register();
+    shader::register();
     ferroui_xaml_interactions_custom::register_types();
     ferroui_controls_treedatagrid::register_types();
     Animation::register_custom_animator::<ReviewCorners>();

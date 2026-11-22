@@ -23,6 +23,7 @@ pub struct RsxCatalog {
     registered: Vec<Arc<RegisteredClass>>,
     animation_properties: BTreeMap<String, crate::animation::Property>,
     style_fields: Arc<BTreeMap<String, RsxStyleField>>,
+    pub(crate) project_effects: bool,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -82,7 +83,13 @@ impl RsxCatalog {
             .collect();
         let animation_properties = animation::properties(catalog, package.as_deref());
         let style_fields = Arc::new(style_fields::project_fields(catalog, schema, package.as_deref()));
-        Self { registered, animation_properties, style_fields }
+        Self { registered, animation_properties, style_fields, project_effects: false }
+    }
+
+    /// Forward mapped effect literals to an app that owns the target registry.
+    pub fn with_project_effects(mut self) -> Self {
+        self.project_effects = true;
+        self
     }
 
     pub(crate) fn style_namespace(&self, name: &str) -> Option<Option<&str>> {

@@ -1038,7 +1038,7 @@ impl RuntimePreview {
         let converted: BoxedValue = match value {
             AnimationValue::Effect(effect) if AnimationEffect::is_effect_property(property) => {
                 value.validate().map_err(|error| error.to_string())?;
-                Rc::new(Some(effect.to_native()))
+                Rc::new(Some(effect.to_native().map_err(|error| error.to_string())?))
             }
             _ => {
                 let value: BoxedValue = Rc::new(value.to_xaml());

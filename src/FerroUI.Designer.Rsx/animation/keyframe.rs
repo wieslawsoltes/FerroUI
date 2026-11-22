@@ -62,7 +62,7 @@ pub(super) fn keyframe(
             return None;
         }
         let (getter, property) = read_property(&current.args[0], catalog)?;
-        let value = property.shape.read(&current.args[1])?;
+        let value = property.shape.read_keyframe(&current.args[1], catalog.project_effects)?;
         keys.push(MappedKey {
             source: KeySource {
                 property: property.name,

@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 
 #[path = "effect_value.rs"]
 mod effect;
+#[cfg(feature = "native-values")]
+#[path = "registered_effect.rs"]
+pub(crate) mod registered_effect;
 pub use effect::{AnimationEffect, EffectForm};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -354,7 +357,11 @@ impl AnimationValue {
                 bottom: mix(*bottom, *b),
             },
             (Self::Effect(from), Self::Effect(to)) => {
-                Self::Effect(from.interpolate(*to, progress, mix, color))
+                require(
+                    !matches!((from, to), (AnimationEffect::Registered { .. }, _) | (_, AnimationEffect::Registered { .. })),
+                    "Sample registered effects with the application's native animation clock",
+                )?;
+                Self::Effect(from.clone().interpolate(to.clone(), progress, mix, color))
             }
             (Self::Discrete(_), Self::Discrete(_)) => {
                 if progress < 1.0 {

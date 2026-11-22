@@ -5,15 +5,15 @@ impl DesignerWorkspace {
     pub(in crate::workspace::timeline) fn timeline_curve_channel(
         &self,
         track: &Track,
-        choices: &[CurveChannel],
-    ) -> Option<CurveChannel> {
+        choices: &[TrackCurveChannel],
+    ) -> Option<TrackCurveChannel> {
         self.timeline_ui
             .borrow()
             .curve_channels
             .get(&(track.target, track.property.clone()))
-            .copied()
             .filter(|channel| choices.contains(channel))
-            .or_else(|| choices.first().copied())
+            .or_else(|| choices.first())
+            .cloned()
     }
 
     pub(in crate::workspace::timeline) fn timeline_curve_title(
@@ -22,21 +22,23 @@ impl DesignerWorkspace {
         lane: &Ref<TimelineLane>,
         track: &Track,
         context: &TimelineContext,
-        (metric, channel): (CurveMetric, CurveChannel),
-        choices: Vec<CurveChannel>,
+        (metric, channel): &(CurveMetric, TrackCurveChannel),
+        choices: Vec<TrackCurveChannel>,
     ) -> Ref<Control> {
         let picker = ComboBox::new();
-        picker.set_width(82.0);
+        let named = matches!(channel, TrackCurveChannel::EffectParameter { .. });
+        picker.set_width(if named { 124.0 } else { 82.0 });
         picker.set_font_size(10.0);
         picker.set_vertical_alignment(VerticalAlignment::Center);
         picker.classes().add("designer-field");
         let label = format!("{} curve channel", track.property);
+        let metric = *metric;
         AutomationProperties::set_name(&picker, Some(&label));
         ToolTip::set_tip(&picker, Some(Rc::new(label)));
         for choice in &choices {
-            picker.items().add(Some(Rc::new(choice.label().to_owned())));
+            picker.items().add(Some(Rc::new(choice.label().into_owned())));
         }
-        if let Some(index) = choices.iter().position(|&choice| choice == channel) {
+        if let Some(index) = choices.iter().position(|choice| choice == channel) {
             picker.set_selected_index(index as i32);
         }
         let workspace = Rc::downgrade(self);
@@ -50,7 +52,7 @@ impl DesignerWorkspace {
             else {
                 return;
             };
-            let Some(&channel) = choices.get(picker.selected_index() as usize) else {
+            let Some(channel) = choices.get(picker.selected_index() as usize) else {
                 return;
             };
             if context.check(&workspace).is_ok() {
@@ -58,8 +60,8 @@ impl DesignerWorkspace {
                     .timeline_ui
                     .borrow_mut()
                     .curve_channels
-                    .insert((track.target, track.property.clone()), channel);
-                workspace.attach_timeline_curve(&lane, &track, &context, metric, channel);
+                    .insert((track.target, track.property.clone()), channel.clone());
+                workspace.attach_timeline_curve(&lane, &track, &context, metric, channel.clone());
             }
         });
         let header = Grid::new();

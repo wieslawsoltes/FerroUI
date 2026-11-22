@@ -2,10 +2,11 @@
 mod selection;
 
 use crate::animation_codecs::with_codecs;
+use ferroui_base::media::CustomEffectRegistry;
 use ferroui_designer_animation::native::{native_keyframe_options, NativeProgramIndex};
 use ferroui_designer_animation::{
     animation_fragment, compose_animation_edit, AnimationError, AnimationProgram, AnimationValue,
-    CurveChannel, ImportOptions, KeyframeEdit, KeyframeLocation, ValueKind,
+    CurveChannel, ImportOptions, KeyframeEdit, KeyframeLocation, TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, NodeId, TextPatch};
 use ferroui_remote_protocol::designer::{
@@ -27,6 +28,7 @@ pub(super) struct HostedKeyframeCapabilities {
     pub(super) sampling: bool,
     pub(super) effects: bool,
     pub(super) effect_objects: bool,
+    pub(super) registered_effects: bool,
 }
 
 impl HostedKeyframes {
@@ -65,8 +67,11 @@ impl HostedKeyframes {
                 tracks(&program)
             }));
             let Ok(Some(mut tracks)) = decoded else { continue };
-            tracks.retain(|track| track.keys.iter().all(|key| key.value_kind != "Effect"
-                || (capabilities.effects && (capabilities.effect_objects || !key.value.starts_with('<')))));
+            tracks.retain(|track| track.keys.iter().all(|key| {
+                key.value_kind != "Effect" || (capabilities.effects
+                    && (capabilities.effect_objects || !key.value.starts_with('<'))
+                    && (capabilities.registered_effects || CustomEffectRegistry::invocation_name(&key.value).is_none()))
+            }));
             if tracks.is_empty() {
                 continue;
             }
@@ -233,7 +238,7 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
         .filter_map(|track| {
             let kind = track.keyframes.first()?.value.kind();
             let curve_channels = matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar | ValueKind::Effect)
-                .then(|| CurveChannel::for_track(track, timeline.duration, timeline.fill))
+                .then(|| TrackCurveChannel::for_track(track, timeline.duration, timeline.fill))
                 .and_then(|channels| serde_json::to_value(channels).ok())
                 .and_then(|channels| serde_json::from_value(channels).ok());
             Some(DesignAnimationTrack {

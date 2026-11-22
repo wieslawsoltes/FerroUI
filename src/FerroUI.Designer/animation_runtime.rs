@@ -6,7 +6,7 @@ use ferroui_designer_animation::native::{
     animation_timing, sample_curve_track, sample_keyframe_value, validate_animation_target, NativePlayback, NativeProgramIndex,
     NativeSourceIndex,
 };
-use ferroui_designer_animation::{AnimationProgram, CurveChannel, CurvePoint, CurveWindow, Timeline};
+use ferroui_designer_animation::{AnimationProgram, CurvePoint, CurveWindow, Timeline, TrackCurveChannel};
 use ferroui_designer_core::{Document, NodeId};
 use std::collections::BTreeSet;
 
@@ -57,13 +57,13 @@ impl NativeAnimations {
         preview: &RuntimePreview,
         target: NodeId,
         property: &str,
-        channel: CurveChannel,
+        channel: TrackCurveChannel,
         window: CurveWindow,
     ) -> Result<Vec<CurvePoint>, String> {
         let animation = self.index.animation(program.id).ok_or("The native animation is unavailable")?;
         let timeline = program.timeline.as_ref().ok_or("Choose a typed animation program")?;
         let track = timeline.track(target, property).ok_or("Choose an authored animation track")?;
-        if !CurveChannel::for_track(track, timeline.duration, timeline.fill).contains(&channel) {
+        if !TrackCurveChannel::for_track(track, timeline.duration, timeline.fill).contains(&channel) {
             return Err("Choose an authored animation track and one of its curve channels".into());
         }
         let object = self.track_target(program, preview, target)?;

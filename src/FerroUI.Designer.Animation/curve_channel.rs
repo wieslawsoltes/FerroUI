@@ -246,18 +246,19 @@ impl CurveChannel {
             AnimationEffect::Blur { .. } => &[BlurRadius],
             AnimationEffect::DropShadow { .. } => &[BlurRadius, OffsetX, OffsetY, ShadowOpacity, Red, Green, Blue, Alpha],
             AnimationEffect::DirectionalDropShadow { .. } => &[BlurRadius, Direction, ShadowDepth, ShadowOpacity, Red, Green, Blue, Alpha],
+            AnimationEffect::Registered { .. } => &[],
         }
     }
 
     fn project_effect(self, effect: &AnimationEffect) -> Option<f64> {
-        let value = match (self, *effect) {
-            (Self::BlurRadius, AnimationEffect::Blur { radius, .. }) => radius,
-            (Self::BlurRadius, AnimationEffect::DropShadow { blur_radius, .. } | AnimationEffect::DirectionalDropShadow { blur_radius, .. }) => blur_radius,
-            (Self::OffsetX, AnimationEffect::DropShadow { offset_x, .. }) => offset_x,
-            (Self::OffsetY, AnimationEffect::DropShadow { offset_y, .. }) => offset_y,
-            (Self::Direction, AnimationEffect::DirectionalDropShadow { direction, .. }) => direction,
-            (Self::ShadowDepth, AnimationEffect::DirectionalDropShadow { shadow_depth, .. }) => shadow_depth,
-            (Self::ShadowOpacity, AnimationEffect::DropShadow { opacity, .. } | AnimationEffect::DirectionalDropShadow { opacity, .. }) => opacity,
+        let value = match (self, effect) {
+            (Self::BlurRadius, AnimationEffect::Blur { radius, .. }) => *radius,
+            (Self::BlurRadius, AnimationEffect::DropShadow { blur_radius, .. } | AnimationEffect::DirectionalDropShadow { blur_radius, .. }) => *blur_radius,
+            (Self::OffsetX, AnimationEffect::DropShadow { offset_x, .. }) => *offset_x,
+            (Self::OffsetY, AnimationEffect::DropShadow { offset_y, .. }) => *offset_y,
+            (Self::Direction, AnimationEffect::DirectionalDropShadow { direction, .. }) => *direction,
+            (Self::ShadowDepth, AnimationEffect::DirectionalDropShadow { shadow_depth, .. }) => *shadow_depth,
+            (Self::ShadowOpacity, AnimationEffect::DropShadow { opacity, .. } | AnimationEffect::DirectionalDropShadow { opacity, .. }) => *opacity,
             (Self::Alpha, shadow) => f64::from(shadow.argb()?[0]) / 255.0,
             (Self::Red, shadow) => f64::from(shadow.argb()?[1]) / 255.0,
             (Self::Green, shadow) => f64::from(shadow.argb()?[2]) / 255.0,

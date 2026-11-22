@@ -3,7 +3,7 @@ mod transfer;
 use super::{KeySource, RsxAnimation, keyframe::BUILTINS, syntax, value::rust_literal};
 use crate::{RsxCatalog, blocks::keep_comments, source_edits::line_prefix};
 use ferroui_designer_animation::{
-    AnimationValue, Easing, KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline,
+    AnimationValue, Easing, KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline, ValueKind,
     native_key_time,
 };
 use ferroui_designer_core::{SourceSpan, TextPatch};
@@ -55,7 +55,11 @@ impl RsxAnimation {
                     property: property.into(),
                     getter,
                     time: self.authored_time(time)?,
-                    value: AnimationValue::parse_native_literal(value, kind).map_err(|error| error.to_string())?,
+                    value: if kind == ValueKind::Effect {
+                        AnimationValue::Effect(super::effect::parse(value, catalog.project_effects)?)
+                    } else {
+                        AnimationValue::parse_native_literal(value, kind).map_err(|error| error.to_string())?
+                    },
                     easing: Easing::parse(easing).map_err(|error| error.to_string())?,
                 };
                 self.insert(source, catalog, &[key])

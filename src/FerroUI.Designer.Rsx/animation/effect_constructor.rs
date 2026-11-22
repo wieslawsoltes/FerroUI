@@ -116,15 +116,15 @@ impl ConstructorSource {
 
     pub(super) fn plan(
         &self,
-        old: AnimationEffect,
-        next: AnimationEffect,
+        old: &AnimationEffect,
+        next: &AnimationEffect,
         patches: &mut Vec<TextPatch>,
     ) -> Result<(), String> {
-        let (kind, parts, color) = fields(next);
+        let (kind, parts, color) = fields(next)?;
         if self.kind != kind {
             return Err("Keep the Rust effect constructor's type when editing its key".into());
         }
-        if let (Some(source), Some(color), Some(old)) = (&self.color, color, fields(old).2) {
+        if let (Some(source), Some(color), Some(old)) = (&self.color, color, fields(old)?.2) {
             source.plan(
                 &AnimationValue::from_argb8(old),
                 &AnimationValue::from_argb8(color),
@@ -138,14 +138,14 @@ impl ConstructorSource {
     }
 }
 
-pub(super) fn literal(effect: AnimationEffect) -> String {
+pub(super) fn literal(effect: &AnimationEffect) -> Result<String, String> {
     if effect.form() == EffectForm::Literal {
-        return format!(
+        return Ok(format!(
             "::ferroui_base::media::Effect::parse({:?}).unwrap()",
             effect.to_xaml()
-        );
+        ));
     }
-    let (kind, args, color) = fields(effect);
+    let (kind, args, color) = fields(effect)?;
     let mut fields = args
         .into_iter()
         .map(|n| format!("{n:?}"))
@@ -161,11 +161,13 @@ pub(super) fn literal(effect: AnimationEffect) -> String {
         Kind::Offset => "ImmutableDropShadowEffect",
         Kind::Directional => "ImmutableDropShadowDirectionEffect",
     };
-    format!("::std::rc::Rc::new(::ferroui_base::media::{name}::new({})) as ::std::rc::Rc<dyn ::ferroui_base::media::IEffect>", fields.join(", "))
+    Ok(format!("::std::rc::Rc::new(::ferroui_base::media::{name}::new({})) as ::std::rc::Rc<dyn ::ferroui_base::media::IEffect>", fields.join(", ")))
 }
 
-fn fields(effect: AnimationEffect) -> (Kind, Vec<f64>, Option<[u8; 4]>) {
-    match effect {
+type ConstructorFields = (Kind, Vec<f64>, Option<[u8; 4]>);
+
+fn fields(effect: &AnimationEffect) -> Result<ConstructorFields, String> {
+    Ok(match *effect {
         AnimationEffect::Blur { radius, .. } => (Kind::Blur, vec![radius], None),
         AnimationEffect::DropShadow {
             offset_x,
@@ -191,7 +193,10 @@ fn fields(effect: AnimationEffect) -> (Kind, Vec<f64>, Option<[u8; 4]>) {
             vec![direction, shadow_depth, blur_radius, opacity],
             Some(argb),
         ),
-    }
+        AnimationEffect::Registered { .. } => {
+            return Err("Use Effect::parse with a registered shader literal".into());
+        }
+    })
 }
 
 fn unparen(mut expr: &Expr) -> &Expr {

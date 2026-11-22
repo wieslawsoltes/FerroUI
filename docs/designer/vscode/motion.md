@@ -147,9 +147,39 @@ In RSX, use a mapped immutable effect constructor. Timeline stores changes in th
 ))
 ```
 
-When directional and offset objects share a track, the picker offers their common properties. Use the native source editor for project shader parameters and binding-driven effect objects. Rebuild the configured App Preview target with the current FerroUI helpers to publish the added channels.
+When directional and offset objects share a track, the picker offers their common properties. Edit binding-driven effect objects in source. Rebuild the configured App Preview target with the current FerroUI helpers to publish the added channels.
 
 Agents can request `direction`, `shadow_depth`, and `shadow_opacity` from the same curve tools. Pass the complete effect object as the keyframe draft value, then apply the checked edit using the accepted frame and document revision.
+
+### Animate registered shader parameters
+
+1. Author two **Effect** keys that call the same registered effect. Use an effect string in a XAML setter or a literal string in a Rust `ferroui_base::media::Effect::parse` call. Library effects such as `spotlight` work in Studio and the isolated VS Code Timeline. Register your own effect in the app before opening its preview. Then open **App Preview** to use the running app’s registry and interpolator.
+2. In **Animation graph**, choose **Value curves** or **Velocity curves**. Select a channel such as **Strength**, **Center X**, or **Color Green** on the Effect lane. App Preview uses the native samples from the chosen target. Scrub to a point on the authored ruler to see the shader at that time.
+3. Open a key in the inspector, edit its effect string, and apply it. The registry checks names, parameter types, and finite numeric values. **Add Key at Playhead** records a snapshot the registry can read back. Each checked edit, including a mapped Rust string change, uses one source Undo step.
+
+![The VS Code Timeline plots spotlight strength with the XAML source and the rendered shader at 1.15 seconds](../images/vscode-timeline-registered-shader.png)
+
+```xml
+<KeyFrame Cue="100%">
+    <Setter Property="Effect"
+            Value="spotlight(center-x=0.64, strength=0.75, color=#FF82CCF0)" />
+</KeyFrame>
+```
+
+```rust
+.key_frame(1.0, |key| key.set(
+    ferroui_base::Visual::effect_property(),
+    ferroui_base::media::Effect::parse(
+        "spotlight(center-x=0.64, strength=0.75, color=#FF82CCF0)"
+    ).unwrap(),
+))
+```
+
+The picker exposes numeric parameters, individual color and geometry components, and Boolean values as 0 or 1. Color uses the 0–1 scale and velocity is measured per authored second. Text and image inputs stay in source. A graph pauses wherever the active effect cannot supply the chosen parameter.
+
+For project effects, register the type with `ferroui_base::media::CustomEffectRegistry::register` during app setup. Rebuild the configured App Preview target after changing its registry. Todo Workbench’s `review-spotlight` uses a slower start than the library spotlight. [Todo Workbench example](../../../samples/TodoWorkbench/app_preview/shader.rs)
+
+Agents discover the exact channel ID in `curve_channels`. For example, pass `effect_parameter/review-spotlight/strength/value` to `designer_hosted_curve`. The same keyframe draft and apply tools use the accepted frame and source revision.
 
 ### Scale selected key times
 

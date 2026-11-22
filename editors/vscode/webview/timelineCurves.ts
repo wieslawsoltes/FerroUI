@@ -20,6 +20,19 @@ const channelLabels: Partial<Record<CurveChannel, string>> = {
     direction: 'Direction (°)', shadow_depth: 'Shadow depth (px)', shadow_opacity: 'Shadow opacity',
 };
 
+function channelComponent(channel: CurveChannel): CurveChannel {
+    return channel.startsWith('effect_parameter/') ? channel.split('/')[3] as CurveChannel : channel;
+}
+
+function channelLabel(channel: CurveChannel): string {
+    const component = channelComponent(channel);
+    const label = channelLabels[component] ?? component[0].toUpperCase() + component.slice(1).replaceAll('_', ' ');
+    if (component === channel) return label;
+    const parameter = channel.split('/')[2].replace(/[_-]+/g, ' ')
+        .replace(/(^|\s)(\p{L})/gu, (_, space: string, letter: string) => space + letter.toUpperCase());
+    return component === 'value' ? parameter : `${parameter} ${label}`;
+}
+
 export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
     return track.curve_channels ?? (track.keyframes[0]?.value_kind === 'Number' ? ['value'] : []);
 }
@@ -61,15 +74,14 @@ export class TimelineCurvePlot {
         lane.prepend(this.svg, this.status);
         label.append(this.scaleLabels);
         const choices = curveChannels(track);
-        if (choices.length > 1) {
+        if (choices.length > 1 || choices[0]?.startsWith('effect_parameter/')) {
             const select = this.channelPicker = create('select');
             const name = `${track.property} curve channel`;
             select.setAttribute('aria-label', name);
             select.title = name;
             select.className = 'timeline-curve-channel';
             select.hidden = true;
-            select.append(...choices.map(channel => new Option(channelLabels[channel] ??
-                channel[0].toUpperCase() + channel.slice(1).replaceAll('_', ' '), channel)));
+            select.append(...choices.map(channel => new Option(channelLabel(channel), channel)));
             if (preferred && choices.includes(preferred)) select.value = preferred;
             select.onchange = () => changed(this.channel);
             label.append(select);
@@ -103,7 +115,8 @@ export class TimelineCurvePlot {
         }
         const editsValues = channel === 'value' && metric === 'value';
         this.lane.dataset.curve = metric === 'value' && !editsValues ? 'component' : metric;
-        this.line.dataset.channel = channel;
+        const component = channelComponent(channel);
+        this.line.dataset.channel = component;
         const visible = points?.filter(point => visibleTime(view, point.time)) ?? [];
         // Include neighbors so panning can move immediately while the current range samples arrive.
         const first = visible[0];
@@ -111,7 +124,7 @@ export class TimelineCurvePlot {
         const before = points?.findLast(point => point.time < (first?.time ?? view.start));
         const after = points?.find(point => point.time > (last?.time ?? view.start + view.span));
         const isVelocity = metric === 'velocity';
-        const keyValues = isVelocity ? [0] : colorChannels.has(channel) ? [0, 1]
+        const keyValues = isVelocity ? [0] : colorChannels.has(component) ? [0, 1]
             : this.keys.flatMap(({ rendered, value }) =>
                 value !== undefined && visibleTime(view, rendered.key.time) ? [value] : []);
         const allValues = this.keys.flatMap(({ value }) => value === undefined ? [] : [value]);
@@ -128,9 +141,9 @@ export class TimelineCurvePlot {
         this.scaleLabels.toggleAttribute('data-waiting', !editsValues && !points?.length);
         this.ticks[0].textContent = axisNumber.format(low);
         this.ticks[1].textContent = axisNumber.format(high);
-        this.unit.textContent = channel.startsWith('percent') ? (isVelocity ? 'pp/s' : '%')
-            : channel === 'direction' ? (isVelocity ? '°/s' : '°')
-            : channel.startsWith('absolute') || channel === 'blur_radius' || channel.startsWith('offset_') || channel === 'shadow_depth'
+        this.unit.textContent = component.startsWith('percent') ? (isVelocity ? 'pp/s' : '%')
+            : component === 'direction' ? (isVelocity ? '°/s' : '°')
+            : component.startsWith('absolute') || component === 'blur_radius' || component.startsWith('offset_') || component === 'shadow_depth'
                 ? (isVelocity ? 'px/s' : 'px') : isVelocity ? '/s' : '';
         this.zeroLine.toggleAttribute('data-visible', isVelocity && Boolean(points?.length) && low < 0 && high > 0);
         const baseline = scale.percent(0).toFixed(3);

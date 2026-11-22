@@ -1,5 +1,5 @@
 use super::*;
-use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint, CurveWindow, RelativeUnit};
+use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint, CurveWindow, RelativeUnit, TrackCurveChannel};
 
 pub(super) const HEIGHT: f64 = 88.0;
 const VALUE_INSET: f64 = 12.0;
@@ -9,7 +9,7 @@ type Edit = Rc<dyn Fn(f64, f64, f64)>;
 
 pub(super) struct Plot {
     metric: CurveMetric,
-    channel: CurveChannel,
+    channel: TrackCurveChannel,
     keys: Vec<CurvePoint>,
     samples: Vec<CurvePoint>,
     scale: Option<Scale>,
@@ -19,7 +19,7 @@ pub(super) struct Plot {
 
 impl Plot {
     fn edits_values(&self) -> bool {
-        self.metric == CurveMetric::Value && self.channel == CurveChannel::Value
+        self.metric == CurveMetric::Value && self.channel.is_scalar()
     }
 
     fn height(&self, height: f64) -> f64 {
@@ -104,13 +104,14 @@ impl TimelineLane {
     pub(crate) fn configure_curve(
         &self,
         metric: CurveMetric,
-        channel: CurveChannel,
+        channel: impl Into<TrackCurveChannel>,
         keys: Vec<CurvePoint>,
         sample: impl Fn(CurveWindow) -> Result<Vec<CurvePoint>, String> + 'static,
         edit: impl Fn(f64, f64, f64) + 'static,
     ) {
+        let channel = channel.into();
         self.set_height(
-            if metric == CurveMetric::Velocity || channel != CurveChannel::Value {
+            if metric == CurveMetric::Velocity || !channel.is_scalar() {
                 HEIGHT + KEY_ROW
             } else {
                 HEIGHT
@@ -140,7 +141,7 @@ impl TimelineLane {
             Err(error) => error.clone(),
         };
         plot.samples = result.unwrap_or_default();
-        let color_value = plot.metric == CurveMetric::Value && plot.channel.is_color() && !plot.samples.is_empty();
+        let color_value = plot.metric == CurveMetric::Value && plot.channel.component().is_color() && !plot.samples.is_empty();
         plot.scale = Scale::from_values(
             plot.samples
                 .iter()
@@ -254,7 +255,8 @@ impl TimelineLane {
         };
         if let Some(scale) = plot.scale {
             let grid: Rc<dyn IPen> = Pen::from_uint32(0xff3b3d46, 1.0).into();
-            let color = match plot.channel {
+            let component = plot.channel.component();
+            let color = match component {
                 CurveChannel::Red => 0xffff958f,
                 CurveChannel::Green => 0xffa3d891,
                 CurveChannel::Alpha => 0xffc9cce0,
@@ -263,8 +265,8 @@ impl TimelineLane {
             let trace: Rc<dyn IPen> = Pen::from_uint32(color, 1.5).into();
             let plot_bounds = plot.height(bounds.height);
             let height = plot_height(plot_bounds);
-            let axis_units = plot.channel.relative_unit().or_else(|| {
-                matches!(plot.channel, CurveChannel::BlurRadius | CurveChannel::OffsetX | CurveChannel::OffsetY | CurveChannel::ShadowDepth)
+            let axis_units = component.relative_unit().or_else(|| {
+                matches!(component, CurveChannel::BlurRadius | CurveChannel::OffsetX | CurveChannel::OffsetY | CurveChannel::ShadowDepth)
                     .then_some(RelativeUnit::Absolute)
             });
             let unit = match (axis_units, plot.metric) {
@@ -272,8 +274,8 @@ impl TimelineLane {
                 (Some(RelativeUnit::Relative), CurveMetric::Velocity) => " pp/s",
                 (Some(RelativeUnit::Absolute), CurveMetric::Value) => " px",
                 (Some(RelativeUnit::Absolute), CurveMetric::Velocity) => " px/s",
-                (None, CurveMetric::Velocity) if plot.channel == CurveChannel::Direction => " °/s",
-                (None, CurveMetric::Value) if plot.channel == CurveChannel::Direction => "°",
+                (None, CurveMetric::Velocity) if component == CurveChannel::Direction => " °/s",
+                (None, CurveMetric::Value) if component == CurveChannel::Direction => "°",
                 (None, CurveMetric::Velocity) => " /s",
                 (None, CurveMetric::Value) => "",
             };

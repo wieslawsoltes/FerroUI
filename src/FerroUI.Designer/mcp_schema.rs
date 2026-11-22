@@ -99,7 +99,8 @@ pub(super) fn animation_value() -> Value {
                 "argb":argb,"opacity":number(),"form":effect_form}), &["kind","offset_x","offset_y","blur_radius","argb"]),
             object(json!({"kind":{"const":"directional_drop_shadow"},"direction":number(),"shadow_depth":number(),"blur_radius":number(),
                 "argb":argb,"opacity":number(),"form":{"enum":["object","property_element"]}}),
-                &["kind","direction","shadow_depth","blur_radius","argb","opacity","form"])
+                &["kind","direction","shadow_depth","blur_radius","argb","opacity","form"]),
+            object(json!({"kind":{"const":"registered"},"source":string()}), &["kind","source"])
         ]})),
         value("Discrete",string())
     ]})

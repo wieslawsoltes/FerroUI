@@ -8,6 +8,8 @@ pub const DESIGN_ANIMATION_CURVE_CHANNELS_QUERY: &str = "ferroui-design-curve-ch
 pub const DESIGN_ANIMATION_EFFECTS_QUERY: &str = "ferroui-design-animation-effects";
 /// Advertise native effect objects and their directional and opacity channels.
 pub const DESIGN_ANIMATION_EFFECT_OBJECTS_QUERY: &str = "ferroui-design-animation-effect-objects";
+/// Advertise registered effect literals and their named parameter channels.
+pub const DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY: &str = "ferroui-design-animation-registered-effects";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCurveRequest {

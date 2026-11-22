@@ -4,6 +4,7 @@
 mod clip_timing;
 mod curve;
 mod curve_channel;
+mod track_curve_channel;
 mod curve_metric;
 mod easing;
 mod interactions;
@@ -28,6 +29,7 @@ pub mod native;
 pub use clip_timing::{ClipClock, ClipSpan, clip_clock_delays, clip_delays, xaml_clip_delay, xaml_clip_delay_edit};
 pub use curve::{CurvePoint, CurveWindow};
 pub use curve_channel::CurveChannel;
+pub use track_curve_channel::TrackCurveChannel;
 pub use curve_metric::CurveMetric;
 pub use easing::{keyframe_easing_presets, Easing, KeyframeEasingPreset};
 pub use interactions::{
@@ -57,7 +59,7 @@ pub use timeline::{
     Sample, Timeline, TimelineTimingEdit, Track,
 };
 pub use value::{AnimationEffect, AnimationValue, EffectForm, RelativeUnit, ValueKind};
-pub use xaml::{AnimationImport, EffectColorResolver, ImportOptions, native_key_time};
+pub use xaml::{AnimationImport, EffectColorResolver, EffectLiteralResolver, ImportOptions, native_key_time};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AnimationError(pub String);

@@ -1,7 +1,7 @@
 use super::{ACTIVE, CURVES};
 use ferroui_base::animation::Animatable;
 use ferroui_designer_animation::native::sample_curve_track;
-use ferroui_designer_animation::{CurveChannel, CurveWindow};
+use ferroui_designer_animation::{CurveChannel, CurveWindow, TrackCurveChannel};
 use ferroui_designer_core::NodeId;
 use ferroui_remote_protocol::designer::{
     DesignAnimationCurvePoint, DesignAnimationCurveRequest, DesignAnimationCurveResult,
@@ -30,7 +30,7 @@ pub(in crate::remote) fn curve(
                 .programs
                 .get(&request.program)
                 .ok_or("Choose a current app-hosted animation")?;
-            let channel = request.channel.as_deref().map(str::parse::<CurveChannel>)
+            let channel = request.channel.as_deref().map(str::parse::<TrackCurveChannel>)
                 .transpose().map_err(|error| error.to_string())?.unwrap_or_default();
             if !program.curve_tracks.as_ref().is_some_and(|tracks| {
                 tracks
@@ -39,7 +39,8 @@ pub(in crate::remote) fn curve(
                         track.property == request.property && match &track.curve_channels {
                             Some(names) => request.channel.as_ref().is_some_and(|name| names.contains(name)),
                             None => track.keys.first().is_some_and(|key| {
-                                CurveChannel::for_authored_kind(&key.value_kind).contains(&channel)
+                                matches!(channel, TrackCurveChannel::Property(component)
+                                    if CurveChannel::for_authored_kind(&key.value_kind).contains(&component))
                             }),
                         }
                     })

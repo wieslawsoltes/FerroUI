@@ -382,7 +382,10 @@ impl Relay {
             *dependencies = Some(previous.dependencies().map(str::to_owned).collect());
             return Err("Repair the Rust module sources to update App Preview".into());
         }
-        let document = crate::document::DesignDocument::parse_with_rust_modules(&design.document, project, rust.as_ref())?;
+        let catalog = crate::document::rsx_catalog(project).clone().with_project_effects();
+        let document = crate::document::DesignDocument::parse_with_catalog(
+            &design.document, project, rust.as_ref(), &catalog,
+        )?;
         let prepared = design.workspace.as_ref().map(|workspace| {
             workspace.prepare(&design, &document.xaml, project.map(|project| &project.resources), dependencies)
         }).transpose()?;
