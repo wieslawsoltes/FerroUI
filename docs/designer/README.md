@@ -145,6 +145,12 @@ remain separate from authored XAML and can be saved as a versioned set. See the
 Studio's `designer_preview_stage_states` MCP tool lists the scoped authored choices used
 by the stage editor and the VS Code **States…** action.
 Open **Review design tokens** from Studio’s **Project** toolbar. Import a DTCG file or export the active XAML resource dictionary. Inspect the mappings and generated file, adjust keys, paths, supported representations, or the logical pixels per `rem`, then save a new local file. Studio, VS Code, and `designer_design_tokens` share the conversion planner for colors, numbers, dimensions, durations, layered shadows, gradient brushes, and Bézier curves. [Design token guide](vscode/authoring.md#review-a-design-token-conversion) · [Studio review](images/studio-design-token-review.png)
+
+### Review design handoff
+
+With a solution and receiving view open, select **Review design handoff** from **Project**. Open a local `.ferroui-handoff.json` with the folder icon. The review resolves exact Toolbox IDs and scoped Library definitions. It shows proposed file transfers and the authored reference for registered or local assets. Use the arrow on a pending transfer to copy the reviewed bytes. Use the plus to place a control or raster relative to the current selection. The source and preview icons open a resolved definition in its Library scope. [Manifest format and steps](vscode/authoring.md#review-design-handoff) · [Handoff MCP workflow](vscode/reference.md#review-design-handoff-with-mcp)
+
+![Studio reviews the checkout component, a scoped receipt template, and a design asset export.](images/studio-design-handoff.png)
 The stage editor supports fitting either or both axes using native measurement. A resize
 grip applies fixed logical dimensions while preserving Live control state; card zoom
 changes only display scale. **Compare matrix** combines size, theme, direction, design-data

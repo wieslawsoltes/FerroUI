@@ -689,6 +689,61 @@ Include the new dictionary with `ResourceInclude`, then reference a brush or sha
 
 The reverse review shows the DTCG values and the preserved FerroUI gradient properties. [VS Code export review](../images/vscode-design-token-export.png) · [Studio export review](../images/studio-design-token-review.png)
 
+## Review design handoff
+
+Pair an external component ID or link with a FerroUI control or authored definition. Use the same manifest to map images, fonts, media, and XAML assets, or to review copies between a local design export and a project. Use a DTCG file for design token values.
+
+1. Open the receiving XAML or RSX view in a workspace. For registered controls and published assets, run **FerroUI: Build Project XAML Schema** for the owning Cargo package.
+2. Save a `.ferroui-handoff.json` manifest beside the design export. The editor offers completion for the manifest. Open **Review Design Handoff** from **Project**, the Command Palette, or the manifest's Explorer context menu. From the Command Palette you can select an export outside the workspace with the file picker.
+3. Filter mappings by name, external ID, type, or target. A control row shows its Toolbox mapping and a source excerpt. A definition row opens its source or its native Library scope. An asset transfer shows its source, destination, and byte count. Hover over the transfer to see the full paths.
+4. Use the download or upload icon to copy a reviewed asset. Use the plus icon to choose where to insert a mapped control or raster relative to the selected Outline control. Each placement is one Undo step in its authored XAML or Rust buffer. A binary copy creates a separate file and remains available after Undo of a placement.
+5. Use **Edit handoff JSON** to change a mapping. Save the manifest and choose **Refresh handoff review** before applying it. A missing target, ambiguous definition, changed source, or occupied destination is reported in the review.
+
+Each ID is unique. The optional `name` is a label for the review. This example maps a built-in action control, a named definition, and an imported brand image.
+
+```json
+{
+  "version": 1,
+  "mappings": [
+    {
+      "id": "checkout/confirm",
+      "name": "Confirm order",
+      "target": { "kind": "control", "toolbox": "Button" }
+    },
+    {
+      "id": "checkout/receipt",
+      "target": {
+        "kind": "definition",
+        "path": "Views/Receipt.xaml",
+        "key": "OrderTile",
+        "scope": "Checkout"
+      }
+    },
+    {
+      "id": "brand/mark",
+      "target": {
+        "kind": "asset",
+        "path": "Assets/Brand Mark.png",
+        "transfer": { "direction": "import", "file": "Exports/Brand Mark.png" }
+      }
+    }
+  ]
+}
+```
+
+| Target | How it resolves |
+| --- | --- |
+| `control` | Use the exact ID in `designer_toolbox`. A registered control includes its namespace and assembly. A saved project snippet uses `project-file:Name`. RSX placement requires a supported source form for that control or snippet. |
+| `definition` | Set `path` relative to the workspace folder or solution. Omit `key` to map a root view definition. If several templates or themes in one file share a key, add the authored `Name` or `x:Name` of the scope that owns it. The review uses current XAML drafts when the definition is open. |
+| `asset` | Set `path` relative to the workspace or solution. Omit `transfer` to reference an existing file. Use `transfer.file` relative to the manifest folder and choose `import` or `export`. A raster uses a URI relative to the receiving view. |
+| `publishedAsset` | Set `address` to the exact `ferres://` address from the active Cargo export. Add `export` with a path relative to the manifest folder to copy the published bytes. |
+
+Use forward slashes in manifest paths. A transfer creates missing destination folders and keeps an existing file if its bytes already match. Source changes and a destination occupied by different content require another review. An asset copy can contain up to 64 MiB and a manifest up to 256 mappings. Raster insertion supports PNG, JPEG, WebP, GIF, BMP, and ICO. A Rust destination needs a mapped child slot and a representable image source.
+
+In Designer Studio, choose **Review design handoff** in **Project**, then use the folder icon to pick the manifest. Select **Inside**, **Before**, or **After** to control placement relative to the current selection. The same row actions copy assets and open authored definitions. [Studio overview](../README.md#review-design-handoff) · [Handoff MCP workflow](reference.md#review-design-handoff-with-mcp)
+
+![VS Code shows a scoped component mapping, a pending asset export, and the Confirm order button placed on the native canvas.](../images/vscode-design-handoff.png)
+
 ## Diagnose a design-time issue
 
 Open a XAML or RSX design and expand **Preview Checks** under **FerroUI → Diagnostics**. Hover a row for the full explanation. Select a finding to highlight the control in Design and reveal the control or its exact authored value in source. In **Stages**, use the check icon on a card to inspect that stage's current size, theme, and state.

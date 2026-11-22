@@ -178,6 +178,8 @@ Use **Find Definition in Designer** to search the active design’s component, t
 
 Use **Import Design Tokens** or **Export Design Tokens** from **Project** or the Command Palette. Review colors, dimensions, durations, gradients, layered shadows, and easing curves beside the generated file. Rename resource keys or token paths, choose representations, and create a new file after review. Studio and MCP use the same planner. [Review a design token conversion](../../docs/designer/vscode/authoring.md#review-a-design-token-conversion)
 
+Use **Review Design Handoff** to open a `.ferroui-handoff.json` beside an XAML or RSX design. Check external IDs against the project Toolbox, scoped definitions, and Cargo asset addresses. Import or export reviewed assets and place mapped controls or rasters through the current designer selection. [Design handoff guide](../../docs/designer/vscode/authoring.md#review-design-handoff)
+
 Import supports DTCG numbers, `px`, `rem` with an explicit scale, sRGB colors, and durations. It resolves typed groups, `$root` tokens, curly-brace aliases, and same-document JSON Pointers, including value components. The report shows resolved aliases and rounded or converted values. Export reads direct literal entries and records the XAML key and representation in the generated token metadata. Group inheritance, non-sRGB colors, composite tokens, and dynamic or included XAML resources appear as skipped entries. VS Code and Studio agents use the same read-only `designer_design_tokens` planner. [DTCG format](https://www.designtokens.org/TR/2025.10/format/)
 
 ## Native UI scenarios

@@ -21,6 +21,7 @@ For a package built from this checkout, see the [extension build and packaging i
 | --- | --- |
 | Create a runnable XAML or RSX app and check the active Rust toolchain | [Start a FerroUI project](authoring.md#start-a-ferroui-project) |
 | Find a project view, edit source and layout, configure columns and behaviors, or work with bindings and resources | [Author views and components](authoring.md) |
+| Map external components, exchange assets, and convert design tokens | [Review design handoff](authoring.md#review-design-handoff) |
 | Compose XAML styles and compare Light, Dark, and High contrast colors | [Edit styles, control themes, and palettes](styles.md) |
 | Edit a clip or state transition, compare variants, or play a prototype | [Animate and preview variations](motion.md) |
 | Preview with the app’s types and data, inspect a running window, or hot reload | [Run and inspect a view](runtime.md) |

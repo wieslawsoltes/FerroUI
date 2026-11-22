@@ -289,6 +289,15 @@ In VS Code, call `ferroui_workspace_plan_resource_rename` with `path`, a zero-ba
 
 Call `ferroui_workspace_rename_resource` with the same fields and the returned `review`. The write requires `ferroui.mcp.allowWrites` and applies all changes in one editor Undo step. In Studio, use `designer_plan_resource_rename` and `designer_rename_resource` with the active XAML UTF-8 byte `offset`, `new_name`, and `expected_revision`. Pass the `review` on apply. Use Undo from a participating tab to restore all buffers. [Authoring workflow](authoring.md#rename-a-resource-across-xaml-files)
 
+### Review design handoff with MCP
+
+1. Call `designer_design_handoff` with `manifest` relative to the receiving workspace folder. Pass a VS Code `session` from `ferroui_designs`. Studio uses the active design and open solution.
+2. Review the resulting `rows`. Each resolved action includes the external `id` and its `review` value, plus the proposed definition, placement, or copy. To display the interactive review, call `designer_apply_handoff` with `action: "openReview"` and the same manifest and session.
+3. Pass the manifest, row ID, and review value to `designer_apply_handoff`. Set `action` to `copy` for a pending transfer, `source` or `preview` for a Library definition, or `openAsset` for an available asset. Studio returns the resolved asset URI. VS Code also opens the file.
+4. To place an item, pass `action: "place"`, the current `expected_revision`, an `anchor` node from the Outline, and `position` of `before`, `inside`, or `after`. The source edit uses the current native placement plan and one Undo step. The mapping is checked against the current source and catalog before applying it.
+
+Write actions use `ferroui.mcp.allowWrites` in VS Code or Studio’s MCP write permission. MCP reads manifests from the open workspace. A local file picker can authorize an export folder elsewhere on the workspace host. [Handoff format and workflows](authoring.md#review-design-handoff)
+
 ### Review design tokens with MCP
 
 Call `designer_design_tokens` with `direction` set to `import` for DTCG JSON or `export` for a standalone XAML dictionary. Supply the selected source text, including unsaved changes. The response contains `source`, `mappings`, and `issues` for review.
@@ -414,6 +423,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Review and move an XAML file | **Move XAML File…**, **Apply File Move**, **Cancel File Move** |
 | Review variations | **Show Animation Timeline**, **Show Design Data**, **Open Preview Stages** |
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
+| Resolve component mappings and transfer assets | **Review Design Handoff** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
 | Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application** |
 | Manage an external MCP connection | **Connect to Running MCP Server**, **Disconnect Running MCP Server** |
