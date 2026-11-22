@@ -29,7 +29,8 @@ impl Target {
                 if v > 10. {
                     c.set_value(Self::value_property(), 10.);
                 }
-            });
+            })
+            .detach();
     }
 }
 
@@ -295,7 +296,8 @@ impl CastTarget {
                 if e.get_new_value::<Scalar>().value > 10. {
                     t.set_value(Self::value_property(), Scalar { value: 10. });
                 }
-            });
+            })
+            .detach();
     }
 }
 #[test]

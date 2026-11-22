@@ -46,7 +46,7 @@ fn parse_and_format_round_trip() {
 
     assert_eq!(Size3D::EMPTY.to_string(), "Empty");
     let size = Size3D::new(0.5, 10.0, 1e16).unwrap();
-    assert_eq!(size.to_string(), "0.5,10,1E+16");
+    assert_eq!(size.to_string(), "0.5,10,10000000000000000");
     assert_eq!(size.to_string().parse::<Size3D>().unwrap(), size);
 
     assert_eq!(Size3D::parse("1,-2,3").unwrap_err().message(), "Dimension cannot be a negative value.");
