@@ -8,7 +8,7 @@ use ferroui_base::{
 };
 use ferroui_markup_xaml::{FerroXamlLoader, XamlLoadError};
 use std::{cell::Cell, rc::Rc};
-thread_local! {static BUILDS:Cell<usize>=const{Cell::new(0)};}
+ferroui_base::ferro_thread_local! {static BUILDS:Cell<usize>=const{Cell::new(0)};}
 const DOCUMENTS: &[&str] = &[
     "ferres://compiled.runtime.tests/Public.xaml",
     "ferres://compiled.runtime.tests/BadRoot.xaml",

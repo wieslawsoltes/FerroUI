@@ -9,9 +9,9 @@ use std::fmt::{self, Write};
 
 /// Flags controlling which syntactic elements a numeric string may contain.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
-pub struct NumberStyles(u32);
+pub struct NumberParseFlags(u32);
 
-impl NumberStyles {
+impl NumberParseFlags {
     pub const NONE: Self = Self(0);
     pub const ALLOW_LEADING_WHITE: Self = Self(0x1);
     pub const ALLOW_TRAILING_WHITE: Self = Self(0x2);
@@ -49,7 +49,7 @@ impl NumberStyles {
     }
 }
 
-impl std::ops::BitOr for NumberStyles {
+impl std::ops::BitOr for NumberParseFlags {
     type Output = Self;
     #[inline]
     fn bitor(self, rhs: Self) -> Self {
@@ -75,7 +75,7 @@ struct Scanned {
     has_group: bool,
 }
 
-fn scan(b: &[u8], style: NumberStyles) -> Option<Scanned> {
+fn scan(b: &[u8], style: NumberParseFlags) -> Option<Scanned> {
     let n = b.len();
     let mut i = 0;
     let mut sign_seen = false;
@@ -84,9 +84,9 @@ fn scan(b: &[u8], style: NumberStyles) -> Option<Scanned> {
     // Leading white space and sign. White space is not accepted after the sign.
     while i < n {
         let c = b[i];
-        if is_number_white(c) && style.contains(NumberStyles::ALLOW_LEADING_WHITE) && !sign_seen {
+        if is_number_white(c) && style.contains(NumberParseFlags::ALLOW_LEADING_WHITE) && !sign_seen {
             i += 1;
-        } else if style.contains(NumberStyles::ALLOW_LEADING_SIGN)
+        } else if style.contains(NumberParseFlags::ALLOW_LEADING_SIGN)
             && !sign_seen
             && (c == b'+' || c == b'-')
         {
@@ -107,12 +107,12 @@ fn scan(b: &[u8], style: NumberStyles) -> Option<Scanned> {
         let c = b[i];
         if c.is_ascii_digit() {
             digits = true;
-        } else if style.contains(NumberStyles::ALLOW_DECIMAL_POINT)
+        } else if style.contains(NumberParseFlags::ALLOW_DECIMAL_POINT)
             && decimal.is_none()
             && c == b'.'
         {
             decimal = Some(i);
-        } else if style.contains(NumberStyles::ALLOW_THOUSANDS)
+        } else if style.contains(NumberParseFlags::ALLOW_THOUSANDS)
             && digits
             && decimal.is_none()
             && c == b','
@@ -133,7 +133,7 @@ fn scan(b: &[u8], style: NumberStyles) -> Option<Scanned> {
     // An exponent marker that is not followed by digits is left unconsumed
     // (and therefore makes the whole string invalid).
     let mut exponent = None;
-    if style.contains(NumberStyles::ALLOW_EXPONENT) && i < n && (b[i] == b'e' || b[i] == b'E') {
+    if style.contains(NumberParseFlags::ALLOW_EXPONENT) && i < n && (b[i] == b'e' || b[i] == b'E') {
         let mut j = i + 1;
         if j < n && (b[j] == b'+' || b[j] == b'-') {
             j += 1;
@@ -152,9 +152,9 @@ fn scan(b: &[u8], style: NumberStyles) -> Option<Scanned> {
     // Trailing white space and (if no sign was seen yet) a trailing sign.
     while i < n {
         let c = b[i];
-        if is_number_white(c) && style.contains(NumberStyles::ALLOW_TRAILING_WHITE) {
+        if is_number_white(c) && style.contains(NumberParseFlags::ALLOW_TRAILING_WHITE) {
             i += 1;
-        } else if style.contains(NumberStyles::ALLOW_TRAILING_SIGN)
+        } else if style.contains(NumberParseFlags::ALLOW_TRAILING_SIGN)
             && !sign_seen
             && (c == b'+' || c == b'-')
         {
@@ -212,7 +212,7 @@ fn parse_special_double(s: &str) -> Option<f64> {
 }
 
 /// Parses a double using the invariant culture and the given style.
-pub fn try_parse_double(s: &str, style: NumberStyles) -> Option<f64> {
+pub fn try_parse_double(s: &str, style: NumberParseFlags) -> Option<f64> {
     let Some(sc) = scan(s.as_bytes(), style) else {
         return parse_special_double(s);
     };
@@ -232,14 +232,14 @@ pub fn try_parse_double(s: &str, style: NumberStyles) -> Option<f64> {
 /// Parses a double with the default style (float syntax plus group separators).
 #[inline]
 pub fn parse_double(s: &str) -> Option<f64> {
-    try_parse_double(s, NumberStyles::FLOAT_THOUSANDS)
+    try_parse_double(s, NumberParseFlags::FLOAT_THOUSANDS)
 }
 
 /// Parses the scanned text as an integer magnitude plus sign.
 ///
 /// A fractional part is accepted only when it consists of zeros. Integer parsing
 /// with an exponent is not used anywhere in this crate and is rejected.
-fn parse_integer(s: &str, style: NumberStyles) -> Option<i64> {
+fn parse_integer(s: &str, style: NumberParseFlags) -> Option<i64> {
     let b = s.as_bytes();
     let sc = scan(b, style)?;
     if sc.exponent.is_some() {
@@ -264,12 +264,12 @@ fn parse_integer(s: &str, style: NumberStyles) -> Option<i64> {
     Some(if sc.negative { -value } else { value })
 }
 
-fn parse_hex_u32(s: &str, style: NumberStyles) -> Option<u32> {
+fn parse_hex_u32(s: &str, style: NumberParseFlags) -> Option<u32> {
     let b = s.as_bytes();
     let n = b.len();
     let mut i = 0;
 
-    if style.contains(NumberStyles::ALLOW_LEADING_WHITE) {
+    if style.contains(NumberParseFlags::ALLOW_LEADING_WHITE) {
         while i < n && is_number_white(b[i]) {
             i += 1;
         }
@@ -295,7 +295,7 @@ fn parse_hex_u32(s: &str, style: NumberStyles) -> Option<u32> {
         return None;
     }
 
-    if style.contains(NumberStyles::ALLOW_TRAILING_WHITE) {
+    if style.contains(NumberParseFlags::ALLOW_TRAILING_WHITE) {
         while i < n && is_number_white(b[i]) {
             i += 1;
         }
@@ -309,8 +309,8 @@ fn parse_hex_u32(s: &str, style: NumberStyles) -> Option<u32> {
 }
 
 /// Parses an unsigned 32-bit integer using the invariant culture and the given style.
-pub fn try_parse_uint(s: &str, style: NumberStyles) -> Option<u32> {
-    if style.contains(NumberStyles::ALLOW_HEX_SPECIFIER) {
+pub fn try_parse_uint(s: &str, style: NumberParseFlags) -> Option<u32> {
+    if style.contains(NumberParseFlags::ALLOW_HEX_SPECIFIER) {
         parse_hex_u32(s, style)
     } else {
         u32::try_from(parse_integer(s, style)?).ok()
@@ -318,12 +318,12 @@ pub fn try_parse_uint(s: &str, style: NumberStyles) -> Option<u32> {
 }
 
 /// Parses a signed 32-bit integer using the invariant culture and the given style.
-pub fn try_parse_int(s: &str, style: NumberStyles) -> Option<i32> {
+pub fn try_parse_int(s: &str, style: NumberParseFlags) -> Option<i32> {
     i32::try_from(parse_integer(s, style)?).ok()
 }
 
 /// Parses a byte using the invariant culture and the given style.
-pub fn try_parse_byte(s: &str, style: NumberStyles) -> Option<u8> {
+pub fn try_parse_byte(s: &str, style: NumberParseFlags) -> Option<u8> {
     u8::try_from(parse_integer(s, style)?).ok()
 }
 
@@ -461,7 +461,7 @@ mod tests {
 
     #[test]
     fn float_style_parsing() {
-        let f = NumberStyles::FLOAT;
+        let f = NumberParseFlags::FLOAT;
         assert_eq!(try_parse_double("1.5", f), Some(1.5));
         assert_eq!(try_parse_double(" -1.5 ", f), Some(-1.5));
         assert_eq!(try_parse_double("+.5", f), Some(0.5));
@@ -487,7 +487,7 @@ mod tests {
 
     #[test]
     fn number_style_parsing() {
-        let n = NumberStyles::NUMBER;
+        let n = NumberParseFlags::NUMBER;
         assert_eq!(try_parse_double("5-", n), Some(-5.0));
         assert_eq!(try_parse_double(" 5 - ", n), Some(-5.0));
         assert_eq!(try_parse_double("1,234.5", n), Some(1234.5));
@@ -502,7 +502,7 @@ mod tests {
 
     #[test]
     fn integer_and_hex_parsing() {
-        let i = NumberStyles::INTEGER;
+        let i = NumberParseFlags::INTEGER;
         assert_eq!(try_parse_int("123", i), Some(123));
         assert_eq!(try_parse_int(" -123 ", i), Some(-123));
         assert_eq!(try_parse_int("+7", i), Some(7));
@@ -511,7 +511,7 @@ mod tests {
         assert_eq!(try_parse_int("-2147483648", i), Some(i32::MIN));
         assert_eq!(try_parse_int("abc", i), None);
 
-        let h = NumberStyles::HEX_NUMBER;
+        let h = NumberParseFlags::HEX_NUMBER;
         assert_eq!(try_parse_uint("ff8844", h), Some(0xff8844));
         assert_eq!(try_parse_uint("FFFFFFFF", h), Some(0xffff_ffff));
         assert_eq!(try_parse_uint(" ff ", h), Some(0xff));
