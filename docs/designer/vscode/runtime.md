@@ -122,6 +122,10 @@ Choose the layers icon beside a property to trace why that value is effective in
 
 The app must expose `get_template_sources` through its inspector. A source link requires a workspace file that matches the app’s recorded revision. XAML records the supplying dictionary or inline definition. A Rust template can open its mounted RSX body or the verified constructor in the running build. [Live App template tools](reference.md#inspect-live-app-templates-with-mcp)
 
+![Live App lists the display and editing templates for the Company and Review columns beside the running account hierarchy](../images/vscode-live-template-picker.png)
+
+Selecting the Company editing template opens its Rust constructor beside the running grid. [Source navigation screenshot](../images/vscode-live-template-source.png)
+
 ## Read diagnostics and save history
 
 Open **FerroUI → Diagnostics** to inspect the managed save outcome, acknowledgement time, binding errors, and native layout and scene counters. Open a binding result with a recorded source location to inspect its original declaration. **Show Hot Reload Output** includes build and process messages. Use **Preview Checks** in a design or stage for measured overflow, clipping, ineffective layout values, and accessibility in the accepted preview. [Read Preview Checks](authoring.md#diagnose-a-design-time-issue)
