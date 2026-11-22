@@ -2,7 +2,7 @@
 use crate::{PreparedReload, ReloadError};
 use ferroui_base::{
     data::BindingPriority, diagnostics::FerroObjectDiagnosticExtensions, AnyValue, FerroObject,
-    PropertyValue, Ref, StyledProperty,
+    Ref, StyledProperty, StyledValue,
 };
 use ferroui_markup_xaml_loader::binding_capture::BindingCaptureScope;
 use std::{
@@ -24,13 +24,13 @@ pub(crate) trait OwnedRootProperty {
         bindings: &BindingCaptureScope,
     ) -> Result<Option<Box<dyn PreparedReload>>, ReloadError>;
 }
-struct Property<T: PropertyValue> {
+struct Property<T: StyledValue> {
     property: &'static StyledProperty<T>,
     static_resources: bool,
     expected: Rc<RefCell<Result<Option<T>, ReloadError>>>,
     version: Rc<Cell<u64>>,
 }
-fn snapshot<T: PropertyValue>(
+fn snapshot<T: StyledValue>(
     root: &FerroObject,
     property: &'static StyledProperty<T>,
 ) -> Result<Option<T>, ReloadError> {
@@ -46,26 +46,26 @@ fn snapshot<T: PropertyValue>(
     }
     Ok((diagnostic.priority() == BindingPriority::LocalValue).then(|| root.get_value(property)))
 }
-fn equal<T: PropertyValue>(a: &Option<T>, b: &Option<T>) -> bool {
+fn equal<T: StyledValue>(a: &Option<T>, b: &Option<T>) -> bool {
     match (a, b) {
         (Some(a), Some(b)) => (a as &dyn AnyValue).value_eq(b),
         (None, None) => true,
         _ => false,
     }
 }
-pub(crate) fn own<T: PropertyValue>(
+pub(crate) fn own<T: StyledValue>(
     root: &FerroObject,
     property: &'static StyledProperty<T>,
 ) -> Box<dyn OwnedRootProperty> {
     own_with_policy(root, property, false)
 }
-pub(crate) fn own_static_resource<T: PropertyValue>(
+pub(crate) fn own_static_resource<T: StyledValue>(
     root: &FerroObject,
     property: &'static StyledProperty<T>,
 ) -> Box<dyn OwnedRootProperty> {
     own_with_policy(root, property, true)
 }
-fn own_with_policy<T: PropertyValue>(
+fn own_with_policy<T: StyledValue>(
     root: &FerroObject,
     property: &'static StyledProperty<T>,
     static_resources: bool,
@@ -87,7 +87,7 @@ fn attribute(source: &str, name: &str) -> Result<Option<String>, ReloadError> {
         .map_err(|error| ReloadError::Failed(error.to_string()))?;
     Ok(xml.root_element().attribute(name).map(str::to_owned))
 }
-impl<T: PropertyValue> OwnedRootProperty for Property<T> {
+impl<T: StyledValue> OwnedRootProperty for Property<T> {
     fn name(&self) -> &str {
         self.property.name()
     }
@@ -200,11 +200,11 @@ fn same_owner(a: &BindingOwner, b: &BindingOwner) -> bool {
             _ => false,
         }
 }
-struct BindingProperty<T: PropertyValue> {
+struct BindingProperty<T: StyledValue> {
     property: &'static StyledProperty<T>,
     owner: Rc<RefCell<Result<BindingOwner, ReloadError>>>,
 }
-pub(crate) fn own_binding<T: PropertyValue>(
+pub(crate) fn own_binding<T: StyledValue>(
     root: &FerroObject,
     property: &'static StyledProperty<T>,
 ) -> Box<dyn OwnedRootProperty> {
@@ -375,7 +375,7 @@ fn context_only_binding(binding: &Rc<dyn ferroui_base::data::BindingBase>) -> bo
     }
 }
 
-impl<T: PropertyValue> OwnedRootProperty for BindingProperty<T> {
+impl<T: StyledValue> OwnedRootProperty for BindingProperty<T> {
     fn name(&self) -> &str {
         self.property.name()
     }
@@ -481,7 +481,7 @@ impl<T: PropertyValue> OwnedRootProperty for BindingProperty<T> {
     }
 }
 
-struct BindingChange<T: PropertyValue> {
+struct BindingChange<T: StyledValue> {
     change: ferroui_base::data::LocalBindingReload<T>,
     root: Ref<FerroObject>,
     property: &'static StyledProperty<T>,
@@ -489,7 +489,7 @@ struct BindingChange<T: PropertyValue> {
     committed: Option<BindingOwner>,
     entered: bool,
 }
-impl<T: PropertyValue> PreparedReload for BindingChange<T> {
+impl<T: StyledValue> PreparedReload for BindingChange<T> {
     fn commit(&mut self) -> Result<(), ReloadError> {
         let owner = self.owner.borrow().clone()?;
         if !same_owner(&owner, &binding_owner(&self.root, self.property)?) {
@@ -525,7 +525,7 @@ impl<T: PropertyValue> PreparedReload for BindingChange<T> {
                 });
     }
 }
-struct Change<T: PropertyValue> {
+struct Change<T: StyledValue> {
     root: Ref<FerroObject>,
     property: &'static StyledProperty<T>,
     before: Option<T>,
@@ -535,7 +535,7 @@ struct Change<T: PropertyValue> {
     started: bool,
     committed_version: u64,
 }
-impl<T: PropertyValue> Change<T> {
+impl<T: StyledValue> Change<T> {
     fn assign(&self, value: &Option<T>) {
         match value {
             Some(value) => self.root.set_value(self.property, value.clone()),
@@ -543,7 +543,7 @@ impl<T: PropertyValue> Change<T> {
         }
     }
 }
-impl<T: PropertyValue> PreparedReload for Change<T> {
+impl<T: StyledValue> PreparedReload for Change<T> {
     fn commit(&mut self) -> Result<(), ReloadError> {
         if self.root.local_write_version(self.property) != self.version.get()
             || !equal(&snapshot(&self.root, self.property)?, &self.before)

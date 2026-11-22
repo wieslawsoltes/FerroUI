@@ -986,6 +986,10 @@ impl TextBlock {
         self.get_value(Self::font_size_property())
     }
 
+    // A call of its own, as it was: inlined into a caller, the caller kept the text block it had
+    // just made on another place of its stack and copied it over (pinned: the inlining shifted
+    // with unrelated changes of the property store, #986).
+    #[inline(never)]
     pub fn set_font_size(&self, value: f64) {
         self.set_value(Self::font_size_property(), value)
     }
