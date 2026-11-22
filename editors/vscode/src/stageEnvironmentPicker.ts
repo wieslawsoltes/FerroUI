@@ -1,8 +1,8 @@
 import type { QuickPickItem } from 'vscode';
-import { stageDirectionLabels, stageThemeLabels, type StageConfiguration, type StageModel } from './stagesProtocol';
+import { stageDirectionLabels, stagePointerLabels, stageThemeLabels, type StageConfiguration, type StageModel, type StagePointerProfile } from './stagesProtocol';
 import { choose, editText } from './studioContext';
 
-type Field = 'size' | 'theme' | 'direction' | 'locale' | 'textSize';
+type Field = 'size' | 'theme' | 'direction' | 'locale' | 'textSize' | 'pointerInput';
 
 export async function editStageEnvironment(configuration: StageConfiguration, model: StageModel): Promise<boolean> {
     const environment = configuration.environment;
@@ -18,6 +18,8 @@ export async function editStageEnvironment(configuration: StageConfiguration, mo
             { field: 'textSize', label: '$(text-size) Text size', description: `${configuration.text?.scale_percent ?? 100}%` },
         );
     }
+    if (model.pointerInput) options.push({ field: 'pointerInput', label: '$(cursor) Pointer input',
+        description: stagePointerLabels[configuration.pointer_input ?? 'automatic'] });
     const choice = await choose(title, options);
     switch (choice?.field) {
         case 'size': {
@@ -55,6 +57,17 @@ export async function editStageEnvironment(configuration: StageConfiguration, mo
                 value => textSize(value) === undefined ? 'Enter a whole percentage from 50% to 300%.' : undefined, title);
             if (input === undefined) return false;
             configuration.text = { ...configuration.text, scale_percent: textSize(input) };
+            return true;
+        }
+        case 'pointerInput': {
+            const profiles: Array<{ value: StagePointerProfile; label: string; description: string }> = [
+                { value: 'automatic', label: '$(device-desktop) Current device', description: 'Use mouse, touch, or pen from the editor' },
+                { value: 'touch', label: '$(device-mobile) Touch', description: 'Use native touch contacts in Interact' },
+                { value: 'pen', label: '$(edit) Pen', description: 'Use native pen contacts in Interact' },
+            ];
+            const profile = await choose('Stage pointer input', profiles);
+            if (!profile) return false;
+            configuration.pointer_input = profile.value === 'automatic' ? undefined : profile.value;
             return true;
         }
         default: return false;

@@ -4,6 +4,9 @@ export const stageThemeLabels = { ...canvasThemeLabels, inherit: 'Application th
 export type StageTheme = keyof typeof stageThemeLabels;
 export const stageDirectionLabels = { inherit: 'Inherited direction', left_to_right: 'Left to right', right_to_left: 'Right to left' } as const;
 export interface StageTextSettings { locale?: string; scale_percent?: number }
+export const stagePointerLabels = { automatic: 'Current device', touch: 'Touch', pen: 'Pen' } as const;
+export type StagePointerProfile = keyof typeof stagePointerLabels;
+export type StagePointerDevice = 'mouse' | 'touch' | 'pen';
 
 export type StageImage = NonNullable<Snapshot['image']>;
 export interface StageConfiguration {
@@ -12,6 +15,7 @@ export interface StageConfiguration {
     target: { kind: string };
     environment: { width: number; height: number; theme: StageTheme; flow_direction: keyof typeof stageDirectionLabels };
     text?: StageTextSettings;
+    pointer_input?: StagePointerProfile;
     layout: 'fixed' | 'size_that_fits' | 'fixed_width' | 'fixed_height';
     design_time_data: boolean;
     design_fixture?: string;
@@ -53,7 +57,7 @@ export interface PrototypeScene {
 }
 export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'activate'; link: number }
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
-export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean; availableThemes?: StageTheme[]; textEnvironment?: boolean }
+export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean; pointerInput?: boolean; availableThemes?: StageTheme[]; textEnvironment?: boolean }
 export interface StageTarget { id: number; epoch: number }
 export interface StageAccessibleNode {
     runtime_id: number;
@@ -75,6 +79,18 @@ export interface SourceAnchor { path: { namespace: string; type_name: string; na
 export interface StageState { owner: SourceAnchor; group: string; state: string }
 export interface StageStateOptions { owner: SourceAnchor; owner_name: string; group: string; states: string[] }
 export interface StagePointer extends StageTarget { x: number; y: number }
+export interface StageContact {
+    contact: number;
+    phase: 'down' | 'move' | 'up' | 'cancel';
+    device: StagePointerDevice;
+    x: number;
+    y: number;
+    pressure?: number;
+    tiltX?: number;
+    tiltY?: number;
+    twist?: number;
+}
+export interface StagePointerInput extends StageTarget { input: StageContact }
 export type StageInput = { kind: 'focus' } | { kind: 'key'; key: string } | { kind: 'text'; text: string };
 export interface StageKeyboard extends StageTarget { input: StageInput }
 export interface StageFocus { name: string; role: string }
@@ -90,6 +106,7 @@ export type NativeStageChange = ExistingStageChange | (AddStage & { source?: Sta
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
     | ({ type: 'keyboard' } & StageKeyboard)
+    | ({ type: 'contact' } & StagePointerInput)
     | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' };
 export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand }
     | { type: 'editPrototype'; epoch: number; edit: PrototypeEdit }
@@ -97,5 +114,5 @@ export type StagesRequest = FromStages | { type: 'prototype'; command?: Prototyp
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }
     | ({ type: 'keyboardFocus'; focus: StageFocus | null } & StageTarget)
-    | { type: 'keyboardUnavailable' }
+    | { type: 'inputUnavailable' }
     | { type: 'prototype'; scene: PrototypeScene | null };

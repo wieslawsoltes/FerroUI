@@ -42,6 +42,9 @@ fn presentation_actions_cannot_refresh_another_live_stage_without_input_permissi
         .call("designer_preview_stage_input", &input, writer)
         .unwrap_err()
         .contains("allow_input"));
+    let pointer = json!({"stage":live,"expected_model":report["model"],"expected_epoch":epoch,
+        "input":{"contact":1,"phase":"down","device":"touch","x":0.5,"y":0.5}});
+    assert!(provider.call("designer_preview_stage_pointer", &pointer, writer).unwrap_err().contains("allow_input"));
     for mut args in [
         json!({"action":"remove","stage":select}),
         json!({"action":"move","stage":select,"index":0}),

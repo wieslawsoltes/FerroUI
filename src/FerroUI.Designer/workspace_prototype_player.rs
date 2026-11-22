@@ -93,6 +93,7 @@ impl DesignerWorkspace {
     pub fn start_preview_prototype(self: &Rc<Self>, flow_name: &str) -> Result<(), String> {
         let graph = self.preview_prototype();
         PreviewPrototypeSession::start(&graph, flow_name)?;
+        self.cancel_preview_stage_pointer_input();
         self.set_preview_prototype_visible(true)?;
         let source_model = self.preview_stage_model();
         let stages = self.preview_stages();

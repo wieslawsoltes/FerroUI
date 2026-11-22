@@ -13,6 +13,7 @@ use ferroui_designer::{
     PreviewEnvironment, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageLayout, PreviewStageMode, PreviewStageSourceMoves, PreviewStageStateOptions,
+    PreviewStagePointerInput, PreviewStagePointerOrigin, PreviewStagePointerPhase,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
@@ -127,6 +128,15 @@ pub(crate) struct Keyboard {
     #[serde(flatten)]
     target: StageTarget,
     input: PreviewStageKeyboardInput,
+}
+
+#[derive(Deserialize)]
+pub(crate) struct PointerInput {
+    #[serde(flatten)]
+    target: StageTarget,
+    input: PreviewStagePointerInput,
+    #[serde(default)]
+    automation: bool,
 }
 
 impl Stages {
@@ -359,6 +369,32 @@ impl Stages {
         let target = self.board.keyboard_target(request.target.id, request.target.epoch)?;
         self.mounted(&request.target)?;
         target.input(request.input)
+    }
+
+    pub(crate) fn pointer_input(&mut self, request: PointerInput) -> Result<(), String> {
+        if self.playback.scene().is_some() {
+            return Err("Close prototype playback before using stage pointer input".into());
+        }
+        let origin = if request.automation { PreviewStagePointerOrigin::Automation } else { PreviewStagePointerOrigin::Editor };
+        let target = self.board.pointer_target(request.target.id, request.target.epoch, origin)?;
+        if request.input.phase == PreviewStagePointerPhase::Down { self.mounted(&request.target)?; }
+        target.input(request.input)
+    }
+
+    pub(crate) fn cancel_editor_pointer_input(&mut self) {
+        self.board.cancel_pointer_input(PreviewStagePointerOrigin::Editor);
+        Dispatcher::ui_thread().run_jobs(None);
+    }
+
+    pub(crate) fn control_prototype(&mut self, request: crate::stages_prototype::Control)
+        -> Result<Option<crate::stages_prototype::Scene>, String>
+    {
+        let scene = self.playback.control(&self.board, request)?;
+        if scene.is_some() {
+            self.board.cancel_pointer_input(PreviewStagePointerOrigin::Automation);
+            self.cancel_editor_pointer_input();
+        }
+        Ok(scene)
     }
 
     fn stage_info(&self, target: &StageTarget) -> Result<PreviewStageInfo, String> {

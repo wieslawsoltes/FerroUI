@@ -192,6 +192,8 @@ pub use preview_stages::{
     PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
     PreviewStageSource, PreviewStageSourceMoves, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget,
+    PreviewStagePointerDevice, PreviewStagePointerInput, PreviewStagePointerOrigin,
+    PreviewStagePointerPhase, PreviewStagePointerProfile, PreviewStagePointerTarget,
     PreviewStageAccessibility, PreviewStageAccessibleNode,
 };
 pub use preview_stage_editor::PreviewStageEditor;

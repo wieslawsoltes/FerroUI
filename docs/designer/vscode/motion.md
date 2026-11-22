@@ -328,6 +328,16 @@ Type a name or role to filter the picker. Choose a mapped row to reveal its XAML
 
 Use an updated preview helper for stage keyboard input. While playing a prototype, use the player’s interaction controls to follow its authored links. [Stage automation](reference.md#send-keyboard-input-to-a-stage)
 
+### Try touch and pen on a stage
+
+1. Open a ready XAML or Rust stage and turn on **Interact**. Choose **Environment** → **Pointer input**.
+2. Choose **Current device** to use the mouse, touch, or pen reported by VS Code. Choose **Touch** or **Pen** to try that device with a mouse or trackpad. Keep a second stage on its current device to compare interactions.
+3. Press and drag a native control, such as a slider, on the artboard. The active contact continues to its captured control when it moves beyond the artboard. Pause the stage or switch away to clear the gesture and release its capture.
+
+The pointer choice travels with the stage set and applies to the card’s retained native view. A physical pen supplies pressure, tilt, and rotation when VS Code reports them. The updated preview helper also accepts native touch and pen contacts from agents. [Pointer automation](reference.md#send-pointer-contacts-to-a-stage)
+
+![The Touch review slider reaches the end of its track after a captured drag while the Pen review slider stays centered](../images/vscode-stage-pointer.png)
+
 ## Play a prototype
 
 Switch the Stages board to **Prototype**. Each flow lists its starting stage, which the play button also announces to screen readers. Hover a shortened name in a narrow tab to read it in full. Use the play button beside a flow or choose **Play Prototype** from the toolbar.

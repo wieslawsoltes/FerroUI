@@ -210,10 +210,16 @@ fn respond(
             .and_then(|request| stages.pointer(request, projects)),
         "stagesKeyboard" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.keyboard(request))),
+        "stagesPointerInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.pointer_input(request))),
+        "stagesCancelEditorPointerInput" => {
+            stages.cancel_editor_pointer_input();
+            Ok(Value::Null)
+        }
         "stagesPrototypeElements" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.prototype_elements(request, projects))),
         "stagesPrototype" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
-            .and_then(|request| serialize(stages.playback.control(&stages.board, request))),
+            .and_then(|request| serialize(stages.control_prototype(request))),
         "render" => serde_json::from_value(message["params"].clone())
             .map_err(|e| e.to_string())
             .and_then(|input: protocol::Render| {

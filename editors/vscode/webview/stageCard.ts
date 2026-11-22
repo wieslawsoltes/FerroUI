@@ -1,7 +1,8 @@
 import type { PrototypeScene, StageFocus, StageImage, StageInfo, StagesRequest } from '../src/stagesProtocol';
-import { stageDirectionLabels, stageThemeLabels } from '../src/stagesProtocol';
+import { stageDirectionLabels, stagePointerLabels, stageThemeLabels } from '../src/stagesProtocol';
 import { create, icon, iconButton, labelButton } from './dom';
 import { StageKeyboard } from './stageKeyboard';
+import { StageContacts } from './stageContacts';
 import type { StageField, StageMenu } from './stageMenu';
 
 export class StageCard {
@@ -19,10 +20,12 @@ export class StageCard {
     private readonly checks = iconButton('check-all', 'Preview checks', () => this.send({ type: 'checks', id: this.stage.id, epoch: this.stage.epoch }));
     private readonly more = iconButton('ellipsis', 'Stage actions', () => this.menu.prepare(this.more, this.stage, field => this.edit(field)));
     private readonly keyboard: StageKeyboard;
+    private readonly contacts: StageContacts;
     private displayedEpoch?: number;
     private pendingImage = 0;
     private keyboardSupported = false;
-    private keyboardCurrent = false;
+    private pointerSupported = false;
+    private inputCurrent = false;
 
     constructor(public stage: StageInfo, private readonly menu: StageMenu, private readonly send: (request: StagesRequest) => void,
         private readonly scene: () => PrototypeScene | null) {
@@ -58,6 +61,7 @@ export class StageCard {
         artboard.append(this.placeholder, this.image, this.status);
         this.keyboard = new StageKeyboard(this.element, artboard, stage.id, this.mode, input =>
             this.send({ type: 'keyboard', id: this.stage.id, epoch: this.stage.epoch, input }));
+        this.contacts = new StageContacts(this.image, input => this.send({ type: 'contact', ...input }), () => this.keyboard.enter());
         tools.append(this.mode, this.keyboard.button, this.pause, this.checks, this.more);
         this.element.append(header, artboard);
         this.update(stage);
@@ -77,7 +81,9 @@ export class StageCard {
         const direction = stageDirectionLabels[environment.flow_direction];
         const textSize = configuration.text?.scale_percent ?? 100;
         const settings = [`Environment for ${name}`, theme, direction, configuration.text?.locale,
-            textSize === 100 ? undefined : `${textSize}% text`].filter(Boolean).join(' · ');
+            textSize === 100 ? undefined : `${textSize}% text`,
+            configuration.pointer_input && configuration.pointer_input !== 'automatic' ? `${stagePointerLabels[configuration.pointer_input]} input` : undefined]
+            .filter(Boolean).join(' · ');
         labelButton(this.environment, settings,
             environment.theme === 'dark' || environment.theme === 'high_contrast' ? 'color-mode' : 'paintcan');
         const fixture = configuration.design_time_data ? configuration.design_fixture : 'Application values';
@@ -101,16 +107,19 @@ export class StageCard {
         if (this.status.textContent !== (message ?? '')) this.status.textContent = message ?? '';
         this.status.hidden = !message || this.image.hidden;
         this.placeholder.textContent = message ?? 'Rendering stage…';
-        this.updateKeyboard();
+        this.updateInput();
     }
 
     get imageSource(): string | undefined { return this.image.hidden ? undefined : this.image.src; }
 
-    setKeyboard(supported: boolean, current: boolean): void {
-        this.keyboardSupported = supported;
-        this.keyboardCurrent = current;
-        this.updateKeyboard();
+    setInput(keyboard: boolean, pointer: boolean, current: boolean): void {
+        this.keyboardSupported = keyboard;
+        this.pointerSupported = pointer;
+        this.inputCurrent = current;
+        this.updateInput();
     }
+
+    cancelContacts(): void { this.contacts.cancel(); }
 
     keyboardFocus(epoch: number, focus: StageFocus | null): void {
         if (this.stage.epoch === epoch) this.keyboard.focused(focus);
@@ -128,15 +137,16 @@ export class StageCard {
         this.image.hidden = false;
         this.status.hidden = !this.status.textContent;
         this.displayedEpoch = epoch;
-        this.updateKeyboard();
+        this.updateInput();
         return next.src;
     }
 
-    private updateKeyboard(): void {
-        const { configuration, epoch, status } = this.stage;
-        const offered = this.keyboardSupported && !this.scene() && configuration.mode === 'live';
-        const enabled = offered && this.keyboardCurrent && status.state === 'ready' && this.displayedEpoch === epoch;
-        this.keyboard.update(configuration.name, offered, enabled);
+    private updateInput(): void {
+        const { id, configuration, epoch, status } = this.stage;
+        const live = !this.scene() && configuration.mode === 'live';
+        const enabled = live && configuration.auto_update && this.inputCurrent && status.state === 'ready' && this.displayedEpoch === epoch;
+        this.keyboard.update(configuration.name, live && this.keyboardSupported, enabled && this.keyboardSupported);
+        this.contacts.update(enabled && this.pointerSupported ? { id, epoch } : undefined);
     }
 
     private edit(field: StageField): void {
@@ -147,6 +157,7 @@ export class StageCard {
         const { stage } = this;
         if (stage.status.state !== 'ready' || this.displayedEpoch !== stage.epoch) return;
         const scene = this.scene();
+        if (!scene && stage.configuration.mode === 'live' && this.pointerSupported) return;
         if (scene && scene.current !== stage.id) {
             if (scene.overlays.at(-1)?.options.dismiss_on_outside) this.send({ type: 'prototype', command: { action: 'closeOverlay' } });
             return;

@@ -21,6 +21,7 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_preview_stage_states"
             | "designer_preview_stage_fixtures"
             | "designer_preview_stage_input"
+            | "designer_preview_stage_pointer"
     )
 }
 
@@ -62,6 +63,9 @@ fn configuration_schema() -> Value {
     s::object(
         json!({"name":bounded_string(128),"source_uri":bounded_string(8192),"target":target,
         "environment":environment_schema(),"layout":{"enum":["fixed","size_that_fits","fixed_width","fixed_height"]},"design_time_data":{"type":"boolean"},
+        "text":s::object(json!({"locale":s::nullable(bounded_string(128)),
+            "scale_percent":{"type":"integer","minimum":50,"maximum":300}}), &[]),
+        "pointer_input":{"enum":["automatic","touch","pen"]},
         "design_fixture":s::nullable(bounded_string(128)),"states":s::array(state,32),
         "pinned":{"type":"boolean"},"auto_update":{"type":"boolean"},"mode":{"enum":["select","live"]}}),
         &[
@@ -90,6 +94,17 @@ fn matrix_schema() -> Value {
         }),
         &[],
     )
+}
+
+fn pointer_schema() -> Value {
+    let axis = json!({"type":"number","minimum":-1024,"maximum":1024});
+    let tilt = json!({"type":"number","minimum":-90,"maximum":90});
+    s::object(json!({
+        "contact":{"type":"integer","minimum":0,"maximum":4294967295_u64},
+        "phase":{"enum":["down","move","up","cancel"]}, "device":{"enum":["mouse","touch","pen"]},
+        "x":axis,"y":axis,"pressure":{"type":"number","minimum":0,"maximum":1},
+        "tiltX":tilt,"tiltY":tilt,"twist":{"type":"number","minimum":0,"exclusiveMaximum":360}
+    }), &["contact","phase","device","x","y"])
 }
 
 fn manifest_schema() -> Value {
@@ -173,6 +188,14 @@ pub(super) fn tools() -> Vec<Value> {
         true,
     );
     input["annotations"]["destructiveHint"] = json!(false);
+    let mut pointer = s::tool(
+        "designer_preview_stage_pointer",
+        "Send a primary pointer contact to a current Live stage. Begin inside the artboard using normalized coordinates and the current stage ID, model and epoch. Follow with move and up or cancel using the same contact and device. The stage's explicit device takes precedence over the supplied device. Requires allow_input and allow_property_writes.",
+        s::object(json!({"stage":s::id(),"expected_model":bounded_string(16),"expected_epoch":s::revision(),
+            "input":pointer_schema()}), &["stage","expected_model","expected_epoch","input"]),
+        true,
+    );
+    pointer["annotations"]["destructiveHint"] = json!(false);
     vec![
         s::tool(
             "designer_preview_stages",
@@ -209,6 +232,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
         ),
         input,
+        pointer,
         edit,
     ]
 }
@@ -232,7 +256,7 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
         .collect::<Vec<_>>();
     let mut value = json!({"model":workspace.preview_stage_model(),"epoch":workspace.preview_stage_epoch(),
         "available_themes":PreviewTheme::available(),
-        "text_environment":true,
+        "text_environment":true, "pointer_input":true,
         "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_set(),
         "active_source_uri":workspace.session().borrow().document_uri()});
     if let Some(stage) = args["stage"].as_u64() {
@@ -335,6 +359,15 @@ pub(super) fn call(
             decode(args, "input")?,
         )?;
         return Ok(json!(focus));
+    }
+    if name == "designer_preview_stage_pointer" {
+        if !permissions.allow_input {
+            return Err("Stage pointer input requires allow_input".into());
+        }
+        workspace.preview_stage_pointer(
+            integer(args, "stage")?, integer(args, "expected_epoch")?, decode(args, "input")?,
+        )?;
+        return Ok(json!({"interacted":true}));
     }
     if name == "designer_preview_image" {
         let id = integer(args, "stage")?;

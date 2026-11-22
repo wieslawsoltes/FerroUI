@@ -3,6 +3,7 @@ export type Schema = {
     enum?: readonly string[];
     minimum?: number;
     maximum?: number;
+    exclusiveMaximum?: number;
     maxLength?: number;
     maxItems?: number;
     maxProperties?: number;
@@ -31,7 +32,8 @@ export function validate(schema: Schema, value: unknown): void {
     if (schema.type === 'number' || schema.type === 'integer') {
         const n = value as number;
         if (!Number.isFinite(value) || (schema.type === 'integer' && !Number.isSafeInteger(n))
-            || n < (schema.minimum ?? -Infinity) || n > (schema.maximum ?? Infinity)) throw new Error('Number is outside the allowed range');
+            || n < (schema.minimum ?? -Infinity) || n > (schema.maximum ?? Infinity)
+            || n >= (schema.exclusiveMaximum ?? Infinity)) throw new Error('Number is outside the allowed range');
     } else if (schema.type === 'string') {
         if (typeof value !== 'string' || value.length > (schema.maxLength ?? Infinity)) throw new Error('Expected a valid string');
     } else if (schema.type === 'boolean') {

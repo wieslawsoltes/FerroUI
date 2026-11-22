@@ -72,6 +72,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     box-shadow: 0 0 0 1px var(--line), 0 4px 16px #0003;
 }
 .stage-card[data-mode="select"][data-state="ready"] img { cursor: crosshair; }
+.stage-contact-surface { touch-action: none; }
 .stage-card[data-keyboard] .stage-artboard img {
     outline: 2px solid var(--vscode-focusBorder);
     outline-offset: 1px;

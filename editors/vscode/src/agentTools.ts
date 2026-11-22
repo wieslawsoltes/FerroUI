@@ -29,7 +29,7 @@ import type { ScenarioRunner } from './scenarioRunner';
 import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
-import type { PrototypeCommand, StageChange, StageInput } from './stagesProtocol';
+import type { PrototypeCommand, StageChange, StageContact, StageInput } from './stagesProtocol';
 import type { PaletteEdit, StylesPage } from './stylesProtocol';
 import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
@@ -109,7 +109,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     stage?: number;
     expected_epoch?: number;
     debug_configuration?: string;
-    input?: CanvasInteraction | StageInput;
+    input?: CanvasInteraction | StageContact | StageInput;
     kind?: string;
     language?: 'xaml' | 'rsx';
     fixture?: string;
@@ -561,6 +561,9 @@ export class AgentTools {
             case 'designer_stage_fixtures': return this.stages.board(document.uri).fixtureOptions(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_input': return this.stages.board(document.uri).keyboard({
                 id: args.stage!, epoch: args.expected_epoch!, input: args.input as StageInput,
+            }, signal);
+            case 'designer_stage_pointer': return this.stages.board(document.uri).contact({
+                id: args.stage!, epoch: args.expected_epoch!, input: args.input as StageContact,
             }, signal);
             case 'designer_stage_change': return this.stages.board(document.uri).applyChange({ ...args.arguments, epoch: args.expected_epoch! } as StageChange, signal);
             case 'designer_stage_prototype': return this.stages.board(document.uri).controlPrototype(args.expected_epoch!, args.arguments as PrototypeCommand, signal);

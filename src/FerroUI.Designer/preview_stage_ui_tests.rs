@@ -464,6 +464,106 @@ fn scaled_stage_pointer_selects_its_authored_control_before_inspector_handoff() 
 }
 
 #[test]
+fn stage_pointer_profiles_dispatch_native_contacts_and_cancel_on_invalidation() {
+    use crate::{PreviewStagePointerDevice as Device, PreviewStagePointerInput, PreviewStagePointerPhase as Phase,
+        PreviewStagePointerProfile as Profile};
+    use ferroui_base::threading::Dispatcher;
+
+    let _app = UnitTestApplication::start(services());
+    let f = Fixture::new();
+    let workspace = &f.workspace;
+    let id = f.first();
+    let initial = workspace.preview_stage(id).unwrap();
+    let mut configuration = initial.configuration;
+    configuration.mode = PreviewStageMode::Live;
+    configuration.pointer_input = Profile::Pen;
+    workspace.update_preview_stage(id, configuration.clone()).unwrap();
+    let other = workspace.duplicate_preview_stage(id).unwrap();
+    f.layout();
+
+    let epoch = workspace.preview_stage(id).unwrap().epoch;
+    let host = workspace.preview_stage_control(id).unwrap();
+    let button = native::<Button>(&host, "Card");
+    let position = button.translate_point(Point::new(12.0, 12.0), &host).unwrap();
+    let size = host.bounds().size();
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_pressed_event(), move |_, event| {
+        let point = event.get_current_point(None);
+        events.borrow_mut().push((Phase::Down, point.pointer.type_(), point.properties.pressure, point.properties.x_tilt));
+    }, ferroui_base::interactivity::RoutingStrategies::BUBBLE, true);
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_moved_event(), move |_, event| {
+        events.borrow_mut().push((Phase::Move, event.pointer().type_(), event.properties().pressure, event.properties().x_tilt));
+    }, ferroui_base::interactivity::RoutingStrategies::BUBBLE, true);
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_released_event(), move |_, event| {
+        events.borrow_mut().push((Phase::Up, event.pointer().type_(), 0.0, 0.0));
+    }, ferroui_base::interactivity::RoutingStrategies::BUBBLE, true);
+    let events = received.clone();
+    button.add_handler_with(InputElement::pointer_capture_lost_event(), move |_, event| {
+        events.borrow_mut().push((Phase::Cancel, event.pointer().type_(), 0.0, 0.0));
+    }, ferroui_base::interactivity::RoutingStrategies::DIRECT, true);
+
+    let input = PreviewStagePointerInput {
+        contact: 42, phase: Phase::Down, device: Device::Mouse,
+        x: position.x / size.width, y: position.y / size.height,
+        pressure: Some(0.8), tilt_x: Some(-14.0), tilt_y: Some(10.0), twist: Some(30.0),
+    };
+    let send = |phase, x| workspace.preview_stage_pointer(id, epoch, PreviewStagePointerInput { phase, x, ..input });
+    assert!(workspace.preview_stage_pointer(id, initial.epoch, input).is_err());
+    assert!(send(Phase::Move, input.x).is_err());
+    assert!(send(Phase::Down, 1.1).is_err());
+    send(Phase::Down, input.x).unwrap();
+    assert!(send(Phase::Down, input.x).is_err());
+    send(Phase::Move, 1.1).unwrap();
+    send(Phase::Up, 1.1).unwrap();
+    assert!(send(Phase::Up, 1.1).is_err());
+    assert_eq!(&received.borrow()[..3], &[
+        (Phase::Down, PointerType::Pen, 0.8, -14.0),
+        (Phase::Move, PointerType::Pen, 0.8, -14.0),
+        (Phase::Up, PointerType::Pen, 0.0, 0.0),
+    ]);
+    received.borrow_mut().clear();
+    send(Phase::Down, input.x).unwrap();
+    send(Phase::Cancel, input.x).unwrap();
+    assert_eq!(received.borrow().iter().map(|event| event.0).collect::<Vec<_>>(), [Phase::Down, Phase::Cancel]);
+    assert!(!button.is_pressed());
+
+    received.borrow_mut().clear();
+    send(Phase::Down, input.x).unwrap();
+    configuration.pointer_input = Profile::Touch;
+    workspace.update_preview_stage(id, configuration).unwrap();
+    Dispatcher::ui_thread().run_jobs(None);
+    f.layout();
+    assert!(send(Phase::Up, input.x).is_err());
+    assert_eq!(received.borrow().iter().map(|event| event.0).collect::<Vec<_>>(), [Phase::Down, Phase::Cancel]);
+    assert_eq!(native::<Button>(&workspace.preview_stage_control(id).unwrap(), "Card"), button);
+    assert_eq!(workspace.preview_stage(other).unwrap().configuration.pointer_input, Profile::Pen);
+    let saved = serde_json::to_value(workspace.preview_stage_set()).unwrap();
+    assert_eq!(saved["stages"][0]["pointer_input"], "touch");
+    assert_eq!(saved["stages"][1]["pointer_input"], "pen");
+
+    received.borrow_mut().clear();
+    let cursor = StagePointer {
+        pointer: Pointer::new(Pointer::get_next_free_id(), PointerType::Mouse, true),
+        source: named(&workspace.preview_stage_view().unwrap().control(), &format!("Stage{id}PointerSurface")),
+        root: f.window.clone(),
+    };
+    let point = host.translate_point(position, &f.window).unwrap();
+    cursor.press(point);
+    cursor.motion(Point::new(point.x + 12.0, point.y));
+    cursor.release(point);
+    assert_eq!(received.borrow().iter().take(3).map(|event| (event.0, event.1)).collect::<Vec<_>>(), [
+        (Phase::Down, PointerType::Touch), (Phase::Move, PointerType::Touch), (Phase::Up, PointerType::Touch),
+    ]);
+    assert!(cursor.pointer.captured().is_none());
+    let session = workspace.session.borrow();
+    assert_eq!(session.document().source(), SOURCE);
+    assert!(!session.can_undo());
+}
+
+#[test]
 fn responsive_cards_and_staged_editor_keep_commands_inside_native_viewports() {
     let _app = UnitTestApplication::start(services());
     let f = Fixture::new();

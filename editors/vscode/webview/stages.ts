@@ -22,7 +22,7 @@ const player = new PrototypePlayer(root, send);
 let model: StageModel | undefined;
 let scene: PrototypeScene | null = null;
 let graphOpen = false;
-let keyboardCurrent = false;
+let inputCurrent = false;
 const graph = new PrototypeGraphView(send, id => {
     switchSurface(false);
     const stage = cards.get(id);
@@ -33,9 +33,9 @@ const graph = new PrototypeGraphView(send, id => {
 window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     if (data.type === 'status') { report(data.message); return; }
     if (data.type === 'prototype') { showScene(data.scene); return; }
-    if (data.type === 'keyboardUnavailable') {
-        keyboardCurrent = false;
-        updateKeyboard();
+    if (data.type === 'inputUnavailable') {
+        inputCurrent = false;
+        updateInput();
         return;
     }
     if (data.type === 'keyboardFocus') {
@@ -44,11 +44,11 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     }
     if (data.type === 'model') {
         model = data.model;
-        keyboardCurrent = true;
+        inputCurrent = true;
         vscode.setState({ uri: data.uri });
         const keep = new Set(model.stages.map(stage => stage.id));
         for (const [id, previous] of cards) {
-            if (!keep.has(id)) { previous.element.remove(); cards.delete(id); menu.close(); }
+            if (!keep.has(id)) { previous.cancelContacts(); previous.element.remove(); cards.delete(id); menu.close(); }
         }
         for (const stage of model.stages) {
             const previous = cards.get(stage.id);
@@ -70,16 +70,17 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     if (src) graph.updatePreview(data.id, src);
 });
 
+window.addEventListener('blur', () => { for (const card of cards.values()) card.cancelContacts(); });
+
 function showScene(next: PrototypeScene | null): void {
     if (scene !== next) menu.close();
     scene = next;
     player.update(scene, model, cards);
-    updateKeyboard();
     showSurface();
 }
 
-function updateKeyboard(): void {
-    for (const card of cards.values()) card.setKeyboard(model?.keyboardInput === true, keyboardCurrent);
+function updateInput(): void {
+    for (const card of cards.values()) card.setInput(model?.keyboardInput === true, model?.pointerInput === true, inputCurrent && !graphOpen);
 }
 
 function report(message: string): void {
@@ -100,6 +101,7 @@ function showSurface(): void {
     tabs.hidden = commands.hidden = Boolean(scene);
     boardTab.setAttribute('aria-pressed', String(!showGraph));
     graphTab.setAttribute('aria-pressed', String(showGraph));
+    updateInput();
 }
 
 element('stages-add').onclick = () => send({ type: 'add' });

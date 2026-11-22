@@ -1,6 +1,6 @@
 //! Native responsive stage cards. Editor chrome is confined to headers and toolbars;
 //! application preview roots retain their own styles, themes and input behavior.
-use crate::{PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStageStatus};
+use crate::{PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStagePointerInput, PreviewStageStatus};
 use ferroui_base::input::{
     IKeyboardNavigationHandler, InputElement, Key, KeyboardNavigation, KeyboardNavigationHandler,
     KeyboardNavigationMode,
@@ -23,7 +23,10 @@ use std::rc::Rc;
 mod presentation;
 #[path = "preview_stage_resize.rs"]
 mod resize;
+#[path = "preview_stage_pointer_surface.rs"]
+mod pointer_surface;
 use presentation::CardPresentation;
+use pointer_surface::StagePointerSurface;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PreviewStageComparison {
@@ -94,6 +97,11 @@ pub enum PreviewStageAction {
         epoch: u64,
         position: Point,
     },
+    Pointer {
+        stage: PreviewStageId,
+        epoch: u64,
+        input: PreviewStagePointerInput,
+    },
     Resize {
         stage: PreviewStageId,
         epoch: u64,
@@ -119,6 +127,7 @@ struct StageCard {
     epoch: u64,
     retired: Rc<Cell<bool>>,
     options: Ref<MenuFlyout>,
+    pointer: Option<Rc<StagePointerSurface>>,
 }
 
 impl StageCard {
@@ -126,6 +135,7 @@ impl StageCard {
         self.retired.set(true);
         self.options.hide();
         self.presentation.retire();
+        if let Some(pointer) = &self.pointer { pointer.cancel(); }
     }
 }
 
@@ -405,10 +415,11 @@ impl PreviewStageView {
         )));
     }
 
-    /// Cancel detached corner-grip drafts before hiding or moving the board.
+    /// Cancel gestures before hiding or moving the board.
     pub fn cancel_interaction(&self) {
         for card in self.cards.borrow().values() {
             card.presentation.cancel_interaction();
+            if let Some(pointer) = &card.pointer { pointer.cancel(); }
         }
     }
 
@@ -699,6 +710,21 @@ impl PreviewStageView {
                 .children()
                 .add(overlay.upcast::<Control>());
         }
+        let pointer = if info.configuration.mode == PreviewStageMode::Live
+            && info.configuration.auto_update
+            && !info.configuration.pointer_input.is_default()
+            && matches!(info.status, PreviewStageStatus::Ready { .. })
+        {
+            let view = Rc::downgrade(self);
+            let anchor = host.downgrade();
+            Some(StagePointerSurface::attach(&presentation.content, &host, format!("Stage{id}PointerSurface"),
+                move |input| {
+                    if let (Some(view), Some(anchor)) = (view.upgrade(), anchor.upgrade()) {
+                        view.emit(PreviewStageAction::Pointer { stage: id, epoch, input }, anchor);
+                    }
+                },
+            ))
+        } else { None };
         // Native controls handle input first. Unhandled live-app shortcuts must not
         // bubble into the editor's Delete/Undo/selection or authoring commands.
         frame.add_handler_with(
@@ -843,6 +869,7 @@ impl PreviewStageView {
             epoch: info.epoch,
             retired,
             options,
+            pointer,
         }
     }
 }

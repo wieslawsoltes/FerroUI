@@ -6,7 +6,7 @@ import type { BuiltProjects } from './builtProjects';
 import { DesignerDependencies, dirtyPreviewSources, xamlPath } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StagePointerInput, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { pickStageCheck } from './stageChecksPicker';
 import { dimensions, editStageEnvironment } from './stageEnvironmentPicker';
 import { editPrototype } from './stagePrototypeEditor';
@@ -89,7 +89,7 @@ export class StagesPanel implements vscode.Disposable {
 
 class StageSession {
     private readonly dependencies = new DesignerDependencies(false, () => this.schedule());
-    private readonly inputImages = new Map<number, ReturnType<typeof setTimeout>>();
+    private readonly inputImages = new Map<number, { timer: ReturnType<typeof setTimeout>; followup?: () => void }>();
     private readonly subscriptions: vscode.Disposable[];
     private cacheKey: string;
     private primary: vscode.Uri;
@@ -115,7 +115,7 @@ class StageSession {
         this.subscriptions = [
             panel.onDidDispose(() => this.dispose()),
             panel.onDidChangeViewState(() => {
-                if (panel.visible && this.modelGeneration !== this.generation) this.schedule();
+                if (!panel.visible || this.modelGeneration !== this.generation) this.schedule();
             }),
             panel.webview.onDidReceiveMessage((message: StagesRequest) => { void this.receive(message); }),
             projects.onDidChange(() => this.schedule()),
@@ -187,6 +187,26 @@ class StageSession {
         return this.applyKeyboard(await this.getClient(), model, target, signal);
     }
 
+    async contact(target: StagePointerInput, signal: AbortSignal) {
+        const model = await this.wait(signal);
+        signal.throwIfAborted();
+        await this.applyContact(await this.getClient(), model, target, true);
+        signal.throwIfAborted();
+        return { interacted: true };
+    }
+
+    private async applyContact(client: NativePreview, model: StageModel, target: StagePointerInput, automation: boolean) {
+        // An unrelated card can be publishing a new model while a contact is
+        // captured. Deliver against the current card identity and let the helper
+        // reject it if that specific card has changed.
+        const accepted = automation ? model : this.model ?? model;
+        const stage = this.currentInputStage(accepted, target, !automation);
+        await client.stageContact(target, automation);
+        if (this.model === accepted && this.modelGeneration === this.generation && !this.disposed) {
+            this.scheduleInputImage(client, accepted, stage);
+        }
+    }
+
     private async applyKeyboard(client: NativePreview, model: StageModel, target: StageKeyboard, signal: AbortSignal) {
         signal.throwIfAborted();
         const stage = this.currentInputStage(model, target);
@@ -200,8 +220,8 @@ class StageSession {
         return focus;
     }
 
-    private currentInputStage(model: StageModel, target: StageTarget): StageInfo {
-        if (this.busy || this.timer || this.disposed || this.model !== model
+    private currentInputStage(model: StageModel, target: StageTarget, allowPublishing = false): StageInfo {
+        if ((this.busy && !allowPublishing) || this.timer || this.disposed || this.model !== model
             || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) {
             throw new Error('The stage changed. Use its current frame.');
         }
@@ -211,14 +231,22 @@ class StageSession {
     }
 
     private scheduleInputImage(client: NativePreview, model: StageModel, stage: StageInfo): void {
-        if (this.inputImages.has(stage.id)) return;
-        this.inputImages.set(stage.id, setTimeout(() => {
+        if (this.disposed || this.model !== model || this.modelGeneration !== this.generation) return;
+        const existing = this.inputImages.get(stage.id);
+        if (existing) {
+            existing.followup = () => this.scheduleInputImage(client, model, stage);
+            return;
+        }
+        const request = { timer: setTimeout(async () => {
+            if (this.model === model && this.modelGeneration === this.generation && !this.disposed) {
+                request.followup = undefined;
+                try { await this.image(client, stage); }
+                catch (error) { if (this.model === model && this.modelGeneration === this.generation) this.report(error); }
+            }
             this.inputImages.delete(stage.id);
-            if (this.disposed || this.model !== model || this.modelGeneration !== this.generation) return;
-            void this.image(client, stage).catch(error => {
-                if (this.model === model && this.modelGeneration === this.generation) this.report(error);
-            });
-        }, 32));
+            request.followup?.();
+        }, 32), followup: undefined as (() => void) | undefined };
+        this.inputImages.set(stage.id, request);
     }
 
     private async readStage<T>(target: StageTarget, signal: AbortSignal, read: (client: NativePreview, target: StageTarget) => Promise<T>): Promise<T> {
@@ -283,8 +311,11 @@ class StageSession {
     }
 
     private schedule(): void {
+        if (this.modelGeneration === this.generation) {
+            if (this.model?.keyboardInput || this.model?.pointerInput) this.post({ type: 'inputUnavailable' });
+            if (this.model?.pointerInput) void this.client?.then(client => client.cancelStageContacts()).catch(() => {});
+        }
         this.generation++;
-        if (this.model?.keyboardInput) this.post({ type: 'keyboardUnavailable' });
         clearTimeout(this.timer);
         this.timer = undefined;
         if (this.ready && this.panel.visible && !this.disposed) this.timer = setTimeout(() => { this.timer = undefined; void this.sync(); }, 170);
@@ -335,6 +366,7 @@ class StageSession {
     private async publish(model: StageModel, client: NativePreview, generation: number): Promise<void> {
         if (generation !== this.generation || this.disposed) return;
         model.keyboardInput = client.capabilities.stageKeyboard === true;
+        model.pointerInput = client.capabilities.stagePointerInput === true;
         this.model = model;
         this.modelVersion = this.document.version;
         this.modelGeneration = generation;
@@ -364,7 +396,8 @@ class StageSession {
 
     private async receive(message: StagesRequest): Promise<void> {
         if (message.type === 'ready') { this.ready = true; this.schedule(); return; }
-        if (this.busy || this.timer || !this.model || this.disposed || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) return;
+        if ((this.busy && message.type !== 'contact') || this.timer || !this.model || this.disposed
+            || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) return;
         const model = this.model;
         const generation = this.generation;
         try {
@@ -390,6 +423,10 @@ class StageSession {
             }
             if (message.type === 'keyboard') {
                 await this.applyKeyboard(client, model, message, AbortSignal.timeout(15_000));
+                return;
+            }
+            if (message.type === 'contact') {
+                await this.applyContact(client, model, message, false);
                 return;
             }
             if (message.type === 'pointer') {
@@ -437,7 +474,9 @@ class StageSession {
                 ? await this.change(client, model, message) : undefined;
             if (!change || generation !== this.generation || model !== this.model) return;
             await this.applyChange(change, AbortSignal.timeout(15_000));
-        } catch (error) { this.report(error); }
+        } catch (error) {
+            if (message.type !== 'contact' || (message.input.phase === 'down' && generation === this.generation)) this.report(error);
+        }
     }
 
     private async revealStageSource(source: string, selection: Range, generation: number): Promise<void> {
@@ -574,7 +613,7 @@ class StageSession {
     private dispose(): void {
         this.disposed = true;
         clearTimeout(this.timer);
-        this.inputImages.forEach(timer => clearTimeout(timer));
+        this.inputImages.forEach(({ timer }) => clearTimeout(timer));
         this.inputImages.clear();
         void this.client?.then(client => client.dispose(), () => {});
         this.dependencies.dispose();

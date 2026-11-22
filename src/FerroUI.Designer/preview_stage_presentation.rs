@@ -233,8 +233,10 @@ impl CardPresentation {
 
     fn update_details(&self) {
         let size = self.size.get();
+        let pointer = self.configuration.pointer_input;
+        let pointer_label = if pointer.is_default() { String::new() } else { format!(" · {} input", pointer.label()) };
         self.details.set_text(Some(&format!(
-            "{} · {} × {} · {} · {}{}",
+            "{} · {} × {} · {} · {}{pointer_label}{}",
             super::short_uri(&self.configuration.source_uri),
             number(size.width),
             number(size.height),

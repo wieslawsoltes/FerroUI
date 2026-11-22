@@ -3,7 +3,7 @@
 use crate::{
     DefinitionPreviewOptions, PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewFlowDirection,
     PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode, PreviewStageSpec,
-    PreviewStageSource, PreviewStageState, PreviewStageTarget, PreviewStageText, PreviewTheme,
+    PreviewStagePointerProfile, PreviewStageSource, PreviewStageState, PreviewStageTarget, PreviewStageText, PreviewTheme,
 };
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -55,6 +55,7 @@ pub struct PreviewStageEditor {
     locale: Ref<TextBox>,
     text_size: Ref<TextBox>,
     mode: Ref<ComboBox>,
+    pointer_input: Ref<ComboBox>,
     design_data: Ref<CheckBox>,
     design_fixture: Ref<ComboBox>,
     fixtures: RefCell<Vec<String>>,
@@ -239,6 +240,13 @@ impl PreviewStageEditor {
             0
         });
         row(&body, "Interaction", &mode);
+        let pointer_input = picker("StagePointerInput", "Pointer device in Live interaction");
+        for profile in PreviewStagePointerProfile::OPTIONS {
+            item(&pointer_input, profile.label());
+        }
+        pointer_input.set_selected_index(PreviewStagePointerProfile::OPTIONS.iter()
+            .position(|profile| *profile == initial.pointer_input).unwrap_or_default() as i32);
+        row(&body, "Pointer input", &pointer_input);
         let design_data = check(
             "Use design-time values and sample data",
             "StageDesignData",
@@ -324,6 +332,7 @@ impl PreviewStageEditor {
             locale,
             text_size,
             mode,
+            pointer_input,
             design_data,
             design_fixture,
             fixtures: RefCell::new(Vec::new()),
@@ -707,6 +716,8 @@ impl PreviewStageEditor {
                 scale_percent: self.text_size.text().unwrap_or_default().trim().trim_end_matches('%')
                     .trim().parse().map_err(|_| "Enter a text size such as 150%")?,
             },
+            pointer_input: PreviewStagePointerProfile::OPTIONS.get(self.pointer_input.selected_index() as usize)
+                .copied().unwrap_or_default(),
             design_time_data: self.design_data.is_checked() == Some(true),
             states,
             pinned: self.pinned.is_checked() == Some(true),

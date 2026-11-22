@@ -4,7 +4,8 @@ use super::*;
 use crate::{
     PreviewEnvironment, PreviewFlowDirection, PreviewStageAction, PreviewStageBoard,
     PreviewStageComparison, PreviewStageConfiguration, PreviewStageEditor, PreviewStageId, PreviewStageSpec, PreviewStageSet,
-    PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStageStatus,
+    PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStagePointerInput,
+    PreviewStagePointerOrigin, PreviewStagePointerPhase, PreviewStageStatus,
     PreviewStageTarget, PreviewStageView, PreviewTheme,
 };
 use ferroui_controls::Flyout;
@@ -76,6 +77,32 @@ impl DesignerWorkspace {
         }
         let target = self.preview_stages.board.borrow().keyboard_target(id, epoch)?;
         target.input(action)
+    }
+
+    pub fn preview_stage_pointer(&self, id: PreviewStageId, epoch: u64, input: PreviewStagePointerInput)
+        -> Result<(), String>
+    {
+        self.route_stage_pointer(id, epoch, input, PreviewStagePointerOrigin::Automation)
+    }
+
+    fn route_stage_pointer(&self, id: PreviewStageId, epoch: u64, input: PreviewStagePointerInput,
+        origin: PreviewStagePointerOrigin) -> Result<(), String>
+    {
+        if !self.preview_stages_visible() || self.preview_prototype_playback().is_some()
+            || self.view_mode() == super::shell::WorkspaceViewMode::Xaml {
+            return Err("Open the Stages board outside prototype playback to use stage input".into());
+        }
+        if !self.preview_stage_source_is_current(id) {
+            return Err("Refresh this stage before using pointer input".into());
+        }
+        let target = self.preview_stages.board.borrow().pointer_target(id, epoch, origin)?;
+        target.input(input)
+    }
+
+    pub(super) fn cancel_preview_stage_pointer_input(&self) {
+        let mut board = self.preview_stages.board.borrow_mut();
+        board.cancel_pointer_input(PreviewStagePointerOrigin::Editor);
+        board.cancel_pointer_input(PreviewStagePointerOrigin::Automation);
     }
     pub fn preview_stages_visible(&self) -> bool {
         self.preview_stages.visible.get()
@@ -351,6 +378,7 @@ impl DesignerWorkspace {
         let canvas = self.view_mode() != super::shell::WorkspaceViewMode::Xaml;
         let board = canvas && self.preview_stages_visible();
         if !board {
+            self.cancel_preview_stage_pointer_input();
             if let Some(view) = self.preview_stage_view() {
                 view.cancel_interaction();
             }
@@ -523,7 +551,9 @@ impl DesignerWorkspace {
         action: PreviewStageAction,
         anchor: &Control,
     ) -> Result<(), String> {
-        self.sync_preview_stage_sources()?;
+        if !matches!(action, PreviewStageAction::Pointer { .. }) {
+            self.sync_preview_stage_sources()?;
+        }
         match action {
             PreviewStageAction::Prototype => self.set_preview_prototype_visible(true),
             PreviewStageAction::AddInteraction { stage, epoch } => {
@@ -618,6 +648,10 @@ impl DesignerWorkspace {
                 self.preview_stages.board.borrow_mut().set_active(stage)?;
                 self.refresh(true);
                 Ok(())
+            }
+            PreviewStageAction::Pointer { stage, epoch, input } => {
+                let result = self.route_stage_pointer(stage, epoch, input, PreviewStagePointerOrigin::Editor);
+                if input.phase == PreviewStagePointerPhase::Cancel { Ok(()) } else { result }
             }
             PreviewStageAction::Compare(comparison) => {
                 self.add_preview_stage_comparison(comparison)

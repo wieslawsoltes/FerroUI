@@ -41,6 +41,10 @@ use includes::{IncludeCatalog, IncludeCatalogs, IncludeSource};
 #[path = "preview_stage_keyboard.rs"]
 mod keyboard;
 pub use keyboard::{PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget};
+#[path = "preview_stage_pointer.rs"]
+mod pointer;
+pub use pointer::{PreviewStagePointerDevice, PreviewStagePointerInput, PreviewStagePointerOrigin,
+    PreviewStagePointerPhase, PreviewStagePointerProfile, PreviewStagePointerTarget};
 #[path = "preview_stage_text.rs"]
 mod text;
 pub use text::PreviewStageText;
@@ -121,6 +125,8 @@ pub struct PreviewStageConfiguration {
     pub environment: PreviewEnvironment,
     #[serde(default, skip_serializing_if = "PreviewStageText::is_default")]
     pub text: PreviewStageText,
+    #[serde(default, skip_serializing_if = "PreviewStagePointerProfile::is_default")]
+    pub pointer_input: PreviewStagePointerProfile,
     #[serde(default)]
     pub layout: PreviewStageLayout,
     pub design_time_data: bool,
@@ -142,6 +148,7 @@ impl PreviewStageConfiguration {
             target: PreviewStageTarget::Document,
             environment,
             text: PreviewStageText::default(),
+            pointer_input: PreviewStagePointerProfile::default(),
             layout: PreviewStageLayout::Fixed,
             design_time_data: true,
             states: Vec::new(),
@@ -341,6 +348,7 @@ struct Stage {
     id: PreviewStageId,
     spec: PreviewStageSpec,
     control: Ref<StageLayoutHost>,
+    pointer_streams: pointer::StagePointerStreams,
     // Isolated player presentation only: never serialized or part of the accepted
     // source/configuration epoch. Shared with retained and candidate theme handlers.
     prototype_overlay: Rc<Cell<bool>>,
@@ -635,6 +643,7 @@ impl PreviewStageBoard {
             id,
             spec,
             control,
+            pointer_streams: pointer::StagePointerStreams::default(),
             prototype_overlay: Rc::new(Cell::new(false)),
             epoch: 1,
             status: PreviewStageStatus::MissingDocument,
@@ -722,7 +731,8 @@ impl PreviewStageBoard {
 
     pub fn remove(&mut self, id: PreviewStageId) -> Result<(), String> {
         let index = self.index(id)?;
-        let stage = self.stages.remove(index);
+        let mut stage = self.stages.remove(index);
+        stage.retire_pointer_streams();
         self.prototype.remove_stage(id);
         stage.control.children().clear();
         if self.active == Some(id) {
@@ -1702,17 +1712,17 @@ impl PreviewStageBoard {
             .expect("Preview board epoch exhausted");
     }
     fn touch(&mut self, index: usize) {
-        self.stages[index].epoch = self.stages[index]
-            .epoch
-            .checked_add(1)
-            .expect("Preview stage epoch exhausted");
+        let stage = &mut self.stages[index];
+        stage.retire_pointer_streams();
+        stage.epoch = stage.epoch.checked_add(1).expect("Preview stage epoch exhausted");
         self.bump();
     }
 }
 
 impl Drop for PreviewStageBoard {
     fn drop(&mut self) {
-        for stage in &self.stages {
+        for stage in &mut self.stages {
+            stage.retire_pointer_streams();
             stage.control.children().clear();
         }
     }
