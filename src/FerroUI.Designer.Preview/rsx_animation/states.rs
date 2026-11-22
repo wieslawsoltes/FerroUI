@@ -4,7 +4,7 @@ use ferroui_designer_core::TextPatch;
 use serde_json::Value;
 
 pub(crate) fn state_edit(tool: &str, action: Option<&str>) -> bool {
-    tool == "designer_state" && matches!(action, Some("upsert" | "remove"))
+    tool == "designer_state" && matches!(action, Some("upsert" | "remove" | "set_event_trigger"))
 }
 
 pub(crate) fn state_patches(
@@ -18,6 +18,12 @@ pub(crate) fn state_patches(
             .map(|(ordinal, _)| ordinal)
             .ok_or("Choose a mapped Rust control")
     };
+    if args["action"] == "set_event_trigger" {
+        let source = args["event_source"].as_u64().ok_or("Choose an event source")?;
+        let event = args["event"].as_str().ok_or("Choose a routed event")?;
+        let group = args["group"].as_str().ok_or("Choose a state group")?;
+        return rsx.plan_state_trigger(owner(source)?, event, group, args["state"].as_str());
+    }
     if args["action"] == "upsert" {
         let model: VisualStateGroup =
             serde_json::from_value(args["model"].clone()).map_err(|error| error.to_string())?;

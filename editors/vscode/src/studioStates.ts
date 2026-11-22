@@ -6,15 +6,17 @@ import type { StateSetter as Setter, StateTransition as Transition, VisualStateG
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 import type { Range } from './protocol';
 import type { BehaviorAction } from './studioBehaviors';
+import { stateTriggerItems, type StateTriggerReport } from './studioStateTriggers';
 
 interface StateSource { owner: number; group: string; range: Range; transitions: Array<Pick<Transition, 'from' | 'to'> & { range: Range }> }
 
 type OpenTransition = (context: StudioContext, route: StateTransitionRoute) => Promise<void>;
 
 export async function stateItems(context: StudioContext, openTransition: OpenTransition): Promise<StudioItem[]> {
-    const { groups, sources, creatableOwners } = await context.read<{
-        groups: StateGroup[]; sources?: StateSource[]; creatableOwners?: number[];
-    }>('designer_states');
+    const eventSource = context.panel.supportsRustStateTriggers ? context.node : undefined;
+    const { groups, sources, creatableOwners, stateTriggers } = await context.read<{
+        groups: StateGroup[]; sources?: StateSource[]; creatableOwners?: number[]; stateTriggers?: StateTriggerReport | null;
+    }>('designer_states', eventSource === undefined ? {} : { event_source: eventSource });
     const update = (model: StateGroup) => context.edit('designer_state', { action: 'upsert', model });
     const rows: StudioItem[] = groups.map(group => ({
         id: groupId(group), label: group.name, description: `${group.states.length} states`,
@@ -22,6 +24,7 @@ export async function stateItems(context: StudioContext, openTransition: OpenTra
             sources?.find(source => source.owner === group.owner && source.group === group.name)),
     }));
     rows.unshift(action('states:clear', 'Clear state preview', () => context.present('designer_state', { action: 'clear_preview' }), 'clear-all'));
+    if (eventSource !== undefined && stateTriggers) rows.unshift(...stateTriggerItems(context, eventSource, stateTriggers));
     const owner = context.node;
     const creatable = owner !== undefined && (context.writable
         || (context.panel.supportsRustStateStructure && creatableOwners?.includes(owner)));

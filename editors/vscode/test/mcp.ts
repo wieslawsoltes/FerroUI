@@ -60,6 +60,7 @@ import { verifyResourcePromotion } from './studioResourceMcp';
 import { verifyRsxAnimation } from './rsxAnimationMcp';
 import { verifyRsxPrograms } from './rsxProgramsMcp';
 import { verifyRsxStates } from './rsxStatesMcp';
+import { verifyRsxStateTriggers } from './rsxStateTriggersMcp';
 import { verifyRsxControlRename } from './rsxRenameMcp';
 import { verifyRsxPlacement } from './rsxPlacementMcp';
 import { verifyXamlFormatting } from './xamlFormattingMcp';
@@ -231,6 +232,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const rsxKeyframeClipboard = await verifyRsxAnimation({ invoke, content });
         await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });
+        await verifyRsxStateTriggers({ invoke, content });
         await verifyRsxControlRename({ invoke, content });
         await verifyRsxPlacement({ invoke, content });
         await verifyXamlFormatting({ invoke, content });

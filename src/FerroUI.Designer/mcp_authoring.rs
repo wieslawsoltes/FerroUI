@@ -96,10 +96,12 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("stop_program",json!({}), &[],true),
             s::action("play_all",json!({"program":s::id(),"time":s::time()}), &[],true),
         ],true),
-        s::tool("designer_states","Read source-backed visual-state groups, setters and directional transitions, optionally for one owner.",s::object(json!({"owner":s::id()}), &[]),false),
+        s::tool("designer_states","Read source-backed states and directional routes. Pass event_source to read mapped Rust state triggers and available routed events for a control.",s::object(json!({"owner":s::id(),"event_source":s::id()}), &[]),false),
         s::actions("designer_state","Author a validated XAML or inline Rust state group, including its states, setters and routes. Preview, advance and clear use the native state clock. XAML setters accept native text including bindings and resources.",vec![
             s::action("upsert",json!({"model":s::state_group()}), &["model"],true),
             s::action("remove",json!({"owner":s::id(),"group":s::string()}), &["owner","group"],true),
+            s::action("set_event_trigger",json!({"event_source":s::id(),"event":s::string(),"group":s::string(),"state":s::nullable(s::string())}),
+                &["event_source","event","group","state"],true),
             s::action("preview",json!({"owner":s::id(),"group":s::string(),"state":s::nullable(s::string()),"time":s::time()}), &["owner","group","state"],true),
             s::action("preview_transition",json!({"owner":s::id(),"group":s::string(),"from":s::nullable(s::string()),"to":s::string(),"time":s::time()}), &["owner","group","from","to","time"],true),
             s::action("advance_preview",json!({"seconds":s::time()}), &["seconds"],true),
@@ -329,6 +331,9 @@ pub(super) fn call(
                     .map(|node| node.id)
                     .filter(|id| owner.is_none_or(|owner| owner == *id) && session.can_create_rust_state_group(*id))
                     .collect::<Vec<_>>());
+                if let Some(source) = args["event_source"].as_u64() {
+                    result["stateTriggers"] = json!(session.rust_state_triggers(source));
+                }
             }
             return Ok(result);
         }
@@ -341,6 +346,10 @@ pub(super) fn call(
             "remove" => {
                 session.remove_state_group(node_id(args, "owner")?, &text(args, "group")?)?
             }
+            "set_event_trigger" => session.set_rust_state_trigger(
+                node_id(args, "event_source")?, &text(args, "event")?,
+                &text(args, "group")?, args["state"].as_str(),
+            )?,
             "preview" => session.preview_state_at(
                 node_id(args, "owner")?,
                 &text(args, "group")?,

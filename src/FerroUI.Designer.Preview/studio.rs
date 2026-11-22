@@ -224,6 +224,9 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     }
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_states") {
         rsx.annotate_states(&mut result, query.arguments["owner"].as_u64());
+        if let Some(source) = query.arguments["event_source"].as_u64() {
+            result["stateTriggers"] = json!(rsx.state_trigger_report(source)?);
+        }
     }
     Ok(result)
 }
@@ -270,7 +273,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     if let Some(rsx) = &stage.authored_rsx {
         rsx.require_source(&design)?;
     }
-    if !source_action(&query.name, query.arguments["action"].as_str()) {
+    if !rust_state && !source_action(&query.name, query.arguments["action"].as_str()) {
         return Err("Choose a source edit from the Studio authoring catalog".into());
     }
     let mut arguments = query.arguments;

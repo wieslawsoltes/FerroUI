@@ -213,6 +213,58 @@ fn rsx_visual_states_apply_native_directional_motion_and_restore_the_base_value(
 }
 
 #[test]
+fn rsx_state_trigger_uses_the_control_that_handles_the_event() {
+    use crate::{visual_state, visual_state_group};
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_base::layout::Layoutable;
+    use ferroui_controls::{Border, StackPanel};
+    let _app = app();
+    let owner = Owner::new_root();
+    let panel = owner.with(|| crate::rsx! {
+        StackPanel {
+            visual_states: [visual_state_group("Review")
+                .state(visual_state("Queued").set_on("Card", Layoutable::width_property(), 120.0))
+                .state(visual_state("Ready").set_on("Card", Layoutable::width_property(), 160.0))
+                .transition(Some("Queued"), "Ready", ms(200), "LinearEasing")],
+            Button {
+                name: "Queue",
+                state_trigger("Click", "Review", "Queued"),
+                "Queue"
+            }
+            Button {
+                name: "Approve",
+                state_trigger("Click", "Review", "Ready"),
+                "Approve"
+            }
+            Border { name: "Card", width: 100.0, height: 40.0 }
+        }
+    }.mount());
+    let clock = Rc::new(ViewClock::default());
+    panel.set_clock(Some(clock.clone()));
+    let window = window_with(&panel);
+    let card = panel.get_visual_descendants().find_map(|child| child.cast::<Border>()).unwrap();
+    let click = |name| {
+        let source = panel.get_visual_descendants().filter_map(|child| child.cast::<Button>())
+            .find(|button| button.name().as_deref() == Some(name)).unwrap();
+        source.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    };
+    let pulse = |seconds| clock.subject.on_next(SignedDuration::from_seconds(seconds));
+    assert_eq!(card.width(), 100.0);
+    click("Queue");
+    pulse(0.0);
+    pulse(0.001);
+    assert_eq!(card.width(), 120.0);
+    click("Approve");
+    pulse(1.0);
+    pulse(1.1);
+    assert!((card.width() - 140.0).abs() < 0.001);
+    pulse(1.2);
+    assert_eq!(card.width(), 160.0);
+    window.close();
+    owner.dispose();
+}
+
+#[test]
 #[should_panic(expected = "does not parse")]
 fn a_selector_that_does_not_parse_says_so() {
     let _ = style("Button..");

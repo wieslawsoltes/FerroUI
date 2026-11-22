@@ -5,7 +5,7 @@ use ferroui_base::reactive::Subscription;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
 use ferroui_designer_animation::{AnimationEffect, AnimationValue, Sample};
-use ferroui_designer_animation::native::FrozenPreviewClock;
+use ferroui_designer_animation::native::{FrozenPreviewClock, NativeStateTriggers};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_designer_project::{CompiledResources, LocalPreviewSources, PreviewIncludes, PreviewSourceBuffer, local_preview_sources_with_resources};
 use ferroui_inspect::{Inspector, TreeKind};
@@ -69,6 +69,7 @@ pub(crate) struct RuntimePreview {
     objects: BTreeMap<NodeId, WeakRef<Visual>>,
     reverse_objects: BTreeMap<u64, NodeId>,
     animation_values: Vec<Subscription>,
+    pub(crate) state_triggers: NativeStateTriggers,
     #[cfg(debug_assertions)]
     reload_driver: Option<ReloadDriver>,
 }
@@ -197,6 +198,7 @@ impl RuntimePreview {
             objects: BTreeMap::new(),
             reverse_objects: BTreeMap::new(),
             animation_values: Vec::new(),
+            state_triggers: NativeStateTriggers::default(),
             #[cfg(debug_assertions)]
             reload_driver,
         };
@@ -594,6 +596,7 @@ impl RuntimePreview {
         if matches!(self.status, PreviewStatus::Ready { .. }) {
             self.host.update_layout();
             self.rebuild_map(document);
+            self.state_triggers = NativeStateTriggers::bind(document, |id| self.visual(id)?.cast::<StyledElement>());
             if self
                 .native_window
                 .as_ref()

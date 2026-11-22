@@ -11,6 +11,7 @@ use std::rc::Rc;
 
 #[path = "behavior_session.rs"]
 mod behaviors;
+mod state_triggers;
 
 #[derive(Default)]
 pub(crate) struct InteractionSession {

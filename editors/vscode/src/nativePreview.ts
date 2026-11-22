@@ -62,6 +62,7 @@ export class NativePreview implements vscode.Disposable {
         stateTransitionPreview?: boolean;
         rsxStateAuthoring?: boolean;
         rsxStateStructure?: boolean;
+        rsxStateTriggers?: boolean;
         rsxKeyframeStructure?: boolean;
         rsxAnimationPrograms?: boolean;
     } = {};

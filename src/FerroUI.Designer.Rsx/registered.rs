@@ -35,6 +35,7 @@ pub(crate) struct RegisteredClass {
     base: Option<String>,
     properties: BTreeMap<String, MappedProperty>,
     commands: Vec<CommandSlot>,
+    state_trigger_events: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -256,6 +257,7 @@ fn registered(
                 .map(|definition| definition.xml_namespace.clone()),
         )
         .collect();
+    let state_trigger_events = control::state_trigger_events(schema, &control.class.name, Some(&namespace));
     Some(Arc::new(RegisteredClass {
         name: control.class.name.clone(),
         namespace,
@@ -264,6 +266,7 @@ fn registered(
         base,
         properties,
         commands,
+        state_trigger_events,
     }))
 }
 

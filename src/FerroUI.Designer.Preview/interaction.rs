@@ -28,6 +28,7 @@ pub(crate) fn input(renderer: &mut Renderer, request: Input) -> Result<Presentat
         return Err("Use a new canvas frame for preview input".into());
     }
     let host: Ref<Control> = stage.session.borrow().preview_host().upcast();
+    let triggers = stage.session.borrow().capture_state_trigger_input();
     stage.sources.run(|| {
         let inspector = Inspector::shared();
         let mut inspector = inspector.borrow_mut();
@@ -75,6 +76,13 @@ pub(crate) fn input(renderer: &mut Renderer, request: Input) -> Result<Presentat
                 ..Default::default()
             },
         )
+    })?;
+    stage.sources.run(|| {
+        let mut session = stage.session.borrow_mut();
+        for trigger in triggers.finish() {
+            session.preview_state(trigger.owner, &trigger.group, Some(&trigger.state))?;
+        }
+        Ok::<(), String>(())
     })?;
     renderer.present(request.next_frame, false)
 }

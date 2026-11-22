@@ -196,3 +196,57 @@ fn mapped_group_removal_keeps_an_opaque_array_member_and_its_comment() {
     assert!(!result.has_projected_states());
     assert_eq!(result.animation_issues.len(), 1);
 }
+#[test]
+fn a_routed_state_trigger_is_a_checked_rust_edit_and_keeps_existing_handlers() {
+    use ferroui_designer_core::TextPatch;
+
+    let source = r#"
+fn unrelated() { rsx! { TextBlock { text: "Other" } }; }
+fn review() {
+    let handler = move |_| update_review();
+    rsx! {
+        StackPanel {
+            visual_states: [ferroui_view::visual_state_group("Review")
+                .state(ferroui_view::visual_state("Ready"))
+                .state(ferroui_view::visual_state("Queued"))],
+            Button {
+                // Retain this action 🚀
+                on_click: handler,
+                "Approve"
+            }
+        }
+    };
+}
+"#.replace('\n', "\r\n");
+    let caret = source.rfind("rsx!").unwrap();
+    let projection = crate::project_rust(&source, caret).unwrap();
+    let report = projection.state_trigger_report(1).unwrap();
+    assert!(report.events.iter().any(|name| name == "Click"));
+    assert!(!report.events.iter().any(|name| name == "SelectionChanged"));
+    assert_eq!(report.groups[0].group, "Review");
+    assert!(projection.plan_state_trigger(1, "Click", "Review", Some("Missing")).is_err());
+    assert!(projection.plan_state_trigger(1, "SelectionChanged", "Review", Some("Ready")).is_err());
+
+    let patches = projection.plan_state_trigger(1, "Click", "Review", Some("Ready")).unwrap();
+    let draft = TextPatch::apply_all(&source, patches).unwrap();
+    assert!(draft.contains("state_trigger(\"Click\", \"Review\", \"Ready\"),\r\n"));
+    assert!(draft.contains("// Retain this action 🚀\r\n                on_click: handler,"));
+    assert_eq!(&draft[..caret], &source[..caret]);
+    let projection = crate::project_rust(&draft, caret).unwrap();
+    let markup = projection.preview_markup();
+    let projected = Document::new(markup.source).unwrap();
+    let triggers = ferroui_designer_animation::ProjectedStateTrigger::scan(&projected);
+    assert_eq!(triggers.len(), 1);
+    assert_eq!(triggers[0].event, "Click");
+    assert_eq!(projected.ast().node(triggers[0].source).unwrap().local_name(), "Button");
+    assert_eq!(markup.controls.len(), 2);
+    assert_eq!(projection.state_trigger_report(1).unwrap().triggers[0].state, "Ready");
+
+    let drafts = projection.plan_state_trigger(1, "Click", "Review", Some("Queued")).unwrap();
+    let edited = TextPatch::apply_all(&draft, drafts).unwrap();
+    let projection = crate::project_rust(&edited, caret).unwrap();
+    let remove = projection.plan_state_trigger(1, "Click", "Review", None).unwrap();
+    assert_eq!(TextPatch::apply_all(&edited, remove).unwrap(), source);
+    let remove = projection.remove_state_group(0, "Review").unwrap();
+    assert!(!TextPatch::apply_all(&edited, remove).unwrap().contains("state_trigger("));
+}

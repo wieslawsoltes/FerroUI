@@ -20,7 +20,7 @@ use ferroui_base::{Ref, StyledElement, Visual};
 use ferroui_controls::Window;
 use ferroui_designer_animation::native::{
     animation_timing, validate_animation_target, NativePlayback, NativeProgramIndex,
-    NativeSourceIndex,
+    NativeSourceIndex, NativeStateTriggers,
 };
 use ferroui_designer_animation::{
     AnimationProgram, AnimationPrograms, StatePreviewGroup, native_key_time, xaml_clip_delay,
@@ -227,6 +227,7 @@ struct HostedAnimations {
     playback: NativePlayback,
     keyframes: Option<HostedKeyframes>,
     state_routes: HostedStateRoutes,
+    _state_triggers: NativeStateTriggers,
 }
 
 impl HostedAnimations {
@@ -271,6 +272,9 @@ impl HostedAnimations {
         }
         let state_routes =
             HostedStateRoutes::mount(&source.document, source.states, &locations, design, &mut targets, catalog);
+        let state_triggers = NativeStateTriggers::bind(&source.document, |id| {
+            targets.get(&i64::try_from(id).ok()?).cloned()
+        });
         catalog.targets = targets
             .iter()
             .map(|(&id, control)| {
@@ -311,6 +315,7 @@ impl HostedAnimations {
             playback: NativePlayback::default(),
             keyframes,
             state_routes,
+            _state_triggers: state_triggers,
         }
     }
 

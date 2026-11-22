@@ -602,6 +602,16 @@ impl<T> El<T> {
         self
     }
 
+    /// Enter a state in the nearest enclosing visual state group when a
+    /// registered routed event is raised on this control.
+    pub fn state_trigger(mut self, event: &str, group: &str, state: &str) -> Self {
+        let (event, group, state) = (event.to_owned(), group.to_owned(), state.to_owned());
+        self.element.on_mount.push(Rc::new(move |control| {
+            crate::visual_states::attach_state_trigger(control, &event, &group, &state);
+        }));
+        self
+    }
+
     /// Keeps the control in `node_ref` once it is made.
     pub fn node_ref(self, node_ref: crate::NodeRef<T>) -> Self
     where

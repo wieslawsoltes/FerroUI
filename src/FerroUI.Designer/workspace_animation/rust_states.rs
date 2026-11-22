@@ -2,6 +2,8 @@
 mod routes;
 #[path = "rust_states/structure.rs"]
 mod structure;
+#[path = "rust_states/triggers.rs"]
+mod triggers;
 
 use super::*;
 use ferroui_designer_core::Ast;
@@ -62,6 +64,7 @@ impl DesignerWorkspace {
         let writable = session.can_manipulate();
         drop(session);
         let active_name = self.authoring.borrow().group.clone();
+        self.build_rust_state_triggers(panel, owner, &accepted, writable);
         if creatable {
             let tools = toolbar(panel);
             self.rust_group_creator(&tools, owner, &accepted);

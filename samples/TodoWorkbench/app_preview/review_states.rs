@@ -21,8 +21,8 @@ pub(super) fn view() -> Ref<Control> {
             TextBlock { text: "Account review", font_size: 30.0, foreground: "#203657" }
             TextBlock { text: "Move a customer between review states.", font_size: 15.0, foreground: "#52678B" }
             StackPanel { orientation: ferroui_base::layout::Orientation::Horizontal, spacing: 8.0,
-                Button { name: "Queue", on_click: |event| enter(event, Some("Queued")), "Queued" }
-                Button { name: "Ready", on_click: |event| enter(event, Some("Ready")), "Ready" }
+                Button { name: "Queue", state_trigger("Click", "Review", "Queued"), "Queued" }
+                Button { name: "Ready", state_trigger("Click", "Review", "Ready"), "Ready" }
                 Button { name: "Reset", on_click: |event| enter(event, None), "Reset" }
             }
             Border { name: "ReviewCard", width: 326.0, height: 133.0,

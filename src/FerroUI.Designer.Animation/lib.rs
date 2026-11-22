@@ -52,7 +52,7 @@ pub use programs::{
 pub use states::{
     StateGroupEdit, StatePreviewGroup, StatePreviewRoute,
     resolve_state_target, rewrite_design_metadata, state_value, ProjectedStateGroup,
-    ProjectedStateRoute, StateSetter, StateTransition, VisualState, VisualStateGroup,
+    ProjectedStateRoute, ProjectedStateTrigger, StateSetter, StateTransition, VisualState, VisualStateGroup,
 };
 pub use timeline::{
     CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,

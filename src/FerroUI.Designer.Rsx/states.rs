@@ -72,6 +72,10 @@ impl RsxStateGroup {
         &self.model.name
     }
 
+    pub(crate) fn model(&self) -> &VisualStateGroup {
+        &self.model
+    }
+
     pub fn source_ranges(&self, owner: NodeId, index: &LineIndex) -> Option<RsxStateSource> {
         Some(RsxStateSource {
             owner,

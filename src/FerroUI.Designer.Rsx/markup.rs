@@ -1,5 +1,6 @@
 use crate::{RsxNode, RsxProjection};
 use crate::animation::{RsxAnimation, RsxAnimationIssue};
+use crate::state_triggers::TriggerMarkup;
 use crate::states::{ProjectedStates, RsxStateGroup};
 use crate::styles::RsxStyle;
 use crate::tree::{Element, escape_xml};
@@ -141,9 +142,10 @@ pub(crate) fn serialize<'a>(
     nodes: &[RsxNode],
     styles: &'a BTreeMap<usize, Vec<RsxStyle>>,
     states: &'a BTreeMap<usize, ProjectedStates>,
+    triggers: &TriggerMarkup,
 ) -> RsxPreviewMarkup<'a> {
     let mut output = RsxPreviewMarkup::default();
-    output.control(root, nodes, styles, states, 0);
+    output.control(root, nodes, styles, states, triggers, 0);
     output
 }
 
@@ -154,6 +156,7 @@ impl<'a> RsxPreviewMarkup<'a> {
         nodes: &[RsxNode],
         styles: &'a BTreeMap<usize, Vec<RsxStyle>>,
         states: &'a BTreeMap<usize, ProjectedStates>,
+        triggers: &TriggerMarkup,
         depth: usize,
     ) {
         let pad = INDENT.repeat(depth);
@@ -188,7 +191,8 @@ impl<'a> RsxPreviewMarkup<'a> {
             let _ = write!(self.source, " Classes=\"{}\"", escape_xml(classes.trim(), Some('"')));
             self.state_groups.extend(groups.groups.iter().map(|group| (offset, group)));
         }
-        if element.children.is_empty() && rules.is_none() && groups.is_none() && columns.is_none() {
+        let trigger_comments = triggers.comments(index);
+        if element.children.is_empty() && rules.is_none() && groups.is_none() && columns.is_none() && trigger_comments.is_empty() {
             self.source.push_str(" />");
             return;
         }
@@ -201,9 +205,12 @@ impl<'a> RsxPreviewMarkup<'a> {
         if let Some(columns) = columns {
             columns.render(&mut self.source, &pad);
         }
+        for comment in trigger_comments {
+            let _ = write!(self.source, "\n{pad}{INDENT}{comment}");
+        }
         for child in &element.children {
             self.source.push('\n');
-            self.control(child, nodes, styles, states, depth + 1);
+            self.control(child, nodes, styles, states, triggers, depth + 1);
         }
         let _ = write!(self.source, "\n{pad}</{tag}>");
     }

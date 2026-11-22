@@ -15,6 +15,9 @@ use std::collections::{BTreeMap, BTreeSet};
 mod projected_routes;
 pub use projected_routes::{ProjectedStateGroup, ProjectedStateRoute};
 pub use projected_routes::{StatePreviewGroup, StatePreviewRoute};
+#[path = "states/projected_triggers.rs"]
+mod projected_triggers;
+pub use projected_triggers::ProjectedStateTrigger;
 const GROUP_MARKER: &str = "ferroui-designer-state-group:";
 const PROJECTED_GROUP_MARKER: &str = "ferroui-designer-projected-state-group:";
 const STATE_MARKER: &str = "ferroui-designer-state:";

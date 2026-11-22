@@ -49,6 +49,7 @@ pub struct RsxNode {
     pub(crate) envelope: Option<ChildEnvelope>,
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
+    pub(crate) state_triggers: crate::state_triggers::StateTriggers,
     pub(crate) columns: Option<ColumnSource>,
     pub(crate) templates: TemplateFields,
     pub(crate) subtree: ProjectedSubtree,
@@ -152,7 +153,7 @@ impl RsxProjection<'_> {
     }
 
     pub fn preview_markup(&self) -> RsxPreviewMarkup<'_> {
-        serialize(&self.tree, &self.nodes, &self.styles, &self.states)
+        serialize(&self.tree, &self.nodes, &self.styles, &self.states, &crate::state_triggers::TriggerMarkup::project(self))
     }
 
     pub fn has_projected_animations(&self) -> bool {
@@ -167,6 +168,10 @@ impl RsxProjection<'_> {
         !self.states.is_empty()
     }
 
+    fn has_state_triggers(&self) -> bool {
+        self.nodes.iter().any(|node| !node.state_triggers.is_empty())
+    }
+
     pub fn has_projected_columns(&self) -> bool {
         self.nodes.iter().any(|node| node.columns.as_ref().is_some_and(ColumnSource::projected))
     }
@@ -178,7 +183,8 @@ impl RsxProjection<'_> {
 
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
-        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_styles() && !self.has_projected_states() && !self.has_projected_columns()
+        self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_styles() && !self.has_projected_states()
+            && !self.has_state_triggers() && !self.has_projected_columns()
             && !self.has_explicit_child_lists() && !self.preserve_asset_expressions
     }
 
@@ -209,7 +215,7 @@ impl RsxProjection<'_> {
         if self.has_projected_columns() {
             return Err("Edit authored Rust column collections in Columns or in source".into());
         }
-        if self.has_projected_states() {
+        if self.has_projected_states() || self.has_state_triggers() {
             return Err("Edit mapped Rust state declarations in States or in the source editor".into());
         }
         if self.has_projected_animations() {
@@ -455,6 +461,7 @@ impl State<'_> {
             } else {
                 ArraySlot::Unavailable
             },
+            state_triggers: crate::state_triggers::StateTriggers::default(),
             style_slot: if class.xaml_property(None, "styles").is_none() {
                 ArraySlot::Missing
             } else {
@@ -481,6 +488,12 @@ impl State<'_> {
                     let argument = arguments.first().filter(|_| arguments.len() == 1);
                     let name = crate::animation::syntax::span(name);
                     let field = self.delimiters.calls.get(&name.start).copied();
+                    if setter == "state_trigger" && class.xaml_property(None, &setter).is_none() {
+                        if !self.nodes[index].state_triggers.read(arguments.iter(), field) {
+                            self.omit(format!("{class}.state_trigger expression"));
+                        }
+                        continue;
+                    }
                     if self.project_command(index, &setter, false, PropertyField {
                         field, fallback: field.unwrap_or(name), expression: argument,
                     }) {

@@ -375,6 +375,14 @@ In Designer Studio, `designer_preview_checks` reads the current canvas. `designe
 
 On Studio's MCP server, call `designer_behaviors` and `designer_behavior` directly. Supply the document revision for editing and preview. Running the trigger requires the server's `allow_input` permission. Call `designer_state_actions` to build the actions for a named visual state, then pass them when attaching a trigger. [Behavior workflow](authoring.md#edit-a-behavior)
 
+### Link Rust events to states with MCP
+
+1. Find the Rust event source with `designer_outline`. Call `designer_studio_query` with `tool: "designer_states"` and `arguments: { event_source: node }`. Read `stateTriggers.events`, `groups`, and the current `triggers`. Each trigger carries its UTF-16 range in the Rust buffer.
+2. Call `designer_studio_edit` with the accepted revision and `tool: "designer_state"`. Pass `action: "set_event_trigger"`, `event_source`, `event`, `group`, and `state`. To remove that event and group link, pass `state: null`. One edit covers the whole link.
+3. Switch the canvas to Interact and send input using the current preview frame. Read the result with `designer_inspect` or `designer_preview_image`.
+
+On Studio’s MCP server, call `designer_states` and `designer_state` directly using the current document revision. [Rust state trigger workflow](motion.md#link-a-rust-event-to-a-state)
+
 ## Find a command
 
 Commands are under **FerroUI** in the Command Palette. Some actions also appear in the canvas, a dock’s title menu, or the Project view.

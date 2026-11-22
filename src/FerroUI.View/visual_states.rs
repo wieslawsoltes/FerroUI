@@ -4,7 +4,8 @@ mod styles;
 
 use crate::{IntoValue, TypedProperty};
 use ferroui_base::animation::{easings::Easing, Animation};
-use ferroui_base::{AttachedProperty, BoxedValue, FerroProperty};
+use ferroui_base::interactivity::{Interactive, RoutedEventRegistry};
+use ferroui_base::{AttachedProperty, BoxedValue, FerroProperty, Ref, StyledElement};
 use ferroui_controls::Control;
 use std::collections::BTreeSet;
 use std::rc::Rc;
@@ -223,6 +224,34 @@ pub(crate) fn install(owner: &Control, groups: &[ViewStateGroup]) {
         mounted.push(state);
     }
     owner.set_value(groups_property(), Some(MountedGroups(Rc::new(mounted))));
+}
+
+pub(crate) fn attach_state_trigger(source: &Ref<Control>, event: &str, group: &str, state: &str) {
+    let event = RoutedEventRegistry::instance()
+        .resolve_by_name(source.get_type(), event)
+        .unwrap_or_else(|| panic!("Unknown routed event {event:?} on {}", source.get_type().name()));
+    let (group, state) = (group.to_owned(), state.to_owned());
+    let token = source.add_route_handler(&event, Rc::new(move |sender, _| {
+        let mut ancestor = sender.to_ref().cast::<StyledElement>();
+        while let Some(element) = ancestor {
+            if let Some(control) = element.cast::<Control>() {
+                let owns_group = control.get_value(groups_property()).is_some_and(|groups| {
+                    groups.0.iter().any(|mounted| mounted.name == group)
+                });
+                if owns_group {
+                    set_visual_state(&control, &group, Some(&state), true);
+                    break;
+                }
+            }
+            ancestor = element.parent();
+        }
+    }), Interactive::DEFAULT_ROUTES, false);
+    let source = source.downgrade();
+    crate::reactive::on_cleanup(move || {
+        if let Some(source) = source.upgrade() {
+            source.remove_handler(&event, token);
+        }
+    });
 }
 
 /// Enter a declared state, or restore the underlying view with `None`.

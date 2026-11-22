@@ -337,6 +337,19 @@ Rust authoring works on mapped inline `visual_states` declarations. When a contr
 
 For MCP, read `designer_states` through `designer_studio_query` to get the groups, source ranges, and eligible Rust owner IDs in `creatableOwners`. Send `designer_state` through `designer_studio_edit` with the current designer revision. Use `upsert` with the complete group model for state, setter, and route changes. Use `remove` with the owner ID and group name to delete a group. Read the accepted frame again before issuing the next edit.
 
+### Link a Rust event to a state
+
+1. Select the event source, such as an Approve button, on the Rust canvas or in Outline.
+2. Open **Studio → States → Event triggers → Link event to state…**. Choose a registered routed event, an enclosing state group, and a destination. **Click** is available on a Button.
+3. Choose **Interact** on the canvas and activate the control to see the destination. In App Preview and Designer Studio, the same event plays the route from the current state. Use **Stop** in the Timeline before testing the event.
+4. Select the link under **Event triggers** to change its destination, reveal the Rust call, or remove it. Each action uses one Undo step. Removing an inline state or group also removes its mapped links.
+
+The source action writes a separate `state_trigger("Click", "Review", "Ready")` call within the control’s `rsx!` block. An unhandled routed event enters the destination in the nearest enclosing group named **Review**. The call works when compiled into the application and in the mapped App Preview with a current app build. Studio and VS Code show event choices from the control’s FerroUI metadata. [Runnable Todo Workbench example](../../../samples/TodoWorkbench/app_preview/review_states.rs)
+
+![Studio States shows the Click to Ready link beside its Rust call and the native account review destination](../images/vscode-rsx-state-trigger.png)
+
+[Author state triggers with MCP](reference.md#link-rust-events-to-states-with-mcp) · [Designer Studio controls](../README.md#rust-visual-states)
+
 ### Author visual states in App Preview
 
 1. Open a XAML view or a mapped `rsx!` invocation with a current App Preview build. Open **Visual state actions** in the App Preview toolbar and choose **New State Group**. Pick a live owner by name and source line, then enter a group name and an initial state.

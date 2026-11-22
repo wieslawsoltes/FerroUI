@@ -4,6 +4,7 @@ use crate::{
     commands::schema::{self as command_schema, CommandSlot},
     literal::Literal,
 };
+use ferroui_designer_language::Schema;
 use std::{collections::BTreeSet, sync::Arc};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -54,6 +55,13 @@ impl Class {
 
     pub(crate) fn mapped_events(&self) -> bool {
         self.base().is_some()
+    }
+
+    pub(crate) fn state_trigger_events(&self) -> Vec<String> {
+        match self {
+            Self::Builtin(name) => state_trigger_events(catalog::schema(), name, None),
+            Self::Registered(class) => class.state_trigger_events.clone(),
+        }
     }
 
     fn mapped_property(&self, name: &str) -> Option<&MappedProperty> {
@@ -151,4 +159,12 @@ impl std::fmt::Display for Class {
     fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         formatter.write_str(self.name())
     }
+}
+
+pub(super) fn state_trigger_events(schema: &Schema, class: &str, namespace: Option<&str>) -> Vec<String> {
+    schema.properties(class, namespace).into_iter()
+        .filter_map(|(name, info)| {
+            (info.event && !info.attached && info.type_name != "Event").then_some(name)
+        })
+        .collect()
 }

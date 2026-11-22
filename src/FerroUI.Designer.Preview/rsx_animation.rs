@@ -140,6 +140,11 @@ impl AuthoredRsxFrame {
         }).collect::<Vec<_>>());
     }
 
+    pub(crate) fn state_trigger_report(&self, source: NodeId) -> Result<Option<ferroui_designer_rsx::StateTriggerReport>, String> {
+        let Some(source) = self.state_owners.get(&source) else { return Ok(None) };
+        Ok(self.projection()?.state_trigger_report(source.ordinal))
+    }
+
     pub(crate) fn state_route_range(&self, args: &Value) -> Option<ferroui_designer_language::Range> {
         let group = self.states.get(&(args["owner"].as_u64()?, args["group"].as_str()?.to_owned()))?;
         let to = args["to"].as_str()?;

@@ -707,6 +707,15 @@ in whole milliseconds, and the easing. Use the playhead in Studio or the Timelin
 transport in VS Code to sample a default or directional route. The reveal control
 opens the authored Rust declaration.
 
+To enter a state from a control event, select the event source and open **States**.
+Under **Event triggers**, choose the routed event and its enclosing group and
+state in **Destination**. Use the **Link event to state** icon to apply the
+source edit. Pick the same event and a new state in the same group to retarget
+the link. The reveal and remove icons are beside each authored trigger. Switch
+to Interact and use the control to see its native transition. The compiled Rust
+form uses `state_trigger("Click", "Review", "Ready")` inside the event source’s
+`rsx!` block. [VS Code event trigger workflow](vscode/motion.md#link-a-rust-event-to-a-state)
+
 App Preview in VS Code can sample eligible mapped routes on the selected Cargo
 binary’s native properties. Use its animation picker and edit icon to change
 duration and easing. The **Interactive review** Rust fixture also runs the

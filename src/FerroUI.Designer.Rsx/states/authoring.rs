@@ -32,7 +32,7 @@ impl RsxProjection<'_> {
         let element =
             get_element(&self.tree, &mut ordinal).ok_or("Choose a mapped Rust control")?;
         let builder = builder::Builder::new(self.catalog, element);
-        let patches = if let Some(group) = self.state_group(owner, &model.name) {
+        let mut patches = if let Some(group) = self.state_group(owner, &model.name) {
             group.plan_structure(self.source, model, &builder)?
         } else {
             let group = builder.group(model)?;
@@ -41,6 +41,7 @@ impl RsxProjection<'_> {
                     group.join(&format!("{eol}{indent}    "))
                 })?
         };
+        patches.extend(self.remove_state_trigger_references(owner, &model.name, Some(model))?);
         self.check_state_edit(owner, &model.name, Some(model), patches)
     }
 
@@ -62,6 +63,7 @@ impl RsxProjection<'_> {
                 replacement: String::new(),
             });
         }
+        patches.extend(self.remove_state_trigger_references(owner, name, None)?);
         self.check_state_edit(owner, name, None, patches)
     }
 

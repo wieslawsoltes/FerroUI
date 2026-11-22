@@ -58,6 +58,7 @@ interface Frame {
     stateTransitionPreview: boolean;
     rsxStateAuthoring: boolean;
     rsxStateStructure: boolean;
+    rsxStateTriggers: boolean;
 }
 
 type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetProperty' }>;
@@ -313,6 +314,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
     get supportsRustStates(): boolean { return Boolean(this.language === 'rust' && this.frame?.rsxStateAuthoring); }
     get supportsRustStateStructure(): boolean { return this.supportsRustStates && Boolean(this.frame?.rsxStateStructure); }
+    get supportsRustStateTriggers(): boolean { return this.supportsRustStates && Boolean(this.frame?.rsxStateTriggers); }
     get animationRecordingTime(): number | undefined { return this.animationRecording && !this.timelinePose?.playback ? this.timelinePose?.time : undefined; }
     get isDisposed(): boolean { return this.disposed; }
     get canvasReady(): boolean { return !this.disposed && this.ready && this.panel.visible; }
@@ -645,7 +647,8 @@ export class DesignerPanel implements vscode.Disposable {
                 || (this.supportsRustKeyframeStructure && action !== undefined &&
                     ['record_keyframe', 'remove_keyframe', 'duplicate_keyframes', 'remove_keyframes'].includes(action)));
         const rustState = name === 'designer_state' && this.supportsRustStates
-            && (action === 'upsert' || (this.supportsRustStateStructure && action === 'remove'));
+            && (action === 'upsert' || (this.supportsRustStateStructure && action === 'remove')
+                || (this.supportsRustStateTriggers && action === 'set_event_trigger'));
         const rustProgram = name === 'designer_program' && this.supportsRustAnimationPrograms
             && action !== undefined && ['create', 'rename', 'duplicate', 'remove'].includes(action);
         const rustPlacement = name === 'designer_program' && action === 'place_clips' && this.supportsTimelineClipPlacement;
@@ -1021,6 +1024,7 @@ export class DesignerPanel implements vscode.Disposable {
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),
                 rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),
+                rsxStateTriggers: Boolean(client.capabilities.rsxStateTriggers),
                 canvas: { ...snapshot, nodes, highContrastTheme, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image),
                     spacingAvailable: Boolean(client.capabilities.spacingHelpers && snapshot.image),
