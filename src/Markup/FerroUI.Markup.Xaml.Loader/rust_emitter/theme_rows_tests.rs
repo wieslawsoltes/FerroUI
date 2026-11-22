@@ -626,17 +626,17 @@ fn the_shapes_of_values_have_their_records() {
 /// and numbers with it.
 #[test]
 fn the_value_tables_of_a_unit_share_its_pools() {
-    let first = value_run(&[("A", "1.0_f64", 1), ("B", "2.0_f64", 2), ("C", "3.0_f64", 3)], "BUILD_T_ROWS_0", Some(4));
-    let second = value_run(&[("A", "2.0_f64", 4), ("D", "5.0_f64", 5), ("E", "1.0_f64", 6)], "BUILD_T_ROWS_1", Some(4));
-    let other = value_run(&[("F", "7.0_f64", 7), ("G", "8.0_f64", 8), ("H", "9.0_f64", 9)], "BUILD_T_ROWS_2", Some(5));
+    let first = value_run(&[("A", "1.0_f64", 1), ("B", "2.0_f64", 2), ("C", "1.0_f64", 3)], "BUILD_T_ROWS_0", Some(4));
+    let second = value_run(&[("A", "2.0_f64", 4), ("D", "5.0_f64", 5), ("E", "2.0_f64", 6)], "BUILD_T_ROWS_1", Some(4));
+    let other = value_run(&[("F", "7.0_f64", 7), ("G", "8.0_f64", 8), ("H", "7.0_f64", 9)], "BUILD_T_ROWS_2", Some(5));
     let texts = row_tables_in("BUILD_T", &[first, second, other], &Default::default());
     assert_eq!(texts.len(), 5, "{texts:#?}");
     assert!(texts[0].ends_with("const BUILD_T_UNIT_4_STRINGS: &str = \"ABCDE\";\n"), "{}", texts[0]);
-    assert!(texts[1].ends_with("static BUILD_T_UNIT_4_NUMBERS: [f64; 4] = [1.0_f64, 2.0_f64, 3.0_f64, 5.0_f64];\n"), "{}", texts[1]);
+    assert!(texts[1].ends_with("static BUILD_T_UNIT_4_NUMBERS: [f64; 3] = [1.0_f64, 2.0_f64, 5.0_f64];\n"), "{}", texts[1]);
     assert!(texts[2].contains("    strings: BUILD_T_UNIT_4_STRINGS,\n    numbers: &BUILD_T_UNIT_4_NUMBERS,\n"), "{}", texts[2]);
-    assert!(texts[3].contains("        0, 1, 4, 8, 1,\n        3, 1, 5, 8, 3,\n        4, 1, 6, 8, 0,\n"), "{}", texts[3]);
+    assert!(texts[3].contains("        0, 1, 4, 8, 1,\n        3, 1, 5, 8, 2,\n        4, 1, 6, 8, 1,\n"), "{}", texts[3]);
     // The only table of another unit keeps its own pools.
-    assert!(texts[4].contains("    strings: \"FGH\",\n    numbers: &[7.0_f64, 8.0_f64, 9.0_f64],\n"), "{}", texts[4]);
+    assert!(texts[4].contains("    strings: \"FGH\",\n    numbers: &[7.0_f64, 8.0_f64],\n"), "{}", texts[4]);
 }
 
 /// #855: the packed tables of one unit of a theme share one pool of strings, written once before
