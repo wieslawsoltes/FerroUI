@@ -354,6 +354,7 @@ impl ComponentLibrary {
             .copied()
             .unwrap_or_default();
         let scope = self.scopes.selected_owner();
+        self.scopes.show_owner_path(scope);
         let items = self
             .items
             .borrow()

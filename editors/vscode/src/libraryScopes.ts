@@ -15,6 +15,7 @@ interface ScopeObject {
 
 interface LibraryScope {
     owner: number;
+    title: string;
     path: string;
     ownerRange: Range | null;
     objects: ScopeObject[];
@@ -50,9 +51,12 @@ export async function scopedLibraryItems(
         : context.revealRange(range);
     return scopes.map(scope => {
         const id = `scope:${scope.owner}`;
+        const parent = scope.path.slice(0, -scope.title.length).replace(/ › $/, '');
+        const line = scope.ownerRange ? `line ${scope.ownerRange.start.line + 1}` : undefined;
         return {
-            id, label: scope.path, icon: 'folder-opened',
-            description: scope.ownerRange ? `line ${scope.ownerRange.start.line + 1}` : undefined,
+            id, label: scope.title, icon: 'folder-opened',
+            description: [parent, line].filter(Boolean).join(' · '),
+            tooltip: [scope.path, line].filter(Boolean).join(' · '),
             children: async () => {
                 context.ensure();
                 const rows: StudioItem[] = scope.objects.map(object => {

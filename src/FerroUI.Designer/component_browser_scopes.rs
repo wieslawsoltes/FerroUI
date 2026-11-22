@@ -16,7 +16,7 @@ pub(super) struct ScopeFilter {
 #[derive(Default, PartialEq, Eq)]
 struct Model {
     uri: String,
-    owners: Vec<(NodeId, String)>,
+    owners: Vec<(NodeId, String, String)>,
     objects: BTreeMap<String, (NodeId, bool)>,
 }
 
@@ -51,15 +51,16 @@ impl ScopeFilter {
     }
 
     pub(super) fn replace(&self, uri: &str, source: &str, scopes: &[LibraryScope]) -> bool {
-        let mut paths = BTreeMap::new();
+        let mut titles = BTreeMap::new();
         for scope in scopes {
-            *paths.entry(scope.path.as_str()).or_insert(0usize) += 1;
+            *titles.entry(scope.title.as_str()).or_insert(0usize) += 1;
         }
         let mut lines = None;
         let owners = scopes
             .iter()
             .map(|scope| {
-                let line = (paths[scope.path.as_str()] > 1)
+                let duplicate = titles[scope.title.as_str()] > 1;
+                let line = duplicate
                     .then_some(scope.owner_range)
                     .flatten()
                     .and_then(|range| {
@@ -68,11 +69,19 @@ impl ScopeFilter {
                             .position(range.start)
                             .ok()
                     });
-                let label = line.map_or_else(
-                    || scope.path.clone(),
-                    |line| format!("{} · line {}", scope.path, line.line + 1),
-                );
-                (scope.owner, label)
+                let label = match line {
+                    Some(line) => format!("{} · line {}", scope.title, line.line + 1),
+                    None if duplicate => {
+                        let parent = scope
+                            .path
+                            .strip_suffix(&scope.title)
+                            .unwrap_or_default()
+                            .trim_end_matches(" › ");
+                        format!("{} · {parent}", scope.title)
+                    }
+                    None => scope.title.clone(),
+                };
+                (scope.owner, label, scope.path.clone())
             })
             .collect();
         let model = Model {
@@ -99,12 +108,12 @@ impl ScopeFilter {
             None
         };
         let selected_index =
-            selected.and_then(|owner| model.owners.iter().position(|(id, _)| *id == owner));
+            selected.and_then(|owner| model.owners.iter().position(|(id, _, _)| *id == owner));
         self.picker.items().clear();
         self.picker
             .items()
             .add(Some(Rc::new("Document and project".to_owned())));
-        for (_, label) in &model.owners {
+        for (_, label, _) in &model.owners {
             self.picker.items().add(Some(Rc::new(label.clone())));
         }
         self.picker
@@ -126,7 +135,21 @@ impl ScopeFilter {
             .borrow()
             .owners
             .get(index)
-            .map(|(owner, _)| *owner)
+            .map(|(owner, _, _)| *owner)
+    }
+
+    pub(super) fn show_owner_path(&self, owner: Option<NodeId>) {
+        let model = self.model.borrow();
+        let label = owner
+            .and_then(|owner| {
+                model
+                    .owners
+                    .iter()
+                    .find(|(id, _, _)| *id == owner)
+                    .map(|(_, _, path)| path.as_str())
+            })
+            .unwrap_or("Browse objects by owning scope");
+        ToolTip::set_tip(&self.picker, Some(Rc::new(label.to_owned())));
     }
 
     pub(super) fn contains(&self, id: &str, scope: Option<NodeId>) -> bool {

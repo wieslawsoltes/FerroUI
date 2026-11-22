@@ -45,6 +45,7 @@ impl LibraryObject {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct LibraryScope {
     pub(crate) owner: NodeId,
+    pub(crate) title: String,
     pub(crate) path: String,
     pub(crate) owner_range: Option<SourceSpan>,
     pub(crate) objects: Vec<LibraryObject>,
@@ -249,6 +250,7 @@ pub(super) fn finish<'a>(
                     })
                     .collect::<Vec<_>>();
             path.reverse();
+            let title = path.last()?.to_string();
             objects.sort_by(|left, right| {
                 (&left.source_uri, left.source.start, &left.id).cmp(&(
                     &right.source_uri,
@@ -260,6 +262,7 @@ pub(super) fn finish<'a>(
                 node.span.start,
                 LibraryScope {
                     owner,
+                    title,
                     path: path.join(" › "),
                     owner_range: owner_range(node),
                     objects,

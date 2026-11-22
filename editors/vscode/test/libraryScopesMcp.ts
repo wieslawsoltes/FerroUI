@@ -57,7 +57,7 @@ export async function verifyLibraryScopes({ invoke, content }: McpFixture): Prom
     assert.ok(panel.supportsLibraryScopes);
     const context = new StudioContext(panel, initial.revision, () => !panel.isDisposed);
     const rows = await scopedLibraryItems(context, (await readLibrary(context)).components, async () => undefined);
-    const group = rows.find(item => item.label === approve.path);
+    const group = rows.find(item => item.label === approve.title && item.tooltip?.includes(approve.path));
     const action = (await group?.children?.())?.find(item => item.label === 'Click')?.run;
     assert.ok(action);
     await action();

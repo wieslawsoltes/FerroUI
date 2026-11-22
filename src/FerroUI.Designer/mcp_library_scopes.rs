@@ -73,7 +73,7 @@ fn report<'a>(
                 "definition":object.definition,"range":range,"sourceUri":object.source_uri
             }))
         }).collect::<Result<Vec<_>, _>>()?;
-        Ok::<_, String>(json!({"owner":scope.owner,"path":scope.path,"ownerRange":owner_range,"objects":objects}))
+        Ok::<_, String>(json!({"owner":scope.owner,"title":scope.title,"path":scope.path,"ownerRange":owner_range,"objects":objects}))
     }).collect::<Result<Vec<_>, _>>()?;
     Ok(json!({
         "uri":session.document_uri(),"revision":session.document().revision(),

@@ -102,6 +102,7 @@ export interface StudioItem {
     id: string;
     label: string;
     description?: string;
+    tooltip?: string;
     icon?: string;
     children?: () => Promise<StudioItem[]>;
     run?: () => Promise<void>;

@@ -63,6 +63,10 @@ export class LibraryView implements vscode.TreeDataProvider<StudioItem>, vscode.
         const row = new vscode.TreeItem(item.label, state);
         row.id = item.id;
         row.description = item.description;
+        if (item.tooltip) {
+            row.tooltip = item.tooltip;
+            row.accessibilityInformation = { label: item.tooltip };
+        }
         if (item.icon) row.iconPath = new vscode.ThemeIcon(item.icon);
         if (item.run) row.command = { command: run, title: item.label, arguments: [item] };
         return row;
