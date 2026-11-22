@@ -59,6 +59,8 @@ mod tests;
 #[cfg(test)]
 mod animation_tests;
 #[cfg(test)]
+mod animation_effect_objects_tests;
+#[cfg(test)]
 mod layout_edit_tests;
 #[cfg(test)]
 mod program_tests;

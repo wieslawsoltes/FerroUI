@@ -113,9 +113,43 @@ Mapped RSX keys use a `ferroui_base::media::Effect::parse` call with a literal s
 ))
 ```
 
-For a direction-based shadow, an effect with separate opacity, or a project shader, use the authored effect representation and the native preview. Component curves are available for tracks whose keys all use the same supported effect kind.
-
 Agents read the track’s `curve_channels` from `designer_programs` or `designer_hosted_animations`. Pass `blur_radius`, `offset_x`, `offset_y`, or one of the tint channels to `designer_animation_curve` or `designer_hosted_curve`. The same keyframe draft and apply tools accept a complete effect literal. An app host built with effect-curve support publishes these channels in App Preview.
+
+### Edit directional shadows and independent opacity
+
+1. Open an `Effect` track with native object keys. Choose **Value curves** and then **Direction**, **Shadow depth**, or **Shadow opacity**. Offset `DropShadowEffect` objects offer **Offset X** and **Offset Y**. Both shadow objects offer radius and tint channels.
+2. Scrub the artboard to compare the resulting shadow with the plot. Shadow opacity controls the whole effect. **Alpha** is the alpha of its tint color. Direction uses degrees, depth uses logical pixels, and **Velocity curves** shows change per authored second. FerroUI interpolates directions as numbers. Use, for example, 350° to 370° for an increasing sweep through 360°.
+3. Open a key and edit its effect object in **Value**. The complete value can include a `Setter.Value` wrapper if the key uses one. Apply the key for one source Undo step. To record the native effect between keys, use **Add Key at Playhead**. The recorded key follows the preceding key's supported object form.
+
+![The VS Code Timeline plots Direction in degrees beside the rendered drop shadow at 1.5 seconds](../images/vscode-timeline-directional-shadow.png)
+
+Use literal attributes on a built-in `BlurEffect`, `DropShadowEffect`, or `DropShadowDirectionEffect` object. Place the object directly inside the setter or use a property element.
+
+```xml
+<KeyFrame Cue="75%">
+    <Setter Property="Effect">
+        <Setter.Value>
+            <DropShadowDirectionEffect Direction="110" ShadowDepth="18"
+                                       BlurRadius="14" Color="#8036587C" Opacity="0.65" />
+        </Setter.Value>
+    </Setter>
+</KeyFrame>
+```
+
+In RSX, use a mapped immutable effect constructor. Timeline stores changes in the existing literal constructor arguments and retains comments, number suffixes, and neighboring expressions. For example, this key exposes the direction, depth, radius, tint, and opacity of the shadow.
+
+```rust
+.key_frame(0.75, |key| key.set(
+    ferroui_base::Visual::effect_property(),
+    std::rc::Rc::new(ferroui_base::media::ImmutableDropShadowDirectionEffect::new(
+        110.0, 18.0, 14.0, ferroui_base::media::Color::from_argb(128, 54, 88, 124), 0.65,
+    )) as std::rc::Rc<dyn ferroui_base::media::IEffect>,
+))
+```
+
+When directional and offset objects share a track, the picker offers their common properties. Use the native source editor for project shader parameters and binding-driven effect objects. Rebuild the configured App Preview target with the current FerroUI helpers to publish the added channels.
+
+Agents can request `direction`, `shadow_depth`, and `shadow_opacity` from the same curve tools. Pass the complete effect object as the keyframe draft value, then apply the checked edit using the accepted frame and document revision.
 
 ### Scale selected key times
 

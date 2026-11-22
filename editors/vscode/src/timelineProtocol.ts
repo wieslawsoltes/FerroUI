@@ -193,7 +193,7 @@ export type CurveMetric = 'value' | 'velocity';
 export type CurveChannel = 'value' | 'x' | 'y' | 'width' | 'height' | 'left' | 'top' | 'right' | 'bottom'
     | 'top_left' | 'top_right' | 'bottom_left' | 'bottom_right' | 'red' | 'green' | 'blue' | 'alpha'
     | 'percent_x' | 'percent_y' | 'absolute_x' | 'absolute_y' | 'percent' | 'absolute'
-    | 'blur_radius' | 'offset_x' | 'offset_y';
+    | 'blur_radius' | 'offset_x' | 'offset_y' | 'direction' | 'shadow_depth' | 'shadow_opacity';
 
 export interface TimelineCurveRequest {
     type: 'curve';

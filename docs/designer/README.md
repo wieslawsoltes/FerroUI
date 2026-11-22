@@ -279,6 +279,12 @@ select the radius, a shadow offset, or a shadow tint channel. The graph reads th
 and leaves gaps for unset poses. Use the contextual key editor for the complete effect literal,
 or record the sampled native value at the playhead. [Inspect a blur or drop-shadow animation](vscode/motion.md#inspect-a-blur-or-drop-shadow-animation)
 
+Native effect objects add separate **Shadow opacity** and, for directional shadows,
+**Direction** and **Shadow depth** curves. Open a key to edit its complete object value.
+Studio keeps direct objects and `Setter.Value` properties in their authored forms. Mapped
+Rust keys keep their immutable effect constructor. MCP exposes the same native curves
+and checked key edits. [Edit directional shadows and independent opacity](vscode/motion.md#edit-directional-shadows-and-independent-opacity)
+
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property
 value, with Opacity as the initial fallback for an object without a track. The **Animation name

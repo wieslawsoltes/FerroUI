@@ -1,8 +1,11 @@
 use crate::{
-    require, AnimationError, AnimationValue, Easing, FillMode, Keyframe, PlaybackBehavior,
-    PlaybackDirection, Repeat, Result, Timeline, Track, ValueKind,
+    require, AnimationEffect, AnimationError, AnimationValue, Easing, EffectForm, FillMode, Keyframe,
+    PlaybackBehavior, PlaybackDirection, Repeat, Result, Timeline, Track, ValueKind,
 };
 use std::collections::BTreeMap;
+
+/// Host converter for named and functional effect colors.
+pub type EffectColorResolver = fn(&str) -> Option<[u8; 4]>;
 
 /// Runtime properties are typed. Hosts should supply hints for custom properties and the live
 /// underlying values of tracks whose endpoints are omitted. Without an underlying value,
@@ -18,6 +21,8 @@ pub struct ImportOptions {
     pub interpolation_errors: BTreeMap<String, String>,
     /// Native hosts can resolve missing effect endpoints, including an unset effect.
     pub native_effect_endpoints: bool,
+    /// Resolve named and functional colors in a statically authored effect object.
+    pub effect_color: Option<EffectColorResolver>,
     pub strict: bool,
 }
 impl Default for ImportOptions {
@@ -28,6 +33,7 @@ impl Default for ImportOptions {
             literal_values: BTreeMap::new(),
             interpolation_errors: BTreeMap::new(),
             native_effect_endpoints: false,
+            effect_color: None,
             strict: true,
         }
     }
@@ -148,7 +154,13 @@ impl Timeline {
             } else {
                 format!(" KeySpline=\"{}\"", escape(&easing.to_xaml()))
             };
-            result.push_str(&format!("  <KeyFrame KeyTime=\"{}\"{spline}><Setter Property=\"{}\" Value=\"{}\" /></KeyFrame>\n",time_string(time),escape(property),escape(&literal_value(&value))));
+            let property = escape(property);
+            let setter = match &value {
+                AnimationValue::Effect(effect) if effect.form() != EffectForm::Literal =>
+                    format!("<Setter Property=\"{property}\">{}</Setter>", effect.setter_object_xaml()),
+                _ => format!("<Setter Property=\"{property}\" Value=\"{}\" />", escape(&literal_value(&value))),
+            };
+            result.push_str(&format!("  <KeyFrame KeyTime=\"{}\"{spline}>{setter}</KeyFrame>\n", time_string(time)));
         }
         result.push_str("</Animation>");
         Ok(result)
@@ -291,9 +303,8 @@ impl Timeline {
             )?;
             for setter in node.children().filter(|n| n.is_element()) {
                 require(
-                    setter.tag_name().name() == "Setter" && native_namespace(setter.tag_name().namespace())
-                        && setter.children().all(|n| !n.is_element()),
-                    "Only literal Setter attributes can be imported; custom or binding objects remain in source",
+                    setter.tag_name().name() == "Setter" && native_namespace(setter.tag_name().namespace()),
+                    "Only native Setter values can be imported",
                 )?;
                 for attr in setter.attributes() {
                     require(
@@ -307,43 +318,7 @@ impl Timeline {
                 if let Some(reason) = options.interpolation_errors.get(property) {
                     return Err(AnimationError(reason.clone()));
                 }
-                let source = setter
-                    .attribute("Value")
-                    .ok_or_else(|| AnimationError("Setter.Value is required".into()))?;
-                let source = if let Some(literal) = source.strip_prefix("{}") {
-                    literal
-                } else {
-                    require(
-                        !source.starts_with('{'),
-                        "Resolve animation binding/resource values through the host before importing into a typed timeline",
-                    )?;
-                    source
-                };
-                let kind = options
-                    .property_kinds
-                    .get(property)
-                    .copied()
-                    .or_else(|| {
-                        options
-                            .literal_values
-                            .get(&(property.to_owned(), source.to_owned()))
-                            .map(AnimationValue::kind)
-                    })
-                    .or_else(|| options.base_values.get(property).map(AnimationValue::kind))
-                    .unwrap_or_else(|| infer_kind(property, source));
-                let value = if let Some(value) = options
-                    .literal_values
-                    .get(&(property.to_owned(), source.to_owned()))
-                {
-                    value.validate()?;
-                    require(
-                        value.kind() == kind,
-                        "Resolved literal differs from the property type",
-                    )?;
-                    value.clone()
-                } else {
-                    AnimationValue::parse(source, kind)?
-                };
+                let value = read_key_value(setter, property, options)?;
                 let track = tracks
                     .entry(property.into())
                     .or_insert_with(|| Track::new(target, property));
@@ -387,6 +362,36 @@ impl Timeline {
         Ok(AnimationImport { timeline, warnings })
     }
 }
+
+fn read_key_value(setter: roxmltree::Node<'_, '_>, property: &str, options: &ImportOptions) -> Result<AnimationValue> {
+    let property_kind = options.property_kinds.get(property).copied();
+    let Some(source) = setter.attribute("Value") else {
+        require(property_kind.map_or(property == "Effect", |kind| kind == ValueKind::Effect),
+            "Only static native effect objects can be imported as typed keyframes")?;
+        return AnimationEffect::read_setter_object(setter, options.effect_color).map(AnimationValue::Effect);
+    };
+    require(setter.children().all(|child| !child.is_element()),
+        "Setter cannot specify an attribute value and an object value")?;
+    let source = if let Some(literal) = source.strip_prefix("{}") {
+        literal
+    } else {
+        require(!source.starts_with('{'),
+            "Resolve animation binding/resource values through the host before importing into a typed timeline")?;
+        source
+    };
+    let resolved = options.literal_values.get(&(property.to_owned(), source.to_owned()));
+    let kind = property_kind
+        .or_else(|| resolved.map(AnimationValue::kind))
+        .or_else(|| options.base_values.get(property).map(AnimationValue::kind))
+        .unwrap_or_else(|| infer_kind(property, source));
+    if let Some(value) = resolved {
+        value.validate()?;
+        require(value.kind() == kind, "Resolved literal differs from the property type")?;
+        return Ok(value.clone());
+    }
+    AnimationValue::parse(source, kind)
+}
+
 fn parse_number(source: &str) -> Result<f64> {
     let value = source
         .trim()

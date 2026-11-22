@@ -1,5 +1,5 @@
 use crate::{
-    require, AnimationEffect, AnimationError, AnimationValue, CurvePoint, FillMode, RelativeUnit, Result, Track,
+    require, AnimationEffect, AnimationError, AnimationValue, CurvePoint, EffectForm, FillMode, RelativeUnit, Result, Track,
     ValueKind,
 };
 use serde::{Deserialize, Serialize};
@@ -36,6 +36,9 @@ pub enum CurveChannel {
     BlurRadius,
     OffsetX,
     OffsetY,
+    Direction,
+    ShadowDepth,
+    ShadowOpacity,
 }
 
 impl FromStr for CurveChannel {
@@ -66,7 +69,7 @@ impl CurveChannel {
             ValueKind::CornerRadius => &[TopLeft, TopRight, BottomRight, BottomLeft],
             ValueKind::RelativePoint => &[PercentX, PercentY, AbsoluteX, AbsoluteY],
             ValueKind::RelativeScalar => &[Percent, Absolute],
-            ValueKind::Effect => &[BlurRadius, OffsetX, OffsetY, Red, Green, Blue, Alpha],
+            ValueKind::Effect => &[BlurRadius, OffsetX, OffsetY, Direction, ShadowDepth, ShadowOpacity, Red, Green, Blue, Alpha],
             _ => &[],
         }
     }
@@ -76,11 +79,20 @@ impl CurveChannel {
             return Vec::new();
         };
         if let AnimationValue::Effect(effect) = &first.value {
-            let channels = Self::effect_channels(effect);
-            let same_family = track.keyframes.iter().all(|key| {
-                matches!(&key.value, AnimationValue::Effect(effect) if Self::effect_channels(effect) == channels)
-            });
-            return if same_family { channels.to_vec() } else { Vec::new() };
+            let mut channels = Self::effect_channels(effect).to_vec();
+            let mut has_object = false;
+            for key in &track.keyframes {
+                let AnimationValue::Effect(value) = &key.value else { return Vec::new() };
+                if value.argb().is_some() != effect.argb().is_some() {
+                    return Vec::new();
+                }
+                has_object |= value.form() != EffectForm::Literal;
+                channels.retain(|channel| Self::effect_channels(value).contains(channel));
+            }
+            if !has_object {
+                channels.retain(|channel| *channel != Self::ShadowOpacity);
+            }
+            return channels;
         }
         let mut channels = Self::for_kind(first.value.kind()).to_vec();
         if let Some(unit) = first.value.relative_unit() {
@@ -131,6 +143,9 @@ impl CurveChannel {
             Self::BlurRadius => "Blur radius (px)",
             Self::OffsetX => "Offset X (px)",
             Self::OffsetY => "Offset Y (px)",
+            Self::Direction => "Direction (°)",
+            Self::ShadowDepth => "Shadow depth (px)",
+            Self::ShadowOpacity => "Shadow opacity",
         }
     }
 
@@ -160,7 +175,7 @@ impl CurveChannel {
                 continue;
             };
             if let AnimationValue::Effect(effect) = &sample {
-                let family = std::mem::discriminant(effect);
+                let family = effect.argb().is_some();
                 gap |= effect_family.is_some_and(|previous| previous != family);
                 effect_family = Some(family);
             }
@@ -229,20 +244,24 @@ impl CurveChannel {
         use CurveChannel::*;
         match effect {
             AnimationEffect::Blur { .. } => &[BlurRadius],
-            AnimationEffect::DropShadow { .. } => &[BlurRadius, OffsetX, OffsetY, Red, Green, Blue, Alpha],
+            AnimationEffect::DropShadow { .. } => &[BlurRadius, OffsetX, OffsetY, ShadowOpacity, Red, Green, Blue, Alpha],
+            AnimationEffect::DirectionalDropShadow { .. } => &[BlurRadius, Direction, ShadowDepth, ShadowOpacity, Red, Green, Blue, Alpha],
         }
     }
 
     fn project_effect(self, effect: &AnimationEffect) -> Option<f64> {
         let value = match (self, *effect) {
-            (Self::BlurRadius, AnimationEffect::Blur { radius }) => radius,
-            (Self::BlurRadius, AnimationEffect::DropShadow { blur_radius, .. }) => blur_radius,
+            (Self::BlurRadius, AnimationEffect::Blur { radius, .. }) => radius,
+            (Self::BlurRadius, AnimationEffect::DropShadow { blur_radius, .. } | AnimationEffect::DirectionalDropShadow { blur_radius, .. }) => blur_radius,
             (Self::OffsetX, AnimationEffect::DropShadow { offset_x, .. }) => offset_x,
             (Self::OffsetY, AnimationEffect::DropShadow { offset_y, .. }) => offset_y,
-            (Self::Alpha, AnimationEffect::DropShadow { argb: [a, ..], .. }) => f64::from(a) / 255.0,
-            (Self::Red, AnimationEffect::DropShadow { argb: [_, r, ..], .. }) => f64::from(r) / 255.0,
-            (Self::Green, AnimationEffect::DropShadow { argb: [_, _, g, _], .. }) => f64::from(g) / 255.0,
-            (Self::Blue, AnimationEffect::DropShadow { argb: [.., b], .. }) => f64::from(b) / 255.0,
+            (Self::Direction, AnimationEffect::DirectionalDropShadow { direction, .. }) => direction,
+            (Self::ShadowDepth, AnimationEffect::DirectionalDropShadow { shadow_depth, .. }) => shadow_depth,
+            (Self::ShadowOpacity, AnimationEffect::DropShadow { opacity, .. } | AnimationEffect::DirectionalDropShadow { opacity, .. }) => opacity,
+            (Self::Alpha, shadow) => f64::from(shadow.argb()?[0]) / 255.0,
+            (Self::Red, shadow) => f64::from(shadow.argb()?[1]) / 255.0,
+            (Self::Green, shadow) => f64::from(shadow.argb()?[2]) / 255.0,
+            (Self::Blue, shadow) => f64::from(shadow.argb()?[3]) / 255.0,
             _ => return None,
         };
         Some(value)

@@ -26,6 +26,7 @@ pub(super) struct HostedKeyframeCapabilities {
     pub(super) curve_channels: bool,
     pub(super) sampling: bool,
     pub(super) effects: bool,
+    pub(super) effect_objects: bool,
 }
 
 impl HostedKeyframes {
@@ -64,11 +65,10 @@ impl HostedKeyframes {
                 tracks(&program)
             }));
             let Ok(Some(mut tracks)) = decoded else { continue };
-            if !capabilities.effects {
-                tracks.retain(|track| track.keys.first().is_some_and(|key| key.value_kind != "Effect"));
-                if tracks.is_empty() {
-                    continue;
-                }
+            tracks.retain(|track| track.keys.iter().all(|key| key.value_kind != "Effect"
+                || (capabilities.effects && (capabilities.effect_objects || !key.value.starts_with('<')))));
+            if tracks.is_empty() {
+                continue;
             }
             if capabilities.curves {
                 let tracks: Vec<_> = tracks
@@ -117,6 +117,15 @@ impl HostedKeyframes {
             }
         }
         Self { document, programs }
+    }
+
+    pub(super) fn sample_in_authored_form(
+        &self, program: i64, target: i64, property: &str, time: f64, value: AnimationValue,
+    ) -> AnimationValue {
+        let track = u64::try_from(target).ok().and_then(|target| {
+            self.programs.get(&program)?.0.timeline.as_ref()?.track(target, property)
+        });
+        if let Some(track) = track { track.sample_in_authored_form(time, value) } else { value }
     }
 
     pub(super) fn plan(

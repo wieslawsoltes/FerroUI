@@ -176,10 +176,9 @@ impl ValueSource {
             ValueSyntax::Color(source) => return source.plan(&self.value, &value, patches),
             ValueSyntax::Relative(source) => return source.plan(&value, patches),
             ValueSyntax::Effect(source) => {
-                if self.value != value {
-                    patches.push(source.patch(text));
-                }
-                return Ok(());
+                let (AnimationValue::Effect(old), AnimationValue::Effect(next)) = (&self.value, value)
+                    else { return Err("The key requires an effect".into()) };
+                return source.plan(*old, next, text, patches);
             }
             ValueSyntax::Numbers(parts) => parts,
         };
@@ -206,7 +205,7 @@ impl ValueSource {
 
 pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
     if let AnimationValue::Effect(effect) = value {
-        return Ok(format!("::ferroui_base::media::Effect::parse({:?}).unwrap()", effect.to_xaml()));
+        return Ok(super::effect_constructor::literal(*effect));
     }
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));

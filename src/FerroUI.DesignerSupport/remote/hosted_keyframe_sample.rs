@@ -57,6 +57,8 @@ impl HostedAnimations {
             .and_then(|control| control.cast::<Animatable>())
             .ok_or("Choose a compatible live preview target")?;
         let value = sample_typed_keyframe(animation, &target, &track.property, time)?;
+        let authored = self.keyframes.as_ref().ok_or("The accepted authoring track retired")?;
+        let value = authored.sample_in_authored_form(request.program, track.target, &track.property, time, value);
         let value_kind = format!("{:?}", value.kind());
         if !track.keys.iter().all(|key| key.value_kind == value_kind) {
             return Err("The native sample differs from the authored property type".into());

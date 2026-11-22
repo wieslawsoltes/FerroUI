@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[path = "effect_value.rs"]
 mod effect;
-pub use effect::AnimationEffect;
+pub use effect::{AnimationEffect, EffectForm};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ValueKind {

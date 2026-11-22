@@ -81,6 +81,8 @@ pub(super) fn animation_value() -> Value {
             &["kind", "value"],
         )
     };
+    let effect_form = json!({"enum":["literal","object","property_element"]});
+    let argb = json!({"type":"array","minItems":4,"maxItems":4,"items":{"type":"integer","minimum":0,"maximum":255}});
     json!({"oneOf":[
         value("Number",number()), value("Color",components(&["a","r","g","b"],true)),
         value("Point",components(&["x","y"],false)),
@@ -92,10 +94,12 @@ pub(super) fn animation_value() -> Value {
         value("RelativePoint",object(json!({"x":number(),"y":number(),"unit":{"enum":["Absolute","Relative"]}}), &["x","y","unit"])),
         value("RelativeScalar",object(json!({"scalar":number(),"unit":{"enum":["Absolute","Relative"]}}), &["scalar","unit"])),
         value("Effect",json!({"oneOf":[
-            object(json!({"kind":{"const":"blur"},"radius":number()}), &["kind","radius"]),
-            object(json!({"kind":{"const":"drop_shadow"},"offset_x":number(),"offset_y":number(),"blur_radius":time(),
-                "argb":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"integer","minimum":0,"maximum":255}}}),
-                &["kind","offset_x","offset_y","blur_radius","argb"])
+            object(json!({"kind":{"const":"blur"},"radius":number(),"form":effect_form}), &["kind","radius"]),
+            object(json!({"kind":{"const":"drop_shadow"},"offset_x":number(),"offset_y":number(),"blur_radius":number(),
+                "argb":argb,"opacity":number(),"form":effect_form}), &["kind","offset_x","offset_y","blur_radius","argb"]),
+            object(json!({"kind":{"const":"directional_drop_shadow"},"direction":number(),"shadow_depth":number(),"blur_radius":number(),
+                "argb":argb,"opacity":number(),"form":{"enum":["object","property_element"]}}),
+                &["kind","direction","shadow_depth","blur_radius","argb","opacity","form"])
         ]})),
         value("Discrete",string())
     ]})

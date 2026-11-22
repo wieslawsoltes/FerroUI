@@ -4,7 +4,7 @@ use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::Subscription;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
-use ferroui_designer_animation::{AnimationValue, Sample};
+use ferroui_designer_animation::{AnimationEffect, AnimationValue, Sample};
 use ferroui_designer_animation::native::FrozenPreviewClock;
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_designer_project::{CompiledResources, LocalPreviewSources, PreviewIncludes, PreviewSourceBuffer, local_preview_sources_with_resources};
@@ -1035,13 +1035,19 @@ impl RuntimePreview {
         if property.is_direct() || property.is_read_only() {
             return Err(format!("{name} does not support an animation value layer"));
         }
-        let value: BoxedValue = Rc::new(value.to_xaml());
-        let converted = ValueTypes::try_convert(
-            Some(&value),
-            ValueType::new(property.property_type(), property.property_type_name()),
-        )
-        .flatten()
-        .ok_or_else(|| format!("Cannot animate {name} with this value"))?;
+        let converted: BoxedValue = match value {
+            AnimationValue::Effect(effect) if AnimationEffect::is_effect_property(property) => {
+                value.validate().map_err(|error| error.to_string())?;
+                Rc::new(Some(effect.to_native()))
+            }
+            _ => {
+                let value: BoxedValue = Rc::new(value.to_xaml());
+                ValueTypes::try_convert(
+                    Some(&value),
+                    ValueType::new(property.property_type(), property.property_type_name()),
+                ).flatten().ok_or_else(|| format!("Cannot animate {name} with this value"))?
+            }
+        };
         if !property.is_valid_value(converted.as_any()) {
             return Err(format!("Invalid animation value for {name}"));
         }

@@ -56,8 +56,8 @@ pub use timeline::{
     CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,
     Sample, Timeline, TimelineTimingEdit, Track,
 };
-pub use value::{AnimationEffect, AnimationValue, RelativeUnit, ValueKind};
-pub use xaml::{AnimationImport, ImportOptions, native_key_time};
+pub use value::{AnimationEffect, AnimationValue, EffectForm, RelativeUnit, ValueKind};
+pub use xaml::{AnimationImport, EffectColorResolver, ImportOptions, native_key_time};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AnimationError(pub String);
@@ -88,3 +88,5 @@ mod program_tests;
 
 #[cfg(test)]
 mod effect_tests;
+#[cfg(test)]
+mod effect_object_tests;

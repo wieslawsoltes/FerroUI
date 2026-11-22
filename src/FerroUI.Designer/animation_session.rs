@@ -766,10 +766,13 @@ impl DesignerSession {
         time: f64,
     ) -> Result<(), String> {
         self.editable_program()?;
-        if self.uses_rust_source() {
-            let program = self.active_animation_program().ok_or("Choose a mapped Rust animation")?;
-            let target = self.recording_target(target);
-            return self.record_rust_keyframe(program, target, property, time);
+        let track_target = self.recording_target(target);
+        let authored_effect = self.animation.timeline.track(track_target, property)
+            .and_then(|track| track.keyframes.first())
+            .is_some_and(|key| matches!(&key.value, AnimationValue::Effect(_)));
+        if self.uses_rust_source() || authored_effect {
+            let program = self.active_animation_program().ok_or("Choose an authored animation")?;
+            return self.record_sampled_keyframe(program, track_target, property, time);
         }
         self.seek(time)?;
         let visual = self
@@ -787,7 +790,7 @@ impl DesignerSession {
         self.seek(key.time)
     }
 
-    pub(crate) fn record_rust_keyframe(
+    pub(crate) fn record_sampled_keyframe(
         &mut self, program: NodeId, target: NodeId, property: &str, time: f64,
     ) -> Result<(), String> {
         let sample = self.sample_keyframe(program, target, property, time)?;
@@ -832,6 +835,7 @@ impl DesignerSession {
             let info = ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
             self.animation_value_from_preview(target, property, &visual.get_value_untyped(info))?
         };
+        let value = if let Some(track) = track { track.sample_in_authored_form(time, value) } else { value };
         Ok(crate::SampledKeyframe {
             previous: key.map(|key| key.time),
             time,
@@ -1236,7 +1240,11 @@ impl DesignerSession {
         animation_property_kind(property)
     }
     fn animation_import_options(&self, program: &AnimationProgram) -> ImportOptions {
-        let mut options = ImportOptions { native_effect_endpoints: true, ..ImportOptions::default() };
+        let mut options = ImportOptions {
+            native_effect_endpoints: true,
+            effect_color: Some(AnimationEffect::resolve_color),
+            ..ImportOptions::default()
+        };
         let target = program.primary_target();
         for setter in subtree_nodes(&self.document, program.id)
             .into_iter()

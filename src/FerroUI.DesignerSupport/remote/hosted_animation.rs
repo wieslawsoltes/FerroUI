@@ -32,7 +32,8 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult, DESIGN_KEYFRAME_SELECTION_QUERY,
     DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
-    DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_EFFECTS_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
+    DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_EFFECTS_QUERY, DESIGN_ANIMATION_EFFECT_OBJECTS_QUERY,
+    DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
     DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
     DESIGN_KEYFRAME_SAMPLING_QUERY,
 };
@@ -48,6 +49,7 @@ ferroui_base::ferro_thread_local! {
     static CURVES: Cell<bool> = const { Cell::new(false) };
     static CURVE_CHANNELS: Cell<bool> = const { Cell::new(false) };
     static EFFECTS: Cell<bool> = const { Cell::new(false) };
+    static EFFECT_OBJECTS: Cell<bool> = const { Cell::new(false) };
     static CLIPS: Cell<bool> = const { Cell::new(false) };
     static CLIP_AUTHORING: Cell<bool> = const { Cell::new(false) };
     static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
@@ -68,6 +70,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
     CURVE_CHANNELS.set(CURVES.get() && requested(DESIGN_ANIMATION_CURVE_CHANNELS_QUERY));
     EFFECTS.set(enabled && requested(DESIGN_ANIMATION_EFFECTS_QUERY));
+    EFFECT_OBJECTS.set(EFFECTS.get() && requested(DESIGN_ANIMATION_EFFECT_OBJECTS_QUERY));
     CLIPS.set(enabled && requested(DESIGN_ANIMATION_CLIPS_QUERY));
     CLIP_AUTHORING.set(AUTHORING.get() && requested(DESIGN_CLIP_AUTHORING_QUERY));
     STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
@@ -291,6 +294,7 @@ impl HostedAnimations {
                     curve_channels: CURVE_CHANNELS.get(),
                     sampling: KEYFRAME_SAMPLING.get(),
                     effects: EFFECTS.get(),
+                    effect_objects: EFFECT_OBJECTS.get(),
                 },
             )
         });

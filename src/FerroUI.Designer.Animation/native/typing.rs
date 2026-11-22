@@ -44,7 +44,11 @@ pub fn native_keyframe_options(
                 .push(setter.attribute("Value"));
         }
     }
-    let mut options = ImportOptions { native_effect_endpoints: true, ..ImportOptions::default() };
+    let mut options = ImportOptions {
+        native_effect_endpoints: true,
+        effect_color: Some(AnimationEffect::resolve_color),
+        ..ImportOptions::default()
+    };
     for (name, values) in setters {
         let mut matches = properties
             .iter()

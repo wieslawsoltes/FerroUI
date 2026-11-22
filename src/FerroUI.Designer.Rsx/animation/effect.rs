@@ -1,13 +1,14 @@
+use super::effect_constructor::ConstructorSource;
 use super::syntax::{path, span};
 use crate::literal::string_literal;
-use ferroui_designer_animation::AnimationEffect;
+use ferroui_designer_animation::{AnimationEffect, EffectForm};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::{Expr, Lit};
 
 #[derive(Clone, Debug)]
-pub(super) struct EffectSource {
-    span: SourceSpan,
-    spelling: String,
+pub(super) enum EffectSource {
+    Literal { span: SourceSpan, spelling: String },
+    Object(ConstructorSource),
 }
 
 impl EffectSource {
@@ -29,7 +30,8 @@ impl EffectSource {
             _ => (expression, false),
         };
         let Expr::MethodCall(method) = inner else {
-            return None;
+            let (value, source) = ConstructorSource::read(inner, resolve)?;
+            return Some((value, Self::Object(source)));
         };
         let returns_effect = (method.method == "unwrap" && method.args.is_empty())
             || (method.method == "expect" && method.args.len() == 1);
@@ -61,17 +63,43 @@ impl EffectSource {
         let value = AnimationEffect::parse_native(&text.value()).ok()?;
         Some((
             value,
-            Self {
+            Self::Literal {
                 span: span(text),
                 spelling: text.token().to_string(),
             },
         ))
     }
 
-    pub(super) fn patch(&self, text: &str) -> TextPatch {
-        TextPatch {
-            span: self.span,
-            replacement: string_literal(&self.spelling, text),
+    pub(super) fn plan(
+        &self,
+        old: AnimationEffect,
+        next: AnimationEffect,
+        text: &str,
+        patches: &mut Vec<TextPatch>,
+    ) -> Result<(), String> {
+        match self {
+            Self::Object(source) => source.plan(old, next, patches),
+            Self::Literal { span, spelling } => {
+                let literal = next.with_form(EffectForm::Literal);
+                if literal.form() != EffectForm::Literal {
+                    return Err(
+                        "Use a native effect constructor for direction or independent opacity"
+                            .into(),
+                    );
+                }
+                if old != literal {
+                    let value = if next.form() == EffectForm::Literal {
+                        text.to_owned()
+                    } else {
+                        literal.to_xaml()
+                    };
+                    patches.push(TextPatch {
+                        span: *span,
+                        replacement: string_literal(spelling, &value),
+                    });
+                }
+                Ok(())
+            }
         }
     }
 }

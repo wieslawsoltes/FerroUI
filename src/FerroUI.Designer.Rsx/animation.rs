@@ -2,6 +2,7 @@
 
 mod color;
 mod effect;
+mod effect_constructor;
 mod color_integer;
 mod color_text;
 mod keyframe;

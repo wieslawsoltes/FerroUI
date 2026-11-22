@@ -264,7 +264,7 @@ impl TimelineLane {
             let plot_bounds = plot.height(bounds.height);
             let height = plot_height(plot_bounds);
             let axis_units = plot.channel.relative_unit().or_else(|| {
-                matches!(plot.channel, CurveChannel::BlurRadius | CurveChannel::OffsetX | CurveChannel::OffsetY)
+                matches!(plot.channel, CurveChannel::BlurRadius | CurveChannel::OffsetX | CurveChannel::OffsetY | CurveChannel::ShadowDepth)
                     .then_some(RelativeUnit::Absolute)
             });
             let unit = match (axis_units, plot.metric) {
@@ -272,6 +272,8 @@ impl TimelineLane {
                 (Some(RelativeUnit::Relative), CurveMetric::Velocity) => " pp/s",
                 (Some(RelativeUnit::Absolute), CurveMetric::Value) => " px",
                 (Some(RelativeUnit::Absolute), CurveMetric::Velocity) => " px/s",
+                (None, CurveMetric::Velocity) if plot.channel == CurveChannel::Direction => " °/s",
+                (None, CurveMetric::Value) if plot.channel == CurveChannel::Direction => "°",
                 (None, CurveMetric::Velocity) => " /s",
                 (None, CurveMetric::Value) => "",
             };
