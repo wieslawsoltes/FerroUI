@@ -84,7 +84,7 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     let available: usize = view_model.home_sections().iter().map(|s| s.items().map_or(0, |items| items.len())).sum();
     // The upstream list has 74 entries. The native catalog also offers these
     // pages, each exactly once and available through its page factory.
-    let additional_pages = ["TreeDataGrid", "FerroBoard", "Video", "Camera", "QR codes", "MediaPlayerElement", "MediaPlayerPresenter", "MediaTransportControls", "CameraCaptureUI", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "PersonPicture", "PagerControl", "ListView", "GridView", "SwipeControl", "Pivot", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart", "PolarChart", "SankeyChart", "TreemapChart", "GeoMap", "Renderer parity"]
+    let additional_pages = ["TreeDataGrid", "FerroBoard", "FerroEdit", "Video", "Camera", "QR codes", "MediaPlayerElement", "MediaPlayerPresenter", "MediaTransportControls", "CameraCaptureUI", "InkCanvas", "InkToolbar", "IconElement", "InfoBadge", "InfoBar", "ProgressRing", "NumberBox", "RadioButtons", "RatingControl", "PersonPicture", "PagerControl", "ListView", "GridView", "SwipeControl", "Pivot", "AutoSuggestBox", "NavigationView", "ItemsRepeater", "Visual States", "RichTextBlock", "RichEditBox", "CartesianChart", "PieChart", "PolarChart", "SankeyChart", "TreemapChart", "GeoMap", "Renderer parity"]
         .into_iter()
         // The first page of the section "Composition" is the upstream page "Composition".
         .chain(COMPOSITION_PAGES.into_iter().skip(1))
@@ -100,6 +100,33 @@ fn the_view_model_lists_every_upstream_page_as_available_or_unavailable() {
     for page in view_model.unavailable_pages() {
         assert!(!page.reason.is_empty(), "{} has no reason", page.document);
     }
+}
+
+#[test]
+fn ferro_edit_catalog_page_hosts_the_interactive_sample() {
+    use crate::pages::FerroEditPage;
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{Border, Button, UserControl};
+    use ferroui_edit::TextEditor;
+
+    let _app = start_catalog_application();
+    let view_model = MainWindowViewModel::new();
+    let sections = view_model.home_sections();
+    let item = sections.iter()
+        .filter_map(|section| section.items())
+        .find_map(|items| items.iter().find(|page| page.header() == "FerroEdit").cloned())
+        .expect("the FerroEdit navigation item");
+    let page = item.create_page().cast::<FerroEditPage>().expect("the FerroEdit page");
+    let view = page.get_control::<Border>("DemoHost").child()
+        .and_then(|child| child.cast::<UserControl>())
+        .expect("the editor demo view");
+    let editor = view.find_control::<TextEditor>("Editor").expect("the editor");
+    assert!(editor.text().contains("fn main()"));
+
+    let wrap = view.find_control::<Button>("Wrap").expect("the Word wrap button");
+    assert!(!editor.word_wrap());
+    wrap.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert!(editor.word_wrap());
 }
 
 /// The pages of the section "Composition" (not from upstream): the composition page of the

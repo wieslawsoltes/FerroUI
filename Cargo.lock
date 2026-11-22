@@ -448,6 +448,7 @@ name = "control-catalog"
 version = "0.6.0-preview.1"
 dependencies = [
  "custom-effects",
+ "editor-demo",
  "ferroboard-controls",
  "ferroboard-core",
  "ferroboard-core-ferro",
@@ -460,6 +461,7 @@ dependencies = [
  "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
+ "ferroui-edit",
  "ferroui-harfbuzz",
  "ferroui-hot-reload",
  "ferroui-livecharts",
@@ -487,6 +489,7 @@ dependencies = [
  "treedatagrid-demo",
  "unicode-normalization",
  "url",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -914,6 +917,45 @@ name = "downcast-rs"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
+
+[[package]]
+name = "editor-demo"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-edit",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-skia",
+ "ferroui-system",
+ "ferroui-textmate",
+ "ferroui-themes-fluent",
+ "ferroui-wayland",
+ "ferroui-win32",
+ "sample-support",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "editor-demo-browser"
+version = "0.6.0-preview.1"
+dependencies = [
+ "editor-demo",
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-controls",
+ "ferroui-edit",
+ "ferroui-fonts-inter",
+ "ferroui-themes-fluent",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
 
 [[package]]
 name = "either"

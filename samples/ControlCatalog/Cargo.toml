@@ -61,6 +61,8 @@ runtime-markup = [
 ferroboard-core = { path = "../../components/FerroBoard/src/FerroBoard.Core" }
 ferroboard-core-ferro = { path = "../../components/FerroBoard/src/FerroBoard.Core.Ferro" }
 ferroboard-controls = { path = "../../components/FerroBoard/src/FerroBoard.Controls" }
+editor-demo = { path = "../EditorDemo", default-features = false }
+ferroui-edit.workspace = true
 ferroui-media.workspace = true
 ferroui-media-video.workspace = true
 ferroui-media-camera.workspace = true
@@ -153,3 +155,6 @@ ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 # `encoding_rs` took the published module over its size budget (pages.yml).
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 ferroui-controls = { workspace = true, features = ["rtf-codepages"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-futures = "=0.4.79"
