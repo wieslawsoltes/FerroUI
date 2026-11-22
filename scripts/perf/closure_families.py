@@ -7,6 +7,10 @@ belong to: the path of the definition, with the closures inside it counted with 
 the most that sharing one body could save: the bytes of the family less its largest instance. Code
 of the closures inlined into the copies has to stay somewhere, so the real saving is smaller.
 
+Each family is also split into its entry (the function that is called to register or build, usually
+once) and its inner closures (which a generic API usually stores and calls later, such as the adapter
+of an event handler): sharing an entry adds no call to the path the stored closure runs on.
+
     closure_families.py <executable> [--top N] [--crates a,b] [--json FILE]
     closure_families.py --self-test
 """
@@ -76,8 +80,9 @@ def crate_of(path):
 
 
 def families(symbols):
-    """API -> [instances, bytes, largest], for the closure-generic instances; and the totals."""
-    found = collections.defaultdict(lambda: [0, 0, 0])
+    """API -> [instances, bytes, largest, entry instances, entry bytes, largest entry], for the
+    closure-generic instances; and the totals."""
+    found = collections.defaultdict(lambda: [0, 0, 0, 0, 0, 0])
     rust = unread = 0
     for name, size in symbols:
         if not name.lstrip("_").startswith("R"):
@@ -89,10 +94,15 @@ def families(symbols):
         rust += size
         path, closure = result
         if closure:
-            entry = found[api_of(path)]
+            api = api_of(path)
+            entry = found[api]
             entry[0] += 1
             entry[1] += size
             entry[2] = max(entry[2], size)
+            if path == api:
+                entry[3] += 1
+                entry[4] += size
+                entry[5] = max(entry[5], size)
     return found, rust, unread
 
 
@@ -103,7 +113,7 @@ def report(path, top, crates, json_path):
           f"({100 * total / max(rust, 1):.1f} %) in {sum(v[0] for v in found.values())} instances of {len(found)} "
           f"functions; {unread} v0 names not read")
     by_crate = collections.defaultdict(lambda: [0, 0, 0])
-    for api, (count, size, largest) in found.items():
+    for api, (count, size, largest, *_) in found.items():
         entry = by_crate[crate_of(api)]
         entry[0] += count
         entry[1] += size
@@ -111,12 +121,15 @@ def report(path, top, crates, json_path):
     print("  crate                              instances       KB  shareable KB")
     for crate, (count, size, shareable) in sorted(by_crate.items(), key=lambda item: -item[1][1])[:14]:
         print(f"  {crate[:34]:34} {count:9} {size / 1024:8.1f} {shareable / 1024:13.1f}")
-    print("  instances       KB  largest KB  shareable KB  function")
+    print("  instances       KB  largest KB  shareable KB  entries  entry KB  entry shareable KB  inner KB  function")
     rows = [(api, v) for api, v in found.items() if not crates or crate_of(api) in crates]
-    for api, (count, size, largest) in sorted(rows, key=lambda item: -(item[1][1] - item[1][2]))[:top]:
-        print(f"  {count:9} {size / 1024:8.1f} {largest / 1024:11.1f} {(size - largest) / 1024:13.1f}  {api[:110]}")
+    for api, (count, size, largest, entries, entry, entry_largest) in sorted(
+            rows, key=lambda item: -(item[1][1] - item[1][2]))[:top]:
+        print(f"  {count:9} {size / 1024:8.1f} {largest / 1024:11.1f} {(size - largest) / 1024:13.1f} {entries:8} "
+              f"{entry / 1024:9.1f} {(entry - entry_largest) / 1024:19.1f} {(size - entry) / 1024:9.1f}  {api[:110]}")
     if json_path:
-        out = [{"function": api, "crate": crate_of(api), "instances": v[0], "bytes": v[1], "largest": v[2]}
+        out = [{"function": api, "crate": crate_of(api), "instances": v[0], "bytes": v[1], "largest": v[2],
+                "entry_instances": v[3], "entry_bytes": v[4], "entry_largest": v[5]}
                for api, v in sorted(found.items(), key=lambda item: -item[1][1])]
         with open(json_path, "w", encoding="utf-8") as file:
             json.dump(out, file, indent=1)
@@ -135,8 +148,11 @@ def self_test():
     assert api_of("a::g::{closure#0}::{closure#1}") == "a::g"
     assert crate_of("<a::{impl#0} as b::T>::f") == "a"
     assert crate_of("<_ as b::T>::f") == "b"
-    found, rust, unread = families([(generic, 10), (generic, 30), (plain, 5), ("_notrust", 7)])
-    assert found["a::g"] == [2, 40, 30] and rust == 45 and unread == 0
+    # The closure inside `a::g::<a::main::{closure#0}>`: its inner part.
+    inner = "_RNCINvCs1_1a1gNCNvB4_4main0E0B4_"
+    assert read(inner) == ("a::g::{closure#0}", True), read(inner)
+    found, rust, unread = families([(generic, 10), (generic, 30), (inner, 20), (plain, 5), ("_notrust", 7)])
+    assert found["a::g"] == [3, 60, 30, 2, 40, 30] and rust == 65 and unread == 0
     print("self-test passed")
 
 
