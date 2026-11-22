@@ -387,8 +387,9 @@ struct Hearing {
     /// in turn. A class sits at the place made of a few bits of its address or at the next one,
     /// which are compared inline. Where the link puts more classes at one place, the others sit
     /// at the next empty places, which the cold path looks through: up to `RECENT` classes never
-    /// reach `by_class` again, whatever their addresses. The class after those empties the places
-    /// once, and from then on every class sits at one of its own two.
+    /// reach `by_class` again, whatever their addresses, so the cost of a walk does not depend on
+    /// the link (#1059). The class after those empties the places once, and from then on every
+    /// class sits at one of its own two, on the path it had before.
     recent: [Cell<(*const TypeInfo, Heard)>; RECENT],
     by_class: RefCell<HashMap<*const TypeInfo, Heard, BuildHasherDefault<ClassHasher>>>,
     /// More classes are known than there are places: each class sits at one of its own two.
@@ -489,73 +490,60 @@ impl Hearing {
     #[cold]
     #[inline(never)]
     fn past_recent(&self, place: usize, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
-        // While the classes known fit in the places, each of them is at one. With more of them
-        // a look through the places would mostly find nothing, so the map answers at once.
         if !self.spilled.get() {
-            if let Some(heard) = self.at_a_further_place(place, class) {
+            return self.among_the_places(place, class, property);
+        }
+        #[cfg(test)]
+        self.past_recent.set(self.past_recent.get() + 1);
+        let known = self.by_class.borrow().get(&std::ptr::from_ref(class)).copied();
+        let heard = known.unwrap_or_else(|| {
+            let heard = self.find(class, property);
+            self.by_class.borrow_mut().insert(class, heard);
+            heard
+        });
+        self.remember(place, class, heard);
+        heard
+    }
+
+    /// The answer for a class while every class known has a place: at the first empty place
+    /// from its own, and places are only emptied all at once, so an empty place ends the search
+    /// and is where a class asked for the first time goes. The class after `RECENT` empties the
+    /// places, and from then on [`past_recent`](Self::past_recent) answers from the map.
+    #[inline(never)]
+    fn among_the_places(&self, place: usize, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+        let mut empty = None;
+        for step in 0..RECENT {
+            let candidate = &self.recent[(place + step) & (RECENT - 1)];
+            let (recent, heard) = candidate.get();
+            if recent.is_null() {
+                empty = Some(candidate);
+                break;
+            }
+            if std::ptr::eq(recent, class) {
                 return heard;
             }
         }
         #[cfg(test)]
         self.past_recent.set(self.past_recent.get() + 1);
-        let known = self.by_class.borrow().get(&std::ptr::from_ref(class)).copied();
-        let heard = match known {
-            Some(heard) => heard,
-            None => self.learn(class, property),
-        };
-        self.remember(place, class, heard);
-        heard
-    }
-
-    /// Finds the answer for a class asked for the first time and keeps it.
-    #[inline(never)]
-    fn learn(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
         let heard = self.find(class, property);
-        let mut by_class = self.by_class.borrow_mut();
-        by_class.insert(class, heard);
-        // From here on the further places are not looked at: nothing may stay there.
-        if by_class.len() == RECENT + 1 {
-            self.spilled.set(true);
-            for recent in &self.recent {
-                recent.set((std::ptr::null(), Heard::Yes));
+        self.by_class.borrow_mut().insert(class, heard);
+        match empty {
+            Some(candidate) => candidate.set((class, heard)),
+            None => {
+                self.spilled.set(true);
+                for recent in &self.recent {
+                    recent.set((std::ptr::null(), Heard::Yes));
+                }
+                self.recent[place].set((class, heard));
             }
         }
         heard
     }
 
-    /// The answer for a class at one of the places after its two. A class is kept at the first
-    /// empty place from its own and places are only emptied all at once, so an empty place ends
-    /// the search.
-    #[inline(never)]
-    fn at_a_further_place(&self, place: usize, class: *const TypeInfo) -> Option<Heard> {
-        for step in 2..RECENT {
-            let (recent, heard) = self.recent[(place + step) & (RECENT - 1)].get();
-            if recent.is_null() {
-                return None;
-            }
-            if std::ptr::eq(recent, class) {
-                return Some(heard);
-            }
-        }
-        None
-    }
-
-    /// Keeps the answer for a class. While the classes known fit in the places, at the first
-    /// empty place from its own. With more of them, at an empty one of its two places, else at
-    /// the first: what the first place held moves to the second when that is a place of its
-    /// class too; a class visiting from the place before could not be found there, and is
-    /// dropped.
-    #[inline(never)]
+    /// Keeps the answer for a class at an empty one of its two places, else at the first. What
+    /// the first place held moves to the second when that is a place of its class too; a class
+    /// visiting from the place before could not be found there, and is dropped.
     fn remember(&self, place: usize, class: *const TypeInfo, heard: Heard) {
-        if !self.spilled.get() {
-            for step in 0..RECENT {
-                let candidate = &self.recent[(place + step) & (RECENT - 1)];
-                if candidate.get().0.is_null() {
-                    candidate.set((class, heard));
-                    return;
-                }
-            }
-        }
         let first = &self.recent[place];
         let second = &self.recent[second_recent_place(place)];
         let held = first.get();
@@ -1406,6 +1394,8 @@ mod hearing_tests {
         let property: &'static FerroProperty = StyledElement::data_context_property();
         let (one, other) = two_classes_at_one_place();
         let hearing = Hearing::new();
+        // Past eight classes: each class sits at one of its own two places.
+        hearing.spilled.set(true);
         let place = recent_place(one);
         let stranger: &'static TypeInfo = Box::leak(Box::new(TypeInfo::new("Stranger", None)));
         for step in 1..RECENT {
