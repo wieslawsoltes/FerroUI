@@ -1496,6 +1496,147 @@ use the list box).
 Test: `the_peer_of_an_items_control_scrolls_with_the_element_of_a_list_box_only`
 (`automation/peers/items_automation_peer_tests.rs`).
 
+### 4.31 One property store per storage type (#986)
+
+The property store was compiled once for every value type of a styled property:
+`EffectiveValue<T>` (its write, `set_and_raise_core`, 1.2 to 2.8 kB a copy), the typed paths of
+`ValueStore`, the immediate value entries, about 6 kB for each of the 157 value types of the
+builders hello world (section 5.6).
+
+**The change.** `StyledValue` (declared in `ferroui-system`, re-exported by `ferroui-base`) names
+the type the store keeps a value type as, its storage type, and the two conversions:
+
+- every enumeration declared with `ferro_markup_enum!` (or `styled_enum!`) is kept as one
+  `EnumValue`, its numeric value; the macro lists the members, and the conversions are a `match`
+  each way, which does not compile when a variant is missing;
+- an `Option<T>` is kept as an `Option` of the storage type of `T`;
+- every other type (handles `Ref<T>`, sets of flags, `ElementRef<T>`, `Rc<dyn ..>`, the other
+  structures) is its own storage type (`styled_value!(Type)` where the type is declared).
+
+Two forms were measured and left out after their gates: handles kept as `Ref<FerroObject>` (the
+checked downcast of every read of a handle, +45 % instructions for the read of a handle, and the
+conversion of a change notification; it saved 0.11 MB, 19 handle types in one store) and points,
+sizes, vectors, thicknesses, rectangles and corner radii kept as `[f64; 2]` and `[f64; 4]` (13.5
+kB for +2.7 to 3.7 % instructions in the reads of inherited values, the moves of a line and the
+start of the tiles).
+
+The store is compiled per storage type: a read is `T::from_storage` of the stored value, a write
+`T::into_storage` and the store's write. What a property hands out still holds its value type: a
+boxed value, a binding value, a setter value and a change notification (a storage type that
+other types share converts the two values back through the routes of the property, one call
+where a value changed; a member of an enumeration is handed out as the static member the macro
+lists, `StyledValue::MEMBERS`, with no call). The metadata the store reads is the typed metadata
+itself for a type that is its own storage type; for the others a copy made once, with the
+default converted and a coercion callback wrapped. The typed API of `StyledProperty<T>` and its
+routes stay per value type.
+
+| Release, macOS ARM64 | Before | After |
+|---|---:|---:|
+| `hello-world-builders` stripped | 20,610,240 B | 20,463,376 B (-0.71 %) |
+| `hello-world-builders` `__TEXT,__text` | 16,336,672 B | 16,213,900 B |
+| `hello-world-builders` Rust code in families of two or more instances | 7.00 of 11.60 MB (60.3 %) | 6.84 of 11.49 MB (59.6 %) |
+| `hello-world` (XAML) stripped | 20,529,096 B | 20,381,928 B (-0.72 %) |
+| `hello-world` (XAML) `__TEXT,__text` | 16,256,708 B | 16,134,144 B |
+
+The first form (handles shared too, `try_set_value_typed` through the untyped route) was
+20,310,896 B: the handles, 0.11 MB, and the typed route of `try_set_value_typed`
+(`route_take_value`, 40.7 kB, which moves the value instead of copying it) are the difference.
+
+`scripts/generic_instances.py`, the families of the store in the builders hello world (instances,
+kB, measured with handles shared; with handles their own storage type the engine families have
+116 instances instead of 97):
+
+| Family | Before | After |
+|---|---:|---:|
+| `EffectiveValue<T>::set_and_raise_core` | 202, 318.3 | 125, 206.1 |
+| `ValueStore::set_value` | 201, 114.9 | 115, 59.2 |
+| `ValueStore::get_base_value` | 169, 99.8 | 99, 56.7 |
+| `EffectiveValue<T>::new` | 157, 78.6 | 97, 45.5 |
+| `raise_unset`, `apply_entry`, `notify_value_changed`, `notify_base_value_changed` | 157 each, 252.0 | 97 each, 163.3 |
+| `ValueStore::create_effective_value` | 157, 38.8 | 89, 27.5 |
+| `ImmediateValueEntry<T>::try_get_value` | 201, 34.6 | 126, 23.1 |
+| New: `route_with_values`, the storage metadata (`storage_copy`) | | 76, 30.8; 137, 24.9 |
+
+157 value types reach the store through 116 storage types. What stays per value type is what
+handles a `T` itself: the routes of `StyledProperty<T>` (about 3.6 kB a type), the typed
+`ValueStore::get_value` and `inherited_or_default` (their default value comes from the typed
+metadata), the class registrations of handles. A storage-typed default (the cache of the single
+default and the metadata of the store kept beside the typed metadata) would move the reads of a
+default to the storage type as well: the next step, about 1.2 kB for each value type that shares
+a storage type.
+
+Breaking: the value type of a styled or attached property implements `StyledValue`
+(`styled_value!(Type)` for a type of an application, `styled_enum!` for an enumeration without
+markup metadata); `StyledProperty<T>` and `AttachedProperty<T>` read and write values only where
+`T: StyledValue`. `FerroObject::try_set_value_typed` sets a styled property through a route of its
+own (`route_take_value`, the value moved), so that it keeps `T: PropertyValue`.
+
+Tests: the conversions (`styled_value` tests of `ferroui-system` and `ferroui-base`), and every
+test of the property store, which now runs on the shared storage type for its enumerations.
+
+**The parts that follow** (one stack, each a pull request of its own):
+
+- *The routes shared, a codec per value type* (#997): one implementation of the routes of a
+  styled and an attached property for every value type (`StyledRoutes`), with what depends on the
+  value type in `StyledCodec`, implemented by `StyledProperty<T>` (the effective value, the coerced
+  default, the default boxed, the metadata, validation, the copy into the storage type, boxing, the
+  values of a notification, data validation, binding values). The untyped paths (markup, bindings,
+  setters, resources, the C ABI) read and write the store through its untyped interface; the typed
+  paths are unchanged. The routes of `StyledProperty<T>` (157 copies of about 3.6 kB in the
+  builders hello world) are one, but for the untyped write and read of a value (below).
+- *Why the untyped write and read stay typed*: the first form of #997 also shared the untyped
+  write, read and binding write. Its gate (base b5e58185d) found the untyped set of a number
+  +36 %, of an enumeration +41 %, of a structure +36 %, the read of an enumeration +19 % and the
+  binding write +14 to 21 % (instructions). Three forms were measured against the base
+  (`property_subsystem::UntypedRoutes`, own binaries, instructions of an operation), the first
+  two kept on the branch `size/property-routes-shared`:
+
+  | Form | Set: enumeration, structure, others | Read: enumeration, others | Binding write: enumeration, structure | Builders hello world |
+  |---|---|---|---|---:|
+  | Shared, with fixes (the type asked once, no marker check for a typed property, the value given to the effective value directly, the read boxed in place) | +14.2, +7.8, +0.1 to 0.9 % | +16.5, +1.7 to 2.9 % | +9.3, +1.9 % | about +50 kB |
+  | Shared, the write and read of an enumeration typed | +7.8, +8.4, +0.5 to 1.4 % | +7.4, +2.1 to 3.3 % | +8.1, +2.3 % | +115 kB |
+  | Typed in the codec (`StyledCodec::set_value`, `set_current_value`, `get_value_boxed`, `set_local_boxed`), reached in one call | +2.7, +0.5, -0.04 to +0.6 % | +1.6, -1.3 to +0.6 % | -1.2, +0.6 % | the routes of main, in the codec |
+
+  The rest of an untyped write of a shared route (a call into the codec, the downcast it
+  repeats, the static members of the notification) is 40 to 50 instructions on an operation of
+  about 600, over the tolerance of the gate (2 %). The write and read of a value of the value
+  type are therefore what the typed routes were, in the codec, and `FerroObject::get_value_untyped`,
+  `set_value_untyped` and the write of an untyped binding call the codec directly; the markers,
+  the conversion of a value of another type and the other routes stay shared. Part of the +2.7 %
+  of the set of an enumeration is the shared storage of the enumeration (its typed write,
+  `ControlWrite.enum_changed`, is +1.5 %).
+- *The conversion of an untyped value shared*: a value of another type is converted, copied into
+  a box of its own through the codec and the temporary released before the write, as the typed
+  routes did (`StyledCodec::set_converted`, 157 instances, 54 kB, is gone).
+- *The failures compiled once*: the panics of the direct accessors, of the registry look-up of a
+  direct property and of the registration of a styled property are cold functions compiled once,
+  and the setter of a direct property is called from one place.
+
+Two lines of the gate of the first part were fixed in it: the read of an inherited value converts
+the stored value where it reads it (as main did), `TextBlock::set_font_size` is pinned as a call
+of its own (inlined into a caller, the caller copied the text block it had just made,
+`trees::Text.create_and_measure`), and the storage metadata of an enumeration is held as what it
+is, so that the store reads it without a call through a vtable. The rest of
+`ControlWrite.enum_style_priority_set_and_dispose` (+1.7 % instructions) is the static member
+looked up for the two values of a change and of an unset, and the storage metadata of a new
+effective value.
+
+| Release, macOS ARM64, stripped | Main (ae7462b47) | The stack | Change |
+|---|---:|---:|---:|
+| `hello-world-builders` | 18,645,296 B | 18,299,632 B | -346 kB (-1.85 %) |
+| `hello-world-builders` `__TEXT,__text` | 14,637,260 B | 14,333,328 B | |
+| `hello-world` (XAML) | 18,563,848 B | 18,201,496 B | -362 kB (-1.95 %) |
+| `hello-world` (XAML) `__TEXT,__text` | 14,551,128 B | 14,241,876 B | |
+| `winui-gallery` | 57,150,408 B | 56,068,568 B | -1.08 MB (-1.89 %) |
+| `winui-gallery` `__TEXT,__text` | 40,029,164 B | 39,093,816 B | |
+| `control-catalog-desktop` | 75,527,792 B | 74,132,032 B | -1.40 MB (-1.85 %) |
+| `control-catalog-desktop` `__TEXT,__text` | 57,223,276 B | 55,988,256 B | |
+
+The gallery is built with its feature `desktop`
+(`cargo build --release -p winui-gallery --features winui-gallery/desktop --bin winui-gallery`):
+without it, cargo builds the library alone and the binary in the target folder is whatever was
+built there last.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

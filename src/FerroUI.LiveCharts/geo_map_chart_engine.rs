@@ -361,6 +361,8 @@ pub struct GeoTooltipValue {
 #[derive(Clone)]
 pub struct GeoTooltipFormatter(Rc<dyn Fn(&GeoTooltipValue) -> String>);
 
+ferroui_base::styled_value!(GeoTooltipFormatter);
+
 impl GeoTooltipFormatter {
     pub fn new(formatter: impl Fn(&GeoTooltipValue) -> String + 'static) -> Self {
         Self(Rc::new(formatter))

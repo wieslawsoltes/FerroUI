@@ -20,6 +20,16 @@ path = "lib.rs"
 
 [dependencies]
 smallvec = { workspace = true }
+# The value types of other crates that properties of FerroUI hold: `StyledValue` is stated for them
+# here, where the trait is (`styled_value.rs`). `ferroui-base` enables both.
+icu_locale_core = { workspace = true, optional = true }
+url = { workspace = true, optional = true }
+
+[features]
+# `StyledValue` for `icu_locale_core::Locale`.
+locale = ["dep:icu_locale_core"]
+# `StyledValue` for `url::Url`.
+url = ["dep:url"]
 
 # `--cfg ferro_tls_table` makes every `ferro_thread_local!` of a build use the table of the Android
 # targets on a Linux or macOS host, so that test suites run against it (`ferro_thread_local.rs`).

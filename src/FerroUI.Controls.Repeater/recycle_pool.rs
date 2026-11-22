@@ -14,6 +14,8 @@ use std::rc::{Rc, Weak};
 
 #[derive(Clone)]
 struct OriginTemplate(Rc<OriginTemplateData>);
+
+ferroui_base::styled_value!(OriginTemplate);
 struct OriginTemplateData {
     weak: Weak<dyn IDataTemplate>,
     retained: RefCell<Option<Rc<dyn IDataTemplate>>>,
