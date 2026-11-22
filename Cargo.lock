@@ -2936,6 +2936,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-textmate-grammars"
+version = "0.6.0-preview.1"
+
+[[package]]
 name = "ferroui-themes-fluent"
 version = "0.6.0-preview.1"
 dependencies = [

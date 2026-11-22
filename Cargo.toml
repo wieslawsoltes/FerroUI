@@ -103,6 +103,7 @@ members = [
     "src/FerroUI.Ident.Macros",
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
+    "src/FerroUI.TextMate.Grammars",
     "src/FerroUI.View",
     "src/FerroUI.View.Macros",
     # The universal C ABI (#636, docs/c-abi.md).
@@ -378,6 +379,7 @@ ferroui-static-view-locator-build = { version = "=0.6.0-preview.1", path = "src/
 ferroui-markup = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-winui = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }
+ferroui-textmate-grammars = { version = "=0.6.0-preview.1", path = "src/FerroUI.TextMate.Grammars", default-features = false }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
 # and the controls, and the build tool (`ferroui-build`) takes the compiler alone. Every crate that loads
 # markup at run time states the `runtime` feature.
