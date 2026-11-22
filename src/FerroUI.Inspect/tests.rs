@@ -290,7 +290,12 @@ fn resources_styles_screenshots_waits_and_stats() {
 }
 #[test]
 fn schemas_reject_invalid_input_before_mutating() {
-    assert_eq!(tools().len(), 19);
+    let tools = tools();
+    assert_eq!(tools.len(), 20);
+    let templates = tools.iter().find(|tool| tool["name"] == "get_template_sources").unwrap();
+    assert_eq!(templates["annotations"]["readOnlyHint"], true);
+    assert!(validate("get_template_sources", &json!({"node_id":1})).is_ok());
+    assert!(validate("get_template_sources", &json!({})).is_err());
     for args in [
         json!({"node_id":0}),
         json!({"node_id":-1}),
