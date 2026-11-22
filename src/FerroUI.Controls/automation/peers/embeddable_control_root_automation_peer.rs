@@ -156,7 +156,7 @@ impl EmbeddableControlRootAutomationPeer {
     pub fn get_peer_from_point(&self, p: Point) -> Option<Ref<AutomationPeer>> {
         let hit = self.owner().get_visual_at(p).and_then(|visual| visual.find_ancestor_of_type::<Control>(true))?;
 
-        let peer = self.get_or_create(&hit);
+        let peer = self.get_or_create(&hit.automation_target());
         Some(peer)
     }
 
@@ -188,7 +188,7 @@ impl EmbeddableControlRootAutomationPeer {
 
     fn on_focus_changed(&self, focus: Option<Ref<InputElement>>) {
         let old_focus = self.focus();
-        let c = focus.and_then(|focus| focus.cast::<Control>());
+        let c = focus.and_then(|focus| focus.cast::<Control>()).map(|control| control.automation_target());
         let owner = self.owner();
 
         let new_focus = c.filter(|c| owner.is_visual_ancestor_of(c));

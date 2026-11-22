@@ -61,6 +61,8 @@ mod window_impl_app_wnd_proc;
 mod window_impl_custom_caption_proc;
 
 #[cfg(windows)]
+mod web_clipboard;
+#[cfg(windows)]
 mod clipboard_impl;
 #[cfg(windows)]
 mod data_transfer_to_ole_data_object_wrapper;

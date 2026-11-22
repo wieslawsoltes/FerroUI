@@ -129,7 +129,9 @@ impl SelectionReadSession {
         }
     }
 
-    async fn wait_for_selection_notify_and_get_property(&self, property: Atom) -> Option<WindowProperty> {
+    async fn wait_for_selection_notify_and_get_property(
+        &self, target: Atom, property: Atom, limit: Option<usize>,
+    ) -> Option<WindowProperty> {
         let window = self.window;
         let selection = self.selection;
         let ev = self
@@ -140,20 +142,28 @@ impl SelectionReadSession {
                         let selection_event = xlib::selection_event(ev);
                         selection_event.requestor == window
                             && selection_event.selection == selection
-                            && selection_event.property == property
+                            && (selection_event.property == property
+                                || selection_event.property == 0 && selection_event.target == target)
                     }
                 }),
                 selection_helper::TIMEOUT,
             )
             .await;
 
-        ev?;
-
-        Some(self.read_property(property))
+        let event = ev?;
+        if xlib::selection_event(&event).property == 0 {
+            return None;
+        }
+        self.read_property(property, limit)
     }
 
-    fn read_property(&self, property: Atom) -> WindowProperty {
-        self.connection.get_window_property(self.window, property, 0, 0x7fffffff, true, xlib::ANY_PROPERTY_TYPE)
+    fn read_property(&self, property: Atom, limit: Option<usize>) -> Option<WindowProperty> {
+        let words = limit.map_or(0x7fffffff, |bytes| bytes.div_ceil(4).min(0x7fffffff) as _);
+        let result = self.connection.get_window_property(self.window, property, 0, words, true, xlib::ANY_PROPERTY_TYPE);
+        if limit.is_some_and(|limit| result.bytes_after != 0 || property_bytes(&result).len() > limit) {
+            return None;
+        }
+        Some(result)
     }
 
     async fn convert_selection_and_get_property(
@@ -161,16 +171,17 @@ impl SelectionReadSession {
         target: Atom,
         property: Atom,
         timestamp: Time,
+        limit: Option<usize>,
     ) -> Option<WindowProperty> {
         self.connection.convert_selection(self.selection, target, property, self.window, timestamp);
-        self.wait_for_selection_notify_and_get_property(property).await
+        self.wait_for_selection_notify_and_get_property(target, property, limit).await
     }
 
     /// Asks the owner of the selection for its targets. `None` when it
     /// does not answer in time, or answers with something that is not a
     /// list of atoms.
     pub async fn send_format_request(&self, _targets_atom: Atom) -> Option<Vec<Atom>> {
-        let res = self.convert_selection_and_get_property(self.targets_atom, self.targets_atom, 0).await?;
+        let res = self.convert_selection_and_get_property(self.targets_atom, self.targets_atom, 0, None).await?;
 
         if res.nitems == 0 {
             return None;
@@ -182,7 +193,7 @@ impl SelectionReadSession {
         Some(res.longs())
     }
 
-    async fn read_incr(&self, property: Atom) -> Option<GetDataResult> {
+    async fn read_incr(&self, property: Atom, limit: Option<usize>) -> Option<GetDataResult> {
         self.connection.flush();
         let mut reader = IncrReader::new();
         let window = self.window;
@@ -204,7 +215,8 @@ impl SelectionReadSession {
 
             ev?;
 
-            let part = self.read_property(property);
+            let remaining = limit.map(|limit| limit.saturating_sub(reader.data.len()));
+            let part = self.read_property(property, remaining)?;
 
             if !reader.append(&part) {
                 break;
@@ -217,20 +229,29 @@ impl SelectionReadSession {
     /// Asks the owner of the selection for the data of a target. `None`
     /// when it does not answer in time or has no data for the target.
     pub async fn send_data_request(&self, format: Atom, timestamp: Time) -> Option<GetDataResult> {
-        let res = self.convert_selection_and_get_property(format, format, timestamp).await?;
+        self.send_data_request_core(format, timestamp, None).await
+    }
+
+    /// Reads optional metadata without accepting an oversized property or incremental transfer.
+    pub async fn send_bounded_data_request(&self, format: Atom, timestamp: Time, max_bytes: usize) -> Option<GetDataResult> {
+        self.send_data_request_core(format, timestamp, Some(max_bytes)).await
+    }
+
+    async fn send_data_request_core(&self, format: Atom, timestamp: Time, limit: Option<usize>) -> Option<GetDataResult> {
+        let res = self.convert_selection_and_get_property(format, format, timestamp, limit).await?;
 
         // The announcement of an incremental transfer is recognised by its type before its
         // length is looked at: there are owners that announce with an empty property (xclip),
         // where the convention asks for a lower bound of the size. The reference looks at
         // the length first and reads nothing from such an owner (DEVIATIONS.md).
         if res.actual_type == self.incr_atom && res.actual_type != 0 {
-            return self.read_incr(format).await;
+            return self.read_incr(format, limit).await;
         }
         if res.nitems == 0 {
             return None;
         }
         if res.actual_type == self.incr_atom {
-            self.read_incr(format).await
+            self.read_incr(format, limit).await
         } else {
             Some(GetDataResult::new(property_bytes(&res).to_vec(), res.actual_type))
         }
@@ -390,6 +411,52 @@ mod tests {
             ]
         );
         assert_eq!(waiter.waits.get(), 1);
+    }
+
+    #[test]
+    fn a_refused_target_finishes_without_reading_the_property() {
+        let atoms = atoms();
+        let target = atoms.STRING;
+        let mut event = selection_notify(WINDOW, SELECTION, 0).unwrap();
+        xlib::selection_event_mut(&mut event).target = target;
+        let connection = MockConnection::new([]);
+        let waiter = MockEventWaiter::new([Some(event)]);
+        let session = session(&connection, &waiter, &atoms);
+
+        assert_eq!(run_ready(session.send_bounded_data_request(target, 0, 64)), None);
+        assert_eq!(waiter.rejected.get(), 0);
+        assert_eq!(connection.calls().len(), 1);
+    }
+
+    #[test]
+    fn bounded_metadata_rejects_a_truncated_property_and_total_incremental_overflow() {
+        let atoms = atoms();
+        let target = atoms.STRING;
+        let mut truncated = bytes_property(target, b"12345678");
+        truncated.bytes_after = 10;
+        let connection = MockConnection::new([truncated]);
+        let waiter = MockEventWaiter::new([selection_notify(WINDOW, SELECTION, target)]);
+        assert_eq!(
+            run_ready(session(&connection, &waiter, &atoms).send_bounded_data_request(target, 0, 8)),
+            None
+        );
+
+        for limit in [8, 9] {
+            let connection = MockConnection::new([
+                longs_property(atoms.INCR, &[9]),
+                bytes_property(target, b"hello"),
+                bytes_property(target, b"1234"),
+                bytes_property(target, b""),
+            ]);
+            let waiter = MockEventWaiter::new([
+                selection_notify(WINDOW, SELECTION, target),
+                property_notify(WINDOW, target, PROPERTY_NEW_VALUE),
+                property_notify(WINDOW, target, PROPERTY_NEW_VALUE),
+                property_notify(WINDOW, target, PROPERTY_NEW_VALUE),
+            ]);
+            let result = run_ready(session(&connection, &waiter, &atoms).send_bounded_data_request(target, 0, limit));
+            assert_eq!(result.as_ref().map(GetDataResult::as_bytes), (limit == 9).then_some(b"hello1234".as_slice()));
+        }
     }
 
     #[test]

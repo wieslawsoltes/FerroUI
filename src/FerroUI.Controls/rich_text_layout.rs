@@ -1495,6 +1495,27 @@ impl ITextDrawingSink for SelectionDrawingSink<'_, '_> {
         }
     }
 
+    fn draw_rounded_rectangle(
+        &mut self,
+        brush: Option<&Rc<dyn IBrush>>,
+        pen: Option<&Rc<dyn IPen>>,
+        rect: Rect,
+        radius: f64,
+    ) {
+        let draw = |context: &mut DrawingContext<'_>| {
+            ITextDrawingSink::draw_rounded_rectangle(context, brush, pen, rect, radius);
+        };
+        if self.hides_backgrounds && brush.is_some() && pen.is_none() {
+            self.draw_split(rect, |context, selected| {
+                if !selected {
+                    draw(context);
+                }
+            });
+        } else {
+            draw(&mut *self.context);
+        }
+    }
+
     fn draw_line(&mut self, pen: &Rc<dyn IPen>, p1: Point, p2: Point) {
         let selected_pen: Option<Rc<dyn IPen>> = match (self.foreground, &self.run_foreground) {
             (Some(selected), Some(run)) if !self.transforms.is_empty() => pen

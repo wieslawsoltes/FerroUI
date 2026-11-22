@@ -3,7 +3,7 @@ import { FerroExports } from "./ferroExports";
 import { StorageItem } from "../storage/storageItem";
 import { applyTextInputOptions } from "./inputOptions";
 import { ViewBox, viewBoxOf, viewPoint } from "./pointerPosition";
-import { setTextInputState as writeTextInputState, subscribeTextInput, TextInputElement } from "./textInput";
+import { readTextSelection, setTextInputState as writeTextInputState, subscribeTextInput, TextInputElement, writeTextSelection } from "./textInput";
 
 enum RawInputModifiers {
     None = 0,
@@ -24,23 +24,6 @@ enum RawInputModifiers {
     PenBarrelButton = 2048
 }
 
-/*
-* This is a hack to handle older Firefox (before v127 from June 2024) clipboard events in a more convenient way for framework users.
-* In the browser, events go in order KeyDown -> Paste -> KeyUp.
-* On KeyDown we trigger the handlers of the framework, which might execute readClipboard.
-* When readClipboard was executed, we mark ClipboardState as Pending and setup clipboard promise,
-* which will un-handle KeyDown event, basically allowing browser to pass a Paste event properly.
-* On actual Paste event we execute promise callbacks, resuming async operation, and returning pasted text to the app.
-* Note #1, on every KeyUp event we will reset all the state and reject pending promises if any, as this event it expected to come after Paste.
-* Note #2, whole this code will be executed only on older browsers where clipboard.read/readText is not available.
-* Note #3, with all of these hacks Clipboard.ReadText will still work only on actual "paste" gesture initiated by user.
-* */
-enum ClipboardState {
-    None,
-    Ready,
-    Pending
-}
-
 interface WriteableClipboardItem {
     data: Record<string, string | Blob>;
 }
@@ -52,6 +35,12 @@ interface WriteableClipboardSource {
 interface ClipboardResult {
     error?: string;
     result?: ReadableDataItem[];
+}
+
+interface ClipboardPaste {
+    keyDown: KeyboardEvent;
+    promise: Promise<ClipboardResult>;
+    complete: (result: ClipboardResult) => void;
 }
 
 // Differs from the original: an item of a drag operation also holds the data transfer of its
@@ -91,22 +80,28 @@ const moveBoxes = new WeakMap<PointerEvent, ViewBox>();
 
 // Not in the original: the hidden textarea of a client of the exact-edit connection (dom.ts).
 const textInputElementClass = "ferroui-text-input-element";
+interface SurroundingProjection {
+    value: string;
+    selection: [number, number];
+}
 const isTextInputElement = (target: EventTarget | null): boolean =>
     (target as Element | null)?.classList?.contains(textInputElementClass) === true;
 
 export class InputHelper {
-    static clipboardState: ClipboardState = ClipboardState.None;
-    static resolveClipboard?: (value: ClipboardResult) => void;
-    static rejectClipboard?: (reason?: any) => void;
+    private static clipboardHandlerInstalled = false;
+    private static pasteKeyDown?: KeyboardEvent;
+    private static clipboardPaste?: ClipboardPaste;
     private static readonly textInputResets = new WeakMap<EventTarget, () => void>();
+    private static readonly surroundingProjections = new WeakMap<HTMLInputElement, SurroundingProjection>();
 
     public static initializeBackgroundHandlers() {
-        if (this.clipboardState !== ClipboardState.None) {
+        if (this.clipboardHandlerInstalled) {
             return;
         }
 
         globalThis.document.addEventListener("paste", args => {
-            if (this.clipboardState !== ClipboardState.Pending || !this.resolveClipboard) {
+            const paste = this.clipboardPaste;
+            if (!paste || args.target !== paste.keyDown.target) {
                 return;
             }
 
@@ -118,10 +113,10 @@ export class InputHelper {
             const items: ReadableDataItem[] = this.getDataTransferItems(clipboardData).map((item) => item.kind === "string" && clipboardData != null
                 ? { type: "string", value: clipboardData.getData(item.type), format: item.type }
                 : { type: "dataTransferItem", value: item });
-            const result: ClipboardResult = { result: items };
-            this.resolveClipboard(result);
+            args.preventDefault();
+            this.completeClipboardPaste(paste, { result: items });
         });
-        this.clipboardState = ClipboardState.Ready;
+        this.clipboardHandlerInstalled = true;
     }
 
     private static getDataTransferItems(dataTransfer?: DataTransfer | null): DataTransferItem[] {
@@ -159,43 +154,61 @@ export class InputHelper {
     // copied.
     public static addBytesToWriteableClipboardItem(item: WriteableClipboardItem, format: string, value: Uint8Array) {
         const bytes = value.slice(0, value.byteLength);
-        item.data[format] = new Blob([bytes], { type: format });
+        const mimeType = format.startsWith("web ") ? format.slice(4) : format;
+        item.data[format] = new Blob([bytes], { type: mimeType });
     }
 
     public static async readClipboard(window: Window): Promise<ClipboardResult> {
         const clipboard = window.navigator.clipboard;
 
         try {
-            if (clipboard.read) {
+            if (clipboard?.read) {
                 const clipboardItems = await clipboard.read();
                 const result: ClipboardResult = { result: clipboardItems.map((item) => ({ type: "clipboardItem", value: item })) };
                 return result;
-            } else if (clipboard.readText) {
+            } else if (clipboard?.readText) {
                 const item: ReadableDataItem = {
                     type: "string",
                     value: await clipboard.readText()
                 };
                 const result: ClipboardResult = { result: [item] };
                 return result;
-            } else {
-                try {
-                    return await new Promise<ClipboardResult>((resolve, reject) => {
-                        this.clipboardState = ClipboardState.Pending;
-                        this.resolveClipboard = resolve;
-                        this.rejectClipboard = reject;
-                    });
-                } finally {
-                    this.clipboardState = ClipboardState.Ready;
-                    this.resolveClipboard = undefined;
-                    this.rejectClipboard = undefined;
-                }
             }
+            return await this.readClipboardFromPaste(window);
         } catch (ex: unknown) {
             if (ex instanceof Error && ex.name === "NotAllowedError") {
                 const result: ClipboardResult = { error: "denied" };
                 return result;
             }
             throw ex;
+        }
+    }
+
+    private static readClipboardFromPaste(window: Window): Promise<ClipboardResult> | ClipboardResult {
+        const keyDown = this.pasteKeyDown;
+        if (!keyDown) {
+            return { error: "denied" };
+        }
+        if (this.clipboardPaste?.keyDown === keyDown) {
+            return this.clipboardPaste.promise;
+        }
+        if (this.clipboardPaste) {
+            this.completeClipboardPaste(this.clipboardPaste, { error: "denied" });
+        }
+        let complete!: (result: ClipboardResult) => void;
+        const promise = new Promise<ClipboardResult>(resolve => { complete = resolve; });
+        const paste = { keyDown, promise, complete };
+        this.clipboardPaste = paste;
+        // A browser's default paste follows the keydown. Release the request
+        // on the next task if the browser cancels it or focus moves away.
+        window.setTimeout(() => this.completeClipboardPaste(paste, { error: "denied" }), 0);
+        return promise;
+    }
+
+    private static completeClipboardPaste(paste: ClipboardPaste, result: ClipboardResult): void {
+        if (this.clipboardPaste === paste) {
+            this.clipboardPaste = undefined;
+            paste.complete(result);
         }
     }
 
@@ -426,10 +439,10 @@ export class InputHelper {
     // when the application handled it.
     //
     // One exception to 2: a key down whose handling started a read of the clipboard through the
-    // paste event (browsers without the asynchronous Clipboard API, see ClipboardState) keeps its
+    // paste event (browsers without the asynchronous Clipboard API) keeps its
     // default action, which is the paste.
     private static shouldPreventDefault(args: KeyboardEvent, handled: boolean): boolean {
-        if (args.type === "keydown" && handled && this.clipboardState === ClipboardState.Pending) {
+        if (this.clipboardPaste?.keyDown === args) {
             return false;
         }
 
@@ -461,10 +474,19 @@ export class InputHelper {
         // default action afterwards: the answer is synchronous, so that the decision is made while
         // the event is still being dispatched. See shouldPreventDefault for the policy.
         const keyDownHandler = (args: KeyboardEvent) => {
-            const handled: boolean =
-                FerroExports.InputHelper?.OnKeyDown(topLevelId, args.code, args.key, this.getModifiers(args)) ?? false;
-            if (this.shouldPreventDefault(args, handled)) {
-                args.preventDefault();
+            const previous = this.pasteKeyDown;
+            const command = args.ctrlKey || args.metaKey;
+            const pasteShortcut = !args.isComposing && !args.altKey &&
+                ((command && args.key.toLowerCase() === "v") || (!command && args.shiftKey && args.key === "Insert"));
+            this.pasteKeyDown = pasteShortcut ? args : undefined;
+            try {
+                const handled: boolean =
+                    FerroExports.InputHelper?.OnKeyDown(topLevelId, args.code, args.key, this.getModifiers(args)) ?? false;
+                if (this.shouldPreventDefault(args, handled)) {
+                    args.preventDefault();
+                }
+            } finally {
+                this.pasteKeyDown = previous;
             }
         };
         element.addEventListener("keydown", keyDownHandler);
@@ -476,9 +498,9 @@ export class InputHelper {
                 args.preventDefault();
             }
 
-            // Differs from the original, which rejects without a reason.
-            if (this.rejectClipboard) {
-                this.rejectClipboard(new Error("The key was released without a paste event."));
+            const paste = this.clipboardPaste;
+            if (paste && paste.keyDown.code === args.code && paste.keyDown.target === args.target) {
+                this.completeClipboardPaste(paste, { error: "denied" });
             }
         };
 
@@ -494,6 +516,19 @@ export class InputHelper {
         element: HTMLInputElement,
         topLevelId: number) {
         let composing = false;
+        const legacyInput = element.querySelector?.<HTMLInputElement>(":scope > .ferroui-input-element");
+        const isLegacyEdit = (args: InputEvent) => legacyInput != null && args.target === legacyInput &&
+            legacyInput.matches(":focus") && !composing && !args.isComposing;
+        const isStandaloneDelete = (args: InputEvent) => isLegacyEdit(args) &&
+            (args.inputType === "deleteContentBackward" || args.inputType === "deleteContentForward");
+        // Undefined means the browser sent no beforeinput. Null marks a
+        // beforeinput whose selection or owner was superseded.
+        let pendingReplacement: { projection: SurroundingProjection; selection: [number, number] } | null | undefined;
+        const invalidateReplacement = () => {
+            if (pendingReplacement !== undefined) pendingReplacement = null;
+        };
+        const standaloneDelete = (args: InputEvent) => FerroExports.InputHelper?.OnStandaloneDelete?.(
+            topLevelId, args.inputType === "deleteContentBackward") ?? false;
         let compositionCommit: string | undefined;
         let compositionCommitTimer: ReturnType<typeof setTimeout> | undefined;
         const clearCompositionCommit = () => {
@@ -506,14 +541,17 @@ export class InputHelper {
         const resetComposition = () => {
             composing = false;
             clearCompositionCommit();
+            invalidateReplacement();
         };
         this.textInputResets.set(element, resetComposition);
+        legacyInput?.addEventListener("blur", invalidateReplacement);
 
         // Not in the original: the events of the textarea of a connection client bubble here too.
         // They belong to its own protocol (subscribeConnectionTextEvents), never to this path.
         const compositionStartHandler = (args: CompositionEvent) => {
             if (isTextInputElement(args.target)) return;
             clearCompositionCommit();
+            invalidateReplacement();
             composing = true;
             FerroExports.InputHelper?.OnCompositionStart(topLevelId);
         };
@@ -521,6 +559,20 @@ export class InputHelper {
 
         const beforeInputHandler = (args: InputEvent) => {
             if (isTextInputElement(args.target)) return;
+            if (legacyInput && isLegacyEdit(args) && args.inputType === "insertReplacementText") {
+                const projection = this.surroundingProjections.get(legacyInput);
+                pendingReplacement = projection && projection.value === legacyInput.value && !args.defaultPrevented
+                    ? { projection, selection: readTextSelection(legacyInput) }
+                    : null;
+                return;
+            }
+            if (isStandaloneDelete(args)) {
+                // Real keydown already prevents the browser default when it
+                // handles the key. For a DOM-only edit, prefer the cancelable
+                // event so deletion works at the edge of the proxy text too.
+                if (args.cancelable && !args.defaultPrevented && standaloneDelete(args)) args.preventDefault();
+                return;
+            }
             const ranges = args.getTargetRanges();
             let start = -1;
             let end = -1;
@@ -550,7 +602,24 @@ export class InputHelper {
             }
             const isCompositionCommit = compositionCommit !== undefined && compositionCommit === args.data;
             clearCompositionCommit();
-            if (args.inputType === "insertText" && !isCompositionCommit && args.data) {
+            const replacement = pendingReplacement;
+            pendingReplacement = undefined;
+            if (isStandaloneDelete(args)) {
+                standaloneDelete(args);
+            } else if (legacyInput && isLegacyEdit(args) && args.inputType === "insertReplacementText") {
+                const projection = this.surroundingProjections.get(legacyInput);
+                if (projection && replacement !== null && (!replacement || replacement.projection === projection) && !isCompositionCommit) {
+                    FerroExports.InputHelper?.OnReplacementText?.(topLevelId, projection.value, ...projection.selection,
+                        ...(replacement?.selection ?? [-1, -1]), legacyInput.value, ...readTextSelection(legacyInput));
+                }
+                // An accepted edit publishes a new native projection. Restore
+                // the latest projection even if the edit was blocked or stale.
+                const current = this.surroundingProjections.get(legacyInput);
+                if (current) {
+                    if (legacyInput.value !== current.value) legacyInput.value = current.value;
+                    writeTextSelection(legacyInput, ...current.selection);
+                }
+            } else if (args.inputType === "insertText" && !isCompositionCommit && args.data) {
                 FerroExports.InputHelper?.OnTextInput(topLevelId, args.data);
             }
         };
@@ -559,6 +628,7 @@ export class InputHelper {
         const textKeyDownHandler = (args: KeyboardEvent) => {
             if (!args.isComposing && !isTextInputElement(args.target)) {
                 clearCompositionCommit();
+                invalidateReplacement();
             }
         };
         element.addEventListener("keydown", textKeyDownHandler);
@@ -607,6 +677,7 @@ export class InputHelper {
             element.removeEventListener("input", inputHandler);
             element.removeEventListener("keydown", textKeyDownHandler);
             element.removeEventListener("blur", clearCompositionCommit);
+            legacyInput?.removeEventListener("blur", invalidateReplacement);
             element.removeEventListener("compositionupdate", compositionUpdateHandler);
             element.removeEventListener("compositionend", compositionEndHandler);
         };
@@ -626,8 +697,8 @@ export class InputHelper {
                 FerroExports.InputHelper?.OnConnectionCompositionUpdate(topLevelId, token, data),
             compositionEnd: (token, data, value, anchor, active) =>
                 FerroExports.InputHelper?.OnConnectionCompositionEnd(topLevelId, token, data, value, anchor, active),
-            // A read of the clipboard through the paste event (see ClipboardState) takes the paste.
-            ownsPaste: () => this.clipboardState === ClipboardState.Pending
+            // A read through the paste event owns the event for its input.
+            ownsPaste: () => this.clipboardPaste?.keyDown.target === input
         });
     }
 
@@ -840,6 +911,7 @@ export class InputHelper {
                 break;
             }
         }
+        this.surroundingProjections.delete(inputElement);
         inputElement.value = "";
     }
 
@@ -902,8 +974,12 @@ export class InputHelper {
             return;
         }
 
-        inputElement.value = text;
-        inputElement.setSelectionRange(start, end);
+        // A single-line input strips line breaks from its value. Preserve
+        // one proxy character for every UTF-16 unit in a line delimiter.
+        const projected = text.replace(/[\r\n]/g, " ");
+        if (inputElement.value !== projected) inputElement.value = projected;
+        writeTextSelection(inputElement, start, end);
+        this.surroundingProjections.set(inputElement, { value: projected, selection: readTextSelection(inputElement) });
         inputElement.style.width = "20px";
         inputElement.style.width = `${inputElement.scrollWidth}px`;
     }

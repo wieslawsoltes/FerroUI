@@ -54,7 +54,8 @@ impl ClipboardImpl {
     fn try_get_data(&self) -> Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError> {
         let native = self.native();
         let change_count = native.get_change_count().clipboard_check()?;
-        let data_transfer = ClipboardDataTransfer::new(ClipboardReadSession::new(native, change_count));
+        let data_transfer =
+            ClipboardDataTransfer::for_clipboard(ClipboardReadSession::new(native, change_count));
 
         if data_transfer.try_formats()?.is_empty() {
             data_transfer.dispose();
@@ -67,9 +68,11 @@ impl ClipboardImpl {
     fn set_data(&self, data_transfer: Rc<dyn IAsyncDataTransfer>) -> Result<(), ClipboardError> {
         self.clear_core()?;
 
-        let source = IFrnClipboardDataSource::from_impl(DataTransferToFrnClipboardDataSourceWrapper::new(
-            data_transfer.to_synchronous(LogArea::MACOS_PLATFORM),
-        ));
+        let source = IFrnClipboardDataSource::from_impl(
+            DataTransferToFrnClipboardDataSourceWrapper::for_clipboard(
+                data_transfer.to_synchronous(LogArea::MACOS_PLATFORM),
+            ),
+        );
         self.native().set_data(Some(&source)).clipboard_check()
     }
 

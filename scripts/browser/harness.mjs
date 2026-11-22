@@ -18,6 +18,10 @@ const TYPES = {
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Headless Edge on Windows stalls clipboard shortcuts when both virtual-key
+// fields are present. The Windows code still enables the keyboard default action.
+export const headlessClipboardKey = { nativeKeyCodes: process.platform !== "win32" };
+
 // The Chromium builds a Playwright installation keeps (newest first), under the directories
 // Playwright uses: PLAYWRIGHT_BROWSERS_PATH, /opt/pw-browsers and the per-user caches.
 function playwrightChromium() {
@@ -135,11 +139,13 @@ const KEYS = {
     Enter: { key: "Enter", code: "Enter", keyCode: 13, text: "\r" },
     Escape: { key: "Escape", code: "Escape", keyCode: 27 },
     Backspace: { key: "Backspace", code: "Backspace", keyCode: 8 },
+    Delete: { key: "Delete", code: "Delete", keyCode: 46 },
     Space: { key: " ", code: "Space", keyCode: 32, text: " " },
     ArrowLeft: { key: "ArrowLeft", code: "ArrowLeft", keyCode: 37 },
     ArrowUp: { key: "ArrowUp", code: "ArrowUp", keyCode: 38 },
     ArrowRight: { key: "ArrowRight", code: "ArrowRight", keyCode: 39 },
     ArrowDown: { key: "ArrowDown", code: "ArrowDown", keyCode: 40 },
+    PageUp: { key: "PageUp", code: "PageUp", keyCode: 33 },
     PageDown: { key: "PageDown", code: "PageDown", keyCode: 34 },
     Home: { key: "Home", code: "Home", keyCode: 36 },
     End: { key: "End", code: "End", keyCode: 35 }
@@ -182,16 +188,18 @@ export async function splashFrames(page) {
 // load of the page (the requests of its workers and of a service worker are not among them). `angle`
 // chooses what WebGL runs on (see `rasteriserArgs`). With `navigate: false` the page is not opened yet:
 // `page.navigate()` opens it, after whatever has to be started before the page exists (a trace).
-export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript, isolated = false, network = false, angle, navigate = true } = {}) {
+export async function open(siteDirectory, { query = "", width = 460, height = 520, scale = 1, chromeArgs = [], initScript, isolated = false, network = false, angle, navigate = true, headless = true } = {}) {
     const server = await serve(siteDirectory, { isolated });
     const profile = fs.mkdtempSync(path.join(os.tmpdir(), "ferroui-browser-"));
     const chrome = spawn(findChrome(), [
-        "--headless=new", "--no-first-run", "--no-default-browser-check", "--no-sandbox", "--hide-scrollbars",
+        ...(headless ? ["--headless=new"] : []),
+        "--no-first-run", "--no-default-browser-check", "--no-sandbox", "--hide-scrollbars",
         // WebGL through the software rasteriser where there is no GPU (CI runners, containers).
         ...rasteriserArgs(angle),
         `--user-data-dir=${profile}`, "--remote-debugging-port=0",
         `--window-size=${width},${height}`, `--force-device-scale-factor=${scale}`, "--force-color-profile=srgb",
         ...chromeArgs, "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
+    const chromeExited = new Promise((resolve) => chrome.once("exit", resolve));
     let chromeErrors = "";
     chrome.stderr.on("data", (chunk) => { chromeErrors = (chromeErrors + chunk).slice(-4000); });
 
@@ -341,7 +349,8 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
         async waitFor(expression, timeout = 120000) {
             const end = Date.now() + timeout;
             while (Date.now() < end) {
-                if (await page.evaluate(`!!(${expression})`).catch(() => false)) { return; }
+                // Evaluate truthiness after an asynchronous predicate settles.
+                if (await page.evaluate(`(async () => !!(await (${expression})))()`).catch(() => false)) { return; }
                 await sleep(100);
             }
             throw new Error(`timed out waiting for ${expression}\n${log.join("\n")}`);
@@ -370,22 +379,35 @@ export async function open(siteDirectory, { query = "", width = 460, height = 52
         async wheel(x, y, deltaX, deltaY) { await send("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX, deltaY, pointerType: "mouse" }); await sleep(150); },
         // Presses a named key (see KEYS) or a single character, with optional modifiers ["ctrl", "shift", ...]
         // and editing commands the browser runs as the default action of the key ({ commands: ["paste"] }).
-        async press(name, modifiers = [], { commands } = {}) {
+        async press(name, modifiers = [], { commands, virtualKeyCodes = true, nativeKeyCodes = virtualKeyCodes } = {}) {
             const key = KEYS[name] ?? { key: name, code: /^[a-z]$/i.test(name) ? `Key${name.toUpperCase()}` : "", keyCode: name.toUpperCase().charCodeAt(0), text: name };
             const mask = modifiers.reduce((m, modifier) => m | MODIFIERS[modifier], 0);
             const command = mask & (MODIFIERS.ctrl | MODIFIERS.meta);
-            const base = { key: key.key, code: key.code, windowsVirtualKeyCode: key.keyCode, nativeVirtualKeyCode: key.keyCode, modifiers: mask };
+            const codes = {
+                ...(virtualKeyCodes ? { windowsVirtualKeyCode: key.keyCode } : {}),
+                ...(nativeKeyCodes ? { nativeVirtualKeyCode: key.keyCode } : {}),
+            };
+            const base = { key: key.key, code: key.code, modifiers: mask, ...codes };
             await send("Input.dispatchKeyEvent", { type: key.text && !command ? "keyDown" : "rawKeyDown", ...base, ...(key.text && !command ? { text: key.text } : {}), ...(commands ? { commands } : {}) });
             await send("Input.dispatchKeyEvent", { type: "keyUp", ...base });
             await sleep(80);
         },
         async type(text) { for (const character of text) { await page.press(character); } },
         async close() {
-            socket.close(); browserSocket?.close(); chrome.kill(); server.close();
-            await sleep(200);
-            // The browser may still be writing to its profile while it ends: a removal that finds
-            // the directory not empty is tried again.
-            fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+            // Let Chromium close its child processes and release its profile
+            // files. On Windows killing only the parent can leave files locked.
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ id: ++id, method: "Browser.close" }));
+            }
+            await Promise.race([chromeExited, sleep(2500)]);
+            if (chrome.exitCode === null && chrome.signalCode === null) {
+                chrome.kill();
+                await Promise.race([chromeExited, sleep(1500)]);
+            }
+            socket.close();
+            browserSocket?.close();
+            server.close();
+            await fs.promises.rm(profile, { recursive: true, force: true, maxRetries: 12, retryDelay: 200 });
         }
     };
     return page;

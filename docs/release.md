@@ -200,13 +200,13 @@ After `0.1.0` the scheme repeats for the next minor version: its previews are `0
 
 The exact pins stay when `0.1.0` is released. They can be relaxed to caret requirements once the crates keep semantic versioning towards one another individually, which is a later decision.
 
-**One place.** The version is stated in `[workspace.package]` of the root manifest, which every member inherits (`version.workspace = true`), and in the `version` keys of the path dependencies in `[workspace.dependencies]`, which every member uses (`workspace = true`). One script writes both and verifies the result:
+**Version updates.** All members inherit `[workspace.package].version` from the root manifest. Dependencies between members use the pins in `[workspace.dependencies]` or an explicit inline path pin where a member needs its own dependency options. The release script updates both forms.
 
 ```sh
 scripts/release/set-version.sh 0.1.0-preview.2
 ```
 
-It rewrites the root manifest, runs `cargo metadata` (which also brings `Cargo.lock` up to date), and fails if a crate does not have the new version or a dependency between crates of the workspace is not pinned to it. The check of the continuous integration fails for the same reasons, so a crate that states its own version or its own requirement is found when it is added.
+The script checks the new versions and pins with `cargo metadata` and refreshes `Cargo.lock` with `cargo update --workspace`. The continuous integration check also verifies the versions and pins.
 
 A version that was published is never reused. If a release stops half way and cannot be completed (section 8.3), the next attempt is the next preview number.
 
@@ -309,6 +309,12 @@ scripts/release/publish.sh --dry-run --no-verify  # package only (what the conti
 ```
 
 It runs `crates.py check` and the check of the README table, packages the published crates with `cargo package --workspace` (the unpublished ones excluded by the rule), builds each package unless `--no-verify` is given, and prints every package with its size and whether crates.io has that version. It fails for a package above 10 MiB. It needs Cargo 1.90 or later and publishes nothing; it does not read the token. `--allow-dirty` packages a working tree with changes that are not committed.
+
+Use a fresh target directory when source changes between dry runs of the same version. Cargo can reuse an older unpacked dependency from the previous dry run's temporary local registry when the version and target directory are reused.
+
+```sh
+CARGO_TARGET_DIR="$(mktemp -d)" scripts/release/publish.sh --dry-run
+```
 
 ### 8.2 The check of the continuous integration
 

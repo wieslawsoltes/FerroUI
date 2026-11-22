@@ -561,6 +561,16 @@ impl ITextDrawingSink for DrawingContext<'_> {
         DrawingContext::draw_rectangle(self, brush, pen, rect, 0.0, 0.0, &BoxShadows::default());
     }
 
+    fn draw_rounded_rectangle(
+        &mut self,
+        brush: Option<&Rc<dyn IBrush>>,
+        pen: Option<&Rc<dyn IPen>>,
+        rect: Rect,
+        radius: f64,
+    ) {
+        DrawingContext::draw_rectangle(self, brush, pen, rect, radius, radius, &BoxShadows::default());
+    }
+
     fn draw_line(&mut self, pen: &Rc<dyn IPen>, p1: Point, p2: Point) {
         DrawingContext::draw_line(self, pen, p1, p2);
     }

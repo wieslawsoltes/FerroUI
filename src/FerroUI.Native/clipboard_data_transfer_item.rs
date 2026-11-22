@@ -1,13 +1,19 @@
 use crate::clipboard_data_format_helper::{to_data_formats, to_native_format};
 use crate::clipboard_read_session::ClipboardReadSession;
 use crate::frn_string::{frn_string_bytes, frn_string_to_string};
-use ferroui_base::input::platform::{ClipboardError, PlatformDataTransferItem, PlatformDataTransferItemImpl};
-use ferroui_base::input::DataFormat;
 use crate::storage_provider_api::{NativeStorageItem, StorageProviderApi};
+use ferroui_base::input::platform::chromium_clipboard::{
+    ChromiumClipboard, FormatAlias, MAX_MAP_BYTES,
+};
+use ferroui_base::input::platform::{
+    ClipboardError, PlatformDataTransferItem, PlatformDataTransferItemImpl,
+};
+use ferroui_base::input::{DataFormat, DataFormatKind};
 use ferroui_base::media::imaging::Bitmap;
 use ferroui_base::platform::storage::IStorageItem;
 use ferroui_base::{FerroLocator, LocatorExtensions};
-use std::any::Any;
+use std::any::{Any, TypeId};
+use std::cell::OnceCell;
 use std::rc::Rc;
 use url::Url;
 
@@ -16,6 +22,7 @@ use url::Url;
 pub(crate) struct ClipboardDataTransferItem {
     session: Rc<ClipboardReadSession>,
     item_index: i32,
+    web_formats: Option<OnceCell<Vec<FormatAlias>>>,
 }
 
 /// The UTF-16 (little endian) bytes of a string.
@@ -46,8 +53,16 @@ fn try_get_file_path_uri(uri_string: Option<&str>, storage_api: &StorageProvider
 }
 
 impl ClipboardDataTransferItem {
-    pub(crate) fn new(session: Rc<ClipboardReadSession>, item_index: i32) -> Rc<PlatformDataTransferItem> {
-        PlatformDataTransferItem::new(ClipboardDataTransferItem { session, item_index })
+    pub(crate) fn new(
+        session: Rc<ClipboardReadSession>,
+        item_index: i32,
+        read_web_formats: bool,
+    ) -> Rc<PlatformDataTransferItem> {
+        PlatformDataTransferItem::new(ClipboardDataTransferItem {
+            session,
+            item_index,
+            web_formats: read_web_formats.then(OnceCell::new),
+        })
     }
 
     /// A bitmap that cannot be decoded is a failure of the read, of the
@@ -87,12 +102,39 @@ impl ClipboardDataTransferItem {
         let bytes = self.session.get_item_value_as_bytes(self.item_index, native_format)?;
         Ok(bytes.map(|bytes| Rc::from(frn_string_bytes(&bytes))))
     }
+
+    fn read_web_formats(&self, formats: &[DataFormat]) -> Vec<FormatAlias> {
+        let clipboard = ChromiumClipboard::MacOs;
+        let Some(map) = clipboard.find_map(formats) else {
+            return Vec::new();
+        };
+        let Ok(Some(bytes)) = self
+            .session
+            .get_item_value_as_bytes(self.item_index, map.identifier())
+        else {
+            return Vec::new();
+        };
+        if !bytes
+            .length()
+            .is_ok_and(|length| (1..=MAX_MAP_BYTES as _).contains(&length))
+        {
+            return Vec::new();
+        }
+        clipboard.parse_map(&frn_string_bytes(&bytes), formats)
+    }
 }
 
 impl PlatformDataTransferItemImpl for ClipboardDataTransferItem {
     fn provide_formats(&self) -> Result<Vec<DataFormat>, ClipboardError> {
         let formats = self.session.get_item_formats(self.item_index)?;
-        Ok(to_data_formats(formats.as_deref(), &|format| self.session.is_text_format(format)))
+        let mut formats = to_data_formats(formats.as_deref(), &|format| {
+            self.session.is_text_format(format)
+        });
+        if let Some(aliases) = &self.web_formats {
+            let aliases = aliases.get_or_init(|| self.read_web_formats(&formats));
+            formats.extend(aliases.iter().map(|alias| alias.application.clone()));
+        }
+        Ok(formats)
     }
 
     /// The value type follows the format: `String` for the text format,
@@ -105,6 +147,16 @@ impl PlatformDataTransferItemImpl for ClipboardDataTransferItem {
     /// reader (the clipboard) gets it, a synchronous one (a drop target)
     /// panics with it.
     fn try_get_raw_core(&self, format: &DataFormat) -> Result<Option<Rc<dyn Any>>, ClipboardError> {
+        if let Some(alias) = self
+            .web_formats
+            .as_ref()
+            .and_then(OnceCell::get)
+            .and_then(|aliases| aliases.iter().find(|alias| alias.application == *format))
+        {
+            return Ok(self
+                .try_get_bytes(alias.slot.identifier())?
+                .and_then(|bytes| alias.decode(Rc::new(bytes))));
+        }
         let native_format = to_native_format(format);
 
         if DataFormat::text() == *format {
@@ -119,7 +171,10 @@ impl PlatformDataTransferItemImpl for ClipboardDataTransferItem {
             return Ok(self.try_get_bitmap(&native_format)?.map(|value| Rc::new(value) as Rc<dyn Any>));
         }
 
-        if self.session.is_text_format(&native_format) {
+        let application_text = self.web_formats.is_some()
+            && format.kind() == DataFormatKind::Application
+            && format.data_type() == Some(TypeId::of::<String>());
+        if application_text || self.session.is_text_format(&native_format) {
             if let Some(string_value) = self.try_get_string(&native_format)? {
                 return Ok(Some(Rc::new(string_value)));
             }

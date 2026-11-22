@@ -597,6 +597,13 @@ impl PropertyChangedObservable {
         }))
     }
 
+    /// Whether the property has class-wide observers. Controls with expensive
+    /// computed values can avoid materializing notification values when no
+    /// object or property observer exists.
+    pub fn has_observers(&self) -> bool {
+        !self.handlers.is_empty()
+    }
+
     /// Subscribes to changes of the property on any object.
     ///
     /// Dropping the returned guard removes the handler; call

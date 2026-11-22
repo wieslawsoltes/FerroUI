@@ -102,6 +102,7 @@ optional = true
 microcom-codegen.workspace = true
 
 [dev-dependencies]
+serde_json.workspace = true
 # The example of a window draws through the render interface of the Vello backend in its CPU
 # mode: a renderer without C or C++ sources, so the example is checked for a Windows target on
 # any host like the crate itself (the Skia backend is not: its bindings are built with a C++
@@ -109,7 +110,7 @@ microcom-codegen.workspace = true
 ferroui-vello.workspace = true
 # The tests of the automation nodes build a window of controls on the windowing platform of the
 # unit tests of the controls.
-ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-base = { workspace = true, features = ["chromium-clipboard-map", "testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 
 [[example]]

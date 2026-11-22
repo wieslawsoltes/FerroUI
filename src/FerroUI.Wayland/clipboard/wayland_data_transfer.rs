@@ -10,6 +10,7 @@ use super::wayland_mime_mapper;
 use crate::server::cross_thread_result::CrossThreadResult;
 use crate::server::interop::pipe2_stream::{Pipe2Stream, PipeDirection};
 use crate::server::transient::clipboard::wayland_offer_cookie::WaylandOfferCookie;
+use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, FormatAlias, MAX_MAP_BYTES};
 use ferroui_base::input::platform::{ClipboardError, PlatformDataTransferItem};
 use ferroui_base::input::{
     DataFormat, IAsyncDataTransfer, IAsyncDataTransferItem, IDataTransfer, IDataTransferItem, LocalBoxFuture,
@@ -19,11 +20,14 @@ use ferroui_base::platform::storage::IStorageItem;
 use ferroui_base::reactive::IDisposable;
 use ferroui_x11::selections::uri_list_helper;
 use std::any::{Any, TypeId};
-use std::cell::{OnceCell, RefCell};
+use std::cell::RefCell;
 use std::future::ready;
 use std::io::Cursor;
 use std::rc::Rc;
 use std::sync::Arc;
+use std::time::Duration;
+
+const WEB_READ_TIMEOUT: Duration = Duration::from_secs(2);
 
 /// An item under both of its contracts.
 #[derive(Clone)]
@@ -55,58 +59,73 @@ impl Items {
 struct Formats {
     formats: Rc<[DataFormat]>,
     format_to_mime: Rc<[(DataFormat, String)]>,
+    web_aliases: Rc<[FormatAlias]>,
+}
+
+impl Formats {
+    fn from_mime_types(mime_types: Vec<String>) -> Self {
+        let mut format_to_mime = Vec::new();
+        for mime in mime_types {
+            if let Some(format) = wayland_mime_mapper::from_mime_type(&mime) {
+                if !format_to_mime.iter().any(|(known, _)| *known == format) {
+                    format_to_mime.push((format, mime));
+                }
+            }
+        }
+        Self {
+            formats: format_to_mime.iter().map(|(format, _)| format.clone()).collect(),
+            format_to_mime: format_to_mime.into(),
+            web_aliases: Rc::from([]),
+        }
+    }
+
+    fn add_web_aliases(&mut self, map: &[u8]) {
+        let aliases = ChromiumClipboard::Linux.parse_map(map, &self.formats);
+        if !aliases.is_empty() {
+            self.formats = self.formats.iter().cloned().chain(aliases.iter().map(|alias| alias.application.clone())).collect();
+            self.web_aliases = aliases.into();
+        }
+    }
 }
 
 /// Data transfer backed by a Wayland `wl_data_offer`, implementing both sync and async interfaces.
 /// The offer cookie is validated on each read to detect stale offers.
 /// Reused by both clipboard and DnD.
 pub struct WaylandDataTransfer {
-    mime_types: Vec<String>,
     offer_cookie: Arc<WaylandOfferCookie>,
-    formats: OnceCell<Formats>,
+    formats: Formats,
     items: RefCell<Option<Items>>,
 }
 
 impl WaylandDataTransfer {
     pub fn new(mime_types: Vec<String>, offer_cookie: Arc<WaylandOfferCookie>) -> Rc<Self> {
-        Rc::new(Self { mime_types, offer_cookie, formats: OnceCell::new(), items: RefCell::new(None) })
-    }
-
-    fn build_formats(&self) -> &Formats {
-        self.formats.get_or_init(|| {
-            let mut format_to_mime: Vec<(DataFormat, String)> = Vec::new();
-            for mime in &self.mime_types {
-                if let Some(format) = wayland_mime_mapper::from_mime_type(mime) {
-                    if !format_to_mime.iter().any(|(known, _)| *known == format) {
-                        format_to_mime.push((format, mime.clone()));
-                    }
-                }
-            }
-            Formats {
-                formats: format_to_mime.iter().map(|(format, _)| format.clone()).collect(),
-                format_to_mime: format_to_mime.into(),
-            }
+        Rc::new(Self {
+            offer_cookie,
+            formats: Formats::from_mime_types(mime_types),
+            items: RefCell::new(None),
         })
     }
 
-    fn get_formats(&self) -> Rc<[DataFormat]> {
-        self.build_formats().formats.clone()
+    pub(crate) async fn for_clipboard(mime_types: Vec<String>, offer_cookie: Arc<WaylandOfferCookie>) -> Option<Rc<Self>> {
+        let mut formats = Formats::from_mime_types(mime_types);
+        if let Some(map) = ChromiumClipboard::Linux.find_map(&formats.formats) {
+            if let Some(bytes) = WaylandDataTransferItem::read_raw_bytes_async(&offer_cookie, map.identifier(), Some(MAX_MAP_BYTES)).await {
+                formats.add_web_aliases(&bytes);
+            }
+        }
+        let transfer = Rc::new(Self { formats, offer_cookie, items: RefCell::new(None) });
+        transfer.preload_async().await;
+        (!transfer.offer_cookie.is_invalidated()).then_some(transfer)
     }
 
     /// Pre-reads the file list asynchronously and builds the item layout. Used by the clipboard read
     /// path so the (cross-process) pipe read doesn't block the caller's thread.
-    pub(crate) fn preload_async(self: &Rc<Self>) -> LocalBoxFuture<()> {
-        if self.items.borrow().is_some() {
-            return Box::pin(ready(()));
-        }
-        let this = self.clone();
-        Box::pin(async move {
-            let files = match this.file_mime() {
-                Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_async(&this.offer_cookie, &mime).await),
-                None => None,
-            };
-            this.set_items(this.build_items(files));
-        })
+    async fn preload_async(&self) {
+        let files = match self.file_mime() {
+            Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_async(&self.offer_cookie, mime, None).await),
+            None => None,
+        };
+        self.set_items(self.build_items(files));
     }
 
     fn ensure_items_blocking(&self) {
@@ -118,7 +137,7 @@ impl WaylandDataTransfer {
         // the UI thread, so it can't deadlock. wl_data_offer transfers are always cross-process —
         // in-process drags use the original IDataTransfer.
         let files = match self.file_mime() {
-            Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_blocking(&self.offer_cookie, &mime)),
+            Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_blocking(&self.offer_cookie, mime, None)),
             None => None,
         };
         self.set_items(self.build_items(files));
@@ -132,7 +151,7 @@ impl WaylandDataTransfer {
     /// matching the single-value contract of the file format) plus one shared item for all
     /// remaining formats. Mirrors the other platforms so file copy/paste and drag-drop work.
     fn build_items(&self, files: Option<Vec<Rc<dyn IStorageItem>>>) -> Vec<Item> {
-        let Formats { formats, format_to_mime } = self.build_formats();
+        let Formats { formats, format_to_mime, web_aliases } = &self.formats;
         let mut items = Vec::new();
         let mut non_file_formats: Vec<DataFormat> = Vec::new();
 
@@ -149,19 +168,20 @@ impl WaylandDataTransfer {
         }
 
         if !non_file_formats.is_empty() {
-            items.push(Item::of(Rc::new(WaylandDataTransferItem::new(
-                non_file_formats.into(),
-                format_to_mime.clone(),
-                self.offer_cookie.clone(),
-            ))));
+            items.push(Item::of(Rc::new(WaylandDataTransferItem {
+                formats: non_file_formats.into(),
+                format_to_mime: format_to_mime.clone(),
+                web_aliases: web_aliases.clone(),
+                offer_cookie: self.offer_cookie.clone(),
+            })));
         }
 
         items
     }
 
     /// The MIME type the file format is read with, or `None` if no File format.
-    fn file_mime(&self) -> Option<String> {
-        self.build_formats().format_to_mime.iter().find(|(format, _)| DataFormat::file() == *format).map(|(_, mime)| mime.clone())
+    fn file_mime(&self) -> Option<&str> {
+        self.formats.format_to_mime.iter().find(|(format, _)| DataFormat::file() == *format).map(|(_, mime)| mime.as_str())
     }
 }
 
@@ -173,7 +193,7 @@ fn files_of(bytes: Option<Vec<u8>>) -> Option<Vec<Rc<dyn IStorageItem>>> {
 
 impl IDataTransfer for WaylandDataTransfer {
     fn formats(&self) -> Rc<[DataFormat]> {
-        self.get_formats()
+        self.formats.formats.clone()
     }
 
     // Synchronous interface: may block to resolve the file list (allowed by the IDataTransfer contract).
@@ -189,7 +209,7 @@ impl IDataTransfer for WaylandDataTransfer {
 
 impl IAsyncDataTransfer for WaylandDataTransfer {
     fn formats(&self) -> Rc<[DataFormat]> {
-        self.get_formats()
+        self.formats.formats.clone()
     }
 
     // The fallback here isn't supposed to be called since clipboard calls `preload_async`, but we do a
@@ -220,38 +240,64 @@ impl IDisposable for WaylandDataTransfer {
 pub struct WaylandDataTransferItem {
     formats: Rc<[DataFormat]>,
     format_to_mime: Rc<[(DataFormat, String)]>,
+    web_aliases: Rc<[FormatAlias]>,
     offer_cookie: Arc<WaylandOfferCookie>,
 }
 
 impl WaylandDataTransferItem {
     pub fn new(formats: Rc<[DataFormat]>, format_to_mime: Rc<[(DataFormat, String)]>, offer_cookie: Arc<WaylandOfferCookie>) -> Self {
-        Self { formats, format_to_mime, offer_cookie }
+        Self { formats, format_to_mime, web_aliases: Rc::from([]), offer_cookie }
     }
 
     /// Reads the raw bytes offered for a MIME type through a pipe: the cookie is sent to the
     /// Wayland thread, which gives the reading end, and the pipe is read on a thread of its
     /// own.
-    pub(crate) fn read_raw_bytes_async(offer_cookie: &Arc<WaylandOfferCookie>, mime_type: &str) -> LocalBoxFuture<Option<Vec<u8>>> {
+    fn read_raw_bytes_async(
+        offer_cookie: &Arc<WaylandOfferCookie>,
+        mime_type: &str,
+        byte_limit: Option<usize>,
+    ) -> LocalBoxFuture<Option<Vec<u8>>> {
         // Send cookie + MIME to Wayland thread; the cookie posts and returns the fd.
         let read_fd = offer_cookie.try_receive_async(mime_type);
+        let cookie = offer_cookie.clone();
         Box::pin(async move {
             let read_fd = read_fd.await.flatten()?;
-            CrossThreadResult::run_on_thread(move || Pipe2Stream::new(read_fd, PipeDirection::In).read_to_end().ok())
-                .await
-                .flatten()
+            let data = CrossThreadResult::run_on_thread(move || Self::read_pipe(read_fd, byte_limit)).await.flatten()?;
+            (!cookie.is_invalidated()).then_some(data)
         })
     }
 
     /// Reads the raw bytes offered for a MIME type through a pipe, on the calling thread.
-    pub(crate) fn read_raw_bytes_blocking(offer_cookie: &Arc<WaylandOfferCookie>, mime_type: &str) -> Option<Vec<u8>> {
+    fn read_raw_bytes_blocking(
+        offer_cookie: &Arc<WaylandOfferCookie>,
+        mime_type: &str,
+        byte_limit: Option<usize>,
+    ) -> Option<Vec<u8>> {
         let read_fd = offer_cookie.try_receive_async(mime_type).wait().flatten()?;
-        Pipe2Stream::new(read_fd, PipeDirection::In).read_to_end().ok()
+        let data = Self::read_pipe(read_fd, byte_limit)?;
+        (!offer_cookie.is_invalidated()).then_some(data)
     }
 
-    /// Finds the MIME type to use for the given format: the preserved mapping from the
-    /// original offer (round-trippable).
-    fn find_mime_type(&self, format: &DataFormat) -> Option<String> {
-        self.format_to_mime.iter().find(|(known, _)| known == format).map(|(_, mime)| mime.clone())
+    fn read_pipe(fd: std::os::fd::OwnedFd, byte_limit: Option<usize>) -> Option<Vec<u8>> {
+        let pipe = Pipe2Stream::new(fd, PipeDirection::In);
+        match byte_limit {
+            Some(max) => pipe.read_to_end_bounded(max, WEB_READ_TIMEOUT),
+            None => pipe.read_to_end(),
+        }.ok()
+    }
+
+    fn find_mime_type(&self, format: &DataFormat) -> Option<(&str, Option<&FormatAlias>)> {
+        if let Some(alias) = self.web_aliases.iter().find(|alias| &alias.application == format) {
+            return Some((alias.slot.identifier(), Some(alias)));
+        }
+        self.format_to_mime.iter().find(|(known, _)| known == format).map(|(_, mime)| (mime.as_str(), None))
+    }
+
+    fn convert_received_data(format: &DataFormat, alias: Option<&FormatAlias>, data: Vec<u8>) -> Option<Rc<dyn Any>> {
+        match alias {
+            Some(alias) => alias.decode(Rc::new(Rc::<[u8]>::from(data))),
+            None => Self::convert_data(format, data),
+        }
     }
 
     pub(crate) fn convert_data(format: &DataFormat, data: Vec<u8>) -> Option<Rc<dyn Any>> {
@@ -297,9 +343,9 @@ impl IDataTransferItem for WaylandDataTransferItem {
         if !self.formats.contains(format) {
             return None;
         }
-        let mime_type = self.find_mime_type(format)?;
-        let data = Self::read_raw_bytes_blocking(&self.offer_cookie, &mime_type)?;
-        Self::convert_data(format, data)
+        let (mime_type, alias) = self.find_mime_type(format)?;
+        let data = Self::read_raw_bytes_blocking(&self.offer_cookie, mime_type, alias.map(|_| usize::MAX))?;
+        Self::convert_received_data(format, alias, data)
     }
 }
 
@@ -315,12 +361,13 @@ impl IAsyncDataTransferItem for WaylandDataTransferItem {
         if !self.formats.contains(format) {
             return Box::pin(ready(Ok(None)));
         }
-        let Some(mime_type) = self.find_mime_type(format) else {
+        let Some((mime_type, alias)) = self.find_mime_type(format) else {
             return Box::pin(ready(Ok(None)));
         };
-        let read = Self::read_raw_bytes_async(&self.offer_cookie, &mime_type);
+        let read = Self::read_raw_bytes_async(&self.offer_cookie, mime_type, alias.map(|_| usize::MAX));
         let format = format.clone();
-        Box::pin(async move { Ok(read.await.and_then(|data| Self::convert_data(&format, data))) })
+        let alias = alias.cloned();
+        Box::pin(async move { Ok(read.await.and_then(|data| Self::convert_received_data(&format, alias.as_ref(), data))) })
     }
 }
 
@@ -360,5 +407,29 @@ mod tests {
         let files = files_of(Some(list.into_bytes())).unwrap();
         assert_eq!(files.len(), 2);
         assert_eq!(files[0].name(), binary.file_name().unwrap().to_string_lossy());
+    }
+
+    #[test]
+    fn clipboard_aliases_require_an_offered_slot_and_keep_native_formats() {
+        let text = DataFormat::create_string_application_format("RectangularSelection");
+        let native = DataFormat::create_string_application_format("WholeLineSelection");
+        let bytes = DataFormat::create_bytes_application_format("Binary");
+        let map = ChromiumClipboard::Linux.create_map(&[text.clone().into(), native.clone().into(), bytes.clone().into()]).unwrap();
+        let mut offer = Formats::from_mime_types(vec![
+            "text/plain".into(),
+            "application/x-ferroui-WholeLineSelection".into(),
+            map.aliases[0].slot.identifier().into(),
+            map.aliases[1].slot.identifier().into(),
+        ]);
+        offer.add_web_aliases(&map.bytes);
+        assert_eq!(offer.web_aliases.len(), 1);
+        let alias = &offer.web_aliases[0];
+        assert_eq!(alias.application, *text);
+        assert!(offer.formats.contains(&text));
+        assert!(offer.formats.contains(&native));
+        assert!(!offer.formats.contains(&bytes));
+        let decode = |data: &[u8]| WaylandDataTransferItem::convert_received_data(&text, Some(alias), data.to_vec());
+        assert_eq!(decode("sélection".as_bytes()).unwrap().downcast_ref::<String>().unwrap(), "sélection");
+        assert!(decode(&[0xff]).is_none());
     }
 }

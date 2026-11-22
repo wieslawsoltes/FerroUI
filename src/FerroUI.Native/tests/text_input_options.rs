@@ -1,4 +1,4 @@
-//! Main-thread AppKit protocol test of the content hints of R12
+//! Main-thread AppKit protocol tests of text input commits and the content hints of R12
 //! (`docs/porting/winui-rich-text.md`). Uses the actual view of a FerroUI window,
 //! not a second text field or a synthetic options object. No keyboard event is
 //! sent outside this process and no native prediction service is enabled.
@@ -21,7 +21,8 @@ fn main() {
 mod macos {
     use ferroui_base::data::TemplateBinding;
     use ferroui_base::input::text_input::{TextInputContentType, TextInputOptions};
-    use ferroui_base::input::{InputScope, InputScopeNameValue};
+    use ferroui_base::input::{InputElement, InputScope, InputScopeNameValue};
+    use ferroui_base::interactivity::RoutingStrategies;
     use ferroui_base::platform::IMacOSTopLevelPlatformHandle;
     use ferroui_base::threading::Dispatcher;
     use ferroui_controls::presenters::ContentPresenter;
@@ -37,6 +38,7 @@ mod macos {
         MacOSTopLevelHandle,
     };
     use ferroui_skia::SkiaApplicationExtensions;
+    use std::cell::RefCell;
     use std::ffi::{c_char, c_void, CStr};
     use std::rc::Rc;
 
@@ -49,6 +51,11 @@ mod macos {
         location: usize,
         length: usize,
     }
+
+    const NO_REPLACEMENT: Range = Range {
+        location: isize::MAX as usize,
+        length: 0,
+    };
 
     #[link(name = "objc")]
     extern "C" {
@@ -137,29 +144,44 @@ mod macos {
         }
     }
 
-    fn set_marked_text(view: Id) {
+    fn native_string(text: &CStr) -> Id {
         unsafe {
             let string: unsafe extern "C" fn(Id, Sel, *const c_char) -> Id =
                 std::mem::transmute(objc_msgSend as unsafe extern "C" fn());
-            let text = string(
+            string(
                 objc_getClass(c"NSString".as_ptr()),
                 sel_registerName(c"stringWithUTF8String:".as_ptr()),
-                c"preview".as_ptr(),
-            );
+                text.as_ptr(),
+            )
+        }
+    }
+
+    fn set_marked_text(view: Id) {
+        unsafe {
             let mark: unsafe extern "C" fn(Id, Sel, Id, Range, Range) =
                 std::mem::transmute(objc_msgSend as unsafe extern "C" fn());
             mark(
                 view,
                 sel_registerName(c"setMarkedText:selectedRange:replacementRange:".as_ptr()),
-                text,
+                native_string(c"preview"),
                 Range {
                     location: 7,
                     length: 0,
                 },
-                Range {
-                    location: isize::MAX as usize,
-                    length: 0,
-                },
+                NO_REPLACEMENT,
+            );
+        }
+    }
+
+    fn insert_text(view: Id, text: &CStr) {
+        unsafe {
+            let insert: unsafe extern "C" fn(Id, Sel, Id, Range) =
+                std::mem::transmute(objc_msgSend as unsafe extern "C" fn());
+            insert(
+                view,
+                sel_registerName(c"insertText:replacementRange:".as_ptr()),
+                native_string(text),
+                NO_REPLACEMENT,
             );
         }
     }
@@ -326,13 +348,30 @@ mod macos {
         }
         // The TextBox is the client of the view (its preedit reaches it) and still has no hint.
         assert!(text_box.focus());
+        text_box.set_caret_index(6);
         set_marked_text(view);
         assert!(text_box.is_composing_text());
         assert_content(view, None);
         send_void(view, c"unmarkText");
+        assert!(!text_box.is_composing_text());
+
+        let commits = Rc::new(RefCell::new(Vec::new()));
+        let recorded = commits.clone();
+        let _handler = text_box.add_disposable_handler_with(
+            &InputElement::text_input_event(),
+            move |_, event| {
+                recorded.borrow_mut().push((event.text.clone(), event.is_from_input_method()));
+            },
+            RoutingStrategies::BUBBLE,
+            true,
+        );
+        insert_text(view, c"{");
+        assert_eq!(&*commits.borrow(), &[(Some("{".to_owned()), true)]);
+        assert_eq!(text_box.text().as_deref(), Some("legacy{"));
+
         window.close();
         Dispatcher::ui_thread().run_jobs(None);
-        println!("text_input_options: 43 mappings, live hints, privacy, focus, legacy client and composition checks passed");
+        println!("text_input_options: content hints, focus, preedit and delayed commit checks passed");
     }
 
     pub fn run() {

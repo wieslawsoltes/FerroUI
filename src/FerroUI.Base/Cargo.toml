@@ -26,6 +26,10 @@ autotests = false
 path = "lib.rs"
 
 [features]
+# The JSON of Chromium's custom clipboard format map, which exchanges application formats with a
+# browser. Off by default: an application that does not enable it neither publishes nor reads the
+# map and links no JSON library. Enabled by `ferroui-edit`.
+chromium-clipboard-map = ["dep:serde_json"]
 # Development-only tracking of explicit writes to reload-owned root properties.
 hot-reload = []
 # Exposes the render test doubles in `rendering::testing` to other crates.
@@ -96,6 +100,9 @@ icu_locale_core = { workspace = true, features = ["alloc"] }
 # Unix systems share.
 [target.'cfg(all(unix, not(target_os = "emscripten")))'.dependencies]
 libc.workspace = true
+
+[target.'cfg(any(windows, all(unix, not(target_arch = "wasm32"))))'.dependencies]
+serde_json = { workspace = true, optional = true }
 
 [build-dependencies]
 # The source scanner and the export of the type model: the standard library and `syn`, nothing of the

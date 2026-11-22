@@ -67,7 +67,26 @@ impl ITextDrawingSink for TextGeometrySink {
     }
 
     fn draw_rectangle(&mut self, brush: Option<&Rc<dyn IBrush>>, pen: Option<&Rc<dyn IPen>>, rect: Rect) {
-        let geometry: Ref<Geometry> = RectangleGeometry::with_rect(rect).upcast();
+        self.draw_rounded_rectangle(brush, pen, rect, 0.0);
+    }
+
+    fn draw_rounded_rectangle(
+        &mut self,
+        brush: Option<&Rc<dyn IBrush>>,
+        pen: Option<&Rc<dyn IPen>>,
+        rect: Rect,
+        radius: f64,
+    ) {
+        let geometry: Ref<Geometry> = if radius == 0.0 {
+            RectangleGeometry::with_rect(rect).upcast()
+        } else {
+            RectangleGeometry::with_rect_and_radii(
+                rect,
+                radius.min(rect.width / 2.0),
+                radius.min(rect.height / 2.0),
+            )
+            .upcast()
+        };
         if let Some(pen) = pen {
             self.append_stroke(&geometry, pen.as_ref());
         }

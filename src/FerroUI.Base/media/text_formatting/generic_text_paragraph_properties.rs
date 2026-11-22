@@ -3,6 +3,7 @@ use std::rc::Rc;
 
 use crate::media::text_formatting::{TextLineMetricsMode, TextParagraphProperties, TextRunProperties, TextTabStop, TextTabStops};
 use crate::media::{FlowDirection, TextAlignment, TextLineBounds, TextWrapping};
+use super::TextParagraphStyle;
 
 /// Generic implementation of `TextParagraphProperties`.
 pub struct GenericTextParagraphProperties {
@@ -10,6 +11,7 @@ pub struct GenericTextParagraphProperties {
     text_alignment: Cell<TextAlignment>,
     text_wrap: Cell<TextWrapping>,
     line_height: Cell<f64>,
+    minimum_line_height: f64,
     first_line_in_paragraph: bool,
     always_collapsible: bool,
     default_text_run_properties: Rc<dyn TextRunProperties>,
@@ -49,6 +51,7 @@ impl GenericTextParagraphProperties {
             text_alignment: Cell::new(text_alignment),
             text_wrap: Cell::new(text_wrapping),
             line_height: Cell::new(line_height),
+            minimum_line_height: 0.0,
             first_line_in_paragraph: false,
             always_collapsible: false,
             default_text_run_properties,
@@ -81,6 +84,7 @@ impl GenericTextParagraphProperties {
             text_alignment: Cell::new(text_alignment),
             text_wrap: Cell::new(text_wrapping),
             line_height: Cell::new(line_height),
+            minimum_line_height: 0.0,
             first_line_in_paragraph,
             always_collapsible,
             default_text_run_properties,
@@ -103,9 +107,23 @@ impl GenericTextParagraphProperties {
         self
     }
 
+    /// Sets the advance of each raw tab. Zero restores the shaper's default.
+    pub fn with_fixed_tab_width(mut self, width: f64) -> Self {
+        self.tabs = None;
+        self.default_tab = TextParagraphStyle::nonnegative(width);
+        self.tab_origin = 0.0;
+        self
+    }
+
     /// Set line spacing: the additional space between lines.
     pub fn set_line_spacing(&self, line_spacing: f64) {
         self.line_spacing.set(line_spacing);
+    }
+
+    /// Sets a minimum row height in device-independent pixels.
+    pub fn with_minimum_line_height(mut self, minimum: f64) -> Self {
+        self.minimum_line_height = TextParagraphStyle::nonnegative(minimum);
+        self
     }
 
     /// Sets how the box of each line is bounded (a FerroUI addition, docs/porting/DEVIATIONS.md,
@@ -153,7 +171,7 @@ impl GenericTextParagraphProperties {
         }
         result.set_text_line_bounds(text_paragraph_properties.text_line_bounds());
         result.set_line_metrics_mode(text_paragraph_properties.line_metrics_mode());
-        result
+        result.with_minimum_line_height(text_paragraph_properties.minimum_line_height())
     }
 
     /// Set flow direction.
@@ -188,6 +206,10 @@ impl TextParagraphProperties for GenericTextParagraphProperties {
 
     fn line_height(&self) -> f64 {
         self.line_height.get()
+    }
+
+    fn minimum_line_height(&self) -> f64 {
+        self.minimum_line_height
     }
 
     fn line_spacing(&self) -> f64 {

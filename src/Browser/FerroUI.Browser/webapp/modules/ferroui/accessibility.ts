@@ -9,10 +9,10 @@ import { FerroExports } from "./ferroExports";
 // - one element per peer, nested as the peers are, absolutely positioned at the bounds of its peer
 //   (relative to its parent element), with the ARIA role, name, states and value of the peer, and
 //   the class and automation id of its control as `data-ferroui-type` and `data-ferroui-name`;
-// - the elements are transparent and take no pointer events: the canvas keeps every pointer and
-//   key event, while a screen reader reads the elements and the element picker finds them;
-// - the container of the view, which keeps the keyboard focus, names the element of the focused
-//   peer with `aria-activedescendant`;
+// - the elements are transparent and take no pointer events, while a screen reader reads the
+//   elements and the element picker finds them;
+// - the container names the focused peer with `aria-activedescendant`. The DOM inputs that take
+//   focus for text entry carry the focused text peer's name and a reference to its mirror;
 // - a click on an element (what a screen reader does to activate it) is sent to the framework, which
 //   invokes, toggles, selects, expands or focuses its peer.
 //
@@ -57,14 +57,20 @@ interface Batch {
 
 class AccessibilityState {
     readonly elements = new Map<number, HTMLElement>();
+    readonly inputProxies: readonly HTMLElement[];
     frame = 0;
+    focused = 0;
 
     constructor(
         readonly host: HTMLElement,
         readonly container: HTMLElement,
         readonly topLevelId: number,
         readonly prefix: string
-    ) {}
+    ) {
+        this.inputProxies = Array.from(container.querySelectorAll<HTMLElement>(
+            ":scope > .ferroui-input-element, :scope > .ferroui-text-input-element"
+        ));
+    }
 }
 
 const STATE = Symbol("ferroui-accessibility");
@@ -121,8 +127,7 @@ export class FerroAccessibility {
             return;
         }
         const batch = JSON.parse(json) as Batch;
-        // The container keeps the keyboard focus and names the focused element: a widget that
-        // handles its own keys, for which `aria-activedescendant` is read.
+        // The container handles its own keys and reports its active descendant when it has focus.
         if (state.container.getAttribute("role") !== "application") {
             state.container.setAttribute("role", "application");
         }
@@ -130,12 +135,9 @@ export class FerroAccessibility {
             FerroAccessibility.applyChange(state, change);
         }
         if (batch.f !== undefined) {
-            if (batch.f > 0 && state.elements.has(batch.f)) {
-                state.container.setAttribute("aria-activedescendant", state.prefix + String(batch.f));
-            } else {
-                state.container.removeAttribute("aria-activedescendant");
-            }
+            state.focused = batch.f;
         }
+        FerroAccessibility.syncFocus(state);
     }
 
     // Shows or removes the visually hidden button that turns the mirror on (built on demand).
@@ -182,8 +184,30 @@ export class FerroAccessibility {
                 child.remove();
             }
         }
-        state.container.removeAttribute("aria-activedescendant");
+        state.focused = 0;
+        FerroAccessibility.syncFocus(state);
         state.container.removeAttribute("role");
+    }
+
+    private static syncFocus(state: AccessibilityState): void {
+        const peer = state.elements.get(state.focused);
+        FerroAccessibility.setAttribute(state.container, "aria-activedescendant", peer?.id ?? "");
+
+        // Text entry focuses one of the persistent DOM inputs. Give either one the text peer's
+        // name and a link to its mirror, whose value can include more than the current IME context.
+        const role = peer?.getAttribute("role");
+        const textPeer = role === "textbox" || role === "combobox" ? peer : undefined;
+        const placeholder = textPeer?.getAttribute("aria-placeholder") ?? "";
+        const name = textPeer?.getAttribute("aria-label") ?? placeholder;
+        const description = textPeer?.getAttribute("aria-description") ?? "";
+        const readOnly = textPeer?.getAttribute("aria-readonly") ?? "";
+        for (const input of state.inputProxies) {
+            FerroAccessibility.setAttribute(input, "aria-label", name);
+            FerroAccessibility.setAttribute(input, "aria-description", description);
+            FerroAccessibility.setAttribute(input, "aria-placeholder", placeholder);
+            FerroAccessibility.setAttribute(input, "aria-readonly", readOnly);
+            FerroAccessibility.setAttribute(input, "aria-controls", textPeer?.id ?? "");
+        }
     }
 
     private static applyChange(state: AccessibilityState, change: NodeChange): void {
@@ -264,6 +288,9 @@ export class FerroAccessibility {
     }
 
     private static setAttribute(element: HTMLElement, name: string, value: string): void {
+        if (element.getAttribute(name) === (value || null)) {
+            return;
+        }
         if (value === "") {
             element.removeAttribute(name);
         } else {

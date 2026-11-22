@@ -2106,7 +2106,7 @@ mod imp {
                 return false;
             };
             let device: Rc<dyn IInputDevice> = WindowsKeyboardDevice::instance();
-            input(Rc::new(RawTextInputEventArgs::new(device, timestamp, self.owner(), text.to_owned())));
+            input(Rc::new(RawTextInputEventArgs::new(device, timestamp, self.owner(), text).with_input_method_origin()));
             true
         }
 

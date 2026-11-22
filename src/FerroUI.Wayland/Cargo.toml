@@ -63,6 +63,9 @@ example = [
 # An example built with this feature alone does not run.
 example-check = ["dep:wayland-protocols-wlr", "dep:wayland-protocols-misc"]
 
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["chromium-clipboard-map"] }
+
 [[example]]
 name = "wayland_window"
 path = "examples/wayland_window.rs"

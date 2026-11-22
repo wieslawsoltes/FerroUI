@@ -23,17 +23,19 @@ const bundled = await build({
 });
 const { InputHelper, FerroExports } = await import("data:text/javascript;base64," + Buffer.from(bundled.outputFiles[0].text).toString("base64"));
 
-function event(type, fields = {}) {
-    return Object.assign(new Event(type, { cancelable: true }), fields);
+function event(type, fields = {}, cancelable = true) {
+    return Object.assign(new Event(type, { cancelable }), fields);
 }
 function insertion(data, fields = {}) {
     return event("input", { inputType: "insertText", data, isComposing: false, ...fields });
 }
-function setup(t, { handled = false } = {}) {
+function setup(t, { handled = false, focusedLegacyInput = false } = {}) {
     const calls = [];
     const record = (name) => (...args) => { calls.push([name, ...args]); };
     FerroExports.attach({
         InputHelper_OnTextInput: record("text"),
+        InputHelper_OnStandaloneDelete: (...args) => { record("delete")(...args); return true; },
+        InputHelper_OnReplacementText: record("replace"),
         InputHelper_OnBeforeInput: record("beforeinput"),
         InputHelper_OnCompositionStart: record("compositionstart"),
         InputHelper_OnCompositionUpdate: record("compositionupdate"),
@@ -47,6 +49,14 @@ function setup(t, { handled = false } = {}) {
         InputHelper_OnKeyUp: (...args) => { record("keyup")(...args); return handled; },
     });
     const element = Object.assign(new EventTarget(), { value: "", selectionStart: 0, selectionEnd: 0 });
+    if (focusedLegacyInput) {
+        element.querySelector = (selector) => selector === ":scope > .ferroui-input-element" ? element : null;
+        element.matches = (selector) => selector === ":focus";
+        element.style = {};
+        element.setSelectionRange = (start, end, direction) => Object.assign(element, {
+            selectionStart: start, selectionEnd: end, selectionDirection: direction
+        });
+    }
     const unsubscribe = InputHelper.subscribeTextEvents(element, 17);
     t.after(unsubscribe);
     return { element, calls, unsubscribe };
@@ -70,6 +80,56 @@ test("empty, generic and non-insertion input events do not enter the native text
         element.dispatchEvent(insertion("ignored", { inputType }));
     }
     assert.deepEqual(calls, []);
+});
+
+test("legacy proxy deletion is dispatched at most once and leaves composition alone", (t) => {
+    const { element, calls } = setup(t, { focusedLegacyInput: true });
+    const backward = { inputType: "deleteContentBackward", getTargetRanges: () => [] };
+    const forward = { ...backward, inputType: "deleteContentForward" };
+    assert.equal(element.dispatchEvent(event("beforeinput", backward)), false);
+    element.dispatchEvent(event("beforeinput", forward, false));
+    assert.deepEqual(calls, [["delete", 17, true]]);
+    element.dispatchEvent(event("input", forward));
+    const prevented = event("beforeinput", backward);
+    prevented.preventDefault();
+    element.dispatchEvent(prevented);
+    element.dispatchEvent(event("input", { ...backward, isComposing: true }));
+    element.matches = () => false;
+    element.dispatchEvent(event("input", backward));
+    assert.deepEqual(calls, [["delete", 17, true], ["delete", 17, false]]);
+});
+
+test("a correction captures directed selection and restores the authoritative proxy", (t) => {
+    const { element, calls } = setup(t, { focusedLegacyInput: true });
+    InputHelper.setSurroundingText(element, "ab\r\nteh", 7, 4);
+    const replacement = { inputType: "insertReplacementText", data: "the" };
+    element.dispatchEvent(event("beforeinput", replacement));
+    element.value = "ab  the";
+    element.setSelectionRange(7, 7, "none");
+    element.dispatchEvent(event("input", replacement));
+    assert.deepEqual(calls, [["replace", 17, "ab  teh", 7, 4, 7, 4, "ab  the", 7, 7]]);
+    assert.deepEqual([element.value, element.selectionStart, element.selectionEnd, element.selectionDirection],
+        ["ab  teh", 4, 7, "backward"]);
+});
+
+test("a fresh surrounding projection invalidates an earlier replacement", (t) => {
+    const { element, calls } = setup(t, { focusedLegacyInput: true });
+    InputHelper.setSurroundingText(element, "teh", 3, 3);
+    const replacement = { inputType: "insertReplacementText", data: "the" };
+    element.dispatchEvent(event("beforeinput", replacement));
+    InputHelper.setSurroundingText(element, "teh", 0, 0);
+    element.value = "the";
+    element.setSelectionRange(3, 3, "none");
+    element.dispatchEvent(event("input", replacement));
+    assert.deepEqual(calls, []);
+    assert.equal(element.value, "teh");
+    assert.equal(element.selectionStart, 0);
+
+    // An input-only correction uses the current projection without a prior range.
+    element.value = "the";
+    element.setSelectionRange(3, 3, "none");
+    element.dispatchEvent(event("input", replacement));
+    assert.deepEqual(calls, [["replace", 17, "teh", 0, 0, -1, -1, "the", 3, 3]]);
 });
 
 test("composition preedit stays separate and its commit is delivered once despite trailing input", (t) => {
@@ -191,6 +251,69 @@ function bubbled(type, target, fields = {}) {
     Object.defineProperty(bubbledEvent, "target", { value: target });
     return bubbledEvent;
 }
+
+const clipboardDocument = new EventTarget();
+function setupClipboard(t, clipboard, read) {
+    const previousDocument = globalThis.document;
+    globalThis.document = clipboardDocument;
+    t.after(() => { globalThis.document = previousDocument; });
+    InputHelper.initializeBackgroundHandlers();
+    const host = new EventTarget();
+    const viewWindow = { navigator: { clipboard }, setTimeout };
+    FerroExports.attach({
+        InputHelper_OnKeyDown: () => { read?.(viewWindow); return true; },
+        InputHelper_OnKeyUp: () => true,
+    });
+    t.after(InputHelper.subscribeKeyEvents(host, 17));
+    return { host, viewWindow };
+}
+
+const pasteKey = (type = "keydown") => event(type, { code: "KeyV", key: "v", ctrlKey: true });
+
+test("event-backed clipboard reads without a paste gesture report denied", async (t) => {
+    const { viewWindow } = setupClipboard(t, {});
+    assert.deepEqual(await Promise.race([InputHelper.readClipboard(viewWindow), nextTask(16)]), { error: "denied" });
+});
+
+test("an unavailable clipboard interface can read plain text and HTML from a paste event", async (t) => {
+    let reads;
+    const { host } = setupClipboard(t, undefined, viewWindow => {
+        reads = Promise.all([InputHelper.readClipboard(viewWindow), InputHelper.readClipboard(viewWindow)]);
+    });
+    const down = pasteKey();
+    host.dispatchEvent(down);
+    assert.equal(down.defaultPrevented, false);
+    const clipboardData = {
+        items: [{ kind: "string", type: "text/plain" }, { kind: "string", type: "text/html" }],
+        getData: format => format === "text/html" ? "<b>paste</b>" : "paste",
+    };
+    const foreign = bubbled("paste", new EventTarget(), { clipboardData });
+    clipboardDocument.dispatchEvent(foreign);
+    assert.equal(foreign.defaultPrevented, false);
+    const paste = bubbled("paste", host, { clipboardData });
+    clipboardDocument.dispatchEvent(paste);
+    assert.equal(paste.defaultPrevented, true);
+    host.dispatchEvent(pasteKey("keyup"));
+    const expected = { result: [
+        { type: "string", format: "text/plain", value: "paste" },
+        { type: "string", format: "text/html", value: "<b>paste</b>" },
+    ] };
+    assert.deepEqual(await Promise.race([reads, nextTask(16)]), [expected, expected]);
+});
+
+test("a missing paste event releases the request even if the key is never released", async (t) => {
+    let read;
+    const { host } = setupClipboard(t, {}, viewWindow => { read = InputHelper.readClipboard(viewWindow); });
+    const down = pasteKey();
+    host.dispatchEvent(down);
+    assert.equal(down.defaultPrevented, false);
+    assert.deepEqual(await Promise.race([read, nextTask(16)]), { error: "denied" });
+
+    const ordinary = event("keydown", { code: "KeyA", key: "a" });
+    host.dispatchEvent(ordinary);
+    assert.equal(ordinary.defaultPrevented, true);
+    assert.deepEqual(await read, { error: "denied" });
+});
 
 test("events of the connection textarea never reach the path of the input element", (t) => {
     const { element, calls } = setup(t);

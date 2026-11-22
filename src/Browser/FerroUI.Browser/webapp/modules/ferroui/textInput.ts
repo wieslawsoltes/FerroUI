@@ -32,10 +32,21 @@ function stateFor(input: TextInputElement): TextState {
     return state;
 }
 
-function selection(input: TextInputElement): [number, number] {
-    return input.selectionDirection === "backward"
-        ? [input.selectionEnd, input.selectionStart]
-        : [input.selectionStart, input.selectionEnd];
+export function readTextSelection(input: HTMLInputElement | TextInputElement): [number, number] {
+    const start = input.selectionStart ?? 0;
+    const end = input.selectionEnd ?? start;
+    return input.selectionDirection === "backward" ? [end, start] : [start, end];
+}
+
+export function writeTextSelection(input: HTMLInputElement | TextInputElement,
+    anchor: number, active: number): void {
+    const start = Math.max(0, Math.min(anchor, active, input.value.length));
+    const end = Math.max(0, Math.min(Math.max(anchor, active), input.value.length));
+    const direction = anchor === active ? "none" : anchor > active ? "backward" : "forward";
+    if (input.selectionStart !== start || input.selectionEnd !== end ||
+        (start !== end && input.selectionDirection !== direction)) {
+        input.setSelectionRange(start, end, direction);
+    }
 }
 
 function writeText(input: TextInputElement, value: string, anchor: number, active: number): void {
@@ -44,13 +55,7 @@ function writeText(input: TextInputElement, value: string, anchor: number, activ
     // Normalize defensively before comparing the textarea's API value.
     value = value.replace(/\r\n?/g, "\n");
     if (input.value !== value) input.value = value;
-    const start = Math.max(0, Math.min(anchor, active, input.value.length));
-    const end = Math.max(0, Math.min(Math.max(anchor, active), input.value.length));
-    const direction = anchor === active ? "none" : anchor > active ? "backward" : "forward";
-    if (input.selectionStart !== start || input.selectionEnd !== end ||
-        (start !== end && input.selectionDirection !== direction)) {
-        input.setSelectionRange(start, end, direction);
-    }
+    writeTextSelection(input, anchor, active);
 }
 
 function restoreText(input: TextInputElement, state: TextState): void {
@@ -67,7 +72,7 @@ export function setTextInputState(input: TextInputElement, text: string,
     if (state.pending) state.pending = { revision: 0, token: 0 };
     writeText(input, text, anchor, active);
     state.value = input.value;
-    [state.anchor, state.active] = selection(input);
+    [state.anchor, state.active] = readTextSelection(input);
     state.revision = revision;
     // Keep the native composition's captured token until its end event. A
     // focus/reset update invalidates that token in Rust; a late end event must
@@ -94,7 +99,7 @@ export function subscribeTextInput(input: TextInputElement, callbacks: TextInput
             return;
         }
         const revision = state.revision;
-        const [anchor, active] = selection(input);
+        const [anchor, active] = readTextSelection(input);
         const token = callbacks.beforeInput(revision, args.inputType ?? "", input.value, anchor, active);
         const accepted = token !== 0 && state.revision === revision;
         // Revision zero records a rejected beforeinput even if it cannot be
@@ -115,7 +120,7 @@ export function subscribeTextInput(input: TextInputElement, callbacks: TextInput
         const pending = state.pending;
         state.pending = undefined;
         const revision = state.revision;
-        const [anchor, active] = selection(input);
+        const [anchor, active] = readTextSelection(input);
         callbacks.input(pending?.revision ?? revision, pending?.token ?? 0,
             args.inputType ?? "", input.value, anchor, active);
         // A missing runtime, rejected callback or no-op still leaves the DOM
@@ -128,7 +133,7 @@ export function subscribeTextInput(input: TextInputElement, callbacks: TextInput
         state.pending = undefined;
         const composition = { token: 0 };
         state.composition = composition;
-        const [anchor, active] = selection(input);
+        const [anchor, active] = readTextSelection(input);
         const token = callbacks.compositionStart(state.revision, input.value, anchor, active);
         if (state.composition === composition) composition.token = token;
     };
@@ -142,7 +147,7 @@ export function subscribeTextInput(input: TextInputElement, callbacks: TextInput
         const token = state.composition?.token;
         state.composition = undefined;
         state.pending = undefined;
-        const [anchor, active] = selection(input);
+        const [anchor, active] = readTextSelection(input);
         if (token) callbacks.compositionEnd(token, args.data, input.value, anchor, active);
         if (!state.composition) restoreText(input, state);
     };

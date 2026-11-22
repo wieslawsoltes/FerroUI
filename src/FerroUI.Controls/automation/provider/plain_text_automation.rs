@@ -173,6 +173,10 @@ impl ITextProvider for ProviderAdapter<TextBoxAutomationPeer> {
         self.0.clone().upcast()
     }
 
+    fn is_multiline(&self) -> bool {
+        self.0.accessible_text_owner().is_some_and(|owner| owner.accepts_return())
+    }
+
     fn document_range(&self) -> Result<Rc<dyn ITextRangeProvider>, ProviderError> {
         let context = PlainTextContext::from_peer(&self.0)?;
         let length = context.text()?.len();
@@ -595,6 +599,7 @@ fn attribute_value(owner: &TextBox, attribute: TextAttribute) -> TextAttributeVa
         A::FontName => V::String(owner.font_family().name().to_owned()),
         A::FontSize => V::Number(owner.font_size() * 72.0 / 96.0),
         A::FontWeight => V::Integer(owner.font_weight().0),
+        A::FontStyle => V::String(owner.font_style().to_string().to_ascii_lowercase()),
         A::IsItalic => V::Bool(owner.font_style() != FontStyle::Normal),
         A::IsReadOnly => V::Bool(owner.is_read_only()),
         A::IsHidden => V::Bool(!owner.is_effectively_visible()),

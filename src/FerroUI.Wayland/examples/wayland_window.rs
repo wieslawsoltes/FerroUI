@@ -2184,7 +2184,39 @@ mod app {
                 );
             }
 
-            // 8. The text box goes (the content of the window is put back): the text input is
+            let prefix = "p".repeat(1500);
+            let selection = "x".repeat(3000);
+            let suffix = "q".repeat(1500);
+            text_box.set_text(Some(&format!("{prefix}🌐{selection}界{suffix}")));
+            let start = prefix.len() + 2;
+            text_box.set_selection_start(start as i32);
+            text_box.set_selection_end((start + selection.len()) as i32);
+            let announced = wait_for(STEP_TIMEOUT, || {
+                probe.input_method().surrounding.is_some_and(|(text, cursor, anchor)| {
+                    let low = cursor.min(anchor) as usize;
+                    let high = cursor.max(anchor) as usize;
+                    text.len() <= 4000 && text.get(low..high) == Some(selection.as_str())
+                        && text.get(..low).is_some_and(|before| before.ends_with('🌐'))
+                        && text.get(high..).is_some_and(|after| after.starts_with('界'))
+                })
+            }).await;
+            let observed = probe.input_method().surrounding.map(|(text, cursor, anchor)| (text.len(), cursor, anchor));
+            report.check("complete surrounding selection", announced,
+                format!("expected the 3000-byte selection and its Unicode neighbors, observed {observed:?} (bytes, cursor, anchor)"));
+
+            if announced {
+                input_method_quiet(probe).await;
+                let sent = probe.input_method_send(Some((4, 3)), Some("Z"), None);
+                let corrected = format!("{prefix}Z{suffix}");
+                let arrived = wait_for(STEP_TIMEOUT, || {
+                    let _ = probe.sync();
+                    text_of(&text_box) == corrected
+                }).await;
+                report.check("replace selection with surrounding deletion", sent.is_ok() && arrived,
+                    format!("a correction should replace the selection and its two Unicode neighbors: {sent:?}, {} bytes remain", text_of(&text_box).len()));
+            }
+
+            // The text box goes (the content of the window is put back): the text input is
             //    disabled and the input method deactivated.
             window.set_content(previous_content);
             let disabled = wait_for(STEP_TIMEOUT, || {

@@ -38,16 +38,17 @@ pub use i_root_provider::IRootProvider;
 pub use i_scroll_provider::{IScrollProvider, ScrollAmount};
 pub use i_selection_item_provider::ISelectionItemProvider;
 pub use i_selection_provider::ISelectionProvider;
-pub use i_text_provider::{ITextProvider, SupportedTextSelection};
+pub use i_text_provider::{ITextProvider, SupportedTextSelection, TextEditDelta};
 pub use i_text_provider2::{ITextProvider2, TextCaretRange};
 pub use i_text_child_provider::ITextChildProvider;
 pub use i_text_edit_provider::{ITextEditProvider, TextEditChangeType, TextEditTextChangedEventArgs};
 pub use i_text_range_provider::{
-    ITextRangeProvider, TextAttribute, TextAttributeValue, TextPatternRangeEndpoint,
-    TextProviderError, TextUnit,
+    ITextRangeProvider, TextAttribute, TextAttributeRun, TextAttributeSet, TextAttributeValue, TextPatternRangeEndpoint,
+    TextProviderError, TextScrollPlacement, TextUnit,
 };
 pub use i_toggle_provider::{IToggleProvider, ToggleState};
 pub use i_value_provider::{IValueProvider, ProviderError};
+pub use text_range_support::ViewGeometry;
 pub(crate) use rich_text_automation::{RichTextAutomationHost, RichTextAutomationPeer, RichTextAutomationState};
 
 use ferroui_base::{ObjectType, Ref};

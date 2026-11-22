@@ -479,7 +479,12 @@ Work posted for a connection client, and each call of the system made for it, is
 | Another client (focus moves to another text control) | The rectangle of the old client is forgotten: the posted enable destroys the caret, and the new client's rectangle makes it again where its cursor is. The same client again (a requery) changes nothing. |
 | No client (focus leaves text, the window loses focus, which clears the keyboard focus of its top level, or is destroyed) | `DestroyCaret`; the bitmap is deleted. |
 | The keyboard language changes (the input context is made again) | The caret is destroyed and made again at the last rectangle of the same window and client. |
-| Another window of the thread takes the input method (`WM_IME_SETCONTEXT`) | The next rectangle, in that window, creates the caret there: `CreateCaret` replaces the caret of the thread whichever window owned it. |
+| Another window of the thread takes focus (`WM_IME_SETCONTEXT` or `WM_SETFOCUS` when the owner has not changed yet) | The next rectangle, in that window, creates the caret there. `CreateCaret` replaces the caret of the thread whichever window owned it. |
+
+Connection clients keep the system caret when IMM32 cannot create or acquire
+a context. Only composition and candidate window positioning require that
+context. The Direct2D editor fixture observes the caret from a native UI
+Automation client on a private desktop.
 
 **The calls are a pure function.** `plan_caret(current, wanted)` returns the calls that turn the caret there is into the one wanted (none, a move, create-move-show, or destroy); the manager keeps the two and makes the calls, publishing the new caret before them so that a window procedure the system runs from inside a call (one that destroys the window or moves the focus) is planned against it and the outer sequence stops. Tests on every host (section 10.2): the plan, the manager (made once the cursor is known, moved only on a change, made again for a height or a window, forgotten for a new client, kept for a change of language, a refused caret asked for again by the next creation only, a destruction from inside the creation), and the input method (the calls for a TextBox at a scaling of two, without an input context, in a popup mapped to its owner, a change of language, a new client, another window).
 

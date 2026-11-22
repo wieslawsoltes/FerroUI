@@ -142,15 +142,15 @@ pub(super) fn truncate_utf16(text: String, max_length: Option<usize>) -> String 
         .collect()
 }
 
-/// The transform of a text view to its visual root and the clip of its ancestors
-/// in root coordinates.
-pub(super) struct ViewGeometry {
+/// The transform of a text view to its visual root and the clip of its ancestors.
+pub struct ViewGeometry {
     transform: Matrix,
     clip: Rect,
 }
 
 impl ViewGeometry {
-    pub(super) fn in_root(view: &Visual, root: &Ref<Visual>) -> Option<Self> {
+    /// Captures the visible geometry of a view in its own visual root.
+    pub fn in_root(view: &Visual, root: &Ref<Visual>) -> Option<Self> {
         if !view.is_effectively_visible() {
             return None;
         }
@@ -173,8 +173,14 @@ impl ViewGeometry {
         Some(Self { transform, clip })
     }
 
-    pub(super) fn visible(&self, local: Rect) -> Rect {
+    /// Transforms a local rectangle to root coordinates and clips it.
+    pub fn visible(&self, local: Rect) -> Rect {
         local.transform_to_aabb(self.transform).intersect(self.clip)
+    }
+
+    /// Returns the bounds of the root clip in view coordinates.
+    pub fn local_clip(&self) -> Option<Rect> {
+        Some(self.clip.transform_to_aabb(self.transform.try_invert()?))
     }
 }
 

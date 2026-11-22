@@ -678,14 +678,24 @@ impl TextLayout {
         result
     }
 
+    /// Gets the visual line at a vertical position measured from the layout
+    /// box. Positions outside the layout resolve to its nearest end line.
+    pub fn line_index_at_y(&self, y: f64) -> Option<usize> {
+        let last = self.text_lines.len().checked_sub(1)?;
+        Some(
+            self.text_lines
+                .iter()
+                .enumerate()
+                .find(|(index, line)| self.line_origin(*index).y + line.height() > y)
+                .map_or(last, |(index, _)| index),
+        )
+    }
+
     /// Gets the character hit of a point relative to the top-left of the layout box.
     pub fn hit_test_point(&self, point: Point) -> TextHitTestResult {
-        if self.text_lines.is_empty() {
+        let Some(index) = self.line_index_at_y(point.y) else {
             return TextHitTestResult::default();
-        }
-        let index = self.text_lines.iter().enumerate()
-            .find(|(index, line)| self.line_origin(*index).y + line.height() > point.y)
-            .map_or(self.text_lines.len() - 1, |(index, _)| index);
+        };
         let line = &self.text_lines[index];
         let origin = self.line_origin(index);
         let relative = Point::new(point.x - origin.x, point.y - origin.y);

@@ -95,9 +95,19 @@ fn snapshot_lines() -> BTreeMap<String, String> {
     }
 
     let mut lines = BTreeMap::new();
+    let text_box_new_line = crate::TextBox::new_line_property();
     for property in properties.iter().copied() {
         let owner = property.owner_type();
         let at = property.host_type().filter(|_| property.is_attached()).unwrap_or(owner);
+        let value = property.default_value_boxed(at);
+        let default = if std::ptr::eq(property, text_box_new_line.as_property()) {
+            // Validate the native newline before writing its platform-neutral representation.
+            let native = if cfg!(windows) { "\r\n" } else { "\n" };
+            assert_eq!(value.downcast_ref::<String>().map(String::as_str), Some(native));
+            format!("{:?}", "\n")
+        } else {
+            display(&value)
+        };
         let mut flags = String::new();
         if property.inherits() {
             flags.push_str("; inherits");
@@ -109,7 +119,7 @@ fn snapshot_lines() -> BTreeMap<String, String> {
             format!("{}.{}: {}", owner.full_name(), property.name(), short_type_name(property.property_type_name())),
             format!(
                 "{}; {:?}{}",
-                display(&property.default_value_boxed(at)),
+                default,
                 property.get_metadata(at).default_binding_mode(),
                 flags
             ),

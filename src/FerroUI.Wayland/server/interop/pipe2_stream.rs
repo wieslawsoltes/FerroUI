@@ -9,7 +9,10 @@
 
 use std::fs::File;
 use std::io::{self, Read, Write};
-use std::os::fd::OwnedFd;
+use std::os::fd::{AsFd, OwnedFd};
+use std::time::{Duration, Instant};
+
+use super::unsafe_native_methods::wait_readable;
 
 /// The direction of a pipe end.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -41,6 +44,27 @@ impl Pipe2Stream {
         let mut bytes = Vec::new();
         Read::read_to_end(&mut self, &mut bytes)?;
         Ok(bytes)
+    }
+
+    /// Reads optional clipboard data without waiting indefinitely for its owner.
+    pub(crate) fn read_to_end_bounded(mut self, max_bytes: usize, timeout: Duration) -> io::Result<Vec<u8>> {
+        let deadline = Instant::now() + timeout;
+        let mut bytes = Vec::new();
+        let mut buffer = [0; 4096];
+        loop {
+            wait_readable(self.file.as_fd(), deadline)?;
+            let count = match self.read(&mut buffer) {
+                Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+                result => result?,
+            };
+            if count == 0 {
+                return Ok(bytes);
+            }
+            if count > max_bytes - bytes.len() {
+                return Err(io::ErrorKind::InvalidData.into());
+            }
+            bytes.extend_from_slice(&buffer[..count]);
+        }
     }
 }
 
@@ -105,5 +129,29 @@ mod tests {
         drop(read);
         let mut writing = Pipe2Stream::new(write, PipeDirection::Out);
         assert!(writing.write_all(&[1, 2, 3]).is_err());
+    }
+
+    #[test]
+    fn bounded_reads_accept_eof_and_enforce_the_byte_limit() {
+        for (data, limit) in [(b"".as_slice(), 0), (b"abcd", 4), (b"abcd", 3)] {
+            let (read, write) = pipe2_cloexec().unwrap();
+            Pipe2Stream::new(write, PipeDirection::Out).write_all(data).unwrap();
+            let result = Pipe2Stream::new(read, PipeDirection::In).read_to_end_bounded(limit, Duration::from_secs(1));
+            if data.len() <= limit {
+                assert_eq!(result.unwrap(), data);
+            } else {
+                assert_eq!(result.unwrap_err().kind(), io::ErrorKind::InvalidData);
+            }
+        }
+    }
+
+    #[test]
+    fn bounded_reads_terminate_after_a_partial_write_without_eof() {
+        let (read, write) = pipe2_cloexec().unwrap();
+        let mut writer = Pipe2Stream::new(write, PipeDirection::Out);
+        writer.write_all(b"partial").unwrap();
+        let result = Pipe2Stream::new(read, PipeDirection::In).read_to_end_bounded(64, Duration::from_millis(30));
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::TimedOut);
+        drop(writer);
     }
 }

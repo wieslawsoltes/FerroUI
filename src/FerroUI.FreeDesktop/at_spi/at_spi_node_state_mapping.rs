@@ -5,7 +5,7 @@ use super::at_spi_node::AtSpiNode;
 use super::at_spi_state::AtSpiState;
 use ferroui_controls::automation::peers::{AutomationControlType, ControlAutomationPeer};
 use ferroui_controls::automation::provider::{
-    IExpandCollapseProvider, IRangeValueProvider, ISelectionItemProvider, ISelectionProvider, IToggleProvider,
+    IExpandCollapseProvider, IRangeValueProvider, ISelectionItemProvider, ISelectionProvider, ITextProvider, IToggleProvider,
     IValueProvider, ToggleState,
 };
 use ferroui_controls::automation::{AutomationProperties, ExpandCollapseState};
@@ -28,6 +28,7 @@ pub(crate) struct StateFacts {
     pub(crate) range_value_read_only: bool,
     pub(crate) is_required_for_form: bool,
     pub(crate) control_type: AutomationControlType,
+    pub(crate) multiline_text: bool,
 }
 
 impl AtSpiNode {
@@ -37,6 +38,7 @@ impl AtSpiNode {
 
     fn compute_states_core(&self) -> Vec<u32> {
         let peer = self.peer();
+        let control_type = peer.get_automation_control_type();
         let facts = StateFacts {
             is_enabled: peer.is_enabled(),
             is_offscreen: peer.is_offscreen(),
@@ -58,7 +60,9 @@ impl AtSpiNode {
                 .cast::<ControlAutomationPeer>()
                 .and_then(|control_peer| control_peer.try_owner())
                 .is_some_and(|owner| AutomationProperties::get_is_required_for_form(&owner)),
-            control_type: peer.get_automation_control_type(),
+            control_type,
+            multiline_text: control_type == AutomationControlType::Edit
+                && peer.get_provider::<dyn ITextProvider>().is_some_and(|text| text.is_multiline()),
         };
 
         build_state_set(&states_of(&facts))
@@ -143,7 +147,7 @@ pub(crate) fn states_of(facts: &StateFacts) -> Vec<AtSpiState> {
         states.push(AtSpiState::Active);
     }
     if facts.control_type == AutomationControlType::Edit {
-        states.push(AtSpiState::SingleLine);
+        states.push(if facts.multiline_text { AtSpiState::MultiLine } else { AtSpiState::SingleLine });
     }
 
     states
@@ -168,6 +172,7 @@ mod tests {
             range_value_read_only: false,
             is_required_for_form: false,
             control_type: AutomationControlType::None,
+            multiline_text: false,
         }
     }
 
@@ -228,7 +233,7 @@ mod tests {
     }
 
     #[test]
-    fn a_window_is_active_and_an_edit_is_a_single_line() {
+    fn a_window_is_active_and_edit_line_state_follows_the_provider() {
         assert_eq!(
             states_of(&StateFacts { control_type: AutomationControlType::Window, ..facts() }),
             vec![AtSpiState::Active]
@@ -236,6 +241,10 @@ mod tests {
         assert_eq!(
             states_of(&StateFacts { control_type: AutomationControlType::Edit, value_read_only: Some(false), ..facts() }),
             vec![AtSpiState::Editable, AtSpiState::SingleLine]
+        );
+        assert_eq!(
+            states_of(&StateFacts { control_type: AutomationControlType::Edit, multiline_text: true, ..facts() }),
+            vec![AtSpiState::MultiLine]
         );
     }
 }

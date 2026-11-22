@@ -1185,9 +1185,8 @@ impl Popup {
     /// a popup opened while its target was moved by an animated render
     /// transform (a page that slides in) stayed where the target was when
     /// it opened. The popup is positioned again, once per frame, when a
-    /// render transform of the chain is set, replaced or removed, or a
-    /// mutable one changes in place, and the place of the target in the
-    /// root differs from the last one (`docs/porting/decisions/
+    /// render transform or layout bounds of the chain change and the place
+    /// of the target in the root differs from the last one (`docs/porting/decisions/
     /// popup-opened-while-its-target-moves.md`).
     fn subscribe_placement_target_transforms(&self) {
         let generation = self.lifecycle_generation.get();
@@ -1255,7 +1254,9 @@ impl Popup {
             }
             self.last_placement_target_rect.set(last);
             self.enqueue_for_placement_target_move();
-        } else if e.property() == Visual::render_transform_origin_property().as_property() {
+        } else if e.property() == Visual::render_transform_origin_property().as_property()
+            || e.property() == Visual::bounds_property().as_property()
+        {
             self.enqueue_for_placement_target_move();
         }
     }

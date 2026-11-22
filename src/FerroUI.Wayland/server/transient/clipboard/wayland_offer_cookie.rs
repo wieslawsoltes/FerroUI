@@ -46,7 +46,7 @@ impl WaylandOfferCookie {
         self.invalidated.store(true, Ordering::Release);
     }
 
-    fn is_invalidated(&self) -> bool {
+    pub(crate) fn is_invalidated(&self) -> bool {
         self.invalidated.load(Ordering::Acquire)
     }
 

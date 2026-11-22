@@ -9,6 +9,7 @@ pub struct RawTextInputEventArgs {
     base: RawInputEventArgs,
     text: String,
     input_method_commit: Option<Rc<TextInputMethodCommit>>,
+    from_input_method: bool,
 }
 
 raw_input_event_args!(RawTextInputEventArgs: RawInputEventArgs);
@@ -17,7 +18,7 @@ impl RawTextInputEventArgs {
     /// Creates raw text input event args. `device` is the keyboard device
     /// the text comes from.
     pub fn new(device: Rc<dyn IInputDevice>, timestamp: u64, root: Rc<dyn IInputRoot>, text: impl Into<String>) -> Self {
-        Self { base: RawInputEventArgs::new(device, timestamp, root), text: text.into(), input_method_commit: None }
+        Self { base: RawInputEventArgs::new(device, timestamp, root), text: text.into(), input_method_commit: None, from_input_method: false }
     }
 
     pub(crate) fn for_input_method(
@@ -31,7 +32,18 @@ impl RawTextInputEventArgs {
             base: RawInputEventArgs::new(device, timestamp, root),
             text: text.to_owned(),
             input_method_commit: Some(commit),
+            from_input_method: true,
         }
+    }
+
+    /// Identifies text committed by an input method, including legacy clients.
+    pub fn with_input_method_origin(mut self) -> Self {
+        self.from_input_method = true;
+        self
+    }
+
+    pub fn is_from_input_method(&self) -> bool {
+        self.from_input_method
     }
 
     /// The captured owner and acceptance of a managed platform commit.

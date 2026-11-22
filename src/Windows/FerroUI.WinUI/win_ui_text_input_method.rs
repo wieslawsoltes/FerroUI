@@ -552,7 +552,7 @@ mod imp {
                 crate::ferro_swap_chain_panel::tick_count(),
                 input_root,
                 text,
-            )));
+            ).with_input_method_origin()));
             self.suppress_client_echo.set(false);
 
             self.sync_from_client(notify_server);

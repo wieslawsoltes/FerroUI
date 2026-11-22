@@ -21,6 +21,9 @@ use std::ffi::c_void;
 use std::sync::{Arc, Mutex};
 use windows_sys::Win32::System::Com::{CoCreateInstance, CoInitializeEx, CoUninitialize};
 
+mod text;
+pub use text::{TextPattern, TextRange};
+
 #[allow(clippy::all, non_snake_case, non_upper_case_globals, dead_code, unused_unsafe, unsafe_op_in_unsafe_fn)]
 mod uia_client {
     include!(concat!(env!("OUT_DIR"), "/uia_client.rs"));
@@ -29,6 +32,7 @@ mod uia_client {
 use uia_client::{IUIAutomationFocusChangedEventHandler, IUIAutomationFocusChangedEventHandlerImpl};
 
 const CLSID_CUI_AUTOMATION: Guid = Guid::from_u128(0xff48dba4_60ef_4201_aa87_54103eef594e);
+const CLSID_CUI_AUTOMATION8: Guid = Guid::from_u128(0xe22ad333_b25f_460c_83d0_0581107395c9);
 const IID_IUI_AUTOMATION: Guid = Guid::from_u128(0x30cbe57d_d9d0_452a_ab13_7ac5ac4825ee);
 const IID_IUI_AUTOMATION2: Guid = Guid::from_u128(0x34723aff_0c9d_49d0_9896_7ab52df8cd8a);
 
@@ -420,6 +424,10 @@ impl Element {
             },
             "IUIAutomationElement::FindAll",
         )?;
+        Self::collect_array(array)
+    }
+
+    fn collect_array(array: *mut c_void) -> Result<Vec<Element>, String> {
         if array.is_null() {
             return Ok(Vec::new());
         }
@@ -545,6 +553,15 @@ pub struct UiaClient {
 
 impl UiaClient {
     pub fn new() -> Result<UiaClient, String> {
+        Self::create(&CLSID_CUI_AUTOMATION)
+    }
+
+    /// Creates the Windows 8 client, which exposes IUIAutomation2 for timeouts.
+    pub fn new_v8() -> Result<UiaClient, String> {
+        Self::create(&CLSID_CUI_AUTOMATION8)
+    }
+
+    fn create(class: &Guid) -> Result<UiaClient, String> {
         // SAFETY: the reserved argument is null; the flag is
         // `COINIT_MULTITHREADED`. The thread keeps COM until it ends.
         check(unsafe { CoInitializeEx(std::ptr::null(), 0) }, "CoInitializeEx")?;
@@ -555,7 +572,7 @@ impl UiaClient {
         check(
             unsafe {
                 CoCreateInstance(
-                    (&CLSID_CUI_AUTOMATION as *const Guid).cast(),
+                    (class as *const Guid).cast(),
                     std::ptr::null_mut(),
                     1,
                     (&IID_IUI_AUTOMATION as *const Guid).cast(),

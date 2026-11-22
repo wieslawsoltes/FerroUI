@@ -164,6 +164,9 @@ ferro_class! {
         /// Returns a new, type-specific automation peer implementation for
         /// the control.
         fn on_create_automation_peer(this) -> Ref<AutomationPeer>;
+        /// The control whose automation peer represents focus and hit testing
+        /// for this control. Internal presenters can delegate to their owner.
+        fn automation_target(this) -> Ref<Control>;
         /// The flyout a context request on the control shows (`for_request`), or
         /// that its keys and cancellation dismiss: `ContextFlyout` by default. A
         /// control whose context flyout belongs to another element (a linked text
@@ -359,6 +362,10 @@ impl ControlImpl for Control {
 
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         NoneAutomationPeer::new(this).upcast()
+    }
+
+    fn automation_target(this: &Self) -> Ref<Control> {
+        this.to_ref()
     }
 
     fn on_size_changed(this: &Self, e: &SizeChangedEventArgs) {

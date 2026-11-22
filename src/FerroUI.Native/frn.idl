@@ -409,6 +409,7 @@ enum FrnAutomationProperty
     ExpandCollapseProvider_ExpandCollapseState,
     SelectionItemProvider_IsSelected,
     SelectionProvider_Selection,
+    TextProvider_Selection,
 }
 
 struct FrnSize
@@ -434,6 +435,12 @@ struct FrnVector
 struct FrnPoint
 {
     double X, Y;
+}
+
+// Half-open UTF-16 bounds. A negative endpoint denotes an unavailable range.
+struct FrnTextSpan
+{
+    int64_t Start, End;
 }
 
 enum FrnScreenOrientation
@@ -477,6 +484,22 @@ struct FrnColor
     byte Red;
     byte Green;
     byte Blue;
+}
+
+// Bounds are relative to the UTF-16 substring returned by IFrnStyledText.
+struct FrnTextStyle
+{
+    FrnTextSpan Span;
+    double FontSize;
+    int FontWeight;
+    int Script;
+    bool Italic;
+    bool Underline;
+    bool Strikethrough;
+    bool HasForeground;
+    bool HasBackground;
+    FrnColor Foreground;
+    FrnColor Background;
 }
 
 enum FrnRawMouseEventType
@@ -843,6 +866,12 @@ interface IFrnTopLevelEvents : IUnknown
     FrnDragDropEffects DragEvent(FrnDragEventType type, FrnPoint position,
                                          FrnInputModifiers modifiers, FrnDragDropEffects effects,
                                          IFrnClipboard* clipboard, [intptr]void* dataTransferHandle);
+}
+
+[uuid(2cdb7d64-3349-468e-8c85-64ac55a94a3d)]
+interface IFrnTextInputMethodEvents : IUnknown
+{
+    bool RawTextInputMethodCommit(u_int64_t timeStamp, [const] char* text);
 }
 
 [uuid(939b6599-40a8-4710-a4c8-5d72d8f174fb)]
@@ -1361,7 +1390,7 @@ interface IFrnAutomationPeer : IUnknown
      
      bool IsValueProvider();
      IFrnString* ValueProvider_GetValue();
-     void ValueProvider_SetValue([const] char* value);
+     void ValueProvider_SetValue([const] void* value, uint64_t length);
      bool ValueProvider_IsReadOnly();
 
      IFrnString* GetHelpText();
@@ -1371,6 +1400,42 @@ interface IFrnAutomationPeer : IUnknown
      int GetHeadingLevel();
 
      FrnLiveSetting GetLiveSetting();
+
+     bool TextProvider_HasRanges();
+     bool TextProvider_IsMultiline();
+     bool TextProvider_CanSelect();
+     FrnTextSpan TextProvider_GetDocumentSpan();
+     IFrnTextSpanArray* TextProvider_GetSelection();
+     FrnTextSpan TextProvider_GetVisibleSpan();
+     IFrnString* TextProvider_GetString(FrnTextSpan span);
+     FrnRect TextProvider_GetBounds(FrnTextSpan span);
+     FrnTextSpan TextProvider_GetCharacterSpan(int64_t offset);
+     FrnTextSpan TextProvider_GetSpanFromPoint(FrnPoint point);
+     void TextProvider_Select(FrnTextSpan span);
+     bool TextProvider_HasLogicalLines();
+     int64_t TextProvider_GetLineForIndex(int64_t offset);
+     FrnTextSpan TextProvider_GetRangeForLine(int64_t index);
+     int64_t TextProvider_GetInsertionPointLine();
+     bool TextProvider_HasStyles();
+     FrnTextSpan TextProvider_GetStyleSpan(int64_t offset);
+     IFrnStyledText* TextProvider_GetStyledText(FrnTextSpan span);
+}
+
+[uuid(2d816ae5-5a93-410a-91a6-e78cf916456d)]
+interface IFrnTextSpanArray : IUnknown
+{
+    uint GetCount();
+    FrnTextSpan Get(uint index);
+    FrnTextSpan GetPrimary();
+}
+
+[uuid(d3a72052-d368-4600-8451-e04bb9606f07)]
+interface IFrnStyledText : IUnknown
+{
+    IFrnString* GetText();
+    uint GetRunCount();
+    FrnTextStyle GetStyle(uint index);
+    IFrnString* GetFontName(uint index);
 }
 
 [uuid(b00af5da-78af-4b33-bfff-4ce13a6239a9)]

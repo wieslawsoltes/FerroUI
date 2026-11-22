@@ -57,6 +57,10 @@ extern "C" {
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = getNavigatorLanguage)]
     pub fn get_navigator_language(global_this: &JsObject) -> Option<String>;
 
+    #[cfg(target_arch = "wasm32")]
+    #[wasm_bindgen(js_namespace = FerroDOM, js_name = getNavigatorPlatform)]
+    pub fn get_navigator_platform(global_this: &JsObject) -> Option<String>;
+
     #[wasm_bindgen(js_namespace = FerroDOM, js_name = addClass)]
     pub fn add_css_class(element: &JsObject, class_name: &str);
 

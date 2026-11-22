@@ -593,6 +593,24 @@ impl IStorageFile for JsStorageFile {
             Ok(Box::new(file.open_write_stream_async().await?) as Box<dyn Write>)
         })
     }
+
+    fn write_with_async(
+        &self,
+        write: Box<dyn FnOnce(&mut dyn Write) -> io::Result<()>>,
+    ) -> LocalBoxFuture<io::Result<()>> {
+        let handle = self.base.file_handle();
+        Box::pin(async move {
+            let file = JsStorageFile::detached(handle)?;
+            let mut target = file.open_write_stream_async().await?;
+            match write(&mut target) {
+                Ok(()) => target.close_async().await,
+                Err(error) => {
+                    let _ = target.abort_async().await;
+                    Err(error)
+                }
+            }
+        })
+    }
 }
 
 impl JsStorageFile {

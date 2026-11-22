@@ -47,7 +47,7 @@ pub use hyperlink::{Hyperlink, HyperlinkBehavior, HyperlinkClickEventArgs, Under
 pub use i_inline_host::IInlineHost;
 pub use inline::{Inline, InlineImpl, InlineImplExt, InlineVTable};
 pub use inline_collection::InlineCollection;
-pub use inline_run::EmbeddedControlRun;
+pub use inline_run::{EmbeddedControlRun, EmbeddedControlRunLengthError};
 pub use inline_ui_container::InlineUIContainer;
 pub use italic::Italic;
 pub use line_break::LineBreak;

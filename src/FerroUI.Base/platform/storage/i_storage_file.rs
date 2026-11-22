@@ -16,4 +16,14 @@ pub trait IStorageFile: IStorageItem {
     ///
     /// Fails (among other reasons) when access to the file is denied.
     fn open_write_async(&self) -> LocalBoxFuture<std::io::Result<Box<dyn Write>>>;
+
+    /// Writes through a platform stream and waits for the provider to finish
+    /// the write. The callback flushes its buffers before returning success.
+    fn write_with_async(
+        &self,
+        write: Box<dyn FnOnce(&mut dyn Write) -> std::io::Result<()>>,
+    ) -> LocalBoxFuture<std::io::Result<()>> {
+        let target = self.open_write_async();
+        Box::pin(async move { write(target.await?.as_mut()) })
+    }
 }

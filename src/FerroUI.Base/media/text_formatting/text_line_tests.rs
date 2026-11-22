@@ -1258,6 +1258,27 @@ fn should_distribute_extra_space_when_line_height_is_larger_than_natural() {
 }
 
 #[test]
+fn minimum_line_height_preserves_natural_metrics_and_centers_added_space() {
+    let _scope = TextTestScope::new();
+    let properties = default_properties();
+    let text_source = SingleBufferTextSource::new("F", properties.clone());
+    let format = |minimum| {
+        let props: Rc<dyn TextParagraphProperties> = Rc::new(GenericTextParagraphProperties::from_properties(
+            &GenericTextParagraphProperties::new(properties.clone()).with_minimum_line_height(minimum),
+        ));
+        format_line(&text_source, 0, f64::INFINITY, &props, None).unwrap()
+    };
+    let natural = format(0.0);
+    let smaller = format(natural.height() / 2.0);
+    let padded = format(natural.height() + 40.0);
+    assert_eq!(smaller.height(), natural.height());
+    assert_eq!(smaller.baseline(), natural.baseline());
+    assert_eq!(padded.height(), natural.height() + 40.0);
+    assert_eq!(padded.baseline(), natural.baseline() + 20.0);
+    assert_eq!(padded.width_including_trailing_whitespace(), natural.width_including_trailing_whitespace());
+}
+
+#[test]
 fn backspace_should_treat_crlf_as_a_unit() {
     let _scope = TextTestScope::new();
 

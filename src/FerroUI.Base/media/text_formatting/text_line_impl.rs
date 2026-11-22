@@ -33,6 +33,7 @@ pub struct TextLineImpl {
 
     ink_bounds: Cell<Rect>,
     bounds: Cell<Rect>,
+    vertical_padding: Cell<f64>,
 }
 
 impl TextLineImpl {
@@ -60,6 +61,7 @@ impl TextLineImpl {
             has_collapsed,
             ink_bounds: Cell::new(Rect::default()),
             bounds: Cell::new(Rect::default()),
+            vertical_padding: Cell::new(0.0),
         })
     }
 
@@ -92,29 +94,26 @@ impl TextLineImpl {
     pub fn get_baseline_offset(text_line: &dyn TextLine, text_run: &dyn DrawableTextRun) -> f64 {
         let baseline = text_run.baseline();
         let baseline_alignment = text_run.properties().map(|properties| properties.baseline_alignment());
-
-        let mut baseline_offset = -baseline;
-
+        if baseline_alignment == Some(BaselineAlignment::Baseline) {
+            return text_line.baseline() - baseline;
+        }
+        let padding = text_line.as_any().downcast_ref::<Self>()
+            .map_or(0.0, |line| line.vertical_padding.get());
+        let height = text_line.height() - 2.0 * padding;
         match baseline_alignment {
-            Some(BaselineAlignment::Baseline) => {
-                baseline_offset += text_line.baseline();
-            }
+            Some(BaselineAlignment::Baseline) => unreachable!(),
             Some(BaselineAlignment::Top | BaselineAlignment::TextTop) => {
-                baseline_offset += text_line.height() - text_line.extent() + text_run.size().height / 2.0;
+                -baseline + (height - text_line.extent() + text_run.size().height / 2.0) + padding
             }
             Some(BaselineAlignment::Center) => {
-                baseline_offset += text_line.height() / 2.0 + baseline - text_run.size().height / 2.0;
+                -baseline + (height / 2.0 + baseline - text_run.size().height / 2.0) + padding
             }
             Some(BaselineAlignment::Subscript | BaselineAlignment::Bottom | BaselineAlignment::TextBottom) => {
-                baseline_offset += text_line.height() - text_run.size().height + baseline;
+                -baseline + (height - text_run.size().height + baseline) + padding
             }
-            Some(BaselineAlignment::Superscript) => {
-                baseline_offset += baseline;
-            }
+            Some(BaselineAlignment::Superscript) => padding,
             None => panic!("Specified argument was out of the range of valid values. (Parameter 'baselineAlignment')"),
         }
-
-        baseline_offset
     }
 
     pub(crate) fn replace_text_run(&self, index: usize, text_run: Rc<dyn TextRun>) {
@@ -898,10 +897,20 @@ impl TextLineImpl {
         }
 
         height += line_spacing;
+        let minimum = self.paragraph_properties.minimum_line_height();
+        let padding = if minimum.is_finite() && minimum > 0.0 && minimum > height {
+            let padding = (minimum - height) / 2.0;
+            height = minimum;
+            baseline += padding;
+            padding
+        } else {
+            0.0
+        };
+        self.vertical_padding.set(padding);
         // For baseline-aligned runs, family mode reports ink at the actual
         // draw baseline, including a caller's explicit line height. Other
         // alignment modes and the default policy retain their existing rules.
-        let ink_offset = if use_font_family { baseline + ascent } else { ink_offset };
+        let ink_offset = if use_font_family { baseline + ascent } else { ink_offset + padding };
 
         let mut width = width_including_whitespace;
 
@@ -945,7 +954,7 @@ impl TextLineImpl {
         let ink_bounds = if use_font_family {
             ink_bounds.translate(Vector::new(0.0, ink_offset))
         } else if text_line_bounds == TextLineBounds::Full {
-            ink_bounds
+            ink_bounds.translate(Vector::new(0.0, padding))
         } else {
             ink_bounds.translate(Vector::new(0.0, ink_offset - half_line_gap))
         };

@@ -35,7 +35,7 @@ use ferroui_base::{Rect, Ref};
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationLandmarkType, AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::automation::provider::{
     IEmbeddedRootProvider, IExpandCollapseProvider, IInvokeProvider, IRangeValueProvider, ISelectionItemProvider,
-    IToggleProvider, IValueProvider, ToggleState,
+    ITextProvider, IToggleProvider, IValueProvider, ToggleState,
 };
 use ferroui_controls::automation::{AutomationLiveSetting, ExpandCollapseState};
 use ferroui_controls::TopLevel;
@@ -179,6 +179,9 @@ pub(crate) fn read_attributes(peer: &AutomationPeer, state: &mut NodeState) {
     states.push(("aria-selected", selected.map(|selected| selected.to_string()).unwrap_or_default()));
     let read_only = value.as_ref().map(|value| value.is_read_only()).or(range.as_ref().map(|range| range.is_read_only()));
     states.push(("aria-readonly", flag(read_only == Some(true) && role != "progressbar")));
+    let multiline = role == "textbox"
+        && peer.get_provider::<dyn ITextProvider>().is_some_and(|text| text.is_multiline());
+    states.push(("aria-multiline", flag(multiline)));
     match &range {
         Some(range) => {
             states.push(("aria-valuemin", range.minimum().to_string()));
@@ -614,12 +617,25 @@ impl BrowserAccessibility {
             }
         });
         let weak = self.this.clone();
-        let property_changed = peer.property_changed(move |_| {
+        let attributes_changed = Rc::new(move || {
             if let Some(this) = weak.upgrade() {
                 this.attributes_dirty.borrow_mut().insert(key);
                 this.request();
             }
         });
+        let property_changed = peer.property_changed({
+            let attributes_changed = attributes_changed.clone();
+            move |_| attributes_changed()
+        });
+        let mut subscriptions = vec![children_changed, property_changed];
+        if peer.get_automation_control_type() == AutomationControlType::Edit {
+            if let Some(text_changed) = peer
+                .get_provider::<dyn ITextProvider>()
+                .and_then(|text| text.text_changed(attributes_changed).ok())
+            {
+                subscriptions.push(Subscription::new(text_changed));
+            }
+        }
         self.nodes.borrow_mut().insert(
             key,
             Node {
@@ -630,7 +646,7 @@ impl BrowserAccessibility {
                 children: Vec::new(),
                 sent: None,
                 absolute: Rect::default(),
-                subscriptions: vec![children_changed, property_changed],
+                subscriptions,
             },
         );
         self.ids.borrow_mut().insert(id, key);

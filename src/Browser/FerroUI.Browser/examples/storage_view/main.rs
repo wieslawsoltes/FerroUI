@@ -189,6 +189,18 @@ async fn scenario(name: String, argument: String) -> Result<String, String> {
             write_bytes(&file, &[b"Hello, ", b"storage"]).await?;
             Ok(format!("saved={}", file.name()))
         }
+        "commit_write" => {
+            let files = pick_file(&provider, false).await?;
+            let file = files.first().ok_or("no file")?;
+            file.write_with_async(Box::new(move |target| {
+                target.write_all(b"committed")?;
+                if argument == "abort" {
+                    return Err(std::io::Error::other("The writer canceled"));
+                }
+                target.flush()
+            })).await.map_err(|error| error.to_string())?;
+            Ok("committed=true".to_string())
+        }
         "large" => {
             // Written in chunks while the module memory grows: every write copies out of the
             // memory as it is at that moment.

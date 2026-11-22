@@ -2,7 +2,7 @@
 
 use crate::at_spi::at_spi_coord_type::AtSpiCoordType;
 use crate::at_spi::at_spi_node::AtSpiNode;
-use ferroui_base::Rect;
+use ferroui_base::{PixelPoint, Point, Rect};
 use std::rc::Rc;
 
 pub(crate) struct AtSpiCoordinateHelper;
@@ -15,7 +15,10 @@ impl AtSpiCoordinateHelper {
     }
 
     pub(crate) fn get_screen_extents(node: &AtSpiNode) -> Rect {
-        let bounds = node.peer().get_bounding_rectangle();
+        Self::to_screen(node, node.peer().get_bounding_rectangle())
+    }
+
+    pub(crate) fn to_screen(node: &AtSpiNode, bounds: Rect) -> Rect {
         if let Some(root) = node.as_root() {
             return root.to_screen(bounds);
         }
@@ -39,6 +42,23 @@ impl AtSpiCoordinateHelper {
                 relative_to(screen_rect, parent_rect)
             }
         }
+    }
+
+    pub(crate) fn screen_point(node: &AtSpiNode, x: i32, y: i32, coord_type: u32) -> PixelPoint {
+        let origin = match AtSpiCoordType::from_u32(coord_type) {
+            Some(AtSpiCoordType::Window) => Self::get_window_rect(node),
+            Some(AtSpiCoordType::Parent) => Self::get_parent_screen_rect(node),
+            Some(AtSpiCoordType::Screen) | None => return PixelPoint::new(x, y),
+        };
+        PixelPoint::new(x.saturating_add(origin.x as i32), y.saturating_add(origin.y as i32))
+    }
+
+    pub(crate) fn to_root_point(node: &AtSpiNode, point: PixelPoint) -> Option<Point> {
+        if let Some(root) = node.as_root() {
+            return root.point_to_client(point);
+        }
+        let root = Self::root_node_of(node, &node.peer().get_visual_root()?)?;
+        root.as_root()?.point_to_client(point)
     }
 
     pub(crate) fn get_window_rect(node: &AtSpiNode) -> Rect {

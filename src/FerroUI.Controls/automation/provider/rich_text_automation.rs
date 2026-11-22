@@ -1423,6 +1423,7 @@ fn attribute_value(
         A::FontWeight => format
             .font_weight
             .map_or(V::NotSupported, |weight| V::Integer(weight.0)),
+        A::FontStyle => V::String(format.font_style.unwrap_or_default().to_string().to_ascii_lowercase()),
         A::IsItalic => V::Bool(
             format
                 .font_style

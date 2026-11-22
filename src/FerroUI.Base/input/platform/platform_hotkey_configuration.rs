@@ -42,6 +42,18 @@ impl PlatformHotkeyConfiguration {
         Self::with_modifiers(command_modifiers, KeyModifiers::SHIFT, KeyModifiers::CONTROL)
     }
 
+    /// The Apple keyboard conventions shared by the native and browser hosts.
+    pub fn apple() -> Self {
+        let command = KeyModifiers::META;
+        let select = command | KeyModifiers::SHIFT;
+        let mut hotkeys = Self::with_modifiers(command, KeyModifiers::SHIFT, KeyModifiers::ALT);
+        hotkeys.move_cursor_to_the_start_of_line.push(KeyGesture::new(Key::Left, command));
+        hotkeys.move_cursor_to_the_end_of_line.push(KeyGesture::new(Key::Right, command));
+        hotkeys.move_cursor_to_the_start_of_line_with_selection.push(KeyGesture::new(Key::Left, select));
+        hotkeys.move_cursor_to_the_end_of_line_with_selection.push(KeyGesture::new(Key::Right, select));
+        hotkeys
+    }
+
     /// Creates a configuration for the given modifiers.
     pub fn with_modifiers(
         command_modifiers: KeyModifiers,

@@ -149,6 +149,12 @@ impl CompareInfo {
         &self.name
     }
 
+    /// The culture data provider's rules, when available. A caller with its
+    /// own portable comparison can use that when the culture has no rules.
+    pub fn provided_rules(&self) -> Option<&Rc<dyn ICompareRules>> {
+        self.rules.as_ref()
+    }
+
     /// Compares two strings using the specified options.
     pub fn compare(&self, a: &str, b: &str, options: CompareOptions) -> Ordering {
         match self.culture_rules(options) {

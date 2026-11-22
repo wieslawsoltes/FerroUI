@@ -139,10 +139,11 @@ impl ITextProviderImpl for AutomationNode {
         let owner = self.id();
         let range = self.invoke_sync_provider(move |provider: &Rc<dyn ITextProvider>| {
             let point = from_screen(&provider.peer(), point)?;
-            provider
-                .range_from_point(point)
-                .map(|range| TextRangeNode::new(owner, range))
-                .map_err(provider_error)
+            let range = match provider.embedded_range_from_point(point).map_err(provider_error)? {
+                Some(range) => range,
+                None => provider.range_from_point(point).map_err(provider_error)?,
+            };
+            Ok(TextRangeNode::new(owner, range))
         })?;
         Ok(Some(range.into_inner()))
     }

@@ -1,5 +1,5 @@
 use crate::browser_clipboard_data_transfer::BrowserClipboardDataTransfer;
-use crate::browser_data_format_helper::to_browser_format;
+use crate::browser_data_format_helper::{to_browser_format, to_web_clipboard_format};
 use crate::browser_data_transfer_helper::{IReadableDataItems, JsReadableDataItems};
 use crate::interop::completion_helper::PromiseError;
 use crate::interop::input_helper;
@@ -137,7 +137,17 @@ impl ClipboardImpl {
             }
 
             let format_string = to_browser_format(format);
-            if !page.is_clipboard_format_supported(&format_string) {
+            let native_supported = page.is_clipboard_format_supported(&format_string);
+            let web_format = |text| {
+                if format.kind() != DataFormatKind::Application {
+                    return None;
+                }
+                let name = to_web_clipboard_format(format.identifier(), text);
+                page.is_clipboard_format_supported(&name).then_some(name)
+            };
+            let web_text = web_format(true);
+            let web_bytes = web_format(false);
+            if !native_supported && web_text.is_none() && web_bytes.is_none() {
                 continue;
             }
 
@@ -174,18 +184,22 @@ impl ClipboardImpl {
                 None => continue,
                 Some(value) => {
                     if let Some(string_value) = value.downcast_ref::<String>() {
-                        writeable_item
-                            .get_or_insert_with(WriteableClipboardItem::default)
-                            .data
-                            .push((format_string, WriteableClipboardValue::String(string_value.clone())));
+                        if let Some(name) = web_text.or_else(|| native_supported.then_some(format_string)) {
+                            writeable_item
+                                .get_or_insert_with(WriteableClipboardItem::default)
+                                .data
+                                .push((name, WriteableClipboardValue::String(string_value.clone())));
+                        }
                         continue;
                     }
 
                     if let Some(bytes) = value.downcast_ref::<Rc<[u8]>>() {
-                        writeable_item
-                            .get_or_insert_with(WriteableClipboardItem::default)
-                            .data
-                            .push((format_string, WriteableClipboardValue::Bytes(bytes.to_vec())));
+                        if let Some(name) = web_bytes.or_else(|| native_supported.then_some(format_string)) {
+                            writeable_item
+                                .get_or_insert_with(WriteableClipboardItem::default)
+                                .data
+                                .push((name, WriteableClipboardValue::Bytes(bytes.to_vec())));
+                        }
                         continue;
                     }
                 }
@@ -450,6 +464,49 @@ mod tests {
             }],
         };
         assert_eq!(vec![Some(expected)], *page.written.borrow());
+    }
+
+    #[test]
+    fn web_application_formats_round_trip_case_and_payload_types() {
+        let text_name = "web application/frn-fmt.text.466c6167";
+        let bytes_name = "web application/frn-fmt.bytes.666c6167";
+        let page = Rc::new(FakePage { supported: vec!["text/plain", text_name, bytes_name], ..page() });
+        let text_format = DataFormat::create_string_application_format("Flag");
+        let bytes_format = DataFormat::create_bytes_application_format("flag");
+        let text = "é😀";
+        let bytes = vec![0, 0xff, 0x80];
+        let item = DataTransferItem::create_text(Some("plain"));
+        item.set(&text_format, Some(text.to_string()));
+        item.set(&bytes_format, Some(Rc::<[u8]>::from(bytes.clone())));
+        let data = DataTransfer::new();
+        data.add(item);
+
+        let clipboard = ClipboardImpl::with_page(page.clone());
+        run(clipboard.set_data_async(data)).unwrap();
+        assert_eq!(*page.written.borrow(), vec![Some(WriteableClipboardSource {
+            items: vec![WriteableClipboardItem { data: vec![
+                ("text/plain".into(), string("plain")),
+                (text_name.into(), string(text)),
+                (bytes_name.into(), WriteableClipboardValue::Bytes(bytes.clone())),
+            ] }],
+        })]);
+
+        *page.read_items.borrow_mut() = Some(vec![FakeReadableDataItem::new(
+            &["text/plain", text_name, bytes_name],
+            &[
+                ("text/plain", FakeValue::String("plain")),
+                (text_name, FakeValue::Bytes(text.as_bytes().to_vec())),
+                (bytes_name, FakeValue::Bytes(bytes.clone())),
+            ],
+        )]);
+        let read = run(clipboard.try_get_data_async()).unwrap().unwrap();
+        let formats = read.formats();
+        let item = &read.items()[0];
+        let expected: [DataFormat; 3] = [DataFormat::text().into(), text_format.clone().into(), bytes_format.clone().into()];
+        assert_eq!(formats.as_ref(), &expected);
+        assert_eq!(run(item.try_get_text_async()).unwrap().as_deref(), Some("plain"));
+        assert_eq!(run(item.try_get_value_async(&text_format)).unwrap().as_deref(), Some(text));
+        assert_eq!(run(item.try_get_value_async(&bytes_format)).unwrap().unwrap().as_ref(), bytes);
     }
 
     #[test]

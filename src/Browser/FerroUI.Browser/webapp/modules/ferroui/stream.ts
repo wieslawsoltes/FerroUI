@@ -22,6 +22,10 @@ export class StreamHelper {
         return await stream.close();
     }
 
+    public static async abort(stream: FileSystemWritableFileStream): Promise<void> {
+        return await stream.abort();
+    }
+
     public static async write(stream: FileSystemWritableFileStream, pointer: number, count: number): Promise<void> {
         const buffer = FerroExports.heapU8().slice(pointer, pointer + count);
         return await stream.write(buffer);

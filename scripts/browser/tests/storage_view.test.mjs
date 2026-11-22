@@ -66,11 +66,13 @@ const STUBS = `(async () => {
     return true;
 })()`;
 
+const waitForStorage = (page) => page.waitFor("globalThis.storageView?.storageViewResult && document.querySelector('canvas')");
+
 // `isolated`: whether the server sends the headers of cross-origin isolation (default: to a threaded
 // site, which cannot start without them unless its service worker adds them).
 async function start({ query = "", stubs = true, isolated = threaded } = {}) {
-    const page = await open(site, { query, width: 320, height: 200, isolated });
-    await page.waitForView(200);
+    const page = await open(site, { query, width: 1180, height: 800, isolated });
+    await waitForStorage(page);
     if (stubs) { await page.evaluate(STUBS); }
     // Runs a scenario and resolves to its outcome as an object of name/value pairs.
     page.scenario = async (name, argument = "", { timeout = 30000, userGesture = false, failing = false } = {}) => {
@@ -187,6 +189,23 @@ check("a failed close of a written file is reported by the next opening of that 
     assert((result.error ?? "").includes("The disk is full"), `expected the failed close, got ${JSON.stringify(result)}`);
 });
 
+check("committed writes wait for the file and report their own close failures", async (page) => {
+    expect((await page.scenario("commit_write")).committed, "true", "commit result");
+    expect(await page.evaluate("opfsText('input.txt')"), "committed", "file at return");
+    await page.evaluate(FAULTY_HANDLE("fail"));
+    const result = await page.scenario("commit_write", "", { failing: true });
+    assert((result.error ?? "").includes("The disk is full"), `expected the immediate close failure, got ${JSON.stringify(result)}`);
+    await page.evaluate("pickerResult.open = pickerResult.open.slice(0, 1)");
+    expect((await page.scenario("open_read")).content, "committed", "read after the reported failure");
+});
+
+check("a failed write callback aborts a browser file without replacing it", async (page) => {
+    const result = await page.scenario("commit_write", "abort", { failing: true });
+    assert((result.error ?? "").includes("The writer canceled"), `expected the callback failure, got ${JSON.stringify(result)}`);
+    expect(await page.evaluate("opfsText('input.txt')"), "first file", "file after abort");
+    expect((await page.scenario("open_read")).content, "first file", "read after abort");
+});
+
 check("a close that never settles does not keep other files from opening", async (page) => {
     await page.evaluate(FAULTY_HANDLE("hang"));
     expect((await page.scenario("write_then_read", "other")).content, "first file", "content of the other file");
@@ -212,8 +231,7 @@ check("a bookmark survives a reload, opens only as its kind and is released", as
     expect(saved.can_bookmark, "true", "can bookmark");
     assert(saved.bookmark.length > 0, "no bookmark");
     await page.evaluate("location.reload()");
-    await page.waitForView(200);
-    await page.waitFor("globalThis.storageView && storageView.storageViewResult");
+    await waitForStorage(page);
     const opened = await page.scenario("bookmark_open", saved.bookmark);
     expect(opened.file, "input.txt", "bookmarked file"); expect(opened.content, "first file", "content of the bookmarked file");
     expect(opened.as_folder, "false", "a file bookmark opens as a folder");
@@ -325,8 +343,7 @@ if (threaded) {
         // The registration of the application did not replace the worker that isolates the page:
         // a new load is still isolated, and the module starts again.
         await page.evaluate("location.reload()");
-        await page.waitForView(200);
-        await page.waitFor("globalThis.storageView && storageView.storageViewResult");
+        await waitForStorage(page);
         expect(await page.evaluate("self.crossOriginIsolated"), true, "the page is cross-origin isolated after another load");
         expect(await page.evaluate("navigator.serviceWorker.getRegistrations().then((registrations) => registrations.length)"), 1, "registrations after another load");
     }, { query: "?PreferPolyfill=true&RegisterServiceWorker=true", stubs: false, isolated: false });

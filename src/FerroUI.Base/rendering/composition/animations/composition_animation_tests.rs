@@ -279,8 +279,9 @@ fn key_frame_animation_timing() {
     ani.insert_key_frame_with_easing(1.0, 10.0, Rc::new(LinearEasing::new()));
     ani.set_duration(Duration::from_secs(1));
     ani.set_delay_time(Duration::from_secs(1));
-    // Before the delay has elapsed the current value is kept.
-    assert_eq!(evaluate(&ani, &[0.5, 1.5, 2.5]), [-1.0, 5.0, 10.0]);
+    // Keep the current value during the delay and for the zero-length
+    // interval at the first frame when the delay ends.
+    assert_eq!(evaluate(&ani, &[0.5, 1.0, 1.5, 2.5]), [-1.0, -1.0, 5.0, 10.0]);
     ani.set_delay_behavior(AnimationDelayBehavior::SetInitialValueBeforeDelay);
     assert_eq!(evaluate(&ani, &[0.5]), [0.0]);
 

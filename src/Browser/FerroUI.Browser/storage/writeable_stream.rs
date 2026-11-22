@@ -122,13 +122,46 @@ impl WriteableStream {
 
     /// Closes the stream, which commits the written content to the file.
     pub async fn close_async(mut self) -> io::Result<()> {
-        let Some(js_reference) = self.js_reference.take() else {
+        self.finish(false).await
+    }
+
+    pub(crate) async fn abort_async(mut self) -> io::Result<()> {
+        self.finish(true).await
+    }
+
+    async fn finish(&mut self, abort: bool) -> io::Result<()> {
+        let Some(pending) = self.start_finish(abort) else {
             return Ok(());
         };
-        let close = stream_helper::close_async(&js_reference).await;
-        requests_settled(self.requests.clone()).await;
-        self.take_error()?;
-        close.map(|_| ()).map_err(io::Error::from)
+        pending.clone().settled().await;
+        let result = pending.state.borrow().error.clone();
+        let _ = pending.take_error();
+        result.map_or(Ok(()), |error| Err(error.into()))
+    }
+
+    fn start_finish(&mut self, abort: bool) -> Option<Rc<PendingClose>> {
+        let js_reference = self.js_reference.take()?;
+        let finish = if abort {
+            stream_helper::abort_async(&js_reference)
+        } else {
+            stream_helper::close_async(&js_reference)
+        };
+        let pending = Rc::new(PendingClose { item: self.item.take(), state: RefCell::default() });
+        PENDING_CLOSES.with(|closes| closes.borrow_mut().push(pending.clone()));
+        let requests = self.requests.clone();
+        let outcome = pending.clone();
+        Dispatcher::ui_thread().start_local(async move {
+            let finished = finish.await;
+            requests_settled(requests.clone()).await;
+            let error = requests.borrow_mut().error.take().or(finished.err());
+            if let Some(error) = &error {
+                if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::BROWSER_PLATFORM) {
+                    logger.log(None, &format!("Writing a file failed: {error}"));
+                }
+            }
+            outcome.settle(error);
+        });
+        Some(pending)
     }
 
     /// Counts a request nobody waits for and records its failure, for the
@@ -217,26 +250,7 @@ fn seek_target(position: SeekFrom, current: u64, length: u64) -> io::Result<u64>
 
 impl Drop for WriteableStream {
     fn drop(&mut self) {
-        let Some(js_reference) = self.js_reference.take() else {
-            return;
-        };
-        // Upstream's `Dispose`: close without waiting. The close stays registered for its file
-        // until it settles, and with its failure until an opening of the file reports it.
-        let close = stream_helper::close_async(&js_reference);
-        let pending = Rc::new(PendingClose { item: self.item.take(), state: RefCell::default() });
-        PENDING_CLOSES.with(|closes| closes.borrow_mut().push(pending.clone()));
-        let requests = self.requests.clone();
-        Dispatcher::ui_thread().start_local(async move {
-            let close = close.await;
-            requests_settled(requests.clone()).await;
-            let error = requests.borrow_mut().error.take().or(close.err());
-            if let Some(error) = &error {
-                if let Some(logger) = Logger::try_get(LogEventLevel::Error, LogArea::BROWSER_PLATFORM) {
-                    logger.log(None, &format!("Writing a file failed: {error}"));
-                }
-            }
-            pending.settle(error);
-        });
+        let _ = self.start_finish(false);
     }
 }
 
@@ -246,6 +260,7 @@ impl Drop for WriteableStream {
 struct CloseState {
     settled: bool,
     error: Option<PromiseError>,
+    reported: bool,
     wakers: Vec<Waker>,
 }
 
@@ -283,7 +298,12 @@ impl PendingClose {
 
     /// Takes the failure of the settled close, which is then reported.
     fn take_error(self: &Rc<Self>) -> Option<PromiseError> {
-        let error = self.state.borrow_mut().error.take();
+        let mut state = self.state.borrow_mut();
+        let error = if std::mem::replace(&mut state.reported, true) {
+            None
+        } else {
+            state.error.clone()
+        };
         PENDING_CLOSES.with(|closes| closes.borrow_mut().retain(|close| !Rc::ptr_eq(close, self)));
         error
     }

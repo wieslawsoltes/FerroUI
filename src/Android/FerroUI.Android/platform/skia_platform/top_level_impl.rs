@@ -451,7 +451,8 @@ impl TopLevelImpl {
             let device: Rc<dyn IInputDevice> = device;
             let uptime_millis =
                 call_static_long(&JavaClass::find("android/os/SystemClock"), "uptimeMillis", "()J", &[]);
-            let args = RawTextInputEventArgs::new(device, uptime_millis as u64, input_root, text);
+            let args = RawTextInputEventArgs::new(device, uptime_millis as u64, input_root, text)
+                .with_input_method_origin();
 
             input(Rc::new(args));
         }

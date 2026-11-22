@@ -5,14 +5,16 @@ use crate::interop::unmanaged_methods::{self, DATADIR_GET, FORMATETC};
 use crate::ole_data_object_helper::{self, StorageItems};
 use crate::ole_data_object_to_data_transfer_item_wrapper::OleDataObjectToDataTransferItemWrapper;
 use crate::ole_virtual_file_data;
+use crate::web_clipboard;
 use crate::win32_com::{IDataObject, IEnumFORMATETC};
 use ferroui_base::input::platform::{
     ClipboardError, PlatformDataTransfer, PlatformDataTransferImpl, PlatformDataTransferItem,
 };
 use ferroui_base::input::DataFormat;
+use ferroui_base::input::platform::chromium_clipboard::FormatAlias;
 use ferroui_base::platform::storage::IStorageItem;
 use ferroui_microcom::ComPtr;
-use std::cell::RefCell;
+use std::cell::{OnceCell, RefCell};
 use std::rc::Rc;
 
 /// Wraps a Win32 `IDataObject` into a data transfer.
@@ -20,13 +22,26 @@ pub(crate) struct OleDataObjectToDataTransferWrapper {
     /// A reference of the wrapper's own, released when the data transfer
     /// is disposed.
     ole_data_object: RefCell<Option<ComPtr<IDataObject>>>,
+    web_formats: Option<OnceCell<Rc<[FormatAlias]>>>,
 }
 
 impl OleDataObjectToDataTransferWrapper {
     /// `ole_data_object` is the wrapped OLE data object.
     pub(crate) fn new(ole_data_object: &IDataObject) -> Rc<PlatformDataTransfer> {
+        Self::wrap(ole_data_object, None)
+    }
+
+    pub(crate) fn new_clipboard(ole_data_object: &IDataObject) -> Rc<PlatformDataTransfer> {
+        Self::wrap(ole_data_object, Some(OnceCell::new()))
+    }
+
+    fn wrap(
+        ole_data_object: &IDataObject,
+        web_formats: Option<OnceCell<Rc<[FormatAlias]>>>,
+    ) -> Rc<PlatformDataTransfer> {
         PlatformDataTransfer::new(OleDataObjectToDataTransferWrapper {
             ole_data_object: RefCell::new(Some(ComPtr::from_ref(ole_data_object))),
+            web_formats,
         })
     }
 
@@ -100,6 +115,11 @@ impl PlatformDataTransferImpl for OleDataObjectToDataTransferWrapper {
             formats.push(DataFormat::file().into());
         }
 
+        if let Some(web_formats) = &self.web_formats {
+            let aliases = web_formats.get_or_init(|| web_clipboard::read_map(&ole_data_object, &formats).into());
+            formats.extend(aliases.iter().map(|alias| alias.application.clone()));
+        }
+
         Ok(formats)
     }
 
@@ -141,7 +161,8 @@ impl PlatformDataTransferImpl for OleDataObjectToDataTransferWrapper {
 
         // Single item containing all formats except for DataFormat.File.
         if let Some(non_file_formats) = non_file_formats {
-            items.push(OleDataObjectToDataTransferItemWrapper::new(ole_data_object.clone(), non_file_formats));
+            let aliases = self.web_formats.as_ref().and_then(OnceCell::get).cloned().unwrap_or_default();
+            items.push(OleDataObjectToDataTransferItemWrapper::new(ole_data_object, non_file_formats, aliases));
         }
 
         Ok(items)

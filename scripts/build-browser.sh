@@ -197,14 +197,31 @@ command -v em++ >/dev/null || { echo "em++ (the linker of the target) is not on 
 command -v wasm-bindgen >/dev/null || { echo "wasm-bindgen is not on PATH" >&2; exit 1; }
 [ -d "$WWWROOT" ] || { echo "no host page at $WWWROOT" >&2; exit 1; }
 
+# Current Windows SDKs ship native executables. cc-rs otherwise selects the
+# older batch wrappers when compiling HarfBuzz and other C/C++ dependencies.
+case "$OSTYPE" in
+  msys*|cygwin*)
+    if command -v emcc.exe >/dev/null && command -v em++.exe >/dev/null && command -v emar.exe >/dev/null; then
+      export CC_wasm32_unknown_emscripten="${CC_wasm32_unknown_emscripten:-$(cygpath -m "$(command -v emcc.exe)")}"
+      export CXX_wasm32_unknown_emscripten="${CXX_wasm32_unknown_emscripten:-$(cygpath -m "$(command -v em++.exe)")}"
+      export AR_wasm32_unknown_emscripten="${AR_wasm32_unknown_emscripten:-$(cygpath -m "$(command -v emar.exe)")}"
+    fi
+    ;;
+esac
+
 # The output directory is deleted before it is written: refuse anything that is not a directory of
 # its own below the repository or the cargo target directory.
 # The real path of a directory that may not exist yet (nothing is created).
 abspath() {
-  node -e 'const fs = require("fs"), path = require("path");
+  local absolute
+  absolute="$(node -e 'const fs = require("fs"), path = require("path");
     let p = path.resolve(process.argv[1]), rest = [];
     while (!fs.existsSync(p) && path.dirname(p) !== p) { rest.unshift(path.basename(p)); p = path.dirname(p); }
-    console.log(path.join(fs.realpathSync(p), ...rest));' "$1"
+    console.log(path.join(fs.realpathSync(p), ...rest));' "$1")" || return
+  case "$OSTYPE" in
+    msys*|cygwin*) cygpath -u "$absolute" ;;
+    *) printf '%s\n' "$absolute" ;;
+  esac
 }
 [ -n "$OUT" ] || { echo "the output directory is empty" >&2; exit 2; }
 ROOT_REAL="$(cd "$ROOT" && pwd -P)"

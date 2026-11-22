@@ -1,7 +1,10 @@
 use crate::clipboard_data_format_helper::to_native_format;
 use crate::frn_string::{FrnString, FrnStringArray};
 use crate::interop::*;
-use ferroui_base::input::{DataFormat, DataFormatKind, DataTransferItemExtensions, IDataTransferItem};
+use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, ClipboardMap};
+use ferroui_base::input::{
+    DataFormat, DataFormatKind, DataTransferItemExtensions, IDataTransferItem,
+};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::imaging::{BitmapEncoderOptions, PngBitmapEncoderOptions};
 use ferroui_microcom::{ComPtr, HResult};
@@ -11,18 +14,22 @@ use std::rc::Rc;
 /// Exposes one item of a data transfer to native code.
 pub(crate) struct DataTransferItemToFrnClipboardDataItemWrapper {
     item: Rc<dyn IDataTransferItem>,
+    web_map: Option<ClipboardMap>,
 }
 
 impl DataTransferItemToFrnClipboardDataItemWrapper {
-    pub(crate) fn new(item: Rc<dyn IDataTransferItem>) -> Self {
-        Self { item }
+    pub(crate) fn new(item: Rc<dyn IDataTransferItem>, web_map: Option<ClipboardMap>) -> Self {
+        Self { item, web_map }
     }
 
     fn find_data_format(&self, native_format: &str) -> Option<DataFormat> {
         self.item
             .formats()
             .iter()
-            .find(|format| format.kind() != DataFormatKind::InProcess && to_native_format(format) == native_format)
+            .find(|format| {
+                format.kind() != DataFormatKind::InProcess
+                    && to_native_format(format) == native_format
+            })
             .cloned()
     }
 
@@ -30,6 +37,24 @@ impl DataTransferItemToFrnClipboardDataItemWrapper {
     /// the type of the stored value: a string is handed over as a string,
     /// bytes as bytes and a bitmap as its PNG encoding.
     fn get_value_core(&self, format: &str) -> Option<ComPtr<IFrnClipboardDataValue>> {
+        if let Some(map) = &self.web_map {
+            if format == ChromiumClipboard::MacOs.map_format().identifier() {
+                return Some(IFrnClipboardDataValue::from_impl(BytesValue(
+                    map.bytes.clone(),
+                )));
+            }
+            if let Some(alias) = map
+                .aliases
+                .iter()
+                .find(|alias| alias.slot.identifier() == format)
+            {
+                let value = self.item.try_get_raw(&alias.application)?;
+                return Some(IFrnClipboardDataValue::from_impl(BytesValue(
+                    alias.encode(value.as_ref())?,
+                )));
+            }
+        }
+
         if let Some(data_format) = self.find_data_format(format) {
             if DataFormat::text() == data_format {
                 let text = self.item.try_get_value(&DataFormat::text()).unwrap_or_default();
@@ -71,9 +96,27 @@ impl IFrnClipboardDataItemImpl for DataTransferItemToFrnClipboardDataItemWrapper
     fn provide_formats(&self) -> Result<Option<ComPtr<IFrnStringArray>>, HResult> {
         crate::callback_base::guard(Err(HResult::FAIL), || {
             let formats = self.item.formats();
-            let native_formats =
-                formats.iter().filter(|f| f.kind() != DataFormatKind::InProcess).map(to_native_format);
-            Ok(Some(IFrnStringArray::from_impl(FrnStringArray::new(native_formats))))
+            let mut native_formats: Vec<_> = formats
+                .iter()
+                .filter(|f| f.kind() != DataFormatKind::InProcess)
+                .map(to_native_format)
+                .collect();
+            if let Some(map) = &self.web_map {
+                native_formats.push(
+                    ChromiumClipboard::MacOs
+                        .map_format()
+                        .identifier()
+                        .to_owned(),
+                );
+                native_formats.extend(
+                    map.aliases
+                        .iter()
+                        .map(|alias| alias.slot.identifier().to_owned()),
+                );
+            }
+            Ok(Some(IFrnStringArray::from_impl(FrnStringArray::new(
+                native_formats,
+            ))))
         })
     }
 
@@ -134,7 +177,9 @@ mod tests {
     use ferroui_base::input::platform::PlatformDataTransferItem;
 
     fn wrap(item: Rc<PlatformDataTransferItem>) -> ComPtr<IFrnClipboardDataItem> {
-        IFrnClipboardDataItem::from_impl(DataTransferItemToFrnClipboardDataItemWrapper::new(item))
+        IFrnClipboardDataItem::from_impl(DataTransferItemToFrnClipboardDataItemWrapper::new(
+            item, None,
+        ))
     }
 
     #[test]

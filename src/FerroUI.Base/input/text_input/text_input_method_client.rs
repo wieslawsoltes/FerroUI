@@ -109,7 +109,19 @@ pub trait TextInputMethodClient {
     /// [`input_method_editing`](Self::input_method_editing); for any other client
     /// this is `None`, and the platform backends keep their upstream behaviour.
     fn input_method_connection(&self) -> Option<Rc<TextInputMethodConnection>> {
+        self.input_method_editing()?;
         self.events().connection()
+    }
+
+    /// The platform can replace text adjoining the primary selection in a
+    /// single managed edit. This capability has no effect on composition.
+    fn supports_surrounding_text_edits(&self) -> bool {
+        false
+    }
+
+    /// The current managed connection for contextual replacement.
+    fn surrounding_text_edit_connection(&self) -> Option<Rc<TextInputMethodConnection>> {
+        self.supports_surrounding_text_edits().then(|| self.events().connection()).flatten()
     }
 
     /// Atomic composition, when implemented by this editing control. Returning

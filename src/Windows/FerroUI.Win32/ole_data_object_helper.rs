@@ -211,20 +211,9 @@ mod imp {
     /// `None` when the object does not have the format; an error when it
     /// has data that cannot be read as the format.
     pub(crate) fn try_get(ole_data_object: &IDataObject, format: &DataFormat) -> Result<Option<Rc<dyn Any>>, ClipboardError> {
-        let Some(format_id) = try_get_contained_format(ole_data_object, format) else {
+        let Some((format_etc, medium)) = try_get_medium(ole_data_object, format) else {
             return Ok(None);
         };
-
-        let mut medium = STGMEDIUM::default();
-        let mut format_etc = to_format_etc(format_id);
-        // SAFETY: two structures of this frame, for the duration of the
-        // call.
-        let result = unsafe { ole_data_object.get_data(&mut format_etc, &mut medium) };
-        if result != HRESULT::S_OK {
-            return Ok(None);
-        }
-
-        let medium = MediumGuard(medium);
         if medium.0.unionmember != 0 {
             if medium.0.tymed == TYMED::TYMED_HGLOBAL {
                 let h_global = medium.0.unionmember;
@@ -240,6 +229,26 @@ mod imp {
         }
 
         Ok(None)
+    }
+
+    pub(crate) fn try_get_bounded_bytes(
+        object: &IDataObject, format: &DataFormat, max_size: usize,
+    ) -> Option<Vec<u8>> {
+        let (_, medium) = try_get_medium(object, format)?;
+        let handle = medium.0.unionmember;
+        if handle == 0 || medium.0.tymed != TYMED::TYMED_HGLOBAL || unmanaged_methods::global_size(handle) > max_size {
+            return None;
+        }
+        // SAFETY: handle refers to the global memory owned by the medium guard.
+        unsafe { unmanaged_methods::read_global(handle) }
+    }
+
+    fn try_get_medium(object: &IDataObject, format: &DataFormat) -> Option<(FORMATETC, MediumGuard)> {
+        let mut format_etc = to_format_etc(try_get_contained_format(object, format)?);
+        let mut medium = STGMEDIUM::default();
+        // SAFETY: both arguments are valid mutable structures for the call.
+        let result = unsafe { object.get_data(&mut format_etc, &mut medium) };
+        (result == HRESULT::S_OK).then(|| (format_etc, MediumGuard(medium)))
     }
 
     fn try_get_contained_format(ole_data_object: &IDataObject, format: &DataFormat) -> Option<u16> {
