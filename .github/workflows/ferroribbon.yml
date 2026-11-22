@@ -1,0 +1,90 @@
+name: FerroRibbon
+
+on:
+  pull_request:
+    # The component is a workspace of its own, which the workspace runs of ci.yml do not build.
+    paths:
+      - '.github/workflows/ferroribbon.yml'
+      - 'components/FerroRibbon/**'
+  schedule:
+    # The component follows the framework by path: a change of the framework can break it
+    # without touching the paths above.
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+    inputs:
+      repeat:
+        description: Run the ribbon test binary six times, and the order-dependent pair six times
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ferroribbon-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  component:
+    name: Build and test (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux
+            os: ubuntu-latest
+            wrapper: xvfb-run -a
+          - name: macOS
+            os: macos-15
+            wrapper: ''
+          - name: Windows
+            os: windows-latest
+            wrapper: ''
+    defaults:
+      run:
+        shell: bash
+        working-directory: components/FerroRibbon
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          workspaces: components/FerroRibbon
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+          cache-on-failure: true
+      - name: System packages
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb xauth libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev libicu-dev pkg-config \
+            fonts-dejavu-core fonts-noto-cjk fonts-noto-color-emoji \
+            libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev mold clang \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpipewire-0.3-dev libgles-dev
+          echo "RUSTFLAGS=-C link-arg=-fuse-ld=mold" >> "$GITHUB_ENV"
+      # The MSVC standard library of the image refuses its libclang, which generates the ANGLE
+      # binding; the binding is declarations only (see the Windows job of ci.yml).
+      - name: Windows build settings
+        if: runner.os == 'Windows'
+        run: echo "BINDGEN_EXTRA_CLANG_ARGS=-D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH" >> "$GITHUB_ENV"
+      - name: Test the libraries and their consumers
+        run: ${{ matrix.wrapper }} cargo test --locked --no-fail-fast
+      # These two build a rendering backend, with Skia.
+      - name: Test the sample and the native probe
+        if: ${{ !cancelled() }}
+        run: ${{ matrix.wrapper }} cargo test --locked --no-fail-fast -p ferroribbon-sample -p ferroribbon-native-probe
+      # A workflow can be started by hand only once it is on the default branch. Until then a
+      # pull request asks for this step with the marker in its description.
+      - name: Repeat the ribbon tests and report every run
+        if: ${{ !cancelled() && (inputs.repeat == true || contains(github.event.pull_request.body, '<!-- ferroribbon-repeat-tests -->')) }}
+        run: ${{ matrix.wrapper }} python3 scripts/repeat_tests.py
