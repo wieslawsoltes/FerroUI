@@ -346,7 +346,18 @@ For MCP, read `designer_states` through `designer_studio_query` to get the group
 
 ![The Review group actions over an XAML source buffer and the app’s Ready pose](../images/vscode-app-preview-xaml-state-actions.jpg)
 
-App Preview uses the app’s registered animators for literal state poses and transitions. XAML authoring writes native style classes, setters, and animations. Mapped Rust authoring edits inline `visual_states` in the active invocation. Use Undo in the source editor to revert each operation. When the active transition or state still resolves after an edit, the first accepted frame restores its preview position.
+App Preview uses the app’s registered animators for state poses and transitions. XAML authoring writes native style classes, setters, and animations. Mapped Rust authoring edits inline `visual_states` in the active invocation. Use Undo in the source editor to revert each operation. When the active transition or state still resolves after an edit, the first accepted frame restores its preview position.
+
+#### Preview state bindings and resources
+
+1. In an XAML state, use **Add or Edit Setter** to enter a literal, a binding, or a resource reference for an animatable property. The live target resolves each value using its loaded XAML scope and the app’s fixture data.
+2. To try a resource-to-binding transition, open [HostedStateValues.xaml](../../../samples/TodoWorkbench/HostedStateValues.xaml) in the Todo Workbench Cargo project. Open **App Preview** with the `app-preview` feature and choose **Review metrics** in **Preview fixture**.
+3. Pick **Delivery · Queued → Ready** under **State routes** and seek to 1 second. The card’s width starts at the scoped resource value of 312, passes 420, and reaches the named control’s width of 528. Its opacity moves from the dynamic resource value to the fixture’s bound value.
+4. Edit `QueuedCardWidth` in XAML while the route is paused. App Preview restores the same playhead using the new resource. **Stop** removes the preview layer and restores the app’s underlying properties and bindings.
+
+![The Review metrics fixture shows the Queued to Ready route at one second beside its XAML resource and binding setters](../images/vscode-app-preview-state-values.png)
+
+Agents can discover the state and route IDs with `designer_hosted_animations` and seek or stop with `designer_hosted_animation`. Use `designer_hosted_state_group_draft` to review changes to the authored expressions and `designer_hosted_state_group` to apply them.
 
 To author directional XAML transitions, include `ferroui-xaml-interactions-custom` in the application and call `ferroui_xaml_interactions_custom::register_types()` before loading XAML in App Preview and in the running app. Studio uses the same `ConditionalAction` class for directional routes. [Todo Workbench registration](../../../samples/TodoWorkbench/app_preview.rs)
 

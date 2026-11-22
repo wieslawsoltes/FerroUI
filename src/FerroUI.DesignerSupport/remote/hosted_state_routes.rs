@@ -1,7 +1,7 @@
 use crate::design_window_loader::LoadedDesign;
 use ferroui_base::{Ref, StyledElement};
 use ferroui_designer_animation::StatePreviewGroup;
-use ferroui_designer_animation::native::NativeStateRoute;
+use ferroui_designer_animation::native::{NativeSourceIndex, NativeStateRoute, NativeStateStyles};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_remote_protocol::designer::{DesignAnimationCatalogMessage, DesignAnimationProgram};
 use std::collections::BTreeMap;
@@ -13,6 +13,7 @@ impl HostedStateRoutes {
     pub(super) fn mount(
         document: &Document,
         groups: Vec<StatePreviewGroup>,
+        locations: &NativeSourceIndex,
         design: &LoadedDesign,
         targets: &mut BTreeMap<i64, Ref<StyledElement>>,
         catalog: &mut DesignAnimationCatalogMessage,
@@ -33,14 +34,22 @@ impl HostedStateRoutes {
                     }
                 }
             }
-            for route in group.routes {
+            let styles = if fixture.is_some() {
+                NativeStateStyles::default()
+            } else {
+                i64::try_from(owner).ok().and_then(|id| targets.get(&id))
+                    .and_then(|owner| catch_unwind(AssertUnwindSafe(|| {
+                        NativeStateStyles::discover(locations, owner, &group)
+                    })).ok()).unwrap_or_default()
+            };
+            for route in &group.routes {
                 let Ok(id) = i64::try_from(route.id) else {
                     continue;
                 };
                 let mut matched = BTreeMap::new();
                 // Property conversion and animator registration can invoke application code.
                 let native = catch_unwind(AssertUnwindSafe(|| {
-                    NativeStateRoute::bind(document, &group.model, &route.transition, |target| {
+                    NativeStateRoute::bind_loaded(document, &group, &route.transition, &styles, |target| {
                         let id = i64::try_from(target).ok()?;
                         let control = if let Some(root) = &fixture {
                             fixture_control(document, target, root)?

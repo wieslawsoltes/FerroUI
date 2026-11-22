@@ -103,6 +103,9 @@ fn register_fixtures() {
             Ok(PreviewFixture::DataContext(Rc::new(text.to_owned())))
         }).expect("valid Todo Workbench XAML fixture");
     }
+    register_preview_fixture("/HostedStateValues.xaml", "Review metrics", || {
+        Ok(PreviewFixture::DataContext(Rc::new(0.8_f64)))
+    }).expect("valid Todo Workbench state values fixture");
     for (name, text) in [("Empty queue", "No tasks yet"), ("One task", "Review the project")] {
         register_preview_fixture("/app_preview.rs", name, move || {
             use ferroui_view::prelude::*;

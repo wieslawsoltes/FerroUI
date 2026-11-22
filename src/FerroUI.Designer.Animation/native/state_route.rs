@@ -1,4 +1,7 @@
-use crate::{Easing, StateSetter, StateTransition, VisualStateGroup, resolve_state_target};
+use super::{validate_animation_target, NativeStateStyles};
+use crate::{
+    resolve_state_target, Easing, StatePreviewGroup, StateSetter, StateTransition, VisualStateGroup,
+};
 use ferroui_base::animation::easings::{Easing as NativeEasing, SpringEasing};
 use ferroui_base::animation::{
     Animatable, Animation, Cue, FillMode, IAnimationSetter, KeyFrame, SignedDuration,
@@ -21,7 +24,61 @@ impl NativeStateRoute {
         document: &Document,
         group: &VisualStateGroup,
         transition: &StateTransition,
+        resolve: impl FnMut(NodeId) -> Option<Ref<StyledElement>>,
+    ) -> Result<Self, String> {
+        Self::bind_setters(
+            document,
+            group,
+            transition,
+            resolve,
+            |target, _, _, setter| literal_setter(target, setter),
+        )
+    }
+
+    pub fn bind_loaded(
+        document: &Document,
+        group: &StatePreviewGroup,
+        transition: &StateTransition,
+        styles: &NativeStateStyles,
+        resolve: impl FnMut(NodeId) -> Option<Ref<StyledElement>>,
+    ) -> Result<Self, String> {
+        Self::bind_setters(
+            document,
+            &group.model,
+            transition,
+            resolve,
+            |target, from, state, setter| {
+                let name = &setter.property;
+                let route = group.setter_style(from, state, &setter.target);
+                let mut native = styles.setter(route, name)?;
+                if native.is_none() && from.is_some() {
+                    native =
+                        styles.setter(group.setter_style(None, state, &setter.target), name)?;
+                }
+                let Some(native) = native else {
+                    return literal_setter(target, setter);
+                };
+                if native.property().is_some_and(|property| {
+                    !property.is_read_only() && Animation::can_animate_property(property)
+                }) {
+                    return Ok(native);
+                }
+                Err(format!("No application animator is registered for {name}"))
+            },
+        )
+    }
+
+    fn bind_setters(
+        document: &Document,
+        group: &VisualStateGroup,
+        transition: &StateTransition,
         mut resolve: impl FnMut(NodeId) -> Option<Ref<StyledElement>>,
+        mut load: impl FnMut(
+            &StyledElement,
+            Option<&str>,
+            &str,
+            &StateSetter,
+        ) -> Result<Rc<dyn IAnimationSetter>, String>,
     ) -> Result<Self, String> {
         let end = group
             .states
@@ -50,15 +107,26 @@ impl NativeStateRoute {
             let mut first = Vec::new();
             let mut last = Vec::new();
             for setter in setters {
-                let endpoint = native_setter(&target, setter)?;
+                let endpoint = load(&target, transition.from.as_deref(), &end.name, setter)?;
                 if duration == 0.0 {
                     first.push(endpoint.clone());
-                } else if let Some(previous) = start.and_then(|state| {
-                    state.setters.iter().find(|previous| {
-                        previous.target == setter.target && previous.property == setter.property
-                    })
+                } else if let Some((state, previous)) = start.and_then(|state| {
+                    state
+                        .setters
+                        .iter()
+                        .find(|previous| {
+                            previous.target == setter.target && previous.property == setter.property
+                        })
+                        .map(|previous| (state, previous))
                 }) {
-                    first.push(native_setter(&target, previous)?);
+                    let previous = load(&target, None, &state.name, previous)?;
+                    if previous.property() != endpoint.property() {
+                        return Err(format!(
+                            "The state endpoints resolve {} to different properties",
+                            setter.property
+                        ));
+                    }
+                    first.push(previous);
                 }
                 last.push(endpoint);
             }
@@ -74,7 +142,9 @@ impl NativeStateRoute {
             animation
                 .children()
                 .add(KeyFrame::with_cue(Cue::new(1.0), last));
-            bindings.insert(id, (animation, target.upcast::<Animatable>()));
+            let target = target.upcast::<Animatable>();
+            validate_animation_target(&animation, &target, "the state target")?;
+            bindings.insert(id, (animation, target));
         }
         if bindings.is_empty() {
             return Err("The state has no mapped animation setters".into());
@@ -91,7 +161,7 @@ impl NativeStateRoute {
     }
 }
 
-fn native_setter(
+fn literal_setter(
     target: &StyledElement,
     setter: &StateSetter,
 ) -> Result<Rc<dyn IAnimationSetter>, String> {

@@ -108,3 +108,5 @@ change the Rust route's duration and easing. Stop the playhead, then click
 handlers. [App Preview state-route workflow](../../docs/designer/vscode/motion.md#scrub-a-rust-state-route-in-app-preview)
 
 Use **Visual state actions** in App Preview to author groups, states, setters, and transitions in XAML or mapped Rust. The sample registers the custom XAML interactions library so directional transitions load in both preview and `--xaml-live` mode. [Visual state authoring](../../docs/designer/vscode/motion.md#author-visual-states-in-app-preview)
+
+Open [HostedStateValues.xaml](HostedStateValues.xaml), choose the **Review metrics** preview fixture, and scrub **Delivery · Queued → Ready**. The transition uses a scoped resource, a dynamic resource, a named control, and the fixture’s data. Edit `QueuedCardWidth` while paused to see the current pose update. [Preview state bindings and resources](../../docs/designer/vscode/motion.md#preview-state-bindings-and-resources)

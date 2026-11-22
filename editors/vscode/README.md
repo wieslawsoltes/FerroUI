@@ -147,7 +147,7 @@ Set **Authored time** and choose the plus icon on a sampleable XAML or mapped Ru
 
 Use **Animation clip actions** to create a clip on a live style owner and rename, duplicate, or remove XAML or mapped Rust clips. Agents can draft or apply the same operations with `designer_hosted_clip_draft` and `designer_hosted_clip_edit`. [App Preview clip actions](../../docs/designer/vscode/motion.md#manage-clips-in-app-preview)
 
-Use **Visual state actions** to edit groups, states, setters, and transitions in XAML or mapped Rust. The running app can sample a supported state or transition. Agents read the accepted state model and plan or apply one source edit with `designer_hosted_state_group_draft` and `designer_hosted_state_group`. [App Preview visual states](../../docs/designer/vscode/motion.md#author-visual-states-in-app-preview)
+Use **Visual state actions** to edit groups, states, setters, and transitions in XAML or mapped Rust. The running app can scrub XAML states that use live bindings or scoped resources. Agents read the accepted state model and plan or apply one source edit with `designer_hosted_state_group_draft` and `designer_hosted_state_group`. [App Preview visual states](../../docs/designer/vscode/motion.md#author-visual-states-in-app-preview)
 
 Open **App Preview palette** to compare Light, Dark, and High contrast colors in the previewed XAML scope. Choose the owning file to edit an included palette before saving. Each change takes one Undo step. [App Preview palette guide](../../docs/designer/vscode/runtime.md#edit-a-palette-in-app-preview)
 

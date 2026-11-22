@@ -270,7 +270,7 @@ impl HostedAnimations {
             }
         }
         let state_routes =
-            HostedStateRoutes::mount(&source.document, source.states, design, &mut targets, catalog);
+            HostedStateRoutes::mount(&source.document, source.states, &locations, design, &mut targets, catalog);
         catalog.targets = targets
             .iter()
             .map(|(&id, control)| {

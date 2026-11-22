@@ -6,6 +6,7 @@ mod curve_value;
 mod programs;
 mod source;
 mod state_route;
+mod state_styles;
 mod typing;
 
 pub use clock::{animation_timing, FrozenPreviewClock, NativePlayback};
@@ -13,4 +14,5 @@ pub use curve::{sample_curve_track, sample_keyframe_value, sample_scalar_track, 
 pub use programs::{validate_animation_target, NativeProgramIndex};
 pub use source::NativeSourceIndex;
 pub use state_route::NativeStateRoute;
+pub use state_styles::NativeStateStyles;
 pub use typing::native_keyframe_options;

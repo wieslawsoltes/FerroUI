@@ -114,7 +114,7 @@ async function checkLanguage(preview: NativePreview, buildSource: (revision: num
     console.log(`App Preview edited ${language} state groups, sampled native endpoints and routes, and restored an accepted pose after editing`);
 }
 
-function applyStateDraft(source: string, patches: HostedSourcePatch[]): string {
+export function applyStateDraft(source: string, patches: HostedSourcePatch[]): string {
     let next = source.length;
     return patches.reduceRight((text, { start, end, expected, replacement }) => {
         assert.ok(start <= end && end <= next);

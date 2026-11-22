@@ -26,7 +26,7 @@ App Preview holds its accepted image through compilation and invalid edits. If t
 
 Edit a workspace dictionary or style included by the current view and watch App Preview update before saving. Literal XAML includes are followed through nested dictionaries. The editor uses the selected package’s build metadata to locate file-backed compiled includes and resolves relative project files against their declaring document. A broken include pauses interaction on the retained image until you repair it. App Preview and the `designer_hosted_*` MCP tools share these revisions. Rebuild an older preview binary with the current `ferroui-designer-support` to enable included drafts. Registered Rust view fixtures use their compiled view factory.
 
-Open **Visual state actions** to edit groups, setters, and transitions in XAML or mapped Rust. Choose a pose or route to preview it with the app’s real control properties and animation registry. A compiled Rust fixture uses its ordinary application clock for input and state handlers. [Author visual states in App Preview](motion.md#author-visual-states-in-app-preview)
+Open **Visual state actions** to edit groups, setters, and transitions in XAML or mapped Rust. XAML state poses and routes resolve bindings and resources in the app’s live scope and sample its registered animators. A compiled Rust fixture uses its ordinary application clock for input and state handlers. [Preview state bindings and resources](motion.md#preview-state-bindings-and-resources)
 
 ### Edit a palette in App Preview
 

@@ -1,4 +1,6 @@
-use super::{STATE_MARKER, StateTransition, TRANSITION_MARKER, VisualStateGroup, decode_text};
+#[cfg(feature = "native-preview")]
+use super::StateStyleKey;
+use super::{state_style_key, StateTransition, VisualStateGroup};
 use crate::Easing;
 use ferroui_designer_core::{Document, NodeId, SourceSpan};
 use std::collections::BTreeMap;
@@ -41,6 +43,8 @@ pub struct StatePreviewGroup {
     pub model: VisualStateGroup,
     pub span: SourceSpan,
     pub routes: Vec<StatePreviewRoute>,
+    #[cfg(feature = "native-preview")]
+    styles: BTreeMap<StateStyleKey, Option<NodeId>>,
 }
 
 pub struct StatePreviewRoute {
@@ -73,24 +77,28 @@ impl StatePreviewGroup {
                     return None;
                 }
                 let group_node = ast.node(*style)?;
+                #[cfg(feature = "native-preview")]
                 let mut styles = BTreeMap::new();
+                let mut route_styles = BTreeMap::new();
                 for child in ast.element_children(*style) {
-                    let child = ast.node(child)?;
-                    let marker = child
-                        .children
-                        .iter()
-                        .filter_map(|id| ast.node(*id)?.text.as_deref())
-                        .find_map(route_marker);
-                    if let Some(key) = marker {
-                        styles.entry(key).or_insert(child);
-                    }
+                    let Some(key) = state_style_key(document, child) else {
+                        continue;
+                    };
+                    route_styles
+                        .entry((key.from.clone(), key.to.clone()))
+                        .or_insert(ast.node(child)?);
+                    #[cfg(feature = "native-preview")]
+                    styles
+                        .entry(key)
+                        .and_modify(|found| *found = None)
+                        .or_insert(Some(child));
                 }
                 let mut routes = model
                     .transitions
                     .iter()
                     .filter_map(|transition| {
                         let style =
-                            styles.get(&(transition.from.clone(), transition.to.clone()))?;
+                            route_styles.get(&(transition.from.clone(), transition.to.clone()))?;
                         Some(StatePreviewRoute {
                             id: style.id,
                             transition: transition.clone(),
@@ -118,7 +126,7 @@ impl StatePreviewGroup {
                                         easing: Easing::Linear,
                                     },
                                     endpoint: true,
-                                    span: styles
+                                    span: route_styles
                                         .get(&(None, state.name.clone()))
                                         .map_or(group_node.span, |style| style.span),
                                 }
@@ -129,19 +137,28 @@ impl StatePreviewGroup {
                     model: model.clone(),
                     span: group_node.span,
                     routes,
+                    #[cfg(feature = "native-preview")]
+                    styles,
                 })
             })
             .collect()
     }
-}
-
-fn route_marker(text: &str) -> Option<(Option<String>, String)> {
-    let text = text.trim();
-    if let Some(marker) = text.strip_prefix(STATE_MARKER) {
-        let (to, _) = marker.split_once(':')?;
-        return Some((None, decode_text(to)?));
+    #[cfg(feature = "native-preview")]
+    pub(crate) fn style_ids(&self) -> impl Iterator<Item = NodeId> + '_ {
+        self.styles.values().filter_map(|id| *id)
     }
-    let (from, rest) = text.strip_prefix(TRANSITION_MARKER)?.split_once(':')?;
-    let (to, _) = rest.split_once(':')?;
-    Some((Some(decode_text(from)?), decode_text(to)?))
+
+    #[cfg(feature = "native-preview")]
+    pub(crate) fn setter_style(
+        &self,
+        from: Option<&str>,
+        to: &str,
+        target: &str,
+    ) -> Option<NodeId> {
+        self.styles.iter().find_map(|(key, id)| {
+            (key.from.as_deref() == from && key.to == to && key.target == target)
+                .then_some(*id)
+                .flatten()
+        })
+    }
 }
