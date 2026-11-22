@@ -47,6 +47,7 @@ Editor and Studio authoring reuse the same native planning and validation. The e
 | Set, remove, or seek to a preview marker | Use `designer_timeline_markers` and `designer_timeline_marker_edit` for a typed clip or the shared Timeline clock. In App Preview, read `markers` from `designer_hosted_animations` and pass `action: "marker"` to `designer_hosted_animation`. [Marker controls and arguments](motion.md#bookmark-preview-positions) |
 | Run, inspect, and test | `ferroui_reload_targets`, `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history` drive managed Cargo and report outcomes. `ferroui_runtime_source` and `ferroui_runtime_apply_source` work with a mapped runtime value. `ferroui_scenario_run` runs a saved native scenario. |
 | Open a running app’s template | `ferroui_runtime_templates` reads the selected element’s templates. Pass its generation and a template ID to `ferroui_runtime_template_source`. [Live App template tools](#inspect-live-app-templates-with-mcp) |
+| Profile a running window | Use `ferroui_runtime_profile_windows`, `ferroui_runtime_profile_start`, `ferroui_runtime_profile_read`, `ferroui_runtime_profile_stop`, and `ferroui_runtime_profile_source`. [Runtime profiler](#profile-a-runtime-with-mcp) |
 
 For example, ask an agent to open the current design, inspect its animation programs, and seek to one keyframe. It should read the active document and RSX invocation, wait for the accepted frame, read the program ID and its keys, then call the native seek with the current frame. Ask it to capture the resulting frame or report the current position. To update a key, validate the time, value, and easing together before applying the edit.
 
@@ -233,6 +234,14 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 Read the application’s current tree to get a node ID. Call `ferroui_runtime_templates` with `node` and `runtime` set to `managed` or `attached`. The catalog lists effective templates, column headers where available, and verified source stamps. The native application tool `get_template_sources` exposes the same template evidence.
 
 Call `ferroui_runtime_template_source` with the same node and runtime, the catalog’s `generation` as `expected_generation`, and the entry’s `id` as `template_id`. The tool rechecks the app’s template and the editor’s source revision before opening the file. [Live App workflow](runtime.md#open-an-effective-template-in-the-running-app)
+
+### Profile a runtime with MCP
+
+1. Call `ferroui_runtime_profile_windows` for the managed or attached application. Use the returned `runtime`, `generation`, and chosen window ID as `runtime`, `expected_generation`, and `window` for `ferroui_runtime_profile_start`. Choose `duration_ms` between 100 and 30,000.
+2. Reproduce the interaction. Use `ferroui_runtime_profile_read` with the same runtime and generation, and the returned `id` as `profile_id`. Use `ferroui_runtime_profile_stop` to end the capture early. Diagnostics shows the same report.
+3. For a row with `has_source`, pass its `row_id` as `row` to `ferroui_runtime_profile_source` with the same runtime, expected generation, and profile ID. Set `reveal_source` to open the verified file. The report returned by the read tool contains the same measurement data as the JSON export.
+
+Start, Stop, and Reveal Profile Source use the extension’s existing `ferroui.mcp.allowWrites` permission. The application inspector exposes `start_ui_profile`, `get_ui_profile`, and `stop_ui_profile` directly, including when Designer Studio hosts the endpoint. [VS Code Diagnostics](runtime.md#profile-a-running-window) · [Application MCP tools](../../mcp.md#record-a-ui-profile)
 
 ### Edit compound properties with MCP
 

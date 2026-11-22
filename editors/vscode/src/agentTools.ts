@@ -25,6 +25,7 @@ import type { ProjectFile, ProjectInventory } from './projectInventory';
 import type { ProjectDefinition } from './projectLibrary';
 import type { ProjectScaffold } from './projectScaffold';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
+import type { RuntimeProfiles } from './runtimeProfiles';
 import type { ScenarioRunner } from './scenarioRunner';
 import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
@@ -107,6 +108,10 @@ interface Arguments extends CanvasAction, CargoSelection {
     program: number;
     selection?: number[];
     stage?: number;
+    window?: number;
+    profile_id?: number;
+    row?: number;
+    duration_ms?: number;
     expected_epoch?: number;
     expected_frame?: number;
     debug_configuration?: string;
@@ -123,7 +128,8 @@ export class AgentTools {
     private readonly workspace = new WorkspaceTools();
 
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
-        private readonly runtimeSource: RuntimeSourceTools, private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold,
+        private readonly runtimeSource: RuntimeSourceTools, private readonly runtimeProfiles: RuntimeProfiles,
+        private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold,
         private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
         private readonly sourceReviews: {
             property: RegisteredRename; type: RegisteredRename; resource: ResourceRename; resourceMove: ResourceMove;
@@ -198,6 +204,19 @@ export class AgentTools {
         if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60);
         if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50) };
         if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration);
+        if (tool === 'ferroui_runtime_profile_windows') return this.runtimeProfiles.windows(signal, args.runtime);
+        if (tool === 'ferroui_runtime_profile_read') {
+            if (args.profile_id !== undefined && (args.runtime === undefined || args.expected_generation === undefined)) {
+                throw new Error('Pass the runtime and expected generation with a profile ID.');
+            }
+            return this.runtimeProfiles.read(signal, args.runtime, args.expected_generation, args.profile_id);
+        }
+        if (tool === 'ferroui_runtime_profile_start' || tool === 'ferroui_runtime_profile_stop' || tool === 'ferroui_runtime_profile_source') {
+            const target = { runtime: args.runtime!, generation: args.expected_generation };
+            if (tool === 'ferroui_runtime_profile_start') return this.runtimeProfiles.start(target, args.window!, args.duration_ms!, signal);
+            if (tool === 'ferroui_runtime_profile_stop') return this.runtimeProfiles.stop(target, args.profile_id!, signal);
+            return this.runtimeProfiles.sourceAt(target, args.profile_id!, args.row!, signal, args.reveal_source === true);
+        }
         if (tool === 'ferroui_runtime_source') return this.runtimeSource.read(args.node!, signal, args.runtime);
         if (tool === 'ferroui_runtime_templates') return this.runtimeSource.templates(args.node!, signal, args.runtime);
         if (tool === 'ferroui_runtime_template_source') {

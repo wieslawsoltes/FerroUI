@@ -99,6 +99,30 @@
         "icon": "$(refresh)"
       },
       {
+        "command": "ferroui.diagnostics.recordProfile",
+        "title": "Record UI Profile",
+        "category": "FerroUI",
+        "icon": "$(record)"
+      },
+      {
+        "command": "ferroui.diagnostics.stopProfile",
+        "title": "Stop UI Profile",
+        "category": "FerroUI",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "ferroui.diagnostics.exportProfile",
+        "title": "Export UI Profile",
+        "category": "FerroUI",
+        "icon": "$(export)"
+      },
+      {
+        "command": "ferroui.diagnostics.profileSource",
+        "title": "Reveal Profile Source",
+        "category": "FerroUI",
+        "icon": "$(go-to-file)"
+      },
+      {
         "command": "ferroui.project.newView",
         "title": "New View",
         "category": "FerroUI",
@@ -550,6 +574,10 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "ferroui.diagnostics.profileSource",
+          "when": "false"
+        },
+        {
           "command": "ferroui.createEventHandler",
           "when": "editorLangId == ferroui-xaml"
         },
@@ -924,6 +952,26 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "ferroui.diagnostics.recordProfile",
+          "when": "view == ferroui.diagnostics && viewItem == profileReady",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.diagnostics.stopProfile",
+          "when": "view == ferroui.diagnostics && viewItem == profileRecording",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.diagnostics.exportProfile",
+          "when": "view == ferroui.diagnostics && viewItem == profileReport",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.diagnostics.profileSource",
+          "when": "view == ferroui.diagnostics && viewItem == profileSource",
+          "group": "inline"
+        },
         {
           "command": "ferroui.behaviors.preview",
           "when": "view == ferroui.behaviors && viewItem =~ /\\bpreview\\b/",

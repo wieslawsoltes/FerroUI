@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import { revision } from '../src/reloadProcess';
 import type { RuntimeNode, RuntimeProperty, RuntimeSource } from '../src/runtimeProtocol';
+import type { NativeProfileReport } from '../src/runtimeProfiles';
 import type { RuntimeSourceEditor } from '../src/runtimeSource';
 import { readRuntimeTemplates } from '../src/runtimeTemplates';
 import { withNativeApp } from './nativeAppFixture';
@@ -28,8 +29,14 @@ export async function verifyLiveXaml(root: vscode.Uri, editor: RuntimeSourceEdit
             assert.ok(editor.canApply(selected, 'attached'));
 
             const [search] = await client.call<RuntimeNode[]>('find_elements', { name: 'Search' });
+            const [window] = await client.call<RuntimeNode[]>('list_windows');
+            const profile = await client.call<NativeProfileReport>('start_ui_profile', { window_id: window.node_id, duration_ms: 20_000 });
             await client.call('type_text', { node_id: search.node_id, text: 'Łódź' });
             assert.ok((await client.call<{ matched: boolean }>('wait_for', { name: 'Result', text: 'Łódź' })).matched);
+            await until(async () => (await client.call<NativeProfileReport>('get_ui_profile', { profile_id: profile.id }))
+                .rows.some(row => row.name === 'Result' && row.has_source && row.phases.some(phase => phase.phase === 'measure')));
+            const completed = await client.call<NativeProfileReport>('stop_ui_profile', { profile_id: profile.id });
+            assert.ok(completed.rows.some(row => row.name === 'Result' && row.kind === 'control' && row.has_source));
 
             const signal = new AbortController().signal;
             const [queue] = await client.call<RuntimeNode[]>('find_elements', { name: 'Queue' });
@@ -68,5 +75,5 @@ export async function verifyLiveXaml(root: vscode.Uri, editor: RuntimeSourceEdit
         await vscode.window.tabGroups.close(tabs);
         await vscode.workspace.fs.writeFile(file, originalBytes);
     }
-    console.log('Live App verified a runtime-loaded XAML source, drove a bound input, applied a guarded Unicode edit and undid it');
+    console.log('Live App verified profiled XAML layout and bound input, applied a guarded Unicode edit and undid it');
 }

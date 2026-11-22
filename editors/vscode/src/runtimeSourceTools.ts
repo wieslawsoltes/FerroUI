@@ -44,12 +44,7 @@ export class RuntimeSourceTools {
     private async useRuntime<T>(target: RuntimeTarget, signal: AbortSignal,
         action: (client: RuntimeClient, generation: number, current: () => boolean) => Promise<T>): Promise<T> {
         signal.throwIfAborted();
-        const endpoint = this.runtimes.get(target);
-        if (!endpoint) throw new Error(target === 'managed'
-            ? 'Start a managed FerroUI application with MCP inspection enabled.'
-            : 'Attach an authenticated FerroUI application first.');
-        const generation = this.runtimes.revision(target);
-        const current = () => this.runtimes.revision(target) === generation && this.runtimes.get(target) === endpoint;
+        const { endpoint, generation, current } = this.runtimes.session(target);
         const client = new RuntimeClient(endpoint);
         try { return await action(client, generation, current); }
         finally { client.dispose(); }

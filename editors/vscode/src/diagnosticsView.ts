@@ -2,12 +2,14 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import type { DesignerWorkbench } from './designerWorkbench';
+import { DiagnosticsProfile, type ProfileItem } from './diagnosticsProfile';
 import { errorMessage, type PreviewFinding } from './protocol';
 import type { ReloadHistory, ReloadRecord } from './reloadHistory';
 import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections } from './runtimeConnections';
 import { readRuntimeDiagnostics, runtimeLogText, type RuntimeFrameStats, type RuntimeLog } from './runtimeDiagnostics';
 import type { RuntimeSourceEditor } from './runtimeSource';
+import type { RuntimeProfiles } from './runtimeProfiles';
 import { isWorkspaceFile } from './workspacePaths';
 
 const viewId = 'ferroui.diagnostics';
@@ -15,23 +17,27 @@ const captions = { applied: 'Reloaded in place', rejected: 'Edit rejected', rebu
     superseded: 'Superseded by a newer save', stopped: 'Session stopped' };
 const frameCaptions = { pending: 'Waiting for a native frame', rendered: 'Native frame rendered', noSceneUpdate: 'No scene drew in this batch',
     discarded: 'Render batch discarded', processExited: 'Process ended before the frame receipt' };
-type Item = { type: 'group'; group: 'preview' | 'reload' | 'binding' | 'layout' }
+type Item = { type: 'group'; group: 'preview' | 'reload' | 'binding' | 'layout' | 'profile' }
     | { type: 'notice'; label: string }
     | { type: 'reload'; record: ReloadRecord }
     | { type: 'binding'; log: RuntimeLog }
     | { type: 'preview'; panel: DesignerPanel; token: number; finding: PreviewFinding }
-    | { type: 'layout'; stats: RuntimeFrameStats };
+    | { type: 'layout'; stats: RuntimeFrameStats }
+    | ProfileItem;
 
 export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private readonly changed = new vscode.EventEmitter<void>();
     readonly onDidChangeTreeData = this.changed.event;
     private current?: Promise<Awaited<ReturnType<typeof readRuntimeDiagnostics>>>;
+    private readonly profile: DiagnosticsProfile;
 
     constructor(private readonly history: ReloadHistory, private readonly runtimes: RuntimeConnections, private readonly source: RuntimeSourceEditor,
-        private readonly designer: DesignerWorkbench) {
+        private readonly designer: DesignerWorkbench, profiles: RuntimeProfiles) {
+        this.profile = new DiagnosticsProfile(profiles);
         const view = vscode.window.createTreeView(viewId, { treeDataProvider: this, showCollapseAll: true });
-        this.subscriptions = [view, view.onDidChangeVisibility(({ visible }) => { if (visible) this.refresh(); }),
+        this.subscriptions = [view, this.profile, profiles.onDidChange(() => this.changed.fire()),
+            view.onDidChangeVisibility(({ visible }) => { if (visible) this.refresh(); }),
             history.onDidChange(() => this.refresh()), runtimes.onDidChange(() => this.refresh()),
             designer.onDidChangePreview(() => this.changed.fire()),
             vscode.commands.registerCommand('ferroui.diagnostics.refresh', () => this.refresh()),
@@ -41,8 +47,10 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
 
     async getChildren(item?: Item): Promise<Item[]> {
         if (!item) return [{ type: 'group', group: 'preview' }, { type: 'group', group: 'reload' },
-            { type: 'group', group: 'binding' }, { type: 'group', group: 'layout' }];
+            { type: 'group', group: 'binding' }, { type: 'group', group: 'layout' }, { type: 'group', group: 'profile' }];
+        if (isProfile(item)) return this.profile.children(item);
         if (item.type !== 'group') return [];
+        if (item.group === 'profile') return this.profile.roots();
         if (item.group === 'preview') return this.previewChecks();
         if (item.group === 'reload') {
             const recent = this.history.recent(50);
@@ -65,11 +73,13 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
     }
 
     getTreeItem(item: Item): vscode.TreeItem {
+        if (isProfile(item)) return this.profile.item(item);
         if (item.type === 'notice') return new vscode.TreeItem(item.label);
         if (item.type === 'group') {
-            const title = { preview: 'Preview Checks', reload: 'Hot Reload History', binding: 'Binding Errors', layout: 'Runtime Layout' }[item.group];
+            const title = { preview: 'Preview Checks', reload: 'Hot Reload History', binding: 'Binding Errors', layout: 'Runtime Layout', profile: 'UI Profile' }[item.group];
             const row = new vscode.TreeItem(title, vscode.TreeItemCollapsibleState.Collapsed);
             row.id = item.group;
+            if (item.group === 'profile') row.contextValue = this.profile.context;
             return row;
         }
         if (item.type === 'preview') {
@@ -152,4 +162,8 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
 
     private refresh(): void { this.current = undefined; this.changed.fire(); }
     dispose(): void { this.subscriptions.forEach(subscription => subscription.dispose()); this.changed.dispose(); }
+}
+
+function isProfile(item: Item): item is ProfileItem {
+    return item.type === 'profileInfo' || item.type === 'profileGroup' || item.type === 'profileRow' || item.type === 'profilePhase';
 }

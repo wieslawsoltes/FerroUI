@@ -35,11 +35,20 @@ export class RuntimeConnections implements vscode.Disposable {
         return target === 'managed' ? this.reload.runtimeMcp : this.external;
     }
 
+    session(target: RuntimeTarget) {
+        const endpoint = this.get(target);
+        if (!endpoint) throw new Error(target === 'managed'
+            ? 'Start a managed FerroUI application with MCP inspection enabled.'
+            : 'Attach an authenticated FerroUI application first.');
+        const generation = this.revision(target);
+        return { endpoint, generation, current: () => this.revision(target) === generation && this.get(target) === endpoint };
+    }
+
     private async attach(): Promise<void> {
-        const url = await vscode.window.showInputBox({ prompt: 'FerroUI MCP endpoint from the running application or Designer Studio',
+        const url = await vscode.window.showInputBox({ prompt: 'FerroUI MCP endpoint from the running application or Designer Studio', ignoreFocusOut: true,
             placeHolder: 'http://127.0.0.1:7491/mcp', validateInput: value => localMcpEndpoint(value) ? undefined : 'Use a loopback HTTP address ending in /mcp.' });
         if (!url || !localMcpEndpoint(url)) return;
-        const token = await vscode.window.showInputBox({ prompt: 'Bearer token displayed by the running FerroUI MCP server', password: true,
+        const token = await vscode.window.showInputBox({ prompt: 'Bearer token displayed by the running FerroUI MCP server', password: true, ignoreFocusOut: true,
             validateInput: value => /^[a-fA-F0-9]{64}$/.test(value) ? undefined : 'Enter the 64-character FerroUI bearer token.' });
         if (!token || !/^[a-fA-F0-9]{64}$/.test(token)) return;
         this.external = { url, token };

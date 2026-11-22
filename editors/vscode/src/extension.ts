@@ -29,6 +29,7 @@ import { RuntimeConnections } from './runtimeConnections';
 import { RuntimePanel } from './runtimePanel';
 import { RuntimeSourceEditor } from './runtimeSource';
 import { RuntimeSourceTools } from './runtimeSourceTools';
+import { RuntimeProfiles } from './runtimeProfiles';
 import { RsxLanguage } from './rsxLanguage';
 import { ScenarioRunner } from './scenarioRunner';
 import { ScenarioTesting } from './scenarioTesting';
@@ -71,16 +72,17 @@ export function activate(context: vscode.ExtensionContext) {
     const runtimes = new RuntimeConnections(reload);
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);
-    const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer);
+    const runtimeProfiles = new RuntimeProfiles(runtimes, runtimeSource);
+    const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer, runtimeProfiles);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, inventory, scaffolds, scenarios, hosted, fileMoves, {
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, runtimeProfiles, inventory, scaffolds, scenarios, hosted, fileMoves, {
         property: propertyRename, type: typeRename, resource: resourceRename, resourceMove,
     }), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, projects, schemaBuild, inventory, designTokens, scaffolds, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {

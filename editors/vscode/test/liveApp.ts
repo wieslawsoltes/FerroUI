@@ -5,8 +5,10 @@ import { revision } from '../src/reloadProcess';
 import type { PropertyTrace } from '../src/propertyTrace';
 import { readRuntimeDiagnostics } from '../src/runtimeDiagnostics';
 import type { RuntimeNode, RuntimeSource } from '../src/runtimeProtocol';
+import type { NativeProfileReport } from '../src/runtimeProfiles';
 import { sourcePosition } from '../src/runtimeSource';
 import { withNativeApp } from './nativeAppFixture';
+import { until } from './wait';
 
 export async function verifyLiveApp(): Promise<void> {
     await withNativeApp(['--demo'], async client => {
@@ -34,15 +36,28 @@ export async function verifyLiveApp(): Promise<void> {
         const position = sourcePosition(unicode, { ...source, line: 1, column: 12 });
         assert.equal(position?.character, unicode.lineAt(0).text.indexOf('TextBox'));
         assert.equal(sourcePosition(unicode, { ...source, line: 1, column: 999 }), undefined);
+        const profile = await client.call<NativeProfileReport>('start_ui_profile', { window_id: window.node_id, duration_ms: 20_000 });
+        assert.ok(profile.recording && profile.window_open);
         await client.call('type_text', { node_id: entry.node_id, text: 'QA task from VS Code' });
         await client.call('click', { node_id: add.node_id });
         assert.ok((await client.call<{ matched: boolean }>('wait_for', { text: 'QA task from VS Code' })).matched);
+        await until(async () => {
+            const live = await client.call<NativeProfileReport>('get_ui_profile', { profile_id: profile.id });
+            return live.rows.some(row => row.kind === 'control') && live.rows.some(row => row.label === 'TodoPage');
+        });
+        const complete = await client.call<NativeProfileReport>('stop_ui_profile', { profile_id: profile.id });
+        assert.equal(complete.recording, false);
+        const page = complete.rows.find(row => row.label === 'TodoPage' && row.kind === 'component');
+        assert.ok(page?.has_source && page.node_id !== null);
+        assert.ok(page.phases.some(phase => phase.phase === 'render' && phase.calls > 0 && phase.total_ms >= phase.self_ms));
+        assert.ok(page.phases.some(phase => phase.phase === 'reconcile' && phase.calls > 0));
+        assert.equal((await client.call<RuntimeSource>('get_source', { node_id: page.node_id })).revision, source.revision);
         const updated = await client.call<string>('screenshot', { node_id: window.node_id });
         assert.notEqual(updated, png);
         const diagnostics = await readRuntimeDiagnostics(client);
         const stats = diagnostics.frames.find(frame => frame.node_id === window.node_id);
         assert.ok(stats && stats.layout_pass_count > 0 && stats.layout_timing_available, JSON.stringify(diagnostics.frames));
         assert.ok(Array.isArray(diagnostics.logs.entries));
-        console.log('Live App found the authored RSX control, entered text, clicked a bound action and captured the updated native window');
+        console.log('Live App verified authored RSX source, native input, frame statistics and a source-linked UI profile');
     });
 }

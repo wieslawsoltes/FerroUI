@@ -156,6 +156,9 @@ Hot Reload output.
 | `wait_for` | Exists, absent, visible, enabled, or property equality, with a bounded timeout |
 | `get_logs` | Up to 1024 recent diagnostics, including binding errors; incremental `after` cursor |
 | `get_frame_stats` | Observed rendered scene updates, update interval and last layout pass timing |
+| `start_ui_profile` | Record native layout and declarative component activity for one window |
+| `get_ui_profile` | Read the current or completed recording, with per-phase work and live node IDs |
+| `stop_ui_profile` | End the specified recording early and return its measurements |
 
 `set_property` requires `allow_property_writes`. Input and automation actions require
 `allow_input`; the Value provider's `set_value` requires both. Disabled/hidden controls reject
@@ -171,6 +174,20 @@ they are editable JSON. Attached properties use `Owner.Property` names.
 The frame tracker observes composition scene updates after rendering, starting when a window is
 first inspected. It does not claim to count idle display refreshes or report GPU presentation
 latency. Layout counts/timing come from the renderer's existing diagnostics.
+
+### Record a UI profile
+
+Call `list_windows`, then `start_ui_profile` with `window_id` and `duration_ms`. Reproduce
+the interaction while the capture runs. Use `get_ui_profile` with the returned ID as
+`profile_id`, or use `stop_ui_profile` with that ID to finish early. The report includes
+each control’s measure and arrange operations and each RSX component’s render and
+reconciliation activity. Follow a live row’s `node_id` with `get_source` to locate
+authored code. [VS Code workflow](designer/vscode/runtime.md#profile-a-running-window)
+
+Each phase reports its call count, total elapsed milliseconds, self time after subtracting
+nested operations, and longest single self time. The report sorts rows by sum of self time.
+The native inspector accepts one active capture per UI thread, for up to 30 seconds and
+1,024 rows. Captures observe UI work with the inspector’s ordinary read permissions.
 
 `ferroui://tree` and `ferroui://logs` are JSON resources that can be re-read. Use
 `logging/setLevel` to receive `notifications/message` on stdio or an HTTP GET SSE stream. The log

@@ -151,6 +151,19 @@ Open **FerroUI → Diagnostics** to inspect the managed save outcome, acknowledg
 
 Expand **Hot Reload History** and hover over a save to see when its app acknowledged the revision and which compositor batch rendered it. The row shows the time from the editor observing the save to a native frame when the app reports one. Several saves can share a compositor batch within a process generation. A replaced process has its own generation and startup frame. If a revision draws no scene or its process exits first, the hover reports that outcome. Agents can read the same records with `ferroui_reload_history`.
 
+### Profile a running window
+
+1. Start a FerroUI app with MCP inspection or attach to its authenticated inspector. Open **FerroUI → Diagnostics** and choose **Record UI Profile** on **UI Profile**.
+2. Choose the app and window if more than one is available. Select a recording duration and reproduce the interaction in the running app. Use **Stop UI Profile** to end the recording early.
+3. Expand **Native Layout** or **RSX Components**. The highest total self time appears first. Expand a row for measure, arrange, render, or reconciliation. The phase tooltip shows total elapsed time including nested work and the longest individual self time.
+4. Use **Reveal Profile Source** on a row with a mapped control. VS Code checks the app connection and current workspace source revision. Use **Export UI Profile** on the report to save its measurements as JSON.
+
+![Diagnostics shows RSX render and reconciliation times alongside the authored code and the running Todo app](../images/vscode-ui-profile.png)
+
+Self time subtracts nested measured operations from an operation's elapsed time. The layout rows count measure and arrange calls that did work. Component rows count actual executions of the RSX rendering and reconciliation paths, including dynamic child collections. They point to a currently mounted control when one is available. **Runtime Layout** continues to show window-level layout passes and compositor scene updates. [Profile tools for agents](reference.md#profile-a-runtime-with-mcp)
+
+Each capture keeps up to 1,024 control or component rows for one window. The report shows any omitted calls after that limit. A process replacement leaves the previous report available for export. Reveal Source follows the report’s original connection generation.
+
 ## Run a native UI scenario
 
 1. Open the [customer search scenario](../../../editors/vscode/test/fixtures/customer-search.ferroui-scenario.json) in the `editors/vscode/test/fixtures` folder as a workspace. The **FerroUI Scenarios** section in Testing lists saved `*.ferroui-scenario.json` files.
