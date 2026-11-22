@@ -87,7 +87,7 @@ export class StagesPanel implements vscode.Disposable {
 }
 
 class StageSession {
-    private readonly dependencies = new DesignerDependencies();
+    private readonly dependencies = new DesignerDependencies(false, () => this.schedule());
     private readonly inputImages = new Map<number, ReturnType<typeof setTimeout>>();
     private readonly subscriptions: vscode.Disposable[];
     private cacheKey: string;
@@ -586,6 +586,7 @@ class StageSession {
         this.inputImages.forEach(timer => clearTimeout(timer));
         this.inputImages.clear();
         void this.client?.then(client => client.dispose(), () => {});
+        this.dependencies.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
     }
 }

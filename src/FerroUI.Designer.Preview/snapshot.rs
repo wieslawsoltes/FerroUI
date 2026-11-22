@@ -43,7 +43,8 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
     if let Some(rust) = &rust {
         dependencies.extend(rust.dependencies().map(str::to_owned));
     }
-    let snapshot = SourceSnapshot::new(local.accepted, local.unavailable);
+    let assets = ferroui_designer::PreviewAssets::new(local.includes.packaged_assets());
+    let snapshot = assets.apply(SourceSnapshot::new(local.accepted, local.unavailable));
     let layers = input.layer_view.as_ref().filter(|layers| layers.block.as_ref() == active_block.as_ref().map(|range| &range.start))
         .and_then(|input| serde_json::from_value(input.state.clone()).ok());
     let (image, bounds, render_error, timeline_pose) = match snapshot.run(|| {
@@ -55,6 +56,7 @@ pub(crate) fn render(renderer: &mut Renderer, input: &Render, project: Option<&P
         }
         Err(error) => (None, Default::default(), Some(error), None),
     };
+    dependencies.extend(assets.dependencies());
     let mut assets = project.map_or_else(Vec::new, |project| project.assets.clone());
     let mut project_assets = project.map_or_else(Vec::new, |project| project.toolbox.clone());
     if let Some(root) = &input.workspace_root {

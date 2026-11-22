@@ -10,6 +10,7 @@ import {
 } from './compiledControlTemplate';
 import { verifyRegisteredPropertyRename } from './registeredPropertyRename';
 import { verifyRegisteredTypeRename } from './registeredTypeRename';
+import { packagedBadge, verifyPackagedAsset } from './packagedAsset';
 import { until } from './wait';
 
 export async function verifyCargoTarget(workspace: vscode.Uri, designer: DesignerWorkbench): Promise<void> {
@@ -62,7 +63,10 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
             { ...appSite, kind: 'class', type_declaration: { file: 'src/main.rs', name: 'AuditCard' } },
             { ...appSite, kind: 'class_info', member: 'Caption' },
         ],
-    }, compiledIndex));
+    }, compiledIndex, {
+        version: 1, manifest, assembly: 'audit_app', crate_name: 'audit_app',
+        assets: [{ key: `/${packagedBadge}`, source: packagedBadge }],
+    }));
     await write('widgets/Cargo.toml', '[package]\nname = "audit-widgets"\nversion = "0.1.0"\nedition = "2024"\n');
     const dependencySource = await write('widgets/src/lib.rs', 'macro_rules! ferro_class { ($($t:tt)*) => {} }\npub struct Meter;\nferro_class!(Meter: Control);\n');
     await write('widgets/build.rs', exportMetadata(JSON.stringify({
@@ -124,6 +128,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     const diagnostics = vscode.languages.getDiagnostics(xaml.uri).map(item => item.message);
     assert.ok(ready, `The built project schema did not provide the type of AuditCard.Caption in ${xaml.uri}. ` +
         `Hovers: ${JSON.stringify(hovers)}. Diagnostics: ${diagnostics.join(', ')}`);
+    await verifyPackagedAsset(workspace, project, designer, write);
     await verifyDefinitions(xaml, source, dependencySource);
     await verifyRegisteredPropertyRename(xaml, source, registry, descriptors);
     await verifyRegisteredTypeRename(xaml, source, registry, mapping);
@@ -207,11 +212,12 @@ async function verifyDefinitions(xaml: vscode.TextDocument, source: vscode.Uri, 
     console.log('VS Code resolved live Rust declarations and dependency controls from the Cargo source index');
 }
 
-function exportMetadata(metadata: string, sourceIndex: object, compiledIndex?: object): string {
+function exportMetadata(metadata: string, sourceIndex: object, compiledIndex?: object, packagedIndex?: object): string {
     const compiled = compiledIndex ? `\n        std::fs::write(directory.join("xaml-symbols.json"), r#"${JSON.stringify(compiledIndex)}"#).unwrap();` : '';
+    const packaged = packagedIndex ? `\n        std::fs::write(directory.join("packaged-assets.json"), r#"${JSON.stringify(packagedIndex)}"#).unwrap();` : '';
     return `fn main() {
         let directory = std::path::PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
         std::fs::write(directory.join("audit.xamlmeta"), r#"${metadata}"#).unwrap();
-        std::fs::write(directory.join("xaml-rust-sources.json"), r#"${JSON.stringify({version: 1, ...sourceIndex})}"#).unwrap();${compiled}
+        std::fs::write(directory.join("xaml-rust-sources.json"), r#"${JSON.stringify({version: 1, ...sourceIndex})}"#).unwrap();${compiled}${packaged}
     }\n`;
 }

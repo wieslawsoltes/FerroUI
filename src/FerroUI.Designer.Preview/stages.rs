@@ -380,6 +380,8 @@ impl Stages {
 
     pub(crate) fn model(&mut self) -> Model {
         let stages = self.board.stage_details();
+        let mut dependencies = stages_sources::watch_paths(&self.sources);
+        dependencies.extend(self.board.asset_dependencies());
         self.windows
             .retain(|id, _| stages.iter().any(|stage| stage.id == *id));
         Model {
@@ -387,7 +389,7 @@ impl Stages {
             manifest: self.board.stage_set(),
             stages,
             prototype: self.playback.scene(),
-            dependencies: stages_sources::watch_paths(&self.sources),
+            dependencies,
             available_themes: PreviewTheme::available(),
         }
     }

@@ -305,6 +305,8 @@ The copy appears under **Assets**. To use a raster import, drag it onto the canv
 
 Run **FerroUI: Build Project XAML Schema** for the Cargo target. Use **Go to Definition** on a `ferres://` image or other typed asset reference in XAML to open the file recorded by the package build. Dependency assets use the metadata available for the selected target. Use the registered asset path's exact case and escape characters such as spaces (`%20`). A closed `ExportPlan` publishes only the asset keys it lists.
 
+Design and Stages load packaged assets from their recorded files. Save a referenced asset to refresh the preview without editing the XAML. If an asset is missing or cannot be decoded, repair it to resume rendering. A stage keeps its last accepted preview during a failed update. App Preview and the running app use the asset bytes built into the application. Rebuild the app to update those bytes. [App Preview](runtime.md#render-with-your-app-in-app-preview)
+
 ### Move an asset and update its references
 
 1. Select an image, font, or media file in **Assets** and use **Move or rename asset…**. Enter a path in an existing directory in the same Cargo package or loose-file project. Keep the file extension.

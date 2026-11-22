@@ -121,7 +121,7 @@ export class DesignerPanel implements vscode.Disposable {
         restored?: DesignerCanvasState,
     ) {
         const document = this.document;
-        this.dependencies = new DesignerDependencies(language === 'rust');
+        this.dependencies = new DesignerDependencies(language === 'rust', () => this.schedule(0));
         this.caret = caret;
         this.viewport = restored?.viewport ?? DEFAULT_VIEWPORT;
         this.designData = restored?.designData;
@@ -1324,6 +1324,7 @@ export class DesignerPanel implements vscode.Disposable {
         clearTimeout(this.sourceCloseTimer);
         this.stopClient();
         this.canvasRequests.dispose();
+        this.dependencies.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.changed.dispose();
     }
