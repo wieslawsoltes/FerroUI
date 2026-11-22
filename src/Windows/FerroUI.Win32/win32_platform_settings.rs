@@ -52,6 +52,17 @@ pub(crate) fn accent_shades_from_ui_colors(colors: [Color; 6]) -> AccentColorSha
     AccentColorShades { dark1, dark2, dark3, light1, light2, light3 }
 }
 
+/// Serializes the tests that read the colours of the system through `UISettings`. On a Windows
+/// runner `GetColorValue(Accent)` of a new `UISettings` reported opaque black, with valid shades,
+/// in up to half of the runs while another thread of the process read the same settings, and
+/// never in a run alone. The product reads them on its UI thread.
+#[cfg(test)]
+#[cfg_attr(not(windows), allow(dead_code))]
+pub(crate) fn ui_settings_test_lock() -> std::sync::MutexGuard<'static, ()> {
+    static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
 /// The colour values of a system in a high contrast mode. The window colour
 /// determines the variant for stock, localized, and edited contrast themes.
 pub(crate) fn high_contrast_color_values(system_colors: SystemColors, accent: Color) -> PlatformColorValues {
@@ -597,6 +608,7 @@ mod tests {
     fn the_platform_settings_report_the_accent_shades_of_the_system() {
         use ferroui_base::platform::IPlatformSettings;
 
+        let _ui_settings = ui_settings_test_lock();
         let settings = Win32PlatformSettings::new();
         let values = settings.get_color_values();
         println!("color values {values:?}");
