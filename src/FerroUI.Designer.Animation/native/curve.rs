@@ -1,7 +1,11 @@
 use super::curve_value;
-use crate::{AnimationError, AnimationValue, CurveChannel, CurvePoint, CurveWindow};
+use crate::{AnimationEffect, AnimationError, AnimationValue, CurveChannel, CurvePoint, CurveWindow};
 use ferroui_base::animation::{Animatable, Animation};
 use ferroui_base::{BoxedValue, FerroProperty};
+
+#[cfg(test)]
+#[path = "effect_curve_tests.rs"]
+mod effect_tests;
 
 /// Read the same scalar animator used by native playback. Resolve against the
 /// loaded setters so the curve uses the exact registered property.
@@ -30,9 +34,13 @@ pub fn sample_curve_track(
     let values = animation
         .sample_track_for_preview(target, property, &positions)
         .map_err(|error| error.to_string())?;
+    let effect = AnimationEffect::is_effect_property(property);
     channel.project_samples(times.into_iter().zip(values).map(|(time, value)| {
-        curve_value::value(&value).map(|value| (time, value))
-            .ok_or_else(|| AnimationError("The native animation does not produce a sample for the selected channel".into()))
+        let value = curve_value::value(&value);
+        if value.is_none() && !effect {
+            return Err(AnimationError("The native animation does not produce a sample for the selected channel".into()));
+        }
+        Ok((time, value))
     })).map_err(|error| error.to_string())
 }
 

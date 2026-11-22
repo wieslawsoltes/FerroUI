@@ -1,6 +1,10 @@
 use crate::{require, AnimationError, Result};
 use serde::{Deserialize, Serialize};
 
+#[path = "effect_value.rs"]
+mod effect;
+pub use effect::AnimationEffect;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ValueKind {
     Number,
@@ -13,6 +17,7 @@ pub enum ValueKind {
     RelativePoint,
     RelativeScalar,
     Thickness,
+    Effect,
     Discrete,
 }
 
@@ -74,6 +79,7 @@ pub enum AnimationValue {
         right: f64,
         bottom: f64,
     },
+    Effect(AnimationEffect),
     Discrete(String),
 }
 impl AnimationValue {
@@ -103,6 +109,7 @@ impl AnimationValue {
             Self::RelativePoint { .. } => ValueKind::RelativePoint,
             Self::RelativeScalar { .. } => ValueKind::RelativeScalar,
             Self::Thickness { .. } => ValueKind::Thickness,
+            Self::Effect(_) => ValueKind::Effect,
             Self::Discrete(_) => ValueKind::Discrete,
         }
     }
@@ -185,6 +192,7 @@ impl AnimationValue {
                 [*left, *top, *right, *bottom].iter().all(|n| n.is_finite()),
                 "Thickness must be finite",
             ),
+            Self::Effect(effect) => effect.validate(),
             Self::Discrete(value) => require(
                 value.len() <= 1_048_576
                     && value.chars().all(|c| {
@@ -345,6 +353,9 @@ impl AnimationValue {
                 right: mix(*right, *r),
                 bottom: mix(*bottom, *b),
             },
+            (Self::Effect(from), Self::Effect(to)) => {
+                Self::Effect(from.interpolate(*to, progress, mix, color))
+            }
             (Self::Discrete(_), Self::Discrete(_)) => {
                 if progress < 1.0 {
                     self.clone()
@@ -399,6 +410,7 @@ impl AnimationValue {
                 right,
                 bottom,
             } => format!("{left},{top},{right},{bottom}"),
+            Self::Effect(effect) => effect.to_xaml(),
             Self::Discrete(v) => v.clone(),
         }
     }
@@ -542,6 +554,7 @@ impl AnimationValue {
                     }
                 }
             }
+            ValueKind::Effect => Self::Effect(AnimationEffect::parse(source)?),
             ValueKind::Discrete => Self::Discrete(source.into()),
         };
         result.validate()?;

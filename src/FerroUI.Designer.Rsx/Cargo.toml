@@ -16,7 +16,7 @@ path = "lib.rs"
 
 [dependencies]
 ferroui-base.workspace = true
-ferroui-designer-animation.workspace = true
+ferroui-designer-animation = { workspace = true, features = ["native-values"] }
 ferroui-designer-core.workspace = true
 ferroui-designer-language.workspace = true
 ferroui-designer-project.workspace = true

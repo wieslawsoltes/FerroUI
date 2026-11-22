@@ -263,7 +263,11 @@ impl TimelineLane {
             let trace: Rc<dyn IPen> = Pen::from_uint32(color, 1.5).into();
             let plot_bounds = plot.height(bounds.height);
             let height = plot_height(plot_bounds);
-            let unit = match (plot.channel.relative_unit(), plot.metric) {
+            let axis_units = plot.channel.relative_unit().or_else(|| {
+                matches!(plot.channel, CurveChannel::BlurRadius | CurveChannel::OffsetX | CurveChannel::OffsetY)
+                    .then_some(RelativeUnit::Absolute)
+            });
+            let unit = match (axis_units, plot.metric) {
                 (Some(RelativeUnit::Relative), CurveMetric::Value) => "%",
                 (Some(RelativeUnit::Relative), CurveMetric::Velocity) => " pp/s",
                 (Some(RelativeUnit::Absolute), CurveMetric::Value) => " px",

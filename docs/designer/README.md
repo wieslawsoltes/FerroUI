@@ -274,6 +274,11 @@ graph keeps a 0–1 scale. The key inspector edits the full hex color in one Und
 
 ![Studio shows the green curve for a Background track and the native pose at 1.15 seconds](images/studio-color-curves.jpg)
 
+For a literal blur or offset drop shadow, choose **Value curves** or **Velocity curves** and
+select the radius, a shadow offset, or a shadow tint channel. The graph reads the native animator
+and leaves gaps for unset poses. Use the contextual key editor for the complete effect literal,
+or record the sampled native value at the playhead. [Inspect a blur or drop-shadow animation](vscode/motion.md#inspect-a-blur-or-drop-shadow-animation)
+
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property
 value, with Opacity as the initial fallback for an object without a track. The **Animation name

@@ -13,9 +13,10 @@ interface CurveSnapshot {
 
 const axisNumber = new Intl.NumberFormat(undefined, { maximumSignificantDigits: 3, notation: 'compact' });
 const colorChannels = new Set<CurveChannel>(['red', 'green', 'blue', 'alpha']);
-const relativeLabels: Partial<Record<CurveChannel, string>> = {
+const channelLabels: Partial<Record<CurveChannel, string>> = {
     percent_x: 'X (%)', percent_y: 'Y (%)', absolute_x: 'X (px)', absolute_y: 'Y (px)',
     percent: 'Percent', absolute: 'Pixels',
+    blur_radius: 'Blur radius (px)', offset_x: 'Offset X (px)', offset_y: 'Offset Y (px)',
 };
 
 export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
@@ -66,7 +67,7 @@ export class TimelineCurvePlot {
             select.title = name;
             select.className = 'timeline-curve-channel';
             select.hidden = true;
-            select.append(...choices.map(channel => new Option(relativeLabels[channel] ??
+            select.append(...choices.map(channel => new Option(channelLabels[channel] ??
                 channel[0].toUpperCase() + channel.slice(1).replaceAll('_', ' '), channel)));
             if (preferred && choices.includes(preferred)) select.value = preferred;
             select.onchange = () => changed(this.channel);
@@ -127,7 +128,8 @@ export class TimelineCurvePlot {
         this.ticks[0].textContent = axisNumber.format(low);
         this.ticks[1].textContent = axisNumber.format(high);
         this.unit.textContent = channel.startsWith('percent') ? (isVelocity ? 'pp/s' : '%')
-            : channel.startsWith('absolute') ? (isVelocity ? 'px/s' : 'px') : isVelocity ? '/s' : '';
+            : channel.startsWith('absolute') || channel === 'blur_radius' || channel.startsWith('offset_')
+                ? (isVelocity ? 'px/s' : 'px') : isVelocity ? '/s' : '';
         this.zeroLine.toggleAttribute('data-visible', isVelocity && Boolean(points?.length) && low < 0 && high > 0);
         const baseline = scale.percent(0).toFixed(3);
         this.zeroLine.setAttribute('y1', baseline);

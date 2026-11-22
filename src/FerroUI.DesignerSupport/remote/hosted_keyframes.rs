@@ -25,6 +25,7 @@ pub(super) struct HostedKeyframeCapabilities {
     pub(super) curves: bool,
     pub(super) curve_channels: bool,
     pub(super) sampling: bool,
+    pub(super) effects: bool,
 }
 
 impl HostedKeyframes {
@@ -63,14 +64,23 @@ impl HostedKeyframes {
                 tracks(&program)
             }));
             let Ok(Some(mut tracks)) = decoded else { continue };
+            if !capabilities.effects {
+                tracks.retain(|track| track.keys.first().is_some_and(|key| key.value_kind != "Effect"));
+                if tracks.is_empty() {
+                    continue;
+                }
+            }
             if capabilities.curves {
                 let tracks: Vec<_> = tracks
                     .iter()
                     .filter(|track| {
                         track.keys.first().is_some_and(|key| {
-                            if track.curve_channels.is_some() {
-                                return capabilities.curve_channels && matches!((key.value_kind.as_str(), options.property_kinds.get(&track.property)),
-                                    ("RelativePoint", Some(ValueKind::RelativePoint)) | ("RelativeScalar", Some(ValueKind::RelativeScalar)));
+                            if let Some(channels) = &track.curve_channels {
+                                return capabilities.curve_channels && !channels.is_empty()
+                                    && matches!((key.value_kind.as_str(), options.property_kinds.get(&track.property)),
+                                        ("RelativePoint", Some(ValueKind::RelativePoint))
+                                        | ("RelativeScalar", Some(ValueKind::RelativeScalar))
+                                        | ("Effect", Some(ValueKind::Effect)));
                             }
                             if key.value_kind == "Color"
                                 && options.property_kinds.get(&track.property) != Some(&ValueKind::Color)
@@ -133,7 +143,7 @@ impl HostedKeyframes {
         };
         let draft = program
             .plan_keyframe(target, property, edit, |text, kind| {
-                AnimationValue::parse(
+                AnimationValue::parse_native_literal(
                     text,
                     kind.ok_or_else(|| {
                         AnimationError("Choose an existing authored animation track".into())
@@ -212,9 +222,10 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
         .tracks
         .iter()
         .filter_map(|track| {
-            let channels = CurveChannel::for_track(track, timeline.duration, timeline.fill);
-            let curve_channels = channels.first().filter(|channel| channel.relative_unit().is_some())
-                .and_then(|_| serde_json::to_value(&channels).ok())
+            let kind = track.keyframes.first()?.value.kind();
+            let curve_channels = matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar | ValueKind::Effect)
+                .then(|| CurveChannel::for_track(track, timeline.duration, timeline.fill))
+                .and_then(|channels| serde_json::to_value(channels).ok())
                 .and_then(|channels| serde_json::from_value(channels).ok());
             Some(DesignAnimationTrack {
                 target: i64::try_from(track.target).ok()?,

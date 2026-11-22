@@ -55,7 +55,7 @@ impl RsxAnimation {
                     property: property.into(),
                     getter,
                     time: self.authored_time(time)?,
-                    value: AnimationValue::parse(value, kind).map_err(|error| error.to_string())?,
+                    value: AnimationValue::parse_native_literal(value, kind).map_err(|error| error.to_string())?,
                     easing: Easing::parse(easing).map_err(|error| error.to_string())?,
                 };
                 self.insert(source, catalog, &[key])

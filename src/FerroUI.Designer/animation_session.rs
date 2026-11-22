@@ -1,9 +1,9 @@
 //! UI-thread adapter for independently selected, source-backed animation programs.
 use crate::DesignerSession;
 use ferroui_base::styling::Style;
-use ferroui_base::{StyledElement, TypeInfo};
+use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use ferroui_designer_animation::{
-    AnimationCodec, AnimationCodecRegistry, AnimationProgram, AnimationPrograms, AnimationValue,
+    AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationValue,
     CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
@@ -778,8 +778,7 @@ impl DesignerSession {
             .ok_or("The animation target has no accepted preview")?;
         let info =
             ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
-        let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
-        let value = self.animation_value_for_target(target, property, &value)?;
+        let value = self.animation_value_from_preview(target, property, &visual.get_value_untyped(info))?;
         self.record_keyframe(target, property, value)?;
         let mut key = ferroui_designer_animation::KeyframeLocation {
             target: self.recording_target(target), property: property.into(), time,
@@ -821,7 +820,7 @@ impl DesignerSession {
         let key = track.and_then(|track| track.keyframes.iter().find(|key| key.time == time));
         let value = if track.is_some() && self.requires_native_animation(program) {
             let value = self.animation.native.sample_keyframe(program, &self.preview, target, property, time)?;
-            self.animation_value_for_target(target, property, &ferroui_inspect::display_value(Some(&value)))?
+            self.animation_value_from_preview(target, property, &value)?
         } else if track.is_some() {
             self.animation.compiled_targets.get(&(id, target))
                 .ok_or("Choose a compiled animation target")?.scrub(time)
@@ -831,8 +830,7 @@ impl DesignerSession {
         } else {
             let visual = self.preview.visual(target).ok_or("Choose a live preview target for this property")?;
             let info = ferroui_inspect::Inspector::property(&visual, property).map_err(|error| error.to_string())?;
-            let value = ferroui_inspect::display_value(Some(&visual.get_value_untyped(info)));
-            self.animation_value_for_target(target, property, &value)?
+            self.animation_value_from_preview(target, property, &visual.get_value_untyped(info))?
         };
         Ok(crate::SampledKeyframe {
             previous: key.map(|key| key.time),
@@ -1205,9 +1203,16 @@ impl DesignerSession {
                     return Ok(color.into());
                 }
             }
-            return AnimationValue::parse(value, kind).map_err(|error| error.to_string());
+            return AnimationValue::parse_native_literal(value, kind).map_err(|error| error.to_string());
         }
         animation_value(property, value)
+    }
+
+    fn animation_value_from_preview(&self, target: NodeId, property: &str, value: &BoxedValue) -> Result<AnimationValue, String> {
+        if let Some(effect) = AnimationEffect::from_boxed(value) {
+            return Ok(AnimationValue::Effect(effect));
+        }
+        self.animation_value_for_target(target, property, &ferroui_inspect::display_value(Some(value)))
     }
     /// Whether the current authored node exposes a property supported by the
     /// native typed animation layer.
@@ -1222,16 +1227,16 @@ impl DesignerSession {
                     !info.is_direct()
                         && !info.is_read_only()
                         && (info.property_type_name() == "bool"
-                            || animation_value_kind(info.property_type_name()).is_some())
+                            || animation_property_kind(info).is_some())
                 })
     }
     fn animation_kind_for_target(&self, target: NodeId, property: &str) -> Option<ValueKind> {
         let visual = self.preview.visual(target)?;
         let property = ferroui_inspect::Inspector::property(&visual, property).ok()?;
-        animation_value_kind(property.property_type_name())
+        animation_property_kind(property)
     }
     fn animation_import_options(&self, program: &AnimationProgram) -> ImportOptions {
-        let mut options = ImportOptions::default();
+        let mut options = ImportOptions { native_effect_endpoints: true, ..ImportOptions::default() };
         let target = program.primary_target();
         for setter in subtree_nodes(&self.document, program.id)
             .into_iter()
@@ -1286,14 +1291,7 @@ impl DesignerSession {
                     let visual = self.preview.visual(target)?;
                     let property_info =
                         ferroui_inspect::Inspector::property(&visual, property).ok()?;
-                    self.animation_value_for_target(
-                        target,
-                        property,
-                        &ferroui_inspect::display_value(Some(
-                            &visual.get_value_untyped(property_info),
-                        )),
-                    )
-                    .ok()
+                    self.animation_value_from_preview(target, property, &visual.get_value_untyped(property_info)).ok()
                 });
             if let Some(base) = base.filter(|base| kind.is_none_or(|kind| base.kind() == kind)) {
                 options.base_values.insert(property.into(), base);
@@ -1368,7 +1366,11 @@ impl DesignerSession {
     }
 }
 
-fn animation_value_kind(name: &str) -> Option<ValueKind> {
+fn animation_property_kind(property: &FerroProperty) -> Option<ValueKind> {
+    if AnimationEffect::is_effect_property(property) {
+        return Some(ValueKind::Effect);
+    }
+    let name = property.property_type_name();
     if name.contains("Color") || name.contains("Brush") {
         return Some(ValueKind::Color);
     }

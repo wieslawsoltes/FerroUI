@@ -4,6 +4,8 @@ use crate::{bson_class, ferro_remote_message_guid};
 pub const DESIGN_ANIMATION_CURVE_QUERY: &str = "ferroui-design-curves";
 /// Ask the app to advertise component and unit-specific tracks alongside scalar tracks.
 pub const DESIGN_ANIMATION_CURVE_CHANNELS_QUERY: &str = "ferroui-design-curve-channels";
+/// Advertise effect component channels and typed effect keys to supporting clients.
+pub const DESIGN_ANIMATION_EFFECTS_QUERY: &str = "ferroui-design-animation-effects";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCurveRequest {

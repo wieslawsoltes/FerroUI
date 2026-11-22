@@ -15,7 +15,8 @@ categories.workspace = true
 path = "lib.rs"
 
 [features]
-native-preview = ["dep:ferroui-base", "dep:ferroui-markup-xaml"]
+native-values = ["dep:ferroui-base"]
+native-preview = ["native-values", "dep:ferroui-markup-xaml"]
 
 [dependencies]
 ferroui-base = { workspace = true, optional = true }

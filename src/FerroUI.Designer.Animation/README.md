@@ -172,6 +172,13 @@ samples within a run. An implicit endpoint can use the live target's underlying 
 result, including its byte precision. Velocity uses these same samples. The key plan
 retains the complete typed color.
 
+`AnimationEffect` supports XAML-compatible blur and offset drop-shadow literals. Radius and
+offset channels use logical pixels. Shadow tint channels use unpremultiplied normalized sRGB
+and alpha. The `native-values` feature uses FerroUI's effect converter for literal validation.
+With `native-preview`, the graph and key sampler use the same specialized animator as playback.
+Missing or unsupported native effect samples mark gaps. Native export keeps implicit effect
+endpoints for the runtime to resolve against the selected target.
+
 Global easing accepts native named curves, the default `SplineEasing`, spline property elements
 and parameterized `SpringEasing`. The editor syntax `Spring(mass,stiffness,damping,velocity)`
 exports an actual `Animation.Easing` / `SpringEasing` object. Spring interpolation matches the

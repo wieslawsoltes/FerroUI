@@ -88,6 +88,33 @@ Agents can request `"red"`, `"green"`, `"blue"`, or `"alpha"` from `designer_ani
 
 ![App Preview shows the blue velocity of a mapped Rust brush animation and the live application at the retained playhead](../images/vscode-app-preview-color-curves.jpg)
 
+### Inspect a blur or drop-shadow animation
+
+1. Open an `Effect` animation with literal blur keys or literal drop-shadow keys. In the docked Timeline or App Preview, open **Animation graph** and choose **Value curves** or **Velocity curves**. In App Preview, choose the effect track and its live target.
+2. Choose **Blur radius** for a blur. For a drop shadow, choose **Blur radius**, **Offset X**, **Offset Y**, or a tint channel (**Red**, **Green**, **Blue**, **Alpha**). Radius and offsets use logical pixels. Velocity uses pixels per authored second. Tint values use a 0–1 scale, with velocity in normalized units per authored second. Scrub to compare the curve with the rendered effect. The graph leaves a gap where the target has no compatible effect.
+3. Select a key marker to edit the whole value, such as `blur(12)` or `drop-shadow(6 -2 16 #A036587C)`. Drag the marker to change its time. To capture the current native sample inside the track, use **Add keyframe at playhead** in Timeline or **Add Key at Playhead** in App Preview. Review the draft and apply it in one Undo step.
+
+A XAML shadow key can use a hex color, a named color, or a functional color. The number after the two offsets is the blur radius. `#AARRGGBB` puts the tint alpha first.
+
+```xml
+<KeyFrame Cue="100%">
+    <Setter Property="Effect" Value="drop-shadow(6 -2 16 #A036587C)" />
+</KeyFrame>
+```
+
+Mapped RSX keys use a `ferroui_base::media::Effect::parse` call with a literal string. A key edit replaces the string contents and keeps its quotes, comments, and Rust error handling.
+
+```rust
+.key_frame(1.0, |key| key.set(
+    ferroui_base::Visual::effect_property(),
+    ferroui_base::media::Effect::parse("drop-shadow(6 -2 16 #A036587C)").unwrap(),
+))
+```
+
+For a direction-based shadow, an effect with separate opacity, or a project shader, use the authored effect representation and the native preview. Component curves are available for tracks whose keys all use the same supported effect kind.
+
+Agents read the track’s `curve_channels` from `designer_programs` or `designer_hosted_animations`. Pass `blur_radius`, `offset_x`, `offset_y`, or one of the tint channels to `designer_animation_curve` or `designer_hosted_curve`. The same keyframe draft and apply tools accept a complete effect literal. An app host built with effect-curve support publishes these channels in App Preview.
+
 ### Scale selected key times
 
 Select at least two keys, then seek to the time that should stay fixed. Open **Keyframe Actions**, choose **Scale from Playhead**, and enter a factor. Use `0.5` to halve the spacing from the playhead or `2` to double it. The edit preserves key values and easing. If a destination would collide or leave the clip, adjust the selection, playhead, or factor and try again.

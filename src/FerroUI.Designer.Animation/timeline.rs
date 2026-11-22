@@ -622,15 +622,14 @@ impl CompiledTimeline {
     ) -> Result<Vec<CurvePoint>> {
         let track = self.0.track(target, property)
             .filter(|track| {
-                !track.muted && track.keyframes.first()
-                    .is_some_and(|key| CurveChannel::for_kind(key.value.kind()).contains(&channel))
+                !track.muted && CurveChannel::for_track(track, self.0.duration, self.0.fill).contains(&channel)
             })
             .ok_or_else(|| AnimationError("Choose an active track and one of its curve channels".into()))?;
         let times = window.sample_times(self.0.duration, track.keyframes.iter().map(|key| key.time))?;
         channel.project_samples(times.into_iter().map(|time| {
             let value = track.sample_validated(time, self.0.duration, self.0.fill)?
                 .ok_or_else(|| AnimationError("The track has no sample at the selected time".into()))?;
-            Ok((time, value))
+            Ok((time, Some(value)))
         }))
     }
     /// Display position in the authored iteration before global easing is applied.

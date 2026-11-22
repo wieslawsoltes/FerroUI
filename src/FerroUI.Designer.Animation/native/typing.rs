@@ -1,5 +1,5 @@
 use super::curve::matches_property;
-use crate::{AnimationProgram, ImportOptions, ValueKind};
+use crate::{AnimationEffect, AnimationProgram, AnimationValue, ImportOptions, ValueKind};
 use ferroui_base::animation::Animation;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{
@@ -44,7 +44,7 @@ pub fn native_keyframe_options(
                 .push(setter.attribute("Value"));
         }
     }
-    let mut options = ImportOptions::default();
+    let mut options = ImportOptions { native_effect_endpoints: true, ..ImportOptions::default() };
     for (name, values) in setters {
         let mut matches = properties
             .iter()
@@ -56,6 +56,15 @@ pub fn native_keyframe_options(
         else {
             continue;
         };
+        if AnimationEffect::is_effect_property(property) {
+            options.property_kinds.insert(name.into(), ValueKind::Effect);
+            options.literal_values.extend(values.into_iter().flatten().filter_map(|text| {
+                let text = text.strip_prefix("{}").unwrap_or(text);
+                let value = AnimationEffect::parse_native(text).ok()?;
+                Some(((name.to_owned(), text.to_owned()), AnimationValue::Effect(value)))
+            }));
+            continue;
+        }
         let mut kind = value_kind(property);
         if kind == Some(ValueKind::Color)
             || property.property_type() == TypeId::of::<Option<Rc<dyn IBrush>>>()

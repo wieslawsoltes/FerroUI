@@ -56,7 +56,7 @@ pub use timeline::{
     CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,
     Sample, Timeline, TimelineTimingEdit, Track,
 };
-pub use value::{AnimationValue, RelativeUnit, ValueKind};
+pub use value::{AnimationEffect, AnimationValue, RelativeUnit, ValueKind};
 pub use xaml::{AnimationImport, ImportOptions, native_key_time};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -85,3 +85,6 @@ mod keyframe_transfer_tests;
 
 #[cfg(test)]
 mod program_tests;
+
+#[cfg(test)]
+mod effect_tests;

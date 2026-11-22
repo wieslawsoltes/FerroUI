@@ -16,6 +16,8 @@ pub struct ImportOptions {
     /// Native value types that need a host animator instead of the portable literal codec.
     /// Extension codecs may replace this entry when they implement that interpolation.
     pub interpolation_errors: BTreeMap<String, String>,
+    /// Native hosts can resolve missing effect endpoints, including an unset effect.
+    pub native_effect_endpoints: bool,
     pub strict: bool,
 }
 impl Default for ImportOptions {
@@ -25,6 +27,7 @@ impl Default for ImportOptions {
             base_values: BTreeMap::new(),
             literal_values: BTreeMap::new(),
             interpolation_errors: BTreeMap::new(),
+            native_effect_endpoints: false,
             strict: true,
         }
     }
@@ -98,7 +101,9 @@ impl Timeline {
         for track in tracks {
             let first = &track.keyframes[0];
             let last = track.keyframes.last().expect("nonempty track");
-            if hold_without_base && first.time > 0.0 && track.base_value.is_none() {
+            // Effects can use an unset base value, which the native animator resolves at playback.
+            let hold = hold_without_base && track.base_value.is_none() && first.value.kind() != ValueKind::Effect;
+            if hold && first.time > 0.0 {
                 keys.push((
                     0.0,
                     &track.property,
@@ -118,7 +123,7 @@ impl Timeline {
                     key.easing.clone(),
                 ));
             }
-            if hold_without_base && last.time < self.duration && track.base_value.is_none() {
+            if hold && last.time < self.duration {
                 keys.push((
                     self.duration,
                     &track.property,
@@ -364,7 +369,9 @@ impl Timeline {
                     .last()
                     .is_some_and(|key| key.time < timeline.duration)
                     && !matches!(timeline.fill, FillMode::Forward | FillMode::Both);
-            if requires_base && track.base_value.is_none() {
+            let native_effect = options.native_effect_endpoints
+                && options.property_kinds.get(&track.property) == Some(&ValueKind::Effect);
+            if requires_base && track.base_value.is_none() && !native_effect {
                 let message = format!(
                     "{} has implicit endpoint values; provide the underlying live value",
                     track.property
@@ -509,6 +516,8 @@ pub(crate) fn infer_kind(property: &str, source: &str) -> ValueKind {
         ValueKind::CornerRadius
     } else if matches!(property, "RenderTransformOrigin") {
         ValueKind::RelativePoint
+    } else if property == "Effect" && crate::AnimationEffect::parse(source).is_ok() {
+        ValueKind::Effect
     } else if matches!(property, "Size" | "PageSize") {
         ValueKind::Size
     } else if matches!(property, "Rect" | "Bounds" | "Viewport") {

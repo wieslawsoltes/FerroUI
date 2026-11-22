@@ -1,4 +1,4 @@
-use crate::{AnimationValue, RelativeUnit};
+use crate::{AnimationEffect, AnimationValue, RelativeUnit};
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{
     BoxedValue, CornerRadius, Point, Rect, RelativePoint, RelativeScalar, Size, Thickness, Vector,
@@ -22,6 +22,9 @@ impl From<ferroui_base::RelativeUnit> for RelativeUnit {
 
 /// Convert the native animator's result to the same types used by authored tracks.
 pub(super) fn value(sample: &BoxedValue) -> Option<AnimationValue> {
+    if let Some(effect) = AnimationEffect::from_boxed(sample) {
+        return Some(AnimationValue::Effect(effect));
+    }
     let native = sample.as_ref();
     if let Some(number) = native.downcast_ref::<f64>() {
         return Some(AnimationValue::Number(*number));

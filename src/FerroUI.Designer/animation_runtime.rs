@@ -61,8 +61,11 @@ impl NativeAnimations {
         window: CurveWindow,
     ) -> Result<Vec<CurvePoint>, String> {
         let animation = self.index.animation(program.id).ok_or("The native animation is unavailable")?;
-        program.timeline.as_ref().and_then(|timeline| timeline.track(target, property))
-            .ok_or("Choose an authored animation track")?;
+        let timeline = program.timeline.as_ref().ok_or("Choose a typed animation program")?;
+        let track = timeline.track(target, property).ok_or("Choose an authored animation track")?;
+        if !CurveChannel::for_track(track, timeline.duration, timeline.fill).contains(&channel) {
+            return Err("Choose an authored animation track and one of its curve channels".into());
+        }
         let object = self.track_target(program, preview, target)?;
         sample_curve_track(animation, &object, property, channel, window)
     }

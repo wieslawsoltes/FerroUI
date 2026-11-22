@@ -1,4 +1,5 @@
 use super::color::{packed_argument, ColorSource};
+use super::effect::EffectSource;
 use super::relative::RelativeSource;
 use super::{syntax, FloatSource};
 use crate::local_rust::{LocalRust, Value};
@@ -23,12 +24,14 @@ enum ValueSyntax {
     Numbers(Vec<FloatSource>),
     Color(ColorSource),
     Relative(RelativeSource),
+    Effect(EffectSource),
 }
 
 impl ValueShape {
     pub(crate) const NUMBER: Self = Self::typed(ValueKind::Number);
     pub(crate) const CORNER_RADIUS: Self = Self::typed(ValueKind::CornerRadius);
     pub(crate) const RELATIVE_POINT: Self = Self::typed(ValueKind::RelativePoint);
+    pub(crate) const EFFECT: Self = Self::typed(ValueKind::Effect);
     pub(crate) const SOLID_BRUSH: Self = Self {
         kind: ValueKind::Color,
         brush: true,
@@ -78,6 +81,10 @@ impl ValueShape {
         if matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar) {
             let (value, source) = RelativeSource::read(expression, kind)?;
             return Some(ValueSource { value, source: ValueSyntax::Relative(source) });
+        }
+        if kind == ValueKind::Effect {
+            let (value, source) = EffectSource::read(expression, &resolve)?;
+            return Some(ValueSource { value: AnimationValue::Effect(value), source: ValueSyntax::Effect(source) });
         }
         let parts = if kind == ValueKind::Number
             || matches!(kind, ValueKind::CornerRadius | ValueKind::Thickness)
@@ -164,10 +171,16 @@ impl ValueSource {
 
     pub(crate) fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) -> Result<(), String> {
         let kind = self.value.kind();
-        let value = AnimationValue::parse(text, kind).map_err(|error| error.to_string())?;
+        let value = AnimationValue::parse_native_literal(text, kind).map_err(|error| error.to_string())?;
         let parts = match &self.source {
             ValueSyntax::Color(source) => return source.plan(&self.value, &value, patches),
             ValueSyntax::Relative(source) => return source.plan(&value, patches),
+            ValueSyntax::Effect(source) => {
+                if self.value != value {
+                    patches.push(source.patch(text));
+                }
+                return Ok(());
+            }
             ValueSyntax::Numbers(parts) => parts,
         };
         let values = numeric_parts(&value)?;
@@ -192,6 +205,9 @@ impl ValueSource {
 }
 
 pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
+    if let AnimationValue::Effect(effect) = value {
+        return Ok(format!("::ferroui_base::media::Effect::parse({:?}).unwrap()", effect.to_xaml()));
+    }
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));
     }

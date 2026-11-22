@@ -1,5 +1,5 @@
 use crate::{
-    require, AnimationError, AnimationValue, CurvePoint, FillMode, RelativeUnit, Result, Track,
+    require, AnimationEffect, AnimationError, AnimationValue, CurvePoint, FillMode, RelativeUnit, Result, Track,
     ValueKind,
 };
 use serde::{Deserialize, Serialize};
@@ -33,6 +33,9 @@ pub enum CurveChannel {
     AbsoluteY,
     Percent,
     Absolute,
+    BlurRadius,
+    OffsetX,
+    OffsetY,
 }
 
 impl FromStr for CurveChannel {
@@ -63,6 +66,7 @@ impl CurveChannel {
             ValueKind::CornerRadius => &[TopLeft, TopRight, BottomRight, BottomLeft],
             ValueKind::RelativePoint => &[PercentX, PercentY, AbsoluteX, AbsoluteY],
             ValueKind::RelativeScalar => &[Percent, Absolute],
+            ValueKind::Effect => &[BlurRadius, OffsetX, OffsetY, Red, Green, Blue, Alpha],
             _ => &[],
         }
     }
@@ -71,6 +75,13 @@ impl CurveChannel {
         let Some(first) = track.keyframes.first() else {
             return Vec::new();
         };
+        if let AnimationValue::Effect(effect) = &first.value {
+            let channels = Self::effect_channels(effect);
+            let same_family = track.keyframes.iter().all(|key| {
+                matches!(&key.value, AnimationValue::Effect(effect) if Self::effect_channels(effect) == channels)
+            });
+            return if same_family { channels.to_vec() } else { Vec::new() };
+        }
         let mut channels = Self::for_kind(first.value.kind()).to_vec();
         if let Some(unit) = first.value.relative_unit() {
             // The live target may supply the units at an unauthored endpoint.
@@ -117,6 +128,9 @@ impl CurveChannel {
             Self::AbsoluteY => "Y (px)",
             Self::Percent => "Percent",
             Self::Absolute => "Pixels",
+            Self::BlurRadius => "Blur radius (px)",
+            Self::OffsetX => "Offset X (px)",
+            Self::OffsetY => "Offset Y (px)",
         }
     }
 
@@ -134,12 +148,22 @@ impl CurveChannel {
 
     pub(crate) fn project_samples(
         self,
-        samples: impl IntoIterator<Item = Result<(f64, AnimationValue)>>,
+        samples: impl IntoIterator<Item = Result<(f64, Option<AnimationValue>)>>,
     ) -> Result<Vec<CurvePoint>> {
         let mut points = Vec::new();
         let mut gap = false;
+        let mut effect_family = None;
         for sample in samples {
             let (time, sample) = sample?;
+            let Some(sample) = sample else {
+                gap = true;
+                continue;
+            };
+            if let AnimationValue::Effect(effect) = &sample {
+                let family = std::mem::discriminant(effect);
+                gap |= effect_family.is_some_and(|previous| previous != family);
+                effect_family = Some(family);
+            }
             require(
                 Self::for_kind(sample.kind()).contains(&self),
                 "The track does not produce the selected curve channel",
@@ -147,6 +171,7 @@ impl CurveChannel {
             if self
                 .relative_unit()
                 .is_some_and(|unit| sample.relative_unit() != Some(unit))
+                || matches!(&sample, AnimationValue::Effect(effect) if !Self::effect_channels(effect).contains(&self))
             {
                 gap = true;
                 continue;
@@ -189,6 +214,7 @@ impl CurveChannel {
             (Self::AbsoluteX | Self::PercentX, V::RelativePoint { x, .. }) => *x,
             (Self::AbsoluteY | Self::PercentY, V::RelativePoint { y, .. }) => *y,
             (Self::Absolute | Self::Percent, V::RelativeScalar { scalar, .. }) => *scalar,
+            (channel, V::Effect(effect)) => channel.project_effect(effect)?,
             _ => return None,
         };
         let sample = if self.relative_unit() == Some(RelativeUnit::Relative) {
@@ -197,5 +223,28 @@ impl CurveChannel {
             sample
         };
         sample.is_finite().then_some(sample)
+    }
+
+    fn effect_channels(effect: &AnimationEffect) -> &'static [Self] {
+        use CurveChannel::*;
+        match effect {
+            AnimationEffect::Blur { .. } => &[BlurRadius],
+            AnimationEffect::DropShadow { .. } => &[BlurRadius, OffsetX, OffsetY, Red, Green, Blue, Alpha],
+        }
+    }
+
+    fn project_effect(self, effect: &AnimationEffect) -> Option<f64> {
+        let value = match (self, *effect) {
+            (Self::BlurRadius, AnimationEffect::Blur { radius }) => radius,
+            (Self::BlurRadius, AnimationEffect::DropShadow { blur_radius, .. }) => blur_radius,
+            (Self::OffsetX, AnimationEffect::DropShadow { offset_x, .. }) => offset_x,
+            (Self::OffsetY, AnimationEffect::DropShadow { offset_y, .. }) => offset_y,
+            (Self::Alpha, AnimationEffect::DropShadow { argb: [a, ..], .. }) => f64::from(a) / 255.0,
+            (Self::Red, AnimationEffect::DropShadow { argb: [_, r, ..], .. }) => f64::from(r) / 255.0,
+            (Self::Green, AnimationEffect::DropShadow { argb: [_, _, g, _], .. }) => f64::from(g) / 255.0,
+            (Self::Blue, AnimationEffect::DropShadow { argb: [.., b], .. }) => f64::from(b) / 255.0,
+            _ => return None,
+        };
+        Some(value)
     }
 }

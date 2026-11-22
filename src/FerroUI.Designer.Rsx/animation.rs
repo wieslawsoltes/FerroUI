@@ -1,6 +1,7 @@
 //! Original Rust source for a native animation projected from a known view builder.
 
 mod color;
+mod effect;
 mod color_integer;
 mod color_text;
 mod keyframe;

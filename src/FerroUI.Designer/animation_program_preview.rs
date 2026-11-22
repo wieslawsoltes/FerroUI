@@ -1,6 +1,6 @@
 //! Playback capabilities and preview-only target assignments for authored programs.
 use crate::{DesignerSession, PreviewSourceAnchor};
-use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator as ProgramLocator};
+use ferroui_designer_animation::{AnimationProgram, AnimationProgramLocator as ProgramLocator, ValueKind};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -37,6 +37,9 @@ impl DesignerSession {
     pub(crate) fn requires_native_animation(&self, program: &AnimationProgram) -> bool {
         self.seeks_animation_elapsed(program)
             || self.animation.native.uses_custom_animators(program.id)
+            || program.timeline.as_ref().is_some_and(|timeline| timeline.tracks.iter().any(|track| {
+                track.keyframes.first().is_some_and(|key| key.value.kind() == ValueKind::Effect)
+            }))
             || (program.has_project_codec() && self.animation.native.duration(program.id).is_some())
     }
 

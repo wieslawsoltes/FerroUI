@@ -91,6 +91,12 @@ pub(super) fn animation_value() -> Value {
         value("CornerRadius",components(&["top_left","top_right","bottom_right","bottom_left"],false)),
         value("RelativePoint",object(json!({"x":number(),"y":number(),"unit":{"enum":["Absolute","Relative"]}}), &["x","y","unit"])),
         value("RelativeScalar",object(json!({"scalar":number(),"unit":{"enum":["Absolute","Relative"]}}), &["scalar","unit"])),
+        value("Effect",json!({"oneOf":[
+            object(json!({"kind":{"const":"blur"},"radius":number()}), &["kind","radius"]),
+            object(json!({"kind":{"const":"drop_shadow"},"offset_x":number(),"offset_y":number(),"blur_radius":time(),
+                "argb":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"integer","minimum":0,"maximum":255}}}),
+                &["kind","offset_x","offset_y","blur_radius","argb"])
+        ]})),
         value("Discrete",string())
     ]})
 }

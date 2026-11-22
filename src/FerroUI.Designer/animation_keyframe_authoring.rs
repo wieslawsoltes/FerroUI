@@ -100,7 +100,7 @@ impl DesignerSession {
         program
             .plan_keyframe(target, property, edit, |value, kind| {
                 let value = match kind {
-                    Some(kind) => AnimationValue::parse(value, kind)?,
+                    Some(kind) => AnimationValue::parse_native_literal(value, kind)?,
                     None => self
                         .animation_value_for_target(target, property, value)
                         .map_err(AnimationError)?,

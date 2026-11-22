@@ -76,6 +76,32 @@ fn color_keys_change_alpha_without_reformatting_authored_rust() {
 }
 
 #[test]
+fn effect_keys_preserve_rust_strings_and_generate_checked_inserts() {
+    let original = r##"::ferroui_base::media::Effect::parse(/* radius 🧭 */ r#"blur(6)"#).expect("valid effect")"##;
+    let source = VIEW.replace("ferroui_base::Visual::opacity_property()", "ferroui_base::Visual::effect_property()")
+        .replace("0.2))", "ferroui_base::media::Effect::parse(\"blur(2)\").ok()))")
+        .replace("0.6f64", original)
+        .replace("1.0))", "Some(ferroui_base::media::Effect::parse(\"blur(16)\").unwrap())))")
+        .replace('\n', "\r\n");
+    let caret = source.rfind("rsx!").unwrap();
+    let catalog = RsxCatalog::built_in();
+    let projected = catalog.project(&source, caret).unwrap();
+    assert!(projected.xaml().contains("Property=\"Effect\" Value=\"blur(6)\""));
+    let clip = projected.preview_markup().animations[0].1;
+    let edit = |value| KeyframeEdit::Upsert { previous: Some(0.5), time: 0.5, value, easing: "0.25,-0.5,0.6,1.2" };
+    assert!(clip.patch_keyframe("Effect", edit("drop-shadow(2 4 -3)")).is_err());
+    let edited = TextPatch::apply_all(&source, clip.patch_keyframe("Effect", edit("blur(9)")).unwrap()).unwrap();
+    assert_eq!(edited, source.replace("blur(6)", "blur(9)"));
+    let insert = KeyframeEdit::Upsert { previous: None, time: 1.5, value: "blur(12)", easing: "LinearEasing" };
+    let patched = TextPatch::apply_all(&source, clip.author_keyframe(&source, catalog, "Effect", insert).unwrap()).unwrap();
+    assert_eq!(patched, source.replace(
+        "\r\n                        .fill_mode",
+        "\r\n                        .key_frame(0.75, |key| key.set(ferroui_base::Visual::effect_property(), ::ferroui_base::media::Effect::parse(\"blur(12)\").unwrap()))\r\n                        .fill_mode",
+    ));
+    assert!(project_rust(&patched, caret).unwrap().xaml().contains("Value=\"blur(12)\""));
+}
+
+#[test]
 fn relative_point_keys_preserve_the_constructor_when_editing_units() {
     let constructor = "ferroui_base::RelativePoint::from_point(ferroui_base::Point::new(/* origin 🧭 */ 0.6f64, 0.25), ::ferroui_base::RelativeUnit::Relative)";
     let source = VIEW.replace("ferroui_base::Visual::opacity_property()", "ferroui_base::Visual::render_transform_origin_property()")
