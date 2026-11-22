@@ -53,6 +53,7 @@ export async function verifyHostedBoxShadows(preview: NativePreview, update: (re
     assert.ok(pose.frame.image.png === reference.image.png, 'The sampled shadow list matches the static native frame');
     await assert.rejects(preview.hostedCurve(identity(first), query), /frame changed/i);
     await verifyMappedShadows(preview, update);
+    await verifyScopedShadowResource(preview, update);
     console.log('App Preview sampled layered box shadows, matched the native frame, and preserved Rust source while editing keys');
 }
 
@@ -87,4 +88,26 @@ fn view() { rsx! {
     assert.ok(patch);
     assert.equal(source.slice(patch.start, patch.end), patch.expected);
     assert.equal(source.slice(0, patch.start) + patch.replacement + source.slice(patch.end), source.replace(middle, value));
+}
+
+async function verifyScopedShadowResource(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {
+    const source = `<Window xmlns="https://github.com/ferroui" xmlns:ui="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Width="420" Height="260" Background="#EDF2FA">
+      <Window.Resources>
+        <Animation x:Key="PresenterShadow" x:SetterTargetType="{x:Type ui:ContentPresenter}" Duration="0:0:2" FillMode="Both">
+          <KeyFrame Cue="0%"><Setter Property="BoxShadow" Value="${base}"/></KeyFrame>
+          <KeyFrame Cue="100%"><Setter Property="BoxShadow" Value="${middle}"/></KeyFrame>
+        </Animation>
+      </Window.Resources>
+      <ContentPresenter Name="Card" Content="Revenue forecast" Width="180" Height="96" Background="White"/>
+    </Window>`;
+    const frame = await preview.renderHosted(update(4133, source));
+    const program = frame.animations?.programs.find(program => program.name === 'PresenterShadow');
+    const target = frame.animations?.targets.find(target => target.label === 'Card');
+    assert.ok(program && target);
+    assert.deepEqual(program.defaultTargets, []);
+    assert.deepEqual(program.compatibleTargets, [target.id]);
+    const points = await preview.hostedCurve(identity(frame), { program: program.id, target: target.id, property,
+        channel, window: { start: 0, end: 2 } });
+    assert.deepEqual(points.find(point => point.time === 1), { time: 1, value: 6 });
 }

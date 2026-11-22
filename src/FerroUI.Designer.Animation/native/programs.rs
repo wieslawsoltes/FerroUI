@@ -1,10 +1,9 @@
-use super::NativeSourceIndex;
+use super::{NativeSourceIndex, target};
 use crate::AnimationProgram;
 use ferroui_base::animation::{Animatable, Animation, IAnimation};
 use ferroui_base::controls::ResourceDictionary;
-use ferroui_base::media::Transform;
 use ferroui_base::styling::{IStyle, Style, StyleBase, Styles};
-use ferroui_base::{FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
+use ferroui_base::{FerroObject, FerroProperty, Ref, StyledElement, TypeInfo};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_markup_xaml::{diagnostics::XamlSourceInfo, FromXamlObject};
 use std::collections::{BTreeMap, BTreeSet};
@@ -19,6 +18,7 @@ pub struct NativeProgramIndex {
 struct LoadedProgram {
     animation: Ref<Animation>,
     style: Option<Ref<Style>>,
+    setter_target: Option<&'static TypeInfo>,
     custom_animators: bool,
     transform_components: Vec<&'static FerroProperty>,
 }
@@ -143,6 +143,9 @@ impl NativeProgramIndex {
                 |(_, provider)| provider.as_object()?.to_ref().cast::<ResourceDictionary>(),
             ));
         }
+        for (&id, program) in &mut index.programs {
+            program.setter_target = target::declared_type(document, id);
+        }
         index
     }
 
@@ -189,6 +192,23 @@ impl NativeProgramIndex {
         })
     }
 
+    pub fn validate_target(&self, id: NodeId, target: &Animatable, role: &str) -> Result<(), String> {
+        let program = self.programs.get(&id).ok_or("The native animation retired")?;
+        let compatible = target::validate_animation_target(&program.animation, target, role);
+        if compatible.is_ok() {
+            return compatible;
+        }
+        let in_scope = program.setter_target.map_or_else(
+            || target.to_ref().cast::<StyledElement>().is_some_and(|control| self.style_matches(id, &control)),
+            |type_| type_.is_assignable_from(target.get_type()),
+        );
+        if in_scope {
+            target::validate(&program.animation, target, role, true)
+        } else {
+            compatible
+        }
+    }
+
     fn insert(
         &mut self,
         source: &NativeSourceIndex,
@@ -206,6 +226,7 @@ impl NativeProgramIndex {
                 transform_components: animation.transform_components(),
                 animation,
                 style,
+                setter_target: None,
             });
         }
     }
@@ -213,30 +234,4 @@ impl NativeProgramIndex {
 
 fn native_object(animation: &Rc<dyn IAnimation>) -> Option<Ref<Animation>> {
     animation.as_object()?.cast::<Animation>()
-}
-
-/// Validate the declared property ownership for an explicit preview target.
-pub fn validate_animation_target(
-    animation: &Animation,
-    target: &Animatable,
-    target_role: &str,
-) -> Result<(), String> {
-    for keyframe in animation.children().snapshot().iter() {
-        for setter in keyframe.setters().snapshot().iter() {
-            let property = setter
-                .property()
-                .ok_or("Native animation Setter has no target property")?;
-            if !property.is_attached()
-                && !property.owner_type().is_assignable_from(target.get_type())
-                && !Transform::TYPE.is_assignable_from(property.owner_type())
-                && !FerroPropertyRegistry::instance().is_registered_for(target, property)
-            {
-                return Err(format!(
-                    "{property} is incompatible with {target_role} {}",
-                    target.get_type()
-                ));
-            }
-        }
-    }
-    Ok(())
 }

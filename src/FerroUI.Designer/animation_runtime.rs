@@ -4,7 +4,7 @@ use ferroui_base::animation::Animatable;
 use ferroui_base::animation::animators::TransformAnimator;
 use ferroui_base::StyledElement;
 use ferroui_designer_animation::native::{
-    animation_timing, sample_curve_track, sample_keyframe_value, validate_animation_target, NativePlayback, NativeProgramIndex,
+    animation_timing, sample_curve_track, sample_keyframe_value, NativePlayback, NativeProgramIndex,
     NativeSourceIndex,
 };
 use ferroui_designer_animation::{AnimationProgram, CurvePoint, CurveWindow, Timeline, TrackCurveChannel};
@@ -213,7 +213,7 @@ impl NativeAnimations {
                     .root()
                     .ok_or("The resource preview factory has no live root")?
                     .upcast::<Animatable>();
-                validate_animation_target(animation, &target, "factory preview root")
+                self.index.validate_target(program.id, &target, "factory preview root")
                     .map_err(|error| format!("Resource program '{}': {error}", program.name))?;
                 bindings.push((animation.clone(), target));
             }

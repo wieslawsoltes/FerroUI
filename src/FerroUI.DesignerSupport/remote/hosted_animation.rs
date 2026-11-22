@@ -19,7 +19,7 @@ use ferroui_base::animation::Animatable;
 use ferroui_base::{Ref, StyledElement, Visual};
 use ferroui_controls::Window;
 use ferroui_designer_animation::native::{
-    animation_timing, validate_animation_target, NativePlayback, NativeProgramIndex,
+    animation_timing, NativePlayback, NativeProgramIndex,
     NativeSourceIndex, NativeStateTriggers,
 };
 use ferroui_designer_animation::{
@@ -345,7 +345,7 @@ fn catalog_entry(
     let mut compatible_targets = Vec::new();
     for (&id, control) in targets {
         if !control.cast::<Animatable>().is_some_and(|target| {
-            validate_animation_target(animation, &target, "the preview target").is_ok()
+            index.validate_target(program.id, &target, "the preview target").is_ok()
         }) {
             continue;
         }
