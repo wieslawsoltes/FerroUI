@@ -18,6 +18,7 @@ static NEXT_SESSION: AtomicU64 = AtomicU64::new(1);
 /// Shared UI-thread state. All authored changes pass through the same document history;
 /// runtime load errors preserve both source and the last successfully rendered tree.
 pub struct DesignerSession {
+    pub(crate) instance_id: u64,
     pub(crate) document: Document,
     pub(crate) rust: Option<RustDocument>,
     pub(crate) selection: Vec<NodeId>,
@@ -110,6 +111,7 @@ impl DesignerSession {
         ferroui_xaml_interactions_custom::register_types();
         let preview = RuntimePreview::new_with_fixture(preview_host, uri, &document, options, fixture)?;
         let mut result = Self {
+            instance_id: NEXT_SESSION.fetch_add(1, Ordering::Relaxed),
             document,
             rust,
             preview,

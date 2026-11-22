@@ -185,6 +185,7 @@ fn model_report(session: &DesignerSession, operation: &str, mut report: Value, t
     // allocations. Layout reports include the recomputed measured adapter edits.
     let mut hash = std::collections::hash_map::DefaultHasher::new();
     operation.hash(&mut hash);
+    session.instance_id.hash(&mut hash);
     session.document_uri().hash(&mut hash);
     if track_selection {
         session.generation().hash(&mut hash);
