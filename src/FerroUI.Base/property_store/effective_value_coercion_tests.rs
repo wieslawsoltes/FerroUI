@@ -387,7 +387,7 @@ fn recoercion_keeps_nan_equality() {
 
 // Copied from 4622c95a: only the two oracle method names and their call differ, and the base value is read and
 // written as the value keeps it (once, where it is the value).
-// Each slot keeps the input of its own priority, so a later reset restores it.
+// Three corrections to the base value and its input are marked in the body.
 impl<T: crate::StyledValue> EffectiveValue<T> {
     fn original_coerce_value(&self, owner: &FerroObject) {
         let Some(uncommon) = &self.uncommon else { return };
@@ -414,12 +414,12 @@ impl<T: crate::StyledValue> EffectiveValue<T> {
         let mut bv = base_value.clone();
 
         if let Some(uncommon) = &self.uncommon {
-            uncommon.coerced_value_valid.set(false);
-            uncommon.coerced_base_valid.set(false);
             v = (uncommon.coerce)(owner, value.clone());
             if priority != base_priority {
                 bv = (uncommon.coerce)(owner, base_value.clone());
             } else {
+                // Correction 1: at one priority the base value is the coerced value. The
+                // original compared the stored base with the input before coercion.
                 bv = v.clone();
             }
         }
@@ -427,24 +427,29 @@ impl<T: crate::StyledValue> EffectiveValue<T> {
         if !value_equals(&*self.value.borrow(), &v) {
             self.set_value_alone(v.clone());
             value_changed = true;
+            if let Some(uncommon) = &self.uncommon {
+                uncommon.uncoerced_value.replace(value);
+            }
         }
 
         if !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &bv))) {
+            // Correction 2: a base value under an animation takes its own coerced value. The
+            // original gave it the coerced value of the animation.
             if priority == base_priority {
                 self.set_base_to_value();
             } else {
                 self.set_base_value(bv);
             }
             base_value_changed = true;
+            if let Some(uncommon) = &self.uncommon {
+                // Correction 3: the base input goes to the base slot. The original overwrote
+                // the input of the animation with it.
+                uncommon.uncoerced_base_value.replace(base_value);
+            }
         }
 
         self.state.priority.set(priority);
         self.state.base_priority.set(base_priority);
-        let previous_inputs = self.uncommon.as_ref().map(|uncommon| {
-            uncommon.coerced_value_valid.set(true);
-            uncommon.coerced_base_valid.set(true);
-            (uncommon.uncoerced_value.replace(value), uncommon.uncoerced_base_value.replace(base_value))
-        });
 
         if value_changed {
             self.notify_value_changed(owner, old_value);
@@ -452,7 +457,6 @@ impl<T: crate::StyledValue> EffectiveValue<T> {
         if base_value_changed {
             self.notify_base_value_changed(owner);
         }
-        drop(previous_inputs);
     }
 }
 
