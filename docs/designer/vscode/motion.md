@@ -61,6 +61,53 @@ In Rust, use the corresponding property getter in an inline style clip. The same
 
 Agents can read the component property name from `designer_programs` or `designer_hosted_animations`. Pass it as `property` with `channel: "value"` to `designer_animation_curve` or `designer_hosted_curve`. Use the accepted program and target to draft, record, or apply a numeric key.
 
+### Animate a gradient brush
+
+1. Open an animation with an inline `LinearGradientBrush`, `RadialGradientBrush`, or `ConicGradientBrush` key for a brush property. In Studio or the VS Code Timeline, open **Animation graph** and choose **Value curves** or **Velocity curves**. In App Preview, choose the live target and track.
+2. Choose a numbered stop and its **Offset**, **Red**, **Green**, **Blue**, or **Alpha**. Stop numbers follow the authored order and stop offsets use fractions of the gradient length. The picker also offers the brush opacity, start and end points, center, gradient and transform origins, radii, and angle where the brush provides them. Distances use percentage or logical-pixel channels. Angles use degrees.
+3. Scrub to see the native brush. The graph starts a new segment where the native animator switches shapes, and it leaves a gap wherever a stop or geometry field is absent. Velocity shows change per authored second.
+4. Select a key to edit the brush markup or use **Add keyframe at playhead** to capture the native brush. **Stop** restores the underlying brush. Each source edit uses one Undo step.
+
+![VS Code plots the first gradient stop’s offset beside the XAML and the rendered pipeline card at 1.12 seconds](../images/vscode-timeline-gradient.png)
+
+```xaml
+<KeyFrame Cue="100%">
+    <Setter Property="Background">
+        <LinearGradientBrush StartPoint="10%,0%" EndPoint="100%,50%">
+            <GradientStop Offset="0.3" Color="#FF285B91" />
+            <GradientStop Offset="1" Color="#FF57B7A8" />
+        </LinearGradientBrush>
+    </Setter>
+</KeyFrame>
+```
+
+Mapped Rust keys use literal native immutable brush constructors. Editing stop fields preserves the
+original operands and comments. Editing geometry on a `from_stops` key expands it to the same
+brush's `new` constructor. Use the Rust source editor for computed values, or edit the declaration
+that owns a bound or resource-backed brush.
+
+```rust
+.key_frame(1.0, |key| key.set(
+    ferroui_controls::Border::background_property(),
+    Some(std::rc::Rc::new(
+        ferroui_base::media::immutable::ImmutableLinearGradientBrush::from_stops(&[
+            ferroui_base::media::immutable::ImmutableGradientStop::new(
+                0.3, ferroui_base::media::Color::from_uint32(0xFF285B91),
+            ),
+            ferroui_base::media::immutable::ImmutableGradientStop::new(
+                1.0, ferroui_base::media::Color::from_uint32(0xFF57B7A8),
+            ),
+        ]),
+    ) as std::rc::Rc<dyn ferroui_base::media::IBrush>),
+))
+```
+
+Agents can read `curve_channels` and pass a channel such as `gradient_stop/1/stop_offset` or
+`gradient/start_point/percent_x` to `designer_animation_curve` or `designer_hosted_curve`.
+Use the checked keyframe tools with the accepted source and frame to read, edit, or record the
+complete brush. App Preview exposes brush authoring when the application and preview helper both
+support it.
+
 ### Animate a transform list
 
 1. Use `RenderTransform` as the keyframe property to animate the complete list of functions on a control. A value can contain translation, rotation, scale, skew, and affine matrix functions. Enter `none` for the identity. Use one whole transform track or separate component tracks for a given clip.

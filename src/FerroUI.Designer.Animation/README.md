@@ -37,7 +37,7 @@ in linear light and alpha is linear, matching FerroUI's `ColorAnimator`. Cubic B
 solves the X polynomial rather than treating the progress as the curve parameter. Thirty named
 easing variants match FerroUI's polynomial, sine, circular, exponential, back, bounce and elastic
 families. A keyframe's easing belongs to the incoming segment. Native-value codecs add typed
-effects, box shadow lists, and ordered transform lists. Gradient brushes and other runtime-specific
+effects, box shadow lists, ordered transform lists, and gradient brushes. Runtime-specific
 payloads use source editing or application codecs. The designer previews them with the framework
 animator.
 
@@ -146,6 +146,13 @@ matrix coefficients from the native animator. The animator uses the underlying p
 implicit endpoints.
 Whole-list keys and redirected component keys apply to the same render property, so each clip
 uses one form. Explicitly registered animators retain their normal precedence.
+
+The `Brush` value codec supports literal linear, radial, and conic gradients and literal solid
+brush keys on the same track. It distinguishes brush geometry, interpolation units, opacity,
+spread, transforms, and ordered stops. The native clock resolves implicit endpoints and solid
+promotion for the entire clip. Curve sampling uses the actual brush produced by the loaded
+animator. A change of shape starts a new segment, and an absent stop or geometry field leaves
+a gap. Empty stop lists use the native discrete fallback.
 
 The `BoxShadows` value codec delegates text conversion and list interpolation to FerroUI. The native
 graph samples the loaded property and exposes channels such as `box_shadow/2/spread` using one-based

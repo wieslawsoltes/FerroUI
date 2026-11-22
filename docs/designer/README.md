@@ -270,6 +270,11 @@ translation, rotation, scale, skew, and matrix operations and the coefficients o
 transform. Record or edit the whole list from the key inspector.
 [Animate a transform list](vscode/motion.md#animate-a-transform-list)
 
+For inline gradient brush keys, plot the native stop offsets, RGBA components, opacity, or brush
+geometry. Choose the key inspector to edit a literal brush, or record the complete brush at the
+playhead. The animation clock and checked XAML or Rust source edit are shared with VS Code and MCP.
+[Animate a gradient brush](vscode/motion.md#animate-a-gradient-brush)
+
 For a `BoxShadow` track, choose a numbered shadow and an offset, blur, spread, or tint channel.
 The native graph follows the layer order and separates segments where a layer changes between
 inner and outer. Use the key inspector to edit the full list or record it at the playhead.

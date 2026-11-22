@@ -16,6 +16,8 @@ For a supported geometry or color track, use the component picker beside its sca
 
 For `BoxShadow`, the picker lists each shadow’s offsets, blur, spread, and tint. Select a supported key to edit the list or add a key from the sampled app pose. [Animate layered box shadows](motion.md#animate-layered-box-shadows)
 
+On a gradient brush track, use the component picker to compare native color stops and direction or geometry. Record the complete sampled brush with **Add keyframe at playhead**. [Animate a gradient brush](motion.md#animate-a-gradient-brush)
+
 For a whole `RenderTransform` track, choose a numbered operation or a coefficient of the combined transform. The native app supplies the value and velocity samples. [Animate a transform list](motion.md#animate-a-transform-list)
 
 Choose **Compare animation clips** to use a shared elapsed ruler for the app’s native clips. Place XAML or mapped Rust clips with a drag or the keyboard, then use **Play all clips** to check the native result. A compatible source update retains the combined pose. [Compare clips in App Preview](motion.md#compare-clips-in-app-preview)
