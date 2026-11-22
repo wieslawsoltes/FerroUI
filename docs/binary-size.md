@@ -1649,6 +1649,79 @@ The whole stack as merged (#989, #1010, #1013, #1015), from one run of `perf.yml
 | `winui-theme-gallery` | 26.12 | 25.56 | -0.56 (-2.1 %) | 21.30 | 20.74 | -0.56 (-2.6 %) |
 | `control-catalog-desktop` | 60.04 | 59.14 | -0.90 (-1.5 %) | 46.14 | 45.29 | -0.85 (-1.8 %) |
 
+### 4.32 The rows of the theme tables, by kind (#855)
+
+Counted on `fcac7548c` from the checked-in generated themes. The rows an application keeps are
+those reachable in the generated code from the runs of the units in its `theme_parts.txt`, so they
+are a count of the source and not of the linked file. The gallery keeps the whole WinUI theme.
+
+**The WinUI theme, by kind.**
+
+| Kind | Rows | Packed | Bytes a row | Bytes |
+|---|---:|---|---:|---:|
+| Resource alias | 3,865 | all | 18 | 69,570 |
+| Literal brush | 766 | all | 14 | 10,724 |
+| Dynamic brush | 761 | all | 18 | 13,698 |
+| Static brush | 338 | all | 18 | 6,084 |
+| Value, `f64` | 496 | none | 32 | 15,872 |
+| Value, `[f64; 4]` | 508 | none | 56 | 28,448 |
+| Value, `u32` | 435 | none | 32 | 13,920 |
+| Value, text | 69 | none | 40 | 2,760 |
+| Style member, setter | 3,581 | none | 56 | 200,536 |
+| Style member, nested style | 1,579 | none | 56 | 88,424 |
+| Style member, target type | 301 | none | 56 | 16,856 |
+| Style member, based on | 138 | none | 56 | 7,728 |
+| Selector step | 3,268 | none | 24 | 78,432 |
+| Resource choice | 615 | none | 72 | 44,280 |
+| Template binding | 1,351 | none | 24 | 32,424 |
+| Dynamic resource binding | 438 | none | 32 | 14,016 |
+
+The four packed kinds are 5,730 rows: 100,076 bytes of records, 23,280 of table headers and
+102,833 of string pools. The twelve kinds that are not packed are 12,779 rows and 543,696 bytes.
+The other themes have 1,417 packed and 5,216 other rows (Fluent, 211,576 bytes), 5,681 and 11,953
+(macOS, 499,136 bytes), and 70 and 3,878 (Simple, 146,880 bytes). The sizes of the rows that are
+not packed are those measured when this work was proposed, except `ValueRow<u32>`, `ValueRow<&str>`,
+`DynamicResourceRow` and `ResourceChoice`, which follow from their fields.
+
+**The most a packed form could save.** A ceiling, not an estimate of a result: every field fits 16
+bits, every string is already in a pool at no cost, one pool of values, functions and types for the
+whole set (a trimmed application needs one per unit, which costs more), no code to read the
+records, and 1.45 bytes of rebase information saved for each pointer (the ratio measured on the
+entry tables of #852). Bytes, and the share of the `dist` file:
+
+| Kind | Hello world | TodoMvc | Gallery | Catalog |
+|---|---:|---:|---:|---:|
+| Value rows | 13,069 (0.091 %) | 20,423 (0.113 %) | 41,844 (0.091 %) | 41,844 (0.069 %) |
+| Style members | 1,246 (0.009 %) | 44,808 (0.249 %) | 266,005 (0.581 %) | 266,005 (0.441 %) |
+| Selector steps | 41 (0.000 %) | 12,805 (0.071 %) | 67,868 (0.148 %) | 67,868 (0.112 %) |
+| Resource choices | 707 (0.005 %) | 17,662 (0.098 %) | 36,850 (0.080 %) | 36,850 (0.061 %) |
+| Template bindings | 57 (0.000 %) | 3,118 (0.017 %) | 23,394 (0.051 %) | 23,394 (0.039 %) |
+| Dynamic bindings | 81 (0.001 %) | 1,903 (0.011 %) | 10,517 (0.023 %) | 10,517 (0.017 %) |
+| All | 15,201 (0.106 %) | 100,718 (0.559 %) | 446,478 (0.975 %) | 446,478 (0.740 %) |
+
+A packed table of value rows also has a header of 48 bytes where a slice has none, which takes the
+ceiling of the value rows to 11,629 bytes in hello world, 16,391 in TodoMvc and 29,844 in the
+gallery and the catalog.
+
+**Each kind.**
+
+- Resource aliases and the three brushes: packed.
+- Value rows: worth an experiment first. They are most of what a small application could save,
+  need no pool of functions, and can follow the form of the packed tables.
+- Style members: worth an experiment only after the value rows. They have the largest ceiling in
+  large applications, but need a tagged record, pools of functions and types for each unit so that
+  trimming still works, and a reader on the path of theme construction.
+- Selector steps: left as they are, unless the style members are packed, since they are read with
+  them.
+- Resource choices, template bindings and dynamic bindings: left as they are. Their ceilings are
+  at most 0.1 % of any of the four files before the cost of a reader.
+
+**What a decision needs.** The stripped file and its sections for each pair, on one toolchain, in
+hello world and one larger application, since a form that shrinks one section can grow the file;
+the code of the reader; and the time of theme construction and first templates. Timed start-up
+lines can move with the amount of static data alone (#1069), so a change of this kind needs its
+timing read against a base measured in the same batch.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)
