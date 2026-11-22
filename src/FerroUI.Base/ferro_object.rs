@@ -912,6 +912,10 @@ impl FerroObject {
     /// does, a direct property as [`set_direct_value`](Self::set_direct_value), with no
     /// untyped value and no copy of it. The value is given back when `T` is not the value type
     /// of the property; [`set_value_untyped`](Self::set_value_untyped) converts it then.
+    ///
+    /// Inlined into its caller: the declarative layer has one call for a value type and runs it
+    /// for every value it writes, and a call of its own costs more than the choice it makes.
+    #[inline(always)]
     pub fn try_set_value_typed<T: crate::StyledValue>(&self, property: &'static FerroProperty, value: T) -> Result<(), T> {
         if let Some(styled) = property.as_styled::<T>() {
             self.set_value(styled, value);
