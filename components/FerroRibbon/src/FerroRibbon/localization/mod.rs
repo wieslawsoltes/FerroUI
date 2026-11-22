@@ -269,6 +269,52 @@ mod tests {
         }
     }
 
+    /// The recorded result with the locale values the operating system owns taken from the
+    /// system: they differ between its releases. These are the group separator of `de-AT` in
+    /// numbers and percentages and the currency symbol of `ar-SA`. Digits, grouping, decimal
+    /// separator, sign, pattern and every other culture stay compared with the record.
+    #[cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))]
+    fn with_system_locale_values(
+        name: &str,
+        format: &str,
+        recorded: &serde_json::Value,
+    ) -> serde_json::Value {
+        let first = format.chars().next();
+        if !matches!((name, first), ("de-AT", Some('N' | 'P')) | ("ar-SA", Some('C'))) {
+            return recorded.clone();
+        }
+        let units = recorded
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|unit| unit.as_u64().unwrap() as u16)
+            .collect::<Vec<_>>();
+        let text = String::from_utf16(&units).unwrap();
+        let system = ferroribbon_platform::native_number_format(name).unwrap();
+        let text = if name == "ar-SA" {
+            text.replace('\u{20c1}', system.currency_symbol())
+        } else {
+            // Between digits only: the space before a percent sign belongs to the pattern.
+            let chars = text.chars().collect::<Vec<_>>();
+            chars
+                .iter()
+                .enumerate()
+                .map(|(index, &c)| {
+                    let grouped = c == '\u{a0}'
+                        && index > 0
+                        && chars[index - 1].is_ascii_digit()
+                        && chars.get(index + 1).is_some_and(char::is_ascii_digit);
+                    if grouped {
+                        system.number_group_separator().to_owned()
+                    } else {
+                        c.to_string()
+                    }
+                })
+                .collect::<String>()
+        };
+        serde_json::json!(text.encode_utf16().collect::<Vec<_>>())
+    }
+
     #[test]
     #[cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))]
     #[cfg_attr(
@@ -336,7 +382,7 @@ mod tests {
                     .as_ref()
                     .map(|v| serde_json::json!(v.as_utf16()))
                     .ok()
-                    != Some(sample["result"].clone())
+                    != Some(with_system_locale_values(name, format, &sample["result"]))
                 {
                     failures.push(serde_json::json!({"name":name,"format":format,"value":sample["value"],"source":sample["result"],"actual":actual.as_ref().ok().map(|s|s.to_utf8().unwrap()),"error":actual.as_ref().err().map(|e|e.to_string())}));
                 }

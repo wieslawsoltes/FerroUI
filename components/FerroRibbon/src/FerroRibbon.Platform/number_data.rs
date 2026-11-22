@@ -314,6 +314,16 @@ mod tests {
     fn values(n: &NumberFormatInfo) -> serde_json::Value {
         json!({"CurrencyDecimalDigits":n.currency_decimal_digits(),"CurrencyDecimalSeparator":n.currency_decimal_separator(),"CurrencyGroupSeparator":n.currency_group_separator(),"CurrencyGroupSizes":n.currency_group_sizes(),"CurrencyNegativePattern":n.currency_negative_pattern(),"CurrencyPositivePattern":n.currency_positive_pattern(),"CurrencySymbol":n.currency_symbol(),"NaNSymbol":n.nan_symbol(),"NegativeInfinitySymbol":n.negative_infinity_symbol(),"NegativeSign":n.negative_sign(),"NumberDecimalDigits":n.number_decimal_digits(),"NumberDecimalSeparator":n.number_decimal_separator(),"NumberGroupSeparator":n.number_group_separator(),"NumberGroupSizes":n.number_group_sizes(),"NumberNegativePattern":n.number_negative_pattern(),"PercentDecimalDigits":n.percent_decimal_digits(),"PercentDecimalSeparator":n.percent_decimal_separator(),"PercentGroupSeparator":n.percent_group_separator(),"PercentGroupSizes":n.percent_group_sizes(),"PercentNegativePattern":n.percent_negative_pattern(),"PercentPositivePattern":n.percent_positive_pattern(),"PercentSymbol":n.percent_symbol(),"PerMilleSymbol":n.per_mille_symbol(),"PositiveInfinitySymbol":n.positive_infinity_symbol(),"PositiveSign":n.positive_sign()})
     }
+    /// The fields of a culture whose value the operating system owns and changes between its
+    /// releases. They must be present and are not compared with the record.
+    #[cfg(not(target_os = "emscripten"))]
+    fn system_owned_fields(name: &str) -> &'static [&'static str] {
+        match name {
+            "de-AT" => &["NumberGroupSeparator", "PercentGroupSeparator"],
+            "ar-SA" => &["CurrencySymbol"],
+            _ => &[],
+        }
+    }
     #[test]
     #[cfg(not(target_os = "emscripten"))]
     #[cfg_attr(
@@ -340,8 +350,17 @@ mod tests {
         for row in cultures.as_array().unwrap() {
             let name = row["name"].as_str().unwrap();
             let data = native_number_format(name).unwrap();
-            let actual = values(&data);
-            if actual != row["number"] {
+            let mut actual = values(&data);
+            let mut recorded = row["number"].clone();
+            for field in system_owned_fields(name) {
+                assert!(
+                    actual[*field].as_str().is_some_and(|value| !value.is_empty()),
+                    "{name} {field}"
+                );
+                actual[*field] = serde_json::Value::Null;
+                recorded[*field] = serde_json::Value::Null;
+            }
+            if actual != recorded {
                 differences.push(json!({"name":name,"actual":actual,"source":row["number"]}));
             }
         }
