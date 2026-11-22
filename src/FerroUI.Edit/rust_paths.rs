@@ -1,0 +1,31 @@
+//! Public names consumed by FerroUI's compiled XAML emitter.
+ferroui_base::ferro_rust_paths! {
+    classes: [
+        crate::TextEditor,
+        crate::TextArea,
+        crate::DottedLineMargin,
+        crate::LineNumberMargin,
+        crate::FoldingMargin,
+        crate::SearchPanel,
+        crate::CompletionWindow,
+        crate::CompletionList,
+        crate::CompletionListBox,
+        crate::CompletionTipContentControl,
+        crate::CompletionWindowBase,
+        crate::InsightWindow,
+        crate::OverloadInsightWindow,
+        crate::OverloadViewer,
+        crate::PopupWithCustomPosition,
+        crate::automation::TextEditorAutomationPeer,
+    ],
+    types: [
+        crate::CompletionAcceptAction,
+        crate::ClipboardSelectionKind,
+        crate::SyntaxHighlighting,
+        crate::OverloadProviderRef,
+        crate::CompletionDataRef,
+    ],
+    contracts: [],
+    generics: [],
+    generic_contracts: [],
+}

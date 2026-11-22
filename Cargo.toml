@@ -104,6 +104,7 @@ members = [
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
     "src/FerroUI.Edit.Core",
+    "src/FerroUI.Edit",
     "src/FerroUI.TextMate",
     "src/FerroUI.TextMate.Grammars",
     "src/FerroUI.View",
@@ -382,6 +383,7 @@ ferroui-markup = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Mark
 ferroui-markup-xaml = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-winui = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }
 ferroui-edit-core = { version = "=0.6.0-preview.1", path = "src/FerroUI.Edit.Core" }
+ferroui-edit = { version = "=0.6.0-preview.1", path = "src/FerroUI.Edit" }
 ferroui-textmate = { version = "=0.6.0-preview.1", path = "src/FerroUI.TextMate" }
 ferroui-textmate-grammars = { version = "=0.6.0-preview.1", path = "src/FerroUI.TextMate.Grammars", default-features = false }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
