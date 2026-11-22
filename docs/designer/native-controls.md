@@ -141,6 +141,12 @@ Open the owning project. In **Split** or **Code**, put the caret on the resource
 
 Choose **Apply extraction** to create the file and update the view. The original view stays open for review and save. Undo from that view restores the inline resources and removes the generated dictionary while its file and contents match the creation. Use Redo to create it again. If you edit the generated dictionary, undo those edits before reversing the extraction. [VS Code and MCP workflows](vscode/authoring.md#extract-a-resource-dictionary)
 
+### Preview a packaged asset
+
+Open the project and build the owning Cargo package from Studio. An XAML image can use the same `ferres://Assembly/Assets/Logo.png` address it uses in the app. Studio reads the asset from the source file recorded by the build for the canvas, native preview, and Preview Stages. If you update an asset outside Studio, refresh the preview to see the new bytes. A failed stage refresh keeps its last accepted frame.
+
+To inspect the recorded source file through MCP, call `designer_language` with `action: "resource_uri"` and the `reference` from XAML. Build the application again to update the embedded bytes used in App Preview or the running app. [Asset paths in VS Code](vscode/authoring.md#open-the-source-of-a-packaged-asset)
+
 ### Move an XAML file
 
 Open an XAML file from the owning project. In **Split** or **Code**, choose the file-and-arrow icon **Move XAML file**. Enter the destination relative to the project workspace and choose **Review file move**. Compare **Original source** and **Proposed source** for affected markup, Rust, Cargo build files, saved stage sets, and scenarios.

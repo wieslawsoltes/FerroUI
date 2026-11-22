@@ -1,5 +1,5 @@
 //! Build an immutable, workspace-scoped view of literal XAML includes.
-use crate::{file_path, file_uri, resolve_uri, same_loader_address, CompiledResources};
+use crate::{file_path, file_uri, resolve_uri, same_loader_address, CompiledResources, PackagedAssets};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind};
 use ferroui_reload_protocol::fingerprint;
 use serde::Deserialize;
@@ -8,6 +8,7 @@ use std::{
     fs::File,
     io::Read,
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 const MAX_DOCUMENT_BYTES: usize = 1024 * 1024;
@@ -36,6 +37,7 @@ pub struct LocalPreviewSources {
 #[derive(Clone, Default)]
 pub struct PreviewIncludes {
     documents: BTreeMap<String, PreviewInclude>,
+    packaged_assets: Arc<PackagedAssets>,
 }
 
 #[derive(Clone)]
@@ -57,6 +59,10 @@ pub fn xaml_source_revision(document: &Document) -> u64 {
 }
 
 impl PreviewIncludes {
+    pub fn packaged_assets(&self) -> &Arc<PackagedAssets> {
+        &self.packaged_assets
+    }
+
     pub fn documents(&self) -> impl Iterator<Item = &PreviewInclude> {
         self.documents.values()
     }
@@ -176,6 +182,9 @@ fn preview_sources(
         resources,
         hosted: hosted_base.is_some(),
     };
+    if let Some(resources) = resources.filter(|_| hosted_base.is_none()) {
+        walker.result.includes.packaged_assets = resources.packaged_assets().clone();
+    }
     walker.walk(hosted_base.unwrap_or(source_uri), &path, source);
     walker.result
 }

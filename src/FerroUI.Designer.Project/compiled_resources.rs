@@ -1,12 +1,13 @@
 //! File-backed XAML addresses from the selected compiler output.
 use crate::{
     canonical_file_uri, file_path, file_uri, relative_asset_path, resolve_uri, MarkupCatalog,
-    ProjectError, Result,
+    PackagedAssets, ProjectError, Result,
 };
 use ferroui_build_scan::compiled_index::CompiledXamlIndex;
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::{Path, PathBuf},
+    sync::Arc,
 };
 
 type Targets = BTreeMap<String, BTreeSet<usize>>;
@@ -29,19 +30,29 @@ pub struct CompiledResources {
     groups: Vec<Targets>,
     published: Targets,
     complete: bool,
+    packaged_assets: Arc<PackagedAssets>,
 }
 
 impl MarkupCatalog {
     pub fn compiled_resources(&self, package: &Path) -> Result<CompiledResources> {
         let manifest = package.join("Cargo.toml").canonicalize()?;
-        let Some(output) = self.compiled_xaml_output(&manifest)? else {
-            return Ok(CompiledResources::default());
-        };
-        Ok(CompiledResources::new(package, &output.index, self))
+        let mut resources = self.compiled_xaml_output(&manifest)?
+            .map(|output| CompiledResources::new(package, &output.index, self))
+            .unwrap_or_default();
+        resources.packaged_assets = self.packaged_assets().clone();
+        Ok(resources)
     }
 }
 
 impl CompiledResources {
+    pub fn packaged_assets(&self) -> &Arc<PackagedAssets> {
+        &self.packaged_assets
+    }
+
+    pub fn has_preview_inputs(&self) -> bool {
+        !self.is_empty() || !self.packaged_assets.is_empty()
+    }
+
     fn new(package: &Path, index: &CompiledXamlIndex, catalog: &MarkupCatalog) -> Self {
         let Some(assembly) = &index.assembly else {
             return Self::default();

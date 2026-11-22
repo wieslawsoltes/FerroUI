@@ -1,5 +1,6 @@
 //! Explicit UI-thread source snapshots for native loaders in every build profile.
 //! Global reload-session publication is available only in development builds.
+use ferroui_base::{platform::IAssetLoader, FerroLocator, LocatorExtensions};
 use std::{
     cell::RefCell,
     collections::{BTreeMap, BTreeSet},
@@ -16,6 +17,13 @@ pub struct SourceSnapshot {
     sources: Rc<Sources>,
     unavailable: Rc<BTreeMap<String, String>>,
     requested: Rc<RefCell<BTreeSet<String>>>,
+    assets: Option<AssetScope>,
+}
+
+#[derive(Clone)]
+struct AssetScope {
+    registered: Rc<dyn IAssetLoader>,
+    scoped: Rc<dyn IAssetLoader>,
 }
 
 ferroui_base::ferro_thread_local! {
@@ -30,7 +38,24 @@ impl SourceSnapshot {
             sources: Rc::new(sources),
             unavailable: Rc::new(unavailable),
             requested: Rc::new(RefCell::new(BTreeSet::new())),
+            assets: None,
         }
+    }
+
+    /// Attach the asset loader used by this isolated source view. An inner
+    /// snapshot decorates the registered services, never another document's assets.
+    pub fn with_asset_loader(
+        mut self,
+        decorate: impl FnOnce(Rc<dyn IAssetLoader>) -> Rc<dyn IAssetLoader>,
+    ) -> Self {
+        let registered = capture_snapshot()
+            .and_then(|snapshot| snapshot.assets.map(|scope| scope.registered))
+            .or_else(|| FerroLocator::current().get_service::<dyn IAssetLoader>());
+        if let Some(registered) = registered {
+            let scoped = decorate(registered.clone());
+            self.assets = Some(AssetScope { registered, scoped });
+        }
+        self
     }
 
     /// Activate this snapshot for construction or deferred native loading. Nested
@@ -42,7 +67,15 @@ impl SourceSnapshot {
                 SNAPSHOT.with(|slot| *slot.borrow_mut() = self.0.take());
             }
         }
-        let _restore = Restore(SNAPSHOT.with(|slot| slot.replace(Some(self.clone()))));
+        let previous = SNAPSHOT.with(|slot| slot.replace(Some(self.clone())));
+        let asset_loader = self.assets.as_ref().map(|scope| scope.scoped.clone())
+            .or_else(|| previous.as_ref()?.assets.as_ref().map(|scope| scope.registered.clone()));
+        let _restore = Restore(previous);
+        let _asset_scope = asset_loader.map(|loader| {
+            let scope = FerroLocator::enter_scope();
+            FerroLocator::current_mutable().bind::<dyn IAssetLoader>().to_constant(loader);
+            scope
+        });
         with_sources(self.sources.clone(), action)
     }
 

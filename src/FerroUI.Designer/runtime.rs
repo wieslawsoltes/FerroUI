@@ -364,7 +364,7 @@ impl RuntimePreview {
     }
 
     pub(crate) fn set_workspace_resources(&mut self, resources: Option<Arc<CompiledResources>>) -> bool {
-        let resources = resources.filter(|resources| !resources.is_empty());
+        let resources = resources.filter(|resources| resources.has_preview_inputs());
         let changed = match (&self.workspace.resources, &resources) {
             (Some(current), Some(next)) => !Arc::ptr_eq(current, next),
             (None, None) => false,
@@ -390,13 +390,21 @@ impl RuntimePreview {
         let sources = local_preview_sources_with_resources(
             Some(root), &self.uri, document, &self.workspace.buffers, self.workspace.resources.as_deref(),
         );
-        (!sources.accepted.is_empty() || !sources.unavailable.is_empty()).then_some(sources)
+        (!sources.accepted.is_empty() || !sources.unavailable.is_empty() || !sources.includes.packaged_assets().is_empty()).then_some(sources)
     }
 
     fn reload_local_sources(&mut self, document: &Document, initialize: bool, local: LocalPreviewSources) {
         let snapshot = ferroui_markup_xaml::source_overlay::SourceSnapshot::new(local.accepted, local.unavailable);
+        let snapshot = crate::PreviewAssets::new(local.includes.packaged_assets()).apply(snapshot);
         snapshot.run(|| self.reload_with_sources(document, initialize));
         self.set_include_documents(local.includes);
+    }
+
+    pub(crate) fn with_workspace_snapshot<T>(&mut self, document: &Document, open: impl FnOnce(&mut Self) -> T) -> T {
+        let Some(local) = self.workspace_sources(document) else { return open(self) };
+        let snapshot = ferroui_markup_xaml::source_overlay::SourceSnapshot::new(local.accepted, local.unavailable);
+        let snapshot = crate::PreviewAssets::new(local.includes.packaged_assets()).apply(snapshot);
+        snapshot.run(|| open(self))
     }
 
     pub(crate) fn set_include_documents(&mut self, includes: PreviewIncludes) {

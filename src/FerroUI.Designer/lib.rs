@@ -61,6 +61,7 @@ pub use scoped_control_templates::ScopedControlTemplates;
 mod property_trace;
 mod preview_environment;
 mod preview_theme;
+mod preview_assets;
 mod preview_host;
 mod preview_prototype;
 mod preview_prototype_editor;
@@ -162,6 +163,7 @@ pub use preview_environment::{
     PreviewSizePreset,
 };
 pub use preview_theme::PreviewTheme;
+pub use preview_assets::PreviewAssets;
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };
@@ -270,6 +272,8 @@ pub mod mcp;
 
 #[cfg(all(test, feature = "render-smoke"))]
 mod render_tests;
+#[cfg(all(test, feature = "render-smoke"))]
+mod packaged_asset_preview_tests;
 
 #[cfg(test)]
 mod animation_integration_tests;

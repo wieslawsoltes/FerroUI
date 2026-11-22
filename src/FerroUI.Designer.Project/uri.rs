@@ -273,7 +273,7 @@ fn valid_asset_path(path: &str) -> bool {
         && !matches!(path.rsplit('/').next(), Some("." | ".."))
 }
 
-fn encode(value: &str) -> String {
+pub(crate) fn encode(value: &str) -> String {
     let mut out = String::new();
     for byte in value.bytes() {
         if byte.is_ascii_alphanumeric() || b"/-._~:".contains(&byte) {

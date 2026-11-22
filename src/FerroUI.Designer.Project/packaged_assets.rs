@@ -1,6 +1,9 @@
 //! Exact asset keys from the selected Cargo build, independent of XAML include routing.
 
-use crate::{uri::decode, ProjectError, Result};
+use crate::{
+    uri::{canonical_path, decode, encode},
+    ProjectError, Result,
+};
 use ferroui_build_scan::packaged_assets::PackagedAssetIndex;
 use std::{
     collections::BTreeMap,
@@ -11,7 +14,7 @@ use std::{
 
 pub(crate) const INDEX_BYTES: u64 = 16 * 1024 * 1024;
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct PackagedAssets {
     packages: BTreeMap<String, Vec<Package>>,
 }
@@ -101,31 +104,82 @@ impl PackagedAssets {
     /// An explicit asset address is owned by the build's assembly even if this
     /// particular key was excluded from its export plan.
     pub fn knows_assembly(&self, uri: &str) -> bool {
-        address(uri).is_some_and(|(assembly, _)| self.packages.contains_key(&assembly))
+        !matches!(self.package_address(uri), Ok(None))
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.packages
+            .values()
+            .flatten()
+            .all(|package| package.inputs.is_empty())
     }
 
     /// Resolve a published `ferres://` key. Assembly names match without case,
     /// asset keys match the case and bytes used by the native asset loader.
     pub fn resolve(&self, uri: &str) -> Result<Option<PackagedAssetSource<'_>>> {
+        Ok(self.input(uri)?.filter(|asset| asset.file.is_file()))
+    }
+
+    /// The physical input of a registered key, including a missing file whose
+    /// path stays in the package. Preview can watch it and report missing bytes.
+    pub fn input(&self, uri: &str) -> Result<Option<PackagedAssetSource<'_>>> {
+        let Some((package, _, key)) = self.package_address(uri)? else {
+            return Ok(None);
+        };
+        let Some(path) = package.inputs.get(&key) else {
+            return Ok(None);
+        };
+        let file = canonical_path(&package.root.join(path))?;
+        if !file.starts_with(&package.root) {
+            return Err(ProjectError(format!(
+                "The build input for {uri} leaves its Cargo package"
+            )));
+        }
+        Ok(Some(PackagedAssetSource {
+            assembly: &package.assembly,
+            file,
+        }))
+    }
+
+    /// List exact exported asset addresses below a folder for native consumers
+    /// that enumerate an asset collection, such as the font loader.
+    pub fn below(&self, folder: &str) -> Result<Vec<String>> {
+        let Some((package, authority, mut prefix)) = self.package_address(folder)? else {
+            return Ok(Vec::new());
+        };
+        if !prefix.ends_with('/') {
+            prefix.push('/');
+        }
+        Ok(package
+            .inputs
+            .range(prefix.clone()..)
+            .take_while(|(key, _)| key.starts_with(&prefix))
+            .map(|(key, _)| format!("ferres://{authority}{}", encode(key)))
+            .collect())
+    }
+
+    fn package_address<'a, 'uri>(
+        &'a self,
+        uri: &'uri str,
+    ) -> Result<Option<(&'a Package, &'uri str, String)>> {
         let Some((assembly, key)) = address(uri) else {
             return Ok(None);
         };
-        let Some(packages) = self.packages.get(&assembly) else {
+        let literal = self.packages.get(&assembly.to_uppercase());
+        let decoded = literal.is_none().then(|| decode(assembly).ok()).flatten();
+        let packages = literal.or_else(|| self.packages.get(&decoded.as_ref()?.to_uppercase()));
+        let mut matches = packages.into_iter().flatten().filter(|package| {
+            literal.is_some() || decoded.as_deref() == Some(package.assembly.as_str())
+        });
+        let Some(package) = matches.next() else {
             return Ok(None);
         };
-        let [package] = packages.as_slice() else {
+        if matches.next().is_some() {
             return Err(ProjectError(format!(
                 "Multiple Cargo outputs claim the asset assembly in {uri}"
             )));
-        };
-        Ok(package
-            .inputs
-            .get(&key)
-            .and_then(|path| package.source(path))
-            .map(|file| PackagedAssetSource {
-                assembly: &package.assembly,
-                file,
-            }))
+        }
+        Ok(Some((package, assembly, key)))
     }
 
     pub fn contains_source(&self, canonical_file: &Path) -> bool {
@@ -146,12 +200,12 @@ impl Package {
     }
 }
 
-fn address(uri: &str) -> Option<(String, String)> {
+fn address(uri: &str) -> Option<(&str, String)> {
     let (scheme, rest) = uri.split_once("://")?;
     if !scheme.eq_ignore_ascii_case("ferres") {
         return None;
     }
     let rest = rest.split(['?', '#']).next()?;
-    let (assembly, path) = rest.split_at(rest.find('/')?);
-    Some((decode(assembly).ok()?.to_uppercase(), decode(path).ok()?))
+    let (assembly, path) = rest.split_at(rest.find('/').unwrap_or(rest.len()));
+    Some((assembly, decode(path).ok()?))
 }

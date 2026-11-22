@@ -1,10 +1,21 @@
 //! Material used for native includes and for comparing accepted stage dependencies.
 use super::{native_source_uri, PreviewStageSource, PreviewStageStatus, SourceStamp};
-use ferroui_designer_project::LocalPreviewSources;
+use crate::PreviewAssets;
+use ferroui_designer_project::{LocalPreviewSources, PackagedAssets};
 use ferroui_markup_xaml::source_overlay::SourceSnapshot;
-use std::{collections::BTreeMap, rc::Rc};
+use std::{collections::BTreeMap, rc::Rc, sync::Arc};
 
-pub(super) type IncludeCatalog = BTreeMap<String, IncludeSource>;
+#[derive(Clone, Default)]
+pub(super) struct IncludeCatalog {
+    documents: BTreeMap<String, IncludeSource>,
+    pub(super) assets: Arc<PackagedAssets>,
+}
+
+impl IncludeCatalog {
+    pub(super) fn get(&self, uri: &str) -> Option<&IncludeSource> {
+        self.documents.get(uri)
+    }
+}
 
 #[derive(Clone)]
 pub(super) enum IncludeSource {
@@ -25,11 +36,11 @@ impl IncludeCatalogs {
         local: &BTreeMap<&str, &LocalPreviewSources>,
         options_epoch: u64,
     ) -> Result<Self, String> {
-        let mut open = BTreeMap::new();
+        let mut open = IncludeCatalog::default();
         for source in sources.values() {
             let key = native_source_uri(&source.uri)?;
             let value = IncludeSource::Open(Rc::new(SourceStamp::new(source, options_epoch)));
-            if open.insert(key, value).is_some() {
+            if open.documents.insert(key, value).is_some() {
                 return Err("Preview source URIs resolve to the same native document".into());
             }
         }
@@ -54,7 +65,8 @@ impl IncludeCatalogs {
 }
 
 fn extend_local(catalog: &mut IncludeCatalog, sources: &LocalPreviewSources) {
-    catalog.extend(
+    catalog.assets = sources.includes.packaged_assets().clone();
+    catalog.documents.extend(
         sources
             .accepted
             .iter()
@@ -68,10 +80,10 @@ fn extend_local(catalog: &mut IncludeCatalog, sources: &LocalPreviewSources) {
     );
 }
 
-pub(super) fn snapshot(catalog: &IncludeCatalog) -> SourceSnapshot {
+pub(super) fn snapshot(catalog: &IncludeCatalog, assets: &PreviewAssets) -> SourceSnapshot {
     let mut accepted = BTreeMap::new();
     let mut unavailable = BTreeMap::new();
-    for (uri, source) in catalog {
+    for (uri, source) in &catalog.documents {
         match source {
             IncludeSource::Open(source) if source.pending => {
                 unavailable.insert(
@@ -96,7 +108,7 @@ pub(super) fn snapshot(catalog: &IncludeCatalog) -> SourceSnapshot {
             }
         }
     }
-    SourceSnapshot::new(accepted, unavailable)
+    assets.apply(SourceSnapshot::new(accepted, unavailable))
 }
 
 impl IncludeSource {

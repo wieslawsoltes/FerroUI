@@ -314,6 +314,7 @@ struct RenderedStage {
     options_epoch: u64,
     source_snapshot: SourceSnapshot,
     source_catalog: Rc<IncludeCatalog>,
+    assets: crate::PreviewAssets,
 }
 
 impl Drop for RenderedStage {
@@ -334,6 +335,7 @@ struct Stage {
     rendered: Option<RenderedStage>,
     observed: Option<SourceStamp>,
     observed_dependencies: BTreeMap<String, Option<IncludeSource>>,
+    observed_assets: crate::PreviewAssets,
 }
 
 #[derive(Clone)]
@@ -588,7 +590,8 @@ impl PreviewStageBoard {
                     _ => true,
                 };
                 let catalog = self.includes.for_document(&stage.spec.configuration.source_uri);
-                (changed || observed_dependencies_changed(stage, catalog)).then_some(stage.id)
+                (changed || stage.observed_assets.changed(&catalog.assets)
+                    || observed_dependencies_changed(stage, catalog)).then_some(stage.id)
             })
             .collect::<Vec<_>>();
         for id in ids {
@@ -624,6 +627,7 @@ impl PreviewStageBoard {
             rendered: None,
             observed: None,
             observed_dependencies: BTreeMap::new(),
+            observed_assets: crate::PreviewAssets::default(),
         });
         self.active = Some(id);
         self.bump();
@@ -823,6 +827,11 @@ impl PreviewStageBoard {
             )
             .expect("Accepted prototype graph references existing preview stages"),
         }
+    }
+
+    /// Source files used by the most recent attempt for each native stage.
+    pub fn asset_dependencies(&self) -> BTreeSet<String> {
+        self.stages.iter().flat_map(|stage| stage.observed_assets.dependencies()).collect()
     }
 
     pub fn snapshot(&self) -> PreviewStageSnapshot {
@@ -1320,12 +1329,14 @@ impl PreviewStageBoard {
         let catalog = self.includes.for_document(&config.source_uri).clone();
         let Some(source) = self.sources.get(&config.source_uri).cloned() else {
             self.stages[index].observed = None;
+            self.stages[index].observed_assets = crate::PreviewAssets::default();
             self.stages[index].status = PreviewStageStatus::MissingDocument;
             self.touch(index);
             self.apply_mode(index);
             return Err("The stage's source document is not open".into());
         };
         self.stages[index].observed = Some(SourceStamp::new(&source, self.options_epoch));
+        self.stages[index].observed_assets = self.stages[index].observed_assets.observe(&catalog.assets);
         let dependency_keys = observed_dependency_keys(&self.stages[index]);
         self.stages[index].observed_dependencies =
             dependency_stamps(&dependency_keys, &catalog);
@@ -1375,6 +1386,7 @@ impl PreviewStageBoard {
                     rendered.preview.status = PreviewStatus::Ready {
                         revision: rendered.document.revision(),
                     };
+                    stage.observed_assets = rendered.assets.clone();
                     stage.status = PreviewStageStatus::Ready {
                         revision: rendered.document.revision(),
                     };
@@ -1384,8 +1396,10 @@ impl PreviewStageBoard {
                 }
             }
         }
-        let source_snapshot = includes::snapshot(&catalog);
-        let candidate = self.build_candidate(index, &source.document, &source_snapshot, &catalog);
+        let assets = crate::PreviewAssets::new(&catalog.assets);
+        let source_snapshot = includes::snapshot(&catalog, &assets);
+        let candidate = self.build_candidate(index, &source.document, &source_snapshot, &catalog, &assets);
+        self.stages[index].observed_assets = assets;
         let attempted = source_snapshot.requested_uris();
         let mut requested = attempted.clone();
         if candidate.is_err() {
@@ -1443,6 +1457,7 @@ impl PreviewStageBoard {
         document: &Document,
         source_snapshot: &SourceSnapshot,
         catalog: &Rc<IncludeCatalog>,
+        assets: &crate::PreviewAssets,
     ) -> Result<RenderedStage, String> {
         let stage = &self.stages[index];
         let spec = &stage.spec;
@@ -1566,6 +1581,7 @@ impl PreviewStageBoard {
                     options_epoch: self.options_epoch,
                     source_snapshot: source_snapshot.clone(),
                     source_catalog: catalog.clone(),
+                    assets: assets.clone(),
                 })
             })
         }))
@@ -1727,7 +1743,7 @@ fn rendered_dependencies_current(
     rendered: &RenderedStage,
     current: &IncludeCatalog,
 ) -> bool {
-    rendered
+    !rendered.assets.changed(&current.assets) && rendered
         .source_snapshot
         .requested_uris()
         .iter()

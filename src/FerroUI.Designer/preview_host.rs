@@ -233,8 +233,8 @@ impl crate::DesignerSession {
     /// Opens the actual platform Window, including native decorations and registered class
     /// behavior. A non-Window document is hosted inside a normal platform Window.
     pub fn open_native_preview(&mut self) -> Result<Ref<Window>, String> {
-        let source = self.document().valid_source().to_owned();
-        self.preview.open_native(source)
+        let source = self.document.valid_source().to_owned();
+        self.preview.with_workspace_snapshot(&self.document, |preview| preview.open_native(source))
     }
     pub fn close_native_preview(&mut self) {
         self.preview.close_native();
@@ -247,8 +247,8 @@ impl crate::DesignerSession {
     /// The document as a new control for the caller to show in its own view: the preview of a
     /// platform without windows.
     pub fn open_view_preview(&mut self) -> Result<Ref<Control>, String> {
-        let source = self.document().valid_source().to_owned();
-        self.preview.open_in_view(source)
+        let source = self.document.valid_source().to_owned();
+        self.preview.with_workspace_snapshot(&self.document, |preview| preview.open_in_view(source))
     }
 }
 

@@ -36,7 +36,7 @@ impl DesignerWorkspace {
         };
         let compiled: Vec<_> = sources.iter().filter_map(|source| {
             let resources = language.compiled_resources(&source.uri)?;
-            (!resources.is_empty()).then_some((source, resources))
+            resources.has_preview_inputs().then_some((source, resources))
         }).collect();
         if compiled.is_empty() {
             return Default::default();
