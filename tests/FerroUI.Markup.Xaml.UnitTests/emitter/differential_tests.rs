@@ -127,7 +127,8 @@ fn a_resolvable_binding_path_emits_no_clr_property_info() {
     assert!(!compiled.contains("rt::clr_property_info("), "{compiled}");
     assert!(!compiled.contains("ReflectionBinding"), "{compiled}");
     let reflection = emitted(false);
-    assert!(reflection.contains("rt::clr_property_info("), "{reflection}");
+    assert!(reflection.contains("rt::reflection_binding_relative_source_property()"), "{reflection}");
+    assert!(!reflection.contains("rt::clr_property_info("), "{reflection}");
 }
 
 /// Not from upstream (#603): path data is parsed when the markup is compiled. The geometry is
