@@ -14,6 +14,7 @@ use crate::harness::Registry;
 pub mod children;
 pub mod fixture;
 pub mod lifetime;
+pub mod many_classes;
 pub mod propagation;
 pub mod scaling;
 pub mod styling;
@@ -22,6 +23,7 @@ pub mod text;
 pub fn register(registry: &mut Registry) {
     children::register(registry);
     lifetime::register(registry);
+    many_classes::register(registry);
     propagation::register(registry);
     scaling::register(registry);
     styling::register(registry);
