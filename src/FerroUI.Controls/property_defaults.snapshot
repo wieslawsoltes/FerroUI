@@ -1173,6 +1173,7 @@ FerroUI.Layout.Layoutable.MaxWidth: f64 = inf; OneWay
 FerroUI.Layout.Layoutable.MinHeight: f64 = 0; OneWay
 FerroUI.Layout.Layoutable.MinWidth: f64 = 0; OneWay
 FerroUI.Layout.Layoutable.UseLayoutRounding: bool = True; OneWay; inherits
+FerroUI.Layout.Layoutable.UseWinUiMeasureRounding: bool = False; OneWay; inherits
 FerroUI.Layout.Layoutable.VerticalAlignment: VerticalAlignment = Stretch; OneWay
 FerroUI.Layout.Layoutable.Width: f64 = NaN; OneWay
 FerroUI.Media.AcrylicBrush.AlwaysUseFallback: bool = False; OneWay
