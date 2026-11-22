@@ -15,7 +15,7 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
     const executable = process.env.FERROUI_TEST_HOSTED_APP;
     if (!executable || process.platform === 'win32') return;
     const workspace = vscode.workspace.workspaceFolders![0].uri;
-    await withManagedAppFixture(workspace, executable, async ({ root, files, labels, expected }) => {
+    await withManagedAppFixture(workspace, async ({ root, files, labels, expected }) => {
         const runs: Run[] = [];
         const tools = async <T>(name: string, args: object = {}) => content<T>(await invoke(name, args));
         const list = () => tools<{ managed: Run[]; runtimes: RuntimeSummary[] }>('ferroui_app_sessions');
