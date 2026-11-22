@@ -1,0 +1,77 @@
+name: Accent read diagnostic
+
+# Temporary, on a draft pull request that is closed afterwards: how often the accent test of the
+# Windows backend fails alone, beside each test that reads the same settings, and in the whole
+# binary with and without the contrast test. Every run is counted; nothing is retried.
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/accent-diagnostic.yml'
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  BINDGEN_EXTRA_CLANG_ARGS: -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
+
+jobs:
+  accent:
+    name: Accent read frequency
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          save-if: false
+      - name: Build the test binary
+        run: |
+          cargo test --locked -p ferroui-win32 --no-default-features --lib --no-run --message-format=json > build.jsonl
+          python3 - <<'EOF'
+          import json
+          found = [m["executable"] for m in map(json.loads, filter(None, open("build.jsonl", encoding="utf-8").read().splitlines()))
+                   if m.get("reason") == "compiler-artifact" and m.get("executable") and m["target"]["name"] == "ferroui_win32"]
+          assert len(found) == 1, found
+          open("binary.txt", "w").write(found[0])
+          EOF
+      - name: Count the failures
+        run: |
+          python3 - <<'EOF'
+          import os, re, subprocess
+          exe = open("binary.txt").read().strip()
+          accent = "win32_platform_settings::tests::the_platform_settings_report_the_accent_shades_of_the_system"
+          contrast = "win32_platform::tests::contrast_notifications_refresh_the_native_settings_cache"
+          sibling = "win_rt::win_rt_tests::the_settings_of_the_user_are_read_through_activation"
+          scenarios = [
+              ("accent alone", ["--exact", accent], 300),
+              ("accent and the contrast test, in parallel", ["--exact", accent, contrast, "--test-threads=2"], 300),
+              ("accent and the activation test, in parallel", ["--exact", accent, sibling, "--test-threads=2"], 300),
+              ("all three, in parallel", ["--exact", accent, contrast, sibling, "--test-threads=3"], 300),
+              ("whole binary", [], 40),
+              ("whole binary without the contrast test", ["--skip", contrast], 40),
+          ]
+          lines = ["## Accent read diagnostic", "", "| Scenario | Runs | Accent failed | Black accent | Other failures |", "|---|---:|---:|---:|---:|"]
+          for name, arguments, runs in scenarios:
+              failed = black = other = 0
+              for _ in range(runs):
+                  result = subprocess.run([exe, *arguments, "--nocapture"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                          text=True, errors="replace", timeout=300)
+                  failing = set(re.findall(r"^test (\S+) \.\.\. FAILED$", result.stdout, re.M))
+                  if not failing and "panicked at" in result.stdout and accent in result.stdout:
+                      failing = {accent}
+                  failed += accent in failing
+                  black += "accent_color1: Color { a: 255, r: 0, g: 0, b: 0 }" in result.stdout
+                  other += bool(failing - {accent})
+              lines.append(f"| {name} | {runs} | {failed} | {black} | {other} |")
+              print(lines[-1], flush=True)
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
+              handle.write("\n".join(lines) + "\n")
+          EOF
