@@ -80,6 +80,8 @@ Rust source actions use the active debug build's source records. App Preview fol
 2. Open **App Preview Templates**. Search by the grid or column header, then choose **Cell template** for the displayed cell or **Cell editing template** for the editor. A template inside an expander appears under its inner column's header.
 3. Open the definition. For a resource-key column, the source link follows the dictionary the app resolved when the cell was realized. For a Rust column, you can also open the assignment in the column builder or open the definition in Design.
 
+![VS Code opens the Company editing template in its XAML dictionary beside the native TreeDataGrid](../images/vscode-app-preview-tree-grid-template.png)
+
 Source links are available for runtime templates paired with a verified declarative column. Keep a row visible when inspecting resource-key columns so the app resolves their templates. If the app provides columns through a separate `Source` or `Model`, open those authored definitions in the application code.
 
 ### Edit a shared Rust palette in App Preview
