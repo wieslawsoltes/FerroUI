@@ -2,7 +2,7 @@
 use super::{data_slots, MAX_USES, MAX_VISUALS};
 use crate::design_window_loader::LoadedDesign;
 use ferroui_base::diagnostics::RsxSourceInfo;
-use ferroui_controls::{templates::IDataTemplate, TableView};
+use ferroui_controls::{diagnostics::column_templates, templates::IDataTemplate};
 use ferroui_remote_protocol::designer::{
     DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse,
 };
@@ -28,20 +28,15 @@ pub(super) fn capture(
         for (member, template) in data_slots(&visual) {
             templates.push(usage(info, &owner, type_name, member, None, template));
         }
-        if let Some(table) = visual.cast::<TableView>() {
-            for (index, column) in table.columns().snapshot().iter().enumerate() {
-                if templates.len() >= MAX_USES {
-                    return None;
-                }
-                templates.push(usage(
-                    info,
-                    &owner,
-                    type_name,
-                    "CellTemplate",
-                    i32::try_from(index).ok(),
-                    column.cell_template(),
-                ));
-            }
+        for slot in column_templates(&visual, MAX_USES.saturating_sub(templates.len()))? {
+            templates.push(usage(
+                info,
+                &owner,
+                type_name,
+                slot.member.name(),
+                Some((i32::try_from(slot.index).ok()?, slot.expander_inner)),
+                slot.template,
+            ));
         }
         if templates.len() >= MAX_USES {
             return None;
@@ -58,7 +53,7 @@ fn usage(
     owner: &DesignTemplateSource,
     type_name: &str,
     member: &str,
-    column: Option<i32>,
+    column: Option<(i32, bool)>,
     template: Option<Rc<dyn IDataTemplate>>,
 ) -> DesignTemplateUse {
     let provenance = template.as_ref().and_then(|item| item.rust_editor_source());
@@ -85,7 +80,8 @@ fn usage(
         type_name: type_name.into(),
         definition,
         member: Some(member.into()),
-        column,
+        column: column.map(|(index, _)| index),
+        column_inner: column.filter(|(_, inner)| *inner).map(|(_, inner)| inner),
         rust_factory,
     }
 }

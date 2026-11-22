@@ -1,0 +1,8 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DataTemplate x:Key="CompanyDisplay">
+    <TextBlock Text="{ReflectionBinding .}" Foreground="#203657" />
+  </DataTemplate>
+  <DataTemplate x:Key="CompanyEditor">
+    <TextBox Text="{ReflectionBinding ., Mode=OneTime}" PlaceholderText="Company name" />
+  </DataTemplate>
+</ResourceDictionary>

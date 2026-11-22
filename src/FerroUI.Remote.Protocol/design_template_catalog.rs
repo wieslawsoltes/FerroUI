@@ -30,6 +30,8 @@ pub struct DesignTemplateUse {
     pub member: Option<String>,
     /// Zero-based declarative column index when the Rust owner is a table.
     pub column: Option<i32>,
+    /// The template belongs to the inner column of a declarative expander.
+    pub column_inner: Option<bool>,
     /// Compiled Rust constructor, verified by an available source fingerprint.
     pub rust_factory: Option<DesignTemplateSource>,
 }
@@ -40,6 +42,7 @@ bson_class!(DesignTemplateUse as "DesignTemplateUse" {
     "Definition" => definition: Option<DesignTemplateSource>,
     "Member" => member: Option<String>,
     "Column" => column: Option<i32>,
+    "ColumnInner" => column_inner: Option<bool>,
     "RustFactory" => rust_factory: Option<DesignTemplateSource>,
 });
 

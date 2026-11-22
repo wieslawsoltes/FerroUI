@@ -57,6 +57,12 @@ impl Templates {
                 else {
                     continue;
                 };
+                let column = if usage.column_inner == Some(true) {
+                    let [inner] = column.children.as_slice() else { continue };
+                    inner
+                } else {
+                    column
+                };
                 (column.node, format!("{label} / {}", column.label))
             } else {
                 (node.id, label.to_owned())

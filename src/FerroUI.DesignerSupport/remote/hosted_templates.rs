@@ -1,7 +1,7 @@
 //! Capture source provenance from the actual loaded app, including custom themes.
 use crate::design_window_loader::LoadedDesign;
 use ferroui_base::{FerroObject, FerroPropertyRegistry};
-use ferroui_controls::{primitives::TemplatedControl, templates::IDataTemplate, TableView};
+use ferroui_controls::{diagnostics::column_templates, primitives::TemplatedControl, templates::IDataTemplate};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_remote_protocol::designer::{
     DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse, DESIGN_TEMPLATES_QUERY,
@@ -68,16 +68,12 @@ pub(super) fn capture(
         for (member, template) in data_slots(&visual) {
             templates.push(xaml_use(&owner, type_name, member, data_definition(template)));
         }
-        if let Some(table) = visual.cast::<TableView>() {
-            for column in table.columns().snapshot().iter() {
-                if templates.len() >= MAX_USES {
-                    return None;
-                }
-                let Some(owner) = XamlSourceInfo::for_object(column).and_then(source) else { continue };
-                if owner.address == root.address && owner.fingerprint == root.fingerprint {
-                    templates.push(xaml_use(&owner, column.get_type().name(), "CellTemplate",
-                        data_definition(column.cell_template())));
-                }
+        for slot in column_templates(&visual, MAX_USES.saturating_sub(templates.len()))? {
+            let Some(owner) = XamlSourceInfo::get_xaml_source_info(&slot.declaration).and_then(source) else {
+                continue;
+            };
+            if owner.address == root.address && owner.fingerprint == root.fingerprint {
+                templates.push(xaml_use(&owner, slot.type_name, slot.member.name(), data_definition(slot.template)));
             }
         }
         if templates.len() >= MAX_USES {

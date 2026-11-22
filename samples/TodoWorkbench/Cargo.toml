@@ -15,7 +15,12 @@ test = false
 [features]
 hot-reload = ["ferroui-view/hot-reload"]
 mcp = ["dep:ferroui-inspect", "dep:ferroui-mcp"]
-app-preview = ["dep:ferroui-build-scan", "dep:ferroui-controls", "dep:ferroui-designer-animation", "dep:ferroui-designer-support", "dep:ferroui-markup-xaml-loader", "dep:ferroui-skia", "dep:ferroui-harfbuzz", "dep:ferroui-xaml-interactions-custom"]
+app-preview = [
+    "dep:ferroui-build-scan", "dep:ferroui-controls", "dep:ferroui-controls-treedatagrid",
+    "dep:ferroui-designer-animation", "dep:ferroui-designer-support", "dep:ferroui-markup-xaml",
+    "dep:ferroui-markup-xaml-loader", "dep:ferroui-skia", "dep:ferroui-harfbuzz",
+    "dep:ferroui-xaml-interactions-custom", "ferroui-view/treedatagrid",
+]
 
 [dependencies]
 ferroui-base = { workspace = true }
@@ -24,8 +29,10 @@ ferroui-themes-winui = { workspace = true }
 ferroui-inspect = { workspace = true, optional = true }
 ferroui-mcp = { workspace = true, optional = true }
 ferroui-controls = { workspace = true, optional = true }
+ferroui-controls-treedatagrid = { workspace = true, optional = true, features = ["document-assets"] }
 ferroui-designer-animation = { workspace = true, optional = true }
 ferroui-designer-support = { workspace = true, optional = true }
+ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
 ferroui-skia = { workspace = true, optional = true }
 ferroui-harfbuzz = { workspace = true, optional = true }

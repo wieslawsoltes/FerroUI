@@ -280,12 +280,13 @@ mod tests {
                 owner: DesignTemplateSource {
                     address: "file:///Project/View.rs".into(), fingerprint: 42, line: 12, column: 9,
                 },
-                type_name: "TableView".into(),
+                type_name: "TreeDataGrid".into(),
                 definition: Some(DesignTemplateSource {
                     address: "file:///Project/Rows.rs".into(), fingerprint: -19, line: 17, column: 13,
                 }),
-                member: Some("CellTemplate".into()),
+                member: Some("CellEditingTemplate".into()),
                 column: Some(2),
+                column_inner: Some(true),
                 rust_factory: Some(DesignTemplateSource {
                     address: "file:///Project/Rows.rs".into(), fingerprint: -19, line: 16, column: 5,
                 }),

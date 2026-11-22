@@ -74,6 +74,14 @@ Rust source actions use the active debug build's source records. App Preview fol
 
 [See the shared Rust template selected in source beside the retained app frame](../images/vscode-app-preview-template-source.png).
 
+#### Inspect TreeDataGrid display and editing templates
+
+1. Open the grid's XAML or RSX view in App Preview with rows in its data source. Try **Account hierarchy** in [Todo Workbench](../../../samples/TodoWorkbench/README.md).
+2. Open **App Preview Templates**. Search by the grid or column header, then choose **Cell template** for the displayed cell or **Cell editing template** for the editor. A template inside an expander appears under its inner column's header.
+3. Open the definition. For a resource-key column, the source link follows the dictionary the app resolved when the cell was realized. For a Rust column, you can also open the assignment in the column builder or open the definition in Design.
+
+Source links are available for runtime templates paired with a verified declarative column. Keep a row visible when inspecting resource-key columns so the app resolves their templates. If the app provides columns through a separate `Source` or `Model`, open those authored definitions in the application code.
+
 ### Edit a shared Rust palette in App Preview
 
 1. Use a `const` initialized with a supported color constructor in a module of the selected Cargo binary or its package library. For example, declare `mod brand;` in the crate root and reference `crate::brand::ACCENT` from an inline `.resource("Accent", crate::brand::ACCENT)` call. Named imports and re-exports also work.

@@ -84,6 +84,14 @@ open its shared template in [template_rows.rs](app_preview/template_rows.rs).
 Use **Open Template Assignment** to return to the list's Rust expression. The
 picker also shows the priority selector and the table's account cell.
 
+Open [HostedTreeTemplates.xaml](HostedTreeTemplates.xaml) or
+[tree_templates.rs](app_preview/tree_templates.rs) and choose **Account hierarchy**.
+In **App Preview Templates**, select **Accounts / Company** to open the display
+or editing template for the expander's inner column. The XAML view uses
+[TreeTemplateResources.xaml](TreeTemplateResources.xaml) for Company and an
+inline template for Review. The Rust view exposes each template's builder
+assignment. [Trace effective templates in VS Code](../../docs/designer/vscode/runtime.md#inspect-treedatagrid-display-and-editing-templates)
+
 Open [review_states.rs](app_preview/review_states.rs) in App Preview and choose
 **Interactive review**. Select **Review · Queued → Ready** in the animation
 picker. Scrub the live card's width and corner radius, or use the pencil to

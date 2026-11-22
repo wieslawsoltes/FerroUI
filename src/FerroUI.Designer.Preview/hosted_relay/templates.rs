@@ -4,10 +4,10 @@ use super::{
     Relay,
 };
 use ferroui_designer::ScopedControlTemplates;
-use ferroui_designer_core::NodeId;
+use ferroui_designer_core::{Node, NodeId};
 use ferroui_designer_language::{Range, XamlLocations};
 use ferroui_designer_project::{resolve_uri, same_loader_address, xaml_source_revision};
-use ferroui_designer_tools::ItemTemplateMember;
+use ferroui_designer_tools::{nearest_table, ItemTemplateMember};
 use ferroui_remote_protocol::designer::{DesignTemplateCatalogMessage, DesignTemplateSource};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -130,13 +130,18 @@ impl Templates {
                 .filter_map(|((owner, _), (member, definition))| {
                     let definition = definition?;
                     let node = document.ast().node(owner)?;
+                    let label = if let Some(header) = node.attribute("Header").filter(|_| {
+                        matches!(member, ItemTemplateMember::CellTemplate | ItemTemplateMember::CellEditingTemplate)
+                    }) {
+                        let table = nearest_table(document, owner).and_then(|table| document.ast().node(table));
+                        table.map(|table| format!("{} / {header}", element_label(table)))
+                            .unwrap_or_else(|| header.to_owned())
+                    } else {
+                        element_label(node).to_owned()
+                    };
                     Some(Template {
                         owner,
-                        label: node
-                            .attribute("x:Name")
-                            .or_else(|| node.attribute("Name"))
-                            .unwrap_or_else(|| node.local_name())
-                            .to_owned(),
+                        label,
                         type_name: node.local_name().to_owned(),
                         definition,
                         can_copy: member == ItemTemplateMember::Template && planner.can_copy(owner),
@@ -147,6 +152,12 @@ impl Templates {
                 .collect(),
         )
     }
+}
+
+fn element_label(node: &Node) -> &str {
+    node.attribute("x:Name")
+        .or_else(|| node.attribute("Name"))
+        .unwrap_or_else(|| node.local_name())
 }
 
 pub(super) fn template_member(name: &str) -> Option<ItemTemplateMember> {

@@ -13,6 +13,7 @@ use ferroui_controls::{AppBuilder, Application, ControlImpl, TextBlock, TextBloc
 use ferroui_designer_support::remote::RemoteDesignerEntryPoint;
 use ferroui_designer_support::{PreviewFixture, register_preview_fixture};
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
+use ferroui_markup_xaml::styling::StyleInclude;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_skia::SkiaApplicationExtensions;
 use std::{fs::File, path::Path};
@@ -23,6 +24,7 @@ mod motion;
 mod review_states;
 mod template_review;
 mod template_rows;
+mod tree_templates;
 
 static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "todo-workbench",
@@ -53,6 +55,12 @@ pub(crate) fn start_if_requested() {
                 if let Some(app) = builder.instance() {
                     app.styles()
                         .add(ferroui_themes_winui::WinUITheme::new().as_style());
+                    let grid_styles = StyleInclude::new(None);
+                    grid_styles.set_source(Some(
+                        "ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml"
+                            .parse().expect("built-in TreeDataGrid style URI"),
+                    ));
+                    app.styles().add(grid_styles.as_style());
                 }
             })
     });
@@ -68,6 +76,12 @@ fn register_fixtures() {
     register_preview_fixture("/app_preview/template_review.rs", "Review queue", || {
         Ok(PreviewFixture::RustView(template_review::view()))
     }).expect("valid Todo Workbench template fixture");
+    register_preview_fixture("/app_preview/tree_templates.rs", "Account hierarchy", || {
+        Ok(PreviewFixture::RustView(tree_templates::view()))
+    }).expect("valid Todo Workbench grid fixture");
+    register_preview_fixture("/HostedTreeTemplates.xaml", "Account hierarchy", || {
+        Ok(PreviewFixture::DataContext(Rc::new(tree_templates::customers())))
+    }).expect("valid Todo Workbench XAML grid fixture");
     for (name, text) in [("Loading", "Loading tasks…"), ("Ready", "Ready to review")] {
         register_preview_fixture("/HostedPreview.xaml", name, move || {
             Ok(PreviewFixture::DataContext(Rc::new(text.to_owned())))
@@ -92,6 +106,7 @@ fn register_fixtures() {
 fn register_markup() {
     FerroRuntimeXamlLoader::register();
     ferroui_xaml_interactions_custom::register_types();
+    ferroui_controls_treedatagrid::register_types();
     Animation::register_custom_animator::<ReviewCorners>();
     ferroui_themes_winui::register_types();
     TypeInfo::register_namespaces(&[(module_path!(), "TodoWorkbench.Design")]);

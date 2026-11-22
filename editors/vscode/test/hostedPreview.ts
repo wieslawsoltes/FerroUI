@@ -20,6 +20,7 @@ import { verifyHostedRustStyles } from './hostedRustStyles';
 import { verifyHostedSharedColors } from './hostedSharedColors';
 import { verifyHostedModuleColors } from './hostedModuleColors';
 import { verifyHostedRustTemplates } from './hostedRustTemplates';
+import { verifyHostedTreeTemplates } from './hostedTreeTemplates';
 import { reviewStateSource } from './rsxStatesMcp';
 
 export async function verifyHostedPreview(preview: NativePreview, uri: string): Promise<void> {
@@ -108,6 +109,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedSharedColors(preview, uri);
         await verifyHostedModuleColors(preview);
         await verifyHostedRustTemplates(preview);
+        await verifyHostedTreeTemplates(preview);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {
