@@ -262,32 +262,32 @@ impl DBusTextInputMethodCore for FcitxX11TextInputMethod {
 
             let context = if name == "org.fcitx.Fcitx" {
                 let method = InputMethodProxy::builder(&connection)
-                    .destination(name.clone())?
-                    .path("/inputmethod")?
+                    .destination(name.clone())
+                    .path("/inputmethod")
                     .cache_properties(CacheProperties::No)
                     .build()
                     .await?;
                 let resp = method.create_icv3(&base.get_app_name(), std::process::id() as i32).await?;
 
                 let proxy = InputContextProxy::builder(&connection)
-                    .destination(name)?
-                    .path(format!("/inputcontext_{}", resp.0))?
+                    .destination(name)
+                    .path(format!("/inputcontext_{}", resp.0))
                     .cache_properties(CacheProperties::No)
                     .build()
                     .await?;
                 FcitxICWrapper::from_old(proxy)
             } else {
                 let method = InputMethod1Proxy::builder(&connection)
-                    .destination(name.clone())?
-                    .path("/inputmethod")?
+                    .destination(name.clone())
+                    .path("/inputmethod")
                     .cache_properties(CacheProperties::No)
                     .build()
                     .await?;
                 let resp = method.create_input_context(&[("appName", base.get_app_name().as_str())]).await?;
 
                 let proxy = InputContext1Proxy::builder(&connection)
-                    .destination(name)?
-                    .path(resp.0.into_inner())?
+                    .destination(name)
+                    .path(resp.0.into_inner())
                     .cache_properties(CacheProperties::No)
                     .build()
                     .await?;

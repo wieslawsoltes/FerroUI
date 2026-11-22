@@ -20,13 +20,13 @@ use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Mutex, PoisonError};
 use zbus::object_server::SignalEmitter;
 use zbus::proxy::CacheProperties;
-use zbus::zvariant::OwnedObjectPath;
+use zbus::OwnedObjectPath;
 use zbus::Connection;
 
 /// `org.kde.StatusNotifierWatcher` (the proxy the reference generates from
 /// `DBusXml/org.kde.StatusNotifierWatcher.xml`), with the member that is
 /// called.
-#[zbus::proxy(interface = "org.kde.StatusNotifierWatcher", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.kde.StatusNotifierWatcher", assume_defaults = false)]
 pub trait StatusNotifierWatcher {
     fn register_status_notifier_item(&self, service: &str) -> zbus::Result<()>;
 }
@@ -313,8 +313,8 @@ impl DBusTrayIconImpl {
 
                     let watcher = async {
                         StatusNotifierWatcherProxy::builder(&connection)
-                            .destination(WATCHER_NAME)?
-                            .path(WATCHER_PATH)?
+                            .destination(WATCHER_NAME)
+                            .path(WATCHER_PATH)
                             .cache_properties(CacheProperties::No)
                             .build()
                             .await
