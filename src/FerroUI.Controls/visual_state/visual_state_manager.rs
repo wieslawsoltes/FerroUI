@@ -124,6 +124,18 @@ impl VisualStateManager {
             .changed()
             .add_class_handler::<Control>(Self::on_visual_state_groups_changed)
             .detach();
+        super::state_mappers::states_in_use(super::state_mappers::VisualStates {
+            has_groups: Self::has_groups_at_root,
+            go_to_state: Self::go_to_state,
+        });
+    }
+
+    /// Whether the root of the visual states of `control` has groups: when the state mapper of
+    /// its family is installed.
+    fn has_groups_at_root(control: &Ref<Control>) -> bool {
+        Self::implementation_root(control).is_some_and(|root| {
+            root.get_value(Self::visual_state_groups_property()).is_some_and(|groups| groups.count() > 0)
+        })
     }
 
     pub fn construct() -> Self {

@@ -15,6 +15,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct Labeler(Rc<dyn Fn(f64) -> String>);
 
+ferroui_base::styled_value!(Labeler);
+
 impl Labeler {
     pub fn new(labeler: impl Fn(f64) -> String + 'static) -> Self {
         Self(Rc::new(labeler))
@@ -67,6 +69,8 @@ impl fmt::Debug for Labeler {
 #[derive(Clone)]
 pub struct ChartPointFormatter(Rc<dyn Fn(&Coordinate) -> String>);
 
+ferroui_base::styled_value!(ChartPointFormatter);
+
 impl ChartPointFormatter {
     pub fn new(formatter: impl Fn(&Coordinate) -> String + 'static) -> Self {
         Self(Rc::new(formatter))
@@ -106,6 +110,8 @@ pub struct NodeTooltipPoint<'a> {
 /// `CoreTreemapSeries`). Two formatters are equal when they are the same function.
 #[derive(Clone)]
 pub struct NodeTooltipFormatter(Rc<dyn Fn(&NodeTooltipPoint<'_>) -> String>);
+
+ferroui_base::styled_value!(NodeTooltipFormatter);
 
 impl NodeTooltipFormatter {
     pub fn new(formatter: impl Fn(&NodeTooltipPoint<'_>) -> String + 'static) -> Self {

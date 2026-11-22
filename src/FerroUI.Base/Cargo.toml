@@ -78,12 +78,13 @@ tagged-weak-references = []
 # The parts of the base class library this crate shares with the reusable libraries; its items are
 # re-exported here at the paths they had before they moved (`lib.rs`, `utilities`, `data::model`,
 # `threading`, `collections`).
-ferroui-system = { workspace = true }
+ferroui-system = { workspace = true, features = ["locale", "url"] }
 # The hasher of identity-keyed maps on hot paths (the layout queues).
 rustc-hash = { workspace = true }
 smallvec = { workspace = true }
 bitflags.workspace = true
-paste.workspace = true
+# Joins identifiers in the class and markup macros (`__paste!`).
+ferroui-ident-macros.workspace = true
 rust_decimal.workspace = true
 time.workspace = true
 # The types of the edges of the API (docs/idiomatic-rust.md, section 2.2): `Uri` converts to and

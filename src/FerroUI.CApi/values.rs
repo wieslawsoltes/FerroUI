@@ -21,7 +21,7 @@ use crate::{
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::metadata::{MarkupProperty, MarkupType, MarkupValue};
-use ferroui_base::{BoxedValue, FerroObject, FerroProperty, PropertyValue, Ref};
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref};
 use ferroui_controls::Control;
 use std::any::TypeId;
 use std::cell::RefCell;
@@ -59,7 +59,7 @@ fn writable(property: &FerroProperty) -> Result<()> {
 
 /// Writes `value` to a property whose value type is `T`, through its typed setter.
 #[inline]
-fn set_typed<T: PropertyValue>(object: &FerroObject, property: &'static FerroProperty, value: T) -> Result<()> {
+fn set_typed<T: ferroui_base::StyledValue>(object: &FerroObject, property: &'static FerroProperty, value: T) -> Result<()> {
     if !property.is_valid_value(&value) {
         return Err(invalid(property));
     }
@@ -315,7 +315,7 @@ pub extern "C" fn ferro_clear(object: FerroHandle, property: i64) -> FerroStatus
 
 /// Reads a property whose value type is `T` through its typed getter, `None` for another type.
 #[inline]
-fn get_typed<T: PropertyValue>(object: &FerroObject, property: &'static FerroProperty) -> Option<T> {
+fn get_typed<T: ferroui_base::StyledValue>(object: &FerroObject, property: &'static FerroProperty) -> Option<T> {
     if let Some(styled) = property.as_styled::<T>() {
         Some(object.get_value(styled))
     } else {

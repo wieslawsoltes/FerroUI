@@ -441,6 +441,7 @@ impl ResourceDictionary {
     }
 
     /// The resource provider used for the given theme variant.
+    #[inline]
     pub fn theme_dictionary(&self, variant: &ThemeVariant) -> Option<Rc<dyn IThemeVariantProvider>> {
         self.theme_dictionaries.get().and_then(|d| d.try_get_value(variant))
     }
