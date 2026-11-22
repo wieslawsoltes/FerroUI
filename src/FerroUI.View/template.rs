@@ -3,7 +3,7 @@
 use crate::component_host::{ComponentHost, HostPool};
 use crate::element::{rerender, Element, IntoElement};
 use crate::hooks::{use_data_context, use_hook};
-use crate::reactive::Owner;
+use crate::{reactive::Owner, RsxSourceInfo};
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::templates::{
     IDataTemplate, IRecyclingDataTemplate, ITemplateWithParam, RustDataTemplateSource,
@@ -45,14 +45,30 @@ where
     T: Clone + 'static,
     E: IntoElement,
 {
-    let source = crate::hot::record_source_locations().then_some(Location::caller());
+    template_with_editor_source(None, view)
+}
+
+/// Expansion target of the template macro.
+#[doc(hidden)]
+#[track_caller]
+pub fn template_with_editor_source<T, E>(
+    compiled: Option<RsxSourceInfo>,
+    view: impl Fn(T) -> E + 'static,
+) -> Rc<dyn IDataTemplate>
+where
+    T: Clone + 'static,
+    E: IntoElement,
+{
+    let constructor = Location::caller();
+    let source = crate::hot::record_source_locations()
+        .then(|| EditorSource::new(constructor, compiled));
     template_of("ComponentHost", source, view)
 }
 
 /// [`template`] whose hosts the inspector calls `origin`.
 pub(crate) fn template_of<T, E>(
     origin: &'static str,
-    constructor: Option<&'static Location<'static>>,
+    source: Option<EditorSource>,
     view: impl Fn(T) -> E + 'static,
 ) -> Rc<dyn IDataTemplate>
 where
@@ -60,7 +76,7 @@ where
     E: IntoElement,
 {
     let view = Rc::new(view);
-    let source = constructor.map(EditorSource::new).map(Rc::new);
+    let source = source.map(Rc::new);
     let editor_source = source.clone();
     let item_view: Rc<dyn Fn() -> Element> = Rc::new(move || {
         let view = view.clone();

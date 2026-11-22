@@ -1,6 +1,9 @@
 use super::{IRecyclingDataTemplate, ITemplateWithParam, ITreeDataTemplate, ITypedDataTemplate};
 use crate::Control;
-use ferroui_base::{diagnostics::RsxSourceInfo, BoxedValue, Ref};
+use ferroui_base::{
+    diagnostics::{RsxSourceInfo, RsxSourceLocation},
+    BoxedValue, Ref,
+};
 use std::panic::Location;
 
 /// Provenance reported by a Rust template constructed with editor diagnostics enabled.
@@ -8,18 +11,38 @@ use std::panic::Location;
 pub struct RustDataTemplateSource {
     /// The caller that constructed the template handle.
     pub constructor: &'static Location<'static>,
+    /// Compile-time source of a constructor that uses the template macro.
+    pub compiled_constructor: Option<RsxSourceInfo>,
     /// The compiled source of the RSX invocation observed when rendering an item.
     pub rendered_body: Option<RsxSourceInfo>,
 }
 
 impl RustDataTemplateSource {
-    /// The compiled evidence for the constructor's file, from a control or an
-    /// observed template body in that file.
+    /// The constructor location with the source revision recorded by the build.
     pub fn verified_constructor(&self, owner: Option<RsxSourceInfo>) -> Option<RsxSourceInfo> {
+        if let Some(source) = self
+            .compiled_constructor
+            .filter(|proof| proof.compiled.revision.is_some())
+        {
+            return Some(source);
+        }
         [owner, self.rendered_body].into_iter().flatten().find_map(|proof| {
             let path = RsxSourceInfo::resolve_file(self.constructor.file(), proof.manifest)?;
             let same = path == RsxSourceInfo::resolve_file(proof.file, proof.manifest)?;
-            (same && proof.compiled.revision.is_some()).then_some(proof)
+            let revision = proof.compiled.revision?;
+            let position = (self.constructor.line() as usize, self.constructor.column() as usize);
+            same.then(|| {
+                RsxSourceInfo::new(
+                    proof.file,
+                    proof.manifest,
+                    RsxSourceLocation {
+                        element: position,
+                        invocation: position,
+                        index: 0,
+                        revision: Some(revision),
+                    },
+                )
+            })
         })
     }
 }

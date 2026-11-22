@@ -14,7 +14,10 @@ export async function verifyHostedTreeTemplates(preview: NativePreview): Promise
     const manifest = join(root, 'Cargo.toml');
     const project = { workspaceRoot: root, metadata: { manifest, directories: [], package: 'todo-workbench' } };
     const rustProject = { manifest, targets: [join(root, 'main.rs')], features: ['app-preview', 'hot-reload', 'mcp'] };
-    const render = async (file: string, language: 'rust' | 'xaml', revision: number) => {
+    const sharedPath = join(root, 'app_preview/template_rows.rs');
+    const sharedUri = pathToFileURL(sharedPath).toString();
+    const sharedSource = await readFile(sharedPath, 'utf8');
+    const render = async (file: string, language: 'rust' | 'xaml', revision: number, sharedDraft?: string) => {
         const path = join(root, file);
         const uri = pathToFileURL(path).toString();
         const source = await readFile(path, 'utf8');
@@ -22,7 +25,7 @@ export async function verifyHostedTreeTemplates(preview: NativePreview): Promise
         const document = await preview.inProject({ uri, source, language, caret: { line, character: 10 } }, project);
         const result = await preview.renderHostedWorkspace({
             revision, document, assembly: 'todo-workbench', projectPath: `/${file}`, fixture: 'Account hierarchy',
-        }, { root, rustProject, localSources: [] });
+        }, { root, rustProject, localSources: sharedDraft === undefined ? [] : [{ uri: sharedUri, source: sharedDraft }] });
         assert.equal(result.error, null);
         assert.ok(result.frame?.templatesAvailable);
         assert.equal(result.frame.fixture, 'Account hierarchy');
@@ -52,18 +55,26 @@ export async function verifyHostedTreeTemplates(preview: NativePreview): Promise
     for (const label of ['Accounts / Company', 'Accounts / Review']) {
         const { display, editing } = pair(rustSlots, label);
         for (const slot of [display, editing]) {
-            assert.equal(slot.definition.uri, rust.uri);
-            const definition = await locate(rust.frame, slot.definition, rust.source);
+            const shared = label.endsWith('/ Review') && slot === editing;
+            const definitionSource = shared ? sharedSource : rust.source;
+            assert.equal(slot.definition.uri, shared ? sharedUri : rust.uri);
+            const definition = await locate(rust.frame, slot.definition, definitionSource);
             const { start, end } = definition.range;
-            assert.equal(rust.source.split('\n')[start.line].slice(start.character, end.character), 'rsx');
+            assert.equal(definitionSource.split('\n')[start.line].slice(start.character, end.character),
+                shared ? '::ferroui_view::rsx' : 'rsx');
             assert.ok(slot.assignment);
             assert.equal(slot.assignment.uri, rust.uri);
             const assignment = await locate(rust.frame, slot.assignment, rust.source);
             const body = rust.source.split('\n').slice(assignment.range.start.line, assignment.range.end.line + 1).join('\n');
-            assert.match(body, slot.member === 'CellTemplate' ? /TextBlock/ : /TextBox/);
+            assert.match(body, shared ? /review_editor\(\)/ : slot.member === 'CellTemplate' ? /TextBlock/ : /TextBox/);
         }
     }
-    const xaml = await render('HostedTreeTemplates.xaml', 'xaml', 3301);
+    const draft = sharedSource.replace('Review status', 'Changed review status');
+    const stale = await render('app_preview/tree_templates.rs', 'rust', 3301, draft);
+    const staleCatalog = await preview.hostedTemplates<HostedTemplateCatalog>(stale.frame, { action: 'catalog' });
+    const staleReview = staleCatalog.templates.filter(entry => entry.label === 'Accounts / Review');
+    assert.deepEqual(staleReview.map(entry => entry.member), ['CellTemplate']);
+    const xaml = await render('HostedTreeTemplates.xaml', 'xaml', 3302);
     const xamlSlots = await gridSlots(xaml.frame);
     const resources = join(root, 'TreeTemplateResources.xaml');
     const dictionary = await readFile(resources, 'utf8');
@@ -81,5 +92,5 @@ export async function verifyHostedTreeTemplates(preview: NativePreview): Promise
         assert.match(xaml.source.split('\n')[range.start.line - 1], new RegExp(slot.member!));
     }
     await assert.rejects(gridSlots(rust.frame), /current app-hosted preview frame/);
-    console.log('App Preview opened native TreeDataGrid display and editing templates in inline Rust, XAML, and an included dictionary');
+    console.log('App Preview verified inline and unmounted cross-file Rust templates, XAML dictionary templates, and stale module rejection');
 }

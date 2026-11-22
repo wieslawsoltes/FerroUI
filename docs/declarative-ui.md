@@ -445,6 +445,8 @@ Each item container gets a `ComponentHost`. Its component reads the item (the `D
 
 To author the body on the designer canvas, assign a direct qualified call such as `ferroui_view::template(|person: Person| rsx! { TextBlock { text: person.name } })`. Use the same builder in `.cell_template(...)` on a `table_column()` for a TableView row. The isolated designer projects literal controls from that RSX body. The application evaluates the closure with the typed item. [Designer authoring walkthrough](designer/vscode/authoring.md#edit-a-rust-item-or-cell-template)
 
+Use `ferroui_view::template!(|person: Person| /* view */)` when editor-enabled debug builds need the factory's source before the first item renders. The macro passes the closure to the same data template implementation and records the constructor's file revision and position during compilation. A shared editing template can then open in App Preview and Live App before its cell enters editing mode. [Shared template example](designer/vscode/runtime.md#record-an-unmounted-rust-templates-source)
+
 **Recycling.** A virtualizing panel realizes only the visible items. When it takes a container away, it clears the container's content, so the presenter builds a new child for the next item: a template that made a new host each time would mount a new component and new controls for every item scrolled into view. The template keeps a pool instead:
 
 1. A host that leaves the visual tree goes to the pool of its template, with its component still mounted. While it has no data context, the component keeps showing its last item, so nothing is taken down.

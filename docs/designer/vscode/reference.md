@@ -181,7 +181,7 @@ Call `designer_hosted_templates` with the design `session` after opening XAML or
 
 The source tool opens the definition by default. For Rust, use `template_destination` with `assignment` to open the reference or `design` to open the mapped template body in Design.
 
-For TreeDataGrid, pass the reported `CellTemplate` or `CellEditingTemplate` member for the column. An expander's inner column has its own owner. [TreeDataGrid template workflow](runtime.md#inspect-treedatagrid-display-and-editing-templates)
+For TreeDataGrid, pass the reported `CellTemplate` or `CellEditingTemplate` member for the column. An expander's inner column has its own owner. The catalog can include a Rust factory defined with `template!` while its cell is still in display mode. [TreeDataGrid template workflow](runtime.md#inspect-treedatagrid-display-and-editing-templates)
 
 When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same fields to review the checked patch. Call `designer_hosted_template_copy` with write access to install the copy as one Undo step. Read a fresh catalog after a source or frame change. [App Preview template workflow](runtime.md#open-and-copy-app-preview-control-templates)
 

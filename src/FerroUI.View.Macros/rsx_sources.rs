@@ -33,19 +33,35 @@ impl RsxSources {
 
     pub(super) fn locate(&self, path: &Path, build: TokenStream, index: u32) -> TokenStream {
         let span = path.span().unwrap();
-        let file = span.file();
-        let line = span.line();
-        let column = span.column();
-        if file != self.file || file.starts_with('<') || line == 0 || column == 0 {
+        let position = (span.line(), span.column());
+        if span.file() != self.file || position.0 == 0 || position.1 == 0 || self.file.starts_with('<') {
             return build;
         }
+        let source = self.source(position, index);
+        quote! { <#path as ::ferroui_view::Builder>::with_editor_source(#build, #source) }
+    }
+
+    pub(super) fn template_source(&self) -> TokenStream {
+        if self.revision.is_none()
+            || self.file.starts_with('<')
+            || self.invocation.0 == 0
+            || self.invocation.1 == 0
+        {
+            return quote!(::core::option::Option::None);
+        }
+        let source = self.source(self.invocation, 0);
+        quote!(::core::option::Option::Some(#source))
+    }
+
+    fn source(&self, (line, column): (usize, usize), index: u32) -> TokenStream {
+        let file = &self.file;
         let (invocation_line, invocation_column) = self.invocation;
         let revision = self.revision.map_or_else(
             || quote!(::core::option::Option::None),
             |revision| quote!(::core::option::Option::Some(#revision)),
         );
         quote! {
-            <#path as ::ferroui_view::Builder>::with_editor_source(#build, ::ferroui_view::RsxSourceInfo::new(
+            ::ferroui_view::RsxSourceInfo::new(
                 #file,
                 match ::core::option_env!("CARGO_MANIFEST_DIR") { Some(dir) => dir, None => "" },
                 ::ferroui_view::RsxSourceLocation {
@@ -54,7 +70,7 @@ impl RsxSources {
                     index: #index,
                     revision: #revision,
                 },
-            ))
+            )
         }
     }
 }

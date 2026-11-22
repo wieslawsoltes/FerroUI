@@ -3,8 +3,9 @@ use crate::{builder::TypedProperty, element::PropValue, Element, RsxSourceInfo};
 use ferroui_controls::templates::RustDataTemplateSource;
 use std::{cell::Cell, panic::Location};
 
-pub(super) struct EditorSource {
+pub(crate) struct EditorSource {
     constructor: &'static Location<'static>,
+    compiled_constructor: Option<RsxSourceInfo>,
     body: Cell<RenderedBody>,
 }
 
@@ -16,9 +17,13 @@ enum RenderedBody {
 }
 
 impl EditorSource {
-    pub(super) fn new(constructor: &'static Location<'static>) -> Self {
+    pub(super) fn new(
+        constructor: &'static Location<'static>,
+        compiled_constructor: Option<RsxSourceInfo>,
+    ) -> Self {
         Self {
             constructor,
+            compiled_constructor,
             body: Cell::new(RenderedBody::Unseen),
         }
     }
@@ -37,6 +42,7 @@ impl EditorSource {
     pub(super) fn provenance(&self) -> RustDataTemplateSource {
         RustDataTemplateSource {
             constructor: self.constructor,
+            compiled_constructor: self.compiled_constructor,
             rendered_body: match self.body.get() {
                 RenderedBody::Invocation(source) => Some(source),
                 RenderedBody::Unseen | RenderedBody::Ambiguous => None,

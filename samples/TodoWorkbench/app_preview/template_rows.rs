@@ -1,4 +1,4 @@
-use ferroui_controls::{templates::IDataTemplate, Border, TextBlock};
+use ferroui_controls::{templates::IDataTemplate, Border, TextBlock, TextBox};
 use ferroui_view::prelude::*;
 use std::rc::Rc;
 
@@ -8,4 +8,12 @@ pub(super) fn queue_row() -> Rc<dyn IDataTemplate> {
             TextBlock { text: customer, foreground: "#203657" }
         }
     })
+}
+
+pub(super) fn review_editor() -> Rc<dyn IDataTemplate> {
+    ::ferroui_view::template! {
+        |_: String| ::ferroui_view::rsx! {
+            TextBox { placeholder_text: "Review status" }
+        }
+    }
 }

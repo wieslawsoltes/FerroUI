@@ -70,7 +70,7 @@ Rebuild the preview binary with the current `ferroui-designer-support` to enable
 
 ![The App Preview template picker shows a shared list template, two combo box templates, and the account table cell beside the running fixture](../images/vscode-app-preview-templates.png)
 
-Rust source actions use the active debug build's source records. App Preview follows the Cargo features reported for the selected executable and checks the control and template against the accepted frame. For a template in a separate Rust module, use fixture data that renders an item so the app can identify the declaration. After a source change, save and rebuild the app-hosted fixture when required. Reopen the picker after the frame updates. [Register app preview fixtures](#render-with-your-app-in-app-preview) · [App Preview template tools](reference.md#inspect-app-preview-templates-with-mcp)
+Rust source actions use the active debug build's source records. App Preview follows the Cargo features reported for the selected executable and checks the control and template against the accepted frame. If your shared factory uses `template(...)`, use fixture data that renders an item so the app can identify the declaration. Use `ferroui_view::template!(...)` to record its source before the first item renders. After a source change, save and rebuild the app-hosted fixture when required. Reopen the picker after the frame updates. [Register app preview fixtures](#render-with-your-app-in-app-preview) · [App Preview template tools](reference.md#inspect-app-preview-templates-with-mcp)
 
 [See the shared Rust template selected in source beside the retained app frame](../images/vscode-app-preview-template-source.png).
 
@@ -83,6 +83,23 @@ Rust source actions use the active debug build's source records. App Preview fol
 ![VS Code opens the Company editing template in its XAML dictionary beside the native TreeDataGrid](../images/vscode-app-preview-tree-grid-template.png)
 
 Source links are available for runtime templates paired with a verified declarative column. Keep a row visible when inspecting resource-key columns so the app resolves their templates. If the app provides columns through a separate `Source` or `Model`, open those authored definitions in the application code.
+
+#### Record an unmounted Rust template's source
+
+Use `ferroui_view::template!` in a Rust file that defines a shared template, such as a cell editor in its own module. Pass the same closure you would give to `ferroui_view::template`.
+
+```rust
+use ferroui_controls::{templates::IDataTemplate, TextBox};
+use std::rc::Rc;
+
+pub fn review_editor() -> Rc<dyn IDataTemplate> {
+    ferroui_view::template!(|_: String| ferroui_view::rsx! {
+        TextBox { placeholder_text: "Review status" }
+    })
+}
+```
+
+Call `review_editor()` from the grid column's `.cell_editing_template(...)` setter and build the application in debug mode. **App Preview Templates** can open the RSX body and reveal the assignment while the grid is showing its display cells. **Live App Templates** can open the factory before the cell enters editing mode. The editor checks both source links against the build that supplied the template. [Try this in Todo Workbench](../../../samples/TodoWorkbench/app_preview/template_rows.rs)
 
 ### Edit a shared Rust palette in App Preview
 
@@ -120,7 +137,7 @@ Choose the layers icon beside a property to trace why that value is effective in
 2. Select a control, item, display, or editing template. For a grid, the picker includes the column header when the app provides it.
 3. VS Code opens the source recorded by the running app. Save or reload changed sources before choosing the template again.
 
-The app must expose `get_template_sources` through its inspector. A source link requires a workspace file that matches the app’s recorded revision. XAML records the supplying dictionary or inline definition. A Rust template can open its mounted RSX body or the verified constructor in the running build. [Live App template tools](reference.md#inspect-live-app-templates-with-mcp)
+The app must expose `get_template_sources` through its inspector. A source link requires a workspace file that matches the app’s recorded revision. XAML records the supplying dictionary or inline definition. A Rust template can open its mounted RSX body or the verified constructor in the running build. Use `template!` for a factory in a separate module that should be available before its first use. [Record an unmounted template's source](#record-an-unmounted-rust-templates-source) · [Live App template tools](reference.md#inspect-live-app-templates-with-mcp)
 
 ![Live App lists the display and editing templates for the Company and Review columns beside the running account hierarchy](../images/vscode-live-template-picker.png)
 

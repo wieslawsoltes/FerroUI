@@ -1,3 +1,4 @@
+use super::template_rows::review_editor;
 use ferroui_base::Ref;
 use ferroui_controls::{Control, GridLength, ItemsSource, StackPanel, TextBlock, TextBox};
 use ferroui_controls_treedatagrid::TreeDataGrid;
@@ -25,9 +26,7 @@ pub(super) fn view() -> Ref<Control> {
                         .cell_template(::ferroui_view::template(|_: String| rsx! {
                             TextBlock { text: "Ready for review", foreground: "#306859" }
                         }))
-                        .cell_editing_template(::ferroui_view::template(|_: String| rsx! {
-                            TextBox { placeholder_text: "Review status" }
-                        })).build(),
+                        .cell_editing_template(review_editor()).build(),
                 ]),
             }
         }

@@ -64,6 +64,18 @@ pub fn rsx(input: TokenStream) -> TokenStream {
     tokens.into()
 }
 
+/// Construct a component data template and record the source of its factory.
+///
+/// `template!(|row: Row| rsx! { TextBlock { text: row.name } })` has the same
+/// runtime behavior as `ferroui_view::template`. Editor-enabled debug builds
+/// can locate the factory even before any item uses the template.
+#[proc_macro]
+pub fn template(input: TokenStream) -> TokenStream {
+    let factory = syn::parse_macro_input!(input as Expr);
+    let source = RsxSources::new().template_source();
+    quote!(::ferroui_view::template_with_editor_source(#source, #factory)).into()
+}
+
 /// A literal that hot reload can change (`ferroui_view::hot::lit`).
 fn hot_literal(index: u32, literal: &TokenStream2) -> TokenStream2 {
     quote! {

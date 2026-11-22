@@ -14,7 +14,8 @@ export async function verifyLiveRustTemplates(): Promise<void> {
         for (const template of templates) {
             assert.ok(template.source?.language === 'rust');
             const uri = vscode.Uri.parse(template.source.uri);
-            assert.ok(uri.path.endsWith('/app_preview/tree_templates.rs'));
+            const shared = template.member === 'CellEditingTemplate' && template.column?.header === 'Review';
+            assert.ok(uri.path.endsWith(shared ? '/app_preview/template_rows.rs' : '/app_preview/tree_templates.rs'));
             const bytes = await vscode.workspace.fs.readFile(uri);
             assert.equal(template.source.revision, revision(Buffer.from(bytes)));
             assert.equal(template.column?.expander_inner, template.column?.header === 'Company');
@@ -24,7 +25,13 @@ export async function verifyLiveRustTemplates(): Promise<void> {
         assert.ok(companyEditor?.source);
         const file = await vscode.workspace.openTextDocument(vscode.Uri.parse(companyEditor.source.uri));
         assert.match(file.lineAt(companyEditor.source.line - 1).text, /cell_editing_template/);
+        const reviewEditor = templates.find(entry =>
+            entry.member === 'CellEditingTemplate' && entry.column?.header === 'Review');
+        assert.ok(reviewEditor?.source);
+        const shared = await vscode.workspace.openTextDocument(vscode.Uri.parse(reviewEditor.source.uri));
+        const constructor = shared.lineAt(reviewEditor.source.line - 1).text;
+        assert.match(constructor.slice(reviewEditor.source.column - 1), /^::ferroui_view::template!/);
         assert.equal(new Set(templates.map(template => template.id)).size, 4);
-        console.log('Live App verified the native TreeDataGrid templates and the compiled Rust editing constructor');
+        console.log('Live App verified the native TreeDataGrid templates and the unmounted cross-file editing constructor');
     });
 }

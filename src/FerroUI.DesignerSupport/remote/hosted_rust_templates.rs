@@ -58,16 +58,9 @@ fn usage(
     let provenance = template.as_ref().and_then(|item| item.rust_editor_source());
     let body = provenance.and_then(|source| source.rendered_body);
     let definition = body.and_then(|body| editor_location(body, true));
-    let rust_factory = provenance.and_then(|source| {
-        let constructor = source.constructor;
-        let proof = source.verified_constructor(Some(info))?;
-        Some(DesignTemplateSource {
-            address: proof.source_uri()?.into(),
-            fingerprint: proof.compiled.revision? as i64,
-            line: i32::try_from(constructor.line()).ok()?,
-            column: i32::try_from(constructor.column()).ok()?,
-        })
-    });
+    let rust_factory = provenance
+        .and_then(|source| source.verified_constructor(Some(info)))
+        .and_then(|proof| editor_location(proof, false));
     DesignTemplateUse {
         owner: owner.clone(),
         type_name: type_name.into(),

@@ -115,6 +115,8 @@ pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedT
 pub use inspect::{attach_inspector, open_inspector};
 pub use mount::{view_stats, ViewStats};
 pub use template::template;
+#[doc(hidden)]
+pub use template::template_with_editor_source;
 pub use table_columns::{TableViewColumnBuilder, table_column, table_columns};
 #[cfg(feature = "treedatagrid")]
 pub use tree_data_grid_columns::{
@@ -136,7 +138,7 @@ pub use reactive::{
 #[cfg(feature = "desktop")]
 pub use app::{launch, launch_themed, launch_with, mount_window, open_window};
 
-pub use ferroui_view_macros::{component, rsx};
+pub use ferroui_view_macros::{component, rsx, template};
 
 /// Everything an application written with the builders or the macro uses.
 pub mod prelude {

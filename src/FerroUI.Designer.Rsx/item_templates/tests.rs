@@ -185,6 +185,31 @@ fn recent() -> Element {
 }
 
 #[test]
+fn template_macro_preserves_the_factory_and_only_patches_the_authored_body() {
+    for (open, close) in [('(', ')'), ('{', '}'), ('[', ']')] {
+        let source = format!(r#"use ferroui_view::template as make_template;
+fn shared() -> Template {{
+    make_template!{open}|name: String| rsx! {{ TextBlock {{ text: name, font_size: 18.0 }} }}{close}
+}}
+fn directory() -> Element {{
+    rsx! {{ ListBox {{ item_template: shared() }} }}
+}}
+"#).replace('\n', "\r\n");
+        let (view, document, node) = owner(&source, "ListBox {");
+        let slots = view.item_templates(&document, node);
+        let body = slots[0].body.as_ref().unwrap();
+        assert_eq!(body.factory.as_deref(), Some("shared"));
+        assert_eq!(&source[body.constructor.range()], "make_template");
+        let child = project_rust(&source, body.location.span.start).unwrap();
+        let patch = child.set_property(0, "FontSize", "20").unwrap();
+        assert_eq!(
+            TextPatch::apply_all(&source, vec![patch]).unwrap(),
+            source.replace("font_size: 18.0", "font_size: 20.0"),
+        );
+    }
+}
+
+#[test]
 fn resets_builder_call_with_comment_and_guards_qualified_assignments() {
     let source = r#"rsx! { ListBox {
         item_template(::ferroui_view::template(|_: String| rsx! { TextBlock { "Row" } }))

@@ -96,13 +96,15 @@ impl Collector<'_> {
 
 impl<'ast> Visit<'ast> for Collector<'_> {
     fn visit_macro(&mut self, item: &'ast syn::Macro) {
-        self.has_invocation |= self.active == Some(self.scopes[self.current].file)
-            && item
-                .path
-                .segments
-                .last()
-                .is_some_and(|segment| segment.ident == "rsx")
-            && span(item).contains(self.offset);
+        if self.active != Some(self.scopes[self.current].file) || !span(item).contains(self.offset) {
+            return;
+        }
+        if item.path.segments.last().is_some_and(|segment| segment.ident == "rsx") {
+            self.has_invocation = true;
+        } else if let Ok(closure) = syn::parse2::<syn::ExprClosure>(item.tokens.clone()) {
+            // A template macro can hold the active RSX inside a Rust closure.
+            Visit::visit_expr_closure(self, &closure);
+        }
     }
 
     fn visit_item(&mut self, item: &'ast Item) {
@@ -110,9 +112,7 @@ impl<'ast> Visit<'ast> for Collector<'_> {
             Item::Enum(item) => self.add(&item.ident, Binding::Opaque),
             Item::Fn(item) => {
                 let binding = super::returned_builder::definition(item)
-                    .map_or(Binding::Opaque, |expression| {
-                        Binding::Builder(Box::new(expression.clone()))
-                    });
+                    .map_or(Binding::Opaque, |expression| Binding::Builder(Box::new(expression)));
                 self.add(&item.sig.ident, binding);
             }
             Item::Static(item) => self.add(&item.ident, Binding::Opaque),

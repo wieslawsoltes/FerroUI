@@ -63,7 +63,7 @@ impl<'a> RustSourceScope<'a> {
     }
 }
 
-pub(super) fn definition(function: &ItemFn) -> Option<&Expr> {
+pub(super) fn definition(function: &ItemFn) -> Option<Expr> {
     let sig = &function.sig;
     if !sig.inputs.is_empty()
         || !sig.generics.params.is_empty()
@@ -79,6 +79,11 @@ pub(super) fn definition(function: &ItemFn) -> Option<&Expr> {
         })
     {
         return None;
+    }
+    if let [Stmt::Macro(mac)] = function.block.stmts.as_slice() {
+        return (mac.attrs.is_empty() && mac.semi_token.is_none()).then(|| {
+            Expr::Macro(syn::ExprMacro { attrs: Vec::new(), mac: mac.mac.clone() })
+        });
     }
     let value = match function.block.stmts.as_slice() {
         [statement] => tail(statement)?,
@@ -110,7 +115,11 @@ pub(super) fn definition(function: &ItemFn) -> Option<&Expr> {
         _ => return None,
     };
     let expression = ungroup(value);
-    matches!(expression, Expr::Call(call) if call.attrs.is_empty()).then_some(expression)
+    match expression {
+        Expr::Call(call) if call.attrs.is_empty() => Some(expression.clone()),
+        Expr::Macro(mac) if mac.attrs.is_empty() => Some(expression.clone()),
+        _ => None,
+    }
 }
 
 fn tail(statement: &Stmt) -> Option<&Expr> {

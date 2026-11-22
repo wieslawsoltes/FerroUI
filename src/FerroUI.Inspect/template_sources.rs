@@ -60,10 +60,10 @@ fn data_source(template: &Rc<dyn IDataTemplate>, owner: Option<RsxSourceInfo>) -
             .filter(|location| location.get("revision").is_some())
             .or_else(|| {
                 let proof = source.verified_constructor(owner)?;
-                let constructor = source.constructor;
+                let (line, column) = proof.compiled.element;
                 Some(json!({
                     "uri":proof.source_uri()?.as_str(), "language":"rust",
-                    "line":constructor.line(), "column":constructor.column(), "columnEncoding":"unicodeScalar",
+                    "line":line, "column":column, "columnEncoding":"unicodeScalar",
                     "revision":format!("{:016x}", proof.compiled.revision?),
                 }))
             })

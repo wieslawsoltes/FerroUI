@@ -1,6 +1,7 @@
 use crate::{animation::syntax::span, local_rust::{RustSourceScope, path_in_source}};
 use ferroui_designer_core::SourceSpan;
-use syn::{Expr, Macro, Path, PathArguments, Stmt};
+use std::borrow::Cow;
+use syn::{Expr, ExprClosure, ExprPath, Macro, Path, PathArguments, Stmt};
 
 pub(super) struct TemplateSyntax {
     pub(super) constructor: SourceSpan,
@@ -12,16 +13,20 @@ pub(super) fn template_syntax(
     expression: &Expr,
     scope: Option<RustSourceScope<'_>>,
 ) -> Option<TemplateSyntax> {
-    let Expr::Call(factory) = expression else {
-        return None;
+    let (mut callee, closure) = match expression {
+        Expr::Call(factory) if factory.args.len() == 1 && factory.attrs.is_empty() => {
+            let Expr::Path(path) = factory.func.as_ref() else { return None };
+            let Expr::Closure(closure) = &factory.args[0] else { return None };
+            (path.clone(), Cow::Borrowed(closure))
+        }
+        Expr::Macro(factory) if factory.attrs.is_empty() => {
+            let path = ExprPath { attrs: Vec::new(), qself: None, path: factory.mac.path.clone() };
+            let closure = syn::parse2::<ExprClosure>(factory.mac.tokens.clone()).ok()?;
+            (path, Cow::Owned(closure))
+        }
+        _ => return None,
     };
-    if factory.args.len() != 1 || !factory.attrs.is_empty() {
-        return None;
-    }
-    let Expr::Path(path) = factory.func.as_ref() else {
-        return None;
-    };
-    let mut callee = path.clone();
+    let constructor = span(&callee);
     let last = callee.path.segments.last_mut()?;
     if matches!(last.arguments, PathArguments::AngleBracketed(_)) {
         last.arguments = PathArguments::None;
@@ -33,9 +38,6 @@ pub(super) fn template_syntax(
     ) {
         return None;
     }
-    let Expr::Closure(closure) = &factory.args[0] else {
-        return None;
-    };
     if closure.inputs.len() != 1 || closure.asyncness.is_some() {
         return None;
     }
@@ -43,7 +45,7 @@ pub(super) fn template_syntax(
     let ident = &body.path.segments.last()?.ident;
     let is_rsx = body.path.is_ident("rsx") || view_rsx(&body.path);
     is_rsx.then(|| TemplateSyntax {
-        constructor: span(factory.func.as_ref()),
+        constructor,
         macro_path: span(&body.path),
         body: SourceSpan::new(
             ident.span().byte_range().start,

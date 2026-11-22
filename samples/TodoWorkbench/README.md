@@ -90,7 +90,9 @@ In **App Preview Templates**, select **Accounts / Company** to open the display
 or editing template for the expander's inner column. The XAML view uses
 [TreeTemplateResources.xaml](TreeTemplateResources.xaml) for Company and an
 inline template for Review. The Rust view exposes each template's builder
-assignment. [Trace effective templates in VS Code](../../docs/designer/vscode/runtime.md#inspect-treedatagrid-display-and-editing-templates)
+assignment. Select the **Review** editing template before editing a cell.
+The `template!` call in its shared factory records a source location in
+[template_rows.rs](app_preview/template_rows.rs). [Trace effective templates in VS Code](../../docs/designer/vscode/runtime.md#inspect-treedatagrid-display-and-editing-templates)
 
 To inspect the Rust grid in its own application window, run
 `cargo run -p todo-workbench --features app-preview,mcp -- --tree-templates-live --mcp`.
