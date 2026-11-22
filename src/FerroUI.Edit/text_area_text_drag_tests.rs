@@ -207,6 +207,28 @@ fn control_word_gesture_and_release_option_keep_separate_selection_behavior() {
 }
 
 #[test]
+fn apple_keymap_gives_box_word_and_copy_gestures_their_own_modifiers() {
+    use ferroui_base::input::platform::PlatformHotkeyConfiguration;
+
+    let scene = Scene::new("alpha beta\ngamma delta");
+    FerroLocator::current_mutable().bind_to_self(Rc::new(PlatformHotkeyConfiguration::apple()));
+    let editor = &scene.editor;
+    let button = RawInputModifiers::LEFT_MOUSE_BUTTON;
+    assert_eq!(crate::text_area::box_selection_modifier(), KeyModifiers::CONTROL);
+    assert_eq!(crate::text_area::text_drag_copy_modifier(), KeyModifiers::ALT);
+
+    scene.pointer(RawPointerEventType::LeftButtonDown, 7, button | RawInputModifiers::META);
+    assert_eq!(editor.selected_text().unwrap(), "beta");
+    scene.pointer(RawPointerEventType::LeftButtonUp, 7, RawInputModifiers::META);
+
+    editor.set_selection(Selection::empty(0)).unwrap();
+    scene.pointer(RawPointerEventType::LeftButtonDown, 1, button | RawInputModifiers::CONTROL);
+    scene.pointer(RawPointerEventType::Move, 14, button | RawInputModifiers::CONTROL);
+    assert!(editor.selection().is_rectangular());
+    scene.pointer(RawPointerEventType::LeftButtonUp, 14, RawInputModifiers::CONTROL);
+}
+
+#[test]
 fn cross_document_move_completes_both_undo_groups_through_routed_input() {
     let scene = Scene::new("alpha beta");
     let target = TextEditor::new();

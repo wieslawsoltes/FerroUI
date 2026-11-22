@@ -309,7 +309,7 @@ impl TextArea {
             return None;
         }
         let allowed = e.drag_effects();
-        let effect = if !e.key_modifiers().contains(KeyModifiers::CONTROL)
+        let effect = if !e.key_modifiers().contains(text_drag_copy_modifier())
             && allowed.contains(DragDropEffects::MOVE)
             && drag.as_ref().is_none_or(|drag| drag.can_move())
         {

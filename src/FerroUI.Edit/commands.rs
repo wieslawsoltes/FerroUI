@@ -420,7 +420,6 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_os = "macos"))]
     #[test]
     fn only_bound_modifier_combinations_change_the_document_or_caret() {
         use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};

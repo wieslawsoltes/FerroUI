@@ -354,15 +354,15 @@ impl TextArea {
             return Ok(());
         }
         let primary = selection.primary();
-        let control_word = !gutter
+        let command_word = !gutter
             && !box_mode
             && e.click_count() == 1
-            && e.key_modifiers().contains(KeyModifiers::CONTROL);
+            && e.key_modifiers().contains(platform_keymap().command_modifiers);
         let unit = if line_number {
             Some(SelectionUnit::GutterLine)
         } else if box_mode {
             None
-        } else if e.click_count() == 2 || control_word {
+        } else if e.click_count() == 2 || command_word {
             Some(SelectionUnit::Word)
         } else if e.click_count() >= 3 {
             Some(SelectionUnit::Line)
@@ -377,7 +377,7 @@ impl TextArea {
             let gutter_unit = matches!(unit, SelectionUnit::GutterLine);
             let simple = !selection.is_rectangular() && selection.segments().len() == 1;
             let extend = shift && !selection.is_empty() && (!gutter_unit || simple);
-            let segment = if control_word && shift && !selection.is_rectangular() {
+            let segment = if command_word && shift && !selection.is_rectangular() {
                 SelectionSegment::with_virtual_space(
                     primary.anchor_tuple().0,
                     primary.anchor_tuple().1,
@@ -389,7 +389,7 @@ impl TextArea {
             } else {
                 SelectionSegment::new(target.start, target.end)
             };
-            let anchor = if control_word {
+            let anchor = if command_word {
                 AnchorSegment::new(&document, target.start, target.len())?
             } else if gutter_unit && extend {
                 AnchorSegment::new(&document, existing.start, existing.len())?
