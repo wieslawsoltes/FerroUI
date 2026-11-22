@@ -18,6 +18,8 @@ pub enum Alignment {
     Top = 3,
 }
 
+ferroui_system::styled_enum!(Alignment { Unset, Left, Bottom, Right, Top });
+
 impl TryFrom<i32> for Alignment {
     type Error = i32;
 

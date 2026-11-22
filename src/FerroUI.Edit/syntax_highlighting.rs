@@ -9,6 +9,8 @@ ferroui_base::ferro_thread_local! {
     static BUILTIN_HIGHLIGHTING: HighlightingManager = HighlightingManager::new();
 }
 
+ferroui_base::styled_value!(SyntaxHighlighting);
+
 /// A compiled XSHD definition that can be assigned to an editor property.
 #[derive(Clone, Debug)]
 pub struct SyntaxHighlighting(pub Rc<HighlightingDefinition>);

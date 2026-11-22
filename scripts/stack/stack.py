@@ -89,8 +89,14 @@ def pull_with_head(branch):
 
 
 def pulls_based_on(branch):
-    found = gh("pr", "list", "--state", "open", "--base", branch, "--json", "number")
-    return [pull(item["number"]) for item in found]
+    """The open pull requests that are parts of the stack above `branch`. One labelled
+    `stack-independent` is based on the branch without being a part of its stack."""
+    found = gh("pr", "list", "--state", "open", "--base", branch, "--json", "number,labels")
+    return [
+        pull(item["number"])
+        for item in found
+        if not any(label["name"] == "stack-independent" for label in item["labels"])
+    ]
 
 
 def stack_below(top, default):

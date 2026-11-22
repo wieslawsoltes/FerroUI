@@ -37,6 +37,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct CustomPopupPlacementCallbackValue(pub CustomPopupPlacementCallback);
 
+ferroui_base::styled_value!(CustomPopupPlacementCallbackValue);
+
 impl PartialEq for CustomPopupPlacementCallbackValue {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
