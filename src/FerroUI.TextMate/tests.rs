@@ -2787,3 +2787,17 @@ fn a_keep_inside_a_lookahead_does_not_slice_backwards() {
     // Either backend may refuse the expression; neither may panic.
     let _ = grammar.tokenize_line("a", None);
 }
+
+#[test]
+fn a_bad_injection_selector_of_one_grammar_does_not_stop_the_others() {
+    let mut registry = Registry::new();
+    registry
+        .add_grammar_json(r#"{"scopeName":"source.good","patterns":[{"match":"a","name":"keyword"}]}"#)
+        .unwrap();
+    registry
+        .add_grammar_json(r#"{"scopeName":"text.bad","injectionSelector":"(((","patterns":[]}"#)
+        .unwrap();
+    let grammar = registry.load_grammar("source.good").unwrap();
+    let line = grammar.tokenize_line("a", None).unwrap();
+    assert!(line.tokens.iter().any(|token| token.scopes.iter().any(|scope| scope == "keyword")));
+}

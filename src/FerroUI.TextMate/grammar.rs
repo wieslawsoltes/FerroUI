@@ -86,9 +86,11 @@ impl Program {
                 .injections
                 .get_mut(root)
                 .expect("registered root injections");
+            // The selector of another grammar: a bad one loses that injection only, and the
+            // grammars that have nothing to do with it still load.
             let append = |&(selector, rule): &(&str, RuleId)| -> Result<()> {
-                for selector in ScopeSelector::parse_many(selector)? {
-                    list.push((selector, rule));
+                if let Ok(selectors) = ScopeSelector::parse_many(selector) {
+                    list.extend(selectors.into_iter().map(|selector| (selector, rule)));
                 }
                 Ok(())
             };
