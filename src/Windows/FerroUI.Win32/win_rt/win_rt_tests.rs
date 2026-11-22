@@ -95,6 +95,7 @@ fn the_api_information_knows_the_types_of_the_system() {
 
 #[test]
 fn the_settings_of_the_user_are_read_through_activation() {
+    let _ui_settings = crate::win32_platform_settings::ui_settings_test_lock();
     // The types the platform settings read: present on a desktop system;
     // a system without them is reported, not failed.
     if WinRTApiInformation::is_type_present("Windows.UI.ViewManagement.UISettings") {
