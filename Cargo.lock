@@ -528,6 +528,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "control-catalog",
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-desktop",
  "ferroui-devtools",
@@ -566,6 +567,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "control-catalog",
  "ferroui-base",
+ "ferroui-build",
  "ferroui-controls",
  "ferroui-ios",
  "ferroui-quartz",

@@ -33,6 +33,9 @@ ferroui-diagnostics = { workspace = true, optional = true }
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
 
 # The options of a smoke run on Windows (`FERROUI_SMOKE_RENDERING`).
+[build-dependencies]
+ferroui-build = { workspace = true }
+
 [target.'cfg(windows)'.dependencies]
 ferroui-media-windows = {workspace=true,features=["controls"]}
 ferroui-media-video-windows.workspace=true

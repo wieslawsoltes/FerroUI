@@ -153,6 +153,14 @@
 //! println!("cargo::metadata=xamlmeta={}/compiled_xaml.xamlmeta", env!("CARGO_MANIFEST_DIR"));
 //! ```
 //!
+//! # The export trie of an executable
+//!
+//! On macOS and iOS, outside the dev profile, the binary targets of the package are linked without
+//! an export trie (`-Wl,-no_exported_symbols`, #1049). A library target keeps its exports. An
+//! application whose plug-ins resolve names from the executable keeps the trie with
+//! `[package.metadata.ferroui] executable-exports = true`. A build script that does not run
+//! [`Build`] calls [`strip_executable_exports`].
+//!
 //! # Theme trimming
 //!
 //! An application (unless its manifest turns it off: `[package.metadata.ferroui]
@@ -204,6 +212,7 @@
 #![forbid(unsafe_code)]
 
 pub mod deterministic_id_generator;
+mod executable_exports;
 mod export_plan;
 pub use export_plan::ExportPlan;
 mod diagnostics;
@@ -374,6 +383,7 @@ impl XamlGroup {
     }
 }
 
+pub use executable_exports::{strip_executable_exports, EXECUTABLE_EXPORTS_KEY};
 pub use ferroui_build_scan::export::Outcome;
 
 /// The build of the markup of a crate; see the crate documentation.
@@ -723,6 +733,11 @@ impl Build {
         rerun(&mut lines, &self.manifest_dir.join("Cargo.toml"));
         for input in &self.inputs {
             rerun(&mut lines, input);
+        }
+        // The executables of the package, on macOS and iOS (#1049).
+        match executable_exports::lines(&self.manifest_dir) {
+            Ok(more) => lines.extend(more),
+            Err(error) => errors.push(error),
         }
         let on_models = self.type_system == TypeSystem::Model;
         // The documents are compiled against the assembly the crate registers; a build
