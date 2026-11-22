@@ -1,0 +1,13 @@
+diff --git a/native/FerroUI.Native/src/OSX/main.mm b/native/FerroUI.Native/src/OSX/main.mm
+index 577eb6a5d..22337d8d5 100644
+--- a/native/FerroUI.Native/src/OSX/main.mm
++++ b/native/FerroUI.Native/src/OSX/main.mm
+@@ -496,7 +496,7 @@ public:
+ 
+ };
+ 
+-extern "C" IFerroNativeFactory* CreateFerroNative()
++extern "C" __attribute__((visibility("default"))) IFerroNativeFactory* CreateFerroNative()
+ {
+     return new FerroNative();
+ };

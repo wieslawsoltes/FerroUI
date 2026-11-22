@@ -13,6 +13,8 @@ fn main() {
         .file("native/player.mm")
         .flag("-fobjc-arc")
         .flag("-fblocks")
+        .flag("-fvisibility=hidden")
+        .flag("-fvisibility-inlines-hidden")
         .compile("ferroui_media_video_apple");
     for framework in ["Foundation", "AVFoundation", "CoreMedia", "CoreVideo"] {
         println!("cargo:rustc-link-lib=framework={framework}");

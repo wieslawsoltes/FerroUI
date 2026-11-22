@@ -84,7 +84,7 @@ fn main() {
     frame_build.file("gpu/metal/frame_completion.m")
         .file("gpu/metal/shader_libraries.m")
         .file("gpu/graphite/pipelined_layer_texture.m")
-        .flag("-fobjc-arc").flag("-fblocks").compile("ferroui_frame_completion");
+        .flag("-fobjc-arc").flag("-fblocks").flag("-fvisibility=hidden").compile("ferroui_frame_completion");
     // The thread pool of Graphite's pipeline compiles (Graphite only).
     if env::var("CARGO_CFG_FERRO_SKIA_APPLE_GANESH").is_err() {
         println!("cargo:rerun-if-changed=gpu/graphite/pipeline_executor.cpp");
@@ -94,6 +94,8 @@ fn main() {
             .std("c++17")
             .file("gpu/graphite/pipeline_executor.cpp")
             .file("gpu/graphite/pipeline_record.cpp")
+            .flag("-fvisibility=hidden")
+            .flag("-fvisibility-inlines-hidden")
             .compile("ferroui_pipeline_executor");
     }
     println!("cargo:rustc-link-lib=framework=Metal");

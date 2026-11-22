@@ -14,6 +14,8 @@ fn main() {
         .file("native/camera.mm")
         .flag("-fobjc-arc")
         .flag("-fblocks")
+        .flag("-fvisibility=hidden")
+        .flag("-fvisibility-inlines-hidden")
         .compile("ferroui_media_camera_apple");
     for framework in [
         "Foundation",
