@@ -469,6 +469,8 @@ export class InputHelper {
         return true;
     }
 
+    private static readonly handledDeleteKeys = new WeakSet<EventTarget>();
+
     public static subscribeKeyEvents(element: HTMLInputElement, topLevelId: number) {
         // Differs from the original, which awaits the answer of the framework and prevents the
         // default action afterwards: the answer is synchronous, so that the decision is made while
@@ -482,6 +484,15 @@ export class InputHelper {
             try {
                 const handled: boolean =
                     FerroExports.InputHelper?.OnKeyDown(topLevelId, args.code, args.key, this.getModifiers(args)) ?? false;
+                // A browser that reports a delete key with the input method code keeps its
+                // default action, which arrives as a delete input event after this key has
+                // already deleted.
+                if (handled && !args.isComposing && args.keyCode === 229 &&
+                    (args.key === "Backspace" || args.key === "Delete")) {
+                    this.handledDeleteKeys.add(element);
+                } else {
+                    this.handledDeleteKeys.delete(element);
+                }
                 if (this.shouldPreventDefault(args, handled)) {
                     args.preventDefault();
                 }
@@ -492,6 +503,7 @@ export class InputHelper {
         element.addEventListener("keydown", keyDownHandler);
 
         const keyUpHandler = (args: KeyboardEvent) => {
+            this.handledDeleteKeys.delete(element);
             const handled: boolean =
                 FerroExports.InputHelper?.OnKeyUp(topLevelId, args.code, args.key, this.getModifiers(args)) ?? false;
             if (this.shouldPreventDefault(args, handled)) {
@@ -566,6 +578,13 @@ export class InputHelper {
                     : null;
                 return;
             }
+            if (isStandaloneDelete(args) && this.handledDeleteKeys.has(element)) {
+                if (args.cancelable) {
+                    args.preventDefault();
+                    this.handledDeleteKeys.delete(element);
+                }
+                return;
+            }
             if (isStandaloneDelete(args)) {
                 // Real keydown already prevents the browser default when it
                 // handles the key. For a DOM-only edit, prefer the cancelable
@@ -604,7 +623,14 @@ export class InputHelper {
             clearCompositionCommit();
             const replacement = pendingReplacement;
             pendingReplacement = undefined;
-            if (isStandaloneDelete(args)) {
+            if (isStandaloneDelete(args) && this.handledDeleteKeys.delete(element)) {
+                // The key has deleted: the proxy goes back to what the framework published.
+                const current = legacyInput ? this.surroundingProjections.get(legacyInput) : undefined;
+                if (legacyInput && current) {
+                    if (legacyInput.value !== current.value) legacyInput.value = current.value;
+                    writeTextSelection(legacyInput, ...current.selection);
+                }
+            } else if (isStandaloneDelete(args)) {
                 standaloneDelete(args);
             } else if (legacyInput && isLegacyEdit(args) && args.inputType === "insertReplacementText") {
                 const projection = this.surroundingProjections.get(legacyInput);

@@ -1,0 +1,552 @@
+diff --git a/native/FerroUI.Native/src/OSX/automation.mm b/native/FerroUI.Native/src/OSX/automation.mm
+--- a/native/FerroUI.Native/src/OSX/automation.mm
++++ b/native/FerroUI.Native/src/OSX/automation.mm
+@@ -6,6 +6,93 @@
+ #include "FrnView.h"
+ #include "WindowInterfaces.h"
+ 
++static NSRange ToNSRange(FrnTextSpan span)
++{
++    if (span.Start < 0 || span.End < span.Start || span.End >= NSNotFound)
++        return NSMakeRange(NSNotFound, 0);
++    return NSMakeRange((NSUInteger)span.Start, (NSUInteger)(span.End - span.Start));
++}
++
++static FrnTextSpan ToTextSpan(NSRange range)
++{
++    if (range.location >= NSNotFound || range.length >= NSNotFound - range.location)
++        return {-1, -1};
++    return {(int64_t)range.location, (int64_t)(range.location + range.length)};
++}
++
++static NSString* TextFromUtf8(IFrnString* value)
++{
++    ComPtr<IFrnString> text(value, true);
++    int length;
++    if (!text.getRaw() || text->Length(&length) != S_OK || length < 0)
++        return nil;
++    if (length == 0)
++        return @"";
++    void* bytes;
++    if (text->Pointer(&bytes) != S_OK || bytes == nullptr)
++        return nil;
++    return [[NSString alloc] initWithBytes:bytes length:(NSUInteger)length encoding:NSUTF8StringEncoding];
++}
++
++static NSColor* TextColor(FrnColor color)
++{
++    return [NSColor colorWithSRGBRed:color.Red / 255.0
++                              green:color.Green / 255.0
++                               blue:color.Blue / 255.0
++                              alpha:color.Alpha / 255.0];
++}
++
++static NSFont* TextFont(NSString* family, FrnTextStyle style)
++{
++    auto manager = [NSFontManager sharedFontManager];
++    const auto traits = style.Italic ? NSItalicFontMask : NSUnitalicFontMask;
++    // AppKit's family lookup uses its own weight scale, with 5 for regular and 9 for bold.
++    constexpr NSInteger weights[] = {2, 2, 3, 4, 5, 6, 8, 9, 10, 12, 14};
++    const auto weight = weights[(style.FontWeight + 50) / 100];
++    NSFont* font = nil;
++    if (family.length > 0)
++        font = [manager fontWithFamily:family traits:traits weight:weight size:style.FontSize];
++    if (font == nil)
++    {
++        font = [NSFont systemFontOfSize:style.FontSize
++                                weight:style.FontWeight >= 700 ? NSFontWeightBold : NSFontWeightRegular];
++        if (style.Italic)
++            font = [manager convertFont:font toHaveTrait:NSItalicFontMask];
++    }
++    return font;
++}
++
++static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange range,
++                                   FrnTextStyle style, NSString* family)
++{
++    if (style.FontSize > 0.0)
++    {
++        NSFont* font = TextFont(family, style);
++        if (font != nil)
++        {
++            auto keys = @{
++                NSAccessibilityFontNameKey: font.fontName,
++                NSAccessibilityFontFamilyKey: font.familyName ?: @"",
++                NSAccessibilityVisibleNameKey: font.displayName ?: @"",
++                NSAccessibilityFontSizeKey: @(font.pointSize),
++            };
++            [text addAttribute:NSAccessibilityFontTextAttribute value:keys range:range];
++        }
++    }
++    if (style.HasForeground)
++        [text addAttribute:NSAccessibilityForegroundColorTextAttribute
++                    value:(__bridge id)TextColor(style.Foreground).CGColor range:range];
++    if (style.HasBackground)
++        [text addAttribute:NSAccessibilityBackgroundColorTextAttribute
++                    value:(__bridge id)TextColor(style.Background).CGColor range:range];
++    if (style.Underline)
++        [text addAttribute:NSAccessibilityUnderlineTextAttribute value:@(NSUnderlineStyleSingle) range:range];
++    if (style.Strikethrough)
++        [text addAttribute:NSAccessibilityStrikethroughTextAttribute value:@YES range:range];
++    if (style.Script != 0)
++        [text addAttribute:NSAccessibilitySuperscriptTextAttribute value:@(style.Script) range:range];
++}
++
+ @implementation FrnAccessibilityElement
+ {
+     ComPtr<IFrnAutomationPeer> _peer;
+@@ -93,7 +180,9 @@
+         case AutomationCheckBox: return NSAccessibilityCheckBoxRole;
+         case AutomationComboBox: return NSAccessibilityPopUpButtonRole;
+         case AutomationComboBoxItem: return NSAccessibilityMenuItemRole;
+-        case AutomationEdit: return NSAccessibilityTextFieldRole;
++        case AutomationEdit:
++            return _peer->TextProvider_HasRanges() && _peer->TextProvider_IsMultiline()
++                ? NSAccessibilityTextAreaRole : NSAccessibilityTextFieldRole;
+         case AutomationHyperlink: return NSAccessibilityLinkRole;
+         case AutomationImage: return NSAccessibilityImageRole;
+         case AutomationListItem: return NSAccessibilityRowRole;
+@@ -244,6 +333,11 @@
+     }
+     else if (_peer->IsValueProvider())
+     {
++        if (_peer->TextProvider_HasRanges())
++        {
++            const auto span = _peer->TextProvider_GetDocumentSpan();
++            return [self accessibilityStringForRange:ToNSRange(span)];
++        }
+         return GetNSStringAndRelease(_peer->ValueProvider_GetValue());
+     }
+     else if (_peer->GetAutomationControlType() == AutomationText)
+@@ -265,9 +359,14 @@
+     if (_peer->IsValueProvider() && !_peer->ValueProvider_IsReadOnly())
+     {
+         if (newValue == nil)
+-            _peer->ValueProvider_SetValue(nil);
++            _peer->ValueProvider_SetValue(nullptr, 0);
+         else if ([newValue isKindOfClass:[NSString class]])
+-            _peer->ValueProvider_SetValue([(NSString*)newValue UTF8String]);
++        {
++            __attribute__((objc_precise_lifetime)) NSData* utf8 =
++                [(NSString*)newValue dataUsingEncoding:NSUTF8StringEncoding];
++            if (utf8 != nil)
++                _peer->ValueProvider_SetValue(utf8.length != 0 ? utf8.bytes : "", utf8.length);
++        }
+     }
+     else if (_peer->IsRangeValueProvider() && !_peer->RangeValueProvider_IsReadOnly())
+     {
+@@ -276,6 +375,131 @@
+     }
+ }
+ 
++- (NSInteger)accessibilityNumberOfCharacters
++{
++    return ToNSRange(_peer->TextProvider_GetDocumentSpan()).length;
++}
++
++- (NSRange)accessibilitySelectedTextRange
++{
++    ComPtr<IFrnTextSpanArray> spans(_peer->TextProvider_GetSelection(), true);
++    return spans.getRaw() ? ToNSRange(spans->GetPrimary()) : NSMakeRange(NSNotFound, 0);
++}
++
++- (NSArray<NSValue *> *)accessibilitySelectedTextRanges
++{
++    ComPtr<IFrnTextSpanArray> spans(_peer->TextProvider_GetSelection(), true);
++    if (!spans.getRaw())
++        return nil;
++
++    NSMutableArray<NSValue *> *result = [NSMutableArray array];
++    const auto count = spans->GetCount();
++    for (uint32_t i = 0; i < count; ++i)
++    {
++        const auto range = ToNSRange(spans->Get(i));
++        if (range.location != NSNotFound)
++            [result addObject:[NSValue valueWithRange:range]];
++    }
++    if (result.count == 0)
++    {
++        const auto caret = ToNSRange(spans->GetPrimary());
++        if (caret.location != NSNotFound)
++            [result addObject:[NSValue valueWithRange:caret]];
++    }
++    return result;
++}
++
++- (void)setAccessibilitySelectedTextRange:(NSRange)range
++{
++    if (_peer->IsEnabled())
++        _peer->TextProvider_Select(ToTextSpan(range));
++}
++
++- (NSString *)accessibilitySelectedText
++{
++    return [self accessibilityStringForRange:[self accessibilitySelectedTextRange]];
++}
++
++- (NSRange)accessibilityVisibleCharacterRange
++{
++    return ToNSRange(_peer->TextProvider_GetVisibleSpan());
++}
++
++- (NSString *)accessibilityStringForRange:(NSRange)range
++{
++    return TextFromUtf8(_peer->TextProvider_GetString(ToTextSpan(range)));
++}
++
++- (NSAttributedString *)accessibilityAttributedStringForRange:(NSRange)range
++{
++    ComPtr<IFrnStyledText> styled(_peer->TextProvider_GetStyledText(ToTextSpan(range)), true);
++    if (!styled.getRaw())
++        return nil;
++    NSString* content = TextFromUtf8(styled->GetText());
++    if (content == nil || content.length != range.length)
++        return nil;
++
++    auto text = [[NSMutableAttributedString alloc] initWithString:content];
++    for (unsigned int index = 0, count = styled->GetRunCount(); index < count; ++index)
++    {
++        const auto style = styled->GetStyle(index);
++        const auto run = ToNSRange(style.Span);
++        if (run.location == NSNotFound || NSMaxRange(run) > content.length)
++            return nil;
++        AddAccessibleTextStyle(text, run, style, TextFromUtf8(styled->GetFontName(index)));
++    }
++    return text;
++}
++
++- (NSRange)accessibilityStyleRangeForIndex:(NSInteger)index
++{
++    return ToNSRange(_peer->TextProvider_GetStyleSpan(index));
++}
++
++- (NSRect)accessibilityFrameForRange:(NSRange)range
++{
++    const auto bounds = _peer->TextProvider_GetBounds(ToTextSpan(range));
++    return bounds.Width == 0 && bounds.Height == 0 ? NSZeroRect : [self rectToScreen:bounds];
++}
++
++- (NSRange)accessibilityRangeForPosition:(NSPoint)point
++{
++    const auto topLevel = [self accessibilityTopLevelUIElement];
++    if (![topLevel isKindOfClass:[FrnWindow class]])
++        return NSMakeRange(NSNotFound, 0);
++
++    auto window = (FrnWindow*)topLevel;
++    auto view = [window view];
++    if (view == nil)
++        return NSMakeRange(NSNotFound, 0);
++
++    const auto windowPoint = [window convertPointFromScreen:point];
++    const auto localPoint = [view convertPoint:windowPoint fromView:nil];
++    return ToNSRange(_peer->TextProvider_GetSpanFromPoint({localPoint.x, localPoint.y}));
++}
++
++- (NSRange)accessibilityRangeForIndex:(NSInteger)index
++{
++    return ToNSRange(_peer->TextProvider_GetCharacterSpan(index));
++}
++
++- (NSInteger)accessibilityLineForIndex:(NSInteger)index
++{
++    const auto line = _peer->TextProvider_GetLineForIndex(index);
++    return line < 0 ? NSNotFound : line;
++}
++
++- (NSRange)accessibilityRangeForLine:(NSInteger)line
++{
++    return ToNSRange(_peer->TextProvider_GetRangeForLine(line));
++}
++
++- (NSInteger)accessibilityInsertionPointLineNumber
++{
++    const auto line = _peer->TextProvider_GetInsertionPointLine();
++    return line < 0 ? NSNotFound : line;
++}
++
+ - (BOOL)accessibilityIsAttributeSettable:(NSAccessibilityAttributeName)attribute
+ {
+     if ([attribute isEqualToString:NSAccessibilityValueAttribute])
+@@ -287,6 +511,9 @@
+         return NO;
+     }
+ 
++    if ([attribute isEqualToString:NSAccessibilitySelectedTextRangeAttribute])
++        return _peer->IsEnabled() && _peer->TextProvider_HasRanges() && _peer->TextProvider_CanSelect();
++
+     return [super accessibilityIsAttributeSettable:attribute];
+ }
+ 
+@@ -493,6 +720,29 @@
+ 
+ - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector
+ {
++    if (selector == @selector(setAccessibilitySelectedTextRange:))
++        return _peer->IsEnabled() && _peer->TextProvider_HasRanges() && _peer->TextProvider_CanSelect();
++
++    if (selector == @selector(accessibilityNumberOfCharacters) ||
++        selector == @selector(accessibilitySelectedText) ||
++        selector == @selector(accessibilitySelectedTextRange) ||
++        selector == @selector(accessibilitySelectedTextRanges) ||
++        selector == @selector(accessibilityVisibleCharacterRange) ||
++        selector == @selector(accessibilityStringForRange:) ||
++        selector == @selector(accessibilityFrameForRange:) ||
++        selector == @selector(accessibilityRangeForIndex:) ||
++        selector == @selector(accessibilityRangeForPosition:))
++        return _peer->TextProvider_HasRanges();
++
++    if (selector == @selector(accessibilityLineForIndex:) ||
++        selector == @selector(accessibilityRangeForLine:) ||
++        selector == @selector(accessibilityInsertionPointLineNumber))
++        return _peer->TextProvider_HasLogicalLines();
++
++    if (selector == @selector(accessibilityAttributedStringForRange:) ||
++        selector == @selector(accessibilityStyleRangeForIndex:))
++        return _peer->TextProvider_HasStyles();
++
+     if (selector == @selector(setAccessibilityValue:))
+     {
+         return (_peer->IsValueProvider() && !_peer->ValueProvider_IsReadOnly()) ||
+@@ -608,6 +858,9 @@
+         case SelectionProvider_Selection:
+             NSAccessibilityPostNotification(self, NSAccessibilitySelectedChildrenChangedNotification);
+             break;
++        case TextProvider_Selection:
++            NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
++            break;
+         case ToggleProvider_ToggleState:
+             NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
+             break;
+diff --git a/native/FerroUI.Native/src/OSX/clipboard.mm b/native/FerroUI.Native/src/OSX/clipboard.mm
+--- a/native/FerroUI.Native/src/OSX/clipboard.mm
++++ b/native/FerroUI.Native/src/OSX/clipboard.mm
+@@ -2,11 +2,48 @@
+ #include "common.h"
+ #include "clipboard.h"
+ #include "FrnString.h"
++#include <limits>
++
++// Chromium stores its web custom format map and numbered slots under these UTIs.
++static NSString* const WebCustomFormatMap = @"org.w3.web-custom-format.map";
++static NSString* const WebCustomFormatSlotPrefix = @"org.w3.web-custom-format.type-";
++static constexpr NSUInteger WebCustomFormatMapLimit = 64 * 1024;
++
++static bool IsWebCustomPasteboardType(NSString* format)
++{
++    if ([format isEqualToString:WebCustomFormatMap])
++        return true;
++    if (![format hasPrefix:WebCustomFormatSlotPrefix])
++        return false;
++
++    auto index = [format substringFromIndex:[WebCustomFormatSlotPrefix length]];
++    auto length = [index length];
++    if (length == 0 || length > 2 || (length == 2 && [index characterAtIndex:0] == '0'))
++        return false;
++    for (NSUInteger i = 0; i < length; ++i)
++    {
++        auto digit = [index characterAtIndex:i];
++        if (digit < '0' || digit > '9')
++            return false;
++    }
++    return true;
++}
+ 
+ class Clipboard : public ComSingleObject<IFrnClipboard, &IID_IFrnClipboard>
+ {
+ private:
+     NSPasteboard* _pasteboard;
++
++    NSPasteboardItem* ItemAtChangeCount(int index, int64_t changeCount)
++    {
++        if (index < 0 || changeCount != [_pasteboard changeCount])
++            return nil;
++        auto items = [_pasteboard pasteboardItems];
++        if (static_cast<NSUInteger>(index) >= [items count] || changeCount != [_pasteboard changeCount])
++            return nil;
++        return [items objectAtIndex:index];
++    }
++
+ public:
+     FORWARD_IUNKNOWN()
+     
+@@ -54,10 +91,9 @@
+         if (ret == nullptr)
+             return E_POINTER;
+         
+-        if (changeCount != [_pasteboard changeCount])
++        auto item = ItemAtChangeCount(index, changeCount);
++        if (item == nil)
+             return COR_E_OBJECTDISPOSED;
+-
+-        auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+         
+         *ret = ConvertPasteboardTypes([item types]);
+         return S_OK;
+@@ -93,11 +129,13 @@
+         if (ret == nullptr)
+             return E_POINTER;
+         
+-        if (changeCount != [_pasteboard changeCount])
++        auto item = ItemAtChangeCount(index, changeCount);
++        if (item == nil)
+             return COR_E_OBJECTDISPOSED;
+         
+-        auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+         auto value = [item stringForType:[NSString stringWithUTF8String:format]];
++        if (changeCount != [_pasteboard changeCount])
++            return COR_E_OBJECTDISPOSED;
+         *ret = value == nil ? nullptr : CreateFrnString(value);
+         return S_OK;
+     }
+@@ -109,10 +147,10 @@
+         if (ret == nullptr)
+             return E_POINTER;
+         
+-        if (changeCount != [_pasteboard changeCount])
++        auto item = ItemAtChangeCount(index, changeCount);
++        if (item == nil)
+             return COR_E_OBJECTDISPOSED;
+         
+-        auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+         auto formatStr = [NSString stringWithUTF8String:format];
+         
+         auto value = [item dataForType: formatStr];
+@@ -152,9 +190,17 @@
+             }
+         }
+ 
+-        *ret = value == nil || [value length] == 0
+-            ? nullptr
+-            : CreateByteArray((void*)[value bytes], (int)[value length]);
++        if (changeCount != [_pasteboard changeCount])
++            return COR_E_OBJECTDISPOSED;
++
++        auto length = [value length];
++        if (value == nil || length > static_cast<NSUInteger>(std::numeric_limits<int>::max())
++            || ([formatStr isEqualToString:WebCustomFormatMap] && length > WebCustomFormatMapLimit))
++            *ret = nullptr;
++        else if (length == 0)
++            *ret = IsWebCustomPasteboardType(formatStr) ? CreateFrnString(@"") : nullptr;
++        else
++            *ret = CreateByteArray((void*)[value bytes], static_cast<int>(length));
+         return S_OK;
+     }
+ 
+@@ -236,6 +282,9 @@
+ 
+ NSString* TryConvertFormatToUti(NSString* format)
+ {
++    if (IsWebCustomPasteboardType(format))
++        return format;
++
+     if (@available(macOS 11.0, *))
+     {
+         auto type = [UTType typeWithIdentifier:format];
+@@ -331,6 +380,8 @@
+         return GetNSStringAndRelease(value->AsString());
+     
+     auto length = value->GetByteLength();
++    if (length == 0)
++        return [NSData data];
+     auto buffer = malloc(length);
+     value->CopyBytesTo(buffer);
+     return [NSData dataWithBytesNoCopy:buffer length:length];
+diff --git a/src/FerroUI.Native/frn.idl b/src/FerroUI.Native/frn.idl
+--- a/src/FerroUI.Native/frn.idl
++++ b/src/FerroUI.Native/frn.idl
+@@ -409,6 +409,7 @@
+     ExpandCollapseProvider_ExpandCollapseState,
+     SelectionItemProvider_IsSelected,
+     SelectionProvider_Selection,
++    TextProvider_Selection,
+ }
+ 
+ struct FrnSize
+@@ -436,6 +437,12 @@
+     double X, Y;
+ }
+ 
++// Half-open UTF-16 bounds. A negative endpoint denotes an unavailable range.
++struct FrnTextSpan
++{
++    int64_t Start, End;
++}
++
+ enum FrnScreenOrientation
+ {
+     UnknownOrientation,
+@@ -479,6 +486,22 @@
+     byte Blue;
+ }
+ 
++// Bounds are relative to the UTF-16 substring returned by IFrnStyledText.
++struct FrnTextStyle
++{
++    FrnTextSpan Span;
++    double FontSize;
++    int FontWeight;
++    int Script;
++    bool Italic;
++    bool Underline;
++    bool Strikethrough;
++    bool HasForeground;
++    bool HasBackground;
++    FrnColor Foreground;
++    FrnColor Background;
++}
++
+ enum FrnRawMouseEventType
+ {
+     LeaveWindow,
+@@ -1367,7 +1390,7 @@
+      
+      bool IsValueProvider();
+      IFrnString* ValueProvider_GetValue();
+-     void ValueProvider_SetValue([const] char* value);
++     void ValueProvider_SetValue([const] void* value, uint64_t length);
+      bool ValueProvider_IsReadOnly();
+ 
+      IFrnString* GetHelpText();
+@@ -1377,6 +1400,42 @@
+      int GetHeadingLevel();
+ 
+      FrnLiveSetting GetLiveSetting();
++
++     bool TextProvider_HasRanges();
++     bool TextProvider_IsMultiline();
++     bool TextProvider_CanSelect();
++     FrnTextSpan TextProvider_GetDocumentSpan();
++     IFrnTextSpanArray* TextProvider_GetSelection();
++     FrnTextSpan TextProvider_GetVisibleSpan();
++     IFrnString* TextProvider_GetString(FrnTextSpan span);
++     FrnRect TextProvider_GetBounds(FrnTextSpan span);
++     FrnTextSpan TextProvider_GetCharacterSpan(int64_t offset);
++     FrnTextSpan TextProvider_GetSpanFromPoint(FrnPoint point);
++     void TextProvider_Select(FrnTextSpan span);
++     bool TextProvider_HasLogicalLines();
++     int64_t TextProvider_GetLineForIndex(int64_t offset);
++     FrnTextSpan TextProvider_GetRangeForLine(int64_t index);
++     int64_t TextProvider_GetInsertionPointLine();
++     bool TextProvider_HasStyles();
++     FrnTextSpan TextProvider_GetStyleSpan(int64_t offset);
++     IFrnStyledText* TextProvider_GetStyledText(FrnTextSpan span);
++}
++
++[uuid(2d816ae5-5a93-410a-91a6-e78cf916456d)]
++interface IFrnTextSpanArray : IUnknown
++{
++    uint GetCount();
++    FrnTextSpan Get(uint index);
++    FrnTextSpan GetPrimary();
++}
++
++[uuid(d3a72052-d368-4600-8451-e04bb9606f07)]
++interface IFrnStyledText : IUnknown
++{
++    IFrnString* GetText();
++    uint GetRunCount();
++    FrnTextStyle GetStyle(uint index);
++    IFrnString* GetFontName(uint index);
+ }
+ 
+ [uuid(b00af5da-78af-4b33-bfff-4ce13a6239a9)]
