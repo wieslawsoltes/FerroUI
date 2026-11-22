@@ -5,7 +5,7 @@ use ferroribbon_core::{RibbonString, model::*, theming::RibbonColor};
 use ferroui_reactiveui::{ICommand, ReactiveCommand};
 use ferroui_system::{
     component_model::INotifyPropertyChanged,
-    invariant_numbers::{NumberStyles, try_parse_double},
+    invariant_numbers::{NumberParseFlags, try_parse_double},
 };
 use std::{
     cell::{Cell, OnceCell, RefCell},
@@ -155,7 +155,7 @@ impl ExcelSheet {
             .font_size()
             .text()
             .and_then(|s| s.to_utf8().ok())
-            .and_then(|s| try_parse_double(&s, NumberStyles::FLOAT))
+            .and_then(|s| try_parse_double(&s, NumberParseFlags::FLOAT))
             .filter(|n| *n > 4. && *n < 100.)
         {
             cell.set_font_size(size);

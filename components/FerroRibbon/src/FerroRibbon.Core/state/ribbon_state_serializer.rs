@@ -325,7 +325,7 @@ fn read_enum(value: Node, names: &[&str]) -> Result<i32, ()> {
             s.to_utf8().map_err(|_| ())?;
             if let Some(n) = ferroui_system::invariant_numbers::try_parse_int(
                 &s.to_utf8().map_err(|_| ())?,
-                ferroui_system::invariant_numbers::NumberStyles::INTEGER,
+                ferroui_system::invariant_numbers::NumberParseFlags::INTEGER,
             ) {
                 return Ok(n);
             }

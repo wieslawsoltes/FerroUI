@@ -1,7 +1,7 @@
 use crate::collections::RibbonFixedItems;
 use crate::collections::{RibbonArray, RibbonList, RibbonReadOnlyList};
 use crate::text::{RibbonString, key_is, trim, whitespace};
-use ferroui_system::invariant_numbers::{InvariantF64, NumberStyles, try_parse_double};
+use ferroui_system::invariant_numbers::{InvariantF64, NumberParseFlags, try_parse_double};
 use std::rc::Rc;
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -339,7 +339,7 @@ fn pair(text: &[u16]) -> Option<(&[u16], &[u16])> {
     Some((trim(&text[..index]), trim(&text[index + 1..])))
 }
 fn number(value: &[u16]) -> Option<f64> {
-    try_parse_double(&String::from_utf16(value).ok()?, NumberStyles::FLOAT)
+    try_parse_double(&String::from_utf16(value).ok()?, NumberParseFlags::FLOAT)
 }
 fn double_equals(a: f64, b: f64) -> bool {
     a == b || a.is_nan() && b.is_nan()

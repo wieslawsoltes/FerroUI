@@ -100,7 +100,7 @@ pub(crate) fn capture_integer_with_format(
     value: Option<&str>,
     format: &ferroui_base::utilities::NumberFormatInfo,
 ) -> Option<i32> {
-    use ferroui_system::invariant_numbers::{NumberStyles, try_parse_int};
+    use ferroui_system::invariant_numbers::{NumberParseFlags, try_parse_int};
     // Capture's Int32 grammar matches culture signs ordinally, unlike the
     // decimal service's NBSP/space aliases and negative-pattern spacing.
     let value = value?.trim_start_matches(|c| c == ' ' || ('\t'..='\r').contains(&c));
@@ -126,7 +126,7 @@ pub(crate) fn capture_integer_with_format(
     let mut normalized = String::with_capacity(digits.len() + 1);
     normalized.push(sign);
     normalized.push_str(digits);
-    try_parse_int(&normalized, NumberStyles::INTEGER)
+    try_parse_int(&normalized, NumberParseFlags::INTEGER)
 }
 pub(crate) fn capture_integer(value: Option<&str>) -> Option<i32> {
     let value = value?;

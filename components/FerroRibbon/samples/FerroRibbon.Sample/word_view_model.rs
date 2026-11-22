@@ -3,7 +3,7 @@
 use ferroui_reactiveui::{
     ICommand, IReactiveObject, IReactiveObjectExt, ReactiveCommand, ReactiveObject, reactive_object,
 };
-use ferroui_system::invariant_numbers::{NumberStyles, try_parse_double, write_double};
+use ferroui_system::invariant_numbers::{NumberParseFlags, try_parse_double, write_double};
 use std::{
     cell::{Cell, OnceCell, RefCell},
     rc::Rc,
@@ -207,7 +207,7 @@ impl WordViewModel {
             WordAction::FontSizeCommitted(text) => {
                 if let Some(size) = text
                     .as_deref()
-                    .and_then(|s| try_parse_double(s, NumberStyles::FLOAT))
+                    .and_then(|s| try_parse_double(s, NumberParseFlags::FLOAT))
                     && size > 1.
                     && size < 400.
                 {
