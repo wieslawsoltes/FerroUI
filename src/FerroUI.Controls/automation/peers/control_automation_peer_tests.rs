@@ -3,9 +3,9 @@ use crate::automation::{AutomationElementIdentifiers, AutomationProperties, Auto
 use crate::presenters::ContentPresenter;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::test_support::{test_scope, TestRoot};
-use crate::{Border, Button, ContentControl, Control, Decorator, Panel};
+use crate::{Border, Button, ContentControl, Control, Decorator, InfoBar, Panel, ToolTip};
 use ferroui_base::data::TemplateBinding;
-use ferroui_base::{AnyValue, Rect, Ref, Size, Visual};
+use ferroui_base::{AnyValue, BoxedValue, Rect, Ref, Size, Visual};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -208,6 +208,125 @@ mod parent {
 
         assert!(target.cast::<ControlAutomationPeer>().expect("a control automation peer").try_owner().is_none());
         assert!(target.get_parent().is_none());
+    }
+}
+
+mod text_notifications {
+    use super::*;
+
+    #[test]
+    fn attached_name_updates_an_existing_peer_and_restores_content_fallback() {
+        let _scope = test_scope();
+        let button = Button::new();
+        button.set_content(Some(Rc::new("Navigation".to_string()) as BoxedValue));
+        AutomationProperties::set_name(&button, Some("Show navigation"));
+        let peer = create_peer(&button);
+        let raised = record(&peer);
+
+        AutomationProperties::set_name(&button, Some("Hide navigation"));
+        AutomationProperties::set_name(&button, Some("Show navigation"));
+        AutomationProperties::set_name(&button, None);
+
+        assert_eq!("Navigation", peer.get_name());
+        assert_eq!(peer, create_peer(&button));
+        let raised = raised.borrow();
+        assert_eq!(3, raised.len());
+        for (change, expected) in raised.iter().zip(["Hide navigation", "Show navigation", "Navigation"]) {
+            assert!(change.property() == AutomationElementIdentifiers::name_property());
+            assert_eq!(Some(expected.to_string()), string_value(change));
+            assert!(change.old_value().is_none());
+        }
+    }
+
+    #[test]
+    fn attached_help_text_updates_an_existing_peer_and_restores_tooltip_fallback() {
+        let _scope = test_scope();
+        let button = Button::new();
+        ToolTip::set_tip(&button, Some(Rc::new("Navigation help".to_string())));
+        let peer = create_peer(&button);
+        let raised = record(&peer);
+
+        AutomationProperties::set_help_text(&button, Some("Open the list navigation"));
+        AutomationProperties::set_help_text(&button, Some("Close the list navigation"));
+        AutomationProperties::set_help_text(&button, None);
+
+        assert_eq!("Navigation help", peer.get_help_text());
+        let raised = raised.borrow();
+        assert_eq!(3, raised.len());
+        for (change, expected) in raised.iter().zip([
+            "Open the list navigation", "Close the list navigation", "Navigation help",
+        ]) {
+            assert!(change.property() == AutomationElementIdentifiers::help_text_property());
+            assert_eq!(Some(expected.to_string()), string_value(change));
+            assert!(change.old_value().is_none());
+        }
+    }
+
+    #[test]
+    fn tooltip_changes_update_and_clear_help_text_without_recreating_the_peer() {
+        let _scope = test_scope();
+        let button = Button::new();
+        let peer = create_peer(&button);
+        let raised = record(&peer);
+
+        ToolTip::set_tip(&button, Some(Rc::new("Show navigation".to_string())));
+        ToolTip::set_tip(&button, Some(Rc::new("Hide navigation".to_string())));
+        ToolTip::set_tip(&button, None);
+
+        assert_eq!("", peer.get_help_text());
+        assert_eq!(peer, create_peer(&button));
+        let raised = raised.borrow();
+        assert_eq!(3, raised.len());
+        for (change, expected) in raised.iter().zip(["Show navigation", "Hide navigation", ""]) {
+            assert!(change.property() == AutomationElementIdentifiers::help_text_property());
+            assert_eq!(Some(expected.to_string()), string_value(change));
+        }
+    }
+
+    #[test]
+    fn tooltip_notification_preserves_explicit_help_text_precedence() {
+        let _scope = test_scope();
+        let button = Button::new();
+        ToolTip::set_tip(&button, Some(Rc::new("Original tooltip".to_string())));
+        AutomationProperties::set_help_text(&button, Some("Explicit help"));
+        let peer = create_peer(&button);
+        let raised = record(&peer);
+
+        ToolTip::set_tip(&button, Some(Rc::new("Updated tooltip".to_string())));
+        assert_eq!("Explicit help", peer.get_help_text());
+        AutomationProperties::set_help_text(&button, None);
+
+        assert_eq!("Updated tooltip", peer.get_help_text());
+        let raised = raised.borrow();
+        assert_eq!(2, raised.len());
+        for (change, expected) in raised.iter().zip(["Explicit help", "Updated tooltip"]) {
+            assert!(change.property() == AutomationElementIdentifiers::help_text_property());
+            assert_eq!(Some(expected.to_string()), string_value(change));
+        }
+    }
+
+    #[test]
+    fn info_bar_reports_attached_name_once_and_keeps_its_fallback_cache_current() {
+        let _scope = test_scope();
+        let bar = InfoBar::new();
+        bar.set_title("Original title");
+        let peer = create_peer(&bar);
+        let raised = record(&peer);
+
+        AutomationProperties::set_name(&bar, Some("Explicit name"));
+        bar.set_title("Changed title");
+        AutomationProperties::set_name(&bar, None);
+        bar.set_title("Final title");
+
+        assert_eq!("Final title", peer.get_name());
+        let raised = raised.borrow();
+        assert_eq!(3, raised.len());
+        for (change, expected) in raised.iter().zip(["Explicit name", "Changed title", "Final title"]) {
+            assert!(change.property() == AutomationElementIdentifiers::name_property());
+            assert_eq!(Some(expected.to_string()), string_value(change));
+        }
+        let previous: &dyn AnyValue = &**raised[2].old_value().expect("the previous effective name");
+        assert_eq!(Some(&"Changed title".to_string()), previous.downcast_ref::<String>());
     }
 }
 
