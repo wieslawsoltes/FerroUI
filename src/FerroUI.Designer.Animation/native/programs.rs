@@ -4,7 +4,7 @@ use ferroui_base::animation::{Animatable, Animation, IAnimation};
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::media::Transform;
 use ferroui_base::styling::{IStyle, Style, StyleBase, Styles};
-use ferroui_base::{FerroObject, Ref, StyledElement};
+use ferroui_base::{FerroObject, FerroProperty, Ref, StyledElement};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_markup_xaml::{diagnostics::XamlSourceInfo, FromXamlObject};
 use std::collections::{BTreeMap, BTreeSet};
@@ -20,6 +20,7 @@ struct LoadedProgram {
     animation: Ref<Animation>,
     style: Option<Ref<Style>>,
     custom_animators: bool,
+    transform_components: Vec<&'static FerroProperty>,
 }
 
 impl NativeProgramIndex {
@@ -155,6 +156,19 @@ impl NativeProgramIndex {
             .is_some_and(|program| program.custom_animators)
     }
 
+    pub fn uses_transform_components(&self, id: NodeId) -> bool {
+        self.programs
+            .get(&id)
+            .is_some_and(|program| !program.transform_components.is_empty())
+    }
+
+    pub fn transform_component(&self, id: NodeId, name: &str) -> Option<&'static FerroProperty> {
+        let mut matches = self.programs.get(&id)?.transform_components
+            .iter().copied().filter(|property| super::curve::matches_property(property, name));
+        let property = matches.next()?;
+        matches.next().is_none().then_some(property)
+    }
+
     pub fn style_matches(&self, id: NodeId, element: &StyledElement) -> bool {
         let Some(style) = self
             .programs
@@ -184,6 +198,7 @@ impl NativeProgramIndex {
         {
             self.programs.entry(id).or_insert_with(|| LoadedProgram {
                 custom_animators: animation.uses_custom_animators(),
+                transform_components: animation.transform_components(),
                 animation,
                 style,
             });

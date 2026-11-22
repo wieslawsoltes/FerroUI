@@ -35,6 +35,30 @@ In **Value curves** or **Velocity curves**, choose a component beside a supporte
 
 Drag a marker beneath the graph to move its key in time. Select the marker and edit **Value** to change the complete geometry value in one source edit. Agents can read the track’s `curve_channels` from `designer_programs` and pass a channel such as `"top_left"` to `designer_animation_curve`.
 
+### Animate a render transform
+
+1. Open an animation with a transform component key. In XAML, use a setter such as `RotateTransform.Angle` or `TranslateTransform.X`. Use a matching transform object, a direct child of a `TransformGroup`, or let FerroUI create its default group on a control without a render transform.
+2. In the VS Code Timeline or Designer Studio, open **Animation graph** and choose **Value curves** or **Velocity curves**. In App Preview, select the component track first. Rotation and skew use degrees, translations and centers use logical pixels, and scale uses a multiplier. Velocity is measured per authored second.
+3. Scrub the curve to see the transformed view. Select a key to edit its value or incoming easing, or use **Add keyframe at playhead** on the track to capture the native value. If the first or last key omits the endpoint, the renderer resolves it from the underlying transform and the clip’s fill mode. **Stop** restores the underlying transform. Use Undo to restore the source.
+
+```xaml
+<KeyFrame Cue="50%">
+    <Setter Property="RotateTransform.Angle" Value="80" />
+    <Setter Property="TranslateTransform.X" Value="44" />
+</KeyFrame>
+```
+
+In Rust, use the corresponding property getter in an inline style clip. The same editor can update literal `RotateTransform`, `Rotate3DTransform`, `ScaleTransform`, `SkewTransform`, and `TranslateTransform` keys.
+
+```rust
+.key_frame(0.5, |key| key.set(
+    ferroui_base::media::RotateTransform::angle_property(),
+    80.0,
+))
+```
+
+Agents can read the component property name from `designer_programs` or `designer_hosted_animations`. Pass it as `property` with `channel: "value"` to `designer_animation_curve` or `designer_hosted_curve`. Use the accepted program and target to draft, record, or apply a numeric key.
+
 ### Inspect a curve that changes units
 
 1. Open an animation of `RenderTransformOrigin` or another `RelativePoint` property. For a `RelativeScalar` property, the same workflow uses one value instead of X and Y.

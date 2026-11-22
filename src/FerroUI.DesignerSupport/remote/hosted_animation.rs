@@ -293,6 +293,7 @@ impl HostedAnimations {
                 source.document,
                 source.programs,
                 &index,
+                &targets,
                 &mut catalog.programs,
                 HostedKeyframeCapabilities {
                     authoring,

@@ -124,6 +124,31 @@ fn relative_point_keys_preserve_the_constructor_when_editing_units() {
 }
 
 #[test]
+fn transform_keyframes_map_owner_names_and_preserve_rust_literals() {
+    let source = VIEW.replace("ferroui_base::Visual::opacity_property()", "ferroui_base::media::RotateTransform::angle_property()")
+        .replace("0.6f64", "/* angle 🧭 */ 60.0f64")
+        .replace('\n', "\r\n");
+    let caret = source.rfind("rsx!").unwrap();
+    let catalog = RsxCatalog::built_in();
+    let projection = catalog.project(&source, caret).unwrap();
+    let markup = projection.preview_markup();
+    assert!(markup.source.contains(r#"Property="RotateTransform.Angle" Value="60""#));
+    let clip = markup.animations[0].1;
+    let edit = KeyframeEdit::Upsert {
+        previous: Some(0.5), time: 0.5, value: "72", easing: "0.25,-0.5,0.6,1.2",
+    };
+    let edited = TextPatch::apply_all(&source, clip.patch_keyframe("RotateTransform.Angle", edit).unwrap()).unwrap();
+    assert_eq!(edited, source.replace("60.0f64", "72.0f64"));
+    let insert = KeyframeEdit::Upsert {
+        previous: None, time: 1.5, value: "28", easing: "LinearEasing",
+    };
+    let patches = clip.author_keyframe(&source, catalog, "TranslateTransform.X", insert).unwrap();
+    let inserted = TextPatch::apply_all(&source, patches).unwrap();
+    assert!(inserted.contains("::ferroui_base::media::TranslateTransform::x_property(), 28.0"));
+    assert!(catalog.project(&inserted, caret).unwrap().xaml().contains(r#"Property="TranslateTransform.X" Value="28""#));
+}
+
+#[test]
 fn retiming_shared_cues_requires_every_setter_and_changes_each_cue_once() {
     let source = VIEW.replace(
         "0.2))",

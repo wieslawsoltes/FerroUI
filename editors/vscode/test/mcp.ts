@@ -16,6 +16,7 @@ import { verifyWorkspaceMcp } from './workspaceMcp';
 import { verifyTimelineMcp } from './studioTimelineMcp';
 import { verifyTimelineColorMcp } from './studioTimelineColorMcp';
 import { verifyTimelineRelativeMcp } from './studioTimelineRelativeMcp';
+import { verifyTimelineTransformMcp } from './studioTimelineTransformMcp';
 import { verifyTimelineRecording } from './studioTimelineRecordingMcp';
 import { verifyTimelineGeometry } from './studioTimelineGeometryMcp';
 import { verifyTimelinePlayback } from './studioTimelinePlaybackMcp';
@@ -319,6 +320,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyTimelineMcp({ invoke, content }, session, document, rsxKeyframeClipboard);
         await verifyTimelineColorMcp({ invoke, content }, session, document);
         await verifyTimelineRelativeMcp({ invoke, content }, session, document);
+        await verifyTimelineTransformMcp({ invoke, content }, session, document);
         await verifyTimelineRecording({ invoke, content }, session, document);
         await verifyTimelineGeometry({ invoke, content }, session, document);
         await verifyTimelinePlayback({ invoke, content }, session, document);

@@ -1,6 +1,6 @@
 use super::curve::matches_property;
 use crate::{AnimationEffect, AnimationProgram, AnimationValue, ImportOptions, ValueKind};
-use ferroui_base::animation::Animation;
+use ferroui_base::animation::{Animatable, Animation, animators::TransformAnimator};
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{
     CornerRadius, FerroProperty, Point, Rect, RelativePoint, RelativeScalar, Size, Thickness,
@@ -17,6 +17,16 @@ pub fn native_keyframe_options(
     document: &Document,
     program: &AnimationProgram,
     animation: &Animation,
+) -> ImportOptions {
+    native_keyframe_options_for_target(document, program, animation, None)
+}
+
+/// Include live underlying values for redirected transform tracks.
+pub fn native_keyframe_options_for_target(
+    document: &Document,
+    program: &AnimationProgram,
+    animation: &Animation,
+    target: Option<&Animatable>,
 ) -> ImportOptions {
     let properties = animation
         .children()
@@ -50,6 +60,7 @@ pub fn native_keyframe_options(
         effect_literal: Some(AnimationEffect::parse_native),
         ..ImportOptions::default()
     };
+    let transform_components = animation.transform_components();
     for (name, values) in setters {
         let mut matches = properties
             .iter()
@@ -95,6 +106,12 @@ pub fn native_keyframe_options(
         }
         if let Some(kind) = kind {
             options.property_kinds.insert(name.into(), kind);
+        }
+        if let Some(base) = target
+            .filter(|_| transform_components.contains(&property))
+            .and_then(|target| TransformAnimator::preview_base_value(target, property))
+        {
+            options.base_values.insert(name.into(), AnimationValue::Number(base));
         }
     }
     options

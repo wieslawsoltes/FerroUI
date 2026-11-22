@@ -114,6 +114,11 @@ pub trait Animator: Sized + 'static {
         None
     }
 
+    /// Resolve the object whose underlying value supplies the sampled track.
+    fn preview_target(&self, control: &Animatable) -> Option<Ref<Animatable>> {
+        Some(control.to_ref())
+    }
+
     fn neutral_value(&self, control: &Animatable) -> Self::Value {
         let property = self.base().styled_property::<Self::Value>();
         control.get_base_value(property).unwrap_or_else(|| control.get_value(property))
@@ -451,15 +456,16 @@ impl<A: Animator> IAnimator for A {
 
     fn sample_for_preview(&self, control: &Animatable, positions: &[f64]) -> Option<Vec<BoxedValue>> {
         let property = self.property()?;
+        let target = self.preview_target(control)?;
         if property.as_styled::<A::Value>().is_none()
-            || (!property.is_attached() && !property.owner_type().is_assignable_from(control.get_type()))
+            || (!property.is_attached() && !property.owner_type().is_assignable_from(target.get_type()))
         {
             return None;
         }
         if let Some(animator) = self.specialized_animator() {
-            return animator.sample_for_preview(control, positions);
+            return animator.sample_for_preview(&target, positions);
         }
-        let base = self.neutral_value(control);
+        let base = self.neutral_value(&target);
         Some(positions.iter().map(|&position| {
             Rc::new(interpolation_handler(self, position, &base)) as BoxedValue
         }).collect())

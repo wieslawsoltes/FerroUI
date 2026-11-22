@@ -775,7 +775,10 @@ impl DesignerSession {
         let authored_effect = self.animation.timeline.track(track_target, property)
             .and_then(|track| track.keyframes.first())
             .is_some_and(|key| matches!(&key.value, AnimationValue::Effect(_)));
-        if self.uses_rust_source() || authored_effect {
+        let transform_component = self.active_animation_program().is_some_and(|id| {
+            self.animation.native.transform_component(id, property).is_some()
+        });
+        if self.uses_rust_source() || authored_effect || transform_component {
             let program = self.active_animation_program().ok_or("Choose an authored animation")?;
             return self.record_sampled_keyframe(program, track_target, property, time);
         }
@@ -1095,6 +1098,11 @@ impl DesignerSession {
                 Ok(targets) => program.targets = targets,
                 Err(error) => program.diagnostics.push(error),
             }
+        }
+        self.animation
+            .native
+            .refresh(&self.document, &self.preview, &programs);
+        for program in &mut programs {
             let options = self.animation_import_options(program);
             match ferroui_designer_animation::animation_fragment(&self.document, program.id) {
                 Ok(source) => self.animation.codecs.decode(program, &source, &options),
@@ -1133,9 +1141,6 @@ impl DesignerSession {
             }
         }
         self.animation.compiled_targets = compiled_targets;
-        self.animation
-            .native
-            .refresh(&self.document, &self.preview, &programs);
         for program in &mut programs {
             if self.animation.native.uses_factory_target(program.id) {
                 program.diagnostics.push("Native preview uses the resource factory's artboard root; this temporary target is not authored in the document".into());
@@ -1261,6 +1266,15 @@ impl DesignerSession {
             let Some(property) = setter.attribute("Property") else {
                 continue;
             };
+            if let Some(component) = self.animation.native.transform_component(program.id, property) {
+                options.property_kinds.insert(property.into(), ValueKind::Number);
+                if let Some(base) = self.animation.native.transform_base_value(
+                    program, &self.preview, target, component,
+                ) {
+                    options.base_values.insert(property.into(), AnimationValue::Number(base));
+                }
+                continue;
+            }
             if self.animation_kind_for_target(target, property).is_none() {
                 if let Some(info) = self
                     .preview

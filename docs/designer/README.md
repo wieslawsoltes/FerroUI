@@ -259,6 +259,12 @@ the trace to retime its key. Change its incoming easing in the inspector to shap
 The fit icon frames a selection in either display. `designer_animation_curve` accepts
 `metric: "velocity"` for the same native samples.
 
+For transform component tracks such as `RotateTransform.Angle` or
+`TranslateTransform.X`, the graph samples the matching native transform object.
+Use the key inspector to edit its value or add a sampled key at the playhead.
+Studio and App Preview keep the original transform and use its properties when
+the animation has an implicit endpoint. [Animate a render transform](vscode/motion.md#animate-a-render-transform)
+
 Use the picker beside a supported geometry track to see one coordinate, dimension, side, or
 corner. Drag beneath the trace to retime its key or use the inspector to edit the complete
 geometry value. The MCP program catalog lists the same `curve_channels` for a track.

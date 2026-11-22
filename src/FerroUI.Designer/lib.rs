@@ -292,4 +292,6 @@ mod animation_integration_tests;
 #[cfg(test)]
 mod animation_effect_tests;
 #[cfg(test)]
+mod animation_transform_tests;
+#[cfg(test)]
 mod native_custom_animation_tests;

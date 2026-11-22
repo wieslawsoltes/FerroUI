@@ -37,6 +37,7 @@ impl DesignerSession {
     pub(crate) fn requires_native_animation(&self, program: &AnimationProgram) -> bool {
         self.seeks_animation_elapsed(program)
             || self.animation.native.uses_custom_animators(program.id)
+            || self.animation.native.uses_transform_components(program.id)
             || program.timeline.as_ref().is_some_and(|timeline| timeline.tracks.iter().any(|track| {
                 track.keyframes.first().is_some_and(|key| key.value.kind() == ValueKind::Effect)
             }))

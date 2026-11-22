@@ -134,6 +134,13 @@ editable even when no portable codec can decode them. Native previews use elapse
 time, including delays, easing, repeat and fill. Typed timeline scrubbing uses its iteration
 edit position as described above.
 
+Numeric transform component keys retain their qualified property names in the
+typed timeline. The native sampler resolves the same transform object as
+playback and reads its underlying value for implicit endpoints. Sampling a
+control without a render transform uses detached defaults, and playback creates
+the group at animation priority. XAML authoring and the mapped Rust getters keep
+the component track and its declared keys in source.
+
 The native codec also accepts registered effect strings when the host provides its effect
 resolver. The portable timeline preserves the source literal. The native animator supplies
 interpolation and the registered value supplies its parameter types. The catalog adds named

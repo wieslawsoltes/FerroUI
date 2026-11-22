@@ -1,6 +1,7 @@
 //! Bind Designer Studio's authored nodes to the shared native animation preview.
 use crate::{runtime::RuntimePreview, PreviewStatus};
 use ferroui_base::animation::Animatable;
+use ferroui_base::animation::animators::TransformAnimator;
 use ferroui_base::StyledElement;
 use ferroui_designer_animation::native::{
     animation_timing, sample_curve_track, sample_keyframe_value, validate_animation_target, NativePlayback, NativeProgramIndex,
@@ -40,6 +41,29 @@ impl NativeAnimations {
 
     pub(crate) fn uses_custom_animators(&self, id: NodeId) -> bool {
         self.index.uses_custom_animators(id)
+    }
+
+    pub(crate) fn uses_transform_components(&self, id: NodeId) -> bool {
+        self.index.uses_transform_components(id)
+    }
+
+    pub(crate) fn transform_component(
+        &self,
+        id: NodeId,
+        name: &str,
+    ) -> Option<&'static ferroui_base::FerroProperty> {
+        self.index.transform_component(id, name)
+    }
+
+    pub(crate) fn transform_base_value(
+        &self,
+        program: &AnimationProgram,
+        preview: &RuntimePreview,
+        node: NodeId,
+        property: &'static ferroui_base::FerroProperty,
+    ) -> Option<f64> {
+        let target = self.track_target(program, preview, node).ok()?;
+        TransformAnimator::preview_base_value(&target, property)
     }
 
     pub(crate) fn duration(&self, id: NodeId) -> Option<f64> {

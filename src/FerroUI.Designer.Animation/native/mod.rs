@@ -17,4 +17,4 @@ pub use source::NativeSourceIndex;
 pub use state_route::NativeStateRoute;
 pub use state_styles::NativeStateStyles;
 pub use state_triggers::{NativeStateTriggers, StateTriggerCapture, StateTriggerSelection};
-pub use typing::native_keyframe_options;
+pub use typing::{native_keyframe_options, native_keyframe_options_for_target};

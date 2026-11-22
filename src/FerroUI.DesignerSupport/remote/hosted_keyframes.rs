@@ -2,8 +2,10 @@
 mod selection;
 
 use crate::animation_codecs::with_codecs;
+use ferroui_base::animation::Animatable;
 use ferroui_base::media::CustomEffectRegistry;
-use ferroui_designer_animation::native::{native_keyframe_options, NativeProgramIndex};
+use ferroui_base::{Ref, StyledElement};
+use ferroui_designer_animation::native::{native_keyframe_options_for_target, NativeProgramIndex};
 use ferroui_designer_animation::{
     animation_fragment, compose_animation_edit, AnimationError, AnimationProgram, AnimationValue,
     CurveChannel, ImportOptions, KeyframeEdit, KeyframeLocation, TrackCurveChannel, ValueKind,
@@ -36,6 +38,7 @@ impl HostedKeyframes {
         document: Document,
         programs: Vec<AnimationProgram>,
         native: &NativeProgramIndex,
+        targets: &BTreeMap<i64, Ref<StyledElement>>,
         catalog: &mut [DesignAnimationProgram],
         capabilities: HostedKeyframeCapabilities,
     ) -> Self {
@@ -50,12 +53,15 @@ impl HostedKeyframes {
             };
             let mut program = program.clone();
             let Some(animation) = native.animation(program.id) else { continue };
-            let options = native_keyframe_options(&document, &program, animation);
             program.targets = entry
                 .default_targets
                 .iter()
                 .map(|id| *id as NodeId)
                 .collect();
+            let target = entry.default_targets.first()
+                .and_then(|id| targets.get(id))
+                .and_then(|target| target.cast::<Animatable>());
+            let options = native_keyframe_options_for_target(&document, &program, animation, target.as_deref());
             let Ok(source) = animation_fragment(&document, program.id) else {
                 continue;
             };
