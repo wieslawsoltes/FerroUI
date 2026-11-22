@@ -1,6 +1,16 @@
 use super::{IRecyclingDataTemplate, ITemplateWithParam, ITreeDataTemplate, ITypedDataTemplate};
 use crate::Control;
-use ferroui_base::{BoxedValue, Ref};
+use ferroui_base::{diagnostics::RsxSourceInfo, BoxedValue, Ref};
+use std::panic::Location;
+
+/// Provenance reported by a Rust template constructed with editor diagnostics enabled.
+#[derive(Clone, Copy, Debug)]
+pub struct RustDataTemplateSource {
+    /// The caller that constructed the template handle.
+    pub constructor: &'static Location<'static>,
+    /// The compiled source of the RSX invocation observed when rendering an item.
+    pub rendered_body: Option<RsxSourceInfo>,
+}
 
 /// Interface representing a template used to build a control for a piece of
 /// data.
@@ -20,6 +30,11 @@ pub trait IDataTemplate: ITemplateWithParam<Option<BoxedValue>, Option<Ref<Contr
 
     /// The template viewed as a tree data template, if it is one.
     fn as_tree_data_template(&self) -> Option<&dyn ITreeDataTemplate> {
+        None
+    }
+
+    /// Source evidence for the actual template handle selected by the control.
+    fn rust_editor_source(&self) -> Option<RustDataTemplateSource> {
         None
     }
 

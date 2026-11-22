@@ -1,8 +1,11 @@
 //! Weak source stamps for shared XAML values outside the class model.
 use super::XamlSourceInfo;
-use crate::{templates::ControlTemplate, FromXamlObject};
+use crate::{
+    templates::{ControlTemplate, DataTemplate, TreeDataTemplate},
+    FromXamlObject,
+};
 use ferroui_base::{AnyValue, BoxedValue};
-use ferroui_controls::templates::IControlTemplate;
+use ferroui_controls::templates::{IControlTemplate, IDataTemplate};
 use std::{
     cell::RefCell,
     collections::HashMap,
@@ -11,14 +14,16 @@ use std::{
 
 enum Owner {
     Boxed(Weak<dyn AnyValue>),
-    Template(Weak<ControlTemplate>),
+    ControlTemplate(Weak<ControlTemplate>),
+    DataTemplate(Weak<dyn IDataTemplate>),
 }
 
 impl Owner {
     fn alive(&self) -> bool {
         match self {
             Self::Boxed(object) => object.strong_count() != 0,
-            Self::Template(template) => template.strong_count() != 0,
+            Self::ControlTemplate(template) => template.strong_count() != 0,
+            Self::DataTemplate(template) => template.strong_count() != 0,
         }
     }
 }
@@ -29,12 +34,12 @@ ferroui_base::ferro_thread_local! {
 }
 
 pub(super) fn set(value: &BoxedValue, info: Option<XamlSourceInfo>) {
-    let (address, owner) = match control_template(value) {
-        Some(template) => (
-            Rc::as_ptr(&template) as usize,
-            Owner::Template(Rc::downgrade(&template)),
-        ),
-        None => (boxed_address(value), Owner::Boxed(Rc::downgrade(value))),
+    let (address, owner) = if let Some(template) = control_template(value) {
+        (address_of(&template), Owner::ControlTemplate(Rc::downgrade(&template)))
+    } else if let Some(template) = data_template(value) {
+        (address_of(&template), Owner::DataTemplate(Rc::downgrade(&template)))
+    } else {
+        (address_of(value), Owner::Boxed(Rc::downgrade(value)))
     };
     SOURCES.with(|sources| {
         let mut sources = sources.borrow_mut();
@@ -48,15 +53,19 @@ pub(super) fn set(value: &BoxedValue, info: Option<XamlSourceInfo>) {
 }
 
 pub(super) fn get(value: &BoxedValue) -> Option<XamlSourceInfo> {
-    lookup(control_template(value).map_or_else(
-        || boxed_address(value),
-        |template| Rc::as_ptr(&template) as usize,
-    ))
+    let address = control_template(value).map(|template| address_of(&template))
+        .or_else(|| data_template(value).map(|template| address_of(&template)))
+        .unwrap_or_else(|| address_of(value));
+    lookup(address)
 }
 
-pub(super) fn for_template(value: &Rc<dyn IControlTemplate>) -> Option<XamlSourceInfo> {
+pub(super) fn for_control_template(value: &Rc<dyn IControlTemplate>) -> Option<XamlSourceInfo> {
     let template = ControlTemplate::from_control_template(value)?;
-    lookup(Rc::as_ptr(&template) as usize)
+    lookup(address_of(&template))
+}
+
+pub(super) fn for_data_template(value: &Rc<dyn IDataTemplate>) -> Option<XamlSourceInfo> {
+    lookup(address_of(value))
 }
 
 fn lookup(address: usize) -> Option<XamlSourceInfo> {
@@ -67,8 +76,20 @@ fn lookup(address: usize) -> Option<XamlSourceInfo> {
     })
 }
 
-fn boxed_address(value: &BoxedValue) -> usize {
+fn address_of<T: ?Sized>(value: &Rc<T>) -> usize {
     Rc::as_ptr(value) as *const () as usize
+}
+
+fn data_template(value: &BoxedValue) -> Option<Rc<dyn IDataTemplate>> {
+    if let Some(template) = Rc::<DataTemplate>::from_xaml_object(value) {
+        return Some(template);
+    }
+    if let Some(template) = Rc::<TreeDataTemplate>::from_xaml_object(value) {
+        return Some(template);
+    }
+    value.downcast_ref::<Rc<dyn IDataTemplate>>()
+        .or_else(|| value.downcast_ref::<Option<Rc<dyn IDataTemplate>>>().and_then(Option::as_ref))
+        .cloned()
 }
 
 fn control_template(value: &BoxedValue) -> Option<Rc<ControlTemplate>> {

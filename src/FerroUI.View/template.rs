@@ -5,10 +5,17 @@ use crate::element::{rerender, Element, IntoElement};
 use crate::hooks::{use_data_context, use_hook};
 use crate::reactive::Owner;
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::templates::{IDataTemplate, IRecyclingDataTemplate, ITemplateWithParam};
+use ferroui_controls::templates::{
+    IDataTemplate, IRecyclingDataTemplate, ITemplateWithParam, RustDataTemplateSource,
+};
 use ferroui_controls::Control;
 use std::cell::RefCell;
+use std::panic::Location;
 use std::rc::Rc;
+
+#[path = "template_source.rs"]
+mod editor;
+use editor::EditorSource;
 
 /// A data template whose item is a component: for the `ItemTemplate` of an
 /// items control or the `ContentTemplate` of a content control.
@@ -32,23 +39,32 @@ use std::rc::Rc;
 /// controls, so scrolling a long list makes no new controls once the pool has
 /// the hosts of a screen. The pool ends its hosts when the template is
 /// dropped.
+#[track_caller]
 pub fn template<T, E>(view: impl Fn(T) -> E + 'static) -> Rc<dyn IDataTemplate>
 where
     T: Clone + 'static,
     E: IntoElement,
 {
-    template_of("ComponentHost", view)
+    let source = crate::hot::record_source_locations().then_some(Location::caller());
+    template_of("ComponentHost", source, view)
 }
 
 /// [`template`] whose hosts the inspector calls `origin`.
-pub(crate) fn template_of<T, E>(origin: &'static str, view: impl Fn(T) -> E + 'static) -> Rc<dyn IDataTemplate>
+pub(crate) fn template_of<T, E>(
+    origin: &'static str,
+    constructor: Option<&'static Location<'static>>,
+    view: impl Fn(T) -> E + 'static,
+) -> Rc<dyn IDataTemplate>
 where
     T: Clone + 'static,
     E: IntoElement,
 {
     let view = Rc::new(view);
+    let source = constructor.map(EditorSource::new).map(Rc::new);
+    let editor_source = source.clone();
     let item_view: Rc<dyn Fn() -> Element> = Rc::new(move || {
         let view = view.clone();
+        let editor_source = editor_source.clone();
         rerender(move || {
             // A host waiting in the pool has no data context: it keeps
             // showing its last item until it is given the next one.
@@ -58,7 +74,13 @@ where
                 *last.borrow_mut() = Some(item.clone());
             }
             match item.or_else(|| last.borrow().clone()) {
-                Some(item) => view(item).into_element(),
+                Some(item) => {
+                    let element = view(item).into_element();
+                    if let Some(source) = &editor_source {
+                        source.observe(&element);
+                    }
+                    element
+                }
                 None => Element::Empty,
             }
         })
@@ -74,6 +96,7 @@ where
         owner: Owner::current(),
         pool: Rc::new(RefCell::new(Vec::new())),
         origin,
+        editor_source: source,
     })
 }
 
@@ -83,6 +106,7 @@ struct ComponentTemplate {
     owner: Option<Owner>,
     pool: Rc<HostPool>,
     origin: &'static str,
+    editor_source: Option<Rc<EditorSource>>,
 }
 
 impl Drop for ComponentTemplate {
@@ -117,6 +141,10 @@ impl IDataTemplate for ComponentTemplate {
 
     fn as_recycling_data_template(&self) -> Option<&dyn IRecyclingDataTemplate> {
         Some(self)
+    }
+
+    fn rust_editor_source(&self) -> Option<RustDataTemplateSource> {
+        Some(self.editor_source.as_ref()?.provenance())
     }
 }
 

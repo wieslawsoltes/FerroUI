@@ -8,7 +8,7 @@ use ferroui_base::{
     ferro_markup_type, ferro_properties, ferro_static_type, AttachedProperty, BoxedValue, FerroObject,
     FerroProperty, WeakRef,
 };
-use ferroui_controls::templates::IControlTemplate;
+use ferroui_controls::templates::{IControlTemplate, IDataTemplate};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt;
@@ -178,7 +178,12 @@ impl XamlSourceInfo {
     /// Return compiler source information for the actual XAML template used
     /// by a control, independent of the boxed handle that created it.
     pub fn for_control_template(template: &Rc<dyn IControlTemplate>) -> Option<Self> {
-        value_identity::for_template(template)
+        value_identity::for_control_template(template)
+    }
+
+    /// Return compiler source information for the effective data template handle.
+    pub fn for_data_template(template: &Rc<dyn IDataTemplate>) -> Option<Self> {
+        value_identity::for_data_template(template)
     }
 
     /// Retrieves the XAML source information associated with the specified
