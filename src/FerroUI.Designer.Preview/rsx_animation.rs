@@ -192,21 +192,15 @@ impl AuthoredRsxFrame {
 
     pub(crate) fn hosted_patch(
         &self,
-        draft: &crate::hosted_animation::KeyframeDraft,
+        program: i64,
+        property: &str,
+        edit: KeyframeEdit<'_>,
     ) -> Result<Option<DesignAnimationSourcePatch>, String> {
-        let clip = u64::try_from(draft.program)
+        let clip = u64::try_from(program)
             .ok()
             .and_then(|id| self.clips.get(&id))
             .ok_or("Choose an animation with a mapped Rust declaration")?;
-        let patches = clip.patch_keyframe(
-            &draft.property,
-            KeyframeEdit::Upsert {
-                previous: draft.previous,
-                time: draft.time,
-                value: &draft.value,
-                easing: &draft.easing,
-            },
-        )?;
+        let patches = clip.author_keyframe(&self.source, &self.catalog, property, edit)?;
         let edited = TextPatch::apply_all(&self.source, patches).map_err(|error| error.to_string())?;
         crate::hosted_animation::checked_source_patch(&self.source, &edited)
     }

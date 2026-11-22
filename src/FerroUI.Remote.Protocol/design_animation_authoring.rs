@@ -3,6 +3,8 @@ use crate::{bson_class, ferro_remote_message_guid};
 /// Opt in alongside the animation transport. Older clients still receive the
 /// playback catalog.
 pub const DESIGN_ANIMATION_AUTHORING_QUERY: &str = "ferroui-design-keyframes";
+/// Allow authoring requests to capture a value from the native track sampler.
+pub const DESIGN_KEYFRAME_SAMPLING_QUERY: &str = "ferroui-design-keyframe-sampling";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationAuthoring {
@@ -21,6 +23,7 @@ pub struct DesignAnimationTrack {
     pub property: String,
     pub keys: Vec<DesignAnimationKeyframe>,
     pub curve_channels: Option<Vec<String>>,
+    pub can_sample: Option<bool>,
 }
 
 bson_class!(DesignAnimationTrack as "DesignAnimationTrack" {
@@ -28,6 +31,7 @@ bson_class!(DesignAnimationTrack as "DesignAnimationTrack" {
     "Property" => property: String,
     "Keys" => keys: Vec<DesignAnimationKeyframe>,
     "CurveChannels" => curve_channels: Option<Vec<String>>,
+    "CanSample" => can_sample: Option<bool>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -58,6 +62,8 @@ pub struct DesignAnimationAuthoringRequest {
     pub time: f64,
     pub value: String,
     pub easing: String,
+    pub sample: Option<bool>,
+    pub sample_target: Option<i64>,
 }
 
 ferro_remote_message_guid!(
@@ -74,6 +80,8 @@ bson_class!(DesignAnimationAuthoringRequest as "DesignAnimationAuthoringRequest"
     "Time" => time: f64,
     "Value" => value: String,
     "Easing" => easing: String,
+    "Sample" => sample: Option<bool>,
+    "SampleTarget" => sample_target: Option<i64>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -83,6 +91,7 @@ pub struct DesignAnimationAuthoringResult {
     pub patch: Option<DesignAnimationSourcePatch>,
     pub samples: Vec<f64>,
     pub value_kind: String,
+    pub sampled_key: Option<DesignAnimationKeyframe>,
     pub error: Option<String>,
 }
 
@@ -96,6 +105,7 @@ bson_class!(DesignAnimationAuthoringResult as "DesignAnimationAuthoringResult" {
     "Patch" => patch: Option<DesignAnimationSourcePatch>,
     "Samples" => samples: Vec<f64>,
     "ValueKind" => value_kind: String,
+    "SampledKey" => sampled_key: Option<DesignAnimationKeyframe>,
     "Error" => error: Option<String>,
 });
 

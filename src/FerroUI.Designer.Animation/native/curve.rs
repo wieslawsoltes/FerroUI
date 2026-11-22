@@ -1,5 +1,5 @@
 use super::curve_value;
-use crate::{AnimationError, CurveChannel, CurvePoint, CurveWindow};
+use crate::{AnimationError, AnimationValue, CurveChannel, CurvePoint, CurveWindow};
 use ferroui_base::animation::{Animatable, Animation};
 use ferroui_base::{BoxedValue, FerroProperty};
 
@@ -50,6 +50,17 @@ pub fn sample_keyframe_value(
         .map_err(|error| error.to_string())?
         .pop()
         .ok_or_else(|| "The native track did not return a value".into())
+}
+
+/// Capture a native sample in the portable authoring format.
+pub fn sample_typed_keyframe(
+    animation: &Animation,
+    target: &Animatable,
+    name: &str,
+    time: f64,
+) -> Result<AnimationValue, String> {
+    let sample = sample_keyframe_value(animation, target, name, time)?;
+    curve_value::value(&sample).ok_or_else(|| "This native value has no typed keyframe representation".into())
 }
 
 fn track(animation: &Animation, name: &str) -> Result<(&'static FerroProperty, Vec<f64>), String> {

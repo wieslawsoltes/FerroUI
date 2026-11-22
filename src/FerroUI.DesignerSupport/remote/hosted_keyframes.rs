@@ -19,15 +19,21 @@ pub(super) struct HostedKeyframes {
     document: Document,
     programs: BTreeMap<i64, (AnimationProgram, ImportOptions)>,
 }
+
+pub(super) struct HostedKeyframeCapabilities {
+    pub(super) authoring: bool,
+    pub(super) curves: bool,
+    pub(super) curve_channels: bool,
+    pub(super) sampling: bool,
+}
+
 impl HostedKeyframes {
     pub(super) fn mount(
         document: Document,
         programs: Vec<AnimationProgram>,
         native: &NativeProgramIndex,
         catalog: &mut [DesignAnimationProgram],
-        can_edit: bool,
-        curves: bool,
-        curve_channels: bool,
+        capabilities: HostedKeyframeCapabilities,
     ) -> Self {
         let candidates = programs
             .into_iter()
@@ -56,14 +62,14 @@ impl HostedKeyframes {
                 });
                 tracks(&program)
             }));
-            let Ok(Some(tracks)) = decoded else { continue };
-            if curves {
+            let Ok(Some(mut tracks)) = decoded else { continue };
+            if capabilities.curves {
                 let tracks: Vec<_> = tracks
                     .iter()
                     .filter(|track| {
                         track.keys.first().is_some_and(|key| {
                             if track.curve_channels.is_some() {
-                                return curve_channels && matches!((key.value_kind.as_str(), options.property_kinds.get(&track.property)),
+                                return capabilities.curve_channels && matches!((key.value_kind.as_str(), options.property_kinds.get(&track.property)),
                                     ("RelativePoint", Some(ValueKind::RelativePoint)) | ("RelativeScalar", Some(ValueKind::RelativeScalar)));
                             }
                             if key.value_kind == "Color"
@@ -72,7 +78,7 @@ impl HostedKeyframes {
                                 return false;
                             }
                             key.value_kind == "Number"
-                                || (curve_channels
+                                || (capabilities.curve_channels
                                     && !CurveChannel::for_authored_kind(&key.value_kind).is_empty())
                         })
                     })
@@ -84,7 +90,15 @@ impl HostedKeyframes {
                 options.property_kinds.get(&track.property).is_some_and(|kind| *kind != ValueKind::Discrete
                     && track.keyframes.iter().all(|key| key.value.kind() == *kind))
             }));
-            if can_edit && (program.has_project_codec() || typed) {
+            if capabilities.authoring && (program.has_project_codec() || typed) {
+                if capabilities.sampling {
+                    for track in &mut tracks {
+                        let supported = options.property_kinds.get(&track.property).is_some_and(|kind| {
+                            *kind != ValueKind::Discrete && track.keys.iter().all(|key| key.value_kind == format!("{kind:?}"))
+                        });
+                        track.can_sample = (supported && !entry.compatible_targets.is_empty()).then_some(true);
+                    }
+                }
                 entry.authoring = Some(DesignAnimationAuthoring {
                     codec: program.codec.clone().unwrap_or_default(),
                     tracks,
@@ -98,6 +112,7 @@ impl HostedKeyframes {
     pub(super) fn plan(
         &self,
         request: &DesignAnimationAuthoringRequest,
+        sampled: Option<DesignAnimationKeyframe>,
     ) -> Result<DesignAnimationAuthoringResult, String> {
         let (program, options) = self
             .programs
@@ -106,11 +121,15 @@ impl HostedKeyframes {
         let target =
             NodeId::try_from(request.target).map_err(|_| "Choose an authored animation track")?;
         let property = &request.property;
+        let (time, value, easing) = sampled.as_ref().map_or(
+            (request.time, request.value.as_str(), request.easing.as_str()),
+            |key| (key.time, key.value.as_str(), key.easing.as_str()),
+        );
         let edit = KeyframeEdit::Upsert {
             previous: request.previous,
-            time: request.time,
-            value: &request.value,
-            easing: &request.easing,
+            time,
+            value,
+            easing,
         };
         let draft = program
             .plan_keyframe(target, property, edit, |text, kind| {
@@ -123,7 +142,11 @@ impl HostedKeyframes {
             })
             .map_err(|error| error.to_string())?;
         let (source, accepted) = with_codecs(|codecs| {
-            let source = codecs.encode_for_document(&self.document, program, &draft)?;
+            let source = if sampled.is_some() {
+                codecs.encode_keyframes_for_document(&self.document, program, &draft)?
+            } else {
+                codecs.encode_for_document(&self.document, program, &draft)?
+            };
             let mut accepted = program.clone();
             codecs.decode(&mut accepted, &source, options);
             Ok::<_, AnimationError>((source, accepted))
@@ -137,12 +160,12 @@ impl HostedKeyframes {
         let mut location = KeyframeLocation {
             target,
             property: property.clone(),
-            time: request.time,
+            time,
         };
         location.reconcile_time(accepted_timeline);
         let expected = draft
             .track(target, property)
-            .and_then(|track| track.keyframes.iter().find(|key| key.time == request.time));
+            .and_then(|track| track.keyframes.iter().find(|key| key.time == time));
         let round_trip = accepted_timeline
             .track(target, property)
             .and_then(|track| track.keyframes.iter().find(|key| key.time == location.time));
@@ -160,6 +183,10 @@ impl HostedKeyframes {
             patch,
             samples: preview.samples,
             value_kind: format!("{:?}", preview.value_kind),
+            sampled_key: sampled.map(|mut key| {
+                key.time = location.time;
+                key
+            }),
             error: None,
         })
     }
@@ -193,6 +220,7 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
                 target: i64::try_from(track.target).ok()?,
                 property: track.property.clone(),
                 curve_channels,
+                can_sample: None,
                 keys: track
                     .keyframes
                     .iter()

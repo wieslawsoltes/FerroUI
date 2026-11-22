@@ -39,6 +39,7 @@
     background: var(--vscode-charts-blue, var(--focus));
     pointer-events: none;
 }
+.hosted-key-ruler::after { inset-block-start: 17px; }
 .hosted-key-ruler span {
     position: absolute;
     inset-block-start: 3px;
@@ -54,6 +55,8 @@
 .hosted-key-row > .timeline-lane > button { cursor: ew-resize; }
 #hosted-key-tracks { margin: 0; padding: 0; list-style: none; }
 #hosted-key-tracks .hosted-key-row:last-child { border-block-end: 0; }
+.hosted-key-heading { display: flex; align-items: center; gap: 4px; min-inline-size: 0; }
+.hosted-key-heading .tool { margin-inline-start: auto; inline-size: 22px; block-size: 22px; min-block-size: 22px; }
 .hosted-key-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hosted-key-grid .timeline-marquee {
     position: absolute;

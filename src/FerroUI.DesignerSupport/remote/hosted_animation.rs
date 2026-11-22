@@ -4,13 +4,15 @@
 mod curve;
 #[path = "hosted_animation_playback.rs"]
 mod playback;
+#[path = "hosted_keyframe_sample.rs"]
+mod keyframe_sample;
 #[path = "hosted_state_routes.rs"]
 mod state_routes;
 
 pub(super) use curve::curve;
 
 use crate::design_window_loader::LoadedDesign;
-use super::hosted_keyframes::HostedKeyframes;
+use super::hosted_keyframes::{HostedKeyframeCapabilities, HostedKeyframes};
 use state_routes::HostedStateRoutes;
 use crate::remote::previewer_windowing_platform::PreviewerWindowingPlatform;
 use ferroui_base::animation::Animatable;
@@ -32,6 +34,7 @@ use ferroui_remote_protocol::designer::{
     DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
     DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_VERSION,
     DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
+    DESIGN_KEYFRAME_SAMPLING_QUERY,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
@@ -41,6 +44,7 @@ ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
     static AUTHORING: Cell<bool> = const { Cell::new(false) };
     static KEYFRAME_SELECTION: Cell<bool> = const { Cell::new(false) };
+    static KEYFRAME_SAMPLING: Cell<bool> = const { Cell::new(false) };
     static CURVES: Cell<bool> = const { Cell::new(false) };
     static CURVE_CHANNELS: Cell<bool> = const { Cell::new(false) };
     static CLIPS: Cell<bool> = const { Cell::new(false) };
@@ -59,6 +63,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     ENABLED.set(enabled);
     AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
     KEYFRAME_SELECTION.set(AUTHORING.get() && requested(DESIGN_KEYFRAME_SELECTION_QUERY));
+    KEYFRAME_SAMPLING.set(AUTHORING.get() && requested(DESIGN_KEYFRAME_SAMPLING_QUERY));
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
     CURVE_CHANNELS.set(CURVES.get() && requested(DESIGN_ANIMATION_CURVE_CHANNELS_QUERY));
     CLIPS.set(enabled && requested(DESIGN_ANIMATION_CLIPS_QUERY));
@@ -167,7 +172,9 @@ pub(super) fn plan_keyframe(request: &DesignAnimationAuthoringRequest) -> Design
             let mut active = active.borrow_mut();
             let host = active.as_mut().ok_or("Open an app-hosted animation preview first")?;
             host.claim(request.revision, request.request)?;
-            host.keyframes.as_ref().ok_or("The application preview has no editable animation tracks")?.plan(request)
+            let sampled = (request.sample == Some(true)).then(|| host.sample_keyframe(request)).transpose()?;
+            host.keyframes.as_ref().ok_or("The application preview has no editable animation tracks")?
+                .plan(request, sampled)
         })
     }));
     let error = match plan {
@@ -276,9 +283,12 @@ impl HostedAnimations {
                 source.programs,
                 &index,
                 &mut catalog.programs,
-                authoring,
-                curves,
-                CURVE_CHANNELS.get(),
+                HostedKeyframeCapabilities {
+                    authoring,
+                    curves,
+                    curve_channels: CURVE_CHANNELS.get(),
+                    sampling: KEYFRAME_SAMPLING.get(),
+                },
             )
         });
         Self {

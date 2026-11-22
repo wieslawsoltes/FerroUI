@@ -150,6 +150,10 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
         const keyDraft = await invoke('designer_hosted_keyframe_draft', hostedKey);
         assert.ok(keyDraft.isError && !keyDraft.content[0]?.text?.includes('allowWrites'));
+        const sampleKey = { ...hostedKey, arguments: { program: 1, target: 1, property: 'Opacity', time: .5, sample: true } };
+        assert.match((await invoke('designer_hosted_keyframe', sampleKey)).content[0]?.text ?? '', /allowWrites/);
+        const mixedKey = { ...sampleKey, arguments: { ...sampleKey.arguments, value: '.3', easing: 'Linear' } };
+        assert.match((await invoke('designer_hosted_keyframe_draft', mixedKey)).content[0]?.text ?? '', /matching input form/);
         const palette = { ...hostedKey, arguments: {
             target: { address: 'ferres://sample/View.xaml', owner: 1 }, edit: { action: 'set', node: 2, color: '#FFFF0000' },
         } };

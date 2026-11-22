@@ -142,6 +142,8 @@ For an editable scalar track, drag a key on its value curve to change its time a
 
 Open **Keyframe lanes** to select and drag keys across an app-hosted clip’s authored tracks. Use the shared typed clipboard for paste and reversed paste, or set **Authored time** to scale or mirror a selection. Group edits take one Undo step and preserve a compatible app preview pose. Agents use the group draft and apply tools from the same frame. [App Preview keyframe lanes](../../docs/designer/vscode/motion.md#edit-several-keys-in-app-preview)
 
+Set **Authored time** and choose the plus icon on a sampleable XAML or mapped Rust property lane to add a key with the value from the running app’s animator. This edits the unsaved source in one Undo step. [Add a native key in App Preview](../../docs/designer/vscode/motion.md#add-a-native-key-in-app-preview)
+
 Use **Animation clip actions** to create a clip on a live style owner and rename, duplicate, or remove XAML or mapped Rust clips. Agents can draft or apply the same operations with `designer_hosted_clip_draft` and `designer_hosted_clip_edit`. [App Preview clip actions](../../docs/designer/vscode/motion.md#manage-clips-in-app-preview)
 
 Use **Visual state actions** to edit groups, states, setters, and transitions in XAML or mapped Rust. The running app can sample a supported state or transition. Agents read the accepted state model and plan or apply one source edit with `designer_hosted_state_group_draft` and `designer_hosted_state_group`. [App Preview visual states](../../docs/designer/vscode/motion.md#author-visual-states-in-app-preview)

@@ -281,7 +281,7 @@ export class HostedAnimationView {
         labelButton(this.edit, program?.stateRoute ? 'Edit state route timing' : 'Edit application keyframe');
         const keyframeUsable = usable && !this.clips.visible;
         this.keyframes.follow(keyframeUsable ? this.state.frame : undefined, this.documentVersion, program?.id);
-        this.keyLanes.follow(program, this.state.targets, this.state.markerScope,
+        this.keyLanes.follow(program, this.state.targets, selectedTargets ?? [], this.state.markerScope,
             keyframeUsable ? this.state.frame : undefined, Boolean(this.state.keyframeSelection) && !this.clips.visible, this.documentVersion);
         this.curves.follow(program, this.state.targets.filter(target => selectedTargets?.includes(target.id)),
             this.state.frame, this.documentVersion, keyframeUsable, Boolean(this.state.canShowVelocity));

@@ -122,6 +122,18 @@ For a Timeline using a native elapsed clock, enter an authored time in seconds w
 
 For VS Code MCP, call `designer_keyframe_clipboard` through `designer_studio_query` with the program ID and selected `keyframes`. Each location contains `target`, `property`, and `time`. Pass the returned clipboard to the `designer_program` action `paste_keyframes` through `designer_studio_edit`. The `paste` argument contains `clipboard`, `destinations` in copied track order, the authored `time`, and optional `reverse`. Each destination contains `target` and `property`. Use `mirror_keyframes` with the selected `keyframes` and authored `pivot`. Use the destination frame’s current revision for the edit. The edit returns the accepted key locations as `keyframes`. Designer Studio exposes the same tool and actions directly.
 
+### Add a native key in App Preview
+
+![App Preview selects the recorded CornerRadius key at one authored second beside the inserted Rust builder and paused client review](../images/vscode-app-preview-recorded-key.png)
+
+1. Open [App Preview](runtime.md#render-with-your-app-in-app-preview) with a current FerroUI app build. Pause the clip and open **Keyframe lanes**. For an animation resource, use **Choose preview targets** to bind it to a live control.
+2. Click the keyframe ruler or enter **Authored time** in seconds. This position belongs to one animation iteration. The transport above the lanes shows elapsed time, including delay, speed, and repeats.
+3. Choose the plus icon beside the property, or focus it and press Enter. **Add keyframe at authored playhead** captures that lane’s value using the running app’s native animator and inserts a key with linear incoming easing. The resulting key is selected. At an occupied time, open the existing key to edit it.
+
+The action is available on typed XAML and mapped Rust tracks that advertise native sampling. With several preview targets, the lane samples its authored target when selected. Otherwise choose one live preview target. The edit updates the unsaved source in one Undo step and retains the compatible elapsed pose through the preview rebuild.
+
+For MCP, read the frame, generation, and tracks from `designer_hosted_animations`. Choose a track with `canSample` and send `program`, the track’s `target` and `property`, authored `time`, and `sample: true` to `designer_hosted_keyframe_draft`. Pass `previewTarget` to select a compatible live control explicitly. The draft returns `sampledKey` and the checked patch. Apply with `designer_hosted_keyframe` using the current frame. For an explicit value, supply `value` and `easing` and omit `previous` to insert a key.
+
 ### Edit several keys in App Preview
 
 ![VS Code shows two retimed keys selected on the CornerRadius and Opacity tracks beside the XAML source and the paused app](../images/vscode-app-preview-keyframe-lanes.jpg)

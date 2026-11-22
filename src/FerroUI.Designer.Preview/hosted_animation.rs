@@ -67,8 +67,11 @@ pub(crate) struct KeyframeDraft {
     pub(crate) property: String,
     pub(crate) previous: Option<f64>,
     pub(crate) time: f64,
-    pub(crate) value: String,
-    pub(crate) easing: String,
+    pub(crate) value: Option<String>,
+    pub(crate) easing: Option<String>,
+    pub(crate) sample: Option<bool>,
+    #[serde(rename = "previewTarget")]
+    pub(crate) preview_target: Option<i64>,
 }
 
 #[derive(Deserialize)]
@@ -117,6 +120,7 @@ fn tracks(tracks: Vec<DesignAnimationTrack>) -> Vec<Value> {
     tracks.into_iter().map(|track| json!({
         "target": track.target,
         "property": track.property,
+        "canSample": track.can_sample,
         "curve_channels": track.curve_channels.map(|channels| json!(channels)).unwrap_or_else(|| {
             json!(track.keys.first().map(|key| CurveChannel::for_authored_kind(&key.value_kind)).unwrap_or_default())
         }),
@@ -126,15 +130,15 @@ fn tracks(tracks: Vec<DesignAnimationTrack>) -> Vec<Value> {
     })).collect()
 }
 
-pub(crate) fn keyframe(result: DesignAnimationAuthoringResult) -> Result<Value, String> {
-    if let Some(error) = result.error {
-        return Err(error);
-    }
-    Ok(json!({
+pub(crate) fn keyframe_plan(result: DesignAnimationAuthoringResult) -> Value {
+    json!({
         "samples": result.samples,
         "valueKind": result.value_kind,
         "patch": result.patch.map(source_patch),
-    }))
+        "sampledKey": result.sampled_key.map(|key| json!({
+            "time": key.time, "value_text": key.value, "easing_text": key.easing, "value_kind": key.value_kind,
+        })),
+    })
 }
 
 pub(crate) fn source_patch(patch: DesignAnimationSourcePatch) -> Value {

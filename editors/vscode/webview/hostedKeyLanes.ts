@@ -1,8 +1,9 @@
-import type { HostedAnimationFrame, HostedAnimationProgram, HostedAnimationTarget } from '../src/hostedAnimationProtocol';
+import type { HostedAnimationFrame, HostedAnimationProgram, HostedAnimationTarget, HostedAnimationTrack } from '../src/hostedAnimationProtocol';
+import { hostedKeyframeTarget } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import type { FrameTarget } from '../src/protocol';
 import type { KeyframeLocation, TimelineKeyAction, TimelineKeyframe, TimelineTrack } from '../src/timelineProtocol';
-import { create, element, labelButton } from './dom';
+import { create, element, iconButton, labelButton } from './dom';
 import { dragKeyframe, renderKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
 import { bindTimelineMarquee } from './timelineMarquee';
 import { keyframeId, TimelineSelection } from './timelineSelection';
@@ -28,10 +29,12 @@ export class HostedKeyLanes {
     private readonly selection = new TimelineSelection();
     private readonly number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 });
     private keys: RenderedKeyframe[] = [];
+    private recorders: { button: HTMLButtonElement; track: HostedAnimationTrack; description: string }[] = [];
     private viewport = fitTimeline(0);
     private program?: HostedAnimationProgram;
     private programKey?: string;
     private scope?: string;
+    private previewTargets: readonly number[] = [];
     private content = '';
     private shown = false;
     private accepted?: FrameTarget;
@@ -69,7 +72,8 @@ export class HostedKeyLanes {
     get editing(): boolean { return this.pending !== undefined; }
     private get frame() { return this.editing ? undefined : this.accepted; }
 
-    follow(program: HostedAnimationProgram | undefined, targets: readonly HostedAnimationTarget[], scope: string | undefined,
+    follow(program: HostedAnimationProgram | undefined, targets: readonly HostedAnimationTarget[], previewTargets: readonly number[],
+        scope: string | undefined,
         frame: HostedAnimationFrame | undefined, available: boolean, version: number): void {
         const tracks = program?.authoring?.tracks ?? [];
         const visible = available && tracks.length > 0 && this.shown;
@@ -79,6 +83,7 @@ export class HostedKeyLanes {
         this.section.hidden = !visible;
         this.program = program;
         this.scope = scope;
+        this.previewTargets = previewTargets;
         const identity = program && JSON.stringify([scope, program.sourceKey ?? program.markerKey ?? program.id]);
         const changedProgram = identity !== this.programKey;
         if (changedProgram) {
@@ -101,7 +106,13 @@ export class HostedKeyLanes {
             if (version === edited && scope === originalScope && program
                 && (before.sourceKey ? before.sourceKey === program.sourceKey : before.selector === program.selector
                     && (before.name === program.name || before.id === program.id))) {
-                this.selection.replace(keys);
+                this.selection.replace(keys.map(key => {
+                    // A structural patch can shift native node IDs in the next app catalog.
+                    const destinations = tracks.filter(track => track.property === key.property);
+                    const sources = before.authoring?.tracks.filter(track => track.property === key.property);
+                    return destinations.length === 1 && sources?.length === 1
+                        ? { ...key, target: destinations[0].target } : key;
+                }));
                 this.selection.reconcile(tracks);
                 if (this.restoreFocus) this.focusKey();
             }
@@ -111,7 +122,7 @@ export class HostedKeyLanes {
         this.paintSelection();
     }
 
-    receive(reply: Extract<ToHosted, { type: 'keyframeGroupReply' }>): void {
+    receive(reply: Extract<ToHosted, { type: 'keyframeLaneReply' }>): void {
         const pending = this.pending;
         if (reply.request !== pending?.request) return;
         this.pending = undefined;
@@ -122,9 +133,10 @@ export class HostedKeyLanes {
         this.changed();
     }
 
-    private render(tracks: TimelineTrack[], targets: readonly HostedAnimationTarget[], duration: number): void {
+    private render(tracks: HostedAnimationTrack[], targets: readonly HostedAnimationTarget[], duration: number): void {
         const hadFocus = this.keys.some(key => key.button === document.activeElement);
         this.keys = [];
+        this.recorders = [];
         this.viewport = fitTimeline(duration);
         this.time.max = String(duration);
         this.setPivot(Math.min(this.pivot, duration), true);
@@ -142,6 +154,14 @@ export class HostedKeyLanes {
             const name = create('span', track.property);
             name.className = 'hosted-key-name';
             name.title = description;
+            const heading = create('div');
+            heading.className = 'hosted-key-heading';
+            heading.append(name);
+            if (track.canSample) {
+                const button = iconButton('add', `Add keyframe at authored playhead · ${description}`, () => this.record(track));
+                this.recorders.push({ button, track, description });
+                heading.append(button);
+            }
             const lane = create('div');
             lane.className = 'timeline-lane';
             for (const key of track.keyframes) {
@@ -171,7 +191,7 @@ export class HostedKeyLanes {
                 };
                 lane.append(button);
             }
-            row.append(name, lane);
+            row.append(heading, lane);
             return row;
         }));
         if (hadFocus && !this.editing && !this.replacement) this.focusKey();
@@ -188,20 +208,36 @@ export class HostedKeyLanes {
         this.pivot = time;
         if (updateInput) this.time.value = String(time);
         this.grid.style.setProperty('--hosted-key-pivot', `${timelinePercent(this.viewport, time)}%`);
+        this.paintRecorders();
     }
 
     private edit(edit?: TimelineKeyAction, keys = this.selection.keys): void {
+        const action = this.beginEdit(this.keys.some(key => key.button === document.activeElement));
+        if (!action) return;
+        const { program, ...identity } = action;
+        this.send({ type: 'keyframeGroup', ...identity, action: { program, keys, pivot: this.pivot, edit } });
+        this.changed();
+    }
+
+    private record(track: HostedAnimationTrack): void {
+        const previewTarget = hostedKeyframeTarget(track.target, this.previewTargets);
+        if (previewTarget === undefined) return;
+        const action = this.beginEdit(true);
+        if (!action) return;
+        const { program, ...identity } = action;
+        this.send({ type: 'recordKeyframe', ...identity,
+            draft: { program, target: track.target, property: track.property, time: this.pivot, sample: true, previewTarget } });
+        this.changed();
+    }
+
+    private beginEdit(restoreFocus: boolean) {
         const frame = this.frame;
         if (!frame || !this.program) return;
-        this.restoreFocus = this.keys.some(key => key.button === document.activeElement);
+        this.restoreFocus = restoreFocus;
         this.showError();
         const request = ++this.request;
         this.pending = { request, program: this.program, scope: this.scope };
-        this.send({
-            type: 'keyframeGroup', frame: { revision: frame.session, sequence: frame.token },
-            request, action: { program: this.program.id, keys, pivot: this.pivot, edit },
-        });
-        this.changed();
+        return { request, program: this.program.id, frame: { revision: frame.session, sequence: frame.token } };
     }
 
     private shortcut(event: KeyboardEvent): void {
@@ -235,6 +271,18 @@ export class HostedKeyLanes {
         const count = this.selection.size ? `${this.selection.size} selected` : '';
         if (this.count.textContent !== count) this.count.textContent = count;
         labelButton(this.actions, count ? `Keyframe actions (${count})` : 'Keyframe actions');
+        this.paintRecorders();
+    }
+
+    private paintRecorders(): void {
+        for (const { button, track, description } of this.recorders) {
+            const occupied = track.keyframes.some(key => key.time === this.pivot);
+            const target = hostedKeyframeTarget(track.target, this.previewTargets);
+            button.disabled = !this.frame || occupied || target === undefined;
+            const action = occupied ? 'Keyframe already at playhead'
+                : target === undefined ? 'Choose a preview target for keyframe sampling' : 'Add keyframe at authored playhead';
+            labelButton(button, `${action} · ${description}`);
+        }
     }
 
     private showError(error?: string): void {

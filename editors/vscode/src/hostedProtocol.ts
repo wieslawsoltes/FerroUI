@@ -1,6 +1,7 @@
 import type { PreviewSourceBuffer, Range, Source } from './protocol';
 import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
-    HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupAction, HostedKeyframeSelection } from './hostedAnimationProtocol';
+    HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupAction,
+    HostedKeyframeSample, HostedKeyframeSelection } from './hostedAnimationProtocol';
 import type { CurvePoint, KeyframeDraftPreview, KeyframeLocation } from './timelineProtocol';
 import type { FromHostedPalette, ToHostedPalette } from './hostedPaletteProtocol';
 import type { FromHostedStyles, ToHostedStyles } from './hostedStylesProtocol';
@@ -70,6 +71,7 @@ export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | { 
     | { type: 'chooseKeyframe' | 'editStateRoute'; frame: HostedAnimationFrame; program: number }
     | { type: 'curve'; frame: HostedAnimationFrame; request: number; query: HostedCurveQuery }
     | { type: 'keyframeDraft'; frame: HostedAnimationFrame; request: number; draft: HostedKeyframeDraft; apply: boolean }
+    | { type: 'recordKeyframe'; frame: HostedAnimationFrame; request: number; draft: HostedKeyframeSample }
     | { type: 'keyframeGroup'; frame: HostedAnimationFrame; request: number; action: HostedKeyframeGroupAction }
     | { type: 'fixture'; revision: number; name: string | null };
 export type ToHosted = ToHostedPalette | ToHostedStyles | { type: 'frame'; frame: HostedFrame }
@@ -78,5 +80,5 @@ export type ToHosted = ToHostedPalette | ToHostedStyles | { type: 'frame'; frame
     | { type: 'openKeyframe'; key: HostedKeyframeSelection }
     | { type: 'curveReply'; request: number; frame: HostedAnimationFrame; points?: CurvePoint[]; error?: string }
     | { type: 'keyframeReply'; frame: HostedAnimationFrame; request: number; preview?: KeyframeDraftPreview; applied?: boolean; error?: string }
-    | { type: 'keyframeGroupReply'; frame: HostedAnimationFrame; request: number; keys?: KeyframeLocation[]; version?: number; error?: string }
+    | { type: 'keyframeLaneReply'; frame: HostedAnimationFrame; request: number; keys?: KeyframeLocation[]; version?: number; error?: string }
     | { type: 'status'; message: string; interactive: boolean; fixtures: HostedFixtureCatalog };

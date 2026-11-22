@@ -10,6 +10,8 @@ export interface HostedStateRoute extends StateTransitionRoute {
     endpoint?: boolean;
 }
 
+export interface HostedAnimationTrack extends TimelineTrack { canSample?: boolean | null }
+
 export interface HostedAnimationProgram {
     id: number;
     name: string;
@@ -22,7 +24,7 @@ export interface HostedAnimationProgram {
     sourceKey?: string;
     markerKey?: string;
     customAnimator: boolean;
-    authoring?: { codec: string; tracks: TimelineTrack[] } | null;
+    authoring?: { codec: string; tracks: HostedAnimationTrack[] } | null;
     curveTracks?: TimelineTrack[] | null;
     clip?: TimelineClipTiming | null;
     stateRoute?: HostedStateRoute;
@@ -115,7 +117,11 @@ export interface HostedAnimationState extends HostedAnimationCatalog, HostedAnim
     markers?: { programs: Record<number, TimelineMarker[]>; shared: TimelineMarker[] };
 }
 
-export type HostedKeyframeDraft = Omit<KeyframeDraft, 'previous'> & { previous?: number };
+export type HostedKeyframeSample = Pick<KeyframeDraft, 'program' | 'target' | 'property' | 'time'> & {
+    sample: true;
+    previewTarget?: number;
+};
+export type HostedKeyframeDraft = (Omit<KeyframeDraft, 'previous'> & { previous?: number }) | HostedKeyframeSample;
 export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window' | 'metric' | 'channel'>;
 export interface HostedStateDraft { program: number; duration: number; easing: string }
 export interface HostedClipDraft { programs: number[]; start?: number; gap?: number }
@@ -144,6 +150,7 @@ export interface HostedKeyframeGroupAction {
 
 export interface HostedKeyframePlan extends KeyframeDraftPreview {
     patch: HostedSourcePatch | null;
+    sampledKey?: TimelineKeyframe | null;
 }
 
 export interface HostedKeyframeSelection {
@@ -155,4 +162,9 @@ export interface HostedKeyframeSelection {
     property: string;
     duration: number;
     keyframe: TimelineKeyframe;
+}
+
+export function hostedKeyframeTarget(authoredTarget: number, previewTargets: readonly number[]): number | undefined {
+    if (previewTargets.includes(authoredTarget)) return authoredTarget;
+    return previewTargets.length === 1 ? previewTargets[0] : undefined;
 }

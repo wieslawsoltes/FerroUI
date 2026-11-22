@@ -6,6 +6,7 @@ import type { BuiltProject } from './builtProjects';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
 import { DesignerDependencies, dirtyPreviewSources } from './designerDependencies';
 import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
+import { hostedKeyframeTarget } from './hostedAnimationProtocol';
 import { HostedAnimations } from './hostedAnimations';
 import { HostedPalettes } from './hostedPalettes';
 import { runHostedPaletteAction } from './hostedPaletteActions';
@@ -604,31 +605,29 @@ class HostedSession {
         await this.animations.control(current, { action: 'targets', program: id, targets: choice.map(item => item.target) }, AbortSignal.timeout(15_000));
     }
 
-    async keyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft, apply: boolean, signal: AbortSignal) {
-        await this.polling;
-        signal.throwIfAborted();
-        const program = this.animations.program(frame, draft.program);
-        if (!program.authoring) throw new Error('Choose an editable animation in the current application preview.');
-        const client = this.client;
-        if (!client || this.pending || this.animations.driving || this.currentFrame?.sequence !== frame.sequence) {
-            throw new Error('Wait for the current application preview frame.');
-        }
-        const document = this.editor.document;
-        const version = document.version;
-        clearTimeout(this.timer);
-        this.pending = true;
-        try {
-            const plan = await client.planHostedKeyframe(frame, draft);
-            signal.throwIfAborted();
-            if (client !== this.client || this.disposed || frame.revision !== this.revision || version !== document.version) {
-                throw new Error('The application preview source changed while planning the keyframe.');
+    keyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft, apply: boolean, signal: AbortSignal) {
+        return this.withAcceptedFrame(frame, signal, async (client, ensure) => {
+            const program = this.animations.program(frame, draft.program);
+            const tracks = program.authoring?.tracks;
+            if (!tracks) throw new Error('Choose an editable animation in the current application preview.');
+            if ('sample' in draft) {
+                if (!tracks.some(track => track.canSample && track.target === draft.target && track.property === draft.property)) {
+                    throw new Error('Choose a track with native keyframe sampling in the current application preview.');
+                }
+                const targets = this.animations.state.overrides[program.id] ?? program.defaultTargets;
+                const previewTarget = draft.previewTarget ?? hostedKeyframeTarget(draft.target, targets);
+                if (previewTarget === undefined || !program.compatibleTargets.includes(previewTarget)) {
+                    throw new Error('Choose a compatible preview target to sample this track.');
+                }
+                draft = { ...draft, previewTarget };
             }
+            const document = this.editor.document;
+            const version = document.version;
+            const plan = await client.planHostedKeyframe(frame, draft);
+            ensure();
             if (apply && plan.patch) await applyHostedSourcePatches(document, version, [plan.patch]);
             return { ...plan, applied: apply && Boolean(plan.patch), version: document.version };
-        } finally {
-            this.pending = false;
-            this.schedule(this.requested === this.revision ? 160 : 0);
-        }
+        });
     }
 
     stateRoute(frame: HostedAnimationFrame, draft: HostedStateDraft, apply: boolean, signal: AbortSignal) {
@@ -816,8 +815,19 @@ class HostedSession {
         if (message.type === 'keyframeDraft') {
             const reply = { type: 'keyframeReply' as const, frame: message.frame, request: message.request };
             try {
-                const { valueKind, samples } = await this.keyframe(message.frame, message.draft, message.apply, AbortSignal.timeout(15_000));
-                this.post({ ...reply, preview: { valueKind, samples }, applied: message.apply });
+                const { valueKind, samples, applied } = await this.keyframe(message.frame, message.draft, message.apply, AbortSignal.timeout(15_000));
+                this.post({ ...reply, preview: { valueKind, samples }, applied });
+            } catch (error) { this.post({ ...reply, error: errorMessage(error) }); }
+            return;
+        }
+        if (message.type === 'recordKeyframe') {
+            const { draft, frame, request } = message;
+            const reply = { type: 'keyframeLaneReply' as const, frame, request };
+            try {
+                const plan = await this.keyframe(frame, draft, true, AbortSignal.timeout(15_000));
+                if (!plan.applied || !plan.sampledKey) throw new Error('The application did not insert a keyframe.');
+                this.post({ ...reply, version: plan.version,
+                    keys: [{ target: draft.target, property: draft.property, time: plan.sampledKey.time }] });
             } catch (error) { this.post({ ...reply, error: errorMessage(error) }); }
             return;
         }
@@ -900,7 +910,7 @@ class HostedSession {
 
     private async receiveKeyframeGroup(message: Extract<FromHosted, { type: 'keyframeGroup' }>): Promise<void> {
         const { action, frame, request } = message;
-        const reply = { type: 'keyframeGroupReply' as const, frame, request };
+        const reply = { type: 'keyframeLaneReply' as const, frame, request };
         const ensure = () => {
             const current = this.currentFrame;
             if (!current || current.revision !== frame.revision || current.sequence !== frame.sequence || this.animations.driving) {

@@ -128,8 +128,37 @@ export async function verifyHostedRustAnimation(preview: NativePreview): Promise
         const shared = await preview.sampleHostedAnimation({ revision: placedFrame.revision, sequence: placedFrame.sequence,
             clips: [{ program: placedClip.id }], elapsed: 1.375, restart: true });
         assert.equal(shared.frame.image.png, before.image.png);
-        console.log('App Preview validated a registered typed Rust key, preserved CRLF and comments, and restored paused and playing native poses');
-        await verifyHostedRustClipAuthoring(preview, source, source.replace(style.replaceAll('\n', '\r\n'), 'styles: styles_for(model),'), documentFor);
+        const accepted = { revision: shared.frame.revision, sequence: shared.frame.sequence };
+        const lane = placedClip.authoring?.tracks[0];
+        assert.ok(lane?.canSample);
+        const location = { program: placedClip.id, target: lane.target, property: lane.property };
+        const sample = { ...location, time: 1, sample: true } as const;
+        await assert.rejects(preview.planHostedKeyframe(placedFrame, sample), /frame changed/i);
+        await assert.rejects(preview.planHostedKeyframe(accepted, { ...sample, time: 1.999999999 }), /occupies/i);
+        await assert.rejects(preview.planHostedKeyframe(accepted, { ...sample, previewTarget: Number.MAX_SAFE_INTEGER }), /compatible live/i);
+        const record = await preview.planHostedKeyframe(accepted, sample);
+        assert.equal(record.sampledKey?.time, 1);
+        assert.equal(record.sampledKey?.value_text, '8,8,8,8', 'Capture the registered quadratic animator at one authored second');
+        assert.ok(record.patch);
+        assert.equal(record.patch.expected, '');
+        const recorded = applyClipDraft(placed, [record.patch]);
+        assert.match(recorded, /\.key_frame\(0\.5, \|key\| key\.set\(.+CornerRadius::new\(8\.0, 8\.0, 8\.0, 8\.0\)\)\)/);
+        assert.ok(recorded.includes('/* preserve 🧭 */'));
+        assert.ok(recorded.includes('motion_from_database(model)'));
+        assert.ok(!recorded.replaceAll('\r\n', '').includes('\n'));
+        const explicit = await preview.planHostedKeyframe(accepted, { ...location, time: .75,
+            value: '6,7,8,9', easing: 'LinearEasing' });
+        assert.ok(explicit.patch);
+        assert.match(applyClipDraft(placed, [explicit.patch]), /\.key_frame\(0\.375,.+CornerRadius::new\(6\.0, 7\.0, 8\.0, 9\.0\)/);
+        const withKey = await render(47, recorded, { frame: shared.frame, position: {
+            program: placedClip.id, clips: [placedClip.id], elapsed: 1.375, playing: false, completed: false,
+        } });
+        assert.equal(withKey.animations?.programs[0].authoring?.tracks[0].keyframes.find(key => key.time === 1)?.value_text, '8,8,8,8');
+        assert.equal(withKey.animationPresentation?.position?.elapsed, 1.375);
+        assert.equal(withKey.image.png, shared.frame.image.png, 'The first replacement frame holds the same sampled native pose');
+        console.log('App Preview edited and inserted registered Rust keys with checked CRLF patches and retained native poses');
+        await verifyHostedRustClipAuthoring(preview, source, source.replace(style.replaceAll('\n', '\r\n'), 'styles: styles_for(model),'),
+            documentFor, withKey.revision);
     } finally { await rm(sandbox, { recursive: true, force: true }); }
 }
 

@@ -34,7 +34,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     if (data.type === 'curveReply') { animations.curve(data); return; }
     if (data.type === 'openKeyframe') { animations.keyframes.open(data.key); return; }
     if (data.type === 'keyframeReply') { animations.keyframes.receive(data); return; }
-    if (data.type === 'keyframeGroupReply') { animations.keyLanes.receive(data); return; }
+    if (data.type === 'keyframeLaneReply') { animations.keyLanes.receive(data); return; }
     if (data.type === 'paletteReply') { palettes.receive(data); return; }
     if (data.type === 'openPalette') { palettes.open(data); return; }
     if (data.type === 'stylesReply') { styles.receive(data); return; }

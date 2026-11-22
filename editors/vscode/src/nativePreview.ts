@@ -198,8 +198,8 @@ export class NativePreview implements vscode.Disposable {
         return this.send('hostedAnimate', request, 12_000);
     }
 
-    planHostedKeyframe(frame: HostedAnimationFrame, draft: HostedKeyframeDraft): Promise<HostedKeyframePlan> {
-        return this.send('hostedKeyframe', { ...frame, ...draft }, 12_000);
+    planHostedKeyframe({ revision, sequence }: HostedAnimationFrame, draft: HostedKeyframeDraft): Promise<HostedKeyframePlan> {
+        return this.send('hostedKeyframe', { revision, sequence, ...draft }, 12_000);
     }
     async planHostedKeyframeGroup(frame: HostedAnimationFrame, draft: HostedKeyframeGroupDraft): Promise<HostedKeyframeGroupPlan> {
         const { patch, ...plan } = await this.send<Omit<HostedKeyframeGroupPlan, 'patches'> & { patch: HostedSourcePatch | null }>(

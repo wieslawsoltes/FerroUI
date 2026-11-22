@@ -52,6 +52,14 @@ export async function verifyHostedAnimation(preview: NativePreview, update: (rev
     await assert.rejects(sample(rewind.frame, { program: resource.id, elapsed: 1, restart: true }), /preview targets/i);
     const alternate = await sample(rewind.frame, { program: resource.id, targets: [card.id], elapsed: 1, restart: true });
     assert.equal(alternate.frame.image.png, halfway.frame.image.png);
+    const resourceTrack = resource.authoring?.tracks[0];
+    assert.ok(resourceTrack?.canSample);
+    const record = await preview.planHostedKeyframe(frame(alternate.frame), { program: resource.id, target: resourceTrack.target,
+        property: resourceTrack.property, time: 1, sample: true, previewTarget: card.id });
+    assert.equal(record.sampledKey?.value_text, '8,8,8,8');
+    assert.ok(record.patch);
+    assert.match(record.patch.replacement, /Property="CornerRadius" Value="8,8,8,8"/);
+    assert.equal(authored.slice(record.patch.start, record.patch.end), record.patch.expected);
     const stopped = await sample(alternate.frame, { elapsed: 0, restart: true });
     assert.equal(stopped.frame.image.png, first.image.png);
     const expected = await preview.renderHosted(update(12, animationFixture(8)));

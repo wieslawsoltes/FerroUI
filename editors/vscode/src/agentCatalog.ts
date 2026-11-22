@@ -52,10 +52,16 @@ const previewRange = { type: 'object', additionalProperties: false, required: ['
     properties: { start: time, end: time, loop: truth } };
 const markerAction = { type: 'object', additionalProperties: false, required: ['action', 'name'],
     properties: { action: choice('set', 'remove', 'seek'), name: { type: 'string', minLength: 1, maxLength: 48 }, time } };
+const hostedKeyframeLocation = { program: node, target: node, property: text, time };
 const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
-    arguments: { type: 'object', additionalProperties: false,
-        required: ['program', 'target', 'property', 'time', 'value', 'easing'],
-        properties: { program: node, target: node, property: text, previous: time, time, value: text, easing: text } } };
+    arguments: { oneOf: [
+        { type: 'object', additionalProperties: false,
+            required: [...Object.keys(hostedKeyframeLocation), 'value', 'easing'],
+            properties: { ...hostedKeyframeLocation, previous: time, value: text, easing: text } },
+        { type: 'object', additionalProperties: false,
+            required: [...Object.keys(hostedKeyframeLocation), 'sample'],
+            properties: { ...hostedKeyframeLocation, sample: truth, previewTarget: node } },
+    ] } };
 const hostedFrameRequired = ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'arguments'];
 const keyframeTrack = { target: node, property: { type: 'string', maxLength: 512 } };
 const hostedKeyframeGroup = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
@@ -170,9 +176,9 @@ export const agentCatalog = {
                 type: 'object', additionalProperties: false, required: ['start', 'end'], properties: { start: time, end: time },
             } },
         } }, hostedFrameRequired),
-    designer_hosted_keyframe_draft: tool('Validate an app-hosted keyframe and return easing samples and a checked XAML or mapped Rust source patch. Use the current app generation, revision, sequence, and authored track.',
+    designer_hosted_keyframe_draft: tool('Validate an app-hosted keyframe and return easing samples and a checked XAML or mapped Rust source patch. Supply value and easing for an explicit draft or sample: true to capture the native value at the authored time on a track with canSample.',
         hostedKeyframe, hostedFrameRequired),
-    designer_hosted_keyframe: tool('Apply a validated animation keyframe as one undoable edit to the current source buffer. For XAML, omit previous to insert a key. For Rust, select an existing mapped key.',
+    designer_hosted_keyframe: tool('Apply a validated keyframe to XAML or mapped Rust as one undoable edit. Omit previous to insert an explicit key. Use sample: true with an authored time on a track with canSample to insert the native value.',
         hostedKeyframe, hostedFrameRequired, true),
     designer_hosted_keyframe_group_draft: tool('Plan a grouped keyframe edit using authored seconds and the current app frame. Copy returns portable clipboard JSON text. For paste, pass the parsed clipboard and one destination per copied track, in clipboard order.',
         hostedKeyframeGroup, hostedFrameRequired),

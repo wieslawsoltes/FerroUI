@@ -1,3 +1,5 @@
+#[path = "keyframe.rs"]
+mod keyframe;
 #[path = "keyframe_selection.rs"]
 mod keyframe_selection;
 
@@ -5,7 +7,7 @@ use super::{send, Connection, Relay, FRAME_TIMEOUT};
 use crate::{hosted_animation, hosted_animation_restore::Presentation};
 use ferroui_designer_animation::{CurveChannel, CurvePoint};
 use ferroui_remote_protocol::designer::{
-    DesignAnimationAuthoringRequest, DesignAnimationClipBinding, DesignAnimationCurveRequest, DesignAnimationRequestMessage,
+    DesignAnimationClipBinding, DesignAnimationCurveRequest, DesignAnimationRequestMessage,
     DesignAnimationResultMessage,
 };
 use std::sync::Arc;
@@ -145,55 +147,6 @@ impl Relay {
             return Err("The application did not render the requested animation sample".into());
         }
         Ok(result)
-    }
-
-    pub(crate) fn plan_keyframe(
-        &mut self,
-        draft: hosted_animation::KeyframeDraft,
-    ) -> Result<serde_json::Value, String> {
-        let connection = self.animation_connection(draft.revision, draft.sequence)?;
-        let authored_patch = self.authored_rsx.as_ref().map(|source| source.hosted_patch(&draft)).transpose()?;
-        let request = self.next_animation_request()?;
-        {
-            let mut state = self.events.0.lock().unwrap();
-            if !state.authorable.contains(&draft.program) {
-                return Err(
-                    "Choose an editable animation in the current application preview".into(),
-                );
-            }
-            state.animation_request = Some(request);
-            state.keyframe_result = None;
-        }
-        send(
-            &connection,
-            Arc::new(DesignAnimationAuthoringRequest {
-                revision: draft.revision,
-                request,
-                program: draft.program,
-                target: draft.target,
-                property: draft.property,
-                previous: draft.previous,
-                time: draft.time,
-                value: draft.value,
-                easing: draft.easing,
-            }),
-        )?;
-        let (mut state, _) = self
-            .events
-            .1
-            .wait_timeout_while(self.events.0.lock().unwrap(), FRAME_TIMEOUT, |state| {
-                !state.disconnected && state.keyframe_result.is_none()
-            })
-            .unwrap();
-        state.animation_request = None;
-        let mut result = state
-            .keyframe_result
-            .take()
-            .ok_or("The application did not return an animation edit plan")?;
-        if let Some(patch) = authored_patch {
-            result.patch = patch;
-        }
-        hosted_animation::keyframe(result)
     }
 
     pub(crate) fn plan_state(&self, draft: hosted_animation::StateDraft) -> Result<serde_json::Value, String> {

@@ -67,6 +67,7 @@ struct Events {
     keyframe_selection_result: Option<DesignKeyframeSelectionResult>,
     curve_result: Option<DesignAnimationCurveResult>,
     authorable: BTreeSet<i64>,
+    sampleable_keys: BTreeSet<(i64, i64, String)>,
     curve_programs: BTreeSet<i64>,
     disconnected: bool,
 }
@@ -443,8 +444,15 @@ impl Relay {
             HostedStates::capture(&document.xaml, catalog, authored_rsx.as_ref())
         });
         if let Some(catalog) = &state.animation_catalog {
-            state.authorable = catalog.programs.iter().filter(|program| program.authoring.is_some())
+            let authorable = catalog.programs.iter().filter(|program| program.authoring.is_some())
                 .map(|program| program.id).collect();
+            let sampleable_keys = catalog.programs.iter().flat_map(|program| {
+                program.authoring.iter().flat_map(|authoring| &authoring.tracks)
+                    .filter(|track| track.can_sample == Some(true))
+                    .map(|track| (program.id, track.target, track.property.clone()))
+            }).collect();
+            state.authorable = authorable;
+            state.sampleable_keys = sampleable_keys;
         }
         let source = state.animation_catalog.as_ref().and_then(|catalog| {
             let mut source = SourceMap::new(document.xaml, scope, catalog, states?)?;

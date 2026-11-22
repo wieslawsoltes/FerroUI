@@ -206,12 +206,14 @@ fn entities() -> Vec<Message> {
                             value_kind: "CornerRadius".into(),
                         }],
                         curve_channels: None,
+                        can_sample: Some(true),
                     }],
                 }),
                 curve_tracks: Some(vec![DesignAnimationTrack {
                     target: 12, property: "RenderTransformOrigin".into(),
                     keys: vec![DesignAnimationKeyframe { time: 1.0, value: "50%,20%".into(), value_kind: "RelativePoint".into(), easing: "Linear".into() }],
                     curve_channels: Some(vec!["percent_x".into(), "percent_y".into()]),
+                    can_sample: None,
                 }]),
                 clip: Some(DesignAnimationClip { delay: 0.5, speed_ratio: 1.0, editable: true }),
             }],
@@ -233,12 +235,15 @@ fn entities() -> Vec<Message> {
         }),
         Arc::new(DesignAnimationAuthoringRequest {
             revision: 40, request: 32, program: 6, target: 12, property: "CornerRadius".into(),
-            previous: Some(1.25), time: 1.5, value: "18".into(), easing: "Linear".into(),
+            time: 1.0, sample: Some(true), sample_target: Some(14), ..Default::default()
         }),
         Arc::new(DesignAnimationAuthoringResult {
             revision: 40, request: 32, samples: vec![0.0, 0.5, 1.0], value_kind: "CornerRadius".into(),
             patch: Some(DesignAnimationSourcePatch { start: 62, end: 64, expected: "16".into(), replacement: "18".into() }),
-            error: Some("Portable draft result".into()),
+            sampled_key: Some(DesignAnimationKeyframe {
+                time: 1.0, value: "8,8,8,8".into(), easing: "LinearEasing".into(), value_kind: "CornerRadius".into(),
+            }),
+            error: None,
         }),
         Arc::new(DesignAnimationCurveRequest {
             revision: 40, request: 33, program: 6, target: 12, property: "CornerRadius".into(),
