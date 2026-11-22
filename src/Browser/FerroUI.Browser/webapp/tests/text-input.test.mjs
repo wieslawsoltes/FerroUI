@@ -99,6 +99,33 @@ test("legacy proxy deletion is dispatched at most once and leaves composition al
     assert.deepEqual(calls, [["delete", 17, true], ["delete", 17, false]]);
 });
 
+test("a handled delete key with the input method code deletes once", (t) => {
+    const { element, calls } = setup(t, { handled: true, focusedLegacyInput: true });
+    t.after(InputHelper.subscribeKeyEvents(element, 17));
+    const key = { code: "Backspace", key: "Backspace", keyCode: 229, isComposing: false };
+    const backward = { inputType: "deleteContentBackward", getTargetRanges: () => [] };
+    const deletes = () => calls.filter(([name]) => name === "delete").length;
+
+    // A cancelable default is stopped before it changes the proxy.
+    element.dispatchEvent(event("keydown", key));
+    const cancelable = event("beforeinput", backward);
+    element.dispatchEvent(cancelable);
+    assert.equal(cancelable.defaultPrevented, true);
+    element.dispatchEvent(event("keyup", key));
+    assert.equal(deletes(), 0);
+
+    // A default that cannot be stopped is ignored once.
+    element.dispatchEvent(event("keydown", key));
+    element.dispatchEvent(event("beforeinput", backward, false));
+    element.dispatchEvent(event("input", backward));
+    assert.equal(deletes(), 0);
+
+    // A later delete without a key is an edit of its own.
+    element.dispatchEvent(event("keyup", key));
+    element.dispatchEvent(event("input", backward));
+    assert.equal(deletes(), 1);
+});
+
 test("a correction captures directed selection and restores the authoritative proxy", (t) => {
     const { element, calls } = setup(t, { focusedLegacyInput: true });
     InputHelper.setSurroundingText(element, "ab\r\nteh", 7, 4);
