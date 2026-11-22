@@ -79,6 +79,8 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 `ferroui-controls-repeater` (`src/FerroUI.Controls.Repeater`, Controls and themes; the port of the Repeater of WinUI, docs/porting/winui-repeater/README.md) joined with #269. It is an optional part of the facade (`repeater`).
 `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`, Markup; the WinUI XAML importer and its run-time loading entry points, from #286, W9; its x:Bind property-path adapter was removed in #525, X6, for the x:Bind core of `ferroui-markup-xaml`) joined with the W9 pull request. It exports its type model in its build script (`links = "ferroui_markup_xaml_winui_xaml"`) and is an optional part of the facade (`winui-xaml`).
 
+`ferroui-ident-macros` (`src/FerroUI.Ident.Macros`, Core; the procedural macro `ferro_idents!`, which joins identifiers inside the declarative macros of the framework) joined with #1026 for `0.6.0`, in place of the unmaintained `paste`. It has no dependencies, so `ferroui-base` does not compile `syn` for it, and it is published before `ferroui-system` and `ferroui-base`. It is a new name on crates.io: the token of the release has to be allowed to create crates, and the crate counts against the rate limit of new crates (section 8.3).
+
 Every crate was checked in the same way: packaged, and built from its package, by `scripts/release/publish.sh --dry-run` (section 8). `cargo publish --dry-run -p <crate>` cannot be used for this before the first release: it resolves the dependencies of the package in the registry, where the other crates of the workspace are not yet. `cargo package --workspace` (Cargo 1.90 and later) resolves them among the packages it has just assembled instead, which is what the dry run uses, and so every crate got the full check, not only the ones without dependencies in the workspace.
 
 ### 1.2 The crates that are never published
@@ -344,7 +346,7 @@ A release is made only after the performance gate (`scripts/perf/gate.py`; `docs
 
 | Platform | Where | What runs |
 |---|---|---|
-| macOS | the machine of the release | every suite: `python3 scripts/perf/gate.py --base <base> --copy-gate --markdown <file>` |
+| macOS | the machine of the release | every suite on the build that ships: `python3 scripts/perf/gate.py --profile dist --base <base> --copy-gate --markdown <file>` |
 | Linux | a machine or a virtual machine with a display (`xvfb-run -a`) | every suite, the same command; with a copy of the sources, `--base-dir <copy of the base>` |
 | Windows | a machine or a virtual machine, in the session of a signed-in user | every suite, the same command; with a copy of the sources, `--base-dir <copy of the base>` |
 | Android | an emulator, or a device | the window suite: `--only window --window-device android` |

@@ -300,7 +300,14 @@ fn row_fields(addition: &DeferredAddition<'_>, row: &DeferredRow) -> Option<RowF
 /// length, a position or the number of namespace tables does not fit 16 bits, or when a position
 /// is negative: the run keeps its slice of rows.
 fn packed_table(kind: RowKind, fields: &[&RowFields]) -> Option<String> {
-    let mut pool = String::new();
+    packed_table_in(kind, fields, &mut String::new(), None)
+}
+
+/// [`packed_table`] over the pool `pool`, which the strings of the rows are found in or added to:
+/// the pool of the table, written as its literal (`pool_name` none), or the pool of the unit of
+/// the theme the table is of, named `pool_name` and written once for all the tables of the unit
+/// ([`row_tables_in`]). `None` leaves `pool` as it may have grown: the caller passes a copy.
+fn packed_table_in(kind: RowKind, fields: &[&RowFields], pool: &mut String, pool_name: Option<&str>) -> Option<String> {
     let mut namespaces: Vec<&str> = Vec::new();
     let mut records: Vec<String> = Vec::with_capacity(fields.len());
     let narrow = |value: usize| u16::try_from(value).ok();
@@ -316,13 +323,13 @@ fn packed_table(kind: RowKind, fields: &[&RowFields]) -> Option<String> {
     };
     for row in fields {
         let mut record: Vec<u16> = Vec::with_capacity(9);
-        record.extend(intern(&mut pool, &row.key)?);
+        record.extend(intern(&mut *pool, &row.key)?);
         match (&row.operand, kind) {
             (Operand::Argb(argb), RowKind::LiteralBrush) => {
                 record.extend([(*argb & 0xFFFF) as u16, (*argb >> 16) as u16]);
             }
             (Operand::Text(text), RowKind::ResourceAlias | RowKind::DynamicBrush | RowKind::StaticBrush) => {
-                record.extend(intern(&mut pool, text)?);
+                record.extend(intern(&mut *pool, text)?);
             }
             _ => return None,
         }
@@ -348,7 +355,10 @@ fn packed_table(kind: RowKind, fields: &[&RowFields]) -> Option<String> {
     // The pool is read by byte offsets: it must fit them as a whole.
     narrow(pool.len())?;
     let mut text = String::from("rt::PackedRows {\n");
-    text.push_str(&format!("    strings: {},\n", super::rust_string_literal(&pool)));
+    match pool_name {
+        Some(name) => text.push_str(&format!("    strings: {name},\n")),
+        None => text.push_str(&format!("    strings: {},\n", super::rust_string_literal(pool))),
+    }
     text.push_str(&format!("    namespaces: &[{}],\n", namespaces.join(", ")));
     text.push_str("    records: &[\n");
     for record in &records {
@@ -638,6 +648,10 @@ pub(super) struct RowRun {
     /// The initializer of the packed table of the run (#855), when it is written as one (the
     /// native backend only).
     pub(super) packed: Option<String>,
+    /// The fields of the rows of a packed table, for the pool of its unit ([`row_tables_in`]).
+    pub(super) fields: Option<Vec<RowFields>>,
+    /// The unit of the theme the rows are entries of (#568).
+    pub(super) unit: Option<u32>,
     /// The program of the run, with the typed bytecode backend.
     program: Option<bytecode::Program>,
 }
@@ -709,14 +723,13 @@ fn flush(
     // The typed backend encodes the run as a program; otherwise a packed table (#855) when the
     // experiment is on and every row of the run fits one. A run is encoded by one of them only.
     let program = typed.then(|| bytecode::Program::encode(kind, run.iter().map(|found| &found.entry.encoded)));
-    let packed = match (program.is_none() && packed_theme_rows(), kind.packed_builder()) {
-        (true, Some(_)) => run
-            .iter()
-            .map(|found| found.entry.fields.as_ref())
-            .collect::<Option<Vec<_>>>()
-            .and_then(|fields| packed_table(kind, &fields)),
+    let fields: Option<Vec<&RowFields>> = match (program.is_none() && packed_theme_rows(), kind.packed_builder()) {
+        (true, Some(_)) => run.iter().map(|found| found.entry.fields.as_ref()).collect(),
         _ => None,
     };
+    let packed = fields.as_ref().and_then(|fields| packed_table(kind, fields));
+    let fields = packed.as_ref().and(fields).map(|fields| fields.into_iter().cloned().collect());
+    let unit = first.unit;
     if program.is_some() {
         let arguments = if kind.is_deferred() { format!("&{dictionary}, &context, &{document}") } else { format!("&{dictionary}") };
         body.push(format!("{indent}{name}.{}({arguments})?;", bytecode::method(kind)));
@@ -729,7 +742,7 @@ fn flush(
     }
     let rows = if typed { Vec::new() } else { run.iter().map(|found| found.entry.row.clone()).collect() };
     let slots = run.iter().filter_map(|found| found.entry.slot).collect();
-    tables.push((name, RowRun { kind, rows, slots, packed, program }));
+    tables.push((name, RowRun { kind, rows, slots, packed, fields, unit, program }));
     run.clear();
 }
 
@@ -817,6 +830,70 @@ pub(super) fn row_runs_with_backend(
     (body, tables)
 }
 
+/// The static of the packed table `name` of the shape `kind` with the initializer `packed`.
+fn packed_static(name: &str, document_text: &str, kind: RowKind, packed: &str) -> String {
+    let builder = kind.packed_builder().unwrap_or_default();
+    format!(
+        "/// {} of a run of `{document_text}`, packed, added in order by `{builder}` (#855).\n\
+         static {name}: rt::PackedRows = {packed};\n",
+        kind.description()
+    )
+}
+
+/// The texts of the tables `tables` (`(name, document text, run)`, in the order of the calls) of
+/// the function `prefix` (upper case) of a document (#855): the packed tables of one unit of a
+/// theme, when it has two or more, share one pool of strings, the constant
+/// `{prefix}_UNIT_{unit}_STRINGS` written before the first of them. The tables of the theme
+/// dictionaries of a unit name the same keys and targets, which a pool for each table repeated;
+/// a pool for each unit, not one for the theme, leaves the strings of a trimmed unit out with it.
+/// A table whose rows do not fit the 16-bit offsets of the pool keeps a pool of its own, as does
+/// every other table.
+pub(super) fn row_tables_in(prefix: &str, tables: &[(String, String, RowRun)], image: &super::BytecodeImage) -> Vec<String> {
+    let mut by_unit: std::collections::BTreeMap<u32, Vec<usize>> = std::collections::BTreeMap::new();
+    for (index, (_, _, run)) in tables.iter().enumerate() {
+        if let (Some(unit), Some(_), Some(_), None) = (run.unit, &run.packed, &run.fields, &run.program) {
+            by_unit.entry(unit).or_default().push(index);
+        }
+    }
+    let mut shared: HashMap<usize, String> = HashMap::new();
+    let mut pools: HashMap<usize, (u32, String)> = HashMap::new();
+    for (unit, indices) in by_unit.into_iter().filter(|(_, indices)| indices.len() >= 2) {
+        let pool_name = format!("{prefix}_UNIT_{unit}_STRINGS");
+        let mut pool = String::new();
+        let mut members = Vec::new();
+        for index in indices {
+            let run = &tables[index].2;
+            let Some(fields) = &run.fields else { continue };
+            let fields: Vec<&RowFields> = fields.iter().collect();
+            let mut trial = pool.clone();
+            if let Some(packed) = packed_table_in(run.kind, &fields, &mut trial, Some(&pool_name)) {
+                pool = trial;
+                members.push((index, packed));
+            }
+        }
+        if members.len() < 2 {
+            continue;
+        }
+        pools.insert(members[0].0, (unit, pool));
+        shared.extend(members);
+    }
+    let mut texts = Vec::with_capacity(tables.len());
+    for (index, (name, document_text, run)) in tables.iter().enumerate() {
+        if let Some((unit, pool)) = pools.get(&index) {
+            texts.push(format!(
+                "/// The keys and targets of the packed tables of the unit {unit} of `{document_text}`, each once (#855).\n\
+                 const {prefix}_UNIT_{unit}_STRINGS: &str = {};\n",
+                super::rust_string_literal(pool)
+            ));
+        }
+        texts.push(match shared.get(&index) {
+            Some(packed) => packed_static(name, document_text, run.kind, packed),
+            None => row_table_in(name, document_text, run, image),
+        });
+    }
+    texts
+}
+
 /// The text of the static table `name` of the rows of `run`, of the document `document_text`.
 #[cfg(test)]
 pub(super) fn row_table(name: &str, document_text: &str, run: &RowRun) -> String {
@@ -827,12 +904,8 @@ pub(super) fn row_table_in(name: &str, document_text: &str, run: &RowRun, image:
     if let Some(program) = &run.program {
         return program.source(name, run.kind, image);
     }
-    if let (Some(packed), Some(builder)) = (&run.packed, run.kind.packed_builder()) {
-        return format!(
-            "/// {} of a run of `{document_text}`, packed, added in order by `{builder}` (#855).\n\
-             static {name}: rt::PackedRows = {packed};\n",
-            run.kind.description()
-        );
+    if let (Some(packed), Some(_)) = (&run.packed, run.kind.packed_builder()) {
+        return packed_static(name, document_text, run.kind, packed);
     }
     let mut text = format!(
         "/// {} of a run of `{document_text}`, added in order by `{}` (#568).\n",

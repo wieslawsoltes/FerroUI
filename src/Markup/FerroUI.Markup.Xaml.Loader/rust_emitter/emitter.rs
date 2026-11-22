@@ -991,8 +991,9 @@ struct Emitter<'a> {
     /// ([`theme_rows::RowStatement`]).
     row_statements: HashMap<String, theme_rows::RowStatement>,
     resolved_calls: std::cell::RefCell<construction::Calls>,
-    /// The row tables of the runs written as rows, in the order of their calls.
-    row_tables: Vec<String>,
+    /// The row tables of the runs written as rows, in the order of their calls: the name of the
+    /// table, the text of the document and the run ([`theme_rows::row_tables_in`]).
+    row_tables: Vec<(String, String, theme_rows::RowRun)>,
     /// How deep the content being written is in deferred content: the entries of units are
     /// marked only at the top level, in the function of the document ([`theme_units`]).
     deferred_depth: usize,
@@ -3381,7 +3382,7 @@ impl<'a> Emitter<'a> {
             for slot in &run.slots {
                 self.deferred_functions[*slot].clear();
             }
-            self.row_tables.push(theme_rows::row_table_in(&name, &document_text, &run, &self.documents.bytecode_image));
+            self.row_tables.push((name, document_text.clone(), run));
         }
         lines
     }
@@ -5625,9 +5626,11 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(run);
     }
-    for table in &emitter.row_tables {
+    // The row tables, the packed tables of a unit with the pool of the unit (#855).
+    let prefix = emitter.function_name.to_uppercase();
+    for table in theme_rows::row_tables_in(&prefix, &emitter.row_tables, &emitter.documents.bytecode_image) {
         source.push('\n');
-        source.push_str(table);
+        source.push_str(&table);
     }
     // The tables of control themes and template bindings and the items they share.
     for item in &emitter.theme_styles.items {
