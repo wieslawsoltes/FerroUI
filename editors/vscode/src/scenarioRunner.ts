@@ -66,6 +66,7 @@ export function scenarioBaselineRef(uri: vscode.Uri): string | undefined {
 
 export class ScenarioRunner implements vscode.Disposable {
     private root?: Promise<string>;
+    private cleanup?: Promise<void>;
     private sequence = 0;
     private readonly stop = new AbortController();
     private readonly pending = new Set<Promise<ScenarioReport>>();
@@ -119,10 +120,19 @@ export class ScenarioRunner implements vscode.Disposable {
     }
 
     dispose(): void {
+        void this.shutdown();
+    }
+
+    shutdown(): Promise<void> {
         this.stop.abort();
-        if (this.root) {
-            void Promise.allSettled(this.pending).then(() => this.root!).then(root =>
-                rm(root, { recursive: true, force: true })).catch(() => {});
-        }
+        this.cleanup ??= this.cleanArtifacts();
+        return this.cleanup;
+    }
+
+    private async cleanArtifacts(): Promise<void> {
+        await Promise.allSettled(this.pending);
+        if (!this.root) return;
+        const root = await this.root.catch(() => undefined);
+        if (root) await rm(root, { recursive: true, force: true, maxRetries: 3 }).catch(() => {});
     }
 }

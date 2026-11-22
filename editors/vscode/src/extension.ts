@@ -72,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
     const projectView = new ProjectView(inventory, projects, reload, projectSetup);
-    stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose()]); };
+    stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose(), scenarios.shutdown()]); };
     const runtimes = new RuntimeConnections(reload);
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanel(context, runtimes, reload, runtimeSource);

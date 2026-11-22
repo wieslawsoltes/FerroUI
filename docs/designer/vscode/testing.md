@@ -11,6 +11,8 @@ Use a FerroUI selector such as `#Filter` for interaction and property assertions
 
 A normal test run checks the PNG in your working copy. A missing baseline or a visual difference above the specified tolerance fails the matching screenshot assertion. **Test Results** links to the available expected, actual, and difference images. The samples commit their approved PNGs alongside the scenarios. Use a consistent rendering host and fonts when screenshots contain text.
 
+VS Code keeps the generated images for the current extension session. Use the CLI artifact directory for a review you need to retain.
+
 ## Review and approve a screenshot
 
 1. Open a scenario and select the compare icon in its editor toolbar, or choose **Review FerroUI Screenshot Baselines** in Testing. **FerroUI: Review Scenario Baselines** also lets you choose a saved scenario from the Command Palette.
