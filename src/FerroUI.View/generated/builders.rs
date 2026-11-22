@@ -9574,6 +9574,15 @@ pub trait TextPresenterProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::presenters::TextPresenter>> TextPresenterProps for El<T> {}
 
+/// The properties and routed events of [`Thumb`](ferroui_controls::primitives::Thumb).
+pub trait ThumbProps: ElementBuilder {
+    /// Sets [`Thumb::drag_start_policy_property`](ferroui_controls::primitives::Thumb::drag_start_policy_property).
+    fn drag_start_policy<M>(self, value: impl IntoProp<ferroui_controls::primitives::ThumbDragStartPolicy, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::Thumb>::drag_start_policy_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::Thumb>> ThumbProps for El<T> {}
+
 /// The properties and routed events of [`TickBar`](ferroui_controls::TickBar).
 pub trait TickBarProps: ElementBuilder {
     /// Sets [`TickBar::fill_property`](ferroui_controls::TickBar::fill_property).
@@ -10607,6 +10616,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`AutomationProperties::is_column_header_property`](ferroui_controls::automation::AutomationProperties::is_column_header_property).
     fn automation_properties_is_column_header<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::is_column_header_property(), value)
+    }
+
+    /// Sets the attached [`AutomationProperties::is_dialog_property`](ferroui_controls::automation::AutomationProperties::is_dialog_property).
+    fn automation_properties_is_dialog<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::automation::AutomationProperties>::is_dialog_property(), value)
     }
 
     /// Sets the attached [`AutomationProperties::is_required_for_form_property`](ferroui_controls::automation::AutomationProperties::is_required_for_form_property).
