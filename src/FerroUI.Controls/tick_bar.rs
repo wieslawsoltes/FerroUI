@@ -32,6 +32,8 @@ pub enum TickBarPlacement {
 #[derive(Clone, Default)]
 pub struct TickList(Rc<FerroList<f64>>);
 
+ferroui_base::styled_value!(TickList);
+
 impl TickList {
     /// Creates an empty list.
     pub fn new() -> Self {

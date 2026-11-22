@@ -1,4 +1,169 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <StackPanel><StackPanel.Resources><SolidColorBrush x:Key="AccentBrush" Color="#0078D4"/></StackPanel.Resources><TextBlock Foreground="{StaticResource AccentBrush}" Text="A shared static resource" FontSize="20"/><TextBlock Foreground="{DynamicResource AccentBrush}" Text="A dynamic resource reference" FontSize="20"/></StackPanel>
+<!-- Ported from the four pinned XamlResources examples of WinUI Gallery (14061eea) and the code
+     behind of XamlResourcesPage.xaml.cs (binding_samples.rs); see ../NOTICE.md. ThemeResource is
+     DynamicResource, which follows the theme as ThemeResource does; StaticResource stays
+     StaticResource, read once when the page loads. The source's StackPanels and Grids with
+     padding and corners are Borders (ControlCornerRadius is its value, 4), and a Color resource
+     set as a Background is the Color of a SolidColorBrush, the brush WinUI makes of it. The
+     headings' SubtitleHeadingTextBlockStyle is the theme's SubtitleTextBlockStyle with the heading
+     level 2. The image of the theme dictionaries (the source's Light_Image.png and
+     Dark_Image.png) is set by binding_samples.rs for the theme of the example and again when it
+     changes. The Color page link is a HyperlinkButton, which the gallery wires as the source's
+     Hyperlink_Click. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel.Resources>
+    <Color x:Key="PrimaryColor">#0078D4</Color>
+    <SolidColorBrush x:Key="HighlightBrush" Color="#A94DC1" />
+    <SolidColorBrush x:Key="FontColor" Color="White" />
+  </StackPanel.Resources>
+
+  <TextBlock Margin="0,12,0,4" Theme="{DynamicResource SubtitleTextBlockStyle}" AutomationProperties.HeadingLevel="2"
+             Text="Creating and using XAML resources" />
+  <StackPanel Spacing="12">
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph><Run Text="XAML Resources are defined using the " /><Run FontFamily="Consolas" Text="ResourceDictionary" /><Run Text=" element. The important parts are " /><Run FontWeight="SemiBold" Text="the resource's key" /><Run Text=" (a unique identifier) and " /><Run FontWeight="SemiBold" Text="the value" /><Run Text=" (like a color or brush)." /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph><Run Text="• App-level: Resources are defined globally, accessible throughout the application." /></Paragraph>
+      <Paragraph><Run Text="• Page-level: Resources are defined specific to a particular page." /></Paragraph>
+      <Paragraph><Run Text="• Control-level: Resources are defined local to a specific control, such as a Button or Grid." /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph FontWeight="SemiBold"><Run Text="Tips" /></Paragraph>
+      <Paragraph><Run Text="• Naming: descriptive keys should always be used for resources to make them easier to identify." /></Paragraph>
+      <Paragraph><Run Text="• Scope: Resources should be defined at the narrowest scope possible to improve maintainability." /></Paragraph>
+      <Paragraph><Run Text="• Access: " /><Run FontFamily="Consolas" Text="{}{StaticResource Key}" /><Run Text=" is used in XAML for most cases, and " /><Run FontFamily="Consolas" Text="Resources[&quot;Key&quot;]" /><Run Text=" is used in C# for runtime access." /></Paragraph>
+    </RichTextBlock>
+  </StackPanel>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="XamlResources" FontSize="18" />
+    <!-- The application-level resource PrimaryColor. -->
+    <Border x:Name="AppLevelPanel" Padding="8" CornerRadius="4">
+      <Border.Background>
+        <SolidColorBrush Color="{StaticResource PrimaryColor}" />
+      </Border.Background>
+      <StackPanel>
+        <TextBlock FontSize="24" Foreground="White" Text="Using application-level resources" />
+        <!-- The page-level resource HighlightBrush. -->
+        <Border x:Name="PageLevelPanel" Margin="8" Padding="8" Background="{StaticResource HighlightBrush}"
+                CornerRadius="4">
+          <StackPanel>
+            <TextBlock x:Name="PageLevelText" FontSize="18" Foreground="{StaticResource FontColor}"
+                       Text="Using page-level resources" />
+            <!-- Control-level resources, in the panel's own Resources. -->
+            <Border Margin="8" Padding="8" CornerRadius="4">
+              <Border.Resources>
+                <Color x:Key="BackgroundColor">#E2241A</Color>
+                <x:String x:Key="Description">Using control-level resources</x:String>
+              </Border.Resources>
+              <Border x:Name="ControlLevelPanel" Padding="8" CornerRadius="4">
+                <Border.Background>
+                  <SolidColorBrush Color="{StaticResource BackgroundColor}" />
+                </Border.Background>
+                <TextBlock x:Name="ControlLevelText" Foreground="White" Text="{StaticResource Description}" />
+              </Border>
+            </Border>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+
+  <TextBlock Margin="0,24,0,4" Theme="{DynamicResource SubtitleTextBlockStyle}" AutomationProperties.HeadingLevel="2"
+             Text="Theme resources" />
+  <StackPanel Spacing="12">
+    <WrapPanel>
+      <TextBlock VerticalAlignment="Center"
+                 Text="WinUI 3 includes built-in theme resources for commonly used colors. See all brushes on the " />
+      <HyperlinkButton x:Name="ColorPageLink" Padding="0" Content="Color page" />
+      <TextBlock VerticalAlignment="Center" Text="." />
+    </WrapPanel>
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph><Run Text="• " /><Run FontWeight="SemiBold" Text="ThemeResource" /><Run Text=" is used for dynamic theme-based updates." /></Paragraph>
+      <Paragraph><Run Text="• " /><Run FontWeight="SemiBold" Text="ThemeDictionaries" /><Run Text=" are defined to provide different values for light and dark themes." /></Paragraph>
+      <Paragraph><Run Text="• A fallback value should always be provided to ensure compatibility with undefined themes." /></Paragraph>
+      <Paragraph><Run Text="• " /><Run FontFamily="Consolas" Text="SetThemeResourceBinding" /><Run Text=" (experimental) applies a ThemeResource from code, so the value updates when the theme changes." /></Paragraph>
+    </RichTextBlock>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="StaticResource versus ThemeResource" FontSize="18" />
+    <InfoBar HorizontalAlignment="Left" IsClosable="False" IsOpen="True"
+             Message="Toggle the theme using the theme switch button in the top right corner.">
+      <InfoBar.IconSource>
+        <FontIconSource Glyph="&#xE793;" />
+      </InfoBar.IconSource>
+    </InfoBar>
+    <Grid x:Name="StaticResourceGrid" Background="{StaticResource SolidBackgroundFillColorBaseBrush}">
+      <TextBlock x:Name="StaticResourceText" FontSize="16" Foreground="{StaticResource TextFillColorPrimaryBrush}"
+                 Text="StaticResource uses the value defined when the app starts and does not update when the theme changes."
+                 TextWrapping="Wrap" />
+    </Grid>
+    <Grid x:Name="ThemeResourceGrid" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
+      <TextBlock x:Name="ThemeResourceText" FontSize="16" Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                 Text="ThemeResource adapts automatically to the current theme. If the app switches from light to dark, the color defined by ThemeResource changes."
+                 TextWrapping="Wrap" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="12">
+    <TextBlock Text="Define a new theme resource" FontSize="18" />
+    <InfoBar HorizontalAlignment="Left" IsClosable="False" IsOpen="True"
+             Message="Toggle the theme using the theme switch button in the top right corner.">
+      <InfoBar.IconSource>
+        <FontIconSource Glyph="&#xE793;" />
+      </InfoBar.IconSource>
+    </InfoBar>
+    <Grid x:Name="ThemeDictionaryHost">
+      <Grid.Resources>
+        <ResourceDictionary>
+          <ResourceDictionary.ThemeDictionaries>
+            <ResourceDictionary x:Key="Default">
+              <SolidColorBrush x:Key="BackgroundBrush" Color="#EEE" />
+              <SolidColorBrush x:Key="TextBrush" Color="#333" />
+              <x:String x:Key="ThemeString">Light theme</x:String>
+            </ResourceDictionary>
+            <ResourceDictionary x:Key="Dark">
+              <SolidColorBrush x:Key="BackgroundBrush" Color="#333" />
+              <SolidColorBrush x:Key="TextBrush" Color="#EEE" />
+              <x:String x:Key="ThemeString">Dark theme</x:String>
+            </ResourceDictionary>
+          </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+      </Grid.Resources>
+      <Border x:Name="ThemeDictionaryPanel" MaxWidth="700" Padding="8" HorizontalAlignment="Center"
+              VerticalAlignment="Center" Background="{DynamicResource BackgroundBrush}" CornerRadius="4">
+        <StackPanel Spacing="4">
+          <TextBlock x:Name="ThemeStringText" Foreground="{DynamicResource TextBrush}"
+                     Theme="{DynamicResource SubtitleTextBlockStyle}" Text="{DynamicResource ThemeString}" />
+          <Border CornerRadius="4" ClipToBounds="True">
+            <Image x:Name="ThemeImage" />
+          </Border>
+        </StackPanel>
+      </Border>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="12">
+    <TextBlock Text="Set a ThemeResource from code" FontSize="18" />
+    <InfoBar HorizontalAlignment="Left" IsClosable="False" IsOpen="True"
+             Message="Toggle the theme using the theme switch button in the top right corner.">
+      <InfoBar.IconSource>
+        <FontIconSource Glyph="&#xE793;" />
+      </InfoBar.IconSource>
+    </InfoBar>
+    <TextBlock TextWrapping="Wrap"
+               Text="FrameworkElement.SetThemeResourceBinding is an experimental API and is the code equivalent of {ThemeResource Key}. Switch the theme of this example to compare it with a one-time resource lookup." />
+    <Grid HorizontalAlignment="Left" ColumnDefinitions="200,200" ColumnSpacing="12">
+      <Border x:Name="OneTimeLookupBorder" Padding="12" CornerRadius="4">
+        <TextBlock x:Name="OneTimeLookupText" TextWrapping="Wrap"
+                   Text="A one-time resource lookup keeps the value from when it was read." />
+      </Border>
+      <Border x:Name="ThemeResourceBindingBorder" Grid.Column="1" Padding="12" CornerRadius="4">
+        <TextBlock x:Name="ThemeResourceBindingText" TextWrapping="Wrap"
+                   Text="SetThemeResourceBinding updates when the theme changes." />
+      </Border>
+    </Grid>
+  </StackPanel>
 </StackPanel>

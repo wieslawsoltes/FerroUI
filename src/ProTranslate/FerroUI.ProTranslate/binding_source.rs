@@ -17,6 +17,8 @@ use std::rc::{Rc, Weak};
 #[derive(Clone)]
 pub struct TranslationBindingSource(pub(crate) Rc<SourceInner>);
 
+ferroui_base::styled_value!(TranslationBindingSource);
+
 pub(crate) struct SourceInner {
     service: RefCell<TranslationService>,
     subscription: RefCell<Option<Subscription>>,

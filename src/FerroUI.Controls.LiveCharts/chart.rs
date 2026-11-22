@@ -31,7 +31,7 @@ use ferroui_livecharts::{
     FindingStrategy, GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions,
     GeographicBounds, HeatLegendSource, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
     PolarChartEngine, PolarOptions, PolarScale, PolarToolTipLabelFormatters, SankeyChartEngine,
-    SankeyOptions, SankeySeriesOptions, Scene, TreemapChartEngine, TreemapOptions,
+    SankeyOptions, SankeySeriesOptions, Scene, TooltipHoverArea, TreemapChartEngine, TreemapOptions,
     TreemapSeriesOptions, ZoomDirection,
 };
 use std::{
@@ -39,6 +39,31 @@ use std::{
     rc::{Rc, Weak},
     time::Duration,
 };
+
+/// The `GeometrySvg` of a line, stacked area, scatter or bar series (`VariableSVGPathGeometry`).
+fn series_geometry_svg(model: &Ref<ChartSeries>) -> Option<String> {
+    use crate::series_classes::*;
+    macro_rules! svg {
+        ($($class:ty),*) => {
+            $(if let Some(series) = model.cast::<$class>() {
+                return series.geometry_svg();
+            })*
+        };
+    }
+    svg!(
+        LineSeries,
+        AreaSeries,
+        StackedAreaSeries,
+        ScatterSeries,
+        ColumnSeries,
+        RowSeries,
+        StackedColumnSeries,
+        StackedRowSeries,
+        RangeColumnSeries,
+        RangeRowSeries
+    );
+    None
+}
 
 /// Immutable event data. Handlers may change collections or remove the chart.
 #[derive(Clone, Debug, PartialEq)]
@@ -56,6 +81,9 @@ struct Measurement {
     polar_origin: Option<(Point, f64)>,
     /// The projector, viewport and lands of a geographic map (its scene is `scene`).
     geo: Option<GeoMapMeasurement>,
+    /// The kind, pivot and geometry size of each series, which place the tooltip of its points
+    /// (`CartesianChartEngine::tooltip_hover_area`).
+    tooltip_series: Vec<ferroui_livecharts::Series>,
 }
 
 /// An animation of the map in progress: the rotation of a globe (`RotateTo`, quadratic in and
@@ -271,18 +299,15 @@ impl VisualImpl for Chart {
             NativeScene::compile(&overlay).render(context);
         }
         let hovered = this.hover.borrow().clone();
-        if let Some(mut hovered) = hovered {
-            // The tooltip of a land is anchored at its centre (`GeoTooltipPoint.LandCenter`).
-            if this.chart_kind() == ChartKind::GeoMap {
-                if let Some(land) = hovered.points.first() {
-                    hovered.position = land.center;
-                }
-            }
+        if let Some(hovered) = hovered {
             if this.tooltip_position() != TooltipPosition::Hidden && !hovered.points.is_empty() {
+                let (lines, tooltip) = crate::decorations::tooltip_layout(size, &hovered);
+                let origin = this.tooltip_origin(&hovered, tooltip, size);
                 let tooltip = crate::decorations::tooltip_scene(
                     size,
-                    &hovered,
-                    this.tooltip_position(),
+                    &lines,
+                    tooltip,
+                    origin,
                     this.text_color(),
                 );
                 NativeScene::compile(&tooltip).render(context);
@@ -727,7 +752,11 @@ impl Chart {
         let heat_legend = self
             .legend()
             .and_then(|legend| ChartLegend::heat_legend(&legend))
-            .map(|legend| {
+            .map(|mut legend| {
+                // `LegendTextSize` of the chart; none or a negative size is the theme's.
+                if let Some(size) = self.legend_text_size().filter(|size| *size >= 0.0) {
+                    legend.text_size = size;
+                }
                 let source = match self.chart_kind() {
                     ChartKind::Cartesian => HeatLegendSource::of_series(&series),
                     ChartKind::GeoMap => heat_lands
@@ -783,9 +812,13 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = CartesianSeriesOptions::default();
+                        options.x_tool_tip_label_formatter = model.x_tool_tip_label_formatter();
+                        options.y_tool_tip_label_formatter = model.y_tool_tip_label_formatter();
                         if let Some(heat) = model.cast::<HeatSeries>() {
                             options.data_labels_position = Some(heat.data_labels_position());
                             options.geometry_svg = heat.geometry_svg();
+                        } else {
+                            options.geometry_svg = series_geometry_svg(model);
                         }
                         options
                     })
@@ -882,9 +915,11 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = SankeySeriesOptions::default();
-                        options.data_labels_max_width = model
-                            .cast::<crate::SankeySeries>()
-                            .map(|s| s.data_labels_max_width());
+                        let sankey = model.cast::<crate::SankeySeries>();
+                        options.data_labels_max_width =
+                            sankey.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            sankey.and_then(|s| s.tool_tip_label_formatter());
                         options
                     })
                     .collect();
@@ -912,9 +947,11 @@ impl Chart {
                     .iter()
                     .map(|model| {
                         let mut options = TreemapSeriesOptions::default();
-                        options.data_labels_max_width = model
-                            .cast::<crate::TreemapSeries>()
-                            .map(|s| s.data_labels_max_width());
+                        let treemap = model.cast::<crate::TreemapSeries>();
+                        options.data_labels_max_width =
+                            treemap.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            treemap.and_then(|s| s.tool_tip_label_formatter());
                         options
                     })
                     .collect();
@@ -987,6 +1024,7 @@ impl Chart {
             self.text_color(),
             self.legend_position(),
             heat_legend.as_ref().map(|(legend, source)| (legend, source.as_ref())),
+            self.legend_background_paint(),
         );
         {
             for (series_index, model) in models.iter().enumerate() {
@@ -1028,11 +1066,31 @@ impl Chart {
                 *current = current.retarget(scene.clone());
             }
         } else {
-            let previous = previous.or_else(|| self.heat_first_draw(&models, &scene));
+            // The first draw of a Cartesian chart takes the heat cells in from transparent and
+            // grows its financial and OHLC bars from their open.
+            let financial = series.iter().any(|s| {
+                use ferroui_livecharts::SeriesKind::{Financial, Ohlc};
+                matches!(s.kind, Financial | Ohlc)
+            });
+            let previous = previous
+                .or_else(|| self.heat_first_draw(&models, &scene))
+                .or_else(|| {
+                    (self.chart_kind() == ChartKind::Cartesian && financial)
+                        .then(|| Rc::new(CartesianChartEngine::first_draw_seed(&scene, &series, &y_scales)))
+                });
             if previous.as_deref() != Some(&*scene) {
                 self.start_transition(previous, scene.clone());
             }
         }
+        let tooltip_series = series
+            .iter()
+            .map(|s| {
+                let mut light = ferroui_livecharts::Series::new(s.kind);
+                light.pivot = s.pivot;
+                light.geometry_size = s.geometry_size;
+                light
+            })
+            .collect();
         *self.measurement.borrow_mut() = Some(Measurement {
             revision,
             scene: scene.clone(),
@@ -1040,6 +1098,7 @@ impl Chart {
             y_scales,
             polar_origin,
             geo,
+            tooltip_series,
         });
         self.last_error.borrow_mut().take();
         self.native_scene.borrow_mut().take();
@@ -1049,6 +1108,40 @@ impl Chart {
         Ok(scene)
     }
 
+    /// The top left corner of the tooltip of the found points (`GetTooltipLocation` over their
+    /// hover areas, `SKDefaultGeoTooltip` about the centre of a land), kept inside the control.
+    fn tooltip_origin(&self, hovered: &ChartPointerEventArgs, tooltip: Size, size: Size) -> Point {
+        use ferroui_livecharts::tooltips::{geo_tooltip_location, tooltip_location};
+        let position = match self.tooltip_position() {
+            TooltipPosition::Hidden => ferroui_livecharts::tooltips::TooltipPosition::Hidden,
+            TooltipPosition::Auto => ferroui_livecharts::tooltips::TooltipPosition::Auto,
+            TooltipPosition::Top => ferroui_livecharts::tooltips::TooltipPosition::Top,
+            TooltipPosition::Bottom => ferroui_livecharts::tooltips::TooltipPosition::Bottom,
+            TooltipPosition::Left => ferroui_livecharts::tooltips::TooltipPosition::Left,
+            TooltipPosition::Right => ferroui_livecharts::tooltips::TooltipPosition::Right,
+            TooltipPosition::Center => ferroui_livecharts::tooltips::TooltipPosition::Center,
+        };
+        let kind = self.chart_kind();
+        if kind == ChartKind::GeoMap {
+            let center = hovered.points.first().map_or(hovered.position, |land| land.center);
+            return geo_tooltip_location(center, tooltip, size, position).origin;
+        }
+        let measurement = self.measurement.borrow();
+        let series = measurement.as_ref().map_or(&[][..], |m| &m.tooltip_series[..]);
+        let areas: Vec<_> = hovered
+            .points
+            .iter()
+            .map(|hit| match kind {
+                ChartKind::Pie => PieChartEngine::tooltip_hover_area(hit),
+                ChartKind::Cartesian => match series.get(hit.id.series) {
+                    Some(s) => CartesianChartEngine::tooltip_hover_area(s, hit, position),
+                    None => TooltipHoverArea::of_region(hit),
+                },
+                _ => TooltipHoverArea::of_region(hit),
+            })
+            .collect();
+        tooltip_location(&areas, tooltip, size, position).origin
+    }
     pub fn find_points(&self, position: Point) -> Vec<HitRegion> {
         let size = self.bounds().size();
         let cached_size = self.measurement.borrow().as_ref().map(|m| m.scene.size);

@@ -32,7 +32,7 @@ use ferroui_base::data::{
 use ferroui_base::metadata::{MarkupInvoke, MarkupProperty, MarkupType};
 use ferroui_base::AnyValue;
 use ferroui_base::styling::{Setter, SetterBase, StyleBase};
-use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, TypeInfo, UnsetValueType};
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, ObjectType, Ref, StyledElement, TypeInfo, UnsetValueType};
 
 use super::{
     DeferredContent, DeferredContentBuilder, FerroXamlIlXmlNamespaceInfo, FrameworkContextServices,
@@ -53,6 +53,11 @@ pub use super::theme_resources::{
     add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
     LiteralBrushRow, ResourceAliasRow, StaticBrushRow, TypedResourceProgram, ValueRow,
 };
+// Packed row tables of the deferred shapes (#855, `packed_resource_rows.rs`).
+pub use super::theme_resources::{
+    add_packed_dynamic_brushes, add_packed_literal_brushes, add_packed_resource_aliases, add_packed_static_brushes,
+    PackedRows,
+};
 // The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
 // run-time choice of the setter of a resource value and a run of template bindings as data.
 pub use super::theme_styles::{
@@ -64,9 +69,9 @@ pub use super::theme_styles::{
 // builds of the dictionaries apply them with.
 pub use super::theme_run_program::{apply_theme_run, ThemeRunImport};
 pub use super::theme_units::{
-    active_theme_units, apply_theme_unit, find_theme_unit, register_theme_parts, register_theme_parts_if_absent,
-    register_wider_theme_parts, registered_theme_parts, report_trimmed_theme, set_active_theme_units, trimmed_type_keys,
-    wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
+    active_theme_units, apply_theme_region, apply_theme_unit, find_theme_unit, register_theme_parts,
+    register_theme_parts_if_absent, register_wider_theme_parts, registered_theme_parts, report_trimmed_theme,
+    set_active_theme_units, trimmed_type_keys, wider_theme_parts, ThemeParts, ThemeUnit, ThemeUnitRun,
 };
 
 /// Materialize an independently linkable constant from the build-time image.
@@ -264,7 +269,20 @@ pub fn exact<T: Clone + 'static>(
     line: i32,
     position: i32,
 ) -> Result<T, XamlLoadError> {
+    // The conversion and its error do not depend on `T` beyond its value type (#1000): one
+    // function for every type, and only the typed read of the result in each instance.
     let target = ValueType::of::<T>();
+    let (value, converted) = exact_conversion(value, target);
+    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+        Some(converted) => Ok(converted.clone()),
+        None => Err(exact_error(&value, target, member, index, line, position)),
+    }
+}
+
+/// The conversion of [`exact`] to the value type `target`: the value as the conversion read
+/// it, and the converted value, if any.
+#[inline(never)]
+fn exact_conversion(value: MarkupValue, target: ValueType) -> (MarkupValue, Option<BoxedValue>) {
     let value = match (&value, target.is_object()) {
         (Some(boxed), true) => untyped_object_form(boxed).map(Some).unwrap_or(value),
         _ => value,
@@ -274,25 +292,26 @@ pub fn exact<T: Clone + 'static>(
         Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
     };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(converted) => Ok(converted.clone()),
-        None => {
-            // A value whose cast refuses it (a negative time span for a `Duration`): the
-            // error of the cast, as the run-time loader reports it (`to_exact`).
-            if let Some(error) = value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
-                return Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position));
-            }
-            let error = MarkupInvokeError::Argument {
-                index,
-                expected: target.name(),
-                actual: match &value {
-                    Some(value) => value.type_name().to_string(),
-                    None => "null".to_string(),
-                },
-            };
-            Err(at("InvalidCastException", format!("{member}: {error}"), line, position))
-        }
+    (value, converted)
+}
+
+/// The error of [`exact`] for a value that does not convert to `target`.
+#[inline(never)]
+fn exact_error(value: &MarkupValue, target: ValueType, member: &str, index: usize, line: i32, position: i32) -> XamlLoadError {
+    // A value whose cast refuses it (a negative time span for a `Duration`): the error of the
+    // cast, as the run-time loader reports it (`to_exact`).
+    if let Some(error) = value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+        return at(TARGET_INVOCATION_EXCEPTION, error, line, position);
     }
+    let error = MarkupInvokeError::Argument {
+        index,
+        expected: target.name(),
+        actual: match value {
+            Some(value) => value.type_name().to_string(),
+            None => "null".to_string(),
+        },
+    };
+    at("InvalidCastException", format!("{member}: {error}"), line, position)
 }
 
 /// The type name of the exception a member call of generated code that
@@ -463,6 +482,33 @@ pub fn bind_dynamic_resource(
     }
 }
 
+/// `{DynamicResource key}` as the value of the registered property `property` of an object, at
+/// `line`, `position` ([`bind_dynamic_resource`]): a row of a run that
+/// [`bind_dynamic_resources`] binds.
+#[derive(Clone, Copy)]
+pub struct DynamicResourceRow {
+    pub property: PropertyFn,
+    pub key: &'static str,
+    pub line: i32,
+    pub position: i32,
+}
+
+/// Binds the dynamic resources `rows` on `target`, in order ([`bind_dynamic_resource`] of each,
+/// its property read before it is bound); the first failure is the error. A run of
+/// `{DynamicResource}` values on one object, which generated code wrote as one call of
+/// [`bind_dynamic_resource`] each.
+#[inline(never)]
+pub fn bind_dynamic_resources(
+    context: &Rc<XamlIlContext>,
+    target: &Ref<FerroObject>,
+    rows: &[DynamicResourceRow],
+) -> Result<(), XamlLoadError> {
+    for row in rows {
+        bind_dynamic_resource(context, target, (row.property)(), row.key, row.line, row.position)?;
+    }
+    Ok(())
+}
+
 /// `{TemplateBinding source}` as the value of the registered property `property` of `target`
 /// (in a control template): what the statements of generated code do, which create the binding
 /// for the property `source` of the templated parent (`TemplateBinding::__markup_new_1`), call
@@ -517,6 +563,34 @@ pub fn static_resource_content(
     StaticResourceExtension::__markup_set_ResourceKey(&extension, string_object(key));
     let provided =
         invoked(StaticResourceExtension::__markup_ProvideValue_0(&extension, self::service_provider(&context)), line, position)?;
+    Ok(to_value(provided))
+}
+
+/// The value of `{StaticResource key}` for the registered property `property` (#568): what the
+/// statements of generated code do, which create the extension with the key
+/// (`StaticResourceExtension::__markup_new_1`), call `ProvideValue` with the property as the
+/// provide-value target property ([`provide_value_invoked`], a failure the error of an invoked
+/// member at `line`, `position`) and hold the provided value as the value of a node
+/// ([`to_value`]). The same calls, in the same order; the caller assigns the value with the
+/// setter it chooses.
+#[inline(never)]
+pub fn static_resource_value(
+    context: &Rc<XamlIlContext>,
+    property: &'static FerroProperty,
+    key: &str,
+    line: i32,
+    position: i32,
+) -> Result<MarkupValue, XamlLoadError> {
+    use crate::markup_extensions::StaticResourceExtension;
+    let extension = StaticResourceExtension::__markup_new_1(string_object(key));
+    let provided = provide_value_invoked(
+        context,
+        property_value(property),
+        &extension,
+        StaticResourceExtension::__markup_ProvideValue_0,
+        line,
+        position,
+    )?;
     Ok(to_value(provided))
 }
 
@@ -652,30 +726,30 @@ pub fn clr_property_info(
     property_type: ValueType,
     cached_boxed_boolean: bool,
 ) -> Rc<dyn IPropertyInfo> {
-    ferroui_base::ferro_thread_local! {
-        static INFOS: RefCell<HashMap<(usize, &'static str, bool), Rc<dyn IPropertyInfo>>> = RefCell::new(HashMap::new());
-    }
-    let key = (markup as *const MarkupType as usize, name, is_static);
-    if let Some(info) = INFOS.with(|infos| infos.borrow().get(&key).cloned()) {
-        return info;
-    }
-    let info = new_clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
-    INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
-    info
+    cached_clr_property_info(markup, None, name, is_static, property_type, cached_boxed_boolean)
 }
 
 /// The description of `Setter.Value` ([`clr_property_info`]) as a value:
 /// the provide-value target property of a markup extension that gives a
 /// setter its value.
+///
+/// It is made from the declared member alone (`Setter::__value_markup_property`), with the
+/// accessors and the name of the owner [`clr_property_info`] gives it: naming the whole
+/// declaration of the setter here kept every member of it, and what they reach, in every
+/// application with a theme (#612).
 #[inline(never)]
 pub fn setter_value_property() -> MarkupValue {
-    boxed(clr_property_info(
-        <Setter as ferroui_base::metadata::MarkupTyped>::MARKUP,
-        "Value",
-        false,
-        ValueType::object(),
-        false,
-    ))
+    ferroui_base::ferro_thread_local! {
+        static INFO: Rc<dyn IPropertyInfo> = new_clr_property_info(
+            "FerroUI.Styling.Setter".to_string(),
+            Setter::__value_markup_property(),
+            "Value",
+            false,
+            ValueType::object(),
+            false,
+        );
+    }
+    boxed(INFO.with(Rc::clone))
 }
 
 /// The Rust type the declaration of the plain property `name` of `markup` states for its
@@ -696,20 +770,76 @@ pub fn declared_property_type(markup: &'static MarkupType, name: &str, is_static
     (declared.type_)()
 }
 
-fn new_clr_property_info(
+/// The declared property `name` of `markup` at `index` of its list (the static properties when
+/// `is_static`), which the emitter resolved at compile time (#603); found by its name when the
+/// list at run time has another property there, so a declaration that changed since the
+/// compilation is still found.
+///
+/// # Panics
+/// Panics if `markup` declares no such property.
+fn declared_property(
     markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &str,
+    is_static: bool,
+) -> &'static MarkupProperty {
+    let list = match is_static {
+        true => markup.static_properties,
+        false => markup.properties,
+    };
+    let at_index = index.and_then(|index| list.get(index)).filter(|property| property.name == name);
+    at_index
+        .or_else(|| list.iter().find(|property| property.name == name))
+        .unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()))
+}
+
+/// [`clr_property_info`] of the declared property at `index` of the declaration of `markup`,
+/// which the emitter resolved at compile time (#603, the option
+/// `rust_emitter::set_compile_time_declared_properties`): no search of the declaration by name at
+/// run time. The description is the one [`clr_property_info`] gives for `name`.
+pub fn declared_clr_property_info(
+    markup: &'static MarkupType,
+    index: usize,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    cached_clr_property_info(markup, Some(index), name, is_static, property_type, cached_boxed_boolean)
+}
+
+/// The description of a declared property, one per property and thread ([`clr_property_info`]).
+fn cached_clr_property_info(
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+) -> Rc<dyn IPropertyInfo> {
+    ferroui_base::ferro_thread_local! {
+        static INFOS: RefCell<HashMap<(usize, &'static str, bool), Rc<dyn IPropertyInfo>>> = RefCell::new(HashMap::new());
+    }
+    let key = (markup as *const MarkupType as usize, name, is_static);
+    if let Some(info) = INFOS.with(|infos| infos.borrow().get(&key).cloned()) {
+        return info;
+    }
+    let declared = declared_property(markup, index, name, is_static);
+    let info = new_clr_property_info(markup.full_name(), declared, name, is_static, property_type, cached_boxed_boolean);
+    INFOS.with(|infos| infos.borrow_mut().insert(key, info.clone()));
+    info
+}
+
+fn new_clr_property_info(
+    owner: String,
+    declared: &'static MarkupProperty,
     name: &str,
     is_static: bool,
     property_type: ValueType,
     cached_boxed_boolean: bool,
 ) -> Rc<dyn IPropertyInfo> {
-    let declared = match is_static {
-        true => markup.static_properties.iter().find(|property| property.name == name),
-        false => markup.find_property(name),
-    };
-    let declared = declared.unwrap_or_else(|| panic!("{} declares no property {name}", markup.full_name()));
     let accessors = Rc::new(DeclaredAccessors {
-        owner: markup.full_name(),
+        owner,
         property: declared,
         is_static,
         cached_boxed_boolean,
@@ -754,18 +884,49 @@ pub fn path_property(
     accepts_null: bool,
     typed: bool,
 ) -> CompiledBindingPathBuilder {
-    if typed {
-        let declared = match is_static {
-            true => None,
-            false => markup.find_property(name),
-        };
-        if let Some(typed) = declared.and_then(|property| property.typed_path_element) {
+    path_property_of(builder, markup, None, name, is_static, property_type, cached_boxed_boolean, accepts_null, typed)
+}
+
+/// [`path_property`] of the declared property at `index` of the declaration of `markup`, which the
+/// emitter resolved at compile time (#603, the option
+/// `rust_emitter::set_compile_time_declared_properties`): no search of the declaration by name at
+/// run time. The element is the one [`path_property`] gives for `name`.
+#[allow(clippy::too_many_arguments)]
+pub fn declared_path_property(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    index: usize,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+    accepts_null: bool,
+    typed: bool,
+) -> CompiledBindingPathBuilder {
+    let cached = cached_boxed_boolean;
+    path_property_of(builder, markup, Some(index), name, is_static, property_type, cached, accepts_null, typed)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn path_property_of(
+    builder: &CompiledBindingPathBuilder,
+    markup: &'static MarkupType,
+    index: Option<usize>,
+    name: &'static str,
+    is_static: bool,
+    property_type: ValueType,
+    cached_boxed_boolean: bool,
+    accepts_null: bool,
+    typed: bool,
+) -> CompiledBindingPathBuilder {
+    if typed && !is_static {
+        if let Some(typed) = declared_property(markup, index, name, is_static).typed_path_element {
             if let Some(builder) = typed(builder, accepts_null) {
                 return builder;
             }
         }
     }
-    let info = clr_property_info(markup, name, is_static, property_type, cached_boxed_boolean);
+    let info = cached_clr_property_info(markup, index, name, is_static, property_type, cached_boxed_boolean);
     let factory: PropertyAccessorFactory = Rc::new(PropertyInfoAccessorFactory::create_inpc_property_accessor);
     match accepts_null {
         true => builder.property_with(info, factory, true),
@@ -1209,6 +1370,96 @@ pub fn populate_context(parent: Option<Rc<dyn IServiceProvider>>, document: &Doc
     context
 }
 
+// --- the parent stack of a styled element (#568) -------------------------------------------
+//
+// Generated code writes these for the objects of templates and documents that are styled
+// elements: the statements they stand for are the same at every element, so they are one
+// function for each class of element instead of a copy of the clone, the box and the call at
+// each element.
+
+/// `context.push_parent(rt::to_value(object.clone()))`: `object` on the parent stack of the
+/// context, as the value of the node ([`to_value`]).
+#[inline(never)]
+pub fn push_parent<T: ObjectType>(context: &Rc<XamlIlContext>, object: &Ref<T>) {
+    context.push_parent(to_value(object.clone()));
+}
+
+/// `context.set_intermediate_root_object(rt::to_value(object.clone()))`: `object` as the
+/// intermediate root of the context (the root of deferred content), as the value of the node
+/// ([`to_value`]).
+#[inline(never)]
+pub fn set_intermediate_root<T: ObjectType>(context: &Rc<XamlIlContext>, object: &Ref<T>) {
+    context.set_intermediate_root_object(to_value(object.clone()));
+}
+
+/// `rt::invoked(element.try_end_init(), line, position)?`: the end of the initialisation of a
+/// styled element, its failure the error of the member at `line`, `position` ([`invoked`]).
+#[inline(never)]
+pub fn end_init(element: &StyledElement, line: i32, position: i32) -> Result<(), XamlLoadError> {
+    invoked(element.try_end_init(), line, position)
+}
+
+/// `context.pop_parent(); rt::invoked(element.try_end_init(), line, position)?`: a styled
+/// element taken off the parent stack of the context, then the end of its initialisation
+/// ([`end_init`]).
+#[inline(never)]
+pub fn pop_parent_end_init(
+    context: &Rc<XamlIlContext>,
+    element: &StyledElement,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    context.pop_parent();
+    invoked(element.try_end_init(), line, position)
+}
+
+/// The name of a styled element (`x:Name` or `Name`): `name` set as its `Name`, then `element`
+/// registered under it in the name scope of the context ([`register_name_value`] of
+/// `Rc::new(element.clone())`, the value in the handle the statements boxed), as the two
+/// statements of generated code did. One function for each class of element; `styled` is the
+/// element as a styled element.
+#[inline(never)]
+pub fn name_element<T: ObjectType>(
+    scope: Option<&Rc<dyn INameScope>>,
+    element: &Ref<T>,
+    styled: &StyledElement,
+    name: &str,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    set_element_name(styled, name);
+    register_name_value(scope, name, Rc::new(element.clone()), line, position)
+}
+
+/// `{CompiledBinding path}` as the value of the registered property `property` of `target`:
+/// what the statements of generated code do, which create the extension with the path
+/// (`CompiledBindingExtension::__markup_new_1`), set the property as the provide-value target
+/// property of the context, call `ProvideValue` with the context as the service provider, clear
+/// the target property and pass the provided binding to the binding setter of the property
+/// ([`bind`]) at `line`, `position`. The same calls, in the same order.
+#[inline(never)]
+pub fn bind_compiled_binding(
+    context: &Rc<XamlIlContext>,
+    target: &Ref<FerroObject>,
+    property: &'static FerroProperty,
+    path: CompiledBindingPath,
+    line: i32,
+    position: i32,
+) -> Result<(), XamlLoadError> {
+    use crate::markup_extensions::CompiledBindingExtension;
+    let extension = CompiledBindingExtension::__markup_new_1(path);
+    context.set_target_property(property_value(property));
+    let provided = CompiledBindingExtension::__markup_ProvideValue_0(&extension, Some(service_provider(context)));
+    context.set_target_property(None);
+    bind(target, property, provided, line, position)
+}
+
+/// `element.Name = name`, the setter of the direct property of a styled element.
+#[inline(never)]
+fn set_element_name(element: &StyledElement, name: &str) {
+    element.set_direct_value(StyledElement::name_property(), Some(String::from(name)));
+}
+
 /// `context.FerroNameScope.Register(name, element)`: registers `element`
 /// under `name` in the name scope of the context. A missing scope, a
 /// completed scope and a duplicate name are load errors at the position of
@@ -1307,7 +1558,13 @@ pub fn object_assignment_value(value: MarkupValue) -> MarkupValue {
 /// ([`untyped_object_form`]), then cast to the untyped value, which is what
 /// a member typed `object` receives from the run-time loader.
 pub fn to_object<T: PartialEq + 'static>(value: T) -> MarkupValue {
-    let boxed: BoxedValue = Rc::new(value);
+    // Only the box depends on `T` (#1000).
+    boxed_object(Rc::new(value))
+}
+
+/// [`to_object`] of a boxed value.
+#[inline(never)]
+fn boxed_object(boxed: BoxedValue) -> MarkupValue {
     let boxed = untyped_object_form(&boxed).unwrap_or(boxed);
     if let Some(untyped) = boxed.downcast_ref::<Option<BoxedValue>>() {
         return untyped.clone();
@@ -1459,20 +1716,35 @@ pub fn instance<'a, T: 'static>(
 /// two types, which is when the cast succeeds; a value it does not convert is
 /// the `InvalidCastException` of the loader at `line`, `position`.
 pub fn cast<T: Clone + 'static, V: PartialEq + 'static>(value: V, line: i32, position: i32) -> Result<T, XamlLoadError> {
+    // The conversion and its error do not depend on the types beyond the value type of `T`
+    // (#1000): one function for every pair, and in each instance the untyped form of the value
+    // and the typed read of the result.
     let target = ValueType::of::<T>();
     let value = into_markup_value(value);
-    let converted = match &value {
+    let converted = cast_conversion(&value, target);
+    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
+        Some(value) => Ok(value.clone()),
+        None => Err(cast_error(&value, target, line, position)),
+    }
+}
+
+/// The conversion of [`cast`] and of [`cast_untyped`] to the value type `target`.
+#[inline(never)]
+fn cast_conversion(value: &MarkupValue, target: ValueType) -> Option<BoxedValue> {
+    match value {
         Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed.clone()),
         Some(boxed) => ValueTypes::try_cast(boxed, target),
         None => ValueTypes::try_convert(None, target).flatten(),
-    };
-    match converted.as_ref().and_then(|converted| converted.downcast_ref::<T>()) {
-        Some(value) => Ok(value.clone()),
-        None => match value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
-            // A value whose cast refuses it (a negative time span for a `Duration`).
-            Some(error) => Err(at(TARGET_INVOCATION_EXCEPTION, error, line, position)),
-            None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
-        },
+    }
+}
+
+/// The error of [`cast`] for a value that does not convert to `target`.
+#[inline(never)]
+fn cast_error(value: &MarkupValue, target: ValueType, line: i32, position: i32) -> XamlLoadError {
+    match value.as_ref().and_then(|boxed| ValueTypes::cast_error(boxed, target)) {
+        // A value whose cast refuses it (a negative time span for a `Duration`).
+        Some(error) => at(TARGET_INVOCATION_EXCEPTION, error, line, position),
+        None => at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position),
     }
 }
 
@@ -1495,11 +1767,7 @@ pub fn cast_untyped<V: PartialEq + 'static>(
     line: i32,
     position: i32,
 ) -> Result<MarkupValue, XamlLoadError> {
-    let converted = match into_markup_value(value) {
-        Some(boxed) if boxed.value_type_id() == target.id() => Some(boxed),
-        Some(boxed) => ValueTypes::try_cast(&boxed, target),
-        None => ValueTypes::try_convert(None, target).flatten(),
-    };
+    let converted = cast_conversion(&into_markup_value(value), target);
     match converted {
         Some(converted) => Ok(to_untyped(converted)),
         None => Err(at("InvalidCastException", format!("Unable to cast the value to {}.", target.name()), line, position)),
@@ -1980,6 +2248,66 @@ pub fn add_event_handler(
 #[cfg(test)]
 mod tests {
     use super::uri_equals;
+
+    /// Not from upstream (#603): the description of a declared property at its position is the one
+    /// found by name (one per property and thread), and a position that names another property, or
+    /// none, falls back to the name.
+    #[test]
+    fn a_declared_property_at_its_position_is_the_one_found_by_name() {
+        use super::{clr_property_info, declared_clr_property_info};
+        use ferroui_base::data::core::ValueType;
+        use ferroui_base::metadata::MarkupTyped;
+        use ferroui_base::styling::Setter;
+        let markup = <Setter as MarkupTyped>::MARKUP;
+        let index = markup.properties.iter().position(|property| property.name == "Value").expect("Setter.Value");
+        let by_name = clr_property_info(markup, "Value", false, ValueType::object(), false);
+        let at_index = declared_clr_property_info(markup, index, "Value", false, ValueType::object(), false);
+        assert!(std::rc::Rc::ptr_eq(&by_name, &at_index));
+        let elsewhere = declared_clr_property_info(markup, index + 1000, "Value", false, ValueType::object(), false);
+        assert!(std::rc::Rc::ptr_eq(&by_name, &elsewhere));
+        assert_eq!(at_index.name(), "Value");
+    }
+
+    /// Not from upstream (#612): the target property a setter's markup extension sees is made
+    /// from the declared member alone and behaves as the description of `Setter.Value` found
+    /// in the declaration: the same name, type and accessors, the value read back as written.
+    #[test]
+    fn the_setter_value_target_property_is_the_declared_member() {
+        use super::{clr_property_info, setter_value_property};
+        use ferroui_base::data::core::{IPropertyInfo, ValueType};
+        use ferroui_base::metadata::MarkupTyped;
+        use ferroui_base::styling::Setter;
+        use std::rc::Rc;
+
+        let declared = <Setter as MarkupTyped>::MARKUP.find_property("Value").expect("Setter.Value");
+        let alone = Setter::__value_markup_property();
+        assert_eq!(alone.name, declared.name);
+        assert_eq!((alone.type_)(), (declared.type_)());
+        assert_eq!(alone.get.is_some(), declared.get.is_some());
+        assert_eq!(alone.set.is_some(), declared.set.is_some());
+        assert_eq!(
+            alone.attributes.iter().map(|attribute| attribute.name).collect::<Vec<_>>(),
+            declared.attributes.iter().map(|attribute| attribute.name).collect::<Vec<_>>()
+        );
+
+        let value = setter_value_property().expect("a property description");
+        let info = value.downcast_ref::<Rc<dyn IPropertyInfo>>().expect("an IPropertyInfo").clone();
+        let by_name = clr_property_info(<Setter as MarkupTyped>::MARKUP, "Value", false, ValueType::object(), false);
+        assert_eq!(info.name(), by_name.name());
+        assert_eq!(info.property_type(), by_name.property_type());
+        assert_eq!((info.can_get(), info.can_set()), (by_name.can_get(), by_name.can_set()));
+        // One description per thread.
+        let again = setter_value_property().expect("a property description");
+        assert!(Rc::ptr_eq(&info, again.downcast_ref::<Rc<dyn IPropertyInfo>>().unwrap()));
+
+        let setter: ferroui_base::BoxedValue = Rc::new(Setter::empty());
+        let written: ferroui_base::BoxedValue = Rc::new(2.5f64);
+        info.set_boxed(&setter, Some(&written)).unwrap();
+        let read = info.get_boxed(&setter).expect("the value");
+        assert_eq!(read.downcast_ref::<f64>(), Some(&2.5));
+        let read = by_name.get_boxed(&setter).expect("the value");
+        assert_eq!(read.downcast_ref::<f64>(), Some(&2.5));
+    }
 
     /// Not from upstream: the comparison of `string.Equals(.., StringComparison.OrdinalIgnoreCase)`.
     #[test]

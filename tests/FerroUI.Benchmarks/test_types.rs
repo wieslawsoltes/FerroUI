@@ -8,6 +8,8 @@ macro_rules! test_struct {
             $(pub $field: i32,)+
         }
 
+        ferroui_base::styled_value!($name);
+
         impl $name {
             pub fn new(value: i32) -> Self {
                 Self { $($field: value,)+ }

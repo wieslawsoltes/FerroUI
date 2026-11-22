@@ -11,7 +11,7 @@ use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::server::IServerObject;
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use crate::threading::{Dispatcher, DispatcherPriority};
-use crate::utilities::{HandlerList, ReleaseExcess};
+use crate::utilities::{HandlerList, ReleaseAtRest};
 use rustc_hash::FxHashSet;
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::{Cell, RefCell};
@@ -102,6 +102,9 @@ pub struct Compositor {
     /// The open scoped batches and the batch of the current frame (WinUI
     /// `CompositionScopedBatch` and `CompositionCommitBatch`).
     animation_batches: super::composition_batch::CompositorBatches,
+    /// Whether the compositor is registered to have its buffers released once a burst is over
+    /// (#836).
+    resting: Cell<bool>,
 }
 
 /// The render loop task of a compositor. The loop may tick on any thread;
@@ -450,6 +453,7 @@ impl Compositor {
             render_context_changed: HandlerList::new(),
             default_easing: Rc::new(SplineEasing::with_key_spline(KeySpline::with_points(0.25, 0.1, 0.25, 1.0))),
             animation_batches: super::composition_batch::CompositorBatches::new(),
+            resting: Cell::new(false),
         });
         COMPOSITORS.with(|compositors| {
             let mut compositors = compositors.borrow_mut();
@@ -701,6 +705,27 @@ impl Compositor {
         }
     }
 
+    /// After the commit of the first frame of a large tree: what it filled (the queue of the
+    /// objects to serialize, its set, the pooled streams) is released once the burst is over
+    /// (#836, `utilities::resting`); the compositor is registered with the job of its thread the
+    /// first time.
+    fn rest_after_burst(&self) {
+        crate::utilities::rest_after_burst(&self.resting, || {
+            let weak = self.this.clone();
+            move || {
+                let Some(compositor) = weak.upgrade() else { return false };
+                if let Ok(mut queue) = compositor.object_serialization_queue.try_borrow_mut() {
+                    queue.release_at_rest();
+                }
+                if let Ok(mut queued) = compositor.object_serialization_hash_set.try_borrow_mut() {
+                    queued.release_at_rest();
+                }
+                let _ = compositor.batches.release_pool_at_rest();
+                true
+            }
+        });
+    }
+
     /// Serializes the pending changes into a batch and hands it to the
     /// server compositor.
     pub fn commit(&self) -> Arc<CompositionBatch> {
@@ -768,10 +793,14 @@ impl Compositor {
                 // commit, up to what an emptied buffer keeps: the commit of
                 // the first frame of a large tree serializes every object of
                 // it.
-                self.object_serialization_queue.borrow_mut().release_excess();
+                let mut burst = self.object_serialization_queue.borrow_mut().release_burst();
                 let mut queued = self.object_serialization_hash_set.borrow_mut();
                 queued.clear();
-                queued.release_excess();
+                burst |= queued.release_burst();
+                drop(queued);
+                if burst {
+                    self.rest_after_burst();
+                }
             }
             drop(serialized);
 

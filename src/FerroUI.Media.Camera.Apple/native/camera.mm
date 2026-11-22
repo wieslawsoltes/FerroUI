@@ -2,6 +2,10 @@
 #import <CoreVideo/CoreVideo.h>
 #import <ImageIO/ImageIO.h>
 #import <TargetConditionals.h>
+#if TARGET_OS_IOS && !TARGET_OS_MACCATALYST
+#import <UIKit/UIKit.h>
+#define FERROUI_IOS_CAMERA 1
+#endif
 #include <atomic>
 #include <cmath>
 #include <cstdint>
@@ -11,6 +15,34 @@
 // One native photo request across generations. A canceled request keeps this
 // slot until AVFoundation's final callback, including when its Rust future dies.
 static std::atomic<bool> FerroPortablePhotoBusy{false};
+#if defined(FERROUI_IOS_CAMERA) || defined(FERROUI_CAMERA_LIFETIME_TESTS)
+// The clockwise quarter turns, in degrees, that the presenter still applies to a
+// buffer the connection has already rotated by bufferAngle so that it shows at
+// displayAngle. Both angles use the clockwise convention of videoRotationAngle.
+static int FerroCameraPreviewRotation(double displayAngle, double bufferAngle) {
+    const double relative = displayAngle - bufferAngle;
+    if (!std::isfinite(relative)) return 0;
+    const int turns = (int)std::lround(std::fmod(relative, 360.) / 90.);
+    return ((turns + 4) % 4) * 90;
+}
+#endif
+#ifdef FERROUI_CAMERA_LIFETIME_TESTS
+extern "C" int ferroui_camera_preview_rotation_contract() {
+    return FerroCameraPreviewRotation(90., 0.) == 90
+        && FerroCameraPreviewRotation(270., 180.) == 90
+        && FerroCameraPreviewRotation(90., 180.) == 270
+        && FerroCameraPreviewRotation(0., 180.) == 180
+        && FerroCameraPreviewRotation(180., 180.) == 0
+        && FerroCameraPreviewRotation(360., 0.) == 0
+        && FerroCameraPreviewRotation(0., 90.) == 270
+        && FerroCameraPreviewRotation(-90., 0.) == 270
+        && FerroCameraPreviewRotation(450., 0.) == 90
+        && FerroCameraPreviewRotation(359.6, 0.) == 0
+        && FerroCameraPreviewRotation(89.7, 0.) == 90
+        && FerroCameraPreviewRotation(NAN, 0.) == 0
+        && FerroCameraPreviewRotation(INFINITY, 0.) == 0;
+}
+#endif
 // AVFoundation compares rational durations, not rounded decimal frame rates.
 // 1/30 rounded to nanoseconds is shorter than the device's exact minimum,
 // which requests 30.0000003 fps and throws even though 30 fps was negotiated.
@@ -110,6 +142,15 @@ extern "C" int ferroui_camera_frame_duration_contract() {
 @property(nonatomic) BOOL stopped;
 @property(nonatomic) CVPixelBufferRef latest;
 @property(nonatomic) double timestamp;
+#if defined(FERROUI_IOS_CAMERA)
+// The rotation the connection applies to the buffers (iOS 17 and later), and the
+// orientation it is set to (earlier systems). Both are read and written under the lock.
+@property(nonatomic) double bufferRotation;
+@property(nonatomic) NSInteger previewOrientation; // An AVCaptureVideoOrientation.
+@property(nonatomic) BOOL reorienting;
+// Created, read and released on the main thread only.
+@property(nonatomic,strong) AVCaptureDeviceRotationCoordinator *previewCoordinator API_AVAILABLE(ios(17.0));
+#endif
 - (void)close;
 @end
 @implementation FerroPortableCamera
@@ -139,6 +180,10 @@ extern "C" int ferroui_camera_frame_duration_contract() {
         session=_session;video=_video;
         [_recording cancel]; _recording=nil;
         _session=nil;_video=nil;_photo=nil;_device=nil;
+#if defined(FERROUI_IOS_CAMERA)
+        // Close runs on the main thread, where the coordinator lives.
+        if (@available(iOS 17.0, *)) _previewCoordinator=nil;
+#endif
         disconnectObserver=_disconnectObserver;runtimeObserver=_runtimeObserver;
         _disconnectObserver=nil;_runtimeObserver=nil;
     }
@@ -172,6 +217,137 @@ extern "C" int ferroui_camera_frame_duration_contract() {
 #endif
 }
 @end
+
+#if defined(FERROUI_IOS_CAMERA)
+// The camera preview is drawn into the application's window, which turns with the
+// interface, not with the device: the preview angle follows the interface orientation.
+// The helpers below run on the main thread. AVCaptureVideoOrientation serves the systems
+// before iOS 17 only, where the replacement API does not exist.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+static UIWindow *FerroCameraKeyWindow(void) {
+    if (@available(iOS 13.0, *)) {
+        UIWindow *foreground = nil;
+        for (UIScene *scene in UIApplication.sharedApplication.connectedScenes) {
+            if (scene.activationState != UISceneActivationStateForegroundActive
+                || ![scene isKindOfClass:UIWindowScene.class]) continue;
+            for (UIWindow *window in ((UIWindowScene *)scene).windows) {
+                if (window.isKeyWindow) return window;
+                if (!foreground) foreground = window;
+            }
+        }
+        return foreground;
+    }
+    return UIApplication.sharedApplication.keyWindow;
+}
+static AVCaptureVideoOrientation FerroCameraInterfaceOrientation(AVCaptureVideoOrientation fallback) {
+    UIInterfaceOrientation orientation = UIInterfaceOrientationUnknown;
+    if (@available(iOS 13.0, *)) {
+        UIWindowScene *scene = FerroCameraKeyWindow().windowScene;
+        if (@available(iOS 16.0, *)) orientation = scene.effectiveGeometry.interfaceOrientation;
+        else orientation = scene.interfaceOrientation;
+    } else {
+        orientation = UIApplication.sharedApplication.statusBarOrientation;
+    }
+    // The two enumerations name the same home-button side for each landscape value.
+    switch (orientation) {
+        case UIInterfaceOrientationPortrait: return AVCaptureVideoOrientationPortrait;
+        case UIInterfaceOrientationPortraitUpsideDown: return AVCaptureVideoOrientationPortraitUpsideDown;
+        case UIInterfaceOrientationLandscapeLeft: return AVCaptureVideoOrientationLandscapeLeft;
+        case UIInterfaceOrientationLandscapeRight: return AVCaptureVideoOrientationLandscapeRight;
+        default: return fallback;
+    }
+}
+static NSInteger FerroCameraStartOrientation(void) {
+    return FerroCameraInterfaceOrientation(AVCaptureVideoOrientationPortrait);
+}
+static CALayer *FerroCameraPreviewLayer(void) {
+    UIWindow *window = FerroCameraKeyWindow();
+    CALayer *layer = window.rootViewController.view.layer;
+    return layer ?: window.layer;
+}
+// Runs on the capture queue inside the session configuration, before the session starts.
+// Returns the rotation the connection applies to the delivered buffers.
+static double FerroCameraPrepareRotation(AVCaptureConnection *connection, AVCaptureDevice *device,
+                                         NSInteger orientation) {
+    if (@available(iOS 17.0, *)) {
+        // The presenter rotates on the GPU. A rotated connection costs a pass in the capture
+        // pipeline and a lengthy reconfiguration on every turn of the interface, and some
+        // front cameras (the iPad line since spring 2024) rotate by 180 degrees by default.
+        if (connection.videoRotationAngle != 0. && [connection isVideoRotationAngleSupported:0.])
+            connection.videoRotationAngle = 0.;
+        return connection.videoRotationAngle;
+    }
+    // Earlier systems have no per-camera rotation query: AVFoundation rotates the buffers to
+    // the interface orientation, which knows how each built-in camera is mounted.
+    if (device.position != AVCaptureDevicePositionUnspecified && connection.isVideoOrientationSupported)
+        connection.videoOrientation = (AVCaptureVideoOrientation)orientation;
+    return 0.;
+}
+// Before iOS 17: turn the connection to a new interface orientation on the capture queue.
+static void FerroCameraReorient(FerroPortableCamera *owner, AVCaptureVideoOrientation orientation) {
+    dispatch_async(owner.queue, ^{
+        AVCaptureVideoDataOutput *video;
+        FerroPortableRecording *recording;
+        @synchronized(owner) {
+            owner.reorienting = NO;
+            if (owner.stopped) return;
+            video = owner.video;
+            recording = owner.recording;
+        }
+        // A recording keeps the size of its first buffer: the turn waits until it ends.
+        if (recording) {
+            @synchronized(recording) {
+                if (recording.status == 0) return;
+            }
+        }
+        @try {
+            AVCaptureConnection *connection = [video connectionWithMediaType:AVMediaTypeVideo];
+            if (!connection.isVideoOrientationSupported) return;
+            connection.videoOrientation = orientation;
+        } @catch (NSException *exception) {
+            (void)exception;
+            return;
+        }
+        @synchronized(owner) {
+            if (!owner.stopped) owner.previewOrientation = orientation;
+        }
+    });
+}
+// The clockwise rotation, in degrees, the presenter applies to a frame. Main thread.
+static int FerroCameraFrameRotation(FerroPortableCamera *owner, AVCaptureDevice *device, double bufferRotation) {
+    // External cameras report no mounting: they are shown as delivered.
+    if (!device || device.position == AVCaptureDevicePositionUnspecified) return 0;
+    if (@available(iOS 17.0, *)) {
+        // The coordinator answers for this camera's mounting and the interface orientation of
+        // the window that holds the layer; without a layer in a window it answers 0 degrees.
+        CALayer *layer = FerroCameraPreviewLayer();
+        if (!layer) return 0;
+        AVCaptureDeviceRotationCoordinator *coordinator = owner.previewCoordinator;
+        if (!coordinator || coordinator.previewLayer != layer) {
+            coordinator = [[AVCaptureDeviceRotationCoordinator alloc] initWithDevice:device previewLayer:layer];
+            owner.previewCoordinator = coordinator;
+        }
+        return FerroCameraPreviewRotation(coordinator.videoRotationAngleForHorizonLevelPreview, bufferRotation);
+    }
+    AVCaptureVideoOrientation applied;
+    BOOL pending;
+    @synchronized(owner) {
+        applied = (AVCaptureVideoOrientation)owner.previewOrientation;
+        pending = owner.reorienting;
+    }
+    const AVCaptureVideoOrientation current = FerroCameraInterfaceOrientation(applied);
+    if (current != applied && !pending) {
+        @synchronized(owner) {
+            if (owner.stopped) return 0;
+            owner.reorienting = YES;
+        }
+        FerroCameraReorient(owner, current);
+    }
+    return 0;
+}
+#pragma clang diagnostic pop
+#endif
 
 static int FerroCameraFacing(AVCaptureDevice *device) {
     if (device.position==AVCaptureDevicePositionFront) return 1;
@@ -267,6 +443,11 @@ static void FerroCameraConfigure(FerroPortableCamera *owner,NSString *deviceID,i
             [session addOutput:video];[video setSampleBufferDelegate:owner queue:owner.queue];
             AVCaptureConnection *connection=[video connectionWithMediaType:AVMediaTypeVideo];
             if (connection.isVideoMirroringSupported) {connection.automaticallyAdjustsVideoMirroring=NO;connection.videoMirrored=NO;}
+#if defined(FERROUI_IOS_CAMERA)
+            NSInteger orientation;
+            @synchronized(owner) {orientation=owner.previewOrientation;}
+            const double bufferRotation=FerroCameraPrepareRotation(connection,selected,orientation);
+#endif
             AVCapturePhotoOutput *photo=[AVCapturePhotoOutput new];
             if ([session canAddOutput:photo]) [session addOutput:photo];else photo=nil;
             BOOL jpeg=photo && [photo.availablePhotoCodecTypes containsObject:AVVideoCodecTypeJPEG];
@@ -274,6 +455,9 @@ static void FerroCameraConfigure(FerroPortableCamera *owner,NSString *deviceID,i
             @synchronized(owner) {
                 if (owner.stopped) return;
                 owner.session=session;owner.device=selected;owner.video=video;owner.photo=jpeg?photo:nil;
+#if defined(FERROUI_IOS_CAMERA)
+                owner.bufferRotation=bufferRotation;
+#endif
             }
             __weak FerroPortableCamera *weak=owner;
             id disconnectObserver=[[NSNotificationCenter defaultCenter] addObserverForName:AVCaptureDeviceWasDisconnectedNotification object:selected queue:nil usingBlock:^(NSNotification *note){(void)note;FerroPortableCamera *live=weak;if(live)FerroCameraFail(live,-3,@"Camera disconnected");}];
@@ -323,6 +507,10 @@ void *ferroui_portable_camera_start(const char *id,int facing,uint32_t width,uin
         if (![NSThread isMainThread]) return nullptr;
         FerroPortableCamera *owner=[FerroPortableCamera new];
         owner.queue=dispatch_queue_create("org.ferroui.camera",DISPATCH_QUEUE_SERIAL);
+#if defined(FERROUI_IOS_CAMERA)
+        // The orientation the connection starts in before iOS 17 (start runs on the main thread).
+        owner.previewOrientation = FerroCameraStartOrientation();
+#endif
         if (@available(macOS 10.15,iOS 11.0,*)) {} else {
             FerroCameraFail(owner,-4,@"This camera profile requires macOS 10.15 or iOS 11");
             return (__bridge_retained void *)owner;
@@ -352,9 +540,25 @@ int ferroui_portable_camera_status(void *p,char *error,size_t capacity) {
     @synchronized(owner) {if(capacity)std::snprintf(error,capacity,"%s",owner.error.UTF8String ?: "Camera failure");return owner.status;}
 }
 char *ferroui_portable_camera_settings(void *p) {FerroPortableCamera *owner=(__bridge FerroPortableCamera *)p;@synchronized(owner){return owner.settings?FerroCameraJSON(owner.settings):nullptr;}}
-void *ferroui_portable_camera_frame(void *p,double *timestamp) {
+void *ferroui_portable_camera_frame(void *p,double *timestamp,int *rotation) {
     FerroPortableCamera *owner=(__bridge FerroPortableCamera *)p;
-    @synchronized(owner) {CVPixelBufferRef buffer=owner.latest;owner.latest=nullptr;*timestamp=owner.timestamp;return buffer;}
+    CVPixelBufferRef buffer;
+#if defined(FERROUI_IOS_CAMERA)
+    AVCaptureDevice *device;
+    double bufferRotation;
+#endif
+    @synchronized(owner) {
+        buffer=owner.latest;owner.latest=nullptr;*timestamp=owner.timestamp;
+#if defined(FERROUI_IOS_CAMERA)
+        device=owner.device;bufferRotation=owner.bufferRotation;
+#endif
+    }
+    *rotation=0;
+#if defined(FERROUI_IOS_CAMERA)
+    // Frames are taken on the main thread, the thread that started the camera.
+    if (buffer) *rotation=FerroCameraFrameRotation(owner,device,bufferRotation);
+#endif
+    return buffer;
 }
 void *ferroui_portable_camera_photo(void *p) {
     FerroPortableCamera *owner=(__bridge FerroPortableCamera *)p;

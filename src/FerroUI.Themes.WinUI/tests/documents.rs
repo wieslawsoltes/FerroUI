@@ -121,6 +121,8 @@ document_tests! {
     controls_label => "/Controls/Label.xaml";
     controls_list_box => "/Controls/ListBox.xaml";
     controls_list_box_item => "/Controls/ListBoxItem.xaml";
+    controls_list_view => "/Controls/ListView.xaml";
+    controls_grid_view => "/Controls/GridView.xaml";
     controls_menu => "/Controls/Menu.xaml";
     controls_menu_flyout_presenter => "/Controls/MenuFlyoutPresenter.xaml";
     controls_menu_item => "/Controls/MenuItem.xaml";
@@ -197,10 +199,14 @@ document_tests! {
     resources_hyperlink_button_themeresources => "/Resources/HyperlinkButton_themeresources.xaml";
     resources_hyperlink_themeresources => "/Resources/Hyperlink_themeresources.xaml";
     resources_info_badge_themeresources => "/Resources/InfoBadge_themeresources.xaml";
+    resources_grid_view_item_themeresources => "/Resources/GridViewItem_themeresources.xaml";
+    resources_pivot_themeresources => "/Resources/Pivot_themeresources.xaml";
+    resources_swipe_control_themeresources => "/Resources/SwipeControl_themeresources.xaml";
     resources_info_bar_themeresources => "/Resources/InfoBar_themeresources.xaml";
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
     resources_list_box_themeresources => "/Resources/ListBox_themeresources.xaml";
     resources_list_view_item_themeresources => "/Resources/ListViewItem_themeresources.xaml";
+    resources_media_transport_controls_themeresources => "/Resources/MediaTransportControls_themeresources.xaml";
     resources_menu_bar_themeresources => "/Resources/MenuBar_themeresources.xaml";
     resources_menu_flyout_themeresources => "/Resources/MenuFlyout_themeresources.xaml";
     resources_navigation_back_button_themeresources => "/Resources/NavigationBackButton_themeresources.xaml";
@@ -241,6 +247,8 @@ document_tests! {
     controls_info_bar => "/Controls/InfoBar.xaml";
     controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_info_badge => "/Controls/InfoBadge.xaml";
+    controls_pivot => "/Controls/Pivot.xaml";
+    controls_swipe_control => "/Controls/SwipeControl.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
     controls_progress_ring => "/Controls/ProgressRing.xaml";
     controls_table_view => "/Controls/TableView.xaml";

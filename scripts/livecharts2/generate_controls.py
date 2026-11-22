@@ -175,13 +175,17 @@ series_props = [
  ('geometry_fill','GeometryFill','Option<Color>','None'),('geometry_stroke','GeometryStroke','Option<Color>','None')]
 # The properties of every series that the engine reads beside the snapshot: DataLabelsMaxWidth,
 # the source's 170 (MaxTooltipsAndLegendsLabelsWidth), which breaks the data labels into lines (#624).
-series_extra_props = [('data_labels_max_width','DataLabelsMaxWidth','f64','170.0')]
+series_extra_props = [('data_labels_max_width','DataLabelsMaxWidth','f64','170.0'),
+ # The XToolTipLabelFormatter and YToolTipLabelFormatter of a Cartesian series (ICartesianSeries,
+ # code only): the header and the value of the tooltip of a point (#624).
+ ('x_tool_tip_label_formatter','XToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
+ ('y_tool_tip_label_formatter','YToolTipLabelFormatter','Option<ChartPointFormatter>','None')]
 series = HEADER + IMPORTS + '''use crate::{ChartPoints, ChartPoint};
 use ferroui_base::{FerroObjectImplExt,FerroPropertyChangedEventArgs,Point};
 use ferroui_base::media::{Color,IBrush,PenLineCap,PenLineJoin};
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
-use ferroui_livecharts::{Series as SeriesSnapshot, SeriesKind, BrushSpace,RadialAlignment,PolarLabelsPosition};
+use ferroui_livecharts::{Series as SeriesSnapshot, SeriesKind, BrushSpace,ChartPointFormatter,RadialAlignment,PolarLabelsPosition};
 use ferroui_livecharts::kernel::Coordinate;
 use std::{cell::RefCell, rc::Rc};
 
@@ -296,8 +300,12 @@ node_props = {
   ('node_corner_radius','NodeCornerRadius','f64','0.0'),('layout_iterations','LayoutIterations','u32','32'),
   ('node_label_position','NodeLabelPosition','SankeyLabelPosition','SankeyLabelPosition::Auto'),
   ('layout','Layout','SankeyLayoutKind','SankeyLayoutKind::Vertical'),
-  ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None')],
- 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()')],
+  ('arc_span_degrees','ArcSpanDegrees','f64','150.0'),('link_fill','LinkFill','Option<Color>','None'),
+  # The tooltip label formatter of CoreSankeySeries (code only), read by the chart (#624).
+  ('tool_tip_label_formatter','ToolTipLabelFormatter','Option<NodeTooltipFormatter>','None')],
+ 'TreemapSeries':[('nodes','Nodes','TreemapNodes','TreemapNodes::new()'),
+  # The tooltip label formatter of CoreTreemapSeries (code only), read by the chart (#624).
+  ('tool_tip_label_formatter','ToolTipLabelFormatter','Option<NodeTooltipFormatter>','None')],
  'HeatLandSeries':[('lands','Lands','HeatLands','HeatLands::new()'),('color_stops','ColorStops','Option<Vec<f64>>','None'),
   ('min_value','MinValue','Option<f64>','None'),('max_value','MaxValue','Option<f64>','None')],
  # The ColorStops, PointPadding, MinValue and MaxValue of CoreHeatSeries (L5).
@@ -307,13 +315,18 @@ node_props = {
   ('data_labels_position','DataLabelsPosition','DataLabelsPosition','DataLabelsPosition::Middle'),
   # Its GeometrySvg: the SVG path data drawn in every cell, None for rectangles (#624).
   ('geometry_svg','GeometrySvg','Option<String>','None')],
+ # The GeometrySvg of the line, stacked area, scatter and bar series: the SVG path data drawn in
+ # place of each marker or bar (VariableSVGPathGeometry), None for the native geometry (#624).
+ **{name:[('geometry_svg','GeometrySvg','Option<String>','None')] for name in
+    ['LineSeries','AreaSeries','StackedAreaSeries','ScatterSeries','ColumnSeries','RowSeries',
+     'StackedColumnSeries','StackedRowSeries','RangeColumnSeries','RangeRowSeries']},
  # The tooltip label formatters of CorePolarLineSeries (code only), read by the chart (#624).
  'PolarLineSeries':[('angle_tool_tip_label_formatter','AngleToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
   ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None')]}
 classes = HEADER + '''use crate::{ChartSeries,HeatLands,SankeyLinks,SankeyNodes,TreemapNodes};
 use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty,Thickness};
 use ferroui_base::media::Color;
-use ferroui_livecharts::{ChartPointFormatter,DataLabelsPosition,SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
+use ferroui_livecharts::{ChartPointFormatter,DataLabelsPosition,NodeTooltipFormatter,SankeyLabelPosition,SankeyLayoutKind,SeriesKind};
 '''
 for name,kind in families:
     owned=''.join(f'this.set_{prop}({typ}::new());' for prop,typ in node_collections.get(name,[]))
@@ -354,6 +367,7 @@ for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSer
     collections += f'''
 #[derive(Clone,Debug,PartialEq)]
 pub struct {name}(FerroList<Ref<{typ}>>);
+ferroui_base::styled_value!({name});
 impl {name} {{
     pub fn new()->Self{{Self(FerroList::new())}}
     pub fn from_items(items:impl IntoIterator<Item=Ref<{typ}>>)->Self{{Self(FerroList::from_items(items))}}
@@ -408,6 +422,10 @@ chart_props = [
  # The legend of the chart (IChartView.Legend): None is the native legend of the series, a
  # HeatLegend the gradient of SKHeatLegend (#624).
  ('legend','Legend','Option<Ref<ChartLegend>>','None'),
+ # The LegendTextSize (None or a negative size is the theme's 16) and LegendBackgroundPaint (none
+ # by default, as the theme) of IChartView, which the heat legend reads (#624).
+ ('legend_text_size','LegendTextSize','Option<f64>','None'),
+ ('legend_background_paint','LegendBackgroundPaint','Option<Color>','None'),
  # The TooltipFormatter of a map (IGeoMapView, code only): the line of each series value in the
  # tooltip of a land (#624).
  ('tooltip_formatter','TooltipFormatter','Option<GeoTooltipFormatter>','None'),

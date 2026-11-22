@@ -65,12 +65,12 @@ mod setter_choice;
 
 /// Runs of theme resources written as row tables (#568).
 #[path = "theme_rows.rs"]
-mod theme_rows;
+pub(crate) mod theme_rows;
 
 /// Control themes, selector chains, resource setter choices and template bindings written as
 /// tables (#568, step 5).
 #[path = "theme_styles.rs"]
-mod theme_styles;
+pub(crate) mod theme_styles;
 
 #[path = "selector_visitor.rs"]
 mod selector_visitor;
@@ -602,6 +602,121 @@ fn fused_template_binding_bind(types: &dyn EmitTypes, lines: &[String], statemen
     })
 }
 
+/// The body of deferred content written as native code, with each value of
+/// `{StaticResource key}` for a registered property as one call of the shared helper of `rt`
+/// (#568): the three statements of the value (the extension created with the key,
+/// `rt::provide_value_invoked` with the property as the provide-value target property, the
+/// provided value held as a node value) are `rt::static_resource_value(&context, property, key,
+/// line, position)?`, which makes the same calls in the same order. The statement that assigns
+/// the value (the setter chosen at run time) stays. Runs after the shapes of the row tables and
+/// of the control themes were read, so that they read the statements as they were.
+fn shared_static_resource_values(types: &dyn EmitTypes, lines: Vec<String>) -> Vec<String> {
+    let Some(extension) = types.framework_path(FrameworkType::StaticResourceExtension) else { return lines };
+    let create = format!("{extension}::__markup_new_1(rt::string_object(");
+    if !lines.iter().any(|line| line.contains(&create)) {
+        return lines;
+    }
+    let mut uses: HashMap<String, usize> = HashMap::new();
+    for line in lines.iter().filter(|line| !line.trim_start().starts_with("//")) {
+        for name in identifiers(line) {
+            *uses.entry(name).or_default() += 1;
+        }
+    }
+    let mut body = Vec::with_capacity(lines.len());
+    let mut index = 0;
+    while index < lines.len() {
+        let window = lines.get(index..index + 3);
+        let fused = window.and_then(|window| fused_static_resource_value(&extension, window, &uses));
+        if let Some(fused) = fused {
+            body.push(fused);
+            index += 3;
+        } else {
+            body.push(lines[index].clone());
+            index += 1;
+        }
+    }
+    body
+}
+
+/// The call of `rt::static_resource_value` for `window` if it is the three statements of a
+/// `{StaticResource}` value for a registered property ([`shared_static_resource_values`]) whose
+/// extension and provided value no other statement names.
+fn fused_static_resource_value(extension: &str, window: &[String], uses: &HashMap<String, usize>) -> Option<String> {
+    let [create, provide, value] = window else { return None };
+    let indent = &create[..create.len() - create.trim_start().len()];
+    let (local, created) = create.strip_prefix(indent)?.strip_prefix("let ")?.split_once(" = ")?;
+    let key = created.strip_prefix(&format!("{extension}::__markup_new_1(rt::string_object("))?.strip_suffix("));")?;
+    let (provided, call) = provide.strip_prefix(indent)?.strip_prefix("let ")?.split_once(" = ")?;
+    let arguments = call.strip_prefix("rt::provide_value_invoked(&context, rt::property_value(")?;
+    let (property, rest) = arguments.split_once("), &")?;
+    let rest = rest.strip_prefix(&format!("{local}, {extension}::__markup_ProvideValue_0, "))?;
+    let (line, column) = rest.strip_suffix(")?;")?.split_once(", ")?;
+    let (held, converted) =
+        value.strip_prefix(indent)?.strip_prefix("let ")?.split_once(": ::ferroui_base::metadata::MarkupValue = ")?;
+    let plain_call = |text: &str| {
+        text.starts_with("::") && text.ends_with("()") && !text[..text.len() - 2].contains(['(', ')', ' '])
+    };
+    let named_once = |name: &str| uses.get(name) == Some(&2);
+    if converted != format!("rt::to_value({provided});")
+        || ![local, provided, held].into_iter().all(is_identifier)
+        || !is_string_literal(key)
+        || !plain_call(property)
+        || line.parse::<i32>().is_err()
+        || column.parse::<i32>().is_err()
+        || !named_once(local)
+        || !named_once(provided)
+    {
+        return None;
+    }
+    Some(format!(
+        "{indent}let {held}: ::ferroui_base::metadata::MarkupValue = \
+         rt::static_resource_value(&context, {property}, {key}, {line}, {column})?;"
+    ))
+}
+
+/// The Rust path of the markup extension of `{CompiledBinding}`, as the type systems of the
+/// emitter name it.
+const COMPILED_BINDING_EXTENSION: &str = "::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension";
+
+/// The binding setter of a registered property whose value is `{CompiledBinding path}` with no
+/// other member of the extension set, as the shared helper of `rt` writes it: `lines` end with
+/// the statements of the value (the extension created with the path, the property set as the
+/// provide-value target property, `ProvideValue` with the context as the service provider, the
+/// target property cleared) and `statement` is the call of `rt::bind` with the provided binding.
+/// `rt::bind_compiled_binding(&context, target, property, path, line, position)` makes the same
+/// calls in the same order. `None` (the statements are kept) for any other shape.
+fn fused_compiled_binding_bind(lines: &[String], statement: &str) -> Option<String> {
+    let [.., create, target, provide, clear] = lines else { return None };
+    let (local, created) = create.strip_prefix("    let ")?.split_once(" = ")?;
+    let path = created.strip_prefix(&format!("{COMPILED_BINDING_EXTENSION}::__markup_new_1("))?.strip_suffix(");")?;
+    let property = target.strip_prefix("    context.set_target_property(rt::property_value(")?.strip_suffix("));")?;
+    let (provided, call) = provide.strip_prefix("    let ")?.split_once(" = ")?;
+    let provide_value = format!(
+        "{COMPILED_BINDING_EXTENSION}::__markup_ProvideValue_0(&{local}, \
+         ::core::option::Option::Some(rt::service_provider(&context)));"
+    );
+    if call != provide_value || clear != "    context.set_target_property(::core::option::Option::None);" {
+        return None;
+    }
+    let receiver = ".upcast_ref::<::ferroui_base::FerroObject>(), ";
+    let (object, rest) = statement.strip_prefix("rt::bind(")?.split_once(receiver)?;
+    let rest = rest.strip_prefix(&format!("{property}, {provided}, "))?;
+    let (line, column) = rest.strip_suffix(")?;")?.split_once(", ")?;
+    let plain_call = |text: &str| {
+        text.starts_with("::") && text.ends_with("()") && !text[..text.len() - 2].contains(['(', ')', ' '])
+    };
+    let path_local = path.strip_suffix(".clone()")?;
+    if !is_identifier(local) || !is_identifier(provided) || !is_identifier(object) || !is_identifier(path_local)
+        || !plain_call(property) || line.parse::<i32>().is_err() || column.parse::<i32>().is_err()
+    {
+        return None;
+    }
+    Some(format!(
+        "rt::bind_compiled_binding(&context, {object}.upcast_ref::<::ferroui_base::FerroObject>(), \
+         {property}, {path}, {line}, {column})?;"
+    ))
+}
+
 /// A deferred resource added to a resource dictionary under a text key, as the shared helper of
 /// `rt` writes it: `last` is the statement that created the deferred content `local`
 /// (`rt::defer`) and `call` the call of `ResourceDictionary.AddDeferred` with it, both at one
@@ -621,6 +736,28 @@ fn fused_deferred_resource_add(types: &dyn EmitTypes, last: &str, local: &str, c
         return None;
     }
     Some(format!("rt::add_deferred_resource({dictionary}, {key}, {result_type}, &context, {build}, {position})?;"))
+}
+
+ferroui_base::ferro_thread_local! {
+    /// Whether the emitter resolves declared properties at compile time
+    /// ([`set_compile_time_declared_properties`]).
+    static COMPILE_TIME_DECLARED_PROPERTIES: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// Turns on (or off) the resolution of the declared properties of `rt::clr_property_info` and
+/// `rt::path_property` at compile time on this thread (#603), and returns what it was: the emitter
+/// then writes `rt::declared_clr_property_info` and `rt::declared_path_property` with the position
+/// of the property in its declaration, where the type system knows it, and the run-time helpers
+/// take the property at that position instead of searching the declaration by its name (they still
+/// find it by name when the declaration changed since). Off by default, so that the checked-in
+/// generated files stay what they are; a host turns it on around a compilation, and the files it
+/// writes are then to be regenerated.
+pub fn set_compile_time_declared_properties(enabled: bool) -> bool {
+    COMPILE_TIME_DECLARED_PROPERTIES.with(|cell| cell.replace(enabled))
+}
+
+fn compile_time_declared_properties() -> bool {
+    COMPILE_TIME_DECLARED_PROPERTIES.with(std::cell::Cell::get)
 }
 
 /// The arguments of `rt::clr_property_info` for `Setter.Value`, which
@@ -854,14 +991,18 @@ struct Emitter<'a> {
     /// ([`theme_rows::RowStatement`]).
     row_statements: HashMap<String, theme_rows::RowStatement>,
     resolved_calls: std::cell::RefCell<construction::Calls>,
-    /// The row tables of the runs written as rows, in the order of their calls.
-    row_tables: Vec<String>,
+    /// The row tables of the runs written as rows, in the order of their calls: the name of the
+    /// table, the text of the document and the run ([`theme_rows::row_tables_in`]).
+    row_tables: Vec<(String, String, theme_rows::RowRun)>,
     /// How deep the content being written is in deferred content: the entries of units are
     /// marked only at the top level, in the function of the document ([`theme_units`]).
     deferred_depth: usize,
     /// The tables of control themes and template bindings and the items they share (#568,
     /// [`theme_styles`]).
     theme_styles: theme_styles::StylePool,
+    /// The theme dictionaries the body assigned a key outside every unit (#853,
+    /// [`theme_units::ThemeUnitPlan::keys_in_runs`]), by the local that holds them.
+    keyed_theme_dictionaries: HashSet<String>,
 }
 
 struct ScopedNamespaceTable {
@@ -900,6 +1041,36 @@ impl<'a> Emitter<'a> {
 
     fn line(&mut self, text: String) {
         self.lines.push(format!("    {text}"));
+    }
+
+    /// The unit of `assignment` when it is the key a merged theme dictionary assigns again to the
+    /// theme dictionary `target` it was merged into (#853, with
+    /// [`theme_units::ThemeUnitPlan::keys_in_runs`]): an assignment of
+    /// `IThemeVariantProvider.Key` in the body of the function of the document, recorded as an
+    /// entry of a unit, to a dictionary the body assigned a key outside every unit before. The
+    /// merge joins only theme dictionaries with equal keys, so it writes the key the dictionary
+    /// has. Any other key assignment of a theme dictionary is recorded as its first.
+    fn theme_key_reassignment(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        assignment: &XamlPropertyAssignmentNode,
+        target: &Typed<'a>,
+    ) -> Option<u32> {
+        let plan = theme_units::ThemeUnitPlan::current();
+        if !plan.keys_in_runs() || self.deferred_depth != 0 || assignment.property.name() != "Key" {
+            return None;
+        }
+        if assignment.property.declaring_type.borrow().full_name() != "FerroUI.Controls.IThemeVariantProvider" {
+            return None;
+        }
+        let unit = self.documents.units().and_then(|units| units.unit_of(node));
+        match unit {
+            Some(unit) if self.keyed_theme_dictionaries.contains(&target.expr) => Some(unit),
+            _ => {
+                self.keyed_theme_dictionaries.insert(target.expr.clone());
+                None
+            }
+        }
     }
 
     /// The position marker of 9.3.6: `// <document>(line,position) <what>`.
@@ -1049,6 +1220,12 @@ impl<'a> Emitter<'a> {
         if let Some(n) = node.cast::<XamlDeferredContentInitializeIntermediateRootNode>() {
             // The root of the deferred content: created, then the intermediate root of the context.
             let value = self.value(&n.value().as_node())?;
+            if self.shares_element_statements(&value) {
+                // A styled element: one function for each class of element.
+                self.uses_context = true;
+                self.line(format!("rt::set_intermediate_root(&context, &{});", value.expr));
+                return Ok(value);
+            }
             let untyped = match value.kind {
                 Kind::Class(_) => format!("rt::to_value({}.clone())", value.expr),
                 Kind::Exact { .. } => format!("rt::to_value({})", value.expr),
@@ -2039,7 +2216,15 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<XamlPropertyAssignmentNode>() {
             self.assignments.push(n.clone());
+            // The key a merged theme dictionary assigns again is an entry of its unit (#853).
+            let unit = self.theme_key_reassignment(node, &n, target);
+            if let Some(unit) = unit {
+                self.lines.push(theme_units::begin_marker(unit));
+            }
             let result = self.property_assignment(node, &n, target);
+            if unit.is_some() {
+                self.lines.push(format!("    {}", theme_units::END_MARKER));
+            }
             self.assignments.pop();
             return result;
         }
@@ -2140,20 +2325,24 @@ impl<'a> Emitter<'a> {
             && self.parent_stack_nodes.contains(&node_address(node));
         if push_parent {
             self.uses_context = true;
-            let statement = format!("context.push_parent(rt::to_value({}.clone()))", target.expr);
-            if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
-                if let Some((ty, false)) = self.construction_type(target.kind) {
-                    self.record_resolved_call(&statement, construction::ResolvedCall {
-                        kind: construction::CallKind::ContextMember,
-                        inputs: vec![construction::CallInput::Register(target.expr.clone(), false)],
-                        import: format!("Call(|args| {{ let parent = args.value::<{ty}>()?.clone(); args.context()?.push_parent(rt::to_value(parent)); Ok(None) }})"),
-                        result: None, line: 0, column: 0,
-                    });
-                }
+            if supports_initialize && self.shares_element_statements(target) {
+                // A styled element: the clone, the box and the call are one function for each
+                // class of element.
+                self.line(format!("rt::push_parent(&context, &{});", target.expr));
+            } else {
+                self.push_parent_statement(target);
             }
-            self.line(format!("{statement};"));
         }
         self.manipulation(&init.manipulation().as_node(), target)?;
+        if supports_initialize && self.shares_element_statements(target) {
+            // The end of the initialisation of a styled element (after it leaves the parent
+            // stack): one function for every element, with the error path of the member.
+            self.line(match push_parent {
+                true => format!("rt::pop_parent_end_init(&context, &{}, {}, {})?;", target.expr, node.line(), node.position()),
+                false => format!("rt::end_init(&{}, {}, {})?;", target.expr, node.line(), node.position()),
+            });
+            return Ok(());
+        }
         if push_parent {
             self.line("context.pop_parent();".to_string());
         }
@@ -2163,6 +2352,34 @@ impl<'a> Emitter<'a> {
             self.line(format!("{};", invoked(format!("{}.try_end_init()", target.expr), true, node)));
         }
         Ok(())
+    }
+
+    /// Whether the statements of a styled element `target` that are the same at every element
+    /// (the parent stack, the intermediate root, the end of the initialisation, the name) are
+    /// written as calls of the shared helpers of `rt`: the target is a local, and the
+    /// operations are not encoded as construction programs, whose encoder reads the statements
+    /// they stand for.
+    fn shares_element_statements(&self, target: &Typed<'a>) -> bool {
+        is_identifier(&target.expr)
+            && !self.documents.backend.uses_construction_programs()
+            && matches!(target.kind, Kind::Class(class) if self.types.is_styled_element(class))
+    }
+
+    /// `context.push_parent(rt::to_value(target.clone()))`, with the resolved call of the
+    /// construction programs when they encode it.
+    fn push_parent_statement(&mut self, target: &Typed<'a>) {
+        let statement = format!("context.push_parent(rt::to_value({}.clone()))", target.expr);
+        if self.documents.backend.uses_construction_programs() && is_identifier(&target.expr) {
+            if let Some((ty, false)) = self.construction_type(target.kind) {
+                self.record_resolved_call(&statement, construction::ResolvedCall {
+                    kind: construction::CallKind::ContextMember,
+                    inputs: vec![construction::CallInput::Register(target.expr.clone(), false)],
+                    import: format!("Call(|args| {{ let parent = args.value::<{ty}>()?.clone(); args.context()?.push_parent(rt::to_value(parent)); Ok(None) }})"),
+                    result: None, line: 0, column: 0,
+                });
+            }
+        }
+        self.line(format!("{statement};"));
     }
 
     /// A property assignment, with the setter the interpreter's plan
@@ -2297,10 +2514,18 @@ impl<'a> Emitter<'a> {
     /// `fused_template_binding_bind`), which replaces the two statements of the value too.
     fn setter_line(&mut self, statement: String) {
         let fused = fused_dynamic_resource_bind(self.types, &self.lines, &statement)
-            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement, false));
+            .or_else(|| fused_template_binding_bind(self.types, &self.lines, &statement, false))
+            .map(|fused| (2, fused))
+            .or_else(|| {
+                // The construction programs encode the statements of the extension themselves.
+                (!self.documents.backend.uses_construction_programs())
+                    .then(|| fused_compiled_binding_bind(&self.lines, &statement))
+                    .flatten()
+                    .map(|fused| (4, fused))
+            });
         match fused {
-            Some(fused) => {
-                self.lines.truncate(self.lines.len() - 2);
+            Some((replaced, fused)) => {
+                self.lines.truncate(self.lines.len() - replaced);
                 self.line(fused);
             }
             None => self.line(statement),
@@ -3157,7 +3382,7 @@ impl<'a> Emitter<'a> {
             for slot in &run.slots {
                 self.deferred_functions[*slot].clear();
             }
-            self.row_tables.push(theme_rows::row_table_in(&name, &document_text, &run, &self.documents.bytecode_image));
+            self.row_tables.push((name, document_text.clone(), run));
         }
         lines
     }
@@ -3220,11 +3445,17 @@ impl<'a> Emitter<'a> {
         (self.uses_context, self.uses_name_scope) = outer_uses;
         let returned = body?;
         let body_lines = self.apply_row_runs(body_lines, |_, _| {});
-        // Runs of template bindings on one object, as tables (#568, step 5).
+        // Runs of template bindings on one object, as tables (#568, step 5), after the template
+        // bindings whose setter is chosen at run time are resolved (#854, off by default). The
+        // typed backend encodes those choices itself, so the native forms are left to it.
         let body_lines = if self.documents.backend.uses_construction_programs() {
             body_lines
         } else {
-            theme_styles::template_binding_runs(&mut self.theme_styles, body_lines)
+            let template_binding = self.types.framework_path(FrameworkType::TemplateBinding).map(|path| absolute(&path));
+            let body_lines = theme_styles::resolve_template_bindings(body_lines, template_binding.as_deref());
+            let body_lines = theme_styles::template_binding_runs(&mut self.theme_styles, body_lines);
+            // And runs of dynamic resources on one object (#568).
+            theme_styles::dynamic_resource_runs(&mut self.theme_styles, body_lines)
         };
 
         let document = self.document_name.replace('`', "'").replace(['\r', '\n'], " ");
@@ -3289,7 +3520,7 @@ impl<'a> Emitter<'a> {
                 }
                 let body_lines = match factory_metadata {
                     Some((types, calls)) => construction::lower(&body_lines, &types, &calls, &returned, &self.documents.bytecode_image),
-                    None => body_lines,
+                    None => shared_static_resource_values(self.types, body_lines),
                 };
                 for line in body_lines {
                     text.push_str(&line);
@@ -3440,11 +3671,16 @@ impl<'a> Emitter<'a> {
     /// as a value: `rt::clr_property_info` over the declaration of its
     /// accessors.
     fn clr_property_info(&self, node: &Rc<dyn IXamlAstNode>, property: &Rc<dyn IXamlProperty>) -> EmitResult<String> {
-        let arguments = self.property_info_arguments(node, property)?;
+        let (markup, rest, index) = self.property_info_parts(node, property)?;
+        let arguments = format!("{markup}, {rest}");
         // `Setter.Value`, the target property of every markup extension that gives a setter its
         // value: the same description, without its arguments at every use.
         if arguments == SETTER_VALUE_PROPERTY_INFO_ARGUMENTS {
             return Ok("rt::setter_value_property()".to_string());
+        }
+        // The declared property resolved at compile time (#603), with the option on.
+        if let Some(index) = index {
+            return Ok(format!("rt::boxed(rt::declared_clr_property_info({markup}, {index}, {rest}))"));
         }
         Ok(format!("rt::boxed(rt::clr_property_info({arguments}))"))
     }
@@ -3454,6 +3690,19 @@ impl<'a> Emitter<'a> {
     /// static, the handle of its type, and whether its getter returns the
     /// shared boolean boxes.
     fn property_info_arguments(&self, node: &Rc<dyn IXamlAstNode>, property: &Rc<dyn IXamlProperty>) -> EmitResult<String> {
+        let (markup, rest, _) = self.property_info_parts(node, property)?;
+        Ok(format!("{markup}, {rest}"))
+    }
+
+    /// [`property_info_arguments`](Self::property_info_arguments) in parts: the metadata, the
+    /// other arguments, and, with the option of compile-time declared properties on (#603,
+    /// [`set_compile_time_declared_properties`]), the position of the property in its
+    /// declaration when the type system knows it.
+    fn property_info_parts(
+        &self,
+        node: &Rc<dyn IXamlAstNode>,
+        property: &Rc<dyn IXamlProperty>,
+    ) -> EmitResult<(String, String, Option<usize>)> {
         let name = property.name();
         let accessor = property
             .getter()
@@ -3490,11 +3739,15 @@ impl<'a> Emitter<'a> {
             _ => "::ferroui_base::data::core::ValueType::object()".to_string(),
         };
         let cached_boxed_boolean = property.getter().is_some_and(|getter| getter.return_type().is("System", "Boolean"));
-        Ok(format!(
-            "{markup}, {}, {}, {handle}, {cached_boxed_boolean}",
-            rust_string_literal(&name),
-            runtime.is_static
-        ))
+        let index = match compile_time_declared_properties() {
+            true => {
+                let metadata = self.types.metadata_of(&*declaring);
+                metadata.and_then(|metadata| metadata.property_index(&name, runtime.is_static))
+            }
+            false => None,
+        };
+        let rest = format!("{}, {}, {handle}, {cached_boxed_boolean}", rust_string_literal(&name), runtime.is_static);
+        Ok((markup, rest, index))
     }
 
     /// The builder call of an indexer of a binding path (`XamlIlClrIndexerPathElementNode`):
@@ -3683,12 +3936,17 @@ impl<'a> Emitter<'a> {
                     false => format!("builder.ferro_property(rt::property({definition}))"),
                 }
             }
-            XamlIlBindingPathElementNode::ClrProperty(e) => format!(
-                "rt::path_property(&builder, {}, {}, {})",
-                self.property_info_arguments(node, &e.property)?,
-                e.accepts_null,
-                e.emit_typed.get()
-            ),
+            XamlIlBindingPathElementNode::ClrProperty(e) => match self.property_info_parts(node, &e.property)? {
+                // The declared property resolved at compile time (#603), with the option on.
+                (markup, rest, Some(index)) => format!(
+                    "rt::declared_path_property(&builder, {markup}, {index}, {rest}, {}, {})",
+                    e.accepts_null,
+                    e.emit_typed.get()
+                ),
+                (markup, rest, None) => {
+                    format!("rt::path_property(&builder, {markup}, {rest}, {}, {})", e.accepts_null, e.emit_typed.get())
+                }
+            },
             XamlIlBindingPathElementNode::ArrayIndexer(e) => {
                 let indices: Vec<String> = e.values.iter().map(|value| format!("{value}_i32")).collect();
                 format!("builder.array_element(&[{}])", indices.join(", "))
@@ -4840,9 +5098,27 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, "a name that is not text"))?
             .text();
         self.uses_name_scope = true;
+        let literal = rust_string_literal(&name);
+        // The name of a styled element, set just before (`Name`, or `x:Name` that sets it): the
+        // two statements are one call of the shared helper, which sets it and registers it.
+        let set_name = format!(
+            "    {}.set_direct_value(::ferroui_base::StyledElement::name_property(), \
+             ::core::option::Option::Some(::std::string::String::from({literal})));",
+            target.expr
+        );
+        if self.shares_element_statements(target) && self.lines.last() == Some(&set_name) {
+            self.lines.pop();
+            self.line(format!(
+                "rt::name_element(name_scope.as_ref(), &{0}, &{0}, {literal}, {1}, {2})?;",
+                target.expr,
+                node.line(),
+                node.position()
+            ));
+            return Ok(());
+        }
         self.line(format!(
             "rt::register_name_value(name_scope.as_ref(), {}, ::std::rc::Rc::new(::core::clone::Clone::clone(&{})), {}, {})?;",
-            rust_string_literal(&name),
+            literal,
             target.expr,
             node.line(),
             node.position()
@@ -5237,6 +5513,7 @@ pub fn emit_function<'a>(
         resolved_calls: Default::default(),
         row_tables: Vec::new(),
         deferred_depth: 0,
+        keyed_theme_dictionaries: HashSet::new(),
         theme_styles: theme_styles::StylePool::new(function_name, &document_name.replace('`', "'").replace(['\r', '\n'], " ")),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
@@ -5349,9 +5626,11 @@ pub fn emit_function<'a>(
         source.push('\n');
         source.push_str(run);
     }
-    for table in &emitter.row_tables {
+    // The row tables, the packed tables of a unit with the pool of the unit (#855).
+    let prefix = emitter.function_name.to_uppercase();
+    for table in theme_rows::row_tables_in(&prefix, &emitter.row_tables, &emitter.documents.bytecode_image) {
         source.push('\n');
-        source.push_str(table);
+        source.push_str(&table);
     }
     // The tables of control themes and template bindings and the items they share.
     for item in &emitter.theme_styles.items {
@@ -5864,5 +6143,79 @@ mod tests {
         );
         assert_eq!(brace_balance("if a { \"}\" "), 1);
         assert_eq!(declared_local("let value_0: ::x::T = f();"), Some(("value_0".to_string(), Some("::x::T".to_string()))));
+    }
+
+    /// #568: the statements every styled element of a template repeats (the intermediate root,
+    /// the parent stack, the end of the initialisation, the name), a `{CompiledBinding}` bound
+    /// to a property and the value of a `{StaticResource}` are calls of the shared helpers of
+    /// `rt` in the native output; the construction programs of the bytecode backend keep the
+    /// statements they encode.
+    #[cfg(feature = "runtime")]
+    #[test]
+    fn styled_elements_of_a_template_share_their_repeated_statements() {
+        use crate::rust_emitter::XamlBackend;
+        use crate::rust_emitter::{compile_documents_with, with_xaml_backend, EmitterHost, TransformOptions};
+        ferroui_markup_xaml::register_types();
+        let host = EmitterHost::runtime(&[]).unwrap();
+        let xaml = r#"<ControlTemplate xmlns="https://github.com/ferroui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" TargetType="Button">
+            <StackPanel x:Name="PART_Root">
+                <Border Width="{CompiledBinding $parent[Button].Width}" />
+                <TextBlock Name="PART_Text" Background="{DynamicResource ExampleBrush}" />
+                <TextBlock Text="plain" Foreground="{StaticResource ExampleBrush}" />
+                <Border />
+            </StackPanel>
+        </ControlTemplate>"#;
+        let emit = |backend| {
+            let options = TransformOptions::default();
+            with_xaml_backend(backend, &Default::default(), || {
+                compile_documents_with(&host, &[("template.xaml", xaml)], Some("ferres://Example/"), &options)
+            })
+            .pop()
+            .unwrap()
+            .source
+            .unwrap()
+        };
+        let native = emit(XamlBackend::Native);
+        for shared in [
+            "rt::set_intermediate_root(&context, &stack_panel_0);",
+            "rt::push_parent(&context, &stack_panel_0);",
+            "rt::name_element(name_scope.as_ref(), &stack_panel_0, &stack_panel_0, \"PART_Root\", ",
+            "rt::name_element(name_scope.as_ref(), &text_block_0, &text_block_0, \"PART_Text\", ",
+            "rt::pop_parent_end_init(&context, &stack_panel_0, ",
+            "rt::end_init(&border_1, ",
+            "rt::bind_compiled_binding(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ",
+            "rt::static_resource_value(&context, ",
+            "_property(), \"ExampleBrush\", ",
+        ] {
+            assert!(native.contains(shared), "{shared} in\n{native}");
+        }
+        // The control template itself is no styled element: only its content shares them.
+        let content = native.split("fn build_template_xaml_deferred_0(").nth(1).expect("the content of the template");
+        for inline in [
+            "context.set_intermediate_root_object(",
+            "push_parent(rt::to_value(",
+            "context.pop_parent();",
+            "try_end_init()",
+            "rt::register_name_value(",
+            "StyledElement::name_property()",
+            "CompiledBindingExtension::__markup_ProvideValue_0",
+            "StaticResourceExtension::__markup_new_1(",
+        ] {
+            assert!(!content.contains(inline), "{inline} in\n{content}");
+        }
+        let typed = emit(XamlBackend::Bytecode);
+        let helpers = [
+            "rt::set_intermediate_root(",
+            "rt::push_parent(",
+            "rt::name_element(",
+            "rt::pop_parent_end_init(",
+            "rt::end_init(",
+            "rt::bind_compiled_binding(",
+            "rt::static_resource_value(",
+        ];
+        for shared in helpers {
+            assert!(!typed.contains(shared), "{shared} in\n{typed}");
+        }
     }
 }

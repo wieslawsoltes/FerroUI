@@ -9,7 +9,7 @@ use crate::at_spi::dbus::descriptions::ACCESSIBLE;
 use crate::at_spi::dbus::interface::{args, reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use crate::at_spi::dbus::types::{AtSpiAttributeSet, AtSpiObjectReference, AtSpiRelationEntry};
 use std::rc::{Rc, Weak};
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiAccessibleHandler {
     server: Weak<AtSpiServer>,
@@ -153,17 +153,17 @@ impl DBusInterface for AtSpiAccessibleHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         let (server, node) = (self.server.upgrade()?, self.node.upgrade()?);
         Some(match name {
-            "version" => Value::from(Self::version()),
-            "Name" => Value::from(Self::name(&node)),
-            "Description" => Value::from(Self::description(&node)),
+            "version" => Variant::from(Self::version()),
+            "Name" => Variant::from(Self::name(&node)),
+            "Description" => Variant::from(Self::description(&node)),
             "Parent" => Self::parent(&server, &node).to_dbus_struct(),
-            "ChildCount" => Value::from(Self::child_count(&node)),
-            "Locale" => Value::from(Self::locale()),
-            "AccessibleId" => Value::from(Self::accessible_id(&node)),
-            "HelpText" => Value::from(Self::help_text(&node)),
+            "ChildCount" => Variant::from(Self::child_count(&node)),
+            "Locale" => Variant::from(Self::locale()),
+            "AccessibleId" => Variant::from(Self::accessible_id(&node)),
+            "HelpText" => Variant::from(Self::help_text(&node)),
             _ => return None,
         })
     }

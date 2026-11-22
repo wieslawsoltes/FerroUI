@@ -28,7 +28,7 @@
 //! format 1, which are always written.
 
 use crate::json::{text_of, Fields, Json, Members};
-pub use crate::xaml_metadata::{DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
+pub use crate::xaml_metadata::{ClassReferencesModel, DocumentModel, MarkupReferencesModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
 
 /// The format [`AssemblyModel::to_json`] writes.
 pub const FORMAT: i64 = 2;
@@ -730,6 +730,11 @@ pub struct TypeModel {
     /// `X::default`; sorted, the class itself left out. They keep the control themes of what a
     /// class creates in code (`ListBox` creates `ListBoxItem` containers). Absent in a file: none.
     pub creates: Vec<String>,
+    /// The targets on which no code constructs the class (#1002), as `cfg` conditions
+    /// (`target_os = "macos"`, `target_arch = "wasm32"`): a build for a matching target drops the
+    /// creates edges into the class, so the class is live there only where something names it.
+    /// Stated by the build script of its crate (`Export::not_created_on`). Absent in a file: none.
+    pub not_created_on: Vec<String>,
 }
 
 impl TypeModel {
@@ -773,6 +778,7 @@ impl TypeModel {
             property_attributes: Vec::new(),
             notify_property_changed: None,
             creates: Vec::new(),
+            not_created_on: Vec::new(),
         }
     }
 
@@ -942,7 +948,8 @@ impl TypeModel {
                     Json::Array(vec![Json::string(name), Json::Array(attributes.iter().map(AttributeModel::to_json).collect())])
                 })
                 .optional("notify_property_changed", optional_type(&self.notify_property_changed))
-                .list("creates", &self.creates, |name| Json::string(name)),
+                .list("creates", &self.creates, |name| Json::string(name))
+                .list("not_created_on", &self.not_created_on, |condition| Json::string(condition)),
         )
     }
 
@@ -998,6 +1005,7 @@ impl TypeModel {
             })?,
             notify_property_changed: fields.optional("notify_property_changed", RustType::from_json)?,
             creates: fields.list("creates", |name| text_of(name, "a class a type creates"))?,
+            not_created_on: fields.list("not_created_on", |condition| text_of(condition, "a target a class is not created on"))?,
         })
     }
 }
@@ -1377,7 +1385,8 @@ impl AssemblyModel {
             .list("functions", &self.functions, FunctionsModel::to_json)
             .list("theme_units", &self.theme_units, theme_units_to_json)
             .list("referenced_types", &self.references.types, |name| Json::string(name))
-            .list("referenced_keys", &self.references.keys, |name| Json::string(name));
+            .list("referenced_keys", &self.references.keys, |name| Json::string(name))
+            .list("class_references", &self.references.classes, class_references_to_json);
         Json::object(members).to_text()
     }
 
@@ -1456,6 +1465,7 @@ impl AssemblyModel {
             references: MarkupReferencesModel {
                 types: fields.list("referenced_types", |name| text_of(name, "a referenced type"))?,
                 keys: fields.list("referenced_keys", |name| text_of(name, "a referenced key"))?,
+                classes: fields.list("class_references", class_references_from_json)?,
             },
         })
     }
@@ -1482,6 +1492,27 @@ fn theme_units_to_json(units: &ThemeUnitsModel) -> Json {
         ("table_path".to_string(), Json::string(&units.table_path)),
         ("units".to_string(), Json::Array(units.units.iter().map(unit).collect())),
     ])
+}
+
+/// What the documents of an ordinary class name (#1002) as an item of `"class_references"`: the
+/// members the reader of format 1 reads ([`XamlMetadata::parse`]).
+fn class_references_to_json(class: &ClassReferencesModel) -> Json {
+    let strings = |items: &[String]| Json::Array(items.iter().map(|item| Json::string(item)).collect());
+    Json::Object(vec![
+        ("class".to_string(), Json::string(&class.class)),
+        ("referenced_types".to_string(), strings(&class.types)),
+        ("referenced_keys".to_string(), strings(&class.keys)),
+    ])
+}
+
+/// Reads an item of `"class_references"` ([`class_references_to_json`]).
+fn class_references_from_json(value: &Json) -> Result<ClassReferencesModel, String> {
+    let fields = Fields::of(value, "the references of a class")?;
+    Ok(ClassReferencesModel {
+        class: fields.text("class")?,
+        types: fields.list("referenced_types", |name| text_of(name, "a referenced type"))?,
+        keys: fields.list("referenced_keys", |name| text_of(name, "a referenced key"))?,
+    })
 }
 
 /// Reads an item of `"theme_units"` ([`theme_units_to_json`]).
@@ -1743,6 +1774,24 @@ mod tests {
         assert_eq!(read.documents, model.documents);
         let newer = model.to_json().replacen("\"format\": 2", "\"format\": 3", 1);
         assert_eq!(AssemblyModel::parse(&newer), Err("the file has the format 3; this reader reads the formats 1 to 2".to_string()));
+    }
+
+    /// Not from upstream (#1002): the references of an ordinary class are written by both writers
+    /// and read by both readers.
+    #[test]
+    fn class_references_are_read_by_both_readers() {
+        let mut model = AssemblyModel::new("Library", "library");
+        model.references.classes.push(ClassReferencesModel {
+            class: "Library.About".to_string(),
+            types: vec!["Button".to_string()],
+            keys: vec!["AboutTitle".to_string()],
+        });
+        let text = model.to_json();
+        assert!(text.contains("\"class_references\""), "{text}");
+        assert_eq!(AssemblyModel::parse(&text), Ok(model.clone()));
+        assert_eq!(XamlMetadata::parse(&text), Ok(model.metadata()));
+        let first = model.metadata().to_json();
+        assert_eq!(AssemblyModel::parse(&first).map(|read| read.references), Ok(model.references.clone()));
     }
 
     /// Not from upstream: the checked-in `.xamlmeta` of the themes (format 1, written by the

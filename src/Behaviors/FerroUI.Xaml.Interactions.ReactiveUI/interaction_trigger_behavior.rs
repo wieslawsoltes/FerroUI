@@ -26,6 +26,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct AnyInteraction(Rc<dyn ErasedInteraction>);
 
+ferroui_base::styled_value!(AnyInteraction);
+
 /// The operations of an interaction whose types are erased.
 trait ErasedInteraction {
     /// Registers a handler that receives the input of each question, and answers the question

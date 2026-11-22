@@ -97,7 +97,7 @@ pub mod __private {
     pub use ferroui_system::events::Event;
     pub use ferroui_system::{IObservable, ObservableError};
     pub use ferroui_system::prop;
-    pub use paste::paste;
+    pub use ferroui_ident_macros::ferro_idents;
 }
 pub use primitives::IThreadAffineSequencer;
 pub use binding::view::*;

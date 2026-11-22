@@ -756,3 +756,55 @@ fn heat_cells_take_their_colours_at_the_first_draw() {
         "the lowest and highest weights take distinct colours"
     );
 }
+
+/// The tooltip goes where the source places it (`GetTooltipLocation` over the hover areas of the
+/// found points), not beside the pointer: above the top of the middle column of five with
+/// `TooltipPosition::Top`, below it with `Bottom`, and above the centre of a land of a map.
+#[test]
+fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(300.0, 300.0);
+    let chart = Chart::new();
+    chart.set_animations_speed(0.0);
+    let series = ChartSeries::new();
+    series.set_kind(SeriesKind::Column);
+    series.set_numeric_values([1.0, 2.0, 3.0, 4.0, 5.0]);
+    series.set_data_padding(Point::new(0.0, 0.0));
+    chart.series().add(series);
+    for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
+        axes.get(0).set_visible(false);
+    }
+    let scene = chart.scene(size).unwrap();
+    let pointer = Point::new(150.0, 150.0);
+    let found = scene.hit_test(pointer, FindingStrategy::Automatic, 0.0);
+    assert_eq!(found.len(), 1);
+    let bar = found[0].shape.hover_bounds();
+    let hovered = ChartPointerEventArgs {
+        position: pointer,
+        points: found.into_iter().cloned().collect(),
+    };
+    let (_, tooltip) = crate::decorations::tooltip_layout(size, &hovered);
+    chart.set_tooltip_position(TooltipPosition::Top);
+    let top = chart.tooltip_origin(&hovered, tooltip, size);
+    assert!((top.x + tooltip.width * 0.5 - (bar.x + bar.width * 0.5)).abs() < 1e-6);
+    assert!((top.y + tooltip.height - bar.y).abs() < 1e-6);
+    chart.set_tooltip_position(TooltipPosition::Bottom);
+    let bottom = chart.tooltip_origin(&hovered, tooltip, size);
+    assert!((bottom.y - bar.y).abs() < 1e-6, "the source anchors at the end of the bar");
+    // A map anchors at the centre of the land.
+    let map = Chart::new();
+    map.set_chart_kind(ChartKind::GeoMap);
+    map.set_tooltip_position(TooltipPosition::Auto);
+    let land = HitRegion {
+        center: Point::new(150.0, 200.0),
+        ..hovered.points[0].clone()
+    };
+    let hovered = ChartPointerEventArgs {
+        position: Point::new(10.0, 10.0),
+        points: vec![land],
+    };
+    let at = map.tooltip_origin(&hovered, tooltip, size);
+    assert!((at.x - (150.0 - tooltip.width * 0.5)).abs() < 1e-6);
+    assert!((at.y - (200.0 - tooltip.height)).abs() < 1e-6);
+}

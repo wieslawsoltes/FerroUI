@@ -117,7 +117,7 @@ macro_rules! gl_entry_points {
     (@method optional $safety:tt [$(#[$attr:meta])*] $vis:vis $field:ident $name:ident ($($arg:ident : $ty:ty),*) $(-> $ret:ty)?) => {
         gl_entry_points!(@call $safety [$(#[$attr])*] $vis $field $name ($($arg : $ty),*) $(-> $ret)?);
 
-        ::paste::paste! {
+        ::ferroui_base::__paste! {
             #[doc = concat!("Whether the context has the entry point behind `", stringify!($name), "`.")]
             $vis fn [<is_ $name _available>](&self) -> bool {
                 self.$field.$name.is_some()
