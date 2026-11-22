@@ -893,6 +893,7 @@ impl PreviewStageBoard {
     /// Imported IDs are freshly allocated so callbacks from a retired board cannot
     /// address a new card. Validation finishes before any old stage is removed.
     pub fn restore_manifest(&mut self, manifest: PreviewStageManifest) -> Result<(), String> {
+        manifest.validate()?;
         self.restore_stage_set(manifest.into())
     }
 
