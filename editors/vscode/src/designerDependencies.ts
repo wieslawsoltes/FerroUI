@@ -1,3 +1,4 @@
+import { watch, type FSWatcher } from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { PreviewSourceBuffer } from './protocol';
@@ -19,7 +20,7 @@ function fileKey(uri: vscode.Uri): string {
 export class DesignerDependencies implements vscode.Disposable {
     private watched = new Set<string>();
     private duringRender?: Set<string>;
-    private readonly assetWatchers = new Map<string, vscode.FileSystemWatcher>();
+    private readonly assetWatchers = new Map<string, vscode.Disposable>();
 
     constructor(private readonly rust = false, private readonly assetChanged?: () => void) {}
 
@@ -67,17 +68,43 @@ export class DesignerDependencies implements vscode.Disposable {
         }
         for (const [key, folder] of folders) {
             if (this.assetWatchers.has(key)) continue;
-            // The recursive watcher also supports volumes that VS Code's single-directory watcher refuses.
-            const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'));
-            const changed = (uri: vscode.Uri) => {
-                if (this.change(uri)) this.assetChanged?.();
-            };
-            watcher.onDidCreate(changed);
-            watcher.onDidChange(changed);
-            watcher.onDidDelete(changed);
-            this.assetWatchers.set(key, watcher);
+            this.assetWatchers.set(key, watchAssetFolder(folder, uri => {
+                if (!uri || this.change(uri)) this.assetChanged?.();
+            }));
         }
     }
+}
+
+function watchAssetFolder(folder: vscode.Uri, changed: (uri?: vscode.Uri) => void): vscode.Disposable {
+    const fallback = () => {
+        const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder, '**/*'));
+        watcher.onDidCreate(changed);
+        watcher.onDidChange(changed);
+        watcher.onDidDelete(changed);
+        return watcher;
+    };
+    let local: FSWatcher;
+    let secondary: vscode.Disposable | undefined;
+    const useFallback = () => {
+        if (secondary) return;
+        local.close();
+        secondary = fallback();
+        changed();
+    };
+    try {
+        // On the workspace host, arm the directory watch before publishing the frame.
+        local = watch(folder.fsPath, { persistent: false }, (event, filename) => {
+            if (event === 'rename' && (!filename || filename === path.basename(folder.fsPath))) {
+                useFallback();
+                return;
+            }
+            changed(filename ? vscode.Uri.joinPath(folder, filename) : undefined);
+        });
+    } catch {
+        return fallback();
+    }
+    local.once('error', useFallback);
+    return new vscode.Disposable(() => { local.close(); secondary?.dispose(); });
 }
 
 export function dirtyPreviewSources(documents: readonly vscode.Uri[], exclude?: vscode.TextDocument, rust = false): PreviewSourceBuffer[] {
