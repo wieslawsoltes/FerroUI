@@ -598,7 +598,7 @@ fn populate_macostheme_xaml_unit_11(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(18,45) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_0)?;
+    rt::add_packed_color_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_0)?;
     ::core::result::Result::Ok(())
 }
 
@@ -614,15 +614,15 @@ fn populate_macostheme_xaml_unit_12(
     // MacOSTheme.xaml(16,49) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SymbolThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_2, 16, 49)?;
     // MacOSTheme.xaml(17,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_1)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_1)?;
     // MacOSTheme.xaml(47,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_2)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_2)?;
     // MacOSTheme.xaml(68,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 68, 66)?, rt::string_object("AppBarExpandButtonThemeWidthGridLength"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(48.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 68, 66)?;
     // MacOSTheme.xaml(69,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 69, 60)?, rt::string_object("HyperlinkFocusRectCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 69, 60)?;
     // MacOSTheme.xaml(70,41) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_3)?;
+    rt::add_packed_color_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_3)?;
     // MacOSTheme.xaml(96,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_4)?;
     // MacOSTheme.xaml(124,8) Content (resource)
@@ -705,7 +705,7 @@ fn populate_macostheme_xaml_unit_13(
     // MacOSTheme.xaml(18,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "SystemControlHighlightListAccentMediumLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_216, 18, 8)?;
     // MacOSTheme.xaml(19,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_29)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_29)?;
     // MacOSTheme.xaml(22,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_30)?;
     // MacOSTheme.xaml(23,8) Content (resource)
@@ -721,7 +721,7 @@ fn populate_macostheme_xaml_unit_14(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(15,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_32)?;
+    rt::add_packed_color_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_32)?;
     // MacOSTheme.xaml(98,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_33)?;
     // MacOSTheme.xaml(136,8) Content (resource)
@@ -751,7 +751,7 @@ fn populate_macostheme_xaml_unit_15(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_36)?;
     // MacOSTheme.xaml(16,51) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_37)?;
+    rt::add_packed_color_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_37)?;
     // MacOSTheme.xaml(26,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_38)?;
     ::core::result::Result::Ok(())
@@ -788,7 +788,7 @@ fn populate_macostheme_xaml_unit_17(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_41)?;
     // MacOSTheme.xaml(52,66) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_42)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_42)?;
     // MacOSTheme.xaml(60,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_43)?;
     // MacOSTheme.xaml(68,8) Content (resource)
@@ -804,7 +804,7 @@ fn populate_macostheme_xaml_unit_18(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(15,50) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_45)?;
+    rt::add_packed_color_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_45)?;
     // MacOSTheme.xaml(18,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_46)?;
     // MacOSTheme.xaml(52,8) Content (resource)
@@ -854,9 +854,9 @@ fn populate_macostheme_xaml_unit_20(
     // MacOSTheme.xaml(26,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_56)?;
     // MacOSTheme.xaml(28,53) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_57)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_57)?;
     // MacOSTheme.xaml(33,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_58)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_58)?;
     // MacOSTheme.xaml(37,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_59)?;
     // MacOSTheme.xaml(38,8) Content (resource)
@@ -935,11 +935,11 @@ fn populate_macostheme_xaml_unit_24(
     // MacOSTheme.xaml(40,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 40, 65)?, rt::string_object("AppBarButtonHasFlyoutChevronVisibility"), rt::to_object(::core::clone::Clone::clone(&true))), 40, 65)?;
     // MacOSTheme.xaml(41,49) Content (resource)
-    rt::add_string_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_71)?;
+    rt::add_packed_string_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_71)?;
     // MacOSTheme.xaml(43,51) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_72)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_72)?;
     // MacOSTheme.xaml(46,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_73)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_73)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1019,7 +1019,7 @@ fn populate_macostheme_xaml_unit_29(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(15,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_87)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_87)?;
     // MacOSTheme.xaml(19,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_88)?;
     // MacOSTheme.xaml(22,56) Content (resource)
@@ -1027,7 +1027,7 @@ fn populate_macostheme_xaml_unit_29(
     // MacOSTheme.xaml(23,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_89)?;
     // MacOSTheme.xaml(29,69) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_90)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_90)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1039,7 +1039,7 @@ fn populate_macostheme_xaml_unit_30(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(15,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_91)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_91)?;
     // MacOSTheme.xaml(25,74) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 25, 74)?, rt::string_object("ListViewItemCompactSelectedBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 25, 74)?;
     // MacOSTheme.xaml(26,8) Content (resource)
@@ -1047,7 +1047,7 @@ fn populate_macostheme_xaml_unit_30(
     // MacOSTheme.xaml(50,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_93)?;
     // MacOSTheme.xaml(65,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_94)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_94)?;
     // MacOSTheme.xaml(68,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_95)?;
     ::core::result::Result::Ok(())
@@ -1110,7 +1110,7 @@ fn populate_macostheme_xaml_unit_34(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(17,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_102)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_102)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1154,9 +1154,9 @@ fn populate_macostheme_xaml_unit_37(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_106)?;
     // MacOSTheme.xaml(72,63) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_107)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_107)?;
     // MacOSTheme.xaml(76,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_108)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_108)?;
     // MacOSTheme.xaml(88,66) Content (resource)
     let value_135 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 88, 66)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 88, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_135))), 88, 66)?;
@@ -1195,11 +1195,11 @@ fn populate_macostheme_xaml_unit_39(
     // MacOSTheme.xaml(21,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 21, 51)?, rt::string_object("ContentDialogBorderWidth"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 21, 51)?;
     // MacOSTheme.xaml(22,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_112)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_112)?;
     // MacOSTheme.xaml(26,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 26, 54)?, rt::string_object("ContentDialogButtonSpacing"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(8.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 26, 54)?;
     // MacOSTheme.xaml(27,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_113)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_113)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1211,7 +1211,7 @@ fn populate_macostheme_xaml_unit_40(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_1 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(15,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_114)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_114)?;
     // MacOSTheme.xaml(19,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 19, 54)?;
     // MacOSTheme.xaml(20,59) Content (resource)
@@ -1308,7 +1308,7 @@ fn populate_macostheme_xaml_unit_46(
     // MacOSTheme.xaml(15,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_125)?;
     // MacOSTheme.xaml(17,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_126)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_126)?;
     // MacOSTheme.xaml(19,55) Content (resource)
     let value_139 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 19, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 19, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_139))), 19, 55)?;
@@ -1337,7 +1337,7 @@ fn populate_macostheme_xaml_unit_47(
     // MacOSTheme.xaml(42,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_133)?;
     // MacOSTheme.xaml(44,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_134)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_134)?;
     // MacOSTheme.xaml(48,59) Content (resource)
     let value_140 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 48, 59)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 48, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_140))), 48, 59)?;
@@ -1438,7 +1438,7 @@ fn populate_macostheme_xaml_unit_54(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_144)?;
     // MacOSTheme.xaml(47,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_145)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_145)?;
     // MacOSTheme.xaml(51,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_146)?;
     ::core::result::Result::Ok(())
@@ -1482,7 +1482,7 @@ fn populate_macostheme_xaml_unit_57(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_150)?;
     // MacOSTheme.xaml(80,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_151)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_151)?;
     // MacOSTheme.xaml(82,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_1, "TabViewSelectedItemBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1537, 82, 8)?;
     ::core::result::Result::Ok(())
@@ -1530,11 +1530,11 @@ fn populate_macostheme_xaml_unit_60(
     // MacOSTheme.xaml(15,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_156)?;
     // MacOSTheme.xaml(17,60) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_157)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_157)?;
     // MacOSTheme.xaml(19,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_158)?;
     // MacOSTheme.xaml(20,60) Content (resource)
-    rt::add_string_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_159)?;
+    rt::add_packed_string_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_159)?;
     // MacOSTheme.xaml(23,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 23, 59)?, rt::string_object("SplitViewPaneRootCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 23, 59)?;
     ::core::result::Result::Ok(())
@@ -1628,7 +1628,7 @@ fn populate_macostheme_xaml_unit_66(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_168)?;
     // MacOSTheme.xaml(33,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_169)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_169)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1686,7 +1686,7 @@ fn populate_macostheme_xaml_unit_69(
     // MacOSTheme.xaml(22,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_178)?;
     // MacOSTheme.xaml(24,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_179)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_179)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1748,9 +1748,9 @@ fn populate_macostheme_xaml_unit_73(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_185)?;
     // MacOSTheme.xaml(17,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_186)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_186)?;
     // MacOSTheme.xaml(23,43) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_187)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_187)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1800,7 +1800,7 @@ fn populate_macostheme_xaml_unit_77(
     // MacOSTheme.xaml(15,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_191)?;
     // MacOSTheme.xaml(21,64) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_192)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_192)?;
     // MacOSTheme.xaml(25,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 25, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 25, 55)?;
     ::core::result::Result::Ok(())
@@ -1828,7 +1828,7 @@ fn populate_macostheme_xaml_unit_79(
     // MacOSTheme.xaml(17,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_194)?;
     // MacOSTheme.xaml(35,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_195)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_195)?;
     // MacOSTheme.xaml(37,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 37, 62)?, rt::string_object("GridViewItemSelectedBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 37, 62)?;
     // MacOSTheme.xaml(38,8) Content (resource)
@@ -1852,7 +1852,7 @@ fn populate_macostheme_xaml_unit_80(
     // MacOSTheme.xaml(22,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 22, 56)?, rt::string_object("PivotHeaderItemCharacterSpacing"), rt::to_object(-25_i32)), 22, 56)?;
     // MacOSTheme.xaml(23,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_MACOSTHEME_XAML_ROWS_198)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_MACOSTHEME_XAML_ROWS_198)?;
     // MacOSTheme.xaml(29,58) Content (resource)
     let value_145 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 29, 58)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 29, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_145))), 29, 58)?;
@@ -1885,7 +1885,7 @@ fn populate_macostheme_xaml_unit_82(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(28,45) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_202)?;
+    rt::add_packed_color_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_202)?;
     ::core::result::Result::Ok(())
 }
 
@@ -1901,15 +1901,15 @@ fn populate_macostheme_xaml_unit_83(
     // MacOSTheme.xaml(313,49) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SymbolThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1916, 313, 49)?;
     // MacOSTheme.xaml(314,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_203)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_203)?;
     // MacOSTheme.xaml(344,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_204)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_204)?;
     // MacOSTheme.xaml(365,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 365, 66)?, rt::string_object("AppBarExpandButtonThemeWidthGridLength"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(48.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 365, 66)?;
     // MacOSTheme.xaml(366,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 366, 60)?, rt::string_object("HyperlinkFocusRectCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 366, 60)?;
     // MacOSTheme.xaml(367,41) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_205)?;
+    rt::add_packed_color_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_205)?;
     // MacOSTheme.xaml(393,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_206)?;
     // MacOSTheme.xaml(421,8) Content (resource)
@@ -1992,7 +1992,7 @@ fn populate_macostheme_xaml_unit_84(
     // MacOSTheme.xaml(31,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "SystemControlHighlightListAccentMediumLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_2129, 31, 8)?;
     // MacOSTheme.xaml(32,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_231)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_231)?;
     // MacOSTheme.xaml(35,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_232)?;
     // MacOSTheme.xaml(36,8) Content (resource)
@@ -2008,7 +2008,7 @@ fn populate_macostheme_xaml_unit_85(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(219,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_234)?;
+    rt::add_packed_color_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_234)?;
     // MacOSTheme.xaml(302,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_235)?;
     // MacOSTheme.xaml(340,8) Content (resource)
@@ -2038,7 +2038,7 @@ fn populate_macostheme_xaml_unit_86(
     // MacOSTheme.xaml(41,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_238)?;
     // MacOSTheme.xaml(42,51) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_239)?;
+    rt::add_packed_color_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_239)?;
     // MacOSTheme.xaml(52,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_240)?;
     ::core::result::Result::Ok(())
@@ -2075,7 +2075,7 @@ fn populate_macostheme_xaml_unit_88(
     // MacOSTheme.xaml(97,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_243)?;
     // MacOSTheme.xaml(134,66) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_244)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_244)?;
     // MacOSTheme.xaml(142,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_245)?;
     // MacOSTheme.xaml(150,8) Content (resource)
@@ -2091,7 +2091,7 @@ fn populate_macostheme_xaml_unit_89(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(66,50) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_247)?;
+    rt::add_packed_color_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_247)?;
     // MacOSTheme.xaml(69,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_248)?;
     // MacOSTheme.xaml(103,8) Content (resource)
@@ -2143,9 +2143,9 @@ fn populate_macostheme_xaml_unit_91(
     // MacOSTheme.xaml(71,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_259)?;
     // MacOSTheme.xaml(73,53) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_260)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_260)?;
     // MacOSTheme.xaml(78,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_261)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_261)?;
     // MacOSTheme.xaml(82,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_262)?;
     // MacOSTheme.xaml(83,8) Content (resource)
@@ -2224,11 +2224,11 @@ fn populate_macostheme_xaml_unit_95(
     // MacOSTheme.xaml(76,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 76, 65)?, rt::string_object("AppBarButtonHasFlyoutChevronVisibility"), rt::to_object(::core::clone::Clone::clone(&true))), 76, 65)?;
     // MacOSTheme.xaml(77,49) Content (resource)
-    rt::add_string_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_274)?;
+    rt::add_packed_string_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_274)?;
     // MacOSTheme.xaml(79,51) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_275)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_275)?;
     // MacOSTheme.xaml(82,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_276)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_276)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2308,7 +2308,7 @@ fn populate_macostheme_xaml_unit_100(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(37,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_290)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_290)?;
     // MacOSTheme.xaml(41,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_291)?;
     // MacOSTheme.xaml(44,56) Content (resource)
@@ -2316,7 +2316,7 @@ fn populate_macostheme_xaml_unit_100(
     // MacOSTheme.xaml(45,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_292)?;
     // MacOSTheme.xaml(51,69) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_293)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_293)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2328,7 +2328,7 @@ fn populate_macostheme_xaml_unit_101(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(88,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_294)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_294)?;
     // MacOSTheme.xaml(98,74) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 98, 74)?, rt::string_object("ListViewItemCompactSelectedBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 98, 74)?;
     // MacOSTheme.xaml(99,8) Content (resource)
@@ -2336,7 +2336,7 @@ fn populate_macostheme_xaml_unit_101(
     // MacOSTheme.xaml(123,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_296)?;
     // MacOSTheme.xaml(138,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_297)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_297)?;
     // MacOSTheme.xaml(141,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_298)?;
     ::core::result::Result::Ok(())
@@ -2399,7 +2399,7 @@ fn populate_macostheme_xaml_unit_105(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(21,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_305)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_305)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2443,9 +2443,9 @@ fn populate_macostheme_xaml_unit_108(
     // MacOSTheme.xaml(93,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_309)?;
     // MacOSTheme.xaml(150,63) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_310)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_310)?;
     // MacOSTheme.xaml(154,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_311)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_311)?;
     // MacOSTheme.xaml(166,66) Content (resource)
     let value_282 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 166, 66)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 166, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_282))), 166, 66)?;
@@ -2484,11 +2484,11 @@ fn populate_macostheme_xaml_unit_110(
     // MacOSTheme.xaml(38,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 38, 51)?, rt::string_object("ContentDialogBorderWidth"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 38, 51)?;
     // MacOSTheme.xaml(39,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_315)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_315)?;
     // MacOSTheme.xaml(43,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 43, 54)?, rt::string_object("ContentDialogButtonSpacing"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(8.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 43, 54)?;
     // MacOSTheme.xaml(44,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_316)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_316)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2500,7 +2500,7 @@ fn populate_macostheme_xaml_unit_111(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_2 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(51,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_317)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_317)?;
     // MacOSTheme.xaml(55,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 55, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 55, 54)?;
     // MacOSTheme.xaml(56,59) Content (resource)
@@ -2599,7 +2599,7 @@ fn populate_macostheme_xaml_unit_117(
     // MacOSTheme.xaml(66,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_329)?;
     // MacOSTheme.xaml(68,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_330)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_330)?;
     // MacOSTheme.xaml(70,55) Content (resource)
     let value_286 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 70, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 70, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_286))), 70, 55)?;
@@ -2628,7 +2628,7 @@ fn populate_macostheme_xaml_unit_118(
     // MacOSTheme.xaml(78,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_337)?;
     // MacOSTheme.xaml(80,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_338)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_338)?;
     // MacOSTheme.xaml(84,59) Content (resource)
     let value_287 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 84, 59)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 84, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_287))), 84, 59)?;
@@ -2729,7 +2729,7 @@ fn populate_macostheme_xaml_unit_125(
     // MacOSTheme.xaml(56,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_348)?;
     // MacOSTheme.xaml(88,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_349)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_349)?;
     // MacOSTheme.xaml(92,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_350)?;
     ::core::result::Result::Ok(())
@@ -2773,7 +2773,7 @@ fn populate_macostheme_xaml_unit_128(
     // MacOSTheme.xaml(93,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_354)?;
     // MacOSTheme.xaml(158,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_355)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_355)?;
     // MacOSTheme.xaml(160,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_2, "TabViewSelectedItemBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3451, 160, 8)?;
     ::core::result::Result::Ok(())
@@ -2821,11 +2821,11 @@ fn populate_macostheme_xaml_unit_131(
     // MacOSTheme.xaml(26,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_360)?;
     // MacOSTheme.xaml(28,60) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_361)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_361)?;
     // MacOSTheme.xaml(30,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_362)?;
     // MacOSTheme.xaml(31,60) Content (resource)
-    rt::add_string_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_363)?;
+    rt::add_packed_string_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_363)?;
     // MacOSTheme.xaml(34,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 34, 59)?, rt::string_object("SplitViewPaneRootCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 34, 59)?;
     ::core::result::Result::Ok(())
@@ -2919,7 +2919,7 @@ fn populate_macostheme_xaml_unit_137(
     // MacOSTheme.xaml(44,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_372)?;
     // MacOSTheme.xaml(62,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_373)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_373)?;
     ::core::result::Result::Ok(())
 }
 
@@ -2977,7 +2977,7 @@ fn populate_macostheme_xaml_unit_140(
     // MacOSTheme.xaml(37,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_382)?;
     // MacOSTheme.xaml(39,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_383)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_383)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3039,9 +3039,9 @@ fn populate_macostheme_xaml_unit_144(
     // MacOSTheme.xaml(29,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_389)?;
     // MacOSTheme.xaml(31,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_390)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_390)?;
     // MacOSTheme.xaml(37,43) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_391)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_391)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3091,7 +3091,7 @@ fn populate_macostheme_xaml_unit_148(
     // MacOSTheme.xaml(28,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_395)?;
     // MacOSTheme.xaml(34,64) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_396)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_396)?;
     // MacOSTheme.xaml(38,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 38, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 38, 55)?;
     ::core::result::Result::Ok(())
@@ -3119,7 +3119,7 @@ fn populate_macostheme_xaml_unit_150(
     // MacOSTheme.xaml(60,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_398)?;
     // MacOSTheme.xaml(78,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_399)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_399)?;
     // MacOSTheme.xaml(80,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 80, 62)?, rt::string_object("GridViewItemSelectedBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 80, 62)?;
     // MacOSTheme.xaml(81,8) Content (resource)
@@ -3143,7 +3143,7 @@ fn populate_macostheme_xaml_unit_151(
     // MacOSTheme.xaml(89,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 89, 56)?, rt::string_object("PivotHeaderItemCharacterSpacing"), rt::to_object(-25_i32)), 89, 56)?;
     // MacOSTheme.xaml(90,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_MACOSTHEME_XAML_ROWS_402)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_MACOSTHEME_XAML_ROWS_402)?;
     // MacOSTheme.xaml(96,58) Content (resource)
     let value_292 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 96, 58)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 96, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_292))), 96, 58)?;
@@ -3176,7 +3176,7 @@ fn populate_macostheme_xaml_unit_153(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(38,45) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_406)?;
+    rt::add_packed_color_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_406)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3192,15 +3192,15 @@ fn populate_macostheme_xaml_unit_154(
     // MacOSTheme.xaml(609,49) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_3, "SymbolThemeFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3830, 609, 49)?;
     // MacOSTheme.xaml(610,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_407)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_407)?;
     // MacOSTheme.xaml(640,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_408)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_408)?;
     // MacOSTheme.xaml(661,66) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 661, 66)?, rt::string_object("AppBarExpandButtonThemeWidthGridLength"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(48.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 661, 66)?;
     // MacOSTheme.xaml(662,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 662, 60)?, rt::string_object("HyperlinkFocusRectCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 662, 60)?;
     // MacOSTheme.xaml(663,41) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_409)?;
+    rt::add_packed_color_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_409)?;
     // MacOSTheme.xaml(689,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_410)?;
     // MacOSTheme.xaml(717,8) Content (resource)
@@ -3283,7 +3283,7 @@ fn populate_macostheme_xaml_unit_155(
     // MacOSTheme.xaml(44,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_3, "SystemControlHighlightListAccentMediumLowBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_4044, 44, 8)?;
     // MacOSTheme.xaml(45,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_435)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_435)?;
     // MacOSTheme.xaml(48,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_436)?;
     // MacOSTheme.xaml(49,8) Content (resource)
@@ -3299,7 +3299,7 @@ fn populate_macostheme_xaml_unit_156(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(426,43) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_438)?;
+    rt::add_packed_color_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_438)?;
     // MacOSTheme.xaml(509,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_439)?;
     // MacOSTheme.xaml(547,8) Content (resource)
@@ -3329,7 +3329,7 @@ fn populate_macostheme_xaml_unit_157(
     // MacOSTheme.xaml(67,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_442)?;
     // MacOSTheme.xaml(68,51) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_443)?;
+    rt::add_packed_color_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_443)?;
     // MacOSTheme.xaml(78,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_444)?;
     ::core::result::Result::Ok(())
@@ -3366,7 +3366,7 @@ fn populate_macostheme_xaml_unit_159(
     // MacOSTheme.xaml(179,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_447)?;
     // MacOSTheme.xaml(216,66) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_448)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_448)?;
     // MacOSTheme.xaml(224,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_449)?;
     // MacOSTheme.xaml(232,8) Content (resource)
@@ -3382,7 +3382,7 @@ fn populate_macostheme_xaml_unit_160(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(117,50) Content (resource)
-    rt::add_color_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_451)?;
+    rt::add_packed_color_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_451)?;
     // MacOSTheme.xaml(120,8) Content (resource)
     rt::add_packed_dynamic_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_452)?;
     // MacOSTheme.xaml(154,8) Content (resource)
@@ -3432,9 +3432,9 @@ fn populate_macostheme_xaml_unit_162(
     // MacOSTheme.xaml(116,57) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_462)?;
     // MacOSTheme.xaml(118,53) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_463)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_463)?;
     // MacOSTheme.xaml(123,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_464)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_464)?;
     // MacOSTheme.xaml(127,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_465)?;
     // MacOSTheme.xaml(128,8) Content (resource)
@@ -3513,11 +3513,11 @@ fn populate_macostheme_xaml_unit_166(
     // MacOSTheme.xaml(112,65) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 112, 65)?, rt::string_object("AppBarButtonHasFlyoutChevronVisibility"), rt::to_object(::core::clone::Clone::clone(&true))), 112, 65)?;
     // MacOSTheme.xaml(113,49) Content (resource)
-    rt::add_string_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_477)?;
+    rt::add_packed_string_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_477)?;
     // MacOSTheme.xaml(115,51) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_478)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_478)?;
     // MacOSTheme.xaml(118,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_479)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_479)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3597,7 +3597,7 @@ fn populate_macostheme_xaml_unit_171(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(59,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_493)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_493)?;
     // MacOSTheme.xaml(63,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_494)?;
     // MacOSTheme.xaml(66,56) Content (resource)
@@ -3605,7 +3605,7 @@ fn populate_macostheme_xaml_unit_171(
     // MacOSTheme.xaml(67,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_495)?;
     // MacOSTheme.xaml(73,69) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_496)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_496)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3617,7 +3617,7 @@ fn populate_macostheme_xaml_unit_172(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(161,52) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_497)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_497)?;
     // MacOSTheme.xaml(171,74) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 171, 74)?, rt::string_object("ListViewItemCompactSelectedBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64))), 171, 74)?;
     // MacOSTheme.xaml(172,8) Content (resource)
@@ -3625,7 +3625,7 @@ fn populate_macostheme_xaml_unit_172(
     // MacOSTheme.xaml(196,8) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_499)?;
     // MacOSTheme.xaml(211,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_500)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_500)?;
     // MacOSTheme.xaml(214,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_501)?;
     ::core::result::Result::Ok(())
@@ -3688,7 +3688,7 @@ fn populate_macostheme_xaml_unit_176(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(25,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_508)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_508)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3732,9 +3732,9 @@ fn populate_macostheme_xaml_unit_179(
     // MacOSTheme.xaml(171,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_512)?;
     // MacOSTheme.xaml(228,63) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_513)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_513)?;
     // MacOSTheme.xaml(232,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_514)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_514)?;
     // MacOSTheme.xaml(244,66) Content (resource)
     let value_429 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 244, 66)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 244, 66)?, rt::string_object("CalendarViewHeaderNavigationFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_429))), 244, 66)?;
@@ -3773,11 +3773,11 @@ fn populate_macostheme_xaml_unit_181(
     // MacOSTheme.xaml(55,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 55, 51)?, rt::string_object("ContentDialogBorderWidth"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 55, 51)?;
     // MacOSTheme.xaml(56,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_518)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_518)?;
     // MacOSTheme.xaml(60,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 60, 54)?, rt::string_object("ContentDialogButtonSpacing"), rt::to_object(::ferroui_controls::GridLength::__markup_new_2(8.0_f64, ::ferroui_controls::GridUnitType::Pixel))), 60, 54)?;
     // MacOSTheme.xaml(61,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_519)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_519)?;
     ::core::result::Result::Ok(())
 }
 
@@ -3789,7 +3789,7 @@ fn populate_macostheme_xaml_unit_182(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_3 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(87,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_520)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_520)?;
     // MacOSTheme.xaml(91,54) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 91, 54)?, rt::string_object("DatePickerHeaderThemeMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 91, 54)?;
     // MacOSTheme.xaml(92,59) Content (resource)
@@ -3886,7 +3886,7 @@ fn populate_macostheme_xaml_unit_188(
     // MacOSTheme.xaml(118,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_531)?;
     // MacOSTheme.xaml(120,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_532)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_532)?;
     // MacOSTheme.xaml(122,55) Content (resource)
     let value_433 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 122, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 122, 55)?, rt::string_object("SliderHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_433))), 122, 55)?;
@@ -3915,7 +3915,7 @@ fn populate_macostheme_xaml_unit_189(
     // MacOSTheme.xaml(114,57) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_539)?;
     // MacOSTheme.xaml(116,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_540)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_540)?;
     // MacOSTheme.xaml(120,59) Content (resource)
     let value_434 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 120, 59)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 120, 59)?, rt::string_object("TimePickerHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_434))), 120, 59)?;
@@ -4016,7 +4016,7 @@ fn populate_macostheme_xaml_unit_196(
     // MacOSTheme.xaml(97,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_550)?;
     // MacOSTheme.xaml(129,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_551)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_551)?;
     // MacOSTheme.xaml(133,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_552)?;
     ::core::result::Result::Ok(())
@@ -4060,7 +4060,7 @@ fn populate_macostheme_xaml_unit_199(
     // MacOSTheme.xaml(171,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_556)?;
     // MacOSTheme.xaml(236,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_557)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_557)?;
     // MacOSTheme.xaml(238,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_3, "TabViewSelectedItemBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5365, 238, 8)?;
     ::core::result::Result::Ok(())
@@ -4108,11 +4108,11 @@ fn populate_macostheme_xaml_unit_202(
     // MacOSTheme.xaml(37,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_562)?;
     // MacOSTheme.xaml(39,60) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_563)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_563)?;
     // MacOSTheme.xaml(41,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_564)?;
     // MacOSTheme.xaml(42,60) Content (resource)
-    rt::add_string_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_565)?;
+    rt::add_packed_string_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_565)?;
     // MacOSTheme.xaml(45,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 45, 59)?, rt::string_object("SplitViewPaneRootCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 45, 59)?;
     ::core::result::Result::Ok(())
@@ -4206,7 +4206,7 @@ fn populate_macostheme_xaml_unit_208(
     // MacOSTheme.xaml(73,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_574)?;
     // MacOSTheme.xaml(91,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_575)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_575)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4264,7 +4264,7 @@ fn populate_macostheme_xaml_unit_211(
     // MacOSTheme.xaml(52,54) Content (resource)
     rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_584)?;
     // MacOSTheme.xaml(54,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_585)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_585)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4320,9 +4320,9 @@ fn populate_macostheme_xaml_unit_215(
     // MacOSTheme.xaml(43,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_588)?;
     // MacOSTheme.xaml(45,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_589)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_589)?;
     // MacOSTheme.xaml(51,43) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_590)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_590)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4376,7 +4376,7 @@ fn populate_macostheme_xaml_unit_219(
     // MacOSTheme.xaml(45,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_596)?;
     // MacOSTheme.xaml(47,64) Content (resource)
-    rt::add_double_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_597)?;
+    rt::add_packed_double_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_597)?;
     // MacOSTheme.xaml(51,55) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 51, 55)?, rt::string_object("PersonPictureBadgeGridMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, -4.0_f64, -4.0_f64, 0.0_f64))), 51, 55)?;
     ::core::result::Result::Ok(())
@@ -4410,7 +4410,7 @@ fn populate_macostheme_xaml_unit_221(
     // MacOSTheme.xaml(118,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_3, &context, &POPULATE_MACOSTHEME_XAML_DOCUMENT, &POPULATE_MACOSTHEME_XAML_ROWS_602)?;
     // MacOSTheme.xaml(121,54) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_603)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_603)?;
     // MacOSTheme.xaml(123,62) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 123, 62)?, rt::string_object("GridViewItemSelectedBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64))), 123, 62)?;
     // MacOSTheme.xaml(124,8) Content (resource)
@@ -4436,7 +4436,7 @@ fn populate_macostheme_xaml_unit_222(
     // MacOSTheme.xaml(193,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 193, 56)?, rt::string_object("PivotHeaderItemCharacterSpacing"), rt::to_object(-25_i32)), 193, 56)?;
     // MacOSTheme.xaml(194,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_3, POPULATE_MACOSTHEME_XAML_ROWS_607)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_3, &POPULATE_MACOSTHEME_XAML_ROWS_607)?;
     // MacOSTheme.xaml(200,58) Content (resource)
     let value_439 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 200, 58)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_3.clone(), 200, 58)?, rt::string_object("PivotHeaderItemThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_439))), 200, 58)?;
@@ -4467,9 +4467,9 @@ fn populate_macostheme_xaml_unit_224(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(905,49) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_610)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_610)?;
     // MacOSTheme.xaml(913,58) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_611)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_611)?;
     // MacOSTheme.xaml(919,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 919, 50)?, rt::string_object("RichEditBoxLeftHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64))), 919, 50)?;
     // MacOSTheme.xaml(920,51) Content (resource)
@@ -4496,7 +4496,7 @@ fn populate_macostheme_xaml_unit_225(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(630,51) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_612)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_612)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4520,7 +4520,7 @@ fn populate_macostheme_xaml_unit_227(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(204,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_613)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_613)?;
     // MacOSTheme.xaml(206,41) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 206, 41)?, rt::string_object("TextBoxIconFontSize"), rt::to_object(12.0_f64)), 206, 41)?;
     ::core::result::Result::Ok(())
@@ -4539,7 +4539,7 @@ fn populate_macostheme_xaml_unit_228(
     // MacOSTheme.xaml(263,46) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 263, 46)?, rt::string_object("MenuFlyoutThemeMinHeight"), rt::to_object(32.0_f64)), 263, 46)?;
     // MacOSTheme.xaml(264,50) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_614)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_614)?;
     // MacOSTheme.xaml(269,56) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_615)?;
     ::core::result::Result::Ok(())
@@ -4583,7 +4583,7 @@ fn populate_macostheme_xaml_unit_230(
     // MacOSTheme.xaml(161,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 161, 42)?, rt::string_object("ExpanderChevronGlyph"), rt::string_object("\u{e70d}")), 161, 42)?;
     // MacOSTheme.xaml(162,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_619)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_619)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4605,7 +4605,7 @@ fn populate_macostheme_xaml_unit_232(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(123,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_621)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_621)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4618,7 +4618,7 @@ fn populate_macostheme_xaml_unit_233(
     // MacOSTheme.xaml(24,44) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_622)?;
     // MacOSTheme.xaml(26,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_623)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_623)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4629,7 +4629,7 @@ fn populate_macostheme_xaml_unit_234(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(210,61) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_624)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_624)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4642,7 +4642,7 @@ fn populate_macostheme_xaml_unit_235(
     // MacOSTheme.xaml(195,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 195, 50)?, rt::string_object("ToggleSwitchTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 195, 50)?;
     // MacOSTheme.xaml(196,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_625)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_625)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4670,7 +4670,7 @@ fn populate_macostheme_xaml_unit_237(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(12,46) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_627)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_627)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4726,11 +4726,11 @@ fn populate_macostheme_xaml_unit_240(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(279,45) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_629)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_629)?;
     // MacOSTheme.xaml(284,38) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_630)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_630)?;
     // MacOSTheme.xaml(286,42) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_631)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_631)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4743,9 +4743,9 @@ fn populate_macostheme_xaml_unit_241(
     // MacOSTheme.xaml(123,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 123, 48)?, rt::string_object("DatePickerTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 123, 48)?;
     // MacOSTheme.xaml(124,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_632)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_632)?;
     // MacOSTheme.xaml(129,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_633)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_633)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4756,7 +4756,7 @@ fn populate_macostheme_xaml_unit_242(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(84,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_634)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_634)?;
     // MacOSTheme.xaml(86,55) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_635)?;
     ::core::result::Result::Ok(())
@@ -4780,19 +4780,19 @@ fn populate_macostheme_xaml_unit_244(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(183,45) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_637)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_637)?;
     // MacOSTheme.xaml(187,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 187, 42)?, rt::string_object("ScrollBarThumbOffset"), rt::to_object(2.0_f64)), 187, 42)?;
     // MacOSTheme.xaml(188,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_638)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_638)?;
     // MacOSTheme.xaml(190,35) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_639)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_639)?;
     // MacOSTheme.xaml(198,46) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_640)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_640)?;
     // MacOSTheme.xaml(200,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 200, 47)?, rt::string_object("ScrollBarCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64))), 200, 47)?;
     // MacOSTheme.xaml(201,56) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_641)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_641)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4805,7 +4805,7 @@ fn populate_macostheme_xaml_unit_245(
     // MacOSTheme.xaml(24,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 24, 50)?, rt::string_object("ScrollViewerScrollBarMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 24, 50)?;
     // MacOSTheme.xaml(25,58) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_642)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_642)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4818,9 +4818,9 @@ fn populate_macostheme_xaml_unit_246(
     // MacOSTheme.xaml(169,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 169, 44)?, rt::string_object("SliderTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 169, 44)?;
     // MacOSTheme.xaml(170,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_643)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_643)?;
     // MacOSTheme.xaml(172,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_644)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_644)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4833,9 +4833,9 @@ fn populate_macostheme_xaml_unit_247(
     // MacOSTheme.xaml(123,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 123, 48)?, rt::string_object("TimePickerTopHeaderMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64))), 123, 48)?;
     // MacOSTheme.xaml(124,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_645)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_645)?;
     // MacOSTheme.xaml(129,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_646)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_646)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4859,15 +4859,15 @@ fn populate_macostheme_xaml_unit_249(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(213,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_647)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_647)?;
     // MacOSTheme.xaml(215,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_648)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_648)?;
     // MacOSTheme.xaml(235,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_649)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_649)?;
     // MacOSTheme.xaml(273,63) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_650)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_650)?;
     // MacOSTheme.xaml(276,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_651)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_651)?;
     // MacOSTheme.xaml(278,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 278, 61)?, rt::string_object("NavigationViewItemExpandedGlyphFontSize"), rt::to_object(8.0_f64)), 278, 61)?;
     // MacOSTheme.xaml(279,53) Content (resource)
@@ -4895,7 +4895,7 @@ fn populate_macostheme_xaml_unit_251(
     // MacOSTheme.xaml(54,35) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 54, 35)?, rt::string_object("MenuBarHeight"), rt::to_object(40.0_f64)), 54, 35)?;
     // MacOSTheme.xaml(55,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_653)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_653)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4919,19 +4919,19 @@ fn populate_macostheme_xaml_unit_253(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(249,43) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_655)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_655)?;
     // MacOSTheme.xaml(252,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_656)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_656)?;
     // MacOSTheme.xaml(257,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 257, 50)?, rt::string_object("TabViewItemHeaderIconMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 10.0_f64, 0.0_f64))), 257, 50)?;
     // MacOSTheme.xaml(258,56) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_657)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_657)?;
     // MacOSTheme.xaml(262,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_658)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_658)?;
     // MacOSTheme.xaml(265,50) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_659)?;
     // MacOSTheme.xaml(268,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_660)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_660)?;
     // MacOSTheme.xaml(271,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_661)?;
     // MacOSTheme.xaml(274,59) Content (resource)
@@ -4939,7 +4939,7 @@ fn populate_macostheme_xaml_unit_253(
     // MacOSTheme.xaml(275,40) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 275, 40)?, rt::string_object("TabViewShadowDepth"), rt::to_object(16.0_f64)), 275, 40)?;
     // MacOSTheme.xaml(276,49) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_662)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_662)?;
     ::core::result::Result::Ok(())
 }
 
@@ -4950,7 +4950,7 @@ fn populate_macostheme_xaml_unit_254(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(33,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_663)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_663)?;
     // MacOSTheme.xaml(37,52) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_664)?;
     ::core::result::Result::Ok(())
@@ -4963,7 +4963,7 @@ fn populate_macostheme_xaml_unit_255(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(330,48) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_665)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_665)?;
     // MacOSTheme.xaml(338,50) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 338, 50)?, rt::string_object("ComboBoxPopupMaxNumberOfItems"), rt::to_object(15_i32)), 338, 50)?;
     // MacOSTheme.xaml(339,73) Content (resource)
@@ -4971,9 +4971,9 @@ fn populate_macostheme_xaml_unit_255(
     // MacOSTheme.xaml(340,56) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 340, 56)?, rt::string_object("ComboBoxItemScaleAnimationDuration"), rt::string_object("00:00:00.167")), 340, 56)?;
     // MacOSTheme.xaml(341,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_666)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_666)?;
     // MacOSTheme.xaml(353,60) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_667)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_667)?;
     // MacOSTheme.xaml(357,53) Content (resource)
     let value_441 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 357, 53)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 357, 53)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_441))), 357, 53)?;
@@ -4992,7 +4992,7 @@ fn populate_macostheme_xaml_unit_256(
     // MacOSTheme.xaml(39,42) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_668)?;
     // MacOSTheme.xaml(41,49) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_669)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_669)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5003,9 +5003,9 @@ fn populate_macostheme_xaml_unit_257(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(39,57) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_670)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_670)?;
     // MacOSTheme.xaml(41,51) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_671)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_671)?;
     // MacOSTheme.xaml(45,52) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 45, 52)?, rt::string_object("NumberBoxPopupIndicatorMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 8.0_f64, 0.0_f64))), 45, 52)?;
     ::core::result::Result::Ok(())
@@ -5026,11 +5026,11 @@ fn populate_macostheme_xaml_unit_258(
     // MacOSTheme.xaml(90,44) Content (resource)
     rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_672)?;
     // MacOSTheme.xaml(92,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_673)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_673)?;
     // MacOSTheme.xaml(94,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_674)?;
     // MacOSTheme.xaml(96,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_675)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_675)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5055,13 +5055,13 @@ fn populate_macostheme_xaml_unit_259(
     // MacOSTheme.xaml(79,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 79, 51)?, rt::string_object("InfoBarHyperlinkButtonMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(-12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 79, 51)?;
     // MacOSTheme.xaml(80,48) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_677)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_677)?;
     // MacOSTheme.xaml(85,48) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_678)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_678)?;
     // MacOSTheme.xaml(87,41) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 87, 41)?, rt::string_object("InfoBarIconFontSize"), rt::to_object(16.0_f64)), 87, 41)?;
     // MacOSTheme.xaml(88,41) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_679)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_679)?;
     // MacOSTheme.xaml(97,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 97, 44)?, rt::string_object("InfoBarCloseButtonSymbol"), rt::to_object(::ferroui_controls::Symbol::Cancel)), 97, 44)?;
     ::core::result::Result::Ok(())
@@ -5074,15 +5074,15 @@ fn populate_macostheme_xaml_unit_260(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(102,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_680)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_680)?;
     // MacOSTheme.xaml(108,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_681)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_681)?;
     // MacOSTheme.xaml(110,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_682)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_682)?;
     // MacOSTheme.xaml(114,53) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_683)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_683)?;
     // MacOSTheme.xaml(117,52) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_684)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_684)?;
     // MacOSTheme.xaml(119,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 119, 59)?, rt::string_object("PipsPagerNavigationButtonScalePressed"), rt::to_object(0.875_f64)), 119, 59)?;
     ::core::result::Result::Ok(())
@@ -5095,7 +5095,7 @@ fn populate_macostheme_xaml_unit_261(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(102,47) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_685)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_685)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5106,13 +5106,13 @@ fn populate_macostheme_xaml_unit_262(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(81,43) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_686)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_686)?;
     // MacOSTheme.xaml(91,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 91, 51)?, rt::string_object("TitleBarCompactContentMargin"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64))), 91, 51)?;
     // MacOSTheme.xaml(92,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_687)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_687)?;
     // MacOSTheme.xaml(96,41) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_688)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_688)?;
     // MacOSTheme.xaml(99,70) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 99, 70)?, rt::string_object("TitleBarLeftHeaderHorizontalAlignment"), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)), 99, 70)?;
     // MacOSTheme.xaml(100,66) Content (resource)
@@ -5135,7 +5135,7 @@ fn populate_macostheme_xaml_unit_263(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(25,54) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_689)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_689)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5146,7 +5146,7 @@ fn populate_macostheme_xaml_unit_264(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(33,46) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_690)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_690)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5288,7 +5288,7 @@ fn populate_macostheme_xaml_unit_266(
     let value_452 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 2 6 0 #26000000")), 58, 42)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 58, 42)?, rt::string_object("MacOSToolTipShadow"), rt::to_object(::core::clone::Clone::clone(&value_452))), 58, 42)?;
     // MacOSTheme.xaml(61,44) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_693)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_693)?;
     // MacOSTheme.xaml(66,45) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSSystemFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5802, 66, 45)?;
     // MacOSTheme.xaml(67,46) Content (resource)
@@ -5296,7 +5296,7 @@ fn populate_macostheme_xaml_unit_266(
     // MacOSTheme.xaml(68,48) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MacOSMonospaceFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5804, 68, 48)?;
     // MacOSTheme.xaml(69,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_694)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_694)?;
     ::core::result::Result::Ok(())
 }
 
@@ -5331,147 +5331,169 @@ fn populate_macostheme_xaml_unit_269(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // MacOSTheme.xaml(16,45) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_MACOSTHEME_XAML_ROWS_697)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_MACOSTHEME_XAML_ROWS_697)?;
     ::core::result::Result::Ok(())
 }
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_0: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemColorWindowColor", value: 4280558630_u32, line: 18, position: 45 },
-    rt::ValueRow { key: "SystemColorWindowTextColor", value: 4294967295_u32, line: 19, position: 49 },
-    rt::ValueRow { key: "SystemColorButtonFaceColor", value: 4281084974_u32, line: 20, position: 49 },
-    rt::ValueRow { key: "SystemColorButtonTextColor", value: 4294967295_u32, line: 21, position: 49 },
-    rt::ValueRow { key: "SystemColorHighlightColor", value: 4278879487_u32, line: 22, position: 48 },
-    rt::ValueRow { key: "SystemColorHighlightTextColor", value: 4294967295_u32, line: 23, position: 52 },
-    rt::ValueRow { key: "SystemColorHotlightColor", value: 4278879487_u32, line: 24, position: 47 },
-    rt::ValueRow { key: "SystemColorGrayTextColor", value: 4288190621_u32, line: 25, position: 47 },
-];
+/// The keys and targets of the packed tables of the unit 1 of `MacOSTheme.xaml`, each once (#855).
+const POPULATE_MACOSTHEME_XAML_UNIT_1_STRINGS: &str = "SystemColorWindowColorSystemColorWindowTextColorSystemColorButtonFaceColorSystemColorButtonTextColorSystemColorHighlightColorSystemColorHighlightTextColorSystemColorHotlightColorSystemColorGrayTextColor";
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_1: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "AppBarExpandButtonThemeHeight", value: 24.0_f64, line: 17, position: 55 },
-    rt::ValueRow { key: "AppBarExpandButtonThemeWidth", value: 48.0_f64, line: 18, position: 54 },
-    rt::ValueRow { key: "AppBarThemeMinimalHeight", value: 24.0_f64, line: 19, position: 50 },
-    rt::ValueRow { key: "AppBarExpandButtonCircleDiameter", value: 3.0_f64, line: 20, position: 58 },
-    rt::ValueRow { key: "AutoSuggestListMaxHeight", value: 374.0_f64, line: 21, position: 50 },
-    rt::ValueRow { key: "AutoSuggestListBorderOpacity", value: 0.0_f64, line: 22, position: 54 },
-    rt::ValueRow { key: "ControlContentThemeFontSize", value: 13.0_f64, line: 23, position: 53 },
-    rt::ValueRow { key: "ContentControlFontSize", value: 13.0_f64, line: 24, position: 48 },
-    rt::ValueRow { key: "FlyoutThemeMaxHeight", value: 758.0_f64, line: 25, position: 46 },
-    rt::ValueRow { key: "FlyoutThemeMaxWidth", value: 456.0_f64, line: 26, position: 45 },
-    rt::ValueRow { key: "FlyoutThemeMinHeight", value: 40.0_f64, line: 27, position: 46 },
-    rt::ValueRow { key: "FlyoutThemeMinWidth", value: 96.0_f64, line: 28, position: 45 },
-    rt::ValueRow { key: "FlyoutThemeTouchMinWidth", value: 240.0_f64, line: 29, position: 50 },
-    rt::ValueRow { key: "GridViewItemSelectedBorderThemeThickness", value: 4.0_f64, line: 30, position: 66 },
-    rt::ValueRow { key: "GridViewItemReorderHintThemeOffset", value: 16.0_f64, line: 31, position: 60 },
-    rt::ValueRow { key: "TextControlBackgroundThemeOpacity", value: 0.8_f64, line: 32, position: 59 },
-    rt::ValueRow { key: "TextControlBorderThemeOpacity", value: 0.8_f64, line: 33, position: 55 },
-    rt::ValueRow { key: "TextControlBorderThemeBrushOpacity", value: 1.0_f64, line: 34, position: 60 },
-    rt::ValueRow { key: "TextControlPointerOverBackgroundThemeOpacity", value: 0.87_f64, line: 35, position: 70 },
-    rt::ValueRow { key: "TextControlPointerOverBorderThemeOpacity", value: 0.87_f64, line: 36, position: 66 },
-    rt::ValueRow { key: "TextControlPointerOverBorderThemeBrushOpacity", value: 1.0_f64, line: 37, position: 71 },
-    rt::ValueRow { key: "TextControlBackgroundRestOpacity", value: 0.4_f64, line: 38, position: 58 },
-    rt::ValueRow { key: "TextControlBackgroundHoverOpacity", value: 0.6_f64, line: 39, position: 59 },
-    rt::ValueRow { key: "TextControlBackgroundFocusedOpacity", value: 1.0_f64, line: 40, position: 61 },
-    rt::ValueRow { key: "TextControlThemeMinHeight", value: 26.0_f64, line: 41, position: 51 },
-    rt::ValueRow { key: "TextControlThemeMinWidth", value: 64.0_f64, line: 42, position: 50 },
-    rt::ValueRow { key: "TextStyleLargeFontSize", value: 18.14_f64, line: 43, position: 48 },
-    rt::ValueRow { key: "TextStyleExtraLargeFontSize", value: 25.5_f64, line: 44, position: 53 },
-    rt::ValueRow { key: "GridViewItemMinWidth", value: 44.0_f64, line: 45, position: 46 },
-    rt::ValueRow { key: "GridViewItemMinHeight", value: 44.0_f64, line: 46, position: 47 },
-];
-
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_2: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarBottomBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 47, position: 59 },
-    rt::ValueRow { key: "AppBarBottomThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 48, position: 51 },
-    rt::ValueRow { key: "AppBarTopBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 49, position: 56 },
-    rt::ValueRow { key: "AppBarTopThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 50, position: 48 },
-    rt::ValueRow { key: "AppBarExpandButtonCircleInnerPadding", value: [3.0_f64, 0.0_f64, 3.0_f64, 0.0_f64], line: 51, position: 63 },
-    rt::ValueRow { key: "AutoSuggestListBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 52, position: 62 },
-    rt::ValueRow { key: "AutoSuggestListMargin", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 53, position: 48 },
-    rt::ValueRow { key: "AutoSuggestListPadding", value: [-1.0_f64, 0.0_f64, -1.0_f64, 0.0_f64], line: 54, position: 49 },
-    rt::ValueRow { key: "AutoSuggestListViewItemMargin", value: [12.0_f64, 11.0_f64, 0.0_f64, 13.0_f64], line: 55, position: 56 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 56, position: 56 },
-    rt::ValueRow { key: "DateTimeFlyoutButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 57, position: 62 },
-    rt::ValueRow { key: "DateTimeFlyoutContentPanelPortraitThemeMargin", value: [0.0_f64, 37.0_f64, 0.0_f64, 0.0_f64], line: 58, position: 72 },
-    rt::ValueRow { key: "DateTimeFlyoutContentPanelLandscapeThemeMargin", value: [0.0_f64, 19.0_f64, 0.0_f64, 0.0_f64], line: 59, position: 73 },
-    rt::ValueRow { key: "DateTimeFlyoutTitleThemeMargin", value: [19.0_f64, 0.0_f64, 19.0_f64, 17.5_f64], line: 60, position: 57 },
-    rt::ValueRow { key: "FlyoutContentThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 61, position: 51 },
-    rt::ValueRow { key: "FlyoutContentThemePadding", value: [12.0_f64, 11.0_f64, 12.0_f64, 12.0_f64], line: 62, position: 52 },
-    rt::ValueRow { key: "GridViewItemCompactSelectedBorderThemeThickness", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 63, position: 74 },
-    rt::ValueRow { key: "GridViewItemMultiselectBorderThickness", value: [2.5_f64, 2.5_f64, 2.5_f64, 2.5_f64], line: 64, position: 65 },
-    rt::ValueRow { key: "TextControlMarginThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 65, position: 58 },
-    rt::ValueRow { key: "HelperButtonThemePadding", value: [0.0_f64, 0.0_f64, -2.0_f64, 0.0_f64], line: 66, position: 51 },
-    rt::ValueRow { key: "TextControlPlaceholderThemePadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 67, position: 61 },
-];
-
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_3: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemAltHighColor", value: 4278190080_u32, line: 70, position: 41 },
-    rt::ValueRow { key: "SystemAltLowColor", value: 855638016_u32, line: 71, position: 40 },
-    rt::ValueRow { key: "SystemAltMediumColor", value: 2566914048_u32, line: 72, position: 43 },
-    rt::ValueRow { key: "SystemAltMediumHighColor", value: 3422552064_u32, line: 73, position: 47 },
-    rt::ValueRow { key: "SystemAltMediumLowColor", value: 1711276032_u32, line: 74, position: 46 },
-    rt::ValueRow { key: "SystemBaseHighColor", value: 4294967295_u32, line: 75, position: 42 },
-    rt::ValueRow { key: "SystemBaseLowColor", value: 872415231_u32, line: 76, position: 41 },
-    rt::ValueRow { key: "SystemBaseMediumColor", value: 2583691263_u32, line: 77, position: 44 },
-    rt::ValueRow { key: "SystemBaseMediumHighColor", value: 3439329279_u32, line: 78, position: 48 },
-    rt::ValueRow { key: "SystemBaseMediumLowColor", value: 1728053247_u32, line: 79, position: 47 },
-    rt::ValueRow { key: "SystemChromeAltLowColor", value: 4294111986_u32, line: 80, position: 46 },
-    rt::ValueRow { key: "SystemChromeBlackHighColor", value: 4278190080_u32, line: 81, position: 49 },
-    rt::ValueRow { key: "SystemChromeBlackLowColor", value: 855638016_u32, line: 82, position: 48 },
-    rt::ValueRow { key: "SystemChromeBlackMediumLowColor", value: 1711276032_u32, line: 83, position: 54 },
-    rt::ValueRow { key: "SystemChromeBlackMediumColor", value: 3422552064_u32, line: 84, position: 51 },
-    rt::ValueRow { key: "SystemChromeDisabledHighColor", value: 4281545523_u32, line: 85, position: 52 },
-    rt::ValueRow { key: "SystemChromeDisabledLowColor", value: 4286940549_u32, line: 86, position: 51 },
-    rt::ValueRow { key: "SystemChromeHighColor", value: 4285953654_u32, line: 87, position: 44 },
-    rt::ValueRow { key: "SystemChromeLowColor", value: 4279703319_u32, line: 88, position: 43 },
-    rt::ValueRow { key: "SystemChromeMediumColor", value: 4280229663_u32, line: 89, position: 46 },
-    rt::ValueRow { key: "SystemChromeMediumLowColor", value: 4281019179_u32, line: 90, position: 49 },
-    rt::ValueRow { key: "SystemChromeWhiteColor", value: 4294967295_u32, line: 91, position: 45 },
-    rt::ValueRow { key: "SystemChromeGrayColor", value: 4285953654_u32, line: 92, position: 44 },
-    rt::ValueRow { key: "SystemListLowColor", value: 436207615_u32, line: 93, position: 41 },
-    rt::ValueRow { key: "SystemListMediumColor", value: 872415231_u32, line: 94, position: 44 },
-    rt::ValueRow { key: "SystemErrorTextColor", value: 4294963200_u32, line: 95, position: 43 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 22, 18, 45, 9254, 65316,
+        22, 26, 19, 49, 65535, 65535,
+        48, 26, 20, 49, 11310, 65324,
+        74, 26, 21, 49, 65535, 65535,
+        100, 25, 22, 48, 34047, 65290,
+        125, 29, 23, 52, 65535, 65535,
+        154, 24, 24, 47, 34047, 65290,
+        178, 24, 25, 47, 39069, 65432,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 2 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS: &str = "SystemControlBackgroundAccentBrushSystemAccentColorSystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColorSystemControlDisabledAccentBrushSystemControlDisabledBaseHighBrushSystemControlDisabledBaseLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemControlDisabledListMediumBrushSystemControlDisabledTransparentBrushSystemControlRevealFocusVisualBrushSystemControlForegroundAccentBrushSystemControlForegroundAltHighBrushSystemControlForegroundAltMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseLowBrushSystemControlForegroundBaseMediumBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundChromeBlackHighBrushSystemControlForegroundChromeHighBrushSystemControlForegroundChromeMediumBrushSystemControlForegroundChromeWhiteBrushSystemControlForegroundChromeDisabledLowBrushSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemControlForegroundListMediumBrushSystemControlForegroundTransparentBrushSystemControlForegroundChromeBlackMediumBrushSystemControlForegroundChromeBlackMediumLowBrushSystemControlHighlightAccentBrushSystemControlHighlightAltAccentBrushSystemControlHighlightAltAltHighBrushSystemControlHighlightAltBaseHighBrushSystemControlHighlightAltBaseLowBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightAltBaseMediumHighBrushSystemControlHighlightAltAltMediumHighBrushSystemControlHighlightAltBaseMediumLowBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightBaseHighBrushSystemControlHighlightBaseLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightChromeWhiteBrushSystemControlHighlightTransparentBrushSystemControlHyperlinkTextBrushSystemControlHyperlinkBaseHighBrushSystemControlHyperlinkBaseMediumBrushSystemControlHyperlinkBaseMediumHighBrushSystemControlPageBackgroundAltMediumBrushSystemControlPageBackgroundAltHighBrushSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlPageTextBaseHighBrushSystemControlPageTextBaseMediumBrushSystemControlPageTextChromeBlackMediumLowBrushSystemControlErrorTextForegroundBrushSystemErrorTextColorSystemControlDescriptionTextForegroundBrushSliderContainerBackgroundSystemControlTransparentBrushThumbBackgroundThumbBackgroundPointerOverThumbBackgroundPressedThumbBorderBrushThumbBorderBrushPointerOverThumbBorderBrushPressedAppBarEllipsisButtonBackgroundAppBarEllipsisButtonBackgroundPointerOverAppBarEllipsisButtonBackgroundPressedAppBarEllipsisButtonBackgroundDisabledAppBarEllipsisButtonForegroundAppBarEllipsisButtonForegroundPointerOverAppBarEllipsisButtonForegroundPressedAppBarEllipsisButtonForegroundDisabledAppBarEllipsisButtonBorderBrushAppBarEllipsisButtonBorderBrushPointerOverAppBarEllipsisButtonBorderBrushPressedAppBarEllipsisButtonBorderBrushDisabledAppBarBackgroundAppBarForegroundAppBarHighContrastBorderLoopingSelectorButtonBackgroundTextControlHeaderForegroundTextControlHeaderForegroundDisabledTextControlButtonBackgroundTextControlHighlighterForegroundTextControlHighlighterBackgroundToggleMenuFlyoutItemBackgroundToggleMenuFlyoutItemBackgroundPointerOverToggleMenuFlyoutItemBackgroundPressedToggleMenuFlyoutItemBackgroundDisabledToggleMenuFlyoutItemForegroundToggleMenuFlyoutItemForegroundPointerOverToggleMenuFlyoutItemForegroundPressedToggleMenuFlyoutItemForegroundDisabledToggleMenuFlyoutItemCheckGlyphForegroundToggleMenuFlyoutItemCheckGlyphForegroundPointerOverToggleMenuFlyoutItemCheckGlyphForegroundPressedToggleMenuFlyoutItemCheckGlyphForegroundDisabledAppBarLightDismissOverlayBackgroundFlyoutLightDismissOverlayBackgroundPopupLightDismissOverlayBackgroundJumpListDefaultEnabledBackgroundJumpListDefaultEnabledForegroundJumpListDefaultDisabledBackgroundJumpListDefaultDisabledForegroundAppBarBackgroundThemeBrushAppBarBorderThemeBrushAppBarItemBackgroundThemeBrushAppBarItemDisabledForegroundThemeBrushAppBarItemForegroundThemeBrushAppBarItemPointerOverBackgroundThemeBrushAppBarItemPointerOverForegroundThemeBrushAppBarItemPressedForegroundThemeBrushAppBarSeparatorForegroundThemeBrushApplicationForegroundThemeBrushApplicationHeaderForegroundThemeBrushApplicationPointerOverForegroundThemeBrushApplicationPressedForegroundThemeBrushApplicationSecondaryForegroundThemeBrushAutoSuggestBackgroundThemeBrushBackButtonBackgroundThemeBrushBackButtonDisabledForegroundThemeBrushBackButtonForegroundThemeBrushBackButtonPointerOverBackgroundThemeBrushBackButtonPointerOverForegroundThemeBrushBackButtonPressedForegroundThemeBrushFlyoutBackgroundThemeBrushFocusVisualBlackStrokeThemeBrushFocusVisualWhiteStrokeThemeBrushHyperlinkButtonBackgroundThemeBrushHyperlinkButtonBorderThemeBrushHyperlinkDisabledThemeBrushHyperlinkForegroundThemeBrushHyperlinkPointerOverForegroundThemeBrushHyperlinkPressedForegroundThemeBrushListViewGroupHeaderForegroundThemeBrushListViewGroupHeaderPointerOverForegroundThemeBrushListViewGroupHeaderPressedForegroundThemeBrushLoopingSelectorForegroundThemeBrushLoopingSelectorSelectionBackgroundThemeBrushSystemColorHighlightColorLoopingSelectorSelectionForegroundThemeBrushMediaButtonForegroundThemeBrushMediaButtonBackgroundThemeBrushMediaButtonPointerOverForegroundThemeBrushMediaButtonPointerOverBackgroundThemeBrushMediaButtonPressedForegroundThemeBrushMediaButtonPressedBackgroundThemeBrushMediaButtonPressedBorderThemeBrushMediaControlPanelVideoThemeBrushMediaControlPanelAudioThemeBrushMediaDownloadProgressIndicatorThemeBrushMediaErrorBackgroundThemeBrushMediaTextThemeBrushTextSelectionHighlightColorThemeBrushThumbBackgroundThemeBrushThumbBorderThemeBrushThumbPointerOverBackgroundThemeBrushThumbPointerOverBorderThemeBrushThumbPressedBackgroundThemeBrushThumbPressedBorderThemeBrushWindowCaptionBackgroundWindowCaptionBackgroundDisabledWindowCaptionForegroundWindowCaptionForegroundDisabledWindowCaptionButtonBackgroundPointerOverWindowCaptionButtonBackgroundPressedWindowCaptionButtonStrokeWindowCaptionButtonStrokePointerOverWindowCaptionButtonStrokePressedCloseButtonBackgroundPointerOverCloseButtonStrokePointerOverCloseButtonBackgroundPressedCloseButtonStrokePressed";
+const POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS: &str = "AppBarExpandButtonThemeHeightAppBarExpandButtonThemeWidthAppBarThemeMinimalHeightAppBarExpandButtonCircleDiameterAutoSuggestListMaxHeightAutoSuggestListBorderOpacityControlContentThemeFontSizeContentControlFontSizeFlyoutThemeMaxHeightFlyoutThemeMaxWidthFlyoutThemeMinHeightFlyoutThemeMinWidthFlyoutThemeTouchMinWidthGridViewItemSelectedBorderThemeThicknessGridViewItemReorderHintThemeOffsetTextControlBackgroundThemeOpacityTextControlBorderThemeOpacityTextControlBorderThemeBrushOpacityTextControlPointerOverBackgroundThemeOpacityTextControlPointerOverBorderThemeOpacityTextControlPointerOverBorderThemeBrushOpacityTextControlBackgroundRestOpacityTextControlBackgroundHoverOpacityTextControlBackgroundFocusedOpacityTextControlThemeMinHeightTextControlThemeMinWidthTextStyleLargeFontSizeTextStyleExtraLargeFontSizeGridViewItemMinWidthGridViewItemMinHeightAppBarBottomBorderThemeThicknessAppBarBottomThemePaddingAppBarTopBorderThemeThicknessAppBarTopThemePaddingAppBarExpandButtonCircleInnerPaddingAutoSuggestListBorderThemeThicknessAutoSuggestListMarginAutoSuggestListPaddingAutoSuggestListViewItemMarginDateTimeFlyoutBorderThicknessDateTimeFlyoutButtonBorderThicknessDateTimeFlyoutContentPanelPortraitThemeMarginDateTimeFlyoutContentPanelLandscapeThemeMarginDateTimeFlyoutTitleThemeMarginFlyoutContentThemeMarginFlyoutContentThemePaddingGridViewItemCompactSelectedBorderThemeThicknessGridViewItemMultiselectBorderThicknessTextControlMarginThemeThicknessHelperButtonThemePaddingTextControlPlaceholderThemePaddingSystemAltHighColorSystemAltLowColorSystemAltMediumColorSystemAltMediumHighColorSystemAltMediumLowColorSystemBaseHighColorSystemBaseLowColorSystemBaseMediumColorSystemBaseMediumHighColorSystemBaseMediumLowColorSystemChromeAltLowColorSystemChromeBlackHighColorSystemChromeBlackLowColorSystemChromeBlackMediumLowColorSystemChromeBlackMediumColorSystemChromeDisabledHighColorSystemChromeDisabledLowColorSystemChromeHighColorSystemChromeLowColorSystemChromeMediumColorSystemChromeMediumLowColorSystemChromeWhiteColorSystemChromeGrayColorSystemListLowColorSystemListMediumColorSystemErrorTextColorSystemControlBackgroundAccentBrushSystemAccentColorSystemControlBackgroundAltHighBrushSystemControlBackgroundAltMediumHighBrushSystemControlBackgroundAltMediumBrushSystemControlBackgroundAltMediumLowBrushSystemControlBackgroundBaseHighBrushSystemControlBackgroundBaseLowBrushSystemControlBackgroundBaseMediumBrushSystemControlBackgroundBaseMediumHighBrushSystemControlBackgroundBaseMediumLowBrushSystemControlBackgroundChromeBlackHighBrushSystemControlBackgroundChromeBlackMediumBrushSystemControlBackgroundChromeBlackLowBrushSystemControlBackgroundChromeBlackMediumLowBrushSystemControlBackgroundChromeMediumBrushSystemControlBackgroundChromeMediumLowBrushSystemControlBackgroundChromeWhiteBrushSystemControlBackgroundListLowBrushSystemControlBackgroundListMediumBrushSystemControlDisabledAccentBrushSystemControlDisabledBaseHighBrushSystemControlDisabledBaseLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlDisabledChromeDisabledHighBrushSystemControlDisabledChromeDisabledLowBrushSystemControlDisabledChromeHighBrushSystemControlDisabledChromeMediumLowBrushSystemControlDisabledListMediumBrushSystemControlDisabledTransparentBrushSystemControlRevealFocusVisualBrushSystemControlForegroundAccentBrushSystemControlForegroundAltHighBrushSystemControlForegroundAltMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseLowBrushSystemControlForegroundBaseMediumBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundChromeBlackHighBrushSystemControlForegroundChromeHighBrushSystemControlForegroundChromeMediumBrushSystemControlForegroundChromeWhiteBrushSystemControlForegroundChromeDisabledLowBrushSystemControlForegroundChromeGrayBrushSystemControlForegroundListLowBrushSystemControlForegroundListMediumBrushSystemControlForegroundTransparentBrushSystemControlForegroundChromeBlackMediumBrushSystemControlForegroundChromeBlackMediumLowBrushSystemControlHighlightAccentBrushSystemControlHighlightAltAccentBrushSystemControlHighlightAltAltHighBrushSystemControlHighlightAltBaseHighBrushSystemControlHighlightAltBaseLowBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightAltBaseMediumHighBrushSystemControlHighlightAltAltMediumHighBrushSystemControlHighlightAltBaseMediumLowBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightBaseHighBrushSystemControlHighlightBaseLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightChromeAltLowBrushSystemControlHighlightChromeHighBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightChromeWhiteBrushSystemControlHighlightTransparentBrushSystemControlHyperlinkTextBrushSystemControlHyperlinkBaseHighBrushSystemControlHyperlinkBaseMediumBrushSystemControlHyperlinkBaseMediumHighBrushSystemControlPageBackgroundAltMediumBrushSystemControlPageBackgroundAltHighBrushSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemControlPageBackgroundChromeLowBrushSystemControlPageBackgroundChromeMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlPageTextBaseHighBrushSystemControlPageTextBaseMediumBrushSystemControlPageTextChromeBlackMediumLowBrushSystemControlErrorTextForegroundBrushSystemControlDescriptionTextForegroundBrushSliderContainerBackgroundSystemControlTransparentBrushThumbBackgroundThumbBackgroundPointerOverThumbBackgroundPressedThumbBorderBrushThumbBorderBrushPointerOverThumbBorderBrushPressedAppBarEllipsisButtonBackgroundAppBarEllipsisButtonBackgroundPointerOverAppBarEllipsisButtonBackgroundPressedAppBarEllipsisButtonBackgroundDisabledAppBarEllipsisButtonForegroundAppBarEllipsisButtonForegroundPointerOverAppBarEllipsisButtonForegroundPressedAppBarEllipsisButtonForegroundDisabledAppBarEllipsisButtonBorderBrushAppBarEllipsisButtonBorderBrushPointerOverAppBarEllipsisButtonBorderBrushPressedAppBarEllipsisButtonBorderBrushDisabledAppBarBackgroundAppBarForegroundAppBarHighContrastBorderLoopingSelectorButtonBackgroundTextControlHeaderForegroundTextControlHeaderForegroundDisabledTextControlButtonBackgroundTextControlHighlighterForegroundTextControlHighlighterBackgroundToggleMenuFlyoutItemBackgroundToggleMenuFlyoutItemBackgroundPointerOverToggleMenuFlyoutItemBackgroundPressedToggleMenuFlyoutItemBackgroundDisabledToggleMenuFlyoutItemForegroundToggleMenuFlyoutItemForegroundPointerOverToggleMenuFlyoutItemForegroundPressedToggleMenuFlyoutItemForegroundDisabledToggleMenuFlyoutItemCheckGlyphForegroundToggleMenuFlyoutItemCheckGlyphForegroundPointerOverToggleMenuFlyoutItemCheckGlyphForegroundPressedToggleMenuFlyoutItemCheckGlyphForegroundDisabledAppBarLightDismissOverlayBackgroundFlyoutLightDismissOverlayBackgroundPopupLightDismissOverlayBackgroundJumpListDefaultEnabledBackgroundJumpListDefaultEnabledForegroundJumpListDefaultDisabledBackgroundJumpListDefaultDisabledForegroundAppBarBackgroundThemeBrushAppBarBorderThemeBrushAppBarItemBackgroundThemeBrushAppBarItemDisabledForegroundThemeBrushAppBarItemForegroundThemeBrushAppBarItemPointerOverBackgroundThemeBrushAppBarItemPointerOverForegroundThemeBrushAppBarItemPressedForegroundThemeBrushAppBarSeparatorForegroundThemeBrushApplicationForegroundThemeBrushApplicationHeaderForegroundThemeBrushApplicationPointerOverForegroundThemeBrushApplicationPressedForegroundThemeBrushApplicationSecondaryForegroundThemeBrushAutoSuggestBackgroundThemeBrushBackButtonBackgroundThemeBrushBackButtonDisabledForegroundThemeBrushBackButtonForegroundThemeBrushBackButtonPointerOverBackgroundThemeBrushBackButtonPointerOverForegroundThemeBrushBackButtonPressedForegroundThemeBrushFlyoutBackgroundThemeBrushFocusVisualBlackStrokeThemeBrushFocusVisualWhiteStrokeThemeBrushHyperlinkButtonBackgroundThemeBrushHyperlinkButtonBorderThemeBrushHyperlinkDisabledThemeBrushHyperlinkForegroundThemeBrushHyperlinkPointerOverForegroundThemeBrushHyperlinkPressedForegroundThemeBrushListViewGroupHeaderForegroundThemeBrushListViewGroupHeaderPointerOverForegroundThemeBrushListViewGroupHeaderPressedForegroundThemeBrushLoopingSelectorForegroundThemeBrushLoopingSelectorSelectionBackgroundThemeBrushSystemColorHighlightColorLoopingSelectorSelectionForegroundThemeBrushMediaButtonForegroundThemeBrushMediaButtonBackgroundThemeBrushMediaButtonPointerOverForegroundThemeBrushMediaButtonPointerOverBackgroundThemeBrushMediaButtonPressedForegroundThemeBrushMediaButtonPressedBackgroundThemeBrushMediaButtonPressedBorderThemeBrushMediaControlPanelVideoThemeBrushMediaControlPanelAudioThemeBrushMediaDownloadProgressIndicatorThemeBrushMediaErrorBackgroundThemeBrushMediaTextThemeBrushTextSelectionHighlightColorThemeBrushThumbBackgroundThemeBrushThumbBorderThemeBrushThumbPointerOverBackgroundThemeBrushThumbPointerOverBorderThemeBrushThumbPressedBackgroundThemeBrushThumbPressedBorderThemeBrushWindowCaptionBackgroundWindowCaptionBackgroundDisabledWindowCaptionForegroundWindowCaptionForegroundDisabledWindowCaptionButtonBackgroundPointerOverWindowCaptionButtonBackgroundPressedWindowCaptionButtonStrokeWindowCaptionButtonStrokePointerOverWindowCaptionButtonStrokePressedCloseButtonBackgroundPointerOverCloseButtonStrokePointerOverCloseButtonBackgroundPressedCloseButtonStrokePressedTimePickerLeftHeaderMarginDatePickerLeftHeaderMarginCalendarDatePickerLeftHeaderMarginSliderLeftHeaderMarginComboBoxLeftHeaderMarginToggleSwitchLeftHeaderMarginToggleSwitchHeaderMarginHyperlinkButtonPaddingCalendarDatePickerLeftHeaderMaxWidthComboBoxLeftHeaderMaxWidthSliderLeftHeaderMaxWidthTimePickerLeftHeaderMaxWidthToggleSwitchLeftHeaderMaxWidth";
+
+/// The numbers of the packed tables of the unit 2 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS: [f64; 40] = [24.0_f64, 48.0_f64, 3.0_f64, 374.0_f64, 0.0_f64, 13.0_f64, 758.0_f64, 456.0_f64, 40.0_f64, 96.0_f64, 240.0_f64, 4.0_f64, 16.0_f64, 0.8_f64, 1.0_f64, 0.87_f64, 0.4_f64, 0.6_f64, 26.0_f64, 64.0_f64, 18.14_f64, 25.5_f64, 44.0_f64, 2.0_f64, -1.0_f64, 12.0_f64, 11.0_f64, 37.0_f64, 19.0_f64, 17.5_f64, 2.5_f64, -2.0_f64, 6.0_f64, 0.45_f64, 0.5625_f64, 0.73_f64, 0.839_f64, 5.0_f64, 32.0_f64, 296.0_f64];
+
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_1: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        0, 29, 17, 55, 0,
+        29, 28, 18, 54, 1,
+        57, 24, 19, 50, 0,
+        81, 32, 20, 58, 2,
+        113, 24, 21, 50, 3,
+        137, 28, 22, 54, 4,
+        165, 27, 23, 53, 5,
+        192, 22, 24, 48, 5,
+        214, 20, 25, 46, 6,
+        234, 19, 26, 45, 7,
+        253, 20, 27, 46, 8,
+        273, 19, 28, 45, 9,
+        292, 24, 29, 50, 10,
+        316, 40, 30, 66, 11,
+        356, 34, 31, 60, 12,
+        390, 33, 32, 59, 13,
+        423, 29, 33, 55, 13,
+        452, 34, 34, 60, 14,
+        486, 44, 35, 70, 15,
+        530, 40, 36, 66, 15,
+        570, 45, 37, 71, 14,
+        615, 32, 38, 58, 16,
+        647, 33, 39, 59, 17,
+        680, 35, 40, 61, 14,
+        715, 25, 41, 51, 18,
+        740, 24, 42, 50, 19,
+        764, 22, 43, 48, 20,
+        786, 27, 44, 53, 21,
+        813, 20, 45, 46, 22,
+        833, 21, 46, 47, 22,
+    ],
+};
+
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_2: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        854, 32, 47, 59, 4, 4, 4, 4,
+        886, 24, 48, 51, 4, 4, 4, 4,
+        910, 29, 49, 56, 4, 4, 4, 4,
+        939, 21, 50, 48, 4, 4, 4, 4,
+        960, 36, 51, 63, 2, 4, 2, 4,
+        996, 35, 52, 62, 14, 14, 14, 14,
+        1031, 21, 53, 48, 4, 23, 4, 23,
+        1052, 22, 54, 49, 24, 4, 24, 4,
+        1074, 29, 55, 56, 25, 26, 4, 5,
+        1103, 29, 56, 56, 14, 14, 14, 14,
+        1132, 35, 57, 62, 4, 4, 4, 4,
+        1167, 45, 58, 72, 4, 27, 4, 4,
+        1212, 46, 59, 73, 4, 28, 4, 4,
+        1258, 30, 60, 57, 28, 4, 28, 29,
+        1288, 24, 61, 51, 4, 4, 4, 4,
+        1312, 25, 62, 52, 25, 26, 25, 25,
+        1337, 47, 63, 74, 11, 11, 11, 11,
+        1384, 38, 64, 65, 30, 30, 30, 30,
+        1422, 31, 65, 58, 4, 4, 4, 4,
+        1453, 24, 66, 51, 4, 4, 31, 4,
+        1477, 34, 67, 61, 32, 2, 32, 2,
+    ],
+};
+
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_3: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &[],
+    records: &[
+        1511, 18, 70, 41, 0, 65280,
+        1529, 17, 71, 40, 0, 13056,
+        1546, 20, 72, 43, 0, 39168,
+        1566, 24, 73, 47, 0, 52224,
+        1590, 23, 74, 46, 0, 26112,
+        1613, 19, 75, 42, 65535, 65535,
+        1632, 18, 76, 41, 65535, 13311,
+        1650, 21, 77, 44, 65535, 39423,
+        1671, 25, 78, 48, 65535, 52479,
+        1696, 24, 79, 47, 65535, 26367,
+        1720, 23, 80, 46, 62194, 65522,
+        1743, 26, 81, 49, 0, 65280,
+        1769, 25, 82, 48, 0, 13056,
+        1794, 31, 83, 54, 0, 26112,
+        1825, 28, 84, 51, 0, 52224,
+        1853, 29, 85, 52, 13107, 65331,
+        1882, 28, 86, 51, 34181, 65413,
+        1910, 21, 87, 44, 30326, 65398,
+        1931, 20, 88, 43, 5911, 65303,
+        1951, 23, 89, 46, 7967, 65311,
+        1974, 26, 90, 49, 11051, 65323,
+        2000, 22, 91, 45, 65535, 65535,
+        2022, 21, 92, 44, 30326, 65398,
+        2043, 18, 93, 41, 65535, 6655,
+        2061, 21, 94, 44, 65535, 13311,
+        2082, 20, 95, 43, 61440, 65535,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_4: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 17, 1, 96, 8, 96, 67,
-        51, 35, 86, 18, 1, 97, 8, 97, 68,
-        104, 41, 145, 24, 1, 98, 8, 98, 74,
-        169, 37, 206, 20, 1, 99, 8, 99, 70,
-        226, 40, 266, 23, 1, 100, 8, 100, 73,
-        289, 36, 325, 19, 1, 101, 8, 101, 69,
-        344, 35, 379, 18, 1, 102, 8, 102, 68,
-        397, 38, 435, 21, 1, 103, 8, 103, 71,
-        456, 42, 498, 25, 1, 104, 8, 104, 75,
-        523, 41, 564, 24, 1, 105, 8, 105, 74,
-        588, 43, 631, 26, 1, 106, 8, 106, 76,
-        657, 45, 702, 28, 1, 107, 8, 107, 78,
-        730, 42, 772, 25, 1, 108, 8, 108, 75,
-        797, 48, 845, 31, 1, 109, 8, 109, 81,
-        876, 40, 916, 23, 1, 110, 8, 110, 73,
-        939, 43, 982, 26, 1, 111, 8, 111, 76,
-        1008, 39, 1047, 22, 1, 112, 8, 112, 72,
-        1069, 35, 1104, 18, 1, 113, 8, 113, 68,
-        1122, 38, 1160, 21, 1, 114, 8, 114, 71,
-        1181, 32, 34, 17, 1, 115, 8, 115, 65,
-        1213, 34, 325, 19, 1, 116, 8, 116, 67,
-        1247, 33, 379, 18, 1, 117, 8, 117, 66,
-        1280, 39, 564, 24, 1, 118, 8, 118, 72,
-        1319, 44, 1363, 29, 1, 119, 8, 119, 77,
-        1392, 43, 1435, 28, 1, 120, 8, 120, 76,
-        1463, 36, 1499, 21, 1, 121, 8, 121, 69,
-        1520, 41, 982, 26, 1, 122, 8, 122, 74,
-        1561, 36, 1160, 21, 1, 123, 8, 123, 69,
+        2102, 34, 2136, 17, 1, 96, 8, 96, 67,
+        2153, 35, 1511, 18, 1, 97, 8, 97, 68,
+        2188, 41, 1566, 24, 1, 98, 8, 98, 74,
+        2229, 37, 1546, 20, 1, 99, 8, 99, 70,
+        2266, 40, 1590, 23, 1, 100, 8, 100, 73,
+        2306, 36, 1613, 19, 1, 101, 8, 101, 69,
+        2342, 35, 1632, 18, 1, 102, 8, 102, 68,
+        2377, 38, 1650, 21, 1, 103, 8, 103, 71,
+        2415, 42, 1671, 25, 1, 104, 8, 104, 75,
+        2457, 41, 1696, 24, 1, 105, 8, 105, 74,
+        2498, 43, 1743, 26, 1, 106, 8, 106, 76,
+        2541, 45, 1825, 28, 1, 107, 8, 107, 78,
+        2586, 42, 1769, 25, 1, 108, 8, 108, 75,
+        2628, 48, 1794, 31, 1, 109, 8, 109, 81,
+        2676, 40, 1951, 23, 1, 110, 8, 110, 73,
+        2716, 43, 1974, 26, 1, 111, 8, 111, 76,
+        2759, 39, 2000, 22, 1, 112, 8, 112, 72,
+        2798, 35, 2043, 18, 1, 113, 8, 113, 68,
+        2833, 38, 2061, 21, 1, 114, 8, 114, 71,
+        2871, 32, 2136, 17, 1, 115, 8, 115, 65,
+        2903, 34, 1613, 19, 1, 116, 8, 116, 67,
+        2937, 33, 1632, 18, 1, 117, 8, 117, 66,
+        2970, 39, 1696, 24, 1, 118, 8, 118, 72,
+        3009, 44, 1853, 29, 1, 119, 8, 119, 77,
+        3053, 43, 1882, 28, 1, 120, 8, 120, 76,
+        3096, 36, 1910, 21, 1, 121, 8, 121, 69,
+        3132, 41, 1974, 26, 1, 122, 8, 122, 74,
+        3173, 36, 2061, 21, 1, 123, 8, 123, 69,
     ],
 };
 
@@ -5480,7 +5502,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_5: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1597, 37, 65535, 255, 1, 124, 8,
+        3209, 37, 65535, 255, 1, 124, 8,
     ],
 };
 
@@ -5489,23 +5511,23 @@ static POPULATE_MACOSTHEME_XAML_ROWS_6: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1634, 35, 34, 17, 1, 125, 8, 125, 68,
-        1669, 34, 34, 17, 1, 126, 8, 126, 67,
-        1703, 35, 86, 18, 1, 127, 8, 127, 68,
-        1738, 41, 145, 24, 1, 128, 8, 128, 74,
-        1779, 36, 325, 19, 1, 129, 8, 129, 69,
-        1815, 35, 379, 18, 1, 130, 8, 130, 68,
-        1850, 38, 435, 21, 1, 131, 8, 131, 71,
-        1888, 42, 498, 25, 1, 132, 8, 132, 75,
-        1930, 41, 564, 24, 1, 133, 8, 133, 74,
-        1971, 43, 631, 26, 1, 134, 8, 134, 76,
-        2014, 38, 1499, 21, 1, 135, 8, 135, 71,
-        2052, 40, 916, 23, 1, 136, 8, 136, 73,
-        2092, 39, 1047, 22, 1, 137, 8, 137, 72,
-        2131, 45, 1435, 28, 1, 138, 8, 138, 78,
-        2176, 38, 2214, 21, 1, 139, 8, 139, 71,
-        2235, 35, 1104, 18, 1, 140, 8, 140, 68,
-        2270, 38, 1160, 21, 1, 141, 8, 141, 71,
+        3246, 35, 2136, 17, 1, 125, 8, 125, 68,
+        3281, 34, 2136, 17, 1, 126, 8, 126, 67,
+        3315, 35, 1511, 18, 1, 127, 8, 127, 68,
+        3350, 41, 1566, 24, 1, 128, 8, 128, 74,
+        3391, 36, 1613, 19, 1, 129, 8, 129, 69,
+        3427, 35, 1632, 18, 1, 130, 8, 130, 68,
+        3462, 38, 1650, 21, 1, 131, 8, 131, 71,
+        3500, 42, 1671, 25, 1, 132, 8, 132, 75,
+        3542, 41, 1696, 24, 1, 133, 8, 133, 74,
+        3583, 43, 1743, 26, 1, 134, 8, 134, 76,
+        3626, 38, 1910, 21, 1, 135, 8, 135, 71,
+        3664, 40, 1951, 23, 1, 136, 8, 136, 73,
+        3704, 39, 2000, 22, 1, 137, 8, 137, 72,
+        3743, 45, 1882, 28, 1, 138, 8, 138, 78,
+        3788, 38, 2022, 21, 1, 139, 8, 139, 71,
+        3826, 35, 2043, 18, 1, 140, 8, 140, 68,
+        3861, 38, 2061, 21, 1, 141, 8, 141, 71,
     ],
 };
 
@@ -5514,7 +5536,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_7: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2308, 39, 65535, 255, 1, 142, 8,
+        3899, 39, 65535, 255, 1, 142, 8,
     ],
 };
 
@@ -5523,17 +5545,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_8: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2347, 45, 702, 28, 1, 143, 8, 143, 78,
-        2392, 48, 845, 31, 1, 144, 8, 144, 81,
-        2440, 33, 34, 17, 1, 145, 8, 145, 66,
-        2473, 36, 34, 17, 1, 146, 8, 146, 69,
-        2509, 37, 86, 18, 1, 147, 8, 147, 70,
-        2546, 38, 325, 19, 1, 148, 8, 148, 71,
-        2584, 37, 379, 18, 1, 149, 8, 149, 70,
-        2621, 40, 435, 21, 1, 150, 8, 150, 73,
-        2661, 44, 498, 25, 1, 151, 8, 151, 77,
-        2705, 43, 145, 24, 1, 152, 8, 152, 76,
-        2748, 43, 564, 24, 1, 153, 8, 153, 76,
+        3938, 45, 1825, 28, 1, 143, 8, 143, 78,
+        3983, 48, 1794, 31, 1, 144, 8, 144, 81,
+        4031, 33, 2136, 17, 1, 145, 8, 145, 66,
+        4064, 36, 2136, 17, 1, 146, 8, 146, 69,
+        4100, 37, 1511, 18, 1, 147, 8, 147, 70,
+        4137, 38, 1613, 19, 1, 148, 8, 148, 71,
+        4175, 37, 1632, 18, 1, 149, 8, 149, 70,
+        4212, 40, 1650, 21, 1, 150, 8, 150, 73,
+        4252, 44, 1671, 25, 1, 151, 8, 151, 77,
+        4296, 43, 1566, 24, 1, 152, 8, 152, 76,
+        4339, 43, 1696, 24, 1, 153, 8, 153, 76,
     ],
 };
 
@@ -5542,7 +5564,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_9: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2791, 41, 1047, 22, 1, 157, 8, 157, 74,
+        4382, 41, 2000, 22, 1, 157, 8, 157, 74,
     ],
 };
 
@@ -5551,7 +5573,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_10: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2832, 41, 65535, 255, 1, 158, 8,
+        4423, 41, 65535, 255, 1, 158, 8,
     ],
 };
 
@@ -5560,13 +5582,13 @@ static POPULATE_MACOSTHEME_XAML_ROWS_11: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2873, 35, 325, 19, 1, 159, 8, 159, 68,
-        2908, 34, 379, 18, 1, 160, 8, 160, 67,
-        2942, 37, 435, 21, 1, 161, 8, 161, 70,
-        2979, 41, 498, 25, 1, 162, 8, 162, 74,
-        3020, 40, 564, 24, 1, 163, 8, 163, 73,
-        3060, 39, 3099, 23, 1, 164, 8, 164, 72,
-        3122, 37, 1499, 21, 1, 165, 8, 165, 70,
+        4464, 35, 1613, 19, 1, 159, 8, 159, 68,
+        4499, 34, 1632, 18, 1, 160, 8, 160, 67,
+        4533, 37, 1650, 21, 1, 161, 8, 161, 70,
+        4570, 41, 1671, 25, 1, 162, 8, 162, 74,
+        4611, 40, 1696, 24, 1, 163, 8, 163, 73,
+        4651, 39, 1720, 23, 1, 164, 8, 164, 72,
+        4690, 37, 1910, 21, 1, 165, 8, 165, 70,
     ],
 };
 
@@ -5575,9 +5597,9 @@ static POPULATE_MACOSTHEME_XAML_ROWS_12: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3159, 37, 1160, 21, 1, 169, 8, 169, 70,
-        3196, 34, 1104, 18, 1, 170, 8, 170, 67,
-        3230, 38, 1047, 22, 1, 171, 8, 171, 71,
+        4727, 37, 2061, 21, 1, 169, 8, 169, 70,
+        4764, 34, 2043, 18, 1, 170, 8, 170, 67,
+        4798, 38, 2000, 22, 1, 171, 8, 171, 71,
     ],
 };
 
@@ -5586,7 +5608,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_13: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3268, 38, 65535, 255, 1, 172, 8,
+        4836, 38, 65535, 255, 1, 172, 8,
     ],
 };
 
@@ -5595,18 +5617,18 @@ static POPULATE_MACOSTHEME_XAML_ROWS_14: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3306, 31, 34, 17, 1, 173, 8, 173, 64,
-        3337, 35, 325, 19, 1, 174, 8, 174, 68,
-        3372, 37, 435, 21, 1, 175, 8, 175, 70,
-        3409, 41, 498, 25, 1, 176, 8, 176, 74,
-        3450, 41, 206, 20, 1, 177, 8, 177, 74,
-        3491, 39, 86, 18, 1, 178, 8, 178, 72,
-        3530, 47, 206, 20, 1, 179, 8, 179, 80,
-        3577, 39, 379, 18, 1, 180, 8, 180, 72,
-        3616, 42, 435, 21, 1, 181, 8, 181, 75,
-        3658, 39, 1104, 18, 1, 182, 8, 182, 72,
-        3697, 41, 3738, 20, 1, 183, 8, 183, 74,
-        3758, 47, 982, 26, 1, 184, 8, 184, 80,
+        4874, 31, 2136, 17, 1, 173, 8, 173, 64,
+        4905, 35, 1613, 19, 1, 174, 8, 174, 68,
+        4940, 37, 1650, 21, 1, 175, 8, 175, 70,
+        4977, 41, 1671, 25, 1, 176, 8, 176, 74,
+        5018, 41, 1546, 20, 1, 177, 8, 177, 74,
+        5059, 39, 1511, 18, 1, 178, 8, 178, 72,
+        5098, 47, 1546, 20, 1, 179, 8, 179, 80,
+        5145, 39, 1632, 18, 1, 180, 8, 180, 72,
+        5184, 42, 1650, 21, 1, 181, 8, 181, 75,
+        5226, 39, 2043, 18, 1, 182, 8, 182, 72,
+        5265, 41, 1931, 20, 1, 183, 8, 183, 74,
+        5306, 47, 1974, 26, 1, 184, 8, 184, 80,
     ],
 };
 
@@ -5615,7 +5637,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_15: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3805, 43, 65535, 255, 1, 185, 8,
+        5353, 43, 65535, 255, 1, 185, 8,
     ],
 };
 
@@ -5624,10 +5646,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_16: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3848, 34, 325, 19, 1, 186, 8, 186, 67,
-        3882, 36, 435, 21, 1, 187, 8, 187, 69,
-        3918, 46, 845, 31, 1, 188, 8, 188, 79,
-        3964, 37, 4001, 20, 1, 189, 8, 189, 70,
+        5396, 34, 1613, 19, 1, 186, 8, 186, 67,
+        5430, 36, 1650, 21, 1, 187, 8, 187, 69,
+        5466, 46, 1794, 31, 1, 188, 8, 188, 79,
+        5512, 37, 2082, 20, 1, 189, 8, 189, 70,
     ],
 };
 
@@ -5636,14 +5658,14 @@ static POPULATE_MACOSTHEME_XAML_ROWS_17: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4021, 43, 3882, 36, 1, 190, 8, 190, 8,
-        4064, 25, 4089, 29, 1, 191, 8, 191, 8,
-        4118, 15, 344, 35, 1, 192, 8, 192, 8,
-        4133, 26, 3020, 40, 1, 193, 8, 193, 8,
-        4159, 22, 2942, 37, 1, 194, 8, 194, 8,
-        4181, 16, 3268, 38, 1, 195, 8, 195, 8,
-        4197, 27, 3268, 38, 1, 196, 8, 196, 8,
-        4224, 23, 3268, 38, 1, 197, 8, 197, 8,
+        5549, 43, 5430, 36, 1, 190, 8, 190, 8,
+        5592, 25, 5617, 29, 1, 191, 8, 191, 8,
+        5646, 15, 2342, 35, 1, 192, 8, 192, 8,
+        5661, 26, 4611, 40, 1, 193, 8, 193, 8,
+        5687, 22, 4533, 37, 1, 194, 8, 194, 8,
+        5709, 16, 4836, 38, 1, 195, 8, 195, 8,
+        5725, 27, 4836, 38, 1, 196, 8, 196, 8,
+        5752, 23, 4836, 38, 1, 197, 8, 197, 8,
     ],
 };
 
@@ -5658,26 +5680,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_19: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4247, 30, 4089, 29, 1, 200, 8, 200, 8,
-        4277, 41, 3196, 34, 1, 201, 8, 201, 8,
-        4318, 37, 3159, 37, 1, 202, 8, 202, 8,
-        4355, 38, 4089, 29, 1, 203, 8, 203, 8,
-        4393, 30, 1779, 36, 1, 204, 8, 204, 8,
-        4423, 41, 2546, 38, 1, 205, 8, 205, 8,
-        4464, 37, 1779, 36, 1, 206, 8, 206, 8,
-        4501, 38, 1280, 39, 1, 207, 8, 207, 8,
-        4539, 31, 4089, 29, 1, 208, 8, 208, 8,
-        4570, 42, 4089, 29, 1, 209, 8, 209, 8,
-        4612, 38, 4089, 29, 1, 210, 8, 210, 8,
-        4650, 39, 4089, 29, 1, 211, 8, 211, 8,
-        4689, 16, 876, 40, 1, 212, 8, 212, 8,
-        4705, 16, 1779, 36, 1, 213, 8, 213, 8,
-        4721, 24, 2308, 39, 1, 214, 8, 214, 8,
-        4745, 31, 876, 40, 1, 215, 8, 215, 8,
-        4776, 27, 1779, 36, 1, 216, 8, 216, 8,
-        4803, 35, 1280, 39, 1, 217, 8, 217, 8,
-        4838, 27, 4089, 29, 1, 218, 8, 218, 8,
-        4865, 32, 1703, 35, 1, 219, 8, 219, 8,
+        5775, 30, 5617, 29, 1, 200, 8, 200, 8,
+        5805, 41, 4764, 34, 1, 201, 8, 201, 8,
+        5846, 37, 4727, 37, 1, 202, 8, 202, 8,
+        5883, 38, 5617, 29, 1, 203, 8, 203, 8,
+        5921, 30, 3391, 36, 1, 204, 8, 204, 8,
+        5951, 41, 4137, 38, 1, 205, 8, 205, 8,
+        5992, 37, 3391, 36, 1, 206, 8, 206, 8,
+        6029, 38, 2970, 39, 1, 207, 8, 207, 8,
+        6067, 31, 5617, 29, 1, 208, 8, 208, 8,
+        6098, 42, 5617, 29, 1, 209, 8, 209, 8,
+        6140, 38, 5617, 29, 1, 210, 8, 210, 8,
+        6178, 39, 5617, 29, 1, 211, 8, 211, 8,
+        6217, 16, 2676, 40, 1, 212, 8, 212, 8,
+        6233, 16, 3391, 36, 1, 213, 8, 213, 8,
+        6249, 24, 3899, 39, 1, 214, 8, 214, 8,
+        6273, 31, 2676, 40, 1, 215, 8, 215, 8,
+        6304, 27, 3391, 36, 1, 216, 8, 216, 8,
+        6331, 35, 2970, 39, 1, 217, 8, 217, 8,
+        6366, 27, 5617, 29, 1, 218, 8, 218, 8,
+        6393, 32, 3315, 35, 1, 219, 8, 219, 8,
     ],
 };
 
@@ -5686,7 +5708,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_20: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4897, 32, 65280, 65535, 1, 220, 8,
+        6425, 32, 65280, 65535, 1, 220, 8,
     ],
 };
 
@@ -5695,25 +5717,25 @@ static POPULATE_MACOSTHEME_XAML_ROWS_21: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4929, 30, 4089, 29, 1, 221, 8, 221, 8,
-        4959, 41, 3196, 34, 1, 222, 8, 222, 8,
-        5000, 37, 3159, 37, 1, 223, 8, 223, 8,
-        5037, 38, 4089, 29, 1, 224, 8, 224, 8,
-        5075, 30, 1779, 36, 1, 225, 8, 225, 8,
-        5105, 41, 2546, 38, 1, 226, 8, 226, 8,
-        5146, 37, 2546, 38, 1, 227, 8, 227, 8,
-        5183, 38, 1280, 39, 1, 228, 8, 228, 8,
-        5221, 40, 1888, 42, 1, 229, 8, 229, 8,
-        5261, 51, 2546, 38, 1, 230, 8, 230, 8,
-        5312, 47, 2546, 38, 1, 231, 8, 231, 8,
-        5359, 48, 1280, 39, 1, 232, 8, 232, 8,
-        5407, 35, 3530, 47, 1, 233, 8, 233, 8,
-        5442, 35, 3530, 47, 1, 234, 8, 234, 8,
-        5477, 34, 3530, 47, 1, 235, 8, 235, 8,
-        5511, 32, 0, 34, 1, 236, 8, 236, 8,
-        5543, 32, 2092, 39, 1, 237, 8, 237, 8,
-        5575, 33, 344, 35, 1, 238, 8, 238, 8,
-        5608, 33, 1280, 39, 1, 239, 8, 239, 8,
+        6457, 30, 5617, 29, 1, 221, 8, 221, 8,
+        6487, 41, 4764, 34, 1, 222, 8, 222, 8,
+        6528, 37, 4727, 37, 1, 223, 8, 223, 8,
+        6565, 38, 5617, 29, 1, 224, 8, 224, 8,
+        6603, 30, 3391, 36, 1, 225, 8, 225, 8,
+        6633, 41, 4137, 38, 1, 226, 8, 226, 8,
+        6674, 37, 4137, 38, 1, 227, 8, 227, 8,
+        6711, 38, 2970, 39, 1, 228, 8, 228, 8,
+        6749, 40, 3500, 42, 1, 229, 8, 229, 8,
+        6789, 51, 4137, 38, 1, 230, 8, 230, 8,
+        6840, 47, 4137, 38, 1, 231, 8, 231, 8,
+        6887, 48, 2970, 39, 1, 232, 8, 232, 8,
+        6935, 35, 5098, 47, 1, 233, 8, 233, 8,
+        6970, 35, 5098, 47, 1, 234, 8, 234, 8,
+        7005, 34, 5098, 47, 1, 235, 8, 235, 8,
+        7039, 32, 2102, 34, 1, 236, 8, 236, 8,
+        7071, 32, 3704, 39, 1, 237, 8, 237, 8,
+        7103, 33, 2342, 35, 1, 238, 8, 238, 8,
+        7136, 33, 2970, 39, 1, 239, 8, 239, 8,
     ],
 };
 
@@ -5722,40 +5744,40 @@ static POPULATE_MACOSTHEME_XAML_ROWS_22: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5641, 26, 0, 65280, 1, 240, 8,
-        5667, 22, 0, 65280, 1, 241, 8,
-        5689, 30, 65535, 255, 1, 242, 8,
-        5719, 38, 65535, 26367, 1, 243, 8,
-        5757, 30, 65535, 65535, 1, 244, 8,
-        5787, 41, 65535, 8703, 1, 245, 8,
-        5828, 41, 65535, 65535, 1, 246, 8,
-        5869, 37, 0, 65280, 1, 247, 8,
-        5906, 35, 31611, 65403, 1, 248, 8,
-        5941, 31, 65535, 57087, 1, 249, 8,
-        5972, 37, 65535, 65535, 1, 250, 8,
-        6009, 42, 65535, 52479, 1, 251, 8,
-        6051, 38, 65535, 26367, 1, 252, 8,
-        6089, 40, 65535, 39423, 1, 253, 8,
-        6129, 31, 65535, 65535, 1, 254, 8,
-        6160, 30, 65535, 255, 1, 255, 8,
-        6190, 38, 65535, 26367, 1, 256, 8,
-        6228, 30, 65535, 65535, 1, 257, 8,
-        6258, 41, 65535, 8703, 1, 258, 8,
-        6299, 41, 65535, 65535, 1, 259, 8,
-        6340, 37, 0, 65280, 1, 260, 8,
-        6377, 26, 0, 65280, 1, 261, 8,
-        6403, 32, 0, 65280, 1, 262, 8,
-        6435, 32, 65535, 65535, 1, 263, 8,
-        6467, 35, 65535, 255, 1, 264, 8,
-        6502, 31, 65535, 255, 1, 265, 8,
-        6533, 27, 65535, 26367, 1, 266, 8,
-        6560, 29, 29439, 65436, 1, 267, 8,
-        6589, 40, 29439, 52380, 1, 268, 8,
-        6629, 36, 29439, 39324, 1, 269, 8,
-        6665, 39, 65535, 65535, 1, 270, 8,
-        6704, 50, 65535, 52479, 1, 271, 8,
-        6754, 46, 65535, 26367, 1, 272, 8,
-        6800, 35, 65535, 29695, 1, 273, 8,
+        7169, 26, 0, 65280, 1, 240, 8,
+        7195, 22, 0, 65280, 1, 241, 8,
+        7217, 30, 65535, 255, 1, 242, 8,
+        7247, 38, 65535, 26367, 1, 243, 8,
+        7285, 30, 65535, 65535, 1, 244, 8,
+        7315, 41, 65535, 8703, 1, 245, 8,
+        7356, 41, 65535, 65535, 1, 246, 8,
+        7397, 37, 0, 65280, 1, 247, 8,
+        7434, 35, 31611, 65403, 1, 248, 8,
+        7469, 31, 65535, 57087, 1, 249, 8,
+        7500, 37, 65535, 65535, 1, 250, 8,
+        7537, 42, 65535, 52479, 1, 251, 8,
+        7579, 38, 65535, 26367, 1, 252, 8,
+        7617, 40, 65535, 39423, 1, 253, 8,
+        7657, 31, 65535, 65535, 1, 254, 8,
+        7688, 30, 65535, 255, 1, 255, 8,
+        7718, 38, 65535, 26367, 1, 256, 8,
+        7756, 30, 65535, 65535, 1, 257, 8,
+        7786, 41, 65535, 8703, 1, 258, 8,
+        7827, 41, 65535, 65535, 1, 259, 8,
+        7868, 37, 0, 65280, 1, 260, 8,
+        7905, 26, 0, 65280, 1, 261, 8,
+        7931, 32, 0, 65280, 1, 262, 8,
+        7963, 32, 65535, 65535, 1, 263, 8,
+        7995, 35, 65535, 255, 1, 264, 8,
+        8030, 31, 65535, 255, 1, 265, 8,
+        8061, 27, 65535, 26367, 1, 266, 8,
+        8088, 29, 29439, 65436, 1, 267, 8,
+        8117, 40, 29439, 52380, 1, 268, 8,
+        8157, 36, 29439, 39324, 1, 269, 8,
+        8193, 39, 65535, 65535, 1, 270, 8,
+        8232, 50, 65535, 52479, 1, 271, 8,
+        8282, 46, 65535, 26367, 1, 272, 8,
+        8328, 35, 65535, 29695, 1, 273, 8,
     ],
 };
 
@@ -5764,7 +5786,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_23: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6835, 44, 6879, 25, 1, 274, 8, 274, 77,
+        8363, 44, 8407, 25, 1, 274, 8, 274, 77,
     ],
 };
 
@@ -5773,26 +5795,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_24: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6904, 44, 65535, 65535, 1, 275, 8,
-        6948, 31, 65535, 65535, 1, 276, 8,
-        6979, 31, 65535, 255, 1, 277, 8,
-        7010, 42, 65535, 65535, 1, 278, 8,
-        7052, 42, 65535, 8703, 1, 279, 8,
-        7094, 38, 0, 65280, 1, 280, 8,
-        7132, 38, 65535, 65535, 1, 281, 8,
-        7170, 34, 65535, 65535, 1, 282, 8,
-        7204, 32, 0, 65280, 1, 283, 8,
-        7236, 32, 0, 65280, 1, 284, 8,
-        7268, 40, 65535, 14591, 1, 285, 8,
-        7308, 30, 0, 65280, 1, 286, 8,
-        7338, 19, 65535, 65535, 1, 287, 8,
-        7357, 37, 6068, 65350, 1, 288, 8,
-        7394, 25, 52685, 65485, 1, 289, 8,
-        7419, 21, 21845, 15189, 1, 290, 8,
-        7440, 36, 56026, 65498, 1, 291, 8,
-        7476, 32, 47031, 27575, 1, 292, 8,
-        7508, 32, 0, 39168, 1, 293, 8,
-        7540, 28, 21845, 60757, 1, 294, 8,
+        8432, 44, 65535, 65535, 1, 275, 8,
+        8476, 31, 65535, 65535, 1, 276, 8,
+        8507, 31, 65535, 255, 1, 277, 8,
+        8538, 42, 65535, 65535, 1, 278, 8,
+        8580, 42, 65535, 8703, 1, 279, 8,
+        8622, 38, 0, 65280, 1, 280, 8,
+        8660, 38, 65535, 65535, 1, 281, 8,
+        8698, 34, 65535, 65535, 1, 282, 8,
+        8732, 32, 0, 65280, 1, 283, 8,
+        8764, 32, 0, 65280, 1, 284, 8,
+        8796, 40, 65535, 14591, 1, 285, 8,
+        8836, 30, 0, 65280, 1, 286, 8,
+        8866, 19, 65535, 65535, 1, 287, 8,
+        8885, 37, 6068, 65350, 1, 288, 8,
+        8922, 25, 52685, 65485, 1, 289, 8,
+        8947, 21, 21845, 15189, 1, 290, 8,
+        8968, 36, 56026, 65498, 1, 291, 8,
+        9004, 32, 47031, 27575, 1, 292, 8,
+        9036, 32, 0, 39168, 1, 293, 8,
+        9068, 28, 21845, 60757, 1, 294, 8,
     ],
 };
 
@@ -5801,10 +5823,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_25: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7568, 23, 344, 35, 1, 295, 8, 295, 8,
-        7591, 31, 344, 35, 1, 296, 8, 296, 8,
-        7622, 23, 1779, 36, 1, 297, 8, 297, 8,
-        7645, 31, 1280, 39, 1, 298, 8, 298, 8,
+        9096, 23, 2342, 35, 1, 295, 8, 295, 8,
+        9119, 31, 2342, 35, 1, 296, 8, 296, 8,
+        9150, 23, 3391, 36, 1, 297, 8, 297, 8,
+        9173, 31, 2970, 39, 1, 298, 8, 298, 8,
     ],
 };
 
@@ -5813,11 +5835,11 @@ static POPULATE_MACOSTHEME_XAML_ROWS_26: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7676, 40, 344, 35, 1, 300, 8, 300, 8,
-        7716, 36, 523, 41, 1, 301, 8, 301, 8,
-        7752, 25, 1779, 36, 1, 302, 8, 302, 8,
-        7777, 36, 1779, 36, 1, 303, 8, 303, 8,
-        7813, 32, 1779, 36, 1, 304, 8, 304, 8,
+        9204, 40, 2342, 35, 1, 300, 8, 300, 8,
+        9244, 36, 2457, 41, 1, 301, 8, 301, 8,
+        9280, 25, 3391, 36, 1, 302, 8, 302, 8,
+        9305, 36, 3391, 36, 1, 303, 8, 303, 8,
+        9341, 32, 3391, 36, 1, 304, 8, 304, 8,
     ],
 };
 
@@ -5826,16 +5848,19 @@ static POPULATE_MACOSTHEME_XAML_ROWS_27: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7676, 29, 65535, 255, 1, 305, 8,
-        7845, 32, 4387, 65512, 1, 306, 8,
-        7877, 28, 65535, 65535, 1, 307, 8,
-        7905, 28, 28794, 65521, 1, 308, 8,
-        7933, 24, 0, 65280, 1, 309, 8,
+        9204, 29, 65535, 255, 1, 305, 8,
+        9373, 32, 4387, 65512, 1, 306, 8,
+        9405, 28, 65535, 65535, 1, 307, 8,
+        9433, 28, 28794, 65521, 1, 308, 8,
+        9461, 24, 0, 65280, 1, 309, 8,
     ],
 };
 
 /// The keys and targets of the packed tables of the unit 3 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS: &str = "SystemControlTransparentBrushApplicationPageBackgroundThemeBrushSolidBackgroundFillColorBaseDefaultTextForegroundThemeBrushTextFillColorPrimaryBrushSystemControlFocusVisualPrimaryBrushFocusStrokeColorOuterBrushSystemControlFocusVisualSecondaryBrushFocusStrokeColorInnerBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS: &str = "SystemControlTransparentBrushTextControlBorderThemeThicknessTextControlBorderThemeThicknessFocusedTextControlThemePaddingApplicationPageBackgroundThemeBrushSolidBackgroundFillColorBaseDefaultTextForegroundThemeBrushTextFillColorPrimaryBrushSystemControlFocusVisualPrimaryBrushFocusStrokeColorOuterBrushSystemControlFocusVisualSecondaryBrushFocusStrokeColorInnerBrush";
+
+/// The numbers of the packed tables of the unit 3 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_3_NUMBERS: [f64; 3] = [1.0_f64, 6.0_f64, 3.0_f64];
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_28: rt::PackedRows = rt::PackedRows {
@@ -5846,19 +5871,23 @@ static POPULATE_MACOSTHEME_XAML_ROWS_28: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_29: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TextControlBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 19, position: 58 },
-    rt::ValueRow { key: "TextControlBorderThemeThicknessFocused", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 20, position: 65 },
-    rt::ValueRow { key: "TextControlThemePadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 21, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_29: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_3_NUMBERS,
+    records: &[
+        29, 31, 19, 58, 0, 0, 0, 0,
+        60, 38, 20, 65, 0, 0, 0, 0,
+        98, 23, 21, 50, 1, 2, 1, 2,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_30: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        29, 35, 64, 28, 1, 22, 8, 22, 68,
+        121, 35, 156, 28, 1, 22, 8, 22, 68,
     ],
 };
 
@@ -5867,145 +5896,149 @@ static POPULATE_MACOSTHEME_XAML_ROWS_31: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        92, 31, 123, 25, 1, 23, 8, 23, 8,
-        148, 36, 184, 26, 1, 24, 8, 24, 8,
-        210, 38, 248, 26, 1, 25, 8, 25, 8,
+        184, 31, 215, 25, 1, 23, 8, 23, 8,
+        240, 36, 276, 26, 1, 24, 8, 24, 8,
+        302, 38, 340, 26, 1, 25, 8, 25, 8,
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_32: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "TextFillColorPrimary", value: 4076863487_u32, line: 15, position: 43 },
-    rt::ValueRow { key: "TextFillColorSecondary", value: 2801795071_u32, line: 16, position: 45 },
-    rt::ValueRow { key: "TextFillColorTertiary", value: 1728053247_u32, line: 17, position: 44 },
-    rt::ValueRow { key: "TextFillColorDisabled", value: 1090519039_u32, line: 18, position: 44 },
-    rt::ValueRow { key: "TextFillColorInverse", value: 4278190080_u32, line: 19, position: 43 },
-    rt::ValueRow { key: "AccentTextFillColorDisabled", value: 1090519039_u32, line: 20, position: 50 },
-    rt::ValueRow { key: "TextOnAccentFillColorSelectedText", value: 4294967295_u32, line: 21, position: 56 },
-    rt::ValueRow { key: "TextOnAccentFillColorPrimary", value: 4294967295_u32, line: 22, position: 51 },
-    rt::ValueRow { key: "TextOnAccentFillColorSecondary", value: 3875536895_u32, line: 23, position: 53 },
-    rt::ValueRow { key: "TextOnAccentFillColorDisabled", value: 2583691263_u32, line: 24, position: 52 },
-    rt::ValueRow { key: "ControlFillColorDefault", value: 4283914071_u32, line: 25, position: 46 },
-    rt::ValueRow { key: "ControlFillColorSecondary", value: 4284637796_u32, line: 26, position: 48 },
-    rt::ValueRow { key: "ControlFillColorTertiary", value: 4285558898_u32, line: 27, position: 47 },
-    rt::ValueRow { key: "ControlFillColorQuarternary", value: 4282927178_u32, line: 28, position: 50 },
-    rt::ValueRow { key: "ControlFillColorDisabled", value: 4281742904_u32, line: 29, position: 47 },
-    rt::ValueRow { key: "ControlFillColorTransparent", value: 16777215_u32, line: 30, position: 50 },
-    rt::ValueRow { key: "ControlFillColorInputActive", value: 4280163872_u32, line: 31, position: 50 },
-    rt::ValueRow { key: "ControlStrongFillColorDefault", value: 4288190621_u32, line: 32, position: 52 },
-    rt::ValueRow { key: "ControlStrongFillColorDisabled", value: 865638557_u32, line: 33, position: 53 },
-    rt::ValueRow { key: "ControlSolidFillColorDefault", value: 4283914071_u32, line: 34, position: 51 },
-    rt::ValueRow { key: "SubtleFillColorTransparent", value: 0_u32, line: 35, position: 49 },
-    rt::ValueRow { key: "SubtleFillColorSecondary", value: 352321535_u32, line: 36, position: 47 },
-    rt::ValueRow { key: "SubtleFillColorTertiary", value: 587202559_u32, line: 37, position: 46 },
-    rt::ValueRow { key: "SubtleFillColorDisabled", value: 0_u32, line: 38, position: 46 },
-    rt::ValueRow { key: "ControlAltFillColorTransparent", value: 0_u32, line: 39, position: 53 },
-    rt::ValueRow { key: "ControlAltFillColorSecondary", value: 4282927178_u32, line: 40, position: 51 },
-    rt::ValueRow { key: "ControlAltFillColorTertiary", value: 4283716694_u32, line: 41, position: 50 },
-    rt::ValueRow { key: "ControlAltFillColorQuarternary", value: 4284703590_u32, line: 42, position: 53 },
-    rt::ValueRow { key: "ControlAltFillColorDisabled", value: 4281742904_u32, line: 43, position: 50 },
-    rt::ValueRow { key: "ControlOnImageFillColorDefault", value: 3425446958_u32, line: 44, position: 53 },
-    rt::ValueRow { key: "ControlOnImageFillColorSecondary", value: 3862575676_u32, line: 45, position: 55 },
-    rt::ValueRow { key: "ControlOnImageFillColorTertiary", value: 4282927178_u32, line: 46, position: 54 },
-    rt::ValueRow { key: "ControlOnImageFillColorDisabled", value: 2787912750_u32, line: 47, position: 54 },
-    rt::ValueRow { key: "AccentFillColorDisabled", value: 864980627_u32, line: 48, position: 46 },
-    rt::ValueRow { key: "ControlStrokeColorDefault", value: 1090519039_u32, line: 49, position: 48 },
-    rt::ValueRow { key: "ControlStrokeColorSecondary", value: 1509949439_u32, line: 50, position: 50 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentDefault", value: 436207616_u32, line: 51, position: 56 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentSecondary", value: 855638016_u32, line: 52, position: 58 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentTertiary", value: 855638016_u32, line: 53, position: 57 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentDisabled", value: 335544320_u32, line: 54, position: 57 },
-    rt::ValueRow { key: "ControlStrokeColorForStrongFillWhenOnImage", value: 1711276032_u32, line: 55, position: 65 },
-    rt::ValueRow { key: "CardStrokeColorDefault", value: 654311423_u32, line: 56, position: 45 },
-    rt::ValueRow { key: "CardStrokeColorDefaultSolid", value: 4282927178_u32, line: 57, position: 50 },
-    rt::ValueRow { key: "ControlStrongStrokeColorDefault", value: 2164260863_u32, line: 58, position: 54 },
-    rt::ValueRow { key: "ControlStrongStrokeColorDisabled", value: 872415231_u32, line: 59, position: 55 },
-    rt::ValueRow { key: "SurfaceStrokeColorDefault", value: 1509949439_u32, line: 60, position: 48 },
-    rt::ValueRow { key: "SurfaceStrokeColorFlyout", value: 872415231_u32, line: 61, position: 47 },
-    rt::ValueRow { key: "SurfaceStrokeColorInverse", value: 855638016_u32, line: 62, position: 48 },
-    rt::ValueRow { key: "DividerStrokeColorDefault", value: 872415231_u32, line: 63, position: 48 },
-    rt::ValueRow { key: "FocusStrokeColorOuter", value: 2567603455_u32, line: 64, position: 44 },
-    rt::ValueRow { key: "FocusStrokeColorInner", value: 0_u32, line: 65, position: 44 },
-    rt::ValueRow { key: "CardBackgroundFillColorDefault", value: 4281084974_u32, line: 66, position: 53 },
-    rt::ValueRow { key: "CardBackgroundFillColorSecondary", value: 4280558630_u32, line: 67, position: 55 },
-    rt::ValueRow { key: "CardBackgroundFillColorTertiary", value: 4282006076_u32, line: 68, position: 54 },
-    rt::ValueRow { key: "SmokeFillColorDefault", value: 1711276032_u32, line: 69, position: 44 },
-    rt::ValueRow { key: "LayerFillColorDefault", value: 3643550766_u32, line: 70, position: 44 },
-    rt::ValueRow { key: "LayerFillColorAlt", value: 4281084974_u32, line: 71, position: 40 },
-    rt::ValueRow { key: "LayerOnAcrylicFillColorDefault", value: 234881023_u32, line: 72, position: 53 },
-    rt::ValueRow { key: "LayerOnAccentAcrylicFillColorDefault", value: 234881023_u32, line: 73, position: 59 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorDefault", value: 3643550766_u32, line: 74, position: 57 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorSecondary", value: 352321535_u32, line: 75, position: 59 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorTertiary", value: 4281084974_u32, line: 76, position: 58 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorTransparent", value: 0_u32, line: 77, position: 61 },
-    rt::ValueRow { key: "SolidBackgroundFillColorBase", value: 4280558630_u32, line: 78, position: 51 },
-    rt::ValueRow { key: "SolidBackgroundFillColorSecondary", value: 4280032286_u32, line: 79, position: 56 },
-    rt::ValueRow { key: "SolidBackgroundFillColorTertiary", value: 4281084974_u32, line: 80, position: 55 },
-    rt::ValueRow { key: "SolidBackgroundFillColorQuarternary", value: 4282006076_u32, line: 81, position: 58 },
-    rt::ValueRow { key: "SolidBackgroundFillColorQuinary", value: 4282927178_u32, line: 82, position: 54 },
-    rt::ValueRow { key: "SolidBackgroundFillColorSenary", value: 4283716694_u32, line: 83, position: 53 },
-    rt::ValueRow { key: "SolidBackgroundFillColorTransparent", value: 2368550_u32, line: 84, position: 58 },
-    rt::ValueRow { key: "SolidBackgroundFillColorBaseAlt", value: 4280032286_u32, line: 85, position: 54 },
-    rt::ValueRow { key: "SystemFillColorSuccess", value: 4281389400_u32, line: 86, position: 45 },
-    rt::ValueRow { key: "SystemFillColorCaution", value: 4294942474_u32, line: 87, position: 45 },
-    rt::ValueRow { key: "SystemFillColorCritical", value: 4294919482_u32, line: 88, position: 46 },
-    rt::ValueRow { key: "SystemFillColorNeutral", value: 2576914589_u32, line: 89, position: 45 },
-    rt::ValueRow { key: "SystemFillColorSolidNeutral", value: 4288190621_u32, line: 90, position: 50 },
-    rt::ValueRow { key: "SystemFillColorAttentionBackground", value: 638223615_u32, line: 91, position: 57 },
-    rt::ValueRow { key: "SystemFillColorSuccessBackground", value: 640733528_u32, line: 92, position: 55 },
-    rt::ValueRow { key: "SystemFillColorCautionBackground", value: 654286602_u32, line: 93, position: 55 },
-    rt::ValueRow { key: "SystemFillColorCriticalBackground", value: 654263610_u32, line: 94, position: 56 },
-    rt::ValueRow { key: "SystemFillColorNeutralBackground", value: 647534749_u32, line: 95, position: 55 },
-    rt::ValueRow { key: "SystemFillColorSolidAttentionBackground", value: 4281084974_u32, line: 96, position: 62 },
-    rt::ValueRow { key: "SystemFillColorSolidNeutralBackground", value: 4281084974_u32, line: 97, position: 60 },
-];
-
 /// The keys and targets of the packed tables of the unit 4 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS: &str = "TextFillColorPrimaryBrushTextFillColorSecondaryBrushTextFillColorTertiaryBrushTextFillColorDisabledBrushTextFillColorInverseBrushAccentTextFillColorPrimaryBrushSystemAccentColorAccentTextFillColorSecondaryBrushAccentTextFillColorTertiaryBrushAccentTextFillColorDisabledBrushTextOnAccentFillColorSelectedTextBrushTextOnAccentFillColorPrimaryBrushTextOnAccentFillColorSecondaryBrushTextOnAccentFillColorDisabledBrushControlFillColorDefaultBrushControlFillColorSecondaryBrushControlFillColorTertiaryBrushControlFillColorQuarternaryBrushControlFillColorDisabledBrushControlFillColorTransparentBrushControlFillColorInputActiveBrushControlStrongFillColorDefaultBrushControlStrongFillColorDisabledBrushControlSolidFillColorDefaultBrushSubtleFillColorTransparentBrushSubtleFillColorSecondaryBrushSubtleFillColorTertiaryBrushSubtleFillColorDisabledBrushControlAltFillColorTransparentBrushControlAltFillColorSecondaryBrushControlAltFillColorTertiaryBrushControlAltFillColorQuarternaryBrushControlAltFillColorDisabledBrushControlOnImageFillColorDefaultBrushControlOnImageFillColorSecondaryBrushControlOnImageFillColorTertiaryBrushControlOnImageFillColorDisabledBrushAccentFillColorSelectedTextBackgroundBrushAccentFillColorDefaultBrushControlStrokeColorDefaultBrushControlStrokeColorSecondaryBrushControlStrokeColorOnAccentDefaultBrushControlStrokeColorOnAccentSecondaryBrushControlStrokeColorOnAccentTertiaryBrushControlStrokeColorOnAccentDisabledBrushControlStrokeColorForStrongFillWhenOnImageBrushCardStrokeColorDefaultBrushCardStrokeColorDefaultSolidBrushControlStrongStrokeColorDefaultBrushControlStrongStrokeColorDisabledBrushSurfaceStrokeColorDefaultBrushSurfaceStrokeColorFlyoutBrushSurfaceStrokeColorInverseBrushDividerStrokeColorDefaultBrushFocusStrokeColorOuterBrushFocusStrokeColorInnerBrushCardBackgroundFillColorDefaultBrushCardBackgroundFillColorSecondaryBrushCardBackgroundFillColorTertiaryBrushSmokeFillColorDefaultBrushLayerFillColorDefaultBrushLayerFillColorAltBrushLayerOnAcrylicFillColorDefaultBrushLayerOnAccentAcrylicFillColorDefaultBrushLayerOnMicaBaseAltFillColorDefaultBrushLayerOnMicaBaseAltFillColorSecondaryBrushLayerOnMicaBaseAltFillColorTertiaryBrushLayerOnMicaBaseAltFillColorTransparentBrushSolidBackgroundFillColorBaseBrushSolidBackgroundFillColorSecondaryBrushSolidBackgroundFillColorTertiaryBrushSolidBackgroundFillColorQuarternaryBrushSolidBackgroundFillColorQuinaryBrushSolidBackgroundFillColorSenaryBrushSolidBackgroundFillColorBaseAltBrushSystemFillColorAttentionBrushSystemFillColorSuccessBrushSystemFillColorCautionBrushSystemFillColorCriticalBrushSystemFillColorNeutralBrushSystemFillColorSolidNeutralBrushSystemFillColorAttentionBackgroundBrushSystemFillColorSuccessBackgroundBrushSystemFillColorCautionBackgroundBrushSystemFillColorCriticalBackgroundBrushSystemFillColorNeutralBackgroundBrushSystemFillColorSolidAttentionBackgroundBrushSystemFillColorSolidNeutralBackgroundBrushSystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorHotlightColorBrushSystemColorGrayTextColorBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS: &str = "TextFillColorPrimaryTextFillColorSecondaryTextFillColorTertiaryTextFillColorDisabledTextFillColorInverseAccentTextFillColorDisabledTextOnAccentFillColorSelectedTextTextOnAccentFillColorPrimaryTextOnAccentFillColorSecondaryTextOnAccentFillColorDisabledControlFillColorDefaultControlFillColorSecondaryControlFillColorTertiaryControlFillColorQuarternaryControlFillColorDisabledControlFillColorTransparentControlFillColorInputActiveControlStrongFillColorDefaultControlStrongFillColorDisabledControlSolidFillColorDefaultSubtleFillColorTransparentSubtleFillColorSecondarySubtleFillColorTertiarySubtleFillColorDisabledControlAltFillColorTransparentControlAltFillColorSecondaryControlAltFillColorTertiaryControlAltFillColorQuarternaryControlAltFillColorDisabledControlOnImageFillColorDefaultControlOnImageFillColorSecondaryControlOnImageFillColorTertiaryControlOnImageFillColorDisabledControlStrokeColorDefaultControlStrokeColorSecondaryControlStrokeColorOnAccentDefaultControlStrokeColorOnAccentSecondaryControlStrokeColorOnAccentTertiaryControlStrokeColorOnAccentDisabledControlStrokeColorForStrongFillWhenOnImageCardStrokeColorDefaultCardStrokeColorDefaultSolidControlStrongStrokeColorDefaultControlStrongStrokeColorDisabledSurfaceStrokeColorDefaultSurfaceStrokeColorFlyoutSurfaceStrokeColorInverseDividerStrokeColorDefaultFocusStrokeColorOuterFocusStrokeColorInnerCardBackgroundFillColorDefaultCardBackgroundFillColorSecondaryCardBackgroundFillColorTertiarySmokeFillColorDefaultLayerFillColorDefaultLayerFillColorAltLayerOnAcrylicFillColorDefaultLayerOnAccentAcrylicFillColorDefaultLayerOnMicaBaseAltFillColorDefaultLayerOnMicaBaseAltFillColorSecondaryLayerOnMicaBaseAltFillColorTertiaryLayerOnMicaBaseAltFillColorTransparentSolidBackgroundFillColorBaseSolidBackgroundFillColorSecondarySolidBackgroundFillColorTertiarySolidBackgroundFillColorQuarternarySolidBackgroundFillColorQuinarySolidBackgroundFillColorSenarySolidBackgroundFillColorTransparentSolidBackgroundFillColorBaseAltSystemFillColorSuccessSystemFillColorCautionSystemFillColorCriticalSystemFillColorNeutralSystemFillColorSolidNeutralSystemFillColorAttentionBackgroundSystemFillColorSuccessBackgroundSystemFillColorCautionBackgroundSystemFillColorCriticalBackgroundSystemFillColorNeutralBackgroundSystemFillColorSolidAttentionBackgroundSystemFillColorSolidNeutralBackgroundTextFillColorPrimaryBrushTextFillColorSecondaryBrushTextFillColorTertiaryBrushTextFillColorDisabledBrushTextFillColorInverseBrushAccentTextFillColorPrimaryBrushSystemAccentColorAccentTextFillColorSecondaryBrushAccentTextFillColorTertiaryBrushAccentTextFillColorDisabledBrushTextOnAccentFillColorSelectedTextBrushTextOnAccentFillColorPrimaryBrushTextOnAccentFillColorSecondaryBrushTextOnAccentFillColorDisabledBrushControlFillColorDefaultBrushControlFillColorSecondaryBrushControlFillColorTertiaryBrushControlFillColorQuarternaryBrushControlFillColorDisabledBrushControlFillColorTransparentBrushControlFillColorInputActiveBrushControlStrongFillColorDefaultBrushControlStrongFillColorDisabledBrushControlSolidFillColorDefaultBrushSubtleFillColorTransparentBrushSubtleFillColorSecondaryBrushSubtleFillColorTertiaryBrushSubtleFillColorDisabledBrushControlAltFillColorTransparentBrushControlAltFillColorSecondaryBrushControlAltFillColorTertiaryBrushControlAltFillColorQuarternaryBrushControlAltFillColorDisabledBrushControlOnImageFillColorDefaultBrushControlOnImageFillColorSecondaryBrushControlOnImageFillColorTertiaryBrushControlOnImageFillColorDisabledBrushAccentFillColorSelectedTextBackgroundBrushAccentFillColorDefaultBrushControlStrokeColorDefaultBrushControlStrokeColorSecondaryBrushControlStrokeColorOnAccentDefaultBrushControlStrokeColorOnAccentSecondaryBrushControlStrokeColorOnAccentTertiaryBrushControlStrokeColorOnAccentDisabledBrushControlStrokeColorForStrongFillWhenOnImageBrushCardStrokeColorDefaultBrushCardStrokeColorDefaultSolidBrushControlStrongStrokeColorDefaultBrushControlStrongStrokeColorDisabledBrushSurfaceStrokeColorDefaultBrushSurfaceStrokeColorFlyoutBrushSurfaceStrokeColorInverseBrushDividerStrokeColorDefaultBrushFocusStrokeColorOuterBrushFocusStrokeColorInnerBrushCardBackgroundFillColorDefaultBrushCardBackgroundFillColorSecondaryBrushCardBackgroundFillColorTertiaryBrushSmokeFillColorDefaultBrushLayerFillColorDefaultBrushLayerFillColorAltBrushLayerOnAcrylicFillColorDefaultBrushLayerOnAccentAcrylicFillColorDefaultBrushLayerOnMicaBaseAltFillColorDefaultBrushLayerOnMicaBaseAltFillColorSecondaryBrushLayerOnMicaBaseAltFillColorTertiaryBrushLayerOnMicaBaseAltFillColorTransparentBrushSolidBackgroundFillColorBaseBrushSolidBackgroundFillColorSecondaryBrushSolidBackgroundFillColorTertiaryBrushSolidBackgroundFillColorQuarternaryBrushSolidBackgroundFillColorQuinaryBrushSolidBackgroundFillColorSenaryBrushSolidBackgroundFillColorBaseAltBrushSystemFillColorAttentionBrushSystemFillColorSuccessBrushSystemFillColorCautionBrushSystemFillColorCriticalBrushSystemFillColorNeutralBrushSystemFillColorSolidNeutralBrushSystemFillColorAttentionBackgroundBrushSystemFillColorSuccessBackgroundBrushSystemFillColorCautionBackgroundBrushSystemFillColorCriticalBackgroundBrushSystemFillColorNeutralBackgroundBrushSystemFillColorSolidAttentionBackgroundBrushSystemFillColorSolidNeutralBackgroundBrushSystemColorWindowTextColorBrushSystemColorWindowColorBrushSystemColorButtonFaceColorBrushSystemColorButtonTextColorBrushSystemColorHighlightColorBrushSystemColorHighlightTextColorBrushSystemColorHotlightColorBrushSystemColorGrayTextColorBrushControlFastOutSlowInKeySpline0,0,0,1ControlNormalAnimationDuration00:00:00.250ControlFastAnimationDuration00:00:00.167ControlFastAnimationAfterDuration00:00:00.168ControlFasterAnimationDuration00:00:00.083";
+
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_32: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 20, 15, 43, 65535, 62207,
+        20, 22, 16, 45, 65535, 42751,
+        42, 21, 17, 44, 65535, 26367,
+        63, 21, 18, 44, 65535, 16639,
+        84, 20, 19, 43, 0, 65280,
+        104, 27, 20, 50, 65535, 16639,
+        131, 33, 21, 56, 65535, 65535,
+        164, 28, 22, 51, 65535, 65535,
+        192, 30, 23, 53, 65535, 59135,
+        222, 29, 24, 52, 65535, 39423,
+        251, 23, 25, 46, 22359, 65367,
+        274, 25, 26, 48, 25188, 65378,
+        299, 24, 27, 47, 28786, 65392,
+        323, 27, 28, 50, 18506, 65352,
+        350, 24, 29, 47, 13880, 65334,
+        374, 27, 30, 50, 65535, 255,
+        401, 27, 31, 50, 7712, 65310,
+        428, 29, 32, 52, 39069, 65432,
+        457, 30, 33, 53, 39069, 13208,
+        487, 28, 34, 51, 22359, 65367,
+        515, 26, 35, 49, 0, 0,
+        541, 24, 36, 47, 65535, 5375,
+        565, 23, 37, 46, 65535, 8959,
+        588, 23, 38, 46, 0, 0,
+        611, 30, 39, 53, 0, 0,
+        641, 28, 40, 51, 18506, 65352,
+        669, 27, 41, 50, 21590, 65364,
+        696, 30, 42, 53, 25446, 65379,
+        726, 27, 43, 50, 13880, 65334,
+        753, 30, 44, 53, 11310, 52268,
+        783, 32, 45, 55, 14908, 58938,
+        815, 31, 46, 54, 18506, 65352,
+        846, 31, 47, 54, 11310, 42540,
+        228, 23, 48, 46, 36499, 13198,
+        877, 25, 49, 48, 65535, 16639,
+        902, 27, 50, 50, 65535, 23039,
+        929, 33, 51, 56, 0, 6656,
+        962, 35, 52, 58, 0, 13056,
+        997, 34, 53, 57, 0, 13056,
+        1031, 34, 54, 57, 0, 5120,
+        1065, 42, 55, 65, 0, 26112,
+        1107, 22, 56, 45, 65535, 9983,
+        1129, 27, 57, 50, 18506, 65352,
+        1156, 31, 58, 54, 65535, 33023,
+        1187, 32, 59, 55, 65535, 13311,
+        1219, 25, 60, 48, 65535, 23039,
+        1244, 24, 61, 47, 65535, 13311,
+        1268, 25, 62, 48, 0, 13056,
+        1293, 25, 63, 48, 65535, 13311,
+        1318, 21, 64, 44, 34047, 39178,
+        1339, 21, 65, 44, 0, 0,
+        1360, 30, 66, 53, 11310, 65324,
+        1390, 32, 67, 55, 9254, 65316,
+        1422, 31, 68, 54, 14908, 65338,
+        1453, 21, 69, 44, 0, 26112,
+        1474, 21, 70, 44, 11310, 55596,
+        1495, 17, 71, 40, 11310, 65324,
+        1512, 30, 72, 53, 65535, 3583,
+        1542, 36, 73, 59, 65535, 3583,
+        1578, 34, 74, 57, 11310, 55596,
+        1612, 36, 75, 59, 65535, 5375,
+        1648, 35, 76, 58, 11310, 65324,
+        1683, 38, 77, 61, 0, 0,
+        1721, 28, 78, 51, 9254, 65316,
+        1749, 33, 79, 56, 7198, 65308,
+        1782, 32, 80, 55, 11310, 65324,
+        1814, 35, 81, 58, 14908, 65338,
+        1849, 31, 82, 54, 18506, 65352,
+        1880, 30, 83, 53, 21590, 65364,
+        1910, 35, 84, 58, 9254, 36,
+        1945, 31, 85, 54, 7198, 65308,
+        1976, 22, 86, 45, 53592, 65328,
+        1998, 22, 87, 45, 40714, 65535,
+        2020, 23, 88, 46, 17722, 65535,
+        2043, 22, 89, 45, 39069, 39320,
+        2065, 27, 90, 50, 39069, 65432,
+        2092, 34, 91, 57, 34047, 9738,
+        2126, 32, 92, 55, 53592, 9776,
+        2158, 32, 93, 55, 40714, 9983,
+        2190, 33, 94, 56, 17722, 9983,
+        2223, 32, 95, 55, 39069, 9880,
+        2255, 39, 96, 62, 11310, 65324,
+        2294, 37, 97, 60, 11310, 65324,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_33: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 0, 20, 1, 98, 8, 98, 58,
-        25, 27, 25, 22, 1, 99, 8, 99, 60,
-        52, 26, 52, 21, 1, 100, 8, 100, 59,
-        78, 26, 78, 21, 1, 101, 8, 101, 59,
-        104, 25, 104, 20, 1, 102, 8, 102, 58,
-        129, 31, 160, 17, 1, 103, 8, 103, 64,
-        177, 33, 160, 17, 1, 104, 8, 104, 66,
-        210, 32, 160, 17, 1, 105, 8, 105, 65,
-        242, 32, 242, 27, 1, 106, 8, 106, 65,
-        274, 38, 274, 33, 1, 107, 8, 107, 71,
-        312, 33, 312, 28, 1, 108, 8, 108, 66,
-        345, 35, 345, 30, 1, 109, 8, 109, 68,
-        380, 34, 380, 29, 1, 110, 8, 110, 67,
-        414, 28, 414, 23, 1, 111, 8, 111, 61,
-        442, 30, 442, 25, 1, 112, 8, 112, 63,
-        472, 29, 472, 24, 1, 113, 8, 113, 62,
-        501, 32, 501, 27, 1, 114, 8, 114, 65,
-        533, 29, 533, 24, 1, 115, 8, 115, 62,
-        562, 32, 562, 27, 1, 116, 8, 116, 65,
-        594, 32, 594, 27, 1, 117, 8, 117, 65,
-        626, 34, 626, 29, 1, 118, 8, 118, 67,
-        660, 35, 660, 30, 1, 119, 8, 119, 68,
-        695, 33, 695, 28, 1, 120, 8, 120, 66,
-        728, 31, 728, 26, 1, 121, 8, 121, 64,
-        759, 29, 759, 24, 1, 122, 8, 122, 62,
-        788, 28, 788, 23, 1, 123, 8, 123, 61,
-        816, 28, 816, 23, 1, 124, 8, 124, 61,
-        844, 35, 844, 30, 1, 125, 8, 125, 68,
-        879, 33, 879, 28, 1, 126, 8, 126, 66,
-        912, 32, 912, 27, 1, 127, 8, 127, 65,
-        944, 35, 944, 30, 1, 128, 8, 128, 68,
-        979, 32, 979, 27, 1, 129, 8, 129, 65,
-        1011, 35, 1011, 30, 1, 130, 8, 130, 68,
-        1046, 37, 1046, 32, 1, 131, 8, 131, 70,
-        1083, 36, 1083, 31, 1, 132, 8, 132, 69,
-        1119, 36, 1119, 31, 1, 133, 8, 133, 69,
-        1155, 42, 160, 17, 1, 134, 8, 134, 75,
-        1197, 27, 160, 17, 1, 135, 8, 135, 60,
+        2331, 25, 0, 20, 1, 98, 8, 98, 58,
+        2356, 27, 20, 22, 1, 99, 8, 99, 60,
+        2383, 26, 42, 21, 1, 100, 8, 100, 59,
+        2409, 26, 63, 21, 1, 101, 8, 101, 59,
+        2435, 25, 84, 20, 1, 102, 8, 102, 58,
+        2460, 31, 2491, 17, 1, 103, 8, 103, 64,
+        2508, 33, 2491, 17, 1, 104, 8, 104, 66,
+        2541, 32, 2491, 17, 1, 105, 8, 105, 65,
+        2573, 32, 104, 27, 1, 106, 8, 106, 65,
+        2605, 38, 131, 33, 1, 107, 8, 107, 71,
+        2643, 33, 164, 28, 1, 108, 8, 108, 66,
+        2676, 35, 192, 30, 1, 109, 8, 109, 68,
+        2711, 34, 222, 29, 1, 110, 8, 110, 67,
+        2745, 28, 251, 23, 1, 111, 8, 111, 61,
+        2773, 30, 274, 25, 1, 112, 8, 112, 63,
+        2803, 29, 299, 24, 1, 113, 8, 113, 62,
+        2832, 32, 323, 27, 1, 114, 8, 114, 65,
+        2864, 29, 350, 24, 1, 115, 8, 115, 62,
+        2893, 32, 374, 27, 1, 116, 8, 116, 65,
+        2925, 32, 401, 27, 1, 117, 8, 117, 65,
+        2957, 34, 428, 29, 1, 118, 8, 118, 67,
+        2991, 35, 457, 30, 1, 119, 8, 119, 68,
+        3026, 33, 487, 28, 1, 120, 8, 120, 66,
+        3059, 31, 515, 26, 1, 121, 8, 121, 64,
+        3090, 29, 541, 24, 1, 122, 8, 122, 62,
+        3119, 28, 565, 23, 1, 123, 8, 123, 61,
+        3147, 28, 588, 23, 1, 124, 8, 124, 61,
+        3175, 35, 611, 30, 1, 125, 8, 125, 68,
+        3210, 33, 641, 28, 1, 126, 8, 126, 66,
+        3243, 32, 669, 27, 1, 127, 8, 127, 65,
+        3275, 35, 696, 30, 1, 128, 8, 128, 68,
+        3310, 32, 726, 27, 1, 129, 8, 129, 65,
+        3342, 35, 753, 30, 1, 130, 8, 130, 68,
+        3377, 37, 783, 32, 1, 131, 8, 131, 70,
+        3414, 36, 815, 31, 1, 132, 8, 132, 69,
+        3450, 36, 846, 31, 1, 133, 8, 133, 69,
+        3486, 42, 2491, 17, 1, 134, 8, 134, 75,
+        3528, 27, 2491, 17, 1, 135, 8, 135, 60,
     ],
 };
 
@@ -6014,56 +6047,56 @@ static POPULATE_MACOSTHEME_XAML_ROWS_34: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        386, 28, 386, 23, 1, 138, 8, 138, 61,
-        1224, 30, 1224, 25, 1, 139, 8, 139, 63,
-        1254, 32, 1254, 27, 1, 140, 8, 140, 65,
-        1286, 38, 1286, 33, 1, 141, 8, 141, 71,
-        1324, 40, 1324, 35, 1, 142, 8, 142, 73,
-        1364, 39, 1364, 34, 1, 143, 8, 143, 72,
-        1403, 39, 1403, 34, 1, 144, 8, 144, 72,
-        1442, 47, 1442, 42, 1, 145, 8, 145, 80,
-        1489, 27, 1489, 22, 1, 146, 8, 146, 60,
-        1516, 32, 1516, 27, 1, 147, 8, 147, 65,
-        1548, 36, 1548, 31, 1, 148, 8, 148, 69,
-        1584, 37, 1584, 32, 1, 149, 8, 149, 70,
-        1621, 30, 1621, 25, 1, 150, 8, 150, 63,
-        1651, 29, 1651, 24, 1, 151, 8, 151, 62,
-        1680, 30, 1680, 25, 1, 152, 8, 152, 63,
-        1710, 30, 1710, 25, 1, 153, 8, 153, 63,
-        1740, 26, 1740, 21, 1, 154, 8, 154, 59,
-        1766, 26, 1766, 21, 1, 155, 8, 155, 59,
-        1792, 35, 1792, 30, 1, 156, 8, 156, 68,
-        1827, 37, 1827, 32, 1, 157, 8, 157, 70,
-        1864, 36, 1864, 31, 1, 158, 8, 158, 69,
-        1900, 26, 1900, 21, 1, 159, 8, 159, 59,
-        1926, 26, 1926, 21, 1, 160, 8, 160, 59,
-        1952, 22, 1952, 17, 1, 161, 8, 161, 55,
-        1974, 35, 1974, 30, 1, 162, 8, 162, 68,
-        2009, 41, 2009, 36, 1, 163, 8, 163, 74,
-        2050, 39, 2050, 34, 1, 164, 8, 164, 72,
-        2089, 41, 2089, 36, 1, 165, 8, 165, 74,
-        2130, 40, 2130, 35, 1, 166, 8, 166, 73,
-        2170, 43, 2170, 38, 1, 167, 8, 167, 76,
-        2213, 33, 2213, 28, 1, 168, 8, 168, 66,
-        2246, 38, 2246, 33, 1, 169, 8, 169, 71,
-        2284, 37, 2284, 32, 1, 170, 8, 170, 70,
-        2321, 40, 2321, 35, 1, 171, 8, 171, 73,
-        2361, 36, 2361, 31, 1, 172, 8, 172, 69,
-        2397, 35, 2397, 30, 1, 173, 8, 173, 68,
-        2432, 36, 2432, 31, 1, 174, 8, 174, 69,
-        2468, 29, 160, 17, 1, 175, 8, 175, 62,
-        2497, 27, 2497, 22, 1, 176, 8, 176, 60,
-        2524, 27, 2524, 22, 1, 177, 8, 177, 60,
-        2551, 28, 2551, 23, 1, 178, 8, 178, 61,
-        2579, 27, 2579, 22, 1, 179, 8, 179, 60,
-        2606, 32, 2606, 27, 1, 180, 8, 180, 65,
-        2638, 39, 2638, 34, 1, 181, 8, 181, 72,
-        2677, 37, 2677, 32, 1, 182, 8, 182, 70,
-        2714, 37, 2714, 32, 1, 183, 8, 183, 70,
-        2751, 38, 2751, 33, 1, 184, 8, 184, 71,
-        2789, 37, 2789, 32, 1, 185, 8, 185, 70,
-        2826, 44, 2826, 39, 1, 186, 8, 186, 77,
-        2870, 42, 2870, 37, 1, 187, 8, 187, 75,
+        2717, 28, 228, 23, 1, 138, 8, 138, 61,
+        3555, 30, 877, 25, 1, 139, 8, 139, 63,
+        3585, 32, 902, 27, 1, 140, 8, 140, 65,
+        3617, 38, 929, 33, 1, 141, 8, 141, 71,
+        3655, 40, 962, 35, 1, 142, 8, 142, 73,
+        3695, 39, 997, 34, 1, 143, 8, 143, 72,
+        3734, 39, 1031, 34, 1, 144, 8, 144, 72,
+        3773, 47, 1065, 42, 1, 145, 8, 145, 80,
+        3820, 27, 1107, 22, 1, 146, 8, 146, 60,
+        3847, 32, 1129, 27, 1, 147, 8, 147, 65,
+        3879, 36, 1156, 31, 1, 148, 8, 148, 69,
+        3915, 37, 1187, 32, 1, 149, 8, 149, 70,
+        3952, 30, 1219, 25, 1, 150, 8, 150, 63,
+        3982, 29, 1244, 24, 1, 151, 8, 151, 62,
+        4011, 30, 1268, 25, 1, 152, 8, 152, 63,
+        4041, 30, 1293, 25, 1, 153, 8, 153, 63,
+        4071, 26, 1318, 21, 1, 154, 8, 154, 59,
+        4097, 26, 1339, 21, 1, 155, 8, 155, 59,
+        4123, 35, 1360, 30, 1, 156, 8, 156, 68,
+        4158, 37, 1390, 32, 1, 157, 8, 157, 70,
+        4195, 36, 1422, 31, 1, 158, 8, 158, 69,
+        4231, 26, 1453, 21, 1, 159, 8, 159, 59,
+        4257, 26, 1474, 21, 1, 160, 8, 160, 59,
+        4283, 22, 1495, 17, 1, 161, 8, 161, 55,
+        4305, 35, 1512, 30, 1, 162, 8, 162, 68,
+        4340, 41, 1542, 36, 1, 163, 8, 163, 74,
+        4381, 39, 1578, 34, 1, 164, 8, 164, 72,
+        4420, 41, 1612, 36, 1, 165, 8, 165, 74,
+        4461, 40, 1648, 35, 1, 166, 8, 166, 73,
+        4501, 43, 1683, 38, 1, 167, 8, 167, 76,
+        4544, 33, 1721, 28, 1, 168, 8, 168, 66,
+        4577, 38, 1749, 33, 1, 169, 8, 169, 71,
+        4615, 37, 1782, 32, 1, 170, 8, 170, 70,
+        4652, 40, 1814, 35, 1, 171, 8, 171, 73,
+        4692, 36, 1849, 31, 1, 172, 8, 172, 69,
+        4728, 35, 1880, 30, 1, 173, 8, 173, 68,
+        4763, 36, 1945, 31, 1, 174, 8, 174, 69,
+        4799, 29, 2491, 17, 1, 175, 8, 175, 62,
+        4828, 27, 1976, 22, 1, 176, 8, 176, 60,
+        4855, 27, 1998, 22, 1, 177, 8, 177, 60,
+        4882, 28, 2020, 23, 1, 178, 8, 178, 61,
+        4910, 27, 2043, 22, 1, 179, 8, 179, 60,
+        4937, 32, 2065, 27, 1, 180, 8, 180, 65,
+        4969, 39, 2092, 34, 1, 181, 8, 181, 72,
+        5008, 37, 2126, 32, 1, 182, 8, 182, 70,
+        5045, 37, 2158, 32, 1, 183, 8, 183, 70,
+        5082, 38, 2190, 33, 1, 184, 8, 184, 71,
+        5120, 37, 2223, 32, 1, 185, 8, 185, 70,
+        5157, 44, 2255, 39, 1, 186, 8, 186, 77,
+        5201, 42, 2294, 37, 1, 187, 8, 187, 75,
     ],
 };
 
@@ -6072,19 +6105,19 @@ static POPULATE_MACOSTHEME_XAML_ROWS_35: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2912, 31, 255, 65535, 1, 188, 8,
-        2943, 27, 255, 65535, 1, 189, 8,
-        2970, 31, 255, 65535, 1, 190, 8,
-        3001, 31, 255, 65535, 1, 191, 8,
-        3032, 30, 255, 65535, 1, 192, 8,
-        3062, 34, 255, 65535, 1, 193, 8,
-        3096, 29, 255, 65535, 1, 194, 8,
-        3125, 29, 255, 65535, 1, 195, 8,
+        5243, 31, 255, 65535, 1, 188, 8,
+        5274, 27, 255, 65535, 1, 189, 8,
+        5301, 31, 255, 65535, 1, 190, 8,
+        5332, 31, 255, 65535, 1, 191, 8,
+        5363, 30, 255, 65535, 1, 192, 8,
+        5393, 34, 255, 65535, 1, 193, 8,
+        5427, 29, 255, 65535, 1, 194, 8,
+        5456, 29, 255, 65535, 1, 195, 8,
     ],
 };
 
 /// The keys and targets of the packed tables of the unit 5 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS: &str = "SystemControlTransientBackgroundBrushTextOnAccentFillColorDefaultBrushTextOnAccentAAFillColorPrimaryBrushTextOnAccentAAFillColorSecondaryBrushTextOnAccentAAFillColorDisabledBrushControlAAFillColorDefaultBrushControlAAFillColorDisabledBrushAccentAAFillColorDefaultBrushSystemAccentColorAccentAAFillColorTertiaryBrushControlStrokeColorForAAFillOnImageBrushControlAAStrokeColorDefaultBrushControlAAStrokeColorDisabledBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS: &str = "SystemControlTransientBackgroundBrushTextOnAccentFillColorDefaultTextOnAccentAAFillColorPrimaryTextOnAccentAAFillColorSecondaryTextOnAccentAAFillColorDisabledControlAAFillColorDefaultControlAAFillColorDisabledControlStrokeColorForAAFillOnImageControlAAStrokeColorDefaultControlAAStrokeColorDisabledTextOnAccentFillColorDefaultBrushTextOnAccentAAFillColorPrimaryBrushTextOnAccentAAFillColorSecondaryBrushTextOnAccentAAFillColorDisabledBrushControlAAFillColorDefaultBrushControlAAFillColorDisabledBrushAccentAAFillColorDefaultBrushSystemAccentColorAccentAAFillColorTertiaryBrushControlStrokeColorForAAFillOnImageBrushControlAAStrokeColorDefaultBrushControlAAStrokeColorDisabledBrush";
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_36: rt::PackedRows = rt::PackedRows {
@@ -6095,43 +6128,50 @@ static POPULATE_MACOSTHEME_XAML_ROWS_36: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_37: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "TextOnAccentFillColorDefault", value: 4294967295_u32, line: 16, position: 51 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorPrimary", value: 4278190080_u32, line: 17, position: 53 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorSecondary", value: 2147483648_u32, line: 18, position: 55 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorDisabled", value: 2281701375_u32, line: 19, position: 54 },
-    rt::ValueRow { key: "ControlAAFillColorDefault", value: 2348810239_u32, line: 20, position: 48 },
-    rt::ValueRow { key: "ControlAAFillColorDisabled", value: 1073741823_u32, line: 21, position: 49 },
-    rt::ValueRow { key: "AccentAAFillColorDisabled", value: 687865855_u32, line: 22, position: 48 },
-    rt::ValueRow { key: "ControlStrokeColorForAAFillOnImage", value: 1795162112_u32, line: 23, position: 57 },
-    rt::ValueRow { key: "ControlAAStrokeColorDefault", value: 2348810239_u32, line: 24, position: 50 },
-    rt::ValueRow { key: "ControlAAStrokeColorDisabled", value: 687865855_u32, line: 25, position: 51 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_37: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS,
+    numbers: &[],
+    records: &[
+        37, 28, 16, 51, 65535, 65535,
+        65, 30, 17, 53, 0, 65280,
+        95, 32, 18, 55, 0, 32768,
+        127, 31, 19, 54, 65535, 34815,
+        158, 25, 20, 48, 65535, 35839,
+        183, 26, 21, 49, 65535, 16383,
+        133, 25, 22, 48, 65535, 10495,
+        209, 34, 23, 57, 0, 27392,
+        243, 27, 24, 50, 65535, 35839,
+        270, 28, 25, 51, 65535, 10495,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_38: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        37, 33, 37, 28, 1, 26, 8, 26, 66,
-        70, 35, 70, 30, 1, 27, 8, 27, 68,
-        105, 37, 105, 32, 1, 28, 8, 28, 70,
-        142, 36, 142, 31, 1, 29, 8, 29, 69,
-        178, 30, 178, 25, 1, 30, 8, 30, 63,
-        208, 31, 208, 26, 1, 31, 8, 31, 64,
-        239, 29, 268, 17, 1, 32, 8, 32, 62,
-        111, 31, 268, 17, 1, 33, 8, 33, 64,
-        285, 30, 268, 17, 1, 34, 8, 34, 63,
-        148, 30, 148, 25, 1, 35, 8, 35, 63,
-        315, 39, 315, 34, 1, 36, 8, 36, 72,
-        354, 32, 354, 27, 1, 37, 8, 37, 65,
-        386, 33, 386, 28, 1, 38, 8, 38, 66,
+        298, 33, 37, 28, 1, 26, 8, 26, 66,
+        331, 35, 65, 30, 1, 27, 8, 27, 68,
+        366, 37, 95, 32, 1, 28, 8, 28, 70,
+        403, 36, 127, 31, 1, 29, 8, 29, 69,
+        439, 30, 158, 25, 1, 30, 8, 30, 63,
+        469, 31, 183, 26, 1, 31, 8, 31, 64,
+        500, 29, 529, 17, 1, 32, 8, 32, 62,
+        372, 31, 529, 17, 1, 33, 8, 33, 64,
+        546, 30, 529, 17, 1, 34, 8, 34, 63,
+        409, 30, 133, 25, 1, 35, 8, 35, 63,
+        576, 39, 209, 34, 1, 36, 8, 36, 72,
+        615, 32, 243, 27, 1, 37, 8, 37, 65,
+        647, 33, 270, 28, 1, 38, 8, 38, 66,
     ],
 };
 
 /// The keys and targets of the packed tables of the unit 7 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_7_STRINGS: &str = "TextBoxForegroundHeaderThemeBrushTextBoxPlaceholderTextThemeBrushTextBoxBackgroundThemeBrushTextBoxBorderThemeBrushTextBoxButtonBackgroundThemeBrushTextBoxButtonBorderThemeBrushTextBoxButtonForegroundThemeBrushTextBoxButtonPointerOverBackgroundThemeBrushTextBoxButtonPointerOverBorderThemeBrushTextBoxButtonPointerOverForegroundThemeBrushTextBoxButtonPressedBackgroundThemeBrushTextBoxButtonPressedBorderThemeBrushTextBoxButtonPressedForegroundThemeBrushTextBoxDisabledBackgroundThemeBrushTextBoxDisabledBorderThemeBrushTextBoxDisabledForegroundThemeBrushTextBoxForegroundThemeBrushTextControlBackgroundControlFillColorDefaultBrushTextControlBackgroundPointerOverControlFillColorSecondaryBrushTextControlBackgroundFocusedControlFillColorInputActiveBrushTextControlBackgroundDisabledControlFillColorDisabledBrushTextControlBorderBrushTextControlElevationBorderBrushTextControlBorderBrushPointerOverTextControlBorderBrushFocusedTextControlElevationBorderFocusedBrushTextControlBorderBrushDisabledControlStrokeColorDefaultBrushTextControlForegroundTextFillColorPrimaryBrushTextControlForegroundPointerOverTextControlForegroundFocusedTextControlForegroundDisabledTemporaryTextFillColorDisabledTextControlPlaceholderForegroundTextFillColorSecondaryBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundFocusedTextControlPlaceholderForegroundDisabledTextFillColorDisabledBrushTextControlSelectionHighlightColorAccentFillColorSelectedTextBackgroundBrushTextControlButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTextControlButtonBackgroundPressedSubtleFillColorTertiaryBrushTextControlButtonBorderBrushControlFillColorTransparentTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextFillColorTertiaryBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_7_STRINGS: &str = "TextBoxForegroundHeaderThemeBrushTextBoxPlaceholderTextThemeBrushTextBoxBackgroundThemeBrushTextBoxBorderThemeBrushTextBoxButtonBackgroundThemeBrushTextBoxButtonBorderThemeBrushTextBoxButtonForegroundThemeBrushTextBoxButtonPointerOverBackgroundThemeBrushTextBoxButtonPointerOverBorderThemeBrushTextBoxButtonPointerOverForegroundThemeBrushTextBoxButtonPressedBackgroundThemeBrushTextBoxButtonPressedBorderThemeBrushTextBoxButtonPressedForegroundThemeBrushTextBoxDisabledBackgroundThemeBrushTextBoxDisabledBorderThemeBrushTextBoxDisabledForegroundThemeBrushTextBoxForegroundThemeBrushTextControlBackgroundControlFillColorDefaultBrushTextControlBackgroundPointerOverControlFillColorSecondaryBrushTextControlBackgroundFocusedControlFillColorInputActiveBrushTextControlBackgroundDisabledControlFillColorDisabledBrushTextControlBorderBrushTextControlElevationBorderBrushTextControlBorderBrushPointerOverTextControlBorderBrushFocusedTextControlElevationBorderFocusedBrushTextControlBorderBrushDisabledControlStrokeColorDefaultBrushTextControlForegroundTextFillColorPrimaryBrushTextControlForegroundPointerOverTextControlForegroundFocusedTextControlForegroundDisabledTemporaryTextFillColorDisabledTextControlPlaceholderForegroundTextFillColorSecondaryBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundFocusedTextControlPlaceholderForegroundDisabledTextFillColorDisabledBrushTextControlSelectionHighlightColorAccentFillColorSelectedTextBackgroundBrushTextControlButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTextControlButtonBackgroundPressedSubtleFillColorTertiaryBrushTextControlButtonBorderBrushControlFillColorTransparentTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextFillColorTertiaryBrushTextBoxTopHeaderMarginTextBoxInnerButtonMargin";
+
+/// The numbers of the packed tables of the unit 7 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_7_NUMBERS: [f64; 3] = [0.0_f64, 8.0_f64, 4.0_f64];
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_39: rt::PackedRows = rt::PackedRows {
@@ -6192,7 +6232,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_40: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 8 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS: &str = "MenuFlyoutSeparatorBackgroundDividerStrokeColorDefaultBrushMenuFlyoutItemBackgroundSubtleFillColorTransparentBrushMenuFlyoutItemBackgroundPointerOverAccentFillColorDefaultBrushMenuFlyoutItemBackgroundPressedMenuFlyoutItemBackgroundDisabledMenuFlyoutItemBackgroundBrushMenuFlyoutItemForegroundTextFillColorPrimaryBrushMenuFlyoutItemForegroundPointerOverTextOnAccentFillColorPrimaryBrushMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledTextFillColorDisabledBrushMenuFlyoutSubItemBackgroundMenuFlyoutSubItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuFlyoutSubItemBackgroundPressedSubtleFillColorTertiaryBrushMenuFlyoutSubItemBackgroundSubMenuOpenedMenuFlyoutSubItemBackgroundDisabledMenuFlyoutSubItemBackgroundBrushMenuFlyoutSubItemForegroundMenuFlyoutSubItemForegroundPointerOverMenuFlyoutSubItemForegroundPressedMenuFlyoutSubItemForegroundSubMenuOpenedMenuFlyoutSubItemForegroundDisabledMenuFlyoutSubItemChevronTextFillColorSecondaryBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedTextFillColorTertiaryBrushMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledSplitMenuFlyoutItemButtonDividerBrushMenuFlyoutPresenterBackgroundDesktopAcrylicTransparentBrushMenuFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushMenuFlyoutItemFocusedBackgroundThemeBrushMenuFlyoutItemFocusedForegroundThemeBrushMenuFlyoutItemDisabledForegroundThemeBrushMenuFlyoutItemPointerOverBackgroundThemeBrushMenuFlyoutItemPointerOverForegroundThemeBrushMenuFlyoutItemPressedBackgroundThemeBrushMenuFlyoutItemPressedForegroundThemeBrushMenuFlyoutSeparatorThemeBrushMenuFlyoutLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushMenuFlyoutItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPointerOverMenuFlyoutItemRevealBackgroundPressedMenuFlyoutItemRevealBackgroundDisabledMenuFlyoutItemRevealBorderBrushMenuFlyoutItemRevealBorderBrushPressedSystemControlTransparentRevealBorderBrushMenuFlyoutItemRevealBorderBrushPointerOverMenuFlyoutItemRevealBorderBrushDisabledToggleMenuFlyoutItemRevealBackgroundToggleMenuFlyoutItemRevealBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushToggleMenuFlyoutItemRevealBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushToggleMenuFlyoutItemRevealBackgroundDisabledToggleMenuFlyoutItemRevealBorderBrushToggleMenuFlyoutItemRevealBorderBrushPressedToggleMenuFlyoutItemRevealBorderBrushPointerOverToggleMenuFlyoutItemRevealBorderBrushDisabledMenuFlyoutSubItemRevealBackgroundMenuFlyoutSubItemRevealBackgroundPointerOverMenuFlyoutSubItemRevealBackgroundPressedSystemControlHighlightAccentRevealBackgroundBrushMenuFlyoutSubItemRevealBackgroundSubMenuOpenedMenuFlyoutSubItemRevealBackgroundDisabledMenuFlyoutSubItemRevealBorderBrushMenuFlyoutSubItemRevealBorderBrushPressedMenuFlyoutSubItemRevealBorderBrushPointerOverMenuFlyoutSubItemRevealBorderBrushSubMenuOpenedMenuFlyoutSubItemRevealBorderBrushDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS: &str = "MenuFlyoutSeparatorBackgroundDividerStrokeColorDefaultBrushMenuFlyoutItemBackgroundSubtleFillColorTransparentBrushMenuFlyoutItemBackgroundPointerOverAccentFillColorDefaultBrushMenuFlyoutItemBackgroundPressedMenuFlyoutItemBackgroundDisabledMenuFlyoutItemBackgroundBrushMenuFlyoutItemForegroundTextFillColorPrimaryBrushMenuFlyoutItemForegroundPointerOverTextOnAccentFillColorPrimaryBrushMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledTextFillColorDisabledBrushMenuFlyoutSubItemBackgroundMenuFlyoutSubItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuFlyoutSubItemBackgroundPressedSubtleFillColorTertiaryBrushMenuFlyoutSubItemBackgroundSubMenuOpenedMenuFlyoutSubItemBackgroundDisabledMenuFlyoutSubItemBackgroundBrushMenuFlyoutSubItemForegroundMenuFlyoutSubItemForegroundPointerOverMenuFlyoutSubItemForegroundPressedMenuFlyoutSubItemForegroundSubMenuOpenedMenuFlyoutSubItemForegroundDisabledMenuFlyoutSubItemChevronTextFillColorSecondaryBrushMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedTextFillColorTertiaryBrushMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedToggleMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledSplitMenuFlyoutItemButtonDividerBrushMenuFlyoutPresenterBackgroundDesktopAcrylicTransparentBrushMenuFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushMenuFlyoutPresenterBorderThemeThicknessMenuFlyoutItemBorderThicknessMenuFlyoutSubItemBorderThicknessMenuFlyoutItemPlaceholderThemeThicknessMenuFlyoutItemDoublePlaceholderThemeThicknessMenuFlyoutItemRevealBorderThicknessToggleMenuFlyoutItemRevealBorderThicknessMenuFlyoutSubItemRevealBorderThicknessMenuFlyoutItemFocusedBackgroundThemeBrushMenuFlyoutItemFocusedForegroundThemeBrushMenuFlyoutItemDisabledForegroundThemeBrushMenuFlyoutItemPointerOverBackgroundThemeBrushMenuFlyoutItemPointerOverForegroundThemeBrushMenuFlyoutItemPressedBackgroundThemeBrushMenuFlyoutItemPressedForegroundThemeBrushMenuFlyoutSeparatorThemeBrushMenuFlyoutLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushMenuFlyoutItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushMenuFlyoutItemRevealBackgroundPointerOverMenuFlyoutItemRevealBackgroundPressedMenuFlyoutItemRevealBackgroundDisabledMenuFlyoutItemRevealBorderBrushMenuFlyoutItemRevealBorderBrushPressedSystemControlTransparentRevealBorderBrushMenuFlyoutItemRevealBorderBrushPointerOverMenuFlyoutItemRevealBorderBrushDisabledToggleMenuFlyoutItemRevealBackgroundToggleMenuFlyoutItemRevealBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushToggleMenuFlyoutItemRevealBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushToggleMenuFlyoutItemRevealBackgroundDisabledToggleMenuFlyoutItemRevealBorderBrushToggleMenuFlyoutItemRevealBorderBrushPressedToggleMenuFlyoutItemRevealBorderBrushPointerOverToggleMenuFlyoutItemRevealBorderBrushDisabledMenuFlyoutSubItemRevealBackgroundMenuFlyoutSubItemRevealBackgroundPointerOverMenuFlyoutSubItemRevealBackgroundPressedSystemControlHighlightAccentRevealBackgroundBrushMenuFlyoutSubItemRevealBackgroundSubMenuOpenedMenuFlyoutSubItemRevealBackgroundDisabledMenuFlyoutSubItemRevealBorderBrushMenuFlyoutSubItemRevealBorderBrushPressedMenuFlyoutSubItemRevealBorderBrushPointerOverMenuFlyoutSubItemRevealBorderBrushSubMenuOpenedMenuFlyoutSubItemRevealBorderBrushDisabledMenuFlyoutItemChevronMarginMenuFlyoutSeparatorThemePaddingMenuFlyoutItemMarginMenuFlyoutItemThemePaddingMenuFlyoutItemThemePaddingNarrow";
+
+/// The numbers of the packed tables of the unit 8 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_8_NUMBERS: [f64; 13] = [1.0_f64, 0.0_f64, 28.0_f64, 56.0_f64, 24.0_f64, -1.0_f64, -4.0_f64, 4.0_f64, 2.0_f64, 11.0_f64, 8.0_f64, 9.0_f64, 5.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_41: rt::PackedRows = rt::PackedRows {
@@ -6239,31 +6282,35 @@ static POPULATE_MACOSTHEME_XAML_ROWS_41: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_42: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuFlyoutPresenterBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 52, position: 66 },
-    rt::ValueRow { key: "MenuFlyoutItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 53, position: 56 },
-    rt::ValueRow { key: "MenuFlyoutSubItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 54, position: 59 },
-    rt::ValueRow { key: "MenuFlyoutItemPlaceholderThemeThickness", value: [28.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 55, position: 66 },
-    rt::ValueRow { key: "MenuFlyoutItemDoublePlaceholderThemeThickness", value: [56.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 56, position: 72 },
-    rt::ValueRow { key: "MenuFlyoutItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 57, position: 62 },
-    rt::ValueRow { key: "ToggleMenuFlyoutItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 58, position: 68 },
-    rt::ValueRow { key: "MenuFlyoutSubItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 59, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_42: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_8_NUMBERS,
+    records: &[
+        1730, 39, 52, 66, 0, 0, 0, 0,
+        1769, 29, 53, 56, 1, 1, 1, 1,
+        1798, 32, 54, 59, 1, 1, 1, 1,
+        1830, 39, 55, 66, 2, 1, 1, 1,
+        1869, 45, 56, 72, 3, 1, 1, 1,
+        1914, 35, 57, 62, 0, 0, 0, 0,
+        1949, 41, 58, 68, 0, 0, 0, 0,
+        1990, 38, 59, 65, 0, 0, 0, 0,
+    ],
+};
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_43: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1730, 41, 8481, 65313, 1, 60, 8,
-        1771, 41, 65535, 65535, 1, 61, 8,
-        1812, 42, 65535, 26367, 1, 62, 8,
-        1854, 45, 8481, 65313, 1, 63, 8,
-        1899, 45, 65535, 65535, 1, 64, 8,
-        1944, 41, 65535, 65535, 1, 65, 8,
-        1985, 41, 0, 65280, 1, 66, 8,
-        2026, 29, 31354, 65402, 1, 67, 8,
+        2028, 41, 8481, 65313, 1, 60, 8,
+        2069, 41, 65535, 65535, 1, 61, 8,
+        2110, 42, 65535, 26367, 1, 62, 8,
+        2152, 45, 8481, 65313, 1, 63, 8,
+        2197, 45, 65535, 65535, 1, 64, 8,
+        2242, 41, 65535, 65535, 1, 65, 8,
+        2283, 41, 0, 65280, 1, 66, 8,
+        2324, 29, 31354, 65402, 1, 67, 8,
     ],
 };
 
@@ -6272,85 +6319,89 @@ static POPULATE_MACOSTHEME_XAML_ROWS_44: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2055, 39, 2094, 47, 1, 68, 8, 68, 8,
-        2141, 30, 2171, 45, 1, 69, 8, 69, 8,
-        2216, 41, 149, 27, 1, 70, 8, 70, 8,
-        2257, 37, 149, 27, 1, 71, 8, 71, 8,
-        2294, 38, 83, 31, 1, 72, 8, 72, 8,
-        2332, 31, 83, 31, 1, 73, 8, 73, 8,
-        2363, 38, 2401, 41, 1, 74, 8, 74, 8,
-        2442, 42, 2401, 41, 1, 75, 8, 75, 8,
-        2484, 39, 83, 31, 1, 76, 8, 76, 8,
-        2523, 36, 2171, 45, 1, 77, 8, 77, 8,
-        2559, 47, 2606, 50, 1, 78, 8, 78, 8,
-        2656, 43, 2699, 53, 1, 79, 8, 79, 8,
-        2752, 44, 83, 31, 1, 80, 8, 80, 8,
-        2796, 37, 83, 31, 1, 81, 8, 81, 8,
-        2833, 44, 2401, 41, 1, 82, 8, 82, 8,
-        2877, 48, 2401, 41, 1, 83, 8, 83, 8,
-        2925, 45, 83, 31, 1, 84, 8, 84, 8,
-        2970, 33, 2171, 45, 1, 85, 8, 85, 8,
-        3003, 44, 2606, 50, 1, 86, 8, 86, 8,
-        3047, 40, 3087, 49, 1, 87, 8, 87, 8,
-        3136, 46, 2606, 50, 1, 88, 8, 88, 8,
-        3182, 41, 83, 31, 1, 89, 8, 89, 8,
-        3223, 34, 83, 31, 1, 90, 8, 90, 8,
-        3257, 41, 2401, 41, 1, 91, 8, 91, 8,
-        3298, 45, 2401, 41, 1, 92, 8, 92, 8,
-        3343, 47, 2401, 41, 1, 93, 8, 93, 8,
-        3390, 42, 83, 31, 1, 94, 8, 94, 8,
+        2353, 39, 2392, 47, 1, 68, 8, 68, 8,
+        2439, 30, 2469, 45, 1, 69, 8, 69, 8,
+        2514, 41, 149, 27, 1, 70, 8, 70, 8,
+        2555, 37, 149, 27, 1, 71, 8, 71, 8,
+        2592, 38, 83, 31, 1, 72, 8, 72, 8,
+        2630, 31, 83, 31, 1, 73, 8, 73, 8,
+        2661, 38, 2699, 41, 1, 74, 8, 74, 8,
+        2740, 42, 2699, 41, 1, 75, 8, 75, 8,
+        2782, 39, 83, 31, 1, 76, 8, 76, 8,
+        2821, 36, 2469, 45, 1, 77, 8, 77, 8,
+        2857, 47, 2904, 50, 1, 78, 8, 78, 8,
+        2954, 43, 2997, 53, 1, 79, 8, 79, 8,
+        3050, 44, 83, 31, 1, 80, 8, 80, 8,
+        3094, 37, 83, 31, 1, 81, 8, 81, 8,
+        3131, 44, 2699, 41, 1, 82, 8, 82, 8,
+        3175, 48, 2699, 41, 1, 83, 8, 83, 8,
+        3223, 45, 83, 31, 1, 84, 8, 84, 8,
+        3268, 33, 2469, 45, 1, 85, 8, 85, 8,
+        3301, 44, 2904, 50, 1, 86, 8, 86, 8,
+        3345, 40, 3385, 49, 1, 87, 8, 87, 8,
+        3434, 46, 2904, 50, 1, 88, 8, 88, 8,
+        3480, 41, 83, 31, 1, 89, 8, 89, 8,
+        3521, 34, 83, 31, 1, 90, 8, 90, 8,
+        3555, 41, 2699, 41, 1, 91, 8, 91, 8,
+        3596, 45, 2699, 41, 1, 92, 8, 92, 8,
+        3641, 47, 2699, 41, 1, 93, 8, 93, 8,
+        3688, 42, 83, 31, 1, 94, 8, 94, 8,
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_45: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemChromeMediumHighColor", value: 4281479730_u32, line: 15, position: 50 },
-    rt::ValueRow { key: "SystemChromeAltMediumHighColor", value: 3424591647_u32, line: 16, position: 53 },
-    rt::ValueRow { key: "SystemChromeAltHighColor", value: 4280032284_u32, line: 17, position: 47 },
-];
-
 /// The keys and targets of the packed tables of the unit 9 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS: &str = "SystemControlAcrylicWindowBrushSystemChromeMediumColorSystemControlAcrylicElementBrushSystemControlAccentAcrylicWindowAccentMediumHighBrushSystemAccentColorSystemControlAccentAcrylicElementAccentMediumHighBrushSystemControlAccentDark1AcrylicWindowAccentDark1BrushSystemControlAccentDark1AcrylicElementAccentDark1BrushSystemControlAccentDark2AcrylicWindowAccentDark2MediumHighBrushSystemControlAccentDark2AcrylicElementAccentDark2MediumHighBrushSystemControlAcrylicWindowMediumHighBrushSystemControlAcrylicElementMediumHighBrushSystemControlChromeMediumLowAcrylicWindowMediumBrushSystemChromeMediumLowColorSystemControlChromeMediumLowAcrylicElementMediumBrushSystemControlBaseHighAcrylicWindowBrushSystemBaseHighColorSystemControlBaseHighAcrylicElementBrushSystemControlBaseHighAcrylicWindowMediumHighBrushSystemControlBaseHighAcrylicElementMediumHighBrushSystemControlBaseHighAcrylicWindowMediumBrushSystemControlBaseHighAcrylicElementMediumBrushSystemControlChromeLowAcrylicWindowBrushSystemChromeLowColorSystemControlChromeLowAcrylicElementBrushSystemControlChromeMediumAcrylicWindowMediumBrushSystemControlChromeMediumAcrylicElementMediumBrushSystemControlChromeHighAcrylicWindowMediumBrushSystemChromeHighColorSystemControlChromeHighAcrylicElementMediumBrushSystemControlBaseLowAcrylicWindowBrushSystemBaseLowColorSystemControlBaseLowAcrylicElementBrushSystemControlBaseMediumLowAcrylicWindowMediumBrushSystemBaseMediumLowColorSystemControlBaseMediumLowAcrylicElementMediumBrushSystemControlAltLowAcrylicWindowBrushSystemAltLowColorSystemControlAltLowAcrylicElementBrushSystemControlAltMediumLowAcrylicWindowMediumBrushSystemAltMediumLowColorSystemControlAltMediumLowAcrylicElementMediumBrushSystemControlAltHighAcrylicWindowBrushSystemAltHighColorSystemControlAltHighAcrylicElementBrushAcrylicBackgroundFillColorDefaultBrushAcrylicInAppFillColorDefaultBrushAcrylicBackgroundFillColorDefaultInverseBrushAcrylicInAppFillColorDefaultInverseBrushAcrylicBackgroundFillColorBaseBrushAcrylicInAppFillColorBaseBrushAccentAcrylicBackgroundFillColorDefaultBrushAccentAcrylicInAppFillColorDefaultBrushAccentAcrylicBackgroundFillColorBaseBrushAccentAcrylicInAppFillColorBaseBrushDesktopAcrylicTransparentBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS: &str = "SystemChromeMediumHighColorSystemChromeAltMediumHighColorSystemChromeAltHighColorSystemControlAcrylicWindowBrushSystemChromeMediumColorSystemControlAcrylicElementBrushSystemControlAccentAcrylicWindowAccentMediumHighBrushSystemAccentColorSystemControlAccentAcrylicElementAccentMediumHighBrushSystemControlAccentDark1AcrylicWindowAccentDark1BrushSystemControlAccentDark1AcrylicElementAccentDark1BrushSystemControlAccentDark2AcrylicWindowAccentDark2MediumHighBrushSystemControlAccentDark2AcrylicElementAccentDark2MediumHighBrushSystemControlAcrylicWindowMediumHighBrushSystemControlAcrylicElementMediumHighBrushSystemControlChromeMediumLowAcrylicWindowMediumBrushSystemChromeMediumLowColorSystemControlChromeMediumLowAcrylicElementMediumBrushSystemControlBaseHighAcrylicWindowBrushSystemBaseHighColorSystemControlBaseHighAcrylicElementBrushSystemControlBaseHighAcrylicWindowMediumHighBrushSystemControlBaseHighAcrylicElementMediumHighBrushSystemControlBaseHighAcrylicWindowMediumBrushSystemControlBaseHighAcrylicElementMediumBrushSystemControlChromeLowAcrylicWindowBrushSystemChromeLowColorSystemControlChromeLowAcrylicElementBrushSystemControlChromeMediumAcrylicWindowMediumBrushSystemControlChromeMediumAcrylicElementMediumBrushSystemControlChromeHighAcrylicWindowMediumBrushSystemChromeHighColorSystemControlChromeHighAcrylicElementMediumBrushSystemControlBaseLowAcrylicWindowBrushSystemBaseLowColorSystemControlBaseLowAcrylicElementBrushSystemControlBaseMediumLowAcrylicWindowMediumBrushSystemBaseMediumLowColorSystemControlBaseMediumLowAcrylicElementMediumBrushSystemControlAltLowAcrylicWindowBrushSystemAltLowColorSystemControlAltLowAcrylicElementBrushSystemControlAltMediumLowAcrylicWindowMediumBrushSystemAltMediumLowColorSystemControlAltMediumLowAcrylicElementMediumBrushSystemControlAltHighAcrylicWindowBrushSystemAltHighColorSystemControlAltHighAcrylicElementBrushAcrylicBackgroundFillColorDefaultBrushAcrylicInAppFillColorDefaultBrushAcrylicBackgroundFillColorDefaultInverseBrushAcrylicInAppFillColorDefaultInverseBrushAcrylicBackgroundFillColorBaseBrushAcrylicInAppFillColorBaseBrushAccentAcrylicBackgroundFillColorDefaultBrushAccentAcrylicInAppFillColorDefaultBrushAccentAcrylicBackgroundFillColorBaseBrushAccentAcrylicInAppFillColorBaseBrushDesktopAcrylicTransparentBrush";
+
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_45: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 27, 15, 50, 12850, 65330,
+        27, 30, 16, 53, 7967, 52255,
+        57, 24, 17, 47, 7196, 65308,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_46: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 23, 1, 18, 8, 18, 64,
-        54, 32, 31, 23, 1, 19, 8, 19, 65,
-        86, 53, 139, 17, 1, 20, 8, 20, 86,
-        156, 54, 139, 17, 1, 21, 8, 21, 87,
-        210, 53, 139, 17, 1, 22, 8, 22, 86,
-        263, 54, 139, 17, 1, 23, 8, 23, 87,
-        317, 63, 139, 17, 1, 24, 8, 24, 96,
-        380, 64, 139, 17, 1, 25, 8, 25, 97,
-        444, 41, 31, 23, 1, 26, 8, 26, 74,
-        485, 42, 31, 23, 1, 27, 8, 27, 75,
-        527, 52, 579, 26, 1, 28, 8, 28, 85,
-        605, 53, 579, 26, 1, 29, 8, 29, 86,
-        658, 39, 697, 19, 1, 30, 8, 30, 72,
-        716, 40, 697, 19, 1, 31, 8, 31, 73,
-        756, 49, 697, 19, 1, 32, 8, 32, 82,
-        805, 50, 697, 19, 1, 33, 8, 33, 83,
-        855, 45, 697, 19, 1, 34, 8, 34, 78,
-        900, 46, 697, 19, 1, 35, 8, 35, 79,
-        946, 40, 986, 20, 1, 36, 8, 36, 73,
-        1006, 41, 986, 20, 1, 37, 8, 37, 74,
-        1047, 49, 31, 23, 1, 38, 8, 38, 82,
-        1096, 50, 31, 23, 1, 39, 8, 39, 83,
-        1146, 47, 1193, 21, 1, 40, 8, 40, 80,
-        1214, 48, 1193, 21, 1, 41, 8, 41, 81,
-        1262, 38, 1300, 18, 1, 42, 8, 42, 71,
-        1318, 39, 1300, 18, 1, 43, 8, 43, 72,
-        1357, 50, 1407, 24, 1, 44, 8, 44, 83,
-        1431, 51, 1407, 24, 1, 45, 8, 45, 84,
-        1482, 37, 1519, 17, 1, 46, 8, 46, 70,
-        1536, 38, 1519, 17, 1, 47, 8, 47, 71,
-        1574, 49, 1623, 23, 1, 48, 8, 48, 82,
-        1646, 50, 1623, 23, 1, 49, 8, 49, 83,
-        1696, 38, 1734, 18, 1, 50, 8, 50, 71,
-        1752, 39, 1734, 18, 1, 51, 8, 51, 72,
+        81, 31, 112, 23, 1, 18, 8, 18, 64,
+        135, 32, 112, 23, 1, 19, 8, 19, 65,
+        167, 53, 220, 17, 1, 20, 8, 20, 86,
+        237, 54, 220, 17, 1, 21, 8, 21, 87,
+        291, 53, 220, 17, 1, 22, 8, 22, 86,
+        344, 54, 220, 17, 1, 23, 8, 23, 87,
+        398, 63, 220, 17, 1, 24, 8, 24, 96,
+        461, 64, 220, 17, 1, 25, 8, 25, 97,
+        525, 41, 112, 23, 1, 26, 8, 26, 74,
+        566, 42, 112, 23, 1, 27, 8, 27, 75,
+        608, 52, 660, 26, 1, 28, 8, 28, 85,
+        686, 53, 660, 26, 1, 29, 8, 29, 86,
+        739, 39, 778, 19, 1, 30, 8, 30, 72,
+        797, 40, 778, 19, 1, 31, 8, 31, 73,
+        837, 49, 778, 19, 1, 32, 8, 32, 82,
+        886, 50, 778, 19, 1, 33, 8, 33, 83,
+        936, 45, 778, 19, 1, 34, 8, 34, 78,
+        981, 46, 778, 19, 1, 35, 8, 35, 79,
+        1027, 40, 1067, 20, 1, 36, 8, 36, 73,
+        1087, 41, 1067, 20, 1, 37, 8, 37, 74,
+        1128, 49, 112, 23, 1, 38, 8, 38, 82,
+        1177, 50, 112, 23, 1, 39, 8, 39, 83,
+        1227, 47, 1274, 21, 1, 40, 8, 40, 80,
+        1295, 48, 1274, 21, 1, 41, 8, 41, 81,
+        1343, 38, 1381, 18, 1, 42, 8, 42, 71,
+        1399, 39, 1381, 18, 1, 43, 8, 43, 72,
+        1438, 50, 1488, 24, 1, 44, 8, 44, 83,
+        1512, 51, 1488, 24, 1, 45, 8, 45, 84,
+        1563, 37, 1600, 17, 1, 46, 8, 46, 70,
+        1617, 38, 1600, 17, 1, 47, 8, 47, 71,
+        1655, 49, 1704, 23, 1, 48, 8, 48, 82,
+        1727, 50, 1704, 23, 1, 49, 8, 49, 83,
+        1777, 38, 1815, 18, 1, 50, 8, 50, 71,
+        1833, 39, 1815, 18, 1, 51, 8, 51, 72,
     ],
 };
 
@@ -6359,12 +6410,12 @@ static POPULATE_MACOSTHEME_XAML_ROWS_47: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1791, 38, 11308, 65324, 1, 53, 8,
-        1829, 33, 11308, 65324, 1, 54, 8,
-        1862, 45, 63993, 65529, 1, 55, 8,
-        1907, 40, 63993, 65529, 1, 56, 8,
-        1947, 35, 7196, 65308, 1, 57, 8,
-        1982, 30, 7196, 65308, 1, 58, 8,
+        1872, 38, 11308, 65324, 1, 53, 8,
+        1910, 33, 11308, 65324, 1, 54, 8,
+        1943, 45, 63993, 65529, 1, 55, 8,
+        1988, 40, 63993, 65529, 1, 56, 8,
+        2028, 35, 7196, 65308, 1, 57, 8,
+        2063, 30, 7196, 65308, 1, 58, 8,
     ],
 };
 
@@ -6373,10 +6424,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_48: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2012, 44, 139, 17, 1, 59, 8, 59, 77,
-        2056, 39, 139, 17, 1, 60, 8, 60, 72,
-        2095, 41, 139, 17, 1, 61, 8, 61, 74,
-        2136, 36, 139, 17, 1, 62, 8, 62, 69,
+        2093, 44, 220, 17, 1, 59, 8, 59, 77,
+        2137, 39, 220, 17, 1, 60, 8, 60, 72,
+        2176, 41, 220, 17, 1, 61, 8, 61, 74,
+        2217, 36, 220, 17, 1, 62, 8, 62, 69,
     ],
 };
 
@@ -6385,7 +6436,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_49: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2172, 30, 0, 0, 1, 63, 8,
+        2253, 30, 0, 0, 1, 63, 8,
     ],
 };
 
@@ -6424,7 +6475,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_52: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 11 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS: &str = "TopNavigationViewItemRevealBackgroundFocusedSystemControlHighlightAccentBrushTopNavigationViewItemRevealIconForegroundFocusedSystemControlHighlightAltChromeWhiteBrushTopNavigationViewItemRevealContentForegroundFocusedProgressBarBackgroundThemeBrushProgressBarBorderThemeBrushProgressBarForegroundThemeBrushProgressBarIndeterminateForegroundThemeBrushContentDialogLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushContentDialogBackgroundThemeBrushContentDialogBorderThemeBrushSystemAccentColorContentDialogContentForegroundBrushContentDialogDimmingThemeBrushExpanderBackgroundCardBackgroundFillColorDefaultBrushExpanderForegroundTextFillColorPrimaryBrushExpanderForegroundPointerOverExpanderForegroundPressedExpanderBorderBrushCardStrokeColorDefaultBrushExpanderBorderPointerOverBrushExpanderBorderPressedBrushExpanderDropDownBackgroundCardBackgroundFillColorSecondaryBrushExpanderDropDownBorderBrushExpanderDisabledForegroundTextFillColorDisabledBrushExpanderDisabledBorderBrushSystemColorButtonFaceColorSystemColorButtonTextColorSystemColorHighlightColor";
+const POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS: &str = "TopNavigationViewItemRevealBackgroundFocusedSystemControlHighlightAccentBrushTopNavigationViewItemRevealIconForegroundFocusedSystemControlHighlightAltChromeWhiteBrushTopNavigationViewItemRevealContentForegroundFocusedProgressBarBackgroundThemeBrushProgressBarBorderThemeBrushProgressBarForegroundThemeBrushProgressBarIndeterminateForegroundThemeBrushContentDialogButtonMinWidthContentDialogButtonMaxWidthContentDialogButtonMinHeightContentDialogButtonHeightContentDialogTitleMaxHeightContentDialogButton1HostMarginContentDialogButton2HostMarginContentDialogContentMarginContentDialogContentScrollViewerMarginContentDialogLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushContentDialogBackgroundThemeBrushContentDialogBorderThemeBrushSystemAccentColorContentDialogContentForegroundBrushContentDialogDimmingThemeBrushExpanderBackgroundCardBackgroundFillColorDefaultBrushExpanderForegroundTextFillColorPrimaryBrushExpanderForegroundPointerOverExpanderForegroundPressedExpanderBorderBrushCardStrokeColorDefaultBrushExpanderBorderPointerOverBrushExpanderBorderPressedBrushExpanderDropDownBackgroundCardBackgroundFillColorSecondaryBrushExpanderDropDownBorderBrushExpanderDisabledForegroundTextFillColorDisabledBrushExpanderDisabledBorderBrushSystemColorButtonFaceColorSystemColorButtonTextColorSystemColorHighlightColorExpanderDropdownDownBorderThicknessExpanderDropdownUpBorderThickness";
+
+/// The numbers of the packed tables of the unit 11 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS: [f64; 7] = [130.0_f64, 202.0_f64, 32.0_f64, 56.0_f64, 0.0_f64, 4.0_f64, 1.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_53: rt::PackedRows = rt::PackedRows {
@@ -6461,29 +6515,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_56: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "FlyoutBorderThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 27, position: 51 },
 ];
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_57: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ContentDialogButtonMinWidth", value: 130.0_f64, line: 28, position: 53 },
-    rt::ValueRow { key: "ContentDialogButtonMaxWidth", value: 202.0_f64, line: 29, position: 53 },
-    rt::ValueRow { key: "ContentDialogButtonMinHeight", value: 32.0_f64, line: 30, position: 54 },
-    rt::ValueRow { key: "ContentDialogButtonHeight", value: 32.0_f64, line: 31, position: 51 },
-    rt::ValueRow { key: "ContentDialogTitleMaxHeight", value: 56.0_f64, line: 32, position: 53 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_57: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS,
+    records: &[
+        350, 27, 28, 53, 0,
+        377, 27, 29, 53, 1,
+        404, 28, 30, 54, 2,
+        432, 25, 31, 51, 2,
+        457, 27, 32, 53, 3,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_58: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ContentDialogButton1HostMargin", value: [0.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 33, position: 57 },
-    rt::ValueRow { key: "ContentDialogButton2HostMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 34, position: 57 },
-    rt::ValueRow { key: "ContentDialogContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 35, position: 53 },
-    rt::ValueRow { key: "ContentDialogContentScrollViewerMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 36, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_58: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS,
+    records: &[
+        484, 30, 33, 57, 4, 4, 5, 4,
+        514, 30, 34, 57, 4, 4, 4, 4,
+        544, 26, 35, 53, 4, 4, 4, 4,
+        570, 38, 36, 65, 4, 4, 4, 4,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_59: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        350, 42, 392, 47, 1, 37, 8, 37, 8,
+        608, 42, 650, 47, 1, 37, 8, 37, 8,
     ],
 };
 
@@ -6492,7 +6554,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_60: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        439, 33, 54227, 65491, 1, 38, 8,
+        697, 33, 54227, 65491, 1, 38, 8,
     ],
 };
 
@@ -6501,7 +6563,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_61: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        472, 29, 501, 17, 1, 39, 8, 39, 62,
+        730, 29, 759, 17, 1, 39, 8, 39, 62,
     ],
 };
 
@@ -6510,8 +6572,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_62: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        518, 35, 0, 65280, 1, 40, 8,
-        553, 30, 65535, 39423, 1, 41, 8,
+        776, 35, 0, 65280, 1, 40, 8,
+        811, 30, 65535, 39423, 1, 41, 8,
     ],
 };
 
@@ -6526,17 +6588,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_64: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        583, 18, 601, 35, 1, 46, 8, 46, 8,
-        636, 18, 654, 25, 1, 47, 8, 47, 8,
-        679, 29, 654, 25, 1, 48, 8, 48, 8,
-        708, 25, 654, 25, 1, 49, 8, 49, 8,
-        733, 19, 752, 27, 1, 50, 8, 50, 8,
-        779, 30, 752, 27, 1, 51, 8, 51, 8,
-        809, 26, 752, 27, 1, 52, 8, 52, 8,
-        835, 26, 861, 37, 1, 53, 8, 53, 8,
-        898, 27, 733, 19, 1, 54, 8, 54, 8,
-        925, 26, 951, 26, 1, 55, 8, 55, 8,
-        977, 27, 733, 19, 1, 56, 8, 56, 8,
+        841, 18, 859, 35, 1, 46, 8, 46, 8,
+        894, 18, 912, 25, 1, 47, 8, 47, 8,
+        937, 29, 912, 25, 1, 48, 8, 48, 8,
+        966, 25, 912, 25, 1, 49, 8, 49, 8,
+        991, 19, 1010, 27, 1, 50, 8, 50, 8,
+        1037, 30, 1010, 27, 1, 51, 8, 51, 8,
+        1067, 26, 1010, 27, 1, 52, 8, 52, 8,
+        1093, 26, 1119, 37, 1, 53, 8, 53, 8,
+        1156, 27, 991, 19, 1, 54, 8, 54, 8,
+        1183, 26, 1209, 26, 1, 55, 8, 55, 8,
+        1235, 27, 991, 19, 1, 56, 8, 56, 8,
     ],
 };
 
@@ -6660,7 +6722,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_69: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 15 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS: &str = "AppBarButtonBackgroundSubtleFillColorTransparentBrushAppBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarButtonForegroundTextFillColorPrimaryBrushAppBarButtonForegroundPointerOverAppBarButtonForegroundPressedTextFillColorSecondaryBrushAppBarButtonForegroundDisabledTextFillColorDisabledBrushAppBarButtonBorderBrushControlFillColorTransparentBrushAppBarButtonBorderBrushPointerOverAppBarButtonBorderBrushPressedAppBarButtonBorderBrushDisabledAppBarButtonKeyboardAcceleratorTextForegroundAppBarButtonKeyboardAcceleratorTextForegroundPointerOverAppBarButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarButtonKeyboardAcceleratorTextForegroundDisabledAppBarButtonBackgroundSubMenuOpenedAppBarButtonForegroundSubMenuOpenedAppBarButtonKeyboardAcceleratorTextForegroundSubMenuOpenedAppBarButtonBorderBrushSubMenuOpenedAppBarButtonSubItemChevronForegroundAppBarButtonSubItemChevronForegroundPointerOverAppBarButtonSubItemChevronForegroundPressedAppBarButtonSubItemChevronForegroundSubMenuOpenedAppBarButtonSubItemChevronForegroundDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS: &str = "AppBarButtonBackgroundSubtleFillColorTransparentBrushAppBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarButtonForegroundTextFillColorPrimaryBrushAppBarButtonForegroundPointerOverAppBarButtonForegroundPressedTextFillColorSecondaryBrushAppBarButtonForegroundDisabledTextFillColorDisabledBrushAppBarButtonBorderBrushControlFillColorTransparentBrushAppBarButtonBorderBrushPointerOverAppBarButtonBorderBrushPressedAppBarButtonBorderBrushDisabledAppBarButtonKeyboardAcceleratorTextForegroundAppBarButtonKeyboardAcceleratorTextForegroundPointerOverAppBarButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarButtonKeyboardAcceleratorTextForegroundDisabledAppBarButtonBackgroundSubMenuOpenedAppBarButtonForegroundSubMenuOpenedAppBarButtonKeyboardAcceleratorTextForegroundSubMenuOpenedAppBarButtonBorderBrushSubMenuOpenedAppBarButtonSubItemChevronForegroundAppBarButtonSubItemChevronForegroundPointerOverAppBarButtonSubItemChevronForegroundPressedAppBarButtonSubItemChevronForegroundSubMenuOpenedAppBarButtonSubItemChevronForegroundDisabledAppBarButtonFlyoutGlyph\u{e974}AppBarButtonOverflowFlyoutGlyphAppBarButtonLabelFontSizeAppBarButtonSubItemChevronFontSizeAppBarButtonSecondarySubItemChevronFontSizeAppBarButtonSubItemChevronMarginAppBarButtonSubItemChevronLabelOnRightMarginAppBarButtonSecondarySubItemChevronMarginAppBarButtonContentViewboxMarginAppBarButtonContentViewboxCompactMarginAppBarButtonContentViewboxCollapsedMarginAppBarButtonOverflowTextTouchMarginAppBarButtonOverflowTextLabelPaddingAppBarButtonTextLabelMarginAppBarButtonTextLabelOnRightMarginAppBarButtonInnerBorderMarginAppBarButtonInnerBorderCompactMarginAppBarButtonInnerBorderOverflowMargin";
+
+/// The numbers of the packed tables of the unit 15 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS: [f64; 14] = [12.0_f64, 8.0_f64, -23.0_f64, 20.0_f64, 0.0_f64, -7.0_f64, 16.0_f64, 10.0_f64, 2.0_f64, 9.0_f64, 5.0_f64, 6.0_f64, 22.0_f64, 4.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_70: rt::PackedRows = rt::PackedRows {
@@ -6695,28 +6760,43 @@ static POPULATE_MACOSTHEME_XAML_ROWS_70: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_71: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "AppBarButtonFlyoutGlyph", value: "\u{e974}", line: 41, position: 49 },
-    rt::ValueRow { key: "AppBarButtonOverflowFlyoutGlyph", value: "\u{e974}", line: 42, position: 57 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_71: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &[],
+    records: &[
+        1187, 23, 41, 49, 1210, 3,
+        1213, 31, 42, 57, 1210, 3,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_72: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "AppBarButtonLabelFontSize", value: 12.0_f64, line: 43, position: 51 },
-    rt::ValueRow { key: "AppBarButtonSubItemChevronFontSize", value: 8.0_f64, line: 44, position: 60 },
-    rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronFontSize", value: 12.0_f64, line: 45, position: 69 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_72: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS,
+    records: &[
+        1244, 25, 43, 51, 0,
+        1269, 34, 44, 60, 1,
+        1303, 43, 45, 69, 0,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_73: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarButtonSubItemChevronMargin", value: [-23.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 46, position: 59 },
-    rt::ValueRow { key: "AppBarButtonSubItemChevronLabelOnRightMargin", value: [-7.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 47, position: 71 },
-    rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 48, position: 68 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_73: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS,
+    records: &[
+        1346, 32, 46, 59, 2, 3, 0, 4,
+        1378, 44, 47, 71, 5, 3, 0, 4,
+        1422, 41, 48, 68, 4, 4, 6, 4,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 16 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_16_STRINGS: &str = "AppBarSeparatorForegroundDividerStrokeColorDefaultBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_16_STRINGS: &str = "AppBarSeparatorForegroundDividerStrokeColorDefaultBrushAppBarSeparatorWidthAppBarOverflowSeparatorHeightAppBarSeparatorCornerRadius";
+
+/// The numbers of the packed tables of the unit 16 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_16_NUMBERS: [f64; 2] = [1.0_f64, 0.5_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_74: rt::PackedRows = rt::PackedRows {
@@ -6728,7 +6808,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_74: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 17 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_17_STRINGS: &str = "AppBarToggleButtonBackgroundSubtleFillColorTransparentBrushAppBarToggleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarToggleButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarToggleButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarToggleButtonBackgroundCheckedAccentFillColorDefaultBrushAppBarToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushAppBarToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushAppBarToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushAppBarToggleButtonBackgroundHighLightOverlayAppBarToggleButtonBackgroundHighLightOverlayPointerOverAppBarToggleButtonBackgroundHighLightOverlayPressedAppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOverAppBarToggleButtonBackgroundHighLightOverlayCheckedPressedAppBarToggleButtonForegroundTextFillColorPrimaryBrushAppBarToggleButtonForegroundPointerOverAppBarToggleButtonForegroundPressedTextFillColorSecondaryBrushAppBarToggleButtonForegroundDisabledTextFillColorDisabledBrushAppBarToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushAppBarToggleButtonForegroundCheckedPointerOverAppBarToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushAppBarToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledAppBarToggleButtonBorderBrushControlFillColorTransparentBrushAppBarToggleButtonBorderBrushPointerOverAppBarToggleButtonBorderBrushPressedAppBarToggleButtonBorderBrushDisabledAppBarToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushAppBarToggleButtonBorderBrushCheckedPointerOverAppBarToggleButtonBorderBrushCheckedPressedAppBarToggleButtonBorderBrushCheckedDisabledAppBarToggleButtonCheckGlyphForegroundAppBarToggleButtonCheckGlyphForegroundPointerOverAppBarToggleButtonCheckGlyphForegroundPressedAppBarToggleButtonCheckGlyphForegroundDisabledAppBarToggleButtonCheckGlyphForegroundCheckedAppBarToggleButtonCheckGlyphForegroundCheckedPointerOverAppBarToggleButtonCheckGlyphForegroundCheckedPressedAppBarToggleButtonCheckGlyphForegroundCheckedDisabledAppBarToggleButtonOverflowLabelForegroundPointerOverAppBarToggleButtonOverflowLabelForegroundPressedAppBarToggleButtonOverflowLabelForegroundDisabledAppBarToggleButtonOverflowLabelForegroundCheckedPointerOverAppBarToggleButtonOverflowLabelForegroundCheckedPressedAppBarToggleButtonOverflowLabelForegroundCheckedDisabledAppBarToggleButtonCheckedBackgroundThemeBrushAppBarToggleButtonCheckedBorderThemeBrushAppBarToggleButtonCheckedDisabledBackgroundThemeBrushAppBarToggleButtonCheckedDisabledBorderThemeBrushAppBarToggleButtonCheckedDisabledForegroundThemeBrushAppBarToggleButtonCheckedForegroundThemeBrushAppBarToggleButtonCheckedPointerOverBackgroundThemeBrushAppBarToggleButtonCheckedPointerOverBorderThemeBrushAppBarToggleButtonCheckedPressedBackgroundThemeBrushAppBarToggleButtonCheckedPressedBorderThemeBrushAppBarToggleButtonCheckedPressedForegroundThemeBrushAppBarToggleButtonPointerOverBackgroundThemeBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundAppBarToggleButtonKeyboardAcceleratorTextForegroundPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundDisabledAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPressedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_17_STRINGS: &str = "AppBarToggleButtonBackgroundSubtleFillColorTransparentBrushAppBarToggleButtonBackgroundPointerOverSubtleFillColorSecondaryBrushAppBarToggleButtonBackgroundPressedSubtleFillColorTertiaryBrushAppBarToggleButtonBackgroundDisabledSubtleFillColorDisabledBrushAppBarToggleButtonBackgroundCheckedAccentFillColorDefaultBrushAppBarToggleButtonBackgroundCheckedPointerOverAccentFillColorSecondaryBrushAppBarToggleButtonBackgroundCheckedPressedAccentFillColorTertiaryBrushAppBarToggleButtonBackgroundCheckedDisabledAccentFillColorDisabledBrushAppBarToggleButtonBackgroundHighLightOverlayAppBarToggleButtonBackgroundHighLightOverlayPointerOverAppBarToggleButtonBackgroundHighLightOverlayPressedAppBarToggleButtonBackgroundHighLightOverlayCheckedPointerOverAppBarToggleButtonBackgroundHighLightOverlayCheckedPressedAppBarToggleButtonForegroundTextFillColorPrimaryBrushAppBarToggleButtonForegroundPointerOverAppBarToggleButtonForegroundPressedTextFillColorSecondaryBrushAppBarToggleButtonForegroundDisabledTextFillColorDisabledBrushAppBarToggleButtonForegroundCheckedTextOnAccentFillColorPrimaryBrushAppBarToggleButtonForegroundCheckedPointerOverAppBarToggleButtonForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushAppBarToggleButtonForegroundCheckedDisabledTextOnAccentFillColorDisabledAppBarToggleButtonBorderBrushControlFillColorTransparentBrushAppBarToggleButtonBorderBrushPointerOverAppBarToggleButtonBorderBrushPressedAppBarToggleButtonBorderBrushDisabledAppBarToggleButtonBorderBrushCheckedAccentControlElevationBorderBrushAppBarToggleButtonBorderBrushCheckedPointerOverAppBarToggleButtonBorderBrushCheckedPressedAppBarToggleButtonBorderBrushCheckedDisabledAppBarToggleButtonCheckGlyphForegroundAppBarToggleButtonCheckGlyphForegroundPointerOverAppBarToggleButtonCheckGlyphForegroundPressedAppBarToggleButtonCheckGlyphForegroundDisabledAppBarToggleButtonCheckGlyphForegroundCheckedAppBarToggleButtonCheckGlyphForegroundCheckedPointerOverAppBarToggleButtonCheckGlyphForegroundCheckedPressedAppBarToggleButtonCheckGlyphForegroundCheckedDisabledAppBarToggleButtonOverflowLabelForegroundPointerOverAppBarToggleButtonOverflowLabelForegroundPressedAppBarToggleButtonOverflowLabelForegroundDisabledAppBarToggleButtonOverflowLabelForegroundCheckedPointerOverAppBarToggleButtonOverflowLabelForegroundCheckedPressedAppBarToggleButtonOverflowLabelForegroundCheckedDisabledAppBarToggleButtonCheckedBackgroundThemeBrushAppBarToggleButtonCheckedBorderThemeBrushAppBarToggleButtonCheckedDisabledBackgroundThemeBrushAppBarToggleButtonCheckedDisabledBorderThemeBrushAppBarToggleButtonCheckedDisabledForegroundThemeBrushAppBarToggleButtonCheckedForegroundThemeBrushAppBarToggleButtonCheckedPointerOverBackgroundThemeBrushAppBarToggleButtonCheckedPointerOverBorderThemeBrushAppBarToggleButtonCheckedPressedBackgroundThemeBrushAppBarToggleButtonCheckedPressedBorderThemeBrushAppBarToggleButtonCheckedPressedForegroundThemeBrushAppBarToggleButtonPointerOverBackgroundThemeBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundAppBarToggleButtonKeyboardAcceleratorTextForegroundPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundPressedTextFillColorTertiaryBrushAppBarToggleButtonKeyboardAcceleratorTextForegroundDisabledAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPointerOverAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedPressedAppBarToggleButtonKeyboardAcceleratorTextForegroundCheckedDisabledAppBarToggleButtonBorderThemeThicknessAppBarToggleButtonOverflowTextTouchMarginAppBarToggleButtonOverflowCheckTouchMarginAppBarToggleButtonOverflowCheckMarginAppBarToggleButtonTextLabelMarginAppBarToggleButtonTextLabelOnRightMarginAppBarToggleButtonOverflowTextLabelPadding";
+
+/// The numbers of the packed tables of the unit 17 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_17_NUMBERS: [f64; 10] = [1.0_f64, 0.0_f64, 9.0_f64, 12.0_f64, 10.0_f64, 4.0_f64, 2.0_f64, 8.0_f64, 16.0_f64, 5.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_75: rt::PackedRows = rt::PackedRows {
@@ -6884,7 +6967,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_82: &[rt::ValueRow<f64>] = &[
 ];
 
 /// The keys and targets of the packed tables of the unit 19 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_19_STRINGS: &str = "ToggleSwitchContentForegroundTextFillColorPrimaryBrushToggleSwitchContentForegroundDisabledTextFillColorDisabledBrushToggleSwitchHeaderForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundSubtleFillColorTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchContainerBackgroundDisabledToggleSwitchFillOffControlAltFillColorSecondaryBrushToggleSwitchFillOffPointerOverControlAltFillColorTertiaryToggleSwitchFillOffPressedControlAltFillColorQuarternaryToggleSwitchFillOffDisabledControlAltFillColorDisabledToggleSwitchStrokeOffControlStrongStrokeColorDefaultBrushToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledControlStrongStrokeColorDisabledToggleSwitchFillOnAccentFillColorDefaultBrushToggleSwitchFillOnPointerOverAccentFillColorSecondaryBrushToggleSwitchFillOnPressedAccentFillColorTertiaryBrushToggleSwitchFillOnDisabledAccentFillColorDisabledBrushToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnToggleSwitchKnobFillOnPointerOverToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledToggleSwitchKnobStrokeOnCircleElevationBorderBrushToggleSwitchCurtainBackgroundThemeBrushToggleSwitchCurtainDisabledBackgroundThemeBrushToggleSwitchCurtainPointerOverBackgroundThemeBrushToggleSwitchCurtainPressedBackgroundThemeBrushToggleSwitchDisabledForegroundThemeBrushToggleSwitchForegroundThemeBrushToggleSwitchHeaderDisabledForegroundThemeBrushToggleSwitchHeaderForegroundThemeBrushToggleSwitchOuterBorderBorderThemeBrushToggleSwitchOuterBorderDisabledBorderThemeBrushToggleSwitchThumbBackgroundThemeBrushToggleSwitchThumbBorderThemeBrushToggleSwitchThumbDisabledBackgroundThemeBrushToggleSwitchThumbDisabledBorderThemeBrushToggleSwitchThumbPointerOverBackgroundThemeBrushToggleSwitchThumbPointerOverBorderThemeBrushToggleSwitchThumbPressedBackgroundThemeBrushToggleSwitchThumbPressedForegroundThemeBrushToggleSwitchTrackBackgroundThemeBrushToggleSwitchTrackBorderThemeBrushToggleSwitchTrackDisabledBackgroundThemeBrushToggleSwitchTrackPointerOverBackgroundThemeBrushToggleSwitchTrackPressedBackgroundThemeBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_19_STRINGS: &str = "ToggleSwitchContentForegroundTextFillColorPrimaryBrushToggleSwitchContentForegroundDisabledTextFillColorDisabledBrushToggleSwitchHeaderForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundSubtleFillColorTransparentBrushToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchContainerBackgroundDisabledToggleSwitchFillOffControlAltFillColorSecondaryBrushToggleSwitchFillOffPointerOverControlAltFillColorTertiaryToggleSwitchFillOffPressedControlAltFillColorQuarternaryToggleSwitchFillOffDisabledControlAltFillColorDisabledToggleSwitchStrokeOffControlStrongStrokeColorDefaultBrushToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledControlStrongStrokeColorDisabledToggleSwitchFillOnAccentFillColorDefaultBrushToggleSwitchFillOnPointerOverAccentFillColorSecondaryBrushToggleSwitchFillOnPressedAccentFillColorTertiaryBrushToggleSwitchFillOnDisabledAccentFillColorDisabledBrushToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnToggleSwitchKnobFillOnPointerOverToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledToggleSwitchKnobStrokeOnCircleElevationBorderBrushToggleSwitchCurtainBackgroundThemeBrushToggleSwitchCurtainDisabledBackgroundThemeBrushToggleSwitchCurtainPointerOverBackgroundThemeBrushToggleSwitchCurtainPressedBackgroundThemeBrushToggleSwitchDisabledForegroundThemeBrushToggleSwitchForegroundThemeBrushToggleSwitchHeaderDisabledForegroundThemeBrushToggleSwitchHeaderForegroundThemeBrushToggleSwitchOuterBorderBorderThemeBrushToggleSwitchOuterBorderDisabledBorderThemeBrushToggleSwitchThumbBackgroundThemeBrushToggleSwitchThumbBorderThemeBrushToggleSwitchThumbDisabledBackgroundThemeBrushToggleSwitchThumbDisabledBorderThemeBrushToggleSwitchThumbPointerOverBackgroundThemeBrushToggleSwitchThumbPointerOverBorderThemeBrushToggleSwitchThumbPressedBackgroundThemeBrushToggleSwitchThumbPressedForegroundThemeBrushToggleSwitchTrackBackgroundThemeBrushToggleSwitchTrackBorderThemeBrushToggleSwitchTrackDisabledBackgroundThemeBrushToggleSwitchTrackPointerOverBackgroundThemeBrushToggleSwitchTrackPressedBackgroundThemeBrushToggleSwitchPreContentMarginToggleSwitchPostContentMarginToggleSwitchThemeMinWidth";
+
+/// The numbers of the packed tables of the unit 19 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_19_NUMBERS: [f64; 2] = [8.0_f64, 0.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_83: rt::PackedRows = rt::PackedRows {
@@ -6974,25 +7060,32 @@ static POPULATE_MACOSTHEME_XAML_ROWS_86: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_87: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CommandBarOverflowMinWidth", value: 160.0_f64, line: 15, position: 52 },
-    rt::ValueRow { key: "CommandBarOverflowTouchMinWidth", value: 240.0_f64, line: 16, position: 57 },
-    rt::ValueRow { key: "CommandBarOverflowMaxWidth", value: 480.0_f64, line: 17, position: 52 },
-    rt::ValueRow { key: "CommandBarOverflowMaxHeight", value: 198.0_f64, line: 18, position: 53 },
-];
-
 /// The keys and targets of the packed tables of the unit 20 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS: &str = "CommandBarBackgroundControlFillColorTransparentBrushCommandBarBackgroundOpenAcrylicInAppFillColorDefaultBrushCommandBarBorderBrushOpenCardStrokeColorDefaultSolidBrushCommandBarForegroundTextFillColorPrimaryBrushCommandBarHighContrastBorderCommandBarEllipsisIconForegroundDisabledTextFillColorDisabledBrushCommandBarOverflowPresenterBackgroundCommandBarOverflowPresenterBorderBrushSystemControlTransientBorderBrushCommandBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS: &str = "CommandBarOverflowMinWidthCommandBarOverflowTouchMinWidthCommandBarOverflowMaxWidthCommandBarOverflowMaxHeightCommandBarBackgroundControlFillColorTransparentBrushCommandBarBackgroundOpenAcrylicInAppFillColorDefaultBrushCommandBarBorderBrushOpenCardStrokeColorDefaultSolidBrushCommandBarForegroundTextFillColorPrimaryBrushCommandBarHighContrastBorderCommandBarEllipsisIconForegroundDisabledTextFillColorDisabledBrushCommandBarOverflowPresenterBackgroundCommandBarOverflowPresenterBorderBrushSystemControlTransientBorderBrushCommandBarLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCommandBarOverflowPresenterBorderThicknessCommandBarOverflowPresenterBorderDownThicknessCommandBarOverflowPresenterBorderUpThicknessCommandBarOverflowPresenterBorderPaddingCommandBarOverflowPresenterBorderDownPaddingCommandBarOverflowPresenterBorderUpPadding";
+
+/// The numbers of the packed tables of the unit 20 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_20_NUMBERS: [f64; 6] = [160.0_f64, 240.0_f64, 480.0_f64, 198.0_f64, 1.0_f64, 0.0_f64];
+
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_87: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_20_NUMBERS,
+    records: &[
+        0, 26, 15, 52, 0,
+        26, 31, 16, 57, 1,
+        57, 26, 17, 52, 2,
+        83, 27, 18, 53, 3,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_88: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 32, 1, 19, 8, 19, 8,
-        52, 24, 76, 33, 1, 20, 8, 20, 8,
-        109, 25, 134, 32, 1, 21, 8, 21, 8,
+        110, 20, 130, 32, 1, 19, 8, 19, 8,
+        162, 24, 186, 33, 1, 20, 8, 20, 8,
+        219, 25, 244, 32, 1, 21, 8, 21, 8,
     ],
 };
 
@@ -7001,71 +7094,82 @@ static POPULATE_MACOSTHEME_XAML_ROWS_89: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        166, 20, 186, 25, 1, 23, 8, 23, 8,
-        211, 28, 20, 32, 1, 24, 8, 24, 8,
-        239, 40, 279, 26, 1, 25, 8, 25, 8,
-        305, 37, 76, 33, 1, 26, 8, 26, 8,
-        342, 38, 380, 33, 1, 27, 8, 27, 8,
-        413, 39, 452, 47, 1, 28, 8, 28, 8,
+        276, 20, 296, 25, 1, 23, 8, 23, 8,
+        321, 28, 130, 32, 1, 24, 8, 24, 8,
+        349, 40, 389, 26, 1, 25, 8, 25, 8,
+        415, 37, 186, 33, 1, 26, 8, 26, 8,
+        452, 38, 490, 33, 1, 27, 8, 27, 8,
+        523, 39, 562, 47, 1, 28, 8, 28, 8,
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_90: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 29, position: 69 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 30, position: 73 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpThickness", value: [0.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 31, position: 71 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 32, position: 67 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 33, position: 71 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 34, position: 69 },
-];
-
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_91: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ListViewItemContentOffsetX", value: -40.5_f64, line: 15, position: 52 },
-    rt::ValueRow { key: "ListViewItemDisabledThemeOpacity", value: 0.3_f64, line: 16, position: 58 },
-    rt::ValueRow { key: "ListViewItemDragThemeOpacity", value: 0.8_f64, line: 17, position: 54 },
-    rt::ValueRow { key: "ListViewItemReorderThemeOpacity", value: 0.8_f64, line: 18, position: 57 },
-    rt::ValueRow { key: "ListViewItemReorderTargetThemeOpacity", value: 0.5_f64, line: 19, position: 63 },
-    rt::ValueRow { key: "ListViewItemReorderTargetThemeScale", value: 0.95_f64, line: 20, position: 61 },
-    rt::ValueRow { key: "ListViewItemReorderHintThemeOffset", value: 10.0_f64, line: 21, position: 60 },
-    rt::ValueRow { key: "ListViewItemSelectedBorderThemeThickness", value: 4.0_f64, line: 22, position: 66 },
-    rt::ValueRow { key: "ListViewItemMinWidth", value: 0.0_f64, line: 23, position: 46 },
-    rt::ValueRow { key: "ListViewItemMinHeight", value: 26.0_f64, line: 24, position: 47 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_90: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_20_NUMBERS,
+    records: &[
+        609, 42, 29, 69, 4, 4, 4, 4,
+        651, 46, 30, 73, 5, 5, 5, 4,
+        697, 44, 31, 71, 5, 4, 5, 5,
+        741, 40, 32, 67, 5, 5, 5, 5,
+        781, 44, 33, 71, 5, 5, 5, 5,
+        825, 42, 34, 69, 5, 5, 5, 5,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 21 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS: &str = "ListViewItemBorderBackgroundSubtleFillColorTertiaryBrushListViewItemBackgroundSubtleFillColorTransparentBrushListViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushListViewItemBackgroundPressedListViewItemBackgroundSelectedAccentFillColorDefaultBrushListViewItemBackgroundSelectedPointerOverListViewItemBackgroundSelectedPressedListViewItemForegroundTextFillColorPrimaryBrushListViewItemForegroundPointerOverListViewItemForegroundPressedListViewItemForegroundSelectedTextOnAccentFillColorPrimaryBrushListViewItemForegroundSelectedPointerOverListViewItemForegroundSelectedPressedListViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushListViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushListViewItemFocusBorderBrushListViewItemFocusSecondaryBorderBrushListViewItemCheckBrushListViewItemCheckBoxBrushControlAltFillColorSecondaryBrushListViewItemDragBackgroundListViewItemDragForegroundListViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushListViewItemMultiArrangeOverlayTextBorderListViewItemMultiArrangeOverlayTextBackgroundListViewItemCheckHintThemeBrushListViewItemCheckSelectingThemeBrushListViewItemCheckThemeBrushListViewItemDragBackgroundThemeBrushListViewItemDragForegroundThemeBrushListViewItemFocusBorderThemeBrushListViewItemOverlayBackgroundThemeBrushListViewItemOverlayForegroundThemeBrushListViewItemOverlaySecondaryForegroundThemeBrushListViewItemPlaceholderBackgroundThemeBrushListViewItemPointerOverBackgroundThemeBrushListViewItemSelectedBackgroundThemeBrushListViewItemSelectedForegroundThemeBrushListViewItemSelectedPointerOverBackgroundThemeBrushListViewItemSelectedPointerOverBorderThemeBrushListViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushListViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushListViewItemCheckBoxPointerOverBrushListViewItemCheckBoxPressedBrushListViewItemCheckBoxDisabledBrushListViewItemCheckBoxSelectedBrushListViewItemCheckBoxSelectedPointerOverBrushListViewItemCheckBoxSelectedPressedBrushAccentFillColorTertiaryBrushListViewItemCheckBoxSelectedDisabledBrushListViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushListViewItemCheckBoxPointerOverBorderBrushListViewItemCheckBoxPressedBorderBrushListViewItemCheckBoxDisabledBorderBrushControlStrongStrokeColorDisabledBrushListViewItemBackgroundSelectedDisabledListViewItemSelectionIndicatorBrushListViewItemSelectionIndicatorPointerOverBrushListViewItemSelectionIndicatorPressedBrushListViewItemSelectionIndicatorDisabledBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS: &str = "ListViewItemContentOffsetXListViewItemDisabledThemeOpacityListViewItemDragThemeOpacityListViewItemReorderThemeOpacityListViewItemReorderTargetThemeOpacityListViewItemReorderTargetThemeScaleListViewItemReorderHintThemeOffsetListViewItemSelectedBorderThemeThicknessListViewItemMinWidthListViewItemMinHeightListViewItemBorderBackgroundSubtleFillColorTertiaryBrushListViewItemBackgroundSubtleFillColorTransparentBrushListViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushListViewItemBackgroundPressedListViewItemBackgroundSelectedAccentFillColorDefaultBrushListViewItemBackgroundSelectedPointerOverListViewItemBackgroundSelectedPressedListViewItemForegroundTextFillColorPrimaryBrushListViewItemForegroundPointerOverListViewItemForegroundPressedListViewItemForegroundSelectedTextOnAccentFillColorPrimaryBrushListViewItemForegroundSelectedPointerOverListViewItemForegroundSelectedPressedListViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushListViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushListViewItemFocusBorderBrushListViewItemFocusSecondaryBorderBrushListViewItemCheckBrushListViewItemCheckBoxBrushControlAltFillColorSecondaryBrushListViewItemDragBackgroundListViewItemDragForegroundListViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushListViewItemMultiArrangeOverlayTextBorderListViewItemMultiArrangeOverlayTextBackgroundListViewItemCheckHintThemeBrushListViewItemCheckSelectingThemeBrushListViewItemCheckThemeBrushListViewItemDragBackgroundThemeBrushListViewItemDragForegroundThemeBrushListViewItemFocusBorderThemeBrushListViewItemOverlayBackgroundThemeBrushListViewItemOverlayForegroundThemeBrushListViewItemOverlaySecondaryForegroundThemeBrushListViewItemPlaceholderBackgroundThemeBrushListViewItemPointerOverBackgroundThemeBrushListViewItemSelectedBackgroundThemeBrushListViewItemSelectedForegroundThemeBrushListViewItemSelectedPointerOverBackgroundThemeBrushListViewItemSelectedPointerOverBorderThemeBrushListViewItemCornerRadiusListViewItemCheckBoxCornerRadiusListViewItemSelectionIndicatorCornerRadiusListViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushListViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushListViewItemCheckBoxPointerOverBrushListViewItemCheckBoxPressedBrushListViewItemCheckBoxDisabledBrushListViewItemCheckBoxSelectedBrushListViewItemCheckBoxSelectedPointerOverBrushListViewItemCheckBoxSelectedPressedBrushAccentFillColorTertiaryBrushListViewItemCheckBoxSelectedDisabledBrushListViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushListViewItemCheckBoxPointerOverBorderBrushListViewItemCheckBoxPressedBorderBrushListViewItemCheckBoxDisabledBorderBrushControlStrongStrokeColorDisabledBrushListViewItemBackgroundSelectedDisabledListViewItemSelectionIndicatorBrushListViewItemSelectionIndicatorPointerOverBrushListViewItemSelectionIndicatorPressedBrushListViewItemSelectionIndicatorDisabledBrush";
+
+/// The numbers of the packed tables of the unit 21 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_21_NUMBERS: [f64; 11] = [-40.5_f64, 0.3_f64, 0.8_f64, 0.5_f64, 0.95_f64, 10.0_f64, 4.0_f64, 0.0_f64, 26.0_f64, 3.0_f64, 1.5_f64];
+
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_91: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_21_NUMBERS,
+    records: &[
+        0, 26, 15, 52, 0,
+        26, 32, 16, 58, 1,
+        58, 28, 17, 54, 2,
+        86, 31, 18, 57, 2,
+        117, 37, 19, 63, 3,
+        154, 35, 20, 61, 4,
+        189, 34, 21, 60, 5,
+        223, 40, 22, 66, 6,
+        263, 20, 23, 46, 7,
+        283, 21, 24, 47, 8,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_92: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 28, 1, 26, 8, 26, 8,
-        56, 22, 78, 31, 1, 27, 8, 27, 8,
-        109, 33, 142, 29, 1, 28, 8, 28, 8,
-        171, 29, 28, 28, 1, 29, 8, 29, 8,
-        200, 30, 230, 27, 1, 30, 8, 30, 8,
-        257, 41, 230, 27, 1, 31, 8, 31, 8,
-        298, 37, 230, 27, 1, 32, 8, 32, 8,
-        335, 22, 357, 25, 1, 33, 8, 33, 8,
-        382, 33, 357, 25, 1, 34, 8, 34, 8,
-        415, 29, 357, 25, 1, 35, 8, 35, 8,
-        444, 30, 474, 33, 1, 36, 8, 36, 8,
-        507, 41, 474, 33, 1, 37, 8, 37, 8,
-        548, 37, 474, 33, 1, 38, 8, 38, 8,
-        585, 35, 620, 26, 1, 39, 8, 39, 8,
-        646, 37, 683, 26, 1, 40, 8, 40, 8,
-        709, 28, 620, 26, 1, 41, 8, 41, 8,
-        737, 37, 357, 25, 1, 42, 8, 42, 8,
-        774, 22, 474, 33, 1, 43, 8, 43, 8,
-        796, 25, 821, 33, 1, 44, 8, 44, 8,
-        854, 26, 78, 31, 1, 45, 8, 45, 8,
-        880, 26, 474, 33, 1, 46, 8, 46, 8,
-        906, 33, 939, 35, 1, 47, 8, 47, 8,
-        974, 41, 474, 33, 1, 48, 8, 48, 8,
-        1015, 45, 230, 27, 1, 49, 8, 49, 8,
+        304, 28, 332, 28, 1, 26, 8, 26, 8,
+        360, 22, 382, 31, 1, 27, 8, 27, 8,
+        413, 33, 446, 29, 1, 28, 8, 28, 8,
+        475, 29, 332, 28, 1, 29, 8, 29, 8,
+        504, 30, 534, 27, 1, 30, 8, 30, 8,
+        561, 41, 534, 27, 1, 31, 8, 31, 8,
+        602, 37, 534, 27, 1, 32, 8, 32, 8,
+        639, 22, 661, 25, 1, 33, 8, 33, 8,
+        686, 33, 661, 25, 1, 34, 8, 34, 8,
+        719, 29, 661, 25, 1, 35, 8, 35, 8,
+        748, 30, 778, 33, 1, 36, 8, 36, 8,
+        811, 41, 778, 33, 1, 37, 8, 37, 8,
+        852, 37, 778, 33, 1, 38, 8, 38, 8,
+        889, 35, 924, 26, 1, 39, 8, 39, 8,
+        950, 37, 987, 26, 1, 40, 8, 40, 8,
+        1013, 28, 924, 26, 1, 41, 8, 41, 8,
+        1041, 37, 661, 25, 1, 42, 8, 42, 8,
+        1078, 22, 778, 33, 1, 43, 8, 43, 8,
+        1100, 25, 1125, 33, 1, 44, 8, 44, 8,
+        1158, 26, 382, 31, 1, 45, 8, 45, 8,
+        1184, 26, 778, 33, 1, 46, 8, 46, 8,
+        1210, 33, 1243, 35, 1, 47, 8, 47, 8,
+        1278, 41, 778, 33, 1, 48, 8, 48, 8,
+        1319, 45, 534, 27, 1, 49, 8, 49, 8,
     ],
 };
 
@@ -7074,54 +7178,58 @@ static POPULATE_MACOSTHEME_XAML_ROWS_93: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1060, 31, 65535, 65535, 1, 50, 8,
-        1091, 36, 65535, 65535, 1, 51, 8,
-        1127, 27, 65535, 65535, 1, 52, 8,
-        1154, 36, 6068, 39238, 1, 53, 8,
-        1190, 36, 65535, 65535, 1, 54, 8,
-        1226, 33, 65535, 65535, 1, 55, 8,
-        1259, 39, 0, 42496, 1, 56, 8,
-        1298, 39, 65535, 65535, 1, 57, 8,
-        1337, 48, 65535, 39423, 1, 58, 8,
-        1385, 43, 15677, 65341, 1, 59, 8,
-        1428, 43, 65535, 19967, 1, 60, 8,
-        1471, 40, 6068, 65350, 1, 61, 8,
-        1511, 40, 65535, 65535, 1, 62, 8,
-        1551, 51, 14270, 65375, 1, 63, 8,
-        1602, 47, 14270, 65375, 1, 64, 8,
+        1364, 31, 65535, 65535, 1, 50, 8,
+        1395, 36, 65535, 65535, 1, 51, 8,
+        1431, 27, 65535, 65535, 1, 52, 8,
+        1458, 36, 6068, 39238, 1, 53, 8,
+        1494, 36, 65535, 65535, 1, 54, 8,
+        1530, 33, 65535, 65535, 1, 55, 8,
+        1563, 39, 0, 42496, 1, 56, 8,
+        1602, 39, 65535, 65535, 1, 57, 8,
+        1641, 48, 65535, 39423, 1, 58, 8,
+        1689, 43, 15677, 65341, 1, 59, 8,
+        1732, 43, 65535, 19967, 1, 60, 8,
+        1775, 40, 6068, 65350, 1, 61, 8,
+        1815, 40, 65535, 65535, 1, 62, 8,
+        1855, 51, 14270, 65375, 1, 63, 8,
+        1906, 47, 14270, 65375, 1, 64, 8,
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_94: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ListViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 65, position: 54 },
-    rt::ValueRow { key: "ListViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 66, position: 62 },
-    rt::ValueRow { key: "ListViewItemSelectionIndicatorCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 67, position: 72 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_94: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_21_NUMBERS,
+    records: &[
+        1953, 24, 65, 54, 6, 6, 6, 6,
+        1977, 32, 66, 62, 9, 9, 9, 9,
+        2009, 42, 67, 72, 10, 10, 10, 10,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_95: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1649, 29, 1678, 35, 1, 68, 8, 68, 8,
-        1713, 30, 1743, 34, 1, 69, 8, 69, 8,
-        1777, 36, 821, 33, 1, 70, 8, 70, 8,
-        1813, 32, 821, 33, 1, 71, 8, 71, 8,
-        1845, 33, 821, 33, 1, 72, 8, 72, 8,
-        1878, 33, 230, 27, 1, 73, 8, 73, 8,
-        1911, 44, 1684, 29, 1, 74, 8, 74, 8,
-        1955, 40, 1995, 28, 1, 75, 8, 75, 8,
-        2023, 41, 1749, 28, 1, 76, 8, 76, 8,
-        2064, 31, 2095, 36, 1, 77, 8, 77, 8,
-        2131, 42, 2095, 36, 1, 78, 8, 78, 8,
-        2173, 38, 2095, 36, 1, 79, 8, 79, 8,
-        2211, 39, 2250, 37, 1, 80, 8, 80, 8,
-        2287, 38, 142, 29, 1, 81, 8, 81, 8,
-        2325, 35, 230, 27, 1, 82, 8, 82, 8,
-        2360, 46, 230, 27, 1, 83, 8, 83, 8,
-        2406, 42, 230, 27, 1, 84, 8, 84, 8,
-        2448, 43, 1749, 28, 1, 85, 8, 85, 8,
+        2051, 29, 2080, 35, 1, 68, 8, 68, 8,
+        2115, 30, 2145, 34, 1, 69, 8, 69, 8,
+        2179, 36, 1125, 33, 1, 70, 8, 70, 8,
+        2215, 32, 1125, 33, 1, 71, 8, 71, 8,
+        2247, 33, 1125, 33, 1, 72, 8, 72, 8,
+        2280, 33, 534, 27, 1, 73, 8, 73, 8,
+        2313, 44, 2086, 29, 1, 74, 8, 74, 8,
+        2357, 40, 2397, 28, 1, 75, 8, 75, 8,
+        2425, 41, 2151, 28, 1, 76, 8, 76, 8,
+        2466, 31, 2497, 36, 1, 77, 8, 77, 8,
+        2533, 42, 2497, 36, 1, 78, 8, 78, 8,
+        2575, 38, 2497, 36, 1, 79, 8, 79, 8,
+        2613, 39, 2652, 37, 1, 80, 8, 80, 8,
+        2689, 38, 446, 29, 1, 81, 8, 81, 8,
+        2727, 35, 534, 27, 1, 82, 8, 82, 8,
+        2762, 46, 534, 27, 1, 83, 8, 83, 8,
+        2808, 42, 534, 27, 1, 84, 8, 84, 8,
+        2850, 43, 2151, 28, 1, 85, 8, 85, 8,
     ],
 };
 
@@ -7284,11 +7392,21 @@ static POPULATE_MACOSTHEME_XAML_ROWS_101: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_102: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ControlCornerRadius", value: [6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64], line: 17, position: 49 },
-    rt::ValueRow { key: "OverlayCornerRadius", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 18, position: 49 },
-];
+/// The keys and targets of the packed tables of the unit 27 of `MacOSTheme.xaml`, each once (#855).
+const POPULATE_MACOSTHEME_XAML_UNIT_27_STRINGS: &str = "ControlCornerRadiusOverlayCornerRadius";
+
+/// The numbers of the packed tables of the unit 27 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_27_NUMBERS: [f64; 2] = [6.0_f64, 12.0_f64];
+
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_102: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_27_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_27_NUMBERS,
+    records: &[
+        0, 19, 17, 49, 0, 0, 0, 0,
+        19, 19, 18, 49, 1, 1, 1, 1,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 28 of `MacOSTheme.xaml`, each once (#855).
 const POPULATE_MACOSTHEME_XAML_UNIT_28_STRINGS: &str = "RepeatButtonBackgroundControlFillColorDefaultBrushRepeatButtonBackgroundPointerOverControlFillColorSecondaryBrushRepeatButtonBackgroundPressedControlFillColorTertiaryBrushRepeatButtonBackgroundDisabledControlFillColorDisabledBrushRepeatButtonForegroundTextFillColorPrimaryBrushRepeatButtonForegroundPointerOverRepeatButtonForegroundPressedTextFillColorSecondaryBrushRepeatButtonForegroundDisabledTextFillColorDisabledBrushRepeatButtonBorderBrushControlElevationBorderBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedControlStrokeColorDefaultBrushRepeatButtonBorderBrushDisabledRepeatButtonBorderThemeBrushRepeatButtonDisabledBackgroundThemeBrushRepeatButtonDisabledBorderThemeBrushRepeatButtonDisabledForegroundThemeBrushRepeatButtonForegroundThemeBrushRepeatButtonPointerOverBackgroundThemeBrushRepeatButtonPointerOverForegroundThemeBrushRepeatButtonPressedBackgroundThemeBrushRepeatButtonPressedForegroundThemeBrush";
@@ -7365,7 +7483,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_105: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 30 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS: &str = "CalendarViewFocusBorderBrushAccentFillColorSecondaryBrushCalendarViewSelectedHoverBorderBrushCalendarViewSelectedPressedBorderBrushSubtleFillColorTertiaryBrushCalendarViewSelectedBorderBrushAccentFillColorDefaultBrushCalendarViewHoverBorderBrushSubtleFillColorSecondaryBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundTextOnAccentFillColorPrimaryBrushCalendarViewBlackoutForegroundTextFillColorPrimaryBrushCalendarViewSelectedForegroundAccentTextFillColorPrimaryBrushCalendarViewPressedForegroundTextFillColorSecondaryBrushCalendarViewOutOfScopeForegroundCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSubtleFillColorTransparentBrushCalendarViewCalendarItemBackgroundCalendarViewForegroundCalendarViewBackgroundControlFillColorInputActiveBrushCalendarViewBorderBrushControlStrokeColorDefaultBrushCalendarViewWeekDayForegroundDisabledTextFillColorDisabledBrushCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverControlStrongFillColorDefaultBrushCalendarViewNavigationButtonForegroundPressedCalendarViewNavigationButtonForegroundDisabledControlStrongFillColorDisabledBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverCalendarViewFocusVisualPrimaryBrushFocusStrokeColorOuterBrushCalendarViewFocusVisualSecondaryBrushFocusStrokeColorInnerBrushCalendarViewBlackoutStrikethroughBrushControlStrongStrokeColorDefaultBrushCalendarViewSelectedDisabledBorderBrushAccentFillColorDisabledBrushCalendarViewTodaySelectedInnerBorderBrushCalendarViewDisabledForegroundCalendarViewSelectedHoverForegroundCalendarViewSelectedPressedForegroundAccentTextFillColorTertiaryBrushCalendarViewSelectedDisabledForegroundAccentTextFillColorDisabledBrushCalendarViewOutOfScopeHoverForegroundCalendarViewOutOfScopePressedForegroundCalendarViewCalendarItemHoverBackgroundCalendarViewCalendarItemPressedBackgroundCalendarViewCalendarItemDisabledBackgroundCalendarViewCalendarItemBorderBrushCalendarViewTodayBackgroundCalendarViewTodayBlackoutBackgroundAccentFillColorTertiaryBrushCalendarViewTodayBlackoutForegroundCalendarViewTodayHoverBackgroundCalendarViewTodayPressedBackgroundCalendarViewTodayDisabledBackgroundCalendarViewBlackoutBackgroundCalendarViewNavigationButtonBackgroundPointerOverCalendarViewNavigationButtonBackgroundPressedCalendarViewHeaderNavigationButtonForegroundCalendarViewHeaderNavigationButtonForegroundPointerOverCalendarViewHeaderNavigationButtonForegroundPressedCalendarViewHeaderNavigationButtonForegroundDisabledCalendarViewDayItemFontSizeControlContentThemeFontSizeCalendarViewMonthYearItemFontSize";
+const POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS: &str = "CalendarViewFocusBorderBrushAccentFillColorSecondaryBrushCalendarViewSelectedHoverBorderBrushCalendarViewSelectedPressedBorderBrushSubtleFillColorTertiaryBrushCalendarViewSelectedBorderBrushAccentFillColorDefaultBrushCalendarViewHoverBorderBrushSubtleFillColorSecondaryBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundTextOnAccentFillColorPrimaryBrushCalendarViewBlackoutForegroundTextFillColorPrimaryBrushCalendarViewSelectedForegroundAccentTextFillColorPrimaryBrushCalendarViewPressedForegroundTextFillColorSecondaryBrushCalendarViewOutOfScopeForegroundCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSubtleFillColorTransparentBrushCalendarViewCalendarItemBackgroundCalendarViewForegroundCalendarViewBackgroundControlFillColorInputActiveBrushCalendarViewBorderBrushControlStrokeColorDefaultBrushCalendarViewWeekDayForegroundDisabledTextFillColorDisabledBrushCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverControlStrongFillColorDefaultBrushCalendarViewNavigationButtonForegroundPressedCalendarViewNavigationButtonForegroundDisabledControlStrongFillColorDisabledBrushCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverCalendarViewFocusVisualPrimaryBrushFocusStrokeColorOuterBrushCalendarViewFocusVisualSecondaryBrushFocusStrokeColorInnerBrushCalendarViewBlackoutStrikethroughBrushControlStrongStrokeColorDefaultBrushCalendarViewSelectedDisabledBorderBrushAccentFillColorDisabledBrushCalendarViewTodaySelectedInnerBorderBrushCalendarViewDisabledForegroundCalendarViewSelectedHoverForegroundCalendarViewSelectedPressedForegroundAccentTextFillColorTertiaryBrushCalendarViewSelectedDisabledForegroundAccentTextFillColorDisabledBrushCalendarViewOutOfScopeHoverForegroundCalendarViewOutOfScopePressedForegroundCalendarViewCalendarItemHoverBackgroundCalendarViewCalendarItemPressedBackgroundCalendarViewCalendarItemDisabledBackgroundCalendarViewCalendarItemBorderBrushCalendarViewTodayBackgroundCalendarViewTodayBlackoutBackgroundAccentFillColorTertiaryBrushCalendarViewTodayBlackoutForegroundCalendarViewTodayHoverBackgroundCalendarViewTodayPressedBackgroundCalendarViewTodayDisabledBackgroundCalendarViewBlackoutBackgroundCalendarViewNavigationButtonBackgroundPointerOverCalendarViewNavigationButtonBackgroundPressedCalendarViewHeaderNavigationButtonForegroundCalendarViewHeaderNavigationButtonForegroundPointerOverCalendarViewHeaderNavigationButtonForegroundPressedCalendarViewHeaderNavigationButtonForegroundDisabledCalendarViewDayItemFontSizeControlContentThemeFontSizeCalendarViewMonthYearItemFontSizeCalendarViewFirstOfMonthLabelFontSizeCalendarViewFirstOfYearDecadeLabelFontSizeCalendarViewHeaderNavigationButtonFontSizeCalendarViewNavigationButtonFontSizeCalendarViewDayItemMarginCalendarViewWeekDayMarginCalendarViewWeekDayPaddingCalendarViewMonthYearItemMarginCalendarViewFirstOfMonthLabelMarginCalendarViewFirstOfYearDecadeLabelMarginCalendarViewHeaderNavigationButtonPaddingCalendarViewNavigationButtonPaddingCalendarViewHeaderNavigationButtonMarginCalendarViewNavigationPreviousButtonMarginCalendarViewNavigationNextButtonMarginCalendarViewNavigationButtonFocusVisualMargin";
+
+/// The numbers of the packed tables of the unit 30 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_30_NUMBERS: [f64; 12] = [8.0_f64, 14.0_f64, 0.0_f64, 3.0_f64, 1.0_f64, 12.0_f64, 2.0_f64, 9.0_f64, 7.0_f64, 11.5_f64, 6.0_f64, -2.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_106: rt::PackedRows = rt::PackedRows {
@@ -7432,32 +7553,43 @@ static POPULATE_MACOSTHEME_XAML_ROWS_106: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_107: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarViewFirstOfMonthLabelFontSize", value: 8.0_f64, line: 72, position: 63 },
-    rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelFontSize", value: 8.0_f64, line: 73, position: 68 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonFontSize", value: 14.0_f64, line: 74, position: 68 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonFontSize", value: 8.0_f64, line: 75, position: 62 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_107: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_30_NUMBERS,
+    records: &[
+        2737, 37, 72, 63, 0,
+        2774, 42, 73, 68, 0,
+        2816, 42, 74, 68, 1,
+        2858, 36, 75, 62, 0,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_108: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CalendarViewDayItemMargin", value: [0.0_f64, 3.0_f64, 0.0_f64, 0.0_f64], line: 76, position: 52 },
-    rt::ValueRow { key: "CalendarViewWeekDayMargin", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 77, position: 52 },
-    rt::ValueRow { key: "CalendarViewWeekDayPadding", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 78, position: 53 },
-    rt::ValueRow { key: "CalendarViewMonthYearItemMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 79, position: 58 },
-    rt::ValueRow { key: "CalendarViewFirstOfMonthLabelMargin", value: [0.0_f64, 2.0_f64, 0.0_f64, 0.0_f64], line: 80, position: 62 },
-    rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelMargin", value: [0.0_f64, 9.0_f64, 0.0_f64, 0.0_f64], line: 81, position: 67 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonPadding", value: [8.0_f64, 7.0_f64, 8.0_f64, 8.0_f64], line: 82, position: 68 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonPadding", value: [12.0_f64, 11.5_f64, 12.0_f64, 11.5_f64], line: 83, position: 62 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonMargin", value: [7.0_f64, 6.0_f64, 3.0_f64, 7.0_f64], line: 84, position: 67 },
-    rt::ValueRow { key: "CalendarViewNavigationPreviousButtonMargin", value: [3.0_f64, 6.0_f64, 3.0_f64, 7.0_f64], line: 85, position: 69 },
-    rt::ValueRow { key: "CalendarViewNavigationNextButtonMargin", value: [3.0_f64, 6.0_f64, 7.0_f64, 7.0_f64], line: 86, position: 65 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 87, position: 72 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_108: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_30_NUMBERS,
+    records: &[
+        2894, 25, 76, 52, 2, 3, 2, 2,
+        2919, 25, 77, 52, 4, 4, 4, 4,
+        2944, 26, 78, 53, 5, 5, 5, 5,
+        2970, 31, 79, 58, 2, 2, 2, 2,
+        3001, 35, 80, 62, 2, 6, 2, 2,
+        3036, 40, 81, 67, 2, 7, 2, 2,
+        3076, 41, 82, 68, 0, 8, 0, 0,
+        3117, 35, 83, 62, 5, 9, 5, 9,
+        3152, 40, 84, 67, 8, 10, 3, 8,
+        3192, 42, 85, 69, 3, 10, 3, 8,
+        3234, 38, 86, 65, 3, 10, 8, 8,
+        3272, 45, 87, 72, 11, 11, 11, 11,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 31 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_31_STRINGS: &str = "CheckBoxForegroundUncheckedTextFillColorPrimaryBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledTextFillColorDisabledBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSubtleFillColorTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedControlStrongStrokeColorDefaultBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedControlStrongStrokeColorDisabledBrushCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedAccentFillColorDefaultBrushCheckBoxCheckBackgroundStrokeCheckedPointerOverAccentFillColorSecondaryBrushCheckBoxCheckBackgroundStrokeCheckedPressedAccentFillColorTertiaryBrushCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedControlAltFillColorSecondaryBrushCheckBoxCheckBackgroundFillUncheckedPointerOverControlAltFillColorTertiaryBrushCheckBoxCheckBackgroundFillUncheckedPressedControlAltFillColorQuarternaryBrushCheckBoxCheckBackgroundFillUncheckedDisabledControlAltFillColorDisabledBrushCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledAccentFillColorDisabledBrushCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedTextOnAccentFillColorPrimaryBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledTextOnAccentFillColorDisabledBrushCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCheckBoxBackgroundThemeBrushCheckBoxBorderThemeBrushCheckBoxContentDisabledForegroundThemeBrushCheckBoxContentForegroundThemeBrushCheckBoxDisabledBackgroundThemeBrushCheckBoxDisabledBorderThemeBrushCheckBoxDisabledForegroundThemeBrushCheckBoxForegroundThemeBrushCheckBoxPointerOverBackgroundThemeBrushCheckBoxPointerOverBorderThemeBrushCheckBoxPointerOverForegroundThemeBrushCheckBoxPressedBackgroundThemeBrushCheckBoxPressedBorderThemeBrushCheckBoxPressedForegroundThemeBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_31_STRINGS: &str = "CheckBoxForegroundUncheckedTextFillColorPrimaryBrushCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledTextFillColorDisabledBrushCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedSubtleFillColorTransparentBrushCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedControlStrongStrokeColorDefaultBrushCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedControlStrongStrokeColorDisabledBrushCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedAccentFillColorDefaultBrushCheckBoxCheckBackgroundStrokeCheckedPointerOverAccentFillColorSecondaryBrushCheckBoxCheckBackgroundStrokeCheckedPressedAccentFillColorTertiaryBrushCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedControlAltFillColorSecondaryBrushCheckBoxCheckBackgroundFillUncheckedPointerOverControlAltFillColorTertiaryBrushCheckBoxCheckBackgroundFillUncheckedPressedControlAltFillColorQuarternaryBrushCheckBoxCheckBackgroundFillUncheckedDisabledControlAltFillColorDisabledBrushCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledAccentFillColorDisabledBrushCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedTextOnAccentFillColorPrimaryBrushCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledTextOnAccentFillColorDisabledBrushCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverCheckBoxCheckGlyphForegroundCheckedPressedTextOnAccentFillColorSecondaryBrushCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCheckBoxBackgroundThemeBrushCheckBoxBorderThemeBrushCheckBoxContentDisabledForegroundThemeBrushCheckBoxContentForegroundThemeBrushCheckBoxDisabledBackgroundThemeBrushCheckBoxDisabledBorderThemeBrushCheckBoxDisabledForegroundThemeBrushCheckBoxForegroundThemeBrushCheckBoxPointerOverBackgroundThemeBrushCheckBoxPointerOverBorderThemeBrushCheckBoxPointerOverForegroundThemeBrushCheckBoxPressedBackgroundThemeBrushCheckBoxPressedBorderThemeBrushCheckBoxPressedForegroundThemeBrushCheckBoxBorderThicknessCheckBoxSizeCheckBoxGlyphSizeCheckBoxHeightCheckBoxMinWidthCheckBoxPaddingCheckBoxFocusVisualMarginCheckBoxCheckedGlyph\u{e73e}CheckBoxIndeterminateGlyph\u{e9ae}";
+
+/// The numbers of the packed tables of the unit 31 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_31_NUMBERS: [f64; 7] = [1.0_f64, 14.0_f64, 12.0_f64, 22.0_f64, 0.0_f64, 6.0_f64, -3.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_109: rt::PackedRows = rt::PackedRows {
@@ -7562,7 +7694,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_110: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 32 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS: &str = "ContentDialogForegroundTextFillColorPrimaryBrushContentDialogBackgroundSolidBackgroundFillColorBaseBrushContentDialogSmokeFillSmokeFillColorDefaultBrushContentDialogTopOverlayLayerFillColorAltBrushContentDialogBorderBrushSurfaceStrokeColorDefaultBrushContentDialogSeparatorBorderBrushCardStrokeColorDefaultBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS: &str = "ContentDialogForegroundTextFillColorPrimaryBrushContentDialogBackgroundSolidBackgroundFillColorBaseBrushContentDialogSmokeFillSmokeFillColorDefaultBrushContentDialogTopOverlayLayerFillColorAltBrushContentDialogBorderBrushSurfaceStrokeColorDefaultBrushContentDialogSeparatorBorderBrushCardStrokeColorDefaultBrushContentDialogMinWidthContentDialogMaxWidthContentDialogMinHeightContentDialogMaxHeightContentDialogTitleMarginContentDialogPaddingContentDialogSeparatorThickness";
+
+/// The numbers of the packed tables of the unit 32 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_32_NUMBERS: [f64; 8] = [320.0_f64, 548.0_f64, 184.0_f64, 756.0_f64, 0.0_f64, 12.0_f64, 24.0_f64, 1.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_111: rt::PackedRows = rt::PackedRows {
@@ -7578,62 +7713,77 @@ static POPULATE_MACOSTHEME_XAML_ROWS_111: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_112: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ContentDialogMinWidth", value: 320.0_f64, line: 22, position: 47 },
-    rt::ValueRow { key: "ContentDialogMaxWidth", value: 548.0_f64, line: 23, position: 47 },
-    rt::ValueRow { key: "ContentDialogMinHeight", value: 184.0_f64, line: 24, position: 48 },
-    rt::ValueRow { key: "ContentDialogMaxHeight", value: 756.0_f64, line: 25, position: 48 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_112: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_32_NUMBERS,
+    records: &[
+        311, 21, 22, 47, 0,
+        332, 21, 23, 47, 1,
+        353, 22, 24, 48, 2,
+        375, 22, 25, 48, 3,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_113: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ContentDialogTitleMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 12.0_f64], line: 27, position: 51 },
-    rt::ValueRow { key: "ContentDialogPadding", value: [24.0_f64, 24.0_f64, 24.0_f64, 24.0_f64], line: 28, position: 47 },
-    rt::ValueRow { key: "ContentDialogSeparatorThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 29, position: 58 },
-];
-
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_114: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerSelectorThemeMinWidth", value: 80.0_f64, line: 15, position: 57 },
-    rt::ValueRow { key: "DatePickerSpacerThemeWidth", value: 1.0_f64, line: 16, position: 52 },
-    rt::ValueRow { key: "DatePickerSpacingThemeWidth", value: 20.0_f64, line: 17, position: 53 },
-    rt::ValueRow { key: "DatePickerSpacingThemeHeight", value: 20.0_f64, line: 18, position: 54 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_113: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_32_NUMBERS,
+    records: &[
+        397, 24, 27, 51, 4, 4, 4, 5,
+        421, 20, 28, 47, 6, 6, 6, 6,
+        441, 31, 29, 58, 4, 4, 4, 7,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 33 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS: &str = "DatePickerSpacerFillControlStrokeColorDefaultBrushDatePickerSpacerFillDisabledDatePickerHeaderForegroundTextFillColorPrimaryBrushDatePickerHeaderForegroundDisabledTextFillColorDisabledBrushDatePickerButtonBorderBrushControlElevationBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundControlFillColorDefaultBrushDatePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushDatePickerButtonBackgroundPressedControlFillColorTertiaryBrushDatePickerButtonBackgroundDisabledControlFillColorDisabledBrushDatePickerButtonBackgroundFocusedDatePickerButtonForegroundDatePickerButtonForegroundDefaultTextFillColorSecondaryBrushDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerButtonForegroundFocusedDatePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushDatePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushDatePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushDatePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushDatePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushDatePickerHeaderForegroundThemeBrushDatePickerForegroundThemeBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS: &str = "DatePickerSelectorThemeMinWidthDatePickerSpacerThemeWidthDatePickerSpacingThemeWidthDatePickerSpacingThemeHeightDatePickerSpacerFillControlStrokeColorDefaultBrushDatePickerSpacerFillDisabledDatePickerHeaderForegroundTextFillColorPrimaryBrushDatePickerHeaderForegroundDisabledTextFillColorDisabledBrushDatePickerButtonBorderBrushControlElevationBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundControlFillColorDefaultBrushDatePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushDatePickerButtonBackgroundPressedControlFillColorTertiaryBrushDatePickerButtonBackgroundDisabledControlFillColorDisabledBrushDatePickerButtonBackgroundFocusedDatePickerButtonForegroundDatePickerButtonForegroundDefaultTextFillColorSecondaryBrushDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerButtonForegroundFocusedDatePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushDatePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushDatePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushDatePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushDatePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryDatePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushDatePickerHeaderForegroundThemeBrushDatePickerForegroundThemeBrushDatePickerFlyoutPresenterHighlightHeightDatePickerFlyoutPresenterItemHeightDatePickerFlyoutPresenterAcceptDismissHostGridHeightDatePickerThemeMinWidthDatePickerThemeMaxWidthDatePickerFlyoutPresenterItemPaddingDatePickerFlyoutPresenterMonthPaddingDatePickerHostPaddingDatePickerHostMonthPaddingDatePickerFlyoutPresenterAcceptMarginDatePickerFlyoutPresenterDismissMargin";
+
+/// The numbers of the packed tables of the unit 33 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_33_NUMBERS: [f64; 12] = [80.0_f64, 1.0_f64, 20.0_f64, 40.0_f64, 26.0_f64, 41.0_f64, 180.0_f64, 456.0_f64, 6.0_f64, 3.0_f64, 4.0_f64, 2.0_f64];
+
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_114: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_33_NUMBERS,
+    records: &[
+        0, 31, 15, 57, 0,
+        31, 26, 16, 52, 1,
+        57, 27, 17, 53, 2,
+        84, 28, 18, 54, 2,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_115: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 30, 1, 21, 8, 21, 8,
-        50, 28, 20, 30, 1, 22, 8, 22, 8,
-        78, 26, 104, 25, 1, 23, 8, 23, 8,
-        129, 34, 163, 26, 1, 24, 8, 24, 8,
-        189, 27, 216, 27, 1, 25, 8, 25, 8,
-        243, 38, 216, 27, 1, 26, 8, 26, 8,
-        281, 34, 20, 30, 1, 27, 8, 27, 8,
-        315, 35, 20, 30, 1, 28, 8, 28, 8,
-        350, 26, 376, 28, 1, 29, 8, 29, 8,
-        404, 37, 441, 30, 1, 30, 8, 30, 8,
-        471, 33, 504, 29, 1, 31, 8, 31, 8,
-        533, 34, 567, 29, 1, 32, 8, 32, 8,
-        596, 33, 376, 28, 1, 33, 8, 33, 8,
-        629, 26, 104, 25, 1, 34, 8, 34, 8,
-        655, 33, 688, 27, 1, 35, 8, 35, 8,
-        715, 37, 104, 25, 1, 36, 8, 36, 8,
-        752, 33, 688, 27, 1, 37, 8, 37, 8,
-        785, 34, 163, 26, 1, 38, 8, 38, 8,
-        819, 33, 104, 25, 1, 39, 8, 39, 8,
-        852, 35, 887, 38, 1, 40, 8, 40, 8,
-        925, 36, 961, 29, 1, 41, 8, 41, 8,
-        990, 35, 1025, 30, 1, 42, 8, 42, 8,
-        1055, 38, 1093, 29, 1, 43, 8, 43, 8,
-        1122, 49, 1171, 30, 1, 44, 8, 44, 8,
-        1201, 39, 1240, 47, 1, 45, 8, 45, 8,
+        112, 20, 132, 30, 1, 21, 8, 21, 8,
+        162, 28, 132, 30, 1, 22, 8, 22, 8,
+        190, 26, 216, 25, 1, 23, 8, 23, 8,
+        241, 34, 275, 26, 1, 24, 8, 24, 8,
+        301, 27, 328, 27, 1, 25, 8, 25, 8,
+        355, 38, 328, 27, 1, 26, 8, 26, 8,
+        393, 34, 132, 30, 1, 27, 8, 27, 8,
+        427, 35, 132, 30, 1, 28, 8, 28, 8,
+        462, 26, 488, 28, 1, 29, 8, 29, 8,
+        516, 37, 553, 30, 1, 30, 8, 30, 8,
+        583, 33, 616, 29, 1, 31, 8, 31, 8,
+        645, 34, 679, 29, 1, 32, 8, 32, 8,
+        708, 33, 488, 28, 1, 33, 8, 33, 8,
+        741, 26, 216, 25, 1, 34, 8, 34, 8,
+        767, 33, 800, 27, 1, 35, 8, 35, 8,
+        827, 37, 216, 25, 1, 36, 8, 36, 8,
+        864, 33, 800, 27, 1, 37, 8, 37, 8,
+        897, 34, 275, 26, 1, 38, 8, 38, 8,
+        931, 33, 216, 25, 1, 39, 8, 39, 8,
+        964, 35, 999, 38, 1, 40, 8, 40, 8,
+        1037, 36, 1073, 29, 1, 41, 8, 41, 8,
+        1102, 35, 1137, 30, 1, 42, 8, 42, 8,
+        1167, 38, 1205, 29, 1, 43, 8, 43, 8,
+        1234, 49, 1283, 30, 1, 44, 8, 44, 8,
+        1313, 39, 1352, 47, 1, 45, 8, 45, 8,
     ],
 };
 
@@ -7642,13 +7792,16 @@ static POPULATE_MACOSTHEME_XAML_ROWS_116: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1287, 36, 65535, 65535, 1, 46, 8,
-        1323, 30, 0, 65280, 1, 47, 8,
+        1399, 36, 65535, 65535, 1, 46, 8,
+        1435, 30, 0, 65280, 1, 47, 8,
     ],
 };
 
 /// The keys and targets of the packed tables of the unit 34 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_34_STRINGS: &str = "DateTimePickerFlyoutButtonBackgroundSubtleFillColorTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSubtleFillColorSecondaryBrushDateTimePickerFlyoutButtonBackgroundPressedSubtleFillColorTertiaryBrushDateTimePickerFlyoutButtonBorderBrushControlStrokeColorDefaultBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverTextFillColorPrimaryBrushDateTimePickerFlyoutButtonForegroundPressedLoopingSelectorUpDownButtonForegroundTextFillColorSecondaryBrushLoopingSelectorUpDownButtonForegroundPointerOverLoopingSelectorUpDownButtonForegroundPressedLoopingSelectorUpDownButtonBackgroundAcrylicBackgroundFillColorDefaultBrushLoopingSelectorUpDownButtonBackgroundPointerOverLoopingSelectorUpDownButtonBackgroundPressedLoopingSelectorItemForegroundLoopingSelectorItemForegroundSelectedLoopingSelectorItemForegroundPointerOverLoopingSelectorItemForegroundPressedLoopingSelectorItemBackgroundSelectedLoopingSelectorItemBackgroundPointerOverLoopingSelectorItemBackgroundPressed";
+const POPULATE_MACOSTHEME_XAML_UNIT_34_STRINGS: &str = "DateTimePickerFlyoutButtonBackgroundSubtleFillColorTransparentBrushDateTimePickerFlyoutButtonBackgroundPointerOverSubtleFillColorSecondaryBrushDateTimePickerFlyoutButtonBackgroundPressedSubtleFillColorTertiaryBrushDateTimePickerFlyoutButtonBorderBrushControlStrokeColorDefaultBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverTextFillColorPrimaryBrushDateTimePickerFlyoutButtonForegroundPressedLoopingSelectorUpDownButtonForegroundTextFillColorSecondaryBrushLoopingSelectorUpDownButtonForegroundPointerOverLoopingSelectorUpDownButtonForegroundPressedLoopingSelectorUpDownButtonBackgroundAcrylicBackgroundFillColorDefaultBrushLoopingSelectorUpDownButtonBackgroundPointerOverLoopingSelectorUpDownButtonBackgroundPressedLoopingSelectorItemForegroundLoopingSelectorItemForegroundSelectedLoopingSelectorItemForegroundPointerOverLoopingSelectorItemForegroundPressedLoopingSelectorItemBackgroundSelectedLoopingSelectorItemBackgroundPointerOverLoopingSelectorItemBackgroundPressedLoopingSelectorItemMarginLoopingSelectorUpDownButtonMargin";
+
+/// The numbers of the packed tables of the unit 34 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_34_NUMBERS: [f64; 3] = [4.0_f64, 2.0_f64, 0.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_117: rt::PackedRows = rt::PackedRows {
@@ -7730,7 +7883,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_120: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 37 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_37_STRINGS: &str = "ScrollBarBackgroundSubtleFillColorTransparentBrushScrollBarBackgroundPointerOverScrollBarBackgroundDisabledScrollBarForegroundScrollBarBorderBrushScrollBarBorderBrushPointerOverScrollBarBorderBrushDisabledScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushScrollBarButtonBackgroundPressedControlStrongFillColorDefaultBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverTextFillColorSecondaryBrushScrollBarButtonArrowForegroundPressedScrollBarButtonArrowForegroundDisabledControlStrongFillColorDisabledBrushScrollBarThumbFillScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarThumbBorderBrushControlFillColorTransparentBrushScrollBarTrackFillAcrylicInAppFillColorDefaultBrushScrollBarTrackFillPointerOverScrollBarTrackFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarTrackStrokeDisabledScrollBarThumbBackgroundScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundDisabledScrollBarButtonForegroundThemeBrushScrollBarButtonPointerOverBackgroundThemeBrushScrollBarButtonPointerOverBorderThemeBrushScrollBarButtonPointerOverForegroundThemeBrushScrollBarButtonPressedBackgroundThemeBrushScrollBarButtonPressedBorderThemeBrushScrollBarButtonPressedForegroundThemeBrushScrollBarPanningBackgroundThemeBrushScrollBarPanningBorderThemeBrushScrollBarThumbBackgroundThemeBrushScrollBarThumbBorderThemeBrushScrollBarThumbPointerOverBackgroundThemeBrushScrollBarThumbPointerOverBorderThemeBrushScrollBarThumbPressedBackgroundThemeBrushScrollBarThumbPressedBorderThemeBrushScrollBarTrackBackgroundThemeBrushScrollBarTrackBorderThemeBrushScrollBarThumbBackgroundColorScrollBarPanningThumbBackgroundColor";
+const POPULATE_MACOSTHEME_XAML_UNIT_37_STRINGS: &str = "ScrollBarBackgroundSubtleFillColorTransparentBrushScrollBarBackgroundPointerOverScrollBarBackgroundDisabledScrollBarForegroundScrollBarBorderBrushScrollBarBorderBrushPointerOverScrollBarBorderBrushDisabledScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSubtleFillColorSecondaryBrushScrollBarButtonBackgroundPressedControlStrongFillColorDefaultBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverTextFillColorSecondaryBrushScrollBarButtonArrowForegroundPressedScrollBarButtonArrowForegroundDisabledControlStrongFillColorDisabledBrushScrollBarThumbFillScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarThumbBorderBrushControlFillColorTransparentBrushScrollBarTrackFillAcrylicInAppFillColorDefaultBrushScrollBarTrackFillPointerOverScrollBarTrackFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarTrackStrokeDisabledScrollBarThumbBackgroundScrollBarPanningThumbBackgroundScrollBarPanningThumbBackgroundDisabledScrollBarButtonForegroundThemeBrushScrollBarButtonPointerOverBackgroundThemeBrushScrollBarButtonPointerOverBorderThemeBrushScrollBarButtonPointerOverForegroundThemeBrushScrollBarButtonPressedBackgroundThemeBrushScrollBarButtonPressedBorderThemeBrushScrollBarButtonPressedForegroundThemeBrushScrollBarPanningBackgroundThemeBrushScrollBarPanningBorderThemeBrushScrollBarThumbBackgroundThemeBrushScrollBarThumbBorderThemeBrushScrollBarThumbPointerOverBackgroundThemeBrushScrollBarThumbPointerOverBorderThemeBrushScrollBarThumbPressedBackgroundThemeBrushScrollBarThumbPressedBorderThemeBrushScrollBarTrackBackgroundThemeBrushScrollBarTrackBorderThemeBrushScrollBarThumbBackgroundColorScrollBarPanningThumbBackgroundColorScrollBarExpandDuration00:00:00.167ScrollBarOpacityChangeDuration00:00:00.083ScrollBarColorChangeDurationScrollBarContractDurationScrollBarContractDelay00:00:02ScrollBarContractFinalKeyframe00:00:02.1ScrollBarSizeScrollBarVerticalThumbMinHeightScrollBarVerticalThumbMinWidthScrollBarHorizontalThumbMinWidthScrollBarHorizontalThumbMinHeightScrollBarThumbStrokeThicknessScrollBarButtonArrowIconFontSizeScrollBarButtonArrowScalePressedScrollBarExpandBeginTime00:00:00.40ScrollBarContractBeginTime00:00:00.50ScrollBarHorizontalDecreaseMarginScrollBarHorizontalIncreaseMarginScrollBarVerticalDecreaseMarginScrollBarVerticalIncreaseMargin";
+
+/// The numbers of the packed tables of the unit 37 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_37_NUMBERS: [f64; 7] = [12.0_f64, 30.0_f64, 8.0_f64, 6.0_f64, 0.875_f64, 4.0_f64, 0.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_121: rt::PackedRows = rt::PackedRows {
@@ -7809,7 +7965,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_123: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 38 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_38_STRINGS: &str = "ScrollViewerScrollBarSeparatorBackgroundControlFillColorTransparentBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_38_STRINGS: &str = "ScrollViewerScrollBarSeparatorBackgroundControlFillColorTransparentBrushScrollViewerSeparatorExpandBeginTime00:00:00.40ScrollViewerSeparatorExpandDuration00:00:00.1ScrollViewerSeparatorContractBeginTime00:00:02.00ScrollViewerSeparatorContractDelayScrollViewerSeparatorContractDurationScrollViewerSeparatorContractFinalKeyframe00:00:02.1";
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_124: rt::PackedRows = rt::PackedRows {
@@ -7826,23 +7982,30 @@ static POPULATE_MACOSTHEME_XAML_ROWS_125: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderTrackThemeHeight", value: 4.0_f64, line: 16, position: 48 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_126: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SliderBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 17, position: 53 },
-    rt::ValueRow { key: "SliderHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 18, position: 50 },
-];
-
 /// The keys and targets of the packed tables of the unit 39 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS: &str = "SliderContainerBackgroundPointerOverControlFillColorTransparentBrushSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSliderThumbBackgroundPointerOverSliderThumbBackgroundPressedSliderThumbBackgroundDisabledSliderThumbBorderBrushControlElevationBorderBrushSliderOuterThumbBackgroundControlSolidFillColorDefaultBrushSliderTrackFillControlStrongFillColorDefaultBrushSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledControlStrongFillColorDisabledBrushSliderTrackValueFillAccentFillColorDefaultBrushSliderTrackValueFillPointerOverAccentFillColorSecondaryBrushSliderTrackValueFillPressedAccentFillColorTertiaryBrushSliderTrackValueFillDisabledAccentFillColorDisabledBrushSliderHeaderForegroundTextFillColorPrimaryBrushSliderHeaderForegroundDisabledTextFillColorDisabledBrushSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillControlFillColorInputActiveBrushSliderBorderThemeBrushSliderDisabledBorderThemeBrushSliderThumbBackgroundThemeBrushSliderThumbBorderThemeBrushSliderThumbDisabledBackgroundThemeBrushSliderThumbPointerOverBackgroundThemeBrushSliderThumbPointerOverBorderThemeBrushSliderThumbPressedBackgroundThemeBrushSliderThumbPressedBorderThemeBrushSliderTickMarkInlineBackgroundThemeBrushSliderTickMarkInlineDisabledForegroundThemeBrushSliderTickmarkOutsideBackgroundThemeBrushSliderTickMarkOutsideDisabledForegroundThemeBrushSliderTrackBackgroundThemeBrushSliderTrackDecreaseBackgroundThemeBrushSliderTrackDecreaseDisabledBackgroundThemeBrushSliderTrackDecreasePointerOverBackgroundThemeBrushSliderTrackDecreasePressedBackgroundThemeBrushSliderTrackDisabledBackgroundThemeBrushSliderTrackPointerOverBackgroundThemeBrushSliderTrackPressedBackgroundThemeBrushSliderHeaderForegroundThemeBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS: &str = "SliderBorderThemeThicknessSliderHeaderThemeMarginSliderContainerBackgroundPointerOverControlFillColorTransparentBrushSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSliderThumbBackgroundPointerOverSliderThumbBackgroundPressedSliderThumbBackgroundDisabledSliderThumbBorderBrushControlElevationBorderBrushSliderOuterThumbBackgroundControlSolidFillColorDefaultBrushSliderTrackFillControlStrongFillColorDefaultBrushSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledControlStrongFillColorDisabledBrushSliderTrackValueFillAccentFillColorDefaultBrushSliderTrackValueFillPointerOverAccentFillColorSecondaryBrushSliderTrackValueFillPressedAccentFillColorTertiaryBrushSliderTrackValueFillDisabledAccentFillColorDisabledBrushSliderHeaderForegroundTextFillColorPrimaryBrushSliderHeaderForegroundDisabledTextFillColorDisabledBrushSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillControlFillColorInputActiveBrushSliderBorderThemeBrushSliderDisabledBorderThemeBrushSliderThumbBackgroundThemeBrushSliderThumbBorderThemeBrushSliderThumbDisabledBackgroundThemeBrushSliderThumbPointerOverBackgroundThemeBrushSliderThumbPointerOverBorderThemeBrushSliderThumbPressedBackgroundThemeBrushSliderThumbPressedBorderThemeBrushSliderTickMarkInlineBackgroundThemeBrushSliderTickMarkInlineDisabledForegroundThemeBrushSliderTickmarkOutsideBackgroundThemeBrushSliderTickMarkOutsideDisabledForegroundThemeBrushSliderTrackBackgroundThemeBrushSliderTrackDecreaseBackgroundThemeBrushSliderTrackDecreaseDisabledBackgroundThemeBrushSliderTrackDecreasePointerOverBackgroundThemeBrushSliderTrackDecreasePressedBackgroundThemeBrushSliderTrackDisabledBackgroundThemeBrushSliderTrackPointerOverBackgroundThemeBrushSliderTrackPressedBackgroundThemeBrushSliderHeaderForegroundThemeBrushSliderTrackCornerRadiusSliderThumbCornerRadiusSliderPreContentMarginSliderPostContentMarginSliderInnerThumbHeightSliderHorizontalHeightSliderVerticalWidthSliderHorizontalThumbWidthSliderHorizontalThumbHeightSliderVerticalThumbWidthSliderVerticalThumbHeightSliderInnerThumbWidth";
+
+/// The numbers of the packed tables of the unit 39 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_39_NUMBERS: [f64; 8] = [0.0_f64, 4.0_f64, 2.0_f64, 9.0_f64, 14.0_f64, 12.0_f64, 32.0_f64, 18.0_f64];
+
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_126: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_39_NUMBERS,
+    records: &[
+        0, 26, 17, 53, 0, 0, 0, 0,
+        26, 23, 18, 50, 0, 0, 0, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_127: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 32, 1, 20, 8, 20, 8,
-        68, 32, 36, 32, 1, 21, 8, 21, 8,
-        100, 33, 36, 27, 1, 22, 8, 22, 8,
+        49, 36, 85, 32, 1, 20, 8, 20, 8,
+        117, 32, 85, 32, 1, 21, 8, 21, 8,
+        149, 33, 85, 27, 1, 22, 8, 22, 8,
     ],
 };
 
@@ -7851,10 +8014,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_128: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        133, 21, 65535, 65535, 1, 23, 8,
-        154, 32, 65535, 65535, 1, 24, 8,
-        186, 28, 65535, 65535, 1, 25, 8,
-        214, 29, 65535, 65535, 1, 26, 8,
+        182, 21, 65535, 65535, 1, 23, 8,
+        203, 32, 65535, 65535, 1, 24, 8,
+        235, 28, 65535, 65535, 1, 25, 8,
+        263, 29, 65535, 65535, 1, 26, 8,
     ],
 };
 
@@ -7863,21 +8026,21 @@ static POPULATE_MACOSTHEME_XAML_ROWS_129: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        243, 22, 265, 27, 1, 27, 8, 27, 8,
-        292, 26, 318, 33, 1, 28, 8, 28, 8,
-        351, 15, 366, 34, 1, 29, 8, 29, 8,
-        400, 26, 366, 34, 1, 30, 8, 30, 8,
-        426, 22, 366, 34, 1, 31, 8, 31, 8,
-        448, 23, 471, 35, 1, 32, 8, 32, 8,
-        506, 20, 526, 27, 1, 33, 8, 33, 8,
-        553, 31, 584, 29, 1, 34, 8, 34, 8,
-        613, 27, 640, 28, 1, 35, 8, 35, 8,
-        668, 28, 696, 28, 1, 36, 8, 36, 8,
-        724, 22, 746, 25, 1, 37, 8, 37, 8,
-        771, 30, 801, 26, 1, 38, 8, 38, 8,
-        827, 17, 366, 34, 1, 39, 8, 39, 8,
-        844, 25, 471, 35, 1, 40, 8, 40, 8,
-        869, 23, 892, 32, 1, 41, 8, 41, 8,
+        292, 22, 314, 27, 1, 27, 8, 27, 8,
+        341, 26, 367, 33, 1, 28, 8, 28, 8,
+        400, 15, 415, 34, 1, 29, 8, 29, 8,
+        449, 26, 415, 34, 1, 30, 8, 30, 8,
+        475, 22, 415, 34, 1, 31, 8, 31, 8,
+        497, 23, 520, 35, 1, 32, 8, 32, 8,
+        555, 20, 575, 27, 1, 33, 8, 33, 8,
+        602, 31, 633, 29, 1, 34, 8, 34, 8,
+        662, 27, 689, 28, 1, 35, 8, 35, 8,
+        717, 28, 745, 28, 1, 36, 8, 36, 8,
+        773, 22, 795, 25, 1, 37, 8, 37, 8,
+        820, 30, 850, 26, 1, 38, 8, 38, 8,
+        876, 17, 415, 34, 1, 39, 8, 39, 8,
+        893, 25, 520, 35, 1, 40, 8, 40, 8,
+        918, 23, 941, 32, 1, 41, 8, 41, 8,
     ],
 };
 
@@ -7886,33 +8049,36 @@ static POPULATE_MACOSTHEME_XAML_ROWS_130: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        924, 22, 65535, 255, 1, 42, 8,
-        946, 30, 65535, 255, 1, 43, 8,
-        976, 31, 65535, 65535, 1, 44, 8,
-        1007, 27, 65535, 65535, 1, 45, 8,
-        1034, 39, 32382, 65406, 1, 46, 8,
-        1073, 42, 65535, 65535, 1, 47, 8,
-        1115, 38, 65535, 65535, 1, 48, 8,
-        1153, 38, 65535, 65535, 1, 49, 8,
-        1191, 34, 65535, 65535, 1, 50, 8,
-        1225, 40, 0, 65280, 1, 51, 8,
-        1265, 48, 0, 65280, 1, 52, 8,
-        1313, 41, 65535, 33023, 1, 53, 8,
-        1354, 49, 65535, 33023, 1, 54, 8,
-        1403, 31, 65535, 10751, 1, 55, 8,
-        1434, 39, 11973, 65371, 1, 56, 8,
-        1473, 47, 65535, 8191, 1, 57, 8,
-        1520, 50, 19405, 65394, 1, 58, 8,
-        1570, 46, 21231, 65409, 1, 59, 8,
-        1616, 39, 65535, 10751, 1, 60, 8,
-        1655, 42, 65535, 18175, 1, 61, 8,
-        1697, 38, 65535, 23039, 1, 62, 8,
-        1735, 32, 65535, 65535, 1, 63, 8,
+        973, 22, 65535, 255, 1, 42, 8,
+        995, 30, 65535, 255, 1, 43, 8,
+        1025, 31, 65535, 65535, 1, 44, 8,
+        1056, 27, 65535, 65535, 1, 45, 8,
+        1083, 39, 32382, 65406, 1, 46, 8,
+        1122, 42, 65535, 65535, 1, 47, 8,
+        1164, 38, 65535, 65535, 1, 48, 8,
+        1202, 38, 65535, 65535, 1, 49, 8,
+        1240, 34, 65535, 65535, 1, 50, 8,
+        1274, 40, 0, 65280, 1, 51, 8,
+        1314, 48, 0, 65280, 1, 52, 8,
+        1362, 41, 65535, 33023, 1, 53, 8,
+        1403, 49, 65535, 33023, 1, 54, 8,
+        1452, 31, 65535, 10751, 1, 55, 8,
+        1483, 39, 11973, 65371, 1, 56, 8,
+        1522, 47, 65535, 8191, 1, 57, 8,
+        1569, 50, 19405, 65394, 1, 58, 8,
+        1619, 46, 21231, 65409, 1, 59, 8,
+        1665, 39, 65535, 10751, 1, 60, 8,
+        1704, 42, 65535, 18175, 1, 61, 8,
+        1746, 38, 65535, 23039, 1, 62, 8,
+        1784, 32, 65535, 65535, 1, 63, 8,
     ],
 };
 
 /// The keys and targets of the packed tables of the unit 40 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_40_STRINGS: &str = "TimePickerSpacerFillControlStrokeColorDefaultBrushTimePickerSpacerFillDisabledTimePickerHeaderForegroundTextFillColorPrimaryBrushTimePickerHeaderForegroundDisabledTextFillColorDisabledBrushTimePickerButtonBorderBrushControlElevationBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundControlFillColorDefaultBrushTimePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushTimePickerButtonBackgroundPressedControlFillColorTertiaryBrushTimePickerButtonBackgroundDisabledControlFillColorDisabledBrushTimePickerButtonBackgroundFocusedTimePickerButtonForegroundTimePickerButtonForegroundDefaultTextFillColorSecondaryBrushTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerButtonForegroundFocusedTimePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushTimePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushTimePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushTimePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushTimePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryTimePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushTimePickerHeaderForegroundThemeBrushTimePickerForegroundThemeBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_40_STRINGS: &str = "TimePickerSpacerFillControlStrokeColorDefaultBrushTimePickerSpacerFillDisabledTimePickerHeaderForegroundTextFillColorPrimaryBrushTimePickerHeaderForegroundDisabledTextFillColorDisabledBrushTimePickerButtonBorderBrushControlElevationBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundControlFillColorDefaultBrushTimePickerButtonBackgroundPointerOverControlFillColorSecondaryBrushTimePickerButtonBackgroundPressedControlFillColorTertiaryBrushTimePickerButtonBackgroundDisabledControlFillColorDisabledBrushTimePickerButtonBackgroundFocusedTimePickerButtonForegroundTimePickerButtonForegroundDefaultTextFillColorSecondaryBrushTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerButtonForegroundFocusedTimePickerFlyoutPresenterBackgroundAcrylicBackgroundFillColorDefaultBrushTimePickerFlyoutPresenterBorderBrushSurfaceStrokeColorFlyoutBrushTimePickerFlyoutPresenterSpacerFillDividerStrokeColorDefaultBrushTimePickerFlyoutPresenterHighlightFillAccentAAFillColorDefaultBrushTimePickerFlyoutPresenterHighlightForegroundColorTextOnAccentAAFillColorPrimaryTimePickerLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushTimePickerHeaderForegroundThemeBrushTimePickerForegroundThemeBrushTimePickerBorderThemeThicknessTimePickerHeaderThemeMarginTimePickerFirstHostThemeMarginTimePickerThirdHostThemeMarginTimePickerFlyoutPresenterHighlightHeightTimePickerFlyoutPresenterAcceptDismissHostGridHeightTimePickerThemeMinWidthTimePickerThemeMaxWidthTimePickerFlyoutPresenterItemHeightTimePickerFlyoutPresenterItemPaddingTimePickerHostPadding";
+
+/// The numbers of the packed tables of the unit 40 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_40_NUMBERS: [f64; 11] = [1.0_f64, 0.0_f64, 4.0_f64, 20.0_f64, 40.0_f64, 41.0_f64, 140.0_f64, 456.0_f64, 26.0_f64, 6.0_f64, 3.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_131: rt::PackedRows = rt::PackedRows {
@@ -7963,13 +8129,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_133: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 43, position: 52 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_134: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 44, position: 57 },
-    rt::ValueRow { key: "TimePickerHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 45, position: 54 },
-    rt::ValueRow { key: "TimePickerFirstHostThemeMargin", value: [0.0_f64, 0.0_f64, 20.0_f64, 0.0_f64], line: 46, position: 57 },
-    rt::ValueRow { key: "TimePickerThirdHostThemeMargin", value: [20.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 47, position: 57 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_134: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_40_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_40_NUMBERS,
+    records: &[
+        1353, 30, 44, 57, 0, 0, 0, 0,
+        1383, 27, 45, 54, 1, 1, 1, 2,
+        1410, 30, 46, 57, 1, 1, 3, 1,
+        1440, 30, 47, 57, 3, 1, 1, 1,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 41 of `MacOSTheme.xaml`, each once (#855).
 const POPULATE_MACOSTHEME_XAML_UNIT_41_STRINGS: &str = "ToolTipForegroundTextFillColorPrimaryBrushToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushSurfaceStrokeColorFlyoutBrushToolTipBackgroundThemeBrushToolTipBorderThemeBrushToolTipForegroundThemeBrushToolTipForegroundBrushToolTipBackgroundBrushAcrylicInAppFillColorDefaultBrush";
@@ -8007,7 +8177,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_137: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 42 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_42_STRINGS: &str = "NavigationViewDefaultPaneBackgroundAcrylicInAppFillColorDefaultBrushNavigationViewExpandedPaneBackgroundSolidBackgroundFillColorTransparentNavigationViewTopPaneBackgroundNavigationViewContentBackgroundLayerFillColorDefaultBrushNavigationViewItemBackgroundSubtleFillColorTransparentBrushNavigationViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushNavigationViewItemBackgroundPressedSubtleFillColorTertiaryBrushNavigationViewItemBackgroundDisabledNavigationViewItemBackgroundCheckedNavigationViewItemBackgroundCheckedPointerOverNavigationViewItemBackgroundCheckedPressedNavigationViewItemBackgroundCheckedDisabledNavigationViewItemBackgroundSelectedNavigationViewItemBackgroundSelectedPointerOverNavigationViewItemBackgroundSelectedPressedNavigationViewItemBackgroundSelectedDisabledNavigationViewItemForegroundTextFillColorPrimaryBrushNavigationViewItemForegroundPointerOverNavigationViewItemForegroundPressedTextFillColorSecondaryBrushNavigationViewItemForegroundDisabledTextFillColorDisabledBrushNavigationViewItemForegroundCheckedNavigationViewItemForegroundCheckedPointerOverNavigationViewItemForegroundCheckedPressedNavigationViewItemForegroundCheckedDisabledNavigationViewItemForegroundSelectedNavigationViewItemForegroundSelectedPointerOverNavigationViewItemForegroundSelectedPressedNavigationViewItemForegroundSelectedDisabledNavigationViewItemBorderBrushNavigationViewItemBorderBrushPointerOverNavigationViewItemBorderBrushPressedNavigationViewItemBorderBrushDisabledNavigationViewItemBorderBrushCheckedNavigationViewItemBorderBrushCheckedPointerOverNavigationViewItemBorderBrushCheckedPressedNavigationViewItemBorderBrushCheckedDisabledNavigationViewItemBorderBrushSelectedNavigationViewItemBorderBrushSelectedPointerOverNavigationViewItemBorderBrushSelectedPressedNavigationViewItemBorderBrushSelectedDisabledNavigationViewItemIconBackgroundSystemControlTransparentBrushNavigationViewItemSeparatorForegroundDividerStrokeColorDefaultBrushNavigationViewItemHeaderForegroundNavigationViewSelectionIndicatorForegroundAccentFillColorDefaultBrushNavigationViewContentGridBorderBrushCardStrokeColorDefaultBrushTopNavigationViewItemForegroundTopNavigationViewItemForegroundPointerOverTopNavigationViewItemForegroundPressedTopNavigationViewItemForegroundDisabledTopNavigationViewItemBackgroundPointerOverTopNavigationViewItemBackgroundPressedTopNavigationViewItemBackgroundSelectedTopNavigationViewItemForegroundSelectedTopNavigationViewItemForegroundSelectedPointerOverTopNavigationViewItemForegroundSelectedPressedTopNavigationViewItemBackgroundSelectedPointerOverTopNavigationViewItemBackgroundSelectedPressedTopNavigationViewItemSeparatorForegroundNavigationViewButtonBackgroundPointerOverNavigationViewButtonBackgroundPressedNavigationViewButtonBackgroundDisabledControlFillColorDisabledBrushNavigationViewButtonForegroundPointerOverNavigationViewButtonForegroundPressedNavigationViewButtonForegroundDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_42_STRINGS: &str = "NavigationViewDefaultPaneBackgroundAcrylicInAppFillColorDefaultBrushNavigationViewExpandedPaneBackgroundSolidBackgroundFillColorTransparentNavigationViewTopPaneBackgroundNavigationViewContentBackgroundLayerFillColorDefaultBrushNavigationViewItemBackgroundSubtleFillColorTransparentBrushNavigationViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushNavigationViewItemBackgroundPressedSubtleFillColorTertiaryBrushNavigationViewItemBackgroundDisabledNavigationViewItemBackgroundCheckedNavigationViewItemBackgroundCheckedPointerOverNavigationViewItemBackgroundCheckedPressedNavigationViewItemBackgroundCheckedDisabledNavigationViewItemBackgroundSelectedNavigationViewItemBackgroundSelectedPointerOverNavigationViewItemBackgroundSelectedPressedNavigationViewItemBackgroundSelectedDisabledNavigationViewItemForegroundTextFillColorPrimaryBrushNavigationViewItemForegroundPointerOverNavigationViewItemForegroundPressedTextFillColorSecondaryBrushNavigationViewItemForegroundDisabledTextFillColorDisabledBrushNavigationViewItemForegroundCheckedNavigationViewItemForegroundCheckedPointerOverNavigationViewItemForegroundCheckedPressedNavigationViewItemForegroundCheckedDisabledNavigationViewItemForegroundSelectedNavigationViewItemForegroundSelectedPointerOverNavigationViewItemForegroundSelectedPressedNavigationViewItemForegroundSelectedDisabledNavigationViewItemBorderBrushNavigationViewItemBorderBrushPointerOverNavigationViewItemBorderBrushPressedNavigationViewItemBorderBrushDisabledNavigationViewItemBorderBrushCheckedNavigationViewItemBorderBrushCheckedPointerOverNavigationViewItemBorderBrushCheckedPressedNavigationViewItemBorderBrushCheckedDisabledNavigationViewItemBorderBrushSelectedNavigationViewItemBorderBrushSelectedPointerOverNavigationViewItemBorderBrushSelectedPressedNavigationViewItemBorderBrushSelectedDisabledNavigationViewItemIconBackgroundSystemControlTransparentBrushNavigationViewItemSeparatorForegroundDividerStrokeColorDefaultBrushNavigationViewItemHeaderForegroundNavigationViewSelectionIndicatorForegroundAccentFillColorDefaultBrushNavigationViewContentGridBorderBrushCardStrokeColorDefaultBrushTopNavigationViewItemForegroundTopNavigationViewItemForegroundPointerOverTopNavigationViewItemForegroundPressedTopNavigationViewItemForegroundDisabledTopNavigationViewItemBackgroundPointerOverTopNavigationViewItemBackgroundPressedTopNavigationViewItemBackgroundSelectedTopNavigationViewItemForegroundSelectedTopNavigationViewItemForegroundSelectedPointerOverTopNavigationViewItemForegroundSelectedPressedTopNavigationViewItemBackgroundSelectedPointerOverTopNavigationViewItemBackgroundSelectedPressedTopNavigationViewItemSeparatorForegroundNavigationViewButtonBackgroundPointerOverNavigationViewButtonBackgroundPressedNavigationViewButtonBackgroundDisabledControlFillColorDisabledBrushNavigationViewButtonForegroundPointerOverNavigationViewButtonForegroundPressedNavigationViewButtonForegroundDisabledNavigationViewAutoSuggestBoxMarginTopNavigationViewAutoSuggestBoxMarginPaneToggleButtonHeightPaneToggleButtonWidthPaneOverlayShadowDepthNavigationViewCompactPaneLengthNavigationViewIconBoxWidthNavigationViewTopPaneHeightNavigationViewAutoSuggestAreaHeightTopNavigationViewPaneCustomContentMinWidthTopNavigationViewOverflowButtonWidthTopNavigationViewOverflowButtonHeightTopNavigationViewSettingsButtonWidthTopNavigationViewSettingsButtonHeightNavigationViewItemOnLeftMinHeightNavigationViewPaneHeaderRowMinHeightNavigationViewItemOnLeftIconBoxHeightNavigationViewSelectionIndicatorWidthNavigationViewSelectionIndicatorHeightNavigationViewSelectionIndicatorRadiusNavigationViewItemSeparatorHeightTopNavigationViewItemSeparatorWidthNavigationViewToggleBorderThicknessNavigationViewItemBorderThicknessNavigationViewItemOnLeftIconBoxMarginNavigationViewItemButtonMarginNavigationViewItemInnerHeaderMarginTopNavigationViewItemInnerHeaderMarginNavigationViewMinimalHeaderMarginNavigationViewButtonHolderGridMarginNavigationViewPaneContentGridMarginNavigationViewContentGridBorderThicknessNavigationViewMinimalContentGridBorderThicknessTopNavigationViewContentGridBorderThicknessTopNavigationViewTopNavGridMarginNavigationViewBorderThicknessNavigationViewHeaderMarginNavigationViewContentPresenterMarginNavigationViewContentMarginNavigationViewMinimalContentMarginTopNavigationViewContentMarginNavigationViewPaneTitlePresenterMarginNavigationViewItemMarginTopNavigationViewItemMarginNavigationViewItemSeparatorMarginNavigationViewCompactItemSeparatorMarginTopNavigationViewItemSeparatorMarginTopNavigationViewOverflowButtonMarginNavigationViewItemContentPresenterMarginNavigationViewCompactItemContentPresenterMarginTopNavigationViewItemContentPresenterMarginTopNavigationViewItemContentOnlyContentPresenterMarginNavigationViewItemExpandChevronMarginTopNavigationViewItemExpandChevronMarginTopNavigationViewItemIconOnlyExpandChevronMarginTopNavigationViewItemContentOnlyExpandChevronMarginTopNavigationViewItemOnOverflowContentPresenterMarginTopNavigationViewItemOnOverflowNoIconContentPresenterMarginTopNavigationViewItemOnOverflowExpandChevronMarginTopNavigationViewItemOnOverflowExpandChevronPaddingNavigationViewContentGridCornerRadiusTopNavigationViewContentGridCornerRadiusNavigationViewMinimalContentGridCornerRadiusTopNavigationViewOverflowMenuPaddingNavigationViewItemChildrenMenuFlyoutPadding";
+
+/// The numbers of the packed tables of the unit 42 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_42_NUMBERS: [f64; 21] = [16.0_f64, 0.0_f64, 4.0_f64, 36.0_f64, 40.0_f64, 48.0_f64, 3.0_f64, 2.0_f64, 1.0_f64, 12.0_f64, -24.0_f64, 44.0_f64, -1.0_f64, 56.0_f64, 8.0_f64, -14.0_f64, -16.0_f64, -12.0_f64, 20.0_f64, -4.0_f64, -8.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_138: rt::PackedRows = rt::PackedRows {
@@ -8120,7 +8293,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_141: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 46 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_46_STRINGS: &str = "MenuBarBackgroundSubtleFillColorTransparentBrushMenuBarItemForegroundTextFillColorPrimaryBrushMenuBarItemBackgroundMenuBarItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuBarItemBackgroundPressedSubtleFillColorTertiaryBrushMenuBarItemBackgroundSelectedMenuBarItemBorderBrushControlAltFillColorTertiaryBrushMenuBarItemBorderBrushPointerOverControlStrokeColorDefaultBrushMenuBarItemBorderBrushPressedMenuBarItemBorderBrushSelected";
+const POPULATE_MACOSTHEME_XAML_UNIT_46_STRINGS: &str = "MenuBarBackgroundSubtleFillColorTransparentBrushMenuBarItemForegroundTextFillColorPrimaryBrushMenuBarItemBackgroundMenuBarItemBackgroundPointerOverSubtleFillColorSecondaryBrushMenuBarItemBackgroundPressedSubtleFillColorTertiaryBrushMenuBarItemBackgroundSelectedMenuBarItemBorderBrushControlAltFillColorTertiaryBrushMenuBarItemBorderBrushPointerOverControlStrokeColorDefaultBrushMenuBarItemBorderBrushPressedMenuBarItemBorderBrushSelectedMenuBarItemButtonPaddingMenuBarItemMargin";
+
+/// The numbers of the packed tables of the unit 46 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_46_NUMBERS: [f64; 2] = [10.0_f64, 4.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_142: rt::PackedRows = rt::PackedRows {
@@ -8149,7 +8325,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_143: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 47 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_47_STRINGS: &str = "TreeViewItemBackgroundSubtleFillColorTransparentBrushTreeViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushTreeViewItemBackgroundPressedSubtleFillColorTertiaryBrushTreeViewItemBackgroundDisabledSubtleFillColorDisabledBrushTreeViewItemBackgroundSelectedAccentFillColorDefaultBrushTreeViewItemBackgroundSelectedPointerOverTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTextFillColorPrimaryBrushTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTextFillColorSecondaryBrushTreeViewItemForegroundDisabledTextFillColorDisabledBrushTreeViewItemForegroundSelectedTextOnAccentFillColorPrimaryBrushTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledTreeViewItemMultiSelectBorderBrushSelectedTreeViewItemCheckBoxBackgroundSelectedTreeViewItemCheckBoxBorderSelectedTreeViewItemCheckGlyphSelectedTreeViewItemSelectionIndicatorForegroundTreeViewItemSelectionIndicatorForegroundPointerOverTreeViewItemSelectionIndicatorForegroundPressedTreeViewItemSelectionIndicatorForegroundDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_47_STRINGS: &str = "TreeViewItemBackgroundSubtleFillColorTransparentBrushTreeViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushTreeViewItemBackgroundPressedSubtleFillColorTertiaryBrushTreeViewItemBackgroundDisabledSubtleFillColorDisabledBrushTreeViewItemBackgroundSelectedAccentFillColorDefaultBrushTreeViewItemBackgroundSelectedPointerOverTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTextFillColorPrimaryBrushTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTextFillColorSecondaryBrushTreeViewItemForegroundDisabledTextFillColorDisabledBrushTreeViewItemForegroundSelectedTextOnAccentFillColorPrimaryBrushTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledTreeViewItemMultiSelectBorderBrushSelectedTreeViewItemCheckBoxBackgroundSelectedTreeViewItemCheckBoxBorderSelectedTreeViewItemCheckGlyphSelectedTreeViewItemSelectionIndicatorForegroundTreeViewItemSelectionIndicatorForegroundPointerOverTreeViewItemSelectionIndicatorForegroundPressedTreeViewItemSelectionIndicatorForegroundDisabledTreeViewItemBorderThemeThicknessTreeViewItemPresenterMarginTreeViewItemPresenterPaddingTreeViewItemMultiSelectSelectedItemBorderMargin";
+
+/// The numbers of the packed tables of the unit 47 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_47_NUMBERS: [f64; 5] = [0.0_f64, 4.0_f64, 2.0_f64, 3.0_f64, 5.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_144: rt::PackedRows = rt::PackedRows {
@@ -8191,13 +8370,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_144: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_145: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TreeViewItemBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 47, position: 59 },
-    rt::ValueRow { key: "TreeViewItemPresenterMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 48, position: 54 },
-    rt::ValueRow { key: "TreeViewItemPresenterPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 5.0_f64], line: 49, position: 55 },
-    rt::ValueRow { key: "TreeViewItemMultiSelectSelectedItemBorderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 50, position: 74 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_145: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_47_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_47_NUMBERS,
+    records: &[
+        1372, 32, 47, 59, 0, 0, 0, 0,
+        1404, 27, 48, 54, 1, 2, 1, 2,
+        1431, 28, 49, 55, 0, 3, 0, 4,
+        1459, 47, 50, 74, 0, 0, 0, 0,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_146: &[rt::ValueRow<f64>] = &[
@@ -8269,7 +8452,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_149: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 50 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS: &str = "TabViewBackgroundSubtleFillColorTransparentBrushTabViewItemHeaderBackgroundLayerOnMicaBaseAltFillColorTransparentBrushTabViewItemHeaderBackgroundSelectedSolidBackgroundFillColorTertiaryBrushTabViewItemHeaderDragBackgroundTabViewItemHeaderBackgroundPointerOverLayerOnMicaBaseAltFillColorSecondaryBrushTabViewItemHeaderBackgroundPressedLayerOnMicaBaseAltFillColorDefaultBrushTabViewItemHeaderBackgroundDisabledTabViewItemHeaderForegroundTextFillColorSecondaryBrushTabViewItemHeaderForegroundPressedTextFillColorTertiaryBrushTabViewItemHeaderForegroundSelectedTextFillColorPrimaryBrushTabViewItemHeaderForegroundPointerOverTabViewItemHeaderForegroundDisabledTextFillColorDisabledBrushTabViewItemIconForegroundTabViewItemIconForegroundPressedTabViewItemIconForegroundSelectedTabViewItemIconForegroundPointerOverTabViewItemIconForegroundDisabledTabViewButtonBackgroundTabViewButtonBackgroundPressedSubtleFillColorTertiaryBrushTabViewButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTabViewButtonBackgroundDisabledTabViewButtonForegroundTabViewButtonForegroundPressedTabViewButtonForegroundPointerOverTabViewButtonForegroundDisabledTabViewButtonBorderBrushTabViewButtonBorderBrushPressedTabViewButtonBorderBrushPointerOverTabViewButtonBorderBrushDisabledTabViewScrollButtonBackgroundTabViewScrollButtonBackgroundPressedTabViewScrollButtonBackgroundPointerOverTabViewScrollButtonBackgroundDisabledTabViewScrollButtonForegroundTabViewScrollButtonForegroundPressedTabViewScrollButtonForegroundPointerOverTabViewScrollButtonForegroundDisabledTabViewScrollButtonBorderBrushTabViewScrollButtonBorderBrushPressedTabViewScrollButtonBorderBrushPointerOverTabViewScrollButtonBorderBrushDisabledTabViewItemSeparatorDividerStrokeColorDefaultBrushTabViewItemHeaderCloseButtonBackgroundTabViewItemHeaderCloseButtonBackgroundPressedTabViewItemHeaderCloseButtonBackgroundPointerOverTabViewItemHeaderPressedCloseButtonBackgroundTabViewItemHeaderPointerOverCloseButtonBackgroundTabViewItemHeaderSelectedCloseButtonBackgroundTabViewItemHeaderDisabledCloseButtonBackgroundTabViewItemHeaderCloseButtonForegroundTabViewItemHeaderCloseButtonForegroundPressedTabViewItemHeaderCloseButtonForegroundPointerOverTabViewItemHeaderPressedCloseButtonForegroundTabViewItemHeaderPointerOverCloseButtonForegroundTabViewItemHeaderSelectedCloseButtonForegroundTabViewItemHeaderDisabledCloseButtonForegroundTabViewItemHeaderCloseButtonBorderBrushTabViewItemHeaderCloseButtonBorderBrushPointerOverTabViewItemHeaderCloseButtonBorderBrushPressedTabViewItemHeaderCloseButtonBorderBrushSelectedTabViewItemHeaderCloseButtonBorderBrushDisabledTabViewButtonBackgroundActiveTabTabViewButtonForegroundActiveTabControlStrongFillColorDefaultBrushTabViewBorderBrushCardStrokeColorDefaultTabViewItemBorderBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS: &str = "TabViewBackgroundSubtleFillColorTransparentBrushTabViewItemHeaderBackgroundLayerOnMicaBaseAltFillColorTransparentBrushTabViewItemHeaderBackgroundSelectedSolidBackgroundFillColorTertiaryBrushTabViewItemHeaderDragBackgroundTabViewItemHeaderBackgroundPointerOverLayerOnMicaBaseAltFillColorSecondaryBrushTabViewItemHeaderBackgroundPressedLayerOnMicaBaseAltFillColorDefaultBrushTabViewItemHeaderBackgroundDisabledTabViewItemHeaderForegroundTextFillColorSecondaryBrushTabViewItemHeaderForegroundPressedTextFillColorTertiaryBrushTabViewItemHeaderForegroundSelectedTextFillColorPrimaryBrushTabViewItemHeaderForegroundPointerOverTabViewItemHeaderForegroundDisabledTextFillColorDisabledBrushTabViewItemIconForegroundTabViewItemIconForegroundPressedTabViewItemIconForegroundSelectedTabViewItemIconForegroundPointerOverTabViewItemIconForegroundDisabledTabViewButtonBackgroundTabViewButtonBackgroundPressedSubtleFillColorTertiaryBrushTabViewButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTabViewButtonBackgroundDisabledTabViewButtonForegroundTabViewButtonForegroundPressedTabViewButtonForegroundPointerOverTabViewButtonForegroundDisabledTabViewButtonBorderBrushTabViewButtonBorderBrushPressedTabViewButtonBorderBrushPointerOverTabViewButtonBorderBrushDisabledTabViewScrollButtonBackgroundTabViewScrollButtonBackgroundPressedTabViewScrollButtonBackgroundPointerOverTabViewScrollButtonBackgroundDisabledTabViewScrollButtonForegroundTabViewScrollButtonForegroundPressedTabViewScrollButtonForegroundPointerOverTabViewScrollButtonForegroundDisabledTabViewScrollButtonBorderBrushTabViewScrollButtonBorderBrushPressedTabViewScrollButtonBorderBrushPointerOverTabViewScrollButtonBorderBrushDisabledTabViewItemSeparatorDividerStrokeColorDefaultBrushTabViewItemHeaderCloseButtonBackgroundTabViewItemHeaderCloseButtonBackgroundPressedTabViewItemHeaderCloseButtonBackgroundPointerOverTabViewItemHeaderPressedCloseButtonBackgroundTabViewItemHeaderPointerOverCloseButtonBackgroundTabViewItemHeaderSelectedCloseButtonBackgroundTabViewItemHeaderDisabledCloseButtonBackgroundTabViewItemHeaderCloseButtonForegroundTabViewItemHeaderCloseButtonForegroundPressedTabViewItemHeaderCloseButtonForegroundPointerOverTabViewItemHeaderPressedCloseButtonForegroundTabViewItemHeaderPointerOverCloseButtonForegroundTabViewItemHeaderSelectedCloseButtonForegroundTabViewItemHeaderDisabledCloseButtonForegroundTabViewItemHeaderCloseButtonBorderBrushTabViewItemHeaderCloseButtonBorderBrushPointerOverTabViewItemHeaderCloseButtonBorderBrushPressedTabViewItemHeaderCloseButtonBorderBrushSelectedTabViewItemHeaderCloseButtonBorderBrushDisabledTabViewButtonBackgroundActiveTabTabViewButtonForegroundActiveTabControlStrongFillColorDefaultBrushTabViewBorderBrushCardStrokeColorDefaultTabViewItemBorderBrushTabViewButtonBorderThicknessTabViewItemHeaderCloseButtonBorderThicknessTabViewHeaderPaddingTabViewItemHeaderPaddingTabViewSelectedItemHeaderPaddingTabViewItemMinHeightTabViewItemMaxWidthTabViewItemMinWidthTabViewItemHeaderFontSizeTabViewItemHeaderIconSizeTabViewItemHeaderCloseButtonHeightTabViewItemHeaderCloseButtonWidthTabViewItemHeaderCloseButtonSizeTabViewItemHeaderCloseFontSizeTabViewItemHeaderCloseMarginTabViewItemHeaderPaddingWithCloseButtonTabViewItemHeaderPaddingWithoutCloseButtonTabViewItemScrollButtonPaddingTabViewItemLeftScrollButtonContainerPaddingTabViewItemRightScrollButtonContainerPaddingTabViewItemSeparatorMarginTabViewItemBorderThicknessTabViewSelectedItemBorderThicknessTabViewSelectedItemHeaderMargin";
+
+/// The numbers of the packed tables of the unit 50 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS: [f64; 16] = [0.0_f64, 8.0_f64, 3.0_f64, 4.0_f64, 9.0_f64, 5.0_f64, 26.0_f64, 240.0_f64, 48.0_f64, 12.0_f64, 16.0_f64, 24.0_f64, 32.0_f64, 7.0_f64, 1.0_f64, -1.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_150: rt::PackedRows = rt::PackedRows {
@@ -8344,14 +8530,21 @@ static POPULATE_MACOSTHEME_XAML_ROWS_150: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_151: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabViewButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 80, position: 55 },
-    rt::ValueRow { key: "TabViewItemHeaderCloseButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 81, position: 70 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_151: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        2760, 28, 80, 55, 0, 0, 0, 0,
+        2788, 43, 81, 70, 0, 0, 0, 0,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 51 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_51_STRINGS: &str = "AutoSuggestBoxSuggestionsListBackgroundAcrylicBackgroundFillColorDefaultBrushAutoSuggestBoxSuggestionsListBorderBrushSurfaceStrokeColorFlyoutBrushAutoSuggestBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_51_STRINGS: &str = "AutoSuggestBoxSuggestionsListBackgroundAcrylicBackgroundFillColorDefaultBrushAutoSuggestBoxSuggestionsListBorderBrushSurfaceStrokeColorFlyoutBrushAutoSuggestBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushAutoSuggestBoxTopHeaderMarginAutoSuggestBoxInnerButtonMarginAutoSuggestBoxDeleteButtonMarginAutoSuggestBoxQueryButtonPadding";
+
+/// The numbers of the packed tables of the unit 51 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_51_NUMBERS: [f64; 6] = [0.0_f64, 8.0_f64, 1.0_f64, 3.0_f64, 4.0_f64, 2.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_152: rt::PackedRows = rt::PackedRows {
@@ -8365,7 +8558,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_152: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 52 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_52_STRINGS: &str = "ComboBoxItemForegroundTextFillColorPrimaryBrushComboBoxItemForegroundPressedTextFillColorSecondaryBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledTextFillColorDisabledBrushComboBoxItemForegroundSelectedTextOnAccentFillColorPrimaryBrushComboBoxItemForegroundSelectedUnfocusedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSubtleFillColorTransparentBrushComboBoxItemBackgroundPressedSubtleFillColorTertiaryBrushComboBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushComboBoxItemBackgroundDisabledSubtleFillColorDisabledBrushComboBoxItemBackgroundSelectedAccentFillColorDefaultBrushComboBoxItemBackgroundSelectedUnfocusedComboBoxItemBackgroundSelectedPressedComboBoxItemBackgroundSelectedPointerOverComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedUnfocusedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundControlFillColorDefaultBrushComboBoxBackgroundPointerOverControlFillColorSecondaryBrushComboBoxBackgroundPressedControlFillColorTertiaryBrushComboBoxBackgroundDisabledControlFillColorDisabledBrushComboBoxBackgroundUnfocusedComboBoxBackgroundFocusedComboBoxBackgroundBorderBrushFocusedFocusStrokeColorOuterBrushComboBoxBackgroundBorderBrushUnfocusedControlStrokeColorDefaultBrushComboBoxForegroundComboBoxForegroundPointerOverComboBoxForegroundPressedComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxHeaderForegroundComboBoxHeaderForegroundDisabledComboBoxPlaceHolderForegroundComboBoxPlaceHolderForegroundPointerOverComboBoxPlaceHolderForegroundPressedTextFillColorTertiaryBrushComboBoxPlaceHolderForegroundDisabledComboBoxPlaceHolderForegroundFocusedComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushControlElevationBorderBrushComboBoxBorderBrushPointerOverComboBoxBorderBrushPressedComboBoxBorderBrushDisabledComboBoxDropDownGlyphForegroundComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedComboBoxDropDownGlyphForegroundFocusedPressedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownForegroundComboBoxDropDownBackgroundAcrylicInAppFillColorDefaultBrushComboBoxDropDownBorderBrushSurfaceStrokeColorFlyoutBrushComboBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushComboBoxArrowDisabledForegroundThemeBrushComboBoxArrowForegroundThemeBrushComboBoxArrowPressedForegroundThemeBrushComboBoxBackgroundThemeBrushComboBoxBorderThemeBrushComboBoxDisabledBackgroundThemeBrushComboBoxDisabledBorderThemeBrushComboBoxDisabledForegroundThemeBrushComboBoxFocusedBackgroundThemeBrushComboBoxFocusedBorderThemeBrushComboBoxFocusedForegroundThemeBrushComboBoxForegroundThemeBrushComboBoxHeaderForegroundThemeBrushComboBoxItemDisabledForegroundThemeBrushComboBoxItemPointerOverBackgroundThemeBrushComboBoxItemPointerOverForegroundThemeBrushComboBoxItemPressedBackgroundThemeBrushComboBoxItemPressedForegroundThemeBrushComboBoxItemSelectedBackgroundThemeBrushComboBoxItemSelectedDisabledBackgroundThemeBrushComboBoxItemSelectedDisabledForegroundThemeBrushComboBoxItemSelectedForegroundThemeBrushComboBoxItemSelectedPointerOverBackgroundThemeBrushComboBoxPlaceholderTextForegroundThemeBrushComboBoxPointerOverBackgroundThemeBrushComboBoxPointerOverBorderThemeBrushComboBoxPopupBackgroundThemeBrushComboBoxPopupBorderThemeBrushComboBoxPopupForegroundThemeBrushComboBoxPressedBackgroundThemeBrushComboBoxPressedBorderThemeBrushComboBoxPressedHighlightThemeBrushComboBoxPressedForegroundThemeBrushComboBoxSelectedBackgroundThemeBrushComboBoxSelectedPointerOverBackgroundThemeBrushComboBoxDropDownBackgroundPointerOverComboBoxDropDownBackgroundPointerPressedComboBoxFocusedDropDownBackgroundPointerOverComboBoxFocusedDropDownBackgroundPointerPressedControlAltFillColorQuarternaryBrushComboBoxEditableDropDownGlyphForegroundComboBoxItemPillFillBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_52_STRINGS: &str = "ComboBoxItemForegroundTextFillColorPrimaryBrushComboBoxItemForegroundPressedTextFillColorSecondaryBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledTextFillColorDisabledBrushComboBoxItemForegroundSelectedTextOnAccentFillColorPrimaryBrushComboBoxItemForegroundSelectedUnfocusedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundSubtleFillColorTransparentBrushComboBoxItemBackgroundPressedSubtleFillColorTertiaryBrushComboBoxItemBackgroundPointerOverSubtleFillColorSecondaryBrushComboBoxItemBackgroundDisabledSubtleFillColorDisabledBrushComboBoxItemBackgroundSelectedAccentFillColorDefaultBrushComboBoxItemBackgroundSelectedUnfocusedComboBoxItemBackgroundSelectedPressedComboBoxItemBackgroundSelectedPointerOverComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedUnfocusedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundControlFillColorDefaultBrushComboBoxBackgroundPointerOverControlFillColorSecondaryBrushComboBoxBackgroundPressedControlFillColorTertiaryBrushComboBoxBackgroundDisabledControlFillColorDisabledBrushComboBoxBackgroundUnfocusedComboBoxBackgroundFocusedComboBoxBackgroundBorderBrushFocusedFocusStrokeColorOuterBrushComboBoxBackgroundBorderBrushUnfocusedControlStrokeColorDefaultBrushComboBoxForegroundComboBoxForegroundPointerOverComboBoxForegroundPressedComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxHeaderForegroundComboBoxHeaderForegroundDisabledComboBoxPlaceHolderForegroundComboBoxPlaceHolderForegroundPointerOverComboBoxPlaceHolderForegroundPressedTextFillColorTertiaryBrushComboBoxPlaceHolderForegroundDisabledComboBoxPlaceHolderForegroundFocusedComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushControlElevationBorderBrushComboBoxBorderBrushPointerOverComboBoxBorderBrushPressedComboBoxBorderBrushDisabledComboBoxDropDownGlyphForegroundComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedComboBoxDropDownGlyphForegroundFocusedPressedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownForegroundComboBoxDropDownBackgroundAcrylicInAppFillColorDefaultBrushComboBoxDropDownBorderBrushSurfaceStrokeColorFlyoutBrushComboBoxLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushComboBoxArrowDisabledForegroundThemeBrushComboBoxArrowForegroundThemeBrushComboBoxArrowPressedForegroundThemeBrushComboBoxBackgroundThemeBrushComboBoxBorderThemeBrushComboBoxDisabledBackgroundThemeBrushComboBoxDisabledBorderThemeBrushComboBoxDisabledForegroundThemeBrushComboBoxFocusedBackgroundThemeBrushComboBoxFocusedBorderThemeBrushComboBoxFocusedForegroundThemeBrushComboBoxForegroundThemeBrushComboBoxHeaderForegroundThemeBrushComboBoxItemDisabledForegroundThemeBrushComboBoxItemPointerOverBackgroundThemeBrushComboBoxItemPointerOverForegroundThemeBrushComboBoxItemPressedBackgroundThemeBrushComboBoxItemPressedForegroundThemeBrushComboBoxItemSelectedBackgroundThemeBrushComboBoxItemSelectedDisabledBackgroundThemeBrushComboBoxItemSelectedDisabledForegroundThemeBrushComboBoxItemSelectedForegroundThemeBrushComboBoxItemSelectedPointerOverBackgroundThemeBrushComboBoxPlaceholderTextForegroundThemeBrushComboBoxPointerOverBackgroundThemeBrushComboBoxPointerOverBorderThemeBrushComboBoxPopupBackgroundThemeBrushComboBoxPopupBorderThemeBrushComboBoxPopupForegroundThemeBrushComboBoxPressedBackgroundThemeBrushComboBoxPressedBorderThemeBrushComboBoxPressedHighlightThemeBrushComboBoxPressedForegroundThemeBrushComboBoxSelectedBackgroundThemeBrushComboBoxSelectedPointerOverBackgroundThemeBrushComboBoxDropDownBackgroundPointerOverComboBoxDropDownBackgroundPointerPressedComboBoxFocusedDropDownBackgroundPointerOverComboBoxFocusedDropDownBackgroundPointerPressedControlAltFillColorQuarternaryBrushComboBoxEditableDropDownGlyphForegroundComboBoxItemPillFillBrushComboBoxArrowThemeFontSizeComboBoxThemeMinWidthComboBoxPopupThemeMinWidthComboBoxPopupThemeTouchMinWidthComboBoxItemPillHeightComboBoxItemPillWidthComboBoxItemPillMinScaleComboBoxMinHeightComboBoxBorderThemeThicknessComboBoxDropdownBorderThicknessComboBoxHeaderThemeMarginComboBoxPopupBorderThemeThicknessComboBoxItemThemePaddingComboBoxItemThemeTouchPaddingComboBoxItemThemeGameControllerPaddingComboBoxBackgroundBorderThicknessFocusedComboBoxDropdownContentMarginComboBoxTopHeaderMarginComboBoxPaddingComboBoxEditableTextPaddingComboBoxHiglightBorderCornerRadiusComboBoxDropDownButtonBackgroundCornerRadiusComboBoxItemCornerRadiusComboBoxItemPillCornerRadius";
+
+/// The numbers of the packed tables of the unit 52 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_52_NUMBERS: [f64; 21] = [21.0_f64, 64.0_f64, 80.0_f64, 240.0_f64, 16.0_f64, 3.0_f64, 0.625_f64, 26.0_f64, 1.0_f64, 0.0_f64, 4.0_f64, 2.0_f64, 11.0_f64, 5.0_f64, 7.0_f64, 13.0_f64, 8.0_f64, 12.0_f64, 38.0_f64, 6.0_f64, 1.5_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_153: rt::PackedRows = rt::PackedRows {
@@ -8499,33 +8695,47 @@ static POPULATE_MACOSTHEME_XAML_ROWS_156: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 16, position: 57 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_157: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SplitViewLeftBorderThemeThickness", value: [0.0_f64, 0.0_f64, 1.0_f64, 0.0_f64], line: 17, position: 60 },
-    rt::ValueRow { key: "SplitViewRightBorderThemeThickness", value: [1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 18, position: 61 },
-];
-
 /// The keys and targets of the packed tables of the unit 53 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS: &str = "SplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS: &str = "SplitViewLeftBorderThemeThicknessSplitViewRightBorderThemeThicknessSplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushSplitViewPaneAnimationOpenDuration00:00:00.2SplitViewPaneAnimationOpenPreDuration00:00:00.19999SplitViewPaneAnimationCloseDuration";
+
+/// The numbers of the packed tables of the unit 53 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_53_NUMBERS: [f64; 2] = [0.0_f64, 1.0_f64];
+
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_157: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_53_NUMBERS,
+    records: &[
+        0, 33, 17, 60, 0, 0, 1, 0,
+        33, 34, 18, 61, 1, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_158: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 38, 47, 1, 19, 8, 19, 8,
+        67, 38, 105, 47, 1, 19, 8, 19, 8,
     ],
 };
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_159: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "SplitViewPaneAnimationOpenDuration", value: "00:00:00.2", line: 20, position: 60 },
-    rt::ValueRow { key: "SplitViewPaneAnimationOpenPreDuration", value: "00:00:00.19999", line: 21, position: 63 },
-    rt::ValueRow { key: "SplitViewPaneAnimationCloseDuration", value: "00:00:00.1", line: 22, position: 61 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_159: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
+    numbers: &[],
+    records: &[
+        152, 34, 20, 60, 186, 10,
+        196, 37, 21, 63, 233, 14,
+        247, 35, 22, 61, 233, 10,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 54 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_54_STRINGS: &str = "ProgressBarForegroundAccentFillColorDefaultBrushProgressBarBackgroundControlStrongStrokeColorDefaultProgressBarBorderBrushControlStrokeColorDefaultBrushProgressBarPausedForegroundColorSystemFillColorCautionProgressBarErrorForegroundColorSystemFillColorCritical";
+const POPULATE_MACOSTHEME_XAML_UNIT_54_STRINGS: &str = "ProgressBarForegroundAccentFillColorDefaultBrushProgressBarBackgroundControlStrongStrokeColorDefaultProgressBarBorderBrushControlStrokeColorDefaultBrushProgressBarPausedForegroundColorSystemFillColorCautionProgressBarErrorForegroundColorSystemFillColorCriticalProgressBarCornerRadiusProgressBarTrackCornerRadius";
+
+/// The numbers of the packed tables of the unit 54 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_54_NUMBERS: [f64; 2] = [1.5_f64, 0.5_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_160: rt::PackedRows = rt::PackedRows {
@@ -8541,7 +8751,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_160: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 55 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_55_STRINGS: &str = "NumberBoxPopupIndicatorForegroundTextFillColorSecondaryBrushNumberBoxPopupBackgroundAcrylicBackgroundFillColorDefaultBrushNumberBoxPopupBorderBrushSurfaceStrokeColorFlyoutBrushNumberBoxPopupSpinButtonBackgroundSubtleFillColorTransparentBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_55_STRINGS: &str = "NumberBoxPopupIndicatorForegroundTextFillColorSecondaryBrushNumberBoxPopupBackgroundAcrylicBackgroundFillColorDefaultBrushNumberBoxPopupBorderBrushSurfaceStrokeColorFlyoutBrushNumberBoxPopupSpinButtonBackgroundSubtleFillColorTransparentBrushNumberBoxSpinButtonBorderThicknessNumberBoxIconMarginNumberBoxPopupHorizonalOffsetNumberBoxPopupVerticalOffsetNumberBoxPopupShadowDepthNumberBoxMinWidth";
+
+/// The numbers of the packed tables of the unit 55 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_55_NUMBERS: [f64; 7] = [0.0_f64, 1.0_f64, 10.0_f64, -21.0_f64, -27.0_f64, 16.0_f64, 120.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_161: rt::PackedRows = rt::PackedRows {
@@ -8564,7 +8777,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_162: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 56 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_56_STRINGS: &str = "ExpanderHeaderBackgroundCardBackgroundFillColorDefaultBrushExpanderHeaderForegroundTextFillColorPrimaryBrushExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderBorderBrushCardStrokeColorDefaultBrushExpanderHeaderBorderPointerOverBrushExpanderHeaderBorderPressedBrushExpanderHeaderDisabledForegroundTextFillColorDisabledBrushExpanderHeaderDisabledBorderBrushExpanderChevronBackgroundSubtleFillColorTransparentBrushExpanderChevronPointerOverBackgroundSubtleFillColorSecondaryBrushExpanderChevronPressedBackgroundSubtleFillColorTertiaryBrushExpanderChevronForegroundExpanderChevronPointerOverForegroundExpanderChevronPressedForegroundExpanderChevronBorderBrushExpanderChevronBorderPointerOverBrushExpanderChevronBorderPressedBrushExpanderContentBackgroundCardBackgroundFillColorSecondaryBrushExpanderContentBorderBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_56_STRINGS: &str = "ExpanderHeaderBackgroundCardBackgroundFillColorDefaultBrushExpanderHeaderForegroundTextFillColorPrimaryBrushExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderBorderBrushCardStrokeColorDefaultBrushExpanderHeaderBorderPointerOverBrushExpanderHeaderBorderPressedBrushExpanderHeaderDisabledForegroundTextFillColorDisabledBrushExpanderHeaderDisabledBorderBrushExpanderChevronBackgroundSubtleFillColorTransparentBrushExpanderChevronPointerOverBackgroundSubtleFillColorSecondaryBrushExpanderChevronPressedBackgroundSubtleFillColorTertiaryBrushExpanderChevronForegroundExpanderChevronPointerOverForegroundExpanderChevronPressedForegroundExpanderChevronBorderBrushExpanderChevronBorderPointerOverBrushExpanderChevronBorderPressedBrushExpanderContentBackgroundCardBackgroundFillColorSecondaryBrushExpanderContentBorderBrushExpanderChevronUpGlyph\u{e70e}ExpanderChevronDownGlyph\u{e70d}ExpanderContentPaddingExpanderContentDownBorderThicknessExpanderContentUpBorderThickness";
+
+/// The numbers of the packed tables of the unit 56 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_56_NUMBERS: [f64; 3] = [12.0_f64, 1.0_f64, 0.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_163: rt::PackedRows = rt::PackedRows {
@@ -8611,7 +8827,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_165: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 57 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_57_STRINGS: &str = "InfoBarErrorSeverityBackgroundBrushSystemFillColorCriticalBackgroundBrushInfoBarWarningSeverityBackgroundBrushSystemFillColorCautionBackgroundBrushInfoBarSuccessSeverityBackgroundBrushSystemFillColorSuccessBackgroundBrushInfoBarInformationalSeverityBackgroundBrushSystemFillColorAttentionBackgroundBrushInfoBarErrorSeverityIconBackgroundSystemFillColorCriticalBrushInfoBarWarningSeverityIconBackgroundSystemFillColorCautionBrushInfoBarSuccessSeverityIconBackgroundSystemFillColorSuccessBrushInfoBarInformationalSeverityIconBackgroundSystemFillColorAttentionBrushInfoBarErrorSeverityIconForegroundTextFillColorInverseBrushInfoBarWarningSeverityIconForegroundInfoBarSuccessSeverityIconForegroundInfoBarInformationalSeverityIconForegroundInfoBarTitleForegroundTextFillColorPrimaryBrushInfoBarMessageForegroundInfoBarHyperlinkButtonForegroundAccentTextFillColorPrimaryBrushInfoBarBorderBrushCardStrokeColorDefaultBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_57_STRINGS: &str = "InfoBarErrorSeverityBackgroundBrushSystemFillColorCriticalBackgroundBrushInfoBarWarningSeverityBackgroundBrushSystemFillColorCautionBackgroundBrushInfoBarSuccessSeverityBackgroundBrushSystemFillColorSuccessBackgroundBrushInfoBarInformationalSeverityBackgroundBrushSystemFillColorAttentionBackgroundBrushInfoBarErrorSeverityIconBackgroundSystemFillColorCriticalBrushInfoBarWarningSeverityIconBackgroundSystemFillColorCautionBrushInfoBarSuccessSeverityIconBackgroundSystemFillColorSuccessBrushInfoBarInformationalSeverityIconBackgroundSystemFillColorAttentionBrushInfoBarErrorSeverityIconForegroundTextFillColorInverseBrushInfoBarWarningSeverityIconForegroundInfoBarSuccessSeverityIconForegroundInfoBarInformationalSeverityIconForegroundInfoBarTitleForegroundTextFillColorPrimaryBrushInfoBarMessageForegroundInfoBarHyperlinkButtonForegroundAccentTextFillColorPrimaryBrushInfoBarBorderBrushCardStrokeColorDefaultBrushInfoBarIconBackgroundGlyph\u{f136}InfoBarInformationalIconGlyph\u{f13f}InfoBarErrorIconGlyph\u{f13d}InfoBarWarningIconGlyph\u{f13c}InfoBarSuccessIconGlyph\u{f13e}InfoBarContentRootPaddingInfoBarIconMarginInfoBarPanelMarginInfoBarPanelHorizontalOrientationPaddingInfoBarPanelVerticalOrientationPaddingInfoBarTitleHorizontalOrientationMarginInfoBarTitleVerticalOrientationMarginInfoBarMessageHorizontalOrientationMarginInfoBarMessageVerticalOrientationMarginInfoBarActionHorizontalOrientationMarginInfoBarActionVerticalOrientationMargin";
+
+/// The numbers of the packed tables of the unit 57 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_57_NUMBERS: [f64; 7] = [16.0_f64, 0.0_f64, 14.0_f64, 18.0_f64, 12.0_f64, 4.0_f64, 8.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_166: rt::PackedRows = rt::PackedRows {
@@ -8638,7 +8857,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_166: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 58 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_58_STRINGS: &str = "PipsPagerSelectionIndicatorBackgroundControlFillColorTransparentBrushPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundControlStrongFillColorDefaultBrushPipsPagerSelectionIndicatorForegroundPointerOverTextFillColorSecondaryBrushPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledControlStrongFillColorDisabledBrushPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_58_STRINGS: &str = "PipsPagerSelectionIndicatorBackgroundControlFillColorTransparentBrushPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundControlStrongFillColorDefaultBrushPipsPagerSelectionIndicatorForegroundPointerOverTextFillColorSecondaryBrushPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledControlStrongFillColorDisabledBrushPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabledPipsPagerButtonWidthPipsPagerButtonHeightPipsPagerHorizontalOrientationButtonWidthPipsPagerHorizontalOrientationButtonHeightPipsPagerVerticalOrientationButtonWidthPipsPagerVerticalOrientationButtonHeightPipsPagerButtonBorderThicknessPipsPagerNavigationButtonBorderThicknessPipsPagerSelectedGlyph\u{ea3b}PipsPagerNormalGlyphPipsPagerPreviousPageButtonGlyph\u{eddb}PipsPagerNextPageButtonGlyph\u{eddc}PipsPagerNavigationButtonHeightPipsPagerNavigationButtonWidthPipsPagerNavigationButtonFontSizePipsPagerSelectedGlyphFontSize6PipsPagerNormalGlyphFontSize4";
+
+/// The numbers of the packed tables of the unit 58 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_58_NUMBERS: [f64; 5] = [20.0_f64, 12.0_f64, 24.0_f64, 1.0_f64, 8.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_167: rt::PackedRows = rt::PackedRows {
@@ -8676,7 +8898,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_167: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 59 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_59_STRINGS: &str = "SelectorBarBackgroundSystemControlTransparentBrushSelectorBarItemPillFillAccentFillColorDefaultBrushSelectorBarItemDisabledPillFillAccentFillColorDisabledBrushSelectorBarItemBorderBrushSelectorBarItemBorderBrushPointerOverSelectorBarItemBorderBrushSelectedSelectorBarItemBorderBrushPressedSelectorBarItemBorderBrushDisabledSelectorBarItemForegroundTextFillColorPrimaryBrushSelectorBarItemForegroundPointerOverTextFillColorSecondaryBrushSelectorBarItemForegroundSelectedSelectorBarItemForegroundPressedTextFillColorTertiaryBrushSelectorBarItemForegroundDisabledTextFillColorDisabledBrushSelectorBarItemBackgroundSelectorBarItemBackgroundPointerOverSelectorBarItemBackgroundSelectedSelectorBarItemBackgroundPressedSelectorBarItemBackgroundDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_59_STRINGS: &str = "SelectorBarBackgroundSystemControlTransparentBrushSelectorBarItemPillFillAccentFillColorDefaultBrushSelectorBarItemDisabledPillFillAccentFillColorDisabledBrushSelectorBarItemBorderBrushSelectorBarItemBorderBrushPointerOverSelectorBarItemBorderBrushSelectedSelectorBarItemBorderBrushPressedSelectorBarItemBorderBrushDisabledSelectorBarItemForegroundTextFillColorPrimaryBrushSelectorBarItemForegroundPointerOverTextFillColorSecondaryBrushSelectorBarItemForegroundSelectedSelectorBarItemForegroundPressedTextFillColorTertiaryBrushSelectorBarItemForegroundDisabledTextFillColorDisabledBrushSelectorBarItemBackgroundSelectorBarItemBackgroundPointerOverSelectorBarItemBackgroundSelectedSelectorBarItemBackgroundPressedSelectorBarItemBackgroundDisabledSelectorBarPaddingSelectorBarBorderThicknessSelectorBarItemBorderThicknessSelectorBarSelectedInnerThicknessSelectorBarItemIconVisualMarginSelectorBarItemTextVisualMarginSelectorBarItemPaddingSelectorBarItemSelectionVisualMarginSelectorBarItemFocusVisualMarginSelectorBarItemPillHeightSelectorBarItemPillWidthSelectorBarItemIconScaleSelectorBarItemSpacing";
+
+/// The numbers of the packed tables of the unit 59 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_59_NUMBERS: [f64; 10] = [0.0_f64, 4.0_f64, 1.0_f64, -2.0_f64, 12.0_f64, 10.0_f64, 7.0_f64, 3.0_f64, 0.8_f64, 8.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_168: rt::PackedRows = rt::PackedRows {
@@ -8704,21 +8929,28 @@ static POPULATE_MACOSTHEME_XAML_ROWS_168: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_169: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SelectorBarPadding", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 33, position: 45 },
-    rt::ValueRow { key: "SelectorBarBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 34, position: 53 },
-    rt::ValueRow { key: "SelectorBarItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 35, position: 57 },
-    rt::ValueRow { key: "SelectorBarSelectedInnerThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 36, position: 60 },
-    rt::ValueRow { key: "SelectorBarItemIconVisualMargin", value: [-2.0_f64, 0.0_f64, -2.0_f64, 0.0_f64], line: 37, position: 58 },
-    rt::ValueRow { key: "SelectorBarItemTextVisualMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 38, position: 58 },
-    rt::ValueRow { key: "SelectorBarItemPadding", value: [12.0_f64, 10.0_f64, 12.0_f64, 7.0_f64], line: 39, position: 49 },
-    rt::ValueRow { key: "SelectorBarItemSelectionVisualMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 40, position: 63 },
-    rt::ValueRow { key: "SelectorBarItemFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 41, position: 59 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_169: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_59_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_59_NUMBERS,
+    records: &[
+        745, 18, 33, 45, 0, 1, 0, 1,
+        763, 26, 34, 53, 2, 2, 2, 2,
+        789, 30, 35, 57, 2, 2, 2, 2,
+        819, 33, 36, 60, 2, 2, 2, 2,
+        852, 31, 37, 58, 3, 0, 3, 0,
+        883, 31, 38, 58, 0, 0, 0, 0,
+        914, 22, 39, 49, 4, 5, 4, 6,
+        936, 36, 40, 63, 0, 0, 0, 0,
+        972, 32, 41, 59, 3, 3, 3, 3,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 60 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_60_STRINGS: &str = "TitleBarForegroundBrushTextFillColorPrimaryBrushTitleBarDeactivatedForegroundBrushTextFillColorTertiaryBrushTitleBarSubtitleForegroundBrushTextFillColorSecondaryBrushTitleBarSubtitleDeactivatedForegroundBrushTitleBarBackButtonBackgroundSubtleFillColorTransparentBrushTitleBarBackButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTitleBarBackButtonBackgroundPressedSubtleFillColorTertiaryBrushTitleBarBackButtonBackgroundDisabledControlFillColorDisabledBrushTitleBarBackButtonForegroundTitleBarBackButtonForegroundPointerOverTitleBarBackButtonForegroundPressedTitleBarBackButtonForegroundDisabledTextFillColorDisabledBrushTitleBarPaneToggleButtonBackgroundTitleBarPaneToggleButtonBackgroundPointerOverTitleBarPaneToggleButtonBackgroundPressedTitleBarPaneToggleButtonBackgroundDisabledTitleBarPaneToggleButtonForegroundTitleBarPaneToggleButtonForegroundPointerOverTitleBarPaneToggleButtonForegroundPressedTitleBarPaneToggleButtonForegroundDisabled";
+const POPULATE_MACOSTHEME_XAML_UNIT_60_STRINGS: &str = "TitleBarForegroundBrushTextFillColorPrimaryBrushTitleBarDeactivatedForegroundBrushTextFillColorTertiaryBrushTitleBarSubtitleForegroundBrushTextFillColorSecondaryBrushTitleBarSubtitleDeactivatedForegroundBrushTitleBarBackButtonBackgroundSubtleFillColorTransparentBrushTitleBarBackButtonBackgroundPointerOverSubtleFillColorSecondaryBrushTitleBarBackButtonBackgroundPressedSubtleFillColorTertiaryBrushTitleBarBackButtonBackgroundDisabledControlFillColorDisabledBrushTitleBarBackButtonForegroundTitleBarBackButtonForegroundPointerOverTitleBarBackButtonForegroundPressedTitleBarBackButtonForegroundDisabledTextFillColorDisabledBrushTitleBarPaneToggleButtonBackgroundTitleBarPaneToggleButtonBackgroundPointerOverTitleBarPaneToggleButtonBackgroundPressedTitleBarPaneToggleButtonBackgroundDisabledTitleBarPaneToggleButtonForegroundTitleBarPaneToggleButtonForegroundPointerOverTitleBarPaneToggleButtonForegroundPressedTitleBarPaneToggleButtonForegroundDisabledTitleBarCompactHeightTitleBarExpandedHeightTitleBarBackButtonWidthTitleBarPaneToggleButtonWidthTitleBarLeftPaddingWidthTitleBarRightPaddingWidthTitleBarLeftHeaderPaddingWidthTitleBarHeaderNegativeInsetPaddingWidthTitleBarMinDragRegionWidthTitleBarDeactivatedOpacityTitleBarIconMaxWidthTitleBarIconMaxHeightTitleBarTitleMinWidthTitleBarSubtitleMinWidthTitleBarIconMarginTitleBarTitleMarginTitleBarSubtitleMargin";
+
+/// The numbers of the packed tables of the unit 60 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_60_NUMBERS: [f64; 9] = [32.0_f64, 48.0_f64, 40.0_f64, 2.0_f64, 0.0_f64, 14.0_f64, 0.5_f64, 16.0_f64, 8.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_170: rt::PackedRows = rt::PackedRows {
@@ -8836,17 +9068,30 @@ static POPULATE_MACOSTHEME_XAML_ROWS_178: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeightComfortable", value: 48.0_f64, line: 23, position: 58 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_179: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TableViewCellPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 24, position: 47 },
-    rt::ValueRow { key: "TableViewCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 25, position: 54 },
-    rt::ValueRow { key: "TableViewCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 26, position: 58 },
-    rt::ValueRow { key: "TableViewHeaderCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 27, position: 60 },
-    rt::ValueRow { key: "TableViewHeaderCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 28, position: 64 },
-];
+/// The keys and targets of the packed tables of the unit 62 of `MacOSTheme.xaml`, each once (#855).
+const POPULATE_MACOSTHEME_XAML_UNIT_62_STRINGS: &str = "TableViewCellPaddingTableViewCellPaddingCompactTableViewCellPaddingComfortableTableViewHeaderCellPaddingCompactTableViewHeaderCellPaddingComfortable";
+
+/// The numbers of the packed tables of the unit 62 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_62_NUMBERS: [f64; 3] = [8.0_f64, 4.0_f64, 2.0_f64];
+
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_179: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_62_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_62_NUMBERS,
+    records: &[
+        0, 20, 24, 47, 0, 1, 0, 1,
+        20, 27, 25, 54, 0, 2, 0, 2,
+        47, 31, 26, 58, 0, 0, 0, 0,
+        78, 33, 27, 60, 0, 2, 0, 2,
+        111, 37, 28, 64, 0, 0, 0, 0,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 63 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_63_STRINGS: &str = "ResizeGripperSeparatorBrushSystemAccentColor";
+const POPULATE_MACOSTHEME_XAML_UNIT_63_STRINGS: &str = "ResizeGripperSeparatorBrushSystemAccentColorResizeGripperSeparatorThicknessResizeGripperSeparatorThicknessVertical";
+
+/// The numbers of the packed tables of the unit 63 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_63_NUMBERS: [f64; 2] = [0.0_f64, 2.0_f64];
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_180: rt::PackedRows = rt::PackedRows {
@@ -8858,7 +9103,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_180: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 66 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_66_STRINGS: &str = "MacOSTrafficLightInactiveBrushMacOSSegmentBackgroundBrushMacOSSegmentSelectedBrushMacOSSelectionBrushSystemAccentColorMacOSSelectionForegroundBrushMacOSContentBackgroundBrushMacOSSidebarBackgroundBrushMacOSSeparatorBrushDividerStrokeColorDefaultSystemColorGrayTextColorSystemColorWindowColorSystemColorButtonFaceColorSystemColorHighlightColorSystemColorHighlightTextColorSystemColorWindowTextColorMacOSTrafficLightGlyphBrushMacOSTrafficLightBorderBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_66_STRINGS: &str = "MacOSTrafficLightInactiveBrushMacOSSegmentBackgroundBrushMacOSSegmentSelectedBrushMacOSSelectionBrushSystemAccentColorMacOSSelectionForegroundBrushMacOSContentBackgroundBrushMacOSSidebarBackgroundBrushMacOSSeparatorBrushDividerStrokeColorDefaultSystemColorGrayTextColorSystemColorWindowColorSystemColorButtonFaceColorSystemColorHighlightColorSystemColorHighlightTextColorSystemColorWindowTextColorMacOSTrafficLightGlyphBrushMacOSTrafficLightBorderBrushMacOSMenuShadowMarginMacOSWindowShadowMarginMacOSToolTipShadowMarginMacOSCaptionFontSizeMacOSBodyFontSizeMacOSHeadlineFontSizeMacOSTitleFontSize";
+
+/// The numbers of the packed tables of the unit 66 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_66_NUMBERS: [f64; 12] = [24.0_f64, 16.0_f64, 32.0_f64, 36.0_f64, 48.0_f64, 6.0_f64, 4.0_f64, 8.0_f64, 11.0_f64, 13.0_f64, 17.0_f64, 22.0_f64];
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_181: rt::PackedRows = rt::PackedRows {
@@ -8901,7 +9149,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 67 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS: &str = "InfoBadgeForegroundTextOnAccentFillColorPrimaryBrushInfoBadgeBackgroundAccentFillColorDefaultBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAccentBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS: &str = "InfoBadgeForegroundTextOnAccentFillColorPrimaryBrushInfoBadgeBackgroundAccentFillColorDefaultBrushInfoBadgeMinHeightInfoBadgeMinWidthInfoBadgeMaxHeightInfoBadgeValueFontSizeInfoBadgeIconHeightInfoBadgeIconWidthInfoBadgePaddingIconInfoBadgeFontIconMarginValueInfoBadgeTextMarginIconInfoBadgeIconMarginSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAccentBrush";
+
+/// The numbers of the packed tables of the unit 67 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_67_NUMBERS: [f64; 8] = [4.0_f64, 16.0_f64, 11.0_f64, 8.0_f64, 12.0_f64, 0.0_f64, 2.0_f64, 9.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
@@ -8913,23 +9164,31 @@ static POPULATE_MACOSTHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_186: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "InfoBadgeMinHeight", value: 4.0_f64, line: 17, position: 44 },
-    rt::ValueRow { key: "InfoBadgeMinWidth", value: 4.0_f64, line: 18, position: 43 },
-    rt::ValueRow { key: "InfoBadgeMaxHeight", value: 16.0_f64, line: 19, position: 44 },
-    rt::ValueRow { key: "InfoBadgeValueFontSize", value: 11.0_f64, line: 20, position: 48 },
-    rt::ValueRow { key: "InfoBadgeIconHeight", value: 8.0_f64, line: 21, position: 45 },
-    rt::ValueRow { key: "InfoBadgeIconWidth", value: 12.0_f64, line: 22, position: 44 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_186: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_67_NUMBERS,
+    records: &[
+        98, 18, 17, 44, 0,
+        116, 17, 18, 43, 0,
+        133, 18, 19, 44, 1,
+        151, 22, 20, 48, 2,
+        173, 19, 21, 45, 3,
+        192, 18, 22, 44, 4,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_187: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "InfoBadgePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 23, position: 43 },
-    rt::ValueRow { key: "IconInfoBadgeFontIconMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 24, position: 54 },
-    rt::ValueRow { key: "ValueInfoBadgeTextMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 25, position: 51 },
-    rt::ValueRow { key: "IconInfoBadgeIconMargin", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 26, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_187: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_67_NUMBERS,
+    records: &[
+        210, 16, 23, 43, 5, 5, 5, 5,
+        226, 27, 24, 54, 0, 5, 0, 6,
+        253, 24, 25, 51, 0, 5, 0, 6,
+        277, 23, 26, 50, 0, 0, 0, 0,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 68 of `MacOSTheme.xaml`, each once (#855).
 const POPULATE_MACOSTHEME_XAML_UNIT_68_STRINGS: &str = "ProgressRingForegroundThemeBrushAccentFillColorDefaultBrushProgressRingBackgroundThemeBrushControlFillColorTransparentBrushSystemControlHighlightAccentBrushSystemControlBackgroundBaseLowBrush";
@@ -8977,7 +9236,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 71 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS: &str = "PersonPictureForegroundThemeBrushTextFillColorPrimaryBrushPersonPictureEllipseBadgeForegroundThemeBrushTextOnAccentFillColorPrimaryBrushPersonPictureEllipseBadgeFillThemeBrushAccentFillColorDefaultBrushPersonPictureEllipseBadgeStrokeThemeBrushControlFillColorTransparentBrushPersonPictureEllipseFillThemeBrushControlAltFillColorQuarternaryPersonPictureEllipseFillStrokeBrushCardStrokeColorDefaultBrushSystemControlForegroundBaseHighBrushSystemColorButtonTextColorSystemColorButtonFaceColorSystemColorHighlightTextColorBrush";
+const POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS: &str = "PersonPictureForegroundThemeBrushTextFillColorPrimaryBrushPersonPictureEllipseBadgeForegroundThemeBrushTextOnAccentFillColorPrimaryBrushPersonPictureEllipseBadgeFillThemeBrushAccentFillColorDefaultBrushPersonPictureEllipseBadgeStrokeThemeBrushControlFillColorTransparentBrushPersonPictureEllipseFillThemeBrushControlAltFillColorQuarternaryPersonPictureEllipseFillStrokeBrushCardStrokeColorDefaultBrushPersonPictureEllipseBadgeStrokeOpacityPersonPictureEllipseBadgeImageSourceStrokeOpacityPersonPictureEllipseStrokeThicknessPersonPictureEllipseBadgeStrokeThicknessSystemControlForegroundBaseHighBrushSystemColorButtonTextColorSystemColorButtonFaceColorSystemColorHighlightTextColorBrush";
+
+/// The numbers of the packed tables of the unit 71 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_71_NUMBERS: [f64; 2] = [1.0_f64, 2.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_191: rt::PackedRows = rt::PackedRows {
@@ -8993,13 +9255,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_191: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_192: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeOpacity", value: 1.0_f64, line: 21, position: 64 },
-    rt::ValueRow { key: "PersonPictureEllipseBadgeImageSourceStrokeOpacity", value: 1.0_f64, line: 22, position: 75 },
-    rt::ValueRow { key: "PersonPictureEllipseStrokeThickness", value: 1.0_f64, line: 23, position: 61 },
-    rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeThickness", value: 2.0_f64, line: 24, position: 66 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_192: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_71_NUMBERS,
+    records: &[
+        401, 38, 21, 64, 0,
+        439, 49, 22, 75, 0,
+        488, 35, 23, 61, 0,
+        523, 40, 24, 66, 1,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 72 of `MacOSTheme.xaml`, each once (#855).
 const POPULATE_MACOSTHEME_XAML_UNIT_72_STRINGS: &str = "PagerControlSelectionIndicatorForegroundAccentFillColorDefaultBrushPagerControlPageNavigationButtonBackgroundPointerOverSubtleFillColorSecondaryBrushPagerControlPageNavigationButtonBackgroundPressedSubtleFillColorTertiaryBrushPagerControlPageNavigationButtonBackgroundDisabledSubtleFillColorDisabledBrushPagerControlPageNavigationButtonForegroundPointerOverTextFillColorPrimaryBrushPagerControlPageNavigationButtonForegroundPressedPagerControlPageNavigationButtonForegroundDisabledTextFillColorDisabledBrushSystemControlForegroundAccentBrushSystemControlHighlightListLowBrushSystemControlHighlightListMediumBrushSystemControlTransparentBrushSystemControlHighlightAltBaseHighBrushSystemControlDisabledBaseMediumLowBrush";
@@ -9020,7 +9286,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 74 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS: &str = "GridViewItemBackgroundSubtleFillColorTransparentBrushGridViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushGridViewItemBackgroundPressedSubtleFillColorTertiaryBrushGridViewItemBackgroundSelectedGridViewItemBackgroundSelectedPointerOverGridViewItemBackgroundSelectedPressedGridViewItemForegroundTextFillColorPrimaryBrushGridViewItemForegroundPointerOverTextFillColorSecondaryBrushGridViewItemForegroundSelectedGridViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushGridViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushGridViewItemFocusBorderBrushGridViewItemFocusSecondaryBorderBrushGridViewItemCheckBrushTextOnAccentFillColorPrimaryBrushGridViewItemCheckBoxBrushControlOnImageFillColorDefaultBrushGridViewItemDragBackgroundGridViewItemDragForegroundGridViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushGridViewItemPointerOverBorderBrushControlStrokeColorOnAccentTertiaryBrushGridViewItemSelectedBorderBrushAccentFillColorDefaultBrushGridViewItemSelectedPointerOverBorderBrushAccentFillColorSecondaryBrushGridViewItemSelectedPressedBorderBrushAccentFillColorTertiaryBrushGridViewItemSelectedDisabledBorderBrushAccentFillColorDisabledBrushGridViewItemSelectedInnerBorderBrushControlSolidFillColorDefaultBrushGridViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushGridViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushGridViewItemCheckBoxPointerOverBrushControlOnImageFillColorSecondaryBrushGridViewItemCheckBoxPressedBrushControlOnImageFillColorTertiaryBrushGridViewItemCheckBoxDisabledBrushControlOnImageFillColorDisabledBrushGridViewItemCheckBoxSelectedBrushGridViewItemCheckBoxSelectedPointerOverBrushGridViewItemCheckBoxSelectedPressedBrushGridViewItemCheckBoxSelectedDisabledBrushGridViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushGridViewItemCheckBoxPointerOverBorderBrushGridViewItemCheckBoxPressedBorderBrushControlStrongStrokeColorDisabledBrushGridViewItemCheckBoxDisabledBorderBrushGridViewItemBackgroundSelectedDisabledSystemColorWindowColorSystemColorWindowTextColorSystemControlForegroundAltHighBrushSystemControlForegroundBaseHighBrushSystemColorButtonFaceColorSystemControlTransparentBrushSystemControlHighlightAltChromeWhiteBrushSystemControlDisabledChromeDisabledHighBrushSystemColorHighlightColorSystemColorGrayTextColorSystemColorButtonTextColor";
+const POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS: &str = "GridViewItemBackgroundSubtleFillColorTransparentBrushGridViewItemBackgroundPointerOverSubtleFillColorSecondaryBrushGridViewItemBackgroundPressedSubtleFillColorTertiaryBrushGridViewItemBackgroundSelectedGridViewItemBackgroundSelectedPointerOverGridViewItemBackgroundSelectedPressedGridViewItemForegroundTextFillColorPrimaryBrushGridViewItemForegroundPointerOverTextFillColorSecondaryBrushGridViewItemForegroundSelectedGridViewItemFocusVisualPrimaryBrushFocusStrokeColorOuterBrushGridViewItemFocusVisualSecondaryBrushFocusStrokeColorInnerBrushGridViewItemFocusBorderBrushGridViewItemFocusSecondaryBorderBrushGridViewItemCheckBrushTextOnAccentFillColorPrimaryBrushGridViewItemCheckBoxBrushControlOnImageFillColorDefaultBrushGridViewItemDragBackgroundGridViewItemDragForegroundGridViewItemPlaceholderBackgroundControlStrongFillColorDisabledBrushGridViewItemCornerRadiusGridViewItemCheckBoxCornerRadiusGridViewItemPointerOverBorderBrushControlStrokeColorOnAccentTertiaryBrushGridViewItemSelectedBorderBrushAccentFillColorDefaultBrushGridViewItemSelectedPointerOverBorderBrushAccentFillColorSecondaryBrushGridViewItemSelectedPressedBorderBrushAccentFillColorTertiaryBrushGridViewItemSelectedDisabledBorderBrushAccentFillColorDisabledBrushGridViewItemSelectedInnerBorderBrushControlSolidFillColorDefaultBrushGridViewItemCheckPressedBrushTextOnAccentFillColorSecondaryBrushGridViewItemCheckDisabledBrushTextOnAccentFillColorDisabledBrushGridViewItemCheckBoxPointerOverBrushControlOnImageFillColorSecondaryBrushGridViewItemCheckBoxPressedBrushControlOnImageFillColorTertiaryBrushGridViewItemCheckBoxDisabledBrushControlOnImageFillColorDisabledBrushGridViewItemCheckBoxSelectedBrushGridViewItemCheckBoxSelectedPointerOverBrushGridViewItemCheckBoxSelectedPressedBrushGridViewItemCheckBoxSelectedDisabledBrushGridViewItemCheckBoxBorderBrushControlStrongStrokeColorDefaultBrushGridViewItemCheckBoxPointerOverBorderBrushGridViewItemCheckBoxPressedBorderBrushControlStrongStrokeColorDisabledBrushGridViewItemCheckBoxDisabledBorderBrushGridViewItemBackgroundSelectedDisabledSystemColorWindowColorSystemColorWindowTextColorSystemControlForegroundAltHighBrushSystemControlForegroundBaseHighBrushSystemColorButtonFaceColorSystemControlTransparentBrushSystemControlHighlightAltChromeWhiteBrushSystemControlDisabledChromeDisabledHighBrushSystemColorHighlightColorSystemColorGrayTextColorSystemColorButtonTextColor";
+
+/// The numbers of the packed tables of the unit 74 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_74_NUMBERS: [f64; 2] = [4.0_f64, 3.0_f64];
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_194: rt::PackedRows = rt::PackedRows {
@@ -9048,37 +9317,41 @@ static POPULATE_MACOSTHEME_XAML_ROWS_194: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_195: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "GridViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 35, position: 54 },
-    rt::ValueRow { key: "GridViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 36, position: 62 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_195: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_74_NUMBERS,
+    records: &[
+        841, 24, 35, 54, 0, 0, 0, 0,
+        865, 32, 36, 62, 1, 1, 1, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        841, 34, 875, 39, 1, 38, 8, 38, 8,
-        914, 31, 945, 27, 1, 39, 8, 39, 8,
-        972, 42, 1014, 29, 1, 40, 8, 40, 8,
-        1043, 38, 1081, 28, 1, 41, 8, 41, 8,
-        1109, 39, 1148, 28, 1, 42, 8, 42, 8,
-        1176, 36, 1212, 33, 1, 43, 8, 43, 8,
-        1245, 29, 1274, 35, 1, 44, 8, 44, 8,
-        1309, 30, 1339, 34, 1, 45, 8, 45, 8,
-        1373, 36, 1409, 37, 1, 46, 8, 46, 8,
-        1446, 32, 1478, 36, 1, 47, 8, 47, 8,
-        1514, 33, 1547, 36, 1, 48, 8, 48, 8,
-        1583, 33, 945, 27, 1, 49, 8, 49, 8,
-        1616, 44, 1014, 29, 1, 50, 8, 50, 8,
-        1660, 40, 1081, 28, 1, 51, 8, 51, 8,
-        1700, 41, 1148, 28, 1, 52, 8, 52, 8,
-        1741, 31, 1772, 36, 1, 53, 8, 53, 8,
-        1808, 42, 1772, 36, 1, 54, 8, 54, 8,
-        1850, 38, 1888, 37, 1, 55, 8, 55, 8,
-        1925, 39, 1888, 37, 1, 56, 8, 56, 8,
-        1964, 38, 86, 29, 1, 57, 8, 57, 8,
+        897, 34, 931, 39, 1, 38, 8, 38, 8,
+        970, 31, 1001, 27, 1, 39, 8, 39, 8,
+        1028, 42, 1070, 29, 1, 40, 8, 40, 8,
+        1099, 38, 1137, 28, 1, 41, 8, 41, 8,
+        1165, 39, 1204, 28, 1, 42, 8, 42, 8,
+        1232, 36, 1268, 33, 1, 43, 8, 43, 8,
+        1301, 29, 1330, 35, 1, 44, 8, 44, 8,
+        1365, 30, 1395, 34, 1, 45, 8, 45, 8,
+        1429, 36, 1465, 37, 1, 46, 8, 46, 8,
+        1502, 32, 1534, 36, 1, 47, 8, 47, 8,
+        1570, 33, 1603, 36, 1, 48, 8, 48, 8,
+        1639, 33, 1001, 27, 1, 49, 8, 49, 8,
+        1672, 44, 1070, 29, 1, 50, 8, 50, 8,
+        1716, 40, 1137, 28, 1, 51, 8, 51, 8,
+        1756, 41, 1204, 28, 1, 52, 8, 52, 8,
+        1797, 31, 1828, 36, 1, 53, 8, 53, 8,
+        1864, 42, 1828, 36, 1, 54, 8, 54, 8,
+        1906, 38, 1944, 37, 1, 55, 8, 55, 8,
+        1981, 39, 1944, 37, 1, 56, 8, 56, 8,
+        2020, 38, 86, 29, 1, 57, 8, 57, 8,
     ],
 };
 
@@ -9089,61 +9362,68 @@ static POPULATE_MACOSTHEME_XAML_ROWS_197: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PivotTitleFontSize", value: 14.0_f64, line: 21, position: 44 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_198: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "PivotHeaderItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 23, position: 48 },
-    rt::ValueRow { key: "PivotItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 24, position: 42 },
-    rt::ValueRow { key: "PivotLandscapeThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 25, position: 53 },
-    rt::ValueRow { key: "PivotNavButtonBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 26, position: 61 },
-    rt::ValueRow { key: "PivotNavButtonMargin", value: [0.0_f64, 6.0_f64, 0.0_f64, 0.0_f64], line: 27, position: 47 },
-    rt::ValueRow { key: "PivotPortraitThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 28, position: 52 },
-];
-
 /// The keys and targets of the packed tables of the unit 75 of `MacOSTheme.xaml`, each once (#855).
-const POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS: &str = "PivotBackgroundSystemControlTransparentBrushPivotHeaderBackgroundPivotNextButtonBackgroundSystemControlBackgroundBaseMediumLowBrushPivotNextButtonBackgroundPointerOverSystemControlHighlightBaseMediumBrushPivotNextButtonBackgroundPressedSystemControlHighlightBaseMediumHighBrushPivotNextButtonBorderBrushSystemControlForegroundTransparentBrushPivotNextButtonBorderBrushPointerOverPivotNextButtonBorderBrushPressedPivotNextButtonForegroundSystemControlForegroundAltMediumHighBrushPivotNextButtonForegroundPointerOverSystemControlHighlightAltAltMediumHighBrushPivotNextButtonForegroundPressedPivotPreviousButtonBackgroundPivotPreviousButtonBackgroundPointerOverPivotPreviousButtonBackgroundPressedPivotPreviousButtonBorderBrushPivotPreviousButtonBorderBrushPointerOverPivotPreviousButtonBorderBrushPressedPivotPreviousButtonForegroundPivotPreviousButtonForegroundPointerOverPivotPreviousButtonForegroundPressedPivotItemBackgroundPivotHeaderItemBackgroundUnselectedPivotHeaderItemBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushPivotHeaderItemBackgroundUnselectedPressedPivotHeaderItemBackgroundSelectedPivotHeaderItemBackgroundSelectedPointerOverPivotHeaderItemBackgroundSelectedPressedPivotHeaderItemBackgroundDisabledPivotHeaderItemForegroundUnselectedSystemControlForegroundBaseMediumBrushPivotHeaderItemForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushPivotHeaderItemForegroundUnselectedPressedPivotHeaderItemForegroundSelectedSystemControlHighlightAltBaseHighBrushPivotHeaderItemForegroundSelectedPointerOverPivotHeaderItemForegroundSelectedPressedPivotHeaderItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushPivotHeaderItemFocusPipeFillSystemControlHighlightAltAccentBrushPivotHeaderItemSelectedPipeFillAccentFillColorDefaultBrushPivotForegroundThemeBrushPivotHeaderBackgroundSelectedBrushPivotHeaderBackgroundUnselectedBrushPivotHeaderForegroundSelectedBrushPivotHeaderForegroundUnselectedBrushPivotNavButtonBackgroundThemeBrushPivotNavButtonBorderThemeBrushPivotNavButtonForegroundThemeBrushPivotNavButtonPointerOverBackgroundThemeBrushPivotNavButtonPointerOverBorderThemeBrushPivotNavButtonPointerOverForegroundThemeBrushPivotNavButtonPressedBackgroundThemeBrushPivotNavButtonPressedBorderThemeBrushPivotNavButtonPressedForegroundThemeBrushSystemColorHighlightColorSystemColorHighlightTextColorSystemColorButtonFaceColorSystemColorButtonTextColor";
+const POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS: &str = "PivotHeaderItemMarginPivotItemMarginPivotLandscapeThemePaddingPivotNavButtonBorderThemeThicknessPivotNavButtonMarginPivotPortraitThemePaddingPivotBackgroundSystemControlTransparentBrushPivotHeaderBackgroundPivotNextButtonBackgroundSystemControlBackgroundBaseMediumLowBrushPivotNextButtonBackgroundPointerOverSystemControlHighlightBaseMediumBrushPivotNextButtonBackgroundPressedSystemControlHighlightBaseMediumHighBrushPivotNextButtonBorderBrushSystemControlForegroundTransparentBrushPivotNextButtonBorderBrushPointerOverPivotNextButtonBorderBrushPressedPivotNextButtonForegroundSystemControlForegroundAltMediumHighBrushPivotNextButtonForegroundPointerOverSystemControlHighlightAltAltMediumHighBrushPivotNextButtonForegroundPressedPivotPreviousButtonBackgroundPivotPreviousButtonBackgroundPointerOverPivotPreviousButtonBackgroundPressedPivotPreviousButtonBorderBrushPivotPreviousButtonBorderBrushPointerOverPivotPreviousButtonBorderBrushPressedPivotPreviousButtonForegroundPivotPreviousButtonForegroundPointerOverPivotPreviousButtonForegroundPressedPivotItemBackgroundPivotHeaderItemBackgroundUnselectedPivotHeaderItemBackgroundUnselectedPointerOverSystemControlHighlightTransparentBrushPivotHeaderItemBackgroundUnselectedPressedPivotHeaderItemBackgroundSelectedPivotHeaderItemBackgroundSelectedPointerOverPivotHeaderItemBackgroundSelectedPressedPivotHeaderItemBackgroundDisabledPivotHeaderItemForegroundUnselectedSystemControlForegroundBaseMediumBrushPivotHeaderItemForegroundUnselectedPointerOverSystemControlHighlightAltBaseMediumHighBrushPivotHeaderItemForegroundUnselectedPressedPivotHeaderItemForegroundSelectedSystemControlHighlightAltBaseHighBrushPivotHeaderItemForegroundSelectedPointerOverPivotHeaderItemForegroundSelectedPressedPivotHeaderItemForegroundDisabledSystemControlDisabledBaseMediumLowBrushPivotHeaderItemFocusPipeFillSystemControlHighlightAltAccentBrushPivotHeaderItemSelectedPipeFillAccentFillColorDefaultBrushPivotForegroundThemeBrushPivotHeaderBackgroundSelectedBrushPivotHeaderBackgroundUnselectedBrushPivotHeaderForegroundSelectedBrushPivotHeaderForegroundUnselectedBrushPivotNavButtonBackgroundThemeBrushPivotNavButtonBorderThemeBrushPivotNavButtonForegroundThemeBrushPivotNavButtonPointerOverBackgroundThemeBrushPivotNavButtonPointerOverBorderThemeBrushPivotNavButtonPointerOverForegroundThemeBrushPivotNavButtonPressedBackgroundThemeBrushPivotNavButtonPressedBorderThemeBrushPivotNavButtonPressedForegroundThemeBrushSystemColorHighlightColorSystemColorHighlightTextColorSystemColorButtonFaceColorSystemColorButtonTextColor";
+
+/// The numbers of the packed tables of the unit 75 of `MacOSTheme.xaml`, each once (#855).
+static POPULATE_MACOSTHEME_XAML_UNIT_75_NUMBERS: [f64; 6] = [12.0_f64, 0.0_f64, 14.0_f64, 13.0_f64, 6.0_f64, 1.0_f64];
+
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_198: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_75_NUMBERS,
+    records: &[
+        0, 21, 23, 48, 0, 1, 0, 1,
+        21, 15, 24, 42, 0, 1, 0, 1,
+        36, 26, 25, 53, 0, 2, 1, 3,
+        62, 34, 26, 61, 1, 1, 1, 1,
+        96, 20, 27, 47, 1, 4, 1, 1,
+        116, 25, 28, 52, 0, 2, 1, 3,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 15, 15, 29, 1, 31, 8, 31, 8,
-        44, 21, 15, 29, 1, 32, 8, 32, 8,
-        65, 25, 90, 41, 1, 33, 8, 33, 8,
-        131, 36, 167, 37, 1, 34, 8, 34, 8,
-        204, 32, 236, 41, 1, 35, 8, 35, 8,
-        277, 26, 303, 39, 1, 36, 8, 36, 8,
-        342, 37, 303, 39, 1, 37, 8, 37, 8,
-        379, 33, 303, 39, 1, 38, 8, 38, 8,
-        412, 25, 437, 41, 1, 39, 8, 39, 8,
-        478, 36, 514, 43, 1, 40, 8, 40, 8,
-        557, 32, 514, 43, 1, 41, 8, 41, 8,
-        589, 29, 90, 41, 1, 42, 8, 42, 8,
-        618, 40, 167, 37, 1, 43, 8, 43, 8,
-        658, 36, 236, 41, 1, 44, 8, 44, 8,
-        694, 30, 303, 39, 1, 45, 8, 45, 8,
-        724, 41, 303, 39, 1, 46, 8, 46, 8,
-        765, 37, 303, 39, 1, 47, 8, 47, 8,
-        802, 29, 437, 41, 1, 48, 8, 48, 8,
-        831, 40, 514, 43, 1, 49, 8, 49, 8,
-        871, 36, 514, 43, 1, 50, 8, 50, 8,
-        907, 19, 15, 29, 1, 51, 8, 51, 8,
-        926, 35, 15, 29, 1, 52, 8, 52, 8,
-        961, 46, 1007, 38, 1, 53, 8, 53, 8,
-        1045, 42, 1007, 38, 1, 54, 8, 54, 8,
-        1087, 33, 1007, 38, 1, 55, 8, 55, 8,
-        1120, 44, 1007, 38, 1, 56, 8, 56, 8,
-        1164, 40, 1007, 38, 1, 57, 8, 57, 8,
-        1204, 33, 15, 29, 1, 58, 8, 58, 8,
-        1237, 35, 1272, 38, 1, 59, 8, 59, 8,
-        1310, 46, 1356, 44, 1, 60, 8, 60, 8,
-        1400, 42, 1356, 44, 1, 61, 8, 61, 8,
-        1442, 33, 1475, 38, 1, 62, 8, 62, 8,
-        1513, 44, 1356, 44, 1, 63, 8, 63, 8,
-        1557, 40, 1356, 44, 1, 64, 8, 64, 8,
-        1597, 33, 1630, 39, 1, 65, 8, 65, 8,
-        1669, 28, 1697, 36, 1, 66, 8, 66, 8,
-        1733, 31, 1764, 27, 1, 67, 8, 67, 8,
+        141, 15, 156, 29, 1, 31, 8, 31, 8,
+        185, 21, 156, 29, 1, 32, 8, 32, 8,
+        206, 25, 231, 41, 1, 33, 8, 33, 8,
+        272, 36, 308, 37, 1, 34, 8, 34, 8,
+        345, 32, 377, 41, 1, 35, 8, 35, 8,
+        418, 26, 444, 39, 1, 36, 8, 36, 8,
+        483, 37, 444, 39, 1, 37, 8, 37, 8,
+        520, 33, 444, 39, 1, 38, 8, 38, 8,
+        553, 25, 578, 41, 1, 39, 8, 39, 8,
+        619, 36, 655, 43, 1, 40, 8, 40, 8,
+        698, 32, 655, 43, 1, 41, 8, 41, 8,
+        730, 29, 231, 41, 1, 42, 8, 42, 8,
+        759, 40, 308, 37, 1, 43, 8, 43, 8,
+        799, 36, 377, 41, 1, 44, 8, 44, 8,
+        835, 30, 444, 39, 1, 45, 8, 45, 8,
+        865, 41, 444, 39, 1, 46, 8, 46, 8,
+        906, 37, 444, 39, 1, 47, 8, 47, 8,
+        943, 29, 578, 41, 1, 48, 8, 48, 8,
+        972, 40, 655, 43, 1, 49, 8, 49, 8,
+        1012, 36, 655, 43, 1, 50, 8, 50, 8,
+        1048, 19, 156, 29, 1, 51, 8, 51, 8,
+        1067, 35, 156, 29, 1, 52, 8, 52, 8,
+        1102, 46, 1148, 38, 1, 53, 8, 53, 8,
+        1186, 42, 1148, 38, 1, 54, 8, 54, 8,
+        1228, 33, 1148, 38, 1, 55, 8, 55, 8,
+        1261, 44, 1148, 38, 1, 56, 8, 56, 8,
+        1305, 40, 1148, 38, 1, 57, 8, 57, 8,
+        1345, 33, 156, 29, 1, 58, 8, 58, 8,
+        1378, 35, 1413, 38, 1, 59, 8, 59, 8,
+        1451, 46, 1497, 44, 1, 60, 8, 60, 8,
+        1541, 42, 1497, 44, 1, 61, 8, 61, 8,
+        1583, 33, 1616, 38, 1, 62, 8, 62, 8,
+        1654, 44, 1497, 44, 1, 63, 8, 63, 8,
+        1698, 40, 1497, 44, 1, 64, 8, 64, 8,
+        1738, 33, 1771, 39, 1, 65, 8, 65, 8,
+        1810, 28, 1838, 36, 1, 66, 8, 66, 8,
+        1874, 31, 1905, 27, 1, 67, 8, 67, 8,
     ],
 };
 
@@ -9152,20 +9432,20 @@ static POPULATE_MACOSTHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1791, 25, 65535, 65535, 1, 68, 8,
-        1816, 34, 65535, 255, 1, 69, 8,
-        1850, 36, 65535, 255, 1, 70, 8,
-        1886, 34, 65535, 65535, 1, 71, 8,
-        1920, 36, 65535, 26367, 1, 72, 8,
-        1956, 34, 54741, 22997, 1, 73, 8,
-        1990, 30, 54741, 22997, 1, 74, 8,
-        2020, 34, 0, 39168, 1, 75, 8,
-        2054, 45, 55255, 61655, 1, 76, 8,
-        2099, 41, 49601, 40641, 1, 77, 8,
-        2140, 45, 0, 65280, 1, 78, 8,
-        2185, 41, 10537, 48425, 1, 79, 8,
-        2226, 37, 10537, 48425, 1, 80, 8,
-        2263, 41, 65535, 65535, 1, 81, 8,
+        1932, 25, 65535, 65535, 1, 68, 8,
+        1957, 34, 65535, 255, 1, 69, 8,
+        1991, 36, 65535, 255, 1, 70, 8,
+        2027, 34, 65535, 65535, 1, 71, 8,
+        2061, 36, 65535, 26367, 1, 72, 8,
+        2097, 34, 54741, 22997, 1, 73, 8,
+        2131, 30, 54741, 22997, 1, 74, 8,
+        2161, 34, 0, 39168, 1, 75, 8,
+        2195, 45, 55255, 61655, 1, 76, 8,
+        2240, 41, 49601, 40641, 1, 77, 8,
+        2281, 45, 0, 65280, 1, 78, 8,
+        2326, 41, 10537, 48425, 1, 79, 8,
+        2367, 37, 10537, 48425, 1, 80, 8,
+        2404, 41, 65535, 65535, 1, 81, 8,
     ],
 };
 
@@ -9187,140 +9467,156 @@ static POPULATE_MACOSTHEME_XAML_ROWS_201: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_202: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemColorWindowColor", value: 4294967295_u32, line: 28, position: 45 },
-    rt::ValueRow { key: "SystemColorWindowTextColor", value: 4278190080_u32, line: 29, position: 49 },
-    rt::ValueRow { key: "SystemColorButtonFaceColor", value: 4294309367_u32, line: 30, position: 49 },
-    rt::ValueRow { key: "SystemColorButtonTextColor", value: 4278190080_u32, line: 31, position: 49 },
-    rt::ValueRow { key: "SystemColorHighlightColor", value: 4278221567_u32, line: 32, position: 48 },
-    rt::ValueRow { key: "SystemColorHighlightTextColor", value: 4294967295_u32, line: 33, position: 52 },
-    rt::ValueRow { key: "SystemColorHotlightColor", value: 4278221567_u32, line: 34, position: 47 },
-    rt::ValueRow { key: "SystemColorGrayTextColor", value: 4286611584_u32, line: 35, position: 47 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_202: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 22, 28, 45, 65535, 65535,
+        22, 26, 29, 49, 0, 65280,
+        48, 26, 30, 49, 62967, 65525,
+        74, 26, 31, 49, 0, 65280,
+        100, 25, 32, 48, 31487, 65280,
+        125, 29, 33, 52, 65535, 65535,
+        154, 24, 34, 47, 31487, 65280,
+        178, 24, 35, 47, 32896, 65408,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_203: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "AppBarExpandButtonThemeHeight", value: 24.0_f64, line: 314, position: 55 },
-    rt::ValueRow { key: "AppBarExpandButtonThemeWidth", value: 48.0_f64, line: 315, position: 54 },
-    rt::ValueRow { key: "AppBarThemeMinimalHeight", value: 24.0_f64, line: 316, position: 50 },
-    rt::ValueRow { key: "AppBarExpandButtonCircleDiameter", value: 3.0_f64, line: 317, position: 58 },
-    rt::ValueRow { key: "AutoSuggestListMaxHeight", value: 374.0_f64, line: 318, position: 50 },
-    rt::ValueRow { key: "AutoSuggestListBorderOpacity", value: 0.0_f64, line: 319, position: 54 },
-    rt::ValueRow { key: "ControlContentThemeFontSize", value: 13.0_f64, line: 320, position: 53 },
-    rt::ValueRow { key: "ContentControlFontSize", value: 13.0_f64, line: 321, position: 48 },
-    rt::ValueRow { key: "FlyoutThemeMaxHeight", value: 758.0_f64, line: 322, position: 46 },
-    rt::ValueRow { key: "FlyoutThemeMaxWidth", value: 456.0_f64, line: 323, position: 45 },
-    rt::ValueRow { key: "FlyoutThemeMinHeight", value: 40.0_f64, line: 324, position: 46 },
-    rt::ValueRow { key: "FlyoutThemeMinWidth", value: 96.0_f64, line: 325, position: 45 },
-    rt::ValueRow { key: "FlyoutThemeTouchMinWidth", value: 240.0_f64, line: 326, position: 50 },
-    rt::ValueRow { key: "GridViewItemSelectedBorderThemeThickness", value: 4.0_f64, line: 327, position: 66 },
-    rt::ValueRow { key: "GridViewItemReorderHintThemeOffset", value: 16.0_f64, line: 328, position: 60 },
-    rt::ValueRow { key: "TextControlBackgroundThemeOpacity", value: 0.8_f64, line: 329, position: 59 },
-    rt::ValueRow { key: "TextControlBorderThemeOpacity", value: 0.45_f64, line: 330, position: 55 },
-    rt::ValueRow { key: "TextControlBorderThemeBrushOpacity", value: 0.5625_f64, line: 331, position: 60 },
-    rt::ValueRow { key: "TextControlPointerOverBackgroundThemeOpacity", value: 0.87_f64, line: 332, position: 70 },
-    rt::ValueRow { key: "TextControlPointerOverBorderThemeOpacity", value: 0.73_f64, line: 333, position: 66 },
-    rt::ValueRow { key: "TextControlPointerOverBorderThemeBrushOpacity", value: 0.839_f64, line: 334, position: 71 },
-    rt::ValueRow { key: "TextControlBackgroundRestOpacity", value: 0.4_f64, line: 335, position: 58 },
-    rt::ValueRow { key: "TextControlBackgroundHoverOpacity", value: 0.6_f64, line: 336, position: 59 },
-    rt::ValueRow { key: "TextControlBackgroundFocusedOpacity", value: 1.0_f64, line: 337, position: 61 },
-    rt::ValueRow { key: "TextControlThemeMinHeight", value: 26.0_f64, line: 338, position: 51 },
-    rt::ValueRow { key: "TextControlThemeMinWidth", value: 64.0_f64, line: 339, position: 50 },
-    rt::ValueRow { key: "TextStyleLargeFontSize", value: 18.14_f64, line: 340, position: 48 },
-    rt::ValueRow { key: "TextStyleExtraLargeFontSize", value: 25.5_f64, line: 341, position: 53 },
-    rt::ValueRow { key: "GridViewItemMinWidth", value: 44.0_f64, line: 342, position: 46 },
-    rt::ValueRow { key: "GridViewItemMinHeight", value: 44.0_f64, line: 343, position: 47 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_203: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        0, 29, 314, 55, 0,
+        29, 28, 315, 54, 1,
+        57, 24, 316, 50, 0,
+        81, 32, 317, 58, 2,
+        113, 24, 318, 50, 3,
+        137, 28, 319, 54, 4,
+        165, 27, 320, 53, 5,
+        192, 22, 321, 48, 5,
+        214, 20, 322, 46, 6,
+        234, 19, 323, 45, 7,
+        253, 20, 324, 46, 8,
+        273, 19, 325, 45, 9,
+        292, 24, 326, 50, 10,
+        316, 40, 327, 66, 11,
+        356, 34, 328, 60, 12,
+        390, 33, 329, 59, 13,
+        423, 29, 330, 55, 33,
+        452, 34, 331, 60, 34,
+        486, 44, 332, 70, 15,
+        530, 40, 333, 66, 35,
+        570, 45, 334, 71, 36,
+        615, 32, 335, 58, 16,
+        647, 33, 336, 59, 17,
+        680, 35, 337, 61, 14,
+        715, 25, 338, 51, 18,
+        740, 24, 339, 50, 19,
+        764, 22, 340, 48, 20,
+        786, 27, 341, 53, 21,
+        813, 20, 342, 46, 22,
+        833, 21, 343, 47, 22,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_204: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarBottomBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 344, position: 59 },
-    rt::ValueRow { key: "AppBarBottomThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 345, position: 51 },
-    rt::ValueRow { key: "AppBarTopBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 346, position: 56 },
-    rt::ValueRow { key: "AppBarTopThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 347, position: 48 },
-    rt::ValueRow { key: "AppBarExpandButtonCircleInnerPadding", value: [3.0_f64, 0.0_f64, 3.0_f64, 0.0_f64], line: 348, position: 63 },
-    rt::ValueRow { key: "AutoSuggestListBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 349, position: 62 },
-    rt::ValueRow { key: "AutoSuggestListMargin", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 350, position: 48 },
-    rt::ValueRow { key: "AutoSuggestListPadding", value: [-1.0_f64, 0.0_f64, -1.0_f64, 0.0_f64], line: 351, position: 49 },
-    rt::ValueRow { key: "AutoSuggestListViewItemMargin", value: [12.0_f64, 11.0_f64, 0.0_f64, 13.0_f64], line: 352, position: 56 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 353, position: 56 },
-    rt::ValueRow { key: "DateTimeFlyoutButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 354, position: 62 },
-    rt::ValueRow { key: "DateTimeFlyoutContentPanelPortraitThemeMargin", value: [0.0_f64, 37.0_f64, 0.0_f64, 0.0_f64], line: 355, position: 72 },
-    rt::ValueRow { key: "DateTimeFlyoutContentPanelLandscapeThemeMargin", value: [0.0_f64, 19.0_f64, 0.0_f64, 0.0_f64], line: 356, position: 73 },
-    rt::ValueRow { key: "DateTimeFlyoutTitleThemeMargin", value: [19.0_f64, 0.0_f64, 19.0_f64, 17.5_f64], line: 357, position: 57 },
-    rt::ValueRow { key: "FlyoutContentThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 358, position: 51 },
-    rt::ValueRow { key: "FlyoutContentThemePadding", value: [12.0_f64, 11.0_f64, 12.0_f64, 12.0_f64], line: 359, position: 52 },
-    rt::ValueRow { key: "GridViewItemCompactSelectedBorderThemeThickness", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 360, position: 74 },
-    rt::ValueRow { key: "GridViewItemMultiselectBorderThickness", value: [2.5_f64, 2.5_f64, 2.5_f64, 2.5_f64], line: 361, position: 65 },
-    rt::ValueRow { key: "TextControlMarginThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 362, position: 58 },
-    rt::ValueRow { key: "HelperButtonThemePadding", value: [0.0_f64, 0.0_f64, -2.0_f64, 0.0_f64], line: 363, position: 51 },
-    rt::ValueRow { key: "TextControlPlaceholderThemePadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 364, position: 61 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_204: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        854, 32, 344, 59, 4, 4, 4, 4,
+        886, 24, 345, 51, 4, 4, 4, 4,
+        910, 29, 346, 56, 4, 4, 4, 4,
+        939, 21, 347, 48, 4, 4, 4, 4,
+        960, 36, 348, 63, 2, 4, 2, 4,
+        996, 35, 349, 62, 14, 14, 14, 14,
+        1031, 21, 350, 48, 4, 23, 4, 23,
+        1052, 22, 351, 49, 24, 4, 24, 4,
+        1074, 29, 352, 56, 25, 26, 4, 5,
+        1103, 29, 353, 56, 14, 14, 14, 14,
+        1132, 35, 354, 62, 4, 4, 4, 4,
+        1167, 45, 355, 72, 4, 27, 4, 4,
+        1212, 46, 356, 73, 4, 28, 4, 4,
+        1258, 30, 357, 57, 28, 4, 28, 29,
+        1288, 24, 358, 51, 4, 4, 4, 4,
+        1312, 25, 359, 52, 25, 26, 25, 25,
+        1337, 47, 360, 74, 11, 11, 11, 11,
+        1384, 38, 361, 65, 30, 30, 30, 30,
+        1422, 31, 362, 58, 4, 4, 4, 4,
+        1453, 24, 363, 51, 4, 4, 31, 4,
+        1477, 34, 364, 61, 32, 2, 32, 2,
+    ],
+};
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_205: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemAltHighColor", value: 4294967295_u32, line: 367, position: 41 },
-    rt::ValueRow { key: "SystemAltLowColor", value: 872415231_u32, line: 368, position: 40 },
-    rt::ValueRow { key: "SystemAltMediumColor", value: 2583691263_u32, line: 369, position: 43 },
-    rt::ValueRow { key: "SystemAltMediumHighColor", value: 3439329279_u32, line: 370, position: 47 },
-    rt::ValueRow { key: "SystemAltMediumLowColor", value: 1728053247_u32, line: 371, position: 46 },
-    rt::ValueRow { key: "SystemBaseHighColor", value: 4278190080_u32, line: 372, position: 42 },
-    rt::ValueRow { key: "SystemBaseLowColor", value: 855638016_u32, line: 373, position: 41 },
-    rt::ValueRow { key: "SystemBaseMediumColor", value: 2566914048_u32, line: 374, position: 44 },
-    rt::ValueRow { key: "SystemBaseMediumHighColor", value: 3422552064_u32, line: 375, position: 48 },
-    rt::ValueRow { key: "SystemBaseMediumLowColor", value: 1711276032_u32, line: 376, position: 47 },
-    rt::ValueRow { key: "SystemChromeAltLowColor", value: 4279703319_u32, line: 377, position: 46 },
-    rt::ValueRow { key: "SystemChromeBlackHighColor", value: 4278190080_u32, line: 378, position: 49 },
-    rt::ValueRow { key: "SystemChromeBlackLowColor", value: 855638016_u32, line: 379, position: 48 },
-    rt::ValueRow { key: "SystemChromeBlackMediumLowColor", value: 1711276032_u32, line: 380, position: 54 },
-    rt::ValueRow { key: "SystemChromeBlackMediumColor", value: 3422552064_u32, line: 381, position: 51 },
-    rt::ValueRow { key: "SystemChromeDisabledHighColor", value: 4291611852_u32, line: 382, position: 52 },
-    rt::ValueRow { key: "SystemChromeDisabledLowColor", value: 4286216826_u32, line: 383, position: 51 },
-    rt::ValueRow { key: "SystemChromeHighColor", value: 4291611852_u32, line: 384, position: 44 },
-    rt::ValueRow { key: "SystemChromeLowColor", value: 4294111986_u32, line: 385, position: 43 },
-    rt::ValueRow { key: "SystemChromeMediumColor", value: 4293322470_u32, line: 386, position: 46 },
-    rt::ValueRow { key: "SystemChromeMediumLowColor", value: 4294111986_u32, line: 387, position: 49 },
-    rt::ValueRow { key: "SystemChromeWhiteColor", value: 4294967295_u32, line: 388, position: 45 },
-    rt::ValueRow { key: "SystemChromeGrayColor", value: 4285953654_u32, line: 389, position: 44 },
-    rt::ValueRow { key: "SystemListLowColor", value: 419430400_u32, line: 390, position: 41 },
-    rt::ValueRow { key: "SystemListMediumColor", value: 855638016_u32, line: 391, position: 44 },
-    rt::ValueRow { key: "SystemErrorTextColor", value: 4291101952_u32, line: 392, position: 43 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_205: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &[],
+    records: &[
+        1511, 18, 367, 41, 65535, 65535,
+        1529, 17, 368, 40, 65535, 13311,
+        1546, 20, 369, 43, 65535, 39423,
+        1566, 24, 370, 47, 65535, 52479,
+        1590, 23, 371, 46, 65535, 26367,
+        1613, 19, 372, 42, 0, 65280,
+        1632, 18, 373, 41, 0, 13056,
+        1650, 21, 374, 44, 0, 39168,
+        1671, 25, 375, 48, 0, 52224,
+        1696, 24, 376, 47, 0, 26112,
+        1720, 23, 377, 46, 5911, 65303,
+        1743, 26, 378, 49, 0, 65280,
+        1769, 25, 379, 48, 0, 13056,
+        1794, 31, 380, 54, 0, 26112,
+        1825, 28, 381, 51, 0, 52224,
+        1853, 29, 382, 52, 52428, 65484,
+        1882, 28, 383, 51, 31354, 65402,
+        1910, 21, 384, 44, 52428, 65484,
+        1931, 20, 385, 43, 62194, 65522,
+        1951, 23, 386, 46, 59110, 65510,
+        1974, 26, 387, 49, 62194, 65522,
+        2000, 22, 388, 45, 65535, 65535,
+        2022, 21, 389, 44, 30326, 65398,
+        2043, 18, 390, 41, 0, 6400,
+        2061, 21, 391, 44, 0, 13056,
+        2082, 20, 392, 43, 1280, 65477,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_206: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 17, 1, 393, 8, 393, 67,
-        51, 35, 86, 18, 1, 394, 8, 394, 68,
-        104, 41, 145, 24, 1, 395, 8, 395, 74,
-        169, 37, 206, 20, 1, 396, 8, 396, 70,
-        226, 40, 266, 23, 1, 397, 8, 397, 73,
-        289, 36, 325, 19, 1, 398, 8, 398, 69,
-        344, 35, 379, 18, 1, 399, 8, 399, 68,
-        397, 38, 435, 21, 1, 400, 8, 400, 71,
-        456, 42, 498, 25, 1, 401, 8, 401, 75,
-        523, 41, 564, 24, 1, 402, 8, 402, 74,
-        588, 43, 631, 26, 1, 403, 8, 403, 76,
-        657, 45, 702, 28, 1, 404, 8, 404, 78,
-        730, 42, 772, 25, 1, 405, 8, 405, 75,
-        797, 48, 845, 31, 1, 406, 8, 406, 81,
-        876, 40, 916, 23, 1, 407, 8, 407, 73,
-        939, 43, 982, 26, 1, 408, 8, 408, 76,
-        1008, 39, 1047, 22, 1, 409, 8, 409, 72,
-        1069, 35, 1104, 18, 1, 410, 8, 410, 68,
-        1122, 38, 1160, 21, 1, 411, 8, 411, 71,
-        1181, 32, 34, 17, 1, 412, 8, 412, 65,
-        1213, 34, 325, 19, 1, 413, 8, 413, 67,
-        1247, 33, 379, 18, 1, 414, 8, 414, 66,
-        1280, 39, 564, 24, 1, 415, 8, 415, 72,
-        1319, 44, 1363, 29, 1, 416, 8, 416, 77,
-        1392, 43, 1435, 28, 1, 417, 8, 417, 76,
-        1463, 36, 1499, 21, 1, 418, 8, 418, 69,
-        1520, 41, 982, 26, 1, 419, 8, 419, 74,
-        1561, 36, 1160, 21, 1, 420, 8, 420, 69,
+        2102, 34, 2136, 17, 1, 393, 8, 393, 67,
+        2153, 35, 1511, 18, 1, 394, 8, 394, 68,
+        2188, 41, 1566, 24, 1, 395, 8, 395, 74,
+        2229, 37, 1546, 20, 1, 396, 8, 396, 70,
+        2266, 40, 1590, 23, 1, 397, 8, 397, 73,
+        2306, 36, 1613, 19, 1, 398, 8, 398, 69,
+        2342, 35, 1632, 18, 1, 399, 8, 399, 68,
+        2377, 38, 1650, 21, 1, 400, 8, 400, 71,
+        2415, 42, 1671, 25, 1, 401, 8, 401, 75,
+        2457, 41, 1696, 24, 1, 402, 8, 402, 74,
+        2498, 43, 1743, 26, 1, 403, 8, 403, 76,
+        2541, 45, 1825, 28, 1, 404, 8, 404, 78,
+        2586, 42, 1769, 25, 1, 405, 8, 405, 75,
+        2628, 48, 1794, 31, 1, 406, 8, 406, 81,
+        2676, 40, 1951, 23, 1, 407, 8, 407, 73,
+        2716, 43, 1974, 26, 1, 408, 8, 408, 76,
+        2759, 39, 2000, 22, 1, 409, 8, 409, 72,
+        2798, 35, 2043, 18, 1, 410, 8, 410, 68,
+        2833, 38, 2061, 21, 1, 411, 8, 411, 71,
+        2871, 32, 2136, 17, 1, 412, 8, 412, 65,
+        2903, 34, 1613, 19, 1, 413, 8, 413, 67,
+        2937, 33, 1632, 18, 1, 414, 8, 414, 66,
+        2970, 39, 1696, 24, 1, 415, 8, 415, 72,
+        3009, 44, 1853, 29, 1, 416, 8, 416, 77,
+        3053, 43, 1882, 28, 1, 417, 8, 417, 76,
+        3096, 36, 1910, 21, 1, 418, 8, 418, 69,
+        3132, 41, 1974, 26, 1, 419, 8, 419, 74,
+        3173, 36, 2061, 21, 1, 420, 8, 420, 69,
     ],
 };
 
@@ -9329,7 +9625,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_207: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1597, 37, 65535, 255, 1, 421, 8,
+        3209, 37, 65535, 255, 1, 421, 8,
     ],
 };
 
@@ -9338,25 +9634,25 @@ static POPULATE_MACOSTHEME_XAML_ROWS_208: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1634, 35, 34, 17, 1, 422, 8, 422, 68,
-        1669, 34, 34, 17, 1, 423, 8, 423, 67,
-        1703, 35, 86, 18, 1, 424, 8, 424, 68,
-        1738, 41, 145, 24, 1, 425, 8, 425, 74,
-        1779, 36, 325, 19, 1, 426, 8, 426, 69,
-        1815, 35, 379, 18, 1, 427, 8, 427, 68,
-        1850, 38, 435, 21, 1, 428, 8, 428, 71,
-        1888, 42, 498, 25, 1, 429, 8, 429, 75,
-        1930, 41, 564, 24, 1, 430, 8, 430, 74,
-        1971, 43, 631, 26, 1, 431, 8, 431, 76,
-        2014, 38, 1499, 21, 1, 432, 8, 432, 71,
-        2052, 40, 916, 23, 1, 433, 8, 433, 73,
-        2131, 45, 1435, 28, 1, 434, 8, 434, 78,
-        2092, 39, 1047, 22, 1, 435, 8, 435, 72,
-        2347, 45, 702, 28, 1, 436, 8, 436, 78,
-        2392, 48, 845, 31, 1, 437, 8, 437, 81,
-        2176, 38, 2214, 21, 1, 438, 8, 438, 71,
-        2235, 35, 1104, 18, 1, 439, 8, 439, 68,
-        2270, 38, 1160, 21, 1, 440, 8, 440, 71,
+        3246, 35, 2136, 17, 1, 422, 8, 422, 68,
+        3281, 34, 2136, 17, 1, 423, 8, 423, 67,
+        3315, 35, 1511, 18, 1, 424, 8, 424, 68,
+        3350, 41, 1566, 24, 1, 425, 8, 425, 74,
+        3391, 36, 1613, 19, 1, 426, 8, 426, 69,
+        3427, 35, 1632, 18, 1, 427, 8, 427, 68,
+        3462, 38, 1650, 21, 1, 428, 8, 428, 71,
+        3500, 42, 1671, 25, 1, 429, 8, 429, 75,
+        3542, 41, 1696, 24, 1, 430, 8, 430, 74,
+        3583, 43, 1743, 26, 1, 431, 8, 431, 76,
+        3626, 38, 1910, 21, 1, 432, 8, 432, 71,
+        3664, 40, 1951, 23, 1, 433, 8, 433, 73,
+        3743, 45, 1882, 28, 1, 434, 8, 434, 78,
+        3704, 39, 2000, 22, 1, 435, 8, 435, 72,
+        3938, 45, 1825, 28, 1, 436, 8, 436, 78,
+        3983, 48, 1794, 31, 1, 437, 8, 437, 81,
+        3788, 38, 2022, 21, 1, 438, 8, 438, 71,
+        3826, 35, 2043, 18, 1, 439, 8, 439, 68,
+        3861, 38, 2061, 21, 1, 440, 8, 440, 71,
     ],
 };
 
@@ -9365,7 +9661,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2308, 39, 65535, 255, 1, 441, 8,
+        3899, 39, 65535, 255, 1, 441, 8,
     ],
 };
 
@@ -9374,15 +9670,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2440, 33, 34, 17, 1, 442, 8, 442, 66,
-        2473, 36, 34, 17, 1, 443, 8, 443, 69,
-        2509, 37, 86, 18, 1, 444, 8, 444, 70,
-        2546, 38, 325, 19, 1, 445, 8, 445, 71,
-        2584, 37, 379, 18, 1, 446, 8, 446, 70,
-        2621, 40, 435, 21, 1, 447, 8, 447, 73,
-        2661, 44, 498, 25, 1, 448, 8, 448, 77,
-        2705, 43, 145, 24, 1, 449, 8, 449, 76,
-        2748, 43, 564, 24, 1, 450, 8, 450, 76,
+        4031, 33, 2136, 17, 1, 442, 8, 442, 66,
+        4064, 36, 2136, 17, 1, 443, 8, 443, 69,
+        4100, 37, 1511, 18, 1, 444, 8, 444, 70,
+        4137, 38, 1613, 19, 1, 445, 8, 445, 71,
+        4175, 37, 1632, 18, 1, 446, 8, 446, 70,
+        4212, 40, 1650, 21, 1, 447, 8, 447, 73,
+        4252, 44, 1671, 25, 1, 448, 8, 448, 77,
+        4296, 43, 1566, 24, 1, 449, 8, 449, 76,
+        4339, 43, 1696, 24, 1, 450, 8, 450, 76,
     ],
 };
 
@@ -9391,7 +9687,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2791, 41, 1047, 22, 1, 454, 8, 454, 74,
+        4382, 41, 2000, 22, 1, 454, 8, 454, 74,
     ],
 };
 
@@ -9400,7 +9696,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2832, 41, 65535, 255, 1, 455, 8,
+        4423, 41, 65535, 255, 1, 455, 8,
     ],
 };
 
@@ -9409,13 +9705,13 @@ static POPULATE_MACOSTHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2873, 35, 325, 19, 1, 456, 8, 456, 68,
-        2908, 34, 379, 18, 1, 457, 8, 457, 67,
-        2942, 37, 435, 21, 1, 458, 8, 458, 70,
-        2979, 41, 498, 25, 1, 459, 8, 459, 74,
-        3020, 40, 564, 24, 1, 460, 8, 460, 73,
-        3060, 39, 3099, 23, 1, 461, 8, 461, 72,
-        3122, 37, 1499, 21, 1, 462, 8, 462, 70,
+        4464, 35, 1613, 19, 1, 456, 8, 456, 68,
+        4499, 34, 1632, 18, 1, 457, 8, 457, 67,
+        4533, 37, 1650, 21, 1, 458, 8, 458, 70,
+        4570, 41, 1671, 25, 1, 459, 8, 459, 74,
+        4611, 40, 1696, 24, 1, 460, 8, 460, 73,
+        4651, 39, 1720, 23, 1, 461, 8, 461, 72,
+        4690, 37, 1910, 21, 1, 462, 8, 462, 70,
     ],
 };
 
@@ -9424,9 +9720,9 @@ static POPULATE_MACOSTHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3159, 37, 1160, 21, 1, 466, 8, 466, 70,
-        3196, 34, 1104, 18, 1, 467, 8, 467, 67,
-        3230, 38, 1047, 22, 1, 468, 8, 468, 71,
+        4727, 37, 2061, 21, 1, 466, 8, 466, 70,
+        4764, 34, 2043, 18, 1, 467, 8, 467, 67,
+        4798, 38, 2000, 22, 1, 468, 8, 468, 71,
     ],
 };
 
@@ -9435,7 +9731,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3268, 38, 65535, 255, 1, 469, 8,
+        4836, 38, 65535, 255, 1, 469, 8,
     ],
 };
 
@@ -9444,18 +9740,18 @@ static POPULATE_MACOSTHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3306, 31, 34, 17, 1, 470, 8, 470, 64,
-        3337, 35, 325, 19, 1, 471, 8, 471, 68,
-        3372, 37, 435, 21, 1, 472, 8, 472, 70,
-        3409, 41, 498, 25, 1, 473, 8, 473, 74,
-        3450, 41, 206, 20, 1, 474, 8, 474, 74,
-        3491, 39, 86, 18, 1, 475, 8, 475, 72,
-        3530, 47, 206, 20, 1, 476, 8, 476, 80,
-        3577, 39, 379, 18, 1, 477, 8, 477, 72,
-        3616, 42, 435, 21, 1, 478, 8, 478, 75,
-        3658, 39, 1104, 18, 1, 479, 8, 479, 72,
-        3697, 41, 3738, 20, 1, 480, 8, 480, 74,
-        3758, 47, 982, 26, 1, 481, 8, 481, 80,
+        4874, 31, 2136, 17, 1, 470, 8, 470, 64,
+        4905, 35, 1613, 19, 1, 471, 8, 471, 68,
+        4940, 37, 1650, 21, 1, 472, 8, 472, 70,
+        4977, 41, 1671, 25, 1, 473, 8, 473, 74,
+        5018, 41, 1546, 20, 1, 474, 8, 474, 74,
+        5059, 39, 1511, 18, 1, 475, 8, 475, 72,
+        5098, 47, 1546, 20, 1, 476, 8, 476, 80,
+        5145, 39, 1632, 18, 1, 477, 8, 477, 72,
+        5184, 42, 1650, 21, 1, 478, 8, 478, 75,
+        5226, 39, 2043, 18, 1, 479, 8, 479, 72,
+        5265, 41, 1931, 20, 1, 480, 8, 480, 74,
+        5306, 47, 1974, 26, 1, 481, 8, 481, 80,
     ],
 };
 
@@ -9464,7 +9760,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3805, 43, 65535, 255, 1, 482, 8,
+        5353, 43, 65535, 255, 1, 482, 8,
     ],
 };
 
@@ -9473,10 +9769,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3848, 34, 325, 19, 1, 483, 8, 483, 67,
-        3882, 36, 435, 21, 1, 484, 8, 484, 69,
-        3918, 46, 845, 31, 1, 485, 8, 485, 79,
-        3964, 37, 4001, 20, 1, 486, 8, 486, 70,
+        5396, 34, 1613, 19, 1, 483, 8, 483, 67,
+        5430, 36, 1650, 21, 1, 484, 8, 484, 69,
+        5466, 46, 1794, 31, 1, 485, 8, 485, 79,
+        5512, 37, 2082, 20, 1, 486, 8, 486, 70,
     ],
 };
 
@@ -9485,13 +9781,13 @@ static POPULATE_MACOSTHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4021, 43, 3882, 36, 1, 487, 8, 487, 8,
-        4118, 15, 344, 35, 1, 488, 8, 488, 8,
-        4133, 26, 3020, 40, 1, 489, 8, 489, 8,
-        4159, 22, 2942, 37, 1, 490, 8, 490, 8,
-        4181, 16, 3268, 38, 1, 491, 8, 491, 8,
-        4197, 27, 3268, 38, 1, 492, 8, 492, 8,
-        4224, 23, 3268, 38, 1, 493, 8, 493, 8,
+        5549, 43, 5430, 36, 1, 487, 8, 487, 8,
+        5646, 15, 2342, 35, 1, 488, 8, 488, 8,
+        5661, 26, 4611, 40, 1, 489, 8, 489, 8,
+        5687, 22, 4533, 37, 1, 490, 8, 490, 8,
+        5709, 16, 4836, 38, 1, 491, 8, 491, 8,
+        5725, 27, 4836, 38, 1, 492, 8, 492, 8,
+        5752, 23, 4836, 38, 1, 493, 8, 493, 8,
     ],
 };
 
@@ -9506,26 +9802,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_221: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4247, 30, 4089, 29, 1, 496, 8, 496, 8,
-        4277, 41, 3196, 34, 1, 497, 8, 497, 8,
-        4318, 37, 3159, 37, 1, 498, 8, 498, 8,
-        4355, 38, 4089, 29, 1, 499, 8, 499, 8,
-        4393, 30, 1779, 36, 1, 500, 8, 500, 8,
-        4423, 41, 2546, 38, 1, 501, 8, 501, 8,
-        4464, 37, 1779, 36, 1, 502, 8, 502, 8,
-        4501, 38, 1280, 39, 1, 503, 8, 503, 8,
-        4539, 31, 4089, 29, 1, 504, 8, 504, 8,
-        4570, 42, 4089, 29, 1, 505, 8, 505, 8,
-        4612, 38, 4089, 29, 1, 506, 8, 506, 8,
-        4650, 39, 4089, 29, 1, 507, 8, 507, 8,
-        4689, 16, 876, 40, 1, 508, 8, 508, 8,
-        4705, 16, 1779, 36, 1, 509, 8, 509, 8,
-        4721, 24, 2308, 39, 1, 510, 8, 510, 8,
-        4745, 31, 876, 40, 1, 511, 8, 511, 8,
-        4776, 27, 1779, 36, 1, 512, 8, 512, 8,
-        4803, 35, 1280, 39, 1, 513, 8, 513, 8,
-        4838, 27, 4089, 29, 1, 514, 8, 514, 8,
-        4865, 32, 1779, 36, 1, 515, 8, 515, 8,
+        5775, 30, 5617, 29, 1, 496, 8, 496, 8,
+        5805, 41, 4764, 34, 1, 497, 8, 497, 8,
+        5846, 37, 4727, 37, 1, 498, 8, 498, 8,
+        5883, 38, 5617, 29, 1, 499, 8, 499, 8,
+        5921, 30, 3391, 36, 1, 500, 8, 500, 8,
+        5951, 41, 4137, 38, 1, 501, 8, 501, 8,
+        5992, 37, 3391, 36, 1, 502, 8, 502, 8,
+        6029, 38, 2970, 39, 1, 503, 8, 503, 8,
+        6067, 31, 5617, 29, 1, 504, 8, 504, 8,
+        6098, 42, 5617, 29, 1, 505, 8, 505, 8,
+        6140, 38, 5617, 29, 1, 506, 8, 506, 8,
+        6178, 39, 5617, 29, 1, 507, 8, 507, 8,
+        6217, 16, 2676, 40, 1, 508, 8, 508, 8,
+        6233, 16, 3391, 36, 1, 509, 8, 509, 8,
+        6249, 24, 3899, 39, 1, 510, 8, 510, 8,
+        6273, 31, 2676, 40, 1, 511, 8, 511, 8,
+        6304, 27, 3391, 36, 1, 512, 8, 512, 8,
+        6331, 35, 2970, 39, 1, 513, 8, 513, 8,
+        6366, 27, 5617, 29, 1, 514, 8, 514, 8,
+        6393, 32, 3391, 36, 1, 515, 8, 515, 8,
     ],
 };
 
@@ -9534,7 +9830,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_222: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4897, 32, 65280, 65535, 1, 516, 8,
+        6425, 32, 65280, 65535, 1, 516, 8,
     ],
 };
 
@@ -9543,25 +9839,25 @@ static POPULATE_MACOSTHEME_XAML_ROWS_223: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4929, 30, 4089, 29, 1, 517, 8, 517, 8,
-        4959, 41, 3196, 34, 1, 518, 8, 518, 8,
-        5000, 37, 3159, 37, 1, 519, 8, 519, 8,
-        5037, 38, 4089, 29, 1, 520, 8, 520, 8,
-        5075, 30, 1779, 36, 1, 521, 8, 521, 8,
-        5105, 41, 2546, 38, 1, 522, 8, 522, 8,
-        5146, 37, 2546, 38, 1, 523, 8, 523, 8,
-        5183, 38, 1280, 39, 1, 524, 8, 524, 8,
-        5221, 40, 1888, 42, 1, 525, 8, 525, 8,
-        5261, 51, 2546, 38, 1, 526, 8, 526, 8,
-        5312, 47, 2546, 38, 1, 527, 8, 527, 8,
-        5359, 48, 1280, 39, 1, 528, 8, 528, 8,
-        5407, 35, 3530, 47, 1, 529, 8, 529, 8,
-        5442, 35, 3530, 47, 1, 530, 8, 530, 8,
-        5477, 34, 3530, 47, 1, 531, 8, 531, 8,
-        5511, 32, 0, 34, 1, 532, 8, 532, 8,
-        5543, 32, 2092, 39, 1, 533, 8, 533, 8,
-        5575, 33, 344, 35, 1, 534, 8, 534, 8,
-        5608, 33, 1280, 39, 1, 535, 8, 535, 8,
+        6457, 30, 5617, 29, 1, 517, 8, 517, 8,
+        6487, 41, 4764, 34, 1, 518, 8, 518, 8,
+        6528, 37, 4727, 37, 1, 519, 8, 519, 8,
+        6565, 38, 5617, 29, 1, 520, 8, 520, 8,
+        6603, 30, 3391, 36, 1, 521, 8, 521, 8,
+        6633, 41, 4137, 38, 1, 522, 8, 522, 8,
+        6674, 37, 4137, 38, 1, 523, 8, 523, 8,
+        6711, 38, 2970, 39, 1, 524, 8, 524, 8,
+        6749, 40, 3500, 42, 1, 525, 8, 525, 8,
+        6789, 51, 4137, 38, 1, 526, 8, 526, 8,
+        6840, 47, 4137, 38, 1, 527, 8, 527, 8,
+        6887, 48, 2970, 39, 1, 528, 8, 528, 8,
+        6935, 35, 5098, 47, 1, 529, 8, 529, 8,
+        6970, 35, 5098, 47, 1, 530, 8, 530, 8,
+        7005, 34, 5098, 47, 1, 531, 8, 531, 8,
+        7039, 32, 2102, 34, 1, 532, 8, 532, 8,
+        7071, 32, 3704, 39, 1, 533, 8, 533, 8,
+        7103, 33, 2342, 35, 1, 534, 8, 534, 8,
+        7136, 33, 2970, 39, 1, 535, 8, 535, 8,
     ],
 };
 
@@ -9570,40 +9866,40 @@ static POPULATE_MACOSTHEME_XAML_ROWS_224: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5641, 26, 61680, 65520, 1, 536, 8,
-        5667, 22, 61680, 65520, 1, 537, 8,
-        5689, 30, 65535, 255, 1, 538, 8,
-        5719, 38, 0, 26112, 1, 539, 8,
-        5757, 30, 0, 65280, 1, 540, 8,
-        5787, 41, 0, 15616, 1, 541, 8,
-        5828, 41, 0, 65280, 1, 542, 8,
-        5869, 37, 65535, 65535, 1, 543, 8,
-        5906, 35, 31611, 65403, 1, 544, 8,
-        6129, 31, 65535, 65535, 1, 545, 8,
-        5941, 31, 0, 56832, 1, 546, 8,
-        5972, 37, 0, 65280, 1, 547, 8,
-        6009, 42, 0, 52224, 1, 548, 8,
-        6051, 38, 0, 26112, 1, 549, 8,
-        6089, 40, 0, 39168, 1, 550, 8,
-        6160, 30, 65535, 255, 1, 551, 8,
-        6190, 38, 0, 26112, 1, 552, 8,
-        6228, 30, 0, 65280, 1, 553, 8,
-        6258, 41, 0, 15616, 1, 554, 8,
-        6299, 41, 0, 65280, 1, 555, 8,
-        6340, 37, 65535, 65535, 1, 556, 8,
-        6377, 26, 65535, 65535, 1, 557, 8,
-        6403, 32, 0, 65280, 1, 558, 8,
-        6435, 32, 65535, 65535, 1, 559, 8,
-        6467, 35, 65535, 255, 1, 560, 8,
-        6502, 31, 65535, 255, 1, 561, 8,
-        6533, 27, 0, 26112, 1, 562, 8,
-        6560, 29, 6859, 65359, 1, 563, 8,
-        6589, 40, 6859, 52303, 1, 564, 8,
-        6629, 36, 6859, 39247, 1, 565, 8,
-        6665, 39, 0, 65280, 1, 566, 8,
-        6704, 50, 0, 52224, 1, 567, 8,
-        6754, 46, 0, 26112, 1, 568, 8,
-        6800, 35, 0, 16384, 1, 569, 8,
+        7169, 26, 61680, 65520, 1, 536, 8,
+        7195, 22, 61680, 65520, 1, 537, 8,
+        7217, 30, 65535, 255, 1, 538, 8,
+        7247, 38, 0, 26112, 1, 539, 8,
+        7285, 30, 0, 65280, 1, 540, 8,
+        7315, 41, 0, 15616, 1, 541, 8,
+        7356, 41, 0, 65280, 1, 542, 8,
+        7397, 37, 65535, 65535, 1, 543, 8,
+        7434, 35, 31611, 65403, 1, 544, 8,
+        7657, 31, 65535, 65535, 1, 545, 8,
+        7469, 31, 0, 56832, 1, 546, 8,
+        7500, 37, 0, 65280, 1, 547, 8,
+        7537, 42, 0, 52224, 1, 548, 8,
+        7579, 38, 0, 26112, 1, 549, 8,
+        7617, 40, 0, 39168, 1, 550, 8,
+        7688, 30, 65535, 255, 1, 551, 8,
+        7718, 38, 0, 26112, 1, 552, 8,
+        7756, 30, 0, 65280, 1, 553, 8,
+        7786, 41, 0, 15616, 1, 554, 8,
+        7827, 41, 0, 65280, 1, 555, 8,
+        7868, 37, 65535, 65535, 1, 556, 8,
+        7905, 26, 65535, 65535, 1, 557, 8,
+        7931, 32, 0, 65280, 1, 558, 8,
+        7963, 32, 65535, 65535, 1, 559, 8,
+        7995, 35, 65535, 255, 1, 560, 8,
+        8030, 31, 65535, 255, 1, 561, 8,
+        8061, 27, 0, 26112, 1, 562, 8,
+        8088, 29, 6859, 65359, 1, 563, 8,
+        8117, 40, 6859, 52303, 1, 564, 8,
+        8157, 36, 6859, 39247, 1, 565, 8,
+        8193, 39, 0, 65280, 1, 566, 8,
+        8232, 50, 0, 52224, 1, 567, 8,
+        8282, 46, 0, 26112, 1, 568, 8,
+        8328, 35, 0, 16384, 1, 569, 8,
     ],
 };
 
@@ -9612,7 +9908,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_225: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6835, 44, 6879, 25, 1, 570, 8, 570, 77,
+        8363, 44, 8407, 25, 1, 570, 8, 570, 77,
     ],
 };
 
@@ -9621,26 +9917,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_226: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6904, 44, 0, 65280, 1, 571, 8,
-        6948, 31, 65535, 65535, 1, 572, 8,
-        6979, 31, 65535, 255, 1, 573, 8,
-        7010, 42, 65535, 65535, 1, 574, 8,
-        7052, 42, 65535, 8703, 1, 575, 8,
-        7094, 38, 0, 65280, 1, 576, 8,
-        7132, 38, 65535, 65535, 1, 577, 8,
-        7170, 34, 65535, 65535, 1, 578, 8,
-        7204, 32, 0, 65280, 1, 579, 8,
-        7236, 32, 0, 65280, 1, 580, 8,
-        7268, 40, 65535, 14591, 1, 581, 8,
-        7308, 30, 0, 65280, 1, 582, 8,
-        7338, 19, 65535, 65535, 1, 583, 8,
-        7357, 37, 6068, 65350, 1, 584, 8,
-        7394, 25, 52685, 65485, 1, 585, 8,
-        7419, 21, 21845, 15189, 1, 586, 8,
-        7440, 36, 56026, 65498, 1, 587, 8,
-        7476, 32, 47031, 27575, 1, 588, 8,
-        7508, 32, 0, 39168, 1, 589, 8,
-        7540, 28, 21845, 60757, 1, 590, 8,
+        8432, 44, 0, 65280, 1, 571, 8,
+        8476, 31, 65535, 65535, 1, 572, 8,
+        8507, 31, 65535, 255, 1, 573, 8,
+        8538, 42, 65535, 65535, 1, 574, 8,
+        8580, 42, 65535, 8703, 1, 575, 8,
+        8622, 38, 0, 65280, 1, 576, 8,
+        8660, 38, 65535, 65535, 1, 577, 8,
+        8698, 34, 65535, 65535, 1, 578, 8,
+        8732, 32, 0, 65280, 1, 579, 8,
+        8764, 32, 0, 65280, 1, 580, 8,
+        8796, 40, 65535, 14591, 1, 581, 8,
+        8836, 30, 0, 65280, 1, 582, 8,
+        8866, 19, 65535, 65535, 1, 583, 8,
+        8885, 37, 6068, 65350, 1, 584, 8,
+        8922, 25, 52685, 65485, 1, 585, 8,
+        8947, 21, 21845, 15189, 1, 586, 8,
+        8968, 36, 56026, 65498, 1, 587, 8,
+        9004, 32, 47031, 27575, 1, 588, 8,
+        9036, 32, 0, 39168, 1, 589, 8,
+        9068, 28, 21845, 60757, 1, 590, 8,
     ],
 };
 
@@ -9649,10 +9945,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_227: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7568, 23, 344, 35, 1, 591, 8, 591, 8,
-        7591, 31, 344, 35, 1, 592, 8, 592, 8,
-        7622, 23, 1779, 36, 1, 593, 8, 593, 8,
-        7645, 31, 1280, 39, 1, 594, 8, 594, 8,
+        9096, 23, 2342, 35, 1, 591, 8, 591, 8,
+        9119, 31, 2342, 35, 1, 592, 8, 592, 8,
+        9150, 23, 3391, 36, 1, 593, 8, 593, 8,
+        9173, 31, 2970, 39, 1, 594, 8, 594, 8,
     ],
 };
 
@@ -9661,11 +9957,11 @@ static POPULATE_MACOSTHEME_XAML_ROWS_228: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7676, 40, 344, 35, 1, 596, 8, 596, 8,
-        7716, 36, 523, 41, 1, 597, 8, 597, 8,
-        7752, 25, 1779, 36, 1, 598, 8, 598, 8,
-        7777, 36, 1779, 36, 1, 599, 8, 599, 8,
-        7813, 32, 1779, 36, 1, 600, 8, 600, 8,
+        9204, 40, 2342, 35, 1, 596, 8, 596, 8,
+        9244, 36, 2457, 41, 1, 597, 8, 597, 8,
+        9280, 25, 3391, 36, 1, 598, 8, 598, 8,
+        9305, 36, 3391, 36, 1, 599, 8, 599, 8,
+        9341, 32, 3391, 36, 1, 600, 8, 600, 8,
     ],
 };
 
@@ -9674,11 +9970,11 @@ static POPULATE_MACOSTHEME_XAML_ROWS_229: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7676, 29, 65535, 255, 1, 601, 8,
-        7845, 32, 4387, 65512, 1, 602, 8,
-        7877, 28, 65535, 65535, 1, 603, 8,
-        7905, 28, 28794, 65521, 1, 604, 8,
-        7933, 24, 0, 65280, 1, 605, 8,
+        9204, 29, 65535, 255, 1, 601, 8,
+        9373, 32, 4387, 65512, 1, 602, 8,
+        9405, 28, 65535, 65535, 1, 603, 8,
+        9433, 28, 28794, 65521, 1, 604, 8,
+        9461, 24, 0, 65280, 1, 605, 8,
     ],
 };
 
@@ -9691,19 +9987,23 @@ static POPULATE_MACOSTHEME_XAML_ROWS_230: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_231: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TextControlBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 32, position: 58 },
-    rt::ValueRow { key: "TextControlBorderThemeThicknessFocused", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 33, position: 65 },
-    rt::ValueRow { key: "TextControlThemePadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 34, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_231: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_3_NUMBERS,
+    records: &[
+        29, 31, 32, 58, 0, 0, 0, 0,
+        60, 38, 33, 65, 0, 0, 0, 0,
+        98, 23, 34, 50, 1, 2, 1, 2,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_232: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        29, 35, 64, 28, 1, 35, 8, 35, 68,
+        121, 35, 156, 28, 1, 35, 8, 35, 68,
     ],
 };
 
@@ -9712,142 +10012,146 @@ static POPULATE_MACOSTHEME_XAML_ROWS_233: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        92, 31, 123, 25, 1, 36, 8, 36, 8,
-        148, 36, 184, 26, 1, 37, 8, 37, 8,
-        210, 38, 248, 26, 1, 38, 8, 38, 8,
+        184, 31, 215, 25, 1, 36, 8, 36, 8,
+        240, 36, 276, 26, 1, 37, 8, 37, 8,
+        302, 38, 340, 26, 1, 38, 8, 38, 8,
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_234: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "TextFillColorPrimary", value: 3640655872_u32, line: 219, position: 43 },
-    rt::ValueRow { key: "TextFillColorSecondary", value: 2566914048_u32, line: 220, position: 45 },
-    rt::ValueRow { key: "TextFillColorTertiary", value: 1711276032_u32, line: 221, position: 44 },
-    rt::ValueRow { key: "TextFillColorDisabled", value: 1073741824_u32, line: 222, position: 44 },
-    rt::ValueRow { key: "TextFillColorInverse", value: 4294967295_u32, line: 223, position: 43 },
-    rt::ValueRow { key: "AccentTextFillColorDisabled", value: 1073741824_u32, line: 224, position: 50 },
-    rt::ValueRow { key: "TextOnAccentFillColorSelectedText", value: 4294967295_u32, line: 225, position: 56 },
-    rt::ValueRow { key: "TextOnAccentFillColorPrimary", value: 4294967295_u32, line: 226, position: 51 },
-    rt::ValueRow { key: "TextOnAccentFillColorSecondary", value: 3875536895_u32, line: 227, position: 53 },
-    rt::ValueRow { key: "TextOnAccentFillColorDisabled", value: 2583691263_u32, line: 228, position: 52 },
-    rt::ValueRow { key: "ControlFillColorDefault", value: 4294967295_u32, line: 229, position: 46 },
-    rt::ValueRow { key: "ControlFillColorSecondary", value: 4294572538_u32, line: 230, position: 48 },
-    rt::ValueRow { key: "ControlFillColorTertiary", value: 4293059300_u32, line: 231, position: 47 },
-    rt::ValueRow { key: "ControlFillColorQuarternary", value: 4293519851_u32, line: 232, position: 50 },
-    rt::ValueRow { key: "ControlFillColorDisabled", value: 4293980402_u32, line: 233, position: 47 },
-    rt::ValueRow { key: "ControlFillColorTransparent", value: 16777215_u32, line: 234, position: 50 },
-    rt::ValueRow { key: "ControlFillColorInputActive", value: 4294967295_u32, line: 235, position: 50 },
-    rt::ValueRow { key: "ControlStrongFillColorDefault", value: 4287532691_u32, line: 236, position: 52 },
-    rt::ValueRow { key: "ControlStrongFillColorDisabled", value: 864980627_u32, line: 237, position: 53 },
-    rt::ValueRow { key: "ControlSolidFillColorDefault", value: 4294967295_u32, line: 238, position: 51 },
-    rt::ValueRow { key: "SubtleFillColorTransparent", value: 0_u32, line: 239, position: 49 },
-    rt::ValueRow { key: "SubtleFillColorSecondary", value: 218103808_u32, line: 240, position: 47 },
-    rt::ValueRow { key: "SubtleFillColorTertiary", value: 402653184_u32, line: 241, position: 46 },
-    rt::ValueRow { key: "SubtleFillColorDisabled", value: 0_u32, line: 242, position: 46 },
-    rt::ValueRow { key: "ControlAltFillColorTransparent", value: 0_u32, line: 243, position: 53 },
-    rt::ValueRow { key: "ControlAltFillColorSecondary", value: 4293256682_u32, line: 244, position: 51 },
-    rt::ValueRow { key: "ControlAltFillColorTertiary", value: 4291940822_u32, line: 245, position: 50 },
-    rt::ValueRow { key: "ControlAltFillColorQuarternary", value: 4291282892_u32, line: 246, position: 53 },
-    rt::ValueRow { key: "ControlAltFillColorDisabled", value: 4294111991_u32, line: 247, position: 50 },
-    rt::ValueRow { key: "ControlOnImageFillColorDefault", value: 3875536895_u32, line: 248, position: 53 },
-    rt::ValueRow { key: "ControlOnImageFillColorSecondary", value: 4076863487_u32, line: 249, position: 55 },
-    rt::ValueRow { key: "ControlOnImageFillColorTertiary", value: 4292664541_u32, line: 250, position: 54 },
-    rt::ValueRow { key: "ControlOnImageFillColorDisabled", value: 2801795071_u32, line: 251, position: 54 },
-    rt::ValueRow { key: "AccentFillColorDisabled", value: 864980627_u32, line: 252, position: 46 },
-    rt::ValueRow { key: "ControlStrokeColorDefault", value: 637534208_u32, line: 253, position: 48 },
-    rt::ValueRow { key: "ControlStrokeColorSecondary", value: 1073741824_u32, line: 254, position: 50 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentDefault", value: 436207616_u32, line: 255, position: 56 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentSecondary", value: 855638016_u32, line: 256, position: 58 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentTertiary", value: 855638016_u32, line: 257, position: 57 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentDisabled", value: 335544320_u32, line: 258, position: 57 },
-    rt::ValueRow { key: "ControlStrokeColorForStrongFillWhenOnImage", value: 1728053247_u32, line: 259, position: 65 },
-    rt::ValueRow { key: "CardStrokeColorDefault", value: 436207616_u32, line: 260, position: 45 },
-    rt::ValueRow { key: "CardStrokeColorDefaultSolid", value: 4292467165_u32, line: 261, position: 50 },
-    rt::ValueRow { key: "ControlStrongStrokeColorDefault", value: 1493172224_u32, line: 262, position: 54 },
-    rt::ValueRow { key: "ControlStrongStrokeColorDisabled", value: 637534208_u32, line: 263, position: 55 },
-    rt::ValueRow { key: "SurfaceStrokeColorDefault", value: 855638016_u32, line: 264, position: 48 },
-    rt::ValueRow { key: "SurfaceStrokeColorFlyout", value: 637534208_u32, line: 265, position: 47 },
-    rt::ValueRow { key: "SurfaceStrokeColorInverse", value: 872415231_u32, line: 266, position: 48 },
-    rt::ValueRow { key: "DividerStrokeColorDefault", value: 637534208_u32, line: 267, position: 48 },
-    rt::ValueRow { key: "FocusStrokeColorOuter", value: 2566945535_u32, line: 268, position: 44 },
-    rt::ValueRow { key: "FocusStrokeColorInner", value: 0_u32, line: 269, position: 44 },
-    rt::ValueRow { key: "CardBackgroundFillColorDefault", value: 4294967295_u32, line: 270, position: 53 },
-    rt::ValueRow { key: "CardBackgroundFillColorSecondary", value: 4294309367_u32, line: 271, position: 55 },
-    rt::ValueRow { key: "CardBackgroundFillColorTertiary", value: 4294967295_u32, line: 272, position: 54 },
-    rt::ValueRow { key: "SmokeFillColorDefault", value: 855638016_u32, line: 273, position: 44 },
-    rt::ValueRow { key: "LayerFillColorDefault", value: 3489002999_u32, line: 274, position: 44 },
-    rt::ValueRow { key: "LayerFillColorAlt", value: 4294967295_u32, line: 275, position: 40 },
-    rt::ValueRow { key: "LayerOnAcrylicFillColorDefault", value: 1090519039_u32, line: 276, position: 53 },
-    rt::ValueRow { key: "LayerOnAccentAcrylicFillColorDefault", value: 1090519039_u32, line: 277, position: 59 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorDefault", value: 3489002999_u32, line: 278, position: 57 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorSecondary", value: 218103808_u32, line: 279, position: 59 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorTertiary", value: 4294309367_u32, line: 280, position: 58 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorTransparent", value: 0_u32, line: 281, position: 61 },
-    rt::ValueRow { key: "SolidBackgroundFillColorBase", value: 4294309367_u32, line: 282, position: 51 },
-    rt::ValueRow { key: "SolidBackgroundFillColorSecondary", value: 4293651437_u32, line: 283, position: 56 },
-    rt::ValueRow { key: "SolidBackgroundFillColorTertiary", value: 4294967295_u32, line: 284, position: 55 },
-    rt::ValueRow { key: "SolidBackgroundFillColorQuarternary", value: 4294111991_u32, line: 285, position: 58 },
-    rt::ValueRow { key: "SolidBackgroundFillColorQuinary", value: 4294967295_u32, line: 286, position: 54 },
-    rt::ValueRow { key: "SolidBackgroundFillColorSenary", value: 4294309367_u32, line: 287, position: 53 },
-    rt::ValueRow { key: "SolidBackgroundFillColorTransparent", value: 16119287_u32, line: 288, position: 58 },
-    rt::ValueRow { key: "SolidBackgroundFillColorBaseAlt", value: 4293256682_u32, line: 289, position: 54 },
-    rt::ValueRow { key: "SystemFillColorSuccess", value: 4280584765_u32, line: 290, position: 45 },
-    rt::ValueRow { key: "SystemFillColorCaution", value: 4289553408_u32, line: 291, position: 45 },
-    rt::ValueRow { key: "SystemFillColorCritical", value: 4294916912_u32, line: 292, position: 46 },
-    rt::ValueRow { key: "SystemFillColorNeutral", value: 2576256659_u32, line: 293, position: 45 },
-    rt::ValueRow { key: "SystemFillColorSolidNeutral", value: 4287532691_u32, line: 294, position: 50 },
-    rt::ValueRow { key: "SystemFillColorAttentionBackground", value: 268466943_u32, line: 295, position: 57 },
-    rt::ValueRow { key: "SystemFillColorSuccessBackground", value: 523552601_u32, line: 296, position: 55 },
-    rt::ValueRow { key: "SystemFillColorCautionBackground", value: 536843520_u32, line: 297, position: 55 },
-    rt::ValueRow { key: "SystemFillColorCriticalBackground", value: 536820528_u32, line: 298, position: 56 },
-    rt::ValueRow { key: "SystemFillColorNeutralBackground", value: 277778067_u32, line: 299, position: 55 },
-    rt::ValueRow { key: "SystemFillColorSolidAttentionBackground", value: 4294309367_u32, line: 300, position: 62 },
-    rt::ValueRow { key: "SystemFillColorSolidNeutralBackground", value: 4294309367_u32, line: 301, position: 60 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_234: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 20, 219, 43, 0, 55552,
+        20, 22, 220, 45, 0, 39168,
+        42, 21, 221, 44, 0, 26112,
+        63, 21, 222, 44, 0, 16384,
+        84, 20, 223, 43, 65535, 65535,
+        104, 27, 224, 50, 0, 16384,
+        131, 33, 225, 56, 65535, 65535,
+        164, 28, 226, 51, 65535, 65535,
+        192, 30, 227, 53, 65535, 59135,
+        222, 29, 228, 52, 65535, 39423,
+        251, 23, 229, 46, 65535, 65535,
+        274, 25, 230, 48, 63994, 65529,
+        299, 24, 231, 47, 58084, 65506,
+        323, 27, 232, 50, 59883, 65513,
+        350, 24, 233, 47, 61682, 65520,
+        374, 27, 234, 50, 65535, 255,
+        401, 27, 235, 50, 65535, 65535,
+        428, 29, 236, 52, 36499, 65422,
+        457, 30, 237, 53, 36499, 13198,
+        487, 28, 238, 51, 65535, 65535,
+        515, 26, 239, 49, 0, 0,
+        541, 24, 240, 47, 0, 3328,
+        565, 23, 241, 46, 0, 6144,
+        588, 23, 242, 46, 0, 0,
+        611, 30, 243, 53, 0, 0,
+        641, 28, 244, 51, 58858, 65509,
+        669, 27, 245, 50, 53718, 65489,
+        696, 30, 246, 53, 51148, 65479,
+        726, 27, 247, 50, 62199, 65522,
+        753, 30, 248, 53, 65535, 59135,
+        783, 32, 249, 55, 65535, 62207,
+        815, 31, 250, 54, 56541, 65500,
+        846, 31, 251, 54, 65535, 42751,
+        228, 23, 252, 46, 36499, 13198,
+        877, 25, 253, 48, 0, 9728,
+        902, 27, 254, 50, 0, 16384,
+        929, 33, 255, 56, 0, 6656,
+        962, 35, 256, 58, 0, 13056,
+        997, 34, 257, 57, 0, 13056,
+        1031, 34, 258, 57, 0, 5120,
+        1065, 42, 259, 65, 65535, 26367,
+        1107, 22, 260, 45, 0, 6656,
+        1129, 27, 261, 50, 55773, 65497,
+        1156, 31, 262, 54, 0, 22784,
+        1187, 32, 263, 55, 0, 9728,
+        1219, 25, 264, 48, 0, 13056,
+        1244, 24, 265, 47, 0, 9728,
+        1268, 25, 266, 48, 65535, 13311,
+        1293, 25, 267, 48, 0, 9728,
+        1318, 21, 268, 44, 31487, 39168,
+        1339, 21, 269, 44, 0, 0,
+        1360, 30, 270, 53, 65535, 65535,
+        1390, 32, 271, 55, 62967, 65525,
+        1422, 31, 272, 54, 65535, 65535,
+        1453, 21, 273, 44, 0, 13056,
+        1474, 21, 274, 44, 62967, 53237,
+        1495, 17, 275, 40, 65535, 65535,
+        1512, 30, 276, 53, 65535, 16639,
+        1542, 36, 277, 59, 65535, 16639,
+        1578, 34, 278, 57, 62967, 53237,
+        1612, 36, 279, 59, 0, 3328,
+        1648, 35, 280, 58, 62967, 65525,
+        1683, 38, 281, 61, 0, 0,
+        1721, 28, 282, 51, 62967, 65525,
+        1749, 33, 283, 56, 60397, 65515,
+        1782, 32, 284, 55, 65535, 65535,
+        1814, 35, 285, 58, 62199, 65522,
+        1849, 31, 286, 54, 65535, 65535,
+        1880, 30, 287, 53, 62967, 65525,
+        1910, 35, 288, 58, 62967, 245,
+        1945, 31, 289, 54, 58858, 65509,
+        1976, 22, 290, 45, 35389, 65316,
+        1998, 22, 291, 45, 25600, 65453,
+        2020, 23, 292, 46, 15152, 65535,
+        2043, 22, 293, 45, 36499, 39310,
+        2065, 27, 294, 50, 36499, 65422,
+        2092, 34, 295, 57, 31487, 4096,
+        2126, 32, 296, 55, 51033, 7988,
+        2158, 32, 297, 55, 38144, 8191,
+        2190, 33, 298, 56, 15152, 8191,
+        2223, 32, 299, 55, 36499, 4238,
+        2255, 39, 300, 62, 62967, 65525,
+        2294, 37, 301, 60, 62967, 65525,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_235: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 0, 20, 1, 302, 8, 302, 58,
-        25, 27, 25, 22, 1, 303, 8, 303, 60,
-        52, 26, 52, 21, 1, 304, 8, 304, 59,
-        78, 26, 78, 21, 1, 305, 8, 305, 59,
-        104, 25, 104, 20, 1, 306, 8, 306, 58,
-        129, 31, 160, 17, 1, 307, 8, 307, 64,
-        177, 33, 160, 17, 1, 308, 8, 308, 66,
-        210, 32, 160, 17, 1, 309, 8, 309, 65,
-        242, 32, 242, 27, 1, 310, 8, 310, 65,
-        274, 38, 274, 33, 1, 311, 8, 311, 71,
-        312, 33, 312, 28, 1, 312, 8, 312, 66,
-        345, 35, 345, 30, 1, 313, 8, 313, 68,
-        380, 34, 380, 29, 1, 314, 8, 314, 67,
-        414, 28, 414, 23, 1, 315, 8, 315, 61,
-        442, 30, 442, 25, 1, 316, 8, 316, 63,
-        472, 29, 472, 24, 1, 317, 8, 317, 62,
-        501, 32, 501, 27, 1, 318, 8, 318, 65,
-        533, 29, 533, 24, 1, 319, 8, 319, 62,
-        562, 32, 562, 27, 1, 320, 8, 320, 65,
-        594, 32, 594, 27, 1, 321, 8, 321, 65,
-        626, 34, 626, 29, 1, 322, 8, 322, 67,
-        660, 35, 660, 30, 1, 323, 8, 323, 68,
-        695, 33, 695, 28, 1, 324, 8, 324, 66,
-        728, 31, 728, 26, 1, 325, 8, 325, 64,
-        759, 29, 759, 24, 1, 326, 8, 326, 62,
-        788, 28, 788, 23, 1, 327, 8, 327, 61,
-        816, 28, 816, 23, 1, 328, 8, 328, 61,
-        844, 35, 844, 30, 1, 329, 8, 329, 68,
-        879, 33, 879, 28, 1, 330, 8, 330, 66,
-        912, 32, 912, 27, 1, 331, 8, 331, 65,
-        944, 35, 944, 30, 1, 332, 8, 332, 68,
-        979, 32, 979, 27, 1, 333, 8, 333, 65,
-        1011, 35, 1011, 30, 1, 334, 8, 334, 68,
-        1046, 37, 1046, 32, 1, 335, 8, 335, 70,
-        1083, 36, 1083, 31, 1, 336, 8, 336, 69,
-        1119, 36, 1119, 31, 1, 337, 8, 337, 69,
-        1155, 42, 160, 17, 1, 338, 8, 338, 75,
-        1197, 27, 160, 17, 1, 339, 8, 339, 60,
+        2331, 25, 0, 20, 1, 302, 8, 302, 58,
+        2356, 27, 20, 22, 1, 303, 8, 303, 60,
+        2383, 26, 42, 21, 1, 304, 8, 304, 59,
+        2409, 26, 63, 21, 1, 305, 8, 305, 59,
+        2435, 25, 84, 20, 1, 306, 8, 306, 58,
+        2460, 31, 2491, 17, 1, 307, 8, 307, 64,
+        2508, 33, 2491, 17, 1, 308, 8, 308, 66,
+        2541, 32, 2491, 17, 1, 309, 8, 309, 65,
+        2573, 32, 104, 27, 1, 310, 8, 310, 65,
+        2605, 38, 131, 33, 1, 311, 8, 311, 71,
+        2643, 33, 164, 28, 1, 312, 8, 312, 66,
+        2676, 35, 192, 30, 1, 313, 8, 313, 68,
+        2711, 34, 222, 29, 1, 314, 8, 314, 67,
+        2745, 28, 251, 23, 1, 315, 8, 315, 61,
+        2773, 30, 274, 25, 1, 316, 8, 316, 63,
+        2803, 29, 299, 24, 1, 317, 8, 317, 62,
+        2832, 32, 323, 27, 1, 318, 8, 318, 65,
+        2864, 29, 350, 24, 1, 319, 8, 319, 62,
+        2893, 32, 374, 27, 1, 320, 8, 320, 65,
+        2925, 32, 401, 27, 1, 321, 8, 321, 65,
+        2957, 34, 428, 29, 1, 322, 8, 322, 67,
+        2991, 35, 457, 30, 1, 323, 8, 323, 68,
+        3026, 33, 487, 28, 1, 324, 8, 324, 66,
+        3059, 31, 515, 26, 1, 325, 8, 325, 64,
+        3090, 29, 541, 24, 1, 326, 8, 326, 62,
+        3119, 28, 565, 23, 1, 327, 8, 327, 61,
+        3147, 28, 588, 23, 1, 328, 8, 328, 61,
+        3175, 35, 611, 30, 1, 329, 8, 329, 68,
+        3210, 33, 641, 28, 1, 330, 8, 330, 66,
+        3243, 32, 669, 27, 1, 331, 8, 331, 65,
+        3275, 35, 696, 30, 1, 332, 8, 332, 68,
+        3310, 32, 726, 27, 1, 333, 8, 333, 65,
+        3342, 35, 753, 30, 1, 334, 8, 334, 68,
+        3377, 37, 783, 32, 1, 335, 8, 335, 70,
+        3414, 36, 815, 31, 1, 336, 8, 336, 69,
+        3450, 36, 846, 31, 1, 337, 8, 337, 69,
+        3486, 42, 2491, 17, 1, 338, 8, 338, 75,
+        3528, 27, 2491, 17, 1, 339, 8, 339, 60,
     ],
 };
 
@@ -9856,56 +10160,56 @@ static POPULATE_MACOSTHEME_XAML_ROWS_236: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        386, 28, 386, 23, 1, 342, 8, 342, 61,
-        1224, 30, 1224, 25, 1, 343, 8, 343, 63,
-        1254, 32, 1254, 27, 1, 344, 8, 344, 65,
-        1286, 38, 1286, 33, 1, 345, 8, 345, 71,
-        1324, 40, 1324, 35, 1, 346, 8, 346, 73,
-        1364, 39, 1364, 34, 1, 347, 8, 347, 72,
-        1403, 39, 1403, 34, 1, 348, 8, 348, 72,
-        1442, 47, 1442, 42, 1, 349, 8, 349, 80,
-        1489, 27, 1489, 22, 1, 350, 8, 350, 60,
-        1516, 32, 1516, 27, 1, 351, 8, 351, 65,
-        1548, 36, 1548, 31, 1, 352, 8, 352, 69,
-        1584, 37, 1584, 32, 1, 353, 8, 353, 70,
-        1621, 30, 1621, 25, 1, 354, 8, 354, 63,
-        1651, 29, 1651, 24, 1, 355, 8, 355, 62,
-        1680, 30, 1680, 25, 1, 356, 8, 356, 63,
-        1710, 30, 1710, 25, 1, 357, 8, 357, 63,
-        1740, 26, 1740, 21, 1, 358, 8, 358, 59,
-        1766, 26, 1766, 21, 1, 359, 8, 359, 59,
-        1792, 35, 1792, 30, 1, 360, 8, 360, 68,
-        1827, 37, 1827, 32, 1, 361, 8, 361, 70,
-        1864, 36, 1864, 31, 1, 362, 8, 362, 69,
-        1900, 26, 1900, 21, 1, 363, 8, 363, 59,
-        1926, 26, 1926, 21, 1, 364, 8, 364, 59,
-        1952, 22, 1952, 17, 1, 365, 8, 365, 55,
-        1974, 35, 1974, 30, 1, 366, 8, 366, 68,
-        2009, 41, 2009, 36, 1, 367, 8, 367, 74,
-        2050, 39, 2050, 34, 1, 368, 8, 368, 72,
-        2089, 41, 2089, 36, 1, 369, 8, 369, 74,
-        2130, 40, 2130, 35, 1, 370, 8, 370, 73,
-        2170, 43, 2170, 38, 1, 371, 8, 371, 76,
-        2213, 33, 2213, 28, 1, 372, 8, 372, 66,
-        2246, 38, 2246, 33, 1, 373, 8, 373, 71,
-        2284, 37, 2284, 32, 1, 374, 8, 374, 70,
-        2321, 40, 2321, 35, 1, 375, 8, 375, 73,
-        2361, 36, 2361, 31, 1, 376, 8, 376, 69,
-        2397, 35, 2397, 30, 1, 377, 8, 377, 68,
-        2432, 36, 2432, 31, 1, 378, 8, 378, 69,
-        2468, 29, 160, 17, 1, 379, 8, 379, 62,
-        2497, 27, 2497, 22, 1, 380, 8, 380, 60,
-        2524, 27, 2524, 22, 1, 381, 8, 381, 60,
-        2551, 28, 2551, 23, 1, 382, 8, 382, 61,
-        2579, 27, 2579, 22, 1, 383, 8, 383, 60,
-        2606, 32, 2606, 27, 1, 384, 8, 384, 65,
-        2638, 39, 2638, 34, 1, 385, 8, 385, 72,
-        2677, 37, 2677, 32, 1, 386, 8, 386, 70,
-        2714, 37, 2714, 32, 1, 387, 8, 387, 70,
-        2751, 38, 2751, 33, 1, 388, 8, 388, 71,
-        2789, 37, 2789, 32, 1, 389, 8, 389, 70,
-        2826, 44, 2826, 39, 1, 390, 8, 390, 77,
-        2870, 42, 2870, 37, 1, 391, 8, 391, 75,
+        2717, 28, 228, 23, 1, 342, 8, 342, 61,
+        3555, 30, 877, 25, 1, 343, 8, 343, 63,
+        3585, 32, 902, 27, 1, 344, 8, 344, 65,
+        3617, 38, 929, 33, 1, 345, 8, 345, 71,
+        3655, 40, 962, 35, 1, 346, 8, 346, 73,
+        3695, 39, 997, 34, 1, 347, 8, 347, 72,
+        3734, 39, 1031, 34, 1, 348, 8, 348, 72,
+        3773, 47, 1065, 42, 1, 349, 8, 349, 80,
+        3820, 27, 1107, 22, 1, 350, 8, 350, 60,
+        3847, 32, 1129, 27, 1, 351, 8, 351, 65,
+        3879, 36, 1156, 31, 1, 352, 8, 352, 69,
+        3915, 37, 1187, 32, 1, 353, 8, 353, 70,
+        3952, 30, 1219, 25, 1, 354, 8, 354, 63,
+        3982, 29, 1244, 24, 1, 355, 8, 355, 62,
+        4011, 30, 1268, 25, 1, 356, 8, 356, 63,
+        4041, 30, 1293, 25, 1, 357, 8, 357, 63,
+        4071, 26, 1318, 21, 1, 358, 8, 358, 59,
+        4097, 26, 1339, 21, 1, 359, 8, 359, 59,
+        4123, 35, 1360, 30, 1, 360, 8, 360, 68,
+        4158, 37, 1390, 32, 1, 361, 8, 361, 70,
+        4195, 36, 1422, 31, 1, 362, 8, 362, 69,
+        4231, 26, 1453, 21, 1, 363, 8, 363, 59,
+        4257, 26, 1474, 21, 1, 364, 8, 364, 59,
+        4283, 22, 1495, 17, 1, 365, 8, 365, 55,
+        4305, 35, 1512, 30, 1, 366, 8, 366, 68,
+        4340, 41, 1542, 36, 1, 367, 8, 367, 74,
+        4381, 39, 1578, 34, 1, 368, 8, 368, 72,
+        4420, 41, 1612, 36, 1, 369, 8, 369, 74,
+        4461, 40, 1648, 35, 1, 370, 8, 370, 73,
+        4501, 43, 1683, 38, 1, 371, 8, 371, 76,
+        4544, 33, 1721, 28, 1, 372, 8, 372, 66,
+        4577, 38, 1749, 33, 1, 373, 8, 373, 71,
+        4615, 37, 1782, 32, 1, 374, 8, 374, 70,
+        4652, 40, 1814, 35, 1, 375, 8, 375, 73,
+        4692, 36, 1849, 31, 1, 376, 8, 376, 69,
+        4728, 35, 1880, 30, 1, 377, 8, 377, 68,
+        4763, 36, 1945, 31, 1, 378, 8, 378, 69,
+        4799, 29, 2491, 17, 1, 379, 8, 379, 62,
+        4828, 27, 1976, 22, 1, 380, 8, 380, 60,
+        4855, 27, 1998, 22, 1, 381, 8, 381, 60,
+        4882, 28, 2020, 23, 1, 382, 8, 382, 61,
+        4910, 27, 2043, 22, 1, 383, 8, 383, 60,
+        4937, 32, 2065, 27, 1, 384, 8, 384, 65,
+        4969, 39, 2092, 34, 1, 385, 8, 385, 72,
+        5008, 37, 2126, 32, 1, 386, 8, 386, 70,
+        5045, 37, 2158, 32, 1, 387, 8, 387, 70,
+        5082, 38, 2190, 33, 1, 388, 8, 388, 71,
+        5120, 37, 2223, 32, 1, 389, 8, 389, 70,
+        5157, 44, 2255, 39, 1, 390, 8, 390, 77,
+        5201, 42, 2294, 37, 1, 391, 8, 391, 75,
     ],
 };
 
@@ -9914,14 +10218,14 @@ static POPULATE_MACOSTHEME_XAML_ROWS_237: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2912, 31, 255, 65535, 1, 416, 8,
-        2943, 27, 255, 65535, 1, 417, 8,
-        2970, 31, 255, 65535, 1, 418, 8,
-        3001, 31, 255, 65535, 1, 419, 8,
-        3032, 30, 255, 65535, 1, 420, 8,
-        3062, 34, 255, 65535, 1, 421, 8,
-        3096, 29, 255, 65535, 1, 422, 8,
-        3125, 29, 255, 65535, 1, 423, 8,
+        5243, 31, 255, 65535, 1, 416, 8,
+        5274, 27, 255, 65535, 1, 417, 8,
+        5301, 31, 255, 65535, 1, 418, 8,
+        5332, 31, 255, 65535, 1, 419, 8,
+        5363, 30, 255, 65535, 1, 420, 8,
+        5393, 34, 255, 65535, 1, 421, 8,
+        5427, 29, 255, 65535, 1, 422, 8,
+        5456, 29, 255, 65535, 1, 423, 8,
     ],
 };
 
@@ -9934,38 +10238,42 @@ static POPULATE_MACOSTHEME_XAML_ROWS_238: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_239: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "TextOnAccentFillColorDefault", value: 4294967295_u32, line: 42, position: 51 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorPrimary", value: 4294967295_u32, line: 43, position: 53 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorSecondary", value: 3019898879_u32, line: 44, position: 55 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorDisabled", value: 4294967295_u32, line: 45, position: 54 },
-    rt::ValueRow { key: "ControlAAFillColorDefault", value: 1912602624_u32, line: 46, position: 48 },
-    rt::ValueRow { key: "ControlAAFillColorDisabled", value: 1358954496_u32, line: 47, position: 49 },
-    rt::ValueRow { key: "AccentAAFillColorDisabled", value: 922746880_u32, line: 48, position: 48 },
-    rt::ValueRow { key: "ControlStrokeColorForAAFillOnImage", value: 1509949439_u32, line: 49, position: 57 },
-    rt::ValueRow { key: "ControlAAStrokeColorDefault", value: 1912602624_u32, line: 50, position: 50 },
-    rt::ValueRow { key: "ControlAAStrokeColorDisabled", value: 922746880_u32, line: 51, position: 51 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_239: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS,
+    numbers: &[],
+    records: &[
+        37, 28, 42, 51, 65535, 65535,
+        65, 30, 43, 53, 65535, 65535,
+        95, 32, 44, 55, 65535, 46079,
+        127, 31, 45, 54, 65535, 65535,
+        158, 25, 46, 48, 0, 29184,
+        183, 26, 47, 49, 0, 20736,
+        133, 25, 48, 48, 0, 14080,
+        209, 34, 49, 57, 65535, 23039,
+        243, 27, 50, 50, 0, 29184,
+        270, 28, 51, 51, 0, 14080,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_240: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        37, 33, 37, 28, 1, 52, 8, 52, 66,
-        70, 35, 70, 30, 1, 53, 8, 53, 68,
-        105, 37, 105, 32, 1, 54, 8, 54, 70,
-        142, 36, 142, 31, 1, 55, 8, 55, 69,
-        178, 30, 178, 25, 1, 56, 8, 56, 63,
-        208, 31, 208, 26, 1, 57, 8, 57, 64,
-        239, 29, 268, 17, 1, 58, 8, 58, 62,
-        111, 31, 268, 17, 1, 59, 8, 59, 64,
-        285, 30, 268, 17, 1, 60, 8, 60, 63,
-        148, 30, 148, 25, 1, 61, 8, 61, 63,
-        315, 39, 315, 34, 1, 62, 8, 62, 72,
-        354, 32, 354, 27, 1, 63, 8, 63, 65,
-        386, 33, 386, 28, 1, 64, 8, 64, 66,
+        298, 33, 37, 28, 1, 52, 8, 52, 66,
+        331, 35, 65, 30, 1, 53, 8, 53, 68,
+        366, 37, 95, 32, 1, 54, 8, 54, 70,
+        403, 36, 127, 31, 1, 55, 8, 55, 69,
+        439, 30, 158, 25, 1, 56, 8, 56, 63,
+        469, 31, 183, 26, 1, 57, 8, 57, 64,
+        500, 29, 529, 17, 1, 58, 8, 58, 62,
+        372, 31, 529, 17, 1, 59, 8, 59, 64,
+        546, 30, 529, 17, 1, 60, 8, 60, 63,
+        409, 30, 133, 25, 1, 61, 8, 61, 63,
+        576, 39, 209, 34, 1, 62, 8, 62, 72,
+        615, 32, 243, 27, 1, 63, 8, 63, 65,
+        647, 33, 270, 28, 1, 64, 8, 64, 66,
     ],
 };
 
@@ -10072,31 +10380,35 @@ static POPULATE_MACOSTHEME_XAML_ROWS_243: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_244: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuFlyoutPresenterBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 134, position: 66 },
-    rt::ValueRow { key: "MenuFlyoutItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 135, position: 56 },
-    rt::ValueRow { key: "MenuFlyoutSubItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 136, position: 59 },
-    rt::ValueRow { key: "MenuFlyoutItemPlaceholderThemeThickness", value: [28.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 137, position: 66 },
-    rt::ValueRow { key: "MenuFlyoutItemDoublePlaceholderThemeThickness", value: [56.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 138, position: 72 },
-    rt::ValueRow { key: "MenuFlyoutItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 139, position: 62 },
-    rt::ValueRow { key: "ToggleMenuFlyoutItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 140, position: 68 },
-    rt::ValueRow { key: "MenuFlyoutSubItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 141, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_244: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_8_NUMBERS,
+    records: &[
+        1730, 39, 134, 66, 0, 0, 0, 0,
+        1769, 29, 135, 56, 1, 1, 1, 1,
+        1798, 32, 136, 59, 1, 1, 1, 1,
+        1830, 39, 137, 66, 2, 1, 1, 1,
+        1869, 45, 138, 72, 3, 1, 1, 1,
+        1914, 35, 139, 62, 0, 0, 0, 0,
+        1949, 41, 140, 68, 0, 0, 0, 0,
+        1990, 38, 141, 65, 0, 0, 0, 0,
+    ],
+};
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_245: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1730, 41, 58853, 65509, 1, 142, 8,
-        1771, 41, 0, 65280, 1, 143, 8,
-        1812, 42, 0, 26112, 1, 144, 8,
-        1854, 45, 58853, 65509, 1, 145, 8,
-        1899, 45, 0, 65280, 1, 146, 8,
-        1944, 41, 0, 65280, 1, 147, 8,
-        1985, 41, 65535, 65535, 1, 148, 8,
-        2026, 29, 31354, 65402, 1, 149, 8,
+        2028, 41, 58853, 65509, 1, 142, 8,
+        2069, 41, 0, 65280, 1, 143, 8,
+        2110, 42, 0, 26112, 1, 144, 8,
+        2152, 45, 58853, 65509, 1, 145, 8,
+        2197, 45, 0, 65280, 1, 146, 8,
+        2242, 41, 0, 65280, 1, 147, 8,
+        2283, 41, 65535, 65535, 1, 148, 8,
+        2324, 29, 31354, 65402, 1, 149, 8,
     ],
 };
 
@@ -10105,82 +10417,86 @@ static POPULATE_MACOSTHEME_XAML_ROWS_246: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2055, 39, 2094, 47, 1, 150, 8, 150, 8,
-        2141, 30, 2171, 45, 1, 151, 8, 151, 8,
-        2216, 41, 149, 27, 1, 152, 8, 152, 8,
-        2257, 37, 149, 27, 1, 153, 8, 153, 8,
-        2294, 38, 83, 31, 1, 154, 8, 154, 8,
-        2332, 31, 83, 31, 1, 155, 8, 155, 8,
-        2363, 38, 2401, 41, 1, 156, 8, 156, 8,
-        2442, 42, 2401, 41, 1, 157, 8, 157, 8,
-        2484, 39, 83, 31, 1, 158, 8, 158, 8,
-        2523, 36, 2171, 45, 1, 159, 8, 159, 8,
-        2559, 47, 2606, 50, 1, 160, 8, 160, 8,
-        2656, 43, 2699, 53, 1, 161, 8, 161, 8,
-        2752, 44, 83, 31, 1, 162, 8, 162, 8,
-        2796, 37, 83, 31, 1, 163, 8, 163, 8,
-        2833, 44, 2401, 41, 1, 164, 8, 164, 8,
-        2877, 48, 2401, 41, 1, 165, 8, 165, 8,
-        2925, 45, 83, 31, 1, 166, 8, 166, 8,
-        2970, 33, 2171, 45, 1, 167, 8, 167, 8,
-        3003, 44, 2606, 50, 1, 168, 8, 168, 8,
-        3047, 40, 3087, 49, 1, 169, 8, 169, 8,
-        3136, 46, 2606, 50, 1, 170, 8, 170, 8,
-        3182, 41, 83, 31, 1, 171, 8, 171, 8,
-        3223, 34, 83, 31, 1, 172, 8, 172, 8,
-        3257, 41, 2401, 41, 1, 173, 8, 173, 8,
-        3298, 45, 2401, 41, 1, 174, 8, 174, 8,
-        3343, 47, 2401, 41, 1, 175, 8, 175, 8,
-        3390, 42, 83, 31, 1, 176, 8, 176, 8,
+        2353, 39, 2392, 47, 1, 150, 8, 150, 8,
+        2439, 30, 2469, 45, 1, 151, 8, 151, 8,
+        2514, 41, 149, 27, 1, 152, 8, 152, 8,
+        2555, 37, 149, 27, 1, 153, 8, 153, 8,
+        2592, 38, 83, 31, 1, 154, 8, 154, 8,
+        2630, 31, 83, 31, 1, 155, 8, 155, 8,
+        2661, 38, 2699, 41, 1, 156, 8, 156, 8,
+        2740, 42, 2699, 41, 1, 157, 8, 157, 8,
+        2782, 39, 83, 31, 1, 158, 8, 158, 8,
+        2821, 36, 2469, 45, 1, 159, 8, 159, 8,
+        2857, 47, 2904, 50, 1, 160, 8, 160, 8,
+        2954, 43, 2997, 53, 1, 161, 8, 161, 8,
+        3050, 44, 83, 31, 1, 162, 8, 162, 8,
+        3094, 37, 83, 31, 1, 163, 8, 163, 8,
+        3131, 44, 2699, 41, 1, 164, 8, 164, 8,
+        3175, 48, 2699, 41, 1, 165, 8, 165, 8,
+        3223, 45, 83, 31, 1, 166, 8, 166, 8,
+        3268, 33, 2469, 45, 1, 167, 8, 167, 8,
+        3301, 44, 2904, 50, 1, 168, 8, 168, 8,
+        3345, 40, 3385, 49, 1, 169, 8, 169, 8,
+        3434, 46, 2904, 50, 1, 170, 8, 170, 8,
+        3480, 41, 83, 31, 1, 171, 8, 171, 8,
+        3521, 34, 83, 31, 1, 172, 8, 172, 8,
+        3555, 41, 2699, 41, 1, 173, 8, 173, 8,
+        3596, 45, 2699, 41, 1, 174, 8, 174, 8,
+        3641, 47, 2699, 41, 1, 175, 8, 175, 8,
+        3688, 42, 83, 31, 1, 176, 8, 176, 8,
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_247: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemChromeMediumHighColor", value: 4293322470_u32, line: 66, position: 50 },
-    rt::ValueRow { key: "SystemChromeAltMediumHighColor", value: 3439329279_u32, line: 67, position: 53 },
-    rt::ValueRow { key: "SystemChromeAltHighColor", value: 4294967295_u32, line: 68, position: 47 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_247: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 27, 66, 50, 59110, 65510,
+        27, 30, 67, 53, 65535, 52479,
+        57, 24, 68, 47, 65535, 65535,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_248: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 23, 1, 69, 8, 69, 64,
-        54, 32, 31, 23, 1, 70, 8, 70, 65,
-        86, 53, 139, 17, 1, 71, 8, 71, 86,
-        156, 54, 139, 17, 1, 72, 8, 72, 87,
-        210, 53, 139, 17, 1, 73, 8, 73, 86,
-        263, 54, 139, 17, 1, 74, 8, 74, 87,
-        317, 63, 139, 17, 1, 75, 8, 75, 96,
-        380, 64, 139, 17, 1, 76, 8, 76, 97,
-        444, 41, 31, 23, 1, 77, 8, 77, 74,
-        485, 42, 31, 23, 1, 78, 8, 78, 75,
-        527, 52, 579, 26, 1, 79, 8, 79, 85,
-        605, 53, 579, 26, 1, 80, 8, 80, 86,
-        658, 39, 697, 19, 1, 81, 8, 81, 72,
-        716, 40, 697, 19, 1, 82, 8, 82, 73,
-        756, 49, 697, 19, 1, 83, 8, 83, 82,
-        805, 50, 697, 19, 1, 84, 8, 84, 83,
-        855, 45, 697, 19, 1, 85, 8, 85, 78,
-        900, 46, 697, 19, 1, 86, 8, 86, 79,
-        946, 40, 986, 20, 1, 87, 8, 87, 73,
-        1006, 41, 986, 20, 1, 88, 8, 88, 74,
-        1047, 49, 31, 23, 1, 89, 8, 89, 82,
-        1096, 50, 31, 23, 1, 90, 8, 90, 83,
-        1146, 47, 1193, 21, 1, 91, 8, 91, 80,
-        1214, 48, 1193, 21, 1, 92, 8, 92, 81,
-        1262, 38, 1300, 18, 1, 93, 8, 93, 71,
-        1318, 39, 1300, 18, 1, 94, 8, 94, 72,
-        1357, 50, 1407, 24, 1, 95, 8, 95, 83,
-        1431, 51, 1407, 24, 1, 96, 8, 96, 84,
-        1482, 37, 1519, 17, 1, 97, 8, 97, 70,
-        1536, 38, 1519, 17, 1, 98, 8, 98, 71,
-        1574, 49, 1623, 23, 1, 99, 8, 99, 82,
-        1646, 50, 1623, 23, 1, 100, 8, 100, 83,
-        1696, 38, 1734, 18, 1, 101, 8, 101, 71,
-        1752, 39, 1734, 18, 1, 102, 8, 102, 72,
+        81, 31, 112, 23, 1, 69, 8, 69, 64,
+        135, 32, 112, 23, 1, 70, 8, 70, 65,
+        167, 53, 220, 17, 1, 71, 8, 71, 86,
+        237, 54, 220, 17, 1, 72, 8, 72, 87,
+        291, 53, 220, 17, 1, 73, 8, 73, 86,
+        344, 54, 220, 17, 1, 74, 8, 74, 87,
+        398, 63, 220, 17, 1, 75, 8, 75, 96,
+        461, 64, 220, 17, 1, 76, 8, 76, 97,
+        525, 41, 112, 23, 1, 77, 8, 77, 74,
+        566, 42, 112, 23, 1, 78, 8, 78, 75,
+        608, 52, 660, 26, 1, 79, 8, 79, 85,
+        686, 53, 660, 26, 1, 80, 8, 80, 86,
+        739, 39, 778, 19, 1, 81, 8, 81, 72,
+        797, 40, 778, 19, 1, 82, 8, 82, 73,
+        837, 49, 778, 19, 1, 83, 8, 83, 82,
+        886, 50, 778, 19, 1, 84, 8, 84, 83,
+        936, 45, 778, 19, 1, 85, 8, 85, 78,
+        981, 46, 778, 19, 1, 86, 8, 86, 79,
+        1027, 40, 1067, 20, 1, 87, 8, 87, 73,
+        1087, 41, 1067, 20, 1, 88, 8, 88, 74,
+        1128, 49, 112, 23, 1, 89, 8, 89, 82,
+        1177, 50, 112, 23, 1, 90, 8, 90, 83,
+        1227, 47, 1274, 21, 1, 91, 8, 91, 80,
+        1295, 48, 1274, 21, 1, 92, 8, 92, 81,
+        1343, 38, 1381, 18, 1, 93, 8, 93, 71,
+        1399, 39, 1381, 18, 1, 94, 8, 94, 72,
+        1438, 50, 1488, 24, 1, 95, 8, 95, 83,
+        1512, 51, 1488, 24, 1, 96, 8, 96, 84,
+        1563, 37, 1600, 17, 1, 97, 8, 97, 70,
+        1617, 38, 1600, 17, 1, 98, 8, 98, 71,
+        1655, 49, 1704, 23, 1, 99, 8, 99, 82,
+        1727, 50, 1704, 23, 1, 100, 8, 100, 83,
+        1777, 38, 1815, 18, 1, 101, 8, 101, 71,
+        1833, 39, 1815, 18, 1, 102, 8, 102, 72,
     ],
 };
 
@@ -10189,12 +10505,12 @@ static POPULATE_MACOSTHEME_XAML_ROWS_249: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1791, 38, 63993, 65529, 1, 104, 8,
-        1829, 33, 63993, 65529, 1, 105, 8,
-        1862, 45, 11308, 65324, 1, 106, 8,
-        1907, 40, 11308, 65324, 1, 107, 8,
-        1947, 35, 61166, 65518, 1, 108, 8,
-        1982, 30, 61166, 65518, 1, 109, 8,
+        1872, 38, 63993, 65529, 1, 104, 8,
+        1910, 33, 63993, 65529, 1, 105, 8,
+        1943, 45, 11308, 65324, 1, 106, 8,
+        1988, 40, 11308, 65324, 1, 107, 8,
+        2028, 35, 61166, 65518, 1, 108, 8,
+        2063, 30, 61166, 65518, 1, 109, 8,
     ],
 };
 
@@ -10203,10 +10519,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_250: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2012, 44, 139, 17, 1, 110, 8, 110, 77,
-        2056, 39, 139, 17, 1, 111, 8, 111, 72,
-        2095, 41, 139, 17, 1, 112, 8, 112, 74,
-        2136, 36, 139, 17, 1, 113, 8, 113, 69,
+        2093, 44, 220, 17, 1, 110, 8, 110, 77,
+        2137, 39, 220, 17, 1, 111, 8, 111, 72,
+        2176, 41, 220, 17, 1, 112, 8, 112, 74,
+        2217, 36, 220, 17, 1, 113, 8, 113, 69,
     ],
 };
 
@@ -10215,7 +10531,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_251: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2172, 30, 0, 0, 1, 114, 8,
+        2253, 30, 0, 0, 1, 114, 8,
     ],
 };
 
@@ -10272,9 +10588,9 @@ static POPULATE_MACOSTHEME_XAML_ROWS_257: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        217, 31, 1004, 26, 1, 66, 8, 66, 64,
-        248, 27, 1030, 26, 1, 67, 8, 67, 60,
-        275, 31, 1056, 25, 1, 68, 8, 68, 64,
+        217, 31, 1262, 26, 1, 66, 8, 66, 64,
+        248, 27, 1288, 26, 1, 67, 8, 67, 60,
+        275, 31, 1314, 25, 1, 68, 8, 68, 64,
     ],
 };
 
@@ -10293,29 +10609,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_259: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "FlyoutBorderThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 72, position: 51 },
 ];
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_260: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ContentDialogButtonMinWidth", value: 130.0_f64, line: 73, position: 53 },
-    rt::ValueRow { key: "ContentDialogButtonMaxWidth", value: 202.0_f64, line: 74, position: 53 },
-    rt::ValueRow { key: "ContentDialogButtonMinHeight", value: 32.0_f64, line: 75, position: 54 },
-    rt::ValueRow { key: "ContentDialogButtonHeight", value: 32.0_f64, line: 76, position: 51 },
-    rt::ValueRow { key: "ContentDialogTitleMaxHeight", value: 56.0_f64, line: 77, position: 53 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_260: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS,
+    records: &[
+        350, 27, 73, 53, 0,
+        377, 27, 74, 53, 1,
+        404, 28, 75, 54, 2,
+        432, 25, 76, 51, 2,
+        457, 27, 77, 53, 3,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_261: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ContentDialogButton1HostMargin", value: [0.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 78, position: 57 },
-    rt::ValueRow { key: "ContentDialogButton2HostMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 79, position: 57 },
-    rt::ValueRow { key: "ContentDialogContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 80, position: 53 },
-    rt::ValueRow { key: "ContentDialogContentScrollViewerMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 81, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_261: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS,
+    records: &[
+        484, 30, 78, 57, 4, 4, 5, 4,
+        514, 30, 79, 57, 4, 4, 4, 4,
+        544, 26, 80, 53, 4, 4, 4, 4,
+        570, 38, 81, 65, 4, 4, 4, 4,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_262: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        350, 42, 392, 47, 1, 82, 8, 82, 8,
+        608, 42, 650, 47, 1, 82, 8, 82, 8,
     ],
 };
 
@@ -10324,7 +10648,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_263: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        439, 33, 54227, 65491, 1, 83, 8,
+        697, 33, 54227, 65491, 1, 83, 8,
     ],
 };
 
@@ -10333,7 +10657,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_264: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        472, 29, 501, 17, 1, 84, 8, 84, 62,
+        730, 29, 759, 17, 1, 84, 8, 84, 62,
     ],
 };
 
@@ -10342,8 +10666,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_265: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        518, 35, 0, 65280, 1, 85, 8,
-        553, 30, 65535, 39423, 1, 86, 8,
+        776, 35, 0, 65280, 1, 85, 8,
+        811, 30, 65535, 39423, 1, 86, 8,
     ],
 };
 
@@ -10358,17 +10682,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_267: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        583, 18, 601, 35, 1, 91, 8, 91, 8,
-        636, 18, 654, 25, 1, 92, 8, 92, 8,
-        679, 29, 654, 25, 1, 93, 8, 93, 8,
-        708, 25, 654, 25, 1, 94, 8, 94, 8,
-        733, 19, 752, 27, 1, 95, 8, 95, 8,
-        779, 30, 752, 27, 1, 96, 8, 96, 8,
-        809, 26, 752, 27, 1, 97, 8, 97, 8,
-        835, 26, 861, 37, 1, 98, 8, 98, 8,
-        898, 27, 733, 19, 1, 99, 8, 99, 8,
-        925, 26, 951, 26, 1, 100, 8, 100, 8,
-        977, 27, 733, 19, 1, 101, 8, 101, 8,
+        841, 18, 859, 35, 1, 91, 8, 91, 8,
+        894, 18, 912, 25, 1, 92, 8, 92, 8,
+        937, 29, 912, 25, 1, 93, 8, 93, 8,
+        966, 25, 912, 25, 1, 94, 8, 94, 8,
+        991, 19, 1010, 27, 1, 95, 8, 95, 8,
+        1037, 30, 1010, 27, 1, 96, 8, 96, 8,
+        1067, 26, 1010, 27, 1, 97, 8, 97, 8,
+        1093, 26, 1119, 37, 1, 98, 8, 98, 8,
+        1156, 27, 991, 19, 1, 99, 8, 99, 8,
+        1183, 26, 1209, 26, 1, 100, 8, 100, 8,
+        1235, 27, 991, 19, 1, 101, 8, 101, 8,
     ],
 };
 
@@ -10515,25 +10839,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_273: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_274: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "AppBarButtonFlyoutGlyph", value: "\u{e974}", line: 77, position: 49 },
-    rt::ValueRow { key: "AppBarButtonOverflowFlyoutGlyph", value: "\u{e974}", line: 78, position: 57 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_274: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &[],
+    records: &[
+        1187, 23, 77, 49, 1210, 3,
+        1213, 31, 78, 57, 1210, 3,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_275: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "AppBarButtonLabelFontSize", value: 12.0_f64, line: 79, position: 51 },
-    rt::ValueRow { key: "AppBarButtonSubItemChevronFontSize", value: 8.0_f64, line: 80, position: 60 },
-    rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronFontSize", value: 12.0_f64, line: 81, position: 69 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_275: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS,
+    records: &[
+        1244, 25, 79, 51, 0,
+        1269, 34, 80, 60, 1,
+        1303, 43, 81, 69, 0,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_276: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarButtonSubItemChevronMargin", value: [-23.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 82, position: 59 },
-    rt::ValueRow { key: "AppBarButtonSubItemChevronLabelOnRightMargin", value: [-7.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 83, position: 71 },
-    rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 84, position: 68 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_276: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS,
+    records: &[
+        1346, 32, 82, 59, 2, 3, 0, 4,
+        1378, 44, 83, 71, 5, 3, 0, 4,
+        1422, 41, 84, 68, 4, 4, 6, 4,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_277: rt::PackedRows = rt::PackedRows {
@@ -10782,22 +11118,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_289: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_290: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CommandBarOverflowMinWidth", value: 160.0_f64, line: 37, position: 52 },
-    rt::ValueRow { key: "CommandBarOverflowTouchMinWidth", value: 240.0_f64, line: 38, position: 57 },
-    rt::ValueRow { key: "CommandBarOverflowMaxWidth", value: 480.0_f64, line: 39, position: 52 },
-    rt::ValueRow { key: "CommandBarOverflowMaxHeight", value: 198.0_f64, line: 40, position: 53 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_290: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_20_NUMBERS,
+    records: &[
+        0, 26, 37, 52, 0,
+        26, 31, 38, 57, 1,
+        57, 26, 39, 52, 2,
+        83, 27, 40, 53, 3,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_291: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 32, 1, 41, 8, 41, 8,
-        52, 24, 76, 33, 1, 42, 8, 42, 8,
-        109, 25, 134, 32, 1, 43, 8, 43, 8,
+        110, 20, 130, 32, 1, 41, 8, 41, 8,
+        162, 24, 186, 33, 1, 42, 8, 42, 8,
+        219, 25, 244, 32, 1, 43, 8, 43, 8,
     ],
 };
 
@@ -10806,68 +11146,76 @@ static POPULATE_MACOSTHEME_XAML_ROWS_292: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        166, 20, 186, 25, 1, 45, 8, 45, 8,
-        211, 28, 20, 32, 1, 46, 8, 46, 8,
-        239, 40, 279, 26, 1, 47, 8, 47, 8,
-        305, 37, 76, 33, 1, 48, 8, 48, 8,
-        342, 38, 380, 33, 1, 49, 8, 49, 8,
-        413, 39, 452, 47, 1, 50, 8, 50, 8,
+        276, 20, 296, 25, 1, 45, 8, 45, 8,
+        321, 28, 130, 32, 1, 46, 8, 46, 8,
+        349, 40, 389, 26, 1, 47, 8, 47, 8,
+        415, 37, 186, 33, 1, 48, 8, 48, 8,
+        452, 38, 490, 33, 1, 49, 8, 49, 8,
+        523, 39, 562, 47, 1, 50, 8, 50, 8,
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_293: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 51, position: 69 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 52, position: 73 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpThickness", value: [0.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 53, position: 71 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 54, position: 67 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 55, position: 71 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 56, position: 69 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_293: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_20_NUMBERS,
+    records: &[
+        609, 42, 51, 69, 4, 4, 4, 4,
+        651, 46, 52, 73, 5, 5, 5, 4,
+        697, 44, 53, 71, 5, 4, 5, 5,
+        741, 40, 54, 67, 5, 5, 5, 5,
+        781, 44, 55, 71, 5, 5, 5, 5,
+        825, 42, 56, 69, 5, 5, 5, 5,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_294: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ListViewItemContentOffsetX", value: -40.5_f64, line: 88, position: 52 },
-    rt::ValueRow { key: "ListViewItemDisabledThemeOpacity", value: 0.3_f64, line: 89, position: 58 },
-    rt::ValueRow { key: "ListViewItemDragThemeOpacity", value: 0.8_f64, line: 90, position: 54 },
-    rt::ValueRow { key: "ListViewItemReorderThemeOpacity", value: 0.8_f64, line: 91, position: 57 },
-    rt::ValueRow { key: "ListViewItemReorderTargetThemeOpacity", value: 0.5_f64, line: 92, position: 63 },
-    rt::ValueRow { key: "ListViewItemReorderTargetThemeScale", value: 0.95_f64, line: 93, position: 61 },
-    rt::ValueRow { key: "ListViewItemReorderHintThemeOffset", value: 10.0_f64, line: 94, position: 60 },
-    rt::ValueRow { key: "ListViewItemSelectedBorderThemeThickness", value: 4.0_f64, line: 95, position: 66 },
-    rt::ValueRow { key: "ListViewItemMinWidth", value: 0.0_f64, line: 96, position: 46 },
-    rt::ValueRow { key: "ListViewItemMinHeight", value: 26.0_f64, line: 97, position: 47 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_294: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_21_NUMBERS,
+    records: &[
+        0, 26, 88, 52, 0,
+        26, 32, 89, 58, 1,
+        58, 28, 90, 54, 2,
+        86, 31, 91, 57, 2,
+        117, 37, 92, 63, 3,
+        154, 35, 93, 61, 4,
+        189, 34, 94, 60, 5,
+        223, 40, 95, 66, 6,
+        263, 20, 96, 46, 7,
+        283, 21, 97, 47, 8,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_295: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 28, 1, 99, 8, 99, 8,
-        56, 22, 78, 31, 1, 100, 8, 100, 8,
-        109, 33, 142, 29, 1, 101, 8, 101, 8,
-        171, 29, 28, 28, 1, 102, 8, 102, 8,
-        200, 30, 230, 27, 1, 103, 8, 103, 8,
-        257, 41, 230, 27, 1, 104, 8, 104, 8,
-        298, 37, 230, 27, 1, 105, 8, 105, 8,
-        335, 22, 357, 25, 1, 106, 8, 106, 8,
-        382, 33, 357, 25, 1, 107, 8, 107, 8,
-        415, 29, 357, 25, 1, 108, 8, 108, 8,
-        444, 30, 474, 33, 1, 109, 8, 109, 8,
-        507, 41, 474, 33, 1, 110, 8, 110, 8,
-        548, 37, 474, 33, 1, 111, 8, 111, 8,
-        585, 35, 620, 26, 1, 112, 8, 112, 8,
-        646, 37, 683, 26, 1, 113, 8, 113, 8,
-        709, 28, 620, 26, 1, 114, 8, 114, 8,
-        737, 37, 357, 25, 1, 115, 8, 115, 8,
-        774, 22, 474, 33, 1, 116, 8, 116, 8,
-        796, 25, 821, 33, 1, 117, 8, 117, 8,
-        854, 26, 78, 31, 1, 118, 8, 118, 8,
-        880, 26, 474, 33, 1, 119, 8, 119, 8,
-        906, 33, 939, 35, 1, 120, 8, 120, 8,
-        974, 41, 474, 33, 1, 121, 8, 121, 8,
-        1015, 45, 230, 27, 1, 122, 8, 122, 8,
+        304, 28, 332, 28, 1, 99, 8, 99, 8,
+        360, 22, 382, 31, 1, 100, 8, 100, 8,
+        413, 33, 446, 29, 1, 101, 8, 101, 8,
+        475, 29, 332, 28, 1, 102, 8, 102, 8,
+        504, 30, 534, 27, 1, 103, 8, 103, 8,
+        561, 41, 534, 27, 1, 104, 8, 104, 8,
+        602, 37, 534, 27, 1, 105, 8, 105, 8,
+        639, 22, 661, 25, 1, 106, 8, 106, 8,
+        686, 33, 661, 25, 1, 107, 8, 107, 8,
+        719, 29, 661, 25, 1, 108, 8, 108, 8,
+        748, 30, 778, 33, 1, 109, 8, 109, 8,
+        811, 41, 778, 33, 1, 110, 8, 110, 8,
+        852, 37, 778, 33, 1, 111, 8, 111, 8,
+        889, 35, 924, 26, 1, 112, 8, 112, 8,
+        950, 37, 987, 26, 1, 113, 8, 113, 8,
+        1013, 28, 924, 26, 1, 114, 8, 114, 8,
+        1041, 37, 661, 25, 1, 115, 8, 115, 8,
+        1078, 22, 778, 33, 1, 116, 8, 116, 8,
+        1100, 25, 1125, 33, 1, 117, 8, 117, 8,
+        1158, 26, 382, 31, 1, 118, 8, 118, 8,
+        1184, 26, 778, 33, 1, 119, 8, 119, 8,
+        1210, 33, 1243, 35, 1, 120, 8, 120, 8,
+        1278, 41, 778, 33, 1, 121, 8, 121, 8,
+        1319, 45, 534, 27, 1, 122, 8, 122, 8,
     ],
 };
 
@@ -10876,54 +11224,58 @@ static POPULATE_MACOSTHEME_XAML_ROWS_296: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1060, 31, 6068, 65350, 1, 123, 8,
-        1091, 36, 6068, 65350, 1, 124, 8,
-        1127, 27, 65535, 65535, 1, 125, 8,
-        1154, 36, 6068, 39238, 1, 126, 8,
-        1190, 36, 65535, 65535, 1, 127, 8,
-        1226, 33, 0, 65280, 1, 128, 8,
-        1259, 39, 0, 42496, 1, 129, 8,
-        1337, 48, 65535, 39423, 1, 130, 8,
-        1298, 39, 65535, 65535, 1, 131, 8,
-        1385, 43, 15677, 65341, 1, 132, 8,
-        1428, 43, 0, 19712, 1, 133, 8,
-        1471, 40, 6068, 65350, 1, 134, 8,
-        1511, 40, 0, 65280, 1, 135, 8,
-        1551, 51, 14270, 65375, 1, 136, 8,
-        1602, 47, 14270, 65375, 1, 137, 8,
+        1364, 31, 6068, 65350, 1, 123, 8,
+        1395, 36, 6068, 65350, 1, 124, 8,
+        1431, 27, 65535, 65535, 1, 125, 8,
+        1458, 36, 6068, 39238, 1, 126, 8,
+        1494, 36, 65535, 65535, 1, 127, 8,
+        1530, 33, 0, 65280, 1, 128, 8,
+        1563, 39, 0, 42496, 1, 129, 8,
+        1641, 48, 65535, 39423, 1, 130, 8,
+        1602, 39, 65535, 65535, 1, 131, 8,
+        1689, 43, 15677, 65341, 1, 132, 8,
+        1732, 43, 0, 19712, 1, 133, 8,
+        1775, 40, 6068, 65350, 1, 134, 8,
+        1815, 40, 0, 65280, 1, 135, 8,
+        1855, 51, 14270, 65375, 1, 136, 8,
+        1906, 47, 14270, 65375, 1, 137, 8,
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_297: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ListViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 138, position: 54 },
-    rt::ValueRow { key: "ListViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 139, position: 62 },
-    rt::ValueRow { key: "ListViewItemSelectionIndicatorCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 140, position: 72 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_297: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_21_NUMBERS,
+    records: &[
+        1953, 24, 138, 54, 6, 6, 6, 6,
+        1977, 32, 139, 62, 9, 9, 9, 9,
+        2009, 42, 140, 72, 10, 10, 10, 10,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_298: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1649, 29, 1678, 35, 1, 141, 8, 141, 8,
-        1713, 30, 1743, 34, 1, 142, 8, 142, 8,
-        1777, 36, 821, 33, 1, 143, 8, 143, 8,
-        1813, 32, 821, 33, 1, 144, 8, 144, 8,
-        1845, 33, 821, 33, 1, 145, 8, 145, 8,
-        1878, 33, 230, 27, 1, 146, 8, 146, 8,
-        1911, 44, 1684, 29, 1, 147, 8, 147, 8,
-        1955, 40, 1995, 28, 1, 148, 8, 148, 8,
-        2023, 41, 1749, 28, 1, 149, 8, 149, 8,
-        2064, 31, 2095, 36, 1, 150, 8, 150, 8,
-        2131, 42, 2095, 36, 1, 151, 8, 151, 8,
-        2173, 38, 2095, 36, 1, 152, 8, 152, 8,
-        2211, 39, 2250, 37, 1, 153, 8, 153, 8,
-        2287, 38, 142, 29, 1, 154, 8, 154, 8,
-        2325, 35, 230, 27, 1, 155, 8, 155, 8,
-        2360, 46, 230, 27, 1, 156, 8, 156, 8,
-        2406, 42, 230, 27, 1, 157, 8, 157, 8,
-        2448, 43, 1749, 28, 1, 158, 8, 158, 8,
+        2051, 29, 2080, 35, 1, 141, 8, 141, 8,
+        2115, 30, 2145, 34, 1, 142, 8, 142, 8,
+        2179, 36, 1125, 33, 1, 143, 8, 143, 8,
+        2215, 32, 1125, 33, 1, 144, 8, 144, 8,
+        2247, 33, 1125, 33, 1, 145, 8, 145, 8,
+        2280, 33, 534, 27, 1, 146, 8, 146, 8,
+        2313, 44, 2086, 29, 1, 147, 8, 147, 8,
+        2357, 40, 2397, 28, 1, 148, 8, 148, 8,
+        2425, 41, 2151, 28, 1, 149, 8, 149, 8,
+        2466, 31, 2497, 36, 1, 150, 8, 150, 8,
+        2533, 42, 2497, 36, 1, 151, 8, 151, 8,
+        2575, 38, 2497, 36, 1, 152, 8, 152, 8,
+        2613, 39, 2652, 37, 1, 153, 8, 153, 8,
+        2689, 38, 446, 29, 1, 154, 8, 154, 8,
+        2727, 35, 534, 27, 1, 155, 8, 155, 8,
+        2762, 46, 534, 27, 1, 156, 8, 156, 8,
+        2808, 42, 534, 27, 1, 157, 8, 157, 8,
+        2850, 43, 2151, 28, 1, 158, 8, 158, 8,
     ],
 };
 
@@ -11077,11 +11429,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_304: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_305: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ControlCornerRadius", value: [6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64], line: 21, position: 49 },
-    rt::ValueRow { key: "OverlayCornerRadius", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 22, position: 49 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_305: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_27_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_27_NUMBERS,
+    records: &[
+        0, 19, 21, 49, 0, 0, 0, 0,
+        19, 19, 22, 49, 1, 1, 1, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_306: rt::PackedRows = rt::PackedRows {
@@ -11216,29 +11572,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_309: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_310: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarViewFirstOfMonthLabelFontSize", value: 8.0_f64, line: 150, position: 63 },
-    rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelFontSize", value: 8.0_f64, line: 151, position: 68 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonFontSize", value: 14.0_f64, line: 152, position: 68 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonFontSize", value: 8.0_f64, line: 153, position: 62 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_310: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_30_NUMBERS,
+    records: &[
+        2737, 37, 150, 63, 0,
+        2774, 42, 151, 68, 0,
+        2816, 42, 152, 68, 1,
+        2858, 36, 153, 62, 0,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_311: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CalendarViewDayItemMargin", value: [0.0_f64, 3.0_f64, 0.0_f64, 0.0_f64], line: 154, position: 52 },
-    rt::ValueRow { key: "CalendarViewWeekDayMargin", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 155, position: 52 },
-    rt::ValueRow { key: "CalendarViewWeekDayPadding", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 156, position: 53 },
-    rt::ValueRow { key: "CalendarViewMonthYearItemMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 157, position: 58 },
-    rt::ValueRow { key: "CalendarViewFirstOfMonthLabelMargin", value: [0.0_f64, 2.0_f64, 0.0_f64, 0.0_f64], line: 158, position: 62 },
-    rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelMargin", value: [0.0_f64, 9.0_f64, 0.0_f64, 0.0_f64], line: 159, position: 67 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonPadding", value: [8.0_f64, 7.0_f64, 8.0_f64, 8.0_f64], line: 160, position: 68 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonPadding", value: [12.0_f64, 11.5_f64, 12.0_f64, 11.5_f64], line: 161, position: 62 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonMargin", value: [7.0_f64, 6.0_f64, 3.0_f64, 7.0_f64], line: 162, position: 67 },
-    rt::ValueRow { key: "CalendarViewNavigationPreviousButtonMargin", value: [3.0_f64, 6.0_f64, 3.0_f64, 7.0_f64], line: 163, position: 69 },
-    rt::ValueRow { key: "CalendarViewNavigationNextButtonMargin", value: [3.0_f64, 6.0_f64, 7.0_f64, 7.0_f64], line: 164, position: 65 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 165, position: 72 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_311: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_30_NUMBERS,
+    records: &[
+        2894, 25, 154, 52, 2, 3, 2, 2,
+        2919, 25, 155, 52, 4, 4, 4, 4,
+        2944, 26, 156, 53, 5, 5, 5, 5,
+        2970, 31, 157, 58, 2, 2, 2, 2,
+        3001, 35, 158, 62, 2, 6, 2, 2,
+        3036, 40, 159, 67, 2, 7, 2, 2,
+        3076, 41, 160, 68, 0, 8, 0, 0,
+        3117, 35, 161, 62, 5, 9, 5, 9,
+        3152, 40, 162, 67, 8, 10, 3, 8,
+        3192, 42, 163, 69, 3, 10, 3, 8,
+        3234, 38, 164, 65, 3, 10, 8, 8,
+        3272, 45, 165, 72, 11, 11, 11, 11,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_312: rt::PackedRows = rt::PackedRows {
@@ -11356,57 +11720,69 @@ static POPULATE_MACOSTHEME_XAML_ROWS_314: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_315: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ContentDialogMinWidth", value: 320.0_f64, line: 39, position: 47 },
-    rt::ValueRow { key: "ContentDialogMaxWidth", value: 548.0_f64, line: 40, position: 47 },
-    rt::ValueRow { key: "ContentDialogMinHeight", value: 184.0_f64, line: 41, position: 48 },
-    rt::ValueRow { key: "ContentDialogMaxHeight", value: 756.0_f64, line: 42, position: 48 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_315: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_32_NUMBERS,
+    records: &[
+        311, 21, 39, 47, 0,
+        332, 21, 40, 47, 1,
+        353, 22, 41, 48, 2,
+        375, 22, 42, 48, 3,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_316: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ContentDialogTitleMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 12.0_f64], line: 44, position: 51 },
-    rt::ValueRow { key: "ContentDialogPadding", value: [24.0_f64, 24.0_f64, 24.0_f64, 24.0_f64], line: 45, position: 47 },
-    rt::ValueRow { key: "ContentDialogSeparatorThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 46, position: 58 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_316: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_32_NUMBERS,
+    records: &[
+        397, 24, 44, 51, 4, 4, 4, 5,
+        421, 20, 45, 47, 6, 6, 6, 6,
+        441, 31, 46, 58, 4, 4, 4, 7,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_317: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerSelectorThemeMinWidth", value: 80.0_f64, line: 51, position: 57 },
-    rt::ValueRow { key: "DatePickerSpacerThemeWidth", value: 1.0_f64, line: 52, position: 52 },
-    rt::ValueRow { key: "DatePickerSpacingThemeWidth", value: 20.0_f64, line: 53, position: 53 },
-    rt::ValueRow { key: "DatePickerSpacingThemeHeight", value: 20.0_f64, line: 54, position: 54 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_317: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_33_NUMBERS,
+    records: &[
+        0, 31, 51, 57, 0,
+        31, 26, 52, 52, 1,
+        57, 27, 53, 53, 2,
+        84, 28, 54, 54, 2,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_318: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 30, 1, 57, 8, 57, 8,
-        50, 28, 20, 30, 1, 58, 8, 58, 8,
-        78, 26, 104, 25, 1, 59, 8, 59, 8,
-        129, 34, 163, 26, 1, 60, 8, 60, 8,
-        189, 27, 216, 27, 1, 61, 8, 61, 8,
-        243, 38, 216, 27, 1, 62, 8, 62, 8,
-        281, 34, 20, 30, 1, 63, 8, 63, 8,
-        315, 35, 20, 30, 1, 64, 8, 64, 8,
-        350, 26, 376, 28, 1, 65, 8, 65, 8,
-        404, 37, 441, 30, 1, 66, 8, 66, 8,
-        471, 33, 504, 29, 1, 67, 8, 67, 8,
-        533, 34, 567, 29, 1, 68, 8, 68, 8,
-        596, 33, 376, 28, 1, 69, 8, 69, 8,
-        629, 26, 104, 25, 1, 70, 8, 70, 8,
-        655, 33, 688, 27, 1, 71, 8, 71, 8,
-        715, 37, 104, 25, 1, 72, 8, 72, 8,
-        752, 33, 688, 27, 1, 73, 8, 73, 8,
-        785, 34, 163, 26, 1, 74, 8, 74, 8,
-        819, 33, 104, 25, 1, 75, 8, 75, 8,
-        852, 35, 887, 38, 1, 76, 8, 76, 8,
-        925, 36, 961, 29, 1, 77, 8, 77, 8,
-        990, 35, 1025, 30, 1, 78, 8, 78, 8,
-        1201, 39, 1240, 47, 1, 79, 8, 79, 8,
+        112, 20, 132, 30, 1, 57, 8, 57, 8,
+        162, 28, 132, 30, 1, 58, 8, 58, 8,
+        190, 26, 216, 25, 1, 59, 8, 59, 8,
+        241, 34, 275, 26, 1, 60, 8, 60, 8,
+        301, 27, 328, 27, 1, 61, 8, 61, 8,
+        355, 38, 328, 27, 1, 62, 8, 62, 8,
+        393, 34, 132, 30, 1, 63, 8, 63, 8,
+        427, 35, 132, 30, 1, 64, 8, 64, 8,
+        462, 26, 488, 28, 1, 65, 8, 65, 8,
+        516, 37, 553, 30, 1, 66, 8, 66, 8,
+        583, 33, 616, 29, 1, 67, 8, 67, 8,
+        645, 34, 679, 29, 1, 68, 8, 68, 8,
+        708, 33, 488, 28, 1, 69, 8, 69, 8,
+        741, 26, 216, 25, 1, 70, 8, 70, 8,
+        767, 33, 800, 27, 1, 71, 8, 71, 8,
+        827, 37, 216, 25, 1, 72, 8, 72, 8,
+        864, 33, 800, 27, 1, 73, 8, 73, 8,
+        897, 34, 275, 26, 1, 74, 8, 74, 8,
+        931, 33, 216, 25, 1, 75, 8, 75, 8,
+        964, 35, 999, 38, 1, 76, 8, 76, 8,
+        1037, 36, 1073, 29, 1, 77, 8, 77, 8,
+        1102, 35, 1137, 30, 1, 78, 8, 78, 8,
+        1313, 39, 1352, 47, 1, 79, 8, 79, 8,
     ],
 };
 
@@ -11415,8 +11791,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_319: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1287, 36, 0, 65280, 1, 80, 8,
-        1323, 30, 0, 65280, 1, 81, 8,
+        1399, 36, 0, 65280, 1, 80, 8,
+        1435, 30, 0, 65280, 1, 81, 8,
     ],
 };
 
@@ -11425,8 +11801,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_320: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1055, 38, 1093, 29, 1, 83, 8, 83, 8,
-        1122, 49, 1171, 30, 1, 84, 8, 84, 8,
+        1167, 38, 1205, 29, 1, 83, 8, 83, 8,
+        1234, 49, 1283, 30, 1, 84, 8, 84, 8,
     ],
 };
 
@@ -11594,21 +11970,25 @@ static POPULATE_MACOSTHEME_XAML_ROWS_329: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderTrackThemeHeight", value: 4.0_f64, line: 67, position: 48 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_330: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SliderBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 68, position: 53 },
-    rt::ValueRow { key: "SliderHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 69, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_330: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_39_NUMBERS,
+    records: &[
+        0, 26, 68, 53, 0, 0, 0, 0,
+        26, 23, 69, 50, 0, 0, 0, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_331: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 36, 32, 1, 71, 8, 71, 8,
-        0, 36, 36, 32, 1, 72, 8, 72, 8,
-        68, 32, 36, 32, 1, 73, 8, 73, 8,
-        100, 33, 36, 32, 1, 74, 8, 74, 8,
+        49, 25, 85, 32, 1, 71, 8, 71, 8,
+        49, 36, 85, 32, 1, 72, 8, 72, 8,
+        117, 32, 85, 32, 1, 73, 8, 73, 8,
+        149, 33, 85, 32, 1, 74, 8, 74, 8,
     ],
 };
 
@@ -11617,10 +11997,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_332: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        133, 21, 65535, 65535, 1, 75, 8,
-        154, 32, 65535, 65535, 1, 76, 8,
-        186, 28, 65535, 65535, 1, 77, 8,
-        214, 29, 65535, 65535, 1, 78, 8,
+        182, 21, 65535, 65535, 1, 75, 8,
+        203, 32, 65535, 65535, 1, 76, 8,
+        235, 28, 65535, 65535, 1, 77, 8,
+        263, 29, 65535, 65535, 1, 78, 8,
     ],
 };
 
@@ -11629,21 +12009,21 @@ static POPULATE_MACOSTHEME_XAML_ROWS_333: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        243, 22, 265, 27, 1, 79, 8, 79, 8,
-        292, 26, 318, 33, 1, 80, 8, 80, 8,
-        351, 15, 366, 34, 1, 81, 8, 81, 8,
-        400, 26, 366, 34, 1, 82, 8, 82, 8,
-        426, 22, 366, 34, 1, 83, 8, 83, 8,
-        448, 23, 471, 35, 1, 84, 8, 84, 8,
-        506, 20, 526, 27, 1, 85, 8, 85, 8,
-        553, 31, 584, 29, 1, 86, 8, 86, 8,
-        613, 27, 640, 28, 1, 87, 8, 87, 8,
-        668, 28, 696, 28, 1, 88, 8, 88, 8,
-        724, 22, 746, 25, 1, 89, 8, 89, 8,
-        771, 30, 801, 26, 1, 90, 8, 90, 8,
-        827, 17, 366, 34, 1, 91, 8, 91, 8,
-        844, 25, 471, 35, 1, 92, 8, 92, 8,
-        869, 23, 892, 32, 1, 93, 8, 93, 8,
+        292, 22, 314, 27, 1, 79, 8, 79, 8,
+        341, 26, 367, 33, 1, 80, 8, 80, 8,
+        400, 15, 415, 34, 1, 81, 8, 81, 8,
+        449, 26, 415, 34, 1, 82, 8, 82, 8,
+        475, 22, 415, 34, 1, 83, 8, 83, 8,
+        497, 23, 520, 35, 1, 84, 8, 84, 8,
+        555, 20, 575, 27, 1, 85, 8, 85, 8,
+        602, 31, 633, 29, 1, 86, 8, 86, 8,
+        662, 27, 689, 28, 1, 87, 8, 87, 8,
+        717, 28, 745, 28, 1, 88, 8, 88, 8,
+        773, 22, 795, 25, 1, 89, 8, 89, 8,
+        820, 30, 850, 26, 1, 90, 8, 90, 8,
+        876, 17, 415, 34, 1, 91, 8, 91, 8,
+        893, 25, 520, 35, 1, 92, 8, 92, 8,
+        918, 23, 941, 32, 1, 93, 8, 93, 8,
     ],
 };
 
@@ -11652,28 +12032,28 @@ static POPULATE_MACOSTHEME_XAML_ROWS_334: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        924, 22, 65535, 255, 1, 94, 8,
-        946, 30, 65535, 255, 1, 95, 8,
-        976, 31, 65535, 65535, 1, 96, 8,
-        1007, 27, 65535, 65535, 1, 97, 8,
-        1034, 39, 32382, 65406, 1, 98, 8,
-        1073, 42, 65535, 65535, 1, 99, 8,
-        1115, 38, 65535, 65535, 1, 100, 8,
-        1153, 38, 65535, 65535, 1, 101, 8,
-        1191, 34, 65535, 65535, 1, 102, 8,
-        1225, 40, 0, 65280, 1, 103, 8,
-        1265, 48, 0, 65280, 1, 104, 8,
-        1313, 41, 65535, 33023, 1, 105, 8,
-        1354, 49, 65535, 33023, 1, 106, 8,
-        1403, 31, 65535, 10751, 1, 107, 8,
-        1434, 39, 11973, 65371, 1, 108, 8,
-        1473, 47, 65535, 8191, 1, 109, 8,
-        1520, 50, 19405, 65394, 1, 110, 8,
-        1570, 46, 21231, 65409, 1, 111, 8,
-        1616, 39, 65535, 10751, 1, 112, 8,
-        1655, 42, 65535, 18175, 1, 113, 8,
-        1697, 38, 65535, 23039, 1, 114, 8,
-        1735, 32, 65535, 65535, 1, 115, 8,
+        973, 22, 65535, 255, 1, 94, 8,
+        995, 30, 65535, 255, 1, 95, 8,
+        1025, 31, 65535, 65535, 1, 96, 8,
+        1056, 27, 65535, 65535, 1, 97, 8,
+        1083, 39, 32382, 65406, 1, 98, 8,
+        1122, 42, 65535, 65535, 1, 99, 8,
+        1164, 38, 65535, 65535, 1, 100, 8,
+        1202, 38, 65535, 65535, 1, 101, 8,
+        1240, 34, 65535, 65535, 1, 102, 8,
+        1274, 40, 0, 65280, 1, 103, 8,
+        1314, 48, 0, 65280, 1, 104, 8,
+        1362, 41, 65535, 33023, 1, 105, 8,
+        1403, 49, 65535, 33023, 1, 106, 8,
+        1452, 31, 65535, 10751, 1, 107, 8,
+        1483, 39, 11973, 65371, 1, 108, 8,
+        1522, 47, 65535, 8191, 1, 109, 8,
+        1569, 50, 19405, 65394, 1, 110, 8,
+        1619, 46, 21231, 65409, 1, 111, 8,
+        1665, 39, 65535, 10751, 1, 112, 8,
+        1704, 42, 65535, 18175, 1, 113, 8,
+        1746, 38, 65535, 23039, 1, 114, 8,
+        1784, 32, 65535, 65535, 1, 115, 8,
     ],
 };
 
@@ -11726,13 +12106,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_337: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 79, position: 52 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_338: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 80, position: 57 },
-    rt::ValueRow { key: "TimePickerHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 81, position: 54 },
-    rt::ValueRow { key: "TimePickerFirstHostThemeMargin", value: [0.0_f64, 0.0_f64, 20.0_f64, 0.0_f64], line: 82, position: 57 },
-    rt::ValueRow { key: "TimePickerThirdHostThemeMargin", value: [20.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 83, position: 57 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_338: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_40_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_40_NUMBERS,
+    records: &[
+        1353, 30, 80, 57, 0, 0, 0, 0,
+        1383, 27, 81, 54, 1, 1, 1, 2,
+        1410, 30, 82, 57, 1, 1, 3, 1,
+        1440, 30, 83, 57, 3, 1, 1, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_339: rt::PackedRows = rt::PackedRows {
@@ -11933,13 +12317,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_348: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_349: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TreeViewItemBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 88, position: 59 },
-    rt::ValueRow { key: "TreeViewItemPresenterMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 89, position: 54 },
-    rt::ValueRow { key: "TreeViewItemPresenterPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 5.0_f64], line: 90, position: 55 },
-    rt::ValueRow { key: "TreeViewItemMultiSelectSelectedItemBorderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 91, position: 74 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_349: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_47_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_47_NUMBERS,
+    records: &[
+        1372, 32, 88, 59, 0, 0, 0, 0,
+        1404, 27, 89, 54, 1, 2, 1, 2,
+        1431, 28, 90, 55, 0, 3, 0, 4,
+        1459, 47, 91, 74, 0, 0, 0, 0,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_350: &[rt::ValueRow<f64>] = &[
@@ -12077,11 +12465,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_354: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_355: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabViewButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 158, position: 55 },
-    rt::ValueRow { key: "TabViewItemHeaderCloseButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 159, position: 70 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_355: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        2760, 28, 158, 55, 0, 0, 0, 0,
+        2788, 43, 159, 70, 0, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_356: rt::PackedRows = rt::PackedRows {
@@ -12226,27 +12618,35 @@ static POPULATE_MACOSTHEME_XAML_ROWS_360: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 27, position: 57 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_361: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SplitViewLeftBorderThemeThickness", value: [0.0_f64, 0.0_f64, 1.0_f64, 0.0_f64], line: 28, position: 60 },
-    rt::ValueRow { key: "SplitViewRightBorderThemeThickness", value: [1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 29, position: 61 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_361: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_53_NUMBERS,
+    records: &[
+        0, 33, 28, 60, 0, 0, 1, 0,
+        33, 34, 29, 61, 1, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_362: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 38, 47, 1, 30, 8, 30, 8,
+        67, 38, 105, 47, 1, 30, 8, 30, 8,
     ],
 };
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_363: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "SplitViewPaneAnimationOpenDuration", value: "00:00:00.2", line: 31, position: 60 },
-    rt::ValueRow { key: "SplitViewPaneAnimationOpenPreDuration", value: "00:00:00.19999", line: 32, position: 63 },
-    rt::ValueRow { key: "SplitViewPaneAnimationCloseDuration", value: "00:00:00.1", line: 33, position: 61 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_363: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
+    numbers: &[],
+    records: &[
+        152, 34, 31, 60, 186, 10,
+        196, 37, 32, 63, 233, 14,
+        247, 35, 33, 61, 233, 10,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_364: rt::PackedRows = rt::PackedRows {
@@ -12410,18 +12810,22 @@ static POPULATE_MACOSTHEME_XAML_ROWS_372: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_373: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SelectorBarPadding", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 62, position: 45 },
-    rt::ValueRow { key: "SelectorBarBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 63, position: 53 },
-    rt::ValueRow { key: "SelectorBarItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 64, position: 57 },
-    rt::ValueRow { key: "SelectorBarSelectedInnerThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 65, position: 60 },
-    rt::ValueRow { key: "SelectorBarItemIconVisualMargin", value: [-2.0_f64, 0.0_f64, -2.0_f64, 0.0_f64], line: 66, position: 58 },
-    rt::ValueRow { key: "SelectorBarItemTextVisualMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 67, position: 58 },
-    rt::ValueRow { key: "SelectorBarItemPadding", value: [12.0_f64, 10.0_f64, 12.0_f64, 7.0_f64], line: 68, position: 49 },
-    rt::ValueRow { key: "SelectorBarItemSelectionVisualMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 69, position: 63 },
-    rt::ValueRow { key: "SelectorBarItemFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 70, position: 59 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_373: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_59_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_59_NUMBERS,
+    records: &[
+        745, 18, 62, 45, 0, 1, 0, 1,
+        763, 26, 63, 53, 2, 2, 2, 2,
+        789, 30, 64, 57, 2, 2, 2, 2,
+        819, 33, 65, 60, 2, 2, 2, 2,
+        852, 31, 66, 58, 3, 0, 3, 0,
+        883, 31, 67, 58, 0, 0, 0, 0,
+        914, 22, 68, 49, 4, 5, 4, 6,
+        936, 36, 69, 63, 0, 0, 0, 0,
+        972, 32, 70, 59, 3, 3, 3, 3,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_374: rt::PackedRows = rt::PackedRows {
@@ -12536,14 +12940,18 @@ static POPULATE_MACOSTHEME_XAML_ROWS_382: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeightComfortable", value: 48.0_f64, line: 38, position: 58 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_383: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TableViewCellPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 39, position: 47 },
-    rt::ValueRow { key: "TableViewCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 40, position: 54 },
-    rt::ValueRow { key: "TableViewCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 41, position: 58 },
-    rt::ValueRow { key: "TableViewHeaderCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 42, position: 60 },
-    rt::ValueRow { key: "TableViewHeaderCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 43, position: 64 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_383: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_62_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_62_NUMBERS,
+    records: &[
+        0, 20, 39, 47, 0, 1, 0, 1,
+        20, 27, 40, 54, 0, 2, 0, 2,
+        47, 31, 41, 58, 0, 0, 0, 0,
+        78, 33, 42, 60, 0, 2, 0, 2,
+        111, 37, 43, 64, 0, 0, 0, 0,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_384: rt::PackedRows = rt::PackedRows {
@@ -12604,23 +13012,31 @@ static POPULATE_MACOSTHEME_XAML_ROWS_389: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_390: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "InfoBadgeMinHeight", value: 4.0_f64, line: 31, position: 44 },
-    rt::ValueRow { key: "InfoBadgeMinWidth", value: 4.0_f64, line: 32, position: 43 },
-    rt::ValueRow { key: "InfoBadgeMaxHeight", value: 16.0_f64, line: 33, position: 44 },
-    rt::ValueRow { key: "InfoBadgeValueFontSize", value: 11.0_f64, line: 34, position: 48 },
-    rt::ValueRow { key: "InfoBadgeIconHeight", value: 9.0_f64, line: 35, position: 45 },
-    rt::ValueRow { key: "InfoBadgeIconWidth", value: 12.0_f64, line: 36, position: 44 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_390: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_67_NUMBERS,
+    records: &[
+        98, 18, 31, 44, 0,
+        116, 17, 32, 43, 0,
+        133, 18, 33, 44, 1,
+        151, 22, 34, 48, 2,
+        173, 19, 35, 45, 7,
+        192, 18, 36, 44, 4,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_391: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "InfoBadgePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 37, position: 43 },
-    rt::ValueRow { key: "IconInfoBadgeFontIconMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 38, position: 54 },
-    rt::ValueRow { key: "ValueInfoBadgeTextMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 39, position: 51 },
-    rt::ValueRow { key: "IconInfoBadgeIconMargin", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 40, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_391: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_67_NUMBERS,
+    records: &[
+        210, 16, 37, 43, 5, 5, 5, 5,
+        226, 27, 38, 54, 0, 5, 0, 6,
+        253, 24, 39, 51, 0, 5, 0, 6,
+        277, 23, 40, 50, 0, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_392: rt::PackedRows = rt::PackedRows {
@@ -12672,13 +13088,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_395: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_396: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeOpacity", value: 1.0_f64, line: 34, position: 64 },
-    rt::ValueRow { key: "PersonPictureEllipseBadgeImageSourceStrokeOpacity", value: 1.0_f64, line: 35, position: 75 },
-    rt::ValueRow { key: "PersonPictureEllipseStrokeThickness", value: 1.0_f64, line: 36, position: 61 },
-    rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeThickness", value: 2.0_f64, line: 37, position: 66 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_396: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_71_NUMBERS,
+    records: &[
+        401, 38, 34, 64, 0,
+        439, 49, 35, 75, 0,
+        488, 35, 36, 61, 0,
+        523, 40, 37, 66, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_397: rt::PackedRows = rt::PackedRows {
@@ -12721,37 +13141,41 @@ static POPULATE_MACOSTHEME_XAML_ROWS_398: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_399: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "GridViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 78, position: 54 },
-    rt::ValueRow { key: "GridViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 79, position: 62 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_399: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_74_NUMBERS,
+    records: &[
+        841, 24, 78, 54, 0, 0, 0, 0,
+        865, 32, 79, 62, 1, 1, 1, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_400: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        841, 34, 875, 39, 1, 81, 8, 81, 8,
-        914, 31, 945, 27, 1, 82, 8, 82, 8,
-        972, 42, 1014, 29, 1, 83, 8, 83, 8,
-        1043, 38, 1081, 28, 1, 84, 8, 84, 8,
-        1109, 39, 1148, 28, 1, 85, 8, 85, 8,
-        1176, 36, 1212, 33, 1, 86, 8, 86, 8,
-        1245, 29, 1274, 35, 1, 87, 8, 87, 8,
-        1309, 30, 1339, 34, 1, 88, 8, 88, 8,
-        1373, 36, 1409, 37, 1, 89, 8, 89, 8,
-        1446, 32, 1478, 36, 1, 90, 8, 90, 8,
-        1514, 33, 1547, 36, 1, 91, 8, 91, 8,
-        1583, 33, 945, 27, 1, 92, 8, 92, 8,
-        1616, 44, 1014, 29, 1, 93, 8, 93, 8,
-        1660, 40, 1081, 28, 1, 94, 8, 94, 8,
-        1700, 41, 1148, 28, 1, 95, 8, 95, 8,
-        1741, 31, 1772, 36, 1, 96, 8, 96, 8,
-        1808, 42, 1772, 36, 1, 97, 8, 97, 8,
-        1850, 38, 1888, 37, 1, 98, 8, 98, 8,
-        1925, 39, 1888, 37, 1, 99, 8, 99, 8,
-        1964, 38, 86, 29, 1, 100, 8, 100, 8,
+        897, 34, 931, 39, 1, 81, 8, 81, 8,
+        970, 31, 1001, 27, 1, 82, 8, 82, 8,
+        1028, 42, 1070, 29, 1, 83, 8, 83, 8,
+        1099, 38, 1137, 28, 1, 84, 8, 84, 8,
+        1165, 39, 1204, 28, 1, 85, 8, 85, 8,
+        1232, 36, 1268, 33, 1, 86, 8, 86, 8,
+        1301, 29, 1330, 35, 1, 87, 8, 87, 8,
+        1365, 30, 1395, 34, 1, 88, 8, 88, 8,
+        1429, 36, 1465, 37, 1, 89, 8, 89, 8,
+        1502, 32, 1534, 36, 1, 90, 8, 90, 8,
+        1570, 33, 1603, 36, 1, 91, 8, 91, 8,
+        1639, 33, 1001, 27, 1, 92, 8, 92, 8,
+        1672, 44, 1070, 29, 1, 93, 8, 93, 8,
+        1716, 40, 1137, 28, 1, 94, 8, 94, 8,
+        1756, 41, 1204, 28, 1, 95, 8, 95, 8,
+        1797, 31, 1828, 36, 1, 96, 8, 96, 8,
+        1864, 42, 1828, 36, 1, 97, 8, 97, 8,
+        1906, 38, 1944, 37, 1, 98, 8, 98, 8,
+        1981, 39, 1944, 37, 1, 99, 8, 99, 8,
+        2020, 38, 86, 29, 1, 100, 8, 100, 8,
     ],
 };
 
@@ -12762,58 +13186,62 @@ static POPULATE_MACOSTHEME_XAML_ROWS_401: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PivotTitleFontSize", value: 14.0_f64, line: 88, position: 44 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_402: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "PivotHeaderItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 90, position: 48 },
-    rt::ValueRow { key: "PivotItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 91, position: 42 },
-    rt::ValueRow { key: "PivotLandscapeThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 92, position: 53 },
-    rt::ValueRow { key: "PivotNavButtonBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 93, position: 61 },
-    rt::ValueRow { key: "PivotNavButtonMargin", value: [0.0_f64, 6.0_f64, 0.0_f64, 0.0_f64], line: 94, position: 47 },
-    rt::ValueRow { key: "PivotPortraitThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 95, position: 52 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_402: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_75_NUMBERS,
+    records: &[
+        0, 21, 90, 48, 0, 1, 0, 1,
+        21, 15, 91, 42, 0, 1, 0, 1,
+        36, 26, 92, 53, 0, 2, 1, 3,
+        62, 34, 93, 61, 1, 1, 1, 1,
+        96, 20, 94, 47, 1, 4, 1, 1,
+        116, 25, 95, 52, 0, 2, 1, 3,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_403: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 15, 15, 29, 1, 98, 8, 98, 8,
-        44, 21, 15, 29, 1, 99, 8, 99, 8,
-        65, 25, 90, 41, 1, 100, 8, 100, 8,
-        131, 36, 167, 37, 1, 101, 8, 101, 8,
-        204, 32, 236, 41, 1, 102, 8, 102, 8,
-        277, 26, 303, 39, 1, 103, 8, 103, 8,
-        342, 37, 303, 39, 1, 104, 8, 104, 8,
-        379, 33, 303, 39, 1, 105, 8, 105, 8,
-        412, 25, 437, 41, 1, 106, 8, 106, 8,
-        478, 36, 514, 43, 1, 107, 8, 107, 8,
-        557, 32, 514, 43, 1, 108, 8, 108, 8,
-        589, 29, 90, 41, 1, 109, 8, 109, 8,
-        618, 40, 167, 37, 1, 110, 8, 110, 8,
-        658, 36, 236, 41, 1, 111, 8, 111, 8,
-        694, 30, 303, 39, 1, 112, 8, 112, 8,
-        724, 41, 303, 39, 1, 113, 8, 113, 8,
-        765, 37, 303, 39, 1, 114, 8, 114, 8,
-        802, 29, 437, 41, 1, 115, 8, 115, 8,
-        831, 40, 514, 43, 1, 116, 8, 116, 8,
-        871, 36, 514, 43, 1, 117, 8, 117, 8,
-        907, 19, 15, 29, 1, 118, 8, 118, 8,
-        926, 35, 15, 29, 1, 119, 8, 119, 8,
-        961, 46, 1007, 38, 1, 120, 8, 120, 8,
-        1045, 42, 1007, 38, 1, 121, 8, 121, 8,
-        1087, 33, 1007, 38, 1, 122, 8, 122, 8,
-        1120, 44, 1007, 38, 1, 123, 8, 123, 8,
-        1164, 40, 1007, 38, 1, 124, 8, 124, 8,
-        1204, 33, 15, 29, 1, 125, 8, 125, 8,
-        1237, 35, 1272, 38, 1, 126, 8, 126, 8,
-        1310, 46, 1356, 44, 1, 127, 8, 127, 8,
-        1400, 42, 1356, 44, 1, 128, 8, 128, 8,
-        1442, 33, 1475, 38, 1, 129, 8, 129, 8,
-        1513, 44, 1356, 44, 1, 130, 8, 130, 8,
-        1557, 40, 1356, 44, 1, 131, 8, 131, 8,
-        1597, 33, 1630, 39, 1, 132, 8, 132, 8,
-        1669, 28, 1697, 36, 1, 133, 8, 133, 8,
-        1733, 31, 1764, 27, 1, 134, 8, 134, 8,
+        141, 15, 156, 29, 1, 98, 8, 98, 8,
+        185, 21, 156, 29, 1, 99, 8, 99, 8,
+        206, 25, 231, 41, 1, 100, 8, 100, 8,
+        272, 36, 308, 37, 1, 101, 8, 101, 8,
+        345, 32, 377, 41, 1, 102, 8, 102, 8,
+        418, 26, 444, 39, 1, 103, 8, 103, 8,
+        483, 37, 444, 39, 1, 104, 8, 104, 8,
+        520, 33, 444, 39, 1, 105, 8, 105, 8,
+        553, 25, 578, 41, 1, 106, 8, 106, 8,
+        619, 36, 655, 43, 1, 107, 8, 107, 8,
+        698, 32, 655, 43, 1, 108, 8, 108, 8,
+        730, 29, 231, 41, 1, 109, 8, 109, 8,
+        759, 40, 308, 37, 1, 110, 8, 110, 8,
+        799, 36, 377, 41, 1, 111, 8, 111, 8,
+        835, 30, 444, 39, 1, 112, 8, 112, 8,
+        865, 41, 444, 39, 1, 113, 8, 113, 8,
+        906, 37, 444, 39, 1, 114, 8, 114, 8,
+        943, 29, 578, 41, 1, 115, 8, 115, 8,
+        972, 40, 655, 43, 1, 116, 8, 116, 8,
+        1012, 36, 655, 43, 1, 117, 8, 117, 8,
+        1048, 19, 156, 29, 1, 118, 8, 118, 8,
+        1067, 35, 156, 29, 1, 119, 8, 119, 8,
+        1102, 46, 1148, 38, 1, 120, 8, 120, 8,
+        1186, 42, 1148, 38, 1, 121, 8, 121, 8,
+        1228, 33, 1148, 38, 1, 122, 8, 122, 8,
+        1261, 44, 1148, 38, 1, 123, 8, 123, 8,
+        1305, 40, 1148, 38, 1, 124, 8, 124, 8,
+        1345, 33, 156, 29, 1, 125, 8, 125, 8,
+        1378, 35, 1413, 38, 1, 126, 8, 126, 8,
+        1451, 46, 1497, 44, 1, 127, 8, 127, 8,
+        1541, 42, 1497, 44, 1, 128, 8, 128, 8,
+        1583, 33, 1616, 38, 1, 129, 8, 129, 8,
+        1654, 44, 1497, 44, 1, 130, 8, 130, 8,
+        1698, 40, 1497, 44, 1, 131, 8, 131, 8,
+        1738, 33, 1771, 39, 1, 132, 8, 132, 8,
+        1810, 28, 1838, 36, 1, 133, 8, 133, 8,
+        1874, 31, 1905, 27, 1, 134, 8, 134, 8,
     ],
 };
 
@@ -12822,20 +13250,20 @@ static POPULATE_MACOSTHEME_XAML_ROWS_404: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1791, 25, 0, 65280, 1, 135, 8,
-        1816, 34, 65535, 255, 1, 136, 8,
-        1850, 36, 65535, 255, 1, 137, 8,
-        1886, 34, 0, 65280, 1, 138, 8,
-        1920, 36, 0, 26112, 1, 139, 8,
-        1956, 34, 54741, 22997, 1, 140, 8,
-        1990, 30, 54741, 22997, 1, 141, 8,
-        2020, 34, 0, 39168, 1, 142, 8,
-        2054, 45, 55255, 61655, 1, 143, 8,
-        2099, 41, 49601, 40641, 1, 144, 8,
-        2140, 45, 0, 65280, 1, 145, 8,
-        2185, 41, 10537, 48425, 1, 146, 8,
-        2226, 37, 10537, 48425, 1, 147, 8,
-        2263, 41, 65535, 65535, 1, 148, 8,
+        1932, 25, 0, 65280, 1, 135, 8,
+        1957, 34, 65535, 255, 1, 136, 8,
+        1991, 36, 65535, 255, 1, 137, 8,
+        2027, 34, 0, 65280, 1, 138, 8,
+        2061, 36, 0, 26112, 1, 139, 8,
+        2097, 34, 54741, 22997, 1, 140, 8,
+        2131, 30, 54741, 22997, 1, 141, 8,
+        2161, 34, 0, 39168, 1, 142, 8,
+        2195, 45, 55255, 61655, 1, 143, 8,
+        2240, 41, 49601, 40641, 1, 144, 8,
+        2281, 45, 0, 65280, 1, 145, 8,
+        2326, 41, 10537, 48425, 1, 146, 8,
+        2367, 37, 10537, 48425, 1, 147, 8,
+        2404, 41, 65535, 65535, 1, 148, 8,
     ],
 };
 
@@ -12854,140 +13282,156 @@ static POPULATE_MACOSTHEME_XAML_ROWS_405: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_406: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemColorWindowColor", value: 4280032286_u32, line: 38, position: 45 },
-    rt::ValueRow { key: "SystemColorWindowTextColor", value: 4294967295_u32, line: 39, position: 49 },
-    rt::ValueRow { key: "SystemColorButtonFaceColor", value: 4281084974_u32, line: 40, position: 49 },
-    rt::ValueRow { key: "SystemColorButtonTextColor", value: 4294967295_u32, line: 41, position: 49 },
-    rt::ValueRow { key: "SystemColorHighlightColor", value: 4278879487_u32, line: 42, position: 48 },
-    rt::ValueRow { key: "SystemColorHighlightTextColor", value: 4294967295_u32, line: 43, position: 52 },
-    rt::ValueRow { key: "SystemColorHotlightColor", value: 4278879487_u32, line: 44, position: 47 },
-    rt::ValueRow { key: "SystemColorGrayTextColor", value: 4288190621_u32, line: 45, position: 47 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_406: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 22, 38, 45, 7198, 65308,
+        22, 26, 39, 49, 65535, 65535,
+        48, 26, 40, 49, 11310, 65324,
+        74, 26, 41, 49, 65535, 65535,
+        100, 25, 42, 48, 34047, 65290,
+        125, 29, 43, 52, 65535, 65535,
+        154, 24, 44, 47, 34047, 65290,
+        178, 24, 45, 47, 39069, 65432,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_407: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "AppBarExpandButtonThemeHeight", value: 24.0_f64, line: 610, position: 55 },
-    rt::ValueRow { key: "AppBarExpandButtonThemeWidth", value: 48.0_f64, line: 611, position: 54 },
-    rt::ValueRow { key: "AppBarThemeMinimalHeight", value: 24.0_f64, line: 612, position: 50 },
-    rt::ValueRow { key: "AppBarExpandButtonCircleDiameter", value: 3.0_f64, line: 613, position: 58 },
-    rt::ValueRow { key: "AutoSuggestListMaxHeight", value: 374.0_f64, line: 614, position: 50 },
-    rt::ValueRow { key: "AutoSuggestListBorderOpacity", value: 0.0_f64, line: 615, position: 54 },
-    rt::ValueRow { key: "ControlContentThemeFontSize", value: 13.0_f64, line: 616, position: 53 },
-    rt::ValueRow { key: "ContentControlFontSize", value: 13.0_f64, line: 617, position: 48 },
-    rt::ValueRow { key: "FlyoutThemeMaxHeight", value: 758.0_f64, line: 618, position: 46 },
-    rt::ValueRow { key: "FlyoutThemeMaxWidth", value: 456.0_f64, line: 619, position: 45 },
-    rt::ValueRow { key: "FlyoutThemeMinHeight", value: 40.0_f64, line: 620, position: 46 },
-    rt::ValueRow { key: "FlyoutThemeMinWidth", value: 96.0_f64, line: 621, position: 45 },
-    rt::ValueRow { key: "FlyoutThemeTouchMinWidth", value: 240.0_f64, line: 622, position: 50 },
-    rt::ValueRow { key: "GridViewItemSelectedBorderThemeThickness", value: 4.0_f64, line: 623, position: 66 },
-    rt::ValueRow { key: "GridViewItemReorderHintThemeOffset", value: 16.0_f64, line: 624, position: 60 },
-    rt::ValueRow { key: "TextControlBackgroundThemeOpacity", value: 0.8_f64, line: 625, position: 59 },
-    rt::ValueRow { key: "TextControlBorderThemeOpacity", value: 0.8_f64, line: 626, position: 55 },
-    rt::ValueRow { key: "TextControlBorderThemeBrushOpacity", value: 1.0_f64, line: 627, position: 60 },
-    rt::ValueRow { key: "TextControlPointerOverBackgroundThemeOpacity", value: 0.87_f64, line: 628, position: 70 },
-    rt::ValueRow { key: "TextControlPointerOverBorderThemeOpacity", value: 0.87_f64, line: 629, position: 66 },
-    rt::ValueRow { key: "TextControlPointerOverBorderThemeBrushOpacity", value: 1.0_f64, line: 630, position: 71 },
-    rt::ValueRow { key: "TextControlBackgroundRestOpacity", value: 0.4_f64, line: 631, position: 58 },
-    rt::ValueRow { key: "TextControlBackgroundHoverOpacity", value: 0.6_f64, line: 632, position: 59 },
-    rt::ValueRow { key: "TextControlBackgroundFocusedOpacity", value: 1.0_f64, line: 633, position: 61 },
-    rt::ValueRow { key: "TextControlThemeMinHeight", value: 26.0_f64, line: 634, position: 51 },
-    rt::ValueRow { key: "TextControlThemeMinWidth", value: 64.0_f64, line: 635, position: 50 },
-    rt::ValueRow { key: "TextStyleLargeFontSize", value: 18.14_f64, line: 636, position: 48 },
-    rt::ValueRow { key: "TextStyleExtraLargeFontSize", value: 25.5_f64, line: 637, position: 53 },
-    rt::ValueRow { key: "GridViewItemMinWidth", value: 44.0_f64, line: 638, position: 46 },
-    rt::ValueRow { key: "GridViewItemMinHeight", value: 44.0_f64, line: 639, position: 47 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_407: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        0, 29, 610, 55, 0,
+        29, 28, 611, 54, 1,
+        57, 24, 612, 50, 0,
+        81, 32, 613, 58, 2,
+        113, 24, 614, 50, 3,
+        137, 28, 615, 54, 4,
+        165, 27, 616, 53, 5,
+        192, 22, 617, 48, 5,
+        214, 20, 618, 46, 6,
+        234, 19, 619, 45, 7,
+        253, 20, 620, 46, 8,
+        273, 19, 621, 45, 9,
+        292, 24, 622, 50, 10,
+        316, 40, 623, 66, 11,
+        356, 34, 624, 60, 12,
+        390, 33, 625, 59, 13,
+        423, 29, 626, 55, 13,
+        452, 34, 627, 60, 14,
+        486, 44, 628, 70, 15,
+        530, 40, 629, 66, 15,
+        570, 45, 630, 71, 14,
+        615, 32, 631, 58, 16,
+        647, 33, 632, 59, 17,
+        680, 35, 633, 61, 14,
+        715, 25, 634, 51, 18,
+        740, 24, 635, 50, 19,
+        764, 22, 636, 48, 20,
+        786, 27, 637, 53, 21,
+        813, 20, 638, 46, 22,
+        833, 21, 639, 47, 22,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_408: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarBottomBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 640, position: 59 },
-    rt::ValueRow { key: "AppBarBottomThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 641, position: 51 },
-    rt::ValueRow { key: "AppBarTopBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 642, position: 56 },
-    rt::ValueRow { key: "AppBarTopThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 643, position: 48 },
-    rt::ValueRow { key: "AppBarExpandButtonCircleInnerPadding", value: [3.0_f64, 0.0_f64, 3.0_f64, 0.0_f64], line: 644, position: 63 },
-    rt::ValueRow { key: "AutoSuggestListBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 645, position: 62 },
-    rt::ValueRow { key: "AutoSuggestListMargin", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 646, position: 48 },
-    rt::ValueRow { key: "AutoSuggestListPadding", value: [-1.0_f64, 0.0_f64, -1.0_f64, 0.0_f64], line: 647, position: 49 },
-    rt::ValueRow { key: "AutoSuggestListViewItemMargin", value: [12.0_f64, 11.0_f64, 0.0_f64, 13.0_f64], line: 648, position: 56 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 649, position: 56 },
-    rt::ValueRow { key: "DateTimeFlyoutButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 650, position: 62 },
-    rt::ValueRow { key: "DateTimeFlyoutContentPanelPortraitThemeMargin", value: [0.0_f64, 37.0_f64, 0.0_f64, 0.0_f64], line: 651, position: 72 },
-    rt::ValueRow { key: "DateTimeFlyoutContentPanelLandscapeThemeMargin", value: [0.0_f64, 19.0_f64, 0.0_f64, 0.0_f64], line: 652, position: 73 },
-    rt::ValueRow { key: "DateTimeFlyoutTitleThemeMargin", value: [19.0_f64, 0.0_f64, 19.0_f64, 17.5_f64], line: 653, position: 57 },
-    rt::ValueRow { key: "FlyoutContentThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 654, position: 51 },
-    rt::ValueRow { key: "FlyoutContentThemePadding", value: [12.0_f64, 11.0_f64, 12.0_f64, 12.0_f64], line: 655, position: 52 },
-    rt::ValueRow { key: "GridViewItemCompactSelectedBorderThemeThickness", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 656, position: 74 },
-    rt::ValueRow { key: "GridViewItemMultiselectBorderThickness", value: [2.5_f64, 2.5_f64, 2.5_f64, 2.5_f64], line: 657, position: 65 },
-    rt::ValueRow { key: "TextControlMarginThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 658, position: 58 },
-    rt::ValueRow { key: "HelperButtonThemePadding", value: [0.0_f64, 0.0_f64, -2.0_f64, 0.0_f64], line: 659, position: 51 },
-    rt::ValueRow { key: "TextControlPlaceholderThemePadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 660, position: 61 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_408: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        854, 32, 640, 59, 4, 4, 4, 4,
+        886, 24, 641, 51, 4, 4, 4, 4,
+        910, 29, 642, 56, 4, 4, 4, 4,
+        939, 21, 643, 48, 4, 4, 4, 4,
+        960, 36, 644, 63, 2, 4, 2, 4,
+        996, 35, 645, 62, 14, 14, 14, 14,
+        1031, 21, 646, 48, 4, 23, 4, 23,
+        1052, 22, 647, 49, 24, 4, 24, 4,
+        1074, 29, 648, 56, 25, 26, 4, 5,
+        1103, 29, 649, 56, 14, 14, 14, 14,
+        1132, 35, 650, 62, 4, 4, 4, 4,
+        1167, 45, 651, 72, 4, 27, 4, 4,
+        1212, 46, 652, 73, 4, 28, 4, 4,
+        1258, 30, 653, 57, 28, 4, 28, 29,
+        1288, 24, 654, 51, 4, 4, 4, 4,
+        1312, 25, 655, 52, 25, 26, 25, 25,
+        1337, 47, 656, 74, 11, 11, 11, 11,
+        1384, 38, 657, 65, 30, 30, 30, 30,
+        1422, 31, 658, 58, 4, 4, 4, 4,
+        1453, 24, 659, 51, 4, 4, 31, 4,
+        1477, 34, 660, 61, 32, 2, 32, 2,
+    ],
+};
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_409: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemAltHighColor", value: 4278190080_u32, line: 663, position: 41 },
-    rt::ValueRow { key: "SystemAltLowColor", value: 855638016_u32, line: 664, position: 40 },
-    rt::ValueRow { key: "SystemAltMediumColor", value: 2566914048_u32, line: 665, position: 43 },
-    rt::ValueRow { key: "SystemAltMediumHighColor", value: 3422552064_u32, line: 666, position: 47 },
-    rt::ValueRow { key: "SystemAltMediumLowColor", value: 1711276032_u32, line: 667, position: 46 },
-    rt::ValueRow { key: "SystemBaseHighColor", value: 4294967295_u32, line: 668, position: 42 },
-    rt::ValueRow { key: "SystemBaseLowColor", value: 872415231_u32, line: 669, position: 41 },
-    rt::ValueRow { key: "SystemBaseMediumColor", value: 2583691263_u32, line: 670, position: 44 },
-    rt::ValueRow { key: "SystemBaseMediumHighColor", value: 3439329279_u32, line: 671, position: 48 },
-    rt::ValueRow { key: "SystemBaseMediumLowColor", value: 1728053247_u32, line: 672, position: 47 },
-    rt::ValueRow { key: "SystemChromeAltLowColor", value: 4294111986_u32, line: 673, position: 46 },
-    rt::ValueRow { key: "SystemChromeBlackHighColor", value: 4278190080_u32, line: 674, position: 49 },
-    rt::ValueRow { key: "SystemChromeBlackLowColor", value: 855638016_u32, line: 675, position: 48 },
-    rt::ValueRow { key: "SystemChromeBlackMediumLowColor", value: 1711276032_u32, line: 676, position: 54 },
-    rt::ValueRow { key: "SystemChromeBlackMediumColor", value: 3422552064_u32, line: 677, position: 51 },
-    rt::ValueRow { key: "SystemChromeDisabledHighColor", value: 4281545523_u32, line: 678, position: 52 },
-    rt::ValueRow { key: "SystemChromeDisabledLowColor", value: 4286940549_u32, line: 679, position: 51 },
-    rt::ValueRow { key: "SystemChromeHighColor", value: 4285953654_u32, line: 680, position: 44 },
-    rt::ValueRow { key: "SystemChromeLowColor", value: 4279703319_u32, line: 681, position: 43 },
-    rt::ValueRow { key: "SystemChromeMediumColor", value: 4280229663_u32, line: 682, position: 46 },
-    rt::ValueRow { key: "SystemChromeMediumLowColor", value: 4281019179_u32, line: 683, position: 49 },
-    rt::ValueRow { key: "SystemChromeWhiteColor", value: 4294967295_u32, line: 684, position: 45 },
-    rt::ValueRow { key: "SystemChromeGrayColor", value: 4285953654_u32, line: 685, position: 44 },
-    rt::ValueRow { key: "SystemListLowColor", value: 436207615_u32, line: 686, position: 41 },
-    rt::ValueRow { key: "SystemListMediumColor", value: 872415231_u32, line: 687, position: 44 },
-    rt::ValueRow { key: "SystemErrorTextColor", value: 4294963200_u32, line: 688, position: 43 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_409: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &[],
+    records: &[
+        1511, 18, 663, 41, 0, 65280,
+        1529, 17, 664, 40, 0, 13056,
+        1546, 20, 665, 43, 0, 39168,
+        1566, 24, 666, 47, 0, 52224,
+        1590, 23, 667, 46, 0, 26112,
+        1613, 19, 668, 42, 65535, 65535,
+        1632, 18, 669, 41, 65535, 13311,
+        1650, 21, 670, 44, 65535, 39423,
+        1671, 25, 671, 48, 65535, 52479,
+        1696, 24, 672, 47, 65535, 26367,
+        1720, 23, 673, 46, 62194, 65522,
+        1743, 26, 674, 49, 0, 65280,
+        1769, 25, 675, 48, 0, 13056,
+        1794, 31, 676, 54, 0, 26112,
+        1825, 28, 677, 51, 0, 52224,
+        1853, 29, 678, 52, 13107, 65331,
+        1882, 28, 679, 51, 34181, 65413,
+        1910, 21, 680, 44, 30326, 65398,
+        1931, 20, 681, 43, 5911, 65303,
+        1951, 23, 682, 46, 7967, 65311,
+        1974, 26, 683, 49, 11051, 65323,
+        2000, 22, 684, 45, 65535, 65535,
+        2022, 21, 685, 44, 30326, 65398,
+        2043, 18, 686, 41, 65535, 6655,
+        2061, 21, 687, 44, 65535, 13311,
+        2082, 20, 688, 43, 61440, 65535,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_410: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 34, 34, 17, 1, 689, 8, 689, 67,
-        51, 35, 86, 18, 1, 690, 8, 690, 68,
-        104, 41, 145, 24, 1, 691, 8, 691, 74,
-        169, 37, 206, 20, 1, 692, 8, 692, 70,
-        226, 40, 266, 23, 1, 693, 8, 693, 73,
-        289, 36, 325, 19, 1, 694, 8, 694, 69,
-        344, 35, 379, 18, 1, 695, 8, 695, 68,
-        397, 38, 435, 21, 1, 696, 8, 696, 71,
-        456, 42, 498, 25, 1, 697, 8, 697, 75,
-        523, 41, 564, 24, 1, 698, 8, 698, 74,
-        588, 43, 631, 26, 1, 699, 8, 699, 76,
-        657, 45, 702, 28, 1, 700, 8, 700, 78,
-        730, 42, 772, 25, 1, 701, 8, 701, 75,
-        797, 48, 845, 31, 1, 702, 8, 702, 81,
-        876, 40, 916, 23, 1, 703, 8, 703, 73,
-        939, 43, 982, 26, 1, 704, 8, 704, 76,
-        1008, 39, 1047, 22, 1, 705, 8, 705, 72,
-        1069, 35, 1104, 18, 1, 706, 8, 706, 68,
-        1122, 38, 1160, 21, 1, 707, 8, 707, 71,
-        1181, 32, 34, 17, 1, 708, 8, 708, 65,
-        1213, 34, 325, 19, 1, 709, 8, 709, 67,
-        1247, 33, 379, 18, 1, 710, 8, 710, 66,
-        1280, 39, 564, 24, 1, 711, 8, 711, 72,
-        1319, 44, 1363, 29, 1, 712, 8, 712, 77,
-        1392, 43, 1435, 28, 1, 713, 8, 713, 76,
-        1463, 36, 1499, 21, 1, 714, 8, 714, 69,
-        1520, 41, 982, 26, 1, 715, 8, 715, 74,
-        1561, 36, 1160, 21, 1, 716, 8, 716, 69,
+        2102, 34, 2136, 17, 1, 689, 8, 689, 67,
+        2153, 35, 1511, 18, 1, 690, 8, 690, 68,
+        2188, 41, 1566, 24, 1, 691, 8, 691, 74,
+        2229, 37, 1546, 20, 1, 692, 8, 692, 70,
+        2266, 40, 1590, 23, 1, 693, 8, 693, 73,
+        2306, 36, 1613, 19, 1, 694, 8, 694, 69,
+        2342, 35, 1632, 18, 1, 695, 8, 695, 68,
+        2377, 38, 1650, 21, 1, 696, 8, 696, 71,
+        2415, 42, 1671, 25, 1, 697, 8, 697, 75,
+        2457, 41, 1696, 24, 1, 698, 8, 698, 74,
+        2498, 43, 1743, 26, 1, 699, 8, 699, 76,
+        2541, 45, 1825, 28, 1, 700, 8, 700, 78,
+        2586, 42, 1769, 25, 1, 701, 8, 701, 75,
+        2628, 48, 1794, 31, 1, 702, 8, 702, 81,
+        2676, 40, 1951, 23, 1, 703, 8, 703, 73,
+        2716, 43, 1974, 26, 1, 704, 8, 704, 76,
+        2759, 39, 2000, 22, 1, 705, 8, 705, 72,
+        2798, 35, 2043, 18, 1, 706, 8, 706, 68,
+        2833, 38, 2061, 21, 1, 707, 8, 707, 71,
+        2871, 32, 2136, 17, 1, 708, 8, 708, 65,
+        2903, 34, 1613, 19, 1, 709, 8, 709, 67,
+        2937, 33, 1632, 18, 1, 710, 8, 710, 66,
+        2970, 39, 1696, 24, 1, 711, 8, 711, 72,
+        3009, 44, 1853, 29, 1, 712, 8, 712, 77,
+        3053, 43, 1882, 28, 1, 713, 8, 713, 76,
+        3096, 36, 1910, 21, 1, 714, 8, 714, 69,
+        3132, 41, 1974, 26, 1, 715, 8, 715, 74,
+        3173, 36, 2061, 21, 1, 716, 8, 716, 69,
     ],
 };
 
@@ -12996,7 +13440,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_411: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1597, 37, 65535, 255, 1, 717, 8,
+        3209, 37, 65535, 255, 1, 717, 8,
     ],
 };
 
@@ -13005,23 +13449,23 @@ static POPULATE_MACOSTHEME_XAML_ROWS_412: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1634, 35, 34, 17, 1, 718, 8, 718, 68,
-        1669, 34, 34, 17, 1, 719, 8, 719, 67,
-        1703, 35, 86, 18, 1, 720, 8, 720, 68,
-        1738, 41, 145, 24, 1, 721, 8, 721, 74,
-        1779, 36, 325, 19, 1, 722, 8, 722, 69,
-        1815, 35, 379, 18, 1, 723, 8, 723, 68,
-        1850, 38, 435, 21, 1, 724, 8, 724, 71,
-        1888, 42, 498, 25, 1, 725, 8, 725, 75,
-        1930, 41, 564, 24, 1, 726, 8, 726, 74,
-        1971, 43, 631, 26, 1, 727, 8, 727, 76,
-        2014, 38, 1499, 21, 1, 728, 8, 728, 71,
-        2052, 40, 916, 23, 1, 729, 8, 729, 73,
-        2092, 39, 1047, 22, 1, 730, 8, 730, 72,
-        2131, 45, 1435, 28, 1, 731, 8, 731, 78,
-        2176, 38, 2214, 21, 1, 732, 8, 732, 71,
-        2235, 35, 1104, 18, 1, 733, 8, 733, 68,
-        2270, 38, 1160, 21, 1, 734, 8, 734, 71,
+        3246, 35, 2136, 17, 1, 718, 8, 718, 68,
+        3281, 34, 2136, 17, 1, 719, 8, 719, 67,
+        3315, 35, 1511, 18, 1, 720, 8, 720, 68,
+        3350, 41, 1566, 24, 1, 721, 8, 721, 74,
+        3391, 36, 1613, 19, 1, 722, 8, 722, 69,
+        3427, 35, 1632, 18, 1, 723, 8, 723, 68,
+        3462, 38, 1650, 21, 1, 724, 8, 724, 71,
+        3500, 42, 1671, 25, 1, 725, 8, 725, 75,
+        3542, 41, 1696, 24, 1, 726, 8, 726, 74,
+        3583, 43, 1743, 26, 1, 727, 8, 727, 76,
+        3626, 38, 1910, 21, 1, 728, 8, 728, 71,
+        3664, 40, 1951, 23, 1, 729, 8, 729, 73,
+        3704, 39, 2000, 22, 1, 730, 8, 730, 72,
+        3743, 45, 1882, 28, 1, 731, 8, 731, 78,
+        3788, 38, 2022, 21, 1, 732, 8, 732, 71,
+        3826, 35, 2043, 18, 1, 733, 8, 733, 68,
+        3861, 38, 2061, 21, 1, 734, 8, 734, 71,
     ],
 };
 
@@ -13030,7 +13474,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_413: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2308, 39, 65535, 255, 1, 735, 8,
+        3899, 39, 65535, 255, 1, 735, 8,
     ],
 };
 
@@ -13039,17 +13483,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_414: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2347, 45, 702, 28, 1, 736, 8, 736, 78,
-        2392, 48, 845, 31, 1, 737, 8, 737, 81,
-        2440, 33, 34, 17, 1, 738, 8, 738, 66,
-        2473, 36, 34, 17, 1, 739, 8, 739, 69,
-        2509, 37, 86, 18, 1, 740, 8, 740, 70,
-        2546, 38, 325, 19, 1, 741, 8, 741, 71,
-        2584, 37, 379, 18, 1, 742, 8, 742, 70,
-        2621, 40, 435, 21, 1, 743, 8, 743, 73,
-        2661, 44, 498, 25, 1, 744, 8, 744, 77,
-        2705, 43, 145, 24, 1, 745, 8, 745, 76,
-        2748, 43, 564, 24, 1, 746, 8, 746, 76,
+        3938, 45, 1825, 28, 1, 736, 8, 736, 78,
+        3983, 48, 1794, 31, 1, 737, 8, 737, 81,
+        4031, 33, 2136, 17, 1, 738, 8, 738, 66,
+        4064, 36, 2136, 17, 1, 739, 8, 739, 69,
+        4100, 37, 1511, 18, 1, 740, 8, 740, 70,
+        4137, 38, 1613, 19, 1, 741, 8, 741, 71,
+        4175, 37, 1632, 18, 1, 742, 8, 742, 70,
+        4212, 40, 1650, 21, 1, 743, 8, 743, 73,
+        4252, 44, 1671, 25, 1, 744, 8, 744, 77,
+        4296, 43, 1566, 24, 1, 745, 8, 745, 76,
+        4339, 43, 1696, 24, 1, 746, 8, 746, 76,
     ],
 };
 
@@ -13058,7 +13502,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_415: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2791, 41, 1047, 22, 1, 750, 8, 750, 74,
+        4382, 41, 2000, 22, 1, 750, 8, 750, 74,
     ],
 };
 
@@ -13067,7 +13511,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_416: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2832, 41, 65535, 255, 1, 751, 8,
+        4423, 41, 65535, 255, 1, 751, 8,
     ],
 };
 
@@ -13076,13 +13520,13 @@ static POPULATE_MACOSTHEME_XAML_ROWS_417: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2873, 35, 325, 19, 1, 752, 8, 752, 68,
-        2908, 34, 379, 18, 1, 753, 8, 753, 67,
-        2942, 37, 435, 21, 1, 754, 8, 754, 70,
-        2979, 41, 498, 25, 1, 755, 8, 755, 74,
-        3020, 40, 564, 24, 1, 756, 8, 756, 73,
-        3060, 39, 3099, 23, 1, 757, 8, 757, 72,
-        3122, 37, 1499, 21, 1, 758, 8, 758, 70,
+        4464, 35, 1613, 19, 1, 752, 8, 752, 68,
+        4499, 34, 1632, 18, 1, 753, 8, 753, 67,
+        4533, 37, 1650, 21, 1, 754, 8, 754, 70,
+        4570, 41, 1671, 25, 1, 755, 8, 755, 74,
+        4611, 40, 1696, 24, 1, 756, 8, 756, 73,
+        4651, 39, 1720, 23, 1, 757, 8, 757, 72,
+        4690, 37, 1910, 21, 1, 758, 8, 758, 70,
     ],
 };
 
@@ -13091,9 +13535,9 @@ static POPULATE_MACOSTHEME_XAML_ROWS_418: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3159, 37, 1160, 21, 1, 762, 8, 762, 70,
-        3196, 34, 1104, 18, 1, 763, 8, 763, 67,
-        3230, 38, 1047, 22, 1, 764, 8, 764, 71,
+        4727, 37, 2061, 21, 1, 762, 8, 762, 70,
+        4764, 34, 2043, 18, 1, 763, 8, 763, 67,
+        4798, 38, 2000, 22, 1, 764, 8, 764, 71,
     ],
 };
 
@@ -13102,7 +13546,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_419: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3268, 38, 65535, 255, 1, 765, 8,
+        4836, 38, 65535, 255, 1, 765, 8,
     ],
 };
 
@@ -13111,18 +13555,18 @@ static POPULATE_MACOSTHEME_XAML_ROWS_420: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3306, 31, 34, 17, 1, 766, 8, 766, 64,
-        3337, 35, 325, 19, 1, 767, 8, 767, 68,
-        3372, 37, 435, 21, 1, 768, 8, 768, 70,
-        3409, 41, 498, 25, 1, 769, 8, 769, 74,
-        3450, 41, 206, 20, 1, 770, 8, 770, 74,
-        3491, 39, 86, 18, 1, 771, 8, 771, 72,
-        3530, 47, 206, 20, 1, 772, 8, 772, 80,
-        3577, 39, 379, 18, 1, 773, 8, 773, 72,
-        3616, 42, 435, 21, 1, 774, 8, 774, 75,
-        3658, 39, 1104, 18, 1, 775, 8, 775, 72,
-        3697, 41, 3738, 20, 1, 776, 8, 776, 74,
-        3758, 47, 982, 26, 1, 777, 8, 777, 80,
+        4874, 31, 2136, 17, 1, 766, 8, 766, 64,
+        4905, 35, 1613, 19, 1, 767, 8, 767, 68,
+        4940, 37, 1650, 21, 1, 768, 8, 768, 70,
+        4977, 41, 1671, 25, 1, 769, 8, 769, 74,
+        5018, 41, 1546, 20, 1, 770, 8, 770, 74,
+        5059, 39, 1511, 18, 1, 771, 8, 771, 72,
+        5098, 47, 1546, 20, 1, 772, 8, 772, 80,
+        5145, 39, 1632, 18, 1, 773, 8, 773, 72,
+        5184, 42, 1650, 21, 1, 774, 8, 774, 75,
+        5226, 39, 2043, 18, 1, 775, 8, 775, 72,
+        5265, 41, 1931, 20, 1, 776, 8, 776, 74,
+        5306, 47, 1974, 26, 1, 777, 8, 777, 80,
     ],
 };
 
@@ -13131,7 +13575,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_421: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3805, 43, 65535, 255, 1, 778, 8,
+        5353, 43, 65535, 255, 1, 778, 8,
     ],
 };
 
@@ -13140,10 +13584,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_422: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3848, 34, 325, 19, 1, 779, 8, 779, 67,
-        3882, 36, 435, 21, 1, 780, 8, 780, 69,
-        3918, 46, 845, 31, 1, 781, 8, 781, 79,
-        3964, 37, 4001, 20, 1, 782, 8, 782, 70,
+        5396, 34, 1613, 19, 1, 779, 8, 779, 67,
+        5430, 36, 1650, 21, 1, 780, 8, 780, 69,
+        5466, 46, 1794, 31, 1, 781, 8, 781, 79,
+        5512, 37, 2082, 20, 1, 782, 8, 782, 70,
     ],
 };
 
@@ -13152,14 +13596,14 @@ static POPULATE_MACOSTHEME_XAML_ROWS_423: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4021, 43, 3882, 36, 1, 783, 8, 783, 8,
-        4064, 25, 4089, 29, 1, 784, 8, 784, 8,
-        4118, 15, 344, 35, 1, 785, 8, 785, 8,
-        4133, 26, 3020, 40, 1, 786, 8, 786, 8,
-        4159, 22, 2942, 37, 1, 787, 8, 787, 8,
-        4181, 16, 3268, 38, 1, 788, 8, 788, 8,
-        4197, 27, 3268, 38, 1, 789, 8, 789, 8,
-        4224, 23, 3268, 38, 1, 790, 8, 790, 8,
+        5549, 43, 5430, 36, 1, 783, 8, 783, 8,
+        5592, 25, 5617, 29, 1, 784, 8, 784, 8,
+        5646, 15, 2342, 35, 1, 785, 8, 785, 8,
+        5661, 26, 4611, 40, 1, 786, 8, 786, 8,
+        5687, 22, 4533, 37, 1, 787, 8, 787, 8,
+        5709, 16, 4836, 38, 1, 788, 8, 788, 8,
+        5725, 27, 4836, 38, 1, 789, 8, 789, 8,
+        5752, 23, 4836, 38, 1, 790, 8, 790, 8,
     ],
 };
 
@@ -13174,26 +13618,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_425: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4247, 30, 4089, 29, 1, 793, 8, 793, 8,
-        4277, 41, 3196, 34, 1, 794, 8, 794, 8,
-        4318, 37, 3159, 37, 1, 795, 8, 795, 8,
-        4355, 38, 4089, 29, 1, 796, 8, 796, 8,
-        4393, 30, 1779, 36, 1, 797, 8, 797, 8,
-        4423, 41, 2546, 38, 1, 798, 8, 798, 8,
-        4464, 37, 1779, 36, 1, 799, 8, 799, 8,
-        4501, 38, 1280, 39, 1, 800, 8, 800, 8,
-        4539, 31, 4089, 29, 1, 801, 8, 801, 8,
-        4570, 42, 4089, 29, 1, 802, 8, 802, 8,
-        4612, 38, 4089, 29, 1, 803, 8, 803, 8,
-        4650, 39, 4089, 29, 1, 804, 8, 804, 8,
-        4689, 16, 876, 40, 1, 805, 8, 805, 8,
-        4705, 16, 1779, 36, 1, 806, 8, 806, 8,
-        4721, 24, 2308, 39, 1, 807, 8, 807, 8,
-        4745, 31, 876, 40, 1, 808, 8, 808, 8,
-        4776, 27, 1779, 36, 1, 809, 8, 809, 8,
-        4803, 35, 1280, 39, 1, 810, 8, 810, 8,
-        4838, 27, 4089, 29, 1, 811, 8, 811, 8,
-        4865, 32, 1703, 35, 1, 812, 8, 812, 8,
+        5775, 30, 5617, 29, 1, 793, 8, 793, 8,
+        5805, 41, 4764, 34, 1, 794, 8, 794, 8,
+        5846, 37, 4727, 37, 1, 795, 8, 795, 8,
+        5883, 38, 5617, 29, 1, 796, 8, 796, 8,
+        5921, 30, 3391, 36, 1, 797, 8, 797, 8,
+        5951, 41, 4137, 38, 1, 798, 8, 798, 8,
+        5992, 37, 3391, 36, 1, 799, 8, 799, 8,
+        6029, 38, 2970, 39, 1, 800, 8, 800, 8,
+        6067, 31, 5617, 29, 1, 801, 8, 801, 8,
+        6098, 42, 5617, 29, 1, 802, 8, 802, 8,
+        6140, 38, 5617, 29, 1, 803, 8, 803, 8,
+        6178, 39, 5617, 29, 1, 804, 8, 804, 8,
+        6217, 16, 2676, 40, 1, 805, 8, 805, 8,
+        6233, 16, 3391, 36, 1, 806, 8, 806, 8,
+        6249, 24, 3899, 39, 1, 807, 8, 807, 8,
+        6273, 31, 2676, 40, 1, 808, 8, 808, 8,
+        6304, 27, 3391, 36, 1, 809, 8, 809, 8,
+        6331, 35, 2970, 39, 1, 810, 8, 810, 8,
+        6366, 27, 5617, 29, 1, 811, 8, 811, 8,
+        6393, 32, 3315, 35, 1, 812, 8, 812, 8,
     ],
 };
 
@@ -13202,7 +13646,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_426: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4897, 32, 65280, 65535, 1, 813, 8,
+        6425, 32, 65280, 65535, 1, 813, 8,
     ],
 };
 
@@ -13211,25 +13655,25 @@ static POPULATE_MACOSTHEME_XAML_ROWS_427: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        4929, 30, 4089, 29, 1, 814, 8, 814, 8,
-        4959, 41, 3196, 34, 1, 815, 8, 815, 8,
-        5000, 37, 3159, 37, 1, 816, 8, 816, 8,
-        5037, 38, 4089, 29, 1, 817, 8, 817, 8,
-        5075, 30, 1779, 36, 1, 818, 8, 818, 8,
-        5105, 41, 2546, 38, 1, 819, 8, 819, 8,
-        5146, 37, 2546, 38, 1, 820, 8, 820, 8,
-        5183, 38, 1280, 39, 1, 821, 8, 821, 8,
-        5221, 40, 1888, 42, 1, 822, 8, 822, 8,
-        5261, 51, 2546, 38, 1, 823, 8, 823, 8,
-        5312, 47, 2546, 38, 1, 824, 8, 824, 8,
-        5359, 48, 1280, 39, 1, 825, 8, 825, 8,
-        5407, 35, 3530, 47, 1, 826, 8, 826, 8,
-        5442, 35, 3530, 47, 1, 827, 8, 827, 8,
-        5477, 34, 3530, 47, 1, 828, 8, 828, 8,
-        5511, 32, 0, 34, 1, 829, 8, 829, 8,
-        5543, 32, 2092, 39, 1, 830, 8, 830, 8,
-        5575, 33, 344, 35, 1, 831, 8, 831, 8,
-        5608, 33, 1280, 39, 1, 832, 8, 832, 8,
+        6457, 30, 5617, 29, 1, 814, 8, 814, 8,
+        6487, 41, 4764, 34, 1, 815, 8, 815, 8,
+        6528, 37, 4727, 37, 1, 816, 8, 816, 8,
+        6565, 38, 5617, 29, 1, 817, 8, 817, 8,
+        6603, 30, 3391, 36, 1, 818, 8, 818, 8,
+        6633, 41, 4137, 38, 1, 819, 8, 819, 8,
+        6674, 37, 4137, 38, 1, 820, 8, 820, 8,
+        6711, 38, 2970, 39, 1, 821, 8, 821, 8,
+        6749, 40, 3500, 42, 1, 822, 8, 822, 8,
+        6789, 51, 4137, 38, 1, 823, 8, 823, 8,
+        6840, 47, 4137, 38, 1, 824, 8, 824, 8,
+        6887, 48, 2970, 39, 1, 825, 8, 825, 8,
+        6935, 35, 5098, 47, 1, 826, 8, 826, 8,
+        6970, 35, 5098, 47, 1, 827, 8, 827, 8,
+        7005, 34, 5098, 47, 1, 828, 8, 828, 8,
+        7039, 32, 2102, 34, 1, 829, 8, 829, 8,
+        7071, 32, 3704, 39, 1, 830, 8, 830, 8,
+        7103, 33, 2342, 35, 1, 831, 8, 831, 8,
+        7136, 33, 2970, 39, 1, 832, 8, 832, 8,
     ],
 };
 
@@ -13238,40 +13682,40 @@ static POPULATE_MACOSTHEME_XAML_ROWS_428: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5641, 26, 0, 65280, 1, 833, 8,
-        5667, 22, 0, 65280, 1, 834, 8,
-        5689, 30, 65535, 255, 1, 835, 8,
-        5719, 38, 65535, 26367, 1, 836, 8,
-        5757, 30, 65535, 65535, 1, 837, 8,
-        5787, 41, 65535, 8703, 1, 838, 8,
-        5828, 41, 65535, 65535, 1, 839, 8,
-        5869, 37, 0, 65280, 1, 840, 8,
-        5906, 35, 31611, 65403, 1, 841, 8,
-        5941, 31, 65535, 57087, 1, 842, 8,
-        5972, 37, 65535, 65535, 1, 843, 8,
-        6009, 42, 65535, 52479, 1, 844, 8,
-        6051, 38, 65535, 26367, 1, 845, 8,
-        6089, 40, 65535, 39423, 1, 846, 8,
-        6129, 31, 65535, 65535, 1, 847, 8,
-        6160, 30, 65535, 255, 1, 848, 8,
-        6190, 38, 65535, 26367, 1, 849, 8,
-        6228, 30, 65535, 65535, 1, 850, 8,
-        6258, 41, 65535, 8703, 1, 851, 8,
-        6299, 41, 65535, 65535, 1, 852, 8,
-        6340, 37, 0, 65280, 1, 853, 8,
-        6377, 26, 0, 65280, 1, 854, 8,
-        6403, 32, 0, 65280, 1, 855, 8,
-        6435, 32, 65535, 65535, 1, 856, 8,
-        6467, 35, 65535, 255, 1, 857, 8,
-        6502, 31, 65535, 255, 1, 858, 8,
-        6533, 27, 65535, 26367, 1, 859, 8,
-        6560, 29, 29439, 65436, 1, 860, 8,
-        6589, 40, 29439, 52380, 1, 861, 8,
-        6629, 36, 29439, 39324, 1, 862, 8,
-        6665, 39, 65535, 65535, 1, 863, 8,
-        6704, 50, 65535, 52479, 1, 864, 8,
-        6754, 46, 65535, 26367, 1, 865, 8,
-        6800, 35, 65535, 29695, 1, 866, 8,
+        7169, 26, 0, 65280, 1, 833, 8,
+        7195, 22, 0, 65280, 1, 834, 8,
+        7217, 30, 65535, 255, 1, 835, 8,
+        7247, 38, 65535, 26367, 1, 836, 8,
+        7285, 30, 65535, 65535, 1, 837, 8,
+        7315, 41, 65535, 8703, 1, 838, 8,
+        7356, 41, 65535, 65535, 1, 839, 8,
+        7397, 37, 0, 65280, 1, 840, 8,
+        7434, 35, 31611, 65403, 1, 841, 8,
+        7469, 31, 65535, 57087, 1, 842, 8,
+        7500, 37, 65535, 65535, 1, 843, 8,
+        7537, 42, 65535, 52479, 1, 844, 8,
+        7579, 38, 65535, 26367, 1, 845, 8,
+        7617, 40, 65535, 39423, 1, 846, 8,
+        7657, 31, 65535, 65535, 1, 847, 8,
+        7688, 30, 65535, 255, 1, 848, 8,
+        7718, 38, 65535, 26367, 1, 849, 8,
+        7756, 30, 65535, 65535, 1, 850, 8,
+        7786, 41, 65535, 8703, 1, 851, 8,
+        7827, 41, 65535, 65535, 1, 852, 8,
+        7868, 37, 0, 65280, 1, 853, 8,
+        7905, 26, 0, 65280, 1, 854, 8,
+        7931, 32, 0, 65280, 1, 855, 8,
+        7963, 32, 65535, 65535, 1, 856, 8,
+        7995, 35, 65535, 255, 1, 857, 8,
+        8030, 31, 65535, 255, 1, 858, 8,
+        8061, 27, 65535, 26367, 1, 859, 8,
+        8088, 29, 29439, 65436, 1, 860, 8,
+        8117, 40, 29439, 52380, 1, 861, 8,
+        8157, 36, 29439, 39324, 1, 862, 8,
+        8193, 39, 65535, 65535, 1, 863, 8,
+        8232, 50, 65535, 52479, 1, 864, 8,
+        8282, 46, 65535, 26367, 1, 865, 8,
+        8328, 35, 65535, 29695, 1, 866, 8,
     ],
 };
 
@@ -13280,7 +13724,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_429: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6835, 44, 6879, 25, 1, 867, 8, 867, 77,
+        8363, 44, 8407, 25, 1, 867, 8, 867, 77,
     ],
 };
 
@@ -13289,26 +13733,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_430: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6904, 44, 65535, 65535, 1, 868, 8,
-        6948, 31, 65535, 65535, 1, 869, 8,
-        6979, 31, 65535, 255, 1, 870, 8,
-        7010, 42, 65535, 65535, 1, 871, 8,
-        7052, 42, 65535, 8703, 1, 872, 8,
-        7094, 38, 0, 65280, 1, 873, 8,
-        7132, 38, 65535, 65535, 1, 874, 8,
-        7170, 34, 65535, 65535, 1, 875, 8,
-        7204, 32, 0, 65280, 1, 876, 8,
-        7236, 32, 0, 65280, 1, 877, 8,
-        7268, 40, 65535, 14591, 1, 878, 8,
-        7308, 30, 0, 65280, 1, 879, 8,
-        7338, 19, 65535, 65535, 1, 880, 8,
-        7357, 37, 6068, 65350, 1, 881, 8,
-        7394, 25, 52685, 65485, 1, 882, 8,
-        7419, 21, 21845, 15189, 1, 883, 8,
-        7440, 36, 56026, 65498, 1, 884, 8,
-        7476, 32, 47031, 27575, 1, 885, 8,
-        7508, 32, 0, 39168, 1, 886, 8,
-        7540, 28, 21845, 60757, 1, 887, 8,
+        8432, 44, 65535, 65535, 1, 868, 8,
+        8476, 31, 65535, 65535, 1, 869, 8,
+        8507, 31, 65535, 255, 1, 870, 8,
+        8538, 42, 65535, 65535, 1, 871, 8,
+        8580, 42, 65535, 8703, 1, 872, 8,
+        8622, 38, 0, 65280, 1, 873, 8,
+        8660, 38, 65535, 65535, 1, 874, 8,
+        8698, 34, 65535, 65535, 1, 875, 8,
+        8732, 32, 0, 65280, 1, 876, 8,
+        8764, 32, 0, 65280, 1, 877, 8,
+        8796, 40, 65535, 14591, 1, 878, 8,
+        8836, 30, 0, 65280, 1, 879, 8,
+        8866, 19, 65535, 65535, 1, 880, 8,
+        8885, 37, 6068, 65350, 1, 881, 8,
+        8922, 25, 52685, 65485, 1, 882, 8,
+        8947, 21, 21845, 15189, 1, 883, 8,
+        8968, 36, 56026, 65498, 1, 884, 8,
+        9004, 32, 47031, 27575, 1, 885, 8,
+        9036, 32, 0, 39168, 1, 886, 8,
+        9068, 28, 21845, 60757, 1, 887, 8,
     ],
 };
 
@@ -13317,10 +13761,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_431: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7568, 23, 344, 35, 1, 888, 8, 888, 8,
-        7591, 31, 344, 35, 1, 889, 8, 889, 8,
-        7622, 23, 1779, 36, 1, 890, 8, 890, 8,
-        7645, 31, 1280, 39, 1, 891, 8, 891, 8,
+        9096, 23, 2342, 35, 1, 888, 8, 888, 8,
+        9119, 31, 2342, 35, 1, 889, 8, 889, 8,
+        9150, 23, 3391, 36, 1, 890, 8, 890, 8,
+        9173, 31, 2970, 39, 1, 891, 8, 891, 8,
     ],
 };
 
@@ -13329,11 +13773,11 @@ static POPULATE_MACOSTHEME_XAML_ROWS_432: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7676, 40, 344, 35, 1, 893, 8, 893, 8,
-        7716, 36, 523, 41, 1, 894, 8, 894, 8,
-        7752, 25, 1779, 36, 1, 895, 8, 895, 8,
-        7777, 36, 1779, 36, 1, 896, 8, 896, 8,
-        7813, 32, 1779, 36, 1, 897, 8, 897, 8,
+        9204, 40, 2342, 35, 1, 893, 8, 893, 8,
+        9244, 36, 2457, 41, 1, 894, 8, 894, 8,
+        9280, 25, 3391, 36, 1, 895, 8, 895, 8,
+        9305, 36, 3391, 36, 1, 896, 8, 896, 8,
+        9341, 32, 3391, 36, 1, 897, 8, 897, 8,
     ],
 };
 
@@ -13342,11 +13786,11 @@ static POPULATE_MACOSTHEME_XAML_ROWS_433: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        7676, 29, 65535, 255, 1, 898, 8,
-        7845, 32, 4387, 65512, 1, 899, 8,
-        7877, 28, 65535, 65535, 1, 900, 8,
-        7905, 28, 28794, 65521, 1, 901, 8,
-        7933, 24, 0, 65280, 1, 902, 8,
+        9204, 29, 65535, 255, 1, 898, 8,
+        9373, 32, 4387, 65512, 1, 899, 8,
+        9405, 28, 65535, 65535, 1, 900, 8,
+        9433, 28, 28794, 65521, 1, 901, 8,
+        9461, 24, 0, 65280, 1, 902, 8,
     ],
 };
 
@@ -13359,19 +13803,23 @@ static POPULATE_MACOSTHEME_XAML_ROWS_434: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_435: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TextControlBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 45, position: 58 },
-    rt::ValueRow { key: "TextControlBorderThemeThicknessFocused", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 46, position: 65 },
-    rt::ValueRow { key: "TextControlThemePadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 47, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_435: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_3_NUMBERS,
+    records: &[
+        29, 31, 45, 58, 0, 0, 0, 0,
+        60, 38, 46, 65, 0, 0, 0, 0,
+        98, 23, 47, 50, 1, 2, 1, 2,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_436: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        29, 35, 64, 28, 1, 48, 8, 48, 68,
+        121, 35, 156, 28, 1, 48, 8, 48, 68,
     ],
 };
 
@@ -13380,142 +13828,146 @@ static POPULATE_MACOSTHEME_XAML_ROWS_437: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_3_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        92, 31, 123, 25, 1, 49, 8, 49, 8,
-        148, 36, 184, 26, 1, 50, 8, 50, 8,
-        210, 38, 248, 26, 1, 51, 8, 51, 8,
+        184, 31, 215, 25, 1, 49, 8, 49, 8,
+        240, 36, 276, 26, 1, 50, 8, 50, 8,
+        302, 38, 340, 26, 1, 51, 8, 51, 8,
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_438: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "TextFillColorPrimary", value: 4076863487_u32, line: 426, position: 43 },
-    rt::ValueRow { key: "TextFillColorSecondary", value: 2801795071_u32, line: 427, position: 45 },
-    rt::ValueRow { key: "TextFillColorTertiary", value: 1728053247_u32, line: 428, position: 44 },
-    rt::ValueRow { key: "TextFillColorDisabled", value: 1090519039_u32, line: 429, position: 44 },
-    rt::ValueRow { key: "TextFillColorInverse", value: 4278190080_u32, line: 430, position: 43 },
-    rt::ValueRow { key: "AccentTextFillColorDisabled", value: 1090519039_u32, line: 431, position: 50 },
-    rt::ValueRow { key: "TextOnAccentFillColorSelectedText", value: 4294967295_u32, line: 432, position: 56 },
-    rt::ValueRow { key: "TextOnAccentFillColorPrimary", value: 4294967295_u32, line: 433, position: 51 },
-    rt::ValueRow { key: "TextOnAccentFillColorSecondary", value: 3875536895_u32, line: 434, position: 53 },
-    rt::ValueRow { key: "TextOnAccentFillColorDisabled", value: 2583691263_u32, line: 435, position: 52 },
-    rt::ValueRow { key: "ControlFillColorDefault", value: 4283914071_u32, line: 436, position: 46 },
-    rt::ValueRow { key: "ControlFillColorSecondary", value: 4284637796_u32, line: 437, position: 48 },
-    rt::ValueRow { key: "ControlFillColorTertiary", value: 4285558898_u32, line: 438, position: 47 },
-    rt::ValueRow { key: "ControlFillColorQuarternary", value: 4282927178_u32, line: 439, position: 50 },
-    rt::ValueRow { key: "ControlFillColorDisabled", value: 4281742904_u32, line: 440, position: 47 },
-    rt::ValueRow { key: "ControlFillColorTransparent", value: 16777215_u32, line: 441, position: 50 },
-    rt::ValueRow { key: "ControlFillColorInputActive", value: 4280163872_u32, line: 442, position: 50 },
-    rt::ValueRow { key: "ControlStrongFillColorDefault", value: 4288190621_u32, line: 443, position: 52 },
-    rt::ValueRow { key: "ControlStrongFillColorDisabled", value: 865638557_u32, line: 444, position: 53 },
-    rt::ValueRow { key: "ControlSolidFillColorDefault", value: 4283914071_u32, line: 445, position: 51 },
-    rt::ValueRow { key: "SubtleFillColorTransparent", value: 0_u32, line: 446, position: 49 },
-    rt::ValueRow { key: "SubtleFillColorSecondary", value: 352321535_u32, line: 447, position: 47 },
-    rt::ValueRow { key: "SubtleFillColorTertiary", value: 587202559_u32, line: 448, position: 46 },
-    rt::ValueRow { key: "SubtleFillColorDisabled", value: 0_u32, line: 449, position: 46 },
-    rt::ValueRow { key: "ControlAltFillColorTransparent", value: 0_u32, line: 450, position: 53 },
-    rt::ValueRow { key: "ControlAltFillColorSecondary", value: 4282927178_u32, line: 451, position: 51 },
-    rt::ValueRow { key: "ControlAltFillColorTertiary", value: 4283716694_u32, line: 452, position: 50 },
-    rt::ValueRow { key: "ControlAltFillColorQuarternary", value: 4284703590_u32, line: 453, position: 53 },
-    rt::ValueRow { key: "ControlAltFillColorDisabled", value: 4281742904_u32, line: 454, position: 50 },
-    rt::ValueRow { key: "ControlOnImageFillColorDefault", value: 3425446958_u32, line: 455, position: 53 },
-    rt::ValueRow { key: "ControlOnImageFillColorSecondary", value: 3862575676_u32, line: 456, position: 55 },
-    rt::ValueRow { key: "ControlOnImageFillColorTertiary", value: 4282927178_u32, line: 457, position: 54 },
-    rt::ValueRow { key: "ControlOnImageFillColorDisabled", value: 2787912750_u32, line: 458, position: 54 },
-    rt::ValueRow { key: "AccentFillColorDisabled", value: 864980627_u32, line: 459, position: 46 },
-    rt::ValueRow { key: "ControlStrokeColorDefault", value: 1090519039_u32, line: 460, position: 48 },
-    rt::ValueRow { key: "ControlStrokeColorSecondary", value: 1509949439_u32, line: 461, position: 50 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentDefault", value: 436207616_u32, line: 462, position: 56 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentSecondary", value: 855638016_u32, line: 463, position: 58 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentTertiary", value: 855638016_u32, line: 464, position: 57 },
-    rt::ValueRow { key: "ControlStrokeColorOnAccentDisabled", value: 335544320_u32, line: 465, position: 57 },
-    rt::ValueRow { key: "ControlStrokeColorForStrongFillWhenOnImage", value: 1711276032_u32, line: 466, position: 65 },
-    rt::ValueRow { key: "CardStrokeColorDefault", value: 654311423_u32, line: 467, position: 45 },
-    rt::ValueRow { key: "CardStrokeColorDefaultSolid", value: 4282927178_u32, line: 468, position: 50 },
-    rt::ValueRow { key: "ControlStrongStrokeColorDefault", value: 2164260863_u32, line: 469, position: 54 },
-    rt::ValueRow { key: "ControlStrongStrokeColorDisabled", value: 872415231_u32, line: 470, position: 55 },
-    rt::ValueRow { key: "SurfaceStrokeColorDefault", value: 1509949439_u32, line: 471, position: 48 },
-    rt::ValueRow { key: "SurfaceStrokeColorFlyout", value: 872415231_u32, line: 472, position: 47 },
-    rt::ValueRow { key: "SurfaceStrokeColorInverse", value: 855638016_u32, line: 473, position: 48 },
-    rt::ValueRow { key: "DividerStrokeColorDefault", value: 872415231_u32, line: 474, position: 48 },
-    rt::ValueRow { key: "FocusStrokeColorOuter", value: 2567603455_u32, line: 475, position: 44 },
-    rt::ValueRow { key: "FocusStrokeColorInner", value: 0_u32, line: 476, position: 44 },
-    rt::ValueRow { key: "CardBackgroundFillColorDefault", value: 4281084974_u32, line: 477, position: 53 },
-    rt::ValueRow { key: "CardBackgroundFillColorSecondary", value: 4280558630_u32, line: 478, position: 55 },
-    rt::ValueRow { key: "CardBackgroundFillColorTertiary", value: 4282006076_u32, line: 479, position: 54 },
-    rt::ValueRow { key: "SmokeFillColorDefault", value: 1711276032_u32, line: 480, position: 44 },
-    rt::ValueRow { key: "LayerFillColorDefault", value: 3643550766_u32, line: 481, position: 44 },
-    rt::ValueRow { key: "LayerFillColorAlt", value: 4281084974_u32, line: 482, position: 40 },
-    rt::ValueRow { key: "LayerOnAcrylicFillColorDefault", value: 234881023_u32, line: 483, position: 53 },
-    rt::ValueRow { key: "LayerOnAccentAcrylicFillColorDefault", value: 234881023_u32, line: 484, position: 59 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorDefault", value: 3643550766_u32, line: 485, position: 57 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorSecondary", value: 352321535_u32, line: 486, position: 59 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorTertiary", value: 4281084974_u32, line: 487, position: 58 },
-    rt::ValueRow { key: "LayerOnMicaBaseAltFillColorTransparent", value: 0_u32, line: 488, position: 61 },
-    rt::ValueRow { key: "SolidBackgroundFillColorBase", value: 4280558630_u32, line: 489, position: 51 },
-    rt::ValueRow { key: "SolidBackgroundFillColorSecondary", value: 4280032286_u32, line: 490, position: 56 },
-    rt::ValueRow { key: "SolidBackgroundFillColorTertiary", value: 4281084974_u32, line: 491, position: 55 },
-    rt::ValueRow { key: "SolidBackgroundFillColorQuarternary", value: 4282006076_u32, line: 492, position: 58 },
-    rt::ValueRow { key: "SolidBackgroundFillColorQuinary", value: 4282927178_u32, line: 493, position: 54 },
-    rt::ValueRow { key: "SolidBackgroundFillColorSenary", value: 4283716694_u32, line: 494, position: 53 },
-    rt::ValueRow { key: "SolidBackgroundFillColorTransparent", value: 2368550_u32, line: 495, position: 58 },
-    rt::ValueRow { key: "SolidBackgroundFillColorBaseAlt", value: 4280032286_u32, line: 496, position: 54 },
-    rt::ValueRow { key: "SystemFillColorSuccess", value: 4281389400_u32, line: 497, position: 45 },
-    rt::ValueRow { key: "SystemFillColorCaution", value: 4294942474_u32, line: 498, position: 45 },
-    rt::ValueRow { key: "SystemFillColorCritical", value: 4294919482_u32, line: 499, position: 46 },
-    rt::ValueRow { key: "SystemFillColorNeutral", value: 2576914589_u32, line: 500, position: 45 },
-    rt::ValueRow { key: "SystemFillColorSolidNeutral", value: 4288190621_u32, line: 501, position: 50 },
-    rt::ValueRow { key: "SystemFillColorAttentionBackground", value: 638223615_u32, line: 502, position: 57 },
-    rt::ValueRow { key: "SystemFillColorSuccessBackground", value: 640733528_u32, line: 503, position: 55 },
-    rt::ValueRow { key: "SystemFillColorCautionBackground", value: 654286602_u32, line: 504, position: 55 },
-    rt::ValueRow { key: "SystemFillColorCriticalBackground", value: 654263610_u32, line: 505, position: 56 },
-    rt::ValueRow { key: "SystemFillColorNeutralBackground", value: 647534749_u32, line: 506, position: 55 },
-    rt::ValueRow { key: "SystemFillColorSolidAttentionBackground", value: 4281084974_u32, line: 507, position: 62 },
-    rt::ValueRow { key: "SystemFillColorSolidNeutralBackground", value: 4281084974_u32, line: 508, position: 60 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_438: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 20, 426, 43, 65535, 62207,
+        20, 22, 427, 45, 65535, 42751,
+        42, 21, 428, 44, 65535, 26367,
+        63, 21, 429, 44, 65535, 16639,
+        84, 20, 430, 43, 0, 65280,
+        104, 27, 431, 50, 65535, 16639,
+        131, 33, 432, 56, 65535, 65535,
+        164, 28, 433, 51, 65535, 65535,
+        192, 30, 434, 53, 65535, 59135,
+        222, 29, 435, 52, 65535, 39423,
+        251, 23, 436, 46, 22359, 65367,
+        274, 25, 437, 48, 25188, 65378,
+        299, 24, 438, 47, 28786, 65392,
+        323, 27, 439, 50, 18506, 65352,
+        350, 24, 440, 47, 13880, 65334,
+        374, 27, 441, 50, 65535, 255,
+        401, 27, 442, 50, 7712, 65310,
+        428, 29, 443, 52, 39069, 65432,
+        457, 30, 444, 53, 39069, 13208,
+        487, 28, 445, 51, 22359, 65367,
+        515, 26, 446, 49, 0, 0,
+        541, 24, 447, 47, 65535, 5375,
+        565, 23, 448, 46, 65535, 8959,
+        588, 23, 449, 46, 0, 0,
+        611, 30, 450, 53, 0, 0,
+        641, 28, 451, 51, 18506, 65352,
+        669, 27, 452, 50, 21590, 65364,
+        696, 30, 453, 53, 25446, 65379,
+        726, 27, 454, 50, 13880, 65334,
+        753, 30, 455, 53, 11310, 52268,
+        783, 32, 456, 55, 14908, 58938,
+        815, 31, 457, 54, 18506, 65352,
+        846, 31, 458, 54, 11310, 42540,
+        228, 23, 459, 46, 36499, 13198,
+        877, 25, 460, 48, 65535, 16639,
+        902, 27, 461, 50, 65535, 23039,
+        929, 33, 462, 56, 0, 6656,
+        962, 35, 463, 58, 0, 13056,
+        997, 34, 464, 57, 0, 13056,
+        1031, 34, 465, 57, 0, 5120,
+        1065, 42, 466, 65, 0, 26112,
+        1107, 22, 467, 45, 65535, 9983,
+        1129, 27, 468, 50, 18506, 65352,
+        1156, 31, 469, 54, 65535, 33023,
+        1187, 32, 470, 55, 65535, 13311,
+        1219, 25, 471, 48, 65535, 23039,
+        1244, 24, 472, 47, 65535, 13311,
+        1268, 25, 473, 48, 0, 13056,
+        1293, 25, 474, 48, 65535, 13311,
+        1318, 21, 475, 44, 34047, 39178,
+        1339, 21, 476, 44, 0, 0,
+        1360, 30, 477, 53, 11310, 65324,
+        1390, 32, 478, 55, 9254, 65316,
+        1422, 31, 479, 54, 14908, 65338,
+        1453, 21, 480, 44, 0, 26112,
+        1474, 21, 481, 44, 11310, 55596,
+        1495, 17, 482, 40, 11310, 65324,
+        1512, 30, 483, 53, 65535, 3583,
+        1542, 36, 484, 59, 65535, 3583,
+        1578, 34, 485, 57, 11310, 55596,
+        1612, 36, 486, 59, 65535, 5375,
+        1648, 35, 487, 58, 11310, 65324,
+        1683, 38, 488, 61, 0, 0,
+        1721, 28, 489, 51, 9254, 65316,
+        1749, 33, 490, 56, 7198, 65308,
+        1782, 32, 491, 55, 11310, 65324,
+        1814, 35, 492, 58, 14908, 65338,
+        1849, 31, 493, 54, 18506, 65352,
+        1880, 30, 494, 53, 21590, 65364,
+        1910, 35, 495, 58, 9254, 36,
+        1945, 31, 496, 54, 7198, 65308,
+        1976, 22, 497, 45, 53592, 65328,
+        1998, 22, 498, 45, 40714, 65535,
+        2020, 23, 499, 46, 17722, 65535,
+        2043, 22, 500, 45, 39069, 39320,
+        2065, 27, 501, 50, 39069, 65432,
+        2092, 34, 502, 57, 34047, 9738,
+        2126, 32, 503, 55, 53592, 9776,
+        2158, 32, 504, 55, 40714, 9983,
+        2190, 33, 505, 56, 17722, 9983,
+        2223, 32, 506, 55, 39069, 9880,
+        2255, 39, 507, 62, 11310, 65324,
+        2294, 37, 508, 60, 11310, 65324,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_439: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 25, 0, 20, 1, 509, 8, 509, 58,
-        25, 27, 25, 22, 1, 510, 8, 510, 60,
-        52, 26, 52, 21, 1, 511, 8, 511, 59,
-        78, 26, 78, 21, 1, 512, 8, 512, 59,
-        104, 25, 104, 20, 1, 513, 8, 513, 58,
-        129, 31, 160, 17, 1, 514, 8, 514, 64,
-        177, 33, 160, 17, 1, 515, 8, 515, 66,
-        210, 32, 160, 17, 1, 516, 8, 516, 65,
-        242, 32, 242, 27, 1, 517, 8, 517, 65,
-        274, 38, 274, 33, 1, 518, 8, 518, 71,
-        312, 33, 312, 28, 1, 519, 8, 519, 66,
-        345, 35, 345, 30, 1, 520, 8, 520, 68,
-        380, 34, 380, 29, 1, 521, 8, 521, 67,
-        414, 28, 414, 23, 1, 522, 8, 522, 61,
-        442, 30, 442, 25, 1, 523, 8, 523, 63,
-        472, 29, 472, 24, 1, 524, 8, 524, 62,
-        501, 32, 501, 27, 1, 525, 8, 525, 65,
-        533, 29, 533, 24, 1, 526, 8, 526, 62,
-        562, 32, 562, 27, 1, 527, 8, 527, 65,
-        594, 32, 594, 27, 1, 528, 8, 528, 65,
-        626, 34, 626, 29, 1, 529, 8, 529, 67,
-        660, 35, 660, 30, 1, 530, 8, 530, 68,
-        695, 33, 695, 28, 1, 531, 8, 531, 66,
-        728, 31, 728, 26, 1, 532, 8, 532, 64,
-        759, 29, 759, 24, 1, 533, 8, 533, 62,
-        788, 28, 788, 23, 1, 534, 8, 534, 61,
-        816, 28, 816, 23, 1, 535, 8, 535, 61,
-        844, 35, 844, 30, 1, 536, 8, 536, 68,
-        879, 33, 879, 28, 1, 537, 8, 537, 66,
-        912, 32, 912, 27, 1, 538, 8, 538, 65,
-        944, 35, 944, 30, 1, 539, 8, 539, 68,
-        979, 32, 979, 27, 1, 540, 8, 540, 65,
-        1011, 35, 1011, 30, 1, 541, 8, 541, 68,
-        1046, 37, 1046, 32, 1, 542, 8, 542, 70,
-        1083, 36, 1083, 31, 1, 543, 8, 543, 69,
-        1119, 36, 1119, 31, 1, 544, 8, 544, 69,
-        1155, 42, 160, 17, 1, 545, 8, 545, 75,
-        1197, 27, 160, 17, 1, 546, 8, 546, 60,
+        2331, 25, 0, 20, 1, 509, 8, 509, 58,
+        2356, 27, 20, 22, 1, 510, 8, 510, 60,
+        2383, 26, 42, 21, 1, 511, 8, 511, 59,
+        2409, 26, 63, 21, 1, 512, 8, 512, 59,
+        2435, 25, 84, 20, 1, 513, 8, 513, 58,
+        2460, 31, 2491, 17, 1, 514, 8, 514, 64,
+        2508, 33, 2491, 17, 1, 515, 8, 515, 66,
+        2541, 32, 2491, 17, 1, 516, 8, 516, 65,
+        2573, 32, 104, 27, 1, 517, 8, 517, 65,
+        2605, 38, 131, 33, 1, 518, 8, 518, 71,
+        2643, 33, 164, 28, 1, 519, 8, 519, 66,
+        2676, 35, 192, 30, 1, 520, 8, 520, 68,
+        2711, 34, 222, 29, 1, 521, 8, 521, 67,
+        2745, 28, 251, 23, 1, 522, 8, 522, 61,
+        2773, 30, 274, 25, 1, 523, 8, 523, 63,
+        2803, 29, 299, 24, 1, 524, 8, 524, 62,
+        2832, 32, 323, 27, 1, 525, 8, 525, 65,
+        2864, 29, 350, 24, 1, 526, 8, 526, 62,
+        2893, 32, 374, 27, 1, 527, 8, 527, 65,
+        2925, 32, 401, 27, 1, 528, 8, 528, 65,
+        2957, 34, 428, 29, 1, 529, 8, 529, 67,
+        2991, 35, 457, 30, 1, 530, 8, 530, 68,
+        3026, 33, 487, 28, 1, 531, 8, 531, 66,
+        3059, 31, 515, 26, 1, 532, 8, 532, 64,
+        3090, 29, 541, 24, 1, 533, 8, 533, 62,
+        3119, 28, 565, 23, 1, 534, 8, 534, 61,
+        3147, 28, 588, 23, 1, 535, 8, 535, 61,
+        3175, 35, 611, 30, 1, 536, 8, 536, 68,
+        3210, 33, 641, 28, 1, 537, 8, 537, 66,
+        3243, 32, 669, 27, 1, 538, 8, 538, 65,
+        3275, 35, 696, 30, 1, 539, 8, 539, 68,
+        3310, 32, 726, 27, 1, 540, 8, 540, 65,
+        3342, 35, 753, 30, 1, 541, 8, 541, 68,
+        3377, 37, 783, 32, 1, 542, 8, 542, 70,
+        3414, 36, 815, 31, 1, 543, 8, 543, 69,
+        3450, 36, 846, 31, 1, 544, 8, 544, 69,
+        3486, 42, 2491, 17, 1, 545, 8, 545, 75,
+        3528, 27, 2491, 17, 1, 546, 8, 546, 60,
     ],
 };
 
@@ -13524,56 +13976,56 @@ static POPULATE_MACOSTHEME_XAML_ROWS_440: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        386, 28, 386, 23, 1, 549, 8, 549, 61,
-        1224, 30, 1224, 25, 1, 550, 8, 550, 63,
-        1254, 32, 1254, 27, 1, 551, 8, 551, 65,
-        1286, 38, 1286, 33, 1, 552, 8, 552, 71,
-        1324, 40, 1324, 35, 1, 553, 8, 553, 73,
-        1364, 39, 1364, 34, 1, 554, 8, 554, 72,
-        1403, 39, 1403, 34, 1, 555, 8, 555, 72,
-        1442, 47, 1442, 42, 1, 556, 8, 556, 80,
-        1489, 27, 1489, 22, 1, 557, 8, 557, 60,
-        1516, 32, 1516, 27, 1, 558, 8, 558, 65,
-        1548, 36, 1548, 31, 1, 559, 8, 559, 69,
-        1584, 37, 1584, 32, 1, 560, 8, 560, 70,
-        1621, 30, 1621, 25, 1, 561, 8, 561, 63,
-        1651, 29, 1651, 24, 1, 562, 8, 562, 62,
-        1680, 30, 1680, 25, 1, 563, 8, 563, 63,
-        1710, 30, 1710, 25, 1, 564, 8, 564, 63,
-        1740, 26, 1740, 21, 1, 565, 8, 565, 59,
-        1766, 26, 1766, 21, 1, 566, 8, 566, 59,
-        1792, 35, 1792, 30, 1, 567, 8, 567, 68,
-        1827, 37, 1827, 32, 1, 568, 8, 568, 70,
-        1864, 36, 1864, 31, 1, 569, 8, 569, 69,
-        1900, 26, 1900, 21, 1, 570, 8, 570, 59,
-        1926, 26, 1926, 21, 1, 571, 8, 571, 59,
-        1952, 22, 1952, 17, 1, 572, 8, 572, 55,
-        1974, 35, 1974, 30, 1, 573, 8, 573, 68,
-        2009, 41, 2009, 36, 1, 574, 8, 574, 74,
-        2050, 39, 2050, 34, 1, 575, 8, 575, 72,
-        2089, 41, 2089, 36, 1, 576, 8, 576, 74,
-        2130, 40, 2130, 35, 1, 577, 8, 577, 73,
-        2170, 43, 2170, 38, 1, 578, 8, 578, 76,
-        2213, 33, 2213, 28, 1, 579, 8, 579, 66,
-        2246, 38, 2246, 33, 1, 580, 8, 580, 71,
-        2284, 37, 2284, 32, 1, 581, 8, 581, 70,
-        2321, 40, 2321, 35, 1, 582, 8, 582, 73,
-        2361, 36, 2361, 31, 1, 583, 8, 583, 69,
-        2397, 35, 2397, 30, 1, 584, 8, 584, 68,
-        2432, 36, 2432, 31, 1, 585, 8, 585, 69,
-        2468, 29, 160, 17, 1, 586, 8, 586, 62,
-        2497, 27, 2497, 22, 1, 587, 8, 587, 60,
-        2524, 27, 2524, 22, 1, 588, 8, 588, 60,
-        2551, 28, 2551, 23, 1, 589, 8, 589, 61,
-        2579, 27, 2579, 22, 1, 590, 8, 590, 60,
-        2606, 32, 2606, 27, 1, 591, 8, 591, 65,
-        2638, 39, 2638, 34, 1, 592, 8, 592, 72,
-        2677, 37, 2677, 32, 1, 593, 8, 593, 70,
-        2714, 37, 2714, 32, 1, 594, 8, 594, 70,
-        2751, 38, 2751, 33, 1, 595, 8, 595, 71,
-        2789, 37, 2789, 32, 1, 596, 8, 596, 70,
-        2826, 44, 2826, 39, 1, 597, 8, 597, 77,
-        2870, 42, 2870, 37, 1, 598, 8, 598, 75,
+        2717, 28, 228, 23, 1, 549, 8, 549, 61,
+        3555, 30, 877, 25, 1, 550, 8, 550, 63,
+        3585, 32, 902, 27, 1, 551, 8, 551, 65,
+        3617, 38, 929, 33, 1, 552, 8, 552, 71,
+        3655, 40, 962, 35, 1, 553, 8, 553, 73,
+        3695, 39, 997, 34, 1, 554, 8, 554, 72,
+        3734, 39, 1031, 34, 1, 555, 8, 555, 72,
+        3773, 47, 1065, 42, 1, 556, 8, 556, 80,
+        3820, 27, 1107, 22, 1, 557, 8, 557, 60,
+        3847, 32, 1129, 27, 1, 558, 8, 558, 65,
+        3879, 36, 1156, 31, 1, 559, 8, 559, 69,
+        3915, 37, 1187, 32, 1, 560, 8, 560, 70,
+        3952, 30, 1219, 25, 1, 561, 8, 561, 63,
+        3982, 29, 1244, 24, 1, 562, 8, 562, 62,
+        4011, 30, 1268, 25, 1, 563, 8, 563, 63,
+        4041, 30, 1293, 25, 1, 564, 8, 564, 63,
+        4071, 26, 1318, 21, 1, 565, 8, 565, 59,
+        4097, 26, 1339, 21, 1, 566, 8, 566, 59,
+        4123, 35, 1360, 30, 1, 567, 8, 567, 68,
+        4158, 37, 1390, 32, 1, 568, 8, 568, 70,
+        4195, 36, 1422, 31, 1, 569, 8, 569, 69,
+        4231, 26, 1453, 21, 1, 570, 8, 570, 59,
+        4257, 26, 1474, 21, 1, 571, 8, 571, 59,
+        4283, 22, 1495, 17, 1, 572, 8, 572, 55,
+        4305, 35, 1512, 30, 1, 573, 8, 573, 68,
+        4340, 41, 1542, 36, 1, 574, 8, 574, 74,
+        4381, 39, 1578, 34, 1, 575, 8, 575, 72,
+        4420, 41, 1612, 36, 1, 576, 8, 576, 74,
+        4461, 40, 1648, 35, 1, 577, 8, 577, 73,
+        4501, 43, 1683, 38, 1, 578, 8, 578, 76,
+        4544, 33, 1721, 28, 1, 579, 8, 579, 66,
+        4577, 38, 1749, 33, 1, 580, 8, 580, 71,
+        4615, 37, 1782, 32, 1, 581, 8, 581, 70,
+        4652, 40, 1814, 35, 1, 582, 8, 582, 73,
+        4692, 36, 1849, 31, 1, 583, 8, 583, 69,
+        4728, 35, 1880, 30, 1, 584, 8, 584, 68,
+        4763, 36, 1945, 31, 1, 585, 8, 585, 69,
+        4799, 29, 2491, 17, 1, 586, 8, 586, 62,
+        4828, 27, 1976, 22, 1, 587, 8, 587, 60,
+        4855, 27, 1998, 22, 1, 588, 8, 588, 60,
+        4882, 28, 2020, 23, 1, 589, 8, 589, 61,
+        4910, 27, 2043, 22, 1, 590, 8, 590, 60,
+        4937, 32, 2065, 27, 1, 591, 8, 591, 65,
+        4969, 39, 2092, 34, 1, 592, 8, 592, 72,
+        5008, 37, 2126, 32, 1, 593, 8, 593, 70,
+        5045, 37, 2158, 32, 1, 594, 8, 594, 70,
+        5082, 38, 2190, 33, 1, 595, 8, 595, 71,
+        5120, 37, 2223, 32, 1, 596, 8, 596, 70,
+        5157, 44, 2255, 39, 1, 597, 8, 597, 77,
+        5201, 42, 2294, 37, 1, 598, 8, 598, 75,
     ],
 };
 
@@ -13582,14 +14034,14 @@ static POPULATE_MACOSTHEME_XAML_ROWS_441: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2912, 31, 255, 65535, 1, 599, 8,
-        2943, 27, 255, 65535, 1, 600, 8,
-        2970, 31, 255, 65535, 1, 601, 8,
-        3001, 31, 255, 65535, 1, 602, 8,
-        3032, 30, 255, 65535, 1, 603, 8,
-        3062, 34, 255, 65535, 1, 604, 8,
-        3096, 29, 255, 65535, 1, 605, 8,
-        3125, 29, 255, 65535, 1, 606, 8,
+        5243, 31, 255, 65535, 1, 599, 8,
+        5274, 27, 255, 65535, 1, 600, 8,
+        5301, 31, 255, 65535, 1, 601, 8,
+        5332, 31, 255, 65535, 1, 602, 8,
+        5363, 30, 255, 65535, 1, 603, 8,
+        5393, 34, 255, 65535, 1, 604, 8,
+        5427, 29, 255, 65535, 1, 605, 8,
+        5456, 29, 255, 65535, 1, 606, 8,
     ],
 };
 
@@ -13602,38 +14054,42 @@ static POPULATE_MACOSTHEME_XAML_ROWS_442: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_443: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "TextOnAccentFillColorDefault", value: 4294967295_u32, line: 68, position: 51 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorPrimary", value: 4278190080_u32, line: 69, position: 53 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorSecondary", value: 2147483648_u32, line: 70, position: 55 },
-    rt::ValueRow { key: "TextOnAccentAAFillColorDisabled", value: 2281701375_u32, line: 71, position: 54 },
-    rt::ValueRow { key: "ControlAAFillColorDefault", value: 2348810239_u32, line: 72, position: 48 },
-    rt::ValueRow { key: "ControlAAFillColorDisabled", value: 1073741823_u32, line: 73, position: 49 },
-    rt::ValueRow { key: "AccentAAFillColorDisabled", value: 687865855_u32, line: 74, position: 48 },
-    rt::ValueRow { key: "ControlStrokeColorForAAFillOnImage", value: 1795162112_u32, line: 75, position: 57 },
-    rt::ValueRow { key: "ControlAAStrokeColorDefault", value: 2348810239_u32, line: 76, position: 50 },
-    rt::ValueRow { key: "ControlAAStrokeColorDisabled", value: 687865855_u32, line: 77, position: 51 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_443: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS,
+    numbers: &[],
+    records: &[
+        37, 28, 68, 51, 65535, 65535,
+        65, 30, 69, 53, 0, 65280,
+        95, 32, 70, 55, 0, 32768,
+        127, 31, 71, 54, 65535, 34815,
+        158, 25, 72, 48, 65535, 35839,
+        183, 26, 73, 49, 65535, 16383,
+        133, 25, 74, 48, 65535, 10495,
+        209, 34, 75, 57, 0, 27392,
+        243, 27, 76, 50, 65535, 35839,
+        270, 28, 77, 51, 65535, 10495,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_444: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_5_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        37, 33, 37, 28, 1, 78, 8, 78, 66,
-        70, 35, 70, 30, 1, 79, 8, 79, 68,
-        105, 37, 105, 32, 1, 80, 8, 80, 70,
-        142, 36, 142, 31, 1, 81, 8, 81, 69,
-        178, 30, 178, 25, 1, 82, 8, 82, 63,
-        208, 31, 208, 26, 1, 83, 8, 83, 64,
-        239, 29, 268, 17, 1, 84, 8, 84, 62,
-        111, 31, 268, 17, 1, 85, 8, 85, 64,
-        285, 30, 268, 17, 1, 86, 8, 86, 63,
-        148, 30, 148, 25, 1, 87, 8, 87, 63,
-        315, 39, 315, 34, 1, 88, 8, 88, 72,
-        354, 32, 354, 27, 1, 89, 8, 89, 65,
-        386, 33, 386, 28, 1, 90, 8, 90, 66,
+        298, 33, 37, 28, 1, 78, 8, 78, 66,
+        331, 35, 65, 30, 1, 79, 8, 79, 68,
+        366, 37, 95, 32, 1, 80, 8, 80, 70,
+        403, 36, 127, 31, 1, 81, 8, 81, 69,
+        439, 30, 158, 25, 1, 82, 8, 82, 63,
+        469, 31, 183, 26, 1, 83, 8, 83, 64,
+        500, 29, 529, 17, 1, 84, 8, 84, 62,
+        372, 31, 529, 17, 1, 85, 8, 85, 64,
+        546, 30, 529, 17, 1, 86, 8, 86, 63,
+        409, 30, 133, 25, 1, 87, 8, 87, 63,
+        576, 39, 209, 34, 1, 88, 8, 88, 72,
+        615, 32, 243, 27, 1, 89, 8, 89, 65,
+        647, 33, 270, 28, 1, 90, 8, 90, 66,
     ],
 };
 
@@ -13740,31 +14196,35 @@ static POPULATE_MACOSTHEME_XAML_ROWS_447: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_448: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuFlyoutPresenterBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 216, position: 66 },
-    rt::ValueRow { key: "MenuFlyoutItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 217, position: 56 },
-    rt::ValueRow { key: "MenuFlyoutSubItemBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 218, position: 59 },
-    rt::ValueRow { key: "MenuFlyoutItemPlaceholderThemeThickness", value: [28.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 219, position: 66 },
-    rt::ValueRow { key: "MenuFlyoutItemDoublePlaceholderThemeThickness", value: [56.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 220, position: 72 },
-    rt::ValueRow { key: "MenuFlyoutItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 221, position: 62 },
-    rt::ValueRow { key: "ToggleMenuFlyoutItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 222, position: 68 },
-    rt::ValueRow { key: "MenuFlyoutSubItemRevealBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 223, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_448: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_8_NUMBERS,
+    records: &[
+        1730, 39, 216, 66, 0, 0, 0, 0,
+        1769, 29, 217, 56, 1, 1, 1, 1,
+        1798, 32, 218, 59, 1, 1, 1, 1,
+        1830, 39, 219, 66, 2, 1, 1, 1,
+        1869, 45, 220, 72, 3, 1, 1, 1,
+        1914, 35, 221, 62, 0, 0, 0, 0,
+        1949, 41, 222, 68, 0, 0, 0, 0,
+        1990, 38, 223, 65, 0, 0, 0, 0,
+    ],
+};
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_449: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1730, 41, 8481, 65313, 1, 224, 8,
-        1771, 41, 65535, 65535, 1, 225, 8,
-        1812, 42, 65535, 26367, 1, 226, 8,
-        1854, 45, 8481, 65313, 1, 227, 8,
-        1899, 45, 65535, 65535, 1, 228, 8,
-        1944, 41, 65535, 65535, 1, 229, 8,
-        1985, 41, 0, 65280, 1, 230, 8,
-        2026, 29, 31354, 65402, 1, 231, 8,
+        2028, 41, 8481, 65313, 1, 224, 8,
+        2069, 41, 65535, 65535, 1, 225, 8,
+        2110, 42, 65535, 26367, 1, 226, 8,
+        2152, 45, 8481, 65313, 1, 227, 8,
+        2197, 45, 65535, 65535, 1, 228, 8,
+        2242, 41, 65535, 65535, 1, 229, 8,
+        2283, 41, 0, 65280, 1, 230, 8,
+        2324, 29, 31354, 65402, 1, 231, 8,
     ],
 };
 
@@ -13773,82 +14233,86 @@ static POPULATE_MACOSTHEME_XAML_ROWS_450: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2055, 39, 2094, 47, 1, 232, 8, 232, 8,
-        2141, 30, 2171, 45, 1, 233, 8, 233, 8,
-        2216, 41, 149, 27, 1, 234, 8, 234, 8,
-        2257, 37, 149, 27, 1, 235, 8, 235, 8,
-        2294, 38, 83, 31, 1, 236, 8, 236, 8,
-        2332, 31, 83, 31, 1, 237, 8, 237, 8,
-        2363, 38, 2401, 41, 1, 238, 8, 238, 8,
-        2442, 42, 2401, 41, 1, 239, 8, 239, 8,
-        2484, 39, 83, 31, 1, 240, 8, 240, 8,
-        2523, 36, 2171, 45, 1, 241, 8, 241, 8,
-        2559, 47, 2606, 50, 1, 242, 8, 242, 8,
-        2656, 43, 2699, 53, 1, 243, 8, 243, 8,
-        2752, 44, 83, 31, 1, 244, 8, 244, 8,
-        2796, 37, 83, 31, 1, 245, 8, 245, 8,
-        2833, 44, 2401, 41, 1, 246, 8, 246, 8,
-        2877, 48, 2401, 41, 1, 247, 8, 247, 8,
-        2925, 45, 83, 31, 1, 248, 8, 248, 8,
-        2970, 33, 2171, 45, 1, 249, 8, 249, 8,
-        3003, 44, 2606, 50, 1, 250, 8, 250, 8,
-        3047, 40, 3087, 49, 1, 251, 8, 251, 8,
-        3136, 46, 2606, 50, 1, 252, 8, 252, 8,
-        3182, 41, 83, 31, 1, 253, 8, 253, 8,
-        3223, 34, 83, 31, 1, 254, 8, 254, 8,
-        3257, 41, 2401, 41, 1, 255, 8, 255, 8,
-        3298, 45, 2401, 41, 1, 256, 8, 256, 8,
-        3343, 47, 2401, 41, 1, 257, 8, 257, 8,
-        3390, 42, 83, 31, 1, 258, 8, 258, 8,
+        2353, 39, 2392, 47, 1, 232, 8, 232, 8,
+        2439, 30, 2469, 45, 1, 233, 8, 233, 8,
+        2514, 41, 149, 27, 1, 234, 8, 234, 8,
+        2555, 37, 149, 27, 1, 235, 8, 235, 8,
+        2592, 38, 83, 31, 1, 236, 8, 236, 8,
+        2630, 31, 83, 31, 1, 237, 8, 237, 8,
+        2661, 38, 2699, 41, 1, 238, 8, 238, 8,
+        2740, 42, 2699, 41, 1, 239, 8, 239, 8,
+        2782, 39, 83, 31, 1, 240, 8, 240, 8,
+        2821, 36, 2469, 45, 1, 241, 8, 241, 8,
+        2857, 47, 2904, 50, 1, 242, 8, 242, 8,
+        2954, 43, 2997, 53, 1, 243, 8, 243, 8,
+        3050, 44, 83, 31, 1, 244, 8, 244, 8,
+        3094, 37, 83, 31, 1, 245, 8, 245, 8,
+        3131, 44, 2699, 41, 1, 246, 8, 246, 8,
+        3175, 48, 2699, 41, 1, 247, 8, 247, 8,
+        3223, 45, 83, 31, 1, 248, 8, 248, 8,
+        3268, 33, 2469, 45, 1, 249, 8, 249, 8,
+        3301, 44, 2904, 50, 1, 250, 8, 250, 8,
+        3345, 40, 3385, 49, 1, 251, 8, 251, 8,
+        3434, 46, 2904, 50, 1, 252, 8, 252, 8,
+        3480, 41, 83, 31, 1, 253, 8, 253, 8,
+        3521, 34, 83, 31, 1, 254, 8, 254, 8,
+        3555, 41, 2699, 41, 1, 255, 8, 255, 8,
+        3596, 45, 2699, 41, 1, 256, 8, 256, 8,
+        3641, 47, 2699, 41, 1, 257, 8, 257, 8,
+        3688, 42, 83, 31, 1, 258, 8, 258, 8,
     ],
 };
 
-/// The colours of a run of `MacOSTheme.xaml`, added in order by `rt::add_color_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_451: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemChromeMediumHighColor", value: 4281479730_u32, line: 117, position: 50 },
-    rt::ValueRow { key: "SystemChromeAltMediumHighColor", value: 3424591647_u32, line: 118, position: 53 },
-    rt::ValueRow { key: "SystemChromeAltHighColor", value: 4280032284_u32, line: 119, position: 47 },
-];
+/// The colours of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_451: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
+    numbers: &[],
+    records: &[
+        0, 27, 117, 50, 12850, 65330,
+        27, 30, 118, 53, 7967, 52255,
+        57, 24, 119, 47, 7196, 65308,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_452: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 31, 31, 23, 1, 120, 8, 120, 64,
-        54, 32, 31, 23, 1, 121, 8, 121, 65,
-        86, 53, 139, 17, 1, 122, 8, 122, 86,
-        156, 54, 139, 17, 1, 123, 8, 123, 87,
-        210, 53, 139, 17, 1, 124, 8, 124, 86,
-        263, 54, 139, 17, 1, 125, 8, 125, 87,
-        317, 63, 139, 17, 1, 126, 8, 126, 96,
-        380, 64, 139, 17, 1, 127, 8, 127, 97,
-        444, 41, 31, 23, 1, 128, 8, 128, 74,
-        485, 42, 31, 23, 1, 129, 8, 129, 75,
-        527, 52, 579, 26, 1, 130, 8, 130, 85,
-        605, 53, 579, 26, 1, 131, 8, 131, 86,
-        658, 39, 697, 19, 1, 132, 8, 132, 72,
-        716, 40, 697, 19, 1, 133, 8, 133, 73,
-        756, 49, 697, 19, 1, 134, 8, 134, 82,
-        805, 50, 697, 19, 1, 135, 8, 135, 83,
-        855, 45, 697, 19, 1, 136, 8, 136, 78,
-        900, 46, 697, 19, 1, 137, 8, 137, 79,
-        946, 40, 986, 20, 1, 138, 8, 138, 73,
-        1006, 41, 986, 20, 1, 139, 8, 139, 74,
-        1047, 49, 31, 23, 1, 140, 8, 140, 82,
-        1096, 50, 31, 23, 1, 141, 8, 141, 83,
-        1146, 47, 1193, 21, 1, 142, 8, 142, 80,
-        1214, 48, 1193, 21, 1, 143, 8, 143, 81,
-        1262, 38, 1300, 18, 1, 144, 8, 144, 71,
-        1318, 39, 1300, 18, 1, 145, 8, 145, 72,
-        1357, 50, 1407, 24, 1, 146, 8, 146, 83,
-        1431, 51, 1407, 24, 1, 147, 8, 147, 84,
-        1482, 37, 1519, 17, 1, 148, 8, 148, 70,
-        1536, 38, 1519, 17, 1, 149, 8, 149, 71,
-        1574, 49, 1623, 23, 1, 150, 8, 150, 82,
-        1646, 50, 1623, 23, 1, 151, 8, 151, 83,
-        1696, 38, 1734, 18, 1, 152, 8, 152, 71,
-        1752, 39, 1734, 18, 1, 153, 8, 153, 72,
+        81, 31, 112, 23, 1, 120, 8, 120, 64,
+        135, 32, 112, 23, 1, 121, 8, 121, 65,
+        167, 53, 220, 17, 1, 122, 8, 122, 86,
+        237, 54, 220, 17, 1, 123, 8, 123, 87,
+        291, 53, 220, 17, 1, 124, 8, 124, 86,
+        344, 54, 220, 17, 1, 125, 8, 125, 87,
+        398, 63, 220, 17, 1, 126, 8, 126, 96,
+        461, 64, 220, 17, 1, 127, 8, 127, 97,
+        525, 41, 112, 23, 1, 128, 8, 128, 74,
+        566, 42, 112, 23, 1, 129, 8, 129, 75,
+        608, 52, 660, 26, 1, 130, 8, 130, 85,
+        686, 53, 660, 26, 1, 131, 8, 131, 86,
+        739, 39, 778, 19, 1, 132, 8, 132, 72,
+        797, 40, 778, 19, 1, 133, 8, 133, 73,
+        837, 49, 778, 19, 1, 134, 8, 134, 82,
+        886, 50, 778, 19, 1, 135, 8, 135, 83,
+        936, 45, 778, 19, 1, 136, 8, 136, 78,
+        981, 46, 778, 19, 1, 137, 8, 137, 79,
+        1027, 40, 1067, 20, 1, 138, 8, 138, 73,
+        1087, 41, 1067, 20, 1, 139, 8, 139, 74,
+        1128, 49, 112, 23, 1, 140, 8, 140, 82,
+        1177, 50, 112, 23, 1, 141, 8, 141, 83,
+        1227, 47, 1274, 21, 1, 142, 8, 142, 80,
+        1295, 48, 1274, 21, 1, 143, 8, 143, 81,
+        1343, 38, 1381, 18, 1, 144, 8, 144, 71,
+        1399, 39, 1381, 18, 1, 145, 8, 145, 72,
+        1438, 50, 1488, 24, 1, 146, 8, 146, 83,
+        1512, 51, 1488, 24, 1, 147, 8, 147, 84,
+        1563, 37, 1600, 17, 1, 148, 8, 148, 70,
+        1617, 38, 1600, 17, 1, 149, 8, 149, 71,
+        1655, 49, 1704, 23, 1, 150, 8, 150, 82,
+        1727, 50, 1704, 23, 1, 151, 8, 151, 83,
+        1777, 38, 1815, 18, 1, 152, 8, 152, 71,
+        1833, 39, 1815, 18, 1, 153, 8, 153, 72,
     ],
 };
 
@@ -13857,12 +14321,12 @@ static POPULATE_MACOSTHEME_XAML_ROWS_453: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1791, 38, 11308, 65324, 1, 155, 8,
-        1829, 33, 11308, 65324, 1, 156, 8,
-        1862, 45, 63993, 65529, 1, 157, 8,
-        1907, 40, 63993, 65529, 1, 158, 8,
-        1947, 35, 7196, 65308, 1, 159, 8,
-        1982, 30, 7196, 65308, 1, 160, 8,
+        1872, 38, 11308, 65324, 1, 155, 8,
+        1910, 33, 11308, 65324, 1, 156, 8,
+        1943, 45, 63993, 65529, 1, 157, 8,
+        1988, 40, 63993, 65529, 1, 158, 8,
+        2028, 35, 7196, 65308, 1, 159, 8,
+        2063, 30, 7196, 65308, 1, 160, 8,
     ],
 };
 
@@ -13871,10 +14335,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_454: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2012, 44, 139, 17, 1, 161, 8, 161, 77,
-        2056, 39, 139, 17, 1, 162, 8, 162, 72,
-        2095, 41, 139, 17, 1, 163, 8, 163, 74,
-        2136, 36, 139, 17, 1, 164, 8, 164, 69,
+        2093, 44, 220, 17, 1, 161, 8, 161, 77,
+        2137, 39, 220, 17, 1, 162, 8, 162, 72,
+        2176, 41, 220, 17, 1, 163, 8, 163, 74,
+        2217, 36, 220, 17, 1, 164, 8, 164, 69,
     ],
 };
 
@@ -13883,7 +14347,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_455: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_9_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        2172, 30, 0, 0, 1, 165, 8,
+        2253, 30, 0, 0, 1, 165, 8,
     ],
 };
 
@@ -13953,29 +14417,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_462: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "FlyoutBorderThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 117, position: 51 },
 ];
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_463: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ContentDialogButtonMinWidth", value: 130.0_f64, line: 118, position: 53 },
-    rt::ValueRow { key: "ContentDialogButtonMaxWidth", value: 202.0_f64, line: 119, position: 53 },
-    rt::ValueRow { key: "ContentDialogButtonMinHeight", value: 32.0_f64, line: 120, position: 54 },
-    rt::ValueRow { key: "ContentDialogButtonHeight", value: 32.0_f64, line: 121, position: 51 },
-    rt::ValueRow { key: "ContentDialogTitleMaxHeight", value: 56.0_f64, line: 122, position: 53 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_463: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS,
+    records: &[
+        350, 27, 118, 53, 0,
+        377, 27, 119, 53, 1,
+        404, 28, 120, 54, 2,
+        432, 25, 121, 51, 2,
+        457, 27, 122, 53, 3,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_464: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ContentDialogButton1HostMargin", value: [0.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 123, position: 57 },
-    rt::ValueRow { key: "ContentDialogButton2HostMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 124, position: 57 },
-    rt::ValueRow { key: "ContentDialogContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 125, position: 53 },
-    rt::ValueRow { key: "ContentDialogContentScrollViewerMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 126, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_464: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS,
+    records: &[
+        484, 30, 123, 57, 4, 4, 5, 4,
+        514, 30, 124, 57, 4, 4, 4, 4,
+        544, 26, 125, 53, 4, 4, 4, 4,
+        570, 38, 126, 65, 4, 4, 4, 4,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_465: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        350, 42, 392, 47, 1, 127, 8, 127, 8,
+        608, 42, 650, 47, 1, 127, 8, 127, 8,
     ],
 };
 
@@ -13984,7 +14456,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_466: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        439, 33, 54227, 65491, 1, 128, 8,
+        697, 33, 54227, 65491, 1, 128, 8,
     ],
 };
 
@@ -13993,7 +14465,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_467: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        472, 29, 501, 17, 1, 129, 8, 129, 62,
+        730, 29, 759, 17, 1, 129, 8, 129, 62,
     ],
 };
 
@@ -14002,8 +14474,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_468: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        518, 35, 0, 65280, 1, 130, 8,
-        553, 30, 65535, 39423, 1, 131, 8,
+        776, 35, 0, 65280, 1, 130, 8,
+        811, 30, 65535, 39423, 1, 131, 8,
     ],
 };
 
@@ -14018,17 +14490,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_470: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        583, 18, 601, 35, 1, 136, 8, 136, 8,
-        636, 18, 654, 25, 1, 137, 8, 137, 8,
-        679, 29, 654, 25, 1, 138, 8, 138, 8,
-        708, 25, 654, 25, 1, 139, 8, 139, 8,
-        733, 19, 752, 27, 1, 140, 8, 140, 8,
-        779, 30, 752, 27, 1, 141, 8, 141, 8,
-        809, 26, 752, 27, 1, 142, 8, 142, 8,
-        835, 26, 861, 37, 1, 143, 8, 143, 8,
-        898, 27, 733, 19, 1, 144, 8, 144, 8,
-        925, 26, 951, 26, 1, 145, 8, 145, 8,
-        977, 27, 733, 19, 1, 146, 8, 146, 8,
+        841, 18, 859, 35, 1, 136, 8, 136, 8,
+        894, 18, 912, 25, 1, 137, 8, 137, 8,
+        937, 29, 912, 25, 1, 138, 8, 138, 8,
+        966, 25, 912, 25, 1, 139, 8, 139, 8,
+        991, 19, 1010, 27, 1, 140, 8, 140, 8,
+        1037, 30, 1010, 27, 1, 141, 8, 141, 8,
+        1067, 26, 1010, 27, 1, 142, 8, 142, 8,
+        1093, 26, 1119, 37, 1, 143, 8, 143, 8,
+        1156, 27, 991, 19, 1, 144, 8, 144, 8,
+        1183, 26, 1209, 26, 1, 145, 8, 145, 8,
+        1235, 27, 991, 19, 1, 146, 8, 146, 8,
     ],
 };
 
@@ -14175,25 +14647,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_476: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_477: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "AppBarButtonFlyoutGlyph", value: "\u{e974}", line: 113, position: 49 },
-    rt::ValueRow { key: "AppBarButtonOverflowFlyoutGlyph", value: "\u{e974}", line: 114, position: 57 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_477: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &[],
+    records: &[
+        1187, 23, 113, 49, 1210, 3,
+        1213, 31, 114, 57, 1210, 3,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_478: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "AppBarButtonLabelFontSize", value: 12.0_f64, line: 115, position: 51 },
-    rt::ValueRow { key: "AppBarButtonSubItemChevronFontSize", value: 8.0_f64, line: 116, position: 60 },
-    rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronFontSize", value: 12.0_f64, line: 117, position: 69 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_478: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS,
+    records: &[
+        1244, 25, 115, 51, 0,
+        1269, 34, 116, 60, 1,
+        1303, 43, 117, 69, 0,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_479: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarButtonSubItemChevronMargin", value: [-23.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 118, position: 59 },
-    rt::ValueRow { key: "AppBarButtonSubItemChevronLabelOnRightMargin", value: [-7.0_f64, 20.0_f64, 12.0_f64, 0.0_f64], line: 119, position: 71 },
-    rt::ValueRow { key: "AppBarButtonSecondarySubItemChevronMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 120, position: 68 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_479: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS,
+    records: &[
+        1346, 32, 118, 59, 2, 3, 0, 4,
+        1378, 44, 119, 71, 5, 3, 0, 4,
+        1422, 41, 120, 68, 4, 4, 6, 4,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_480: rt::PackedRows = rt::PackedRows {
@@ -14442,22 +14926,26 @@ static POPULATE_MACOSTHEME_XAML_ROWS_492: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_493: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CommandBarOverflowMinWidth", value: 160.0_f64, line: 59, position: 52 },
-    rt::ValueRow { key: "CommandBarOverflowTouchMinWidth", value: 240.0_f64, line: 60, position: 57 },
-    rt::ValueRow { key: "CommandBarOverflowMaxWidth", value: 480.0_f64, line: 61, position: 52 },
-    rt::ValueRow { key: "CommandBarOverflowMaxHeight", value: 198.0_f64, line: 62, position: 53 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_493: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_20_NUMBERS,
+    records: &[
+        0, 26, 59, 52, 0,
+        26, 31, 60, 57, 1,
+        57, 26, 61, 52, 2,
+        83, 27, 62, 53, 3,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_494: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 32, 1, 63, 8, 63, 8,
-        52, 24, 76, 33, 1, 64, 8, 64, 8,
-        109, 25, 134, 32, 1, 65, 8, 65, 8,
+        110, 20, 130, 32, 1, 63, 8, 63, 8,
+        162, 24, 186, 33, 1, 64, 8, 64, 8,
+        219, 25, 244, 32, 1, 65, 8, 65, 8,
     ],
 };
 
@@ -14466,68 +14954,76 @@ static POPULATE_MACOSTHEME_XAML_ROWS_495: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        166, 20, 186, 25, 1, 67, 8, 67, 8,
-        211, 28, 20, 32, 1, 68, 8, 68, 8,
-        239, 40, 279, 26, 1, 69, 8, 69, 8,
-        305, 37, 76, 33, 1, 70, 8, 70, 8,
-        342, 38, 380, 33, 1, 71, 8, 71, 8,
-        413, 39, 452, 47, 1, 72, 8, 72, 8,
+        276, 20, 296, 25, 1, 67, 8, 67, 8,
+        321, 28, 130, 32, 1, 68, 8, 68, 8,
+        349, 40, 389, 26, 1, 69, 8, 69, 8,
+        415, 37, 186, 33, 1, 70, 8, 70, 8,
+        452, 38, 490, 33, 1, 71, 8, 71, 8,
+        523, 39, 562, 47, 1, 72, 8, 72, 8,
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_496: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 73, position: 69 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 74, position: 73 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpThickness", value: [0.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 75, position: 71 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 76, position: 67 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderDownPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 77, position: 71 },
-    rt::ValueRow { key: "CommandBarOverflowPresenterBorderUpPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 78, position: 69 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_496: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_20_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_20_NUMBERS,
+    records: &[
+        609, 42, 73, 69, 4, 4, 4, 4,
+        651, 46, 74, 73, 5, 5, 5, 4,
+        697, 44, 75, 71, 5, 4, 5, 5,
+        741, 40, 76, 67, 5, 5, 5, 5,
+        781, 44, 77, 71, 5, 5, 5, 5,
+        825, 42, 78, 69, 5, 5, 5, 5,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_497: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ListViewItemContentOffsetX", value: -40.5_f64, line: 161, position: 52 },
-    rt::ValueRow { key: "ListViewItemDisabledThemeOpacity", value: 0.3_f64, line: 162, position: 58 },
-    rt::ValueRow { key: "ListViewItemDragThemeOpacity", value: 0.8_f64, line: 163, position: 54 },
-    rt::ValueRow { key: "ListViewItemReorderThemeOpacity", value: 0.8_f64, line: 164, position: 57 },
-    rt::ValueRow { key: "ListViewItemReorderTargetThemeOpacity", value: 0.5_f64, line: 165, position: 63 },
-    rt::ValueRow { key: "ListViewItemReorderTargetThemeScale", value: 0.95_f64, line: 166, position: 61 },
-    rt::ValueRow { key: "ListViewItemReorderHintThemeOffset", value: 10.0_f64, line: 167, position: 60 },
-    rt::ValueRow { key: "ListViewItemSelectedBorderThemeThickness", value: 4.0_f64, line: 168, position: 66 },
-    rt::ValueRow { key: "ListViewItemMinWidth", value: 0.0_f64, line: 169, position: 46 },
-    rt::ValueRow { key: "ListViewItemMinHeight", value: 26.0_f64, line: 170, position: 47 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_497: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_21_NUMBERS,
+    records: &[
+        0, 26, 161, 52, 0,
+        26, 32, 162, 58, 1,
+        58, 28, 163, 54, 2,
+        86, 31, 164, 57, 2,
+        117, 37, 165, 63, 3,
+        154, 35, 166, 61, 4,
+        189, 34, 167, 60, 5,
+        223, 40, 168, 66, 6,
+        263, 20, 169, 46, 7,
+        283, 21, 170, 47, 8,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_498: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 28, 28, 28, 1, 172, 8, 172, 8,
-        56, 22, 78, 31, 1, 173, 8, 173, 8,
-        109, 33, 142, 29, 1, 174, 8, 174, 8,
-        171, 29, 28, 28, 1, 175, 8, 175, 8,
-        200, 30, 230, 27, 1, 176, 8, 176, 8,
-        257, 41, 230, 27, 1, 177, 8, 177, 8,
-        298, 37, 230, 27, 1, 178, 8, 178, 8,
-        335, 22, 357, 25, 1, 179, 8, 179, 8,
-        382, 33, 357, 25, 1, 180, 8, 180, 8,
-        415, 29, 357, 25, 1, 181, 8, 181, 8,
-        444, 30, 474, 33, 1, 182, 8, 182, 8,
-        507, 41, 474, 33, 1, 183, 8, 183, 8,
-        548, 37, 474, 33, 1, 184, 8, 184, 8,
-        585, 35, 620, 26, 1, 185, 8, 185, 8,
-        646, 37, 683, 26, 1, 186, 8, 186, 8,
-        709, 28, 620, 26, 1, 187, 8, 187, 8,
-        737, 37, 357, 25, 1, 188, 8, 188, 8,
-        774, 22, 474, 33, 1, 189, 8, 189, 8,
-        796, 25, 821, 33, 1, 190, 8, 190, 8,
-        854, 26, 78, 31, 1, 191, 8, 191, 8,
-        880, 26, 474, 33, 1, 192, 8, 192, 8,
-        906, 33, 939, 35, 1, 193, 8, 193, 8,
-        974, 41, 474, 33, 1, 194, 8, 194, 8,
-        1015, 45, 230, 27, 1, 195, 8, 195, 8,
+        304, 28, 332, 28, 1, 172, 8, 172, 8,
+        360, 22, 382, 31, 1, 173, 8, 173, 8,
+        413, 33, 446, 29, 1, 174, 8, 174, 8,
+        475, 29, 332, 28, 1, 175, 8, 175, 8,
+        504, 30, 534, 27, 1, 176, 8, 176, 8,
+        561, 41, 534, 27, 1, 177, 8, 177, 8,
+        602, 37, 534, 27, 1, 178, 8, 178, 8,
+        639, 22, 661, 25, 1, 179, 8, 179, 8,
+        686, 33, 661, 25, 1, 180, 8, 180, 8,
+        719, 29, 661, 25, 1, 181, 8, 181, 8,
+        748, 30, 778, 33, 1, 182, 8, 182, 8,
+        811, 41, 778, 33, 1, 183, 8, 183, 8,
+        852, 37, 778, 33, 1, 184, 8, 184, 8,
+        889, 35, 924, 26, 1, 185, 8, 185, 8,
+        950, 37, 987, 26, 1, 186, 8, 186, 8,
+        1013, 28, 924, 26, 1, 187, 8, 187, 8,
+        1041, 37, 661, 25, 1, 188, 8, 188, 8,
+        1078, 22, 778, 33, 1, 189, 8, 189, 8,
+        1100, 25, 1125, 33, 1, 190, 8, 190, 8,
+        1158, 26, 382, 31, 1, 191, 8, 191, 8,
+        1184, 26, 778, 33, 1, 192, 8, 192, 8,
+        1210, 33, 1243, 35, 1, 193, 8, 193, 8,
+        1278, 41, 778, 33, 1, 194, 8, 194, 8,
+        1319, 45, 534, 27, 1, 195, 8, 195, 8,
     ],
 };
 
@@ -14536,54 +15032,58 @@ static POPULATE_MACOSTHEME_XAML_ROWS_499: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1060, 31, 65535, 65535, 1, 196, 8,
-        1091, 36, 65535, 65535, 1, 197, 8,
-        1127, 27, 65535, 65535, 1, 198, 8,
-        1154, 36, 6068, 39238, 1, 199, 8,
-        1190, 36, 65535, 65535, 1, 200, 8,
-        1226, 33, 65535, 65535, 1, 201, 8,
-        1259, 39, 0, 42496, 1, 202, 8,
-        1298, 39, 65535, 65535, 1, 203, 8,
-        1337, 48, 65535, 39423, 1, 204, 8,
-        1385, 43, 15677, 65341, 1, 205, 8,
-        1428, 43, 65535, 19967, 1, 206, 8,
-        1471, 40, 6068, 65350, 1, 207, 8,
-        1511, 40, 65535, 65535, 1, 208, 8,
-        1551, 51, 14270, 65375, 1, 209, 8,
-        1602, 47, 14270, 65375, 1, 210, 8,
+        1364, 31, 65535, 65535, 1, 196, 8,
+        1395, 36, 65535, 65535, 1, 197, 8,
+        1431, 27, 65535, 65535, 1, 198, 8,
+        1458, 36, 6068, 39238, 1, 199, 8,
+        1494, 36, 65535, 65535, 1, 200, 8,
+        1530, 33, 65535, 65535, 1, 201, 8,
+        1563, 39, 0, 42496, 1, 202, 8,
+        1602, 39, 65535, 65535, 1, 203, 8,
+        1641, 48, 65535, 39423, 1, 204, 8,
+        1689, 43, 15677, 65341, 1, 205, 8,
+        1732, 43, 65535, 19967, 1, 206, 8,
+        1775, 40, 6068, 65350, 1, 207, 8,
+        1815, 40, 65535, 65535, 1, 208, 8,
+        1855, 51, 14270, 65375, 1, 209, 8,
+        1906, 47, 14270, 65375, 1, 210, 8,
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_500: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ListViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 211, position: 54 },
-    rt::ValueRow { key: "ListViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 212, position: 62 },
-    rt::ValueRow { key: "ListViewItemSelectionIndicatorCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 213, position: 72 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_500: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_21_NUMBERS,
+    records: &[
+        1953, 24, 211, 54, 6, 6, 6, 6,
+        1977, 32, 212, 62, 9, 9, 9, 9,
+        2009, 42, 213, 72, 10, 10, 10, 10,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_501: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_21_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1649, 29, 1678, 35, 1, 214, 8, 214, 8,
-        1713, 30, 1743, 34, 1, 215, 8, 215, 8,
-        1777, 36, 821, 33, 1, 216, 8, 216, 8,
-        1813, 32, 821, 33, 1, 217, 8, 217, 8,
-        1845, 33, 821, 33, 1, 218, 8, 218, 8,
-        1878, 33, 230, 27, 1, 219, 8, 219, 8,
-        1911, 44, 1684, 29, 1, 220, 8, 220, 8,
-        1955, 40, 1995, 28, 1, 221, 8, 221, 8,
-        2023, 41, 1749, 28, 1, 222, 8, 222, 8,
-        2064, 31, 2095, 36, 1, 223, 8, 223, 8,
-        2131, 42, 2095, 36, 1, 224, 8, 224, 8,
-        2173, 38, 2095, 36, 1, 225, 8, 225, 8,
-        2211, 39, 2250, 37, 1, 226, 8, 226, 8,
-        2287, 38, 142, 29, 1, 227, 8, 227, 8,
-        2325, 35, 230, 27, 1, 228, 8, 228, 8,
-        2360, 46, 230, 27, 1, 229, 8, 229, 8,
-        2406, 42, 230, 27, 1, 230, 8, 230, 8,
-        2448, 43, 1749, 28, 1, 231, 8, 231, 8,
+        2051, 29, 2080, 35, 1, 214, 8, 214, 8,
+        2115, 30, 2145, 34, 1, 215, 8, 215, 8,
+        2179, 36, 1125, 33, 1, 216, 8, 216, 8,
+        2215, 32, 1125, 33, 1, 217, 8, 217, 8,
+        2247, 33, 1125, 33, 1, 218, 8, 218, 8,
+        2280, 33, 534, 27, 1, 219, 8, 219, 8,
+        2313, 44, 2086, 29, 1, 220, 8, 220, 8,
+        2357, 40, 2397, 28, 1, 221, 8, 221, 8,
+        2425, 41, 2151, 28, 1, 222, 8, 222, 8,
+        2466, 31, 2497, 36, 1, 223, 8, 223, 8,
+        2533, 42, 2497, 36, 1, 224, 8, 224, 8,
+        2575, 38, 2497, 36, 1, 225, 8, 225, 8,
+        2613, 39, 2652, 37, 1, 226, 8, 226, 8,
+        2689, 38, 446, 29, 1, 227, 8, 227, 8,
+        2727, 35, 534, 27, 1, 228, 8, 228, 8,
+        2762, 46, 534, 27, 1, 229, 8, 229, 8,
+        2808, 42, 534, 27, 1, 230, 8, 230, 8,
+        2850, 43, 2151, 28, 1, 231, 8, 231, 8,
     ],
 };
 
@@ -14737,11 +15237,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_507: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_508: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ControlCornerRadius", value: [6.0_f64, 6.0_f64, 6.0_f64, 6.0_f64], line: 25, position: 49 },
-    rt::ValueRow { key: "OverlayCornerRadius", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 26, position: 49 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_508: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_27_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_27_NUMBERS,
+    records: &[
+        0, 19, 25, 49, 0, 0, 0, 0,
+        19, 19, 26, 49, 1, 1, 1, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_509: rt::PackedRows = rt::PackedRows {
@@ -14876,29 +15380,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_512: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_513: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarViewFirstOfMonthLabelFontSize", value: 8.0_f64, line: 228, position: 63 },
-    rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelFontSize", value: 8.0_f64, line: 229, position: 68 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonFontSize", value: 14.0_f64, line: 230, position: 68 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonFontSize", value: 8.0_f64, line: 231, position: 62 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_513: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_30_NUMBERS,
+    records: &[
+        2737, 37, 228, 63, 0,
+        2774, 42, 229, 68, 0,
+        2816, 42, 230, 68, 1,
+        2858, 36, 231, 62, 0,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_514: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CalendarViewDayItemMargin", value: [0.0_f64, 3.0_f64, 0.0_f64, 0.0_f64], line: 232, position: 52 },
-    rt::ValueRow { key: "CalendarViewWeekDayMargin", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 233, position: 52 },
-    rt::ValueRow { key: "CalendarViewWeekDayPadding", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 234, position: 53 },
-    rt::ValueRow { key: "CalendarViewMonthYearItemMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 235, position: 58 },
-    rt::ValueRow { key: "CalendarViewFirstOfMonthLabelMargin", value: [0.0_f64, 2.0_f64, 0.0_f64, 0.0_f64], line: 236, position: 62 },
-    rt::ValueRow { key: "CalendarViewFirstOfYearDecadeLabelMargin", value: [0.0_f64, 9.0_f64, 0.0_f64, 0.0_f64], line: 237, position: 67 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonPadding", value: [8.0_f64, 7.0_f64, 8.0_f64, 8.0_f64], line: 238, position: 68 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonPadding", value: [12.0_f64, 11.5_f64, 12.0_f64, 11.5_f64], line: 239, position: 62 },
-    rt::ValueRow { key: "CalendarViewHeaderNavigationButtonMargin", value: [7.0_f64, 6.0_f64, 3.0_f64, 7.0_f64], line: 240, position: 67 },
-    rt::ValueRow { key: "CalendarViewNavigationPreviousButtonMargin", value: [3.0_f64, 6.0_f64, 3.0_f64, 7.0_f64], line: 241, position: 69 },
-    rt::ValueRow { key: "CalendarViewNavigationNextButtonMargin", value: [3.0_f64, 6.0_f64, 7.0_f64, 7.0_f64], line: 242, position: 65 },
-    rt::ValueRow { key: "CalendarViewNavigationButtonFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 243, position: 72 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_514: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_30_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_30_NUMBERS,
+    records: &[
+        2894, 25, 232, 52, 2, 3, 2, 2,
+        2919, 25, 233, 52, 4, 4, 4, 4,
+        2944, 26, 234, 53, 5, 5, 5, 5,
+        2970, 31, 235, 58, 2, 2, 2, 2,
+        3001, 35, 236, 62, 2, 6, 2, 2,
+        3036, 40, 237, 67, 2, 7, 2, 2,
+        3076, 41, 238, 68, 0, 8, 0, 0,
+        3117, 35, 239, 62, 5, 9, 5, 9,
+        3152, 40, 240, 67, 8, 10, 3, 8,
+        3192, 42, 241, 69, 3, 10, 3, 8,
+        3234, 38, 242, 65, 3, 10, 8, 8,
+        3272, 45, 243, 72, 11, 11, 11, 11,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_515: rt::PackedRows = rt::PackedRows {
@@ -15016,59 +15528,71 @@ static POPULATE_MACOSTHEME_XAML_ROWS_517: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_518: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ContentDialogMinWidth", value: 320.0_f64, line: 56, position: 47 },
-    rt::ValueRow { key: "ContentDialogMaxWidth", value: 548.0_f64, line: 57, position: 47 },
-    rt::ValueRow { key: "ContentDialogMinHeight", value: 184.0_f64, line: 58, position: 48 },
-    rt::ValueRow { key: "ContentDialogMaxHeight", value: 756.0_f64, line: 59, position: 48 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_518: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_32_NUMBERS,
+    records: &[
+        311, 21, 56, 47, 0,
+        332, 21, 57, 47, 1,
+        353, 22, 58, 48, 2,
+        375, 22, 59, 48, 3,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_519: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ContentDialogTitleMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 12.0_f64], line: 61, position: 51 },
-    rt::ValueRow { key: "ContentDialogPadding", value: [24.0_f64, 24.0_f64, 24.0_f64, 24.0_f64], line: 62, position: 47 },
-    rt::ValueRow { key: "ContentDialogSeparatorThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 63, position: 58 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_519: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_32_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_32_NUMBERS,
+    records: &[
+        397, 24, 61, 51, 4, 4, 4, 5,
+        421, 20, 62, 47, 6, 6, 6, 6,
+        441, 31, 63, 58, 4, 4, 4, 7,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_520: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerSelectorThemeMinWidth", value: 80.0_f64, line: 87, position: 57 },
-    rt::ValueRow { key: "DatePickerSpacerThemeWidth", value: 1.0_f64, line: 88, position: 52 },
-    rt::ValueRow { key: "DatePickerSpacingThemeWidth", value: 20.0_f64, line: 89, position: 53 },
-    rt::ValueRow { key: "DatePickerSpacingThemeHeight", value: 20.0_f64, line: 90, position: 54 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_520: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_33_NUMBERS,
+    records: &[
+        0, 31, 87, 57, 0,
+        31, 26, 88, 52, 1,
+        57, 27, 89, 53, 2,
+        84, 28, 90, 54, 2,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_521: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 20, 20, 30, 1, 93, 8, 93, 8,
-        50, 28, 20, 30, 1, 94, 8, 94, 8,
-        78, 26, 104, 25, 1, 95, 8, 95, 8,
-        129, 34, 163, 26, 1, 96, 8, 96, 8,
-        189, 27, 216, 27, 1, 97, 8, 97, 8,
-        243, 38, 216, 27, 1, 98, 8, 98, 8,
-        281, 34, 20, 30, 1, 99, 8, 99, 8,
-        315, 35, 20, 30, 1, 100, 8, 100, 8,
-        350, 26, 376, 28, 1, 101, 8, 101, 8,
-        404, 37, 441, 30, 1, 102, 8, 102, 8,
-        471, 33, 504, 29, 1, 103, 8, 103, 8,
-        533, 34, 567, 29, 1, 104, 8, 104, 8,
-        596, 33, 376, 28, 1, 105, 8, 105, 8,
-        629, 26, 104, 25, 1, 106, 8, 106, 8,
-        655, 33, 688, 27, 1, 107, 8, 107, 8,
-        715, 37, 104, 25, 1, 108, 8, 108, 8,
-        752, 33, 688, 27, 1, 109, 8, 109, 8,
-        785, 34, 163, 26, 1, 110, 8, 110, 8,
-        819, 33, 104, 25, 1, 111, 8, 111, 8,
-        852, 35, 887, 38, 1, 112, 8, 112, 8,
-        925, 36, 961, 29, 1, 113, 8, 113, 8,
-        990, 35, 1025, 30, 1, 114, 8, 114, 8,
-        1055, 38, 1093, 29, 1, 115, 8, 115, 8,
-        1122, 49, 1171, 30, 1, 116, 8, 116, 8,
-        1201, 39, 1240, 47, 1, 117, 8, 117, 8,
+        112, 20, 132, 30, 1, 93, 8, 93, 8,
+        162, 28, 132, 30, 1, 94, 8, 94, 8,
+        190, 26, 216, 25, 1, 95, 8, 95, 8,
+        241, 34, 275, 26, 1, 96, 8, 96, 8,
+        301, 27, 328, 27, 1, 97, 8, 97, 8,
+        355, 38, 328, 27, 1, 98, 8, 98, 8,
+        393, 34, 132, 30, 1, 99, 8, 99, 8,
+        427, 35, 132, 30, 1, 100, 8, 100, 8,
+        462, 26, 488, 28, 1, 101, 8, 101, 8,
+        516, 37, 553, 30, 1, 102, 8, 102, 8,
+        583, 33, 616, 29, 1, 103, 8, 103, 8,
+        645, 34, 679, 29, 1, 104, 8, 104, 8,
+        708, 33, 488, 28, 1, 105, 8, 105, 8,
+        741, 26, 216, 25, 1, 106, 8, 106, 8,
+        767, 33, 800, 27, 1, 107, 8, 107, 8,
+        827, 37, 216, 25, 1, 108, 8, 108, 8,
+        864, 33, 800, 27, 1, 109, 8, 109, 8,
+        897, 34, 275, 26, 1, 110, 8, 110, 8,
+        931, 33, 216, 25, 1, 111, 8, 111, 8,
+        964, 35, 999, 38, 1, 112, 8, 112, 8,
+        1037, 36, 1073, 29, 1, 113, 8, 113, 8,
+        1102, 35, 1137, 30, 1, 114, 8, 114, 8,
+        1167, 38, 1205, 29, 1, 115, 8, 115, 8,
+        1234, 49, 1283, 30, 1, 116, 8, 116, 8,
+        1313, 39, 1352, 47, 1, 117, 8, 117, 8,
     ],
 };
 
@@ -15077,8 +15601,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_522: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1287, 36, 65535, 65535, 1, 118, 8,
-        1323, 30, 0, 65280, 1, 119, 8,
+        1399, 36, 65535, 65535, 1, 118, 8,
+        1435, 30, 0, 65280, 1, 119, 8,
     ],
 };
 
@@ -15246,20 +15770,24 @@ static POPULATE_MACOSTHEME_XAML_ROWS_531: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderTrackThemeHeight", value: 4.0_f64, line: 119, position: 48 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_532: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SliderBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 120, position: 53 },
-    rt::ValueRow { key: "SliderHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 121, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_532: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_39_NUMBERS,
+    records: &[
+        0, 26, 120, 53, 0, 0, 0, 0,
+        26, 23, 121, 50, 0, 0, 0, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_533: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 36, 36, 32, 1, 123, 8, 123, 8,
-        68, 32, 36, 32, 1, 124, 8, 124, 8,
-        100, 33, 36, 27, 1, 125, 8, 125, 8,
+        49, 36, 85, 32, 1, 123, 8, 123, 8,
+        117, 32, 85, 32, 1, 124, 8, 124, 8,
+        149, 33, 85, 27, 1, 125, 8, 125, 8,
     ],
 };
 
@@ -15268,10 +15796,10 @@ static POPULATE_MACOSTHEME_XAML_ROWS_534: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        133, 21, 65535, 65535, 1, 126, 8,
-        154, 32, 65535, 65535, 1, 127, 8,
-        186, 28, 65535, 65535, 1, 128, 8,
-        214, 29, 65535, 65535, 1, 129, 8,
+        182, 21, 65535, 65535, 1, 126, 8,
+        203, 32, 65535, 65535, 1, 127, 8,
+        235, 28, 65535, 65535, 1, 128, 8,
+        263, 29, 65535, 65535, 1, 129, 8,
     ],
 };
 
@@ -15280,21 +15808,21 @@ static POPULATE_MACOSTHEME_XAML_ROWS_535: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        243, 22, 265, 27, 1, 130, 8, 130, 8,
-        292, 26, 318, 33, 1, 131, 8, 131, 8,
-        351, 15, 366, 34, 1, 132, 8, 132, 8,
-        400, 26, 366, 34, 1, 133, 8, 133, 8,
-        426, 22, 366, 34, 1, 134, 8, 134, 8,
-        448, 23, 471, 35, 1, 135, 8, 135, 8,
-        506, 20, 526, 27, 1, 136, 8, 136, 8,
-        553, 31, 584, 29, 1, 137, 8, 137, 8,
-        613, 27, 640, 28, 1, 138, 8, 138, 8,
-        668, 28, 696, 28, 1, 139, 8, 139, 8,
-        724, 22, 746, 25, 1, 140, 8, 140, 8,
-        771, 30, 801, 26, 1, 141, 8, 141, 8,
-        827, 17, 366, 34, 1, 142, 8, 142, 8,
-        844, 25, 471, 35, 1, 143, 8, 143, 8,
-        869, 23, 892, 32, 1, 144, 8, 144, 8,
+        292, 22, 314, 27, 1, 130, 8, 130, 8,
+        341, 26, 367, 33, 1, 131, 8, 131, 8,
+        400, 15, 415, 34, 1, 132, 8, 132, 8,
+        449, 26, 415, 34, 1, 133, 8, 133, 8,
+        475, 22, 415, 34, 1, 134, 8, 134, 8,
+        497, 23, 520, 35, 1, 135, 8, 135, 8,
+        555, 20, 575, 27, 1, 136, 8, 136, 8,
+        602, 31, 633, 29, 1, 137, 8, 137, 8,
+        662, 27, 689, 28, 1, 138, 8, 138, 8,
+        717, 28, 745, 28, 1, 139, 8, 139, 8,
+        773, 22, 795, 25, 1, 140, 8, 140, 8,
+        820, 30, 850, 26, 1, 141, 8, 141, 8,
+        876, 17, 415, 34, 1, 142, 8, 142, 8,
+        893, 25, 520, 35, 1, 143, 8, 143, 8,
+        918, 23, 941, 32, 1, 144, 8, 144, 8,
     ],
 };
 
@@ -15303,28 +15831,28 @@ static POPULATE_MACOSTHEME_XAML_ROWS_536: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        924, 22, 65535, 255, 1, 145, 8,
-        946, 30, 65535, 255, 1, 146, 8,
-        976, 31, 65535, 65535, 1, 147, 8,
-        1007, 27, 65535, 65535, 1, 148, 8,
-        1034, 39, 32382, 65406, 1, 149, 8,
-        1073, 42, 65535, 65535, 1, 150, 8,
-        1115, 38, 65535, 65535, 1, 151, 8,
-        1153, 38, 65535, 65535, 1, 152, 8,
-        1191, 34, 65535, 65535, 1, 153, 8,
-        1225, 40, 0, 65280, 1, 154, 8,
-        1265, 48, 0, 65280, 1, 155, 8,
-        1313, 41, 65535, 33023, 1, 156, 8,
-        1354, 49, 65535, 33023, 1, 157, 8,
-        1403, 31, 65535, 10751, 1, 158, 8,
-        1434, 39, 11973, 65371, 1, 159, 8,
-        1473, 47, 65535, 8191, 1, 160, 8,
-        1520, 50, 19405, 65394, 1, 161, 8,
-        1570, 46, 21231, 65409, 1, 162, 8,
-        1616, 39, 65535, 10751, 1, 163, 8,
-        1655, 42, 65535, 18175, 1, 164, 8,
-        1697, 38, 65535, 23039, 1, 165, 8,
-        1735, 32, 65535, 65535, 1, 166, 8,
+        973, 22, 65535, 255, 1, 145, 8,
+        995, 30, 65535, 255, 1, 146, 8,
+        1025, 31, 65535, 65535, 1, 147, 8,
+        1056, 27, 65535, 65535, 1, 148, 8,
+        1083, 39, 32382, 65406, 1, 149, 8,
+        1122, 42, 65535, 65535, 1, 150, 8,
+        1164, 38, 65535, 65535, 1, 151, 8,
+        1202, 38, 65535, 65535, 1, 152, 8,
+        1240, 34, 65535, 65535, 1, 153, 8,
+        1274, 40, 0, 65280, 1, 154, 8,
+        1314, 48, 0, 65280, 1, 155, 8,
+        1362, 41, 65535, 33023, 1, 156, 8,
+        1403, 49, 65535, 33023, 1, 157, 8,
+        1452, 31, 65535, 10751, 1, 158, 8,
+        1483, 39, 11973, 65371, 1, 159, 8,
+        1522, 47, 65535, 8191, 1, 160, 8,
+        1569, 50, 19405, 65394, 1, 161, 8,
+        1619, 46, 21231, 65409, 1, 162, 8,
+        1665, 39, 65535, 10751, 1, 163, 8,
+        1704, 42, 65535, 18175, 1, 164, 8,
+        1746, 38, 65535, 23039, 1, 165, 8,
+        1784, 32, 65535, 65535, 1, 166, 8,
     ],
 };
 
@@ -15377,13 +15905,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_539: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 115, position: 52 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_540: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 116, position: 57 },
-    rt::ValueRow { key: "TimePickerHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 117, position: 54 },
-    rt::ValueRow { key: "TimePickerFirstHostThemeMargin", value: [0.0_f64, 0.0_f64, 20.0_f64, 0.0_f64], line: 118, position: 57 },
-    rt::ValueRow { key: "TimePickerThirdHostThemeMargin", value: [20.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 119, position: 57 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_540: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_40_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_40_NUMBERS,
+    records: &[
+        1353, 30, 116, 57, 0, 0, 0, 0,
+        1383, 27, 117, 54, 1, 1, 1, 2,
+        1410, 30, 118, 57, 1, 1, 3, 1,
+        1440, 30, 119, 57, 3, 1, 1, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_541: rt::PackedRows = rt::PackedRows {
@@ -15584,13 +16116,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_550: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_551: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TreeViewItemBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 129, position: 59 },
-    rt::ValueRow { key: "TreeViewItemPresenterMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 130, position: 54 },
-    rt::ValueRow { key: "TreeViewItemPresenterPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 5.0_f64], line: 131, position: 55 },
-    rt::ValueRow { key: "TreeViewItemMultiSelectSelectedItemBorderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 132, position: 74 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_551: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_47_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_47_NUMBERS,
+    records: &[
+        1372, 32, 129, 59, 0, 0, 0, 0,
+        1404, 27, 130, 54, 1, 2, 1, 2,
+        1431, 28, 131, 55, 0, 3, 0, 4,
+        1459, 47, 132, 74, 0, 0, 0, 0,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_552: &[rt::ValueRow<f64>] = &[
@@ -15728,11 +16264,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_556: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_557: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabViewButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 236, position: 55 },
-    rt::ValueRow { key: "TabViewItemHeaderCloseButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 237, position: 70 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_557: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        2760, 28, 236, 55, 0, 0, 0, 0,
+        2788, 43, 237, 70, 0, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_558: rt::PackedRows = rt::PackedRows {
@@ -15877,27 +16417,35 @@ static POPULATE_MACOSTHEME_XAML_ROWS_562: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitViewCompactPaneThemeLength", value: 48.0_f64, line: 38, position: 57 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_563: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SplitViewLeftBorderThemeThickness", value: [0.0_f64, 0.0_f64, 1.0_f64, 0.0_f64], line: 39, position: 60 },
-    rt::ValueRow { key: "SplitViewRightBorderThemeThickness", value: [1.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 40, position: 61 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_563: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_53_NUMBERS,
+    records: &[
+        0, 33, 39, 60, 0, 0, 1, 0,
+        33, 34, 40, 61, 1, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_564: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 38, 38, 47, 1, 41, 8, 41, 8,
+        67, 38, 105, 47, 1, 41, 8, 41, 8,
     ],
 };
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_565: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "SplitViewPaneAnimationOpenDuration", value: "00:00:00.2", line: 42, position: 60 },
-    rt::ValueRow { key: "SplitViewPaneAnimationOpenPreDuration", value: "00:00:00.19999", line: 43, position: 63 },
-    rt::ValueRow { key: "SplitViewPaneAnimationCloseDuration", value: "00:00:00.1", line: 44, position: 61 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_565: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_53_STRINGS,
+    numbers: &[],
+    records: &[
+        152, 34, 42, 60, 186, 10,
+        196, 37, 43, 63, 233, 14,
+        247, 35, 44, 61, 233, 10,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_566: rt::PackedRows = rt::PackedRows {
@@ -16061,18 +16609,22 @@ static POPULATE_MACOSTHEME_XAML_ROWS_574: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_575: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SelectorBarPadding", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 91, position: 45 },
-    rt::ValueRow { key: "SelectorBarBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 92, position: 53 },
-    rt::ValueRow { key: "SelectorBarItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 93, position: 57 },
-    rt::ValueRow { key: "SelectorBarSelectedInnerThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 94, position: 60 },
-    rt::ValueRow { key: "SelectorBarItemIconVisualMargin", value: [-2.0_f64, 0.0_f64, -2.0_f64, 0.0_f64], line: 95, position: 58 },
-    rt::ValueRow { key: "SelectorBarItemTextVisualMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 96, position: 58 },
-    rt::ValueRow { key: "SelectorBarItemPadding", value: [12.0_f64, 10.0_f64, 12.0_f64, 7.0_f64], line: 97, position: 49 },
-    rt::ValueRow { key: "SelectorBarItemSelectionVisualMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 98, position: 63 },
-    rt::ValueRow { key: "SelectorBarItemFocusVisualMargin", value: [-2.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 99, position: 59 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_575: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_59_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_59_NUMBERS,
+    records: &[
+        745, 18, 91, 45, 0, 1, 0, 1,
+        763, 26, 92, 53, 2, 2, 2, 2,
+        789, 30, 93, 57, 2, 2, 2, 2,
+        819, 33, 94, 60, 2, 2, 2, 2,
+        852, 31, 95, 58, 3, 0, 3, 0,
+        883, 31, 96, 58, 0, 0, 0, 0,
+        914, 22, 97, 49, 4, 5, 4, 6,
+        936, 36, 98, 63, 0, 0, 0, 0,
+        972, 32, 99, 59, 3, 3, 3, 3,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_576: rt::PackedRows = rt::PackedRows {
@@ -16187,14 +16739,18 @@ static POPULATE_MACOSTHEME_XAML_ROWS_584: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TableViewRowMinHeightComfortable", value: 48.0_f64, line: 53, position: 58 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_585: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TableViewCellPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 54, position: 47 },
-    rt::ValueRow { key: "TableViewCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 55, position: 54 },
-    rt::ValueRow { key: "TableViewCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 56, position: 58 },
-    rt::ValueRow { key: "TableViewHeaderCellPaddingCompact", value: [8.0_f64, 2.0_f64, 8.0_f64, 2.0_f64], line: 57, position: 60 },
-    rt::ValueRow { key: "TableViewHeaderCellPaddingComfortable", value: [8.0_f64, 8.0_f64, 8.0_f64, 8.0_f64], line: 58, position: 64 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_585: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_62_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_62_NUMBERS,
+    records: &[
+        0, 20, 54, 47, 0, 1, 0, 1,
+        20, 27, 55, 54, 0, 2, 0, 2,
+        47, 31, 56, 58, 0, 0, 0, 0,
+        78, 33, 57, 60, 0, 2, 0, 2,
+        111, 37, 58, 64, 0, 0, 0, 0,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_586: rt::PackedRows = rt::PackedRows {
@@ -16226,28 +16782,36 @@ static POPULATE_MACOSTHEME_XAML_ROWS_588: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 19, 98, 41, 1, 43, 8, 43, 8,
-        52, 19, 139, 33, 1, 44, 8, 44, 8,
+        0, 19, 300, 41, 1, 43, 8, 43, 8,
+        52, 19, 341, 33, 1, 44, 8, 44, 8,
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_589: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "InfoBadgeMinHeight", value: 4.0_f64, line: 45, position: 44 },
-    rt::ValueRow { key: "InfoBadgeMinWidth", value: 4.0_f64, line: 46, position: 43 },
-    rt::ValueRow { key: "InfoBadgeMaxHeight", value: 16.0_f64, line: 47, position: 44 },
-    rt::ValueRow { key: "InfoBadgeValueFontSize", value: 11.0_f64, line: 48, position: 48 },
-    rt::ValueRow { key: "InfoBadgeIconHeight", value: 9.0_f64, line: 49, position: 45 },
-    rt::ValueRow { key: "InfoBadgeIconWidth", value: 12.0_f64, line: 50, position: 44 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_589: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_67_NUMBERS,
+    records: &[
+        98, 18, 45, 44, 0,
+        116, 17, 46, 43, 0,
+        133, 18, 47, 44, 1,
+        151, 22, 48, 48, 2,
+        173, 19, 49, 45, 7,
+        192, 18, 50, 44, 4,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_590: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "InfoBadgePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 51, position: 43 },
-    rt::ValueRow { key: "IconInfoBadgeFontIconMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 52, position: 54 },
-    rt::ValueRow { key: "ValueInfoBadgeTextMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 2.0_f64], line: 53, position: 51 },
-    rt::ValueRow { key: "IconInfoBadgeIconMargin", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 54, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_590: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_67_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_67_NUMBERS,
+    records: &[
+        210, 16, 51, 43, 5, 5, 5, 5,
+        226, 27, 52, 54, 0, 5, 0, 6,
+        253, 24, 53, 51, 0, 5, 0, 6,
+        277, 23, 54, 50, 0, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_591: rt::PackedRows = rt::PackedRows {
@@ -16290,7 +16854,7 @@ static POPULATE_MACOSTHEME_XAML_ROWS_594: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 33, 401, 36, 1, 41, 8, 41, 8,
+        0, 33, 563, 36, 1, 41, 8, 41, 8,
     ],
 };
 
@@ -16299,9 +16863,9 @@ static POPULATE_MACOSTHEME_XAML_ROWS_595: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        58, 45, 437, 26, 1, 42, 8, 42, 78,
-        136, 39, 463, 26, 1, 43, 8, 43, 72,
-        202, 41, 437, 26, 1, 44, 8, 44, 74,
+        58, 45, 599, 26, 1, 42, 8, 42, 78,
+        136, 39, 625, 26, 1, 43, 8, 43, 72,
+        202, 41, 599, 26, 1, 44, 8, 44, 74,
     ],
 };
 
@@ -16310,18 +16874,22 @@ static POPULATE_MACOSTHEME_XAML_ROWS_596: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        275, 34, 489, 34, 1, 45, 8, 45, 8,
+        275, 34, 651, 34, 1, 45, 8, 45, 8,
         339, 35, 374, 27, 1, 46, 8, 46, 8,
     ],
 };
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_597: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeOpacity", value: 1.0_f64, line: 47, position: 64 },
-    rt::ValueRow { key: "PersonPictureEllipseBadgeImageSourceStrokeOpacity", value: 1.0_f64, line: 48, position: 75 },
-    rt::ValueRow { key: "PersonPictureEllipseStrokeThickness", value: 1.0_f64, line: 49, position: 61 },
-    rt::ValueRow { key: "PersonPictureEllipseBadgeStrokeThickness", value: 2.0_f64, line: 50, position: 66 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_597: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_71_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_71_NUMBERS,
+    records: &[
+        401, 38, 47, 64, 0,
+        439, 49, 48, 75, 0,
+        488, 35, 49, 61, 0,
+        523, 40, 50, 66, 1,
+    ],
+};
 
 /// The resource aliases of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_598: rt::PackedRows = rt::PackedRows {
@@ -16343,17 +16911,17 @@ static POPULATE_MACOSTHEME_XAML_ROWS_599: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 22, 2002, 22, 1, 103, 8, 103, 55,
-        53, 33, 2002, 22, 1, 104, 8, 104, 66,
-        115, 29, 2002, 22, 1, 105, 8, 105, 62,
-        172, 30, 2002, 22, 1, 106, 8, 106, 63,
-        202, 41, 2002, 22, 1, 107, 8, 107, 74,
-        243, 37, 2002, 22, 1, 108, 8, 108, 70,
-        280, 22, 2024, 26, 1, 109, 8, 109, 55,
-        327, 33, 2024, 26, 1, 110, 8, 110, 66,
-        387, 30, 2024, 26, 1, 111, 8, 111, 63,
-        417, 35, 2024, 26, 1, 112, 8, 112, 68,
-        478, 37, 2002, 22, 1, 113, 8, 113, 70,
+        0, 22, 2058, 22, 1, 103, 8, 103, 55,
+        53, 33, 2058, 22, 1, 104, 8, 104, 66,
+        115, 29, 2058, 22, 1, 105, 8, 105, 62,
+        172, 30, 2058, 22, 1, 106, 8, 106, 63,
+        202, 41, 2058, 22, 1, 107, 8, 107, 74,
+        243, 37, 2058, 22, 1, 108, 8, 108, 70,
+        280, 22, 2080, 26, 1, 109, 8, 109, 55,
+        327, 33, 2080, 26, 1, 110, 8, 110, 66,
+        387, 30, 2080, 26, 1, 111, 8, 111, 63,
+        417, 35, 2080, 26, 1, 112, 8, 112, 68,
+        478, 37, 2058, 22, 1, 113, 8, 113, 70,
     ],
 };
 
@@ -16362,8 +16930,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_600: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        541, 28, 2050, 35, 1, 114, 8, 114, 8,
-        569, 37, 2085, 36, 1, 115, 8, 115, 8,
+        541, 28, 2106, 35, 1, 114, 8, 114, 8,
+        569, 37, 2141, 36, 1, 115, 8, 115, 8,
     ],
 };
 
@@ -16372,8 +16940,8 @@ static POPULATE_MACOSTHEME_XAML_ROWS_601: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        606, 22, 2024, 26, 1, 116, 8, 116, 55,
-        661, 25, 2121, 26, 1, 117, 8, 117, 58,
+        606, 22, 2080, 26, 1, 116, 8, 116, 55,
+        661, 25, 2177, 26, 1, 117, 8, 117, 58,
     ],
 };
 
@@ -16382,43 +16950,47 @@ static POPULATE_MACOSTHEME_XAML_ROWS_602: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        721, 26, 2147, 29, 1, 118, 8, 118, 8,
-        747, 26, 2176, 41, 1, 119, 8, 119, 8,
-        773, 33, 2217, 44, 1, 120, 8, 120, 8,
+        721, 26, 2203, 29, 1, 118, 8, 118, 8,
+        747, 26, 2232, 41, 1, 119, 8, 119, 8,
+        773, 33, 2273, 44, 1, 120, 8, 120, 8,
     ],
 };
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_603: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "GridViewItemCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 121, position: 54 },
-    rt::ValueRow { key: "GridViewItemCheckBoxCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 122, position: 62 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_603: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_74_NUMBERS,
+    records: &[
+        841, 24, 121, 54, 0, 0, 0, 0,
+        865, 32, 122, 62, 1, 1, 1, 1,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_604: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_74_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        841, 34, 2261, 25, 1, 124, 8, 124, 67,
-        914, 31, 2261, 25, 1, 125, 8, 125, 64,
-        972, 42, 2261, 25, 1, 126, 8, 126, 75,
-        1043, 38, 2261, 25, 1, 127, 8, 127, 71,
-        1109, 39, 2286, 24, 1, 128, 8, 128, 72,
-        1176, 36, 2024, 26, 1, 129, 8, 129, 69,
-        1245, 29, 2002, 22, 1, 130, 8, 130, 62,
-        1309, 30, 2286, 24, 1, 131, 8, 131, 63,
-        1373, 36, 2121, 26, 1, 132, 8, 132, 69,
-        1446, 32, 2121, 26, 1, 133, 8, 133, 65,
-        1514, 33, 2121, 26, 1, 134, 8, 134, 66,
-        1583, 33, 2002, 22, 1, 135, 8, 135, 66,
-        1616, 44, 2002, 22, 1, 136, 8, 136, 77,
-        1660, 40, 2002, 22, 1, 137, 8, 137, 73,
-        1700, 41, 2002, 22, 1, 138, 8, 138, 74,
-        1741, 31, 2310, 26, 1, 139, 8, 139, 64,
-        1808, 42, 2310, 26, 1, 140, 8, 140, 75,
-        1850, 38, 2310, 26, 1, 141, 8, 141, 71,
-        1925, 39, 2310, 26, 1, 142, 8, 142, 72,
-        1964, 38, 2002, 22, 1, 143, 8, 143, 71,
+        897, 34, 2317, 25, 1, 124, 8, 124, 67,
+        970, 31, 2317, 25, 1, 125, 8, 125, 64,
+        1028, 42, 2317, 25, 1, 126, 8, 126, 75,
+        1099, 38, 2317, 25, 1, 127, 8, 127, 71,
+        1165, 39, 2342, 24, 1, 128, 8, 128, 72,
+        1232, 36, 2080, 26, 1, 129, 8, 129, 69,
+        1301, 29, 2058, 22, 1, 130, 8, 130, 62,
+        1365, 30, 2342, 24, 1, 131, 8, 131, 63,
+        1429, 36, 2177, 26, 1, 132, 8, 132, 69,
+        1502, 32, 2177, 26, 1, 133, 8, 133, 65,
+        1570, 33, 2177, 26, 1, 134, 8, 134, 66,
+        1639, 33, 2058, 22, 1, 135, 8, 135, 66,
+        1672, 44, 2058, 22, 1, 136, 8, 136, 77,
+        1716, 40, 2058, 22, 1, 137, 8, 137, 73,
+        1756, 41, 2058, 22, 1, 138, 8, 138, 74,
+        1797, 31, 2366, 26, 1, 139, 8, 139, 64,
+        1864, 42, 2366, 26, 1, 140, 8, 140, 75,
+        1906, 38, 2366, 26, 1, 141, 8, 141, 71,
+        1981, 39, 2366, 26, 1, 142, 8, 142, 72,
+        2020, 38, 2058, 22, 1, 143, 8, 143, 71,
     ],
 };
 
@@ -16427,43 +16999,43 @@ static POPULATE_MACOSTHEME_XAML_ROWS_605: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        0, 15, 15, 29, 1, 151, 8, 151, 8,
-        44, 21, 15, 29, 1, 152, 8, 152, 8,
-        65, 25, 90, 41, 1, 153, 8, 153, 8,
-        131, 36, 167, 37, 1, 154, 8, 154, 8,
-        204, 32, 236, 41, 1, 155, 8, 155, 8,
-        277, 26, 303, 39, 1, 156, 8, 156, 8,
-        342, 37, 303, 39, 1, 157, 8, 157, 8,
-        379, 33, 303, 39, 1, 158, 8, 158, 8,
-        412, 25, 437, 41, 1, 159, 8, 159, 8,
-        478, 36, 514, 43, 1, 160, 8, 160, 8,
-        557, 32, 514, 43, 1, 161, 8, 161, 8,
-        589, 29, 90, 41, 1, 162, 8, 162, 8,
-        618, 40, 167, 37, 1, 163, 8, 163, 8,
-        658, 36, 236, 41, 1, 164, 8, 164, 8,
-        694, 30, 303, 39, 1, 165, 8, 165, 8,
-        724, 41, 303, 39, 1, 166, 8, 166, 8,
-        765, 37, 303, 39, 1, 167, 8, 167, 8,
-        802, 29, 437, 41, 1, 168, 8, 168, 8,
-        831, 40, 514, 43, 1, 169, 8, 169, 8,
-        871, 36, 514, 43, 1, 170, 8, 170, 8,
-        907, 19, 15, 29, 1, 171, 8, 171, 8,
-        926, 35, 15, 29, 1, 172, 8, 172, 8,
-        961, 46, 1007, 38, 1, 173, 8, 173, 8,
-        1045, 42, 1007, 38, 1, 174, 8, 174, 8,
-        1087, 33, 1007, 38, 1, 175, 8, 175, 8,
-        1120, 44, 1007, 38, 1, 176, 8, 176, 8,
-        1164, 40, 1007, 38, 1, 177, 8, 177, 8,
-        1204, 33, 15, 29, 1, 178, 8, 178, 8,
-        1237, 35, 1272, 38, 1, 179, 8, 179, 8,
-        1310, 46, 1356, 44, 1, 180, 8, 180, 8,
-        1400, 42, 1356, 44, 1, 181, 8, 181, 8,
-        1442, 33, 1475, 38, 1, 182, 8, 182, 8,
-        1513, 44, 1356, 44, 1, 183, 8, 183, 8,
-        1557, 40, 1356, 44, 1, 184, 8, 184, 8,
-        1597, 33, 1630, 39, 1, 185, 8, 185, 8,
-        1669, 28, 1697, 36, 1, 186, 8, 186, 8,
-        1733, 31, 1697, 36, 1, 187, 8, 187, 8,
+        141, 15, 156, 29, 1, 151, 8, 151, 8,
+        185, 21, 156, 29, 1, 152, 8, 152, 8,
+        206, 25, 231, 41, 1, 153, 8, 153, 8,
+        272, 36, 308, 37, 1, 154, 8, 154, 8,
+        345, 32, 377, 41, 1, 155, 8, 155, 8,
+        418, 26, 444, 39, 1, 156, 8, 156, 8,
+        483, 37, 444, 39, 1, 157, 8, 157, 8,
+        520, 33, 444, 39, 1, 158, 8, 158, 8,
+        553, 25, 578, 41, 1, 159, 8, 159, 8,
+        619, 36, 655, 43, 1, 160, 8, 160, 8,
+        698, 32, 655, 43, 1, 161, 8, 161, 8,
+        730, 29, 231, 41, 1, 162, 8, 162, 8,
+        759, 40, 308, 37, 1, 163, 8, 163, 8,
+        799, 36, 377, 41, 1, 164, 8, 164, 8,
+        835, 30, 444, 39, 1, 165, 8, 165, 8,
+        865, 41, 444, 39, 1, 166, 8, 166, 8,
+        906, 37, 444, 39, 1, 167, 8, 167, 8,
+        943, 29, 578, 41, 1, 168, 8, 168, 8,
+        972, 40, 655, 43, 1, 169, 8, 169, 8,
+        1012, 36, 655, 43, 1, 170, 8, 170, 8,
+        1048, 19, 156, 29, 1, 171, 8, 171, 8,
+        1067, 35, 156, 29, 1, 172, 8, 172, 8,
+        1102, 46, 1148, 38, 1, 173, 8, 173, 8,
+        1186, 42, 1148, 38, 1, 174, 8, 174, 8,
+        1228, 33, 1148, 38, 1, 175, 8, 175, 8,
+        1261, 44, 1148, 38, 1, 176, 8, 176, 8,
+        1305, 40, 1148, 38, 1, 177, 8, 177, 8,
+        1345, 33, 156, 29, 1, 178, 8, 178, 8,
+        1378, 35, 1413, 38, 1, 179, 8, 179, 8,
+        1451, 46, 1497, 44, 1, 180, 8, 180, 8,
+        1541, 42, 1497, 44, 1, 181, 8, 181, 8,
+        1583, 33, 1616, 38, 1, 182, 8, 182, 8,
+        1654, 44, 1497, 44, 1, 183, 8, 183, 8,
+        1698, 40, 1497, 44, 1, 184, 8, 184, 8,
+        1738, 33, 1771, 39, 1, 185, 8, 185, 8,
+        1810, 28, 1838, 36, 1, 186, 8, 186, 8,
+        1874, 31, 1838, 36, 1, 187, 8, 187, 8,
     ],
 };
 
@@ -16474,35 +17046,39 @@ static POPULATE_MACOSTHEME_XAML_ROWS_606: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "PivotHeaderItemLockedTranslation", value: 40.0_f64, line: 192, position: 58 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_607: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "PivotHeaderItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 194, position: 48 },
-    rt::ValueRow { key: "PivotItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 195, position: 42 },
-    rt::ValueRow { key: "PivotLandscapeThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 196, position: 53 },
-    rt::ValueRow { key: "PivotNavButtonBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 197, position: 61 },
-    rt::ValueRow { key: "PivotNavButtonMargin", value: [0.0_f64, 6.0_f64, 0.0_f64, 0.0_f64], line: 198, position: 47 },
-    rt::ValueRow { key: "PivotPortraitThemePadding", value: [12.0_f64, 14.0_f64, 0.0_f64, 13.0_f64], line: 199, position: 52 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_607: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_75_NUMBERS,
+    records: &[
+        0, 21, 194, 48, 0, 1, 0, 1,
+        21, 15, 195, 42, 0, 1, 0, 1,
+        36, 26, 196, 53, 0, 2, 1, 3,
+        62, 34, 197, 61, 5, 5, 5, 5,
+        96, 20, 198, 47, 1, 4, 1, 1,
+        116, 25, 199, 52, 0, 2, 1, 3,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_608: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_MACOSTHEME_XAML_UNIT_75_STRINGS,
     namespaces: &[POPULATE_MACOSTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        1791, 25, 2304, 25, 1, 202, 8, 202, 58,
-        1816, 34, 2304, 25, 1, 203, 8, 203, 67,
-        1850, 36, 2304, 25, 1, 204, 8, 204, 69,
-        1886, 34, 2329, 29, 1, 205, 8, 205, 67,
-        1920, 36, 2304, 25, 1, 206, 8, 206, 69,
-        1956, 34, 2358, 26, 1, 207, 8, 207, 67,
-        1990, 30, 2384, 26, 1, 208, 8, 208, 63,
-        2020, 34, 2384, 26, 1, 209, 8, 209, 67,
-        2054, 45, 2304, 25, 1, 210, 8, 210, 78,
-        2099, 41, 2384, 26, 1, 211, 8, 211, 74,
-        2140, 45, 2329, 29, 1, 212, 8, 212, 78,
-        2185, 41, 2384, 26, 1, 213, 8, 213, 74,
-        2226, 37, 2384, 26, 1, 214, 8, 214, 70,
-        2263, 41, 2358, 26, 1, 215, 8, 215, 74,
+        1932, 25, 2445, 25, 1, 202, 8, 202, 58,
+        1957, 34, 2445, 25, 1, 203, 8, 203, 67,
+        1991, 36, 2445, 25, 1, 204, 8, 204, 69,
+        2027, 34, 2470, 29, 1, 205, 8, 205, 67,
+        2061, 36, 2445, 25, 1, 206, 8, 206, 69,
+        2097, 34, 2499, 26, 1, 207, 8, 207, 67,
+        2131, 30, 2525, 26, 1, 208, 8, 208, 63,
+        2161, 34, 2525, 26, 1, 209, 8, 209, 67,
+        2195, 45, 2445, 25, 1, 210, 8, 210, 78,
+        2240, 41, 2525, 26, 1, 211, 8, 211, 74,
+        2281, 45, 2470, 29, 1, 212, 8, 212, 78,
+        2326, 41, 2525, 26, 1, 213, 8, 213, 74,
+        2367, 37, 2525, 26, 1, 214, 8, 214, 70,
+        2404, 41, 2499, 26, 1, 215, 8, 215, 74,
     ],
 };
 
@@ -16521,51 +17097,71 @@ static POPULATE_MACOSTHEME_XAML_ROWS_609: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_610: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 905, position: 49 },
-    rt::ValueRow { key: "DatePickerLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 906, position: 49 },
-    rt::ValueRow { key: "CalendarDatePickerLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 907, position: 57 },
-    rt::ValueRow { key: "SliderLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 908, position: 45 },
-    rt::ValueRow { key: "ComboBoxLeftHeaderMargin", value: [0.0_f64, 5.0_f64, 32.0_f64, 0.0_f64], line: 909, position: 47 },
-    rt::ValueRow { key: "ToggleSwitchLeftHeaderMargin", value: [0.0_f64, 6.0_f64, 32.0_f64, 0.0_f64], line: 910, position: 51 },
-    rt::ValueRow { key: "ToggleSwitchHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 911, position: 47 },
-    rt::ValueRow { key: "HyperlinkButtonPadding", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 912, position: 45 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_610: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        9485, 26, 905, 49, 4, 37, 38, 4,
+        9511, 26, 906, 49, 4, 37, 38, 4,
+        9537, 34, 907, 57, 4, 37, 38, 4,
+        9571, 22, 908, 45, 4, 37, 38, 4,
+        9593, 24, 909, 47, 4, 37, 38, 4,
+        9617, 28, 910, 51, 4, 32, 38, 4,
+        9645, 24, 911, 47, 4, 4, 4, 11,
+        9669, 22, 912, 45, 4, 23, 4, 23,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_611: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarDatePickerLeftHeaderMaxWidth", value: 296.0_f64, line: 913, position: 58 },
-    rt::ValueRow { key: "ComboBoxLeftHeaderMaxWidth", value: 296.0_f64, line: 914, position: 48 },
-    rt::ValueRow { key: "DatePickerLeftHeaderMaxWidth", value: 296.0_f64, line: 915, position: 50 },
-    rt::ValueRow { key: "SliderLeftHeaderMaxWidth", value: 296.0_f64, line: 916, position: 46 },
-    rt::ValueRow { key: "TimePickerLeftHeaderMaxWidth", value: 296.0_f64, line: 917, position: 50 },
-    rt::ValueRow { key: "ToggleSwitchLeftHeaderMaxWidth", value: 296.0_f64, line: 918, position: 52 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_611: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        9691, 36, 913, 58, 39,
+        9727, 26, 914, 48, 39,
+        9699, 28, 915, 50, 39,
+        9753, 24, 916, 46, 39,
+        9777, 28, 917, 50, 39,
+        9805, 30, 918, 52, 39,
+    ],
+};
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_612: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "ControlFastOutSlowInKeySpline", value: "0,0,0,1", line: 630, position: 51 },
-    rt::ValueRow { key: "ControlNormalAnimationDuration", value: "00:00:00.250", line: 631, position: 52 },
-    rt::ValueRow { key: "ControlFastAnimationDuration", value: "00:00:00.167", line: 632, position: 50 },
-    rt::ValueRow { key: "ControlFastAnimationAfterDuration", value: "00:00:00.168", line: 633, position: 55 },
-    rt::ValueRow { key: "ControlFasterAnimationDuration", value: "00:00:00.083", line: 634, position: 52 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_612: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_4_STRINGS,
+    numbers: &[],
+    records: &[
+        5485, 29, 630, 51, 5514, 7,
+        5521, 30, 631, 52, 5551, 12,
+        5563, 28, 632, 50, 5591, 12,
+        5603, 33, 633, 55, 5636, 12,
+        5648, 30, 634, 52, 5678, 12,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_613: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TextBoxTopHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 8.0_f64], line: 204, position: 45 },
-    rt::ValueRow { key: "TextBoxInnerButtonMargin", value: [0.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 205, position: 47 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_613: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_7_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_7_NUMBERS,
+    records: &[
+        1855, 22, 204, 45, 0, 0, 0, 1,
+        1877, 24, 205, 47, 0, 2, 2, 2,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_614: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuFlyoutItemChevronMargin", value: [24.0_f64, 0.0_f64, 0.0_f64, -1.0_f64], line: 264, position: 50 },
-    rt::ValueRow { key: "MenuFlyoutSeparatorThemePadding", value: [-4.0_f64, 1.0_f64, -4.0_f64, 1.0_f64], line: 265, position: 54 },
-    rt::ValueRow { key: "MenuFlyoutItemMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 266, position: 43 },
-    rt::ValueRow { key: "MenuFlyoutItemThemePadding", value: [11.0_f64, 8.0_f64, 11.0_f64, 9.0_f64], line: 267, position: 49 },
-    rt::ValueRow { key: "MenuFlyoutItemThemePaddingNarrow", value: [11.0_f64, 4.0_f64, 11.0_f64, 5.0_f64], line: 268, position: 55 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_614: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_8_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_8_NUMBERS,
+    records: &[
+        3730, 27, 264, 50, 4, 1, 1, 5,
+        3757, 31, 265, 54, 6, 0, 6, 0,
+        3788, 20, 266, 43, 7, 8, 7, 8,
+        3808, 26, 267, 49, 9, 10, 9, 11,
+        3834, 32, 268, 55, 9, 7, 9, 12,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_615: &[rt::ValueRow<f64>] = &[
@@ -16591,11 +17187,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_618: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ExpanderChevronWidth", value: 1.0_f64, line: 160, position: 42 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_619: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ExpanderDropdownDownBorderThickness", value: [1.0_f64, 0.0_f64, 1.0_f64, 1.0_f64], line: 162, position: 58 },
-    rt::ValueRow { key: "ExpanderDropdownUpBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 0.0_f64], line: 163, position: 56 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_619: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_11_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_11_NUMBERS,
+    records: &[
+        1339, 35, 162, 58, 6, 4, 6, 6,
+        1374, 33, 163, 56, 6, 6, 6, 4,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_620: &[rt::ValueRow<f64>] = &[
@@ -16604,19 +17204,23 @@ static POPULATE_MACOSTHEME_XAML_ROWS_620: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "RadioButtonCheckGlyphPressedOverSize", value: 10.0_f64, line: 191, position: 58 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_621: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarButtonContentViewboxMargin", value: [12.0_f64, 16.0_f64, 0.0_f64, 10.0_f64], line: 123, position: 55 },
-    rt::ValueRow { key: "AppBarButtonContentViewboxCompactMargin", value: [0.0_f64, 12.0_f64, 0.0_f64, 12.0_f64], line: 124, position: 62 },
-    rt::ValueRow { key: "AppBarButtonContentViewboxCollapsedMargin", value: [0.0_f64, 16.0_f64, 0.0_f64, 2.0_f64], line: 125, position: 64 },
-    rt::ValueRow { key: "AppBarButtonOverflowTextTouchMargin", value: [0.0_f64, 9.0_f64, 0.0_f64, 12.0_f64], line: 126, position: 58 },
-    rt::ValueRow { key: "AppBarButtonOverflowTextLabelPadding", value: [0.0_f64, 5.0_f64, 0.0_f64, 8.0_f64], line: 127, position: 59 },
-    rt::ValueRow { key: "AppBarButtonTextLabelMargin", value: [2.0_f64, 0.0_f64, 2.0_f64, 8.0_f64], line: 128, position: 50 },
-    rt::ValueRow { key: "AppBarButtonTextLabelOnRightMargin", value: [8.0_f64, 16.0_f64, 12.0_f64, 10.0_f64], line: 129, position: 57 },
-    rt::ValueRow { key: "AppBarButtonInnerBorderMargin", value: [2.0_f64, 6.0_f64, 2.0_f64, 6.0_f64], line: 130, position: 52 },
-    rt::ValueRow { key: "AppBarButtonInnerBorderCompactMargin", value: [2.0_f64, 6.0_f64, 2.0_f64, 22.0_f64], line: 131, position: 59 },
-    rt::ValueRow { key: "AppBarButtonInnerBorderOverflowMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 132, position: 60 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_621: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_15_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_15_NUMBERS,
+    records: &[
+        1463, 32, 123, 55, 0, 6, 4, 7,
+        1495, 39, 124, 62, 4, 0, 4, 0,
+        1534, 41, 125, 64, 4, 6, 4, 8,
+        1575, 35, 126, 58, 4, 9, 4, 0,
+        1610, 36, 127, 59, 4, 10, 4, 1,
+        1646, 27, 128, 50, 8, 4, 8, 1,
+        1673, 34, 129, 57, 1, 6, 0, 7,
+        1707, 29, 130, 52, 8, 11, 8, 11,
+        1736, 36, 131, 59, 8, 11, 8, 12,
+        1772, 37, 132, 60, 13, 4, 13, 4,
+    ],
+};
 
 /// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_622: &[rt::ValueRow<[f64; 4]>] = &[
@@ -16624,30 +17228,42 @@ static POPULATE_MACOSTHEME_XAML_ROWS_622: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "AppBarOverflowSeparatorMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 25, position: 52 },
 ];
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_623: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "AppBarSeparatorWidth", value: 1.0_f64, line: 26, position: 42 },
-    rt::ValueRow { key: "AppBarOverflowSeparatorHeight", value: 1.0_f64, line: 27, position: 51 },
-    rt::ValueRow { key: "AppBarSeparatorCornerRadius", value: 0.5_f64, line: 28, position: 49 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_623: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_16_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_16_NUMBERS,
+    records: &[
+        55, 20, 26, 42, 0,
+        75, 29, 27, 51, 0,
+        104, 27, 28, 49, 1,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_624: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AppBarToggleButtonBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 210, position: 61 },
-    rt::ValueRow { key: "AppBarToggleButtonOverflowTextTouchMargin", value: [0.0_f64, 9.0_f64, 0.0_f64, 12.0_f64], line: 211, position: 64 },
-    rt::ValueRow { key: "AppBarToggleButtonOverflowCheckTouchMargin", value: [12.0_f64, 10.0_f64, 12.0_f64, 10.0_f64], line: 212, position: 65 },
-    rt::ValueRow { key: "AppBarToggleButtonOverflowCheckMargin", value: [12.0_f64, 4.0_f64, 12.0_f64, 4.0_f64], line: 213, position: 60 },
-    rt::ValueRow { key: "AppBarToggleButtonTextLabelMargin", value: [2.0_f64, 0.0_f64, 2.0_f64, 8.0_f64], line: 214, position: 56 },
-    rt::ValueRow { key: "AppBarToggleButtonTextLabelOnRightMargin", value: [8.0_f64, 16.0_f64, 12.0_f64, 10.0_f64], line: 215, position: 63 },
-    rt::ValueRow { key: "AppBarToggleButtonOverflowTextLabelPadding", value: [0.0_f64, 5.0_f64, 0.0_f64, 8.0_f64], line: 216, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_624: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_17_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_17_NUMBERS,
+    records: &[
+        3470, 38, 210, 61, 0, 0, 0, 0,
+        3508, 41, 211, 64, 1, 2, 1, 3,
+        3549, 42, 212, 65, 3, 4, 3, 4,
+        3591, 37, 213, 60, 3, 5, 3, 5,
+        3628, 33, 214, 56, 6, 1, 6, 7,
+        3661, 40, 215, 63, 7, 8, 3, 4,
+        3701, 42, 216, 65, 1, 9, 1, 7,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_625: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ToggleSwitchPreContentMargin", value: 8.0_f64, line: 196, position: 50 },
-    rt::ValueRow { key: "ToggleSwitchPostContentMargin", value: 8.0_f64, line: 197, position: 51 },
-    rt::ValueRow { key: "ToggleSwitchThemeMinWidth", value: 0.0_f64, line: 198, position: 47 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_625: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_19_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_19_NUMBERS,
+    records: &[
+        2324, 28, 196, 50, 0,
+        2352, 29, 197, 51, 0,
+        2381, 25, 198, 47, 1,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_626: &[rt::ValueRow<f64>] = &[
@@ -16655,14 +17271,18 @@ static POPULATE_MACOSTHEME_XAML_ROWS_626: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AppBarThemeCompactHeight", value: 48.0_f64, line: 82, position: 46 },
 ];
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_627: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CaptionTextBlockFontSize", value: 11.0_f64, line: 12, position: 46 },
-    rt::ValueRow { key: "BodyTextBlockFontSize", value: 13.0_f64, line: 13, position: 43 },
-    rt::ValueRow { key: "BodyLargeTextBlockFontSize", value: 15.0_f64, line: 14, position: 48 },
-    rt::ValueRow { key: "SubtitleTextBlockFontSize", value: 17.0_f64, line: 15, position: 47 },
-    rt::ValueRow { key: "TitleTextBlockFontSize", value: 22.0_f64, line: 16, position: 44 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_627: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "CaptionTextBlockFontSizeBodyTextBlockFontSizeBodyLargeTextBlockFontSizeSubtitleTextBlockFontSizeTitleTextBlockFontSize",
+    numbers: &[11.0_f64, 13.0_f64, 15.0_f64, 17.0_f64, 22.0_f64],
+    records: &[
+        0, 24, 12, 46, 0,
+        24, 21, 13, 43, 1,
+        45, 26, 14, 48, 2,
+        71, 25, 15, 47, 3,
+        96, 22, 16, 44, 4,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_628: &[rt::ValueRow<f64>] = &[
@@ -16671,51 +17291,75 @@ static POPULATE_MACOSTHEME_XAML_ROWS_628: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "DisplayTextBlockFontSize", value: 36.0_f64, line: 14, position: 46 },
 ];
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_629: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CheckBoxBorderThickness", value: 1.0_f64, line: 279, position: 45 },
-    rt::ValueRow { key: "CheckBoxSize", value: 14.0_f64, line: 280, position: 34 },
-    rt::ValueRow { key: "CheckBoxGlyphSize", value: 12.0_f64, line: 281, position: 39 },
-    rt::ValueRow { key: "CheckBoxHeight", value: 22.0_f64, line: 282, position: 36 },
-    rt::ValueRow { key: "CheckBoxMinWidth", value: 0.0_f64, line: 283, position: 38 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_629: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_31_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_31_NUMBERS,
+    records: &[
+        3809, 23, 279, 45, 0,
+        3832, 12, 280, 34, 1,
+        3844, 17, 281, 39, 2,
+        3861, 14, 282, 36, 3,
+        3875, 16, 283, 38, 4,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_630: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CheckBoxPadding", value: [6.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 284, position: 38 },
-    rt::ValueRow { key: "CheckBoxFocusVisualMargin", value: [-3.0_f64, -3.0_f64, -3.0_f64, -3.0_f64], line: 285, position: 48 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_630: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_31_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_31_NUMBERS,
+    records: &[
+        3891, 15, 284, 38, 5, 4, 4, 4,
+        3906, 25, 285, 48, 6, 6, 6, 6,
+    ],
+};
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_631: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "CheckBoxCheckedGlyph", value: "\u{e73e}", line: 286, position: 42 },
-    rt::ValueRow { key: "CheckBoxIndeterminateGlyph", value: "\u{e9ae}", line: 287, position: 48 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_631: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_31_STRINGS,
+    numbers: &[],
+    records: &[
+        3931, 20, 286, 42, 3951, 3,
+        3954, 26, 287, 48, 3980, 3,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_632: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 124, position: 62 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemHeight", value: 26.0_f64, line: 125, position: 57 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 126, position: 74 },
-    rt::ValueRow { key: "DatePickerThemeMinWidth", value: 180.0_f64, line: 127, position: 45 },
-    rt::ValueRow { key: "DatePickerThemeMaxWidth", value: 456.0_f64, line: 128, position: 45 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_632: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_33_NUMBERS,
+    records: &[
+        1465, 40, 124, 62, 3,
+        1505, 35, 125, 57, 4,
+        1540, 52, 126, 74, 5,
+        1592, 23, 127, 45, 6,
+        1615, 23, 128, 45, 7,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_633: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemPadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 129, position: 59 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterMonthPadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 130, position: 60 },
-    rt::ValueRow { key: "DatePickerHostPadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 131, position: 44 },
-    rt::ValueRow { key: "DatePickerHostMonthPadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 132, position: 49 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptMargin", value: [4.0_f64, 4.0_f64, 2.0_f64, 4.0_f64], line: 133, position: 60 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterDismissMargin", value: [2.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 134, position: 61 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_633: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_33_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_33_NUMBERS,
+    records: &[
+        1638, 36, 129, 59, 8, 9, 8, 9,
+        1674, 37, 130, 60, 8, 9, 8, 9,
+        1711, 21, 131, 44, 8, 9, 8, 9,
+        1732, 26, 132, 49, 8, 9, 8, 9,
+        1758, 37, 133, 60, 10, 10, 11, 10,
+        1795, 38, 134, 61, 11, 10, 10, 10,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_634: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "LoopingSelectorItemMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 84, position: 48 },
-    rt::ValueRow { key: "LoopingSelectorUpDownButtonMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 85, position: 56 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_634: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_34_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_34_NUMBERS,
+    records: &[
+        1066, 25, 84, 48, 0, 1, 0, 1,
+        1091, 33, 85, 56, 2, 2, 2, 2,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_635: &[rt::ValueRow<f64>] = &[
@@ -16729,175 +17373,235 @@ static POPULATE_MACOSTHEME_XAML_ROWS_636: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "FlipViewButtonScalePressed", value: 0.875_f64, line: 82, position: 48 },
 ];
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_637: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "ScrollBarExpandDuration", value: "00:00:00.167", line: 183, position: 45 },
-    rt::ValueRow { key: "ScrollBarOpacityChangeDuration", value: "00:00:00.083", line: 184, position: 52 },
-    rt::ValueRow { key: "ScrollBarColorChangeDuration", value: "00:00:00.083", line: 185, position: 50 },
-    rt::ValueRow { key: "ScrollBarContractDuration", value: "00:00:00.167", line: 186, position: 47 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_637: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_37_STRINGS,
+    numbers: &[],
+    records: &[
+        1882, 23, 183, 45, 1905, 12,
+        1917, 30, 184, 52, 1947, 12,
+        1959, 28, 185, 50, 1947, 12,
+        1987, 25, 186, 47, 1905, 12,
+    ],
+};
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_638: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "ScrollBarContractDelay", value: "00:00:02", line: 188, position: 44 },
-    rt::ValueRow { key: "ScrollBarContractFinalKeyframe", value: "00:00:02.1", line: 189, position: 52 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_638: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_37_STRINGS,
+    numbers: &[],
+    records: &[
+        2012, 22, 188, 44, 2034, 8,
+        2042, 30, 189, 52, 2072, 10,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_639: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ScrollBarSize", value: 12.0_f64, line: 190, position: 35 },
-    rt::ValueRow { key: "ScrollBarVerticalThumbMinHeight", value: 30.0_f64, line: 191, position: 53 },
-    rt::ValueRow { key: "ScrollBarVerticalThumbMinWidth", value: 8.0_f64, line: 192, position: 52 },
-    rt::ValueRow { key: "ScrollBarHorizontalThumbMinWidth", value: 30.0_f64, line: 193, position: 54 },
-    rt::ValueRow { key: "ScrollBarHorizontalThumbMinHeight", value: 8.0_f64, line: 194, position: 55 },
-    rt::ValueRow { key: "ScrollBarThumbStrokeThickness", value: 6.0_f64, line: 195, position: 51 },
-    rt::ValueRow { key: "ScrollBarButtonArrowIconFontSize", value: 8.0_f64, line: 196, position: 54 },
-    rt::ValueRow { key: "ScrollBarButtonArrowScalePressed", value: 0.875_f64, line: 197, position: 54 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_639: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_37_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_37_NUMBERS,
+    records: &[
+        2082, 13, 190, 35, 0,
+        2095, 31, 191, 53, 1,
+        2126, 30, 192, 52, 2,
+        2156, 32, 193, 54, 1,
+        2188, 33, 194, 55, 2,
+        2221, 29, 195, 51, 3,
+        2250, 32, 196, 54, 2,
+        2282, 32, 197, 54, 4,
+    ],
+};
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_640: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "ScrollBarExpandBeginTime", value: "00:00:00.40", line: 198, position: 46 },
-    rt::ValueRow { key: "ScrollBarContractBeginTime", value: "00:00:00.50", line: 199, position: 48 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_640: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_37_STRINGS,
+    numbers: &[],
+    records: &[
+        2314, 24, 198, 46, 2338, 11,
+        2349, 26, 199, 48, 2375, 11,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_641: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ScrollBarHorizontalDecreaseMargin", value: [4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 201, position: 56 },
-    rt::ValueRow { key: "ScrollBarHorizontalIncreaseMargin", value: [0.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 202, position: 56 },
-    rt::ValueRow { key: "ScrollBarVerticalDecreaseMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 0.0_f64], line: 203, position: 54 },
-    rt::ValueRow { key: "ScrollBarVerticalIncreaseMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 204, position: 54 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_641: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_37_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_37_NUMBERS,
+    records: &[
+        2386, 33, 201, 56, 5, 6, 6, 6,
+        2419, 33, 202, 56, 6, 6, 5, 6,
+        2452, 31, 203, 54, 6, 5, 6, 6,
+        2483, 31, 204, 54, 6, 6, 6, 5,
+    ],
+};
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_642: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "ScrollViewerSeparatorExpandBeginTime", value: "00:00:00.40", line: 25, position: 58 },
-    rt::ValueRow { key: "ScrollViewerSeparatorExpandDuration", value: "00:00:00.1", line: 26, position: 57 },
-    rt::ValueRow { key: "ScrollViewerSeparatorContractBeginTime", value: "00:00:02.00", line: 27, position: 60 },
-    rt::ValueRow { key: "ScrollViewerSeparatorContractDelay", value: "00:00:02", line: 28, position: 56 },
-    rt::ValueRow { key: "ScrollViewerSeparatorContractDuration", value: "00:00:00.1", line: 29, position: 59 },
-    rt::ValueRow { key: "ScrollViewerSeparatorContractFinalKeyframe", value: "00:00:02.1", line: 30, position: 64 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_642: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_38_STRINGS,
+    numbers: &[],
+    records: &[
+        72, 36, 25, 58, 108, 11,
+        119, 35, 26, 57, 154, 10,
+        164, 38, 27, 60, 202, 11,
+        213, 34, 28, 56, 202, 8,
+        247, 37, 29, 59, 154, 10,
+        284, 42, 30, 64, 326, 10,
+    ],
+};
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_643: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SliderTrackCornerRadius", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 170, position: 49 },
-    rt::ValueRow { key: "SliderThumbCornerRadius", value: [9.0_f64, 9.0_f64, 9.0_f64, 9.0_f64], line: 171, position: 49 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_643: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_39_NUMBERS,
+    records: &[
+        1816, 23, 170, 49, 2, 2, 2, 2,
+        1839, 23, 171, 49, 3, 3, 3, 3,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_644: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "SliderPreContentMargin", value: 14.0_f64, line: 172, position: 44 },
-    rt::ValueRow { key: "SliderPostContentMargin", value: 14.0_f64, line: 173, position: 45 },
-    rt::ValueRow { key: "SliderInnerThumbHeight", value: 12.0_f64, line: 174, position: 44 },
-    rt::ValueRow { key: "SliderHorizontalHeight", value: 32.0_f64, line: 175, position: 44 },
-    rt::ValueRow { key: "SliderVerticalWidth", value: 32.0_f64, line: 176, position: 41 },
-    rt::ValueRow { key: "SliderHorizontalThumbWidth", value: 18.0_f64, line: 177, position: 48 },
-    rt::ValueRow { key: "SliderHorizontalThumbHeight", value: 18.0_f64, line: 178, position: 49 },
-    rt::ValueRow { key: "SliderVerticalThumbWidth", value: 18.0_f64, line: 179, position: 46 },
-    rt::ValueRow { key: "SliderVerticalThumbHeight", value: 18.0_f64, line: 180, position: 47 },
-    rt::ValueRow { key: "SliderInnerThumbWidth", value: 12.0_f64, line: 181, position: 43 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_644: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_39_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_39_NUMBERS,
+    records: &[
+        1862, 22, 172, 44, 4,
+        1884, 23, 173, 45, 4,
+        1907, 22, 174, 44, 5,
+        1929, 22, 175, 44, 6,
+        1951, 19, 176, 41, 6,
+        1970, 26, 177, 48, 7,
+        1996, 27, 178, 49, 7,
+        2023, 24, 179, 46, 7,
+        2047, 25, 180, 47, 7,
+        2072, 21, 181, 43, 5,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_645: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 124, position: 62 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 125, position: 74 },
-    rt::ValueRow { key: "TimePickerThemeMinWidth", value: 140.0_f64, line: 126, position: 45 },
-    rt::ValueRow { key: "TimePickerThemeMaxWidth", value: 456.0_f64, line: 127, position: 45 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterItemHeight", value: 26.0_f64, line: 128, position: 57 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_645: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_40_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_40_NUMBERS,
+    records: &[
+        1470, 40, 124, 62, 4,
+        1510, 52, 125, 74, 5,
+        1562, 23, 126, 45, 6,
+        1585, 23, 127, 45, 7,
+        1608, 35, 128, 57, 8,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_646: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterItemPadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 129, position: 59 },
-    rt::ValueRow { key: "TimePickerHostPadding", value: [6.0_f64, 3.0_f64, 6.0_f64, 3.0_f64], line: 130, position: 44 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_646: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_40_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_40_NUMBERS,
+    records: &[
+        1643, 36, 129, 59, 9, 10, 9, 10,
+        1679, 21, 130, 44, 9, 10, 9, 10,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_647: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "NavigationViewAutoSuggestBoxMargin", value: [16.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 213, position: 57 },
-    rt::ValueRow { key: "TopNavigationViewAutoSuggestBoxMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 214, position: 60 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_647: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_42_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_42_NUMBERS,
+    records: &[
+        2922, 34, 213, 57, 0, 1, 0, 1,
+        2956, 37, 214, 60, 2, 1, 2, 1,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_648: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "PaneToggleButtonHeight", value: 36.0_f64, line: 215, position: 44 },
-    rt::ValueRow { key: "PaneToggleButtonWidth", value: 40.0_f64, line: 216, position: 43 },
-    rt::ValueRow { key: "PaneOverlayShadowDepth", value: 16.0_f64, line: 217, position: 44 },
-    rt::ValueRow { key: "NavigationViewCompactPaneLength", value: 48.0_f64, line: 218, position: 53 },
-    rt::ValueRow { key: "NavigationViewIconBoxWidth", value: 40.0_f64, line: 219, position: 48 },
-    rt::ValueRow { key: "NavigationViewTopPaneHeight", value: 48.0_f64, line: 220, position: 49 },
-    rt::ValueRow { key: "NavigationViewAutoSuggestAreaHeight", value: 40.0_f64, line: 221, position: 57 },
-    rt::ValueRow { key: "TopNavigationViewPaneCustomContentMinWidth", value: 48.0_f64, line: 222, position: 64 },
-    rt::ValueRow { key: "TopNavigationViewOverflowButtonWidth", value: 40.0_f64, line: 223, position: 58 },
-    rt::ValueRow { key: "TopNavigationViewOverflowButtonHeight", value: 40.0_f64, line: 224, position: 59 },
-    rt::ValueRow { key: "TopNavigationViewSettingsButtonWidth", value: 40.0_f64, line: 225, position: 58 },
-    rt::ValueRow { key: "TopNavigationViewSettingsButtonHeight", value: 40.0_f64, line: 226, position: 59 },
-    rt::ValueRow { key: "NavigationViewItemOnLeftMinHeight", value: 36.0_f64, line: 227, position: 55 },
-    rt::ValueRow { key: "NavigationViewPaneHeaderRowMinHeight", value: 40.0_f64, line: 228, position: 58 },
-    rt::ValueRow { key: "NavigationViewItemOnLeftIconBoxHeight", value: 16.0_f64, line: 229, position: 59 },
-    rt::ValueRow { key: "NavigationViewSelectionIndicatorWidth", value: 3.0_f64, line: 230, position: 59 },
-    rt::ValueRow { key: "NavigationViewSelectionIndicatorHeight", value: 16.0_f64, line: 231, position: 60 },
-    rt::ValueRow { key: "NavigationViewSelectionIndicatorRadius", value: 2.0_f64, line: 232, position: 60 },
-    rt::ValueRow { key: "NavigationViewItemSeparatorHeight", value: 1.0_f64, line: 233, position: 55 },
-    rt::ValueRow { key: "TopNavigationViewItemSeparatorWidth", value: 1.0_f64, line: 234, position: 57 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_648: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_42_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_42_NUMBERS,
+    records: &[
+        2993, 22, 215, 44, 3,
+        3015, 21, 216, 43, 4,
+        3036, 22, 217, 44, 0,
+        3058, 31, 218, 53, 5,
+        3089, 26, 219, 48, 4,
+        3115, 27, 220, 49, 5,
+        3142, 35, 221, 57, 4,
+        3177, 42, 222, 64, 5,
+        3219, 36, 223, 58, 4,
+        3255, 37, 224, 59, 4,
+        3292, 36, 225, 58, 4,
+        3328, 37, 226, 59, 4,
+        3365, 33, 227, 55, 3,
+        3398, 36, 228, 58, 4,
+        3434, 37, 229, 59, 0,
+        3471, 37, 230, 59, 6,
+        3508, 38, 231, 60, 0,
+        3546, 38, 232, 60, 7,
+        3584, 33, 233, 55, 8,
+        3617, 35, 234, 57, 8,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_649: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "NavigationViewToggleBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 235, position: 58 },
-    rt::ValueRow { key: "NavigationViewItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 236, position: 56 },
-    rt::ValueRow { key: "NavigationViewItemOnLeftIconBoxMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 237, position: 60 },
-    rt::ValueRow { key: "NavigationViewItemButtonMargin", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 238, position: 53 },
-    rt::ValueRow { key: "NavigationViewItemInnerHeaderMargin", value: [16.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 239, position: 58 },
-    rt::ValueRow { key: "TopNavigationViewItemInnerHeaderMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 240, position: 61 },
-    rt::ValueRow { key: "NavigationViewMinimalHeaderMargin", value: [-24.0_f64, 44.0_f64, 0.0_f64, 0.0_f64], line: 241, position: 56 },
-    rt::ValueRow { key: "NavigationViewButtonHolderGridMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 242, position: 59 },
-    rt::ValueRow { key: "NavigationViewPaneContentGridMargin", value: [-1.0_f64, 3.0_f64, -1.0_f64, 3.0_f64], line: 243, position: 58 },
-    rt::ValueRow { key: "NavigationViewContentGridBorderThickness", value: [1.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 244, position: 63 },
-    rt::ValueRow { key: "NavigationViewMinimalContentGridBorderThickness", value: [0.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 245, position: 70 },
-    rt::ValueRow { key: "TopNavigationViewContentGridBorderThickness", value: [0.0_f64, 1.0_f64, 0.0_f64, 0.0_f64], line: 246, position: 66 },
-    rt::ValueRow { key: "TopNavigationViewTopNavGridMargin", value: [4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 247, position: 56 },
-    rt::ValueRow { key: "NavigationViewBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 248, position: 52 },
-    rt::ValueRow { key: "NavigationViewHeaderMargin", value: [56.0_f64, 44.0_f64, 0.0_f64, 0.0_f64], line: 249, position: 49 },
-    rt::ValueRow { key: "NavigationViewContentPresenterMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 250, position: 59 },
-    rt::ValueRow { key: "NavigationViewContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 251, position: 50 },
-    rt::ValueRow { key: "NavigationViewMinimalContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 252, position: 57 },
-    rt::ValueRow { key: "TopNavigationViewContentMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 253, position: 53 },
-    rt::ValueRow { key: "NavigationViewPaneTitlePresenterMargin", value: [8.0_f64, 4.0_f64, 0.0_f64, 0.0_f64], line: 254, position: 61 },
-    rt::ValueRow { key: "NavigationViewItemMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 255, position: 47 },
-    rt::ValueRow { key: "TopNavigationViewItemMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 256, position: 50 },
-    rt::ValueRow { key: "NavigationViewItemSeparatorMargin", value: [0.0_f64, 3.0_f64, 0.0_f64, 4.0_f64], line: 257, position: 56 },
-    rt::ValueRow { key: "NavigationViewCompactItemSeparatorMargin", value: [0.0_f64, 3.0_f64, 0.0_f64, 4.0_f64], line: 258, position: 63 },
-    rt::ValueRow { key: "TopNavigationViewItemSeparatorMargin", value: [3.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 259, position: 59 },
-    rt::ValueRow { key: "TopNavigationViewOverflowButtonMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 260, position: 60 },
-    rt::ValueRow { key: "NavigationViewItemContentPresenterMargin", value: [4.0_f64, -1.0_f64, 8.0_f64, -1.0_f64], line: 261, position: 63 },
-    rt::ValueRow { key: "NavigationViewCompactItemContentPresenterMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 262, position: 70 },
-    rt::ValueRow { key: "TopNavigationViewItemContentPresenterMargin", value: [8.0_f64, -1.0_f64, 12.0_f64, -1.0_f64], line: 263, position: 66 },
-    rt::ValueRow { key: "TopNavigationViewItemContentOnlyContentPresenterMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 264, position: 77 },
-    rt::ValueRow { key: "NavigationViewItemExpandChevronMargin", value: [0.0_f64, 0.0_f64, -14.0_f64, 0.0_f64], line: 265, position: 60 },
-    rt::ValueRow { key: "TopNavigationViewItemExpandChevronMargin", value: [-16.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 266, position: 63 },
-    rt::ValueRow { key: "TopNavigationViewItemIconOnlyExpandChevronMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 267, position: 71 },
-    rt::ValueRow { key: "TopNavigationViewItemContentOnlyExpandChevronMargin", value: [-12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 268, position: 74 },
-    rt::ValueRow { key: "TopNavigationViewItemOnOverflowContentPresenterMargin", value: [12.0_f64, 0.0_f64, 20.0_f64, 0.0_f64], line: 269, position: 76 },
-    rt::ValueRow { key: "TopNavigationViewItemOnOverflowNoIconContentPresenterMargin", value: [16.0_f64, 0.0_f64, 20.0_f64, 0.0_f64], line: 270, position: 82 },
-    rt::ValueRow { key: "TopNavigationViewItemOnOverflowExpandChevronMargin", value: [-4.0_f64, 0.0_f64, -8.0_f64, 0.0_f64], line: 271, position: 73 },
-    rt::ValueRow { key: "TopNavigationViewItemOnOverflowExpandChevronPadding", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 272, position: 74 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_649: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_42_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_42_NUMBERS,
+    records: &[
+        3652, 35, 235, 58, 1, 1, 1, 1,
+        3687, 33, 236, 56, 8, 8, 8, 8,
+        3720, 37, 237, 60, 1, 1, 1, 1,
+        3757, 30, 238, 53, 2, 7, 2, 7,
+        3787, 35, 239, 58, 0, 1, 0, 1,
+        3822, 38, 240, 61, 9, 1, 9, 1,
+        3860, 33, 241, 56, 10, 11, 1, 1,
+        3893, 36, 242, 59, 1, 2, 1, 2,
+        3929, 35, 243, 58, 12, 6, 12, 6,
+        3964, 40, 244, 63, 8, 8, 1, 1,
+        4004, 47, 245, 70, 1, 8, 1, 1,
+        4051, 43, 246, 66, 1, 8, 1, 1,
+        4094, 33, 247, 56, 2, 1, 2, 1,
+        4127, 29, 248, 52, 8, 8, 8, 8,
+        4156, 26, 249, 49, 13, 11, 1, 1,
+        4182, 36, 250, 59, 1, 1, 1, 1,
+        4218, 27, 251, 50, 1, 1, 1, 1,
+        4245, 34, 252, 57, 1, 1, 1, 1,
+        4279, 30, 253, 53, 1, 1, 1, 1,
+        4309, 38, 254, 61, 14, 2, 1, 1,
+        4347, 24, 255, 47, 1, 1, 1, 1,
+        4371, 27, 256, 50, 1, 1, 1, 1,
+        4398, 33, 257, 56, 1, 6, 1, 2,
+        4431, 40, 258, 63, 1, 6, 1, 2,
+        4471, 36, 259, 59, 6, 1, 2, 1,
+        4507, 37, 260, 60, 1, 1, 1, 1,
+        4544, 40, 261, 63, 2, 12, 14, 12,
+        4584, 47, 262, 70, 1, 1, 1, 1,
+        4631, 43, 263, 66, 14, 12, 9, 12,
+        4674, 54, 264, 77, 9, 1, 9, 1,
+        4728, 37, 265, 60, 1, 1, 15, 1,
+        4765, 40, 266, 63, 16, 1, 1, 1,
+        4805, 48, 267, 71, 1, 1, 1, 1,
+        4853, 51, 268, 74, 17, 1, 1, 1,
+        4904, 53, 269, 76, 9, 1, 18, 1,
+        4957, 59, 270, 82, 0, 1, 18, 1,
+        5016, 50, 271, 73, 19, 1, 20, 1,
+        5066, 51, 272, 74, 9, 1, 9, 1,
+    ],
+};
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_650: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "NavigationViewContentGridCornerRadius", value: [8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 273, position: 63 },
-    rt::ValueRow { key: "TopNavigationViewContentGridCornerRadius", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 274, position: 66 },
-    rt::ValueRow { key: "NavigationViewMinimalContentGridCornerRadius", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 275, position: 70 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_650: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_42_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_42_NUMBERS,
+    records: &[
+        5117, 37, 273, 63, 14, 1, 1, 1,
+        5154, 40, 274, 66, 1, 1, 1, 1,
+        5194, 44, 275, 70, 1, 1, 1, 1,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_651: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TopNavigationViewOverflowMenuPadding", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 276, position: 59 },
-    rt::ValueRow { key: "NavigationViewItemChildrenMenuFlyoutPadding", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 277, position: 66 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_651: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_42_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_42_NUMBERS,
+    records: &[
+        5238, 36, 276, 59, 1, 7, 1, 7,
+        5274, 43, 277, 66, 1, 7, 1, 7,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_652: &[rt::ValueRow<f64>] = &[
@@ -16905,11 +17609,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_652: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "NavigationBackButtonHeight", value: 36.0_f64, line: 25, position: 48 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_653: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuBarItemButtonPadding", value: [10.0_f64, 4.0_f64, 10.0_f64, 4.0_f64], line: 55, position: 47 },
-    rt::ValueRow { key: "MenuBarItemMargin", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 56, position: 40 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_653: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_46_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_46_NUMBERS,
+    records: &[
+        437, 24, 55, 47, 0, 1, 0, 1,
+        461, 17, 56, 40, 1, 1, 1, 1,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_654: &[rt::ValueRow<f64>] = &[
@@ -16917,36 +17625,52 @@ static POPULATE_MACOSTHEME_XAML_ROWS_654: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SplitButtonSecondaryButtonSize", value: 35.0_f64, line: 112, position: 52 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_655: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabViewHeaderPadding", value: [0.0_f64, 8.0_f64, 0.0_f64, 0.0_f64], line: 249, position: 43 },
-    rt::ValueRow { key: "TabViewItemHeaderPadding", value: [8.0_f64, 3.0_f64, 4.0_f64, 3.0_f64], line: 250, position: 47 },
-    rt::ValueRow { key: "TabViewSelectedItemHeaderPadding", value: [9.0_f64, 3.0_f64, 5.0_f64, 4.0_f64], line: 251, position: 55 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_655: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        2831, 20, 249, 43, 0, 1, 0, 0,
+        2851, 24, 250, 47, 1, 2, 3, 2,
+        2875, 32, 251, 55, 4, 2, 5, 3,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_656: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TabViewItemMinHeight", value: 26.0_f64, line: 252, position: 42 },
-    rt::ValueRow { key: "TabViewItemMaxWidth", value: 240.0_f64, line: 253, position: 41 },
-    rt::ValueRow { key: "TabViewItemMinWidth", value: 48.0_f64, line: 254, position: 41 },
-    rt::ValueRow { key: "TabViewItemHeaderFontSize", value: 12.0_f64, line: 255, position: 47 },
-    rt::ValueRow { key: "TabViewItemHeaderIconSize", value: 16.0_f64, line: 256, position: 47 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_656: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        2907, 20, 252, 42, 6,
+        2927, 19, 253, 41, 7,
+        2946, 19, 254, 41, 8,
+        2965, 25, 255, 47, 9,
+        2990, 25, 256, 47, 10,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_657: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TabViewItemHeaderCloseButtonHeight", value: 24.0_f64, line: 258, position: 56 },
-    rt::ValueRow { key: "TabViewItemHeaderCloseButtonWidth", value: 32.0_f64, line: 259, position: 55 },
-    rt::ValueRow { key: "TabViewItemHeaderCloseButtonSize", value: 16.0_f64, line: 260, position: 54 },
-    rt::ValueRow { key: "TabViewItemHeaderCloseFontSize", value: 12.0_f64, line: 261, position: 52 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_657: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        3015, 34, 258, 56, 11,
+        3049, 33, 259, 55, 12,
+        3082, 32, 260, 54, 10,
+        3114, 30, 261, 52, 9,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_658: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabViewItemHeaderCloseMargin", value: [4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 262, position: 51 },
-    rt::ValueRow { key: "TabViewItemHeaderPaddingWithCloseButton", value: [8.0_f64, 3.0_f64, 4.0_f64, 3.0_f64], line: 263, position: 62 },
-    rt::ValueRow { key: "TabViewItemHeaderPaddingWithoutCloseButton", value: [8.0_f64, 3.0_f64, 8.0_f64, 3.0_f64], line: 264, position: 65 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_658: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        3144, 28, 262, 51, 3, 0, 0, 0,
+        3172, 39, 263, 62, 1, 2, 3, 2,
+        3211, 42, 264, 65, 1, 2, 1, 2,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_659: &[rt::ValueRow<f64>] = &[
@@ -16955,12 +17679,16 @@ static POPULATE_MACOSTHEME_XAML_ROWS_659: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabViewItemScrollButonFontSize", value: 8.0_f64, line: 267, position: 52 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_660: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabViewItemScrollButtonPadding", value: [7.0_f64, 3.0_f64, 7.0_f64, 3.0_f64], line: 268, position: 53 },
-    rt::ValueRow { key: "TabViewItemLeftScrollButtonContainerPadding", value: [8.0_f64, 0.0_f64, 3.0_f64, 3.0_f64], line: 269, position: 66 },
-    rt::ValueRow { key: "TabViewItemRightScrollButtonContainerPadding", value: [3.0_f64, 0.0_f64, 8.0_f64, 3.0_f64], line: 270, position: 67 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_660: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        3253, 30, 268, 53, 13, 2, 13, 2,
+        3283, 43, 269, 66, 1, 0, 2, 2,
+        3326, 44, 270, 67, 2, 0, 1, 2,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_661: &[rt::ValueRow<f64>] = &[
@@ -16969,21 +17697,29 @@ static POPULATE_MACOSTHEME_XAML_ROWS_661: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabViewItemAddButtonFontSize", value: 12.0_f64, line: 273, position: 50 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_662: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabViewItemSeparatorMargin", value: [0.0_f64, 8.0_f64, 0.0_f64, 8.0_f64], line: 276, position: 49 },
-    rt::ValueRow { key: "TabViewItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 277, position: 49 },
-    rt::ValueRow { key: "TabViewSelectedItemBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 0.0_f64], line: 278, position: 57 },
-    rt::ValueRow { key: "TabViewSelectedItemHeaderMargin", value: [-1.0_f64, 0.0_f64, -1.0_f64, 1.0_f64], line: 279, position: 54 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_662: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_50_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_50_NUMBERS,
+    records: &[
+        3370, 26, 276, 49, 0, 1, 0, 1,
+        3396, 26, 277, 49, 14, 14, 14, 14,
+        3422, 34, 278, 57, 14, 14, 14, 0,
+        3456, 31, 279, 54, 15, 0, 15, 14,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_663: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AutoSuggestBoxTopHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 8.0_f64], line: 33, position: 52 },
-    rt::ValueRow { key: "AutoSuggestBoxInnerButtonMargin", value: [1.0_f64, 3.0_f64, 1.0_f64, 3.0_f64], line: 34, position: 54 },
-    rt::ValueRow { key: "AutoSuggestBoxDeleteButtonMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 35, position: 55 },
-    rt::ValueRow { key: "AutoSuggestBoxQueryButtonPadding", value: [3.0_f64, 2.0_f64, 3.0_f64, 2.0_f64], line: 36, position: 55 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_663: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_51_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_51_NUMBERS,
+    records: &[
+        236, 29, 33, 52, 0, 0, 0, 1,
+        265, 31, 34, 54, 2, 3, 2, 3,
+        296, 32, 35, 55, 0, 4, 0, 4,
+        328, 32, 36, 55, 3, 5, 3, 5,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_664: &[rt::ValueRow<f64>] = &[
@@ -16991,41 +17727,53 @@ static POPULATE_MACOSTHEME_XAML_ROWS_664: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "AutoSuggestBoxRightButtonMargin", value: 4.0_f64, line: 38, position: 53 },
 ];
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_665: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ComboBoxArrowThemeFontSize", value: 21.0_f64, line: 330, position: 48 },
-    rt::ValueRow { key: "ComboBoxThemeMinWidth", value: 64.0_f64, line: 331, position: 43 },
-    rt::ValueRow { key: "ComboBoxPopupThemeMinWidth", value: 80.0_f64, line: 332, position: 48 },
-    rt::ValueRow { key: "ComboBoxPopupThemeTouchMinWidth", value: 240.0_f64, line: 333, position: 53 },
-    rt::ValueRow { key: "ComboBoxItemPillHeight", value: 16.0_f64, line: 334, position: 44 },
-    rt::ValueRow { key: "ComboBoxItemPillWidth", value: 3.0_f64, line: 335, position: 43 },
-    rt::ValueRow { key: "ComboBoxItemPillMinScale", value: 0.625_f64, line: 336, position: 46 },
-    rt::ValueRow { key: "ComboBoxMinHeight", value: 26.0_f64, line: 337, position: 39 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_665: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_52_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_52_NUMBERS,
+    records: &[
+        4126, 26, 330, 48, 0,
+        4152, 21, 331, 43, 1,
+        4173, 26, 332, 48, 2,
+        4199, 31, 333, 53, 3,
+        4230, 22, 334, 44, 4,
+        4252, 21, 335, 43, 5,
+        4273, 24, 336, 46, 6,
+        4297, 17, 337, 39, 7,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_666: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ComboBoxBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 341, position: 51 },
-    rt::ValueRow { key: "ComboBoxDropdownBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 342, position: 54 },
-    rt::ValueRow { key: "ComboBoxHeaderThemeMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64], line: 343, position: 48 },
-    rt::ValueRow { key: "ComboBoxPopupBorderThemeThickness", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 344, position: 56 },
-    rt::ValueRow { key: "ComboBoxItemThemePadding", value: [11.0_f64, 5.0_f64, 11.0_f64, 7.0_f64], line: 345, position: 47 },
-    rt::ValueRow { key: "ComboBoxItemThemeTouchPadding", value: [11.0_f64, 11.0_f64, 11.0_f64, 13.0_f64], line: 346, position: 52 },
-    rt::ValueRow { key: "ComboBoxItemThemeGameControllerPadding", value: [11.0_f64, 11.0_f64, 11.0_f64, 13.0_f64], line: 347, position: 61 },
-    rt::ValueRow { key: "ComboBoxBackgroundBorderThicknessFocused", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 348, position: 63 },
-    rt::ValueRow { key: "ComboBoxDropdownContentMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 349, position: 52 },
-    rt::ValueRow { key: "ComboBoxTopHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 8.0_f64], line: 350, position: 46 },
-    rt::ValueRow { key: "ComboBoxPadding", value: [12.0_f64, 5.0_f64, 0.0_f64, 7.0_f64], line: 351, position: 38 },
-    rt::ValueRow { key: "ComboBoxEditableTextPadding", value: [11.0_f64, 5.0_f64, 38.0_f64, 6.0_f64], line: 352, position: 50 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_666: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_52_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_52_NUMBERS,
+    records: &[
+        4314, 28, 341, 51, 8, 8, 8, 8,
+        4342, 31, 342, 54, 8, 8, 8, 8,
+        4373, 25, 343, 48, 9, 9, 9, 10,
+        4398, 33, 344, 56, 11, 11, 11, 11,
+        4431, 24, 345, 47, 12, 13, 12, 14,
+        4455, 29, 346, 52, 12, 12, 12, 15,
+        4484, 38, 347, 61, 12, 12, 12, 15,
+        4522, 40, 348, 63, 11, 11, 11, 11,
+        4562, 29, 349, 52, 9, 10, 9, 10,
+        4591, 23, 350, 46, 9, 9, 9, 16,
+        4614, 15, 351, 38, 17, 13, 9, 14,
+        4629, 27, 352, 50, 12, 13, 18, 19,
+    ],
+};
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_667: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ComboBoxHiglightBorderCornerRadius", value: [7.0_f64, 7.0_f64, 7.0_f64, 7.0_f64], line: 353, position: 60 },
-    rt::ValueRow { key: "ComboBoxDropDownButtonBackgroundCornerRadius", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 354, position: 70 },
-    rt::ValueRow { key: "ComboBoxItemCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 355, position: 50 },
-    rt::ValueRow { key: "ComboBoxItemPillCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 356, position: 54 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_667: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_52_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_52_NUMBERS,
+    records: &[
+        4656, 34, 353, 60, 14, 14, 14, 14,
+        4690, 44, 354, 70, 10, 10, 10, 10,
+        4734, 24, 355, 50, 5, 5, 5, 5,
+        4758, 28, 356, 54, 20, 20, 20, 20,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_668: &[rt::ValueRow<f64>] = &[
@@ -17033,25 +17781,37 @@ static POPULATE_MACOSTHEME_XAML_ROWS_668: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ProgressBarTrackHeight", value: 1.0_f64, line: 40, position: 44 },
 ];
 
-/// The corner radii of a run of `MacOSTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_669: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ProgressBarCornerRadius", value: [1.5_f64, 1.5_f64, 1.5_f64, 1.5_f64], line: 41, position: 49 },
-    rt::ValueRow { key: "ProgressBarTrackCornerRadius", value: [0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64], line: 42, position: 54 },
-];
+/// The corner radii of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_669: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_54_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_54_NUMBERS,
+    records: &[
+        260, 23, 41, 49, 0, 0, 0, 0,
+        283, 28, 42, 54, 1, 1, 1, 1,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_670: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "NumberBoxSpinButtonBorderThickness", value: [0.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 39, position: 57 },
-    rt::ValueRow { key: "NumberBoxIconMargin", value: [10.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 40, position: 42 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_670: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_55_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_55_NUMBERS,
+    records: &[
+        241, 34, 39, 57, 0, 1, 1, 1,
+        275, 19, 40, 42, 2, 0, 0, 0,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_671: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "NumberBoxPopupHorizonalOffset", value: -21.0_f64, line: 41, position: 51 },
-    rt::ValueRow { key: "NumberBoxPopupVerticalOffset", value: -27.0_f64, line: 42, position: 50 },
-    rt::ValueRow { key: "NumberBoxPopupShadowDepth", value: 16.0_f64, line: 43, position: 47 },
-    rt::ValueRow { key: "NumberBoxMinWidth", value: 120.0_f64, line: 44, position: 39 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_671: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_55_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_55_NUMBERS,
+    records: &[
+        294, 29, 41, 51, 3,
+        323, 28, 42, 50, 4,
+        351, 25, 43, 47, 5,
+        376, 17, 44, 39, 6,
+    ],
+};
 
 /// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_672: &[rt::ValueRow<[f64; 4]>] = &[
@@ -17059,11 +17819,15 @@ static POPULATE_MACOSTHEME_XAML_ROWS_672: &[rt::ValueRow<[f64; 4]>] = &[
     rt::ValueRow { key: "ExpanderChevronMargin", value: [20.0_f64, 0.0_f64, 8.0_f64, 0.0_f64], line: 91, position: 44 },
 ];
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_673: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "ExpanderChevronUpGlyph", value: "\u{e70e}", line: 92, position: 44 },
-    rt::ValueRow { key: "ExpanderChevronDownGlyph", value: "\u{e70d}", line: 93, position: 46 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_673: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_56_STRINGS,
+    numbers: &[],
+    records: &[
+        843, 22, 92, 44, 865, 3,
+        868, 24, 93, 46, 892, 3,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_674: &[rt::ValueRow<f64>] = &[
@@ -17071,12 +17835,16 @@ static POPULATE_MACOSTHEME_XAML_ROWS_674: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "ExpanderChevronGlyphSize", value: 12.0_f64, line: 95, position: 46 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_675: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ExpanderContentPadding", value: [12.0_f64, 12.0_f64, 12.0_f64, 12.0_f64], line: 96, position: 45 },
-    rt::ValueRow { key: "ExpanderContentDownBorderThickness", value: [1.0_f64, 0.0_f64, 1.0_f64, 1.0_f64], line: 97, position: 57 },
-    rt::ValueRow { key: "ExpanderContentUpBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 0.0_f64], line: 98, position: 55 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_675: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_56_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_56_NUMBERS,
+    records: &[
+        895, 22, 96, 45, 0, 0, 0, 0,
+        917, 34, 97, 57, 1, 2, 1, 1,
+        951, 32, 98, 55, 1, 1, 1, 2,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_676: &[rt::ValueRow<f64>] = &[
@@ -17085,120 +17853,176 @@ static POPULATE_MACOSTHEME_XAML_ROWS_676: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "InfoBarCloseButtonGlyphSize", value: 16.0_f64, line: 78, position: 49 },
 ];
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_677: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "InfoBarIconBackgroundGlyph", value: "\u{f136}", line: 80, position: 48 },
-    rt::ValueRow { key: "InfoBarInformationalIconGlyph", value: "\u{f13f}", line: 81, position: 51 },
-    rt::ValueRow { key: "InfoBarErrorIconGlyph", value: "\u{f13d}", line: 82, position: 43 },
-    rt::ValueRow { key: "InfoBarWarningIconGlyph", value: "\u{f13c}", line: 83, position: 45 },
-    rt::ValueRow { key: "InfoBarSuccessIconGlyph", value: "\u{f13e}", line: 84, position: 45 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_677: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_57_STRINGS,
+    numbers: &[],
+    records: &[
+        914, 26, 80, 48, 940, 3,
+        943, 29, 81, 51, 972, 3,
+        975, 21, 82, 43, 996, 3,
+        999, 23, 83, 45, 1022, 3,
+        1025, 23, 84, 45, 1048, 3,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_678: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "InfoBarContentRootPadding", value: [16.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 85, position: 48 },
-    rt::ValueRow { key: "InfoBarIconMargin", value: [0.0_f64, 16.0_f64, 14.0_f64, 16.0_f64], line: 86, position: 40 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_678: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_57_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_57_NUMBERS,
+    records: &[
+        1051, 25, 85, 48, 0, 1, 1, 1,
+        1076, 17, 86, 40, 1, 0, 2, 0,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_679: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "InfoBarPanelMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 88, position: 41 },
-    rt::ValueRow { key: "InfoBarPanelHorizontalOrientationPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 89, position: 63 },
-    rt::ValueRow { key: "InfoBarPanelVerticalOrientationPadding", value: [0.0_f64, 14.0_f64, 0.0_f64, 18.0_f64], line: 90, position: 61 },
-    rt::ValueRow { key: "InfoBarTitleHorizontalOrientationMargin", value: [0.0_f64, 14.0_f64, 0.0_f64, 0.0_f64], line: 91, position: 62 },
-    rt::ValueRow { key: "InfoBarTitleVerticalOrientationMargin", value: [0.0_f64, 14.0_f64, 0.0_f64, 0.0_f64], line: 92, position: 60 },
-    rt::ValueRow { key: "InfoBarMessageHorizontalOrientationMargin", value: [12.0_f64, 14.0_f64, 0.0_f64, 0.0_f64], line: 93, position: 64 },
-    rt::ValueRow { key: "InfoBarMessageVerticalOrientationMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 0.0_f64], line: 94, position: 62 },
-    rt::ValueRow { key: "InfoBarActionHorizontalOrientationMargin", value: [16.0_f64, 8.0_f64, 0.0_f64, 0.0_f64], line: 95, position: 63 },
-    rt::ValueRow { key: "InfoBarActionVerticalOrientationMargin", value: [0.0_f64, 12.0_f64, 0.0_f64, 0.0_f64], line: 96, position: 61 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_679: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_57_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_57_NUMBERS,
+    records: &[
+        1093, 18, 88, 41, 1, 1, 0, 1,
+        1111, 40, 89, 63, 1, 1, 1, 1,
+        1151, 38, 90, 61, 1, 2, 1, 3,
+        1189, 39, 91, 62, 1, 2, 1, 1,
+        1228, 37, 92, 60, 1, 2, 1, 1,
+        1265, 41, 93, 64, 4, 2, 1, 1,
+        1306, 39, 94, 62, 1, 5, 1, 1,
+        1345, 40, 95, 63, 0, 6, 1, 1,
+        1385, 38, 96, 61, 1, 4, 1, 1,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_680: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "PipsPagerButtonWidth", value: 20.0_f64, line: 102, position: 42 },
-    rt::ValueRow { key: "PipsPagerButtonHeight", value: 12.0_f64, line: 103, position: 43 },
-    rt::ValueRow { key: "PipsPagerHorizontalOrientationButtonWidth", value: 12.0_f64, line: 104, position: 63 },
-    rt::ValueRow { key: "PipsPagerHorizontalOrientationButtonHeight", value: 24.0_f64, line: 105, position: 64 },
-    rt::ValueRow { key: "PipsPagerVerticalOrientationButtonWidth", value: 24.0_f64, line: 106, position: 61 },
-    rt::ValueRow { key: "PipsPagerVerticalOrientationButtonHeight", value: 12.0_f64, line: 107, position: 62 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_680: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_58_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_58_NUMBERS,
+    records: &[
+        1292, 20, 102, 42, 0,
+        1312, 21, 103, 43, 1,
+        1333, 41, 104, 63, 1,
+        1374, 42, 105, 64, 2,
+        1416, 39, 106, 61, 2,
+        1455, 40, 107, 62, 1,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_681: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "PipsPagerButtonBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 108, position: 53 },
-    rt::ValueRow { key: "PipsPagerNavigationButtonBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 109, position: 63 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_681: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_58_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_58_NUMBERS,
+    records: &[
+        1495, 30, 108, 53, 3, 3, 3, 3,
+        1525, 40, 109, 63, 3, 3, 3, 3,
+    ],
+};
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_682: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "PipsPagerSelectedGlyph", value: "\u{ea3b}", line: 110, position: 44 },
-    rt::ValueRow { key: "PipsPagerNormalGlyph", value: "\u{ea3b}", line: 111, position: 42 },
-    rt::ValueRow { key: "PipsPagerPreviousPageButtonGlyph", value: "\u{eddb}", line: 112, position: 54 },
-    rt::ValueRow { key: "PipsPagerNextPageButtonGlyph", value: "\u{eddc}", line: 113, position: 50 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_682: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_58_STRINGS,
+    numbers: &[],
+    records: &[
+        1565, 22, 110, 44, 1587, 3,
+        1590, 20, 111, 42, 1587, 3,
+        1610, 32, 112, 54, 1642, 3,
+        1645, 28, 113, 50, 1673, 3,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_683: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "PipsPagerNavigationButtonHeight", value: 24.0_f64, line: 114, position: 53 },
-    rt::ValueRow { key: "PipsPagerNavigationButtonWidth", value: 24.0_f64, line: 115, position: 52 },
-    rt::ValueRow { key: "PipsPagerNavigationButtonFontSize", value: 8.0_f64, line: 116, position: 55 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_683: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_58_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_58_NUMBERS,
+    records: &[
+        1676, 31, 114, 53, 2,
+        1707, 30, 115, 52, 2,
+        1737, 33, 116, 55, 4,
+    ],
+};
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_684: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "PipsPagerSelectedGlyphFontSize", value: "6", line: 117, position: 52 },
-    rt::ValueRow { key: "PipsPagerNormalGlyphFontSize", value: "4", line: 118, position: 50 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_684: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_58_STRINGS,
+    numbers: &[],
+    records: &[
+        1770, 30, 117, 52, 1800, 1,
+        1801, 28, 118, 50, 1829, 1,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_685: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "SelectorBarItemPillHeight", value: 3.0_f64, line: 102, position: 47 },
-    rt::ValueRow { key: "SelectorBarItemPillWidth", value: 4.0_f64, line: 103, position: 46 },
-    rt::ValueRow { key: "SelectorBarItemIconScale", value: 0.8_f64, line: 104, position: 46 },
-    rt::ValueRow { key: "SelectorBarItemSpacing", value: 8.0_f64, line: 105, position: 44 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_685: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_59_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_59_NUMBERS,
+    records: &[
+        1004, 25, 102, 47, 7,
+        1029, 24, 103, 46, 1,
+        1053, 24, 104, 46, 8,
+        1077, 22, 105, 44, 9,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_686: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TitleBarCompactHeight", value: 32.0_f64, line: 81, position: 43 },
-    rt::ValueRow { key: "TitleBarExpandedHeight", value: 48.0_f64, line: 82, position: 44 },
-    rt::ValueRow { key: "TitleBarBackButtonWidth", value: 40.0_f64, line: 83, position: 45 },
-    rt::ValueRow { key: "TitleBarPaneToggleButtonWidth", value: 40.0_f64, line: 84, position: 51 },
-    rt::ValueRow { key: "TitleBarLeftPaddingWidth", value: 2.0_f64, line: 85, position: 46 },
-    rt::ValueRow { key: "TitleBarRightPaddingWidth", value: 0.0_f64, line: 86, position: 47 },
-    rt::ValueRow { key: "TitleBarLeftHeaderPaddingWidth", value: 14.0_f64, line: 87, position: 52 },
-    rt::ValueRow { key: "TitleBarHeaderNegativeInsetPaddingWidth", value: 2.0_f64, line: 88, position: 61 },
-    rt::ValueRow { key: "TitleBarMinDragRegionWidth", value: 48.0_f64, line: 89, position: 48 },
-    rt::ValueRow { key: "TitleBarDeactivatedOpacity", value: 0.5_f64, line: 90, position: 48 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_686: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_60_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_60_NUMBERS,
+    records: &[
+        951, 21, 81, 43, 0,
+        972, 22, 82, 44, 1,
+        994, 23, 83, 45, 2,
+        1017, 29, 84, 51, 2,
+        1046, 24, 85, 46, 3,
+        1070, 25, 86, 47, 4,
+        1095, 30, 87, 52, 5,
+        1125, 39, 88, 61, 3,
+        1164, 26, 89, 48, 1,
+        1190, 26, 90, 48, 6,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_687: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TitleBarIconMaxWidth", value: 16.0_f64, line: 92, position: 42 },
-    rt::ValueRow { key: "TitleBarIconMaxHeight", value: 16.0_f64, line: 93, position: 43 },
-    rt::ValueRow { key: "TitleBarTitleMinWidth", value: 0.0_f64, line: 94, position: 43 },
-    rt::ValueRow { key: "TitleBarSubtitleMinWidth", value: 0.0_f64, line: 95, position: 46 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_687: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_60_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_60_NUMBERS,
+    records: &[
+        1216, 20, 92, 42, 7,
+        1236, 21, 93, 43, 7,
+        1257, 21, 94, 43, 4,
+        1278, 24, 95, 46, 4,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_688: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TitleBarIconMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 96, position: 41 },
-    rt::ValueRow { key: "TitleBarTitleMargin", value: [0.0_f64, 0.0_f64, 8.0_f64, 0.0_f64], line: 97, position: 42 },
-    rt::ValueRow { key: "TitleBarSubtitleMargin", value: [0.0_f64, 0.0_f64, 16.0_f64, 0.0_f64], line: 98, position: 45 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_688: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_60_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_60_NUMBERS,
+    records: &[
+        1302, 18, 96, 41, 4, 4, 7, 4,
+        1320, 19, 97, 42, 4, 4, 8, 4,
+        1339, 22, 98, 45, 4, 4, 7, 4,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_689: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ResizeGripperSeparatorThickness", value: [0.0_f64, 0.0_f64, 2.0_f64, 0.0_f64], line: 25, position: 54 },
-    rt::ValueRow { key: "ResizeGripperSeparatorThicknessVertical", value: [0.0_f64, 0.0_f64, 0.0_f64, 2.0_f64], line: 26, position: 62 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_689: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_63_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_63_NUMBERS,
+    records: &[
+        44, 31, 25, 54, 0, 0, 1, 0,
+        75, 39, 26, 62, 0, 0, 0, 1,
+    ],
+};
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_690: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ThemeShadowFlyoutMargin", value: [16.0_f64, 8.0_f64, 16.0_f64, 24.0_f64], line: 33, position: 46 },
-    rt::ValueRow { key: "ThemeShadowSubMenuMargin", value: [20.0_f64, 10.0_f64, 20.0_f64, 30.0_f64], line: 36, position: 47 },
-    rt::ValueRow { key: "ThemeShadowToolTipMargin", value: [8.0_f64, 4.0_f64, 8.0_f64, 12.0_f64], line: 39, position: 47 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_690: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "ThemeShadowFlyoutMarginThemeShadowSubMenuMarginThemeShadowToolTipMargin",
+    numbers: &[16.0_f64, 8.0_f64, 24.0_f64, 20.0_f64, 10.0_f64, 30.0_f64, 4.0_f64, 12.0_f64],
+    records: &[
+        0, 23, 33, 46, 0, 1, 0, 2,
+        23, 24, 36, 47, 3, 4, 3, 5,
+        47, 24, 39, 47, 1, 6, 1, 7,
+    ],
+};
 
 /// The brushes with a literal colour of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static POPULATE_MACOSTHEME_XAML_ROWS_691: rt::PackedRows = rt::PackedRows {
@@ -17216,20 +18040,28 @@ static POPULATE_MACOSTHEME_XAML_ROWS_692: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "MacOSWindowTitleFontSize", value: 13.0_f64, line: 51, position: 46 },
 ];
 
-/// The thicknesses of a run of `MacOSTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_693: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MacOSMenuShadowMargin", value: [24.0_f64, 16.0_f64, 24.0_f64, 32.0_f64], line: 61, position: 44 },
-    rt::ValueRow { key: "MacOSWindowShadowMargin", value: [36.0_f64, 24.0_f64, 36.0_f64, 48.0_f64], line: 62, position: 46 },
-    rt::ValueRow { key: "MacOSToolTipShadowMargin", value: [6.0_f64, 4.0_f64, 6.0_f64, 8.0_f64], line: 63, position: 47 },
-];
+/// The thicknesses of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_693: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_66_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_66_NUMBERS,
+    records: &[
+        452, 21, 61, 44, 0, 1, 0, 2,
+        473, 23, 62, 46, 3, 0, 3, 4,
+        496, 24, 63, 47, 5, 6, 5, 7,
+    ],
+};
 
-/// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_694: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "MacOSCaptionFontSize", value: 11.0_f64, line: 69, position: 42 },
-    rt::ValueRow { key: "MacOSBodyFontSize", value: 13.0_f64, line: 70, position: 39 },
-    rt::ValueRow { key: "MacOSHeadlineFontSize", value: 17.0_f64, line: 71, position: 43 },
-    rt::ValueRow { key: "MacOSTitleFontSize", value: 22.0_f64, line: 72, position: 40 },
-];
+/// The numbers of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_694: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_MACOSTHEME_XAML_UNIT_66_STRINGS,
+    numbers: &POPULATE_MACOSTHEME_XAML_UNIT_66_NUMBERS,
+    records: &[
+        520, 20, 69, 42, 8,
+        540, 17, 70, 39, 9,
+        557, 21, 71, 43, 10,
+        578, 18, 72, 40, 11,
+    ],
+};
 
 /// The numbers of a run of `MacOSTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_MACOSTHEME_XAML_ROWS_695: &[rt::ValueRow<f64>] = &[
@@ -17244,15 +18076,19 @@ static POPULATE_MACOSTHEME_XAML_ROWS_696: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "RatingControlCaptionTopMargin", value: -12.5_f64, line: 47, position: 51 },
 ];
 
-/// The texts of a run of `MacOSTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_MACOSTHEME_XAML_ROWS_697: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringTextFlyoutCutText", value: "Cut", line: 16, position: 45 },
-    rt::ValueRow { key: "StringTextFlyoutCopyText", value: "Copy", line: 17, position: 46 },
-    rt::ValueRow { key: "StringTextFlyoutPasteText", value: "Paste", line: 18, position: 47 },
-    rt::ValueRow { key: "StringTextFlyoutUndoText", value: "Undo", line: 19, position: 46 },
-    rt::ValueRow { key: "StringTextFlyoutRedoText", value: "Redo", line: 20, position: 46 },
-    rt::ValueRow { key: "StringTextFlyoutSelectAllText", value: "Select All", line: 21, position: 51 },
-];
+/// The texts of a run of `MacOSTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_MACOSTHEME_XAML_ROWS_697: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "StringTextFlyoutCutTextStringTextFlyoutCopyTextStringTextFlyoutPasteTextStringTextFlyoutUndoTextStringTextFlyoutRedoTextStringTextFlyoutSelectAllTextSelect All",
+    numbers: &[],
+    records: &[
+        0, 23, 16, 45, 16, 3,
+        23, 24, 17, 46, 39, 4,
+        47, 25, 18, 47, 63, 5,
+        72, 24, 19, 46, 88, 4,
+        96, 24, 20, 46, 112, 4,
+        120, 29, 21, 51, 149, 10,
+    ],
+};
 
 /// Builds the deferred content at `MacOSTheme.xaml(106,8)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_0(
@@ -20378,7 +21214,7 @@ fn build_controls_macoscontrols_xaml_unit_58(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(56,65) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_0)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_0)?;
     // Controls/MacOSControls.xaml(70,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "ManagedFileChooserListViewStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_261, 70, 4)?;
     // Controls/MacOSControls.xaml(109,4) Content (resource)
@@ -21065,7 +21901,7 @@ fn build_controls_macoscontrols_xaml_unit_93(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/MacOSControls.xaml(25,44) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_1)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_1)?;
     // Controls/MacOSControls.xaml(28,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "WinUIRichEditBoxContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_536, 28, 4)?;
     // Controls/MacOSControls.xaml(52,4) Content (resource)
@@ -21207,27 +22043,35 @@ fn build_controls_macoscontrols_xaml_unit_99(
     ::core::result::Result::Ok(())
 }
 
-/// The texts of a run of `Controls/MacOSControls.xaml`, added in order by `rt::add_string_resources` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_0: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringManagedFileChooserFileNamePlaceholder", value: "File name", line: 56, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserShowHiddenFilesText", value: "Show hidden files", line: 57, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserOkText", value: "OK", line: 58, position: 52 },
-    rt::ValueRow { key: "StringManagedFileChooserCancelText", value: "Cancel", line: 59, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserNameColumn", value: "Name", line: 60, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserDateModifiedColumn", value: "Date Modified", line: 61, position: 64 },
-    rt::ValueRow { key: "StringManagedFileChooserTypeColumn", value: "Type", line: 62, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserSizeColumn", value: "Size", line: 63, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", value: "{0} already exists. Do you want to replace it?", line: 64, position: 82 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptConfirmText", value: "Yes", line: 65, position: 72 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptCancelText", value: "No", line: 66, position: 71 },
-];
+/// The texts of a run of `Controls/MacOSControls.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "StringManagedFileChooserFileNamePlaceholderFile nameStringManagedFileChooserShowHiddenFilesTextShow hidden filesStringManagedFileChooserOkTextOKStringManagedFileChooserCancelTextStringManagedFileChooserNameColumnStringManagedFileChooserDateModifiedColumnDate ModifiedStringManagedFileChooserTypeColumnStringManagedFileChooserSizeColumnStringManagedFileChooserOverwritePromptFileAlreadyExistsText{0} already exists. Do you want to replace it?StringManagedFileChooserOverwritePromptConfirmTextYesStringManagedFileChooserOverwritePromptCancelTextNo",
+    numbers: &[],
+    records: &[
+        0, 43, 56, 65, 43, 9,
+        52, 43, 57, 65, 95, 17,
+        112, 30, 58, 52, 142, 2,
+        144, 34, 59, 56, 168, 6,
+        178, 34, 60, 56, 28, 4,
+        212, 42, 61, 64, 254, 13,
+        267, 34, 62, 56, 291, 4,
+        301, 34, 63, 56, 325, 4,
+        335, 60, 64, 82, 395, 46,
+        441, 50, 65, 72, 491, 3,
+        494, 49, 66, 71, 543, 2,
+    ],
+};
 
-/// The texts of a run of `Controls/MacOSControls.xaml`, added in order by `rt::add_string_resources` (#568).
-static BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_1: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringRichEditBoldText", value: "Bold", line: 25, position: 44 },
-    rt::ValueRow { key: "StringRichEditItalicText", value: "Italic", line: 26, position: 46 },
-    rt::ValueRow { key: "StringRichEditUnderlineText", value: "Underline", line: 27, position: 49 },
-];
+/// The texts of a run of `Controls/MacOSControls.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static BUILD_CONTROLS_MACOSCONTROLS_XAML_ROWS_1: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "StringRichEditBoldTextStringRichEditItalicTextStringRichEditUnderlineText",
+    numbers: &[],
+    records: &[
+        0, 22, 25, 44, 14, 4,
+        22, 24, 26, 46, 36, 6,
+        46, 27, 27, 49, 60, 9,
+    ],
+};
 
 /// A property definition of the tables of `Controls/MacOSControls.xaml` (#568).
 fn build_controls_macoscontrols_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
@@ -85318,73 +86162,97 @@ pub fn build_densitystyles_compact_xaml(
     let deferred_0 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_densitystyles_compact_xaml_deferred_0, 14, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_0) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 14, 4)?;
     // DensityStyles/Compact.xaml(17,49) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_0)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_0)?;
     // DensityStyles/Compact.xaml(20,46) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 20, 46)?, rt::string_object("TextControlThemePadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(2.0_f64, 2.0_f64, 6.0_f64, 1.0_f64))), 20, 46)?;
     // DensityStyles/Compact.xaml(21,43) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1)?;
     // DensityStyles/Compact.xaml(26,44) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2)?;
     // DensityStyles/Compact.xaml(30,39) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 30, 39)?, rt::string_object("ComboBoxMinHeight"), rt::to_object(24.0_f64)), 30, 39)?;
     // DensityStyles/Compact.xaml(31,38) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 31, 38)?, rt::string_object("ComboBoxPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(12.0_f64, 1.0_f64, 0.0_f64, 3.0_f64))), 31, 38)?;
     // DensityStyles/Compact.xaml(32,55) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3)?;
     // DensityStyles/Compact.xaml(36,59) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 59)?, rt::string_object("TimePickerFlyoutPresenterItemPadding"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64))), 36, 59)?;
     // DensityStyles/Compact.xaml(37,57) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_4)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_4)?;
     // DensityStyles/Compact.xaml(40,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5)?;
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 11, 2)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
 
-/// The numbers of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_0: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ControlContentThemeFontSize", value: 14.0_f64, line: 17, position: 49 },
-    rt::ValueRow { key: "ContentControlFontSize", value: 14.0_f64, line: 18, position: 44 },
-    rt::ValueRow { key: "TextControlThemeMinHeight", value: 24.0_f64, line: 19, position: 47 },
-];
+/// The numbers of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "ControlContentThemeFontSizeContentControlFontSizeTextControlThemeMinHeight",
+    numbers: &[14.0_f64, 24.0_f64],
+    records: &[
+        0, 27, 17, 49, 0,
+        27, 22, 18, 44, 0,
+        49, 25, 19, 47, 1,
+    ],
+};
 
-/// The numbers of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "ListViewItemMinHeight", value: 32.0_f64, line: 21, position: 43 },
-    rt::ValueRow { key: "TreeViewItemMinHeight", value: 24.0_f64, line: 22, position: 43 },
-    rt::ValueRow { key: "TreeViewItemMultiSelectCheckBoxMinHeight", value: 24.0_f64, line: 23, position: 62 },
-    rt::ValueRow { key: "TreeViewItemPresenterMargin", value: 0.0_f64, line: 24, position: 49 },
-    rt::ValueRow { key: "TreeViewItemPresenterPadding", value: 0.0_f64, line: 25, position: 50 },
-];
+/// The numbers of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "ListViewItemMinHeightTreeViewItemMinHeightTreeViewItemMultiSelectCheckBoxMinHeightTreeViewItemPresenterMarginTreeViewItemPresenterPadding",
+    numbers: &[32.0_f64, 24.0_f64, 0.0_f64],
+    records: &[
+        0, 21, 21, 43, 0,
+        21, 21, 22, 43, 1,
+        42, 40, 23, 62, 1,
+        82, 27, 24, 49, 2,
+        109, 28, 25, 50, 2,
+    ],
+};
 
-/// The thicknesses of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerHostPadding", value: [0.0_f64, 1.0_f64, 0.0_f64, 2.0_f64], line: 26, position: 44 },
-    rt::ValueRow { key: "DatePickerHostPadding", value: [0.0_f64, 1.0_f64, 0.0_f64, 2.0_f64], line: 27, position: 44 },
-    rt::ValueRow { key: "DatePickerHostMonthPadding", value: [9.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 28, position: 49 },
-    rt::ValueRow { key: "ComboBoxEditableTextPadding", value: [10.0_f64, 0.0_f64, 30.0_f64, 0.0_f64], line: 29, position: 50 },
-];
+/// The thicknesses of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "TimePickerHostPaddingDatePickerHostPaddingDatePickerHostMonthPaddingComboBoxEditableTextPadding",
+    numbers: &[0.0_f64, 1.0_f64, 2.0_f64, 9.0_f64, 10.0_f64, 30.0_f64],
+    records: &[
+        0, 21, 26, 44, 0, 1, 0, 2,
+        21, 21, 27, 44, 0, 1, 0, 2,
+        42, 26, 28, 49, 3, 0, 0, 1,
+        68, 27, 29, 50, 4, 0, 5, 0,
+    ],
+};
 
-/// The numbers of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "NavigationViewItemOnLeftMinHeight", value: 32.0_f64, line: 32, position: 55 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterItemHeight", value: 32.0_f64, line: 33, position: 57 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterHighlightHeight", value: 32.0_f64, line: 34, position: 62 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 33.0_f64, line: 35, position: 74 },
-];
+/// The numbers of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "NavigationViewItemOnLeftMinHeightTimePickerFlyoutPresenterItemHeightTimePickerFlyoutPresenterHighlightHeightTimePickerFlyoutPresenterAcceptDismissHostGridHeight",
+    numbers: &[32.0_f64, 33.0_f64],
+    records: &[
+        0, 33, 32, 55, 0,
+        33, 35, 33, 57, 0,
+        68, 40, 34, 62, 0,
+        108, 52, 35, 74, 1,
+    ],
+};
 
-/// The numbers of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_4: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemHeight", value: 32.0_f64, line: 37, position: 57 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterHighlightHeight", value: 32.0_f64, line: 38, position: 62 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 33.0_f64, line: 39, position: 74 },
-];
+/// The numbers of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_4: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "DatePickerFlyoutPresenterItemHeightDatePickerFlyoutPresenterHighlightHeightDatePickerFlyoutPresenterAcceptDismissHostGridHeight",
+    numbers: &[32.0_f64, 33.0_f64],
+    records: &[
+        0, 35, 37, 57, 0,
+        35, 40, 38, 62, 0,
+        75, 52, 39, 74, 1,
+    ],
+};
 
-/// The thicknesses of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 40, position: 59 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterMonthPadding", value: [9.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 41, position: 60 },
-];
+/// The thicknesses of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "DatePickerFlyoutPresenterItemPaddingDatePickerFlyoutPresenterMonthPadding",
+    numbers: &[0.0_f64, 1.0_f64, 9.0_f64],
+    records: &[
+        0, 36, 40, 59, 0, 0, 0, 1,
+        36, 37, 41, 60, 2, 0, 0, 1,
+    ],
+};
 
 /// A property definition of the tables of `DensityStyles/Compact.xaml` (#568).
 fn build_densitystyles_compact_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
