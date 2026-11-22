@@ -664,7 +664,30 @@ The isolated template renders the current fixture on the native canvas. [Custome
 
 Save a reusable, single-root XAML fragment under `.ferroui/toolbox` in the workspace or Cargo package. Select the package view to see its snippets and registered **Project controls** and **Dependency controls**. A package snippet takes precedence over a workspace snippet with the same filename. RSX offers entries with a supported source mapping.
 
-Run **Import Design Tokens** on a DTCG JSON file or **Export Design Tokens** on a literal XAML dictionary. Review the mapping, rename keys or paths, and choose applicable color and dimension representations before creating a file. Import supports typed groups, `$root`, numbers, sRGB colors, `px`, `rem` with a scale, durations, and resolvable aliases. The report identifies skipped values such as unsupported composite tokens or dynamic resources. Include the imported dictionary with `ResourceInclude`. The preview refreshes for saved and unsaved local includes. [Example tokens](../../../editors/vscode/test/fixtures/customer-design.tokens.json) · [DTCG format](https://www.designtokens.org/TR/2025.10/format/)
+### Review a design token conversion
+
+1. In VS Code, choose **Import Design Tokens** from **Project** or the Command Palette, then open a DTCG `.tokens` or `.tokens.json` file. To go the other way, open a standalone XAML resource dictionary and choose **Export Design Tokens**.
+2. Read the **Tokens** review beside the generated source. Each row shows the token path, XAML resource key, type, and conversions that affected its value. Use the pencil next to a mapping to rename a key or path and choose an applicable representation. The review identifies skipped entries and their reasons.
+3. Use the ruler icon to set **Logical pixels per rem** when the file uses `rem`. Review the new values and choose the disk icon to create the reviewed file at a new workspace path. If you edit the source during review, use **Refresh from source** before saving. The code icon reopens the generated source.
+
+In Designer Studio, open **Project** and choose **Review design tokens**. Use the folder icon to import or the source icon to export the active XAML dictionary. Select a mapping in the toolbar, edit its key, path, or representation, and choose the check icon to update the review. Save the generated source with the disk icon. The save picker creates a new local file after checking the reviewed source again.
+
+| DTCG type | XAML resource |
+| --- | --- |
+| sRGB color | `Color` or `SolidColorBrush` |
+| Number or dimension | `x:Double`. Export can write a number or a `px` dimension. |
+| Duration | `sys:TimeSpan` |
+| Shadow | `BoxShadows`, including ordered layers and inset shadows |
+| Gradient | `LinearGradientBrush`, `RadialGradientBrush`, or `ConicGradientBrush` |
+| Cubic Bézier | `KeySpline`. The editor preserves finite Y coordinates outside the unit interval for overshoot. |
+
+Standard DTCG stops import as a horizontal linear gradient by default. You can choose another brush type in the mapping. A FerroUI export also records brush geometry, opacity, and spread in the `com.github.ferroui` extension. Import preserves those values when the brush type matches. If you choose a different type, the review shows the new geometry and keeps the stops, opacity, and spread. Literal colors in XAML composites use hexadecimal sRGB. Dynamic resources, unsupported brush properties, and XAML stop positions outside zero to one appear under skipped entries. DTCG positions outside that range are clamped on import and recorded in the review. [DTCG gradient and shadow definitions](https://www.designtokens.org/tr/2025.10/format/#composite-types)
+
+Include the new dictionary with `ResourceInclude`, then reference a brush or shadow by key with `StaticResource`. Use a `KeySpline` resource on a keyframe to share its easing curve. The designer refreshes when an included dictionary changes in the workspace. [Example tokens](../../../editors/vscode/test/fixtures/customer-design.tokens.json) · [Token tools for agents](reference.md#review-design-tokens-with-mcp)
+
+![VS Code reviews eight design tokens beside the generated XAML dictionary, including a gradient, an inset shadow, and a key spline.](../images/vscode-design-token-import.png)
+
+The reverse review shows the DTCG values and the preserved FerroUI gradient properties. [VS Code export review](../images/vscode-design-token-export.png) · [Studio export review](../images/studio-design-token-review.png)
 
 ## Diagnose a design-time issue
 

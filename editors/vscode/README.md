@@ -176,7 +176,7 @@ Use **Find Definition in Designer** to search the active design’s component, t
 
 ### Design token handoff
 
-Use **Import Design Tokens** or **Export Design Tokens** from the Project view or Command Palette. Review the generated file beside the token-to-resource mapping and skipped entries. You can rename a resource key or token path, change a color between `Color` and `SolidColorBrush`, or export a `Double` as a logical-pixel dimension. Create a new file after review. Include an imported dictionary in a view with `ResourceInclude`. The native canvas renders local workspace includes and refreshes when a saved or unsaved dependency changes.
+Use **Import Design Tokens** or **Export Design Tokens** from **Project** or the Command Palette. Review colors, dimensions, durations, gradients, layered shadows, and easing curves beside the generated file. Rename resource keys or token paths, choose representations, and create a new file after review. Studio and MCP use the same planner. [Review a design token conversion](../../docs/designer/vscode/authoring.md#review-a-design-token-conversion)
 
 Import supports DTCG numbers, `px`, `rem` with an explicit scale, sRGB colors, and durations. It resolves typed groups, `$root` tokens, curly-brace aliases, and same-document JSON Pointers, including value components. The report shows resolved aliases and rounded or converted values. Export reads direct literal entries and records the XAML key and representation in the generated token metadata. Group inheritance, non-sRGB colors, composite tokens, and dynamic or included XAML resources appear as skipped entries. VS Code and Studio agents use the same read-only `designer_design_tokens` planner. [DTCG format](https://www.designtokens.org/TR/2025.10/format/)
 
