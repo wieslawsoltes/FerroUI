@@ -57,6 +57,7 @@ mod extras;
 pub mod hooks;
 pub mod hot;
 pub mod inspect;
+mod model_binding;
 mod mount;
 mod path_data;
 pub mod reactive;
@@ -111,6 +112,7 @@ pub use style::{
 pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedTree, PropertyInfo};
 #[cfg(feature = "desktop")]
 pub use inspect::{attach_inspector, open_inspector};
+pub use model_binding::{BindableTo, ModelBinding, ModelProperty, ReadOnlyModelProperty};
 pub use mount::{view_stats, ViewStats};
 pub use path_data::{path_data, PathBuilder, PathData};
 pub use template::template;
@@ -171,6 +173,7 @@ pub mod prelude {
     };
     pub use crate::{auto, px, star, GridDefinitionSizes, GridLength, GridLengths, IntoGridLengths};
     pub use crate::{path, path_data, PathBuilder, PathData};
+    pub use crate::{ModelBinding, ModelProperty, ReadOnlyModelProperty};
     pub use crate::{
         alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
         BoxShadowOptions, KeyCode, KeyGestureModifiers, LinearGradient, Transforms,

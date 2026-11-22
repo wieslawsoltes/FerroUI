@@ -134,6 +134,8 @@ pub mod markers {
     pub struct FromControlElement;
     /// A binding.
     pub struct FromBinding;
+    /// A typed binding to a property of a view model, of value type `V`.
+    pub struct FromModel<V>(std::marker::PhantomData<V>);
 }
 
 /// What a setter of a property whose value is `T` takes. `M` tells the

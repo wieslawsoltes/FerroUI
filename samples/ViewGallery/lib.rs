@@ -5,11 +5,13 @@
 //! - the theme variant and resources of the theme ([`use_theme_variant`], [`use_resource_as`]);
 //! - a transition of a width ([`transition`]);
 //! - a context menu given as an element;
+//! - a view model bound with typed property paths ([`ModelProperty`]);
 //! - a colour view of `ferroui-controls-color-picker` and a TreeDataGrid of
 //!   `ferroui-controls-treedatagrid`, written with their generated builders.
 //!
 //! `cargo run -p view-gallery`.
 
+use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::layout::{Layoutable, Orientation, VerticalAlignment};
 use ferroui_base::media::IBrush;
 use ferroui_base::styling::ThemeVariant;
@@ -21,6 +23,7 @@ use ferroui_controls_treedatagrid::TreeDataGridSourceRef;
 use ferroui_treedatagrid_core::models::ColumnRef;
 use ferroui_treedatagrid_core::{Accessor, FlatTreeDataGridSource, Models};
 use ferroui_view::prelude::*;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// A row of the TreeDataGrid.
@@ -67,6 +70,50 @@ fn languages() -> TreeDataGridSourceRef {
     TreeDataGridSourceRef::of(source)
 }
 
+/// A view model: state that lives outside of the component and notifies its changes.
+pub struct Greeting {
+    name: RefCell<String>,
+    property_changed: Event<str>,
+}
+
+impl PartialEq for Greeting {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}
+
+impl INotifyPropertyChanged for Greeting {
+    fn property_changed(&self) -> &Event<str> {
+        &self.property_changed
+    }
+}
+
+impl Greeting {
+    fn new() -> Rc<Self> {
+        Rc::new(Self { name: RefCell::new(String::from("FerroUI")), property_changed: Event::default() })
+    }
+
+    fn name(&self) -> String {
+        self.name.borrow().clone()
+    }
+
+    fn set_name(&self, value: String) {
+        if *self.name.borrow() != value {
+            *self.name.borrow_mut() = value;
+            self.property_changed.raise("Name");
+            self.property_changed.raise("Text");
+        }
+    }
+
+    fn text(&self) -> String {
+        format!("Hello, {}", self.name.borrow())
+    }
+}
+
+/// The properties of the view model, checked by the compiler.
+const GREETING_NAME: ModelProperty<Greeting, String> = ModelProperty::new("Name", Greeting::name, Greeting::set_name);
+const GREETING_TEXT: ReadOnlyModelProperty<Greeting, String> = ReadOnlyModelProperty::new("Text", Greeting::text);
+
 /// The gallery: the theme variant it shows is a hook of its own.
 #[component(rerender)]
 pub fn Gallery(#[prop(default)] start_dark: bool) -> Element {
@@ -93,6 +140,7 @@ fn Page(dark: Signal<bool>) -> Element {
     let wide = use_signal(|| false);
     let bar_transitions = use_hook(|| transitions([transition(Layoutable::width_property(), ms(400))]));
     let source = use_hook(languages);
+    let greeting = use_hook(Greeting::new);
     let is_dark = variant.as_ref() == Some(&ThemeVariant::dark());
 
     rsx! {
@@ -113,6 +161,11 @@ fn Page(dark: Signal<bool>) -> Element {
                     Button { name: "Grow", on_click: move |_| wide.update(|wide| *wide = !*wide),
                         context_menu: rsx! { ContextMenu { MenuItem { header: "Copy" } MenuItem { header: "Paste" } } },
                         "Animate the bar (right-click: a context menu)" }
+                }
+                StackPanel { orientation: Orientation::Horizontal, spacing: 8.0,
+                    data_context: greeting.clone() as BoxedValue,
+                    TextBox { name: "GreetingName", width: 180.0, text: GREETING_NAME.two_way() }
+                    TextBlock { vertical_alignment: VerticalAlignment::Center, text: GREETING_TEXT.one_way() }
                 }
                 Border { name: "Bar", height: 12.0, corner_radius: 6.0, background: rgb(0x0063B1),
                     horizontal_alignment: ferroui_base::layout::HorizontalAlignment::Left,

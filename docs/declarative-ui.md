@@ -120,7 +120,7 @@ The element also has its own methods:
 | `key(..)`, `name(..)`, `class("a b")` | The key, the `Name`, style classes |
 | `child(..)`, `children((a, b, c))` | Children: elements, builders, text, vectors, arrays, tuples |
 | `set(property, value)` | Any property, also one the generator left out or one of another crate |
-| `bind(property, binding)` | A binding of the property system (`Binding`, a path on the data context) |
+| `bind(property, binding)` | A binding of the property system (`Binding`, a path on the data context). For a view model, a typed binding (section 4.4) goes straight to the setter |
 | `on(event, handler)` | Any routed event, with the control that handles it |
 | `on_changed(property, handler)` | The new value of a property whenever it changes |
 | `with(|control| ..)` | The control once it was made (a call the class has no property for) |
@@ -185,6 +185,26 @@ The values that have a text form also have a short typed one, which setters take
 - Every element that names one color shares one brush, whichever form names it, and the same holds for one gradient. Both tables are bounded, and a value past the bound gets a brush of its own.
 - `rgb` refuses a value of more than 24 bits, so a color with alpha is not silently cut. In a `const` this is a compile error.
 - A transform or an effect is a new object each time it is converted. A component that runs again with one gives the control a new value, as it does with one parsed from text.
+
+### 4.4 Typed bindings to a view model
+
+Signals are the default for state a component owns. A view model that already raises `INotifyPropertyChanged` is bound through a typed property, a constant with the accessors of the model:
+
+```rust
+const NAME: ModelProperty<Person, String> = ModelProperty::new("Name", Person::name, Person::set_name);
+const GREETING: ReadOnlyModelProperty<Person, String> = ReadOnlyModelProperty::new("Greeting", Person::greeting);
+
+stack_panel()
+    .data_context(person as BoxedValue)
+    .child(text_box().text(NAME.two_way()))
+    .child(text_block().text(GREETING.one_way()))
+```
+
+- `one_way`, `two_way`, `one_time` and `one_way_to_source` make the binding, and a setter takes it, in builders and `rsx!`. A read-only property has no `two_way`.
+- A misspelled accessor, a value of another type, or a two-way binding of a read-only property does not compile. A property of type `V` takes a binding of `V`, and a property of type `Option<V>` too.
+- The result is the existing `CompiledBinding` with one typed path element, which reads and writes without boxing when the types are the same. There is no reflection and no path text.
+- The name is the text the model raises its change with. It is the one part the compiler cannot check: a model that raises another name leaves the control with its first value.
+- A path through several objects, a converter or a fallback value is still written with `CompiledBindingPathBuilder` and `.bind(property, binding)`.
 
 ## 5. The macros
 
