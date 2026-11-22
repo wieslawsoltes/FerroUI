@@ -1135,7 +1135,8 @@ is 15 % too slow. What a frame of the declarative program does, counted with
    runtime is 17 % of the UI thread, two thirds of it in these runs.
 4. **Geometries that are written again** (#805). Section 9.88 keeps the geometry of the
    shapes whose geometry is a rectangle, an ellipse, a line or a list of points; the stream
-   geometries (arcs, sectors, a border with unequal corners) are still made new.
+   geometries (arcs, sectors, a border with unequal corners) are still made new. Done since:
+   section 9.105.
 5. **The bands of a frame** (#810). The patchwork at tier 20 is limited by drawing: its UI
    thread is busy 29 % of the time, its render thread 50 %, and the two threads that record
    the bands of a frame 87 and 81 %. With the default of the bands changed for the
@@ -8292,3 +8293,46 @@ gauntlet the rate falls. The hierarchy is built when the picture is recorded, on
 and the bands of these scenes cross most of the commands of the picture, so it culls little of what
 a band replays. Left out (PR 872 closed); the bands keep replaying the whole picture under their
 clip, which Skia's canvas rejects per draw.
+
+### 9.105 A stream geometry written again in place: arcs, sectors, borders (#805)
+
+Section 9.88 keeps the geometry of a shape and gives it what the shape is now, for rectangles,
+ellipses, lines, polylines and polygons. Three places were left, because a stream geometry could
+not be written again: `Arc`, `Sector`, and `Border` when it draws with geometries.
+
+- `StreamGeometry::reopen` opens the geometry to define it again. The figures written on the
+  context replace the ones it has; the object, its transform and what listens to it are kept, and
+  it raises its change once, when the context is disposed. `open` keeps its meaning: it adds
+  figures, as in the source.
+- `Arc` and `Sector` write the stream geometry they have when an angle, the size or the stroke
+  thickness changes (`ShapeImpl::update_defining_geometry`). A change between a full turn and a
+  partial figure makes another geometry, as before.
+- `BorderRenderHelper`: a border drawn with geometries that is resized writes its background
+  geometry and the two stream geometries of its combined border geometry again. After a size with
+  no geometry (an empty rectangle) new ones are made. Unequal corners with one thickness and the
+  default sizing make no geometry on Skia and Vello, so the benchmark's border has unequal
+  thicknesses too.
+
+The local gate (macOS arm64, four rounds), against the commit that adds the three scenes of
+`layout_subsystem::ShapeGeometry`:
+
+| Line | Before | After | Time | Instructions |
+|---|---:|---:|---:|---:|
+| `arc_swept[Shapes=500]` | 455.8 us | 392.7 us | -13.9 % | -14.94 % |
+| `sector_swept[Shapes=500]` | 428.6 us | 363.2 us | -15.3 % | -15.74 % |
+| `border_unequal_resized[Shapes=500]` | 5.325 ms | 5.010 ms | -5.9 % | -6.01 % |
+| The five scenes of section 9.88 | | | -1.4 to +1.4 % | -0.62 to +0.05 % |
+
+Against the `main` of that day, frames and framework suites, 364 metrics: the one line that takes
+more instructions is `ResourceLookup.switch_theme_variant` (+2.89 %). This change does not run it,
+and another pull request showed the same amount against the same base. Resident memory of
+`startup/tiles` varies within each side, and the other lines over their tolerance moved in time
+alone.
+
+An earlier two-round gate reported `frames/recolor` at +3.53 % instructions a frame. It came from
+one disturbed round that presented 223 of its 240 frames, which the gate scales by. Three more
+alternating runs of the same two binaries, each presenting 239 or 240 frames, gave +0.1 % a frame
+and +0.3 % for the show.
+
+The objects made a frame by an animated progress ring and by a resized border, which the ticket
+also names, were not counted. Kept (PR 871).
