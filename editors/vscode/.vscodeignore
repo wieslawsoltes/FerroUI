@@ -11,6 +11,7 @@
 !dist/timeline.js
 !dist/designData.js
 !dist/styles.js
+!dist/scenarioReview.js
 !dist/icons/*
 !dist/extension.js
 !dist/THIRD-PARTY-NOTICES.txt

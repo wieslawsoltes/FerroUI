@@ -37,7 +37,8 @@ export async function run(): Promise<void> {
     assert.equal(vscode.workspace.getConfiguration('ferroui.preview').get('path'), '');
     await Promise.all([
         ...['ferroui-xaml-lsp', 'ferroui-designer-preview'].map(name => access(path.join(extension.extensionPath, 'bin', name + suffix))),
-        ...['timeline.js', 'designData.js', 'hosted.js', 'styles.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
+        ...['timeline.js', 'designData.js', 'hosted.js', 'styles.js', 'scenarioReview.js'].map(name => access(path.join(extension.extensionPath, 'dist', name))),
+        access(path.join(extension.extensionPath, 'media', 'scenarioReview.css')),
         access(path.join(extension.extensionPath, 'dist', 'icons', 'history.svg')),
         access(path.join(extension.extensionPath, 'dist', 'icons', 'table.svg')),
         access(path.join(extension.extensionPath, 'media', 'keyframe-editor.css')),
@@ -66,6 +67,7 @@ export async function run(): Promise<void> {
         assert.ok(native.capabilities.controlTemplateAuthoring, 'The installed preview negotiates control template editing');
         assert.ok(native.capabilities.propertyTrace, 'The installed preview negotiates property value traces');
         assert.ok(native.capabilities.designFixtures, 'The installed preview recognizes named design fixtures');
+        assert.ok(native.capabilities.scenarioReview, 'The installed preview supports native scenario review');
         assert.ok(native.capabilities.timelineGeometryRecording, 'The installed preview supports canvas animation recording');
         assert.ok(native.capabilities.timelineKeyframeDrafts, 'The installed preview validates keyframe drafts and samples easing');
         assert.ok(native.capabilities.timelineCurves, 'The installed preview samples scalar animation curves');

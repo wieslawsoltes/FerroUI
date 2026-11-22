@@ -45,7 +45,7 @@ Editor and Studio authoring reuse the same native planning and validation. The e
 | Sequence app-hosted clips | Use `scrub_all` and `play_all` in `designer_hosted_animation` for the app’s shared elapsed clock. Use `designer_hosted_clip_placement_draft` to check a delay change and `designer_hosted_clip_placement` to apply it to the current buffer in one Undo step. |
 | Rehearse an app-hosted range | Use `play_range` in `designer_hosted_animation` with an elapsed `start`, `end`, and `loop` in `range`. Include `program` to rehearse one animation or omit it to rehearse the shared clip clock. |
 | Set, remove, or seek to a preview marker | Use `designer_timeline_markers` and `designer_timeline_marker_edit` for a typed clip or the shared Timeline clock. In App Preview, read `markers` from `designer_hosted_animations` and pass `action: "marker"` to `designer_hosted_animation`. [Marker controls and arguments](motion.md#bookmark-preview-positions) |
-| Run, inspect, and test | `ferroui_reload_targets`, `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history` drive managed Cargo and report outcomes. `ferroui_runtime_source` and `ferroui_runtime_apply_source` work with a mapped runtime value. `ferroui_scenario_run` runs a saved native scenario. |
+| Run, inspect, and test | `ferroui_reload_targets`, `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history` drive managed Cargo and report outcomes. `ferroui_runtime_source` and `ferroui_runtime_apply_source` work with a mapped runtime value. `ferroui_scenario_run`, `ferroui_scenario_review`, and `ferroui_scenario_approve_baseline` run tests, compare images, and approve a checked capture. |
 | Open a running app’s template | `ferroui_runtime_templates` reads the selected element’s templates. Pass its generation and a template ID to `ferroui_runtime_template_source`. [Live App template tools](#inspect-live-app-templates-with-mcp) |
 | Profile a running window | Use `ferroui_runtime_profile_windows`, `ferroui_runtime_profile_start`, `ferroui_runtime_profile_read`, `ferroui_runtime_profile_stop`, and `ferroui_runtime_profile_source`. [Runtime profiler](#profile-a-runtime-with-mcp) |
 | Create a project | Use `ferroui_project_templates`, `ferroui_project_plan_new`, `ferroui_project_create`, and `ferroui_project_check_toolchain`. [Project setup](#create-a-project-with-mcp) |
@@ -428,3 +428,11 @@ This workspace settings example selects the app-hosted Todo Workbench target fro
 ```
 
 For a missing command or helper, see [installation and troubleshooting](README.md#if-the-designer-does-not-open). For an app that cannot attach or apply an edit, see [Run and test a view](runtime.md).
+
+## Review and approve a scenario with MCP
+
+1. Call `ferroui_scenario_review` with the saved scenario `path`. In VS Code, use `folder` to select a workspace root when the path is ambiguous. Pass `baseline_ref` to compare its Git merge-base images. Set `open` to show the comparison in the editor.
+2. Read the assertion results and each item's `workspace` and `comparison` status in `visuals`. Inspect the `expected`, `actual`, and `difference` PNGs for the selected step. An available `approval` identifies the exact capture and workspace baseline from the review.
+3. Call `ferroui_scenario_approve_baseline` with the returned `approval` and the same scenario path and Git reference. VS Code requires `ferroui.mcp.allowWrites` and Studio requires write permission. A missing or stale identifier requires a fresh review. Call `ferroui_scenario_run` to verify against the accepted image.
+
+Studio's `ferroui_scenario_list` discovers saved scenarios for the open project. Its run, review, and approval calls start the helper asynchronously and return a `run` number. Pass it to `ferroui_scenario_result` for status and the completed report. `ferroui_scenario_cancel` stops the current owned run. VS Code returns the completed report directly. [Scenario review and CI](testing.md)

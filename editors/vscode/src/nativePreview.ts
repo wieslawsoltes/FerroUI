@@ -53,7 +53,7 @@ export class NativePreview implements vscode.Disposable {
         controlTemplateAuthoring?: boolean; propertyTrace?: boolean; includedPropertyTrace?: boolean;
         styleComposition?: boolean; rustStyleComposition?: boolean;
         hostedRustStyles?: boolean; hostedRustModules?: boolean; rustModuleSources?: boolean;
-        projectInventory?: boolean; projectSetup?: boolean; tokenHandoff?: boolean;
+        projectInventory?: boolean; projectSetup?: boolean; scenarioReview?: boolean; tokenHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
         timelineKeyframeDrafts?: boolean; timelineKeyframeScale?: boolean; timelineCurves?: boolean; timelineCurveVelocity?: boolean;
         timelineCurveChannels?: boolean; timelineCombinedPlayback?: boolean; timelineClipPlacement?: boolean;

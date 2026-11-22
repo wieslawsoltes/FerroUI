@@ -106,6 +106,14 @@ the destination, checking that an existing file has not changed externally. Virt
 use their provider's stream API. The workspace tracks the exact saved source so subsequent edits
 remain dirty.
 
+### Test a saved scenario
+
+Open the folder that contains the scenario from Studio's **Project** pane and select the baseline review icon. Choose a saved XAML, RSX, or prototype scenario. Enter an optional local Git branch, tag, or commit and select **Run baseline review**. The comparison shows the chosen expected image, current native capture, and highlighted difference. Select the check icon to approve one capture after its assertions pass.
+
+![Studio Baseline Review displays expected and actual native screenshots](images/studio-scenario-review.png)
+
+Studio uses the same `ferroui-designer-preview` helper as VS Code and CI. Build it beside Studio with `cargo build -p designer-studio -p ferroui-designer-preview` or set `FERROUI_DESIGNER_PREVIEW` to its executable. Studio's MCP tools can list, run, review, cancel, and approve the same saved scenario. [Scenario user guide](vscode/testing.md) · [Scenario MCP workflow](vscode/reference.md#review-and-approve-a-scenario-with-mcp)
+
 ## Native workspace
 
 Designer Studio uses native WinUI controls with reusable scoped chrome: semantic color resources,

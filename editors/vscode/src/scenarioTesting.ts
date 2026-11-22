@@ -1,7 +1,8 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { errorMessage } from './protocol';
-import { ScenarioRunner, scenarioPattern, type ScenarioReport } from './scenarioRunner';
+import { ScenarioRunner, scenarioBaselineRef, scenarioPattern, type ScenarioReport } from './scenarioRunner';
+import type { ScenarioReview } from './scenarioReview';
 
 export class ScenarioTesting implements vscode.Disposable {
     private readonly controller = vscode.tests.createTestController('ferroui.scenarios', 'FerroUI Scenarios');
@@ -10,7 +11,7 @@ export class ScenarioTesting implements vscode.Disposable {
     private revision = 0;
     private disposed = false;
 
-    constructor(private readonly runner: ScenarioRunner) {
+    constructor(private readonly runner: ScenarioRunner, private readonly reviews: ScenarioReview) {
         const watcher = vscode.workspace.createFileSystemWatcher(scenarioPattern);
         this.subscriptions = [
             this.controller, watcher,
@@ -20,7 +21,7 @@ export class ScenarioTesting implements vscode.Disposable {
             vscode.workspace.onDidChangeWorkspaceFolders(() => { void this.discover(); }),
             this.controller.createRunProfile('Run FerroUI Scenario', vscode.TestRunProfileKind.Run,
                 (request, token) => this.run(request, token, false), true),
-            this.controller.createRunProfile('Accept FerroUI Screenshot Baselines', vscode.TestRunProfileKind.Run,
+            this.controller.createRunProfile('Review FerroUI Screenshot Baselines', vscode.TestRunProfileKind.Run,
                 (request, token) => this.run(request, token, true), false),
         ];
         this.controller.resolveHandler = () => this.discover();
@@ -63,7 +64,7 @@ export class ScenarioTesting implements vscode.Disposable {
         this.controller.items.add(item);
     }
 
-    private async run(request: vscode.TestRunRequest, token: vscode.CancellationToken, accept: boolean): Promise<void> {
+    private async run(request: vscode.TestRunRequest, token: vscode.CancellationToken, review: boolean): Promise<void> {
         if (!request.include && !this.controller.items.size) await this.discover();
         const excluded = new Set(request.exclude?.map(item => item.id));
         const included = request.include ? [...request.include] : [];
@@ -84,7 +85,9 @@ export class ScenarioTesting implements vscode.Disposable {
                 const started = performance.now();
                 try {
                     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before running native scenarios.');
-                    const report = await this.runner.run(item.uri!, cancellation.signal, accept);
+                    const report = review
+                        ? await this.reviews.run(item.uri!, cancellation.signal, scenarioBaselineRef(item.uri!), true)
+                        : await this.runner.run(item.uri!, cancellation.signal);
                     this.showReport(run, item, report, performance.now() - started);
                 } catch (error) {
                     if (cancellation.signal.aborted) run.skipped(item);

@@ -795,7 +795,43 @@ export function stylesHtml(webview: vscode.Webview, root: vscode.Uri): string {
 </fieldset>`);
 }
 
-function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string, extraStyles: readonly string[] = []): string {
+export function scenarioReviewHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'scenarioReview', 'FerroUI Baseline Review', `
+<header class="toolbar" aria-label="Baseline review toolbar">
+    <div class="tool-group" role="group" aria-label="Scenario">
+        ${tool('open-scenario', 'go-to-file', 'Open scenario')}
+        ${tool('rerun-scenario', 'refresh', 'Run review again')}
+    </div>
+    <select id="capture" aria-label="Screenshot assertion" hidden></select>
+    <div id="comparison-tools" class="tool-group toolbar-divider" role="group" aria-label="Comparison mode" hidden>
+        ${tool('split', 'split-horizontal', 'Side by side', 'aria-pressed="true"')}
+        ${tool('overlay', 'layers', 'Overlay', 'aria-pressed="false"')}
+        ${tool('difference', 'diff-single', 'Highlight differences', 'aria-pressed="false"')}
+    </div>
+    <div id="review-zoom" class="tool-group toolbar-divider" role="group" aria-label="Image zoom" hidden>
+        ${tool('zoom-out', 'zoom-out', 'Zoom out')}
+        <button id="fit" type="button" class="metric" title="Fit images" aria-label="Fit images">Fit</button>
+        ${tool('zoom-in', 'zoom-in', 'Zoom in')}
+    </div>
+    <button id="approve" class="primary" type="button" aria-label="Approve current image as baseline" hidden>${icon('check')} Approve</button>
+</header>
+<div id="review-summary" class="review-summary" hidden>
+    <span id="reference"></span><span id="pixels"></span><span id="workspace-status"></span>
+</div>
+<main id="image-review" class="review-canvases" data-mode="split" hidden>
+    <figure id="expected" class="review-frame"><figcaption>Expected</figcaption><div class="review-scroll preview-surface" tabindex="0" aria-label="Expected image viewport"></div></figure>
+    <figure id="actual" class="review-frame"><figcaption>Actual</figcaption><div class="review-scroll preview-surface" tabindex="0" aria-label="Actual image viewport"></div></figure>
+    <figure id="overlay-frame" class="review-frame" hidden>
+        <figcaption>Overlay <input id="wipe" type="range" min="0" max="100" value="50" aria-label="Percentage of actual image" /></figcaption>
+        <div class="review-scroll preview-surface" tabindex="0" aria-label="Overlay image viewport"></div>
+    </figure>
+    <figure id="diff-frame" class="review-frame" hidden><figcaption>Difference</figcaption><div class="review-scroll preview-surface" tabindex="0" aria-label="Difference image viewport"></div></figure>
+</main>
+<p id="review-message" class="dock-message" role="status">Loading review…</p>`, [], true);
+}
+
+function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string,
+    extraStyles: readonly string[] = [], allowImageFiles = false): string {
     const resource = (...parts: string[]) => webview.asWebviewUri(vscode.Uri.joinPath(root, ...parts));
     const nonce = randomBytes(16).toString('base64');
     return `<!doctype html>
@@ -803,7 +839,7 @@ function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: s
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:${allowImageFiles ? ` ${webview.cspSource}` : ''}; font-src ${webview.cspSource}; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
     <link rel="stylesheet" href="${resource('dist', 'icons', 'codicon.css')}">
     <link rel="stylesheet" href="${resource('media', 'workbench.css')}">
     ${extraStyles.map(style => `<link rel="stylesheet" href="${resource('media', `${style}.css`)}">`).join('')}

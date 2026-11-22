@@ -166,18 +166,4 @@ Each capture keeps up to 1,024 control or component rows for one window. The rep
 
 ## Run a native UI scenario
 
-1. Open the [customer search scenario](../../../editors/vscode/test/fixtures/customer-search.ferroui-scenario.json) in the `editors/vscode/test/fixtures` folder as a workspace. The **FerroUI Scenarios** section in Testing lists saved `*.ferroui-scenario.json` files.
-2. If the scenario needs its first baseline, choose **Accept FerroUI Screenshot Baselines** in the Testing run-profile picker. Then run the scenario. It mounts saved source in a fresh native preview, drives input, checks the rendered properties and accessibility tree, and compares images for screenshot assertions. A visual mismatch links to the expected image, actual image, and diff.
-3. Run the same file in CI. Relative document and baseline paths resolve from the scenario file. Set `--workspace` for a scenario nested under its workspace root and `--artifacts` for output images. A failed assertion gives the command a failing status.
-
-```sh
-ferroui-designer-preview --scenario customer-search.ferroui-scenario.json
-```
-
-A Rust scenario can select an RSX invocation with a zero-based UTF-16 `caret`. Use `channelTolerance` or `maxChangedPixels` when a fixture allows image variation. To test a `.ferrostages` flow with the same engine, use `prototype`, a stage set and flow, then `activateLink`, `expectStage`, and `expectOverlay`. The [customer review scenario](../../../editors/vscode/test/fixtures/customer-review.ferroui-scenario.json) exercises two stages and an overlay. [Scenario format and CLI options](../../../editors/vscode/README.md#native-ui-scenarios)
-
-Use `pressActiveKey` with `key: "Tab"`, `"Shift+Tab"`, `"Enter"`, or `"Escape"` to follow the player’s current focus. Add an `expectFocus` step with `name` and `role` to check focus after opening or closing an overlay. Set `prototype.capture` to `"artboard"` to compare the base, dimming, and overlays together. The default `"activeLayer"` captures only the stage at the top of the stack.
-
-Scenarios also read version-4 stage sets with authored transitions. Each step uses the
-settled stage, so focus checks and screenshot baselines are independent of transition
-duration. Play the same stage set in the designer to inspect its motion. [Prototype transitions](motion.md#set-a-prototype-transition)
+Testing discovers saved XAML, RSX, and prototype scenarios. Run a case to check native input, rendered properties, accessibility, and screenshot baselines. Review differences and approve an image from the comparison editor. [Test UI and review visual changes](testing.md)

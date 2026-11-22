@@ -139,6 +139,20 @@
         "icon": "$(new-file)"
       },
       {
+        "command": "ferroui.scenario.review",
+        "title": "Review Scenario Baselines",
+        "category": "FerroUI",
+        "icon": "$(diff)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
+        "command": "ferroui.scenario.compare",
+        "title": "Compare Scenario Baselines with Git",
+        "category": "FerroUI",
+        "icon": "$(git-compare)",
+        "enablement": "isWorkspaceTrusted"
+      },
+      {
         "command": "ferroui.project.newProject",
         "title": "New Project",
         "category": "FerroUI",
@@ -807,6 +821,11 @@
           "group": "navigation"
         },
         {
+          "command": "ferroui.scenario.review",
+          "when": "isWorkspaceTrusted && resourceScheme == file && resourceFilename =~ /\\.ferroui-scenario\\.json$/",
+          "group": "navigation"
+        },
+        {
           "command": "ferroui.dictionaryReview.showFile",
           "when": "resourceScheme == ferroui-dictionary-review && resourcePath =~ /^\\/(before|after)\\//",
           "group": "navigation@1"
@@ -1164,6 +1183,12 @@
           "default": false,
           "scope": "machine",
           "description": "Allow agents to edit editor buffers, control designer views, or run an application through the VS Code designer MCP server."
+        },
+        "ferroui.scenarios.baselineRef": {
+          "type": "string",
+          "default": "",
+          "scope": "resource",
+          "description": "Optional local Git reference for visual scenario review. The review uses the merge-base images and verifies the worktree baseline."
         },
         "ferroui.mcp.stdioServers": {
           "type": "array",

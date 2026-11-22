@@ -29,6 +29,7 @@ import type { ProjectTemplateRequest } from './projectSetupProtocol';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
 import type { RuntimeProfiles } from './runtimeProfiles';
 import type { ScenarioRunner } from './scenarioRunner';
+import type { ScenarioReview } from './scenarioReview';
 import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
@@ -54,6 +55,9 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_sequence: number;
     runtime?: RuntimeTarget;
     accept_baselines?: boolean;
+    baseline_ref?: string;
+    approval?: string;
+    open?: boolean;
     all?: boolean;
     path: string;
     line?: number;
@@ -132,7 +136,8 @@ export class AgentTools {
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
         private readonly runtimeSource: RuntimeSourceTools, private readonly runtimeProfiles: RuntimeProfiles,
         private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold, private readonly projectSetup: ProjectSetup,
-        private readonly scenarios: ScenarioRunner, private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
+        private readonly scenarios: ScenarioRunner, private readonly scenarioReviews: ScenarioReview,
+        private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
         private readonly sourceReviews: {
             property: RegisteredRename; type: RegisteredRename; resource: ResourceRename; resourceMove: ResourceMove;
         }) {}
@@ -239,9 +244,10 @@ export class AgentTools {
         if (tool === 'ferroui_project_library') return this.workbench.projectLibrary.list(args.folder, args.query ?? '', args.offset ?? 0, args.limit ?? 100, signal);
         if (tool === 'designer_open_project_definition') return this.workbench.openProjectDefinition(args.entry!, args.destination ?? 'preview', signal);
         if (tool === 'ferroui_project_scaffold') return this.scaffolds.create(args.kind as 'view' | 'component', args.language!, args.path, args.folder, signal);
-        if (tool === 'ferroui_scenario_run') {
+        if (tool === 'ferroui_scenario_run' || tool === 'ferroui_scenario_review' || tool === 'ferroui_scenario_approve_baseline') {
             const uri = await resolveWorkspaceFile(args.path, args.folder);
-            return this.scenarios.run(uri, signal, args.accept_baselines);
+            if (tool === 'ferroui_scenario_review') return this.scenarioReviews.run(uri, signal, args.baseline_ref, args.open);
+            return this.scenarios.run(uri, signal, { accept: args.accept_baselines, reference: args.baseline_ref, approval: args.approval });
         }
 
         const panel = this.workbench.designs().find(panel => panel.session === args.session);

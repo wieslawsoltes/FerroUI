@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import * as vscode from 'vscode';
 import type { ScenarioReport } from '../src/scenarioRunner';
 import type { McpFixture } from './mcp';
+import { verifyBranchReview } from './scenarioReviewMcp';
 
 export async function verifyScenarioMcp({ invoke, content }: McpFixture): Promise<void> {
     const root = vscode.workspace.workspaceFolders![0].uri;
@@ -19,6 +20,7 @@ export async function verifyScenarioMcp({ invoke, content }: McpFixture): Promis
     assert.equal(Buffer.from(baselineImage).subarray(1, 4).toString(), 'PNG');
     const matched = await run();
     assert.equal(matched.passed, true, JSON.stringify(matched.steps));
+    await verifyBranchReview({ invoke, content }, root, original, baselineImage);
 
     try {
         const changed = new TextDecoder().decode(original).replace('#E4EEE8', '#823E40');

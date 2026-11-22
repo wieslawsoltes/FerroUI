@@ -33,6 +33,7 @@ import { RuntimeSourceTools } from './runtimeSourceTools';
 import { RuntimeProfiles } from './runtimeProfiles';
 import { RsxLanguage } from './rsxLanguage';
 import { ScenarioRunner } from './scenarioRunner';
+import { ScenarioReview } from './scenarioReview';
 import { ScenarioTesting } from './scenarioTesting';
 import { StagesPanel } from './stagesPanel';
 import { xamlLanguage, XamlServer } from './xamlServer';
@@ -49,7 +50,8 @@ export function activate(context: vscode.ExtensionContext) {
     const schemaBuild = new ProjectSchemaBuild(languageOutput, publish);
     const rsx = new RsxLanguage(context, languageOutput, projects);
     const scenarios = new ScenarioRunner(context);
-    const scenarioTesting = new ScenarioTesting(scenarios);
+    const scenarioReviews = new ScenarioReview(context, scenarios);
+    const scenarioTesting = new ScenarioTesting(scenarios, scenarioReviews);
     const assets = new ProjectAssets();
     const assetMoves = new AssetMoves(server);
     const inventory = new ProjectInventory(context, previewOutput, assets, assetMoves);
@@ -77,14 +79,14 @@ export function activate(context: vscode.ExtensionContext) {
     const runtimeProfiles = new RuntimeProfiles(runtimes, runtimeSource);
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer, runtimeProfiles);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
-    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, runtimeProfiles, inventory, scaffolds, projectSetup, scenarios, hosted, fileMoves, {
+    const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, runtimeProfiles, inventory, scaffolds, projectSetup, scenarios, scenarioReviews, hosted, fileMoves, {
         property: propertyRename, type: typeRename, resource: resourceRename, resourceMove,
     }), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
-        projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
+        projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, scenarioReviews, scenarios, designer, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {

@@ -334,6 +334,10 @@ export const agentCatalog = {
         ['node', 'property', 'value', 'expected_generation', 'expected_version'], true),
     ferroui_scenario_run: tool('Run a saved FerroUI scenario in a fresh native preview. Returns step results and any screenshot evidence. Set accept_baselines to write baselines after the scenario assertions pass.',
         { path: workspacePath, folder: workspacePath, accept_baselines: { type: 'boolean' } }, ['path'], true),
+    ferroui_scenario_review: tool('Review a native scenario with the expected, actual and difference images. Optional baseline_ref compares to its Git merge base while testing the workspace baseline. Set open to show the editor comparison.',
+        { path: workspacePath, folder: workspacePath, baseline_ref: workspacePath, open: { type: 'boolean' } }, ['path']),
+    ferroui_scenario_approve_baseline: tool('Publish one reviewed screenshot. Pass the approval identifier and the same scenario and baseline_ref from the review. The native runner verifies the capture and the existing baseline before writing.',
+        { path: workspacePath, folder: workspacePath, baseline_ref: workspacePath, approval: { type: 'string', maxLength: 16 } }, ['path', 'approval'], true),
 };
 
 export type AgentTool = keyof typeof agentCatalog;

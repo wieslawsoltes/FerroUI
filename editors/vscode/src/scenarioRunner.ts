@@ -1,4 +1,6 @@
 import { execFile } from 'node:child_process';
+import { mkdir, mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
 import * as vscode from 'vscode';
@@ -8,11 +10,42 @@ import { isWorkspaceFile } from './workspacePaths';
 const exec = promisify(execFile);
 export const scenarioPattern = '**/*.ferroui-scenario.json';
 
+export interface ScenarioRunOptions {
+    accept?: boolean;
+    review?: boolean;
+    reference?: string;
+    approval?: string;
+}
+
 interface StepReport {
     step: number;
     passed: boolean;
     message: string;
     artifacts: string[];
+}
+
+export interface ImageSize {
+    width: number;
+    height: number;
+}
+
+export interface BaselineComparison {
+    status: 'match' | 'changed' | 'missing' | 'resized';
+    actual: ImageSize;
+    expected: ImageSize | null;
+    changedPixels: number | null;
+    maxChangedPixels: number;
+}
+
+export interface VisualReview {
+    step: number;
+    baseline: string;
+    workspace: BaselineComparison;
+    comparison: BaselineComparison;
+    actual: string;
+    expected: string | null;
+    difference: string | null;
+    approval: string | null;
 }
 
 export interface ScenarioReport {
@@ -21,35 +54,75 @@ export interface ScenarioReport {
     passed: boolean;
     notices: string[];
     steps: StepReport[];
+    reference?: { name: string; commit: string };
+    visuals?: VisualReview[];
+    approved?: string;
+    artifactDirectory: string;
 }
 
-export class ScenarioRunner {
+export function scenarioBaselineRef(uri: vscode.Uri): string | undefined {
+    return vscode.workspace.getConfiguration('ferroui.scenarios', uri).get<string>('baselineRef')?.trim() || undefined;
+}
+
+export class ScenarioRunner implements vscode.Disposable {
+    private root?: Promise<string>;
+    private sequence = 0;
+    private readonly stop = new AbortController();
+    private readonly pending = new Set<Promise<ScenarioReport>>();
+
     constructor(private readonly context: vscode.ExtensionContext) {}
 
-    async run(uri: vscode.Uri, signal: AbortSignal, accept = false): Promise<ScenarioReport> {
+    run(uri: vscode.Uri, signal: AbortSignal, options: ScenarioRunOptions = {}): Promise<ScenarioReport> {
+        const pending = this.start(uri, AbortSignal.any([signal, this.stop.signal]), options);
+        this.pending.add(pending);
+        void pending.then(() => this.pending.delete(pending), () => this.pending.delete(pending));
+        return pending;
+    }
+
+    private async start(uri: vscode.Uri, signal: AbortSignal, options: ScenarioRunOptions): Promise<ScenarioReport> {
+        if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before running native scenarios.');
         signal.throwIfAborted();
         const workspace = vscode.workspace.getWorkspaceFolder(uri);
         if (!workspace || !await isWorkspaceFile(uri) || !uri.fsPath.endsWith('.ferroui-scenario.json')) {
             throw new Error('Choose a .ferroui-scenario.json file in the current workspace.');
         }
         const binary = await commandFor('preview', this.context);
-        const args = ['--scenario', uri.fsPath, '--workspace', workspace.uri.fsPath];
-        if (accept) args.push('--accept-baselines');
+        signal.throwIfAborted();
+        this.root ??= mkdtemp(path.join(tmpdir(), 'ferroui-scenarios-'));
+        const artifactDirectory = path.join(await this.root, String(++this.sequence));
+        const args = ['--scenario', uri.fsPath, '--workspace', workspace.uri.fsPath, '--artifacts', artifactDirectory];
+        if (options.approval) args.push('--approve-baseline', options.approval);
+        else if (options.review) args.push('--review-baselines');
+        else if (options.accept) args.push('--accept-baselines');
+        if (options.reference) args.push('--baseline-ref', options.reference);
         let stdout: string;
         try {
             ({ stdout } = await exec(binary, args, {
                 cwd: path.dirname(uri.fsPath), encoding: 'utf8', signal, windowsHide: true, maxBuffer: 4 * 1024 * 1024,
             }));
         } catch (error) {
-            signal.throwIfAborted();
             const failure = error as { stdout?: string; stderr?: string };
-            if (!failure.stdout?.trim()) throw new Error(failure.stderr?.trim() || String(error));
+            if (signal.aborted || !failure.stdout?.trim()) {
+                await rm(artifactDirectory, { recursive: true, force: true }).catch(() => {});
+                signal.throwIfAborted();
+                throw new Error(failure.stderr?.trim() || String(error));
+            }
             stdout = failure.stdout;
         }
         const report = JSON.parse(stdout) as ScenarioReport;
         if (!Array.isArray(report.steps) || !Array.isArray(report.notices) || typeof report.passed !== 'boolean') {
             throw new Error('The native runner returned an invalid scenario report.');
         }
-        return report;
+        // Empty review results still need a resource root for their error view.
+        if (options.review || options.approval) await mkdir(artifactDirectory, { recursive: true });
+        return { ...report, artifactDirectory };
+    }
+
+    dispose(): void {
+        this.stop.abort();
+        if (this.root) {
+            void Promise.allSettled(this.pending).then(() => this.root!).then(root =>
+                rm(root, { recursive: true, force: true })).catch(() => {});
+        }
     }
 }

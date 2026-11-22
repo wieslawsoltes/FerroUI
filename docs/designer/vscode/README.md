@@ -23,7 +23,8 @@ For a package built from this checkout, see the [extension build and packaging i
 | Find a project view, edit source and layout, configure columns and behaviors, or work with bindings and resources | [Author views and components](authoring.md) |
 | Compose XAML styles and compare Light, Dark, and High contrast colors | [Edit styles, control themes, and palettes](styles.md) |
 | Edit a clip or state transition, compare variants, or play a prototype | [Animate and preview variations](motion.md) |
-| Preview with the app’s types and data, inspect a running window, hot reload, or run UI tests | [Run and test a view](runtime.md) |
+| Preview with the app’s types and data, inspect a running window, or hot reload | [Run and inspect a view](runtime.md) |
+| Verify interaction and accessibility, compare baseline images, or run a CI suite | [Test UI and review visual changes](testing.md) |
 | Set up MCP, find a command, or configure the workspace | [Use agents and configure the extension](reference.md) |
 
 The canvas toolbar and its **More designer actions** menu open the workbench views. You can also run their **FerroUI** commands from the Command Palette. Drag a view’s title or use **View: Move View** to place Toolbox, Outline, Properties, Events, Behaviors, Resources, and Assets where you use them. **FerroUI Timeline** opens in the VS Code Panel, below the editor groups in the default workbench layout. Drag the Panel divider to size it or use **Maximize Panel**. [VS Code custom layout](https://code.visualstudio.com/docs/configure/custom-layout)
