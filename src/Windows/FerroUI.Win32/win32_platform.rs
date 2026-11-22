@@ -117,6 +117,7 @@ mod tests {
 
     #[test]
     fn contrast_notifications_refresh_the_native_settings_cache() {
+        let _ui_settings = crate::win32_platform_settings::ui_settings_test_lock();
         let platform = Win32Platform::instance();
         let settings = Win32PlatformSettings::new();
         let previous = platform.win32_platform_settings.replace(Some(settings.clone()));
