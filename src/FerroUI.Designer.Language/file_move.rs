@@ -29,12 +29,22 @@ const MAX_DRAFT_BYTES: usize = 8 * 1024 * 1024;
 
 pub use super::source_review::SourceDraft as FileMoveDraft;
 
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq, Ord, PartialOrd)]
+pub struct PublishedAssetAddressMove {
+    pub from: String,
+    pub to: String,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct FileMovePlan {
     pub from: String,
     pub to: String,
     pub review: String,
     pub documents: Vec<FileMoveDocument>,
+    #[serde(default, skip_serializing_if = "Option::is_none", rename = "assetDigest")]
+    pub asset_digest: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty", rename = "publishedAssets")]
+    pub published_assets: Vec<PublishedAssetAddressMove>,
     #[serde(default, skip_serializing_if = "Vec::is_empty", rename = "generatedRust")]
     pub generated_rust: Vec<GeneratedRustRename>,
 }
@@ -123,6 +133,8 @@ impl LanguageService {
             from: movement.from,
             to: movement.to,
             documents,
+            asset_digest: None,
+            published_assets: Vec::new(),
             generated_rust: addresses.generated_rust,
         })
     }

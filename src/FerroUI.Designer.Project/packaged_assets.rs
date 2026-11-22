@@ -4,13 +4,17 @@ use crate::{
     uri::{canonical_path, decode, encode},
     ProjectError, Result,
 };
-use ferroui_build_scan::packaged_assets::PackagedAssetIndex;
+use ferroui_build_scan::packaged_assets::{AssetPublication, PackagedAssetIndex};
 use std::{
     collections::BTreeMap,
     fs,
     io::Read,
     path::{Component, Path, PathBuf},
 };
+
+#[path = "packaged_asset_moves.rs"]
+mod moves;
+pub use moves::PublishedAssetMove;
 
 pub(crate) const INDEX_BYTES: u64 = 16 * 1024 * 1024;
 
@@ -24,6 +28,7 @@ struct Package {
     root: PathBuf,
     assembly: String,
     inputs: BTreeMap<String, PathBuf>,
+    publications: Vec<AssetPublication>,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -37,6 +42,8 @@ pub struct PublishedAsset<'a> {
     pub address: String,
     pub assembly: &'a str,
     pub key: &'a str,
+    #[serde(rename = "sourceRoot", skip_serializing_if = "Option::is_none")]
+    pub source_root: Option<&'a Path>,
 }
 
 impl PackagedAssets {
@@ -63,7 +70,7 @@ impl PackagedAssets {
         if !fits {
             return;
         }
-        let Ok(index) = PackagedAssetIndex::parse(&text) else {
+        let Ok((index, publication)) = PackagedAssetIndex::parse_with_publication(&text) else {
             return;
         };
         if index.assembly != assembly
@@ -101,9 +108,16 @@ impl PackagedAssets {
             root: root.to_owned(),
             assembly: index.assembly,
             inputs,
+            publications: publication.into_iter().collect(),
         };
         let known = self.packages.entry(assembly.to_uppercase()).or_default();
-        if !known.contains(&package) {
+        if let Some(existing) = known.iter_mut().find(|existing| existing.root == package.root
+            && existing.assembly == package.assembly && existing.inputs == package.inputs)
+        {
+            for publication in package.publications {
+                if !existing.publications.contains(&publication) { existing.publications.push(publication); }
+            }
+        } else {
             known.push(package);
         }
     }
@@ -134,13 +148,11 @@ impl PackagedAssets {
                 }
             })
             .flat_map(|package| {
-                let authority = encode(&package.assembly)
-                    .replace('/', "%2F")
-                    .replace(':', "%3A");
-                package.inputs.keys().map(move |key| PublishedAsset {
-                    address: format!("ferres://{authority}{}", encode(key)),
+                package.inputs.keys().map(|key| PublishedAsset {
+                    address: published_address(&package.assembly, key),
                     assembly: &package.assembly,
                     key,
+                    source_root: (package.publications.len() == 1).then_some(package.root.as_path()),
                 })
             })
     }
@@ -251,6 +263,11 @@ fn address(uri: &str) -> Option<(&str, String)> {
     let rest = rest.split(['?', '#']).next()?;
     let (assembly, path) = rest.split_at(rest.find('/').unwrap_or(rest.len()));
     Some((assembly, decode(path).ok()?))
+}
+
+fn published_address(assembly: &str, key: &str) -> String {
+    let authority = encode(assembly).replace('/', "%2F").replace(':', "%3A");
+    format!("ferres://{authority}{}", encode(key))
 }
 
 /// An absolute address of an individual asset in FerroUI's package registry.

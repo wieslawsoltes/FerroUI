@@ -1,18 +1,21 @@
-//! Review physical asset moves using the typed XAML URI sites and authored Rust includes.
-use super::file_moves::{move_drafts, new_reference, rust_files};
-use super::source_review::{ReviewedDocument, RustSnapshot, check_incomplete, reviewed_document};
+//! Review asset moves using typed XAML URI sites, Rust operands, and the selected build.
+use super::file_moves::{move_drafts, new_reference, rust_files, PublishedAssetAddressMove};
+use super::source_review::{check_incomplete, reviewed_document, ReviewedDocument, RustSnapshot};
 use super::{
-    FileMoveDraft, FileMovePlan, LanguageService, State, file_move_literals, handlers::read_rust,
+    file_move_literals, handlers::read_rust, FileMoveDraft, FileMovePlan, LanguageService, State,
 };
-use crate::{LanguageError, Result, require};
+use crate::{require, LanguageError, Result};
 use ferroui_designer_core::{Document, SourceSpan, TextPatch};
 use ferroui_designer_project::{
-    ProjectFileMove, RustFilePath, RustPathAnchor, canonical_file_uri, file_path, file_uri,
-    relative_asset_uri, relative_file_path, rust_file_includes,
+    asset_digest, canonical_file_uri, file_path, file_uri, is_packaged_asset_uri,
+    relative_asset_uri, relative_file_path, ProjectFileMove, RustAssetReferences, RustFilePath,
+    RustPathAnchor,
 };
+use std::collections::BTreeSet;
 use std::hash::{DefaultHasher, Hash, Hasher};
-use std::io::{self, Read};
-use std::path::Path;
+
+#[path = "asset_move_build.rs"]
+mod build;
 
 impl LanguageService {
     pub fn plan_asset_move(
@@ -35,10 +38,12 @@ impl LanguageService {
 
         let drafts = move_drafts(drafts)?;
         let original = file_path(&movement.from)?;
-        require(
-            !self.package_schemas.values().any(|schema| schema.catalog.packaged_assets().contains_source(&original)),
-            "This asset is published by a Cargo export table. Update the package's asset registration before moving it.",
-        )?;
+        let mut publications = BTreeSet::new();
+        for schema in self.package_schemas.values() {
+            publications.extend(schema.resources.packaged_assets().plan_moves(&movement)?);
+        }
+        let published = !publications.is_empty();
+        let build_inputs = build::build_inputs(self, &movement, &publications)?;
         let target = file_path(&movement.to)?;
         let name = original
             .file_name()
@@ -60,18 +65,25 @@ impl LanguageService {
                 check_incomplete(uri, state, mentions)?;
                 continue;
             }
-            let patches = self.asset_xaml_patches(uri, state, &movement)?;
+            let patches = self.asset_xaml_patches(uri, state, &movement, published)?;
             if !patches.is_empty() {
                 let document = reviewed_document(uri, state.version, &state.index, patches)?;
                 Document::new(&document.after)?;
                 documents.push(document);
             }
         }
+        let mut build_sources = Vec::new();
         for (uri, (entry, package, _)) in rust_files(self) {
             let snapshot = RustSnapshot::read(uri, &drafts)?;
+            let build = build_inputs.get(uri);
             let may_include =
                 |text: &str| text.contains("include_bytes") || text.contains("include_str");
-            if !may_include(&snapshot.text) && snapshot.version < 0 {
+            let may_address = |text: &str| {
+                published
+                    && (text.contains("ferres") || (text.contains("concat") && mentions(text)))
+            };
+            let may_reference = |text: &str| may_include(text) || may_address(text);
+            if build.is_none() && !may_reference(&snapshot.text) && snapshot.version < 0 {
                 continue;
             }
             let parent = entry
@@ -90,17 +102,37 @@ impl LanguageService {
                     .ok();
                 (resolved.as_deref() == Some(movement.from.as_str())).then_some(base)
             };
+            let resources = self.compiled_resources(uri);
+            let moved_address = |site: &RustFilePath| -> Result<Option<String>> {
+                if let Some(resources) = resources.as_ref().filter(|_| published) {
+                    return Ok(resources
+                        .packaged_assets()
+                        .moved_address(&site.path, &movement)?);
+                }
+                Ok(None)
+            };
             let could_reference =
-                |text: &str| may_include(text) && (mentions(text) || text.contains("concat"));
-            let sites = match rust_file_includes(&snapshot.text) {
+                |text: &str| may_reference(text) && (mentions(text) || text.contains("concat"));
+            let syntax = match RustAssetReferences::parse(&snapshot.text, build.is_some()) {
                 Ok(sites) => sites,
-                Err(_) => {
+                Err(error) => {
+                    if build.is_some() {
+                        return Err(error.into());
+                    }
                     let disk_uses_asset = snapshot.version >= 0
                         && read_rust(uri).is_ok_and(|disk| {
-                            may_include(&disk)
-                                && rust_file_includes(&disk).map_or_else(
+                            may_reference(&disk)
+                                && RustAssetReferences::parse(&disk, false).map_or_else(
                                     |_| could_reference(&disk),
-                                    |sites| sites.iter().any(|site| reference_base(site).is_some()),
+                                    |sites| {
+                                        sites
+                                            .includes
+                                            .iter()
+                                            .any(|site| reference_base(site).is_some())
+                                            || sites.addresses.iter().any(|site| {
+                                                !matches!(moved_address(site), Ok(None))
+                                            })
+                                    },
                                 )
                         });
                     require(
@@ -112,8 +144,12 @@ impl LanguageService {
                     continue;
                 }
             };
-            let mut patches = Vec::new();
-            for site in sites {
+            if build.is_some() {
+                build_sources.push((uri, snapshot.version, snapshot.text.clone()));
+            }
+            let mut patches =
+                build::build_patches(build, &syntax, &snapshot.text, &movement.package_root)?;
+            for site in syntax.includes {
                 let Some(base) = reference_base(&site) else {
                     continue;
                 };
@@ -128,18 +164,49 @@ impl LanguageService {
                     replacement: site.replacement(&snapshot.text, &replacement),
                 });
             }
+            for site in syntax.addresses {
+                if let Some(replacement) = moved_address(&site)? {
+                    patches.push(TextPatch {
+                        span: SourceSpan::new(site.range.start, site.range.end),
+                        replacement: site.replacement(&snapshot.text, &replacement),
+                    });
+                }
+            }
             if !patches.is_empty() {
-                documents.push(snapshot.document(uri, patches)?);
+                patches.sort_by_key(|patch| (patch.span.start, patch.span.end));
+                patches.dedup();
+                let document = snapshot.document(uri, patches)?;
+                RustAssetReferences::parse(&document.after, false)?;
+                documents.push(document);
             }
         }
         documents.sort_by(|left, right| left.edit.uri.cmp(&right.edit.uri));
-        let review = asset_review_id(&movement, &original, &documents)
-            .map_err(|error| LanguageError(error.to_string()))?;
+        let mut publication_snapshot = DefaultHasher::new();
+        publications.hash(&mut publication_snapshot);
+        build_sources.hash(&mut publication_snapshot);
+        let digest = asset_digest(&original).map_err(|error| LanguageError(error.to_string()))?;
+        let review = asset_review_id(
+            &movement,
+            &digest,
+            &documents,
+            publication_snapshot.finish(),
+        );
+        let published_assets = publications
+            .iter()
+            .map(|plan| {
+                let (from, to) = plan.addresses();
+                PublishedAssetAddressMove { from, to }
+            })
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect();
         Ok(FileMovePlan {
             from: movement.from,
             to: movement.to,
             review,
             documents,
+            asset_digest: Some(digest),
+            published_assets,
             generated_rust: Vec::new(),
         })
     }
@@ -149,6 +216,7 @@ impl LanguageService {
         uri: &str,
         state: &State,
         movement: &ProjectFileMove,
+        published: bool,
     ) -> Result<Vec<TextPatch>> {
         let resources = self.compiled_resources(uri);
         let mut patches = Vec::new();
@@ -161,6 +229,18 @@ impl LanguageService {
             let (value, suffix) = site.value.split_at(delim.unwrap_or(site.value.len()));
             if value.is_empty() {
                 continue;
+            }
+            if published {
+                if let Some(resources) = &resources {
+                    if let Some(next) = resources.moved_asset_address(uri, value, movement)? {
+                        let replacement = format!("{next}{suffix}");
+                        patches.extend(site.patches(&replacement));
+                        continue;
+                    }
+                }
+                if is_packaged_asset_uri(value) {
+                    continue;
+                }
             }
             if resources
                 .as_ref()
@@ -185,20 +265,14 @@ impl LanguageService {
 
 fn asset_review_id(
     movement: &ProjectFileMove,
-    original: &Path,
+    digest: &str,
     documents: &[ReviewedDocument],
-) -> io::Result<String> {
+    publication: u64,
+) -> String {
     let mut hash = DefaultHasher::new();
     (&movement.from, &movement.to).hash(&mut hash);
-    let mut file = std::fs::File::open(original)?;
-    let mut bytes = [0; 32 * 1024];
-    loop {
-        let count = file.read(&mut bytes)?;
-        if count == 0 {
-            break;
-        }
-        hash.write(&bytes[..count]);
-    }
+    publication.hash(&mut hash);
+    digest.hash(&mut hash);
     for document in documents {
         (
             &document.edit.uri,
@@ -208,5 +282,5 @@ fn asset_review_id(
         )
             .hash(&mut hash);
     }
-    Ok(format!("{:016x}", hash.finish()))
+    format!("{:016x}", hash.finish())
 }

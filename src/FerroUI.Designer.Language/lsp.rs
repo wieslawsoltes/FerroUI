@@ -575,7 +575,10 @@ impl LspServer {
                     "workspaceFolders": { "supported": true, "changeNotifications": true },
                     "fileOperations": {
                         "willRename": { "filters": [{ "pattern": { "glob": "**/*.xaml" } }] },
-                        "didRename": { "filters": [{ "pattern": { "glob": "**/*.xaml" } }] }
+                        "didRename": { "filters": [{ "scheme": "file", "pattern": {
+                            "glob": "**/*.{xaml,png,jpg,jpeg,webp,gif,bmp,ico,svg,ttf,otf,woff,woff2,wav,mp3,ogg,mp4,webm}",
+                            "options": { "ignoreCase": true }
+                        } }] }
                     }
                 }
             },

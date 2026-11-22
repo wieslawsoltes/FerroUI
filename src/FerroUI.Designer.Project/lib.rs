@@ -3,7 +3,7 @@ mod discovery;
 mod dictionary_file;
 mod markup;
 mod packaged_assets;
-pub use packaged_assets::{is_packaged_asset_uri, is_raster_asset, PackagedAssetSource, PackagedAssets, PublishedAsset};
+pub use packaged_assets::{is_packaged_asset_uri, is_raster_asset, PackagedAssetSource, PackagedAssets, PublishedAsset, PublishedAssetMove};
 mod preview_sources;
 mod compiled_resources;
 pub use compiled_resources::{compiled_resource_key, CompiledResources};
@@ -32,13 +32,14 @@ pub use rust_imports::visit_rust_imports;
 pub use rust_modules::{RustModuleProject, RustModuleSource, RustModuleSources};
 pub use rust_xaml::{
     check_rust_rename_tokens, RustPathAnchor, RustXamlFileInput, RustXamlPath, RustXamlReferences,
-    RustFilePath, RustIncludeSyntax, RustXamlRegistration, rust_file_includes, rust_string_like,
+    CargoAssetCall, RustAssetReferences, RustFilePath, RustIncludeSyntax, RustXamlRegistration,
+    rust_file_includes, rust_source_offset, rust_string_like,
 };
 pub use preview_sources::{
     hosted_preview_sources, local_preview_sources, local_preview_sources_with_resources, LocalPreviewSources,
     PreviewInclude, PreviewIncludes, PreviewSourceBuffer, xaml_source_revision,
 };
-pub use workspace::{Buffer, BufferUpdate, CreatedSourceFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
+pub use workspace::{asset_digest, Buffer, BufferUpdate, CreatedSourceFile, MovedAssetFile, MovedSourceFile, ProjectWorkspace, SavePolicy, SavedReferenceEdit};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProjectError(pub String);

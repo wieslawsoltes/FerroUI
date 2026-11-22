@@ -1,10 +1,12 @@
 //! Source ranges for Rust literals whose XAML path has a known base.
+mod asset_paths;
 mod build_script;
 mod include_path;
 mod includes;
 mod macros;
 mod tokens;
 pub use includes::{rust_file_includes, RustIncludeSyntax};
+pub use asset_paths::{rust_source_offset, CargoAssetCall, RustAssetReferences};
 pub use tokens::check_rust_rename_tokens;
 
 use self::build_script::{BuildScript, DocumentInput, DocumentKey, Site};

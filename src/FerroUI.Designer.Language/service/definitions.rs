@@ -170,7 +170,7 @@ impl LanguageService {
                 if attribute.name == "Source" && attribute.value_span.contains(offset) {
                     if let Ok(target) = self.resource_uri(uri, &attribute.value) {
                         let unresolved = self.project_schema_for(uri).is_some_and(|(_, project)| {
-                            project.catalog.packaged_assets().knows_assembly(&target)
+                            project.resources.packaged_assets().knows_assembly(&target)
                         });
                         if !unresolved {
                             return Ok(Definition::Locations(vec![Location {
@@ -186,7 +186,7 @@ impl LanguageService {
             let site = super::file_move_literals::paths(&state.document, schema)
                 .into_iter().find(|site| site.contains_offset(offset));
             if let Some(site) = site {
-                if let Ok(Some(source)) = project.catalog.packaged_assets().resolve(&site.value) {
+                if let Ok(Some(source)) = project.resources.packaged_assets().resolve(&site.value) {
                     return Ok(Definition::Locations(vec![Location {
                         uri: file_uri(source.file)?,
                         range: Range::default(),

@@ -33,15 +33,22 @@ impl MacroSyntax {
         if args.len() != 1 {
             return None;
         }
-        let argument = args.first()?;
+        self.static_string_path(args.first()?, offset)
+    }
+
+    pub(super) fn static_string_path(&self, argument: &Expr, offset: usize) -> Option<RustFilePath> {
         if let Some(literal) = string_literal(argument) {
             return RustFilePath::from_literal(literal, RustPathAnchor::SourceFile, "", offset);
         }
         let Expr::Macro(expression) = argument else {
             return None;
         };
+        self.static_concat_path(&expression.mac, offset)
+    }
+
+    pub(super) fn static_concat_path(&self, expression: &Macro, offset: usize) -> Option<RustFilePath> {
         let mut path = Concatenation::default();
-        self.concat_path(&expression.mac, &mut path, 0)?;
+        self.concat_path(expression, &mut path, 0)?;
         path.into_path(offset)
     }
 

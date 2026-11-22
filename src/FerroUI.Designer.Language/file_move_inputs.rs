@@ -2,7 +2,7 @@
 use super::{refers_to, rust_files};
 use crate::{LanguageError, LanguageService, Result};
 use ferroui_build_scan::compiled_index::CompiledXamlInput;
-use ferroui_designer_project::{CompiledResources, RustXamlPath, RustXamlReferences, XamlFileMove};
+use ferroui_designer_project::{rust_source_offset, CompiledResources, RustXamlPath, RustXamlReferences, XamlFileMove};
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::Path,
@@ -54,7 +54,7 @@ pub(super) fn paths<'a>(
     inputs
         .iter()
         .map(|input| {
-            let offset = call_offset(source, input).ok_or_else(|| unmapped(input, package))?;
+            let offset = rust_source_offset(source, input.line, input.column).ok_or_else(|| unmapped(input, package))?;
             references
                 .file_documents
                 .iter()
@@ -66,20 +66,6 @@ pub(super) fn paths<'a>(
                 .ok_or_else(|| unmapped(input, package))
         })
         .collect()
-}
-
-fn call_offset(source: &str, input: &CompiledXamlInput) -> Option<usize> {
-    let body = source.strip_prefix('\u{feff}').unwrap_or(source);
-    let mut offset = source.len() - body.len();
-    let mut lines = body.split_inclusive('\n');
-    for _ in 0..input.line.checked_sub(1)? {
-        offset += lines.next()?.len();
-    }
-    let (local, _) = lines
-        .next()?
-        .char_indices()
-        .nth(input.column.checked_sub(1)? as usize)?;
-    Some(offset + local)
 }
 
 fn unmapped(input: &CompiledXamlInput, package: &Path) -> LanguageError {

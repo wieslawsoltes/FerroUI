@@ -1,7 +1,7 @@
 //! File-backed XAML addresses from the selected compiler output.
 use crate::{
     canonical_file_uri, file_path, file_uri, relative_asset_path, resolve_uri, MarkupCatalog,
-    PackagedAssets, ProjectError, Result,
+    is_packaged_asset_uri, PackagedAssets, ProjectError, ProjectFileMove, Result,
 };
 use ferroui_build_scan::compiled_index::CompiledXamlIndex;
 use std::{
@@ -140,6 +140,28 @@ impl CompiledResources {
         self.by_source.contains_key(uri)
     }
 
+    pub fn tracks_input(&self, uri: &str) -> bool {
+        self.contains_source(uri) || self.packaged_assets.tracks_input(uri)
+    }
+
+    pub fn moved_asset_address(&self, owner: &str, reference: &str, movement: &ProjectFileMove) -> Result<Option<String>> {
+        if is_packaged_asset_uri(reference) {
+            return self.packaged_assets.moved_address(reference, movement);
+        }
+        let owner = canonical_file_uri(owner)?;
+        let Some(bases) = self.by_source.get(&owner).map(|source| &self.bases[*source]) else { return Ok(None); };
+        let mut paths = bases.iter().map(|base| {
+            let Ok(address) = resolve_uri(&base.uri, reference) else { return Ok(None); };
+            self.packaged_assets.moved_address(&address, movement)
+        }).collect::<Result<Vec<_>>>()?;
+        let Some(address) = paths.iter().find_map(Option::as_ref) else { return Ok(None); };
+        if paths.iter().all(|path| path.as_ref() == Some(address)) {
+            Ok(paths.pop().flatten())
+        } else {
+            Err(ambiguous(reference))
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.sources.is_empty()
     }
@@ -247,6 +269,9 @@ impl CompiledResources {
     /// Retarget only registered paths in the owning package. The input is one
     /// simultaneous editor transaction, so swapping paths is also unambiguous.
     pub fn retarget(&mut self, moves: &BTreeMap<String, String>) {
+        if moves.keys().any(|from| self.packaged_assets.tracks_input(from)) {
+            Arc::make_mut(&mut self.packaged_assets).retarget(moves);
+        }
         if self.sources.is_empty() || moves.is_empty() {
             return;
         }

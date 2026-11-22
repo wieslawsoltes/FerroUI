@@ -1582,7 +1582,7 @@ impl LanguageService {
         }
         let resolved = ferroui_designer_project::resolve_uri(base, reference)?;
         if let Some(schema) = schema {
-            let assets = schema.catalog.packaged_assets();
+            let assets = schema.resources.packaged_assets();
             if let Some(source) = assets.resolve(&resolved)? {
                 return Ok(ferroui_designer_project::file_uri(source.file)?);
             }
@@ -1672,7 +1672,7 @@ impl LanguageService {
             )?;
         }
         for schema in self.package_schemas.values_mut() {
-            if mapping.keys().any(|from| schema.resources.contains_source(from)) {
+            if mapping.keys().any(|from| schema.resources.tracks_input(from)) {
                 std::sync::Arc::make_mut(&mut schema.resources).retarget(&mapping);
             }
         }
