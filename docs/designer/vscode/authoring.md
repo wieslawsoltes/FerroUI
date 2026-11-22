@@ -309,6 +309,8 @@ The copy appears under **Assets**. To use a raster import, drag it onto the canv
 
 The edit uses the exported URI in XAML and `::ferroui_view::asset_image("ferres://…")` in mapped RSX. Both forms work in the designer and in the built app when its asset registry contains the export. Undo restores the prior source in one step. Computed image expressions and binding values remain editable in source. [Designer Studio workflow](../native-controls.md#place-a-packaged-asset) · [MCP reference](reference.md#drive-an-editor-workflow)
 
+![The Assets dock lists the Cargo export beside its XAML address and the rendered artwork](../images/vscode-published-assets.png)
+
 ### Open the source of a packaged asset
 
 Run **FerroUI: Build Project XAML Schema** for the Cargo target. Use **Go to Definition** on a `ferres://` image or other typed asset reference in XAML to open the file recorded by the package build. Dependency assets use the metadata available for the selected target. Use the registered asset path's exact case and escape characters such as spaces (`%20`). A closed `ExportPlan` publishes only the asset keys it lists.
