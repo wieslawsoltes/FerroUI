@@ -39,7 +39,9 @@ Drag a marker beneath the graph to move its key in time. Select the marker and e
 
 1. Open an animation with a transform component key. In XAML, use a setter such as `RotateTransform.Angle` or `TranslateTransform.X`. Use a matching transform object, a direct child of a `TransformGroup`, or let FerroUI create its default group on a control without a render transform.
 2. In the VS Code Timeline or Designer Studio, open **Animation graph** and choose **Value curves** or **Velocity curves**. In App Preview, select the component track first. Rotation and skew use degrees, translations and centers use logical pixels, and scale uses a multiplier. Velocity is measured per authored second.
-3. Scrub the curve to see the transformed view. Select a key to edit its value or incoming easing, or use **Add keyframe at playhead** on the track to capture the native value. If the first or last key omits the endpoint, the renderer resolves it from the underlying transform and the clip’s fill mode. **Stop** restores the underlying transform. Use Undo to restore the source.
+3. Drag the playhead to see the transformed view. Select a key to edit its value or incoming easing, or use **Add keyframe at playhead** on the track to capture the native value. If the first or last key omits the endpoint, the renderer resolves it from the underlying transform and the clip’s fill mode. **Stop** restores the underlying transform. Use Undo to restore the source.
+
+![The VS Code Timeline plots rotation and translation beside the account card’s native pose at 0.75 seconds](../images/vscode-timeline-transform-curves.png)
 
 ```xaml
 <KeyFrame Cue="50%">
