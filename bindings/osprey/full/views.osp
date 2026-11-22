@@ -3135,194 +3135,198 @@ fn onHolding(message) = AttrOn { attrOnEvent: 26, attrOnMessage: message }
 // onHorizontalSnapPointsChanged(message: M) -> Attr<M>: sends the message on every
 // HorizontalSnapPointsChanged (PivotPanel, StackPanel, VirtualizingStackPanel).
 fn onHorizontalSnapPointsChanged(message) = AttrOn { attrOnEvent: 27, attrOnMessage: message }
+// onImageFailed(message: M) -> Attr<M>: sends the message on every ImageFailed (Image).
+fn onImageFailed(message) = AttrOn { attrOnEvent: 28, attrOnMessage: message }
+// onImageOpened(message: M) -> Attr<M>: sends the message on every ImageOpened (Image).
+fn onImageOpened(message) = AttrOn { attrOnEvent: 29, attrOnMessage: message }
 // onIsCheckedChanged(message: M) -> Attr<M>: sends the message on every IsCheckedChanged
 // (ToggleButton, ToggleSplitButton); `eventText()` is the IsChecked of the sender while
 // `update` runs.
-fn onIsCheckedChanged(message) = AttrOnValue { attrValueEvent: 28, attrValueProperty: 386, attrValueMessage: message }
+fn onIsCheckedChanged(message) = AttrOnValue { attrValueEvent: 30, attrValueProperty: 386, attrValueMessage: message }
 // onIsSelectedChanged(message: M) -> Attr<M>: sends the message on every IsSelectedChanged
 // (SelectingItemsControl).
-fn onIsSelectedChanged(message) = AttrOn { attrOnEvent: 29, attrOnMessage: message }
+fn onIsSelectedChanged(message) = AttrOn { attrOnEvent: 31, attrOnMessage: message }
 // onIsTextTrimmedChanged(message: M) -> Attr<M>: sends the message on every
 // IsTextTrimmedChanged (RichTextBlock).
-fn onIsTextTrimmedChanged(message) = AttrOn { attrOnEvent: 30, attrOnMessage: message }
+fn onIsTextTrimmedChanged(message) = AttrOn { attrOnEvent: 32, attrOnMessage: message }
 // onKeyDown(message: M) -> Attr<M>: sends the message on every KeyDown (InputElement).
-fn onKeyDown(message) = AttrOn { attrOnEvent: 31, attrOnMessage: message }
+fn onKeyDown(message) = AttrOn { attrOnEvent: 33, attrOnMessage: message }
 // onKeyUp(message: M) -> Attr<M>: sends the message on every KeyUp (InputElement).
-fn onKeyUp(message) = AttrOn { attrOnEvent: 32, attrOnMessage: message }
+fn onKeyUp(message) = AttrOn { attrOnEvent: 34, attrOnMessage: message }
 // onLoaded(message: M) -> Attr<M>: sends the message on every Loaded (Control).
-fn onLoaded(message) = AttrOn { attrOnEvent: 33, attrOnMessage: message }
+fn onLoaded(message) = AttrOn { attrOnEvent: 35, attrOnMessage: message }
 // onLosingFocus(message: M) -> Attr<M>: sends the message on every LosingFocus (InputElement).
-fn onLosingFocus(message) = AttrOn { attrOnEvent: 34, attrOnMessage: message }
+fn onLosingFocus(message) = AttrOn { attrOnEvent: 36, attrOnMessage: message }
 // onLostFocus(message: M) -> Attr<M>: sends the message on every LostFocus (InputElement).
-fn onLostFocus(message) = AttrOn { attrOnEvent: 35, attrOnMessage: message }
+fn onLostFocus(message) = AttrOn { attrOnEvent: 37, attrOnMessage: message }
 // onNotificationClosed(message: M) -> Attr<M>: sends the message on every NotificationClosed
 // (NotificationCard).
-fn onNotificationClosed(message) = AttrOn { attrOnEvent: 36, attrOnMessage: message }
+fn onNotificationClosed(message) = AttrOn { attrOnEvent: 38, attrOnMessage: message }
 // onOpened(message: M) -> Attr<M>: sends the message on every Opened (CommandBar, DrawerPage,
 // MenuBase).
-fn onOpened(message) = AttrOn { attrOnEvent: 37, attrOnMessage: message }
+fn onOpened(message) = AttrOn { attrOnEvent: 39, attrOnMessage: message }
 // onOpening(message: M) -> Attr<M>: sends the message on every Opening (CommandBar).
-fn onOpening(message) = AttrOn { attrOnEvent: 38, attrOnMessage: message }
+fn onOpening(message) = AttrOn { attrOnEvent: 40, attrOnMessage: message }
 // onPageNavigationSystemBackButtonPressed(message: M) -> Attr<M>: sends the message on every
 // PageNavigationSystemBackButtonPressed (Page).
-fn onPageNavigationSystemBackButtonPressed(message) = AttrOn { attrOnEvent: 39, attrOnMessage: message }
+fn onPageNavigationSystemBackButtonPressed(message) = AttrOn { attrOnEvent: 41, attrOnMessage: message }
 // onPaneClosed(message: M) -> Attr<M>: sends the message on every PaneClosed (SplitView).
-fn onPaneClosed(message) = AttrOn { attrOnEvent: 40, attrOnMessage: message }
+fn onPaneClosed(message) = AttrOn { attrOnEvent: 42, attrOnMessage: message }
 // onPaneClosing(message: M) -> Attr<M>: sends the message on every PaneClosing (SplitView).
-fn onPaneClosing(message) = AttrOn { attrOnEvent: 41, attrOnMessage: message }
+fn onPaneClosing(message) = AttrOn { attrOnEvent: 43, attrOnMessage: message }
 // onPaneOpened(message: M) -> Attr<M>: sends the message on every PaneOpened (SplitView).
-fn onPaneOpened(message) = AttrOn { attrOnEvent: 42, attrOnMessage: message }
+fn onPaneOpened(message) = AttrOn { attrOnEvent: 44, attrOnMessage: message }
 // onPaneOpening(message: M) -> Attr<M>: sends the message on every PaneOpening (SplitView).
-fn onPaneOpening(message) = AttrOn { attrOnEvent: 43, attrOnMessage: message }
+fn onPaneOpening(message) = AttrOn { attrOnEvent: 45, attrOnMessage: message }
 // onPastingFromClipboard(message: M) -> Attr<M>: sends the message on every
 // PastingFromClipboard (RichEditBox, TextBox).
-fn onPastingFromClipboard(message) = AttrOn { attrOnEvent: 44, attrOnMessage: message }
+fn onPastingFromClipboard(message) = AttrOn { attrOnEvent: 46, attrOnMessage: message }
 // onPinch(message: M) -> Attr<M>: sends the message on every Pinch (InputElement).
-fn onPinch(message) = AttrOn { attrOnEvent: 45, attrOnMessage: message }
+fn onPinch(message) = AttrOn { attrOnEvent: 47, attrOnMessage: message }
 // onPinchEnded(message: M) -> Attr<M>: sends the message on every PinchEnded (InputElement).
-fn onPinchEnded(message) = AttrOn { attrOnEvent: 46, attrOnMessage: message }
+fn onPinchEnded(message) = AttrOn { attrOnEvent: 48, attrOnMessage: message }
 // onPointerCaptureChanging(message: M) -> Attr<M>: sends the message on every
 // PointerCaptureChanging (InputElement).
-fn onPointerCaptureChanging(message) = AttrOn { attrOnEvent: 47, attrOnMessage: message }
+fn onPointerCaptureChanging(message) = AttrOn { attrOnEvent: 49, attrOnMessage: message }
 // onPointerCaptureLost(message: M) -> Attr<M>: sends the message on every PointerCaptureLost
 // (InputElement).
-fn onPointerCaptureLost(message) = AttrOn { attrOnEvent: 48, attrOnMessage: message }
+fn onPointerCaptureLost(message) = AttrOn { attrOnEvent: 50, attrOnMessage: message }
 // onPointerEntered(message: M) -> Attr<M>: sends the message on every PointerEntered
 // (InputElement).
-fn onPointerEntered(message) = AttrOn { attrOnEvent: 49, attrOnMessage: message }
+fn onPointerEntered(message) = AttrOn { attrOnEvent: 51, attrOnMessage: message }
 // onPointerEnteredItem(message: M) -> Attr<M>: sends the message on every PointerEnteredItem
 // (MenuItem).
-fn onPointerEnteredItem(message) = AttrOn { attrOnEvent: 50, attrOnMessage: message }
+fn onPointerEnteredItem(message) = AttrOn { attrOnEvent: 52, attrOnMessage: message }
 // onPointerExited(message: M) -> Attr<M>: sends the message on every PointerExited
 // (InputElement).
-fn onPointerExited(message) = AttrOn { attrOnEvent: 51, attrOnMessage: message }
+fn onPointerExited(message) = AttrOn { attrOnEvent: 53, attrOnMessage: message }
 // onPointerExitedItem(message: M) -> Attr<M>: sends the message on every PointerExitedItem
 // (MenuItem).
-fn onPointerExitedItem(message) = AttrOn { attrOnEvent: 52, attrOnMessage: message }
+fn onPointerExitedItem(message) = AttrOn { attrOnEvent: 54, attrOnMessage: message }
 // onPointerMoved(message: M) -> Attr<M>: sends the message on every PointerMoved
 // (InputElement).
-fn onPointerMoved(message) = AttrOn { attrOnEvent: 53, attrOnMessage: message }
+fn onPointerMoved(message) = AttrOn { attrOnEvent: 55, attrOnMessage: message }
 // onPointerPressed(message: M) -> Attr<M>: sends the message on every PointerPressed
 // (InputElement).
-fn onPointerPressed(message) = AttrOn { attrOnEvent: 54, attrOnMessage: message }
+fn onPointerPressed(message) = AttrOn { attrOnEvent: 56, attrOnMessage: message }
 // onPointerReleased(message: M) -> Attr<M>: sends the message on every PointerReleased
 // (InputElement).
-fn onPointerReleased(message) = AttrOn { attrOnEvent: 55, attrOnMessage: message }
+fn onPointerReleased(message) = AttrOn { attrOnEvent: 57, attrOnMessage: message }
 // onPointerTouchPadGestureMagnify(message: M) -> Attr<M>: sends the message on every
 // PointerTouchPadGestureMagnify (InputElement).
-fn onPointerTouchPadGestureMagnify(message) = AttrOn { attrOnEvent: 56, attrOnMessage: message }
+fn onPointerTouchPadGestureMagnify(message) = AttrOn { attrOnEvent: 58, attrOnMessage: message }
 // onPointerTouchPadGestureRotate(message: M) -> Attr<M>: sends the message on every
 // PointerTouchPadGestureRotate (InputElement).
-fn onPointerTouchPadGestureRotate(message) = AttrOn { attrOnEvent: 57, attrOnMessage: message }
+fn onPointerTouchPadGestureRotate(message) = AttrOn { attrOnEvent: 59, attrOnMessage: message }
 // onPointerTouchPadGestureSwipe(message: M) -> Attr<M>: sends the message on every
 // PointerTouchPadGestureSwipe (InputElement).
-fn onPointerTouchPadGestureSwipe(message) = AttrOn { attrOnEvent: 58, attrOnMessage: message }
+fn onPointerTouchPadGestureSwipe(message) = AttrOn { attrOnEvent: 60, attrOnMessage: message }
 // onPointerWheelChanged(message: M) -> Attr<M>: sends the message on every PointerWheelChanged
 // (InputElement).
-fn onPointerWheelChanged(message) = AttrOn { attrOnEvent: 59, attrOnMessage: message }
+fn onPointerWheelChanged(message) = AttrOn { attrOnEvent: 61, attrOnMessage: message }
 // onPullGesture(message: M) -> Attr<M>: sends the message on every PullGesture (InputElement).
-fn onPullGesture(message) = AttrOn { attrOnEvent: 60, attrOnMessage: message }
+fn onPullGesture(message) = AttrOn { attrOnEvent: 62, attrOnMessage: message }
 // onPullGestureEnded(message: M) -> Attr<M>: sends the message on every PullGestureEnded
 // (InputElement).
-fn onPullGestureEnded(message) = AttrOn { attrOnEvent: 61, attrOnMessage: message }
+fn onPullGestureEnded(message) = AttrOn { attrOnEvent: 63, attrOnMessage: message }
 // onQuerySubmitted(message: M) -> Attr<M>: sends the message on every QuerySubmitted
 // (AutoCompleteBox).
-fn onQuerySubmitted(message) = AttrOn { attrOnEvent: 62, attrOnMessage: message }
+fn onQuerySubmitted(message) = AttrOn { attrOnEvent: 64, attrOnMessage: message }
 // onRefreshCompleted(message: M) -> Attr<M>: sends the message on every RefreshCompleted
 // (RefreshInfoProvider).
-fn onRefreshCompleted(message) = AttrOn { attrOnEvent: 63, attrOnMessage: message }
+fn onRefreshCompleted(message) = AttrOn { attrOnEvent: 65, attrOnMessage: message }
 // onRefreshRequested(message: M) -> Attr<M>: sends the message on every RefreshRequested
 // (RefreshContainer, RefreshVisualizer).
-fn onRefreshRequested(message) = AttrOn { attrOnEvent: 64, attrOnMessage: message }
+fn onRefreshRequested(message) = AttrOn { attrOnEvent: 66, attrOnMessage: message }
 // onRefreshStarted(message: M) -> Attr<M>: sends the message on every RefreshStarted
 // (RefreshInfoProvider).
-fn onRefreshStarted(message) = AttrOn { attrOnEvent: 65, attrOnMessage: message }
+fn onRefreshStarted(message) = AttrOn { attrOnEvent: 67, attrOnMessage: message }
 // onRequestBringIntoView(message: M) -> Attr<M>: sends the message on every
 // RequestBringIntoView (Control).
-fn onRequestBringIntoView(message) = AttrOn { attrOnEvent: 66, attrOnMessage: message }
+fn onRequestBringIntoView(message) = AttrOn { attrOnEvent: 68, attrOnMessage: message }
 // onRightTapped(message: M) -> Attr<M>: sends the message on every RightTapped (InputElement).
-fn onRightTapped(message) = AttrOn { attrOnEvent: 67, attrOnMessage: message }
+fn onRightTapped(message) = AttrOn { attrOnEvent: 69, attrOnMessage: message }
 // onScrollChanged(message: M) -> Attr<M>: sends the message on every ScrollChanged
 // (ScrollViewer).
-fn onScrollChanged(message) = AttrOn { attrOnEvent: 68, attrOnMessage: message }
+fn onScrollChanged(message) = AttrOn { attrOnEvent: 70, attrOnMessage: message }
 // onScrollGesture(message: M) -> Attr<M>: sends the message on every ScrollGesture
 // (InputElement).
-fn onScrollGesture(message) = AttrOn { attrOnEvent: 69, attrOnMessage: message }
+fn onScrollGesture(message) = AttrOn { attrOnEvent: 71, attrOnMessage: message }
 // onScrollGestureEnded(message: M) -> Attr<M>: sends the message on every ScrollGestureEnded
 // (InputElement).
-fn onScrollGestureEnded(message) = AttrOn { attrOnEvent: 70, attrOnMessage: message }
+fn onScrollGestureEnded(message) = AttrOn { attrOnEvent: 72, attrOnMessage: message }
 // onScrollGestureInertiaStarting(message: M) -> Attr<M>: sends the message on every
 // ScrollGestureInertiaStarting (InputElement).
-fn onScrollGestureInertiaStarting(message) = AttrOn { attrOnEvent: 71, attrOnMessage: message }
+fn onScrollGestureInertiaStarting(message) = AttrOn { attrOnEvent: 73, attrOnMessage: message }
 // onSelectedIndexChanged(message: M) -> Attr<M>: sends the message on every
 // SelectedIndexChanged (PipsPager).
-fn onSelectedIndexChanged(message) = AttrOn { attrOnEvent: 72, attrOnMessage: message }
+fn onSelectedIndexChanged(message) = AttrOn { attrOnEvent: 74, attrOnMessage: message }
 // onSelectionChanged(message: M) -> Attr<M>: sends the message on every SelectionChanged
 // (AutoCompleteBox, RichEditBox, RichTextBlock, SelectingItemsControl, SelectingMultiPage);
 // `eventText()` is the SelectedIndex of the sender while `update` runs.
-fn onSelectionChanged(message) = AttrOnValue { attrValueEvent: 73, attrValueProperty: 754, attrValueMessage: message }
+fn onSelectionChanged(message) = AttrOnValue { attrValueEvent: 75, attrValueProperty: 754, attrValueMessage: message }
 // onSelectionChanging(message: M) -> Attr<M>: sends the message on every SelectionChanging
 // (RichEditBox).
-fn onSelectionChanging(message) = AttrOn { attrOnEvent: 74, attrOnMessage: message }
+fn onSelectionChanging(message) = AttrOn { attrOnEvent: 76, attrOnMessage: message }
 // onSizeChanged(message: M) -> Attr<M>: sends the message on every SizeChanged (Control).
-fn onSizeChanged(message) = AttrOn { attrOnEvent: 75, attrOnMessage: message }
+fn onSizeChanged(message) = AttrOn { attrOnEvent: 77, attrOnMessage: message }
 // onSpin(message: M) -> Attr<M>: sends the message on every Spin (Spinner).
-fn onSpin(message) = AttrOn { attrOnEvent: 76, attrOnMessage: message }
+fn onSpin(message) = AttrOn { attrOnEvent: 78, attrOnMessage: message }
 // onSubmenuOpened(message: M) -> Attr<M>: sends the message on every SubmenuOpened (MenuItem).
-fn onSubmenuOpened(message) = AttrOn { attrOnEvent: 77, attrOnMessage: message }
+fn onSubmenuOpened(message) = AttrOn { attrOnEvent: 79, attrOnMessage: message }
 // onSwipeGesture(message: M) -> Attr<M>: sends the message on every SwipeGesture
 // (InputElement).
-fn onSwipeGesture(message) = AttrOn { attrOnEvent: 78, attrOnMessage: message }
+fn onSwipeGesture(message) = AttrOn { attrOnEvent: 80, attrOnMessage: message }
 // onSwipeGestureEnded(message: M) -> Attr<M>: sends the message on every SwipeGestureEnded
 // (InputElement).
-fn onSwipeGestureEnded(message) = AttrOn { attrOnEvent: 79, attrOnMessage: message }
+fn onSwipeGestureEnded(message) = AttrOn { attrOnEvent: 81, attrOnMessage: message }
 // onTapped(message: M) -> Attr<M>: sends the message on every Tapped (InputElement).
-fn onTapped(message) = AttrOn { attrOnEvent: 80, attrOnMessage: message }
+fn onTapped(message) = AttrOn { attrOnEvent: 82, attrOnMessage: message }
 // onTemplateApplied(message: M) -> Attr<M>: sends the message on every TemplateApplied
 // (TemplatedControl).
-fn onTemplateApplied(message) = AttrOn { attrOnEvent: 81, attrOnMessage: message }
+fn onTemplateApplied(message) = AttrOn { attrOnEvent: 83, attrOnMessage: message }
 // onTextChanged(message: M) -> Attr<M>: sends the message on every TextChanged
 // (AutoCompleteBox, RichEditBox, TextBox); `eventText()` is the Text of the sender while
 // `update` runs.
-fn onTextChanged(message) = AttrOnValue { attrValueEvent: 82, attrValueProperty: 846, attrValueMessage: message }
+fn onTextChanged(message) = AttrOnValue { attrValueEvent: 84, attrValueProperty: 846, attrValueMessage: message }
 // onTextChanging(message: M) -> Attr<M>: sends the message on every TextChanging (RichEditBox,
 // TextBox); `eventText()` is the Text of the sender while `update` runs.
-fn onTextChanging(message) = AttrOnValue { attrValueEvent: 83, attrValueProperty: 846, attrValueMessage: message }
+fn onTextChanging(message) = AttrOnValue { attrValueEvent: 85, attrValueProperty: 846, attrValueMessage: message }
 // onTextCompositionChanged(message: M) -> Attr<M>: sends the message on every
 // TextCompositionChanged (RichEditBox).
-fn onTextCompositionChanged(message) = AttrOn { attrOnEvent: 84, attrOnMessage: message }
+fn onTextCompositionChanged(message) = AttrOn { attrOnEvent: 86, attrOnMessage: message }
 // onTextCompositionEnded(message: M) -> Attr<M>: sends the message on every
 // TextCompositionEnded (RichEditBox).
-fn onTextCompositionEnded(message) = AttrOn { attrOnEvent: 85, attrOnMessage: message }
+fn onTextCompositionEnded(message) = AttrOn { attrOnEvent: 87, attrOnMessage: message }
 // onTextCompositionStarted(message: M) -> Attr<M>: sends the message on every
 // TextCompositionStarted (RichEditBox).
-fn onTextCompositionStarted(message) = AttrOn { attrOnEvent: 86, attrOnMessage: message }
+fn onTextCompositionStarted(message) = AttrOn { attrOnEvent: 88, attrOnMessage: message }
 // onTextInput(message: M) -> Attr<M>: sends the message on every TextInput (InputElement).
-fn onTextInput(message) = AttrOn { attrOnEvent: 87, attrOnMessage: message }
+fn onTextInput(message) = AttrOn { attrOnEvent: 89, attrOnMessage: message }
 // onTextInputMethodClientRequested(message: M) -> Attr<M>: sends the message on every
 // TextInputMethodClientRequested (InputElement).
-fn onTextInputMethodClientRequested(message) = AttrOn { attrOnEvent: 88, attrOnMessage: message }
+fn onTextInputMethodClientRequested(message) = AttrOn { attrOnEvent: 90, attrOnMessage: message }
 // onToolTipClosing(message: M) -> Attr<M>: sends the message on every ToolTipClosing
 // (ToolTip).
-fn onToolTipClosing(message) = AttrOn { attrOnEvent: 89, attrOnMessage: message }
+fn onToolTipClosing(message) = AttrOn { attrOnEvent: 91, attrOnMessage: message }
 // onToolTipOpening(message: M) -> Attr<M>: sends the message on every ToolTipOpening
 // (ToolTip).
-fn onToolTipOpening(message) = AttrOn { attrOnEvent: 90, attrOnMessage: message }
+fn onToolTipOpening(message) = AttrOn { attrOnEvent: 92, attrOnMessage: message }
 // onTransitionCompleted(message: M) -> Attr<M>: sends the message on every TransitionCompleted
 // (TransitioningContentControl).
-fn onTransitionCompleted(message) = AttrOn { attrOnEvent: 91, attrOnMessage: message }
+fn onTransitionCompleted(message) = AttrOn { attrOnEvent: 93, attrOnMessage: message }
 // onUnloaded(message: M) -> Attr<M>: sends the message on every Unloaded (Control).
-fn onUnloaded(message) = AttrOn { attrOnEvent: 92, attrOnMessage: message }
+fn onUnloaded(message) = AttrOn { attrOnEvent: 94, attrOnMessage: message }
 // onValueChanged(message: M) -> Attr<M>: sends the message on every ValueChanged
 // (NumericUpDown, RangeBase); `eventText()` is the Value of the sender while `update` runs.
-fn onValueChanged(message) = AttrOnValue { attrValueEvent: 93, attrValueProperty: 1000, attrValueMessage: message }
+fn onValueChanged(message) = AttrOnValue { attrValueEvent: 95, attrValueProperty: 1000, attrValueMessage: message }
 // onVerticalSnapPointsChanged(message: M) -> Attr<M>: sends the message on every
 // VerticalSnapPointsChanged (PivotPanel, StackPanel, VirtualizingStackPanel).
-fn onVerticalSnapPointsChanged(message) = AttrOn { attrOnEvent: 94, attrOnMessage: message }
+fn onVerticalSnapPointsChanged(message) = AttrOn { attrOnEvent: 96, attrOnMessage: message }
 // onWindowClosed(message: M) -> Attr<M>: sends the message on every WindowClosed (Window).
-fn onWindowClosed(message) = AttrOn { attrOnEvent: 95, attrOnMessage: message }
+fn onWindowClosed(message) = AttrOn { attrOnEvent: 97, attrOnMessage: message }
 // onWindowOpened(message: M) -> Attr<M>: sends the message on every WindowOpened (Window).
-fn onWindowOpened(message) = AttrOn { attrOnEvent: 96, attrOnMessage: message }
+fn onWindowOpened(message) = AttrOn { attrOnEvent: 98, attrOnMessage: message }
 
 // ---- driving an interface from a script --------------------------------------------------
 
@@ -3356,73 +3360,76 @@ fn raiseExpandedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 22
 // raiseHorizontalSnapPointsChangedAt(key: int) -> int: raises HorizontalSnapPointsChanged on
 // the control of the element with the key `key`, as the control does.
 fn raiseHorizontalSnapPointsChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 27))
+// raiseImageOpenedAt(key: int) -> int: raises ImageOpened on the control of the element with
+// the key `key`, as the control does.
+fn raiseImageOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 29))
 // raiseIsCheckedChangedAt(key: int) -> int: raises IsCheckedChanged on the control of the
 // element with the key `key`, as the control does.
-fn raiseIsCheckedChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 28))
+fn raiseIsCheckedChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 30))
 // raiseIsSelectedChangedAt(key: int) -> int: raises IsSelectedChanged on the control of the
 // element with the key `key`, as the control does.
-fn raiseIsSelectedChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 29))
+fn raiseIsSelectedChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 31))
 // raiseIsTextTrimmedChangedAt(key: int) -> int: raises IsTextTrimmedChanged on the control of
 // the element with the key `key`, as the control does.
-fn raiseIsTextTrimmedChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 30))
+fn raiseIsTextTrimmedChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 32))
 // raiseLoadedAt(key: int) -> int: raises Loaded on the control of the element with the key
 // `key`, as the control does.
-fn raiseLoadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 33))
+fn raiseLoadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 35))
 // raiseNotificationClosedAt(key: int) -> int: raises NotificationClosed on the control of the
 // element with the key `key`, as the control does.
-fn raiseNotificationClosedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 36))
+fn raiseNotificationClosedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 38))
 // raiseOpenedAt(key: int) -> int: raises Opened on the control of the element with the key
 // `key`, as the control does.
-fn raiseOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 37))
+fn raiseOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 39))
 // raiseOpeningAt(key: int) -> int: raises Opening on the control of the element with the key
 // `key`, as the control does.
-fn raiseOpeningAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 38))
+fn raiseOpeningAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 40))
 // raisePageNavigationSystemBackButtonPressedAt(key: int) -> int: raises
 // PageNavigationSystemBackButtonPressed on the control of the element with the key `key`, as
 // the control does.
-fn raisePageNavigationSystemBackButtonPressedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 39))
+fn raisePageNavigationSystemBackButtonPressedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 41))
 // raisePaneClosedAt(key: int) -> int: raises PaneClosed on the control of the element with the
 // key `key`, as the control does.
-fn raisePaneClosedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 40))
+fn raisePaneClosedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 42))
 // raisePaneOpenedAt(key: int) -> int: raises PaneOpened on the control of the element with the
 // key `key`, as the control does.
-fn raisePaneOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 42))
+fn raisePaneOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 44))
 // raisePastingFromClipboardAt(key: int) -> int: raises PastingFromClipboard on the control of
 // the element with the key `key`, as the control does.
-fn raisePastingFromClipboardAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 44))
+fn raisePastingFromClipboardAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 46))
 // raisePointerEnteredItemAt(key: int) -> int: raises PointerEnteredItem on the control of the
 // element with the key `key`, as the control does.
-fn raisePointerEnteredItemAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 50))
+fn raisePointerEnteredItemAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 52))
 // raisePointerExitedItemAt(key: int) -> int: raises PointerExitedItem on the control of the
 // element with the key `key`, as the control does.
-fn raisePointerExitedItemAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 52))
+fn raisePointerExitedItemAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 54))
 // raiseRefreshCompletedAt(key: int) -> int: raises RefreshCompleted on the control of the
 // element with the key `key`, as the control does.
-fn raiseRefreshCompletedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 63))
+fn raiseRefreshCompletedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 65))
 // raiseRefreshStartedAt(key: int) -> int: raises RefreshStarted on the control of the element
 // with the key `key`, as the control does.
-fn raiseRefreshStartedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 65))
+fn raiseRefreshStartedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 67))
 // raiseSelectionChangedAt(key: int) -> int: raises SelectionChanged on the control of the
 // element with the key `key`, as the control does.
-fn raiseSelectionChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 73))
+fn raiseSelectionChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 75))
 // raiseSubmenuOpenedAt(key: int) -> int: raises SubmenuOpened on the control of the element
 // with the key `key`, as the control does.
-fn raiseSubmenuOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 77))
+fn raiseSubmenuOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 79))
 // raiseTextChangedAt(key: int) -> int: raises TextChanged on the control of the element with
 // the key `key`, as the control does.
-fn raiseTextChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 82))
+fn raiseTextChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 84))
 // raiseToolTipClosingAt(key: int) -> int: raises ToolTipClosing on the control of the element
 // with the key `key`, as the control does.
-fn raiseToolTipClosingAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 89))
+fn raiseToolTipClosingAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 91))
 // raiseUnloadedAt(key: int) -> int: raises Unloaded on the control of the element with the key
 // `key`, as the control does.
-fn raiseUnloadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 92))
+fn raiseUnloadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 94))
 // raiseVerticalSnapPointsChangedAt(key: int) -> int: raises VerticalSnapPointsChanged on the
 // control of the element with the key `key`, as the control does.
-fn raiseVerticalSnapPointsChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 94))
+fn raiseVerticalSnapPointsChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 96))
 // raiseWindowClosedAt(key: int) -> int: raises WindowClosed on the control of the element with
 // the key `key`, as the control does.
-fn raiseWindowClosedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 95))
+fn raiseWindowClosedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 97))
 // raiseWindowOpenedAt(key: int) -> int: raises WindowOpened on the control of the element with
 // the key `key`, as the control does.
-fn raiseWindowOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 96))
+fn raiseWindowOpenedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 98))

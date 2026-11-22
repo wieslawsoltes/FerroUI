@@ -2,7 +2,7 @@
  "format": 1,
  "generated_by": "scripts/generate_api_model.py",
  "abi_version": 1,
- "fingerprint": 6762059796223988462,
+ "fingerprint": 425336128539517366,
  "naming": "Names are the names of the framework; `words` are their words in lower case, for each backend to apply the casing of its language.",
  "abi": {
   "functions": [
@@ -5932,7 +5932,10 @@
     "Stretch",
     "StretchDirection"
    ],
-   "events": [],
+   "events": [
+    "ImageFailed",
+    "ImageOpened"
+   ],
    "doc": "Displays an [`IImage`]."
   },
   {
@@ -45389,6 +45392,50 @@
   },
   {
    "id": 28,
+   "name": "ImageFailed",
+   "words": [
+    "image",
+    "failed"
+   ],
+   "declarations": [
+    {
+     "owner": "Image",
+     "args": "ImageFailedEventArgs",
+     "raisable": false,
+     "doc": "Defines the `ImageFailed` event."
+    }
+   ],
+   "value_property": null,
+   "dispatch": [
+    "token",
+    "user_data",
+    "frame_tag"
+   ]
+  },
+  {
+   "id": 29,
+   "name": "ImageOpened",
+   "words": [
+    "image",
+    "opened"
+   ],
+   "declarations": [
+    {
+     "owner": "Image",
+     "args": "RoutedEventArgs",
+     "raisable": true,
+     "doc": "Defines the `ImageOpened` event."
+    }
+   ],
+   "value_property": null,
+   "dispatch": [
+    "token",
+    "user_data",
+    "frame_tag"
+   ]
+  },
+  {
+   "id": 30,
    "name": "IsCheckedChanged",
    "words": [
     "is",
@@ -45417,7 +45464,7 @@
    ]
   },
   {
-   "id": 29,
+   "id": 31,
    "name": "IsSelectedChanged",
    "words": [
     "is",
@@ -45440,7 +45487,7 @@
    ]
   },
   {
-   "id": 30,
+   "id": 32,
    "name": "IsTextTrimmedChanged",
    "words": [
     "is",
@@ -45464,7 +45511,7 @@
    ]
   },
   {
-   "id": 31,
+   "id": 33,
    "name": "KeyDown",
    "words": [
     "key",
@@ -45486,7 +45533,7 @@
    ]
   },
   {
-   "id": 32,
+   "id": 34,
    "name": "KeyUp",
    "words": [
     "key",
@@ -45508,7 +45555,7 @@
    ]
   },
   {
-   "id": 33,
+   "id": 35,
    "name": "Loaded",
    "words": [
     "loaded"
@@ -45529,7 +45576,7 @@
    ]
   },
   {
-   "id": 34,
+   "id": 36,
    "name": "LosingFocus",
    "words": [
     "losing",
@@ -45551,7 +45598,7 @@
    ]
   },
   {
-   "id": 35,
+   "id": 37,
    "name": "LostFocus",
    "words": [
     "lost",
@@ -45573,7 +45620,7 @@
    ]
   },
   {
-   "id": 36,
+   "id": 38,
    "name": "NotificationClosed",
    "words": [
     "notification",
@@ -45595,7 +45642,7 @@
    ]
   },
   {
-   "id": 37,
+   "id": 39,
    "name": "Opened",
    "words": [
     "opened"
@@ -45628,7 +45675,7 @@
    ]
   },
   {
-   "id": 38,
+   "id": 40,
    "name": "Opening",
    "words": [
     "opening"
@@ -45649,7 +45696,7 @@
    ]
   },
   {
-   "id": 39,
+   "id": 41,
    "name": "PageNavigationSystemBackButtonPressed",
    "words": [
     "page",
@@ -45675,7 +45722,7 @@
    ]
   },
   {
-   "id": 40,
+   "id": 42,
    "name": "PaneClosed",
    "words": [
     "pane",
@@ -45697,7 +45744,7 @@
    ]
   },
   {
-   "id": 41,
+   "id": 43,
    "name": "PaneClosing",
    "words": [
     "pane",
@@ -45719,7 +45766,7 @@
    ]
   },
   {
-   "id": 42,
+   "id": 44,
    "name": "PaneOpened",
    "words": [
     "pane",
@@ -45741,7 +45788,7 @@
    ]
   },
   {
-   "id": 43,
+   "id": 45,
    "name": "PaneOpening",
    "words": [
     "pane",
@@ -45763,7 +45810,7 @@
    ]
   },
   {
-   "id": 44,
+   "id": 46,
    "name": "PastingFromClipboard",
    "words": [
     "pasting",
@@ -45792,7 +45839,7 @@
    ]
   },
   {
-   "id": 45,
+   "id": 47,
    "name": "Pinch",
    "words": [
     "pinch"
@@ -45813,7 +45860,7 @@
    ]
   },
   {
-   "id": 46,
+   "id": 48,
    "name": "PinchEnded",
    "words": [
     "pinch",
@@ -45835,7 +45882,7 @@
    ]
   },
   {
-   "id": 47,
+   "id": 49,
    "name": "PointerCaptureChanging",
    "words": [
     "pointer",
@@ -45858,7 +45905,7 @@
    ]
   },
   {
-   "id": 48,
+   "id": 50,
    "name": "PointerCaptureLost",
    "words": [
     "pointer",
@@ -45881,7 +45928,7 @@
    ]
   },
   {
-   "id": 49,
+   "id": 51,
    "name": "PointerEntered",
    "words": [
     "pointer",
@@ -45903,7 +45950,7 @@
    ]
   },
   {
-   "id": 50,
+   "id": 52,
    "name": "PointerEnteredItem",
    "words": [
     "pointer",
@@ -45926,7 +45973,7 @@
    ]
   },
   {
-   "id": 51,
+   "id": 53,
    "name": "PointerExited",
    "words": [
     "pointer",
@@ -45948,7 +45995,7 @@
    ]
   },
   {
-   "id": 52,
+   "id": 54,
    "name": "PointerExitedItem",
    "words": [
     "pointer",
@@ -45971,7 +46018,7 @@
    ]
   },
   {
-   "id": 53,
+   "id": 55,
    "name": "PointerMoved",
    "words": [
     "pointer",
@@ -45993,7 +46040,7 @@
    ]
   },
   {
-   "id": 54,
+   "id": 56,
    "name": "PointerPressed",
    "words": [
     "pointer",
@@ -46015,7 +46062,7 @@
    ]
   },
   {
-   "id": 55,
+   "id": 57,
    "name": "PointerReleased",
    "words": [
     "pointer",
@@ -46037,7 +46084,7 @@
    ]
   },
   {
-   "id": 56,
+   "id": 58,
    "name": "PointerTouchPadGestureMagnify",
    "words": [
     "pointer",
@@ -46062,7 +46109,7 @@
    ]
   },
   {
-   "id": 57,
+   "id": 59,
    "name": "PointerTouchPadGestureRotate",
    "words": [
     "pointer",
@@ -46087,7 +46134,7 @@
    ]
   },
   {
-   "id": 58,
+   "id": 60,
    "name": "PointerTouchPadGestureSwipe",
    "words": [
     "pointer",
@@ -46112,7 +46159,7 @@
    ]
   },
   {
-   "id": 59,
+   "id": 61,
    "name": "PointerWheelChanged",
    "words": [
     "pointer",
@@ -46135,7 +46182,7 @@
    ]
   },
   {
-   "id": 60,
+   "id": 62,
    "name": "PullGesture",
    "words": [
     "pull",
@@ -46157,7 +46204,7 @@
    ]
   },
   {
-   "id": 61,
+   "id": 63,
    "name": "PullGestureEnded",
    "words": [
     "pull",
@@ -46180,7 +46227,7 @@
    ]
   },
   {
-   "id": 62,
+   "id": 64,
    "name": "QuerySubmitted",
    "words": [
     "query",
@@ -46202,7 +46249,7 @@
    ]
   },
   {
-   "id": 63,
+   "id": 65,
    "name": "RefreshCompleted",
    "words": [
     "refresh",
@@ -46224,7 +46271,7 @@
    ]
   },
   {
-   "id": 64,
+   "id": 66,
    "name": "RefreshRequested",
    "words": [
     "refresh",
@@ -46252,7 +46299,7 @@
    ]
   },
   {
-   "id": 65,
+   "id": 67,
    "name": "RefreshStarted",
    "words": [
     "refresh",
@@ -46274,7 +46321,7 @@
    ]
   },
   {
-   "id": 66,
+   "id": 68,
    "name": "RequestBringIntoView",
    "words": [
     "request",
@@ -46298,7 +46345,7 @@
    ]
   },
   {
-   "id": 67,
+   "id": 69,
    "name": "RightTapped",
    "words": [
     "right",
@@ -46320,7 +46367,7 @@
    ]
   },
   {
-   "id": 68,
+   "id": 70,
    "name": "ScrollChanged",
    "words": [
     "scroll",
@@ -46342,7 +46389,7 @@
    ]
   },
   {
-   "id": 69,
+   "id": 71,
    "name": "ScrollGesture",
    "words": [
     "scroll",
@@ -46364,7 +46411,7 @@
    ]
   },
   {
-   "id": 70,
+   "id": 72,
    "name": "ScrollGestureEnded",
    "words": [
     "scroll",
@@ -46387,7 +46434,7 @@
    ]
   },
   {
-   "id": 71,
+   "id": 73,
    "name": "ScrollGestureInertiaStarting",
    "words": [
     "scroll",
@@ -46411,7 +46458,7 @@
    ]
   },
   {
-   "id": 72,
+   "id": 74,
    "name": "SelectedIndexChanged",
    "words": [
     "selected",
@@ -46434,7 +46481,7 @@
    ]
   },
   {
-   "id": 73,
+   "id": 75,
    "name": "SelectionChanged",
    "words": [
     "selection",
@@ -46480,7 +46527,7 @@
    ]
   },
   {
-   "id": 74,
+   "id": 76,
    "name": "SelectionChanging",
    "words": [
     "selection",
@@ -46502,7 +46549,7 @@
    ]
   },
   {
-   "id": 75,
+   "id": 77,
    "name": "SizeChanged",
    "words": [
     "size",
@@ -46524,7 +46571,7 @@
    ]
   },
   {
-   "id": 76,
+   "id": 78,
    "name": "Spin",
    "words": [
     "spin"
@@ -46545,7 +46592,7 @@
    ]
   },
   {
-   "id": 77,
+   "id": 79,
    "name": "SubmenuOpened",
    "words": [
     "submenu",
@@ -46567,7 +46614,7 @@
    ]
   },
   {
-   "id": 78,
+   "id": 80,
    "name": "SwipeGesture",
    "words": [
     "swipe",
@@ -46589,7 +46636,7 @@
    ]
   },
   {
-   "id": 79,
+   "id": 81,
    "name": "SwipeGestureEnded",
    "words": [
     "swipe",
@@ -46612,7 +46659,7 @@
    ]
   },
   {
-   "id": 80,
+   "id": 82,
    "name": "Tapped",
    "words": [
     "tapped"
@@ -46633,7 +46680,7 @@
    ]
   },
   {
-   "id": 81,
+   "id": 83,
    "name": "TemplateApplied",
    "words": [
     "template",
@@ -46655,7 +46702,7 @@
    ]
   },
   {
-   "id": 82,
+   "id": 84,
    "name": "TextChanged",
    "words": [
     "text",
@@ -46689,7 +46736,7 @@
    ]
   },
   {
-   "id": 83,
+   "id": 85,
    "name": "TextChanging",
    "words": [
     "text",
@@ -46717,7 +46764,7 @@
    ]
   },
   {
-   "id": 84,
+   "id": 86,
    "name": "TextCompositionChanged",
    "words": [
     "text",
@@ -46740,7 +46787,7 @@
    ]
   },
   {
-   "id": 85,
+   "id": 87,
    "name": "TextCompositionEnded",
    "words": [
     "text",
@@ -46763,7 +46810,7 @@
    ]
   },
   {
-   "id": 86,
+   "id": 88,
    "name": "TextCompositionStarted",
    "words": [
     "text",
@@ -46786,7 +46833,7 @@
    ]
   },
   {
-   "id": 87,
+   "id": 89,
    "name": "TextInput",
    "words": [
     "text",
@@ -46808,7 +46855,7 @@
    ]
   },
   {
-   "id": 88,
+   "id": 90,
    "name": "TextInputMethodClientRequested",
    "words": [
     "text",
@@ -46833,7 +46880,7 @@
    ]
   },
   {
-   "id": 89,
+   "id": 91,
    "name": "ToolTipClosing",
    "words": [
     "tool",
@@ -46856,7 +46903,7 @@
    ]
   },
   {
-   "id": 90,
+   "id": 92,
    "name": "ToolTipOpening",
    "words": [
     "tool",
@@ -46879,7 +46926,7 @@
    ]
   },
   {
-   "id": 91,
+   "id": 93,
    "name": "TransitionCompleted",
    "words": [
     "transition",
@@ -46901,7 +46948,7 @@
    ]
   },
   {
-   "id": 92,
+   "id": 94,
    "name": "Unloaded",
    "words": [
     "unloaded"
@@ -46922,7 +46969,7 @@
    ]
   },
   {
-   "id": 93,
+   "id": 95,
    "name": "ValueChanged",
    "words": [
     "value",
@@ -46950,7 +46997,7 @@
    ]
   },
   {
-   "id": 94,
+   "id": 96,
    "name": "VerticalSnapPointsChanged",
    "words": [
     "vertical",
@@ -46986,7 +47033,7 @@
    ]
   },
   {
-   "id": 95,
+   "id": 97,
    "name": "WindowClosed",
    "words": [
     "window",
@@ -47008,7 +47055,7 @@
    ]
   },
   {
-   "id": 96,
+   "id": 98,
    "name": "WindowOpened",
    "words": [
     "window",

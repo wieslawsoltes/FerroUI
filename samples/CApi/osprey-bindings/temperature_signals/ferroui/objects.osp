@@ -1367,485 +1367,485 @@ fn raiseHorizontalSnapPointsChanged(object) = {
 // onKeyDown(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every KeyDown (InputElement). Defines the `KeyDown` event.
 fn onKeyDown(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 31, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 33, tag: tag)
     object
 }
 // raiseKeyDown(object: int) -> int: raises KeyDown on the object, as the control does (for
 // tests and scripts).
 fn raiseKeyDown(object) = {
-    let _ = ferro_raise(object: object, event: 31)
+    let _ = ferro_raise(object: object, event: 33)
     object
 }
 // onKeyUp(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the application
 // on every KeyUp (InputElement). Defines the `KeyUp` event.
 fn onKeyUp(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 32, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 34, tag: tag)
     object
 }
 // raiseKeyUp(object: int) -> int: raises KeyUp on the object, as the control does (for tests
 // and scripts).
 fn raiseKeyUp(object) = {
-    let _ = ferro_raise(object: object, event: 32)
+    let _ = ferro_raise(object: object, event: 34)
     object
 }
 // onLoaded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every Loaded (Control). Defines the `Loaded` event.
 fn onLoaded(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 33, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 35, tag: tag)
     object
 }
 // raiseLoaded(object: int) -> int: raises Loaded on the object, as the control does (for tests
 // and scripts).
 fn raiseLoaded(object) = {
-    let _ = ferro_raise(object: object, event: 33)
+    let _ = ferro_raise(object: object, event: 35)
     object
 }
 // onLosingFocus(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every LosingFocus (InputElement). Defines the `LosingFocus` event.
 fn onLosingFocus(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 34, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 36, tag: tag)
     object
 }
 // raiseLosingFocus(object: int) -> int: raises LosingFocus on the object, as the control does
 // (for tests and scripts).
 fn raiseLosingFocus(object) = {
-    let _ = ferro_raise(object: object, event: 34)
+    let _ = ferro_raise(object: object, event: 36)
     object
 }
 // onLostFocus(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every LostFocus (InputElement). Defines the `LostFocus` event.
 fn onLostFocus(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 35, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 37, tag: tag)
     object
 }
 // raiseLostFocus(object: int) -> int: raises LostFocus on the object, as the control does (for
 // tests and scripts).
 fn raiseLostFocus(object) = {
-    let _ = ferro_raise(object: object, event: 35)
+    let _ = ferro_raise(object: object, event: 37)
     object
 }
 // onPastingFromClipboard(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of
 // the application on every PastingFromClipboard (RichEditBox, TextBox). Defines the
 // `PastingFromClipboard` event. The event is raised with [`PastingFromClipboardEventArgs`].
 fn onPastingFromClipboard(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 44, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 46, tag: tag)
     object
 }
 // raisePastingFromClipboard(object: int) -> int: raises PastingFromClipboard on the object, as
 // the control does (for tests and scripts).
 fn raisePastingFromClipboard(object) = {
-    let _ = ferro_raise(object: object, event: 44)
+    let _ = ferro_raise(object: object, event: 46)
     object
 }
 // onPinch(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the application
 // on every Pinch (InputElement). Defines the `Pinch` event.
 fn onPinch(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 45, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 47, tag: tag)
     object
 }
 // raisePinch(object: int) -> int: raises Pinch on the object, as the control does (for tests
 // and scripts).
 fn raisePinch(object) = {
-    let _ = ferro_raise(object: object, event: 45)
+    let _ = ferro_raise(object: object, event: 47)
     object
 }
 // onPinchEnded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PinchEnded (InputElement). Defines the `PinchEnded` event.
 fn onPinchEnded(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 46, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 48, tag: tag)
     object
 }
 // raisePinchEnded(object: int) -> int: raises PinchEnded on the object, as the control does
 // (for tests and scripts).
 fn raisePinchEnded(object) = {
-    let _ = ferro_raise(object: object, event: 46)
+    let _ = ferro_raise(object: object, event: 48)
     object
 }
 // onPointerCaptureChanging(object: int, tag: int) -> int: dispatches `tag` to the dispatcher
 // of the application on every PointerCaptureChanging (InputElement). Defines the
 // `PointerCaptureChanging` routed event.
 fn onPointerCaptureChanging(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 47, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 49, tag: tag)
     object
 }
 // raisePointerCaptureChanging(object: int) -> int: raises PointerCaptureChanging on the
 // object, as the control does (for tests and scripts).
 fn raisePointerCaptureChanging(object) = {
-    let _ = ferro_raise(object: object, event: 47)
+    let _ = ferro_raise(object: object, event: 49)
     object
 }
 // onPointerCaptureLost(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of
 // the application on every PointerCaptureLost (InputElement). Defines the `PointerCaptureLost`
 // routed event.
 fn onPointerCaptureLost(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 48, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 50, tag: tag)
     object
 }
 // raisePointerCaptureLost(object: int) -> int: raises PointerCaptureLost on the object, as the
 // control does (for tests and scripts).
 fn raisePointerCaptureLost(object) = {
-    let _ = ferro_raise(object: object, event: 48)
+    let _ = ferro_raise(object: object, event: 50)
     object
 }
 // onPointerEntered(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerEntered (InputElement). Defines the `PointerEntered` event.
 fn onPointerEntered(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 49, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 51, tag: tag)
     object
 }
 // raisePointerEntered(object: int) -> int: raises PointerEntered on the object, as the control
 // does (for tests and scripts).
 fn raisePointerEntered(object) = {
-    let _ = ferro_raise(object: object, event: 49)
+    let _ = ferro_raise(object: object, event: 51)
     object
 }
 // onPointerExited(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerExited (InputElement). Defines the `PointerExited` event.
 fn onPointerExited(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 51, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 53, tag: tag)
     object
 }
 // raisePointerExited(object: int) -> int: raises PointerExited on the object, as the control
 // does (for tests and scripts).
 fn raisePointerExited(object) = {
-    let _ = ferro_raise(object: object, event: 51)
+    let _ = ferro_raise(object: object, event: 53)
     object
 }
 // onPointerMoved(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerMoved (InputElement). Defines the `PointerMoved` event.
 fn onPointerMoved(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 53, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 55, tag: tag)
     object
 }
 // raisePointerMoved(object: int) -> int: raises PointerMoved on the object, as the control
 // does (for tests and scripts).
 fn raisePointerMoved(object) = {
-    let _ = ferro_raise(object: object, event: 53)
+    let _ = ferro_raise(object: object, event: 55)
     object
 }
 // onPointerPressed(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerPressed (InputElement). Defines the `PointerPressed` event.
 fn onPointerPressed(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 54, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 56, tag: tag)
     object
 }
 // raisePointerPressed(object: int) -> int: raises PointerPressed on the object, as the control
 // does (for tests and scripts).
 fn raisePointerPressed(object) = {
-    let _ = ferro_raise(object: object, event: 54)
+    let _ = ferro_raise(object: object, event: 56)
     object
 }
 // onPointerReleased(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PointerReleased (InputElement). Defines the `PointerReleased` event.
 fn onPointerReleased(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 55, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 57, tag: tag)
     object
 }
 // raisePointerReleased(object: int) -> int: raises PointerReleased on the object, as the
 // control does (for tests and scripts).
 fn raisePointerReleased(object) = {
-    let _ = ferro_raise(object: object, event: 55)
+    let _ = ferro_raise(object: object, event: 57)
     object
 }
 // onPointerTouchPadGestureMagnify(object: int, tag: int) -> int: dispatches `tag` to the
 // dispatcher of the application on every PointerTouchPadGestureMagnify (InputElement). Defines
 // the `PointerTouchPadGestureMagnify` event.
 fn onPointerTouchPadGestureMagnify(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 56, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 58, tag: tag)
     object
 }
 // raisePointerTouchPadGestureMagnify(object: int) -> int: raises PointerTouchPadGestureMagnify
 // on the object, as the control does (for tests and scripts).
 fn raisePointerTouchPadGestureMagnify(object) = {
-    let _ = ferro_raise(object: object, event: 56)
+    let _ = ferro_raise(object: object, event: 58)
     object
 }
 // onPointerTouchPadGestureRotate(object: int, tag: int) -> int: dispatches `tag` to the
 // dispatcher of the application on every PointerTouchPadGestureRotate (InputElement). Defines
 // the `PointerTouchPadGestureRotate` event.
 fn onPointerTouchPadGestureRotate(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 57, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 59, tag: tag)
     object
 }
 // raisePointerTouchPadGestureRotate(object: int) -> int: raises PointerTouchPadGestureRotate
 // on the object, as the control does (for tests and scripts).
 fn raisePointerTouchPadGestureRotate(object) = {
-    let _ = ferro_raise(object: object, event: 57)
+    let _ = ferro_raise(object: object, event: 59)
     object
 }
 // onPointerTouchPadGestureSwipe(object: int, tag: int) -> int: dispatches `tag` to the
 // dispatcher of the application on every PointerTouchPadGestureSwipe (InputElement). Defines
 // the `PointerTouchPadGestureSwipe` event.
 fn onPointerTouchPadGestureSwipe(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 58, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 60, tag: tag)
     object
 }
 // raisePointerTouchPadGestureSwipe(object: int) -> int: raises PointerTouchPadGestureSwipe on
 // the object, as the control does (for tests and scripts).
 fn raisePointerTouchPadGestureSwipe(object) = {
-    let _ = ferro_raise(object: object, event: 58)
+    let _ = ferro_raise(object: object, event: 60)
     object
 }
 // onPointerWheelChanged(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of
 // the application on every PointerWheelChanged (InputElement). Defines the
 // `PointerWheelChanged` event.
 fn onPointerWheelChanged(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 59, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 61, tag: tag)
     object
 }
 // raisePointerWheelChanged(object: int) -> int: raises PointerWheelChanged on the object, as
 // the control does (for tests and scripts).
 fn raisePointerWheelChanged(object) = {
-    let _ = ferro_raise(object: object, event: 59)
+    let _ = ferro_raise(object: object, event: 61)
     object
 }
 // onPullGesture(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PullGesture (InputElement). Defines the `PullGesture` event.
 fn onPullGesture(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 60, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 62, tag: tag)
     object
 }
 // raisePullGesture(object: int) -> int: raises PullGesture on the object, as the control does
 // (for tests and scripts).
 fn raisePullGesture(object) = {
-    let _ = ferro_raise(object: object, event: 60)
+    let _ = ferro_raise(object: object, event: 62)
     object
 }
 // onPullGestureEnded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every PullGestureEnded (InputElement). Defines the `PullGestureEnded` event.
 fn onPullGestureEnded(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 61, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 63, tag: tag)
     object
 }
 // raisePullGestureEnded(object: int) -> int: raises PullGestureEnded on the object, as the
 // control does (for tests and scripts).
 fn raisePullGestureEnded(object) = {
-    let _ = ferro_raise(object: object, event: 61)
+    let _ = ferro_raise(object: object, event: 63)
     object
 }
 // onRequestBringIntoView(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of
 // the application on every RequestBringIntoView (Control). Event raised when an element wishes
 // to be scrolled into view.
 fn onRequestBringIntoView(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 66, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 68, tag: tag)
     object
 }
 // raiseRequestBringIntoView(object: int) -> int: raises RequestBringIntoView on the object, as
 // the control does (for tests and scripts).
 fn raiseRequestBringIntoView(object) = {
-    let _ = ferro_raise(object: object, event: 66)
+    let _ = ferro_raise(object: object, event: 68)
     object
 }
 // onRightTapped(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every RightTapped (InputElement). Defines the `RightTapped` event.
 fn onRightTapped(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 67, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 69, tag: tag)
     object
 }
 // raiseRightTapped(object: int) -> int: raises RightTapped on the object, as the control does
 // (for tests and scripts).
 fn raiseRightTapped(object) = {
-    let _ = ferro_raise(object: object, event: 67)
+    let _ = ferro_raise(object: object, event: 69)
     object
 }
 // onScrollGesture(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every ScrollGesture (InputElement). Defines the `ScrollGesture` event.
 fn onScrollGesture(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 69, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 71, tag: tag)
     object
 }
 // raiseScrollGesture(object: int) -> int: raises ScrollGesture on the object, as the control
 // does (for tests and scripts).
 fn raiseScrollGesture(object) = {
-    let _ = ferro_raise(object: object, event: 69)
+    let _ = ferro_raise(object: object, event: 71)
     object
 }
 // onScrollGestureEnded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of
 // the application on every ScrollGestureEnded (InputElement). Defines the `ScrollGestureEnded`
 // event.
 fn onScrollGestureEnded(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 70, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 72, tag: tag)
     object
 }
 // raiseScrollGestureEnded(object: int) -> int: raises ScrollGestureEnded on the object, as the
 // control does (for tests and scripts).
 fn raiseScrollGestureEnded(object) = {
-    let _ = ferro_raise(object: object, event: 70)
+    let _ = ferro_raise(object: object, event: 72)
     object
 }
 // onScrollGestureInertiaStarting(object: int, tag: int) -> int: dispatches `tag` to the
 // dispatcher of the application on every ScrollGestureInertiaStarting (InputElement). Defines
 // the `ScrollGestureInertiaStarting` event.
 fn onScrollGestureInertiaStarting(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 71, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 73, tag: tag)
     object
 }
 // raiseScrollGestureInertiaStarting(object: int) -> int: raises ScrollGestureInertiaStarting
 // on the object, as the control does (for tests and scripts).
 fn raiseScrollGestureInertiaStarting(object) = {
-    let _ = ferro_raise(object: object, event: 71)
+    let _ = ferro_raise(object: object, event: 73)
     object
 }
 // onSizeChanged(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every SizeChanged (Control). Defines the `SizeChanged` event.
 fn onSizeChanged(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 75, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 77, tag: tag)
     object
 }
 // raiseSizeChanged(object: int) -> int: raises SizeChanged on the object, as the control does
 // (for tests and scripts).
 fn raiseSizeChanged(object) = {
-    let _ = ferro_raise(object: object, event: 75)
+    let _ = ferro_raise(object: object, event: 77)
     object
 }
 // onSwipeGesture(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every SwipeGesture (InputElement). Defines the `SwipeGesture` event.
 fn onSwipeGesture(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 78, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 80, tag: tag)
     object
 }
 // raiseSwipeGesture(object: int) -> int: raises SwipeGesture on the object, as the control
 // does (for tests and scripts).
 fn raiseSwipeGesture(object) = {
-    let _ = ferro_raise(object: object, event: 78)
+    let _ = ferro_raise(object: object, event: 80)
     object
 }
 // onSwipeGestureEnded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every SwipeGestureEnded (InputElement). Defines the `SwipeGestureEnded`
 // event.
 fn onSwipeGestureEnded(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 79, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 81, tag: tag)
     object
 }
 // raiseSwipeGestureEnded(object: int) -> int: raises SwipeGestureEnded on the object, as the
 // control does (for tests and scripts).
 fn raiseSwipeGestureEnded(object) = {
-    let _ = ferro_raise(object: object, event: 79)
+    let _ = ferro_raise(object: object, event: 81)
     object
 }
 // onTapped(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every Tapped (InputElement). Defines the `Tapped` event.
 fn onTapped(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 80, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 82, tag: tag)
     object
 }
 // raiseTapped(object: int) -> int: raises Tapped on the object, as the control does (for tests
 // and scripts).
 fn raiseTapped(object) = {
-    let _ = ferro_raise(object: object, event: 80)
+    let _ = ferro_raise(object: object, event: 82)
     object
 }
 // onTemplateApplied(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every TemplateApplied (TemplatedControl). Defines the `TemplateApplied`
 // routed event.
 fn onTemplateApplied(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 81, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 83, tag: tag)
     object
 }
 // raiseTemplateApplied(object: int) -> int: raises TemplateApplied on the object, as the
 // control does (for tests and scripts).
 fn raiseTemplateApplied(object) = {
-    let _ = ferro_raise(object: object, event: 81)
+    let _ = ferro_raise(object: object, event: 83)
     object
 }
 // onTextChanged(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every TextChanged (AutoCompleteBox, RichEditBox, TextBox). Defines the
 // `TextChanged` event.
 fn onTextChanged(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 82, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 84, tag: tag)
     object
 }
 // raiseTextChanged(object: int) -> int: raises TextChanged on the object, as the control does
 // (for tests and scripts).
 fn raiseTextChanged(object) = {
-    let _ = ferro_raise(object: object, event: 82)
+    let _ = ferro_raise(object: object, event: 84)
     object
 }
 // onTextChanging(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every TextChanging (RichEditBox, TextBox). Defines the `TextChanging` event.
 fn onTextChanging(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 83, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 85, tag: tag)
     object
 }
 // raiseTextChanging(object: int) -> int: raises TextChanging on the object, as the control
 // does (for tests and scripts).
 fn raiseTextChanging(object) = {
-    let _ = ferro_raise(object: object, event: 83)
+    let _ = ferro_raise(object: object, event: 85)
     object
 }
 // onTextInput(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every TextInput (InputElement). Defines the `TextInput` event.
 fn onTextInput(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 87, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 89, tag: tag)
     object
 }
 // raiseTextInput(object: int) -> int: raises TextInput on the object, as the control does (for
 // tests and scripts).
 fn raiseTextInput(object) = {
-    let _ = ferro_raise(object: object, event: 87)
+    let _ = ferro_raise(object: object, event: 89)
     object
 }
 // onTextInputMethodClientRequested(object: int, tag: int) -> int: dispatches `tag` to the
 // dispatcher of the application on every TextInputMethodClientRequested (InputElement).
 // Defines the `TextInputMethodClientRequested` event.
 fn onTextInputMethodClientRequested(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 88, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 90, tag: tag)
     object
 }
 // raiseTextInputMethodClientRequested(object: int) -> int: raises
 // TextInputMethodClientRequested on the object, as the control does (for tests and scripts).
 fn raiseTextInputMethodClientRequested(object) = {
-    let _ = ferro_raise(object: object, event: 88)
+    let _ = ferro_raise(object: object, event: 90)
     object
 }
 // onUnloaded(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every Unloaded (Control). Defines the `Unloaded` event.
 fn onUnloaded(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 92, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 94, tag: tag)
     object
 }
 // raiseUnloaded(object: int) -> int: raises Unloaded on the object, as the control does (for
 // tests and scripts).
 fn raiseUnloaded(object) = {
-    let _ = ferro_raise(object: object, event: 92)
+    let _ = ferro_raise(object: object, event: 94)
     object
 }
 // onVerticalSnapPointsChanged(object: int, tag: int) -> int: dispatches `tag` to the
 // dispatcher of the application on every VerticalSnapPointsChanged (PivotPanel, StackPanel,
 // VirtualizingStackPanel). Defines the `VerticalSnapPointsChanged` event.
 fn onVerticalSnapPointsChanged(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 94, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 96, tag: tag)
     object
 }
 // raiseVerticalSnapPointsChanged(object: int) -> int: raises VerticalSnapPointsChanged on the
 // object, as the control does (for tests and scripts).
 fn raiseVerticalSnapPointsChanged(object) = {
-    let _ = ferro_raise(object: object, event: 94)
+    let _ = ferro_raise(object: object, event: 96)
     object
 }
 // onWindowClosed(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every WindowClosed (Window). Routed event that can be used for global
 // tracking of window destruction.
 fn onWindowClosed(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 95, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 97, tag: tag)
     object
 }
 // raiseWindowClosed(object: int) -> int: raises WindowClosed on the object, as the control
 // does (for tests and scripts).
 fn raiseWindowClosed(object) = {
-    let _ = ferro_raise(object: object, event: 95)
+    let _ = ferro_raise(object: object, event: 97)
     object
 }
 // onWindowOpened(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the
 // application on every WindowOpened (Window). Routed event that can be used for global
 // tracking of opening windows.
 fn onWindowOpened(object, tag) = {
-    let _ = ferro_subscribe_dispatch(object: object, event: 96, tag: tag)
+    let _ = ferro_subscribe_dispatch(object: object, event: 98, tag: tag)
     object
 }
 // raiseWindowOpened(object: int) -> int: raises WindowOpened on the object, as the control
 // does (for tests and scripts).
 fn raiseWindowOpened(object) = {
-    let _ = ferro_raise(object: object, event: 96)
+    let _ = ferro_raise(object: object, event: 98)
     object
 }

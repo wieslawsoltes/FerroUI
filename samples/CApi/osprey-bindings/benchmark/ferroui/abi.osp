@@ -9,10 +9,10 @@
 namespace ferroui;
 
 // apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format 1.
-fn apiFingerprint() = 6762059796223988462
+fn apiFingerprint() = 425336128539517366
 // selectionFingerprint() -> int: the fingerprint of the selection of these bindings, which a
 // library built for the same manifest returns (ferro_selection_fingerprint); 0 for every class.
-fn selectionFingerprint() = 1133760879206642042
+fn selectionFingerprint() = -7084749498308237584
 // abiVersion() -> int: the version of the ABI the bindings were generated for.
 fn abiVersion() = 1
 
@@ -141,40 +141,40 @@ fn gettingFocusEventId() = 24
 fn gotFocusEventId() = 25
 fn holdingEventId() = 26
 fn horizontalSnapPointsChangedEventId() = 27
-fn keyDownEventId() = 31
-fn keyUpEventId() = 32
-fn loadedEventId() = 33
-fn losingFocusEventId() = 34
-fn lostFocusEventId() = 35
-fn pinchEventId() = 45
-fn pinchEndedEventId() = 46
-fn pointerCaptureChangingEventId() = 47
-fn pointerCaptureLostEventId() = 48
-fn pointerEnteredEventId() = 49
-fn pointerExitedEventId() = 51
-fn pointerMovedEventId() = 53
-fn pointerPressedEventId() = 54
-fn pointerReleasedEventId() = 55
-fn pointerTouchPadGestureMagnifyEventId() = 56
-fn pointerTouchPadGestureRotateEventId() = 57
-fn pointerTouchPadGestureSwipeEventId() = 58
-fn pointerWheelChangedEventId() = 59
-fn pullGestureEventId() = 60
-fn pullGestureEndedEventId() = 61
-fn requestBringIntoViewEventId() = 66
-fn rightTappedEventId() = 67
-fn scrollGestureEventId() = 69
-fn scrollGestureEndedEventId() = 70
-fn scrollGestureInertiaStartingEventId() = 71
-fn sizeChangedEventId() = 75
-fn swipeGestureEventId() = 78
-fn swipeGestureEndedEventId() = 79
-fn tappedEventId() = 80
-fn templateAppliedEventId() = 81
-fn textInputEventId() = 87
-fn textInputMethodClientRequestedEventId() = 88
-fn unloadedEventId() = 92
-fn verticalSnapPointsChangedEventId() = 94
+fn keyDownEventId() = 33
+fn keyUpEventId() = 34
+fn loadedEventId() = 35
+fn losingFocusEventId() = 36
+fn lostFocusEventId() = 37
+fn pinchEventId() = 47
+fn pinchEndedEventId() = 48
+fn pointerCaptureChangingEventId() = 49
+fn pointerCaptureLostEventId() = 50
+fn pointerEnteredEventId() = 51
+fn pointerExitedEventId() = 53
+fn pointerMovedEventId() = 55
+fn pointerPressedEventId() = 56
+fn pointerReleasedEventId() = 57
+fn pointerTouchPadGestureMagnifyEventId() = 58
+fn pointerTouchPadGestureRotateEventId() = 59
+fn pointerTouchPadGestureSwipeEventId() = 60
+fn pointerWheelChangedEventId() = 61
+fn pullGestureEventId() = 62
+fn pullGestureEndedEventId() = 63
+fn requestBringIntoViewEventId() = 68
+fn rightTappedEventId() = 69
+fn scrollGestureEventId() = 71
+fn scrollGestureEndedEventId() = 72
+fn scrollGestureInertiaStartingEventId() = 73
+fn sizeChangedEventId() = 77
+fn swipeGestureEventId() = 80
+fn swipeGestureEndedEventId() = 81
+fn tappedEventId() = 82
+fn templateAppliedEventId() = 83
+fn textInputEventId() = 89
+fn textInputMethodClientRequestedEventId() = 90
+fn unloadedEventId() = 94
+fn verticalSnapPointsChangedEventId() = 96
 
 // ---- the C ABI -------------------------------------------------------------------------------
 
