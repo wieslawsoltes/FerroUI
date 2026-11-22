@@ -435,8 +435,17 @@ jobs:
             text=$(size -m "measured/$app" | awk '/Section __text:/ { print $3; exit }')
             printf '%-28s %8.2f %8.2f %8.2f\n' "$app" "$(echo "$raw / 1000000" | bc -l)" "$(echo "$stripped / 1000000" | bc -l)" \
               "$(echo "${text:-0} / 1000000" | bc -l)" | tee -a "$GITHUB_STEP_SUMMARY"
+            printf '%s\t%s\t%s\n' "$app" "$stripped" "${text:-0}" >> "exact-sizes-$PROFILE-$SIDE.tsv"
           done
           echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Keep the exact sizes
+        if: always() && env.MEASURE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: exact-sizes-${{ matrix.profile }}-${{ matrix.side }}
+          path: exact-sizes-${{ matrix.profile }}-${{ matrix.side }}.tsv
+          retention-days: 7
+          if-no-files-found: ignore
       # The generic families from the symbols (#1001): the release executables have them; the dist
       # executables are linked again without stripping, with the link line and the list of what
       # ld64 deduplicates, so that the option is shown to reach the linker.
@@ -575,6 +584,31 @@ jobs:
             measured/todo-mvc
           retention-days: 7
           if-no-files-found: ignore
+
+  # The exact bytes of the stripped executables and of their code, of the ref and the baseline side
+  # by side with the signed difference (`scripts/perf/exact_sizes.py` of the workflow's own commit,
+  # so that a tree from before the script is compared too). The tables in MB above stay as they are.
+  macos-samples-exact:
+    name: Exact sizes (macOS)
+    if: always() && inputs.samples
+    needs: macos-samples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the report script
+        uses: actions/checkout@v4
+        with:
+          path: tools
+          sparse-checkout: |
+            scripts/perf/exact_sizes.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: exact-sizes-*
+          merge-multiple: true
+          path: exact-sizes
+      - name: Compare
+        shell: bash
+        run: python3 -I tools/scripts/perf/exact_sizes.py exact-sizes | tee -a "$GITHUB_STEP_SUMMARY"
 
   # The C samples of the C ABI (docs/binary-size.md, section 3.7; #978): `hello_world.c` and
   # `gauge.c` linked against `ferroui-capi` in the full mode and, where the tree has it, by use
