@@ -1,7 +1,5 @@
 //! Typed command bindings share the language service's registered DataContext paths.
-use crate::{
-    LanguageError, LanguageService, Position, PropertyInfo, Range, Result, Schema, require,
-};
+use crate::{LanguageError, LanguageService, Position, PropertyInfo, Range, Result, Schema, require};
 use ferroui_designer_core::{Document, Node};
 use serde::{Deserialize, Serialize};
 
@@ -84,11 +82,12 @@ impl LanguageService {
         let slots = schema
             .properties(&owner.name, owner.namespace_uri.as_deref())
             .into_values()
-            .filter(writable_command)
+            .filter(PropertyInfo::is_writable_command)
             .map(|property| {
                 let binding =
                     AuthoredValue::read(schema, document, owner, &property.name)?.model(index)?;
-                let parameter = parameter_property(schema, owner, &property.name)
+                let parameter = schema
+                    .command_parameter(&owner.name, owner.namespace_uri.as_deref(), &property.name)
                     .map(|parameter| {
                         AuthoredValue::read(schema, document, owner, &parameter.name)?.model(index)
                     })
@@ -113,7 +112,7 @@ impl LanguageService {
                 .filter(|(name, property)| !property.event && crate::is_xaml_identifier(name))
                 .map(|(name, property)| {
                     let path = format!("{partial}{name}");
-                    let command = command_type(&property);
+                    let command = property.is_command();
                     let children = !command
                         && !crate::binding::members(
                             schema,
@@ -151,14 +150,14 @@ impl LanguageService {
                     owner.namespace_uri.as_deref(),
                     &change.property,
                 )
-                .is_some_and(|property| writable_command(&property)),
+                .is_some_and(|property| property.is_writable_command()),
             "Choose a writable command property",
         )?;
         let mut edits = Vec::new();
         if let CommandSelection::Bind { path } = &change.command {
             require(
                 binding_member(schema, document, owner, path)
-                    .is_some_and(|member| command_type(&member)),
+                    .is_some_and(|member| member.is_command()),
                 "Choose a registered ICommand binding path",
             )?;
         }
@@ -170,8 +169,9 @@ impl LanguageService {
             &mut edits,
         )?;
         if !matches!(change.parameter, CommandSelection::Keep) {
-            let parameter =
-                parameter_property(schema, owner, &change.property).ok_or_else(|| {
+            let parameter = schema
+                .command_parameter(&owner.name, owner.namespace_uri.as_deref(), &change.property)
+                .ok_or_else(|| {
                     LanguageError("This command does not expose a writable parameter".into())
                 })?;
             if let CommandSelection::Bind { path } = &change.parameter {
@@ -240,16 +240,6 @@ impl LanguageService {
     }
 }
 
-fn parameter_property(schema: &Schema, owner: &Node, command: &str) -> Option<PropertyInfo> {
-    schema
-        .property(
-            &owner.name,
-            owner.namespace_uri.as_deref(),
-            &format!("{command}Parameter"),
-        )
-        .filter(|property| !property.read_only && !property.attached && !property.event)
-}
-
 fn binding_member(
     schema: &Schema,
     document: &Document,
@@ -267,24 +257,4 @@ fn binding_member(
 
 fn valid_path(path: &str) -> bool {
     path.len() <= 4096 && path.split('.').all(crate::is_xaml_identifier)
-}
-
-fn writable_command(property: &PropertyInfo) -> bool {
-    !property.read_only && !property.attached && command_type(property)
-}
-
-fn command_type(property: &PropertyInfo) -> bool {
-    if property.event {
-        return false;
-    }
-    if let Some(model) = &property.model_type {
-        return model.name == "ICommand" && model.namespace == "System.Windows.Input";
-    }
-    let kind = crate::project_schema::unwrapped_type(&property.type_name);
-    let kind = kind
-        .strip_prefix("dyn ")
-        .unwrap_or(kind)
-        .trim_start_matches("::");
-    matches!(kind, "ICommand" | "System.Windows.Input.ICommand")
-        || kind.starts_with("ferroui_base::") && kind.ends_with("::ICommand")
 }

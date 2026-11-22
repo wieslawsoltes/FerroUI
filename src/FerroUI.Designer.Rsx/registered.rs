@@ -2,6 +2,7 @@
 //! matches a XAML type. A package can declare the correspondence in its exported
 //! MarkupAssembly metadata. Ordinary Rust name resolution remains rust-analyzer's.
 use crate::{catalog, literal::Literal};
+use crate::commands::schema::{self as command_schema, CommandSlot};
 use crate::styles::{fields as style_fields, RsxStyleField};
 use ferroui_designer_language::Schema;
 use ferroui_designer_project::{
@@ -32,13 +33,14 @@ pub(crate) struct RegisteredClass {
     rust_path: String,
     base: Option<String>,
     properties: BTreeMap<String, MappedProperty>,
+    commands: Vec<CommandSlot>,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 struct MappedProperty {
     setter: String,
     value_type: String,
-    codec: Literal,
+    codec: Option<Literal>,
 }
 
 impl RsxCatalog {
@@ -201,7 +203,16 @@ fn registered(
             if info.attached {
                 return None;
             }
-            let codec = catalog::property_codec(&info)?;
+            let codec = catalog::property_codec(&info);
+            let is_command_parameter = name.strip_suffix("Parameter").is_some_and(|command| {
+                schema.property(&control.class.name, Some(&namespace), command)
+                    .is_some_and(|property| property.is_writable_command())
+                    && schema.command_parameter(&control.class.name, Some(&namespace), command)
+                        .is_some()
+            });
+            if codec.is_none() && !info.is_writable_command() && !is_command_parameter {
+                return None;
+            }
             Some((
                 name,
                 MappedProperty {
@@ -214,11 +225,20 @@ fn registered(
         .collect::<Option<_>>()?;
     let setters: BTreeSet<_> = properties
         .values()
-        .map(|property| property.setter.as_str())
+        .map(|property| property.setter.trim_start_matches("r#"))
         .collect();
     if setters.len() != properties.len() {
         return None;
     }
+    let inherited = base.as_deref().map(command_schema::builtin).unwrap_or_default();
+    let commands = command_schema::slots(schema, &control.class.name, Some(&namespace), |name| {
+        if let Some(property) = properties.get(name) {
+            return Some(property.setter.clone());
+        }
+        let member = inherited.iter().flat_map(CommandSlot::members)
+            .find(|member| member.property == name)?;
+        (!setters.contains(member.setter.trim_start_matches("r#"))).then(|| member.setter.clone())
+    });
     let aliases = std::iter::once(format!("using:{}", control.class.namespace))
         .chain(
             control
@@ -236,6 +256,7 @@ fn registered(
         rust_path,
         base,
         properties,
+        commands,
     }))
 }
 

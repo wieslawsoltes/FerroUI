@@ -3,6 +3,7 @@ use crate::blocks::{blocks, contains_trivia, keep_comments, SourceDelimiters};
 use crate::catalog::Children;
 use crate::child_collection::{ChildEnvelope, CollectionSource, InlineChildren, control_expression};
 use crate::columns::{ColumnSource, collection_member, table_kind};
+use crate::commands::CommandFields;
 use crate::item_templates::TemplateFields;
 use crate::literal;
 use crate::local_rust::LocalRust;
@@ -36,6 +37,7 @@ pub struct RsxNode {
     pub expressions: BTreeMap<String, SourceSpan>,
     pub events: BTreeMap<String, RsxEvent>,
     pub(crate) fields: BTreeMap<String, SourceSpan>,
+    pub(crate) commands: CommandFields,
     pub(crate) class: Class,
     pub(crate) open: usize,
     pub(crate) close: usize,
@@ -425,6 +427,7 @@ impl State<'_> {
             expressions: BTreeMap::new(),
             events: BTreeMap::new(),
             fields: BTreeMap::new(),
+            commands: CommandFields::default(),
             class: class.clone(),
             open: node.braces.open().byte_range().end,
             close: node.braces.close().byte_range().start,
@@ -464,6 +467,11 @@ impl State<'_> {
                     let argument = arguments.first().filter(|_| arguments.len() == 1);
                     let name = crate::animation::syntax::span(name);
                     let field = self.delimiters.calls.get(&name.start).copied();
+                    if self.project_command(index, &setter, false, PropertyField {
+                        field, fallback: field.unwrap_or(name), expression: argument,
+                    }) {
+                        continue;
+                    }
                     if let Some(styles) = argument.filter(|_| {
                         setter == "styles" && class.xaml_property(None, "styles").is_none()
                     }) {
@@ -527,6 +535,11 @@ impl State<'_> {
             let value_span = value.span().byte_range();
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
+            if self.project_command(index, &setter, owner.is_some(), PropertyField {
+                field: Some(field), fallback: field, expression: Some(value),
+            }) {
+                continue;
+            }
             if self.project_template(index, &setter, owner.is_some(), Some(value), owner.is_none().then_some(field)) {
                 self.omit(format!("{class}.{setter} template"));
                 continue;
@@ -645,6 +658,35 @@ impl State<'_> {
             LocalRust::parse(source, value.span().byte_range().start, modules)
         }).source_scope(value));
         templates.record(property, argument, field, scope);
+        true
+    }
+
+    fn project_command(
+        &mut self,
+        index: usize,
+        setter: &str,
+        qualified: bool,
+        source: PropertyField<'_>,
+    ) -> bool {
+        let node = &mut self.nodes[index];
+        let slots = node.class.commands();
+        if slots.is_empty() {
+            return false;
+        }
+        node.commands.note_setter(setter);
+        let Some(member) = slots.iter().flat_map(|slot| slot.members())
+            .find(|member| member.setter.trim_start_matches("r#") == setter) else {
+            return false;
+        };
+        let expression = source.expression.map(crate::animation::syntax::span);
+        let field = if qualified { None } else { source.field };
+        node.commands.record(&member.property, expression, field);
+        if !qualified && node.class.literal(&member.property).is_some() {
+            return false;
+        }
+        node.expressions.insert(member.property.clone(), expression.unwrap_or(source.fallback));
+        let reason = format!("{}.{setter} command expression", node.class);
+        self.omit(reason);
         true
     }
 

@@ -4,6 +4,7 @@
 mod animation;
 mod blocks;
 mod catalog;
+mod commands;
 mod child_collection;
 mod columns;
 mod image_source;
@@ -30,6 +31,7 @@ mod xaml;
 
 pub use animation::{RsxAnimation, RsxAnimationIssue};
 pub use columns::RsxColumnDeclaration;
+pub use commands::{RsxCommandEdit, RsxCommandSelection, RsxCommandSlot, RsxCommandValue};
 pub use item_templates::{RsxItemTemplate, RsxTemplateBody, is_item_template_owner};
 pub use language::{RsxLanguageDocument, analyze_rsx};
 pub use layout_edits::{is_child_list_edit, RsxChildEdit};

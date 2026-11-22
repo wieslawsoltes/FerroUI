@@ -19,13 +19,15 @@ impl Fixture {
                 "app",
                 json!({"format":2,"name":"Example","crate_name":"example",
                 "metadata":[["FerroUI.Designer.Rsx.v1:Example.Views.StatusCard",
-                    r#"{"path":"crate::views::ReviewCard","properties":{"Caption":"heading"}}"#],
+                    r#"{"path":"crate::views::ReviewCard","properties":{"Caption":"heading","SaveCommand":"perform_save","SaveCommandParameter":"save_argument"}}"#],
                     ["FerroUI.Designer.RsxAnimation.v1:crate::motion::reading_radius", "crate::StatusCard::reading_radius_property"],
                     ["FerroUI.Designer.RsxAnimation.v1:crate::StatusCard::relative_radius_property", "crate::StatusCard::relative_radius_property"]],
                 "types":[{"name":"StatusCard","namespace":"Example.Views","kind":"class",
                     "rust_path":"::example::StatusCard","object_model":true,
                     "base":"::ferroui_controls::Control","default_constructor":{},
-                    "properties":[{"name":"Caption","value_type":"String","setter":{}}],
+                    "properties":[{"name":"Caption","value_type":"String","setter":{}},
+                        {"name":"SaveCommand","value_type":"Option<::std::rc::Rc<dyn ::ferroui_base::input::ICommand>>","setter":{}},
+                        {"name":"SaveCommandParameter","value_type":"Option<::ferroui_base::BoxedValue>","setter":{}}],
                     "registered":[{"accessor":"reading_radius_property","name":"ReadingRadius","kind":"styled",
                         "value_type":"::ferroui_base::corner_radius::CornerRadius","registration":"declared"},
                         {"accessor":"relative_radius_property","name":"RelativeRadius","kind":"styled",
@@ -62,6 +64,30 @@ impl Fixture {
     }
 }
 
+#[test]
+fn registered_command_and_parameter_keep_the_declared_rust_setter_names() {
+    use crate::{RsxCommandEdit, RsxCommandSelection};
+    use ferroui_designer_core::TextPatch;
+
+    let catalog = Fixture::catalog();
+    let source = "rsx! { crate::views::ReviewCard { heading: \"Review\" } }";
+    let projection = catalog.project(source, 0).unwrap();
+    let document = Document::new(projection.xaml()).unwrap();
+    let node = document.ast().root();
+    let slots = projection.command_slots(&document, node);
+    assert_eq!(slots[0].binding.property, "SaveCommand");
+    assert_eq!(slots[0].parameter.as_ref().unwrap().property, "SaveCommandParameter");
+    let edits = projection.plan_command(&document, node, &RsxCommandEdit {
+        property: "SaveCommand".into(),
+        command: RsxCommandSelection::Set { expression: "save()".into() },
+        parameter: RsxCommandSelection::Set { expression: "account_id".into() },
+    }).unwrap();
+    let changed = TextPatch::apply_all(source, edits).unwrap();
+    assert!(changed.contains("perform_save: save(), save_argument: account_id,"));
+    let updated = catalog.project(&changed, 0).unwrap();
+    assert!(updated.xaml().contains("Caption=\"Review\""));
+    assert!(!updated.xaml().contains("SaveCommand"));
+}
 #[test]
 fn registered_style_property_projects_typed_custom_control_and_keeps_constructor_comments() {
     use crate::RsxStyleEdit;

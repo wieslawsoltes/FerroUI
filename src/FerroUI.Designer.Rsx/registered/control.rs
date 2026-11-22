@@ -1,6 +1,7 @@
 use super::{MappedProperty, RegisteredClass};
 use crate::{
     catalog::{self, Children},
+    commands::schema::{self as command_schema, CommandSlot},
     literal::Literal,
 };
 use std::{collections::BTreeSet, sync::Arc};
@@ -63,22 +64,24 @@ impl Class {
     }
 
     pub(crate) fn literal(&self, name: &str) -> Option<Literal> {
-        self.mapped_property(name)
-            .map(|property| property.codec.clone())
-            .or_else(|| {
-                let base = self.base()?;
-                if let Self::Registered(class) = self {
-                    let setter = catalog::setter(name);
-                    if class
-                        .properties
-                        .values()
-                        .any(|property| property.setter == setter)
-                    {
-                        return None;
-                    }
-                }
-                catalog::property(base, name)
-            })
+        if let Some(property) = self.mapped_property(name) {
+            return property.codec.clone();
+        }
+        let base = self.base()?;
+        if let Self::Registered(class) = self {
+            let setter = catalog::setter(name);
+            if class.properties.values().any(|property| property.setter == setter) {
+                return None;
+            }
+        }
+        catalog::property(base, name)
+    }
+
+    pub(crate) fn commands(&self) -> &[CommandSlot] {
+        match self {
+            Self::Builtin(name) => command_schema::builtin(name),
+            Self::Registered(class) => &class.commands,
+        }
     }
 
     pub(crate) fn setter(&self, name: &str) -> String {
