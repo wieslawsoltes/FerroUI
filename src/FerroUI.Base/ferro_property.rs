@@ -370,9 +370,14 @@ struct Hearing {
     targets: RefCell<Vec<(u64, Option<&'static TypeIdentity>, Option<Question>)>>,
     /// The answers for the classes asked last: a walk over a tree asks for a handful of classes
     /// in turn. A class sits at the place made of a few bits of its address or at the next one,
-    /// so that two classes the link happens to put at one place do not evict each other.
+    /// which are compared inline. Where the link puts more classes at one place, the others sit
+    /// at the next empty places, which the cold path looks through: up to `RECENT` classes never
+    /// reach `by_class` again, whatever their addresses. The class after those empties the places
+    /// once, and from then on every class sits at one of its own two.
     recent: [Cell<(*const TypeInfo, Heard)>; RECENT],
     by_class: RefCell<HashMap<*const TypeInfo, Heard, BuildHasherDefault<ClassHasher>>>,
+    /// More classes are known than there are places: each class sits at one of its own two.
+    spilled: Cell<bool>,
     /// The questions of the classes that have some.
     asked: RefCell<Vec<Questions>>,
     /// The questions that reached `by_class`.
@@ -423,6 +428,7 @@ impl Hearing {
             targets: RefCell::new(Vec::new()),
             recent: std::array::from_fn(|_| Cell::new((std::ptr::null(), Heard::Yes))),
             by_class: RefCell::new(HashMap::default()),
+            spilled: Cell::new(false),
             asked: RefCell::new(Vec::new()),
             #[cfg(test)]
             past_recent: Cell::new(0),
@@ -434,6 +440,7 @@ impl Hearing {
             recent.set((std::ptr::null(), Heard::Yes));
         }
         self.by_class.borrow_mut().clear();
+        self.spilled.set(false);
         self.asked.borrow_mut().clear();
     }
 
@@ -467,22 +474,73 @@ impl Hearing {
     #[cold]
     #[inline(never)]
     fn past_recent(&self, place: usize, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+        // While the classes known fit in the places, each of them is at one. With more of them
+        // a look through the places would mostly find nothing, so the map answers at once.
+        if !self.spilled.get() {
+            if let Some(heard) = self.at_a_further_place(place, class) {
+                return heard;
+            }
+        }
         #[cfg(test)]
         self.past_recent.set(self.past_recent.get() + 1);
         let known = self.by_class.borrow().get(&std::ptr::from_ref(class)).copied();
-        let heard = known.unwrap_or_else(|| {
-            let heard = self.find(class, property);
-            self.by_class.borrow_mut().insert(class, heard);
-            heard
-        });
+        let heard = match known {
+            Some(heard) => heard,
+            None => self.learn(class, property),
+        };
         self.remember(place, class, heard);
         heard
     }
 
-    /// Keeps the answer for a class at an empty one of its two places, else at the first. What
-    /// the first place held moves to the second when that is a place of its class too; a class
-    /// visiting from the place before could not be found there, and is dropped.
+    /// Finds the answer for a class asked for the first time and keeps it.
+    #[inline(never)]
+    fn learn(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+        let heard = self.find(class, property);
+        let mut by_class = self.by_class.borrow_mut();
+        by_class.insert(class, heard);
+        // From here on the further places are not looked at: nothing may stay there.
+        if by_class.len() == RECENT + 1 {
+            self.spilled.set(true);
+            for recent in &self.recent {
+                recent.set((std::ptr::null(), Heard::Yes));
+            }
+        }
+        heard
+    }
+
+    /// The answer for a class at one of the places after its two. A class is kept at the first
+    /// empty place from its own and places are only emptied all at once, so an empty place ends
+    /// the search.
+    #[inline(never)]
+    fn at_a_further_place(&self, place: usize, class: *const TypeInfo) -> Option<Heard> {
+        for step in 2..RECENT {
+            let (recent, heard) = self.recent[(place + step) & (RECENT - 1)].get();
+            if recent.is_null() {
+                return None;
+            }
+            if std::ptr::eq(recent, class) {
+                return Some(heard);
+            }
+        }
+        None
+    }
+
+    /// Keeps the answer for a class. While the classes known fit in the places, at the first
+    /// empty place from its own. With more of them, at an empty one of its two places, else at
+    /// the first: what the first place held moves to the second when that is a place of its
+    /// class too; a class visiting from the place before could not be found there, and is
+    /// dropped.
+    #[inline(never)]
     fn remember(&self, place: usize, class: *const TypeInfo, heard: Heard) {
+        if !self.spilled.get() {
+            for step in 0..RECENT {
+                let candidate = &self.recent[(place + step) & (RECENT - 1)];
+                if candidate.get().0.is_null() {
+                    candidate.set((class, heard));
+                    return;
+                }
+            }
+        }
         let first = &self.recent[place];
         let second = &self.recent[second_recent_place(place)];
         let held = first.get();
@@ -505,6 +563,7 @@ impl Hearing {
         questions.iter().flatten().any(|question| question(object))
     }
 
+    #[inline(never)]
     fn find(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
         let mut questions: Questions = [None; 3];
         let mut asked = 0;
@@ -1233,14 +1292,20 @@ mod hearing_tests {
 
     /// Two classes at one first place: of nine addresses, two share one of the eight places.
     fn two_classes_at_one_place() -> (&'static TypeInfo, &'static TypeInfo) {
-        let mut seen: [Option<&'static TypeInfo>; RECENT] = [None; RECENT];
+        let classes = classes_at_one_place(2);
+        (classes[0], classes[1])
+    }
+
+    /// `count` classes at one first place.
+    fn classes_at_one_place(count: usize) -> Vec<&'static TypeInfo> {
+        let mut seen: [Vec<&'static TypeInfo>; RECENT] = std::array::from_fn(|_| Vec::new());
         loop {
             let class: &'static TypeInfo = Box::leak(Box::new(TypeInfo::new("AtOnePlace", None)));
             let place = recent_place(class);
-            if let Some(other) = seen[place] {
-                return (other, class);
+            seen[place].push(class);
+            if seen[place].len() == count {
+                return std::mem::take(&mut seen[place]);
             }
-            seen[place] = Some(class);
         }
     }
 
@@ -1267,8 +1332,10 @@ mod hearing_tests {
         let hearing = Hearing::new();
         let place = recent_place(one);
         let stranger: &'static TypeInfo = Box::leak(Box::new(TypeInfo::new("Stranger", None)));
+        for step in 1..RECENT {
+            hearing.recent[(place + step) & (RECENT - 1)].set((stranger, Heard::No));
+        }
         hearing.recent[place].set((one, Heard::No));
-        hearing.recent[second_recent_place(place)].set((stranger, Heard::No));
         hearing.of_class(other, property);
         assert_eq!(hearing.past_recent.get(), 1);
         assert!(matches!(hearing.of_class(one, property), Heard::No), "moved with its answer");
@@ -1287,6 +1354,138 @@ mod hearing_tests {
         hearing.of_class(one, property);
         hearing.of_class(other, property);
         assert_eq!(hearing.past_recent.get(), 4);
+    }
+
+    #[test]
+    fn three_classes_at_one_place_reach_the_map_once() {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let classes = classes_at_one_place(3);
+        let hearing = Hearing::new();
+        for class in &classes {
+            hearing.of_class(class, property);
+        }
+        assert_eq!(hearing.past_recent.get(), 3);
+        for _ in 0..100 {
+            for class in &classes {
+                hearing.of_class(class, property);
+            }
+        }
+        assert_eq!(hearing.past_recent.get(), 3, "each class keeps a place");
+    }
+
+    #[test]
+    fn eight_classes_at_one_place_reach_the_map_once() {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let classes = classes_at_one_place(RECENT);
+        let hearing = Hearing::new();
+        for _ in 0..100 {
+            for class in &classes {
+                hearing.of_class(class, property);
+            }
+        }
+        assert_eq!(hearing.past_recent.get(), RECENT as u32, "as many classes as places");
+    }
+
+    #[test]
+    fn more_classes_than_places_are_answered_by_the_map_and_keep_the_last_asked() {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let classes = classes_at_one_place(RECENT + 4);
+        let hearing = Hearing::new();
+        for _ in 0..10 {
+            for class in &classes {
+                let expected = hearing.find(class, property);
+                let heard = hearing.of_class(class, property);
+                assert_eq!(std::mem::discriminant(&heard), std::mem::discriminant(&expected));
+            }
+        }
+        assert_eq!(hearing.by_class.borrow().len(), RECENT + 4, "the map knows every class");
+        let last = classes[RECENT + 3];
+        let reached = hearing.past_recent.get();
+        hearing.of_class(last, property);
+        assert_eq!(hearing.past_recent.get(), reached, "the class asked last is at its first place");
+    }
+
+    /// The misses of the two-place logic on a walk over `classes`, from empty places at the class
+    /// `start`: `warm` walks are not counted, the `walks` after them are.
+    fn two_place_misses(classes: &[&'static TypeInfo], start: usize, warm: usize, walks: usize) -> u32 {
+        let mut places: [*const TypeInfo; RECENT] = [std::ptr::null(); RECENT];
+        let mut misses = 0;
+        for walk in 0..warm + walks {
+            let from = if walk == 0 { start } else { 0 };
+            for class in &classes[from..] {
+                let class = std::ptr::from_ref(*class);
+                let place = recent_place(class);
+                let second = second_recent_place(place);
+                if std::ptr::eq(places[place], class) || std::ptr::eq(places[second], class) {
+                    continue;
+                }
+                if walk >= warm {
+                    misses += 1;
+                }
+                if places[place].is_null() {
+                    places[place] = class;
+                } else if places[second].is_null() {
+                    places[second] = class;
+                } else {
+                    if recent_place(places[place]) == place {
+                        places[second] = places[place];
+                    }
+                    places[place] = class;
+                }
+            }
+        }
+        misses
+    }
+
+    /// What a walk over `classes` costs a `Hearing` once it is warm.
+    fn misses_of_walks(classes: &[&'static TypeInfo], warm: usize, walks: usize) -> u32 {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let hearing = Hearing::new();
+        for _ in 0..warm {
+            for class in classes {
+                hearing.of_class(class, property);
+            }
+        }
+        let before = hearing.past_recent.get();
+        for _ in 0..walks {
+            for class in classes {
+                hearing.of_class(class, property);
+            }
+        }
+        hearing.past_recent.get() - before
+    }
+
+    #[test]
+    fn past_eight_classes_a_walk_misses_as_the_two_place_logic_does() {
+        const CLASSES: usize = RECENT + 4;
+        let any: Vec<&'static TypeInfo> =
+            (0..CLASSES).map(|_| &*Box::leak(Box::new(TypeInfo::new("AnyPlace", None)))).collect();
+        // The places are emptied at the ninth class, so the two-place logic starts there.
+        assert_eq!(misses_of_walks(&any, 3, 20), two_place_misses(&any, RECENT, 3, 20));
+        let at_one_place = classes_at_one_place(CLASSES);
+        let misses = misses_of_walks(&at_one_place, 3, 20);
+        assert_eq!(misses, two_place_misses(&at_one_place, RECENT, 3, 20));
+        assert!(misses <= two_place_misses(&at_one_place, 0, 3, 20), "not more than from the first class");
+    }
+
+    #[test]
+    fn no_class_stays_at_a_further_place_past_eight_classes() {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let classes = classes_at_one_place(RECENT + 1);
+        let hearing = Hearing::new();
+        for class in &classes {
+            hearing.of_class(class, property);
+        }
+        let last = classes[RECENT];
+        let place = recent_place(last);
+        for (index, recent) in hearing.recent.iter().enumerate() {
+            let held = recent.get().0;
+            if index == place {
+                assert!(std::ptr::eq(held, last), "the class that came last is at its first place");
+            } else {
+                assert!(held.is_null(), "the place {index} was emptied");
+            }
+        }
     }
 }
 
