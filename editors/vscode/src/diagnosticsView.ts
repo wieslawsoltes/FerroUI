@@ -56,7 +56,8 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
             const recent = this.history.recent(50);
             return recent.length ? recent.map(record => ({ type: 'reload', record })) : [{ type: 'notice', label: 'Save a file while a managed app is running' }];
         }
-        const endpoint = this.runtimes.get('managed') ?? this.runtimes.get('attached');
+        const runtime = this.runtimes.defaultRuntime();
+        const endpoint = runtime && this.runtimes.get(runtime);
         if (!endpoint) return [{ type: 'notice', label: 'Start or attach a FerroUI application with MCP' }];
         try {
             if (!this.current) {
@@ -110,11 +111,11 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
             const frameTime = frame?.elapsedMs === undefined ? undefined : `${frame.elapsedMs} ms to frame`;
             const frameOutcome = frame && frameCaptions[frame.status];
             const timing = frameTime ?? frameOutcome ?? `${record.acknowledgedMs ?? record.elapsedMs} ms`;
-            row.description = outcome ? `${outcome} · ${timing}` : 'Waiting for the application';
+            row.description = [record.target, outcome ? `${outcome} · ${timing}` : 'Waiting for the application'].filter(Boolean).join(' · ');
             const resultTime = record.acknowledgedMs !== undefined ? `Application acknowledged in ${record.acknowledgedMs} ms`
                 : record.elapsedMs === undefined ? undefined : `${outcome} in ${record.elapsedMs} ms`;
             const batch = frame?.batch !== undefined ? `Compositor batch ${frame.batch}` : undefined;
-            row.tooltip = [record.file, record.pid ? `PID ${record.pid}` : undefined,
+            row.tooltip = [record.target, record.file, record.pid ? `PID ${record.pid}` : undefined,
                 record.generation ? `Process generation ${record.generation}` : undefined, resultTime, frameOutcome, frameTime, batch, record.message].filter(Boolean).join('\n');
             row.accessibilityInformation = { label: [row.label, row.description, frameOutcome, batch].filter(Boolean).join('. ') };
             row.iconPath = new vscode.ThemeIcon(record.outcome === 'rejected' || record.outcome === 'buildFailed' ? 'error' : 'history');

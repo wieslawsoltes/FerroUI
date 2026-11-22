@@ -1,209 +1,258 @@
 import * as vscode from 'vscode';
-import { describeCargoTarget, discoverCargoTargets, selectCargoTarget, type CargoSelection, type CargoTarget } from './cargoTarget';
+import { describeCargoTarget, discoverCargoTargets, selectCargoTarget, type CargoSelection } from './cargoTarget';
+import { ManagedReload, recipeKey, type ReloadRecipe } from './managedReload';
 import { errorMessage } from './protocol';
-import { ReloadLog } from './reloadLog';
-import { managedProcessVariable, ReloadDebugger } from './reloadDebugger';
+import { managedProcessVariable } from './reloadDebugger';
 import { ReloadHistory } from './reloadHistory';
-import { RegisteredReload } from './registeredReload';
 import type { ProjectMetadata } from './reloadProcess';
-import { ReloadSession } from './reloadSession';
-import type { RuntimeMcpEndpoint } from './runtimeMcp';
+import { reloadWatchPattern } from './reloadScope';
 import { localFolders, workspaceFolders } from './workspacePaths';
+
+const stopped = { target: null, pid: null, status: 'Stopped', selection: null, mcpAvailable: false };
 
 export class HotReload implements vscode.Disposable {
     readonly history = new ReloadHistory();
     private readonly output = vscode.window.createOutputChannel('FerroUI Hot Reload');
-    private readonly log = new ReloadLog(this.output);
-    private readonly debugger = new ReloadDebugger(this.output);
     private readonly indicator = vscode.window.createStatusBarItem('ferroui.hotReload', vscode.StatusBarAlignment.Left, 35);
     private readonly subscriptions: vscode.Disposable[];
     private readonly runtimeChanged = new vscode.EventEmitter<void>();
     readonly onDidChangeRuntime = this.runtimeChanged.event;
+    private readonly changed = new vscode.EventEmitter<void>();
+    readonly onDidChangeRuns = this.changed.event;
     private readonly built = new vscode.EventEmitter<ProjectMetadata>();
     readonly onDidBuild = this.built.event;
-    runtimeMcp?: RuntimeMcpEndpoint;
-    private session?: ReloadSession;
-    private registered?: RegisteredReload;
+    private readonly live = new Map<string, ManagedReload>();
+    private readonly retiring = new Map<string, Promise<void>>();
+    private readonly byRecipe = new Map<string, ManagedReload>();
     private choosing = false;
-    private generation = 0;
-    private message = 'Stopped';
-    private shutdown = Promise.resolve();
+    private disposed = false;
+    private selectionEpoch = 0;
+    active?: string;
 
     constructor() {
         this.indicator.name = 'FerroUI Hot Reload';
-        this.indicator.command = 'ferroui.hotReload.showOutput';
+        this.indicator.command = 'ferroui.hotReload.select';
+        const watcher = vscode.workspace.createFileSystemWatcher(reloadWatchPattern);
+        const observe = (uri: vscode.Uri) => { for (const run of this.live.values()) run.observe(uri); };
         this.subscriptions = [
-            vscode.commands.registerCommand('ferroui.hotReload.start', () => this.startInteractive()),
-            vscode.commands.registerCommand('ferroui.hotReload.runAndDebug', () => this.startInteractive(true)),
-            vscode.commands.registerCommand('ferroui.hotReload.startRegistered', () => this.startRegisteredInteractive()),
-            vscode.commands.registerCommand('ferroui.hotReload.rebuild', () => {
-                if (this.session) return this.session.build();
-                if (this.registered) return this.output.show(true);
-                return this.startInteractive();
+            watcher, watcher.onDidChange(observe), watcher.onDidCreate(observe), watcher.onDidDelete(observe),
+            vscode.workspace.onDidSaveTextDocument(document => observe(document.uri)),
+            vscode.workspace.onDidChangeWorkspaceFolders(({ removed }) => {
+                for (const run of this.live.values()) {
+                    if (removed.some(folder => folder.uri.toString() === run.folder.uri.toString())) void this.stopOne(run);
+                }
             }),
-            vscode.commands.registerCommand('ferroui.hotReload.stop', () => this.stop()),
-            vscode.commands.registerCommand('ferroui.hotReload.showOutput', () => this.output.show(true)),
-            vscode.commands.registerCommand('ferroui.hotReload.debug', () => this.attachDebugger()),
-            vscode.commands.registerCommand('ferroui.hotReload.processId', () => String(this.requirePid())),
+            vscode.commands.registerCommand('ferroui.hotReload.start', () => this.interactive(() => this.startInteractive())),
+            vscode.commands.registerCommand('ferroui.hotReload.runAndDebug', () => this.interactive(() => this.startInteractive(true))),
+            vscode.commands.registerCommand('ferroui.hotReload.startRegistered', () => this.interactive(() => this.startRegisteredInteractive())),
+            vscode.commands.registerCommand('ferroui.hotReload.rebuild', (id?: string) => this.interactive(async () => {
+                const run = this.find(id);
+                if (run) run.rebuild();
+                else await this.startInteractive();
+            })),
+            vscode.commands.registerCommand('ferroui.hotReload.stop', (id?: string) => this.interactive(async () => {
+                const run = this.find(id);
+                if (run) await this.stopOne(run);
+            })),
+            vscode.commands.registerCommand('ferroui.hotReload.stopAll', () => this.stop()),
+            vscode.commands.registerCommand('ferroui.hotReload.select', (id?: string) => this.interactive(() => this.pick(id))),
+            vscode.commands.registerCommand('ferroui.hotReload.showOutput', (id?: string) => this.interactive(async () => {
+                const run = this.find(id);
+                if (run) run.showOutput();
+                else this.output.show(true);
+            })),
+            vscode.commands.registerCommand('ferroui.hotReload.debug', (id?: string) => this.interactive(async () => {
+                const run = this.require(id);
+                const configuration = await selectDebugConfiguration(run.folder);
+                if (configuration && this.live.get(run.id) === run) await run.attach(configuration);
+            })),
+            vscode.commands.registerCommand('ferroui.hotReload.processId', () => {
+                const pid = this.require().pid;
+                if (!pid) throw new Error('Wait for the selected FerroUI application to start.');
+                return String(pid);
+            }),
         ];
     }
 
-    get state() {
-        const target = this.session?.target;
-        return { target: target?.label ?? (this.registered ? 'Registered patch supervisor' : null), pid: this.session?.pid ?? this.registered?.pid ?? null, status: this.message,
-            selection: target ? describeCargoTarget(target) : null, mcpAvailable: this.runtimeMcp !== undefined };
+    get state() { return this.stateFor(); }
+
+    runs(): ManagedReload[] { return [...this.live.values()]; }
+
+    stateFor(session?: string) { return this.find(session)?.state ?? stopped; }
+
+    recentOutput(lines: number, session?: string) {
+        return { ...this.stateFor(session), output: this.find(session)?.recentOutput(lines) ?? '' };
     }
 
-    recentOutput(lines: number) { return { ...this.state, output: this.log.tail(lines) }; }
-    xamlRevision(file: string): string | undefined { return this.session?.xamlRevision(file); }
+    xamlRevision(file: string, session?: string): string | undefined {
+        return this.live.get(session ?? this.active ?? '')?.xamlRevision(file);
+    }
+
     async targets(selection: CargoSelection) {
         const targets = await discoverCargoTargets(selection);
         return { targets: targets.map(target => ({ ...describeCargoTarget(target), features: target.features })) };
     }
 
-    async agentControl(action: string, selection: CargoSelection, signal: AbortSignal, debugConfiguration?: string): Promise<object> {
-        if (action === 'start' || action === 'start_debug') await this.start(async () => {
+    async agentControl(action: string, selection: CargoSelection, signal: AbortSignal, debugConfiguration?: string, session?: string): Promise<object> {
+        const epoch = this.selectionEpoch;
+        signal.throwIfAborted();
+        if (action === 'start' || action === 'start_debug') {
             const targets = await discoverCargoTargets(selection);
             if (targets.length !== 1) throw new Error('Choose a single Cargo target from ferroui_reload_targets.');
-            return targets[0];
-        }, signal, action === 'start_debug' ? folder => selectDebugConfiguration(folder, false, debugConfiguration) : undefined);
-        else if (action === 'start_registered') {
+            const target = targets[0];
+            const configuration = action === 'start_debug' ? await selectDebugConfiguration(target.folder, false, debugConfiguration) : undefined;
+            return (await this.launch({ kind: 'cargo', target }, epoch, configuration, signal)).state;
+        }
+        if (action === 'start_registered') {
             const folders = workspaceFolders(selection.folder);
             if (folders.length !== 1) throw new Error('Choose a single workspace folder for the registered supervisor.');
-            await this.startRegistered(folders[0], signal);
+            return (await this.launch({ kind: 'registered', folder: folders[0] }, epoch, undefined, signal)).state;
         }
-        else if (action === 'stop') await this.stop();
-        else if (action === 'show_output') this.output.show(true);
-        else if (action === 'rebuild') {
-            if (!this.session) throw new Error('Start a managed FerroUI application first.');
-            this.session.build();
+        if (action === 'stop_all') { await this.stop(); return this.state; }
+        if (action === 'stop' && !session && !this.live.size) return stopped;
+        if (action === 'show_output' && !session && !this.live.size) { this.output.show(true); return stopped; }
+        if (!session && this.live.size > 1) throw new Error('Pass app_session from ferroui_app_sessions to address a running app.');
+        const run = this.require(session);
+        switch (action) {
+            case 'select': this.select(run); break;
+            case 'stop': await this.stopOne(run); return { ...stopped, session: run.id };
+            case 'rebuild': run.rebuild(); break;
+            case 'show_output': run.showOutput(); break;
+            case 'attach_debug': {
+                const configuration = await selectDebugConfiguration(run.folder, false, debugConfiguration);
+                signal.throwIfAborted();
+                if (configuration) await run.attach(configuration);
+                break;
+            }
         }
-        return this.state;
+        return run.state;
+    }
+
+    private find(id?: string): ManagedReload | undefined {
+        const run = this.live.get(id ?? this.active ?? '');
+        if (!run && id !== undefined) throw new Error('This FerroUI app session has ended. Choose a current session.');
+        return run;
+    }
+
+    private require(id?: string): ManagedReload {
+        const run = this.find(id);
+        if (!run) throw new Error('Start a managed FerroUI application first.');
+        return run;
+    }
+
+    private async pick(id?: string): Promise<void> {
+        if (id) { this.select(this.require(id)); return; }
+        if (this.live.size < 2) { this.find()?.showOutput(); return; }
+        const choices = this.runs().map(run => ({ label: run.label, description: run.state.status,
+            detail: run.pid !== undefined ? `PID ${run.pid} · ${run.folder.name}` : run.folder.name, run }));
+        const selected = await vscode.window.showQuickPick(choices, { title: 'Select FerroUI App Session', matchOnDetail: true });
+        if (selected && this.live.get(selected.run.id) === selected.run) this.select(selected.run);
+    }
+
+    private select(run: ManagedReload): void {
+        this.active = run.id;
+        this.refresh();
+        this.runtimeChanged.fire();
     }
 
     private async startInteractive(debug = false): Promise<void> {
         if (this.choosing) return;
-        try {
-            await this.start(() => selectCargoTarget(), undefined, debug ? selectDebugConfiguration : undefined);
-        } catch (error) {
-            this.output.appendLine(errorMessage(error));
-            void vscode.window.showErrorMessage(`FerroUI hot reload could not start. ${errorMessage(error)}`);
-        }
-    }
-
-    private requirePid(): number {
-        const pid = this.session?.pid ?? this.registered?.pid;
-        if (!pid) throw new Error('Start a managed FerroUI application first.');
-        return pid;
-    }
-
-    private async attachDebugger(): Promise<void> {
-        try {
-            const pid = this.requirePid();
-            const folder = this.session?.target.folder ?? this.registered!.folder;
-            const selected = await selectDebugConfiguration(folder);
-            if (selected && this.requirePid() === pid) await this.debugger.attach(folder, selected, pid);
-        } catch (error) {
-            void vscode.window.showErrorMessage(errorMessage(error));
-        }
-    }
-
-    private async start(resolveTarget: () => Promise<CargoTarget | undefined>, signal?: AbortSignal,
-        debug?: (folder: vscode.WorkspaceFolder) => Promise<vscode.DebugConfiguration | undefined>): Promise<void> {
-        if (this.choosing) throw new Error('A FerroUI Cargo target is already being selected.');
-        const generation = ++this.generation;
         this.choosing = true;
+        const epoch = this.selectionEpoch;
         try {
-            const target = await resolveTarget();
-            signal?.throwIfAborted();
-            if (!target || this.generation !== generation) return;
-            if (debug) {
-                const configuration = await debug(target.folder);
-                signal?.throwIfAborted();
-                if (!configuration || this.generation !== generation) return;
-                this.debugger.prepare(target.folder, configuration);
-            } else this.debugger.detach();
-            void this.retireProcesses();
-            this.log.reset();
-            this.session = new ReloadSession(target, this.log, this.history, (message, problem) => {
-                this.report(target.label, message, problem);
-            }, endpoint => {
-                if (endpoint?.url === this.runtimeMcp?.url && endpoint?.token === this.runtimeMcp?.token) return;
-                this.runtimeMcp = endpoint;
-                this.runtimeChanged.fire();
-            }, metadata => this.built.fire(metadata), pid => this.debugger.activated(pid));
-            this.message = 'Build queued';
-            this.session.build();
-        } finally {
-            this.choosing = false;
-        }
-    }
-
-    private async startRegisteredInteractive(): Promise<void> {
-        try {
-            const document = vscode.window.activeTextEditor?.document;
-            const folders = localFolders();
-            const folder = (document && vscode.workspace.getWorkspaceFolder(document.uri))
-                ?? (folders.length === 1 ? folders[0] : await vscode.window.showWorkspaceFolderPick());
-            if (folder) await this.startRegistered(folder);
-        } catch (error) {
-            this.output.appendLine(errorMessage(error));
-            void vscode.window.showErrorMessage(errorMessage(error));
-        }
-    }
-
-    private async startRegistered(folder: vscode.WorkspaceFolder, signal?: AbortSignal): Promise<void> {
-        if (this.choosing) throw new Error('A FerroUI target is already being selected.');
-        this.choosing = true;
-        try {
-            const generation = this.generation + 1;
-            signal?.throwIfAborted();
-            const session = await RegisteredReload.start(folder, this.log, (message, pid, problem) => {
-                if (this.generation !== generation) return;
-                this.report('Registered patch supervisor', message, problem);
-                if (pid) this.debugger.activated(pid);
-            });
-            if (signal?.aborted || generation !== this.generation + 1) { session.dispose(); signal?.throwIfAborted(); return; }
-            this.stop();
-            this.registered = session;
-            this.log.reset();
-            this.report('Registered patch supervisor', 'Starting registered target');
+            const target = await selectCargoTarget();
+            if (!target) return;
+            const configuration = debug ? await selectDebugConfiguration(target.folder) : undefined;
+            if (debug && !configuration) return;
+            await this.launch({ kind: 'cargo', target }, epoch, configuration);
         } finally { this.choosing = false; }
     }
 
-    private report(target: string, message: string, problem?: boolean): void {
-        this.message = message;
-        this.indicator.text = `$(flame) ${message}`;
-        this.indicator.tooltip = `${target} · ${message}\nShow FerroUI Hot Reload output`;
-        this.indicator.backgroundColor = problem ? new vscode.ThemeColor('statusBarItem.errorBackground') : undefined;
-        this.indicator.show();
+    private async startRegisteredInteractive(): Promise<void> {
+        const epoch = this.selectionEpoch;
+        const document = vscode.window.activeTextEditor?.document;
+        const folders = localFolders();
+        const folder = (document && vscode.workspace.getWorkspaceFolder(document.uri))
+            ?? (folders.length === 1 ? folders[0] : await vscode.window.showWorkspaceFolderPick());
+        if (folder) await this.launch({ kind: 'registered', folder }, epoch);
     }
 
-    stop(): Promise<void> {
-        this.generation++;
-        this.debugger.detach();
-        this.message = 'Stopped';
-        this.indicator.hide();
-        return this.retireProcesses();
+    private async launch(recipe: ReloadRecipe, epoch: number, configuration?: vscode.DebugConfiguration, signal?: AbortSignal): Promise<ManagedReload> {
+        const key = recipeKey(recipe);
+        await this.retiring.get(key);
+        signal?.throwIfAborted();
+        if (this.disposed || this.selectionEpoch !== epoch || !vscode.workspace.isTrusted) {
+            throw new Error('The workspace app selection changed before launch.');
+        }
+        const folder = recipe.kind === 'cargo' ? recipe.target.folder : recipe.folder;
+        if (!localFolders().some(item => item.uri.toString() === folder.uri.toString())) throw new Error('The selected workspace folder has closed.');
+        const existing = this.byRecipe.get(key);
+        if (existing) {
+            this.select(existing);
+            if (configuration) await existing.attach(configuration);
+            existing.ensureStarted();
+            return existing;
+        }
+        const run = new ManagedReload(recipe, this.history, () => this.refresh(), () => this.runtimeChanged.fire(), meta => this.built.fire(meta));
+        this.live.set(run.id, run);
+        this.byRecipe.set(run.key, run);
+        this.select(run);
+        try {
+            await run.start(configuration);
+            signal?.throwIfAborted();
+            if (this.live.get(run.id) !== run) throw new Error('The app session stopped before launch completed.');
+            return run;
+        } catch (error) { await this.stopOne(run); throw error; }
     }
 
-    private retireProcesses(): Promise<void> {
-        const previous = [this.session?.dispose(), this.registered?.dispose()];
-        this.session = undefined;
-        this.registered = undefined;
-        this.shutdown = Promise.all([this.shutdown, ...previous]).then(() => undefined);
-        return this.shutdown;
+    private stopOne(run: ManagedReload): Promise<void> {
+        if (this.live.get(run.id) !== run) return this.retiring.get(run.key) ?? Promise.resolve();
+        this.live.delete(run.id);
+        this.byRecipe.delete(run.key);
+        if (this.active === run.id) this.active = this.runs().at(-1)?.id;
+        const cleanup = run.stop().finally(() => { this.retiring.delete(run.key); });
+        this.retiring.set(run.key, cleanup);
+        this.refresh();
+        this.runtimeChanged.fire();
+        return cleanup;
+    }
+
+    async stop(): Promise<void> {
+        this.selectionEpoch++;
+        await Promise.all([...this.retiring.values(), ...this.runs().map(run => this.stopOne(run))]);
+    }
+
+    private refresh(): void {
+        const run = this.find();
+        if (run) {
+            const { status, problem } = run.state;
+            this.indicator.text = `$(flame) ${this.live.size === 1 ? status : `${run.label} · ${this.live.size} apps`}`;
+            this.indicator.tooltip = `${run.label} · ${status}\n${this.live.size === 1 ? 'Show FerroUI Hot Reload output' : 'Select a FerroUI app session'}`;
+            this.indicator.backgroundColor = problem ? new vscode.ThemeColor('statusBarItem.errorBackground') : undefined;
+            this.indicator.show();
+        } else this.indicator.hide();
+        this.changed.fire();
+    }
+
+    private async interactive(action: () => Promise<void>): Promise<void> {
+        try { await action(); }
+        catch (error) {
+            this.output.appendLine(errorMessage(error));
+            void vscode.window.showErrorMessage(errorMessage(error));
+        }
     }
 
     dispose(): void {
-        void this.stop();
+        this.disposed = true;
         this.subscriptions.forEach(subscription => subscription.dispose());
-        this.indicator.dispose();
-        this.debugger.dispose();
-        this.output.dispose();
-        this.runtimeChanged.dispose();
-        this.built.dispose();
-        this.history.dispose();
+        void this.stop().finally(() => {
+            this.indicator.dispose();
+            this.output.dispose();
+            this.runtimeChanged.dispose();
+            this.built.dispose();
+            this.changed.dispose();
+            this.history.dispose();
+        });
     }
 }
 
@@ -220,5 +269,5 @@ async function selectDebugConfiguration(folder: vscode.WorkspaceFolder, interact
     if (configurations.length === 1) return configurations[0];
     if (!interactive) throw new Error('Specify debug_configuration using the attach configuration name in launch.json.');
     return (await vscode.window.showQuickPick(configurations.map(configuration => ({ label: configuration.name, configuration })),
-        { placeHolder: 'Debug the managed FerroUI application' }))?.configuration;
+        { placeHolder: 'Debug this FerroUI application session' }))?.configuration;
 }

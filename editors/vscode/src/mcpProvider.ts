@@ -36,12 +36,11 @@ export class FerroMcpProvider implements vscode.McpServerDefinitionProvider, vsc
                     ['--mcp-editor'], await this.bridge.environment(), this.context.extension.packageJSON.version));
             } catch (error) { this.output.appendLine(String(error)); }
         }
-        const attached = this.runtimes.get('attached');
-        if (attached) definitions.push(new vscode.McpHttpServerDefinition('FerroUI Running Application or Studio',
-            vscode.Uri.parse(attached.url), { Authorization: `Bearer ${attached.token}` }));
-        const runtime = this.runtimes.get('managed');
-        if (runtime) definitions.push(new vscode.McpHttpServerDefinition('FerroUI Managed Application',
-            vscode.Uri.parse(runtime.url), { Authorization: `Bearer ${runtime.token}` }, String(this.runtimes.managedRevision)));
+        for (const { target, endpoint } of this.runtimes.endpoints()) {
+            const name = `FerroUI ${target.kind === 'managed' ? 'Managed' : 'Attached'} · ${target.label} (${target.runtime.split(':')[1].slice(0, 8)})`;
+            definitions.push(new vscode.McpHttpServerDefinition(name, vscode.Uri.parse(endpoint.url),
+                { Authorization: `Bearer ${endpoint.token}` }, String(target.generation)));
+        }
         for (const profile of config.get<StdioProfile[]>('stdioServers') ?? []) {
             if (!profile.label || !profile.command || !path.isAbsolute(profile.command)) continue;
             definitions.push(new vscode.McpStdioServerDefinition(profile.label, profile.command, profile.args ?? []));

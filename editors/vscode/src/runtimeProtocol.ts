@@ -1,5 +1,5 @@
 import type { Bounds } from './protocol';
-import type { RuntimeTarget } from './runtimeConnections';
+import type { AppRuntime } from './runtimeTargets';
 
 export interface RuntimeNode {
     node_id: number;
@@ -43,7 +43,8 @@ export interface RuntimeFrame {
 }
 
 export type ToRuntime =
-    | { type: 'state'; target?: RuntimeTarget; targets: RuntimeTarget[]; status: string; windows: RuntimeNode[]; root?: number }
+    | { type: 'state'; target?: AppRuntime; targets: { runtime: AppRuntime; label: string }[];
+        generation?: number; status: string; windows: RuntimeNode[]; root?: number }
     | { type: 'frame'; frame: RuntimeFrame }
     | { type: 'inspection'; token: number; view: RuntimeInspection; node: number; data: unknown; canReveal: boolean; canApply: boolean; canTrace: boolean; canInspectTemplates: boolean }
     | { type: 'problem'; message: string };
@@ -61,7 +62,7 @@ type RuntimeFrameAction =
 
 export type FromRuntime =
     | { type: 'ready' | 'refresh' | 'start' | 'attach' }
-    | { type: 'target'; target: RuntimeTarget }
+    | { type: 'target'; target: AppRuntime }
     | { type: 'window'; id: number }
     | { type: 'hierarchy'; tree: RuntimeHierarchy }
     | (RuntimeFrameAction & { token: number });

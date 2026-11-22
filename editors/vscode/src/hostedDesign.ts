@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
+import { inCargoBuildSlot } from './cargoBuildGate';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
 import { DesignerDependencies, dirtyPreviewSources } from './designerDependencies';
 import type { HostedAnimationAction, HostedAnimationFrame, HostedAnimationRequest, HostedAnimationState, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedSourcePlan, HostedStateDraft } from './hostedAnimationProtocol';
@@ -310,6 +311,7 @@ class HostedSession {
     private readonly dependencies: DesignerDependencies;
     private readonly subscriptions: vscode.Disposable[];
     private readonly startup: Promise<void>;
+    private readonly lifetime = new AbortController();
     private compiler?: ReloadProcess;
     private application?: ReloadProcess;
     private retiring?: Promise<void>;
@@ -372,31 +374,35 @@ class HostedSession {
 
     private async start(built: (metadata: ProjectMetadata) => void): Promise<void> {
         try {
-            const build = buildCargo(this.target, this.output);
-            this.compiler = build.process;
-            const artifact = await build.artifact;
-            if (this.disposed) return;
-            this.compiler = undefined;
-            const metadata = build.metadata();
-            this.project = { metadata, workspaceRoot: this.target.folder.uri.fsPath };
-            built(metadata);
-            const client = await NativePreview.start(this.context, this.output);
-            if (this.disposed) { client.dispose(); return; }
-            this.client = client;
-            const nonce = randomBytes(32).toString('hex');
-            const { port, animationQuery } = await client.listenHosted(nonce);
-            if (this.disposed) return;
-            const endpoint = new URL(`tcp-bson://127.0.0.1:${port}/`);
-            if (animationQuery) endpoint.search = animationQuery;
-            const args = ['--ferroui-preview', '--transport', endpoint.toString(), '--session-id', nonce,
-                '--method', 'ferroui-remote', artifact];
-            const launch = await launchArtifact(artifact, { ...this.target, args }, this.output, () => {}, () => {});
-            if (this.disposed) { await launch.process.stop(); return; }
-            this.application = launch.process;
-            void launch.process.closed.then(code => this.ended(`The design host stopped (${code ?? 'terminated'}).`), error => this.ended(errorMessage(error)));
-            this.report('Waiting for the application preview…');
-            this.schedule(0);
+            await inCargoBuildSlot(this.target.targetDirectory, this.lifetime.signal, () => this.buildAndLaunch(built));
         } catch (error) { this.ended(errorMessage(error)); }
+    }
+
+    private async buildAndLaunch(built: (metadata: ProjectMetadata) => void): Promise<void> {
+        const build = buildCargo(this.target, this.output);
+        this.compiler = build.process;
+        const artifact = await build.artifact;
+        if (this.disposed) return;
+        this.compiler = undefined;
+        const metadata = build.metadata();
+        this.project = { metadata, workspaceRoot: this.target.folder.uri.fsPath };
+        built(metadata);
+        const client = await NativePreview.start(this.context, this.output);
+        if (this.disposed) { client.dispose(); return; }
+        this.client = client;
+        const nonce = randomBytes(32).toString('hex');
+        const { port, animationQuery } = await client.listenHosted(nonce);
+        if (this.disposed) return;
+        const endpoint = new URL(`tcp-bson://127.0.0.1:${port}/`);
+        if (animationQuery) endpoint.search = animationQuery;
+        const args = ['--ferroui-preview', '--transport', endpoint.toString(), '--session-id', nonce,
+            '--method', 'ferroui-remote', artifact];
+        const launch = await launchArtifact(artifact, { ...this.target, args }, this.output, () => {}, () => {});
+        if (this.disposed) { await launch.process.stop(); return; }
+        this.application = launch.process;
+        void launch.process.closed.then(code => this.ended(`The design host stopped (${code ?? 'terminated'}).`), error => this.ended(errorMessage(error)));
+        this.report('Waiting for the application preview…');
+        this.schedule(0);
     }
 
     private ended(message: string) {
@@ -970,6 +976,7 @@ class HostedSession {
     dispose(): Promise<void> {
         if (this.stopped) return this.stopped;
         this.disposed = true;
+        this.lifetime.abort();
         clearTimeout(this.timer);
         this.animations.invalidate();
         this.client?.dispose();

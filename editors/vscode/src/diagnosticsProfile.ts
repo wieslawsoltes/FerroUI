@@ -1,12 +1,10 @@
 import { Buffer } from 'node:buffer';
 import * as vscode from 'vscode';
 import { errorMessage } from './protocol';
-import type { RuntimeTarget } from './runtimeConnections';
 import type { ProfilePhase, ProfileReport, ProfileRow, RuntimeProfiles } from './runtimeProfiles';
 import { choose } from './studioContext';
 
 const phaseLabels = { measure: 'Measure', arrange: 'Arrange', render: 'RSX render', reconcile: 'Reconciliation' };
-const runtimeLabels: Record<RuntimeTarget, string> = { managed: 'Managed app', attached: 'Attached app' };
 const request = () => AbortSignal.timeout(15_000);
 
 export type ProfileItem =
@@ -71,7 +69,7 @@ export class DiagnosticsProfile implements vscode.Disposable {
             const tree = new vscode.TreeItem(state);
             tree.id = id;
             tree.description = (report.elapsed_ms / 1000).toFixed(1) + ' s';
-            const location = runtimeLabels[report.runtime] + ' · Window ' + report.window_id;
+            const location = this.profiles.label(report.runtime) + ' · Window ' + report.window_id;
             tree.tooltip = report.omitted_calls ? location + '\n' + report.omitted_calls + ' calls omitted' : location;
             tree.iconPath = new vscode.ThemeIcon(report.recording ? 'record' : 'graph');
             tree.contextValue = 'profileReport';
@@ -109,8 +107,9 @@ export class DiagnosticsProfile implements vscode.Disposable {
     private async record(): Promise<void> {
         const targets = this.profiles.targets();
         if (!targets.length) throw new Error('Start or attach a FerroUI application with MCP.');
-        const target = targets.length === 1 ? targets[0]
-            : (await choose('Application to profile', targets.map(runtime => ({ label: runtimeLabels[runtime], runtime }))))?.runtime;
+        const target = targets.length === 1 ? targets[0].runtime
+            : (await choose('Application to profile', targets.map(({ label, runtime, pid }) => ({ label, runtime,
+                description: pid ? `PID ${pid}` : runtime.split(':')[0] }))))?.runtime;
         if (!target) return;
         const session = await this.profiles.windows(request(), target);
         if (!session.windows.length) throw new Error('Open a window in the running application.');

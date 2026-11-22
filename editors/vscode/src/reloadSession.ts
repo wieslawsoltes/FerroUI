@@ -1,16 +1,15 @@
-import { realpathSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { inCargoBuildSlot } from './cargoBuildGate';
 import type { CargoTarget } from './cargoTarget';
-import { isInside } from './workspacePaths';
 import { buildCargo, launchArtifact, ReloadProcess, revision, type ProjectMetadata, type RuntimeEvent } from './reloadProcess';
-import type { ReloadHistory, ReloadRecord } from './reloadHistory';
+import type { ReloadHistory, ReloadIdentity, ReloadRecord } from './reloadHistory';
 import type { RuntimeFrameReceipt } from './reloadFrames';
 import type { ProcessOutput } from './reloadLog';
+import { fileKey, ReloadScope } from './reloadScope';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
-const watchPattern = '**/{*.rs,*.xaml,Cargo.toml}';
 const reloadWindow = 1800;
 
 interface SourceChange {
@@ -25,15 +24,14 @@ interface SourceChange {
 type LiveEvent = RuntimeEvent & { generation: number; pid?: number };
 
 export class ReloadSession implements vscode.Disposable {
-    private readonly resources: vscode.Disposable[] = [];
+    private readonly lifetime = new AbortController();
     private readonly changes = new Map<string, SourceChange>();
     private readonly observed = new Map<string, string>();
     private readonly waitingReads = new Map<string, object>();
     private readonly results = new Map<string, LiveEvent>();
     private readonly acceptedXaml = new Map<string, string>();
     private readonly languages = new Set<RuntimeEvent['language']>();
-    private readonly root: string;
-    private readonly targetDirectory: string;
+    private readonly scope: ReloadScope;
     private live?: ReloadProcess;
     private liveGeneration?: number;
     private compiler?: ReloadProcess;
@@ -45,17 +43,13 @@ export class ReloadSession implements vscode.Disposable {
     private serial = 0;
     private disposed = false;
 
-    constructor(readonly target: CargoTarget, private readonly output: ProcessOutput, private readonly history: ReloadHistory,
+    constructor(readonly target: CargoTarget, private readonly identity: ReloadIdentity,
+        private readonly output: ProcessOutput, private readonly history: ReloadHistory,
         private readonly status: (message: string, problem?: boolean) => void,
-        private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint) => void,
+        private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint, processGeneration?: number) => void,
         private readonly built: (metadata: ProjectMetadata) => void,
         private readonly activated: (pid: number) => void) {
-        this.root = fileKey(target.folder.uri.fsPath);
-        this.targetDirectory = fileKey(target.targetDirectory);
-        const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(target.folder, watchPattern));
-        const observe = (uri: vscode.Uri) => { void this.observe(uri); };
-        this.resources.push(watcher, watcher.onDidChange(observe), watcher.onDidCreate(observe), watcher.onDidDelete(observe),
-            vscode.workspace.onDidSaveTextDocument(document => observe(document.uri)));
+        this.scope = new ReloadScope(target);
     }
 
     get pid(): number | undefined { return this.live?.pid; }
@@ -69,12 +63,15 @@ export class ReloadSession implements vscode.Disposable {
         this.schedule(0);
     }
 
-    private async observe(uri: vscode.Uri): Promise<void> {
+    ensureStarted(): void {
+        if (!this.disposed && !this.live && !this.building && !this.timer) this.build();
+    }
+
+    async observe(uri: vscode.Uri): Promise<void> {
         if (this.disposed || uri.scheme !== 'file') return;
         const file = uri.fsPath;
         const key = fileKey(file);
-        if (!isInside(this.root, key) || isInside(this.targetDirectory, key)
-            || path.relative(this.root, key).split(path.sep).some(part => ['.git', '.vscode', 'target', 'node_modules'].includes(part))) return;
+        if (!this.scope.observes(key)) return;
         const extension = path.extname(file).toLowerCase();
         if (extension !== '.rs' && extension !== '.xaml' && path.basename(file) !== 'Cargo.toml') return;
         const marker = {};
@@ -105,7 +102,7 @@ export class ReloadSession implements vscode.Disposable {
         const previous = this.changes.get(key);
         if (previous) this.history.finish(previous.record, 'superseded', this.pid);
         const observed = Date.now();
-        const record = this.history.observe(file, fingerprint, observed);
+        const record = this.history.observe(file, fingerprint, observed, this.identity);
         this.changes.set(key, { file, fingerprint, xamlFingerprint, language, observed, record });
         this.serial++;
         this.schedule(120);
@@ -118,11 +115,11 @@ export class ReloadSession implements vscode.Disposable {
         }
         if (this.liveGeneration === undefined || !event.file || !path.isAbsolute(event.file)) return;
         const key = fileKey(event.file);
-        if (!isInside(this.root, key)) return;
+        if (!this.scope.observeRuntime(key)) return;
         this.results.set(key, { ...event, generation: this.liveGeneration, pid: this.pid });
         if (this.changes.has(key)) this.schedule(120);
         // The running app may see a structural edit before VS Code's watcher reports it.
-        else if (event.status === 'rebuild') void this.observe(vscode.Uri.file(event.file));
+        else void this.observe(vscode.Uri.file(event.file));
     }
 
     private schedule(delay: number): void {
@@ -176,45 +173,53 @@ export class ReloadSession implements vscode.Disposable {
     }
 
     private async replace(): Promise<void> {
-        const serial = this.serial;
-        const previous = this.live;
+        let serial = this.serial;
+        let previous = this.live;
         this.building = true;
-        this.output.appendLine(`Building ${this.target.label}${previous ? ` · keeping PID ${previous.pid} running` : ''}`);
-        this.status(previous ? 'Building update' : 'Building application');
+        this.status(previous ? 'Update queued' : 'Build queued');
         try {
-            const build = buildCargo(this.target, this.output);
-            this.compiler = build.process;
-            const artifact = await build.artifact;
-            this.compiler = undefined;
-            if (this.superseded(serial)) return;
-            this.built(build.metadata());
             const candidateEvents: RuntimeEvent[] = [];
             const candidateFrames: RuntimeFrameReceipt[] = [];
             let endpoint: RuntimeMcpEndpoint | undefined;
             let live = false;
-            const candidate = await launchArtifact(artifact, this.target, this.output, event => {
-                if (this.disposed) return;
-                if (!live) candidateEvents.push(event);
-                else if (this.live === candidate.process) this.accept(event);
-            }, value => {
-                if (this.disposed) return;
-                if (!live) endpoint = value;
-                else if (this.live === candidate.process) this.mcpChanged(value);
-            }, receipt => {
-                if (this.disposed) return;
-                if (!live) {
-                    if (candidateFrames.length === 256) candidateFrames.shift();
-                    candidateFrames.push(receipt);
-                } else if (this.live === candidate.process && this.liveGeneration !== undefined) {
-                    this.history.observeFrame(this.liveGeneration, receipt);
-                }
+            const candidate = await inCargoBuildSlot(this.scope.targetDirectory, this.lifetime.signal, async () => {
+                serial = this.serial;
+                previous = this.live;
+                this.rebuild = false;
+                this.output.appendLine(`Building ${this.target.label}${previous ? ` · keeping PID ${previous.pid} running` : ''}`);
+                this.status(previous ? 'Building update' : 'Building application');
+                const build = buildCargo(this.target, this.output);
+                this.compiler = build.process;
+                const artifact = await build.artifact;
+                this.compiler = undefined;
+                if (this.superseded(serial)) return;
+                this.built(build.metadata());
+                const launch = await launchArtifact(artifact, this.target, this.output, event => {
+                    if (this.disposed) return;
+                    if (!live) candidateEvents.push(event);
+                    else if (this.live === launch.process) this.accept(event);
+                }, value => {
+                    if (this.disposed) return;
+                    if (!live) endpoint = value;
+                    else if (this.live === launch.process) this.mcpChanged(value, this.liveGeneration);
+                }, receipt => {
+                    if (this.disposed) return;
+                    if (!live) {
+                        if (candidateFrames.length === 256) candidateFrames.shift();
+                        candidateFrames.push(receipt);
+                    } else if (this.live === launch.process && this.liveGeneration !== undefined) {
+                        this.history.observeFrame(this.liveGeneration, receipt);
+                    }
+                });
+                this.candidate = launch.process;
+                return { ...launch, manifests: build.localManifests() };
             });
-            this.candidate = candidate.process;
-            if (this.superseded(serial)) return;
+            if (!candidate || this.superseded(serial)) return;
             await awaitStartup(candidate.process, candidate.ready);
             if (this.superseded(serial)) return;
             this.live = candidate.process;
-            const generation = this.history.startGeneration();
+            this.scope.built(candidate.manifests);
+            const generation = this.history.startGeneration(this.identity.session);
             this.liveGeneration = generation;
             this.candidate = undefined;
             const ready = candidateEvents.find(event => event.status === 'ready');
@@ -229,22 +234,24 @@ export class ReloadSession implements vscode.Disposable {
             this.acceptedXaml.clear();
             this.languages.clear();
             live = true;
-            this.mcpChanged(endpoint);
+            this.mcpChanged(endpoint, generation);
             for (const event of candidateEvents) this.accept(event);
             if (this.live.pid) this.activated(this.live.pid);
             const retired = previous?.stop();
             this.output.appendLine(`Running ${this.target.label} · PID ${this.live.pid}${previous ? ' · rebuilt and restarted' : ''}`);
             this.status(previous ? 'Rebuilt and restarted' : 'Watching saves');
-            void this.live.closed.then(code => {
+            const ended = (message: string, failed: boolean) => {
                 if (this.disposed || this.live !== candidate.process) return;
                 this.live = undefined;
                 this.liveGeneration = undefined;
                 this.history.endGeneration(generation);
                 this.mcpChanged();
                 this.languages.clear();
-                this.output.appendLine(`Application exited${code === null ? '' : ` (${code})`}.`);
-                this.status('Application stopped', Boolean(code));
-            }, error => this.output.appendLine(String(error)));
+                this.output.appendLine(message);
+                this.status('Application stopped', failed);
+            };
+            void this.live.closed.then(code => ended(`Application exited${code === null ? '' : ` (${code})`}.`, Boolean(code)),
+                error => ended(String(error), true));
             await retired;
         } catch (error) {
             if (this.disposed || this.serial !== serial) return;
@@ -274,19 +281,13 @@ export class ReloadSession implements vscode.Disposable {
 
     async dispose(): Promise<void> {
         this.disposed = true;
+        this.lifetime.abort();
         if (this.liveGeneration !== undefined) this.history.endGeneration(this.liveGeneration);
         for (const change of this.changes.values()) this.history.finish(change.record, 'stopped', this.pid);
         this.mcpChanged();
         clearTimeout(this.timer);
-        this.resources.forEach(resource => resource.dispose());
         await Promise.all([this.compiler?.stop(), this.candidate?.stop(), this.live?.stop(), this.replacement]);
     }
-}
-
-function fileKey(file: string): string {
-    let real: string;
-    try { real = realpathSync.native(file); } catch { real = path.resolve(file); }
-    return process.platform === 'win32' ? real.toLowerCase() : real;
 }
 
 async function awaitStartup(child: ReloadProcess, acknowledged: Promise<void>): Promise<void> {

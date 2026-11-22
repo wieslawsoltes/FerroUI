@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { inCargoBuildSlot } from './cargoBuildGate';
 import { selectCargoTarget } from './cargoTarget';
 import { errorMessage } from './protocol';
 import { buildCargo, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
@@ -7,6 +8,7 @@ import { buildCargo, type ProjectMetadata, type ReloadProcess } from './reloadPr
 export class ProjectSchemaBuild implements vscode.Disposable {
     private readonly command = vscode.commands.registerCommand('ferroui.buildProjectSchema', () => this.build());
     private active?: ReloadProcess;
+    private pending?: AbortController;
     private disposed = false;
 
     constructor(private readonly output: vscode.OutputChannel, private readonly publish: (metadata: ProjectMetadata) => void) {}
@@ -15,22 +17,27 @@ export class ProjectSchemaBuild implements vscode.Disposable {
         try {
             const target = await selectCargoTarget('Select a Cargo binary to build its FerroUI XAML schema');
             if (!target || this.disposed) return;
-            if (this.active) throw new Error('A FerroUI schema build is already running.');
+            if (this.pending) throw new Error('A FerroUI schema build is already running.');
             await vscode.window.withProgress({
                 location: vscode.ProgressLocation.Notification, title: `Building XAML schema for ${target.label}`, cancellable: true,
             }, async (_, token) => {
                 if (this.disposed || token.isCancellationRequested) return;
-                if (this.active) throw new Error('A FerroUI schema build is already running.');
-                const build = buildCargo(target, this.output);
-                this.active = build.process;
-                const cancellation = token.onCancellationRequested(() => build.process.stop());
+                if (this.pending) throw new Error('A FerroUI schema build is already running.');
+                const pending = new AbortController();
+                this.pending = pending;
+                const cancellation = token.onCancellationRequested(() => { pending.abort(); void this.active?.stop(); });
                 try {
-                    await build.artifact;
-                    if (!this.disposed && !token.isCancellationRequested) this.publish(build.metadata());
+                    await inCargoBuildSlot(target.targetDirectory, pending.signal, async () => {
+                        const build = buildCargo(target, this.output);
+                        this.active = build.process;
+                        await build.artifact;
+                        if (!pending.signal.aborted) this.publish(build.metadata());
+                    });
                 } catch (error) {
                     if (!this.disposed && !token.isCancellationRequested) throw error;
                 } finally {
                     cancellation.dispose();
+                    this.pending = undefined;
                     this.active = undefined;
                 }
             });
@@ -44,6 +51,7 @@ export class ProjectSchemaBuild implements vscode.Disposable {
     async dispose(): Promise<void> {
         this.disposed = true;
         this.command.dispose();
+        this.pending?.abort();
         await this.active?.stop();
     }
 }

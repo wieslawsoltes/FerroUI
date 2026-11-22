@@ -7,6 +7,7 @@ import { prototypeInput, stageContactInput, stageKeyboardInput } from './stageIn
 import { runtimeProfileCatalog } from './runtimeProfileCatalog';
 import { projectSetupCatalog } from './projectSetupCatalog';
 import { collaborationCatalog } from './collaborationAgents';
+import { runtimeArgument } from './runtimeTargets';
 
 const node = integer(1);
 const session = { session: integer(1) };
@@ -319,26 +320,33 @@ export const agentCatalog = {
         { ...session, expected_frame: integer(1) }, ['session', 'expected_frame']),
     designer_stage_prototype_input: tool('Send a key, text, or pointer contact to the accepted native prototype. Only the active layer receives input. Pointer coordinates are fractions of the full composited artboard.',
         { ...session, expected_frame: integer(1), input: prototypeInput }, ['session', 'expected_frame', 'input'], true, false),
-    ferroui_reload_status: tool('Read the active managed runtime and last reported reload state.'),
+    ferroui_app_sessions: tool('List managed and attached FerroUI app sessions with their exact IDs, process status and inspector generation.'),
+    ferroui_runtime_attach: tool('Connect to a loopback FerroUI app or Studio MCP endpoint. Returns its session identity.', {
+        url: { type: 'string', maxLength: 2048 }, token: { type: 'string', maxLength: 64 }, label: { type: 'string', maxLength: 128 },
+    }, ['url', 'token'], true, false),
+    ferroui_runtime_detach: tool('Disconnect this attached app session.', { runtime: runtimeArgument }, ['runtime'], true, false),
+    ferroui_runtime_open: tool('Open a Live App editor pinned to this exact app session.', { runtime: runtimeArgument }, ['runtime'], true, false),
+    ferroui_reload_status: tool('Read one managed app session’s process and reload state. Defaults to the selected app.', { app_session: { type: 'string', maxLength: 36 } }),
     ferroui_reload_targets: tool('Discover managed Cargo binaries and their enabled features. Supply the folder or a workspace-relative Cargo.toml for a nested project.',
         cargoSelection),
-    ferroui_reload_control: tool('Start a single discovered Cargo target, start it with a configured debugger, rebuild, stop, or show output. Pass the target fields from ferroui_reload_targets and the attach configuration name from launch.json if there are several.',
-        { ...cargoSelection, action: choice('start', 'start_debug', 'start_registered', 'rebuild', 'stop', 'show_output'), debug_configuration: text }, ['action'], true, false),
+    ferroui_reload_control: tool('Start a Cargo target or registered supervisor, attach a debugger, select, rebuild, stop, or show output. Pass app_session when controlling one of several existing apps.',
+        { ...cargoSelection, action: choice('start', 'start_debug', 'start_registered', 'attach_debug', 'select', 'rebuild', 'stop', 'stop_all', 'show_output'),
+            debug_configuration: text, app_session: { type: 'string', maxLength: 36 } }, ['action'], true, false),
     ferroui_reload_output: tool('Read the recent Cargo build and runtime output for the managed application.',
-        { lines: integer(1, 250) }),
+        { lines: integer(1, 250), app_session: { type: 'string', maxLength: 36 } }),
     ferroui_reload_history: tool('Read managed save outcomes, application acknowledgements, and native compositor frame receipts by process generation.',
-        { limit: integer(1, 200) }),
+        { limit: integer(1, 200), app_session: { type: 'string', maxLength: 36 } }),
     ...runtimeProfileCatalog,
     ...projectSetupCatalog,
     ferroui_runtime_source: tool('Resolve a node from the managed or attached runtime inspector to a workspace location. Returns the connection generation and editor buffer version.',
-        { node, runtime: { enum: ['managed', 'attached'] } }, ['node']),
+        { node, runtime: runtimeArgument }, ['node']),
     ferroui_runtime_templates: tool('Read the live templates of an element. Use the returned generation and template ID to open a verified source location.',
-        { node, runtime: { enum: ['managed', 'attached'] } }, ['node']),
+        { node, runtime: runtimeArgument }, ['node']),
     ferroui_runtime_template_source: tool('Open a live template at its verified workspace source. Pass the ID and generation from ferroui_runtime_templates.',
-        { node, runtime: { enum: ['managed', 'attached'] }, template_id: { type: 'string', maxLength: 64 }, expected_generation: integer(0) },
+        { node, runtime: runtimeArgument, template_id: { type: 'string', maxLength: 64 }, expected_generation: integer(0) },
         ['node', 'template_id', 'expected_generation'], true, false),
     ferroui_runtime_apply_source: tool('Apply a runtime property as a literal through the workbench source editor. Use the same runtime, node, generation and buffer version as ferroui_runtime_source. Saving the resulting buffer is a separate action.',
-        { node, runtime: { enum: ['managed', 'attached'] }, property: text, value: { type: 'string', maxLength: 4096 }, expected_generation: integer(0), expected_version: integer(1) },
+        { node, runtime: runtimeArgument, property: text, value: { type: 'string', maxLength: 4096 }, expected_generation: integer(0), expected_version: integer(1) },
         ['node', 'property', 'value', 'expected_generation', 'expected_version'], true),
     ferroui_scenario_run: tool('Run a saved FerroUI scenario in a fresh native preview. Returns step results and any screenshot evidence. Set accept_baselines to write baselines after the scenario assertions pass.',
         { path: workspacePath, folder: workspacePath, accept_baselines: { type: 'boolean' } }, ['path'], true),

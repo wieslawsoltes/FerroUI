@@ -22,6 +22,7 @@ interface CargoPackage {
     manifest_path: string;
     rust_version?: string | null;
     features: Record<string, string[]>;
+    dependencies?: { path?: string | null; kind?: string | null }[];
     targets: { name: string; kind: string[]; src_path: string }[];
 }
 
@@ -29,6 +30,13 @@ interface CargoMetadata {
     packages: CargoPackage[];
     workspace_members: string[];
     target_directory: string;
+    workspace_root?: string;
+}
+
+export interface CargoSources {
+    workspaceManifest?: string;
+    packageRoots: string[];
+    dependencyRoots: string[];
 }
 
 export interface RustModuleProject {
@@ -53,6 +61,7 @@ export interface CargoTarget {
     features: string[];
     args: string[];
     targetDirectory: string;
+    sources?: CargoSources;
 }
 
 export interface CargoSelection {
@@ -144,7 +153,24 @@ async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target
             libraryRoots: pkg.targets.filter(target => target.kind.some(kind => libraryKinds.has(kind))).map(target => target.src_path),
             features: target.features ?? (Object.hasOwn(pkg.features, 'hot-reload') ? ['hot-reload'] : []),
             args: target.args ?? [], targetDirectory: metadata.target_directory,
+            sources: cargoSources(metadata, pkg),
         })));
+}
+
+function cargoSources(metadata: CargoMetadata, selected: CargoPackage): CargoSources {
+    const packages = new Map(metadata.packages.map(pkg => [path.dirname(pkg.manifest_path), pkg]));
+    const dependencyRoots = new Set<string>();
+    const visit = (pkg: CargoPackage) => {
+        for (const dependency of pkg.dependencies ?? []) {
+            if (!dependency.path || dependency.kind === 'dev' || dependencyRoots.has(dependency.path)) continue;
+            dependencyRoots.add(dependency.path);
+            const local = packages.get(dependency.path);
+            if (local) visit(local);
+        }
+    };
+    visit(selected);
+    return { workspaceManifest: metadata.workspace_root && path.join(metadata.workspace_root, 'Cargo.toml'),
+        packageRoots: [...packages.keys()], dependencyRoots: [...dependencyRoots] };
 }
 
 const libraryKinds = new Set(['lib', 'rlib', 'dylib', 'cdylib', 'staticlib', 'proc-macro']);

@@ -4,6 +4,7 @@ import type { HotReload } from './hotReload';
 import { revision } from './reloadProcess';
 import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeTarget } from './runtimeConnections';
+import { runtimeKind } from './runtimeTargets';
 import type { RuntimeNode, RuntimeProperty, RuntimeSource } from './runtimeProtocol';
 import { readRuntimeTemplates } from './runtimeTemplates';
 import { asRange } from './textDocument';
@@ -61,7 +62,8 @@ export class RuntimeSourceEditor {
         if (document.isDirty || document.isClosed) return false;
         if (anchor.language === 'rust') return document.languageId === 'rust' && matchesRevision(document, anchor.revision);
         if (!document.uri.fsPath.toLowerCase().endsWith('.xaml')) return false;
-        const accepted = target === 'managed' ? this.reload.xamlRevision(document.uri.fsPath) : undefined;
+        const accepted = runtimeKind(target) === 'managed'
+            ? this.reload.xamlRevision(document.uri.fsPath, target === 'managed' ? undefined : target.slice('managed:'.length)) : undefined;
         if (anchor.revision === undefined) return matchesRevision(document, accepted);
         return (!accepted || accepted === anchor.revision) && matchesRevision(document, anchor.revision);
     }

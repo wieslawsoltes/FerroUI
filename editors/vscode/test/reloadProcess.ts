@@ -5,6 +5,7 @@ import { access, mkdtemp, rm, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
+import { inCargoBuildSlot } from '../src/cargoBuildGate';
 import { ReloadHistory } from '../src/reloadHistory';
 import { parseFrameReceipt, type RuntimeFrameReceipt } from '../src/reloadFrames';
 import { ReloadProcess } from '../src/reloadProcess';
@@ -81,5 +82,42 @@ export function verifyReloadHistory(): void {
         assert.equal(lateObservation.frame?.status, 'rendered');
         assert.deepEqual(parseFrameReceipt(JSON.stringify(receipt)), receipt);
         assert.equal(parseFrameReceipt(JSON.stringify({ ...receipt, frame: -1 })), undefined);
+
+        const firstApp = { session: 'first', target: 'Account Desk' };
+        const secondApp = { session: 'second', target: 'Routing Queue' };
+        const firstProcess = history.startGeneration(firstApp.session);
+        const secondProcess = history.startGeneration(secondApp.session);
+        const firstSave = history.observe('Account.xaml', 'same-receipt', 1000, firstApp);
+        const secondSave = history.observe('Queue.xaml', 'same-receipt', 1000, secondApp);
+        history.finish(firstSave, 'applied', 34, undefined, { generation: firstProcess, frame: 1 });
+        history.finish(secondSave, 'applied', 54, undefined, { generation: secondProcess, frame: 1 });
+        history.startGeneration(firstApp.session);
+        assert.equal(firstSave.frame?.status, 'processExited');
+        assert.equal(secondSave.frame?.status, 'pending');
+        history.observeFrame(secondProcess, { ...receipt, batch: 25 });
+        assert.equal(secondSave.frame?.batch, 25);
+        assert.deepEqual(history.recent(50, secondApp.session), [secondSave]);
     } finally { history.dispose(); }
+}
+
+export async function verifyCargoBuildSlots(): Promise<void> {
+    const signal = new AbortController().signal;
+    const cancelled = new AbortController();
+    const events: string[] = [];
+    let release!: () => void;
+    const finish = new Promise<void>(resolve => { release = resolve; });
+    const first = inCargoBuildSlot('shared-target', signal, async () => {
+        events.push('first build');
+        await finish;
+        events.push('first executable copied');
+    });
+    const queued = inCargoBuildSlot('shared-target', cancelled.signal, async () => { events.push('cancelled build'); });
+    const later = inCargoBuildSlot('shared-target', signal, async () => { events.push('second build'); });
+    try {
+        cancelled.abort();
+        await assert.rejects(queued, { name: 'AbortError' });
+        await inCargoBuildSlot('independent-target', signal, async () => { events.push('independent build'); });
+        assert.deepEqual(events, ['first build', 'independent build']);
+    } finally { release(); await Promise.all([first, later]); }
+    assert.deepEqual(events, ['first build', 'independent build', 'first executable copied', 'second build']);
 }

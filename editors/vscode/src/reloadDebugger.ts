@@ -11,6 +11,7 @@ export class ReloadDebugger implements vscode.Disposable {
     private active?: vscode.DebugSession;
     private transition = Promise.resolve();
     private readonly instance = randomUUID();
+    private closing?: Promise<void>;
 
     constructor(private readonly output: vscode.OutputChannel) {
         this.subscriptions = [
@@ -81,8 +82,12 @@ export class ReloadDebugger implements vscode.Disposable {
         catch (error) { this.output.appendLine(`FerroUI debugger: ${String(error)}`); }
     }
 
-    dispose(): void {
+    close(): Promise<void> {
+        if (this.closing) return this.closing;
         this.detach();
-        this.subscriptions.forEach(subscription => subscription.dispose());
+        this.closing = this.transition.finally(() => this.subscriptions.forEach(subscription => subscription.dispose()));
+        return this.closing;
     }
+
+    dispose(): void { void this.close(); }
 }

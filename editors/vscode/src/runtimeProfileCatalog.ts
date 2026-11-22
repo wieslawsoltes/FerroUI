@@ -1,6 +1,6 @@
-import { choice, integer, tool, truth } from './agentSchema';
+import { integer, tool, truth } from './agentSchema';
+import { runtimeArgument as runtime } from './runtimeTargets';
 
-const runtime = choice('managed', 'attached');
 const handle = { runtime, expected_generation: integer(0), profile_id: integer(1) };
 const required = ['runtime', 'expected_generation', 'profile_id'];
 

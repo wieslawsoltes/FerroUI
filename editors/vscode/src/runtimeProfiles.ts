@@ -4,6 +4,7 @@ import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
 import type { RuntimeNode } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
+import type { AppRuntime } from './runtimeTargets';
 
 export interface ProfilePhase {
     phase: 'measure' | 'arrange' | 'render' | 'reconcile';
@@ -56,18 +57,17 @@ export class RuntimeProfiles implements vscode.Disposable {
         });
     }
 
-    targets(): RuntimeTarget[] {
-        return (['managed', 'attached'] as const).filter(target => this.runtimes.get(target));
-    }
+    targets() { return this.runtimes.targets().filter(target => target.available); }
+    label(runtime: RuntimeTarget): string { return this.runtimes.describe(runtime)?.label ?? 'Retired app session'; }
 
     isCurrent(target: ProfileTarget): boolean {
         return this.runtimes.revision(target.runtime) === target.generation && this.runtimes.get(target.runtime) !== undefined;
     }
 
     async windows(signal: AbortSignal, runtime = this.defaultTarget()): Promise<ProfileTarget & { windows: RuntimeNode[] }> {
-        return this.use(runtime, undefined, signal, async (client, generation, active) => {
+        return this.use(runtime, undefined, signal, async (client, generation, active, selected) => {
             if (!await client.supports('start_ui_profile')) throw new Error('This app’s inspector has no UI profiler.');
-            return { runtime, generation, windows: await client.call<RuntimeNode[]>('list_windows', {}, active) };
+            return { runtime: selected, generation, windows: await client.call<RuntimeNode[]>('list_windows', {}, active) };
         });
     }
 
@@ -107,16 +107,16 @@ export class RuntimeProfiles implements vscode.Disposable {
     }
 
     private defaultTarget(): RuntimeTarget {
-        return this.targets()[0] ?? 'managed';
+        return this.runtimes.defaultRuntime() ?? 'managed';
     }
 
     private async capture(
         runtime: RuntimeTarget, generation: number | undefined, method: string, args: object, signal: AbortSignal,
     ): Promise<ProfileReport | null> {
         const request = ++this.nextRequest;
-        const report = await this.use(runtime, generation, signal, async (client, current, active) => {
+        const report = await this.use(runtime, generation, signal, async (client, current, active, selected) => {
             const data = await client.call<NativeProfileReport | null>(method, args, active);
-            return data && { ...data, runtime, generation: current };
+            return data && { ...data, runtime: selected, generation: current };
         });
         if (report && !this.isCurrent(report)) throw new Error('The application connection changed.');
         const displayed = this.report;
@@ -134,14 +134,14 @@ export class RuntimeProfiles implements vscode.Disposable {
     }
 
     private async use<T>(runtime: RuntimeTarget, expected: number | undefined, signal: AbortSignal,
-        action: (client: RuntimeClient, generation: number, active: AbortSignal) => Promise<T>): Promise<T> {
+        action: (client: RuntimeClient, generation: number, active: AbortSignal, selected: AppRuntime) => Promise<T>): Promise<T> {
         const active = AbortSignal.any([signal, this.lifetime.signal]);
         active.throwIfAborted();
-        const { endpoint, generation, current } = this.runtimes.session(runtime);
+        const { endpoint, generation, current, runtime: selected } = this.runtimes.session(runtime);
         if (expected !== undefined && expected !== generation) throw new Error('The application connection changed. Choose its current window.');
         const client = new RuntimeClient(endpoint);
         try {
-            const result = await action(client, generation, active);
+            const result = await action(client, generation, active, selected);
             active.throwIfAborted();
             if (!current()) throw new Error('The application connection changed.');
             return result;

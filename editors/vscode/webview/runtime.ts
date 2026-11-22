@@ -1,5 +1,5 @@
 import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, ToRuntime } from '../src/runtimeProtocol';
-import type { RuntimeTarget } from '../src/runtimeConnections';
+import type { AppRuntime } from '../src/runtimeTargets';
 import { create, element, iconButton } from './dom';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromRuntime): void };
@@ -26,7 +26,8 @@ let frame: RuntimeFrame | undefined;
 let pending = 0;
 let selected: number | undefined;
 let interaction = false;
-let currentTarget: RuntimeTarget | undefined;
+let currentTarget: AppRuntime | undefined;
+let currentGeneration: number | undefined;
 let currentWindow: number | undefined;
 
 const send = (message: FromRuntime) => vscode.postMessage(message);
@@ -120,8 +121,8 @@ function filterProperties(): void {
 window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
     const message = event.data;
     if (message.type === 'state') {
-        const options = message.targets.map(item => new Option(item === 'managed' ? 'Managed application' : 'Attached application', item));
-        if (target.options.length !== options.length || options.some((option, i) => option.value !== target.options[i]?.value)) {
+        const options = message.targets.map(item => new Option(item.label, item.runtime));
+        if (target.options.length !== options.length || options.some((option, i) => option.value !== target.options[i]?.value || option.label !== target.options[i]?.label)) {
             target.replaceChildren(...options);
         }
         target.disabled = options.length < 2;
@@ -133,14 +134,17 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         windowChoice.value = String(message.root ?? '');
         windowChoice.disabled = windows.length < 2;
         element('runtime-status').textContent = message.status;
-        if (currentTarget !== message.target || currentWindow !== message.root) {
+        if (currentTarget !== message.target || currentWindow !== message.root || currentGeneration !== message.generation) {
+            if (currentTarget !== message.target) main.hidden = true;
             currentTarget = message.target;
+            currentGeneration = message.generation;
             currentWindow = message.root;
             pending++;
             frame = undefined;
             selected = undefined;
             main.setAttribute('aria-busy', 'true');
             inspector.replaceChildren();
+            tree.replaceChildren();
             reveal.hidden = true;
             templates.hidden = true;
             propertyFilter.hidden = true;
@@ -182,7 +186,7 @@ element('runtime-attach').onclick = () => send({ type: 'attach' });
 element('runtime-refresh').onclick = () => send({ type: 'refresh' });
 reveal.onclick = () => { if (frame && selected !== undefined) send({ type: 'reveal', token: frame.token, node: selected }); };
 templates.onclick = () => { if (frame && selected !== undefined) send({ type: 'templates', token: frame.token, node: selected }); };
-target.onchange = () => send({ type: 'target', target: target.value as RuntimeTarget });
+target.onchange = () => send({ type: 'target', target: target.value as AppRuntime });
 windowChoice.onchange = () => send({ type: 'window', id: Number(windowChoice.value) });
 hierarchy.onchange = () => send({ type: 'hierarchy', tree: hierarchy.value as RuntimeHierarchy });
 detail.onchange = () => { if (frame) inspect(selected ?? frame.root.node_id); };

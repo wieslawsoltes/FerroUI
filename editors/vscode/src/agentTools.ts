@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import type { AppSessions } from './appSessions';
 import type { Collaboration } from './collaboration';
 import { collaborationTool, isCollaborationTool } from './collaborationAgents';
 import { agentCatalog, type AgentTool } from './agentCatalog';
@@ -33,7 +34,7 @@ import type { RuntimeProfiles } from './runtimeProfiles';
 import type { ScenarioRunner } from './scenarioRunner';
 import type { ScenarioReview } from './scenarioReview';
 import { renameRsxControl } from './rsxRename';
-import type { RuntimeTarget } from './runtimeConnections';
+import type { AppRuntime, RuntimeTarget } from './runtimeTargets';
 import type { StagesPanel } from './stagesPanel';
 import type { PrototypeCommand, PrototypeInput, StageChange, StageContact, StageInput } from './stagesProtocol';
 import type { PaletteEdit, StylesPage } from './stylesProtocol';
@@ -56,6 +57,9 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_generation: number;
     expected_sequence: number;
     runtime?: RuntimeTarget;
+    app_session?: string;
+    url?: string;
+    token?: string;
     accept_baselines?: boolean;
     baseline_ref?: string;
     approval?: string;
@@ -137,6 +141,7 @@ export class AgentTools {
 
     constructor(private readonly workbench: DesignerWorkbench, private readonly reload: HotReload, private readonly stages: StagesPanel,
         private readonly runtimeSource: RuntimeSourceTools, private readonly runtimeProfiles: RuntimeProfiles,
+        private readonly appSessions: AppSessions,
         private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold, private readonly projectSetup: ProjectSetup,
         private readonly scenarios: ScenarioRunner, private readonly scenarioReviews: ScenarioReview,
         private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves, private readonly collaboration: Collaboration,
@@ -217,11 +222,15 @@ export class AgentTools {
             await panel.waitForSnapshot(signal).catch(error => { if (signal.aborted) throw error; });
             return describe(panel);
         }
-        if (tool === 'ferroui_reload_status') return this.reload.state;
+        if (tool === 'ferroui_app_sessions') return this.appSessions.list();
+        if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
+        if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }
+        if (tool === 'ferroui_runtime_open') { this.appSessions.open(args.runtime as AppRuntime); return { runtime: args.runtime }; }
+        if (tool === 'ferroui_reload_status') return this.reload.stateFor(args.app_session);
         if (tool === 'ferroui_reload_targets') return this.reload.targets(args);
-        if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60);
-        if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50) };
-        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration);
+        if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60, args.app_session);
+        if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50, args.app_session) };
+        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration, args.app_session);
         if (tool === 'ferroui_runtime_profile_windows') return this.runtimeProfiles.windows(signal, args.runtime);
         if (tool === 'ferroui_runtime_profile_read') {
             if (args.profile_id !== undefined && (args.runtime === undefined || args.expected_generation === undefined)) {

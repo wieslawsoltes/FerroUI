@@ -76,7 +76,9 @@ export class ReloadProcess {
 
 export interface ProjectMetadata { manifest: string; directories: string[]; package?: string; features?: string[] }
 
-export function buildCargo(target: CargoTarget, output: ProcessOutput): { process: ReloadProcess; artifact: Promise<string>; metadata(): ProjectMetadata } {
+export function buildCargo(target: CargoTarget, output: ProcessOutput): {
+    process: ReloadProcess; artifact: Promise<string>; metadata(): ProjectMetadata; localManifests(): string[];
+} {
     const args = ['build', '--manifest-path', target.manifest, '--package', target.packageName,
         '--bin', target.binary, '--message-format=json-render-diagnostics'];
     if (target.features.length) args.push('--features', target.features.join(','));
@@ -85,9 +87,13 @@ export function buildCargo(target: CargoTarget, output: ProcessOutput): { proces
     let artifact: string | undefined;
     let features: string[] | undefined;
     const directories = new Set<string>();
+    const manifests = new Set<string>();
     lines(child.stdout, line => {
         try {
             const message = JSON.parse(line);
+            if (message.reason === 'compiler-artifact' && typeof message.manifest_path === 'string' && path.isAbsolute(message.manifest_path)) {
+                manifests.add(message.manifest_path);
+            }
             if (message.reason === 'compiler-artifact' && message.package_id === target.packageId
                 && message.target?.name === target.binary && message.target.kind.includes('bin')
                 && typeof message.executable === 'string') {
@@ -102,7 +108,8 @@ export function buildCargo(target: CargoTarget, output: ProcessOutput): { proces
         } catch { output.appendLine(line); }
     });
     lines(child.stderr, line => output.appendLine(line));
-    return { process: proc, metadata: () => ({ manifest: target.manifest, directories: [...directories], package: target.packageName, features }), artifact: proc.closed.then(code => {
+    return { process: proc, metadata: () => ({ manifest: target.manifest, directories: [...directories], package: target.packageName, features }),
+        localManifests: () => [...manifests], artifact: proc.closed.then(code => {
         if (code !== 0) throw new Error(`Cargo build failed${code === null ? '' : ` with exit code ${code}`}.`);
         if (!artifact) throw new Error('Cargo did not report an executable for the selected binary.');
         return artifact;

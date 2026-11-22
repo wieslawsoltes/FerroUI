@@ -3,11 +3,12 @@ import type { HotReload } from './hotReload';
 import { errorMessage } from './protocol';
 import { showPropertyTrace, type PropertyTrace } from './propertyTrace';
 import { RuntimeClient } from './runtimeClient';
-import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
+import type { RuntimeConnections } from './runtimeConnections';
 import { readRuntimeDiagnostics } from './runtimeDiagnostics';
 import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, RuntimeSource, ToRuntime } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
 import { readRuntimeTemplates, runtimeTemplateLabel } from './runtimeTemplates';
+import type { AppRuntime } from './runtimeTargets';
 import { runtimeHtml, webviewOptions } from './view';
 
 const refreshInterval = 500;
@@ -16,7 +17,7 @@ export class RuntimePanel implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private panel?: vscode.WebviewPanel;
     private client?: RuntimeClient;
-    private target: RuntimeTarget = 'managed';
+    private target?: AppRuntime;
     private hierarchy: RuntimeHierarchy = 'visual';
     private windows: RuntimeNode[] = [];
     private windowId?: number;
@@ -28,16 +29,19 @@ export class RuntimePanel implements vscode.Disposable {
     private ready = false;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly connections: RuntimeConnections,
-        private readonly reload: HotReload, private readonly authoredSource: RuntimeSourceEditor) {
+        reload: HotReload, private readonly authoredSource: RuntimeSourceEditor,
+        private readonly pinned: AppRuntime | undefined, private readonly closed: () => void) {
         this.subscriptions = [
-            vscode.commands.registerCommand('ferroui.openLiveApp', () => this.show()),
             connections.onDidChange(() => this.reset()),
+            reload.onDidChangeRuns(() => this.postState()),
         ];
     }
 
-    private show(): void {
+    show(): void {
         if (!this.panel) {
-            const panel = vscode.window.createWebviewPanel('ferroui.liveApp', 'FerroUI Live App', vscode.ViewColumn.Beside,
+            const summary = this.pinned && this.connections.describe(this.pinned);
+            const title = summary ? `Live App · ${summary.label}` : 'FerroUI Live App';
+            const panel = vscode.window.createWebviewPanel('ferroui.liveApp', title, vscode.ViewColumn.Beside,
                 { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
             panel.webview.html = runtimeHtml(panel.webview, this.context.extensionUri);
             panel.webview.onDidReceiveMessage((message: FromRuntime) => { void this.receive(message); });
@@ -45,20 +49,17 @@ export class RuntimePanel implements vscode.Disposable {
             panel.onDidDispose(() => {
                 this.panel = undefined;
                 this.ready = false;
-                this.reset();
+                this.dispose();
+                this.closed();
             });
             this.panel = panel;
         } else this.panel.reveal();
     }
 
     private reset(): void {
-        let endpoint = this.connections.get(this.target);
-        if (!endpoint) {
-            const alternate = this.target === 'managed' ? 'attached' : 'managed';
-            endpoint = this.connections.get(alternate);
-            if (endpoint) this.target = alternate;
-        }
-        if (this.panel && endpoint && endpoint === this.client?.endpoint) return;
+        this.target = this.pinned ?? (this.target && this.connections.describe(this.target) ? this.target : this.connections.defaultRuntime());
+        const endpoint = this.target && this.connections.get(this.target);
+        if (!this.panel || endpoint === this.client?.endpoint) { this.postState(); return; }
         this.invalidate();
         this.client?.dispose();
         this.client = this.panel && endpoint ? new RuntimeClient(endpoint) : undefined;
@@ -74,10 +75,16 @@ export class RuntimePanel implements vscode.Disposable {
     }
 
     private postState(): void {
-        const targets = (['managed', 'attached'] as const).filter(target => this.connections.get(target));
-        this.post({ type: 'state', target: this.client ? this.target : undefined, targets, windows: this.windows, root: this.windowId,
-            status: this.client ? this.target === 'managed' ? `${this.reload.state.target ?? 'Managed application'} · ${this.reload.state.status}` : 'Attached application'
-                : 'Run a FerroUI app with MCP enabled, or connect to a running app.' });
+        const targets = this.connections.targets().filter(target => !this.pinned || target.runtime === this.pinned);
+        const summary = targets.find(item => item.runtime === this.target);
+        const options = targets.map(target => ({ runtime: target.runtime,
+            label: targets.some(other => other !== target && other.label === target.label)
+                ? `${target.label} · ${target.pid ?? target.runtime.split(':')[1].slice(0, 8)}` : target.label }));
+        const status = summary ? `${summary.status}${summary.pid && !summary.available ? ' · Inspector unavailable' : ''}`
+            : this.pinned ? 'App session ended.' : 'Run a FerroUI app with MCP enabled, or connect to a running app.';
+        this.post({ type: 'state', target: summary?.runtime, targets: options, generation: summary?.generation ?? undefined,
+            windows: this.windows, root: this.windowId,
+            status });
     }
 
     private schedule(delay = refreshInterval): void {
@@ -125,11 +132,14 @@ export class RuntimePanel implements vscode.Disposable {
         }
         if (message.type === 'start' || message.type === 'attach') {
             await vscode.commands.executeCommand(message.type === 'start' ? 'ferroui.hotReload.start' : 'ferroui.mcp.attach');
-            if (message.type === 'attach' && this.connections.get('attached')) { this.target = 'attached'; this.reset(); }
+            if (!this.pinned) {
+                this.target = this.connections.describe(message.type === 'attach' ? 'attached' : 'managed')?.runtime ?? this.target;
+                this.reset();
+            }
             return;
         }
         if (message.type === 'target') {
-            if (message.target === 'managed' || message.target === 'attached') {
+            if (!this.pinned && this.connections.targets().some(target => target.runtime === message.target)) {
                 this.target = message.target;
                 this.reset();
             }
@@ -160,6 +170,8 @@ export class RuntimePanel implements vscode.Disposable {
         const client = this.client;
         const epoch = this.epoch;
         const frame = this.frame;
+        const runtime = this.target;
+        if (!runtime) return;
         try {
             const nodes = flatten(frame.tree);
             if (message.type === 'pointer') {
@@ -245,7 +257,7 @@ export class RuntimePanel implements vscode.Disposable {
                 await this.inspect(client, epoch, frame.token, node_id, 'properties');
             } else if (message.type === 'assignSource' && typeof message.property === 'string' && typeof message.value === 'string' && message.value.length <= 4096) {
                 await this.authoredSource.apply(client, node, message.property, message.value, AbortSignal.timeout(15_000),
-                    this.target, () => epoch === this.epoch && this.frame?.token === frame.token);
+                    runtime, () => epoch === this.epoch && this.frame?.token === frame.token);
             }
             if (message.type !== 'select') this.schedule(0);
         } catch (error) {
@@ -267,7 +279,7 @@ export class RuntimePanel implements vscode.Disposable {
             view === 'properties' ? client.supports('get_property_trace') : false,
             client.supports('get_template_sources'),
         ]);
-        const canApply = view === 'properties' && source && this.authoredSource.canApply(source, this.target);
+        const canApply = view === 'properties' && source && this.target && this.authoredSource.canApply(source, this.target);
         if (epoch === this.epoch && this.frame?.token === token) this.post({
             type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply), canTrace, canInspectTemplates,
         });

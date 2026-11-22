@@ -75,6 +75,60 @@
     ],
     "commands": [
       {
+        "command": "ferroui.showAppSessions",
+        "title": "Show App Sessions",
+        "category": "FerroUI",
+        "icon": "$(run-all)"
+      },
+      {
+        "command": "ferroui.hotReload.select",
+        "title": "Select Hot Reload Application",
+        "category": "FerroUI",
+        "icon": "$(list-selection)"
+      },
+      {
+        "command": "ferroui.hotReload.stopAll",
+        "title": "Stop All Hot Reload Applications",
+        "category": "FerroUI",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "ferroui.appSessions.preview",
+        "title": "Open This Live App",
+        "category": "FerroUI",
+        "icon": "$(preview)"
+      },
+      {
+        "command": "ferroui.appSessions.select",
+        "title": "Select This Managed App",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.appSessions.rebuild",
+        "title": "Rebuild This App",
+        "category": "FerroUI",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ferroui.appSessions.debug",
+        "title": "Attach Debugger to This App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "ferroui.appSessions.showOutput",
+        "title": "Show App Output",
+        "category": "FerroUI",
+        "icon": "$(output)"
+      },
+      {
+        "command": "ferroui.appSessions.stop",
+        "title": "Stop or Disconnect This App",
+        "category": "FerroUI",
+        "icon": "$(debug-disconnect)"
+      },
+      {
         "command": "ferroui.collaboration.host",
         "title": "Host XAML Room…",
         "category": "FerroUI",
@@ -728,6 +782,30 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "ferroui.appSessions.preview",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.select",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.rebuild",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.debug",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.showOutput",
+          "when": "false"
+        },
+        {
+          "command": "ferroui.appSessions.stop",
+          "when": "false"
+        },
+        {
           "command": "ferroui.collaboration.incoming.apply",
           "when": "ferroui.roomApplyReview"
         },
@@ -1074,6 +1152,21 @@
       ],
       "view/title": [
         {
+          "command": "ferroui.hotReload.start",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.mcp.attach",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.hotReload.stopAll",
+          "when": "view == ferroui.appSessions && ferroui.hasManagedApps",
+          "group": "1_apps"
+        },
+        {
           "command": "ferroui.collaboration.host",
           "when": "view == ferroui.collaboration && isWorkspaceTrusted",
           "group": "navigation@1"
@@ -1180,6 +1273,36 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "ferroui.appSessions.preview",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "ferroui.appSessions.rebuild",
+          "when": "view == ferroui.appSessions && viewItem == app-session-managed",
+          "group": "inline@2"
+        },
+        {
+          "command": "ferroui.appSessions.stop",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached)$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "ferroui.appSessions.select",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)$/",
+          "group": "1_apps@1"
+        },
+        {
+          "command": "ferroui.appSessions.debug",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)$/",
+          "group": "1_apps@2"
+        },
+        {
+          "command": "ferroui.appSessions.showOutput",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)$/",
+          "group": "1_apps@3"
+        },
         {
           "command": "ferroui.collaboration.review",
           "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
@@ -1540,6 +1663,11 @@
     },
     "viewsWelcome": [
       {
+        "view": "ferroui.appSessions",
+        "contents": "[Run with Hot Reload](command:ferroui.hotReload.start)\n[Connect to a Running App](command:ferroui.mcp.attach)",
+        "when": "isWorkspaceTrusted"
+      },
+      {
         "view": "ferroui.collaboration",
         "contents": "[Host XAML Room…](command:ferroui.collaboration.host)\n[Join XAML Room…](command:ferroui.collaboration.join)\n[Resume XAML Room…](command:ferroui.collaboration.resume)",
         "when": "isWorkspaceTrusted"
@@ -1557,6 +1685,13 @@
           "id": "ferroui.diagnostics",
           "name": "Diagnostics",
           "contextualTitle": "FerroUI Diagnostics",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.appSessions",
+          "name": "App Sessions",
+          "icon": "dist/icons/preview.svg",
+          "contextualTitle": "FerroUI App Sessions",
           "visibility": "collapsed"
         },
         {
