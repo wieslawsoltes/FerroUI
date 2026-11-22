@@ -140,7 +140,7 @@ export const agentCatalog = {
         { ...session, node, inspector_id: node, selection: { type: 'array', items: node, maxItems: 128 } }, ['session']),
     designer_resources: tool('List authored XAML resources with scope, compatible properties and usage counts. Supply a source node for selection-relative resolution.',
         { ...session, node }, ['session']),
-    designer_assets: tool('Browse project image, font, media and markup files from the Assets view.',
+    designer_assets: tool('Browse project files and Cargo-published image, font, media and markup assets from the Assets view.',
         { ...session, offset: integer(0), limit: integer(1, 200) }, ['session']),
     designer_set_image_source: tool('Assign a project raster to an authored image property in XAML or mapped RSX. Read imageSourceProperties on the current outline node and supply the property when needed.',
         { ...frame, node, project_asset: text, property: text }, ['session', 'expected_revision', 'node', 'project_asset'], true),

@@ -30,7 +30,7 @@ Choose the invocation in **Design**, select a control in the canvas or **Outline
 
 The edit changes the existing argument and keeps the builder call and adjacent Rust. **Reset** removes the assignment and retains its comments. If the view is fully mapped, edit the same value on the **XAML** tab and choose **Apply**. Undo restores the original buffer in one step. Hover over a mapped call in Rust to see the XAML property and type. Enable `ferroui.rsx.inlayHints` to show the type beside a mapped literal.
 
-Use the source arrow in **Properties** for a computed argument or a repeated assignment. **Assets → Use as image source** also works with a mapped `source(::ferroui_view::embedded_image(...))` call. Saving a builder call to a managed app uses the Cargo rebuild path when that call has no runtime patch slot. [Studio workflow](../native-controls.md#edit-rsx-builder-values) · [MCP workflow](reference.md#drive-an-editor-workflow) · [Embedded images](#edit-values-actions-and-resources)
+Use the source arrow in **Properties** for a computed argument or a repeated assignment. **Assets → Use as image source** works with mapped `embedded_image` and `asset_image` calls. Saving a builder call to a managed app uses the Cargo rebuild path when that call has no runtime patch slot. [Studio workflow](../native-controls.md#edit-rsx-builder-values) · [MCP workflow](reference.md#drive-an-editor-workflow) · [Packaged images](#place-a-published-cargo-asset)
 
 ### Format XAML
 
@@ -248,7 +248,7 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | **Behaviors** | Attach an event or data trigger to an XAML control, edit and order its actions, and run the actions on the native Design canvas. |
 | **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Use the rename icon to review a key and its project references. Extract the containing dictionary into a reusable file, or use **Promote to resource** to replace a literal with a reference. |
 | **Library** | Browse reusable XAML definitions across the project. In the active design, browse definitions by kind or XAML and mapped Rust objects by owning scope. Open a scoped native preview, find uses, or reveal the original declaration. |
-| **Assets** | Import and browse images, fonts, media, and markup. Open a file, preview a raster image, or copy a relative path. Drop a raster image on the canvas or Outline, or use **Choose image placement**. XAML inserts a relative URI. Mapped RSX uses `embedded_image` with a relative `include_bytes!` path whose bytes are read at build time. |
+| **Assets** | Import and browse images, fonts, media, and markup. Open a file, preview a raster image, or copy its path or published Cargo address. Drop a raster image on the canvas or Outline, or use **Choose image placement**. Workspace files use relative XAML URIs or an `embedded_image` call in mapped RSX. [Published assets](#place-a-published-cargo-asset) use a `ferres://` address. |
 | **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. Open **Behaviors** to edit the selected XAML control’s triggers. |
 
 To change an authored image, select it in **Design** or **Outline**. Select a raster file in **Assets** and choose **Use as image source**. The action is available for an empty or literal image source. XAML writes the document-relative URI. On an existing mapped RSX source, the edit changes the path inside `include_bytes!` and preserves the surrounding call, comments, and compatible raw-string delimiters. One Undo restores the previous source.
@@ -300,6 +300,14 @@ For a Rust design, **By Scope** uses the selected RSX invocation. It groups auth
 3. Review the source, destination, type, and byte count. Confirm **Import** to create a copy. If the destination exists or the source changes during review, choose a new destination or review the current file.
 
 The copy appears under **Assets**. To use a raster import, drag it onto the canvas or use **Use as image source** for a selected authored image. MCP agents can review and copy assets already inside the workspace. [MCP reference](reference.md#drive-an-editor-workflow)
+
+### Place a published Cargo asset
+
+1. Run **FerroUI: Build Project XAML Schema** for the target you want to edit. Open a design from that Cargo package and show **Assets**. A published entry lists its assembly and export key beneath the filename. The search field accepts either of those names.
+2. Select an entry to see its thumbnail when available. Use **Open asset** to open the build's recorded source file, or use **Copy packaged address** to copy its `ferres://` URI.
+3. Drag a published raster to the design canvas or **Outline**. To choose a placement from the keyboard, focus the asset row and press Shift+Enter. For an existing authored image, select the control, select the asset, and use **Use as image source**. Choose an image property when the control has several.
+
+The edit uses the exported URI in XAML and `::ferroui_view::asset_image("ferres://…")` in mapped RSX. Both forms work in the designer and in the built app when its asset registry contains the export. Undo restores the prior source in one step. Computed image expressions and binding values remain editable in source. [Designer Studio workflow](../native-controls.md#place-a-packaged-asset) · [MCP reference](reference.md#drive-an-editor-workflow)
 
 ### Open the source of a packaged asset
 

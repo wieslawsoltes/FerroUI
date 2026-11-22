@@ -41,7 +41,14 @@ export class ProjectAssets implements vscode.Disposable {
     }
 
     async resolve(folder: vscode.WorkspaceFolder, id: string): Promise<IndexEntry> {
-        const asset = (await this.scan(folder)).find(asset => asset.path === id);
+        const key = folder.uri.toString();
+        const cached = this.index.get(key);
+        let asset = (await this.scan(folder)).find(entry => entry.path === id);
+        if (!asset && cached) {
+            // A newly written asset can be used before its create event reaches the host.
+            if (this.index.get(key) === cached) this.index.delete(key);
+            asset = (await this.scan(folder)).find(entry => entry.path === id);
+        }
         if (!asset) throw new Error('Choose a file in the current project Assets view.');
         const [root, file] = await Promise.all([realpath(folder.uri.fsPath), realpath(asset.uri.fsPath)]);
         if (!isInside(root, file)) throw new Error('The asset resolves outside the workspace.');
@@ -50,15 +57,7 @@ export class ProjectAssets implements vscode.Disposable {
 
     async thumbnail(folder: vscode.WorkspaceFolder, id: string): Promise<string | undefined> {
         const asset = await this.resolve(folder, id);
-        if (!asset.mime) return undefined;
-        const file = await open(asset.uri.fsPath, 'r');
-        try {
-            const stat = await file.stat();
-            if (!stat.isFile() || stat.size <= 0 || stat.size > maxThumbnailBytes) return undefined;
-            const buffer = Buffer.alloc(stat.size);
-            const { bytesRead } = await file.read(buffer, 0, stat.size, 0);
-            return `data:${asset.mime};base64,${buffer.subarray(0, bytesRead).toString('base64')}`;
-        } finally { await file.close(); }
+        return rasterThumbnail(asset.uri, asset.mime);
     }
 
     async imageSource(document: vscode.Uri, id: string): Promise<string> {
@@ -77,7 +76,10 @@ export class ProjectAssets implements vscode.Disposable {
         const key = folder.uri.toString();
         const cached = this.index.get(key);
         if (cached) return cached;
-        const result = this.find(folder).catch(error => { this.index.delete(key); throw error; });
+        const result = this.find(folder).catch(error => {
+            if (this.index.get(key) === result) this.index.delete(key);
+            throw error;
+        });
         this.index.set(key, result);
         return result;
     }
@@ -101,6 +103,18 @@ export class ProjectAssets implements vscode.Disposable {
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.changed.dispose();
     }
+}
+
+export async function rasterThumbnail(uri: vscode.Uri, mime?: string): Promise<string | undefined> {
+    if (!mime) return undefined;
+    const file = await open(uri.fsPath, 'r');
+    try {
+        const stat = await file.stat();
+        if (!stat.isFile() || stat.size <= 0 || stat.size > maxThumbnailBytes) return undefined;
+        const buffer = Buffer.alloc(stat.size);
+        const { bytesRead } = await file.read(buffer, 0, stat.size, 0);
+        return `data:${mime};base64,${buffer.subarray(0, bytesRead).toString('base64')}`;
+    } finally { await file.close(); }
 }
 
 function relativeTo(document: vscode.Uri, file: vscode.Uri): string {

@@ -18,7 +18,7 @@ import { applyTextEdits, asPosition, asRange, exactRange, offsetAfterChanges, so
 import type { TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { SpacingCatalog, SpacingDraft, SpacingRequest, SpacingResponse } from './spacingProtocol';
 import { designerHtml, webviewOptions } from './view';
-import type { EditResult, Inspection, InspectionTarget, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
+import type { EditResult, Inspection, InspectionTarget, PublishedAsset, PublishedAssetInput, Range, ResourceRow, RuntimeRow, RuntimeTreeMode } from './protocol';
 import type { CanvasAction, CanvasFocusOrder, CanvasInteraction, CanvasPresentation, DefinitionNavigation, DesignDataPresentation, DesignerViewState, ResizeGesture, RustTemplateNavigation, StudioPresentation } from './protocol';
 import { isInside } from './workspacePaths';
 
@@ -228,6 +228,37 @@ export class DesignerPanel implements vscode.Disposable {
             this.schedule(0);
         }
         this.panel.reveal(undefined, true);
+    }
+
+    get publishedAssetProject(): BuiltProject | undefined { return this.project; }
+
+    async publishedAssets(): Promise<PublishedAsset[]> {
+        try {
+            return await this.queryPublishedAssets((client, source) => client.publishedAssets(source)) ?? [];
+        } catch (error) {
+            this.output.appendLine(`Published assets: ${errorMessage(error)}`);
+            return [];
+        }
+    }
+
+    async publishedAsset(address: string): Promise<PublishedAssetInput> {
+        const result = await this.queryPublishedAssets((client, source) => client.publishedAsset(source, address));
+        if (!result) throw new Error('Build the owning Cargo package to access its published assets.');
+        return result;
+    }
+
+    private async queryPublishedAssets<T>(query: (client: NativePreview, source: Source) => Promise<T>): Promise<T | undefined> {
+        const project = this.project;
+        if (!project) return;
+        const document = this.document;
+        const client = await this.getClient();
+        if (!client.capabilities.publishedAssets) return;
+        const source = await client.inProject(sourceOf(document, this.language, this.caret), project);
+        const result = await query(client, source);
+        if (this.project !== project || this.document !== document || this.disposed) {
+            throw new Error('The active Cargo design changed. Choose the asset again.');
+        }
+        return result;
     }
 
     get currentToken(): number | undefined {

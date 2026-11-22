@@ -78,7 +78,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         this.assets.view.post(update);
         for (const panel of this.panels.values()) panel.post(update);
     }, origin => this.assets.ownsImage(origin), async (panel, origin) => {
-        const source = await this.assets.library.imageSource(panel.document.uri, origin.asset ?? '');
+        const source = await this.assets.imageSource(panel, origin.asset ?? '');
         if (source !== origin.source) throw new Error('The image changed during the drag. Start again from Assets.');
     });
     private readonly subscriptions: vscode.Disposable[];
@@ -504,11 +504,11 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     async projectAssets(panel: DesignerPanel) {
         const folder = vscode.workspace.getWorkspaceFolder(panel.document.uri);
-        return folder ? this.assets.library.list(folder, panel.document.uri, true) : [];
+        return folder ? this.assets.list(folder, panel) : [];
     }
 
     async projectImage(panel: DesignerPanel, id: string): Promise<Extract<DragOrigin, { type: 'image' }>> {
-        return { type: 'image', source: await this.assets.library.imageSource(panel.document.uri, id) };
+        return { type: 'image', source: await this.assets.imageSource(panel, id), asset: id };
     }
 
     async projectImageSource(panel: DesignerPanel, target: NodeTarget, id: string, property?: string): Promise<Extract<NodeOperation, { type: 'setProperty' }>> {

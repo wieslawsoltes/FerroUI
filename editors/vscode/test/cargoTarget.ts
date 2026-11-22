@@ -172,6 +172,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     const rasterDirectory = vscode.Uri.joinPath(project, 'Assets');
     await vscode.workspace.fs.createDirectory(rasterDirectory);
     const imageFile = vscode.Uri.joinPath(rasterDirectory, 'Card.png');
+    await designer.projectAssets(rustPanel);
     await vscode.workspace.fs.copy(vscode.Uri.joinPath(workspace, 'Assets', 'Preview Image.png'), imageFile);
     const asset = path.relative(workspace.fsPath, imageFile.fsPath).split(path.sep).join('/');
     await assert.rejects(() => designer.projectImageSource(rustPanel, frame, asset), /available image property/);
