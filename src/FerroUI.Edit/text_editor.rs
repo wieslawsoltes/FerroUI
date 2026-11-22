@@ -1323,7 +1323,7 @@ impl TextEditor {
                     installation.invalidate_from(line);
                 }
                 let rebased = editor.area.get().is_some_and(|area| {
-                    area.document_changed();
+                    area.document_edited(change);
                     editor.document_epoch() == epoch && area.rebase_context_caret(&editor, change)
                 });
                 if editor.document_epoch() != epoch {

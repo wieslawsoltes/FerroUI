@@ -28,6 +28,42 @@ impl HeightTree {
         *self = Self::new(count, default_height);
     }
 
+    pub fn default_height(&self) -> f64 {
+        self.default_height
+    }
+
+    pub fn line_count(&self) -> usize {
+        self.count
+    }
+
+    /// An edit replaced `removed` logical lines at `first` with `inserted` lines: the measured
+    /// heights of the other lines move with them. Lines replaced one for one keep theirs until
+    /// they are measured again. The caller sets the collapsed ranges again afterwards.
+    pub fn splice_lines(&mut self, first: usize, removed: usize, inserted: usize) {
+        if removed == 0 && inserted == 0 {
+            return;
+        }
+        let measured = std::mem::take(&mut self.heights);
+        self.sums.clear();
+        self.collapsed.clear();
+        self.count = (self.count.saturating_sub(removed) + inserted).max(1);
+        for (line, height) in measured {
+            let moved = if line < first {
+                line
+            } else if line >= first + removed {
+                line - removed + inserted
+            } else if removed == inserted {
+                line
+            } else {
+                continue;
+            };
+            if moved < self.count {
+                self.heights.insert(moved, height);
+                self.add_height_delta(moved, height - self.default_height);
+            }
+        }
+    }
+
     pub fn set_height(&mut self, line: usize, height: f64) {
         if line >= self.count
             || self.next_visible(line) != line
@@ -170,6 +206,23 @@ impl HeightTree {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_edit_moves_the_measured_heights_of_the_other_lines() {
+        let mut tree = HeightTree::new(10, 10.0);
+        tree.set_height(1, 30.0);
+        tree.set_height(5, 50.0);
+        tree.set_height(8, 80.0);
+        // Line 5 is replaced by three lines.
+        tree.splice_lines(5, 1, 3);
+        assert_eq!(tree.line_count(), 12);
+        assert_eq!(tree.top(2), 50.0 - 10.0);
+        assert_eq!(tree.top(10), 10.0 * 10.0 + 20.0);
+        assert_eq!(tree.top(11), tree.top(10) + 80.0);
+        // A line replaced by one line keeps its height until it is measured again.
+        tree.splice_lines(1, 1, 1);
+        assert_eq!(tree.top(2), 40.0);
+    }
 
     #[test]
     fn sparse_heights_support_wrap_and_deep_scrolling() {
