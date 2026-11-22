@@ -23,6 +23,7 @@ pub struct ColumnTemplate {
     pub index: usize,
     pub expander_inner: bool,
     pub declaration: BoxedValue,
+    pub header: Option<BoxedValue>,
     pub type_name: &'static str,
     pub member: ColumnTemplateMember,
     pub template: Option<Rc<dyn IDataTemplate>>,

@@ -140,6 +140,7 @@ impl TableView {
             index,
             expander_inner: false,
             declaration: Rc::new(column.clone()),
+            header: column.header(),
             type_name: column.get_type().name(),
             member: ColumnTemplateMember::Display,
             template: column.cell_template(),

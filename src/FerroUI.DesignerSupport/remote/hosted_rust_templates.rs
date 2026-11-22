@@ -1,13 +1,12 @@
 //! Read template properties of the actual app-hosted RSX controls.
-use super::{data_slots, MAX_USES, MAX_VISUALS};
+use super::{MAX_USES, MAX_VISUALS};
 use crate::design_window_loader::LoadedDesign;
 use ferroui_base::diagnostics::RsxSourceInfo;
-use ferroui_controls::{diagnostics::column_templates, templates::IDataTemplate};
+use ferroui_controls::{diagnostics::{column_templates, data_template_slots}, templates::IDataTemplate};
 use ferroui_remote_protocol::designer::{
     DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse,
 };
 use std::rc::Rc;
-use url::Url;
 
 pub(super) fn capture(
     revision: i64,
@@ -25,7 +24,7 @@ pub(super) fn capture(
             continue;
         };
         let type_name = visual.get_type().name();
-        for (member, template) in data_slots(&visual) {
+        for (member, template) in data_template_slots(&visual) {
             templates.push(usage(info, &owner, type_name, member, None, template));
         }
         for slot in column_templates(&visual, MAX_USES.saturating_sub(templates.len()))? {
@@ -61,16 +60,10 @@ fn usage(
     let definition = body.and_then(|body| editor_location(body, true));
     let rust_factory = provenance.and_then(|source| {
         let constructor = source.constructor;
-        let path = RsxSourceInfo::resolve_file(constructor.file(), info.manifest)?;
-        let address = Url::from_file_path(path).ok()?;
-        let fingerprint = [Some(info), body].into_iter().flatten().find_map(|proof| {
-            (proof.source_uri()? == address)
-                .then_some(proof.compiled.revision)
-                .flatten()
-        })?;
+        let proof = source.verified_constructor(Some(info))?;
         Some(DesignTemplateSource {
-            address: address.into(),
-            fingerprint: fingerprint as i64,
+            address: proof.source_uri()?.into(),
+            fingerprint: proof.compiled.revision? as i64,
             line: i32::try_from(constructor.line()).ok()?,
             column: i32::try_from(constructor.column()).ok()?,
         })

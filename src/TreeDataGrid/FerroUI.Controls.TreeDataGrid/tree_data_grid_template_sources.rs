@@ -58,6 +58,7 @@ impl GeneratedTemplateColumn {
         };
         let native = IColumn::as_any(view).downcast_ref::<TemplateColumn<BoxedValue>>()?;
         let [display, editing] = native.known_templates();
+        let header = IColumn::header(native);
         let declaration: BoxedValue = declaration;
         Some(
             [
@@ -68,6 +69,7 @@ impl GeneratedTemplateColumn {
                 index: self.index,
                 expander_inner: self.expander_inner,
                 declaration: declaration.clone(),
+                header: header.clone(),
                 type_name: "TreeDataGridTemplateColumn",
                 member,
                 template,

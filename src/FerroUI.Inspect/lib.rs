@@ -14,6 +14,7 @@ mod property_trace;
 mod schema;
 mod source;
 pub mod target;
+mod template_sources;
 mod text_contrast;
 mod visual_checks;
 use base64::Engine;
@@ -778,6 +779,7 @@ impl Inspector {
                 let trace = Self::property_trace(&object, name)?;
                 Ok(trace.json(|_, entry| entry.source_location()))
             }
+            "get_template_sources" => template_sources::list(&Self::visual_object(&self.object(args)?)),
             "get_element_at" => {
                 let root = Self::visual_object(&self.object(args)?)
                     .cast::<Visual>().ok_or("The selected object has no visual surface")?;

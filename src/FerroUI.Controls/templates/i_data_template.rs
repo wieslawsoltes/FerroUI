@@ -12,6 +12,18 @@ pub struct RustDataTemplateSource {
     pub rendered_body: Option<RsxSourceInfo>,
 }
 
+impl RustDataTemplateSource {
+    /// The compiled evidence for the constructor's file, from a control or an
+    /// observed template body in that file.
+    pub fn verified_constructor(&self, owner: Option<RsxSourceInfo>) -> Option<RsxSourceInfo> {
+        [owner, self.rendered_body].into_iter().flatten().find_map(|proof| {
+            let path = RsxSourceInfo::resolve_file(self.constructor.file(), proof.manifest)?;
+            let same = path == RsxSourceInfo::resolve_file(proof.file, proof.manifest)?;
+            (same && proof.compiled.revision.is_some()).then_some(proof)
+        })
+    }
+}
+
 /// Interface representing a template used to build a control for a piece of
 /// data.
 pub trait IDataTemplate: ITemplateWithParam<Option<BoxedValue>, Option<Ref<Control>>> {

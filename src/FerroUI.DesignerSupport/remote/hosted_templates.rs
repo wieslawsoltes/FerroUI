@@ -1,7 +1,10 @@
 //! Capture source provenance from the actual loaded app, including custom themes.
 use crate::design_window_loader::LoadedDesign;
-use ferroui_base::{FerroObject, FerroPropertyRegistry};
-use ferroui_controls::{diagnostics::column_templates, primitives::TemplatedControl, templates::IDataTemplate};
+use ferroui_controls::{
+    diagnostics::{column_templates, data_template_slots},
+    primitives::TemplatedControl,
+    templates::IDataTemplate,
+};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_remote_protocol::designer::{
     DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse, DESIGN_TEMPLATES_QUERY,
@@ -15,7 +18,6 @@ mod rust;
 
 const MAX_VISUALS: usize = 8_192;
 const MAX_USES: usize = 2_000;
-const DATA_MEMBERS: &[&str] = &["ItemTemplate", "SelectionBoxItemTemplate", "MenuItemTemplate"];
 
 ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
@@ -65,7 +67,7 @@ pub(super) fn capture(
                 .and_then(|template| XamlSourceInfo::for_control_template(&template).and_then(source));
             templates.push(xaml_use(&owner, type_name, "Template", definition));
         }
-        for (member, template) in data_slots(&visual) {
+        for (member, template) in data_template_slots(&visual) {
             templates.push(xaml_use(&owner, type_name, member, data_definition(template)));
         }
         for slot in column_templates(&visual, MAX_USES.saturating_sub(templates.len()))? {
@@ -95,14 +97,6 @@ fn xaml_use(owner: &DesignTemplateSource, type_name: &str, member: &str, definit
 
 fn data_definition(template: Option<Rc<dyn IDataTemplate>>) -> Option<DesignTemplateSource> {
     XamlSourceInfo::for_data_template(&template?).and_then(source)
-}
-
-fn data_slots(object: &FerroObject) -> impl Iterator<Item = (&'static str, Option<Rc<dyn IDataTemplate>>)> + '_ {
-    DATA_MEMBERS.iter().filter_map(move |&member| {
-        let property = FerroPropertyRegistry::instance().find_registered(object.get_type(), member)?;
-        let value = object.get_value_untyped(property);
-        Some((member, value.downcast_ref::<Option<Rc<dyn IDataTemplate>>>()?.clone()))
-    })
 }
 
 fn source(info: XamlSourceInfo) -> Option<DesignTemplateSource> {
