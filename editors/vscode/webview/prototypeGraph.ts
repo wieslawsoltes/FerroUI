@@ -1,4 +1,5 @@
 import type { PrototypeAction, PrototypeEdit, SourceAnchor, StageModel, StagesRequest } from '../src/stagesProtocol';
+import { prototypeEffects } from '../src/stagesProtocol';
 import { create, element, icon, iconButton } from './dom';
 import { connectStageDrag } from './prototypeStageDrag';
 
@@ -121,7 +122,10 @@ export class PrototypeGraphView {
             const target = this.actionText(link.action);
             const summary = create('span');
             summary.className = 'prototype-route-summary';
-            summary.append(create('span', trigger?.name ?? trigger?.type_name ?? 'Trigger'), icon('arrow-right'), create('span', target));
+            const transition = model.manifest.prototype_transitions?.find(item => item.link === index)?.transition;
+            const destination = transition ? target + ' · ' + prototypeEffects[transition.effect] + ' · ' + transition.duration_ms + ' ms' : target;
+            summary.append(create('span', trigger?.name ?? trigger?.type_name ?? 'Trigger'), icon('arrow-right'), create('span', destination));
+            summary.title = summary.textContent ?? '';
             const edit = button(link.name, `Edit ${link.name}`, `interaction-${index}`, () => this.edit({ kind: 'interaction', index }));
             edit.className = 'prototype-route-title';
             edit.prepend(icon('link'));

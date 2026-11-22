@@ -22,19 +22,23 @@ export async function verifyPrototypeMcp({ invoke, content }: McpFixture): Promi
     const hits = content<PrototypeHotspot[]>(await invoke('designer_stage_hotspots', { session, stage: base.id, expected_epoch: base.epoch }));
     const open = hits.find(hit => hit.label === 'Button · Open');
     assert.ok(open);
+    const transitions = [{ link: 0, transition: { effect: 'dissolve', duration_ms: 500, easing: 'ease_in_out' } }];
     const board = content<StageModel>(await invoke('designer_stage_change', { session, expected_epoch: add.epoch,
         arguments: { action: 'setPrototype', graph: { flows: [{ name: 'Account settings', start: 0 }], links: [
             { source: 0, trigger: open.anchor, name: 'Edit account', action: { kind: 'open_overlay', stage: 2,
                 options: { placement: { kind: 'center' }, dim_background: true, dismiss_on_outside: true } } },
-        ] } } }));
+        ] }, transitions } }));
+    assert.equal(board.manifest.version, 4);
+    assert.deepEqual(board.manifest.prototype_transitions, transitions);
     const start = content<PrototypeScene>(await invoke('designer_stage_prototype', { session, expected_epoch: board.epoch,
-        arguments: { action: 'start', flow: 'Account settings' } }));
+        arguments: { action: 'start', flow: 'Account settings', reducedMotion: true } }));
     assert.ok(start.frame);
     const input = (scene: PrototypeScene, input: StageInput) => invoke('designer_stage_prototype_input', {
         session, expected_frame: scene.frame, input: { kind: 'keyboard', input },
     });
     const opened = content<PrototypeInputResult>(await input(start, { kind: 'key', key: 'Enter' }));
     assert.ok(opened.scene?.frame);
+    assert.equal(opened.scene.animating, false);
     assert.equal(opened.scene.current, modal.id);
     assert.deepEqual(opened.focus, { name: 'Company', role: 'Edit' });
     assert.ok((await input(start, { kind: 'focus' })).isError);

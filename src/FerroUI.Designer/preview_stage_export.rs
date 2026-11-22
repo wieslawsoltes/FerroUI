@@ -82,6 +82,35 @@ pub fn capture_preview_stage_png(
     control: &Ref<Control>,
     options: PreviewStageExportOptions,
 ) -> Result<PreviewStageImage, String> {
+    let (png, logical, pixels) = capture_stage(control, options, |bitmap| {
+        let mut output = BoundedPng::default();
+        bitmap
+            .save(&mut output, &PngBitmapEncoderOptions::default().into())
+            .map_err(|error| format!("Could not encode the preview screenshot: {error}"))?;
+        if output.bytes.is_empty() {
+            return Err("The native renderer returned an empty preview screenshot".into());
+        }
+        Ok(output.bytes)
+    })?;
+    Ok(PreviewStageImage {
+        png,
+        logical_width: logical.width,
+        logical_height: logical.height,
+        pixel_width: pixels.width as u32,
+        pixel_height: pixels.height as u32,
+        scale: options.scale,
+    })
+}
+
+pub(crate) fn capture_preview_stage_bitmap(control: &Ref<Control>) -> Result<RenderTargetBitmap, String> {
+    capture_stage(control, PreviewStageExportOptions::default(), Ok).map(|(bitmap, _, _)| bitmap)
+}
+
+fn capture_stage<T>(
+    control: &Ref<Control>,
+    options: PreviewStageExportOptions,
+    read: impl FnOnce(RenderTargetBitmap) -> Result<T, String>,
+) -> Result<(T, Size, PixelSize), String> {
     if !Dispatcher::ui_thread().check_access() {
         return Err("Capture preview screenshots on the UI thread".into());
     }
@@ -100,20 +129,13 @@ pub fn capture_preview_stage_png(
     // Boundary (#567): the size and the backend are checked above; rendering the stage runs the
     // render code of the previewed controls, and a panic of it answers with an error. Isolating
     // it needs a build that unwinds (`dev`, `release` or `dist-unwind` profile).
-    let png = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-        let bitmap = BitmapGuard(RenderTargetBitmap::with_dpi(
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let bitmap = RenderTargetBitmap::with_dpi(
             pixels,
             Vector::new(96.0 * options.scale, 96.0 * options.scale),
-        ));
-        bitmap.0.render(&control.clone().upcast());
-        let mut output = BoundedPng::default();
-        bitmap
-            .0
-            .save(&mut output, &PngBitmapEncoderOptions::default().into())
-            .map_err(|error| format!("Could not encode the preview screenshot: {error}"))?;
-        if output.bytes.is_empty() {
-            return Err("The native renderer returned an empty preview screenshot".into());
-        }
+        );
+        bitmap.render(&control.clone().upcast());
+        let output = read(bitmap)?;
         if control.bounds().size() != logical
             || !control.is_measure_valid()
             || !control.is_arrange_valid()
@@ -123,7 +145,7 @@ pub fn capture_preview_stage_png(
             );
         }
         validate_visible_layout(&control.clone().upcast())?;
-        Ok(output.bytes)
+        Ok((output, logical, pixels))
     }))
     .unwrap_or_else(|payload| {
         let message = payload
@@ -138,14 +160,6 @@ pub fn capture_preview_stage_png(
         Err(format!(
             "Could not render the preview screenshot: {message}"
         ))
-    })?;
-    Ok(PreviewStageImage {
-        png,
-        logical_width: logical.width,
-        logical_height: logical.height,
-        pixel_width: pixels.width as u32,
-        pixel_height: pixels.height as u32,
-        scale: options.scale,
     })
 }
 
@@ -182,13 +196,6 @@ fn validate_visible_layout(root: &Ref<Visual>) -> Result<(), String> {
         }
     }
     Ok(())
-}
-
-struct BitmapGuard(RenderTargetBitmap);
-impl Drop for BitmapGuard {
-    fn drop(&mut self) {
-        self.0.dispose();
-    }
 }
 
 #[derive(Default)]

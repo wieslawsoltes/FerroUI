@@ -551,7 +551,7 @@ export class AgentTools {
                 const block = panel.snapshot?.activeBlock?.start;
                 return this.stages.open(document, block ? new vscode.Position(block.line, block.character) : new vscode.Position(0, 0)).wait(signal);
             }
-            case 'designer_stages': return this.stages.board(document.uri).wait(signal);
+            case 'designer_stages': return this.stages.board(document.uri).inspect(signal);
             case 'designer_stage_image': {
                 const image = await this.stages.board(document.uri).capture(args.stage!, args.expected_epoch!, signal);
                 return { mimeType: 'image/png', data: image.png, width: image.width, height: image.height };

@@ -33,10 +33,10 @@ Historical material is identified explicitly.
 | [Qt Design Studio Flow Mode introduction](https://www.qt.io/blog/introducing-flow-mode-qt-design-studio-1.5), **historical 2020 reference**, and [current Connections documentation](https://doc.qt.io/qtdesignstudio/quick-signals.html) | Flow Mode described action areas, connected screens, Go Back and live presentation. Connections associates native signals with actions and state changes. | Add a native prototype player and interaction model while retaining existing XAML behavior/state authoring for application logic. The historical article is not a claim about current Flow Mode availability. |
 | [Microsoft SketchFlow description](https://learn.microsoft.com/en-us/archive/msdn-magazine/2009/september/the-tao-of-screen-design), **archived 2009 reference** | Screens form a visual navigation map; reusable Component Screens map to UserControls. | Reuse native document and definition stages for complete screens and components. SketchFlow is a historical design precedent, not a current Blend feature claim. |
 
-The implementation concentrates on finding views, describing connections and playing
-navigation and overlays with real controls. It uses the current native state and binding
-systems for screen content. Animated transitions and prototype variables remain separate
-contracts, described under [Boundaries](#boundaries).
+The player uses the current native state and binding systems for screen content. Screen
+connections and overlays can use instant changes, a dissolve, or a directional slide.
+Duration and easing are set per interaction, and the same motion plays in both hosts.
+[Figma prototype animations](https://help.figma.com/hc/en-us/articles/360040522373-Prototype-animations)
 
 FerroUI deliberately defines **Back as closing the top overlay first**. Figma documents
 that swapping overlays does not enter its navigation history and that Back after a swap
@@ -248,6 +248,25 @@ overlay, Tab and Shift+Tab cycle within that view. The player's toolbar and inte
 commands remain available for the design review, including an explicit Close overlay
 command.
 
+### Animate an interaction
+
+Edit a connection in **Prototype**. Open **Transition**, select **Dissolve** or a slide
+direction, and enter the duration in milliseconds. Choose **Linear**, **Ease in**,
+**Ease out**, or **Ease in and out**, then apply the draft. For a bottom sheet, use
+**Slide up**. The sheet enters from the bottom and the base screen stays in place.
+Choose **Instant** to clear the connection's transition.
+
+Play the flow to try the motion with real controls. Back and Close reverse the opening
+transition by default. A connection with its own Back or Close transition uses the
+assigned effect instead. When swapping overlays, the outgoing dialog dissolves as the
+new one appears. Pointer and text input resume after the new frame settles. Back, Close,
+Restart, and Exit remain available while a transition plays.
+
+The player uses the desktop animation preference. VS Code also uses its workbench
+Reduce Motion setting. Reduced motion skips the transition and keeps the same
+navigation, retained controls, and focus restoration. Use reduced motion when reviewing
+the interaction without movement. [Animation from interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)
+
 ## Playing a flow
 
 The player owns a separate, bounded set of native stage graphs for the run. It copies the
@@ -284,20 +303,22 @@ invalid XAML draft cannot be represented as a current interactive screen.
 
 ## Persistence and limits
 
-**Save set** writes a version-3 preview-stage manifest when the graph contains an overlay
-action, version 2 for a graph using only Navigate/Back, and version 1 for an empty graph.
+**Save set** writes a version-4 stage set when a transition is assigned. It writes
+version 3 for overlay actions, version 2 for Navigate and Back, and version 1 for an empty graph.
 Each contains the stage configurations and, where present, the prototype graph. Its flow
 starts and interaction endpoints use indices into that manifest's stage list. Loading
 allocates fresh runtime stage IDs and remaps every graph
 reference to those new IDs. Runtime control IDs and source `NodeId` values are never saved
 as persistent interaction targets.
 
-All three versions load; version-1 sets have an empty prototype graph, and version-1/2
-sets reject overlay actions rather than silently changing their meaning. Validation of a
+All four versions load. Versions 1 through 3 play immediately and accept the actions
+available in their version. Validation of a
 complete incoming set finishes before replacing the accepted set. Unknown fields, invalid indices,
 duplicate flow names, duplicate source interactions, malformed anchors and oversized
 descriptors are rejected. Reordering stages preserves logical connections; removing a
-stage removes flows that start there and interactions to or from that stage.
+stage removes flows that start there and interactions to or from that stage. Each
+version-4 transition travels with its interaction. The `prototype_transitions` array
+pairs each transition with its zero-based link index.
 
 The current bounds are:
 
@@ -308,6 +329,7 @@ The current bounds are:
 | Prototype interactions | 128 |
 | Navigation history entries in one run | 64 |
 | Simultaneous overlays above the base | 8 |
+| Transition duration | 1 to 10,000 ms |
 | Manual X and Y position | −16,384 to 16,384 logical pixels each |
 | Flow and interaction labels | 128 UTF-8 bytes each |
 | Prototype descriptor text | 512 KiB |
@@ -331,6 +353,7 @@ The portable model and the native views can be reused independently:
 | `PreviewPrototype`, `PreviewPrototypeFlow`, `PreviewPrototypeLink`, `PreviewPrototypeAction` | Bounded live graph, named starts, source anchors, screen/overlay actions and reachability |
 | `PreviewPrototypeOverlayPlacement`, `PreviewPrototypeOverlayOptions`, `PreviewPrototypeOverlay` | Validated placement and dismissal settings; one presented overlay entry |
 | `PreviewPrototypeManifest` | Positional persistence and fresh stage-ID remapping |
+| `PreviewStageSet`, `PreviewPrototypeLinkTransition` | Save design fixtures and per-link effects, durations, and easing |
 | `PreviewPrototypeSession` | Base-screen cursor, bounded history and overlay stack; no source session or native control ownership |
 | `PreviewPrototypeView` | Native flow and connection overview |
 | `PreviewPrototypeFlowEditor`, `PreviewPrototypeLinkEditor` | Detached native drafts |
@@ -340,6 +363,8 @@ Workspace APIs expose the same behavior:
 
 - `preview_prototype`, `set_preview_prototype` and `preview_prototype_model` inspect,
   validate and install the graph.
+- `preview_prototype_transitions` and `set_preview_prototype_with_transitions` read
+  and atomically replace transition authoring alongside the graph.
 - `preview_prototype_playback` reports the current run, including `screen` (base), `current`
   (top overlay or base), `overlays` and base-screen `history`.
 - `set_preview_prototype_visible` opens or closes the overview.
@@ -359,11 +384,16 @@ views, document drafts, dependency snapshots or application input permissions.
 | MCP tool | Behavior |
 | --- | --- |
 | `designer_prototype` | Read the graph, optimistic model, flow/reachability and playback state; optionally include source element choices for a stage. |
-| `designer_prototype_action` | Apply `set_graph`, or execute `play`, `activate`, `back`, `close_overlay`, `restart` and `stop` against `expected_model`. |
+| `designer_prototype_action` | Apply `set_graph` with optional `transitions`, or execute `play`, `activate`, `back`, `close_overlay`, `restart`, `set_reduced_motion` and `stop` against `expected_model`. |
 | `designer_prototype_input` | Send keyboard, text, or pointer input using `expected_model` and the current playback `epoch` as `expected_frame`. The active native layer owns focus and pointer routing. |
 | `designer_prototype_image` | Capture the accepted native artboard and its modal overlays. Supply `expected_model` and `expected_frame`. |
 
 VS Code mounts the same native player. The host supplies the toolbar and presents the native artboard as one image. Native focus, placement, clipping, and dismissal follow the same rules. For a saved scenario, `pressActiveKey` follows the active layer, `expectFocus` checks the control’s accessible name and role, and `prototype.capture: "artboard"` compares the modal composition. [VS Code playback](vscode/motion.md#operate-a-native-prototype) · [VS Code agent tools](vscode/reference.md#drive-the-native-prototype-player)
+
+Pass `reduced_motion: true` to Studio’s `play` action for settled frames, or change it
+with `set_reduced_motion` during a run. Read `playback.animating` to decide when the
+active frame can accept another trigger. Scenarios open settled frames and compare their
+interaction outcomes and pixels independently of the wall clock.
 
 Read operations are observational: they do not construct previews, advance playback or
 apply pending source. Mutations use the host's write permission. `play`, `activate`, `back`,
@@ -379,7 +409,7 @@ event handlers, or claim the platform-specific behavior of UIKit segues or Andro
 Navigation component. A production application continues to own its navigation service,
 view models, bindings and native event handlers.
 
-Animated transitions, delayed/hover triggers, conditional branches, prototype variables,
+Delayed and hover triggers, conditional branches, prototype variables,
 remembered group destinations and externally shareable hosted prototypes are not
 implemented by this graph. Overlay presentation is currently modal, bounded by the base
 frame and positioned in its coordinates. Nonmodal popovers, trigger-relative anchors,

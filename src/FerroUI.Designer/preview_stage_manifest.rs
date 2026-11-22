@@ -1,9 +1,10 @@
 //! Compatible stage manifests and per-stage design fixture extensions.
 
 use super::{
-    PreviewPrototypeManifest, PreviewStageConfiguration, PreviewStageInfo, MAX_MANIFEST_BYTES,
-    MAX_PREVIEW_STAGES,
+    PreviewPrototypeLinkTransition, PreviewPrototypeManifest, PreviewStageConfiguration,
+    PreviewStageInfo, MAX_MANIFEST_BYTES, MAX_PREVIEW_STAGES,
 };
+use crate::preview_prototype_transition::validate_link_transitions;
 use serde::{Deserialize, Serialize};
 
 /// A stage configuration with an optional design-time fixture override.
@@ -57,7 +58,7 @@ pub struct PreviewStageManifest {
 pub type PreviewStageSnapshot = PreviewStageManifest;
 pub type PreviewStageDetails = PreviewStageInfo<PreviewStageSpec>;
 
-/// A saved stage set including the design fixture selected on each card.
+/// A saved stage set with design fixtures and authored prototype transitions.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PreviewStageSet {
@@ -66,6 +67,8 @@ pub struct PreviewStageSet {
     pub active: Option<usize>,
     #[serde(default, skip_serializing_if = "PreviewPrototypeManifest::is_empty")]
     pub prototype: PreviewPrototypeManifest,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub prototype_transitions: Vec<PreviewPrototypeLinkTransition>,
 }
 
 impl From<PreviewStageManifest> for PreviewStageSet {
@@ -79,12 +82,16 @@ impl From<PreviewStageManifest> for PreviewStageSet {
                 .collect(),
             active: manifest.active,
             prototype: manifest.prototype,
+            prototype_transitions: Vec::new(),
         }
     }
 }
 
 impl PreviewStageManifest {
     pub fn validate(&self) -> Result<(), String> {
+        if self.version > 3 {
+            return Err("Unsupported preview-stage manifest version".into());
+        }
         validate_stages(
             self.version,
             self.stages.len(),
@@ -111,8 +118,13 @@ impl PreviewStageManifest {
 
 impl PreviewStageSet {
     pub(super) fn into_manifest(self) -> PreviewStageManifest {
+        let version = if self.version == 4 && !self.prototype.has_overlay_actions() {
+            2
+        } else {
+            self.version.min(3)
+        };
         PreviewStageManifest {
-            version: self.version,
+            version,
             stages: self
                 .stages
                 .into_iter()
@@ -124,6 +136,10 @@ impl PreviewStageSet {
     }
 
     pub fn validate(&self) -> Result<(), String> {
+        if self.version < 4 && !self.prototype_transitions.is_empty() {
+            return Err("Prototype transitions require preview-stage manifest version 4".into());
+        }
+        validate_link_transitions(&self.prototype_transitions, self.prototype.links.len())?;
         validate_stages(
             self.version,
             self.stages.len(),
@@ -155,7 +171,7 @@ fn validate_stages(
     prototype: &PreviewPrototypeManifest,
     stages: impl Iterator<Item = Result<usize, String>>,
 ) -> Result<(), String> {
-    if !matches!(version, 1..=3) {
+    if !matches!(version, 1..=4) {
         return Err("Unsupported preview-stage manifest version".into());
     }
     if version < 3 && prototype.has_overlay_actions() {

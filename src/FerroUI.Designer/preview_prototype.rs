@@ -1,6 +1,7 @@
 //! View-to-view interactions are local designer presentation data. Persistent
 //! references use stage positions; live references use freshly allocated stage IDs.
-use crate::{PreviewSourceAnchor, PreviewStageId};
+use crate::preview_prototype_transition::{validate_link_transitions, JourneyPosition, MotionHistory};
+use crate::{PreviewPrototypeLinkTransition, PreviewPrototypeMotion, PreviewPrototypeTransition, PreviewSourceAnchor, PreviewStageId};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -587,6 +588,9 @@ pub struct PreviewPrototypeSession {
     screen: PreviewStageId,
     history: Vec<PreviewStageId>,
     overlays: Vec<PreviewPrototypeOverlay>,
+    transitions: Vec<PreviewPrototypeLinkTransition>,
+    motion_history: MotionHistory,
+    motion: Option<PreviewPrototypeMotion>,
 }
 
 impl PreviewPrototypeSession {
@@ -594,7 +598,16 @@ impl PreviewPrototypeSession {
     /// This operation also validates structure so standalone callers cannot install
     /// ambiguous interactions, invalid anchors or unbounded descriptors.
     pub fn start(graph: &PreviewPrototype, flow_name: &str) -> Result<Self, String> {
+        Self::start_with_transitions(graph, flow_name, &[])
+    }
+
+    pub fn start_with_transitions(
+        graph: &PreviewPrototype,
+        flow_name: &str,
+        transitions: &[PreviewPrototypeLinkTransition],
+    ) -> Result<Self, String> {
         graph.validate_structure()?;
+        validate_link_transitions(transitions, graph.links.len())?;
         let flow = graph
             .flows
             .iter()
@@ -607,6 +620,9 @@ impl PreviewPrototypeSession {
             screen: flow.start,
             history: Vec::new(),
             overlays: Vec::new(),
+            transitions: transitions.to_vec(),
+            motion_history: MotionHistory::default(),
+            motion: None,
         })
     }
 
@@ -643,11 +659,17 @@ impl PreviewPrototypeSession {
         !self.overlays.is_empty() || !self.history.is_empty()
     }
 
+    pub fn motion(&self) -> Option<PreviewPrototypeMotion> {
+        self.motion
+    }
+
     /// Restart navigation; the host decides separately whether native views reset.
     pub fn restart(&mut self) -> PreviewStageId {
         self.screen = self.start;
         self.history.clear();
         self.overlays.clear();
+        self.motion_history = MotionHistory::default();
+        self.motion = None;
         self.screen
     }
 
@@ -658,16 +680,48 @@ impl PreviewPrototypeSession {
             .get(index)
             .cloned()
             .ok_or("The prototype interaction no longer exists")?;
-        self.activate(&link)
+        self.activate_at(index, &link)
     }
 
     pub fn activate(&mut self, link: &PreviewPrototypeLink) -> Result<PreviewStageId, String> {
-        if link.source != self.current() || !self.graph.links.contains(link) {
-            return Err(
-                "The prototype interaction does not belong to the current accepted screen".into(),
-            );
+        let index = self.graph.links.iter().position(|value| value == link)
+            .ok_or("The prototype interaction does not belong to the current accepted screen")?;
+        self.activate_at(index, link)
+    }
+
+    fn activate_at(&mut self, index: usize, link: &PreviewPrototypeLink) -> Result<PreviewStageId, String> {
+        if link.source != self.current() {
+            return Err("The prototype interaction does not belong to the current accepted screen".into());
         }
-        match link.action {
+        let transition = self.transitions.iter().find(|entry| entry.link == index)
+            .map(|entry| entry.transition);
+        self.apply_action(link.action, transition)
+    }
+
+    fn position(&self) -> JourneyPosition {
+        JourneyPosition {
+            screen: self.screen,
+            history_depth: self.history.len(),
+            overlays: self.overlays.clone(),
+        }
+    }
+
+    fn apply_action(
+        &mut self,
+        action: PreviewPrototypeAction,
+        transition: Option<PreviewPrototypeTransition>,
+    ) -> Result<PreviewStageId, String> {
+        let before = self.position();
+        let result = self.navigate(action)?;
+        let after = self.position();
+        if before != after {
+            self.motion = self.motion_history.advance(&before, &after, transition);
+        }
+        Ok(result)
+    }
+
+    fn navigate(&mut self, action: PreviewPrototypeAction) -> Result<PreviewStageId, String> {
+        match action {
             PreviewPrototypeAction::Navigate { stage } => {
                 if stage == self.screen {
                     self.overlays.clear();
@@ -683,7 +737,7 @@ impl PreviewPrototypeSession {
                 self.overlays.clear();
                 Ok(self.screen)
             }
-            PreviewPrototypeAction::Back => self.back(),
+            PreviewPrototypeAction::Back => self.go_back(),
             PreviewPrototypeAction::OpenOverlay { stage, options } => {
                 if self.overlays.len() >= MAX_PREVIEW_PROTOTYPE_OVERLAYS {
                     return Err(format!("A prototype supports at most {MAX_PREVIEW_PROTOTYPE_OVERLAYS} open overlays"));
@@ -715,14 +769,18 @@ impl PreviewPrototypeSession {
                 self.overlays[lower] = PreviewPrototypeOverlay { stage, options };
                 Ok(stage)
             }
-            PreviewPrototypeAction::CloseOverlay => self.close_overlay(),
+            PreviewPrototypeAction::CloseOverlay => self.pop_overlay(),
         }
     }
 
     /// Close the top overlay first; otherwise return through screen history.
     pub fn back(&mut self) -> Result<PreviewStageId, String> {
+        self.apply_action(PreviewPrototypeAction::Back, None)
+    }
+
+    fn go_back(&mut self) -> Result<PreviewStageId, String> {
         if !self.overlays.is_empty() {
-            return self.close_overlay();
+            return self.pop_overlay();
         }
         let stage = self
             .history
@@ -733,6 +791,10 @@ impl PreviewPrototypeSession {
     }
 
     pub fn close_overlay(&mut self) -> Result<PreviewStageId, String> {
+        self.apply_action(PreviewPrototypeAction::CloseOverlay, None)
+    }
+
+    fn pop_overlay(&mut self) -> Result<PreviewStageId, String> {
         self.overlays
             .pop()
             .ok_or("This prototype flow has no open overlay")?;

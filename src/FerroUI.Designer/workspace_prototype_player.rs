@@ -44,12 +44,21 @@ impl DesignerWorkspace {
     }
 
     pub fn start_preview_prototype(self: &Rc<Self>, flow_name: &str) -> Result<(), String> {
+        self.start_preview_prototype_with_motion_preference(flow_name, false)
+    }
+
+    pub fn start_preview_prototype_with_motion_preference(
+        self: &Rc<Self>,
+        flow_name: &str,
+        reduced_motion: bool,
+    ) -> Result<(), String> {
         let graph = self.preview_prototype();
-        PreviewPrototypeSession::start(&graph, flow_name)?;
+        let session = PreviewPrototypeSession::start_with_transitions(
+            &graph, flow_name, &self.preview_prototype_transitions(),
+        )?;
         self.cancel_preview_stage_pointer_input();
         self.set_preview_prototype_visible(true)?;
         let source_model = self.preview_stage_model();
-        let session = PreviewPrototypeSession::start(&graph, flow_name)?;
         let sources = self.preview_stages.board.borrow().prototype_sources(&session)?;
         let (board, mapping) = sources.realize()?;
 
@@ -58,6 +67,7 @@ impl DesignerWorkspace {
         }
         self.retire_preview_prototype_player();
         self.ensure_preview_prototype_player_view();
+        self.preview_prototype_player_view().unwrap().set_reduced_motion(reduced_motion);
         *self.prototype.player.borrow_mut() = Some(RunningPrototype {
             session,
             board,
@@ -77,6 +87,9 @@ impl DesignerWorkspace {
 
     pub fn activate_preview_prototype_link(self: &Rc<Self>, index: usize) -> Result<(), String> {
         self.ensure_current_prototype_player()?;
+        if self.preview_prototype_motion_running() {
+            return Err("Wait for the prototype transition to finish".into());
+        }
         let graph = self.preview_prototype();
         let link = graph
             .links
@@ -179,11 +192,23 @@ impl DesignerWorkspace {
         self.refresh_preview_prototype();
     }
 
+    pub fn preview_prototype_motion_running(&self) -> bool {
+        self.preview_prototype_player_view().is_some_and(|view| view.motion_running())
+    }
+
+    pub fn set_preview_prototype_reduced_motion(&self, reduced: bool) -> Result<(), String> {
+        self.ensure_current_prototype_player()?;
+        let view = self.preview_prototype_player_view().ok_or("The prototype was closed")?;
+        view.set_reduced_motion(reduced);
+        Ok(())
+    }
+
     /// Deliver agent input to the same native controls used by the Studio player.
     pub fn preview_prototype_input(self: &Rc<Self>, frame: u64, input: PreviewPrototypeInput)
         -> Result<Option<PreviewStageFocus>, String>
     {
         let view = self.accepted_prototype_view(frame)?;
+        view.check_motion_input(&input)?;
         match input {
             PreviewPrototypeInput::Keyboard { input } => {
                 view.focus_active_plane();
@@ -209,6 +234,8 @@ impl DesignerWorkspace {
 
     pub fn preview_prototype_image(&self, frame: u64) -> Result<PreviewStageImage, String> {
         let view = self.accepted_prototype_view(frame)?;
+        view.advance_motion();
+        view.control().update_layout();
         let image = crate::capture_preview_stage_png(&view.artboard(), PreviewStageExportOptions::default())?;
         self.accepted_prototype_view(frame)?;
         Ok(image)
@@ -245,6 +272,8 @@ impl DesignerWorkspace {
         if self.prototype.refreshing.replace(true) {
             return Err("Wait for the current native prototype layout before navigating".into());
         }
+        let view = self.preview_prototype_player_view();
+        let motion = view.as_ref().map(|view| view.capture_motion(next.motion())).transpose();
         {
             let mut player = self.prototype.player.borrow_mut();
             let player = player.as_mut().unwrap();
@@ -256,6 +285,17 @@ impl DesignerWorkspace {
         }
         self.bump_prototype_generation();
         let result = self.refresh_preview_prototype_player();
+        if result.is_ok() {
+            match motion {
+                Ok(Some(capture)) => view.unwrap().play_motion(capture),
+                Ok(None) => {}
+                Err(error) => {
+                    if let Some(player) = self.prototype.player.borrow_mut().as_mut() {
+                        player.diagnostics.push(format!("Transition skipped. {error}"));
+                    }
+                }
+            }
+        }
         if result.is_err() {
             // A fitted destination can resolve a different size only after it
             // inherits the real native root. Recover the prior retained stack

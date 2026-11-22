@@ -2,7 +2,7 @@ import { strict as assert } from 'node:assert';
 import { createHash } from 'node:crypto';
 import type { NativePreview } from '../src/nativePreview';
 import type { Source } from '../src/protocol';
-import type { PrototypeScene, StageConfiguration, StageInput, StageContact } from '../src/stagesProtocol';
+import type { PrototypeGraph, PrototypeLinkTransition, PrototypeScene, StageConfiguration, StageInput, StageContact, StageModel } from '../src/stagesProtocol';
 
 /** Exercise the real native artboard protocol used by the player and MCP. */
 export async function verifyNativePrototype(preview: NativePreview, uri: string): Promise<void> {
@@ -85,6 +85,40 @@ export async function verifyNativePrototype(preview: NativePreview, uri: string)
         assert.equal(hash((await preview.stageImage(first)).png), comparison);
         assert.equal((await press(returned.scene!, 'Escape')).scene, null);
         await assert.rejects(preview.prototypeImage(opened.frame), /current frame/i);
+        await verifyNativeTransition(preview, board, graph);
     }
     console.log('Native prototype artboard, nested modal focus, text input, dismissal, and stale frame checks passed in XAML and RSX');
+}
+
+async function verifyNativeTransition(preview: NativePreview, board: StageModel, graph: PrototypeGraph): Promise<void> {
+    assert.ok(preview.capabilities.prototypeTransitions);
+    const transitions: PrototypeLinkTransition[] = [
+        { link: 0, transition: { effect: 'slide_up', duration_ms: 4000, easing: 'linear' } },
+    ];
+    const edited = await preview.editStages({ action: 'setPrototype', epoch: board.epoch, graph, transitions });
+    assert.equal(edited.manifest.version, 4);
+    assert.deepEqual(edited.manifest.prototype_transitions, transitions);
+    await assert.rejects(preview.editStages({ action: 'setPrototype', epoch: edited.epoch, graph, transitions: [...transitions, ...transitions] }),
+        /distinct prototype interaction/i);
+    const start = await preview.stagePrototype(edited.epoch, { action: 'start', flow: 'Account setup' });
+    assert.ok(start?.frame);
+    const opened = await preview.stagePrototype(edited.epoch, { action: 'activate', link: 0 }, start.frame);
+    assert.ok(opened?.frame && opened.animating);
+    assert.ok((await preview.prototypeImage(opened.frame)).animating);
+    await assert.rejects(preview.prototypeInput(opened.frame, { kind: 'keyboard', input: { kind: 'key', key: 'Tab' } }, true), /transition/i);
+    await assert.rejects(preview.prototypeImage(start.frame), /current frame/i);
+    const quiet = await preview.stagePrototype(edited.epoch, { action: 'setReducedMotion', reducedMotion: true }, opened.frame);
+    assert.equal(quiet?.frame, opened.frame);
+    assert.equal(quiet?.animating, false);
+    assert.equal((await preview.prototypeImage(opened.frame)).animating, false);
+    assert.equal((await preview.prototypeInput(opened.frame, { kind: 'keyboard', input: { kind: 'focus' } }, true)).focus?.name, 'Customer');
+    await preview.stagePrototype(edited.epoch, { action: 'setReducedMotion', reducedMotion: false }, opened.frame);
+    const closed = await preview.stagePrototype(edited.epoch, { action: 'closeOverlay' }, opened.frame);
+    assert.equal(closed?.current, edited.stages[0].id);
+    assert.ok(closed?.frame && closed.animating);
+    const returned = await preview.stagePrototype(edited.epoch, { action: 'setReducedMotion', reducedMotion: true }, closed.frame);
+    assert.equal(returned?.animating, false);
+    assert.equal((await preview.prototypeInput(closed.frame, { kind: 'keyboard', input: { kind: 'focus' } }, true)).focus?.name, 'Open account');
+    await preview.stagePrototype(edited.epoch, { action: 'stop' }, closed.frame);
+    console.log('Prototype transition authoring, reduced motion, focus restoration, and accepted frame checks passed');
 }

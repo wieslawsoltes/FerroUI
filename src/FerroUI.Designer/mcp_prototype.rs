@@ -57,18 +57,31 @@ fn action(name: &str, mut properties: Value, required: &[&str]) -> Value {
     s::action(name, properties, &required, false)
 }
 
+pub(super) fn transitions_schema() -> Value {
+    let transition = s::object(json!({
+        "effect":{"enum":["dissolve","slide_left","slide_right","slide_up","slide_down"]},
+        "duration_ms":{"type":"integer","minimum":1,"maximum":crate::MAX_PROTOTYPE_TRANSITION_MS},
+        "easing":{"enum":["linear","ease_in","ease_out","ease_in_out"]}
+    }), &["effect", "duration_ms"]);
+    s::array(s::object(json!({
+        "link":{"type":"integer","minimum":0,"maximum":crate::MAX_PREVIEW_PROTOTYPE_LINKS - 1},
+        "transition":transition
+    }), &["link", "transition"]), crate::MAX_PREVIEW_PROTOTYPE_LINKS)
+}
+
 pub(super) fn tools() -> Vec<Value> {
     let mut edit = s::actions(
         "designer_prototype_action",
-        "Edit a local prototype graph or navigate its isolated native player using the model from designer_prototype. set_graph atomically accepts named starts and source-anchored Navigate, Back, OpenOverlay, SwapOverlay and CloseOverlay interactions; it never runs factories or edits XAML. Play creates isolated Live views for reachable stages. Modal overlays retain underlying views; Back closes the top overlay before consuming screen history. close_overlay dismisses only the top overlay. Restart clears overlays and history while retaining native state; stop then play creates fresh views. Playing, navigating or closing an overlay requires allow_input as well as allow_property_writes; stop requires only allow_property_writes. Source or stage changes invalidate a running journey. No arbitrary scripts, URLs or paths are executed.",
+        "Edit a local prototype graph or navigate its isolated native player using the model from designer_prototype. set_graph atomically accepts source-anchored interactions and optional transitions indexed by link order. Omitting transitions preserves existing motion for the same source anchors. Use an empty list for instant playback on every link. Play creates isolated views. Back closes the top overlay before consuming screen history and can reverse its opening motion. reduced_motion skips animations for this play session. Restart retains native state. Stop then play creates fresh views. Playing and navigating require allow_input and allow_property_writes.",
         vec![
-            action("set_graph", json!({"graph":graph_schema(false)}), &["graph"]),
-            action("play", json!({"flow":{"type":"string","maxLength":128}}), &["flow"]),
+            action("set_graph", json!({"graph":graph_schema(false),"transitions":transitions_schema()}), &["graph"]),
+            action("play", json!({"flow":{"type":"string","maxLength":128},"reduced_motion":{"type":"boolean"}}), &["flow"]),
             action("activate", json!({"link":{"type":"integer","minimum":0,"maximum":127}}), &["link"]),
             action("back", json!({}), &[]),
             action("close_overlay", json!({}), &[]),
             action("restart", json!({}), &[]),
             action("stop", json!({}), &[]),
+            action("set_reduced_motion", json!({"reduced_motion":{"type":"boolean"}}), &["reduced_motion"]),
         ], false,
     );
     edit["annotations"]["readOnlyHint"] = json!(false);
@@ -95,7 +108,12 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
     let graph = workspace.preview_prototype();
     let flows = graph.flows.iter().map(|flow| json!({"name":flow.name,"start":flow.start,"reachable":graph.reachable(flow.start)})).collect::<Vec<_>>();
     let stages = workspace.preview_stages().into_iter().map(|stage| json!({"id":stage.id,"name":stage.configuration.name,"source_uri":stage.configuration.source_uri,"status":stage.status})).collect::<Vec<_>>();
-    let mut value = json!({"model":workspace.preview_prototype_model(),"graph":graph,"flows":flows,"stages":stages,"playback":workspace.preview_prototype_playback(),"visible":workspace.preview_prototype_visible()});
+    let mut value = json!({"model":workspace.preview_prototype_model(),"graph":graph,
+        "transitions":workspace.preview_prototype_transitions(),"flows":flows,"stages":stages,
+        "playback":workspace.preview_prototype_playback(),"visible":workspace.preview_prototype_visible()});
+    if let Some(playback) = value["playback"].as_object_mut() {
+        playback.insert("animating".to_owned(), json!(workspace.preview_prototype_motion_running()));
+    }
     if let Some(stage) = args["stage"].as_u64() {
         workspace
             .preview_stage(stage)
@@ -144,13 +162,23 @@ pub(super) fn call(
         return Err("Playing or navigating native prototypes requires allow_input".into());
     }
     match action.as_str() {
-        "set_graph" => workspace.set_preview_prototype(decode(args, "graph")?)?,
-        "play" => workspace.start_preview_prototype(&text(args, "flow")?)?,
+        "set_graph" => {
+            let graph = decode(args, "graph")?;
+            if args.get("transitions").is_some() {
+                workspace.set_preview_prototype_with_transitions(graph, decode(args, "transitions")?)?;
+            } else {
+                workspace.set_preview_prototype(graph)?;
+            }
+        }
+        "play" => workspace.start_preview_prototype_with_motion_preference(
+            &text(args, "flow")?, args["reduced_motion"].as_bool().unwrap_or(false),
+        )?,
         "activate" => workspace.activate_preview_prototype_link(integer(args, "link")? as usize)?,
         "back" => workspace.back_preview_prototype()?,
         "close_overlay" => workspace.close_preview_prototype_overlay()?,
         "restart" => workspace.restart_preview_prototype()?,
         "stop" => workspace.stop_preview_prototype(),
+        "set_reduced_motion" => workspace.set_preview_prototype_reduced_motion(decode(args, "reduced_motion")?)?,
         _ => return Err("Unknown prototype action".into()),
     }
     report(workspace, &json!({}))

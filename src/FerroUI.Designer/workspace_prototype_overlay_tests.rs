@@ -222,6 +222,43 @@ impl Drop for Fixture {
 }
 
 #[test]
+fn studio_overlay_transition_keeps_covered_controls_and_honors_reduced_motion() {
+    use crate::{PreviewPrototypeEffect, PreviewPrototypeLinkTransition, PreviewPrototypeTransition,
+        PreviewStageKeyboardInput, PreviewPrototypeInput};
+    let _app = UnitTestApplication::start(services());
+    let fixture = Fixture::new(PreviewPrototypeOverlayOptions::default());
+    let workspace = &fixture.workspace;
+    let motion = PreviewPrototypeLinkTransition {
+        link: 0,
+        transition: PreviewPrototypeTransition {
+            effect: PreviewPrototypeEffect::SlideUp,
+            duration_ms: 4000,
+            easing: Default::default(),
+        },
+    };
+    workspace
+        .set_preview_prototype_with_transitions(workspace.preview_prototype(), vec![motion])
+        .unwrap();
+    workspace.start_preview_prototype("Overlay journey").unwrap();
+    let kept = fixture.note(0);
+    kept.set_text(Some("Retained"));
+    fixture.activate(0);
+    let accepted = fixture.info();
+    assert!(workspace.preview_prototype_motion_running());
+    assert_eq!(fixture.note(0), kept);
+    assert!(workspace.preview_prototype_input(accepted.epoch, PreviewPrototypeInput::Keyboard {
+        input: PreviewStageKeyboardInput::Key { key: "Tab".into() },
+    }).err().unwrap().contains("transition"));
+    workspace.set_preview_prototype_reduced_motion(true).unwrap();
+    assert!(!workspace.preview_prototype_motion_running());
+    workspace.close_preview_prototype_overlay().unwrap();
+    assert!(!workspace.preview_prototype_motion_running());
+    assert_eq!(fixture.note(0).text().as_deref(), Some("Retained"));
+    assert_eq!(workspace.preview_stage_set().prototype_transitions, [motion]);
+    assert!(!workspace.session().borrow().can_undo());
+}
+
+#[test]
 fn native_overlay_stack_retains_covered_views_and_restores_focus_without_source_history() {
     let _app = UnitTestApplication::start(services());
     let fixture = Fixture::new(Default::default());

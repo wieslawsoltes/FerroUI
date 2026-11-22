@@ -10,7 +10,7 @@ use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::{Point, Ref, threading::Dispatcher};
 use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
-    PreviewEnvironment, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
+    PreviewEnvironment, PreviewPrototypeElementChoice, PreviewPrototypeLinkTransition, PreviewPrototypeManifest,
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageLayout, PreviewStageMode, PreviewStageSourceMoves, PreviewStageStateOptions,
     PreviewStagePointerInput, PreviewStagePointerOrigin, PreviewStagePointerPhase,
@@ -67,6 +67,8 @@ enum Action {
     },
     SetPrototype {
         graph: PreviewPrototypeManifest,
+        #[serde(default)]
+        transitions: Option<Vec<PreviewPrototypeLinkTransition>>,
     },
 }
 
@@ -207,14 +209,18 @@ impl Stages {
                 self.board.update_spec(id, configuration)?;
             }
             Action::Refresh { id } => self.board.refresh(id)?,
-            Action::SetPrototype { graph } => {
+            Action::SetPrototype { graph, transitions } => {
                 let ids = self
                     .board
                     .stages()
                     .into_iter()
                     .map(|stage| stage.id)
                     .collect::<Vec<_>>();
-                self.board.set_prototype(graph.restore(&ids)?)?;
+                let graph = graph.restore(&ids)?;
+                match transitions {
+                    Some(transitions) => self.board.set_prototype_with_transitions(graph, transitions)?,
+                    None => self.board.set_prototype(graph)?,
+                }
             }
         }
         if epoch != self.board.epoch() {

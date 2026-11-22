@@ -117,9 +117,10 @@ pub(super) fn keyboard_schema() -> Value {
 
 fn manifest_schema() -> Value {
     s::object(
-        json!({"version":{"enum":[1,2,3]},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
+        json!({"version":{"enum":[1,2,3,4]},"stages":s::array(configuration_schema(),crate::MAX_PREVIEW_STAGES),
         "active":s::nullable(json!({"type":"integer","minimum":0,"maximum":15})),
-        "prototype":super::prototype::graph_schema(true)}),
+        "prototype":super::prototype::graph_schema(true),
+        "prototype_transitions":super::prototype::transitions_schema()}),
         &["version", "stages", "active"],
     )
 }

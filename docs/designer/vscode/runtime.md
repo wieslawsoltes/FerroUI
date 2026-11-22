@@ -164,3 +164,7 @@ ferroui-designer-preview --scenario customer-search.ferroui-scenario.json
 A Rust scenario can select an RSX invocation with a zero-based UTF-16 `caret`. Use `channelTolerance` or `maxChangedPixels` when a fixture allows image variation. To test a `.ferrostages` flow with the same engine, use `prototype`, a stage set and flow, then `activateLink`, `expectStage`, and `expectOverlay`. The [customer review scenario](../../../editors/vscode/test/fixtures/customer-review.ferroui-scenario.json) exercises two stages and an overlay. [Scenario format and CLI options](../../../editors/vscode/README.md#native-ui-scenarios)
 
 Use `pressActiveKey` with `key: "Tab"`, `"Shift+Tab"`, `"Enter"`, or `"Escape"` to follow the player’s current focus. Add an `expectFocus` step with `name` and `role` to check focus after opening or closing an overlay. Set `prototype.capture` to `"artboard"` to compare the base, dimming, and overlays together. The default `"activeLayer"` captures only the stage at the top of the stack.
+
+Scenarios also read version-4 stage sets with authored transitions. Each step uses the
+settled stage, so focus checks and screenshot baselines are independent of transition
+duration. Play the same stage set in the designer to inspect its motion. [Prototype transitions](motion.md#set-a-prototype-transition)

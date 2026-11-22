@@ -68,6 +68,7 @@ mod preview_prototype;
 mod preview_prototype_editor;
 pub mod preview_prototype_layout;
 mod preview_prototype_player;
+mod preview_prototype_transition;
 mod preview_prototype_view;
 #[cfg(test)]
 mod preview_prototype_ui_tests;
@@ -183,7 +184,11 @@ pub use preview_prototype_editor::{
 };
 pub use preview_prototype_player::{
     PreviewPrototypeHotspot, PreviewPrototypeInput, PreviewPrototypePlayerAction, PreviewPrototypePlayerLayer,
-    PreviewPrototypePlayerView,
+    PreviewPrototypeMotionCapture, PreviewPrototypePlayerView,
+};
+pub use preview_prototype_transition::{
+    PreviewPrototypeEffect, PreviewPrototypeLinkTransition, PreviewPrototypeMotion, PreviewPrototypeTransition,
+    PreviewPrototypeTransitionEasing, MAX_PROTOTYPE_TRANSITION_MS,
 };
 pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewAction};
 pub use preview_source_anchor::{PreviewSourceAnchor, PreviewSourceSegment};

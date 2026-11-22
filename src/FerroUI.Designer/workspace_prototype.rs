@@ -3,7 +3,7 @@
 use super::*;
 use crate::{
     PreviewPrototype, PreviewPrototypeElementChoice, PreviewPrototypeFlowEditor,
-    PreviewPrototypeLinkEditor, PreviewPrototypeOverlay, PreviewPrototypePlayerView,
+    PreviewPrototypeLinkEditor, PreviewPrototypeLinkTransition, PreviewPrototypeOverlay, PreviewPrototypePlayerView,
     PreviewPrototypeSession, PreviewPrototypeView, PreviewPrototypeViewAction, PreviewStageBoard,
     PreviewStageId,
 };
@@ -92,6 +92,10 @@ impl DesignerWorkspace {
         self.preview_stages.board.borrow().prototype()
     }
 
+    pub fn preview_prototype_transitions(&self) -> Vec<PreviewPrototypeLinkTransition> {
+        self.preview_stages.board.borrow().prototype_transitions().to_vec()
+    }
+
     /// Includes the accepted source/board token and the independent playback epoch.
     /// Reading this token never creates controls, updates layout or advances input.
     pub fn preview_prototype_model(&self) -> String {
@@ -148,16 +152,36 @@ impl DesignerWorkspace {
     }
 
     pub fn set_preview_prototype(self: &Rc<Self>, graph: PreviewPrototype) -> Result<(), String> {
+        self.apply_preview_prototype(graph, None)
+    }
+
+    pub fn set_preview_prototype_with_transitions(
+        self: &Rc<Self>,
+        graph: PreviewPrototype,
+        transitions: Vec<PreviewPrototypeLinkTransition>,
+    ) -> Result<(), String> {
+        self.apply_preview_prototype(graph, Some(transitions))
+    }
+
+    fn apply_preview_prototype(
+        self: &Rc<Self>,
+        graph: PreviewPrototype,
+        transitions: Option<Vec<PreviewPrototypeLinkTransition>>,
+    ) -> Result<(), String> {
         self.validate_preview_prototype(&graph)?;
-        if graph == self.preview_prototype() {
-            return Ok(());
+        let changed = {
+            let mut board = self.preview_stages.board.borrow_mut();
+            let epoch = board.epoch();
+            match transitions {
+                Some(transitions) => board.set_prototype_with_transitions(graph, transitions)?,
+                None => board.set_prototype(graph)?,
+            }
+            board.epoch() != epoch
+        };
+        if changed {
+            self.retire_preview_prototype_player();
+            self.refresh_preview_prototype();
         }
-        self.preview_stages
-            .board
-            .borrow_mut()
-            .set_prototype(graph)?;
-        self.retire_preview_prototype_player();
-        self.refresh_preview_prototype();
         Ok(())
     }
 
@@ -438,11 +462,15 @@ impl DesignerWorkspace {
             );
         }
         self.close_prototype_editor();
-        let editor = PreviewPrototypeLinkEditor::new(initial, source, stages, elements);
+        let motion = index.and_then(|index| {
+            self.preview_prototype_transitions().into_iter()
+                .find(|entry| entry.link == index).map(|entry| entry.transition)
+        });
+        let editor = PreviewPrototypeLinkEditor::new_with_transition(initial, motion, source, stages, elements);
         let model = self.preview_stage_model();
         let weak = Rc::downgrade(self);
         let expected = model.clone();
-        editor.on_apply(move |link| {
+        editor.on_apply_with_transition(move |link, transition| {
             let workspace = weak.upgrade().ok_or("The workspace was closed")?;
             if workspace.preview_stage_model() != expected {
                 return Err(
@@ -450,11 +478,17 @@ impl DesignerWorkspace {
                 );
             }
             let mut next = workspace.preview_prototype();
+            let slot = index.unwrap_or(next.links.len());
             match index {
                 Some(index) => next.links[index] = link,
                 None => next.links.push(link),
             }
-            workspace.set_preview_prototype(next)
+            let mut transitions = workspace.preview_prototype_transitions();
+            transitions.retain(|entry| entry.link != slot);
+            if let Some(transition) = transition {
+                transitions.push(PreviewPrototypeLinkTransition { link: slot, transition });
+            }
+            workspace.set_preview_prototype_with_transitions(next, transitions)
         });
         let weak = Rc::downgrade(self);
         editor.on_close(move || {

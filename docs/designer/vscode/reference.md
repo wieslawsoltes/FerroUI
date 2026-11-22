@@ -87,7 +87,27 @@ Read the result with `designer_stage_image`. Contact input requires `ferroui.mcp
 3. Send `input: { kind: "pointer", input: { contact: 1, phase: "down", device: "mouse", x: 0.5, y: 0.5 } }` to start a contact. Send its later phases with the same contact and frame. Coordinates are fractions of the entire artboard, including the area outside the top overlay.
 4. Call `designer_stage_prototype_image` with `session` and the current `expected_frame` to capture the base and overlays together. Read the frame returned after an interaction opens a new screen or closes an overlay before sending input again.
 
-In Designer Studio, use `designer_prototype_input` and `designer_prototype_image` with `expected_model` and the playback `epoch` as `expected_frame`. [Native player guide](motion.md#operate-a-native-prototype) · [Studio tool reference](../prototyping.md#automation)
+In Designer Studio, use `designer_prototype_input` and `designer_prototype_image` with `expected_model` and the playback `epoch` as `expected_frame`. [Native player guide](motion.md#operate-a-native-prototype) · [Studio tool reference](../prototyping.md#embedding-and-automation)
+
+### Author and play prototype transitions
+
+Read the graph through `designer_stages`, then pass it with a `transitions` array
+to `designer_stage_change` using `action: "setPrototype"` and the current
+`expected_epoch`. For example, this entry assigns a 300 ms slide to the first link.
+
+```json
+{"link":0,"transition":{"effect":"slide_up","duration_ms":300,"easing":"ease_out"}}
+```
+
+The available effects are `dissolve`, `slide_left`, `slide_right`, `slide_up`, and
+`slide_down`. The easing defaults to `ease_in_out`. Pass an empty transitions array to
+clear all motion, or omit it to preserve the assignments for existing source anchors.
+
+Read `animating` in the playback scene before sending the next interaction.
+Use `reducedMotion: true` with `start` to drive settled frames, or use
+`setReducedMotion` to change the preference for an active run. In Studio,
+`designer_prototype_action` accepts the same entries with `set_graph` and uses
+`reduced_motion` for its playback preference. [Transition guide](motion.md#set-a-prototype-transition)
 
 ### Wrap controls with MCP
 

@@ -344,6 +344,18 @@ Switch the Stages board to **Prototype**. Each flow lists its starting stage, wh
 
 Drag a stage title onto a destination or choose **Add interaction** to add a source-anchored trigger. Choose a native control, set the target stage or overlay, and use **Reveal trigger** to review the authored source. An overlay can set its placement, dimming, and dismissal. Save the stage set to reopen the same graph in Studio or run a [prototype scenario](runtime.md#run-a-native-ui-scenario). [Prototype authoring](../prototyping.md)
 
+### Set a prototype transition
+
+1. In **Prototype**, choose an interaction and select **Transition…**.
+2. Choose **Dissolve** or a slide direction. Enter a duration in milliseconds and choose an easing. The connection displays the effect and duration.
+3. Play the flow. A screen slides over the previous view. A dialog slides inside the current artboard while the covered controls stay in place. Try **Back** or **Close overlay** to see the reverse motion.
+
+Choose **Instant** to remove a transition. Save the stage set to share the settings with Studio. VS Code’s Reduce Motion preference takes effect during playback. [Studio transition guide](../prototyping.md#animate-an-interaction)
+
+![The Prototype graph shows Accounts and Account review side by side, with Slide up and 2200 ms on the Review account interaction](../images/vscode-prototype-transitions.png)
+
+The sheet moves into the clipped artboard while the Accounts screen stays in place. [Slide-up playback capture](../images/vscode-prototype-sheet.png)
+
 ### Operate a native prototype
 
 1. Play a flow and click a native control, or choose **Keyboard input** from the playback toolbar. Type into an active field or use Tab and Shift+Tab to move. Press Enter or Space to activate a focused interaction.

@@ -38,6 +38,7 @@ impl PrototypeRun {
         };
         run.control(Command::Start {
             flow: spec.flow.clone(),
+            reduced_motion: true,
         })?;
         Ok(run)
     }

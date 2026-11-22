@@ -107,6 +107,8 @@ class StageSession {
     private ready = false;
     private busy = false;
     private disposed = false;
+    private workbenchReducedMotion = false;
+    private prototypeReducedMotion = false;
     private manifest?: StageManifest;
 
     constructor(readonly panel: vscode.WebviewPanel, private document: vscode.TextDocument,
@@ -307,10 +309,28 @@ class StageSession {
         if (model.epoch !== epoch) throw new Error('Read the current stage set before controlling its flow.');
         const client = await this.getClient();
         this.checkPrototypeFrame(model, frame);
-        const scene = await client.stagePrototype(epoch, command, frame);
+        const preference = command.action === 'start' || command.action === 'setReducedMotion' ? command.reducedMotion ?? false : undefined;
+        const request = preference !== undefined && client.capabilities.prototypeTransitions
+            ? { ...command, reducedMotion: preference || this.workbenchReducedMotion } : command;
+        const scene = await client.stagePrototype(epoch, request, frame);
         this.checkPrototypeFrame(model);
+        if (preference !== undefined) this.prototypeReducedMotion = preference;
         this.publishPrototype(client, model, scene);
         return scene;
+    }
+
+    async inspect(signal: AbortSignal): Promise<StageModel> {
+        const model = await this.wait(signal);
+        const frame = model.prototype?.frame;
+        if (model.prototype?.animating && frame !== undefined) {
+            const client = await this.getClient();
+            this.checkPrototypeFrame(model, frame);
+            const scene = await client.prototypeState(frame);
+            this.checkPrototypeFrame(model, frame);
+            signal.throwIfAborted();
+            if (!scene?.animating) this.publishPrototype(client, model, scene);
+        }
+        return model;
     }
 
     async prototypeImage(frame: number, signal: AbortSignal) {
@@ -351,7 +371,8 @@ class StageSession {
     private publishPrototype(client: NativePreview, model: StageModel, scene: PrototypeScene | null): void {
         const previous = model.prototype;
         model.prototype = scene;
-        if (previous?.frame !== scene?.frame || scene?.frame === undefined || previous?.links?.join() !== scene?.links?.join()
+        if (previous?.frame !== scene?.frame || scene?.frame === undefined || previous?.animating !== scene?.animating
+            || previous?.links?.join() !== scene?.links?.join()
             || previous?.diagnostics?.join('\n') !== scene?.diagnostics?.join('\n')) {
             this.post({ type: 'prototype', scene });
         }
@@ -375,6 +396,12 @@ class StageSession {
                 const image = await client.prototypeImage(frame);
                 this.checkPrototypeFrame(model, frame);
                 this.post({ type: 'prototypeImage', frame, image });
+                if (image.animating && this.panel.visible) {
+                    this.prototypeFrameRequest ??= request;
+                } else if (image.animating === false && model.prototype?.animating) {
+                    model.prototype = { ...model.prototype, animating: false };
+                    this.post({ type: 'prototype', scene: model.prototype });
+                }
             } catch (error) {
                 if (this.model === model && this.modelGeneration === this.generation && model.prototype?.frame === frame) this.report(error);
             } finally {
@@ -441,6 +468,7 @@ class StageSession {
         if (generation !== this.generation || this.disposed) return;
         model.keyboardInput = client.capabilities.stageKeyboard === true;
         model.pointerInput = client.capabilities.stagePointerInput === true;
+        model.prototypeTransitions = client.capabilities.prototypeTransitions === true;
         this.model = model;
         this.modelVersion = this.document.version;
         this.modelGeneration = generation;
@@ -471,6 +499,19 @@ class StageSession {
 
     private async receive(message: StagesRequest): Promise<void> {
         if (message.type === 'ready') { this.ready = true; this.schedule(); return; }
+        if (message.type === 'prototypeMotionPreference') {
+            this.workbenchReducedMotion = message.reduced === true;
+            const model = this.model;
+            if (model?.prototypeTransitions && model.prototype?.frame !== undefined) {
+                try {
+                    await this.controlPrototype(model.epoch, { action: 'setReducedMotion', reducedMotion: this.prototypeReducedMotion },
+                        AbortSignal.timeout(15_000), model.prototype.frame);
+                } catch (error) {
+                    if (model === this.model && model.prototype) this.report(error);
+                }
+            }
+            return;
+        }
         if ((this.busy && message.type !== 'contact') || this.timer || !this.model || this.disposed
             || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) return;
         const model = this.model;
@@ -572,8 +613,8 @@ class StageSession {
     }
 
     private async editPrototype(model: StageModel, edit: PrototypeEdit): Promise<StageChange | undefined> {
-        const graph = await editPrototype(model, stage => this.hotspots(stage.id, stage.epoch, AbortSignal.timeout(15_000)), edit);
-        if (graph) return { action: 'setPrototype', graph, epoch: model.epoch };
+        const prototype = await editPrototype(model, stage => this.hotspots(stage.id, stage.epoch, AbortSignal.timeout(15_000)), edit);
+        if (prototype) return { action: 'setPrototype', ...prototype, epoch: model.epoch };
     }
 
     private async revealPrototypeTrigger(model: StageModel, index: number, generation: number): Promise<void> {

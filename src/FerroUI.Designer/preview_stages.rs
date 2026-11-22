@@ -3,8 +3,10 @@
 use crate::runtime::RuntimePreview;
 use crate::{
     DefinitionPreviewOptions, PreviewEnvironment, PreviewFlowDirection, PreviewHostOptions,
-    PreviewPrototype, PreviewPrototypeManifest, PreviewStatus, RuntimeNode,
+    PreviewPrototype, PreviewPrototypeLinkTransition, PreviewPrototypeManifest, PreviewStatus,
+    RuntimeNode,
 };
+use crate::preview_prototype_transition::{rebase_link_transitions, validate_link_transitions};
 use ferroui_base::media::FlowDirection;
 use crate::preview_theme::preview_backing;
 use ferroui_base::diagnostics::DesignTextEnvironment;
@@ -411,6 +413,7 @@ impl SourceStamp {
 pub struct PreviewStageBoard {
     stages: Vec<Stage>,
     prototype: PreviewPrototype,
+    prototype_transitions: Vec<PreviewPrototypeLinkTransition>,
     active: Option<PreviewStageId>,
     active_uri: String,
     sources: BTreeMap<String, PreviewStageSource>,
@@ -431,6 +434,7 @@ impl PreviewStageBoard {
         Self {
             stages: Vec::new(),
             prototype: PreviewPrototype::default(),
+            prototype_transitions: Vec::new(),
             active: None,
             active_uri: String::new(),
             sources: BTreeMap::new(),
@@ -452,12 +456,29 @@ impl PreviewStageBoard {
         self.prototype.clone()
     }
 
+    pub fn prototype_transitions(&self) -> &[PreviewPrototypeLinkTransition] {
+        &self.prototype_transitions
+    }
+
     /// Replace local interaction descriptors without rebuilding native stages or
     /// mutating authored source. Rejected graphs leave the accepted board intact.
     pub fn set_prototype(&mut self, prototype: PreviewPrototype) -> Result<(), String> {
+        let transitions = rebase_link_transitions(&self.prototype_transitions, &self.prototype, &prototype);
+        self.set_prototype_with_transitions(prototype, transitions)
+    }
+
+    /// Replace the graph and its per-link transitions in a single board revision.
+    pub fn set_prototype_with_transitions(
+        &mut self,
+        prototype: PreviewPrototype,
+        mut transitions: Vec<PreviewPrototypeLinkTransition>,
+    ) -> Result<(), String> {
         prototype.validate(&self.stages.iter().map(|stage| stage.id).collect::<Vec<_>>())?;
-        if self.prototype != prototype {
+        validate_link_transitions(&transitions, prototype.links.len())?;
+        transitions.sort_unstable_by_key(|entry| entry.link);
+        if self.prototype != prototype || self.prototype_transitions != transitions {
             self.prototype = prototype;
+            self.prototype_transitions = transitions;
             self.bump();
         }
         Ok(())
@@ -734,7 +755,10 @@ impl PreviewStageBoard {
         let index = self.index(id)?;
         let mut stage = self.stages.remove(index);
         stage.retire_pointer_streams();
-        self.prototype.remove_stage(id);
+        let mut prototype = self.prototype.clone();
+        prototype.remove_stage(id);
+        self.prototype_transitions = rebase_link_transitions(&self.prototype_transitions, &self.prototype, &prototype);
+        self.prototype = prototype;
         stage.control.children().clear();
         if self.active == Some(id) {
             self.active = self
@@ -831,7 +855,9 @@ impl PreviewStageBoard {
 
     pub fn stage_set(&self) -> PreviewStageSet {
         PreviewStageSet {
-            version: if self.prototype.is_empty() {
+            version: if !self.prototype_transitions.is_empty() {
+                4
+            } else if self.prototype.is_empty() {
                 1
             } else if self.prototype.has_overlay_actions() {
                 3
@@ -851,6 +877,7 @@ impl PreviewStageBoard {
                 &self.stages.iter().map(|stage| stage.id).collect::<Vec<_>>(),
             )
             .expect("Accepted prototype graph references existing preview stages"),
+            prototype_transitions: self.prototype_transitions.clone(),
         }
     }
 
@@ -887,6 +914,8 @@ impl PreviewStageBoard {
                 .map(|stage| stage.id)
                 .collect::<Vec<_>>(),
         )?;
+        candidate.prototype_transitions = manifest.prototype_transitions;
+        candidate.prototype_transitions.sort_unstable_by_key(|entry| entry.link);
         candidate.active = manifest
             .active
             .and_then(|index| candidate.stages.get(index).map(|stage| stage.id));

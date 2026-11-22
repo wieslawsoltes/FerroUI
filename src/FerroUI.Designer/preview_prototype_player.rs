@@ -24,6 +24,10 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use serde::Deserialize;
 
+#[path = "preview_prototype_motion_view.rs"]
+mod motion;
+pub use motion::PreviewPrototypeMotionCapture;
+
 /// Clipped bounds are expressed in the accepted stage host's logical coordinates.
 #[derive(Clone, Debug, PartialEq)]
 pub struct PreviewPrototypeHotspot {
@@ -97,6 +101,7 @@ pub struct PreviewPrototypePlayerView {
     hints: Ref<CheckBox>,
     search: Ref<TextBox>,
     empty: Ref<TextBlock>,
+    artboard: Ref<Grid>,
     content: Ref<Grid>,
     hotspots: Ref<Canvas>,
     commands: Ref<StackPanel>,
@@ -108,6 +113,8 @@ pub struct PreviewPrototypePlayerView {
     frame_retired: RefCell<Rc<Cell<bool>>>,
     focus_pending: Cell<bool>,
     action: RefCell<Option<Action>>,
+    playing_motion: RefCell<Option<motion::PlayingMotion>>,
+    reduced_motion: Cell<bool>,
 }
 
 impl PreviewPrototypePlayerView {
@@ -184,6 +191,9 @@ impl PreviewPrototypePlayerView {
         viewport.set_padding(Thickness::uniform(16.0));
         let content = Grid::new();
         content.set_clip_to_bounds(true);
+        let artboard = Grid::new();
+        artboard.set_clip_to_bounds(true);
+        artboard.children().add(content.clone().upcast::<Control>());
         let hotspots = Canvas::new();
         hotspots.set_name(Some("PrototypePlayerHotspots".into()));
         hotspots.set_clip_to_bounds(true);
@@ -194,7 +204,7 @@ impl PreviewPrototypePlayerView {
         viewbox.set_horizontal_alignment(HorizontalAlignment::Center);
         viewbox.set_vertical_alignment(VerticalAlignment::Center);
         if !embedded {
-            viewbox.set_child(Some(content.clone().upcast::<Control>()));
+            viewbox.set_child(Some(artboard.clone().upcast::<Control>()));
         }
         viewport.set_child(Some(viewbox.upcast::<Control>()));
         body.children().add(viewport.upcast::<Control>());
@@ -234,7 +244,7 @@ impl PreviewPrototypePlayerView {
         aside.children().add(scroll.upcast::<Control>());
         body.children().add(aside.upcast::<Control>());
         if embedded {
-            root.children().add(content.clone().upcast::<Control>());
+            root.children().add(artboard.clone().upcast::<Control>());
         } else {
             root.children().add(body.upcast::<Control>());
         }
@@ -249,6 +259,7 @@ impl PreviewPrototypePlayerView {
             hints,
             search,
             empty,
+            artboard,
             content,
             hotspots,
             commands,
@@ -260,6 +271,8 @@ impl PreviewPrototypePlayerView {
             frame_retired: RefCell::new(Rc::new(Cell::new(false))),
             focus_pending: Cell::new(false),
             action: RefCell::new(None),
+            playing_motion: RefCell::new(None),
+            reduced_motion: Cell::new(false),
         });
         for (control, action) in [
             (view.back.clone(), PreviewPrototypePlayerAction::Back),
@@ -325,7 +338,7 @@ impl PreviewPrototypePlayerView {
     }
 
     pub fn artboard(&self) -> Ref<Control> {
-        self.content.clone().upcast()
+        self.artboard.clone().upcast()
     }
 
     pub fn active_plane(&self) -> Option<Ref<Control>> {
@@ -374,6 +387,9 @@ impl PreviewPrototypePlayerView {
             .collect();
     }
     fn emit(&self, action: PreviewPrototypePlayerAction, epoch: u64, anchor: Ref<Control>) {
+        if self.motion_running() && matches!(action, PreviewPrototypePlayerAction::Activate { .. }) {
+            return;
+        }
         let result = self
             .action
             .borrow()
@@ -542,8 +558,8 @@ impl PreviewPrototypePlayerView {
         )));
         self.back.set_is_enabled(can_back);
         self.close_overlay.set_is_visible(layers.len() > 1);
-        self.content.set_width(frame_size.width);
-        self.content.set_height(frame_size.height);
+        self.artboard.set_width(frame_size.width);
+        self.artboard.set_height(frame_size.height);
 
         let rebuild_hotspots = active_changed || !same_hotspots;
         if rebuild_hotspots {
@@ -997,17 +1013,20 @@ impl PreviewPrototypePlayerView {
             true,
         );
         macro_rules! block_lower_input {
-            ($event:expr) => {{
+            ($event:expr, $guard:expr) => {{
                 let weak = Rc::downgrade(self);
                 self.root.add_handler_with(
                     $event,
                     move |_, event| {
                         if let Some(view) = weak.upgrade() {
-                            if view.blocked_source(
-                                event
-                                    .source()
-                                    .and_then(|source| source.cast::<InputElement>()),
-                            ) {
+                            let source = event.source().and_then(|source| source.cast::<InputElement>());
+                            if view.motion_running() && ($guard)(event)
+                                && source.as_ref().is_some_and(|source| contains(&view.content, source))
+                            {
+                                event.set_handled(true);
+                                return;
+                            }
+                            if view.blocked_source(source) {
                                 event.set_handled(true);
                                 view.restore_active_focus();
                             }
@@ -1018,9 +1037,9 @@ impl PreviewPrototypePlayerView {
                 );
             }};
         }
-        block_lower_input!(InputElement::key_down_event());
-        block_lower_input!(InputElement::key_up_event());
-        block_lower_input!(InputElement::text_input_event());
+        block_lower_input!(InputElement::key_down_event(), |event: &ferroui_base::input::KeyEventArgs| event.key != Key::Escape);
+        block_lower_input!(InputElement::key_up_event(), |_| true);
+        block_lower_input!(InputElement::text_input_event(), |_| true);
         macro_rules! block_lower_pointer {
             ($event:expr) => {{
                 let weak = Rc::downgrade(self);
@@ -1097,6 +1116,7 @@ impl PreviewPrototypePlayerView {
 
     /// Retire all captured callback epochs before the host drops its playback graph.
     pub fn clear(&self) {
+        self.finish_motion();
         self.frame_retired.borrow().set(true);
         self.focus_pending.set(false);
         self.host.borrow_mut().take();

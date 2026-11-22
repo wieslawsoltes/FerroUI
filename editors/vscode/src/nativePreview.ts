@@ -15,7 +15,7 @@ import type { NativePaletteRequest } from './hostedPaletteProtocol';
 import type { NativeStyleRequest } from './hostedStylesProtocol';
 import type { NativeTemplateRequest } from './hostedTemplates';
 import type { StateGroupEdit } from './stateGroupProtocol';
-import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeInput, PrototypeInputResult, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StagePointerInput, StageStateOptions, StageTarget } from './stagesProtocol';
+import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeImage, PrototypeInput, PrototypeInputResult, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StagePointerInput, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 import type { RustModuleProject } from './cargoTarget';
 
@@ -44,7 +44,7 @@ export class NativePreview implements vscode.Disposable {
         isolatedDesign?: boolean; appHostedDesign?: boolean; hostedSourceSnapshots?: boolean; hostedPalette?: boolean; hostedStyles?: boolean;
         hostedTemplates?: boolean;
         hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean; rsxLanguage?: boolean;
-        stages?: boolean; stageKeyboard?: boolean; stagePointerInput?: boolean; prototypeEditing?: boolean; prototypeNativePlayer?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean; publishedAssets?: boolean;
+        stages?: boolean; stageKeyboard?: boolean; stagePointerInput?: boolean; prototypeEditing?: boolean; prototypeNativePlayer?: boolean; prototypeTransitions?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean; publishedAssets?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; canvasHighContrast?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; rsxColumnAuthoring?: boolean; itemTemplateAuthoring?: boolean; rsxItemTemplateAuthoring?: boolean;
         behaviorAuthoring?: boolean;
@@ -213,6 +213,9 @@ export class NativePreview implements vscode.Disposable {
     syncStages(source: StageDocument, manifest?: StageManifest, additional: StageDocument[] = [], localSources?: PreviewSourceBuffer[],
         sourceMoves?: Record<string, string>): Promise<StageModel> {
         if (!this.capabilities.stages) throw new Error('Update the FerroUI preview helper to use Stages.');
+        if (manifest && manifest.version >= 4 && !this.capabilities.prototypeTransitions) {
+            throw new Error('Update the FerroUI preview helper to open stage sets with transitions.');
+        }
         const params = { source, manifest, additional, sourceMoves };
         const drafts = localSources?.length ? fitStageDrafts(params, localSources) : undefined;
         return this.send('stagesSync', { ...params, localSources: drafts });
@@ -221,6 +224,9 @@ export class NativePreview implements vscode.Disposable {
     editStages(change: NativeStageChange): Promise<StageModel> {
         if (!this.capabilities.prototypeEditing && (change.action === 'setPrototype' || (change.action === 'add' && change.source))) {
             throw new Error('Update the FerroUI preview helper to edit prototypes and add other documents.');
+        }
+        if (change.action === 'setPrototype' && change.transitions !== undefined && !this.capabilities.prototypeTransitions) {
+            throw new Error('Update the FerroUI preview helper to edit prototype transitions.');
         }
         return this.send('stagesEdit', change);
     }
@@ -248,11 +254,17 @@ export class NativePreview implements vscode.Disposable {
         return this.send('stagesPrototypeElements', target);
     }
     stagePrototype(epoch: number, command: PrototypeCommand, expectedFrame?: number): Promise<PrototypeScene | null> {
+        if (command.action === 'setReducedMotion' && !this.capabilities.prototypeTransitions) {
+            throw new Error('Update the FerroUI preview helper to control prototype motion.');
+        }
         return this.send('stagesPrototype', { epoch, expectedFrame, ...command });
     }
-    prototypeImage(frame: number): Promise<StageImage> {
+    prototypeImage(frame: number): Promise<PrototypeImage> {
         if (!this.capabilities.prototypeNativePlayer) throw new Error('Update the preview helper for the native prototype player.');
         return this.send('stagesPrototypeImage', { frame });
+    }
+    prototypeState(frame: number): Promise<PrototypeScene | null> {
+        return this.send('stagesPrototypeState', { frame });
     }
     prototypeInput(frame: number, input: PrototypeInput, automation: boolean): Promise<PrototypeInputResult> {
         if (!this.capabilities.prototypeNativePlayer) throw new Error('Update the preview helper for the native prototype player.');

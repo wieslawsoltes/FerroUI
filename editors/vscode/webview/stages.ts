@@ -116,4 +116,13 @@ element('stages-load').onclick = () => send({ type: 'loadManifest' });
 boardTab.onclick = () => switchSurface(false);
 graphTab.onclick = () => switchSurface(true);
 play.onclick = () => send({ type: 'prototype' });
+let reducedMotion: boolean | undefined;
+function syncMotionPreference(): void {
+    const reduced = document.body.classList.contains('vscode-reduce-motion');
+    if (reduced === reducedMotion) return;
+    reducedMotion = reduced;
+    send({ type: 'prototypeMotionPreference', reduced });
+}
+new MutationObserver(syncMotionPreference).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+syncMotionPreference();
 send({ type: 'ready' });

@@ -197,6 +197,10 @@ Run the same scenario in CI with `ferroui-designer-preview --scenario customer-s
 
 Set `prototype` to run a saved `.ferrostages` file through the native Stages player. Supply its `stageSet` path and `flow` name. The optional `sources` map assigns a saved source URI to a workspace-relative `path` and optional RSX `caret` for a portable scenario. Paths are resolved from the scenario folder. Use `activateLink` with an authored interaction name, `expectStage` with the underlying screen name, and `expectOverlay` with the top overlay name or `null`. Input, accessibility, property checks, and PNG comparisons use the current native screen or overlay. The customer review fixture follows a saved flow through two screens and a notes overlay. [Customer review scenario](test/fixtures/customer-review.ferroui-scenario.json)
 
+Version-4 stage sets can assign a dissolve or slide to a prototype link. The scenario
+runner uses settled frames for focus and baseline comparisons. Play the stage set in
+**Prototype** to review timing and easing. [Set a prototype transition](../../docs/designer/vscode/motion.md#set-a-prototype-transition)
+
 ## Hot reload a running application
 
 Run **FerroUI: Run with Hot Reload** from a local Cargo workspace and select a development binary. Try `hot-reload-demo` for XAML or `view-gallery` for Rust. The extension uses Cargo metadata and enables a package’s `hot-reload` feature when defined. Save your changes in the editor or save a design edit to update the application. The status bar and **FerroUI: Show Hot Reload Output** report in-place updates, rejected edits, and rebuilds.

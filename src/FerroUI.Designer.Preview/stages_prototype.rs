@@ -30,13 +30,21 @@ pub(crate) struct Control {
 #[derive(Deserialize)]
 #[serde(tag = "action", rename_all = "camelCase")]
 pub(crate) enum Command {
-    Start { flow: String },
+    Start {
+        flow: String,
+        #[serde(default, rename = "reducedMotion")]
+        reduced_motion: bool,
+    },
     Back,
     CloseOverlay,
     DismissOverlay,
     Restart,
     Stop,
     Activate { link: usize },
+    SetReducedMotion {
+        #[serde(rename = "reducedMotion")]
+        reduced_motion: bool,
+    },
 }
 
 #[derive(Serialize)]
@@ -49,11 +57,19 @@ pub(crate) struct Scene {
     frame: u64,
     links: Vec<usize>,
     diagnostics: Vec<String>,
+    animating: bool,
 }
 
 #[derive(Deserialize)]
 pub(crate) struct FrameRequest {
     frame: u64,
+}
+
+#[derive(Serialize)]
+pub(crate) struct FrameImage {
+    #[serde(flatten)]
+    image: Image,
+    animating: bool,
 }
 
 #[derive(Deserialize)]
@@ -87,6 +103,7 @@ impl Playback {
             frame: player.frame,
             links: player.links.keys().copied().collect(),
             diagnostics: player.diagnostics.clone(),
+            animating: player.animating(),
         })
     }
 
@@ -102,11 +119,17 @@ impl Playback {
             self.check_frame(frame)?;
         }
         match request.action {
-            Command::Start { flow } => {
-                let session = PreviewPrototypeSession::start(&board.prototype(), &flow)?;
+            Command::Start { flow, reduced_motion } => {
+                let session = PreviewPrototypeSession::start_with_transitions(
+                    &board.prototype(), &flow, board.prototype_transitions(),
+                )?;
                 let frame = self.next_frame();
-                let player = NativePlayer::start(board, session, frame)?;
+                let player = NativePlayer::start(board, session, frame, reduced_motion)?;
                 self.player = Some(player);
+            }
+            Command::SetReducedMotion { reduced_motion } => {
+                self.player.as_ref().ok_or("Start a prototype flow first")?
+                    .set_reduced_motion(reduced_motion);
             }
             action => self.apply_action(action)?,
         }
@@ -145,7 +168,7 @@ impl Playback {
                 player.validate_link(link)?;
                 next.activate_link(link)?;
             }
-            Command::Start { .. } | Command::Stop => unreachable!(),
+            Command::Start { .. } | Command::SetReducedMotion { .. } | Command::Stop => unreachable!(),
         }
         player.navigate(next, frame)
     }
@@ -167,6 +190,7 @@ impl Playback {
 
     pub(crate) fn input(&mut self, request: InputRequest) -> Result<InputResult, String> {
         let player = self.check_frame(request.frame)?;
+        player.check_input(&request.input)?;
         let (mut focus, settle) = match request.input {
             PreviewPrototypeInput::Keyboard { input } => (player.keyboard(input)?, true),
             PreviewPrototypeInput::Pointer { input } => {
@@ -189,7 +213,7 @@ impl Playback {
             if let Some(player) = &self.player {
                 focus = player.keyboard(PreviewStageKeyboardInput::Focus)?;
             }
-        } else if settle {
+        } else if settle && self.player.as_ref().is_some_and(|player| !player.animating()) {
             self.player.as_mut().unwrap().present()?;
         }
         Ok(InputResult {
@@ -214,8 +238,15 @@ impl Playback {
         Ok(true)
     }
 
-    pub(crate) fn image(&mut self, request: FrameRequest) -> Result<Image, String> {
-        self.check_frame(request.frame)?.image()
+    pub(crate) fn image(&mut self, request: FrameRequest) -> Result<FrameImage, String> {
+        let player = self.check_frame(request.frame)?;
+        let image = player.image()?;
+        Ok(FrameImage { image, animating: player.animating() })
+    }
+
+    pub(crate) fn state(&self, request: FrameRequest) -> Result<Option<Scene>, String> {
+        self.check_frame(request.frame)?.advance_motion();
+        Ok(self.scene())
     }
 
     pub(crate) fn active_control(&self) -> Result<Ref<NativeControl>, String> {

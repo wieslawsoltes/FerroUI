@@ -1,28 +1,41 @@
-import type { PrototypeAction, PrototypeEdit, PrototypeGraph, PrototypeHotspot, StageInfo, StageModel, StageTarget } from './stagesProtocol';
+import type { PrototypeAction, PrototypeEdit, PrototypeGraph, PrototypeHotspot, PrototypeLinkTransition, StageInfo, StageModel, StageTarget } from './stagesProtocol';
 import { editOverlayOptions } from './stagePrototypeOverlay';
+import { editPrototypeTransition } from './stagePrototypeTransition';
 import { choose, editText } from './studioContext';
 
 type Hotspots = (stage: StageTarget) => Promise<PrototypeHotspot[]>;
 
-export async function editPrototype(model: StageModel, hotspots: Hotspots, edit: PrototypeEdit): Promise<PrototypeGraph | undefined> {
+export async function editPrototype(model: StageModel, hotspots: Hotspots, edit: PrototypeEdit):
+    Promise<{ graph: PrototypeGraph; transitions?: PrototypeLinkTransition[] } | undefined> {
     const graph = structuredClone(model.manifest.prototype ?? { flows: [], links: [] });
+    let transitions = model.prototypeTransitions ? structuredClone(model.manifest.prototype_transitions ?? []) : undefined;
     const index = edit.index;
     const flow = edit.kind === 'flow';
     const entries = flow ? graph.flows : graph.links;
     if (index !== undefined && !entries[index]) throw new Error('Choose an entry from the current prototype.');
     const apply = () => edit.kind === 'flow' ? editFlow(model, graph, index)
         : editLink(model, graph, hotspots, edit);
-    const changed = index === undefined ? await apply()
-        : await chooseEdit(entries[index].name, apply, () => entries.splice(index, 1));
-    return changed ? graph : undefined;
-}
-
-async function chooseEdit(label: string, edit: () => Promise<boolean>, remove: () => void): Promise<boolean> {
-    const selection = await choose(label, [{ label: 'Edit…', edit: true }, { label: 'Remove', edit: false }]);
-    if (!selection) return false;
-    if (selection.edit) return edit();
-    remove();
-    return true;
+    if (index === undefined) return await apply() ? { graph, transitions } : undefined;
+    const actions = [
+        { label: '$(edit) Edit…', action: 'edit' },
+        ...(!flow && transitions ? [{ label: '$(play) Transition…', action: 'transition' }] : []),
+        { label: '$(trash) Remove', action: 'remove' },
+    ];
+    const selection = await choose(entries[index].name, actions);
+    if (!selection) return;
+    if (selection.action === 'edit') return await apply() ? { graph, transitions } : undefined;
+    if (selection.action === 'transition' && transitions) {
+        const previous = transitions.find(item => item.link === index);
+        const transition = await editPrototypeTransition(previous?.transition);
+        if (transition === undefined) return;
+        transitions = transitions.filter(item => item.link !== index);
+        if (transition) transitions.push({ link: index, transition });
+    } else if (selection.action === 'remove') {
+        entries.splice(index, 1);
+        if (!flow) transitions = transitions?.filter(item => item.link !== index)
+            .map(item => ({ ...item, link: item.link > index ? item.link - 1 : item.link }));
+    }
+    return { graph, transitions };
 }
 
 function screens(model: StageModel) {

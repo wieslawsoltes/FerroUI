@@ -222,6 +222,8 @@ fn respond(
             .and_then(|request| serialize(stages.control_prototype(request))),
         "stagesPrototypeImage" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.playback.image(request))),
+        "stagesPrototypeState" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.playback.state(request))),
         "stagesPrototypeInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.playback.input(request))),
         "render" => serde_json::from_value(message["params"].clone())

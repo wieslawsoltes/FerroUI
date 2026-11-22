@@ -6,7 +6,7 @@ use ferroui_base::{threading::Dispatcher, Rect, Ref};
 use ferroui_controls::Control;
 use ferroui_designer::preview_prototype_layout as layout;
 use ferroui_designer::{
-    capture_preview_stage_png, PreviewPrototypePlayerAction, PreviewPrototypePlayerView,
+    capture_preview_stage_png, PreviewPrototypeInput, PreviewPrototypePlayerAction, PreviewPrototypePlayerView,
     PreviewPrototypeSession, PreviewStageBoard, PreviewStageFocus, PreviewStageId,
     PreviewStageKeyboardInput, PreviewStagePointerInput, PreviewStagePointerOrigin,
     PreviewStageStatus,
@@ -34,9 +34,11 @@ impl NativePlayer {
         authoring: &PreviewStageBoard,
         session: PreviewPrototypeSession,
         frame: u64,
+        reduced_motion: bool,
     ) -> Result<Self, String> {
         let (board, stages) = authoring.prototype_sources(&session)?.realize()?;
         let view = PreviewPrototypePlayerView::new_embedded();
+        view.set_reduced_motion(reduced_motion);
         let pending = Rc::new(Cell::new(None));
         let requested = pending.clone();
         view.on_action(move |action, frame, _| {
@@ -72,6 +74,7 @@ impl NativePlayer {
         layout::layers(&self.board, &self.stages, &next)?;
         self.cancel(PreviewStagePointerOrigin::Editor);
         self.cancel(PreviewStagePointerOrigin::Automation);
+        let motion = self.view.capture_motion(next.motion());
         let previous = std::mem::replace(&mut self.session, next);
         let previous_frame = std::mem::replace(&mut self.frame, frame);
         if let Err(error) = self.present() {
@@ -80,10 +83,18 @@ impl NativePlayer {
             self.present()?;
             return Err(error);
         }
+        match motion {
+            Ok(capture) => self.view.play_motion(capture),
+            Err(error) => self.diagnostics.push(format!("Transition skipped. {error}")),
+        }
         Ok(())
     }
 
     pub(super) fn validate_link(&mut self, index: usize) -> Result<(), String> {
+        self.view.advance_motion();
+        if self.view.motion_running() {
+            return Err("Wait for the prototype transition to finish".into());
+        }
         if !self.links.contains_key(&index) {
             return Err("Choose an available interaction on the active prototype layer".into());
         }
@@ -254,8 +265,25 @@ impl NativePlayer {
     }
 
     pub(super) fn image(&self) -> Result<Image, String> {
+        self.view.advance_motion();
         self.layout();
         capture(&self.view.artboard())
+    }
+
+    pub(super) fn animating(&self) -> bool {
+        self.view.motion_running()
+    }
+
+    pub(super) fn advance_motion(&self) {
+        self.view.advance_motion();
+    }
+
+    pub(super) fn set_reduced_motion(&self, reduced: bool) {
+        self.view.set_reduced_motion(reduced);
+    }
+
+    pub(super) fn check_input(&self, input: &PreviewPrototypeInput) -> Result<(), String> {
+        self.view.check_motion_input(input)
     }
 
     pub(super) fn active_control(&self) -> Result<Ref<Control>, String> {

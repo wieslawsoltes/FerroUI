@@ -41,7 +41,7 @@ export class PrototypePlayer {
         this.artboard.update(scene, current || 'Prototype');
         const actions = scene ? (model?.manifest.prototype?.links ?? []).flatMap((link, index) =>
             model?.stages[link.source]?.id === scene.current && (scene.links?.includes(index) ?? true) ? [{ name: link.name, index }] : []) : [];
-        const key = JSON.stringify([scene?.flow, scene?.current, scene?.can_go_back, scene?.overlays.length, this.frame !== undefined, current, actions]);
+        const key = JSON.stringify([scene?.flow, scene?.current, scene?.can_go_back, scene?.overlays.length, scene?.animating, this.frame !== undefined, current, actions]);
         if (key === this.key) return;
         this.key = key;
         const focus = document.activeElement instanceof HTMLElement ? document.activeElement : undefined;
@@ -85,6 +85,7 @@ export class PrototypePlayer {
             control.className = 'prototype-trigger';
             control.append(icon('arrow-right'));
             control.dataset.playerAction = String(index);
+            control.disabled = scene.animating === true;
             control.onclick = () => this.send({ type: 'prototype', command: { action: 'activate', link: index }, frame: this.frame });
             triggers.append(control);
         }

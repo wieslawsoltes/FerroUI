@@ -367,12 +367,12 @@ The public components can be embedded independently:
   from its host and does not own document or runtime state.
 - `PreviewStageEditor` edits a detached configuration and validates it on Apply.
 - `PreviewStageSet` validates and serializes a versioned stage set with its prototype
-  graph and per-card design fixtures. `PreviewStageManifest` provides the original
-  configuration API. Overlay actions use version 3, Navigate/Back-only graphs use version 2,
-  and an empty graph uses version 1. All three versions load; older versions reject
-  overlay actions. JSON parsing rejects unknown fields, invalid dimensions or overlay
+  graph, per-card design fixtures, and per-interaction transitions. `PreviewStageManifest`
+  provides the original configuration API. Transitions use version 4, overlays use version 3,
+  Navigate and Back use version 2, and an empty graph uses version 1. Studio reads all
+  four versions. JSON parsing rejects unknown fields, invalid dimensions or overlay
   coordinates, malformed source paths, invalid graph references and manifests larger
-  than 1 MiB.
+  than 1 MiB. [Animate an interaction](prototyping.md#animate-an-interaction)
 - `PreviewStageMatrix` validates and expands comparison axes into ordinary stage
   configurations within a supplied capacity.
 - `PreviewStageExportOptions` and `PreviewStageImage` describe bounded PNG density and

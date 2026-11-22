@@ -1,4 +1,4 @@
-import type { PrototypeInput, PrototypeScene, StageFocus, StageImage, StagesRequest } from '../src/stagesProtocol';
+import type { PrototypeImage, PrototypeInput, PrototypeScene, StageFocus, StagesRequest } from '../src/stagesProtocol';
 import { create } from './dom';
 import { StageContacts } from './stageContacts';
 import { StageKeyboard } from './stageKeyboard';
@@ -53,7 +53,7 @@ export class PrototypeArtboard {
         if (frame === this.scene?.frame) this.keyboard.focused(focus);
     }
 
-    async present(frame: number, image: StageImage): Promise<void> {
+    async present(frame: number, image: PrototypeImage): Promise<void> {
         if (this.scene?.frame !== frame) return;
         const pending = ++this.pending;
         const next = new Image();
@@ -64,7 +64,8 @@ export class PrototypeArtboard {
         this.image.alt = `${this.title} native preview`;
         this.image.hidden = false;
         this.placeholder.hidden = true;
-        this.displayed = frame;
+        this.displayed = image.animating ? undefined : frame;
+        this.element.setAttribute('aria-busy', String(image.animating === true));
         this.updateInput();
     }
 
@@ -78,7 +79,8 @@ export class PrototypeArtboard {
     private input(input: PrototypeInput, expected?: number): void {
         const frame = this.scene?.frame;
         if (this.current && frame !== undefined && (expected === undefined || expected === frame) && (this.displayed === frame
-            || (input.kind === 'keyboard' && input.input.kind === 'focus'))) {
+            || (input.kind === 'keyboard' && (input.input.kind === 'focus'
+                || (input.input.kind === 'key' && input.input.key === 'Escape'))))) {
             this.send({ type: 'prototypeInput', frame, input });
         }
     }

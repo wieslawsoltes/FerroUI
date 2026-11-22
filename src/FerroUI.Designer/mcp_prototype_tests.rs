@@ -424,10 +424,14 @@ fn prototype_agent_input_checks_both_permissions_and_the_active_frame() {
     services.input_manager = focus.input_manager;
     let _app = UnitTestApplication::start(services);
     let fixture = Fixture::new();
-    fixture.command(json!({"action":"set_graph","graph":fixture.overlay_graph()}), false).unwrap();
-    fixture.command(json!({"action":"play","flow":"Browse"}), true).unwrap();
+    let transitions = json!([{"link":0,"transition":{"effect":"slide_up","duration_ms":4000,"easing":"ease_out"}}]);
+    fixture.command(json!({"action":"set_graph","graph":fixture.overlay_graph(),"transitions":transitions}), false).unwrap();
+    assert_eq!(fixture.read()["transitions"], transitions);
+    assert_eq!(fixture.workspace.preview_stage_set().version, 4);
+    fixture.command(json!({"action":"play","flow":"Browse","reduced_motion":true}), true).unwrap();
     fixture.command(json!({"action":"activate","link":0}), true).unwrap();
     let accepted = fixture.read();
+    assert_eq!(accepted["playback"]["animating"], false);
     let focus = json!({"expected_model":accepted["model"],"expected_frame":accepted["playback"]["epoch"],
         "input":{"kind":"keyboard","input":{"kind":"focus"}}});
     let tool = "designer_prototype_input";

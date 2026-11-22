@@ -1,7 +1,7 @@
 //! Detached native forms for named prototype starts and source-backed interactions.
 use crate::{
     PreviewPrototype, PreviewPrototypeAction, PreviewPrototypeFlow, PreviewPrototypeLink,
-    PreviewPrototypeOverlayOptions, PreviewPrototypeOverlayPlacement, PreviewSourceAnchor,
+    PreviewPrototypeOverlayOptions, PreviewPrototypeOverlayPlacement, PreviewPrototypeTransition, PreviewSourceAnchor,
     PreviewStageId, PreviewStageInfo, MAX_PREVIEW_PROTOTYPE_OVERLAY_OFFSET,
 };
 use ferroui_base::input::{
@@ -20,6 +20,10 @@ use ferroui_controls::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+
+#[path = "preview_prototype_transition_editor.rs"]
+mod transition;
+use transition::TransitionEditor;
 
 /// The workspace supplies only eligible authored elements from its accepted sources.
 #[derive(Clone, Debug, serde::Serialize)]
@@ -266,7 +270,7 @@ impl PreviewPrototypeFlowEditor {
 }
 
 pub struct PreviewPrototypeLinkEditor {
-    state: EditorState<PreviewPrototypeLink>,
+    state: EditorState<(PreviewPrototypeLink, Option<PreviewPrototypeTransition>)>,
     name: Ref<TextBox>,
     source: Ref<ComboBox>,
     element: Ref<ComboBox>,
@@ -284,11 +288,22 @@ pub struct PreviewPrototypeLinkEditor {
     stages: Vec<PreviewStageInfo>,
     elements: Vec<PreviewPrototypeElementChoice>,
     visible_elements: RefCell<Vec<PreviewPrototypeElementChoice>>,
+    transition: TransitionEditor,
 }
 
 impl PreviewPrototypeLinkEditor {
     pub fn new(
         initial: Option<PreviewPrototypeLink>,
+        source: Option<PreviewStageId>,
+        stages: Vec<PreviewStageInfo>,
+        elements: Vec<PreviewPrototypeElementChoice>,
+    ) -> Rc<Self> {
+        Self::new_with_transition(initial, None, source, stages, elements)
+    }
+
+    pub(crate) fn new_with_transition(
+        initial: Option<PreviewPrototypeLink>,
+        motion: Option<PreviewPrototypeTransition>,
         source: Option<PreviewStageId>,
         stages: Vec<PreviewStageInfo>,
         elements: Vec<PreviewPrototypeElementChoice>,
@@ -439,6 +454,7 @@ impl PreviewPrototypeLinkEditor {
             .body
             .children()
             .add(overlay_fields.clone().upcast::<Control>());
+        let transition = TransitionEditor::new(&state.body, motion);
         let editor = Rc::new(Self {
             state,
             name,
@@ -458,6 +474,7 @@ impl PreviewPrototypeLinkEditor {
             stages,
             elements,
             visible_elements: RefCell::new(Vec::new()),
+            transition,
         });
         editor.rebuild_elements(
             initial.as_ref().map(|link| &link.trigger),
@@ -571,7 +588,13 @@ impl PreviewPrototypeLinkEditor {
         &self,
         callback: impl Fn(PreviewPrototypeLink) -> Result<(), String> + 'static,
     ) {
-        *self.state.apply.borrow_mut() = Some(Rc::new(callback));
+        self.on_apply_with_transition(move |link, _| callback(link));
+    }
+    pub(crate) fn on_apply_with_transition(
+        &self,
+        callback: impl Fn(PreviewPrototypeLink, Option<PreviewPrototypeTransition>) -> Result<(), String> + 'static,
+    ) {
+        *self.state.apply.borrow_mut() = Some(Rc::new(move |(link, motion)| callback(link, motion)));
     }
     pub fn on_close(&self, callback: impl Fn() + 'static) {
         *self.state.close.borrow_mut() = Some(Rc::new(callback));
@@ -631,7 +654,8 @@ impl PreviewPrototypeLinkEditor {
     }
 
     pub fn apply(&self) -> Result<(), String> {
-        self.state.submit(self.value())
+        let draft = self.value().and_then(|link| self.transition.value().map(|motion| (link, motion)));
+        self.state.submit(draft)
     }
 
     fn overlay_options(&self) -> Result<PreviewPrototypeOverlayOptions, String> {

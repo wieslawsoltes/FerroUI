@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "active": 0,
   "stages": [
     {
@@ -52,5 +52,9 @@
         "action": { "kind": "close_overlay" }
       }
     ]
-  }
+  },
+  "prototype_transitions": [
+    { "link": 0, "transition": { "effect": "dissolve", "duration_ms": 220, "easing": "ease_in_out" } },
+    { "link": 1, "transition": { "effect": "slide_up", "duration_ms": 300, "easing": "ease_out" } }
+  ]
 }

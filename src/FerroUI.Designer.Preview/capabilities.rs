@@ -17,6 +17,7 @@ pub(crate) fn initialize() -> Value {
         "stageKeyboard",
         "stagePointerInput",
         "prototypeNativePlayer",
+        "prototypeTransitions",
         "prototypeEditing",
         "stageIncludes",
         "stageSourceMoves",
