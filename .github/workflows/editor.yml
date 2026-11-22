@@ -1,0 +1,240 @@
+name: Editor port conformance
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Edit*/**'
+      - 'src/FerroUI.TextMate*/**'
+      - 'src/FerroUI.Base/**'
+      - 'src/Browser/FerroUI.Browser/**'
+      - 'src/FerroUI.Native/**'
+      - 'native/FerroUI.Native/**'
+      - 'src/Windows/FerroUI.Direct2D/**'
+      - 'src/Windows/FerroUI.Win32/**'
+      - 'samples/EditorDemo/**'
+      - 'samples/EditorDemo.Browser/**'
+      - 'samples/ControlCatalog/Assets/FallbackFonts/NotoColorEmoji-Catalog.ttf'
+      - 'samples/ControlCatalog/Assets/FallbackFonts/WenQuanYiMicroHei-Catalog.ttf'
+      - 'scripts/edit-port/**'
+      - 'scripts/build-browser.sh'
+      - 'scripts/browser/harness.mjs'
+      - 'scripts/browser/tests/editor_clipboard_native_roundtrip.mjs'
+      - 'scripts/browser/tests/editor_clipboard_macos.test.mjs'
+      - 'scripts/browser/tests/editor_clipboard_windows.test.mjs'
+      - 'scripts/browser/tests/editor_demo.test.mjs'
+      - 'docs/porting/data/editor-*.json'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - '.github/workflows/editor.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: editor-${{ github.ref }}
+  # Let the linked browser build finish while newer commits arrive.
+  # GitHub keeps the latest pending run for this group; older pending runs coalesce.
+  cancel-in-progress: false
+
+env:
+  CARGO_BUILD_JOBS: 1
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+      - name: Source inventory and unchanged assets
+        run: |
+          python3 scripts/edit-port/editor_port.py --check
+          python3 scripts/edit-port/test_editor_port.py
+          python3 scripts/edit-port/check_assets.py
+      - name: Document, native grammar, control and XAML demo tests
+        run: >-
+          cargo test --locked --lib --no-default-features
+          -p ferroui-edit-core -p ferroui-textmate -p ferroui-edit -p editor-demo
+          --features ferroui-textmate/native-onig,ferroui-textmate/bundled-grammars
+      - name: Explicit portable regex fallback
+        run: cargo test --locked -p ferroui-textmate --lib --no-default-features --features portable-regex,bundled-grammars
+      - name: Headless editor actions through the compositor
+        timeout-minutes: 10
+        run: cargo run --locked -p editor-demo --no-default-features --features headless -- --smoke-actions
+
+  wasm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '22'
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: editor-wasm
+      - name: Check editor control portability
+        run: cargo check --locked -p ferroui-edit-core -p ferroui-edit --target wasm32-unknown-unknown
+      - name: Verify scanner assets with the production browser site composer
+        run: node src/FerroUI.TextMate/tests/oracle/check-browser-packaging.mjs
+      - name: Build the real Rust/Wasm conformance harness
+        run: cargo build --locked -p ferroui-textmate --example textmate_browser_conformance --features bundled-grammars --target wasm32-unknown-unknown
+      - name: Install matching bindings generator
+        run: cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - name: Compare every token through the browser Oniguruma engine
+        run: |
+          wasm-bindgen --target experimental-nodejs-module --out-dir /tmp/editor-wasm \
+            target/wasm32-unknown-unknown/debug/examples/textmate_browser_conformance.wasm
+          node src/FerroUI.TextMate/tests/oracle/check-wasm.mjs \
+            /tmp/editor-wasm/textmate_browser_conformance.js
+
+  browser:
+    name: Linked browser editor (Emscripten build and package)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ./.github/actions/browser-toolchain
+        with:
+          cache-key: editor-browser
+      - name: Link and package the actual editor application
+        run: scripts/build-browser.sh editor-demo-browser
+      # Keep compilation independent of acceptance so its successful dependency
+      # cache is saved even when a later browser interaction finds a regression.
+      - name: Keep the linked editor site
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
+          if-no-files-found: error
+          retention-days: 1
+
+  browser-conformance:
+    name: Browser editor conformance (real input and rendering)
+    needs: browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
+      - name: Browser editing, popup, scanner and rendering conformance
+        run: >-
+          node scripts/browser/tests/editor_demo.test.mjs
+          --screenshot target/browser/screenshots/editor-demo.png
+      - name: Keep the editor screenshot
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: editor-browser-screenshot
+          path: target/browser/screenshots/editor-demo.png
+          if-no-files-found: ignore
+
+  windows-conformance:
+    name: Windows Direct2D and Edge editor conformance
+    needs: browser
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: editor-direct2d
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
+      - name: Build the isolated Windows editor fixture
+        shell: pwsh
+        run: |
+          $executables = @(cargo test --locked -p editor-demo --no-default-features --features direct2d `
+            --test editor_clipboard_windows --no-run --message-format json-render-diagnostics | ForEach-Object {
+              $message = $_ | ConvertFrom-Json
+              if ($message.reason -eq 'compiler-artifact' -and $message.target.name -eq 'editor_clipboard_windows' -and $message.executable) {
+                $message.executable
+              }
+            })
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($executables.Count -ne 1) { throw 'Expected one editor_clipboard_windows executable from Cargo' }
+          "FERROUI_EDITOR_WINDOWS_FIXTURE=$($executables[0])" >> $env:GITHUB_ENV
+      - name: Verify Direct2D drag selection, gutters and I-beam re-entry
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $env:FERROUI_TEST_WINDOWS_DESKTOP = 'FerroEditDrag-' + [guid]::NewGuid().ToString('N')
+          & $env:FERROUI_EDITOR_WINDOWS_FIXTURE --fixture drag-render
+      - name: Verify UI Automation text ranges and the Windows system caret
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $env:FERROUI_TEST_WINDOWS_DESKTOP = 'FerroEditUIA-' + [guid]::NewGuid().ToString('N')
+          & $env:FERROUI_EDITOR_WINDOWS_FIXTURE --fixture text-automation
+      - name: Verify inline-control input and UI Automation ranges
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $env:FERROUI_TEST_WINDOWS_DESKTOP = 'FerroEditInline-' + [guid]::NewGuid().ToString('N')
+          & $env:FERROUI_EDITOR_WINDOWS_FIXTURE --fixture inline-control
+      - name: Verify Edge and native Windows clipboard round trips
+        shell: pwsh
+        timeout-minutes: 15
+        run: |
+          $edge = @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe",
+                    "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe") |
+            Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
+          if (!$edge) { throw 'Microsoft Edge executable was not found on the runner' }
+          node scripts/browser/tests/editor_clipboard_windows.test.mjs target/browser/editor-demo-browser `
+            $env:FERROUI_EDITOR_WINDOWS_FIXTURE $edge
+
+  macos-conformance:
+    name: macOS AppKit input and Chrome clipboard conformance
+    needs: browser
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: editor-appkit
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: editor-browser-site
+          path: target/browser/editor-demo-browser
+      - name: Verify AppKit marked text and committed text
+        run: cargo test --locked -p ferroui-native --test text_input_options
+      - name: Build the native macOS editor fixture
+        shell: bash
+        run: |
+          fixture="$(cargo test --locked -p editor-demo --test editor_clipboard_macos --no-run \
+            --message-format json-render-diagnostics | jq -r \
+              'select(.reason == "compiler-artifact" and .target.name == "editor_clipboard_macos" and .executable != null) | .executable')"
+          test -x "$fixture"
+          echo "FERROUI_EDITOR_MACOS_FIXTURE=$fixture" >> "$GITHUB_ENV"
+      - name: Verify the AppKit editor text accessibility bridge
+        run: '"$FERROUI_EDITOR_MACOS_FIXTURE" --fixture text-automation'
+      - name: Verify Chrome and native AppKit clipboard round trips
+        timeout-minutes: 15
+        run: |
+          node scripts/browser/tests/editor_clipboard_macos.test.mjs target/browser/editor-demo-browser \
+            "$FERROUI_EDITOR_MACOS_FIXTURE"

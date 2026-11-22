@@ -585,6 +585,7 @@ Design, state and compatibility:
 
 - [Critical path](docs/porting/CRITICAL-PATH.md): the state of each subsystem and what is open.
 - [Porting guide](docs/porting/PORTING-GUIDE.md): the class model, naming and mapping rules, and the conventions every ported file follows.
+- [Text editor and TextMate port](docs/porting/editor-textmate.md): pinned upstreams, source and asset inventories, implementation contracts and remaining work; [EditorDemo](samples/EditorDemo) exercises the native controls and runtime XAML.
 - [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
 - [Deviations](docs/porting/DEVIATIONS.md): every place where FerroUI differs from the projects it follows, and why.
 - [Idiomatic Rust under the .NET-named API](docs/idiomatic-rust.md): the names that stay .NET-like, the std and chosen-crate types that replace the ports of `System.*` types, the deprecation policy for 0.5 and the inventory of the work (#423).
