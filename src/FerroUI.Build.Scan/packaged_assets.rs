@@ -1,7 +1,11 @@
 //! Build receipt for the byte streams in a package's compiled asset table.
 
-use super::{field, json_string, JsonParser};
+use super::{field, json_string, JsonParser, JsonValue};
 use std::path::PathBuf;
+
+#[path = "packaged_asset_publication.rs"]
+mod publication;
+pub use publication::{AssetDeclaration, AssetPublication};
 
 const VERSION: u32 = 1;
 
@@ -25,6 +29,12 @@ impl PackagedAssetIndex {
     pub const FILE_NAME: &str = "packaged-assets.json";
 
     pub fn parse(source: &str) -> Result<Self, String> {
+        Self::parse_with_publication(source).map(|(index, _)| index)
+    }
+
+    pub fn parse_with_publication(
+        source: &str,
+    ) -> Result<(Self, Option<AssetPublication>), String> {
         let json = JsonParser {
             text: source.as_bytes(),
             at: 0,
@@ -45,12 +55,18 @@ impl PackagedAssetIndex {
                 })
             })
             .collect::<Result<_, String>>()?;
-        Ok(Self {
+        let index = Self {
             manifest: field(root, "manifest")?.string("manifest")?.into(),
             assembly: field(root, "assembly")?.string("assembly")?.into(),
             crate_name: field(root, "crate_name")?.string("crate_name")?.into(),
             assets,
-        })
+        };
+        let publication = root
+            .iter()
+            .find(|(key, _)| key == "publication")
+            .map(|(_, value)| AssetPublication::parse(value))
+            .transpose()?;
+        Ok((index, publication))
     }
 
     pub fn to_json(&self) -> String {
@@ -72,5 +88,14 @@ impl PackagedAssetIndex {
             json_string(&self.assembly),
             json_string(&self.crate_name),
         )
+    }
+
+    pub fn to_json_with_publication(&self, publication: &AssetPublication) -> String {
+        let mut json = self.to_json();
+        json.pop();
+        json.push_str(",\"publication\":");
+        json.push_str(&publication.to_json());
+        json.push('}');
+        json
     }
 }

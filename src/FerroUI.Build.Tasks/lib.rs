@@ -236,7 +236,7 @@ use std::time::Instant;
 
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_build_scan::compiled_index::CompiledXamlIndex;
-use ferroui_build_scan::packaged_assets::{PackagedAsset, PackagedAssetIndex};
+use ferroui_build_scan::packaged_assets::{AssetDeclaration, AssetPublication, PackagedAsset, PackagedAssetIndex};
 use ferroui_build_scan::compiled_names::CompiledGroupKind;
 use xamlx::type_system::IXamlTypeSystem;
 
@@ -403,7 +403,7 @@ pub struct Build {
     assembly: Option<&'static MarkupAssembly>,
     xaml_root: PathBuf,
     groups: Vec<XamlGroup>,
-    asset_directories: Vec<String>,
+    asset_directories: Vec<AssetDeclaration>,
     loaders: Vec<String>,
     checked_in_metadata: Vec<PathBuf>,
     inputs: Vec<PathBuf>,
@@ -684,8 +684,10 @@ impl Build {
     /// Embeds every file below the directories (relative to the crate directory) as an
     /// asset of the crate, by its path below the crate directory, except the documents
     /// the build compiles.
+    #[track_caller]
     pub fn embed_assets(mut self, directories: &[&str]) -> Self {
-        self.asset_directories.extend(directories.iter().map(|directory| directory.to_string()));
+        let caller = std::panic::Location::caller();
+        self.asset_directories.extend(directories.iter().map(|directory| AssetDeclaration::at(directory, caller)));
         self
     }
 
@@ -1259,7 +1261,7 @@ impl Build {
         // 3. The assets.
         let mut assets: Vec<(String, PathBuf)> = Vec::new();
         for directory in &self.asset_directories {
-            let directory = self.manifest_dir.join(directory);
+            let directory = self.manifest_dir.join(&directory.value);
             rerun(&mut lines, &directory);
             if let Err(error) = collect(&self.manifest_dir, &directory, &mut assets) {
                 errors.push(error);
@@ -1538,7 +1540,11 @@ impl Build {
             symbols.file_inputs.sort();
             symbols.file_inputs.dedup();
             write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &symbols.to_json(), &mut errors);
-            write_if_changed(&self.out_dir.join(PackagedAssetIndex::FILE_NAME), &packaged.to_json(), &mut errors);
+            let publication = AssetPublication {
+                directories: self.asset_directories.clone(),
+                registrations: self.export_plan.asset_registrations(),
+            };
+            write_if_changed(&self.out_dir.join(PackagedAssetIndex::FILE_NAME), &packaged.to_json_with_publication(&publication), &mut errors);
             if let Some(mut authored) = authored_symbols {
                 authored.assembly = assembly_name.clone();
                 if let Err(error) = authored.write(&self.out_dir) {
@@ -1701,6 +1707,7 @@ pub fn compile_xaml(assembly: &'static MarkupAssembly) {
 
 /// Embeds the files below `directories` as the assets of the crate whose build script
 /// is running (`Build::from_env().assembly(assembly).embed_assets(directories).run()`).
+#[track_caller]
 pub fn embed_assets(assembly: &'static MarkupAssembly, directories: &[&str]) {
     Build::from_env().assembly(assembly).embed_assets(directories).run();
 }
@@ -1919,11 +1926,19 @@ mod tests {
                 .hot_reload_manifest(false)
                 .execute();
             assert!(outcome.errors.is_empty(), "{:?}", outcome.errors);
-            PackagedAssetIndex::parse(&fs::read_to_string(out.join(PackagedAssetIndex::FILE_NAME)).unwrap()).unwrap()
+            PackagedAssetIndex::parse_with_publication(&fs::read_to_string(out.join(PackagedAssetIndex::FILE_NAME)).unwrap()).unwrap()
         };
-        let all = run(ExportPlan::all());
+        let (all, publication) = run(ExportPlan::all());
         assert_eq!(all.assets.len(), 2);
-        let closed = run(ExportPlan::closed().asset("/assets/badge 100%.png"));
+        let publication = publication.unwrap();
+        assert_eq!(publication.directories[0].value, "Assets");
+        assert!(publication.registrations.is_none());
+        let (closed, publication) = run(ExportPlan::closed().asset("/assets/badge 100%.png"));
+        let registrations = publication.unwrap().registrations.unwrap();
+        assert_eq!(registrations.len(), 1);
+        assert_eq!(registrations[0].value, "/assets/badge 100%.png");
+        assert!(registrations[0].rust_file.ends_with("lib.rs"));
+        assert!(registrations[0].line > 0 && registrations[0].column > 0);
         assert_eq!(closed.manifest, root.join("Cargo.toml"));
         assert_eq!(closed.assembly, ASSEMBLY.name);
         assert_eq!(closed.crate_name, ASSEMBLY.crate_name);
@@ -1934,7 +1949,7 @@ mod tests {
         let registration = fs::read_to_string(out.join("xaml/mod.rs")).unwrap();
         assert!(registration.contains("\"/Assets/Badge 100%.png\""));
         assert!(!registration.contains("Hidden.png"));
-        assert!(run(ExportPlan::closed()).assets.is_empty());
+        assert!(run(ExportPlan::closed()).0.assets.is_empty());
         fs::remove_dir_all(root).unwrap();
     }
 
