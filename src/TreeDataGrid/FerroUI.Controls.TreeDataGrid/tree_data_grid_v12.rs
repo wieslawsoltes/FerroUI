@@ -2,7 +2,7 @@
 //! (`ColumnDefinitions`), from which it generates a source; the selection mode; and the control's
 //! `SelectionChanged`.
 
-use super::TreeDataGrid;
+use super::{template_sources::GeneratedTemplateColumn, TreeDataGrid};
 use crate::presentation::{apply_selection_mode_to, TreeDataGridSourcePresentation};
 use crate::{TreeDataGridSelectionChangedEventArgs, TreeDataGridSelectionMode, TreeDataGridSourceRef};
 use ferroui_base::collections::{NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
@@ -256,6 +256,7 @@ impl TreeDataGrid {
         let items_source = self.items_source();
         let columns = self.column_definitions.list().to_vec();
         let Some(items_source) = items_source.filter(|_| !columns.is_empty()) else {
+            self.generated_template_columns.borrow_mut().clear();
             *self.generated_source.borrow_mut() = None;
             self.update_active_source();
             return;
@@ -269,20 +270,27 @@ impl TreeDataGrid {
 
         let items: Models<BoxedValue> = ItemsSourceModels::new(items_source);
 
+        let mut template_columns = Vec::new();
+        let views = columns.iter().enumerate().map(|(index, definition)| {
+            let view = definition.create_untyped_column();
+            template_columns.extend(GeneratedTemplateColumn::new(index, definition, &view));
+            view
+        });
         let source = if columns.iter().any(|column| column.is_hierarchical_expander()) {
             let source = HierarchicalTreeDataGridSource::<BoxedValue>::new(items);
-            for column in &columns {
-                source.columns().add(column.create_untyped_column());
+            for view in views {
+                source.columns().add(view);
             }
             TreeDataGridSourceRef::from(source)
         } else {
             let source = FlatTreeDataGridSource::<BoxedValue>::new(items);
-            for column in &columns {
-                source.columns().add(column.create_untyped_column());
+            for view in views {
+                source.columns().add(view);
             }
             TreeDataGridSourceRef::from(source)
         };
 
+        *self.generated_template_columns.borrow_mut() = template_columns;
         *self.generated_source.borrow_mut() = Some(source);
         self.update_active_source();
     }

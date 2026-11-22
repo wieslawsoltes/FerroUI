@@ -186,6 +186,12 @@ impl XamlSourceInfo {
         value_identity::for_data_template(template)
     }
 
+    /// Keeps a markup source location with the shared `Rc<T>` allocation.
+    /// Register plain reference types whose constructor or assignment drops the original box.
+    pub fn register_shared_value<T: PartialEq + 'static>() {
+        value_identity::register_shared_value::<T>();
+    }
+
     /// Retrieves the XAML source information associated with the specified
     /// key in the given resource dictionary, if available.
     pub fn get_xaml_source_info_for_key(
@@ -343,6 +349,26 @@ mod tests {
         XamlSourceInfo::set_xaml_source_info(&a, Some(info.clone()));
         assert_eq!(XamlSourceInfo::get_xaml_source_info(&a), Some(info));
         assert_eq!(XamlSourceInfo::get_xaml_source_info(&b), None);
+    }
+
+    #[test]
+    fn source_info_of_registered_shared_values_survives_the_original_box() {
+        #[derive(PartialEq)]
+        struct Column;
+        XamlSourceInfo::register_shared_value::<Column>();
+        let column = Rc::new(Column);
+        let original: BoxedValue = Rc::new(column.clone());
+        let info = XamlSourceInfo::new(10, 4, Some("/columns.xaml")).with_source_revision(27);
+        XamlSourceInfo::set_xaml_source_info(&original, Some(info.clone()));
+        drop(original);
+        let native: BoxedValue = column.clone();
+        let wrapper: BoxedValue = Rc::new(Some(column.clone()));
+        assert_eq!(XamlSourceInfo::get_xaml_source_info(&native), Some(info.clone()));
+        assert_eq!(XamlSourceInfo::get_xaml_source_info(&wrapper), Some(info));
+        assert_eq!(XamlSourceInfo::get_xaml_source_info(&(Rc::new(Column) as BoxedValue)), None);
+        let weak = Rc::downgrade(&column);
+        drop((column, native, wrapper));
+        assert!(weak.upgrade().is_none());
     }
 
     #[test]

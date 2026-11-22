@@ -1,3 +1,4 @@
+use crate::diagnostics::{register_column_templates, ColumnTemplate, ColumnTemplateMember};
 use crate::generators::RecycleKey;
 use crate::presenters::table_view_layout_helper::TableViewLayoutHelper;
 use crate::presenters::TableViewColumnHeadersPresenter;
@@ -126,6 +127,25 @@ ferro_properties! {
 }
 
 impl TableView {
+    fn static_constructor() {
+        register_column_templates(Self::template_sources);
+    }
+
+    fn template_sources(&self, budget: usize) -> Option<Vec<ColumnTemplate>> {
+        let columns = self.columns().snapshot();
+        if columns.len() > budget {
+            return None;
+        }
+        Some(columns.iter().enumerate().map(|(index, column)| ColumnTemplate {
+            index,
+            expander_inner: false,
+            declaration: Rc::new(column.clone()),
+            type_name: column.get_type().name(),
+            member: ColumnTemplateMember::Display,
+            template: column.cell_template(),
+        }).collect())
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self {

@@ -7,9 +7,11 @@ use crate::{
 use ferroui_base::{AnyValue, BoxedValue};
 use ferroui_controls::templates::{IControlTemplate, IDataTemplate};
 use std::{
+    any::TypeId,
     cell::RefCell,
     collections::HashMap,
     rc::{Rc, Weak},
+    sync::{LazyLock, RwLock},
 };
 
 enum Owner {
@@ -33,12 +35,34 @@ ferroui_base::ferro_thread_local! {
         RefCell::new(HashMap::new());
 }
 
+type UnboxShared = fn(&BoxedValue) -> Option<BoxedValue>;
+static SHARED_TYPES: LazyLock<RwLock<HashMap<TypeId, UnboxShared>>> =
+    LazyLock::new(|| RwLock::new(HashMap::new()));
+
+pub(super) fn register_shared_value<T: PartialEq + 'static>() {
+    let mut types = SHARED_TYPES.write().unwrap();
+    types.insert(TypeId::of::<Rc<T>>(), |value| {
+        value.downcast_ref::<Rc<T>>().map(|shared| shared.clone() as BoxedValue)
+    });
+    types.insert(TypeId::of::<Option<Rc<T>>>(), |value| {
+        let shared = value.downcast_ref::<Option<Rc<T>>>()?.as_ref()?;
+        Some(shared.clone() as BoxedValue)
+    });
+}
+
+fn shared_value(value: &BoxedValue) -> Option<BoxedValue> {
+    let unbox = SHARED_TYPES.read().unwrap().get(&value.value_type_id()).copied()?;
+    unbox(value)
+}
+
 pub(super) fn set(value: &BoxedValue, info: Option<XamlSourceInfo>) {
     let (address, owner) = if let Some(template) = control_template(value) {
         (address_of(&template), Owner::ControlTemplate(Rc::downgrade(&template)))
     } else if let Some(template) = data_template(value) {
         (address_of(&template), Owner::DataTemplate(Rc::downgrade(&template)))
     } else {
+        let shared = shared_value(value);
+        let value = shared.as_ref().unwrap_or(value);
         (address_of(value), Owner::Boxed(Rc::downgrade(value)))
     };
     SOURCES.with(|sources| {
@@ -55,6 +79,7 @@ pub(super) fn set(value: &BoxedValue, info: Option<XamlSourceInfo>) {
 pub(super) fn get(value: &BoxedValue) -> Option<XamlSourceInfo> {
     let address = control_template(value).map(|template| address_of(&template))
         .or_else(|| data_template(value).map(|template| address_of(&template)))
+        .or_else(|| shared_value(value).map(|shared| address_of(&shared)))
         .unwrap_or_else(|| address_of(value));
     lookup(address)
 }

@@ -72,6 +72,7 @@ pub fn register_types() {
         crate::rust_paths::register_rust_paths();
         MarkupAssembly::register_table(&ASSEMBLY);
         crate::markup_types::register();
+        ferroui_markup_xaml::diagnostics::XamlSourceInfo::register_shared_value::<crate::TreeDataGridTemplateColumn>();
         ValueTypes::register_global(register_value_types);
         #[cfg(any(test, feature = "document-assets"))]
         crate::assets::register();

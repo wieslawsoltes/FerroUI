@@ -6,6 +6,8 @@
 
 #[path = "tree_data_grid_core_model.rs"]
 mod core_model;
+#[path = "tree_data_grid_template_sources.rs"]
+mod template_sources;
 #[path = "tree_data_grid_v12.rs"]
 mod v12;
 
@@ -111,6 +113,7 @@ pub struct TreeDataGrid {
     // `TreeDataGrid.V12.cs`.
     explicit_source: RefCell<Option<TreeDataGridSourceRef>>,
     generated_source: RefCell<Option<TreeDataGridSourceRef>>,
+    generated_template_columns: RefCell<Vec<template_sources::GeneratedTemplateColumn>>,
     updating_selection_mode: Cell<bool>,
     column_definitions: TreeDataGridColumns,
     column_definitions_token: Cell<Option<u64>>,
@@ -299,6 +302,7 @@ impl TreeDataGrid {
     ];
 
     fn static_constructor() {
+        ferroui_controls::diagnostics::register_column_templates(template_sources::read);
         DragDrop::drag_over_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drag_over(e)).detach();
         DragDrop::drag_leave_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drag_leave(e)).detach();
         DragDrop::drop_event().add_class_handler::<TreeDataGrid>(|x, e| x.on_drop(e)).detach();
@@ -339,6 +343,7 @@ impl TreeDataGrid {
             native_selection_token: Cell::new(None),
             explicit_source: RefCell::new(None),
             generated_source: RefCell::new(None),
+            generated_template_columns: RefCell::new(Vec::new()),
             updating_selection_mode: Cell::new(false),
             column_definitions: TreeDataGridColumns::new(),
             column_definitions_token: Cell::new(None),
