@@ -32,7 +32,10 @@ use ferroui_base::input::platform::{
     Clipboard, IClipboard, IClipboardImpl, IPlatformDragSource, KeyGestureFormatInfo, PlatformHotkeyConfiguration,
 };
 use ferroui_base::input::{IKeyboardDevice, Key, KeyGesture, KeyModifiers, KeyboardDevice};
-use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformGraphicsContext, IPlatformSettings};
+use ferroui_base::platform::{
+    render_interface_supports_open_gl, ICursorFactory, IPlatformGraphics, IPlatformGraphicsContext,
+    IPlatformSettings,
+};
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, RenderLoop, ThreadProxyRenderTimer};
 use ferroui_base::threading::Dispatcher;
@@ -335,9 +338,16 @@ impl FerroNativePlatform {
             "⇧",
         )));
 
+        let mut open_gl_skipped = false;
         for mode in &options.rendering_mode {
             match mode {
                 FerroNativeRenderingMode::OpenGl => {
+                    // A render backend built without OpenGL cannot draw with these graphics
+                    // (the default Skia build on macOS is Graphite on Metal): the next mode.
+                    if !render_interface_supports_open_gl() {
+                        open_gl_skipped = true;
+                        continue;
+                    }
                     // A failure is ignored, as in the original: the next
                     // mode is tried.
                     let Ok(Some(display)) = factory.obtain_gl_display() else {
@@ -365,6 +375,13 @@ impl FerroNativePlatform {
         }
 
         let platform_graphics = self.platform_graphics.borrow().clone();
+        if open_gl_was_the_only_way(&options.rendering_mode, open_gl_skipped, platform_graphics.is_some()) {
+            panic!(
+                "FerroNativePlatformOptions.rendering_mode has a value of {:?}, but no options were applied: \
+                 the render backend of this build cannot render with OpenGL (docs/porting/apple-opengl.md).",
+                options.rendering_mode
+            );
+        }
         if let Some(platform_graphics) = &platform_graphics {
             // One object for the services of this thread and for the
             // thread that renders, as in the reference: shared by its
@@ -433,5 +450,30 @@ impl IWindowingPlatform for FerroNativePlatform {
                 .and_then(WindowImpl::z_order)
                 .map_or(0, |z_order| z_order as i64);
         }
+    }
+}
+
+/// Whether the modes asked for OpenGL, which the render backend of the build cannot draw with,
+/// and left nothing else: not a GPU mode that worked, and not software rendering, which the
+/// application did not ask for (#567).
+fn open_gl_was_the_only_way(modes: &[FerroNativeRenderingMode], open_gl_skipped: bool, has_graphics: bool) -> bool {
+    open_gl_skipped && !has_graphics && !modes.contains(&FerroNativeRenderingMode::Software)
+}
+
+#[cfg(test)]
+mod rendering_mode_tests {
+    // Not from upstream.
+    use super::*;
+    use FerroNativeRenderingMode::{Metal, OpenGl, Software};
+
+    #[test]
+    fn opengl_without_a_backend_for_it_is_an_error_only_when_nothing_else_applies() {
+        assert!(open_gl_was_the_only_way(&[OpenGl], true, false));
+        assert!(open_gl_was_the_only_way(&[OpenGl, Metal], true, false));
+        // The next mode applied, or the application accepts software rendering.
+        assert!(!open_gl_was_the_only_way(&[OpenGl, Metal], true, true));
+        assert!(!open_gl_was_the_only_way(&[OpenGl, Software], true, false));
+        // The backend has OpenGL: a mode that failed is not this error.
+        assert!(!open_gl_was_the_only_way(&[OpenGl], false, false));
     }
 }

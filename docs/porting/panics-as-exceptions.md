@@ -478,10 +478,11 @@ conversion, or that the panic comes from a third-party crate.
 - **A rendering mode the backend cannot render with** (`ferroui-skia`
   `platform_render_interface.rs:115`, `create_gpu`): forcing the OpenGL mode of the macOS native
   backend (`FERROUI_SMOKE_RENDERING=opengl` of the catalog) with a Skia build without Ganesh GL
-  (the default macOS build, Graphite on Metal) panics on the render thread with "Graphics context
-  of type is not supported", which aborts with `panic = "abort"`. The default modes are not
-  affected. A fallible `create_backend_context`, falling back to software, or a platform that
-  offers only the modes the backend renders, is its own step.
+  (the default macOS build, Graphite on Metal) panicked on the render thread with "Graphics
+  context of type is not supported". The default modes were not affected. Converted in 0.6: the
+  macOS and iOS platforms ask `IPlatformRenderInterface::supports_open_gl` and go on to the next
+  mode. A list with no other mode ends at start-up with an error that names the cause; it does
+  not fall back to software rendering, which the application did not ask for.
 - **Run-time loading of application XAML outside a scope** (5.1): converted in 0.6, the load
   has its own scope and returns the error (11.2).
 
