@@ -18,7 +18,7 @@ use crate::at_spi::dbus::interface::{args, reply, CallResult, DBusError, DBusInt
 use crate::at_spi::dbus::types::{AtSpiMatchRule, AtSpiMatchRuleWire, AtSpiObjectReference};
 use std::collections::{BTreeSet, HashMap};
 use std::rc::{Rc, Weak};
-use zbus::zvariant::{OwnedObjectPath, Value};
+use zbus::{OwnedObjectPath, Variant};
 
 // `MatchType`
 const MATCH_INVALID: i32 = 0;
@@ -328,8 +328,8 @@ impl DBusInterface for AtSpiCollectionHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(Self::version()))
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
+        (name == "version").then(|| Variant::from(Self::version()))
     }
 }
 
