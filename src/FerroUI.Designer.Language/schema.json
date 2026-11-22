@@ -8094,6 +8094,13 @@
     "base": "Panel",
     "constructible": true,
     "properties": {
+      "Padding": {
+        "name": "Padding",
+        "type_name": "Thickness",
+        "documentation": "Grid.Padding: Thickness",
+        "values": [],
+        "attached": false
+      },
       "ShowGridLines": {
         "name": "ShowGridLines",
         "type_name": "bool",
@@ -12137,6 +12144,16 @@
         "name": "UseLayoutRounding",
         "type_name": "bool",
         "documentation": "Layoutable.UseLayoutRounding: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "UseWinuiMeasureRounding": {
+        "name": "UseWinuiMeasureRounding",
+        "type_name": "bool",
+        "documentation": "Layoutable.UseWinuiMeasureRounding: bool",
         "values": [
           "True",
           "False"
