@@ -42,6 +42,7 @@ pub(crate) mod palette;
 mod sources;
 pub(crate) mod styles;
 mod rust_styles;
+mod rust_templates;
 pub(crate) mod templates;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
@@ -434,6 +435,10 @@ impl Relay {
         };
         let templates = state.templates.take();
         let authored_rsx = AuthoredRsxFrame::capture(&document, &design.document.uri);
+        let templates = templates.and_then(|catalog| match authored_rsx.as_ref() {
+            Some(source) => templates::Templates::capture_rust(&document, source, catalog),
+            None => authored.as_ref().map(|source| templates::Templates::capture(source, catalog)),
+        });
         let states = state.animation_catalog.as_mut().map(|catalog| {
             HostedStates::capture(&document.xaml, catalog, authored_rsx.as_ref())
         });
@@ -470,8 +475,7 @@ impl Relay {
             source.states.annotate(catalog);
         }
         self.animation_sources.deliver(source, revision, frame.sequence);
-        self.templates = authored.as_ref().zip(templates)
-            .map(|(source, catalog)| templates::Templates::capture(source, catalog));
+        self.templates = templates;
         self.authored_rsx = authored_rsx;
         self.authored = authored;
         frame.palette_available = self.authored.is_some();

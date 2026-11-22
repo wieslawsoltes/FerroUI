@@ -32,6 +32,7 @@ ferroui-headless.workspace = true
 ferroui-inspect.workspace = true
 ferroui-markup-xaml = { workspace = true, features = ["source-overlays"] }
 ferroui-mcp.workspace = true
+ferroui-reload-protocol.workspace = true
 ferroui-remote-protocol.workspace = true
 ferroui-themes-winui.workspace = true
 ferroui-vello.workspace = true

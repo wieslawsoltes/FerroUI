@@ -1822,6 +1822,7 @@ dependencies = [
  "ferroui-inspect",
  "ferroui-markup-xaml",
  "ferroui-mcp",
+ "ferroui-reload-protocol",
  "ferroui-remote-protocol",
  "ferroui-themes-winui",
  "ferroui-vello",

@@ -34,6 +34,10 @@ pub struct RsxItemTemplate {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct RsxTemplateBody {
     pub location: RsxSourceLocation,
+    /// Callee of the compiled template constructor, in the same source file.
+    pub constructor: SourceSpan,
+    /// Full macro path, including a qualifier when the author used one.
+    pub macro_path: SourceSpan,
     pub factory: Option<String>,
 }
 
@@ -70,12 +74,14 @@ fn read_body(
     scope: Option<RustSourceScope<'_>>,
     factory: Option<&str>,
 ) -> Option<RsxTemplateBody> {
-    let span = syntax::template_body(expression, scope)?;
+    let syntax = syntax::template_syntax(expression, scope)?;
     Some(RsxTemplateBody {
         location: RsxSourceLocation {
             uri: scope.and_then(RustSourceScope::uri).map(str::to_owned),
-            span,
+            span: syntax.body,
         },
+        constructor: syntax.constructor,
+        macro_path: syntax.macro_path,
         factory: factory.map(str::to_owned),
     })
 }

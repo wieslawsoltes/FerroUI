@@ -20,24 +20,29 @@ pub(crate) enum Action {
     PlanCopy { owner: NodeId, source: String },
 }
 
-pub(super) struct Templates(Vec<Template>);
+pub(super) struct Templates(pub(super) Vec<Template>);
 
-#[derive(Serialize)]
+#[derive(PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct Template {
-    owner: NodeId,
-    label: String,
-    type_name: String,
-    definition: Location,
-    can_copy: bool,
+pub(super) struct Template {
+    pub(super) owner: NodeId,
+    pub(super) label: String,
+    pub(super) type_name: String,
+    pub(super) definition: Location,
+    pub(super) can_copy: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(super) member: Option<ItemTemplateMember>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(super) assignment: Option<Location>,
 }
 
 #[derive(PartialEq, Serialize)]
-struct Location {
-    address: String,
-    uri: String,
-    node: NodeId,
-    range: Range,
+pub(super) struct Location {
+    pub(super) address: String,
+    pub(super) uri: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(super) node: Option<NodeId>,
+    pub(super) range: Range,
 }
 
 struct AcceptedSource<'a> {
@@ -48,7 +53,7 @@ struct AcceptedSource<'a> {
 
 impl Relay {
     pub(crate) fn templates(&self, request: Request<Action>) -> Result<Value, String> {
-        let authored = self.authored(request.frame)?;
+        self.require_authored_frame(request.frame)?;
         let templates = self
             .templates
             .as_ref()
@@ -56,19 +61,20 @@ impl Relay {
         match request.action {
             Action::Catalog => Ok(json!({ "templates": templates.0 })),
             Action::PlanCopy { owner, source } => {
+                let authored = self.authored(request.frame)?;
                 let template = templates
                     .0
                     .iter()
-                    .find(|entry| entry.owner == owner)
-                    .filter(|entry| entry.can_copy)
+                    .find(|entry| entry.owner == owner && entry.can_copy)
                     .ok_or("Choose an inherited template from the accepted application preview")?;
+                let definition = template.definition.node.ok_or("Choose an authored XAML template")?;
                 let address = &authored.sources.base_uri;
                 let planner = authored.template_planner();
                 let mut plan = authored.plan(address, &source, |_| {
                     planner.plan_copy(
                         owner,
                         &template.definition.address,
-                        template.definition.node,
+                        definition,
                     )
                 })?;
                 plan["includes"] = json!(authored.sources.includes.documents().map(|include| {
@@ -92,7 +98,7 @@ impl Templates {
             authored,
             cache: BTreeMap::new(),
         };
-        let mut owners = BTreeMap::<NodeId, Option<Location>>::new();
+        let mut owners = BTreeMap::<(NodeId, &'static str), (ItemTemplateMember, Option<Location>)>::new();
         for usage in &catalog.templates {
             let Some(owner) = sources
                 .locate(&usage.owner, &usage.type_name)
@@ -100,23 +106,28 @@ impl Templates {
             else {
                 continue;
             };
-            let definition = usage
-                .definition
-                .as_ref()
-                .and_then(|stamp| sources.locate(stamp, "ControlTemplate"));
+            let Some(member) = template_member(usage.member.as_deref().unwrap_or("Template")) else { continue };
+            let definition = usage.definition.as_ref().and_then(|stamp| {
+                if member == ItemTemplateMember::Template {
+                    sources.locate(stamp, "ControlTemplate")
+                } else {
+                    sources.locate(stamp, "DataTemplate").or_else(|| sources.locate(stamp, "TreeDataTemplate"))
+                }
+            });
+            let Some(node) = owner.node else { continue };
             owners
-                .entry(owner.node)
-                .and_modify(|previous| {
+                .entry((node, member.name()))
+                .and_modify(|(_, previous)| {
                     if *previous != definition {
                         *previous = None;
                     }
                 })
-                .or_insert(definition);
+                .or_insert((member, definition));
         }
         Self(
             owners
                 .into_iter()
-                .filter_map(|(owner, definition)| {
+                .filter_map(|((owner, _), (member, definition))| {
                     let definition = definition?;
                     let node = document.ast().node(owner)?;
                     Some(Template {
@@ -128,12 +139,18 @@ impl Templates {
                             .to_owned(),
                         type_name: node.local_name().to_owned(),
                         definition,
-                        can_copy: planner.can_copy(owner),
+                        can_copy: member == ItemTemplateMember::Template && planner.can_copy(owner),
+                        member: Some(member),
+                        assignment: None,
                     })
                 })
                 .collect(),
         )
     }
+}
+
+pub(super) fn template_member(name: &str) -> Option<ItemTemplateMember> {
+    ItemTemplateMember::AUTHORABLE.into_iter().find(|member| member.name() == name)
 }
 
 impl AuthoredPreview {
@@ -164,13 +181,18 @@ impl<'a> Sources<'a> {
         let node = source
             .locations
             .element(stamp.line, stamp.column, type_name)?;
-        if type_name == "ControlTemplate" && !ItemTemplateMember::Template.accepts(node) {
+        let property = match type_name {
+            "ControlTemplate" => Some(ItemTemplateMember::Template),
+            "DataTemplate" | "TreeDataTemplate" => Some(ItemTemplateMember::ItemTemplate),
+            _ => None,
+        };
+        if property.is_some_and(|property| !property.accepts(node)) {
             return None;
         }
         Some(Location {
             address: source.address.to_owned(),
             uri: source.uri.to_owned(),
-            node: node.id,
+            node: Some(node.id),
             range: source.locations.name_range(node)?,
         })
     }

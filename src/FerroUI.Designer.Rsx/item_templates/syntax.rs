@@ -1,11 +1,17 @@
-use crate::local_rust::{RustSourceScope, path_in_source};
+use crate::{animation::syntax::span, local_rust::{RustSourceScope, path_in_source}};
 use ferroui_designer_core::SourceSpan;
 use syn::{Expr, Macro, Path, PathArguments, Stmt};
 
-pub(super) fn template_body(
+pub(super) struct TemplateSyntax {
+    pub(super) constructor: SourceSpan,
+    pub(super) macro_path: SourceSpan,
+    pub(super) body: SourceSpan,
+}
+
+pub(super) fn template_syntax(
     expression: &Expr,
     scope: Option<RustSourceScope<'_>>,
-) -> Option<SourceSpan> {
+) -> Option<TemplateSyntax> {
     let Expr::Call(factory) = expression else {
         return None;
     };
@@ -36,11 +42,13 @@ pub(super) fn template_body(
     let body = tail_macro(&closure.body)?;
     let ident = &body.path.segments.last()?.ident;
     let is_rsx = body.path.is_ident("rsx") || view_rsx(&body.path);
-    is_rsx.then(|| {
-        SourceSpan::new(
+    is_rsx.then(|| TemplateSyntax {
+        constructor: span(factory.func.as_ref()),
+        macro_path: span(&body.path),
+        body: SourceSpan::new(
             ident.span().byte_range().start,
             body.delimiter.span().close().byte_range().end,
-        )
+        ),
     })
 }
 
