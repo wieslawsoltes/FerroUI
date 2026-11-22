@@ -4743,6 +4743,11 @@ pub trait ImageProps: ElementBuilder {
     fn stretch_direction<M>(self, value: impl IntoProp<ferroui_base::media::StretchDirection, M>) -> Self {
         self.prop(<ferroui_controls::Image>::stretch_direction_property(), value)
     }
+
+    /// Handles [`Image::image_opened_event`](ferroui_controls::Image::image_opened_event).
+    fn on_image_opened(self, handler: impl Fn(&ferroui_base::interactivity::RoutedEventArgs) + 'static) -> Self {
+        self.routed(<ferroui_controls::Image>::image_opened_event(), move |_, e| handler(e))
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::Image>> ImageProps for El<T> {}
 
