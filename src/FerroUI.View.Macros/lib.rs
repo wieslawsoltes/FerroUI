@@ -15,6 +15,7 @@ use syn::spanned::Spanned;
 use syn::{braced, token, Expr, FnArg, Ident, ItemFn, LitStr, Pat, Path, Token, Type};
 
 mod path_data;
+mod route;
 
 /// An element tree, expanded to the builders of `ferroui-view`.
 ///
@@ -372,6 +373,26 @@ impl ElementNode {
         }
         tokens
     }
+}
+
+/// A typed route: a struct that declares its pattern, whose fields are the parameters.
+///
+/// ```ignore
+/// #[derive(Route)]
+/// #[route("/people/:id")]
+/// struct PersonRoute { id: u32 }
+///
+/// #[derive(Route)]
+/// #[route("/files/*")]
+/// struct FileRoute { #[route(rest)] path: String }
+/// ```
+///
+/// A parameter of the pattern with no field, or a field with no parameter, is a compile error, and
+/// a field's type must implement `FromStr` and `Display`.
+#[proc_macro_derive(Route, attributes(route))]
+pub fn derive_route(input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input as syn::DeriveInput);
+    route::expand(&input).unwrap_or_else(syn::Error::into_compile_error).into()
 }
 
 /// Path data checked when the crate is compiled and written as a static table: a

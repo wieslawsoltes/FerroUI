@@ -128,7 +128,9 @@ pub use extras::{auto, px, star, GridDefinitionSizes, GridDefinitions, GridDefin
 pub use ferroui_controls::GridLength;
 pub use async_data::{sleep, suspense, use_future, AsyncState};
 pub use error_boundary::{error_boundary, ErrorInfo};
-pub use router::{route, router, try_use_router, use_router, RouteDef, RouteMatch, Router};
+pub use router::{
+    route, router, try_use_router, typed_route, use_router, RouteDef, RouteMatch, RouteParamError, Router, TypedRoute,
+};
 pub use reactive::{
     batch, effect, memo, on_cleanup, provide_context, signal, untrack, use_context, Memo, Owner, Signal, TwoWay,
 };
@@ -136,7 +138,7 @@ pub use reactive::{
 #[cfg(feature = "desktop")]
 pub use app::{launch, launch_themed, launch_with, mount_window, open_window};
 
-pub use ferroui_view_macros::{component, path, rsx};
+pub use ferroui_view_macros::{component, path, rsx, Route};
 
 /// What the expansion of [`path!`] names.
 #[doc(hidden)]
@@ -174,6 +176,7 @@ pub mod prelude {
     pub use crate::{auto, px, star, GridDefinitionSizes, GridLength, GridLengths, IntoGridLengths};
     pub use crate::{path, path_data, PathBuilder, PathData};
     pub use crate::{ModelBinding, ModelProperty, ReadOnlyModelProperty};
+    pub use crate::{typed_route, Route, RouteParamError, TypedRoute};
     pub use crate::{
         alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
         BoxShadowOptions, KeyCode, KeyGestureModifiers, LinearGradient, Transforms,

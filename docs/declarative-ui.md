@@ -805,6 +805,34 @@ router("/", vec![
 - **Views.** The view of the current route is a component of its own. Another route mounts its view anew and takes the view before out, with its state. The same route with other parameters runs its view again with the new `RouteMatch`, and the reconciler patches its controls.
 - **The handle.** `current()`, `can_go_back()` and `stack()` are reactive: a component that reads them runs again when the path changes. A component calls `use_router()` while it runs and keeps the handle, which is `Copy`, for its handlers.
 
+#### Typed routes
+
+A route can be a Rust type that declares its pattern, with its parameters as fields:
+
+```rust
+#[derive(Route)]
+#[route("/people/:id")]
+struct PersonRoute { id: u32 }
+
+#[derive(Route)]
+#[route("/files/*")]
+struct FileRoute { #[route(rest)] path: String }
+
+router("/", vec![
+    route("/", |_| rsx! { Home {} }),
+    typed_route::<PersonRoute>(|route| rsx! { Person { id: route.id } }),
+    route("*", |m| rsx! { NotFound { path: m.path().to_string() } }),
+])
+
+use_router().navigate_to(&PersonRoute { id: 42 });
+```
+
+- `#[derive(Route)]` checks the pattern against the fields: a parameter with no field, a field with no parameter, or a `*` with no `#[route(rest)]` field does not compile, and a field's type must implement `FromStr` and `Display`.
+- Paths stay the entries of the stack, so typed and text routes share a router, and a deep link is an ordinary path.
+- **An invalid value in a deep link.** A path whose value does not parse (`/people/abc`) does not match the typed route. The router goes on to the next route, usually the last `route("*", ..)`, and shows nothing when there is none.
+- A value is escaped in its segment (`/` as `%2F`, `%` as `%25`, an empty value as a lone `%`) and read back unescaped, so any text survives the path. The field of a `*` holds the rest of the path as it is.
+- `navigate_to`, `navigate_and_reset_to` and `current_route::<T>()` are the typed forms of the router's methods. Text routes are the form for a pattern that is not known when the crate is compiled.
+
 ### 13.4 The samples
 
 Two applications use the API of the phases together, in the WinUI 3 theme:

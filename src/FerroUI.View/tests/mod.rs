@@ -9,6 +9,7 @@ mod path_tests;
 mod reactive_tests;
 mod selector_tests;
 mod rerender_tests;
+mod route_tests;
 mod template_tests;
 mod values_tests;
 mod api_tests;

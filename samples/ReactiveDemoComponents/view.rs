@@ -67,7 +67,20 @@ impl PartialEq for Browser {
 
 /// The route of the page of the crate `name`.
 pub fn details_path(name: &str) -> String {
-    format!("/crate/{name}")
+    CrateRoute { name: name.to_string() }.to_path()
+}
+
+/// The route of the search.
+#[derive(Route)]
+#[route("/")]
+pub struct SearchRoute;
+
+/// The route of the page of a crate.
+#[derive(Route)]
+#[route("/crate/:name")]
+pub struct CrateRoute {
+    /// The name of the crate.
+    pub name: String,
 }
 
 /// Searches `term` (trimmed already): no crates for an empty term, at once; otherwise the crates
@@ -90,9 +103,8 @@ pub fn App(browser: Option<Browser>, #[prop(default = String::from("/"))] path: 
     let browser = use_hook(move || browser.unwrap_or_else(|| Browser::new(default_search_service())));
     let (search, details) = (browser.clone(), browser);
     let routes = vec![
-        route("/", move |_| rsx! { SearchPage { browser: search.clone() } }),
-        route("/crate/:name", move |found| {
-            let name = found.param("name").unwrap_or_default().to_string();
+        typed_route::<SearchRoute>(move |_| rsx! { SearchPage { browser: search.clone() } }),
+        typed_route::<CrateRoute>(move |CrateRoute { name }| {
             rsx! { DetailsPage { browser: details.clone(), name } }
         }),
     ];
@@ -179,7 +191,7 @@ fn result_item(krate: CrateSearchMetadata, browser: Browser, router: Router) -> 
             background: "Transparent", padding: 0.0,
             on_click: move |_| {
                 browser.remember(krate.clone());
-                router.navigate(&details_path(&krate.name));
+                router.navigate_to(&CrateRoute { name: krate.name.clone() });
             },
             Grid { column_definitions: [auto(), star(1.0)],
                 {badge(&name, 48.0)}
@@ -248,7 +260,7 @@ fn crate_details(krate: CrateSearchMetadata, router: Router) -> Element {
                 on_click: move |_| {
                     // Back to the page before, or to the search when the browser started here.
                     if !router.navigate_back() {
-                        router.navigate_and_reset("/");
+                        router.navigate_and_reset_to(&SearchRoute);
                     }
                 },
                 "Back" }
@@ -286,7 +298,7 @@ fn failure(error: ErrorInfo, router: Router) -> Element {
             TextBlock { name: "ErrorMessage", text: message, text_wrapping: TextWrapping::Wrap }
             StackPanel { orientation: Orientation::Horizontal, spacing: 8.0,
                 Button { name: "TryAgain", on_click: move |_| error.reset(), "Try again" }
-                Button { name: "BackToSearch", on_click: move |_| router.navigate_and_reset("/"), "Back to the search" }
+                Button { name: "BackToSearch", on_click: move |_| router.navigate_and_reset_to(&SearchRoute), "Back to the search" }
             }
         }
     }
