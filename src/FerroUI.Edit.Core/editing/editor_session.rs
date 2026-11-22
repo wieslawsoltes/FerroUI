@@ -20,6 +20,8 @@ use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::{Rc, Weak};
 
+ferroui_system::styled_value!(EditorOptions);
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EditorOptions {
     pub indentation_size: usize,
