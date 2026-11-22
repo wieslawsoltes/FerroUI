@@ -279,7 +279,8 @@ impl RegexCache {
                 .map_err(|e| Error::RegexLimit(e.to_string()))?;
             Ok(captures.map(|captures| {
                 (0..captures.len())
-                    .map(|i| captures.get(i).map(|m| (m.start(), m.end())))
+                    // `\K` in a lookahead can report a start after the end.
+                    .map(|i| captures.get(i).map(|m| (m.start().min(m.end()), m.end())))
                     .collect()
             }))
         }
@@ -429,6 +430,11 @@ mod native {
             let mut params = onig::MatchParam::default();
             params.set_retry_limit_in_match(1_000_000);
             params.set_match_stack_limit(1_000_000);
+            // The limit above is per start position: a search over a long line needs its own.
+            // SAFETY: `params` owns the live parameter block for the duration of the call.
+            unsafe {
+                onig_sys::onig_set_retry_limit_in_search_of_match_param(params.as_raw(), 10_000_000);
+            }
             let start = regex
                 .search_with_param(
                     line,

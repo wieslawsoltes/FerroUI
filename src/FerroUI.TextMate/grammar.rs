@@ -241,24 +241,25 @@ impl Program {
         base: RuleId,
         unavailable: &[bool],
         output: &mut Vec<RuleId>,
-        visiting: &mut HashSet<RuleId>,
+        seen: &mut HashSet<RuleId>,
     ) {
-        let node = &self.nodes[id];
-        if node.disabled || unavailable[id] || !visiting.insert(id) {
-            return;
-        }
-        if let Some(include) = &node.include {
-            if let Some(target) = self.resolve_include(node, include, base) {
-                self.collect(target, base, unavailable, output, visiting);
+        // A preorder walk that visits each rule once. A rule reached again cannot win, because
+        // its first place in the list comes earlier, and grammars can share includes so that
+        // the number of paths grows exponentially or nest them deeper than the stack.
+        let mut pending = vec![id];
+        while let Some(id) = pending.pop() {
+            let node = &self.nodes[id];
+            if node.disabled || unavailable[id] || !seen.insert(id) {
+                continue;
             }
-        } else if node.match_pattern.is_some() || node.begin.is_some() {
-            output.push(id);
-        } else {
-            for child in &node.patterns {
-                self.collect(*child, base, unavailable, output, visiting);
+            if let Some(include) = &node.include {
+                pending.extend(self.resolve_include(node, include, base));
+            } else if node.match_pattern.is_some() || node.begin.is_some() {
+                output.push(id);
+            } else {
+                pending.extend(node.patterns.iter().rev().copied());
             }
         }
-        visiting.remove(&id);
     }
 }
 
@@ -421,9 +422,9 @@ impl Grammar {
             self.program
                 .collect(id, self.root, unavailable, &mut result, &mut HashSet::new());
         } else {
+            let mut seen = HashSet::new();
             for child in &self.program.nodes[id].patterns {
-                self.program
-                    .collect(*child, self.root, unavailable, &mut result, &mut HashSet::new());
+                self.program.collect(*child, self.root, unavailable, &mut result, &mut seen);
             }
         }
         let result = Rc::new(result);
