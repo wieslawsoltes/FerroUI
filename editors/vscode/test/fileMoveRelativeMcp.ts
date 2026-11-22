@@ -1,5 +1,6 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
+import { runEditorHistory } from '../src/editorHistory';
 import type { FileMovePlan } from '../src/fileMoveProtocol';
 import type { ProjectMetadata } from '../src/reloadProcess';
 import type { McpFixture } from './mcp';
@@ -66,11 +67,15 @@ export async function verifyRelativeCompiledMove({ invoke, content }: McpFixture
         assert.equal(doc.getText(), markup);
     };
     await expectSource(to);
-    await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(uri('build.rs')));
-    await vscode.commands.executeCommand('undo');
-    await expectSource(from);
-    await vscode.commands.executeCommand('redo');
-    await expectSource(to);
+    const build = await vscode.workspace.openTextDocument(uri('build.rs'));
+    const replay = async (action: 'undo' | 'redo', file: string) => {
+        const version = build.version;
+        await runEditorHistory(build, action, () => assert.equal(build.version, version), AbortSignal.timeout(5000));
+        assert.ok(build.getText().includes(`"${file}"`), `The Cargo declaration follows ${action}`);
+        await expectSource(file);
+    };
+    await replay('undo', from);
+    await replay('redo', to);
 
     const palette = await vscode.workspace.openTextDocument(uri(to));
     const start = palette.positionAt(palette.getText().indexOf(color));
