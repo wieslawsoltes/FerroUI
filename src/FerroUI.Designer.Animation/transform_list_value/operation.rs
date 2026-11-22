@@ -96,7 +96,7 @@ impl AnimationTransformOperation {
         }
     }
 
-    pub(super) fn to_xaml(&self) -> String {
+    pub(super) fn xaml(&self) -> String {
         match self {
             Self::Translate([x, y]) => format!("translate({x}px, {y}px)"),
             Self::Rotate(angle) => format!("rotate({angle}rad)"),

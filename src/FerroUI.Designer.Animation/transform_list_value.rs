@@ -122,7 +122,7 @@ impl AnimationTransformList {
         }
         self.operations
             .iter()
-            .map(AnimationTransformOperation::to_xaml)
+            .map(AnimationTransformOperation::xaml)
             .collect::<Vec<_>>()
             .join(" ")
     }
