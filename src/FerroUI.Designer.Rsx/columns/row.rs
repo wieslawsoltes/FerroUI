@@ -27,22 +27,18 @@ pub(crate) struct ColumnPosition {
 
 impl ColumnPosition {
     pub(super) fn find(model: &TableColumns, id: NodeId) -> Option<(Self, &AuthoredColumn)> {
+        Self::authored(model).find(|(_, column)| column.node == id)
+    }
+
+    pub(super) fn authored(model: &TableColumns) -> impl Iterator<Item = (Self, &AuthoredColumn)> {
         model
             .columns
             .iter()
             .enumerate()
-            .find_map(|(index, column)| {
-                if column.node == id {
-                    return Some((
-                        Self {
-                            index,
-                            inner: false,
-                        },
-                        column,
-                    ));
-                }
-                let child = column.children.first().filter(|inner| inner.node == id)?;
-                Some((Self { index, inner: true }, child))
+            .flat_map(|(index, column)| {
+                std::iter::once((Self { index, inner: false }, column)).chain(
+                    column.children.first().map(move |child| (Self { index, inner: true }, child)),
+                )
             })
     }
 

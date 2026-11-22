@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { findLibraryDefinition, type DefinitionChoice } from './librarySearch';
+import { scopedLibraryItems } from './libraryScopes';
 import type { ProjectDefinition, ProjectLibrary } from './projectLibrary';
 import { errorMessage } from './protocol';
 import { action, StudioContext, type StudioItem } from './studioContext';
@@ -103,6 +104,18 @@ export class LibraryView implements vscode.TreeDataProvider<StudioItem>, vscode.
             const owner = panel.nodes[0]?.id;
             if (context.writable && owner !== undefined) {
                 items.push(action('create', 'New Template…', () => createTemplate(context, owner), 'add'));
+            }
+            if (panel.supportsLibraryScopes) {
+                items.push({ id: 'scopes', label: 'By Scope', icon: 'list-tree', children: async () => {
+                    try {
+                        return await scopedLibraryItems(context, components, async node => {
+                            context.ensure();
+                            await this.editStyle(panel, node);
+                        });
+                    } catch (error) {
+                        return key === this.key ? [{ id: 'scopes:error', label: errorMessage(error), icon: 'warning' }] : [];
+                    }
+                } });
             }
             const groups = new Map<string, Component[]>();
             for (const component of components) {

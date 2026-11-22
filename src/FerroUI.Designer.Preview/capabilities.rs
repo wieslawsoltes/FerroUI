@@ -26,6 +26,7 @@ pub(crate) fn initialize() -> Value {
         "selectionWrapping",
         "columnAuthoring",
         "behaviorAuthoring",
+        "libraryScopes",
         "rsxColumnAuthoring",
         "itemTemplateAuthoring",
         "rsxItemTemplateAuthoring",

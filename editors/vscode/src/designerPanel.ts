@@ -37,6 +37,7 @@ interface Frame {
     guideAnchor?: GuideAnchor;
     columnAuthoring: boolean;
     behaviorAuthoring: boolean;
+    libraryScopes: boolean;
     itemTemplateAuthoring: boolean;
     controlTemplateAuthoring: boolean;
     propertyTrace: boolean;
@@ -253,6 +254,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
     get supportsItemTemplates(): boolean { return Boolean(this.frame?.itemTemplateAuthoring); }
     get supportsBehaviorAuthoring(): boolean { return this.language === 'xaml' && Boolean(this.frame?.behaviorAuthoring); }
+    get supportsLibraryScopes(): boolean { return Boolean(this.frame?.libraryScopes); }
     get supportsControlTemplate(): boolean { return Boolean(this.frame?.controlTemplateAuthoring); }
     get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
     get supportsIncludedPropertyTrace(): boolean { return Boolean(this.frame?.includedPropertyTrace); }
@@ -968,6 +970,7 @@ export class DesignerPanel implements vscode.Disposable {
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
                 columnAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxColumnAuthoring : client.capabilities.columnAuthoring),
                 behaviorAuthoring: Boolean(client.capabilities.behaviorAuthoring),
+                libraryScopes: Boolean(client.capabilities.libraryScopes),
                 itemTemplateAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxItemTemplateAuthoring : client.capabilities.itemTemplateAuthoring),
                 controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
                 propertyTrace: Boolean(client.capabilities.propertyTrace),

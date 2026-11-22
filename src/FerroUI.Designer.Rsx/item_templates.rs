@@ -178,6 +178,34 @@ impl RsxProjection<'_> {
             .collect()
     }
 
+    /// Source anchors for every mapped template assignment in the invocation.
+    /// Browsing a document reuses the projected controls and column models.
+    pub fn authored_item_templates(
+        &self, document: &Document,
+    ) -> Vec<(NodeId, ItemTemplateMember, RsxSourceLocation)> {
+        let controls = self.preview_markup().controls;
+        let mut locations = Vec::new();
+        for node in document.ast().nodes_in_source_order() {
+            let Ok(index) = controls.binary_search(&node.span.start) else { continue };
+            if node.kind != ferroui_designer_core::NodeKind::Element {
+                continue;
+            }
+            for (property, source) in &self.nodes[index].templates.authored {
+                locations.push((node.id, *property, RsxSourceLocation::local(source.expression)));
+            }
+            for (column, position, kind) in self.template_columns(document, node.id, index) {
+                for &property in column_template_members(kind) {
+                    if let Some((_, Some(source), _, declaration)) = self.column_template(index, position, property) {
+                        locations.push((column, property, RsxSourceLocation {
+                            uri: declaration.uri.clone(), span: source.expression,
+                        }));
+                    }
+                }
+            }
+        }
+        locations
+    }
+
     /// Produce checked patches against the original Rust. The owning RSX
     /// invocation and exact slot must resolve again in the edited candidate.
     pub fn edit_item_template(
@@ -297,12 +325,7 @@ impl RsxProjection<'_> {
         let Some((table, column, kind)) = self.template_column(document, node) else {
             return Vec::new();
         };
-        let properties: &[_] = if kind == ColumnKind::Template {
-            &[CellTemplate, CellEditingTemplate]
-        } else {
-            &[CellTemplate]
-        };
-        properties
+        column_template_members(kind)
             .iter()
             .map(|property| TemplateOwner::Column(table, column, *property))
             .collect()
@@ -388,5 +411,13 @@ impl RsxProjection<'_> {
         self.catalog
             .project_with_modules(source, body.span.start, companion.as_ref().or(self.modules))
             .is_ok_and(|projection| projection.invocation == body.span)
+    }
+}
+
+fn column_template_members(kind: ColumnKind) -> &'static [ItemTemplateMember] {
+    if kind == ColumnKind::Template {
+        &[CellTemplate, CellEditingTemplate]
+    } else {
+        &[CellTemplate]
     }
 }

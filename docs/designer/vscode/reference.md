@@ -237,6 +237,12 @@ The edit stays in the current buffer and groups both changes into one Undo step.
 
 After building the owning Cargo schema, call `ferroui_workspace_language` with `action: "definition"`, the XAML file in `path`, and a zero-based UTF-16 `position`. It returns the same URI and range as **Go to Definition**. In Studio, call `designer_language` with `action: "definitions"` and the XAML byte `offset`. [Supported declarations](authoring.md#follow-registered-rust-declarations)
 
+### Browse Library scopes with MCP
+
+In Studio, call `designer_library_scopes` with an empty argument object. In VS Code, use `designer_studio_query` with the current design `session`, `tool: "designer_library_scopes"`, and empty `arguments`. Each group contains the authored `owner`, its path, and the objects declared there. Source ranges use UTF-16. When an RSX assignment lives in a companion module, its `sourceUri` identifies that file.
+
+Use an XAML row’s `definition` with the existing definition actions. Use a behavior group’s `owner` with `designer_behaviors` to inspect its triggers. The report identifies the current revision and scope epoch. Read it again after changing source or opening a different definition. [Library workflow](authoring.md#browse-objects-by-owning-scope)
+
 ### Review a registered property rename with MCP
 
 Use the registered property's position in XAML, a typed binding, or a resolved style selector predicate. An affected RSX builder mapping appears as a Rust document in the same review, with current editor text and a version when its buffer is open. A mapping supplied by a text constant in another Cargo module uses that module's current buffer. The patch edits the assembly tuple, and a change to the imported mapping requires a fresh review.

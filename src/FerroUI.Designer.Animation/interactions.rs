@@ -2,7 +2,7 @@
 //! and nested payloads round-trip through Custom variants instead of being discarded.
 use crate::programs::{core_error, escape, fragment, native_fragment, validate_fragment};
 use crate::{require, AnimationError, Result};
-use ferroui_designer_core::{Document, Edit, NodeId, NodeKind};
+use ferroui_designer_core::{Attribute, Document, Node, Edit, NodeId, NodeKind};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -204,6 +204,15 @@ impl BehaviorModel {
         )
     }
     pub fn read(document: &Document, owner: NodeId) -> Result<Vec<Self>> {
+        Self::authored_nodes(document, owner)?
+            .into_iter()
+            .map(|id| Self::from_source(&fragment(document, id)?, owner, Some(id)))
+            .collect()
+    }
+
+    /// Authored children of the native attached collection in their source order.
+    /// Catalogs can browse the definitions without parsing the actions in each row.
+    pub fn authored_nodes(document: &Document, owner: NodeId) -> Result<Vec<NodeId>> {
         let node = document
             .ast()
             .node(owner)
@@ -212,7 +221,7 @@ impl BehaviorModel {
             .children
             .iter()
             .filter_map(|id| document.ast().node(*id))
-            .find(|node| node.local_name() == "Interaction.Behaviors")
+            .find(|node| Self::is_collection_property(node))
         else {
             return Ok(Vec::new());
         };
@@ -224,15 +233,22 @@ impl BehaviorModel {
                 document
                     .ast()
                     .node(*id)
-                    .is_some_and(|node| node.local_name() == "BehaviorCollection")
+                    .is_some_and(|node| node.local_name() == "BehaviorCollection"
+                        && native_behavior_namespace(node.namespace_uri.as_deref()))
             })
             .unwrap_or(collection.id);
-        document
-            .ast()
-            .element_children(container)
-            .into_iter()
-            .map(|id| Self::from_source(&fragment(document, id)?, owner, Some(id)))
-            .collect()
+        Ok(document.ast().element_children(container))
+    }
+
+    pub fn is_collection_property(node: &Node) -> bool {
+        node.kind == NodeKind::PropertyElement
+            && node.local_name() == "Interaction.Behaviors"
+            && native_behavior_namespace(node.namespace_uri.as_deref())
+    }
+
+    pub fn is_collection_attribute(attribute: &Attribute) -> bool {
+        attribute.name.rsplit(':').next() == Some("Interaction.Behaviors")
+            && native_behavior_namespace(attribute.namespace_uri.as_deref())
     }
     pub fn from_source(source: &str, owner: NodeId, id: Option<NodeId>) -> Result<Self> {
         let document = Document::new(source).map_err(core_error)?;
@@ -347,7 +363,7 @@ impl BehaviorModel {
             .children
             .iter()
             .filter_map(|id| document.ast().node(*id))
-            .find(|node| node.local_name() == "Interaction.Behaviors")
+            .find(|node| Self::is_collection_property(node))
         {
             let container = document
                 .ast()

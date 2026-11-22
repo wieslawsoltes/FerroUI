@@ -3,7 +3,7 @@ use crate::edits::{editor_edits, module_edits, rust_name_edit};
 use crate::protocol::{EditResult, Source};
 use crate::renderer::{Presentation, Renderer, Stage};
 use crate::rsx_animation;
-use ferroui_designer::mcp::{DesignerMcp, RSX_COMMAND_EDIT, RSX_COMMANDS, RSX_STYLES, RSX_STYLE_EDIT};
+use ferroui_designer::mcp::{DesignerMcp, LIBRARY_SCOPES, RSX_COMMAND_EDIT, RSX_COMMANDS, RSX_STYLES, RSX_STYLE_EDIT};
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_mcp::{Permissions, UiToolProvider};
 use serde::Deserialize;
@@ -147,7 +147,7 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     let needs_selection = match query.name.as_str() {
         "designer_style_catalog" => query.arguments.get("target").is_none(),
         "designer_style_definition" | "designer_style_source" | "designer_style_resources" | "designer_palette"
-        | "designer_item_templates" | RSX_STYLES | RSX_COMMANDS => false,
+        | "designer_item_templates" | RSX_STYLES | RSX_COMMANDS | LIBRARY_SCOPES => false,
         _ => true,
     };
     // A direct style or template lookup can run while another view holds a
@@ -172,6 +172,12 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
         let rust = stage.authored_rsx.as_ref().ok_or("Open an authored RSX view")?;
         return ferroui_designer::mcp::rust_command_report(
             &stage.session.borrow(), rust.source(), &rust.projection()?, &query.arguments,
+        );
+    }
+    if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == LIBRARY_SCOPES) {
+        stage.studio.validate(&query.name, &query.arguments)?;
+        return ferroui_designer::mcp::rust_library_scopes_report(
+            &stage.session.borrow(), rust.source(), &rust.projection()?,
         );
     }
     if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_property_trace") {

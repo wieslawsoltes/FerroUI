@@ -48,6 +48,7 @@ export class NativePreview implements vscode.Disposable {
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; canvasHighContrast?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; rsxColumnAuthoring?: boolean; itemTemplateAuthoring?: boolean; rsxItemTemplateAuthoring?: boolean;
         behaviorAuthoring?: boolean;
+        libraryScopes?: boolean;
         controlTemplateAuthoring?: boolean; propertyTrace?: boolean; includedPropertyTrace?: boolean;
         styleComposition?: boolean; rustStyleComposition?: boolean;
         hostedRustStyles?: boolean; hostedRustModules?: boolean; rustModuleSources?: boolean;

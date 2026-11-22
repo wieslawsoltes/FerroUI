@@ -32,6 +32,8 @@ mod project_sources;
 mod source_import;
 #[path = "workspace_style_composition.rs"]
 mod style_composition;
+#[path = "workspace_library_scopes.rs"]
+mod library_scopes;
 
 /// Exact XAML supplied by a library or a project. The designer does not reconstruct
 /// a compiled template from live visuals. The source is copied through an AST edit.
@@ -121,6 +123,7 @@ pub(super) struct ComponentUi {
     sources: BTreeMap<String, source_import::DefinitionSource>,
     documents: project_sources::ComponentDocumentIndex,
     style_source_visit: Option<style_composition::StyleSourceVisit>,
+    scopes: library_scopes::ScopeCache,
 }
 
 impl DesignerWorkspace {
@@ -328,6 +331,10 @@ impl DesignerWorkspace {
         let weak = Rc::downgrade(self);
         browser.on_activate(move |item| {
             if let Some(this) = weak.upgrade() {
+                if let Some(result) = this.reveal_library_source(item) {
+                    this.report(result);
+                    return;
+                }
                 this.select_library_item(item);
                 if let Some(node) = item.node {
                     if matches!(
@@ -439,6 +446,9 @@ impl DesignerWorkspace {
     }
 
     fn select_library_item(self: &Rc<Self>, item: &ComponentLibraryItem) {
+        if self.components.borrow().scopes.source_only(&item.id).is_some() {
+            return;
+        }
         let selection = if let Some(node) = item.node {
             LibrarySelection::Document(node)
         } else if let Some(id) = item.asset_id.as_ref() {
@@ -472,11 +482,13 @@ impl DesignerWorkspace {
         let ast = document.ast_snapshot();
         let writable = !session.is_read_only() && document.is_valid() && !self.pending_source.get();
         let catalog = session.component_catalog().unwrap_or_default();
+        let scopes = self.components.borrow_mut().scopes.update(&session, &catalog.entries);
         let mut items = catalog
             .entries
             .iter()
             .map(|entry| library_item(document, entry))
             .collect::<Vec<_>>();
+        items.extend(library_scopes::source_items(&scopes));
         let scope = session.definition_scope().cloned();
         let rust_template = session.rust_template_property();
         let scope_epoch = session.definition_scope_epoch();
@@ -558,7 +570,7 @@ impl DesignerWorkspace {
                 });
             }
         }
-        browser.replace_items(items);
+        browser.replace_scoped_items(items, &canonical_uri, self.session.borrow().authored_source(), &scopes);
         let (selection, open, create, rebuild) = {
             let mut state = self.components.borrow_mut();
             let same = state.stamp.as_ref().is_some_and(|stamp| {

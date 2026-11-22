@@ -90,6 +90,42 @@ pub struct ComponentEntry {
     pub usages: usize,
 }
 
+impl ComponentEntry {
+    /// The object that contains the authored declaration. A template introduces its
+    /// own namescope while its declaration still belongs to the enclosing object.
+    pub fn declaration_owner(&self, document: &Document) -> NodeId {
+        self.owner
+            .or_else(|| declaration_container(document, self.node))
+            .unwrap_or(self.node)
+    }
+}
+
+/// Find the authored object around an object or property assignment.
+pub fn declaration_container(document: &Document, node: NodeId) -> Option<NodeId> {
+    let ast = document.ast();
+    let parent = ast.node(node)?.parent.and_then(|id| ast.node(id));
+    std::iter::successors(parent, |node| node.parent.and_then(|id| ast.node(id)))
+        .find(|node| node.kind == NodeKind::Element)
+        .map(|node| node.id)
+}
+
+pub fn is_component_include(node: &Node) -> bool {
+    node.kind == NodeKind::Element
+        && matches!(node.local_name(), "ResourceInclude" | "MergeResourceInclude" | "StyleInclude")
+        && framework(node)
+}
+
+/// Framework markup templates that can be browsed at their declaration.
+pub fn is_component_template(node: &Node) -> bool {
+    node.kind == NodeKind::Element
+        && matches!(
+            node.local_name(),
+            "ControlTemplate" | "DataTemplate" | "TreeDataTemplate" | "ItemsPanelTemplate"
+                | "FocusAdornerTemplate" | "WindowDrawnDecorationsTemplate" | "Template"
+        )
+        && framework(node)
+}
+
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ComponentCatalog {
     pub entries: Vec<ComponentEntry>,
@@ -447,7 +483,8 @@ pub(crate) fn framework_type_namespace(name: &str, namespace: &str) -> bool {
         "ControlTheme" | "Style" | "Styles" | "Setter" | "ThemeVariant" => {
             ("FerroUI.Styling", "FerroUI.Base")
         }
-        "ControlTemplate" | "DataTemplate" | "TreeDataTemplate" => {
+        "ControlTemplate" | "DataTemplate" | "TreeDataTemplate" | "ItemsPanelTemplate"
+        | "FocusAdornerTemplate" | "WindowDrawnDecorationsTemplate" | "Template" => {
             ("FerroUI.Markup.Xaml.Templates", "FerroUI.Markup.Xaml")
         }
         "StaticResource"

@@ -67,6 +67,7 @@ import { verifyAssetMove } from './assetMoveMcp';
 import { verifyControlTemplate } from './controlTemplateMcp';
 import { verifyCommandBindings } from './commandBindingsMcp';
 import { verifyRsxCommandBindings } from './rsxCommandBindingsMcp';
+import { verifyLibraryScopes } from './libraryScopesMcp';
 
 interface ToolResponse {
     content: { type: string; text?: string; data?: string }[];
@@ -235,6 +236,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyControlTemplate({ invoke, content });
         await verifyCommandBindings({ invoke, content });
         await verifyRsxCommandBindings({ invoke, content });
+        await verifyLibraryScopes({ invoke, content });
         await verifyIncludedItemTemplatesMcp({ invoke, content });
         await verifyIncludedTemplateCopiesMcp({ invoke, content });
         await verifyResourceRename({ invoke, content });

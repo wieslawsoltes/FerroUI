@@ -85,6 +85,12 @@ When a color comes from a same-file constant, choose the diamond icon beside its
 
 Open the owning Cargo project and build it from **Project** to load the exported XAML registry. Open the XAML view in **Split** or **Code**. Put the caret on an event attribute such as `Click="OnApply"`, then choose the lightning button **Create Rust event handler** in the source toolbar. Studio adds the typed callback to the view’s Rust class registration and opens its declaration. Use an empty attribute value to accept a generated name. The paired edit participates in Studio Undo and Redo. [VS Code and MCP workflows](vscode/authoring.md#create-a-rust-handler-for-an-xaml-event)
 
+### Browse objects by owning scope
+
+Open **Library** and use the **Owning scope** selector beside the category filter. Choose an owning control or dictionary to browse its resources, includes, templates, and behaviors. Use the category filter and search to narrow the selected scope. **Document and project** returns to the general Library.
+
+Select a reusable XAML definition to open its existing inspector. Press Enter or double-click an include, behavior, or mapped Rust entry to reveal the declaration in source. Rust item and cell template assignments open in their owning Rust module. An isolated definition lists its own contents. [VS Code workflow](vscode/authoring.md#browse-objects-by-owning-scope) · [MCP workflow](vscode/reference.md#browse-library-scopes-with-mcp)
+
 ### Bind a command and its parameter
 
 Build the owning Cargo project to load its registered properties. Open an XAML view with a typed data context, then select the control in the canvas or Layers. In the inspector header, choose the link icon **Edit command binding**.

@@ -23,6 +23,9 @@ mod brush;
 mod automation_tests;
 #[path = "mcp_components.rs"]
 mod components;
+#[path = "mcp_library_scopes.rs"]
+mod library_scopes;
+pub use library_scopes::{rust_library_scopes_report, LIBRARY_SCOPES};
 #[path = "mcp_style_composition.rs"]
 mod style_composition;
 #[path = "mcp_events.rs"]
@@ -327,6 +330,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(columns::tools());
         tools.extend(item_templates::tools());
         tools.extend(components::tools());
+        tools.push(library_scopes::tool());
         tools.extend(style_composition::tools());
         tools.extend(rsx_style::tools());
         tools.extend(rsx_commands::tools());
@@ -363,6 +367,7 @@ impl UiToolProvider for DesignerMcp {
             || item_templates::handles(name)
             || name == "designer_property_trace"
             || components::handles(name)
+            || name == LIBRARY_SCOPES
             || style_composition::handles(name)
             || rsx_style::handles(name)
             || rsx_commands::handles(name)
@@ -683,6 +688,9 @@ impl UiToolProvider for DesignerMcp {
                 return Ok(state(&owner.borrow()));
             }
             return Ok(result);
+        }
+        if name == LIBRARY_SCOPES {
+            return library_scopes::call(&session);
         }
         if components::handles(name) {
             let mut result = components::call(&mut session, name, args)?;

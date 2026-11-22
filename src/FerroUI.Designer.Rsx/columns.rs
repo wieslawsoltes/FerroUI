@@ -439,15 +439,28 @@ impl RsxProjection<'_> {
         }
         let table = ferroui_designer_tools::nearest_table(document, node)?;
         let index = self.control_index(document, table)?;
-        let ColumnSource::Mapped(columns) = self.nodes[index].columns.as_ref()? else {
-            return None;
+        self.template_columns(document, table, index).into_iter()
+            .find(|(id, _, _)| *id == node).map(|(_, position, kind)| (index, position, kind))
+    }
+
+    pub(crate) fn template_columns(
+        &self, document: &Document, table: NodeId, index: usize,
+    ) -> Vec<(NodeId, ColumnPosition, ColumnKind)> {
+        let Some(ColumnSource::Mapped(columns)) = self.nodes[index].columns.as_ref() else {
+            return Vec::new();
         };
-        let model = ferroui_designer_tools::table_columns(document, table).ok()?;
-        if model.reason.is_some() || columns.rows.len() != model.columns.len() {
-            return None;
+        let Ok(model) = ferroui_designer_tools::table_columns(document, table) else {
+            return Vec::new();
+        };
+        if model.reason.is_some() || !matches_model(&columns.rows, &model) {
+            return Vec::new();
         }
-        let (position, column) = ColumnPosition::find(&model, node)?;
-        (position.at(&columns.rows)?.kind == column.kind).then_some((index, position, column.kind))
+        ColumnPosition::authored(&model)
+            .filter(|(_, column)| document.ast().node(column.node).is_some_and(|node| {
+                matches!(node.local_name(), "TableViewColumn" | "TreeDataGridTemplateColumn")
+            }))
+            .map(|(position, column)| (column.node, position, column.kind))
+            .collect()
     }
 
     pub(crate) fn column_template(

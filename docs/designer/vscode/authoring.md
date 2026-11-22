@@ -247,7 +247,7 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | **Events** | Assign or clear an XAML handler name or supported RSX expression. Create a Rust code-behind handler for an XAML event with a project registration, or open its declaration. |
 | **Behaviors** | Attach an event or data trigger to an XAML control, edit and order its actions, and run the actions on the native Design canvas. |
 | **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Use the rename icon to review a key and its project references. Extract the containing dictionary into a reusable file, or use **Promote to resource** to replace a literal with a reference. |
-| **Library** | Browse reusable XAML definitions across the project and group the active design’s definitions by kind. Open a scoped native preview or reveal the original declaration. The current document’s Library also exposes references, template creation, and applicable resource actions. |
+| **Library** | Browse reusable XAML definitions across the project. In the active design, browse definitions by kind or XAML and mapped Rust objects by owning scope. Open a scoped native preview, find uses, or reveal the original declaration. |
 | **Assets** | Import and browse images, fonts, media, and markup. Open a file, preview a raster image, or copy a relative path. Drop a raster image on the canvas or Outline, or use **Choose image placement**. XAML inserts a relative URI. Mapped RSX uses `embedded_image` with a relative `include_bytes!` path whose bytes are read at build time. |
 | **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. Open **Behaviors** to edit the selected XAML control’s triggers. |
 
@@ -280,6 +280,14 @@ To wire an event to a visual state, select the control that raises the event. In
 3. Choose a search result to open its scoped native preview. In the tree, expand an entry and choose **Preview definition** or **Reveal definition in source**. **Current document** offers the actions for the original authored scope, including **Return to document preview**.
 
 The Library follows unsaved XAML drafts and updates when files change on disk. Repair an invalid draft to bring its definitions back. If a definition changes while the search is open, reopen the search to get its current name and location. [Studio Library](../components.md#use-the-library) · [MCP reference](reference.md#drive-an-editor-workflow)
+
+### Browse objects by owning scope
+
+1. Run **FerroUI: Show Library** and expand **Current document**, then **By Scope**. Each folder is an owning control or dictionary. Its path identifies the scope even when the same resource key appears in several places.
+2. Expand a folder to see its styles, resources, include declarations, templates, and attached behaviors. Select an object to reveal its exact source. Expand a reusable XAML definition for its available preview, resource, and reference actions.
+3. Use **Reveal scope owner** to find the enclosing declaration. In an isolated definition preview, **By Scope** shows the objects inside that definition. **Return to document preview** restores the surrounding scopes.
+
+For a Rust design, **By Scope** uses the selected RSX invocation. It groups authored styles and their resources by control and finds mapped item and cell template assignments, including assignments in companion Rust modules. Select a Rust entry to open its own source. [Designer Studio](../native-controls.md#browse-objects-by-owning-scope) · [MCP workflow](reference.md#browse-library-scopes-with-mcp)
 
 ### Import an asset
 

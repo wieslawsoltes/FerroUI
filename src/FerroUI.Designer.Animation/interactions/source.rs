@@ -41,13 +41,15 @@ impl BehaviorSource {
         let container = parent(node)
             .and_then(|id| document.ast().node(id))
             .ok_or_else(|| AnimationError("Behavior has no collection".into()))?;
-        let collection = if container.local_name() == "BehaviorCollection" {
+        let collection = if container.local_name() == "BehaviorCollection"
+            && native_behavior_namespace(container.namespace_uri.as_deref())
+        {
             container.parent.and_then(|id| document.ast().node(id))
         } else {
             Some(container)
         };
         collection
-            .filter(|node| node.local_name() == "Interaction.Behaviors")
+            .filter(|node| BehaviorModel::is_collection_property(node))
             .and_then(|node| node.parent)
             .ok_or_else(|| AnimationError("Select a directly attached behavior".into()))
     }
@@ -57,9 +59,7 @@ impl BehaviorSource {
         document.ast().node(owner).is_some_and(|node| {
             node.is_element()
                 && node.kind != NodeKind::PropertyElement
-                && !node.attributes.iter().any(|attribute| {
-                    attribute.name.rsplit(':').next() == Some("Interaction.Behaviors")
-                })
+                && !node.attributes.iter().any(BehaviorModel::is_collection_attribute)
         })
     }
 

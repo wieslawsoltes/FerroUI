@@ -43,6 +43,7 @@ mod icons;
 mod interaction_session;
 mod layer_state;
 mod layout_helper_renderer;
+mod library_scopes;
 mod preview_checks;
 mod column_authoring;
 mod included_source;

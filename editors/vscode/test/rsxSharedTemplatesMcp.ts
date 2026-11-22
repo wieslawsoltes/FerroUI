@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import type { TableColumns } from '../src/columnEditor';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
+import type { LibraryScopes } from '../src/libraryScopes';
 import type { OutlineNode, Range, RustTemplateNavigation } from '../src/protocol';
 import { asRange } from '../src/textDocument';
 import type { McpFixture } from './mcp';
@@ -113,6 +114,15 @@ export async function verifySharedRsxTemplates({ invoke, content }: McpFixture):
         assert.equal(vscode.Uri.parse(slot.sourceUri!, true).fsPath, columns.uri.fsPath);
         assert.equal(vscode.Uri.parse(slot.rustBodyUri!, true).fsPath, body.uri.fsPath);
         assert.equal(columns.getText(asRange(slot.range)), 'cell()');
+        const { scopes } = await tool<LibraryScopes>('designer_studio_query', {
+            session, tool: 'designer_library_scopes', arguments: {},
+        });
+        const ownership = scopes.find(scope => scope.owner === cell.node);
+        assert.ok(ownership);
+        assert.ok(ownership.path.endsWith('Accounts › Account'));
+        const assignment = ownership.objects.find(object => object.title === 'CellTemplate');
+        assert.equal(assignment?.sourceUri, slot.sourceUri);
+        assert.deepEqual(assignment?.range, slot.range);
         assert.ok(body.getText(asRange(slot.rustBody!)).includes('Customer profile 🧭'));
         assert.ok(slot.canReset);
         const opened = content<{ opened_session: number; opened_template: RustTemplateNavigation }>(await run(cell, 'preview'));

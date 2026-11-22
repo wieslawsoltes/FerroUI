@@ -32,7 +32,7 @@ pub use components::{
     component_property_attribute, component_property_elements, component_property_extractable,
     component_property_object, component_property_resource_owners,
     component_resource_expression, component_resource_location, component_resource_references,
-    component_resource_resolution,
+    component_resource_resolution, declaration_container, is_component_include, is_component_template,
     plan_component_action, plan_component_action_in_context, plan_property_object,
     resolve_component_resource, resolve_component_resource_in_context, visible_component_resources,
     visible_component_resources_in_context,
