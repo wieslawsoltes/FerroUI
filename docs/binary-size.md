@@ -1870,8 +1870,8 @@ been measured.
 | Linux x86-64, lld | None | `dist`: `--icf=safe` -0.6 % (hello world), -0.2 % (catalog); `--icf=all` -2.7 %, -2.1 % | 44889928913, `707791323` |
 | Android arm64, lld | None | `dist`, catalog library: `--icf=safe` 0 bytes; `--icf=all` -1,711,872 bytes (-2.26 %), `.text` -2.67 % | 45004519904, `2f22d5a22` |
 | macOS ARM64, ld64 | Its default deduplication | `dist` with `-no_deduplicate` has the same size | 44859088556, 44889928913 |
-| iOS simulator | As macOS: the folding options of the two `dist` link lines are the same | Not measured, since the link lines do not differ | 45004519904, `2f22d5a22` |
-| Browser | On: `duplicate-function-elimination` runs in both `wasm-opt` commands of the link | Catalog as linked: 38.60 MB, 13.86 MB gzip, 9.29 MB brotli | 45004519904, `2f22d5a22` |
+| iOS simulator | As macOS: the two `dist` link lines have the same options for folding | Not measured, since those options match. The device target was not read | 45004519904, `2f22d5a22` |
+| Browser | Already on: `duplicate-function-elimination` runs in both `wasm-opt` commands of the link | Catalog as linked: 38.60 MB, 13.86 MB gzip, 9.29 MB brotli | 45004519904, `2f22d5a22` |
 
 `hb_font_t::has_func_set` of HarfBuzz compares callback addresses, so a folded default callback
 could change a code path. Run 44907900542 on `ae7462b47` checked eight links (hello world and the
@@ -1884,12 +1884,15 @@ folded together would be accepted as one, with the same behaviour. No function i
 callback is removed by its address, and the compiler's lint on function pointer comparisons has no
 hit in the log of the Linux workspace build.
 
-Not measured or not established, so `--icf=all` stays a candidate and not a recommendation:
+`--icf=all` is not on, on Linux or on Android. On Linux, Skia and the other C++ code have not been
+reviewed for comparisons of addresses, and start-up with it has not been measured.
+
+Not measured or not established:
 
 - start-up with `--icf=all` on Linux and Android;
 - the C++ code other than the HarfBuzz check above, Skia included, for comparisons of addresses;
-- what ld64 deduplicates: `-verbose_deduplicate` reaches the link line of `ld-1167.5`, but the log
-  has no line about it, and `ld64.lld --icf` was not tried;
+- ld64's deduplication output, which is still not shown: `-verbose_deduplicate` reaches the link
+  line of `ld-1167.5`, but the log has no line about it; `ld64.lld --icf` was not tried;
 - the link line of the iOS device target;
 - why `--icf=safe` folds nothing on Android.
 
