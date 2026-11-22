@@ -301,13 +301,17 @@ For a Rust design, **By Scope** uses the selected RSX invocation. It groups auth
 
 The copy appears under **Assets**. To use a raster import, drag it onto the canvas or use **Use as image source** for a selected authored image. MCP agents can review and copy assets already inside the workspace. [MCP reference](reference.md#drive-an-editor-workflow)
 
+### Open the source of a packaged asset
+
+Run **FerroUI: Build Project XAML Schema** for the Cargo target. Use **Go to Definition** on a `ferres://` image or other typed asset reference in XAML to open the file recorded by the package build. Dependency assets use the metadata available for the selected target. Use the registered asset path's exact case and escape characters such as spaces (`%20`). A closed `ExportPlan` publishes only the asset keys it lists.
+
 ### Move an asset and update its references
 
 1. Select an image, font, or media file in **Assets** and use **Move or rename asset…**. Enter a path in an existing directory in the same Cargo package or loose-file project. Keep the file extension.
 2. The Changes editor shows the proposed patches. Review the XAML URI properties, typed style values, font source paths, and Rust includes there. The review includes static `concat!` paths, including paths anchored to `CARGO_MANIFEST_DIR`. A move with no indexed references shows a file confirmation.
 3. Choose **Apply Asset Move** to move the file and update the displayed references in one VS Code edit. Undo from an edited reference to restore the file and those source changes together. Use **Cancel Asset Move** to return to the editor. If a file or draft changes, prepare a new review.
 
-The review reflects the indexed XAML and Rust code, including open drafts. Inspect runtime-generated paths and externally managed asset mappings before applying. If a Rust draft with a possible include is incomplete, repair it and prepare the review again. Save the edited buffers to update the running app. [Move a XAML file](#move-an-xaml-file-and-its-references) · [MCP reference](reference.md#drive-an-editor-workflow)
+The review reflects the indexed XAML and Rust code, including open drafts. For a file listed in the build's published asset table, update its path, `ferres://` references, and any explicit `ExportPlan` entry in source, then rebuild the package. Inspect runtime-generated paths and externally managed asset mappings before applying a reviewed move. If a Rust draft with a possible include is incomplete, repair it and prepare the review again. Save the edited buffers to update the running app. [Move a XAML file](#move-an-xaml-file-and-its-references) · [MCP reference](reference.md#drive-an-editor-workflow)
 
 ## Create a Rust handler for an XAML event
 

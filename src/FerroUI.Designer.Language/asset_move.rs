@@ -35,6 +35,10 @@ impl LanguageService {
 
         let drafts = move_drafts(drafts)?;
         let original = file_path(&movement.from)?;
+        require(
+            !self.package_schemas.values().any(|schema| schema.catalog.packaged_assets().contains_source(&original)),
+            "This asset is published by a Cargo export table. Update the package's asset registration before moving it.",
+        )?;
         let target = file_path(&movement.to)?;
         let name = original
             .file_name()

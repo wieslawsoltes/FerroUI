@@ -3,6 +3,7 @@ use ferroui_build_scan::{
     compiled_index::{CompiledXamlGroup, CompiledXamlIndex, CompiledXamlInput, CompiledXamlMember},
     compiled_names::CompiledGroupKind,
     model::AssemblyModel,
+    packaged_assets::{PackagedAsset, PackagedAssetIndex},
 };
 use ferroui_designer_project::{
     hosted_preview_sources, local_preview_sources_with_resources, resolve_uri, BuildMetadata,
@@ -14,6 +15,47 @@ const COLORS: &str = "Themes/Colors.xaml";
 const PALETTE: &str = "Colors.xaml";
 const ACTIVE_GROUP: &str = "compiled_views";
 const ASSEMBLY: &str = "Customer.Views";
+
+#[test]
+fn published_asset_addresses_use_the_selected_package_receipt() {
+    let (project, mut service, _) = setup(false);
+    let owner = project.uri("View.xaml");
+    let badge = "Assets/Badge 100%.png";
+    let address = "ferres://CUSTOMER.VIEWS/Assets/Badge%20100%25.png";
+    let unpublished = "ferres://Customer.Views/Assets/Hidden.png";
+    project.write(badge, "badge bytes");
+    project.write("Assets/Hidden.png", "unpublished bytes");
+    let source = format!("<Image {NS} Source='{address}' />");
+    project.write("View.xaml", &source);
+    service.open(&owner, &source, 1).unwrap();
+
+    let output = project.0.join("target/schema");
+    let manifest = project.0.join("Cargo.toml");
+    let receipt = PackagedAssetIndex {
+        manifest: manifest.clone(),
+        assembly: ASSEMBLY.into(),
+        crate_name: "customer_views".into(),
+        assets: vec![PackagedAsset { key: format!("/{badge}"), source: badge.into() }],
+    };
+    fs::write(output.join(PackagedAssetIndex::FILE_NAME), receipt.to_json()).unwrap();
+    service.set_build_metadata(&BuildMetadata {
+        manifest,
+        directories: vec![output],
+        package: Some("customer-views".into()),
+    }).unwrap();
+
+    assert_eq!(service.resource_uri(&owner, address).unwrap(), project.uri(badge));
+    assert_eq!(service.definitions(&owner, source.find(address).unwrap() + 10).unwrap()[0].uri, project.uri(badge));
+    assert_eq!(service.resource_uri(&owner, unpublished).unwrap(), unpublished);
+    let wrong_case = address.replace("Badge", "badge");
+    assert_eq!(service.resource_uri(&owner, &wrong_case).unwrap(), wrong_case);
+    let excluded = source.replace(address, unpublished);
+    service.open(&owner, &excluded, 2).unwrap();
+    assert!(service.definitions(&owner, excluded.find(unpublished).unwrap() + 10).unwrap().is_empty());
+    assert!(service.plan_asset_move(&project.uri(badge), &project.uri("Assets/Moved.png"), &[])
+        .unwrap_err().0.contains("published by a Cargo export table"));
+    assert!(service.plan_asset_move(&project.uri("Assets/Hidden.png"), &project.uri("Assets/Moved.png"), &[]).is_ok());
+}
 
 #[test]
 fn moving_a_private_compiled_dictionary_keeps_relative_includes_and_rebases_loose_files() {

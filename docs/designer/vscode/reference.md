@@ -237,6 +237,8 @@ The edit stays in the current buffer and groups both changes into one Undo step.
 
 After building the owning Cargo schema, call `ferroui_workspace_language` with `action: "definition"`, the XAML file in `path`, and a zero-based UTF-16 `position`. It returns the same URI and range as **Go to Definition**. In Studio, call `designer_language` with `action: "definitions"` and the XAML byte `offset`. [Supported declarations](authoring.md#follow-registered-rust-declarations)
 
+Use the same definition query on a typed XAML `ferres://` asset reference to retrieve its published source file. Studio also accepts `designer_language` with `action: "resource_uri"` and the authored `reference`. [Packaged assets](authoring.md#open-the-source-of-a-packaged-asset)
+
 ### Browse Library scopes with MCP
 
 In Studio, call `designer_library_scopes` with an empty argument object. In VS Code, use `designer_studio_query` with the current design `session`, `tool: "designer_library_scopes"`, and empty `arguments`. Each group contains the authored `owner`, its path, and the objects declared there. Source ranges use UTF-16. When an RSX assignment lives in a companion module, its `sourceUri` identifies that file.

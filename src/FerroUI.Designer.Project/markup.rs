@@ -1,10 +1,11 @@
-use crate::{ProjectError, Result, require};
+use crate::{PackagedAssets, ProjectError, Result, packaged_assets, require};
 use ferroui_build_scan::model::{AssemblyModel, RegisteredKind, TypeKind, TypeModel};
 use ferroui_build_scan::model_set::ModelSet;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 #[path = "markup_symbols.rs"]
 mod symbols;
@@ -61,6 +62,7 @@ pub struct MarkupCatalog {
     models: ModelSet,
     directories: BTreeSet<PathBuf>,
     sources: sources::MarkupSources,
+    packaged_assets: Arc<PackagedAssets>,
 }
 
 /// An element with a known XAML constructor and Control ancestry.
@@ -115,6 +117,8 @@ impl MarkupCatalog {
         let mut directories = BTreeSet::new();
         let mut sources = sources::MarkupSources::default();
         let mut source_budget = sources::INDEX_BYTES;
+        let mut assets = PackagedAssets::default();
+        let mut asset_budget = packaged_assets::INDEX_BYTES;
         let mut remaining = MAX_BYTES;
         for path in paths {
             let mut source = String::new();
@@ -133,6 +137,7 @@ impl MarkupCatalog {
             })?;
             if let Some(directory) = path.parent() {
                 sources.read(directory, &model, &mut source_budget);
+                assets.read(directory, &model.name, &model.crate_name, &mut asset_budget);
                 directories.insert(directory.to_owned());
             }
             models.push(model);
@@ -141,7 +146,12 @@ impl MarkupCatalog {
             models: ModelSet::new(models),
             directories,
             sources,
+            packaged_assets: Arc::new(assets),
         })
+    }
+
+    pub fn packaged_assets(&self) -> &Arc<PackagedAssets> {
+        &self.packaged_assets
     }
 
     pub fn models(&self) -> &ModelSet {
@@ -296,6 +306,7 @@ mod tests {
             directories: BTreeSet::new(),
             models: ModelSet::new(vec![shell, widgets, framework]),
             sources: sources::MarkupSources::default(),
+            packaged_assets: Arc::default(),
         };
         let found = catalog.controls().collect::<Vec<_>>();
         assert_eq!(found.len(), 1);

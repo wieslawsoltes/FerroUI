@@ -236,6 +236,7 @@ use std::time::Instant;
 
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_build_scan::compiled_index::CompiledXamlIndex;
+use ferroui_build_scan::packaged_assets::{PackagedAsset, PackagedAssetIndex};
 use ferroui_build_scan::compiled_names::CompiledGroupKind;
 use xamlx::type_system::IXamlTypeSystem;
 
@@ -1503,6 +1504,12 @@ impl Build {
         }
         // A crate that only exports its model includes nothing; one whose code constructs a theme
         // from its parts (`Build::theme`) includes the table.
+        let mut packaged = PackagedAssetIndex {
+            manifest,
+            assembly: assembly_name.clone(),
+            crate_name: self.crate_name.clone(),
+            assets: Vec::new(),
+        };
         let includes = self.assembly.is_some() || !self.groups.is_empty() || !self.asset_directories.is_empty();
         // A table for a theme a dependency constructs (#846) is written for a crate without markup too.
         if includes || !self.themes.is_empty() || !parts_tables.is_empty() {
@@ -1515,6 +1522,11 @@ impl Build {
                     write_if_changed(&xaml_directory.join("exports.txt"), &report, &mut errors);
                     let text = crate_file_with_plan(&assembly_name, &modules, &self.loaders, &applied, &parts_tables);
                     write_if_changed(&xaml_directory.join("mod.rs"), &text, &mut errors);
+                    packaged.assets = applied.assets.into_iter().filter_map(|(key, path)| {
+                        let source = path.strip_prefix(&self.manifest_dir).ok()?;
+                        source.to_str()?;
+                        Some(PackagedAsset { key, source: source.to_owned() })
+                    }).collect();
                 }
                 Err(plan_errors) => errors.extend(plan_errors),
             }
@@ -1523,6 +1535,7 @@ impl Build {
             symbols.file_inputs.sort();
             symbols.file_inputs.dedup();
             write_if_changed(&self.out_dir.join(CompiledXamlIndex::FILE_NAME), &symbols.to_json(), &mut errors);
+            write_if_changed(&self.out_dir.join(PackagedAssetIndex::FILE_NAME), &packaged.to_json(), &mut errors);
             if let Some(mut authored) = authored_symbols {
                 authored.assembly = assembly_name.clone();
                 if let Err(error) = authored.write(&self.out_dir) {
@@ -1882,6 +1895,45 @@ fn crate_file_with_plan(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn packaged_asset_index_follows_the_registered_table() {
+        static ASSEMBLY: MarkupAssembly = MarkupAssembly {
+            name: "AssetFixture", crate_name: "asset_fixture",
+            xmlns_definitions: &[], xmlns_prefixes: &[], metadata: &[],
+        };
+        let root = env::temp_dir().join(format!("ferroui-build-assets-{}", std::process::id()));
+        let out = root.join("out");
+        fs::create_dir_all(root.join("Assets")).unwrap();
+        fs::write(root.join("Cargo.toml"), "[package]\nname='asset-fixture'\nversion='0.0.0'\n").unwrap();
+        fs::write(root.join("Assets/Badge 100%.png"), b"badge").unwrap();
+        fs::write(root.join("Assets/Hidden.png"), b"hidden").unwrap();
+        let run = |plan| {
+            let outcome = Build::new(root.clone(), out.clone(), "asset-fixture", Vec::new())
+                .assembly(&ASSEMBLY)
+                .embed_assets(&["Assets"])
+                .export_plan(plan)
+                .hot_reload_manifest(false)
+                .execute();
+            assert!(outcome.errors.is_empty(), "{:?}", outcome.errors);
+            PackagedAssetIndex::parse(&fs::read_to_string(out.join(PackagedAssetIndex::FILE_NAME)).unwrap()).unwrap()
+        };
+        let all = run(ExportPlan::all());
+        assert_eq!(all.assets.len(), 2);
+        let closed = run(ExportPlan::closed().asset("/assets/badge 100%.png"));
+        assert_eq!(closed.manifest, root.join("Cargo.toml"));
+        assert_eq!(closed.assembly, ASSEMBLY.name);
+        assert_eq!(closed.crate_name, ASSEMBLY.crate_name);
+        assert_eq!(closed.assets, [PackagedAsset {
+            key: "/Assets/Badge 100%.png".into(),
+            source: PathBuf::from("Assets").join("Badge 100%.png"),
+        }]);
+        let registration = fs::read_to_string(out.join("xaml/mod.rs")).unwrap();
+        assert!(registration.contains("\"/Assets/Badge 100%.png\""));
+        assert!(!registration.contains("Hidden.png"));
+        assert!(run(ExportPlan::closed()).assets.is_empty());
+        fs::remove_dir_all(root).unwrap();
+    }
 
     #[cfg(feature = "runtime-host")]
     #[test]

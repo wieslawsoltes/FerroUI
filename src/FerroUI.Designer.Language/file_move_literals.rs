@@ -18,6 +18,10 @@ pub(super) struct LiteralPath {
 }
 
 impl LiteralPath {
+    pub fn contains_offset(&self, offset: usize) -> bool {
+        self.parts.iter().any(|part| part.span.contains(offset))
+    }
+
     pub fn patches(self, replacement: &str) -> Vec<TextPatch> {
         let relative_font;
         let replacement = if self.font_source && !replacement.contains(['/', ':']) {

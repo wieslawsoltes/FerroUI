@@ -81,6 +81,8 @@ use std::path::{Path, PathBuf};
 
 #[path = "compiled_index.rs"]
 pub mod compiled_index;
+#[path = "packaged_assets.rs"]
+pub mod packaged_assets;
 
 /// A compiled document of a crate (`DocumentModel`).
 #[derive(Clone, Debug, PartialEq, Eq)]

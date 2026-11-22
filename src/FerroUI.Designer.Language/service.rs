@@ -1573,13 +1573,29 @@ impl LanguageService {
         Ok(out)
     }
     pub fn resource_uri(&self, base: &str, reference: &str) -> Result<String> {
-        if let Some((_, schema)) = self.project_schema_for(base) {
+        let schema = self.project_schema_for(base).map(|(_, schema)| schema);
+        if let Some(schema) = schema {
             let owner = self.document_uri(base)?;
             if let Some(uri) = schema.resources.resolve(&owner, reference)? {
                 return Ok(uri.to_owned());
             }
         }
         let resolved = ferroui_designer_project::resolve_uri(base, reference)?;
+        if let Some(schema) = schema {
+            let assets = schema.catalog.packaged_assets();
+            if let Some(source) = assets.resolve(&resolved)? {
+                return Ok(ferroui_designer_project::file_uri(source.file)?);
+            }
+            let path = resolved.split(['?', '#']).next().unwrap_or(&resolved);
+            // Keep existing XAML include lookup. The package asset table does
+            // not include documents registered by a generated XAML loader.
+            let markup = std::path::Path::new(path)
+                .extension()
+                .is_some_and(|extension| extension.eq_ignore_ascii_case("xaml"));
+            if assets.knows_assembly(&resolved) && !markup {
+                return Ok(resolved);
+            }
+        }
         if resolved.starts_with("ferres://") || resolved.starts_with("resm:") {
             let owner = self.document_uri(base)?;
             if let Some(path) = self

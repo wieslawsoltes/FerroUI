@@ -2,6 +2,8 @@
 mod discovery;
 mod dictionary_file;
 mod markup;
+mod packaged_assets;
+pub use packaged_assets::{PackagedAssetSource, PackagedAssets};
 mod preview_sources;
 mod compiled_resources;
 pub use compiled_resources::{compiled_resource_key, CompiledResources};
