@@ -53,12 +53,11 @@ ferroui-designer-core = { workspace = true }
 ferroui-designer-animation = { workspace = true, features = ["native-preview"] }
 ferroui-designer-collaboration = { workspace = true }
 serde_json = "1"
+url.workspace = true
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
-# The URLs of the storage provider of the tests (C5 of #423).
-url.workspace = true
 
 [package.metadata.release]
 group = "tools"
