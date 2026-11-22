@@ -31,6 +31,8 @@ pub struct XamlSourceInfo {
     source_revision: Option<u64>,
 }
 
+ferroui_base::styled_value!(XamlSourceInfo);
+
 ferro_static_type!(XamlSourceInfo);
 
 ferro_properties! {

@@ -152,6 +152,8 @@ impl IDisposable for CommandCanExecuteIsEnabledBinder {
 #[derive(Clone, Default)]
 struct CommandCanExecuteIsEnabledOverlayState(Rc<OverlayState>);
 
+ferroui_base::styled_value!(CommandCanExecuteIsEnabledOverlayState);
+
 #[derive(Default)]
 struct OverlayState {
     block_count: Cell<i32>,

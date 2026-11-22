@@ -26,7 +26,7 @@ use crate::element::{Attach, ControlElement, Handler, Element, ElementClass, Int
 use crate::reactive::{Memo, Signal, TwoWay};
 use ferroui_base::data::BindingBase;
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEvent};
-use ferroui_base::{AttachedProperty, BoxedValue, DirectProperty, FerroObject, FerroProperty, ObjectType, PropertyValue, Ref, StyledProperty, Upcast};
+use ferroui_base::{AttachedProperty, BoxedValue, DirectProperty, FerroObject, FerroProperty, ObjectType, PropertyValue, Ref, StyledProperty, StyledValue, Upcast};
 use ferroui_controls::Control;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -74,19 +74,19 @@ impl<T: ViewClass> Builder for T {
 /// element take.
 pub trait TypedProperty: 'static {
     /// The type of the value of the property.
-    type Value: PropertyValue;
+    type Value: StyledValue;
     /// The property, untyped.
     fn untyped(&'static self) -> &'static FerroProperty;
 }
 
-impl<T: PropertyValue> TypedProperty for StyledProperty<T> {
+impl<T: StyledValue> TypedProperty for StyledProperty<T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         self.as_property()
     }
 }
 
-impl<T: PropertyValue> TypedProperty for AttachedProperty<T> {
+impl<T: StyledValue> TypedProperty for AttachedProperty<T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         let styled: &'static StyledProperty<T> = self;
@@ -94,7 +94,7 @@ impl<T: PropertyValue> TypedProperty for AttachedProperty<T> {
     }
 }
 
-impl<O: ObjectType, T: PropertyValue> TypedProperty for DirectProperty<O, T> {
+impl<O: ObjectType, T: StyledValue> TypedProperty for DirectProperty<O, T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         let base: &'static ferroui_base::DirectPropertyBase<T> = self;
@@ -298,7 +298,7 @@ pub(crate) fn compute_into(
 /// The closure of a reactive property of type `T`, from what computes its value: run by the
 /// effect of the property ([`compute_into`]) it sets the property with the value as it is; run
 /// anywhere else it returns the value in the box of the run before ([`KeptBox`]).
-fn typed_compute<T: PropertyValue>(value: impl Fn() -> T + 'static) -> Rc<dyn Fn() -> BoxedValue> {
+fn typed_compute<T: StyledValue>(value: impl Fn() -> T + 'static) -> Rc<dyn Fn() -> BoxedValue> {
     let kept = KeptBox::<T>::new();
     Rc::new(move || {
         // Taken before the value is computed, so that a closure the computation runs (one of a
@@ -321,31 +321,31 @@ fn typed_compute<T: PropertyValue>(value: impl Fn() -> T + 'static) -> Rc<dyn Fn
     })
 }
 
-impl<T: PropertyValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
+impl<T: StyledValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
     fn into_prop(self) -> PropValue {
         PropValue::Value(boxed(self.into_value()))
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
+impl<T: StyledValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
     fn into_prop(self) -> PropValue {
         PropValue::Follows { source: self.source_id(), compute: typed_compute::<T>(move || self.get().into_value()) }
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
+impl<T: StyledValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
     fn into_prop(self) -> PropValue {
         PropValue::Follows { source: self.source_id(), compute: typed_compute::<T>(move || self.get().into_value()) }
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T>, F: Fn() -> V + 'static> IntoProp<T, markers::FromClosure<V>> for F {
+impl<T: StyledValue, V: IntoValue<T>, F: Fn() -> V + 'static> IntoProp<T, markers::FromClosure<V>> for F {
     fn into_prop(self) -> PropValue {
         PropValue::Dynamic(typed_compute::<T>(move || self().into_value()))
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + FromValue<T> + Clone + PartialEq + 'static> IntoProp<T, markers::FromTwoWay<V>>
+impl<T: StyledValue, V: IntoValue<T> + FromValue<T> + Clone + PartialEq + 'static> IntoProp<T, markers::FromTwoWay<V>>
     for TwoWay<V>
 {
     fn into_prop(self) -> PropValue {
@@ -383,7 +383,7 @@ impl<T: ObjectType + Upcast<Control>, E: IntoElement> IntoProp<Option<Ref<T>>, m
 /// (`.text(Bind(binding))`).
 pub struct Bind<B: BindingBase + 'static>(pub B);
 
-impl<T: PropertyValue, B: BindingBase + 'static> IntoProp<T, markers::FromBinding> for Bind<B> {
+impl<T: StyledValue, B: BindingBase + 'static> IntoProp<T, markers::FromBinding> for Bind<B> {
     fn into_prop(self) -> PropValue {
         PropValue::Binding(Rc::new(self.0))
     }

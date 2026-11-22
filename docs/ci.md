@@ -89,7 +89,7 @@ A pull request that changes the documentation alone (`docs/**`, Markdown) does n
 workflow, except for the data under `docs/` that tests read (`docs/porting/data/**`,
 `docs/designer/samples/**`).
 
-**A part of a stack.** A pull request with an open pull request based on its branch runs the changed-areas and conventions checks and leaves the build and test jobs to the top part, whose head contains its code. The check `Reduced CI (the pull request above runs the full checks)` marks such a run, and `scripts/stack/stack.py` does not land a top part whose latest run has it (`gh workflow run ci.yml --ref <branch>` runs the full checks on that head). A pull request based on the branch that is not a part of the stack carries the label `stack-independent`. See docs/stacked-pull-requests.md.
+**A part of a stack.** A pull request with an open pull request based on its branch runs the changed-areas and conventions checks and leaves the build and test jobs to the top part, whose head contains its code. The jobs of a part based on another branch follow every file the stack changes up to that part (the comparison with `main`), not only its own diff; more than the 300 files the comparison lists runs every job. The check `Reduced CI (the pull request above runs the full checks)` marks such a run, and `scripts/stack/stack.py` does not land a top part whose latest run has it (`gh workflow run ci.yml --ref <branch>` runs the full checks on that head). A pull request based on the branch that is not a part of the stack carries the label `stack-independent`. See docs/stacked-pull-requests.md.
 
 ## 2. The workflows of one area
 

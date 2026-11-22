@@ -95,7 +95,7 @@ impl AnimatorBase {
 pub trait Animator: Sized + 'static {
     /// The type of the values the animator produces, which is the value
     /// type of the properties it animates.
-    type Value: PropertyValue + Default;
+    type Value: crate::StyledValue + Default;
 
     /// The key frames and the target property.
     fn base(&self) -> &AnimatorBase;

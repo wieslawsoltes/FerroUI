@@ -3010,7 +3010,9 @@ dependencies = [
 name = "ferroui-system"
 version = "0.6.0-preview.1"
 dependencies = [
+ "icu_locale_core",
  "smallvec",
+ "url",
 ]
 
 [[package]]

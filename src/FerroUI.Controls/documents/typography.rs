@@ -42,7 +42,7 @@ ferroui_base::ferro_thread_local! {
 
 /// The options of an inherited typography property, which marks typography in use
 /// when its value changes.
-fn options<T: ferroui_base::PropertyValue>(default_value: T) -> StyledPropertyOptions<T> {
+fn options<T: ferroui_base::StyledValue>(default_value: T) -> StyledPropertyOptions<T> {
     // A property is registered before it can change on an element.
     TYPOGRAPHY_TYPE.with(|type_| type_.set(Some(Typography::TYPE)));
     StyledPropertyOptions::new(default_value)
