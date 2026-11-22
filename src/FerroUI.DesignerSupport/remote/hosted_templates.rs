@@ -1,16 +1,21 @@
 //! Capture source provenance from the actual loaded app, including custom themes.
 use crate::design_window_loader::LoadedDesign;
-use ferroui_controls::primitives::TemplatedControl;
+use ferroui_base::{FerroObject, FerroPropertyRegistry};
+use ferroui_controls::{primitives::TemplatedControl, templates::IDataTemplate, TableView};
 use ferroui_markup_xaml::diagnostics::XamlSourceInfo;
 use ferroui_remote_protocol::designer::{
     DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse, DESIGN_TEMPLATES_QUERY,
     DESIGN_TEMPLATES_VERSION,
 };
-use std::cell::Cell;
+use std::{cell::Cell, rc::Rc};
 use url::Url;
+
+#[path = "hosted_rust_templates.rs"]
+mod rust;
 
 const MAX_VISUALS: usize = 8_192;
 const MAX_USES: usize = 2_000;
+const DATA_MEMBERS: &[&str] = &["ItemTemplate", "SelectionBoxItemTemplate", "MenuItemTemplate"];
 
 ferroui_base::ferro_thread_local! {
     static ENABLED: Cell<bool> = const { Cell::new(false) };
@@ -35,8 +40,11 @@ pub(super) fn capture(
     revision: i64,
     design: &LoadedDesign,
 ) -> Option<DesignTemplateCatalogMessage> {
-    if !enabled() || design.rust_fixture {
+    if !enabled() {
         return None;
+    }
+    if design.rust_fixture {
+        return rust::capture(revision, design);
     }
     let root = XamlSourceInfo::for_object(&design.root).and_then(source)?;
     let mut templates = Vec::new();
@@ -45,27 +53,59 @@ pub(super) fn capture(
         if index == MAX_VISUALS || templates.len() == MAX_USES {
             return None;
         }
-        let Some(control) = visual.cast::<TemplatedControl>() else {
-            continue;
-        };
-        let Some(owner) = XamlSourceInfo::for_object(&control).and_then(source) else {
+        let Some(owner) = XamlSourceInfo::for_object(&visual).and_then(source) else {
             continue;
         };
         if owner.address != root.address || owner.fingerprint != root.fingerprint {
             continue;
         }
-        let definition = control
-            .template()
-            .and_then(|template| XamlSourceInfo::for_control_template(&template).and_then(source));
-        templates.push(DesignTemplateUse {
-            owner,
-            type_name: control.get_type().name().into(),
-            definition,
-        });
+        let type_name = visual.get_type().name();
+        if let Some(control) = visual.cast::<TemplatedControl>() {
+            let definition = control.template()
+                .and_then(|template| XamlSourceInfo::for_control_template(&template).and_then(source));
+            templates.push(xaml_use(&owner, type_name, "Template", definition));
+        }
+        for (member, template) in data_slots(&visual) {
+            templates.push(xaml_use(&owner, type_name, member, data_definition(template)));
+        }
+        if let Some(table) = visual.cast::<TableView>() {
+            for column in table.columns().snapshot().iter() {
+                if templates.len() >= MAX_USES {
+                    return None;
+                }
+                let Some(owner) = XamlSourceInfo::for_object(column).and_then(source) else { continue };
+                if owner.address == root.address && owner.fingerprint == root.fingerprint {
+                    templates.push(xaml_use(&owner, column.get_type().name(), "CellTemplate",
+                        data_definition(column.cell_template())));
+                }
+            }
+        }
+        if templates.len() >= MAX_USES {
+            return None;
+        }
     }
     Some(DesignTemplateCatalogMessage {
         revision,
         templates,
+    })
+}
+
+fn xaml_use(owner: &DesignTemplateSource, type_name: &str, member: &str, definition: Option<DesignTemplateSource>) -> DesignTemplateUse {
+    DesignTemplateUse {
+        owner: owner.clone(), type_name: type_name.into(), definition,
+        member: Some(member.into()), ..Default::default()
+    }
+}
+
+fn data_definition(template: Option<Rc<dyn IDataTemplate>>) -> Option<DesignTemplateSource> {
+    XamlSourceInfo::for_data_template(&template?).and_then(source)
+}
+
+fn data_slots(object: &FerroObject) -> impl Iterator<Item = (&'static str, Option<Rc<dyn IDataTemplate>>)> + '_ {
+    DATA_MEMBERS.iter().filter_map(move |&member| {
+        let property = FerroPropertyRegistry::instance().find_registered(object.get_type(), member)?;
+        let value = object.get_value_untyped(property);
+        Some((member, value.downcast_ref::<Option<Rc<dyn IDataTemplate>>>()?.clone()))
     })
 }
 

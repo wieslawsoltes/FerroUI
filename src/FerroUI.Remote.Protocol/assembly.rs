@@ -274,6 +274,21 @@ mod tests {
                 definition: Some(DesignTemplateSource {
                     address: "file:///Project/Theme.xaml".into(), fingerprint: 42, line: 17, column: 13,
                 }),
+                member: Some("Template".into()),
+                ..Default::default()
+            }, DesignTemplateUse {
+                owner: DesignTemplateSource {
+                    address: "file:///Project/View.rs".into(), fingerprint: 42, line: 12, column: 9,
+                },
+                type_name: "TableView".into(),
+                definition: Some(DesignTemplateSource {
+                    address: "file:///Project/Rows.rs".into(), fingerprint: -19, line: 17, column: 13,
+                }),
+                member: Some("CellTemplate".into()),
+                column: Some(2),
+                rust_factory: Some(DesignTemplateSource {
+                    address: "file:///Project/Rows.rs".into(), fingerprint: -19, line: 16, column: 5,
+                }),
             }],
         };
         let message: Message = Arc::new(packet.clone());

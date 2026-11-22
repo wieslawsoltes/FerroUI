@@ -3,7 +3,7 @@ use crate::{bson_class, ferro_remote_message_guid};
 pub const DESIGN_TEMPLATES_QUERY: &str = "ferroui-design-templates";
 pub const DESIGN_TEMPLATES_VERSION: &str = "1";
 
-/// The loader address and exact XAML input used by the native compiler.
+/// A location in the exact source bytes used by the loader or the Rust view.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignTemplateSource {
     pub address: String,
@@ -26,12 +26,21 @@ pub struct DesignTemplateUse {
     pub type_name: String,
     /// An opaque template still counts as a use of the owner's source.
     pub definition: Option<DesignTemplateSource>,
+    /// The native property name. Older control-template catalogs omit it.
+    pub member: Option<String>,
+    /// Zero-based declarative column index when the Rust owner is a table.
+    pub column: Option<i32>,
+    /// Compiled Rust constructor, verified by an available source fingerprint.
+    pub rust_factory: Option<DesignTemplateSource>,
 }
 
 bson_class!(DesignTemplateUse as "DesignTemplateUse" {
     "Owner" => owner: DesignTemplateSource,
     "TypeName" => type_name: String,
     "Definition" => definition: Option<DesignTemplateSource>,
+    "Member" => member: Option<String>,
+    "Column" => column: Option<i32>,
+    "RustFactory" => rust_factory: Option<DesignTemplateSource>,
 });
 
 /// Effective templates captured when the application accepts a source snapshot.

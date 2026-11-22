@@ -179,6 +179,7 @@ fn entities() -> Vec<Message> {
                 definition: Some(DesignTemplateSource {
                     address: "ferres://test/Resources/Controls.xaml".into(), fingerprint: 14, line: 16, column: 11,
                 }),
+                ..Default::default()
             }],
         }),
         Arc::new(ferroui_remote_protocol::designer::DesignFrameMessage { revision: 40, frame: FrameMessage { sequence_id: 8, data: Some(vec![0, 128, 0, 128]), ..Default::default() } }),
