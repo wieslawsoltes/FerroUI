@@ -29,6 +29,17 @@ use std::time::Duration;
 
 const WEB_READ_TIMEOUT: Duration = Duration::from_secs(2);
 
+/// How a read of an offer through a pipe ends.
+#[derive(Clone, Copy)]
+enum PipeRead {
+    /// When the owner closes the pipe.
+    ToEnd,
+    /// A small piece of metadata: the whole read has one deadline.
+    Bounded(usize),
+    /// A payload of any size: the owner may take as long as it keeps sending.
+    WhileSending,
+}
+
 /// An item under both of its contracts.
 #[derive(Clone)]
 struct Item {
@@ -109,7 +120,7 @@ impl WaylandDataTransfer {
     pub(crate) async fn for_clipboard(mime_types: Vec<String>, offer_cookie: Arc<WaylandOfferCookie>) -> Option<Rc<Self>> {
         let mut formats = Formats::from_mime_types(mime_types);
         if let Some(map) = ChromiumClipboard::Linux.find_map(&formats.formats) {
-            if let Some(bytes) = WaylandDataTransferItem::read_raw_bytes_async(&offer_cookie, map.identifier(), Some(MAX_MAP_BYTES)).await {
+            if let Some(bytes) = WaylandDataTransferItem::read_raw_bytes_async(&offer_cookie, map.identifier(), PipeRead::Bounded(MAX_MAP_BYTES)).await {
                 formats.add_web_aliases(&bytes);
             }
         }
@@ -122,7 +133,7 @@ impl WaylandDataTransfer {
     /// path so the (cross-process) pipe read doesn't block the caller's thread.
     async fn preload_async(&self) {
         let files = match self.file_mime() {
-            Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_async(&self.offer_cookie, mime, None).await),
+            Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_async(&self.offer_cookie, mime, PipeRead::ToEnd).await),
             None => None,
         };
         self.set_items(self.build_items(files));
@@ -137,7 +148,7 @@ impl WaylandDataTransfer {
         // the UI thread, so it can't deadlock. wl_data_offer transfers are always cross-process —
         // in-process drags use the original IDataTransfer.
         let files = match self.file_mime() {
-            Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_blocking(&self.offer_cookie, mime, None)),
+            Some(mime) => files_of(WaylandDataTransferItem::read_raw_bytes_blocking(&self.offer_cookie, mime, PipeRead::ToEnd)),
             None => None,
         };
         self.set_items(self.build_items(files));
@@ -255,14 +266,14 @@ impl WaylandDataTransferItem {
     fn read_raw_bytes_async(
         offer_cookie: &Arc<WaylandOfferCookie>,
         mime_type: &str,
-        byte_limit: Option<usize>,
+        read: PipeRead,
     ) -> LocalBoxFuture<Option<Vec<u8>>> {
         // Send cookie + MIME to Wayland thread; the cookie posts and returns the fd.
         let read_fd = offer_cookie.try_receive_async(mime_type);
         let cookie = offer_cookie.clone();
         Box::pin(async move {
             let read_fd = read_fd.await.flatten()?;
-            let data = CrossThreadResult::run_on_thread(move || Self::read_pipe(read_fd, byte_limit)).await.flatten()?;
+            let data = CrossThreadResult::run_on_thread(move || Self::read_pipe(read_fd, read)).await.flatten()?;
             (!cookie.is_invalidated()).then_some(data)
         })
     }
@@ -271,19 +282,24 @@ impl WaylandDataTransferItem {
     fn read_raw_bytes_blocking(
         offer_cookie: &Arc<WaylandOfferCookie>,
         mime_type: &str,
-        byte_limit: Option<usize>,
+        read: PipeRead,
     ) -> Option<Vec<u8>> {
         let read_fd = offer_cookie.try_receive_async(mime_type).wait().flatten()?;
-        let data = Self::read_pipe(read_fd, byte_limit)?;
+        let data = Self::read_pipe(read_fd, read)?;
         (!offer_cookie.is_invalidated()).then_some(data)
     }
 
-    fn read_pipe(fd: std::os::fd::OwnedFd, byte_limit: Option<usize>) -> Option<Vec<u8>> {
+    fn read_pipe(fd: std::os::fd::OwnedFd, read: PipeRead) -> Option<Vec<u8>> {
         let pipe = Pipe2Stream::new(fd, PipeDirection::In);
-        match byte_limit {
-            Some(max) => pipe.read_to_end_bounded(max, WEB_READ_TIMEOUT),
-            None => pipe.read_to_end(),
+        match read {
+            PipeRead::ToEnd => pipe.read_to_end(),
+            PipeRead::Bounded(max) => pipe.read_to_end_bounded(max, WEB_READ_TIMEOUT),
+            PipeRead::WhileSending => pipe.read_to_end_while_sending(WEB_READ_TIMEOUT),
         }.ok()
+    }
+
+    fn payload_read(alias: Option<&FormatAlias>) -> PipeRead {
+        alias.map_or(PipeRead::ToEnd, |_| PipeRead::WhileSending)
     }
 
     fn find_mime_type(&self, format: &DataFormat) -> Option<(&str, Option<&FormatAlias>)> {
@@ -344,7 +360,7 @@ impl IDataTransferItem for WaylandDataTransferItem {
             return None;
         }
         let (mime_type, alias) = self.find_mime_type(format)?;
-        let data = Self::read_raw_bytes_blocking(&self.offer_cookie, mime_type, alias.map(|_| usize::MAX))?;
+        let data = Self::read_raw_bytes_blocking(&self.offer_cookie, mime_type, Self::payload_read(alias))?;
         Self::convert_received_data(format, alias, data)
     }
 }
@@ -364,7 +380,7 @@ impl IAsyncDataTransferItem for WaylandDataTransferItem {
         let Some((mime_type, alias)) = self.find_mime_type(format) else {
             return Box::pin(ready(Ok(None)));
         };
-        let read = Self::read_raw_bytes_async(&self.offer_cookie, mime_type, alias.map(|_| usize::MAX));
+        let read = Self::read_raw_bytes_async(&self.offer_cookie, mime_type, Self::payload_read(alias));
         let format = format.clone();
         let alias = alias.cloned();
         Box::pin(async move { Ok(read.await.and_then(|data| Self::convert_received_data(&format, alias.as_ref(), data))) })

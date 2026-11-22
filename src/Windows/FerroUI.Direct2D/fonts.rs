@@ -376,6 +376,8 @@ pub(super) fn shape_analysis(
     // the paragraph analysis for their neighboring text in the cache.
     SHAPE_ANALYSES.with(|entries| {
         let mut entries = entries.borrow_mut();
+        // A weak owner keeps the allocation of its text: entries of dropped text leave first.
+        entries.retain(|entry| entry.owner.strong_count() > 0);
         if let Some(index) = entries.iter().position(|entry| {
             std::ptr::eq(entry.owner.as_ptr(), Rc::as_ptr(owner))
                 && entry.language == *language
