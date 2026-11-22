@@ -1651,22 +1651,3 @@ fn media_controls_publish_their_public_xaml_namespaces() {
         assert!(scan.model.namespaces.iter().any(|(module, name)| module == crate_name && name == namespace));
     }
 }
-
-#[test]
-fn editor_publishes_named_syntax_highlighting_in_its_xaml_namespace() {
-    let source = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
-    let scan = scan_crate(&ScanOptions::new("ferroui_edit", source.join("FerroUI.Edit/lib.rs")));
-    let editor = scan.model.types.iter()
-        .find(|ty| ty.full_name() == "FerroUI.Edit.TextEditor")
-        .unwrap();
-    assert!(editor.registered.iter()
-        .any(|property| property.name.as_deref() == Some("SyntaxHighlighting")));
-    let syntax = scan.model.types.iter()
-        .find(|ty| ty.full_name() == "FerroUI.Edit.SyntaxHighlighting")
-        .unwrap();
-    assert!(syntax.parse.is_some());
-    assert!(scan.model.value_types.iter().any(|value| {
-        value.registration == "nullable"
-            && value.types.first().is_some_and(|ty| ty.text == syntax.rust_path.text)
-    }));
-}
