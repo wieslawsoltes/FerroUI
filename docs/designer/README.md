@@ -793,6 +793,8 @@ strict `LineIndex` conversion. See the [language](../../src/FerroUI.Designer.Lan
 
 ## Collaboration semantics
 
+VS Code’s **Collaboration** view connects to the same rooms as Designer Studio. The VS Code workbench binds the room to a local XAML buffer and uses the native Changes editor for a version-checked review. [Share and review XAML in a room](vscode/collaboration.md)
+
 `DocumentReplica` is an ordered operation-set replication engine over the same lossless document
 model. It has stable shared node aliases, actor/sequence identities, Lamport ordering, duplicate
 detection, dependency replay, contiguous version summaries and SHA-256 baseline verification.

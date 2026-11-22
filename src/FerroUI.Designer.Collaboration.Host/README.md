@@ -41,3 +41,5 @@ performs network and persistence work on a worker thread. `PeerTransport` permit
 transports without changing replica semantics.
 
 See [the designer guide](../../docs/designer/README.md) for native sharing and deployment.
+
+With both `client` and `server` enabled, `editor::EditorRoom` reuses this service for editors that own their buffer and Undo stack. A host provides a private session directory, binds it to a local document identity, and starts or resumes a room with `OpenRoom`. Review tokens include the replica identity, epoch, version, source checksum, and role. `prepare_apply` verifies the reviewed version with the room service and durably saves the editor’s previous text. The caller still checks its own buffer identity and version before applying the text. The VS Code extension uses a dedicated native helper process so synchronization follows the room lifecycle. [VS Code room workflow](../../docs/designer/vscode/collaboration.md)

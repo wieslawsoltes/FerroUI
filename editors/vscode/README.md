@@ -223,6 +223,8 @@ Discovery starts at the active file and uses the nearest Cargo manifest inside t
 
 ## Drive the designer with MCP
 
+Use **Collaboration** to host or join the same XAML rooms as Designer Studio. Review incoming or outgoing source in VS Code, manage members, and resume your saved connection or queued draft. The room tools share the editor’s version checks and Undo. [Share and review XAML in a room](../../docs/designer/vscode/collaboration.md)
+
 In a trusted workspace, start **FerroUI Designer in VS Code** from the MCP servers list and select its tools in your agent. Set `ferroui.mcp.allowWrites` in user settings to authorize source edits, designer controls, and managed Cargo actions. `ferroui.mcp.enableDesigner` controls the editor server. [VS Code MCP integration](https://code.visualstudio.com/api/extension-guides/ai/mcp)
 
 | Workflow | Tools |
