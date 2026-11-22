@@ -572,7 +572,9 @@ together:
 | 0 | docs, scripts, CI, a change whose runtime code is byte-equal (a build-time decision that only removes unreached code: compare the generated files or the executables) | no gate; the size run | 0 |
 | 1 | a narrow change, a part of a stack | `--quick` (2 rounds, a third only for a metric within the spread of its rounds; 120 frames a scene) with `--frames-filter` (scene names or prefixes ending in `*`; a filter that names no scene stops the gate) and a `--framework-filter` of the classes it can move | 15 to 20 minutes |
 | 2 | the stacks that are ready, merged into one temporary branch; a change of a hot path everywhere (the property store, layout, rendering) | `--batch`: every scene in 3 timed rounds, every class in 1 round | about 25 minutes |
-| 3 | a release | every scene and class in 3 timed rounds (`--rounds 3 --max-rounds 4`) with `window` and `tdg`, on every platform (section 8.3) | hours |
+| 3 | a release | every scene and class in 3 timed rounds (`--profile dist --rounds 3 --max-rounds 4`) with `window` and `tdg`, on every platform (section 8.3) | hours |
+
+Tiers 1 and 2 build with `release`, for short builds and symbols to sample. Tier 3 measures `dist`, the build that ships: fat LTO in one code generation unit can inline differently, so a line can move there that did not move in `release`. Its first run in a target folder builds native Skia there, and a device build keeps `release`.
 
 A regression that a tier 1 gate did not look for is found by the tier 2 gate of its batch before
 the stacks are merged. When a batch fails, the failing lines are measured on each stack alone

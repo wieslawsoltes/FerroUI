@@ -84,6 +84,7 @@ jobs:
       windows: ${{ steps.areas.outputs.windows }}
       browser: ${{ steps.areas.outputs.browser }}
       x11: ${{ steps.areas.outputs.x11 }}
+      reduced: ${{ steps.areas.outputs.reduced }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       # The files of the pull request, with the old names of renamed ones. The API lists at most
@@ -100,11 +101,27 @@ jobs:
             -q '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/files.txt"
           if [ "${CHANGED:-0}" -ge 3000 ]; then echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"; fi
           wc -l < "$RUNNER_TEMP/files.txt"
+      # A part of a stack with a part above it: the head of the top part contains this code, and
+      # its checks decide when the stack lands (scripts/stack/stack.py, docs/ci.md). A pull request
+      # based on this branch that is not a part of its stack carries the label `stack-independent`.
+      # A branch of a fork can have the name of a branch here, so only this repository's count.
+      - name: A pull request above this one
+        id: stack
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          above=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --base "$HEAD" --limit 20 --json number,labels \
+            --jq '[.[] | select(all(.labels[]; .name != "stack-independent")) | .number | tostring] | join(",")')
+          echo "above=$above" >> "$GITHUB_OUTPUT"
+          echo "pull requests above: ${above:-none}"
       - name: The jobs this run needs
         id: areas
         env:
           EVENT: ${{ github.event_name }}
           INCOMPLETE: ${{ steps.files.outputs.incomplete }}
+          ABOVE: ${{ steps.stack.outputs.above }}
         run: |
           touch "$RUNNER_TEMP/files.txt"
           # shellcheck disable=SC2086
@@ -112,6 +129,12 @@ jobs:
               --output "$RUNNER_TEMP/areas.txt" --summary "$GITHUB_STEP_SUMMARY"; then
             echo "::warning::the changed areas could not be worked out: every job runs"
             printf '%s=true\n' api-gate linux macos windows browser x11 > "$RUNNER_TEMP/areas.txt"
+          fi
+          if [ -n "$ABOVE" ]; then
+            echo "::notice::#$ABOVE is above this pull request and runs the full checks; this run keeps the conventions"
+            printf '%s=false\n' api-gate linux macos windows browser x11 > "$RUNNER_TEMP/areas.txt"
+            echo 'reduced=true' >> "$RUNNER_TEMP/areas.txt"
+            printf '\nReduced run: #%s above this pull request runs the full checks.\n' "$ABOVE" >> "$GITHUB_STEP_SUMMARY"
           fi
           cat "$RUNNER_TEMP/areas.txt" >> "$GITHUB_OUTPUT"
 
@@ -1164,6 +1187,17 @@ jobs:
   # One check for the whole workflow: it fails when a job failed or was cancelled, and passes when
   # the jobs a pull request does not need were skipped. A branch protection rule can require it
   # alone, whatever the pull request changes.
+  # Marks a run that left the build and test jobs to the part above. `scripts/stack/stack.py` reads
+  # this check by its name and does not land a top part whose latest run has it.
+  stack-part:
+    name: Reduced CI (the pull request above runs the full checks)
+    needs: changes
+    if: needs.changes.outputs.reduced == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "The build and test jobs run on the top part of this stack."
+
   result:
     name: CI result
     if: ${{ !cancelled() }}
