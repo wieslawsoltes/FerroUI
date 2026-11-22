@@ -1165,3 +1165,45 @@ fn every_bundled_definition_loads_compiles_and_round_trips_through_the_typed_tre
         assert_eq!(restored[index].to_xml().unwrap(), saved[index]);
     }
 }
+
+#[test]
+fn imports_that_double_at_each_level_are_an_error() {
+    let mut sets = String::new();
+    for level in 0..30 {
+        let next = level + 1;
+        sets.push_str(&format!(
+            r#"<RuleSet name="r{level}"><Import ruleSet="r{next}"/><Import ruleSet="r{next}"/></RuleSet>"#
+        ));
+    }
+    let xml = format!(
+        r##"<SyntaxDefinition name="x"><RuleSet><Import ruleSet="r0"/></RuleSet>{sets}
+        <RuleSet name="r30"><Keywords foreground="#FF0000"><Word>x</Word></Keywords></RuleSet>
+        </SyntaxDefinition>"##
+    );
+    assert!(HighlightingDefinition::load(&xml).is_err());
+}
+
+#[test]
+fn a_long_chain_of_imports_is_an_error() {
+    let mut sets = String::new();
+    for level in 0..20_000 {
+        let next = level + 1;
+        sets.push_str(&format!(r#"<RuleSet name="r{level}"><Import ruleSet="r{next}"/></RuleSet>"#));
+    }
+    let xml = format!(
+        r#"<SyntaxDefinition name="x"><RuleSet><Import ruleSet="r0"/></RuleSet>{sets}
+        <RuleSet name="r20000"/></SyntaxDefinition>"#
+    );
+    assert!(HighlightingDefinition::load(&xml).is_err());
+}
+
+#[test]
+fn deeply_nested_xml_is_an_error() {
+    let levels = 200_000;
+    let xml = format!(
+        r#"<SyntaxDefinition name="x">{}{}</SyntaxDefinition>"#,
+        "<RuleSet>".repeat(levels),
+        "</RuleSet>".repeat(levels)
+    );
+    assert!(matches!(HighlightingDefinition::load(&xml), Err(HighlightingError::Xml(_))));
+}
