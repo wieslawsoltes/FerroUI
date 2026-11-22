@@ -38242,14 +38242,14 @@
       },
       "CellTemplateResourceKey": {
         "name": "CellTemplateResourceKey",
-        "type_name": "Option<ResourceKey>",
-        "documentation": "TreeDataGridTemplateColumn.CellTemplateResourceKey: Option<ResourceKey>",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TreeDataGridTemplateColumn.CellTemplateResourceKey: Option<BoxedValue>",
         "values": []
       },
       "CellEditingTemplateResourceKey": {
         "name": "CellEditingTemplateResourceKey",
-        "type_name": "Option<ResourceKey>",
-        "documentation": "TreeDataGridTemplateColumn.CellEditingTemplateResourceKey: Option<ResourceKey>",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TreeDataGridTemplateColumn.CellEditingTemplateResourceKey: Option<BoxedValue>",
         "values": []
       },
       "TextSearchBinding": {

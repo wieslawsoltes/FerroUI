@@ -309,7 +309,7 @@ impl Hash for ObjectKey {
 
 /// The resource key an untyped value stands for: text, a type, a key or any
 /// other value.
-pub(crate) fn resource_key_of(value: &BoxedValue) -> ResourceKey {
+pub fn resource_key_of(value: &BoxedValue) -> ResourceKey {
     if let Some(key) = value.downcast_ref::<ResourceKey>() {
         return key.clone();
     }
