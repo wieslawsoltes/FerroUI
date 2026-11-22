@@ -9,10 +9,10 @@
 namespace ferroui;
 
 // apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format 1.
-fn apiFingerprint() = 425336128539517366
+fn apiFingerprint() = -6950048311254607189
 // selectionFingerprint() -> int: the fingerprint of the selection of these bindings, which a
 // library built for the same manifest returns (ferro_selection_fingerprint); 0 for every class.
-fn selectionFingerprint() = -7084749498308237584
+fn selectionFingerprint() = 8875630394048072125
 // abiVersion() -> int: the version of the ABI the bindings were generated for.
 fn abiVersion() = 1
 
@@ -127,12 +127,13 @@ fn themePropertyId() = 896
 fn transitionsPropertyId() = 939
 fn translationPropertyId() = 940
 fn useLayoutRoundingPropertyId() = 994
-fn verticalAlignmentPropertyId() = 1002
-fn verticalContentAlignmentPropertyId() = 1003
-fn visualFlowDirectionPropertyId() = 1013
-fn visualParentPropertyId() = 1014
-fn widthPropertyId() = 1020
-fn zIndexPropertyId() = 1042
+fn useWinUiMeasureRoundingPropertyId() = 998
+fn verticalAlignmentPropertyId() = 1003
+fn verticalContentAlignmentPropertyId() = 1004
+fn visualFlowDirectionPropertyId() = 1014
+fn visualParentPropertyId() = 1015
+fn widthPropertyId() = 1021
+fn zIndexPropertyId() = 1043
 fn clickEventId() = 4
 fn contextCanceledEventId() = 9
 fn contextRequestedEventId() = 11

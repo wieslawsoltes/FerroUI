@@ -539,13 +539,13 @@ fn orientationRefreshVisualizerOrientation(object, value) = {
     let _ = ferro_set_str(object: object, property: 600, text: refreshVisualizerOrientationName(value: value), length: -1)
     object
 }
-// padding(object: int, value: string) -> int: sets Padding (ContentPresenter, Decorator,
+// padding(object: int, value: string) -> int: sets Padding (ContentPresenter, Decorator, Grid,
 // RichTextBlock, TemplatedControl, TextBlock). Defines the `Padding` property.
 fn padding(object, value) = {
     let _ = ferro_set_str(object: object, property: 607, text: value, length: -1)
     object
 }
-// getPadding(object: int) -> string: reads Padding (ContentPresenter, Decorator,
+// getPadding(object: int) -> string: reads Padding (ContentPresenter, Decorator, Grid,
 // RichTextBlock, TemplatedControl, TextBlock); the fallback of its kind when the read fails
 // (`failure()` tells): a plain value, no Result.
 fn getPadding(object) = "${ferro_get_cstr_or(object: object, property: 607, fallback: "")}"
@@ -732,10 +732,21 @@ fn useLayoutRounding(object, value) = {
 // getUseLayoutRounding(object: int) -> bool: reads UseLayoutRounding (Layoutable); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getUseLayoutRounding(object) = ferro_get_bool_or(object: object, property: 994, fallback: toInt8(0)) != toInt8(0)
+// useWinUiMeasureRounding(object: int, value: bool) -> int: sets UseWinUiMeasureRounding
+// (Layoutable). Defines the inherited `UseWinUiMeasureRounding` property. When layout rounding
+// is enabled, this uses WinUI's physical-pixel rounding for layout sizes, offsets and border
+// insets.
+fn useWinUiMeasureRounding(object, value) = {
+    let _ = ferro_set_bool(object: object, property: 998, value: value ? toInt8(1) : toInt8(0))
+    object
+}
+// getUseWinUiMeasureRounding(object: int) -> bool: reads UseWinUiMeasureRounding (Layoutable);
+// the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getUseWinUiMeasureRounding(object) = ferro_get_bool_or(object: object, property: 998, fallback: toInt8(0)) != toInt8(0)
 // verticalAlignment(object: int, value: VerticalAlignment) -> int: sets VerticalAlignment
 // (Layoutable). Defines the `VerticalAlignment` property.
 fn verticalAlignment(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1002, text: verticalAlignmentName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1003, text: verticalAlignmentName(value: value), length: -1)
     object
 }
 // verticalContentAlignment(object: int, value: VerticalAlignment) -> int: sets
@@ -743,38 +754,38 @@ fn verticalAlignment(object, value) = {
 // ContentPresenter, DatePicker, DrawerPage, NumericUpDown, TabControl, TextBox, TimePicker).
 // Defines the `VerticalContentAlignment` property.
 fn verticalContentAlignment(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1003, text: verticalAlignmentName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1004, text: verticalAlignmentName(value: value), length: -1)
     object
 }
 // visualFlowDirection(object: int, value: FlowDirection) -> int: sets Visual.FlowDirection
 // (Visual). Defines the `FlowDirection` attached property.
 fn visualFlowDirection(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1013, text: flowDirectionName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1014, text: flowDirectionName(value: value), length: -1)
     object
 }
 // width(object: int, value: float) -> int: sets Width (ColumnDefinition, Layoutable,
 // TableViewColumn). Defines the `Width` property.
 fn width(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 1020, value: value)
+    let _ = ferro_set_f64(object: object, property: 1021, value: value)
     object
 }
 // widthText(object: int, value: string) -> int: sets Width (ColumnDefinition, Layoutable,
 // TableViewColumn). Defines the `Width` property.
 fn widthText(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1020, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 1021, text: value, length: -1)
     object
 }
 // getWidth(object: int) -> float: reads Width (ColumnDefinition, Layoutable, TableViewColumn);
 // the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getWidth(object) = ferro_get_f64_or(object: object, property: 1020, fallback: 0.0)
+fn getWidth(object) = ferro_get_f64_or(object: object, property: 1021, fallback: 0.0)
 // zIndex(object: int, value: int) -> int: sets ZIndex (Visual). Defines the `ZIndex` property.
 fn zIndex(object, value) = {
-    let _ = ferro_set_i64(object: object, property: 1042, value: value)
+    let _ = ferro_set_i64(object: object, property: 1043, value: value)
     object
 }
 // getZIndex(object: int) -> int: reads ZIndex (Visual); the fallback of its kind when the read
 // fails (`failure()` tells): a plain value, no Result.
-fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1042, fallback: 0)
+fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1043, fallback: 0)
 
 // ---- events --------------------------------------------------------------------------------
 

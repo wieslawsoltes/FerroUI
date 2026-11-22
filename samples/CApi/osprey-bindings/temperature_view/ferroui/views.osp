@@ -200,8 +200,8 @@ fn orientation(value) = AttrText { attrTextProperty: 600, attrTextValue: orienta
 // sets Orientation (PipsPager, ProgressBar, RefreshVisualizer, ScrollBar, Slider, StackPanel,
 // TickBar, Track, VirtualizingStackPanel, WrapPanel).
 fn orientationRefreshVisualizerOrientation(value) = AttrText { attrTextProperty: 600, attrTextValue: refreshVisualizerOrientationName(value: value) }
-// padding(value: string) -> Attr<M>: sets Padding (ContentPresenter, Decorator, RichTextBlock,
-// TemplatedControl, TextBlock).
+// padding(value: string) -> Attr<M>: sets Padding (ContentPresenter, Decorator, Grid,
+// RichTextBlock, TemplatedControl, TextBlock).
 fn padding(value) = AttrText { attrTextProperty: 607, attrTextValue: value }
 // placeholderForeground(value: string) -> Attr<M>: sets PlaceholderForeground
 // (AutoCompleteBox, CalendarDatePicker, ComboBox, NumericUpDown, RichEditBox, TextBox).
@@ -307,28 +307,30 @@ fn undoLimit(value) = AttrInteger { attrIntegerProperty: 989, attrIntegerValue: 
 fn useFloatingPlaceholder(value) = AttrBool { attrBoolProperty: 993, attrBoolValue: value }
 // useLayoutRounding(value: bool) -> Attr<M>: sets UseLayoutRounding (Layoutable).
 fn useLayoutRounding(value) = AttrBool { attrBoolProperty: 994, attrBoolValue: value }
+// useWinUiMeasureRounding(value: bool) -> Attr<M>: sets UseWinUiMeasureRounding (Layoutable).
+fn useWinUiMeasureRounding(value) = AttrBool { attrBoolProperty: 998, attrBoolValue: value }
 // verticalAlignment(value: VerticalAlignment) -> Attr<M>: sets VerticalAlignment (Layoutable).
-fn verticalAlignment(value) = AttrText { attrTextProperty: 1002, attrTextValue: verticalAlignmentName(value: value) }
+fn verticalAlignment(value) = AttrText { attrTextProperty: 1003, attrTextValue: verticalAlignmentName(value: value) }
 // verticalContentAlignment(value: VerticalAlignment) -> Attr<M>: sets VerticalContentAlignment
 // (CalendarDatePicker, ComboBox, ContentControl, ContentPage, ContentPresenter, DatePicker,
 // DrawerPage, NumericUpDown, TabControl, TextBox, TimePicker).
-fn verticalContentAlignment(value) = AttrText { attrTextProperty: 1003, attrTextValue: verticalAlignmentName(value: value) }
+fn verticalContentAlignment(value) = AttrText { attrTextProperty: 1004, attrTextValue: verticalAlignmentName(value: value) }
 // visualFlowDirection(value: FlowDirection) -> Attr<M>: sets Visual.FlowDirection (Visual).
-fn visualFlowDirection(value) = AttrText { attrTextProperty: 1013, attrTextValue: flowDirectionName(value: value) }
+fn visualFlowDirection(value) = AttrText { attrTextProperty: 1014, attrTextValue: flowDirectionName(value: value) }
 // width(value: float) -> Attr<M>: sets Width (ColumnDefinition, Layoutable, TableViewColumn).
-fn width(value) = AttrNumber { attrNumberProperty: 1020, attrNumberValue: value }
+fn width(value) = AttrNumber { attrNumberProperty: 1021, attrNumberValue: value }
 // widthText(value: string) -> Attr<M>: sets Width (ColumnDefinition, Layoutable,
 // TableViewColumn).
-fn widthText(value) = AttrText { attrTextProperty: 1020, attrTextValue: value }
+fn widthText(value) = AttrText { attrTextProperty: 1021, attrTextValue: value }
 // windowDecorations(value: WindowDecorations) -> Attr<M>: sets WindowDecorations (Window).
-fn windowDecorations(value) = AttrText { attrTextProperty: 1025, attrTextValue: windowDecorationsName(value: value) }
+fn windowDecorations(value) = AttrText { attrTextProperty: 1026, attrTextValue: windowDecorationsName(value: value) }
 // windowStartupLocation(value: WindowStartupLocation) -> Attr<M>: sets WindowStartupLocation
 // (Window).
-fn windowStartupLocation(value) = AttrText { attrTextProperty: 1029, attrTextValue: windowStartupLocationName(value: value) }
+fn windowStartupLocation(value) = AttrText { attrTextProperty: 1030, attrTextValue: windowStartupLocationName(value: value) }
 // windowState(value: WindowState) -> Attr<M>: sets WindowState (Window).
-fn windowState(value) = AttrText { attrTextProperty: 1030, attrTextValue: windowStateName(value: value) }
+fn windowState(value) = AttrText { attrTextProperty: 1031, attrTextValue: windowStateName(value: value) }
 // zIndex(value: int) -> Attr<M>: sets ZIndex (Visual).
-fn zIndex(value) = AttrInteger { attrIntegerProperty: 1042, attrIntegerValue: value }
+fn zIndex(value) = AttrInteger { attrIntegerProperty: 1043, attrIntegerValue: value }
 
 // ---- attributes of events ------------------------------------------------------------------
 
