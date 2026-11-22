@@ -53,10 +53,11 @@ pub use super::theme_resources::{
     add_resource_aliases, add_static_brushes, add_string_resources, add_thickness_resources, DynamicBrushRow,
     LiteralBrushRow, ResourceAliasRow, StaticBrushRow, TypedResourceProgram, ValueRow,
 };
-// Packed row tables of the deferred shapes (#855, `packed_resource_rows.rs`).
+// Packed row tables (#855, `packed_resource_rows.rs`).
 pub use super::theme_resources::{
+    add_packed_color_resources, add_packed_corner_radius_resources, add_packed_double_resources,
     add_packed_dynamic_brushes, add_packed_literal_brushes, add_packed_resource_aliases, add_packed_static_brushes,
-    PackedRows,
+    add_packed_string_resources, add_packed_thickness_resources, PackedRows, PackedValueRows,
 };
 // The tables of control themes (#568, `theme_styles.rs`): a control theme, a selector chain, the
 // run-time choice of the setter of a resource value and a run of template bindings as data.

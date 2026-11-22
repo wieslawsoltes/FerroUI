@@ -613,6 +613,74 @@ fn a_packed_record_out_of_range_is_an_error_not_a_panic() {
     assert!(deferred(&dictionary, "Key"));
 }
 
+/// #855: a packed table of plain values adds what the slices of rows add.
+#[test]
+fn packed_values_are_added_with_their_types() {
+    static DOUBLES: PackedValueRows = PackedValueRows {
+        strings: "WidthOpacity",
+        numbers: &[24.0, 0.5],
+        records: &[0, 5, 1, 1, 0, 5, 7, 2, 1, 1],
+    };
+    static THICKNESSES: PackedValueRows =
+        PackedValueRows { strings: "Padding", numbers: &[1.0, 2.0, 3.0, 4.0], records: &[0, 7, 3, 1, 0, 1, 2, 3] };
+    static RADII: PackedValueRows = PackedValueRows { strings: "Radius", numbers: &[4.0, 0.0], records: &[0, 6, 4, 1, 0, 0, 1, 1] };
+    static COLORS: PackedValueRows = PackedValueRows {
+        strings: "Colour",
+        numbers: &[],
+        records: &[0, 6, 5, 1, (ACCENT & 0xFFFF) as u16, (ACCENT >> 16) as u16],
+    };
+    static TEXTS: PackedValueRows = PackedValueRows { strings: "Spline0,0,0,1", numbers: &[], records: &[0, 6, 6, 1, 6, 7] };
+    let (dictionary, _context) = populated();
+    add_packed_double_resources(&dictionary, &DOUBLES).expect("the numbers are added");
+    add_packed_thickness_resources(&dictionary, &THICKNESSES).expect("the thickness is added");
+    add_packed_corner_radius_resources(&dictionary, &RADII).expect("the corner radius is added");
+    add_packed_color_resources(&dictionary, &COLORS).expect("the colour is added");
+    add_packed_string_resources(&dictionary, &TEXTS).expect("the text is added");
+    assert_eq!(resource(&dictionary, "Width").downcast_ref::<f64>(), Some(&24.0));
+    assert_eq!(resource(&dictionary, "Opacity").downcast_ref::<f64>(), Some(&0.5));
+    assert_eq!(resource(&dictionary, "Padding").downcast_ref::<Thickness>(), Some(&Thickness::new(1.0, 2.0, 3.0, 4.0)));
+    assert_eq!(resource(&dictionary, "Radius").downcast_ref::<CornerRadius>(), Some(&CornerRadius::new(4.0, 4.0, 0.0, 0.0)));
+    assert_eq!(resource(&dictionary, "Colour").downcast_ref::<Color>(), Some(&Color::from_uint32(ACCENT)));
+    assert_eq!(resource(&dictionary, "Spline").downcast_ref::<String>().map(String::as_str), Some("0,0,0,1"));
+    assert!(!deferred(&dictionary, "Width"));
+}
+
+/// #855: the first failure of a packed table of values is the failure of the row at its position,
+/// with the rows before it added.
+#[test]
+fn packed_values_keep_the_order_and_the_position_of_the_first_failure() {
+    static DUPLICATE: PackedValueRows = PackedValueRows {
+        strings: "FirstAfter",
+        numbers: &[1.0],
+        records: &[0, 5, 11, 22, 0, 0, 5, 33, 44, 0, 5, 5, 55, 66, 0],
+    };
+    let (dictionary, _context) = populated();
+    let error = add_packed_double_resources(&dictionary, &DUPLICATE).expect_err("the key is added twice");
+    assert!(error.message().contains("An item with the same key has already been added"), "{}", error.message());
+    assert!(at_position(&error, 33, 44), "{}", error.message());
+    assert!(dictionary.try_get_value(&ResourceKey::from("First")).is_some());
+    assert!(dictionary.try_get_value(&ResourceKey::from("After")).is_none());
+}
+
+#[test]
+fn a_packed_value_out_of_range_is_an_error_not_a_panic() {
+    static KEY: PackedValueRows = PackedValueRows { strings: "Key", numbers: &[1.0], records: &[0, 9, 1, 1, 0] };
+    static NUMBER: PackedValueRows = PackedValueRows { strings: "Key", numbers: &[1.0], records: &[0, 3, 1, 1, 1] };
+    static TEXT: PackedValueRows = PackedValueRows { strings: "Key", numbers: &[], records: &[0, 3, 1, 1, 2, 9] };
+    static SHORT: PackedValueRows = PackedValueRows { strings: "Key", numbers: &[1.0], records: &[0, 3, 1, 1, 0, 0, 3] };
+    let (dictionary, _context) = populated();
+    for error in [
+        add_packed_double_resources(&dictionary, &KEY).expect_err("the key is out of range"),
+        add_packed_double_resources(&dictionary, &NUMBER).expect_err("the number is out of range"),
+        add_packed_string_resources(&dictionary, &TEXT).expect_err("the text is out of range"),
+    ] {
+        assert!(error.message().contains("out of range"), "{}", error.message());
+    }
+    // A trailing partial record is not a row.
+    add_packed_double_resources(&dictionary, &SHORT).expect("the complete record");
+    assert_eq!(resource(&dictionary, "Key").downcast_ref::<f64>(), Some(&1.0));
+}
+
 #[test]
 fn typed_resource_programs_build_all_resolved_shapes_and_preserve_deferred_identity() {
     static ALIAS: TypedResourceProgram<ResourceAliasRow> =

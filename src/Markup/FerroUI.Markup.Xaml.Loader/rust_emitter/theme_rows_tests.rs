@@ -568,6 +568,77 @@ fn typed_resource_runs_keep_units_local_and_encode_singleton_values_and_scopes()
     assert!(!number.contains("SCOPED"));
 }
 
+/// The additions of the numbers `rows` (key, literal, line) to one dictionary, as a run.
+fn value_run(rows: &[(&str, &str, i32)], name: &str, unit: Option<u32>) -> (String, String, RowRun) {
+    let lines = body(&rows.iter().map(|(key, value, line)| format!("{};", value_call("resource_dictionary_1", key, &format!("rt::to_object({value})"), *line, 8))).collect::<Vec<_>>().iter().map(String::as_str).collect::<Vec<_>>());
+    let statements = recorded(&lines, &[]);
+    let (_, mut tables) = with_packed_theme_rows(true, || row_runs(lines, &statements, "D", || name.to_string()));
+    let (name, mut run) = tables.remove(0);
+    run.unit = unit;
+    (name, "t.xaml".to_string(), run)
+}
+
+/// #855: a run of plain values is a packed table of its strings and numbers when that is smaller
+/// than its rows, and the call names the builder of the table.
+#[test]
+fn a_run_of_values_is_a_packed_table_when_that_is_smaller() {
+    let rows = [("A", "1.0_f64", 1), ("BB", "2.0_f64", 2), ("A2", "1.0_f64", 3)];
+    let lines = body(&rows.iter().map(|(key, value, line)| format!("{};", value_call("resource_dictionary_1", key, &format!("rt::to_object({value})"), *line, 8))).collect::<Vec<_>>().iter().map(String::as_str).collect::<Vec<_>>());
+    let statements = recorded(&lines, &[]);
+    let (written, tables) = with_packed_theme_rows(true, || row_runs(lines, &statements, "D", || "BUILD_T_ROWS_0".to_string()));
+    assert_eq!(written, body(&["rt::add_packed_double_resources(&resource_dictionary_1, &BUILD_T_ROWS_0)?;"]));
+    assert_eq!(
+        tables[0].1.packed.as_deref(),
+        Some("rt::PackedValueRows {\n    strings: \"ABBA2\",\n    numbers: &[1.0_f64, 2.0_f64],\n    records: &[\n        0, 1, 1, 8, 0,\n        1, 2, 2, 8, 1,\n        3, 2, 3, 8, 0,\n    ],\n}")
+    );
+    assert!(row_table("BUILD_T_ROWS_0", "t.xaml", &tables[0].1).contains("static BUILD_T_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {"));
+    // Two numbers are smaller as a slice than with the header of a table.
+    let short = value_run(&[("A", "1.0_f64", 1), ("B", "2.0_f64", 2)], "ROWS", None);
+    assert!(short.2.packed.is_none());
+    assert!(row_table("ROWS", "t.xaml", &short.2).contains("&[rt::ValueRow<f64>]"));
+}
+
+/// #855: every shape of plain value has its record, and a position beyond 16 bits keeps the slice.
+#[test]
+fn the_shapes_of_values_have_their_records() {
+    let thickness = "::ferroui_base::Thickness::__markup_new_3(1.0_f64, 2.0_f64, 1.0_f64, 0.0_f64)";
+    let run = value_run(&[("A", thickness, 1), ("B", thickness, 2)], "ROWS", None).2;
+    assert_eq!((run.kind, run.packed.as_deref()), (
+        RowKind::Thickness,
+        Some("rt::PackedValueRows {\n    strings: \"AB\",\n    numbers: &[1.0_f64, 2.0_f64, 0.0_f64],\n    records: &[\n        0, 1, 1, 8, 0, 1, 0, 2,\n        1, 1, 2, 8, 0, 1, 0, 2,\n    ],\n}"),
+    ));
+    let lines = body(&[
+        &format!("{};", value_call("resource_dictionary_1", "A", "rt::string_object(\"xy\")", 1, 8)),
+        &format!("{};", value_call("resource_dictionary_1", "B", "rt::string_object(\"y\")", 2, 8)),
+    ]);
+    let statements = recorded(&lines, &[]);
+    let (written, tables) = with_packed_theme_rows(true, || row_runs(lines, &statements, "D", || "ROWS".to_string()));
+    assert_eq!(written, body(&["rt::add_packed_string_resources(&resource_dictionary_1, &ROWS)?;"]));
+    assert_eq!(
+        tables[0].1.packed.as_deref(),
+        Some("rt::PackedValueRows {\n    strings: \"AxyB\",\n    numbers: &[],\n    records: &[\n        0, 1, 1, 8, 1, 2,\n        3, 1, 2, 8, 2, 1,\n    ],\n}")
+    );
+    let far = value_run(&[("A", "1.0_f64", 1), ("B", "2.0_f64", 70_000), ("C", "3.0_f64", 3), ("D", "4.0_f64", 4)], "ROWS", None).2;
+    assert!(far.packed.is_none(), "a line beyond 16 bits keeps the slice");
+}
+
+/// #855: the tables of values of a unit share its pools, so that a trimmed unit takes its strings
+/// and numbers with it.
+#[test]
+fn the_value_tables_of_a_unit_share_its_pools() {
+    let first = value_run(&[("A", "1.0_f64", 1), ("B", "2.0_f64", 2), ("C", "3.0_f64", 3)], "BUILD_T_ROWS_0", Some(4));
+    let second = value_run(&[("A", "2.0_f64", 4), ("D", "5.0_f64", 5), ("E", "1.0_f64", 6)], "BUILD_T_ROWS_1", Some(4));
+    let other = value_run(&[("F", "7.0_f64", 7), ("G", "8.0_f64", 8), ("H", "9.0_f64", 9)], "BUILD_T_ROWS_2", Some(5));
+    let texts = row_tables_in("BUILD_T", &[first, second, other], &Default::default());
+    assert_eq!(texts.len(), 5, "{texts:#?}");
+    assert!(texts[0].ends_with("const BUILD_T_UNIT_4_STRINGS: &str = \"ABCDE\";\n"), "{}", texts[0]);
+    assert!(texts[1].ends_with("static BUILD_T_UNIT_4_NUMBERS: [f64; 4] = [1.0_f64, 2.0_f64, 3.0_f64, 5.0_f64];\n"), "{}", texts[1]);
+    assert!(texts[2].contains("    strings: BUILD_T_UNIT_4_STRINGS,\n    numbers: &BUILD_T_UNIT_4_NUMBERS,\n"), "{}", texts[2]);
+    assert!(texts[3].contains("        0, 1, 4, 8, 1,\n        3, 1, 5, 8, 3,\n        4, 1, 6, 8, 0,\n"), "{}", texts[3]);
+    // The only table of another unit keeps its own pools.
+    assert!(texts[4].contains("    strings: \"FGH\",\n    numbers: &[7.0_f64, 8.0_f64, 9.0_f64],\n"), "{}", texts[4]);
+}
+
 /// #855: the packed tables of one unit of a theme share one pool of strings, written once before
 /// the first of them, while a table of no unit, or the only table of its unit, keeps its own.
 #[test]
