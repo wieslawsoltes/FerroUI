@@ -201,6 +201,7 @@ impl ToolTip {
         crate::tool_tip_service::tool_tips_in_use();
         crate::top_level::TopLevel::tool_tips_in_use();
         TIP_OF.set(Some(Self::get_tip));
+        TIP_PROPERTY.set(Some(Self::tip_property().as_property()));
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -641,6 +642,7 @@ impl IPopupHostProvider for ToolTipPopupHostProvider {
 ferroui_base::ferro_thread_local! {
     /// [`ToolTip::get_tip`], stated by the static constructor of the class.
     static TIP_OF: std::cell::Cell<Option<fn(&Control) -> Option<BoxedValue>>> = const { std::cell::Cell::new(None) };
+    static TIP_PROPERTY: std::cell::Cell<Option<&'static FerroProperty>> = const { std::cell::Cell::new(None) };
 }
 
 /// The tip of `control` for code outside the class that only reads it (the help text of an
@@ -648,4 +650,9 @@ ferroui_base::ferro_thread_local! {
 /// tip then, and without naming the class, so that such code does not link it (#612).
 pub(crate) fn tip_if_any(control: &Control) -> Option<BoxedValue> {
     TIP_OF.get().and_then(|tip| tip(control))
+}
+
+/// Recognizes a changed tip without initializing or linking the ToolTip class (#612).
+pub(crate) fn is_tip_property(property: &FerroProperty) -> bool {
+    TIP_PROPERTY.get().is_some_and(|tip| tip == property)
 }
