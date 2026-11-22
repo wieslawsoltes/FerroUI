@@ -20,6 +20,7 @@ export class DesignTokenReview implements vscode.Disposable {
     private mappingRevision = 0;
     private candidateColumn: vscode.ViewColumn = vscode.ViewColumn.Beside;
     private busy = false;
+    private reportedCurrent?: boolean;
     private problem?: string;
 
     constructor(root: vscode.Uri, private readonly projects: ProjectInventory, private document: vscode.TextDocument,
@@ -35,8 +36,8 @@ export class DesignTokenReview implements vscode.Disposable {
                 onClose();
             }),
             this.panel.webview.onDidReceiveMessage(message => { void this.receive(message); }),
-            vscode.workspace.onDidChangeTextDocument(event => { if (event.document === this.document) this.publish(); }),
-            vscode.workspace.onDidCloseTextDocument(closed => { if (closed === this.document) this.publish(); }),
+            vscode.workspace.onDidChangeTextDocument(event => { if (event.document === this.document) this.sourceChanged(); }),
+            vscode.workspace.onDidCloseTextDocument(closed => { if (closed === this.document) this.sourceChanged(); }),
         ];
         this.panel.webview.html = tokenReviewHtml(this.panel.webview, root);
     }
@@ -147,9 +148,18 @@ export class DesignTokenReview implements vscode.Disposable {
         return AbortSignal.any([this.lifetime.signal, AbortSignal.timeout(timeout)]);
     }
 
+    private isCurrent(): boolean {
+        return this.accepted?.document === this.document && this.accepted.version === this.document.version && !this.document.isClosed;
+    }
+
+    private sourceChanged(): void {
+        if (this.isCurrent() !== this.reportedCurrent) this.publish();
+    }
+
     private publish(): void {
         if (this.lifetime.signal.aborted) return;
-        const current = this.accepted?.document === this.document && this.accepted.version === this.document.version && !this.document.isClosed;
+        const current = this.isCurrent();
+        this.reportedCurrent = current;
         const state: TokenReviewState = {
             type: 'review', direction: this.direction, sourceName: path.basename(this.document.uri.path),
             ready: this.accepted !== undefined, current, busy: this.busy, mappingRevision: this.mappingRevision,

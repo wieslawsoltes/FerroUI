@@ -21,7 +21,7 @@ window.addEventListener('message', ({ data }: MessageEvent<TokenReviewState>) =>
     const counts = `${data.mappingRows.length} mapped · ${data.issues.length} skipped`;
     element('token-status').textContent = data.ready ? counts : data.busy ? 'Preparing token review…' : '';
     element('token-report').setAttribute('aria-busy', String(data.busy));
-    button('candidate').disabled = !data.ready;
+    button('candidate').disabled = data.busy || !data.ready;
     button('refresh').disabled = data.busy;
     button('scale').hidden = data.direction !== 'import';
     button('scale').disabled = data.busy || !data.current;

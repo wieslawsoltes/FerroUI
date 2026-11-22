@@ -81,7 +81,7 @@ pub(super) fn create(workspace: &DesignerWorkspace, args: &Value) -> Result<Valu
     }) {
         return Err("Choose a file extension appropriate for the token conversion".into());
     }
-    let uri = file_uri(&root.join(destination)).map_err(|error| error.to_string())?;
+    let uri = file_uri(root.join(destination)).map_err(|error| error.to_string())?;
     let path = ProjectWorkspace::new(solution)
         .resolve_path(&uri)
         .map_err(|error| error.to_string())?;
