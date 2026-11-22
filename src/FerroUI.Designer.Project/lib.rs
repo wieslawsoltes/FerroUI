@@ -3,7 +3,7 @@ mod discovery;
 mod dictionary_file;
 mod markup;
 mod packaged_assets;
-pub use packaged_assets::{PackagedAssetSource, PackagedAssets};
+pub use packaged_assets::{is_packaged_asset_uri, is_raster_asset, PackagedAssetSource, PackagedAssets, PublishedAsset};
 mod preview_sources;
 mod compiled_resources;
 pub use compiled_resources::{compiled_resource_key, CompiledResources};

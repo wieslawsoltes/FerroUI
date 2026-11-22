@@ -32,6 +32,13 @@ pub struct PackagedAssetSource<'a> {
     pub file: PathBuf,
 }
 
+#[derive(serde::Serialize)]
+pub struct PublishedAsset<'a> {
+    pub address: String,
+    pub assembly: &'a str,
+    pub key: &'a str,
+}
+
 impl PackagedAssets {
     pub(crate) fn read(
         &mut self,
@@ -114,6 +121,30 @@ impl PackagedAssets {
             .all(|package| package.inputs.is_empty())
     }
 
+    /// List the unambiguous exports of the selected Cargo build. Resolve the
+    /// address again before opening its current source file.
+    pub fn published(&self) -> impl Iterator<Item = PublishedAsset<'_>> {
+        self.packages
+            .values()
+            .filter_map(|outputs| {
+                if let [package] = outputs.as_slice() {
+                    Some(package)
+                } else {
+                    None
+                }
+            })
+            .flat_map(|package| {
+                let authority = encode(&package.assembly)
+                    .replace('/', "%2F")
+                    .replace(':', "%3A");
+                package.inputs.keys().map(move |key| PublishedAsset {
+                    address: format!("ferres://{authority}{}", encode(key)),
+                    assembly: &package.assembly,
+                    key,
+                })
+            })
+    }
+
     /// Resolve a published `ferres://` key. Assembly names match without case,
     /// asset keys match the case and bytes used by the native asset loader.
     pub fn resolve(&self, uri: &str) -> Result<Option<PackagedAssetSource<'_>>> {
@@ -193,6 +224,18 @@ impl PackagedAssets {
     }
 }
 
+/// Raster formats that the designers can insert as an authored Image source.
+pub fn is_raster_asset(path: &Path) -> bool {
+    path.extension()
+        .and_then(|extension| extension.to_str())
+        .is_some_and(|extension| {
+            matches!(
+                extension.to_ascii_lowercase().as_str(),
+                "png" | "jpg" | "jpeg" | "webp" | "gif" | "bmp" | "ico"
+            )
+        })
+}
+
 impl Package {
     fn source(&self, relative: &Path) -> Option<PathBuf> {
         let file = self.root.join(relative).canonicalize().ok()?;
@@ -208,4 +251,16 @@ fn address(uri: &str) -> Option<(&str, String)> {
     let rest = rest.split(['?', '#']).next()?;
     let (assembly, path) = rest.split_at(rest.find('/').unwrap_or(rest.len()));
     Some((assembly, decode(path).ok()?))
+}
+
+/// An absolute address of an individual asset in FerroUI's package registry.
+pub fn is_packaged_asset_uri(uri: &str) -> bool {
+    address(uri).is_some_and(|(authority, key)| {
+        !authority.is_empty()
+            && !authority.contains([':', '@', '\\'])
+            && decode(authority).is_ok()
+            && key.starts_with('/')
+            && !key.ends_with('/')
+            && !key.contains('\\')
+    })
 }

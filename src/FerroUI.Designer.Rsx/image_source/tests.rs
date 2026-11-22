@@ -13,6 +13,55 @@ impl Drop for Package {
 }
 
 #[test]
+fn packaged_image_edits_keep_the_cargo_address_and_authored_expression() {
+    let first = "ferres://Photo.App/Assets/Old%20badge.png";
+    let next = "ferres://Photo.App/Assets/%C5%81%C3%B3d%C5%BA%20%23%25.png";
+    let source = format!(
+        r##"use ::ferroui_view::asset_image as texture;
+fn header() {{ rsx! {{ TextBlock {{ text: "Other invocation" }} }}; }}
+fn badge() {{ rsx! {{ Image {{ source(texture(/* selected 🧭 */ r#"{first}"#,)) }} }}; }}"##
+    )
+    .replace('\n', "\r\n");
+    let projection = project_rust(
+        &source,
+        source.find("fn badge").unwrap() + "fn badge() { rsx! {".len(),
+    )
+    .unwrap();
+    assert_eq!(projection.omitted_count, 0);
+    assert!(projection.xaml().contains(first));
+    let xaml = ferroui_designer_core::Document::new(&projection.xaml()).unwrap();
+    let rust = crate::xaml_to_rsx(&xaml).unwrap();
+    assert!(rust.contains(&format!("::ferroui_view::asset_image({first:?})")));
+    let patches = projection
+        .apply_xaml(&projection.xaml().replace(first, next))
+        .unwrap();
+    assert_eq!(
+        TextPatch::apply_all(&source, patches).unwrap(),
+        source.replace(first, next)
+    );
+
+    let physical = projection
+        .edit_property(0, "Source", Some("../Assets/Local%20badge.png"))
+        .unwrap();
+    let physical = TextPatch::apply_all(&source, vec![physical]).unwrap();
+    assert!(physical.contains(r#"/* selected 🧭 */ ::ferroui_view::embedded_image(::core::include_bytes!("../Assets/Local badge.png"))"#));
+    let cursor = physical.find("fn badge").unwrap() + "fn badge() { rsx! {".len();
+    let projection = project_rust(&physical, cursor).unwrap();
+    let publish = projection.edit_property(0, "Source", Some(next)).unwrap();
+    let publish = TextPatch::apply_all(&physical, vec![publish]).unwrap();
+    assert!(publish.contains(&format!("::ferroui_view::asset_image({next:?})")));
+    assert!(publish.contains("/* selected 🧭 */"));
+    assert!(publish.contains("text: \"Other invocation\""));
+    assert!(project_rust(&publish, cursor)
+        .unwrap()
+        .xaml()
+        .contains(next));
+    let computed = source.replace(&format!(r##"r#"{first}"#"##), "active_badge()");
+    let projection = project_rust(&computed, cursor).unwrap();
+    assert!(!projection.nodes[0].can_set_image_source());
+}
+
+#[test]
 fn cargo_include_projects_a_document_uri_and_keeps_its_authored_package_anchor() {
     let package = Package(std::env::temp_dir().join(format!(
         "ferroui-rsx-image-package-{}-{:?}",
