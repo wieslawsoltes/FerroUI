@@ -179,6 +179,10 @@ pub(crate) fn read_json_or_plist<T: DeserializeOwned>(text: &str) -> Result<T> {
 }
 
 fn read_plist<T: DeserializeOwned>(source: &str) -> Result<T> {
+    // The XML parser and the conversion below both recurse once per level.
+    if !ferroui_system::xml_nesting_is_within(source, MAX_PLIST_DEPTH) {
+        return Err(Error::Json(format!("plist nesting exceeds {MAX_PLIST_DEPTH} levels")));
+    }
     let doc = roxmltree::Document::parse_with_options(
         source,
         roxmltree::ParsingOptions {
@@ -191,6 +195,9 @@ fn read_plist<T: DeserializeOwned>(source: &str) -> Result<T> {
         .map_err(|e| Error::Json(e.to_string()))?;
     serde_json::from_slice(&json).map_err(|e| Error::Json(e.to_string()))
 }
+
+// The nesting the JSON reader accepts.
+const MAX_PLIST_DEPTH: usize = 128;
 
 // A plist dictionary yields entries in source order, just like the JSON input.
 struct PlistValue<'a, 'input>(roxmltree::Node<'a, 'input>);

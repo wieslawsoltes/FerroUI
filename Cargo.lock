@@ -3041,6 +3041,7 @@ dependencies = [
  "indexmap",
  "js-sys",
  "onig",
+ "onig_sys",
  "roxmltree 0.20.0",
  "serde",
  "serde_json",
