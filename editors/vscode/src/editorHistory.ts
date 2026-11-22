@@ -19,6 +19,20 @@ async function applyEditorHistory(
     requireCurrent: () => void,
     signal: AbortSignal,
 ): Promise<void> {
+    // Search and other widgets can finish taking focus after their command returned.
+    // Retry only after the first command finished without updating this document.
+    for (let attempt = 0; attempt < 2; attempt++) {
+        if (await dispatchEditorHistory(document, action, requireCurrent, signal)) return;
+    }
+    throw new Error(`VS Code did not ${action} an edit in the authored source.`);
+}
+
+async function dispatchEditorHistory(
+    document: vscode.TextDocument,
+    action: 'undo' | 'redo',
+    requireCurrent: () => void,
+    signal: AbortSignal,
+): Promise<boolean> {
     signal.throwIfAborted();
     requireCurrent();
     const editor = await vscode.window.showTextDocument(document, {
@@ -54,9 +68,7 @@ async function applyEditorHistory(
             await update;
         }
         signal.throwIfAborted();
-        if (!document.isClosed && document.version === version) {
-            throw new Error(`VS Code did not ${action} an edit in the authored source.`);
-        }
+        return document.isClosed || document.version !== version;
     } finally {
         for (const listener of listeners) listener.dispose();
         clearTimeout(timeout);
