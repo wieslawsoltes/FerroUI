@@ -77,7 +77,10 @@ async function verifyImageSource({ invoke, content }: McpFixture, input: ImageSo
         const { revision, nodes } = content<{ revision: number; nodes: OutlineNode[] }>(await invoke('designer_outline', { session }));
         const image = nodes.find(node => node.canSetImageSource);
         assert.ok(image, 'The accepted image must offer an authored source edit');
-        const edit = { session, expected_revision: revision, node: image.id, project_asset: asset };
+        assert.deepEqual(image.imageSourceProperties, ['Source']);
+        const edit = { session, expected_revision: revision, node: image.id, project_asset: asset, property: 'Source' };
+        assert.ok((await invoke('designer_set_image_source', { ...edit, property: 'Width' })).isError);
+        assert.equal(document.getText(), source);
         content(await invoke('designer_set_image_source', edit));
         assert.equal(document.getText(), expected);
         assert.ok((await invoke('designer_set_image_source', edit)).isError, 'A replaced frame cannot change the source again');

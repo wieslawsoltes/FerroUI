@@ -73,7 +73,9 @@ export async function verifyRegisteredPropertyRename(
         .replace('?.Caption}', '?.Heading}')
         .replace('AuditCard Caption=', 'AuditCard Heading='));
     assert.equal(rust.getText(), draft.replace('Caption: String', 'Heading: String'));
-    const renamedMapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Heading: 'headingFromDraft' } });
+    const importedMapping = /r#"([^\r\n]+)"#/.exec(descriptorDraft)?.[1];
+    assert.ok(importedMapping);
+    const renamedMapping = importedMapping.replace('"Caption":', '"Heading":');
     assert.equal(registry.getText(), registryDraft.replace(', MAPPING)', `, r#"${renamedMapping}"#)`));
     assert.equal(descriptor.getText(), descriptorDraft);
     await vscode.window.showTextDocument(xaml);

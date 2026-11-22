@@ -313,7 +313,7 @@ fn editor_kind(
             "String" | "Option<String>" | "FontFamily" | "FontWeight" | "GridLength"
             | "BoxShadows" => plain("text"),
             "Option<BoxedValue>" if matches!(name, "Content" | "Header") => plain("text"),
-            "Option<Rc<dyn IImage>>" if name == "Source" => plain("text"),
+            "Option<Rc<dyn IImage>>" => plain("text"),
             _ if !info.values.is_empty() => ("enum", info.values.clone()),
             _ if PropertyComponentType::for_type(&info.type_name).is_some() => plain("text"),
             _ => plain("object"),

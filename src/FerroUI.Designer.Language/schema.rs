@@ -309,6 +309,34 @@ impl Schema {
         self.property_in_context(owner, namespace, name, namespace)
     }
 
+    /// Inherited raster properties that accept authored image URIs.
+    pub fn image_property_names(&self, owner: &str, namespace: Option<&str>) -> Vec<&str> {
+        let raster = |property: &PropertyInfo| {
+            !property.event
+                && !property.read_only
+                && !property.attached
+                && property.type_name == "Option<Rc<dyn IImage>>"
+        };
+        let mut candidates = BTreeSet::new();
+        let mut seen = BTreeSet::new();
+        let mut next = self.type_info(owner, namespace);
+        while let Some(info) = next {
+            if !seen.insert((&info.namespace, &info.name)) {
+                break;
+            }
+            candidates.extend(
+                info.properties.iter().filter_map(|(name, property)| {
+                    raster(property).then_some(name.as_str())
+                }),
+            );
+            next = self.base_type(info);
+        }
+        candidates
+            .into_iter()
+            .filter(|name| self.member(owner, namespace, name).is_some_and(raster))
+            .collect()
+    }
+
     pub(crate) fn base_type(&self, info: &TypeInfo) -> Option<&TypeInfo> {
         if let Some(base) = &info.model_base {
             return self.type_info(&base.name, Some(&base.namespace));

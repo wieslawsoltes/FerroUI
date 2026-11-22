@@ -23,7 +23,8 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     await write('Cargo.toml', '[package]\nname = "audit-app"\nversion = "0.1.0"\nedition = "2024"\n[features]\nhot-reload = []\n[dependencies]\naudit-widgets = { path = "widgets" }\n');
     await write('.cargo/config.toml', '[build]\ntarget-dir = "audit-output"\n');
     const mappingKey = 'FerroUI.Designer.Rsx.v1:Audit.Controls.AuditCard';
-    const mapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Caption: 'heading' } });
+    const mapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Caption: 'heading', HeroImage: 'hero_raster', BadgeImage: 'badge_raster' } });
+    const raster = 'Option<::std::rc::Rc<dyn ::ferroui_base::media::IImage>>';
     const descriptors = await write('src/rsx_mappings.rs', `// Shared builder 🧭\r\npub(crate) const CARD: &str = r#"${mapping}"#;\r\n`);
     const registry = await write('src/registry.rs', [
         'use crate::rsx_mappings::CARD as MAPPING;',
@@ -42,7 +43,8 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
             build_path: '::audit_app::published_theme::build_customer_theme', populate_path: null, public: true }],
         types: [{ name: 'AuditCard', namespace: 'Audit.Controls', kind: 'class', rust_path: '::audit_app::AuditCard',
             object_model: true, base: '::audit_widgets::Meter', default_constructor: {},
-            properties: [{ name: 'Caption', value_type: 'String', setter: {} }] }],
+            properties: [{ name: 'Caption', value_type: 'String', setter: {} },
+                { name: 'HeroImage', value_type: raster, setter: {} }, { name: 'BadgeImage', value_type: raster, setter: {} }] }],
     });
     const appSite = { rust_type: '::audit_app::AuditCard', type: 'AuditCard', file: 'src/main.rs', owner: 'AuditCard' };
     const manifest = vscode.Uri.joinPath(project, 'Cargo.toml').fsPath;
@@ -124,7 +126,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
         `Hovers: ${JSON.stringify(hovers)}. Diagnostics: ${diagnostics.join(', ')}`);
     await verifyDefinitions(xaml, source, dependencySource);
     await verifyRegisteredPropertyRename(xaml, source, registry, descriptors);
-    await verifyRegisteredTypeRename(xaml, source, registry);
+    await verifyRegisteredTypeRename(xaml, source, registry, mapping);
 
     const view = await write('View.xaml', '<StackPanel xmlns="https://github.com/ferroui" />');
     const panel = await designer.openDocument(view);
@@ -156,8 +158,23 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     await rustPanel.editNode({ session: rustPanel.session, token: current, node: selected.id }, {
         type: 'setProperty', node: selected.id, name: 'Caption', value: 'Updated',
     });
-    assert.equal(rustPanel.document.getText(), rustDraft.replace('🦀 First', 'Updated'));
-    console.log('VS Code used the nested Cargo registry for XAML, dependency Toolbox placement, and mapped RSX completion and literal editing');
+    const updated = rustDraft.replace('🦀 First', 'Updated');
+    assert.equal(rustPanel.document.getText(), updated);
+    await until(() => rustPanel.currentToken !== undefined && rustPanel.currentToken !== current);
+    const card = rustPanel.nodes[0];
+    assert.deepEqual(card.imageSourceProperties, ['BadgeImage', 'HeroImage']);
+    const frame = { session: rustPanel.session, token: rustPanel.currentToken!, node: card.id };
+    const rasterDirectory = vscode.Uri.joinPath(project, 'Assets');
+    await vscode.workspace.fs.createDirectory(rasterDirectory);
+    const imageFile = vscode.Uri.joinPath(rasterDirectory, 'Card.png');
+    await vscode.workspace.fs.copy(vscode.Uri.joinPath(workspace, 'Assets', 'Preview Image.png'), imageFile);
+    const asset = path.relative(workspace.fsPath, imageFile.fsPath).split(path.sep).join('/');
+    await assert.rejects(() => designer.projectImageSource(rustPanel, frame, asset), /available image property/);
+    const image = await designer.projectImageSource(rustPanel, frame, asset, 'HeroImage');
+    await rustPanel.editNode(frame, image);
+    assert.ok(rustPanel.document.getText().includes('hero_raster: ::ferroui_view::embedded_image(::core::include_bytes!("../Assets/Card.png"))'));
+    assert.ok(!rustPanel.document.getText().includes('badge_raster'));
+    console.log('VS Code used the nested Cargo registry for XAML, dependency Toolbox placement, and mapped RSX image properties and literals');
     await verifyCompiledControlTemplate(designer, theme, write);
 }
 

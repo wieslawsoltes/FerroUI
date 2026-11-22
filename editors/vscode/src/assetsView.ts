@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { ProjectAssets } from './projectAssets';
-import { errorMessage, type AssetsState, type DragOrigin, type FrameTarget, type FromAssets, type ProjectAsset, type ToAssets } from './protocol';
+import { errorMessage, imageSourceProperties, type AssetsState, type DragOrigin, type FrameTarget, type FromAssets, type ProjectAsset, type ToAssets } from './protocol';
 import { assetsHtml } from './view';
 
 export const ASSETS_VIEW = 'ferroui.assets';
@@ -46,8 +46,8 @@ export class AssetsView {
         const selected = panel?.selectedNode;
         this.view.show({
             frame: accepted,
-            imageTarget: accepted && selected?.canSetImageSource && panel?.selectedIds.length === 1
-                ? { ...accepted, node: selected.id, selection: [selected.id] } : undefined,
+            imageTarget: frame && selected && panel?.selectedIds.length === 1 && panel.canUse(frame)
+                && imageSourceProperties(selected).length > 0 ? { ...frame, node: selected.id, selection: [selected.id] } : undefined,
             assets: this.cache.assets ?? [], canInsert, folder: folder.uri.toString(),
             message: this.cache.error ?? (this.cache.assets ? undefined : 'Finding project assets…'),
         }, folder.name);

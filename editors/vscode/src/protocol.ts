@@ -178,7 +178,12 @@ export interface OutlineNode {
     canRemove: boolean;
     canMove: boolean;
     canSetImageSource?: boolean;
+    imageSourceProperties?: string[];
     selectable?: boolean;
+}
+
+export function imageSourceProperties(node: OutlineNode | undefined): readonly string[] {
+    return node?.imageSourceProperties ?? (node?.canSetImageSource ? ['Source'] : []);
 }
 export interface Snapshot {
     nodes: OutlineNode[];

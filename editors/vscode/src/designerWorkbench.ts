@@ -42,7 +42,7 @@ import { STYLES_VIEW, StylesView } from './stylesView';
 import type { StylesPage } from './stylesProtocol';
 import type { TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import { TIMELINE_VIEW, TimelineView } from './timelineView';
-import { errorMessage, type DefinitionNavigation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type RustTemplateNavigation, type ToolboxState, type ToToolbox } from './protocol';
+import { errorMessage, imageSourceProperties, type DefinitionNavigation, type DesignerView, type DetailsView, type DragOrigin, type FrameTarget, type FromAssets, type FromDetails, type FromOutline, type FromToolbox, type Language, type NodeOperation, type NodeTarget, type OutlineMode, type RustTemplateNavigation, type ToolboxState, type ToToolbox } from './protocol';
 import { asPosition, asRange, languageOf } from './textDocument';
 import { toolboxHtml, webviewOptions } from './view';
 
@@ -511,12 +511,15 @@ export class DesignerWorkbench implements vscode.Disposable {
         return { type: 'image', source: await this.assets.library.imageSource(panel.document.uri, id) };
     }
 
-    async projectImageSource(panel: DesignerPanel, target: NodeTarget, id: string): Promise<Extract<NodeOperation, { type: 'setProperty' }>> {
-        if (!panel.canUse(target) || !panel.nodes.some(node => node.id === target.node && node.canSetImageSource)) {
+    async projectImageSource(panel: DesignerPanel, target: NodeTarget, id: string, property?: string): Promise<Extract<NodeOperation, { type: 'setProperty' }>> {
+        const available = imageSourceProperties(panel.nodes.find(node => node.id === target.node));
+        if (!panel.canUse(target) || available.length === 0) {
             throw new Error('Choose an editable image source in the current design.');
         }
+        const name = property ?? available.find(field => field === 'Source') ?? (available.length === 1 ? available[0] : undefined);
+        if (name === undefined || !available.includes(name)) throw new Error('Choose an available image property from the current outline.');
         const image = await this.projectImage(panel, id);
-        return { type: 'setProperty', node: target.node, name: 'Source', value: image.source };
+        return { type: 'setProperty', node: target.node, name, value: image.source };
     }
 
     private followFocus(): void {
@@ -760,7 +763,12 @@ export class DesignerWorkbench implements vscode.Disposable {
                 await this.assets.browse(message.type, message.id);
             } else if (message.type === 'setImageSource') {
                 const panel = this.panelFor(message.target);
-                const operation = await this.projectImageSource(panel, message.target, message.id);
+                const available = imageSourceProperties(panel.nodes.find(node => node.id === message.target.node));
+                const property = available.length > 1 ? await vscode.window.showQuickPick(available, {
+                    title: 'Use as Image Source', placeHolder: 'Choose the control property',
+                }) : available[0];
+                if (available.length > 1 && property === undefined) return;
+                const operation = await this.projectImageSource(panel, message.target, message.id, property);
                 await this.edit(message.target, operation);
             } else if (message.type === 'insert') {
                 const panel = this.panelFor(message.frame);

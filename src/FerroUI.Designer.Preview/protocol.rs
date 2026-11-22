@@ -209,6 +209,8 @@ pub(crate) struct OutlineNode {
     pub(crate) can_remove: bool,
     pub(crate) can_move: bool,
     pub(crate) can_set_image_source: bool,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) image_source_properties: Vec<String>,
     pub(crate) selectable: bool,
 }
 

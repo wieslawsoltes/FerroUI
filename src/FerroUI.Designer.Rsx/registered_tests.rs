@@ -19,7 +19,7 @@ impl Fixture {
                 "app",
                 json!({"format":2,"name":"Example","crate_name":"example",
                 "metadata":[["FerroUI.Designer.Rsx.v1:Example.Views.StatusCard",
-                    r#"{"path":"crate::views::ReviewCard","properties":{"Caption":"heading","SaveCommand":"perform_save","SaveCommandParameter":"save_argument"}}"#],
+                    r#"{"path":"crate::views::ReviewCard","properties":{"Caption":"heading","SaveCommand":"perform_save","SaveCommandParameter":"save_argument","HeroImage":"hero_raster","BadgeImage":"badge_raster"}}"#],
                     ["FerroUI.Designer.RsxAnimation.v1:crate::motion::reading_radius", "crate::StatusCard::reading_radius_property"],
                     ["FerroUI.Designer.RsxAnimation.v1:crate::StatusCard::relative_radius_property", "crate::StatusCard::relative_radius_property"]],
                 "types":[{"name":"StatusCard","namespace":"Example.Views","kind":"class",
@@ -27,7 +27,9 @@ impl Fixture {
                     "base":"::ferroui_controls::Control","default_constructor":{},
                     "properties":[{"name":"Caption","value_type":"String","setter":{}},
                         {"name":"SaveCommand","value_type":"Option<::std::rc::Rc<dyn ::ferroui_base::input::ICommand>>","setter":{}},
-                        {"name":"SaveCommandParameter","value_type":"Option<::ferroui_base::BoxedValue>","setter":{}}],
+                        {"name":"SaveCommandParameter","value_type":"Option<::ferroui_base::BoxedValue>","setter":{}},
+                        {"name":"HeroImage","value_type":"Option<::std::rc::Rc<dyn ::ferroui_base::media::IImage>>","setter":{}},
+                        {"name":"BadgeImage","value_type":"Option<::std::rc::Rc<dyn ::ferroui_base::media::IImage>>","setter":{}}],
                     "registered":[{"accessor":"reading_radius_property","name":"ReadingRadius","kind":"styled",
                         "value_type":"::ferroui_base::corner_radius::CornerRadius","registration":"declared"},
                         {"accessor":"relative_radius_property","name":"RelativeRadius","kind":"styled",
@@ -62,6 +64,30 @@ impl Fixture {
         schema.register_project(&project);
         RsxCatalog::from_project(&project, &schema, Some("example"))
     }
+}
+
+#[test]
+fn registered_image_properties_follow_the_mapped_setter_and_exclude_expressions() {
+    use ferroui_designer_core::TextPatch;
+
+    let catalog = Fixture::catalog();
+    let source = r#"rsx! { crate::views::ReviewCard {
+        hero_raster(::ferroui_view::embedded_image(::core::include_bytes!(concat!("img/", "card.png")))),
+    } }"#;
+    let projection = catalog.project(source, 0).unwrap();
+    assert_eq!(projection.omitted_count, 0);
+    assert_eq!(projection.nodes[0].editable_image_properties(), ["BadgeImage", "HeroImage"]);
+    assert!(!projection.nodes[0].can_set_image_source());
+    assert!(projection.xaml().contains("HeroImage=\"img/card.png\""));
+    let patch = projection.edit_property(0, "HeroImage", Some("img/hero.png")).unwrap();
+    assert_eq!(TextPatch::apply_all(source, vec![patch]).unwrap(), source.replace("card.png", "hero.png"));
+    let patch = projection.edit_property(0, "BadgeImage", Some("img/badge.png")).unwrap();
+    let inserted = TextPatch::apply_all(source, vec![patch]).unwrap();
+    assert!(inserted.contains("badge_raster: ::ferroui_view::embedded_image("));
+    assert!(catalog.project(&inserted, 0).unwrap().xaml().contains("BadgeImage=\"img/badge.png\""));
+
+    let dynamic = source.replace("hero_raster(", "badge_raster(load_badge()), hero_raster(");
+    assert_eq!(catalog.project(&dynamic, 0).unwrap().nodes[0].editable_image_properties(), ["HeroImage"]);
 }
 
 #[test]
@@ -235,10 +261,8 @@ fn registered_literally_mapped_component_keeps_other_invocations_and_dynamic_chi
     edited.replace_range(patch.span.range(), &patch.replacement);
     assert_eq!(edited, source.replace("🦀 First", "Second"));
     let language = serde_json::to_value(catalog.analyze(source)).unwrap();
-    assert_eq!(
-        language["properties"]["crate::views::ReviewCard"][0]["setter"],
-        "heading"
-    );
+    assert!(language["properties"]["crate::views::ReviewCard"]
+        .as_array().unwrap().iter().any(|property| property["setter"] == "heading" && property["xamlName"] == "Caption"));
     assert!(
         !language["nodes"][3]["fields"][0]["literal"]
             .as_bool()

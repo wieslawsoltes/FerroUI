@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { RegisteredRename } from '../src/registeredRename';
 import { until } from './wait';
 
-export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rustUri: vscode.Uri, registryUri: vscode.Uri) {
+export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rustUri: vscode.Uri, registryUri: vscode.Uri, mapping: string) {
     const extension = vscode.extensions.getExtension<{ typeRename: RegisteredRename }>('FerroUI.ferroui')!;
     const { typeRename } = await extension.activate();
     const xamlConsumer = vscode.Uri.joinPath(xaml.uri, '..', 'RegisteredTypeConsumer.xaml');
@@ -53,7 +53,7 @@ export async function verifyRegisteredTypeRename(xaml: vscode.TextDocument, rust
         assert.equal(editedRust.getText(), code.replaceAll(symbol, replacement));
         assert.equal(rust.getText(), originalRust.replaceAll(symbol, replacement));
         assert.equal(styled.getText(), originalStyle.replaceAll(symbol, replacement));
-        const renamedMapping = JSON.stringify({ path: 'crate::OverviewCard', properties: { Caption: 'heading' } });
+        const renamedMapping = mapping.replace('"crate::AuditCard"', '"crate::OverviewCard"');
         assert.equal(registry.getText(), originalRegistry
             .replace('Audit.Controls.AuditCard', 'Audit.Controls.OverviewCard')
             .replace(', MAPPING)', `, r#"${renamedMapping}"#)`));

@@ -74,6 +74,14 @@ impl RsxNode {
             && !self.expressions.contains_key("Source")
     }
 
+    /// Registered raster properties with a missing or mapped authored value.
+    pub fn editable_image_properties(&self) -> Vec<String> {
+        self.class.image_property_names()
+            .filter(|name| !self.expressions.contains_key(*name))
+            .map(str::to_owned)
+            .collect()
+    }
+
     pub fn supports_events(&self) -> bool {
         self.class.mapped_events()
     }

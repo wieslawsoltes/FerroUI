@@ -121,6 +121,20 @@ impl Class {
         names
     }
 
+    pub(crate) fn image_property_names(&self) -> impl Iterator<Item = &str> {
+        let mappings = match self {
+            Self::Builtin(_) => None,
+            Self::Registered(class) => Some(&class.properties),
+        };
+        (self.literal("Source") == Some(Literal::EmbeddedImage))
+            .then_some("Source")
+            .into_iter()
+            .chain(mappings.into_iter().flatten().filter_map(|(name, property)| {
+                (name != "Source" && property.codec == Some(Literal::EmbeddedImage))
+                    .then_some(name.as_str())
+            }))
+    }
+
     pub(crate) fn property_type(&self, name: &str) -> String {
         self.mapped_property(name)
             .map(|property| property.value_type.clone())

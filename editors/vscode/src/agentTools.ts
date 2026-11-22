@@ -427,7 +427,7 @@ export class AgentTools {
                 break;
             case 'designer_set_image_source': {
                 const target = { session: panel.session, token: args.expected_revision, node: args.node! };
-                const operation = await this.workbench.projectImageSource(panel, target, args.project_asset!);
+                const operation = await this.workbench.projectImageSource(panel, target, args.project_asset!, args.property);
                 await panel.agentEdit(target.token, operation, signal);
                 break;
             }

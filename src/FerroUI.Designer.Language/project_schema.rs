@@ -229,12 +229,39 @@ pub(crate) fn unwrapped_type(text: &str) -> &str {
 }
 
 fn local_type(text: &str) -> &str {
+    if optional_raster(text) {
+        return "Option<Rc<dyn IImage>>";
+    }
     let text = unwrapped_type(text);
     if text.contains('<') {
         text
     } else {
         text.rsplit("::").next().unwrap_or(text)
     }
+}
+
+/// Keep the shape needed by a raster setter when the compiler supplies fully
+/// qualified Rust paths. Other image-shaped types keep their original editor.
+fn optional_raster(text: &str) -> bool {
+    fn argument<'a>(text: &'a str, names: &[&str]) -> Option<&'a str> {
+        let (name, argument) = text.trim().split_once('<')?;
+        if !names.contains(&name.trim().trim_start_matches("::")) {
+            return None;
+        }
+        Some(argument.strip_suffix('>')?.trim())
+    }
+
+    let target = argument(
+        text,
+        &["Option", "core::option::Option", "std::option::Option"],
+    )
+    .and_then(|text| argument(text, &["Rc", "alloc::rc::Rc", "std::rc::Rc"]))
+    .and_then(|text| text.strip_prefix("dyn "))
+    .map(|text| text.trim().trim_start_matches("::"));
+    matches!(
+        target,
+        Some("IImage" | "ferroui_base::media::IImage" | "ferroui_base::media::i_image::IImage")
+    )
 }
 
 #[cfg(test)]
