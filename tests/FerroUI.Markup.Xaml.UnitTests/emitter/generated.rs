@@ -5628,7 +5628,7 @@ pub fn build_scoped_namespace_bindings_xaml(
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
     // scoped_namespace_bindings.xaml(1,175) RelativeSource
     let relative_source_extension_0 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::SelfMode);
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 1, 175)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 1, 175)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 1, 175)?, rt::cast(::core::clone::Clone::clone(&provided_0), 1, 175)?);
     context.pop_parent();
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -5648,7 +5648,7 @@ pub fn build_scoped_namespace_bindings_xaml(
     context.push_parent(rt::to_value(reflection_binding_extension_1.clone()));
     // scoped_namespace_bindings.xaml(1,335) RelativeSource
     let relative_source_extension_1 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::SelfMode);
-    let provided_2 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 1, 335)?;
+    let provided_2 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 1, 335)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 1, 335)?, rt::cast(::core::clone::Clone::clone(&provided_2), 1, 335)?);
     context.pop_parent();
     let provided_3 = rt::provide_value(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
@@ -5699,7 +5699,7 @@ fn build_scoped_namespace_bindings_xaml_deferred_0(
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
     // scoped_namespace_bindings.xaml(1,556) RelativeSource
     let relative_source_extension_0 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::SelfMode);
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 1, 556)?;
+    let provided_0 = rt::provide_value_invoked(&context, rt::reflection_binding_relative_source_property(), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 1, 556)?;
     ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 1, 556)?, rt::cast(::core::clone::Clone::clone(&provided_0), 1, 556)?);
     context.pop_parent();
     let provided_1 = rt::provide_value(&context, rt::property_value(::ferroui_controls::TextBlock::text_property()), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);

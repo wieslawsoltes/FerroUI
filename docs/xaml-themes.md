@@ -636,24 +636,38 @@ Documents loaded at run time bind the way the built application does (#604):
 
 ### 5.1 Property lookups by name in compiled themes (#603)
 
-Two run-time helpers of compiled markup still find a declared (plain) property by its name:
+Two run-time helpers of compiled markup find a declared (plain) property by its name:
 
-- `rt::clr_property_info`: the provide-value target of a nested markup extension, such as
-  `TemplateBinding.Converter` with a `{StaticResource}`, or `MultiBinding.Bindings` and `Converter`.
+- `rt::clr_property_info`: the provide-value target of a nested markup extension. The checked-in
+  themes no longer call it (see below).
 - `rt::path_property`: a plain property in a compiled binding path, such as
   `ProgressBar.TemplateSettings`, `CommandBar.VisiblePrimaryCommands` or the view models of the
   managed file chooser.
 
 `python3 scripts/themes/by_name_lookups.py` counts the calls in the checked-in compiled themes;
-`--by-property` breaks them down by owner and property. On the branch of the change the counts were:
+`--by-property` breaks them down by owner and property. The counts now are:
 
 | Theme | `rt::clr_property_info` | `rt::path_property` |
 |---|---:|---:|
-| WinUI | 70 | 59 |
-| Fluent | 65 | 53 |
-| Simple | 36 | 43 |
-| macOS | 67 | 43 |
-| All four | 238 | 198 |
+| WinUI | 0 | 59 |
+| Fluent | 0 | 53 |
+| Simple | 0 | 43 |
+| macOS | 0 | 43 |
+| All four | 0 | 198 |
+
+**The targets of nested markup extensions.** The five members the themes describe this way have
+a `MarkupProperty` of their own, as `Setter.Value` has, and generated code calls one helper per
+member. It names neither the declaration of the binding nor that of the type of the member:
+
+| Member | Helper |
+|---|---|
+| `TemplateBinding.Converter` | `rt::template_binding_converter_property()` |
+| `CompiledBinding.Converter` | `rt::compiled_binding_converter_property()` |
+| `MultiBinding.Bindings` | `rt::multi_binding_bindings_property()` |
+| `MultiBinding.Converter` | `rt::multi_binding_converter_property()` |
+| `ReflectionBinding.RelativeSource` | `rt::reflection_binding_relative_source_property()` |
+
+A nested extension on any other plain property is still written with `rt::clr_property_info`.
 
 **Resolving the property at compile time.** The emitter can resolve the declared property at compile
 time wherever the type system knows the declaring type. It then writes
@@ -741,7 +755,8 @@ section 9).
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
 | Relative-source paths of the themes resolved at compile time (no `ReflectionBinding.RelativeSource` targets) | #603 | In review |
 | `rt::clr_property_info` and `rt::path_property` counted (`scripts/themes/by_name_lookups.py`); declared properties resolved at compile time behind `Build::compile_time_declared_properties` (off by default) | #603 follow-up | In review |
-| `rt::clr_property_info` of plain properties (nested markup extension targets, plain path elements) resolved to typed accessors | #603 follow-up | Planned |
+| The targets of markup extensions nested in bindings described from the member alone (no `rt::clr_property_info` in the checked-in themes) | #603 follow-up | In review |
+| `rt::path_property` of plain path elements resolved to typed accessors | #603 follow-up | Planned |
 | Path data converted at compile time instead of at load | #603 | In review |
 | `panic = "abort"` in `dist` | #595 | On `main` |
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
