@@ -10,6 +10,7 @@ mod state_route;
 mod state_styles;
 mod state_triggers;
 mod target;
+mod transform_curve;
 mod typing;
 
 pub use clock::{animation_timing, FrozenPreviewClock, NativePlayback};
@@ -20,4 +21,6 @@ pub use state_route::NativeStateRoute;
 pub use state_styles::NativeStateStyles;
 pub use state_triggers::{NativeStateTriggers, StateTriggerCapture, StateTriggerSelection};
 pub use target::validate_animation_target;
-pub use typing::{native_keyframe_options, native_keyframe_options_for_target};
+pub use typing::{
+    native_keyframe_options, native_keyframe_options_for_target, native_list_base, native_list_kind,
+};

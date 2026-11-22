@@ -40,6 +40,15 @@ pub enum CurveChannel {
     ShadowDepth,
     ShadowOpacity,
     Spread,
+    Angle,
+    AngleX,
+    AngleY,
+    M11,
+    M12,
+    M21,
+    M22,
+    M31,
+    M32,
 }
 
 impl FromStr for CurveChannel {
@@ -148,6 +157,15 @@ impl CurveChannel {
             Self::ShadowDepth => "Shadow depth (px)",
             Self::ShadowOpacity => "Shadow opacity",
             Self::Spread => "Spread (px)",
+            Self::Angle => "Angle (°)",
+            Self::AngleX => "X (°)",
+            Self::AngleY => "Y (°)",
+            Self::M11 => "M11",
+            Self::M12 => "M12",
+            Self::M21 => "M21",
+            Self::M22 => "M22",
+            Self::M31 => "M31 (px)",
+            Self::M32 => "M32 (px)",
         }
     }
 
@@ -158,9 +176,13 @@ impl CurveChannel {
     pub fn relative_unit(self) -> Option<RelativeUnit> {
         match self {
             Self::PercentX | Self::PercentY | Self::Percent => Some(RelativeUnit::Relative),
-            Self::AbsoluteX | Self::AbsoluteY | Self::Absolute => Some(RelativeUnit::Absolute),
+            Self::AbsoluteX | Self::AbsoluteY | Self::Absolute | Self::M31 | Self::M32 => Some(RelativeUnit::Absolute),
             _ => None,
         }
+    }
+
+    pub fn uses_degrees(self) -> bool {
+        matches!(self, Self::Direction | Self::Angle | Self::AngleX | Self::AngleY)
     }
 
     pub(crate) fn project_samples(

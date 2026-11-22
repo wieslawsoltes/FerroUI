@@ -4,22 +4,23 @@
 mod layer;
 
 use super::syntax::span;
-use crate::literal::string_literal;
+use super::text_source::TextSource;
 use ferroui_base::media::BoxShadows;
 use ferroui_designer_animation::{AnimationBoxShadows, AnimationValue};
-use ferroui_designer_core::{SourceSpan, TextPatch};
+use ferroui_designer_core::TextPatch;
 use layer::ShadowLayer;
-use syn::{Expr, ExprCall, Lit};
+use syn::{Expr, ExprCall};
 
 const CLASS: &str = "ferroui_base::media::BoxShadows";
 const MODULE_CLASS: &str = "ferroui_base::media::box_shadows::BoxShadows";
+const FACTORIES: &[&str] = &["ferroui_base::media::BoxShadows::parse", "ferroui_base::media::box_shadows::BoxShadows::parse"];
 
 #[derive(Clone, Debug)]
 pub(super) struct BoxShadowsSource(ListSyntax);
 
 #[derive(Clone, Debug)]
 enum ListSyntax {
-    Text(ShadowText),
+    Text(TextSource),
     Layers(Vec<ShadowLayer>),
 }
 
@@ -28,7 +29,7 @@ impl BoxShadowsSource {
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
     ) -> Option<(AnimationBoxShadows, Self)> {
-        if let Some((value, source)) = ShadowText::read(expression, resolve, CLASS, MODULE_CLASS) {
+        if let Some((value, source)) = TextSource::parse_call(expression, resolve, FACTORIES) {
             return Some((
                 AnimationBoxShadows::parse(&value).ok()?,
                 Self(ListSyntax::Text(source)),
@@ -92,59 +93,6 @@ impl BoxShadowsSource {
             }
         }
         Ok(())
-    }
-}
-
-#[derive(Clone, Debug)]
-struct ShadowText {
-    literal: SourceSpan,
-    spelling: String,
-}
-
-impl ShadowText {
-    fn read(
-        expression: &Expr,
-        resolve: &impl Fn(&Expr) -> Option<String>,
-        class: &str,
-        module_class: &str,
-    ) -> Option<(String, Self)> {
-        let call = match expression {
-            Expr::MethodCall(method)
-                if method.attrs.is_empty()
-                    && method.turbofish.is_none()
-                    && ((method.method == "unwrap" && method.args.is_empty())
-                        || (method.method == "expect" && method.args.len() == 1)) =>
-            {
-                method.receiver.as_ref()
-            }
-            Expr::Try(operation) if operation.attrs.is_empty() => operation.expr.as_ref(),
-            _ => return None,
-        };
-        let Expr::Call(call) = call else { return None };
-        let (method, args) = constructor(call, resolve, class, module_class)?;
-        let [Expr::Lit(literal)] = args.as_slice() else {
-            return None;
-        };
-        let Lit::Str(text) = &literal.lit else {
-            return None;
-        };
-        if method != "parse" || !literal.attrs.is_empty() {
-            return None;
-        }
-        Some((
-            text.value(),
-            Self {
-                literal: span(text),
-                spelling: text.token().to_string(),
-            },
-        ))
-    }
-
-    fn plan(&self, text: &str, patches: &mut Vec<TextPatch>) {
-        patches.push(TextPatch {
-            span: self.literal,
-            replacement: string_literal(&self.spelling, text),
-        });
     }
 }
 

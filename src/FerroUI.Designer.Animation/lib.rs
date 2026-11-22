@@ -20,6 +20,10 @@ mod program_locator;
 mod programs;
 mod states;
 mod timeline;
+#[cfg(feature = "native-values")]
+mod transform_list_value;
+#[cfg(feature = "native-values")]
+mod transform_curve_channel;
 mod value;
 mod xaml;
 
@@ -58,6 +62,10 @@ pub use timeline::{
     CompiledTimeline, FillMode, Keyframe, PlaybackBehavior, PlaybackDirection, Player, Repeat,
     Sample, Timeline, TimelineTimingEdit, Track,
 };
+#[cfg(feature = "native-values")]
+pub use transform_list_value::{AnimationTransformList, AnimationTransformOperation, TransformOperationKind};
+#[cfg(feature = "native-values")]
+pub use transform_curve_channel::TransformCurveChannel;
 pub use value::{AnimationEffect, AnimationValue, EffectForm, RelativeUnit, ValueKind};
 #[cfg(feature = "native-values")]
 pub use value::{AnimationBoxShadow, AnimationBoxShadows};

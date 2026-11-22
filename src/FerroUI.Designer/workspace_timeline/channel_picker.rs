@@ -26,8 +26,11 @@ impl DesignerWorkspace {
         choices: Vec<TrackCurveChannel>,
     ) -> Ref<Control> {
         let picker = ComboBox::new();
-        let named = matches!(channel, TrackCurveChannel::EffectParameter { .. });
-        picker.set_width(if named { 124.0 } else { 82.0 });
+        picker.set_width(match channel {
+            TrackCurveChannel::Transform(_) | TrackCurveChannel::BoxShadow { .. } => 164.0,
+            TrackCurveChannel::EffectParameter { .. } => 124.0,
+            _ => 82.0,
+        });
         picker.set_font_size(10.0);
         picker.set_vertical_alignment(VerticalAlignment::Center);
         picker.classes().add("designer-field");

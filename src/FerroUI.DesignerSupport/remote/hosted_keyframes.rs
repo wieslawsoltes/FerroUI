@@ -32,6 +32,7 @@ pub(super) struct HostedKeyframeCapabilities {
     pub(super) effect_objects: bool,
     pub(super) registered_effects: bool,
     pub(super) box_shadows: bool,
+    pub(super) transform_lists: bool,
 }
 
 impl HostedKeyframes {
@@ -80,6 +81,7 @@ impl HostedKeyframes {
                         && (capabilities.effect_objects || !key.value.starts_with('<'))
                         && (capabilities.registered_effects || CustomEffectRegistry::invocation_name(&key.value).is_none()),
                     "BoxShadows" => capabilities.box_shadows,
+                    "TransformList" => capabilities.transform_lists,
                     _ => true,
                 }
             }));
@@ -97,7 +99,8 @@ impl HostedKeyframes {
                                         ("RelativePoint", Some(ValueKind::RelativePoint))
                                         | ("RelativeScalar", Some(ValueKind::RelativeScalar))
                                         | ("Effect", Some(ValueKind::Effect))
-                                        | ("BoxShadows", Some(ValueKind::BoxShadows)));
+                                        | ("BoxShadows", Some(ValueKind::BoxShadows))
+                                        | ("TransformList", Some(ValueKind::TransformList)));
                             }
                             if key.value_kind == "Color"
                                 && options.property_kinds.get(&track.property) != Some(&ValueKind::Color)
@@ -249,7 +252,8 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
         .iter()
         .filter_map(|track| {
             let kind = track.keyframes.first()?.value.kind();
-            let curve_channels = matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar | ValueKind::Effect | ValueKind::BoxShadows)
+            let curve_channels = matches!(kind,
+                ValueKind::RelativePoint | ValueKind::RelativeScalar | ValueKind::Effect | ValueKind::BoxShadows | ValueKind::TransformList)
                 .then(|| TrackCurveChannel::for_track(track, timeline.duration, timeline.fill))
                 .and_then(|channels| serde_json::to_value(channels).ok())
                 .and_then(|channels| serde_json::from_value(channels).ok());

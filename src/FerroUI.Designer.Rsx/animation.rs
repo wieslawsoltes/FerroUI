@@ -12,6 +12,8 @@ mod relative;
 mod retime;
 mod structural;
 pub(crate) mod syntax;
+mod text_source;
+mod transform_list;
 mod value;
 
 use ferroui_designer_animation::{native_key_time, Easing, KeyframeEdit, ValueKind};

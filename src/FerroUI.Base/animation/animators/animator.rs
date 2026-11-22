@@ -222,6 +222,9 @@ pub(crate) fn run<A: Animator>(
     let base_clock = clock
         .or_else(|| control.clock())
         .unwrap_or_else(Clock::global_clock);
+    if !base_clock.runs_animations() {
+        return Disposable::empty();
+    }
     let instance = AnimationInstance::new(
         animation.clone(),
         control,

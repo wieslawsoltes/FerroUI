@@ -2,6 +2,7 @@ use super::box_shadows::BoxShadowsSource;
 use super::color::{packed_argument, ColorSource};
 use super::effect::EffectSource;
 use super::relative::RelativeSource;
+use super::transform_list::TransformListSource;
 use super::{syntax, FloatSource};
 use crate::local_rust::{LocalRust, Value};
 use ferroui_designer_animation::{AnimationValue, ValueKind};
@@ -27,6 +28,7 @@ enum ValueSyntax {
     Relative(RelativeSource),
     Effect(EffectSource),
     BoxShadows(BoxShadowsSource),
+    TransformList(TransformListSource),
 }
 
 impl ValueShape {
@@ -35,6 +37,7 @@ impl ValueShape {
     pub(crate) const RELATIVE_POINT: Self = Self::typed(ValueKind::RelativePoint);
     pub(crate) const EFFECT: Self = Self::typed(ValueKind::Effect);
     pub(crate) const BOX_SHADOWS: Self = Self::typed(ValueKind::BoxShadows);
+    pub(crate) const TRANSFORM_LIST: Self = Self::typed(ValueKind::TransformList);
     pub(crate) const SOLID_BRUSH: Self = Self {
         kind: ValueKind::Color,
         brush: true,
@@ -94,6 +97,13 @@ impl ValueShape {
             return Some(ValueSource {
                 value: AnimationValue::BoxShadows(value),
                 source: ValueSyntax::BoxShadows(source),
+            });
+        }
+        if kind == ValueKind::TransformList {
+            let (value, source) = TransformListSource::read(expression, &resolve)?;
+            return Some(ValueSource {
+                value: AnimationValue::TransformList(value),
+                source: ValueSyntax::TransformList(source),
             });
         }
         let parts = if kind == ValueKind::Number
@@ -209,6 +219,12 @@ impl ValueSource {
                 };
                 return source.plan(previous, &next, patches);
             }
+            ValueSyntax::TransformList(source) => {
+                if self.value != value {
+                    source.plan(&value.to_xaml(), patches);
+                }
+                return Ok(());
+            }
             ValueSyntax::Numbers(parts) => parts,
         };
         let values = numeric_parts(&value)?;
@@ -242,6 +258,10 @@ pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
             "::ferroui_base::media::BoxShadows::parse({:?}).unwrap()",
             shadows.to_xaml(),
         ));
+    }
+    if let AnimationValue::TransformList(list) = value {
+        value.validate().map_err(|error| error.to_string())?;
+        return Ok(format!("{:?}", list.to_xaml()));
     }
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));

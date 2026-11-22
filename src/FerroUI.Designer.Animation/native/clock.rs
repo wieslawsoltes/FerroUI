@@ -1,14 +1,26 @@
 use crate::{Repeat, Timeline};
-use ferroui_base::animation::{Animatable, Animation, IClock, PlayState, SignedDuration};
+use ferroui_base::animation::{Animatable, Animation, IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
-use ferroui_base::Ref;
+use ferroui_base::{FerroLocator, Ref};
 use std::cell::Cell;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 /// Inherited clock for an artboard whose timeline owns its time.
 pub struct FrozenPreviewClock;
+
+impl FrozenPreviewClock {
+    /// Freeze animations during construction, before a control can inherit
+    /// the preview root's clock. Dropping the scope restores the app clock.
+    pub fn enter_scope() -> Rc<dyn IDisposable> {
+        let scope = FerroLocator::enter_scope();
+        FerroLocator::current_mutable()
+            .bind::<dyn IGlobalClock>()
+            .to_constant(Rc::new(Self));
+        scope
+    }
+}
 
 impl IObservable<SignedDuration> for FrozenPreviewClock {
     fn subscribe(&self, _observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
@@ -22,7 +34,13 @@ impl IClock for FrozenPreviewClock {
     }
 
     fn set_play_state(&self, _value: PlayState) {}
+
+    fn runs_animations(&self) -> bool {
+        false
+    }
 }
+
+impl IGlobalClock for FrozenPreviewClock {}
 
 /// The elapsed-time bounds of a loaded animation, including delays and repetitions.
 pub fn animation_timing(animation: &Animation) -> Option<Timeline> {

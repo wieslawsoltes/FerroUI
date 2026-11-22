@@ -12,6 +12,12 @@ pub trait IClock: IObservable<SignedDuration> + 'static {
 
     /// Sets the playback state of the clock.
     fn set_play_state(&self, value: PlayState);
+
+    /// Whether new animations can run on this clock. A permanently frozen
+    /// clock can decline them before they install any animated values.
+    fn runs_animations(&self) -> bool {
+        true
+    }
 }
 
 impl PartialEq for dyn IClock {

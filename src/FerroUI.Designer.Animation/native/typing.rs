@@ -1,5 +1,5 @@
 use super::curve::matches_property;
-use crate::{AnimationBoxShadows, AnimationEffect, AnimationProgram, AnimationValue, ImportOptions, ValueKind};
+use crate::{AnimationBoxShadows, AnimationEffect, AnimationProgram, AnimationTransformList, AnimationValue, ImportOptions, ValueKind};
 use ferroui_base::animation::{Animatable, Animation, animators::TransformAnimator};
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{
@@ -81,10 +81,10 @@ pub fn native_keyframe_options_for_target(
             }));
             continue;
         }
-        if AnimationBoxShadows::is_property(property) {
-            options.property_kinds.insert(name.into(), ValueKind::BoxShadows);
-            if let Some(base) = target.and_then(|target| AnimationBoxShadows::base_value(target, property)) {
-                options.base_values.insert(name.into(), AnimationValue::BoxShadows(base));
+        if let Some(kind) = native_list_kind(property) {
+            options.property_kinds.insert(name.into(), kind);
+            if let Some(base) = target.and_then(|target| native_list_base(target, property, kind)) {
+                options.base_values.insert(name.into(), base);
             }
             continue;
         }
@@ -122,6 +122,24 @@ pub fn native_keyframe_options_for_target(
         }
     }
     options
+}
+
+pub fn native_list_kind(property: &FerroProperty) -> Option<ValueKind> {
+    if AnimationBoxShadows::is_property(property) {
+        Some(ValueKind::BoxShadows)
+    } else if AnimationTransformList::is_property(property) {
+        Some(ValueKind::TransformList)
+    } else {
+        None
+    }
+}
+
+pub fn native_list_base(target: &Animatable, property: &'static FerroProperty, kind: ValueKind) -> Option<AnimationValue> {
+    match kind {
+        ValueKind::BoxShadows => AnimationBoxShadows::base_value(target, property).map(AnimationValue::BoxShadows),
+        ValueKind::TransformList => AnimationTransformList::base_value(target, property).map(AnimationValue::TransformList),
+        _ => None,
+    }
 }
 
 fn value_kind(property: &FerroProperty) -> Option<ValueKind> {

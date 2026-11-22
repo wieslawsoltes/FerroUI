@@ -526,6 +526,12 @@ pub(crate) fn infer_kind(property: &str, source: &str) -> ValueKind {
     if property == "BoxShadow" && crate::AnimationBoxShadows::parse(source).is_ok() {
         return ValueKind::BoxShadows;
     }
+    #[cfg(feature = "native-values")]
+    if matches!(property, "RenderTransform" | "LayoutTransform" | "Transform" | "RelativeTransform")
+        && crate::AnimationTransformList::parse(source).is_ok()
+    {
+        return ValueKind::TransformList;
+    }
     if matches!(property, "Margin" | "Padding" | "BorderThickness") {
         ValueKind::Thickness
     } else if property == "CornerRadius" {

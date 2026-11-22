@@ -201,8 +201,8 @@ impl RsxProjection<'_> {
                 .ok_or_else(outside_static_values);
         }
         let original = &self.source[span.range()];
-        if codec == literal::Literal::BoxShadows {
-            return Ok(TextPatch { span, replacement: literal::edit_box_shadows(original, value)? });
+        if let Some(shape) = codec.native_list_shape() {
+            return Ok(TextPatch { span, replacement: literal::edit_native_list(shape, original, value)? });
         }
         let mut replacement = codec.rust(value).ok_or_else(outside_static_values)?;
         if original.contains('/') {

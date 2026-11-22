@@ -1,6 +1,8 @@
 use crate::{AnimationError, CurveChannel, FillMode, Track};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{borrow::Cow, num::NonZeroUsize, str::FromStr};
+#[cfg(feature = "native-values")]
+use crate::TransformCurveChannel;
 
 const EFFECT_PARAMETER: &str = "effect_parameter/";
 const BOX_SHADOW: &str = "box_shadow/";
@@ -29,6 +31,8 @@ pub enum TrackCurveChannel {
         layer: NonZeroUsize,
         component: CurveChannel,
     },
+    #[cfg(feature = "native-values")]
+    Transform(TransformCurveChannel),
 }
 
 impl Default for TrackCurveChannel {
@@ -45,6 +49,10 @@ impl From<CurveChannel> for TrackCurveChannel {
 
 impl TrackCurveChannel {
     pub fn for_track(track: &Track, duration: f64, fill: FillMode) -> Vec<Self> {
+        #[cfg(feature = "native-values")]
+        if let Some(channels) = TransformCurveChannel::for_track(track) {
+            return channels;
+        }
         #[cfg(feature = "native-values")]
         if matches!(track.keyframes.first().map(|key| &key.value), Some(crate::AnimationValue::BoxShadows(_))) {
             let count = track.keyframes.iter().map(|key| &key.value)
@@ -71,6 +79,8 @@ impl TrackCurveChannel {
 
     pub fn component(&self) -> CurveChannel {
         match self {
+            #[cfg(feature = "native-values")]
+            Self::Transform(channel) => channel.component(),
             Self::Property(component) | Self::EffectParameter { component, .. } | Self::BoxShadow { component, .. } => *component,
         }
     }
@@ -81,6 +91,8 @@ impl TrackCurveChannel {
 
     pub fn label(&self) -> Cow<'_, str> {
         match self {
+            #[cfg(feature = "native-values")]
+            Self::Transform(channel) => channel.label().into(),
             Self::Property(component) => component.label().into(),
             Self::BoxShadow { layer, component } => format!("Shadow {layer} · {}", component.label()).into(),
             Self::EffectParameter {
@@ -123,6 +135,10 @@ impl FromStr for TrackCurveChannel {
     type Err = AnimationError;
 
     fn from_str(value: &str) -> crate::Result<Self> {
+        #[cfg(feature = "native-values")]
+        if let Some(channel) = TransformCurveChannel::parse(value) {
+            return Ok(Self::Transform(channel));
+        }
         if let Some(path) = value.strip_prefix(EFFECT_PARAMETER) {
             let mut parts = path.split('/');
             if let (Some(effect), Some(parameter), Some(component), None) =
@@ -159,6 +175,11 @@ impl Serialize for TrackCurveChannel {
     fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
         match self {
             Self::Property(component) => component.serialize(serializer),
+            #[cfg(feature = "native-values")]
+            Self::Transform(channel) => {
+                let component = component_name::<S::Error>(channel.component())?;
+                serializer.serialize_str(&channel.path(&component))
+            }
             Self::BoxShadow { layer, component } => {
                 let component = component_name::<S::Error>(*component)?;
                 serializer.serialize_str(&format!("{BOX_SHADOW}{layer}/{component}"))

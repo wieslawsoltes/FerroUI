@@ -2,6 +2,9 @@ use crate::{require, AnimationError, Result};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "native-values")]
+use crate::AnimationTransformList;
+
+#[cfg(feature = "native-values")]
 #[path = "box_shadow_value.rs"]
 mod box_shadows;
 #[cfg(feature = "native-values")]
@@ -29,6 +32,8 @@ pub enum ValueKind {
     Effect,
     #[cfg(feature = "native-values")]
     BoxShadows,
+    #[cfg(feature = "native-values")]
+    TransformList,
     Discrete,
 }
 
@@ -93,6 +98,8 @@ pub enum AnimationValue {
     Effect(AnimationEffect),
     #[cfg(feature = "native-values")]
     BoxShadows(AnimationBoxShadows),
+    #[cfg(feature = "native-values")]
+    TransformList(AnimationTransformList),
     Discrete(String),
 }
 impl AnimationValue {
@@ -125,6 +132,8 @@ impl AnimationValue {
             Self::Effect(_) => ValueKind::Effect,
             #[cfg(feature = "native-values")]
             Self::BoxShadows(_) => ValueKind::BoxShadows,
+            #[cfg(feature = "native-values")]
+            Self::TransformList(_) => ValueKind::TransformList,
             Self::Discrete(_) => ValueKind::Discrete,
         }
     }
@@ -210,6 +219,8 @@ impl AnimationValue {
             Self::Effect(effect) => effect.validate(),
             #[cfg(feature = "native-values")]
             Self::BoxShadows(shadows) => shadows.validate(),
+            #[cfg(feature = "native-values")]
+            Self::TransformList(list) => list.validate(),
             Self::Discrete(value) => require(
                 value.len() <= 1_048_576
                     && value.chars().all(|c| {
@@ -379,6 +390,8 @@ impl AnimationValue {
             }
             #[cfg(feature = "native-values")]
             (Self::BoxShadows(from), Self::BoxShadows(to)) => Self::BoxShadows(from.interpolate(to, progress)),
+            #[cfg(feature = "native-values")]
+            (Self::TransformList(from), Self::TransformList(to)) => Self::TransformList(from.interpolate(to, progress)?),
             (Self::Discrete(_), Self::Discrete(_)) => {
                 if progress < 1.0 {
                     self.clone()
@@ -436,6 +449,8 @@ impl AnimationValue {
             Self::Effect(effect) => effect.to_xaml(),
             #[cfg(feature = "native-values")]
             Self::BoxShadows(shadows) => shadows.to_xaml(),
+            #[cfg(feature = "native-values")]
+            Self::TransformList(list) => list.to_xaml(),
             Self::Discrete(v) => v.clone(),
         }
     }
@@ -582,6 +597,8 @@ impl AnimationValue {
             ValueKind::Effect => Self::Effect(AnimationEffect::parse(source)?),
             #[cfg(feature = "native-values")]
             ValueKind::BoxShadows => Self::BoxShadows(AnimationBoxShadows::parse(source)?),
+            #[cfg(feature = "native-values")]
+            ValueKind::TransformList => Self::TransformList(AnimationTransformList::parse(source)?),
             ValueKind::Discrete => Self::Discrete(source.into()),
         };
         result.validate()?;

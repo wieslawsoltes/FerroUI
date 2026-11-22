@@ -142,7 +142,11 @@ fn read_property(expr: &Expr, catalog: &RsxCatalog) -> Option<(String, Property)
 
 pub(crate) const BUILTINS: &[(&str, &str, ValueShape)] = &[
     ("ferroui_base::Visual::opacity_property", "Opacity", ValueShape::NUMBER),
+    ("ferroui_base::Visual::render_transform_property", "RenderTransform", ValueShape::TRANSFORM_LIST),
     ("ferroui_base::Visual::render_transform_origin_property", "RenderTransformOrigin", ValueShape::RELATIVE_POINT),
+    ("ferroui_controls::LayoutTransformControl::layout_transform_property", "LayoutTransform", ValueShape::TRANSFORM_LIST),
+    ("ferroui_base::media::Brush::transform_property", "Transform", ValueShape::TRANSFORM_LIST),
+    ("ferroui_base::media::Brush::relative_transform_property", "RelativeTransform", ValueShape::TRANSFORM_LIST),
     ("ferroui_base::media::RotateTransform::angle_property", "RotateTransform.Angle", ValueShape::NUMBER),
     ("ferroui_base::media::RotateTransform::center_x_property", "RotateTransform.CenterX", ValueShape::NUMBER),
     ("ferroui_base::media::RotateTransform::center_y_property", "RotateTransform.CenterY", ValueShape::NUMBER),

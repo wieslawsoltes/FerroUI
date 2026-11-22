@@ -261,12 +261,15 @@ fn codec(info: &PropertyInfo, expanded_type: &str) -> Option<Codec> {
     if info.type_name == "Option<Rc<dyn IBrush>>" {
         return Some(Codec::Native(ValueShape::SOLID_BRUSH));
     }
+    if info.type_name == "Option<Rc<dyn ITransform>>" {
+        return Some(Codec::Native(ValueShape::TRANSFORM_LIST));
+    }
     if let Some(shape) = ValueShape::from_type(expanded_type) {
         return Some(Codec::Native(shape));
     }
     let literal = catalog::property_codec(info)?;
     match literal {
-        Literal::EmbeddedImage | Literal::CornerRadius | Literal::BoxShadows => None,
+        Literal::EmbeddedImage | Literal::CornerRadius | Literal::BoxShadows | Literal::TransformList => None,
         _ if info.type_name == "Option<bool>" => None,
         _ => Some(Codec::Literal(literal)),
     }

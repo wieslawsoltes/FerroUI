@@ -10,6 +10,7 @@ use ferroui_controls::embedding::offscreen::OffscreenTopLevelImplBase;
 use ferroui_controls::platform::PlatformManager;
 use ferroui_controls::templates::IDataTemplate;
 use ferroui_controls::{Control, Design, PreviewTarget, SizeToContent, Window};
+use ferroui_designer_animation::native::FrozenPreviewClock;
 use ferroui_markup_xaml::{
     IRuntimeXamlLoader, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument, XamlLoadError,
 };
@@ -93,11 +94,14 @@ impl DesignWindowLoader {
         let window: Ref<Window>;
         let control: Ref<Control>;
         let rust_fixture;
+        let _clock_scope;
         {
             let _designer_mode = DesignerMode(PlatformManager::designer_mode());
             let fixture = input.fixture.map(|name| preview_fixtures::create(input.project_path, name))
                 .transpose().map_err(XamlLoadError::with_message)?;
             rust_fixture = matches!(fixture, Some(PreviewFixture::RustView(_)));
+            let freeze_clock = input.freeze_animation_clock && !rust_fixture;
+            _clock_scope = freeze_clock.then(FrozenPreviewClock::enter_scope);
 
             control = if let Some(PreviewFixture::RustView(control)) = &fixture {
                 if control.parent().is_some() || control.visual_parent().is_some()
@@ -115,8 +119,7 @@ impl DesignWindowLoader {
                 None => (Window::new(), true),
             };
             window = preview;
-            if input.freeze_animation_clock && !rust_fixture {
-                use ferroui_designer_animation::native::FrozenPreviewClock;
+            if freeze_clock {
                 window.set_clock(Some(Rc::new(FrozenPreviewClock)));
             }
             if wrap_content {

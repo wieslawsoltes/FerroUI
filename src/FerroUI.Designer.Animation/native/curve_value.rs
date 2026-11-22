@@ -1,4 +1,4 @@
-use crate::{AnimationBoxShadows, AnimationEffect, AnimationValue, RelativeUnit};
+use crate::{AnimationBoxShadows, AnimationEffect, AnimationTransformList, AnimationValue, RelativeUnit};
 use ferroui_base::media::{BoxShadows, Color, IBrush};
 use ferroui_base::{
     BoxedValue, CornerRadius, Point, Rect, RelativePoint, RelativeScalar, Size, Thickness, Vector,
@@ -24,6 +24,9 @@ impl From<ferroui_base::RelativeUnit> for RelativeUnit {
 pub(super) fn value(sample: &BoxedValue) -> Option<AnimationValue> {
     if let Some(effect) = AnimationEffect::from_boxed(sample) {
         return Some(AnimationValue::Effect(effect));
+    }
+    if let Some(list) = AnimationTransformList::from_boxed(sample) {
+        return list.ok().map(AnimationValue::TransformList);
     }
     let native = sample.as_ref();
     if let Some(shadows) = native.downcast_ref::<BoxShadows>() {

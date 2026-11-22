@@ -1,4 +1,4 @@
-use super::{ShadowText, constructor, span};
+use super::{TextSource, constructor, span};
 use crate::animation::{FloatSource, color::ColorSource, syntax::float};
 use ferroui_base::media::BoxShadow;
 use ferroui_designer_animation::{AnimationBoxShadow, AnimationValue};
@@ -7,6 +7,7 @@ use syn::{Expr, ExprStruct, Lit, Member};
 
 const CLASS: &str = "ferroui_base::media::BoxShadow";
 const MODULE_CLASS: &str = "ferroui_base::media::box_shadow::BoxShadow";
+const FACTORIES: &[&str] = &["ferroui_base::media::BoxShadow::parse", "ferroui_base::media::box_shadow::BoxShadow::parse"];
 const NUMBERS: [&str; 4] = ["offset_x", "offset_y", "blur", "spread"];
 
 #[derive(Clone, Debug)]
@@ -17,7 +18,7 @@ pub(super) struct ShadowLayer {
 
 #[derive(Clone, Debug)]
 enum LayerSyntax {
-    Text(ShadowText),
+    Text(TextSource),
     Fields(Box<Fields>),
 }
 
@@ -32,7 +33,7 @@ struct Fields {
 
 impl ShadowLayer {
     pub(super) fn read(expr: &Expr, resolve: &impl Fn(&Expr) -> Option<String>) -> Option<Self> {
-        if let Some((value, source)) = ShadowText::read(expr, resolve, CLASS, MODULE_CLASS) {
+        if let Some((value, source)) = TextSource::parse_call(expr, resolve, FACTORIES) {
             let value = BoxShadow::parse(&value).ok()?.into();
             return Some(Self {
                 value,

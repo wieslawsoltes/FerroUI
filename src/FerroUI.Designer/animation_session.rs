@@ -2,8 +2,9 @@
 use crate::DesignerSession;
 use ferroui_base::styling::Style;
 use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
+use ferroui_designer_animation::native::{native_list_base, native_list_kind};
 use ferroui_designer_animation::{
-    AnimationBoxShadows, AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationValue,
+    AnimationBoxShadows, AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationTransformList, AnimationValue,
     CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
@@ -774,7 +775,8 @@ impl DesignerSession {
         let track_target = self.recording_target(target);
         let native_key = self.animation.timeline.track(track_target, property)
             .and_then(|track| track.keyframes.first())
-            .is_some_and(|key| matches!(&key.value, AnimationValue::Effect(_) | AnimationValue::BoxShadows(_)));
+            .is_some_and(|key| matches!(&key.value,
+                AnimationValue::Effect(_) | AnimationValue::BoxShadows(_) | AnimationValue::TransformList(_)));
         let transform_component = self.active_animation_program().is_some_and(|id| {
             self.animation.native.transform_component(id, property).is_some()
         });
@@ -1223,6 +1225,9 @@ impl DesignerSession {
     }
 
     fn animation_value_from_preview(&self, target: NodeId, property: &str, value: &BoxedValue) -> Result<AnimationValue, String> {
+        if let Some(list) = AnimationTransformList::from_boxed(value) {
+            return list.map(AnimationValue::TransformList).map_err(|error| error.to_string());
+        }
         if let Some(shadows) = value.downcast_ref::<ferroui_base::media::BoxShadows>() {
             return Ok(AnimationValue::BoxShadows(AnimationBoxShadows::from_native(shadows)));
         }
@@ -1278,19 +1283,19 @@ impl DesignerSession {
                 }
                 continue;
             }
-            if options.property_kinds.get(property) == Some(&ValueKind::BoxShadows) {
+            if matches!(options.property_kinds.get(property), Some(ValueKind::BoxShadows | ValueKind::TransformList)) {
                 continue;
             }
             if !options.property_kinds.contains_key(property) {
-                if let Some(info) = self.animation.native.track_property(program.id, property)
-                    .filter(|info| AnimationBoxShadows::is_property(info))
+                if let Some((info, kind)) = self.animation.native.track_property(program.id, property)
+                    .and_then(|info| Some((info, native_list_kind(info)?)))
                 {
-                    options.property_kinds.insert(property.into(), ValueKind::BoxShadows);
+                    options.property_kinds.insert(property.into(), kind);
                     let base = self.animation.native.track_target(program, &self.preview, target)
                         .ok()
-                        .and_then(|object| AnimationBoxShadows::base_value(&object, info));
+                        .and_then(|object| native_list_base(&object, info, kind));
                     if let Some(base) = base {
-                        options.base_values.insert(property.into(), AnimationValue::BoxShadows(base));
+                        options.base_values.insert(property.into(), base);
                     }
                     continue;
                 }
@@ -1416,8 +1421,8 @@ impl DesignerSession {
 }
 
 fn animation_property_kind(property: &FerroProperty) -> Option<ValueKind> {
-    if AnimationBoxShadows::is_property(property) {
-        return Some(ValueKind::BoxShadows);
+    if let Some(kind) = native_list_kind(property) {
+        return Some(kind);
     }
     if AnimationEffect::is_effect_property(property) {
         return Some(ValueKind::Effect);

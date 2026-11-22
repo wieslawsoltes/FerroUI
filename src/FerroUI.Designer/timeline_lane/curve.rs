@@ -274,8 +274,8 @@ impl TimelineLane {
                 (Some(RelativeUnit::Relative), CurveMetric::Velocity) => " pp/s",
                 (Some(RelativeUnit::Absolute), CurveMetric::Value) => " px",
                 (Some(RelativeUnit::Absolute), CurveMetric::Velocity) => " px/s",
-                (None, CurveMetric::Velocity) if component == CurveChannel::Direction => " °/s",
-                (None, CurveMetric::Value) if component == CurveChannel::Direction => "°",
+                (None, CurveMetric::Velocity) if component.uses_degrees() => " °/s",
+                (None, CurveMetric::Value) if component.uses_degrees() => "°",
                 (None, CurveMetric::Velocity) => " /s",
                 (None, CurveMetric::Value) => "",
             };

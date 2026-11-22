@@ -63,6 +63,8 @@ mod animation_tests;
 #[cfg(test)]
 mod animation_box_shadow_tests;
 #[cfg(test)]
+mod animation_transform_list_tests;
+#[cfg(test)]
 mod animation_effect_objects_tests;
 #[cfg(test)]
 mod layout_edit_tests;

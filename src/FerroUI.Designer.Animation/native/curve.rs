@@ -44,6 +44,9 @@ pub fn sample_curve_track(
     if let TrackCurveChannel::BoxShadow { layer, component } = channel {
         return super::box_shadow_curve::project(layer, component, samples);
     }
+    if let TrackCurveChannel::Transform(channel) = channel {
+        return super::transform_curve::project(channel, samples);
+    }
     let effect = AnimationEffect::is_effect_property(property);
     let component = channel.component();
     component.project_samples(samples.map(|(time, sample)| {

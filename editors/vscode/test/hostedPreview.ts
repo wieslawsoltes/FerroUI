@@ -21,6 +21,7 @@ import { verifyHostedStateAuthoring } from './hostedStateAuthoring';
 import { verifyHostedStateValues } from './hostedStateValues';
 import { verifyHostedStateTrigger } from './hostedStateTriggers';
 import { verifyHostedTransformCurves } from './hostedTransformCurves';
+import { verifyHostedTransformList } from './hostedTransformList';
 import { verifyHostedWorkspaceSources } from './hostedWorkspaceSources';
 import { verifyHostedStyles } from './hostedStyles';
 import { verifyHostedRustStyles } from './hostedRustStyles';
@@ -124,6 +125,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedStateTrigger(preview, { ...hostedRsx(4110), projectPath: '/ApprovalStateTrigger.rs' });
         await verifyHostedTransformCurves(preview, update);
         await verifyHostedBoxShadows(preview, update);
+        await verifyHostedTransformList(preview, update);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

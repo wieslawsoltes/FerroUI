@@ -26,6 +26,7 @@ pub(crate) enum Literal {
     Number,
     CornerRadius,
     BoxShadows,
+    TransformList,
     Thickness,
     EmbeddedImage,
     Enum {
@@ -36,6 +37,14 @@ pub(crate) enum Literal {
 }
 
 impl Literal {
+    pub(crate) fn native_list_shape(&self) -> Option<ValueShape> {
+        match self {
+            Self::BoxShadows => Some(ValueShape::BOX_SHADOWS),
+            Self::TransformList => Some(ValueShape::TRANSFORM_LIST),
+            _ => None,
+        }
+    }
+
     pub(crate) fn enumeration(module: &'static str, property: &PropertyInfo) -> Self {
         Self::Enum {
             module,
@@ -62,7 +71,7 @@ impl Literal {
             Self::Integer => Some(integer(expr)?.to_string()),
             Self::Number => Some(number(expr)?.to_string()),
             Self::CornerRadius => read_radius(expr),
-            Self::BoxShadows => Some(ValueShape::BOX_SHADOWS.read(expr)?.value.to_xaml()),
+            Self::BoxShadows | Self::TransformList => Some(self.native_list_shape()?.read(expr)?.value.to_xaml()),
             Self::EmbeddedImage => crate::image_source::read(expr),
             Self::Thickness => match expr {
                 Expr::Tuple(tuple) if matches!(tuple.elems.len(), 2 | 4) => Some(
@@ -117,7 +126,8 @@ impl Literal {
             Self::Integer => value.trim().parse::<i32>().ok()?.to_string(),
             Self::Number => format!("{:?}", parse_number(value.trim())?),
             Self::CornerRadius => rust_radius(value)?,
-            Self::BoxShadows => rust_literal(&AnimationValue::parse(value, ValueKind::BoxShadows).ok()?).ok()?,
+            Self::BoxShadows | Self::TransformList =>
+                rust_literal(&AnimationValue::parse(value, self.native_list_shape()?.kind()).ok()?).ok()?,
             Self::EmbeddedImage => crate::image_source::rust(value)?,
             Self::Thickness => {
                 let values = value
@@ -151,9 +161,9 @@ impl Literal {
     }
 }
 
-pub(crate) fn edit_box_shadows(original: &str, value: &str) -> Result<String, String> {
+pub(crate) fn edit_native_list(shape: ValueShape, original: &str, value: &str) -> Result<String, String> {
     let expression = syn::parse_str(original).map_err(|error| error.to_string())?;
-    let source = ValueShape::BOX_SHADOWS.read(&expression).ok_or("Edit a literal box shadow list")?;
+    let source = shape.read(&expression).ok_or("Edit a literal value list")?;
     let mut patches = Vec::new();
     source.plan(value, &mut patches)?;
     TextPatch::apply_all(original, patches).map_err(|error| error.to_string())
