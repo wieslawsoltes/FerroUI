@@ -792,5 +792,12 @@ multicaret undo with CRLF and supplementary characters. [C# raw-string rules](ht
   projections replace lone surrogates; a surrogate pair split by formatting
   takes the leading code unit's style.
 
+- A caret move, a document swap or an options change during the background scan
+  of an indented paste cancels that paste with a stale edit error and leaves the
+  document unchanged. The paste is not applied at the new caret.
+- A clipboard read of a Chromium web format on Wayland ends when its owner has
+  been silent for two seconds. The format map has one deadline for the whole
+  read and a limit of 64 KiB.
+
 None of these differences is counted as behavioral parity merely because a
 similarly named Rust type exists.

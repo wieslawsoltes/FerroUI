@@ -38,6 +38,11 @@ Other pages hold the entries of their own area, and this page does not repeat th
 
 | Upstream | Port | Kind | Why | Since |
 |---|---|---|---|---|
+| The editor's rectangular selection uses Alt, and its other pointer and keyboard gestures use fixed modifiers. | Every gesture takes its modifier from the active keymap. The pointer rectangle is Alt or Option on every keymap; from the keyboard it is Control on the Apple keymaps, where Option moves by word. | Behaviour | Control with a click is the secondary click on macOS, and Option with an arrow belongs to word movement. | Editor port |
+| A document change discards the measured heights of all visual lines. | An edit moves the measured heights of the lines it did not touch and forgets those it replaced. | Performance | Wrapped text above the caret stays in place while typing, and a frame does not measure the document again. | Editor port |
+| The search panel searches again on every document change. | A closed panel marks its results out of date and searches when it is opened or used. | Performance | A search copies the document, which a closed panel has no reason to do on each key. | Editor port |
+| Copy always produces the HTML form of the selection. | A selection above 4 MiB is copied as plain text. | Behaviour | The HTML form tokenizes on the UI thread, and a very large selection would freeze the editor. | Editor port |
+| Readers of grammars, XSHD files, snippets and regular expressions have no limits on what a file asks for. | Nesting, include expansion, rule counts, snippet expansion, indentation depth and regular expression work are bounded. A file over a limit is refused or keeps the tokens it reached; it does not crash or hang the editor. A bad injection selector loses that injection only. | Behaviour | These files come from outside the application, and a release build aborts on a panic or a stack overflow. | Editor port |
 | `FormattedTextElement.CreateTextRun` tries to format an unset plain-text field after construction with `FormattedText`. | `FormattedTextElement::from_formatted_text` sends the prepared object to the drawable run. | Behaviour | The pinned `FormattedTextRun` can draw the object and supplies its height, baseline and width including trailing whitespace. The generated element uses that run behavior. | Editor port |
 
 ### Layout (`src/FerroUI.Base/layout/`)
