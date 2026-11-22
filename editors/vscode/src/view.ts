@@ -330,6 +330,7 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
             <div class="runtime-inspect-toolbar">
                 <select id="runtime-detail" aria-label="Inspection category"><option value="properties">Properties</option><option value="styles">Styles</option><option value="resources">Resources</option><option value="diagnostics">Diagnostics</option></select>
                 ${tool('runtime-reveal', 'go-to-file', 'Reveal Source', 'hidden')}
+                ${tool('runtime-templates', 'symbol-snippet', 'Live App Templates', 'aria-haspopup="listbox" hidden')}
             </div>
             <input id="runtime-property-filter" type="search" placeholder="Filter properties" aria-label="Filter runtime properties" hidden>
             <div id="runtime-details" aria-label="Runtime details"></div>

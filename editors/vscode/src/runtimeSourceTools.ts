@@ -2,6 +2,7 @@ import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
 import type { RuntimeNode } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
+import { readRuntimeTemplates } from './runtimeTemplates';
 
 export class RuntimeSourceTools {
     constructor(private readonly runtimes: RuntimeConnections, private readonly source: RuntimeSourceEditor) {}
@@ -11,6 +12,21 @@ export class RuntimeSourceTools {
             const source = await this.source.read(client, node, signal);
             if (!current()) throw new Error('The application connection changed. Read its current runtime tree.');
             return { generation, source: source ? this.source.describe(source, target) : null };
+        });
+    }
+
+    async templates(node: number, signal: AbortSignal, target: RuntimeTarget = 'managed') {
+        return this.useRuntime(target, signal, async (client, generation, current) => {
+            const templates = await readRuntimeTemplates(client, node, signal);
+            if (!current()) throw new Error('The application connection changed. Read its current runtime tree.');
+            return { generation, templates };
+        });
+    }
+
+    async templateSource(node: number, id: string, generation: number, signal: AbortSignal, target: RuntimeTarget = 'managed') {
+        return this.useRuntime(target, signal, async (client, currentGeneration, current) => {
+            if (generation !== currentGeneration) throw new Error('Read the current application generation before opening a template.');
+            return this.source.revealTemplate(client, node, id, signal, current);
         });
     }
 

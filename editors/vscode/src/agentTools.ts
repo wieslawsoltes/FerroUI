@@ -62,6 +62,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     node?: number;
     member?: string;
     template_destination?: import('./hostedTemplates').HostedTemplateSelection['destination'];
+    template_id?: string;
     filter?: string;
     offset?: number;
     limit?: number;
@@ -197,6 +198,10 @@ export class AgentTools {
         if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50) };
         if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration);
         if (tool === 'ferroui_runtime_source') return this.runtimeSource.read(args.node!, signal, args.runtime);
+        if (tool === 'ferroui_runtime_templates') return this.runtimeSource.templates(args.node!, signal, args.runtime);
+        if (tool === 'ferroui_runtime_template_source') {
+            return this.runtimeSource.templateSource(args.node!, args.template_id!, args.expected_generation, signal, args.runtime);
+        }
         if (tool === 'ferroui_runtime_apply_source') {
             return this.runtimeSource.apply(args.node!, args.property, args.value!, args.expected_generation, args.expected_version, signal, args.runtime);
         }

@@ -92,6 +92,12 @@ or editing template for the expander's inner column. The XAML view uses
 inline template for Review. The Rust view exposes each template's builder
 assignment. [Trace effective templates in VS Code](../../docs/designer/vscode/runtime.md#inspect-treedatagrid-display-and-editing-templates)
 
+To inspect the Rust grid in its own application window, run
+`cargo run -p todo-workbench --features app-preview,mcp -- --tree-templates-live --mcp`.
+For an externally launched debug build, set `FERROUI_EDITOR_SOURCE=1` before
+starting the process. Connect Live App to its inspector, pick **Accounts**, and
+open **Live App Templates**. [Inspect the running app](../../docs/designer/vscode/runtime.md#open-an-effective-template-in-the-running-app)
+
 Open [review_states.rs](app_preview/review_states.rs) in App Preview and choose
 **Interactive review**. Select **Review · Queued → Ready** in the animation
 picker. Scrub the live card's width and corner radius, or use the pencil to

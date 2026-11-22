@@ -55,15 +55,30 @@ pub(crate) fn start_if_requested() {
                 if let Some(app) = builder.instance() {
                     app.styles()
                         .add(ferroui_themes_winui::WinUITheme::new().as_style());
-                    let grid_styles = StyleInclude::new(None);
-                    grid_styles.set_source(Some(
-                        "ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml"
-                            .parse().expect("built-in TreeDataGrid style URI"),
-                    ));
-                    app.styles().add(grid_styles.as_style());
+                    app.styles().add(grid_styles().as_style());
                 }
             })
     });
+}
+
+fn grid_styles() -> Rc<StyleInclude> {
+    let include = StyleInclude::new(None);
+    include.set_source(Some(
+        "ferres://FerroUI.Controls.TreeDataGrid/Themes/Generic.xaml"
+            .parse().expect("built-in TreeDataGrid style URI"),
+    ));
+    include
+}
+
+pub(crate) fn template_demo_window() -> Ref<Window> {
+    register_markup();
+    let window = Window::new();
+    window.set_title(Some("FerroUI Account hierarchy".into()));
+    window.set_width(660.0);
+    window.set_height(350.0);
+    window.styles().add(grid_styles().as_style());
+    window.set_content(Some(ferroui_controls::Control::boxed(tree_templates::view())));
+    window
 }
 
 fn register_fixtures() {

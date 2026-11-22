@@ -7,6 +7,7 @@ import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
 import { readRuntimeDiagnostics } from './runtimeDiagnostics';
 import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, RuntimeSource, ToRuntime } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
+import { readRuntimeTemplates, runtimeTemplateLabel } from './runtimeTemplates';
 import { runtimeHtml, webviewOptions } from './view';
 
 const refreshInterval = 500;
@@ -195,6 +196,25 @@ export class RuntimePanel implements vscode.Disposable {
             const node = nodes.find(node => node.node_id === message.node);
             if (!node) return;
             const node_id = message.node;
+            if (message.type === 'templates') {
+                const current = () => epoch === this.epoch && client === this.client;
+                const templates = await readRuntimeTemplates(client, node_id);
+                if (!current()) return;
+                const mapped = templates.filter(template => template.source);
+                if (!mapped.length) {
+                    void vscode.window.showInformationMessage('The app has no source-backed templates for this element.');
+                    return;
+                }
+                const choice = await vscode.window.showQuickPick(mapped.map(template => ({
+                    label: runtimeTemplateLabel(template),
+                    description: template.column ? template.column.header ?? `Column ${template.column.index + 1}` : node.name || node.type,
+                    template,
+                })), { title: 'Live App Templates', placeHolder: 'Choose an effective template to open its source', matchOnDescription: true });
+                if (choice && current()) {
+                    await this.authoredSource.revealTemplate(client, node_id, choice.template.id, AbortSignal.timeout(15_000), current);
+                }
+                return;
+            }
             if (message.type === 'trace') {
                 if (typeof message.property !== 'string' || !message.property || message.property.length > 256) return;
                 if (!await client.supports('get_property_trace')) throw new Error('This app does not expose value traces.');
@@ -242,13 +262,14 @@ export class RuntimePanel implements vscode.Disposable {
             case 'diagnostics': data = await readRuntimeDiagnostics(client); break;
             default: return;
         }
-        const [source, canTrace] = await Promise.all([
+        const [source, canTrace, canInspectTemplates] = await Promise.all([
             this.authoredSource.read(client, node),
             view === 'properties' ? client.supports('get_property_trace') : false,
+            client.supports('get_template_sources'),
         ]);
         const canApply = view === 'properties' && source && this.authoredSource.canApply(source, this.target);
         if (epoch === this.epoch && this.frame?.token === token) this.post({
-            type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply), canTrace,
+            type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply), canTrace, canInspectTemplates,
         });
     }
 

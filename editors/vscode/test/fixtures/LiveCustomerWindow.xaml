@@ -12,6 +12,11 @@
             <!-- 👋 Customer overview --> <TextBlock Classes="heading" x:Name="Heading" Text="Open customer records" />
             <TextBox x:Name="Search" PlaceholderText="Filter customers" Text="" />
             <TextBlock x:Name="Result" Text="{Binding Text, ElementName=Search}" />
+            <ListBox x:Name="Queue" Height="36">
+                <ListBox.ItemTemplate>
+                    <DataTemplate><TextBlock Text="{ReflectionBinding .}" /></DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </StackPanel>
     </Border>
 </Window>

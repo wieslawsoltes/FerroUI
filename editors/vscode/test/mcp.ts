@@ -124,6 +124,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
+        assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_templates'));
+        assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_template_source'));
         for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'palette', 'palette_edit_draft', 'palette_edit',

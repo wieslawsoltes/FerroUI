@@ -5,6 +5,7 @@ import { revision } from './reloadProcess';
 import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { RuntimeNode, RuntimeProperty, RuntimeSource } from './runtimeProtocol';
+import { readRuntimeTemplates } from './runtimeTemplates';
 import { asRange } from './textDocument';
 import { workspaceSourceUri } from './workspacePaths';
 
@@ -31,6 +32,22 @@ export class RuntimeSourceEditor {
         if ((anchor.language === 'rust' || anchor.revision !== undefined) && !matchesRevision(document, anchor.revision)) return;
         const position = sourcePosition(document, anchor);
         return position && { anchor, document, position };
+    }
+
+    async revealTemplate(client: RuntimeClient, node: number, id: string, signal: AbortSignal, isCurrent: () => boolean) {
+        const templates = await readRuntimeTemplates(client, node, signal);
+        const template = templates.find(template => template.id === id);
+        if (!template || !isCurrent()) throw new Error('The template changed. Open the current template catalog.');
+        if (!template.source) throw new Error('The app has no recorded source for this template.');
+        const source = await this.resolve(template.source);
+        signal.throwIfAborted();
+        if (!isCurrent()) throw new Error('The application connection changed.');
+        if (!source) throw new Error('The template source is unavailable in the current workspace or revision.');
+        const { document, position } = source;
+        await vscode.window.showTextDocument(document, {
+            selection: new vscode.Range(position, position), viewColumn: vscode.ViewColumn.Beside,
+        });
+        return { uri: document.uri.toString(), version: document.version, position: { line: position.line, character: position.character } };
     }
 
     describe(source: AuthoredSource, target: RuntimeTarget) {

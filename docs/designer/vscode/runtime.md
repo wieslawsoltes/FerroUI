@@ -114,6 +114,14 @@ Managed debug builds record compiled RSX locations. Set `FERROUI_EDITOR_SOURCE=1
 
 Choose the layers icon beside a property to trace why that value is effective in the running app. The trace shows active and inactive contributors, a current value override, and the base value under an animation when available. Use a source arrow to open a matching location in the workspace. The layers icon appears when the app’s MCP server supports `get_property_trace`. [MCP value trace](reference.md#trace-property-values-with-mcp)
 
+### Open an effective template in the running app
+
+1. Select a control or grid in the live window or its visual tree. Choose the **Live App Templates** icon next to **Reveal Source**.
+2. Select a control, item, display, or editing template. For a grid, the picker includes the column header when the app provides it.
+3. VS Code opens the source recorded by the running app. Save or reload changed sources before choosing the template again.
+
+The app must expose `get_template_sources` through its inspector. A source link requires a workspace file that matches the app’s recorded revision. XAML records the supplying dictionary or inline definition. A Rust template can open its mounted RSX body or the verified constructor in the running build. [Live App template tools](reference.md#inspect-live-app-templates-with-mcp)
+
 ## Read diagnostics and save history
 
 Open **FerroUI → Diagnostics** to inspect the managed save outcome, acknowledgement time, binding errors, and native layout and scene counters. Open a binding result with a recorded source location to inspect its original declaration. **Show Hot Reload Output** includes build and process messages. Use **Preview Checks** in a design or stage for measured overflow, clipping, ineffective layout values, and accessibility in the accepted preview. [Read Preview Checks](authoring.md#diagnose-a-design-time-issue)

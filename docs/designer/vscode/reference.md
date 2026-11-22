@@ -46,6 +46,7 @@ Editor and Studio authoring reuse the same native planning and validation. The e
 | Rehearse an app-hosted range | Use `play_range` in `designer_hosted_animation` with an elapsed `start`, `end`, and `loop` in `range`. Include `program` to rehearse one animation or omit it to rehearse the shared clip clock. |
 | Set, remove, or seek to a preview marker | Use `designer_timeline_markers` and `designer_timeline_marker_edit` for a typed clip or the shared Timeline clock. In App Preview, read `markers` from `designer_hosted_animations` and pass `action: "marker"` to `designer_hosted_animation`. [Marker controls and arguments](motion.md#bookmark-preview-positions) |
 | Run, inspect, and test | `ferroui_reload_targets`, `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history` drive managed Cargo and report outcomes. `ferroui_runtime_source` and `ferroui_runtime_apply_source` work with a mapped runtime value. `ferroui_scenario_run` runs a saved native scenario. |
+| Open a running app’s template | `ferroui_runtime_templates` reads the selected element’s templates. Pass its generation and a template ID to `ferroui_runtime_template_source`. [Live App template tools](#inspect-live-app-templates-with-mcp) |
 
 For example, ask an agent to open the current design, inspect its animation programs, and seek to one keyframe. It should read the active document and RSX invocation, wait for the accepted frame, read the program ID and its keys, then call the native seek with the current frame. Ask it to capture the resulting frame or report the current position. To update a key, validate the time, value, and easing together before applying the edit.
 
@@ -183,6 +184,12 @@ The source tool opens the definition by default. For Rust, use `template_destina
 For TreeDataGrid, pass the reported `CellTemplate` or `CellEditingTemplate` member for the column. An expander's inner column has its own owner. [TreeDataGrid template workflow](runtime.md#inspect-treedatagrid-display-and-editing-templates)
 
 When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same fields to review the checked patch. Call `designer_hosted_template_copy` with write access to install the copy as one Undo step. Read a fresh catalog after a source or frame change. [App Preview template workflow](runtime.md#open-and-copy-app-preview-control-templates)
+
+### Inspect Live App templates with MCP
+
+Read the application’s current tree to get a node ID. Call `ferroui_runtime_templates` with `node` and `runtime` set to `managed` or `attached`. The catalog lists effective templates, column headers where available, and verified source stamps. The native application tool `get_template_sources` exposes the same template evidence.
+
+Call `ferroui_runtime_template_source` with the same node and runtime, the catalog’s `generation` as `expected_generation`, and the entry’s `id` as `template_id`. The tool rechecks the app’s template and the editor’s source revision before opening the file. [Live App workflow](runtime.md#open-an-effective-template-in-the-running-app)
 
 ### Edit compound properties with MCP
 

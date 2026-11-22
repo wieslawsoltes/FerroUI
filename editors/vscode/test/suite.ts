@@ -12,6 +12,7 @@ import { verifyXamlRefactoring } from './xamlLanguage';
 import { verifyRuntimeClient } from './runtimeClient';
 import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
+import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
 import { verifyProcessShutdown, verifyReloadHistory } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
@@ -182,6 +183,7 @@ export async function run(): Promise<void> {
         await verifyStudioPresentations(preview, xamlInput.uri);
         await verifyHostedPreview(preview, xamlInput.uri);
         await verifyLiveApp();
+        await verifyLiveRustTemplates();
         await verifyLiveXaml(workspace, runtimeSource);
         const commands = await vscode.commands.getCommands(true);
         assert.ok(commands.includes('ferroui.outline.focus'), 'Outline is a contributed VS Code view');

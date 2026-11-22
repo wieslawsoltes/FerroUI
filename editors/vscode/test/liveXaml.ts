@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { revision } from '../src/reloadProcess';
 import type { RuntimeNode, RuntimeProperty, RuntimeSource } from '../src/runtimeProtocol';
 import type { RuntimeSourceEditor } from '../src/runtimeSource';
+import { readRuntimeTemplates } from '../src/runtimeTemplates';
 import { withNativeApp } from './nativeAppFixture';
 import { until } from './wait';
 
@@ -31,6 +32,14 @@ export async function verifyLiveXaml(root: vscode.Uri, editor: RuntimeSourceEdit
             assert.ok((await client.call<{ matched: boolean }>('wait_for', { name: 'Result', text: 'Łódź' })).matched);
 
             const signal = new AbortController().signal;
+            const [queue] = await client.call<RuntimeNode[]>('find_elements', { name: 'Queue' });
+            const template = (await readRuntimeTemplates(client, queue.node_id, signal))
+                .find(entry => entry.member === 'ItemTemplate');
+            assert.equal(template?.source?.revision, source.revision);
+            assert.ok(template);
+            const opened = await editor.revealTemplate(client, queue.node_id, template.id, signal, () => true);
+            assert.equal(opened.uri, file.toString());
+            assert.match(document.lineAt(opened.position.line).text, /<DataTemplate>/);
             const initialVersion = document.version;
             const replacement = 'Customers in Łódź';
             await assert.rejects(
@@ -39,6 +48,7 @@ export async function verifyLiveXaml(root: vscode.Uri, editor: RuntimeSourceEdit
             );
             await editor.apply(client, heading, 'Text', replacement, signal, 'attached', () => true, initialVersion);
             assert.equal(document.getText(), original.replace('Open customer records', replacement));
+            await assert.rejects(editor.revealTemplate(client, queue.node_id, template.id, signal, () => true), /current workspace or revision/);
             assert.deepEqual(await vscode.workspace.fs.readFile(file), withBom);
             const [property] = await client.call<RuntimeProperty[]>('get_properties', { node_id: heading.node_id, properties: ['Text'] });
             assert.equal(property.value, 'Open customer records');

@@ -11,6 +11,14 @@ fn main() {
     #[cfg(feature = "app-preview")]
     {
         app_preview::start_if_requested();
+        if std::env::args_os().any(|arg| arg == "--tree-templates-live") {
+            ferroui_view::launch_themed(
+                || ferroui_themes_winui::WinUITheme::new().as_style(),
+                || app_preview::template_demo_window().into_element(),
+                window_started,
+            );
+            return;
+        }
         let mut args = std::env::args_os().skip(1);
         if args.any(|arg| arg == "--xaml-live") {
             let path = std::path::PathBuf::from(
