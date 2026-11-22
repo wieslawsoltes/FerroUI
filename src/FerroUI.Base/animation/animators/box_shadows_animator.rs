@@ -1,6 +1,8 @@
 use crate::animation::animators::BoxShadowAnimator;
+use crate::animation::Animatable;
 use crate::media::BoxShadows;
 use crate::animation::animators::{Animator, AnimatorBase};
+use crate::StyledProperty;
 
 /// Animator that interpolates [`BoxShadows`] properties.
 #[derive(Default)]
@@ -11,6 +13,17 @@ pub struct BoxShadowsAnimator {
 impl BoxShadowsAnimator {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    /// Return the underlying list, including the default for an animation-only property.
+    pub fn base_value(target: &Animatable, property: &'static StyledProperty<BoxShadows>) -> BoxShadows {
+        target.get_base_value(property).unwrap_or_else(|| {
+            if property.inherits() {
+                target.values().inherited_or_default(target, property)
+            } else {
+                property.get_default_value_for(target)
+            }
+        })
     }
 
     /// Interpolates between two values using the specified progress.
@@ -53,6 +66,10 @@ impl Animator for BoxShadowsAnimator {
 
     fn base(&self) -> &AnimatorBase {
         &self.base
+    }
+
+    fn neutral_value(&self, target: &Animatable) -> Self::Value {
+        Self::base_value(target, self.base.styled_property())
     }
 
     #[inline]

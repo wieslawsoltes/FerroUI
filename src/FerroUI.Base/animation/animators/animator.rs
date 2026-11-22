@@ -7,7 +7,7 @@ use crate::reactive::{
     CompositeDisposable, Disposable, IDisposable, IObservable, IObserver, LightweightSubject,
     ObservableError,
 };
-use crate::{AnyValue, BoxedValue, FerroProperty, PropertyValue, Ref, StyledProperty, Visual};
+use crate::{AnyValue, BoxedValue, FerroProperty, FerroPropertyRegistry, PropertyValue, Ref, StyledProperty, Visual};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -458,7 +458,8 @@ impl<A: Animator> IAnimator for A {
         let property = self.property()?;
         let target = self.preview_target(control)?;
         if property.as_styled::<A::Value>().is_none()
-            || (!property.is_attached() && !property.owner_type().is_assignable_from(target.get_type()))
+            || (!property.is_attached() && !property.owner_type().is_assignable_from(target.get_type())
+                && !FerroPropertyRegistry::instance().is_registered_for(&target, property))
         {
             return None;
         }
