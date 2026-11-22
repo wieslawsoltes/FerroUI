@@ -2642,6 +2642,13 @@ mod app {
             item.set(&bytes_format, Some(Rc::from(payload.as_slice())));
             item.set(&DataFormat::create_in_process_format::<String>("smoke-private"), Some("private".to_string()));
             transfer.add(item);
+            // With `chromium-clipboard-map` the offer also has the map and a slot for the format.
+            let mut expected_types = vec![UTF8.to_string(), "text/plain".to_string(), BYTES.to_string()];
+            let chromium = ferroui_base::input::platform::chromium_clipboard::ChromiumClipboard::Linux;
+            if let Some(map) = chromium.create_map(&transfer.formats()) {
+                expected_types.push(chromium.map_format().identifier().to_string());
+                expected_types.extend(map.aliases.iter().map(|alias| alias.slot.identifier().to_string()));
+            }
             let before = probe.selections();
             let set = pumped(probe, clipboard.set_data_async(Some(transfer))).await;
             let announced = wait_for(STEP_TIMEOUT, || probe.selections() > before).await;
@@ -2649,7 +2656,7 @@ mod app {
             let read = read_by_probe(probe, BYTES).await;
             report.check(
                 "application format",
-                matches!(set, Some(Ok(()))) && announced && mime_types == [UTF8, "text/plain", BYTES] && read.as_deref() == Ok(payload.as_slice()),
+                matches!(set, Some(Ok(()))) && announced && mime_types == expected_types && read.as_deref() == Ok(payload.as_slice()),
                 format!("types {mime_types:?} (the format of the process is not offered); {} bytes read", read.as_ref().map(Vec::len).unwrap_or(0)),
             );
 
