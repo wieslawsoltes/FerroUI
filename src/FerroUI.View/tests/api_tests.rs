@@ -329,6 +329,27 @@ fn transitions_and_animations_are_built_for_the_animation_system() {
 }
 
 #[test]
+fn transform_list_literals_build_and_sample_in_rust() {
+    use ferroui_base::media::{ITransform, transformation::TransformOperations};
+
+    let owner = Owner::new_root();
+    let target = owner.with(|| border().render_transform("translateX(4px)").into_element().mount());
+    let built = animation(ms(600))
+        .key_frame(0.0, |frame| frame.set(Visual::render_transform_property(), None))
+        .key_frame(1.0, |frame| frame.set(
+            Visual::render_transform_property(), TransformOperations::parse("translateX(36px)").unwrap(),
+        ))
+        .build();
+    let samples = built.sample_track_for_preview(
+        &target, Visual::render_transform_property().as_property(), &[0.5],
+    ).unwrap();
+    let transform = samples[0].downcast_ref::<Option<Rc<dyn ITransform>>>().unwrap().as_ref().unwrap();
+    assert_eq!(transform.value().m31, 18.0);
+    assert_eq!(target.render_transform().unwrap().value().m31, 4.0);
+    owner.dispose();
+}
+
+#[test]
 fn a_popup_holds_its_child_element_and_a_context_menu_is_an_element() {
     let owner = Owner::new_root();
     let panel = owner.with(|| {

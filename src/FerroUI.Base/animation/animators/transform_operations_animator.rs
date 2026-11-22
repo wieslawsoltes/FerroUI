@@ -6,10 +6,8 @@ use std::rc::Rc;
 
 /// Interpolates transform operation lists.
 ///
-/// This is the interpolation behind
+/// The operations used by
 /// [`TransformOperationsTransition`](crate::animation::TransformOperationsTransition).
-/// It is not registered for any property type, so key frame animations do
-/// not select it.
 #[derive(Default)]
 pub struct TransformOperationsAnimator;
 

@@ -17,13 +17,7 @@ impl BoxShadowsAnimator {
 
     /// Return the underlying list, including the default for an animation-only property.
     pub fn base_value(target: &Animatable, property: &'static StyledProperty<BoxShadows>) -> BoxShadows {
-        target.get_base_value(property).unwrap_or_else(|| {
-            if property.inherits() {
-                target.values().inherited_or_default(target, property)
-            } else {
-                property.get_default_value_for(target)
-            }
-        })
+        target.values().unanimated_value(target, property)
     }
 
     /// Interpolates between two values using the specified progress.

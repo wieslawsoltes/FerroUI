@@ -64,6 +64,7 @@ impl Registry {
         register_animator::<EffectAnimator>(&mut animators);
         register_animator::<BoxShadowAnimator>(&mut animators);
         register_animator::<BoxShadowsAnimator>(&mut animators);
+        register_animator::<TransformListAnimator>(&mut animators);
         register_animator::<BaseBrushAnimator>(&mut animators);
         register_animator::<CornerRadiusAnimator>(&mut animators);
         register_animator::<ColorAnimator>(&mut animators);

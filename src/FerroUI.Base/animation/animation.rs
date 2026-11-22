@@ -25,6 +25,25 @@ const NO_SETTER_PROPERTY: &str = "No Setter property assigned.";
 const CSS_TRANSFORM_TARGET: &str = "The native component animator cannot target an existing CSS \
     TransformOperations value; use a native TransformGroup or a registered transform animator.";
 
+fn validate_transform_tracks(
+    tracks: impl IntoIterator<Item = (TypeId, &'static FerroProperty)>,
+) -> Result<(), AnimationError> {
+    use crate::animation::animators::{TransformAnimator, TransformListAnimator};
+    let mut components = false;
+    let mut render_transform = false;
+    for (kind, property) in tracks {
+        components |= kind == TypeId::of::<TransformAnimator>();
+        render_transform |= kind == TypeId::of::<TransformListAnimator>()
+            && property == Visual::render_transform_property().as_property();
+    }
+    if components && render_transform {
+        return Err(AnimationError(
+            "Choose a whole RenderTransform track or transform component tracks for this clip".into(),
+        ));
+    }
+    Ok(())
+}
+
 /// The rejection of a property no animator is registered for.
 fn no_animator_message(property: &'static FerroProperty) -> String {
     format!(
@@ -366,6 +385,11 @@ impl Animation {
             }
             Err(error)
         };
+        if let Err(error) = validate_transform_tracks(animators.iter().filter_map(|animator| {
+            Some((animator.animator_type(), animator.property()?))
+        })) {
+            return reject(subscriptions, error);
+        }
 
         let should_pause_on_invisible = match self.playback_behavior.get() {
             PlaybackBehavior::Auto => !(animates_visibility || is_manually_started),
@@ -632,6 +656,7 @@ impl Animation {
                 }
             }
         }
+        validate_transform_tracks(animators.iter().copied())?;
         for (kind, _) in animators {
             if kind == transform_animator && visual.is_none() {
                 return Err(AnimationError(crate::animation::animators::not_a_visual_message(control)));

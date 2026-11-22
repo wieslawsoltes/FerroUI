@@ -670,7 +670,7 @@ impl ValueStore {
     // Keep the inherited value's temporary Rc and its unwind cleanup off the
     // hot paths for a local value or the default of a non-inheriting property.
     #[inline(never)]
-    pub(crate) fn inherited_or_default<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
+    fn inherited_or_default<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) -> T {
         // The stored value converted where it is read, with no function of its own between: the
         // read of an inherited value of a type that is its own storage type is the read of main.
         match self.try_get_inherited_value(property) {
@@ -733,6 +733,18 @@ impl ValueStore {
 
     pub fn get_base_value<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
         self.get_stored_base_value::<T::Storage>(property).map(T::from_storage)
+    }
+
+    pub(crate) fn unanimated_value<T: StyledValue>(
+        &self, owner: &FerroObject, property: &'static StyledProperty<T>,
+    ) -> T {
+        self.get_base_value(property).unwrap_or_else(|| {
+            if property.inherits() {
+                self.inherited_or_default(owner, property)
+            } else {
+                property.get_default_value_for(owner)
+            }
+        })
     }
 
     fn get_stored_base_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {

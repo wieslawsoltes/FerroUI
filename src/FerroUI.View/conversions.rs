@@ -11,10 +11,10 @@
 //! | `f64`, `(f64, f64)`, `(f64, f64, f64, f64)` | `Thickness`          |
 //! | `f64`, `(f64, f64)`, `(f64, f64, f64, f64)` | `CornerRadius`       |
 //! | `Color`, a color name or `#rgb` text | `Option<Rc<dyn IBrush>>`    |
+//! | a `TransformOperations` handle or transform text | `Option<Rc<dyn ITransform>>` |
 //! | `&str`                        | `Option<BoxedValue>` (text content)|
 //!
-//! A color text that does not parse panics with the text: it is a mistake
-//! in the source, like an attribute XAML does not compile.
+//! Malformed color and transform literals panic with the source text.
 //!
 //! The brush of a color is one object for every element that names the
 //! color ([`brush_of`]): a list of a thousand rows written with `"#1E293B"`
@@ -22,7 +22,7 @@
 
 use crate::builder::{FromValue, IntoValue};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Brush, Color, IBrush};
+use ferroui_base::media::{Brush, Color, IBrush, ITransform, transformation::TransformOperations};
 use ferroui_base::{BoxedValue, CornerRadius, PropertyValue, Thickness};
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -188,5 +188,19 @@ impl IntoValue<Option<Rc<dyn IBrush>>> for &str {
             Some(color) => brush_of(color),
             None => Brush::parse(self).unwrap_or_else(|_| panic!("`{self}` is not a color")),
         })
+    }
+}
+
+impl IntoValue<Option<Rc<dyn ITransform>>> for Rc<TransformOperations> {
+    fn into_value(self) -> Option<Rc<dyn ITransform>> {
+        Some(self)
+    }
+}
+
+impl IntoValue<Option<Rc<dyn ITransform>>> for &str {
+    fn into_value(self) -> Option<Rc<dyn ITransform>> {
+        TransformOperations::parse(self)
+            .unwrap_or_else(|error| panic!("{error}"))
+            .into_value()
     }
 }
