@@ -1,4 +1,4 @@
-use crate::{AnimationBoxShadows, AnimationEffect, AnimationTransformList, AnimationValue, RelativeUnit};
+use crate::{AnimationBoxShadows, AnimationBrush, AnimationEffect, AnimationTransformList, AnimationValue, RelativeUnit};
 use ferroui_base::media::{BoxShadows, Color, IBrush};
 use ferroui_base::{
     BoxedValue, CornerRadius, Point, Rect, RelativePoint, RelativeScalar, Size, Thickness, Vector,
@@ -42,8 +42,11 @@ pub(super) fn value(sample: &BoxedValue) -> Option<AnimationValue> {
         return Some(color.into());
     }
     if let Some(brush) = native.downcast_ref::<Option<Rc<dyn IBrush>>>() {
-        let solid = brush.as_ref()?.as_solid_color_brush()?;
-        return Some(solid.color().into());
+        let brush = brush.as_deref()?;
+        if let Some(solid) = brush.as_solid_color_brush() {
+            return Some(solid.color().into());
+        }
+        return AnimationBrush::from_native(brush).ok().map(AnimationValue::Brush);
     }
     if let Some(&Point { x, y }) = native.downcast_ref::<Point>() {
         return Some(AnimationValue::Point { x, y });

@@ -12,6 +12,7 @@ pub const DESIGN_ANIMATION_EFFECT_OBJECTS_QUERY: &str = "ferroui-design-animatio
 pub const DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY: &str = "ferroui-design-animation-registered-effects";
 pub const DESIGN_ANIMATION_BOX_SHADOWS_QUERY: &str = "ferroui-design-animation-box-shadows";
 pub const DESIGN_ANIMATION_TRANSFORM_LISTS_QUERY: &str = "ferroui-design-animation-transform-lists";
+pub const DESIGN_ANIMATION_BRUSHES_QUERY: &str = "ferroui-design-animation-brushes";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCurveRequest {

@@ -2,7 +2,7 @@ use crate::{require, AnimationError, Result};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "native-values")]
-use crate::AnimationTransformList;
+use crate::{AnimationBrush, AnimationTransformList};
 
 #[cfg(feature = "native-values")]
 #[path = "box_shadow_value.rs"]
@@ -34,6 +34,8 @@ pub enum ValueKind {
     BoxShadows,
     #[cfg(feature = "native-values")]
     TransformList,
+    #[cfg(feature = "native-values")]
+    Brush,
     Discrete,
 }
 
@@ -100,6 +102,8 @@ pub enum AnimationValue {
     BoxShadows(AnimationBoxShadows),
     #[cfg(feature = "native-values")]
     TransformList(AnimationTransformList),
+    #[cfg(feature = "native-values")]
+    Brush(AnimationBrush),
     Discrete(String),
 }
 impl AnimationValue {
@@ -134,6 +138,8 @@ impl AnimationValue {
             Self::BoxShadows(_) => ValueKind::BoxShadows,
             #[cfg(feature = "native-values")]
             Self::TransformList(_) => ValueKind::TransformList,
+            #[cfg(feature = "native-values")]
+            Self::Brush(_) => ValueKind::Brush,
             Self::Discrete(_) => ValueKind::Discrete,
         }
     }
@@ -221,6 +227,8 @@ impl AnimationValue {
             Self::BoxShadows(shadows) => shadows.validate(),
             #[cfg(feature = "native-values")]
             Self::TransformList(list) => list.validate(),
+            #[cfg(feature = "native-values")]
+            Self::Brush(brush) => brush.validate(),
             Self::Discrete(value) => require(
                 value.len() <= 1_048_576
                     && value.chars().all(|c| {
@@ -392,6 +400,8 @@ impl AnimationValue {
             (Self::BoxShadows(from), Self::BoxShadows(to)) => Self::BoxShadows(from.interpolate(to, progress)),
             #[cfg(feature = "native-values")]
             (Self::TransformList(from), Self::TransformList(to)) => Self::TransformList(from.interpolate(to, progress)?),
+            #[cfg(feature = "native-values")]
+            (Self::Brush(from), Self::Brush(to)) => Self::Brush(from.interpolate(to, progress)?),
             (Self::Discrete(_), Self::Discrete(_)) => {
                 if progress < 1.0 {
                     self.clone()
@@ -451,6 +461,8 @@ impl AnimationValue {
             Self::BoxShadows(shadows) => shadows.to_xaml(),
             #[cfg(feature = "native-values")]
             Self::TransformList(list) => list.to_xaml(),
+            #[cfg(feature = "native-values")]
+            Self::Brush(brush) => brush.to_xaml(),
             Self::Discrete(v) => v.clone(),
         }
     }
@@ -599,6 +611,8 @@ impl AnimationValue {
             ValueKind::BoxShadows => Self::BoxShadows(AnimationBoxShadows::parse(source)?),
             #[cfg(feature = "native-values")]
             ValueKind::TransformList => Self::TransformList(AnimationTransformList::parse(source)?),
+            #[cfg(feature = "native-values")]
+            ValueKind::Brush => Self::Brush(AnimationBrush::parse(source)?),
             ValueKind::Discrete => Self::Discrete(source.into()),
         };
         result.validate()?;

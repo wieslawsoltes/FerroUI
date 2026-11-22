@@ -39,7 +39,12 @@ impl GradientBrushAnimator {
             return discrete();
         };
 
-        let stops = || Self::interpolate_stops(progress, &old_gradient.gradient_stops(), &new_gradient.gradient_stops());
+        let old_stops = old_gradient.gradient_stops();
+        let new_stops = new_gradient.gradient_stops();
+        if old_stops.is_empty() || new_stops.is_empty() {
+            return discrete();
+        }
+        let stops = || Self::interpolate_stops(progress, &old_stops, &new_stops);
         let opacity = DoubleAnimator::interpolate_core(progress, &old_brush.opacity(), &new_brush.opacity());
         let transform = || Self::interpolate_transform(progress, old_brush.transform(), new_brush.transform());
         let transform_origin = RelativePointAnimator::interpolate_core(
@@ -233,6 +238,10 @@ impl Animator for GradientBrushAnimator {
 
     fn base(&self) -> &AnimatorBase {
         &self.base
+    }
+
+    fn neutral_value(&self, target: &crate::animation::Animatable) -> Self::Value {
+        target.values().unanimated_value(target, self.base.styled_property())
     }
 
     fn interpolate(&self, progress: f64, old_value: &Self::Value, new_value: &Self::Value) -> Self::Value {

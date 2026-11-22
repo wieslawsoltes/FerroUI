@@ -4,7 +4,7 @@ use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Button, ContentControl};
 use ferroui_designer_animation::{
     AnimationValue, BehaviorAction, BehaviorModel, BehaviorTrigger, Easing, StateSetter,
-    StateTransition, VisualState, VisualStateGroup,
+    StateTransition, ValueKind, VisualState, VisualStateGroup,
 };
 use ferroui_designer_core::Edit;
 
@@ -898,7 +898,10 @@ fn complex_native_programs_seek_shadows_gradients_effects_and_transform_componen
         session.preview_status()
     );
     let id = session.animation_programs()[0].id;
-    assert!(session.animation_programs()[0].timeline.is_none());
+    assert!(session.animation_programs()[0].timeline.as_ref().is_some_and(|timeline| {
+        timeline.tracks.iter().any(|track| track.property == "Background"
+            && track.keyframes.iter().all(|key| key.value.kind() == ValueKind::Brush))
+    }));
     let target = session.document().ast().root();
     session.seek(1.0).unwrap();
     let border = session

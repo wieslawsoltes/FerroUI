@@ -31,7 +31,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationCatalogMessage, DesignAnimationClip, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationResultMessage, DesignAnimationTarget, UpdateDesignMessage,
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult, DESIGN_KEYFRAME_SELECTION_QUERY,
-    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_BOX_SHADOWS_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
+    DESIGN_ANIMATION_AUTHORING_QUERY, DESIGN_ANIMATION_BOX_SHADOWS_QUERY, DESIGN_ANIMATION_BRUSHES_QUERY, DESIGN_ANIMATION_CLIPS_QUERY, DESIGN_ANIMATION_CURVE_CHANNELS_QUERY,
     DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_EFFECTS_QUERY, DESIGN_ANIMATION_EFFECT_OBJECTS_QUERY,
     DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY, DESIGN_ANIMATION_TRANSFORM_LISTS_QUERY, DESIGN_ANIMATION_VERSION,
     DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
@@ -53,6 +53,7 @@ ferroui_base::ferro_thread_local! {
     static REGISTERED_EFFECTS: Cell<bool> = const { Cell::new(false) };
     static BOX_SHADOWS: Cell<bool> = const { Cell::new(false) };
     static TRANSFORM_LISTS: Cell<bool> = const { Cell::new(false) };
+    static BRUSHES: Cell<bool> = const { Cell::new(false) };
     static CLIPS: Cell<bool> = const { Cell::new(false) };
     static CLIP_AUTHORING: Cell<bool> = const { Cell::new(false) };
     static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
@@ -77,6 +78,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     REGISTERED_EFFECTS.set(EFFECTS.get() && requested(DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY));
     BOX_SHADOWS.set(enabled && requested(DESIGN_ANIMATION_BOX_SHADOWS_QUERY));
     TRANSFORM_LISTS.set(enabled && requested(DESIGN_ANIMATION_TRANSFORM_LISTS_QUERY));
+    BRUSHES.set(enabled && requested(DESIGN_ANIMATION_BRUSHES_QUERY));
     CLIPS.set(enabled && requested(DESIGN_ANIMATION_CLIPS_QUERY));
     CLIP_AUTHORING.set(AUTHORING.get() && requested(DESIGN_CLIP_AUTHORING_QUERY));
     STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
@@ -309,6 +311,7 @@ impl HostedAnimations {
                     registered_effects: REGISTERED_EFFECTS.get(),
                     box_shadows: BOX_SHADOWS.get(),
                     transform_lists: TRANSFORM_LISTS.get(),
+                    brushes: BRUSHES.get(),
                 },
             )
         });

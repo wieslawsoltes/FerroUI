@@ -49,6 +49,7 @@ pub enum CurveChannel {
     M22,
     M31,
     M32,
+    StopOffset,
 }
 
 impl FromStr for CurveChannel {
@@ -166,6 +167,7 @@ impl CurveChannel {
             Self::M22 => "M22",
             Self::M31 => "M31 (px)",
             Self::M32 => "M32 (px)",
+            Self::StopOffset => "Offset",
         }
     }
 
@@ -230,10 +232,10 @@ impl CurveChannel {
         Ok(points)
     }
 
-    fn project(self, value: &AnimationValue) -> Option<f64> {
+    pub(crate) fn project(self, value: &AnimationValue) -> Option<f64> {
         use AnimationValue as V;
         let sample = match (self, value) {
-            (Self::Value, V::Number(n)) => *n,
+            (Self::Value | Self::StopOffset | Self::Angle, V::Number(n)) => *n,
             (Self::Red, V::Color { r, .. }) => *r,
             (Self::Green, V::Color { g, .. }) => *g,
             (Self::Blue, V::Color { b, .. }) => *b,

@@ -4,7 +4,7 @@ use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::Subscription;
 use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Rect, Ref, StyledElement, Visual, WeakRef};
 use ferroui_controls::{ContentControl, Control};
-use ferroui_designer_animation::{AnimationBoxShadows, AnimationEffect, AnimationTransformList, AnimationValue, Sample};
+use ferroui_designer_animation::{AnimationBoxShadows, AnimationBrush, AnimationEffect, AnimationTransformList, AnimationValue, Sample};
 use ferroui_designer_animation::native::{FrozenPreviewClock, NativeStateTriggers};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_designer_project::{CompiledResources, LocalPreviewSources, PreviewIncludes, PreviewSourceBuffer, local_preview_sources_with_resources};
@@ -1041,6 +1041,10 @@ impl RuntimePreview {
             return Err(format!("{name} does not support an animation value layer"));
         }
         let converted: BoxedValue = match value {
+            AnimationValue::Brush(brush) if AnimationBrush::is_property(property) => {
+                value.validate().map_err(|error| error.to_string())?;
+                Rc::new(Some(brush.to_native()))
+            }
             AnimationValue::TransformList(list) if AnimationTransformList::is_property(property) => {
                 value.validate().map_err(|error| error.to_string())?;
                 Rc::new(list.to_transform())

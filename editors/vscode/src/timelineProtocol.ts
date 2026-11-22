@@ -196,7 +196,8 @@ export type CurveChannel = 'value' | 'x' | 'y' | 'width' | 'height' | 'left' | '
     | 'blur_radius' | 'offset_x' | 'offset_y' | 'spread' | 'direction' | 'shadow_depth' | 'shadow_opacity'
     | 'angle' | 'angle_x' | 'angle_y' | 'm11' | 'm12' | 'm21' | 'm22' | 'm31' | 'm32'
     | `effect_parameter/${string}` | `box_shadow/${number}/${string}`
-    | `transform_operation/${number}/${string}` | `transform_matrix/${string}`;
+    | `transform_operation/${number}/${string}` | `transform_matrix/${string}`
+    | 'stop_offset' | `gradient_stop/${number}/${string}` | `gradient/${string}`;
 
 export interface TimelineCurveRequest {
     type: 'curve';

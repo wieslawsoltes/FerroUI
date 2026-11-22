@@ -36,7 +36,10 @@ impl RsxAnimation {
             } => {
                 let existing = self.keys.iter().find(|key| key.property == property);
                 let (getter, kind) = if let Some(key) = existing {
-                    (key.getter.clone(), key.value.value.kind())
+                    let kind = if self.keys.iter().any(|key| key.property == property && key.value.value.kind() == ValueKind::Brush) {
+                        ValueKind::Brush
+                    } else { key.value.value.kind() };
+                    (key.getter.clone(), kind)
                 } else {
                     let (path, shape) = BUILTINS
                         .iter()
@@ -49,7 +52,10 @@ impl RsxAnimation {
                     } else {
                         format!("::{path}")
                     };
-                    (path, shape.kind())
+                    let kind = if shape.is_brush() && value.trim_start().starts_with('<') {
+                        ValueKind::Brush
+                    } else { shape.kind() };
+                    (path, kind)
                 };
                 let key = NewKey {
                     property: property.into(),

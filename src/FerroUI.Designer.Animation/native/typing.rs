@@ -1,5 +1,5 @@
 use super::curve::matches_property;
-use crate::{AnimationBoxShadows, AnimationEffect, AnimationProgram, AnimationTransformList, AnimationValue, ImportOptions, ValueKind};
+use crate::{AnimationBoxShadows, AnimationBrush, AnimationEffect, AnimationProgram, AnimationTransformList, AnimationValue, ImportOptions, ValueKind};
 use ferroui_base::animation::{Animatable, Animation, animators::TransformAnimator};
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{
@@ -42,12 +42,16 @@ pub fn native_keyframe_options_for_target(
         })
         .collect::<Vec<_>>();
     let mut setters = BTreeMap::<_, Vec<_>>::new();
+    let mut brushes = std::collections::BTreeSet::new();
     for setter in document
         .ast()
         .subtree(program.id)
         .filter(|node| node.local_name() == "Setter")
     {
         if let Some(name) = setter.attribute("Property") {
+            if setter.attribute("Value").is_none() && AnimationBrush::is_authored_brush_object(document, setter.id) {
+                brushes.insert(name);
+            }
             setters
                 .entry(name)
                 .or_default()
@@ -56,6 +60,7 @@ pub fn native_keyframe_options_for_target(
     }
     let mut options = ImportOptions {
         native_effect_endpoints: true,
+        native_brush_endpoints: true,
         effect_color: Some(AnimationEffect::resolve_color),
         effect_literal: Some(AnimationEffect::parse_native),
         ..ImportOptions::default()
@@ -85,6 +90,13 @@ pub fn native_keyframe_options_for_target(
             options.property_kinds.insert(name.into(), kind);
             if let Some(base) = target.and_then(|target| native_list_base(target, property, kind)) {
                 options.base_values.insert(name.into(), base);
+            }
+            continue;
+        }
+        if AnimationBrush::is_property(property) && brushes.contains(&name) {
+            options.property_kinds.insert(name.into(), ValueKind::Brush);
+            if let Some(base) = target.and_then(|object| AnimationBrush::base_value(object, property)) {
+                options.base_values.insert(name.into(), AnimationValue::Brush(base));
             }
             continue;
         }

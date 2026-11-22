@@ -244,6 +244,31 @@ pub(crate) fn span(tokens: &impl Spanned) -> SourceSpan {
     SourceSpan::new(range.start, range.end)
 }
 
+pub(super) fn unparen(mut expression: &Expr) -> &Expr {
+    while let Expr::Paren(paren) = expression {
+        if !paren.attrs.is_empty() { break; }
+        expression = &paren.expr;
+    }
+    expression
+}
+
+pub(super) fn rc_interface_cast(
+    ty: &syn::Type, interface: &str, resolve: &impl Fn(&Expr) -> Option<String>,
+) -> bool {
+    use syn::{GenericArgument, PathArguments, Type, TypeParamBound};
+    let Type::Path(path) = ty else { return false };
+    let Some(rc) = path.path.segments.last() else { return false };
+    let PathArguments::AngleBracketed(arguments) = &rc.arguments else { return false };
+    let Some(GenericArgument::Type(Type::TraitObject(object))) = arguments.args.first() else { return false };
+    let Some(TypeParamBound::Trait(bound)) = object.bounds.first() else { return false };
+    let resolve_type = |path: syn::Path| resolve(&Expr::Path(ExprPath { attrs: vec![], qself: None, path }));
+    let mut container = path.path.clone();
+    container.segments.last_mut().expect("Rc type").arguments = PathArguments::None;
+    path.qself.is_none() && arguments.args.len() == 1 && object.bounds.len() == 1
+        && matches!(resolve_type(container).as_deref(), Some("std::rc::Rc" | "alloc::rc::Rc"))
+        && resolve_type(bound.path.clone()).as_deref() == Some(interface)
+}
+
 pub(crate) fn method_suffix(method: &ExprMethodCall) -> SourceSpan {
     SourceSpan::new(span(&method.dot_token).start, span(method).end)
 }

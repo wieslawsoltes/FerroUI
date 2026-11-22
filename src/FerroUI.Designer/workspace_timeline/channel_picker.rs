@@ -27,7 +27,7 @@ impl DesignerWorkspace {
     ) -> Ref<Control> {
         let picker = ComboBox::new();
         picker.set_width(match channel {
-            TrackCurveChannel::Transform(_) | TrackCurveChannel::BoxShadow { .. } => 164.0,
+            TrackCurveChannel::Transform(_) | TrackCurveChannel::BoxShadow { .. } | TrackCurveChannel::Brush(_) => 164.0,
             TrackCurveChannel::EffectParameter { .. } => 124.0,
             _ => 82.0,
         });

@@ -1,7 +1,7 @@
 use super::{HostedAnimations, KEYFRAME_SAMPLING};
 use ferroui_base::animation::Animatable;
-use ferroui_designer_animation::native::sample_typed_keyframe;
-use ferroui_designer_animation::{native_key_time, Easing};
+use ferroui_designer_animation::native::{sample_keyframe_value, sample_typed_keyframe};
+use ferroui_designer_animation::{AnimationBrush, Easing, native_key_time};
 use ferroui_designer_core::NodeId;
 use ferroui_remote_protocol::designer::{DesignAnimationAuthoringRequest, DesignAnimationKeyframe};
 
@@ -56,7 +56,12 @@ impl HostedAnimations {
             .filter(|_| program.compatible_targets.contains(&target))
             .and_then(|control| control.cast::<Animatable>())
             .ok_or("Choose a compatible live preview target")?;
-        let value = sample_typed_keyframe(animation, &target, &track.property, time)?;
+        let value = if track.keys.first().is_some_and(|key| key.value_kind == "Brush") {
+            let sample = sample_keyframe_value(animation, &target, &track.property, time)?;
+            AnimationBrush::sampled_value(&sample)?
+        } else {
+            sample_typed_keyframe(animation, &target, &track.property, time)?
+        };
         let authored = self.keyframes.as_ref().ok_or("The accepted authoring track retired")?;
         let value = authored.sample_in_authored_form(request.program, track.target, &track.property, time, value);
         let value_kind = format!("{:?}", value.kind());

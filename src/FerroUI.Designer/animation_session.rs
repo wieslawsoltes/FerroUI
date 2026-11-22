@@ -4,7 +4,7 @@ use ferroui_base::styling::Style;
 use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use ferroui_designer_animation::native::{native_list_base, native_list_kind};
 use ferroui_designer_animation::{
-    AnimationBoxShadows, AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationTransformList, AnimationValue,
+    AnimationBoxShadows, AnimationBrush, AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationTransformList, AnimationValue,
     CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
@@ -776,7 +776,7 @@ impl DesignerSession {
         let native_key = self.animation.timeline.track(track_target, property)
             .and_then(|track| track.keyframes.first())
             .is_some_and(|key| matches!(&key.value,
-                AnimationValue::Effect(_) | AnimationValue::BoxShadows(_) | AnimationValue::TransformList(_)));
+                AnimationValue::Effect(_) | AnimationValue::BoxShadows(_) | AnimationValue::TransformList(_) | AnimationValue::Brush(_)));
         let transform_component = self.active_animation_program().is_some_and(|id| {
             self.animation.native.transform_component(id, property).is_some()
         });
@@ -833,7 +833,11 @@ impl DesignerSession {
         let key = track.and_then(|track| track.keyframes.iter().find(|key| key.time == time));
         let value = if track.is_some() && self.requires_native_animation(program) {
             let value = self.animation.native.sample_keyframe(program, &self.preview, target, property, time)?;
-            self.animation_value_from_preview(target, property, &value)?
+            if track.and_then(|track| track.keyframes.first()).is_some_and(|key| key.value.kind() == ValueKind::Brush) {
+                AnimationBrush::sampled_value(&value)?
+            } else {
+                self.animation_value_from_preview(target, property, &value)?
+            }
         } else if track.is_some() {
             self.animation.compiled_targets.get(&(id, target))
                 .ok_or("Choose a compiled animation target")?.scrub(time)
@@ -1213,6 +1217,13 @@ impl DesignerSession {
         property: &str,
         value: &str,
     ) -> Result<AnimationValue, String> {
+        if value.trim_start().starts_with('<') && self.preview.visual(target)
+            .and_then(|visual| ferroui_inspect::Inspector::property(&visual, property).ok())
+            .is_some_and(AnimationBrush::is_property)
+        {
+            return AnimationValue::parse_native_literal(value, ValueKind::Brush)
+                .map_err(|error| error.to_string());
+        }
         if let Some(kind) = self.animation_kind_for_target(target, property) {
             if kind == ValueKind::Color {
                 if let Some(color) = ferroui_base::media::Color::try_parse(value) {
@@ -1225,6 +1236,11 @@ impl DesignerSession {
     }
 
     fn animation_value_from_preview(&self, target: NodeId, property: &str, value: &BoxedValue) -> Result<AnimationValue, String> {
+        if let Some(Ok(brush)) = AnimationBrush::from_boxed(value) {
+            if brush.as_gradient().is_some() {
+                return Ok(AnimationValue::Brush(brush));
+            }
+        }
         if let Some(list) = AnimationTransformList::from_boxed(value) {
             return list.map(AnimationValue::TransformList).map_err(|error| error.to_string());
         }
@@ -1261,11 +1277,17 @@ impl DesignerSession {
     fn animation_import_options(&self, program: &AnimationProgram) -> ImportOptions {
         let mut options = ImportOptions {
             native_effect_endpoints: true,
+            native_brush_endpoints: true,
             effect_color: Some(AnimationEffect::resolve_color),
             effect_literal: Some(AnimationEffect::parse_native),
             ..ImportOptions::default()
         };
         let target = program.primary_target();
+        let brushes = self.document.ast().subtree(program.id)
+            .filter(|node| node.local_name() == "Setter" && node.attribute("Value").is_none())
+            .filter(|node| AnimationBrush::is_authored_brush_object(&self.document, node.id))
+            .filter_map(|node| node.attribute("Property"))
+            .collect::<std::collections::BTreeSet<_>>();
         for setter in subtree_nodes(&self.document, program.id)
             .into_iter()
             .filter_map(|id| self.document.ast().node(id))
@@ -1274,6 +1296,21 @@ impl DesignerSession {
             let Some(property) = setter.attribute("Property") else {
                 continue;
             };
+            if brushes.contains(property) {
+                let info = self.animation.native.track_property(program.id, property).or_else(|| {
+                    let target = self.preview.visual(target)?;
+                    ferroui_inspect::Inspector::property(&target, property).ok()
+                });
+                if let Some(info) = info.filter(|info| AnimationBrush::is_property(info)) {
+                    options.property_kinds.insert(property.into(), ValueKind::Brush);
+                    if let Some(value) = self.animation.native.track_target(program, &self.preview, target)
+                        .ok().and_then(|object| AnimationBrush::base_value(&object, info))
+                    {
+                        options.base_values.insert(property.into(), AnimationValue::Brush(value));
+                    }
+                    continue;
+                }
+            }
             if let Some(component) = self.animation.native.transform_component(program.id, property) {
                 options.property_kinds.insert(property.into(), ValueKind::Number);
                 if let Some(base) = self.animation.native.transform_base_value(

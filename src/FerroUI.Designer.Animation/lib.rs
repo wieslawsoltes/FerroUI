@@ -1,6 +1,10 @@
 //! Renderer-independent animation authoring. Times are seconds; colors are unpremultiplied sRGB.
 //! Samples can be applied to a live preview without modifying authored XAML, and recording adds
 //! keyframes rather than baking transient preview values into document attributes.
+#[cfg(feature = "native-values")]
+mod brush_value;
+#[cfg(feature = "native-values")]
+mod brush_curve_channel;
 mod clip_timing;
 mod curve;
 mod curve_channel;
@@ -66,6 +70,13 @@ pub use timeline::{
 pub use transform_list_value::{AnimationTransformList, AnimationTransformOperation, TransformOperationKind};
 #[cfg(feature = "native-values")]
 pub use transform_curve_channel::TransformCurveChannel;
+#[cfg(feature = "native-values")]
+pub use brush_value::{
+    AnimationBrush, AnimationGradient, AnimationGradientStop, BrushForm, GradientDistance,
+    GradientPoint, GradientShape, GradientSpread,
+};
+#[cfg(feature = "native-values")]
+pub use brush_curve_channel::{BrushCurveChannel, BrushField};
 pub use value::{AnimationEffect, AnimationValue, EffectForm, RelativeUnit, ValueKind};
 #[cfg(feature = "native-values")]
 pub use value::{AnimationBoxShadow, AnimationBoxShadows};

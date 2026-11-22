@@ -47,6 +47,9 @@ pub fn sample_curve_track(
     if let TrackCurveChannel::Transform(channel) = channel {
         return super::transform_curve::project(channel, samples);
     }
+    if let TrackCurveChannel::Brush(channel) = channel {
+        return super::brush_curve::project(channel, samples);
+    }
     let effect = AnimationEffect::is_effect_property(property);
     let component = channel.component();
     component.project_samples(samples.map(|(time, sample)| {

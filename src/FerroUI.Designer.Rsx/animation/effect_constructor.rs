@@ -1,7 +1,7 @@
 use super::{color::ColorSource, syntax, FloatSource};
 use ferroui_designer_animation::{AnimationEffect, AnimationValue, EffectForm};
 use ferroui_designer_core::TextPatch;
-use syn::{Expr, ExprPath, GenericArgument, PathArguments, Type, TypeParamBound};
+use syn::Expr;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Kind {
@@ -9,7 +9,6 @@ enum Kind {
     Offset,
     Directional,
 }
-
 #[derive(Clone, Debug)]
 pub(super) struct ConstructorSource {
     kind: Kind,
@@ -22,10 +21,11 @@ impl ConstructorSource {
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
     ) -> Option<(AnimationEffect, Self)> {
-        let expression = unparen(expression);
+        let expression = syntax::unparen(expression);
         let expression = match expression {
-            Expr::Cast(cast) if cast.attrs.is_empty() && is_effect_rc(&cast.ty, resolve) => {
-                unparen(&cast.expr)
+            Expr::Cast(cast) if cast.attrs.is_empty()
+                && syntax::rc_interface_cast(&cast.ty, "ferroui_base::media::IEffect", resolve) => {
+                syntax::unparen(&cast.expr)
             }
             _ => expression,
         };
@@ -41,7 +41,7 @@ impl ConstructorSource {
         {
             return None;
         }
-        let Expr::Call(call) = unparen(rc.args.first()?) else {
+        let Expr::Call(call) = syntax::unparen(rc.args.first()?) else {
             return None;
         };
         if !call.attrs.is_empty() {
@@ -197,47 +197,4 @@ fn fields(effect: &AnimationEffect) -> Result<ConstructorFields, String> {
             return Err("Use Effect::parse with a registered shader literal".into());
         }
     })
-}
-
-fn unparen(mut expr: &Expr) -> &Expr {
-    while let Expr::Paren(paren) = expr {
-        if !paren.attrs.is_empty() {
-            break;
-        }
-        expr = &paren.expr;
-    }
-    expr
-}
-
-fn is_effect_rc(ty: &Type, resolve: &impl Fn(&Expr) -> Option<String>) -> bool {
-    let Type::Path(path) = ty else { return false };
-    let Some(rc) = path.path.segments.last() else {
-        return false;
-    };
-    let PathArguments::AngleBracketed(arguments) = &rc.arguments else {
-        return false;
-    };
-    let Some(GenericArgument::Type(Type::TraitObject(effect))) = arguments.args.first() else {
-        return false;
-    };
-    let Some(TypeParamBound::Trait(bound)) = effect.bounds.first() else {
-        return false;
-    };
-    let resolve_type = |path: syn::Path| {
-        resolve(&Expr::Path(ExprPath {
-            attrs: Vec::new(),
-            qself: None,
-            path,
-        }))
-    };
-    let mut container = path.path.clone();
-    container.segments.last_mut().expect("Rc type").arguments = PathArguments::None;
-    path.qself.is_none()
-        && arguments.args.len() == 1
-        && effect.bounds.len() == 1
-        && matches!(
-            resolve_type(container).as_deref(),
-            Some("std::rc::Rc" | "alloc::rc::Rc")
-        )
-        && resolve_type(bound.path.clone()).as_deref() == Some("ferroui_base::media::IEffect")
 }

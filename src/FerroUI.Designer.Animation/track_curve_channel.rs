@@ -2,7 +2,7 @@ use crate::{AnimationError, CurveChannel, FillMode, Track};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{borrow::Cow, num::NonZeroUsize, str::FromStr};
 #[cfg(feature = "native-values")]
-use crate::TransformCurveChannel;
+use crate::{BrushCurveChannel, TransformCurveChannel};
 
 const EFFECT_PARAMETER: &str = "effect_parameter/";
 const BOX_SHADOW: &str = "box_shadow/";
@@ -33,6 +33,8 @@ pub enum TrackCurveChannel {
     },
     #[cfg(feature = "native-values")]
     Transform(TransformCurveChannel),
+    #[cfg(feature = "native-values")]
+    Brush(BrushCurveChannel),
 }
 
 impl Default for TrackCurveChannel {
@@ -49,6 +51,10 @@ impl From<CurveChannel> for TrackCurveChannel {
 
 impl TrackCurveChannel {
     pub fn for_track(track: &Track, duration: f64, fill: FillMode) -> Vec<Self> {
+        #[cfg(feature = "native-values")]
+        if let Some(channels) = BrushCurveChannel::for_track(track) {
+            return channels;
+        }
         #[cfg(feature = "native-values")]
         if let Some(channels) = TransformCurveChannel::for_track(track) {
             return channels;
@@ -81,6 +87,8 @@ impl TrackCurveChannel {
         match self {
             #[cfg(feature = "native-values")]
             Self::Transform(channel) => channel.component(),
+            #[cfg(feature = "native-values")]
+            Self::Brush(channel) => channel.component(),
             Self::Property(component) | Self::EffectParameter { component, .. } | Self::BoxShadow { component, .. } => *component,
         }
     }
@@ -93,6 +101,8 @@ impl TrackCurveChannel {
         match self {
             #[cfg(feature = "native-values")]
             Self::Transform(channel) => channel.label().into(),
+            #[cfg(feature = "native-values")]
+            Self::Brush(channel) => channel.label().into(),
             Self::Property(component) => component.label().into(),
             Self::BoxShadow { layer, component } => format!("Shadow {layer} · {}", component.label()).into(),
             Self::EffectParameter {
@@ -136,6 +146,10 @@ impl FromStr for TrackCurveChannel {
 
     fn from_str(value: &str) -> crate::Result<Self> {
         #[cfg(feature = "native-values")]
+        if let Some(channel) = BrushCurveChannel::parse(value) {
+            return Ok(Self::Brush(channel));
+        }
+        #[cfg(feature = "native-values")]
         if let Some(channel) = TransformCurveChannel::parse(value) {
             return Ok(Self::Transform(channel));
         }
@@ -177,6 +191,11 @@ impl Serialize for TrackCurveChannel {
             Self::Property(component) => component.serialize(serializer),
             #[cfg(feature = "native-values")]
             Self::Transform(channel) => {
+                let component = component_name::<S::Error>(channel.component())?;
+                serializer.serialize_str(&channel.path(&component))
+            }
+            #[cfg(feature = "native-values")]
+            Self::Brush(channel) => {
                 let component = component_name::<S::Error>(channel.component())?;
                 serializer.serialize_str(&channel.path(&component))
             }

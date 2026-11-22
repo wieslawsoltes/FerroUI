@@ -22,6 +22,7 @@ const channelLabels: Partial<Record<CurveChannel, string>> = {
     direction: 'Direction (°)', shadow_depth: 'Shadow depth (px)', shadow_opacity: 'Shadow opacity',
     angle: 'Angle (°)', angle_x: 'X (°)', angle_y: 'Y (°)',
     m31: 'M31 (px)', m32: 'M32 (px)',
+    stop_offset: 'Offset',
 };
 
 function channelComponent(channel: CurveChannel): CurveChannel {
@@ -33,6 +34,14 @@ function channelLabel(channel: CurveChannel): string {
     const label = channelLabels[component] ?? component[0].toUpperCase() + component.slice(1).replaceAll('_', ' ');
     if (component === channel) return label;
     if (channel.startsWith('box_shadow/')) return `Shadow ${channel.split('/')[1]} · ${label}`;
+    if (channel.startsWith('gradient_stop/')) return `Stop ${channel.split('/')[1]} · ${label}`;
+    if (channel.startsWith('gradient/')) {
+        const [, field] = channel.split('/');
+        if (field === 'opacity') return 'Brush opacity';
+        if (field === 'angle') return label;
+        const name = field[0].toUpperCase() + field.slice(1).replaceAll('_', ' ');
+        return `${name} · ${label}`;
+    }
     if (channel.startsWith('transform_matrix/')) return `Combined · ${label}`;
     if (channel.startsWith('transform_operation/')) {
         const [, index, kind] = channel.split('/');

@@ -1,7 +1,7 @@
 use super::syntax::{float, method_suffix, path, span};
 use super::{KeySource, Property, TargetType, ValueShape, TRACK_TARGET};
 use crate::RsxCatalog;
-use ferroui_designer_animation::{native_key_time, Timeline};
+use ferroui_designer_animation::{AnimationBrush, AnimationValue, Timeline, ValueKind, native_key_time};
 use syn::{Expr, ExprMethodCall, Pat};
 
 pub(super) struct MappedKey {
@@ -104,12 +104,23 @@ pub(super) fn record(timeline: &mut Timeline, key: &KeySource) -> Option<()> {
     {
         return None;
     }
+    let mut value = key.value.value.clone();
+    if let Some(track) = timeline.track_mut(TRACK_TARGET, &key.property) {
+        let brush = track.keyframes.first().is_some_and(|key| key.value.kind() == ValueKind::Brush);
+        if brush && value.kind() == ValueKind::Color {
+            value = AnimationValue::Brush(AnimationBrush::solid(value.argb8()?));
+        } else if !brush && value.kind() == ValueKind::Brush {
+            for previous in &mut track.keyframes {
+                previous.value = AnimationValue::Brush(AnimationBrush::solid(previous.value.argb8()?));
+            }
+        }
+    }
     timeline
         .record(
             TRACK_TARGET,
             &key.property,
             key.time,
-            key.value.value.clone(),
+            value,
         )
         .ok()?;
     if key.spline.is_some() {

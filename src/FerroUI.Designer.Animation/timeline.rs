@@ -96,13 +96,23 @@ impl Track {
         }
     }
 
-    /// Use the preceding key's effect form when recording another native sample.
+    /// Use the preceding key's value form when recording another native sample.
     pub fn sample_in_authored_form(&self, time: f64, sampled: AnimationValue) -> AnimationValue {
-        let AnimationValue::Effect(effect) = sampled else { return sampled };
         let index = self.keyframes.partition_point(|key| key.time <= time).saturating_sub(1);
-        match self.keyframes.get(index).map(|key| &key.value) {
-            Some(AnimationValue::Effect(authored)) => AnimationValue::Effect(effect.with_form(authored.form())),
-            _ => AnimationValue::Effect(effect),
+        let authored = self.keyframes.get(index).map(|key| &key.value);
+        match sampled {
+            #[cfg(feature = "native-values")]
+            AnimationValue::Brush(mut brush) => {
+                if let Some(AnimationValue::Brush(prior)) = authored {
+                    brush.keep_source_form(prior);
+                }
+                AnimationValue::Brush(brush)
+            }
+            AnimationValue::Effect(effect) => match authored {
+                Some(AnimationValue::Effect(authored)) => AnimationValue::Effect(effect.with_form(authored.form())),
+                _ => AnimationValue::Effect(effect),
+            },
+            value => value,
         }
     }
     pub fn record(&mut self, time: f64, value: AnimationValue) -> Result<()> {

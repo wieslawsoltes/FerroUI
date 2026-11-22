@@ -2,6 +2,10 @@ use crate::{
     require, AnimationEffect, AnimationError, AnimationValue, Easing, EffectForm, FillMode, Keyframe,
     PlaybackBehavior, PlaybackDirection, Repeat, Result, Timeline, Track, ValueKind,
 };
+#[cfg(feature = "native-values")]
+use crate::AnimationBrush;
+#[cfg(feature = "native-values")]
+use roxmltree::Node;
 use std::collections::BTreeMap;
 
 /// Host converter for named and functional effect colors.
@@ -22,6 +26,8 @@ pub struct ImportOptions {
     pub interpolation_errors: BTreeMap<String, String>,
     /// Native hosts can resolve missing effect endpoints, including an unset effect.
     pub native_effect_endpoints: bool,
+    /// A loaded brush track can resolve implicit values through the native animator.
+    pub native_brush_endpoints: bool,
     /// Resolve named and functional colors in a statically authored effect object.
     pub effect_color: Option<EffectColorResolver>,
     /// Resolve a literal with the application that owns the native effect registry.
@@ -36,6 +42,7 @@ impl Default for ImportOptions {
             literal_values: BTreeMap::new(),
             interpolation_errors: BTreeMap::new(),
             native_effect_endpoints: false,
+            native_brush_endpoints: false,
             effect_color: None,
             effect_literal: None,
             strict: true,
@@ -111,8 +118,11 @@ impl Timeline {
         for track in tracks {
             let first = &track.keyframes[0];
             let last = track.keyframes.last().expect("nonempty track");
-            // Effects can use an unset base value, which the native animator resolves at playback.
-            let hold = hold_without_base && track.base_value.is_none() && first.value.kind() != ValueKind::Effect;
+            // The native animator can resolve an unset object-valued endpoint.
+            let native_object = first.value.kind() == ValueKind::Effect;
+            #[cfg(feature = "native-values")]
+            let native_object = native_object || first.value.kind() == ValueKind::Brush;
+            let hold = hold_without_base && track.base_value.is_none() && !native_object;
             if hold && first.time > 0.0 {
                 keys.push((
                     0.0,
@@ -159,10 +169,17 @@ impl Timeline {
                 format!(" KeySpline=\"{}\"", escape(&easing.to_xaml()))
             };
             let property = escape(property);
-            let setter = match &value {
+            let object = match &value {
                 AnimationValue::Effect(effect) if effect.form() != EffectForm::Literal =>
-                    format!("<Setter Property=\"{property}\">{}</Setter>", effect.setter_object_xaml()),
-                _ => format!("<Setter Property=\"{property}\" Value=\"{}\" />", escape(&literal_value(&value))),
+                    Some(effect.setter_object_xaml()),
+                #[cfg(feature = "native-values")]
+                AnimationValue::Brush(brush) => brush.setter_object_xaml(),
+                _ => None,
+            };
+            let setter = if let Some(object) = object {
+                format!("<Setter Property=\"{property}\">{object}</Setter>")
+            } else {
+                format!("<Setter Property=\"{property}\" Value=\"{}\" />", escape(&literal_value(&value)))
             };
             result.push_str(&format!("  <KeyFrame KeyTime=\"{}\"{spline}>{setter}</KeyFrame>\n", time_string(time)));
         }
@@ -261,6 +278,13 @@ impl Timeline {
             _ => return Err(AnimationError("Invalid FillMode".into())),
         };
         timeline.easing = import_easing(root)?;
+        #[cfg(feature = "native-values")]
+        let brush_tracks = root.children().filter(Node::is_element)
+            .filter(|frame| frame.tag_name().name() == "KeyFrame")
+            .flat_map(|frame| frame.children().filter(Node::is_element))
+            .filter(|setter| setter.tag_name().name() == "Setter" && AnimationBrush::is_brush_setter(*setter))
+            .filter_map(|setter| setter.attribute("Property"))
+            .collect::<std::collections::BTreeSet<_>>();
         let mut tracks: BTreeMap<String, Track> = BTreeMap::new();
         for node in root.children().filter(|n| n.is_element()) {
             if node.tag_name().name() == "Animation.Easing"
@@ -322,6 +346,17 @@ impl Timeline {
                 if let Some(reason) = options.interpolation_errors.get(property) {
                     return Err(AnimationError(reason.clone()));
                 }
+                #[cfg(feature = "native-values")]
+                let value = if brush_tracks.contains(property)
+                    || options.property_kinds.get(property) == Some(&ValueKind::Brush)
+                {
+                    require(options.property_kinds.get(property).is_none_or(|kind| *kind == ValueKind::Brush),
+                        "Choose a registered brush property for a gradient keyframe")?;
+                    AnimationValue::Brush(AnimationBrush::read_setter(setter)?)
+                } else {
+                    read_key_value(setter, property, options)?
+                };
+                #[cfg(not(feature = "native-values"))]
                 let value = read_key_value(setter, property, options)?;
                 let track = tracks
                     .entry(property.into())
@@ -350,7 +385,12 @@ impl Timeline {
                     && !matches!(timeline.fill, FillMode::Forward | FillMode::Both);
             let native_effect = options.native_effect_endpoints
                 && options.property_kinds.get(&track.property) == Some(&ValueKind::Effect);
-            if requires_base && track.base_value.is_none() && !native_effect {
+            #[cfg(feature = "native-values")]
+            let native_brush = options.native_brush_endpoints && track.keyframes.first()
+                .is_some_and(|key| key.value.kind() == ValueKind::Brush);
+            #[cfg(not(feature = "native-values"))]
+            let native_brush = false;
+            if requires_base && track.base_value.is_none() && !(native_effect || native_brush) {
                 let message = format!(
                     "{} has implicit endpoint values; provide the underlying live value",
                     track.property
@@ -511,7 +551,7 @@ pub(crate) fn time_string(time: f64) -> String {
         format!("{day_prefix}{hours}:{minutes}:{seconds}.{fraction:07}")
     }
 }
-fn escape(text: &str) -> String {
+pub(crate) fn escape(text: &str) -> String {
     text.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")

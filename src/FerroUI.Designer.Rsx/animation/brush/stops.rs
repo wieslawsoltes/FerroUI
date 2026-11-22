@@ -1,0 +1,124 @@
+use super::super::{FloatSource, color::ColorSource, syntax};
+use crate::blocks::keep_comments;
+use ferroui_designer_animation::{AnimationGradientStop, AnimationValue};
+use ferroui_designer_core::{SourceSpan, TextPatch};
+use syn::{Expr, spanned::Spanned};
+
+const STOP: &str = "::ferroui_base::media::immutable::ImmutableGradientStop::new";
+
+#[derive(Clone, Debug)]
+pub(super) struct StopsSource {
+    stops: Vec<StopSource>,
+    array: SourceSpan,
+    text: String,
+    end: usize,
+}
+
+#[derive(Clone, Debug)]
+struct StopSource {
+    span: SourceSpan,
+    offset: FloatSource,
+    color: ColorSource,
+}
+
+impl StopsSource {
+    pub(super) fn read(
+        expression: &Expr,
+        resolve: &impl Fn(&Expr) -> Option<String>,
+    ) -> Option<(Vec<AnimationGradientStop>, Self)> {
+        let Expr::Reference(reference) = expression else {
+            return None;
+        };
+        let Expr::Array(array) = reference.expr.as_ref() else {
+            return None;
+        };
+        if reference.mutability.is_some() || !reference.attrs.is_empty() || !array.attrs.is_empty()
+        {
+            return None;
+        }
+        let mut values = Vec::with_capacity(array.elems.len());
+        let mut stops = Vec::with_capacity(array.elems.len());
+        for expr in &array.elems {
+            let Expr::Call(call) = expr else { return None };
+            if !call.attrs.is_empty()
+                || call.args.len() != 2
+                || resolve(&call.func)?.as_str() != STOP.trim_start_matches("::")
+            {
+                return None;
+            }
+            let offset = syntax::float(&call.args[0])?;
+            let (color, source) = ColorSource::read_with(&call.args[1], false, resolve)?;
+            values.push(AnimationGradientStop {
+                offset: offset.value,
+                argb: color.argb8()?,
+            });
+            stops.push(StopSource {
+                span: syntax::span(expr),
+                offset,
+                color: source,
+            });
+        }
+        let result = Self {
+            stops,
+            array: syntax::span(array),
+            text: array.span().source_text()?,
+            end: array.bracket_token.span.close().byte_range().start,
+        };
+        Some((values, result))
+    }
+
+    pub(super) fn plan(
+        &self,
+        original: &[AnimationGradientStop],
+        next: &[AnimationGradientStop],
+        patches: &mut Vec<TextPatch>,
+    ) -> Result<(), String> {
+        for ((source, original), next) in self.stops.iter().zip(original).zip(next) {
+            source.offset.plan(next.offset, patches);
+            source.color.plan(
+                &AnimationValue::from_argb8(original.argb),
+                &AnimationValue::from_argb8(next.argb),
+                patches,
+            )?;
+        }
+        if next.len() < self.stops.len() {
+            let span = SourceSpan {
+                start: self.stops[next.len()].span.start,
+                end: self.end,
+            };
+            let text = self
+                .text
+                .get(span.start - self.array.start..span.end - self.array.start)
+                .ok_or("The authored gradient stop range is unavailable")?;
+            patches.push(TextPatch {
+                span,
+                replacement: keep_comments(text)?,
+            });
+        } else if next.len() > self.stops.len() {
+            let at = self.stops.last().map_or(self.end, |stop| stop.span.end);
+            let prefix = if self.stops.is_empty() { "" } else { ", " };
+            let additions = next[self.stops.len()..]
+                .iter()
+                .map(stop_literal)
+                .collect::<Vec<_>>();
+            patches.push(TextPatch {
+                span: SourceSpan { start: at, end: at },
+                replacement: format!("{prefix}{}", additions.join(", ")),
+            });
+        }
+        Ok(())
+    }
+}
+
+pub(super) fn color_literal([a, r, g, b]: [u8; 4]) -> String {
+    format!("::ferroui_base::media::Color::from_argb({a}, {r}, {g}, {b})")
+}
+
+fn stop_literal(stop: &AnimationGradientStop) -> String {
+    format!("{STOP}({:?}, {})", stop.offset, color_literal(stop.argb))
+}
+
+pub(super) fn literal(stops: &[AnimationGradientStop]) -> String {
+    let stops = stops.iter().map(stop_literal).collect::<Vec<_>>();
+    format!("&[{}]", stops.join(", "))
+}

@@ -90,6 +90,25 @@ pub(super) fn animation_value() -> Value {
         value("translate",coefficients(2)), value("rotate",number()), value("scale",coefficients(2)),
         value("skew",coefficients(2)), value("matrix",coefficients(6))
     ]});
+    let transform = object(json!({"operations":array(transform_operation,100_000)}), &["operations"]);
+    let point = object(json!({"x":number(),"y":number(),"unit":{"enum":["Absolute","Relative"]}}), &["x","y","unit"]);
+    let distance = object(json!({"scalar":number(),"unit":{"enum":["Absolute","Relative"]}}), &["scalar","unit"]);
+    let shapes = json!({"oneOf":[
+        object(json!({"kind":{"const":"linear"},"start":point,"end":point}), &["kind","start","end"]),
+        object(json!({"kind":{"const":"radial"},"center":point,"origin":point,"radius_x":distance,"radius_y":distance}),
+            &["kind","center","origin","radius_x","radius_y"]),
+        object(json!({"kind":{"const":"conic"},"center":point,"angle":number()}), &["kind","center","angle"])
+    ]});
+    let stop = object(json!({"argb":argb,"offset":number()}), &["argb","offset"]);
+    let optional_transform = json!({"anyOf":[transform,{"type":"null"}]});
+    let gradient = object(json!({"shape":shapes,"stops":array(stop,100_000),"opacity":number(),
+        "spread":{"enum":["Pad","Reflect","Repeat"]},"transform_origin":point,
+        "transform":optional_transform,"relative_transform":optional_transform
+    }), &["shape","stops","opacity","spread","transform_origin"]);
+    let brush = json!({"oneOf":[
+        object(json!({"Gradient":object(json!({"value":gradient,"wrapped":{"type":"boolean"}}), &["value"])}), &["Gradient"]),
+        object(json!({"Solid":object(json!({"argb":argb,"opacity":number(),"form":effect_form}), &["argb","opacity"])}), &["Solid"])
+    ]});
     json!({"oneOf":[
         value("Number",number()), value("Color",components(&["a","r","g","b"],true)),
         value("Point",components(&["x","y"],false)),
@@ -101,7 +120,7 @@ pub(super) fn animation_value() -> Value {
         value("RelativePoint",object(json!({"x":number(),"y":number(),"unit":{"enum":["Absolute","Relative"]}}), &["x","y","unit"])),
         value("RelativeScalar",object(json!({"scalar":number(),"unit":{"enum":["Absolute","Relative"]}}), &["scalar","unit"])),
         value("BoxShadows",object(json!({"layers":{"type":"array","items":box_shadow}}), &["layers"])),
-        value("TransformList",object(json!({"operations":array(transform_operation,100_000)}), &["operations"])),
+        value("TransformList",transform), value("Brush",brush),
         value("Effect",json!({"oneOf":[
             object(json!({"kind":{"const":"blur"},"radius":number(),"form":effect_form}), &["kind","radius"]),
             object(json!({"kind":{"const":"drop_shadow"},"offset_x":number(),"offset_y":number(),"blur_radius":number(),

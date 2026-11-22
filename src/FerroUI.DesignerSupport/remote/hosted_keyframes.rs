@@ -33,6 +33,7 @@ pub(super) struct HostedKeyframeCapabilities {
     pub(super) registered_effects: bool,
     pub(super) box_shadows: bool,
     pub(super) transform_lists: bool,
+    pub(super) brushes: bool,
 }
 
 impl HostedKeyframes {
@@ -82,6 +83,7 @@ impl HostedKeyframes {
                         && (capabilities.registered_effects || CustomEffectRegistry::invocation_name(&key.value).is_none()),
                     "BoxShadows" => capabilities.box_shadows,
                     "TransformList" => capabilities.transform_lists,
+                    "Brush" => capabilities.brushes,
                     _ => true,
                 }
             }));
@@ -100,7 +102,8 @@ impl HostedKeyframes {
                                         | ("RelativeScalar", Some(ValueKind::RelativeScalar))
                                         | ("Effect", Some(ValueKind::Effect))
                                         | ("BoxShadows", Some(ValueKind::BoxShadows))
-                                        | ("TransformList", Some(ValueKind::TransformList)));
+                                        | ("TransformList", Some(ValueKind::TransformList))
+                                        | ("Brush", Some(ValueKind::Brush)));
                             }
                             if key.value_kind == "Color"
                                 && options.property_kinds.get(&track.property) != Some(&ValueKind::Color)
@@ -253,7 +256,7 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
         .filter_map(|track| {
             let kind = track.keyframes.first()?.value.kind();
             let curve_channels = matches!(kind,
-                ValueKind::RelativePoint | ValueKind::RelativeScalar | ValueKind::Effect | ValueKind::BoxShadows | ValueKind::TransformList)
+                ValueKind::RelativePoint | ValueKind::RelativeScalar | ValueKind::Effect | ValueKind::BoxShadows | ValueKind::TransformList | ValueKind::Brush)
                 .then(|| TrackCurveChannel::for_track(track, timeline.duration, timeline.fill))
                 .and_then(|channels| serde_json::to_value(channels).ok())
                 .and_then(|channels| serde_json::from_value(channels).ok());

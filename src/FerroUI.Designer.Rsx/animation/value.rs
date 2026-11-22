@@ -1,4 +1,5 @@
 use super::box_shadows::BoxShadowsSource;
+use super::brush::BrushSource;
 use super::color::{packed_argument, ColorSource};
 use super::effect::EffectSource;
 use super::relative::RelativeSource;
@@ -29,6 +30,7 @@ enum ValueSyntax {
     Effect(EffectSource),
     BoxShadows(BoxShadowsSource),
     TransformList(TransformListSource),
+    Brush(Box<BrushSource>),
 }
 
 impl ValueShape {
@@ -49,6 +51,10 @@ impl ValueShape {
 
     pub(crate) fn kind(self) -> ValueKind {
         self.kind
+    }
+
+    pub(super) fn is_brush(self) -> bool {
+        self.brush
     }
 
     pub(crate) fn from_type(path: &str) -> Option<Self> {
@@ -155,6 +161,12 @@ impl ValueShape {
     }
 
     pub(super) fn read_keyframe(self, expression: &Expr, project_effects: bool) -> Option<ValueSource> {
+        if self.brush {
+            if let Some((value, source)) = BrushSource::read(expression, &syntax::path) {
+                value.validate().ok()?;
+                return Some(ValueSource { value, source: ValueSyntax::Brush(Box::new(source)) });
+            }
+        }
         if self.kind == ValueKind::Effect {
             return self.read_effect(expression, syntax::path, project_effects);
         }
@@ -225,6 +237,12 @@ impl ValueSource {
                 }
                 return Ok(());
             }
+            ValueSyntax::Brush(source) => {
+                let (AnimationValue::Brush(old), AnimationValue::Brush(next)) = (&self.value, value) else {
+                    return Err("The key requires a brush".into());
+                };
+                return source.plan(old, &next, patches);
+            }
             ValueSyntax::Numbers(parts) => parts,
         };
         let values = numeric_parts(&value)?;
@@ -249,6 +267,10 @@ impl ValueSource {
 }
 
 pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
+    if let AnimationValue::Brush(brush) = value {
+        value.validate().map_err(|error| error.to_string())?;
+        return super::brush::literal(brush);
+    }
     if let AnimationValue::Effect(effect) = value {
         return super::effect_constructor::literal(effect);
     }
