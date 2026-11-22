@@ -84,7 +84,7 @@ impl VisualLineLinkText {
     pub fn link_is_clickable(&self, modifiers: KeyModifiers) -> bool {
         self.navigate_uri.is_some()
             && (!self.require_control_modifier_for_click
-                || modifiers.contains(KeyModifiers::CONTROL))
+                || modifiers.contains(crate::text_area::platform_keymap().command_modifiers))
     }
 
     pub(crate) fn underline_decorations(&self) -> Option<TextDecorationCollection> {

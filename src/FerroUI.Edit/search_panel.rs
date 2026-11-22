@@ -774,10 +774,7 @@ impl SearchPanel {
                 InputElement::key_down_event(),
                 move |_, e: &KeyEventArgs| {
                     if let Some(editor) = weak.upgrade().and_then(|panel| panel.editor()) {
-                        let keymap = Application::current()
-                            .and_then(|app| app.platform_settings())
-                            .map(|settings| settings.hotkey_configuration())
-                            .unwrap_or_default();
+                        let keymap = crate::text_area::platform_keymap();
                         dispatch_search_key(&editor, e, keymap.command_modifiers, true);
                     }
                 },

@@ -53,6 +53,7 @@ mod text_drag;
 #[path = "text_area_typing.rs"]
 mod typing;
 use ferroui_base::data::BindingPriority;
+use ferroui_base::input::platform::PlatformHotkeyConfiguration;
 use ferroui_base::input::text_input::TextInputMethodClient;
 use ferroui_base::input::{
     Cursor, DragDrop, FocusChangedEventArgs, HoldingRoutedEventArgs, HoldingState, ICommand,
@@ -139,15 +140,33 @@ impl CachedVisualLine {
     }
 }
 
+/// The key gestures of the application: those of its platform settings, or the defaults when
+/// the platform registered none.
+pub(crate) fn platform_keymap() -> Rc<PlatformHotkeyConfiguration> {
+    let Some(registered) = FerroLocator::current().get_service::<PlatformHotkeyConfiguration>() else {
+        return Rc::default();
+    };
+    Application::current()
+        .and_then(|app| app.platform_settings())
+        .map_or(registered, |settings| settings.hotkey_configuration())
+}
+
+/// The modifier of rectangular selection: Alt, unless the keymap moves by word with it, as the
+/// Apple keymaps do with Option. Those use Control, which they leave free.
 pub(crate) fn box_selection_modifier() -> KeyModifiers {
-    let apple_browser = cfg!(target_arch = "wasm32")
-        && FerroLocator::current()
-            .get_service::<ferroui_base::input::platform::PlatformHotkeyConfiguration>()
-            .is_some_and(|config| config.command_modifiers == KeyModifiers::META);
-    if cfg!(target_os = "macos") || apple_browser {
+    if platform_keymap().whole_word_text_action_modifiers == KeyModifiers::ALT {
         KeyModifiers::CONTROL
     } else {
         KeyModifiers::ALT
+    }
+}
+
+/// The modifier that makes a text drag a copy: Option on the Apple keymaps, Control on the others.
+pub(crate) fn text_drag_copy_modifier() -> KeyModifiers {
+    if platform_keymap().whole_word_text_action_modifiers == KeyModifiers::ALT {
+        KeyModifiers::ALT
+    } else {
+        KeyModifiers::CONTROL
     }
 }
 
@@ -388,10 +407,7 @@ impl InputElementImpl for TextArea {
             }
             return;
         }
-        let keymap = Application::current()
-            .and_then(|app| app.platform_settings())
-            .map(|settings| settings.hotkey_configuration())
-            .unwrap_or_default();
+        let keymap = platform_keymap();
         let modifiers = e.key_modifiers;
         let matches = |gestures: &[ferroui_base::input::KeyGesture]| {
             gestures.iter().any(|g| g.matches(Some(e)))
@@ -422,7 +438,7 @@ impl InputElementImpl for TextArea {
                 return;
             }
         }
-        if modifiers == KeyModifiers::CONTROL {
+        if modifiers == keymap.command_modifiers {
             let line_command = match e.key {
                 Key::D => Some(EditorCommandKind::Transform(TextTransformation::DeleteLines)),
                 Key::I => Some(EditorCommandKind::Reindent),
