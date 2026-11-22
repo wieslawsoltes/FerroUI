@@ -583,6 +583,10 @@ fn accounts() -> Element {
 
 The designer follows explicit imports and aliases and a function with no arguments that returns the template directly or through one immutable local. The typed closure must return a supported RSX invocation. For other expressions, use **Reveal Template Assignment**. [Studio workflow](../native-controls.md#edit-item-and-cell-templates) · [MCP workflow](reference.md#edit-item-templates-with-mcp)
 
+![A shared account cell template open in its owning Rust file with the title selected on the canvas](../images/vscode-shared-rust-template-body.png)
+
+[Named template picker in Columns](../images/vscode-shared-rust-template-picker.png)
+
 ![Native artboard with the shared template in Directory and the compact resource in Review queue](../images/native-item-template-resource.png)
 
 ## Edit a control template
