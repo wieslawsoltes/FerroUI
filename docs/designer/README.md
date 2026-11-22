@@ -265,6 +265,11 @@ Use the key inspector to edit its value or add a sampled key at the playhead.
 Studio and App Preview keep the original transform and use its properties when
 the animation has an implicit endpoint. [Animate a render transform](vscode/motion.md#animate-a-render-transform)
 
+For a `BoxShadow` track, choose a numbered shadow and an offset, blur, spread, or tint channel.
+The native graph follows the layer order and separates segments where a layer changes between
+inner and outer. Use the key inspector to edit the full list or record it at the playhead.
+[Animate layered box shadows](vscode/motion.md#animate-layered-box-shadows)
+
 Use the picker beside a supported geometry track to see one coordinate, dimension, side, or
 corner. Drag beneath the trace to retime its key or use the inspector to edit the complete
 geometry value. The MCP program catalog lists the same `curve_channels` for a track.
@@ -599,9 +604,9 @@ rules and runtime semantic tests.
 Register the same codec with `DesignerSession::register_animation_codec` for an embedded Studio
 session and `ferroui_designer_support::register_preview_animation_codec` in the application
 preview's UI-thread setup for VS Code. App Preview offers keyframe editing when the codec can
-decode an accepted XAML clip and round-trip its key values. The authored track can present a
-text value for a native property such as `BoxShadows`. Playback still resolves the property's
-actual native animator. [Todo Workbench shadow codec](../../samples/TodoWorkbench/app_preview/animation_codec.rs)
+decode an accepted XAML clip and round-trip its key values. A codec can expose a native
+property through a text representation and validate each authoring edit. Playback uses the
+property's registered animator. [Todo Workbench shadow codec](../../samples/TodoWorkbench/app_preview/animation_codec.rs)
 
 App Preview uses the same authored program IDs and source paths as Studio when a valid source
 replaces its native tree. The relay resolves the selected clip and assigned controls, then samples

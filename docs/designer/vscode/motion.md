@@ -61,6 +61,35 @@ In Rust, use the corresponding property getter in an inline style clip. The same
 
 Agents can read the component property name from `designer_programs` or `designer_hosted_animations`. Pass it as `property` with `channel: "value"` to `designer_animation_curve` or `designer_hosted_curve`. Use the accepted program and target to draft, record, or apply a numeric key.
 
+### Animate layered box shadows
+
+1. Open a clip with a `BoxShadow` track on a supported control such as `Border` or `ContentPresenter`. In the Timeline, choose **Animation graph**, then **Value curves** or **Velocity curves**. In App Preview, also choose the track and its live target.
+2. Choose a numbered shadow and component, such as **Shadow 2 · Spread (px)**. Each layer offers **Offset X**, **Offset Y**, **Blur radius**, **Spread**, **Red**, **Green**, **Blue**, and **Alpha**. Geometry uses logical pixels. Tint uses normalized 0–1 values. Velocity measures change per authored second.
+3. Scrub to see how the layers render together. A missing layer leaves a gap. A switch between inner and outer shadows starts a new graph segment. Layer numbers follow the order of the authored list.
+4. Select a key to edit the complete list and incoming easing, or choose **Add keyframe at playhead** to capture the list from the native preview. Separate layers with commas and use `inset` for an inner shadow. Enter `none` for an empty list. Use Undo to restore the source after applying the key.
+
+![The VS Code Timeline plots the second shadow’s spread beside XAML and the rendered revenue card at one second](../images/vscode-timeline-box-shadow-curves.png)
+
+```xaml
+<KeyFrame Cue="50%">
+    <Setter Property="BoxShadow"
+            Value="0 12 24 2 #40263452, inset 2 4 8 -1 #80325AC0" />
+</KeyFrame>
+```
+
+Mapped Rust keys accept a qualified `BoxShadows::parse` string and literal `BoxShadows::new` or `BoxShadows::with_rest` constructors. Change the layer count in a parsed string or in source. The constructor form lets you edit the existing layers while keeping Rust comments and numeric suffixes.
+
+```rust
+.key_frame(0.5, |key| key.set(
+    ferroui_controls::Border::box_shadow_property(),
+    ferroui_base::media::BoxShadows::parse(
+        "0 12 24 2 #40263452, inset 2 4 8 -1 #80325AC0",
+    ).unwrap(),
+))
+```
+
+Agents read `curve_channels` from `designer_programs` or `designer_hosted_animations` and pass a name such as `box_shadow/2/spread` to `designer_animation_curve` or `designer_hosted_curve`. Use the same keyframe draft and apply tools with the whole list as the value. An App Preview helper and app built with layered shadow support advertise these channels.
+
 ### Inspect a curve that changes units
 
 1. Open an animation of `RenderTransformOrigin` or another `RelativePoint` property. For a `RelativeScalar` property, the same workflow uses one value instead of X and Y.
