@@ -162,6 +162,8 @@ impl Case {
 #[derive(Clone, PartialEq)]
 pub struct CaseCollection(FerroList<Ref<Case>>);
 
+ferroui_base::styled_value!(CaseCollection);
+
 impl CaseCollection {
     /// Creates an empty collection.
     pub fn new() -> Self {

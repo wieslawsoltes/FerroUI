@@ -367,6 +367,7 @@ for name,typ in [('ChartPoints','ChartPoint'),('ChartSeriesCollection','ChartSer
     collections += f'''
 #[derive(Clone,Debug,PartialEq)]
 pub struct {name}(FerroList<Ref<{typ}>>);
+ferroui_base::styled_value!({name});
 impl {name} {{
     pub fn new()->Self{{Self(FerroList::new())}}
     pub fn from_items(items:impl IntoIterator<Item=Ref<{typ}>>)->Self{{Self(FerroList::from_items(items))}}
