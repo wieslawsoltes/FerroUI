@@ -265,6 +265,11 @@ Use the key inspector to edit its value or add a sampled key at the playhead.
 Studio and App Preview keep the original transform and use its properties when
 the animation has an implicit endpoint. [Animate a render transform](vscode/motion.md#animate-a-render-transform)
 
+Use a `RenderTransform` key to animate a complete ordered list. The native graph exposes individual
+translation, rotation, scale, skew, and matrix operations and the coefficients of the combined
+transform. Record or edit the whole list from the key inspector.
+[Animate a transform list](vscode/motion.md#animate-a-transform-list)
+
 For a `BoxShadow` track, choose a numbered shadow and an offset, blur, spread, or tint channel.
 The native graph follows the layer order and separates segments where a layer changes between
 inner and outer. Use the key inspector to edit the full list or record it at the playhead.

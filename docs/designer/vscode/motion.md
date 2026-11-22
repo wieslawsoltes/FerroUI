@@ -61,6 +61,33 @@ In Rust, use the corresponding property getter in an inline style clip. The same
 
 Agents can read the component property name from `designer_programs` or `designer_hosted_animations`. Pass it as `property` with `channel: "value"` to `designer_animation_curve` or `designer_hosted_curve`. Use the accepted program and target to draft, record, or apply a numeric key.
 
+### Animate a transform list
+
+1. Use `RenderTransform` as the keyframe property to animate the complete list of functions on a control. A value can contain translation, rotation, scale, skew, and affine matrix functions. Enter `none` for the identity. Use one whole transform track or separate component tracks for a given clip.
+2. Open **Animation graph** and choose **Value curves** or **Velocity curves**. Choose an operation by position, such as **Operation 2 · Rotate Angle (°)**, or choose a coefficient of the **Combined** matrix. Translation uses logical pixels, angles use degrees, and scale uses a multiplier. Velocity measures change per authored second.
+3. Scrub to see the native pose. Matching operations interpolate in order. When the remaining operations differ, the animator composes that part of each list and interpolates the matrices when possible. Operation graphs leave a gap during matrix fallback. The combined matrix shows the property’s sampled transform across the clip.
+4. Edit the complete list in the key inspector or use **Add keyframe at playhead** to capture the current native value. App Preview uses the same workflow after you choose a track and live target. **Stop** restores the underlying transform. Use Undo to restore the source.
+
+![The VS Code Timeline plots the second transform operation’s rotation beside XAML and the rendered dispatch card](../images/vscode-timeline-transform-list.png)
+
+```xaml
+<KeyFrame Cue="100%">
+    <Setter Property="RenderTransform"
+            Value="translate(24px, 8px) rotate(35deg) scale(1.1)" />
+</KeyFrame>
+```
+
+Use the same literal with the Rust getter. Mapped edits also preserve the string in qualified `TransformOperations::parse` calls and their Rust error handling. A sampled or newly inserted key uses a string literal.
+
+```rust
+.key_frame(1.0, |key| key.set(
+    ferroui_base::Visual::render_transform_property(),
+    "translate(24px, 8px) rotate(35deg) scale(1.1)",
+))
+```
+
+Agents can pass channels such as `transform_operation/2/rotate/angle` and `transform_matrix/m31` from `curve_channels` to `designer_animation_curve` or `designer_hosted_curve`. The checked keyframe tools accept the complete transform list. App Preview advertises these channels when the helper and application support transform-list authoring.
+
 ### Animate layered box shadows
 
 1. Open a clip with a `BoxShadow` track on a supported control such as `Border` or `ContentPresenter`. In the Timeline, choose **Animation graph**, then **Value curves** or **Velocity curves**. In App Preview, also choose the track and its live target.

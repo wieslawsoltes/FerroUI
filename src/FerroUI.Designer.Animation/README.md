@@ -37,8 +37,9 @@ in linear light and alpha is linear, matching FerroUI's `ColorAnimator`. Cubic B
 solves the X polynomial rather than treating the progress as the curve parameter. Thirty named
 easing variants match FerroUI's polynomial, sine, circular, exponential, back, bounce and elastic
 families. A keyframe's easing belongs to the incoming segment. Native-value codecs add typed
-effects and box shadow lists. Gradient brushes and other runtime-specific payloads use source
-editing or application codecs. The designer previews them with the framework animator.
+effects, box shadow lists, and ordered transform lists. Gradient brushes and other runtime-specific
+payloads use source editing or application codecs. The designer previews them with the framework
+animator.
 
 ## Transfer keyframes
 
@@ -139,6 +140,13 @@ control without a render transform uses detached defaults, and playback creates
 the group at animation priority. XAML authoring and the mapped Rust getters keep
 the component track and its declared keys in source.
 
+The typed `TransformList` value uses the framework’s transform parser and the same interpolation
+kernel as `TransformOperationsTransition`. Curves project operation slots or combined affine
+matrix coefficients from the native animator. The animator uses the underlying property for
+implicit endpoints.
+Whole-list keys and redirected component keys apply to the same render property, so each clip
+uses one form. Explicitly registered animators retain their normal precedence.
+
 The `BoxShadows` value codec delegates text conversion and list interpolation to FerroUI. The native
 graph samples the loaded property and exposes channels such as `box_shadow/2/spread` using one-based
 layer indices. Samples separate intervals where a layer is absent or switches between inset and
@@ -157,13 +165,12 @@ automatically created transforms at disposable animation priority. Stop, program
 source reload and failed source acceptance dispose the runs and restore underlying values
 and bindings. Completed fill retains its original priority frame, and overlapping component
 programs share the lifetime of any temporary transform they create. Native clock errors are
-surfaced as diagnostics. A program must have a loaded
-source object and live preview targets; the designer never binds a program from another
-compiled source merely because its selector or resource name matches. Whole CSS
-`TransformOperations` keyframes are not a built-in native keyframe animator; use native
-transform-component properties or a registered animator for those values. The native component
-animator also cannot animate an existing CSS operation list; preview reports that limitation
-explicitly and permits a registered replacement animator.
+surfaced as diagnostics. A program must have a loaded source object and live preview targets.
+Source provenance ties the program to its compiled document. While a Timeline owns playback,
+the preview clock freezes style animations from construction and explicit seeks use the native
+playback clock. The component animator redirects keys into a mutable native transform. Use a whole
+`RenderTransform` key to animate an existing CSS-style operation list, or register an application
+animator for a specialized representation.
 
 A standalone `ResourceDictionary` can use a resource preview factory that installs the loaded
 dictionary on a real control. An animation without authored targets then previews on that
