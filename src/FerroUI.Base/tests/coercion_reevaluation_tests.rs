@@ -5,6 +5,13 @@ use crate::{data::BindingPriority, ferro_property_metadata::PropertyMetadata, *}
 test_class!(ScopeOwner: FerroObject);
 test_class!(DerivedScopeOwner: ScopeOwner);
 
+/// A full reevaluation pass: ending a styling pass alone runs one only when a change is pending.
+fn reevaluate(owner: &FerroObject) {
+    owner.values().begin_styling();
+    owner.values().request_reevaluation();
+    owner.values().end_styling(owner);
+}
+
 fn gated_property() -> (&'static StyledProperty<bool>, Rc<Cell<bool>>) {
     let blocked = Rc::new(Cell::new(true));
     let gate = blocked.clone();
@@ -95,8 +102,7 @@ fn explicit_policy_keeps_coerced_default_without_polling_unchanged_frames() {
     assert_eq!(calls.get(), 1);
     assert!(!owner.get_value(property));
     for _ in 0..3 {
-        owner.values().begin_styling();
-        owner.values().end_styling(&owner);
+        reevaluate(&owner);
         assert_eq!(calls.get(), 1);
         assert!(!owner.get_value(property));
     }
@@ -112,8 +118,7 @@ fn explicit_policy_reuses_unchanged_frame_but_coerces_replacement_and_restores_d
         .set_value_with_priority(property, true, BindingPriority::Style)
         .unwrap();
     assert_eq!(calls.get(), 1);
-    owner.values().begin_styling();
-    owner.values().end_styling(&owner);
+    reevaluate(&owner);
     assert_eq!(calls.get(), 1);
     assert!(!owner.get_value(property));
     owner.values().begin_styling();
@@ -146,8 +151,7 @@ fn default_policy_preserves_automatic_default_recoercion() {
     let (property, calls) = property(true);
     let owner = ScopeOwner::new();
     owner.coerce_value(property.as_property());
-    owner.values().begin_styling();
-    owner.values().end_styling(&owner);
+    reevaluate(&owner);
     assert_eq!(calls.get(), 2);
     assert!(!owner.get_value(property));
 }
@@ -200,8 +204,7 @@ fn explicit_policy_and_local_input_survive_the_storage_of_an_enumeration() {
         .set_value_with_priority(property, Choice::First, BindingPriority::Style)
         .unwrap();
     assert_eq!(calls.get(), 1);
-    owner.values().begin_styling();
-    owner.values().end_styling(&owner);
+    reevaluate(&owner);
     assert_eq!(calls.get(), 1, "an unchanged frame is not coerced again");
     assert_eq!(owner.get_value(property), Choice::Second);
     style.dispose();
@@ -221,8 +224,7 @@ fn explicit_policy_still_polls_changed_binding_entries() {
     assert_eq!(calls.get(), 2);
     source.on_next(true);
     assert_eq!(calls.get(), 3);
-    owner.values().begin_styling();
-    owner.values().end_styling(&owner);
+    reevaluate(&owner);
     assert_eq!(calls.get(), 3);
     binding.dispose();
     assert!(owner.get_value(property));
@@ -240,8 +242,7 @@ fn explicit_policy_reuses_animation_and_base_inputs_and_recoerces_a_new_winner()
         .set_value_with_priority(property, true, BindingPriority::Animation)
         .unwrap();
     assert_eq!(calls.get(), 2);
-    owner.values().begin_styling();
-    owner.values().end_styling(&owner);
+    reevaluate(&owner);
     assert_eq!(calls.get(), 2);
     animation.dispose();
     assert_eq!(calls.get(), 3);
@@ -276,8 +277,7 @@ fn explicit_policy_does_not_cache_a_failed_coercion() {
         owner.set_value_with_priority(property, true, BindingPriority::Style);
     }))
     .is_err());
-    owner.values().begin_styling();
-    owner.values().end_styling(&owner);
+    reevaluate(&owner);
     assert_eq!(calls.get(), 2);
     assert!(!owner.get_value(property));
 }
