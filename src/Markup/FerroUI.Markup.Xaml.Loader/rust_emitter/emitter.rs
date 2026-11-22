@@ -2978,23 +2978,50 @@ impl<'a> Emitter<'a> {
     /// of the delegate type (the parameters exactly, or wider ones): `rt::method_delegate`
     /// over the root object of the context, with the typed function of the declared method
     /// called with the instance and the arguments in the types it declares. The delegate
-    /// follows native weak root ownership; try_invoke retains method errors.
+    /// holds its instance weakly and reports a failure to the dispatcher, as the interpreter's does.
     fn method_delegate(&mut self, node: &Rc<dyn IXamlAstNode>, delegate: &Rc<XamlLoadMethodDelegateNode>) -> EmitResult<Typed<'a>> {
         let name = delegate.method.name();
         if !delegate.base.value().as_node().is::<XamlRootObjectNode>() {
             return Err(unsupported(node, format!("{name}: a delegate over another object than the root object")));
         }
-        if delegate.method.is_generic_method() { return Err(unsupported(node, "a generic named handler")); }
-        let returns = self.types.method(&*delegate.method).and_then(|method| method.declared().and_then(|d| d.returns));
-        if returns.is_some_and(|returned| returned == self.types.known(Known::Class) || returned == self.types.known(Known::OptionClass)) {
+        let method = self
+            .types
+            .method(delegate.method.as_ref())
+            .ok_or_else(|| unsupported(node, format!("{name}: the method is not a method of the type system of the host")))?;
+        let declared = method
+            .declared()
+            .filter(|declared| declared.kind == DeclaredKind::Method)
+            .ok_or_else(|| unsupported(node, format!("{name}: the method is not a method markup metadata declares")))?;
+        let emit = declared.emit().ok_or_else(|| unsupported(node, format!("{name}: the declaration has no typed function")))?;
+        // The run-time loader hands a class a method returns to the caller in a form of its
+        // own, which generated code does not have.
+        let returns_type = declared
+            .returns
+            .is_some_and(|returned| returned == self.types.known(Known::Class) || returned == self.types.known(Known::OptionClass));
+        if returns_type {
             return Err(unsupported(node, format!("{name}: a method that returns a type")));
         }
-        let declaring = delegate.method.declaring_type();
-        let ordinal = declaring.methods().into_iter().filter(|m| m.name() == name)
-            .position(|m| m.equals(&*delegate.method)).ok_or_else(|| unsupported(node, "the named handler's declared overload is absent"))?;
-        let markup = self.markup_expr(node, &declaring)?;
-        self.uses_context = true;
-        let expr = format!("rt::declared_method_handler(&context, {markup}, {}, {ordinal}, ({}, {}))?", rust_string_literal(&name), node.line(), node.position());
+        let owner = self.owner_path(node, &method)?;
+        let count = method.parameters.len();
+        let mut arguments: Vec<&str> = Vec::with_capacity(count + 1);
+        if !method.is_static {
+            arguments.push("this");
+        }
+        arguments.extend(std::iter::repeat_n("arguments.next()?", count));
+        let call = format!("{owner}::{}({})", emit.function, arguments.join(", "));
+        let call = if emit.fallible { format!("{call}?") } else { call };
+        let body = match declared.returns {
+            Some(_) => format!("::core::result::Result::Ok(rt::delegate_result({call}))"),
+            None => format!("{{ {call}; ::core::result::Result::Ok(::core::option::Option::None) }}"),
+        };
+        let parameter = if count == 0 { "_arguments" } else { "arguments" };
+        let expr = match method.is_static {
+            true => format!("rt::static_method_delegate({count}, |{parameter}| {body})"),
+            false => {
+                self.uses_context = true;
+                format!("rt::method_delegate(&context, {count}, |this, {parameter}| {body})")
+            }
+        };
         Ok(self.exact(Known::Delegate, expr))
     }
 

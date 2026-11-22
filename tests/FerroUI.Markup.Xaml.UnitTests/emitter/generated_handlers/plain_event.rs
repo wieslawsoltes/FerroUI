@@ -41,7 +41,7 @@ pub fn populate_handlers_plainevent_xaml(
     let name_scope = context.name_scope_field();
     root.begin_init();
     // Handlers/PlainEvent.xaml(1,2) Opening
-    rt::add_event_handler(rt::class_markup(<crate::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE), "Opening", rt::to_value(root.clone()), rt::declared_method_handler(&context, rt::class_markup(<crate::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE), "OnOpening", 0, (1, 150))?, 1, 2)?;
+    rt::add_event_handler(rt::class_markup(<crate::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE), "Opening", rt::to_value(root.clone()), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyHost::__markup_OnOpening_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }), 1, 2)?;
     // Handlers/PlainEvent.xaml(1,171) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(root.upcast_ref::<::ferroui_controls::Panel>());
     // Handlers/PlainEvent.xaml(1,171) Border
@@ -51,7 +51,7 @@ pub fn populate_handlers_plainevent_xaml(
     // Handlers/PlainEvent.xaml(1,178) Name
     rt::name_element(name_scope.as_ref(), &border_0, &border_0, "target", 1, 178)?;
     // Handlers/PlainEvent.xaml(1,171) PropertyChanged
-    rt::add_event_handler(rt::class_markup(<::ferroui_base::FerroObject as ::ferroui_base::StaticType>::TYPE), "PropertyChanged", rt::to_value(border_0.clone()), rt::declared_method_handler(&context, rt::class_markup(<crate::support::xaml::event_tests::MyHost as ::ferroui_base::StaticType>::TYPE), "OnPropertyChanged", 0, (1, 192))?, 1, 171)?;
+    rt::add_event_handler(rt::class_markup(<::ferroui_base::FerroObject as ::ferroui_base::StaticType>::TYPE), "PropertyChanged", rt::to_value(border_0.clone()), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyHost::__markup_OnPropertyChanged_2(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }), 1, 171)?;
     rt::end_init(&border_0, 1, 171)?;
     rt::end_init(&root, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&root), name_scope.as_ref(), 1, 2)?;
