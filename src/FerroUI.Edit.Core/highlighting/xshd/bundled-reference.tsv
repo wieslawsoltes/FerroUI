@@ -1,0 +1,173 @@
+ASP/XHTML
+<%@ Page Language="C#" %>	0:2:ASPSectionStartEndTags,18:22:String,23:25:ASPSectionStartEndTags	-
+<div id="main"><%= DateTime.Now %></div>	0:5:HtmlTag,5:7:Attributes,7:8:Assignment,8:14:String,14:15:HtmlTag,15:17:ASPSectionStartEndTags,27:28:Punctuation,32:34:ASPSectionStartEndTags,34:35:HtmlTag,35:36:Slash,36:40:HtmlTag	-
+<script runat="server">	0:8:UnknownScriptTag	-
+  protected void Show() { string s = "value"; }	-	-
+</script>	0:9:UnknownScriptTag	-
+<%-- comment	0:2:ASPSectionStartEndTags,2:4:Punctuation	-
+--%>	0:2:Punctuation,2:4:ASPSectionStartEndTags	-
+
+Boo
+# greeting	-	-
+class Sample:	-	-
+  def say(name as string):	-	-
+    print("Hello ${name}")	10:25:String	-
+  first = '''multi	10:18:String	-
+second'''	6:9:String	-
+  n = 0x2a	-	-
+
+Coco
+COMPILER Sample	0:8:Keywords	?
+CHARACTERS letter = 'A'..'Z'.	20:23:Char,23:25:Punctuation,25:28:Char,28:29:Punctuation	?
+TOKENS word = letter {letter}.	21:22:Punctuation,28:30:Punctuation	?
+PRODUCTIONS	-	?
+Sample = (. int x = 1; .) word.	9:11:Punctuation,12:15:ValueTypeKeywords,20:21:NumberLiteral,21:22:Punctuation,23:25:Punctuation,30:31:Punctuation	?
+END Sample.	10:11:Punctuation	?
+
+C++
+#include <vector>	0:17:Preprocessor	-
+#define COUNT 42	0:16:Preprocessor	-
+// note	0:7:Comment	-
+int main() { std::string s = "😀"; return -0x2a; }	0:3:Keywords,4:8:MethodName,8:10:Punctuation,11:12:Punctuation,27:28:Punctuation,29:33:String,33:34:Punctuation,35:41:JumpKeywords,42:43:Punctuation,43:47:Digits,47:48:Punctuation,49:50:Punctuation	-
+/* a	0:4:Comment	Comment
+  comment */ bool ready = true;	0:12:Comment,13:17:TypeKeywords,24:25:Punctuation,26:30:BooleanConstants,30:31:Punctuation	-
+
+C#
+/// <summary>Use <see cref="int"/>.</summary>	0:3:DocComment,3:4:Comment,4:5:DocComment,5:12:KnownDocTags,12:13:DocComment,13:17:Comment,17:18:DocComment,18:21:KnownDocTags,21:22:DocComment,22:26:KnownDocTags,26:27:XmlPunctuation,27:32:XmlString,32:33:XmlPunctuation,33:34:DocComment,34:35:Comment,35:36:DocComment,36:37:XmlPunctuation,37:44:KnownDocTags,44:45:DocComment	-
+namespace Demo;	0:9:NamespaceKeywords,14:15:Punctuation	-
+class C { string s = @"a ""quoted"" 😀"; }	0:5:ReferenceTypeKeywords,8:9:Punctuation,10:16:ReferenceTypeKeywords,21:39:String,39:40:Punctuation,41:42:Punctuation	-
+#line 12 "demo.cs"	0:18:Preprocessor	-
+/* note	0:7:Comment	Comment
+*/ var bits = 0b1010; // end	0:2:Comment,3:6:ContextKeywords,14:15:NumberLiteral,20:21:Punctuation,22:28:Comment	-
+string s = $"{2+3}";	0:6:ReferenceTypeKeywords,11:13:String,13:14:StringInterpolation,14:15:NumberLiteral,15:16:Punctuation,16:17:NumberLiteral,17:18:StringInterpolation,18:19:String,19:20:Punctuation	-
+
+CSS
+/* theme	0:8:Comment	Comment
+ */	0:3:Comment	-
+#main:hover { color: #112233; margin: 1.5em !important; }	0:12:Class,12:13:CurlyBraces,13:19:Property,19:20:Colon,20:28:Value,28:29:CurlyBraces,29:36:Property,36:37:Colon,37:54:Value,54:55:CurlyBraces,55:56:Property,56:57:CurlyBraces	-
+a[href="http://example.test"] { background: url("x.png"); }	0:1:Selector,2:6:Selector,8:12:Selector,15:22:Selector,23:27:Selector,30:31:CurlyBraces,31:42:Property,42:43:Colon,43:48:Value,48:55:String,55:56:Value,56:57:CurlyBraces,57:58:Property,58:59:CurlyBraces	-
+@media screen { .x { display: none; } }	1:6:Selector,7:13:Selector,14:15:CurlyBraces,15:28:Property,28:29:Colon,29:34:Value,34:35:CurlyBraces,35:36:Property,36:37:CurlyBraces	-
+
+HTML
+<!DOCTYPE html>	0:1:HtmlTag,1:9:Tags,9:15:HtmlTag	-
+<div data-n="😀">&amp;<!-- note	0:5:HtmlTag,5:9:Attributes,9:10:HtmlTag,10:11:UnknownAttribute,11:12:Assignment,12:16:String,16:17:HtmlTag,17:18:EntityReference,18:21:Entities,21:22:EntityReference,22:31:Comment	Comment
+--><b>word</b></div>	0:3:Comment,3:6:HtmlTag,10:11:HtmlTag,11:12:Slash,12:15:HtmlTag,15:16:Slash,16:20:HtmlTag	-
+<script>const x = 'text';</script>	0:8:ScriptTag,8:13:JavaScriptKeyWords,18:24:Character,25:34:ScriptTag	-
+<style>.x { color: red; }</style>	0:1:HtmlTag,1:6:Attributes,6:7:HtmlTag,25:26:HtmlTag,26:27:Slash,27:32:Attributes,32:33:HtmlTag	-
+
+Java
+package demo;	0:7:Package	-
+import java.util.List;	0:6:Package,11:12:Punctuation,16:17:Punctuation	-
+/** use {@code x} */	0:20:Comment	-
+class Demo { private final int n = 42; }	0:5:ReferenceTypes,11:12:Punctuation,13:20:AccessModifiers,21:26:Modifiers,27:30:ValueTypes,35:37:Digits,39:40:Punctuation	-
+String s = "escaped\n😀";	11:24:String	-
+/* comment	0:10:Comment	Comment
+*/ return null;	0:2:Comment,3:9:JumpStatements,10:14:Literals	-
+
+JavaScript
+let x = /ab+\s/gi;	8:15:Regex	-
+function run(x) { return `value ${x}`; }	0:8:JavaScriptKeyWords,18:24:JavaScriptKeyWords	-
+/* note	0:7:Comment	Comment
+*/ const n = 0xff; // end	0:2:Comment,3:8:JavaScriptKeyWords,13:17:Digits,19:25:Comment	-
+console.log("😀\n", true);	12:18:String,20:24:JavaScriptLiterals	-
+
+Json
+{	0:1:Punctuation	Punctuation
+  "word": "😀 escaped\" text",	0:2:Punctuation,2:8:FieldName,8:10:Punctuation,10:29:String,29:30:Punctuation	Punctuation
+  "value": [-1, 0, 3.14e-10, true, null],	0:2:Punctuation,2:9:FieldName,9:13:Punctuation,13:14:Number,14:41:Punctuation	Punctuation,Punctuation,Punctuation
+  "empty": {}	0:2:Punctuation,2:9:String,9:13:Punctuation	Punctuation,Punctuation,Punctuation
+}	0:1:Punctuation	Punctuation,Punctuation,Punctuation
+
+MarkDown
+# Heading	0:9:Heading	-
+**bold** and *italic* with [link](https://example.test).	0:8:StrongEmphasis,13:21:Emphasis,27:55:Link	-
+> quote	0:7:BlockQuote	BlockQuote
+	-	-
+```csharp	0:3:Code	-
+int x = 1;	-	-
+```	0:3:Code	-
+`inline` and <b>html</b>	0:8:Code	-
+- item	-	-
+
+MarkDownWithFontSize
+# Heading	0:9:Heading1	-
+## Secondary	0:12:Heading2	-
+**bold** and *italic* with [link](https://example.test).	0:8:StrongEmphasis,13:21:Emphasis,27:55:Link	-
+> quote	0:7:BlockQuote	BlockQuote
+	-	-
+```csharp	0:3:Code	-
+int x = 1;	-	-
+```	0:3:Code	-
+`inline`	0:8:Code	-
+
+Patch
+diff --git a/test b/test	4:24:UnchangedText	-
+index 111..222 100644	5:21:UnchangedText	-
+--- a/test	0:10:Header	-
++++ b/test	0:10:Header	-
+@@ -1,2 +1,2 @@	-	-
+ context	0:8:UnchangedText	-
+-old	0:4:RemovedText	-
++new	0:4:AddedText	-
+\ No newline at end of file	1:27:UnchangedText	-
+
+PHP
+<div>before <?php	0:1:Punctuation,4:5:Punctuation,12:14:Punctuation	-
+$greet = "Hello $name 😀";	9:25:String,25:26:Punctuation	-
+if (true) echo 42; // note	0:2:FunctionCall,3:4:Punctuation,4:8:OperatorKeywords,8:9:Punctuation,15:17:NumberLiteral,17:18:Punctuation,19:26:Comment	-
+/* multi	0:8:Comment	Comment
+ */	0:3:Comment	-
+?>after</div>	0:2:Punctuation,7:9:Punctuation,12:13:Punctuation	-
+
+PowerShell
+param([string]$Name)	0:5:Keywords,5:7:Punctuation,13:14:Punctuation,14:19:Variable,19:20:Punctuation	-
+# note	0:6:Comment	-
+Write-Output "Hello $Name $($env:PATH)"	0:12:Command,13:39:String	-
+$value = 3.14	0:6:Variable,9:13:NumberLiteral	-
+<#! note	0:8:Comment	Comment
+#> Get-ChildItem	0:2:Comment,3:16:Command	-
+$here = @"	0:5:Variable,8:10:String	String
+hello $Name	0:11:String	String
+"@	0:2:String	-
+
+Python
+#!/usr/bin/python	0:17:Comment	-
+@decorator	-	-
+def run(x: int):	0:3:Keywords,4:7:MethodCall	-
+    """multi	4:12:String	String
+    docstring"""	0:16:String	-
+    return f"value {x}" # note	4:10:Keywords,12:23:String,24:30:Comment	-
+x = 0xff	-	-
+s = r"\w+😀"	5:12:String	-
+
+TSQL
+-- note	0:7:Comment	-
+SELECT [name], N'word''s', 1.25 FROM [dbo].[Table]	0:6:Keywords,16:25:Char,32:36:Keywords,44:49:Keywords	-
+WHERE id >= 42 AND flag IS NOT NULL;	0:5:Keywords,15:18:Keywords,24:26:Keywords,27:30:Keywords,31:35:Keywords	-
+/* multi	0:8:Comment	Comment
+*/ GO	0:2:Comment,3:5:Keywords	-
+
+VB
+Imports System	0:7:Keywords	-
+Public Module Demo	0:6:Keywords,7:13:Keywords	-
+    ' comment	4:13:Comment	-
+    Dim s As String = "a ""quoted"" 😀"	4:7:Keywords,10:12:Keywords,13:19:DataTypes,22:39:String	-
+    Dim n = &H2A	4:7:Keywords	-
+End Module	0:3:Keywords,4:10:Keywords	-
+#If DEBUG Then	0:14:Preprocessor	-
+#End If	0:7:Preprocessor	-
+
+XML
+<?xml version="1.0"?>	0:21:XmlDeclaration	-
+<root xmlns="urn:demo" name="A &amp; B">😀	0:6:XmlTag,6:11:AttributeName,11:22:AttributeValue,22:23:XmlTag,23:27:AttributeName,27:31:AttributeValue,31:36:Entity,36:39:AttributeValue,39:40:XmlTag	-
+  <!-- a	2:8:Comment	Comment
+    b -->	0:9:Comment	-
+  <![CDATA[<tag attr="x">]]>	2:28:CData	-
+  <child-value test = 'yes'/>	2:15:XmlTag,15:19:AttributeName,19:20:XmlTag,20:21:AttributeValue,21:22:XmlTag,22:27:AttributeValue,27:29:XmlTag	-
+</root>	0:7:XmlTag	-
+
+XmlDoc
+<summary>Text &amp; <see cref="Demo"/>.</summary>	0:1:DocComment,1:8:KnownDocTags,8:9:DocComment,20:21:DocComment,21:24:KnownDocTags,24:25:DocComment,25:29:KnownDocTags,29:30:XmlPunctuation,30:36:XmlString,36:37:XmlPunctuation,37:38:DocComment,39:40:DocComment,40:41:XmlPunctuation,41:48:KnownDocTags,48:49:DocComment	-
+<param name="x">Optional</param>	0:1:DocComment,1:6:KnownDocTags,6:7:DocComment,7:11:KnownDocTags,11:12:XmlPunctuation,12:15:XmlString,15:16:DocComment,24:25:DocComment,25:26:XmlPunctuation,26:31:KnownDocTags,31:32:DocComment	-
+<!-- a	0:6:DocComment	-
+b -->	-	-

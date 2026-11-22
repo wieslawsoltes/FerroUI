@@ -103,6 +103,7 @@ members = [
     "src/FerroUI.Ident.Macros",
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
+    "src/FerroUI.Edit.Core",
     "src/FerroUI.TextMate",
     "src/FerroUI.TextMate.Grammars",
     "src/FerroUI.View",
@@ -380,6 +381,7 @@ ferroui-static-view-locator-build = { version = "=0.6.0-preview.1", path = "src/
 ferroui-markup = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup" }
 ferroui-markup-xaml = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml" }
 ferroui-markup-xaml-winui = { version = "=0.6.0-preview.1", path = "src/Markup/FerroUI.Markup.Xaml.WinUI" }
+ferroui-edit-core = { version = "=0.6.0-preview.1", path = "src/FerroUI.Edit.Core" }
 ferroui-textmate = { version = "=0.6.0-preview.1", path = "src/FerroUI.TextMate" }
 ferroui-textmate-grammars = { version = "=0.6.0-preview.1", path = "src/FerroUI.TextMate.Grammars", default-features = false }
 # Without the default features: the default is the run-time back end, which links the XAML runtime library
@@ -449,6 +451,8 @@ encoding_rs = { version = "=0.8.42", default-features = false }
 icu_segmenter = { version = "2.4", default-features = false, features = ["compiled_data"] }
 icu_locale_core = "2.4"
 icu_properties = "2.4"
+icu_casemap = { version = "2.4", default-features = false, features = ["compiled_data"] }
+icu_normalizer = { version = "2.4", default-features = false, features = ["compiled_data"] }
 icu_locale = "2.4"
 icu_decimal = { version = "2.4", features = ["alloc"] }
 icu_calendar = { version = "2.4", default-features = false, features = ["compiled_data"] }
