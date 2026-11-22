@@ -1,6 +1,7 @@
 //! Diagnostics of the object model: what the developer tools and tests read
 //! about the state of a property on an object.
 
+mod design_text_environment;
 mod diagnostic_consts;
 mod ferro_object_extensions;
 mod ferro_property_value;
@@ -13,6 +14,7 @@ mod style_value_frame_diagnostic;
 mod value_frame_diagnostic;
 mod value_store_diagnostic;
 
+pub use design_text_environment::DesignTextEnvironment;
 pub use diagnostic_consts::{DiagnosticMeters, DiagnosticTags};
 pub use ferro_object_extensions::FerroObjectDiagnosticExtensions;
 pub use ferro_property_value::FerroPropertyValue;

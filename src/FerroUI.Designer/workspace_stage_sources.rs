@@ -2,11 +2,12 @@
 //! the authoritative document, definition scope, selection and property inspector.
 use super::*;
 use crate::{
-    DefinitionPreviewOptions, PreviewEnvironment, PreviewHostOptions, PreviewStageConfiguration,
+    DefinitionPreviewOptions, PreviewEnvironment, PreviewHostOptions, PreviewStageAccessibility, PreviewStageConfiguration,
     PreviewStageId, PreviewStageMode, PreviewStageSelection, PreviewStageSource,
     PreviewStageTarget, RuntimeNode,
 };
 use ferroui_designer_animation::VisualStateGroup;
+use ferroui_designer_core::Document;
 use ferroui_designer_project::{
     file_path, local_preview_sources_with_resources, LocalPreviewSources, PreviewSourceBuffer,
 };
@@ -148,21 +149,41 @@ impl DesignerWorkspace {
         let stage = self.preview_stage(id).ok_or("The preview stage was removed")?;
         let uri = stage.configuration.source_uri;
         let mut findings = self.preview_stages.board.borrow().preview_checks(id)?;
+        self.map_preview_stage_rust_source(&uri, |document, map| {
+            for finding in &mut findings {
+                finding.map_rsx_source(document, map);
+            }
+        });
+        Ok(findings)
+    }
+
+    pub fn preview_stage_accessibility(&self, id: PreviewStageId) -> Result<PreviewStageAccessibility, String> {
+        if !self.preview_stage_source_is_current(id) {
+            return Err("Refresh this stage before inspecting accessibility".into());
+        }
+        let stage = self.preview_stage(id).ok_or("The preview stage was removed")?;
+        let mut report = self.preview_stages.board.borrow().preview_accessibility(id)?;
+        self.map_preview_stage_rust_source(&stage.configuration.source_uri, |document, map| {
+            report.map_rsx_source(document, map);
+        });
+        Ok(report)
+    }
+
+    fn map_preview_stage_rust_source(
+        &self,
+        uri: &str,
+        apply: impl FnOnce(&Document, &ferroui_designer_rsx::RsxSourceMap),
+    ) {
         let session = self.session.borrow();
         if session.document_uri() == uri {
             if let Some(map) = session.rust_map() {
-                for finding in &mut findings {
-                    finding.map_rsx_source(session.document(), map);
-                }
+                apply(session.document(), map);
             }
         } else if let Some(tab) = self.project.borrow().tabs.values().find(|tab| tab.preview_uri == uri) {
             if let Some(map) = tab.rust.as_ref().and_then(|rust| rust.map()) {
-                for finding in &mut findings {
-                    finding.map_rsx_source(&tab.document, map);
-                }
+                apply(&tab.document, map);
             }
         }
-        Ok(findings)
     }
 
     /// State groups available to an accepted source and stage configuration.

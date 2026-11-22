@@ -6,12 +6,13 @@ use crate::{
     protocol::Image,
 };
 use base64::{Engine, engine::general_purpose::STANDARD};
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::{Point, Ref, threading::Dispatcher};
 use ferroui_controls::{Control, SizeToContent, Window, WindowDecorations};
 use ferroui_designer::{
     PreviewEnvironment, PreviewPrototypeElementChoice, PreviewPrototypeManifest,
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
-    PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageMode, PreviewStageSourceMoves, PreviewStageStateOptions,
+    PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageLayout, PreviewStageMode, PreviewStageSourceMoves, PreviewStageStateOptions,
     PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
@@ -88,6 +89,8 @@ pub(crate) struct Model {
     dependencies: BTreeSet<String>,
     #[serde(rename = "availableThemes")]
     available_themes: Vec<PreviewTheme>,
+    #[serde(rename = "textEnvironment")]
+    text_environment: bool,
 }
 
 #[derive(Deserialize)]
@@ -100,6 +103,7 @@ pub(crate) struct StageTarget {
 pub(crate) struct StageChecks {
     uri: String,
     findings: Vec<crate::preview_checks::SourceFinding>,
+    accessibility: crate::preview_checks::SourceAccessibility,
 }
 
 #[derive(Serialize)]
@@ -288,9 +292,11 @@ impl Stages {
         let source = &self.sources.get(&uri).ok_or("Open the stage's source document first")?.authored;
         let document = DesignDocument::parse(source, projects.source(source)?)?;
         let findings = self.board.preview_checks(target.id)?;
-        let map = document.rsx.as_ref().filter(|_| !findings.is_empty()).map(|rsx| rsx.mapped_markup().1);
+        let accessibility = self.board.preview_accessibility(target.id)?;
+        let map = document.rsx.as_ref().map(|rsx| rsx.mapped_markup().1);
         let findings = crate::preview_checks::source_findings(findings, &document.xaml, document.source, map.as_ref());
-        Ok(StageChecks { uri, findings })
+        let accessibility = crate::preview_checks::source_accessibility(accessibility, &document.xaml, document.source, map.as_ref());
+        Ok(StageChecks { uri, findings, accessibility })
     }
 
     pub(crate) fn state_options(&self, target: StageTarget) -> Result<Vec<PreviewStageStateOptions>, String> {
@@ -315,21 +321,22 @@ impl Stages {
         }
         let size = control.bounds().size();
         let point = Point::new(size.width * request.x, size.height * request.y);
-        if self.playback.interact(&self.board, id, point)? {
+        let text = stage.configuration.text.environment()?;
+        if DesignTextEnvironment::run(text.as_ref(), || self.playback.interact(&self.board, id, point))? {
             return Ok(json!({"prototype":self.playback.scene()}));
         }
         if stage.configuration.mode == PreviewStageMode::Live {
             let inspector = Inspector::shared();
             let mut inspector = inspector.borrow_mut();
             let node_id = inspector.node_id(&control);
-            inspector.execute(
+            DesignTextEnvironment::run(text.as_ref(), || inspector.execute(
                 "click",
                 &json!({"node_id":node_id,"x":point.x,"y":point.y}),
                 Permissions {
                     allow_input: true,
                     ..Default::default()
                 },
-            )?;
+            ))?;
             return Ok(json!({"interacted":true}));
         }
         let selection = self
@@ -365,25 +372,39 @@ impl Stages {
         if self.stage_info(target)?.rendered_revision.is_none() {
             return Err("This stage has no accepted preview".into());
         }
-        let control = self
-            .board
-            .control(target.id)
-            .ok_or("The stage was removed")?;
-        self.windows
-            .entry(target.id)
-            .or_insert_with(|| StageWindow::new(control.clone()));
+        let control = self.mount_control(target.id).ok_or("The stage was removed")?;
         Dispatcher::ui_thread().run_jobs(None);
         control.update_layout();
         self.board.refresh_runtime_mapping(target.id)?;
         Ok(control)
     }
 
+    fn mount_control(&mut self, id: PreviewStageId) -> Option<Ref<Control>> {
+        let control = self.board.control(id)?;
+        self.windows.entry(id).or_insert_with(|| StageWindow::new(control.clone()));
+        Some(control)
+    }
+
     pub(crate) fn model(&mut self) -> Model {
+        self.windows.retain(|id, _| self.board.control(*id).is_some());
+        for stage in self.board.stages() {
+            if stage.rendered_revision.is_some() && stage.configuration.layout != PreviewStageLayout::Fixed {
+                let _ = self.mount_control(stage.id);
+            }
+        }
+        if !self.windows.is_empty() {
+            // A fitted window may finish its resize on the dispatcher after a
+            // stage update. Report the same settled layout used for its image.
+            Dispatcher::ui_thread().run_jobs(None);
+            for id in self.windows.keys() {
+                if let Some(control) = self.board.control(*id) {
+                    control.update_layout();
+                }
+            }
+        }
         let stages = self.board.stage_details();
         let mut dependencies = stages_sources::watch_paths(&self.sources);
         dependencies.extend(self.board.asset_dependencies());
-        self.windows
-            .retain(|id, _| stages.iter().any(|stage| stage.id == *id));
         Model {
             epoch: self.board.epoch(),
             manifest: self.board.stage_set(),
@@ -391,6 +412,7 @@ impl Stages {
             prototype: self.playback.scene(),
             dependencies,
             available_themes: PreviewTheme::available(),
+            text_environment: true,
         }
     }
 }

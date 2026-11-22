@@ -81,6 +81,10 @@ pub enum PreviewStageAction {
         stage: PreviewStageId,
         epoch: u64,
     },
+    Checks {
+        stage: PreviewStageId,
+        epoch: u64,
+    },
     Focus {
         stage: PreviewStageId,
         epoch: u64,
@@ -759,6 +763,13 @@ impl PreviewStageView {
             (
                 "Save preview image…",
                 PreviewStageAction::Export {
+                    stage: info.id,
+                    epoch: info.epoch,
+                },
+            ),
+            (
+                "Preview checks…",
+                PreviewStageAction::Checks {
                     stage: info.id,
                     epoch: info.epoch,
                 },

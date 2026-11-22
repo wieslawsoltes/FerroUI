@@ -2,13 +2,16 @@ import { canvasThemeLabels, type PreviewFinding, type PreviewSourceBuffer, type 
 
 export const stageThemeLabels = { ...canvasThemeLabels, inherit: 'Application theme' } as const;
 export type StageTheme = keyof typeof stageThemeLabels;
+export const stageDirectionLabels = { inherit: 'Inherited direction', left_to_right: 'Left to right', right_to_left: 'Right to left' } as const;
+export interface StageTextSettings { locale?: string; scale_percent?: number }
 
 export type StageImage = NonNullable<Snapshot['image']>;
 export interface StageConfiguration {
     name: string;
     source_uri: string;
     target: { kind: string };
-    environment: { width: number; height: number; theme: StageTheme; flow_direction: 'inherit' | 'left_to_right' | 'right_to_left' };
+    environment: { width: number; height: number; theme: StageTheme; flow_direction: keyof typeof stageDirectionLabels };
+    text?: StageTextSettings;
     layout: 'fixed' | 'size_that_fits' | 'fixed_width' | 'fixed_height';
     design_time_data: boolean;
     design_fixture?: string;
@@ -50,9 +53,24 @@ export interface PrototypeScene {
 }
 export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'activate'; link: number }
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
-export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean; availableThemes?: StageTheme[] }
+export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean; availableThemes?: StageTheme[]; textEnvironment?: boolean }
 export interface StageTarget { id: number; epoch: number }
-export interface StageChecks { uri: string; findings: (PreviewFinding & { range: Range | null })[] }
+export interface StageAccessibleNode {
+    runtime_id: number;
+    depth: number;
+    control: string;
+    name: string;
+    role: string;
+    control_element: boolean;
+    enabled: boolean;
+    offscreen: boolean;
+    range: Range | null;
+}
+export interface StageChecks {
+    uri: string;
+    findings: (PreviewFinding & { range: Range | null })[];
+    accessibility?: { tree: StageAccessibleNode[]; tab_order: StageAccessibleNode[]; truncated: boolean };
+}
 export interface SourceAnchor { path: { namespace: string; type_name: string; name: string | null; key: string | null }[] }
 export interface StageState { owner: SourceAnchor; group: string; state: string }
 export interface StageStateOptions { owner: SourceAnchor; owner_name: string; group: string; states: string[] }

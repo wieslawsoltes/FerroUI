@@ -7,6 +7,7 @@ use ferroui_controls::automation::peers::AutomationControlType;
 pub enum VisualFinding {
     MissingAccessibleName(AutomationControlType),
     ClippedLayout(String),
+    ClippedText,
     LowTextContrast { ratio: f64, minimum: f64 },
 }
 
@@ -15,6 +16,7 @@ impl VisualFinding {
         match self {
             Self::MissingAccessibleName(_) => "missingAccessibleName",
             Self::ClippedLayout(_) => "clippedLayout",
+            Self::ClippedText => "clippedText",
             Self::LowTextContrast { .. } => "lowTextContrast",
         }
     }
@@ -23,6 +25,7 @@ impl VisualFinding {
         match self {
             Self::MissingAccessibleName(role) => format!("{role:?} needs an accessible name"),
             Self::ClippedLayout(clip) => format!("Arranged bounds extend beyond {clip}"),
+            Self::ClippedText => "Text does not fit in the available space".into(),
             Self::LowTextContrast { ratio, minimum } => {
                 format!("Text contrast is {ratio:.2}:1. WCAG AA requires {minimum:.1}:1.")
             }
@@ -86,6 +89,18 @@ pub fn check_visual_with_layout(
     if let Some(text) = visual.cast::<TextBlock>() {
         if let Some(finding) = crate::text_contrast::check(&text, &ancestry) {
             findings.push(finding);
+        }
+        if text.is_measure_valid() && text.is_arrange_valid() {
+            let layout = text.text_layout();
+            let available = text.bounds().size().deflate(text.padding());
+            if !layout.has_collapsed_lines()
+                && (layout.is_truncated_by_height()
+                    || text.clip_to_bounds()
+                        && (layout.width() > available.width + 0.5
+                            || layout.height() > available.height + 0.5))
+            {
+                findings.push(VisualFinding::ClippedText);
+            }
         }
     }
     Some(VisualChecks {

@@ -2,6 +2,7 @@ use crate::utils::debug_display::{append_optional_value, build_base_debug_displa
 use crate::documents::{EmbeddedControlRun, IInlineHost, Inline, InlineCollection, TextElement, Typography};
 use crate::{Border, Control, ControlImpl, Decorator, TextLayoutRoundingPlacement};
 use ferroui_base::collections::FerroList;
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
@@ -127,6 +128,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
                     | "TextLineBounds"
                     | "LayoutRoundingPlacement"
                     | "Inlines"
+                    | "DesignTextEnvironment"
             ))
         .into()
     });
@@ -161,7 +163,8 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
         match change.property().name() {
             // Properties that affect shaping: invalidate the run cache + layout.
             "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FlowDirection"
-            | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground" => {
+            | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground"
+            | "DesignTextEnvironment" => {
                 this.invalidate_text_layout();
             }
             // The text: the shaped runs go, the run and paragraph properties are not made of it.
@@ -533,6 +536,7 @@ fn shared_run_properties(
     text_decorations: Option<TextDecorationCollection>,
     foreground: Option<Rc<dyn IBrush>>,
     font_features: Option<FontFeatureCollection>,
+    locale: Option<ferroui_base::utilities::Locale>,
 ) -> Rc<dyn TextRunProperties> {
     let shareable = text_decorations.is_none() && font_features.is_none();
     let same_brush = |kept: Option<&Rc<dyn IBrush>>| match (kept, foreground.as_ref()) {
@@ -545,6 +549,7 @@ fn shared_run_properties(
             let mut kept = kept.borrow_mut();
             let index = kept.iter().position(|properties| {
                 properties.font_rendering_em_size() == font_size
+                    && properties.culture_info() == locale.as_ref()
                     && same_brush(properties.foreground_brush())
                     && *properties.typeface() == typeface
             })?;
@@ -565,7 +570,7 @@ fn shared_run_properties(
         foreground,
         None,
         Default::default(),
-        None,
+        locale,
         font_features,
     ));
     if shareable {
@@ -1353,12 +1358,15 @@ impl TextBlock {
         }
         let typeface =
             Typeface::with_style(self.font_family(), self.font_style(), self.font_weight(), self.font_stretch());
+        let environment = DesignTextEnvironment::get(self);
+        let size = self.font_size();
         let properties = shared_run_properties(
             typeface,
-            self.font_size(),
+            environment.as_ref().map_or(size, |settings| settings.scale_font(size)),
             self.text_decorations(),
             self.foreground(),
             Typography::effective_font_features(self),
+            environment.as_ref().and_then(DesignTextEnvironment::locale).cloned(),
         );
         self.run_properties.set(Some(properties.clone()));
         properties

@@ -1,5 +1,5 @@
 import type { PrototypeScene, StageFocus, StageImage, StageInfo, StagesRequest } from '../src/stagesProtocol';
-import { stageThemeLabels } from '../src/stagesProtocol';
+import { stageDirectionLabels, stageThemeLabels } from '../src/stagesProtocol';
 import { create, icon, iconButton, labelButton } from './dom';
 import { StageKeyboard } from './stageKeyboard';
 import type { StageField, StageMenu } from './stageMenu';
@@ -74,8 +74,11 @@ export class StageCard {
         const dimensions = `${Math.round(layout.width)} × ${Math.round(layout.height)}`;
         setting(this.size, 'layout', dimensions, `Sizing for ${name} · ${dimensions}`);
         const theme = stageThemeLabels[environment.theme];
-        const direction = { inherit: 'Inherited direction', left_to_right: 'Left to right', right_to_left: 'Right to left' }[environment.flow_direction];
-        labelButton(this.environment, `Environment for ${name} · ${theme} · ${direction}`,
+        const direction = stageDirectionLabels[environment.flow_direction];
+        const textSize = configuration.text?.scale_percent ?? 100;
+        const settings = [`Environment for ${name}`, theme, direction, configuration.text?.locale,
+            textSize === 100 ? undefined : `${textSize}% text`].filter(Boolean).join(' · ');
+        labelButton(this.environment, settings,
             environment.theme === 'dark' || environment.theme === 'high_contrast' ? 'color-mode' : 'paintcan');
         const fixture = configuration.design_time_data ? configuration.design_fixture : 'Application values';
         this.fixture.hidden = configuration.design_time_data && !configuration.design_fixture;

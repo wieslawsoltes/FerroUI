@@ -1,6 +1,6 @@
 //! Translate findings from an accepted design into the UTF-16 coordinates of its editor buffer.
 use crate::renderer::Stage;
-use ferroui_designer::PreviewFinding;
+use ferroui_designer::{PreviewFinding, PreviewStageAccessibility, PreviewStageAccessibleNode};
 use ferroui_designer_core::Document;
 use ferroui_designer_language::{LineIndex, Range};
 use ferroui_designer_rsx::RsxSourceMap;
@@ -13,6 +13,41 @@ pub(crate) struct SourceFinding {
     #[serde(flatten)]
     finding: PreviewFinding,
     range: Option<Range>,
+}
+
+#[derive(Serialize)]
+pub(crate) struct SourceAccessibility {
+    tree: Vec<SourceAccessibleNode>,
+    tab_order: Vec<SourceAccessibleNode>,
+    truncated: bool,
+}
+
+#[derive(Serialize)]
+struct SourceAccessibleNode {
+    #[serde(flatten)]
+    node: PreviewStageAccessibleNode,
+    range: Option<Range>,
+}
+
+pub(crate) fn source_accessibility(
+    mut report: PreviewStageAccessibility,
+    document: &Document,
+    source: &str,
+    rsx: Option<&RsxSourceMap>,
+) -> SourceAccessibility {
+    if let Some(map) = rsx {
+        report.map_rsx_source(document, map);
+    }
+    let index = LineIndex::new(source);
+    let with_range = |node: PreviewStageAccessibleNode| {
+        let range = node.source.and_then(|span| index.range(span).ok());
+        SourceAccessibleNode { node, range }
+    };
+    SourceAccessibility {
+        tree: report.tree.into_iter().map(with_range).collect(),
+        tab_order: report.tab_order.into_iter().map(with_range).collect(),
+        truncated: report.truncated,
+    }
 }
 
 pub(crate) fn source_findings(

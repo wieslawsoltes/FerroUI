@@ -358,12 +358,12 @@ impl TextBlockImpl for SelectableTextBlock {
                 let selection_properties = |typeface: Typeface, font_features| -> Rc<dyn TextRunProperties> {
                     Rc::new(GenericTextRunProperties::with_all(
                         typeface,
-                        this.font_size(),
+                        default_properties.font_rendering_em_size(),
                         None,
                         Some(selection_foreground_brush.clone()),
                         None,
                         BaselineAlignment::Baseline,
-                        None,
+                        default_properties.culture_info().cloned(),
                         font_features,
                     ))
                 };

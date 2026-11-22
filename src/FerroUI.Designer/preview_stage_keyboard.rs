@@ -1,5 +1,6 @@
 //! Scoped native input for clients that present a stage as an image.
 use super::{with_runtime_errors, PreviewStageBoard, PreviewStageId, PreviewStageMode};
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::input::text_input::TextInputMethodClientRequestedEventArgs;
 use ferroui_base::input::{
     FocusManager, InputElement, Key, KeyGesture, KeyModifiers, KeyboardNavigationHandler,
@@ -32,6 +33,7 @@ pub struct PreviewStageFocus {
 pub struct PreviewStageKeyboardTarget {
     scope: Ref<Control>,
     sources: SourceSnapshot,
+    text: Option<DesignTextEnvironment>,
 }
 
 impl PreviewStageBoard {
@@ -54,6 +56,7 @@ impl PreviewStageBoard {
         Ok(PreviewStageKeyboardTarget {
             scope: rendered.scope.clone().upcast(),
             sources: rendered.source_snapshot.clone(),
+            text: DesignTextEnvironment::get(&rendered.scope),
         })
     }
 }
@@ -63,7 +66,7 @@ impl PreviewStageKeyboardTarget {
         self,
         action: PreviewStageKeyboardInput,
     ) -> Result<Option<PreviewStageFocus>, String> {
-        self.sources.run(|| {
+        DesignTextEnvironment::run(self.text.as_ref(), || self.sources.run(|| {
             with_runtime_errors("keyboard input", || {
                 let top =
                     TopLevel::get_top_level(Some(&self.scope)).ok_or("Mount the stage first")?;
@@ -84,7 +87,7 @@ impl PreviewStageKeyboardTarget {
                         }
                     }))
             })
-        })
+        }))
     }
 
     fn dispatch(&self, top: &TopLevel, action: PreviewStageKeyboardInput) -> Result<(), String> {
@@ -134,26 +137,42 @@ impl PreviewStageKeyboardTarget {
 
     fn move_focus(&self, from: Option<&Ref<InputElement>>, modifiers: KeyModifiers) {
         let scope = self.scope.clone().upcast::<InputElement>();
-        let backwards = modifiers.contains(KeyModifiers::SHIFT);
-        let direction = if backwards {
-            NavigationDirection::Previous
-        } else {
-            NavigationDirection::Next
-        };
-        let candidate = from
-            .and_then(|input| KeyboardNavigationHandler::get_next(input, direction))
-            .filter(|input| self.contains(input))
-            .or_else(|| {
-                if backwards {
-                    FocusManager::find_last_focusable_element_in(&scope)
-                } else {
-                    FocusManager::find_first_focusable_element_in(&scope)
-                }
-            });
-        if let Some(candidate) = candidate.filter(|input| self.contains(input)) {
+        if let Some(candidate) = tab_target(&scope, from, modifiers.contains(KeyModifiers::SHIFT)) {
             candidate.focus_with(NavigationMethod::Tab, modifiers);
         }
     }
+}
+
+pub(super) fn tab_target(
+    scope: &Ref<InputElement>,
+    from: Option<&Ref<InputElement>>,
+    backwards: bool,
+) -> Option<Ref<InputElement>> {
+    let direction = if backwards {
+        NavigationDirection::Previous
+    } else {
+        NavigationDirection::Next
+    };
+    let in_scope = |input: &Ref<InputElement>| {
+        scope.upcast_ref::<Visual>().is_visual_ancestor_of(input.upcast_ref::<Visual>())
+    };
+    let can_tab_to = |input: &Ref<InputElement>| {
+        in_scope(input) && input.is_effectively_enabled() && input.is_effectively_visible()
+            && input.focusable() && input.is_tab_stop()
+    };
+    let next = |input: &Ref<InputElement>| {
+        KeyboardNavigationHandler::get_next(input, direction).filter(can_tab_to)
+    };
+    from.and_then(next).or_else(|| {
+        let entry = if backwards {
+            FocusManager::find_last_focusable_element_in(scope)
+        } else {
+            FocusManager::find_first_focusable_element_in(scope)
+        }.filter(in_scope)?;
+        // The focus manager's initial search can suggest a disabled element.
+        // Native Tab traversal skips it in the same navigation group.
+        if can_tab_to(&entry) { Some(entry) } else { next(&entry) }
+    })
 }
 
 fn accepts_text(input: &Ref<InputElement>) -> bool {

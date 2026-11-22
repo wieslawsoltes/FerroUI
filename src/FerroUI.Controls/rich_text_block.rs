@@ -184,6 +184,7 @@ impl FerroObjectImpl for RichTextBlock {
             | "FontStretch"
             | "FontFeatures"
             | "Language"
+            | "DesignTextEnvironment"
             | "Foreground"
             | "FlowDirection"
             | "LetterSpacing"

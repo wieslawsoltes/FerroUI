@@ -7,9 +7,11 @@ use crate::{
 };
 use ferroui_base::media::FlowDirection;
 use crate::preview_theme::preview_backing;
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::utilities::UriRef;
 use ferroui_base::{Point, Ref, Visual, WeakRef};
 use ferroui_controls::{Border, ContentControl, Control, ThemeVariantScope};
+use ferroui_controls::documents::TextElement;
 use ferroui_designer_core::{Ast, Document, NodeId};
 use crate::PreviewSourceAnchor;
 use ferroui_designer_project::LocalPreviewSources;
@@ -39,6 +41,12 @@ use includes::{IncludeCatalog, IncludeCatalogs, IncludeSource};
 #[path = "preview_stage_keyboard.rs"]
 mod keyboard;
 pub use keyboard::{PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget};
+#[path = "preview_stage_text.rs"]
+mod text;
+pub use text::PreviewStageText;
+#[path = "preview_stage_accessibility.rs"]
+mod accessibility;
+pub use accessibility::{PreviewStageAccessibility, PreviewStageAccessibleNode};
 
 pub type PreviewStageId = u64;
 pub const MAX_PREVIEW_STAGES: usize = 16;
@@ -111,6 +119,8 @@ pub struct PreviewStageConfiguration {
     pub source_uri: String,
     pub target: PreviewStageTarget,
     pub environment: PreviewEnvironment,
+    #[serde(default, skip_serializing_if = "PreviewStageText::is_default")]
+    pub text: PreviewStageText,
     #[serde(default)]
     pub layout: PreviewStageLayout,
     pub design_time_data: bool,
@@ -131,6 +141,7 @@ impl PreviewStageConfiguration {
             source_uri: source_uri.into(),
             target: PreviewStageTarget::Document,
             environment,
+            text: PreviewStageText::default(),
             layout: PreviewStageLayout::Fixed,
             design_time_data: true,
             states: Vec::new(),
@@ -144,6 +155,7 @@ impl PreviewStageConfiguration {
         bounded(&self.name, 128, "Stage name", false)?;
         validate_uri(&self.source_uri)?;
         self.environment.validate()?;
+        self.text.validate()?;
         if let PreviewStageTarget::Definition { anchor, options } = &self.target {
             anchor.validate()?;
             options.validate()?;
@@ -176,6 +188,7 @@ impl PreviewStageConfiguration {
     fn text_size(&self) -> usize {
         self.name.len()
             + self.source_uri.len()
+            + self.text.locale.as_ref().map_or(0, String::len)
             + 256
             + match &self.target {
                 PreviewStageTarget::Document => 0,
@@ -197,6 +210,7 @@ impl PreviewStageConfiguration {
             && self.target == other.target
             && self.environment.theme == other.environment.theme
             && self.environment.flow_direction == other.environment.flow_direction
+            && self.text == other.text
             && self.design_time_data == other.design_time_data
             && self.states == other.states
     }
@@ -1486,6 +1500,13 @@ impl PreviewStageBoard {
             .collect::<Result<Vec<_>, String>>()?;
         let scope = ThemeVariantScope::new();
         apply_environment(&scope, config.environment)?;
+        let text = config.text.environment()?;
+        if let Some(settings) = &text {
+            settings.install(&scope);
+            if let Some(locale) = settings.locale() {
+                scope.set_value(TextElement::language_property(), locale.clone());
+            }
+        }
         apply_scope_layout(&scope, config.layout, config.environment);
         scope.set_opacity(0.0);
         scope.set_is_hit_test_visible(false);
@@ -1528,14 +1549,16 @@ impl PreviewStageBoard {
             source_snapshot.run(|| {
                 let mut options = self.options.clone();
                 options.design_time_data = config.design_time_data;
-                let mut preview = RuntimePreview::new_isolated_with_fixture(
-                    host,
-                    config.source_uri.clone(),
-                    document,
-                    options,
-                    spec.design_fixture.clone(),
-                    definition_scope,
-                )?;
+                let mut preview = DesignTextEnvironment::run(text.as_ref(), || {
+                    RuntimePreview::new_isolated_with_fixture(
+                        host,
+                        config.source_uri.clone(),
+                        document,
+                        options,
+                        spec.design_fixture.clone(),
+                        definition_scope,
+                    )
+                })?;
                 match &preview.status {
                     PreviewStatus::Ready { revision } if *revision == document.revision() => {}
                     PreviewStatus::Failed { message, .. } => return Err(message.clone()),

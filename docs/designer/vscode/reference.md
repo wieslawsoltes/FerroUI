@@ -58,6 +58,12 @@ Open a board with `designer_stages_open` and read its `availableThemes`. In `des
 
 In Studio, read `available_themes` from `designer_preview_stages`, then update the same environment through `designer_preview_stage`. The preview uses the host’s native contrast variant and the choices persist in the stage set. [Compare high contrast in VS Code](motion.md#compare-a-high-contrast-stage)
 
+### Set stage locale and text size with MCP
+
+Read the board with `designer_stages`. When it reports `textEnvironment`, update the selected stage with `designer_stage_change` and the current board epoch. Send the complete configuration with `text: { locale: "ja-JP", scale_percent: 150 }`. An omitted locale uses the application locale. An omitted scale uses 100%. Text size accepts whole percentages from 50 through 300.
+
+Studio reports the same support as `text_environment` in `designer_preview_stages`. Use the current Studio model and `designer_preview_stage` to apply the same configuration. Read the new stage epoch before requesting its image or checks. [Compare locale and text size](motion.md#compare-locale-and-text-size)
+
 ### Send keyboard input to a stage
 
 1. Read the board with `designer_stages`. Use `designer_stage_change` to set the card's mode to `live`. Read the accepted stage ID and epoch from the returned board.
@@ -298,6 +304,8 @@ Read the open board again after Apply, Undo, or Redo. Use `designer_stages` in V
 ### Read Preview Checks with MCP
 
 Call `designer_studio_query` with `tool: "designer_preview_checks"` and empty `arguments` for the active design. On a stage, call `designer_stage_checks` with its current ID and epoch. `layoutOverflow` and `clippedLayout` include `overflow.boundary` and `left`, `top`, `right`, and `bottom` distances in logical pixels. `ineffectiveLayoutValue` identifies the authored `property` and explains the effective layout. `range` points to the original XAML or mapped Rust in UTF-16 coordinates.
+
+Stage checks include `accessibility.tree`, `accessibility.tab_order`, and `accessibility.truncated`. Each row provides the native `name`, `role`, `enabled` and `offscreen` state, and a `range` when the control maps to authored source. Tab order follows one native traversal from the stage's entry point. Each list reports up to 512 rows. The `clippedText` finding identifies text cut by the available layout. Formatted ellipses keep their authored behavior.
 
 In Designer Studio, `designer_preview_checks` reads the current canvas. `designer_preview_stage_checks` takes the current stage model. Studio reports `source` as a byte span in the authored document. [Preview Checks in VS Code](authoring.md#diagnose-a-design-time-issue)
 

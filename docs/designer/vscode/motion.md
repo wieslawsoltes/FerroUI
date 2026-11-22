@@ -298,6 +298,26 @@ Use the **Environment** icon on one card and choose **High contrast** under **Th
 
 The choice stays on that card and is saved in the stage set. Authored background and foreground values keep their native precedence. [Designer Studio stages](../xcode-previews.md) · [MCP stage actions](reference.md#choose-a-stage-theme-with-mcp)
 
+### Compare locale and text size
+
+1. Open **Environment** on a stage and choose **Locale**. Enter a language tag such as `ja-JP` or `fr-CA`. Clear the field to use the application's locale. **Direction** remains available for an independent reading-direction comparison.
+2. Open **Environment** again and choose **Text size**. Enter a whole percentage from 50% to 300%. Text blocks, input text, and rich text measure at the new size within the stage's logical layout. Use **Checks** to find content that clips at the larger size.
+3. Keep a second card at 100% to compare. Save the stage set to reopen the same settings in VS Code or Studio.
+
+Locale supplies the preview's text language and its default binding converter culture. The native host's registered formatting data determines localized numbers and dates. A binding's explicit converter culture takes precedence. [Studio environment settings](../xcode-previews.md#environments-and-sizing) · [MCP text environment](reference.md#set-stage-locale-and-text-size-with-mcp)
+
+![Two native Project inbox stages compare the same 520 by 540 layout at 100 and 150 percent text size](../images/vscode-stage-text-comparison.png)
+
+[Environment picker with the Japanese locale and 150 percent text size](../images/vscode-stage-text-environment.png)
+
+### Inspect accessibility on a stage
+
+Open **Checks** on the card you want to review. **Findings** includes missing accessible names, low text contrast, clipped layout and text, and ineffective layout values. **Tab order** shows one pass of the stage's native keyboard navigation. **Accessibility tree** uses native roles and accessible names and identifies disabled or offscreen peers.
+
+Type a name or role to filter the picker. Choose a mapped row to reveal its XAML element or RSX control in the editor. Compare the Tab order in a reference card with a card that uses a different size, fixture, or state. Inspection keeps focus and source intact. [MCP reports](reference.md#read-preview-checks-with-mcp)
+
+![Stage Checks shows an unnamed edit control, the stage Tab order, and native roles beside the two previews](../images/vscode-stage-accessibility-checks.png)
+
 ### Use the keyboard in a stage
 
 1. Switch a ready stage to **Interact**. Choose **Keyboard input for** the stage with the **abc** icon, or click a control directly on the artboard.

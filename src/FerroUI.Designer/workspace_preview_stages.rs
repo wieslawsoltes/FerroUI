@@ -10,6 +10,9 @@ use crate::{
 use ferroui_controls::Flyout;
 use std::collections::{BTreeMap, BTreeSet};
 
+#[path = "workspace_stage_checks.rs"]
+mod checks;
+
 pub(super) struct PreviewStagesUi {
     pub(super) board: RefCell<PreviewStageBoard>,
     visible: Cell<bool>,
@@ -581,6 +584,10 @@ impl DesignerWorkspace {
             PreviewStageAction::Refresh { stage, epoch } => {
                 self.accepted_preview_stage(stage, epoch)?;
                 self.refresh_preview_stage(stage)
+            }
+            PreviewStageAction::Checks { stage, epoch } => {
+                let info = self.accepted_preview_stage(stage, epoch)?;
+                self.show_preview_stage_checks(&info, anchor)
             }
             PreviewStageAction::Focus { stage, epoch } => {
                 self.accepted_preview_stage(stage, epoch)?;

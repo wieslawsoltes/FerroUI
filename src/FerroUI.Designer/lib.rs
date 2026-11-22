@@ -188,10 +188,11 @@ pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewActio
 pub use preview_source_anchor::{PreviewSourceAnchor, PreviewSourceSegment};
 pub use preview_stages::{
     MAX_PREVIEW_STAGES, PreviewStageBoard,
-    PreviewStageConfiguration, PreviewStageDetails, PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageSet, PreviewStageSpec,
+    PreviewStageConfiguration, PreviewStageDetails, PreviewStageId, PreviewStageInfo, PreviewStageManifest, PreviewStageSet, PreviewStageSpec, PreviewStageText,
     PreviewStageLayout, PreviewStageSize, PreviewStageMode, PreviewStageSelection, PreviewStageSelectionToken, PreviewStageSnapshot,
     PreviewStageSource, PreviewStageSourceMoves, PreviewStageState, PreviewStageStatus, PreviewStageTarget,
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget,
+    PreviewStageAccessibility, PreviewStageAccessibleNode,
 };
 pub use preview_stage_editor::PreviewStageEditor;
 pub use preview_stage_export::{

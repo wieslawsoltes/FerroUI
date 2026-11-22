@@ -1,5 +1,6 @@
 use super::{TextElement, TextElementImpl, Typography};
 use crate::Control;
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::media::text_formatting::{GenericTextRunProperties, TextRun, TextRunProperties};
 use ferroui_base::media::{
     subscribe_invalidated, BaselineAlignment, IBrush, TextDecorationCollection, Typeface,
@@ -213,7 +214,7 @@ impl Inline {
 
         Rc::new(GenericTextRunProperties::with_all(
             typeface,
-            self.font_size(),
+            DesignTextEnvironment::font_size(self, self.font_size()),
             self.text_decorations(),
             self.foreground(),
             parent_or_self_background,

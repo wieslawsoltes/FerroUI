@@ -7,7 +7,8 @@ import { DesignerDependencies, dirtyPreviewSources, xamlPath } from './designerD
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
 import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
-import { stageThemeLabels } from './stagesProtocol';
+import { pickStageCheck } from './stageChecksPicker';
+import { dimensions, editStageEnvironment } from './stageEnvironmentPicker';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
 import { sameStageSource, stageUsesSource, retargetStageManifest, type StageFileMove } from './stageSourceMoves';
@@ -406,15 +407,13 @@ class StageSession {
                 return;
             }
             if (message.type === 'checks') {
-                const { uri, findings } = await this.checks(message.id, message.epoch, AbortSignal.timeout(15_000));
-                if (!findings.length) { void vscode.window.showInformationMessage('No findings in this stage.'); return; }
-                const issue = await choose('Stage Preview Checks', findings.map(finding => ({
-                    label: `$(${finding.code === 'ineffectiveLayoutValue' ? 'info' : 'warning'}) ${finding.summary ?? finding.message}`,
-                    description: finding.name ?? finding.control,
-                    detail: finding.summary ? finding.message : undefined,
-                    range: finding.range,
-                })));
-                if (issue?.range) await this.revealStageSource(uri, issue.range, generation);
+                const stage = this.currentInputStage(model, message);
+                const checks = await this.checks(message.id, message.epoch, AbortSignal.timeout(15_000));
+                const range = await pickStageCheck(stage.configuration.name, checks);
+                if (range) {
+                    this.currentInputStage(model, message);
+                    await this.revealStageSource(checks.uri, range, generation);
+                }
                 return;
             }
             if (message.type === 'saveManifest') {
@@ -558,15 +557,7 @@ class StageSession {
                 break;
             }
             case 'environment': {
-                const environment = configuration.environment;
-                const size = await dimensions(environment.width, environment.height);
-                if (!size) return;
-                const themes = model.availableThemes ?? ['light', 'dark', 'inherit'] as const;
-                const theme = await choose('Theme', themes.map(value => ({ label: stageThemeLabels[value], value })));
-                if (!theme) return;
-                const direction = await choose('Direction', [{ label: 'Inherit', value: 'inherit' }, { label: 'Left to right', value: 'left_to_right' }, { label: 'Right to left', value: 'right_to_left' }] as const);
-                if (!direction) return;
-                configuration.environment = { ...size, theme: theme.value, flow_direction: direction.value };
+                if (!await editStageEnvironment(configuration, model)) return;
                 break;
             }
         }
@@ -594,12 +585,4 @@ class StageSession {
 function stageDocument(source: Source, uri: vscode.Uri): StageDocument {
     const folder = vscode.workspace.getWorkspaceFolder(uri);
     return { ...source, workspaceRoot: folder?.uri.scheme === 'file' ? folder.uri.fsPath : undefined };
-}
-
-async function dimensions(width: number, height: number): Promise<{ width: number; height: number } | undefined> {
-    const value = await editText('Logical size, for example 800 × 520', `${width} × ${height}`);
-    if (value === undefined) return;
-    const parts = /^\s*(\d{1,4})\s*[x×]\s*(\d{1,4})\s*$/i.exec(value);
-    if (!parts || parts.slice(1).some(part => Number(part) < 64 || Number(part) > 2048)) throw new Error('Choose dimensions from 64 to 2048.');
-    return { width: Number(parts[1]), height: Number(parts[2]) };
 }

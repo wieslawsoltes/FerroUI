@@ -1,6 +1,7 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
-import type { StageFocus, StageInput, StageModel } from '../src/stagesProtocol';
+import type { StageChecks, StageFocus, StageInput, StageModel } from '../src/stagesProtocol';
+import { asRange } from '../src/textDocument';
 import type { McpFixture } from './mcp';
 
 export async function verifyStageKeyboard({ invoke, content }: McpFixture): Promise<void> {
@@ -27,6 +28,16 @@ export async function verifyStageKeyboard({ invoke, content }: McpFixture): Prom
         const target = (stage: StageModel['stages'][number]) => ({ session, stage: stage.id, expected_epoch: stage.epoch });
         const focus = { kind: 'focus' } as const;
         assert.ok((await invoke('designer_stage_input', { ...target(selection), input: focus })).isError);
+        const { accessibility } = content<StageChecks>(await invoke('designer_stage_checks', target(selection)));
+        assert.ok(accessibility);
+        assert.equal(accessibility.truncated, false);
+        assert.deepEqual(accessibility.tab_order.map(row => row.role), ['Button', 'Edit']);
+        assert.ok(accessibility.tree.some(row => row.name === 'Apply' && row.role === 'Button'));
+        const stops = accessibility.tab_order.map(row => {
+            assert.ok(row.range, JSON.stringify(row));
+            return document.getText(asRange(row.range));
+        });
+        assert.deepEqual(stops, ['Button', 'TextBox']);
         const update = async (board: StageModel, stage: StageModel['stages'][number], configuration: object) =>
             content<StageModel>(await invoke('designer_stage_change', { session, expected_epoch: board.epoch, arguments: {
                 action: 'update', id: stage.id, configuration: { ...stage.configuration, ...configuration },
@@ -34,6 +45,7 @@ export async function verifyStageKeyboard({ invoke, content }: McpFixture): Prom
         const live = await update(first, selection, { mode: 'live' });
         const stage = live.stages[0];
         assert.ok((await invoke('designer_stage_input', { ...target(selection), input: focus })).isError);
+        assert.ok((await invoke('designer_stage_checks', target(selection))).isError);
         const send = async (input: StageInput) => content<StageFocus>(await invoke('designer_stage_input', { ...target(stage), input }));
         const key = (key: string) => send({ kind: 'key', key });
         assert.equal((await send(focus)).role, 'Button');
@@ -60,5 +72,5 @@ export async function verifyStageKeyboard({ invoke, content }: McpFixture): Prom
             .filter(tab => tab.label === path || tab.label === `Design · ${path}` || tab.label === `Stages · ${path}`);
         await vscode.window.tabGroups.close(tabs);
     }
-    console.log('VS Code MCP drove scoped native keyboard input in current XAML and RSX stages, preserving the other card and source');
+    console.log('VS Code MCP linked native roles and Tab order to XAML and RSX, rejected stale stages, and preserved the other card and source during keyboard input');
 }

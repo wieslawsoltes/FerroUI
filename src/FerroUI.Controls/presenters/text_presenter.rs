@@ -1,13 +1,14 @@
 use crate::documents::{TextElement, Typography};
 use crate::primitives::{TextSelectionHandleCanvas, TextSelectorLayer};
 use crate::{Border, Control, ControlImpl, TextBlock, TextBox, TextBoxTextInputMethodClient};
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, VerticalAlignment};
 use ferroui_base::media::immutable::{ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::text_formatting::{
-    GenericTextRunProperties, LogicalDirection, TextLayout, TextLayoutOptions, TextRunCache, TextRunProperties,
-    TextParagraphStyles,
+    FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, LogicalDirection,
+    TextLayout, TextParagraphStyles, TextRunCache, TextRunProperties,
 };
 use ferroui_base::media::{
     BaselineAlignment, BrushExtensions, Brushes, CharacterHit, Color, DrawingContext, FlowDirection, FontFamily,
@@ -133,7 +134,7 @@ impl FerroObjectImpl for TextPresenter {
             "PreeditText" | "Foreground" | "FontSize" | "FontStyle" | "FontWeight" | "FontFamily" | "FontStretch"
             | "Text" | "LetterSpacing" | "PasswordChar" | "RevealPassword" | "FlowDirection"
             | "FontFeatures" | "TextStyleOverrides" | "TextParagraphStyles"
-            | "SelectionForegroundBrush" | "ShowSelectionHighlight" => {
+            | "SelectionForegroundBrush" | "ShowSelectionHighlight" | "DesignTextEnvironment" => {
                 this.invalidate_text_layout();
             }
             // Properties that do not affect shaping: preserve the run cache.
@@ -312,9 +313,14 @@ impl TextPresenterImpl for TextPresenter {
         let start = selection_start.min(selection_end);
         let length = selection_start.max(selection_end) - start;
 
+        let environment = DesignTextEnvironment::get(this);
+        let font_size = this.font_size();
         let defaults: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
-            typeface.clone(), this.font_size(), None, this.foreground(), None,
-            BaselineAlignment::Baseline, None, Typography::effective_font_features(this),
+            typeface,
+            environment.as_ref().map_or(font_size, |settings| settings.scale_font(font_size)),
+            None, this.foreground(), None, BaselineAlignment::Baseline,
+            environment.as_ref().and_then(DesignTextEnvironment::locale).cloned(),
+            Typography::effective_font_features(this),
         ));
         let styles = this.text_style_overrides();
         let removed = this.current_im_client.borrow().as_ref().and_then(Weak::upgrade)
@@ -324,7 +330,7 @@ impl TextPresenterImpl for TextPresenter {
             .then(|| this.selection_foreground_brush()).flatten()
             .map(|brush| (start, length, brush));
         let text_style_overrides = super::text_presenter_styles::compose(
-            defaults, styles, committed_length, removed, caret_index,
+            defaults.clone(), styles, committed_length, removed, caret_index,
             preedit_text.as_ref().map_or(0, |text| text.len() as i32), selected_foreground,
         );
         let paragraph_styles = this.text_paragraph_styles();
@@ -352,12 +358,12 @@ impl TextPresenterImpl for TextPresenter {
             this.create_text_layout_internal(
                 this.constraint.get(),
                 Some(ReadOnlyMemory::from_vec(password)),
-                typeface,
+                defaults,
                 text_style_overrides,
                 None,
             )
         } else {
-            this.create_text_layout_internal(this.constraint.get(), text, typeface, text_style_overrides, paragraph_styles)
+            this.create_text_layout_internal(this.constraint.get(), text, defaults, text_style_overrides, paragraph_styles)
         }
     }
 
@@ -901,7 +907,7 @@ impl TextPresenter {
         &self,
         constraint: Size,
         text: Option<ReadOnlyMemory<u16>>,
-        typeface: Typeface,
+        defaults: Rc<dyn TextRunProperties>,
         text_style_overrides: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>>,
         paragraph_styles: Option<TextParagraphStyles>,
     ) -> Rc<TextLayout> {
@@ -910,26 +916,15 @@ impl TextPresenter {
 
         let text_run_cache = self.text_run_cache.borrow_mut().get_or_insert_with(|| Rc::new(TextRunCache::new())).clone();
 
-        Rc::new(TextLayout::from_utf16_with_paragraph_styles(
-            text.unwrap_or_default(),
-            typeface,
-            TextLayoutOptions {
-                font_size: self.font_size(),
-                foreground: self.foreground(),
-                text_alignment: self.text_alignment(),
-                text_wrapping: self.text_wrapping(),
-                text_trimming: None,
-                text_decorations: None,
-                flow_direction: self.flow_direction(),
-                max_width,
-                max_height,
-                line_height: self.line_height(),
-                letter_spacing: self.letter_spacing(),
-                max_lines: 0,
-                font_features: Typography::effective_font_features(self),
-                text_style_overrides,
-                text_run_cache: Some(text_run_cache),
-            },
+        let source = Rc::new(FormattedTextSource::new(
+            text.unwrap_or_default(), defaults.clone(), text_style_overrides,
+        ));
+        let paragraph = Rc::new(GenericTextParagraphProperties::with_all(
+            self.flow_direction(), self.text_alignment(), true, false, defaults,
+            self.text_wrapping(), self.line_height(), 0.0, self.letter_spacing(),
+        ));
+        Rc::new(TextLayout::from_text_source_with_paragraph_styles(
+            source, paragraph, None, max_width, max_height, 0, Some(text_run_cache),
             paragraph_styles,
         ))
     }

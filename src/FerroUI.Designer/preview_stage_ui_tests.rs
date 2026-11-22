@@ -130,6 +130,8 @@ fn stage_editor_applies_complete_draft_for_viewer_and_cancel_preserves_source_an
     named::<TextBox>(&editor.control(), "StageHeight").set_text(Some("844"));
     named::<ComboBox>(&editor.control(), "StageTheme").set_selected_index(1);
     named::<ComboBox>(&editor.control(), "StageDirection").set_selected_index(2);
+    named::<TextBox>(&editor.control(), "StageLocale").set_text(Some("fr-CA"));
+    named::<TextBox>(&editor.control(), "StageTextSize").set_text(Some("150"));
     named::<CheckBox>(&editor.control(), "StagePinned").set_is_checked(Some(true));
     named::<CheckBox>(&editor.control(), "StageAutoUpdate").set_is_checked(Some(false));
     named::<CheckBox>(&editor.control(), "StageDesignData").set_is_checked(Some(false));
@@ -146,6 +148,8 @@ fn stage_editor_applies_complete_draft_for_viewer_and_cancel_preserves_source_an
         }
     );
     assert!(configuration.pinned);
+    assert_eq!(configuration.text.locale.as_deref(), Some("fr-CA"));
+    assert_eq!(configuration.text.scale_percent, 150);
     assert!(!configuration.auto_update);
     assert!(!configuration.design_time_data);
     assert_eq!(workspace.session.borrow().document().source(), SOURCE);

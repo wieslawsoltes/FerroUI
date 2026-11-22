@@ -1,4 +1,5 @@
 use crate::{Inspector, VisualFinding};
+use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{Rect, Ref, Visual};
 use ferroui_controls::{Border, Panel, TextBlock};
@@ -18,7 +19,7 @@ pub(super) fn check(text: &Ref<TextBlock>, ancestry: &[Ref<Visual>]) -> Option<V
     let second = luminance(background);
     let ratio = (first.max(second) + 0.05) / (first.min(second) + 0.05);
     // WCAG large text is 18pt or at least 14pt bold, at 96 DIPs per inch.
-    let size = text.font_size();
+    let size = DesignTextEnvironment::font_size(text, text.font_size());
     let large = size >= 24.0 || size >= 14.0 * 96.0 / 72.0 && text.font_weight().0 >= 700;
     let minimum = if large { 3.0 } else { 4.5 };
     (ratio < minimum).then_some(VisualFinding::LowTextContrast { ratio, minimum })

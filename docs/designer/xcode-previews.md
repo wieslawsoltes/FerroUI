@@ -124,10 +124,28 @@ layout still receives the configured dimensions; the reduced card size is not th
 application's layout size.
 
 Each stage has its own theme scope and reading direction. Theme-aware resources resolve
-against that scope, and inherited flow direction reaches the application controls. The
-board does not rewrite fixed widths, font sizes or explicit theme settings authored by
-the application. For example, a fixed-width root can still overflow a narrow stage; that
-is useful evidence about the actual layout.
+against that scope, and inherited flow direction reaches the application controls.
+Authored widths still constrain native layout. A fixed-width root can overflow a narrow stage.
+
+In **Edit preview stage**, set **Locale** to a language tag such as `ja-JP` or `fr-CA`.
+Leave it blank to inherit the application locale. The scope supplies a language for native
+text shaping and a default binding converter culture. Installed native culture data
+supplies locale-specific number and date formatting. Explicit binding cultures and rich-text
+languages take precedence.
+
+Set **Text size** to a whole percentage from 50% to 300%. The stage measures supported
+plain, inline, input, and rich text using the authored sizes multiplied by this value.
+Compare a card at 100% with one at 200% to see how fixed widths and heights affect larger text.
+Both settings travel with the stage set, and earlier sets use the application locale and 100%.
+
+### Review a stage's accessibility
+
+Open the card's actions menu and choose **Preview checks**. The **Findings** tab shows
+contrast, missing accessible names, and clipping for the current layout. **Tab order**
+lists the controls visited by one pass through the stage using Tab. **Accessibility tree**
+shows the native roles and names, including disabled and offscreen peers. Select a row with
+an authored location to open its XAML or mapped Rust declaration. The report can also be
+queried with `designer_preview_stage_checks`.
 
 **Use design-time values and sample data** controls the existing projection independently
 for each stage. Turning it off exposes the ordinary runtime values and bindings. See
@@ -444,6 +462,7 @@ The MCP tools expose the same workspace board and native graphs:
 | `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. Reading does not rebuild a stage or apply source drafts. |
 | `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. |
 | `designer_preview_stage_input` | Focus or send keyboard input to a visible Live stage. Supply `stage`, `expected_model` and `expected_epoch` from the latest board. Returns the focused control's accessible name and role, or `null`. |
+| `designer_preview_stage_checks` | Read layout, text clipping and contrast findings, the native accessibility tree, and Tab order. Supply `stage` and `expected_model`. Authored locations are byte spans. |
 | `designer_preview_matrix` | Plan the exact combinations and return their configurations, count, available capacity and current model without adding native stages. |
 | `designer_preview_image` | Read a current accepted native stage as a PNG with source, graph and size metadata, using `expected_model` from the latest read. Accepts bounded pixel density; does not refresh the stage, apply drafts or write files. |
 

@@ -211,12 +211,14 @@ impl BindingExpression {
     }
 
     /// The culture in which the converter is evaluated: the converter
-    /// culture of the binding, or the current culture when it names none.
+    /// culture of the binding, then the target preview or current culture.
     pub fn converter_culture(&self) -> CultureInfo {
         self.uncommon
             .as_ref()
             .and_then(|uncommon| uncommon.converter_culture.clone())
-            .unwrap_or_else(CultureInfo::current_formatting)
+            .unwrap_or_else(|| {
+                crate::diagnostics::DesignTextEnvironment::formatting_for(|| self.base.try_get_target())
+            })
     }
 
     pub fn converter_parameter(&self) -> Option<&BoxedValue> {

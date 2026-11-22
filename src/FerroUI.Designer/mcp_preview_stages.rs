@@ -195,7 +195,7 @@ pub(super) fn tools() -> Vec<Value> {
         ),
         s::tool(
             "designer_preview_stage_checks",
-            "Read source-linked layout overflow, ineffective values and accessibility findings from a visible, current native stage. Use the model returned by designer_preview_stages.",
+            "Read source-linked layout, contrast and accessibility findings, the native accessibility tree, and Tab order from a visible, current native stage. Use the model returned by designer_preview_stages.",
             s::object(json!({"stage":s::id(),"expected_model":bounded_string(16)}), &["stage","expected_model"]), false,
         ),
         s::tool(
@@ -232,6 +232,7 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
         .collect::<Vec<_>>();
     let mut value = json!({"model":workspace.preview_stage_model(),"epoch":workspace.preview_stage_epoch(),
         "available_themes":PreviewTheme::available(),
+        "text_environment":true,
         "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_set(),
         "active_source_uri":workspace.session().borrow().document_uri()});
     if let Some(stage) = args["stage"].as_u64() {
@@ -313,7 +314,8 @@ pub(super) fn call(
     if name == "designer_preview_stage_checks" {
         let id = integer(args, "stage")?;
         let stage = workspace.preview_stage(id).ok_or("The preview stage was removed")?;
-        return Ok(json!({"stage":id,"epoch":stage.epoch,"uri":stage.configuration.source_uri,"findings":workspace.preview_stage_checks(id)?}));
+        return Ok(json!({"stage":id,"epoch":stage.epoch,"uri":stage.configuration.source_uri,
+            "findings":workspace.preview_stage_checks(id)?, "accessibility":workspace.preview_stage_accessibility(id)?}));
     }
     if name == "designer_preview_stage_states" {
         let id = integer(args, "stage")?;

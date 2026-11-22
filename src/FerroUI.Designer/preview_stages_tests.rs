@@ -34,6 +34,73 @@ fn config(name: &str) -> PreviewStageConfiguration {
 }
 
 #[test]
+fn stage_text_environment_reflows_native_text_and_round_trips_with_no_source_change() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<TextBlock xmlns="https://github.com/ferroui" Name="Title" FontSize="18" Text="Preview account 日本語"/>"#;
+    let document = Document::new(source).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let mut settings = config("Language and text");
+    settings.layout = PreviewStageLayout::SizeThatFits;
+    let normal = board.add(settings.clone()).unwrap();
+    settings.name = "Larger text".into();
+    settings.text = PreviewStageText { locale: Some("ja-JP".into()), scale_percent: 200 };
+    let comparison = board.add(settings.clone()).unwrap();
+    let window = attach(&board);
+    let normal_text = visual(&board, normal, document.ast().root()).cast::<TextBlock>().unwrap();
+    let large_text = visual(&board, comparison, document.ast().root()).cast::<TextBlock>().unwrap();
+    let language = DesignTextEnvironment::get(&large_text).unwrap();
+    assert_eq!(language.locale().unwrap().to_string(), "ja-JP");
+    assert!(DesignTextEnvironment::get(&normal_text).is_none());
+    assert_eq!(large_text.font_size(), 18.0);
+    assert!(large_text.text_layout().height() > normal_text.text_layout().height());
+    assert!(board.stage(comparison).unwrap().layout_size.height > board.stage(normal).unwrap().layout_size.height);
+
+    let manifest = board.stage_set().to_json().unwrap();
+    let restored = PreviewStageSet::from_json_with_fixtures(&manifest).unwrap();
+    assert_eq!(restored.stages[1].configuration.text, settings.text);
+    assert_eq!(restored.stages[0].configuration.text, PreviewStageText::default());
+    let previous = board.epoch();
+    settings.text.locale = Some("bad/locale".into());
+    assert!(board.update(comparison, settings).is_err());
+    assert_eq!(board.epoch(), previous);
+    assert_eq!(document.source(), source);
+    window.close();
+}
+
+#[test]
+fn stage_accessibility_reports_native_names_tab_order_and_clipped_text() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui">
+        <Button Content="Second" TabIndex="2"/>
+        <Button Content="First" TabIndex="1"/>
+        <Button Content="Unavailable" IsEnabled="False" TabIndex="0"/>
+        <TextBlock Name="Clipped" Width="28" ClipToBounds="True" Text="Truncated account name"/>
+        <TextBlock Name="Ellipsis" Width="28" TextTrimming="CharacterEllipsis" Text="Trimmed account name"/>
+    </StackPanel>"#;
+    let document = Document::new(source).unwrap();
+    let mut board = PreviewStageBoard::new();
+    sync(&mut board, &document, false);
+    let id = board.add(config("Accessibility comparison")).unwrap();
+    let window = attach(&board);
+    let focus_before = window.focus_manager().get_focused_element();
+    let report = board.preview_accessibility(id).unwrap();
+    let tab_names = report.tab_order.iter().map(|row| row.name.as_str()).collect::<Vec<_>>();
+    assert_eq!(tab_names, ["First", "Second"]);
+    let disabled = report.tree.iter().find(|row| row.name == "Unavailable").unwrap();
+    assert_eq!(disabled.role, "Button");
+    assert!(!disabled.enabled);
+    assert_eq!(&source[disabled.source.unwrap().range()], "Button");
+    assert_eq!(window.focus_manager().get_focused_element(), focus_before);
+    let findings = board.preview_checks(id).unwrap();
+    assert!(findings.iter().any(|issue| issue.name.as_deref() == Some("Clipped") && issue.code == "clippedText"));
+    assert!(!findings.iter().any(|issue| issue.name.as_deref() == Some("Ellipsis") && issue.code == "clippedText"));
+    board.set_paused(id, true).unwrap();
+    assert!(board.preview_accessibility(id).is_err());
+    window.close();
+}
+
+#[test]
 fn fitting_policies_use_native_desired_size_with_finite_logical_proposals() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let document =

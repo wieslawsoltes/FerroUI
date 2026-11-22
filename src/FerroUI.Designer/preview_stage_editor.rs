@@ -3,7 +3,7 @@
 use crate::{
     DefinitionPreviewOptions, PREVIEW_SIZE_PRESETS, PreviewEnvironment, PreviewFlowDirection,
     PreviewSourceAnchor, PreviewStageConfiguration, PreviewStageLayout, PreviewStageMode, PreviewStageSpec,
-    PreviewStageSource, PreviewStageState, PreviewStageTarget, PreviewTheme,
+    PreviewStageSource, PreviewStageState, PreviewStageTarget, PreviewStageText, PreviewTheme,
 };
 use ferroui_base::input::{InputElement, Key};
 use ferroui_base::layout::{HorizontalAlignment, Orientation};
@@ -52,6 +52,8 @@ pub struct PreviewStageEditor {
     theme: Ref<ComboBox>,
     themes: Vec<PreviewTheme>,
     flow: Ref<ComboBox>,
+    locale: Ref<TextBox>,
+    text_size: Ref<TextBox>,
     mode: Ref<ComboBox>,
     design_data: Ref<CheckBox>,
     design_fixture: Ref<ComboBox>,
@@ -222,6 +224,12 @@ impl PreviewStageEditor {
             PreviewFlowDirection::RightToLeft => 2,
         });
         row(&body, "Direction", &flow);
+        let locale = field(initial.text.locale.as_deref().unwrap_or_default(),
+            "StageLocale", "Stage locale. Leave blank to use the application locale.");
+        row(&body, "Locale", &locale);
+        let text_size = field(&format!("{}%", initial.text.scale_percent),
+            "StageTextSize", "Stage text size in percent");
+        row(&body, "Text size", &text_size);
         let mode = picker("StageMode", "Stage interaction mode");
         item(&mode, "Select authored controls");
         item(&mode, "Live interaction");
@@ -313,6 +321,8 @@ impl PreviewStageEditor {
             theme,
             themes,
             flow,
+            locale,
+            text_size,
             mode,
             design_data,
             design_fixture,
@@ -691,6 +701,11 @@ impl PreviewStageEditor {
                     2 => PreviewFlowDirection::RightToLeft,
                     _ => PreviewFlowDirection::Inherit,
                 },
+            },
+            text: PreviewStageText {
+                locale: self.locale.text().map(|locale| locale.trim().to_owned()).filter(|locale| !locale.is_empty()),
+                scale_percent: self.text_size.text().unwrap_or_default().trim().trim_end_matches('%')
+                    .trim().parse().map_err(|_| "Enter a text size such as 150%")?,
             },
             design_time_data: self.design_data.is_checked() == Some(true),
             states,
