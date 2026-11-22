@@ -56,12 +56,25 @@ impl<T: PartialEq + 'static> AnyValue for T {
     }
 
     fn any_value_eq(&self, other: &dyn AnyValue) -> bool {
-        other.any_value_as_any().downcast_ref::<T>().is_some_and(|other| value_equals(self, other))
+        data_of_type(other, TypeId::of::<T>()).is_some_and(|other| {
+            // SAFETY: `data_of_type` returned the data of a value whose type is `T`, which `other`
+            // keeps alive for this call.
+            value_equals(self, unsafe { other.cast::<T>().as_ref() })
+        })
     }
 
     fn any_value_type_name(&self) -> &'static str {
         std::any::type_name::<T>()
     }
+}
+
+/// The data of `other` if it holds a value of the type `expected`: the type check of
+/// [`AnyValue::any_value_eq`], out of line, so that each of its copies is the constant of its
+/// type, this call and its typed comparison (#566).
+#[inline(never)]
+fn data_of_type(other: &dyn AnyValue, expected: TypeId) -> Option<std::ptr::NonNull<()>> {
+    let other = other.any_value_as_any();
+    (other.type_id() == expected).then(|| std::ptr::NonNull::from(other).cast())
 }
 
 /// Deviation (DEVIATIONS.md, Property system): the comparer of the reference
