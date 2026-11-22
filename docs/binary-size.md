@@ -1827,6 +1827,72 @@ size). Each step is measured by size and by the local gate (section 8.4); the sh
 handler functions of the builders (#956) are the example of a step left out: 40 to 50 kB for
 +3.9 % instructions on a re-run.
 
+**Generic code in `release` and `dist` (#1001).** From `perf.yml` run 45004519904, the property
+store stack as merged (`2f22d5a22`) against the commit before it (`938fccd18`), macOS ARM64. Sizes
+are of the symbols, in MiB (2^20 bytes); the `dist` executables were linked again with symbols.
+
+| | Profile | Rust before | After | In families of 2+, before | After |
+|---|---|---:|---:|---:|---:|
+| `hello-world-builders` | `release` | 9.06 | 8.80 | 5.16 (56.9 %) | 4.90 (55.7 %) |
+| `hello-world-builders` | `dist` | 7.66 | 7.44 | 4.09 (53.3 %) | 3.85 (51.8 %) |
+| `control-catalog-desktop` | `release` | 48.43 | 47.32 | 28.16 (58.2 %) | 27.00 (57.1 %) |
+| `control-catalog-desktop` | `dist` | 39.95 | 39.14 | 21.71 (54.4 %) | 20.84 (53.3 %) |
+
+The runners' toolchain mangles with v0, so these counts use the reader of v0 names added in #1033.
+They agree with the binary: Rust and other code add up to the symbols, and the symbols of the
+`dist` executables cover their `__text`. Between 1.4 and 3.6 % of the Rust functions have a v0 name
+the reader does not parse. Those count as families of one, so the shares are lower bounds.
+
+Of the size the stack saves in `release`, 66 to 82 % ships in `dist` (section 4.31, the same two
+commits). Why the rest does not has not been measured.
+
+**LLVM IR lines per family (#1001).** Unoptimised IR (`-C no-prepopulate-passes`), `release`, one
+codegen unit per crate, of `ferroui-base`, `ferroui-controls`, `ferroui-markup-xaml` and
+`ferroui-themes-winui` on `ae7462b47`, before the stack: 16.52 million lines in 372,978 functions.
+
+| Family | Instances | Lines | Share |
+|---|---:|---:|---:|
+| `ferro_property::both_not_a_number` | 2,825 | 1,192,150 | 7.2 % |
+| `drop` (the largest group) | 5,440 | 502,940 | 3.0 % |
+| `call_once` | 27,012 | 282,898 | 1.7 % |
+| `new` | 11,140 | 242,635 | 1.5 % |
+| `set_and_raise_core` | 395 | 219,693 | 1.3 % |
+| `nullable_operation` | 1,099 | 196,483 | 1.2 % |
+
+How much of `both_not_a_number` survives optimisation, and what it costs in compile time, has not
+been measured.
+
+**Identical code folding by platform (#1001).** No default was changed.
+
+| Platform | Folding today | Measured | Run, commit |
+|---|---|---|---|
+| Windows x86-64 | On: rustc passes `/OPT:REF,ICF` | What it saves in `dist`: hello world 1.57 MB (5.7 %), catalog 3.29 MB (4.5 %) | 44889928913, `707791323` |
+| Linux x86-64, lld | None | `dist`: `--icf=safe` -0.6 % (hello world), -0.2 % (catalog); `--icf=all` -2.7 %, -2.1 % | 44889928913, `707791323` |
+| Android arm64, lld | None | `dist`, catalog library: `--icf=safe` 0 bytes; `--icf=all` -1,711,872 bytes (-2.26 %), `.text` -2.67 % | 45004519904, `2f22d5a22` |
+| macOS ARM64, ld64 | Its default deduplication | `dist` with `-no_deduplicate` has the same size | 44859088556, 44889928913 |
+| iOS simulator | As macOS: the folding options of the two `dist` link lines are the same | Not measured, since the link lines do not differ | 45004519904, `2f22d5a22` |
+| Browser | On: `duplicate-function-elimination` runs in both `wasm-opt` commands of the link | Catalog as linked: 38.60 MB, 13.86 MB gzip, 9.29 MB brotli | 45004519904, `2f22d5a22` |
+
+`hb_font_t::has_func_set` of HarfBuzz compares callback addresses, so a folded default callback
+could change a code path. Run 44907900542 on `ae7462b47` checked eight links (hello world and the
+catalog; Windows `release` and `dist`, Linux `--icf=safe` and `--icf=all`): no default callback is
+folded with anything. This holds for those builds, not for another compiler version.
+
+A read of the Rust code for what compares function addresses found one explicit comparison:
+`install_current_culture_provider` in FerroBoard (`fn_addr_eq`), where two identical providers
+folded together would be accepted as one, with the same behaviour. No function is a map key and no
+callback is removed by its address, and the compiler's lint on function pointer comparisons has no
+hit in the log of the Linux workspace build.
+
+Not measured or not established, so `--icf=all` stays a candidate and not a recommendation:
+
+- start-up with `--icf=all` on Linux and Android;
+- the C++ code other than the HarfBuzz check above, Skia included, for comparisons of addresses;
+- what ld64 deduplicates: `-verbose_deduplicate` reaches the link line of `ld-1167.5`, but the log
+  has no line about it, and `ld64.lld --icf` was not tried;
+- the link line of the iOS device target;
+- why `--icf=safe` folds nothing on Android.
+
 ## 6. The settings applications should use
 
 - `cargo run --profile fast-release -p <application>` to try an application with optimised code:
