@@ -552,6 +552,26 @@ Flyouts (`flyout`, `context_flyout`) are not controls (`FlyoutBase` derives from
 |---|---|
 | ![The gallery, light](images/declarative-ui/view-gallery.png) | ![The gallery, dark](images/declarative-ui/view-gallery-dark.png) |
 
+### 10.7 Path geometry
+
+```rust
+// Fixed data: checked when the crate is compiled, kept as a static table.
+Path { data: path!("M8 3v5H3v2h5v5h2V10h5V8h-5V3z"), fill: "#1E293B" }
+
+// Computed from values: a fluent builder.
+Path { data: path_data().move_to(0.0, 0.0).line_to(width, 0.0).line_to(width / 2.0, height).close() }
+```
+
+| Form | Use it for | Parser linked |
+|---|---|---|
+| `path!("M...")` | Icons and shapes whose data is known when the crate is compiled | No |
+| `path_data()` with `move_to`, `line_to`, `quad_to`, `cubic_to`, `arc_to`, `close`, `fill_rule` | A path computed from values | No |
+| `Geometry::parse(text)` | Data that arrives at run time | Yes |
+
+- `path!` reads the grammar of `Geometry::parse`. The tests of `ferroui-view` compare its table with the calls of the parser on the data of the parser's tests. Invalid data is a compile error at the literal, with the byte it stopped at.
+- Every element that names one `path!` holds one geometry, for one platform on one thread, so a list of a thousand icons holds one, and a component that runs again gives its shape the geometry it already has. `PathData::to_geometry()` makes a geometry of its own, for one that will be changed.
+- A builder makes a new geometry each time it is converted.
+
 ## 11. Tools (phase 4)
 
 ### 11.1 Hot reload of `rsx!`

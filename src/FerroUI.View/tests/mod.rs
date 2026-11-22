@@ -4,6 +4,7 @@
 mod builder_tests;
 mod dynamic_tests;
 mod macro_tests;
+mod path_tests;
 mod reactive_tests;
 mod selector_tests;
 mod rerender_tests;

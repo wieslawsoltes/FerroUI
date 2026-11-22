@@ -14,6 +14,8 @@ use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
 use syn::{braced, token, Expr, FnArg, Ident, ItemFn, LitStr, Pat, Path, Token, Type};
 
+mod path_data;
+
 /// An element tree, expanded to the builders of `ferroui-view`.
 ///
 /// ```ignore
@@ -370,6 +372,21 @@ impl ElementNode {
         }
         tokens
     }
+}
+
+/// Path data checked when the crate is compiled and written as a static table: a
+/// `ferroui_view::PathData`, which a setter of a geometry takes.
+///
+/// ```ignore
+/// Path { data: path!("M8 3v5H3v2h5v5h2V10h5V8h-5V3z"), fill: "#1E293B" }
+/// ```
+///
+/// The grammar is the one of `Geometry::parse`, and the table holds the calls that parser makes.
+/// Invalid data is a compile error at the literal, and the application links no path parser.
+#[proc_macro]
+pub fn path(input: TokenStream) -> TokenStream {
+    let literal = syn::parse_macro_input!(input as LitStr);
+    path_data::expand(&literal).unwrap_or_else(syn::Error::into_compile_error).into()
 }
 
 /// A component: a function whose parameters are its properties, with a

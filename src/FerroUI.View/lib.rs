@@ -58,6 +58,7 @@ pub mod hooks;
 pub mod hot;
 pub mod inspect;
 mod mount;
+mod path_data;
 pub mod reactive;
 mod register_types;
 pub mod router;
@@ -110,6 +111,7 @@ pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedT
 #[cfg(feature = "desktop")]
 pub use inspect::{attach_inspector, open_inspector};
 pub use mount::{view_stats, ViewStats};
+pub use path_data::{path_data, PathBuilder, PathData};
 pub use template::template;
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
@@ -126,7 +128,14 @@ pub use reactive::{
 #[cfg(feature = "desktop")]
 pub use app::{launch, launch_themed, launch_with, mount_window, open_window};
 
-pub use ferroui_view_macros::{component, rsx};
+pub use ferroui_view_macros::{component, path, rsx};
+
+/// What the expansion of [`path!`] names.
+#[doc(hidden)]
+pub mod __path {
+    pub use ferroui_base::media::{FillRule, PathCommand, SweepDirection};
+    pub use ferroui_base::{Point, Size};
+}
 
 /// Everything an application written with the builders or the macro uses.
 pub mod prelude {
@@ -155,6 +164,7 @@ pub mod prelude {
         TypedSelector,
     };
     pub use crate::{auto, px, star, GridDefinitionSizes, GridLength, GridLengths, IntoGridLengths};
+    pub use crate::{path, path_data, PathBuilder, PathData};
     pub use crate::{
         error_boundary, route, router, sleep, suspense, try_use_router, use_future, use_router, AsyncState, ErrorInfo, RouteDef,
         RouteMatch, Router,
