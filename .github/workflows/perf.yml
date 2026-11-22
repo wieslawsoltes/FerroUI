@@ -449,6 +449,7 @@ jobs:
           sparse-checkout: |
             scripts/generic_instances.py
             scripts/symsize.py
+            scripts/perf/export_trie.py
           sparse-checkout-cone-mode: false
       - name: Generic instances and the deduplication of the linker
         if: inputs.symbols && env.MEASURE == 'true'
@@ -462,11 +463,11 @@ jobs:
           ld -v > "$out/ld-version.txt" 2>&1 || true
           verbose=(-C "link-arg=-Wl,-verbose_deduplicate")
           if ld -verbose_deduplicate 2>&1 | grep -q 'unknown option'; then verbose=(); fi
-          for app in hello-world-builders control-catalog-desktop; do
+          for app in hello-world hello-world-builders control-catalog-desktop; do
             binary="measured/$app"
             if [ "$PROFILE" = dist ]; then
               if ! cargo rustc --locked --profile dist -p "$app" --bin "$app" -- -C strip=none "${verbose[@]}" \
-                --print=link-args -W linker-messages -W linker-info > "$out/$app.log" 2>&1; then
+                -C "link-arg=-Wl,-map,$RUNNER_TEMP/$app.map" --print=link-args -W linker-messages -W linker-info > "$out/$app.log" 2>&1; then
                 tail -n 40 "$out/$app.log"
                 exit 1
               fi
@@ -490,6 +491,28 @@ jobs:
               echo '```'
             } | tee -a "$GITHUB_STEP_SUMMARY"
           done
+      # What the export trie of each application holds (#1049), attributed with the link maps of
+      # the dist links above.
+      - name: The export trie
+        if: inputs.symbols && env.MEASURE == 'true'
+        env:
+          PROFILE: ${{ matrix.profile }}
+          SIDE: ${{ matrix.side }}
+        run: |
+          {
+            echo "### The export trie, $PROFILE, $SIDE (bytes)"
+            echo
+            echo '```'
+            for file in measured/*; do
+              case "$file" in *.stripped) ;; *) python3 -I tools/scripts/perf/export_trie.py "$file" ;; esac
+            done
+            if [ "$PROFILE" = dist ]; then
+              for app in hello-world hello-world-builders control-catalog-desktop; do
+                python3 -I tools/scripts/perf/export_trie.py "target/dist/$app" --map "$RUNNER_TEMP/$app.map"
+              done
+            fi
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Keep the generic families
         if: always() && inputs.symbols && env.MEASURE == 'true'
         uses: actions/upload-artifact@v4
@@ -624,6 +647,57 @@ jobs:
                 "capi-size-baseline-$profile.json" --markdown "$GITHUB_STEP_SUMMARY"
             fi
           done
+
+  # The export trie of the iOS executables (#1049), simulator, dist.
+  ios-exports:
+    name: The export trie on iOS (simulator, dist, ${{ matrix.side }})
+    if: inputs.symbols
+    runs-on: macos-15
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [ref, baseline]
+    env:
+      MEASURE: ${{ matrix.side == 'ref' || inputs.baseline != '' }}
+      SIDE_REF: ${{ matrix.side == 'ref' && inputs.ref || inputs.baseline }}
+    steps:
+      - name: Check out the ref
+        if: env.MEASURE == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SIDE_REF }}
+      - name: Check out the report of the export trie
+        if: env.MEASURE == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          sparse-checkout: scripts/perf/export_trie.py
+          sparse-checkout-cone-mode: false
+      - uses: dtolnay/rust-toolchain@stable
+        if: env.MEASURE == 'true'
+        with:
+          targets: aarch64-apple-ios-sim
+      - name: Build and read
+        if: env.MEASURE == 'true'
+        env:
+          SIDE: ${{ matrix.side }}
+          CARGO_TERM_COLOR: never
+        run: |
+          target=aarch64-apple-ios-sim
+          cargo build --locked --profile dist -p ferroui-ios --features example --example ios_view --target "$target"
+          cargo build --locked --profile dist -p control-catalog-ios --bin control-catalog-ios --target "$target"
+          {
+            echo "### The export trie on iOS, simulator, dist, $SIDE: \`$SIDE_REF\` at \`$(git rev-parse HEAD)\` (bytes)"
+            echo
+            echo '```'
+            for file in "target/$target/dist/examples/ios_view" "target/$target/dist/control-catalog-ios"; do
+              python3 -I tools/scripts/perf/export_trie.py "$file" --list | awk 'NR == 1 || !/^    _/'
+              python3 -I tools/scripts/perf/export_trie.py "$file" --list | awk 'NR > 1' | grep -c . || true
+            done
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
   # Identical code folding on Android (#1001): the catalog's library for arm64 in dist, linked again
   # with lld's --icf=safe and --icf=all. Only the final crate is linked again.
