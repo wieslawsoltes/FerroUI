@@ -143,19 +143,6 @@ impl FrnAutomationPeer {
         })
     }
 
-    /// Native accessibility clients can retain peers after their controls are released.
-    /// Keep a live owner for the callback, or report an unavailable element.
-    fn guard_live<R>(&self, default: R, body: impl FnOnce() -> R) -> R {
-        let _owner = match self.inner.cast::<ControlAutomationPeer>() {
-            Some(peer) => match peer.try_owner() {
-                Some(owner) => Some(owner),
-                None => return default,
-            },
-            None => None,
-        };
-        crate::callback_base::guard(default, body)
-    }
-
     /// The node native code set on the wrapper, if any.
     pub(crate) fn node(&self) -> Option<ComPtr<IFrnAutomationNode>> {
         self.node.borrow().clone()

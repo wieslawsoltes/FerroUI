@@ -233,6 +233,12 @@ impl ValueStore {
         }
     }
 
+    /// Makes the end of the current styling pass reevaluate every value.
+    #[cfg(test)]
+    pub(crate) fn request_reevaluation(&self) {
+        self.reevaluation_pending.set(true);
+    }
+
     pub fn add_frame(&self, owner: &FerroObject, frame: Rc<dyn ValueFrame>) {
         self.insert_frame(owner, frame);
         self.reevaluate_effective_values(owner, None);
