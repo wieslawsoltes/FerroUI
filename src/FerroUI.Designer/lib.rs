@@ -290,6 +290,8 @@ mod packaged_asset_preview_tests;
 #[cfg(test)]
 mod animation_integration_tests;
 #[cfg(test)]
+mod animation_box_shadow_tests;
+#[cfg(test)]
 mod animation_effect_tests;
 #[cfg(test)]
 mod animation_transform_tests;

@@ -266,7 +266,7 @@ impl TimelineLane {
             let plot_bounds = plot.height(bounds.height);
             let height = plot_height(plot_bounds);
             let axis_units = component.relative_unit().or_else(|| {
-                matches!(component, CurveChannel::BlurRadius | CurveChannel::OffsetX | CurveChannel::OffsetY | CurveChannel::ShadowDepth)
+                matches!(component, CurveChannel::BlurRadius | CurveChannel::OffsetX | CurveChannel::OffsetY | CurveChannel::Spread | CurveChannel::ShadowDepth)
                     .then_some(RelativeUnit::Absolute)
             });
             let unit = match (axis_units, plot.metric) {

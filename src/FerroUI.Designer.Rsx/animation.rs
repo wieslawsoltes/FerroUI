@@ -1,5 +1,6 @@
 //! Original Rust source for a native animation projected from a known view builder.
 
+mod box_shadows;
 mod color;
 mod effect;
 mod effect_constructor;

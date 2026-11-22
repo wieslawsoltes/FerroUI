@@ -39,7 +39,7 @@ impl DesignerSession {
             || self.animation.native.uses_custom_animators(program.id)
             || self.animation.native.uses_transform_components(program.id)
             || program.timeline.as_ref().is_some_and(|timeline| timeline.tracks.iter().any(|track| {
-                track.keyframes.first().is_some_and(|key| key.value.kind() == ValueKind::Effect)
+                track.keyframes.first().is_some_and(|key| matches!(key.value.kind(), ValueKind::Effect | ValueKind::BoxShadows))
             }))
             || (program.has_project_codec() && self.animation.native.duration(program.id).is_some())
     }

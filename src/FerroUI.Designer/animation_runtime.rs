@@ -47,6 +47,10 @@ impl NativeAnimations {
         self.index.uses_transform_components(id)
     }
 
+    pub(crate) fn track_property(&self, id: NodeId, name: &str) -> Option<&'static ferroui_base::FerroProperty> {
+        self.index.track_property(id, name)
+    }
+
     pub(crate) fn transform_component(
         &self,
         id: NodeId,
@@ -107,7 +111,7 @@ impl NativeAnimations {
         sample_keyframe_value(animation, &object, property, time)
     }
 
-    fn track_target(
+    pub(crate) fn track_target(
         &self, program: &AnimationProgram, preview: &RuntimePreview, target: NodeId,
     ) -> Result<ferroui_base::Ref<Animatable>, String> {
         if program.targets.contains(&target) {

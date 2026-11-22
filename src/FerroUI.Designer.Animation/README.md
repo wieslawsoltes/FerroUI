@@ -36,11 +36,9 @@ points/scalars, thicknesses and discrete values. RGB interpolation occurs
 in linear light and alpha is linear, matching FerroUI's `ColorAnimator`. Cubic Bezier interpolation
 solves the X polynomial rather than treating the progress as the curve parameter. Thirty named
 easing variants match FerroUI's polynomial, sine, circular, exponential, back, bounce and elastic
-families. A keyframe's easing belongs to the incoming segment. Effects, gradient brushes,
-shadow collections, transform components and arbitrary object payloads remain available through
-source editing or extension codecs; their preview uses the native framework animator when
-running in the designer. The portable timeline does not invent interpolation semantics for
-runtime-specific values.
+families. A keyframe's easing belongs to the incoming segment. Native-value codecs add typed
+effects and box shadow lists. Gradient brushes and other runtime-specific payloads use source
+editing or application codecs. The designer previews them with the framework animator.
 
 ## Transfer keyframes
 
@@ -140,6 +138,12 @@ playback and reads its underlying value for implicit endpoints. Sampling a
 control without a render transform uses detached defaults, and playback creates
 the group at animation priority. XAML authoring and the mapped Rust getters keep
 the component track and its declared keys in source.
+
+The `BoxShadows` value codec delegates text conversion and list interpolation to FerroUI. The native
+graph samples the loaded property and exposes channels such as `box_shadow/2/spread` using one-based
+layer indices. Samples separate intervals where a layer is absent or switches between inset and
+outset. Key authoring samples the complete list. The native animator reads underlying values for
+implicit endpoints, even while the preview is scrubbed.
 
 The native codec also accepts registered effect strings when the host provides its effect
 resolver. The portable timeline preserves the source literal. The native animator supplies

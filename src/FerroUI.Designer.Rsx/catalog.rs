@@ -70,6 +70,7 @@ pub(crate) fn property_codec(info: &PropertyInfo) -> Option<Literal> {
         "i32" => Literal::Integer,
         "f64" => Literal::Number,
         "CornerRadius" => Literal::CornerRadius,
+        "BoxShadows" => Literal::BoxShadows,
         "Thickness" => Literal::Thickness,
         "Option<Rc<dyn IImage>>" => Literal::EmbeddedImage,
         "HorizontalAlignment" | "VerticalAlignment" | "Orientation" => {

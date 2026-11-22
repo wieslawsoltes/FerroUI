@@ -59,6 +59,8 @@ pub use timeline::{
     Sample, Timeline, TimelineTimingEdit, Track,
 };
 pub use value::{AnimationEffect, AnimationValue, EffectForm, RelativeUnit, ValueKind};
+#[cfg(feature = "native-values")]
+pub use value::{AnimationBoxShadow, AnimationBoxShadows};
 pub use xaml::{AnimationImport, EffectColorResolver, EffectLiteralResolver, ImportOptions, native_key_time};
 
 #[derive(Clone, Debug, PartialEq, Eq)]

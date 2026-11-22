@@ -40,15 +40,18 @@ pub fn sample_curve_track(
         .sample_track_for_preview(target, property, &positions)
         .map_err(|error| error.to_string())?;
     let channel = channel.into();
+    let samples = times.into_iter().zip(values);
+    if let TrackCurveChannel::BoxShadow { layer, component } = channel {
+        return super::box_shadow_curve::project(layer, component, samples);
+    }
     let effect = AnimationEffect::is_effect_property(property);
     let component = channel.component();
-    component.project_samples(times.into_iter().zip(values).map(|(time, sample)| {
-        let value = match &channel {
-            TrackCurveChannel::Property(_) => curve_value::value(&sample),
-            TrackCurveChannel::EffectParameter { effect, parameter, .. } => {
-                effect_parameter(&sample, effect, parameter)
-                    .filter(|value| CurveChannel::for_kind(value.kind()).contains(&component))
-            }
+    component.project_samples(samples.map(|(time, sample)| {
+        let value = if let TrackCurveChannel::EffectParameter { effect, parameter, .. } = &channel {
+            effect_parameter(&sample, effect, parameter)
+                .filter(|value| CurveChannel::for_kind(value.kind()).contains(&component))
+        } else {
+            curve_value::value(&sample)
         };
         if value.is_none() && !effect {
             return Err(AnimationError("The native animation does not produce a sample for the selected channel".into()));
@@ -92,7 +95,7 @@ pub fn sample_typed_keyframe(
     curve_value::value(&sample).ok_or_else(|| "This native value has no typed keyframe representation".into())
 }
 
-fn track(animation: &Animation, name: &str) -> Result<(&'static FerroProperty, Vec<f64>), String> {
+pub(super) fn track(animation: &Animation, name: &str) -> Result<(&'static FerroProperty, Vec<f64>), String> {
     let duration = animation.duration().total_seconds();
     let mut property: Option<&'static FerroProperty> = None;
     let mut keys = Vec::new();

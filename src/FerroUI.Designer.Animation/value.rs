@@ -1,6 +1,12 @@
 use crate::{require, AnimationError, Result};
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "native-values")]
+#[path = "box_shadow_value.rs"]
+mod box_shadows;
+#[cfg(feature = "native-values")]
+pub use box_shadows::{AnimationBoxShadow, AnimationBoxShadows};
+
 #[path = "effect_value.rs"]
 mod effect;
 #[cfg(feature = "native-values")]
@@ -21,6 +27,8 @@ pub enum ValueKind {
     RelativeScalar,
     Thickness,
     Effect,
+    #[cfg(feature = "native-values")]
+    BoxShadows,
     Discrete,
 }
 
@@ -83,6 +91,8 @@ pub enum AnimationValue {
         bottom: f64,
     },
     Effect(AnimationEffect),
+    #[cfg(feature = "native-values")]
+    BoxShadows(AnimationBoxShadows),
     Discrete(String),
 }
 impl AnimationValue {
@@ -113,6 +123,8 @@ impl AnimationValue {
             Self::RelativeScalar { .. } => ValueKind::RelativeScalar,
             Self::Thickness { .. } => ValueKind::Thickness,
             Self::Effect(_) => ValueKind::Effect,
+            #[cfg(feature = "native-values")]
+            Self::BoxShadows(_) => ValueKind::BoxShadows,
             Self::Discrete(_) => ValueKind::Discrete,
         }
     }
@@ -196,6 +208,8 @@ impl AnimationValue {
                 "Thickness must be finite",
             ),
             Self::Effect(effect) => effect.validate(),
+            #[cfg(feature = "native-values")]
+            Self::BoxShadows(shadows) => shadows.validate(),
             Self::Discrete(value) => require(
                 value.len() <= 1_048_576
                     && value.chars().all(|c| {
@@ -363,6 +377,8 @@ impl AnimationValue {
                 )?;
                 Self::Effect(from.clone().interpolate(to.clone(), progress, mix, color))
             }
+            #[cfg(feature = "native-values")]
+            (Self::BoxShadows(from), Self::BoxShadows(to)) => Self::BoxShadows(from.interpolate(to, progress)),
             (Self::Discrete(_), Self::Discrete(_)) => {
                 if progress < 1.0 {
                     self.clone()
@@ -418,6 +434,8 @@ impl AnimationValue {
                 bottom,
             } => format!("{left},{top},{right},{bottom}"),
             Self::Effect(effect) => effect.to_xaml(),
+            #[cfg(feature = "native-values")]
+            Self::BoxShadows(shadows) => shadows.to_xaml(),
             Self::Discrete(v) => v.clone(),
         }
     }
@@ -562,6 +580,8 @@ impl AnimationValue {
                 }
             }
             ValueKind::Effect => Self::Effect(AnimationEffect::parse(source)?),
+            #[cfg(feature = "native-values")]
+            ValueKind::BoxShadows => Self::BoxShadows(AnimationBoxShadows::parse(source)?),
             ValueKind::Discrete => Self::Discrete(source.into()),
         };
         result.validate()?;

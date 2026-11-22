@@ -39,6 +39,7 @@ pub enum CurveChannel {
     Direction,
     ShadowDepth,
     ShadowOpacity,
+    Spread,
 }
 
 impl FromStr for CurveChannel {
@@ -146,6 +147,7 @@ impl CurveChannel {
             Self::Direction => "Direction (°)",
             Self::ShadowDepth => "Shadow depth (px)",
             Self::ShadowOpacity => "Shadow opacity",
+            Self::Spread => "Spread (px)",
         }
     }
 

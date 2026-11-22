@@ -54,7 +54,7 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_select_rsx_view", "Select an RSX invocation by its authored UTF-8 starting offset.",
             s::object(json!({"start":s::revision(),"expected_revision":s::revision()}), &["start","expected_revision"]), true),
         s::tool("designer_programs","Read animation programs, source keys, codec diagnostics and typed timelines. include_keyframe_text adds formatted XAML values and easing to the typed keys.",s::object(json!({"include_source":{"type":"boolean"},"include_keyframe_text":{"type":"boolean"}}), &[]),false),
-        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored track. Use the channel ID from designer_programs for properties or registered effect parameters. Percent channels use percentages and percentage points per second. Absolute distances use logical pixels and shadow direction uses degrees. Color channels use normalized values. break_before marks a new segment after a gap or unit change.",
+        s::tool("designer_animation_curve", "Sample values or signed velocity of an authored track. Read channel IDs from designer_programs for properties, shadow layers, and registered effects. Percent channels use percentages and percentage points per second. Distances use logical pixels, shadow direction uses degrees, and colors use normalized values. A break_before point starts a new segment.",
             s::object(json!({"program":s::id(),"target":s::id(),"property":s::string(),
                 "metric":{"type":"string","enum":["value","velocity"]},
                 "channel":s::string(),

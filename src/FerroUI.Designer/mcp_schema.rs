@@ -83,6 +83,8 @@ pub(super) fn animation_value() -> Value {
     };
     let effect_form = json!({"enum":["literal","object","property_element"]});
     let argb = json!({"type":"array","minItems":4,"maxItems":4,"items":{"type":"integer","minimum":0,"maximum":255}});
+    let box_shadow = object(json!({"offset_x":number(),"offset_y":number(),"blur":number(),"spread":number(),"argb":argb,"inset":{"type":"boolean"}}),
+        &["offset_x","offset_y","blur","spread","argb","inset"]);
     json!({"oneOf":[
         value("Number",number()), value("Color",components(&["a","r","g","b"],true)),
         value("Point",components(&["x","y"],false)),
@@ -93,6 +95,7 @@ pub(super) fn animation_value() -> Value {
         value("CornerRadius",components(&["top_left","top_right","bottom_right","bottom_left"],false)),
         value("RelativePoint",object(json!({"x":number(),"y":number(),"unit":{"enum":["Absolute","Relative"]}}), &["x","y","unit"])),
         value("RelativeScalar",object(json!({"scalar":number(),"unit":{"enum":["Absolute","Relative"]}}), &["scalar","unit"])),
+        value("BoxShadows",object(json!({"layers":{"type":"array","items":box_shadow}}), &["layers"])),
         value("Effect",json!({"oneOf":[
             object(json!({"kind":{"const":"blur"},"radius":number(),"form":effect_form}), &["kind","radius"]),
             object(json!({"kind":{"const":"drop_shadow"},"offset_x":number(),"offset_y":number(),"blur_radius":number(),

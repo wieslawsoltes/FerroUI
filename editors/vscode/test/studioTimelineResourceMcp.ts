@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import type * as vscode from 'vscode';
 import type { OutlineNode } from '../src/protocol';
-import type { TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
+import type { CurvePoint, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 
 const scene = `<Canvas xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Background="#F4F6FB">
@@ -32,9 +32,8 @@ export async function verifyTimelineResource({ invoke, content }: McpFixture, se
     await source(scene);
     let frame = await wait();
     let program = await resource();
-    assert.equal(program.timeline, null);
+    assert.deepEqual(program.targets, []);
     assert.equal(program.preview?.available, false);
-    assert.equal(program.preview?.native, true);
     const before = await image();
     const present = async (action: string, fields: object = {}) => {
         content(await invoke('designer_studio_present', { session, expected_revision: frame.revision,
@@ -47,6 +46,13 @@ export async function verifyTimelineResource({ invoke, content }: McpFixture, se
     assert.equal(program.preview?.explicit_targets, true);
     assert.equal(program.preview?.total_duration, 2);
     assert.deepEqual(program.targets, targets);
+    const track = program.timeline?.tracks.find(track => track.property === 'BoxShadow');
+    assert.ok(track?.curve_channels?.includes('box_shadow/1/offset_x'));
+    const { points } = content<{ points: CurvePoint[] }>(await invoke('designer_studio_query', {
+        session, tool: 'designer_animation_curve', arguments: { program: program.id, target: targets[0],
+            property: 'BoxShadow', channel: 'box_shadow/1/offset_x', window: { start: 0, end: 2 } },
+    }));
+    assert.deepEqual(points.find(point => point.time === 1), { time: 1, value: 10 });
     const seek = async (time: number) => {
         const position = content<TimelinePosition>(await invoke('designer_timeline_control', {
             session, expected_revision: frame.revision, arguments: { action: 'seek', program: program.id, time },

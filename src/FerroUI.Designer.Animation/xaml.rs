@@ -522,6 +522,10 @@ fn escape(text: &str) -> String {
 }
 pub(crate) fn infer_kind(property: &str, source: &str) -> ValueKind {
     let property = property.rsplit('.').next().unwrap_or(property);
+    #[cfg(feature = "native-values")]
+    if property == "BoxShadow" && crate::AnimationBoxShadows::parse(source).is_ok() {
+        return ValueKind::BoxShadows;
+    }
     if matches!(property, "Margin" | "Padding" | "BorderThickness") {
         ValueKind::Thickness
     } else if property == "CornerRadius" {

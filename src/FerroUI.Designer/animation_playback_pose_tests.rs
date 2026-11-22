@@ -137,7 +137,7 @@ fn timeline_native_resource_keeps_explicit_targets_and_samples_after_rebuild() {
     let window = attach_preview(&session);
     let id = session.active_animation_program().unwrap();
     let target = session.document().ast().find_name("Card").unwrap();
-    assert!(session.animation_programs()[0].timeline.is_none());
+    assert!(session.animation_programs()[0].targets.is_empty());
     session
         .set_animation_program_preview_targets(id, Some(vec![target]))
         .unwrap();

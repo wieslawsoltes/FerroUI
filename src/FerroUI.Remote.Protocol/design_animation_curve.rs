@@ -10,6 +10,7 @@ pub const DESIGN_ANIMATION_EFFECTS_QUERY: &str = "ferroui-design-animation-effec
 pub const DESIGN_ANIMATION_EFFECT_OBJECTS_QUERY: &str = "ferroui-design-animation-effect-objects";
 /// Advertise registered effect literals and their named parameter channels.
 pub const DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY: &str = "ferroui-design-animation-registered-effects";
+pub const DESIGN_ANIMATION_BOX_SHADOWS_QUERY: &str = "ferroui-design-animation-box-shadows";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationCurveRequest {

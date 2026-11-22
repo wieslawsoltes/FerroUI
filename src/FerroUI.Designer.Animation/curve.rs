@@ -12,7 +12,7 @@ pub struct CurveWindow {
 pub struct CurvePoint {
     pub time: f64,
     pub value: f64,
-    /// The selected unit was inactive since the previous sample.
+    /// The selected channel was inactive or changed representation since the previous sample.
     #[serde(skip_serializing_if = "std::ops::Not::not")]
     pub break_before: bool,
 }

@@ -1,3 +1,4 @@
+use super::box_shadows::BoxShadowsSource;
 use super::color::{packed_argument, ColorSource};
 use super::effect::EffectSource;
 use super::relative::RelativeSource;
@@ -25,6 +26,7 @@ enum ValueSyntax {
     Color(ColorSource),
     Relative(RelativeSource),
     Effect(EffectSource),
+    BoxShadows(BoxShadowsSource),
 }
 
 impl ValueShape {
@@ -32,6 +34,7 @@ impl ValueShape {
     pub(crate) const CORNER_RADIUS: Self = Self::typed(ValueKind::CornerRadius);
     pub(crate) const RELATIVE_POINT: Self = Self::typed(ValueKind::RelativePoint);
     pub(crate) const EFFECT: Self = Self::typed(ValueKind::Effect);
+    pub(crate) const BOX_SHADOWS: Self = Self::typed(ValueKind::BoxShadows);
     pub(crate) const SOLID_BRUSH: Self = Self {
         kind: ValueKind::Color,
         brush: true,
@@ -52,6 +55,7 @@ impl ValueShape {
         let name = path.strip_prefix("::ferroui_base::")?;
         Some(Self::typed(match name {
             "media::Color" | "media::color::Color" => ValueKind::Color,
+            "media::BoxShadows" | "media::box_shadows::BoxShadows" => ValueKind::BoxShadows,
             "CornerRadius" | "corner_radius::CornerRadius" => ValueKind::CornerRadius,
             "Thickness" | "thickness::Thickness" => ValueKind::Thickness,
             "Point" | "point::Point" => ValueKind::Point,
@@ -84,6 +88,13 @@ impl ValueShape {
         }
         if kind == ValueKind::Effect {
             return self.read_effect(expression, resolve, false);
+        }
+        if kind == ValueKind::BoxShadows {
+            let (value, source) = BoxShadowsSource::read(expression, &resolve)?;
+            return Some(ValueSource {
+                value: AnimationValue::BoxShadows(value),
+                source: ValueSyntax::BoxShadows(source),
+            });
         }
         let parts = if kind == ValueKind::Number
             || matches!(kind, ValueKind::CornerRadius | ValueKind::Thickness)
@@ -190,6 +201,14 @@ impl ValueSource {
             ValueSyntax::Color(source) => return source.plan(&self.value, &value, patches),
             ValueSyntax::Relative(source) => return source.plan(&value, patches),
             ValueSyntax::Effect(_) => return Err("The key requires an effect".into()),
+            ValueSyntax::BoxShadows(source) => {
+                let (AnimationValue::BoxShadows(previous), AnimationValue::BoxShadows(next)) =
+                    (&self.value, value)
+                else {
+                    return Err("The key requires box shadows".into());
+                };
+                return source.plan(previous, &next, patches);
+            }
             ValueSyntax::Numbers(parts) => parts,
         };
         let values = numeric_parts(&value)?;
@@ -216,6 +235,13 @@ impl ValueSource {
 pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
     if let AnimationValue::Effect(effect) = value {
         return super::effect_constructor::literal(effect);
+    }
+    if let AnimationValue::BoxShadows(shadows) = value {
+        value.validate().map_err(|error| error.to_string())?;
+        return Ok(format!(
+            "::ferroui_base::media::BoxShadows::parse({:?}).unwrap()",
+            shadows.to_xaml(),
+        ));
     }
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));

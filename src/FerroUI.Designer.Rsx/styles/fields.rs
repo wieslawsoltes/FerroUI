@@ -266,7 +266,7 @@ fn codec(info: &PropertyInfo, expanded_type: &str) -> Option<Codec> {
     }
     let literal = catalog::property_codec(info)?;
     match literal {
-        Literal::EmbeddedImage | Literal::CornerRadius => None,
+        Literal::EmbeddedImage | Literal::CornerRadius | Literal::BoxShadows => None,
         _ if info.type_name == "Option<bool>" => None,
         _ => Some(Codec::Literal(literal)),
     }

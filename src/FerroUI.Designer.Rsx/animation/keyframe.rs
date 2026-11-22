@@ -167,6 +167,8 @@ pub(crate) const BUILTINS: &[(&str, &str, ValueShape)] = &[
     ("ferroui_base::layout::Layoutable::max_width_property", "MaxWidth", ValueShape::NUMBER),
     ("ferroui_base::layout::Layoutable::max_height_property", "MaxHeight", ValueShape::NUMBER),
     ("ferroui_controls::Border::corner_radius_property", "CornerRadius", ValueShape::CORNER_RADIUS),
+    ("ferroui_controls::Border::box_shadow_property", "BoxShadow", ValueShape::BOX_SHADOWS),
+    ("ferroui_controls::presenters::ContentPresenter::box_shadow_property", "BoxShadow", ValueShape::BOX_SHADOWS),
     ("ferroui_controls::Border::background_property", "Background", ValueShape::SOLID_BRUSH),
     ("ferroui_controls::Border::border_brush_property", "BorderBrush", ValueShape::SOLID_BRUSH),
     ("ferroui_controls::Panel::background_property", "Background", ValueShape::SOLID_BRUSH),

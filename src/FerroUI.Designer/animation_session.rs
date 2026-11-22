@@ -3,7 +3,7 @@ use crate::DesignerSession;
 use ferroui_base::styling::Style;
 use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use ferroui_designer_animation::{
-    AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationValue,
+    AnimationBoxShadows, AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationValue,
     CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
@@ -724,7 +724,7 @@ impl DesignerSession {
             .or_else(|| self.animation.compiled_programs.get(&id))
             .ok_or("Choose a compiled animation program")?;
         let TrackCurveChannel::Property(channel) = channel else {
-            return Err("A registered effect curve requires the native animator".into());
+            return Err("This curve channel requires the native animator".into());
         };
         compiled.curve(target, property, channel, window).map_err(|error| error.to_string())
     }
@@ -772,13 +772,13 @@ impl DesignerSession {
     ) -> Result<(), String> {
         self.editable_program()?;
         let track_target = self.recording_target(target);
-        let authored_effect = self.animation.timeline.track(track_target, property)
+        let native_key = self.animation.timeline.track(track_target, property)
             .and_then(|track| track.keyframes.first())
-            .is_some_and(|key| matches!(&key.value, AnimationValue::Effect(_)));
+            .is_some_and(|key| matches!(&key.value, AnimationValue::Effect(_) | AnimationValue::BoxShadows(_)));
         let transform_component = self.active_animation_program().is_some_and(|id| {
             self.animation.native.transform_component(id, property).is_some()
         });
-        if self.uses_rust_source() || authored_effect || transform_component {
+        if self.uses_rust_source() || native_key || transform_component {
             let program = self.active_animation_program().ok_or("Choose an authored animation")?;
             return self.record_sampled_keyframe(program, track_target, property, time);
         }
@@ -1223,6 +1223,9 @@ impl DesignerSession {
     }
 
     fn animation_value_from_preview(&self, target: NodeId, property: &str, value: &BoxedValue) -> Result<AnimationValue, String> {
+        if let Some(shadows) = value.downcast_ref::<ferroui_base::media::BoxShadows>() {
+            return Ok(AnimationValue::BoxShadows(AnimationBoxShadows::from_native(shadows)));
+        }
         if let Some(effect) = value.downcast_ref::<Option<Rc<dyn ferroui_base::media::IEffect>>>() {
             return effect.as_deref().and_then(AnimationEffect::from_native).map(AnimationValue::Effect)
                 .ok_or_else(|| "Choose a native effect that the source can represent as a keyframe".into());
@@ -1274,6 +1277,23 @@ impl DesignerSession {
                     options.base_values.insert(property.into(), AnimationValue::Number(base));
                 }
                 continue;
+            }
+            if options.property_kinds.get(property) == Some(&ValueKind::BoxShadows) {
+                continue;
+            }
+            if !options.property_kinds.contains_key(property) {
+                if let Some(info) = self.animation.native.track_property(program.id, property)
+                    .filter(|info| AnimationBoxShadows::is_property(info))
+                {
+                    options.property_kinds.insert(property.into(), ValueKind::BoxShadows);
+                    let base = self.animation.native.track_target(program, &self.preview, target)
+                        .ok()
+                        .and_then(|object| AnimationBoxShadows::base_value(&object, info));
+                    if let Some(base) = base {
+                        options.base_values.insert(property.into(), AnimationValue::BoxShadows(base));
+                    }
+                    continue;
+                }
             }
             if self.animation_kind_for_target(target, property).is_none() {
                 if let Some(info) = self
@@ -1396,6 +1416,9 @@ impl DesignerSession {
 }
 
 fn animation_property_kind(property: &FerroProperty) -> Option<ValueKind> {
+    if AnimationBoxShadows::is_property(property) {
+        return Some(ValueKind::BoxShadows);
+    }
     if AnimationEffect::is_effect_property(property) {
         return Some(ValueKind::Effect);
     }

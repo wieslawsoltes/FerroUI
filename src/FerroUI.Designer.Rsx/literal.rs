@@ -1,5 +1,6 @@
-use crate::animation::ValueShape;
+use crate::animation::{ValueShape, rust_literal};
 use ferroui_designer_animation::{AnimationValue, ValueKind};
+use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::PropertyInfo;
 use syn::{Expr, Lit, UnOp};
 
@@ -24,6 +25,7 @@ pub(crate) enum Literal {
     Integer,
     Number,
     CornerRadius,
+    BoxShadows,
     Thickness,
     EmbeddedImage,
     Enum {
@@ -60,6 +62,7 @@ impl Literal {
             Self::Integer => Some(integer(expr)?.to_string()),
             Self::Number => Some(number(expr)?.to_string()),
             Self::CornerRadius => read_radius(expr),
+            Self::BoxShadows => Some(ValueShape::BOX_SHADOWS.read(expr)?.value.to_xaml()),
             Self::EmbeddedImage => crate::image_source::read(expr),
             Self::Thickness => match expr {
                 Expr::Tuple(tuple) if matches!(tuple.elems.len(), 2 | 4) => Some(
@@ -114,6 +117,7 @@ impl Literal {
             Self::Integer => value.trim().parse::<i32>().ok()?.to_string(),
             Self::Number => format!("{:?}", parse_number(value.trim())?),
             Self::CornerRadius => rust_radius(value)?,
+            Self::BoxShadows => rust_literal(&AnimationValue::parse(value, ValueKind::BoxShadows).ok()?).ok()?,
             Self::EmbeddedImage => crate::image_source::rust(value)?,
             Self::Thickness => {
                 let values = value
@@ -145,6 +149,14 @@ impl Literal {
     pub(crate) fn normalize(&self, value: &str) -> Option<String> {
         self.read_rust(&syn::parse_str(&self.rust(value)?).ok()?)
     }
+}
+
+pub(crate) fn edit_box_shadows(original: &str, value: &str) -> Result<String, String> {
+    let expression = syn::parse_str(original).map_err(|error| error.to_string())?;
+    let source = ValueShape::BOX_SHADOWS.read(&expression).ok_or("Edit a literal box shadow list")?;
+    let mut patches = Vec::new();
+    source.plan(value, &mut patches)?;
+    TextPatch::apply_all(original, patches).map_err(|error| error.to_string())
 }
 
 pub(crate) fn text_value(text: &str) -> String {

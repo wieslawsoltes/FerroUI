@@ -200,8 +200,11 @@ impl RsxProjection<'_> {
             return crate::image_source::edit(self.source, span, value, self.modules)
                 .ok_or_else(outside_static_values);
         }
-        let mut replacement = codec.rust(value).ok_or_else(outside_static_values)?;
         let original = &self.source[span.range()];
+        if codec == literal::Literal::BoxShadows {
+            return Ok(TextPatch { span, replacement: literal::edit_box_shadows(original, value)? });
+        }
+        let mut replacement = codec.rust(value).ok_or_else(outside_static_values)?;
         if original.contains('/') {
             let comments = keep_comments(original)?;
             replacement.insert_str(0, &comments);

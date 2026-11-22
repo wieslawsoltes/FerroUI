@@ -999,7 +999,9 @@ fn native_resource_animation_uses_its_source_identity_and_explicit_targets() {
     session
         .set_animation_program_preview_targets(id, Some(vec![a]))
         .unwrap();
-    assert!(session.animation_programs()[0].timeline.is_none());
+    let track = session.animation_programs()[0].timeline.as_ref().unwrap()
+        .track(a, "BoxShadow").unwrap();
+    assert_eq!(track.keyframes[0].value.kind(), ferroui_designer_animation::ValueKind::BoxShadows);
     session.preview_animation_programs(&[id], 1.0).unwrap();
     let a = session
         .preview

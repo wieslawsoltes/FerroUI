@@ -16,18 +16,21 @@ const colorChannels = new Set<CurveChannel>(['red', 'green', 'blue', 'alpha']);
 const channelLabels: Partial<Record<CurveChannel, string>> = {
     percent_x: 'X (%)', percent_y: 'Y (%)', absolute_x: 'X (px)', absolute_y: 'Y (px)',
     percent: 'Percent', absolute: 'Pixels',
-    blur_radius: 'Blur radius (px)', offset_x: 'Offset X (px)', offset_y: 'Offset Y (px)',
+    blur_radius: 'Blur radius (px)', offset_x: 'Offset X (px)', offset_y: 'Offset Y (px)', spread: 'Spread (px)',
     direction: 'Direction (°)', shadow_depth: 'Shadow depth (px)', shadow_opacity: 'Shadow opacity',
 };
 
 function channelComponent(channel: CurveChannel): CurveChannel {
-    return channel.startsWith('effect_parameter/') ? channel.split('/')[3] as CurveChannel : channel;
+    if (channel.startsWith('effect_parameter/')) return channel.split('/')[3] as CurveChannel;
+    if (channel.startsWith('box_shadow/')) return channel.split('/')[2] as CurveChannel;
+    return channel;
 }
 
 function channelLabel(channel: CurveChannel): string {
     const component = channelComponent(channel);
     const label = channelLabels[component] ?? component[0].toUpperCase() + component.slice(1).replaceAll('_', ' ');
     if (component === channel) return label;
+    if (channel.startsWith('box_shadow/')) return `Shadow ${channel.split('/')[1]} · ${label}`;
     const parameter = channel.split('/')[2].replace(/[_-]+/g, ' ')
         .replace(/(^|\s)(\p{L})/gu, (_, space: string, letter: string) => space + letter.toUpperCase());
     return component === 'value' ? parameter : `${parameter} ${label}`;
@@ -143,7 +146,7 @@ export class TimelineCurvePlot {
         this.ticks[1].textContent = axisNumber.format(high);
         this.unit.textContent = component.startsWith('percent') ? (isVelocity ? 'pp/s' : '%')
             : component === 'direction' ? (isVelocity ? '°/s' : '°')
-            : component.startsWith('absolute') || component === 'blur_radius' || component.startsWith('offset_') || component === 'shadow_depth'
+            : component.startsWith('absolute') || component === 'blur_radius' || component.startsWith('offset_') || component === 'spread' || component === 'shadow_depth'
                 ? (isVelocity ? 'px/s' : 'px') : isVelocity ? '/s' : '';
         this.zeroLine.toggleAttribute('data-visible', isVelocity && Boolean(points?.length) && low < 0 && high > 0);
         const baseline = scale.percent(0).toFixed(3);

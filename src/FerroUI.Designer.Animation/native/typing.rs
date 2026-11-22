@@ -1,5 +1,5 @@
 use super::curve::matches_property;
-use crate::{AnimationEffect, AnimationProgram, AnimationValue, ImportOptions, ValueKind};
+use crate::{AnimationBoxShadows, AnimationEffect, AnimationProgram, AnimationValue, ImportOptions, ValueKind};
 use ferroui_base::animation::{Animatable, Animation, animators::TransformAnimator};
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::{
@@ -21,7 +21,7 @@ pub fn native_keyframe_options(
     native_keyframe_options_for_target(document, program, animation, None)
 }
 
-/// Include live underlying values for redirected transform tracks.
+/// Include live underlying values for transform and box shadow tracks.
 pub fn native_keyframe_options_for_target(
     document: &Document,
     program: &AnimationProgram,
@@ -79,6 +79,13 @@ pub fn native_keyframe_options_for_target(
                 let value = AnimationEffect::parse_native(text).ok()?;
                 Some(((name.to_owned(), text.to_owned()), AnimationValue::Effect(value)))
             }));
+            continue;
+        }
+        if AnimationBoxShadows::is_property(property) {
+            options.property_kinds.insert(name.into(), ValueKind::BoxShadows);
+            if let Some(base) = target.and_then(|target| AnimationBoxShadows::base_value(target, property)) {
+                options.base_values.insert(name.into(), AnimationValue::BoxShadows(base));
+            }
             continue;
         }
         let mut kind = value_kind(property);

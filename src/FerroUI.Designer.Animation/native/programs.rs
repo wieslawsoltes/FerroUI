@@ -4,7 +4,7 @@ use ferroui_base::animation::{Animatable, Animation, IAnimation};
 use ferroui_base::controls::ResourceDictionary;
 use ferroui_base::media::Transform;
 use ferroui_base::styling::{IStyle, Style, StyleBase, Styles};
-use ferroui_base::{FerroObject, FerroProperty, Ref, StyledElement};
+use ferroui_base::{FerroObject, FerroProperty, FerroPropertyRegistry, Ref, StyledElement};
 use ferroui_designer_core::{Document, NodeId};
 use ferroui_markup_xaml::{diagnostics::XamlSourceInfo, FromXamlObject};
 use std::collections::{BTreeMap, BTreeSet};
@@ -162,6 +162,11 @@ impl NativeProgramIndex {
             .is_some_and(|program| !program.transform_components.is_empty())
     }
 
+    pub fn track_property(&self, id: NodeId, name: &str) -> Option<&'static FerroProperty> {
+        let (property, _) = super::curve::track(self.animation(id)?, name).ok()?;
+        Some(property)
+    }
+
     pub fn transform_component(&self, id: NodeId, name: &str) -> Option<&'static FerroProperty> {
         let mut matches = self.programs.get(&id)?.transform_components
             .iter().copied().filter(|property| super::curve::matches_property(property, name));
@@ -224,6 +229,7 @@ pub fn validate_animation_target(
             if !property.is_attached()
                 && !property.owner_type().is_assignable_from(target.get_type())
                 && !Transform::TYPE.is_assignable_from(property.owner_type())
+                && !FerroPropertyRegistry::instance().is_registered_for(target, property)
             {
                 return Err(format!(
                     "{property} is incompatible with {target_role} {}",

@@ -1,5 +1,5 @@
-use crate::{AnimationEffect, AnimationValue, RelativeUnit};
-use ferroui_base::media::{Color, IBrush};
+use crate::{AnimationBoxShadows, AnimationEffect, AnimationValue, RelativeUnit};
+use ferroui_base::media::{BoxShadows, Color, IBrush};
 use ferroui_base::{
     BoxedValue, CornerRadius, Point, Rect, RelativePoint, RelativeScalar, Size, Thickness, Vector,
 };
@@ -26,6 +26,9 @@ pub(super) fn value(sample: &BoxedValue) -> Option<AnimationValue> {
         return Some(AnimationValue::Effect(effect));
     }
     let native = sample.as_ref();
+    if let Some(shadows) = native.downcast_ref::<BoxShadows>() {
+        return Some(AnimationValue::BoxShadows(AnimationBoxShadows::from_native(shadows)));
+    }
     if let Some(number) = native.downcast_ref::<f64>() {
         return Some(AnimationValue::Number(*number));
     }
