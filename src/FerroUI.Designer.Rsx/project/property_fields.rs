@@ -1,6 +1,6 @@
 use super::State;
-use crate::{image_source, literal::Literal};
 use crate::tree::Element;
+use crate::{image_source, literal::Literal};
 use ferroui_designer_core::SourceSpan;
 use std::collections::BTreeSet;
 use syn::{spanned::Spanned, Expr};
@@ -31,19 +31,35 @@ impl State<'_> {
             node.properties.remove(&key);
             node.fields.remove(&key);
             format!("Repeated {}.{key}", node.class)
-        } else if let Some((field, text)) = source.field.zip(
-            node.class
-                .literal(&key)
-                .and_then(|kind| {
-                    let expression = source.expression?;
-                    match kind {
-                        Literal::EmbeddedImage => image_source::projected_reference(
-                            expression, text, self.modules, &self.image_includes,
-                        ),
-                        _ => kind.read_rust(expression),
-                    }
-                }),
-        ) {
+        } else if let Some((field, text)) =
+            source.field.zip(node.class.literal(&key).and_then(|kind| {
+                let expression = source.expression?;
+                match kind {
+                    Literal::EmbeddedImage => image_source::projected_reference(
+                        expression,
+                        text,
+                        self.modules,
+                        &self.image_includes,
+                        |function| {
+                            self.local_rust
+                                .get_or_insert_with(|| {
+                                    crate::local_rust::LocalRust::parse(
+                                        text,
+                                        operand.start,
+                                        self.modules,
+                                    )
+                                })
+                                .path(function)
+                        },
+                    )
+                    .map(|reference| {
+                        self.preserve_asset_expressions |= reference.preserve_expression;
+                        reference.uri
+                    }),
+                    _ => kind.read_rust(expression),
+                }
+            }))
+        {
             node.properties.insert(key.clone(), operand);
             node.fields.insert(key.clone(), field);
             result.properties.insert(key, text);

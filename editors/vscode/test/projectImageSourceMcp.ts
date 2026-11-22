@@ -41,19 +41,20 @@ export async function verifyProjectImageSource(fixture: McpFixture): Promise<voi
             vscode.workspace.fs.writeFile(file('Assets/Card.png'), bytes),
             vscode.workspace.fs.writeFile(file('Assets/New Photo.png'), replacement),
         ]);
-        const source = `fn view() { rsx! { Image {
-            source(::ferroui_view::embedded_image(::std::include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"), /* credit 🎨 */ r#"/Assets/Card.png"#,
+        const source = `use ::ferroui_view::embedded_image as raster;
+        fn view() { rsx! { Image {
+            source(raster(::std::include_bytes!(concat!(
+                env!("CARGO_MANIFEST_DIR"), "/Assets/", /* credit 🎨 */ r#"Card"#, ".png",
             )))),
         } }; }`;
         await verifyImageSource(fixture, {
             path: `${directory}/src/card.rs`, source, asset: `${directory}/Assets/New Photo.png`,
-            expected: source.replace('/Assets/Card.png', '/Assets/New Photo.png'), verifyPreview: true,
+            expected: source.replace('r#"Card"#', 'r#"New Photo"#'), verifyPreview: true,
         });
     } finally {
         await vscode.workspace.fs.delete(packageRoot, { recursive: true, useTrash: false });
     }
-    console.log('Project image source changes preserved XAML and RSX includes, rendered the replacement Cargo asset, and restored the original on Undo');
+    console.log('Project image source changes preserved an imported RSX helper and the assembled Cargo path, rendered the new asset, and restored the original on Undo');
 }
 
 async function verifyImageSource({ invoke, content }: McpFixture, input: ImageSourceEdit): Promise<void> {

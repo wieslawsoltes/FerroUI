@@ -12,7 +12,7 @@ export async function verifyAssetMove({ invoke, content }: McpFixture): Promise<
     const xamlUri = vscode.Uri.joinPath(folder, 'Consumer.xaml');
     const rustUri = vscode.Uri.joinPath(folder, 'consumer.rs');
     const source = '<StackPanel xmlns="https://github.com/ferroui"><Image Source="./Logo%20%C5%81.png"/><TextBlock Text="Keep Logo Ł.png"/></StackPanel>';
-    const rustSource = 'fn view() { rsx! { Image { source: ::ferroui_view::embedded_image(/* original */ ::core::include_bytes!(r#"./Logo Ł.png"#)) } }; }\r\n';
+    const rustSource = 'fn view() { rsx! { Image { source: ::ferroui_view::embedded_image(::core::include_bytes!(concat!("./", /* original */ r#"Logo Ł"#, ".png"))) } }; }\r\n';
     const bytes = Buffer.from([0, 18, 29, 255]);
     const request = { path: 'AssetMoveFixture/Logo Ł.png', destination: 'AssetMoveFixture/Assets/Moved #Logo.png', folder: workspace.toString() };
     const plan = async () => content<FileMovePlan>(await invoke('ferroui_project_plan_asset_move', request));
@@ -40,7 +40,7 @@ export async function verifyAssetMove({ invoke, content }: McpFixture): Promise<
         assert.deepEqual(Buffer.from(await vscode.workspace.fs.readFile(to)), bytes);
         await assert.rejects(async () => vscode.workspace.fs.stat(from));
         assert.equal(xaml.getText(), source.replace('./Logo%20%C5%81.png', './Assets/Moved%20%23Logo.png'));
-        assert.equal(rust.getText(), draft.replace('./Logo Ł.png', './Assets/Moved #Logo.png'));
+        assert.equal(rust.getText(), draft.replace('r#"Logo Ł"#', 'r#"Assets/Moved #Logo"#'));
 
         await vscode.window.showTextDocument(xaml, { preview: false });
         await vscode.commands.executeCommand('undo');

@@ -167,6 +167,8 @@ Choose the `rsx!` invocation and select the control in the canvas or **Layers**.
 
 Select a control in a Rust view and open **Properties**. Edit a supported literal authored as a field, such as `width: 160.0`, or as a single-argument call, such as `width(160.0)`. The same editor handles mapped layout calls such as `grid_row(1)` and setters registered by the project. **Reset** removes the assignment and retains its comments. Use the source arrow to open a computed value. Each applied edit takes one Undo step. [VS Code workflow](vscode/authoring.md#edit-rsx-builder-values) · [MCP tools](vscode/reference.md#drive-an-editor-workflow)
 
+For a mapped image, edit **Source** using a URI relative to the Rust file. Studio updates the path in `embedded_image(include_bytes!(…))`, including an explicitly imported `embedded_image` and a path assembled from string literals with `concat!`. The edit keeps the existing macro calls and comments. When the include starts with `env!("CARGO_MANIFEST_DIR")`, open the owning package so Studio can resolve its base. [VS Code Assets workflow](vscode/authoring.md#edit-values-actions-and-resources)
+
 When Studio has the Cargo target for a Rust view, it can preview embedded raster paths anchored to `CARGO_MANIFEST_DIR`. Edit the image's **Source** relative to the Rust file in Properties. Studio keeps the package-relative constructor and macro in the original source. [Supported embedded paths](vscode/authoring.md#edit-values-actions-and-resources)
 
 ### Arrange an inline Rust child collection

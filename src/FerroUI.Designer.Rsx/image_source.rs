@@ -10,8 +10,17 @@ use syn::{Expr, LitStr, Macro, Path};
 #[cfg(test)]
 mod tests;
 
+pub(crate) struct ImageReference {
+    pub(crate) uri: String,
+    pub(crate) preserve_expression: bool,
+}
+
 pub(crate) fn read(expression: &Expr) -> Option<String> {
-    relative_asset_uri(&relative_literal(image_include(expression)?)?.value())
+    let (function, include) = image_parts(expression)?;
+    if !absolute_embedded_image(function) {
+        return None;
+    }
+    relative_asset_uri(&relative_literal(include)?.value())
 }
 
 pub(crate) fn projected_reference(
@@ -19,17 +28,26 @@ pub(crate) fn projected_reference(
     source: &str,
     modules: Option<&RustModuleSources>,
     includes: &OnceCell<Option<RustIncludeSyntax>>,
-) -> Option<String> {
+    resolve: impl FnOnce(&Expr) -> Option<String>,
+) -> Option<ImageReference> {
     if let Some(uri) = read(expression) {
-        return Some(uri);
+        return Some(ImageReference {
+            uri,
+            preserve_expression: false,
+        });
     }
-    let include = image_include(expression)?;
+    let (function, include) = image_parts(expression)?;
+    if !absolute_embedded_image(function)
+        && resolve(function).as_deref() != Some("ferroui_view::embedded_image")
+    {
+        return None;
+    }
     let site = includes
         .get_or_init(|| RustIncludeSyntax::parse(source).ok())
         .as_ref()?
         .include_bytes(include)?;
     let reference = relative_asset_uri(&site.path)?;
-    match site.anchor {
+    let uri = match site.anchor {
         RustPathAnchor::SourceFile => Some(reference),
         RustPathAnchor::Package => {
             let modules = modules?;
@@ -38,7 +56,11 @@ pub(crate) fn projected_reference(
             relative_file_reference(&modules.active().uri, &asset).ok()
         }
         _ => None,
-    }
+    }?;
+    Some(ImageReference {
+        uri,
+        preserve_expression: true,
+    })
 }
 
 pub(crate) fn edit(
@@ -50,7 +72,9 @@ pub(crate) fn edit(
     let path = relative_asset_path(reference)?;
     let authored = source.get(value.start..value.end)?;
     let expression = syn::parse_str(authored).ok()?;
-    let include = image_include(&expression)?;
+    // `value` is the checked field range returned by the current projection.
+    // Reparse its operand to retain the original constructor and argument trivia.
+    let (_, include) = image_parts(&expression)?;
     let (token, replacement) = if let Some(literal) = relative_literal(include) {
         let token = literal.span().byte_range();
         let replacement = rust_string_like(authored.get(token.clone())?, &path);
@@ -75,23 +99,22 @@ pub(crate) fn edit(
     Some(TextPatch { span, replacement })
 }
 
-fn image_include(expression: &Expr) -> Option<&Macro> {
+fn image_parts(expression: &Expr) -> Option<(&Expr, &Macro)> {
     let Expr::Call(call) = expression else {
         return None;
     };
-    let Expr::Path(function) = call.func.as_ref() else {
-        return None;
-    };
-    if function.qself.is_some()
-        || !qualified(&function.path, &["ferroui_view", "embedded_image"])
-        || call.args.len() != 1
-    {
+    if !call.attrs.is_empty() || call.args.len() != 1 {
         return None;
     }
     let Expr::Macro(image) = call.args.first()? else {
         return None;
     };
-    Some(&image.mac)
+    Some((&call.func, &image.mac))
+}
+
+fn absolute_embedded_image(function: &Expr) -> bool {
+    matches!(function, Expr::Path(function) if function.qself.is_none()
+        && qualified(&function.path, &["ferroui_view", "embedded_image"]))
 }
 
 fn relative_literal(include: &Macro) -> Option<LitStr> {

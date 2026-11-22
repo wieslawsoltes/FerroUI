@@ -62,9 +62,10 @@ fn studio_replaces_a_cargo_relative_rsx_image_through_the_authored_source() {
     let target = files.0.join("src/lib.rs");
     fs::write(&target, "mod review;").unwrap();
     let view = files.0.join("src/review.rs");
-    let source = r##"fn view() { rsx! { Image {
-        source(::ferroui_view::embedded_image(::core::include_bytes!(concat!(
-            env!("CARGO_MANIFEST_DIR"), /* paint 🧭 */ r#"/Assets/Card.png"#,
+    let source = r##"use ::ferroui_view::embedded_image as raster;
+    fn view() { rsx! { Image {
+        source(raster(::core::include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"), "/Assets/", /* paint 🧭 */ r#"Card"#, ".png",
         )))),
     } }; }"##;
     fs::write(&view, source).unwrap();
@@ -132,7 +133,7 @@ fn studio_replaces_a_cargo_relative_rsx_image_through_the_authored_source() {
     }), writes).unwrap();
     assert_eq!(
         session.borrow().authored_source(),
-        source.replace("/Assets/Card.png", "/Assets/Next Image.png")
+        source.replace("r#\"Card\"#", "r#\"Next Image\"#")
     );
     assert_eq!(image_size(), Size::new(6.0, 3.0));
     let revision = session.borrow().document().revision();

@@ -1,5 +1,6 @@
 //! Source ranges for Rust literals whose XAML path has a known base.
 mod build_script;
+mod include_path;
 mod includes;
 mod macros;
 mod tokens;
@@ -36,6 +37,7 @@ pub struct RustFilePath {
     /// their filesystem and URI spellings differ.
     pub shares_input_path: bool,
     prefix: String,
+    fragments: Vec<include_path::Fragment>,
 }
 
 pub type RustXamlPath = RustFilePath;
@@ -43,7 +45,10 @@ pub type RustXamlPath = RustFilePath;
 impl RustFilePath {
     pub fn replacement(&self, source: &str, path: &str) -> String {
         let value = format!("{}{path}", self.prefix);
-        rust_string_like(&source[self.range.clone()], &value)
+        if self.fragments.is_empty() {
+            return rust_string_like(&source[self.range.clone()], &value);
+        }
+        include_path::replace_fragments(source, self.range.clone(), &self.fragments, &value)
     }
 
     fn from_literal(literal: &LitStr, anchor: RustPathAnchor, prefix: &str, offset: usize) -> Option<Self> {
@@ -52,7 +57,7 @@ impl RustFilePath {
         let range = literal.span().byte_range();
         Some(Self {
             range: offset + range.start..offset + range.end, path: path.into(), anchor,
-            input: None, shares_input_path: false, prefix: prefix.into(),
+            input: None, shares_input_path: false, prefix: prefix.into(), fragments: Vec::new(),
         })
     }
 }
@@ -155,8 +160,8 @@ impl Collector<'_> {
     fn input_file(&self, input: DocumentInput<'_>) -> Option<(String, RustPathAnchor)> {
         match input {
             DocumentInput::Include(input) => {
-                let (value, anchor, prefix) = self.macros.include_path(input)?;
-                Some((value.value().strip_prefix(prefix)?.to_owned(), anchor))
+                let path = self.macros.include_path(input, self.offset)?;
+                Some((path.path, path.anchor))
             }
             DocumentInput::Read(literal) => Some((literal.value(), RustPathAnchor::Package)),
         }
@@ -239,11 +244,11 @@ impl<'source> Visit<'source> for Collector<'source> {
                 return;
             }
         }
-        if let Some((literal, anchor, prefix)) = self
-            .macros
-            .include_path(expression)
-            .or_else(|| self.macros.manifest_path(expression))
-        {
+        if let Some(path) = self.macros.include_path(expression, self.offset) {
+            if path.path.to_ascii_lowercase().ends_with(".xaml") {
+                self.references.paths.push(path);
+            }
+        } else if let Some((literal, anchor, prefix)) = self.macros.manifest_path(expression) {
             self.record(&literal, anchor, prefix, None);
         } else if self.cargo_build {
             if let Some(args) = self.macros.arguments(expression, "println") {

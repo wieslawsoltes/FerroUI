@@ -1,7 +1,7 @@
-use super::{MacroSyntax, RustFilePath, rust_body};
+use super::{rust_body, MacroSyntax, RustFilePath};
 use crate::{ProjectError, Result};
 use proc_macro2::{TokenStream, TokenTree};
-use syn::{Expr, Macro, visit::Visit};
+use syn::{visit::Visit, Expr, Macro};
 
 /// Context for checking standard include macros in an authored Rust file.
 pub struct RustIncludeSyntax(MacroSyntax);
@@ -13,16 +13,15 @@ impl RustIncludeSyntax {
         Ok(Self(MacroSyntax::new(&file)))
     }
 
-    /// The include must come from the captured file. The literal range uses
-    /// the same coordinates as the supplied macro tokens.
+    /// The include must come from the captured file. The replacement range
+    /// uses the same coordinates as the supplied macro tokens.
     pub fn include_bytes(&self, expression: &Macro) -> Option<RustFilePath> {
-        let (literal, anchor, prefix) = self.0.include_operand(expression, "include_bytes")?;
-        RustFilePath::from_literal(&literal, anchor, prefix, 0)
+        self.0.include_operand(expression, "include_bytes", 0)
     }
 }
 
-/// Find literal standard `include_bytes!` and `include_str!` operands. RSX macro
-/// bodies are searched for embedded Rust expressions using the same include parser.
+/// Find static standard `include_bytes!` and `include_str!` operands, including
+/// strings assembled with `concat!` and the Cargo manifest directory.
 pub fn rust_file_includes(source: &str) -> Result<Vec<RustFilePath>> {
     let body = rust_body(source);
     let syntax =
@@ -65,10 +64,8 @@ impl Includes {
 
 impl<'ast> Visit<'ast> for Includes {
     fn visit_macro(&mut self, expression: &'ast Macro) {
-        if let Some((literal, anchor, prefix)) = self.macros.include_path(expression) {
-            if let Some(site) = RustFilePath::from_literal(&literal, anchor, prefix, self.offset) {
-                self.paths.push(site);
-            }
+        if let Some(site) = self.macros.include_path(expression, self.offset) {
+            self.paths.push(site);
         } else if expression
             .path
             .segments
@@ -113,5 +110,48 @@ mod tests {
             paths[1].replacement(source, "../Icons/Logo.png"),
             "r#\"../Icons/Logo.png\"#"
         );
+    }
+
+    #[test]
+    fn assembled_paths_preserve_the_anchor_comments_and_unchanged_terms() {
+        let source = concat!(
+            "\u{feff}const LOGO: &[u8] = include_bytes!(::std::concat!(::core::env!(\"CARGO_MANIFEST_DIR\"),\r\n",
+            "    r#\"/Assets/\"#, /* path 🎨 */ concat!(\"Logo Ł\", \".png\"),\r\n",
+            "));\r\n",
+            "const CARD: &str = include_str!(concat!(\"view/\", \"Card.xaml\"));\r\n",
+        );
+        let paths = rust_file_includes(source).unwrap();
+        assert_eq!(paths.len(), 2);
+        let logo = &paths[0];
+        assert_eq!(
+            (&logo.path[..], logo.anchor),
+            ("Assets/Logo Ł.png", RustPathAnchor::Package)
+        );
+        assert_eq!(
+            logo.replacement(source, "Icons/New #.png"),
+            "r#\"/Icons/\"#, /* path 🎨 */ concat!(\"New #\", \".png\""
+        );
+        assert_eq!(
+            (&paths[1].path[..], paths[1].anchor),
+            ("view/Card.xaml", RustPathAnchor::SourceFile)
+        );
+        assert_eq!(
+            paths[1].replacement(source, "view/New.xaml"),
+            "\"view/\", \"New.xaml\""
+        );
+        let xaml = super::super::RustXamlReferences::parse(source, false).unwrap();
+        assert_eq!(xaml.paths, [paths[1].clone()]);
+    }
+
+    #[test]
+    fn dynamic_or_shadowed_macro_paths_have_no_editable_range() {
+        let source = r#"
+            macro_rules! concat { ($a:literal, $b:literal) => { "elsewhere" }; }
+            const SHADOWED: &[u8] = include_bytes!(concat!("Assets/", "logo.png"));
+            const GENERATED: &[u8] = include_bytes!(::std::concat!(env!("OUT_DIR"), "/logo.png"));
+            const COMPUTED: &[u8] = include_bytes!(::std::concat!("Assets/", FILE));
+            const MISPLACED: &[u8] = include_bytes!(::std::concat!("x", env!("CARGO_MANIFEST_DIR"), "/logo.png"));
+        "#;
+        assert!(rust_file_includes(source).unwrap().is_empty());
     }
 }

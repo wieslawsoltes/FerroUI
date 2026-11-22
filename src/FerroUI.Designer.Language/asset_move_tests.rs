@@ -18,7 +18,7 @@ fn asset_move_rewrites_xaml_and_rsx_operands_with_live_draft_precedence() {
         "</StackPanel>",
     );
     files.write("Views/View.xaml", authored);
-    let rust = "fn view() { rsx! { Image { source: ::ferroui_view::embedded_image(/* art 🎨 */ ::core::include_bytes!(r#\"../Assets/Logo Ł.png\"#)) } }; }\r\n";
+    let rust = "fn view() { rsx! { Image { source: ::ferroui_view::embedded_image(::core::include_bytes!(concat!(r#\"../Assets/\"#, /* art 🎨 */ r#\"Logo Ł\"#, \".png\"))) } }; }\r\n";
     files.write("Views/Card.rs", rust);
     let mut language = LanguageService::default();
     language
@@ -58,7 +58,8 @@ fn asset_move_rewrites_xaml_and_rsx_operands_with_live_draft_precedence() {
         rsx.after,
         draft
             .source
-            .replace("../Assets/Logo Ł.png", "../Icons/New #.png")
+            .replace("../Assets/", "../Icons/")
+            .replace("Logo Ł", "New #")
     );
     assert_eq!(
         plan,

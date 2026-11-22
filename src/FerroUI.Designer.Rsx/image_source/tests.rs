@@ -26,7 +26,7 @@ fn cargo_include_projects_a_document_uri_and_keeps_its_authored_package_anchor()
     let source = r##"fn view() { rsx! {
         Image {
             source(::ferroui_view::embedded_image(::std::include_bytes!(concat!(
-                env!("CARGO_MANIFEST_DIR"), /* keep 🎨 */ r#"/Assets/Łódź #%.png"#,
+                env!("CARGO_MANIFEST_DIR"), r#"/Assets/"#, /* keep 🎨 */ r#"Łódź #%.png"#,
             )))),
         }
     }; }"##
@@ -49,7 +49,7 @@ fn cargo_include_projects_a_document_uri_and_keeps_its_authored_package_anchor()
     assert_eq!(patches.len(), 1);
     assert_eq!(
         TextPatch::apply_all(&source, patches).unwrap(),
-        source.replace("/Assets/Łódź #%.png", "/Assets/New photo.png"),
+        source.replace("Łódź #%.png", "New photo.png"),
     );
     assert!(!project_rust(&source, 0).unwrap().nodes[0].can_set_image_source());
 }
@@ -72,4 +72,37 @@ fn inferred_standard_relative_include_uses_the_verified_file_scope() {
         format!("macro_rules! include_bytes {{ ($path:literal) => {{ &[] }} }}\n{source}");
     let projection = project_rust(&shadowed, 0).unwrap();
     assert!(!projection.nodes[0].can_set_image_source());
+}
+
+#[test]
+fn an_imported_image_helper_keeps_its_alias_and_assembled_path() {
+    let source = r#"use ::ferroui_view::embedded_image as texture;
+        fn view() { rsx! { Image { source: texture(include_bytes!(concat!("art/", "Logo", ".png"))) } }; }"#;
+    let preview = project_rust(source, 0).unwrap();
+    assert_eq!(preview.omitted_count, 0);
+    assert!(preview.nodes[0].can_set_image_source());
+    assert!(preview.xaml().contains("art/Logo.png"));
+    let patches = preview
+        .apply_xaml(&preview.xaml().replace("art/Logo.png", "icons/Mark.png"))
+        .unwrap();
+    assert_eq!(
+        TextPatch::apply_all(source, patches).unwrap(),
+        source
+            .replace("\"art/\"", "\"icons/\"")
+            .replace("\"Logo\"", "\"Mark\"")
+    );
+    assert!(!preview.can_replace_structure());
+    assert!(preview
+        .apply_xaml("<Button xmlns='https://github.com/ferroui' />")
+        .is_err());
+
+    for unrelated in [
+        source.replace(
+            "::ferroui_view::embedded_image",
+            "::other_api::embedded_image",
+        ),
+        source.replace("fn view() {", "fn view() { let texture = custom_loader;"),
+    ] {
+        assert!(!project_rust(&unrelated, 0).unwrap().nodes[0].can_set_image_source());
+    }
 }

@@ -253,7 +253,7 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 
 To change an authored image, select it in **Design** or **Outline**. Select a raster file in **Assets** and choose **Use as image source**. The action is available for an empty or literal image source. XAML writes the document-relative URI. On an existing mapped RSX source, the edit changes the path inside `include_bytes!` and preserves the surrounding call, comments, and compatible raw-string delimiters. One Undo restores the previous source.
 
-For an RSX image with `include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/Assets/Card.png"))` inside `::ferroui_view::embedded_image`, the preview uses the Cargo package that owns the Rust target. Open the package or build its XAML schema so the designer can resolve that target. Replacing the image updates the package-relative suffix and keeps the manifest expression. Computed paths and shadowed macros remain editable in Rust.
+`embedded_image` can be qualified or explicitly imported under its original name or an alias. Use a literal include path or assemble it with `concat!`, such as `include_bytes!(concat!("../Assets/", "Card", ".png"))`. A leading `env!("CARGO_MANIFEST_DIR")` anchors the path to the owning Cargo package. Open the package or build its XAML schema to resolve that target. Image replacement keeps the constructor, manifest anchor, macro calls, and comments and updates the changed path fragments. Use the Rust editor for runtime-generated paths or shadowed macros. Use the canvas or Outline to move controls that have an assembled image expression.
 
 To try the binding inspector, open [BindingWorkbench.xaml](../../../editors/vscode/test/fixtures/BindingWorkbench.xaml), select its bound control, and open the binding on its property. For a gradient, open [CustomerGradient.xaml](../../../editors/vscode/test/fixtures/CustomerGradient.xaml), choose **Edit brush**, and change a stop’s color or position. Review the draft and apply it to author one edit.
 
@@ -302,10 +302,10 @@ The copy appears under **Assets**. To use a raster import, drag it onto the canv
 ### Move an asset and update its references
 
 1. Select an image, font, or media file in **Assets** and use **Move or rename asset…**. Enter a path in an existing directory in the same Cargo package or loose-file project. Keep the file extension.
-2. The Changes editor shows the proposed patches. Review the XAML URI properties, typed style values, font source paths, and supported literal Rust includes there. A move with no indexed references shows a file confirmation.
+2. The Changes editor shows the proposed patches. Review the XAML URI properties, typed style values, font source paths, and Rust includes there. The review includes static `concat!` paths, including paths anchored to `CARGO_MANIFEST_DIR`. A move with no indexed references shows a file confirmation.
 3. Choose **Apply Asset Move** to move the file and update the displayed references in one VS Code edit. Undo from an edited reference to restore the file and those source changes together. Use **Cancel Asset Move** to return to the editor. If a file or draft changes, prepare a new review.
 
-The review reflects the indexed XAML and Rust code, including open drafts. Inspect dynamically constructed paths and externally managed asset mappings before applying. In RSX, the editor can update the literal in a supported `include_bytes!` call while preserving the surrounding Rust. Save the edited buffers to update the running app. [Move a XAML file](#move-an-xaml-file-and-its-references) · [MCP reference](reference.md#drive-an-editor-workflow)
+The review reflects the indexed XAML and Rust code, including open drafts. Inspect runtime-generated paths and externally managed asset mappings before applying. If a Rust draft with a possible include is incomplete, repair it and prepare the review again. Save the edited buffers to update the running app. [Move a XAML file](#move-an-xaml-file-and-its-references) · [MCP reference](reference.md#drive-an-editor-workflow)
 
 ## Create a Rust handler for an XAML event
 

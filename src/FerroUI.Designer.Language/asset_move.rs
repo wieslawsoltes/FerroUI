@@ -7,8 +7,8 @@ use super::{
 use crate::{LanguageError, Result, require};
 use ferroui_designer_core::{Document, SourceSpan, TextPatch};
 use ferroui_designer_project::{
-    ProjectFileMove, RustPathAnchor, canonical_file_uri, file_path, file_uri, relative_asset_uri,
-    relative_file_path, rust_file_includes,
+    ProjectFileMove, RustFilePath, RustPathAnchor, canonical_file_uri, file_path, file_uri,
+    relative_asset_uri, relative_file_path, rust_file_includes,
 };
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::io::{self, Read};
@@ -67,18 +67,40 @@ impl LanguageService {
             let snapshot = RustSnapshot::read(uri, &drafts)?;
             let may_include =
                 |text: &str| text.contains("include_bytes") || text.contains("include_str");
-            let disk_uses_asset = || {
-                snapshot.version >= 0
-                    && read_rust(uri).is_ok_and(|disk| may_include(&disk) && mentions(&disk))
-            };
-            if !may_include(&snapshot.text) && !disk_uses_asset() {
+            if !may_include(&snapshot.text) && snapshot.version < 0 {
                 continue;
             }
+            let parent = entry
+                .path
+                .parent()
+                .ok_or_else(|| LanguageError("The Rust source has no parent directory".into()))?;
+            let package_root = package.authored_package_root(&entry.path);
+            let reference_base = |site: &RustFilePath| {
+                let base = match site.anchor {
+                    RustPathAnchor::SourceFile => parent,
+                    RustPathAnchor::Package => package_root,
+                    RustPathAnchor::XamlRoot | RustPathAnchor::ResourceUri => return None,
+                };
+                let resolved = file_uri(base.join(&site.path))
+                    .and_then(|uri| canonical_file_uri(&uri))
+                    .ok();
+                (resolved.as_deref() == Some(movement.from.as_str())).then_some(base)
+            };
+            let could_reference =
+                |text: &str| may_include(text) && (mentions(text) || text.contains("concat"));
             let sites = match rust_file_includes(&snapshot.text) {
                 Ok(sites) => sites,
                 Err(_) => {
+                    let disk_uses_asset = snapshot.version >= 0
+                        && read_rust(uri).is_ok_and(|disk| {
+                            may_include(&disk)
+                                && rust_file_includes(&disk).map_or_else(
+                                    |_| could_reference(&disk),
+                                    |sites| sites.iter().any(|site| reference_base(site).is_some()),
+                                )
+                        });
                     require(
-                        !mentions(&snapshot.text) && !disk_uses_asset(),
+                        !could_reference(&snapshot.text) && !disk_uses_asset,
                         format!(
                             "Repair the Rust draft that may reference this asset before moving it: {uri}"
                         ),
@@ -86,23 +108,11 @@ impl LanguageService {
                     continue;
                 }
             };
-            let parent = entry
-                .path
-                .parent()
-                .ok_or_else(|| LanguageError("The Rust source has no parent directory".into()))?;
             let mut patches = Vec::new();
             for site in sites {
-                let base = match site.anchor {
-                    RustPathAnchor::SourceFile => parent,
-                    RustPathAnchor::Package => package.authored_package_root(&entry.path),
-                    RustPathAnchor::XamlRoot | RustPathAnchor::ResourceUri => continue,
-                };
-                let resolved = file_uri(base.join(&site.path))
-                    .and_then(|uri| canonical_file_uri(&uri))
-                    .ok();
-                if resolved.as_deref() != Some(movement.from.as_str()) {
+                let Some(base) = reference_base(&site) else {
                     continue;
-                }
+                };
                 let relative = relative_file_path(base, &target)?;
                 let replacement = if site.path.starts_with("./") && !relative.starts_with("../") {
                     format!("./{relative}")

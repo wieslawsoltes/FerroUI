@@ -107,6 +107,7 @@ pub struct RsxProjection<'a> {
     pub animation_issues: Vec<RsxAnimationIssue>,
     pub style_issues: Vec<RsxStyleIssue>,
     inner_trivia: bool,
+    preserve_asset_expressions: bool,
     pub(crate) styles: BTreeMap<usize, Vec<RsxStyle>>,
     pub(crate) states: BTreeMap<usize, ProjectedStates>,
 }
@@ -170,7 +171,7 @@ impl RsxProjection<'_> {
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
         self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_styles() && !self.has_projected_states() && !self.has_projected_columns()
-            && !self.has_explicit_child_lists()
+            && !self.has_explicit_child_lists() && !self.preserve_asset_expressions
     }
 
     pub fn set_property(&self, index: usize, name: &str, value: &str) -> Result<TextPatch, String> {
@@ -248,6 +249,9 @@ impl RsxProjection<'_> {
         if self.has_explicit_child_lists() {
             return Err("Use the canvas or Outline to edit the authored Rust child list".into());
         }
+        if self.preserve_asset_expressions {
+            return Err("Use the canvas, Outline, or Rust editor to keep the authored image expressions".into());
+        }
         if self.inner_trivia {
             return Err("Edit RSX structure in the Rust editor to keep its comments".into());
         }
@@ -311,6 +315,7 @@ impl RsxCatalog {
             animation_issues: state.animation_issues,
             style_issues: state.style_issues,
             inner_trivia,
+            preserve_asset_expressions: state.preserve_asset_expressions,
             styles: state.styles,
             states: state.states,
         })
@@ -362,6 +367,7 @@ struct State<'a> {
     local_rust: Option<LocalRust>,
     modules: Option<&'a RustModuleSources>,
     image_includes: OnceCell<Option<ferroui_designer_project::RustIncludeSyntax>>,
+    preserve_asset_expressions: bool,
 }
 
 impl State<'_> {

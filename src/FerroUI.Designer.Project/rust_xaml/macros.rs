@@ -64,29 +64,6 @@ impl MacroSyntax {
         *self.local_names.entry(identifier.to_string()).or_default() += 1;
     }
 
-    pub(super) fn include_path(
-        &self,
-        expression: &Macro,
-    ) -> Option<(LitStr, RustPathAnchor, &'static str)> {
-        self.include_operand(expression, "include_str")
-            .or_else(|| self.include_operand(expression, "include_bytes"))
-    }
-
-    pub(super) fn include_operand(
-        &self,
-        expression: &Macro,
-        name: &str,
-    ) -> Option<(LitStr, RustPathAnchor, &'static str)> {
-        let args = self.arguments(expression, name)?;
-        if args.len() != 1 {
-            return None;
-        }
-        match args.into_iter().next()? {
-            Expr::Macro(nested) => self.manifest_path(&nested.mac),
-            value => Some((take_literal(value)?, RustPathAnchor::SourceFile, "")),
-        }
-    }
-
     pub(super) fn file_input(&self, expression: &Macro) -> Option<LitStr> {
         let mut segments = expression.path.segments.iter();
         let first = &segments.next()?.ident;
