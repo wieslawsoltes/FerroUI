@@ -114,7 +114,7 @@ fn SearchPage(browser: Browser) -> Element {
     let results = use_future(term.clone(), move |term: &String| search_crates(service.clone(), term.clone()));
 
     rsx! {
-        Grid { row_definitions: "Auto,*", column_definitions: "Auto,*",
+        Grid { row_definitions: [auto(), star(1.0)], column_definitions: [auto(), star(1.0)],
             TextBlock { text: "Search for: ", font_size: 16.0, font_weight: FontWeight::SemiBold,
                 vertical_alignment: VerticalAlignment::Center }
             TextBox { name: "Search", Grid.column: 1, margin: (6.0, 0.0, 0.0, 0.0),
@@ -181,7 +181,7 @@ fn result_item(krate: CrateSearchMetadata, browser: Browser, router: Router) -> 
                 browser.remember(krate.clone());
                 router.navigate(&details_path(&krate.name));
             },
-            Grid { column_definitions: "Auto,*",
+            Grid { column_definitions: [auto(), star(1.0)],
                 {badge(&name, 48.0)}
                 StackPanel { Grid.column: 1, margin: 6.0, vertical_alignment: VerticalAlignment::Center,
                     TextBlock { text: title, font_size: 14.0, font_weight: FontWeight::SemiBold }
@@ -252,7 +252,7 @@ fn crate_details(krate: CrateSearchMetadata, router: Router) -> Element {
                     }
                 },
                 "Back" }
-            Grid { column_definitions: "Auto,*",
+            Grid { column_definitions: [auto(), star(1.0)],
                 {badge(&krate.name, 64.0)}
                 StackPanel { Grid.column: 1, margin: 6.0, vertical_alignment: VerticalAlignment::Center,
                     TextBlock { name: "CrateName", text: krate.name.clone(), font_size: 24.0, font_weight: FontWeight::SemiBold }

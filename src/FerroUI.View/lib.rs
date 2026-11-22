@@ -114,7 +114,8 @@ pub use template::template;
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
 pub use xaml::{load_xaml, load_xaml_uri, use_xaml};
-pub use extras::{GridDefinitions, GridDefinitionsText};
+pub use extras::{auto, px, star, GridDefinitionSizes, GridDefinitions, GridDefinitionsText, GridLengths, IntoGridLengths};
+pub use ferroui_controls::GridLength;
 pub use async_data::{sleep, suspense, use_future, AsyncState};
 pub use error_boundary::{error_boundary, ErrorInfo};
 pub use router::{route, router, try_use_router, use_router, RouteDef, RouteMatch, Router};
@@ -153,6 +154,7 @@ pub mod prelude {
         any, any_of, is_type, nesting, of, style_of, AnySelector, IntoSelector, PseudoClassSelectors, Selector, Selectors,
         TypedSelector,
     };
+    pub use crate::{auto, px, star, GridDefinitionSizes, GridLength, GridLengths, IntoGridLengths};
     pub use crate::{
         error_boundary, route, router, sleep, suspense, try_use_router, use_future, use_router, AsyncState, ErrorInfo, RouteDef,
         RouteMatch, Router,

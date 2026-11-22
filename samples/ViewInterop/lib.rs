@@ -106,7 +106,7 @@ pub fn Directory(#[prop(default = 10_000)] count: u32) -> Element {
     });
 
     rsx! {
-        Grid { column_definitions: "280,*", row_definitions: "Auto,*", margin: 16.0,
+        Grid { column_definitions: [px(280.0), star(1.0)], row_definitions: [auto(), star(1.0)], margin: 16.0,
             TextBlock { Grid.column_span: 2, margin: (0.0, 0.0, 0.0, 8.0), vertical_alignment: VerticalAlignment::Center,
                 text: format!("{} people; the list realizes only the visible ones", all.len()) }
             ListBox { name: "People", Grid.row: 1, items_source: source, item_template: item_template,

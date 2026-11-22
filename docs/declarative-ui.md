@@ -125,15 +125,20 @@ The element also has its own methods:
 | `on_changed(property, handler)` | The new value of a property whenever it changes |
 | `with(|control| ..)` | The control once it was made (a call the class has no property for) |
 | `node_ref(r)` | Keeps the control in a `NodeRef` |
-| `row_definitions("Auto,*")`, `column_definitions(..)` | The rows and columns of a grid, as XAML writes them |
+| `row_definitions([auto(), star(1.0)])`, `column_definitions(..)` | The rows and columns of a grid: typed lengths (`auto()`, `star(2.0)`, `px(40.0)`), or the text XAML takes (`"Auto,*"`) |
 
-The rows and columns are values of the grid in their text form (`GridDefinitionsText::rows_property()`,
-`columns_property()`): a component that runs again with another text, or a text that follows state
-(`.set(GridDefinitionsText::columns_property(), move || format!("{filled}*,{rest}*"))`), gives the grid
-the new sizes. Where the grid has as many definitions as the text names, each of the same kind (pixels,
-`Auto`, stars), the definitions it has take the new sizes and stay in the grid; otherwise the grid gets
-a new collection. A collection given to the grid directly (`Grid::set_column_definitions`) is always
-the one the grid then has.
+The rows and columns are values of the grid (`GridDefinitionSizes::rows_property()`,
+`columns_property()`): a component that runs again with other lengths, or lengths that follow state
+(`.set(GridDefinitionSizes::columns_property(), move || [star(filled.get()), star(rest.get())])`), give
+the grid the new sizes, with no text formatted or parsed. Where the grid has as many definitions as there
+are lengths, each of the same kind (pixels, `Auto`, stars), the definitions it has take the new sizes and
+stay in the grid; otherwise the grid gets a new collection. A collection given to the grid directly
+(`Grid::set_column_definitions`) is always the one the grid then has.
+
+The text form stays for definitions that come from data or are copied from XAML:
+`row_definitions("Auto,*")` parses the text into the same lengths, and text that follows state goes
+through `GridDefinitionsText` (`.set(GridDefinitionsText::columns_property(), move || format!(..))`).
+A text that does not parse panics when it is set; a typed form cannot be wrong.
 
 ### 4.1 What a setter takes
 
@@ -169,7 +174,7 @@ Upstream writes properties and bindings in code with indexers and operators on p
 
 ```rust
 rsx! {
-    Grid { row_definitions: "Auto,*", column_definitions: "*,Auto",
+    Grid { row_definitions: [auto(), star(1.0)], column_definitions: [star(1.0), auto()],
         TextBox { Grid.row: 0, text: draft.two_way() }
         Button { Grid.column: 1, class: "accent", on_click: add, "Add" }
         ListBox { Grid.row: 1, { for_each(move || todos.get(), |t| t.id, |t| rsx! { ListBoxItem { content: t.title } }) } }

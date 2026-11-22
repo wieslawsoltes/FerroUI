@@ -41,7 +41,7 @@ fn reactive_demo(view_model: &Rc<ReactiveDemoViewModel>) -> Element {
     let view_locator: Rc<dyn IViewLocator> = locator;
     grid()
         .margin(16.0)
-        .row_definitions("Auto,*")
+        .row_definitions([auto(), star(1.0)])
         .child(
             stack_panel()
                 .orientation(Orientation::Horizontal)
@@ -54,7 +54,7 @@ fn reactive_demo(view_model: &Rc<ReactiveDemoViewModel>) -> Element {
             grid()
                 .grid_row(1)
                 .margin((0.0, 16.0, 0.0, 0.0))
-                .column_definitions("*,*")
+                .column_definitions([star(1.0), star(1.0)])
                 .child(panel_of(
                     0,
                     "Data template",
@@ -91,7 +91,7 @@ fn panel_of(column: i32, title: &str, content: Element) -> Element {
         .corner_radius(6.0)
         .child(
             grid()
-                .row_definitions("Auto,*")
+                .row_definitions([auto(), star(1.0)])
                 .child(text_block().text(title).font_weight(FontWeight::SemiBold))
                 .child(content_control().grid_row(1).margin((0.0, 12.0, 0.0, 0.0)).content(Some(ferroui_controls::Control::boxed(&content.mount())))),
         )

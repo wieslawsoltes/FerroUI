@@ -21,8 +21,8 @@ const CELL_WIDTH: f64 = 80.0;
 
 /// The spreadsheet of a sheet: what the tests drive.
 pub fn cells_of(sheet: Sheet) -> Element {
-    let columns = format!("40,{}", vec![CELL_WIDTH.to_string(); COLUMNS].join(","));
-    let rows = format!("Auto,{}", vec!["24"; ROWS].join(","));
+    let columns: Vec<_> = std::iter::once(px(40.0)).chain((0..COLUMNS).map(|_| px(CELL_WIDTH))).collect();
+    let rows: Vec<_> = std::iter::once(auto()).chain((0..ROWS).map(|_| px(24.0))).collect();
     let mut grid = grid().row_definitions(&rows).column_definitions(&columns);
     for column in 0..COLUMNS {
         grid = grid.child(header(CellRef::column_name(column), 0, column as i32 + 1));

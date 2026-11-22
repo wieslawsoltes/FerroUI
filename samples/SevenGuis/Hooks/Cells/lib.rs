@@ -17,8 +17,8 @@ const CELL_WIDTH: f64 = 80.0;
 /// each cell runs again on its own.
 #[component(rerender)]
 pub fn Cells(#[prop(default = Sheet::with_example())] sheet: Sheet) -> Element {
-    let columns = format!("40,{}", vec![CELL_WIDTH.to_string(); COLUMNS].join(","));
-    let rows = format!("Auto,{}", vec!["24"; ROWS].join(","));
+    let columns: Vec<_> = std::iter::once(px(40.0)).chain((0..COLUMNS).map(|_| px(CELL_WIDTH))).collect();
+    let rows: Vec<_> = std::iter::once(auto()).chain((0..ROWS).map(|_| px(24.0))).collect();
     rsx! {
         ScrollViewer { horizontal_scroll_bar_visibility: ScrollBarVisibility::Auto,
             Grid { row_definitions: &rows, column_definitions: &columns,

@@ -113,7 +113,7 @@ fn TodoItem(todo: Todo, todos: Signal<Todos>) -> Element {
     let completed = todo.completed;
 
     rsx! {
-        Grid { name: format!("Todo-{id}"), column_definitions: "Auto,*,Auto", min_height: 40.0,
+        Grid { name: format!("Todo-{id}"), column_definitions: [auto(), star(1.0), auto()], min_height: 40.0,
             // The check box of WinUI 3 is at least 120 wide; the title starts next to it here.
             CheckBox { name: format!("Done-{id}"), is_checked: completed, vertical_alignment: VerticalAlignment::Center,
                 min_width: 0.0, margin: (0.0, 0.0, 8.0, 0.0),
@@ -163,7 +163,7 @@ fn Footer(todos: Signal<Todos>, filter: Filter) -> Element {
     let (left, completed) = todos.with(|list| (list.active_count(), list.completed_count()));
 
     rsx! {
-        Grid { name: "Footer", column_definitions: "*,Auto,*", margin: (0.0, 8.0, 0.0, 0.0),
+        Grid { name: "Footer", column_definitions: [star(1.0), auto(), star(1.0)], margin: (0.0, 8.0, 0.0, 0.0),
             TextBlock { name: "ItemsLeft", text: items_left(left), vertical_alignment: VerticalAlignment::Center }
             StackPanel { Grid.column: 1, orientation: Orientation::Horizontal, spacing: 4.0,
                 {filter_link(Filter::All, filter, router)}

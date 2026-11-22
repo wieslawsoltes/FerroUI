@@ -117,7 +117,7 @@ fn Page(dark: Signal<bool>) -> Element {
                 Border { name: "Bar", height: 12.0, corner_radius: 6.0, background: "#0063B1",
                     horizontal_alignment: ferroui_base::layout::HorizontalAlignment::Left,
                     width: if wide.get() { 480.0 } else { 120.0 }, transitions: bar_transitions }
-                Grid { column_definitions: "Auto,*", height: 330.0,
+                Grid { column_definitions: [auto(), star(1.0)], height: 330.0,
                     ColorView { width: 300.0, vertical_alignment: VerticalAlignment::Top }
                     TreeDataGrid { Grid.column: 1, margin: (16.0, 0.0, 0.0, 0.0), source: source }
                 }
