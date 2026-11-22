@@ -157,6 +157,12 @@ mod tests {
     }
 
     #[test]
+    fn a_long_line_of_brackets_keeps_its_text_and_bounded_indentation() {
+        let line = "(".repeat(200_000);
+        assert!(format(&line).ends_with(&line));
+    }
+
+    #[test]
     fn raw_string_content_and_the_closing_column_survive_reindentation() {
         let input = concat!(
             "class C\r\n{\r\n",

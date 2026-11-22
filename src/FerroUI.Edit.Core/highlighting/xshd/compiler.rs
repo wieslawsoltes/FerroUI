@@ -83,7 +83,14 @@ struct Compiler<'a> {
     status: Vec<u8>,
     resolver: Option<&'a dyn HighlightingDefinitionResolver>,
     external: HashMap<String, ExternalDefinition>,
+    compile_depth: usize,
 }
+
+/// How deep rule sets may import each other: compilation recurses once per level.
+const MAX_RULE_SET_DEPTH: usize = 256;
+/// The rules and spans one rule set may hold after its imports. Two imports of the next set at
+/// each level would otherwise double the set per level.
+const MAX_RULES_PER_SET: usize = 1 << 16;
 
 impl<'a> Compiler<'a> {
     fn new(
@@ -103,6 +110,7 @@ impl<'a> Compiler<'a> {
             status: Vec::new(),
             resolver,
             external: HashMap::new(),
+            compile_depth: 0,
         };
         for definition in 0..result.definitions.len() {
             let syntax = result.definitions[definition];
@@ -266,6 +274,10 @@ impl<'a> Compiler<'a> {
             1 => return Err(set.position.error("RuleSet contains a cyclic Import")),
             _ => {}
         }
+        if self.compile_depth >= MAX_RULE_SET_DEPTH {
+            return Err(set.position.error("RuleSet imports are nested too deeply"));
+        }
+        self.compile_depth += 1;
         self.status[index] = 1;
         let ignore_case = set.ignore_case.unwrap_or(inherited_case);
         let mut output = HighlightingRuleSet {
@@ -353,32 +365,43 @@ impl<'a> Compiler<'a> {
                         // A different definition has its own lexical root context.
                         self.compile_set(target, input.definition == definition && ignore_case)?;
                     }
-                    self.append_import(&mut output, target);
+                    self.append_import(&mut output, target, import.position)?;
                 }
                 XshdElement::RuleSet(child) => {
                     let target = self.index(child);
                     self.compile_set(target, ignore_case)?;
-                    self.append_import(&mut output, target);
+                    self.append_import(&mut output, target, child.position)?;
                 }
                 XshdElement::Color(_) | XshdElement::Property(_) => {}
             }
         }
         self.output[index] = output;
         self.status[index] = 2;
+        self.compile_depth -= 1;
         Ok(())
     }
 
-    fn append_import(&self, output: &mut HighlightingRuleSet, target: usize) {
+    fn append_import(
+        &self,
+        output: &mut HighlightingRuleSet,
+        target: usize,
+        position: XshdPosition,
+    ) -> Result<(), HighlightingError> {
         let mut seen = HashSet::new();
         let mut pending = vec![target];
         while let Some(index) = pending.pop() {
             if seen.insert(index) {
                 let set = &self.output[index];
+                let total = output.rules.len() + output.spans.len() + set.rules.len() + set.spans.len();
+                if total > MAX_RULES_PER_SET {
+                    return Err(position.error("RuleSet imports expand to too many rules"));
+                }
                 output.rules.extend(set.rules.iter().cloned());
                 output.spans.extend(set.spans.iter().cloned());
                 pending.extend(set.imports.iter().rev().copied());
             }
         }
+        Ok(())
     }
 
     fn external_definition(
