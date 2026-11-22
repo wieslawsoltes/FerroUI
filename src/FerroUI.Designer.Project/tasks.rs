@@ -132,7 +132,17 @@ impl BuildTask {
             .stdin(Stdio::null())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
-        let mut child = spawn_project_process(&mut command)?;
+        TaskHandle::spawn(&mut command, self.metadata.clone(), self.config.clone())
+    }
+}
+
+impl TaskHandle {
+    pub(crate) fn spawn(
+        command: &mut Command,
+        metadata: Option<BuildMetadata>,
+        config: CargoBuildConfiguration,
+    ) -> Result<Self> {
+        let mut child = spawn_project_process(command)?;
         let output = Arc::new(Mutex::new(OutputBuffer {
             readers: 2,
             ..Default::default()
@@ -148,7 +158,7 @@ impl BuildTask {
             ),
         ] {
             let output = output.clone();
-            let cargo = self.metadata.is_some() && stream == OutputStream::Stdout;
+            let cargo = metadata.is_some() && stream == OutputStream::Stdout;
             std::thread::spawn(move || {
                 if cargo {
                     cargo_output::read(reader, &output);
@@ -158,13 +168,13 @@ impl BuildTask {
                 }
             });
         }
-        Ok(TaskHandle {
+        Ok(Self {
             child,
             output,
             status: TaskStatus::Running,
             exit_code: None,
-            metadata: self.metadata.clone(),
-            config: self.config.clone(),
+            metadata,
+            config,
         })
     }
 }

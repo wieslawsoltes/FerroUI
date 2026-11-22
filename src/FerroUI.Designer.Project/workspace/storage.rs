@@ -7,7 +7,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_TEMP: AtomicU64 = AtomicU64::new(1);
 
-pub(super) fn atomic_create(path: &Path, source: &str) -> Result<()> {
+pub(crate) fn atomic_create(path: &Path, source: &str) -> Result<()> {
     atomic_create_with_metadata(path, source).map(|_| ())
 }
 

@@ -1,0 +1,12 @@
+mod view;
+
+use ferroui_view::prelude::*;
+
+fn main() {
+    launch_themed(
+        || ferroui_themes_winui::WinUITheme::new().as_style(),
+        || window().title("__APP_TITLE__").width(640.0).height(420.0)
+            .child(view::TaskCounter()).into(),
+        |_| {},
+    );
+}

@@ -1,0 +1,25 @@
+use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+use ferroui_view::prelude::*;
+
+#[component]
+pub fn TaskCounter() -> Element {
+    let completed = signal(0);
+    rsx! {
+        Border { background: "#EDF3F8", padding: 32.0,
+            Border { background: "#FFFFFF", border_brush: "#D5E1EA",
+                border_thickness: 1.0, corner_radius: 16.0, padding: 28.0,
+                max_width: 440.0, horizontal_alignment: HorizontalAlignment::Stretch,
+                vertical_alignment: VerticalAlignment::Center,
+                StackPanel { spacing: 14.0,
+                    TextBlock { text: "__APP_TITLE__", font_size: 28.0, foreground: "#142C40" }
+                    TextBlock { text: "Keep track of your completed tasks.", foreground: "#37546D" }
+                    TextBlock { name: "TaskCount", foreground: "#087A6A", font_size: 20.0,
+                        text: move || format!("{} tasks completed", completed.get()) }
+                    Button { name: "CompleteTask", on_click: move |_| completed.update(|count| *count += 1),
+                        "Complete a task"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,12 @@
+use ferroui_build::{Build, TypeSystem, XamlGroup};
+
+fn main() {
+    println!("cargo:rerun-if-changed=Views/MainView.xaml");
+    Build::from_env()
+        .type_system(TypeSystem::Model)
+        .compile_group(XamlGroup::new("main_view").documents(&[
+            ("Views/MainView.xaml", include_str!("Views/MainView.xaml")),
+        ]))
+        .export_metadata()
+        .run();
+}

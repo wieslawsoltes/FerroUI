@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Border Background="#EDF3F8" Padding="32">
+    <Border Background="#FFFFFF" BorderBrush="#D5E1EA" BorderThickness="1"
+            CornerRadius="16" Padding="28" MaxWidth="440" VerticalAlignment="Center">
+      <StackPanel Spacing="14">
+        <TextBlock Text="__APP_TITLE__" FontSize="28" Foreground="#142C40" />
+        <TextBlock Text="Name a task to see the binding update." Foreground="#37546D" />
+        <TextBox x:Name="TaskName" Watermark="Task name" Text="Review the project" />
+        <TextBlock x:Name="TaskPreview" Text="{Binding #TaskName.Text}" FontSize="20" Foreground="#087A6A" />
+      </StackPanel>
+    </Border>
+  </Border>
+</UserControl>

@@ -11,6 +11,8 @@ mod tasks;
 mod toolbox;
 mod uri;
 mod workspace;
+pub mod project_templates;
+pub mod toolchain;
 
 pub use discovery::{CargoTarget, DocumentEntry, DocumentKind, ProjectDescriptor, Solution, workspace_documents};
 pub use dictionary_file::{DictionaryDestination, dictionary_destination, suggested_dictionary_name};
