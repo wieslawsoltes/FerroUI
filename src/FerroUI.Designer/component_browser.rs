@@ -127,7 +127,8 @@ impl ComponentLibrary {
         filter.set_selected_index(0);
         let scopes = ScopeFilter::new(&filter);
         Grid::set_row(scopes.control(), 1);
-        root.children().add(scopes.control().clone().upcast::<Control>());
+        root.children()
+            .add(scopes.control().clone().upcast::<Control>());
         let list = ListBox::new();
         list.set_name(Some("ComponentLibraryList".into()));
         list.classes().add("designer-library-list");
@@ -225,7 +226,9 @@ impl ComponentLibrary {
                     return;
                 };
                 if event.key == Key::Enter {
-                    if let Some(item) = this.list.selected_item()
+                    if let Some(item) = this
+                        .list
+                        .selected_item()
                         .and_then(|item| item.downcast_ref::<ComponentLibraryItem>().cloned())
                     {
                         let callback = this.activate.borrow().clone();
@@ -355,21 +358,25 @@ impl ComponentLibrary {
             .unwrap_or_default();
         let scope = self.scopes.selected_owner();
         self.scopes.show_owner_path(scope);
-        let items = self
-            .items
-            .borrow()
-            .iter()
-            .filter(|item| {
-                (filter == ComponentLibraryFilter::All || item.filter == filter)
-                    && self.scopes.contains(&item.id, scope)
-                    && terms.iter().all(|term| {
-                        format!("{} {} {}", item.title, item.kind, item.detail)
-                            .to_lowercase()
-                            .contains(term)
-                    })
-            })
-            .cloned()
-            .collect::<Vec<_>>();
+        let (items, total) = {
+            let catalog = self.items.borrow();
+            let scoped = catalog
+                .iter()
+                .filter(|item| self.scopes.contains(&item.id, scope));
+            let total = scoped.clone().count();
+            let items = scoped
+                .filter(|item| {
+                    (filter == ComponentLibraryFilter::All || item.filter == filter)
+                        && terms.iter().all(|term| {
+                            format!("{} {} {}", item.title, item.kind, item.detail)
+                                .to_lowercase()
+                                .contains(term)
+                        })
+                })
+                .cloned()
+                .collect::<Vec<_>>();
+            (items, total)
+        };
         let selected = self.selected.borrow().clone();
         self.guard.set(true);
         self.list.items().clear();
@@ -384,11 +391,14 @@ impl ComponentLibrary {
         );
         self.guard.set(false);
         self.empty.set_is_visible(items.is_empty());
-        self.count.set_text(Some(&format!(
-            "{} of {} definitions",
-            items.len(),
-            self.items.borrow().len()
-        )));
+        let kind = if scope.is_some() {
+            "object"
+        } else {
+            "definition"
+        };
+        let plural = if total == 1 { "" } else { "s" };
+        self.count
+            .set_text(Some(&format!("{} of {total} {kind}{plural}", items.len())));
         *self.visible.borrow_mut() = items;
     }
     fn item_control(self: &Rc<Self>, item: &ComponentLibraryItem) -> Ref<Control> {
