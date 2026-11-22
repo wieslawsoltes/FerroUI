@@ -103,6 +103,8 @@ fn transform_curve_keeps_the_default_base_while_scrubbed() {
     let _window = attach_preview(&session);
     let program = session.animation_programs()[0].id;
     let target = session.document().ast().root();
+    let visual = session.preview.visual(target).unwrap();
+    let base_transform = visual.render_transform().map(|transform| transform.value());
     let window = CurveWindow {
         start: 0.0,
         end: 2.0,
@@ -113,6 +115,10 @@ fn transform_curve_keeps_the_default_base_while_scrubbed() {
         .unwrap();
     assert!(curve.contains(&CurvePoint::new(0.5, 40.0)));
     session.scrub_animation_program(program, 0.5).unwrap();
+    assert_ne!(
+        visual.render_transform().map(|transform| transform.value()),
+        base_transform
+    );
     assert_eq!(
         session
             .animation_curve(program, target, property, window)
@@ -127,13 +133,9 @@ fn transform_curve_keeps_the_default_base_while_scrubbed() {
         "40"
     );
     session.stop();
-    assert!(
-        session
-            .preview
-            .visual(target)
-            .unwrap()
-            .render_transform()
-            .is_none()
+    assert_eq!(
+        visual.render_transform().map(|transform| transform.value()),
+        base_transform
     );
     assert_eq!(session.document().source(), source);
 }
