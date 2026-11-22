@@ -43,7 +43,7 @@ impl DesignerWorkspace {
                     .set_text(Some("The preview changed. Reopen Checks."));
                 return;
             }
-            let result = workspace.activate_document(&uri).and_then(|_| {
+            let result = workspace.activate_document(&uri).map(|_| {
                 if let Some(node) = node {
                     workspace.session.borrow_mut().select([node]);
                     workspace.runtime_selection.set(None);
@@ -53,7 +53,6 @@ impl DesignerWorkspace {
                 }
                 workspace.refresh(true);
                 workspace.select_source_span(span);
-                Ok(())
             });
             workspace.report(result);
         });
