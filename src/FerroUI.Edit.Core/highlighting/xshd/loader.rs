@@ -1,13 +1,22 @@
+use std::cell::Cell;
 use super::model::*;
 use super::writer::XSHD_NAMESPACE;
 use crate::highlighting::highlighting_definition::parse_font_weight;
 use crate::highlighting::{HighlightingError, HighlightingFontStyle};
 use roxmltree::Node;
 
+const MAX_XSHD_DEPTH: usize = 256;
+
 /// Loads an editable syntax tree. References and import cycles are resolved
 /// during compilation, so incomplete programmatic definitions remain editable.
 /// Namespace-free v2 files and the historical RuleSets format are accepted.
 pub fn load_xshd(xml: &str) -> Result<XshdSyntaxDefinition, HighlightingError> {
+    // The XML parser and the reader below both recurse once per element.
+    if !ferroui_system::xml_nesting_is_within(xml, MAX_XSHD_DEPTH) {
+        return Err(HighlightingError::Xml(format!(
+            "XSHD nesting exceeds {MAX_XSHD_DEPTH} levels or declares an internal subset"
+        )));
+    }
     let document = roxmltree::Document::parse(xml)
         .map_err(|error| HighlightingError::Xml(error.to_string()))?;
     let root = document.root_element();
@@ -39,6 +48,9 @@ pub fn load_xshd(xml: &str) -> Result<XshdSyntaxDefinition, HighlightingError> {
 pub(super) struct Parser<'input> {
     input: &'input str,
     line_starts: Vec<usize>,
+    // The last position: line start, byte offset and UTF-16 column. Elements are read in document
+    // order, so a definition written on one line does not recount the line per element.
+    last_column: Cell<(usize, usize, usize)>,
     namespace: Option<&'input str>,
 }
 
@@ -54,6 +66,7 @@ impl<'input> Parser<'input> {
         Self {
             input,
             line_starts,
+            last_column: Cell::new((0, 0, 0)),
             namespace,
         }
     }
@@ -62,7 +75,14 @@ impl<'input> Parser<'input> {
         let offset = node.range().start;
         let line = self.line_starts.partition_point(|start| *start <= offset);
         let start = self.line_starts[line.saturating_sub(1)];
-        XshdPosition::new(line, self.input[start..offset].encode_utf16().count() + 1)
+        let (last_start, last_offset, last_units) = self.last_column.get();
+        let units = if last_start == start && last_offset <= offset {
+            last_units + self.input[last_offset..offset].encode_utf16().count()
+        } else {
+            self.input[start..offset].encode_utf16().count()
+        };
+        self.last_column.set((start, offset, units));
+        XshdPosition::new(line, units + 1)
     }
 
     pub(super) fn error(

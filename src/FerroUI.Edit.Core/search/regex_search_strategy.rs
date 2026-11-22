@@ -181,6 +181,7 @@ impl RegexSearchStrategy {
         let regex = native.unwrap_or(&self.regex);
         let mut candidates = None;
         let mut remaining = RegexInput::new(text);
+        let mut scan_from = 0;
         loop {
             let captures = if let Some(candidates) = &mut candidates {
                 captures_at_candidates(regex, &remaining, candidates)
@@ -204,27 +205,29 @@ impl RegexSearchStrategy {
                 break;
             };
             let matched = captures.get(0).expect("capture zero always exists");
-            let empty = matched.start() == matched.end();
-            let advance = if empty {
-                text[matched.end()..]
-                    .chars()
-                    .next()
-                    .map_or(1, char::len_utf8)
+            // `\K` in a lookaround can report a start after the end, or a match that ends at
+            // the position the scan started from.
+            let (match_start, match_end) = (matched.start().min(matched.end()), matched.end());
+            let stalled = match_start == match_end || match_end <= scan_from;
+            let resume = match_end.max(scan_from);
+            let advance = if stalled {
+                text[resume..].chars().next().map_or(1, char::len_utf8)
             } else {
                 0
             };
-            // A zero-length hit advances the next scan past that position.
+            // A hit that made no progress advances the next scan past that position.
             // The skipped position is still the last match end for \G.
+            scan_from = resume + advance;
             remaining = RegexInput::new(text)
-                .from_pos(matched.end() + advance)
-                .continue_from_previous_match_end(!empty);
-            let start = offset_at(matched.start());
-            let finish = offset_at(matched.end());
+                .from_pos(scan_from)
+                .continue_from_previous_match_end(!stalled);
+            let start = offset_at(match_start);
+            let finish = offset_at(match_end);
             if start < offset || finish > end {
                 continue;
             }
             if self.options.match_whole_words
-                && (!word_border(text, matched.start()) || !word_border(text, matched.end()))
+                && (!word_border(text, match_start) || !word_border(text, match_end))
             {
                 continue;
             }
@@ -236,7 +239,9 @@ impl RegexSearchStrategy {
                     .layout
                     .slots
                     .iter()
-                    .map(|&(_, backend)| captures.get(backend).map(|found| found.range()))
+                    .map(|&(_, backend)| {
+                        captures.get(backend).map(|found| found.start().min(found.end())..found.end())
+                    })
                     .collect(),
                 layout: self.layout.clone(),
             };
@@ -413,6 +418,21 @@ fn character_class(ch: char) -> u8 {
 mod tests {
     use super::*;
     use crate::search::{SearchMode, SearchStrategyFactory};
+
+    #[test]
+    fn a_keep_in_a_lookaround_cannot_stall_or_invert_a_match() {
+        for pattern in [r"(?<=\Ka)", r"(?=a\K)"] {
+            let strategy =
+                SearchStrategyFactory::create(pattern, false, false, SearchMode::RegEx).unwrap();
+            let hits = strategy.find_all("aaa", 0, 3).unwrap();
+            assert!(!hits.is_empty() && hits.len() <= 4, "{pattern}: {}", hits.len());
+            for hit in &hits {
+                hit.try_replace_with("[$&]").unwrap();
+            }
+            let search: &dyn ISearchStrategy = &strategy;
+            assert!(search.find_next("aaa", 1, 2).unwrap().is_some(), "{pattern}");
+        }
+    }
 
     #[test]
     fn find_next_stops_before_an_expensive_suffix() {
