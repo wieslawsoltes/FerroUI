@@ -1,23 +1,31 @@
 //! Typed property paths for bindings to view models.
 //!
-//! Signals are the default for state a component owns. A view model that already raises
-//! `INotifyPropertyChanged` is bound through a [`ModelProperty`]: a constant that names the
-//! property in change notifications and holds its typed accessors.
+//! Signals are the default for state a component owns. A view model is declared with
+//! `#[derive(ViewModel)]`, and one declaration gives the accessors, the name its changes are raised
+//! with, and the typed property a binding takes, so they cannot disagree:
 //!
 //! ```ignore
-//! const NAME: ModelProperty<Person, String> = ModelProperty::new("Name", Person::name, Person::set_name);
-//! const GREETING: ReadOnlyModelProperty<Person, String> = ReadOnlyModelProperty::new("Greeting", Person::greeting);
+//! #[derive(ViewModel)]
+//! #[computed(greeting: String, depends_on(name))]
+//! struct Person {
+//!     #[property] name: RefCell<String>,
+//!     property_changed: Event<str>,
+//! }
 //!
 //! stack_panel()
 //!     .data_context(person as BoxedValue)
-//!     .child(text_box().text(NAME.two_way()))
-//!     .child(text_block().text(GREETING.one_way()))
+//!     .child(text_box().text(Person::NAME.two_way()))
+//!     .child(text_block().text(Person::GREETING.one_way()))
 //! ```
 //!
-//! An accessor that does not exist, a value type that does not fit the property, or a two-way
-//! binding of a read-only property does not compile. The result is the existing compiled binding
-//! with one typed path element: no reflection and no path text. The name is the text the model
-//! raises its change with, and it is the one part the compiler cannot check.
+//! A property that does not exist, a value type that does not fit, or a two-way binding of a
+//! read-only property does not compile. The result is the existing compiled binding with one
+//! typed path element: no reflection and no path text.
+//!
+//! A model that already implements `INotifyPropertyChanged` with setters of its own raises names
+//! the compiler cannot see. It is bound with [`ModelProperty::with_raised_name`], whose name is
+//! **not checked**: a name that differs from what the model raises compiles, shows the first
+//! value, and then does not update.
 
 use crate::builder::{markers, IntoProp};
 use crate::element::PropValue;
@@ -57,8 +65,19 @@ impl<S: 'static, V: 'static> Clone for ReadOnlyModelProperty<S, V> {
 impl<S: 'static, V: 'static> Copy for ReadOnlyModelProperty<S, V> {}
 
 impl<S: 'static, V: 'static> ModelProperty<S, V> {
-    /// The property `name` (the text its changes are raised with) with its accessors.
-    pub const fn new(name: &'static str, get: fn(&S) -> V, set: fn(&S, V)) -> Self {
+    /// A property of a model with setters of its own, which raises its changes with the text
+    /// `raised_name`.
+    ///
+    /// **The name is not checked.** The accessors are, but a name that differs from what the
+    /// model raises compiles, shows the first value, and then does not update. A model declared
+    /// with `#[derive(ViewModel)]` has its properties as constants instead (`Person::NAME`).
+    pub const fn with_raised_name(raised_name: &'static str, get: fn(&S) -> V, set: fn(&S, V)) -> Self {
+        Self { name: raised_name, get, set }
+    }
+
+    /// A property that `#[derive(ViewModel)]` declared, with the name its setter raises.
+    #[doc(hidden)]
+    pub const fn __declared(name: &'static str, get: fn(&S) -> V, set: fn(&S, V)) -> Self {
         Self { name, get, set }
     }
 
@@ -69,8 +88,19 @@ impl<S: 'static, V: 'static> ModelProperty<S, V> {
 }
 
 impl<S: 'static, V: 'static> ReadOnlyModelProperty<S, V> {
-    /// The property `name` (the text its changes are raised with) with its getter.
-    pub const fn new(name: &'static str, get: fn(&S) -> V) -> Self {
+    /// A read-only property of a model with setters of its own, which raises its changes with the
+    /// text `raised_name`.
+    ///
+    /// **The name is not checked.** The getter is, but a name that differs from what the model
+    /// raises compiles, shows the first value, and then does not update. A model declared with
+    /// `#[derive(ViewModel)]` has its properties as constants instead (`Person::GREETING`).
+    pub const fn with_raised_name(raised_name: &'static str, get: fn(&S) -> V) -> Self {
+        Self { name: raised_name, get }
+    }
+
+    /// A property that `#[derive(ViewModel)]` declared, with the name its model raises.
+    #[doc(hidden)]
+    pub const fn __declared(name: &'static str, get: fn(&S) -> V) -> Self {
         Self { name, get }
     }
 
@@ -128,40 +158,95 @@ impl<S: INotifyPropertyChanged + PartialEq + 'static, V: PropertyValue> ReadOnly
 /// `Option<V>` takes. It reads the `DataContext` of the control.
 ///
 /// ```
-/// use ferroui_base::data::model::{Event, INotifyPropertyChanged};
+/// use ferroui_base::data::model::Event;
 /// use ferroui_view::prelude::*;
-/// #[derive(PartialEq)]
-/// struct Person;
-/// impl INotifyPropertyChanged for Person {
-///     fn property_changed(&self) -> &Event<str> { unimplemented!() }
+/// use std::cell::RefCell;
+///
+/// #[derive(ViewModel)]
+/// struct Person {
+///     #[property]
+///     name: RefCell<String>,
+///     property_changed: Event<str>,
 /// }
-/// impl Person { fn name(&self) -> String { String::new() } }
-/// const NAME: ReadOnlyModelProperty<Person, String> = ReadOnlyModelProperty::new("Name", Person::name);
-/// let _ = text_block().text(NAME.one_way());
+///
+/// assert_eq!(Person::NAME.name(), "name");
+/// let _ = text_block().text(Person::NAME.one_way());
 /// ```
 ///
-/// A property that does not exist does not compile:
+/// A property that does not exist does not compile, so the name cannot be misspelled:
 ///
 /// ```compile_fail
+/// use ferroui_base::data::model::Event;
 /// use ferroui_view::prelude::*;
-/// struct Person;
-/// impl Person { fn name(&self) -> String { String::new() } }
-/// const NAME: ReadOnlyModelProperty<Person, String> = ReadOnlyModelProperty::new("Name", Person::nmae);
+/// use std::cell::RefCell;
+///
+/// #[derive(ViewModel)]
+/// struct Person {
+///     #[property]
+///     name: RefCell<String>,
+///     property_changed: Event<str>,
+/// }
+///
+/// let _ = text_block().text(Person::NMAE.one_way());
 /// ```
 ///
-/// Nor does a value of another type, or a two-way binding of a read-only property:
+/// Nor does a computed property that depends on a property the model does not have:
 ///
 /// ```compile_fail
-/// use ferroui_base::data::model::{Event, INotifyPropertyChanged};
+/// use ferroui_base::data::model::Event;
 /// use ferroui_view::prelude::*;
-/// #[derive(PartialEq)]
-/// struct Person;
-/// impl INotifyPropertyChanged for Person {
-///     fn property_changed(&self) -> &Event<str> { unimplemented!() }
+/// use std::cell::RefCell;
+///
+/// #[derive(ViewModel)]
+/// #[computed(greeting: String, depends_on(nmae))]
+/// struct Person {
+///     #[property]
+///     name: RefCell<String>,
+///     property_changed: Event<str>,
 /// }
-/// impl Person { fn age(&self) -> i32 { 1 } }
-/// const AGE: ReadOnlyModelProperty<Person, i32> = ReadOnlyModelProperty::new("Age", Person::age);
-/// let _ = text_block().text(AGE.two_way());
+///
+/// impl Person {
+///     fn greeting(&self) -> String { String::new() }
+/// }
+/// ```
+///
+/// Nor a value of another type:
+///
+/// ```compile_fail
+/// use ferroui_base::data::model::Event;
+/// use ferroui_view::prelude::*;
+/// use std::cell::Cell;
+///
+/// #[derive(ViewModel)]
+/// struct Person {
+///     #[property]
+///     age: Cell<i32>,
+///     property_changed: Event<str>,
+/// }
+///
+/// let _ = text_block().text(Person::AGE.one_way());
+/// ```
+///
+/// Nor a two-way binding of a read-only property:
+///
+/// ```compile_fail
+/// use ferroui_base::data::model::Event;
+/// use ferroui_view::prelude::*;
+/// use std::cell::RefCell;
+///
+/// #[derive(ViewModel)]
+/// #[computed(greeting: String, depends_on(name))]
+/// struct Person {
+///     #[property]
+///     name: RefCell<String>,
+///     property_changed: Event<str>,
+/// }
+///
+/// impl Person {
+///     fn greeting(&self) -> String { String::new() }
+/// }
+///
+/// let _ = text_box().text(Person::GREETING.two_way());
 /// ```
 pub struct ModelBinding<S, V> {
     binding: Rc<CompiledBinding>,

@@ -15,6 +15,7 @@ use syn::spanned::Spanned;
 use syn::{braced, token, Expr, FnArg, Ident, ItemFn, LitStr, Pat, Path, Token, Type};
 
 mod path_data;
+mod view_model;
 
 /// An element tree, expanded to the builders of `ferroui-view`.
 ///
@@ -372,6 +373,35 @@ impl ElementNode {
         }
         tokens
     }
+}
+
+/// The properties of a view model from one declaration: the name a change is raised with, the
+/// accessors and the typed property of a binding cannot disagree.
+///
+/// ```ignore
+/// #[derive(ViewModel)]
+/// #[computed(greeting: String, depends_on(name))]
+/// struct Person {
+///     #[property] name: RefCell<String>,
+///     #[property] age: Cell<f64>,
+///     property_changed: Event<str>,
+/// }
+///
+/// impl Person {
+///     fn greeting(&self) -> String { format!("Hello, {}", self.name()) }
+/// }
+///
+/// text_box().text(Person::NAME.two_way())
+/// ```
+///
+/// A `#[property]` gets a getter (`name()`), a setter that raises the change when the value differs
+/// (`set_name(..)`) and a typed property (`Person::NAME`). A `#[computed]` property has its getter
+/// written by hand and is raised with the properties it depends on. The model compares by identity
+/// and implements `INotifyPropertyChanged`.
+#[proc_macro_derive(ViewModel, attributes(property, computed))]
+pub fn derive_view_model(input: TokenStream) -> TokenStream {
+    let input = syn::parse_macro_input!(input as syn::DeriveInput);
+    view_model::expand(&input).unwrap_or_else(syn::Error::into_compile_error).into()
 }
 
 /// Path data checked when the crate is compiled and written as a static table: a

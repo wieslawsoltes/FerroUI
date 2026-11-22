@@ -2,7 +2,7 @@
 
 use crate::generated::builders::*;
 use crate::reactive::Owner;
-use crate::{IntoElement, ModelProperty, ReadOnlyModelProperty};
+use crate::{IntoElement, ModelProperty, ViewModel};
 use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::layout::ILayoutManager;
 use ferroui_base::media::text_formatting::testing::TextTestScope;
@@ -14,22 +14,14 @@ use ferroui_controls::{Control, Slider, TextBlock, TextBox, Window};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+#[derive(ViewModel)]
+#[computed(greeting: String, depends_on(name))]
 struct Person {
+    #[property]
     name: RefCell<String>,
+    #[property]
     age: Cell<f64>,
     property_changed: Event<str>,
-}
-
-impl PartialEq for Person {
-    fn eq(&self, other: &Self) -> bool {
-        std::ptr::eq(self, other)
-    }
-}
-
-impl INotifyPropertyChanged for Person {
-    fn property_changed(&self) -> &Event<str> {
-        &self.property_changed
-    }
 }
 
 impl Person {
@@ -37,37 +29,42 @@ impl Person {
         Rc::new(Self { name: RefCell::new(name.to_string()), age: Cell::new(30.0), property_changed: Event::default() })
     }
 
-    fn name(&self) -> String {
-        self.name.borrow().clone()
-    }
-
-    fn set_name(&self, value: String) {
-        if *self.name.borrow() != value {
-            *self.name.borrow_mut() = value;
-            self.property_changed.raise("Name");
-            self.property_changed.raise("Greeting");
-        }
-    }
-
     fn greeting(&self) -> String {
         format!("Hello, {}", self.name.borrow())
     }
+}
 
-    fn age(&self) -> f64 {
-        self.age.get()
-    }
+/// A model with setters of its own, which raises its own names.
+struct Existing {
+    title: RefCell<String>,
+    property_changed: Event<str>,
+}
 
-    fn set_age(&self, value: f64) {
-        if self.age.get() != value {
-            self.age.set(value);
-            self.property_changed.raise("Age");
-        }
+impl PartialEq for Existing {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
     }
 }
 
-const NAME: ModelProperty<Person, String> = ModelProperty::new("Name", Person::name, Person::set_name);
-const AGE: ModelProperty<Person, f64> = ModelProperty::new("Age", Person::age, Person::set_age);
-const GREETING: ReadOnlyModelProperty<Person, String> = ReadOnlyModelProperty::new("Greeting", Person::greeting);
+impl INotifyPropertyChanged for Existing {
+    fn property_changed(&self) -> &Event<str> {
+        &self.property_changed
+    }
+}
+
+impl Existing {
+    fn title(&self) -> String {
+        self.title.borrow().clone()
+    }
+
+    fn set_title(&self, value: String) {
+        *self.title.borrow_mut() = value;
+        self.property_changed.raise("Title");
+    }
+}
+
+const TITLE: ModelProperty<Existing, String> =
+    ModelProperty::with_raised_name("Title", Existing::title, Existing::set_title);
 
 struct App {
     _app: UnitTestApplicationScope,
@@ -105,7 +102,7 @@ fn one_way_follows_the_model() {
     let root = owner.with(|| {
         stack_panel()
             .data_context(person.clone() as BoxedValue)
-            .child(text_block().text(GREETING.one_way()))
+            .child(text_block().text(Person::GREETING.one_way()))
             .into_element()
             .mount()
     });
@@ -126,8 +123,8 @@ fn two_way_writes_a_change_of_the_control_to_the_model() {
     let root = owner.with(|| {
         stack_panel()
             .data_context(person.clone() as BoxedValue)
-            .child(text_box().text(NAME.two_way()))
-            .child(slider().maximum(100.0).value(AGE.two_way()))
+            .child(text_box().text(Person::NAME.two_way()))
+            .child(slider().maximum(100.0).value(Person::AGE.two_way()))
             .into_element()
             .mount()
     });
@@ -157,7 +154,7 @@ fn one_time_takes_the_value_once() {
     let root = owner.with(|| {
         stack_panel()
             .data_context(person.clone() as BoxedValue)
-            .child(text_block().text(NAME.one_time()))
+            .child(text_block().text(Person::NAME.one_time()))
             .into_element()
             .mount()
     });
@@ -178,7 +175,7 @@ fn one_way_to_source_writes_only_to_the_model() {
     let root = owner.with(|| {
         stack_panel()
             .data_context(person.clone() as BoxedValue)
-            .child(text_box().text(NAME.one_way_to_source()))
+            .child(text_box().text(Person::NAME.one_way_to_source()))
             .into_element()
             .mount()
     });
@@ -201,13 +198,52 @@ fn rsx_takes_a_typed_binding() {
         let context = person.clone() as BoxedValue;
         let element: crate::Element = crate::rsx! {
             StackPanel { data_context: context,
-                TextBlock { text: GREETING.one_way() }
+                TextBlock { text: Person::GREETING.one_way() }
             }
         };
         element.mount()
     });
     let window = window_with(&root);
     assert_eq!(find::<TextBlock>(&root).text().as_deref(), Some("Hello, Ada"));
+    window.close();
+    owner.dispose();
+}
+
+#[test]
+fn the_declaration_gives_the_name_the_setter_raises() {
+    assert_eq!(Person::NAME.name(), "name");
+    assert_eq!(Person::AGE.name(), "age");
+    assert_eq!(Person::GREETING.name(), "greeting");
+    let person = Person::new("Ada");
+    let raised = Rc::new(RefCell::new(Vec::new()));
+    let seen = raised.clone();
+    let _token = person.property_changed().add(Rc::new(move |name: &str| seen.borrow_mut().push(name.to_string())));
+    person.set_name("Ada".to_string());
+    assert!(raised.borrow().is_empty(), "the same value raises nothing");
+    person.set_name("Grace".to_string());
+    assert_eq!(*raised.borrow(), ["name", "greeting"], "a change raises the property and what depends on it");
+    person.set_age(31.0);
+    assert_eq!(raised.borrow().last().map(String::as_str), Some("age"));
+    assert!(*person == *person.clone() && *person != *Person::new("Grace"), "a model compares by identity");
+}
+
+#[test]
+fn a_model_with_its_own_setters_binds_with_the_name_it_raises() {
+    let _app = app();
+    let model = Rc::new(Existing { title: RefCell::new("first".to_string()), property_changed: Event::default() });
+    let owner = Owner::new_root();
+    let root = owner.with(|| {
+        stack_panel()
+            .data_context(model.clone() as BoxedValue)
+            .child(text_block().text(TITLE.one_way()))
+            .into_element()
+            .mount()
+    });
+    let window = window_with(&root);
+    let text = find::<TextBlock>(&root);
+    assert_eq!(text.text().as_deref(), Some("first"));
+    model.set_title("second".to_string());
+    assert_eq!(text.text().as_deref(), Some("second"));
     window.close();
     owner.dispose();
 }
