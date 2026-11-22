@@ -47,8 +47,23 @@ impl Pipe2Stream {
     }
 
     /// Reads optional clipboard data without waiting indefinitely for its owner.
-    pub(crate) fn read_to_end_bounded(mut self, max_bytes: usize, timeout: Duration) -> io::Result<Vec<u8>> {
-        let deadline = Instant::now() + timeout;
+    pub(crate) fn read_to_end_bounded(self, max_bytes: usize, timeout: Duration) -> io::Result<Vec<u8>> {
+        self.read_with_deadline(max_bytes, timeout, false)
+    }
+
+    /// Reads data of any size from an owner that keeps sending: the timeout is the longest
+    /// pause between two reads, so a large transfer is not cut off and a silent owner is.
+    pub(crate) fn read_to_end_while_sending(self, idle_timeout: Duration) -> io::Result<Vec<u8>> {
+        self.read_with_deadline(usize::MAX, idle_timeout, true)
+    }
+
+    fn read_with_deadline(
+        mut self,
+        max_bytes: usize,
+        timeout: Duration,
+        restart_on_data: bool,
+    ) -> io::Result<Vec<u8>> {
+        let mut deadline = Instant::now() + timeout;
         let mut bytes = Vec::new();
         let mut buffer = [0; 4096];
         loop {
@@ -64,6 +79,9 @@ impl Pipe2Stream {
                 return Err(io::ErrorKind::InvalidData.into());
             }
             bytes.extend_from_slice(&buffer[..count]);
+            if restart_on_data {
+                deadline = Instant::now() + timeout;
+            }
         }
     }
 }
@@ -143,6 +161,29 @@ mod tests {
                 assert_eq!(result.unwrap_err().kind(), io::ErrorKind::InvalidData);
             }
         }
+    }
+
+    #[test]
+    fn a_read_of_a_sending_owner_outlasts_the_timeout_and_ends_when_it_goes_silent() {
+        let timeout = Duration::from_millis(400);
+        let (read, write) = pipe2_cloexec().unwrap();
+        let writer = std::thread::spawn(move || {
+            let mut stream = Pipe2Stream::new(write, PipeDirection::Out);
+            for _ in 0..6 {
+                stream.write_all(&[1; 16]).unwrap();
+                std::thread::sleep(Duration::from_millis(120));
+            }
+        });
+        let bytes = Pipe2Stream::new(read, PipeDirection::In).read_to_end_while_sending(timeout).unwrap();
+        assert_eq!(bytes.len(), 96);
+        writer.join().unwrap();
+
+        let (read, write) = pipe2_cloexec().unwrap();
+        let mut stream = Pipe2Stream::new(write, PipeDirection::Out);
+        stream.write_all(&[1; 16]).unwrap();
+        let result = Pipe2Stream::new(read, PipeDirection::In).read_to_end_while_sending(timeout);
+        assert_eq!(result.unwrap_err().kind(), io::ErrorKind::TimedOut);
+        drop(stream);
     }
 
     #[test]
