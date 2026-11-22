@@ -88,3 +88,52 @@ fn transform_tracks_sample_the_live_components_and_keep_implicit_keys() {
     session.undo().unwrap();
     assert_eq!(session.document().source(), source);
 }
+
+#[test]
+fn transform_curve_keeps_the_default_base_while_scrubbed() {
+    let _application = UnitTestApplication::start(TestServices::styled_window());
+    let source = r#"<Border xmlns="https://github.com/ferroui" Name="Card" Width="180" Height="100">
+      <Border.Styles><Style Selector="Border#Card"><Style.Animations>
+        <Animation Duration="0:0:2">
+          <KeyFrame Cue="50%"><Setter Property="RotateTransform.Angle" Value="80"/></KeyFrame>
+        </Animation>
+      </Style.Animations></Style></Border.Styles>
+    </Border>"#;
+    let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
+    let _window = attach_preview(&session);
+    let program = session.animation_programs()[0].id;
+    let target = session.document().ast().root();
+    let window = CurveWindow {
+        start: 0.0,
+        end: 2.0,
+    };
+    let property = "RotateTransform.Angle";
+    let curve = session
+        .animation_curve(program, target, property, window)
+        .unwrap();
+    assert!(curve.contains(&CurvePoint::new(0.5, 40.0)));
+    session.scrub_animation_program(program, 0.5).unwrap();
+    assert_eq!(
+        session
+            .animation_curve(program, target, property, window)
+            .unwrap(),
+        curve
+    );
+    assert_eq!(
+        session
+            .sample_keyframe(program, target, property, 0.5)
+            .unwrap()
+            .value,
+        "40"
+    );
+    session.stop();
+    assert!(
+        session
+            .preview
+            .visual(target)
+            .unwrap()
+            .render_transform()
+            .is_none()
+    );
+    assert_eq!(session.document().source(), source);
+}

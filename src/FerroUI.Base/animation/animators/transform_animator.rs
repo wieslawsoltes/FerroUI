@@ -1,5 +1,5 @@
 use crate::animation::animators::{apply_with_visual, Animator, AnimatorBase, DoubleAnimator};
-use crate::animation::{Animatable, Animation, AnimationError, IAnimator, IClock};
+use crate::animation::{Animatable, Animation, AnimationError, IClock};
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::transformation::TransformOperations;
 use crate::media::{
@@ -7,8 +7,7 @@ use crate::media::{
     TransformGroup, TranslateTransform,
 };
 use crate::reactive::{Disposable, IDisposable, IObservable};
-use crate::{FerroProperty, Ref, TypeInfo, Visual};
-use std::cell::RefCell;
+use crate::{FerroProperty, Ref, StyledProperty, TypeInfo, Visual};
 use std::rc::Rc;
 
 /// Animator that handles `f64` properties of [`Transform`]s: redirects the
@@ -17,26 +16,11 @@ use std::rc::Rc;
 #[derive(Default)]
 pub struct TransformAnimator {
     base: AnimatorBase,
-    double_animator: RefCell<Option<Rc<DoubleAnimator>>>,
 }
 
 impl TransformAnimator {
     pub fn new() -> Self {
         Self::default()
-    }
-
-    fn double_animator(&self, property: &'static FerroProperty) -> Rc<DoubleAnimator> {
-        self.double_animator
-            .borrow_mut()
-            .get_or_insert_with(|| {
-                let animator = Rc::new(DoubleAnimator::new());
-                for keyframe in self.base.to_vec() {
-                    IAnimator::add(&*animator, keyframe);
-                }
-                animator.base().set_property(Some(property));
-                animator
-            })
-            .clone()
     }
 
     /// Read the underlying component, including defaults from the same
@@ -47,11 +31,7 @@ impl TransformAnimator {
     ) -> Option<f64> {
         let target = preview_component_target(control, property)?;
         let property = property.as_styled::<f64>()?;
-        Some(
-            target
-                .get_base_value(property)
-                .unwrap_or_else(|| target.get_value(property)),
-        )
+        Some(component_base(&target, property))
     }
 }
 
@@ -92,6 +72,18 @@ fn preview_component_target(
     component_target(&*transform, property.owner_type())
 }
 
+fn component_base(target: &Animatable, property: &'static StyledProperty<f64>) -> f64 {
+    target.get_base_value(property).unwrap_or_else(|| {
+        // An animation-only value has no stored base. The transform still
+        // uses the property's default as the neutral value at a missing key.
+        if property.as_property().inherits() {
+            target.get_value(property)
+        } else {
+            property.get_default_value(target.get_type())
+        }
+    })
+}
+
 /// The rejection of a target of the transform animator that is not a `Visual`
 /// (`Animation::try_apply_for_preview` reports it, #567).
 pub(crate) fn not_a_visual_message(control: &Animatable) -> String {
@@ -118,9 +110,7 @@ impl Animator for TransformAnimator {
             return Err(AnimationError(not_a_visual_message(control)));
         };
 
-        let Some(property) = this.base.property() else {
-            return Err(AnimationError(super::animator::NO_PROPERTY.to_owned()));
-        };
+        let property = this.base.try_styled_property::<f64>()?.as_property();
         crate::animation::animation_instance::validate_timing(animation)?;
 
         if !Transform::TYPE.is_assignable_from(property.owner_type()) {
@@ -152,7 +142,7 @@ impl Animator for TransformAnimator {
         animation.retain_preview_transform(ctrl, &transform);
         if let Some(target) = component_target(&*transform, property.owner_type()) {
             return Ok(Some(apply_with_visual(
-                &this.double_animator(property),
+                this,
                 animation,
                 &target,
                 clock.or_else(|| control.clock()),
@@ -163,26 +153,28 @@ impl Animator for TransformAnimator {
             )));
         }
 
+        let message = format!(
+            "{} has no {} render transform for {}.",
+            control.get_type(),
+            property.owner_type(),
+            property.name(),
+        );
+        if animation.is_preview() {
+            return Err(AnimationError(message));
+        }
         if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::ANIMATIONS) {
-            logger.log(
-                None,
-                &format!(
-                    "Cannot find the appropriate transform: \"{}\" in {}.",
-                    property.owner_type(),
-                    control.get_type()
-                ),
-            );
+            logger.log(None, &message);
         }
 
         Ok(None)
     }
 
-    fn interpolate(&self, _progress: f64, _old_value: &f64, _new_value: &f64) -> f64 {
-        0.0
+    fn interpolate(&self, progress: f64, old_value: &f64, new_value: &f64) -> f64 {
+        DoubleAnimator::interpolate_core(progress, old_value, new_value)
     }
 
-    fn specialized_animator(&self) -> Option<Rc<dyn IAnimator>> {
-        Some(self.double_animator(self.base.property()?))
+    fn neutral_value(&self, target: &Animatable) -> f64 {
+        component_base(target, self.base.styled_property())
     }
 
     fn preview_target(&self, control: &Animatable) -> Option<Ref<Animatable>> {

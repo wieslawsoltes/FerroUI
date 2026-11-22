@@ -64,7 +64,9 @@ fn preview() { rsx! {
     const rotation = transformTrack(mapped, angle);
     const mappedAngles = await preview.hostedCurve(identity(mapped), rotation.query);
     assert.deepEqual(mappedAngles.find(point => point.time === .5), { time: .5, value: 40 });
-    const change = await preview.planHostedKeyframe(identity(mapped), { program: rotation.program.id, target: rotation.track.target,
+    const rustPose = await preview.sampleHostedAnimation({ ...identity(mapped), program: rotation.program.id, elapsed: .5, restart: true });
+    assert.deepEqual(await preview.hostedCurve(identity(rustPose.frame), rotation.query), mappedAngles);
+    const change = await preview.planHostedKeyframe(identity(rustPose.frame), { program: rotation.program.id, target: rotation.track.target,
         property: angle, previous: 1, time: 1, value: '72', easing: 'LinearEasing' });
     assert.ok(change.patch);
     assert.equal(applyPatch(rust, change.patch), rust.replace('80.0f64', '72.0f64'));
