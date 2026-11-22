@@ -289,6 +289,8 @@ The Library follows unsaved XAML drafts and updates when files change on disk. R
 
 For a Rust design, **By Scope** uses the selected RSX invocation. It groups authored styles and their resources by control and finds mapped item and cell template assignments, including assignments in companion Rust modules. Select a Rust entry to open its own source. [Designer Studio](../native-controls.md#browse-objects-by-owning-scope) · [MCP workflow](reference.md#browse-library-scopes-with-mcp)
 
+![Library shows two Accent resources under separate owners and reveals the Approve button's Click behavior in XAML](../images/vscode-library-scopes.png)
+
 ### Import an asset
 
 1. Open **Assets** and use the import icon, or run **FerroUI: Import Asset…**.
@@ -336,6 +338,8 @@ Undo restores both values in the owning XAML file. Named sources, converters, re
 Open an RSX design and select one control with a mapped command, such as a **Button**. In **Events**, choose the link icon **Edit command binding**. Choose **Set Rust expression…** to enter an expression such as `approve.clone()` for the registered type. If the command has a parameter, the second picker lets you set or keep it. Completing both pickers applies one edit, and Undo restores both expressions.
 
 Use **Clear expression** to remove an authored assignment or **Reveal in source** to edit a longer expression in the Rust editor. The designer supports builder fields and single-argument calls, such as `command: approve.clone()` and `command(approve.clone())`. It also uses setter names recorded in project RSX metadata. Edit duplicate or indirect assignments in the Rust editor. The running app evaluates the expressions, and rust-analyzer reports their Rust types and diagnostics. [Designer Studio](../native-controls.md#edit-a-rust-command-binding) · [MCP workflow](reference.md#edit-a-rust-command-with-mcp)
+
+![The command picker shows the current Rust expression and registered command type above the authored Button and its preview](../images/vscode-rust-command-binding.png)
 
 ## Rename a resource across XAML files
 
