@@ -57,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
     const assets = new ProjectAssets();
     const assetMoves = new AssetMoves(server);
     const inventory = new ProjectInventory(context, previewOutput, assets, assetMoves);
-    const designTokens = new DesignTokenCommands(inventory);
+    const designTokens = new DesignTokenCommands(context, inventory);
     const scaffolds = new ProjectScaffold();
     const projectSetup = new ProjectSetup(inventory);
     const handlers = new EventHandlers(server);

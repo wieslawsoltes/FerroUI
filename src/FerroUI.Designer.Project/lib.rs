@@ -48,6 +48,13 @@ pub use workspace::{asset_digest, Buffer, BufferUpdate, CreatedSourceFile, Moved
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ProjectError(pub String);
 pub type Result<T> = std::result::Result<T, ProjectError>;
+
+/// Publish a generated text file at an explicitly selected path. A competing
+/// file creation keeps its contents, and failed writes leave no output file.
+pub fn create_new_file(path: &std::path::Path, source: &str) -> Result<()> {
+    workspace::atomic_create(path, source)
+}
+
 impl fmt::Display for ProjectError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)

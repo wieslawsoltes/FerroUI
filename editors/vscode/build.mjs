@@ -16,7 +16,7 @@ const [host] = await Promise.all([
         entryPoints: { designer: 'webview/main.ts', properties: 'webview/properties.ts', outline: 'webview/outline.ts',
             toolbox: 'webview/toolbox.ts', details: 'webview/details.ts', assets: 'webview/assets.ts', runtime: 'webview/runtime.ts',
             hosted: 'webview/hosted.ts', stages: 'webview/stages.ts', timeline: 'webview/timeline.ts', designData: 'webview/designData.ts',
-            styles: 'webview/styles.ts', scenarioReview: 'webview/scenarioReview.ts' },
+            styles: 'webview/styles.ts', scenarioReview: 'webview/scenarioReview.ts', tokenReview: 'webview/tokenReview.ts' },
         outdir: 'dist',
         bundle: true,
         platform: 'browser',

@@ -1,6 +1,6 @@
 //! Workspace lifecycle and language automation use the same project/editor transaction APIs.
 use super::schema as s;
-use super::{decode, integer, state, text};
+use super::{decode, design_tokens, integer, state, text};
 use crate::DesignerWorkspace;
 use ferroui_designer_language::{FormattingOptions, LanguageService, WorkspaceEdit};
 use ferroui_designer_project::{BuildTask, TaskKind};
@@ -21,7 +21,7 @@ mod resource_move;
 mod scenarios;
 
 pub(super) fn handles(name: &str) -> bool {
-    canvas_guides::handles(name) || project_library::handles(name) || project_setup::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || scenarios::handles(name) || matches!(
+    name == design_tokens::CREATE || canvas_guides::handles(name) || project_library::handles(name) || project_setup::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || scenarios::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -146,6 +146,7 @@ pub(super) fn tools() -> Vec<Value> {
     tools.extend(canvas_guides::tools());
     tools.extend(project_library::tools());
     tools.extend(project_setup::tools());
+    tools.push(design_tokens::create_tool());
     tools.extend(command_bindings::tools());
     tools.extend(resource_move::tools());
     tools.extend(scenarios::tools());
@@ -165,6 +166,9 @@ pub(super) fn call(
     }
     if project_setup::handles(name) {
         return project_setup::call(workspace, name, args);
+    }
+    if name == design_tokens::CREATE {
+        return design_tokens::create(workspace, args);
     }
     if command_bindings::handles(name) {
         return command_bindings::call(workspace, name, args);

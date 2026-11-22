@@ -1007,6 +1007,8 @@ pub(crate) mod scenarios;
 pub(crate) mod scenario_review;
 #[path = "workspace_project_setup.rs"]
 mod project_setup;
+#[path = "workspace_design_tokens.rs"]
+mod design_tokens;
 #[cfg(feature = "mcp")]
 #[path = "workspace_project_library.rs"]
 mod project_library;

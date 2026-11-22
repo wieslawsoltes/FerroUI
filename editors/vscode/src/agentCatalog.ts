@@ -119,7 +119,7 @@ export const agentCatalog = {
     ...fileMoveCatalog,
     ...renameCatalog,
     ...resourceMoveCatalog,
-    designer_design_tokens: tool('Plan a DTCG-to-XAML import or XAML-to-DTCG export with candidate source, mapping rows and issues. Mapping keys use token paths during import and XAML resource keys during export. Use a separate workspace creation action to write the reviewed candidate.',
+    designer_design_tokens: tool('Review colors, numbers, dimensions, durations, gradient brushes, layered shadows and key splines between DTCG and a XAML dictionary. Mapping keys use token paths during import and XAML resource keys during export. Read generated source and issues before creating the reviewed file.',
         { direction: choice('import', 'export'), source: text, options: { type: 'object', additionalProperties: false, properties: {
             pixelsPerRem: { type: 'number' }, mappings: { type: 'object', maxProperties: 4096,
                 additionalProperties: { type: 'object', additionalProperties: false, properties: { key: text, token: text, kind: text, xamlType: text } } },

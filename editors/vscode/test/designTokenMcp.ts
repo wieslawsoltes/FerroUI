@@ -4,19 +4,23 @@ import type { TokenPlan } from '../src/designTokenProtocol';
 import type { PropertyField } from '../src/protocol';
 import type { StageInfo, StageModel } from '../src/stagesProtocol';
 import type { McpFixture } from './mcp';
+import { until } from './wait';
 
 export async function verifyDesignTokens({ invoke, content }: McpFixture): Promise<void> {
     const folder = vscode.workspace.workspaceFolders![0].uri;
     const document = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(folder, 'customer-design.tokens.json'));
     const source = document.getText();
     const plan = content<TokenPlan>(await invoke('designer_design_tokens', { direction: 'import', source, options: {
-        mappings: { 'brand.card': { key: 'CustomerCardBrush' } }, pixelsPerRem: 16,
+        mappings: { 'brand.card': { key: 'CustomerCardBrush' }, 'brand.banner': { xamlType: 'RadialGradientBrush' } }, pixelsPerRem: 16,
     } }));
-    assert.equal(plan.mappings.length, 5);
+    assert.equal(plan.mappings.length, 8);
     assert.equal(plan.issues.length, 1);
     assert.equal(plan.issues[0].path, 'controls.title');
     assert.equal(plan.mappings.find(row => row.key === 'CustomerCardBrush')?.value, '#2D6A51');
     assert.equal(plan.mappings.find(row => row.key === 'layout.padding')?.value, '24');
+    assert.equal(plan.mappings.find(row => row.key === 'brand.banner')?.xamlType, 'RadialGradientBrush');
+    assert.equal(plan.mappings.find(row => row.key === 'depth.card')?.xamlType, 'BoxShadows');
+    assert.equal(plan.mappings.find(row => row.key === 'motion.settle')?.value, '0.2,0.8,0.3,1.18');
     assert.equal(document.getText(), source);
     const dictionary = 'CustomerTokens.xaml';
     const create = { path: dictionary, source: plan.source };
@@ -24,16 +28,17 @@ export async function verifyDesignTokens({ invoke, content }: McpFixture): Promi
     assert.ok((await invoke('ferroui_workspace_create', create)).isError);
     const view = 'CustomerTokenView.xaml';
     content(await invoke('ferroui_workspace_create', { path: view, source: `<Border xmlns="https://github.com/ferroui"
-        Name="Card" Background="{StaticResource CustomerCardBrush}" Width="{StaticResource layout.cardWidth}">
+        Name="Card" Background="{StaticResource CustomerCardBrush}" Width="{StaticResource layout.cardWidth}" BoxShadow="{StaticResource depth.card}" Padding="16" CornerRadius="12">
         <Border.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
             <ResourceInclude Source="${dictionary}"/>
         </ResourceDictionary.MergedDictionaries></ResourceDictionary></Border.Resources>
-        <TextBlock Text="Customer review"/>
+        <Border Name="Banner" Background="{StaticResource brand.banner}" Padding="18" CornerRadius="8"><TextBlock Text="Customer review" Foreground="White"/></Border>
     </Border>` }));
     const { session } = content<{ session: number }>(await invoke('designer_open', { path: view }));
     const { revision, nodes } = content<{ revision: number; nodes: { name: string | null; id: number }[] }>(await invoke('designer_outline', { session }));
     const card = nodes.find(node => node.name === 'Card');
     assert.ok(card);
+    assert.ok(nodes.some(node => node.name === 'Banner'));
     const { properties } = content<{ properties: PropertyField[] }>(await invoke('designer_inspect', { session, node: card.id }));
     assert.equal(properties.find(field => field.name === 'Background')?.effective, '#FF2D6A51');
     assert.equal(properties.find(field => field.name === 'Width')?.effective, '320');
@@ -93,11 +98,23 @@ export async function verifyDesignTokens({ invoke, content }: McpFixture): Promi
     assert.equal(exportedJson.brand.card.$extensions['com.github.ferroui'].key, 'CustomerCardBrush');
     assert.deepEqual(exportedJson.layout.cardWidth.$value, { value: 320, unit: 'px' });
     assert.deepEqual(exportedJson.motion.fade.$value, { value: 250, unit: 'ms' });
+    assert.deepEqual(exportedJson.motion.settle.$value, [0.2, 0.8, 0.3, 1.18]);
+    assert.equal(exportedJson['depth'].card.$value[1].inset, true);
+    assert.equal(exportedJson.brand.banner.$extensions['com.github.ferroui'].xamlType, 'RadialGradientBrush');
     const roundtrip = content<TokenPlan>(await invoke('designer_design_tokens', { direction: 'import', source: exported.source }));
     assert.equal(roundtrip.issues.length, 0);
     assert.equal(roundtrip.mappings.find(row => row.key === 'CustomerCardBrush')?.value, '#2D6A51');
+    assert.equal(roundtrip.mappings.find(row => row.key === 'brand.banner')?.xamlType, 'RadialGradientBrush');
     const labels = [view, `Design · ${view}`, `Stages · ${view}`];
     const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab => labels.includes(tab.label));
     await vscode.window.tabGroups.close(tabs);
+    await vscode.commands.executeCommand('ferroui.designTokens.import', document.uri);
+    const reviewLabel = 'Tokens · customer-design.tokens.json';
+    await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === reviewLabel)));
+    const generated = vscode.workspace.textDocuments.find(document => document.uri.scheme === 'ferroui-token-review' && document.uri.path.endsWith('/DesignTokens.xaml'));
+    assert.match(generated?.getText() ?? '', /<LinearGradientBrush/);
+    assert.match(generated?.getText() ?? '', /<KeySpline/);
+    const reviewTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab => tab.label === reviewLabel || tab.label === 'DesignTokens.xaml');
+    await vscode.window.tabGroups.close(reviewTabs);
     console.log('VS Code rendered DTCG resources in the canvas and Stages, retained good frames through an invalid include, and exported the reverse mapping');
 }

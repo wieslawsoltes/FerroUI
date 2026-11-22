@@ -565,6 +565,7 @@ impl DesignerWorkspace {
     pub(super) fn connect_project(self: &Rc<Self>) {
         self.connect_project_setup();
         self.connect_scenario_review();
+        self.connect_design_tokens();
         for name in [
             "OpenProject",
             "SaveAll",

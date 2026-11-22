@@ -830,6 +830,25 @@ export function scenarioReviewHtml(webview: vscode.Webview, root: vscode.Uri): s
 <p id="review-message" class="dock-message" role="status">Loading review…</p>`, [], true);
 }
 
+export function tokenReviewHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'tokenReview', 'FerroUI Design Tokens', `
+<header class="toolbar token-toolbar" aria-label="Design tokens toolbar">
+    <span id="token-source"></span>
+    <div class="tool-group" role="group" aria-label="Review actions">
+        ${tool('token-candidate', 'code', 'Open generated source', 'disabled')}
+        ${tool('token-refresh', 'refresh', 'Refresh from source')}
+        ${tool('token-scale', 'symbol-ruler', 'Set logical pixels per rem', 'hidden disabled')}
+        ${tool('token-save', 'save', 'Create the reviewed file', 'disabled')}
+    </div>
+</header>
+<p id="token-status" class="dock-message" role="status">Reading design tokens…</p>
+<p id="token-problem" class="dock-message error" role="alert" hidden></p>
+<main id="token-report" aria-label="Design token mappings" aria-busy="true">
+    <ul id="token-mappings" aria-label="Mapped tokens"></ul>
+    <section id="token-issues" hidden><h2>Skipped entries</h2><ul id="token-issue-list"></ul></section>
+</main>`);
+}
+
 function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string,
     extraStyles: readonly string[] = [], allowImageFiles = false): string {
     const resource = (...parts: string[]) => webview.asWebviewUri(vscode.Uri.joinPath(root, ...parts));
