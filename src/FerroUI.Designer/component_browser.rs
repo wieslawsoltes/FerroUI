@@ -157,7 +157,7 @@ impl ComponentLibrary {
         count.set_foreground(Some(SolidColorBrush::from_uint32(0xffa9adba).into()));
         footer.children().add(count.clone().upcast::<Control>());
         let hint = TextBlock::new();
-        hint.set_text(Some("Enter to edit · Drag resources to properties"));
+        hint.set_text(Some("Enter to open · Drag resources to properties"));
         hint.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
         hint.set_font_size(10.0);
         hint.set_foreground(Some(SolidColorBrush::from_uint32(0xff979caa).into()));
@@ -220,8 +220,9 @@ impl ComponentLibrary {
             }
         });
         let weak = Rc::downgrade(&this);
-        this.list
-            .add_handler(InputElement::key_down_event(), move |_, event| {
+        this.list.add_handler_with(
+            InputElement::key_down_event(),
+            move |_, event| {
                 let Some(this) = weak.upgrade() else {
                     return;
                 };
@@ -233,15 +234,19 @@ impl ComponentLibrary {
                     {
                         let callback = this.activate.borrow().clone();
                         if let Some(callback) = callback {
-                            callback(&item);
                             event.set_handled(true);
+                            callback(&item);
                         }
                     }
                 }
                 if event.key == Key::Escape {
                     this.cancel_pending_drag();
                 }
-            });
+            },
+            // A focused ListBoxItem handles Enter for selection on the bubble route.
+            RoutingStrategies::TUNNEL,
+            false,
+        );
         let weak = Rc::downgrade(&this);
         create.click(move |_, _| {
             if let Some(this) = weak.upgrade() {

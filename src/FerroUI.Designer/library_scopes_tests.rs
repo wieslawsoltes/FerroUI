@@ -139,20 +139,36 @@ fn accounts() -> Element {
     assert_eq!(&source[assignment.source.range()], "account_row()");
 }
 
-#[cfg(feature = "mcp")]
+#[cfg(all(feature = "mcp", feature = "render-smoke"))]
 #[test]
 fn studio_library_scope_and_mcp_library_reveal_use_the_same_authored_owner() {
-    use crate::{mcp::DesignerMcp, DesignerWorkspace};
+    use crate::{mcp::DesignerMcp, DesignerWorkspace, NavigationPane};
+    use ferroui_base::animation::IGlobalClock;
     use ferroui_base::input::{InputElement, Key, KeyEventArgs};
+    use ferroui_base::{media::MediaContext, styling::IThemeVariantHost, FerroLocator};
     use ferroui_controls::{
         automation::AutomationProperties,
         testing::{TestServices, UnitTestApplication},
-        ComboBox, Control, TextBox, Window,
+        Application, ComboBox, Control, TextBox, Window,
     };
     use ferroui_mcp::{Permissions, UiToolProvider};
     use serde_json::json;
 
-    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let mut services = TestServices::styled_window()
+        .with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style());
+    let focus = TestServices::real_focus();
+    services.keyboard_device = focus.keyboard_device;
+    services.keyboard_navigation = focus.keyboard_navigation;
+    services.input_manager = focus.input_manager;
+    let _app = UnitTestApplication::start(services);
+    ferroui_themes_winui::register_types();
+    let locator = FerroLocator::current_mutable();
+    locator
+        .bind::<dyn IGlobalClock>()
+        .to_constant(MediaContext::instance().clock());
+    locator
+        .bind::<dyn IThemeVariantHost>()
+        .to_constant(Application::current().unwrap().as_theme_variant_host());
     let source = r#"<StackPanel Name="Order" xmlns="https://github.com/ferroui"
         xmlns:i="using:FerroUI.Xaml.Interactivity" xmlns:b="using:FerroUI.Xaml.Interactions.Core">
         <Button Name="Review" Content="Review">
@@ -166,6 +182,7 @@ fn studio_library_scope_and_mcp_library_reveal_use_the_same_authored_owner() {
     window.set_height(720.0);
     window.set_content(Some(Control::boxed(workspace.control())));
     window.show();
+    workspace.set_navigation_pane(NavigationPane::Library);
     window.update_layout();
     workspace.refresh(true);
     let browser = workspace.component_library().unwrap();
@@ -181,11 +198,14 @@ fn studio_library_scope_and_mcp_library_reveal_use_the_same_authored_owner() {
     let [row]: [_; 1] = browser.visible_items().try_into().unwrap();
     assert_eq!(row.title, "Click");
     assert!(browser.select(&row.id));
+    window.update_layout();
+    let row = browser.list().container_from_index(0).unwrap();
+    assert!(row.focus());
     let mut enter = KeyEventArgs::new();
     enter.key = Key::Enter;
     enter.set_routed_event(Some(InputElement::key_down_event()));
-    enter.set_source(browser.list().to_ref());
-    browser.list().raise_event(&enter);
+    enter.set_source(row.to_ref());
+    row.raise_event(&enter);
     assert!(enter.handled());
     let session = workspace.session();
     let owner = session
