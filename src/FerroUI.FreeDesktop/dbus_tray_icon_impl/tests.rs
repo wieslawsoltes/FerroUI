@@ -8,7 +8,7 @@ use crate::test_support::{log, on_session_bus, peer_call, peer_property, pump_un
 use ferroui_controls::{NativeMenu, NativeMenuItem};
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use zbus::zvariant::OwnedValue;
+use zbus::OwnedVariant;
 
 const INTERFACE: &str = "org.kde.StatusNotifierItem";
 
@@ -84,8 +84,11 @@ impl Fixture {
         if !on_session_bus() {
             return None;
         }
-        let dbus = zbus::blocking::fdo::DBusProxy::new(&self.connections.service).unwrap();
-        Some(dbus.name_has_owner(zbus::names::BusName::try_from(name).unwrap()).unwrap())
+        let service = &self.connections.service;
+        Some(zbus::block_on(async {
+            let dbus = zbus::fdo::DBusProxy::new(service).await.unwrap();
+            dbus.name_has_owner(zbus::names::BusName::try_from(name).unwrap()).await.unwrap()
+        }))
     }
 }
 
@@ -151,7 +154,7 @@ fn dbus_an_item_is_registered_with_the_watcher_and_answers_a_host() {
     tray_icon.menu_exporter().unwrap().set_native_menu(Some(menu));
     let body = (0i32, -1i32, vec!["label".to_string()]);
     let reply = peer_call(&fixture.connections, &menu_path, "com.canonical.dbusmenu", "GetLayout", body).unwrap();
-    let (_, (_, _, children)): (u32, (i32, HashMap<String, OwnedValue>, Vec<OwnedValue>)) = reply.body().deserialize().unwrap();
+    let (_, (_, _, children)): (u32, (i32, HashMap<String, OwnedVariant>, Vec<OwnedVariant>)) = reply.body().deserialize().unwrap();
     assert_eq!(children.iter().map(|child| crate::test_support::show(child)).collect::<Vec<_>>(), ["(1,{label=Quit},[])"]);
 
     tray_icon.dispose();

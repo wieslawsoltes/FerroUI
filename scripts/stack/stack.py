@@ -9,19 +9,25 @@ from it to the default branch (and up from it, for `list`).
   scripts/stack/stack.py merge 290           # merges the stack up to #290 while each one is ready
   scripts/stack/stack.py merge 290 --wait    # and waits for the checks of the next one between merges
   scripts/stack/stack.py merge 290 --dry-run # says what it would merge
-  scripts/stack/stack.py land 290            # GitHub's atomic stack merge, up to the last ready pull request
+  scripts/stack/stack.py land 290            # GitHub's atomic stack merge, on the checks of the top part
   scripts/stack/stack.py land 290 --dry-run  # says how far it would land
 
 `land` is the fast way (docs/stacked-pull-requests.md, "GitHub stacks"): it links the stack on
-GitHub (`gh stack link`, the stacks of the `gh-stack` extension), finds the highest pull request
-that is ready with every one below it ready, and merges all of them into the default branch in one
-all-or-nothing operation (`gh stack merge <pr> --merge --yes`): no retarget, no second run of the
-checks against the default branch, no waiting between the parts. A pull request of a GitHub stack is
-ready when its base is the branch of the one below it (the default branch for the lowest), it is
-not a draft, GitHub says it can be merged (CLEAN), and every check of its head passed on runs that
-started after the last change of its base. GitHub checks nothing more than open and not a draft
-before an atomic merge (the default branch has no required checks), so the script is what keeps a
-failing part out. The parts are merged with merge commits, as `merge` does.
+GitHub (`gh stack link`, the stacks of the `gh-stack` extension), takes the highest part that can
+land, and merges it and every part below it into the default branch in one all-or-nothing operation
+(`gh stack merge <pr> --merge --yes`): no retarget, no second run of the checks against the default
+branch, no waiting between the parts. A part can land when its base is the branch of the one below
+it (the default branch for the lowest), it is not a draft and it has no conflict.
+
+Only the checks of the top part decide, because its head contains the code of every part below it:
+all of them must have passed on runs that started after the last change of its base, and GitHub must
+say it can be merged (CLEAN). Two guards keep that true. The head of every lower part must be an
+ancestor of the top head, so a part that was pushed and not merged up stops the landing. And when the
+default branch has moved since the top was last merged with it, the files changed there must not
+overlap the files of the stack (`CHANGELOG.md` aside), since the checks did not see the two together;
+the top is then brought up to date first. GitHub checks nothing more than open and not a draft before
+an atomic merge (the default branch has no required checks), so the script is what keeps a failing
+stack out. The parts are merged with merge commits, as `merge` does.
 
 A pull request is merged only when:
 - its base is the default branch and GitHub says it can be merged without conflicts (CLEAN);
@@ -57,6 +63,9 @@ GOOD = {"SUCCESS", "SKIPPED", "NEUTRAL"}
 # A run cancelled by a newer run of its workflow (the concurrency group of the CI cancels the run of
 # the old base when a retarget starts one on the new base): neither passed nor failed.
 SUPERSEDED = {"CANCELLED", "STALE"}
+# The check of a CI run that left the build and test jobs to the pull request above (ci.yml). Its
+# other checks pass or are skipped, so a part whose latest run has it must not be merged on them.
+REDUCED_CHECK = "Reduced CI (the pull request above runs the full checks)"
 
 
 def gh(*args, parse=True):
@@ -162,6 +171,19 @@ def checks(pr, since):
     return not pending and not cancelled and not failed and not stale, summary
 
 
+def has_reduced_ci(pr):
+    """Whether the latest CI run of the head left its build and test jobs to a part above it."""
+    runs = [item for item in pr["statusCheckRollup"] or [] if item.get("name") == REDUCED_CHECK]
+    if not runs:
+        return False
+    latest = max(runs, key=lambda item: parse_time(item.get("startedAt")) or datetime.min.replace(tzinfo=timezone.utc))
+    return latest.get("conclusion") == "SUCCESS"
+
+
+def full_ci_hint(pr):
+    return f"its CI was reduced: run `gh workflow run ci.yml --ref {pr['headRefName']}` for the full checks"
+
+
 def readiness(repo, pr, default):
     """(ready, reasons) of a pull request for merging now."""
     reasons = []
@@ -176,6 +198,8 @@ def readiness(repo, pr, default):
     ready, summary = checks(pr, base_changed_at(repo, pr["number"]))
     if not ready:
         reasons.append(f"checks: {summary}")
+    if has_reduced_ci(pr):
+        reasons.append(full_ci_hint(pr))
     return not reasons, reasons, summary
 
 
@@ -240,8 +264,15 @@ def command_merge(args):
     return 0
 
 
-def stack_readiness(repo, pr, expected_base):
-    """(ready, reasons) of a part of a GitHub stack: based on the part below it."""
+# The merge states of a part below the top: its own checks may still run or have failed (UNSTABLE),
+# since the top's checks decide, but it cannot have a conflict.
+LOWER_PART_STATES = {"CLEAN", "UNSTABLE", "HAS_HOOKS"}
+# Files that many changes add a line to, and that merge without a meaning of their own.
+OVERLAP_IGNORED = {"CHANGELOG.md"}
+
+
+def part_reasons(pr, expected_base):
+    """Why a part of a GitHub stack cannot land, whatever its own checks say."""
     reasons = []
     if pr["state"] != "OPEN":
         reasons.append(pr["state"].lower())
@@ -249,12 +280,44 @@ def stack_readiness(repo, pr, expected_base):
         reasons.append("a draft")
     if pr["baseRefName"] != expected_base:
         reasons.append(f"based on {pr['baseRefName']}, not {expected_base}")
-    if pr["mergeStateStatus"] != "CLEAN":
+    if pr["mergeStateStatus"] not in LOWER_PART_STATES:
         reasons.append(f"merge state {pr['mergeStateStatus']}")
-    ready, summary = checks(pr, base_changed_at(repo, pr["number"]))
-    if not ready:
-        reasons.append(f"checks: {summary}")
-    return not reasons, reasons
+    return reasons
+
+
+def git(*args):
+    return subprocess.run(["git", *args], capture_output=True, text=True)
+
+
+def git_lines(*args):
+    result = git(*args)
+    if result.returncode != 0:
+        raise SystemExit(f"git {' '.join(args)}: {result.stderr.strip()}")
+    return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+
+
+def top_guards(parts, default):
+    """Why the checks of the top part do not speak for the whole stack (empty when they do)."""
+    top = parts[-1]["headRefOid"]
+    fetched = git("fetch", "-q", "origin", f"+refs/heads/{default}:refs/remotes/origin/{default}",
+                  *[part["headRefOid"] for part in parts])
+    if fetched.returncode != 0:
+        raise SystemExit(f"git fetch: {fetched.stderr.strip()}")
+    reasons = [
+        f"the head of #{part['number']} is not in the top: merge it up"
+        for part in parts[:-1]
+        if git("merge-base", "--is-ancestor", part["headRefOid"], top).returncode != 0
+    ]
+    main = f"refs/remotes/origin/{default}"
+    base = git("merge-base", main, top).stdout.strip()
+    if not base:
+        raise SystemExit(f"{top} has no common history with {default}")
+    moved = git_lines("diff", "--name-only", base, main)
+    overlap = sorted((moved & git_lines("diff", "--name-only", base, top)) - OVERLAP_IGNORED)
+    if overlap:
+        shown = ", ".join(overlap[:5]) + (f" and {len(overlap) - 5} more" if len(overlap) > 5 else "")
+        reasons.append(f"{default} has moved and changed files of the stack ({shown}): merge {default} into the top")
+    return reasons
 
 
 def command_land(args):
@@ -262,18 +325,32 @@ def command_land(args):
     name, default = repo["nameWithOwner"], repo["defaultBranchRef"]["name"]
     top = pull(args.pr)
     chain = stack_below(top, default) + stack_above(top)
-    landed = None
+    parts = []
     expected_base = default
     for pr in chain:
-        ready, reasons = stack_readiness(name, pr, expected_base)
+        reasons = part_reasons(pr, expected_base)
         print(f"  #{pr['number']} {pr['headRefName']} -> {pr['baseRefName']}: "
-              f"{'ready' if ready else '; '.join(reasons)}")
-        if not ready:
+              f"{'can land' if not reasons else '; '.join(reasons)}")
+        if reasons:
             break
-        landed = pr
+        parts.append(pr)
         expected_base = pr["headRefName"]
-    if landed is None:
-        print("nothing to land: the lowest pull request is not ready")
+    if not parts:
+        print("nothing to land: the lowest pull request cannot land")
+        return 1
+    landed = parts[-1]
+    passed, summary = checks(landed, base_changed_at(name, landed["number"]))
+    print(f"  top #{landed['number']}: {summary}, merge state {landed['mergeStateStatus']}")
+    if not passed or landed["mergeStateStatus"] != "CLEAN":
+        print(f"nothing landed: the checks of the top part #{landed['number']} have not all passed")
+        return 1
+    if has_reduced_ci(landed):
+        print(f"nothing landed: #{landed['number']} is the top part here, but {full_ci_hint(landed)}")
+        return 1
+    guards = top_guards(parts, default)
+    if guards:
+        for reason in guards:
+            print(f"  not landed: {reason}")
         return 1
     numbers = [str(pr["number"]) for pr in chain]
     upto = [pr["number"] for pr in chain[:chain.index(landed) + 1]]
@@ -307,7 +384,7 @@ def main():
     merge.add_argument("--wait", action="store_true", help="wait for the checks of each pull request")
     merge.add_argument("--timeout", type=int, default=180, help="minutes to wait for one pull request (with --wait)")
     merge.add_argument("--dry-run", action="store_true", help="say what would be merged first, and merge nothing")
-    land = sub.add_parser("land", help="merge the stack at once, up to the last ready pull request (GitHub stacks)")
+    land = sub.add_parser("land", help="merge the stack at once, when the checks of its top part passed (GitHub stacks)")
     land.add_argument("pr", type=int)
     land.add_argument("--dry-run", action="store_true", help="say how far it would land, and merge nothing")
     args = parser.parse_args()

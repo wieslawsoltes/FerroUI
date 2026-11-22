@@ -183,6 +183,8 @@ pub struct Export {
     dependencies: Vec<PathBuf>,
     source_root: Option<PathBuf>,
     compiled_markup: Vec<PathBuf>,
+    not_created_on: Vec<(String, Vec<String>)>,
+    creates: Vec<(String, Vec<String>)>,
 }
 
 impl Export {
@@ -205,7 +207,16 @@ impl Export {
     /// The export of the package `package_name` in `manifest_dir`, writing below `out_dir`,
     /// with the `.xamlmeta` files of its direct dependencies.
     pub fn new(manifest_dir: PathBuf, out_dir: PathBuf, package_name: &str, dependencies: Vec<PathBuf>) -> Self {
-        Self { manifest_dir, out_dir, crate_name: package_name.replace('-', "_"), dependencies, source_root: None, compiled_markup: Vec::new() }
+        Self {
+            manifest_dir,
+            out_dir,
+            crate_name: package_name.replace('-', "_"),
+            dependencies,
+            source_root: None,
+            compiled_markup: Vec::new(),
+            not_created_on: Vec::new(),
+            creates: Vec::new(),
+        }
     }
 
     /// The `.xamlmeta` of a checked-in generated file of the crate, relative to the crate
@@ -214,6 +225,26 @@ impl Export {
     /// assembly of the crate.
     pub fn compiled_markup(mut self, path: &str) -> Self {
         self.compiled_markup.push(self.manifest_dir.join(path));
+        self
+    }
+
+    /// States that no code constructs the class `class` (its full markup name,
+    /// `FerroUI.Controls.Chrome.WindowDrawnDecorations`) on the targets of `conditions` (`cfg`
+    /// conditions: `target_os = "macos"`, `target_arch = "wasm32"`), for the trimming of the themes
+    /// (#1002): the creates edges into the class do not hold in a build for such a target
+    /// (`TypeModel::not_created_on`). A class the scan does not find is an error.
+    pub fn not_created_on(mut self, class: &str, conditions: &[&str]) -> Self {
+        self.not_created_on.push((class.to_string(), conditions.iter().map(|condition| condition.to_string()).collect()));
+        self
+    }
+
+    /// States that the code of the class `class` (its full markup name) creates the classes
+    /// `created` (full markup names) through a call the scan does not read as a construction (a
+    /// factory function of another type), for the trimming of the themes (#994): they are added to
+    /// the creates edges of the class (`TypeModel::creates`). A class the scan does not find is an
+    /// error.
+    pub fn creates(mut self, class: &str, created: &[&str]) -> Self {
+        self.creates.push((class.to_string(), created.iter().map(|created| created.to_string()).collect()));
         self
     }
 
@@ -300,6 +331,27 @@ impl Export {
                 Err(error) => return Outcome { lines, errors: vec![format!("{}: {error}", path.display())] },
             }
         }
+        for (class, conditions) in &self.not_created_on {
+            match model.types.iter_mut().find(|type_| type_.full_name() == *class) {
+                Some(type_) => type_.not_created_on = conditions.clone(),
+                None => {
+                    let error = format!("the class `{class}` (Export::not_created_on) is not a type of the crate");
+                    return Outcome { lines, errors: vec![error] };
+                }
+            }
+        }
+        for (class, created) in &self.creates {
+            let known: Vec<String> = model.types.iter().map(|type_| type_.full_name()).collect();
+            if let Some(unknown) = std::iter::once(class).chain(created).find(|name| !known.contains(name)) {
+                let error = format!("the class `{unknown}` (Export::creates) is not a type of the crate");
+                return Outcome { lines, errors: vec![error] };
+            }
+            if let Some(type_) = model.types.iter_mut().find(|type_| type_.full_name() == *class) {
+                type_.creates.extend(created.iter().filter(|created| *created != class).cloned());
+                type_.creates.sort();
+                type_.creates.dedup();
+            }
+        }
         let text = model.to_json();
         let path = self.out_dir.join(format!("{}.xamlmeta", self.crate_name));
         let started = Instant::now();
@@ -328,6 +380,68 @@ mod tests {
 
     fn fixtures() -> PathBuf {
         Path::new(env!("CARGO_MANIFEST_DIR")).with_file_name("FerroUI.Build.Scan").join("tests").join("fixtures")
+    }
+
+    /// Not from upstream (#1002): the targets a class is not created on are written on the class,
+    /// and a class the scan does not find is an error.
+    #[test]
+    fn export_writes_the_targets_a_class_is_not_created_on() {
+        let out = env::temp_dir().join(format!("ferroui-build-scan-not-created-on-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&out);
+        let directory = fixtures().join("scanner");
+        let export = |name: &str, class: Option<&str>| {
+            let export = Export::new(directory.clone(), out.join(name), "fixture", Vec::new()).source_root("lib.rs");
+            match class {
+                Some(class) => export.not_created_on(class, &["target_os = \"macos\""]).execute(),
+                None => export.execute(),
+            }
+        };
+        assert_eq!(export("plain", None).errors, Vec::<String>::new());
+        let read = |name: &str| {
+            let text = fs::read_to_string(out.join(name).join("fixture.xamlmeta")).expect("the .xamlmeta of the fixture");
+            AssemblyModel::parse(&text).expect("a file of format 2")
+        };
+        let plain = read("plain");
+        let class = plain.types.iter().find(|type_| type_.object_model).expect("a class of the fixture").full_name();
+        assert!(plain.types.iter().all(|type_| type_.not_created_on.is_empty()));
+        assert_eq!(export("stated", Some(&class)).errors, Vec::<String>::new());
+        let stated = read("stated");
+        let found = stated.types.iter().find(|type_| type_.full_name() == class).expect("the class");
+        assert_eq!(found.not_created_on, ["target_os = \"macos\""]);
+        let unknown = export("unknown", Some("Fixture.Unknown"));
+        assert_eq!(unknown.errors, ["the class `Fixture.Unknown` (Export::not_created_on) is not a type of the crate"]);
+        let _ = fs::remove_dir_all(&out);
+    }
+
+    /// Not from upstream (#994): the classes a class is stated to create are added to its creates
+    /// edges, once and sorted, and a class the scan does not find is an error.
+    #[test]
+    fn export_adds_the_stated_creates_edges() {
+        let out = env::temp_dir().join(format!("ferroui-build-scan-creates-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&out);
+        let directory = fixtures().join("scanner");
+        let run = |name: &str, class: &str, created: &[&str]| {
+            Export::new(directory.clone(), out.join(name), "fixture", Vec::new()).source_root("lib.rs").creates(class, created).execute()
+        };
+        let plain = Export::new(directory.clone(), out.join("plain"), "fixture", Vec::new()).source_root("lib.rs").execute();
+        assert_eq!(plain.errors, Vec::<String>::new());
+        let read = |name: &str| {
+            let text = fs::read_to_string(out.join(name).join("fixture.xamlmeta")).expect("the .xamlmeta of the fixture");
+            AssemblyModel::parse(&text).expect("a file of format 2")
+        };
+        let classes: Vec<String> = read("plain").types.iter().filter(|type_| type_.object_model).map(|type_| type_.full_name()).collect();
+        let (class, created) = (&classes[0], &classes[1]);
+        assert_eq!(run("stated", class, &[created, created, class]).errors, Vec::<String>::new());
+        let stated = read("stated");
+        let found = stated.types.iter().find(|type_| type_.full_name() == *class).expect("the class");
+        assert_eq!(found.creates.iter().filter(|name| *name == created).count(), 1, "{:?}", found.creates);
+        assert!(!found.creates.contains(class));
+        let mut sorted = found.creates.clone();
+        sorted.sort();
+        assert_eq!(found.creates, sorted);
+        let unknown = run("unknown", class, &["Fixture.Unknown"]);
+        assert_eq!(unknown.errors, ["the class `Fixture.Unknown` (Export::creates) is not a type of the crate"]);
+        let _ = fs::remove_dir_all(&out);
     }
 
     /// Not from upstream: the export scans the sources of the crate, writes its model

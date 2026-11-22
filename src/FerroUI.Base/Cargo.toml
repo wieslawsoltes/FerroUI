@@ -84,7 +84,8 @@ ferroui-markup-syntax.workspace = true
 rustc-hash = { workspace = true }
 smallvec = { workspace = true }
 bitflags.workspace = true
-paste.workspace = true
+# Joins identifiers in the class and markup macros (`__paste!`).
+ferroui-ident-macros.workspace = true
 rust_decimal.workspace = true
 time.workspace = true
 # The types of the edges of the API (docs/idiomatic-rust.md, section 2.2): `Uri` converts to and
