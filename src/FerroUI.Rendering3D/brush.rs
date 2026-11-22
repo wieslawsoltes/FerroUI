@@ -246,6 +246,14 @@ impl BrushTextureSource {
         }
     }
 
+    /// The bitmap of an image brush this texture is made of.
+    pub fn bitmap(&self) -> Option<&Arc<SharedBitmapImpl>> {
+        match &self.origin {
+            TextureOrigin::Image(bitmap) => Some(bitmap),
+            _ => None,
+        }
+    }
+
     /// The content of a visual or drawing brush this texture is the offscreen render of.
     pub fn content(&self) -> Option<&Scene3DBrushContent> {
         match &self.origin {
@@ -332,6 +340,17 @@ impl MaterialBrush {
     /// The brush of a layer (`None`: a brush without a shared form) over a mesh whose texture
     /// coordinates have the bounding box `texture_bounds` ([`texture_coordinate_bounds`]).
     pub fn of(brush: Option<&SharedBrush>, texture_bounds: Rect) -> MaterialBrush {
+        MaterialBrush::of_with(brush, texture_bounds, &|_| false)
+    }
+
+    /// [`of`](Self::of) for a renderer that has some bitmaps as textures of its device
+    /// (`on_device`, step D7): an image brush of such a bitmap is sampled although its pixels
+    /// cannot be read.
+    pub fn of_with(
+        brush: Option<&SharedBrush>,
+        texture_bounds: Rect,
+        on_device: &dyn Fn(&SharedBitmapImpl) -> bool,
+    ) -> MaterialBrush {
         let unsampled = MaterialBrush {
             shader: BrushShader::Solid,
             uniforms: BrushUniforms::default(),
@@ -423,7 +442,10 @@ impl MaterialBrush {
                 return MaterialBrush { shader: BrushShader::Image, uniforms, texture: None, unsampled: false };
             };
             let pixels = bitmap.pixel_size();
-            if pixels.width <= 0 || pixels.height <= 0 || bitmap.as_readable_bitmap().is_none() {
+            if pixels.width <= 0
+                || pixels.height <= 0
+                || (bitmap.as_readable_bitmap().is_none() && !on_device(&*bitmap))
+            {
                 return unsampled;
             }
             image_uniforms(&mut uniforms, tile, image_size(&*bitmap), texture_bounds);

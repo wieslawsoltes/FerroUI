@@ -52,6 +52,7 @@ use crate::shader::{
 };
 use crate::uniforms::{DrawUniforms, Face, FrameUniforms, LayerKind, Std140};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::platform::SharedBitmapImpl;
 use ferroui_base::rendering::scene3d::{MeshData, Scene3DMaterialLayer, Scene3DModel, Scene3DSnapshot};
 use ferroui_base::Rect;
 use std::cell::Cell;
@@ -144,11 +145,50 @@ pub struct Scene3DTextureCounters {
     /// takes): their layers are drawn with their colours and counted
     /// ([`crate::layers_with_unsampled_brushes`]).
     pub textures_refused: u64,
+    /// Textures of brushes the renderer already had on the device (a frame of a video, step D7):
+    /// sampled as they are, with nothing written.
+    pub textures_on_device: u64,
+}
+
+/// A texture of the device that a renderer gives for a bitmap (step D7): `Rgba8Unorm`,
+/// premultiplied, one sample, bindable. The executor samples it and never writes it.
+pub struct Scene3DDeviceTexture {
+    /// The texture.
+    pub texture: wgpu::Texture,
+    /// Its view.
+    pub view: wgpu::TextureView,
+    /// What keeps the texture from being used for something else while the executor keeps it.
+    pub owner: std::sync::Arc<dyn std::any::Any + Send + Sync>,
+}
+
+/// The bitmaps a renderer has as textures of the device the executor draws on, whose pixels
+/// cannot be read: the frames of a video or a camera (step D7).
+pub trait Scene3DDeviceTextures {
+    /// Whether `bitmap` is a texture of this device. Asked for every layer that has such a
+    /// bitmap, so it does no work.
+    fn is_on_device(&self, bitmap: &SharedBitmapImpl) -> bool;
+
+    /// The texture of `bitmap`, asked once for each bitmap the executor does not hold. `None`
+    /// when it is gone: the layer is drawn with its colour.
+    fn device_texture(&self, bitmap: &SharedBitmapImpl) -> Option<Scene3DDeviceTexture>;
+}
+
+/// A renderer without such bitmaps.
+struct NoDeviceTextures;
+
+impl Scene3DDeviceTextures for NoDeviceTextures {
+    fn is_on_device(&self, _: &SharedBitmapImpl) -> bool {
+        false
+    }
+
+    fn device_texture(&self, _: &SharedBitmapImpl) -> Option<Scene3DDeviceTexture> {
+        None
+    }
 }
 
 impl Scene3DTextureCounters {
     const ZERO: Scene3DTextureCounters =
-        Scene3DTextureCounters { textures_uploaded: 0, texture_bytes: 0, textures_refused: 0 };
+        Scene3DTextureCounters { textures_uploaded: 0, texture_bytes: 0, textures_refused: 0, textures_on_device: 0 };
 }
 
 impl Scene3DGpuCounters {
@@ -324,6 +364,8 @@ struct BrushTexture {
     size: (u32, u32),
     group: wgpu::BindGroup,
     last_used: u64,
+    /// The owner of a texture the renderer gave (step D7), which is never written.
+    owner: Option<std::sync::Arc<dyn std::any::Any + Send + Sync>>,
 }
 
 /// The textures of the pool for one size and sample count.
@@ -617,10 +659,26 @@ impl Scene3DWgpuExecutor {
         scene: &Scene3DSnapshot,
         target: &Scene3DTarget<'_>,
     ) -> Result<Scene3DRenderReport, Scene3DWgpuError> {
+        self.render_with_textures(device, queue, viewport, scene, target, &NoDeviceTextures)
+    }
+
+    /// [`render`](Self::render) for a renderer that has some bitmaps of the scene as textures of
+    /// the device (`textures`, step D7): they are sampled without a copy.
+    pub fn render_with_textures(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        viewport: &mut Scene3DViewport,
+        scene: &Scene3DSnapshot,
+        target: &Scene3DTarget<'_>,
+        textures: &dyn Scene3DDeviceTextures,
+    ) -> Result<Scene3DRenderReport, Scene3DWgpuError> {
         self.renders += 1;
         let mut report = Scene3DRenderReport::default();
         let sample_count = if target.antialiased && self.multisample { MULTISAMPLE_COUNT } else { 1 };
-        let (result, error) = scoped(device, || self.render_with(device, queue, viewport, scene, target, sample_count, &mut report));
+        let (result, error) = scoped(device, || {
+            self.render_with(device, queue, viewport, scene, target, textures, sample_count, &mut report)
+        });
         let failure = match (result, error) {
             (Ok(()), None) => return Ok(report),
             (Err(error), _) => error,
@@ -633,7 +691,9 @@ impl Scene3DWgpuExecutor {
         self.multisample = false;
         report_single_sample(&failure.reason);
         let mut report = Scene3DRenderReport::default();
-        let (result, error) = scoped(device, || self.render_with(device, queue, viewport, scene, target, 1, &mut report));
+        let (result, error) = scoped(device, || {
+            self.render_with(device, queue, viewport, scene, target, textures, 1, &mut report)
+        });
         match (result, error) {
             (Ok(()), None) => Ok(report),
             (Err(error), _) => Err(error),
@@ -649,6 +709,7 @@ impl Scene3DWgpuExecutor {
         viewport: &mut Scene3DViewport,
         scene: &Scene3DSnapshot,
         target: &Scene3DTarget<'_>,
+        textures: &dyn Scene3DDeviceTextures,
         sample_count: u32,
         report: &mut Scene3DRenderReport,
     ) -> Result<(), Scene3DWgpuError> {
@@ -671,7 +732,8 @@ impl Scene3DWgpuExecutor {
                     continue;
                 }
                 for (face, layers) in [(Face::Front, &model.front), (Face::Back, &model.back)] {
-                    self.add_draws(device, queue, viewport, model, layers, face, (index_count, texture_bounds), report);
+                    let mesh = (index_count, texture_bounds);
+                    self.add_draws(device, queue, viewport, model, layers, face, mesh, textures, report);
                 }
             }
         }
@@ -810,16 +872,18 @@ impl Scene3DWgpuExecutor {
         layers: &[Scene3DMaterialLayer],
         face: Face,
         (index_count, texture_bounds): (u32, Rect),
+        textures: &dyn Scene3DDeviceTextures,
         report: &mut Scene3DRenderReport,
     ) {
         let depth_layer =
             layers.iter().position(|layer| LayerKind::of(layer.kind) == LayerKind::Diffuse).unwrap_or(0);
         for (index, layer) in layers.iter().enumerate() {
             let (uniforms, _) = DrawUniforms::of(model, layer, face);
-            let mut brush = MaterialBrush::of(layer.brush.as_ref(), texture_bounds);
+            let on_device = |bitmap: &SharedBitmapImpl| textures.is_on_device(bitmap);
+            let mut brush = MaterialBrush::of_with(layer.brush.as_ref(), texture_bounds, &on_device);
             let mut texture = None;
             if let Some(source) = brush.texture().cloned() {
-                if self.brush_texture(device, queue, &source, report) {
+                if self.brush_texture(device, queue, &source, textures, report) {
                     texture = Some(source.key());
                 } else {
                     // Texels that cannot be read or uploaded: the layer is drawn with its colour.
@@ -859,6 +923,7 @@ impl Scene3DWgpuExecutor {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         source: &BrushTextureSource,
+        textures: &dyn Scene3DDeviceTextures,
         report: &mut Scene3DRenderReport,
     ) -> bool {
         let key = source.key();
@@ -866,6 +931,30 @@ impl Scene3DWgpuExecutor {
         if let Some(texture) = self.textures.get_mut(&key) {
             texture.last_used = renders;
             return true;
+        }
+        if let Some(bitmap) = source.bitmap().filter(|bitmap| textures.is_on_device(&***bitmap)) {
+            let given = textures.device_texture(&**bitmap).filter(|given| {
+                given.texture.format() == COLOR_FORMAT
+                    && given.texture.sample_count() == 1
+                    && given.texture.usage().contains(wgpu::TextureUsages::TEXTURE_BINDING)
+            });
+            if let Some(given) = given {
+                let size = (given.texture.width(), given.texture.height());
+                let group = self.texture_group(device, &given.view, "FerroUI 3D device texture");
+                self.textures.insert(
+                    key,
+                    BrushTexture {
+                        identity: source.identity(),
+                        texture: given.texture,
+                        size,
+                        group,
+                        last_used: renders,
+                        owner: Some(given.owner),
+                    },
+                );
+                count_textures(|counters| counters.textures_on_device += 1);
+                return true;
+            }
         }
         if let Some(last) = self.refused_textures.get_mut(&key) {
             *last = renders;
@@ -889,6 +978,7 @@ impl Scene3DWgpuExecutor {
                     matches!(other, BrushTextureKey::Image { identity: other, .. } if *other == identity)
                         && texture.last_used != renders
                         && texture.size == size
+                        && texture.owner.is_none()
                 })
                 .map(|(other, _)| *other),
             _ => None,
@@ -944,15 +1034,20 @@ impl Scene3DWgpuExecutor {
             view_formats: &[],
         });
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+        let group = self.texture_group(device, &view, label);
+        BrushTexture { identity, texture, size, group, last_used: self.renders, owner: None }
+    }
+
+    /// The bind group of a brush texture: its view and the sampler.
+    fn texture_group(&self, device: &wgpu::Device, view: &wgpu::TextureView, label: &str) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some(label),
             layout: &self.texture_layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&view) },
+                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(view) },
                 wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&self.sampler) },
             ],
-        });
-        BrushTexture { identity, texture, size, group, last_used: self.renders }
+        })
     }
 
     /// The buffers of `mesh` on the device, uploaded when its `(id, version)` is new; returns
