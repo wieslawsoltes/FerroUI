@@ -41,12 +41,14 @@ mod i_progress;
 mod styled_value;
 pub mod task;
 pub mod threading;
+mod xml_nesting;
 
 pub use i_disposable::IDisposable;
 pub use subscription::Subscription;
 pub use i_observable::{IObservable, IObserver, ObservableError, SubscribeGuard};
 pub use i_progress::IProgress;
 pub use styled_value::{EnumValue, StyledValue};
+pub use xml_nesting::xml_nesting_is_within;
 
 #[cfg(test)]
 mod tests;
