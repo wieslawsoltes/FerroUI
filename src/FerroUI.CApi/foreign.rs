@@ -892,7 +892,7 @@ pub unsafe extern "C" fn ferro_property_register(
 /// A styled (or attached) property of `T` owned by [`ForeignProperties`] and registered on the
 /// class `owner` too, where it is found by name (and on its subclasses; `Owner.Name` for an
 /// attached one).
-fn register<T: ferroui_base::PropertyValue>(
+fn register<T: ferroui_base::StyledValue>(
     owner: &'static TypeInfo,
     name: &str,
     default: T,
