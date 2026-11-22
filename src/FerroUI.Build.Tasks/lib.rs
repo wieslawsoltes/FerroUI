@@ -247,7 +247,7 @@ use ferroui_markup_xaml_loader::rust_emitter::{
 use crate::theme_roots::{
     binary_roots, compile_bindings_from_manifest, explain_kept_units, kept_units_across, live_class_references, parts_constructor,
     parts_static_name, parts_static_names, source_roots, unit_static_path, verify_parts_constructor, why_kept_listing,
-    BuildTarget, Roots, ThemeTrimming, TypeGraph,
+    managed_file_chooser_roots, BuildTarget, Roots, ThemeTrimming, TypeGraph,
 };
 
 /// The name of the module of the default group ([`Build::compile_xaml`]).
@@ -1322,6 +1322,9 @@ impl Build {
                 roots.types.extend(class_roots.types.iter().cloned());
                 roots.keys.extend(class_roots.keys.iter().cloned());
             }
+            // The chooser a file picker falls back to is named by no document or source (#612).
+            let from_file_pickers = managed_file_chooser_roots(&source_references, &roots, &graph, target.as_ref());
+            roots.extend(from_file_pickers.clone());
             // Which target named each root of the sources (#847), for whoever traces a kept unit to
             // the line that named it: the types and the keys of each production target.
             let mut traced = String::new();
@@ -1383,6 +1386,7 @@ impl Build {
                     ("documents", &document_roots),
                     ("sources", &from_sources),
                     ("dependencies", &from_dependencies),
+                    ("file picker fallback", &from_file_pickers),
                 ];
                 sources.extend(from_live_classes.iter().map(|(label, class_roots)| (label.as_str(), class_roots)));
                 sources.push(("other themes used together", from_others));

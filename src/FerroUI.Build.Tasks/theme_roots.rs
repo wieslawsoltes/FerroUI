@@ -18,7 +18,8 @@
 //!   reload, the designer, DevTools, Inspect) keep every unit. What the compiled documents of the
 //!   dependencies name is a root too (the `references` of their `.xamlmeta`), but what the
 //!   documents of an ordinary class of a dependency name only where the class is live
-//!   ([`live_class_references`], #1002).
+//!   ([`live_class_references`], #1002). Where a file picker can fall back to the managed file
+//!   chooser, its control is a root ([`managed_file_chooser_roots`], #612).
 //! - **Live types.** A live type makes its base classes live, and the classes its code creates
 //!   (the creates edges of the type models, `TypeModel::creates`: `ListBox` creates
 //!   `ListBoxItem`), transitively ([`TypeGraph::live`]).
@@ -432,6 +433,56 @@ pub fn source_roots<'t>(references: &SourceReferences, themes: impl IntoIterator
         types: references.names.iter().filter(|name| type_keys.contains(name.as_str()) || graph.is_class(name)).cloned().collect(),
         keys: references.strings.iter().filter(|text| keys.contains(text.as_str())).cloned().collect(),
         ..Roots::default()
+    }
+}
+
+/// The control the managed storage provider shows, whose theme is a root where a file picker can
+/// fall back to it ([`managed_file_chooser_roots`]).
+pub const MANAGED_FILE_CHOOSER: &str = "ManagedFileChooser";
+
+/// The names of the sources that install or construct the managed storage provider, on any target
+/// (`.use_managed_system_dialogs()`, as the scanner records a call, in the case of a type).
+const MANAGED_PROVIDER_NAMES: [&str; 3] =
+    ["ManagedStorageProvider", "UseManagedSystemDialogs", "UseManagedSystemDialogsWith"];
+
+/// `TopLevel.StorageProvider`, as sources (`.storage_provider()`) and documents name it.
+const STORAGE_PROVIDER: &str = "StorageProvider";
+
+/// The classes of the libraries whose code opens a picker of the storage provider of their window.
+const STORAGE_PROVIDER_CLASSES: [&str; 3] = ["PickerActionBase", "PickerBehaviorBase", "ScreenshotAction"];
+
+/// Whether the storage provider of a window on `target` ends in the managed file chooser: the X11
+/// and Wayland backends fall back to it without a portal or GTK. Without a target (outside a build
+/// script) it may.
+fn storage_provider_falls_back(target: Option<&BuildTarget>) -> bool {
+    target.is_none_or(|target| {
+        target.arch != "wasm32" && !matches!(target.os.as_str(), "macos" | "ios" | "android" | "windows")
+    })
+}
+
+/// The root of the theme of the managed file chooser, where the application can reach the control
+/// though nothing names it: it constructs or installs the managed storage provider, or, on a
+/// target whose backends fall back to it, it uses the storage provider of a window (`roots` are
+/// the roots found so far: the keys of its documents and its live classes). None otherwise, so an
+/// application without a file picker does not keep the theme.
+pub fn managed_file_chooser_roots(
+    references: &SourceReferences,
+    roots: &Roots,
+    graph: &TypeGraph,
+    target: Option<&BuildTarget>,
+) -> Roots {
+    let installs = MANAGED_PROVIDER_NAMES.iter().any(|name| references.names.contains(*name));
+    let reaches = || {
+        references.names.contains(STORAGE_PROVIDER)
+            || roots.keys.contains(STORAGE_PROVIDER)
+            || roots.types.iter().any(|type_| {
+                let live = graph.live(type_);
+                STORAGE_PROVIDER_CLASSES.iter().any(|class| live.contains(*class))
+            })
+    };
+    match installs || (storage_provider_falls_back(target) && reaches()) {
+        true => Roots { names: BTreeSet::from([MANAGED_FILE_CHOOSER.to_string()]), ..Roots::default() },
+        false => Roots::default(),
     }
 }
 

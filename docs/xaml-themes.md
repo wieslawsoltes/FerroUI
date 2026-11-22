@@ -311,7 +311,13 @@ needs. The build computes the table from the roots:
    creates its drawn decorations (`WindowDrawnDecorations`, with the caption buttons and the title
    bar resources they need) everywhere but on macOS, iOS, Android and the browser, so applications
    for those targets keep that theme only when they name it;
-6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
+6. the names in `[package.metadata.ferroui] theme-roots = [..]`;
+7. `ManagedFileChooser`, where a file picker can reach it though nothing names it (#612): on every
+   target when the sources install or construct the managed dialogs
+   (`use_managed_system_dialogs`, `ManagedStorageProvider`), and on the targets whose backends
+   fall back to it without a portal or GTK (X11 and Wayland) when the sources or documents use
+   `TopLevel.StorageProvider` or a picker action or behavior is live. An application without a
+   file picker does not keep it.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
 `$OUT_DIR/xaml/theme_parts.txt`. `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
@@ -374,7 +380,7 @@ them to the applications that depend on it. The documents of a class group that 
 includes root nothing.
 
 The roots are the ones of the list above without the documents: what the sources name and call
-(4), what the code of the live classes creates (5), and `theme-roots` (6). The build reads the
+(4), what the code of the live classes creates (5), `theme-roots` (6) and the chooser (7). The build reads the
 sources from the root file of the crate (`src/lib.rs`, else `lib.rs`, else `src/main.rs`) and
 the modules it declares, and from the root file of each binary of the package (#847). The table is named after
 the full name of the class of the theme, in upper case. With `theme-trimming = false` it holds
