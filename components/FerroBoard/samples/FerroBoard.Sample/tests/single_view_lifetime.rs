@@ -11,7 +11,6 @@ use ferroui_controls::{
 };
 use ferroui_headless::{FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions};
 use std::{
-    any::Any,
     cell::{Cell, RefCell},
     path::PathBuf,
     rc::Rc,
