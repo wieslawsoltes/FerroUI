@@ -286,7 +286,8 @@ impl NumberFormatInfo {
 
     /// The format information of the current culture.
     pub fn current_info() -> Rc<NumberFormatInfo> {
-        Self::for_culture(&CultureInfo::current_formatting())
+        // A culture with conventions of its own answers with them.
+        CultureInfo::current_formatting().number_format()
     }
 
     /// The given format information, or that of the current culture when

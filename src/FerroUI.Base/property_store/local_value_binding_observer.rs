@@ -4,7 +4,7 @@ use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError, Subs
 use crate::{
     BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledValue, WeakRef,
 };
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// The source keeps its observer weakly. The value store holds the observer
