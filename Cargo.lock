@@ -1979,6 +1979,7 @@ version = "0.6.0-preview.1"
 dependencies = [
  "corvus-regex-ecma262",
  "fancy-regex",
+ "ferroui-system",
  "icu_casemap",
  "icu_normalizer",
  "quick-xml",
@@ -2982,7 +2983,9 @@ dependencies = [
 name = "ferroui-system"
 version = "0.6.0-preview.1"
 dependencies = [
+ "icu_locale_core",
  "smallvec",
+ "url",
 ]
 
 [[package]]
