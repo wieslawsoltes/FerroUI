@@ -332,7 +332,7 @@ impl Stages {
         let size = control.bounds().size();
         let point = Point::new(size.width * request.x, size.height * request.y);
         let text = stage.configuration.text.environment()?;
-        if DesignTextEnvironment::run(text.as_ref(), || self.playback.interact(&self.board, id, point))? {
+        if DesignTextEnvironment::run(text.as_ref(), || self.playback.interact(id, point))? {
             return Ok(json!({"prototype":self.playback.scene()}));
         }
         if stage.configuration.mode == PreviewStageMode::Live {
@@ -383,6 +383,7 @@ impl Stages {
 
     pub(crate) fn cancel_editor_pointer_input(&mut self) {
         self.board.cancel_pointer_input(PreviewStagePointerOrigin::Editor);
+        self.playback.cancel_editor_contacts();
         Dispatcher::ui_thread().run_jobs(None);
     }
 
@@ -453,10 +454,10 @@ impl Stages {
     }
 }
 
-struct StageWindow(Ref<Window>);
+pub(crate) struct StageWindow(Ref<Window>);
 
 impl StageWindow {
-    fn new(control: Ref<Control>) -> Self {
+    pub(crate) fn new(control: Ref<Control>) -> Self {
         let window = Window::new();
         window.set_window_decorations(WindowDecorations::None);
         window.set_size_to_content(SizeToContent::WIDTH_AND_HEIGHT);

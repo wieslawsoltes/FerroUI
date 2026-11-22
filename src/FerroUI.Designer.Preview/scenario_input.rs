@@ -80,6 +80,8 @@ pub(crate) fn execute(host: &Ref<Control>, step: ScenarioStep) -> Result<String,
         }
         ScenarioStep::ExpectScreenshot { .. } => unreachable!(),
         ScenarioStep::ActivateLink { .. }
+        | ScenarioStep::PressActiveKey { .. }
+        | ScenarioStep::ExpectFocus { .. }
         | ScenarioStep::ExpectStage { .. }
         | ScenarioStep::ExpectOverlay { .. } => {
             Err("This step requires a prototype stage set".into())

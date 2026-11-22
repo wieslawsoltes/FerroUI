@@ -613,6 +613,9 @@ impl PreviewPrototypeSession {
     pub fn flow(&self) -> &str {
         &self.flow
     }
+    pub fn graph(&self) -> &PreviewPrototype {
+        &self.graph
+    }
     /// The only stage that accepts an interaction: the top overlay, or the screen.
     pub fn current(&self) -> PreviewStageId {
         self.overlays

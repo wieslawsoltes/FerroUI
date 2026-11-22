@@ -69,6 +69,16 @@ pub struct ScenarioPrototype {
     /// Remap a saved source URI to a document in the selected test workspace.
     #[serde(default)]
     pub sources: BTreeMap<String, ScenarioStageSource>,
+    #[serde(default)]
+    pub capture: ScenarioPrototypeCapture,
+}
+
+#[derive(Clone, Copy, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum ScenarioPrototypeCapture {
+    #[default]
+    ActiveLayer,
+    Artboard,
 }
 
 #[derive(Debug, Deserialize)]
@@ -106,6 +116,8 @@ pub enum ScenarioStep {
         selector: String,
         key: String,
     },
+    PressActiveKey { key: String },
+    ExpectFocus { name: String, role: String },
     ExpectProperty {
         selector: String,
         property: String,

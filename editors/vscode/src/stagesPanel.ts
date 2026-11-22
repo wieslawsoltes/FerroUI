@@ -6,7 +6,7 @@ import type { BuiltProjects } from './builtProjects';
 import { DesignerDependencies, dirtyPreviewSources, xamlPath } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StagePointerInput, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, PrototypeInput, PrototypeScene, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StagePointerInput, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { pickStageCheck } from './stageChecksPicker';
 import { dimensions, editStageEnvironment } from './stageEnvironmentPicker';
 import { editPrototype } from './stagePrototypeEditor';
@@ -90,6 +90,9 @@ export class StagesPanel implements vscode.Disposable {
 class StageSession {
     private readonly dependencies = new DesignerDependencies(false, () => this.schedule());
     private readonly inputImages = new Map<number, { timer: ReturnType<typeof setTimeout>; followup?: () => void }>();
+    private prototypeFrameRequest?: { client: NativePreview; model: StageModel; frame: number };
+    private prototypeFrameTimer?: ReturnType<typeof setTimeout>;
+    private capturingPrototype = false;
     private readonly subscriptions: vscode.Disposable[];
     private cacheKey: string;
     private primary: vscode.Uri;
@@ -299,15 +302,86 @@ class StageSession {
         return { action, epoch, name, width, height, dark, source: stageDocument(source, document.uri), localSources };
     }
 
-    async controlPrototype(epoch: number, command: PrototypeCommand, signal: AbortSignal) {
+    async controlPrototype(epoch: number, command: PrototypeCommand, signal: AbortSignal, frame?: number) {
         const model = await this.wait(signal);
-        const generation = this.generation;
         if (model.epoch !== epoch) throw new Error('Read the current stage set before controlling its flow.');
-        const scene = await (await this.getClient()).stagePrototype(epoch, command);
-        if (generation !== this.generation) throw new Error('The stage set changed during playback.');
-        model.prototype = scene;
-        this.post({ type: 'prototype', scene });
+        const client = await this.getClient();
+        this.checkPrototypeFrame(model, frame);
+        const scene = await client.stagePrototype(epoch, command, frame);
+        this.checkPrototypeFrame(model);
+        this.publishPrototype(client, model, scene);
         return scene;
+    }
+
+    async prototypeImage(frame: number, signal: AbortSignal) {
+        const model = await this.wait(signal);
+        const client = await this.getClient();
+        this.checkPrototypeFrame(model, frame);
+        const image = await client.prototypeImage(frame);
+        this.checkPrototypeFrame(model, frame);
+        signal.throwIfAborted();
+        return image;
+    }
+
+    async prototypeInput(frame: number, input: PrototypeInput, signal: AbortSignal) {
+        const model = await this.wait(signal);
+        const client = await this.getClient();
+        signal.throwIfAborted();
+        return this.applyPrototypeInput(client, model, frame, input, true);
+    }
+
+    private async applyPrototypeInput(client: NativePreview, model: StageModel, frame: number, input: PrototypeInput, automation: boolean) {
+        this.checkPrototypeFrame(model, frame);
+        const report = await client.prototypeInput(frame, input, automation);
+        this.checkPrototypeFrame(model, frame);
+        this.publishPrototype(client, model, report.scene);
+        if (report.scene?.frame !== undefined && (input.kind === 'keyboard' || report.scene.frame !== frame)) {
+            this.post({ type: 'prototypeFocus', frame: report.scene.frame, focus: report.focus });
+        }
+        return report;
+    }
+
+    private checkPrototypeFrame(model: StageModel, frame?: number): void {
+        if (this.model !== model || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version
+            || this.disposed || (frame !== undefined && model.prototype?.frame !== frame)) {
+            throw new Error('The prototype changed. Use its current frame.');
+        }
+    }
+
+    private publishPrototype(client: NativePreview, model: StageModel, scene: PrototypeScene | null): void {
+        const previous = model.prototype;
+        model.prototype = scene;
+        if (previous?.frame !== scene?.frame || scene?.frame === undefined || previous?.links?.join() !== scene?.links?.join()
+            || previous?.diagnostics?.join('\n') !== scene?.diagnostics?.join('\n')) {
+            this.post({ type: 'prototype', scene });
+        }
+        if (client.capabilities.prototypeNativePlayer && scene?.frame !== undefined) {
+            this.prototypeFrameRequest = { client, model, frame: scene.frame };
+            this.schedulePrototypeFrame();
+        }
+    }
+
+    private schedulePrototypeFrame(): void {
+        if (this.disposed || !this.prototypeFrameRequest || this.capturingPrototype || this.prototypeFrameTimer) return;
+        this.prototypeFrameTimer = setTimeout(async () => {
+            this.prototypeFrameTimer = undefined;
+            const request = this.prototypeFrameRequest;
+            this.prototypeFrameRequest = undefined;
+            if (!request || this.disposed) return;
+            const { client, model, frame } = request;
+            this.capturingPrototype = true;
+            try {
+                this.checkPrototypeFrame(model, frame);
+                const image = await client.prototypeImage(frame);
+                this.checkPrototypeFrame(model, frame);
+                this.post({ type: 'prototypeImage', frame, image });
+            } catch (error) {
+                if (this.model === model && this.modelGeneration === this.generation && model.prototype?.frame === frame) this.report(error);
+            } finally {
+                this.capturingPrototype = false;
+                this.schedulePrototypeFrame();
+            }
+        }, 24);
     }
 
     private schedule(): void {
@@ -378,6 +452,7 @@ class StageSession {
         }
         if (generation !== this.generation || this.model !== model || this.disposed) return;
         this.post({ type: 'model', uri: this.document.uri.toString(), model });
+        this.publishPrototype(client, model, model.prototype);
         for (const stage of model.stages) {
             if (generation !== this.generation || this.disposed) break;
             if (stage.rendered_revision === null) continue;
@@ -405,8 +480,12 @@ class StageSession {
             if (message.type === 'prototype') {
                 const command = message.command ?? await this.chooseFlow(model);
                 if (command && generation === this.generation) {
-                    await this.controlPrototype(model.epoch, command, AbortSignal.timeout(15_000));
+                    await this.controlPrototype(model.epoch, command, AbortSignal.timeout(15_000), message.frame);
                 }
+                return;
+            }
+            if (message.type === 'prototypeInput') {
+                await this.applyPrototypeInput(client, model, message.frame, message.input, false);
                 return;
             }
             if (message.type === 'editPrototype' || message.type === 'revealTrigger') {
@@ -475,6 +554,7 @@ class StageSession {
             if (!change || generation !== this.generation || model !== this.model) return;
             await this.applyChange(change, AbortSignal.timeout(15_000));
         } catch (error) {
+            if (message.type === 'prototypeInput' && model.prototype?.frame !== message.frame) return;
             if (message.type !== 'contact' || (message.input.phase === 'down' && generation === this.generation)) this.report(error);
         }
     }
@@ -613,6 +693,8 @@ class StageSession {
     private dispose(): void {
         this.disposed = true;
         clearTimeout(this.timer);
+        clearTimeout(this.prototypeFrameTimer);
+        this.prototypeFrameRequest = undefined;
         this.inputImages.forEach(({ timer }) => clearTimeout(timer));
         this.inputImages.clear();
         void this.client?.then(client => client.dispose(), () => {});

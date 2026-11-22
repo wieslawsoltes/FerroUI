@@ -96,7 +96,7 @@ fn matrix_schema() -> Value {
     )
 }
 
-fn pointer_schema() -> Value {
+pub(super) fn pointer_schema() -> Value {
     let axis = json!({"type":"number","minimum":-1024,"maximum":1024});
     let tilt = json!({"type":"number","minimum":-90,"maximum":90});
     s::object(json!({
@@ -105,6 +105,14 @@ fn pointer_schema() -> Value {
         "x":axis,"y":axis,"pressure":{"type":"number","minimum":0,"maximum":1},
         "tiltX":tilt,"tiltY":tilt,"twist":{"type":"number","minimum":0,"exclusiveMaximum":360}
     }), &["contact","phase","device","x","y"])
+}
+
+pub(super) fn keyboard_schema() -> Value {
+    json!({"oneOf":[
+        s::object(json!({"kind":{"const":"focus"}}), &["kind"]),
+        s::object(json!({"kind":{"const":"key"},"key":bounded_string(64)}), &["kind","key"]),
+        s::object(json!({"kind":{"const":"text"},"text":bounded_string(8192)}), &["kind","text"])
+    ]})
 }
 
 fn manifest_schema() -> Value {
@@ -180,11 +188,7 @@ pub(super) fn tools() -> Vec<Value> {
         "designer_preview_stage_input",
         "Focus the current Live stage or send it a key gesture or text. Use the model and stage epoch from designer_preview_stages. Returns the focused control's accessible name and role. Requires allow_input and allow_property_writes.",
         s::object(json!({"stage":s::id(),"expected_model":bounded_string(16),"expected_epoch":s::revision(),
-            "input":{"oneOf":[
-                s::object(json!({"kind":{"const":"focus"}}), &["kind"]),
-                s::object(json!({"kind":{"const":"key"},"key":bounded_string(64)}), &["kind","key"]),
-                s::object(json!({"kind":{"const":"text"},"text":bounded_string(8192)}), &["kind","text"])
-            ]}}), &["stage","expected_model","expected_epoch","input"]),
+            "input":keyboard_schema()}), &["stage","expected_model","expected_epoch","input"]),
         true,
     );
     input["annotations"]["destructiveHint"] = json!(false);

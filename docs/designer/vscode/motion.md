@@ -343,3 +343,13 @@ The pointer choice travels with the stage set and applies to the card’s retain
 Switch the Stages board to **Prototype**. Each flow lists its starting stage, which the play button also announces to screen readers. Hover a shortened name in a narrow tab to read it in full. Use the play button beside a flow or choose **Play Prototype** from the toolbar.
 
 Drag a stage title onto a destination or choose **Add interaction** to add a source-anchored trigger. Choose a native control, set the target stage or overlay, and use **Reveal trigger** to review the authored source. An overlay can set its placement, dimming, and dismissal. Save the stage set to reopen the same graph in Studio or run a [prototype scenario](runtime.md#run-a-native-ui-scenario). [Prototype authoring](../prototyping.md)
+
+### Operate a native prototype
+
+1. Play a flow and click a native control, or choose **Keyboard input** from the playback toolbar. Type into an active field or use Tab and Shift+Tab to move. Press Enter or Space to activate a focused interaction.
+2. Open an overlay. Its native controls receive focus, and Tab cycles within the overlay. Open a second overlay to test a stacked dialog. Use Escape or **Close overlay** to return to the previous layer. Its opener regains focus when it is still available.
+3. **Back** closes the top overlay first and then returns through the flow’s screen history. **Restart prototype** returns to the flow’s start while retaining your playback values. **Exit Prototype** followed by Play starts a fresh run.
+
+The native artboard includes the base view, clipped overlays, and dimming. The playback toolbar and named interactions stay available for design review. While typing in a modal, the status on the artboard announces the focused control’s accessible name and role. [Prototype automation](reference.md#drive-the-native-prototype-player)
+
+![The Accounts view stays visible behind the native Account settings modal, where the Company edit control has focus](../images/vscode-prototype-modal.png)

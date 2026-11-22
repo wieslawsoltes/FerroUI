@@ -12,6 +12,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     padding: 8px 10px;
     border: 1px solid var(--line);
     border-radius: 5px;
+    white-space: pre-line;
     background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
 }
 #stage-cards, .prototype-stages {
@@ -189,6 +190,21 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 .prototype-location .codicon, .prototype-current, .prototype-trigger .codicon { color: var(--muted); }
 .prototype-triggers { flex-wrap: wrap; }
 .prototype-trigger { background: var(--vscode-editorWidget-background, var(--vscode-editor-background)); border-color: var(--line); }
+.prototype-artboard {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-block-size: 180px;
+    padding: clamp(8px, 2vw, 18px);
+}
+.prototype-artboard img {
+    display: block;
+    max-inline-size: 100%;
+    max-block-size: calc(100vh - 100px);
+    object-fit: contain;
+    box-shadow: 0 0 0 1px var(--line), 0 8px 24px #0004;
+}
+.prototype-artboard[data-keyboard] img { outline: 2px solid var(--vscode-focusBorder); }
 #stage-cards.prototype-view {
     display: block;
     position: relative;

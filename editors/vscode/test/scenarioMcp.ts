@@ -40,9 +40,10 @@ export async function verifyScenarioMcp({ invoke, content }: McpFixture): Promis
         await invoke('ferroui_scenario_run', { path: prototype, accept_baselines }));
     const recorded = await runPrototype(true);
     assert.equal(recorded.passed, true, JSON.stringify(recorded.steps));
-    assert.equal(recorded.steps.length, 10);
+    assert.equal(recorded.steps.length, 11);
     assert.match(recorded.steps[4].message, /Showing overlay "Notes"/);
-    assert.match(recorded.steps[8].message, /No overlay is open/);
+    assert.match(recorded.steps[6].message, /Focused Button "Close notes"/);
+    assert.match(recorded.steps[9].message, /No overlay is open/);
     const replayed = await runPrototype();
     assert.equal(replayed.passed, true, JSON.stringify(replayed.steps));
     console.log('VS Code ran native input and accessibility assertions, accepted a PNG baseline and detected a real visual diff');

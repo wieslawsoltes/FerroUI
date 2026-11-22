@@ -29,7 +29,7 @@ import type { ScenarioRunner } from './scenarioRunner';
 import { renameRsxControl } from './rsxRename';
 import type { RuntimeTarget } from './runtimeConnections';
 import type { StagesPanel } from './stagesPanel';
-import type { PrototypeCommand, StageChange, StageContact, StageInput } from './stagesProtocol';
+import type { PrototypeCommand, PrototypeInput, StageChange, StageContact, StageInput } from './stagesProtocol';
 import type { PaletteEdit, StylesPage } from './stylesProtocol';
 import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
@@ -108,8 +108,9 @@ interface Arguments extends CanvasAction, CargoSelection {
     selection?: number[];
     stage?: number;
     expected_epoch?: number;
+    expected_frame?: number;
     debug_configuration?: string;
-    input?: CanvasInteraction | StageContact | StageInput;
+    input?: CanvasInteraction | PrototypeInput | StageContact | StageInput;
     kind?: string;
     language?: 'xaml' | 'rsx';
     fixture?: string;
@@ -566,7 +567,13 @@ export class AgentTools {
                 id: args.stage!, epoch: args.expected_epoch!, input: args.input as StageContact,
             }, signal);
             case 'designer_stage_change': return this.stages.board(document.uri).applyChange({ ...args.arguments, epoch: args.expected_epoch! } as StageChange, signal);
-            case 'designer_stage_prototype': return this.stages.board(document.uri).controlPrototype(args.expected_epoch!, args.arguments as PrototypeCommand, signal);
+            case 'designer_stage_prototype': return this.stages.board(document.uri).controlPrototype(args.expected_epoch!, args.arguments as PrototypeCommand, signal, args.expected_frame);
+            case 'designer_stage_prototype_image': {
+                const image = await this.stages.board(document.uri).prototypeImage(args.expected_frame!, signal);
+                return { mimeType: 'image/png', data: image.png, width: image.width, height: image.height };
+            }
+            case 'designer_stage_prototype_input': return this.stages.board(document.uri)
+                .prototypeInput(args.expected_frame!, args.input as PrototypeInput, signal);
         }
         return describe(panel);
     }

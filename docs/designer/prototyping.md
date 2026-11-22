@@ -360,6 +360,10 @@ views, document drafts, dependency snapshots or application input permissions.
 | --- | --- |
 | `designer_prototype` | Read the graph, optimistic model, flow/reachability and playback state; optionally include source element choices for a stage. |
 | `designer_prototype_action` | Apply `set_graph`, or execute `play`, `activate`, `back`, `close_overlay`, `restart` and `stop` against `expected_model`. |
+| `designer_prototype_input` | Send keyboard, text, or pointer input using `expected_model` and the current playback `epoch` as `expected_frame`. The active native layer owns focus and pointer routing. |
+| `designer_prototype_image` | Capture the accepted native artboard and its modal overlays. Supply `expected_model` and `expected_frame`. |
+
+VS Code mounts the same native player. The host supplies the toolbar and presents the native artboard as one image. Native focus, placement, clipping, and dismissal follow the same rules. For a saved scenario, `pressActiveKey` follows the active layer, `expectFocus` checks the control’s accessible name and role, and `prototype.capture: "artboard"` compares the modal composition. [VS Code playback](vscode/motion.md#operate-a-native-prototype) · [VS Code agent tools](vscode/reference.md#drive-the-native-prototype-player)
 
 Read operations are observational: they do not construct previews, advance playback or
 apply pending source. Mutations use the host's write permission. `play`, `activate`, `back`,

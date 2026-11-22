@@ -1,6 +1,8 @@
 //! Native prototype presentation. Application roots and navigation remain host-owned.
 use crate::{
-    PreviewPrototypeOverlayOptions, PreviewStageId, PreviewStageSize,
+    PreviewPrototypeOverlayOptions, PreviewStageBoard, PreviewStageId, PreviewStageKeyboardInput,
+    PreviewStageKeyboardTarget, PreviewStagePointerInput, PreviewStagePointerOrigin,
+    PreviewStagePointerTarget, PreviewStageSize,
     MAX_PREVIEW_PROTOTYPE_OVERLAYS,
 };
 use ferroui_base::input::{
@@ -20,6 +22,7 @@ use ferroui_controls::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use serde::Deserialize;
 
 /// Clipped bounds are expressed in the accepted stage host's logical coordinates.
 #[derive(Clone, Debug, PartialEq)]
@@ -47,6 +50,14 @@ pub enum PreviewPrototypePlayerAction {
     DismissOverlay,
     Restart,
     Exit,
+}
+
+/// Keyboard and pointer input use the active native layer and the accepted artboard.
+#[derive(Deserialize)]
+#[serde(tag = "kind", rename_all = "camelCase", deny_unknown_fields)]
+pub enum PreviewPrototypeInput {
+    Keyboard { input: PreviewStageKeyboardInput },
+    Pointer { input: PreviewStagePointerInput },
 }
 
 type Action = Rc<dyn Fn(PreviewPrototypePlayerAction, u64, Ref<Control>) -> Result<(), String>>;
@@ -101,6 +112,15 @@ pub struct PreviewPrototypePlayerView {
 
 impl PreviewPrototypePlayerView {
     pub fn new(_palette: &Control) -> Rc<Self> {
+        Self::build(false)
+    }
+
+    /// The same native layers and modal behavior with host-owned player chrome.
+    pub fn new_embedded() -> Rc<Self> {
+        Self::build(true)
+    }
+
+    fn build(embedded: bool) -> Rc<Self> {
         let root = Grid::new();
         root.set_name(Some("PreviewPrototypePlayer".into()));
         let keyboard_navigation = KeyboardNavigationHandler::new();
@@ -139,7 +159,9 @@ impl PreviewPrototypePlayerView {
             toolbar.children().add(control);
         }
         header.children().add(toolbar.upcast::<Control>());
-        root.children().add(header.upcast::<Control>());
+        if !embedded {
+            root.children().add(header.upcast::<Control>());
+        }
         let error = text("");
         error.set_name(Some("PrototypePlayerError".into()));
         error.classes().add("designer-error");
@@ -147,7 +169,9 @@ impl PreviewPrototypePlayerView {
         error.set_is_visible(false);
         error.set_margin(Thickness::new(16.0, 0.0, 16.0, 8.0));
         Grid::set_row(&error, 1);
-        root.children().add(error.clone().upcast::<Control>());
+        if !embedded {
+            root.children().add(error.clone().upcast::<Control>());
+        }
         let body = Grid::new();
         body.set_column_definitions(ColumnDefinitions::parse("*,240").unwrap());
         body.set_column_spacing(16.0);
@@ -169,7 +193,9 @@ impl PreviewPrototypePlayerView {
         viewbox.set_stretch_direction(StretchDirection::Both);
         viewbox.set_horizontal_alignment(HorizontalAlignment::Center);
         viewbox.set_vertical_alignment(VerticalAlignment::Center);
-        viewbox.set_child(Some(content.clone().upcast::<Control>()));
+        if !embedded {
+            viewbox.set_child(Some(content.clone().upcast::<Control>()));
+        }
         viewport.set_child(Some(viewbox.upcast::<Control>()));
         body.children().add(viewport.upcast::<Control>());
         let aside = Grid::new();
@@ -207,7 +233,11 @@ impl PreviewPrototypePlayerView {
         Grid::set_row(&scroll, 3);
         aside.children().add(scroll.upcast::<Control>());
         body.children().add(aside.upcast::<Control>());
-        root.children().add(body.upcast::<Control>());
+        if embedded {
+            root.children().add(content.clone().upcast::<Control>());
+        } else {
+            root.children().add(body.upcast::<Control>());
+        }
         let view = Rc::new(Self {
             root,
             _keyboard_navigation: keyboard_navigation,
@@ -293,6 +323,35 @@ impl PreviewPrototypePlayerView {
     pub fn control(&self) -> Ref<Control> {
         self.root.clone().upcast()
     }
+
+    pub fn artboard(&self) -> Ref<Control> {
+        self.content.clone().upcast()
+    }
+
+    pub fn active_plane(&self) -> Option<Ref<Control>> {
+        self.layers.borrow().last().map(|layer| layer.plane.clone().upcast())
+    }
+
+    pub fn keyboard_target(&self, board: &PreviewStageBoard, native: PreviewStageId) -> Result<PreviewStageKeyboardTarget, String> {
+        let epoch = board.stage(native).ok_or("The native stage was removed")?.epoch;
+        board.keyboard_target(native, epoch)?.on_surface(self.active_plane().ok_or("The prototype has no active layer")?)
+    }
+
+    pub fn pointer_target(&self, board: &PreviewStageBoard, native: PreviewStageId,
+        origin: PreviewStagePointerOrigin) -> Result<PreviewStagePointerTarget, String>
+    {
+        let epoch = board.stage(native).ok_or("The native stage was removed")?.epoch;
+        board.pointer_target(native, epoch, origin)?.on_surface(self.artboard())
+    }
+
+    pub fn focus_active_plane(&self) {
+        let focused = FocusManager::get_focus_manager(&self.root).and_then(|manager| manager.get_focused_element());
+        if !self.layers.borrow().last().is_some_and(|layer| {
+            focused.as_ref().is_some_and(|input| contains(&layer.plane, input))
+        }) {
+            self.restore_active_focus();
+        }
+    }
     pub fn on_action(
         &self,
         callback: impl Fn(PreviewPrototypePlayerAction, u64, Ref<Control>) -> Result<(), String>
@@ -308,7 +367,7 @@ impl PreviewPrototypePlayerView {
     /// Bind source controls to the current frame's semantic interaction identities.
     /// Keep the previous frame's bindings until preparation has saved its focus;
     /// the host supplies the new bindings before finalizing the native frame.
-    pub(crate) fn set_hotspot_focus_targets(&self, targets: &[(usize, Ref<InputElement>)]) {
+    pub fn set_hotspot_focus_targets(&self, targets: &[(usize, Ref<InputElement>)]) {
         *self.hotspot_focus_targets.borrow_mut() = targets
             .iter()
             .map(|(link, target)| (*link, target.downgrade()))
@@ -364,7 +423,7 @@ impl PreviewPrototypePlayerView {
 
     /// Attach and measure native layers while their final hotspots are settling.
     /// Focus is saved once and restored by the next successful `update_layers`.
-    pub(crate) fn prepare_layers(
+    pub fn prepare_layers(
         self: &Rc<Self>,
         frame_size: PreviewStageSize,
         layers: &[PreviewPrototypePlayerLayer],

@@ -32,7 +32,9 @@ const graph = new PrototypeGraphView(send, id => {
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     if (data.type === 'status') { report(data.message); return; }
-    if (data.type === 'prototype') { showScene(data.scene); return; }
+    if (data.type === 'prototype') { showScene(data.scene); report(data.scene?.diagnostics?.join('\n') ?? ''); return; }
+    if (data.type === 'prototypeImage') { await player.artboard.present(data.frame, data.image); return; }
+    if (data.type === 'prototypeFocus') { player.artboard.focused(data.frame, data.focus); return; }
     if (data.type === 'inputUnavailable') {
         inputCurrent = false;
         updateInput();
@@ -61,7 +63,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
         }
         graph.update(model);
         showScene(model.prototype);
-        report(keep.size ? '' : 'Add a stage to compare the current design or another workspace view.');
+        report(scene?.diagnostics?.join('\n') || (keep.size ? '' : 'Add a stage to compare the current design or another workspace view.'));
         save.disabled = !keep.size;
         play.disabled = !model.manifest.prototype?.flows.length;
         return;
@@ -70,7 +72,10 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     if (src) graph.updatePreview(data.id, src);
 });
 
-window.addEventListener('blur', () => { for (const card of cards.values()) card.cancelContacts(); });
+window.addEventListener('blur', () => {
+    for (const card of cards.values()) card.cancelContacts();
+    player.artboard.cancelContacts();
+});
 
 function showScene(next: PrototypeScene | null): void {
     if (scene !== next) menu.close();
@@ -81,6 +86,7 @@ function showScene(next: PrototypeScene | null): void {
 
 function updateInput(): void {
     for (const card of cards.values()) card.setInput(model?.keyboardInput === true, model?.pointerInput === true, inputCurrent && !graphOpen);
+    player.artboard.setCurrent(inputCurrent);
 }
 
 function report(message: string): void {
@@ -96,7 +102,7 @@ function switchSurface(open: boolean): void {
 
 function showSurface(): void {
     const showGraph = graphOpen && !scene;
-    root.hidden = showGraph;
+    root.hidden = showGraph || scene?.frame !== undefined;
     graph.show(showGraph);
     tabs.hidden = commands.hidden = Boolean(scene);
     boardTab.setAttribute('aria-pressed', String(!showGraph));

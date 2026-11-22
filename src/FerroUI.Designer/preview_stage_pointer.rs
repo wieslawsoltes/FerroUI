@@ -218,6 +218,16 @@ impl PreviewStageBoard {
 }
 
 impl PreviewStagePointerTarget {
+    /// Route through the composite artboard so the modal plane owns hit testing.
+    pub fn on_surface(mut self, surface: Ref<Control>) -> Result<Self, String> {
+        if !surface.is_visual_ancestor_of(&self.scope) {
+            return Err("The native stage is outside its presentation surface".into());
+        }
+        self.host = surface.clone();
+        self.scope = surface;
+        Ok(self)
+    }
+
     pub fn input(self, input: PreviewStagePointerInput) -> Result<(), String> {
         if self.stream.retired.get() {
             return Err("The stage changed. Use its current frame.".into());

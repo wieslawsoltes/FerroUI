@@ -80,6 +80,15 @@ Stage input requires `ferroui.mcp.allowWrites` and an updated preview helper. It
 
 Read the result with `designer_stage_image`. Contact input requires `ferroui.mcp.allowWrites`. Studio exposes `designer_preview_stage_pointer` with its `expected_model` in place of `session` and requires both `allow_input` and `allow_property_writes`. [Try touch and pen](motion.md#try-touch-and-pen-on-a-stage)
 
+### Drive the native prototype player
+
+1. Read `designer_stages` and use `designer_stage_prototype` with the board’s `expected_epoch` and `arguments: { action: "start", flow: "Account setup" }`. Use the returned `frame` as `expected_frame` for subsequent navigation, input, and capture.
+2. Send `input: { kind: "keyboard", input: { kind: "focus" } }` to `designer_stage_prototype_input` to read the active control. Use the same outer `kind` with `input: { kind: "key", key: "Tab" }` or `input: { kind: "text", text: "Acme" }` to operate the view.
+3. Send `input: { kind: "pointer", input: { contact: 1, phase: "down", device: "mouse", x: 0.5, y: 0.5 } }` to start a contact. Send its later phases with the same contact and frame. Coordinates are fractions of the entire artboard, including the area outside the top overlay.
+4. Call `designer_stage_prototype_image` with `session` and the current `expected_frame` to capture the base and overlays together. Read the frame returned after an interaction opens a new screen or closes an overlay before sending input again.
+
+In Designer Studio, use `designer_prototype_input` and `designer_prototype_image` with `expected_model` and the playback `epoch` as `expected_frame`. [Native player guide](motion.md#operate-a-native-prototype) · [Studio tool reference](../prototyping.md#automation)
+
 ### Wrap controls with MCP
 
 1. Wait for the accepted designer frame with `designer_wait`. Use `designer_select` for one authored control or a consecutive source sibling run.

@@ -4,7 +4,7 @@ import { create, iconButton, labelButton } from './dom';
 const navigationKeys: Record<string, string> = {
     Tab: 'Tab', Enter: 'Enter', ' ': 'Space', Backspace: 'Back', Delete: 'Delete',
     ArrowLeft: 'Left', ArrowRight: 'Right', ArrowUp: 'Up', ArrowDown: 'Down',
-    Home: 'Home', End: 'End', PageUp: 'PageUp', PageDown: 'PageDown',
+    Home: 'Home', End: 'End', PageUp: 'PageUp', PageDown: 'PageDown', Escape: 'Escape',
 };
 
 export class StageKeyboard {
@@ -15,8 +15,10 @@ export class StageKeyboard {
     private composing = false;
 
     constructor(private readonly card: HTMLElement, artboard: HTMLElement, id: number, private readonly returnTo: HTMLElement,
-        private readonly send: (input: StageInput) => void) {
-        const instructions = create('span', 'Tab and Shift+Tab move within the preview. Press Escape to return to the stage toolbar.');
+        private readonly send: (input: StageInput) => void, private readonly nativeEscape = false) {
+        const instructions = create('span', nativeEscape
+            ? 'Tab and Shift+Tab move within the active view. Escape closes an overlay or exits the prototype.'
+            : 'Tab and Shift+Tab move within the preview. Press Escape to return to the stage toolbar.');
         instructions.id = `stage-keyboard-help-${id}`;
         instructions.hidden = true;
         this.capture.className = 'stage-keyboard-capture';
@@ -53,7 +55,7 @@ export class StageKeyboard {
         this.capture.hidden = this.status.hidden = false;
         this.card.dataset.keyboard = 'true';
         this.button.setAttribute('aria-pressed', 'true');
-        this.status.textContent = 'Esc to exit';
+        this.status.textContent = this.shortcut;
         this.capture.focus({ preventScroll: true });
         this.send({ kind: 'focus' });
     }
@@ -61,9 +63,11 @@ export class StageKeyboard {
     focused(focus: StageFocus | null): void {
         if (!this.active) return;
         const message = focus ? [focus.name, focus.role].filter(Boolean).join(' · ') : 'No focusable control';
-        const label = `${message} · Esc to exit`;
+        const label = `${message} · ${this.shortcut}`;
         if (this.status.textContent !== label) this.status.textContent = label;
     }
+
+    private get shortcut(): string { return this.nativeEscape ? 'Esc to go back' : 'Esc to exit'; }
 
     private leave(restore: boolean): void {
         if (!this.active) return;
@@ -77,7 +81,7 @@ export class StageKeyboard {
 
     private keydown(event: KeyboardEvent): void {
         if (event.isComposing || this.composing) return;
-        if (event.key === 'Escape') {
+        if (event.key === 'Escape' && !this.nativeEscape) {
             event.preventDefault();
             event.stopPropagation();
             this.leave(true);

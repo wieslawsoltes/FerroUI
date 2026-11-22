@@ -13,8 +13,6 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 use std::hash::{Hash, Hasher};
 
-#[path = "workspace_prototype_layout.rs"]
-mod layout;
 #[path = "workspace_prototype_player.rs"]
 mod player;
 

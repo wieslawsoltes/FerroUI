@@ -36,6 +36,7 @@ mod source_moves;
 pub use source_moves::PreviewStageSourceMoves;
 #[path = "preview_stage_prototype_elements.rs"]
 mod prototype_elements;
+pub use prototype_elements::PreviewPrototypeSources;
 use layout::StageLayoutHost;
 use includes::{IncludeCatalog, IncludeCatalogs, IncludeSource};
 #[path = "preview_stage_keyboard.rs"]
@@ -483,7 +484,7 @@ impl PreviewStageBoard {
     /// Let an overlay's native content supply its own shape and translucency.
     /// Switching between an overlay and a base screen keeps the native graph,
     /// interaction epochs and live input intact, including a retained failed frame.
-    pub(crate) fn set_prototype_overlay_backing(
+    pub fn set_prototype_overlay_backing(
         &mut self,
         id: PreviewStageId,
         overlay: bool,

@@ -1,4 +1,5 @@
 export type Schema = {
+    oneOf?: readonly Schema[];
     type?: string;
     enum?: readonly string[];
     minimum?: number;
@@ -28,6 +29,13 @@ export function tool(description: string, properties: Record<string, Schema> = {
 }
 
 export function validate(schema: Schema, value: unknown): void {
+    if (schema.oneOf) {
+        const count = schema.oneOf.filter(alternative => {
+            try { validate(alternative, value); return true; }
+            catch { return false; }
+        }).length;
+        if (count !== 1) throw new Error('Expected one matching input form');
+    }
     if (schema.enum && !schema.enum.includes(value as string)) throw new Error('Invalid choice');
     if (schema.type === 'number' || schema.type === 'integer') {
         const n = value as number;

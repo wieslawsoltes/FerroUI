@@ -416,6 +416,34 @@ fn overlay_reports_and_close_commands_are_observational_permission_and_model_gua
 }
 
 #[test]
+fn prototype_agent_input_checks_both_permissions_and_the_active_frame() {
+    let mut services = TestServices::styled_window();
+    let focus = TestServices::real_focus();
+    services.keyboard_device = focus.keyboard_device;
+    services.keyboard_navigation = focus.keyboard_navigation;
+    services.input_manager = focus.input_manager;
+    let _app = UnitTestApplication::start(services);
+    let fixture = Fixture::new();
+    fixture.command(json!({"action":"set_graph","graph":fixture.overlay_graph()}), false).unwrap();
+    fixture.command(json!({"action":"play","flow":"Browse"}), true).unwrap();
+    fixture.command(json!({"action":"activate","link":0}), true).unwrap();
+    let accepted = fixture.read();
+    let focus = json!({"expected_model":accepted["model"],"expected_frame":accepted["playback"]["epoch"],
+        "input":{"kind":"keyboard","input":{"kind":"focus"}}});
+    let tool = "designer_prototype_input";
+    fixture.provider.validate(tool, &focus).unwrap();
+    assert!(fixture.provider.call(tool, &focus, permissions(false, true)).is_err());
+    assert!(fixture.provider.call(tool, &focus, permissions(true, false)).unwrap_err().contains("allow_input"));
+    let result = fixture.provider.call(tool, &focus, permissions(true, true)).unwrap();
+    assert_eq!(result["focus"]["role"], "Edit");
+    assert_eq!(result["playback"]["current"], fixture.second);
+    let mut stale = focus;
+    stale["expected_frame"] = json!(0);
+    assert!(fixture.provider.call(tool, &stale, permissions(true, true)).unwrap_err().contains("current frame"));
+    assert_eq!(fixture.workspace.session().borrow().document().source(), SOURCE);
+}
+
+#[test]
 fn mcp_manifest_v3_remaps_overlay_targets_and_options_without_starting_playback() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let fixture = Fixture::new();

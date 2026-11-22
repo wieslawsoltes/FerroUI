@@ -50,6 +50,7 @@ import { verifyPreviewChecks } from './previewChecksMcp';
 import { verifyStageStates } from './stageStateMcp';
 import { verifyStageKeyboard } from './stageKeyboardMcp';
 import { verifyStagePointer } from './stagePointerMcp';
+import { verifyPrototypeMcp } from './prototypeMcp';
 import { verifyStageContrast } from './stageContrastMcp';
 import { verifyStageText } from './stageTextMcp';
 import { verifyDesignTokens } from './designTokenMcp';
@@ -142,6 +143,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
             input: { kind: 'focus' } })).content[0]?.text ?? '', /allowWrites/);
         assert.match((await invoke('designer_stage_pointer', { session: 1, stage: 1, expected_epoch: 0,
             input: { contact: 1, phase: 'down', device: 'pen', x: 0.5, y: 0.5 } })).content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_stage_prototype_input', { session: 1, expected_frame: 1,
+            input: { kind: 'keyboard', input: { kind: 'focus' } } })).content[0]?.text ?? '', /allowWrites/);
         const hostedKey = { session: 1, expected_generation: 1, expected_revision: 1, expected_sequence: 1,
             arguments: { program: 1, target: 1, property: 'BoxShadow', previous: 2, time: 2, value: '8 14 24 2 #60244B90', easing: 'Linear' } };
         assert.match((await invoke('designer_hosted_keyframe', hostedKey)).content[0]?.text ?? '', /allowWrites/);
@@ -329,6 +332,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyStageStates({ invoke, content });
         await verifyStageKeyboard({ invoke, content });
         await verifyStagePointer({ invoke, content });
+        await verifyPrototypeMcp({ invoke, content });
         await verifyStageContrast({ invoke, content });
         await verifyStageText({ invoke, content });
         await verifyDesignTokens({ invoke, content });

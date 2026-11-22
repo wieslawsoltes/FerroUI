@@ -1,11 +1,12 @@
 //! Observational graph/playback reports and explicitly guarded prototype commands.
 use super::{decode, integer, schema as s, text, Permissions};
 use crate::DesignerWorkspace;
+use base64::Engine;
 use serde_json::{json, Value};
 use std::rc::Rc;
 
 pub(super) fn handles(name: &str) -> bool {
-    matches!(name, "designer_prototype" | "designer_prototype_action")
+    matches!(name, "designer_prototype" | "designer_prototype_action" | "designer_prototype_input" | "designer_prototype_image")
 }
 
 pub(super) fn graph_schema(indices: bool) -> Value {
@@ -73,11 +74,20 @@ pub(super) fn tools() -> Vec<Value> {
     edit["annotations"]["readOnlyHint"] = json!(false);
     edit["annotations"]["destructiveHint"] = json!(true);
     edit["inputSchema"]["required"] = json!(["action", "expected_model"]);
+    let model = json!({"type":"string","maxLength":16});
+    let input = json!({"oneOf":[
+        s::object(json!({"kind":{"const":"keyboard"},"input":super::preview_stages::keyboard_schema()}), &["kind","input"]),
+        s::object(json!({"kind":{"const":"pointer"},"input":super::preview_stages::pointer_schema()}), &["kind","input"])
+    ]});
     vec![
         s::tool("designer_prototype",
             "Read the named flows, source-anchored interactions, reachable screens, original stage IDs and current player history without creating native views, synchronizing source, changing layout or advancing playback. Optional stage includes eligible authored hotspot choices from its existing native map. current_source is false when retained playback no longer matches the workspace. Persist through the preview-stage manifest, which uses remapped stage indices.",
             s::object(json!({"stage":s::id()}), &[]), false),
         edit,
+        s::tool("designer_prototype_image", "Capture the accepted native prototype artboard including its modal stack. Use expected_model and the playback epoch from designer_prototype.",
+            s::object(json!({"expected_model":model,"expected_frame":s::revision()}), &["expected_model","expected_frame"]), false),
+        s::tool("designer_prototype_input", "Send a key, text, or pointer contact to the accepted native prototype. Only the active layer receives input. Use expected_model and the playback epoch from designer_prototype. Requires input and write permission.",
+            s::object(json!({"expected_model":model,"expected_frame":s::revision(),"input":input}), &["expected_model","expected_frame","input"]), true),
     ]
 }
 
@@ -114,6 +124,16 @@ pub(super) fn call(
         return Err(
             "The prototype, player or source changed; read designer_prototype again".into(),
         );
+    }
+    if name == "designer_prototype_image" {
+        let image = workspace.preview_prototype_image(integer(args, "expected_frame")?)?;
+        return Ok(json!({"mimeType":"image/png", "data":base64::engine::general_purpose::STANDARD.encode(image.png),
+            "width":image.pixel_width,"height":image.pixel_height}));
+    }
+    if name == "designer_prototype_input" {
+        if !permissions.allow_input { return Err("Native prototype input requires allow_input".into()); }
+        let focus = workspace.preview_prototype_input(integer(args, "expected_frame")?, decode(args, "input")?)?;
+        return Ok(json!({"focus":focus,"playback":workspace.preview_prototype_playback(),"model":workspace.preview_prototype_model()}));
     }
     let action = text(args, "action")?;
     if matches!(

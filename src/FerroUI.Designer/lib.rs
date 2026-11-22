@@ -66,6 +66,7 @@ mod raster_assets;
 mod preview_host;
 mod preview_prototype;
 mod preview_prototype_editor;
+pub mod preview_prototype_layout;
 mod preview_prototype_player;
 mod preview_prototype_view;
 #[cfg(test)]
@@ -181,7 +182,7 @@ pub use preview_prototype_editor::{
     PreviewPrototypeElementChoice, PreviewPrototypeFlowEditor, PreviewPrototypeLinkEditor,
 };
 pub use preview_prototype_player::{
-    PreviewPrototypeHotspot, PreviewPrototypePlayerAction, PreviewPrototypePlayerLayer,
+    PreviewPrototypeHotspot, PreviewPrototypeInput, PreviewPrototypePlayerAction, PreviewPrototypePlayerLayer,
     PreviewPrototypePlayerView,
 };
 pub use preview_prototype_view::{PreviewPrototypeView, PreviewPrototypeViewAction};
@@ -194,6 +195,7 @@ pub use preview_stages::{
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageKeyboardTarget,
     PreviewStagePointerDevice, PreviewStagePointerInput, PreviewStagePointerOrigin,
     PreviewStagePointerPhase, PreviewStagePointerProfile, PreviewStagePointerTarget,
+    PreviewPrototypeSources,
     PreviewStageAccessibility, PreviewStageAccessibleNode,
 };
 pub use preview_stage_editor::PreviewStageEditor;

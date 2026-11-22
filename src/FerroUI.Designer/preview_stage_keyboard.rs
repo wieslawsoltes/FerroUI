@@ -62,6 +62,15 @@ impl PreviewStageBoard {
 }
 
 impl PreviewStageKeyboardTarget {
+    /// Route through a containing presentation plane so prototype hotspots can own focus.
+    pub fn on_surface(mut self, surface: Ref<Control>) -> Result<Self, String> {
+        if !surface.is_visual_ancestor_of(&self.scope) {
+            return Err("The native stage is outside its presentation plane".into());
+        }
+        self.scope = surface;
+        Ok(self)
+    }
+
     pub fn input(
         self,
         action: PreviewStageKeyboardInput,
@@ -71,23 +80,24 @@ impl PreviewStageKeyboardTarget {
                 let top =
                     TopLevel::get_top_level(Some(&self.scope)).ok_or("Mount the stage first")?;
                 self.dispatch(&top, action)?;
-                Ok(self
-                    .focused(&top)
-                    .and_then(|input| input.cast::<Control>())
-                    .map(|control| {
-                        let peer = ControlAutomationPeer::create_peer_for_element(&control);
-                        let name = peer.get_name();
-                        PreviewStageFocus {
-                            name: if name.is_empty() {
-                                control.name().unwrap_or_default()
-                            } else {
-                                name
-                            },
-                            role: format!("{:?}", peer.get_automation_control_type()),
-                        }
-                    }))
+                Ok(self.describe_focus(&top))
             })
         }))
+    }
+
+    pub fn current_focus(&self) -> Option<PreviewStageFocus> {
+        let top = TopLevel::get_top_level(Some(&self.scope))?;
+        self.describe_focus(&top)
+    }
+
+    fn describe_focus(&self, top: &TopLevel) -> Option<PreviewStageFocus> {
+        let control = self.focused(top)?.cast::<Control>()?;
+        let peer = ControlAutomationPeer::create_peer_for_element(&control);
+        let name = peer.get_name();
+        Some(PreviewStageFocus {
+            name: if name.is_empty() { control.name().unwrap_or_default() } else { name },
+            role: format!("{:?}", peer.get_automation_control_type()),
+        })
     }
 
     fn dispatch(&self, top: &TopLevel, action: PreviewStageKeyboardInput) -> Result<(), String> {
@@ -130,9 +140,9 @@ impl PreviewStageKeyboardTarget {
     }
 
     fn contains(&self, input: &Ref<InputElement>) -> bool {
-        self.scope
-            .upcast_ref::<Visual>()
-            .is_visual_ancestor_of(input.upcast_ref::<Visual>())
+        let scope = self.scope.upcast_ref::<Visual>();
+        scope == input.upcast_ref::<Visual>()
+            || scope.is_visual_ancestor_of(input.upcast_ref::<Visual>())
     }
 
     fn move_focus(&self, from: Option<&Ref<InputElement>>, modifiers: KeyModifiers) {

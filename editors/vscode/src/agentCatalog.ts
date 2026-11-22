@@ -3,6 +3,7 @@ import { hostedPaletteCatalog } from './hostedPaletteCatalog';
 import { hostedStylesCatalog } from './hostedStylesCatalog';
 import { hostedTemplateCatalog } from './hostedTemplateCatalog';
 import { fileMoveCatalog, renameCatalog, resourceMoveCatalog, workspaceCatalog } from './workspaceCatalog';
+import { prototypeInput, stageContactInput, stageKeyboardInput } from './stageInputCatalog';
 
 const node = integer(1);
 const session = { session: integer(1) };
@@ -297,22 +298,17 @@ export const agentCatalog = {
     designer_stage_fixtures: tool('Read the named fixtures of a current stage. Use designer_stage_change with design_time_data and design_fixture to choose one.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_input: tool('Focus an Interact stage or send it a key gesture or text. Pass its current ID and epoch. Returns the focused control’s accessible name and role.',
-        { ...session, stage: node, expected_epoch: integer(0), input: { type: 'object', additionalProperties: false, required: ['kind'],
-            properties: { kind: choice('focus', 'key', 'text'), key: { type: 'string', maxLength: 64 },
-                text: { type: 'string', maxLength: 8192 } } } }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
+        { ...session, stage: node, expected_epoch: integer(0), input: stageKeyboardInput }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
     designer_stage_pointer: tool('Send a primary pointer contact to an Interact stage. Start inside the artboard with normalized coordinates and its current epoch, then move, release, or cancel using the same contact and device. The stage’s explicit pointer profile takes precedence.',
-        { ...session, stage: node, expected_epoch: integer(0), input: { type: 'object', additionalProperties: false,
-            required: ['contact', 'phase', 'device', 'x', 'y'], properties: {
-                contact: integer(0, 4294967295), phase: choice('down', 'move', 'up', 'cancel'), device: choice('mouse', 'touch', 'pen'),
-                x: { type: 'number', minimum: -1024, maximum: 1024 }, y: { type: 'number', minimum: -1024, maximum: 1024 },
-                pressure: { type: 'number', minimum: 0, maximum: 1 },
-                tiltX: { type: 'number', minimum: -90, maximum: 90 }, tiltY: { type: 'number', minimum: -90, maximum: 90 },
-                twist: { type: 'number', minimum: 0, exclusiveMaximum: 360 },
-            } } }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
+        { ...session, stage: node, expected_epoch: integer(0), input: stageContactInput }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
     designer_stage_change: tool('Apply a board action. Use update with id and the complete configuration. Hosts with textEnvironment support text.locale and text.scale_percent. Hosts with pointerInput support pointer_input set to automatic, touch, or pen. Use add with name, width, height, dark and optional sourcePath, remove or refresh with id, or setPrototype with a graph using zero-based stage indices.',
         { ...session, expected_epoch: integer(0), arguments: object }, ['session', 'expected_epoch', 'arguments'], true, false),
-    designer_stage_prototype: tool('Drive the stage-set prototype using start with flow, activate with link index, back, closeOverlay, restart or stop.',
-        { ...session, expected_epoch: integer(0), arguments: object }, ['session', 'expected_epoch', 'arguments'], true, false),
+    designer_stage_prototype: tool('Drive the stage-set prototype using start with flow, activate with link index, back, closeOverlay, restart or stop. Use the returned frame for subsequent input and navigation.',
+        { ...session, expected_epoch: integer(0), expected_frame: integer(1), arguments: object }, ['session', 'expected_epoch', 'arguments'], true, false),
+    designer_stage_prototype_image: tool('Capture the current native prototype image, including its modal overlays. Use the current prototype frame.',
+        { ...session, expected_frame: integer(1) }, ['session', 'expected_frame']),
+    designer_stage_prototype_input: tool('Send a key, text, or pointer contact to the accepted native prototype. Only the active layer receives input. Pointer coordinates are fractions of the full composited artboard.',
+        { ...session, expected_frame: integer(1), input: prototypeInput }, ['session', 'expected_frame', 'input'], true, false),
     ferroui_reload_status: tool('Read the active managed runtime and last reported reload state.'),
     ferroui_reload_targets: tool('Discover managed Cargo binaries and their enabled features. Supply the folder or a workspace-relative Cargo.toml for a nested project.',
         cargoSelection),

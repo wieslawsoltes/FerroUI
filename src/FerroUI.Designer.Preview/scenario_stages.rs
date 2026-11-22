@@ -2,16 +2,17 @@
 use crate::protocol::{Image, Source};
 use crate::renderer::Renderer;
 use crate::scenario::{existing_workspace_path, read_source, read_text};
-use crate::stages::{StageTarget, Stages, Sync};
+use crate::stages::{Stages, Sync};
 use crate::stages_prototype::{Command, Control, Scene};
 use crate::stages_sources::StageDocument;
 use ferroui_designer::{PreviewStageId, PreviewStageSet};
-use ferroui_designer_tools::scenario::{ScenarioPrototype, ScenarioStep};
+use ferroui_designer_tools::scenario::{ScenarioPrototype, ScenarioPrototypeCapture, ScenarioStep};
 use std::collections::BTreeMap;
 use std::path::Path;
 
 pub(crate) struct PrototypeRun {
     stages: Stages,
+    capture: ScenarioPrototypeCapture,
     // Stage windows must be dropped before the native platform and its dispatcher services.
     _platform: Renderer,
 }
@@ -32,6 +33,7 @@ impl PrototypeRun {
         stages.sync(input, &Default::default())?;
         let mut run = Self {
             stages,
+            capture: spec.capture,
             _platform: platform,
         };
         run.control(Command::Start {
@@ -47,27 +49,8 @@ impl PrototypeRun {
             .ok_or_else(|| "Start a prototype flow first".into())
     }
 
-    fn target(&self, id: PreviewStageId) -> Result<StageTarget, String> {
-        let info = self
-            .stages
-            .board
-            .stage(id)
-            .ok_or("The prototype stage was removed")?;
-        Ok(StageTarget {
-            id,
-            epoch: info.epoch,
-        })
-    }
-
     fn control(&mut self, action: Command) -> Result<(), String> {
-        let board = &self.stages.board;
-        self.stages.playback.control(
-            board,
-            Control {
-                epoch: board.epoch(),
-                action,
-            },
-        )?;
+        self.stages.control_prototype(Control { epoch: self.stages.board.epoch(), expected_frame: None, action })?;
         Ok(())
     }
 
@@ -86,8 +69,6 @@ impl PrototypeRun {
                 "Interaction {name:?} is ambiguous on the current stage"
             ));
         }
-        let stage = self.target(current)?;
-        self.stages.mounted(&stage)?;
         self.control(Command::Activate { link })?;
         Ok(format!("Activated interaction {name:?}"))
     }
@@ -101,13 +82,27 @@ impl PrototypeRun {
     }
 
     pub(crate) fn capture(&mut self) -> Result<Image, String> {
-        let stage = self.target(self.scene()?.current)?;
-        self.stages.image(stage)
+        match self.capture {
+            ScenarioPrototypeCapture::ActiveLayer => self.stages.playback.active_image(),
+            ScenarioPrototypeCapture::Artboard => self.stages.playback.artboard_image(),
+        }
     }
 
     pub(crate) fn inspect(&mut self, step: ScenarioStep) -> Result<String, String> {
         let scene = self.scene()?;
         match step {
+            ScenarioStep::PressActiveKey { key } => {
+                self.stages.playback.press_key(key.clone())?;
+                Ok(format!("Sent {key} to the active layer"))
+            }
+            ScenarioStep::ExpectFocus { name, role } => {
+                let focus = self.stages.playback.active_focus()?;
+                if !focus.as_ref().is_some_and(|candidate| candidate.name == name && candidate.role == role) {
+                    let actual = focus.map_or_else(|| "no active focus".into(), |focus| format!("{} {:?}", focus.role, focus.name));
+                    return Err(format!("Expected focused {role} {name:?}, received {actual}"));
+                }
+                Ok(format!("Focused {role} {name:?}"))
+            }
             ScenarioStep::ActivateLink { name } => self.activate(scene.current, &name),
             ScenarioStep::ExpectStage { name } => {
                 let actual = self.name(scene.screen)?;
@@ -131,9 +126,10 @@ impl PrototypeRun {
                 ))
             }
             step => {
-                let stage = self.target(scene.current)?;
-                let root = self.stages.mounted(&stage)?;
-                crate::scenario_input::execute(&root, step)
+                let root = self.stages.playback.active_control()?;
+                let result = crate::scenario_input::execute(&root, step)?;
+                self.stages.playback.flush_action()?;
+                Ok(result)
             }
         }
     }

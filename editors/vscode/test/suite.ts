@@ -17,6 +17,7 @@ import { verifyLiveXaml } from './liveXaml';
 import { verifyProcessShutdown, verifyReloadHistory } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
+import { verifyNativePrototype } from './prototypeNative';
 import { until } from './wait';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
 import type { RuntimeSourceEditor } from '../src/runtimeSource';
@@ -181,6 +182,7 @@ export async function run(): Promise<void> {
         await verifyMultiSelection(preview, xamlInput.uri, rustInput.uri);
         await verifyPropertyComponents(preview, xamlInput.uri, rustInput.uri);
         await verifyStudioPresentations(preview, xamlInput.uri);
+        await verifyNativePrototype(preview, xamlInput.uri);
         await verifyHostedPreview(preview, xamlInput.uri);
         await verifyLiveApp();
         await verifyLiveRustTemplates();

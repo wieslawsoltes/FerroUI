@@ -54,6 +54,9 @@ export interface PrototypeScene {
     current: number;
     overlays: Array<{ stage: number; options: OverlayOptions }>;
     can_go_back: boolean;
+    frame?: number;
+    links?: number[];
+    diagnostics?: string[];
 }
 export type PrototypeCommand = { action: 'start'; flow: string } | { action: 'activate'; link: number }
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
@@ -94,6 +97,8 @@ export interface StagePointerInput extends StageTarget { input: StageContact }
 export type StageInput = { kind: 'focus' } | { kind: 'key'; key: string } | { kind: 'text'; text: string };
 export interface StageKeyboard extends StageTarget { input: StageInput }
 export interface StageFocus { name: string; role: string }
+export type PrototypeInput = { kind: 'keyboard'; input: StageInput } | { kind: 'pointer'; input: StageContact };
+export interface PrototypeInputResult { scene: PrototypeScene | null; focus: StageFocus | null }
 export interface StagePick { range?: Range; uri?: string; interacted?: boolean; prototype?: PrototypeScene }
 interface AddStage { action: 'add'; name: string; width: number; height: number; dark: boolean; epoch: number }
 type ExistingStageChange = (
@@ -108,11 +113,14 @@ export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifes
     | ({ type: 'keyboard' } & StageKeyboard)
     | ({ type: 'contact' } & StagePointerInput)
     | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' };
-export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand }
+export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand; frame?: number }
+    | { type: 'prototypeInput'; frame: number; input: PrototypeInput }
     | { type: 'editPrototype'; epoch: number; edit: PrototypeEdit }
     | { type: 'revealTrigger'; epoch: number; index: number };
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }
     | ({ type: 'keyboardFocus'; focus: StageFocus | null } & StageTarget)
     | { type: 'inputUnavailable' }
-    | { type: 'prototype'; scene: PrototypeScene | null };
+    | { type: 'prototype'; scene: PrototypeScene | null }
+    | { type: 'prototypeImage'; frame: number; image: StageImage }
+    | { type: 'prototypeFocus'; frame: number; focus: StageFocus | null };
