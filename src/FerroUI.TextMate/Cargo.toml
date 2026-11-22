@@ -1,0 +1,52 @@
+[package]
+name = "ferroui-textmate"
+description = "TextMate grammar execution, incremental tokenization and themes for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["native-onig"]
+native-onig = ["dep:onig"]
+# Select the explicitly named Rust backend on native hosts for differential tests.
+portable-regex = []
+bundled-grammars = ["dep:ferroui-textmate-grammars", "ferroui-textmate-grammars/full-catalog"]
+# The languages of the embedded editor demo. The full bundle wins when both are selected.
+editor-demo-grammars = ["dep:ferroui-textmate-grammars", "ferroui-textmate-grammars/editor-demo"]
+
+[dependencies]
+corvus-regex-ecma262 = "=0.2.7"
+ferroui-system.workspace = true
+ferroui-textmate-grammars = { workspace = true, optional = true }
+indexmap = { workspace = true, features = ["serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+fancy-regex = "=0.19.2"
+roxmltree.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+onig = { version = "=6.5.3", default-features = false, optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen.workspace = true
+js-sys.workspace = true
+wasm-bindgen-futures = "=0.4.79"
+
+[package.metadata.release]
+group = "controls"
+
+[[example]]
+name = "textmate_browser_conformance"
+path = "examples/browser_conformance.rs"
+crate-type = ["cdylib"]
+required-features = ["bundled-grammars"]

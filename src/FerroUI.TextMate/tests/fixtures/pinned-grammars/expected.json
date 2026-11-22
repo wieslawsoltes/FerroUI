@@ -1,0 +1,191 @@
+[
+  {
+    "name": "using",
+    "scope": "source.cs",
+    "lines": [
+      {
+        "text": "using System;",
+        "tokens": [
+          {"start_index": 0, "end_index": 5, "scopes": ["source.cs", "keyword.other.using.cs"]},
+          {"start_index": 5, "end_index": 6, "scopes": ["source.cs"]},
+          {"start_index": 6, "end_index": 12, "scopes": ["source.cs", "entity.name.type.namespace.cs"]},
+          {"start_index": 12, "end_index": 13, "scopes": ["source.cs", "punctuation.terminator.statement.cs"]}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "css",
+    "scope": "source.css",
+    "lines": [
+      {
+        "text": "body { margin: 25px; }",
+        "tokens": [
+          {"start_index": 0, "end_index": 4, "scopes": ["source.css", "meta.selector.css", "entity.name.tag.css"]},
+          {"start_index": 4, "end_index": 5, "scopes": ["source.css"]},
+          {"start_index": 5, "end_index": 6, "scopes": ["source.css", "meta.property-list.css", "punctuation.section.property-list.begin.bracket.curly.css"]},
+          {"start_index": 6, "end_index": 7, "scopes": ["source.css", "meta.property-list.css"]},
+          {"start_index": 7, "end_index": 13, "scopes": ["source.css", "meta.property-list.css", "meta.property-name.css", "support.type.property-name.css"]},
+          {"start_index": 13, "end_index": 14, "scopes": ["source.css", "meta.property-list.css", "punctuation.separator.key-value.css"]},
+          {"start_index": 14, "end_index": 15, "scopes": ["source.css", "meta.property-list.css"]},
+          {"start_index": 15, "end_index": 17, "scopes": ["source.css", "meta.property-list.css", "meta.property-value.css", "constant.numeric.css"]},
+          {"start_index": 17, "end_index": 19, "scopes": ["source.css", "meta.property-list.css", "meta.property-value.css", "constant.numeric.css", "keyword.other.unit.px.css"]},
+          {"start_index": 19, "end_index": 20, "scopes": ["source.css", "meta.property-list.css", "punctuation.terminator.rule.css"]},
+          {"start_index": 20, "end_index": 21, "scopes": ["source.css", "meta.property-list.css"]},
+          {"start_index": 21, "end_index": 22, "scopes": ["source.css", "meta.property-list.css", "punctuation.section.property-list.end.bracket.curly.css"]}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "batch",
+    "scope": "source.batchfile",
+    "lines": [
+      {
+        "text": "REM echo off",
+        "tokens": [
+          {"start_index": 0, "end_index": 3, "scopes": ["source.batchfile", "comment.line.rem.batchfile", "keyword.command.rem.batchfile"]},
+          {"start_index": 3, "end_index": 12, "scopes": ["source.batchfile", "comment.line.rem.batchfile"]}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "continued",
+    "scope": "source.cs",
+    "lines": [
+      {
+        "text": "public int Compute()",
+        "tokens": [
+          {"start_index": 0, "end_index": 6, "scopes": ["source.cs", "storage.modifier.cs"]},
+          {"start_index": 6, "end_index": 7, "scopes": ["source.cs"]},
+          {"start_index": 7, "end_index": 10, "scopes": ["source.cs", "keyword.type.cs"]},
+          {"start_index": 10, "end_index": 11, "scopes": ["source.cs"]},
+          {"start_index": 11, "end_index": 18, "scopes": ["source.cs", "entity.name.function.cs"]},
+          {"start_index": 18, "end_index": 19, "scopes": ["source.cs", "punctuation.parenthesis.open.cs"]},
+          {"start_index": 19, "end_index": 20, "scopes": ["source.cs", "punctuation.parenthesis.close.cs"]}
+        ]
+      },
+      {
+        "text": "{",
+        "tokens": [
+          {"start_index": 0, "end_index": 1, "scopes": ["source.cs", "punctuation.curlybrace.open.cs"]}
+        ]
+      },
+      {
+        "text": "    return 5 \u002B 8;",
+        "tokens": [
+          {"start_index": 0, "end_index": 4, "scopes": ["source.cs"]},
+          {"start_index": 4, "end_index": 10, "scopes": ["source.cs", "keyword.control.flow.return.cs"]},
+          {"start_index": 10, "end_index": 11, "scopes": ["source.cs"]},
+          {"start_index": 11, "end_index": 12, "scopes": ["source.cs", "constant.numeric.decimal.cs"]},
+          {"start_index": 12, "end_index": 13, "scopes": ["source.cs"]},
+          {"start_index": 13, "end_index": 14, "scopes": ["source.cs", "keyword.operator.arithmetic.cs"]},
+          {"start_index": 14, "end_index": 15, "scopes": ["source.cs"]},
+          {"start_index": 15, "end_index": 16, "scopes": ["source.cs", "constant.numeric.decimal.cs"]},
+          {"start_index": 16, "end_index": 17, "scopes": ["source.cs", "punctuation.terminator.statement.cs"]}
+        ]
+      },
+      {
+        "text": "}",
+        "tokens": [
+          {"start_index": 0, "end_index": 1, "scopes": ["source.cs", "punctuation.curlybrace.close.cs"]}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "unicode-string",
+    "scope": "source.cs",
+    "lines": [
+      {
+        "text": "string s = \u0022chars: \u5B89\u5B9A\u3055\u305B\u308B\u0022;",
+        "tokens": [
+          {"start_index": 0, "end_index": 6, "scopes": ["source.cs", "keyword.type.cs"]},
+          {"start_index": 6, "end_index": 7, "scopes": ["source.cs"]},
+          {"start_index": 7, "end_index": 8, "scopes": ["source.cs", "entity.name.variable.local.cs"]},
+          {"start_index": 8, "end_index": 9, "scopes": ["source.cs"]},
+          {"start_index": 9, "end_index": 10, "scopes": ["source.cs", "keyword.operator.assignment.cs"]},
+          {"start_index": 10, "end_index": 11, "scopes": ["source.cs"]},
+          {"start_index": 11, "end_index": 12, "scopes": ["source.cs", "string.quoted.double.cs", "punctuation.definition.string.begin.cs"]},
+          {"start_index": 12, "end_index": 24, "scopes": ["source.cs", "string.quoted.double.cs"]},
+          {"start_index": 24, "end_index": 25, "scopes": ["source.cs", "string.quoted.double.cs", "punctuation.definition.string.end.cs"]},
+          {"start_index": 25, "end_index": 26, "scopes": ["source.cs", "punctuation.terminator.statement.cs"]}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "unicode-comment",
+    "scope": "source.cs",
+    "lines": [
+      {
+        "text": "//\u5B89\u5B89\u5B89",
+        "tokens": [
+          {"start_index": 0, "end_index": 2, "scopes": ["source.cs", "comment.line.double-slash.cs", "punctuation.definition.comment.cs"]},
+          {"start_index": 2, "end_index": 5, "scopes": ["source.cs", "comment.line.double-slash.cs"]}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "decorator-template",
+    "scope": "source.ts",
+    "lines": [
+      {
+        "text": "@Component({template:\u0060\u003Ca href=\u0027\u0027 \u003E\u003C/a\u003E\u0060})",
+        "tokens": [
+          {"start_index": 0, "end_index": 1, "scopes": ["source.ts", "meta.decorator.ts", "punctuation.decorator.ts"]},
+          {"start_index": 1, "end_index": 10, "scopes": ["source.ts", "meta.decorator.ts", "entity.name.function.ts"]},
+          {"start_index": 10, "end_index": 11, "scopes": ["source.ts", "meta.decorator.ts", "meta.brace.round.ts"]},
+          {"start_index": 11, "end_index": 12, "scopes": ["source.ts", "meta.decorator.ts", "meta.object-literal.ts", "punctuation.definition.block.ts"]},
+          {"start_index": 12, "end_index": 20, "scopes": ["source.ts", "meta.decorator.ts", "meta.object-literal.ts", "meta.object.member.ts", "meta.object-literal.key.ts"]},
+          {"start_index": 20, "end_index": 21, "scopes": ["source.ts", "meta.decorator.ts", "meta.object-literal.ts", "meta.object.member.ts", "meta.object-literal.key.ts", "punctuation.separator.key-value.ts"]},
+          {"start_index": 21, "end_index": 22, "scopes": ["source.ts", "meta.decorator.ts", "meta.object-literal.ts", "meta.object.member.ts", "string.template.ts", "punctuation.definition.string.template.begin.ts"]},
+          {"start_index": 22, "end_index": 38, "scopes": ["source.ts", "meta.decorator.ts", "meta.object-literal.ts", "meta.object.member.ts", "string.template.ts"]},
+          {"start_index": 38, "end_index": 39, "scopes": ["source.ts", "meta.decorator.ts", "meta.object-literal.ts", "meta.object.member.ts", "string.template.ts", "punctuation.definition.string.template.end.ts"]},
+          {"start_index": 39, "end_index": 40, "scopes": ["source.ts", "meta.decorator.ts", "meta.object-literal.ts", "punctuation.definition.block.ts"]},
+          {"start_index": 40, "end_index": 41, "scopes": ["source.ts", "meta.decorator.ts", "meta.brace.round.ts"]}
+        ]
+      }
+    ]
+  },
+  {
+    "name": "fresh-csharp",
+    "scope": "source.cs",
+    "lines": [
+      {
+        "text": "using System; class Foo { int Bar() { return 42; } }",
+        "tokens": [
+          {"start_index": 0, "end_index": 5, "scopes": ["source.cs", "keyword.other.using.cs"]},
+          {"start_index": 5, "end_index": 6, "scopes": ["source.cs"]},
+          {"start_index": 6, "end_index": 12, "scopes": ["source.cs", "entity.name.type.namespace.cs"]},
+          {"start_index": 12, "end_index": 13, "scopes": ["source.cs", "punctuation.terminator.statement.cs"]},
+          {"start_index": 13, "end_index": 14, "scopes": ["source.cs"]},
+          {"start_index": 14, "end_index": 19, "scopes": ["source.cs", "keyword.other.class.cs"]},
+          {"start_index": 19, "end_index": 20, "scopes": ["source.cs"]},
+          {"start_index": 20, "end_index": 23, "scopes": ["source.cs", "entity.name.type.class.cs"]},
+          {"start_index": 23, "end_index": 24, "scopes": ["source.cs"]},
+          {"start_index": 24, "end_index": 25, "scopes": ["source.cs", "punctuation.curlybrace.open.cs"]},
+          {"start_index": 25, "end_index": 26, "scopes": ["source.cs"]},
+          {"start_index": 26, "end_index": 29, "scopes": ["source.cs", "keyword.type.cs"]},
+          {"start_index": 29, "end_index": 30, "scopes": ["source.cs"]},
+          {"start_index": 30, "end_index": 33, "scopes": ["source.cs", "entity.name.function.cs"]},
+          {"start_index": 33, "end_index": 34, "scopes": ["source.cs", "punctuation.parenthesis.open.cs"]},
+          {"start_index": 34, "end_index": 35, "scopes": ["source.cs", "punctuation.parenthesis.close.cs"]},
+          {"start_index": 35, "end_index": 36, "scopes": ["source.cs"]},
+          {"start_index": 36, "end_index": 37, "scopes": ["source.cs", "punctuation.curlybrace.open.cs"]},
+          {"start_index": 37, "end_index": 38, "scopes": ["source.cs"]},
+          {"start_index": 38, "end_index": 44, "scopes": ["source.cs", "keyword.control.flow.return.cs"]},
+          {"start_index": 44, "end_index": 45, "scopes": ["source.cs"]},
+          {"start_index": 45, "end_index": 47, "scopes": ["source.cs", "constant.numeric.decimal.cs"]},
+          {"start_index": 47, "end_index": 48, "scopes": ["source.cs", "punctuation.terminator.statement.cs"]},
+          {"start_index": 48, "end_index": 49, "scopes": ["source.cs"]},
+          {"start_index": 49, "end_index": 50, "scopes": ["source.cs", "punctuation.curlybrace.close.cs"]},
+          {"start_index": 50, "end_index": 51, "scopes": ["source.cs"]},
+          {"start_index": 51, "end_index": 52, "scopes": ["source.cs", "punctuation.curlybrace.close.cs"]}
+        ]
+      }
+    ]
+  }
+]
