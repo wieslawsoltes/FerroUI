@@ -51,26 +51,24 @@ jobs:
           contrast = "win32_platform::tests::contrast_notifications_refresh_the_native_settings_cache"
           sibling = "win_rt::win_rt_tests::the_settings_of_the_user_are_read_through_activation"
           scenarios = [
-              ("accent alone", ["--exact", accent], 300),
-              ("accent and the contrast test, in parallel", ["--exact", accent, contrast, "--test-threads=2"], 300),
-              ("accent and the activation test, in parallel", ["--exact", accent, sibling, "--test-threads=2"], 300),
-              ("all three, in parallel", ["--exact", accent, contrast, sibling, "--test-threads=3"], 300),
-              ("whole binary", [], 40),
-              ("whole binary without the contrast test", ["--skip", contrast], 40),
+              ("accent alone", ["--exact", accent], 200),
+              ("accent and the contrast test, in parallel", ["--exact", accent, contrast, "--test-threads=2"], 200),
+              ("accent and the activation test, in parallel", ["--exact", accent, sibling, "--test-threads=2"], 200),
+              ("whole binary", [], 80),
+              ("whole binary without the contrast test", ["--skip", contrast], 80),
+              ("whole binary without the activation test", ["--skip", sibling], 80),
+              ("whole binary without either", ["--skip", contrast, "--skip", sibling], 80),
           ]
-          lines = ["## Accent read diagnostic", "", "| Scenario | Runs | Accent failed | Black accent | Other failures |", "|---|---:|---:|---:|---:|"]
+          lines = ["## Accent read diagnostic", "", "| Scenario | Runs | Accent test failed | Other tests failed |", "|---|---:|---:|---:|"]
           for name, arguments, runs in scenarios:
-              failed = black = other = 0
+              failed = other = 0
               for _ in range(runs):
-                  result = subprocess.run([exe, *arguments, "--nocapture"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                  result = subprocess.run([exe, *arguments], stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                           text=True, errors="replace", timeout=300)
                   failing = set(re.findall(r"^test (\S+) \.\.\. FAILED$", result.stdout, re.M))
-                  if not failing and "panicked at" in result.stdout and accent in result.stdout:
-                      failing = {accent}
                   failed += accent in failing
-                  black += "accent_color1: Color { a: 255, r: 0, g: 0, b: 0 }" in result.stdout
                   other += bool(failing - {accent})
-              lines.append(f"| {name} | {runs} | {failed} | {black} | {other} |")
+              lines.append(f"| {name} | {runs} | {failed} | {other} |")
               print(lines[-1], flush=True)
           with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as handle:
               handle.write("\n".join(lines) + "\n")
