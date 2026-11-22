@@ -198,7 +198,7 @@ fn file_input_imports(tree: &UseTree, names: &mut BTreeSet<String>) {
     }
 }
 
-fn take_literal(expr: Expr) -> Option<LitStr> {
+pub(super) fn take_literal(expr: Expr) -> Option<LitStr> {
     match expr {
         Expr::Lit(ExprLit {
             lit: Lit::Str(literal),

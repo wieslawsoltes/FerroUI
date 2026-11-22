@@ -1,3 +1,4 @@
+use super::macros::take_literal;
 use super::{rust_string_like, string_literal, MacroSyntax, RustFilePath, RustPathAnchor};
 use std::ops::Range;
 use syn::{Expr, LitStr, Macro};
@@ -54,12 +55,9 @@ impl MacroSyntax {
             return None;
         }
         for argument in self.arguments(expression, "concat")? {
-            if let Some(literal) = string_literal(&argument) {
-                path.literals.push(literal.clone());
-                continue;
-            }
             let Expr::Macro(expression) = argument else {
-                return None;
+                path.literals.push(take_literal(argument)?);
+                continue;
             };
             if let Some(env) = self.arguments(&expression.mac, "env") {
                 if path.manifest
