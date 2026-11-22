@@ -15,6 +15,7 @@
 
 use crate::harness::Registry;
 
+pub mod boxed_compare;
 pub mod control_read;
 pub mod control_write;
 pub mod font_family_made;
@@ -22,6 +23,7 @@ pub mod inheritance_parent;
 pub mod untyped_routes;
 
 pub fn register(registry: &mut Registry) {
+    boxed_compare::register(registry);
     control_read::register(registry);
     control_write::register(registry);
     font_family_made::register(registry);

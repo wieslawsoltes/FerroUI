@@ -1303,6 +1303,103 @@ impl<T: StyledValue> StyledPropertyOptions<T> {
 }
 
 #[cfg(test)]
+mod boxed_equality_tests {
+    // Not from upstream (#566): what comparing two boxed values means.
+    use super::*;
+    use std::mem::MaybeUninit;
+
+    fn boxed<T: PartialEq + 'static>(value: T) -> BoxedValue {
+        Rc::new(value)
+    }
+
+    fn equal(a: &BoxedValue, b: &BoxedValue) -> bool {
+        a.value_eq(&**b)
+    }
+
+    #[test]
+    fn values_of_one_type_compare_by_value() {
+        assert!(equal(&boxed(7i32), &boxed(7i32)));
+        assert!(!equal(&boxed(7i32), &boxed(8i32)));
+        assert!(equal(&boxed("text".to_string()), &boxed("text".to_string())));
+    }
+
+    #[test]
+    fn values_of_two_types_are_not_equal() {
+        assert!(!equal(&boxed(1i32), &boxed(1i64)));
+        assert!(!equal(&boxed(1.0f64), &boxed(1.0f32)));
+        assert!(!equal(&boxed(Some(1.0f64)), &boxed(1.0f64)));
+    }
+
+    #[test]
+    fn floating_point_values_compare_as_the_reference_does() {
+        assert!(equal(&boxed(f64::NAN), &boxed(f64::NAN)));
+        assert!(equal(&boxed(f32::NAN), &boxed(f32::NAN)));
+        assert!(!equal(&boxed(f64::NAN), &boxed(1.0f64)));
+        // `==`: the two zeros are equal, though their bits differ.
+        assert!(equal(&boxed(0.0f64), &boxed(-0.0f64)));
+        assert!(equal(&boxed(0.0f32), &boxed(-0.0f32)));
+    }
+
+    #[test]
+    fn nullable_values_compare_by_their_contents() {
+        assert!(equal(&boxed(Some(f64::NAN)), &boxed(Some(f64::NAN))));
+        assert!(equal(&boxed(Some(0.0f64)), &boxed(Some(-0.0f64))));
+        assert!(equal(&boxed(None::<f64>), &boxed(None::<f64>)));
+        assert!(!equal(&boxed(Some(f64::NAN)), &boxed(None::<f64>)));
+        assert!(!equal(&boxed(Some(1.0f64)), &boxed(Some(2.0f64))));
+    }
+
+    #[test]
+    fn padding_takes_no_part() {
+        #[derive(Clone, Copy, PartialEq)]
+        #[repr(C)]
+        struct Padded {
+            small: u8,
+            large: u32,
+        }
+        let with_padding = |fill: u8| {
+            let mut value = MaybeUninit::<Padded>::uninit();
+            // SAFETY: the bytes are written, then both fields are given valid values.
+            unsafe {
+                value.as_mut_ptr().write_bytes(fill, 1);
+                std::ptr::addr_of_mut!((*value.as_mut_ptr()).small).write(1);
+                std::ptr::addr_of_mut!((*value.as_mut_ptr()).large).write(2);
+                value.assume_init()
+            }
+        };
+        assert!(equal(&boxed(with_padding(0x00)), &boxed(with_padding(0xFF))));
+    }
+
+    /// A value that answers for another one, as the probes of the Dock crates do: its own
+    /// comparison decides, across types.
+    struct Probe(BoxedValue);
+
+    impl AnyValue for Probe {
+        fn any_value_as_any(&self) -> &dyn Any {
+            self.0.as_any()
+        }
+
+        fn any_value_eq(&self, other: &dyn AnyValue) -> bool {
+            std::ptr::addr_eq(self.0.as_any(), other.as_any())
+        }
+
+        fn any_value_type_name(&self) -> &'static str {
+            "probe"
+        }
+    }
+
+    #[test]
+    fn a_value_with_its_own_comparison_keeps_it() {
+        let held = boxed(5i32);
+        let probe: Rc<dyn AnyValue> = Rc::new(Probe(held.clone()));
+        assert!(probe.value_eq(&*held));
+        assert!(!probe.value_eq(&*boxed(5i32)));
+        // The other way round the typed comparison reads the value the probe holds.
+        assert!(held.value_eq(&*probe));
+    }
+}
+
+#[cfg(test)]
 mod hearing_tests {
     use super::*;
     use crate::StyledElement;
