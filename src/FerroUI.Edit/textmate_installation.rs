@@ -419,6 +419,9 @@ impl TextMateInstallation {
                             .position(|line| line.as_ref().is_none_or(|line| line.utf16_length > limit))
                             .map(|relative| index + 1 + relative)
                     } else {
+                        // The cached lines after this one came from another state: a later
+                        // pass can only converge past them.
+                        cache.dirty_until = cache.dirty_until.max(index + 1);
                         (index + 1 < cache.lines.len()).then_some(index + 1)
                     };
                     if cache.invalid_from.is_none() {
@@ -684,6 +687,27 @@ mod tests {
         document.replace(closer, 1, "]").unwrap();
         assert!(!installation.has_unmatched_closing_bracket_after(&document, "(", 0));
         assert!(installation.has_unmatched_closing_bracket_after(&document, "[", closer));
+    }
+
+    #[test]
+    fn a_partial_pass_does_not_converge_before_the_lines_it_has_not_reached() {
+        let installation = TextMateInstallation::new(grammar(), theme("#005500"));
+        let document = TextDocument::from_text("a\n1\n2\n3\n4");
+        assert!(installation.advance_to(&document, document.line_count(), 10));
+
+        // The pass opened by the comment stops after two lines.
+        document.insert(0, "/*").unwrap();
+        installation.invalidate_from(1);
+        installation.advance_to(&document, document.line_count(), 2);
+        // An edit above repeats the same state on line two: the lines after it are still old.
+        document.insert(2, "x").unwrap();
+        installation.invalidate_from(1);
+        assert!(installation.advance_to(&document, document.line_count(), 10));
+        let fresh = TextMateInstallation::new(grammar(), theme("#005500"));
+        assert!(fresh.advance_to(&document, document.line_count(), 10));
+        for line in 0..document.line_count() {
+            assert_eq!(installation.styled_tokens(line), fresh.styled_tokens(line), "line {line}");
+        }
     }
 
     #[test]

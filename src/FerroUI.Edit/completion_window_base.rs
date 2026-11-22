@@ -240,16 +240,6 @@ impl CompletionWindowBase {
         let weak = self.to_ref().downgrade();
         self.subscriptions
             .borrow_mut()
-            .push(editor.property_changed(move |change| {
-                if change.property() == TextEditor::document_property().as_property() {
-                    if let Some(window) = weak.upgrade() {
-                        window.dismiss();
-                    }
-                }
-            }).into());
-        let weak = self.to_ref().downgrade();
-        self.subscriptions
-            .borrow_mut()
             .push(area.scroll_invalidated(Rc::new(move || {
                 if let Some(window) = weak.upgrade() {
                     window.update_position();

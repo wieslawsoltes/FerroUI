@@ -47,6 +47,7 @@ pub struct SearchPanel {
     action_buttons: OnceCell<[(EditorCommandKind, Ref<Button>); 5]>,
     language: Cell<SearchLanguage>,
     results: RefCell<Vec<SearchResult>>,
+    results_stale: Cell<bool>,
     current: Cell<Option<usize>>,
     error: RefCell<Option<String>>,
     synchronizing: Cell<bool>,
@@ -110,6 +111,7 @@ impl SearchPanel {
             action_buttons: OnceCell::new(),
             language: Cell::new(SearchLanguage::default()),
             results: RefCell::new(Vec::new()),
+            results_stale: Cell::new(false),
             current: Cell::new(None),
             error: RefCell::new(None),
             synchronizing: Cell::new(false),
@@ -137,7 +139,12 @@ impl SearchPanel {
         let subscription =
             editor.add_disposable_handler(TextEditor::text_changed_event(), move |_, _| {
                 if let Some(panel) = weak.upgrade() {
-                    panel.refresh();
+                    // A search copies the document: a closed panel searches when it is used.
+                    if panel.is_open() {
+                        panel.refresh();
+                    } else {
+                        panel.results_stale.set(true);
+                    }
                 }
             });
         panel.subscriptions.borrow_mut().push(subscription);
@@ -225,11 +232,16 @@ impl SearchPanel {
         .into()
     }
     pub fn result_count(&self) -> usize {
+        self.refresh_stale_results();
         self.results.borrow().len()
     }
     /// Snapshot match ranges intersecting a visible document interval. Rendering
     /// hosts can highlight results without copying all captured match text.
     pub fn results_in_range(&self, offset: usize, length: usize) -> Vec<SimpleSegment> {
+        // Rendering calls this: a closed panel whose results are out of date draws nothing.
+        if self.results_stale.get() {
+            return Vec::new();
+        }
         let results = self.results.borrow();
         let end = offset.saturating_add(length);
         let first =
@@ -349,7 +361,14 @@ impl SearchPanel {
             whole_words: self.whole_words(),
         }
     }
+    fn refresh_stale_results(&self) {
+        if self.results_stale.get() {
+            self.refresh();
+        }
+    }
+
     fn refresh_results(&self, notify_options: bool) {
+        self.results_stale.set(false);
         let options = self.search_options();
         let strategy = (!options.search_pattern.is_empty())
             .then(|| {
@@ -513,6 +532,7 @@ impl SearchPanel {
         let Some(editor) = self.editor() else {
             return false;
         };
+        self.refresh_stale_results();
         let results = self.results.borrow();
         if results.is_empty() {
             return false;
@@ -579,6 +599,7 @@ impl SearchPanel {
         if target.is_current_after(&editor, changes)
             && self.editor().is_some_and(|owner| owner == editor)
         {
+            self.refresh_stale_results();
             let results = self.results.borrow();
             let count = results.len();
             // An empty match can survive at the boundary after insertion.
@@ -1386,6 +1407,24 @@ mod tests {
         assert!(!panel.replace_next().unwrap());
         assert_eq!(editor.selection(), Selection::simple(0, 2));
         assert_eq!(editor.text(), "😀 🧭");
+    }
+
+    #[test]
+    fn a_closed_panel_searches_when_it_is_used_and_not_on_each_edit() {
+        let _scope = crate::tests::test_scope();
+        let editor = TextEditor::new();
+        editor.set_text("a a").unwrap();
+        let panel = editor.search_panel();
+        panel.set_search_pattern("a");
+        assert!(!panel.is_open());
+        assert_eq!(panel.result_count(), 2);
+
+        editor.document().insert(0, "a ").unwrap();
+        assert!(panel.results_stale.get());
+        assert!(panel.results_in_range(0, 5).is_empty());
+        assert_eq!(panel.result_count(), 3);
+        assert!(!panel.results_stale.get());
+        assert_eq!(panel.results_in_range(0, 5).len(), 3);
     }
 
     #[test]

@@ -14,7 +14,7 @@ use ferroui_base::{
     FerroProperty, FerroPropertyChangedEventArgs, Matrix, StyledProperty, StyledPropertyOptions,
 };
 use ferroui_edit_core::document::{DocumentVersion, ISegment, TextDocument};
-use ferroui_edit_core::editing::EditorOptions;
+use ferroui_edit_core::editing::{EditorOptions, Selection, SelectionSegment};
 use ferroui_controls::documents::EmbeddedControlRun;
 use std::collections::HashSet;
 use std::ops::Range;
@@ -103,6 +103,20 @@ impl Drop for RenderingScope<'_> {
         self.0.rendering.set(false);
         self.0.schedule_automation_format_change();
     }
+}
+
+/// The segments that can touch the given lines: a frame costs what is visible, not the size of
+/// the selection. The segments of a selection are ordered by offset.
+fn visible_segments<'a>(selection: &'a Selection, lines: &[ViewportLine]) -> &'a [SelectionSegment] {
+    let segments = selection.segments();
+    let (Some(first), Some(last)) = (lines.first(), lines.last()) else {
+        return &[];
+    };
+    let start = first.line.offset;
+    let end = last.line.offset + last.line.length;
+    let from = segments.partition_point(|segment| segment.end_offset() < start);
+    let to = from + segments[from..].partition_point(|segment| segment.start_offset() <= end);
+    &segments[from..to]
 }
 
 impl Drop for BackgroundFrameScope<'_> {
@@ -901,9 +915,7 @@ impl TextArea {
                 frame.options.enable_virtual_space || frame.selection.is_rectangular();
             let pixel_size = BackgroundGeometryBuilder::pixel_size(self);
             let primary = frame.selection.primary();
-            for segment in frame
-                .selection
-                .segments()
+            for segment in visible_segments(&frame.selection, &frame.lines)
                 .iter()
                 .filter(|segment| !segment.is_empty())
             {
@@ -984,7 +996,7 @@ impl TextArea {
 
         for entry in &frame.lines {
             let line = &entry.line;
-            for &segment in selection.segments() {
+            for &segment in visible_segments(selection, std::slice::from_ref(entry)) {
                 let is_primary = segment == primary;
                 let preedit_caret = is_primary && composing && line.preedit.is_some();
                 if !preedit_caret

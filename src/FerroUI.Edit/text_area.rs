@@ -151,7 +151,7 @@ pub(crate) fn platform_keymap() -> Rc<PlatformHotkeyConfiguration> {
         .map_or(registered, |settings| settings.hotkey_configuration())
 }
 
-/// The modifier of rectangular selection: Alt, unless the keymap moves by word with it, as the
+/// The modifier of rectangular selection from the keyboard: Alt, unless the keymap moves by word with it, as the
 /// Apple keymaps do with Option. Those use Control, which they leave free.
 pub(crate) fn box_selection_modifier() -> KeyModifiers {
     if platform_keymap().whole_word_text_action_modifiers == KeyModifiers::ALT {
@@ -160,6 +160,10 @@ pub(crate) fn box_selection_modifier() -> KeyModifiers {
         KeyModifiers::ALT
     }
 }
+
+/// The modifier of rectangular selection with the pointer: Alt, also on the Apple keymaps, where
+/// Control with a click is the secondary click.
+pub(crate) const BOX_SELECTION_POINTER_MODIFIER: KeyModifiers = KeyModifiers::ALT;
 
 /// The modifier that makes a text drag a copy: Option on the Apple keymaps, Control on the others.
 pub(crate) fn text_drag_copy_modifier() -> KeyModifiers {
@@ -567,7 +571,10 @@ impl InputElementImpl for TextArea {
             Key::Return if matches!(modifiers, KeyModifiers::NONE | KeyModifiers::SHIFT) => {
                 this.insert_line_break()
             }
-            Key::Tab if editor.options().accepts_tab => {
+            Key::Tab
+                if editor.options().accepts_tab
+                    && matches!(modifiers, KeyModifiers::NONE | KeyModifiers::SHIFT) =>
+            {
                 editor.indent(modifiers == KeyModifiers::SHIFT, true)
             }
             // Search and stacked handlers can act on Escape before this fallback.
@@ -1116,9 +1123,13 @@ impl TextArea {
     }
 
     pub(crate) fn invalidate_layout_cache(&self) {
+        self.invalidate_layout(None);
+    }
+
+    fn invalidate_layout(&self, edited: Option<(usize, usize, usize)>) {
         self.watermark_layout.take();
         self.visual_lines.end_of_line_layouts.take();
-        self.reset_line_metrics();
+        self.rebuild_line_metrics(edited);
         self.extent.set(Size::default());
         self.invalidate_line_measure();
         self.request_redraw();
@@ -1164,6 +1175,13 @@ impl TextArea {
         );
     }
     fn reset_line_metrics(&self) {
+        self.rebuild_line_metrics(None);
+    }
+
+    /// Rebuilds the cached lines and folds. `edited` is the span of logical lines an edit
+    /// replaced (first, removed, inserted): the measured heights of the other lines stay, so
+    /// that typing in wrapped text does not move what is above the caret.
+    fn rebuild_line_metrics(&self, edited: Option<(usize, usize, usize)>) {
         self.clear_visual_line_cache();
         self.visual_lines.collapsed.borrow_mut().clear();
         self.default_text_metrics.set(None);
@@ -1172,9 +1190,13 @@ impl TextArea {
         self.detach_collapses_from_other_document(document.as_ref());
         if let Some(document) = &document {
             let line_height = self.line_height();
-            self.heights
-                .borrow_mut()
-                .reset(document.line_count(), line_height);
+            {
+                let mut heights = self.heights.borrow_mut();
+                match edited.filter(|_| heights.default_height() == line_height) {
+                    Some((first, removed, inserted)) => heights.splice_lines(first, removed, inserted),
+                    None => heights.reset(document.line_count(), line_height),
+                }
+            }
             if let Some(manager) = self.editor().and_then(|editor| editor.folding_manager()) {
                 let mut sections = manager.all_foldings();
                 sections.sort_by_key(|s| (s.start_offset(), std::cmp::Reverse(s.end_offset())));
@@ -1218,22 +1240,51 @@ impl TextArea {
         self.heights.borrow_mut().set_collapsed_preserving_heights(&collapsed);
     }
     pub(crate) fn document_changed(&self) {
+        self.document_replaced_lines(None);
+    }
+
+    /// One edit of the bound document: only the lines it touched lose their measured height.
+    pub(crate) fn document_edited(&self, change: &ferroui_edit_core::document::DocumentChangeEventArgs) {
+        self.document_replaced_lines(self.edited_line_span(change));
+    }
+
+    fn document_replaced_lines(&self, edited: Option<(usize, usize, usize)>) {
         self.set_drop_caret(None);
         if let Some(client) = self.im_client.get() {
             client.discard_stale_preview(self);
         }
-        self.invalidate_layout_cache();
+        self.invalidate_layout(edited);
         if let Some(client) = self.im_client.get() {
             client.raise_surrounding_text_changed();
             client.raise_selection_changed();
         }
     }
+
+    /// The logical lines an edit replaced: (first, removed, inserted). The span includes one
+    /// more line on each side, because a CR or LF at its edge can join a neighbouring line.
+    fn edited_line_span(
+        &self,
+        change: &ferroui_edit_core::document::DocumentChangeEventArgs,
+    ) -> Option<(usize, usize, usize)> {
+        let document = self.editor()?.document();
+        let length = document.text_length();
+        let old_count = self.heights.borrow().line_count();
+        let new_count = document.line_count();
+        let start = change.offset.min(length);
+        let end = (change.offset + change.inserted_text.text_length()).min(length);
+        let first = (document.get_line_by_offset(start).ok()?.line_number() - 1).saturating_sub(1);
+        let new_end = (document.get_line_by_offset(end).ok()?.line_number() + 1).min(new_count);
+        let inserted = new_end.checked_sub(first)?;
+        let removed = (old_count + new_end).checked_sub(new_count + first)?;
+        (first + removed <= old_count).then_some((first, removed, inserted))
+    }
+
     pub(crate) fn selection_changed_with_affinity(&self, at_end_of_line: bool) {
         if let Some(client) = self.im_client.get() {
             client.discard_stale_preview(self);
         }
         if self.has_preedit() {
-            self.reset_line_metrics();
+            self.rebuild_line_metrics(Some((0, 0, 0)));
         }
         self.box_caret.set(None);
         self.context_caret.set(None);
@@ -1247,6 +1298,11 @@ impl TextArea {
             self.desired_x.set(None);
         }
         self.caret_visible.set(true);
+        // A full blink interval starts here, so the caret stays visible while it moves.
+        if let Some(timer) = self.blink_timer.get().filter(|timer| timer.is_enabled()) {
+            timer.stop();
+            timer.start();
+        }
         self.update_caret_geometry();
         self.request_redraw();
     }
@@ -1407,7 +1463,9 @@ impl TextArea {
         let y = (point.y + offset.y).max(0.0);
         let index = self.heights.borrow().line_at(y);
         let Some(line) = self.line_layout(index) else {
-            return (0, 0);
+            // A line whose layout failed: stay on that line instead of the document start.
+            let line = self.editor().and_then(|editor| editor.document().get_line_by_number(index + 1).ok());
+            return (line.map_or(0, |line| line.offset()), 0);
         };
         let top = self.heights.borrow().top(index);
         self.selection_position_on_line(
@@ -2047,7 +2105,7 @@ impl TextArea {
             client.preview_changed();
         }
         if content_changed {
-            self.reset_line_metrics();
+            self.rebuild_line_metrics(Some((0, 0, 0)));
         }
         self.request_redraw();
         if let Some(client) = self.im_client.get() {
