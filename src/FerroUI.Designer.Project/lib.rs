@@ -12,6 +12,7 @@ mod toolbox;
 mod uri;
 mod workspace;
 pub mod project_templates;
+pub mod design_handoff;
 pub mod scenario_baselines;
 pub mod scenario_process;
 pub mod toolchain;

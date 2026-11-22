@@ -39,7 +39,7 @@ pub use extraction::{DictionaryExtractionPlan, DictionaryExtractionRequest, Dict
 pub use file_moves::{FileMoveDocument, FileMoveDraft, FileMovePlan, FileMoveRustResolution, GeneratedRustRename};
 pub use handlers::{HandlerDraft, HandlerPlan, HandlerRequest, HandlerTarget};
 pub use command_bindings::{CommandBindingEdit, CommandBindingModel, CommandBindingRequest, CommandMember, CommandSelection, CommandSlot, CommandValue};
-pub use project_library::{LibraryDefinition, ProjectLibrary, ProjectLibraryEntry, ProjectLibraryRequest, ProjectLibraryResolution};
+pub use project_library::{exact_library_definition, LibraryDefinition, ProjectLibrary, ProjectLibraryEntry, ProjectLibraryRequest, ProjectLibraryResolution};
 pub use registered_rename::{RegisteredPropertyPlan, RegisteredPropertyRequest, RegisteredPropertyTarget};
 pub use registered_types::{RegisteredTypeTarget, RegisteredTypePlan};
 pub use refactoring::resource_rename::{ResourceRenamePlan, ResourceRenameTarget, ThemeResourceFamily, ThemeResourceMember};

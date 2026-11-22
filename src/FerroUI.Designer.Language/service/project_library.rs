@@ -1,9 +1,11 @@
 use super::{LanguageService, State};
-use crate::{Range, Result, require};
+use crate::{require, Range, Result};
+use crate::{LanguageError, LineIndex};
+use ferroui_designer_core::Document;
 use ferroui_designer_project::{canonical_file_uri, file_path, file_uri};
-use ferroui_designer_tools::{ComponentCatalog, ComponentKind};
+use ferroui_designer_tools::{ComponentCatalog, ComponentEntry, ComponentKind};
 use serde::{Deserialize, Serialize};
-use std::path::{MAIN_SEPARATOR, Path, PathBuf};
+use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -154,20 +156,60 @@ impl State {
             ComponentCatalog::project_definitions(&self.document)
                 .unwrap_or_default()
                 .into_iter()
-                .filter_map(|entry| {
-                    let node = self.document.ast().node(entry.node)?;
-                    let range = self.index.range(node.name_span).ok()?;
-                    Some(LibraryDefinition {
-                        kind: entry.kind,
-                        name: entry.display_name,
-                        range,
-                        key: entry.key,
-                        target_type: entry.target_type,
-                    })
-                })
+                .filter_map(|entry| describe(&self.document, &self.index, entry))
                 .collect()
         })
     }
+}
+
+/// Resolve an external mapping by exact key and optional authored scope, with
+/// the same definition kinds and source ranges as the Project Library.
+pub fn exact_library_definition(
+    source: &str,
+    key: Option<&str>,
+    scope: Option<&str>,
+) -> Result<LibraryDefinition> {
+    let document = Document::new(source).map_err(|error| LanguageError(error.to_string()))?;
+    let entries = ComponentCatalog::project_definitions(&document)
+        .map_err(|error| LanguageError(error.to_string()))?;
+    let mut matches = entries.into_iter().filter(|entry| {
+        let same_key = match key {
+            Some(key) => entry.key.as_deref() == Some(key),
+            None => entry.node == document.ast().root(),
+        };
+        same_key
+            && scope.is_none_or(|name| {
+                let ast = document.ast();
+                std::iter::successors(ast.node(entry.declaration_owner(&document)), |node| {
+                    node.parent.and_then(|parent| ast.node(parent))
+                })
+                .any(|node| node.xaml_name() == Some(name))
+            })
+    });
+    let entry = matches.next().ok_or_else(|| {
+        LanguageError("The mapped definition is absent from this source scope".into())
+    })?;
+    require(
+        matches.next().is_none(),
+        "More than one definition matches this key. Specify its named scope",
+    )?;
+    describe(&document, &LineIndex::new(source), entry)
+        .ok_or_else(|| LanguageError("The mapped definition has no source location".into()))
+}
+
+fn describe(
+    document: &Document,
+    index: &LineIndex,
+    entry: ComponentEntry,
+) -> Option<LibraryDefinition> {
+    let node = document.ast().node(entry.node)?;
+    Some(LibraryDefinition {
+        kind: entry.kind,
+        name: entry.display_name,
+        range: index.range(node.name_span).ok()?,
+        key: entry.key,
+        target_type: entry.target_type,
+    })
 }
 
 impl LibraryDefinition {

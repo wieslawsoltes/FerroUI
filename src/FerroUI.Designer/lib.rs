@@ -126,6 +126,7 @@ pub use asset_toolbox::{
     project_designer_assets,
 };
 pub use project_controls::registered_designer_assets;
+pub mod design_handoff;
 pub use item_template_scope::ItemTemplateScopeSnapshot;
 pub use chrome::designer_chrome_style;
 pub use animation_keyframe_authoring::SampledKeyframe;
