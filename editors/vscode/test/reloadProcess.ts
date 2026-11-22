@@ -1,14 +1,17 @@
 import { strict as assert } from 'node:assert';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { access, mkdtemp, rm, unlink, writeFile } from 'node:fs/promises';
+import { access, mkdtemp, rm, stat, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
+import * as vscode from 'vscode';
 import { inCargoBuildSlot } from '../src/cargoBuildGate';
 import { ReloadHistory } from '../src/reloadHistory';
 import { parseFrameReceipt, type RuntimeFrameReceipt } from '../src/reloadFrames';
 import { ReloadProcess } from '../src/reloadProcess';
+import { ReloadSession } from '../src/reloadSession';
+import { until } from './wait';
 
 export async function verifyProcessShutdown(): Promise<void> {
     const directory = await mkdtemp(join(tmpdir(), 'ferroui-reload-stop-'));
@@ -32,6 +35,32 @@ export async function verifyProcessShutdown(): Promise<void> {
     } finally {
         await processHandle.stop();
         await rm(directory, { recursive: true, force: true });
+    }
+}
+
+export async function verifyReloadWatchBoundary(folder: vscode.WorkspaceFolder): Promise<void> {
+    const root = await mkdtemp(join(folder.uri.fsPath, 'reload-watch-'));
+    const file = join(root, 'View.xaml');
+    const manifest = join(root, 'Cargo.toml');
+    const history = new ReloadHistory();
+    try {
+        await writeFile(file, '<Grid/>');
+        const info = await stat(file);
+        await until(() => Date.now() > Math.max(info.ctimeMs, info.mtimeMs, info.birthtimeMs));
+        const session = new ReloadSession({ label: 'watch', folder, cargo: 'cargo', cargoDirectory: root,
+            discoveryManifest: manifest, manifest, packageId: 'watch', packageName: 'watch', binary: 'watch',
+            features: [], args: [], targetDirectory: join(root, 'target') },
+        { session: 'watch', target: 'watch' }, { append() {}, appendLine() {} }, history, () => {}, () => {}, () => {}, () => {});
+        try {
+            await session.observe(vscode.Uri.file(file), true);
+            assert.deepEqual(history.recent(10, 'watch'), [], 'A delayed create from before launch is part of the initial build');
+            await writeFile(file, '<Border/>');
+            await session.observe(vscode.Uri.file(file), true);
+            assert.equal(history.recent(10, 'watch').length, 1, 'An edit after launch remains queued');
+        } finally { await session.dispose(); }
+    } finally {
+        history.dispose();
+        await rm(root, { recursive: true, force: true });
     }
 }
 

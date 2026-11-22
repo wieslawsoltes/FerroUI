@@ -33,9 +33,10 @@ export class HotReload implements vscode.Disposable {
         this.indicator.name = 'FerroUI Hot Reload';
         this.indicator.command = 'ferroui.hotReload.select';
         const watcher = vscode.workspace.createFileSystemWatcher(reloadWatchPattern);
-        const observe = (uri: vscode.Uri) => { for (const run of this.live.values()) run.observe(uri); };
+        const observe = (uri: vscode.Uri, fromWatcher = false) => { for (const run of this.live.values()) run.observe(uri, fromWatcher); };
+        const watched = (uri: vscode.Uri) => observe(uri, true);
         this.subscriptions = [
-            watcher, watcher.onDidChange(observe), watcher.onDidCreate(observe), watcher.onDidDelete(observe),
+            watcher, watcher.onDidChange(watched), watcher.onDidCreate(watched), watcher.onDidDelete(watched),
             vscode.workspace.onDidSaveTextDocument(document => observe(document.uri)),
             vscode.workspace.onDidChangeWorkspaceFolders(({ removed }) => {
                 for (const run of this.live.values()) {

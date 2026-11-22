@@ -14,7 +14,7 @@ import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
 import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
-import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory } from './reloadProcess';
+import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
 import { verifyNativePrototype } from './prototypeNative';
@@ -34,6 +34,7 @@ export async function run(): Promise<void> {
     verifyTimelineViewport();
     await verifyProcessShutdown();
     verifyReloadHistory();
+    await verifyReloadWatchBoundary(vscode.workspace.workspaceFolders![0]);
     await verifyCargoBuildSlots();
     await verifyRuntimeClient();
     await vscode.commands.executeCommand('ferroui.openLiveApp');

@@ -59,7 +59,7 @@ export class ManagedReload {
             mcpAvailable: this.endpoint !== undefined };
     }
 
-    observe(uri: vscode.Uri): void { void this.session?.observe(uri); }
+    observe(uri: vscode.Uri, fromWatcher: boolean): void { void this.session?.observe(uri, fromWatcher); }
     xamlRevision(file: string): string | undefined { return this.session?.xamlRevision(file); }
     recentOutput(lines: number): string { return this.log.tail(lines); }
     showOutput(): void { this.output.show(true); }

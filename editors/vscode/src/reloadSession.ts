@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { open, readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { inCargoBuildSlot } from './cargoBuildGate';
@@ -25,6 +25,7 @@ type LiveEvent = RuntimeEvent & { generation: number; pid?: number };
 
 export class ReloadSession implements vscode.Disposable {
     private readonly lifetime = new AbortController();
+    private readonly watchingSince = Date.now();
     private readonly changes = new Map<string, SourceChange>();
     private readonly observed = new Map<string, string>();
     private readonly waitingReads = new Map<string, object>();
@@ -67,7 +68,7 @@ export class ReloadSession implements vscode.Disposable {
         if (!this.disposed && !this.live && !this.building && !this.timer) this.build();
     }
 
-    async observe(uri: vscode.Uri): Promise<void> {
+    async observe(uri: vscode.Uri, fromWatcher = false): Promise<void> {
         if (this.disposed || uri.scheme !== 'file') return;
         const file = uri.fsPath;
         const key = fileKey(file);
@@ -79,7 +80,8 @@ export class ReloadSession implements vscode.Disposable {
         let fingerprint: string;
         let xamlFingerprint: string | undefined;
         try {
-            const bytes = await readFile(file);
+            const bytes = fromWatcher ? await this.watchedBytes(file) : await readFile(file);
+            if (bytes === undefined) return;
             fingerprint = revision(bytes);
             // The protocol acknowledges the file bytes. XAML source positions and the
             // loaded VS Code document exclude the leading UTF-8 signature.
@@ -106,6 +108,18 @@ export class ReloadSession implements vscode.Disposable {
         this.changes.set(key, { file, fingerprint, xamlFingerprint, language, observed, record });
         this.serial++;
         this.schedule(120);
+    }
+
+    private async watchedBytes(file: string): Promise<Buffer | undefined> {
+        const handle = await open(file, 'r');
+        try {
+            const info = await handle.stat();
+            const changed = Math.max(info.ctimeMs, info.mtimeMs, info.birthtimeMs);
+            // Native watchers can deliver a batch after launch. The initial
+            // Cargo build already sees files written before the session starts.
+            if (changed > 0 && changed < this.watchingSince) return;
+            return await handle.readFile();
+        } finally { await handle.close(); }
     }
 
     private accept(event: RuntimeEvent): void {
