@@ -2703,3 +2703,87 @@ fn token_stream_matches_official_upstream_corpus() {
         failures.join("\n\n")
     );
 }
+
+#[test]
+fn includes_shared_by_many_paths_expand_once() {
+    // Two includes of the next rule at each of 40 levels: 2^40 paths to one match.
+    let mut repository = String::new();
+    for level in 0..40 {
+        let next = level + 1;
+        repository.push_str(&format!(
+            r##""r{level}":{{"patterns":[{{"include":"#r{next}"}},{{"include":"#r{next}"}}]}},"##
+        ));
+    }
+    repository.push_str(r##""r40":{"match":"x","name":"keyword.x"}"##);
+    let source = format!(
+        r##"{{"scopeName":"source.test","patterns":[{{"include":"#r0"}}],"repository":{{{repository}}}}}"##
+    );
+    let result = grammar(&source).tokenize_line("x", None).unwrap();
+    assert_eq!(result.tokens[0].scopes.last().unwrap(), "keyword.x");
+}
+
+#[test]
+fn a_long_include_chain_does_not_use_the_stack() {
+    let levels = 50_000;
+    let mut repository = String::new();
+    for level in 0..levels {
+        let next = level + 1;
+        repository.push_str(&format!(r##""r{level}":{{"include":"#r{next}"}},"##));
+    }
+    repository.push_str(&format!(r##""r{levels}":{{"match":"x","name":"keyword.x"}}"##));
+    let source = format!(
+        r##"{{"scopeName":"source.test","patterns":[{{"include":"#r0"}}],"repository":{{{repository}}}}}"##
+    );
+    let result = grammar(&source).tokenize_line("x", None).unwrap();
+    assert_eq!(result.tokens[0].scopes.last().unwrap(), "keyword.x");
+}
+
+#[test]
+fn a_deeply_nested_plist_is_an_error() {
+    let levels = 200_000;
+    let source = format!(
+        r#"<plist version="1.0">{}{}</plist>"#,
+        "<array>".repeat(levels),
+        "</array>".repeat(levels)
+    );
+    assert!(RawGrammar::from_json(&source).is_err());
+}
+
+#[test]
+fn a_partial_pass_does_not_converge_before_the_lines_it_has_not_reached() {
+    let grammar = grammar(
+        r##"{"scopeName":"source.test","patterns":[
+            {"begin":"/\\*","end":"\\*/","name":"comment.block"},
+            {"match":"x","name":"keyword.x"}]}"##,
+    );
+    let mut model = TokenizationModel::new(grammar);
+    model.set_text(&vec!["x"; 100].join("\n"));
+    assert!(!model.retokenize(100).unwrap().pending);
+
+    model.replace_lines(0..1, [String::from("/*")]).unwrap();
+    assert!(model.retokenize(10).unwrap().pending);
+    model.replace_lines(5..6, [String::from("y")]).unwrap();
+    assert!(!model.retokenize(100).unwrap().pending);
+    let last = &model.tokens(99).unwrap().tokens[0];
+    assert!(last.scopes.iter().any(|scope| scope == "comment.block"), "{:?}", last.scopes);
+}
+
+#[test]
+fn a_line_over_the_work_budget_does_not_stop_the_lines_after_it() {
+    let grammar = grammar(r#"{"scopeName":"source.test","patterns":[{"match":"x","name":"keyword.x"}]}"#);
+    let mut model = TokenizationModel::new(grammar);
+    model.set_text("xxxx\nxxxx");
+    let options = TokenizeOptions { max_steps: 1, ..TokenizeOptions::default() };
+    let result = model.retokenize_with_options(100, options, None).unwrap();
+    assert!(result.stopped_early && !result.pending);
+    assert!(model.tokens(1).is_some());
+}
+
+#[test]
+fn a_keep_inside_a_lookahead_does_not_slice_backwards() {
+    let grammar = grammar(
+        r#"{"scopeName":"source.test","patterns":[{"match":"(?=a\\K)","name":"entity.$0"}]}"#,
+    );
+    // Either backend may refuse the expression; neither may panic.
+    let _ = grammar.tokenize_line("a", None);
+}
