@@ -141,6 +141,8 @@ struct DocumentInner {
     notified_is_modified: Cell<bool>,
 }
 
+ferroui_system::styled_value!(TextDocument);
+
 /// Shared UI-thread document with persistent UTF-16 storage, incremental line
 /// metrics, undo groups, immutable snapshots and stable text anchors.
 #[derive(Clone)]

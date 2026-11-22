@@ -1,7 +1,7 @@
 //! Reversible replacement of an explicitly owned local binding.
 use super::{BindingBase, BindingExpressionBase, BindingPriority, BindingValueType};
 use crate::diagnostics::FerroObjectDiagnosticExtensions;
-use crate::{FerroObject, PropertyValue, Ref, StyledProperty};
+use crate::{FerroObject, Ref, StyledProperty, StyledValue};
 use std::rc::Rc;
 
 /// A prepared replacement (or removal) of a supported local binding on a
@@ -17,7 +17,7 @@ use std::rc::Rc;
 /// Commit retains the original subscriptions until `finish`. `rollback` restores
 /// the original expression and user input without sending that input to either
 /// model. Dropping an unfinished change attempts rollback.
-pub struct LocalBindingReload<T: PropertyValue> {
+pub struct LocalBindingReload<T: StyledValue> {
     target: Ref<FerroObject>,
     property: &'static StyledProperty<T>,
     original: Option<Rc<dyn BindingExpressionBase>>,
@@ -38,7 +38,7 @@ enum State {
     Finished,
 }
 
-impl<T: PropertyValue> LocalBindingReload<T> {
+impl<T: StyledValue> LocalBindingReload<T> {
     pub fn prepare(
         target: &Ref<FerroObject>,
         property: &'static StyledProperty<T>,
@@ -243,7 +243,7 @@ impl<T: PropertyValue> LocalBindingReload<T> {
     }
 }
 
-impl<T: PropertyValue> Drop for LocalBindingReload<T> {
+impl<T: StyledValue> Drop for LocalBindingReload<T> {
     fn drop(&mut self) {
         // Property observers are application code and may panic. Do not double
         // panic while unwinding a failed commit; the session reports that failure.

@@ -101,7 +101,10 @@ impl<T: PropertyValue> DirectPropertyBase<T> {
 
     #[inline]
     fn accessor(&self) -> &'static dyn DirectPropertyAccessor<T> {
-        *self.accessor.get().expect("property is not fully registered")
+        match self.accessor.get() {
+            Some(accessor) => *accessor,
+            None => not_fully_registered(),
+        }
     }
 
     /// Gets the value of the property on the instance.
@@ -216,10 +219,13 @@ impl<T: PropertyValue> PropertyRoutes for DirectPropertyBase<T> {
             // An untyped entry (a binding expression): the value is already
             // converted to the property type, or is a marker. Data validation
             // is reported separately by the expression's sink.
-            if let Some(value) = boxed.downcast_ref::<T>() {
-                self.invoke_setter(o, BindingValue::new(value.clone()));
-            } else if boxed.is::<UnsetValueType>() {
-                self.invoke_setter(o, BindingValue::new(self.get_unset_value_for(o)));
+            let value = match boxed.downcast_ref::<T>() {
+                Some(value) => Some(value.clone()),
+                None if boxed.is::<UnsetValueType>() => Some(self.get_unset_value_for(o)),
+                None => None,
+            };
+            if let Some(value) = value {
+                self.invoke_setter(o, BindingValue::new(value));
             }
         }
     }
@@ -349,15 +355,12 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectProperty<TOwner, T> {
         result
     }
 
+    #[inline]
     fn owner_of<'a>(&self, instance: &'a FerroObject) -> &'a TOwner {
-        instance.downcast_ref::<TOwner>().unwrap_or_else(|| {
-            panic!(
-                "property '{}' is registered on {}, which {} does not derive from",
-                self.name(),
-                TOwner::TYPE,
-                instance.get_type()
-            )
-        })
+        match instance.downcast_ref::<TOwner>() {
+            Some(owner) => owner,
+            None => not_an_owner(self, TOwner::TYPE, instance),
+        }
     }
 }
 
@@ -367,13 +370,36 @@ impl<TOwner: ObjectType, T: PropertyValue> DirectPropertyAccessor<T> for DirectP
     }
 
     fn invoke_setter(&self, instance: &FerroObject, value: BindingValue<T>) {
-        let Some(setter) = self.setter else {
-            panic!("The property {} is readonly.", self.name());
-        };
+        let Some(setter) = self.setter else { read_only(self) };
         if let Some(value) = value.into_option() {
             setter(self.owner_of(instance), value);
         }
     }
+}
+
+// The failures of the accessors, compiled once instead of once for each owner and value type.
+
+#[cold]
+#[inline(never)]
+fn not_fully_registered() -> ! {
+    panic!("property is not fully registered")
+}
+
+#[cold]
+#[inline(never)]
+fn not_an_owner(property: &FerroProperty, owner: &'static TypeInfo, instance: &FerroObject) -> ! {
+    panic!(
+        "property '{}' is registered on {}, which {} does not derive from",
+        property.name(),
+        owner,
+        instance.get_type()
+    )
+}
+
+#[cold]
+#[inline(never)]
+pub(crate) fn read_only(property: &FerroProperty) -> ! {
+    panic!("The property {} is readonly.", property.name())
 }
 
 /// Type-erased view of a direct property used by the registry.

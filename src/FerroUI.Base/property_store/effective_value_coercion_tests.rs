@@ -2,6 +2,8 @@
 //! Compare user-observable operations instead of assuming a cleanup order.
 
 use super::*;
+#[allow(unused_imports)]
+use crate::{PropertyValue, StyledProperty};
 use crate::ferro_property_metadata::PropertyMetadata;
 use crate::{FerroPropertyMetadata, StyledPropertyOptions, WeakRef};
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -93,6 +95,8 @@ struct Tracked {
     serial: usize,
     trace: Rc<Trace>,
 }
+
+crate::styled_value!(Tracked);
 
 impl Clone for Tracked {
     fn clone(&self) -> Self {
@@ -383,7 +387,7 @@ fn recoercion_keeps_nan_equality() {
 
 // Copied from 4622c95a: only the two oracle method names and their call differ, and the base value is read and
 // written as the value keeps it (once, where it is the value).
-impl<T: PropertyValue> EffectiveValue<T> {
+impl<T: crate::StyledValue> EffectiveValue<T> {
     fn original_coerce_value(&self, owner: &FerroObject) {
         let Some(uncommon) = &self.uncommon else { return };
         let value = uncommon.uncoerced_value.borrow().clone();
@@ -555,7 +559,7 @@ mod end_reevaluation_tests {
             let property = FerroProperty::register_with::<FerroObject, _>(
                 &unique_name(), StyledPropertyOptions::new(f64::NAN).coerce(|_, value| value),
             );
-            let effective = EffectiveValue::new(&owner, property, None);
+            let effective = EffectiveValue::new(property.as_property(), property.get_metadata_for(&owner), None);
             if original { effective.original_end_reevaluation(&owner); }
             else { EffectiveValueDyn::end_reevaluation(&effective, &owner); }
             assert!(effective.value().is_nan());
@@ -564,7 +568,7 @@ mod end_reevaluation_tests {
             let property = FerroProperty::register_with::<FerroObject, _>(
                 &unique_name(), StyledPropertyOptions::new(1_i32).coerce(|_, _| panic!("metadata callback used")),
             );
-            let mut effective = EffectiveValue::new(&owner, property, None);
+            let mut effective = EffectiveValue::new(property.as_property(), property.get_metadata_for(&owner), None);
             // The algorithm must still call the callback retained in uncommon,
             // even though metadata supplies the demand-rooted dispatch entry.
             effective.uncommon.as_mut().unwrap().coerce = Rc::new(|_, value| value + 5);
@@ -575,7 +579,7 @@ mod end_reevaluation_tests {
     }
 
     // Copied from bbff5971; only the oracle method name differs.
-    impl<T: PropertyValue> EffectiveValue<T> {
+    impl<T: crate::StyledValue> EffectiveValue<T> {
         fn original_end_reevaluation(&self, owner: &FerroObject) {
             if self.state.priority.get() == BindingPriority::Unset {
                 if let Some(uncommon) = &self.uncommon {

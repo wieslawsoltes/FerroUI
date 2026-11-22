@@ -14,6 +14,8 @@ pub(super) fn decode_windows_1252(byte: u8) -> char {
     }
 }
 
+ferroui_system::styled_value!(TextEncoding);
+
 /// Encodings supported by the editor's dependency-free file reader.
 /// Byte-order marks are reported separately from the selected encoding.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]

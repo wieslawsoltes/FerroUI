@@ -16,6 +16,8 @@ pub trait IOverloadProvider: INotifyPropertyChanged {
     fn current_content(&self) -> Option<BoxedValue>;
 }
 
+ferroui_base::styled_value!(OverloadProviderRef);
+
 /// Identity-comparable provider reference for the native `Provider` property.
 #[derive(Clone)]
 pub struct OverloadProviderRef(pub Rc<dyn IOverloadProvider>);

@@ -67,6 +67,8 @@ use std::{
 /// Property-system value for a source host-window callback. Public accessors retain the callback API.
 #[derive(Clone)]
 pub struct HostWindowFactoryValue(pub HostWindowFactory);
+
+ferroui_base::styled_value!(HostWindowFactoryValue);
 impl PartialEq for HostWindowFactoryValue {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
