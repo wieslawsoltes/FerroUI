@@ -221,6 +221,12 @@ jobs:
         with:
           name: editor-browser-site
           path: target/browser/editor-demo-browser
+      # The keymap of macOS gives Control and Option other meanings than the other platforms.
+      - name: Document, native grammar, control and XAML demo tests on macOS
+        run: >-
+          cargo test --locked --lib --no-default-features
+          -p ferroui-edit-core -p ferroui-textmate -p ferroui-edit -p editor-demo
+          --features ferroui-textmate/native-onig,ferroui-textmate/bundled-grammars
       - name: Verify AppKit marked text and committed text
         run: cargo test --locked -p ferroui-native --test text_input_options
       - name: Build the native macOS editor fixture
