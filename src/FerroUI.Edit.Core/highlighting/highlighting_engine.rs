@@ -131,7 +131,7 @@ impl HighlightingEngine {
                 span.end_expression
                     .find_from_pos(text, position)
                     .map_err(|e| HighlightingError::MatchBudget(e.to_string()))?
-                    .map(|m| Candidate::End(m.start(), m.end()))
+                    .map(|m| Candidate::End(m.start().min(m.end()), m.end()))
                     .or_else(|| {
                         // Compiled XSHD includes this boundary in the regex.
                         // Programmatic definitions can supply only the delimiter.
@@ -208,7 +208,10 @@ impl HighlightingEngine {
                         let color = overlay(color, span.start_color.as_ref());
                         self.push(&mut sections, &utf16, start, end, offset, color);
                     }
-                    state.stack.push((set, index));
+                    // Every cached line keeps its whole stack, so deeper nesting is not tracked.
+                    if state.stack.len() < MAX_SPAN_DEPTH {
+                        state.stack.push((set, index));
+                    }
                 }
             }
             if end > position {
@@ -263,11 +266,12 @@ impl HighlightingEngine {
                 .find_from_pos(text, position)
                 .map_err(|e| HighlightingError::MatchBudget(e.to_string()))?
             {
+                // `\K` in a lookahead can report a start after the end.
+                let start = m.start().min(m.end());
                 if candidate.as_ref().is_none_or(|c| {
-                    m.start() < c.start()
-                        || (m.start() == c.start() && matches!(c, Candidate::End(_, _)))
+                    start < c.start() || (start == c.start() && matches!(c, Candidate::End(_, _)))
                 }) {
-                    *candidate = Some(Candidate::Span(set, index, m.start(), m.end()));
+                    *candidate = Some(Candidate::Span(set, index, start, m.end()));
                 }
             }
         }
@@ -420,6 +424,9 @@ fn overlay(
     }
 }
 
+/// The span nesting a line state tracks.
+const MAX_SPAN_DEPTH: usize = 256;
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -439,6 +446,22 @@ mod tests {
         assert_eq!(second.sections[0].offset, 20);
         assert_eq!(second.sections[0].length, 6);
         assert_eq!(second.end_state, HighlightingState::default());
+    }
+    #[test]
+    fn recursive_spans_keep_a_bounded_stack() {
+        let definition = Rc::new(
+            HighlightingDefinition::load(
+                r#"<SyntaxDefinition><RuleSet><Import ruleSet="Nested"/></RuleSet>
+                <RuleSet name="Nested"><Span begin="\(" end="\)" multiline="true" ruleSet="Nested"/></RuleSet>
+                </SyntaxDefinition>"#,
+            )
+            .unwrap(),
+        );
+        let engine = HighlightingEngine::new(definition);
+        let line = engine
+            .highlight_line(&"(".repeat(1000), 1, 0, &HighlightingState::default())
+            .unwrap();
+        assert_eq!(line.end_state.stack.len(), MAX_SPAN_DEPTH);
     }
     #[test]
     fn zero_width_recursive_span_is_bounded() {

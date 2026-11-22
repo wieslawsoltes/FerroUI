@@ -46,18 +46,27 @@ impl Block {
 
     fn indent(&mut self, indentation: &str) {
         self.outer_indent = self.inner_indent.clone();
-        let mut inner = self.inner_indent.to_string();
-        inner.push_str(indentation);
-        self.inner_indent = Rc::from(inner);
+        if self.inner_indent.len() + indentation.len() <= MAX_INDENT_LENGTH {
+            let mut inner = self.inner_indent.to_string();
+            inner.push_str(indentation);
+            self.inner_indent = Rc::from(inner);
+        }
         self.continuation = false;
         self.reset_one_line_block();
         self.last_word = Rc::from("");
     }
 }
 
+/// The open blocks the reformatter tracks, and the longest indentation it builds. Each open
+/// block keeps its own indentation strings, so one long line of brackets would otherwise hold
+/// memory quadratic in its length.
+const MAX_BLOCK_DEPTH: usize = 256;
+const MAX_INDENT_LENGTH: usize = 4096;
+
 pub(super) struct IndentationReformatter {
     word_builder: String,
     blocks: Vec<Block>,
+    untracked_blocks: usize,
     block: Block,
     scanner: LiteralScanner,
     last_real_char: char,
@@ -68,6 +77,7 @@ impl Default for IndentationReformatter {
         Self {
             word_builder: String::new(),
             blocks: Vec::new(),
+            untracked_blocks: 0,
             block: Block::default(),
             scanner: LiteralScanner::default(),
             last_real_char: ' ',
@@ -149,6 +159,8 @@ impl IndentationReformatter {
             }
 
             match current {
+                '{' | '(' | '[' if self.blocks.len() >= MAX_BLOCK_DEPTH => self.untracked_blocks += 1,
+                '}' | ')' | ']' if self.untracked_blocks > 0 => self.untracked_blocks -= 1,
                 '{' => {
                     self.block.reset_one_line_block();
                     self.blocks.push(self.block.clone());

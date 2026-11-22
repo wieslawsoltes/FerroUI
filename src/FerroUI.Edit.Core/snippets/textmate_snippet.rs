@@ -365,11 +365,23 @@ fn collect<'a>(
     }
 }
 
+/// The nodes and bytes one default may expand to. Defaults can refer to each other, so a short
+/// snippet can otherwise stand for an exponential expansion.
+const MAX_DEFAULT_EXPANSION: usize = 1 << 20;
+
+fn spend_expansion(budget: &mut usize, amount: usize) -> Result<(), SnippetError> {
+    *budget = budget
+        .checked_sub(amount)
+        .ok_or(SnippetError::InvalidExpansion("snippet default expansion limit exceeded"))?;
+    Ok(())
+}
+
 fn initial_text(
     nodes: &[Node],
     defaults: &BTreeMap<usize, &FieldDefault>,
     active: &mut BTreeSet<usize>,
     depth: usize,
+    budget: &mut usize,
     text: &mut String,
 ) -> Result<(), SnippetError> {
     if depth >= 256 {
@@ -378,8 +390,12 @@ fn initial_text(
         ));
     }
     for node in nodes {
+        spend_expansion(budget, 1)?;
         match node {
-            Node::Text(value) => text.push_str(value),
+            Node::Text(value) => {
+                spend_expansion(budget, value.len())?;
+                text.push_str(value);
+            }
             Node::TabStop(0, children) => initial_text(
                 children
                     .as_ref()
@@ -388,15 +404,19 @@ fn initial_text(
                 defaults,
                 active,
                 depth + 1,
+                budget,
                 text,
             )?,
             Node::TabStop(id, _) | Node::TransformedTabStop(id, _) => match defaults.get(id) {
-                Some(FieldDefault::Choices(choices)) => text.push_str(&choices[0]),
+                Some(FieldDefault::Choices(choices)) => {
+                    spend_expansion(budget, choices[0].len())?;
+                    text.push_str(&choices[0]);
+                }
                 Some(FieldDefault::Content(children)) => {
                     if !active.insert(*id) {
                         return Err(SnippetError::InvalidExpansion("cyclic snippet default"));
                     }
-                    initial_text(children, defaults, active, depth + 1, text)?;
+                    initial_text(children, defaults, active, depth + 1, budget, text)?;
                     active.remove(id);
                 }
                 None => {}
@@ -452,7 +472,8 @@ fn lower(
                 }
                 let default = default.map(FieldDefault::nodes).unwrap_or_default();
                 let mut text = String::new();
-                initial_text(default, defaults, &mut BTreeSet::from([*id]), 0, &mut text)?;
+                let mut budget = MAX_DEFAULT_EXPANSION;
+                initial_text(default, defaults, &mut BTreeSet::from([*id]), 0, &mut budget, &mut text)?;
                 if default
                     .iter()
                     .any(|node| matches!(node, Node::TabStop(..) | Node::TransformedTabStop(..)))
@@ -480,6 +501,20 @@ mod tests {
     use super::*;
     use crate::document::{DocumentError, TextDocument};
     use std::rc::Rc;
+
+    #[test]
+    fn defaults_that_refer_to_each_other_have_an_expansion_limit() {
+        for last in ["${40:x}", "$40"] {
+            let mut source = String::new();
+            for id in 1..40 {
+                let next = id + 1;
+                source.push_str(&format!("${{{id}:${next}${next}}}"));
+            }
+            source.push_str(last);
+            let result = TextMateSnippet::parse(&source).and_then(|snippet| snippet.instantiate(""));
+            assert!(matches!(result, Err(SnippetError::InvalidExpansion(_))), "{last}");
+        }
+    }
 
     #[test]
     fn variable_transforms_support_captures_conditions_flags_and_utf16() {
