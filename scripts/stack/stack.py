@@ -63,6 +63,9 @@ GOOD = {"SUCCESS", "SKIPPED", "NEUTRAL"}
 # A run cancelled by a newer run of its workflow (the concurrency group of the CI cancels the run of
 # the old base when a retarget starts one on the new base): neither passed nor failed.
 SUPERSEDED = {"CANCELLED", "STALE"}
+# The check of a CI run that left the build and test jobs to the pull request above (ci.yml). Its
+# other checks pass or are skipped, so a part whose latest run has it must not be merged on them.
+REDUCED_CHECK = "Reduced CI (the pull request above runs the full checks)"
 
 
 def gh(*args, parse=True):
@@ -168,6 +171,19 @@ def checks(pr, since):
     return not pending and not cancelled and not failed and not stale, summary
 
 
+def has_reduced_ci(pr):
+    """Whether the latest CI run of the head left its build and test jobs to a part above it."""
+    runs = [item for item in pr["statusCheckRollup"] or [] if item.get("name") == REDUCED_CHECK]
+    if not runs:
+        return False
+    latest = max(runs, key=lambda item: parse_time(item.get("startedAt")) or datetime.min.replace(tzinfo=timezone.utc))
+    return latest.get("conclusion") == "SUCCESS"
+
+
+def full_ci_hint(pr):
+    return f"its CI was reduced: run `gh workflow run ci.yml --ref {pr['headRefName']}` for the full checks"
+
+
 def readiness(repo, pr, default):
     """(ready, reasons) of a pull request for merging now."""
     reasons = []
@@ -182,6 +198,8 @@ def readiness(repo, pr, default):
     ready, summary = checks(pr, base_changed_at(repo, pr["number"]))
     if not ready:
         reasons.append(f"checks: {summary}")
+    if has_reduced_ci(pr):
+        reasons.append(full_ci_hint(pr))
     return not reasons, reasons, summary
 
 
@@ -325,6 +343,9 @@ def command_land(args):
     print(f"  top #{landed['number']}: {summary}, merge state {landed['mergeStateStatus']}")
     if not passed or landed["mergeStateStatus"] != "CLEAN":
         print(f"nothing landed: the checks of the top part #{landed['number']} have not all passed")
+        return 1
+    if has_reduced_ci(landed):
+        print(f"nothing landed: #{landed['number']} is the top part here, but {full_ci_hint(landed)}")
         return 1
     guards = top_guards(parts, default)
     if guards:
