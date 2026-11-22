@@ -41,7 +41,9 @@ impl GradientBrushAnimator {
 
         let old_stops = old_gradient.gradient_stops();
         let new_stops = new_gradient.gradient_stops();
-        if old_stops.is_empty() || new_stops.is_empty() {
+        // Two empty gradients still interpolate opacity and geometry. An
+        // abrupt change in stop availability uses the discrete brush value.
+        if old_stops.is_empty() != new_stops.is_empty() {
             return discrete();
         }
         let stops = || Self::interpolate_stops(progress, &old_stops, &new_stops);
