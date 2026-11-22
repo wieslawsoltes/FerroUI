@@ -222,9 +222,16 @@ fn apple_keymap_gives_box_word_and_copy_gestures_their_own_modifiers() {
     scene.pointer(RawPointerEventType::LeftButtonUp, 7, RawInputModifiers::META);
 
     editor.set_selection(Selection::empty(0)).unwrap();
+    // Control with a click is the secondary click on macOS: Option draws the rectangle.
+    scene.pointer(RawPointerEventType::LeftButtonDown, 1, button | RawInputModifiers::ALT);
+    scene.pointer(RawPointerEventType::Move, 14, button | RawInputModifiers::ALT);
+    assert!(editor.selection().is_rectangular());
+    scene.pointer(RawPointerEventType::LeftButtonUp, 14, RawInputModifiers::ALT);
+
+    editor.set_selection(Selection::empty(0)).unwrap();
     scene.pointer(RawPointerEventType::LeftButtonDown, 1, button | RawInputModifiers::CONTROL);
     scene.pointer(RawPointerEventType::Move, 14, button | RawInputModifiers::CONTROL);
-    assert!(editor.selection().is_rectangular());
+    assert!(!editor.selection().is_rectangular());
     scene.pointer(RawPointerEventType::LeftButtonUp, 14, RawInputModifiers::CONTROL);
 }
 

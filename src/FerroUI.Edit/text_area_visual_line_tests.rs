@@ -2879,3 +2879,25 @@ fn crossing_fold_placeholders_keep_the_first_title_and_activate_its_section() {
     assert_eq!(editor.selection(), selection);
     window.close();
 }
+
+#[test]
+fn an_edit_keeps_the_measured_height_of_wrapped_lines_it_did_not_touch() {
+    let _scope = test_scope();
+    let wrapped = "alpha beta gamma delta epsilon zeta eta theta iota kappa";
+    let editor = laid_out_editor(&format!("{wrapped}\nsecond\nthird\nfourth"));
+    editor.set_word_wrap(true);
+    let area = editor.text_area();
+    area.measure(Size::new(135.0, 400.0));
+    area.arrange(Rect::new(0.0, 0.0, 135.0, 400.0));
+    area.ensure_visual_lines().unwrap();
+    let measured = area.heights.borrow().top(1);
+    assert!(measured > area.line_height() * 1.5);
+
+    let end = editor.document().text_length();
+    editor.document().insert(end, "x").unwrap();
+    assert_eq!(area.heights.borrow().top(1), measured);
+
+    editor.document().insert(end, "\nfifth").unwrap();
+    assert_eq!(area.heights.borrow().line_count(), 5);
+    assert_eq!(area.heights.borrow().top(1), measured);
+}

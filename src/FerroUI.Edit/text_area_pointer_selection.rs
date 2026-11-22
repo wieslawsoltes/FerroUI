@@ -317,7 +317,7 @@ impl TextArea {
         let shift = e.key_modifiers().contains(KeyModifiers::SHIFT);
         let gutter = line_number || point.x < self.gutter_width();
         let box_mode = options.enable_rectangular_selection
-            && e.key_modifiers().contains(box_selection_modifier())
+            && e.key_modifiers().contains(BOX_SELECTION_POINTER_MODIFIER)
             && !gutter;
         let caret = self.navigation_caret_at_point(point, options.enable_virtual_space || box_mode);
         if !gutter

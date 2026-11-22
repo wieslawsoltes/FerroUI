@@ -186,7 +186,7 @@ impl TextArea {
             .get_line_index_from_character_index(column, false) as usize;
         let bounds = line.layout.hit_test_text_position(column);
         let origin = line.layout.line_origin(row);
-        let row_height = line.layout.text_lines()[row].height();
+        let row_height = line.layout.text_lines().get(row).map_or(0.0, |row| row.height());
         let viewport = self.content_viewport();
         let mut scroll = self.offset.get();
         let x = bounds.x;

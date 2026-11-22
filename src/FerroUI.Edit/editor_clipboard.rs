@@ -161,6 +161,8 @@ impl Drop for ReadTransfer {
     }
 }
 
+const MAX_RICH_COPY_BYTES: usize = 4 << 20;
+
 // The classic Windows editor's registered byte marker. Other platforms carry
 // the rectangle through the FerroUI application format alone.
 const RECTANGLE_PLATFORM_FORMATS: &[&str] = if cfg!(target_os = "windows") {
@@ -379,11 +381,17 @@ impl EditorClipboard {
         let options = HtmlOptions {
             tab_size: editor.session().options().indentation_size,
         };
-        let (html, formatting_error) = match Self::rich_selection(editor, &copy.selection)
-            .and_then(|rich| Ok(rich.to_html(&options)?))
-        {
-            Ok(html) => (Some(html), None),
-            Err(error) => (None, Some(error.to_string())),
+        // Rich text tokenizes up to the end of the selection on the UI thread: a very large
+        // selection is copied as plain text.
+        let (html, formatting_error) = if text.len() > MAX_RICH_COPY_BYTES {
+            (None, None)
+        } else {
+            match Self::rich_selection(editor, &copy.selection)
+                .and_then(|rich| Ok(rich.to_html(&options)?))
+            {
+                Ok(html) => (Some(html), None),
+                Err(error) => (None, Some(error.to_string())),
+            }
         };
         let data = DataTransfer::new();
         let item = DataTransferItem::create_text(Some(&text));
