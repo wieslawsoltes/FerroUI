@@ -320,10 +320,14 @@ Design and Stages load packaged assets from their recorded files. Save a referen
 ### Move an asset and update its references
 
 1. Select an image, font, or media file in **Assets** and use **Move or rename asset…**. Enter a path in an existing directory in the same Cargo package or loose-file project. Keep the file extension.
-2. The Changes editor shows the proposed patches. Review the XAML URI properties, typed style values, font source paths, and Rust includes there. The review includes static `concat!` paths, including paths anchored to `CARGO_MANIFEST_DIR`. A move with no indexed references shows a file confirmation.
+2. The Changes editor shows the proposed patches. Review the XAML URI properties, typed style values, font source paths, Cargo registrations, and Rust references there. The review includes static `concat!` paths, including paths anchored to `CARGO_MANIFEST_DIR`. A move with no source patches shows the file and any published address changes in a confirmation.
 3. Choose **Apply Asset Move** to move the file and update the displayed references in one VS Code edit. Undo from an edited reference to restore the file and those source changes together. Use **Cancel Asset Move** to return to the editor. If a file or draft changes, prepare a new review.
 
-The review reflects the indexed XAML and Rust code, including open drafts. For a file listed in the build's published asset table, update its path, `ferres://` references, and any explicit `ExportPlan` entry in source, then rebuild the package. Inspect runtime-generated paths and externally managed asset mappings before applying a reviewed move. If a Rust draft with a possible include is incomplete, repair it and prepare the review again. Save the edited buffers to update the running app. [Move a XAML file](#move-an-xaml-file-and-its-references) · [MCP reference](reference.md#drive-an-editor-workflow)
+For a published asset, build the selected Cargo target first and use **Move or rename asset…** on the export in **Assets**. Choose a destination inside an embedded directory. The review updates literal closed `ExportPlan::asset` entries, typed XAML references and authored Rust addresses. Design, Stages and source navigation follow the new `ferres://` address through Apply, Undo and Redo. Save the edited buffers and rebuild to publish the address in the running app.
+
+![The Changes editor compares the old and new asset references in XAML, the Cargo build script, and RSX](../images/vscode-published-asset-move.png)
+
+The review reflects open drafts. Repair an incomplete reference or rebuild the schema if a Cargo declaration has shifted. Inspect runtime-generated paths and externally managed mappings before applying the move. [Move a XAML file](#move-an-xaml-file-and-its-references) · [Designer Studio workflow](../native-controls.md#move-a-published-asset) · [MCP reference](reference.md#drive-an-editor-workflow)
 
 ## Create a Rust handler for an XAML event
 

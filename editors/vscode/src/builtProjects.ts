@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { assetFormat } from './assetFormats';
 import { errorMessage } from './protocol';
 import type { ProjectMetadata } from './reloadProcess';
 import { isInside } from './workspacePaths';
@@ -69,9 +70,17 @@ export class BuiltProjects implements vscode.Disposable {
         let changed = false;
         for (const [manifest, project] of this.projects) {
             const root = path.dirname(manifest);
-            const moves = new Map(files.filter(({ oldUri, newUri }) =>
-                [oldUri, newUri].every(uri => uri.scheme === 'file'
-                    && path.extname(uri.fsPath).toLowerCase() === '.xaml' && isInside(root, uri.fsPath)))
+            const moves = new Map(files.filter(({ oldUri, newUri }) => {
+                const endpoints = [oldUri, newUri];
+                if (!endpoints.every(uri => uri.scheme === 'file')) return false;
+                if (endpoints.every(uri => path.extname(uri.fsPath).toLowerCase() === '.xaml')) {
+                    return endpoints.every(uri => isInside(root, uri.fsPath));
+                }
+                return endpoints.every(uri => {
+                    const asset = assetFormat(uri.fsPath);
+                    return asset && asset.kind !== 'XAML' && isInside(project.workspaceRoot, uri.fsPath);
+                });
+            })
                 .map(({ oldUri, newUri }) => [oldUri.toString(), newUri.toString()]));
             if (!moves.size) continue;
             const previous = Object.entries(project.resourceMoves ?? {});

@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import type { FileMovePlan } from '../src/fileMoveProtocol';
 import type { McpFixture } from './mcp';
+import { verifyPublishedAssetMove } from './publishedAssetMoveMcp';
 import { until } from './wait';
 
 export async function verifyAssetMove({ invoke, content }: McpFixture): Promise<void> {
@@ -60,4 +61,5 @@ export async function verifyAssetMove({ invoke, content }: McpFixture): Promise<
         await vscode.workspace.fs.delete(folder, { recursive: true, useTrash: false });
     }
     console.log('Reviewed asset move updated XAML and Rust drafts and restored the binary and both buffers with one Undo');
+    await verifyPublishedAssetMove({ invoke, content });
 }

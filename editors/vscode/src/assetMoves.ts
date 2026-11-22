@@ -36,8 +36,10 @@ export class AssetMoves implements vscode.Disposable {
                 return to;
             });
         } else {
+            const addresses = plan.publishedAssets?.map(({ from, to }) => `${from}\n→ ${to}`);
             const choice = await vscode.window.showInformationMessage(title, { modal: true,
-                detail: 'This move affects the asset file. The index found no authored path references.' }, 'Move');
+                detail: addresses?.length ? `Cargo will publish the asset at its new address.\n\n${addresses.join('\n\n')}`
+                    : 'This move affects the asset file. The index found no authored path references.' }, 'Move');
             if (choice === 'Move') {
                 await this.apply(from, to, plan.review);
                 await vscode.commands.executeCommand('vscode.open', to);
@@ -45,9 +47,9 @@ export class AssetMoves implements vscode.Disposable {
         }
     }
 
-    async agent(request: FileMoveRequest, review: string | undefined, signal: AbortSignal) {
+    async agent(request: FileMoveRequest, review: string | undefined, signal: AbortSignal, published?: vscode.Uri) {
         signal.throwIfAborted();
-        const from = await resolveWorkspaceFile(request.path, request.folder);
+        const from = published ?? await resolveWorkspaceFile(request.path, request.folder);
         const { folder, extension } = await assetInWorkspace(from);
         const to = await assetDestination(request.destination, folder, extension);
         if (review !== undefined) return this.apply(from, to, review, signal);
@@ -57,7 +59,8 @@ export class AssetMoves implements vscode.Disposable {
     }
 
     private async plan(from: vscode.Uri, to: vscode.Uri) {
-        const drafts = await fileMoveDrafts(document => document.uri.path.toLowerCase().endsWith('.rs') && !isCompiledXamlRust(document));
+        const drafts = await fileMoveDrafts(document => document.isDirty && document.uri.path.toLowerCase().endsWith('.rs')
+            && !isCompiledXamlRust(document));
         return this.server.planAssetMove(from, to, drafts);
     }
 

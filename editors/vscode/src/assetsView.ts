@@ -67,11 +67,12 @@ export class AssetsView {
         const [files, published] = await Promise.all([
             this.library.list(folder, panel?.document.uri, Boolean(panel)), panel?.publishedAssets() ?? [],
         ]);
-        const packaged = published.flatMap<ProjectAsset>(({ address, assembly, key }) => {
+        const packaged = published.flatMap<ProjectAsset>(({ address, assembly, key, sourceRoot }) => {
             const format = assetFormat(key);
             if (!format) return [];
             return [{ id: address, label: path.posix.basename(key), path: `${assembly} · ${key}`,
                 kind: format.kind, relative: address, published: true, thumbnail: Boolean(format.mime),
+                movable: format.kind !== 'XAML' && Boolean(sourceRoot && vscode.workspace.getWorkspaceFolder(vscode.Uri.file(sourceRoot))),
                 source: format.mime ? address : undefined }];
         });
         return [...packaged, ...files];
@@ -88,7 +89,7 @@ export class AssetsView {
         if (!folder) return;
         if (isPublished(id)) {
             const panel = this.panel;
-            if (!panel || action === 'move') throw new Error('Use the published asset from its owning Cargo design.');
+            if (!panel) throw new Error('Use the published asset from its owning Cargo design.');
             const input = await panel.publishedAsset(id);
             const file = vscode.Uri.parse(input.uri, true);
             if (this.panel !== panel) return;
@@ -98,7 +99,8 @@ export class AssetsView {
             } else if (action === 'copy') {
                 await vscode.env.clipboard.writeText(id);
                 this.view.post({ type: 'assetStatus', message: 'Copied packaged address.' });
-            } else await vscode.commands.executeCommand('vscode.open', file);
+            } else if (action === 'move') await vscode.commands.executeCommand('ferroui.moveAsset', file);
+            else await vscode.commands.executeCommand('vscode.open', file);
             return;
         }
         if (action === 'preview') {

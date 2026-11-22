@@ -163,8 +163,14 @@ export class AgentTools {
             return this.project.assetImport.agent(request, request.review, signal);
         }
         if (tool === 'ferroui_project_plan_asset_move' || tool === 'ferroui_project_move_asset') {
-            const request = input as FileMoveRequest & { review?: string };
-            return this.project.assetMoves.agent(request, request.review, signal);
+            const request = input as FileMoveRequest & { review?: string; session?: number };
+            let published: vscode.Uri | undefined;
+            if (/^ferres:\/\//i.test(request.path)) {
+                const design = this.workbench.designs().find(panel => panel.session === request.session);
+                if (!design) throw new Error('Pass the designer session that lists the published asset.');
+                published = vscode.Uri.parse((await design.publishedAsset(request.path)).uri, true);
+            }
+            return this.project.assetMoves.agent(request, request.review, signal, published);
         }
         const args = input as Arguments;
         if (tool === 'ferroui_designs') {

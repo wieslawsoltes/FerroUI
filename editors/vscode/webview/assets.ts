@@ -147,7 +147,7 @@ function showPreviewButtons(): void {
     place.hidden = !selected?.source;
     place.disabled = !state.frame;
     useSource.hidden = !selected?.source || !state.imageTarget;
-    move.hidden = !selected || Boolean(selected.published) || (selected.kind === 'XAML' && !selected.path.toLowerCase().endsWith('.xaml'));
+    move.hidden = !selected || (selected.published ? !selected.movable : selected.kind === 'XAML' && !selected.path.toLowerCase().endsWith('.xaml'));
     copy.title = selected?.published ? 'Copy packaged address' : 'Copy relative path';
     copy.setAttribute('aria-label', copy.title);
     insert.title = insert.disabled ? 'Select a panel that accepts children or drag onto the artboard' : '';

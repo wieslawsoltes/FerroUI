@@ -246,7 +246,7 @@ export type ToProperties = { type: 'state'; state: PropertiesState }
     | { type: 'edit'; request: number; error?: string };
 
 export interface Asset { id: string; title: string; category: string; description: string; icon: string; rust: boolean }
-export interface PublishedAsset { address: string; assembly: string; key: string }
+export interface PublishedAsset { address: string; assembly: string; key: string; sourceRoot?: string }
 export interface PublishedAssetInput { uri: string; raster: boolean }
 export interface ProjectAsset {
     id: string;
@@ -257,6 +257,7 @@ export interface ProjectAsset {
     thumbnail: boolean;
     source?: string;
     published?: boolean;
+    movable?: boolean;
 }
 export interface AssetsState {
     frame?: FrameTarget;

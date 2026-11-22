@@ -15,6 +15,7 @@ export interface FileMovePlan {
     review: string;
     documents: FileMoveDocument[];
     generatedRust?: GeneratedRustRename[];
+    publishedAssets?: { from: string; to: string }[];
 }
 
 export interface RustSymbolRename {
