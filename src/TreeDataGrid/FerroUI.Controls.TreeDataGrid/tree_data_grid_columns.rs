@@ -10,6 +10,8 @@ use std::rc::Rc;
 #[derive(Clone, PartialEq)]
 pub struct TreeDataGridColumns(FerroList<Rc<dyn TreeDataGridColumn>>);
 
+ferroui_base::styled_value!(TreeDataGridColumns);
+
 impl TreeDataGridColumns {
     pub fn new() -> Self {
         Self(FerroList::new())

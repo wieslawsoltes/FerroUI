@@ -168,6 +168,8 @@ pub(crate) fn validate(groups: &[ViewStateGroup]) {
 #[derive(Clone)]
 struct MountedGroups(Rc<Vec<MountedGroup>>);
 
+ferroui_base::styled_value!(MountedGroups);
+
 impl PartialEq for MountedGroups {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
