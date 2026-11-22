@@ -2,7 +2,7 @@
 //! `ChangeVisualState` of the button family and the list item, and the `UpdateVisualState` of the
 //! text box.
 
-use super::state_mappers::{has_mapper, is_installed};
+use super::state_mappers::{has_mapper, is_installed, states_known};
 use crate::primitives::{TemplatedControl, ToggleButton};
 use crate::presenters::TextPresenter;
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
@@ -234,6 +234,26 @@ fn a_family_has_its_mapper_once_its_class_is_initialised_on_the_thread() {
         // A class registers the mapper of its own family only.
         assert!(!has_mapper(TextBox::TYPE));
         drop(item);
+    })
+    .join()
+    .unwrap();
+}
+
+#[test]
+fn the_manager_is_named_by_the_mappers_once_an_element_has_groups() {
+    std::thread::spawn(|| {
+        let _scope = test_scope();
+        // A template without visual states: the manager is never initialised on the thread.
+        let button = Button::new();
+        button.set_template(Some(FuncControlTemplate::new(|_, _| Border::new().upcast())));
+        button.apply_template();
+        assert!(!is_installed(&button));
+        assert!(!states_known());
+        // Groups are the manager's attached property: making them initialises it.
+        let groups = templated(&button, &[COMMON]);
+        assert!(states_known());
+        assert!(is_installed(&button));
+        assert_eq!(states(&groups), ["Normal"]);
     })
     .join()
     .unwrap();

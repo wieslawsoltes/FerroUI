@@ -57,6 +57,8 @@ ferro_properties! {
 #[derive(Clone)]
 struct HostHandlers(Rc<RefCell<Vec<Rc<dyn IDisposable>>>>);
 
+ferroui_base::styled_value!(HostHandlers);
+
 impl PartialEq for HostHandlers {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)

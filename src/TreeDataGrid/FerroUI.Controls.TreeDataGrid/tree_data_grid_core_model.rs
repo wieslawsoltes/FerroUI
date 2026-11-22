@@ -26,6 +26,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct TreeDataGridSourceRef(Rc<dyn ITreeDataGridSource>);
 
+ferroui_base::styled_value!(TreeDataGridSourceRef);
+
 impl TreeDataGridSourceRef {
     /// The handle of an untyped source.
     pub fn new(source: Rc<dyn ITreeDataGridSource>) -> Self {
