@@ -1,5 +1,10 @@
-use super::{size, valid_token_name, Conversion, Issue, Options, Plan, EXTENSION};
-use crate::components::{framework, key_attribute, literal_key, FRAMEWORK, XAML};
+use super::scalars::{duration_ms, hex_color, literal_number};
+use super::GRADIENT_PROPERTIES;
+use super::{
+    bezier, gradient, gradient_geometry, native_type, shadow, size, valid_token_name, Conversion,
+    Issue, Options, Plan, ValueResult, EXTENSION,
+};
+use crate::components::{framework, key_attribute, literal_key, XAML};
 use crate::{Result, ToolError};
 use ferroui_designer_core::{Document, Node, NodeKind};
 use serde_json::{json, Map, Value};
@@ -9,6 +14,11 @@ use std::collections::BTreeSet;
 pub fn plan_export(source: &str, options: &Options) -> Result<Plan> {
     size(source)?;
     let document = Document::new(source).map_err(crate::error)?;
+    if !document.is_valid() {
+        return Err(ToolError(
+            "Repair the XAML dictionary before exporting its tokens".into(),
+        ));
+    }
     let root = document.ast().root();
     if !document
         .ast()
@@ -35,12 +45,16 @@ pub fn plan_export(source: &str, options: &Options) -> Result<Plan> {
                 if !seen.insert(key.clone()) {
                     return Err("Duplicate XAML resource key".into());
                 }
-                let (mapping, value) = conversion(&document, node, &key, options)?;
+                let (mapping, resource) = conversion(&document, node, &key, options)?;
+                let mut identity = json!({"key":key,"xamlType":mapping.xaml_type});
+                if let Some(properties) = resource.gradient_properties {
+                    identity[GRADIENT_PROPERTIES] = properties;
+                }
                 install(
                     &mut output,
                     &mapping.token,
-                    json!({"$type":mapping.kind, "$value":value,
-                "$extensions":{EXTENSION:{"key":key,"xamlType":mapping.xaml_type}}}),
+                    json!({"$type":mapping.kind, "$value":resource.value,
+                    "$extensions":{EXTENSION:identity}}),
                 )?;
                 Ok(mapping)
             });
@@ -64,18 +78,63 @@ pub fn plan_export(source: &str, options: &Options) -> Result<Plan> {
     })
 }
 
-type Export<T> = std::result::Result<T, String>;
+struct ExportedResource {
+    kind: String,
+    xaml_type: &'static str,
+    value: Value,
+    display: String,
+    note: Option<String>,
+    gradient_properties: Option<Value>,
+}
 
 fn conversion(
     document: &Document,
     node: &Node,
     key: &str,
     options: &Options,
-) -> Export<(Conversion, Value)> {
+) -> ValueResult<(Conversion, ExportedResource)> {
     let mapping = options.mappings.get(key);
     let token = mapping
         .and_then(|mapping| mapping.token.as_deref())
         .unwrap_or(key);
+    let name = node.local_name();
+    let resource = if native_type(node, "FerroUI.Media") && gradient_geometry::TYPES.contains(&name)
+    {
+        let brush = gradient::export(document, node)?;
+        let display = brush.summary();
+        ExportedResource {
+            kind: "gradient".into(),
+            xaml_type: brush.kind,
+            value: Value::Array(brush.stops),
+            display,
+            note: Some("Retained FerroUI gradient properties in the token extensions".into()),
+            gradient_properties: Some(json!(brush.properties)),
+        }
+    } else {
+        scalar_resource(
+            document,
+            node,
+            mapping.and_then(|mapping| mapping.kind.as_deref()),
+        )?
+    };
+    Ok((
+        Conversion {
+            token: token.into(),
+            key: key.into(),
+            kind: resource.kind.clone(),
+            xaml_type: resource.xaml_type.into(),
+            value: resource.display.clone(),
+            note: resource.note.clone(),
+        },
+        resource,
+    ))
+}
+
+fn scalar_resource(
+    document: &Document,
+    node: &Node,
+    numeric_kind: Option<&str>,
+) -> ValueResult<ExportedResource> {
     let extra = node
         .attributes
         .iter()
@@ -84,9 +143,10 @@ fn conversion(
     let name = node.local_name();
     let namespace = node.namespace_uri.as_deref();
     let content = literal_content(document, node)?;
-    let (kind, xaml_type, value, display) = match (namespace, name) {
-        (Some(FRAMEWORK), "SolidColorBrush")
-            if content.is_empty() && extra.clone().all(|attr| attr.name == "Color") =>
+    let media = native_type(node, "FerroUI.Media");
+    let (kind, xaml_type, value, display) = match name {
+        "SolidColorBrush"
+            if media && content.is_empty() && extra.clone().all(|attr| attr.name == "Color") =>
         {
             let color = node
                 .attribute("Color")
@@ -98,16 +158,10 @@ fn conversion(
                 color.to_string(),
             )
         }
-        (Some(FRAMEWORK), "Color") if plain => ("color", "Color", hex_color(&content)?, content),
-        (Some(XAML | "using:System"), "Double") if plain => {
-            let number = content
-                .parse::<f64>()
-                .ok()
-                .filter(|value| value.is_finite())
-                .ok_or("Expected a finite literal Double")?;
-            let kind = mapping
-                .and_then(|mapping| mapping.kind.as_deref())
-                .unwrap_or("number");
+        "Color" if media && plain => ("color", "Color", hex_color(&content)?, content),
+        "Double" if plain && matches!(namespace, Some(XAML | "using:System")) => {
+            let number = literal_number(&content)?;
+            let kind = numeric_kind.unwrap_or("number");
             let value = match kind {
                 "number" => json!(number),
                 "dimension" => json!({"value":number,"unit":"px"}),
@@ -115,29 +169,53 @@ fn conversion(
             };
             (kind, "x:Double", value, content)
         }
-        (Some("using:System"), "TimeSpan") if plain => (
+        "TimeSpan" if plain && namespace == Some("using:System") => (
             "duration",
             "sys:TimeSpan",
             json!({"value":duration_ms(&content)?,"unit":"ms"}),
             content,
         ),
+        "BoxShadows" if media && plain => {
+            ("shadow", "BoxShadows", shadow::export(&content)?, content)
+        }
+        "KeySpline" if native_type(node, "FerroUI.Animation") => {
+            let curve = if plain {
+                content
+            } else if content.is_empty()
+                && extra
+                    .clone()
+                    .all(|attr| bezier::PROPERTIES.contains(&attr.name.as_str()))
+            {
+                bezier::PROPERTIES
+                    .iter()
+                    .map(|&name| {
+                        node.attribute(name)
+                            .ok_or("Define all four literal KeySpline control-point properties")
+                    })
+                    .collect::<std::result::Result<Vec<_>, _>>()?
+                    .join(",")
+            } else {
+                return Err(
+                    "Use a literal KeySpline value or four literal control-point properties".into(),
+                );
+            };
+            let (points, display) = bezier::export(&curve)?;
+            ("cubicBezier", "KeySpline", json!(points), display)
+        }
         _ => return Err(format!("No literal token mapping for {}", node.name)),
     };
     let note = (kind == "number").then(|| "Map to dimension to export as logical pixels".into());
-    Ok((
-        Conversion {
-            token: token.into(),
-            key: key.into(),
-            kind: kind.into(),
-            xaml_type: xaml_type.into(),
-            value: display,
-            note,
-        },
+    Ok(ExportedResource {
+        kind: kind.into(),
+        xaml_type,
         value,
-    ))
+        display,
+        note,
+        gradient_properties: None,
+    })
 }
 
-fn literal_content(document: &Document, element: &Node) -> Export<String> {
+fn literal_content(document: &Document, element: &Node) -> ValueResult<String> {
     let mut content = String::new();
     for child in element
         .children
@@ -155,66 +233,7 @@ fn literal_content(document: &Document, element: &Node) -> Export<String> {
     Ok(content.trim().to_string())
 }
 
-fn hex_color(value: &str) -> Export<Value> {
-    let digits = value
-        .trim()
-        .strip_prefix('#')
-        .ok_or("Use a literal hexadecimal sRGB color")?;
-    let hex = u32::from_str_radix(digits, 16).map_err(|_| "Invalid hexadecimal sRGB color")?;
-    let (alpha, red, green, blue) = match digits.len() {
-        3 => (
-            255,
-            (hex >> 8 & 15) * 17,
-            (hex >> 4 & 15) * 17,
-            (hex & 15) * 17,
-        ),
-        4 => (
-            (hex >> 12 & 15) * 17,
-            (hex >> 8 & 15) * 17,
-            (hex >> 4 & 15) * 17,
-            (hex & 15) * 17,
-        ),
-        6 => (255, hex >> 16 & 255, hex >> 8 & 255, hex & 255),
-        8 => (hex >> 24 & 255, hex >> 16 & 255, hex >> 8 & 255, hex & 255),
-        _ => return Err("Invalid hexadecimal sRGB color".into()),
-    };
-    let normalize = |value: u32| f64::from(value) / 255.0;
-    Ok(
-        json!({"colorSpace":"srgb","components":[normalize(red),normalize(green),normalize(blue)],
-        "alpha":normalize(alpha),"hex":format!("#{red:02X}{green:02X}{blue:02X}")}),
-    )
-}
-
-fn duration_ms(value: &str) -> Export<f64> {
-    let components = value.split(':').collect::<Vec<_>>();
-    let [first, minutes, seconds] = components.as_slice() else {
-        return Err("Expected a literal TimeSpan with hours, minutes and seconds".into());
-    };
-    let (days, hours) = first.split_once('.').unwrap_or(("0", first));
-    let days = days.parse::<u32>().map_err(|_| "Invalid TimeSpan days")?;
-    let hours = hours.parse::<u32>().map_err(|_| "Invalid TimeSpan hours")?;
-    let minutes = minutes
-        .parse::<u32>()
-        .map_err(|_| "Invalid TimeSpan minutes")?;
-    let seconds = seconds
-        .parse::<f64>()
-        .map_err(|_| "Invalid TimeSpan seconds")?;
-    let total = (f64::from(days) * 86_400.0
-        + f64::from(hours) * 3600.0
-        + f64::from(minutes) * 60.0
-        + seconds)
-        * 1000.0;
-    if hours >= 24
-        || minutes >= 60
-        || !(0.0..60.0).contains(&seconds)
-        || total >= (i64::MAX as f64) / 10_000.0
-    {
-        return Err("TimeSpan is outside the supported duration range".into());
-    }
-    Ok(total)
-}
-
-fn install(output: &mut Map<String, Value>, path: &str, token: Value) -> Export<()> {
+fn install(output: &mut Map<String, Value>, path: &str, token: Value) -> ValueResult<()> {
     let steps: Vec<_> = path.split('.').collect();
     let (name, groups) = steps.split_last().expect("A path has one or more segments");
     if groups.iter().any(|group| !valid_token_name(group))

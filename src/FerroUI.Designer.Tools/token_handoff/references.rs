@@ -1,4 +1,4 @@
-use super::{valid_token_name, Issue};
+use super::{valid_token_name, Issue, EXTENSION, GRADIENT_PROPERTIES};
 use serde_json::Value;
 use std::collections::{BTreeMap, HashMap};
 
@@ -18,6 +18,8 @@ pub(super) struct Resolved<'a> {
     pub value: &'a Value,
     pub kind: Option<&'a str>,
     pub reference: Option<&'a str>,
+    pub xaml_type: Option<&'a str>,
+    pub gradient_properties: Option<&'a Value>,
 }
 
 type Result<T> = std::result::Result<T, String>;
@@ -94,6 +96,10 @@ impl<'a> Tokens<'a> {
         Ok(self.follow(property, None, &mut Vec::new())?.value)
     }
 
+    pub fn typed_property(&self, property: &'a Value, kind: &'static str) -> Result<&'a Value> {
+        Ok(self.follow(property, Some(kind), &mut Vec::new())?.value)
+    }
+
     fn follow(
         &self,
         node: &'a Value,
@@ -121,7 +127,7 @@ impl<'a> Tokens<'a> {
             ));
         }
         let kind = expected.or(kind);
-        if let Some(reference) = node.get("$ref") {
+        let mut resolved = if let Some(reference) = node.get("$ref") {
             if node.get("$value").is_some() {
                 return Err("A token cannot combine $ref and $value".into());
             }
@@ -159,8 +165,23 @@ impl<'a> Tokens<'a> {
                 value: node,
                 kind,
                 reference: None,
+                xaml_type: None,
+                gradient_properties: None,
             })
+        }?;
+        if let Some(native) = node
+            .get("$extensions")
+            .and_then(|extensions| extensions.get(EXTENSION))
+        {
+            resolved.xaml_type = native
+                .get("xamlType")
+                .and_then(Value::as_str)
+                .or(resolved.xaml_type);
+            resolved.gradient_properties = native
+                .get(GRADIENT_PROPERTIES)
+                .or(resolved.gradient_properties);
         }
+        Ok(resolved)
     }
 }
 

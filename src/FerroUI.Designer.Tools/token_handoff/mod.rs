@@ -1,18 +1,27 @@
 //! Reviewable conversion between DTCG tokens and a standalone XAML resource dictionary.
 //! Both directions return a candidate; a host chooses when and where to write it.
+mod bezier;
 mod export;
+mod gradient;
+mod gradient_geometry;
 mod import;
 mod references;
+mod scalars;
+mod shadow;
 
 pub use export::plan_export;
 pub use import::plan_import;
 
 use crate::{Result, ToolError};
+use ferroui_designer_core::Node;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
 const MAX_SOURCE_BYTES: usize = 1024 * 1024;
 const EXTENSION: &str = "com.github.ferroui";
+const GRADIENT_PROPERTIES: &str = "gradientProperties";
+
+type ValueResult<T> = std::result::Result<T, String>;
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -23,7 +32,7 @@ pub struct Request {
     pub options: Options,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Direction {
     Import,
@@ -40,14 +49,14 @@ impl Request {
 }
 
 /// Overrides are keyed by DTCG token path during import and XAML key during export.
-#[derive(Default, Deserialize)]
+#[derive(Clone, Default, Deserialize)]
 #[serde(default, deny_unknown_fields, rename_all = "camelCase")]
 pub struct Options {
     pub mappings: BTreeMap<String, Mapping>,
     pub pixels_per_rem: Option<f64>,
 }
 
-#[derive(Default, Deserialize)]
+#[derive(Clone, Default, Deserialize)]
 #[serde(default, deny_unknown_fields, rename_all = "camelCase")]
 pub struct Mapping {
     pub key: Option<String>,
@@ -112,5 +121,18 @@ fn simple_key(token: &str) -> String {
         .collect()
 }
 
+fn native_type(node: &Node, namespace: &str) -> bool {
+    node.namespace_uri.as_deref().is_some_and(|uri| {
+        uri == crate::components::FRAMEWORK
+            || uri.strip_prefix("using:") == Some(namespace)
+            || uri
+                .strip_prefix("clr-namespace:")
+                .and_then(|uri| uri.split_once(";assembly="))
+                == Some((namespace, "FerroUI.Base"))
+    })
+}
+
+#[cfg(test)]
+mod compound_tests;
 #[cfg(test)]
 mod tests;
