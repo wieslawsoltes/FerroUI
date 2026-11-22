@@ -8,13 +8,13 @@ description: "Connect the editor, Studio, and application MCP servers, and look 
 1. Open a trusted workspace in desktop VS Code. Run **MCP: List Servers** and start **FerroUI Designer in VS Code**. Choose its tools in your VS Code agent.
 2. Ask the agent to read the active unsaved document or open a design and describe its accepted native frame. To permit source edits, designer actions, or managed Cargo commands, enable `ferroui.mcp.allowWrites` in VS Code user settings. Editor write access is off by default.
 3. For Studio or an independently running application, use **FerroUI: Connect to Running MCP Server** and supply the authenticated loopback endpoint. **Disconnect Running MCP Server** removes that connection. Configure `ferroui.mcp.stdioServers` for a known executable using its native stdio transport.
-4. Start a configured app through **Run with Hot Reload** to discover its **FerroUI Managed Application** server when the app advertises one. Its runtime inspection and input permissions come from the app. An in-place update keeps the connection. A replacement process advertises its own server after startup.
+4. Start a configured app through **Run with Hot Reload** to discover its named FerroUI MCP server when the app advertises one. Its runtime inspection and input permissions come from the app. An in-place update keeps the connection. A replacement process advertises its own server after startup.
 
 | Server or scope | What to use it for |
 | --- | --- |
 | **FerroUI Designer in VS Code** | VS Code’s open buffers, project files and language providers, design selection and views, authoring in the designer, Stages, and managing Cargo. |
 | **Designer Studio** attached from VS Code | Studio’s open documents, native project actions, stage sets, animation and layout tools, and collaboration features of the Studio session. |
-| **FerroUI Managed Application** or attached app | Actual native windows, properties, binding and layout diagnostics, accessibility, screenshots, and permitted input. |
+| Named managed or attached app | Actual native windows, properties, binding and layout diagnostics, accessibility, screenshots, and permitted input. |
 
 Editor and Studio authoring reuse the same native planning and validation. The editor applies source changes through VS Code’s undo history. Studio applies them through its document history. Use the server owning the unsaved buffer you intend to edit. [VS Code MCP setup](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) · [Designer Studio MCP](../README.md#mcp-integration) · [Application MCP](../../mcp.md)
 
@@ -45,7 +45,7 @@ Editor and Studio authoring reuse the same native planning and validation. The e
 | Sequence app-hosted clips | Use `scrub_all` and `play_all` in `designer_hosted_animation` for the app’s shared elapsed clock. Use `designer_hosted_clip_placement_draft` to check a delay change and `designer_hosted_clip_placement` to apply it to the current buffer in one Undo step. |
 | Rehearse an app-hosted range | Use `play_range` in `designer_hosted_animation` with an elapsed `start`, `end`, and `loop` in `range`. Include `program` to rehearse one animation or omit it to rehearse the shared clip clock. |
 | Set, remove, or seek to a preview marker | Use `designer_timeline_markers` and `designer_timeline_marker_edit` for a typed clip or the shared Timeline clock. In App Preview, read `markers` from `designer_hosted_animations` and pass `action: "marker"` to `designer_hosted_animation`. [Marker controls and arguments](motion.md#bookmark-preview-positions) |
-| Run, inspect, and test | `ferroui_reload_targets`, `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history` drive managed Cargo and report outcomes. `ferroui_runtime_source` and `ferroui_runtime_apply_source` work with a mapped runtime value. `ferroui_scenario_run`, `ferroui_scenario_review`, and `ferroui_scenario_approve_baseline` run tests, compare images, and approve a checked capture. |
+| Run, inspect, and test | Discover sessions with `ferroui_app_sessions` and control their Cargo builds and inspectors. `ferroui_runtime_source` and `ferroui_runtime_apply_source` work with a mapped runtime value. `ferroui_scenario_run`, `ferroui_scenario_review`, and `ferroui_scenario_approve_baseline` run tests, compare images, and approve a checked capture. [Target app sessions with MCP](#target-app-sessions-with-mcp) |
 | Open a running app’s template | `ferroui_runtime_templates` reads the selected element’s templates. Pass its generation and a template ID to `ferroui_runtime_template_source`. [Live App template tools](#inspect-live-app-templates-with-mcp) |
 | Profile a running window | Use `ferroui_runtime_profile_windows`, `ferroui_runtime_profile_start`, `ferroui_runtime_profile_read`, `ferroui_runtime_profile_stop`, and `ferroui_runtime_profile_source`. [Runtime profiler](#profile-a-runtime-with-mcp) |
 | Create a project | Use `ferroui_project_templates`, `ferroui_project_plan_new`, `ferroui_project_create`, and `ferroui_project_check_toolchain`. [Project setup](#create-a-project-with-mcp) |
@@ -241,9 +241,17 @@ For TreeDataGrid, pass the reported `CellTemplate` or `CellEditingTemplate` memb
 
 When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same fields to review the checked patch. Call `designer_hosted_template_copy` with write access to install the copy as one Undo step. Read a fresh catalog after a source or frame change. [App Preview template workflow](runtime.md#open-and-copy-app-preview-control-templates)
 
+### Target app sessions with MCP
+
+1. Use `ferroui_reload_targets` to find a target. Start it with `ferroui_reload_control` and `action: "start"`, or use `start_debug` with a Rust attach configuration. For an independent app or Studio, call `ferroui_runtime_attach` with its loopback `url`, bearer `token`, and optional `label`. Only share the token with an agent authorized to inspect that app.
+2. Read `ferroui_app_sessions`. Use the returned `app_session` for `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history`. Supply the exact ID for controls such as `select`, `attach_debug`, `rebuild`, or `stop` when several managed apps are running. Use `stop_all` to stop the managed apps together.
+3. Use the returned `runtime` to pin a Live App editor with `ferroui_runtime_open`, inspect a mapped property, or disconnect one attachment with `ferroui_runtime_detach`. Pass the same `runtime` and the current connection generation for checked source and profiler operations. A replacement process retains the session ID and issues a new generation. `managed` follows the selected app and `attached` follows the most recent attachment.
+
+[App Sessions in the workbench](runtime.md#run-several-app-sessions)
+
 ### Inspect Live App templates with MCP
 
-Read the application’s current tree to get a node ID. Call `ferroui_runtime_templates` with `node` and `runtime` set to `managed` or `attached`. The catalog lists effective templates, column headers where available, and verified source stamps. The native application tool `get_template_sources` exposes the same template evidence.
+Read the application’s current tree to get a node ID. Call `ferroui_runtime_templates` with `node` and the app’s `runtime` from `ferroui_app_sessions`. The catalog lists effective templates, column headers where available, and verified source stamps. The native application tool `get_template_sources` exposes the same template evidence.
 
 Call `ferroui_runtime_template_source` with the same node and runtime, the catalog’s `generation` as `expected_generation`, and the entry’s `id` as `template_id`. The tool rechecks the app’s template and the editor’s source revision before opening the file. [Live App workflow](runtime.md#open-an-effective-template-in-the-running-app)
 

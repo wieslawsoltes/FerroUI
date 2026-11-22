@@ -129,6 +129,17 @@ VS Code keeps an executable copy next to the Cargo binary for each running candi
 
 The XAML app must register a `ReloadManifest` and a `HotReloadSession` and acknowledge its startup. For RSX, use a debug binary with `ferroui-view`’s `hot-reload` feature and a compatible `launch` integration. [Framework reload prerequisites and registered patch workflow](../../development/hot-reload.md)
 
+### Run several app sessions
+
+1. Open **FerroUI → App Sessions** and choose the run icon. Pick a Cargo target. Repeat to launch another package, binary, or configuration. Running the same Cargo target with the same features and arguments selects its existing session and retries it if startup previously failed.
+2. Choose a session in the tree to open its own Live App editor. Move the editors into separate groups to work with two native windows at once. The session stays pinned through in-place reloads and successful rebuilds. Choose **Open Live App** from the Command Palette for an editor with a session picker.
+3. Use a row’s rebuild or stop icon to act on that app. The row’s context menu opens its build output, attaches a configured Rust debugger, or makes it the managed app used by the status bar and Diagnostics. **Stop All Hot Reload Applications** stops every managed session.
+4. To attach an independently launched app or Designer Studio, choose the connection icon in **App Sessions** and enter its loopback MCP address and bearer token. A successful connection adds a row. Disconnect from that row to close the inspector connection. The independently launched process keeps running. The Live App editor requires a server with native window inspection.
+
+A save can affect one app or several. The extension tracks each app’s Cargo package and local dependencies, along with XAML watched by that process. Builds sharing one Cargo output directory take turns through compilation and executable staging. Each running app keeps its own PID, reload outcomes, debugger, and window selection. [Target app sessions with MCP](reference.md#target-app-sessions-with-mcp)
+
+![App Sessions lists Account Desk and Routing Queue with different PIDs. Each app has its own Live App canvas and visual tree in a separate editor group.](../images/vscode-app-sessions.png)
+
 ## Inspect the actual window in Live App
 
 1. Start the managed development binary or run **FerroUI: Connect to Running MCP Server** to attach an authenticated loopback inspector. Use the `--mcp` flags of a participating app such as Todo Workbench to start its server. **Open Live App** opens the supported application windows in the editor. Pick a window from its toolbar.
