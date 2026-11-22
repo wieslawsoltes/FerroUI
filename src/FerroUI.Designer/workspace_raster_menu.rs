@@ -1,6 +1,9 @@
 use super::DesignerWorkspace;
 use crate::DesignerAsset;
-use ferroui_base::Ref;
+use ferroui_base::{
+    threading::{Dispatcher, DispatcherPriority},
+    Ref,
+};
 use ferroui_controls::{ContextMenu, Control, MenuItem};
 use ferroui_designer_core::NodeId;
 use std::rc::Rc;
@@ -14,46 +17,74 @@ impl DesignerWorkspace {
         if self.pending_source.get() {
             return false;
         }
-        let Ok(language) = self.try_language_service() else {
-            return false;
-        };
         let session = self.session.borrow();
-        let [node] = session.selection() else {
-            return false;
-        };
-        let properties =
-            session.raster_properties(*node, language.schema_for(session.document_uri()));
-        if properties.is_empty() || session.validate_raster_asset(&asset.id).is_err() {
+        if session.validate_raster_asset(&asset.id).is_err() {
             return false;
         }
-        let generation = session.generation();
-        let node = *node;
-        let choose_property = properties.len() > 1;
         menu.items().clear();
         crate::chrome::apply_designer_menu_resources(menu, &self.root);
-        for property in properties {
+        if let ([node], Ok(language)) = (session.selection(), self.try_language_service()) {
+            let properties =
+                session.raster_properties(*node, language.schema_for(session.document_uri()));
+            let generation = session.generation();
+            let node = *node;
+            let choose_property = properties.len() > 1;
+            for property in properties {
+                let item = MenuItem::new();
+                let label = if choose_property {
+                    format!("Set {property}")
+                } else {
+                    "Use as image source".into()
+                };
+                item.set_header(Some(Rc::new(label)));
+                let weak = Rc::downgrade(self);
+                let uri = session.document_uri().to_owned();
+                let address = asset.id.clone();
+                item.click(move |_, event| {
+                    if let Some(workspace) = weak.upgrade() {
+                        workspace.report(
+                            workspace
+                                .apply_raster_menu(&uri, generation, node, &property, &address),
+                        );
+                        workspace.refresh(true);
+                    }
+                    event.set_handled(true);
+                });
+                menu.items().add(Some(Control::boxed(&item)));
+            }
+        }
+        let movable = session
+            .preview
+            .packaged_assets()
+            .filter(|catalog| catalog.has_move_provenance(&asset.id))
+            .and_then(|catalog| catalog.resolve(&asset.id).ok().flatten())
+            .is_some_and(|input| {
+                self.project
+                    .borrow()
+                    .workspace
+                    .as_ref()
+                    .is_some_and(|project| input.file.starts_with(&project.solution.root))
+            });
+        if movable {
             let item = MenuItem::new();
-            let label = if choose_property {
-                format!("Set {property}")
-            } else {
-                "Use as image source".into()
-            };
-            item.set_header(Some(Rc::new(label)));
+            item.set_header(Some(Rc::new("Move or rename asset…".to_owned())));
             let weak = Rc::downgrade(self);
-            let uri = session.document_uri().to_owned();
             let address = asset.id.clone();
             item.click(move |_, event| {
-                if let Some(workspace) = weak.upgrade() {
-                    workspace.report(
-                        workspace.apply_raster_menu(&uri, generation, node, &property, &address),
-                    );
-                    workspace.refresh(true);
-                }
+                let (weak, address) = (weak.clone(), address.clone());
+                Dispatcher::ui_thread().post_local(
+                    move || {
+                        if let Some(workspace) = weak.upgrade() {
+                            workspace.report(workspace.show_asset_move(address));
+                        }
+                    },
+                    DispatcherPriority::NORMAL,
+                );
                 event.set_handled(true);
             });
             menu.items().add(Some(Control::boxed(&item)));
         }
-        true
+        menu.items().count() != 0
     }
 
     fn apply_raster_menu(

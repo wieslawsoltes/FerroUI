@@ -16,6 +16,8 @@ use std::{path::Path, rc::Rc};
 mod resolution;
 #[path = "workspace_file_move_review.rs"]
 mod review;
+#[path = "workspace_asset_move.rs"]
+mod asset;
 pub(super) use resolution::RustMoveReview;
 #[cfg(all(test, feature = "mcp"))]
 #[path = "workspace_file_move_tests.rs"]
@@ -27,9 +29,18 @@ pub(super) struct MovedXaml {
     participants: Vec<String>,
 }
 
-impl MovedXaml {
+#[derive(Clone)]
+pub(super) enum MovedProjectFile {
+    Xaml(MovedXaml),
+    Asset(asset::MovedAsset),
+}
+
+impl MovedProjectFile {
     pub(super) fn participates(&self, uri: &str) -> bool {
-        uri == self.file.to || self.participants.iter().any(|file| file == uri)
+        match self {
+            Self::Xaml(moved) => uri == moved.file.to || moved.participants.iter().any(|file| file == uri),
+            Self::Asset(moved) => moved.participants.iter().any(|file| file == uri),
+        }
     }
 }
 
@@ -123,6 +134,15 @@ impl DesignerWorkspace {
                 });
             }
         }
+        let session = self.session.borrow();
+        if session.uses_rust_source() {
+            rust_drafts.push(FileMoveDraft {
+                uri: from.into(),
+                version: i64::try_from(session.document().revision())
+                    .map_err(|_| "Rust document revision exhausted")?,
+                source: session.authored_source().to_owned(),
+            });
+        }
         Ok(rust_drafts)
     }
 
@@ -177,7 +197,7 @@ impl DesignerWorkspace {
             .borrow_mut()
             .linked_history
             .moves
-            .insert(label, MovedXaml { file, participants });
+            .insert(label, MovedProjectFile::Xaml(MovedXaml { file, participants }));
         self.accept_file_move(staged, &plan.from, &plan.to, &stage_moves)?;
         self.project.borrow_mut().rust_move = None;
         Ok(plan)
@@ -203,9 +223,13 @@ impl DesignerWorkspace {
     pub(super) fn step_file_move(
         self: &Rc<Self>,
         label: &str,
-        mut moved: MovedXaml,
+        moved: MovedProjectFile,
         redo: bool,
     ) -> Result<(), String> {
+        let mut moved = match moved {
+            MovedProjectFile::Xaml(moved) => moved,
+            MovedProjectFile::Asset(moved) => return self.step_asset_move(label, &moved, redo),
+        };
         self.ensure_local_file_move()?;
         let (from, to) = if redo {
             (moved.file.from.clone(), moved.file.to.clone())
@@ -249,7 +273,7 @@ impl DesignerWorkspace {
             .borrow_mut()
             .linked_history
             .moves
-            .insert(label.into(), moved);
+            .insert(label.into(), MovedProjectFile::Xaml(moved));
         self.accept_file_move(staged, &from, &to, &stage_moves)
     }
 

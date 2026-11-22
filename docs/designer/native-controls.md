@@ -155,6 +155,14 @@ To inspect the recorded source file through MCP, call `designer_language` with `
 
 Studio writes a `ferres://` reference in XAML or a static `::ferroui_view::asset_image` call in mapped Rust. MCP agents can find the raster with `designer_toolbox`, place it with `designer_place`, and assign it with `designer_set_image_source`. [VS Code workflow](vscode/authoring.md#place-a-published-cargo-asset) · [MCP reference](vscode/reference.md#drive-an-editor-workflow)
 
+### Move a published asset
+
+1. Build the owning Cargo package. In the **Packaged images** category, open the image’s context menu and choose **Move or rename asset…**.
+2. Enter a workspace-relative destination inside an embedded directory and choose **Review asset move**. Compare the old and new published addresses and review the source changes, including any `ExportPlan::asset` entry.
+3. Choose **Apply file move**. The native canvas and Stages follow the new address. Undo or Redo from the design or a participating source tab to restore the file and references together. Save the edited buffers and rebuild to publish the address in the app.
+
+With MCP, pass the Toolbox `asset` ID, `destination`, and current `expected_revision` to `designer_plan_asset_move`. Review the returned documents and addresses, then pass its `review` with the same arguments to `designer_move_asset`. [VS Code workflow](vscode/authoring.md#move-an-asset-and-update-its-references)
+
 ### Move an XAML file
 
 Open an XAML file from the owning project. In **Split** or **Code**, choose the file-and-arrow icon **Move XAML file**. Enter the destination relative to the project workspace and choose **Review file move**. Compare **Original source** and **Proposed source** for affected markup, Rust, Cargo build files, saved stage sets, and scenarios.

@@ -127,6 +127,13 @@ impl RustDocument {
         Ok(update)
     }
 
+    pub(crate) fn record_workspace_operation(&mut self, document: &mut Document, label: String) -> Result<(), DesignerError> {
+        let before = self.history_revision(document);
+        document.record_workspace_operation(document.revision(), label.clone())?;
+        self.history.commit(label, before, self.history_revision(document));
+        Ok(())
+    }
+
     pub(crate) fn select_invocation(
         &mut self,
         document: &mut Document,

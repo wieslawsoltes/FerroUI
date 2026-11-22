@@ -1,17 +1,17 @@
-use super::{DesignerWorkspace, resolution::MoveTarget};
 use super::super::reviewed_sources::ui::{panel, relative, source_diffs, toolbar};
+use super::{resolution::MoveTarget, DesignerWorkspace};
 use crate::{
     icons,
-    workspace::inspector_actions::{SOURCE, add_button, text},
+    workspace::inspector_actions::{add_button, text, SOURCE},
 };
 use ferroui_base::{
-    Ref,
     threading::{DispatcherPriority, DispatcherTimer},
+    Ref,
 };
 use ferroui_controls::{
-    Button, Control, Flyout, PlacementMode, TextBlock,
-    TextBox,
     automation::{AutomationLiveSetting, AutomationProperties},
+    primitives::FlyoutBase,
+    Button, ContentControl, Control, Flyout, PlacementMode, TextBlock, TextBox,
 };
 use ferroui_designer_language::FileMovePlan;
 use std::{cell::Cell, rc::Rc, time::Duration};
@@ -138,9 +138,7 @@ fn wait_for_review(
             }) {
                 match workspace.plan_project_file_move(&destination, false) {
                     Ok(None) => return true,
-                    Ok(Some(plan)) => {
-                        show_review(&workspace, &flyout, destination.clone(), plan)
-                    }
+                    Ok(Some(plan)) => show_review(&workspace, &flyout, destination.clone(), plan),
                     Err(error) => message.set_text(Some(&error)),
                 }
             } else {
@@ -165,6 +163,91 @@ fn show_review(
     plan: FileMovePlan,
 ) {
     let target = workspace.move_target(&destination).ok();
+    show_move_review(
+        workspace,
+        flyout,
+        plan,
+        move |workspace, review| workspace.apply_project_file_move(&destination, review),
+        move |workspace| {
+            if let Some(target) = &target {
+                workspace.cancel_move_resolution(target);
+            }
+        },
+    );
+}
+
+impl DesignerWorkspace {
+    pub(crate) fn show_asset_move(self: &Rc<Self>, address: String) -> Result<(), String> {
+        let from = self.published_asset_source(&address)?;
+        let anchor = self
+            .root
+            .get_control::<ContentControl>("AssetHost")
+            .upcast::<Control>();
+        let flyout = Flyout::new();
+        flyout.set_placement(PlacementMode::Right);
+        flyout.popup().set_should_use_overlay_layer(true);
+        flyout.flyout_presenter_classes().add("designer-chrome");
+        let body = panel(self);
+        body.children()
+            .add(text("Destination in the project").upcast::<Control>());
+        let row = toolbar();
+        let input = TextBox::new();
+        input.set_min_width(280.0);
+        input.set_text(Some(&relative(self, &from)));
+        AutomationProperties::set_name(&input, Some("Destination asset path"));
+        row.children().add(input.clone().upcast::<Control>());
+        let status = text("");
+        status.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
+        AutomationProperties::set_live_setting(&status, AutomationLiveSetting::Polite);
+        let (owner, popup, path, message) = (
+            Rc::downgrade(self),
+            flyout.downgrade(),
+            input.downgrade(),
+            status.downgrade(),
+        );
+        add_button(&row, SOURCE, "Review asset move", move || {
+            let (Some(workspace), Some(popup), Some(input)) =
+                (owner.upgrade(), popup.upgrade(), path.upgrade())
+            else {
+                return;
+            };
+            let destination = input.text().unwrap_or_default().trim().to_owned();
+            match workspace.plan_project_asset_move(&address, &destination) {
+                Ok(plan) => {
+                    let asset = address.clone();
+                    show_move_review(
+                        &workspace,
+                        &popup,
+                        plan,
+                        move |workspace, review| {
+                            workspace.apply_project_asset_move(&asset, &destination, review)
+                        },
+                        |_| {},
+                    );
+                }
+                Err(error) => {
+                    if let Some(message) = message.upgrade() {
+                        message.set_text(Some(&error));
+                    }
+                }
+            }
+        });
+        body.children().add(row.upcast::<Control>());
+        body.children().add(status.upcast::<Control>());
+        flyout.set_content(Some(Control::boxed(body)));
+        FlyoutBase::set_attached_flyout(&anchor, Some(flyout.upcast()));
+        FlyoutBase::show_attached_flyout(&anchor);
+        Ok(())
+    }
+}
+
+fn show_move_review(
+    workspace: &Rc<DesignerWorkspace>,
+    flyout: &Ref<Flyout>,
+    plan: FileMovePlan,
+    apply: impl Fn(&Rc<DesignerWorkspace>, &str) -> Result<FileMovePlan, String> + 'static,
+    cancel: impl Fn(&Rc<DesignerWorkspace>) + 'static,
+) {
     let body = panel(workspace);
     let title = format!(
         "{}  →  {}",
@@ -172,6 +255,10 @@ fn show_review(
         relative(workspace, &plan.to)
     );
     body.children().add(text(&title).upcast::<Control>());
+    for address in &plan.published_assets {
+        body.children()
+            .add(text(&format!("{}  →  {}", address.from, address.to)).upcast::<Control>());
+    }
     source_diffs(workspace, &body, &plan.from, Rc::new(plan.documents));
     let review = plan.review;
     let actions = toolbar();
@@ -184,7 +271,7 @@ fn show_review(
         let (Some(workspace), Some(popup)) = (owner.upgrade(), popup.upgrade()) else {
             return;
         };
-        match workspace.apply_project_file_move(&destination, &review) {
+        match apply(&workspace, &review) {
             Ok(_) => popup.hide(),
             Err(error) => {
                 if let Some(message) = message.upgrade() {
@@ -196,8 +283,8 @@ fn show_review(
     let popup = flyout.downgrade();
     let owner = Rc::downgrade(workspace);
     add_button(&actions, icons::CLOSE, "Cancel file move", move || {
-        if let (Some(workspace), Some(target)) = (owner.upgrade(), target.as_ref()) {
-            workspace.cancel_move_resolution(target);
+        if let Some(workspace) = owner.upgrade() {
+            cancel(&workspace);
         }
         if let Some(popup) = popup.upgrade() {
             popup.hide();

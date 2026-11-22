@@ -109,7 +109,9 @@ fn packaged_asset_preview_is_scoped_and_missing_inputs_keep_the_last_stage() {
         .language_service()
         .set_project_catalog(root.0.clone(), catalog)
         .unwrap();
-    let authoring_uri = file_uri(root.0.join("Workspace.xaml")).unwrap();
+    let authoring_file = root.0.join("Workspace.xaml");
+    fs::write(&authoring_file, &source).unwrap();
+    let authoring_uri = file_uri(authoring_file).unwrap();
     workspace
         .open_document(source.clone(), authoring_uri)
         .unwrap();
@@ -182,6 +184,109 @@ fn packaged_asset_preview_is_scoped_and_missing_inputs_keep_the_last_stage() {
         repaired.status
     );
     assert!(repaired.epoch > missing.epoch);
+    #[cfg(feature = "mcp")]
+    move_workspace_asset(&workspace, &root.0, &source);
+}
+
+#[cfg(feature = "mcp")]
+fn move_workspace_asset(
+    workspace: &std::rc::Rc<crate::DesignerWorkspace>,
+    root: &std::path::Path,
+    original: &str,
+) {
+    use ferroui_mcp::{Permissions, UiToolProvider};
+    use serde_json::json;
+
+    let out = root.join("move-output");
+    fs::create_dir_all(&out).unwrap();
+    fs::create_dir(root.join("Assets/Archive")).unwrap();
+    let build = "use ferroui_build::{Build, ExportPlan};\nfn main() {\n    Build::from_env().embed_assets(&[\"Assets\"])\n        .export_plan(ExportPlan::closed().asset(\"/Assets/Approval badge.png\")).run();\n}\n";
+    let build_file = root.join("build.rs");
+    fs::write(&build_file, build).unwrap();
+    let source = root.join("AssetMove.xaml");
+    fs::write(&source, original).unwrap();
+    let record = |line: usize, name: &str, value: &str| json!({
+        "value": value, "rust_file": "build.rs", "line": line + 1,
+        "column": build.lines().nth(line).unwrap().find(name).unwrap() + 1
+    });
+    let assembly = "Studio.Asset.Preview.Tests";
+    let index = json!({
+        "version": 1, "manifest": root.join("Cargo.toml"), "assembly": assembly, "crate_name":"asset_preview",
+        "assets": [{"key": format!("/{BADGE}"), "source": BADGE}],
+        "publication": {
+            "directories": [record(2, "embed_assets", "Assets")],
+            "registrations": [record(3, "asset(", &format!("/{BADGE}"))],
+        }
+    });
+    fs::write(
+        out.join("packaged-assets.json"),
+        index.to_string(),
+    )
+    .unwrap();
+    fs::write(
+        out.join("asset-preview.xamlmeta"),
+        json!({"format": 2, "name": assembly, "crate_name": "asset_preview", "types": []}).to_string(),
+    )
+    .unwrap();
+    workspace
+        .set_solution(ferroui_designer_project::Solution::discover(root).unwrap())
+        .unwrap();
+    let catalog = Arc::new(MarkupCatalog::load(&[out]).unwrap());
+    workspace
+        .language_service()
+        .set_project_catalog(root.into(), catalog)
+        .unwrap();
+    workspace
+        .open_document(original.into(), file_uri(&source).unwrap())
+        .unwrap();
+    let provider = crate::mcp::DesignerMcp::with_workspace(workspace);
+    let read = Permissions::default();
+    let write = Permissions {
+        allow_property_writes: true,
+        allow_input: false,
+    };
+    let revision = || workspace.session().borrow().document().revision();
+    let destination = "Assets/Archive/Approval #2.png";
+    let address = "ferres://Studio.Asset.Preview.Tests/Assets/Archive/Approval%20%232.png";
+    let arguments =
+        json!({"asset":ADDRESS,"destination":destination,"expected_revision":revision()});
+    let plan = provider
+        .call("designer_plan_asset_move", &arguments, read)
+        .unwrap();
+    assert_eq!(plan["publishedAssets"][0]["to"], address);
+    let mut apply = arguments.clone();
+    apply["review"] = plan["review"].clone();
+    assert!(provider.call("designer_move_asset", &apply, read).is_err());
+    provider.call("designer_move_asset", &apply, write).unwrap();
+    assert_eq!(fs::read(root.join(destination)).unwrap(), PNG);
+    assert!(!root.join(BADGE).exists());
+    assert!(workspace
+        .session()
+        .borrow()
+        .document()
+        .source()
+        .contains("/Archive/Approval%20%232.png"));
+    assert!(workspace.session().borrow().can_manipulate());
+    assert!(workspace
+        .asset_toolbox()
+        .unwrap()
+        .assets()
+        .iter()
+        .any(|asset| asset.id == address));
+    for (tool, path) in [("designer_undo", BADGE), ("designer_redo", destination)] {
+        provider
+            .call(tool, &json!({"expected_revision":revision()}), write)
+            .unwrap();
+        assert_eq!(fs::read(root.join(path)).unwrap(), PNG);
+        assert!(workspace.session().borrow().can_manipulate());
+    }
+    workspace
+        .activate_document(&file_uri(&build_file).unwrap())
+        .unwrap();
+    assert_eq!(
+        workspace.session().borrow().authored_source(),
+        build.replace(BADGE, destination)
+    );
 }
 
 #[cfg(feature = "mcp")]

@@ -1,6 +1,6 @@
 use super::DesignerWorkspace;
 use super::dictionary_extraction::CreatedDictionary;
-use super::file_move::MovedXaml;
+use super::file_move::MovedProjectFile;
 use super::project::{Tab, document_identity};
 use super::reviewed_sources::check_saved;
 use std::collections::BTreeMap;
@@ -13,7 +13,7 @@ pub(super) struct WorkspaceHistory {
     serial: u64,
     groups: BTreeMap<String, Vec<String>>,
     created: BTreeMap<String, CreatedDictionary>,
-    pub(super) moves: BTreeMap<String, MovedXaml>,
+    pub(super) moves: BTreeMap<String, MovedProjectFile>,
     closed: BTreeMap<String, Tab>,
 }
 

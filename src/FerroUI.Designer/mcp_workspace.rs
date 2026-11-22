@@ -31,6 +31,8 @@ pub(super) fn handles(name: &str) -> bool {
             | "designer_extract_dictionary"
             | "designer_plan_xaml_move"
             | "designer_move_xaml"
+            | "designer_plan_asset_move"
+            | "designer_move_asset"
             | "designer_plan_property_rename"
             | "designer_rename_property"
             | "designer_plan_type_rename"
@@ -128,6 +130,8 @@ pub(super) fn tools() -> Vec<Value> {
         s::tool("designer_extract_dictionary","Create the reviewed XAML dictionary and update the view in one editor transaction. Pass file_name and review from designer_dictionary_extraction at the current design revision.",s::object(json!({"node":s::id(),"file_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["node","file_name","review","expected_revision"]),true),
         s::tool("designer_plan_xaml_move","Review a move of the active XAML file. Pass a workspace-relative destination to get edits for XAML, Rust, Cargo builds, saved stage sets, and scenarios. Generated Rust references may return status resolving. Start that analysis with allow_input, then poll with the same destination and revision until the review identifier arrives. Pass cancel to discard the pending or completed review.",s::object(json!({"destination":s::string(),"expected_revision":s::revision(),"cancel":{"type":"boolean"}}),&["destination","expected_revision"]),false),
         s::tool("designer_move_xaml","Move the active XAML file and change its references in one Studio history step. Pass the destination and review identifier from designer_plan_xaml_move.",s::object(json!({"destination":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["destination","review","expected_revision"]),true),
+        s::tool("designer_plan_asset_move", "Review a move of a published Cargo asset and its XAML, Rust, and Cargo declaration edits. Choose an address from designer_toolbox and a workspace-relative destination.",s::object(json!({"asset":s::string(),"destination":s::string(),"expected_revision":s::revision()}),&["asset","destination","expected_revision"]),false),
+        s::tool("designer_move_asset", "Apply the reviewed published asset move and its source patches in one Studio history step.",s::object(json!({"asset":s::string(),"destination":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["asset","destination","review","expected_revision"]),true),
         s::tool("designer_plan_property_rename","Review a registered XAML property or typed binding member at a byte offset in the active view. Returns checked Rust and XAML patches and possible unmapped locations.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"expected_revision":s::revision()}),&["offset","new_name","expected_revision"]),false),
         s::tool("designer_rename_property","Apply the reviewed property rename across Rust and XAML as one Studio history step. Copy review from designer_plan_property_rename.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"review":s::string(),"expected_revision":s::revision()}),&["offset","new_name","review","expected_revision"]),true),
         s::tool("designer_plan_type_rename","Review a Cargo-registered XAML type name. At the active XAML byte offset, returns a checked Rust and XAML plan. For an implicit Rust name, start analysis with allow_input and poll with the same offset, name and revision. Pass cancel to discard the review.",s::object(json!({"offset":s::revision(),"new_name":s::string(),"expected_revision":s::revision(),"cancel":{"type":"boolean"}}),&["offset","new_name","expected_revision"]),false),
@@ -240,6 +244,8 @@ pub(super) fn call(
             })
         }
         "designer_move_xaml" => Ok(json!(workspace.apply_project_file_move(&text(args, "destination")?, &text(args, "review")?)?)),
+        "designer_plan_asset_move" => Ok(json!(workspace.plan_project_asset_move(&text(args, "asset")?, &text(args, "destination")?)?)),
+        "designer_move_asset" => Ok(json!(workspace.apply_project_asset_move(&text(args, "asset")?, &text(args, "destination")?, &text(args, "review")?)?)),
         "designer_plan_property_rename" | "designer_rename_property" => {
             let review = (name == "designer_rename_property").then(|| text(args, "review")).transpose()?;
             Ok(json!(workspace.registered_property_rename(

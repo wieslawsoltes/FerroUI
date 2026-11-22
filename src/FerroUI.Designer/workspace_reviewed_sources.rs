@@ -134,7 +134,11 @@ impl DesignerWorkspace {
                 sync(&mut language, uri, tab.source())?;
             }
         }
-        sync(&mut language, active, self.session.borrow().document().source())
+        let session = self.session.borrow();
+        if !session.uses_rust_source() {
+            sync(&mut language, active, session.document().source())?;
+        }
+        Ok(())
     }
 
     pub(super) fn stage_reviewed_sources(&self) -> Result<ReviewedSources, String> {
