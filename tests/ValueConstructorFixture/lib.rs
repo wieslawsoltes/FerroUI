@@ -6,7 +6,7 @@ pub use values::CountedValue;
 
 mod values {
     use std::cell::Cell;
-    thread_local! { static CALLS: Cell<u32> = const { Cell::new(0) }; }
+    ferroui_base::ferro_thread_local! { static CALLS: Cell<u32> = const { Cell::new(0) }; }
     #[derive(Clone, Copy, Debug, PartialEq, Eq)]
     pub struct CountedValue {
         pub rows: i32,

@@ -60,7 +60,7 @@
       "Monitor": 1,
       "Nullable": 1,
       "NumberFormatInfo": 1,
-      "NumberStyles": 2,
+      "NumberStyles": 1,
       "PlatformGraphicsContextLostException": 1,
       "Quaternion": 1,
       "ReadOnlyMemory": 1,
