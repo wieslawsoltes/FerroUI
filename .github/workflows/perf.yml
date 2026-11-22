@@ -510,6 +510,13 @@ jobs:
               for app in hello-world hello-world-builders control-catalog-desktop; do
                 python3 -I tools/scripts/perf/export_trie.py "target/dist/$app" --map "$RUNNER_TEMP/$app.map"
               done
+              # A library keeps its exports: the names of the C ABI, and the factory of the native
+              # backend, which a library loaded through ferro_native_library_path has to export.
+              cargo build --locked --profile dist -p ferroui-capi --lib > /dev/null 2>&1
+              python3 -I tools/scripts/perf/export_trie.py target/dist/libferroui_capi.dylib
+              archive="$(find target/dist/build -path '*/ferroui-native-*/out/libferro_native_osx.a' | head -n 1)"
+              echo "native archive: $(nm -gU "$archive" 2>/dev/null | grep -c ' [A-TV-Z] ') external symbols"
+              nm -m "$archive" 2>/dev/null | grep '_CreateFerroNative$' | sed -E 's/^[0-9a-f]+ //' | head -n 2
             fi
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"

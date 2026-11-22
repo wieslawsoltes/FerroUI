@@ -10,6 +10,7 @@ name. The trie is read from the load commands, so a stripped executable can be r
 """
 import argparse
 import collections
+import hashlib
 import os
 import re
 import struct
@@ -116,7 +117,8 @@ def report(path, map_path=None, listing=False):
         data = file.read()
     trie = trie_of(data)
     names = symbols_of(trie)
-    print(f"{os.path.basename(path):30} file {len(data):>10}  trie {len(trie):>7}  symbols {len(names):>6}")
+    digest = hashlib.sha256("\n".join(names).encode()).hexdigest()[:12]
+    print(f"{os.path.basename(path):30} file {len(data):>10}  trie {len(trie):>7}  symbols {len(names):>6}  names {digest}")
     if map_path:
         with open(map_path, errors="replace") as file:
             defined = definitions_of_map(file.read())
