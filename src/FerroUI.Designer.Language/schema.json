@@ -1064,6 +1064,16 @@
         ],
         "attached": true
       },
+      "IsDialog": {
+        "name": "IsDialog",
+        "type_name": "bool",
+        "documentation": "AutomationProperties.IsDialog: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
       "IsRequiredForForm": {
         "name": "IsRequiredForForm",
         "type_name": "bool",
@@ -26093,6 +26103,16 @@
     "base": "TemplatedControl",
     "constructible": true,
     "properties": {
+      "DragStartPolicy": {
+        "name": "DragStartPolicy",
+        "type_name": "ThumbDragStartPolicy",
+        "documentation": "Thumb.DragStartPolicy: ThumbDragStartPolicy",
+        "values": [
+          "AnyPress",
+          "PrimaryPressWhenIdle"
+        ],
+        "attached": false
+      },
       "DragStarted": {
         "name": "DragStarted",
         "type_name": "VectorEventArgs",
