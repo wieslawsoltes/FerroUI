@@ -1530,6 +1530,8 @@ itself for a type that is its own storage type; for the others a copy made once,
 default converted and a coercion callback wrapped. The typed API of `StyledProperty<T>` and its
 routes stay per value type.
 
+The first part alone, on the `main` of that time:
+
 | Release, macOS ARM64 | Before | After |
 |---|---:|---:|
 | `hello-world-builders` stripped | 20,610,240 B | 20,463,376 B (-0.71 %) |
@@ -1568,8 +1570,7 @@ a storage type.
 Breaking: the value type of a styled or attached property implements `StyledValue`
 (`styled_value!(Type)` for a type of an application, `styled_enum!` for an enumeration without
 markup metadata); `StyledProperty<T>` and `AttachedProperty<T>` read and write values only where
-`T: StyledValue`. `FerroObject::try_set_value_typed` sets a styled property through a route of its
-own (`route_take_value`, the value moved), so that it keeps `T: PropertyValue`.
+`T: StyledValue`, and so does `FerroObject::try_set_value_typed`, which is inlined into its caller.
 
 Tests: the conversions (`styled_value` tests of `ferroui-system` and `ferroui-base`), and every
 test of the property store, which now runs on the shared storage type for its enumerations.
@@ -1621,21 +1622,32 @@ is, so that the store reads it without a call through a vtable. The rest of
 looked up for the two values of a change and of an unset, and the storage metadata of a new
 effective value.
 
-| Release, macOS ARM64, stripped | Main (ae7462b47) | The stack | Change |
-|---|---:|---:|---:|
-| `hello-world-builders` | 18,645,296 B | 18,299,632 B | -346 kB (-1.85 %) |
-| `hello-world-builders` `__TEXT,__text` | 14,637,260 B | 14,333,328 B | |
-| `hello-world` (XAML) | 18,563,848 B | 18,201,496 B | -362 kB (-1.95 %) |
-| `hello-world` (XAML) `__TEXT,__text` | 14,551,128 B | 14,241,876 B | |
-| `winui-gallery` | 57,150,408 B | 56,068,568 B | -1.08 MB (-1.89 %) |
-| `winui-gallery` `__TEXT,__text` | 40,029,164 B | 39,093,816 B | |
-| `control-catalog-desktop` | 75,527,792 B | 74,132,032 B | -1.40 MB (-1.85 %) |
-| `control-catalog-desktop` `__TEXT,__text` | 57,223,276 B | 55,988,256 B | |
+The whole stack as merged (#989, #1010, #1013, #1015), from one run of `perf.yml` (44991194138):
+`2f22d5a22` against the commit before it, `938fccd18`, on macOS ARM64. The sizes are in MB
+(10^6 bytes) with two decimals, as the run prints them, so a difference can be off by 0.01. A
+`dist` executable is already stripped.
 
-The gallery is built with its feature `desktop`
-(`cargo build --release -p winui-gallery --features winui-gallery/desktop --bin winui-gallery`):
-without it, cargo builds the library alone and the binary in the target folder is whatever was
-built there last.
+| Release, MB | Stripped, before | After | Change | `__text`, before | After | Change |
+|---|---:|---:|---:|---:|---:|---:|
+| `hello_window` | 14.99 | 14.71 | -0.28 (-1.9 %) | 11.83 | 11.60 | -0.23 (-1.9 %) |
+| `hello-world` | 16.71 | 16.43 | -0.28 (-1.7 %) | 13.10 | 12.84 | -0.26 (-2.0 %) |
+| `hello-world-component-host` | 17.45 | 17.12 | -0.33 (-1.9 %) | 13.68 | 13.41 | -0.27 (-2.0 %) |
+| `hello-world-builders` | 17.36 | 17.04 | -0.32 (-1.8 %) | 13.62 | 13.34 | -0.28 (-2.1 %) |
+| `hello-world-macros` | 17.36 | 17.04 | -0.32 (-1.8 %) | 13.62 | 13.34 | -0.28 (-2.1 %) |
+| `hello-world-hooks` | 17.34 | 17.04 | -0.30 (-1.7 %) | 13.61 | 13.34 | -0.27 (-2.0 %) |
+| `winui-theme-gallery` | 33.08 | 32.24 | -0.84 (-2.5 %) | 26.00 | 25.26 | -0.74 (-2.8 %) |
+| `control-catalog-desktop` | 73.99 | 72.63 | -1.36 (-1.8 %) | 54.93 | 53.77 | -1.16 (-2.1 %) |
+
+| Dist, MB | Stripped, before | After | Change | `__text`, before | After | Change |
+|---|---:|---:|---:|---:|---:|---:|
+| `hello_window` | 13.10 | 12.89 | -0.21 (-1.6 %) | 10.80 | 10.59 | -0.21 (-1.9 %) |
+| `hello-world` | 14.35 | 14.12 | -0.23 (-1.6 %) | 11.77 | 11.55 | -0.22 (-1.9 %) |
+| `hello-world-component-host` | 14.88 | 14.64 | -0.24 (-1.6 %) | 12.23 | 12.00 | -0.23 (-1.9 %) |
+| `hello-world-builders` | 14.82 | 14.57 | -0.25 (-1.7 %) | 12.17 | 11.94 | -0.23 (-1.9 %) |
+| `hello-world-macros` | 14.82 | 14.57 | -0.25 (-1.7 %) | 12.17 | 11.94 | -0.23 (-1.9 %) |
+| `hello-world-hooks` | 14.80 | 14.57 | -0.23 (-1.6 %) | 12.17 | 11.94 | -0.23 (-1.9 %) |
+| `winui-theme-gallery` | 26.12 | 25.56 | -0.56 (-2.1 %) | 21.30 | 20.74 | -0.56 (-2.6 %) |
+| `control-catalog-desktop` | 60.04 | 59.14 | -0.90 (-1.5 %) | 46.14 | 45.29 | -0.85 (-1.8 %) |
 
 ## 5. What an executable is made of
 
