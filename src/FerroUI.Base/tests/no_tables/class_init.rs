@@ -41,9 +41,12 @@ fn names(properties: &[&'static FerroProperty]) -> Vec<String> {
     properties.iter().map(|property| property.name().to_string()).collect()
 }
 
+/// Run by itself (`cargo test -p ferroui-base --test class_init_without_tables`) this target has no
+/// tables of types, which is the case it is for. In a build of the whole workspace another crate
+/// enables the feature for this one, and the tests below hold with the tables as well.
 #[test]
-fn this_target_is_built_without_the_tables_of_types() {
-    assert!(!ValueTypes::TYPE_TABLES);
+fn the_tables_of_types_are_what_the_features_of_this_build_say() {
+    assert_eq!(ValueTypes::TYPE_TABLES, cfg!(all(feature = "type-tables", not(ferroui_bounded_reflection))));
 }
 
 #[test]
