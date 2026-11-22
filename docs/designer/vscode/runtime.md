@@ -101,6 +101,8 @@ pub fn review_editor() -> Rc<dyn IDataTemplate> {
 
 Call `review_editor()` from the grid column's `.cell_editing_template(...)` setter and build the application in debug mode. **App Preview Templates** can open the RSX body and reveal the assignment while the grid is showing its display cells. **Live App Templates** can open the factory before the cell enters editing mode. The editor checks both source links against the build that supplied the template. [Try this in Todo Workbench](../../../samples/TodoWorkbench/app_preview/template_rows.rs)
 
+![VS Code selects the shared review_editor factory in template_rows.rs while the running TreeDataGrid shows its display cells](../images/vscode-live-shared-editing-template.png)
+
 ### Edit a shared Rust palette in App Preview
 
 1. Use a `const` initialized with a supported color constructor in a module of the selected Cargo binary or its package library. For example, declare `mod brand;` in the crate root and reference `crate::brand::ACCENT` from an inline `.resource("Accent", crate::brand::ACCENT)` call. Named imports and re-exports also work.
