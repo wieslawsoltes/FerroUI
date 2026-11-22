@@ -912,3 +912,152 @@ jobs:
           name: icf-linux-${{ matrix.folding }}
           path: icf-linux-${{ matrix.folding }}
           retention-days: 7
+
+  # What the executables of Linux and Windows export, by origin (#1049). Measured only: the link
+  # adds nothing but its map.
+  linux-exports:
+    name: The export table on Linux (x86-64, dist)
+    if: inputs.symbols
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Check out the report
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          sparse-checkout: scripts/perf/export_table.py
+          sparse-checkout-cone-mode: false
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          path: tree
+      - uses: dtolnay/rust-toolchain@stable
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libx11-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxtst-dev \
+            libgl1-mesa-dev libegl1-mesa-dev libfontconfig1-dev libfreetype6-dev libicu-dev pkg-config \
+            libglib2.0-dev libgtk-3-dev libxkbcommon-dev libwayland-dev libvulkan-dev clang lld \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libpipewire-0.3-dev libgles-dev
+      - name: Build and read
+        working-directory: tree
+        env:
+          REF: ${{ inputs.ref }}
+          CARGO_TERM_COLOR: never
+        run: |
+          out="$RUNNER_TEMP/exports"
+          mkdir -p "$out"
+          {
+            echo "## The export table on Linux x86-64, \`$REF\` at \`$(git rev-parse HEAD)\`, dist (bytes)"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          for app in hello-world control-catalog-desktop; do
+            if ! cargo rustc --locked --profile dist -p "$app" --bin "$app" -- \
+              "-Clink-arg=-Wl,-Map=$out/$app.map" > "$out/$app.log" 2>&1; then
+              tail -n 40 "$out/$app.log"
+              exit 1
+            fi
+            python3 -I ../tools/scripts/perf/export_table.py "target/dist/$app" --map "$out/$app.map" \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+
+  windows-exports:
+    name: The export table on Windows (x86-64, dist)
+    if: inputs.symbols
+    runs-on: windows-latest
+    timeout-minutes: 150
+    env:
+      # As in the job of the Windows sizes above.
+      BINDGEN_EXTRA_CLANG_ARGS: -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out the report
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          sparse-checkout: scripts/perf/export_table.py
+          sparse-checkout-cone-mode: false
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          path: tree
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and read
+        working-directory: tree
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          CARGO_TERM_COLOR: never
+          # The options of link.exe start with a slash: the shell must not take them for paths.
+          MSYS_NO_PATHCONV: "1"
+          REF: ${{ inputs.ref }}
+        run: |
+          out="$GITHUB_WORKSPACE/exports"
+          mkdir -p "$out"
+          {
+            echo "## The export table on Windows x86-64, \`$REF\` at \`$(git rev-parse HEAD)\`, dist (bytes)"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          for app in hello-world control-catalog-desktop; do
+            if ! cargo rustc --locked --profile dist -p "$app" --bin "$app" -- \
+              -C "link-arg=/MAP:$out/$app.map" > "$out/$app.log" 2>&1; then
+              tail -n 40 "$out/$app.log"
+              exit 1
+            fi
+            python -I "$GITHUB_WORKSPACE/tools/scripts/perf/export_table.py" "$CARGO_TARGET_DIR/dist/$app.exe" \
+              --map "$out/$app.map" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # The generic functions with a copy per closure type (#998), from the symbols of dist links.
+  macos-closure-families:
+    name: The closure-generic families (macOS, dist)
+    if: inputs.symbols
+    runs-on: macos-15
+    timeout-minutes: 180
+    steps:
+      - name: Check out the ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Check out the report
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: tools
+          sparse-checkout: |
+            scripts/generic_instances.py
+            scripts/symsize.py
+            scripts/perf/closure_families.py
+          sparse-checkout-cone-mode: false
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build and read
+        env:
+          REF: ${{ inputs.ref }}
+          CARGO_TERM_COLOR: never
+        run: |
+          {
+            echo "## The closure-generic families, \`$REF\` at \`$(git rev-parse HEAD)\`, macOS ARM64, dist"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          for app in hello-world-builders todo-mvc control-catalog-desktop; do
+            if ! cargo rustc --locked --profile dist -p "$app" --bin "$app" -- -C strip=none \
+              > "$RUNNER_TEMP/$app.log" 2>&1; then
+              tail -n 40 "$RUNNER_TEMP/$app.log"
+              exit 1
+            fi
+            python3 -I tools/scripts/perf/closure_families.py "target/dist/$app" --top 40 \
+              --crates ferroui_view,ferroui_base,ferroui_controls,ferroui_markup_xaml,ferroui_markup \
+              | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
