@@ -1154,7 +1154,8 @@ fn parse_float_numeric(text: &str, info: &NumberFormatInfo) -> Option<f64> {
     if text[pos..].bytes().any(|b| b != 0) {
         return None;
     }
-    ferroui_system::invariant_numbers::try_parse_double(&normal, ferroui_system::invariant_numbers::NumberStyles::FLOAT)
+    use ferroui_system::invariant_numbers::{try_parse_double, NumberParseFlags};
+    try_parse_double(&normal, NumberParseFlags::FLOAT)
 }
 
 /// Parses a decimal with the given styles and format information.
