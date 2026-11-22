@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import type { Collaboration } from './collaboration';
+import { collaborationTool, isCollaborationTool } from './collaborationAgents';
 import { agentCatalog, type AgentTool } from './agentCatalog';
 import { validate } from './agentSchema';
 import type { AssetImportRequest } from './assetImport';
@@ -137,7 +139,7 @@ export class AgentTools {
         private readonly runtimeSource: RuntimeSourceTools, private readonly runtimeProfiles: RuntimeProfiles,
         private readonly project: ProjectInventory, private readonly scaffolds: ProjectScaffold, private readonly projectSetup: ProjectSetup,
         private readonly scenarios: ScenarioRunner, private readonly scenarioReviews: ScenarioReview,
-        private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves,
+        private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves, private readonly collaboration: Collaboration,
         private readonly sourceReviews: {
             property: RegisteredRename; type: RegisteredRename; resource: ResourceRename; resourceMove: ResourceMove;
         }) {}
@@ -157,6 +159,7 @@ export class AgentTools {
             throw new Error('Enable ferroui.mcp.allowWrites to let agents edit files or control the designer and running application.');
         }
         if (isWorkspaceTool(tool)) return this.workspace.call(tool, input, signal);
+        if (isCollaborationTool(tool)) return collaborationTool(this.collaboration, tool, input, signal);
         if (tool === 'ferroui_workspace_plan_xaml_move') return this.fileMoves.agent(input as FileMoveRequest, signal);
         if (tool === 'ferroui_workspace_move_xaml') {
             const request = input as FileMoveRequest & { review: string };

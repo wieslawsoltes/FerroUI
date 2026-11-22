@@ -75,6 +75,108 @@
     ],
     "commands": [
       {
+        "command": "ferroui.collaboration.host",
+        "title": "Host XAML Room…",
+        "category": "FerroUI",
+        "icon": "$(share)"
+      },
+      {
+        "command": "ferroui.collaboration.join",
+        "title": "Join XAML Room…",
+        "category": "FerroUI",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "ferroui.collaboration.resume",
+        "title": "Resume XAML Room…",
+        "category": "FerroUI",
+        "icon": "$(history)"
+      },
+      {
+        "command": "ferroui.collaboration.review",
+        "title": "Review Room Source",
+        "category": "FerroUI",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "ferroui.collaboration.publish",
+        "title": "Publish Local Draft…",
+        "category": "FerroUI",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "ferroui.collaboration.resolve",
+        "title": "Publish Reviewed Resolution…",
+        "category": "FerroUI",
+        "icon": "$(merge)"
+      },
+      {
+        "command": "ferroui.collaboration.sync",
+        "title": "Synchronize Room",
+        "category": "FerroUI",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "ferroui.collaboration.invite",
+        "title": "Copy Room Invitation…",
+        "category": "FerroUI",
+        "icon": "$(link)"
+      },
+      {
+        "command": "ferroui.collaboration.member",
+        "title": "Manage Room Member…",
+        "category": "FerroUI",
+        "icon": "$(account)"
+      },
+      {
+        "command": "ferroui.collaboration.checkpoint",
+        "title": "Checkpoint Room…",
+        "category": "FerroUI",
+        "icon": "$(archive)"
+      },
+      {
+        "command": "ferroui.collaboration.checkpointResolution",
+        "title": "Review Room Checkpoint Resolution…",
+        "category": "FerroUI",
+        "icon": "$(git-merge)"
+      },
+      {
+        "command": "ferroui.collaboration.recover",
+        "title": "Review Saved Room Backup…",
+        "category": "FerroUI",
+        "icon": "$(history)"
+      },
+      {
+        "command": "ferroui.collaboration.disconnect",
+        "title": "Disconnect Room",
+        "category": "FerroUI",
+        "icon": "$(debug-disconnect)"
+      },
+      {
+        "command": "ferroui.collaboration.incoming.apply",
+        "title": "Apply Reviewed Room Source",
+        "category": "FerroUI",
+        "icon": "$(check)"
+      },
+      {
+        "command": "ferroui.collaboration.incoming.cancel",
+        "title": "Close Room Source Review",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
+        "command": "ferroui.collaboration.outgoing.apply",
+        "title": "Publish Reviewed Room Source",
+        "category": "FerroUI",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "ferroui.collaboration.outgoing.cancel",
+        "title": "Close Room Publish Review",
+        "category": "FerroUI",
+        "icon": "$(close)"
+      },
+      {
         "command": "ferroui.openDesigner",
         "title": "Open Designer",
         "category": "FerroUI",
@@ -626,6 +728,22 @@
     "menus": {
       "commandPalette": [
         {
+          "command": "ferroui.collaboration.incoming.apply",
+          "when": "ferroui.roomApplyReview"
+        },
+        {
+          "command": "ferroui.collaboration.incoming.cancel",
+          "when": "ferroui.roomApplyReview"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.apply",
+          "when": "ferroui.roomPublishReview"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.cancel",
+          "when": "ferroui.roomPublishReview"
+        },
+        {
           "command": "ferroui.project.runCargo",
           "when": "false"
         },
@@ -816,6 +934,26 @@
       ],
       "editor/title": [
         {
+          "command": "ferroui.collaboration.incoming.apply",
+          "when": "ferroui.roomApplyReview",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.collaboration.incoming.cancel",
+          "when": "ferroui.roomApplyReview",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.apply",
+          "when": "ferroui.roomPublishReview",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.collaboration.outgoing.cancel",
+          "when": "ferroui.roomPublishReview",
+          "group": "navigation@2"
+        },
+        {
           "command": "ferroui.openDesigner",
           "when": "resourceScheme == file && (editorLangId == ferroui-xaml || editorLangId == rust)",
           "group": "navigation"
@@ -936,6 +1074,21 @@
       ],
       "view/title": [
         {
+          "command": "ferroui.collaboration.host",
+          "when": "view == ferroui.collaboration && isWorkspaceTrusted",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ferroui.collaboration.join",
+          "when": "view == ferroui.collaboration && isWorkspaceTrusted",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ferroui.collaboration.resume",
+          "when": "view == ferroui.collaboration && isWorkspaceTrusted",
+          "group": "navigation@3"
+        },
+        {
           "command": "ferroui.project.newProject",
           "when": "view == ferroui.project && isWorkspaceTrusted",
           "group": "navigation@1"
@@ -1027,6 +1180,56 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "ferroui.collaboration.review",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "inline@1"
+        },
+        {
+          "command": "ferroui.collaboration.publish",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor)$/",
+          "group": "inline@2"
+        },
+        {
+          "command": "ferroui.collaboration.sync",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "inline@3"
+        },
+        {
+          "command": "ferroui.collaboration.resolve",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor)$/",
+          "group": "1_source@1"
+        },
+        {
+          "command": "ferroui.collaboration.recover",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "1_source@2"
+        },
+        {
+          "command": "ferroui.collaboration.invite",
+          "when": "view == ferroui.collaboration && viewItem == room-owner",
+          "group": "2_members@1"
+        },
+        {
+          "command": "ferroui.collaboration.member",
+          "when": "view == ferroui.collaboration && viewItem == room-participant",
+          "group": "inline"
+        },
+        {
+          "command": "ferroui.collaboration.checkpoint",
+          "when": "view == ferroui.collaboration && viewItem == room-owner",
+          "group": "3_checkpoint@1"
+        },
+        {
+          "command": "ferroui.collaboration.checkpointResolution",
+          "when": "view == ferroui.collaboration && viewItem == room-owner",
+          "group": "3_checkpoint@2"
+        },
+        {
+          "command": "ferroui.collaboration.disconnect",
+          "when": "view == ferroui.collaboration && viewItem =~ /^room-(owner|editor|viewer)$/",
+          "group": "4_connection"
+        },
         {
           "command": "ferroui.project.runCargo",
           "when": "view == ferroui.project && viewItem == ferrouiProjectTarget && isWorkspaceTrusted",
@@ -1275,6 +1478,18 @@
           "scope": "machine",
           "description": "Absolute path to ferroui-xaml-lsp. Leave empty to use the bundled binary or PATH."
         },
+        "ferroui.collaboration.bindAddress": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Loopback IP and port of newly hosted rooms. Leave empty for an available local port."
+        },
+        "ferroui.collaboration.publicEndpoint": {
+          "type": "string",
+          "scope": "machine",
+          "default": "",
+          "description": "Optional HTTPS MCP endpoint advertised for new hosted rooms behind a TLS reverse proxy."
+        },
         "ferroui.preview.path": {
           "type": "string",
           "default": "",
@@ -1323,6 +1538,13 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "ferroui.collaboration",
+        "contents": "[Host XAML Room…](command:ferroui.collaboration.host)\n[Join XAML Room…](command:ferroui.collaboration.join)\n[Resume XAML Room…](command:ferroui.collaboration.resume)",
+        "when": "isWorkspaceTrusted"
+      }
+    ],
     "views": {
       "ferrouiWorkbench": [
         {
@@ -1335,6 +1557,13 @@
           "id": "ferroui.diagnostics",
           "name": "Diagnostics",
           "contextualTitle": "FerroUI Diagnostics",
+          "visibility": "collapsed"
+        },
+        {
+          "id": "ferroui.collaboration",
+          "name": "Collaboration",
+          "icon": "dist/icons/account.svg",
+          "contextualTitle": "FerroUI Collaboration",
           "visibility": "collapsed"
         },
         {

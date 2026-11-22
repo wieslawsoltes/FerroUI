@@ -70,6 +70,7 @@ import { verifyProjectLibrary } from './projectLibraryMcp';
 import { verifyAssetImport } from './assetImportMcp';
 import { verifyAssetMove } from './assetMoveMcp';
 import { verifyControlTemplate } from './controlTemplateMcp';
+import { verifyCollaboration } from './collaborationMcp';
 import { verifyCommandBindings } from './commandBindingsMcp';
 import { verifyRsxCommandBindings } from './rsxCommandBindingsMcp';
 import { verifyLibraryScopes } from './libraryScopesMcp';
@@ -230,6 +231,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok((await invoke('designer_studio_edit', designData)).isError);
         assert.ok((await invoke('ferroui_workspace_create', { path: 'Denied.rs', source: 'fn main() {}' })).isError);
         await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
+        await verifyCollaboration({ invoke, content });
         const rsxKeyframeClipboard = await verifyRsxAnimation({ invoke, content });
         await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });

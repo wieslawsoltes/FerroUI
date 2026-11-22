@@ -6,6 +6,7 @@ import { fileMoveCatalog, renameCatalog, resourceMoveCatalog, workspaceCatalog }
 import { prototypeInput, stageContactInput, stageKeyboardInput } from './stageInputCatalog';
 import { runtimeProfileCatalog } from './runtimeProfileCatalog';
 import { projectSetupCatalog } from './projectSetupCatalog';
+import { collaborationCatalog } from './collaborationAgents';
 
 const node = integer(1);
 const session = { session: integer(1) };
@@ -109,6 +110,7 @@ const resize = { ...frame, node, handle: integer(0, 7), dx: { type: 'number', mi
 const resizeRequired = ['session', 'expected_revision', 'node', 'handle', 'dx', 'dy'];
 
 export const agentCatalog = {
+    ...collaborationCatalog,
     ...hostedPaletteCatalog,
     ...hostedStylesCatalog,
     ...hostedTemplateCatalog,
