@@ -21,7 +21,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
         await vscode.workspace.fs.writeFile(uri, Buffer.from(content));
         return uri;
     };
-    await write('Cargo.toml', '[package]\nname = "audit-app"\nversion = "0.1.0"\nedition = "2024"\n[features]\nhot-reload = []\n[dependencies]\naudit-widgets = { path = "widgets" }\n');
+    await write('Cargo.toml', '[package]\nname = "audit-app"\nversion = "0.1.0"\nedition = "2024"\n[features]\ndefault = ["shared-view"]\nhot-reload = []\nshared-view = []\n[dependencies]\naudit-widgets = { path = "widgets" }\n');
     await write('.cargo/config.toml', '[build]\ntarget-dir = "audit-output"\n');
     const mappingKey = 'FerroUI.Designer.Rsx.v1:Audit.Controls.AuditCard';
     const mapping = JSON.stringify({ path: 'crate::AuditCard', properties: { Caption: 'heading', HeroImage: 'hero_raster', BadgeImage: 'badge_raster' } });
@@ -104,7 +104,7 @@ export async function verifyCargoTarget(workspace: vscode.Uri, designer: Designe
     try {
         const { artifact, metadata } = buildCargo(target, output);
         assert.equal(path.basename(path.dirname(path.dirname(await artifact))), 'audit-output');
-        assert.deepEqual(metadata().features, ['hot-reload']);
+        assert.deepEqual(metadata().features?.slice().sort(), ['default', 'hot-reload', 'shared-view']);
     } finally {
         output.dispose();
     }
