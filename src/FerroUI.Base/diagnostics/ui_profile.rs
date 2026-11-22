@@ -19,20 +19,20 @@ impl Phase {
 #[path = "ui_profile_recording.rs"]
 mod recording;
 #[cfg(feature = "ui-profiling")]
-pub use recording::{Capture, Metric, Row, Snapshot, Span};
+pub use recording::{Capture, Metric, Row, Snapshot, ProfileSpan};
 
 #[cfg(not(feature = "ui-profiling"))]
-pub struct Span;
+pub struct ProfileSpan;
 
 #[cfg(not(feature = "ui-profiling"))]
-impl Span {
+impl ProfileSpan {
     #[inline]
     pub fn set_visual(&self, _: Option<Ref<Visual>>) {}
 }
 
 /// Records an actual layout operation after its cached result has been ruled out.
 #[cfg(feature = "ui-profiling")]
-pub(crate) fn layout(control: &Visual, phase: Phase) -> Option<Span> {
+pub(crate) fn layout(control: &Visual, phase: Phase) -> Option<ProfileSpan> {
     recording::layout(control, phase)
 }
 
@@ -44,7 +44,7 @@ pub fn component<T: Any>(
     name: &'static str,
     phase: Phase,
     views: impl FnOnce() -> (Option<Ref<Visual>>, Option<Ref<Visual>>),
-) -> Option<Span> {
+) -> Option<ProfileSpan> {
     #[cfg(feature = "ui-profiling")]
     {
         recording::component(instance, name, phase, views)

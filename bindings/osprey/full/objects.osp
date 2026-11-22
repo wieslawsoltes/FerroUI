@@ -1110,7 +1110,7 @@ fn skewTransform() = ferro_create(typeId: 374)
 fn slider() = ferro_create(typeId: 375)
 // solidColorBrush() -> int: creates a SolidColorBrush. Fills an area with a solid color.
 fn solidColorBrush() = ferro_create(typeId: 377)
-// span() -> int: creates a Span.
+// span() -> int: creates a Span. Span element used for grouping other `Inline` elements.
 fn span() = ferro_create(typeId: 378)
 // splineColorKeyFrame() -> int: creates a SplineColorKeyFrame. Interpolates along a
 // `KeySpline` from the value before it (WinUI's `SplineColorKeyFrame`).

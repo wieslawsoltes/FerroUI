@@ -151,7 +151,7 @@ impl Capture {
         identity: Identity,
         phase: Phase,
         make_row: impl FnOnce(&mut Records) -> Row,
-    ) -> Span {
+    ) -> ProfileSpan {
         let depth = {
             let mut records = self.records.borrow_mut();
             let row = records.index.get(&identity).copied().or_else(|| {
@@ -173,13 +173,13 @@ impl Capture {
             });
             depth
         };
-        Span {
+        ProfileSpan {
             capture: self,
             depth,
         }
     }
 
-    fn exclude_nested(self: Rc<Self>, phase: Phase) -> Option<Span> {
+    fn exclude_nested(self: Rc<Self>, phase: Phase) -> Option<ProfileSpan> {
         let depth = {
             let mut records = self.records.borrow_mut();
             let depth = records.stack.len();
@@ -194,7 +194,7 @@ impl Capture {
             });
             depth
         };
-        Some(Span {
+        Some(ProfileSpan {
             capture: self,
             depth,
         })
@@ -202,12 +202,12 @@ impl Capture {
 }
 
 /// The execution of a single synchronous UI operation.
-pub struct Span {
+pub struct ProfileSpan {
     capture: Rc<Capture>,
     depth: usize,
 }
 
-impl Span {
+impl ProfileSpan {
     /// Associates the recorded component with the control it just committed.
     pub fn set_visual(&self, output: Option<Ref<Visual>>) {
         let Some(output) = output.filter(|view| self.capture.contains(view)) else {
@@ -222,7 +222,7 @@ impl Span {
     }
 }
 
-impl Drop for Span {
+impl Drop for ProfileSpan {
     fn drop(&mut self) {
         let ended = Instant::now().min(self.capture.end());
         let mut records = self.capture.records.borrow_mut();
@@ -261,7 +261,7 @@ fn active() -> Option<Rc<Capture>> {
     }
 }
 
-pub(super) fn layout(control: &Visual, phase: Phase) -> Option<Span> {
+pub(super) fn layout(control: &Visual, phase: Phase) -> Option<ProfileSpan> {
     let capture = active()?;
     if !capture.contains(control) {
         return capture.exclude_nested(phase);
@@ -280,7 +280,7 @@ pub(super) fn component<T: Any>(
     name: &'static str,
     phase: Phase,
     views: impl FnOnce() -> (Option<Ref<Visual>>, Option<Ref<Visual>>),
-) -> Option<Span> {
+) -> Option<ProfileSpan> {
     let capture = active()?;
     let (output, host) = views();
     let output = output.filter(|view| capture.contains(view));

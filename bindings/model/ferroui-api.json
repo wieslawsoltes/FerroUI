@@ -10862,7 +10862,7 @@
     "Inlines"
    ],
    "events": [],
-   "doc": ""
+   "doc": "Span element used for grouping other `Inline` elements."
   },
   {
    "id": 379,
