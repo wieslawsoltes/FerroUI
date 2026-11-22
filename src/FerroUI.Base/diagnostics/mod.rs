@@ -8,6 +8,7 @@ mod ferro_property_value;
 mod i_value_frame_diagnostic;
 mod local_value_frame_diagnostic;
 pub mod perf_counters;
+pub mod ui_profile;
 mod property_value_trace;
 mod rsx_source_info;
 mod style_value_frame_diagnostic;

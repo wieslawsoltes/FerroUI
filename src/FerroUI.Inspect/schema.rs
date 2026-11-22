@@ -102,6 +102,21 @@ pub fn tools() -> Vec<Value> {
         &[],
         false,
     );
+    if !cfg!(target_arch = "wasm32") {
+        let profile = json!({"type":"integer","minimum":1});
+        let duration = json!({"type":"integer","minimum":super::ui_profile::MIN_DURATION_MS,"maximum":super::ui_profile::MAX_DURATION_MS});
+        add("start_ui_profile", "Record layout and declarative component work in one live window. Use its ID from list_windows. The capture ends after duration_ms and can be stopped early.",
+            json!({"window_id":id,"duration_ms":duration}), &["window_id", "duration_ms"], false);
+        add("get_ui_profile", "Read the current capture and its slowest controls and components. Pass profile_id to guard a specific capture. Use get_source on a reported live node_id.",
+            json!({"profile_id":profile}), &[], false);
+        add("stop_ui_profile", "End a specific profile early and read its final rows.",
+            json!({"profile_id":profile}), &["profile_id"], false);
+    }
+    for tool in &mut out {
+        if matches!(tool["name"].as_str(), Some("start_ui_profile" | "stop_ui_profile")) {
+            tool["annotations"]["readOnlyHint"] = json!(false);
+        }
+    }
     out
 }
 

@@ -8,6 +8,11 @@ pub(super) fn location(object: &FerroObject) -> Option<Value> {
         .or_else(|| rust_location(RsxSourceInfo::get(object)?, false))
 }
 
+pub(super) fn has_location(object: &FerroObject) -> bool {
+    XamlSourceInfo::for_object(object).is_some_and(|source| source.source_uri().is_some())
+        || RsxSourceInfo::get(object).is_some()
+}
+
 pub(super) fn xaml_location(info: XamlSourceInfo) -> Option<Value> {
     let uri = info.source_uri()?;
     let mut source =

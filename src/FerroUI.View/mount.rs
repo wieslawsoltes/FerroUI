@@ -27,9 +27,9 @@
 use crate::element::{AnyValueEq, ComponentElement, ControlElement, DynamicChildren, Element, ElementClass, Key, PropValue};
 use crate::reactive::{effect, on_cleanup, signal, untrack, Owner, Signal};
 use ferroui_base::data::BindingPriority;
-use ferroui_base::{BoxedValue, FerroProperty, Ref, WeakRef};
+use ferroui_base::{BoxedValue, FerroProperty, Ref, Visual, WeakRef};
 use ferroui_controls::presenters::ContentPresenter;
-use ferroui_controls::{ContentControl, Control, Decorator, ItemsControl, Panel, TextBlock};
+use ferroui_controls::{ContentControl, Control, Decorator, ItemsControl, Panel, TextBlock, TopLevel};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -157,6 +157,14 @@ impl Host {
             Host::Text(text) => Some(text.clone().upcast()),
             Host::Typed(control, ..) => Some(control.clone()),
             Host::Root => None,
+        }
+    }
+
+    fn profile_host(&self) -> Option<Ref<Visual>> {
+        let control = self.control()?;
+        match control.downcast_ref::<TopLevel>() {
+            Some(window) => window.presentation_source().root_visual().map(Ref::upcast),
+            None => Some(control.upcast()),
         }
     }
 
@@ -412,6 +420,16 @@ impl Slot {
         let mut out = Vec::new();
         self.collect(&mut out);
         out
+    }
+
+    fn first_visual(&self) -> Option<Ref<Visual>> {
+        match &*self.content.borrow() {
+            SlotContent::Leaf(items) => items.iter().find_map(|item| match item {
+                Placed::Control(control) => Some(control.clone().upcast()),
+                Placed::Value(_) => None,
+            }),
+            SlotContent::Group(slots) => slots.iter().find_map(|slot| slot.first_visual()),
+        }
     }
 
     fn collect(&self, out: &mut Vec<Placed>) {
@@ -997,6 +1015,7 @@ fn set_untyped(control: &Ref<Control>, property: &'static FerroProperty, value: 
 }
 
 fn mount_dynamic(dynamic: DynamicChildren, host: &Rc<Host>) -> Rc<DynamicInstance> {
+    use ferroui_base::diagnostics::ui_profile::{self, Phase};
     let owner = Owner::new();
     let instance = owner.with(|| {
         Rc::new(DynamicInstance {
@@ -1017,10 +1036,17 @@ fn mount_dynamic(dynamic: DynamicChildren, host: &Rc<Host>) -> Rc<DynamicInstanc
         effect(move || {
             state.version.get();
             let render = state.render.borrow().render.clone();
+            let target = || (state.slot.first_visual(), host.profile_host());
+            let render_profile = ui_profile::component(&state, "Dynamic children", Phase::Render, target);
             let entries = render();
+            drop(render_profile);
             untrack(|| {
+                let profile = ui_profile::component(&state, "Dynamic children", Phase::Reconcile, target);
                 let _patched = Patched::now(state.patched);
                 update_dynamic(&state, &host, &mounted, &unkeyed, entries);
+                if let Some(profile) = profile {
+                    profile.set_visual(state.slot.first_visual());
+                }
             });
         })
     });
@@ -1132,6 +1158,7 @@ fn update_dynamic(
 }
 
 fn mount_component(element: ComponentElement, host: &Rc<Host>) -> Rc<ComponentInstance> {
+    use ferroui_base::diagnostics::ui_profile::{self, Phase};
     let boundary = crate::error_boundary::nearest();
     let owner = Owner::new();
     let instance = owner.with(|| {
@@ -1172,6 +1199,8 @@ fn mount_component(element: ComponentElement, host: &Rc<Host>) -> Rc<ComponentIn
             }
             let render = state.render.borrow().clone();
             let parent = state.host.control();
+            let target = || (state.slot.first_visual(), state.host.profile_host());
+            let render_profile = ui_profile::component(&state, state.name, Phase::Render, target);
             let (element, after) = match &state.boundary {
                 None => crate::hooks::render_with(&state.hooks, state.owner, parent, || render()),
                 // A run that panicked before: nothing, until the boundary
@@ -1190,13 +1219,18 @@ fn mount_component(element: ComponentElement, host: &Rc<Host>) -> Rc<ComponentIn
                     }
                 },
             };
+            drop(render_profile);
             untrack(|| {
+                let profile = ui_profile::component(&state, state.name, Phase::Reconcile, target);
                 let old = std::mem::take(&mut *state.instances.borrow_mut());
                 // What a component that runs again renders is patched by its next run.
                 let patched = Patched::now(true);
                 let next = state.tree.with(|| reconcile_list(&state.host, &state.slot, old, vec![element]));
                 drop(patched);
                 *state.instances.borrow_mut() = next;
+                if let Some(profile) = profile {
+                    profile.set_visual(state.slot.first_visual());
+                }
                 for f in after {
                     f();
                 }

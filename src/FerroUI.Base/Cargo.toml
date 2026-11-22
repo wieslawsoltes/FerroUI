@@ -26,6 +26,8 @@ autotests = false
 path = "lib.rs"
 
 [features]
+# On-demand per-window UI profiling, enabled by the runtime inspector.
+ui-profiling = []
 # Development-only tracking of explicit writes to reload-owned root properties.
 hot-reload = []
 # Exposes the render test doubles in `rendering::testing` to other crates.

@@ -917,6 +917,11 @@ impl Layoutable {
             panic!("Cannot call Measure using a size with NaN values.");
         }
 
+        #[cfg(feature = "ui-profiling")]
+        let _profile = crate::diagnostics::ui_profile::layout(
+            self,
+            crate::diagnostics::ui_profile::Phase::Measure,
+        );
         let previous_desired_size = self.desired_size();
         self.measure_hold.set(None);
         crate::perf_count!(MeasuresExecuted);
@@ -983,6 +988,11 @@ impl Layoutable {
             return;
         }
 
+        #[cfg(feature = "ui-profiling")]
+        let _profile = crate::diagnostics::ui_profile::layout(
+            self,
+            crate::diagnostics::ui_profile::Phase::Arrange,
+        );
         let valid = self.is_arrange_valid.get();
         self.is_arrange_valid.set(true);
         crate::perf_count!(ArrangesExecuted);

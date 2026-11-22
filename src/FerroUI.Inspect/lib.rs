@@ -16,6 +16,7 @@ mod source;
 pub mod target;
 mod template_sources;
 mod text_contrast;
+mod ui_profile;
 mod visual_checks;
 use base64::Engine;
 use ferroui_base::controls::{IResourceHost, ResourceKey};
@@ -144,6 +145,7 @@ pub struct Inspector {
     roots: Vec<WeakRef<TopLevel>>,
     frames: HashMap<NodeId, frames::FrameStats>,
     overlays: Vec<WeakRef<Visual>>,
+    profile: Option<ui_profile::Recording>,
 }
 
 impl Default for Inspector {
@@ -162,6 +164,7 @@ impl Inspector {
             roots: Vec::new(),
             frames: HashMap::new(),
             overlays: Vec::new(),
+            profile: None,
         }
     }
 
@@ -903,6 +906,11 @@ impl Inspector {
                 )
             }
             "get_logs" => Ok(LogCapture::snapshot(args["after"].as_u64().unwrap_or(0))),
+            "start_ui_profile" => self.start_ui_profile(
+                args["window_id"].as_u64().unwrap(), args["duration_ms"].as_u64().unwrap(),
+            ),
+            "get_ui_profile" => self.read_ui_profile(args["profile_id"].as_u64(), false),
+            "stop_ui_profile" => self.read_ui_profile(args["profile_id"].as_u64(), true),
             "get_frame_stats" => {
                 let windows = self.windows();
                 Ok(Value::Array(

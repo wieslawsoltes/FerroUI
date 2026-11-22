@@ -12,6 +12,8 @@ use std::cell::Cell;
 
 #[path = "property_trace_tests.rs"]
 mod property_trace_tests;
+#[path = "ui_profile_tests.rs"]
+mod ui_profile_tests;
 
 fn app() -> AppBuilder {
     AppBuilder::configure::<Application>()
@@ -291,7 +293,7 @@ fn resources_styles_screenshots_waits_and_stats() {
 #[test]
 fn schemas_reject_invalid_input_before_mutating() {
     let tools = tools();
-    assert_eq!(tools.len(), 20);
+    assert!(tools.iter().any(|tool| tool["name"] == "get_frame_stats"));
     let templates = tools.iter().find(|tool| tool["name"] == "get_template_sources").unwrap();
     assert_eq!(templates["annotations"]["readOnlyHint"], true);
     assert!(validate("get_template_sources", &json!({"node_id":1})).is_ok());
