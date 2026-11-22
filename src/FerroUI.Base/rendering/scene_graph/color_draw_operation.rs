@@ -35,12 +35,13 @@ mod tests {
     use crate::media::{ISceneBrushContent, ITileBrush, immutable::ImmutableImageBrush};
     use crate::rendering::composition::drawing::RenderDataDrawingContext;
     use crate::rendering::composition::server::CompositorDrawingContextProxy;
-    use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl};
+    use crate::rendering::testing::{DrawingLog, MockDrawingContextImpl, MockPlatformRenderInterface};
 
     #[test]
     fn color_composition_flushes_pending_clip_and_layer_state_in_order() {
         let log = DrawingLog::new();
         let mut mock = MockDrawingContextImpl::new(log.clone());
+        mock.supports_compositing_layers = true;
         mock.log_transforms = false;
         let proxy = CompositorDrawingContextProxy::new(Box::new(mock));
         let mut context =
@@ -62,6 +63,8 @@ mod tests {
 
     #[test]
     fn recorded_color_stays_inside_its_compositing_layer() {
+        let (_scope, backend) = MockPlatformRenderInterface::install();
+        backend.set_supports_compositing_layers(true);
         let bounds = Rect::new(0., 0., 3., 2.);
         let mut recorder = RenderDataDrawingContext::new(None);
         {
@@ -76,7 +79,9 @@ mod tests {
             std::rc::Rc::new(ImmutableImageBrush::from_bitmap(None));
         let content = recorder.get_immediate_scene_brush_content(brush, None, true).unwrap();
         let log = DrawingLog::new();
-        content.render(&mut MockDrawingContextImpl::new(log.clone()), None);
+        let mut target = MockDrawingContextImpl::new(log.clone());
+        target.supports_compositing_layers = true;
+        content.render(&mut target, None);
         assert_eq!(log.count("PushCompositingLayer"), 1, "{:?}", log.entries());
         assert_eq!(log.count("PopCompositingLayer"), 1, "{:?}", log.entries());
     }

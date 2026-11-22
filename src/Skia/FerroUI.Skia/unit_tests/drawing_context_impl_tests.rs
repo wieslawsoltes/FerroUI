@@ -67,6 +67,10 @@ fn solid_color_composition_preserves_destination_alpha_clip_and_transform() {
 
 #[test]
 fn recorded_source_in_layer_preserves_unrelated_background() {
+    let _scope = ferroui_base::FerroLocator::enter_scope();
+    ferroui_base::FerroLocator::current_mutable()
+        .bind::<dyn ferroui_base::platform::IPlatformRenderInterface>()
+        .to_constant(Rc::new(crate::PlatformRenderInterface::default()));
     use ferroui_base::media::{Color, DrawingContext, ISceneBrushContent, SolidColorBrush, imaging::BitmapBlendingMode, immutable::ImmutableImageBrush};
     use ferroui_base::rendering::composition::drawing::RenderDataDrawingContext;
     let mut recorder = RenderDataDrawingContext::new(None);
