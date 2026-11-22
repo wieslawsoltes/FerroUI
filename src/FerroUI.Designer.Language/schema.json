@@ -8726,6 +8726,18 @@
           "Both"
         ],
         "attached": false
+      },
+      "ImageOpened": {
+        "name": "ImageOpened",
+        "type_name": "RoutedEventArgs",
+        "documentation": "Image.ImageOpened routed event",
+        "event": true
+      },
+      "ImageFailed": {
+        "name": "ImageFailed",
+        "type_name": "ImageFailedEventArgs",
+        "documentation": "Image.ImageFailed routed event",
+        "event": true
       }
     },
     "namespace_aliases": [
@@ -8790,6 +8802,25 @@
     "namespace_aliases": [
       "using:FerroUI.Media",
       "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "ImageFailedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ImageFailedEventArgs",
+    "base": "IRoutedEventArgs",
+    "constructible": false,
+    "properties": {
+      "ErrorMessage": {
+        "name": "ErrorMessage",
+        "type_name": "String",
+        "documentation": "ImageFailedEventArgs.ErrorMessage: String",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
