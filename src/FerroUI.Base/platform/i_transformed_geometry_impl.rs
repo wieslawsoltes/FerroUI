@@ -13,3 +13,11 @@ pub trait ITransformedGeometryImpl: IGeometryImpl {
     /// The applied transform.
     fn transform(&self) -> Matrix;
 }
+
+impl dyn ITransformedGeometryImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

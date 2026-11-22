@@ -109,3 +109,11 @@ pub trait IVulkanPlatformGraphicsContext: IPlatformGraphicsContext {
     /// of the surface cannot be created.
     fn create_render_target(&self, surfaces: &[Arc<dyn IPlatformRenderSurface>]) -> Rc<dyn IVulkanRenderTarget>;
 }
+
+impl dyn IVulkanPlatformGraphicsContext {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

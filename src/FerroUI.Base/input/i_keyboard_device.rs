@@ -103,3 +103,11 @@ impl RawInputModifiers {
 
 /// Represents a keyboard device.
 pub trait IKeyboardDevice: IInputDevice {}
+
+impl dyn IKeyboardDevice {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

@@ -8,3 +8,11 @@ pub trait ISingleTopLevelApplicationLifetime: IApplicationLifetime {
     /// The top-level that hosts the main view of the application.
     fn top_level(&self) -> Option<Ref<TopLevel>>;
 }
+
+impl dyn ISingleTopLevelApplicationLifetime {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

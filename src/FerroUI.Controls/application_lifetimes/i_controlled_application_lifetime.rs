@@ -21,3 +21,11 @@ pub trait IControlledApplicationLifetime: IApplicationLifetime {
     /// exit code is 0.
     fn shutdown(&self, exit_code: i32);
 }
+
+impl dyn IControlledApplicationLifetime {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

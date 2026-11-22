@@ -17,3 +17,11 @@ pub trait IWin32OptionsTopLevelImpl: ITopLevelImpl {
     /// Sets hints that configure the shape of window corners.
     fn set_window_corner_preference(&self, preference: WindowCornerPreference);
 }
+
+impl dyn IWin32OptionsTopLevelImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

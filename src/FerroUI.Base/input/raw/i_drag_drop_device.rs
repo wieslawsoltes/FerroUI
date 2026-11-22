@@ -5,3 +5,11 @@ use crate::input::IInputDevice;
 ///
 /// This is an implementation detail of the platform backends.
 pub trait IDragDropDevice: IInputDevice {}
+
+impl dyn IDragDropDevice {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

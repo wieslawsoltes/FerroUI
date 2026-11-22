@@ -14,3 +14,11 @@ pub trait DrawableTextRun: TextRun {
     /// Draws the run at the given origin.
     fn draw(&self, drawing_context: &mut dyn ITextDrawingSink, origin: Point);
 }
+
+impl dyn DrawableTextRun {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

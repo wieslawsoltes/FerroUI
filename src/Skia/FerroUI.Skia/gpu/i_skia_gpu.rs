@@ -41,6 +41,14 @@ pub trait ISkiaGpu: IPlatformGraphicsContext {
     fn try_get_gr_context(&self) -> Option<ScopedGrContext>;
 }
 
+impl dyn ISkiaGpu {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 /// A Skia surface owned by a GPU, optionally with a faster way of copying it
 /// to a canvas than drawing it.
 pub trait ISkiaSurface {

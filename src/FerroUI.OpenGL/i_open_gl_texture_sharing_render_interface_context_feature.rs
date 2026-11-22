@@ -40,3 +40,11 @@ pub trait ICompositionImportableOpenGlSharedTexture: ICompositionImportableShare
 
     fn size(&self) -> PixelSize;
 }
+
+impl dyn ICompositionImportableOpenGlSharedTexture {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

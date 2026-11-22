@@ -143,6 +143,14 @@ pub trait IAnimatedServerObject: IServerObject + IServerAnimatedPropertyHost {
     }
 }
 
+impl dyn IAnimatedServerObject {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 /// An animatable server object as an expression reads it: the target of an
 /// animation, or an object an animation refers to through a reference
 /// parameter (upstream passes the `ServerObject` itself, which implements

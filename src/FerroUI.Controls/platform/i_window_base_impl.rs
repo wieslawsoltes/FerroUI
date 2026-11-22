@@ -50,3 +50,11 @@ pub trait IWindowBaseImpl: ITopLevelImpl {
     /// Sets whether this window appears on top of all other windows.
     fn set_topmost(&self, value: bool);
 }
+
+impl dyn IWindowBaseImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

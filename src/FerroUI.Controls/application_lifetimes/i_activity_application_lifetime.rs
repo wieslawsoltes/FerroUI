@@ -12,3 +12,11 @@ pub trait IActivityApplicationLifetime: IApplicationLifetime {
     /// Sets the factory that creates the main view of an activity.
     fn set_main_view_factory(&self, value: Option<Rc<dyn Fn() -> Ref<Control>>>);
 }
+
+impl dyn IActivityApplicationLifetime {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

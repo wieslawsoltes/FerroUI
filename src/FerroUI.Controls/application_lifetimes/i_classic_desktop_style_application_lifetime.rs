@@ -56,3 +56,11 @@ pub trait IClassicDesktopStyleApplicationLifetime: IControlledApplicationLifetim
     /// shutdown of the operating system.
     fn shutdown_requested(&self, handler: Rc<dyn Fn(&ShutdownRequestedEventArgs)>) -> Rc<dyn IDisposable>;
 }
+
+impl dyn IClassicDesktopStyleApplicationLifetime {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

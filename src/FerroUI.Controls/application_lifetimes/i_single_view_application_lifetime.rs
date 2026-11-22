@@ -11,3 +11,11 @@ pub trait ISingleViewApplicationLifetime: IApplicationLifetime {
     /// Sets the main view of the application.
     fn set_main_view(&self, value: Option<Ref<Control>>);
 }
+
+impl dyn ISingleViewApplicationLifetime {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

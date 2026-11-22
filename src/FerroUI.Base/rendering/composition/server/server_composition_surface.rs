@@ -69,3 +69,11 @@ pub trait IServerCompositionSurface: IServerObject {
         canvas.draw_bitmap(&*bitmap, opacity, Rect::from_size(bitmap.pixel_size().to_size(1.0)), dest);
     }
 }
+
+impl dyn IServerCompositionSurface {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

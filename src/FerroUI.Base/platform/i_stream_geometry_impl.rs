@@ -16,3 +16,11 @@ pub trait IStreamGeometryImpl: IGeometryImpl {
     #[deprecated(note = "This method is unused and will be removed.")]
     fn open(&self) -> Box<dyn IStreamGeometryContextImpl>;
 }
+
+impl dyn IStreamGeometryImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

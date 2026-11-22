@@ -18,6 +18,14 @@ pub trait IMetalDevice: IPlatformGraphicsContext {
     fn command_queue(&self) -> *mut c_void;
 }
 
+impl dyn IMetalDevice {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 /// A surface that is rendered to with Metal.
 ///
 /// A render surface announces that it is a Metal surface through

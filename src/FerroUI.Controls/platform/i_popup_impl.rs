@@ -17,3 +17,11 @@ pub trait IPopupImpl: IWindowBaseImpl {
     /// Sets whether the popup takes part in hit testing.
     fn set_hit_test_visible(&self, is_hit_test_visible: bool);
 }
+
+impl dyn IPopupImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

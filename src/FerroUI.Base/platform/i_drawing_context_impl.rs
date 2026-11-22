@@ -259,6 +259,14 @@ pub trait IDrawingContextLayerImpl: IBitmapImpl {
     }
 }
 
+impl dyn IDrawingContextLayerImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 /// A layer that may only be usable with the render context it was created
 /// with.
 pub trait IDrawingContextLayerWithRenderContextAffinityImpl: IDrawingContextLayerImpl {
@@ -267,4 +275,12 @@ pub trait IDrawingContextLayerWithRenderContextAffinityImpl: IDrawingContextLaye
 
     /// Creates a snapshot of the layer that is usable with any context.
     fn create_non_affined_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
+}
+
+impl dyn IDrawingContextLayerWithRenderContextAffinityImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

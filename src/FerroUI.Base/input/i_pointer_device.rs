@@ -10,3 +10,11 @@ pub trait IPointerDevice: IInputDevice {
     /// return `None`.
     fn try_get_pointer(&self, ev: &RawPointerEventArgs) -> Option<Rc<dyn IPointer>>;
 }
+
+impl dyn IPointerDevice {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}

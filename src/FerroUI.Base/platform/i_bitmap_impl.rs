@@ -63,12 +63,36 @@ pub trait IReadableBitmapImpl: IBitmapImpl {
     fn lock(&self) -> Rc<dyn ILockedFramebuffer>;
 }
 
+impl dyn IReadableBitmapImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 /// Defines the platform-specific interface for a writeable bitmap.
 pub trait IWriteableBitmapImpl: IReadableBitmapImpl + Send + Sync {}
+
+impl dyn IWriteableBitmapImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
 
 /// Defines the platform-specific interface for a bitmap that can be drawn
 /// into.
 pub trait IRenderTargetBitmapImpl: IReadableBitmapImpl + Send + Sync {
     /// Creates a drawing context that draws into the bitmap.
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl>;
+}
+
+impl dyn IRenderTargetBitmapImpl {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }

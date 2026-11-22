@@ -259,6 +259,14 @@ pub trait IFontCollectionBase: IFontCollection {
     ) -> Option<Rc<GlyphTypeface>>;
 }
 
+impl dyn IFontCollectionBase {
+    /// The value as [`Any`](std::any::Any), by native trait upcasting.
+    #[inline]
+    pub fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 impl<T: FontCollectionBaseImpl> IFontCollectionBase for T {
     fn base(&self) -> &FontCollectionBase {
         T::base(self)
