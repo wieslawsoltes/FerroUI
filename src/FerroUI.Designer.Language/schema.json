@@ -1064,6 +1064,16 @@
         ],
         "attached": true
       },
+      "IsDialog": {
+        "name": "IsDialog",
+        "type_name": "bool",
+        "documentation": "AutomationProperties.IsDialog: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": true
+      },
       "IsRequiredForForm": {
         "name": "IsRequiredForForm",
         "type_name": "bool",
@@ -8084,6 +8094,13 @@
     "base": "Panel",
     "constructible": true,
     "properties": {
+      "Padding": {
+        "name": "Padding",
+        "type_name": "Thickness",
+        "documentation": "Grid.Padding: Thickness",
+        "values": [],
+        "attached": false
+      },
       "ShowGridLines": {
         "name": "ShowGridLines",
         "type_name": "bool",
@@ -8716,6 +8733,18 @@
           "Both"
         ],
         "attached": false
+      },
+      "ImageOpened": {
+        "name": "ImageOpened",
+        "type_name": "RoutedEventArgs",
+        "documentation": "Image.ImageOpened routed event",
+        "event": true
+      },
+      "ImageFailed": {
+        "name": "ImageFailed",
+        "type_name": "ImageFailedEventArgs",
+        "documentation": "Image.ImageFailed routed event",
+        "event": true
       }
     },
     "namespace_aliases": [
@@ -8780,6 +8809,25 @@
     "namespace_aliases": [
       "using:FerroUI.Media",
       "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "ImageFailedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ImageFailedEventArgs",
+    "base": "IRoutedEventArgs",
+    "constructible": false,
+    "properties": {
+      "ErrorMessage": {
+        "name": "ErrorMessage",
+        "type_name": "String",
+        "documentation": "ImageFailedEventArgs.ErrorMessage: String",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -12096,6 +12144,16 @@
         "name": "UseLayoutRounding",
         "type_name": "bool",
         "documentation": "Layoutable.UseLayoutRounding: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "UseWinuiMeasureRounding": {
+        "name": "UseWinuiMeasureRounding",
+        "type_name": "bool",
+        "documentation": "Layoutable.UseWinuiMeasureRounding: bool",
         "values": [
           "True",
           "False"
@@ -26093,6 +26151,16 @@
     "base": "TemplatedControl",
     "constructible": true,
     "properties": {
+      "DragStartPolicy": {
+        "name": "DragStartPolicy",
+        "type_name": "ThumbDragStartPolicy",
+        "documentation": "Thumb.DragStartPolicy: ThumbDragStartPolicy",
+        "values": [
+          "AnyPress",
+          "PrimaryPressWhenIdle"
+        ],
+        "attached": false
+      },
       "DragStarted": {
         "name": "DragStarted",
         "type_name": "VectorEventArgs",
