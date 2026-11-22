@@ -2,7 +2,7 @@
 //! media and rendering contracts shared by every other FerroUI crate.
 
 #[doc(hidden)]
-pub use paste::paste as __paste;
+pub use ferroui_ident_macros::ferro_idents as __paste;
 
 pub mod animation;
 pub mod collections;
