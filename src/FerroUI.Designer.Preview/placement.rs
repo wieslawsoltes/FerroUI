@@ -2,8 +2,8 @@ use crate::protocol::{DragOrigin, DropHint, DropPosition, DropTarget, Placement}
 use crate::renderer::{Renderer, Stage};
 use crate::toolbox;
 use ferroui_base::Point;
-use ferroui_designer::{OutlinePlacement, PlacementOrigin, PlacementTarget};
-use ferroui_designer_core::{Document, Edit};
+use ferroui_designer::{raster_asset_fragment, OutlinePlacement, PlacementOrigin, PlacementTarget};
+use ferroui_designer_core::Edit;
 
 impl Renderer {
     pub(crate) fn stage(&self, frame: u64) -> Result<&Stage, String> {
@@ -18,6 +18,7 @@ impl Renderer {
 
 impl Stage {
     pub(crate) fn plan(&self, placement: &Placement, recording: bool) -> Result<(Vec<Edit>, DropHint), String> {
+        let session = self.session.borrow();
         let image;
         let origin = match &placement.origin {
             DragOrigin::Asset { control } => {
@@ -27,7 +28,8 @@ impl Stage {
                 PlacementOrigin::Asset(&asset.source)
             }
             DragOrigin::Image { source } => {
-                image = image_fragment(source)?;
+                session.validate_raster_asset(source)?;
+                image = raster_asset_fragment(source)?;
                 PlacementOrigin::Asset(&image)
             }
             DragOrigin::Node { node, grab } => PlacementOrigin::Node {
@@ -63,7 +65,6 @@ impl Stage {
                 PlacementTarget::Canvas(Point::new(x, y))
             }
         };
-        let session = self.session.borrow();
         let as_layout_point = |point: Point| ferroui_designer_tools::Point::new(point.x, point.y);
         let plan = match (recording, origin, target) {
             (true, PlacementOrigin::Node { node, grab }, PlacementTarget::Canvas(point)) => {
@@ -86,16 +87,4 @@ impl Stage {
             },
         ))
     }
-}
-
-fn image_fragment(source: &str) -> Result<String, String> {
-    if source.len() > 4096 || ferroui_designer_project::relative_asset_path(source).is_none() {
-        return Err("Choose a relative image from the project Assets view".into());
-    }
-    let mut document = Document::new(r#"<Image xmlns="https://github.com/ferroui" Stretch="Uniform" Width="120"/>"#)
-        .map_err(|error| error.to_string())?;
-    let node = document.ast().root();
-    document.apply("Set image source", vec![Edit::SetAttribute { node, name: "Source".into(), value: source.into() }])
-        .map_err(|error| error.to_string())?;
-    Ok(document.source().into())
 }

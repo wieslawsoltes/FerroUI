@@ -21,6 +21,7 @@ mod inventory;
 mod placement;
 mod preview_checks;
 mod projects;
+mod published_assets;
 mod property_fields;
 mod protocol;
 mod renderer;
@@ -117,6 +118,8 @@ fn respond(
                 }
                 Ok(Value::Null)
             }),
+        "publishedAssets" => serde_json::from_value(message["params"].clone())
+            .map_err(|error| error.to_string()).and_then(|query| published_assets::query(projects, query)),
         "rsxLanguage" => match message["params"]["source"].as_str() {
             Some(source) if source.len() <= protocol::MAX_SOURCE_BYTES => {
                 let params = &message["params"];

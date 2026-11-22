@@ -22,6 +22,8 @@ use std::time::Duration;
 
 #[path = "workspace_shell.rs"]
 pub(crate) mod shell;
+#[path = "workspace_raster_menu.rs"]
+mod raster_menu;
 
 pub use inspector_drag::{OutlineCommand, OutlinePlacement};
 pub use selection_tools::{CanvasLayerChoice, CanvasSelectionSnapshot};
@@ -806,6 +808,10 @@ impl DesignerWorkspace {
         let weak = Rc::downgrade(self);
         toolbox.on_begin_drag(move |asset, event| {
             if let Some(this) = weak.upgrade() {
+                if let Err(error) = this.session.borrow().validate_toolbox_asset(asset) {
+                    this.status.set_text(Some(&error));
+                    return;
+                }
                 this.surface.begin_asset_drag(asset.source.clone(), event);
                 this.status
                     .set_text(Some(&format!("Drag {} onto the artboard", asset.title)));
@@ -814,12 +820,20 @@ impl DesignerWorkspace {
         let weak = Rc::downgrade(self);
         toolbox.on_activate(move |asset| {
             if let Some(this) = weak.upgrade() {
+                if let Err(error) = this.session.borrow().validate_toolbox_asset(asset) {
+                    this.status.set_text(Some(&error));
+                    return;
+                }
                 this.surface.arm_insert(asset.source.clone());
                 this.status.set_text(Some(&format!(
                     "Click the artboard to place {}",
                     asset.title
                 )));
             }
+        });
+        let weak = Rc::downgrade(self);
+        toolbox.on_prepare_menu(move |asset, menu| {
+            weak.upgrade().is_some_and(|workspace| workspace.prepare_raster_menu(asset, menu))
         });
         self.root
             .get_control::<ContentControl>("AssetHost")

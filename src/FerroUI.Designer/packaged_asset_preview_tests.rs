@@ -53,9 +53,10 @@ fn packaged_asset_preview_is_scoped_and_missing_inputs_keep_the_last_stage() {
     let manifest = root.0.join("Cargo.toml");
     fs::write(
         &manifest,
-        "[package]\nname='asset-preview'\nversion='0.0.0'\n",
+        "[package]\nname='asset-preview'\nversion='0.0.0'\n[lib]\npath='lib.rs'\n",
     )
     .unwrap();
+    fs::write(root.0.join("lib.rs"), "").unwrap();
     fs::write(&path, PNG).unwrap();
     fs::write(out.join("preview.xamlmeta"), r#"{"format":2,"name":"Studio.Asset.Preview.Tests","crate_name":"asset_preview","types":[]}"#).unwrap();
     fs::write(out.join("packaged-assets.json"), serde_json::json!({
@@ -63,7 +64,7 @@ fn packaged_asset_preview_is_scoped_and_missing_inputs_keep_the_last_stage() {
         "assets":[{"key": format!("/{BADGE}"), "source": BADGE}],
     }).to_string()).unwrap();
 
-    let catalog = MarkupCatalog::load(&[out]).unwrap();
+    let catalog = Arc::new(MarkupCatalog::load(&[out]).unwrap());
     let resources = Arc::new(catalog.compiled_resources(&root.0).unwrap());
     let source = format!(
         "<Image xmlns='https://github.com/ferroui' Source='{ADDRESS}' Width='120' Height='60' />"
@@ -96,6 +97,29 @@ fn packaged_asset_preview_is_scoped_and_missing_inputs_keep_the_last_stage() {
         session.preview_status()
     );
     assert!(session.open_view_preview().is_ok());
+    #[cfg(feature = "mcp")]
+    author_published_raster(resources.clone(), &root.0);
+
+    let workspace =
+        crate::DesignerWorkspace::new("<StackPanel xmlns='https://github.com/ferroui' />").unwrap();
+    workspace
+        .set_solution(ferroui_designer_project::Solution::discover(&root.0).unwrap())
+        .unwrap();
+    workspace
+        .language_service()
+        .set_project_catalog(root.0.clone(), catalog)
+        .unwrap();
+    let authoring_uri = file_uri(root.0.join("Workspace.xaml")).unwrap();
+    workspace
+        .open_document(source.clone(), authoring_uri)
+        .unwrap();
+    let toolbox = workspace.asset_toolbox().unwrap();
+    assert!(toolbox.set_category(Some("Packaged images")));
+    assert_eq!(
+        toolbox.visible_asset_ids(),
+        ["ferres://Studio.Asset.Preview.Tests/Assets/Approval%20badge.png"]
+    );
+    assert!(workspace.session().borrow().can_manipulate());
 
     let document = Document::new(&source).unwrap();
     let sync = |board: &mut PreviewStageBoard| {
@@ -158,4 +182,79 @@ fn packaged_asset_preview_is_scoped_and_missing_inputs_keep_the_last_stage() {
         repaired.status
     );
     assert!(repaired.epoch > missing.epoch);
+}
+
+#[cfg(feature = "mcp")]
+fn author_published_raster(
+    resources: Arc<ferroui_designer_project::CompiledResources>,
+    root: &std::path::Path,
+) {
+    use ferroui_mcp::{Permissions, UiToolProvider};
+    use serde_json::json;
+    use std::{cell::RefCell, rc::Rc};
+
+    let source = "<StackPanel xmlns='https://github.com/ferroui'><Image Name='Badge' Width='120' /></StackPanel>";
+    let mut session = DesignerSession::with_preview_fixture(
+        source,
+        ContentControl::new(),
+        file_uri(root.join("Authoring.xaml")).unwrap(),
+        PreviewHostOptions::default(),
+        None,
+    )
+    .unwrap();
+    session.set_workspace_preview_root(root.into());
+    session.set_workspace_preview_resources(Some(resources), true);
+    let parent = session.document().ast().root();
+    let node = session.document().ast().find_name("Badge").unwrap();
+    let session = Rc::new(RefCell::new(session));
+    let provider = crate::mcp::DesignerMcp::new(&session);
+    let read = Permissions::default();
+    let write = Permissions {
+        allow_property_writes: true,
+        allow_input: false,
+    };
+    let assets = provider.call("designer_toolbox", &json!({}), read).unwrap();
+    let published = assets["assets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|asset| {
+            asset["category"] == "Packaged images" && asset["title"] == "Approval badge.png"
+        })
+        .unwrap();
+    let address = published["id"].as_str().unwrap();
+    assert_eq!(
+        address,
+        "ferres://Studio.Asset.Preview.Tests/Assets/Approval%20badge.png"
+    );
+    let assign = json!({"expected_revision":0,"node":node,"project_asset":address});
+    assert!(provider
+        .call("designer_set_image_source", &assign, read)
+        .is_err());
+    let mut forged = assign.clone();
+    forged["property"] = json!("Width");
+    assert!(provider
+        .call("designer_set_image_source", &forged, write)
+        .is_err());
+    let result = provider
+        .call("designer_set_image_source", &assign, write)
+        .unwrap();
+    assert_eq!(result["revision"], 1);
+    assert!(session.borrow().document().source().contains(address));
+    assert!(provider
+        .call("designer_set_image_source", &assign, write)
+        .is_err());
+    provider
+        .call("designer_undo", &json!({"expected_revision":1}), write)
+        .unwrap();
+    assert_eq!(session.borrow().document().source(), source);
+
+    let insert = json!({"expected_revision":2,"asset":address,"anchor":parent,"position":"inside"});
+    provider.call("designer_place", &insert, write).unwrap();
+    assert!(session.borrow().document().source().contains(address));
+    assert!(session.borrow().can_manipulate());
+    provider
+        .call("designer_undo", &json!({"expected_revision":3}), write)
+        .unwrap();
+    assert_eq!(session.borrow().document().source(), source);
 }

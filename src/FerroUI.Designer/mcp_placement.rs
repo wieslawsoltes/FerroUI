@@ -14,7 +14,7 @@ mod snap;
 pub(super) fn handles(name: &str) -> bool {
     matches!(
         name,
-        "designer_toolbox" | "designer_place" | "designer_placement_hint" | "designer_resize" | "designer_resize_hint" | "designer_record_geometry"
+        "designer_toolbox" | "designer_place" | "designer_placement_hint" | "designer_resize" | "designer_resize_hint" | "designer_record_geometry" | "designer_set_image_source"
     )
 }
 
@@ -26,8 +26,11 @@ pub(super) fn tools() -> Vec<Value> {
     let resize = s::object(json!({"expected_revision":s::revision(),"node":s::id(),"handle":{"type":"integer","minimum":0,"maximum":7},
         "dx":s::number(),"dy":s::number(),"snap":snap::schema()}), &["expected_revision", "node", "handle", "dx", "dy"]);
     vec![
-        s::tool("designer_toolbox", "List control assets available for insertion in this designer.", s::object(json!({}), &[]), false),
+        s::tool("designer_toolbox", "List controls, snippets, and published raster assets available for insertion in this design.", s::object(json!({}), &[]), false),
         s::tool("designer_place", "Insert a Toolbox asset or move an authored selection. Use an outline anchor or canvas coordinates with optional snapping.", placement.clone(), true),
+        s::tool("designer_set_image_source", "Assign a Cargo-published image from the Assets view to an authored image property.",
+            s::object(json!({"expected_revision":s::revision(),"node":s::id(),"project_asset":s::string(),"property":s::string()}),
+                &["expected_revision", "node", "project_asset"]), true),
         s::tool("designer_placement_hint", "Read the native landing bounds and snap lines for a proposed placement.", placement, false),
         s::tool("designer_resize", "Commit a native resize at an optional snap adjustment. Handles run clockwise from the top left.", resize.clone(), true),
         s::tool("designer_resize_hint", "Read the effective native resize displacement and snap lines.", resize, false),
@@ -48,16 +51,27 @@ pub(super) fn call(
     name: &str,
     args: &Value,
 ) -> Result<Value, String> {
-    let assets = assets(workspace);
     if name == "designer_toolbox" {
-        return Ok(json!({ "assets": assets.iter().map(|asset| json!({
+        let toolbox = assets(workspace).into_iter()
+            .filter(|asset| !ferroui_designer_project::is_packaged_asset_uri(&asset.id))
+            .chain(session.published_rasters());
+        return Ok(json!({ "assets": toolbox.map(|asset| json!({
             "id": asset.id, "title": asset.title, "category": asset.category,
             "description": asset.description, "icon": asset.icon.path().trim_start_matches("F1 "),
         })).collect::<Vec<_>>() }));
     }
     let revision = super::integer(args, "expected_revision")?;
     if session.document().revision() != revision {
-        return Err("Read the current designer revision before placing a control".into());
+        return Err("Read the current designer revision before editing".into());
+    }
+    if name == "designer_set_image_source" {
+        let schema = match workspace {
+            Some(workspace) => workspace.try_language_service()?.schema_for(session.document_uri()).clone(),
+            None => ferroui_designer_language::Schema::ferroui(),
+        };
+        session.set_published_raster(node_id(args, "node")?, args["property"].as_str(),
+            &super::text(args, "project_asset")?, &schema)?;
+        return Ok(super::state(session));
     }
     if name == "designer_record_geometry" {
         return record_geometry(session, workspace, args);
@@ -66,14 +80,18 @@ pub(super) fn call(
         return resize(session, workspace, name, args);
     }
     let nodes: Option<Vec<u64>> = args.get("selection").map(|_| decode(args, "selection")).transpose()?;
+    let fragment;
     let origin = match (args["asset"].as_str(), args["node"].as_u64(), nodes.as_deref()) {
-        (Some(asset), None, None) => PlacementOrigin::Asset(
-            &assets
-                .iter()
-                .find(|item| item.id == asset)
-                .ok_or("Unknown toolbox control")?
-                .source,
-        ),
+        (Some(address), None, None) if ferroui_designer_project::is_packaged_asset_uri(address) => {
+            session.validate_raster_asset(address)?;
+            fragment = crate::raster_asset_fragment(address)?;
+            PlacementOrigin::Asset(&fragment)
+        }
+        (Some(asset), None, None) => {
+            fragment = assets(workspace).into_iter().find(|item| item.id == asset)
+                .ok_or("Unknown designer asset")?.source;
+            PlacementOrigin::Asset(&fragment)
+        }
         (None, Some(node), None) => PlacementOrigin::Node { node, grab: None },
         (None, None, Some(nodes)) if (2..=128).contains(&nodes.len()) => {
             let anchor = args["moving_anchor"].as_u64().unwrap_or(nodes[0]);

@@ -147,6 +147,14 @@ Open the project and build the owning Cargo package from Studio. An XAML image c
 
 To inspect the recorded source file through MCP, call `designer_language` with `action: "resource_uri"` and the `reference` from XAML. Build the application again to update the embedded bytes used in App Preview or the running app. [Asset paths in VS Code](vscode/authoring.md#open-the-source-of-a-packaged-asset)
 
+### Place a packaged asset
+
+1. In a built Cargo project, open the view and choose **Assets**, then **Packaged images**. Find the raster by filename, assembly, or export key.
+2. Drag the raster onto the canvas or into **Layers**. For keyboard selection, focus the raster row and press Enter, then choose a location on the artboard. To edit an existing authored image, select the control and open the raster’s context menu. Choose **Use as image source** or the named image property.
+3. Check the image on the canvas and save the document. Undo reverses the insertion or assignment as a single source edit. Build the app again after replacing the asset bytes.
+
+Studio writes a `ferres://` reference in XAML or a static `::ferroui_view::asset_image` call in mapped Rust. MCP agents can find the raster with `designer_toolbox`, place it with `designer_place`, and assign it with `designer_set_image_source`. [VS Code workflow](vscode/authoring.md#place-a-published-cargo-asset) · [MCP reference](vscode/reference.md#drive-an-editor-workflow)
+
 ### Move an XAML file
 
 Open an XAML file from the owning project. In **Split** or **Code**, choose the file-and-arrow icon **Move XAML file**. Enter the destination relative to the project workspace and choose **Review file move**. Compare **Original source** and **Proposed source** for affected markup, Rust, Cargo build files, saved stage sets, and scenarios.

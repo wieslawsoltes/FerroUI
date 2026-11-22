@@ -62,6 +62,7 @@ mod property_trace;
 mod preview_environment;
 mod preview_theme;
 mod preview_assets;
+mod raster_assets;
 mod preview_host;
 mod preview_prototype;
 mod preview_prototype_editor;
@@ -164,6 +165,7 @@ pub use preview_environment::{
 };
 pub use preview_theme::PreviewTheme;
 pub use preview_assets::PreviewAssets;
+pub use raster_assets::{raster_asset_fragment, xaml_raster_properties};
 pub use preview_host::{
     PreviewFactory, PreviewHostOptions, PreviewRequest, ResourcePreviewFactory,
 };

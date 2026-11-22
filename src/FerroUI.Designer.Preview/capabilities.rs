@@ -19,6 +19,7 @@ pub(crate) fn initialize() -> Value {
         "stageIncludes",
         "stageSourceMoves",
         "projectCatalog",
+        "publishedAssets",
         "canvasInteraction",
         "canvasHighContrast",
         "canvasFocusOrder",

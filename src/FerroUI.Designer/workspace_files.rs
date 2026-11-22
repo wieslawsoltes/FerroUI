@@ -24,6 +24,7 @@ impl DesignerWorkspace {
     /// document starts its own history and is detached from the previous collaboration room.
     pub fn open_document(self: &Rc<Self>, source: String, uri: String) -> Result<(), String> {
         let uri = super::project::document_identity(&uri)?;
+        let resources = self.try_language_service().ok().map(|language| language.compiled_resources(&uri));
         self.capture_tab();
         self.pending_source.set(false);
         #[cfg(feature = "collaboration-client")]
@@ -34,12 +35,16 @@ impl DesignerWorkspace {
         } else {
             self.session.borrow_mut().open_document(source.clone(), uri)?;
         }
+        if let Some(resources) = resources {
+            self.session.borrow_mut().set_workspace_preview_resources(resources, true);
+        }
         self.reset_canvas_guides();
         *self.file.borrow_mut() = None;
         *self.saved_source.borrow_mut() = source;
         self.runtime_selection.set(None);
         self.surface.set_interactive(false);
         self.refresh_rust_modules()?;
+        self.refresh_project_toolbox();
         self.refresh(true);
         self.refresh_file_title();
         Ok(())

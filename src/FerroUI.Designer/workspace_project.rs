@@ -139,7 +139,7 @@ impl DesignerWorkspace {
         self.refresh_run_targets();
         Ok(())
     }
-    fn refresh_project_toolbox(&self) {
+    pub(super) fn refresh_project_toolbox(&self) {
         let Some(toolbox) = self.asset_toolbox() else { return };
         let state = self.project.borrow();
         let Some(workspace) = &state.workspace else { return };
@@ -152,6 +152,7 @@ impl DesignerWorkspace {
         match crate::project_designer_assets(&workspace.solution.root, document) {
             Ok(mut assets) => {
                 assets.extend_from_slice(state.markup.assets(&project.root));
+                assets.extend(self.session.borrow().published_rasters());
                 toolbox.replace_project_assets(assets);
             }
             Err(error) => {
@@ -327,6 +328,7 @@ impl DesignerWorkspace {
         *self.file.borrow_mut() = tab.file;
         self.pending_source.set(false);
         self.runtime_selection.set(None);
+        self.refresh_project_toolbox();
         self.refresh(true);
         self.restore_canvas_viewport(tab.viewport);
         if let Some(snapshot) = tab.guides {
@@ -727,8 +729,8 @@ impl DesignerWorkspace {
         }).map(|(metadata, config)| state.markup.load(metadata, config));
         let refreshed = state.markup.poll();
         drop(state);
-        if refreshed.iter().any(Result::is_ok) {
-            self.refresh_project_toolbox();
+        let refresh_assets = refreshed.iter().any(Result::is_ok);
+        if refresh_assets {
             self.refresh_rust_catalog();
         }
         let published = refreshed.into_iter().map(|result| result.and_then(|(root, catalog)| {
@@ -743,6 +745,9 @@ impl DesignerWorkspace {
         }));
         for result in published.chain(added) {
             if let Err(error) = result { self.status.set_text(Some(&error)); }
+        }
+        if refresh_assets {
+            self.refresh_project_toolbox();
         }
     }
     pub(super) fn rebuild_project_tree(self: &Rc<Self>) {

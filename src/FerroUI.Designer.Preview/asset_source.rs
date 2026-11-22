@@ -1,7 +1,7 @@
 use crate::document::DesignDocument;
 use crate::edits::editable_attribute;
 use crate::property_fields::can_add_property;
-use ferroui_designer_core::{MarkupValue, Node, NodeKind};
+use ferroui_designer_core::Node;
 
 pub(crate) fn image_source_properties(design: &DesignDocument<'_>, node: &Node) -> Vec<String> {
     if design.rsx.is_some() {
@@ -9,43 +9,10 @@ pub(crate) fn image_source_properties(design: &DesignDocument<'_>, node: &Node) 
             .rsx_node(node.id)
             .map_or_else(Vec::new, |(_, rsx)| rsx.editable_image_properties());
     }
-    design
-        .schema()
-        .image_property_names(node.local_name(), node.namespace_uri.as_deref())
+    ferroui_designer::xaml_raster_properties(&design.xaml, design.schema(), node)
         .into_iter()
-        .filter(|name| editable_source(design, node, name))
-        .map(str::to_owned)
+        .filter(|name| editable_attribute(design, node, name) || can_add_property(design, node, name))
         .collect()
-}
-
-fn editable_source(design: &DesignDocument<'_>, node: &Node, name: &str) -> bool {
-    // Bindings, owner-qualified assignments, and object values keep their authored form.
-    let object_source = node
-        .children
-        .iter()
-        .filter_map(|id| design.xaml.ast().node(*id))
-        .any(|child| {
-            child.kind == NodeKind::PropertyElement
-                && child
-                    .local_name()
-                    .rsplit_once('.')
-                    .is_some_and(|(_, property)| property == name)
-        });
-    !object_source
-        && node
-            .attributes
-            .iter()
-            .filter(|attribute| {
-                attribute.name == name
-                    || attribute
-                        .name
-                        .rsplit_once('.')
-                        .is_some_and(|(_, property)| property == name)
-            })
-            .all(|attribute| {
-                attribute.name == name && matches!(attribute.markup(), Ok(MarkupValue::Literal(_)))
-            })
-        && (editable_attribute(design, node, name) || can_add_property(design, node, name))
 }
 
 #[cfg(test)]

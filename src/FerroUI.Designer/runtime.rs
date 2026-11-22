@@ -374,6 +374,14 @@ impl RuntimePreview {
         changed
     }
 
+    pub(crate) fn packaged_assets(&self) -> Option<&ferroui_designer_project::PackagedAssets> {
+        if self.workspace.root.is_some() {
+            self.workspace.resources.as_ref().map(|resources| resources.packaged_assets().as_ref())
+        } else {
+            Some(self.resource_sources.0.packaged_assets().as_ref())
+        }
+    }
+
     fn reload_document(&mut self, document: &Document, initialize: bool) {
         if let Some(local) = self.workspace_sources(document) {
             self.reload_local_sources(document, initialize, local);
