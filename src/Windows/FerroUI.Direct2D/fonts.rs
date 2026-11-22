@@ -359,7 +359,7 @@ struct ShapeAnalysisEntry {
     analysis: Option<Rc<Owned>>,
 }
 
-thread_local! {
+ferroui_base::ferro_thread_local! {
     static SHAPE_ANALYSES: RefCell<VecDeque<ShapeAnalysisEntry>> = const { RefCell::new(VecDeque::new()) };
 }
 
