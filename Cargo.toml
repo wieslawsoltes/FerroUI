@@ -100,6 +100,7 @@ members = [
     "src/FerroUI.ReactiveUI",
     "src/FerroUI.ReactiveUI.Testing",
     "src/FerroUI.ReactiveUI.Controls",
+    "src/FerroUI.Ident.Macros",
     "src/FerroUI.Base",
     "src/FerroUI.Controls",
     "src/FerroUI.View",
@@ -358,6 +359,7 @@ ferroui-dynamic-data = { version = "=0.6.0-preview.1", path = "src/FerroUI.Dynam
 ferroui-reactiveui = { version = "=0.6.0-preview.1", path = "src/FerroUI.ReactiveUI" }
 ferroui-reactiveui-testing = { version = "=0.6.0-preview.1", path = "src/FerroUI.ReactiveUI.Testing" }
 ferroui-reactiveui-controls = { version = "=0.6.0-preview.1", path = "src/FerroUI.ReactiveUI.Controls" }
+ferroui-ident-macros = { version = "=0.6.0-preview.1", path = "src/FerroUI.Ident.Macros" }
 ferroui-base = { version = "=0.6.0-preview.1", path = "src/FerroUI.Base" }
 ferroui-controls = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls" }
 ferroui-view = { version = "=0.6.0-preview.1", path = "src/FerroUI.View" }
@@ -475,9 +477,9 @@ libc = "0.2"
 # time (nothing is linked), `debug` prints the structures and results.
 ash = { version = "=0.38.0", default-features = false, features = ["loaded", "debug", "std"] }
 # D-Bus for the FreeDesktop services (docs/porting/x11-platform.md, section 3): pure Rust, its own
-# executor thread per connection (the default features), no Tokio. `futures-util` for the streams of
-# signals and for waiting on one of two futures.
-zbus = { version = "=5.19.0" }
+# runtime (`zruntime`, the default features) with a helper thread between calls of `block_on`, no
+# Tokio. `futures-util` for the streams of signals and for waiting on one of two futures.
+zbus = { version = "=6.5.0" }
 futures-util = { version = "0.3", default-features = false, features = ["std"] }
 # The Wayland platform (docs/porting/wayland-platform.md, section 2): the protocol bindings over
 # libwayland-client, which is opened at run time (`dlopen`), because EGL needs the display and the
@@ -496,7 +498,6 @@ wayland-protocols-misc = { version = "=0.3.12", features = ["client"] }
 # The Android platform (docs/porting/android-platform.md, section 2.1): the declarations of the Java
 # Native Interface, which one module of the backend wraps in safe functions.
 jni-sys = { version = "=0.4.1" }
-paste = "1"
 cc = "1"
 skia-safe = { version = "=0.153.3" }
 # The Vello render backend (docs/porting/vello-backend.md, section 2): exact versions, because the
