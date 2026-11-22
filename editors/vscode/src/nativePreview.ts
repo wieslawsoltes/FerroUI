@@ -4,6 +4,7 @@ import type * as vscode from 'vscode';
 import type { BuiltProject } from './builtProjects';
 import type { CanvasSnapAdjustment, CanvasSnapGesture, GuideCatalog, GuideEdit, GuideSettings, GuideUpdate } from './canvasGuidesProtocol';
 import type { TokenPlan, TokenRequest } from './designTokenProtocol';
+import type { HandoffInput, HandoffQuery } from './designHandoffProtocol';
 import type { LayerViewInput } from './layerViews';
 import type { CurvePoint, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeProjectInventory } from './projectInventory';
@@ -53,7 +54,7 @@ export class NativePreview implements vscode.Disposable {
         controlTemplateAuthoring?: boolean; propertyTrace?: boolean; includedPropertyTrace?: boolean;
         styleComposition?: boolean; rustStyleComposition?: boolean;
         hostedRustStyles?: boolean; hostedRustModules?: boolean; rustModuleSources?: boolean;
-        projectInventory?: boolean; projectSetup?: boolean; scenarioReview?: boolean; tokenHandoff?: boolean;
+        projectInventory?: boolean; projectSetup?: boolean; scenarioReview?: boolean; tokenHandoff?: boolean; designHandoff?: boolean;
         designFixtures?: boolean; timelineTransport?: boolean; timelineRecording?: boolean; timelineGeometryRecording?: boolean;
         timelineKeyframeDrafts?: boolean; timelineKeyframeScale?: boolean; timelineCurves?: boolean; timelineCurveVelocity?: boolean;
         timelineCurveChannels?: boolean; timelineCombinedPlayback?: boolean; timelineClipPlacement?: boolean;
@@ -164,6 +165,11 @@ export class NativePreview implements vscode.Disposable {
     designTokens(request: TokenRequest): Promise<TokenPlan> {
         if (!this.capabilities.tokenHandoff) throw new Error('Update the FerroUI preview helper to convert design tokens.');
         return this.send('designTokens', request);
+    }
+
+    designHandoff<T>(request: HandoffInput & HandoffQuery): Promise<T> {
+        if (!this.capabilities.designHandoff) throw new Error('Update the FerroUI preview helper to review design handoff.');
+        return this.send('designHandoff', request, 25_000);
     }
 
     listenHosted(nonce: string): Promise<{ port: number; animationQuery?: string }> {

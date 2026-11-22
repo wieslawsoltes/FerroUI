@@ -12,11 +12,14 @@
 !dist/designData.js
 !dist/styles.js
 !dist/scenarioReview.js
+!dist/tokenReview.js
+!dist/designHandoff.js
 !dist/icons/*
 !dist/extension.js
 !dist/THIRD-PARTY-NOTICES.txt
 !media/*.css
 !syntaxes/ferroui-xaml.tmLanguage.json
+!schemas/design-handoff.schema.json
 !bin/ferroui-xaml-lsp
 !bin/ferroui-xaml-lsp.exe
 !bin/ferroui-designer-preview

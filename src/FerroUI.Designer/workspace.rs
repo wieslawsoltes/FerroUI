@@ -1009,7 +1009,8 @@ pub(crate) mod scenario_review;
 mod project_setup;
 #[path = "workspace_design_tokens.rs"]
 mod design_tokens;
-#[cfg(feature = "mcp")]
+#[path = "workspace_design_handoff.rs"]
+mod design_handoff;
 #[path = "workspace_project_library.rs"]
 mod project_library;
 #[path = "workspace_history.rs"]

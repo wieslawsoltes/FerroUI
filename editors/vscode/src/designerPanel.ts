@@ -6,6 +6,7 @@ import type { GuideCatalog, GuideEdit } from './canvasGuidesProtocol';
 import { CanvasRequests } from './canvasRequests';
 import { rustModuleProject, type RustModuleProject } from './cargoTarget';
 import { DesignerDependencies, dirtyPreviewSources } from './designerDependencies';
+import type { HandoffFile, HandoffQuery } from './designHandoffProtocol';
 import { DesignerSnapping, snappedPlacement, snappedResize } from './designerSnapping';
 import { GuideViews, type GuideAnchor } from './guideViews';
 import { previewSourceUri } from './includedSource';
@@ -232,6 +233,39 @@ export class DesignerPanel implements vscode.Disposable {
     }
 
     get publishedAssetProject(): BuiltProject | undefined { return this.project; }
+
+    handoffIdentity() {
+        // Viewport and playback refreshes keep the reviewed authored scope.
+        return JSON.stringify([this.session, this.document.uri.toString(), this.document.version,
+            this.blockOffset, this.frame?.snapshot.definitionScope]);
+    }
+
+    async designHandoff<T>(file: HandoffFile, request: HandoffQuery, signal: AbortSignal): Promise<T> {
+        signal.throwIfAborted();
+        if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before reviewing a design handoff.');
+        const uri = vscode.Uri.parse(file.uri);
+        const document = this.document;
+        const folder = vscode.workspace.getWorkspaceFolder(document.uri);
+        if (folder?.uri.scheme !== 'file' || uri.scheme !== 'file') throw new Error('Open a local design inside a workspace folder.');
+        if (vscode.workspace.textDocuments.some(open => open.uri.toString() === file.uri && open.isDirty)) {
+            throw new Error('Save the handoff JSON before reviewing its file transfers.');
+        }
+        const project = this.project;
+        const revision = this.handoffIdentity();
+        const client = await this.getClient();
+        const source = await client.inProject(sourceOf(document, this.language,
+            this.blockOffset === undefined ? this.caret : document.positionAt(this.blockOffset)), project);
+        const current = () => !this.disposed && !document.isClosed && this.project === project && this.handoffIdentity() === revision;
+        signal.throwIfAborted();
+        if (!current()) throw new Error('The authored design changed. Refresh the handoff review.');
+        const result = await client.designHandoff<T>({ ...request, document: source, workspaceRoot: folder.uri.fsPath,
+            manifest: uri.fsPath, selectedFile: file.selected, revision, drafts: dirtyPreviewSources([document.uri]) });
+        if (request.action !== 'copy') {
+            signal.throwIfAborted();
+            if (!current()) throw new Error('The authored design changed. Refresh the handoff review.');
+        }
+        return result;
+    }
 
     async publishedAssets(): Promise<PublishedAsset[]> {
         try {

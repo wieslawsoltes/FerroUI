@@ -6,6 +6,7 @@ mod document;
 mod canvas_guides;
 mod canvas_snap;
 mod collaboration;
+mod design_handoff;
 mod editor_mcp;
 mod edit_selection;
 mod edits;
@@ -118,6 +119,8 @@ fn respond(
             }),
         "designTokens" => serde_json::from_value::<ferroui_designer_tools::token_handoff::Request>(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan().map_err(|error| error.to_string()))),
+        "designHandoff" => serde_json::from_value(message["params"].clone())
+            .map_err(|error| error.to_string()).and_then(|request| design_handoff::run(projects, request)),
         "configureProject" => serde_json::from_value(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| {
                 if let (Some(project), Some(renderer)) = (projects.register(request)?, renderer.as_mut()) {

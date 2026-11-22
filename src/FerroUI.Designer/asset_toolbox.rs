@@ -311,6 +311,9 @@ impl AssetToolbox {
     pub fn assets(&self) -> Vec<DesignerAsset> {
         self.catalog.borrow().iter().chain(self.project_catalog.borrow().iter()).cloned().collect()
     }
+    pub(crate) fn registered_assets(&self) -> Vec<DesignerAsset> {
+        self.catalog.borrow().clone()
+    }
     pub(crate) fn replace_project_assets(self: &Rc<Self>, assets: Vec<DesignerAsset>) {
         if *self.project_catalog.borrow() == assets {
             return;

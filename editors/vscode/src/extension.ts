@@ -6,6 +6,7 @@ import { AgentTools } from './agentTools';
 import { FileMoves } from './fileMoves';
 import { BuiltProjects } from './builtProjects';
 import { Collaboration } from './collaboration';
+import { DesignHandoff } from './designHandoff';
 import { DesignTokenCommands } from './designTokenCommands';
 import { DesignerWorkbench } from './designerWorkbench';
 import { DictionaryExtraction } from './dictionaryExtraction';
@@ -67,6 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
     server.eventDefinition = (document, position, token) => projects.forDocument(document.uri)
         ? handlers.definitionAt(document, position, token) : Promise.resolve(undefined);
     const designer = new DesignerWorkbench(context, previewOutput, projects, assets, handlers, extraction, resourceRename, resourceMove, new ProjectLibrary(server), new CommandBindings(server));
+    const designHandoff = new DesignHandoff(context, designer);
     const collaboration = new Collaboration(context, previewOutput,
         () => vscode.window.activeTextEditor?.document ?? designer.activeDesign?.document);
     const fileMoves = new FileMoves(server, from => designer.cancelFileMove(from));
@@ -86,11 +88,12 @@ export function activate(context: vscode.ExtensionContext) {
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
     const mcp = new FerroMcpProvider(context, new AgentTools(designer, reload, stages, runtimeTools, runtimeProfiles, appSessions, inventory, scaffolds, projectSetup, scenarios, scenarioReviews, hosted, fileMoves, collaboration, {
         property: propertyRename, type: typeRename, resource: resourceRename, resourceMove,
-    }), previewOutput, runtimes);
+    }, designHandoff.actions), previewOutput, runtimes);
     const startForXaml = (document: vscode.TextDocument) => {
         if (document.languageId === xamlLanguage && document.uri.scheme === 'file') void server.start();
     };
     context.subscriptions.push(
+        designHandoff,
         projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, scenarioReviews, scenarios, designer, collaboration, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, appSessions, reload, runtimes, mcp, languageOutput, previewOutput,
         reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),

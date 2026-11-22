@@ -46,6 +46,7 @@ pub(crate) fn initialize() -> Value {
         "projectSetup",
         "scenarioReview",
         "tokenHandoff",
+        "designHandoff",
         "designFixtures",
         "timelineTransport",
         "timelineRecording",

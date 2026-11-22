@@ -849,6 +849,25 @@ export function tokenReviewHtml(webview: vscode.Webview, root: vscode.Uri): stri
 </main>`);
 }
 
+export function handoffHtml(webview: vscode.Webview, root: vscode.Uri): string {
+    return page(webview, root, 'designHandoff', 'FerroUI Design Handoff', `
+<header class="toolbar handoff-toolbar" aria-label="Design handoff toolbar">
+    <span id="handoff-manifest"></span>
+    <div class="tool-group" role="group" aria-label="Handoff actions">
+        ${tool('handoff-source', 'json', 'Edit handoff JSON')}
+        ${tool('handoff-refresh', 'refresh', 'Refresh handoff review')}
+    </div>
+</header>
+<main class="handoff-body" aria-label="Design handoff mappings" aria-busy="true">
+    <div class="handoff-summary">
+        <input id="handoff-filter" type="search" aria-label="Filter mappings" placeholder="Filter mappings">
+        <span id="handoff-count" aria-live="polite"></span>
+    </div>
+    <p id="handoff-status" class="dock-message" role="status">Resolving design handoff…</p>
+    <ul id="handoff-rows" aria-label="Mapped design elements and assets"></ul>
+</main>`);
+}
+
 function page(webview: vscode.Webview, root: vscode.Uri, entry: string, title: string, body: string,
     extraStyles: readonly string[] = [], allowImageFiles = false): string {
     const resource = (...parts: string[]) => webview.asWebviewUri(vscode.Uri.joinPath(root, ...parts));

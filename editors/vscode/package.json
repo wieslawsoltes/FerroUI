@@ -37,6 +37,12 @@
     "onWebviewPanel:ferroui.stages"
   ],
   "contributes": {
+    "jsonValidation": [
+      {
+        "fileMatch": "*.ferroui-handoff.json",
+        "url": "./schemas/design-handoff.schema.json"
+      }
+    ],
     "taskDefinitions": [
       {
         "type": "ferroui",
@@ -340,6 +346,12 @@
         "command": "ferroui.project.newComponent",
         "title": "New Component",
         "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.designHandoff.review",
+        "title": "Review Design Handoff",
+        "category": "FerroUI",
+        "enablement": "isWorkspaceTrusted"
       },
       {
         "command": "ferroui.designTokens.import",
@@ -1141,6 +1153,11 @@
       ],
       "explorer/context": [
         {
+          "command": "ferroui.designHandoff.review",
+          "when": "resourceFilename =~ /\\.ferroui-handoff\\.json$/i && resourceScheme == file && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
           "command": "ferroui.openDesigner",
           "when": "resourceExtname == .xaml || resourceExtname == .rs"
         },
@@ -1253,6 +1270,11 @@
         },
         {
           "command": "ferroui.project.newComponent",
+          "when": "view == ferroui.project && isWorkspaceTrusted",
+          "group": "ferroui"
+        },
+        {
+          "command": "ferroui.designHandoff.review",
           "when": "view == ferroui.project && isWorkspaceTrusted",
           "group": "ferroui"
         },

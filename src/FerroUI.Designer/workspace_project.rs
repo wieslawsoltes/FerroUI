@@ -161,6 +161,17 @@ impl DesignerWorkspace {
             }
         }
     }
+
+    pub(super) fn handoff_toolbox(&self, path: &std::path::Path) -> Result<Vec<crate::DesignerAsset>, String> {
+        let state = self.project.borrow();
+        let workspace = state.workspace.as_ref().ok_or("Open a solution to review design handoff")?;
+        let mut controls = self.asset_toolbox().map_or_else(crate::default_designer_assets, |toolbox| toolbox.registered_assets());
+        if let Some(root) = path.ancestors().skip(1).find(|root| root.join("Cargo.toml").is_file()) {
+            controls.extend_from_slice(state.markup.assets(root));
+        }
+        controls.extend(crate::project_designer_assets(&workspace.solution.root, path)?);
+        Ok(controls)
+    }
     pub(super) fn rust_catalog(&self, uri: &str) -> Option<std::sync::Arc<ferroui_designer_rsx::RsxCatalog>> {
         self.project.borrow().markup.rust(uri)
     }
@@ -566,6 +577,7 @@ impl DesignerWorkspace {
         self.connect_project_setup();
         self.connect_scenario_review();
         self.connect_design_tokens();
+        self.connect_design_handoff();
         for name in [
             "OpenProject",
             "SaveAll",

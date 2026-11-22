@@ -68,6 +68,7 @@ import { verifyXamlFormatting } from './xamlFormattingMcp';
 import { verifyProjectImageSource } from './projectImageSourceMcp';
 import { verifyProjectLibrary } from './projectLibraryMcp';
 import { verifyAssetImport } from './assetImportMcp';
+import { verifyDesignHandoff } from './designHandoffMcp';
 import { verifyAssetMove } from './assetMoveMcp';
 import { verifyControlTemplate } from './controlTemplateMcp';
 import { verifyCollaboration } from './collaborationMcp';
@@ -244,6 +245,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyProjectImageSource({ invoke, content });
         await verifyProjectLibrary({ invoke, content });
         await verifyAssetImport({ invoke, content });
+        await verifyDesignHandoff({ invoke, content });
         await verifyAssetMove({ invoke, content });
         await verifyColumnsMcp({ invoke, content });
         await verifyRsxColumns({ invoke, content });

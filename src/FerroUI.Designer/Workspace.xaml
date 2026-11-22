@@ -117,12 +117,13 @@
         </ContentControl>
         <Grid Name="ProjectPane" Grid.Row="1" IsVisible="False" RowDefinitions="Auto,Auto,*" Margin="12,12,12,8">
           <StackPanel Spacing="8">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto" ColumnSpacing="4">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="4">
               <TextBlock Text="Project" Classes="designer-section-title" VerticalAlignment="Center" />
               <Button Name="NewCargoProject" Grid.Column="1" Classes="designer-icon-button" ToolTip.Tip="New FerroUI project" AutomationProperties.Name="New FerroUI project" />
               <Button Name="ProjectToolchain" Grid.Column="2" Classes="designer-icon-button" ToolTip.Tip="Check project toolchain" AutomationProperties.Name="Check project toolchain" />
               <Button Name="ReviewScenario" Grid.Column="3" Classes="designer-icon-button" ToolTip.Tip="Review scenario baselines" AutomationProperties.Name="Review scenario baselines" />
               <Button Name="DesignTokens" Grid.Column="4" Classes="designer-icon-button" ToolTip.Tip="Review design tokens" AutomationProperties.Name="Review design tokens" />
+              <Button Name="DesignHandoff" Grid.Column="5" Classes="icon" ToolTip.Tip="Review design handoff" AutomationProperties.Name="Review design handoff" />
             </Grid>
             <TextBox Name="ProjectPath" PlaceholderText="Folder or Cargo.toml path" ToolTip.Tip="Enter a path and choose Check to load the solution" />
             <ComboBox Name="RunTarget" PlaceholderText="Choose a binary target" HorizontalAlignment="Stretch" />

@@ -19,9 +19,11 @@ mod command_bindings;
 mod resource_move;
 #[path = "mcp_scenarios.rs"]
 mod scenarios;
+#[path = "mcp_design_handoff.rs"]
+mod design_handoff;
 
 pub(super) fn handles(name: &str) -> bool {
-    name == design_tokens::CREATE || canvas_guides::handles(name) || project_library::handles(name) || project_setup::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || scenarios::handles(name) || matches!(
+    name == design_tokens::CREATE || design_handoff::handles(name) || canvas_guides::handles(name) || project_library::handles(name) || project_setup::handles(name) || command_bindings::handles(name) || resource_move::handles(name) || scenarios::handles(name) || matches!(
         name,
         "designer_project"
             | "designer_project_edit"
@@ -147,6 +149,7 @@ pub(super) fn tools() -> Vec<Value> {
     tools.extend(project_library::tools());
     tools.extend(project_setup::tools());
     tools.push(design_tokens::create_tool());
+    tools.extend(design_handoff::tools());
     tools.extend(command_bindings::tools());
     tools.extend(resource_move::tools());
     tools.extend(scenarios::tools());
@@ -169,6 +172,9 @@ pub(super) fn call(
     }
     if name == design_tokens::CREATE {
         return design_tokens::create(workspace, args);
+    }
+    if design_handoff::handles(name) {
+        return design_handoff::call(workspace, name, args);
     }
     if command_bindings::handles(name) {
         return command_bindings::call(workspace, name, args);

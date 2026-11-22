@@ -55,10 +55,13 @@ pub enum Insertion {
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CopySummary {
     pub direction: &'static str,
     pub source: String,
     pub destination: String,
+    pub source_label: String,
+    pub destination_label: String,
     pub bytes: usize,
 }
 

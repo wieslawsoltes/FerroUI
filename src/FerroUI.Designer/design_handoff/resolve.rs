@@ -59,6 +59,12 @@ impl ReviewContext<'_> {
                     .manifest
                     .project_path(path)
                     .map_err(|error| error.to_string())?;
+                if !source_path
+                    .extension()
+                    .is_some_and(|ext| ext.eq_ignore_ascii_case("xaml"))
+                {
+                    return Err("Choose an authored XAML definition in the Library".into());
+                }
                 let uri = file_uri(&source_path).map_err(|error| error.to_string())?;
                 let source = match (self.draft)(&uri)? {
                     Some(source) => source,
@@ -70,7 +76,10 @@ impl ReviewContext<'_> {
                 let definition =
                     exact_library_definition(&source, key.as_deref(), scope.as_deref())
                         .map_err(|error| error.to_string())?;
-                row.reference = Some(definition.name.clone());
+                row.reference = Some(match definition.target_type.as_deref() {
+                    Some(target) => format!("{:?} · {target}", definition.kind),
+                    None => format!("{:?}", definition.kind),
+                });
                 row.definition = Some(ProjectLibraryEntry {
                     folder: file_uri(self.manifest.workspace())
                         .map_err(|error| error.to_string())?,
@@ -164,18 +173,37 @@ impl ReviewContext<'_> {
             }
         }
         row.reference = Some(reference);
-        row.copy = asset.copy.as_ref().map(|copy| CopySummary {
-            direction: if importing { "import" } else { "export" },
-            source: display_path(&copy.source),
-            destination: display_path(&copy.destination),
-            bytes: copy.bytes,
+        row.copy = asset.copy.as_ref().map(|copy| {
+            let project = (self.manifest.workspace(), "Project");
+            let handoff = (self.manifest.directory(), "Design export");
+            let (from, to, direction) = if importing {
+                (handoff, project, "import")
+            } else {
+                (project, handoff, "export")
+            };
+            CopySummary {
+                direction,
+                source: copy.source.display().to_string(),
+                destination: copy.destination.display().to_string(),
+                source_label: copy_label(&copy.source, from),
+                destination_label: copy_label(&copy.destination, to),
+                bytes: copy.bytes,
+            }
         });
         Ok(())
     }
 }
 
-fn display_path(path: &Path) -> String {
-    path.display().to_string()
+fn copy_label(path: &Path, (root, label): (&Path, &str)) -> String {
+    match path.strip_prefix(root) {
+        Ok(relative) => format!(
+            "{label} / {}",
+            relative
+                .to_string_lossy()
+                .replace(std::path::MAIN_SEPARATOR, "/")
+        ),
+        Err(_) => path.display().to_string(),
+    }
 }
 
 fn excerpt(source: &str) -> String {

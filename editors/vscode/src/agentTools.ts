@@ -5,6 +5,7 @@ import { collaborationTool, isCollaborationTool } from './collaborationAgents';
 import { agentCatalog, type AgentTool } from './agentCatalog';
 import { validate } from './agentSchema';
 import type { AssetImportRequest } from './assetImport';
+import type { DesignHandoffActions, HandoffAgentInput } from './designHandoffActions';
 import type { CanvasSnapInput, GuideEdit } from './canvasGuidesProtocol';
 import type { CargoSelection } from './cargoTarget';
 import type { CommandBindingEdit } from './commandBindings';
@@ -147,7 +148,7 @@ export class AgentTools {
         private readonly hosted: HostedDesign, private readonly fileMoves: FileMoves, private readonly collaboration: Collaboration,
         private readonly sourceReviews: {
             property: RegisteredRename; type: RegisteredRename; resource: ResourceRename; resourceMove: ResourceMove;
-        }) {}
+        }, private readonly designHandoff: DesignHandoffActions) {}
 
     definitions() { return Object.entries(agentCatalog).map(([name, definition]) => ({ name, ...definition })); }
 
@@ -183,6 +184,9 @@ export class AgentTools {
             return this.sourceReviews.resourceMove.agent(input as ResourceMoveInput, signal);
         }
         if (tool === 'designer_design_tokens') return this.project.designTokens(input as TokenRequest, signal);
+        if (tool === 'designer_design_handoff' || tool === 'designer_apply_handoff') {
+            return this.designHandoff.agent(input as HandoffAgentInput, signal);
+        }
         if (tool === 'ferroui_project_templates') return this.projectSetup.catalog(signal);
         if (tool === 'ferroui_project_plan_new' || tool === 'ferroui_project_create') {
             return this.projectSetup.agentTemplate(input as ProjectTemplateRequest & { folder?: string; review?: string }, signal);

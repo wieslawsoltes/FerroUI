@@ -80,6 +80,11 @@ pub struct ManifestFile {
 }
 
 impl ManifestFile {
+    pub fn in_workspace(workspace: &Path, relative: &str) -> Result<PathBuf> {
+        let root = workspace.canonicalize()?;
+        confined_path(&root, relative_path(relative)?)
+    }
+
     pub fn read(workspace: &Path, path: &Path, access: Access) -> Result<Self> {
         let workspace = workspace.canonicalize()?;
         require(
@@ -114,6 +119,10 @@ impl ManifestFile {
 
     pub fn path(&self) -> &Path {
         &self.path
+    }
+
+    pub fn directory(&self) -> &Path {
+        &self.directory
     }
 
     pub fn fingerprint(&self) -> &str {
