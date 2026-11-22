@@ -30,7 +30,7 @@ use ferroui_base::data::{BindingBase, BindingPriority};
 use ferroui_base::metadata::{MarkupType, MarkupTyped, MarkupValue};
 use ferroui_base::styling::{ControlTheme, Selector, Selectors, Setter, SetterBase, Style, StyleBase};
 use ferroui_base::{
-    BoxedValue, CornerRadius, FerroObject, FerroProperty, PropertyValue, Ref, StaticType, StyledProperty, Thickness,
+    BoxedValue, CornerRadius, FerroObject, FerroProperty, Ref, StaticType, StyledProperty, Thickness,
     TypeIdentity, TypeInfo, UnsetValueType,
 };
 
@@ -476,7 +476,7 @@ fn untyped_resource_choice(
 /// its errors. The typed setter sets the local value, or the value at `priority` when generated
 /// code set it with a priority (in a template). The choice is one non-generic function; this one
 /// is instantiated once per property value type.
-pub fn assign_resource_value<T: PropertyValue>(
+pub fn assign_resource_value<T: ferroui_base::StyledValue>(
     target: &Ref<FerroObject>,
     property: &'static StyledProperty<T>,
     value: MarkupValue,

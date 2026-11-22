@@ -15,6 +15,8 @@ use std::str::FromStr;
 #[derive(Clone)]
 pub struct Easing(Rc<dyn IEasing>);
 
+crate::styled_value!(Easing);
+
 impl Easing {
     /// Wraps an easing function.
     pub fn new(easing: impl IEasing) -> Self {
