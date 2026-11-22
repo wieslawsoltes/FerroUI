@@ -18,13 +18,12 @@
 //! families here would keep the list box item, the text box and their classes in every
 //! application with a templated control.
 
-use super::VisualStateManager;
 use crate::primitives::{TemplatedControl, ToggleButton};
 use crate::{Control, ListBoxItem, TextBox};
 use ferroui_base::media::TextWrapping;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{ObjectType, Ref, TypeInfo, WeakRef};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 
@@ -44,6 +43,28 @@ struct Installed {
 
 ferroui_base::ferro_thread_local! {
     static INSTALLED: RefCell<HashMap<usize, Installed>> = RefCell::new(HashMap::new());
+}
+
+/// What the mappers need of the visual state manager, stated by its static constructor
+/// ([`states_in_use`]). An element has groups of visual states only once the manager is
+/// initialised on its thread (the groups are its attached property), so before that no mapper
+/// is installed, and the mappers name nothing of the manager: an application whose templates
+/// have no visual states does not link it (#612).
+#[derive(Clone, Copy)]
+pub(crate) struct VisualStates {
+    /// Whether the root of the visual states of the control has groups.
+    pub(crate) has_groups: fn(&Ref<Control>) -> bool,
+    /// `VisualStateManager::go_to_state`.
+    pub(crate) go_to_state: fn(&Control, &str, bool) -> bool,
+}
+
+ferroui_base::ferro_thread_local! {
+    static STATES: Cell<Option<VisualStates>> = const { Cell::new(None) };
+}
+
+/// States what the mappers need of the visual state manager: called by its static constructor.
+pub(crate) fn states_in_use(states: VisualStates) {
+    STATES.set(Some(states));
 }
 
 ferroui_base::ferro_thread_local! {
@@ -103,9 +124,7 @@ pub(crate) fn on_template_applied(control: &TemplatedControl) {
         return;
     };
     uninstall(&control);
-    let has_groups = VisualStateManager::implementation_root(&control).is_some_and(|root| {
-        root.get_value(VisualStateManager::visual_state_groups_property()).is_some_and(|groups| groups.count() > 0)
-    });
+    let has_groups = STATES.get().is_some_and(|states| (states.has_groups)(&control));
     if !has_groups {
         return;
     }
@@ -139,6 +158,12 @@ pub(crate) fn on_template_applied(control: &TemplatedControl) {
     mapper(&control, false);
 }
 
+/// Whether the visual state manager has stated what the mappers need on this thread.
+#[cfg(test)]
+pub(crate) fn states_known() -> bool {
+    STATES.get().is_some()
+}
+
 /// Whether the class `type_` itself has stated a mapper on this thread.
 #[cfg(test)]
 pub(crate) fn has_mapper(type_: &'static TypeInfo) -> bool {
@@ -156,7 +181,8 @@ fn has(control: &Control, pseudo_class: &str) -> bool {
 }
 
 fn go(control: &Ref<Control>, state: &str, use_transitions: bool) -> bool {
-    VisualStateManager::go_to_state(control, state, use_transitions)
+    // A mapper is installed only where there are groups, so the manager is initialised.
+    STATES.get().is_some_and(|states| (states.go_to_state)(control, state, use_transitions))
 }
 
 /// The common state of the button family: `Disabled`, `Pressed`, `PointerOver` or `Normal`.

@@ -2,7 +2,7 @@
 //! media and rendering contracts shared by every other FerroUI crate.
 
 #[doc(hidden)]
-pub use paste::paste as __paste;
+pub use ferroui_ident_macros::ferro_idents as __paste;
 
 pub mod animation;
 pub mod collections;
@@ -70,6 +70,7 @@ mod size;
 mod styled_element;
 mod styled_element_extensions;
 mod styled_property;
+mod styled_value;
 mod thickness;
 mod type_system;
 mod element_ref;
@@ -127,6 +128,11 @@ pub use rounded_rect::RoundedRect;
 pub use size::Size;
 pub use styled_element::{StyledElement, StyledElementImpl, StyledElementImplExt, StyledElementVTable};
 pub use styled_property::{AttachedProperty, StyledProperty};
+pub use ferroui_system::{EnumValue, StyledValue};
+#[doc(no_inline)]
+pub use ferroui_system::{styled_enum, styled_value};
+#[doc(hidden)]
+pub use ferroui_system::{__styled_enum, __styled_enum_variant};
 pub use thickness::Thickness;
 pub use element_ref::ElementRef;
 pub use type_system::{
