@@ -44,8 +44,9 @@ export class RuntimeSourceEditor {
         if (!isCurrent()) throw new Error('The application connection changed.');
         if (!source) throw new Error('The template source is unavailable in the current workspace or revision.');
         const { document, position } = source;
+        const existing = vscode.window.visibleTextEditors.find(editor => editor.document === document);
         await vscode.window.showTextDocument(document, {
-            selection: new vscode.Range(position, position), viewColumn: vscode.ViewColumn.Beside,
+            selection: new vscode.Range(position, position), viewColumn: existing?.viewColumn ?? vscode.ViewColumn.Beside,
         });
         return { uri: document.uri.toString(), version: document.version, position: { line: position.line, character: position.character } };
     }
