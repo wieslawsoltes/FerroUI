@@ -1856,7 +1856,8 @@ pub fn delegate_result<T: PartialEq + 'static>(value: T) -> MarkupValue {
 /// The delegate does not keep the root object alive: the root object owns the element the
 /// delegate is attached to, and a strong reference would close a cycle. A delegate whose
 /// root object is gone does nothing, as does one that is called with other arguments than
-/// the method takes or whose method fails: a handler has nowhere to report a failure to.
+/// the method takes. A failure of the method reaches the dispatcher, as it does from the
+/// delegate the run-time loader creates.
 pub fn method_delegate<This: Clone + 'static>(
     context: &Rc<XamlIlContext>,
     parameters: usize,
@@ -1872,7 +1873,15 @@ pub fn method_delegate<This: Clone + 'static>(
             return None;
         }
         let this = from_markup_value::<This>(&instance)?;
-        method(&this, &mut DelegateArguments { arguments, next: 0 }).ok().flatten()
+        handler_result(method(&this, &mut DelegateArguments { arguments, next: 0 }))
+    })
+}
+
+/// What a named handler returns; a failure goes to the dispatcher.
+fn handler_result(result: Result<MarkupValue, MarkupInvokeError>) -> MarkupValue {
+    result.unwrap_or_else(|error| {
+        ferroui_base::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+        None
     })
 }
 
@@ -1885,7 +1894,7 @@ pub fn static_method_delegate(
         if arguments.len() != parameters {
             return None;
         }
-        method(&mut DelegateArguments { arguments, next: 0 }).ok().flatten()
+        handler_result(method(&mut DelegateArguments { arguments, next: 0 }))
     })
 }
 
@@ -1965,20 +1974,6 @@ fn command_element<This: Clone + 'static>(
         }) as UntypedCanExecute
     });
     builder.command_untyped(name, execute, can_execute, depends_on_properties, declaring.notify_property_changed)
-}
-
-/// The selected descriptor of a named root handler. Root ownership follows the
-/// native weak handler convention while method/target identity remains observable.
-pub fn declared_method_handler(
-    context: &Rc<XamlIlContext>, markup: &'static MarkupType,
-    name: &str, overload: usize, location: (i32, i32),
-) -> Result<ferroui_base::metadata::MarkupDelegate, XamlLoadError> {
-    let method = markup.find_methods(name).nth(overload).ok_or_else(|| {
-        at("MissingMethodException", format!("{}.{}: overload {overload} is absent from metadata", markup.full_name(), name), location.0, location.1)
-    })?;
-    if method.is_static { return Ok(ferroui_base::metadata::MarkupDelegate::for_method(None, markup, method)); }
-    let owner = context.root_object_field().ok_or_else(|| at("InvalidOperationException", "A method handler needs a root object", location.0, location.1))?;
-    Ok(ferroui_base::metadata::MarkupDelegate::for_method_of_source(&owner, markup, method))
 }
 
 /// A declared method as a binding value. The compiler records the overload's

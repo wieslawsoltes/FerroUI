@@ -34,7 +34,7 @@ fn untyped_notifications_added_peer_blocks_nested_change_in_same_dispatch() {
             remove(&c, first);
             remove(&c, peer.get().unwrap());
             assert!(result.is_err());
-            assert_eq!(c.iter().collect::<Vec<_>>(), vec![1]);
+            assert_eq!(c.to_vec(), vec![1]);
             c.add(3);
         }
     }
@@ -80,7 +80,7 @@ fn untyped_notifications_count_every_subscriber_and_restore_monitor_after_error(
             for token in tokens {
                 remove(&c, token);
             }
-            let values = c.iter().collect::<Vec<_>>();
+            let values = c.to_vec();
             c.add(3);
             assert_eq!(
                 result.is_err(),
@@ -88,7 +88,7 @@ fn untyped_notifications_count_every_subscriber_and_restore_monitor_after_error(
                 "count={count}, typed-mask={mask}"
             );
             assert_eq!(values, if count == 1 { vec![1, 2] } else { vec![1] });
-            assert_eq!(c.iter().last(), Some(3), "monitor reset after exception");
+            assert_eq!(c.to_vec().last().copied(), Some(3), "monitor reset after exception");
         }
     }
 }
