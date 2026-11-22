@@ -35,6 +35,9 @@ pub use columns::{columns_report, rust_column_declaration_plan, rust_column_sour
 #[path = "mcp_rsx_style.rs"]
 mod rsx_style;
 pub use rsx_style::{rust_style_source_plan, RSX_STYLES, RSX_STYLE_EDIT};
+#[path = "mcp_rsx_commands.rs"]
+mod rsx_commands;
+pub use rsx_commands::{rust_command_report, rust_command_source_plan, RSX_COMMANDS, RSX_COMMAND_EDIT};
 #[path = "mcp_item_templates.rs"]
 mod item_templates;
 pub use item_templates::{rust_template_declaration_plan, rust_template_navigation, rust_template_report, rust_template_source_plan};
@@ -326,6 +329,7 @@ impl UiToolProvider for DesignerMcp {
         tools.extend(components::tools());
         tools.extend(style_composition::tools());
         tools.extend(rsx_style::tools());
+        tools.extend(rsx_commands::tools());
         tools.extend(events::tools());
         tools.extend(design_workflows::tools());
         tools.extend(selection_workflows::tools());
@@ -361,6 +365,7 @@ impl UiToolProvider for DesignerMcp {
             || components::handles(name)
             || style_composition::handles(name)
             || rsx_style::handles(name)
+            || rsx_commands::handles(name)
             || events::handles(name)
             || workspace_tools::handles(name)
             || design_workflows::handles(name)
@@ -618,6 +623,11 @@ impl UiToolProvider for DesignerMcp {
                 }
             }
         }
+        if name == RSX_COMMAND_EDIT {
+            if let Some(workspace) = self.workspace.as_ref().and_then(Weak::upgrade) {
+                return rsx_commands::call_workspace(&workspace, args);
+            }
+        }
         let style_workspace = self.workspace.as_ref()
             .filter(|_| name == RSX_STYLE_EDIT).and_then(Weak::upgrade);
         if let Some(workspace) = style_workspace {
@@ -657,6 +667,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if rsx_style::handles(name) {
             return rsx_style::call(&mut session, name, args);
+        }
+        if rsx_commands::handles(name) {
+            return rsx_commands::call(&mut session, name, args);
         }
         if item_templates::handles(name) {
             let result = item_templates::call(&mut session, name, args)?;

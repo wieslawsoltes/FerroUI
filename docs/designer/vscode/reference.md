@@ -227,6 +227,12 @@ Send `designer_extract_dictionary` with the same `node`, `expected_revision`, `f
 
 The edit stays in the current buffer and groups both changes into one Undo step. A value with `editable: false` provides a range for opening its authored expression. [Command binding picker](authoring.md#bind-a-command-and-its-parameter)
 
+### Edit a Rust command with MCP
+
+1. In Studio, find the authored control with `designer_tree` and call `designer_rsx_commands` with its `node`. In VS Code, find the node with `designer_outline` and pass the command query through `designer_studio_query` with the design `session`. The result supplies the `model`, registered property types, and UTF-16 ranges for authored expressions.
+2. Call `designer_rsx_command_edit` with the `node`, `expected_model`, and a `change` containing the command `property` and both `command` and `parameter` choices. Use `{"kind":"set","expression":"approve.clone()"}`, `{"kind":"clear"}`, or `{"kind":"keep"}` for each choice. Pass `keep` for a slot with no mapped parameter.
+3. In Studio, put `expected_revision` from the command report on the edit. In VS Code, send the edit through `designer_studio_edit` with the `session` and `expected_revision` from the design outline. A changed source, scope, or layer requires a fresh report before applying. Both choices form one Undo step. [Rust command binding picker](authoring.md#edit-a-rust-command-binding)
+
 ### Find registered Rust definitions with MCP
 
 After building the owning Cargo schema, call `ferroui_workspace_language` with `action: "definition"`, the XAML file in `path`, and a zero-based UTF-16 `position`. It returns the same URI and range as **Go to Definition**. In Studio, call `designer_language` with `action: "definitions"` and the XAML byte `offset`. [Supported declarations](authoring.md#follow-registered-rust-declarations)

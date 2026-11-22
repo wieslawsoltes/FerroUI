@@ -9,14 +9,15 @@ use ferroui_designer_rsx::{RsxProjection, RsxStyleEdit};
 use std::{rc::Rc, sync::Arc};
 
 impl DesignerWorkspace {
-    pub(super) fn with_current_rust_sources<T>(
+    pub(crate) fn with_current_rust_sources<T>(
         &self,
         read: impl FnOnce(&crate::DesignerSession, &RsxProjection<'_>) -> Result<T, String>,
     ) -> Result<(T, Option<Arc<RustModuleSources>>), String> {
         if self.pending_source.get() {
             return Err("Apply the current source draft before using the inspector".into());
         }
-        let session = self.session.borrow();
+        let session = self.session.try_borrow()
+            .map_err(|_| "Designer is already processing a transaction")?;
         let rust = session.rust.as_ref().ok_or("Open a mapped Rust view")?;
         let projection = rust.projection()?;
         let modules = rust.module_sources().cloned();

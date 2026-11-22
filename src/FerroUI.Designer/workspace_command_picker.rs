@@ -1,48 +1,14 @@
-use super::{CommandSite, DesignerWorkspace};
-use crate::workspace::inspector_actions::{SOURCE, add_button, picker, text};
+use super::{CommandSite, Context, DesignerWorkspace, APPLY};
+use crate::workspace::inspector_actions::{add_button, picker, text, SOURCE};
 use ferroui_base::layout::Orientation;
 use ferroui_base::media::{FontWeight, TextWrapping};
-use ferroui_base::{Ref, WeakRef};
-use ferroui_controls::{ComboBox, Control, Flyout, StackPanel, TextBlock};
+use ferroui_base::Ref;
+use ferroui_controls::{ComboBox, Control, Flyout, StackPanel};
 use ferroui_designer_language::{
     CommandBindingEdit, CommandMember, CommandSelection, CommandSlot, CommandValue,
 };
 use std::cell::{Cell, RefCell};
-use std::rc::{Rc, Weak};
-
-const APPLY: &str = "F1 M1 9L2.5 7.5 6 11 13.5 3.5 15 5 6 14Z";
-
-#[derive(Clone)]
-struct Context {
-    workspace: Weak<DesignerWorkspace>,
-    flyout: WeakRef<Flyout>,
-    site: CommandSite,
-    status: WeakRef<TextBlock>,
-}
-
-impl Context {
-    fn run<T>(
-        &self,
-        action: impl FnOnce(&Rc<DesignerWorkspace>) -> Result<T, String>,
-    ) -> Option<T> {
-        match action(&self.workspace.upgrade()?) {
-            Ok(result) => Some(result),
-            Err(error) => {
-                if let Some(status) = self.status.upgrade() {
-                    status.set_text(Some(&error));
-                    status.set_is_visible(true);
-                }
-                None
-            }
-        }
-    }
-
-    fn close(&self) {
-        if let Some(flyout) = self.flyout.upgrade() {
-            flyout.hide();
-        }
-    }
-}
+use std::rc::Rc;
 
 pub(super) fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     let body = StackPanel::new();
@@ -58,6 +24,13 @@ pub(super) fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     body.children().add(status.clone().upcast::<Control>());
     let owner = workspace.session.borrow().selection().first().copied();
     let Some(owner) = owner else { return };
+    if workspace.session.borrow().uses_rust_source() {
+        if let Err(error) = super::rust_picker::render(workspace, flyout, &body, &status, owner) {
+            status.set_text(Some(&error));
+            status.set_is_visible(true);
+        }
+        return;
+    }
     let site = match workspace.command_site(owner) {
         Ok(site) => site,
         Err(error) => {
@@ -66,12 +39,7 @@ pub(super) fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
             return;
         }
     };
-    let context = Context {
-        workspace: Rc::downgrade(workspace),
-        flyout: flyout.downgrade(),
-        site,
-        status: status.downgrade(),
-    };
+    let context = Context::new(workspace, flyout, &status, site);
     let Some(model) =
         context.run(|workspace| workspace.command_model(&context.site, String::new()))
     else {
@@ -86,7 +54,12 @@ pub(super) fn render(workspace: &Rc<DesignerWorkspace>, flyout: &Ref<Flyout>) {
     }
 }
 
-fn add_slot(body: &StackPanel, context: Context, slot: CommandSlot, members: &[CommandMember]) {
+fn add_slot(
+    body: &StackPanel,
+    context: Context<CommandSite>,
+    slot: CommandSlot,
+    members: &[CommandMember],
+) {
     let command = PathPicker::add(
         body,
         &slot.property,
@@ -148,7 +121,7 @@ impl PathPicker {
         value: CommandValue,
         members: &[CommandMember],
         command_only: bool,
-        context: Context,
+        context: Context<CommandSite>,
     ) -> Rc<Self> {
         let heading = StackPanel::new();
         heading.set_orientation(Orientation::Horizontal);

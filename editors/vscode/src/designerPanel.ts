@@ -572,6 +572,7 @@ export class DesignerPanel implements vscode.Disposable {
                 if (name === 'designer_state') return this.supportsRustStates;
                 if (name === 'designer_item_template') return this.supportsItemTemplates;
                 if (name === 'designer_rsx_style_edit') return this.supportsRustStyles;
+                if (name === 'designer_rsx_command_edit') return true;
                 return this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement;
             }),
         ];
@@ -580,6 +581,7 @@ export class DesignerPanel implements vscode.Disposable {
         const queries = tools.filter(tool => {
             const { name } = tool as { name: string };
             if (name === 'designer_rsx_styles') return this.language === 'rust' && this.supportsRustStyles;
+            if (name === 'designer_rsx_commands') return this.language === 'rust';
             return this.language === 'xaml' || name !== 'designer_behaviors';
         });
         return { tools: queries, presentations: availablePresentations ?? [], edits };
@@ -587,7 +589,8 @@ export class DesignerPanel implements vscode.Disposable {
 
     private mappedStudioEdit(name: string): boolean {
         return mappedStudioEdits.has(name) || (name === 'designer_columns_edit' && this.supportsColumnAuthoring)
-            || (name === 'designer_rsx_style_edit' && this.supportsRustStyles);
+            || (name === 'designer_rsx_style_edit' && this.supportsRustStyles)
+            || name === 'designer_rsx_command_edit';
     }
 
     async studioQuery(name: string, args: object, selection: number[] | undefined, signal: AbortSignal): Promise<unknown> {

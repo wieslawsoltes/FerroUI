@@ -91,6 +91,10 @@ Build the owning Cargo project to load its registered properties. Open an XAML v
 
 Choose an `ICommand` member from the **Command** picker and, where offered, a typed member from **CommandParameter**. **Browse** opens the selected object’s registered members. Use the source icon to open an existing expression or choose **Clear binding** to remove a simple data-context binding. The check icon applies both fields in one Undo step. Source edits or changes to the preview scope retire the open picker. [VS Code workflow](vscode/authoring.md#bind-a-command-and-its-parameter) · [MCP arguments](vscode/reference.md#bind-a-command-with-mcp)
 
+### Edit a Rust command binding
+
+Select a control with a mapped Rust command on the canvas or in **Layers**. In the inspector header, choose **Edit command binding**. Enter the Rust expression and optional parameter in their fields. Hover over a field to see the registered type. Use the source icon to reveal an expression in **Split**, or use the reset icon to clear the field. The check icon applies both changes with one Undo step. The app supplies and evaluates the command at runtime. [VS Code workflow](vscode/authoring.md#edit-a-rust-command-binding) · [MCP arguments](vscode/reference.md#edit-a-rust-command-with-mcp)
+
 ### Follow a Rust declaration from XAML
 
 Build the owning Cargo package from Studio. In **Split** or **Code**, place the caret on a registered control, property, type annotation, typed binding member, or style selector operand and press **F12**. Choose the result to open the source and select the declaration. Open Rust drafts contribute their current text. For a dependency inside the open solution, the result opens its Rust tab. [Supported declarations](vscode/authoring.md#follow-registered-rust-declarations)

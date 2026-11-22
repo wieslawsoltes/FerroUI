@@ -209,6 +209,18 @@ impl RsxProjection<'_> {
                 ));
             }
         }
+        // A set and a clear can share the opening offset on a compact control.
+        // Send one range so every source editor applies the accepted ordering.
+        if edits
+            .iter()
+            .filter(|edit| edit.span.start == node.open)
+            .count()
+            > 1
+        {
+            return Ok(TextPatch::between(self.source, &candidate)
+                .into_iter()
+                .collect());
+        }
         Ok(edits)
     }
 }

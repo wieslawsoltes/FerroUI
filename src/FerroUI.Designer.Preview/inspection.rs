@@ -33,6 +33,8 @@ pub(crate) struct Inspection {
     pub(crate) item_templates: bool,
     #[serde(rename = "controlTemplate")]
     pub(crate) control_template: bool,
+    #[serde(rename = "rustCommandBinding")]
+    pub(crate) rust_command_binding: bool,
 }
 
 pub(crate) fn inspect(
@@ -67,6 +69,7 @@ pub(crate) fn inspect(
                     |rsx| !rsx.item_templates(&design.xaml, node).is_empty(),
                 ),
                 control_template: design.rsx.is_none() && session.as_ref().is_some_and(|session| session.has_control_template(node)),
+                rust_command_binding: design.rsx_node(node).is_some_and(|(_, node)| node.supports_commands()),
             })
         }
         InspectionTarget::Selection { ref nodes } => {
@@ -91,7 +94,7 @@ pub(crate) fn inspect(
             for fields in fields {
                 crate::property_fields::intersect(&mut properties, fields?);
             }
-            Ok(Inspection { properties, events: Vec::new(), item_templates: false, control_template: false })
+            Ok(Inspection { properties, events: Vec::new(), item_templates: false, control_template: false, rust_command_binding: false })
         }
         InspectionTarget::Runtime { id } => {
             let properties = stage
@@ -104,6 +107,7 @@ pub(crate) fn inspect(
                 events: Vec::new(),
                 item_templates: false,
                 control_template: false,
+                rust_command_binding: false,
             })
         }
     }

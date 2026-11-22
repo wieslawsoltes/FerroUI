@@ -48,6 +48,7 @@ mod column_authoring;
 mod included_source;
 mod item_template_authoring;
 mod rust_template_authoring;
+mod rust_command_authoring;
 mod control_template_starter;
 mod item_template_copy;
 mod item_template_project;

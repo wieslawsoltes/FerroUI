@@ -41,9 +41,15 @@ struct ControlSource {
     editable_children: bool,
     can_create_animation: bool,
     can_create_state_group: bool,
+    supports_commands: bool,
 }
 
 impl RsxSourceMap {
+    pub fn supports_commands(&self, offset: usize) -> bool {
+        self.control(offset)
+            .is_some_and(|(index, _)| self.controls[index].supports_commands)
+    }
+
     pub fn editable_children(&self, offset: usize) -> bool {
         self.control(offset)
             .is_some_and(|(index, _)| self.controls[index].editable_children)
@@ -109,6 +115,7 @@ impl RsxProjection<'_> {
                     editable_children: node.editable_children(),
                     can_create_animation: self.can_create_animation(index),
                     can_create_state_group: self.can_create_state_group(index),
+                    supports_commands: node.supports_commands(),
                     properties: node
                         .properties
                         .iter()

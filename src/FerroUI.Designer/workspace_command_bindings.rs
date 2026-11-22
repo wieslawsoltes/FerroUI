@@ -1,18 +1,69 @@
-//! Studio command authoring uses the same source plans as the XAML language server.
-use super::{DesignerWorkspace, project::document_identity};
-use crate::{DesignerSession, PreviewStatus, design_time::DesignTimeSnapshot};
-use ferroui_controls::{Button, Flyout, PlacementMode};
+//! Studio command authoring shares checked source plans with the editor and MCP.
+use super::{project::document_identity, DesignerWorkspace};
+use crate::{design_time::DesignTimeSnapshot, DesignerSession, PreviewStatus};
+use ferroui_base::{Ref, WeakRef};
+use ferroui_controls::{Button, Flyout, PlacementMode, TextBlock};
 use ferroui_designer_core::{NodeId, SourceSpan};
 use ferroui_designer_language::{
     CommandBindingEdit, CommandBindingModel, CommandBindingRequest, Range,
 };
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 #[path = "workspace_command_picker.rs"]
 mod picker;
+#[path = "workspace_rust_command_picker.rs"]
+mod rust_picker;
 #[cfg(all(test, feature = "mcp"))]
 #[path = "workspace_command_bindings_tests.rs"]
 mod tests;
+
+const APPLY: &str = "F1 M1 9L2.5 7.5 6 11 13.5 3.5 15 5 6 14Z";
+
+#[derive(Clone)]
+struct Context<Site> {
+    workspace: Weak<DesignerWorkspace>,
+    flyout: WeakRef<Flyout>,
+    site: Site,
+    status: WeakRef<TextBlock>,
+}
+
+impl<Site> Context<Site> {
+    fn new(
+        workspace: &Rc<DesignerWorkspace>,
+        flyout: &Ref<Flyout>,
+        status: &Ref<TextBlock>,
+        site: Site,
+    ) -> Self {
+        Self {
+            workspace: Rc::downgrade(workspace),
+            flyout: flyout.downgrade(),
+            site,
+            status: status.downgrade(),
+        }
+    }
+
+    fn run<T>(
+        &self,
+        action: impl FnOnce(&Rc<DesignerWorkspace>) -> Result<T, String>,
+    ) -> Option<T> {
+        match action(&self.workspace.upgrade()?) {
+            Ok(result) => Some(result),
+            Err(error) => {
+                if let Some(status) = self.status.upgrade() {
+                    status.set_text(Some(&error));
+                    status.set_is_visible(true);
+                }
+                None
+            }
+        }
+    }
+
+    fn close(&self) {
+        if let Some(flyout) = self.flyout.upgrade() {
+            flyout.hide();
+        }
+    }
+}
 
 #[derive(Clone)]
 pub(crate) struct CommandSite {
@@ -44,9 +95,12 @@ impl DesignerWorkspace {
 
     pub(super) fn refresh_command_binding(&self) {
         let session = self.session.borrow();
-        let visible = !session.uses_rust_source()
-            && matches!(session.selection(), [node] if session.document().ast().node(*node)
-                .is_some_and(|node| node.kind == ferroui_designer_core::NodeKind::Element));
+        let visible = matches!(session.selection(), [node] if if session.uses_rust_source() {
+            session.has_rust_command_slots(*node)
+        } else {
+            session.document().ast().node(*node)
+                .is_some_and(|node| node.kind == ferroui_designer_core::NodeKind::Element)
+        });
         self.root
             .get_control::<Button>("EditCommandBinding")
             .set_is_visible(visible);

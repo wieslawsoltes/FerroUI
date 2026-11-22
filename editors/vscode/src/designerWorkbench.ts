@@ -26,6 +26,7 @@ import { showPropertyTrace, type DesignTraceSource, type PropertyTrace } from '.
 import type { ProjectAssets } from './projectAssets';
 import type { ProjectDefinition, ProjectLibrary } from './projectLibrary';
 import { promptRsxControlName } from './rsxRename';
+import { openRustCommandBinding } from './rustCommandBindings';
 import { editBinding } from './studioBinding';
 import { StudioContext } from './studioContext';
 import type { StateTransitionControl } from './stateTransitionProtocol';
@@ -218,7 +219,7 @@ export class DesignerWorkbench implements vscode.Disposable {
                     const panel = this.active;
                     const token = panel?.currentToken;
                     if (!panel || token === undefined || panel.selectedIds.length !== 1) {
-                        throw new Error('Select one authored control in the current XAML design.');
+                        throw new Error('Select one authored control in the current design.');
                     }
                     await this.openCommandBinding({ session: panel.session, token, node: panel.selectedIds[0] });
                 } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
@@ -703,6 +704,15 @@ export class DesignerWorkbench implements vscode.Disposable {
 
     private async openCommandBinding(target: NodeTarget): Promise<void> {
         const panel = this.panelFor(target);
+        if (panel.language === 'rust') {
+            if (panel.selectedIds.length !== 1 || panel.selectedNode?.id !== target.node) {
+                throw new Error('Select one authored control in the current Rust design.');
+            }
+            await openRustCommandBinding(
+                new StudioContext(panel, target.token, () => this.active === panel), target.node,
+            );
+            return;
+        }
         await this.commandBindings.open(this.commandBindingSite(panel, target, true));
     }
 

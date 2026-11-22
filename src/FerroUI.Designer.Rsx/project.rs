@@ -673,9 +673,9 @@ impl State<'_> {
         if slots.is_empty() {
             return false;
         }
-        node.commands.note_setter(setter);
         let Some(member) = slots.iter().flat_map(|slot| slot.members())
             .find(|member| member.setter.trim_start_matches("r#") == setter) else {
+            node.commands.note_setter(setter);
             return false;
         };
         let expression = source.expression.map(crate::animation::syntax::span);

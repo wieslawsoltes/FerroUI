@@ -156,7 +156,13 @@ export type ToDetails = { type: 'state'; state: DetailsState }
     | { type: 'edit'; request: number; error?: string };
 export type InspectionTarget = { type: 'source'; node: number } | { type: 'selection'; nodes: number[] } | { type: 'runtime'; id: number };
 export type PropertyTraceTarget = Exclude<InspectionTarget, { type: 'selection' }>;
-export interface Inspection { properties: PropertyField[]; events: EventField[]; itemTemplates?: boolean; controlTemplate?: boolean }
+export interface Inspection {
+    properties: PropertyField[];
+    events: EventField[];
+    itemTemplates?: boolean;
+    controlTemplate?: boolean;
+    rustCommandBinding?: boolean;
+}
 export interface OutlineNode {
     id: number;
     parent: number | null;

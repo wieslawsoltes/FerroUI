@@ -116,6 +116,7 @@ fn inserts_into_inherited_button_and_updates_rust_shorthand() {
         },
     )
     .unwrap();
+    assert_eq!(patch.len(), 1);
     assert_eq!(
         TextPatch::apply_all(source, patch).unwrap(),
         "rsx! { Button{ command_parameter: ticket // current item\n, } }"

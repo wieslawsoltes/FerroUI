@@ -323,6 +323,12 @@ Give the XAML view an `x:DataType` that exposes the command, and run **FerroUI: 
 
 Undo restores both values in the owning XAML file. Named sources, converters, resources, and object-form values open at their source. The parameter uses a typed data path. Its accepted runtime values depend on the command’s implementation. [Designer Studio](../native-controls.md#bind-a-command-and-its-parameter) · [MCP workflow](reference.md#bind-a-command-with-mcp)
 
+### Edit a Rust command binding
+
+Open an RSX design and select one control with a mapped command, such as a **Button**. In **Events**, choose the link icon **Edit command binding**. Choose **Set Rust expression…** to enter an expression such as `approve.clone()` for the registered type. If the command has a parameter, the second picker lets you set or keep it. Completing both pickers applies one edit, and Undo restores both expressions.
+
+Use **Clear expression** to remove an authored assignment or **Reveal in source** to edit a longer expression in the Rust editor. The designer supports builder fields and single-argument calls, such as `command: approve.clone()` and `command(approve.clone())`. It also uses setter names recorded in project RSX metadata. Edit duplicate or indirect assignments in the Rust editor. The running app evaluates the expressions, and rust-analyzer reports their Rust types and diagnostics. [Designer Studio](../native-controls.md#edit-a-rust-command-binding) · [MCP workflow](reference.md#edit-a-rust-command-with-mcp)
+
 ## Rename a resource across XAML files
 
 1. Open the containing project in a trusted workspace. In **Resources**, use the rename icon beside the key. In **Library**, choose **Rename resource and references…** on a keyed definition. From XAML, place the caret on a resource declaration or reference and run **FerroUI: Rename Resource and References…**.
