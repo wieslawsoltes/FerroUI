@@ -12,7 +12,7 @@ use std::{
     rc::{Rc, Weak},
 };
 
-const MAX_PRESENTED_COLUMNS: usize = 8_192;
+const MAX_SOURCE_COLUMNS: usize = 8_192;
 
 pub(super) struct GeneratedTemplateColumn {
     index: usize,
@@ -78,25 +78,27 @@ impl GeneratedTemplateColumn {
 
 pub(super) fn read(grid: &TreeDataGrid, budget: usize) -> Option<Vec<ColumnTemplate>> {
     let origins = grid.generated_template_columns.borrow();
-    if origins.is_empty() || grid.source() != grid.generated_source() {
+    if origins.is_empty() {
         return Some(Vec::new());
     }
-    let Some(columns) = grid.columns() else {
+    let Some(source) = grid
+        .source()
+        .filter(|active| grid.generated_source().as_ref() == Some(active))
+    else {
         return Some(Vec::new());
     };
-    let count = columns.count();
-    if count > MAX_PRESENTED_COLUMNS {
+    let count = source.column_count();
+    if count > MAX_SOURCE_COLUMNS {
         return None;
     }
-    // Reordering the presented columns does not change the authored index.
-    // Columns supplied by an explicit source, or replacing a generated column, have no origin.
-    let presented: HashSet<*const ()> = (0..count)
-        .map(|index| Rc::as_ptr(&columns.get(index)) as *const ())
+    // The active source tracks replacements and moves even while the presentation is detached.
+    let active_columns: HashSet<*const ()> = (0..count)
+        .map(|index| Rc::as_ptr(&source.column(index)) as *const ())
         .collect();
     let mut templates = Vec::new();
     for origin in origins
         .iter()
-        .filter(|origin| presented.contains(&(origin.view.as_ptr() as *const ())))
+        .filter(|origin| active_columns.contains(&(origin.view.as_ptr() as *const ())))
     {
         if let Some(slots) = origin.slots() {
             if slots.len() > budget.saturating_sub(templates.len()) {
