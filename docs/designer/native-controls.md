@@ -91,6 +91,8 @@ Open **Library** and use the **Owning scope** selector beside the category filte
 
 Select a reusable XAML definition to open its existing inspector. Press Enter or double-click an include, behavior, or mapped Rust entry to reveal the declaration in source. Rust item and cell template assignments open in their owning Rust module. An isolated definition lists its own contents. [VS Code workflow](vscode/authoring.md#browse-objects-by-owning-scope) · [MCP workflow](vscode/reference.md#browse-library-scopes-with-mcp)
 
+![The Studio Library filters to the Approve button and reveals its Click behavior in Split view](images/studio-library-scopes.png)
+
 ### Bind a command and its parameter
 
 Build the owning Cargo project to load its registered properties. Open an XAML view with a typed data context, then select the control in the canvas or Layers. In the inspector header, choose the link icon **Edit command binding**.
