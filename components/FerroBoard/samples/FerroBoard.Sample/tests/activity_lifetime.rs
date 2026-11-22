@@ -50,9 +50,6 @@ struct ActivityLifetime {
     factory: RefCell<Option<ViewFactory>>,
 }
 impl IApplicationLifetime for ActivityLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_activity_application_lifetime(&self) -> Option<&dyn IActivityApplicationLifetime> {
         Some(self)
     }

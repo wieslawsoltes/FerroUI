@@ -8,7 +8,6 @@ fn inventory(theme: &Ref<WinUITheme>) -> (usize, usize) {
     struct ProbeCursor;
     impl ferroui_base::platform::ICursorImpl for ProbeCursor {
         fn dispose(&self) {}
-        fn as_any(&self) -> &dyn std::any::Any { self }
     }
     impl ferroui_base::platform::ICursorFactory for ProbeCursor {
         fn get_cursor(&self, _: ferroui_base::input::StandardCursorType) -> Rc<dyn ferroui_base::platform::ICursorImpl> {

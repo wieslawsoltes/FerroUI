@@ -47,9 +47,6 @@ struct SingleLifetime {
     view: RefCell<Option<Ref<Control>>>,
 }
 impl IApplicationLifetime for SingleLifetime {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
     fn as_single_view_application_lifetime(&self) -> Option<&dyn ISingleViewApplicationLifetime> {
         Some(self)
     }
