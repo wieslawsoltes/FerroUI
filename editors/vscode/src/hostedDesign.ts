@@ -420,7 +420,7 @@ class HostedSession {
 
     private schedule(delay: number): void {
         clearTimeout(this.timer);
-        if (this.ready && this.panel.visible && this.client && this.application && !this.disposed) {
+        if (!this.disposed && this.ready && this.client && this.application && this.panel.visible) {
             this.timer = setTimeout(() => {
                 this.polling = this.tick().finally(() => { this.polling = undefined; });
             }, delay);

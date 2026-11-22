@@ -14,6 +14,7 @@ interface GroupSelection {
     scope?: string;
     keys: KeyframeLocation[];
     version: number;
+    playhead: number;
 }
 
 export class HostedKeyLanes {
@@ -39,7 +40,7 @@ export class HostedKeyLanes {
     private shown = false;
     private accepted?: FrameTarget;
     private request = 0;
-    private pending?: { request: number; program: HostedAnimationProgram; scope?: string };
+    private pending?: { request: number; program: HostedAnimationProgram; scope?: string; playhead: number };
     private replacement?: GroupSelection;
     private pivot = 0;
     private restoreFocus = false;
@@ -101,7 +102,7 @@ export class HostedKeyLanes {
             }
         }
         if (frame && this.replacement && version >= this.replacement.version) {
-            const { keys, program: before, scope: originalScope, version: edited } = this.replacement;
+            const { keys, program: before, scope: originalScope, version: edited, playhead } = this.replacement;
             this.replacement = undefined;
             if (version === edited && scope === originalScope && program
                 && (before.sourceKey ? before.sourceKey === program.sourceKey : before.selector === program.selector
@@ -114,6 +115,7 @@ export class HostedKeyLanes {
                         ? { ...key, target: destinations[0].target } : key;
                 }));
                 this.selection.reconcile(tracks);
+                this.setPivot(Math.min(playhead, program.duration), true);
                 if (this.restoreFocus) this.focusKey();
             }
             this.restoreFocus = false;
@@ -127,7 +129,8 @@ export class HostedKeyLanes {
         if (reply.request !== pending?.request) return;
         this.pending = undefined;
         if (reply.keys && reply.version !== undefined) {
-            this.replacement = { program: pending.program, scope: pending.scope, keys: reply.keys, version: reply.version };
+            this.replacement = { program: pending.program, scope: pending.scope, keys: reply.keys,
+                version: reply.version, playhead: pending.playhead };
         } else this.restoreFocus = false;
         this.showError(reply.error);
         this.changed();
@@ -236,7 +239,7 @@ export class HostedKeyLanes {
         this.restoreFocus = restoreFocus;
         this.showError();
         const request = ++this.request;
-        this.pending = { request, program: this.program, scope: this.scope };
+        this.pending = { request, program: this.program, scope: this.scope, playhead: this.pivot };
         return { request, program: this.program.id, frame: { revision: frame.session, sequence: frame.token } };
     }
 

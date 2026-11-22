@@ -130,7 +130,9 @@ For VS Code MCP, call `designer_keyframe_clipboard` through `designer_studio_que
 2. Click the keyframe ruler or enter **Authored time** in seconds. This position belongs to one animation iteration. The transport above the lanes shows elapsed time, including delay, speed, and repeats.
 3. Choose the plus icon beside the property, or focus it and press Enter. **Add keyframe at authored playhead** captures that lane’s value using the running app’s native animator and inserts a key with linear incoming easing. The resulting key is selected. At an occupied time, open the existing key to edit it.
 
-The action is available on typed XAML and mapped Rust tracks that advertise native sampling. With several preview targets, the lane samples its authored target when selected. Otherwise choose one live preview target. The edit updates the unsaved source in one Undo step and retains the compatible elapsed pose through the preview rebuild.
+The action is available on typed XAML and mapped Rust tracks that advertise native sampling. With several preview targets, the lane samples its authored target when selected. Otherwise choose one live preview target. The edit updates the unsaved source in one Undo step. The authored cursor and compatible elapsed pose carry over through the preview rebuild.
+
+![The ReviewCorners XAML resource has a new key at one authored second while App Preview holds its assigned card at 1.25 seconds elapsed](../images/vscode-app-preview-xaml-recorded-key.png)
 
 For MCP, read the frame, generation, and tracks from `designer_hosted_animations`. Choose a track with `canSample` and send `program`, the track’s `target` and `property`, authored `time`, and `sample: true` to `designer_hosted_keyframe_draft`. Pass `previewTarget` to select a compatible live control explicitly. The draft returns `sampledKey` and the checked patch. Apply with `designer_hosted_keyframe` using the current frame. For an explicit value, supply `value` and `easing` and omit `previous` to insert a key.
 
