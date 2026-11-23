@@ -1,5 +1,5 @@
 use crate::{DesignerSession, RuntimeNode};
-use ferroui_base::{FerroObject, Ref};
+use ferroui_base::{FerroObject, FerroPropertyRegistry, Ref};
 use ferroui_designer_core::NodeId;
 use ferroui_inspect::{Inspector, PropertyInfo, TreeKind};
 use std::collections::{BTreeMap, BTreeSet};
@@ -36,9 +36,30 @@ impl DesignerSession {
     }
 
     pub fn authored_preview_properties(&self, node: NodeId) -> Vec<PropertyInfo> {
-        self.preview
-            .visual(node)
-            .map_or_else(Vec::new, |visual| Inspector::properties(&visual))
+        let Some(visual) = self.preview.visual(node) else {
+            return Vec::new();
+        };
+        let mut properties = Inspector::properties(&visual);
+        let registered = FerroPropertyRegistry::instance().get_registered_for(&visual);
+        let mut by_name = BTreeMap::new();
+        for property in registered.iter() {
+            by_name.entry(property.name()).or_insert(property.id());
+        }
+        // XAML can use a short name for an attached property that the control
+        // declares or adds as an owner. Explicit Owner.Name still works.
+        let aliases = properties
+            .iter()
+            .filter(|info| {
+                info.property.is_attached()
+                    && by_name.get(info.property.name()) == Some(&info.property.id())
+            })
+            .map(|info| PropertyInfo {
+                name: info.property.name().to_owned(),
+                ..info.clone()
+            })
+            .collect::<Vec<_>>();
+        properties.extend(aliases);
+        properties
     }
 
     pub fn inspected_preview_properties(&self, id: u64) -> Result<Vec<PropertyInfo>, String> {

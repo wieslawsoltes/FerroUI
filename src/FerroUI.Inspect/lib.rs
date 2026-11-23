@@ -340,10 +340,14 @@ impl Inspector {
 
     /// A registered or attached (`Owner.Name`) property of the object.
     pub fn property(object: &FerroObject, name: &str) -> Result<&'static FerroProperty, String> {
-        Self::registered(object)
-            .into_iter()
-            .find(|p| property_name(p) == name)
-            .ok_or_else(|| format!("Unknown property: {name}"))
+        let property = if name.contains('.') {
+            Self::registered(object)
+                .into_iter()
+                .find(|property| property_name(property) == name)
+        } else {
+            FerroPropertyRegistry::instance().find_registered_for(object, name)
+        };
+        property.ok_or_else(|| format!("Unknown property: {name}"))
     }
 
     /// The registered and attached properties of the object, sorted by name.
