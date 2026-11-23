@@ -2,8 +2,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Header="MapControl"
              x:Class="ControlCatalog.Pages.MapControlPage">
-  <Grid x:Name="LayoutRoot" RowDefinitions="Auto,480">
+  <Grid x:Name="LayoutRoot" RowDefinitions="Auto,Auto,480">
     <TextBlock Margin="0,0,0,8" TextWrapping="Wrap"
-               Text="Drag to move, use the wheel or a pinch to zoom, or focus the map and use the arrow, plus and minus keys. The tiles are an offline grid: the catalog makes no network requests." />
+               Text="Drag to move; use the wheel or a pinch to zoom. Turn the map with a right drag, Control and a drag, or two fingers. With the map focused: arrows move, plus and minus zoom, Control and left or right turn, Home goes back to north. Click an element to see it below. The tiles are an offline grid: the catalog makes no network requests." />
+    <TextBlock x:Name="Clicked" Grid.Row="1" Margin="0,0,0,8" TextWrapping="Wrap" Text="No element clicked yet." />
   </Grid>
 </ContentPage>

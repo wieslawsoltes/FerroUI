@@ -3,10 +3,10 @@
 
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::{ferro_class_info, instantiate, Ref};
-use ferroui_controls::{ContentPage, Control, Grid};
+use ferroui_controls::{ContentPage, Control, Grid, TextBlock};
 use ferroui_controls_maps::{
-    grid_tile_source, BasicGeoposition, GridTileLoader, MapControl, MapElement, MapElementsLayer, MapIcon, MapPolygon,
-    MapPolyline,
+    grid_tile_source, BasicGeoposition, GridTileLoader, MapControl, MapElement, MapElementClickEventArgs,
+    MapElementsLayer, MapIcon, MapPolygon, MapPolyline,
 };
 use std::rc::Rc;
 
@@ -33,7 +33,7 @@ impl MapControlPage {
         this.initialize_component();
 
         let map = MapControl::new();
-        Grid::set_row(&map, 1);
+        Grid::set_row(&map, 2);
         map.set_tile_source(Some(Rc::new(grid_tile_source())), Some(Rc::new(GridTileLoader)));
         map.set_zoom_level(2.0);
 
@@ -52,6 +52,20 @@ impl MapControlPage {
         let mut icon = MapIcon::new(place(25.0, 5.0));
         icon.title = Some("An icon".to_owned());
         layer.add(MapElement::Icon(icon));
+        let clicked = this.get_control::<TextBlock>("Clicked").downgrade();
+        layer.map_element_click().add(Rc::new(move |args: &MapElementClickEventArgs| {
+            let Some(clicked) = clicked.upgrade() else { return };
+            let kind = match args.element {
+                MapElement::Icon(_) => "the icon",
+                MapElement::Polyline(_) => "the line",
+                MapElement::Polygon(_) => "the area",
+            };
+            let text = format!(
+                "Clicked {kind} at {:.3}, {:.3}.",
+                args.location.latitude, args.location.longitude
+            );
+            clicked.set_text(Some(text.as_str()));
+        }));
         map.add_layer(layer);
 
         this.get_control::<Grid>("LayoutRoot").children().add(map.upcast::<Control>());
