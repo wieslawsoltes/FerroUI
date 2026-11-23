@@ -4,6 +4,7 @@
 //! template and the attribution its provider requires, and an [`ITileLoader`] that fetches.
 
 mod camera;
+mod grid_tiles;
 mod map_control;
 mod map_elements;
 mod projection;
@@ -15,6 +16,7 @@ mod tile_store;
 mod tests;
 
 pub use camera::{MapCamera, MAX_ZOOM, MIN_ZOOM};
+pub use grid_tiles::{grid_tile_source, GridTileLoader};
 pub use map_control::{MapControl, MapControlAutomationPeer, MapInteractionMode};
 pub use map_elements::{MapElement, MapElementsLayer, MapIcon, MapPolygon, MapPolyline};
 pub use projection::{

@@ -231,3 +231,41 @@ fn the_disk_cache_answers_without_the_loader() {
     drop(store);
     let _ = std::fs::remove_dir_all(&folder);
 }
+
+fn key(map: &MapControl, key: ferroui_base::input::Key) -> bool {
+    let mut args = ferroui_base::input::KeyEventArgs::new();
+    args.key = key;
+    <MapControl as ferroui_base::input::InputElementImpl>::on_key_down(map, &args);
+    args.handled()
+}
+
+#[test]
+fn the_arrow_keys_move_the_map_and_a_disabled_mode_stops_them() {
+    use ferroui_base::input::Key;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let map = MapControl::new();
+    map.set_zoom_level(4.0);
+    let start = map.center().longitude;
+    assert!(key(&map, Key::Right));
+    assert!(map.center().longitude > start, "the view moves east");
+    let moved = map.center().longitude;
+    map.set_pan_interaction_mode(MapInteractionMode::Disabled);
+    assert!(!key(&map, Key::Right));
+    assert_eq!(map.center().longitude, moved);
+    map.set_zoom_interaction_mode(MapInteractionMode::Disabled);
+    assert!(!key(&map, Key::Add));
+    assert_eq!(map.zoom_level(), 4.0);
+}
+
+#[test]
+fn the_grid_source_needs_no_network() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let loader: SharedTileLoader = Rc::new(GridTileLoader);
+    let store: TileStore<usize> = TileStore::new(1 << 24, |bytes: &[u8]| {
+        Some((bytes.len(), bytes.len() as u64))
+    });
+    store.set_source(Some(Rc::new(grid_tile_source())), Some(loader));
+    store.request([tile(3, 1, 2)]);
+    run_jobs();
+    assert!(*store.best(tile(3, 1, 2)).unwrap().0 > 256 * 256 * 4);
+}
