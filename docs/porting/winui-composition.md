@@ -496,7 +496,7 @@ with their transforms into their spaces, the material); the Skia shader evaluate
 are `PixelOperation`, with `apply_to_premultiplied_rgba8` as the CPU reference. Each method of
 `IDrawingContextImplWithLayerEffects` that takes them returns whether the context drew; when it
 did not (Vello's CPU mode and WebGL2, the mock and test contexts, a context without runtime
-effects, more than `LightingParameters::MAX_LIGHTS` point and spot lights) the compositor draws the same on the CPU.
+effects, more than `LightingParameters::MAX_LIGHTS` point and spot lights on a context that does not answer for them through `evaluates_lighting`) the compositor draws the same on the CPU.
 
 ### 5.4 WinUI's effect and render subsystems and the custom effects of FerroUI
 

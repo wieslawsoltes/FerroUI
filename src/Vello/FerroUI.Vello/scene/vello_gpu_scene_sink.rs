@@ -1,9 +1,9 @@
 use crate::gpu::{log_render_failure, premultiply_pixel, VelloGpuTexture, VelloWgpuDevice};
 use crate::scene::image_textures::{release_unused_textures, rgba_bytes};
-use crate::scene::vello_cpu_scene_sink::{prepare, stroke_outline};
+use crate::scene::vello_cpu_scene_sink::{closed_form_std_dev, prepare, stroke_outline};
 use crate::scene::{
-    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint, VelloScenePixelRect,
-    VelloSceneTexture,
+    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneFilterCapabilities, VelloSceneGlyphRun,
+    VelloScenePaint, VelloScenePixelRect, VelloSceneTexture,
 };
 use crate::vello_options::VelloRenderingMode;
 use kurbo::{Affine, BezPath, Diagonal2, PathEl, Point, Rect, Stroke, Vec2};
@@ -652,19 +652,24 @@ impl VelloGpuSceneSink {
 
         let scene = combined.as_ref().unwrap_or(&self.scene);
         let (images, anti_aliasing) = (&self.images, self.anti_aliasing);
+        // Taken out of the state until it is copied: the lock is not held between the render and
+        // the copy, and another thread may render on this device in between.
         let rendered = self.device.with_renderer_state(Self::new_state, |device, state| {
-            let reusable =
-                state.region.as_ref().is_some_and(|texture| texture.width() == width && texture.height() == height);
-            if !reusable {
-                state.region = Some(device.create_rgba_texture(width, height, Self::TARGET_USAGE));
-            }
-            let region = state.region.clone().unwrap_or_else(|| panic!("The texture was just created"));
+            let region = state
+                .region
+                .take()
+                .filter(|texture| texture.width() == width && texture.height() == height)
+                .unwrap_or_else(|| device.create_rgba_texture(width, height, Self::TARGET_USAGE));
             let view = region.create_view(&wgpu::TextureViewDescriptor::default());
-            Self::render(scene, images, anti_aliasing, device, state, &view, width, height)?;
+            if let Err(error) = Self::render(scene, images, anti_aliasing, device, state, &view, width, height) {
+                state.region = Some(region);
+                return Err(error);
+            }
             Ok::<_, String>(region)
         })?;
 
         self.device.copy_texture_region(&rendered, (0, 0), target, (x, y), (width, height));
+        self.device.with_renderer_state(Self::new_state, |_, state| state.region = Some(rendered));
         Ok(())
     }
 
@@ -1178,6 +1183,32 @@ impl IVelloSceneSink for VelloGpuSceneSink {
         }
     }
 
+    fn filter_capabilities(&self) -> VelloSceneFilterCapabilities {
+        // The renderer has no filter layers; it has the closed form.
+        VelloSceneFilterCapabilities { filter_layers: false, blurred_rounded_rects: true }
+    }
+
+    /// # Panics
+    /// Panics with `invert`: the renderer has no inverted form, and the box shadows draw an inset
+    /// shadow through its shape.
+    fn fill_blurred_rounded_rect(
+        &mut self,
+        rect: Rect,
+        radius: f64,
+        std_deviation: f64,
+        invert: bool,
+        transform: Affine,
+        color: AlphaColor<peniko::color::Srgb>,
+    ) {
+        assert!(!invert, "The compute renderer has no inverted blurred rounded rectangle");
+        self.drawing();
+        // The renderer evaluates the blur at the corner of a pixel, not at its center, as it does
+        // a gradient (see `fill`). The shape the blur is drawn in reaches past where the blur
+        // ends, so moving both by half a pixel moves only the blur.
+        let transform = Affine::translate((-0.5, -0.5)) * self.placed(transform);
+        self.scene.draw_blurred_rounded_rect(transform, rect, color, radius, closed_form_std_dev(std_deviation));
+    }
+
     fn render_to_pixels(&mut self, pixels: &mut [u8]) {
         // Pixels in memory are rendered whole: a scene restricted to a part
         // of a kept target goes back to the size of the target.
@@ -1227,22 +1258,27 @@ impl IVelloSceneSink for VelloGpuSceneSink {
             });
         }
 
-        let intermediate = self.device.with_renderer_state(Self::new_state, |device, state| {
-            let reusable =
-                state.intermediate.as_ref().is_some_and(|texture| texture.width() == width && texture.height() == height);
-            if !reusable {
-                state.intermediate = Some(device.create_rgba_texture(width, height, Self::TARGET_USAGE));
-            }
-            let intermediate = state.intermediate.clone().unwrap_or_else(|| panic!("The texture was just created"));
+        // Taken out of the state until it is copied: the lock is not held between the render and
+        // the copy, and another thread may render on this device in between.
+        let (intermediate, view) = self.device.with_renderer_state(Self::new_state, |device, state| {
+            let intermediate = state
+                .intermediate
+                .take()
+                .filter(|texture| texture.width() == width && texture.height() == height)
+                .unwrap_or_else(|| device.create_rgba_texture(width, height, Self::TARGET_USAGE));
             let view = intermediate.create_view(&wgpu::TextureViewDescriptor::default());
 
-            Self::render(scene, images, anti_aliasing, device, state, &view, width, height)?;
-            Ok::<_, String>(view)
+            if let Err(error) = Self::render(scene, images, anti_aliasing, device, state, &view, width, height) {
+                state.intermediate = Some(intermediate);
+                return Err(error);
+            }
+            Ok::<_, String>((intermediate, view))
         })?;
 
         // The renderer's output is not premultiplied; the texture of a
         // window holds premultiplied pixels.
-        self.device.copy_texture_to_texture(&intermediate, target.texture, true);
+        self.device.copy_texture_to_texture(&view, target.texture, true);
+        self.device.with_renderer_state(Self::new_state, |_, state| state.intermediate = Some(intermediate));
         Ok(())
     }
 }

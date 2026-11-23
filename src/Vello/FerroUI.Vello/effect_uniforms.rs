@@ -10,7 +10,7 @@
 
 use ferroui_base::media::effects::{ImmutableCustomEffect, ShaderUniformValue};
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
-use ferroui_base::platform::{LightingParameters, PixelOperation};
+use ferroui_base::platform::{LightingParameters, MultiplyLayerFactors, PixelOperation, PositionedLight};
 use ferroui_base::rendering::composition::effects::BlendEffectMode;
 use ferroui_base::rendering::composition::server::{LightSource, LIGHT_MAP_MAX_SCALE};
 
@@ -66,6 +66,8 @@ pub(crate) const COLOR_MATRIX_FLOATS: usize = 6 * 4;
 pub(crate) const PIXEL_OPERATION_FLOATS: usize = 6 * 4;
 /// Floats of the convolution block: seven `vec4` of weights, the size, the factors, the extent.
 pub(crate) const CONVOLUTION_FLOATS: usize = 10 * 4;
+/// Floats of the block of a multiply layer of factors: 4 `vec4`.
+pub(crate) const MULTIPLY_FACTORS_FLOATS: usize = 4 * 4;
 
 /// What a lighting program writes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -87,6 +89,21 @@ pub(crate) fn lighting(
     to_local: kurbo::Affine,
 ) -> Vec<f32> {
     let mut floats = vec![0f32; LIGHTING_FLOATS];
+    floats[..HEAD_FLOATS].copy_from_slice(&lighting_head(lighting, output, origin, to_local));
+    let count = lighting.lights.len().min(MAX_LIGHTS);
+    floats[10] = count as f32;
+    write_lights(&mut floats[HEAD_FLOATS..], &lighting.lights[..count]);
+    floats
+}
+
+/// The floats of the block before the lights, with the whole number of lights.
+fn lighting_head(
+    lighting: &LightingParameters,
+    output: LightingOutput,
+    origin: (u32, u32),
+    to_local: kurbo::Affine,
+) -> [f32; HEAD_FLOATS] {
+    let mut floats = [0f32; HEAD_FLOATS];
     let constant = lighting.constant;
     let material = lighting.material;
     let (mode, scale) = match output {
@@ -101,11 +118,16 @@ pub(crate) fn lighting(
         material.specular as f32,
         material.shine as f32,
     ]);
-    floats[8..12].copy_from_slice(&[mode, scale, lighting.lights.len().min(MAX_LIGHTS) as f32, 0.0]);
+    floats[8..12].copy_from_slice(&[mode, scale, lighting.lights.len() as f32, 0.0]);
     floats[12..16].copy_from_slice(&[origin.0 as f32, origin.1 as f32, 0.0, 0.0]);
     // x' = a x + c y + e, y' = b x + d y + f
     floats[16..20].copy_from_slice(&[a as f32, c as f32, e as f32, 0.0]);
     floats[20..24].copy_from_slice(&[b as f32, d as f32, f as f32, 0.0]);
+    floats
+}
+
+/// Writes `lights`, [`LIGHT_FLOATS`] floats each.
+fn write_lights(floats: &mut [f32], lights: &[PositionedLight]) {
     let max_cutoff = |value: f64| -> [f32; 2] {
         if value.is_nan() || value >= f64::from(f32::MAX) {
             [0.0, 0.0]
@@ -115,8 +137,8 @@ pub(crate) fn lighting(
             [value as f32, 1.0]
         }
     };
-    for (index, light) in lighting.lights.iter().take(MAX_LIGHTS).enumerate() {
-        let at = HEAD_FLOATS + index * LIGHT_FLOATS;
+    for (index, light) in lights.iter().enumerate() {
+        let at = index * LIGHT_FLOATS;
         let slot = |field: usize| at + field * 4;
         let m = light.to_light_space;
         floats[slot(7)..slot(7) + 3].copy_from_slice(&[m.m11 as f32, m.m21 as f32, m.m31 as f32]);
@@ -170,7 +192,53 @@ pub(crate) fn lighting(
         ]);
         floats[slot(6)..slot(6) + 2].copy_from_slice(&max_cutoff(attenuation.max_cutoff));
     }
-    floats
+}
+
+/// More lights than the uniform block holds (#1158): the floats before the lights, and the lights
+/// as the rows of an image of [`LIGHT_FLOATS`] / 4 `RGBA32F` texels, which the programs read by
+/// texel.
+pub(crate) struct ManyLights {
+    /// The block of the program.
+    pub(crate) head: [f32; HEAD_FLOATS],
+    /// [`LIGHT_FLOATS`] floats per light.
+    pub(crate) rows: Vec<f32>,
+}
+
+impl ManyLights {
+    fn new(lighting: &LightingParameters, head: [f32; HEAD_FLOATS]) -> Self {
+        let mut rows = vec![0f32; lighting.lights.len() * LIGHT_FLOATS];
+        write_lights(&mut rows, &lighting.lights);
+        Self { head, rows }
+    }
+
+    /// The rows of the image: one per light.
+    pub(crate) fn row_count(&self) -> u32 {
+        (self.rows.len() / LIGHT_FLOATS) as u32
+    }
+}
+
+/// [`lighting`] for any number of lights.
+pub(crate) fn many_lighting(
+    lighting: &LightingParameters,
+    output: LightingOutput,
+    origin: (u32, u32),
+    to_local: kurbo::Affine,
+) -> ManyLights {
+    ManyLights::new(lighting, lighting_head(lighting, output, origin, to_local))
+}
+
+/// [`light_multiply`] for any number of lights.
+pub(crate) fn many_light_multiply(
+    lighting: &LightingParameters,
+    (width, height): (u32, u32),
+    to_local: kurbo::Affine,
+) -> ManyLights {
+    let scale = LIGHT_MAP_MAX_SCALE as f32;
+    let output = LightingOutput::Factors { scale_bits: scale.to_bits() };
+    let mut head = lighting_head(lighting, output, (0, 0), to_local);
+    head[14] = width as f32;
+    head[15] = height as f32;
+    ManyLights::new(lighting, head)
 }
 
 /// The block of the multiply layer of lit visuals over an area of `width` by `height` pixels:
@@ -250,6 +318,41 @@ pub(crate) fn pixel_operation(
 }
 
 /// The convolution block over an area of `width` by `height` pixels.
+/// The samples of `factors` to upload: their size, their pixels and their scale. Factors whose
+/// pixels do not fill their size change nothing, as `MultiplyLayerFactors::factor_at`.
+pub(crate) fn factor_samples(factors: &MultiplyLayerFactors) -> (u32, u32, &[u8], f32) {
+    const NEUTRAL: [u8; 4] = [255; 4];
+    let (width, height) = (factors.size.width.max(1) as u32, factors.size.height.max(1) as u32);
+    if factors.rgba.len() < width as usize * height as usize * 4 {
+        return (1, 1, &NEUTRAL, 1.0);
+    }
+    (width, height, &factors.rgba, factors.scale)
+}
+
+/// The transform from the pixels of the scene of a multiply layer to the unit square of its
+/// factors, which are stretched over `bounds`.
+pub(crate) fn factors_to_unit(bounds: ferroui_base::Rect, scene_to_local: kurbo::Affine) -> kurbo::Affine {
+    kurbo::Affine::scale_non_uniform(1.0 / bounds.width, 1.0 / bounds.height)
+        * kurbo::Affine::translate((-bounds.x, -bounds.y))
+        * scene_to_local
+}
+
+/// The block of a multiply layer: the rows of `to_unit` from the pixels of the area to the unit
+/// square of the factors, the size of the samples and their scale, and the size of the area.
+pub(crate) fn multiply_factors(
+    (samples_x, samples_y, scale): (u32, u32, f32),
+    to_unit: kurbo::Affine,
+    (width, height): (u32, u32),
+) -> Vec<f32> {
+    let [a, b, c, d, e, f] = to_unit.as_coeffs();
+    vec![
+        a as f32, c as f32, e as f32, 0.0,
+        b as f32, d as f32, f as f32, 0.0,
+        samples_x as f32, samples_y as f32, scale, 0.0,
+        width as f32, height as f32, 0.0, 0.0,
+    ]
+}
+
 pub(crate) fn convolution(convolution: &ConvolveMatrix, (width, height): (u32, u32)) -> Vec<f32> {
     let mut floats = vec![0.0f32; CONVOLUTION_FLOATS];
     for (slot, weight) in floats.iter_mut().take(28).zip(convolution.correlation_kernel()) {

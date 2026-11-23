@@ -17,9 +17,12 @@
 //! tests of the framebuffer, the viewport), and unbound otherwise.
 
 use super::frame_textures::VelloWebGlTexture;
+use super::shadow_programs as shadows;
 use crate::effect_uniforms as blocks;
 use std::rc::Rc;
-use web_sys::{WebGl2RenderingContext as Gl, WebGlProgram, WebGlShader, WebGlUniformLocation, WebGlVertexArrayObject};
+use web_sys::{
+    WebGl2RenderingContext as Gl, WebGlProgram, WebGlShader, WebGlTexture, WebGlUniformLocation, WebGlVertexArrayObject,
+};
 
 /// The vertex stage of the passes: a triangle over the target, without attributes.
 const VERTEX: &str = r#"#version 300 es
@@ -100,6 +103,21 @@ void main() {
 "#;
 
 /// The lights at a pixel (`LIGHT_COMMON_WGSL`), which the two lighting programs start with.
+/// Up to 8 lights in the uniform array of the program.
+macro_rules! eight_lights {
+    () => {
+        "uniform vec4 u_params[86];\n#define LIGHT(i, k) u_params[6 + (i) * 10 + (k)]\n#define LIGHT_LIMIT 8\n"
+    };
+}
+
+/// Any number of lights in an image of `RGBA32F` texels, one row per light, read by texel (#1158).
+macro_rules! many_lights {
+    () => {
+        "uniform vec4 u_params[6];\nuniform highp sampler2D u_lights;\n\
+         #define LIGHT(i, k) texelFetch(u_lights, ivec2(k, i), 0)\n#define LIGHT_LIMIT 1048576\n"
+    };
+}
+
 macro_rules! light_common {
     () => {
         r#"
@@ -110,8 +128,6 @@ macro_rules! light_common {
 // cones), the colour (the inner colour of a spot light), the outer colour, the position, the
 // direction, the attenuation (constant, linear, quadratic, minimum cutoff), the cutoff (x the
 // maximum cutoff, y 1 when there is one), the rows of the transform into the space of the light.
-uniform vec4 u_params[86];
-
 float attenuation_factor(vec4 a, vec4 c, float d) {
     if (c.y > 0.5 && d > c.x) {
         return 0.0;
@@ -166,31 +182,30 @@ vec3 light_at(vec2 fragment) {
     vec3 light = u_params[0].rgb;
     int count = int(u_params[2].z);
     vec4 material = u_params[1];
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < LIGHT_LIMIT; i++) {
         if (i >= count) {
             break;
         }
-        int at = 6 + i * 10;
-        vec4 kind = u_params[at];
+        vec4 kind = LIGHT(i, 0);
         vec3 point = vec3(coord, 1.0);
-        vec2 p = vec2(dot(u_params[at + 7].xyz, point), dot(u_params[at + 8].xyz, point))
-            / dot(u_params[at + 9].xyz, point);
-        vec3 pos = u_params[at + 3].xyz;
+        vec2 p = vec2(dot(LIGHT(i, 7).xyz, point), dot(LIGHT(i, 8).xyz, point))
+            / dot(LIGHT(i, 9).xyz, point);
+        vec3 pos = LIGHT(i, 3).xyz;
         vec3 to_light = vec3(pos.xy - p, pos.z);
         float d = length(to_light);
         float incidence = 0.0;
         if (d > 0.0 && pos.z > 0.0) {
             incidence = pos.z / d;
         }
-        float att = attenuation_factor(u_params[at + 5], u_params[at + 6], d);
-        vec3 c = u_params[at + 1].rgb;
+        float att = attenuation_factor(LIGHT(i, 5), LIGHT(i, 6), d);
+        vec3 c = LIGHT(i, 1).rgb;
         float cone = 1.0;
         if (kind.x > 1.5) {
-            cone = spot_cone(pos, u_params[at + 4].xyz, kind.y, kind.z, p);
+            cone = spot_cone(pos, LIGHT(i, 4).xyz, kind.y, kind.z, p);
             if (cone <= 0.0) {
                 continue;
             }
-            c = mix(u_params[at + 2].rgb, u_params[at + 1].rgb, cone);
+            c = mix(LIGHT(i, 2).rgb, LIGHT(i, 1).rgb, cone);
         }
         vec3 lit = vec3(0.0);
         if (material.y != 0.0) {
@@ -210,9 +225,9 @@ vec3 light_at(vec2 fragment) {
 /// The multiply layer of lit visuals (`LIGHT_MULTIPLY_FRAGMENT_WGSL`): each colour channel of the
 /// content times the light at its pixel, clamped to 0..`scale`, the result clamped to the alpha,
 /// the alpha kept.
-const LIGHT_MULTIPLY: &str = concat!(
-    light_common!(),
-    r#"
+macro_rules! light_multiply_main {
+    () => {
+        r#"
 void main() {
     ivec2 pixel = ivec2(floor(gl_FragCoord.xy));
     if (outside(pixel)) {
@@ -224,13 +239,17 @@ void main() {
     o_color = vec4(min(c.rgb * factors, vec3(c.a)), c.a);
 }
 "#
-);
+    };
+}
+const LIGHT_MULTIPLY: &str = concat!(eight_lights!(), light_common!(), light_multiply_main!());
+/// [`LIGHT_MULTIPLY`] with the lights read from an image (#1158).
+const MANY_LIGHT_MULTIPLY: &str = concat!(many_lights!(), light_common!(), light_multiply_main!());
 
 /// The lighting fill of a scene lighting effect (`LIGHTING_FRAGMENT_WGSL`): the light at each
 /// pixel, opaque. It reads no texture.
-const LIGHT_FILL: &str = concat!(
-    light_common!(),
-    r#"
+macro_rules! light_fill_main {
+    () => {
+        r#"
 void main() {
     ivec2 pixel = ivec2(floor(gl_FragCoord.xy));
     if (outside(pixel)) {
@@ -246,7 +265,11 @@ void main() {
     o_color = vec4(clamp(light, vec3(0.0), vec3(1.0)), 1.0);
 }
 "#
-);
+    };
+}
+const LIGHT_FILL: &str = concat!(eight_lights!(), light_common!(), light_fill_main!());
+/// [`LIGHT_FILL`] with the lights read from an image (#1158).
+const MANY_LIGHT_FILL: &str = concat!(many_lights!(), light_common!(), light_fill_main!());
 
 /// The pixel operations of two sources (`PIXEL_OPERATION_WGSL`): the next source (`u_next`)
 /// combined into what the sources before it made (`u_content`).
@@ -483,6 +506,47 @@ void main() {
 "#;
 
 /// A program of the layers with an effect on the WebGL2 context.
+/// A multiply layer of factors (`MULTIPLY_FACTORS_WGSL`): each colour channel of the content times
+/// the factor of its point, sampled bilinearly between the centres of the samples of `u_next`
+/// (upright, of its own size), clamped to the alpha; a pixel outside the factors is cleared.
+const MULTIPLY_FACTORS: &str = r#"
+// 0, 1: the rows of the transform from the pixels of the area to the unit square of the factors;
+// 2: x, y the size of the samples, z what a sample of 1 stands for; 3: x, y the size of the area.
+uniform vec4 u_params[4];
+
+vec3 factor_sample(ivec2 p) {
+    return texelFetch(u_next, p, 0).rgb;
+}
+
+void main() {
+    ivec2 pixel = ivec2(floor(gl_FragCoord.xy));
+    if (outside(pixel)) {
+        o_color = vec4(0.0);
+        return;
+    }
+    vec4 c = load_content(pixel);
+    if (c.a <= 0.0) {
+        o_color = vec4(0.0);
+        return;
+    }
+    vec3 at = vec3(vec2(pixel) + 0.5, 1.0);
+    vec2 unit = vec2(dot(u_params[0].xyz, at), dot(u_params[1].xyz, at));
+    if (unit.x < 0.0 || unit.x > 1.0 || unit.y < 0.0 || unit.y > 1.0) {
+        o_color = vec4(0.0);
+        return;
+    }
+    vec2 size = u_params[2].xy;
+    vec2 p = clamp(unit * size - 0.5, vec2(0.0), size - 1.0);
+    ivec2 a = ivec2(floor(p));
+    ivec2 b = min(a + ivec2(1), ivec2(size) - ivec2(1));
+    vec2 f = p - vec2(a);
+    vec3 top = mix(factor_sample(a), factor_sample(ivec2(b.x, a.y)), f.x);
+    vec3 bottom = mix(factor_sample(ivec2(a.x, b.y)), factor_sample(b), f.x);
+    vec3 factor = mix(top, bottom, f.y) * u_params[2].z;
+    o_color = vec4(min(c.rgb * factor, vec3(c.a)), c.a);
+}
+"#;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum LayerProgram {
     /// The colour matrix layers and the luminance mask.
@@ -493,17 +557,35 @@ pub(crate) enum LayerProgram {
     PixelOperation,
     /// The matrix convolution layers.
     Convolution,
+    /// The coverage of the box of a shadow (`shadow_programs.rs`).
+    ShadowCoverage,
+    /// One direction of the Gaussian of a shadow.
+    ShadowGaussian,
+    /// A shadow blurred at a reduced scale, scaled back.
+    ShadowScaleUp,
+    /// A multiply layer of factors: the content and the image of its factors.
+    MultiplyFactors,
     /// The lighting fill of a scene lighting effect.
     LightFill,
+    /// The multiply layer of lit visuals with the lights in an image (#1158).
+    ManyLightMultiply,
+    /// The lighting fill with the lights in an image (#1158).
+    ManyLightFill,
 }
 
 impl LayerProgram {
-    const ALL: [LayerProgram; 5] = [
+    const ALL: [LayerProgram; 11] = [
         LayerProgram::ColorMatrix,
         LayerProgram::LightMultiply,
         LayerProgram::PixelOperation,
         LayerProgram::Convolution,
+        LayerProgram::ShadowCoverage,
+        LayerProgram::ShadowGaussian,
+        LayerProgram::ShadowScaleUp,
+        LayerProgram::MultiplyFactors,
         LayerProgram::LightFill,
+        LayerProgram::ManyLightMultiply,
+        LayerProgram::ManyLightFill,
     ];
 
     fn index(self) -> usize {
@@ -517,7 +599,13 @@ impl LayerProgram {
             LayerProgram::LightMultiply => "light multiply",
             LayerProgram::PixelOperation => "pixel operation",
             LayerProgram::Convolution => "convolution",
+            LayerProgram::ShadowCoverage => "shadow coverage",
+            LayerProgram::ShadowGaussian => "shadow Gaussian",
+            LayerProgram::ShadowScaleUp => "shadow scale up",
+            LayerProgram::MultiplyFactors => "multiply factors",
             LayerProgram::LightFill => "lighting fill",
+            LayerProgram::ManyLightMultiply => "many lights multiply",
+            LayerProgram::ManyLightFill => "many lights fill",
         }
     }
 
@@ -528,15 +616,21 @@ impl LayerProgram {
             LayerProgram::LightMultiply => LIGHT_MULTIPLY,
             LayerProgram::PixelOperation => PIXEL_OPERATION,
             LayerProgram::Convolution => CONVOLUTION,
+            LayerProgram::ShadowCoverage => shadows::COVERAGE,
+            LayerProgram::ShadowGaussian => shadows::GAUSSIAN,
+            LayerProgram::ShadowScaleUp => shadows::SCALE_UP,
+            LayerProgram::MultiplyFactors => MULTIPLY_FACTORS,
             LayerProgram::LightFill => LIGHT_FILL,
+            LayerProgram::ManyLightMultiply => MANY_LIGHT_MULTIPLY,
+            LayerProgram::ManyLightFill => MANY_LIGHT_FILL,
         }
     }
 
     /// The textures the program reads.
     fn inputs(self) -> usize {
         match self {
-            LayerProgram::PixelOperation => 2,
-            LayerProgram::LightFill => 0,
+            LayerProgram::PixelOperation | LayerProgram::MultiplyFactors => 2,
+            LayerProgram::ShadowCoverage | LayerProgram::LightFill | LayerProgram::ManyLightFill => 0,
             _ => 1,
         }
     }
@@ -546,8 +640,13 @@ impl LayerProgram {
         match self {
             LayerProgram::ColorMatrix => blocks::COLOR_MATRIX_FLOATS,
             LayerProgram::LightMultiply | LayerProgram::LightFill => blocks::LIGHTING_FLOATS,
+            LayerProgram::ManyLightMultiply | LayerProgram::ManyLightFill => blocks::HEAD_FLOATS,
             LayerProgram::PixelOperation => blocks::PIXEL_OPERATION_FLOATS,
             LayerProgram::Convolution => blocks::CONVOLUTION_FLOATS,
+            LayerProgram::ShadowCoverage => shadows::COVERAGE_FLOATS,
+            LayerProgram::ShadowGaussian => shadows::GAUSSIAN_FLOATS,
+            LayerProgram::ShadowScaleUp => shadows::SCALE_UP_FLOATS,
+            LayerProgram::MultiplyFactors => blocks::MULTIPLY_FACTORS_FLOATS,
         }
     }
 }
@@ -559,6 +658,8 @@ struct Program {
     next: Option<WebGlUniformLocation>,
     area: Option<WebGlUniformLocation>,
     params: Option<WebGlUniformLocation>,
+    /// The image of the lights (#1158).
+    lights: Option<WebGlUniformLocation>,
 }
 
 /// An input of a pass: a texture of the pool, and whether its first row is the bottom one of the
@@ -571,7 +672,14 @@ pub(crate) type PassInput<'a> = (&'a Rc<VelloWebGlTexture>, bool);
 pub(crate) struct LayerPrograms {
     vertex_array: Option<WebGlVertexArrayObject>,
     programs: [Option<Result<Program, ()>>; LayerProgram::ALL.len()],
+    /// The image of the lights and the rows it holds (#1158).
+    light_rows: Option<(WebGlTexture, u32)>,
 }
+
+/// The texture unit of the image of the lights.
+const LIGHT_ROWS_UNIT: u32 = 2;
+/// The texels of a light in that image.
+const LIGHT_ROW_TEXELS: i32 = (blocks::LIGHT_FLOATS / 4) as i32;
 
 pub(super) fn compile(gl: &Gl, kind: u32, source: &str) -> Result<WebGlShader, String> {
     let shader = gl.create_shader(kind).ok_or("the context did not create a shader")?;
@@ -625,6 +733,7 @@ impl LayerPrograms {
                     next: gl.get_uniform_location(&linked, "u_next"),
                     area: gl.get_uniform_location(&linked, "u_area"),
                     params: gl.get_uniform_location(&linked, "u_params"),
+                    lights: gl.get_uniform_location(&linked, "u_lights"),
                     program: linked,
                 }),
                 Err(error) => {
@@ -634,6 +743,56 @@ impl LayerPrograms {
             }
         });
         compiled.as_ref().ok()
+    }
+
+    /// Writes the rows of the lights (`LIGHT_FLOATS` floats each) into the image the many-lights
+    /// programs read. `false` when the context did not take them.
+    pub(crate) fn write_light_rows(&mut self, gl: &Gl, rows: &[f32], limit: u32) -> bool {
+        let count = (rows.len() / blocks::LIGHT_FLOATS) as u32;
+        if count == 0 || count > limit {
+            return false;
+        }
+        if self.light_rows.as_ref().is_none_or(|(_, held)| *held < count) {
+            if let Some((old, _)) = self.light_rows.take() {
+                gl.delete_texture(Some(&old));
+            }
+            let Some(texture) = gl.create_texture() else {
+                return false;
+            };
+            let held = count.next_power_of_two().min(limit);
+            gl.active_texture(Gl::TEXTURE0);
+            gl.bind_texture(Gl::TEXTURE_2D, Some(&texture));
+            gl.tex_storage_2d(Gl::TEXTURE_2D, 1, Gl::RGBA32F, LIGHT_ROW_TEXELS, held as i32);
+            for (name, value) in [
+                (Gl::TEXTURE_MIN_FILTER, Gl::NEAREST),
+                (Gl::TEXTURE_MAG_FILTER, Gl::NEAREST),
+                (Gl::TEXTURE_WRAP_S, Gl::CLAMP_TO_EDGE),
+                (Gl::TEXTURE_WRAP_T, Gl::CLAMP_TO_EDGE),
+            ] {
+                gl.tex_parameteri(Gl::TEXTURE_2D, name, value as i32);
+            }
+            gl.bind_texture(Gl::TEXTURE_2D, None);
+            self.light_rows = Some((texture, held));
+        }
+        let Some((texture, _)) = &self.light_rows else {
+            return false;
+        };
+        gl.active_texture(Gl::TEXTURE0);
+        gl.bind_texture(Gl::TEXTURE_2D, Some(texture));
+        let array = js_sys::Float32Array::from(rows);
+        let written = gl.tex_sub_image_2d_with_i32_and_i32_and_u32_and_type_and_opt_array_buffer_view(
+            Gl::TEXTURE_2D,
+            0,
+            0,
+            0,
+            LIGHT_ROW_TEXELS,
+            count as i32,
+            Gl::RGBA,
+            Gl::FLOAT,
+            Some(&array),
+        );
+        gl.bind_texture(Gl::TEXTURE_2D, None);
+        written.is_ok()
     }
 
     /// The pass of `program`: its `uniforms` (the floats of `u_params`) over the `width` by
@@ -656,6 +815,11 @@ impl LayerPrograms {
             self.vertex_array = gl.create_vertex_array();
         }
         let vertex_array = self.vertex_array.clone();
+        let reads_rows = matches!(program, LayerProgram::ManyLightMultiply | LayerProgram::ManyLightFill);
+        let light_rows = self.light_rows.as_ref().map(|(texture, _)| texture.clone());
+        if reads_rows && light_rows.is_none() {
+            return false;
+        }
         let Some(compiled) = self.program(gl, program) else {
             return false;
         };
@@ -666,6 +830,11 @@ impl LayerPrograms {
         gl.uniform1i(compiled.next.as_ref(), 1);
         gl.uniform4f(compiled.area.as_ref(), bottom_up(0), bottom_up(1), width as f32, height as f32);
         gl.uniform4fv_with_f32_array(compiled.params.as_ref(), uniforms);
+        if reads_rows {
+            gl.uniform1i(compiled.lights.as_ref(), LIGHT_ROWS_UNIT as i32);
+            gl.active_texture(Gl::TEXTURE0 + LIGHT_ROWS_UNIT);
+            gl.bind_texture(Gl::TEXTURE_2D, light_rows.as_ref());
+        }
 
         let tests = [Gl::BLEND, Gl::SCISSOR_TEST, Gl::DEPTH_TEST, Gl::STENCIL_TEST];
         let enabled: Vec<bool> = tests.iter().map(|test| gl.is_enabled(*test)).collect();
@@ -685,6 +854,10 @@ impl LayerPrograms {
         gl.draw_arrays(Gl::TRIANGLES, 0, 3);
 
         gl.bind_vertex_array(None);
+        if reads_rows {
+            gl.active_texture(Gl::TEXTURE0 + LIGHT_ROWS_UNIT);
+            gl.bind_texture(Gl::TEXTURE_2D, None);
+        }
         for unit in (0..2).rev() {
             gl.active_texture(Gl::TEXTURE0 + unit);
             gl.bind_texture(Gl::TEXTURE_2D, None);
@@ -707,6 +880,9 @@ impl LayerPrograms {
                 gl.delete_program(Some(&program.program));
             }
         }
+        if let Some((texture, _)) = self.light_rows.take() {
+            gl.delete_texture(Some(&texture));
+        }
         if let Some(vertex_array) = self.vertex_array.take() {
             gl.delete_vertex_array(Some(&vertex_array));
         }
@@ -726,6 +902,6 @@ mod tests {
             assert_eq!(program.uniform_floats() % 4, 0);
         }
         let indices: Vec<usize> = LayerProgram::ALL.iter().map(|program| program.index()).collect();
-        assert_eq!(indices, vec![0, 1, 2, 3, 4]);
+        assert_eq!(indices, (0..LayerProgram::ALL.len()).collect::<Vec<_>>());
     }
 }

@@ -514,6 +514,10 @@ impl crate::platform::IDrawingContextImplWithLayerEffects for CompositorDrawingC
         }
     }
 
+    fn evaluates_lighting(&mut self, lighting: &crate::platform::LightingParameters) -> bool {
+        self.inner.as_drawing_context_impl_with_layer_effects().is_some_and(|layers| layers.evaluates_lighting(lighting))
+    }
+
     fn draw_lighting(&mut self, rect: Rect, lighting: &crate::platform::LightingParameters) -> bool {
         self.flush();
         self.inner.as_drawing_context_impl_with_layer_effects().is_some_and(|layers| layers.draw_lighting(rect, lighting))

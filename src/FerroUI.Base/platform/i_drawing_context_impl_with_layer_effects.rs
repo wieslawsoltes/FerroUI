@@ -86,6 +86,16 @@ pub trait IDrawingContextImplWithLayerEffects: IDrawingContextImpl {
         false
     }
 
+    /// Whether the compositor asks this context to evaluate `lighting`
+    /// ([`draw_lighting`](Self::draw_lighting),
+    /// [`push_lighting_multiply_layer`](Self::push_lighting_multiply_layer)) rather than
+    /// sampling a light map on the CPU. By default up to
+    /// [`LightingParameters::MAX_LIGHTS`] point and spot lights; a context that evaluates more
+    /// answers for them, and may still refuse a draw.
+    fn evaluates_lighting(&mut self, lighting: &LightingParameters) -> bool {
+        lighting.fits_a_drawing_context()
+    }
+
     /// Pushes a multiply layer (see
     /// [`push_multiply_layer`](Self::push_multiply_layer)) whose factor at
     /// each point is the light `lighting` reflects there, each channel

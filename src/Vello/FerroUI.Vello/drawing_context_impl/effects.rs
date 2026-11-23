@@ -89,7 +89,7 @@ fn note_cpu_layer() {
 /// into a texture of the pool and passed through a program of
 /// `gpu/effect_passes.rs` into another texture of the pool, which the scene
 /// the layer was pushed in paints with.
-#[cfg(feature = "hybrid")]
+#[cfg(any(feature = "hybrid", feature = "gpu"))]
 #[derive(Clone)]
 pub(super) struct DeviceLayer {
     device: std::sync::Arc<crate::gpu::VelloWgpuDevice>,
@@ -104,6 +104,10 @@ pub(super) struct DeviceLayer {
     /// the area.
     scene_width: u16,
     scene_height: u16,
+    /// The blur or drop shadow the content goes through in the compute mode, which has no filter
+    /// layers, with the linear part (a, b, c, d) of the transform to the target.
+    #[cfg(feature = "gpu")]
+    filter: Option<(VelloSceneFilter, [f64; 4])>,
     /// The bounds of the layer in the coordinates of the context when it
     /// was pushed, with the transform from them to the pixels of the scene
     /// it was pushed in; `None` for the whole area.
@@ -111,7 +115,7 @@ pub(super) struct DeviceLayer {
 }
 
 /// No layer is drawn on a device in a build without the hybrid renderer.
-#[cfg(not(feature = "hybrid"))]
+#[cfg(not(any(feature = "hybrid", feature = "gpu")))]
 pub(super) enum DeviceLayer {}
 
 /// A layer whose content is recorded into a scene of the WebGL2 context of the canvas, rendered
@@ -144,7 +148,7 @@ type WebGlLayerTexture = (std::rc::Rc<crate::web_gl::VelloWebGlTexture>, bool);
 pub(super) enum WebGlLayer {}
 
 /// The result of a layer drawn on the device: a texture of the pool.
-#[cfg(feature = "hybrid")]
+#[cfg(any(feature = "hybrid", feature = "gpu"))]
 type LayerTexture = std::sync::Arc<crate::gpu::VelloDeviceTexture>;
 
 /// An effect that is pushed.
@@ -173,10 +177,10 @@ struct ShaderEffectFrame {
     effect: ImmutableCustomEffect,
     /// The area of the effect in the pixels of the scene it was pushed in,
     /// in whole pixels (it may reach beyond that scene).
-    #[cfg_attr(not(any(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
+    #[cfg_attr(not(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl")), allow(dead_code))]
     area: kurbo::Rect,
     /// The size of the area (`layer_size`).
-    #[cfg_attr(not(any(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
+    #[cfg_attr(not(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl")), allow(dead_code))]
     size: [f32; 2],
     /// Device pixels per device independent pixel (`layer_scale`).
     scale: f32,
@@ -358,14 +362,14 @@ impl DrawingContextImpl {
                 match layer {}
             }
             if let Some(layer) = frame.device {
-                #[cfg(feature = "hybrid")]
+                #[cfg(any(feature = "hybrid", feature = "gpu"))]
                 {
                     let matrix = crate::effect_uniforms::luminance_mask_matrix();
                     let operation = LayerOperation::Matrix { matrix, alpha_mode: ColorMatrixAlphaMode::Straight };
                     self.end_device_layer(scene, layer, &operation);
                     return;
                 }
-                #[cfg(not(feature = "hybrid"))]
+                #[cfg(not(any(feature = "hybrid", feature = "gpu")))]
                 match layer {}
             }
             note_cpu_layer();
@@ -383,6 +387,11 @@ impl DrawingContextImpl {
             }
             self.draw_image_at_pixels(to_image(rgba, PixelSize::new(width as i32, height as i32)), position.x, position.y);
         } else {
+            #[cfg(feature = "gpu")]
+            if let Some(layer) = frame.device {
+                self.end_compute_filter(scene, layer);
+                return;
+            }
             self.draw_filter_scene(&mut *scene, position.x, position.y, area.0, area.1, crate::perf::Phase::EffectAsImage);
         }
     }
@@ -580,7 +589,7 @@ impl DrawingContextImpl {
             inherited_opacity: self.current_opacity,
         };
 
-        #[cfg(feature = "hybrid")]
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
         if let Some(device) = self.layer_device() {
             if crate::gpu::effect_passes::shader_module(effect).is_none() {
                 return false;
@@ -597,6 +606,8 @@ impl DrawingContextImpl {
                 height: visible_height,
                 scene_width: scene_width.min(limit) as u16,
                 scene_height: scene_height.min(limit) as u16,
+                #[cfg(feature = "gpu")]
+                filter: None,
                 // The result covers the area in whole pixels.
                 bounds: None,
             };
@@ -690,12 +701,12 @@ impl DrawingContextImpl {
         // As a bitmap of the result would be drawn: with the opacity in effect.
         let alpha = ((255.0 * self.current_opacity) as u8) as f32 / 255.0;
         if let Some(layer) = device {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             {
                 self.end_device_shader_effect(scene, layer, &shader, alpha);
                 return;
             }
-            #[cfg(not(feature = "hybrid"))]
+            #[cfg(not(any(feature = "hybrid", feature = "gpu")))]
             match layer {}
         }
 
@@ -723,7 +734,7 @@ impl DrawingContextImpl {
     /// texture of the pool, the pass of the effect, and its result painted
     /// over the part of the area on the scene, one texel per pixel; the
     /// content unchanged should the pass fail.
-    #[cfg(feature = "hybrid")]
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
     fn end_device_shader_effect(
         &mut self,
         scene: Box<dyn IVelloSceneSink>,
@@ -756,7 +767,7 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
         // WebGL2 context of the canvas in the hybrid mode of a web page, in a
         // scene of the processor otherwise.
         if effect.as_any().is::<ferroui_base::media::ImmutableLuminanceToAlphaEffect>() {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             if let Some(layer) = self.device_layer(clip_rect) {
                 let outer = self.enter_device_scene(&layer);
                 self.sink().push_layer(BlendMode::default(), 1.0);
@@ -829,6 +840,11 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
             return;
         };
 
+        #[cfg(feature = "gpu")]
+        if self.push_compute_filter(clip_rect, filter) {
+            return;
+        }
+
         let outer =
             if self.draws_effects_in_the_scene() { None } else { Some(self.begin_effect_scene(clip_rect, &filter, false)) };
 
@@ -886,7 +902,7 @@ enum LayerOperation {
     Multiply { factors: MultiplyLayerFactors, bounds: Rect, scene_to_local: Affine },
     /// A multiply layer of the lights evaluated at each pixel (on the
     /// device or the WebGL2 context); `scene_to_local` as for `Multiply`.
-    #[cfg_attr(not(any(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
+    #[cfg_attr(not(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl")), allow(dead_code))]
     LightingMultiply { lighting: LightingParameters, scene_to_local: Affine },
     /// A matrix convolution.
     Convolve(ConvolveMatrix),
@@ -896,7 +912,7 @@ enum LayerOperation {
 /// each source is recorded into a scene of the device (of the canvas) and
 /// rendered into a texture of the pool, which the pass of the operation
 /// combines into what the sources before it made.
-#[cfg_attr(not(any(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
+#[cfg_attr(not(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl")), allow(dead_code))]
 pub(super) struct PixelOperationFrame {
     operation: PixelOperation,
     route: PixelOperationRoute,
@@ -912,10 +928,10 @@ pub(super) struct PixelOperationFrame {
 
 /// Where a pixel operation is drawn, with what the sources so far made.
 /// (No variant in a build without a GPU route: nothing pushes one.)
-#[cfg_attr(not(any(feature = "hybrid", feature = "hybrid-webgl")), allow(dead_code))]
+#[cfg_attr(not(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl")), allow(dead_code))]
 enum PixelOperationRoute {
     /// On the device.
-    #[cfg(feature = "hybrid")]
+    #[cfg(any(feature = "hybrid", feature = "gpu"))]
     Device { layer: DeviceLayer, result: Option<LayerTexture> },
     /// On the WebGL2 context of the canvas.
     #[cfg(feature = "hybrid-webgl")]
@@ -951,7 +967,7 @@ impl DrawingContextImpl {
     /// web page (but a multiply layer of factors), on the processor
     /// otherwise.
     fn push_operation_layer(&mut self, bounds: Rect, operation: LayerOperation) {
-        #[cfg(feature = "hybrid")]
+        #[cfg(any(feature = "hybrid", feature = "gpu"))]
         if !matches!(operation, LayerOperation::Multiply { .. }) {
             if let Some(layer) = self.device_layer(Some(bounds)) {
                 let outer = self.enter_device_scene(&layer);
@@ -998,12 +1014,12 @@ impl DrawingContextImpl {
         }
 
         if let Some(layer) = frame.device {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             {
                 self.end_device_layer(scene, layer, &frame.operation);
                 return;
             }
-            #[cfg(not(feature = "hybrid"))]
+            #[cfg(not(any(feature = "hybrid", feature = "gpu")))]
             match layer {}
         }
 
@@ -1034,7 +1050,7 @@ impl DrawingContextImpl {
 
     /// Ends the source of a pixel operation that is being recorded.
     pub(super) fn end_pixel_source(&mut self) {
-        #[cfg(any(feature = "hybrid", feature = "hybrid-webgl"))]
+        #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
         self.end_gpu_pixel_source();
     }
 
@@ -1042,7 +1058,7 @@ impl DrawingContextImpl {
     /// rendered into a texture of the pool, which is the result of the
     /// operation when it is the first source, and is combined into the
     /// result by the pass of the operation otherwise.
-    #[cfg(any(feature = "hybrid", feature = "hybrid-webgl"))]
+    #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
     fn end_gpu_pixel_source(&mut self) {
         let Some(mut frame) = self.pixel_operation_stack.pop() else {
             panic!("The pixel operation stack is empty");
@@ -1053,7 +1069,7 @@ impl DrawingContextImpl {
         let scene = self.leave_scene(outer);
         let (operation, scene_to_local) = (&frame.operation, frame.scene_to_local);
         match &mut frame.route {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             PixelOperationRoute::Device { layer, result } => {
                 Self::end_device_pixel_source(scene, layer, result, operation, scene_to_local)
             }
@@ -1066,6 +1082,12 @@ impl DrawingContextImpl {
     }
 }
 
+/// The lights the uniform block of the lighting programs holds.
+#[cfg(feature = "hybrid-webgl")]
+fn blocks_max_lights() -> usize {
+    crate::effect_uniforms::MAX_LIGHTS
+}
+
 impl LayerOperation {
     /// The program of the WebGL2 context that draws the operation; `None` for a multiply layer
     /// of factors (drawn on the processor).
@@ -1074,9 +1096,13 @@ impl LayerOperation {
         use crate::web_gl::LayerProgram;
         match self {
             LayerOperation::Matrix { .. } => Some(LayerProgram::ColorMatrix),
-            LayerOperation::LightingMultiply { .. } => Some(LayerProgram::LightMultiply),
+            LayerOperation::LightingMultiply { lighting, .. } => Some(if lighting.lights.len() > blocks_max_lights() {
+                LayerProgram::ManyLightMultiply
+            } else {
+                LayerProgram::LightMultiply
+            }),
             LayerOperation::Convolve(_) => Some(LayerProgram::Convolution),
-            LayerOperation::Multiply { .. } => None,
+            LayerOperation::Multiply { .. } => Some(LayerProgram::MultiplyFactors),
         }
     }
 }
@@ -1176,6 +1202,10 @@ impl DrawingContextImpl {
         use crate::effect_uniforms as blocks;
         use crate::web_gl::LayerProgram;
         let size = (layer.width, layer.height);
+        if let LayerOperation::Multiply { factors, bounds, scene_to_local } = operation {
+            self.end_web_gl_multiply(scene, layer, factors, *bounds, *scene_to_local);
+            return;
+        }
         let (program, uniforms) = match operation {
             LayerOperation::Matrix { matrix, alpha_mode } => {
                 (LayerProgram::ColorMatrix, Some(blocks::color_matrix(matrix, *alpha_mode, size)))
@@ -1183,12 +1213,21 @@ impl DrawingContextImpl {
             LayerOperation::LightingMultiply { lighting, scene_to_local } => {
                 // The pass evaluates the lights at the pixels of the area, from its top left.
                 let to_local = *scene_to_local * Affine::translate((f64::from(layer.x), f64::from(layer.y)));
-                (LayerProgram::LightMultiply, blocks::light_multiply(lighting, size, to_local))
+                if lighting.lights.len() > blocks::MAX_LIGHTS {
+                    let lights = blocks::many_light_multiply(lighting, size, to_local);
+                    if !layer.gpu.write_light_rows(&lights.rows) {
+                        crate::web_gl::log_render_failure("the context did not take the lights");
+                        return;
+                    }
+                    (LayerProgram::ManyLightMultiply, Some(lights.head.to_vec()))
+                } else {
+                    (LayerProgram::LightMultiply, blocks::light_multiply(lighting, size, to_local))
+                }
             }
             LayerOperation::Convolve(convolution) => {
                 (LayerProgram::Convolution, Some(blocks::convolution(convolution, size)))
             }
-            // Drawn on the processor: never pushed here.
+            // Ended above.
             LayerOperation::Multiply { .. } => return,
         };
         let Some(uniforms) = uniforms else {
@@ -1199,6 +1238,43 @@ impl DrawingContextImpl {
         };
         match layer.gpu.layer_texture(program, &[(&content, true)], size, &uniforms) {
             Ok(Some(texture)) => self.paint_web_gl_layer(&layer, (texture, false), 1.0, BlendMode::default()),
+            // The program was there when the layer was pushed.
+            Ok(None) => {}
+            Err(error) => crate::web_gl::log_render_failure(&error),
+        }
+    }
+
+    /// Ends a multiply layer on the context: the content rendered, the samples of the factors
+    /// uploaded, and the pass of the two painted over the bounds of the layer.
+    fn end_web_gl_multiply(
+        &mut self,
+        scene: Box<dyn IVelloSceneSink>,
+        layer: WebGlLayer,
+        factors: &MultiplyLayerFactors,
+        bounds: Rect,
+        scene_to_local: Affine,
+    ) {
+        use crate::effect_uniforms as blocks;
+        use crate::web_gl::LayerProgram;
+        let size = (layer.width, layer.height);
+        let Some(content) = Self::render_web_gl_scene(scene, &layer) else {
+            return;
+        };
+        let (width, height, samples, scale) = blocks::factor_samples(factors);
+        let texture = match layer.gpu.pixels_texture(width, height, samples) {
+            Ok(texture) => texture,
+            Err(error) => {
+                crate::web_gl::log_render_failure(&error);
+                return;
+            }
+        };
+        // The pass works in the pixels of the area, from its top left.
+        let to_local = scene_to_local * Affine::translate((f64::from(layer.x), f64::from(layer.y)));
+        let to_unit = blocks::factors_to_unit(bounds, to_local);
+        let uniforms = blocks::multiply_factors((width, height, scale), to_unit, size);
+        let inputs = [(&content, true), (&texture, false)];
+        match layer.gpu.layer_texture(LayerProgram::MultiplyFactors, &inputs, size, &uniforms) {
+            Ok(Some(result)) => self.paint_web_gl_layer(&layer, (result, false), 1.0, BlendMode::default()),
             // The program was there when the layer was pushed.
             Ok(None) => {}
             Err(error) => crate::web_gl::log_render_failure(&error),
@@ -1216,10 +1292,9 @@ impl DrawingContextImpl {
         let Some(gpu) = self.scene().web_gl_gpu() else {
             return false;
         };
-        if self.sink_origin != Vec2::ZERO
-            || lighting.lights.len() > ferroui_base::platform::LightingParameters::MAX_LIGHTS
-            || !gpu.prepare(LayerProgram::LightFill)
-        {
+        let many = lighting.lights.len() > blocks::MAX_LIGHTS;
+        let program = if many { LayerProgram::ManyLightFill } else { LayerProgram::LightFill };
+        if self.sink_origin != Vec2::ZERO || !gpu.holds_lights(lighting.lights.len()) || !gpu.prepare(program) {
             return false;
         }
         let transform = self.device_transform();
@@ -1231,8 +1306,17 @@ impl DrawingContextImpl {
         };
         let (x0, y0) = (region.origin.x as f64, region.origin.y as f64);
         let size = (region.size.width as u32, region.size.height as u32);
-        let uniforms = blocks::lighting(lighting, LightingOutput::Light, (x0 as u32, y0 as u32), transform.inverse());
-        let texture = match gpu.layer_texture(LayerProgram::LightFill, &[], size, &uniforms) {
+        let origin = (x0 as u32, y0 as u32);
+        let uniforms = if many {
+            let lights = blocks::many_lighting(lighting, LightingOutput::Light, origin, transform.inverse());
+            if !gpu.write_light_rows(&lights.rows) {
+                return false;
+            }
+            lights.head.to_vec()
+        } else {
+            blocks::lighting(lighting, LightingOutput::Light, origin, transform.inverse())
+        };
+        let texture = match gpu.layer_texture(program, &[], size, &uniforms) {
             Ok(Some(texture)) => texture,
             Ok(None) => return false,
             Err(error) => {
@@ -1356,8 +1440,109 @@ impl DrawingContextImpl {
     }
 }
 
+/// The blur and drop shadow effects of the compute mode, whose renderer has no filter layers: the
+/// content is recorded into a layer of the device and goes through the Gaussian of
+/// `gpu/shadow_blur.rs` (#1146).
+#[cfg(feature = "gpu")]
+impl DrawingContextImpl {
+    /// Pushes `filter` as a layer of the device in the compute mode. `false` in any other scene.
+    fn push_compute_filter(&mut self, clip_rect: Option<Rect>, filter: VelloSceneFilter) -> bool {
+        if self.scene().rendering_mode() != crate::VelloRenderingMode::Gpu {
+            return false;
+        }
+        let (std_deviation, offset) = match filter {
+            VelloSceneFilter::Blur { std_deviation } => (f64::from(std_deviation), 0.0),
+            VelloSceneFilter::DropShadow { dx, dy, std_deviation, .. } => {
+                (f64::from(std_deviation), f64::from(dx.abs().max(dy.abs())))
+            }
+        };
+        // What the filter makes of the clip reaches beyond it.
+        let reach = super::box_shadows::BLUR_REACH * std_deviation + offset;
+        let area = clip_rect.map(|rect| rect.inflate(reach));
+        let Some(mut layer) = self.device_layer(area) else {
+            return false;
+        };
+        let [a, b, c, d, _, _] = self.device_transform().as_coeffs();
+        layer.filter = Some((filter, [a, b, c, d]));
+        let outer = self.enter_device_scene(&layer);
+        self.sink().push_layer(BlendMode::default(), 1.0);
+        self.effect_stack.push(EffectFrame {
+            cropped: clip_rect.is_some(),
+            outer: Some(outer),
+            luminance_to_alpha: false,
+            device: Some(layer),
+            web_gl: None,
+            shader: None,
+        });
+        self.save(SavedKind::Effect);
+        if let Some(rect) = clip_rect {
+            self.push_clip(rect);
+        }
+        true
+    }
+
+    /// Ends a filter of the compute mode: the content rendered, blurred and painted into the
+    /// scene the layer was pushed in, over the shadow of the content for a drop shadow.
+    fn end_compute_filter(&mut self, scene: Box<dyn IVelloSceneSink>, layer: DeviceLayer) {
+        use crate::gpu::shadow_blur::blurred_content;
+        let Some((filter, [a, b, c, d])) = layer.filter else {
+            return;
+        };
+        let (scale_x, scale_y) = (a.hypot(b), c.hypot(d));
+        let Some(content) = Self::render_device_scene(scene, &layer) else {
+            return;
+        };
+        match filter {
+            VelloSceneFilter::Blur { std_deviation } => {
+                let deviation = f64::from(std_deviation);
+                let blurred = blurred_content(&layer.device, &content, (deviation * scale_x, deviation * scale_y), None);
+                self.paint_compute_layer(&layer, blurred, (0.0, 0.0));
+            }
+            VelloSceneFilter::DropShadow { dx, dy, std_deviation, color } => {
+                let deviation = f64::from(std_deviation);
+                let [red, green, blue, alpha] = color.components;
+                let tint = [red * alpha, green * alpha, blue * alpha, alpha];
+                let deviations = (deviation * scale_x, deviation * scale_y);
+                let shadow = blurred_content(&layer.device, &content, deviations, Some(tint));
+                // The offset turns with the content, and moves by whole pixels as in the filter
+                // of the CPU renderer.
+                let (dx, dy) = (f64::from(dx), f64::from(dy));
+                let offset = ((a * dx + c * dy).round(), (b * dx + d * dy).round());
+                self.paint_compute_layer(&layer, shadow, offset);
+                self.paint_compute_layer(&layer, content, (0.0, 0.0));
+            }
+        }
+    }
+
+    /// Paints a texture of the layer one texel per pixel at `offset` from its area, over what of
+    /// the area it covers.
+    fn paint_compute_layer(&mut self, layer: &DeviceLayer, texture: LayerTexture, offset: (f64, f64)) {
+        use crate::scene::{VelloSceneBrush, VelloScenePaint, VelloSceneTexture};
+        let (x, y) = (layer.x + offset.0, layer.y + offset.1);
+        let (width, height) = (f64::from(layer.width), f64::from(layer.height));
+        let area = kurbo::Rect::new(layer.x, layer.y, layer.x + width, layer.y + height)
+            .intersect(kurbo::Rect::new(x, y, x + width, y + height));
+        if area.width() <= 0.0 || area.height() <= 0.0 {
+            return;
+        }
+        let paint = VelloScenePaint {
+            brush: VelloSceneBrush::Texture(VelloSceneTexture {
+                texture,
+                x_extend: peniko::Extend::Pad,
+                y_extend: peniko::Extend::Pad,
+                quality: peniko::ImageQuality::Low,
+                alpha: 1.0,
+            }),
+            transform: Affine::translate((x, y)),
+        };
+        let path = rect_path(Rect::new(area.x0, area.y0, area.width(), area.height()));
+        let anti_alias = self.edge_anti_alias(false);
+        self.sink().fill(&path, peniko::Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::default(), anti_alias);
+    }
+}
+
 /// The route of the device (gpu-rendering.md, "Vello", step 2).
-#[cfg(feature = "hybrid")]
+#[cfg(any(feature = "hybrid", feature = "gpu"))]
 impl DrawingContextImpl {
     /// The device a layer with an effect is drawn on: the device of the
     /// scene of the context, when the scene is drawn there and paints with
@@ -1398,6 +1583,8 @@ impl DrawingContextImpl {
             height: area_height,
             scene_width: scene_width.min(limit) as u16,
             scene_height: scene_height.min(limit) as u16,
+            #[cfg(feature = "gpu")]
+            filter: None,
             bounds: bounds.map(|bounds| (bounds, transform)),
         })
     }
@@ -1405,8 +1592,13 @@ impl DrawingContextImpl {
     /// Replaces the scene of the context by a scene of the device for the
     /// content of `layer`, and returns the scene that was replaced.
     fn enter_device_scene(&mut self, layer: &DeviceLayer) -> OuterScene {
+        // The hybrid renderer where it is built; the compute renderer of a build without it.
+        #[cfg(feature = "hybrid")]
         let scene: Box<dyn IVelloSceneSink> =
             Box::new(crate::scene::VelloHybridSceneSink::new(layer.device.clone(), layer.scene_width, layer.scene_height));
+        #[cfg(not(feature = "hybrid"))]
+        let scene: Box<dyn IVelloSceneSink> =
+            Box::new(crate::scene::VelloGpuSceneSink::new(layer.device.clone(), layer.scene_width, layer.scene_height));
         let sink = match self.sink.replace(scene) {
             Some(sink) => sink,
             None => panic!("The drawing context has been disposed"),
@@ -1485,8 +1677,10 @@ impl DrawingContextImpl {
             LayerOperation::Convolve(convolution) => {
                 effect_passes::convolution_texture(device, &content, area, convolution)
             }
-            // A multiply layer of factors is drawn on the processor.
-            LayerOperation::Multiply { .. } => None,
+            LayerOperation::Multiply { factors, bounds, scene_to_local } => {
+                let to_unit = crate::effect_uniforms::factors_to_unit(*bounds, *scene_to_local);
+                effect_passes::multiply_factors_texture(device, &content, area, factors, to_unit)
+            }
         };
         // The content is the pool's again: the pass that reads it is
         // submitted.
@@ -1553,20 +1747,35 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         self.restore();
     }
 
-    /// The factors are applied to the pixels of a scene of the CPU renderer:
-    /// they are an image of the processor (the light map of the compositor,
-    /// for more lights than a drawing context evaluates), and vello has no
-    /// blend mode that multiplies the colour and keeps the alpha of what is
-    /// under it. The lit visuals of a GPU mode take
-    /// [`push_lighting_multiply_layer`](Self::push_lighting_multiply_layer).
+    /// The factors are an image of the processor (the light map of the compositor, for more
+    /// lights than a drawing context evaluates). In a GPU mode and on the WebGL2 context of the
+    /// canvas they are uploaded and a pass multiplies the content by them, because vello has no
+    /// blend mode that multiplies the colour and keeps the alpha of what is under it; the CPU
+    /// mode and a scene of the CPU renderer apply them to its pixels. The lit visuals of a GPU
+    /// mode take [`push_lighting_multiply_layer`](Self::push_lighting_multiply_layer).
     fn push_multiply_layer(&mut self, bounds: Rect, factors: &MultiplyLayerFactors) {
-        let outer = self.begin_cpu_scene(bounds);
+        #[allow(unused_labels)]
+        let entered: Option<(OuterScene, Option<DeviceLayer>, Option<WebGlLayer>)> = 'entered: {
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            if let Some(layer) = self.device_layer(Some(bounds)) {
+                break 'entered Some((self.enter_device_scene(&layer), Some(layer), None));
+            }
+            #[cfg(feature = "hybrid-webgl")]
+            if let Some(layer) = self.web_gl_layer(Some(bounds), crate::web_gl::LayerProgram::MultiplyFactors) {
+                break 'entered Some((self.enter_web_gl_scene(), None, Some(layer)));
+            }
+            None
+        };
+        let (outer, device, web_gl) = match entered {
+            Some(entered) => entered,
+            None => (self.begin_cpu_scene(bounds), None, None),
+        };
         let scene_to_local = self.device_transform().inverse();
         self.color_matrix_stack.push(ColorMatrixFrame {
             outer,
             operation: LayerOperation::Multiply { factors: factors.clone(), bounds, scene_to_local },
-            device: None,
-            web_gl: None,
+            device,
+            web_gl,
         });
         self.save(SavedKind::ColorMatrix);
         self.push_clip(bounds);
@@ -1589,6 +1798,14 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         self.restore();
     }
 
+    /// The renderer's own lighting programs evaluate any number of lights in the GPU modes and on
+    /// WebGL2 (#1158): a draw it cannot make on the device returns `false`, and the compositor's
+    /// light map draws it, as in the CPU mode.
+    #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
+    fn evaluates_lighting(&mut self, _lighting: &LightingParameters) -> bool {
+        true
+    }
+
     /// In a GPU mode: the content is recorded into a scene of the device,
     /// and the light multiply pass of `gpu/effect_passes.rs` multiplies it
     /// by the lights it evaluates at each pixel; in the hybrid mode of a web
@@ -1596,19 +1813,27 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
     /// (`web_gl/layer_programs.rs`). The CPU mode and a scene of the CPU
     /// renderer leave it to the compositor's light map
     /// (`push_multiply_layer`).
-    #[cfg(any(feature = "hybrid", feature = "hybrid-webgl"))]
+    #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
     fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &LightingParameters) -> bool {
-        if lighting.lights.len() > LightingParameters::MAX_LIGHTS {
-            return false;
-        }
         let entered = 'entered: {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             if let Some(layer) = self.device_layer(Some(bounds)) {
+                if !crate::gpu::effect_passes::holds_lights(&layer.device, lighting.lights.len()) {
+                    return false;
+                }
                 break 'entered Some((self.enter_device_scene(&layer), Some(layer), None));
             }
             #[cfg(feature = "hybrid-webgl")]
-            if let Some(layer) = self.web_gl_layer(Some(bounds), crate::web_gl::LayerProgram::LightMultiply) {
-                break 'entered Some((self.enter_web_gl_scene(), None, Some(layer)));
+            {
+                use crate::web_gl::LayerProgram;
+                let many = lighting.lights.len() > crate::effect_uniforms::MAX_LIGHTS;
+                let program = if many { LayerProgram::ManyLightMultiply } else { LayerProgram::LightMultiply };
+                let held = self.scene().web_gl_gpu().is_none_or(|gpu| gpu.holds_lights(lighting.lights.len()));
+                if held {
+                    if let Some(layer) = self.web_gl_layer(Some(bounds), program) {
+                        break 'entered Some((self.enter_web_gl_scene(), None, Some(layer)));
+                    }
+                }
             }
             None
         };
@@ -1634,7 +1859,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
     /// In the hybrid mode of a web page the same on the WebGL2 context of
     /// the canvas (`web_gl/layer_programs.rs`). The CPU mode and a scene of
     /// the CPU renderer leave it to the compositor's pixels.
-    #[cfg(any(feature = "hybrid", feature = "hybrid-webgl"))]
+    #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
     fn push_pixel_operation(&mut self, bounds: Rect, operation: &PixelOperation) -> bool {
         if let PixelOperation::Blend { noise_grid, .. } = operation {
             if noise_grid.width <= 0.0 || noise_grid.height <= 0.0 {
@@ -1642,7 +1867,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
             }
         }
         let entered = 'entered: {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             if let Some(layer) = self.device_layer(Some(bounds)) {
                 let outer = self.enter_device_scene(&layer);
                 break 'entered Some((outer, PixelOperationRoute::Device { layer, result: None }));
@@ -1676,7 +1901,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         true
     }
 
-    #[cfg(any(feature = "hybrid", feature = "hybrid-webgl"))]
+    #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
     fn next_pixel_operation_source(&mut self) {
         // The clip and the source before.
         self.restore();
@@ -1686,7 +1911,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         };
         // The scene of the next source, and the bounds that cut it.
         let next: (Option<OuterScene>, Option<Rect>) = match &frame.route {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             PixelOperationRoute::Device { layer, .. } => {
                 let layer = layer.clone();
                 (Some(self.enter_device_scene(&layer)), layer.bounds.map(|(bounds, _)| bounds))
@@ -1707,7 +1932,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         }
     }
 
-    #[cfg(any(feature = "hybrid", feature = "hybrid-webgl"))]
+    #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
     fn pop_pixel_operation(&mut self) {
         // The clip and the last source.
         self.restore();
@@ -1721,7 +1946,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         let alpha = ((255.0 * self.current_opacity) as u8) as f32 / 255.0;
         let blend_mode = crate::vello_extensions::to_blend_mode(self.render_options.bitmap_blending_mode);
         match frame.route {
-            #[cfg(feature = "hybrid")]
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
             PixelOperationRoute::Device { layer, result } => {
                 if let Some(result) = result {
                     self.paint_device_layer(&layer, result, alpha, blend_mode);
@@ -1764,7 +1989,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
                 None => return false,
             }
         };
-        if lighting.lights.len() > ferroui_base::platform::LightingParameters::MAX_LIGHTS {
+        if !crate::gpu::effect_passes::holds_lights(&device, lighting.lights.len()) {
             return false;
         }
         let transform = self.device_transform();

@@ -36,7 +36,10 @@ use std::sync::Arc;
 const SIZE: u16 = 96;
 
 fn device_modes(device: &Arc<VelloWgpuDevice>) -> Vec<VelloRenderingMode> {
-    let mut modes = vec![VelloRenderingMode::Hybrid];
+    let mut modes = Vec::new();
+    if cfg!(feature = "hybrid") {
+        modes.push(VelloRenderingMode::Hybrid);
+    }
     if cfg!(feature = "gpu") && device.supports_compute() {
         modes.push(VelloRenderingMode::Gpu);
     }
@@ -508,6 +511,107 @@ fn the_multiply_layer_of_lit_visuals_matches_the_exact_light_in_the_gpu_modes() 
         let (most, mean, _) = difference(&expected, &actual);
         // The light is within 2 levels of the exact one (see the lighting
         // test); the content scales the error by at most one.
+        assert!(most <= 3 && mean <= 0.5, "{mode:?}: lit content: largest {most}, mean {mean}");
+    }
+}
+
+/// More point and spot lights than the uniform block of the programs holds (#1158): twelve
+/// lights, spread over the target.
+fn many_lights() -> LightMap {
+    let mut map = LightMap::new();
+    map.add(LightSource::Ambient { color: LightColor::new(0.02, 0.03, 0.05) }, Matrix::IDENTITY);
+    let attenuation = LightAttenuation { constant: 1.0, linear: 0.01, quadratic: 0.0, min_cutoff: 5.0, max_cutoff: 400.0 };
+    for index in 0..12 {
+        let at = f64::from(index);
+        let position = Vector3D::new(6.0 + at * 8.0, 90.0 - at * 7.0, 25.0 + at);
+        let source = if index % 3 == 2 {
+            LightSource::Spot {
+                inner_color: LightColor::new(0.4, 0.3, 0.2),
+                outer_color: LightColor::new(0.05, 0.1, 0.3),
+                position,
+                direction: Vector3D::new(0.2, -0.1, -1.0),
+                inner_cone_angle: 0.3,
+                outer_cone_angle: 0.8,
+                attenuation,
+            }
+        } else {
+            LightSource::Point { color: LightColor::new(0.12 + at * 0.01, 0.2, 0.25 - at * 0.01), position, attenuation }
+        };
+        map.add(source, Matrix::create_translation(at * 0.5, -at * 0.25));
+    }
+    map
+}
+
+/// The lighting fill and the multiply layer with more lights than the block holds stay on the
+/// device, against the exact light: within the 2 levels of the fill and the 3 of the layer of
+/// the tests above, and steady frames allocate nothing.
+#[test]
+fn more_than_eight_lights_are_evaluated_on_the_device_in_the_gpu_modes() {
+    use ferroui_base::rendering::composition::server::LIGHT_MAP_MAX_SCALE;
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let size = usize::from(SIZE);
+    let map = many_lights();
+    let lighting = LightingParameters::new(&map, SHINY);
+    assert_eq!(12, lighting.lights.len());
+    assert!(!lighting.fits_a_drawing_context());
+    for mode in device_modes(&device) {
+        let mut allocations = None;
+        for frame in 0..5 {
+            let pixels = Rc::new(RefCell::new(vec![0u8; size * size * 4]));
+            let mut drawing = context(&device, mode, &pixels);
+            let layers = drawing.as_drawing_context_impl_with_layer_effects().unwrap();
+            assert!(layers.evaluates_lighting(&lighting), "{mode:?}");
+            assert!(layers.draw_lighting(full(), &lighting), "{mode:?}: the device draws twelve lights");
+            drawing.dispose();
+            if frame == 0 {
+                let pixels = pixels.borrow();
+                let mut largest = 0;
+                for (index, pixel) in pixels.chunks_exact(4).enumerate() {
+                    let (x, y) = (index % size, index / size);
+                    if x < 2 || y < 2 || x >= size - 2 || y >= size - 2 {
+                        continue;
+                    }
+                    let light = lighting.lit_at(Point::new(x as f64 + 0.5, y as f64 + 0.5)).clamped();
+                    let expected = [light.r, light.g, light.b].map(|value| (value * 255.0).round() as i32);
+                    for channel in 0..3 {
+                        largest = largest.max((expected[channel] - i32::from(pixel[channel])).abs());
+                    }
+                }
+                assert!(largest <= 2, "{mode:?}: the fill within 2 levels of the exact light: {largest}");
+            }
+            let now = super::effect_passes::texture_allocations();
+            if frame == 2 {
+                allocations = Some(now);
+            } else if let Some(previous) = allocations {
+                assert_eq!(previous, now, "{mode:?}: frame {frame} allocated a texture");
+            }
+        }
+
+        let plain = draw_in(&device, mode, |drawing| content(drawing));
+        let mut expected = plain.clone();
+        for (index, pixel) in expected.chunks_exact_mut(4).enumerate() {
+            let light = lighting.lit_at(Point::new((index % size) as f64 + 0.5, (index / size) as f64 + 0.5));
+            let alpha = f64::from(pixel[3]);
+            for (channel, factor) in [light.r, light.g, light.b].into_iter().enumerate() {
+                let factor = factor.clamp(0.0, LIGHT_MAP_MAX_SCALE);
+                pixel[channel] = (f64::from(pixel[channel]) * factor).min(alpha).round() as u8;
+            }
+        }
+        let cpu_layers = crate::drawing_context_impl::cpu_layer_count();
+        let actual = draw_in(&device, mode, |drawing| {
+            let layers = drawing.as_drawing_context_impl_with_layer_effects().unwrap();
+            assert!(layers.push_lighting_multiply_layer(full(), &lighting), "{mode:?}: the layer on the device");
+            content(drawing);
+            drawing.as_drawing_context_impl_with_layer_effects().unwrap().pop_multiply_layer();
+        });
+        assert_eq!(cpu_layers, crate::drawing_context_impl::cpu_layer_count(), "{mode:?}: drawn on the processor");
+        let (most, mean, _) = difference(&expected, &actual);
         assert!(most <= 3 && mean <= 0.5, "{mode:?}: lit content: largest {most}, mean {mean}");
     }
 }

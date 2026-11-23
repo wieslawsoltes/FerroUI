@@ -14,6 +14,7 @@ pub(crate) mod effect_passes;
 pub mod external_objects;
 mod i_vello_gpu;
 pub(crate) mod shared_frame;
+pub(crate) mod shadow_blur;
 #[cfg(feature = "media3d")]
 pub mod scene3d_passes;
 #[cfg(target_os = "macos")]
@@ -104,8 +105,12 @@ pub fn create_gpu(graphics_context: &Rc<dyn IPlatformGraphicsContext>) -> Option
 
 #[cfg(all(test, feature = "hybrid"))]
 mod layer_tests;
-#[cfg(all(test, feature = "hybrid"))]
+#[cfg(test)]
 mod effect_pass_tests;
+#[cfg(test)]
+mod effect_route_tests;
+#[cfg(test)]
+mod shadow_route_tests;
 #[cfg(test)]
 mod fragment_tests;
 #[cfg(test)]

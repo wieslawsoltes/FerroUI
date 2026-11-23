@@ -33,6 +33,7 @@ mod layer_programs;
 #[cfg(feature = "media3d")]
 mod scene3d;
 mod shader_programs;
+pub(crate) mod shadow_programs;
 
 pub use external_objects::{VelloWebGlExternalObjectsFeature, VelloWebGlFrameBitmap};
 pub use frame_textures::VelloWebGlTexture;
@@ -106,6 +107,8 @@ struct WebGlState {
     programs: LayerPrograms,
     /// The programs of the shader effects, compiled when first needed.
     shaders: ShaderPrograms,
+    /// The blurred box shadows of the last frames.
+    shadows: shadow_programs::ShadowCache,
     /// The GL executor of 3D scenes and its kept outputs, made when a scene is first drawn.
     #[cfg(feature = "media3d")]
     scenes: scene3d::WebGlScenes,
@@ -179,6 +182,7 @@ impl VelloWebGlGpu {
                 textures: TexturePool::default(),
                 programs: LayerPrograms::default(),
                 shaders: ShaderPrograms::default(),
+                shadows: shadow_programs::ShadowCache::default(),
                 #[cfg(feature = "media3d")]
                 scenes: scene3d::WebGlScenes::default(),
             })),
@@ -244,6 +248,7 @@ impl VelloWebGlGpu {
             for image in state.images.values() {
                 self.gl.delete_texture(Some(&image.texture));
             }
+            state.shadows.clear();
             state.textures.dispose(&self.gl);
             state.programs.dispose(&self.gl);
             state.shaders.dispose(&self.gl);
@@ -410,6 +415,25 @@ impl VelloWebGlGpu {
         scenes.scene_texture(&self.gl, &self.gl_context, textures, limit, gpu, scene, size, scale, antialiased, origin)
     }
 
+    /// The blurred shadow of `key` this context kept.
+    pub(crate) fn kept_shadow(
+        &self,
+        key: &crate::drawing_context_impl::box_shadows::ShadowKey,
+    ) -> Option<shadow_programs::WebGlBlurredShape> {
+        self.state.borrow_mut().as_mut()?.shadows.get(key)
+    }
+
+    /// Keeps a blurred shadow for the next frames.
+    pub(crate) fn keep_shadow(
+        &self,
+        key: crate::drawing_context_impl::box_shadows::ShadowKey,
+        shadow: shadow_programs::WebGlBlurredShape,
+    ) {
+        if let Some(state) = self.state.borrow_mut().as_mut() {
+            state.shadows.insert(key, shadow);
+        }
+    }
+
     /// What names this GPU: the frame bitmaps of its pool carry it.
     pub(crate) fn identity(&self) -> u64 {
         self.identity
@@ -516,6 +540,19 @@ impl VelloWebGlGpu {
         Ok(upright)
     }
 
+    /// Whether the image of the lights of the context holds `lights` rows (#1158).
+    pub(crate) fn holds_lights(&self, lights: usize) -> bool {
+        lights <= self.max_texture_size as usize
+    }
+
+    /// Writes the lights the many-lights programs read next (#1158).
+    pub(crate) fn write_light_rows(&self, rows: &[f32]) -> bool {
+        match self.state.borrow_mut().as_mut() {
+            Some(state) => state.programs.write_light_rows(&self.gl, rows, self.max_texture_size),
+            None => false,
+        }
+    }
+
     /// The pass of the shader effect `effect` over `content` (upright, holding `area` pixels whose
     /// top left is `origin` of the area of the effect, of `size` pixels at `scale`) into a texture
     /// of the pool. `None` when its program is not there or its uniforms do not match it.
@@ -542,6 +579,38 @@ impl VelloWebGlGpu {
         if let Some(state) = self.state.borrow_mut().as_mut() {
             state.textures.trim(&self.gl, 4);
         }
+    }
+
+    /// A texture of the pool with `rgba` (`width` by `height` pixels, row by row from the top, the
+    /// first row the first of the texture) at its top left: what a pass reads as an image of its
+    /// own. The texture is the pool's again once it is dropped.
+    pub(crate) fn pixels_texture(&self, width: u32, height: u32, rgba: &[u8]) -> Result<Rc<VelloWebGlTexture>, String> {
+        if width == 0 || height == 0 || width.max(height) > self.max_texture_size {
+            return Err(format!("{width}x{height} pixels do not fit a texture of the context"));
+        }
+        let bytes = width as usize * height as usize * 4;
+        let pixels = rgba.get(..bytes).ok_or("the pixels do not fill their size")?;
+        let mut state = self.state.borrow_mut();
+        let state = state.as_mut().ok_or("the renderer of the canvas has been released")?;
+        let (texture_width, texture_height) = frame_textures::pooled_size(width, height, self.max_texture_size);
+        let target = state.textures.acquire(&self.gl, texture_width, texture_height)?;
+        let gl = &self.gl;
+        gl.active_texture(WebGl2RenderingContext::TEXTURE0);
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&target.texture));
+        let uploaded = gl.tex_sub_image_2d_with_i32_and_i32_and_u32_and_type_and_opt_u8_array(
+            WebGl2RenderingContext::TEXTURE_2D,
+            0,
+            0,
+            0,
+            width as i32,
+            height as i32,
+            WebGl2RenderingContext::RGBA,
+            WebGl2RenderingContext::UNSIGNED_BYTE,
+            Some(pixels),
+        );
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+        uploaded.map_err(|_| "the context did not take the pixels".to_string())?;
+        Ok(target)
     }
 
     /// A texture of the context with the pixels of an image, premultiplied,

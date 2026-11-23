@@ -1136,7 +1136,7 @@ impl LitContent {
             // The light evaluated by the drawing context (on the GPU), or the
             // light map sampled here; a light that is the same everywhere
             // needs the smallest map.
-            if lighting.fits_a_drawing_context() && layers.push_lighting_multiply_layer(rect, &lighting) {
+            if layers.evaluates_lighting(&lighting) && layers.push_lighting_multiply_layer(rect, &lighting) {
                 return Some(LitContent { kind: LitContentKind::Multiplied });
             }
             let size = if lighting.is_uniform() { PixelSize::new(2, 2) } else { size };
@@ -1294,8 +1294,9 @@ pub fn paint_scene_lighting(canvas: &mut dyn IDrawingContextImpl, rect: Rect, ma
         return;
     }
     // The lights evaluated per pixel by the drawing context (on the GPU).
-    if lighting.fits_a_drawing_context()
-        && canvas.as_drawing_context_impl_with_layer_effects().is_some_and(|layers| layers.draw_lighting(rect, &lighting))
+    if canvas
+        .as_drawing_context_impl_with_layer_effects()
+        .is_some_and(|layers| layers.evaluates_lighting(&lighting) && layers.draw_lighting(rect, &lighting))
     {
         return;
     }

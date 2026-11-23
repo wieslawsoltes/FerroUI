@@ -1,4 +1,4 @@
-use crate::scene::vello_cpu_scene_sink::{prepare, ALIASING_THRESHOLD, CURVE_TOLERANCE};
+use crate::scene::vello_cpu_scene_sink::{closed_form_std_dev, prepare, ALIASING_THRESHOLD, CURVE_TOLERANCE};
 use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint};
 use crate::vello_options::VelloRenderingMode;
 use crate::web_gl::{log_render_failure, VelloWebGlGpu, VelloWebGlTexture};
@@ -364,5 +364,29 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
         let rendered = self.gpu.render_to_texture(&self.scene, &self.images, &self.textures, area);
         self.textures.clear();
         rendered
+    }
+
+    fn filter_capabilities(&self) -> crate::scene::VelloSceneFilterCapabilities {
+        // The closed form of the renderer. Its filter layers stay unused: the layers with an
+        // effect have their own passes on this context.
+        crate::scene::VelloSceneFilterCapabilities { filter_layers: false, blurred_rounded_rects: true }
+    }
+
+    fn fill_blurred_rounded_rect(
+        &mut self,
+        rect: Rect,
+        radius: f64,
+        std_deviation: f64,
+        invert: bool,
+        transform: Affine,
+        color: peniko::color::AlphaColor<peniko::color::Srgb>,
+    ) {
+        self.set_anti_alias(true);
+        self.scene.set_blend_mode(BlendMode::default());
+        self.scene.set_paint(PaintType::Solid(color));
+        self.scene.set_paint_transform(Affine::IDENTITY);
+        self.scene.set_transform(transform);
+        self.scene.set_fill_rule(Fill::NonZero);
+        self.scene.fill_blurred_rounded_rect(&rect, radius as f32, closed_form_std_dev(std_deviation) as f32, invert);
     }
 }

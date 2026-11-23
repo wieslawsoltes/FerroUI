@@ -333,13 +333,17 @@ pub(crate) fn lighting_texture(
     lighting: &LightingParameters,
     output: LightingOutput,
 ) -> Option<Arc<VelloDeviceTexture>> {
-    if lighting.lights.len() > MAX_LIGHTS || width == 0 || height == 0 {
+    if width == 0 || height == 0 {
         return None;
     }
     // The sizes of the pool are multiples of 32 pixels: an area that moves
     // by a fraction of a pixel covers one pixel more or less, and takes the
     // same texture (the scene paints the part the area covers).
     let (width, height) = (width.div_ceil(32) * 32, height.div_ceil(32) * 32);
+    if lighting.lights.len() > MAX_LIGHTS {
+        let lights = blocks::many_lighting(lighting, output, origin, to_local);
+        return many_lights_pass(device, None, (width, height), &lights);
+    }
     let floats = blocks::lighting(lighting, output, origin, to_local);
     let bytes: Vec<u8> = floats.iter().flat_map(|value| value.to_ne_bytes()).collect();
     with_pipeline(device, |pipeline| {
@@ -720,6 +724,55 @@ fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
 /// the kernel as a correlation (the weight of row `i`, column `j` at
 /// `i * width + j`), the sum times the gain plus the bias, the colours
 /// un-premultiplied and the alpha kept, or the four channels convolved.
+/// A multiply layer of factors: each colour channel of the content times the factor of its point,
+/// sampled bilinearly between the centres of the samples (`MultiplyLayerFactors::factor_at`),
+/// clamped to the alpha; a pixel outside the unit square of the factors is cleared.
+const MULTIPLY_FACTORS_WGSL: &str = r#"
+struct Params {
+    // The rows of the transform from the pixels of the area to the unit square of the factors.
+    row_u: vec4<f32>,
+    row_v: vec4<f32>,
+    // x, y: the size of the samples; z: what a sample of 1 stands for.
+    samples: vec4<f32>,
+    // x, y: the size of the area in pixels.
+    extent: vec4<f32>,
+}
+
+@group(0) @binding(0) var<uniform> params: Params;
+@group(0) @binding(1) var content: texture_2d<f32>;
+@group(0) @binding(2) var factors: texture_2d<f32>;
+
+fn sample(p: vec2<i32>) -> vec3<f32> {
+    return textureLoad(factors, p, 0).rgb;
+}
+
+@fragment
+fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    let pixel = vec2<i32>(floor(fragment.xy));
+    if (f32(pixel.x) >= params.extent.x || f32(pixel.y) >= params.extent.y) {
+        return vec4<f32>(0.0);
+    }
+    let c = textureLoad(content, pixel, 0);
+    if (c.a <= 0.0) {
+        return vec4<f32>(0.0);
+    }
+    let at = vec3<f32>(vec2<f32>(pixel) + 0.5, 1.0);
+    let unit = vec2<f32>(dot(params.row_u.xyz, at), dot(params.row_v.xyz, at));
+    if (any(unit < vec2<f32>(0.0)) || any(unit > vec2<f32>(1.0))) {
+        return vec4<f32>(0.0);
+    }
+    let size = params.samples.xy;
+    let p = clamp(unit * size - 0.5, vec2<f32>(0.0), size - 1.0);
+    let a = vec2<i32>(floor(p));
+    let b = min(a + vec2<i32>(1), vec2<i32>(size) - vec2<i32>(1));
+    let f = p - vec2<f32>(a);
+    let top = mix(sample(a), sample(vec2<i32>(b.x, a.y)), f.x);
+    let bottom = mix(sample(vec2<i32>(a.x, b.y)), sample(b), f.x);
+    let factor = mix(top, bottom, f.y) * params.samples.z;
+    return vec4<f32>(min(c.rgb * factor, vec3<f32>(c.a)), c.a);
+}
+"#;
+
 const CONVOLUTION_WGSL: &str = r#"
 struct Params {
     weights: array<vec4<f32>, 7>,
@@ -800,6 +853,7 @@ enum LayerProgram {
     PixelOperation,
     Convolution,
     FrameConversion,
+    MultiplyFactors,
     Nv12Conversion,
 }
 
@@ -811,6 +865,7 @@ impl LayerProgram {
             LayerProgram::PixelOperation => "FerroUI pixel operation",
             LayerProgram::Convolution => "FerroUI convolution",
             LayerProgram::FrameConversion => "FerroUI frame conversion",
+            LayerProgram::MultiplyFactors => "FerroUI multiply factors",
             LayerProgram::Nv12Conversion => "FerroUI NV12 conversion",
         }
     }
@@ -826,13 +881,14 @@ impl LayerProgram {
                 format!("{LAYER_VERTEX_WGSL}{REC709_TO_SRGB_WGSL}{FRAME_CONVERSION_WGSL}")
             }
             LayerProgram::Nv12Conversion => format!("{LAYER_VERTEX_WGSL}{REC709_TO_SRGB_WGSL}{NV12_CONVERSION_WGSL}"),
+            LayerProgram::MultiplyFactors => format!("{LAYER_VERTEX_WGSL}{MULTIPLY_FACTORS_WGSL}"),
         }
     }
 
     /// The textures the program reads.
     fn inputs(self) -> usize {
         match self {
-            LayerProgram::PixelOperation | LayerProgram::Nv12Conversion => 2,
+            LayerProgram::PixelOperation | LayerProgram::MultiplyFactors | LayerProgram::Nv12Conversion => 2,
             _ => 1,
         }
     }
@@ -845,6 +901,7 @@ impl LayerProgram {
             LayerProgram::PixelOperation => blocks::PIXEL_OPERATION_FLOATS,
             LayerProgram::FrameConversion | LayerProgram::Nv12Conversion => 2 * 4,
             LayerProgram::Convolution => blocks::CONVOLUTION_FLOATS,
+            LayerProgram::MultiplyFactors => blocks::MULTIPLY_FACTORS_FLOATS,
         }
     }
 }
@@ -1031,8 +1088,8 @@ fn run_layer_pass(
     inputs: &[&Arc<VelloDeviceTexture>],
 ) -> Option<Arc<VelloDeviceTexture>> {
     let first = inputs.first()?;
-    // The chroma plane of NV12 is the one input with a size of its own.
-    let same_size = program == LayerProgram::Nv12Conversion
+    // The chroma plane of NV12 and the factors of a multiply layer are inputs of their own size.
+    let same_size = matches!(program, LayerProgram::Nv12Conversion | LayerProgram::MultiplyFactors)
         || inputs.iter().all(|input| input.width() == first.width() && input.height() == first.height());
     if inputs.len() != program.inputs() || uniforms.len() != program.uniform_floats() || !same_size {
         return None;
@@ -1163,8 +1220,217 @@ pub(crate) fn light_multiply_texture(
     lighting: &LightingParameters,
     to_local: kurbo::Affine,
 ) -> Option<Arc<VelloDeviceTexture>> {
+    if lighting.lights.len() > MAX_LIGHTS {
+        let lights = blocks::many_light_multiply(lighting, (area.width, area.height), to_local);
+        return many_lights_pass(device, Some(content), (content.width(), content.height()), &lights);
+    }
     let floats = blocks::light_multiply(lighting, (area.width, area.height), to_local)?;
     run_layer_pass(device, LayerProgram::LightMultiply, &floats, &[content])
+}
+
+// --- more lights than the uniform block holds (#1158) ------------------------------------
+
+/// The binding of the image of the lights.
+const LIGHT_ROWS_BINDING: u32 = 3;
+/// The texels of a light.
+const LIGHT_ROW_TEXELS: u32 = (blocks::LIGHT_FLOATS / 4) as u32;
+
+/// [`LIGHT_COMMON_WGSL`] with the lights read from an image, one row per light, so that their
+/// number is not bound by the size of a uniform block.
+fn many_lights_common_wgsl() -> String {
+    let replacements = [
+        ("    lights: array<Light, 8>,\n", ""),
+        (
+            "@group(0) @binding(0) var<uniform> params: Params;\n",
+            "@group(0) @binding(0) var<uniform> params: Params;\n\
+             @group(0) @binding(3) var light_rows: texture_2d<f32>;\n\
+             fn light_field(i: i32, field: i32) -> vec4<f32> {\n\
+                 return textureLoad(light_rows, vec2<i32>(field, i), 0);\n\
+             }\n\
+             fn light_of(i: i32) -> Light {\n\
+                 return Light(light_field(i, 0), light_field(i, 1), light_field(i, 2), light_field(i, 3),\n\
+                     light_field(i, 4), light_field(i, 5), light_field(i, 6), light_field(i, 7),\n\
+                     light_field(i, 8), light_field(i, 9));\n\
+             }\n",
+        ),
+        ("for (var i = 0; i < 8; i = i + 1) {", "for (var i = 0; i < count; i = i + 1) {"),
+        ("let l = params.lights[i];", "let l = light_of(i);"),
+    ];
+    let mut source = LIGHT_COMMON_WGSL.to_string();
+    for (from, to) in replacements {
+        debug_assert_eq!(1, source.matches(from).count(), "{from}");
+        source = source.replace(from, to);
+    }
+    source
+}
+
+/// The pipeline of the lights read from an image, with or without content to multiply.
+struct ManyLightsPipeline {
+    device: Weak<VelloWgpuDevice>,
+    multiply: bool,
+    pipeline: wgpu::RenderPipeline,
+    layout: wgpu::BindGroupLayout,
+    buffer: wgpu::Buffer,
+    /// The image of the lights and the rows it holds; it grows and is written each pass.
+    rows: Option<(wgpu::Texture, wgpu::TextureView, u32)>,
+    /// By the id of the content (0 for none).
+    bind_groups: Vec<(u64, wgpu::BindGroup)>,
+}
+
+ferroui_base::ferro_thread_local! {
+    // As `PIPELINES`: not destroyed when the thread ends.
+    static MANY_LIGHTS_PIPELINES: ManuallyDrop<RefCell<Vec<ManyLightsPipeline>>> =
+        ManuallyDrop::new(RefCell::new(Vec::new()));
+}
+
+/// Whether `lights` point and spot lights fit the image of the lights of `device`.
+pub(crate) fn holds_lights(device: &VelloWgpuDevice, lights: usize) -> bool {
+    lights <= MAX_LIGHTS || lights <= device.device().limits().max_texture_dimension_2d as usize
+}
+
+/// The lights of `lights` evaluated per pixel into a texture of the pool of `size`: over `content`
+/// when there is one (the multiply layer), else the light itself (the lighting fill). The cost per
+/// pixel grows with the number of lights, as in the uniform route; what a frame uploads is the one
+/// image of the lights.
+fn many_lights_pass(
+    device: &Arc<VelloWgpuDevice>,
+    content: Option<&Arc<VelloDeviceTexture>>,
+    size: (u32, u32),
+    lights: &blocks::ManyLights,
+) -> Option<Arc<VelloDeviceTexture>> {
+    let rows = lights.row_count();
+    if rows == 0 || !holds_lights(device, rows as usize) {
+        return None;
+    }
+    let output = pooled_texture(device, size.0, size.1);
+    let multiply = content.is_some();
+    MANY_LIGHTS_PIPELINES.with(|pipelines| {
+        let mut pipelines = pipelines.borrow_mut();
+        pipelines.retain(|pipeline| pipeline.device.strong_count() > 0);
+        let found = pipelines.iter().position(|pipeline| {
+            pipeline.multiply == multiply && std::ptr::eq(pipeline.device.as_ptr(), Arc::as_ptr(device))
+        });
+        let index = found.unwrap_or_else(|| {
+            let wgpu_device = device.device();
+            let label = Some(if multiply { "FerroUI many lights multiply" } else { "FerroUI many lights" });
+            let fragment = if multiply { LIGHT_MULTIPLY_FRAGMENT_WGSL } else { LIGHTING_FRAGMENT_WGSL };
+            let mut entries = vec![uniform_entry(0)];
+            if multiply {
+                entries.push(texture_entry(1));
+            }
+            entries.push(texture_entry(LIGHT_ROWS_BINDING));
+            let source = format!("{}{fragment}", many_lights_common_wgsl());
+            let (pipeline, layout) = create_pass_pipeline(wgpu_device, label, source, &entries);
+            let buffer = wgpu_device.create_buffer(&wgpu::BufferDescriptor {
+                label,
+                size: (blocks::HEAD_FLOATS * 4) as u64,
+                usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+                mapped_at_creation: false,
+            });
+            pipelines.push(ManyLightsPipeline {
+                device: Arc::downgrade(device),
+                multiply,
+                pipeline,
+                layout,
+                buffer,
+                rows: None,
+                bind_groups: Vec::new(),
+            });
+            pipelines.len() - 1
+        });
+        let pipeline = &mut pipelines[index];
+        if pipeline.rows.as_ref().is_none_or(|(_, _, held)| *held < rows) {
+            let held = rows.next_power_of_two().min(device.device().limits().max_texture_dimension_2d);
+            let texture = device.device().create_texture(&wgpu::TextureDescriptor {
+                label: Some("FerroUI light rows"),
+                size: wgpu::Extent3d { width: LIGHT_ROW_TEXELS, height: held, depth_or_array_layers: 1 },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                format: wgpu::TextureFormat::Rgba32Float,
+                usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+                view_formats: &[],
+            });
+            let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
+            pipeline.rows = Some((texture, view, held));
+            pipeline.bind_groups.clear();
+            ALLOCATIONS.with(|count| count.set(count.get() + 1));
+        }
+        let (texture, view, _) = pipeline.rows.as_ref()?;
+        let row_bytes: Vec<u8> = lights.rows.iter().flat_map(|value| value.to_ne_bytes()).collect();
+        device.queue().write_texture(
+            wgpu::TexelCopyTextureInfo {
+                texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            &row_bytes,
+            wgpu::TexelCopyBufferLayout {
+                offset: 0,
+                bytes_per_row: Some(LIGHT_ROW_TEXELS * 16),
+                rows_per_image: Some(rows),
+            },
+            wgpu::Extent3d { width: LIGHT_ROW_TEXELS, height: rows, depth_or_array_layers: 1 },
+        );
+        let id = content.map_or(0, |content| content.id());
+        let group = match pipeline.bind_groups.iter().position(|(key, _)| *key == id) {
+            Some(group) => group,
+            None => {
+                if pipeline.bind_groups.len() >= MAX_BIND_GROUPS {
+                    pipeline.bind_groups.clear();
+                }
+                let mut entries =
+                    vec![wgpu::BindGroupEntry { binding: 0, resource: pipeline.buffer.as_entire_binding() }];
+                if let Some(content) = content {
+                    entries.push(wgpu::BindGroupEntry {
+                        binding: 1,
+                        resource: wgpu::BindingResource::TextureView(content.view()),
+                    });
+                }
+                entries.push(wgpu::BindGroupEntry {
+                    binding: LIGHT_ROWS_BINDING,
+                    resource: wgpu::BindingResource::TextureView(view),
+                });
+                let bind_group = device.device().create_bind_group(&wgpu::BindGroupDescriptor {
+                    label: Some("FerroUI many lights"),
+                    layout: &pipeline.layout,
+                    entries: &entries,
+                });
+                pipeline.bind_groups.push((id, bind_group));
+                pipeline.bind_groups.len() - 1
+            }
+        };
+        let head: Vec<u8> = lights.head.iter().flat_map(|value| value.to_ne_bytes()).collect();
+        device.queue().write_buffer(&pipeline.buffer, 0, &head);
+        let mut encoder = device
+            .device()
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("FerroUI many lights") });
+        {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                label: Some("FerroUI many lights"),
+                color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                    view: output.view(),
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
+                    depth_slice: None,
+                })],
+                depth_stencil_attachment: None,
+                occlusion_query_set: None,
+                timestamp_writes: None,
+                multiview_mask: None,
+            });
+            pass.set_pipeline(&pipeline.pipeline);
+            pass.set_bind_group(0, &pipeline.bind_groups[group].1, &[]);
+            pass.draw(0..3, 0..1);
+        }
+        device.queue().submit(Some(encoder.finish()));
+        Some(())
+    })?;
+    Some(output)
 }
 
 /// `operation` of `source` onto `destination`; `to_local` maps a pixel of
@@ -1183,6 +1449,37 @@ pub(crate) fn pixel_operation_texture(
 }
 
 /// `content` convolved with `convolution`.
+/// `content` multiplied by `factors`, whose samples are uploaded into a texture of the pool for
+/// the pass. `to_unit` maps the pixels of the area to the unit square of the factors.
+pub(crate) fn multiply_factors_texture(
+    device: &Arc<VelloWgpuDevice>,
+    content: &Arc<VelloDeviceTexture>,
+    area: LayerArea,
+    factors: &ferroui_base::platform::MultiplyLayerFactors,
+    to_unit: kurbo::Affine,
+) -> Option<Arc<VelloDeviceTexture>> {
+    let (width, height, samples, scale) = blocks::factor_samples(factors);
+    let largest = device.device().limits().max_texture_dimension_2d;
+    if width > largest || height > largest {
+        return None;
+    }
+    let (texture_width, texture_height) = pooled_size(device, width, height);
+    let texture = pooled_texture(device, texture_width, texture_height);
+    device.queue().write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: texture.texture(),
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        &samples[..width as usize * height as usize * 4],
+        wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(width * 4), rows_per_image: Some(height) },
+        wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+    );
+    let floats = blocks::multiply_factors((width, height, scale), to_unit, (area.width, area.height));
+    run_layer_pass(device, LayerProgram::MultiplyFactors, &floats, &[content, &texture])
+}
+
 pub(crate) fn convolution_texture(
     device: &Arc<VelloWgpuDevice>,
     content: &Arc<VelloDeviceTexture>,
