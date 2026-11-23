@@ -23,6 +23,7 @@ export async function verifyLiveApp(): Promise<void> {
         assert.equal(source?.language, 'rust');
         assert.equal(source.columnEncoding, 'unicodeScalar');
         assert.ok(source.invocation && source.invocation.line < source.line);
+        assert.ok(source.uri);
         const rust = await readFile(new URL(source.uri), 'utf8');
         assert.equal(source.revision, revision(Buffer.from(rust)));
         const line = rust.split(/\r?\n/)[source.line - 1];

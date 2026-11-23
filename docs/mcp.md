@@ -42,6 +42,11 @@ claude mcp add --transport http ferroui http://127.0.0.1:8765/mcp --header "Auth
 The token changes on every run. Do not commit it. HTTP binds only to loopback, validates Host and
 Origin, requires the bearer token for every method, and does not enable cross-origin access.
 
+An app that delivers its endpoint through a private channel can start the inspector with
+`ferroui_mcp::serve_private` and use the address and token from the returned handle. The Android
+Live App helper delivers these values in the debuggable app’s private files directory. VS Code reads
+the receipt through ADB and connects over its session’s port forward. [Run or attach an Android app in VS Code](designer/vscode/runtime.md#run-or-attach-an-android-app)
+
 Example agent request: “Find SearchBox, type Button, inspect the resulting tree, and show me a
 screenshot.” The schema descriptions returned by `tools/list` describe all arguments.
 

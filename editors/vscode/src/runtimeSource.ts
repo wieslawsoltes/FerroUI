@@ -6,9 +6,9 @@ import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeTarget } from './runtimeConnections';
 import { runtimeKind } from './runtimeTargets';
 import type { RuntimeNode, RuntimeProperty, RuntimeSource } from './runtimeProtocol';
+import { runtimeSourceUri } from './runtimeSourcePaths';
 import { readRuntimeTemplates } from './runtimeTemplates';
 import { asRange } from './textDocument';
-import { workspaceSourceUri } from './workspacePaths';
 
 interface AuthoredSource {
     anchor: RuntimeSource;
@@ -26,8 +26,8 @@ export class RuntimeSourceEditor {
     }
 
     async resolve(anchor: RuntimeSource | null): Promise<AuthoredSource | undefined> {
-        if (!anchor || typeof anchor.uri !== 'string') return;
-        const uri = await workspaceSourceUri(vscode.Uri.parse(anchor.uri, true));
+        if (!anchor) return;
+        const uri = await runtimeSourceUri(anchor);
         if (!uri) return;
         const document = await vscode.workspace.openTextDocument(uri);
         if ((anchor.language === 'rust' || anchor.revision !== undefined) && !matchesRevision(document, anchor.revision)) return;

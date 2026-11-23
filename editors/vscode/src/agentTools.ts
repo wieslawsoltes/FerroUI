@@ -25,6 +25,7 @@ import type { ResourceMove, ResourceMoveInput } from './resourceMove';
 import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
 import type { IosSimulatorRun } from './iosSimulatorTargets';
+import type { AndroidRequest } from './androidTargets';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
@@ -246,6 +247,14 @@ export class AgentTools {
         if (tool === 'ferroui_ios_simulator_stop') {
             await this.appSessions.simulators.stop(args.runtime as AppRuntime);
             return { stopped: true };
+        }
+        if (tool === 'ferroui_android_targets') return this.appSessions.android.targets((input as { folder?: string }).folder, signal);
+        if (tool === 'ferroui_android_run' || tool === 'ferroui_android_attach') {
+            return this.appSessions.android.open(input as AndroidRequest, tool === 'ferroui_android_run' ? 'run' : 'attach', signal);
+        }
+        if (tool === 'ferroui_android_stop') {
+            await this.appSessions.android.stop(args.runtime as AppRuntime);
+            return { closed: true };
         }
         if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
         if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }

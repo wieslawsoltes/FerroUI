@@ -7,12 +7,22 @@ import { mcpEndpointPrefix, runtimeEndpointReader } from '../src/runtimeMcp';
 
 export async function verifyRuntimeClient(): Promise<void> {
     verifyRuntimeAnnouncements();
+    await verifyRuntimeHttp();
+    await verifyRuntimeHttp(54_321);
+}
+
+async function verifyRuntimeHttp(devicePort?: number): Promise<void> {
     const token = 'a'.repeat(64);
     const session = 'live-test';
     const methods: string[] = [];
     let ended!: () => void;
     const deleted = new Promise<void>(resolve => { ended = resolve; });
     const server = createServer(async (request, response) => {
+        const port = devicePort ?? (server.address() as AddressInfo).port;
+        if (request.headers.host !== `127.0.0.1:${port}`) {
+            response.writeHead(403).end();
+            return;
+        }
         if (request.headers.authorization !== `Bearer ${token}`) {
             response.writeHead(401).end();
             return;
@@ -46,7 +56,7 @@ export async function verifyRuntimeClient(): Promise<void> {
     });
     server.listen(0, '127.0.0.1');
     await once(server, 'listening');
-    const client = new RuntimeClient({ url: `http://127.0.0.1:${(server.address() as AddressInfo).port}/mcp`, token });
+    const client = new RuntimeClient({ url: `http://127.0.0.1:${(server.address() as AddressInfo).port}/mcp`, token, devicePort });
     try {
         const [windows, screenshot] = await Promise.all([client.call('list_windows'), client.call('screenshot', { node_id: 1 })]);
         assert.deepEqual(windows, [{ node_id: 1, type: 'Window' }]);

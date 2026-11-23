@@ -12,7 +12,7 @@ export async function verifyLiveRustTemplates(): Promise<void> {
         const templates = (await readRuntimeTemplates(client, grid.node_id)).filter(entry => entry.column);
         assert.equal(templates.length, 4);
         for (const template of templates) {
-            assert.ok(template.source?.language === 'rust');
+            assert.ok(template.source?.language === 'rust' && template.source.uri);
             const uri = vscode.Uri.parse(template.source.uri);
             const shared = template.member === 'CellEditingTemplate' && template.column?.header === 'Review';
             assert.ok(uri.path.endsWith(shared ? '/app_preview/template_rows.rs' : '/app_preview/tree_templates.rs'));
@@ -22,12 +22,12 @@ export async function verifyLiveRustTemplates(): Promise<void> {
         }
         const companyEditor = templates.find(entry =>
             entry.member === 'CellEditingTemplate' && entry.column?.header === 'Company');
-        assert.ok(companyEditor?.source);
+        assert.ok(companyEditor?.source?.uri);
         const file = await vscode.workspace.openTextDocument(vscode.Uri.parse(companyEditor.source.uri));
         assert.match(file.lineAt(companyEditor.source.line - 1).text, /cell_editing_template/);
         const reviewEditor = templates.find(entry =>
             entry.member === 'CellEditingTemplate' && entry.column?.header === 'Review');
-        assert.ok(reviewEditor?.source);
+        assert.ok(reviewEditor?.source?.uri);
         const shared = await vscode.workspace.openTextDocument(vscode.Uri.parse(reviewEditor.source.uri));
         const constructor = shared.lineAt(reviewEditor.source.line - 1).text;
         assert.match(constructor.slice(reviewEditor.source.column - 1), /^::ferroui_view::template!/);

@@ -23,7 +23,9 @@ export interface RuntimeProperty {
 }
 
 export interface RuntimeSource {
-    uri: string;
+    uri?: string;
+    workspacePath?: string;
+    manifestPath?: string;
     line: number;
     column: number;
     language?: 'rust';

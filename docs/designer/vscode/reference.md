@@ -22,7 +22,7 @@ In a remote window, **FerroUI Designer in VS Code** starts its native MCP helper
 
 ### Run app tools through the editor MCP server
 
-Use **FerroUI Designer in VS Code** to reach a managed app, attached runtime, or Studio session. This also works when your agent’s server list has yet to load a newly launched app.
+Use **FerroUI Designer in VS Code** to reach a managed app, attached runtime, mobile app, or Studio session. Android app tools use this editor connection through the workspace host’s ADB forward.
 
 1. Call `ferroui_app_sessions` and take the exact `runtime` ID of the available session. Call `ferroui_runtime_tools` with that ID to read the app’s tool names, schemas, and `generation`.
 2. For a tool with `readOnlyHint: true`, call `ferroui_runtime_query`. Pass the same `runtime`, the generation as `expected_generation`, the tool name in `tool`, and its own `arguments`. For example, use `list_windows` to get window IDs and `screenshot` to return a native PNG.
@@ -269,6 +269,12 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_ios_simulator_run` with the device ID as `device`, the profile ID as `profile`, and its `folder`. The tool waits for the authenticated app inspector and its first native frame. It returns the exact simulator `runtime` and `generation`.
 3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s own permissions still apply. Call `ferroui_ios_simulator_stop` with the simulator runtime ID to stop the session. A new launch returns a new runtime identity. [Configure and run an iOS simulator app](runtime.md#run-an-app-on-an-ios-simulator)
 
+### Run or attach an Android app with MCP
+
+1. Call `ferroui_android_targets` on the workspace host. Supply `folder` to select a workspace folder. Choose an authorized device with `status: "device"` and take a profile’s `id` and `folder`.
+2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_android_run` or `ferroui_android_attach`. Pass the device ID as `device`, profile ID as `profile`, and the profile’s `folder`. The tool authenticates the opted-in app and returns its exact `runtime` and `generation` after the first native frame.
+3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s permissions still apply to input and live property writes. Use `ferroui_android_stop` to close that session. Apps started by the run tool stop, and independently started apps remain running. [Configure and run an Android app](runtime.md#run-or-attach-an-android-app)
+
 [App Sessions in the workbench](runtime.md#run-several-app-sessions)
 
 ### Inspect Live App templates with MCP
@@ -489,7 +495,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Resolve component mappings and transfer assets | **Review Design Handoff** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
-| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Run iOS Simulator App** |
+| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run Android App**, **Attach to Android App** |
 | Manage an external MCP connection | **Connect to Running MCP Server**, **Disconnect Running MCP Server** |
 
 ## Configure the workspace
@@ -504,6 +510,8 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | `ferroui.hostedPreview.assembly` | Empty | Name the application’s markup assembly when its name differs from the selected Cargo package. |
 | `ferroui.hotReload.targets` | `[]` | Offer chosen Cargo binaries and set their package, manifest, features, and arguments. An empty list discovers targets from Cargo. |
 | `ferroui.iosSimulator.apps` | `[]` | Set launch profiles for iOS simulator bundles with an opted-in app inspector. A profile can install the built app before launch. |
+| `ferroui.android.adbPath` | Empty | Select the Android Debug Bridge executable on the workspace host. |
+| `ferroui.android.apps` | `[]` | Set profiles for debuggable Android apps with an opted-in Live App inspector. A profile can install its APK before launching. |
 | `ferroui.hotReload.cargoPath` | Empty | Choose a specific Cargo executable on the workspace host. |
 | `ferroui.hotReload.registeredSupervisor` | `scripts/hot-reload/supervisor.py` | Choose a workspace-relative script for registered Rust patching and state handoff. |
 | `ferroui.hotReload.pythonPath` | Empty | Select the Python executable for that supervisor. |

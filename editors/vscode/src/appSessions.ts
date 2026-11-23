@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
+import type { AndroidSessions } from './androidSessions';
+import { DeviceAppCommands } from './deviceAppCommands';
 import type { HotReload } from './hotReload';
 import type { IosSimulatorSessions } from './iosSimulatorSessions';
-import type { IosSimulatorRun } from './iosSimulatorTargets';
-import { errorMessage } from './protocol';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import type { RuntimePanels } from './runtimePanels';
 import { RuntimeMcpActions } from './runtimeMcpActions';
@@ -18,7 +18,7 @@ export class AppSessions implements vscode.Disposable {
     readonly mcp: RuntimeMcpActions;
 
     constructor(private readonly reload: HotReload, private readonly connections: RuntimeConnections,
-        private readonly panels: RuntimePanels, readonly simulators: IosSimulatorSessions) {
+        private readonly panels: RuntimePanels, readonly simulators: IosSimulatorSessions, readonly android: AndroidSessions) {
         this.mcp = new RuntimeMcpActions(connections);
         const view = vscode.window.createTreeView<AppItem>('ferroui.appSessions', { treeDataProvider: {
             onDidChangeTreeData: this.changed.event,
@@ -49,15 +49,11 @@ export class AppSessions implements vscode.Disposable {
         this.subscriptions = [view, view.onDidChangeVisibility(({ visible }) => { if (visible) refresh(); }),
             reload.onDidChangeRuns(refresh), connections.onDidChange(refresh),
             vscode.commands.registerCommand('ferroui.showAppSessions', () => vscode.commands.executeCommand('ferroui.appSessions.focus')),
-            vscode.commands.registerCommand('ferroui.iosSimulator.run', (request?: IosSimulatorRun) => this.runSimulator(request)),
+            new DeviceAppCommands(simulators, android, runtime => this.open(runtime)),
             command('preview', session => this.open(session.runtime)),
             managed('select'), managed('rebuild'), managed('debug'), managed('showOutput'),
-            command('stop', session => session.app_session
-                ? vscode.commands.executeCommand('ferroui.hotReload.stop', session.app_session)
-                : session.kind === 'simulator' ? this.simulators.stop(session.runtime)
-                    : vscode.commands.executeCommand('ferroui.mcp.detach', session.runtime)),
+            command('stop', session => this.stop(session)),
         ];
-        void vscode.commands.executeCommand('setContext', 'ferroui.iosSimulatorHost', simulators.supported);
     }
 
     list() { return { active: this.reload.active ?? null, managed: this.reload.runs().map(run => run.state), runtimes: this.connections.targets() }; }
@@ -66,38 +62,11 @@ export class AppSessions implements vscode.Disposable {
     detach(runtime: AppRuntime): void { this.connections.detach(runtime); }
     open(runtime: AppRuntime): void { this.panels.open(runtime); }
 
-    private async runSimulator(selection?: IosSimulatorRun): Promise<void> {
-        try {
-            const request = selection ?? await this.chooseSimulatorApp();
-            if (!request) return;
-            const runtime = await vscode.window.withProgress({
-                title: 'Connecting to the iOS simulator app', location: vscode.ProgressLocation.Notification, cancellable: true,
-            }, async (_, token) => {
-                const controller = new AbortController();
-                const subscription = token.onCancellationRequested(() => controller.abort());
-                if (token.isCancellationRequested) controller.abort();
-                try { return await this.simulators.start(request, controller.signal); }
-                catch (error) { if (!controller.signal.aborted) throw error; }
-                finally { subscription.dispose(); }
-            });
-            if (runtime) this.open(runtime.runtime);
-        } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
-    }
-
-    private async chooseSimulatorApp(): Promise<IosSimulatorRun | undefined> {
-        const { supported, devices, apps } = await this.simulators.targets(undefined, AbortSignal.timeout(10_000));
-        if (!supported) throw new Error('iOS simulator sessions require a macOS workspace host.');
-        if (!apps.length) throw new Error('Add a launch profile to ferroui.iosSimulator.apps in Workspace Settings.');
-        const booted = devices.filter(device => device.booted);
-        if (!booted.length) throw new Error('Boot an iOS simulator in Xcode or Simulator on the workspace Mac.');
-        const app = await vscode.window.showQuickPick(apps.map(app => ({
-            label: app.label, description: app.bundleId, detail: vscode.Uri.parse(app.folder).fsPath, app,
-        })), { title: 'Run iOS Simulator App', placeHolder: 'Choose the configured app to launch or restart' });
-        if (!app) return;
-        const device = await vscode.window.showQuickPick(booted.map(device => ({
-            label: device.name, description: device.system, detail: device.id, device,
-        })), { title: 'Select an iOS Simulator', placeHolder: 'Choose the run destination' });
-        if (device) return { device: device.device.id, profile: app.app.id, folder: app.app.folder };
+    private stop(session: RuntimeSummary) {
+        if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.stop', session.app_session);
+        if (session.kind === 'simulator') return this.simulators.stop(session.runtime);
+        if (session.kind === 'android') return this.android.stop(session.runtime);
+        return vscode.commands.executeCommand('ferroui.mcp.detach', session.runtime);
     }
 
     private item(session: RuntimeSummary): AppItem {
@@ -110,7 +79,7 @@ export class AppSessions implements vscode.Disposable {
         item.accessibilityInformation = { label: `${session.label}. ${item.description}${selected ? '. Selected managed app' : ''}` };
         const problem = run && 'problem' in run && run.problem;
         item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : selected ? 'play-circle'
-            : session.kind === 'attached' ? 'plug' : session.kind === 'simulator' ? 'device-mobile' : 'run');
+            : session.kind === 'attached' ? 'plug' : session.kind === 'simulator' || session.kind === 'android' ? 'device-mobile' : 'run');
         item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
         item.command = { command: 'ferroui.appSessions.preview', title: 'Open Live App', arguments: [session.runtime] };
         return item;

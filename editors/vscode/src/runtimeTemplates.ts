@@ -15,7 +15,7 @@ export async function readRuntimeTemplates(client: RuntimeClient, node: number, 
         const { column, member, source } = template;
         const identity = JSON.stringify([
             member, column?.index, column?.expander_inner,
-            source?.uri, source?.line, source?.column, source?.revision,
+            source?.uri ?? (source?.workspacePath && [source.workspacePath, source.manifestPath]), source?.line, source?.column, source?.revision,
         ]);
         return { ...template, id: createHash('sha256').update(identity).digest('hex') };
     });

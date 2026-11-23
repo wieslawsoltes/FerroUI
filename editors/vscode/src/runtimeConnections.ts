@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
 import { RuntimeClient } from './runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
-import type { AppRuntime, IosRuntimeTarget, RuntimeKind, RuntimeTarget } from './runtimeTargets';
+import type { AndroidRuntimeTarget, AppRuntime, DeviceRuntime, IosRuntimeTarget, RuntimeKind, RuntimeTarget } from './runtimeTargets';
 
 export type { AppRuntime, RuntimeTarget } from './runtimeTargets';
 
@@ -17,10 +17,12 @@ export interface RuntimeSummary {
     pid?: number;
     app_session?: string;
     simulator?: IosRuntimeTarget;
+    android?: AndroidRuntimeTarget;
 }
 
 interface Connection { endpoint: RuntimeMcpEndpoint; generation: number }
-interface Attachment extends Connection { runtime: AppRuntime; label: string; simulator?: IosRuntimeTarget }
+type ExternalKind = DeviceRuntime | { kind: 'attached' };
+interface Attachment extends Connection { runtime: AppRuntime; label: string; target: ExternalKind }
 
 /** Credentials stay in the workspace extension host. Public summaries use stable session IDs. */
 export class RuntimeConnections implements vscode.Disposable {
@@ -47,10 +49,11 @@ export class RuntimeConnections implements vscode.Disposable {
             runtime: run.runtime, kind: 'managed', label: run.label, status: run.state.status,
             app_session: run.id, pid: run.pid, generation: this.revision(run.runtime) ?? null, available: this.managed.has(run.runtime),
         }));
-        return managed.concat([...this.external.values()].map(attachment => ({
-            runtime: attachment.runtime, kind: attachment.simulator ? 'simulator' : 'attached', label: attachment.label,
-            status: attachment.simulator?.system ?? 'Attached application', generation: attachment.generation,
-            available: true, simulator: attachment.simulator,
+        return managed.concat([...this.external.values()].map(({ runtime, label, generation, target }): RuntimeSummary => ({
+            ...target, runtime, label, generation, available: true,
+            status: target.kind === 'simulator' ? target.simulator.system : target.kind === 'android'
+                ? (target.android.emulator ? 'Android emulator' : 'Android device') : 'Attached application',
+            ...(target.kind === 'android' ? { pid: target.android.pid } : {}),
         })));
     }
 
@@ -111,7 +114,7 @@ export class RuntimeConnections implements vscode.Disposable {
         const existing = this.attachments().find(item => item.endpoint.url === endpoint);
         const runtime: AppRuntime = existing?.runtime ?? `attached:${randomUUID()}`;
         const label = name?.trim() || existing?.label || `Attached · ${new URL(endpoint).host}`;
-        this.external.set(runtime, { runtime, label, endpoint: { url: endpoint, token }, generation: ++this.nextGeneration });
+        this.external.set(runtime, { runtime, label, endpoint: { url: endpoint, token }, generation: ++this.nextGeneration, target: { kind: 'attached' } });
         this.activeAttachment = runtime;
         this.changed.fire();
         return this.describe(runtime)!;
@@ -120,26 +123,28 @@ export class RuntimeConnections implements vscode.Disposable {
     detach(runtime: AppRuntime): void {
         const attachment = this.external.get(runtime);
         if (!attachment) throw new Error('Select an attached app session.');
-        if (attachment.simulator) throw new Error('Stop this iOS simulator app from App Sessions or with ferroui_ios_simulator_stop.');
+        if (attachment.target.kind === 'simulator') throw new Error('Stop this iOS simulator app from App Sessions or with ferroui_ios_simulator_stop.');
+        if (attachment.target.kind === 'android') throw new Error('Close this Android session from App Sessions or with ferroui_android_stop.');
         this.external.delete(runtime);
         if (this.activeAttachment === runtime) this.activeAttachment = this.attachments().at(-1)?.runtime;
         this.changed.fire();
     }
 
-    addSimulator(simulator: IosRuntimeTarget, label: string, endpoint: RuntimeMcpEndpoint): RuntimeSummary {
-        if (!this.trusted()) throw new Error('Open a trusted workspace before running an iOS simulator app.');
-        const runtime: AppRuntime = `simulator:${randomUUID()}`;
-        this.external.set(runtime, { runtime, label, endpoint, simulator, generation: ++this.nextGeneration });
+    addDevice(target: DeviceRuntime, label: string, endpoint: RuntimeMcpEndpoint): RuntimeSummary {
+        if (!this.trusted()) throw new Error('Open a trusted workspace before connecting a device.');
+        const runtime: AppRuntime = `${target.kind}:${randomUUID()}`;
+        this.external.set(runtime, { runtime, label, endpoint, target, generation: ++this.nextGeneration });
         this.changed.fire();
         return this.describe(runtime)!;
     }
 
-    removeSimulator(runtime: AppRuntime): void {
-        if (this.external.get(runtime)?.simulator && this.external.delete(runtime)) this.changed.fire();
+    removeDevice(runtime: AppRuntime): void {
+        const connection = this.external.get(runtime);
+        if (connection && connection.target.kind !== 'attached' && this.external.delete(runtime)) this.changed.fire();
     }
 
     private attachments(): Attachment[] {
-        return [...this.external.values()].filter(item => !item.simulator);
+        return [...this.external.values()].filter(item => item.target.kind === 'attached');
     }
 
     private resolve(target: RuntimeTarget): AppRuntime | undefined {

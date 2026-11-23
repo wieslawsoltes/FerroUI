@@ -1,4 +1,5 @@
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
+import { sendRuntimeRequest } from './runtimeHttp';
 
 interface Content {
     type: string;
@@ -32,7 +33,8 @@ export class RuntimeClient {
     private next = 0;
 
     constructor(readonly endpoint: RuntimeMcpEndpoint) {
-        if (!localMcpEndpoint(endpoint.url) || !/^[0-9a-f]{64}$/i.test(endpoint.token)) {
+        if (!localMcpEndpoint(endpoint.url) || !/^[0-9a-f]{64}$/i.test(endpoint.token)
+            || endpoint.devicePort !== undefined && (!Number.isInteger(endpoint.devicePort) || endpoint.devicePort < 1 || endpoint.devicePort > 65_535)) {
             throw new Error('Choose an authenticated local FerroUI runtime.');
         }
     }
@@ -83,17 +85,18 @@ export class RuntimeClient {
 
     private async request<T>(method: string, params: object, signal?: AbortSignal, notify = false): Promise<T> {
         const id = ++this.next;
-        const response = await fetch(this.endpoint.url, {
-            method: 'POST', redirect: 'error', headers: { ...this.headers(), 'Content-Type': 'application/json' },
-            signal: AbortSignal.any([this.lifetime.signal, AbortSignal.timeout(5000), ...(signal ? [signal] : [])]),
-            body: JSON.stringify({ jsonrpc: '2.0', method, params, ...(notify ? {} : { id }) }),
-        });
+        const active = AbortSignal.any([this.lifetime.signal, AbortSignal.timeout(5000), ...(signal ? [signal] : [])]);
+        const body = JSON.stringify({ jsonrpc: '2.0', method, params, ...(notify ? {} : { id }) });
+        const response = await sendRuntimeRequest(this.endpoint, 'POST', { ...this.headers(), 'Content-Type': 'application/json' }, active, body);
         if (!response.ok) {
             void response.body?.cancel();
             throw new Error(`The runtime returned HTTP ${response.status}.`);
         }
         this.session = response.headers.get('Mcp-Session-Id') ?? this.session;
-        if (notify) return undefined as T;
+        if (notify) {
+            void response.body?.cancel();
+            return undefined as T;
+        }
         const packet = JSON.parse(await readResponse(response)) as { id?: number; result?: T; error?: { message: string } };
         if (packet.id !== id) throw new Error('The runtime reply did not match its request.');
         if (packet.error) throw new Error(packet.error.message);
@@ -104,8 +107,8 @@ export class RuntimeClient {
     dispose(): void {
         if (this.lifetime.signal.aborted) return;
         this.lifetime.abort();
-        if (this.session) void fetch(this.endpoint.url, { method: 'DELETE', redirect: 'error', headers: this.headers(),
-            signal: AbortSignal.timeout(1500) }).then(response => response.body?.cancel()).catch(() => {});
+        if (this.session) void sendRuntimeRequest(this.endpoint, 'DELETE', this.headers(), AbortSignal.timeout(1500))
+            .then(response => response.body?.cancel()).catch(() => {});
     }
 }
 

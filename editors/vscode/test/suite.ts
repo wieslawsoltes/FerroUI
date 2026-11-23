@@ -15,6 +15,7 @@ import { verifyLiveApp } from './liveApp';
 import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
 import { verifyIosSimulatorMcp } from './iosSimulatorMcp';
+import { verifyAndroidMcp } from './androidMcp';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
@@ -33,6 +34,10 @@ export async function run(): Promise<void> {
     const { designer, runtimeSource } = await extension.activate();
     if (process.env.FERROUI_TEST_IOS_SIMULATOR) {
         await verifyIosSimulatorMcp(process.env.FERROUI_TEST_IOS_SIMULATOR);
+        return;
+    }
+    if (process.env.FERROUI_TEST_ANDROID_DEVICE) {
+        await verifyAndroidMcp(process.env.FERROUI_TEST_ANDROID_DEVICE);
         return;
     }
     await verifyRsxRecovery(workspace);

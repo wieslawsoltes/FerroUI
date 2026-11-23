@@ -190,7 +190,7 @@ In the owning workspace folder’s settings, add a profile that uses the app’s
 }
 ```
 
-1. In **App Sessions**, choose the device icon for **Run iOS Simulator App**. Select the profile and booted simulator. The command installs the optional bundle, launches it, and opens Live App after its inspector and native frame are ready.
+1. In **App Sessions**, choose the device icon for **Open Mobile App** and choose **Run iOS Simulator App** if VS Code offers several workflows. Select the profile and booted simulator. The command installs the optional bundle, launches it, and opens Live App after its inspector and native frame are ready.
 2. Use **Inspect** to pick controls, read their properties or accessibility information, and reveal mapped source from a matching debug build. Use **Interact** if the app enabled inputs. The example opts into inspection with `--mcp` and enables input with `--mcp-input`.
 3. Choose **Stop or Disconnect This App** on the simulator session to stop it. Running the same profile on the same device focuses its existing Live App session. To deploy a new build or switch launch profiles, stop the session, then run the desired profile. Use **Connect to Running MCP Server** to inspect an independently launched app without restarting it.
 
@@ -198,9 +198,43 @@ A launch starts or restarts the chosen bundle on the selected simulator. Multipl
 
 ![The Contact Review app on iOS 26.4 in App Sessions, with its Rust source, portrait Live App frame, and visual tree](../images/vscode-ios-simulator-live-app.png)
 
+### Run or attach an Android app
+
+Install Android SDK Platform Tools on the workspace host. Start an emulator or authorize a connected device in ADB. Use a debuggable APK that enables the FerroUI Live App inspector. To try Service Review on an ARM64 device from the FerroUI checkout, install the SDK and NDK for the Android build and run:
+
+```sh
+rustup target add aarch64-linux-android
+scripts/android/apk.sh inspector
+```
+
+Add a profile to the owning workspace folder. Set `apkPath` to install the built APK when you run it. Leave it out to run the installed app. For a custom Android activity, set `activity` to its name. The default launches `org.ferroui.android.FerroMainActivity`.
+
+```json
+{
+  "ferroui.android.apps": [
+    {
+      "id": "service-review",
+      "label": "Service Review",
+      "packageId": "org.ferroui.androidinspector",
+      "apkPath": "target/android/inspector-arm64-v8a-debug.apk"
+    }
+  ]
+}
+```
+
+1. In **App Sessions**, choose **Open Mobile App**, then **Run Android App**. Select the profile and the authorized device. If set, VS Code installs the APK, and then launches or restarts the selected app.
+2. Use **Inspect** in Live App to read the app’s tree, properties, and accessibility or reveal mapped source. **Interact** sends input when the app enabled it. Verified Rust source comes from the debug build’s compiler locations and matching workspace files.
+3. To inspect an app that is already running, choose **Attach to Android App**. **Stop or Disconnect This App** stops an app started from its App Sessions row. For an attached app, it closes the editor connection and leaves the app running.
+
+Use `ferroui.android.adbPath` in user settings if the workspace host keeps Platform Tools in another location. The adapter uses a local ADB server on that host and owns a separate forward for each connection. Rebuild the APK and run the profile to deploy source changes. [Android MCP tools](reference.md#run-or-attach-an-android-app-with-mcp)
+
+For your own app, enable the `live-inspector` feature of `ferroui-android` and include the `android.permission.INTERNET` manifest permission. On the UI thread after platform setup call `ferroui_android::live_inspector::serve` with the app’s MCP permissions and keep its handle. For an RSX app, call `ferroui_view::hot::enable_editor_source_locations()` before mounting the controls. [Android build setup](../../porting/android-platform.md) · [Application MCP permissions](../../mcp.md)
+
+![Service Review running on the Android 16 emulator, beside its Rust source and native visual tree in VS Code](../images/vscode-android-live-app.png)
+
 ## Inspect the actual window in Live App
 
-1. Start a managed desktop target, run a configured iOS simulator app, or choose **FerroUI: Connect to Running MCP Server** to attach an authenticated loopback inspector. Use the app’s inspector flags, such as `--mcp` in Todo Workbench, to start its server. **Open Live App** opens the supported windows in the editor. Pick a window from its toolbar.
+1. Start a managed desktop target, open a mobile app from App Sessions, or choose **FerroUI: Connect to Running MCP Server** for an authenticated loopback inspector. Use the app’s inspector flags, such as `--mcp` in Todo Workbench, to start its server. **Open Live App** opens the supported windows in the editor. Pick a window from its toolbar.
 2. In **Inspect**, select a control in the native frame or browse the visual, logical, and accessibility trees. Alt+click chooses among overlapping native hits. Read properties, their effective style values, resources, accessible names, roles, and native diagnostics. Switch to **Interact** for clicks, scroll, text, or keys when the app permits input.
 3. Try a property override in the inspector. Just the running session receives the override. Use **Reveal Source** to locate the authored value. When the current revision and source mapping match, use **Apply to Source** to write the supported RSX literal or XAML value into the editor. Review it, then save if you want hot reload to apply the source change.
 

@@ -12,19 +12,36 @@ const profile = join(sandbox, 'profile');
 const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../target/debug'));
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
+const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 try {
     let target = workspace;
-    let simulatorSettings = {};
+    let targetSettings = {};
+    let targetEnv;
+    if (simulator && android) throw new Error('Choose one device acceptance fixture per run.');
     if (simulator) {
         const appPath = process.env.FERROUI_TEST_IOS_SIMULATOR_APP;
         if (process.platform !== 'darwin' || !appPath) {
             throw new Error('Set FERROUI_TEST_IOS_SIMULATOR_APP to the built Contact Review bundle on the workspace Mac.');
         }
         target = resolve(process.env.FERROUI_TEST_IOS_SIMULATOR_SOURCE ?? join(extension, '../..'));
-        simulatorSettings = { 'ferroui.iosSimulator.apps': [{
+        targetSettings = { 'ferroui.iosSimulator.apps': [{
             id: 'contact-review', label: 'Contact Review', bundleId: 'org.ferroui.simulator-inspector',
             appPath: resolve(appPath), args: ['--mcp', '--mcp-input'],
         }] };
+        targetEnv = { FERROUI_TEST_IOS_SIMULATOR: simulator };
+    } else if (android) {
+        const apkPath = process.env.FERROUI_TEST_ANDROID_APK;
+        const adbPath = process.env.FERROUI_TEST_ANDROID_ADB;
+        if (!apkPath || !adbPath) throw new Error('Set FERROUI_TEST_ANDROID_APK and FERROUI_TEST_ANDROID_ADB for the Service Review fixture.');
+        target = resolve(process.env.FERROUI_TEST_ANDROID_SOURCE ?? join(extension, '../..'));
+        targetSettings = {
+            'ferroui.android.adbPath': resolve(adbPath),
+            'ferroui.android.apps': [{
+                id: 'service-review', label: 'Service Review', packageId: 'org.ferroui.androidinspector',
+                apkPath: resolve(apkPath),
+            }],
+        };
+        targetEnv = { FERROUI_TEST_ANDROID_DEVICE: android };
     } else {
         await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
         const animation = join(workspace, 'animation_view.rs');
@@ -36,7 +53,7 @@ try {
     }
     await mkdir(join(profile, 'User'), { recursive: true });
     await writeFile(join(profile, 'User/settings.json'), JSON.stringify({
-        ...simulatorSettings,
+        ...targetSettings,
         'ferroui.languageServer.path': executable('ferroui-xaml-lsp'),
         'ferroui.preview.path': executable('ferroui-designer-preview'),
         'workbench.startupEditor': 'none',
@@ -51,7 +68,7 @@ try {
             version: process.env.FERROUI_TEST_VSCODE_VERSION,
             extensionDevelopmentPath: extension,
         }),
-        extensionTestsEnv: simulator ? { FERROUI_TEST_IOS_SIMULATOR: simulator } : undefined,
+        extensionTestsEnv: targetEnv,
         launchArgs: [target, '--user-data-dir', profile, '--extensions-dir', join(sandbox, 'extensions'),
             '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'],
     });

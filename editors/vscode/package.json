@@ -141,6 +141,22 @@
         "icon": "$(device-mobile)"
       },
       {
+        "command": "ferroui.appSessions.mobile",
+        "title": "Open Mobile App",
+        "category": "FerroUI",
+        "icon": "$(device-mobile)"
+      },
+      {
+        "command": "ferroui.android.run",
+        "title": "Run Android App",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.android.attach",
+        "title": "Attach to Android App",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.collaboration.host",
         "title": "Host XAML Room…",
         "category": "FerroUI",
@@ -835,6 +851,18 @@
           "when": "isWorkspaceTrusted && ferroui.iosSimulatorHost"
         },
         {
+          "command": "ferroui.appSessions.mobile",
+          "when": "isWorkspaceTrusted && ferroui.mobileAppProfiles"
+        },
+        {
+          "command": "ferroui.android.run",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.android.attach",
+          "when": "isWorkspaceTrusted"
+        },
+        {
           "command": "ferroui.collaboration.incoming.apply",
           "when": "ferroui.roomApplyReview"
         },
@@ -1196,8 +1224,8 @@
           "group": "navigation@2"
         },
         {
-          "command": "ferroui.iosSimulator.run",
-          "when": "view == ferroui.appSessions && isWorkspaceTrusted && ferroui.iosSimulatorHost",
+          "command": "ferroui.appSessions.mobile",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted && ferroui.mobileAppProfiles",
           "group": "navigation@3"
         },
         {
@@ -1319,7 +1347,7 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android)$/",
           "group": "inline@1"
         },
         {
@@ -1329,7 +1357,7 @@
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android)$/",
           "group": "inline@3"
         },
         {
@@ -1541,6 +1569,34 @@
           "default": false,
           "scope": "resource",
           "description": "Keep existing blank lines between XAML elements."
+        },
+        "ferroui.android.adbPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to the Android Debug Bridge executable on the workspace host."
+        },
+        "ferroui.android.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Profiles for debuggable Android apps that enable the FerroUI Live App inspector.",
+          "items": {
+            "type": "object",
+            "required": ["id", "packageId"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "description": "Unique profile ID in this workspace folder." },
+              "packageId": { "type": "string", "description": "The application's Android package name." },
+              "label": { "type": "string", "description": "App name shown in the picker and App Sessions." },
+              "activity": {
+                "type": "string",
+                "default": "org.ferroui.android.FerroMainActivity",
+                "description": "The app's launch activity."
+              },
+              "apkPath": { "type": "string", "description": "Optional built APK to install when running. Relative paths start at this workspace folder." }
+            }
+          }
         },
         "ferroui.iosSimulator.apps": {
           "type": "array",

@@ -37,7 +37,9 @@ export class FerroMcpProvider implements vscode.McpServerDefinitionProvider, vsc
             } catch (error) { this.output.appendLine(String(error)); }
         }
         for (const { target, endpoint } of this.runtimes.endpoints()) {
-            const kind = { managed: 'Managed', attached: 'Attached', simulator: 'Simulator' }[target.kind];
+            // Android's forwarded socket and its HTTP authority differ. Editor tools use the workspace transport.
+            if (endpoint.devicePort !== undefined) continue;
+            const kind = { managed: 'Managed', attached: 'Attached', simulator: 'Simulator', android: 'Android' }[target.kind];
             const name = `FerroUI ${kind} · ${target.label} (${target.runtime.split(':')[1].slice(0, 8)})`;
             definitions.push(new vscode.McpHttpServerDefinition(name, vscode.Uri.parse(endpoint.url),
                 { Authorization: `Bearer ${endpoint.token}` }, String(target.generation)));

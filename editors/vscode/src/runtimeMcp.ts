@@ -1,6 +1,6 @@
 import { isIPv4 } from 'node:net';
 
-export interface RuntimeMcpEndpoint { url: string; token: string }
+export interface RuntimeMcpEndpoint { url: string; token: string; devicePort?: number }
 
 export const mcpEndpointPrefix = 'FERROUI_MCP_V1=';
 
