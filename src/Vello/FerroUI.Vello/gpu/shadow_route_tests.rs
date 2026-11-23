@@ -103,6 +103,23 @@ fn no_shadow_reaches_a_scene_of_the_cpu_renderer_in_the_device_modes() {
     }
 }
 
+/// `ALLOWED_ERROR` of the render tests.
+#[cfg(feature = "gpu")]
+const RENDER_TEST_ALLOWED_ERROR: f64 = 0.022;
+
+/// The error of the render tests (`compare_images`) between two images of premultiplied pixels:
+/// the root mean square of the difference of every channel, over the whole image.
+#[cfg(feature = "gpu")]
+fn render_test_error(actual: &[u8], expected: &[u8]) -> f64 {
+    assert_eq!(actual.len(), expected.len());
+    let squares: f64 = actual
+        .iter()
+        .zip(expected)
+        .map(|(a, e)| ((f64::from(*a) - f64::from(*e)) / 255.0).powi(2))
+        .sum();
+    (squares / actual.len() as f64).sqrt()
+}
+
 /// The blur on the device of the compute mode against the CPU reference, at deviations it blurs
 /// directly and at deviations it blurs at a reduced scale, away from the edge of the box.
 #[cfg(feature = "gpu")]
@@ -157,6 +174,9 @@ fn the_device_blur_of_the_compute_mode_agrees_with_the_cpu_reference() {
             }
         }
         assert!(largest <= 4, "{name}: {largest} of 255");
+        let error = render_test_error(&compute, &reference);
+        println!("{name}: {largest} of 255 away from the edge, error {error:.4} over the image");
+        assert!(error <= RENDER_TEST_ALLOWED_ERROR, "{name}: error {error}");
     }
 }
 
