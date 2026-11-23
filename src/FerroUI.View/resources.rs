@@ -52,6 +52,11 @@ pub type ResourceValueConverter = fn(&Option<BoxedValue>) -> Option<BoxedValue>;
 /// A key of a theme that does not exist does not compile, because the keys are constants of the
 /// `keys` module of the theme. A key the theme has with no single value type is a
 /// `ThemeResourceKey<BoxedValue>`, used through its text: `key.name()`.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is not a resource key for a property of type `{T}`",
+    label = "the value of this key does not convert to the property",
+    note = "use a key of the `keys` module of a theme whose value fits the property, or the text of a key"
+)]
 pub trait ResourceKeyFor<T> {
     /// The key.
     fn resource_key(self) -> ResourceKey;

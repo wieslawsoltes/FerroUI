@@ -140,6 +140,12 @@ pub mod markers {
 
 /// What a setter of a property whose value is `T` takes. `M` tells the
 /// conversions apart and is inferred.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is not a value for a property of type `{T}`",
+    label = "this cannot set the property",
+    note = "a setter takes the value, what converts to it, a signal, a closure, a two-way signal or a binding",
+    note = "the short typed forms are rgb(0x1E293B), ctrl(KeyCode::S), translate(x, y), shadow(..), blur(r) and path!(\"..\")"
+)]
 pub trait IntoProp<T, M> {
     /// The value of the element.
     fn into_prop(self) -> PropValue;

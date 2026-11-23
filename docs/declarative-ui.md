@@ -77,6 +77,24 @@ fn main() {
 
 `launch` uses the Fluent theme with the control theme of every control; `launch_themed` takes the theme of the application. An application that ships constructs its theme from the units it uses: a build script of one statement (`ferroui_build::Build::theme`) and `WinUITheme::with_parts` instead of `WinUITheme::new()`, as the hello world samples do (docs/xaml-themes.md, section 3, "An application without markup"). Hello world is 39 % smaller that way (docs/binary-size.md, section 4.24).
 
+### Typed forms and text forms
+
+What has a text form in XAML also has a typed form in the builders. The typed form is the default: the compiler checks it and it links no parser. Text is the form for a value that comes from data at run time, or one copied from XAML.
+
+| What | Typed | Text | Section |
+|---|---|---|---|
+| Style selector | `style(of::<Button>().class("accent").pressed())` | `style("Button.accent:pressed")` | 10.2 |
+| Grid rows and columns | `row_definitions([auto(), star(1.0), px(40.0)])` | `row_definitions("Auto,*,40")` | 4 |
+| Path geometry | `path!("M0 0L10 10z")`, `path_data()` | `Geometry::parse(..)` | 10.7 |
+| Key gesture | `ctrl(KeyCode::S).shift()` | `KeyGesture::parse("Ctrl+Shift+S")` | 4.3 |
+| Transform | `translate(10.0, 5.0).rotate(45.0)` | `TransformOperations::parse(..)` | 4.3 |
+| Shadow, effect | `shadow(0.0, 2.0, 4.0, color)`, `blur(5.0)` | `BoxShadows::parse(..)`, `Effect::parse(..)` | 4.3 |
+| Brush | `rgb(0x1E293B)`, `linear_gradient(..)` | `"#1E293B"` | 4.3 |
+| Binding to a view model | `Person::NAME.two_way()` | a `Binding` with a path | 4.4 |
+| Route | `#[derive(Route)]`, `navigate_to(&route)` | `route("/people/:id", ..)` | 13.3 |
+| Resource reference | `.dynamic_resource(property, keys::Name)` | the same with `"Name"` | 10.3 |
+| Control theme, dictionary | `control_theme::<T>()`, `resource_dictionary()` | XAML | 10.3 |
+
 ## 2. The crates
 
 | Crate | What it holds |

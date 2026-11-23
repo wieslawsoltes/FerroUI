@@ -255,6 +255,11 @@ pub struct ModelBinding<S, V> {
 
 /// A value type that a binding can give a property of type `T`: `T` itself or the `T` of an
 /// `Option<T>`.
+#[diagnostic::on_unimplemented(
+    message = "a binding of a `{Self}` cannot set a property of type `{T}`",
+    label = "the value type of this property of the model does not fit",
+    note = "a property of type `V` takes a binding of `V`, and a property of type `Option<V>` too"
+)]
 pub trait BindableTo<T> {}
 
 impl<T> BindableTo<T> for T {}

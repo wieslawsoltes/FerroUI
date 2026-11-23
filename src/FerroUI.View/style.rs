@@ -45,6 +45,11 @@ pub struct StyleBuilder {
 }
 
 /// What [`style`] takes: a typed [`Selector`], or text in the syntax of XAML.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is not a selector",
+    label = "`style` takes a selector here",
+    note = "write a typed selector, such as `of::<Button>().class(\"accent\").pressed()`, or text, such as `\"Button.accent\"`"
+)]
 pub trait IntoSelector {
     /// The selector.
     fn into_selector(self) -> Selector;

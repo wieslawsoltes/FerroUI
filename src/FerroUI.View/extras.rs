@@ -80,6 +80,11 @@ impl<const N: usize> IntoValue<Option<GridLengths>> for [GridLength; N] {
 
 /// What [`GridDefinitions`] takes: typed lengths (`[auto(), star(1.0), px(40.0)]`), or the text
 /// form of XAML (`"Auto,*,40"`). Only the text forms call the parser of lengths.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is not a list of row or column lengths",
+    label = "the definitions of a grid go here",
+    note = "write `[auto(), star(1.0), px(40.0)]`, or text such as `\"Auto,*,40\"`"
+)]
 pub trait IntoGridLengths {
     /// The lengths; `kind` (`row`, `column`) names them in the message of a text that does not
     /// parse.

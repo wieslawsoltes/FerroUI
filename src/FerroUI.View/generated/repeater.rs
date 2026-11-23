@@ -134,21 +134,29 @@ pub trait LayoutPanelProps: ElementBuilder {
     }
 
     /// Sets [`LayoutPanel::border_brush_property`](ferroui_controls_repeater::LayoutPanel::border_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls_repeater::LayoutPanel>::border_brush_property(), value)
     }
 
     /// Sets [`LayoutPanel::border_thickness_property`](ferroui_controls_repeater::LayoutPanel::border_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_repeater::LayoutPanel>::border_thickness_property(), value)
     }
 
     /// Sets [`LayoutPanel::corner_radius_property`](ferroui_controls_repeater::LayoutPanel::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls_repeater::LayoutPanel>::corner_radius_property(), value)
     }
 
     /// Sets [`LayoutPanel::padding_property`](ferroui_controls_repeater::LayoutPanel::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_repeater::LayoutPanel>::padding_property(), value)
     }

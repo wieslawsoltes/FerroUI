@@ -2245,6 +2245,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::AccessText>> AccessTex
 /// The properties and routed events of [`AcrylicBrush`](ferroui_base::media::AcrylicBrush).
 pub trait AcrylicBrushProps: ElementBuilder {
     /// Sets [`AcrylicBrush::tint_color_property`](ferroui_base::media::AcrylicBrush::tint_color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn tint_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::AcrylicBrush>::tint_color_property(), value)
     }
@@ -2421,6 +2423,8 @@ pub trait AutoCompleteBoxProps: ElementBuilder {
     }
 
     /// Sets [`AutoCompleteBox::placeholder_foreground_property`](ferroui_controls::AutoCompleteBox::placeholder_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::placeholder_foreground_property(), value)
     }
@@ -2625,6 +2629,8 @@ pub trait BlockProps: ElementBuilder {
     }
 
     /// Sets [`Block::margin_property`](ferroui_controls::documents::Block::margin_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::documents::Block>::margin_property(), value)
     }
@@ -2648,6 +2654,8 @@ impl<T: ObjectType + Upcast<ferroui_base::media::BlurEffect>> BlurEffectProps fo
 /// The properties and routed events of [`Border`](ferroui_controls::Border).
 pub trait BorderProps: ElementBuilder {
     /// Sets [`Border::background_property`](ferroui_controls::Border::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Border>::background_property(), value)
     }
@@ -2658,21 +2666,29 @@ pub trait BorderProps: ElementBuilder {
     }
 
     /// Sets [`Border::border_brush_property`](ferroui_controls::Border::border_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Border>::border_brush_property(), value)
     }
 
     /// Sets [`Border::border_thickness_property`](ferroui_controls::Border::border_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::Border>::border_thickness_property(), value)
     }
 
     /// Sets [`Border::corner_radius_property`](ferroui_controls::Border::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::Border>::corner_radius_property(), value)
     }
 
     /// Sets [`Border::box_shadow_property`](ferroui_controls::Border::box_shadow_property).
+    ///
+    /// Takes `shadow(x, y, blur, color)`, or an array of them.
     fn box_shadow<M>(self, value: impl IntoProp<ferroui_base::media::BoxShadows, M>) -> Self {
         self.prop(<ferroui_controls::Border>::box_shadow_property(), value)
     }
@@ -2701,6 +2717,8 @@ pub trait BrushProps: ElementBuilder {
     }
 
     /// Sets [`Brush::transform_property`](ferroui_base::media::Brush::transform_property).
+    ///
+    /// Takes `translate(x, y)`, `rotate(degrees)`, `scale(x, y)` or `skew(x, y)`, chained.
     fn transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_base::media::Brush>::transform_property(), value)
     }
@@ -2711,6 +2729,8 @@ pub trait BrushProps: ElementBuilder {
     }
 
     /// Sets [`Brush::relative_transform_property`](ferroui_base::media::Brush::relative_transform_property).
+    ///
+    /// Takes `translate(x, y)`, `rotate(degrees)`, `scale(x, y)` or `skew(x, y)`, chained.
     fn relative_transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_base::media::Brush>::relative_transform_property(), value)
     }
@@ -2730,6 +2750,8 @@ pub trait ButtonProps: ElementBuilder {
     }
 
     /// Sets [`Button::hot_key_property`](ferroui_controls::Button::hot_key_property).
+    ///
+    /// Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.
     fn hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::Button>::hot_key_property(), value)
     }
@@ -2793,6 +2815,8 @@ pub trait CalendarProps: ElementBuilder {
     }
 
     /// Sets [`Calendar::header_background_property`](ferroui_controls::Calendar::header_background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn header_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Calendar>::header_background_property(), value)
     }
@@ -2912,6 +2936,8 @@ pub trait CalendarDatePickerProps: ElementBuilder {
     }
 
     /// Sets [`CalendarDatePicker::placeholder_foreground_property`](ferroui_controls::CalendarDatePicker::placeholder_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::CalendarDatePicker>::placeholder_foreground_property(), value)
     }
@@ -2941,6 +2967,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::CalendarDatePicker>> CalendarDateP
 /// The properties and routed events of [`CalendarItem`](ferroui_controls::primitives::CalendarItem).
 pub trait CalendarItemProps: ElementBuilder {
     /// Sets [`CalendarItem::header_background_property`](ferroui_controls::primitives::CalendarItem::header_background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn header_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::CalendarItem>::header_background_property(), value)
     }
@@ -3022,16 +3050,22 @@ impl<T: ObjectType + Upcast<ferroui_controls::CarouselPage>> CarouselPageProps f
 /// The properties and routed events of [`ColorAnimation`](ferroui_controls::animation::ColorAnimation).
 pub trait ColorAnimationProps: ElementBuilder {
     /// Sets [`ColorAnimation::from_property`](ferroui_controls::animation::ColorAnimation::from_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn from<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::from_property(), value)
     }
 
     /// Sets [`ColorAnimation::to_property`](ferroui_controls::animation::ColorAnimation::to_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn to<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::to_property(), value)
     }
 
     /// Sets [`ColorAnimation::by_property`](ferroui_controls::animation::ColorAnimation::by_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn by<M>(self, value: impl IntoProp<Option<ferroui_base::media::Color>, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorAnimation>::by_property(), value)
     }
@@ -3065,6 +3099,8 @@ pub trait ColorKeyFrameProps: ElementBuilder {
     }
 
     /// Sets [`ColorKeyFrame::value_property`](ferroui_controls::animation::ColorKeyFrame::value_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn value<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls::animation::ColorKeyFrame>::value_property(), value)
     }
@@ -3084,6 +3120,8 @@ pub trait ColumnDefinitionProps: ElementBuilder {
     }
 
     /// Sets [`ColumnDefinition::width_property`](ferroui_controls::ColumnDefinition::width_property).
+    ///
+    /// Takes `auto()`, `star(1.0)` or `px(40.0)`.
     fn width<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::ColumnDefinition>::width_property(), value)
     }
@@ -3093,11 +3131,15 @@ impl<T: ObjectType + Upcast<ferroui_controls::ColumnDefinition>> ColumnDefinitio
 /// The properties and routed events of [`CombinedGeometry`](ferroui_base::media::CombinedGeometry).
 pub trait CombinedGeometryProps: ElementBuilder {
     /// Sets [`CombinedGeometry::geometry1_property`](ferroui_base::media::CombinedGeometry::geometry1_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn geometry1<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::CombinedGeometry>::geometry1_property(), value)
     }
 
     /// Sets [`CombinedGeometry::geometry2_property`](ferroui_base::media::CombinedGeometry::geometry2_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn geometry2<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::CombinedGeometry>::geometry2_property(), value)
     }
@@ -3132,6 +3174,8 @@ pub trait ComboBoxProps: ElementBuilder {
     }
 
     /// Sets [`ComboBox::placeholder_foreground_property`](ferroui_controls::ComboBox::placeholder_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::ComboBox>::placeholder_foreground_property(), value)
     }
@@ -3433,6 +3477,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::ContentPage>> ContentPageProps for
 /// The properties and routed events of [`ContentPresenter`](ferroui_controls::presenters::ContentPresenter).
 pub trait ContentPresenterProps: ElementBuilder {
     /// Sets [`ContentPresenter::background_property`](ferroui_controls::presenters::ContentPresenter::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::background_property(), value)
     }
@@ -3443,26 +3489,36 @@ pub trait ContentPresenterProps: ElementBuilder {
     }
 
     /// Sets [`ContentPresenter::border_brush_property`](ferroui_controls::presenters::ContentPresenter::border_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::border_brush_property(), value)
     }
 
     /// Sets [`ContentPresenter::border_thickness_property`](ferroui_controls::presenters::ContentPresenter::border_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::border_thickness_property(), value)
     }
 
     /// Sets [`ContentPresenter::corner_radius_property`](ferroui_controls::presenters::ContentPresenter::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::corner_radius_property(), value)
     }
 
     /// Sets [`ContentPresenter::box_shadow_property`](ferroui_controls::presenters::ContentPresenter::box_shadow_property).
+    ///
+    /// Takes `shadow(x, y, blur, color)`, or an array of them.
     fn box_shadow<M>(self, value: impl IntoProp<ferroui_base::media::BoxShadows, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::box_shadow_property(), value)
     }
 
     /// Sets [`ContentPresenter::foreground_property`](ferroui_controls::presenters::ContentPresenter::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::foreground_property(), value)
     }
@@ -3543,6 +3599,8 @@ pub trait ContentPresenterProps: ElementBuilder {
     }
 
     /// Sets [`ContentPresenter::padding_property`](ferroui_controls::presenters::ContentPresenter::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::presenters::ContentPresenter>::padding_property(), value)
     }
@@ -3824,6 +3882,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::date_time_pickers::DateTimePickerP
 /// The properties and routed events of [`Decorator`](ferroui_controls::Decorator).
 pub trait DecoratorProps: ElementBuilder {
     /// Sets [`Decorator::padding_property`](ferroui_controls::Decorator::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::Decorator>::padding_property(), value)
     }
@@ -4008,31 +4068,43 @@ pub trait DrawerPageProps: ElementBuilder {
     }
 
     /// Sets [`DrawerPage::drawer_background_property`](ferroui_controls::DrawerPage::drawer_background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn drawer_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_background_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_header_background_property`](ferroui_controls::DrawerPage::drawer_header_background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn drawer_header_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_header_background_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_header_foreground_property`](ferroui_controls::DrawerPage::drawer_header_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn drawer_header_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_header_foreground_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_footer_background_property`](ferroui_controls::DrawerPage::drawer_footer_background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn drawer_footer_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_footer_background_property(), value)
     }
 
     /// Sets [`DrawerPage::drawer_footer_foreground_property`](ferroui_controls::DrawerPage::drawer_footer_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn drawer_footer_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::drawer_footer_foreground_property(), value)
     }
 
     /// Sets [`DrawerPage::backdrop_brush_property`](ferroui_controls::DrawerPage::backdrop_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn backdrop_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::DrawerPage>::backdrop_brush_property(), value)
     }
@@ -4086,16 +4158,22 @@ pub trait DrawingGroupProps: ElementBuilder {
     }
 
     /// Sets [`DrawingGroup::clip_geometry_property`](ferroui_base::media::DrawingGroup::clip_geometry_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn clip_geometry<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::clip_geometry_property(), value)
     }
 
     /// Sets [`DrawingGroup::opacity_mask_property`](ferroui_base::media::DrawingGroup::opacity_mask_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn opacity_mask<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::opacity_mask_property(), value)
     }
 
     /// Sets [`DrawingGroup::effect_property`](ferroui_base::media::DrawingGroup::effect_property).
+    ///
+    /// Takes `blur(radius)` or `drop_shadow(x, y, radius, color)`.
     fn effect<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IEffect>>, M>) -> Self {
         self.prop(<ferroui_base::media::DrawingGroup>::effect_property(), value)
     }
@@ -4152,6 +4230,8 @@ pub trait DropShadowEffectBaseProps: ElementBuilder {
     }
 
     /// Sets [`DropShadowEffectBase::color_property`](ferroui_base::media::DropShadowEffectBase::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::DropShadowEffectBase>::color_property(), value)
     }
@@ -4269,6 +4349,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::Expander>> ExpanderProps for El<T>
 /// The properties and routed events of [`ExperimentalAcrylicBorder`](ferroui_controls::ExperimentalAcrylicBorder).
 pub trait ExperimentalAcrylicBorderProps: ElementBuilder {
     /// Sets [`ExperimentalAcrylicBorder::corner_radius_property`](ferroui_controls::ExperimentalAcrylicBorder::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::ExperimentalAcrylicBorder>::corner_radius_property(), value)
     }
@@ -4283,6 +4365,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::ExperimentalAcrylicBorder>> Experi
 /// The properties and routed events of [`ExperimentalAcrylicMaterial`](ferroui_base::media::ExperimentalAcrylicMaterial).
 pub trait ExperimentalAcrylicMaterialProps: ElementBuilder {
     /// Sets [`ExperimentalAcrylicMaterial::tint_color_property`](ferroui_base::media::ExperimentalAcrylicMaterial::tint_color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn tint_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::tint_color_property(), value)
     }
@@ -4308,6 +4392,8 @@ pub trait ExperimentalAcrylicMaterialProps: ElementBuilder {
     }
 
     /// Sets [`ExperimentalAcrylicMaterial::fallback_color_property`](ferroui_base::media::ExperimentalAcrylicMaterial::fallback_color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn fallback_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::ExperimentalAcrylicMaterial>::fallback_color_property(), value)
     }
@@ -4478,11 +4564,15 @@ impl<T: ObjectType + Upcast<ferroui_base::media::Geometry>> GeometryProps for El
 /// The properties and routed events of [`GeometryDrawing`](ferroui_base::media::GeometryDrawing).
 pub trait GeometryDrawingProps: ElementBuilder {
     /// Sets [`GeometryDrawing::geometry_property`](ferroui_base::media::GeometryDrawing::geometry_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn geometry<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::media::GeometryDrawing>::geometry_property(), value)
     }
 
     /// Sets [`GeometryDrawing::brush_property`](ferroui_base::media::GeometryDrawing::brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::GeometryDrawing>::brush_property(), value)
     }
@@ -4506,6 +4596,8 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GeometryGroup>> GeometryGroupPr
 /// The properties and routed events of [`GlyphRunDrawing`](ferroui_base::media::GlyphRunDrawing).
 pub trait GlyphRunDrawingProps: ElementBuilder {
     /// Sets [`GlyphRunDrawing::foreground_property`](ferroui_base::media::GlyphRunDrawing::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::GlyphRunDrawing>::foreground_property(), value)
     }
@@ -4534,6 +4626,8 @@ pub trait GradientStopProps: ElementBuilder {
     }
 
     /// Sets [`GradientStop::color_property`](ferroui_base::media::GradientStop::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::GradientStop>::color_property(), value)
     }
@@ -4716,6 +4810,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::HyperlinkButton>> HyperlinkButtonP
 /// The properties and routed events of [`IconSource`](ferroui_controls::IconSource).
 pub trait IconSourceProps: ElementBuilder {
     /// Sets [`IconSource::foreground_property`](ferroui_controls::IconSource::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::IconSource>::foreground_property(), value)
     }
@@ -4786,6 +4882,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::InfoBadge>> InfoBadgeProps for El<
 /// The properties and routed events of [`InfoBadgeTemplateSettings`](ferroui_controls::primitives::InfoBadgeTemplateSettings).
 pub trait InfoBadgeTemplateSettingsProps: ElementBuilder {
     /// Sets [`InfoBadgeTemplateSettings::info_badge_corner_radius_property`](ferroui_controls::primitives::InfoBadgeTemplateSettings::info_badge_corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn info_badge_corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBadgeTemplateSettings>::info_badge_corner_radius_property(), value)
     }
@@ -4859,21 +4957,29 @@ impl<T: ObjectType + Upcast<ferroui_controls::InfoBar>> InfoBarProps for El<T> {
 /// The properties and routed events of [`InfoBarPanel`](ferroui_controls::primitives::InfoBarPanel).
 pub trait InfoBarPanelProps: ElementBuilder {
     /// Sets [`InfoBarPanel::horizontal_orientation_padding_property`](ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn horizontal_orientation_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::horizontal_orientation_padding_property(), value)
     }
 
     /// Sets [`InfoBarPanel::vertical_orientation_padding_property`](ferroui_controls::primitives::InfoBarPanel::vertical_orientation_padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn vertical_orientation_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::vertical_orientation_padding_property(), value)
     }
 
     /// Sets [`InfoBarPanel::horizontal_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn horizontal_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::horizontal_orientation_margin_property(), value)
     }
 
     /// Sets [`InfoBarPanel::vertical_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn vertical_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::vertical_orientation_margin_property(), value)
     }
@@ -5166,6 +5272,8 @@ pub trait ItemsStackPanelProps: ElementBuilder {
     }
 
     /// Sets [`ItemsStackPanel::group_padding_property`](ferroui_controls::ItemsStackPanel::group_padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn group_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::ItemsStackPanel>::group_padding_property(), value)
     }
@@ -5204,6 +5312,8 @@ pub trait KeyBindingProps: ElementBuilder {
     }
 
     /// Sets [`KeyBinding::gesture_property`](ferroui_base::input::KeyBinding::gesture_property).
+    ///
+    /// Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.
     fn gesture<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_base::input::KeyBinding>::gesture_property(), value)
     }
@@ -5213,6 +5323,8 @@ impl<T: ObjectType + Upcast<ferroui_base::input::KeyBinding>> KeyBindingProps fo
 /// The properties and routed events of [`LayoutTransformControl`](ferroui_controls::LayoutTransformControl).
 pub trait LayoutTransformControlProps: ElementBuilder {
     /// Sets [`LayoutTransformControl::layout_transform_property`](ferroui_controls::LayoutTransformControl::layout_transform_property).
+    ///
+    /// Takes `translate(x, y)`, `rotate(degrees)`, `scale(x, y)` or `skew(x, y)`, chained.
     fn layout_transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_controls::LayoutTransformControl>::layout_transform_property(), value)
     }
@@ -5257,6 +5369,8 @@ pub trait LayoutableProps: ElementBuilder {
     }
 
     /// Sets [`Layoutable::margin_property`](ferroui_base::layout::Layoutable::margin_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::margin_property(), value)
     }
@@ -5516,6 +5630,8 @@ pub trait MenuItemProps: ElementBuilder {
     }
 
     /// Sets [`MenuItem::hot_key_property`](ferroui_controls::MenuItem::hot_key_property).
+    ///
+    /// Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.
     fn hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::hot_key_property(), value)
     }
@@ -5531,6 +5647,8 @@ pub trait MenuItemProps: ElementBuilder {
     }
 
     /// Sets [`MenuItem::input_gesture_property`](ferroui_controls::MenuItem::input_gesture_property).
+    ///
+    /// Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.
     fn input_gesture<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::MenuItem>::input_gesture_property(), value)
     }
@@ -5628,6 +5746,8 @@ pub trait NativeMenuItemProps: ElementBuilder {
     }
 
     /// Sets [`NativeMenuItem::gesture_property`](ferroui_controls::NativeMenuItem::gesture_property).
+    ///
+    /// Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.
     fn gesture<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::NativeMenuItem>::gesture_property(), value)
     }
@@ -6180,6 +6300,8 @@ pub trait NumericUpDownProps: ElementBuilder {
     }
 
     /// Sets [`NumericUpDown::placeholder_foreground_property`](ferroui_controls::NumericUpDown::placeholder_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::NumericUpDown>::placeholder_foreground_property(), value)
     }
@@ -6237,6 +6359,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::OverlayPopupHost>> Ove
 /// The properties and routed events of [`Page`](ferroui_controls::Page).
 pub trait PageProps: ElementBuilder {
     /// Sets [`Page::safe_area_padding_property`](ferroui_controls::Page::safe_area_padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn safe_area_padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::Page>::safe_area_padding_property(), value)
     }
@@ -6394,6 +6518,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::PagerControl>> PagerControlProps f
 /// The properties and routed events of [`Panel`](ferroui_controls::Panel).
 pub trait PanelProps: ElementBuilder {
     /// Sets [`Panel::background_property`](ferroui_controls::Panel::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::Panel>::background_property(), value)
     }
@@ -6442,6 +6568,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::Paragraph>> ParagraphPr
 /// The properties and routed events of [`Path`](ferroui_controls::shapes::Path).
 pub trait PathProps: ElementBuilder {
     /// Sets [`Path::data_property`](ferroui_controls::shapes::Path::data_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Path>::data_property(), value)
     }
@@ -6489,6 +6617,8 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PathGeometry>> PathGeometryProp
 /// The properties and routed events of [`PathIcon`](ferroui_controls::PathIcon).
 pub trait PathIconProps: ElementBuilder {
     /// Sets [`PathIcon::data_property`](ferroui_controls::PathIcon::data_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_controls::PathIcon>::data_property(), value)
     }
@@ -6498,6 +6628,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::PathIcon>> PathIconProps for El<T>
 /// The properties and routed events of [`PathIconSource`](ferroui_controls::PathIconSource).
 pub trait PathIconSourceProps: ElementBuilder {
     /// Sets [`PathIconSource::data_property`](ferroui_controls::PathIconSource::data_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn data<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_controls::PathIconSource>::data_property(), value)
     }
@@ -6516,6 +6648,8 @@ impl<T: ObjectType + Upcast<ferroui_base::media::PathSegment>> PathSegmentProps 
 /// The properties and routed events of [`Pen`](ferroui_base::media::Pen).
 pub trait PenProps: ElementBuilder {
     /// Sets [`Pen::brush_property`](ferroui_base::media::Pen::brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::Pen>::brush_property(), value)
     }
@@ -7508,6 +7642,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::RepeatButton>> RepeatButtonProps f
 /// The properties and routed events of [`RevealBrush`](ferroui_controls::media::RevealBrush).
 pub trait RevealBrushProps: ElementBuilder {
     /// Sets [`RevealBrush::color_property`](ferroui_controls::media::RevealBrush::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls::media::RevealBrush>::color_property(), value)
     }
@@ -7571,21 +7707,29 @@ pub trait RichEditBoxProps: ElementBuilder {
     }
 
     /// Sets [`RichEditBox::selection_highlight_color_property`](ferroui_controls::RichEditBox::selection_highlight_color_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_highlight_color<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_highlight_color_property(), value)
     }
 
     /// Sets [`RichEditBox::selection_highlight_color_when_not_focused_property`](ferroui_controls::RichEditBox::selection_highlight_color_when_not_focused_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_highlight_color_when_not_focused<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_highlight_color_when_not_focused_property(), value)
     }
 
     /// Sets [`RichEditBox::selection_foreground_brush_property`](ferroui_controls::RichEditBox::selection_foreground_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`RichEditBox::caret_brush_property`](ferroui_controls::RichEditBox::caret_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::caret_brush_property(), value)
     }
@@ -7676,6 +7820,8 @@ pub trait RichEditBoxProps: ElementBuilder {
     }
 
     /// Sets [`RichEditBox::placeholder_foreground_property`](ferroui_controls::RichEditBox::placeholder_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichEditBox>::placeholder_foreground_property(), value)
     }
@@ -7790,26 +7936,36 @@ pub trait RichTextBlockProps: ElementBuilder {
     }
 
     /// Sets [`RichTextBlock::selection_highlight_color_property`](ferroui_controls::RichTextBlock::selection_highlight_color_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_highlight_color<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::selection_highlight_color_property(), value)
     }
 
     /// Sets [`RichTextBlock::selection_foreground_brush_property`](ferroui_controls::RichTextBlock::selection_foreground_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`RichTextBlock::caret_brush_property`](ferroui_controls::RichTextBlock::caret_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::caret_brush_property(), value)
     }
 
     /// Sets [`RichTextBlock::background_property`](ferroui_controls::RichTextBlock::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::background_property(), value)
     }
 
     /// Sets [`RichTextBlock::padding_property`](ferroui_controls::RichTextBlock::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::padding_property(), value)
     }
@@ -7845,6 +8001,8 @@ pub trait RichTextBlockProps: ElementBuilder {
     }
 
     /// Sets [`RichTextBlock::foreground_property`](ferroui_controls::RichTextBlock::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::foreground_property(), value)
     }
@@ -7987,6 +8145,8 @@ pub trait RowDefinitionProps: ElementBuilder {
     }
 
     /// Sets [`RowDefinition::height_property`](ferroui_controls::RowDefinition::height_property).
+    ///
+    /// Takes `auto()`, `star(1.0)` or `px(40.0)`.
     fn height<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::RowDefinition>::height_property(), value)
     }
@@ -8259,11 +8419,15 @@ pub trait SelectableTextBlockProps: ElementBuilder {
     }
 
     /// Sets [`SelectableTextBlock::selection_brush_property`](ferroui_controls::SelectableTextBlock::selection_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_brush_property(), value)
     }
 
     /// Sets [`SelectableTextBlock::selection_foreground_brush_property`](ferroui_controls::SelectableTextBlock::selection_foreground_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_foreground_brush_property(), value)
     }
@@ -8356,6 +8520,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::SelectingMultiPage>> SelectingMult
 /// The properties and routed events of [`Shape`](ferroui_controls::shapes::Shape).
 pub trait ShapeProps: ElementBuilder {
     /// Sets [`Shape::fill_property`](ferroui_controls::shapes::Shape::fill_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn fill<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::fill_property(), value)
     }
@@ -8366,6 +8532,8 @@ pub trait ShapeProps: ElementBuilder {
     }
 
     /// Sets [`Shape::stroke_property`](ferroui_controls::shapes::Shape::stroke_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn stroke<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::shapes::Shape>::stroke_property(), value)
     }
@@ -8453,6 +8621,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::Slider>> SliderProps for El<T> {}
 /// The properties and routed events of [`SolidColorBrush`](ferroui_base::media::SolidColorBrush).
 pub trait SolidColorBrushProps: ElementBuilder {
     /// Sets [`SolidColorBrush::color_property`](ferroui_base::media::SolidColorBrush::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::SolidColorBrush>::color_property(), value)
     }
@@ -8527,6 +8697,8 @@ pub trait SplitButtonProps: ElementBuilder {
     }
 
     /// Sets [`SplitButton::hot_key_property`](ferroui_controls::SplitButton::hot_key_property).
+    ///
+    /// Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.
     fn hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::SplitButton>::hot_key_property(), value)
     }
@@ -8561,6 +8733,8 @@ pub trait SplitViewProps: ElementBuilder {
     }
 
     /// Sets [`SplitView::pane_background_property`](ferroui_controls::SplitView::pane_background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn pane_background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SplitView>::pane_background_property(), value)
     }
@@ -8605,6 +8779,8 @@ pub trait SplitViewTemplateSettingsProps: ElementBuilder {
     }
 
     /// Sets [`SplitViewTemplateSettings::pane_column_grid_length_property`](ferroui_controls::primitives::SplitViewTemplateSettings::pane_column_grid_length_property).
+    ///
+    /// Takes `auto()`, `star(1.0)` or `px(40.0)`.
     fn pane_column_grid_length<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SplitViewTemplateSettings>::pane_column_grid_length_property(), value)
     }
@@ -8615,6 +8791,8 @@ pub trait SplitViewTemplateSettingsProps: ElementBuilder {
     }
 
     /// Sets [`SplitViewTemplateSettings::pane_row_grid_length_property`](ferroui_controls::primitives::SplitViewTemplateSettings::pane_row_grid_length_property).
+    ///
+    /// Takes `auto()`, `star(1.0)` or `px(40.0)`.
     fn pane_row_grid_length<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::primitives::SplitViewTemplateSettings>::pane_row_grid_length_property(), value)
     }
@@ -8768,11 +8946,15 @@ pub trait SwipeItemProps: ElementBuilder {
     }
 
     /// Sets [`SwipeItem::background_property`](ferroui_controls::SwipeItem::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::background_property(), value)
     }
 
     /// Sets [`SwipeItem::foreground_property`](ferroui_controls::SwipeItem::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SwipeItem>::foreground_property(), value)
     }
@@ -8950,6 +9132,8 @@ pub trait TableViewColumnProps: ElementBuilder {
     }
 
     /// Sets [`TableViewColumn::width_property`](ferroui_controls::TableViewColumn::width_property).
+    ///
+    /// Takes `auto()`, `star(1.0)` or `px(40.0)`.
     fn width<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::width_property(), value)
     }
@@ -8979,6 +9163,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::TableViewColumn>> TableViewColumnP
 /// The properties and routed events of [`TemplatedControl`](ferroui_controls::primitives::TemplatedControl).
 pub trait TemplatedControlProps: ElementBuilder {
     /// Sets [`TemplatedControl::background_property`](ferroui_controls::primitives::TemplatedControl::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::background_property(), value)
     }
@@ -8989,16 +9175,22 @@ pub trait TemplatedControlProps: ElementBuilder {
     }
 
     /// Sets [`TemplatedControl::border_brush_property`](ferroui_controls::primitives::TemplatedControl::border_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::border_brush_property(), value)
     }
 
     /// Sets [`TemplatedControl::border_thickness_property`](ferroui_controls::primitives::TemplatedControl::border_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::border_thickness_property(), value)
     }
 
     /// Sets [`TemplatedControl::corner_radius_property`](ferroui_controls::primitives::TemplatedControl::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::corner_radius_property(), value)
     }
@@ -9034,6 +9226,8 @@ pub trait TemplatedControlProps: ElementBuilder {
     }
 
     /// Sets [`TemplatedControl::foreground_property`](ferroui_controls::primitives::TemplatedControl::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::foreground_property(), value)
     }
@@ -9044,6 +9238,8 @@ pub trait TemplatedControlProps: ElementBuilder {
     }
 
     /// Sets [`TemplatedControl::padding_property`](ferroui_controls::primitives::TemplatedControl::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::padding_property(), value)
     }
@@ -9068,11 +9264,15 @@ impl<T: ObjectType + Upcast<ferroui_controls::primitives::TemplatedControl>> Tem
 /// The properties and routed events of [`TextBlock`](ferroui_controls::TextBlock).
 pub trait TextBlockProps: ElementBuilder {
     /// Sets [`TextBlock::background_property`](ferroui_controls::TextBlock::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::background_property(), value)
     }
 
     /// Sets [`TextBlock::padding_property`](ferroui_controls::TextBlock::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::padding_property(), value)
     }
@@ -9103,6 +9303,8 @@ pub trait TextBlockProps: ElementBuilder {
     }
 
     /// Sets [`TextBlock::foreground_property`](ferroui_controls::TextBlock::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::foreground_property(), value)
     }
@@ -9217,16 +9419,22 @@ pub trait TextBoxProps: ElementBuilder {
     }
 
     /// Sets [`TextBox::selection_brush_property`](ferroui_controls::TextBox::selection_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::selection_brush_property(), value)
     }
 
     /// Sets [`TextBox::selection_foreground_brush_property`](ferroui_controls::TextBox::selection_foreground_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`TextBox::caret_brush_property`](ferroui_controls::TextBox::caret_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::caret_brush_property(), value)
     }
@@ -9302,6 +9510,8 @@ pub trait TextBoxProps: ElementBuilder {
     }
 
     /// Sets [`TextBox::placeholder_foreground_property`](ferroui_controls::TextBox::placeholder_foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn placeholder_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TextBox>::placeholder_foreground_property(), value)
     }
@@ -9371,6 +9581,8 @@ pub trait TextDecorationProps: ElementBuilder {
     }
 
     /// Sets [`TextDecoration::stroke_property`](ferroui_base::media::TextDecoration::stroke_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn stroke<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::media::TextDecoration>::stroke_property(), value)
     }
@@ -9420,6 +9632,8 @@ pub trait TextElementProps: ElementBuilder {
     }
 
     /// Sets [`TextElement::background_property`](ferroui_controls::documents::TextElement::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::background_property(), value)
     }
@@ -9455,6 +9669,8 @@ pub trait TextElementProps: ElementBuilder {
     }
 
     /// Sets [`TextElement::foreground_property`](ferroui_controls::documents::TextElement::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::foreground_property(), value)
     }
@@ -9469,11 +9685,15 @@ impl<T: ObjectType + Upcast<ferroui_controls::documents::TextElement>> TextEleme
 /// The properties and routed events of [`TextHighlighter`](ferroui_controls::documents::TextHighlighter).
 pub trait TextHighlighterProps: ElementBuilder {
     /// Sets [`TextHighlighter::foreground_property`](ferroui_controls::documents::TextHighlighter::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextHighlighter>::foreground_property(), value)
     }
 
     /// Sets [`TextHighlighter::background_property`](ferroui_controls::documents::TextHighlighter::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextHighlighter>::background_property(), value)
     }
@@ -9503,16 +9723,22 @@ pub trait TextPresenterProps: ElementBuilder {
     }
 
     /// Sets [`TextPresenter::selection_brush_property`](ferroui_controls::presenters::TextPresenter::selection_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::selection_brush_property(), value)
     }
 
     /// Sets [`TextPresenter::selection_foreground_brush_property`](ferroui_controls::presenters::TextPresenter::selection_foreground_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn selection_foreground_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::selection_foreground_brush_property(), value)
     }
 
     /// Sets [`TextPresenter::caret_brush_property`](ferroui_controls::presenters::TextPresenter::caret_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn caret_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::caret_brush_property(), value)
     }
@@ -9568,6 +9794,8 @@ pub trait TextPresenterProps: ElementBuilder {
     }
 
     /// Sets [`TextPresenter::background_property`](ferroui_controls::presenters::TextPresenter::background_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn background<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::presenters::TextPresenter>::background_property(), value)
     }
@@ -9577,6 +9805,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::presenters::TextPresenter>> TextPr
 /// The properties and routed events of [`TickBar`](ferroui_controls::TickBar).
 pub trait TickBarProps: ElementBuilder {
     /// Sets [`TickBar::fill_property`](ferroui_controls::TickBar::fill_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn fill<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TickBar>::fill_property(), value)
     }
@@ -9961,6 +10191,8 @@ pub trait TopLevelProps: ElementBuilder {
     }
 
     /// Sets [`TopLevel::transparency_background_fallback_property`](ferroui_controls::TopLevel::transparency_background_fallback_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn transparency_background_fallback<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::TopLevel>::transparency_background_fallback_property(), value)
     }
@@ -10260,6 +10492,8 @@ pub trait VisualProps: ElementBuilder {
     }
 
     /// Sets [`Visual::clip_property`](ferroui_base::Visual::clip_property).
+    ///
+    /// Takes `path!("M0 0L10 10z")`, checked when compiled, or `path_data()`.
     fn clip<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_base::media::Geometry>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::clip_property(), value)
     }
@@ -10270,16 +10504,22 @@ pub trait VisualProps: ElementBuilder {
     }
 
     /// Sets [`Visual::effect_property`](ferroui_base::Visual::effect_property).
+    ///
+    /// Takes `blur(radius)` or `drop_shadow(x, y, radius, color)`.
     fn effect<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IEffect>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::effect_property(), value)
     }
 
     /// Sets [`Visual::opacity_mask_property`](ferroui_base::Visual::opacity_mask_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn opacity_mask<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::opacity_mask_property(), value)
     }
 
     /// Sets [`Visual::render_transform_property`](ferroui_base::Visual::render_transform_property).
+    ///
+    /// Takes `translate(x, y)`, `rotate(degrees)`, `scale(x, y)` or `skew(x, y)`, chained.
     fn render_transform<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::render_transform_property(), value)
     }
@@ -10440,11 +10680,15 @@ pub trait WindowDrawnDecorationsProps: ElementBuilder {
     }
 
     /// Sets [`WindowDrawnDecorations::default_frame_thickness_property`](ferroui_controls::chrome::WindowDrawnDecorations::default_frame_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn default_frame_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::default_frame_thickness_property(), value)
     }
 
     /// Sets [`WindowDrawnDecorations::default_shadow_thickness_property`](ferroui_controls::chrome::WindowDrawnDecorations::default_shadow_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn default_shadow_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::chrome::WindowDrawnDecorations>::default_shadow_thickness_property(), value)
     }
@@ -10512,6 +10756,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::WrapPanel>> WrapPanelProps for El<
 /// The properties and routed events of [`XamlAmbientLight`](ferroui_controls::media::XamlAmbientLight).
 pub trait XamlAmbientLightProps: ElementBuilder {
     /// Sets [`XamlAmbientLight::color_property`](ferroui_controls::media::XamlAmbientLight::color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_controls::media::XamlAmbientLight>::color_property(), value)
     }
@@ -10526,6 +10772,8 @@ impl<T: ObjectType + Upcast<ferroui_controls::media::XamlAmbientLight>> XamlAmbi
 /// The properties and routed events of [`XamlCompositionBrushBase`](ferroui_base::media::XamlCompositionBrushBase).
 pub trait XamlCompositionBrushBaseProps: ElementBuilder {
     /// Sets [`XamlCompositionBrushBase::fallback_color_property`](ferroui_base::media::XamlCompositionBrushBase::fallback_color_property).
+    ///
+    /// Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.
     fn fallback_color<M>(self, value: impl IntoProp<ferroui_base::media::Color, M>) -> Self {
         self.prop(<ferroui_base::media::XamlCompositionBrushBase>::fallback_color_property(), value)
     }
@@ -10780,16 +11028,22 @@ pub trait AttachedProps: ElementBuilder {
     }
 
     /// Sets the attached [`HotKeyManager::hot_key_property`](ferroui_controls::HotKeyManager::hot_key_property).
+    ///
+    /// Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.
     fn hot_key_manager_hot_key<M>(self, value: impl IntoProp<Option<ferroui_base::input::KeyGesture>, M>) -> Self {
         self.prop(<ferroui_controls::HotKeyManager>::hot_key_property(), value)
     }
 
     /// Sets the attached [`InfoBarPanel::horizontal_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::horizontal_orientation_margin_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn info_bar_panel_horizontal_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::horizontal_orientation_margin_property(), value)
     }
 
     /// Sets the attached [`InfoBarPanel::vertical_orientation_margin_property`](ferroui_controls::primitives::InfoBarPanel::vertical_orientation_margin_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn info_bar_panel_vertical_orientation_margin<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::primitives::InfoBarPanel>::vertical_orientation_margin_property(), value)
     }
@@ -11190,6 +11444,8 @@ pub trait AttachedProps: ElementBuilder {
     }
 
     /// Sets the attached [`TextElement::foreground_property`](ferroui_controls::documents::TextElement::foreground_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn text_element_foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::foreground_property(), value)
     }

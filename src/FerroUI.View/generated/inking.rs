@@ -282,16 +282,22 @@ pub trait InkToolbarProps: ElementBuilder {
     }
 
     /// Sets [`InkToolbar::border_brush_property`](ferroui_controls_inking::InkToolbar::border_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::border_brush_property(), value)
     }
 
     /// Sets [`InkToolbar::border_thickness_property`](ferroui_controls_inking::InkToolbar::border_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::border_thickness_property(), value)
     }
 
     /// Sets [`InkToolbar::corner_radius_property`](ferroui_controls_inking::InkToolbar::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::corner_radius_property(), value)
     }
@@ -302,6 +308,8 @@ pub trait InkToolbarProps: ElementBuilder {
     }
 
     /// Sets [`InkToolbar::padding_property`](ferroui_controls_inking::InkToolbar::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbar>::padding_property(), value)
     }
@@ -390,16 +398,22 @@ impl<T: ObjectType + Upcast<ferroui_controls_inking::InkToolbarPenButton>> InkTo
 /// The properties and routed events of [`InkToolbarPenConfigurationControl`](ferroui_controls_inking::InkToolbarPenConfigurationControl).
 pub trait InkToolbarPenConfigurationControlProps: ElementBuilder {
     /// Sets [`InkToolbarPenConfigurationControl::border_brush_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::border_brush_property).
+    ///
+    /// Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.
     fn border_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::border_brush_property(), value)
     }
 
     /// Sets [`InkToolbarPenConfigurationControl::border_thickness_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::border_thickness_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn border_thickness<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::border_thickness_property(), value)
     }
 
     /// Sets [`InkToolbarPenConfigurationControl::corner_radius_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::corner_radius_property).
+    ///
+    /// Takes `8.0`.
     fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::corner_radius_property(), value)
     }
@@ -410,6 +424,8 @@ pub trait InkToolbarPenConfigurationControlProps: ElementBuilder {
     }
 
     /// Sets [`InkToolbarPenConfigurationControl::padding_property`](ferroui_controls_inking::InkToolbarPenConfigurationControl::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls_inking::InkToolbarPenConfigurationControl>::padding_property(), value)
     }

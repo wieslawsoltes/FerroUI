@@ -28,6 +28,25 @@
 //! - With the feature `desktop`: [`launch`] runs an application whose main
 //!   window is an element.
 //!
+//! # Typed forms first
+//!
+//! What has a text form in XAML also has a typed one here, which the compiler checks and which
+//! links no parser. Text stays the form for a value that comes from data at run time.
+//!
+//! | What | Typed | Text |
+//! |---|---|---|
+//! | Selector | `style(of::<Button>().class("a").pressed())` | `style("Button.a:pressed")` |
+//! | Grid | `row_definitions([auto(), star(1.0), px(40.0)])` | `row_definitions("Auto,*,40")` |
+//! | Path | `path!("M0 0L10 10z")`, `path_data().move_to(..)` | `Geometry::parse(..)` |
+//! | Gesture | `ctrl(KeyCode::S).shift()` | `KeyGesture::parse("Ctrl+Shift+S")` |
+//! | Transform | `translate(1.0, 2.0).rotate(45.0)` | `TransformOperations::parse(..)` |
+//! | Shadow, effect | `shadow(0.0, 2.0, 4.0, color)`, `blur(5.0)` | `BoxShadows::parse(..)`, `Effect::parse(..)` |
+//! | Brush | `rgb(0x1E293B)`, `linear_gradient(..)` | `"#1E293B"` |
+//! | Binding | `Person::NAME.two_way()` (`#[derive(ViewModel)]`) | `Binding` with a path |
+//! | Route | `#[derive(Route)]`, `navigate_to(&route)` | `route("/people/:id", ..)` |
+//! | Resource | `.dynamic_resource(property, keys::Name)` | the same with `"Name"` |
+//! | Theme | `control_theme::<T>()`, `resource_dictionary()` | XAML |
+//!
 //! ```ignore
 //! use ferroui_view::prelude::*;
 //!

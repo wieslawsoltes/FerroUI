@@ -112,6 +112,32 @@ ELEMENT_METHODS = {
     "content_element", "dyn_children", "items_dyn",
 }
 
+# What the documentation of a setter says it takes, by the value type of the property: the short
+# typed forms first (docs/declarative-ui.md, section 4.3).
+SETTER_HINTS = {
+    "Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>":
+        "Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.",
+    "ferroui_base::media::Color": "Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.",
+    "Option<ferroui_base::media::Color>": "Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.",
+    "ferroui_base::Thickness": "Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.",
+    "ferroui_base::CornerRadius": "Takes `8.0`.",
+    "ferroui_controls::GridLength": "Takes `auto()`, `star(1.0)` or `px(40.0)`.",
+    "Option<ferroui_base::input::KeyGesture>": "Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.",
+    "Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>":
+        "Takes `translate(x, y)`, `rotate(degrees)`, `scale(x, y)` or `skew(x, y)`, chained.",
+    "ferroui_base::media::BoxShadows": "Takes `shadow(x, y, blur, color)`, or an array of them.",
+    "Option<std::rc::Rc<dyn ferroui_base::media::IEffect>>": "Takes `blur(radius)` or `drop_shadow(x, y, radius, color)`.",
+    "Option<ferroui_base::Ref<ferroui_base::media::Geometry>>":
+        "Takes `path!(\"M0 0L10 10z\")`, checked when compiled, or `path_data()`.",
+}
+
+
+def setter_hint(resolved):
+    """The line of the documentation of a setter about its typed forms, if it has some."""
+    hint = SETTER_HINTS.get(resolved)
+    return f"    ///\n    /// {hint}\n" if hint else ""
+
+
 def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", attached_trait="AttachedProps"):
     """The file of the classes of `crates` (all the classes read when None)."""
     lines = [
@@ -183,6 +209,7 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
                 continue
             members.append(
                 f"    /// Sets [`{holder}::{prop}_property`]({holder_path}::{prop}_property).\n"
+                f"{setter_hint(resolved)}"
                 f"    fn {ident(prop)}<M>(self, value: impl IntoProp<{resolved}, M>) -> Self {{\n"
                 f"        self.prop(<{holder_path}>::{prop}_property(), value)\n    }}\n"
             )
@@ -223,6 +250,7 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
             method = f"{snake(owner)}_{prop}"
             attached.append(
                 f"    /// Sets the attached [`{holder}::{prop}_property`]({holder_path}::{prop}_property).\n"
+                f"{setter_hint(resolved)}"
                 f"    fn {ident(method)}<M>(self, value: impl IntoProp<{resolved}, M>) -> Self {{\n"
                 f"        self.prop(<{holder_path}>::{prop}_property(), value)\n    }}\n"
             )
