@@ -39,6 +39,8 @@ pub mod playback_samples;
 #[path = "../media_desktop.rs"]
 mod desktop_media;
 pub mod navigation;
+mod color_samples;
+mod color_sections;
 mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
@@ -73,6 +75,8 @@ mod custom_controls_tests;
 #[cfg(test)]
 mod feedback_samples_tests;
 
+#[cfg(test)]
+mod color_samples_tests;
 #[cfg(test)]
 mod navigation_view_samples_tests;
 

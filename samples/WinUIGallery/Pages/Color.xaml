@@ -1,4 +1,21 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Colors and brushes" FontSize="24"/><WrapPanel ItemSpacing="8" LineSpacing="8"><Border Width="100" Height="70" Background="#0078D4"><TextBlock Text="#0078D4" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border><Border Width="100" Height="70" Background="#107C10"><TextBlock Text="#107C10" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border><Border Width="100" Height="70" Background="#D83B01"><TextBlock Text="#D83B01" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Center"/></Border></WrapPanel>
-</StackPanel>
+<!-- Adapted from the Color page of the pinned WinUI Gallery (14061eea); see ../NOTICE.md. The six
+     sections of the source show the groups, brushes and usage notes of its brushes.json
+     (color_sections.rs) with the values of the WinUI theme, built in color_samples.rs. -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="12">
+  <TextBlock TextWrapping="Wrap"
+             Text="The brushes below are part of the WinUI theme and you can use them in your application with ThemeResource." />
+  <SelectableTextBlock Grid.Row="1" FontFamily="Cascadia Mono, Consolas, Menlo, monospace" TextWrapping="Wrap"
+                       Text="&lt;TextBlock Text=&quot;...&quot; Foreground=&quot;{ThemeResource TextFillColorPrimaryBrush}&quot; /&gt;" />
+  <TabStrip x:Name="ColorSections" Grid.Row="2" AutomationProperties.Name="PageSelector">
+    <TabStripItem Content="Text" />
+    <TabStripItem Content="Fill" />
+    <TabStripItem Content="Stroke" />
+    <TabStripItem Content="Background" />
+    <TabStripItem Content="Signal" />
+    <TabStripItem Content="High Contrast" />
+  </TabStrip>
+  <ScrollViewer Grid.Row="3">
+    <StackPanel x:Name="ColorGroups" Spacing="8" />
+  </ScrollViewer>
+</Grid>

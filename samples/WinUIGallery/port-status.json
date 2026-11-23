@@ -498,7 +498,9 @@
       "status": "partial",
       "implementation": [
         "samples/WinUIGallery/Pages/Color.xaml",
-        "samples/WinUIGallery/examples.rs"
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/color_samples.rs",
+        "samples/WinUIGallery/color_sections.rs"
       ],
       "tests": [
         {
@@ -506,7 +508,7 @@
           "name": "all_reviewed_native_adaptations_load_real_controls"
         }
       ],
-      "notes": "Native brushes display the color swatches; the full upstream color tools are not claimed. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
+      "notes": "The six sections of the source show its 28 groups and 106 brushes with their usage notes (color_sections.rs, from the source's brushes.json) and the values of the WinUI theme, follow the theme and sit on a native TabStrip (color_samples.rs). The two Mica brushes of the source are not defined by the WinUI theme: they are listed without a swatch, which keeps the page partial.",
       "examples": []
     },
     "ComboBox": {
