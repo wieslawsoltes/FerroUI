@@ -213,12 +213,11 @@ fn every_rejection_rule() {
         f[8..12].copy_from_slice(&length.to_be_bytes());
     });
     assert_eq!(decode_error(&extra), Some(malformed("WOFF data after the last block")));
-    // A table that runs past the end of the file.
-    let length = good.len() as u32;
+    // A table that runs past the end of the file: an aligned offset near the end.
+    let longest = (0..count).max_by_key(|index| good.u32_at(entry(*index) + 8).unwrap()).unwrap();
+    let near_end = (good.len() & !3) as u32;
     assert_eq!(
-        decode_error(&patched(
-            &|f| f[entry(count - 1) + 8..entry(count - 1) + 12].copy_from_slice(&length.to_be_bytes())
-        )),
+        decode_error(&patched(&|f| f[entry(longest) + 4..entry(longest) + 8].copy_from_slice(&near_end.to_be_bytes()))),
         Some(FontDecodeError::Truncated)
     );
     // Padding that is not zero.
