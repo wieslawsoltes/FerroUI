@@ -576,6 +576,9 @@ Shift for larger steps or Ctrl or Command for finer steps. Press Enter or choose
 **Apply keyframe** to write the checked XAML or mapped Rust edit in one Undo step.
 The graph stays focused when a keyboard apply rebuilds the Timeline.
 
+For a mapped Rust key that uses a shared numeric constant, changing the key writes a typed literal
+at the edited use. Undo restores the reference. [Shared numeric key workflow](vscode/motion.md#edit-a-key-that-uses-a-shared-rust-number)
+
 ![Designer Studio shows both incoming Bézier handles beneath the selected Width keyframe](images/designer-easing-handles.png)
 
 To change the spacing of selected keys, set the playhead to the pivot, enter a **Factor** in the

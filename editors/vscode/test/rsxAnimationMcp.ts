@@ -45,8 +45,8 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const preview = content<{ samples: number[] }>(await query('designer_keyframe_draft', draft));
     assert.ok(preview.samples.some(value => value > 1));
     content(await edit(frame.revision, draft));
-    assert.equal(document.getText(), original.replace('.key_frame(0.25,', '.key_frame(0.7,')
-        .replace('0.65f64', '0.82f64').replace('0.25, 0.1, 0.75, 1.0', '0.25, 0.3, 0.75, 1.4'));
+    assert.equal(document.getText(), original.replace('.key_frame(HOLD_CUE,', '.key_frame(0.7f64,')
+        .replace('*/ HOLD_OPACITY', '*/ 0.82f64').replace('0.25, 0.1, 0.75, HOLD_Y2', '0.25, 0.3, 0.75, 1.4f64'));
     assert.ok((await edit(frame.revision, draft)).isError);
     frame = await outline();
     const [updated] = await programs();
@@ -81,7 +81,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const keyframes = track.keyframes.slice(1).map(key => ({ target: track.target, property: track.property, time: key.time }));
     const move = { action: 'move_keyframes', program: restored.id, keyframes, offset: -0.25 };
     content(await edit(frame.revision, move));
-    assert.equal(document.getText(), original.replace('.key_frame(0.25,', '.key_frame(0.125,')
+    assert.equal(document.getText(), original.replace('.key_frame(HOLD_CUE,', '.key_frame(0.125f64,')
         .replace('.key_frame(1.0,', '.key_frame(0.875,'));
     assert.ok((await edit(frame.revision, move)).isError);
     const movedVersion = document.version;
@@ -91,7 +91,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     frame = await outline();
     const scale = { action: 'scale_keyframes', program: restored.id, keyframes, pivot: 0, factor: .5 };
     content(await edit(frame.revision, scale));
-    assert.equal(document.getText(), original.replace('.key_frame(0.25,', '.key_frame(0.125,')
+    assert.equal(document.getText(), original.replace('.key_frame(HOLD_CUE,', '.key_frame(0.125f64,')
         .replace('.key_frame(1.0,', '.key_frame(0.5,'));
     assert.ok((await edit(frame.revision, scale)).isError);
     content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
@@ -163,7 +163,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const reflectedKeys = (await programs())[0].timeline!.tracks[0].keyframes;
     assert.deepEqual(reflectedKeys.map(key => key.time), [.5, 1, 2]);
     assert.equal(reflectedKeys[0].value_text, '0.65');
-    assert.match(document.getText(), /\/\* 🪴 hold \*\/ 0\.65f64/);
+    assert.match(document.getText(), /\/\* 🪴 hold \*\/ HOLD_OPACITY/);
     assert.ok(!document.getText().replace(/\r\n/g, '').includes('\n'));
     frame = await undo(original);
 
@@ -173,6 +173,6 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const fixtureTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
         tab.label === 'Design · animation_view.rs' || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
     await vscode.window.tabGroups.close(fixtureTabs);
-    console.log('RSX animation validated native keyframes, including reverse paste and mirror, rejected stale revisions, and restored CRLF and Unicode with Undo');
+    console.log('RSX animation edited constant-backed cue, value and easing, rejected stale revisions, and restored CRLF and Unicode with Undo');
     return clipboard;
 }

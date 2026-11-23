@@ -1,4 +1,4 @@
-use super::super::{FloatSource, color::ColorSource, syntax};
+use super::super::{FloatSource, color::ColorSource, number_source::FloatReader, syntax};
 use super::operand;
 use ferroui_designer_animation::{AnimationBrush, AnimationValue, BrushForm};
 use ferroui_designer_core::{SourceSpan, TextPatch};
@@ -25,6 +25,7 @@ impl SolidSource {
         call: &ExprCall,
         method: &str,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        numbers: &FloatReader<'_>,
     ) -> Option<(AnimationBrush, Self)> {
         let color = call.args.first()?;
         let (value, opacity, source) = match (method, call.args.len()) {
@@ -35,7 +36,7 @@ impl SolidSource {
                 {
                     return None;
                 }
-                let opacity = syntax::float(&call.args[1])?;
+                let opacity = numbers.read(&call.args[1])?;
                 (
                     ColorSource::read_with(color, false, resolve)?,
                     opacity.value,
@@ -90,7 +91,7 @@ impl SolidSource {
             &AnimationValue::from_argb8(next),
             patches,
         )?;
-        match self.opacity {
+        match &self.opacity {
             OpacitySource::Explicit(source) => source.plan(opacity, patches),
             OpacitySource::Default {
                 method,
@@ -98,10 +99,10 @@ impl SolidSource {
                 packed,
             } if opacity != 1.0 => {
                 patches.push(TextPatch {
-                    span: method,
+                    span: *method,
                     replacement: "with_opacity".into(),
                 });
-                if packed {
+                if *packed {
                     patches.push(TextPatch {
                         span: SourceSpan::new(argument.start, argument.start),
                         replacement: "::ferroui_base::media::Color::from_uint32(".into(),
@@ -109,7 +110,7 @@ impl SolidSource {
                 }
                 patches.push(TextPatch {
                     span: SourceSpan::new(argument.end, argument.end),
-                    replacement: format!("{}, {opacity:?}", if packed { ")" } else { "" }),
+                    replacement: format!("{}, {opacity:?}", if *packed { ")" } else { "" }),
                 });
             }
             _ => {}

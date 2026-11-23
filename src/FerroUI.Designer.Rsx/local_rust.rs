@@ -123,6 +123,15 @@ impl LocalRust {
     }
 
     fn value_in<'a>(&'a self, scope: usize, expression: &'a Expr) -> Option<Value<'a>> {
+        self.value_in_checked(scope, expression, |_, _| true)
+    }
+
+    fn value_in_checked<'a>(
+        &'a self,
+        scope: usize,
+        expression: &'a Expr,
+        accept: impl Fn(&Value<'a>, &[syn::Attribute]) -> bool,
+    ) -> Option<Value<'a>> {
         let mut value = Value {
             expression,
             constant: None,
@@ -145,6 +154,9 @@ impl LocalRust {
                         ty: Some(item.ty.as_ref()),
                         scope,
                     };
+                    if !accept(&value, &item.attrs) {
+                        return None;
+                    }
                 }
                 _ => return Some(value),
             }

@@ -144,6 +144,29 @@ fn a_shadowed_factory_keeps_the_authored_clip_in_source() {
 }
 
 #[test]
+fn edits_numeric_constants_in_gradient_relative_and_effect_constructors() {
+    let source = VIEW
+        .replace("fn caption", "const STOP: f64 = 0.25;\nconst PIVOT: f64 = 0.2;\nconst DIRECTION: f64 = 24.0;\nfn caption")
+        .replace("0.25f64", "STOP")
+        .replace("Pivot::new(0.2, 0.3, Percent)", "Pivot::new(PIVOT, 0.3, Percent)")
+        .replace("24.0f64", "DIRECTION");
+    let catalog = RsxCatalog::built_in();
+    let view = catalog.project(&source, source.rfind("rsx!").unwrap()).unwrap();
+    let markup = view.preview_markup();
+    let clip = markup.animations[0].1;
+    for (property, value, old, new) in [
+        ("Background", r##"<LinearGradientBrush TransformOrigin="0%,0%"><GradientStop Offset="0.4" Color="#FF223344"/></LinearGradientBrush>"##,
+            "STOP, Paint::from_uint32", "0.4f64, Paint::from_uint32"),
+        ("RenderTransformOrigin", "45%,30%", "Pivot::new(PIVOT,", "Pivot::new(0.45f64,"),
+        ("Effect", r##"<DropShadowDirectionEffect Direction="58" ShadowDepth="4" BlurRadius="2" Color="#FF203657" Opacity="0.6"/>"##,
+            "DIRECTION, 4.0", "58.0f64, 4.0"),
+    ] {
+        let patches = clip.patch_keyframe(property, edit(Some(0.0), 0.0, value)).unwrap();
+        assert_eq!(TextPatch::apply_all(&source, patches).unwrap(), source.replace(old, new));
+    }
+}
+
+#[test]
 fn solid_brush_opacity_promotes_only_the_edited_constructor() {
     let source = r###"use ferroui_view::prelude::*;
 use ferroui_base::media::{IBrush, Color, immutable::ImmutableSolidColorBrush as Solid};

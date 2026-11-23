@@ -406,6 +406,8 @@ For App Preview, read the authored key from `designer_hosted_animations`. Use it
 
 Use `components` in App Preview when the program’s `authoring.componentBatch` is true. The source plan for an existing native XAML key targets its authored setter and any compatible timing attributes. It checks the candidate with the same native codec before Apply. [Compound keyframe workflow](motion.md#edit-compound-keyframe-values)
 
+For a Rust cue, spline coordinate, or typed value that references a mapped `f64` constant, the same keyframe draft edits the selected use. Apply writes a typed literal for the changed argument and keeps the shared declaration and sibling references intact. [Shared numeric key workflow](motion.md#edit-a-key-that-uses-a-shared-rust-number)
+
 For a registered shader, copy the exact channel from the key’s `curve_values`, for example `effect_parameter/spotlight/strength/value`. A Boolean handle reports `step: "boolean"` and accepts 0 or 1. An integer handle reports `step: "integer"` and accepts a signed 32-bit integer. App Preview resolves project-registered effects against the loaded application. [Registered shader workflow](motion.md#animate-registered-shader-parameters)
 
 ### Edit property transitions with MCP

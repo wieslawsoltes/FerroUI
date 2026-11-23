@@ -104,3 +104,20 @@ fn box_shadow_base_property_uses_the_same_literal_source_mapping() {
         source.replace("0 8 12 0 #80263452", "none")
     );
 }
+
+#[test]
+fn box_shadow_key_edits_only_the_selected_const_use() {
+    let source = format!("const SHADOW_DROP: f64 = 8.0;\n{}", SOURCE.replace("8.0f64", "SHADOW_DROP"));
+    let projected = RsxCatalog::built_in().project(&source, source.rfind("rsx!").unwrap()).unwrap();
+    let markup = projected.preview_markup();
+    let patches = markup.animations[0].1.patch_keyframe("BoxShadow", KeyframeEdit::Upsert {
+        previous: Some(0.0),
+        time: 0.0,
+        easing: "LinearEasing",
+        value: "0 -12 0 0 #80263452, inset 4 8 12 2 #80325AC0",
+    }).unwrap();
+    assert_eq!(
+        TextPatch::apply_all(&source, patches).unwrap(),
+        source.replace("*/ SHADOW_DROP", "*/ -12.0f64")
+    );
+}

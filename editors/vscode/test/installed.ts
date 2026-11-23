@@ -225,7 +225,7 @@ export async function run(): Promise<void> {
             action: 'scale_keyframes', program: program.id, pivot: 0, factor: .5,
             keyframes: track.keyframes.slice(1).map(({ time }) => ({ target: track.target, property: track.property, time })),
         }, []);
-        assert.deepEqual(scaled.edits.map(edit => edit.newText), ['0.125', '0.5']);
+        assert.deepEqual(scaled.edits.map(edit => edit.newText), ['0.125f64', '0.5']);
         const stateSource = { uri: vscode.Uri.joinPath(workspace.uri, 'review_states.rs').toString(),
             language: 'rust' as const, source: reviewStateSource, caret: { line: 3, character: 2 } };
         const states = await native.render(stateSource, { width: 640, height: 420, dark: false }, 3);

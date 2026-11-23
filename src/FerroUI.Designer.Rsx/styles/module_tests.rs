@@ -78,16 +78,18 @@ fn shared_gradient_keys_follow_an_unsaved_palette_module() {
     let fixture = Fixture::create();
     fixture.write("application.rs", "mod palette; mod screen;\n");
     let initial = r#"use ferroui_base::media::{immutable::ImmutableGradientStop as Stop, Colors};
-pub const PALETTE: &[Stop] = &[Stop::new(0.2, Colors::STEEL_BLUE), Stop::new(1.0, Colors::MEDIUM_SEA_GREEN)];
+pub const OFFSET: f64 = 0.2;
+pub const CUE: f64 = 1.0;
+pub const PALETTE: &[Stop] = &[Stop::new(OFFSET, Colors::STEEL_BLUE), Stop::new(1.0, Colors::MEDIUM_SEA_GREEN)];
 "#;
     let palette = fixture.write("palette.rs", initial);
-    let screen = r#"use crate::palette::PALETTE;
+    let screen = r#"use crate::palette::{CUE, PALETTE};
 use ferroui_base::media::{immutable::ImmutableLinearGradientBrush as Gradient, IBrush};
 use ferroui_controls::Border;
 use ferroui_view::prelude::*;
 use std::rc::Rc;
 fn view() -> Element { rsx! { Border {
-    styles: [style("Border").animation(animation(ms(1000)).key_frame(1.0, |key|
+    styles: [style("Border").animation(animation(ms(1000)).key_frame(CUE, |key|
         key.set(Border::background_property(), Some(Rc::new(Gradient::from_stops(PALETTE)) as Rc<dyn IBrush>))))],
 } } }"#;
     let uri = fixture.write("screen.rs", screen);
@@ -99,8 +101,12 @@ fn view() -> Element { rsx! { Border {
         view.preview_markup().animations[0].1.xaml.clone()
     };
     assert!(render(&modules).contains("Offset=\"0.2\""));
-    let draft = modules.with_file_text(&palette, &initial.replace("0.2,", "0.37,")).unwrap();
+    let draft = modules.with_file_text(&palette, &initial.replace("0.2;", "0.37;").replace("1.0;", "0.8;")).unwrap();
     assert!(render(&draft).contains("Offset=\"0.37\""));
+    let view = catalog.project_with_modules(screen, caret, Some(&draft)).unwrap();
+    assert!(view.preview_markup().animations[0].1.maps_key(
+        "Background", 0.8, ferroui_designer_animation::ValueKind::Brush,
+    ));
 }
 
 #[test]

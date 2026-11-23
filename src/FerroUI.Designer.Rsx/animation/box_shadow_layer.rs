@@ -1,5 +1,5 @@
 use super::{TextSource, constructor, span};
-use crate::animation::{FloatSource, color::ColorSource, syntax::float};
+use crate::animation::{FloatSource, color::ColorSource, number_source::FloatReader};
 use ferroui_base::media::BoxShadow;
 use ferroui_designer_animation::{AnimationBoxShadow, AnimationValue};
 use ferroui_designer_core::{SourceSpan, TextPatch};
@@ -32,7 +32,11 @@ struct Fields {
 }
 
 impl ShadowLayer {
-    pub(super) fn read(expr: &Expr, resolve: &impl Fn(&Expr) -> Option<String>) -> Option<Self> {
+    pub(super) fn read(
+        expr: &Expr,
+        resolve: &impl Fn(&Expr) -> Option<String>,
+        numbers: &FloatReader<'_>,
+    ) -> Option<Self> {
         if let Some((value, source)) = TextSource::parse_call(expr, resolve, FACTORIES) {
             let value = BoxShadow::parse(&value).ok()?.into();
             return Some(Self {
@@ -43,7 +47,7 @@ impl ShadowLayer {
         let Expr::Struct(layer) = expr else {
             return None;
         };
-        let (value, fields) = Fields::read(layer, resolve)?;
+        let (value, fields) = Fields::read(layer, resolve, numbers)?;
         Some(Self {
             value,
             source: LayerSyntax::Fields(Box::new(fields)),
@@ -70,6 +74,7 @@ impl Fields {
     fn read(
         layer: &ExprStruct,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        reader: &FloatReader<'_>,
     ) -> Option<(AnimationBoxShadow, Self)> {
         if !layer.attrs.is_empty() || layer.qself.is_some() {
             return None;
@@ -137,11 +142,11 @@ impl Fields {
                 }
                 name => {
                     let index = NUMBERS.iter().position(|candidate| *candidate == name)?;
-                    let number = float(&field.expr)?;
+                    let number = reader.read(&field.expr)?;
+                    *numbers[index] = number.value;
                     if fields.numbers[index].replace(number).is_some() {
                         return None;
                     }
-                    *numbers[index] = number.value;
                 }
             }
         }
@@ -158,7 +163,7 @@ impl Fields {
         let previous_numbers = [before.offset_x, before.offset_y, before.blur, before.spread];
         let next_numbers = [next.offset_x, next.offset_y, next.blur, next.spread];
         for (index, name) in NUMBERS.into_iter().enumerate() {
-            if let Some(source) = self.numbers[index] {
+            if let Some(source) = &self.numbers[index] {
                 source.plan(next_numbers[index], patches);
             } else if previous_numbers[index] != next_numbers[index] {
                 added.push_str(&format!("{name}: {:?}, ", next_numbers[index]));

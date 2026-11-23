@@ -1,4 +1,5 @@
-use super::syntax::{authored_path, float, method_suffix, path, span};
+use super::number_source::FloatReader;
+use super::syntax::{authored_path, method_suffix, path, span};
 use super::{KeySource, Property, TargetType, ValueShape, TRACK_TARGET};
 use crate::RsxCatalog;
 use ferroui_designer_animation::{AnimationBrush, AnimationGradientStop, AnimationValue, Timeline, ValueKind, native_key_time};
@@ -15,11 +16,12 @@ pub(super) fn keyframe(
     catalog: &RsxCatalog,
     resolve: &impl Fn(&Expr) -> Option<String>,
     shared_stops: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
+    numbers: &FloatReader<'_>,
 ) -> Option<Vec<MappedKey>> {
     if method.args.len() != 2 {
         return None;
     }
-    let cue = float(&method.args[0])?;
+    let cue = numbers.read(&method.args[0])?;
     if !(0.0..=1.0).contains(&cue.value) {
         return None;
     }
@@ -43,10 +45,10 @@ pub(super) fn keyframe(
             return None;
         }
         let points = [
-            float(&outer.args[0])?,
-            float(&outer.args[1])?,
-            float(&outer.args[2])?,
-            float(&outer.args[3])?,
+            numbers.read(&outer.args[0])?,
+            numbers.read(&outer.args[1])?,
+            numbers.read(&outer.args[2])?,
+            numbers.read(&outer.args[3])?,
         ];
         (setter, Some(points))
     } else {
@@ -64,16 +66,18 @@ pub(super) fn keyframe(
             return None;
         }
         let (getter, property) = read_property(&current.args[0], catalog, resolve)?;
-        let value = property.shape.read_keyframe(&current.args[1], catalog.project_effects, resolve, shared_stops)?;
+        let value = property.shape.read_keyframe(
+            &current.args[1], catalog.project_effects, resolve, shared_stops, numbers,
+        )?;
         keys.push(MappedKey {
             source: KeySource {
                 property: property.name,
                 getter,
                 time,
-                cue,
+                cue: cue.clone(),
                 value,
-                spline,
-                spline_method: spline.map(|_| method_suffix(outer)),
+                spline: spline.clone(),
+                spline_method: spline.as_ref().map(|_| method_suffix(outer)),
                 shared: false,
                 end,
                 frame: method_suffix(method),

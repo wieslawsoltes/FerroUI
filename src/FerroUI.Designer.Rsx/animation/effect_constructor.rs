@@ -1,4 +1,4 @@
-use super::{color::ColorSource, syntax, FloatSource};
+use super::{color::ColorSource, number_source::FloatReader, syntax, FloatSource};
 use ferroui_designer_animation::{AnimationEffect, AnimationValue, EffectForm};
 use ferroui_designer_core::TextPatch;
 use syn::Expr;
@@ -20,6 +20,7 @@ impl ConstructorSource {
     pub(super) fn read(
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        numbers: &FloatReader<'_>,
     ) -> Option<(AnimationEffect, Self)> {
         let expression = syntax::unparen(expression);
         let expression = match expression {
@@ -53,7 +54,7 @@ impl ConstructorSource {
             .strip_prefix("ferroui_base::media::")?
             .strip_suffix("::new")?;
         if class == "ImmutableBlurEffect" && call.args.len() == 1 {
-            let radius = syntax::float(call.args.first()?)?;
+            let radius = numbers.read(call.args.first()?)?;
             let value = AnimationEffect::Blur {
                 radius: radius.value,
                 form,
@@ -77,7 +78,7 @@ impl ConstructorSource {
         }
         let numbers = [0, 1, 2, 4]
             .into_iter()
-            .map(|index| syntax::float(&call.args[index]))
+            .map(|index| numbers.read(&call.args[index]))
             .collect::<Option<Vec<_>>>()?;
         let (color, source) = ColorSource::read_with(&call.args[3], false, resolve)?;
         let argb = color.argb8()?;

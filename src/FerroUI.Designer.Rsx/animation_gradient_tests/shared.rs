@@ -6,8 +6,9 @@ use ferroui_view::{animation as clip, ms, style};
 use std::rc::Rc;
 mod palette {
     use ferroui_base::media::{Color as Paint, immutable::ImmutableGradientStop as Stop};
+    const FIRST_OFFSET: f64 = 0.25;
     pub const APPROVAL: &[Stop] = &[
-        Stop::new(0.25, Paint::from_argb(255, 44, 98, 166)),
+        Stop::new(FIRST_OFFSET, Paint::from_argb(255, 44, 98, 166)),
         Stop::new(1.0, Paint::from_argb(255, 103, 190, 154)),
     ];
 }

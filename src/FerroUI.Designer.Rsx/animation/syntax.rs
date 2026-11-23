@@ -1,5 +1,6 @@
 use super::keyframe::{keyframe, record, MappedKey};
 use super::brush::{shared_key, shared_values};
+use super::number_source::{constant_value, FloatReader};
 use super::{
     DelaySource, FloatSource, RsxAnimation, TargetType, TRACK_TARGET,
 };
@@ -7,7 +8,7 @@ use crate::{local_rust::LocalRust, tree::escape_xml, RsxCatalog};
 use ferroui_designer_animation::{AnimationGradientStop, Easing, FillMode, Repeat, Timeline};
 use ferroui_designer_core::SourceSpan;
 use std::{cell::RefCell, collections::BTreeMap};
-use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, LitInt, UnOp};
+use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, LitInt};
 
 pub(crate) fn valid_selector(selector: &str) -> bool {
     !(selector.trim().is_empty()
@@ -20,7 +21,13 @@ pub(crate) fn valid_selector(selector: &str) -> bool {
 
 pub(crate) fn authored_clip(expr: &Expr, catalog: &RsxCatalog, bindings: &LocalRust) -> Option<RsxAnimation> {
     let scope = bindings.source_scope(expr)?;
-    clip(expr, catalog, |expression| bindings.path(expression), |expression| shared_values(expression, scope))
+    clip(
+        expr,
+        catalog,
+        |expression| bindings.path(expression),
+        |expression| shared_values(expression, scope),
+        |path| constant_value(path, scope),
+    )
 }
 
 pub(super) fn clip(
@@ -28,11 +35,13 @@ pub(super) fn clip(
     catalog: &RsxCatalog,
     resolve: impl Fn(&Expr) -> Option<String>,
     read_stops: impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
+    read_number: impl Fn(&Expr) -> Option<f64>,
 ) -> Option<RsxAnimation> {
     // Structural edits reparse the clip by itself. Retain the imported paths
     // resolved in this accepted source scope for that detached check.
     let imports = RefCell::new(BTreeMap::new());
     let stops = RefCell::new(BTreeMap::new());
+    let numbers = RefCell::new(BTreeMap::new());
     let resolve = |expression: &Expr| {
         let resolved = resolve(expression)?;
         let written = authored_path(expression)?;
@@ -49,6 +58,13 @@ pub(super) fn clip(
         stops.borrow_mut().insert(name, values.clone());
         Some(values)
     };
+    let read_number = |expression: &Expr| {
+        let name = authored_path(expression)?;
+        let value = read_number(expression)?;
+        numbers.borrow_mut().insert(name, value);
+        Some(value)
+    };
+    let numbers_reader = FloatReader(&read_number);
     let (factory, methods) = chain(expr)?;
     let duration = milliseconds(view_argument_with(factory, "animation", &resolve)?, &resolve)?;
     let mut timeline = Timeline::new(duration).ok()?;
@@ -60,7 +76,9 @@ pub(super) fn clip(
     for method in methods {
         match method.method.to_string().as_str() {
             "key_frame" => {
-                for MappedKey { source: key, owner } in keyframe(method, duration, catalog, &resolve, &read_stops)? {
+                for MappedKey { source: key, owner } in
+                    keyframe(method, duration, catalog, &resolve, &read_stops, &numbers_reader)?
+                {
                     if let Some(owner) = owner {
                         if target_type.as_ref().is_some_and(|target| *target != owner) {
                             return None;
@@ -98,6 +116,7 @@ pub(super) fn clip(
         keys,
         imports: imports.into_inner(),
         shared_stops: stops.into_inner(),
+        shared_numbers: numbers.into_inner(),
         attachment: None,
     })
 }
@@ -269,31 +288,7 @@ fn easing(expr: &Expr) -> Option<Easing> {
 }
 
 pub(crate) fn float(expr: &Expr) -> Option<FloatSource> {
-    let (expr, minus) = match expr {
-        Expr::Unary(unary) if matches!(unary.op, UnOp::Neg(_)) => {
-            (unary.expr.as_ref(), Some(span(&unary.op)))
-        }
-        _ => (expr, None),
-    };
-    let Expr::Lit(value) = expr else { return None };
-    let Lit::Float(literal) = &value.lit else {
-        return None;
-    };
-    let suffix = literal.suffix();
-    if !matches!(suffix, "" | "f64") {
-        return None;
-    }
-    let magnitude = literal.base10_parse::<f64>().ok()?;
-    magnitude.is_finite().then_some(FloatSource {
-        value: if minus.is_some() {
-            -magnitude
-        } else {
-            magnitude
-        },
-        literal: span(literal),
-        minus,
-        explicit_type: suffix == "f64",
-    })
+    FloatReader::LITERALS.read(expr)
 }
 
 pub(crate) fn span(tokens: &impl Spanned) -> SourceSpan {

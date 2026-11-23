@@ -108,8 +108,8 @@ impl RsxAnimation {
                 }
             }
             Easing::CubicBezier { x1, y1, x2, y2 } => {
-                if let Some(existing) = key.spline {
-                    for (literal, point) in existing.into_iter().zip([x1, y1, x2, y2]) {
+                if let Some(existing) = &key.spline {
+                    for (literal, point) in existing.iter().zip([x1, y1, x2, y2]) {
                         literal.plan(point, patches);
                     }
                 } else {

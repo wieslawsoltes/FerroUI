@@ -2,6 +2,7 @@ use super::box_shadows::BoxShadowsSource;
 use super::brush::BrushSource;
 use super::color::{packed_argument, ColorSource};
 use super::effect::EffectSource;
+use super::number_source::FloatReader;
 use super::numbers::Numbers;
 use super::relative::RelativeSource;
 use super::transform_list::TransformListSource;
@@ -27,7 +28,7 @@ pub(crate) struct ValueSource {
 enum ValueSyntax {
     Numbers(Numbers),
     Color(ColorSource),
-    Relative(RelativeSource),
+    Relative(Box<RelativeSource>),
     Effect(EffectSource),
     BoxShadows(BoxShadowsSource),
     TransformList(TransformListSource),
@@ -87,33 +88,44 @@ impl ValueShape {
         expression: &Expr,
         resolve: impl Fn(&Expr) -> Option<String>,
     ) -> Option<ValueSource> {
+        self.read_value(expression, &resolve, &FloatReader::LITERALS, false)
+    }
+
+    fn read_value(
+        self,
+        expression: &Expr,
+        resolve: &impl Fn(&Expr) -> Option<String>,
+        numbers: &FloatReader<'_>,
+        project_effects: bool,
+    ) -> Option<ValueSource> {
         let kind = self.kind;
         if kind == ValueKind::Color {
             return ColorSource::read_with(expression, self.brush, resolve)
                 .map(ValueSource::color);
         }
         if matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar) {
-            let (value, source) = RelativeSource::read(expression, kind, &resolve)?;
-            return Some(ValueSource { value, source: ValueSyntax::Relative(source) });
+            let (value, source) = RelativeSource::read(expression, kind, resolve, numbers)?;
+            return Some(ValueSource { value, source: ValueSyntax::Relative(Box::new(source)) });
         }
         if kind == ValueKind::Effect {
-            return self.read_effect(expression, resolve, false);
+            let (value, source) = EffectSource::read(expression, resolve, project_effects, numbers)?;
+            return Some(ValueSource { value: AnimationValue::Effect(value), source: ValueSyntax::Effect(source) });
         }
         if kind == ValueKind::BoxShadows {
-            let (value, source) = BoxShadowsSource::read(expression, &resolve)?;
+            let (value, source) = BoxShadowsSource::read(expression, resolve, numbers)?;
             return Some(ValueSource {
                 value: AnimationValue::BoxShadows(value),
                 source: ValueSyntax::BoxShadows(source),
             });
         }
         if kind == ValueKind::TransformList {
-            let (value, source) = TransformListSource::read(expression, &resolve)?;
+            let (value, source) = TransformListSource::read(expression, resolve)?;
             return Some(ValueSource {
                 value: AnimationValue::TransformList(value),
                 source: ValueSyntax::TransformList(source),
             });
         }
-        let (value, source) = Numbers::read(expression, kind, &resolve)?;
+        let (value, source) = Numbers::read(expression, kind, resolve, numbers)?;
         Some(ValueSource { value, source: ValueSyntax::Numbers(source) })
     }
 
@@ -123,22 +135,15 @@ impl ValueShape {
         project_effects: bool,
         resolve: &impl Fn(&Expr) -> Option<String>,
         shared_stops: &impl Fn(&Expr) -> Option<Vec<ferroui_designer_animation::AnimationGradientStop>>,
+        numbers: &FloatReader<'_>,
     ) -> Option<ValueSource> {
         if self.brush {
-            if let Some((value, source)) = BrushSource::read(expression, resolve, shared_stops) {
+            if let Some((value, source)) = BrushSource::read(expression, resolve, shared_stops, numbers) {
                 value.validate().ok()?;
                 return Some(ValueSource { value, source: ValueSyntax::Brush(Box::new(source)) });
             }
         }
-        if self.kind == ValueKind::Effect {
-            return self.read_effect(expression, resolve, project_effects);
-        }
-        self.read_with(expression, resolve)
-    }
-
-    fn read_effect(self, expression: &Expr, resolve: impl Fn(&Expr) -> Option<String>, project_effects: bool) -> Option<ValueSource> {
-        let (value, source) = EffectSource::read(expression, &resolve, project_effects)?;
-        Some(ValueSource { value: AnimationValue::Effect(value), source: ValueSyntax::Effect(source) })
+        self.read_value(expression, resolve, numbers, project_effects)
     }
 }
 

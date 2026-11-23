@@ -336,7 +336,7 @@ fn easing_patches(
             },
         ) => {
             let mut patches = Vec::new();
-            for (&parameter, &next) in
+            for (parameter, &next) in
                 parameters
                     .iter()
                     .zip([mass, stiffness, damping, initial_velocity])

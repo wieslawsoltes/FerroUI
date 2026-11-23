@@ -1,4 +1,4 @@
-use super::{syntax, variant::VariantSource, FloatSource};
+use super::{number_source::FloatReader, variant::VariantSource, FloatSource};
 use ferroui_designer_animation::{AnimationValue, RelativeUnit, ValueKind};
 use ferroui_designer_core::TextPatch;
 use syn::Expr;
@@ -18,6 +18,7 @@ impl RelativeSource {
         expr: &Expr,
         kind: ValueKind,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        numbers: &FloatReader<'_>,
     ) -> Option<(AnimationValue, Self)> {
         let Expr::Call(call) = expr else { return None };
         if !call.attrs.is_empty() {
@@ -27,7 +28,7 @@ impl RelativeSource {
         let args = call.args.iter().collect::<Vec<_>>();
         let (first, second, unit) = match (kind, factory.as_str(), args.as_slice()) {
             (ValueKind::RelativePoint, "ferroui_base::RelativePoint::new", [x, y, unit]) => {
-                (syntax::float(x)?, Some(syntax::float(y)?), *unit)
+                (numbers.read(x)?, Some(numbers.read(y)?), *unit)
             }
             (
                 ValueKind::RelativePoint,
@@ -37,13 +38,13 @@ impl RelativeSource {
                 && point.attrs.is_empty() && point.args.len() == 2 =>
             {
                 (
-                    syntax::float(&point.args[0])?,
-                    Some(syntax::float(&point.args[1])?),
+                    numbers.read(&point.args[0])?,
+                    Some(numbers.read(&point.args[1])?),
                     *unit,
                 )
             }
             (ValueKind::RelativeScalar, "ferroui_base::RelativeScalar::new", [value, unit]) => {
-                (syntax::float(value)?, None, *unit)
+                (numbers.read(value)?, None, *unit)
             }
             _ => return None,
         };
@@ -53,7 +54,7 @@ impl RelativeSource {
             "ferroui_base::RelativeUnit::Relative" => RelativeUnit::Relative,
             _ => return None,
         };
-        let value = match second {
+        let value = match &second {
             Some(y) => AnimationValue::RelativePoint {
                 x: first.value,
                 y: y.value,
@@ -82,7 +83,7 @@ impl RelativeSource {
         value: &AnimationValue,
         patches: &mut Vec<TextPatch>,
     ) -> Result<(), String> {
-        let (first, second, unit) = match (self.second, value) {
+        let (first, second, unit) = match (&self.second, value) {
             (Some(y_source), AnimationValue::RelativePoint { x, y, unit }) => {
                 (*x, Some((y_source, *y)), *unit)
             }

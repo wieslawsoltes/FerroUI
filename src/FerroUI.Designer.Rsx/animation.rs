@@ -8,6 +8,7 @@ mod effect_constructor;
 mod color_integer;
 mod color_text;
 mod keyframe;
+mod number_source;
 mod numbers;
 pub(crate) mod program_comment;
 mod relative;
@@ -23,6 +24,7 @@ use ferroui_designer_animation::{native_key_time, AnimationGradientStop, Easing,
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 pub(crate) use keyframe::{BUILTINS as BUILTIN_PROPERTIES, property as view_property};
+pub(crate) use number_source::FloatSource;
 pub(crate) use value::{ValueShape, ValueSource, rust_literal};
 
 pub(crate) const TRACK_TARGET: u64 = 1;
@@ -45,7 +47,7 @@ pub struct RsxAnimationIssue {
     pub reason: &'static str,
 }
 
-/// Source mapping for one clip. Its keys address only authored Rust literals.
+/// Source mapping for one clip. Keys resolve authored operands and edit their use sites.
 #[derive(Clone, Debug)]
 pub struct RsxAnimation {
     pub declaration: SourceSpan,
@@ -58,6 +60,7 @@ pub struct RsxAnimation {
     keys: Vec<KeySource>,
     imports: BTreeMap<String, String>,
     shared_stops: BTreeMap<String, Vec<AnimationGradientStop>>,
+    shared_numbers: BTreeMap<String, f64>,
     pub(crate) attachment: Option<program_comment::AnimationAttachment>,
 }
 
@@ -84,43 +87,14 @@ struct KeySource {
 }
 
 impl KeySource {
+    fn spline_values(&self) -> Option<[f64; 4]> {
+        self.spline.as_ref().map(|points| points.each_ref().map(|point| point.value))
+    }
+
     fn easing(&self) -> Easing {
-        self.spline.map_or(Easing::Linear, |points| {
-            let [x1, y1, x2, y2] = points.map(|point| point.value);
+        self.spline_values().map_or(Easing::Linear, |[x1, y1, x2, y2]| {
             Easing::CubicBezier { x1, y1, x2, y2 }
         })
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-pub(crate) struct FloatSource {
-    pub(crate) value: f64,
-    literal: SourceSpan,
-    minus: Option<SourceSpan>,
-    explicit_type: bool,
-}
-
-impl FloatSource {
-    pub(crate) fn plan(self, value: f64, patches: &mut Vec<TextPatch>) {
-        if self.value == value {
-            return;
-        }
-        let prefix = if self.minus.is_none() && value.is_sign_negative() {
-            "-"
-        } else {
-            ""
-        };
-        let suffix = if self.explicit_type { "f64" } else { "" };
-        patches.push(TextPatch {
-            span: self.literal,
-            replacement: format!("{prefix}{:?}{suffix}", value.abs()),
-        });
-        if let Some(minus) = self.minus.filter(|_| !value.is_sign_negative()) {
-            patches.push(TextPatch {
-                span: minus,
-                replacement: String::new(),
-            });
-        }
     }
 }
 
@@ -190,8 +164,7 @@ impl RsxAnimation {
         };
         let mapped_time = native_key_time(time).map_err(|error| error.to_string())?;
         if key.shared
-            && (key.time != mapped_time
-                || points != key.spline.map(|spline| spline.map(|point| point.value)))
+            && (key.time != mapped_time || points != key.spline_values())
         {
             return Err("This Rust keyframe shares its cue and easing with other setters. Edit those fields in source.".into());
         }
@@ -205,9 +178,9 @@ impl RsxAnimation {
             key.cue.plan(mapped_time / self.duration, &mut patches);
         }
         key.value.plan(value, &mut patches)?;
-        if let Some(existing) = key.spline {
+        if let Some(existing) = &key.spline {
             for (literal, point) in existing
-                .into_iter()
+                .iter()
                 .zip(points.unwrap_or([0.0, 0.0, 1.0, 1.0]))
             {
                 literal.plan(point, &mut patches);

@@ -176,7 +176,7 @@ fn read_easing(expression: &Expr, bindings: &LocalRust) -> Option<(Easing, Easin
                     .try_into()
                     .ok()?;
                 let [mass, stiffness, damping, initial_velocity] =
-                    parameters.map(|parameter| parameter.value);
+                    parameters.each_ref().map(|parameter| parameter.value);
                 let easing = Easing::Spring {
                     mass,
                     stiffness,

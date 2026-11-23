@@ -1,4 +1,4 @@
-use super::super::{color::ColorSource, syntax, FloatSource};
+use super::super::{color::ColorSource, number_source::{constant_value, FloatReader}, syntax, FloatSource};
 use super::operand::Leaf;
 use crate::blocks::keep_comments;
 use crate::local_rust::RustSourceScope;
@@ -34,9 +34,10 @@ impl StopsSource {
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
         shared: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
+        numbers: &FloatReader<'_>,
     ) -> Option<(Vec<AnimationGradientStop>, Self)> {
         if let Some(array) = borrowed(expression).and_then(array) {
-            let (values, source) = InlineStops::read(array, resolve)?;
+            let (values, source) = InlineStops::read(array, resolve, numbers)?;
             return Some((values, Self::Inline(source)));
         }
         Some((shared(expression)?, Self::Shared(Leaf::read(expression)?)))
@@ -79,7 +80,12 @@ pub(in crate::animation) fn shared_values(
     } else {
         array(borrowed(initializer)?)?
     };
-    InlineStops::read(array, &|path| scope.path(path)).map(|(values, _)| values)
+    InlineStops::read(
+        array,
+        &|path| scope.path(path),
+        &FloatReader(&|path| constant_value(path, scope)),
+    )
+    .map(|(values, _)| values)
 }
 
 fn borrowed(expression: &Expr) -> Option<&Expr> {
@@ -101,6 +107,7 @@ impl InlineStops {
     fn read(
         array: &ExprArray,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        numbers: &FloatReader<'_>,
     ) -> Option<(Vec<AnimationGradientStop>, Self)> {
         let mut values = Vec::with_capacity(array.elems.len());
         let mut stops = Vec::with_capacity(array.elems.len());
@@ -112,7 +119,7 @@ impl InlineStops {
             {
                 return None;
             }
-            let offset = syntax::float(&call.args[0])?;
+            let offset = numbers.read(&call.args[0])?;
             let (color, source) = ColorSource::read_with(&call.args[1], false, resolve)?;
             values.push(AnimationGradientStop {
                 offset: offset.value,

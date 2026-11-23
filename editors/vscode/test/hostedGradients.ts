@@ -89,7 +89,8 @@ async function verifySharedGradientStops(preview: NativePreview, update: (revisi
         'use ferroui_base::media::{Color, IBrush, immutable::{ImmutableGradientStop as Stop, ImmutableLinearGradientBrush as Brush}};',
         'use ferroui_controls::Border;',
         'use std::rc::Rc;',
-        'const BRAND_STOPS: &[Stop] = &[Stop::new(0.25, Color::from_argb(255, 41, 85, 137)),',
+        'const BRAND_OFFSET: f64 = 0.25;',
+        'const BRAND_STOPS: &[Stop] = &[Stop::new(BRAND_OFFSET, Color::from_argb(255, 41, 85, 137)),',
         '    Stop::new(1.0, Color::from_argb(255, 80, 170, 151))];',
         'fn view() { ferroui_view::rsx! { StackPanel {',
         '    styles: [ferroui_view::style("Border#Card").animation(ferroui_view::animation(ferroui_view::ms(2000))',
@@ -102,7 +103,7 @@ async function verifySharedGradientStops(preview: NativePreview, update: (revisi
     const request = (revision: number, source: string): HostedSource => {
         const draft = update(revision, source);
         return { ...draft, projectPath: '/SharedGradient.rs', document: { ...draft.document, source, language: 'rust',
-            uri: new URL('SharedGradient.rs', draft.document.uri).toString(), caret: { line: 5, character: 34 } } };
+            uri: new URL('SharedGradient.rs', draft.document.uri).toString(), caret: { line: 6, character: 34 } } };
     };
     const before = await preview.renderHosted(request(4157, original));
     const { program, track } = trackOf(before);
@@ -230,12 +231,13 @@ async function verifyMappedSolidBrush(preview: NativePreview, update: (revision:
 use ferroui_controls::Border as Card;
 use ferroui_base::{animation::FillMode, media::{IBrush, Color, immutable::ImmutableSolidColorBrush as Solid}};
 use std::rc::Rc;
+const FINAL_OPACITY: f64 = 1.0;
 fn view() -> Element { rsx! {
     StackPanel {
         styles: [style("Border#Card").animation(animation(ms(2000))
             .key_frame(0.0, |key| key.set(Card::background_property(), Some(Rc::new(${packed}) as Rc<dyn IBrush>)))
             .key_frame(1.0, |key| key.set(Card::background_property(),
-                Some(Rc::new(Solid::new(Color::from_rgb(51, 102, 136))) as Rc<dyn IBrush>)))
+                Some(Rc::new(Solid::with_opacity(Color::from_rgb(51, 102, 136), /* shared 🧭 */ FINAL_OPACITY)) as Rc<dyn IBrush>)))
             .fill_mode(FillMode::Both))],
         Border { name: "Card", width: 230.0, height: 126.0, background: "#336688" }
     }
@@ -245,7 +247,7 @@ fn view() -> Element { rsx! {
         const draft = update(revision, text);
         return { ...draft, projectPath: '/SolidBrushMotion.rs', document: { ...draft.document,
             uri: new URL('SolidBrushMotion.rs', draft.document.uri).toString(), language: 'rust',
-            caret: { line: 4, character: 25 },
+            caret: { line: 5, character: 25 },
         } };
     };
     const frame = await preview.renderHosted(source(4155, original));
@@ -259,8 +261,14 @@ fn view() -> Element { rsx! {
     assert.equal(revised, original.replace(packed,
         'Solid::with_opacity(/* preserve 🧭 */ ::ferroui_base::media::Color::from_uint32(0xFF33_6688_u32), 0.6)'));
     const accepted = await preview.renderHosted(source(4156, revised));
-    const curve = await preview.hostedCurve(identity(accepted), { ...trackOf(accepted).query, channel });
+    const updated = trackOf(accepted);
+    const curve = await preview.hostedCurve(identity(accepted), { ...updated.query, channel });
     assert.equal(curve.find(point => point.time === 1)?.value, .8);
+    const final = await preview.planHostedKeyframe(identity(accepted), { program: updated.program.id,
+        target: updated.track.target, property, previous: 2, time: 2, easing: 'LinearEasing',
+        component: { channel, value: .72 } });
+    assert.ok(final.patch);
+    assert.equal(apply(revised, final.patch), revised.replace('*/ FINAL_OPACITY', '*/ 0.72f64'));
 }
 
 function trackOf(frame: HostedFrame) {

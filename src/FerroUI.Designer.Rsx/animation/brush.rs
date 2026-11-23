@@ -3,7 +3,7 @@ mod operand;
 mod solid;
 mod stops;
 
-use super::syntax;
+use super::{number_source::FloatReader, syntax};
 use arguments::Arguments;
 use ferroui_designer_animation::{
     AnimationBrush, AnimationGradient, AnimationGradientStop, AnimationValue, GradientShape,
@@ -43,6 +43,7 @@ impl BrushSource {
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
         shared_stops: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
+        numbers: &FloatReader<'_>,
     ) -> Option<(AnimationValue, Self)> {
         let operand = syntax::unparen(operand::optional(expression, resolve)??);
         let operand = match operand {
@@ -68,11 +69,11 @@ impl BrushSource {
         let resolved = resolve(&call.func)?;
         let (class, method) = resolved.strip_prefix(IMMUTABLE)?.rsplit_once("::")?;
         if class == "SolidColorBrush" {
-            let (brush, source) = SolidSource::read(call, method, resolve)?;
+            let (brush, source) = SolidSource::read(call, method, resolve, numbers)?;
             return Some((AnimationValue::Brush(brush), Self::Solid(source)));
         }
         let shape = GradientShape::defaults(class)?;
-        let (values, stops) = StopsSource::read(call.args.first()?, resolve, shared_stops)?;
+        let (values, stops) = StopsSource::read(call.args.first()?, resolve, shared_stops, numbers)?;
         let mut gradient = AnimationGradient::from_stops(shape, values);
         gradient.transform_origin = ferroui_base::RelativePoint::TOP_LEFT.into();
         let (gradient, constructor) = match method {
@@ -95,7 +96,7 @@ impl BrushSource {
                 };
                 let operands = call.args.iter().skip(1).collect::<Vec<_>>();
                 let (gradient, args) =
-                    Arguments::read(gradient, &operands, shared_radius, resolve)?;
+                    Arguments::read(gradient, &operands, shared_radius, resolve, numbers)?;
                 (gradient, Constructor::Full(Box::new(args)))
             }
             _ => return None,

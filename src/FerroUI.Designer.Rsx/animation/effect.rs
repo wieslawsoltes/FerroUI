@@ -1,4 +1,5 @@
 use super::effect_constructor::ConstructorSource;
+use super::number_source::FloatReader;
 use super::syntax::{span, unparen};
 use crate::literal::string_literal;
 use ferroui_designer_animation::{AnimationEffect, EffectForm};
@@ -16,6 +17,7 @@ impl EffectSource {
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
         project_effects: bool,
+        numbers: &FloatReader<'_>,
     ) -> Option<(AnimationEffect, Self)> {
         let expression = unparen(expression);
         let (inner, wrapped) = match expression {
@@ -32,7 +34,7 @@ impl EffectSource {
             _ => (expression, false),
         };
         let Expr::MethodCall(method) = unparen(inner) else {
-            let (value, source) = ConstructorSource::read(inner, resolve)?;
+            let (value, source) = ConstructorSource::read(inner, resolve, numbers)?;
             return Some((value, Self::Object(source)));
         };
         let returns_effect = (method.method == "unwrap" && method.args.is_empty())

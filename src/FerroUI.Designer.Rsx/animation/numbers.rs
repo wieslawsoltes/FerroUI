@@ -1,4 +1,5 @@
 use super::{FloatSource, ValueShape, syntax};
+use super::number_source::FloatReader;
 use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::Expr;
@@ -27,6 +28,7 @@ impl Numbers {
         expression: &Expr,
         kind: ValueKind,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        numbers: &FloatReader<'_>,
     ) -> Option<(AnimationValue, Self)> {
         let uniform = [0; 4];
         let (args, shorthand) = if kind == ValueKind::Number {
@@ -88,7 +90,7 @@ impl Numbers {
         };
         let parts = args
             .iter()
-            .map(|expr| syntax::float(expr))
+            .map(|expr| numbers.read(expr))
             .collect::<Option<Vec<_>>>()?;
         let values = match &shorthand {
             Some(short) => short.fields.map(|part| parts[part].value).to_vec(),

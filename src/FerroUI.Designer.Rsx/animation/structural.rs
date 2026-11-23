@@ -268,10 +268,16 @@ impl RsxAnimation {
         let changed =
             TextPatch::apply_all(original, relative).map_err(|error| error.to_string())?;
         let expression = syn::parse_str(&changed).map_err(|error| error.to_string())?;
-        syntax::clip(&expression, catalog, |path| {
-            let path = syntax::authored_path(path)?;
-            Some(self.resolved_path(&path).to_owned())
-        }, |expression| self.shared_stops.get(&super::brush::shared_key(expression)?).cloned())
-            .ok_or_else(|| "The edited Rust animation has no source mapping".into())
+        syntax::clip(
+            &expression,
+            catalog,
+            |path| {
+                let path = syntax::authored_path(path)?;
+                Some(self.resolved_path(&path).to_owned())
+            },
+            |expression| self.shared_stops.get(&super::brush::shared_key(expression)?).cloned(),
+            |path| self.shared_numbers.get(&syntax::authored_path(path)?).copied(),
+        )
+        .ok_or_else(|| "The edited Rust animation has no source mapping".into())
     }
 }

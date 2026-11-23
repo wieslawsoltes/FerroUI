@@ -569,6 +569,24 @@ For `CornerRadius::uniform`, `CornerRadius::top_bottom`, `Thickness::uniform`, a
 shorthand while its fields can represent the edit and expands to the same type's `new` constructor
 when the fields become independent. The change preserves existing operand comments and takes one Undo.
 
+### Edit a key that uses a shared Rust number
+
+1. Open [animation_view.rs](../../../editors/vscode/test/fixtures/animation_view.rs), then open the
+   `forecast` invocation in Design and show the Timeline. Its middle key uses `HOLD_CUE`,
+   `HOLD_OPACITY`, and `HOLD_Y2`.
+2. Select the Opacity key at **0.5 s**. Set **Value** to `0.82` or drag the value handle, then
+   apply the key. The edited argument reads `/* 🪴 hold */ 0.82f64`. The shared declaration
+   keeps its value of `0.65`.
+3. Edit **Time** or **Incoming easing** to adjust its cue or spline in the same way. Undo
+   restores the references for that edit. To change every use, edit the constant's declaration in Rust.
+
+The Timeline, Designer Studio, and App Preview resolve unconditional `f64` constants initialized with
+a finite literal or another supported constant. Named imports from the selected Cargo target can come
+from unsaved workspace buffers. The same mapping works for numeric fields of supported geometry,
+brush, and effect constructors. Use source editing for computed initializers and conditional declarations.
+
+![The Timeline previews the edited Opacity key at 1.4 seconds beside the new Rust literals and original constant declarations](../images/vscode-rust-constant-keyframes.png)
+
 ![VS Code shows the Top right corner edited at 0.6 seconds, the original Rust imports, and the updated native card](../images/vscode-timeline-rust-imports.png)
 
 1. Seek to a time and choose **Add keyframe at playhead**, or double-click an empty part of a property track. The isolated designer samples the track at that time and adds a Rust `.key_frame(...)`. An empty mapped clip starts with Opacity.
