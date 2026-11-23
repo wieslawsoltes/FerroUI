@@ -462,3 +462,61 @@ fn what_cannot_be_drawn_again_makes_no_fragment() {
         assert!(context.end_fragment().is_none(), "the pop of a clip opened before the fragment");
     });
 }
+
+#[test]
+fn the_ranges_of_a_delta_rebuild_the_next_stream() {
+    let previous: Vec<u8> = (0..2000u32).map(|value| (value % 251) as u8).collect();
+    let mut next = previous.clone();
+    next[700] ^= 0x55;
+    next[1500] ^= 0x33;
+    for (name, next) in [("equal size", next.clone()), ("longer", [next.clone(), vec![7; 300]].concat()), ("shorter", next[..900].to_vec())] {
+        let (ranges, bytes) = crate::device::scene_delta_ranges(&previous, &next);
+        let mut rebuilt = previous.clone();
+        rebuilt.resize(next.len(), 0);
+        let mut at = 0;
+        for range in &ranges {
+            let (offset, size) = (range.offset as usize, range.size as usize);
+            rebuilt[offset..offset + size].copy_from_slice(&bytes[at..at + size]);
+            at += size;
+        }
+        assert_eq!(at, bytes.len(), "{name}");
+        assert!(rebuilt == next, "{name}");
+        assert!(bytes.len() < next.len(), "{name}: only what differs");
+    }
+}
+
+#[test]
+fn frames_sent_as_deltas_read_back_like_whole_streams() {
+    let Some(engine) = device() else { return };
+    let Some(reference) = device() else { return };
+    let mut scene = SceneBuilder::new();
+    for frame in 0..4 {
+        let brush = solid(40 + frame as u8 * 50, 90, 200);
+        let draw = |context: &mut ProGpuDrawingContext| {
+            context.clear(Color::from_rgb(255, 255, 255));
+            for index in 0..(6 + frame) {
+                let at = f64::from(index) * 12.0;
+                fill_rect(context, brush.as_ref(), Rect::new(at, at / 2.0, 10.0, 10.0));
+            }
+        };
+        let mut context = ProGpuDrawingContext::new(scene, None);
+        draw(&mut context);
+        let (kept, error) = context.finish();
+        assert!(error.is_none(), "recording: {error:?}");
+        scene = kept;
+        let stream = scene.build().expect("the stream of the scene").to_vec();
+        engine.update_scene_by_delta(&stream).expect("the frame");
+        let target = engine.device();
+        let (texture, view) = target.create_target(SIZE, SIZE);
+        engine.render_scene(scene.scene_id(), scene.generation(), view, SIZE, SIZE, false).expect("the frame is rendered");
+        let actual = target.read_rgba8(texture, SIZE, SIZE);
+        target.release_texture(texture, view);
+        let expected = render(&reference, |context| {
+            for index in 0..(6 + frame) {
+                let at = f64::from(index) * 12.0;
+                fill_rect(context, brush.as_ref(), Rect::new(at, at / 2.0, 10.0, 10.0));
+            }
+        });
+        assert!(actual == expected, "frame {frame}");
+    }
+}
