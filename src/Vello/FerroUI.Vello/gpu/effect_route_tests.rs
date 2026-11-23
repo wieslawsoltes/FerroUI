@@ -156,8 +156,7 @@ fn drawing(device: &Arc<VelloWgpuDevice>, mode: VelloRenderingMode, pixels: &Rc<
 /// What still reaches the CPU in a device mode: the guard of #1146. An effect that is given a
 /// device route leaves this list, and one that starts to reach the CPU fails the test.
 fn known_on_the_cpu() -> &'static [&'static str] {
-    // A multiply layer of factors takes an image of the processor in every mode.
-    &["multiply layer of factors"]
+    &[]
 }
 
 #[test]
@@ -190,5 +189,61 @@ fn only_the_known_effects_reach_the_cpu_in_the_device_modes() {
             }
         }
         assert_eq!(on_the_cpu, known_on_the_cpu(), "{mode:?}");
+    }
+}
+
+/// The multiply layer on the device against its CPU reference applied to the same content drawn
+/// plain, straight and turned: the factors are stretched over the bounds of the layer.
+#[test]
+fn the_multiply_layer_on_the_device_matches_its_cpu_reference() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let factors = MultiplyLayerFactors {
+        size: PixelSize::new(2, 2),
+        rgba: Arc::new(vec![255, 64, 32, 255, 32, 255, 64, 255, 64, 32, 255, 255, 128, 128, 128, 255]),
+        scale: 1.5,
+    };
+    let mut modes = Vec::new();
+    if cfg!(feature = "hybrid") {
+        modes.push(VelloRenderingMode::Hybrid);
+    }
+    if cfg!(feature = "gpu") && device.supports_compute() {
+        modes.push(VelloRenderingMode::Gpu);
+    }
+    let about_centre = |matrix: Matrix| Matrix::create_translation(-32.0, -32.0) * matrix * Matrix::create_translation(32.0, 32.0);
+    for mode in modes {
+        for transform in [Matrix::IDENTITY, Matrix::create_translation(3.0, -2.0), about_centre(Matrix::create_rotation(0.3))] {
+            let render = |layer: bool| {
+                let pixels = Rc::new(RefCell::new(vec![0u8; usize::from(SIZE) * usize::from(SIZE) * 4]));
+                let mut context = drawing(&device, mode, &pixels);
+                context.set_transform(transform);
+                if layer {
+                    context.as_drawing_context_impl_with_layer_effects().unwrap().push_multiply_layer(BOUNDS, &factors);
+                }
+                content(&mut context);
+                if layer {
+                    context.as_drawing_context_impl_with_layer_effects().unwrap().pop_multiply_layer();
+                }
+                context.dispose();
+                pixels.take()
+            };
+            let (scenes, layers) = (cpu_scenes_made(), cpu_layer_count());
+            let actual = render(true);
+            assert_eq!((scenes, layers), (cpu_scenes_made(), cpu_layer_count()), "{mode:?}: on the CPU");
+            let mut expected = render(false);
+            let inverse = transform.try_invert().unwrap();
+            factors.apply_to_premultiplied_rgba8(&mut expected, usize::from(SIZE), |x, y| {
+                let local = inverse.transform(ferroui_base::Point::new(x, y));
+                let (u, v) = ((local.x - BOUNDS.x) / BOUNDS.width, (local.y - BOUNDS.y) / BOUNDS.height);
+                ((0.0..=1.0).contains(&u) && (0.0..=1.0).contains(&v)).then_some((u, v))
+            });
+            let largest = actual.iter().zip(&expected).map(|(a, e)| a.abs_diff(*e)).max().unwrap_or(0);
+            assert!(largest <= 2, "{mode:?}, {transform:?}: {largest} of 255");
+        }
     }
 }

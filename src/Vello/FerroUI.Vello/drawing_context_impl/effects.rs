@@ -1092,7 +1092,7 @@ impl LayerOperation {
             LayerOperation::Matrix { .. } => Some(LayerProgram::ColorMatrix),
             LayerOperation::LightingMultiply { .. } => Some(LayerProgram::LightMultiply),
             LayerOperation::Convolve(_) => Some(LayerProgram::Convolution),
-            LayerOperation::Multiply { .. } => None,
+            LayerOperation::Multiply { .. } => Some(LayerProgram::MultiplyFactors),
         }
     }
 }
@@ -1192,6 +1192,10 @@ impl DrawingContextImpl {
         use crate::effect_uniforms as blocks;
         use crate::web_gl::LayerProgram;
         let size = (layer.width, layer.height);
+        if let LayerOperation::Multiply { factors, bounds, scene_to_local } = operation {
+            self.end_web_gl_multiply(scene, layer, factors, *bounds, *scene_to_local);
+            return;
+        }
         let (program, uniforms) = match operation {
             LayerOperation::Matrix { matrix, alpha_mode } => {
                 (LayerProgram::ColorMatrix, Some(blocks::color_matrix(matrix, *alpha_mode, size)))
@@ -1204,7 +1208,7 @@ impl DrawingContextImpl {
             LayerOperation::Convolve(convolution) => {
                 (LayerProgram::Convolution, Some(blocks::convolution(convolution, size)))
             }
-            // Drawn on the processor: never pushed here.
+            // Ended above.
             LayerOperation::Multiply { .. } => return,
         };
         let Some(uniforms) = uniforms else {
@@ -1215,6 +1219,43 @@ impl DrawingContextImpl {
         };
         match layer.gpu.layer_texture(program, &[(&content, true)], size, &uniforms) {
             Ok(Some(texture)) => self.paint_web_gl_layer(&layer, (texture, false), 1.0, BlendMode::default()),
+            // The program was there when the layer was pushed.
+            Ok(None) => {}
+            Err(error) => crate::web_gl::log_render_failure(&error),
+        }
+    }
+
+    /// Ends a multiply layer on the context: the content rendered, the samples of the factors
+    /// uploaded, and the pass of the two painted over the bounds of the layer.
+    fn end_web_gl_multiply(
+        &mut self,
+        scene: Box<dyn IVelloSceneSink>,
+        layer: WebGlLayer,
+        factors: &MultiplyLayerFactors,
+        bounds: Rect,
+        scene_to_local: Affine,
+    ) {
+        use crate::effect_uniforms as blocks;
+        use crate::web_gl::LayerProgram;
+        let size = (layer.width, layer.height);
+        let Some(content) = Self::render_web_gl_scene(scene, &layer) else {
+            return;
+        };
+        let (width, height, samples, scale) = blocks::factor_samples(factors);
+        let texture = match layer.gpu.pixels_texture(width, height, samples) {
+            Ok(texture) => texture,
+            Err(error) => {
+                crate::web_gl::log_render_failure(&error);
+                return;
+            }
+        };
+        // The pass works in the pixels of the area, from its top left.
+        let to_local = scene_to_local * Affine::translate((f64::from(layer.x), f64::from(layer.y)));
+        let to_unit = blocks::factors_to_unit(bounds, to_local);
+        let uniforms = blocks::multiply_factors((width, height, scale), to_unit, size);
+        let inputs = [(&content, true), (&texture, false)];
+        match layer.gpu.layer_texture(LayerProgram::MultiplyFactors, &inputs, size, &uniforms) {
+            Ok(Some(result)) => self.paint_web_gl_layer(&layer, (result, false), 1.0, BlendMode::default()),
             // The program was there when the layer was pushed.
             Ok(None) => {}
             Err(error) => crate::web_gl::log_render_failure(&error),
@@ -1559,8 +1600,10 @@ impl DrawingContextImpl {
             LayerOperation::Convolve(convolution) => {
                 effect_passes::convolution_texture(device, &content, area, convolution)
             }
-            // A multiply layer of factors is drawn on the processor.
-            LayerOperation::Multiply { .. } => None,
+            LayerOperation::Multiply { factors, bounds, scene_to_local } => {
+                let to_unit = crate::effect_uniforms::factors_to_unit(*bounds, *scene_to_local);
+                effect_passes::multiply_factors_texture(device, &content, area, factors, to_unit)
+            }
         };
         // The content is the pool's again: the pass that reads it is
         // submitted.
@@ -1627,20 +1670,35 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         self.restore();
     }
 
-    /// The factors are applied to the pixels of a scene of the CPU renderer:
-    /// they are an image of the processor (the light map of the compositor,
-    /// for more lights than a drawing context evaluates), and vello has no
-    /// blend mode that multiplies the colour and keeps the alpha of what is
-    /// under it. The lit visuals of a GPU mode take
-    /// [`push_lighting_multiply_layer`](Self::push_lighting_multiply_layer).
+    /// The factors are an image of the processor (the light map of the compositor, for more
+    /// lights than a drawing context evaluates). In a GPU mode and on the WebGL2 context of the
+    /// canvas they are uploaded and a pass multiplies the content by them, because vello has no
+    /// blend mode that multiplies the colour and keeps the alpha of what is under it; the CPU
+    /// mode and a scene of the CPU renderer apply them to its pixels. The lit visuals of a GPU
+    /// mode take [`push_lighting_multiply_layer`](Self::push_lighting_multiply_layer).
     fn push_multiply_layer(&mut self, bounds: Rect, factors: &MultiplyLayerFactors) {
-        let outer = self.begin_cpu_scene(bounds);
+        #[allow(unused_labels)]
+        let entered: Option<(OuterScene, Option<DeviceLayer>, Option<WebGlLayer>)> = 'entered: {
+            #[cfg(any(feature = "hybrid", feature = "gpu"))]
+            if let Some(layer) = self.device_layer(Some(bounds)) {
+                break 'entered Some((self.enter_device_scene(&layer), Some(layer), None));
+            }
+            #[cfg(feature = "hybrid-webgl")]
+            if let Some(layer) = self.web_gl_layer(Some(bounds), crate::web_gl::LayerProgram::MultiplyFactors) {
+                break 'entered Some((self.enter_web_gl_scene(), None, Some(layer)));
+            }
+            None
+        };
+        let (outer, device, web_gl) = match entered {
+            Some(entered) => entered,
+            None => (self.begin_cpu_scene(bounds), None, None),
+        };
         let scene_to_local = self.device_transform().inverse();
         self.color_matrix_stack.push(ColorMatrixFrame {
             outer,
             operation: LayerOperation::Multiply { factors: factors.clone(), bounds, scene_to_local },
-            device: None,
-            web_gl: None,
+            device,
+            web_gl,
         });
         self.save(SavedKind::ColorMatrix);
         self.push_clip(bounds);

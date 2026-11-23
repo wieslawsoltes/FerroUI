@@ -567,6 +567,38 @@ impl VelloWebGlGpu {
         }
     }
 
+    /// A texture of the pool with `rgba` (`width` by `height` pixels, row by row from the top, the
+    /// first row the first of the texture) at its top left: what a pass reads as an image of its
+    /// own. The texture is the pool's again once it is dropped.
+    pub(crate) fn pixels_texture(&self, width: u32, height: u32, rgba: &[u8]) -> Result<Rc<VelloWebGlTexture>, String> {
+        if width == 0 || height == 0 || width.max(height) > self.max_texture_size {
+            return Err(format!("{width}x{height} pixels do not fit a texture of the context"));
+        }
+        let bytes = width as usize * height as usize * 4;
+        let pixels = rgba.get(..bytes).ok_or("the pixels do not fill their size")?;
+        let mut state = self.state.borrow_mut();
+        let state = state.as_mut().ok_or("the renderer of the canvas has been released")?;
+        let (texture_width, texture_height) = frame_textures::pooled_size(width, height, self.max_texture_size);
+        let target = state.textures.acquire(&self.gl, texture_width, texture_height)?;
+        let gl = &self.gl;
+        gl.active_texture(WebGl2RenderingContext::TEXTURE0);
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&target.texture));
+        let uploaded = gl.tex_sub_image_2d_with_i32_and_i32_and_u32_and_type_and_opt_u8_array(
+            WebGl2RenderingContext::TEXTURE_2D,
+            0,
+            0,
+            0,
+            width as i32,
+            height as i32,
+            WebGl2RenderingContext::RGBA,
+            WebGl2RenderingContext::UNSIGNED_BYTE,
+            Some(pixels),
+        );
+        gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+        uploaded.map_err(|_| "the context did not take the pixels".to_string())?;
+        Ok(target)
+    }
+
     /// A texture of the context with the pixels of an image, premultiplied,
     /// as the renderer samples a bound texture: by texel, level 0 alone.
     fn create_image_texture(&self, image: &ImageData) -> Result<WebGlTexture, String> {

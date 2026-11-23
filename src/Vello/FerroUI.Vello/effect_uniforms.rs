@@ -10,7 +10,7 @@
 
 use ferroui_base::media::effects::{ImmutableCustomEffect, ShaderUniformValue};
 use ferroui_base::media::{ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix};
-use ferroui_base::platform::{LightingParameters, PixelOperation};
+use ferroui_base::platform::{LightingParameters, MultiplyLayerFactors, PixelOperation};
 use ferroui_base::rendering::composition::effects::BlendEffectMode;
 use ferroui_base::rendering::composition::server::{LightSource, LIGHT_MAP_MAX_SCALE};
 
@@ -66,6 +66,8 @@ pub(crate) const COLOR_MATRIX_FLOATS: usize = 6 * 4;
 pub(crate) const PIXEL_OPERATION_FLOATS: usize = 6 * 4;
 /// Floats of the convolution block: seven `vec4` of weights, the size, the factors, the extent.
 pub(crate) const CONVOLUTION_FLOATS: usize = 10 * 4;
+/// Floats of the block of a multiply layer of factors: 4 `vec4`.
+pub(crate) const MULTIPLY_FACTORS_FLOATS: usize = 4 * 4;
 
 /// What a lighting program writes.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -250,6 +252,41 @@ pub(crate) fn pixel_operation(
 }
 
 /// The convolution block over an area of `width` by `height` pixels.
+/// The samples of `factors` to upload: their size, their pixels and their scale. Factors whose
+/// pixels do not fill their size change nothing, as `MultiplyLayerFactors::factor_at`.
+pub(crate) fn factor_samples(factors: &MultiplyLayerFactors) -> (u32, u32, &[u8], f32) {
+    const NEUTRAL: [u8; 4] = [255; 4];
+    let (width, height) = (factors.size.width.max(1) as u32, factors.size.height.max(1) as u32);
+    if factors.rgba.len() < width as usize * height as usize * 4 {
+        return (1, 1, &NEUTRAL, 1.0);
+    }
+    (width, height, &factors.rgba, factors.scale)
+}
+
+/// The transform from the pixels of the scene of a multiply layer to the unit square of its
+/// factors, which are stretched over `bounds`.
+pub(crate) fn factors_to_unit(bounds: ferroui_base::Rect, scene_to_local: kurbo::Affine) -> kurbo::Affine {
+    kurbo::Affine::scale_non_uniform(1.0 / bounds.width, 1.0 / bounds.height)
+        * kurbo::Affine::translate((-bounds.x, -bounds.y))
+        * scene_to_local
+}
+
+/// The block of a multiply layer: the rows of `to_unit` from the pixels of the area to the unit
+/// square of the factors, the size of the samples and their scale, and the size of the area.
+pub(crate) fn multiply_factors(
+    (samples_x, samples_y, scale): (u32, u32, f32),
+    to_unit: kurbo::Affine,
+    (width, height): (u32, u32),
+) -> Vec<f32> {
+    let [a, b, c, d, e, f] = to_unit.as_coeffs();
+    vec![
+        a as f32, c as f32, e as f32, 0.0,
+        b as f32, d as f32, f as f32, 0.0,
+        samples_x as f32, samples_y as f32, scale, 0.0,
+        width as f32, height as f32, 0.0, 0.0,
+    ]
+}
+
 pub(crate) fn convolution(convolution: &ConvolveMatrix, (width, height): (u32, u32)) -> Vec<f32> {
     let mut floats = vec![0.0f32; CONVOLUTION_FLOATS];
     for (slot, weight) in floats.iter_mut().take(28).zip(convolution.correlation_kernel()) {

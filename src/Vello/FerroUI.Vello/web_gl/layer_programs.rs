@@ -452,6 +452,47 @@ void main() {
 "#;
 
 /// A program of the layers with an effect on the WebGL2 context.
+/// A multiply layer of factors (`MULTIPLY_FACTORS_WGSL`): each colour channel of the content times
+/// the factor of its point, sampled bilinearly between the centres of the samples of `u_next`
+/// (upright, of its own size), clamped to the alpha; a pixel outside the factors is cleared.
+const MULTIPLY_FACTORS: &str = r#"
+// 0, 1: the rows of the transform from the pixels of the area to the unit square of the factors;
+// 2: x, y the size of the samples, z what a sample of 1 stands for; 3: x, y the size of the area.
+uniform vec4 u_params[4];
+
+vec3 factor_sample(ivec2 p) {
+    return texelFetch(u_next, p, 0).rgb;
+}
+
+void main() {
+    ivec2 pixel = ivec2(floor(gl_FragCoord.xy));
+    if (outside(pixel)) {
+        o_color = vec4(0.0);
+        return;
+    }
+    vec4 c = load_content(pixel);
+    if (c.a <= 0.0) {
+        o_color = vec4(0.0);
+        return;
+    }
+    vec3 at = vec3(vec2(pixel) + 0.5, 1.0);
+    vec2 unit = vec2(dot(u_params[0].xyz, at), dot(u_params[1].xyz, at));
+    if (unit.x < 0.0 || unit.x > 1.0 || unit.y < 0.0 || unit.y > 1.0) {
+        o_color = vec4(0.0);
+        return;
+    }
+    vec2 size = u_params[2].xy;
+    vec2 p = clamp(unit * size - 0.5, vec2(0.0), size - 1.0);
+    ivec2 a = ivec2(floor(p));
+    ivec2 b = min(a + ivec2(1), ivec2(size) - ivec2(1));
+    vec2 f = p - vec2(a);
+    vec3 top = mix(factor_sample(a), factor_sample(ivec2(b.x, a.y)), f.x);
+    vec3 bottom = mix(factor_sample(ivec2(a.x, b.y)), factor_sample(b), f.x);
+    vec3 factor = mix(top, bottom, f.y) * u_params[2].z;
+    o_color = vec4(min(c.rgb * factor, vec3(c.a)), c.a);
+}
+"#;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum LayerProgram {
     /// The colour matrix layers and the luminance mask.
@@ -468,10 +509,12 @@ pub(crate) enum LayerProgram {
     ShadowGaussian,
     /// A shadow blurred at a reduced scale, scaled back.
     ShadowScaleUp,
+    /// A multiply layer of factors: the content and the image of its factors.
+    MultiplyFactors,
 }
 
 impl LayerProgram {
-    const ALL: [LayerProgram; 7] = [
+    const ALL: [LayerProgram; 8] = [
         LayerProgram::ColorMatrix,
         LayerProgram::LightMultiply,
         LayerProgram::PixelOperation,
@@ -479,6 +522,7 @@ impl LayerProgram {
         LayerProgram::ShadowCoverage,
         LayerProgram::ShadowGaussian,
         LayerProgram::ShadowScaleUp,
+        LayerProgram::MultiplyFactors,
     ];
 
     fn index(self) -> usize {
@@ -495,6 +539,7 @@ impl LayerProgram {
             LayerProgram::ShadowCoverage => "shadow coverage",
             LayerProgram::ShadowGaussian => "shadow Gaussian",
             LayerProgram::ShadowScaleUp => "shadow scale up",
+            LayerProgram::MultiplyFactors => "multiply factors",
         }
     }
 
@@ -508,13 +553,14 @@ impl LayerProgram {
             LayerProgram::ShadowCoverage => shadows::COVERAGE,
             LayerProgram::ShadowGaussian => shadows::GAUSSIAN,
             LayerProgram::ShadowScaleUp => shadows::SCALE_UP,
+            LayerProgram::MultiplyFactors => MULTIPLY_FACTORS,
         }
     }
 
     /// The textures the program reads.
     fn inputs(self) -> usize {
         match self {
-            LayerProgram::PixelOperation => 2,
+            LayerProgram::PixelOperation | LayerProgram::MultiplyFactors => 2,
             LayerProgram::ShadowCoverage => 0,
             _ => 1,
         }
@@ -530,6 +576,7 @@ impl LayerProgram {
             LayerProgram::ShadowCoverage => shadows::COVERAGE_FLOATS,
             LayerProgram::ShadowGaussian => shadows::GAUSSIAN_FLOATS,
             LayerProgram::ShadowScaleUp => shadows::SCALE_UP_FLOATS,
+            LayerProgram::MultiplyFactors => blocks::MULTIPLY_FACTORS_FLOATS,
         }
     }
 }
@@ -708,6 +755,6 @@ mod tests {
             assert_eq!(program.uniform_floats() % 4, 0);
         }
         let indices: Vec<usize> = LayerProgram::ALL.iter().map(|program| program.index()).collect();
-        assert_eq!(indices, vec![0, 1, 2, 3, 4, 5, 6]);
+        assert_eq!(indices, vec![0, 1, 2, 3, 4, 5, 6, 7]);
     }
 }
