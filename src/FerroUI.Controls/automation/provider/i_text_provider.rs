@@ -32,6 +32,11 @@ pub struct TextEditDelta {
 /// native screen coordinates at their boundary.
 pub trait ITextProvider {
     fn peer(&self) -> Ref<AutomationPeer>;
+    /// The span operations of a native accessibility bridge. `None` (the default) keeps them out
+    /// of an application whose text providers do not ask for them.
+    fn text_span_ops(&self) -> Option<&'static dyn super::TextSpanOps> {
+        None
+    }
     /// Whether vertical line navigation is part of this text input's behavior.
     fn is_multiline(&self) -> bool { false }
     fn document_range(&self) -> Result<Rc<dyn ITextRangeProvider>, ProviderError>;
