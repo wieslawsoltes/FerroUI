@@ -2,14 +2,14 @@
 //! snapshots of layers, render-target bitmaps). A scene draws one as an image of its stream.
 //!
 //! Image files are decoded by the image module of ProGPU, which reads PNG, JPEG, GIF (the first
-//! frame) and BMP: a file of another format, and saving a bitmap (the module has no encoder),
-//! report `Unsupported`.
+//! frame) and BMP (a file of another format reports `Unsupported`), and bitmaps are saved by it
+//! as PNG or JPEG.
 
 use crate::drawing_context::ProGpuDrawingContext;
 use crate::gpu::{default_gpu, GpuTexture};
 use crate::notes;
 use crate::scene::SceneBuilder;
-use ferroui_base::media::imaging::BitmapEncoderOptions;
+use ferroui_base::media::imaging::{BitmapEncoderOptions, CompressionLevel};
 use ferroui_base::platform::{
     AlphaFormat, IBitmapImpl, IDrawingContextImpl, ILockedFramebuffer, IReadableBitmapImpl, IRenderTargetBitmapImpl,
     IWriteableBitmapImpl, PixelFormat,
@@ -126,8 +126,16 @@ impl IBitmapImpl for ProGpuBitmap {
         self.pixels.version.load(Ordering::Relaxed)
     }
 
-    fn save(&self, _stream: &mut dyn io::Write, _options: &BitmapEncoderOptions) -> io::Result<()> {
-        Err(unsupported_codec("encoding a bitmap"))
+    fn save(&self, stream: &mut dyn io::Write, options: &BitmapEncoderOptions) -> io::Result<()> {
+        let source = SavedPixels {
+            width: self.size.width.max(0) as u32,
+            height: self.size.height.max(0) as u32,
+            row_bytes: self.row_bytes,
+            bgra: self.format == PixelFormat::BGRA8888,
+            alpha: self.alpha_format,
+        };
+        let pixels = self.pixels.data();
+        save_pixels(&pixels, &source, stream, options)
     }
 
     fn dispose(&self) {}
@@ -141,9 +149,91 @@ impl IBitmapImpl for ProGpuBitmap {
     }
 }
 
+/// How the pixels a bitmap or a layer saves are laid out.
+pub(crate) struct SavedPixels {
+    pub(crate) width: u32,
+    pub(crate) height: u32,
+    pub(crate) row_bytes: usize,
+    pub(crate) bgra: bool,
+    pub(crate) alpha: AlphaFormat,
+}
+
+/// The pixels in the order red, green, blue, alpha, in rows without padding. For a PNG alpha is
+/// not premultiplied; for a JPEG, which has no alpha, the colours are those over black.
+fn rgba_to_save(pixels: &[u8], source: &SavedPixels, for_jpeg: bool) -> io::Result<Vec<u8>> {
+    let (width, height) = (source.width as usize, source.height as usize);
+    let row = width * 4;
+    let needed = if height == 0 { 0 } else { source.row_bytes * (height - 1) + row };
+    if width == 0 || height == 0 || source.row_bytes < row || pixels.len() < needed {
+        return Err(io::Error::new(io::ErrorKind::InvalidInput, "a bitmap without pixels cannot be saved"));
+    }
+    let mut out = Vec::with_capacity(row * height);
+    for y in 0..height {
+        let start = y * source.row_bytes;
+        for pixel in pixels[start..start + row].chunks_exact(4) {
+            let (r, g, b, a) = if source.bgra { (pixel[2], pixel[1], pixel[0], pixel[3]) } else { (pixel[0], pixel[1], pixel[2], pixel[3]) };
+            let [r, g, b, a] = match (source.alpha, for_jpeg) {
+                (AlphaFormat::Opaque, _) => [r, g, b, 255],
+                (AlphaFormat::Premul, true) => [r, g, b, 255],
+                (AlphaFormat::Unpremul, false) => [r, g, b, a],
+                (AlphaFormat::Unpremul, true) => {
+                    let over_black = |c: u8| ((u32::from(c) * u32::from(a) + 127) / 255) as u8;
+                    [over_black(r), over_black(g), over_black(b), 255]
+                }
+                (AlphaFormat::Premul, false) if a == 0 => [0, 0, 0, 0],
+                (AlphaFormat::Premul, false) => {
+                    let straight = |c: u8| ((u32::from(c) * 255 + u32::from(a) / 2) / u32::from(a)).min(255) as u8;
+                    [straight(r), straight(g), straight(b), a]
+                }
+            };
+            out.extend_from_slice(&[r, g, b, a]);
+        }
+    }
+    Ok(out)
+}
+
+/// Writes the pixels as the file `options` asks for, with the image module of ProGPU.
+pub(crate) fn save_pixels(
+    pixels: &[u8],
+    source: &SavedPixels,
+    stream: &mut dyn io::Write,
+    options: &BitmapEncoderOptions,
+) -> io::Result<()> {
+    use progpu_native_sys::image::*;
+    let for_jpeg = matches!(options, BitmapEncoderOptions::Jpeg(_));
+    let rgba = rgba_to_save(pixels, source, for_jpeg)?;
+    let (mut output, mut size, mut error) = (std::ptr::null_mut(), 0usize, 0u32);
+    // SAFETY: `rgba` is a live slice of the size given, and the out pointers are live locals.
+    let written = unsafe {
+        match options {
+            BitmapEncoderOptions::Png(png) => {
+                let level = match png.compression_level {
+                    CompressionLevel::NoCompression => PROGPU_NATIVE_IMAGE_PNG_NO_COMPRESSION,
+                    CompressionLevel::Fastest => PROGPU_NATIVE_IMAGE_PNG_FASTEST,
+                    CompressionLevel::Optimal => PROGPU_NATIVE_IMAGE_PNG_OPTIMAL,
+                    CompressionLevel::SmallestSize => PROGPU_NATIVE_IMAGE_PNG_SMALLEST,
+                };
+                progpu_native_image_encode_png(rgba.as_ptr(), rgba.len(), source.width, source.height, level, &mut output, &mut size, &mut error)
+            }
+            BitmapEncoderOptions::Jpeg(jpeg) => {
+                let quality = jpeg.quality.clamp(1, 100) as u32;
+                progpu_native_image_encode_jpeg(rgba.as_ptr(), rgba.len(), source.width, source.height, quality, &mut output, &mut size, &mut error)
+            }
+        }
+    };
+    if written == 0 {
+        return Err(io::Error::other(format!("the image could not be encoded (image error {error})")));
+    }
+    // SAFETY: on success the encoder handed out `size` bytes at `output`; they are released once,
+    // after the write, whatever its result.
+    let result = stream.write_all(unsafe { std::slice::from_raw_parts(output, size) });
+    unsafe { progpu_native_image_free(output) };
+    result
+}
+
 /// The error of what the image module of ProGPU does not do, noted once.
 pub(crate) fn unsupported_codec(what: &str) -> io::Error {
-    let message = format!("{what} is not in the image module of ProGPU, which reads PNG only");
+    let message = format!("{what} is not in the image module of ProGPU");
     notes::note_once("image-codec", &message);
     io::Error::new(io::ErrorKind::Unsupported, message)
 }

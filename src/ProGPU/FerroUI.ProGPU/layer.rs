@@ -2,7 +2,7 @@
 //! another scene of the same device samples (the layer of the compositor, the intermediate
 //! surfaces of visual brushes and effects).
 
-use crate::bitmap::{unsupported_codec, ProGpuBitmap};
+use crate::bitmap::{save_pixels, unsupported_codec, ProGpuBitmap, SavedPixels};
 use crate::drawing_context::ProGpuDrawingContext;
 use crate::gpu::{Gpu, GpuTexture};
 use crate::notes;
@@ -69,8 +69,20 @@ impl IBitmapImpl for ProGpuLayer {
         self.inner.texture.as_ref().map_or(0, |texture| texture.version() as i32)
     }
 
-    fn save(&self, _stream: &mut dyn io::Write, _options: &BitmapEncoderOptions) -> io::Result<()> {
-        Err(unsupported_codec("encoding a layer"))
+    fn save(&self, stream: &mut dyn io::Write, options: &BitmapEncoderOptions) -> io::Result<()> {
+        // A layer without a device has no pixels to read.
+        let Some(texture) = &self.inner.texture else {
+            return Err(unsupported_codec("saving a layer without a device"));
+        };
+        let pixels = texture.read();
+        let source = SavedPixels {
+            width: texture.width(),
+            height: texture.height(),
+            row_bytes: texture.width() as usize * 4,
+            bgra: false,
+            alpha: AlphaFormat::Premul,
+        };
+        save_pixels(&pixels, &source, stream, options)
     }
 
     fn dispose(&self) {}
