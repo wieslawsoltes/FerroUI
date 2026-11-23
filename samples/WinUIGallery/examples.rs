@@ -155,6 +155,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     ferroui_controls_color_picker::register_types();
     ferroui_controls_flip_view::register_types();
     ferroui_controls_icons::register_types();
+    ferroui_controls_teaching_tip::register_types();
     ferroui_controls_repeater::register_types();
     ferroui_controls_inking::register_types();
     ferroui_controls_livecharts::register_types();
