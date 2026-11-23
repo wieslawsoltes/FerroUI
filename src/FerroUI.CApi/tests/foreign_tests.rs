@@ -3,10 +3,18 @@
 
 use super::support::*;
 use crate::*;
+use ferroui_base::animation::{Animation, FillMode, IClock, KeyFrame, PlayState, SignedDuration};
 use ferroui_base::media::DrawingContext;
+use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::rendering::composition::drawing::RenderDataDrawingContext;
+use ferroui_base::styling::{Selectors, Setter, Style};
+use ferroui_base::{BoxedValue, FerroProperty, Ref};
+use ferroui_controls::primitives::TemplatedControl;
+use ferroui_controls::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
+use ferroui_controls::{Border, Control};
 use std::ffi::c_void;
-use std::sync::atomic::{AtomicI64, Ordering};
+use std::rc::Rc;
+use std::sync::atomic::{AtomicI64, AtomicU64, Ordering};
 
 fn register(name: &str, base: i32) -> i64 {
     // SAFETY: a pointer and the length of a Rust string.
@@ -282,5 +290,156 @@ fn every_base_makes_instances_of_its_kind() {
             assert_eq!(ferro_release(child), FERRO_OK);
             assert_eq!(ferro_release(object), FERRO_OK);
         }
+    });
+}
+
+static TEMPLATE_PART: AtomicU64 = AtomicU64::new(0);
+
+unsafe extern "C" fn applied(_data: *mut c_void, object: FerroHandle, _property: i64) -> FerroStatus {
+    // SAFETY: a NUL-terminated literal.
+    let part = unsafe { ferro_template_part(object, c"PART_Inner".as_ptr(), -1) };
+    TEMPLATE_PART.store(part, Ordering::Relaxed);
+    0
+}
+
+#[test]
+fn the_parts_of_a_real_template_are_found_from_the_apply_template_callback() {
+    ui(|| {
+        let class = register("CTemplated", FERRO_BASE_CONTENT_CONTROL);
+        assert_eq!(ferro_class_on_apply_template(class, Some(applied)), FERRO_OK);
+        let object = ferro_create(class);
+        assert_ne!(object, 0, "{}", last_error());
+        let target = crate::handles::get(object).unwrap().cast::<TemplatedControl>().unwrap();
+        target.set_template(Some(FuncControlTemplate::new(|_, scope| {
+            let inner = Border::new();
+            inner.set_name(Some("PART_Inner".to_string()));
+            inner.register_in_name_scope(&**scope).upcast()
+        })));
+        target.apply_template();
+
+        let part = TEMPLATE_PART.swap(0, Ordering::Relaxed);
+        assert!(part > 0, "{}", last_error());
+        assert!(crate::handles::get(part).unwrap().cast::<Border>().is_some());
+        // SAFETY: a NUL-terminated literal.
+        assert_eq!(unsafe { ferro_template_part(object, c"Missing".as_ptr(), -1) }, 0);
+        assert!(last_error().contains("Missing"), "{}", last_error());
+        for handle in [part, object] {
+            assert_eq!(ferro_release(handle), FERRO_OK);
+        }
+    });
+}
+
+/// A number property registered on `class`, with the default `0.25`.
+fn number_property(class: i64, name: &str) -> i64 {
+    // SAFETY: a pointer and the length of a Rust string, a NULL default text.
+    let id = unsafe {
+        ferro_property_register(class, name.as_ptr().cast(), name.len() as i64, FERRO_SIGNAL_F64, 0.25, std::ptr::null(), 0)
+    };
+    assert!(id > 0, "{name}: {}", last_error());
+    id
+}
+
+/// The property behind the ID `id` on `object`.
+fn registered(object: FerroHandle, id: i64) -> &'static FerroProperty {
+    let target = crate::handles::get(object).unwrap();
+    match crate::ids::property(target.get_type(), id) {
+        Ok(crate::ids::Property::Registered(property)) => property,
+        _ => panic!("{id} is not a registered property of the object"),
+    }
+}
+
+fn control(object: FerroHandle) -> Ref<Control> {
+    crate::handles::get(object).unwrap().cast::<Control>().unwrap()
+}
+
+#[test]
+fn a_style_sets_a_registered_property() {
+    ui(|| {
+        let class = register("CStyled", FERRO_BASE_CONTROL);
+        let level = number_property(class, "StyledLevel");
+        let object = ferro_create(class);
+        let target = control(object);
+        let style = Style::with_selector(Selectors::is::<Control>());
+        style.add_setter(Setter::new_untyped(registered(object, level), Rc::new(0.75f64)));
+        target.styles().add(style);
+        target.apply_styling();
+        assert_eq!(get_f64(object, "StyledLevel"), Ok(0.75));
+        // A local value is above the style, as for a property of the framework.
+        assert_eq!(ferro_set_f64(object, level, 0.5), FERRO_OK);
+        assert_eq!(get_f64(object, "StyledLevel"), Ok(0.5));
+        assert_eq!(ferro_release(object), FERRO_OK);
+    });
+}
+
+#[test]
+fn a_binding_of_a_style_drives_a_registered_property() {
+    ui(|| {
+        let class = register("CBound", FERRO_BASE_CONTROL);
+        let level = number_property(class, "BoundLevel");
+        let object = ferro_create(class);
+        let target = control(object);
+        let source = Rc::new(LightweightSubject::<BoxedValue>::new());
+        let style = Style::with_selector(Selectors::is::<Control>());
+        style.add_setter(Setter::new_binding(registered(object, level), source.clone()));
+        target.styles().add(style);
+        target.apply_styling();
+        source.on_next(Rc::new(0.6f64));
+        assert_eq!(get_f64(object, "BoundLevel"), Ok(0.6));
+        source.on_next(Rc::new(0.9f64));
+        assert_eq!(get_f64(object, "BoundLevel"), Ok(0.9));
+        assert_eq!(ferro_release(object), FERRO_OK);
+    });
+}
+
+/// A clock the test advances.
+#[derive(Default)]
+struct StepClock {
+    subject: LightweightSubject<SignedDuration>,
+}
+
+impl IObservable<SignedDuration> for StepClock {
+    fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
+        self.subject.subscribe(observer)
+    }
+}
+
+impl IClock for StepClock {
+    fn play_state(&self) -> PlayState {
+        PlayState::Run
+    }
+
+    fn set_play_state(&self, _: PlayState) {}
+}
+
+#[test]
+fn an_animation_runs_on_a_registered_property() {
+    ui(|| {
+        let class = register("CAnimated", FERRO_BASE_CONTROL);
+        let level = number_property(class, "AnimatedLevel");
+        let object = ferro_create(class);
+        let target = control(object);
+        let property = registered(object, level);
+        let frame = |at: f64, value: f64| {
+            let setter = Setter::new_untyped(property, Rc::new(value));
+            KeyFrame::with_key_time(SignedDuration::from_seconds(at), [setter as _])
+        };
+        let animation = Animation::new();
+        animation.set_duration(SignedDuration::from_seconds(1.0));
+        animation.set_fill_mode(FillMode::Both);
+        animation.children().add(frame(0.0, 0.0));
+        animation.children().add(frame(1.0, 1.0));
+
+        let clock = Rc::new(StepClock::default());
+        let running = animation.apply_for_preview(&target, Some(clock.clone() as Rc<dyn IClock>), None);
+        clock.subject.on_next(SignedDuration::ZERO);
+        clock.subject.on_next(SignedDuration::from_seconds(0.5));
+        let midway = get_f64(object, "AnimatedLevel").unwrap();
+        assert!((midway - 0.5).abs() < 1e-6, "{midway}");
+        clock.subject.on_next(SignedDuration::from_seconds(1.0));
+        assert_eq!(get_f64(object, "AnimatedLevel"), Ok(1.0));
+        running.dispose();
+        // The default again, once the animation is gone.
+        assert_eq!(get_f64(object, "AnimatedLevel"), Ok(0.25));
+        assert_eq!(ferro_release(object), FERRO_OK);
     });
 }
