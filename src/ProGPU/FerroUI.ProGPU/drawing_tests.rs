@@ -4,13 +4,9 @@ use crate::geometry::{PathData, ProGpuGeometry};
 use crate::{ProGpuDevice, ProGpuDrawingContext, ProGpuEngine, SceneBuilder, TargetFormat};
 use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::{BoxShadow, BoxShadows, Color, GradientSpreadMethod, IBrush, PenLineCap, PenLineJoin};
-<<<<<<< HEAD
 use ferroui_base::media::effects::{ImmutableBlurEffect, ImmutableDropShadowEffect};
 use ferroui_base::media::imaging::BitmapBlendingMode;
-use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithEffects};
-=======
-use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithFragments, IDrawingFragment};
->>>>>>> progpu/p5-image-formats
+use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments, IDrawingFragment};
 use ferroui_base::{Matrix, Point, Rect, RelativePoint, RelativeUnit, RoundedRect, Vector};
 use std::rc::Rc;
 
@@ -237,7 +233,6 @@ fn the_relative_transform_of_a_brush_acts_on_the_unit_square() {
     assert!(is_reddish(right), "the right of the mirrored gradient: {right:?}");
 }
 
-<<<<<<< HEAD
 fn fill_rect(context: &mut ProGpuDrawingContext, brush: &dyn IBrush, rect: Rect) {
     context.draw_rectangle(Some(brush), None, RoundedRect::from_rect(rect), &BoxShadows::default());
 }
@@ -352,7 +347,8 @@ fn the_shadow_of_uneven_corners_is_drawn() {
     assert_eq!([0, 0, 0, 255], pixel(&pixels, 75, 50), "the shadow right of the shape");
     assert_eq!([255, 255, 255, 255], pixel(&pixels, 48, 48), "the shape over it");
     assert_eq!([255, 255, 255, 255], pixel(&pixels, 12, 12), "nothing else");
-=======
+}
+
 /// The content of the fragment tests: shapes, a gradient path, a clip and a group, under the
 /// transform in force.
 fn fragment_content(context: &mut ProGpuDrawingContext) {
@@ -465,5 +461,4 @@ fn what_cannot_be_drawn_again_makes_no_fragment() {
         context.pop_clip();
         assert!(context.end_fragment().is_none(), "the pop of a clip opened before the fragment");
     });
->>>>>>> progpu/p5-image-formats
 }

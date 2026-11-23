@@ -23,12 +23,8 @@ use ferroui_base::media::effects::IEffect;
 use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use ferroui_base::media::{BoxShadows, Color, EdgeMode, GradientSpreadMethod, IBrush, IPen, RenderOptions, TextOptions, TextRenderingMode};
 use ferroui_base::platform::{
-<<<<<<< HEAD
-    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
-=======
-    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithFragments, IDrawingContextLayerImpl,
-    IDrawingFragment, IGeometryImpl, IGlyphRunImpl,
->>>>>>> progpu/p5-image-formats
+    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextImplWithFragments,
+    IDrawingContextLayerImpl, IDrawingFragment, IGeometryImpl, IGlyphRunImpl,
     IPlatformRenderInterfaceRegion, PixelFormat,
 };
 use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
@@ -466,6 +462,9 @@ impl ProGpuDrawingContext {
         }
         let (native, stops) = Self::gradient_record(brush, bounds)?;
         let result = self.scene().add_brush(&native, &stops);
+        if let Some(fragment) = &mut self.fragment {
+            fragment.set_brush(FragmentBrush::Gradient { brush: Box::new(native), stops: stops.into_boxed_slice() });
+        }
         self.record(result)
     }
 
@@ -555,14 +554,7 @@ impl ProGpuDrawingContext {
         let coordinate = brush_transform.try_invert().unwrap_or(Matrix::IDENTITY);
         native.coordinate_transform0 = [coordinate.m11 as f32, coordinate.m21 as f32, coordinate.m31 as f32, 0.0];
         native.coordinate_transform1 = [coordinate.m12 as f32, coordinate.m22 as f32, coordinate.m32 as f32, 0.0];
-<<<<<<< HEAD
         Some((native, stops))
-=======
-        let result = self.scene().add_brush(&native, &stops);
-        if let Some(fragment) = &mut self.fragment {
-            fragment.set_brush(FragmentBrush::Gradient { brush: Box::new(native), stops: stops.into_boxed_slice() });
-        }
-        self.record(result)
     }
 
     /// Adds the brush of a kept draw.
@@ -572,7 +564,6 @@ impl ProGpuDrawingContext {
             FragmentBrush::Gradient { brush, stops } => self.scene().add_brush(brush, stops),
         };
         self.record(result)
->>>>>>> progpu/p5-image-formats
     }
 
     /// Draws `fragment` moved by `offset` device pixels, under the clips in force now.
@@ -1288,19 +1279,12 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         self.record(result);
     }
 
-<<<<<<< HEAD
     fn draw_bitmap_with_mask(&mut self, source: &dyn IBitmapImpl, opacity_mask: &dyn IBrush, opacity_mask_rect: Rect, dest_rect: Rect) {
         let size = source.pixel_size();
         let source_rect = Rect::new(0.0, 0.0, f64::from(size.width), f64::from(size.height));
         self.push_brush_mask_layer(opacity_mask, opacity_mask_rect);
         self.draw_bitmap(source, 1.0, source_rect, dest_rect);
         self.pop_scene_layer();
-=======
-    fn draw_bitmap_with_mask(&mut self, _source: &dyn IBitmapImpl, _opacity_mask: &dyn IBrush, _opacity_mask_rect: Rect, _dest_rect: Rect) {
-        self.refuse_fragment();
-        // Step P5 of the plan.
-        notes::note_once("bitmap-mask", "bitmaps under an opacity mask are not drawn by the ProGPU backend yet");
->>>>>>> progpu/p5-image-formats
     }
 
     fn draw_line(&mut self, pen: Option<&dyn IPen>, p1: Point, p2: Point) {
@@ -1494,16 +1478,8 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         self.pop_scene_layer();
     }
 
-<<<<<<< HEAD
     fn push_opacity_mask(&mut self, mask: &dyn IBrush, bounds: Rect) {
         self.push_brush_mask_layer(mask, bounds);
-=======
-    fn push_opacity_mask(&mut self, _mask: &dyn IBrush, bounds: Rect) {
-        self.refuse_fragment();
-        // Opacity masks (a brush layer mask): step P5 of the plan; the layer keeps the stack.
-        notes::note_once("opacity-mask", "opacity masks are not applied by the ProGPU backend yet");
-        self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
->>>>>>> progpu/p5-image-formats
     }
 
     fn pop_opacity_mask(&mut self) {
@@ -1565,11 +1541,11 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         None
     }
 
-<<<<<<< HEAD
     fn as_drawing_context_impl_with_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithEffects> {
-=======
+        Some(self)
+    }
+
     fn as_drawing_context_impl_with_fragments(&mut self) -> Option<&mut dyn IDrawingContextImplWithFragments> {
->>>>>>> progpu/p5-image-formats
         Some(self)
     }
 
@@ -1591,7 +1567,6 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 }
 
-<<<<<<< HEAD
 impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
         let target = clip_rect.map(|clip| transform_bounds(clip, &self.current.transform));
@@ -1624,7 +1599,9 @@ impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
 
     fn pop_effect(&mut self) {
         self.pop_scene_layer();
-=======
+    }
+}
+
 impl IDrawingContextImplWithFragments for ProGpuDrawingContext {
     fn begin_fragment(&mut self) {
         self.fragment = Some(FragmentRecorder::new(self.current.transform, self.aliased_text()));
@@ -1648,6 +1625,5 @@ impl IDrawingContextImplWithFragments for ProGpuDrawingContext {
         };
         self.replay(fragment, offset);
         true
->>>>>>> progpu/p5-image-formats
     }
 }
