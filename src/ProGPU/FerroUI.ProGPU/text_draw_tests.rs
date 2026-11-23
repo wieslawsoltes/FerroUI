@@ -501,3 +501,20 @@ fn a_fragment_of_text_draws_the_same_glyphs_moved_by_whole_pixels() {
         assert!(!context.draw_fragment(&fragment), "another subpixel phase");
     });
 }
+
+#[test]
+fn an_underline_band_is_crossed_by_descenders_and_not_by_the_rest() {
+    use ferroui_base::platform::IGlyphRunImpl;
+    // Below the baseline: `p` reaches there and `x` does not.
+    let below = run("xpx", 40.0, Point::new(10.0, 50.0)).get_intersections(2.0, 4.0);
+    assert_eq!(below.len(), 2, "one glyph in the band: {below:?}");
+    let plain = run("x", 40.0, Point::new(10.0, 50.0));
+    let advance = plain.bounds().width;
+    assert!(below[0] < below[1], "from left to right: {below:?}");
+    assert!(f64::from(below[0]) > 0.0 && f64::from(below[1]) < 3.0 * advance, "inside the run: {below:?}");
+    // Through the middle of the letters, every glyph is in the band.
+    let middle = run("xpx", 40.0, Point::new(10.0, 50.0)).get_intersections(-10.0, -8.0);
+    assert_eq!(middle.len(), 6, "three glyphs in the band: {middle:?}");
+    // The order of the limits does not matter.
+    assert_eq!(below, run("xpx", 40.0, Point::new(10.0, 50.0)).get_intersections(4.0, 2.0));
+}

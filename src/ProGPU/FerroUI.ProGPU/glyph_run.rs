@@ -321,6 +321,86 @@ pub(crate) fn add_outline(builder: &mut PathBuilder, segments: &[progpu_native_p
     }
 }
 
+/// The line pieces a curve of an outline is measured on: at the size of text the error is far
+/// below what an underline can show.
+const CURVE_PIECES: u32 = 16;
+
+/// How far the outline of a glyph reaches across a horizontal band.
+#[derive(Clone, Copy)]
+struct BandExtent {
+    lower: f64,
+    upper: f64,
+    left: f64,
+    right: f64,
+}
+
+impl BandExtent {
+    fn new(lower: f64, upper: f64) -> Self {
+        BandExtent { lower, upper, left: f64::INFINITY, right: f64::NEG_INFINITY }
+    }
+
+    /// Adds what the line from `a` to `b` has inside the band: the line is cut to the range of
+    /// its parameter between the two limits.
+    fn add_line(&mut self, a: (f64, f64), b: (f64, f64)) {
+        let rise = b.1 - a.1;
+        let (mut enter, mut leave) = (0.0f64, 1.0f64);
+        if rise == 0.0 {
+            if a.1 < self.lower || a.1 > self.upper {
+                return;
+            }
+        } else {
+            let (at_lower, at_upper) = ((self.lower - a.1) / rise, (self.upper - a.1) / rise);
+            enter = enter.max(at_lower.min(at_upper));
+            leave = leave.min(at_lower.max(at_upper));
+            if enter > leave {
+                return;
+            }
+        }
+        for t in [enter, leave] {
+            let x = a.0 + (b.0 - a.0) * t;
+            self.left = self.left.min(x);
+            self.right = self.right.max(x);
+        }
+    }
+
+    /// Adds a segment of an outline, a curve as `CURVE_PIECES` lines.
+    fn add_segment(
+        &mut self,
+        segment: &progpu_native_path_segment,
+        place: &impl Fn(progpu_native_sys::progpu::progpu_native_point) -> (f64, f64),
+    ) {
+        let (p0, p1, p2, p3) = (place(segment.p0), place(segment.p1), place(segment.p2), place(segment.p3));
+        let lerp = |a: (f64, f64), b: (f64, f64), t: f64| (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t);
+        let curve: fn(_, _, _, _, _, f64) -> (f64, f64) = if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC as u32
+        {
+            |lerp: &dyn Fn((f64, f64), (f64, f64), f64) -> (f64, f64), a, b, c, _, t| {
+                lerp(lerp(a, b, t), lerp(b, c, t), t)
+            }
+        } else if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_CUBIC as u32 {
+            |lerp: &dyn Fn((f64, f64), (f64, f64), f64) -> (f64, f64), a, b, c, d, t| {
+                let (ab, bc, cd) = (lerp(a, b, t), lerp(b, c, t), lerp(c, d, t));
+                lerp(lerp(ab, bc, t), lerp(bc, cd, t), t)
+            }
+        } else {
+            if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_LINE as u32 {
+                self.add_line(p0, p1);
+            }
+            return;
+        };
+        let mut from = p0;
+        for piece in 1..=CURVE_PIECES {
+            let to = curve(&lerp, p0, p1, p2, p3, f64::from(piece) / f64::from(CURVE_PIECES));
+            self.add_line(from, to);
+            from = to;
+        }
+    }
+
+    /// From where to where the outline is in the band, when it is.
+    fn range(&self) -> Option<(f64, f64)> {
+        (self.left <= self.right).then_some((self.left, self.right))
+    }
+}
+
 /// The outlines of glyphs of a typeface, placed along a baseline: the geometry of a run.
 pub(crate) fn outline_geometry(glyph_typeface: &GlyphTypeface, em_size: f64, glyph_infos: &[GlyphInfo], baseline_origin: Point) -> Option<PathData> {
     let typeface = ProGpuTypeface::try_get(&**glyph_typeface.platform_typeface())?;
@@ -358,8 +438,37 @@ impl IGlyphRunImpl for ProGpuGlyphRun {
         self.bounds
     }
 
-    fn get_intersections(&self, _lower_limit: f32, _upper_limit: f32) -> Vec<f32> {
-        Vec::new()
+    /// For each glyph whose outline lies partly between the two limits (distances below the
+    /// baseline), from where to where it does: two values a glyph, relative to the baseline origin
+    /// of the run, in the order of the glyphs. An underline uses them to skip descenders.
+    fn get_intersections(&self, lower_limit: f32, upper_limit: f32) -> Vec<f32> {
+        let Some(font) = &self.font else { return Vec::new() };
+        let (lower, upper) = (lower_limit.min(upper_limit) as f64, lower_limit.max(upper_limit) as f64);
+        let scale = self.font_rendering_em_size / f64::from(font.face.units_per_em().max(1));
+        let skew = if font.simulations.contains(FontSimulations::Oblique) { f64::from(OBLIQUE_SKEW) } else { 0.0 };
+        // A simulated bold is two strikes, half the widening to each side.
+        let widening = if font.simulations.contains(FontSimulations::Bold) {
+            f64::from(BOLD_EM_FRACTION) * self.font_rendering_em_size / 2.0
+        } else {
+            0.0
+        };
+        let mut spans = Vec::new();
+        for glyph in &self.glyphs {
+            let Some(outline) = font.face.cached_outline(glyph.glyph, &font.coordinates, 0, false) else { continue };
+            let (x, y) = (f64::from(glyph.x), f64::from(glyph.y));
+            let place = |point: progpu_native_sys::progpu::progpu_native_point| {
+                let (px, py) = (f64::from(point.x) * scale, -f64::from(point.y) * scale);
+                (x + px - py * skew, y + py)
+            };
+            let mut extent = BandExtent::new(lower, upper);
+            for segment in &outline.segments {
+                extent.add_segment(segment, &place);
+            }
+            if let Some((left, right)) = extent.range() {
+                spans.extend([(left - widening) as f32, (right + widening) as f32]);
+            }
+        }
+        spans
     }
 
     fn dispose(&self) {}
