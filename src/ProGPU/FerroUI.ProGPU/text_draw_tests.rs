@@ -7,7 +7,7 @@ use crate::{ProGpuDevice, ProGpuDrawingContext, ProGpuEngine, ProGpuFontManager,
 use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutableSolidColorBrush};
 use ferroui_base::media::text_formatting::{GlyphInfo, TextShaperOptions};
 use ferroui_base::media::{Color, FontSimulations, GlyphTypeface, GradientSpreadMethod, RenderOptions, TextOptions, TextRenderingMode};
-use ferroui_base::platform::{IDrawingContextImpl, IFontManagerImpl, ITextShaperImpl};
+use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithFragments, IFontManagerImpl, ITextShaperImpl};
 use ferroui_base::utilities::ReadOnlyMemory;
 use ferroui_base::{FerroLocator, Matrix, Point, Rect, RelativePoint, RelativeUnit};
 use progpu_native_sys::progpu::progpu_native_scene_frame_metrics;
@@ -471,4 +471,33 @@ fn the_outlines_of_a_face_stay_while_a_scene_draws_them_and_leave_with_the_face(
     let again = render(&engine, |context| context.draw_glyph_run(Some(&black), &text));
     assert_eq!(one.pixels, again.pixels);
     assert!(again.metrics.coverage_staging_bytes > 0, "the glyphs of the new face are rasterized");
+}
+
+#[test]
+fn a_fragment_of_text_draws_the_same_glyphs_moved_by_whole_pixels() {
+    let Some(engine) = engine() else { return };
+    let text = run("Fragment", 18.0, Point::new(4.25, 24.5));
+    let mut kept = None;
+    render(&engine, |context| {
+        context.begin_fragment();
+        context.draw_glyph_run(Some(&black()), &text);
+        kept = context.end_fragment();
+    });
+    let fragment = kept.expect("text can be kept");
+    for (x, y) in [(0.0, 0.0), (11.0, 7.0), (-2.0, 20.0)] {
+        let at = Matrix::create_translation(x, y);
+        let expected = render(&engine, |context| {
+            context.set_transform(at);
+            context.draw_glyph_run(Some(&black()), &text);
+        });
+        let actual = render(&engine, |context| {
+            context.set_transform(at);
+            assert!(context.draw_fragment(&fragment), "moved by ({x}, {y})");
+        });
+        assert!(expected.pixels == actual.pixels, "moved by ({x}, {y}): the pixels differ");
+    }
+    render(&engine, |context| {
+        context.set_transform(Matrix::create_translation(0.25, 0.0));
+        assert!(!context.draw_fragment(&fragment), "another subpixel phase");
+    });
 }
