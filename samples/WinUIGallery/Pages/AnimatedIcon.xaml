@@ -1,0 +1,44 @@
+<!-- Ported from both pinned AnimatedIcon examples; see ../NOTICE.md. The pointer handlers of the
+     button are in animated_visual_samples.rs; the combo box stands for $(AnimatedVisualSourceKind). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:animatedvisuals="https://ferroui.dev/animated-visuals" Spacing="24">
+  <TextBlock Text="Adding AnimatedIcon to a button" FontSize="18" />
+  <StackPanel Orientation="Horizontal" Spacing="24">
+    <Button x:Name="AnimatedIconButton" Width="75" AutomationProperties.Name="Animated icon">
+      <animatedvisuals:AnimatedIcon x:Name="SearchAnimatedIcon" Width="20" Height="20">
+        <animatedvisuals:AnimatedFindVisualSource />
+        <animatedvisuals:AnimatedIcon.FallbackIconSource>
+          <SymbolIconSource Symbol="Find" />
+        </animatedvisuals:AnimatedIcon.FallbackIconSource>
+      </animatedvisuals:AnimatedIcon>
+    </Button>
+    <ComboBox x:Name="AnimatedVisualSourceKind" Width="280" SelectedIndex="5"
+              AutomationProperties.Name="Animated visual source">
+      <x:String>AnimatedAcceptVisualSource</x:String>
+      <x:String>AnimatedBackVisualSource</x:String>
+      <x:String>AnimatedChevronDownSmallVisualSource</x:String>
+      <x:String>AnimatedChevronRightDownSmallVisualSource</x:String>
+      <x:String>AnimatedChevronUpDownSmallVisualSource</x:String>
+      <x:String>AnimatedFindVisualSource</x:String>
+      <x:String>AnimatedGlobalNavigationButtonVisualSource</x:String>
+      <x:String>AnimatedSettingsVisualSource</x:String>
+    </ComboBox>
+  </StackPanel>
+  <TextBlock Text="Adding AnimatedIcon to a NavigationView" FontSize="18" />
+  <NavigationView x:Name="AnimatedIconNavigationView" Height="200" IsSettingsVisible="False"
+                  PaneDisplayMode="Left" IsPaneToggleButtonVisible="False">
+    <NavigationView.MenuItems>
+      <NavigationViewItem Content="Game Settings">
+        <NavigationViewItem.Icon>
+          <animatedvisuals:AnimatedIcon x:Name="NavigationAnimatedIcon">
+            <animatedvisuals:AnimatedSettingsVisualSource />
+            <animatedvisuals:AnimatedIcon.FallbackIconSource>
+              <FontIconSource Glyph="&#xE713;" />
+            </animatedvisuals:AnimatedIcon.FallbackIconSource>
+          </animatedvisuals:AnimatedIcon>
+        </NavigationViewItem.Icon>
+      </NavigationViewItem>
+    </NavigationView.MenuItems>
+  </NavigationView>
+</StackPanel>

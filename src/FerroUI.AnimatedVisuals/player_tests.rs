@@ -135,3 +135,25 @@ fn the_foreground_of_an_icon_reaches_its_renderer() {
     assert_eq!(icon.presenter.borrow().renderer.color("Foreground"), Some(Color::from_rgb(200, 10, 20)));
     icon.set_foreground(None);
 }
+
+/// The pages of the gallery, read by the runtime loader: the classes of this crate in markup.
+#[test]
+fn the_gallery_pages_load_with_the_classes_of_this_crate() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_markup_xaml::register_types();
+    crate::register_types();
+    let load = |page: &str| {
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(page, None)
+            .unwrap_or_else(|error| panic!("{error}"))
+    };
+    let root = load(include_str!("../../samples/WinUIGallery/Pages/AnimatedVisualPlayer.xaml"));
+    let player = root.find_control::<Control>("Player").and_then(|control| control.cast::<AnimatedVisualPlayer>());
+    assert!(player.expect("the player").source().is_some(), "the content of a player is its source");
+    let root = load(include_str!("../../samples/WinUIGallery/Pages/AnimatedIcon.xaml"));
+    for name in ["SearchAnimatedIcon", "NavigationAnimatedIcon"] {
+        let icon = root.find_control::<Control>(name).and_then(|control| control.cast::<AnimatedIcon>());
+        let icon = icon.unwrap_or_else(|| panic!("{name}"));
+        assert!(icon.source().is_some(), "{name}: the content of an icon is its source");
+        assert!(icon.fallback_icon_source().is_some(), "{name}: the fallback");
+    }
+}

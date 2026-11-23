@@ -56,6 +56,8 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("CompactSizing", "The source standard/compact page navigation copies all four text/password values and the selected date. The existing native compact dictionary is scoped to each compact page; global theme density remains unchanged. Header and PasswordBox are explicit compositions/adaptations; full WinUI control contracts and input/visual acceptance remain pending."),
     page!("InfoBadge", "All four source compositions use native InfoBadge: NavigationView item badges, severity styles, an embedded button badge and dynamic NumberBox values. Visibility and pane options retain the original handlers. Exact upstream rendering and host accessibility acceptance remain pending."),
     page!("NavigationView", "All eight source compositions use native NavigationView, items, hierarchy, footer, settings and Frame navigation. Model templates and C# handlers are explicitly adapted to Rust. Top overflow, selectors, transition effects and platform visual/accessibility acceptance remain pending."),
+    page!("AnimatedVisualPlayer", "The source Play, Pause, Resume and Stop actions use the native AnimatedVisualPlayer. The generated LottieLogo1 is not in the pinned sources, so the page plays the settings icon document."),
+    page!("AnimatedIcon", "Both source compositions use the native AnimatedIcon: the button with its pointer handlers and source choice, and the NavigationView item with a font fallback."),
     page!("ProgressRing", "Both source examples use the native ProgressRing, active state, background options and original NumberBox empty-value recovery. Native arc animation is an explicit adaptation; exact Lottie motion, custom animated sources and platform accessibility acceptance remain pending."),
     page!("RatingControl", "Both source examples use native RatingControl input, caption changes, clearing/read-only options and half-step placeholder binding. Programmatic updates retain the original caption; user ValueChanged selects Your rating. Exact source animation and host accessibility acceptance remain pending."),
     page!("InfoBar", "All three original compositions use the native InfoBar with severity, short/long messages, optional button/hyperlink and visibility/closability options. The options keep the source TwoWay x:Bind, compiled by the x:Bind core; final layout, icons and live-region acceptance remain pending."),
@@ -151,6 +153,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     ferroui_controls_repeater::register_types();
     ferroui_controls_inking::register_types();
     ferroui_controls_livecharts::register_types();
+    ferroui_animated_visuals::register_types();
     ferroui_media_video_controls::register_types();
     ferroui_media_camera_controls::register_types();
     let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(sample.xaml, None)?;
@@ -171,6 +174,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::repeater_samples::wire(&root);
     crate::ink_samples::wire(&root);
     crate::chart_samples::wire(&root);
+    crate::animated_visual_samples::wire(&root);
     wire(&root);
     initialize_x_bind(&root)?;
     Ok(root)

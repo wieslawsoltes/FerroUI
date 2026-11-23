@@ -1692,6 +1692,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
  "ferroui-vello",
  "serde_json",
  "url",
@@ -8017,6 +8018,7 @@ dependencies = [
 name = "winui-gallery"
 version = "0.5.1-preview.1"
 dependencies = [
+ "ferroui-animated-visuals",
  "ferroui-base",
  "ferroui-controls",
  "ferroui-controls-color-picker",

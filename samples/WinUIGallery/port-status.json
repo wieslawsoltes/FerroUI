@@ -57,6 +57,96 @@
       "notes": "Native automation names and decorative accessibility views are assigned; screen-reader execution remains unverified. This reviewed subset does not establish every source example, event, binding, accessibility behavior, platform integration or visual state of the upstream page.",
       "examples": []
     },
+    "AnimatedIcon": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/AnimatedIcon.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/animated_visual_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/animated_visual_samples_tests.rs",
+          "name": "the_icon_page_has_both_examples_and_changes_the_source"
+        }
+      ],
+      "notes": "Both original examples use the native AnimatedIcon with the WinUI icon documents, the pointer handlers of the source and a fallback icon. Rendering and pointer interaction of the page have not been run.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/AnimatedIcon/AddingAnimatediconButton.txt",
+          "source_sha256": "440a4c443d61da2fa85f6904b83d37019d43fa38b701ea0619c21adfbca53511",
+          "status": "partial",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/animated_visual_samples_tests.rs",
+              "name": "the_icon_page_has_both_examples_and_changes_the_source"
+            }
+          ],
+          "notes": "Both original examples use the native AnimatedIcon with the WinUI icon documents, the pointer handlers of the source and a fallback icon. Rendering and pointer interaction of the page have not been run."
+        },
+        {
+          "source": "WinUIGallery/Samples/AnimatedIcon/AddingAnimatediconNavigationview.txt",
+          "source_sha256": "4d4afd06f97fa78e0ccd833799a0563139cb9275b5df8872ced70a90a9a3d796",
+          "status": "partial",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/animated_visual_samples_tests.rs",
+              "name": "the_icon_page_has_both_examples_and_changes_the_source"
+            }
+          ],
+          "notes": "Both original examples use the native AnimatedIcon with the WinUI icon documents, the pointer handlers of the source and a fallback icon. Rendering and pointer interaction of the page have not been run."
+        }
+      ]
+    },
+    "AnimatedVisualPlayer": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/AnimatedVisualPlayer.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/animated_visual_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/animated_visual_samples_tests.rs",
+          "name": "the_player_page_plays_pauses_and_stops"
+        }
+      ],
+      "notes": "The native AnimatedVisualPlayer with the Play, Pause, Resume and Stop actions. The generated LottieLogo1 of the source is not in the pinned sources, so the page plays the settings icon document. Rendering of the page has not been run.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/AnimatedVisualPlayer/AnimatedVisualPlayerPlaybackLottieAnimation.txt",
+          "source_sha256": "3ee37bad60f61640be8f537be4fe850983096a9f2742c7d3d4fef287f12bf110",
+          "status": "partial",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/animated_visual_samples_tests.rs",
+              "name": "the_player_page_plays_pauses_and_stops"
+            }
+          ],
+          "notes": "The native AnimatedVisualPlayer with the Play, Pause, Resume and Stop actions. The generated LottieLogo1 of the source is not in the pinned sources, so the page plays the settings icon document. Rendering of the page has not been run."
+        }
+      ]
+    },
     "AppBarButton": {
       "status": "partial",
       "implementation": [

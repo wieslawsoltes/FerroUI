@@ -37,6 +37,7 @@ ferroui-build-scan.workspace = true
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 ferroui-vello.workspace = true
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 
 [package.metadata.release]
 group = "controls"
