@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (70 done, 43 planned) | 113 |
+| `port` (71 done, 42 planned) | 113 |
 | `already` | 17 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -306,7 +306,7 @@ left out only with a recorded performance or better-code reason.
 | `2061fb5090` | #22760 | 2026-11-10 | text | `port` (done) | text | Wrap opportunity between shaped runs, decided from a window of both runs. The per-run break tables stay, so multi-run lines do not fall back to the enumerator. |
 | `bdeeeef0a7` | #22693 | 2026-11-10 | platform-ios | `port` | ios | Embedded native controls in accessibility. |
 | `80c4f31848` | #22462 | 2026-11-10 | platform-x11 | `port` (done) | x11 | ConfigureNotify older than our last resize ignored. |
-| `0dc28102b4` | #22566 | 2026-11-10 | platform-linux | `port` | linux | DRM: no block on the page flip just queued. |
+| `0dc28102b4` | #22566 | 2026-11-10 | platform-linux | `port` (done) | x11b | DRM output: the next frame renders while the flip just queued waits for vblank; the wait happens before the next flip, or at once when no free buffer is left. |
 | `8dae868308` | #22628 | 2026-11-10 | input | `deferred` |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
 | `5ef345810e` | #22782 | 2026-11-12 | platform-win32 | `port` | win32 | Virtual key mapping behind the keyboard layout tests. |
 | `3ecf2a3fd8` | #22777 | 2026-11-12 | build | `not-applicable` |  | Empty upstream CI commit. |

@@ -258,8 +258,8 @@ mod imp {
 
     /// The handler of the page flip event: the frame is on the screen.
     unsafe extern "C" fn flip_cb(_fd: c_int, _sequence: c_uint, _tv_sec: c_uint, _tv_usec: c_uint, user_data: *mut c_void) {
-        // SAFETY: the user data of the flip is the flag of the session that waits for it, alive
-        // until the event has been handled.
+        // SAFETY: the user data of a flip is the flag of its output, allocated for the life of the
+        // process.
         unsafe { (*user_data.cast::<Cell<bool>>()).set(false) };
     }
 
@@ -287,6 +287,11 @@ mod imp {
         egl_surface: Rc<EglSurface>,
         deferred_context: Rc<EglContext>,
         current_bo: Cell<*mut c_void>,
+        /// The buffer of the flip that is queued, shown after the next vblank.
+        pending_bo: Cell<*mut c_void>,
+        /// Whether a flip of this output is queued. Allocated for the life of the process: a page
+        /// flip event can arrive through another output that shares the descriptor of the card.
+        flip_pending: &'static Cell<bool>,
         rotation_fbo: i32,
         rotation_texture: i32,
         rotated_size: PixelSize,
@@ -296,6 +301,29 @@ mod imp {
     }
 
     impl Inner {
+        /// Waits for the flip that is queued, if any, and releases the buffer it replaced.
+        fn wait_for_pending_flip(&self, egl: &EglState) {
+            if egl.pending_bo.get().is_null() {
+                return;
+            }
+
+            let fd = self.card.fd();
+            let mut ctx = DrmEventContext { version: 4, page_flip_handler: Some(flip_cb), ..Default::default() };
+            while egl.flip_pending.get() {
+                let mut pfd = libc::pollfd { events: libc::POLLIN, fd, revents: 0 };
+                // SAFETY: one descriptor, in a structure alive for the call; the context and its
+                // handler are alive for the call.
+                unsafe {
+                    libc::poll(&mut pfd, 1, -1);
+                    self.lib.drm_handle_event(fd, &mut ctx);
+                }
+            }
+
+            // SAFETY: the buffer that was shown until the flip, locked before and released once.
+            unsafe { self.lib.gbm_surface_release_buffer(self.gbm_target_surface.0, egl.current_bo.get()) };
+            egl.current_bo.set(egl.pending_bo.replace(std::ptr::null_mut()));
+        }
+
         fn options(&self) -> std::sync::MutexGuard<'_, DrmOutputOptions> {
             self.output_options.lock().unwrap_or_else(PoisonError::into_inner)
         }
@@ -580,6 +608,8 @@ mod imp {
                 egl_surface,
                 deferred_context,
                 current_bo,
+                pending_bo: Cell::new(std::ptr::null_mut()),
+                flip_pending: Box::leak(Box::new(Cell::new(false))),
                 rotation_fbo,
                 rotation_texture,
                 rotated_size,
@@ -991,47 +1021,37 @@ mod imp {
                     Ok(fb) => fb,
                     Err(error) => panic!("{error}"),
                 };
-                let waiting_for_flip = Cell::new(true);
+                // Only the flip queued before is waited for, so the next frame can be rendered
+                // while this one waits for vblank.
+                parent.wait_for_pending_flip(&egl);
 
                 let fd = parent.card.fd();
-                // SAFETY: the card's descriptor and numbers; the user data is the flag above,
-                // which outlives the wait for the event that hands it back.
+                egl.flip_pending.set(true);
+                // SAFETY: the card's descriptor and numbers; the user data is the flag of this
+                // output, which lives as long as the process.
                 let ret = unsafe {
                     lib.drm_mode_page_flip(
                         fd,
                         parent.crtc_id,
                         fb,
                         DrmModePageFlip::EVENT,
-                        (&waiting_for_flip as *const Cell<bool>).cast_mut().cast(),
+                        (egl.flip_pending as *const Cell<bool>).cast_mut().cast(),
                     )
                 };
 
-                if ret != 0 {
-                    // The reference does not read the result and would wait for an event that
-                    // does not come; the buffer that was not shown goes back to the surface.
+                if ret == 0 {
+                    egl.pending_bo.set(next_bo);
+
+                    // No buffer is left to render the next frame into: wait for the flip now.
+                    // SAFETY: the surface of the output.
+                    if unsafe { lib.gbm_surface_has_free_buffers(surface) } == 0 {
+                        parent.wait_for_pending_flip(&egl);
+                    }
+                } else {
+                    egl.flip_pending.set(false);
                     println!("drmModePageFlip failed {ret}");
                     // SAFETY: the buffer object locked above, released once.
                     unsafe { lib.gbm_surface_release_buffer(surface, next_bo) };
-                } else {
-                    let mut ctx = DrmEventContext {
-                        version: 4,
-                        page_flip_handler: Some(flip_cb),
-                        ..Default::default()
-                    };
-                    while waiting_for_flip.get() {
-                        let mut pfd = libc::pollfd { events: libc::POLLIN, fd, revents: 0 };
-                        // SAFETY: one descriptor, in a structure alive for the call; the context
-                        // and its handler are alive for the call.
-                        unsafe {
-                            libc::poll(&mut pfd, 1, -1);
-                            lib.drm_handle_event(fd, &mut ctx);
-                        }
-                    }
-
-                    // SAFETY: the buffer object that was shown until the flip, locked before and
-                    // released once.
-                    unsafe { lib.gbm_surface_release_buffer(surface, egl.current_bo.get()) };
-                    egl.current_bo.set(next_bo);
                 }
             }
             self.clear_context.dispose();

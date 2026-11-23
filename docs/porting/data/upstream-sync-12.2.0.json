@@ -1175,9 +1175,9 @@
    "date": "2026-11-10",
    "area": "platform-linux",
    "class": "port",
-   "note": "DRM: no block on the page flip just queued.",
-   "part": "linux",
-   "state": "planned"
+   "note": "DRM output: the next frame renders while the flip just queued waits for vblank; the wait happens before the next flip, or at once when no free buffer is left.",
+   "part": "x11b",
+   "state": "done"
   },
   {
    "hash": "8dae868308851046bb384c45769c45f55798d536",
