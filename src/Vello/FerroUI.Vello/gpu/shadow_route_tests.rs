@@ -18,7 +18,10 @@ use std::sync::Arc;
 const SIZE: u16 = 96;
 
 fn device_modes(device: &Arc<VelloWgpuDevice>) -> Vec<VelloRenderingMode> {
-    let mut modes = vec![VelloRenderingMode::Hybrid];
+    let mut modes = Vec::new();
+    if cfg!(feature = "hybrid") {
+        modes.push(VelloRenderingMode::Hybrid);
+    }
     if cfg!(feature = "gpu") && device.supports_compute() {
         modes.push(VelloRenderingMode::Gpu);
     }
@@ -97,6 +100,63 @@ fn no_shadow_reaches_a_scene_of_the_cpu_renderer_in_the_device_modes() {
             assert_eq!(before, cpu_scenes_made(), "{mode:?}, {name}: a CPU scene was made");
             assert!(pixels.chunks_exact(4).any(|pixel| pixel[3] > 0), "{mode:?}, {name}: nothing was drawn");
         }
+    }
+}
+
+/// The blur on the device of the compute mode against the CPU reference, at deviations it blurs
+/// directly and at deviations it blurs at a reduced scale, away from the edge of the box.
+#[cfg(feature = "gpu")]
+#[test]
+fn the_device_blur_of_the_compute_mode_agrees_with_the_cpu_reference() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    if !device.supports_compute() {
+        println!("skipped: no compute");
+        return;
+    }
+    let corner = Vector::new(16.0, 8.0);
+    let thin = RoundedRect::from_radius(Rect::new(20.0, 40.0, 56.0, 14.0), 7.0);
+    let elliptical = RoundedRect::new(Rect::new(20.0, 24.0, 56.0, 48.0), corner, corner, corner, corner);
+    let inset = RoundedRect::from_radius(Rect::new(16.0, 16.0, 64.0, 64.0), 8.0);
+    for (name, shape, blur, is_inset) in [
+        ("thin, direct", thin, 10.0, false),
+        ("thin, reduced by 2", thin, 20.0, false),
+        ("thin, reduced by 3", thin, 40.0, false),
+        ("thin, reduced by 6", thin, 80.0, false),
+        ("elliptical, direct", elliptical, 12.0, false),
+        ("elliptical, reduced", elliptical, 40.0, false),
+        ("inset, direct", inset, 12.0, true),
+        ("inset, reduced", inset, 40.0, true),
+    ] {
+        let shadows = shadow(blur, is_inset);
+        let compute = draw(&device, VelloRenderingMode::Gpu, shape, &shadows);
+        let reference = draw_into(
+            Box::new(VelloCpuSceneSink::single_threaded(SIZE, SIZE)),
+            VelloRenderingMode::Cpu,
+            shape,
+            &shadows,
+        );
+        let edge = shape.rect.inflate(2.0);
+        let inner = shape.rect.inflate(-2.0);
+        let mut largest = 0;
+        for y in 0..usize::from(SIZE) {
+            for x in 0..usize::from(SIZE) {
+                let at = Point::new(x as f64 + 0.5, y as f64 + 0.5);
+                if edge.contains(at) && !inner.contains(at) {
+                    continue;
+                }
+                let index = (y * usize::from(SIZE) + x) * 4;
+                for channel in 0..4 {
+                    largest = largest.max(compute[index + channel].abs_diff(reference[index + channel]));
+                }
+            }
+        }
+        assert!(largest <= 4, "{name}: {largest} of 255");
     }
 }
 
