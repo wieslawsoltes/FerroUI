@@ -610,3 +610,57 @@ fn area_coverage_is_the_anti_aliasing_nearest_to_the_cpu_mode() {
     let msaa16 = mean(VelloGpuAntiAliasing::Msaa16);
     assert!(area <= msaa8 && area <= msaa16, "area {area}, 8 samples {msaa8}, 16 samples {msaa16}");
 }
+
+/// Scenes of the compute renderer rendered into textures on several threads of one device each
+/// keep their own pixels: the texture a scene goes through on its way to the target is not shared
+/// between the render and the copy.
+#[cfg(feature = "gpu")]
+#[test]
+fn scenes_rendered_on_several_threads_of_a_device_keep_their_own_pixels() {
+    use crate::gpu::{VelloDeviceTexture, VelloGpuTexture, VelloTextureAlpha};
+    use crate::scene::VelloGpuSceneSink;
+
+    const SIDE: u16 = 32;
+    const ROUNDS: usize = 150;
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    if !device.supports_compute() {
+        println!("skipped: no compute");
+        return;
+    }
+    let colors: [[u8; 3]; 4] = [[255, 0, 0], [0, 255, 0], [0, 0, 255], [255, 255, 0]];
+    let start = Arc::new(std::sync::Barrier::new(colors.len()));
+    let threads: Vec<_> = colors
+        .into_iter()
+        .map(|[red, green, blue]| {
+            let (device, start) = (device.clone(), start.clone());
+            std::thread::spawn(move || {
+                start.wait();
+                let side = usize::from(SIDE);
+                let area = Rect::new(0.0, 0.0, f64::from(SIDE), f64::from(SIDE)).to_path(0.1);
+                let paint = VelloScenePaint::solid(Color::from_rgba8(red, green, blue, 255));
+                let mut wrong = 0;
+                for _ in 0..ROUNDS {
+                    let target =
+                        VelloDeviceTexture::new(&device, u32::from(SIDE), u32::from(SIDE), VelloTextureAlpha::Premultiplied);
+                    let mut scene = VelloGpuSceneSink::new(device.clone(), SIDE, SIDE);
+                    scene.fill(&area, Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::default(), false);
+                    scene.render_to_texture(&VelloGpuTexture { texture: target.texture() }).unwrap();
+                    let mut pixels = vec![0u8; side * side * 4];
+                    assert!(device.read_texture(target.texture(), &mut pixels));
+                    if pixels.chunks_exact(4).any(|pixel| pixel != [red, green, blue, 255]) {
+                        wrong += 1;
+                    }
+                }
+                wrong
+            })
+        })
+        .collect();
+    let wrong: usize = threads.into_iter().map(|thread| thread.join().unwrap()).sum();
+    assert_eq!(wrong, 0, "{wrong} of {} renders held the pixels of another thread", ROUNDS * colors.len());
+}

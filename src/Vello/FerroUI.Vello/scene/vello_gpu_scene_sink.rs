@@ -652,19 +652,24 @@ impl VelloGpuSceneSink {
 
         let scene = combined.as_ref().unwrap_or(&self.scene);
         let (images, anti_aliasing) = (&self.images, self.anti_aliasing);
+        // Taken out of the state until it is copied: the lock is not held between the render and
+        // the copy, and another thread may render on this device in between.
         let rendered = self.device.with_renderer_state(Self::new_state, |device, state| {
-            let reusable =
-                state.region.as_ref().is_some_and(|texture| texture.width() == width && texture.height() == height);
-            if !reusable {
-                state.region = Some(device.create_rgba_texture(width, height, Self::TARGET_USAGE));
-            }
-            let region = state.region.clone().unwrap_or_else(|| panic!("The texture was just created"));
+            let region = state
+                .region
+                .take()
+                .filter(|texture| texture.width() == width && texture.height() == height)
+                .unwrap_or_else(|| device.create_rgba_texture(width, height, Self::TARGET_USAGE));
             let view = region.create_view(&wgpu::TextureViewDescriptor::default());
-            Self::render(scene, images, anti_aliasing, device, state, &view, width, height)?;
+            if let Err(error) = Self::render(scene, images, anti_aliasing, device, state, &view, width, height) {
+                state.region = Some(region);
+                return Err(error);
+            }
             Ok::<_, String>(region)
         })?;
 
         self.device.copy_texture_region(&rendered, (0, 0), target, (x, y), (width, height));
+        self.device.with_renderer_state(Self::new_state, |_, state| state.region = Some(rendered));
         Ok(())
     }
 
@@ -1227,22 +1232,27 @@ impl IVelloSceneSink for VelloGpuSceneSink {
             });
         }
 
-        let intermediate = self.device.with_renderer_state(Self::new_state, |device, state| {
-            let reusable =
-                state.intermediate.as_ref().is_some_and(|texture| texture.width() == width && texture.height() == height);
-            if !reusable {
-                state.intermediate = Some(device.create_rgba_texture(width, height, Self::TARGET_USAGE));
-            }
-            let intermediate = state.intermediate.clone().unwrap_or_else(|| panic!("The texture was just created"));
+        // Taken out of the state until it is copied: the lock is not held between the render and
+        // the copy, and another thread may render on this device in between.
+        let (intermediate, view) = self.device.with_renderer_state(Self::new_state, |device, state| {
+            let intermediate = state
+                .intermediate
+                .take()
+                .filter(|texture| texture.width() == width && texture.height() == height)
+                .unwrap_or_else(|| device.create_rgba_texture(width, height, Self::TARGET_USAGE));
             let view = intermediate.create_view(&wgpu::TextureViewDescriptor::default());
 
-            Self::render(scene, images, anti_aliasing, device, state, &view, width, height)?;
-            Ok::<_, String>(view)
+            if let Err(error) = Self::render(scene, images, anti_aliasing, device, state, &view, width, height) {
+                state.intermediate = Some(intermediate);
+                return Err(error);
+            }
+            Ok::<_, String>((intermediate, view))
         })?;
 
         // The renderer's output is not premultiplied; the texture of a
         // window holds premultiplied pixels.
-        self.device.copy_texture_to_texture(&intermediate, target.texture, true);
+        self.device.copy_texture_to_texture(&view, target.texture, true);
+        self.device.with_renderer_state(Self::new_state, |_, state| state.intermediate = Some(intermediate));
         Ok(())
     }
 }
