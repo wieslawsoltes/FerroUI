@@ -6,7 +6,7 @@
 //! use ferroui_themes_fluent::keys;
 //!
 //! border()
-//!     .dynamic_resource(Border::background_property(), keys::CardBackgroundFillColorDefaultBrush)
+//!     .dynamic_resource(Border::background_property(), keys::SystemControlBackgroundAltHighBrush)
 //!     .static_resource(Border::corner_radius_property(), keys::ControlCornerRadius)
 //! ```
 //!
