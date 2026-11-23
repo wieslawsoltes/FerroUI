@@ -131,20 +131,54 @@ fn alt_and_a_key_together_invoke_without_showing_the_tips_after() {
         None,
         KeyModifiers::ALT,
     );
-    assert!(scene.key(
+    let handled = scene.key(
         InputElement::key_down_event,
         Key::F,
         Some("f"),
-        KeyModifiers::ALT
-    ));
+        KeyModifiers::ALT,
+    );
     scene.key(
         InputElement::key_up_event,
         Key::LeftAlt,
         None,
         KeyModifiers::NONE,
     );
-    assert_eq!(clicks.get(), 1);
+    // The Option key of a Mac types characters, so there it does not invoke.
+    let invokes = !cfg!(target_vendor = "apple");
+    assert_eq!(handled, invokes);
+    assert_eq!(clicks.get(), u32::from(invokes));
     assert!(!AccessKeyManager::is_display_mode_enabled());
+}
+
+#[test]
+fn altgr_and_a_key_still_types_its_character() {
+    let _app = start();
+    let scene = scene();
+    let (_button, clicks) = scene.button("E");
+    scene.key(
+        InputElement::key_down_event,
+        Key::RightAlt,
+        None,
+        KeyModifiers::ALT,
+    );
+    let handled = scene.key(
+        InputElement::key_down_event,
+        Key::E,
+        Some("e"),
+        KeyModifiers::ALT,
+    );
+    scene.key(
+        InputElement::key_up_event,
+        Key::RightAlt,
+        None,
+        KeyModifiers::NONE,
+    );
+    assert!(!handled, "the key goes on to the text box");
+    assert_eq!(clicks.get(), 0);
+    assert!(
+        !AccessKeyManager::is_display_mode_enabled(),
+        "typing a character shows no tips"
+    );
 }
 
 #[test]
