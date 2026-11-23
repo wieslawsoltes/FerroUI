@@ -10,7 +10,7 @@ use crate::scene::{cpu_scenes_made, IVelloSceneSink, VelloCpuSceneSink};
 use crate::vello_options::VelloRenderingMode;
 use ferroui_base::media::{BoxShadow, BoxShadows, Color};
 use ferroui_base::platform::IDrawingContextImpl;
-use ferroui_base::{Point, Rect, RoundedRect, Vector};
+use ferroui_base::{Matrix, Point, Rect, RoundedRect, Vector};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -55,9 +55,19 @@ fn shapes() -> Vec<(&'static str, RoundedRect, BoxShadows)> {
 }
 
 fn draw(device: &Arc<VelloWgpuDevice>, mode: VelloRenderingMode, shape: RoundedRect, shadows: &BoxShadows) -> Vec<u8> {
+    draw_under(device, mode, shape, shadows, Matrix::IDENTITY)
+}
+
+fn draw_under(
+    device: &Arc<VelloWgpuDevice>,
+    mode: VelloRenderingMode,
+    shape: RoundedRect,
+    shadows: &BoxShadows,
+    transform: Matrix,
+) -> Vec<u8> {
     let sink: Box<dyn IVelloSceneSink> =
         crate::gpu::create_window_scene_sink(device, &[mode], SIZE, SIZE, wgpu::TextureFormat::Rgba8Unorm);
-    draw_into(sink, mode, shape, shadows)
+    draw_into_under(sink, mode, shape, shadows, transform)
 }
 
 fn draw_into(
@@ -65,6 +75,16 @@ fn draw_into(
     mode: VelloRenderingMode,
     shape: RoundedRect,
     shadows: &BoxShadows,
+) -> Vec<u8> {
+    draw_into_under(sink, mode, shape, shadows, Matrix::IDENTITY)
+}
+
+fn draw_into_under(
+    sink: Box<dyn IVelloSceneSink>,
+    mode: VelloRenderingMode,
+    shape: RoundedRect,
+    shadows: &BoxShadows,
+    transform: Matrix,
 ) -> Vec<u8> {
     let pixels = Rc::new(RefCell::new(vec![0u8; usize::from(SIZE) * usize::from(SIZE) * 4]));
     let target = pixels.clone();
@@ -79,6 +99,7 @@ fn draw_into(
         },
         Vec::new(),
     );
+    drawing.set_transform(transform);
     drawing.draw_rectangle(None, None, shape, shadows);
     drawing.dispose();
     pixels.take()
@@ -104,12 +125,10 @@ fn no_shadow_reaches_a_scene_of_the_cpu_renderer_in_the_device_modes() {
 }
 
 /// `ALLOWED_ERROR` of the render tests.
-#[cfg(feature = "gpu")]
 const RENDER_TEST_ALLOWED_ERROR: f64 = 0.022;
 
 /// The error of the render tests (`compare_images`) between two images of premultiplied pixels:
 /// the root mean square of the difference of every channel, over the whole image.
-#[cfg(feature = "gpu")]
 fn render_test_error(actual: &[u8], expected: &[u8]) -> f64 {
     assert_eq!(actual.len(), expected.len());
     let squares: f64 = actual
@@ -140,7 +159,10 @@ fn the_device_blur_of_the_compute_mode_agrees_with_the_cpu_reference() {
     let thin = RoundedRect::from_radius(Rect::new(20.0, 40.0, 56.0, 14.0), 7.0);
     let elliptical = RoundedRect::new(Rect::new(20.0, 24.0, 56.0, 48.0), corner, corner, corner, corner);
     let inset = RoundedRect::from_radius(Rect::new(16.0, 16.0, 64.0, 64.0), 8.0);
+    // Too long for one kept picture at its deviation: blurred for the area it shows.
+    let long = RoundedRect::from_radius(Rect::new(-1500.0, 40.0, 3096.0, 14.0), 7.0);
     for (name, shape, blur, is_inset) in [
+        ("too long to keep", long, 3.0, false),
         ("thin, direct", thin, 10.0, false),
         ("thin, reduced by 2", thin, 20.0, false),
         ("thin, reduced by 4", thin, 40.0, false),
@@ -227,4 +249,58 @@ fn the_closed_form_of_the_compute_mode_agrees_with_the_cpu_reference() {
         }
     }
     assert!(largest <= 1, "{largest} of 255");
+}
+
+/// A shadow under an animated scale, and turned, is blurred once in each device mode and stays
+/// within the error of the render tests of the CPU reference at every frame.
+#[test]
+fn an_animated_transform_reuses_one_picture_and_agrees_with_the_cpu_reference() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    let corner = Vector::new(16.0, 8.0);
+    let cases = [
+        ("thin", RoundedRect::from_radius(Rect::new(20.0, 40.0, 56.0, 14.0), 7.0), shadow(20.0, false)),
+        ("elliptical", RoundedRect::new(Rect::new(20.0, 24.0, 56.0, 48.0), corner, corner, corner, corner), shadow(12.0, false)),
+        ("inset", RoundedRect::from_radius(Rect::new(16.0, 16.0, 64.0, 64.0), 8.0), shadow(12.0, true)),
+    ];
+    let about_centre = |matrix: Matrix| {
+        Matrix::create_translation(-48.0, -48.0) * matrix * Matrix::create_translation(48.0, 48.0)
+    };
+    let frames: Vec<Matrix> = [0.85, 0.88, 0.91, 0.94, 0.97, 1.0, 1.13]
+        .into_iter()
+        .map(|scale| about_centre(Matrix::create_scale(scale, scale)))
+        .chain([about_centre(Matrix::create_rotation(0.3))])
+        .collect();
+    for mode in device_modes(&device) {
+        for (name, shape, shadows) in &cases {
+            crate::gpu::shadow_blur::forget_pictures();
+            let before = crate::gpu::shadow_blur::pictures_made();
+            let scenes_before = cpu_scenes_made();
+            let mut drawn = Vec::new();
+            for frame in &frames {
+                drawn.push(draw_under(&device, mode, *shape, shadows, *frame));
+            }
+            assert_eq!(scenes_before, cpu_scenes_made(), "{mode:?}, {name}: a CPU scene was made");
+            let made = crate::gpu::shadow_blur::pictures_made() - before;
+            assert_eq!(made, 1, "{mode:?}, {name}: {made} pictures for {} frames", frames.len());
+            let mut worst: f64 = 0.0;
+            for (frame, pixels) in frames.iter().zip(&drawn) {
+                let reference = draw_into_under(
+                    Box::new(VelloCpuSceneSink::single_threaded(SIZE, SIZE)),
+                    VelloRenderingMode::Cpu,
+                    *shape,
+                    shadows,
+                    *frame,
+                );
+                worst = worst.max(render_test_error(pixels, &reference));
+            }
+            println!("{mode:?}, {name}: {made} picture(s), worst error {worst:.4}");
+            assert!(worst <= RENDER_TEST_ALLOWED_ERROR, "{mode:?}, {name}: error {worst}");
+        }
+    }
 }
