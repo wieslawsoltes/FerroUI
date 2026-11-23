@@ -57,12 +57,12 @@ const ATTRIBUTION_SIZE: f64 = 11.0;
 /// Whether an interaction is available to the user.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq)]
 #[repr(i32)]
-pub enum MapInteractionMode {
+pub enum MapControlInteractionMode {
     #[default]
     Auto = 0,
     Disabled = 1,
 }
-ferroui_base::ferro_markup_enum!(MapInteractionMode { Auto, Disabled }, { namespace: "FerroUI.Controls.Maps" });
+ferroui_base::ferro_markup_enum!(MapControlInteractionMode { Auto, Disabled }, { namespace: "FerroUI.Controls.Maps" });
 ferroui_base::styled_value!(BasicGeoposition);
 
 /// What a press of a pointer is doing.
@@ -139,15 +139,15 @@ ferro_properties! { impl MapControl {
 
     ferro_property!(
         /// Defines the `PanInteractionMode` property.
-        pub fn pan_interaction_mode_property() -> StyledProperty<MapInteractionMode> {
-            FerroProperty::register::<MapControl, _>("PanInteractionMode", MapInteractionMode::Auto)
+        pub fn pan_interaction_mode_property() -> StyledProperty<MapControlInteractionMode> {
+            FerroProperty::register::<MapControl, _>("PanInteractionMode", MapControlInteractionMode::Auto)
         }
     );
 
     ferro_property!(
         /// Defines the `ZoomInteractionMode` property.
-        pub fn zoom_interaction_mode_property() -> StyledProperty<MapInteractionMode> {
-            FerroProperty::register::<MapControl, _>("ZoomInteractionMode", MapInteractionMode::Auto)
+        pub fn zoom_interaction_mode_property() -> StyledProperty<MapControlInteractionMode> {
+            FerroProperty::register::<MapControl, _>("ZoomInteractionMode", MapControlInteractionMode::Auto)
         }
     );
 
@@ -161,8 +161,8 @@ ferro_properties! { impl MapControl {
 
     ferro_property!(
         /// Defines the `RotateInteractionMode` property.
-        pub fn rotate_interaction_mode_property() -> StyledProperty<MapInteractionMode> {
-            FerroProperty::register::<MapControl, _>("RotateInteractionMode", MapInteractionMode::Auto)
+        pub fn rotate_interaction_mode_property() -> StyledProperty<MapControlInteractionMode> {
+            FerroProperty::register::<MapControl, _>("RotateInteractionMode", MapControlInteractionMode::Auto)
         }
     );
 }}
@@ -280,22 +280,22 @@ impl MapControl {
     }
 
     /// Whether the user can move the map.
-    pub fn pan_interaction_mode(&self) -> MapInteractionMode {
+    pub fn pan_interaction_mode(&self) -> MapControlInteractionMode {
         self.get_value(Self::pan_interaction_mode_property())
     }
 
     /// Sets whether the user can move the map.
-    pub fn set_pan_interaction_mode(&self, value: MapInteractionMode) {
+    pub fn set_pan_interaction_mode(&self, value: MapControlInteractionMode) {
         self.set_value(Self::pan_interaction_mode_property(), value);
     }
 
     /// Whether the user can zoom the map.
-    pub fn zoom_interaction_mode(&self) -> MapInteractionMode {
+    pub fn zoom_interaction_mode(&self) -> MapControlInteractionMode {
         self.get_value(Self::zoom_interaction_mode_property())
     }
 
     /// Sets whether the user can zoom the map.
-    pub fn set_zoom_interaction_mode(&self, value: MapInteractionMode) {
+    pub fn set_zoom_interaction_mode(&self, value: MapControlInteractionMode) {
         self.set_value(Self::zoom_interaction_mode_property(), value);
     }
 
@@ -310,12 +310,12 @@ impl MapControl {
     }
 
     /// Whether the user can turn the map.
-    pub fn rotate_interaction_mode(&self) -> MapInteractionMode {
+    pub fn rotate_interaction_mode(&self) -> MapControlInteractionMode {
         self.get_value(Self::rotate_interaction_mode_property())
     }
 
     /// Sets whether the user can turn the map.
-    pub fn set_rotate_interaction_mode(&self, value: MapInteractionMode) {
+    pub fn set_rotate_interaction_mode(&self, value: MapControlInteractionMode) {
         self.set_value(Self::rotate_interaction_mode_property(), value);
     }
 
@@ -461,15 +461,15 @@ impl MapControl {
     }
 
     fn can_pan(&self) -> bool {
-        self.pan_interaction_mode() != MapInteractionMode::Disabled
+        self.pan_interaction_mode() != MapControlInteractionMode::Disabled
     }
 
     fn can_zoom(&self) -> bool {
-        self.zoom_interaction_mode() != MapInteractionMode::Disabled
+        self.zoom_interaction_mode() != MapControlInteractionMode::Disabled
     }
 
     fn can_rotate(&self) -> bool {
-        self.rotate_interaction_mode() != MapInteractionMode::Disabled
+        self.rotate_interaction_mode() != MapControlInteractionMode::Disabled
     }
 
     fn on_pinch(&self, args: &PinchEventArgs) {
