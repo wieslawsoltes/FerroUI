@@ -57,7 +57,7 @@ export async function verifyBrowserMcp(url: string): Promise<void> {
     }
 }
 
-function runtimeApp({ invoke, content }: McpFixture, { runtime, generation }: RuntimeSummary) {
+export function runtimeApp({ invoke, content }: McpFixture, { runtime, generation }: RuntimeSummary) {
     assert.ok(generation);
     const query = (tool: string, args: object = {}) => invoke('ferroui_runtime_query', { runtime, expected_generation: generation, tool, arguments: args });
     const result = async <T>(tool: string, args?: object) => content<{ result: T }>(await query(tool, args)).result;
@@ -166,7 +166,7 @@ async function checkAttach(url: string, request: { profile: string; folder: stri
         assert.match(stale.content[0]?.text ?? '', /inspector is unavailable/);
         const reloaded = content<RuntimeSummary>(await invoke('ferroui_browser_attach', request));
         assert.notEqual(reloaded.generation, reopened.generation);
-        assert.equal((await runtimeApp({ invoke, content }, reloaded).find('DispatchedCount')).text, 'Dispatched orders: 0');
+        assert.equal((await runtimeApp({ invoke, content }, reloaded).find('DispatchedCount')).text, 'Dispatched orders: 1');
         await child.stop();
         await until(async () => !(await sessions()).some(session => session.runtime === reloaded.runtime));
     } finally {

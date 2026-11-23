@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { testVSCodeExecutable } from './vscodeDownload.mjs';
+import { browserBuildWorkspace } from './browserBuildWorkspace.mjs';
 
 const extension = fileURLToPath(new URL('../', import.meta.url));
 const sandbox = await mkdtemp(join(tmpdir(), 'ferroui-vscode-'));
@@ -14,11 +15,12 @@ const executable = name => join(bin, name + (process.platform === 'win32' ? '.ex
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 const browser = process.env.FERROUI_TEST_BROWSER_URL;
+const browserBuild = process.env.FERROUI_TEST_BROWSER_BUILD;
 try {
     let target = workspace;
     let targetSettings = {};
     let targetEnv;
-    if ([simulator, android, browser].filter(Boolean).length > 1) throw new Error('Choose one platform acceptance fixture per run.');
+    if ([simulator, android, browser, browserBuild].filter(Boolean).length > 1) throw new Error('Choose one platform acceptance fixture per run.');
     if (simulator) {
         const appPath = process.env.FERROUI_TEST_IOS_SIMULATOR_APP;
         if (process.platform !== 'darwin' || !appPath) {
@@ -43,13 +45,20 @@ try {
             }],
         };
         targetEnv = { FERROUI_TEST_ANDROID_DEVICE: android };
-    } else if (browser) {
+    } else if (browser || browserBuild) {
         const chrome = process.env.FERROUI_TEST_BROWSER_EXECUTABLE;
-        target = resolve(process.env.FERROUI_TEST_BROWSER_SOURCE ?? join(extension, '../..'));
-        targetSettings = { ...(chrome ? { 'ferroui.browser.executablePath': resolve(chrome) } : {}),
-            'ferroui.browser.apps': [{ id: 'dispatch-desk', label: 'Dispatch Desk', url: browser }],
-        };
-        targetEnv = { FERROUI_TEST_BROWSER_URL: browser };
+        const toolkit = resolve(process.env.FERROUI_TEST_BROWSER_SOURCE ?? join(extension, '../..'));
+        targetSettings = { ...(chrome ? { 'ferroui.browser.executablePath': resolve(chrome) } : {}) };
+        if (browserBuild) {
+            await browserBuildWorkspace(workspace, toolkit);
+            targetSettings['ferroui.browser.apps'] = [{ id: 'dispatch-check', label: 'Dispatch Check',
+                build: { application: 'dispatch-check', toolchain: toolkit } }];
+            targetEnv = { FERROUI_TEST_BROWSER_BUILD: browserBuild, CARGO_TARGET_DIR: process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo') };
+        } else {
+            target = toolkit;
+            targetSettings['ferroui.browser.apps'] = [{ id: 'dispatch-desk', label: 'Dispatch Desk', url: browser }];
+            targetEnv = { FERROUI_TEST_BROWSER_URL: browser };
+        }
     } else {
         await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
         const animation = join(workspace, 'animation_view.rs');
