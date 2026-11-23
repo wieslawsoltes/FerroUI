@@ -389,23 +389,40 @@ no origin, so the limits above and the HTTPS default are its protection.
 
 ## 9. Incremental Font Transfer
 
-IFT is implemented last, in milestone 0.7.0 (#1204). It does not block 0.6.0, by the owner's
-decision, for these reasons:
+IFT is in milestone 0.7.0 (#1204), behind the feature `incremental` of `ferroui-fonts-web`, which
+is off by default and needs `woff2`. It follows the Candidate Recommendation Draft of
+13 October 2026, whose test suite is still in development.
 
-- It is a Candidate Recommendation Draft whose test suite is still in development.
-- Table-keyed patches use the LZ77 dictionary of the Shared Brotli format (draft 15, section
-  3.2). The custom dictionary of `brotli-decompressor` 5.0.3 is a prefix of its ring buffer: the
-  addressing is the same only while the dictionary and the output fit in the window, so those
-  patches need a decoder with real Shared Brotli support. Glyph-keyed patches are plain RFC 7932.
-- `unicode-range` segments already give on-demand loading for most of the same cases.
+Scope of the client: **glyph-keyed patches only**. Table-keyed patches use the LZ77 dictionary of
+the Shared Brotli format (draft 15, section 3.2). The custom dictionary of `brotli-decompressor`
+5.0.3 is a prefix of its ring buffer: the addressing is the same only while the dictionary and
+the output fit in the window, so those patches need a decoder with real Shared Brotli support.
+FerroUI does not write its own Shared Brotli addressing and does not take a second decoder for it.
+A font with an active table-keyed entry is never decoded approximately: the face moves on to its
+next `src` entry. Without the feature, an entry with `tech(incremental)` is skipped, as the
+standard requires of an unsupported technology.
 
-Scope of the client: **glyph-keyed patches only**. FerroUI does not write its own Shared Brotli
-addressing and does not take a second decoder for it. A font that needs a table-keyed patch is
-never decoded approximately: the face fails over to the next `src` entry, as for any font that
-cannot be used.
+How it works:
 
-Until the client lands, an `src` entry with `tech(incremental)` is skipped, as the standard
-requires of an unsupported technology, so a page-style declaration with a WOFF2 fallback works.
+- The text is seen where it is shaped, by the wrapper shaper that already adds the features of a
+  face. It is installed only for a face that needs it.
+- The patches for what has been seen are fetched, at most eight at a time, and applied as one
+  batch: on a worker thread, or in slices of the UI thread in a browser build without threads.
+- The extended font goes through the sanitizer again and replaces the font in use. Only one copy
+  is kept between extensions; while a batch is applied there are two.
+
+Limits, each of them deliberate:
+
+- **A glyph whose patch has not arrived draws empty** until the swap, as text does in a block
+  period. It does not fall back to another font for that time.
+- **Any failed patch ends the extension** and the face moves to its next `src` entry. The standard
+  would allow continuing without that patch, and then falling back for what it held.
+- **Patch URLs must stay on the origin of the font**, and for a font on disk inside its folder.
+  The standard allows other origins with CORS, which a native client does not have.
+- **The design space of the target is the whole range of each axis**, so a variable font fetches
+  the variation data of a glyph for every instance.
+- After a failed extension with no further `src`, the status of the face stays `loaded`, since
+  the state machine of CSS has no way back from it. Its text falls back.
 
 ## 10. Phases
 
@@ -436,7 +453,15 @@ Each step is one draft pull request, stacked on the one below.
 
 16. Color capability answers, `@font-palette-values` and `font-palette`.
 17. Level 5 descriptors and Local Font Access.
-18. Incremental Font Transfer, glyph-keyed patches only (milestone 0.7.0).
+18. `font-language-override`, through the culture of the run (section 3.6).
+
+**Phase D, milestone 0.7.0**
+
+19. Incremental Font Transfer, glyph-keyed patches only (#1204).
+20. Size-aware font lookup for the `font-size` descriptor (#1292), measured against hello world,
+    start-up and layout.
+21. The whole language of a culture in the HarfBuzz path, cached per culture, then `ZHT` and `ZHH`
+    in the language table (#1299).
 
 ## 11. What must be measured
 

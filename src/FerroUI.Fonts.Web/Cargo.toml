@@ -21,6 +21,8 @@ woff2 = ["dep:brotli-decompressor"]
 # Fonts over `https:` on desktop and mobile. Off by default: it brings a TLS stack. In the browser
 # fonts are fetched by the browser, and this feature adds nothing.
 http = ["dep:ureq"]
+# Incremental Font Transfer, glyph-keyed patches only: `tech(incremental)`. Off by default.
+incremental = ["woff2"]
 # Fonts over the network in the browser, through `fetch()`.
 browser = ["dep:wasm-bindgen", "dep:js-sys"]
 

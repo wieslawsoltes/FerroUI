@@ -90,6 +90,11 @@ struct Slot {
     last_used: u64,
     /// Let go under the memory budget: its status stays `loaded`, and the next use loads it.
     evicted: bool,
+    /// The URL of the source being loaded, when it declares `tech(incremental)`.
+    #[cfg(feature = "incremental")]
+    incremental_source: Option<String>,
+    #[cfg(feature = "incremental")]
+    incremental: Option<Box<incremental::IncrementalState>>,
 }
 
 /// What an instance of a font was made for.
@@ -114,7 +119,12 @@ impl InstanceKey {
 struct DecodeJob {
     id: FontFaceId,
     decoder: FontDecoder<Arc<[u8]>>,
+    /// Which extension of an incremental font this is; 0 for a font as it was fetched.
+    generation: u64,
 }
+
+#[cfg(feature = "incremental")]
+mod incremental;
 
 struct Shared {
     platform: Rc<dyn IFontManagerImpl>,
@@ -128,7 +138,8 @@ struct Shared {
     set: RefCell<FontFaceSetState>,
     next_id: Cell<u32>,
     jobs: RefCell<VecDeque<DecodeJob>>,
-    finished: RefCell<Vec<(FontFaceId, Result<Vec<u8>, FontDecodeError>)>>,
+    /// Decoded fonts, each with the generation of the extension it is, or 0.
+    finished: RefCell<Vec<(FontFaceId, Result<Vec<u8>, FontDecodeError>, u64)>>,
     /// Whether a slice of work is already scheduled on the dispatcher.
     scheduled: Cell<bool>,
     /// Off for tests, which run the work with [`WebFontCollection::run_pending_work`].
@@ -145,6 +156,10 @@ struct Shared {
     use_tick: Cell<u64>,
     /// The wrapper of the shaper, once a face has declared features.
     feature_shaper: RefCell<Option<Rc<FontFeatureShaper>>>,
+    #[cfg(feature = "incremental")]
+    pending_extensions: RefCell<Vec<FontFaceId>>,
+    #[cfg(feature = "incremental")]
+    patch_jobs: RefCell<VecDeque<incremental::PatchWork>>,
     /// The `font-language-override` tags already reported as not known.
     reported_languages: RefCell<Vec<String>>,
     listeners: RefCell<Vec<Rc<dyn Fn(&FontFaceSetEvent)>>>,
@@ -201,8 +216,14 @@ fn simulations_for(
 /// and the version of the system, and an entry claimed wrongly would replace a plain font that
 /// draws with one that does not. An application that knows its targets says so with
 /// [`WebFontCollection::set_supported_techs`]. A font without `tech()` is loaded either way.
-const DEFAULT_TECHS: FontTechs =
-    FontTechs::NONE.with(FontTech::Variations).with(FontTech::FeaturesOpenType).with(FontTech::Palettes);
+const DEFAULT_TECHS: FontTechs = {
+    let techs = FontTechs::NONE.with(FontTech::Variations).with(FontTech::FeaturesOpenType).with(FontTech::Palettes);
+    if cfg!(feature = "incremental") {
+        techs.with(FontTech::Incremental)
+    } else {
+        techs
+    }
+};
 
 impl Shared {
     fn with_slot<R>(&self, id: FontFaceId, action: impl FnOnce(&mut Slot) -> R) -> Option<R> {
@@ -300,6 +321,11 @@ impl Shared {
             if !source.is_supported(this.supported_techs.get()) {
                 continue;
             }
+            #[cfg(feature = "incremental")]
+            let declares_incremental =
+                matches!(&source, FontSource::Url { techs, .. } if techs.contains(FontTech::Incremental));
+            #[cfg(feature = "incremental")]
+            this.with_slot(id, |slot| slot.incremental_source = None);
             let url = match source {
                 FontSource::Url { url, .. } => url,
                 FontSource::Local { name } => {
@@ -334,6 +360,8 @@ impl Shared {
             }
             this.active_fetches.set(this.active_fetches.get() + 1);
             let url = this.resolve(&url);
+            #[cfg(feature = "incremental")]
+            this.with_slot(id, |slot| slot.incremental_source = declares_incremental.then(|| url.clone()));
             let weak = Rc::downgrade(this);
             fetcher.fetch(
                 &url,
@@ -444,9 +472,9 @@ impl Shared {
         if this.use_dispatcher && Self::decode_off_thread(this, id, bytes.clone()) {
             return;
         }
-        match FontDecoder::with_brotli(bytes, this.options, brotli_decoder_factory()) {
+        match FontDecoder::with_brotli(bytes, this.options_for(id), brotli_decoder_factory()) {
             Ok(decoder) => {
-                this.jobs.borrow_mut().push_back(DecodeJob { id, decoder });
+                this.jobs.borrow_mut().push_back(DecodeJob { id, decoder, generation: 0 });
                 Self::schedule_work(this);
             }
             Err(_) => Self::try_next_source(this, id),
@@ -457,19 +485,33 @@ impl Shared {
     /// in slices on the UI thread.
     #[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
     fn decode_off_thread(this: &Rc<Self>, id: FontFaceId, bytes: Arc<[u8]>) -> bool {
-        let options = this.options;
+        let options = this.options_for(id);
         let weak = Rc::downgrade(this);
         crate::off_thread::run_off_thread(
             move || decode_font_with_brotli(&bytes, &options, brotli_decoder_factory()),
             move |result| {
                 if let Some(this) = weak.upgrade() {
-                    this.finished.borrow_mut().push((id, result));
+                    this.finished.borrow_mut().push((id, result, 0));
                     // Through the queue, so that fonts that finish together swap together.
                     Shared::schedule_work(&this);
                 }
             },
         )
         .is_ok()
+    }
+
+    /// What a font of this face is sanitized with: the patch maps stay for `tech(incremental)`.
+    fn options_for(&self, id: FontFaceId) -> SanitizeOptions {
+        #[cfg(feature = "incremental")]
+        {
+            let keep_patch_maps = self.with_slot(id, |slot| slot.incremental_source.is_some()) == Some(true);
+            SanitizeOptions { keep_patch_maps, ..self.options }
+        }
+        #[cfg(not(feature = "incremental"))]
+        {
+            let _ = id;
+            self.options
+        }
     }
 
     fn schedule_work(this: &Rc<Self>) {
@@ -500,6 +542,11 @@ impl Shared {
     /// Decodes in small steps until `duration` has passed, at least one step.
     fn run_slice_for(this: &Rc<Self>, duration: Duration) -> bool {
         let started = Instant::now();
+        #[cfg(feature = "incremental")]
+        {
+            Self::run_extensions(this);
+            Self::step_patch_jobs(this, started, duration);
+        }
         loop {
             let job = this.jobs.borrow_mut().pop_front();
             let Some(mut job) = job else {
@@ -507,8 +554,8 @@ impl Shared {
             };
             match job.decoder.step(DECODE_STEP) {
                 Ok(None) => this.jobs.borrow_mut().push_front(job),
-                Ok(Some(font)) => this.finished.borrow_mut().push((job.id, Ok(font))),
-                Err(error) => this.finished.borrow_mut().push((job.id, Err(error))),
+                Ok(Some(font)) => this.finished.borrow_mut().push((job.id, Ok(font), job.generation)),
+                Err(error) => this.finished.borrow_mut().push((job.id, Err(error), job.generation)),
             }
             if started.elapsed() >= duration {
                 break;
@@ -518,6 +565,10 @@ impl Shared {
         // held back while another is one slice from done only by the order of the queue.
         if this.jobs.borrow().is_empty() {
             Self::install_finished(this);
+        }
+        #[cfg(feature = "incremental")]
+        if !this.patch_jobs.borrow().is_empty() || !this.pending_extensions.borrow().is_empty() {
+            return true;
         }
         !this.jobs.borrow().is_empty()
     }
@@ -529,14 +580,32 @@ impl Shared {
         }
         let now = (this.clock)();
         let mut changed = false;
-        for (id, result) in finished {
+        for (id, result, generation) in finished {
+            #[cfg(feature = "incremental")]
+            let extending = match this.take_extension(id, generation) {
+                Some(extending) => extending,
+                // The work of a state that was replaced.
+                None => continue,
+            };
+            #[cfg(not(feature = "incremental"))]
+            let extending = {
+                let _ = generation;
+                false
+            };
             let mut size = 0;
             let mut axes = None;
             let typeface = result.ok().and_then(|mut font| {
-                // A font that cannot take the overrides is used as it is.
-                let _ = this.with_slot(id, |slot| apply_metric_overrides(&mut font, &slot.descriptors));
-                if let Some(palette) = this.palette_of(id) {
-                    apply_font_palette(&mut font, &palette);
+                // An extended font already has what was written into it when it was first loaded.
+                if !extending {
+                    // A font that cannot take the overrides is used as it is.
+                    let _ = this.with_slot(id, |slot| apply_metric_overrides(&mut font, &slot.descriptors));
+                    if let Some(palette) = this.palette_of(id) {
+                        apply_font_palette(&mut font, &palette);
+                    }
+                    #[cfg(feature = "incremental")]
+                    if !this.begin_incremental(id, &font) {
+                        return None;
+                    }
                 }
                 size = font.len();
                 axes = read_font_axes(&font).map(Rc::new);
@@ -546,9 +615,18 @@ impl Shared {
                 GlyphTypeface::try_create(typeface, FontSimulations::None)
             });
             let Some(typeface) = typeface else {
+                #[cfg(feature = "incremental")]
+                if extending {
+                    Self::fail_extension(this, id);
+                    continue;
+                }
                 Self::try_next_source(this, id);
                 continue;
             };
+            #[cfg(feature = "incremental")]
+            if extending {
+                this.release_instances(id);
+            }
             let tick = this.next_tick();
             this.with_slot(id, |slot| {
                 slot.usable = slot.usable || slot.timeline.accepts_load(now);
@@ -559,6 +637,11 @@ impl Shared {
                 slot.last_used = tick;
             });
             this.register_features(id, &typeface);
+            #[cfg(feature = "incremental")]
+            if this.with_slot(id, |slot| slot.incremental.is_some()) == Some(true) {
+                Self::connect_shaper(this);
+                Self::schedule_extension(this, id);
+            }
             this.set_status(id, FontFaceLoadStatus::Loaded);
         }
         if changed {
@@ -592,7 +675,11 @@ impl Shared {
             return;
         };
         let language = tag.and_then(|tag| self.language_override(&tag));
-        if features.is_empty() && language.is_none() {
+        #[cfg(feature = "incremental")]
+        let observed = self.with_slot(id, |slot| slot.incremental.is_some()) == Some(true);
+        #[cfg(not(feature = "incremental"))]
+        let observed = false;
+        if features.is_empty() && language.is_none() && !observed {
             return;
         }
         if self.feature_shaper.borrow().is_none() {
@@ -600,6 +687,10 @@ impl Shared {
         }
         if let Some(shaper) = self.feature_shaper.borrow().as_ref() {
             shaper.set_face(typeface, features, language);
+            #[cfg(feature = "incremental")]
+            if observed {
+                shaper.observe(typeface, id);
+            }
         }
     }
 
@@ -627,6 +718,11 @@ impl Shared {
             let Some(typeface) = &slot.glyph_typeface else {
                 return false;
             };
+            // What it was extended with would have to be fetched again.
+            #[cfg(feature = "incremental")]
+            if slot.incremental.is_some() {
+                return false;
+            }
             let listed = slot.instances.iter().filter(|(_, instance)| Rc::ptr_eq(instance, typeface)).count();
             Rc::strong_count(typeface) <= 1 + listed + table(slot)
                 && slot
@@ -856,6 +952,10 @@ impl WebFontCollection {
             chosen_palettes: RefCell::new(Vec::new()),
             use_tick: Cell::new(0),
             feature_shaper: RefCell::new(None),
+            #[cfg(feature = "incremental")]
+            pending_extensions: RefCell::new(Vec::new()),
+            #[cfg(feature = "incremental")]
+            patch_jobs: RefCell::new(VecDeque::new()),
             reported_languages: RefCell::new(Vec::new()),
             listeners: RefCell::new(Vec::new()),
         });
@@ -898,6 +998,10 @@ impl WebFontCollection {
             size: 0,
             last_used: 0,
             evicted: false,
+            #[cfg(feature = "incremental")]
+            incremental_source: None,
+            #[cfg(feature = "incremental")]
+            incremental: None,
         });
         self.shared.fonts_changed();
         Ok(id)
@@ -949,6 +1053,10 @@ impl WebFontCollection {
             slot.instances.clear();
             slot.glyph_typeface = None;
             slot.evicted = true;
+            #[cfg(feature = "incremental")]
+            {
+                slot.incremental = None;
+            }
         }
         self.shared.fonts_changed();
         true
@@ -1009,7 +1117,13 @@ impl WebFontCollection {
 
     /// `check`: whether `text` can be drawn with what is loaded.
     pub fn check(&self, family: &str, request: &FontMatchRequest, text: &str) -> bool {
-        self.shared.views(|views| check_faces(views, family, request, text))
+        let loaded = self.shared.views(|views| check_faces(views, family, request, text));
+        #[cfg(feature = "incremental")]
+        if loaded {
+            let ids = self.shared.views(|views| find_matching_faces(views, family, request, text));
+            return !ids.iter().any(|id| self.shared.needs_patches(*id, text));
+        }
+        loaded
     }
 
     /// `load`: starts loading the faces `text` needs, and returns them.
@@ -1017,6 +1131,8 @@ impl WebFontCollection {
         let ids = self.shared.views(|views| find_matching_faces(views, family, request, text));
         for id in &ids {
             Shared::request_load(&self.shared, *id);
+            #[cfg(feature = "incremental")]
+            Shared::note_text(&self.shared, *id, &text.encode_utf16().collect::<Vec<u16>>(), None);
         }
         ids
     }
@@ -1308,7 +1424,7 @@ mod tests {
     fn a_source_this_build_cannot_use_is_skipped() {
         let harness = Harness::new();
         harness.collection.add_style_sheet(
-            "@font-face { font-family: A; src: url(a.svg) format(svg), url(b.ttf) tech(incremental), url(c.ttf) }",
+            "@font-face { font-family: A; src: url(a.svg) format(svg), url(b.ttf) tech(features-graphite), url(c.ttf) }",
         );
         harness.lookup("A");
         assert_eq!(harness.urls(), ["c.ttf"]);
@@ -1687,6 +1803,131 @@ mod tests {
         let installed = FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap();
         for culture in ["en", "tr"] {
             assert_eq!(shaped(&*installed, &typeface, culture), shaped(&*harfbuzz, &typeface, culture), "{culture}");
+        }
+    }
+
+    #[cfg(feature = "incremental")]
+    mod incremental_fonts {
+        use super::*;
+        use ferroui_fonts_web_core::ift::testing::{add_table, incremental_font, patch_map, FIXTURE_ID};
+        use ferroui_fonts_web_core::ift::IFT_TABLE;
+        use ferroui_fonts_web_core::woff2::testing::outlines;
+        use std::io::Read;
+
+        const SHEET: &str = "@font-face { font-family: A; src: url(a.ttf) tech(incremental), url(b.ttf) }";
+
+        fn points(text: &str) -> Vec<u32> {
+            text.chars().map(u32::from).collect()
+        }
+
+        fn bytes_of(typeface: &GlyphTypeface) -> Vec<u8> {
+            let mut bytes = Vec::new();
+            typeface.platform_typeface().try_get_stream().unwrap().read_to_end(&mut bytes).unwrap();
+            bytes
+        }
+
+        fn glyph_of(typeface: &GlyphTypeface, character: char) -> usize {
+            typeface.character_to_glyph_map().try_get_glyph(character as i32).unwrap() as usize
+        }
+
+        fn installed() -> Rc<dyn ITextShaperImpl> {
+            FerroLocator::current().get_service::<dyn ITextShaperImpl>().unwrap()
+        }
+
+        #[test]
+        fn a_patch_is_fetched_when_text_needs_it_and_the_glyph_comes_back() {
+            bind_harfbuzz();
+            let harness = Harness::new();
+            let original = inter();
+            let fixture = incremental_font(&original, &[&points("fi"), &points("xy")], &stored_brotli);
+            harness.collection.add_style_sheet(SHEET);
+            harness.lookup("A");
+            assert_eq!(harness.urls(), ["a.ttf"]);
+            harness.finish(&HashMap::from([("a.ttf", Ok(fixture.font.clone()))]));
+            let typeface = harness.lookup("A").expect("the font");
+            let request = request();
+            assert!(!harness.collection.check("A", &request, "fi"), "its glyphs are not here yet");
+            harness.collection.run_pending_work();
+            assert!(harness.urls().is_empty(), "nothing is fetched before a text needs it");
+            let (f, x) = (glyph_of(&typeface, 'f'), glyph_of(&typeface, 'x'));
+            shaped(&*installed(), &typeface, "en");
+            harness.collection.run_pending_work();
+            let (url, patch) = fixture.patches[0].clone();
+            assert_eq!(harness.urls(), [url.clone()]);
+            harness.finish(&HashMap::from([(url.as_str(), Ok(patch))]));
+            let extended = harness.lookup("A").expect("the extended font");
+            assert!(!Rc::ptr_eq(&typeface, &extended), "the font was swapped");
+            let (now, before) = (outlines(&bytes_of(&extended)), outlines(&original));
+            assert_eq!(now[f], before[f]);
+            assert_ne!(now[x], before[x], "what no text needs stays out");
+            assert!(harness.collection.check("A", &request, "fi"));
+            assert!(!harness.collection.check("A", &request, "x"));
+            harness.collection.run_pending_work();
+            assert!(harness.urls().is_empty(), "a patch is fetched once");
+        }
+
+        #[test]
+        fn a_failed_patch_gives_the_face_up_for_the_next_source() {
+            bind_harfbuzz();
+            let harness = Harness::new();
+            let original = inter();
+            let fixture = incremental_font(&original, &[&points("fi")], &stored_brotli);
+            harness.collection.add_style_sheet(SHEET);
+            harness.lookup("A");
+            harness.finish(&HashMap::from([("a.ttf", Ok(fixture.font.clone()))]));
+            let typeface = harness.lookup("A").expect("the font");
+            shaped(&*installed(), &typeface, "en");
+            harness.collection.run_pending_work();
+            harness.finish(&HashMap::new());
+            assert_eq!(harness.urls(), ["b.ttf"]);
+            harness.finish(&HashMap::from([("b.ttf", Ok(original.clone()))]));
+            let whole = harness.lookup("A").expect("the next source");
+            assert_eq!(outlines(&bytes_of(&whole)), outlines(&original));
+        }
+
+        #[test]
+        fn a_corrupt_patch_gives_the_face_up_too() {
+            bind_harfbuzz();
+            let harness = Harness::new();
+            let original = inter();
+            let fixture = incremental_font(&original, &[&points("fi")], &stored_brotli);
+            harness.collection.add_style_sheet(SHEET);
+            harness.lookup("A");
+            harness.finish(&HashMap::from([("a.ttf", Ok(fixture.font.clone()))]));
+            let typeface = harness.lookup("A").expect("the font");
+            shaped(&*installed(), &typeface, "en");
+            harness.collection.run_pending_work();
+            let url = fixture.patches[0].0.clone();
+            harness.finish(&HashMap::from([(url.as_str(), Ok(b"ifgk and nothing else".to_vec()))]));
+            assert_eq!(harness.urls(), ["b.ttf"]);
+        }
+
+        #[test]
+        fn a_font_that_needs_a_table_keyed_patch_moves_on_to_the_next_source() {
+            bind_harfbuzz();
+            let harness = Harness::new();
+            let original = inter();
+            let map = patch_map(&FIXTURE_ID, &[128], &[&points("a")], 1, None);
+            harness.collection.add_style_sheet(SHEET);
+            harness.lookup("A");
+            harness.finish(&HashMap::from([("a.ttf", Ok(add_table(&original, IFT_TABLE, map)))]));
+            assert_eq!(harness.urls(), ["b.ttf"]);
+        }
+
+        #[test]
+        fn a_font_not_declared_incremental_is_an_ordinary_font() {
+            bind_harfbuzz();
+            let harness = Harness::new();
+            let fixture = incremental_font(&inter(), &[&points("fi")], &stored_brotli);
+            harness.collection.add_style_sheet("@font-face { font-family: A; src: url(a.ttf) }");
+            harness.lookup("A");
+            harness.finish(&HashMap::from([("a.ttf", Ok(fixture.font))]));
+            let typeface = harness.lookup("A").expect("the font");
+            let tag = OpenTypeTag::new(u32::from_be_bytes(IFT_TABLE));
+            assert!(typeface.platform_typeface().try_get_table(tag).is_none());
+            shaped(&*installed(), &typeface, "en");
+            harness.collection.run_pending_work();
+            assert!(harness.urls().is_empty());
         }
     }
 
