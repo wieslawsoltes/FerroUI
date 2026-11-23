@@ -10,7 +10,7 @@ const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:Tod
     Width="380" Height="280" Background="#F2F6FB">
     <Grid Margin="20" RowDefinitions="40,44,46,*">
         <TextBlock Text="Order note" FontSize="25" Foreground="#162C4A"/>
-        <TextBox Grid.Row="1" Name="Note" FontSize="17" Watermark="Enter a note"/>
+        <TextBox Grid.Row="1" Name="Note" FontSize="17"/>
         <app:PreviewBadge Grid.Row="2" Text="{Binding #Note.Text}" FontSize="16" Foreground="#194779"/>
         <ScrollViewer Grid.Row="3">
             <StackPanel Spacing="8">
@@ -57,6 +57,9 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
                 assert.equal(frame.generation, generation);
                 accepted = { ...frame, pixels };
                 return true;
+            }).catch(async error => {
+                const { status } = content<{ status: string }>(await invoke('designer_hosted_animations', { session }));
+                throw new Error(`App Preview did not deliver the expected frame. ${status}`, { cause: error });
             });
             return accepted!;
         };

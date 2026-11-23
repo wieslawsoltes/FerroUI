@@ -51,6 +51,8 @@ Use **App Preview Property Transitions** to edit a source-backed XAML or mapped 
 These gestures use the app’s native input path and keep the authored source buffer intact.
 [MCP reference](reference.md#drive-an-editor-workflow)
 
+![App Preview shows the entered order note in the field and its bound badge, with the order list scrolled beside the XAML source.](../images/vscode-app-preview-agent-input.png)
+
 ### Edit a palette in App Preview
 
 1. Open an XAML App Preview with the current `ferroui-designer-support` and choose the **App Preview palette** color icon in the toolbar.
