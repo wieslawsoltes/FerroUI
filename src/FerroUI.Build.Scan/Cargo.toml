@@ -17,6 +17,12 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+# The check of the default XML namespace (docs/porting/PORTING-GUIDE.md, ground rule 7).
+[[example]]
+name = "xml_namespaces"
+path = "examples/xml_namespaces.rs"
+test = true
+
 # The crate is a build dependency of the framework crates themselves (the base crate, the controls,
 # the XAML runtime library), so it depends on nothing of the framework: the standard library and the
 # three crates the scanner reads Rust source with (docs/porting/xaml.md, 9.5.13).

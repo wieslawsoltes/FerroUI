@@ -1,0 +1,116 @@
+# The default XML namespace (ground rule 7 of docs/porting/PORTING-GUIDE.md, #1279).
+#
+# Read by `cargo run -p ferroui-build-scan --example xml_namespaces -- --check`.
+# exception <namespace>  # why it stays out of the default XML namespace
+# open <namespace>       # not mapped yet, with its ticket
+# uri <xml namespace>    # another XML namespace still declared, with its ticket
+# collision <name>       # a name in two namespaces, with its decision
+
+# Stay out.
+exception FerroUI.Automation.Peers # automation peers are created by controls and are not markup
+exception FerroUI.Controls.Automation.Peers # automation peers are created by controls and are not markup
+exception FerroUI.Markup.Xaml.XamlIl.Runtime # the runtime of compiled markup, which no document names
+exception ReactiveUI # metadata for types of another library
+exception ReactiveUI.Reactive # metadata for types of another library
+exception System # the runtime library: names the language and converters use
+exception System.Collections # the runtime library: names the language and converters use
+exception System.Collections.Generic # the runtime library: names the language and converters use
+exception System.Collections.ObjectModel # the runtime library: names the language and converters use
+exception System.ComponentModel # the runtime library: names the language and converters use
+exception System.Globalization # the runtime library: names the language and converters use
+exception System.Windows.Input # the runtime library: names the language and converters use
+exception XamlX.Runtime # the runtime of compiled markup, which no document names
+
+# Work still open: map each, or move it to an exception with the reason (#1280, #1281).
+open FerroDock.Ferro.CommandBars # #1280, Dock
+open FerroDock.Ferro.Commands # #1280, Dock
+open FerroDock.Ferro.Contract # #1280, Dock
+open FerroDock.Ferro.Diagnostics.Behaviors # #1280, Dock
+open FerroDock.Ferro.Mdi # #1280, Dock
+open FerroDock.Ferro.Selectors # #1280, Dock
+open FerroDock.Model # #1280, Dock
+open FerroDock.Model.CommandBars # #1280, Dock
+open FerroDock.Model.Controls # #1280, Dock
+open FerroDock.Model.Core # #1280, Dock
+open FerroDock.Model.Core.Events # #1280, Dock
+open FerroDock.Model.ReactiveUI # #1280, Dock
+open FerroDock.Model.ReactiveUI.Controls # #1280, Dock
+open FerroDock.Model.ReactiveUI.Core # #1280, Dock
+open FerroDock.Model.ReactiveUI.Services.Ferro.Controls # #1280, Dock
+open FerroDock.Model.Services # #1280, Dock
+open FerroUI.Collections # #1280
+open FerroUI.Controls.Converters # #1280
+open FerroUI.Controls.Embedding.Offscreen # #1280
+open FerroUI.Controls.Models.TreeDataGrid # #1280
+open FerroUI.Controls.Platform # #1280
+open FerroUI.Controls.Primitives.Converters # #1280
+open FerroUI.Controls.Primitives.PopupPositioning # #1280
+open FerroUI.Controls.PullToRefresh # #1280
+open FerroUI.Controls.Repeater # #1280
+open FerroUI.Controls.Selection # #1280
+open FerroUI.Controls.Utils # #1280
+open FerroUI.Data.Core # #1280
+open FerroUI.Data.Core.Plugins # #1280
+open FerroUI.Diagnostics # #1280
+open FerroUI.Diagnostics.Behaviors # #1280, decision 4: DevTools details, proposed *.Internal
+open FerroUI.Diagnostics.Controls # #1280, decision 4: DevTools details, proposed *.Internal
+open FerroUI.Diagnostics.Converters # #1280, decision 4: DevTools details, proposed *.Internal
+open FerroUI.Diagnostics.Models # #1280, decision 4: DevTools details, proposed *.Internal
+open FerroUI.Diagnostics.ViewModels # #1280, decision 4: DevTools details, proposed *.Internal
+open FerroUI.Diagnostics.Views # #1280, decision 4: DevTools details, proposed *.Internal
+open FerroUI.Dialogs # #1280
+open FerroUI.Interactivity # #1280
+open FerroUI.LiveCharts # #1281
+open FerroUI.LiveCharts.Core # #1281
+open FerroUI.Markup.Xaml # #1280
+open FerroUI.Markup.Xaml.Converters # #1280
+open FerroUI.Markup.Xaml.Diagnostics # #1280
+open FerroUI.Markup.Xaml.MarkupExtensions.CompiledBindings # #1280
+open FerroUI.Media.Fonts # #1280
+open FerroUI.Media.Immutable # #1280
+open FerroUI.Media.TextFormatting # #1280
+open FerroUI.Metadata # #1280
+open FerroUI.Navigation # #1280
+open FerroUI.OpenGL.Controls # #1280
+open FerroUI.Platform # #1280
+open FerroUI.Platform.Storage # #1280
+open FerroUI.Rendering # #1280
+open FerroUI.Themes.Fluent.Accents # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.MacOS.Accents # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.MacOS.Converters # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.MacOS.Primitives # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.Material.Accents # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.Material.Converters # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.Material.Primitives # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.WinUI.Accents # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.WinUI.Converters # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Themes.WinUI.Primitives # #1280, decision 4: theme details, proposed *.Internal
+open FerroUI.Utilities # #1280
+open FerroUI.View # #1280
+open FerroUI.Xaml.Interactions.DragAndDrop.Controls # #1280
+open ReactiveUI.FerroUI # #1281
+
+# Other XML namespaces, kept as aliases once their types are mapped (#1281).
+uri http://reactiveui.net # #1281
+uri https://ferroui.dev/livecharts # #1281
+uri https://ferroui.dev/livecharts/core # #1281
+uri https://github.com/ferroui/charts # #1281
+uri https://github.com/protranslate/xaml # #1281
+
+# Names in two namespaces. The decisions are in docs/porting/default-xml-namespace.md.
+collision Application # decision 4
+collision AreaSeries # decision 3
+collision Axis # decision 3
+collision Chart # decision 3
+collision ChartSeriesCollection # decision 3
+collision ColumnDefinition # decision 4
+collision CornerRadiusToThicknessConverter # decision 4
+collision CornerRadiusToThicknessConverterKind # decision 4
+collision DateTimeAxis # decision 3
+collision DensityStyle # decision 2, live
+collision DragPreviewWindow # decision 1
+collision InfoBarPanel # decision 4
+collision LineSeries # decision 3
+collision OverlayLayer # decision 1, live
+collision SystemAccentColors # decision 4
+collision TabViewEqualWidthPanel # decision 4
