@@ -181,3 +181,13 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 3000
         run: xvfb-run -a make -C samples/CApi run-go
+      # The Dart bindings (#636): the SDK is installed here, and this is their only check.
+      - uses: dart-lang/setup-dart@2286a0c042b44434fe26d292bbce8d34f7ec662b # v1.8.2
+        with:
+          sdk: '3.5.4'
+      - name: Tests of the Dart bindings
+        run: make -C samples/CApi test-dart
+      - name: The Dart hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run-dart

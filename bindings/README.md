@@ -14,13 +14,15 @@ same facts and a new language is one backend:
    docs/osprey.md); C++ is the second (`scripts/generate_cpp_bindings.py`, `bindings/cpp/`, a
    header-only library with RAII handles and typed accessors, `samples/CApi/cpp/`); Go is the
    third (`scripts/generate_go_bindings.py`, `bindings/go/`, a cgo package with the UI thread
-   locked, `samples/CApi/go/`).
+   locked, `samples/CApi/go/`); Dart is the fourth (`scripts/generate_dart_bindings.py`,
+   `bindings/dart/`, extension types over `dart:ffi`, `samples/CApi/dart/`).
 
 ```sh
 python3 scripts/generate_api_model.py          # the model and the ID table of the library
 python3 scripts/generate_osprey_bindings.py    # the Osprey bindings: full, and each sample's selection
 python3 scripts/generate_cpp_bindings.py       # the C++ bindings: full, and each sample's selection
 python3 scripts/generate_go_bindings.py        # the Go bindings: full, and each sample's selection
+python3 scripts/generate_dart_bindings.py      # the Dart bindings: full, and each sample's selection
 python3 scripts/test_generate_bindings.py      # the tests of both
 ```
 

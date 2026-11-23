@@ -38,6 +38,7 @@ MODEL = load("generate_api_model")
 OSPREY = load("generate_osprey_bindings")
 CPP = load("generate_cpp_bindings")
 GO = load("generate_go_bindings")
+DART = load("generate_dart_bindings")
 sys.path.insert(0, os.path.join(SCRIPTS, "capi"))
 _collect = importlib.util.spec_from_file_location("collect_manifest", os.path.join(SCRIPTS, "capi", "collect_manifest.py"))
 COLLECT = importlib.util.module_from_spec(_collect)
@@ -264,6 +265,59 @@ class GoTests(unittest.TestCase):
                     self.assertEqual(file.read(), text, f"{directory}/{name} is stale: python3 scripts/generate_go_bindings.py")
 
 
+class DartTests(unittest.TestCase):
+    """What can be checked without a Dart SDK; the job of capi.yml analyzes and runs it."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(DART.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.text = DART.generate(cls.model)
+
+    def test_names_follow_dart(self):
+        self.assertEqual(DART.camel(["font", "size"]), "fontSize")
+        self.assertEqual(DART.safe("default"), "defaultValue")
+        self.assertEqual(DART.safe("fontSize"), "fontSize")
+
+    def test_properties_are_getters_and_setters(self):
+        self.assertIn("extension type Button._(int handle) implements ContentControl {", self.text)
+        self.assertRegex(self.text, r"double get fontSize => _getF64\(handle, \d+\);")
+        self.assertRegex(self.text, r"set fontSize\(double value\) => _setF64\(handle, \d+, value\);")
+        self.assertRegex(self.text, r"static void setRow\(FerroObject target, int value\)")
+        self.assertIn("Subscription onClick(void Function(Button sender) handler)", self.text)
+
+    def test_only_reads_are_leaf_calls(self):
+        # A write can raise an event whose handler is Dart code, which a leaf call cannot run.
+        for name in ("ferro_set_f64", "ferro_set_str", "ferro_set_bool", "ferro_set_handle", "ferro_raise", "ferro_app_run"):
+            found = re.search(r"'" + name + r"'([^)]*)\)", self.text)
+            self.assertIsNotNone(found, name)
+            self.assertNotIn("isLeaf", found.group(1), name)
+        self.assertIn("'ferro_get_f64_or', isLeaf: true", self.text)
+
+    def test_members_do_not_collide(self):
+        for name, body in re.findall(r"^extension type (?:const )?(\w+)[^\n]*\{\n(.*?)^\}", self.text, re.M | re.S):
+            getters = re.findall(r"^  (?:static )?[\w<>?]+ get (\w+) =>", body, re.M)
+            self.assertEqual(len(getters), len(set(getters)), name)
+            statics = re.findall(r"^  static const \w+ (\w+) =", body, re.M)
+            self.assertEqual(len(statics), len(set(statics)), name)
+
+    def test_a_selection_registers_its_classes(self):
+        text = DART.generate(self.model, {"classes": ["Button"]})
+        self.assertIn("'ferro_type_button'", text)
+        self.assertIn("extension type ContentControl._", text)
+        self.assertNotIn("extension type Grid._", text)
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in DART.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            with open(os.path.join(directory, DART.FILE), encoding="utf-8") as file:
+                self.assertEqual(file.read(), DART.generate(self.model, manifest),
+                                 f"{directory} is stale: python3 scripts/generate_dart_bindings.py")
+
+
 class ManifestTests(unittest.TestCase):
     """The lists of properties and events of a manifest, and a manifest collected from sources."""
 
@@ -339,6 +393,19 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
         self.assertEqual(found["events"], ["Click"])
 
+    def test_dart_sources(self):
+        found = self.collect("app.dart", """
+            // Slider in a comment is not a use.
+            final button = Button()
+              ..fontSize = 12
+              ..content = 'Grid in a text';
+            button.onClick((sender) {});
+            Grid.setRow(button, 1);
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+
     def test_osprey_sources_keep_every_group(self):
         found = self.collect("app.osp", 'let b = button() |> fontSize(12.0) |> onClick(1)\n')
         self.assertEqual(found["classes"], ["Button"])
@@ -363,6 +430,8 @@ class ManifestTests(unittest.TestCase):
                 cases.append(([os.path.dirname(manifest)], manifest))
         cases.append(([os.path.join(samples, "go", "hello_world", "main.go")],
                       os.path.join(samples, "go", "hello_world", "ferroui.json")))
+        cases.append(([os.path.join(samples, "dart", "hello_world", "main.dart")],
+                      os.path.join(samples, "dart", "hello_world", "ferroui.json")))
         for manifest in glob.glob(os.path.join(samples, "osprey-bindings", "*", "ferroui.json")):
             cases.append(([os.path.dirname(manifest)], manifest))
         self.assertGreater(len(cases), 5)

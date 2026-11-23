@@ -4,7 +4,7 @@
     python3 scripts/capi/collect_manifest.py <file or directory>... [--out ferroui.json]
     python3 scripts/capi/collect_manifest.py <file or directory>... --check ferroui.json
 
-Reads C and C++ (`.c .h .cc .cpp .cxx .hpp`), Go (`.go`) and Osprey (`.osp`) and writes the `ferroui.json` the
+Reads C and C++ (`.c .h .cc .cpp .cxx .hpp`), Go (`.go`), Dart (`.dart`) and Osprey (`.osp`) and writes the `ferroui.json` the
 generators of the bindings and of the library take: the `classes`, `properties` and `events` the
 sources name and the groups of calls (`abi`) they use. With `--check` it writes nothing and fails
 when a manifest leaves out a class, a property, an event or a group the sources use.
@@ -19,6 +19,7 @@ hand. Generated bindings (a `ferroui/` directory) and the outputs of the library
 | C | `ferro_type_stack_panel()`, a literal `"StackPanel"` | a literal `"FontSize"` | a literal `"Click"` |
 | C++ | `StackPanel` | `.font_size(`, `Grid::set_row(` | `.on_click(`, `.subscribe_click(` |
 | Go | `NewStackPanel(`, `ferroui.StackPanel` | `.SetFontSize(`, `.FontSize(`, `GridSetRow(` | `.OnClick(` |
+| Dart | `StackPanel(`, `StackPanel.of(` | `.fontSize`, `Grid.setRow(` | `.onClick(` |
 | Osprey | `stackPanel(` | `fontSize(`, `getFontSize(` | `onClick(`, `raiseClick(` |
 
 Osprey programs run on its runtime, which uses frames and signals, so a manifest collected from
@@ -41,6 +42,7 @@ from generate_osprey_bindings import load_model, scalar_kinds, weights  # noqa: 
 C_SUFFIXES = {".c", ".h"}
 CPP_SUFFIXES = {".cc", ".cpp", ".cxx", ".hpp"}
 GO_SUFFIXES = {".go"}
+DART_SUFFIXES = {".dart"}
 OSPREY_SUFFIXES = {".osp"}
 SKIPPED_DIRECTORIES = {"ferroui", "ferroui-library"}
 
@@ -68,6 +70,7 @@ class Spellings:
         self.cpp_properties, self.cpp_attached, self.cpp_events = {}, {}, {}
         self.osprey_classes, self.osprey_properties, self.osprey_events = {}, {}, {}
         self.go_properties, self.go_attached, self.go_events = {}, {}, {}
+        self.dart_properties, self.dart_attached, self.dart_events = {}, {}, {}
         weight = weights(model)
         for cls in model["classes"]:
             if cls["creatable"]:
@@ -80,7 +83,12 @@ class Spellings:
                     self.cpp_attached[key] = prop["name"]
                     self.go_attached[f"{owner}{short}"] = prop["name"]
                     self.go_attached[f"{owner}Set{short}"] = prop["name"]
+                    self.dart_attached[f"{owner}.get{short}"] = prop["name"]
+                    self.dart_attached[f"{owner}.set{short}"] = prop["name"]
                 else:
+                    camel = prop["words"][0] + "".join(word.capitalize() for word in prop["words"][1:])
+                    for spelling in (camel, camel + "Value", camel + "Object"):
+                        self.dart_properties.setdefault(spelling, set()).add(prop["name"])
                     pascal = "".join(word.capitalize() for word in prop["words"])
                     for spelling in (pascal, pascal + "Value", pascal + "Object", "Set" + pascal,
                                      "Set" + pascal + "Value", "Set" + pascal + "Object"):
@@ -100,6 +108,7 @@ class Spellings:
             self.cpp_events[f"subscribe_{words}"] = event["name"]
             self.osprey_events[names.event(event)] = event["name"]
             self.go_events["On" + "".join(word.capitalize() for word in event["words"])] = event["name"]
+            self.dart_events["on" + "".join(word.capitalize() for word in event["words"])] = event["name"]
             self.osprey_events["raise" + "".join(word.capitalize() for word in event["words"])] = event["name"]
 
     @staticmethod
@@ -155,6 +164,8 @@ def read_cpp(text, spellings, usage):
 
 
 def read_go(text, spellings, usage):
+    # The runtime of the Go bindings links `ferro_raise`, a call of this group.
+    usage.groups.add(group_of("ferro_raise"))
     code = LITERAL.sub('""', text)
     for word in re.findall(r"\b(?:New|ferroui\.)([A-Z]\w*)", code):
         if word in spellings.class_names:
@@ -165,6 +176,20 @@ def read_go(text, spellings, usage):
             usage.events.add(spellings.go_events[member])
         if member in spellings.go_attached:
             usage.properties.add(spellings.go_attached[member])
+
+
+def read_dart(text, spellings, usage):
+    code = re.sub(r"'(?:[^'\\\n]|\\.)*'", "''", LITERAL.sub('""', text))
+    for word in re.findall(r"\b([A-Z]\w*)\s*(?:\(|\.of\s*\()", code):
+        if word in spellings.class_names:
+            usage.classes.add(word)
+    for owner, member in re.findall(r"\b([A-Z]\w*)\.((?:get|set)[A-Z]\w*)\s*\(", code):
+        if f"{owner}.{member}" in spellings.dart_attached:
+            usage.properties.add(spellings.dart_attached[f"{owner}.{member}"])
+    for member in re.findall(r"\.\s*([a-z]\w*)", code):
+        usage.properties.update(spellings.dart_properties.get(member, ()))
+        if member in spellings.dart_events:
+            usage.events.add(spellings.dart_events[member])
 
 
 def read_osprey(text, spellings, usage):
@@ -206,6 +231,8 @@ def collect(paths, model=None, names=None):
             language, reader = "cpp", read_cpp
         elif suffix in GO_SUFFIXES:
             language, reader = "go", read_go
+        elif suffix in DART_SUFFIXES:
+            language, reader = "dart", read_dart
         elif suffix in OSPREY_SUFFIXES:
             language, reader = "osprey", read_osprey
         else:
@@ -214,7 +241,7 @@ def collect(paths, model=None, names=None):
             reader(strip_comments(file.read(), language), spellings, usage)
         found += 1
     if not found:
-        raise SystemExit("no C, C++, Go or Osprey source among the paths")
+        raise SystemExit("no C, C++, Go, Dart or Osprey source among the paths")
     return usage.manifest()
 
 

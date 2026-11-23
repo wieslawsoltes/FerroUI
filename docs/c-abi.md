@@ -351,7 +351,9 @@ machine: the numbers say how large the overhead is, not its exact value.
   library with RAII handles and typed accessors, generated from the model or a selection; a
   failed call throws, and nothing unwinds across the ABI. Go is there too (`bindings/go/`,
   `scripts/generate_go_bindings.py`: cgo, `runtime.LockOSThread` for the UI thread, handlers
-  through `cgo.Handle`). Still to come: Dart and Flutter
+  through `cgo.Handle`), and so is Dart (`bindings/dart/`, `scripts/generate_dart_bindings.py`:
+  extension types over `dart:ffi`; a standalone Dart program is not on the main thread of the
+  process, so its windows run on Linux and Windows and not on macOS). Still to come: Flutter
   (`dart:ffi`, `ffigen`); C#, Python, Swift and Zig as demand shows.
 - **Osprey (#950):** the generated bindings of section 12 (shape 1: an Osprey executable over
   the dynamic library with named-function callbacks); FerroUI owning the process with Osprey as
