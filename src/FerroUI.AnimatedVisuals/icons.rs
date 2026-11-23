@@ -6,20 +6,8 @@ use crate::source::{AnimatedVisualSource, LottieVisualSource};
 use ferroui_base::{ferro_class, ferro_class_info, instantiate, FerroObjectImpl, Ref};
 
 macro_rules! animated_icon_sources {
-    ($($(#[$meta:meta])* $name:ident => $file:literal,)*) => {
+    ($($name:ident => $file:literal,)*) => {
         $(
-            $(#[$meta])*
-            #[repr(C)]
-            pub struct $name {
-                base: LottieVisualSource,
-            }
-
-            ferro_class!($name: LottieVisualSource);
-            ferro_class_info!($name {
-                new: $name::new,
-                markup: { namespace: "FerroUI.AnimatedVisuals" },
-            });
-
             impl FerroObjectImpl for $name {}
 
             impl $name {
@@ -50,23 +38,113 @@ macro_rules! animated_icon_sources {
 }
 
 animated_icon_sources! {
-    /// The check mark of a check box.
     AnimatedAcceptVisualSource => "icons/Accept.json",
-    /// The arrow of a back button.
     AnimatedBackVisualSource => "icons/Back.json",
-    /// The chevron of a drop-down.
     AnimatedChevronDownSmallVisualSource => "icons/ChevronDownSmall.json",
-    /// A chevron that turns from right to down.
     AnimatedChevronRightDownSmallVisualSource => "icons/ChevronRightDownSmall.json",
-    /// A chevron that turns from up to down.
     AnimatedChevronUpDownSmallVisualSource => "icons/ChevronUpDownSmall.json",
-    /// The magnifier of a search box.
     AnimatedFindVisualSource => "icons/Find.json",
-    /// The three lines of a navigation button.
     AnimatedGlobalNavigationButtonVisualSource => "icons/GlobalNavigationButton.json",
-    /// The gear of a settings button.
     AnimatedSettingsVisualSource => "icons/Settings.json",
 }
+
+// Written out for each class: the scan of the markup metadata resolves a class by the item of
+// its module, which an item made by a macro is not.
+/// The check mark of a check box.
+#[repr(C)]
+pub struct AnimatedAcceptVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedAcceptVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedAcceptVisualSource {
+    new: AnimatedAcceptVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
+
+/// The arrow of a back button.
+#[repr(C)]
+pub struct AnimatedBackVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedBackVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedBackVisualSource {
+    new: AnimatedBackVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
+
+/// The chevron of a drop-down.
+#[repr(C)]
+pub struct AnimatedChevronDownSmallVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedChevronDownSmallVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedChevronDownSmallVisualSource {
+    new: AnimatedChevronDownSmallVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
+
+/// A chevron that turns from right to down.
+#[repr(C)]
+pub struct AnimatedChevronRightDownSmallVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedChevronRightDownSmallVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedChevronRightDownSmallVisualSource {
+    new: AnimatedChevronRightDownSmallVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
+
+/// A chevron that turns from up to down.
+#[repr(C)]
+pub struct AnimatedChevronUpDownSmallVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedChevronUpDownSmallVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedChevronUpDownSmallVisualSource {
+    new: AnimatedChevronUpDownSmallVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
+
+/// The magnifier of a search box.
+#[repr(C)]
+pub struct AnimatedFindVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedFindVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedFindVisualSource {
+    new: AnimatedFindVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
+
+/// The three lines of a navigation button.
+#[repr(C)]
+pub struct AnimatedGlobalNavigationButtonVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedGlobalNavigationButtonVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedGlobalNavigationButtonVisualSource {
+    new: AnimatedGlobalNavigationButtonVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
+
+/// The gear of a settings button.
+#[repr(C)]
+pub struct AnimatedSettingsVisualSource {
+    base: LottieVisualSource,
+}
+
+ferro_class!(AnimatedSettingsVisualSource: LottieVisualSource);
+ferro_class_info!(AnimatedSettingsVisualSource {
+    new: AnimatedSettingsVisualSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals" },
+});
 
 #[cfg(test)]
 mod tests {
