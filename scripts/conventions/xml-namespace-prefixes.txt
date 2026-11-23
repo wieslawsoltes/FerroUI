@@ -19,6 +19,7 @@ samples/ChartsDemo/MainView.xaml	https://github.com/ferroui/charts	1
 samples/ControlCatalog/CustomThemes.xaml	FerroUI.Themes.WinUI	1
 samples/ControlCatalog/Pages/CartesianChartPage.xaml	https://ferroui.dev/livecharts	1
 samples/ControlCatalog/Pages/ColorPickerPage.xaml	FerroUI.Controls	1
+samples/ControlCatalog/Pages/DialogsPage.xaml	FerroUI.Platform.Storage	1
 samples/ControlCatalog/Pages/GeoMapPage.xaml	https://ferroui.dev/livecharts	1
 samples/ControlCatalog/Pages/PieChartPage.xaml	https://ferroui.dev/livecharts	1
 samples/ControlCatalog/Pages/PolarChartPage.xaml	https://ferroui.dev/livecharts	1
@@ -49,6 +50,7 @@ src/Behaviors/FerroUI.Xaml.Interactions.Draggable/Styles.xaml	FerroUI.Xaml.Inter
 src/Dock/FerroDock.Ferro.Diagnostics/controls/RootDockDebug.xaml	FerroDock.Ferro.Converters	1
 src/Dock/FerroDock.Ferro.Diagnostics/controls/RootDockDebug.xaml	FerroDock.Ferro.Diagnostics.Controls	1
 src/Dock/FerroDock.Ferro.Themes.Browser/Styles/BrowserTabAccents.xaml	FerroDock.Ferro.Controls	1
+src/Dock/FerroDock.Ferro.Themes.Browser/Styles/BrowserTabAccents.xaml	FerroUI.Platform	1
 src/Dock/FerroDock.Ferro.Themes.Browser/Styles/BrowserTabTheme.xaml	FerroDock.Ferro.Controls	1
 src/Dock/FerroDock.Ferro.Themes.Browser/Styles/BrowserTabTheme.xaml	FerroDock.Ferro.Themes.Fluent	1
 src/Dock/FerroDock.Ferro.Themes.Browser/Styles/Controls/HostWindow.xaml	FerroDock.Ferro.Behaviors	1
