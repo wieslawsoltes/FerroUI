@@ -1149,6 +1149,10 @@ impl ProGpuDrawingContext {
             return Some(image);
         }
         if let Some(bitmap) = any.downcast_ref::<ProGpuBitmap>() {
+            if !bitmap.pixels_ready() {
+                notes::note_once("pixels-pending", "a bitmap whose pixels are not back from the GPU is not drawn");
+                return None;
+            }
             let key = (bitmap as *const ProGpuBitmap as usize, bitmap.version());
             if let Some(image) = self.bitmaps.get(&key) {
                 return Some(*image);
