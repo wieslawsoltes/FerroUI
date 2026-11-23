@@ -3530,7 +3530,7 @@
       ]
     },
     "ItemsRepeater": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ItemsRepeater.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -3591,9 +3591,13 @@
         {
           "path": "samples/WinUIGallery/repeater_samples_tests.rs",
           "name": "repeater_pages_and_their_handlers_release_their_native_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/repeater_samples_tests.rs",
+          "name": "recipe_source_keeps_stable_keys_and_announces_the_filter"
         }
       ],
-      "notes": "All six catalog examples (and the nested repeaters of the source page, which has no sample definition of its own) use the native ItemsRepeater of ferroui-controls-repeater with the layouts, element factories and selectors of the port; the Gallery layouts ActivityFeedLayout and VariedImageSizeLayout are Rust VirtualizingLayouts; x:Bind becomes {Binding} over markup types and the C# handlers are Rust. Four examples are ported; the animated scrolling and content-heavy examples miss the accessibility announcements and the key-index mapping of their custom source. ThemeResource becomes DynamicResource; text styles are written as their sizes and weights. Rendering and host accessibility acceptance remain pending.",
+      "notes": "All six catalog examples (and the nested repeaters of the source page, which has no sample definition of its own) use the native ItemsRepeater of ferroui-controls-repeater with the layouts, element factories and selectors of the port; the Gallery layouts ActivityFeedLayout and VariedImageSizeLayout are Rust VirtualizingLayouts; x:Bind becomes {Binding} over markup types and the C# handlers are Rust. The announcements are polite live regions and the content-heavy example's source has the stable keys of its IKeyIndexMapping. ThemeResource becomes DynamicResource; text styles are written as their sizes and weights. Rendering and host accessibility acceptance remain pending.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterBasicNonInteractiveItems.txt",
@@ -3686,8 +3690,8 @@
         {
           "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterAnimatedScrollingContentDisplay.txt",
           "source_sha256": "b9ce86b8eac579c012bf04c28a0d573374348ce485d2a86a4c8120a9a1d2fefe",
-          "status": "partial",
-          "notes": "Buttons of the 20 colours: a click colours the rectangle and names the selected button; GotFocus remembers the index and centres the item; GettingFocus returns focus from outside to that item; Home and End reach the first and the last item. Adapted: the composition ExpressionAnimation on the scroll manipulation property set becomes a scale set from the scroll offset after each layout pass and scroll change (same expression, about the item centre); StartBringIntoView with VerticalAlignmentRatio 0.5 becomes a scroll offset that centres the item, without the animation. Pending: the accessibility announcement of UIHelper.AnnounceActionForAccessibility (no notification event on FerroUI automation peers).",
+          "status": "ported",
+          "notes": "Buttons of the 20 colours: a click colours the rectangle and names the selected button; GotFocus remembers the index and centres the item; GettingFocus returns focus from outside to that item; Home and End reach the first and the last item. Adapted: the composition ExpressionAnimation on the scroll manipulation property set becomes a scale set from the scroll offset after each layout pass and scroll change (same expression, about the item centre); StartBringIntoView with VerticalAlignmentRatio 0.5 becomes a scroll offset that centres the item, without the animation. UIHelper.AnnounceActionForAccessibility is a polite live region.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -3710,8 +3714,8 @@
         {
           "source": "WinUIGallery/Samples/ItemsRepeater/ItemsRepeaterVirtualizedContentHeavyLayout.txt",
           "source_sha256": "b3778bae44caa700e84f3be2b66c0843d141355d74f63bf8086b55f5b1b1f7ae",
-          "status": "partial",
-          "notes": "The Gallery VariedImageSizeLayout is ported to a Rust VirtualizingLayout (columns of 200, the lowest column first, bounds cached until the items change); 1000 generated recipes (seeded generator) bound with {Binding} over the Recipe markup type; the ingredient filter (ignoring case) and the two sort orders replace the items. Pending: the IKeyIndexMapping of the custom MyItemsSource (an observable list is replaced instead) and the automation notification of the result count.",
+          "status": "ported",
+          "notes": "The Gallery VariedImageSizeLayout is ported to a Rust VirtualizingLayout (columns of 200, the lowest column first, bounds cached until the items change); 1000 generated recipes (seeded generator) bound with {Binding} over the Recipe markup type; the ingredient filter (ignoring case) and the two sort orders replace the items. MyItemsSource is a native items list with its IKeyIndexMapping, and the notification of the result count is a polite live region.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",

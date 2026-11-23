@@ -401,7 +401,7 @@ Phase G1 of the full port (#418) gives the pending pages whose control is on mai
 | TitleBar | 3 of 3 | ported | `window_samples.rs` | `window_samples_tests.rs` |
 | RichTextBlock | 4 of 4 | ported | `text_samples.rs` | `text_samples_tests.rs` |
 | RichEditBox | 2 ported, 1 partial, 2 not applicable | partial | `text_samples.rs` | `text_samples_tests.rs` |
-| ItemsRepeater | 4 ported, 2 partial | partial | `repeater_samples.rs` | `repeater_samples_tests.rs` |
+| ItemsRepeater | 6 of 6 | ported | `repeater_samples.rs` | `repeater_samples_tests.rs` |
 | LayoutPanel | 1 of 1 | ported | `repeater_samples.rs` | `repeater_samples_tests.rs` |
 | InkCanvas | 3 of 3 | ported | `ink_samples.rs` | `ink_samples_tests.rs` |
 | Chart | 3 ported, 4 partial | partial | `chart_samples.rs` | `chart_samples_tests.rs` |
