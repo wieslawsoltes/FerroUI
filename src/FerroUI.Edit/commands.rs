@@ -421,6 +421,29 @@ mod tests {
     }
 
     #[test]
+    fn line_commands_stay_on_control_with_the_apple_keymap() {
+        use ferroui_base::input::platform::PlatformHotkeyConfiguration;
+        use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
+
+        let _scope = crate::tests::test_scope();
+        ferroui_base::FerroLocator::current_mutable()
+            .bind_to_self(std::rc::Rc::new(PlatformHotkeyConfiguration::apple()));
+        let editor = crate::tests::laid_out_editor("one\ntwo\nthree");
+        editor.set_caret_offset(5).unwrap();
+
+        let mut args = KeyEventArgs::new();
+        args.key = Key::D;
+        args.key_modifiers = KeyModifiers::META;
+        args.set_routed_event(Some(InputElement::key_down_event()));
+        editor.text_area().raise_event(&args);
+        assert!(!args.handled());
+        assert_eq!(editor.text(), "one\ntwo\nthree");
+
+        control_key(&editor, Key::D);
+        assert_eq!(editor.text(), "one\nthree");
+    }
+
+    #[test]
     fn only_bound_modifier_combinations_change_the_document_or_caret() {
         use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
         use ferroui_edit_core::editing::Selection;
