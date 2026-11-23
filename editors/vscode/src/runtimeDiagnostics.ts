@@ -20,10 +20,10 @@ export interface RuntimeFrameStats {
     last_interval_ms?: number;
 }
 
-export async function readRuntimeDiagnostics(client: RuntimeClient) {
+export async function readRuntimeDiagnostics(client: RuntimeClient, signal?: AbortSignal) {
     const [frames, logs] = await Promise.all([
-        client.call<RuntimeFrameStats[]>('get_frame_stats'),
-        client.call<{ cursor: number; entries: RuntimeLog[] }>('get_logs'),
+        client.call<RuntimeFrameStats[]>('get_frame_stats', {}, signal),
+        client.call<{ cursor: number; entries: RuntimeLog[] }>('get_logs', {}, signal),
     ]);
     return { frames, logs };
 }

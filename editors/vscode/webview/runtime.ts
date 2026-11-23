@@ -1,4 +1,5 @@
-import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, ToRuntime } from '../src/runtimeProtocol';
+import { runtimeFilterLength, type FromRuntime, type RuntimeFrame, type RuntimeHierarchy, type RuntimeInspection,
+    type RuntimeNode, type RuntimeProperty, type RuntimeViewChange, type ToRuntime } from '../src/runtimeProtocol';
 import type { AppRuntime } from '../src/runtimeTargets';
 import { create, element, iconButton } from './dom';
 import { PreviewBitmap } from './previewBitmap';
@@ -26,6 +27,10 @@ const reveal = element('runtime-reveal');
 const templates = element('runtime-templates');
 let frame: RuntimeFrame | undefined;
 let pending = 0;
+let decoding: number | undefined;
+type Inspection = Extract<ToRuntime, { type: 'inspection' }>;
+let pendingInspection: Inspection | undefined;
+let inspectionRevision = 0;
 let selected: number | undefined;
 let interaction = false;
 let currentTarget: AppRuntime | undefined;
@@ -33,9 +38,13 @@ let currentGeneration: number | undefined;
 let currentWindow: number | undefined;
 
 const send = (message: FromRuntime) => vscode.postMessage(message);
-const inspect = (node: number, view = detail.value as RuntimeInspection) => {
-    if (frame) send({ type: 'select', token: frame.token, node, view });
+const changeView = (change: RuntimeViewChange) => {
+    if (currentGeneration !== undefined) send({ type: 'presentation', generation: currentGeneration, change });
 };
+const inspect = (node: number, view = detail.value as RuntimeInspection) => {
+    if (frame) changeView({ action: 'select', frame: frame.token, node, view });
+};
+filter.maxLength = propertyFilter.maxLength = runtimeFilterLength;
 
 function label(node: RuntimeNode) {
     const name = node.name || node.text;
@@ -120,6 +129,47 @@ function filterProperties(): void {
     }
 }
 
+function updateSelection(): void {
+    setMode(interaction);
+    for (const button of tree.querySelectorAll('button')) {
+        button.setAttribute('aria-pressed', String(button.dataset.node === String(selected)));
+    }
+}
+
+function clearSelection(): void {
+    selected = undefined;
+    pendingInspection = undefined;
+    inspectionRevision = 0;
+    inspector.replaceChildren();
+    reveal.hidden = templates.hidden = propertyFilter.hidden = true;
+    updateSelection();
+}
+
+function invalidateFrame(): void {
+    pending++;
+    decoding = undefined;
+    frame = undefined;
+    main.setAttribute('aria-busy', 'true');
+    detail.disabled = true;
+    tree.replaceChildren();
+    clearSelection();
+    problem.hidden = true;
+}
+
+function showInspection(message: Inspection): void {
+    if (inspectionRevision === message.revision) return;
+    inspectionRevision = message.revision;
+    const { node, view, data, canReveal, canApply, canTrace, canInspectTemplates } = message.inspection;
+    selected = node;
+    detail.value = view;
+    reveal.hidden = !canReveal;
+    templates.hidden = !canInspectTemplates;
+    propertyFilter.hidden = view !== 'properties';
+    updateSelection();
+    if (view === 'properties') showProperties(data as RuntimeProperty[], canApply, canTrace);
+    else inspector.replaceChildren(create('pre', JSON.stringify(data, null, 2)));
+}
+
 window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
     const message = event.data;
     if (message.type === 'state') {
@@ -130,7 +180,8 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         target.disabled = options.length < 2;
         target.value = message.target ?? '';
         const windows = message.windows.map(node => new Option(label(node), String(node.node_id)));
-        if (windows.length !== windowChoice.options.length || windows.some((option, i) => option.value !== windowChoice.options[i]?.value)) {
+        if (windows.length !== windowChoice.options.length || windows.some((option, i) => option.value !== windowChoice.options[i]?.value
+            || option.label !== windowChoice.options[i]?.label)) {
             windowChoice.replaceChildren(...windows);
         }
         windowChoice.value = String(message.root ?? '');
@@ -141,22 +192,35 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
             currentTarget = message.target;
             currentGeneration = message.generation;
             currentWindow = message.root;
-            pending++;
-            frame = undefined;
-            selected = undefined;
-            main.setAttribute('aria-busy', 'true');
-            inspector.replaceChildren();
-            tree.replaceChildren();
-            reveal.hidden = true;
-            templates.hidden = true;
-            propertyFilter.hidden = true;
-            problem.hidden = true;
-            setMode(false);
+            invalidateFrame();
         }
+    } else if (message.type === 'presentation') {
+        const { hierarchy: treeKind, inspection, mode, treeFilter, propertyFilter: propertyQuery } = message.presentation;
+        if (treeKind !== undefined) hierarchy.value = treeKind;
+        if (inspection !== undefined) detail.value = inspection;
+        if (mode !== undefined) setMode(mode === 'interact');
+        if (treeFilter !== undefined && filter.value !== treeFilter) {
+            filter.value = treeFilter;
+            renderTree();
+        }
+        if (propertyQuery !== undefined && propertyFilter.value !== propertyQuery) {
+            propertyFilter.value = propertyQuery;
+            filterProperties();
+        }
+    } else if (message.type === 'invalidateFrame') {
+        invalidateFrame();
+    } else if (message.type === 'clearSelection') {
+        clearSelection();
     } else if (message.type === 'frame') {
+        if (frame?.token === message.frame.token || decoding === message.frame.token) return;
         const revision = ++pending;
+        decoding = message.frame.token;
         let bitmap: ImageBitmap | null;
-        try { bitmap = await presenter.decode(message.frame.png); } catch { return; }
+        try { bitmap = await presenter.decode(message.frame.png); }
+        catch {
+            if (pending === revision) decoding = undefined;
+            return;
+        }
         if (pending !== revision) {
             bitmap?.close();
             return;
@@ -164,21 +228,17 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         const changed = JSON.stringify(frame?.tree) !== JSON.stringify(message.frame.tree);
         presenter.present(message.frame.png, bitmap);
         frame = message.frame;
+        decoding = undefined;
         main.hidden = false;
         main.setAttribute('aria-busy', 'false');
+        detail.disabled = false;
         problem.hidden = true;
         if (changed) renderTree();
+        if (pendingInspection?.token === frame.token) showInspection(pendingInspection);
+        pendingInspection = undefined;
     } else if (message.type === 'inspection') {
-        if (frame?.token !== message.token) return;
-        selected = message.node;
-        detail.value = message.view;
-        reveal.hidden = !message.canReveal;
-        templates.hidden = !message.canInspectTemplates;
-        propertyFilter.hidden = message.view !== 'properties';
-        setMode(interaction);
-        for (const button of tree.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.node === String(selected)));
-        if (message.view === 'properties') showProperties(message.data as RuntimeProperty[], message.canApply, message.canTrace);
-        else inspector.replaceChildren(create('pre', JSON.stringify(message.data, null, 2)));
+        if (frame?.token === message.token) showInspection(message);
+        else if (decoding === message.token) pendingInspection = message;
     } else if (message.type === 'problem') {
         problem.textContent = message.message;
         problem.hidden = false;
@@ -187,17 +247,23 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
 
 element('runtime-start').onclick = () => send({ type: 'start' });
 element('runtime-attach').onclick = () => send({ type: 'attach' });
-element('runtime-refresh').onclick = () => send({ type: 'refresh' });
+element('runtime-refresh').onclick = () => changeView({ action: 'refresh' });
 reveal.onclick = () => { if (frame && selected !== undefined) send({ type: 'reveal', token: frame.token, node: selected }); };
 templates.onclick = () => { if (frame && selected !== undefined) send({ type: 'templates', token: frame.token, node: selected }); };
 target.onchange = () => send({ type: 'target', target: target.value as AppRuntime });
-windowChoice.onchange = () => send({ type: 'window', id: Number(windowChoice.value) });
-hierarchy.onchange = () => send({ type: 'hierarchy', tree: hierarchy.value as RuntimeHierarchy });
+windowChoice.onchange = () => changeView({ action: 'window', window: Number(windowChoice.value) });
+hierarchy.onchange = () => changeView({ action: 'hierarchy', hierarchy: hierarchy.value as RuntimeHierarchy });
 detail.onchange = () => { if (frame) inspect(selected ?? frame.root.node_id); };
-filter.oninput = renderTree;
-propertyFilter.oninput = filterProperties;
-selectMode.onclick = () => setMode(false);
-interactMode.onclick = () => setMode(true);
+filter.oninput = () => {
+    renderTree();
+    changeView({ action: 'filter', field: 'treeFilter', query: filter.value });
+};
+propertyFilter.oninput = () => {
+    filterProperties();
+    changeView({ action: 'filter', field: 'propertyFilter', query: propertyFilter.value });
+};
+selectMode.onclick = () => changeView({ action: 'mode', mode: 'inspect' });
+interactMode.onclick = () => changeView({ action: 'mode', mode: 'interact' });
 image.onclick = event => {
     if (!frame) return;
     const bounds = image.getBoundingClientRect();

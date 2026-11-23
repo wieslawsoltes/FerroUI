@@ -283,6 +283,23 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 
 [App Sessions in the workbench](runtime.md#run-several-app-sessions)
 
+### Control the Live App editor with MCP
+
+1. Open a session from **App Sessions**, or call `ferroui_runtime_open` with an exact `runtime` from `ferroui_app_sessions`.
+2. Call `ferroui_live_app_view` with that runtime. It reports the current window list, hierarchy, filters, mode, inspection category, selection, and the accepted `frame`. A null frame means the editor is waiting for a window or rendering a new tree.
+3. With `ferroui.mcp.allowWrites` enabled, call `ferroui_live_app_control` with the same runtime, `expected_generation` and `expected_revision` from the view, and one `change` from the table. Each call returns the updated editor state. Agent commands can update a pinned editor while its tab is in the background.
+
+| Action | Fields in `change` |
+| --- | --- |
+| `window` | `window` is the `node_id` of an entry in `windows`. |
+| `hierarchy` | `hierarchy` is `visual`, `logical`, or `automation`. |
+| `select` | Use the accepted `frame`, the `node` from that window’s hierarchy, and a `view` of `properties`, `styles`, `resources`, or `diagnostics`. Use `get_tree` with the same window and hierarchy to find node IDs. |
+| `mode` | `mode` is `inspect` or `interact`. |
+| `filter` | `field` is `treeFilter` or `propertyFilter`. Set `query` to the search text or an empty string to clear it. |
+| `refresh` | Reconnect and request a new frame for the current window. |
+
+Read the current view again after switching windows or hierarchies, refreshing, or receiving a stale-state error. Wait for a frame before selecting a node. Use `ferroui_runtime_query` to read node data or capture a PNG. Input and property overrides still require the app’s own permissions and go through the runtime tools. [Inspect the actual window](runtime.md#inspect-the-actual-window-in-live-app)
+
 ### Inspect Live App templates with MCP
 
 Read the application’s current tree to get a node ID. Call `ferroui_runtime_templates` with `node` and the app’s `runtime` from `ferroui_app_sessions`. The catalog lists effective templates, column headers where available, and verified source stamps. The native application tool `get_template_sources` exposes the same template evidence.

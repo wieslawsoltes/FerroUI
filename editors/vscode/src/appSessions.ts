@@ -8,6 +8,7 @@ import type { IosSimulatorSessions } from './iosSimulatorSessions';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import type { RuntimePanels } from './runtimePanels';
 import { RuntimeMcpActions } from './runtimeMcpActions';
+import type { RuntimeViewChange } from './runtimeProtocol';
 import type { AppRuntime } from './runtimeTargets';
 
 class AppItem extends vscode.TreeItem {
@@ -65,6 +66,10 @@ export class AppSessions implements vscode.Disposable {
     attach(url: string, token: string, name?: string, signal?: AbortSignal) { return this.connections.attach(url, token, name, signal); }
     detach(runtime: AppRuntime): void { this.connections.detach(runtime); }
     open(runtime: AppRuntime): void { this.panels.open(runtime); }
+    view(runtime: AppRuntime) { return this.panels.view(runtime); }
+    controlView(runtime: AppRuntime, generation: number, revision: number, change: RuntimeViewChange, signal: AbortSignal) {
+        return this.panels.control(runtime, generation, revision, change, signal);
+    }
 
     private stop(session: RuntimeSummary) {
         if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.stop', session.app_session);

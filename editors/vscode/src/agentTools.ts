@@ -42,6 +42,7 @@ import type { ProjectSetup } from './projectSetup';
 import type { ProjectTemplateRequest } from './projectSetupProtocol';
 import type { RuntimeSourceTools } from './runtimeSourceTools';
 import type { RuntimeProfiles } from './runtimeProfiles';
+import type { RuntimeViewChange } from './runtimeProtocol';
 import type { ScenarioRunner } from './scenarioRunner';
 import type { ScenarioReview } from './scenarioReview';
 import { renameRsxControl } from './rsxRename';
@@ -268,6 +269,11 @@ export class AgentTools {
         if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
         if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }
         if (tool === 'ferroui_runtime_open') { this.appSessions.open(args.runtime as AppRuntime); return { runtime: args.runtime }; }
+        if (tool === 'ferroui_live_app_view') return this.appSessions.view(args.runtime as AppRuntime);
+        if (tool === 'ferroui_live_app_control') {
+            const { change } = input as { change: RuntimeViewChange };
+            return this.appSessions.controlView(args.runtime as AppRuntime, args.expected_generation, args.expected_revision, change, signal);
+        }
         if (tool === 'ferroui_runtime_tools') return this.appSessions.mcp.tools(args.runtime as AppRuntime, signal);
         if (tool === 'ferroui_runtime_query' || tool === 'ferroui_runtime_call') {
             return this.appSessions.mcp.call({ runtime: args.runtime as AppRuntime, expected_generation: args.expected_generation,

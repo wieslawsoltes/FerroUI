@@ -8,6 +8,7 @@ import type { RuntimeSummary } from '../src/runtimeConnections';
 import { verifyRuntimeMcpAccess } from './runtimeMcpAccess';
 import { withManagedAppFixture } from './managedAppFixture';
 import { verifyHostedInputMcp } from './hostedInputMcp';
+import { liveAppControl, liveAppView, verifyLiveAppPresentation } from './liveAppPresentationMcp';
 import type { McpFixture } from './mcp';
 import { until } from './wait';
 
@@ -95,7 +96,10 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
             await tools('ferroui_runtime_detach', { runtime: attachments[1].runtime });
             attachments.length = 0;
             await focus(left, labels[0]);
+            await until(async () => (await liveAppView({ invoke, content }, left.runtime)()).frame !== null);
             await focus(right, labels[1]);
+            await until(async () => (await liveAppView({ invoke, content }, right.runtime)()).frame !== null);
+            const oldView = await verifyLiveAppPresentation({ invoke, content }, left.runtime, right.runtime, headings[0][0].node_id);
             content(await control('select', left));
             assert.equal(await vscode.commands.executeCommand('ferroui.hotReload.processId'), String(first.pid));
             const [search] = await rightClient.call<RuntimeNode[]>('find_elements', { name: 'Search' });
@@ -117,6 +121,8 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
                 runtime: left.runtime, expected_generation: sources[0].generation, tool: 'list_windows',
             });
             assert.match(retired.content[0]?.text ?? '', /application connection changed/);
+            const retiredView = await invoke('ferroui_live_app_control', liveAppControl(oldView, { action: 'refresh' }));
+            assert.match(retiredView.content[0]?.text ?? '', /Live App editor changed/);
             assert.equal((await status(right)).pid, second.pid);
             assert.ok((await rightClient.call<{ matched: boolean }>('wait_for', { name: 'Result', text: 'Retain this filter' })).matched);
             const update = await clientFor(labels[0]);

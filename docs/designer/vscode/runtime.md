@@ -278,7 +278,11 @@ The app opts in through the `live-inspector` feature of `ferroui-browser`. On th
 2. In **Inspect**, select a control in the native frame or browse the visual, logical, and accessibility trees. Alt+click chooses among overlapping native hits. Read properties, their effective style values, resources, accessible names, roles, and native diagnostics. Switch to **Interact** for clicks, scroll, text, or keys when the app permits input.
 3. Try a property override in the inspector. Just the running session receives the override. Use **Reveal Source** to locate the authored value. When the current revision and source mapping match, use **Apply to Source** to write the supported RSX literal or XAML value into the editor. Review it, then save if you want hot reload to apply the source change.
 
-Live App keeps the last accepted frame visible while it decodes a replacement. When you return to its tab, it shows the accepted window and resumes inspection.
+Live App keeps the last accepted frame visible while it decodes a replacement. **Reconnect and refresh** keeps the selected window while it renews the inspector connection. A window change, a different hierarchy, or a refresh clears the selection while the new tree loads. When you return to its tab, Live App restores the current inspection and resumes polling.
+
+Open Live App from a row in **App Sessions** to pin it to that session. An agent can adjust its window, hierarchy, inspection category, mode, and filters through the same controls. Those changes affect that editor, while app input and source edits use their own permission checks. [Control Live App with MCP](reference.md#control-the-live-app-editor-with-mcp)
+
+![Customer Accounts in a pinned Live App editor. The agent selected Heading in the visual tree and filtered the selected control's properties to Text.](../images/vscode-live-app-mcp-presentation.png)
 
 Managed debug builds record compiled RSX locations. Set `FERROUI_EDITOR_SOURCE=1` for an externally launched debug build that needs RSX source reveal. XAML source application requires compiled or runtime-loaded source information. If a change is stale or its target is untracked, reload the running app’s compatible revision or edit its authored source directly. [Runtime inspector and permissions](../../mcp.md)
 
