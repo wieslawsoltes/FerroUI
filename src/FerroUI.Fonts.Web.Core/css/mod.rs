@@ -4,6 +4,7 @@
 //! attributes of a `FontFace`. Input is untrusted: a parser returns an error and never panics.
 
 mod descriptors;
+mod palette;
 mod source;
 mod stylesheet;
 mod tokenizer;
@@ -18,8 +19,9 @@ pub use descriptors::{
     parse_variation_settings, FontDisplay, FontFeatureSetting, FontStyleDescriptor, FontVariationSetting,
     FontWeightRange, FontWidthRange, MetricOverride,
 };
+pub use palette::{parse_base_palette, parse_override_colors, BasePalette, FontPaletteValues, PaletteColor};
 pub use source::{parse_src, FontFormat, FontSource, FontTech, FontTechs};
-pub use stylesheet::{parse_font_face_block, parse_stylesheet, FontFaceDescriptors};
+pub use stylesheet::{parse_font_face_block, parse_font_palettes, parse_stylesheet, FontFaceDescriptors};
 pub use unicode_range::{parse_unicode_range, UnicodeRangeSet};
 
 use std::fmt;

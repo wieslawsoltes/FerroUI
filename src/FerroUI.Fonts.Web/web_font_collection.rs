@@ -13,7 +13,8 @@ use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::Locale;
 use ferroui_base::{FerroLocator, LocatorExtensions};
 use ferroui_fonts_web_core::css::{
-    parse_stylesheet, FontFaceDescriptors, FontSource, FontStyleDescriptor, FontTech, FontTechs,
+    parse_font_palettes, parse_stylesheet, FontFaceDescriptors, FontPaletteValues, FontSource, FontStyleDescriptor,
+    FontTech, FontTechs,
 };
 #[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
 use ferroui_fonts_web_core::decode_font_with_brotli;
@@ -23,7 +24,7 @@ use ferroui_fonts_web_core::loading::{
 };
 use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMatchRequest, FontStyleRequest};
 use ferroui_fonts_web_core::sfnt::{
-    apply_metric_overrides, has_metric_overrides, make_invisible_font, SanitizeOptions,
+    apply_font_palette, apply_metric_overrides, has_metric_overrides, make_invisible_font, SanitizeOptions,
 };
 use ferroui_fonts_web_core::variations::{names_of, read_font_axes, resolve_font_variations, FontAxes};
 use ferroui_fonts_web_core::{FontDecodeError, FontDecoder};
@@ -133,6 +134,11 @@ struct Shared {
     options: SanitizeOptions,
     invisible: RefCell<Option<Option<Rc<GlyphTypeface>>>>,
     memory_budget: Cell<usize>,
+    supported_techs: Cell<FontTechs>,
+    /// The `@font-palette-values` rules declared.
+    palettes: RefCell<Vec<FontPaletteValues>>,
+    /// The palette chosen for a family, by the name of its rule.
+    chosen_palettes: RefCell<Vec<(String, String)>>,
     use_tick: Cell<u64>,
     /// The wrapper of the shaper, once a face has declared features.
     feature_shaper: RefCell<Option<Rc<FontFeatureShaper>>>,
@@ -185,8 +191,13 @@ fn simulations_for(
     simulations
 }
 
-/// What this build can draw of `tech()`. Color formats are answered per backend in a later part.
-const SUPPORTED_TECHS: FontTechs = FontTechs::NONE.with(FontTech::Variations).with(FontTech::FeaturesOpenType);
+/// What `tech()` answers by default. Palettes are applied to the font itself, so every backend has
+/// them. The color formats are not claimed: which of them a backend draws depends on the backend
+/// and the version of the system, and an entry claimed wrongly would replace a plain font that
+/// draws with one that does not. An application that knows its targets says so with
+/// [`WebFontCollection::set_supported_techs`]. A font without `tech()` is loaded either way.
+const DEFAULT_TECHS: FontTechs =
+    FontTechs::NONE.with(FontTech::Variations).with(FontTech::FeaturesOpenType).with(FontTech::Palettes);
 
 impl Shared {
     fn with_slot<R>(&self, id: FontFaceId, action: impl FnOnce(&mut Slot) -> R) -> Option<R> {
@@ -281,7 +292,7 @@ impl Shared {
                 this.fonts_changed();
                 return;
             };
-            if !source.is_supported(SUPPORTED_TECHS) {
+            if !source.is_supported(this.supported_techs.get()) {
                 continue;
             }
             let url = match source {
@@ -331,10 +342,14 @@ impl Shared {
         let mut size = 0;
         // The usual reason to name a local font: overriding its metrics to match a web font. That
         // takes a private copy of the font, and only then.
-        if let Some(descriptors) = descriptors.filter(has_metric_overrides) {
+        let palette = this.palette_of(id);
+        if let Some(descriptors) = descriptors.filter(|face| has_metric_overrides(face) || palette.is_some()) {
             let mut bytes = Vec::new();
             let read = typeface.platform_typeface().try_get_stream().map(|mut stream| stream.read_to_end(&mut bytes));
             if matches!(read, Some(Ok(_))) && apply_metric_overrides(&mut bytes, &descriptors).is_ok() {
+                if let Some(palette) = &palette {
+                    apply_font_palette(&mut bytes, palette);
+                }
                 axes = read_font_axes(&bytes).map(Rc::new);
                 size = bytes.len();
                 let mut stream = FontDataStream::new(bytes);
@@ -500,6 +515,9 @@ impl Shared {
             let typeface = result.ok().and_then(|mut font| {
                 // A font that cannot take the overrides is used as it is.
                 let _ = this.with_slot(id, |slot| apply_metric_overrides(&mut font, &slot.descriptors));
+                if let Some(palette) = this.palette_of(id) {
+                    apply_font_palette(&mut font, &palette);
+                }
                 size = font.len();
                 axes = read_font_axes(&font).map(Rc::new);
                 let mut stream = FontDataStream::new(font);
@@ -527,6 +545,16 @@ impl Shared {
             this.fonts_changed();
         }
         this.enforce_memory_budget();
+    }
+
+    /// The palette rule chosen for the family of a face, if it applies to that family.
+    fn palette_of(&self, id: FontFaceId) -> Option<FontPaletteValues> {
+        let family = self.with_slot(id, |slot| slot.descriptors.family.clone())?;
+        let chosen = self.chosen_palettes.borrow();
+        let (_, name) = chosen.iter().find(|(known, _)| known.eq_ignore_ascii_case(&family))?;
+        let palettes = self.palettes.borrow();
+        let rule = palettes.iter().find(|rule| rule.name == *name)?;
+        rule.families.iter().any(|known| known.eq_ignore_ascii_case(&family)).then(|| rule.clone())
     }
 
     fn next_tick(&self) -> u64 {
@@ -786,6 +814,9 @@ impl WebFontCollection {
             options: SanitizeOptions::default(),
             invisible: RefCell::new(None),
             memory_budget: Cell::new(DEFAULT_MEMORY_BUDGET),
+            supported_techs: Cell::new(DEFAULT_TECHS),
+            palettes: RefCell::new(Vec::new()),
+            chosen_palettes: RefCell::new(Vec::new()),
             use_tick: Cell::new(0),
             feature_shaper: RefCell::new(None),
             listeners: RefCell::new(Vec::new()),
@@ -834,8 +865,57 @@ impl WebFontCollection {
         Ok(id)
     }
 
-    /// Declares the `@font-face` rules of a style sheet, in order. Returns their ids.
+    /// Says which technologies of `tech()` count as supported, for an application that knows
+    /// which color formats its backend and systems draw.
+    pub fn set_supported_techs(&self, techs: FontTechs) {
+        self.shared.supported_techs.set(techs);
+    }
+
+    /// `font-palette` for a family: the name of an `@font-palette-values` rule, or `None` for the
+    /// palette of the font. The palette is written into the font, so the faces of the family are
+    /// loaded again. Returns whether a rule of that name applies to the family.
+    pub fn set_font_palette(&self, family: &str, palette: Option<&str>) -> bool {
+        let applies =
+            palette.is_none_or(|name| {
+                self.shared.palettes.borrow().iter().any(|rule| {
+                    rule.name == name && rule.families.iter().any(|known| known.eq_ignore_ascii_case(family))
+                })
+            });
+        if !applies {
+            return false;
+        }
+        {
+            let mut chosen = self.shared.chosen_palettes.borrow_mut();
+            chosen.retain(|(known, _)| !known.eq_ignore_ascii_case(family));
+            if let Some(name) = palette {
+                chosen.push((family.to_owned(), name.to_owned()));
+            }
+        }
+        let shaper = self.shared.feature_shaper.borrow().clone();
+        for slot in self.shared.faces.borrow_mut().iter_mut() {
+            if !family_matches(&slot.descriptors, family) || slot.glyph_typeface.is_none() {
+                continue;
+            }
+            if let Some(shaper) = &shaper {
+                slot.instances.iter().for_each(|(_, instance)| shaper.remove(instance));
+                slot.glyph_typeface.iter().for_each(|typeface| shaper.remove(typeface));
+            }
+            slot.instances.clear();
+            slot.glyph_typeface = None;
+            slot.evicted = true;
+        }
+        self.shared.fonts_changed();
+        true
+    }
+
+    /// Declares the `@font-face` and `@font-palette-values` rules of a style sheet, in order.
+    /// Returns the ids of the faces.
     pub fn add_style_sheet(&self, css: &str) -> Vec<FontFaceId> {
+        for rule in parse_font_palettes(css) {
+            let mut palettes = self.shared.palettes.borrow_mut();
+            palettes.retain(|known| known.name != rule.name);
+            palettes.push(rule);
+        }
         parse_stylesheet(css).into_iter().filter_map(|face| self.add(face).ok()).collect()
     }
 
@@ -1440,6 +1520,49 @@ mod tests {
             .add_style_sheet(&format!("@font-face {{ font-family: A; src: local(\"{wrong}\"), url(a.ttf) }}"));
         harness.lookup("A");
         assert_eq!(harness.urls(), ["a.ttf"], "no other face of the family is substituted");
+    }
+
+    #[test]
+    fn a_color_technology_is_not_claimed_unless_the_application_says_so() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(color.ttf) tech(color-COLRv1), url(plain.ttf) }
+             @font-face { font-family: B; src: url(color.ttf) tech(color-COLRv1), url(plain.ttf) }",
+        );
+        harness.lookup("A");
+        assert_eq!(harness.urls(), ["plain.ttf"]);
+        harness.pending.borrow_mut().clear();
+        harness.collection.set_supported_techs(DEFAULT_TECHS.with(FontTech::ColorColrV1));
+        harness.lookup("B");
+        assert_eq!(harness.urls(), ["color.ttf"]);
+    }
+
+    #[test]
+    fn a_palette_is_written_into_the_font_when_it_loads() {
+        let harness = Harness::new();
+        let bytes = font("../samples/ControlCatalog/Assets/FallbackFonts/NotoColorEmoji-Catalog.ttf");
+        let has_palette = ferroui_fonts_web_core::woff2::testing::font_table(&bytes, b"CPAL").is_some();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(a.ttf) }
+             @font-palette-values --mine { font-family: A; override-colors: 0 #ff0000 }",
+        );
+        assert!(!harness.collection.set_font_palette("A", Some("--nope")), "no such rule");
+        assert!(!harness.collection.set_font_palette("B", Some("--mine")), "not for that family");
+        assert!(harness.collection.set_font_palette("A", Some("--mine")));
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("a.ttf", Ok(bytes))]));
+        let found = harness.lookup("A").expect("the font");
+        if has_palette {
+            let table =
+                found.platform_typeface().try_get_table(OpenTypeTag::new(u32::from_be_bytes(*b"CPAL"))).unwrap();
+            let table = table.span();
+            let records = u32::from_be_bytes([table[8], table[9], table[10], table[11]]) as usize;
+            let first = u16::from_be_bytes([table[12], table[13]]) as usize;
+            assert_eq!(table[records + first * 4..records + first * 4 + 4], [0, 0, 255, 255]);
+        }
+        assert!(harness.collection.set_font_palette("A", None));
+        assert!(harness.lookup("A").is_none(), "the font is loaded again with its own palette");
+        assert_eq!(harness.urls(), ["a.ttf"]);
     }
 
     #[test]

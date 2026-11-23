@@ -3,6 +3,7 @@
 use std::borrow::Cow;
 
 use super::descriptors::*;
+use super::palette::{parse_palette_block, FontPaletteValues};
 use super::source::{parse_src, FontSource};
 use super::tokenizer::{Token, Tokenizer};
 use super::unicode_range::{parse_unicode_range, UnicodeRangeSet};
@@ -195,6 +196,59 @@ pub fn parse_font_face_block(block: &str) -> Result<FontFaceDescriptors, CssPars
         face.apply(name, value);
     }
     Ok(face)
+}
+
+/// Parses the `@font-palette-values` rules of a style sheet, in order. A rule needs a name that
+/// starts with two dashes and a valid `font-family`.
+pub fn parse_font_palettes(text: &str) -> Vec<FontPaletteValues> {
+    let mut tokenizer = Tokenizer::new(text);
+    let mut palettes = Vec::new();
+    loop {
+        let is_palette = match tokenizer.next_significant() {
+            Token::Eof => return palettes,
+            Token::AtKeyword(name) => name.eq_ignore_ascii_case("font-palette-values"),
+            _ => false,
+        };
+        let mut name = None;
+        let mut depth = 0usize;
+        let opened = loop {
+            match tokenizer.next_token() {
+                Token::Eof => return palettes,
+                Token::LeftBrace if depth == 0 => break true,
+                Token::Semicolon if depth == 0 => break false,
+                Token::Ident(ident) if depth == 0 && name.is_none() => name = Some(ident.into_owned()),
+                Token::Function(_) | Token::LeftParen | Token::LeftBracket | Token::LeftBrace => depth += 1,
+                Token::RightParen | Token::RightBracket | Token::RightBrace => depth = depth.saturating_sub(1),
+                _ => {}
+            }
+        };
+        if !opened {
+            continue;
+        }
+        let start = tokenizer.position();
+        let mut depth = 1usize;
+        let end = loop {
+            let before = tokenizer.position();
+            match tokenizer.next_token() {
+                Token::Eof => break text.len(),
+                Token::LeftBrace | Token::Function(_) | Token::LeftParen | Token::LeftBracket => depth += 1,
+                Token::RightBrace | Token::RightParen | Token::RightBracket => {
+                    depth -= 1;
+                    if depth == 0 {
+                        break before;
+                    }
+                }
+                _ => {}
+            }
+        };
+        if let (true, Some(name)) = (is_palette, name.filter(|name| name.starts_with("--"))) {
+            if let Some(rule) = parse_palette_block(&name, &declarations(&text[start..end])) {
+                // When several rules share a name, the last one in the document wins.
+                palettes.retain(|known: &FontPaletteValues| known.name != rule.name);
+                palettes.push(rule);
+            }
+        }
+    }
 }
 
 /// Parses the `@font-face` rules of a style sheet, in order. Every other rule is skipped, and

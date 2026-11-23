@@ -3,6 +3,7 @@
 mod deep;
 mod glyf;
 mod metrics;
+mod palette;
 mod sanitize;
 mod tables;
 
@@ -10,6 +11,7 @@ mod tables;
 mod tests;
 
 pub use metrics::{apply_metric_overrides, has_metric_overrides};
+pub use palette::apply_font_palette;
 pub use sanitize::{sanitize, SanitizeOptions, Sanitizer};
 
 use crate::{FontDecodeError, WebFontLimits};
