@@ -143,6 +143,11 @@ impl WindowBaseAutomationPeer {
             }).detach();
             *self.keyboard_device_subscription.borrow_mut() = Some(subscription);
             self.on_focus_changed(keyboard_device.focused_element());
+            // When tracking starts again on the same control, no change above follows its parts.
+            if let Some(focus) = self.focus() {
+                let peer = self.get_or_create(&focus);
+                self.follow_focused_descendant(Some(&peer));
+            }
         }
     }
 

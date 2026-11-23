@@ -701,6 +701,52 @@ mod input {
     }
 
     #[test]
+    fn tab_on_the_real_key_route_stays_in_the_map_and_then_moves_on() {
+        use ferroui_controls::{Button, StackPanel};
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let map = MapControl::new();
+        map.set_width(WIDTH);
+        map.set_height(HEIGHT);
+        let layer = MapElementsLayer::new();
+        layer.add(MapElement::Icon(MapIcon::new(BasicGeoposition::default())));
+        layer.add(MapElement::Icon(MapIcon::new(BasicGeoposition {
+            latitude: 2.0,
+            longitude: 2.0,
+        })));
+        map.add_layer(layer);
+        let next = Button::new();
+        let panel = StackPanel::new();
+        panel.children().add(map.clone().upcast::<Control>());
+        panel.children().add(next.clone().upcast::<Control>());
+        let window = Window::with_impl(MockWindowingPlatform::create_window_mock());
+        window.set_content(Some(Control::boxed(panel)));
+        window.show();
+        window.update_layout();
+        assert!(map.focus());
+        let tab = || {
+            let mut args = KeyEventArgs::new();
+            args.set_routed_event(Some(InputElement::key_down_event()));
+            args.key = Key::Tab;
+            map.raise_event(&args);
+        };
+        tab();
+        assert_eq!(map.focused_element().map(|(_, index)| index), Some(0));
+        assert!(
+            map.is_focused(),
+            "the handled key does not move the focus away"
+        );
+        tab();
+        assert_eq!(map.focused_element().map(|(_, index)| index), Some(1));
+        assert!(map.is_focused());
+        tab();
+        assert!(map.focused_element().is_none());
+        assert!(
+            next.is_focused(),
+            "past the last element, Tab goes on to the next control"
+        );
+    }
+
+    #[test]
     fn enter_and_space_activate_and_escape_gives_the_focus_back() {
         let _app = UnitTestApplication::start(TestServices::styled_window());
         let (map, layer) = map_with_elements();
@@ -790,6 +836,26 @@ mod input {
         assert!(press_key(&map, Key::Escape, KeyModifiers::NONE));
         assert_eq!(root.get_focus(), Some(map_peer));
         assert_eq!(changes.get(), after_focus + 3);
+    }
+
+    #[test]
+    fn the_root_follows_the_element_again_after_tracking_restarts() {
+        use ferroui_controls::automation::peers::WindowBaseAutomationPeer;
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let (map, _layer) = map_with_elements();
+        let root_peer = ControlAutomationPeer::create_peer_for_element(&map._window);
+        let root = root_peer
+            .cast::<WindowBaseAutomationPeer>()
+            .expect("a window peer");
+        assert!(map.focus());
+        root.start_tracking_focus();
+        root.stop_tracking_focus();
+        root.start_tracking_focus();
+        let changes = Rc::new(Cell::new(0));
+        let count = changes.clone();
+        let _subscription = root.focus_changed(move || count.set(count.get() + 1));
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert_eq!(changes.get(), 1);
     }
 
     #[test]
