@@ -1,11 +1,12 @@
 //! Apply typed transition collection edits through the authored document transaction.
+use crate::native_types::registered_xml_type;
 use crate::property_literals::{element_type, registered_type, setter_target_type};
-use crate::property_transition_properties::{
-    transition_choices, NativeTransitionChoice, TransitionPropertyChoice,
-};
 use crate::DesignerSession;
 use ferroui_base::animation::Animatable;
 use ferroui_base::TypeInfo;
+use ferroui_designer_animation::native::{
+    choose_transition, transition_choices, NativeTransitionChoice, TransitionPropertyChoice,
+};
 use ferroui_designer_animation::{
     PropertyTransitionCollectionEdit, PropertyTransitionList, PropertyTransitionTiming,
 };
@@ -141,7 +142,12 @@ impl DesignerSession {
                     type_name.as_deref(),
                     None,
                 )?;
-                let target = choice.xaml_target(document, at, list.target_owner.is_none());
+                let target = choice.xaml_target(
+                    document,
+                    at,
+                    list.target_owner.is_none(),
+                    registered_xml_type,
+                );
                 (
                     "Add property transition",
                     collection_edit(PropertyTransitionCollectionEdit::Add {
@@ -181,6 +187,7 @@ impl DesignerSession {
                     document,
                     transition,
                     list.target_owner.is_none() || has_static_property,
+                    registered_xml_type,
                 );
                 (
                     "Retarget property transition",
@@ -217,21 +224,9 @@ impl DesignerSession {
         let type_ = self
             .transition_target_type(list, resource_target)?
             .ok_or("Choose a registered target for this transition collection")?;
-        let mut matches = transition_choices(type_).into_iter().filter(|choice| {
-            choice.description.property == property
-                && requested.is_none_or(|name| choice.description.type_name == name)
-        });
-        let first = matches
-            .next()
-            .ok_or("Choose a compatible property and transition class from the current target")?;
-        if preferred.is_some_and(|name| name != first.description.type_name) {
-            if let Some(choice) =
-                matches.find(|choice| Some(choice.description.type_name) == preferred)
-            {
-                return Ok(choice);
-            }
-        }
-        Ok(first)
+        choose_transition(type_, property, requested, preferred).ok_or_else(|| {
+            "Choose a compatible property and transition class from the current target".into()
+        })
     }
 
     fn transition_target_type(

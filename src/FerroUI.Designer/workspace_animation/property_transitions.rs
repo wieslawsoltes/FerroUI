@@ -1,11 +1,11 @@
 use super::behaviors::{add_picker, buttons};
 use super::{description, field, text, DesignerWorkspace};
 use crate::icons;
-use crate::property_transition_properties::TransitionPropertyChoice;
 use crate::property_transition_session::PropertyTransitionCommand;
 use crate::workspace::inspector_actions::{add_button, picker, SOURCE};
 use ferroui_base::Ref;
 use ferroui_controls::{Control, StackPanel, TextBox};
+use ferroui_designer_animation::native::TransitionPropertyChoice;
 use ferroui_designer_animation::{AuthoredPropertyTransition, Easing, PropertyTransitionTiming};
 use ferroui_designer_core::{NodeId, SourceSpan};
 use std::rc::{Rc, Weak};

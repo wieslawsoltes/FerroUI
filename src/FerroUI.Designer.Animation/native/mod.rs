@@ -7,6 +7,7 @@ mod curve;
 mod curve_value;
 mod programs;
 mod property_transitions;
+mod property_transition_catalog;
 mod source;
 mod state_route;
 mod state_styles;
@@ -19,6 +20,9 @@ pub use clock::{animation_timing, FrozenPreviewClock, NativePlayback};
 pub use curve::{sample_curve_track, sample_keyframe_value, sample_scalar_track, sample_typed_keyframe};
 pub use programs::NativeProgramIndex;
 pub use property_transitions::native_property_transition_types;
+pub use property_transition_catalog::{
+    choose_transition, transition_choices, NativeTransitionChoice, TransitionPropertyChoice,
+};
 pub use source::NativeSourceIndex;
 pub use state_route::NativeStateRoute;
 pub use state_styles::NativeStateStyles;

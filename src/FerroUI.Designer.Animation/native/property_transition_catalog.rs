@@ -1,8 +1,7 @@
 //! Turn registered native properties into qualified XAML transition targets.
-use crate::native_types::registered_xml_type;
+use super::native_property_transition_types;
+use crate::XamlTransitionTarget;
 use ferroui_base::{FerroProperty, FerroPropertyRegistry, TypeInfo};
-use ferroui_designer_animation::native::native_property_transition_types;
-use ferroui_designer_animation::XamlTransitionTarget;
 use ferroui_designer_core::{Document, NodeId};
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
@@ -11,19 +10,20 @@ const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub(crate) struct TransitionPropertyChoice {
+pub struct TransitionPropertyChoice {
     pub property: String,
     pub label: String,
     pub type_name: &'static str,
 }
 
-pub(super) struct NativeTransitionChoice {
+pub struct NativeTransitionChoice {
     pub description: TransitionPropertyChoice,
     property: &'static FerroProperty,
     qualified: bool,
 }
 
-pub(super) fn transition_choices(type_: &'static TypeInfo) -> Vec<NativeTransitionChoice> {
+/// Registered properties and their compatible built-in transition classes.
+pub fn transition_choices(type_: &'static TypeInfo) -> Vec<NativeTransitionChoice> {
     let regular = type_.properties();
     let attached = FerroPropertyRegistry::instance().get_registered_attached(type_);
     let mut seen = BTreeSet::new();
@@ -65,17 +65,44 @@ pub(super) fn transition_choices(type_: &'static TypeInfo) -> Vec<NativeTransiti
     choices
 }
 
+/// Resolve an exact choice or prefer the class already authored on an entry.
+pub fn choose_transition(
+    type_: &'static TypeInfo,
+    property: &str,
+    requested: Option<&str>,
+    preferred: Option<&str>,
+) -> Option<NativeTransitionChoice> {
+    let mut matches = transition_choices(type_).into_iter().filter(|choice| {
+        choice.description.property == property
+            && requested.is_none_or(|name| choice.description.type_name == name)
+    });
+    let first = matches.next()?;
+    if let Some(name) = preferred.filter(|name| *name != first.description.type_name) {
+        if let Some(choice) = matches.find(|choice| choice.description.type_name == name) {
+            return Some(choice);
+        }
+    }
+    Some(first)
+}
+
 impl NativeTransitionChoice {
+    /// Qualify the property using the host's registered XML namespace resolver.
     pub fn xaml_target(
         &self,
         document: &Document,
         at: NodeId,
         static_property: bool,
+        resolve_type: impl Fn(&str, &str) -> Option<&'static TypeInfo>,
     ) -> XamlTransitionTarget {
         let mut scope = document.ast().namespaces(at);
         let mut namespaces = Vec::new();
         let property = if self.qualified || static_property {
-            let owner = qualify_owner(self.property.owner_type(), &mut scope, &mut namespaces);
+            let owner = qualify_owner(
+                self.property.owner_type(),
+                &mut scope,
+                &mut namespaces,
+                resolve_type,
+            );
             let name = self.property.name();
             if static_property {
                 let prefix = scope
@@ -103,12 +130,13 @@ fn qualify_owner(
     owner: &'static TypeInfo,
     scope: &mut BTreeMap<String, String>,
     namespaces: &mut Vec<(String, String)>,
+    resolve_type: impl Fn(&str, &str) -> Option<&'static TypeInfo>,
 ) -> String {
     let name = owner.name();
     let prefix = scope
         .iter()
         .find_map(|(prefix, uri)| {
-            registered_xml_type(uri, name)
+            resolve_type(uri, name)
                 .is_some_and(|found| std::ptr::eq(found, owner))
                 .then(|| prefix.clone())
         })

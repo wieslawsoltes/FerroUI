@@ -1,7 +1,7 @@
 //! Bridge accepted native transition IDs to edits in their original Rust invocation.
-use crate::property_transition_properties::TransitionPropertyChoice;
 use crate::property_transition_session::{PropertyTransitionCommand, PropertyTransitionEditor};
 use crate::DesignerSession;
+use ferroui_designer_animation::native::TransitionPropertyChoice;
 use ferroui_designer_animation::PropertyTransitionList;
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_designer_rsx::{RsxProjection, RsxPropertyTransitionEdit};
