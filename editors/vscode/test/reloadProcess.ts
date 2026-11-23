@@ -1,7 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { access, mkdtemp, rm, stat, unlink, writeFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, rm, stat, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -10,6 +10,7 @@ import { inCargoBuildSlot } from '../src/cargoBuildGate';
 import { ReloadHistory } from '../src/reloadHistory';
 import { parseFrameReceipt, type RuntimeFrameReceipt } from '../src/reloadFrames';
 import { ReloadProcess } from '../src/reloadProcess';
+import { fileKey } from '../src/reloadScope';
 import { ReloadSession } from '../src/reloadSession';
 import { until } from './wait';
 
@@ -44,6 +45,16 @@ export async function verifyReloadWatchBoundary(folder: vscode.WorkspaceFolder):
     const manifest = join(root, 'Cargo.toml');
     const history = new ReloadHistory();
     try {
+        const physical = join(root, 'cargo-output');
+        const alias = join(root, 'linked-output');
+        await mkdir(physical);
+        await symlink(physical, alias, process.platform === 'win32' ? 'junction' : 'dir');
+        const targetDirectory = join(alias, 'dev', 'target');
+        const before = fileKey(targetDirectory);
+        assert.equal(before, fileKey(join(physical, 'dev', 'target')));
+        await mkdir(targetDirectory, { recursive: true });
+        assert.equal(fileKey(targetDirectory), before);
+
         await writeFile(file, '<Grid/>');
         const info = await stat(file);
         await until(() => Date.now() > Math.max(info.ctimeMs, info.mtimeMs, info.birthtimeMs));

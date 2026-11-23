@@ -6,8 +6,20 @@ import { isInside, localFolders } from './workspacePaths';
 export const reloadWatchPattern = '**/{*.[rR][sS],*.[xX][aA][mM][lL],Cargo.toml}';
 
 export function fileKey(file: string): string {
-    let real: string;
-    try { real = realpathSync.native(file); } catch { real = path.resolve(file); }
+    const absolute = path.resolve(file);
+    let ancestor = absolute;
+    let real = absolute;
+    for (;;) {
+        try {
+            // Keep the resolved path stable when Cargo creates a build directory through a symlink.
+            real = path.resolve(realpathSync.native(ancestor), path.relative(ancestor, absolute));
+            break;
+        } catch (error) {
+            const parent = path.dirname(ancestor);
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT' || parent === ancestor) break;
+            ancestor = parent;
+        }
+    }
     return process.platform === 'win32' ? real.toLowerCase() : real;
 }
 
