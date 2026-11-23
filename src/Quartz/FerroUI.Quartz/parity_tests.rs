@@ -722,6 +722,48 @@ fn batched_draws_keep_order_across_nested_layers_copies_and_pool_reuse() {
     assert_eq!(pixel(60, 60), &[0, 0, 0, 0]);
 }
 
+/// Many sizes in a frame stay cached: drawing them again uploads no glyph. With a cache emptied at
+/// 32 sizes, the second pass rasterized all of them again.
+#[cfg(feature = "metal")]
+#[test]
+fn a_frame_of_many_font_sizes_keeps_its_glyphs_cached() {
+    use ferroui_base::media::{TextHintingMode, TextOptions};
+    let manager = fonts::FontManager::default();
+    let face = manager
+        .try_create_glyph_typeface(
+            "Helvetica",
+            ferroui_base::media::FontStyle::Normal,
+            ferroui_base::media::FontWeight::Normal,
+            ferroui_base::media::FontStretch::Normal,
+        )
+        .unwrap();
+    let face = GlyphTypeface::new(face, ferroui_base::media::FontSimulations::None).unwrap();
+    let glyph = face.character_to_glyph_map().get_glyph('F' as i32);
+    let target = Bitmap::new(PixelSize::new(128, 128), Vector::new(96., 96.));
+    let frame = || {
+        let mut draw = target.drawing(false, None);
+        draw.clear(Colors::TRANSPARENT);
+        draw.push_text_options(TextOptions {
+            text_hinting_mode: TextHintingMode::Light,
+            ..Default::default()
+        });
+        // Fractional sizes no other test draws, so each is a new strike here.
+        for step in 0..48 {
+            let size = 9.125 + f64::from(step) * 0.25;
+            let run = GlyphRun::new(&face, size, &[GlyphInfo::with_offset(glyph, 0, size, Vector::ZERO)], Point::new(8., 64.));
+            draw.draw_glyph_run(Some(&ImmutableSolidColorBrush::new(Colors::WHITE)), &run);
+        }
+        draw.pop_text_options();
+        draw.dispose();
+    };
+    frame();
+    let before = crate::metal_statistics();
+    frame();
+    let _ = target.pixels();
+    let after = crate::metal_statistics();
+    assert_eq!(after[5], before[5], "the second frame uploads no glyph: {before:?} -> {after:?}");
+}
+
 #[cfg(all(feature = "metal", feature = "media-test-fixtures"))]
 #[test]
 fn native_glyph_atlas_eviction_preserves_pixels_without_frame_readbacks() {
