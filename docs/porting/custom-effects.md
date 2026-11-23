@@ -403,8 +403,8 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   content texture; steady frames allocate no texture. Under a rotation the area is the bounding box
   of the rotated bounds, in device pixels, where Skia scales the area to the lengths of the axes
   and rotates the result: a program whose output depends on the direction of the axes differs.
-- *The CPU mode* (and a shader effect inside a scene of the CPU renderer, and WebGL2 until step 3
-  of the Vello route) draws the CPU reference (decision 3): the content is recorded into a scene of
+- *The CPU mode* (and a shader effect inside a scene of the CPU renderer, and on WebGL2 an effect
+  with images or of an application) draws the CPU reference (decision 3): the content is recorded into a scene of
   the CPU renderer over the whole area (cut to the scene above 2^24 pixels), rendered, the
   reference applied to its pixels at `layer_scale`, and the result drawn as an image with the
   opacity in effect. An effect without a reference (an application's) draws its content unchanged
@@ -413,8 +413,10 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   (`ferroui_build::shader_effects`: `translate_shader_effect_module`, `shader_effect_glsl::<T>()`,
   `write_shader_effect_glsl::<T>()`, which writes `$OUT_DIR/shader_effects/<name>.vert.glsl` and
   `.frag.glsl`, with the names naga gives the uniform blocks and the texture by their WGSL
-  bindings). The browser renderer does not draw these programs yet: its sink has no device textures
-  (step 3 of the route in gpu-rendering.md), so WebGL2 draws the CPU reference.
+  bindings). The WebGL2 route of Vello draws the effects of the library that sample no image with
+  these programs (`ferroui_build::library_shader_effects`, written into the crate by its build
+  script; `web_gl/shader_programs.rs`). The page transitions and the effects of an application
+  still draw their CPU references there.
 
 ### 3.5 Input routing for interactive effects
 

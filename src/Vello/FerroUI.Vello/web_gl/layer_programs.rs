@@ -535,7 +535,7 @@ pub(crate) struct LayerPrograms {
     programs: [Option<Result<Program, ()>>; LayerProgram::ALL.len()],
 }
 
-fn compile(gl: &Gl, kind: u32, source: &str) -> Result<WebGlShader, String> {
+pub(super) fn compile(gl: &Gl, kind: u32, source: &str) -> Result<WebGlShader, String> {
     let shader = gl.create_shader(kind).ok_or("the context did not create a shader")?;
     gl.shader_source(&shader, source);
     gl.compile_shader(&shader);

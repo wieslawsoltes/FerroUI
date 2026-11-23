@@ -24,15 +24,18 @@
 //! of the context ([`VelloWebGlTexture`], `frame_textures.rs`), and a layer with an effect is
 //! drawn on the context: its content rendered and copied into a texture of the pool, passed
 //! through a program of `layer_programs.rs` into another, which the scene the layer was pushed
-//! in paints with.
+//! in paints with. The shader effects of the library run their GLSL ES 3.0, translated at build
+//! time (`shader_programs.rs`).
 
 mod frame_textures;
 mod layer_programs;
+mod shader_programs;
 
 pub use frame_textures::VelloWebGlTexture;
 use frame_textures::TexturePool;
 pub(crate) use layer_programs::{LayerProgram, PassInput};
 use layer_programs::LayerPrograms;
+use shader_programs::ShaderPrograms;
 
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::helpers::pixel_format_helper::scene_size;
@@ -41,6 +44,7 @@ use crate::scene::VelloWebGlSceneSink;
 use crate::vello_options::VelloRenderingMode;
 use crate::vello_platform::VelloPlatform;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::media::effects::ImmutableCustomEffect;
 use ferroui_base::platform::surfaces::IPlatformRenderSurface;
 use ferroui_base::platform::{
     IDrawingContextImpl, IOptionalFeatureProvider, IPlatformGraphicsContext, IRenderTarget, PlatformRenderTargetState,
@@ -94,6 +98,8 @@ struct WebGlState {
     textures: TexturePool,
     /// The programs of the layers with an effect, compiled when first needed.
     programs: LayerPrograms,
+    /// The programs of the shader effects, compiled when first needed.
+    shaders: ShaderPrograms,
 }
 
 /// The WebGL2 context of a canvas as the Vello backend draws with it: what
@@ -154,6 +160,7 @@ impl VelloWebGlGpu {
                 render_count: 0,
                 textures: TexturePool::default(),
                 programs: LayerPrograms::default(),
+                shaders: ShaderPrograms::default(),
             })),
         })))
     }
@@ -212,6 +219,7 @@ impl VelloWebGlGpu {
             }
             state.textures.dispose(&self.gl);
             state.programs.dispose(&self.gl);
+            state.shaders.dispose(&self.gl);
         }
     }
 
@@ -349,6 +357,70 @@ impl VelloWebGlGpu {
         let (width, height) = frame_textures::pooled_size(area.0, area.1, self.max_texture_size);
         let target = state.textures.acquire(&self.gl, width, height)?;
         let drawn = state.programs.pass(&self.gl, program, inputs, &target, area, uniforms);
+        Ok(drawn.then_some(target))
+    }
+
+    /// Whether the shader effect `effect` is drawn on the context: it is one of the library's and
+    /// its program compiled (now, the first time).
+    pub(crate) fn prepare_shader(&self, effect: &ImmutableCustomEffect) -> bool {
+        match self.state.borrow_mut().as_mut() {
+            Some(state) => state.shaders.prepare(&self.gl, effect),
+            None => false,
+        }
+    }
+
+    /// The content `copied` as [`render_to_texture`](Self::render_to_texture) leaves it, its first
+    /// row the bottom one of `area` (width, height), in a texture of the pool with its first row
+    /// the top one: what the program of a shader effect reads by texel.
+    pub(crate) fn upright_texture(
+        &self,
+        copied: &Rc<VelloWebGlTexture>,
+        (width, height): (u32, u32),
+    ) -> Result<Rc<VelloWebGlTexture>, String> {
+        let upright = self.acquire_texture(width, height)?;
+        let gl = &self.gl;
+        let scissor = gl.is_enabled(WebGl2RenderingContext::SCISSOR_TEST);
+        gl.disable(WebGl2RenderingContext::SCISSOR_TEST);
+        gl.bind_framebuffer(WebGl2RenderingContext::READ_FRAMEBUFFER, Some(&copied.framebuffer));
+        gl.bind_framebuffer(WebGl2RenderingContext::DRAW_FRAMEBUFFER, Some(&upright.framebuffer));
+        let (width, height) = (width as i32, height as i32);
+        gl.blit_framebuffer(
+            0,
+            0,
+            width,
+            height,
+            0,
+            height,
+            width,
+            0,
+            WebGl2RenderingContext::COLOR_BUFFER_BIT,
+            WebGl2RenderingContext::NEAREST,
+        );
+        gl.bind_framebuffer(WebGl2RenderingContext::READ_FRAMEBUFFER, None);
+        gl.bind_framebuffer(WebGl2RenderingContext::DRAW_FRAMEBUFFER, None);
+        if scissor {
+            gl.enable(WebGl2RenderingContext::SCISSOR_TEST);
+        }
+        Ok(upright)
+    }
+
+    /// The pass of the shader effect `effect` over `content` (upright, holding `area` pixels whose
+    /// top left is `origin` of the area of the effect, of `size` pixels at `scale`) into a texture
+    /// of the pool. `None` when its program is not there or its uniforms do not match it.
+    pub(crate) fn shader_effect_texture(
+        &self,
+        effect: &ImmutableCustomEffect,
+        content: &Rc<VelloWebGlTexture>,
+        area: (u32, u32),
+        origin: [f32; 2],
+        size: [f32; 2],
+        scale: f32,
+    ) -> Result<Option<Rc<VelloWebGlTexture>>, String> {
+        let mut state = self.state.borrow_mut();
+        let state = state.as_mut().ok_or("the renderer of the canvas has been released")?;
+        let (width, height) = frame_textures::pooled_size(area.0, area.1, self.max_texture_size);
+        let target = state.textures.acquire(&self.gl, width, height)?;
+        let drawn = state.shaders.pass(&self.gl, effect, content, &target, area, origin, size, scale);
         Ok(drawn.then_some(target))
     }
 

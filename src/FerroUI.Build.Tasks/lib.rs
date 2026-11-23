@@ -216,8 +216,9 @@ pub mod type_system;
 pub mod xaml_compiler_diagnostics_filter;
 #[cfg(feature = "shader-effects")]
 pub use shader_effects::{
-    shader_effect_glsl, translate_shader_effect_module, write_shader_effect_glsl, write_shader_effect_glsl_to,
-    ShaderEffectGlsl, ShaderEffectGlslError, ShaderEffectGlslFiles,
+    library_shader_effects, shader_effect_glsl, shader_module_hash, translate_shader_effect_module,
+    write_shader_effect_glsl, write_shader_effect_glsl_to, LibraryShaderEffect, ShaderEffectGlsl,
+    ShaderEffectGlslError, ShaderEffectGlslFiles,
 };
 
 use std::env;
