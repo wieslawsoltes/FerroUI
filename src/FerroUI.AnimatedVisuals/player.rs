@@ -6,7 +6,7 @@ use crate::{AnimatedVisual, AnimatedVisualError, AnimatedVisualSource, FrameComm
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::media::{Color, DrawingContext, FlowDirection, IBrush, ISolidColorBrush, MediaExtensions, Stretch, StretchDirection};
+use ferroui_base::media::{Color, DrawingContext, FlowDirection, ISolidColorBrush, MediaExtensions, Stretch, StretchDirection};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_properties, instantiate, AttachedProperty, FerroObject, FerroObjectImpl,
@@ -14,9 +14,8 @@ use ferroui_base::{
     StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use ferroui_controls::automation::peers::{AutomationPeer, ImageAutomationPeer};
-use ferroui_controls::documents::TextElement;
-use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::{Button, ComboBox, Control, ControlImpl, IconSource, NavigationViewItem};
+use ferroui_controls::primitives::{TemplatedControl, TemplatedControlImpl, ToggleButton};
+use ferroui_controls::{Button, ComboBox, Control, ControlImpl, IconElement, IconSource, NavigationViewItem};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
@@ -512,7 +511,7 @@ struct IconSegment {
 /// Shows an animated visual whose markers are the transitions between named states.
 #[repr(C)]
 pub struct AnimatedIcon {
-    base: Control,
+    base: IconElement,
     source_generation: Rc<Cell<u64>>,
     pending_state: Cell<bool>,
     state_owner: RefCell<Option<(Ref<Control>, u64)>>,
@@ -528,12 +527,12 @@ pub struct AnimatedIcon {
     attached: Cell<bool>,
 }
 
-ferro_class!(AnimatedIcon: Control);
+ferro_class!(AnimatedIcon: IconElement);
 ferroui_base::ferro_class_info!(AnimatedIcon {
     new: AnimatedIcon::new,
     markup: { namespace: "FerroUI.AnimatedVisuals", content: Source },
 });
-ferro_impl_classes!(AnimatedIcon: StyledElementImpl, InteractiveImpl, InputElementImpl);
+ferro_impl_classes!(AnimatedIcon: StyledElementImpl, InteractiveImpl, InputElementImpl, TemplatedControlImpl);
 
 ferro_properties! {
     impl AnimatedIcon {
@@ -549,9 +548,6 @@ ferro_properties! {
         }
         pub fn fallback_icon_source_property() -> StyledProperty<Option<Ref<IconSource>>> {
             FerroProperty::register::<Self, _>("FallbackIconSource", None)
-        }
-        pub fn foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
-            TextElement::foreground_property().add_owner::<AnimatedIcon>()
         }
         pub fn mirrored_when_right_to_left_property() -> StyledProperty<bool> {
             FerroProperty::register::<Self, _>("MirroredWhenRightToLeft", false)
@@ -576,7 +572,7 @@ impl FerroObjectImpl for AnimatedIcon {
                 .and_then(|source| source.create_icon_element())
                 .map(|element| element.upcast::<Control>());
             this.set_fallback_icon(element);
-        } else if property == Self::foreground_property().as_property() {
+        } else if property == TemplatedControl::foreground_property().as_property() {
             this.apply_foreground();
         } else if property == Self::mirrored_when_right_to_left_property().as_property()
             || property == Visual::flow_direction_property().as_property()
@@ -664,7 +660,7 @@ fn state_of(owner: &Control) -> String {
 impl AnimatedIcon {
     pub fn new() -> Ref<Self> {
         instantiate(Self {
-            base: Control::construct(),
+            base: IconElement::construct(),
             source_generation: Rc::new(Cell::new(0)),
             pending_state: Cell::new(false),
             state_owner: RefCell::new(None),
@@ -703,13 +699,6 @@ impl AnimatedIcon {
     }
     pub fn set_fallback_icon_source(&self, source: Option<Ref<IconSource>>) {
         self.set_value(Self::fallback_icon_source_property(), source);
-    }
-
-    pub fn foreground(&self) -> Option<Rc<dyn IBrush>> {
-        self.get_value(Self::foreground_property())
-    }
-    pub fn set_foreground(&self, value: Option<Rc<dyn IBrush>>) {
-        self.set_value(Self::foreground_property(), value);
     }
 
     pub fn mirrored_when_right_to_left(&self) -> bool {
