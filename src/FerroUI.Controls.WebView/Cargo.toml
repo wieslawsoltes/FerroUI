@@ -43,6 +43,10 @@ windows-sys = { workspace = true, features = [
 [target.'cfg(target_os = "android")'.dependencies]
 ferroui-android.workspace = true
 
+# WebKitGTK and GTK are opened at run time, with the first web view.
+[target.'cfg(target_os = "linux")'.dependencies]
+ferroui-x11.workspace = true
+
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
 ferroui-browser.workspace = true
 wasm-bindgen.workspace = true

@@ -1699,6 +1699,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-system",
+ "ferroui-x11",
  "libc",
  "objc2",
  "wasm-bindgen",
