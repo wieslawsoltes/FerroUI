@@ -10,6 +10,7 @@ mod managed_file_chooser_item_view_model;
 mod managed_file_chooser_navigation_item;
 mod managed_file_chooser_sources;
 mod managed_file_chooser_view_model;
+mod managed_storage_fallback;
 mod resource_selector_converter;
 
 pub use bcl_mounted_volume_info_provider::BclMountedVolumeInfoProvider;
@@ -22,4 +23,5 @@ pub use managed_file_chooser_item_view_model::ManagedFileChooserItemViewModel;
 pub use managed_file_chooser_navigation_item::ManagedFileChooserNavigationItem;
 pub use managed_file_chooser_sources::ManagedFileChooserSources;
 pub use managed_file_chooser_view_model::ManagedFileChooserViewModel;
+pub use managed_storage_fallback::ManagedStorageFallback;
 pub use resource_selector_converter::ResourceSelectorConverter;

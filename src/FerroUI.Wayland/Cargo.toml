@@ -17,7 +17,6 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
-ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
 # The source files the reference compiles into both Linux backends (the grouping of raw input, the

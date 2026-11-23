@@ -17,7 +17,6 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
-ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
 ferroui-system.workspace = true

@@ -4,6 +4,7 @@
                     xmlns:internal="using:FerroUI.Dialogs.Internal"
                     xmlns:converters="clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
                     x:ClassModifier="internal">
+  <internal:ManagedStorageFallback x:Key="ManagedStorageFallback" />
   <DrawingGroup x:Key="LevelUp">
     <GeometryDrawing Brush="#00FFFFFF" Geometry="F1M16,16L0,16 0,0 16,0z" />
     <GeometryDrawing Brush="#FFF6F6F6"

@@ -4,6 +4,7 @@
         xmlns:internal="using:FerroUI.Dialogs.Internal"
         xmlns:converters="clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
         x:ClassModifier="internal">
+  <internal:ManagedStorageFallback x:Key="ManagedStorageFallback" />
   <BoxShadows x:Key="ManagedFileChooserQuickLinksBoxShadow">inset -6 0 3 -3 #20000000</BoxShadows>
 
   <Design.PreviewWith>

@@ -39,7 +39,10 @@ mod win32_properties;
 mod dialogs;
 mod in_process_drag_source;
 mod x11_properties;
-pub use dialogs::{IMountedVolumeInfoProvider, IStorageProviderFactory, MountedVolumeInfo};
+pub use dialogs::{
+    managed_storage_fallback, IMountedVolumeInfoProvider, IStorageProviderFactory, MountedVolumeInfo,
+    MANAGED_STORAGE_FALLBACK_KEY,
+};
 pub use in_process_drag_source::InProcessDragSource;
 pub use x11_properties::X11Properties;
 

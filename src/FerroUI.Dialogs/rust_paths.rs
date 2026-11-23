@@ -18,6 +18,7 @@ ferroui_base::ferro_rust_paths! {
         crate::internal::ManagedFileChooserItemType,
         crate::internal::ManagedFileChooserItemViewModel,
         crate::internal::ManagedFileChooserViewModel,
+        crate::internal::ManagedStorageFallback,
     ],
     contracts: [
     ],
