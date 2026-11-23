@@ -897,7 +897,8 @@ impl TextFormatterImpl {
             if !super::text_tab_layout::resolve_tabs(pre_split, &**paragraph_properties, paragraph_width) {
                 break;
             }
-            let adjusted_length = Self::find_wrap_length(pre_split, paragraph_width - line_indent, &**paragraph_properties);
+            let adjusted_length =
+                Self::find_wrap_length(pre_split, paragraph_width - line_indent, &**paragraph_properties);
             if adjusted_length >= split_length {
                 break;
             }
@@ -950,7 +951,12 @@ impl TextFormatterImpl {
         };
 
         let text_line = match &mut pre_split_runs {
-            None => Self::create_indented_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties, line_indent),
+            None => Self::create_indented_empty_text_line(
+                first_text_source_index,
+                paragraph_width,
+                paragraph_properties,
+                line_indent,
+            ),
             Some(pre_split_runs) => {
                 if has_post_split_runs {
                     Self::reset_trailing_whitespace_bidi_levels(
@@ -1110,7 +1116,8 @@ impl TextFormatterImpl {
                                     current_run = &text_runs[index];
                                     current_run_length = current_run.length();
 
-                                    line_breaker = Self::run_line_breaks(&**current_run, measured_length - current_length);
+                                    line_breaker =
+                                        Self::run_line_breaks(&**current_run, measured_length - current_length);
                                     end_is_opportunity = text_runs.get(index + 1).is_some_and(|next| {
                                         next.is::<ShapedTextRun>()
                                             && !next.text_span().is_empty()

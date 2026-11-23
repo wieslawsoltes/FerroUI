@@ -25,7 +25,11 @@ impl LineGeometryImpl {
             Point::new(p1.x.max(p2.x), p1.y.max(p2.y)),
         );
 
-        register(Self { base: GeometryImplBase::new(), bounds, stroke_path: Shared::new(cache_path_bounds(path.detach())) })
+        register(Self {
+            base: GeometryImplBase::new(),
+            bounds,
+            stroke_path: Shared::new(cache_path_bounds(path.detach())),
+        })
     }
 
     fn geometry_bounds(&self) -> Rect {
