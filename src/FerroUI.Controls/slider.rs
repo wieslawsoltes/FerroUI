@@ -592,7 +592,7 @@ impl Slider {
     }
 
     /// Snaps the input value to the closest tick.
-    fn snap_to_tick(&self, mut value: f64) -> f64 {
+    pub(crate) fn snap_to_tick(&self, mut value: f64) -> f64 {
         if let Some(step) = self.step_interval() {
             let (minimum, maximum) = (self.minimum(), self.maximum());
             let previous = minimum + ((value - minimum) / step).floor() * step;
