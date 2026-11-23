@@ -348,6 +348,60 @@ static NSDictionary *shaping_attributes(CTFontRef font, double size, int rtl,
   }
   return attributes;
 }
+// The typesetter of the last paragraph shaped on this thread. A paragraph is
+// shaped run by run over its whole text: one typesetter serves all its runs,
+// where each run built the attributed string and the typesetter again.
+@interface QParagraph : NSObject
+@property(nonatomic, copy) NSData *text;
+@property(nonatomic, strong) NSDictionary *attributes;
+@property(nonatomic) CTTypesetterRef typesetter;
+@end
+@implementation QParagraph
+- (void)dealloc {
+  if (_typesetter)
+    CFRelease(_typesetter);
+}
+@end
+// In UTF-16 units: a longer text is not kept after it is shaped.
+enum { QMostKeptParagraph = 256 * 1024 };
+#ifdef QUARTZ_MEDIA_TEST_FIXTURES
+static __thread uint64_t fixtureParagraphTypesetters;
+uint64_t q_fixture_paragraph_typesetters(void) {
+  return fixtureParagraphTypesetters;
+}
+#endif
+static QParagraph *paragraph_of(const uint16_t *text, size_t n,
+                                NSDictionary *attributes) {
+  NSMutableDictionary *thread = NSThread.currentThread.threadDictionary;
+  static NSString *const key = @"FerroUI.Quartz.Paragraph";
+  QParagraph *last = thread[key];
+  if (last && last.attributes == attributes &&
+      last.text.length == n * sizeof(*text) &&
+      !memcmp(last.text.bytes, text, n * sizeof(*text)))
+    return last;
+  CFStringRef string = CFStringCreateWithCharacters(NULL, text, n);
+  if (!string)
+    return nil;
+  CFAttributedStringRef attributed = CFAttributedStringCreate(
+      NULL, string, (__bridge CFDictionaryRef)attributes);
+  CFRelease(string);
+  if (!attributed)
+    return nil;
+  CTTypesetterRef typesetter =
+      CTTypesetterCreateWithAttributedString(attributed);
+  CFRelease(attributed);
+  if (!typesetter)
+    return nil;
+#ifdef QUARTZ_MEDIA_TEST_FIXTURES
+  fixtureParagraphTypesetters++;
+#endif
+  QParagraph *paragraph = [QParagraph new];
+  paragraph.text = [NSData dataWithBytes:text length:n * sizeof(*text)];
+  paragraph.attributes = attributes;
+  paragraph.typesetter = typesetter;
+  thread[key] = paragraph;
+  return paragraph;
+}
 void q_shape(void *font, const uint16_t *text, size_t n, size_t start,
              size_t length, const char *language, double size, int rtl,
              const uint32_t *tags, const int *values, const uint32_t *starts,
@@ -364,85 +418,94 @@ void q_shape(void *font, const uint16_t *text, size_t n, size_t start,
         return;
       CTFontRef sized =
           (__bridge CTFontRef)configured[(__bridge id)kCTFontAttributeName];
-      CFStringRef s = CFStringCreateWithCharacters(NULL, text, n);
-      if (!s)
-        return;
-      // The common case has uniform immutable attributes. Avoid constructing
-      // a mutable string/attribute-run store when no feature ranges are edited.
-      // The CFString owns its UTF-16 bytes; no borrowed Rust storage escapes.
-      NSAttributedString *uniform =
-          features ? nil
-                   : CFBridgingRelease(CFAttributedStringCreate(
-                         NULL, s, (__bridge CFDictionaryRef)configured));
-      NSMutableAttributedString *a =
-          features ? [[NSMutableAttributedString alloc]
-                         initWithString:(__bridge NSString *)s
-                             attributes:configured]
-                   : nil;
-      CFAttributedStringRef attributed =
-          (__bridge CFAttributedStringRef)(features ? a : uniform);
-      if (!attributed) {
-        CFRelease(s);
-        return;
+      CTLineRef line = NULL;
+      CFStringRef s = NULL;
+      if (!features && (start != 0 || length != n) && n <= QMostKeptParagraph) {
+        QParagraph *paragraph = paragraph_of(text, n, configured);
+        if (paragraph)
+          line = CTTypesetterCreateLine(paragraph.typesetter,
+                                        CFRangeMake(start, length));
       }
-      // Feature ranges use UTF-16 indices in the containing text, just like
-      // HarfBuzz clusters. Keep that context intact when configuring subranges.
-      if (features) {
-        NSMutableIndexSet *boundaries = [NSMutableIndexSet indexSetWithIndex:0];
-        [boundaries addIndex:n];
-        for (size_t i = 0; i < features; i++) {
-          [boundaries addIndex:MIN((size_t)starts[i], n)];
-          [boundaries addIndex:MIN((size_t)ends[i], n)];
+      if (!line) {
+        s = CFStringCreateWithCharacters(NULL, text, n);
+        if (!s)
+          return;
+        // The common case has uniform immutable attributes. Avoid constructing
+        // a mutable string/attribute-run store when no feature ranges are edited.
+        // The CFString owns its UTF-16 bytes; no borrowed Rust storage escapes.
+        NSAttributedString *uniform =
+            features ? nil
+                     : CFBridgingRelease(CFAttributedStringCreate(
+                           NULL, s, (__bridge CFDictionaryRef)configured));
+        NSMutableAttributedString *a =
+            features ? [[NSMutableAttributedString alloc]
+                           initWithString:(__bridge NSString *)s
+                               attributes:configured]
+                     : nil;
+        CFAttributedStringRef attributed =
+            (__bridge CFAttributedStringRef)(features ? a : uniform);
+        if (!attributed) {
+          CFRelease(s);
+          return;
         }
-        for (NSUInteger lower = boundaries.firstIndex; lower < n;) {
-          NSUInteger upper = [boundaries indexGreaterThanIndex:lower];
-          NSMutableDictionary<NSString *, NSNumber *> *active =
-              [NSMutableDictionary dictionary];
+        // Feature ranges use UTF-16 indices in the containing text, just like
+        // HarfBuzz clusters. Keep that context intact when configuring subranges.
+        if (features) {
+          NSMutableIndexSet *boundaries = [NSMutableIndexSet indexSetWithIndex:0];
+          [boundaries addIndex:n];
           for (size_t i = 0; i < features; i++) {
-            if (starts[i] > lower || ends[i] <= lower)
-              continue;
-            char tag[5] = {(char)(tags[i] >> 24), (char)(tags[i] >> 16),
-                           (char)(tags[i] >> 8), (char)tags[i], 0};
-            // Core Text requires a four-character string, not the numeric tag.
-            active[@(tag)] = @(values[i]);
+            [boundaries addIndex:MIN((size_t)starts[i], n)];
+            [boundaries addIndex:MIN((size_t)ends[i], n)];
           }
-          if (active.count) {
-            NSMutableArray *settings = [NSMutableArray array];
-            for (NSString *tag in active)
-              [settings addObject:@{
-                (__bridge id)kCTFontOpenTypeFeatureTag : tag,
-                (__bridge id)kCTFontOpenTypeFeatureValue : active[tag]
-              }];
-            NSDictionary *fontAttrs =
-                @{(__bridge id)kCTFontFeatureSettingsAttribute : settings};
-            CTFontDescriptorRef desc = CTFontDescriptorCreateWithAttributes(
-                (__bridge CFDictionaryRef)fontAttrs);
-            CTFontRef ranged =
-                CTFontCreateCopyWithAttributes(sized, size, NULL, desc);
-            if (ranged)
-              [a addAttribute:(__bridge id)kCTFontAttributeName
-                        value:(__bridge id)ranged
-                        range:NSMakeRange(lower, upper - lower)];
-            if (ranged)
-              CFRelease(ranged);
-            if (desc)
-              CFRelease(desc);
+          for (NSUInteger lower = boundaries.firstIndex; lower < n;) {
+            NSUInteger upper = [boundaries indexGreaterThanIndex:lower];
+            NSMutableDictionary<NSString *, NSNumber *> *active =
+                [NSMutableDictionary dictionary];
+            for (size_t i = 0; i < features; i++) {
+              if (starts[i] > lower || ends[i] <= lower)
+                continue;
+              char tag[5] = {(char)(tags[i] >> 24), (char)(tags[i] >> 16),
+                             (char)(tags[i] >> 8), (char)tags[i], 0};
+              // Core Text requires a four-character string, not the numeric tag.
+              active[@(tag)] = @(values[i]);
+            }
+            if (active.count) {
+              NSMutableArray *settings = [NSMutableArray array];
+              for (NSString *tag in active)
+                [settings addObject:@{
+                  (__bridge id)kCTFontOpenTypeFeatureTag : tag,
+                  (__bridge id)kCTFontOpenTypeFeatureValue : active[tag]
+                }];
+              NSDictionary *fontAttrs =
+                  @{(__bridge id)kCTFontFeatureSettingsAttribute : settings};
+              CTFontDescriptorRef desc = CTFontDescriptorCreateWithAttributes(
+                  (__bridge CFDictionaryRef)fontAttrs);
+              CTFontRef ranged =
+                  CTFontCreateCopyWithAttributes(sized, size, NULL, desc);
+              if (ranged)
+                [a addAttribute:(__bridge id)kCTFontAttributeName
+                          value:(__bridge id)ranged
+                          range:NSMakeRange(lower, upper - lower)];
+              if (ranged)
+                CFRelease(ranged);
+              if (desc)
+                CFRelease(desc);
+            }
+            lower = upper;
           }
-          lower = upper;
         }
+        CTTypesetterRef typesetter =
+            (start != 0 || length != n)
+                ? CTTypesetterCreateWithAttributedString(attributed)
+                : NULL;
+        line = (start == 0 && length == n)
+                   ? CTLineCreateWithAttributedString(attributed)
+               : typesetter
+                   ? CTTypesetterCreateLine(typesetter, CFRangeMake(start, length))
+                   : NULL;
+        if (typesetter)
+          CFRelease(typesetter);
       }
-      CTTypesetterRef typesetter =
-          (start != 0 || length != n)
-              ? CTTypesetterCreateWithAttributedString(attributed)
-              : NULL;
-      CTLineRef line =
-          (start == 0 && length == n)
-              ? CTLineCreateWithAttributedString(attributed)
-          : typesetter
-              ? CTTypesetterCreateLine(typesetter, CFRangeMake(start, length))
-              : NULL;
-      if (typesetter)
-        CFRelease(typesetter);
       CFArrayRef runs = line ? CTLineGetGlyphRuns(line) : NULL;
       for (CFIndex r = 0; runs && r < CFArrayGetCount(runs); r++) {
         CTRunRef run = CFArrayGetValueAtIndex(runs, r);
@@ -506,7 +569,8 @@ void q_shape(void *font, const uint16_t *text, size_t n, size_t start,
       }
       if (line)
         CFRelease(line);
-      CFRelease(s);
+      if (s)
+        CFRelease(s);
     }
 
   } @catch (NSException *error) {

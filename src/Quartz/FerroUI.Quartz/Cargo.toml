@@ -36,5 +36,7 @@ cc.workspace = true
 group = "rendering"
 
 [target.'cfg(target_os = "macos")'.dev-dependencies]
+# The same font shaped by HarfBuzz, the shaper of the other backends (#640).
+ferroui-harfbuzz.workspace = true
 objc2 = "0.6.3"
 objc2-metal = { version = "0.3.2", default-features = false, features = ["std", "MTLAllocation", "MTLDevice", "MTLCommandQueue", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLEvent"] }

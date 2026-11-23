@@ -1866,3 +1866,89 @@ fn compact_draw_counts_cross_recording_and_deferred_merge_limits() {
         "every compact draw must survive batch boundaries"
     );
 }
+
+/// #640: the same font through Core Text and through HarfBuzz, the shaper of the other backends.
+#[test]
+fn core_text_and_harfbuzz_measure_the_same_font_alike() {
+    use ferroui_base::media::text_formatting::TextShaperOptions;
+    use ferroui_base::platform::{IFontManagerImpl, ITextShaperImpl};
+    use ferroui_base::utilities::ReadOnlyMemory;
+    let manager = fonts::FontManager::default();
+    let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf");
+    let inter = manager
+        .try_create_glyph_typeface_from_stream(&mut &bytes[..], ferroui_base::media::FontSimulations::None)
+        .expect("the font is read");
+    let default_name = manager.get_default_font_family_name();
+    let named = |name: &str| {
+        manager.try_create_glyph_typeface(
+            name,
+            ferroui_base::media::FontStyle::Normal,
+            ferroui_base::media::FontWeight::Normal,
+            ferroui_base::media::FontStretch::Normal,
+        )
+    };
+    let faces = [("Inter", Some(inter)), ("Helvetica", named("Helvetica")), ("default", named(&default_name))];
+    let text = "The quick brown fox jumps over the lazy dog. AVATAR 0123456789";
+    let units: Vec<u16> = text.encode_utf16().collect();
+    // A glyph typeface takes the shaper of the locator when it is made, so each shaper has its own.
+    let measure = |shaper: Rc<dyn ITextShaperImpl>, platform: &Rc<dyn ferroui_base::media::IPlatformTypeface>, size: f64| {
+        let _scope = ferroui_base::FerroLocator::enter_scope();
+        ferroui_base::FerroLocator::current_mutable().bind::<dyn ITextShaperImpl>().to_constant(shaper.clone());
+        let face = GlyphTypeface::new(platform.clone(), ferroui_base::media::FontSimulations::None).unwrap();
+        let metrics = face.metrics();
+        let line = f64::from(metrics.descent - metrics.ascent + metrics.line_gap) / f64::from(metrics.design_em_height) * size;
+        let options = TextShaperOptions::with_all(face, size, 0, None, 0.0, 0.0, None);
+        let shaped = shaper.shape_text(&ReadOnlyMemory::from_vec(units.clone()), &options);
+        let width: f64 = shaped.glyph_infos().iter().map(|glyph| glyph.glyph_advance).sum();
+        (line, width, shaped.length())
+    };
+    for (name, face) in faces {
+        let Some(face) = face else { continue };
+        for size in [12.0, 14.0, 16.0] {
+            let ours = measure(Rc::new(fonts::TextShaper), &face, size);
+            let theirs = measure(Rc::new(ferroui_harfbuzz::HarfBuzzTextShaper::new()), &face, size);
+            assert_eq!(ours.0, theirs.0, "{name} at {size}: the line height");
+            assert_eq!(ours.2, theirs.2, "{name} at {size}: the glyphs");
+            // The system font is variable: Core Text applies its optical size, and HarfBuzz
+            // reads the default instance, so only its line height is compared.
+            if name != "default" {
+                assert!((ours.1 - theirs.1).abs() < 0.01, "{name} at {size}: {} / {}", ours.1, theirs.1);
+            }
+        }
+    }
+}
+
+/// #640: the runs of a paragraph share one typesetter and shape as they do alone.
+#[cfg(feature = "media-test-fixtures")]
+#[test]
+fn the_runs_of_a_paragraph_share_a_typesetter() {
+    use ferroui_base::media::text_formatting::TextShaperOptions;
+    use ferroui_base::platform::{IFontManagerImpl, ITextShaperImpl};
+    use ferroui_base::utilities::ReadOnlyMemory;
+    unsafe extern "C" {
+        fn q_fixture_paragraph_typesetters() -> u64;
+    }
+    let _scope = ferroui_base::FerroLocator::enter_scope();
+    ferroui_base::FerroLocator::current_mutable().bind::<dyn ITextShaperImpl>().to_constant(Rc::new(fonts::TextShaper) as Rc<dyn ITextShaperImpl>);
+    let manager = fonts::FontManager::default();
+    let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf");
+    let face = manager.try_create_glyph_typeface_from_stream(&mut &bytes[..], ferroui_base::media::FontSimulations::None).unwrap();
+    let face = GlyphTypeface::new(face, ferroui_base::media::FontSimulations::None).unwrap();
+    let options = TextShaperOptions::with_all(face, 16.0, 0, None, 0.0, 0.0, None);
+    let paragraph: Vec<u16> = "AVATAR office waffle, a paragraph of several runs.".encode_utf16().collect();
+    let other: Vec<u16> = "Another paragraph between the runs.".encode_utf16().collect();
+    let owner = ReadOnlyMemory::from_vec(paragraph.clone());
+    let other = ReadOnlyMemory::from_vec(other);
+    let glyphs = |shaped: &ferroui_base::media::text_formatting::ShapedBuffer| -> Vec<(u16, i32, u64)> {
+        shaped.glyph_infos().iter().map(|g| (g.glyph_index, g.glyph_cluster, g.glyph_advance.to_bits())).collect()
+    };
+    let runs = [(0, 13), (13, 12), (25, paragraph.len() - 25)];
+    let before = unsafe { q_fixture_paragraph_typesetters() };
+    let shared: Vec<_> = runs.iter().map(|&(start, length)| glyphs(&fonts::TextShaper.shape_text(&owner.slice(start, length), &options))).collect();
+    assert_eq!(unsafe { q_fixture_paragraph_typesetters() } - before, 1, "one typesetter for the paragraph");
+    for (index, &(start, length)) in runs.iter().enumerate() {
+        fonts::TextShaper.shape_text(&other.slice(1, 5), &options);
+        let alone = glyphs(&fonts::TextShaper.shape_text(&owner.slice(start, length), &options));
+        assert_eq!(alone, shared[index], "run {index} shapes as it does alone");
+    }
+}
