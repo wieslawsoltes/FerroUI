@@ -20,6 +20,10 @@ ferroui-controls.workspace = true
 ferroui-opengl.workspace = true
 ferroui-skia = { workspace = true, optional = true }
 ferroui-harfbuzz.workspace = true
+ferroui-inspect = { workspace = true, optional = true }
+ferroui-themes-simple = { workspace = true, optional = true }
+ferroui-view = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }
 wasm-bindgen.workspace = true
 # The URLs of the launcher and the storage (C5 of #423).
 url.workspace = true
@@ -34,6 +38,8 @@ ferroui-vello = { workspace = true, optional = true, features = ["hybrid-webgl"]
 default = ["skia"]
 skia = ["dep:ferroui-skia"]
 vello = ["dep:ferroui-vello"]
+live-inspector = ["dep:ferroui-inspect", "dep:serde_json"]
+inspector-example = ["live-inspector", "dep:ferroui-themes-simple", "dep:ferroui-view"]
 
 [dev-dependencies]
 # The tests of the textarea protocol run a RichEditBox in a test application.
@@ -49,6 +55,11 @@ path = "examples/themed_view/main.rs"
 [[example]]
 name = "storage_view"
 path = "examples/storage_view/main.rs"
+
+[[example]]
+name = "live_inspector"
+path = "examples/live_inspector/main.rs"
+required-features = ["inspector-example"]
 
 # A page of the threaded build (scripts/build-browser.sh render_worker_clear --threads).
 [[example]]

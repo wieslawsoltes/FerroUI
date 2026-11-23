@@ -41,7 +41,7 @@ pub(super) fn rust_location(info: RsxSourceInfo, use_invocation: bool) -> Option
     }
     if let Some(uri) = info.source_uri() {
         source["uri"] = json!(uri.as_str());
-    } else if cfg!(target_os = "android") && location.revision.is_some() {
+    } else if cfg!(any(target_os = "android", target_arch = "wasm32")) && location.revision.is_some() {
         source["workspacePath"] = json!(info.file);
         source["manifestPath"] = json!(info.manifest);
     } else {
