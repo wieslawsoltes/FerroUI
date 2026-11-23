@@ -42,6 +42,7 @@
 //! the CPU reference; a pipeline that cannot be made with four samples is reported once, and the
 //! executor draws with one from then on.
 
+use crate::brush::DeviceBitmap;
 use crate::brush::{
     texture_coordinate_bounds, BrushShader, BrushTextureIdentity, BrushTextureKey, BrushTextureSource, BrushUniforms,
     MaterialBrush,
@@ -879,7 +880,11 @@ impl Scene3DWgpuExecutor {
             layers.iter().position(|layer| LayerKind::of(layer.kind) == LayerKind::Diffuse).unwrap_or(0);
         for (index, layer) in layers.iter().enumerate() {
             let (uniforms, _) = DrawUniforms::of(model, layer, face);
-            let on_device = |bitmap: &SharedBitmapImpl| textures.is_on_device(bitmap);
+            // What this executor is given is already converted (its contract).
+            let on_device = |bitmap: &SharedBitmapImpl| match textures.is_on_device(bitmap) {
+                true => DeviceBitmap::Converted,
+                false => DeviceBitmap::NotOnDevice,
+            };
             let mut brush = MaterialBrush::of_with(layer.brush.as_ref(), texture_bounds, &on_device);
             let mut texture = None;
             if let Some(source) = brush.texture().cloned() {

@@ -43,7 +43,7 @@ use ferroui_base::media::{
     GradientSpreadMethod, IBrush, IGradientBrush, ITileBrush, MediaExtensions, SharedBrush, StretchDirection, TileMode,
 };
 use ferroui_base::platform::{AlphaFormat, PixelFormat, SharedBitmapImpl};
-use ferroui_base::rendering::composition::frames::{FrameMetadata, FrameRotation};
+use ferroui_base::rendering::composition::frames::{FrameAlpha, FrameColor, FrameMetadata, FrameRotation};
 use ferroui_base::rendering::scene3d::{MeshData, Scene3DBrushContent, Scene3DSnapshot};
 use ferroui_base::rendering::utilities::TileBrushCalculator;
 use ferroui_base::{Matrix, Point, Rect, Size};
@@ -328,6 +328,17 @@ impl BrushTexels {
     }
 }
 
+/// How a renderer has a bitmap whose pixels cannot be read on its device (step D7).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum DeviceBitmap {
+    /// It does not: the layer is drawn with its colour.
+    NotOnDevice,
+    /// As a texture of premultiplied values on the canvas's curve (Vello's converted frame).
+    Converted,
+    /// As the producer stored it: the shader applies the colour transfer of the frame.
+    Stored,
+}
+
 /// The brush of a material layer as a draw samples it.
 #[derive(Clone)]
 pub struct MaterialBrush {
@@ -341,7 +352,7 @@ impl MaterialBrush {
     /// The brush of a layer (`None`: a brush without a shared form) over a mesh whose texture
     /// coordinates have the bounding box `texture_bounds` ([`texture_coordinate_bounds`]).
     pub fn of(brush: Option<&SharedBrush>, texture_bounds: Rect) -> MaterialBrush {
-        MaterialBrush::of_with(brush, texture_bounds, &|_| false)
+        MaterialBrush::of_with(brush, texture_bounds, &|_| DeviceBitmap::NotOnDevice)
     }
 
     /// [`of`](Self::of) for a renderer that has some bitmaps as textures of its device
@@ -350,7 +361,7 @@ impl MaterialBrush {
     pub fn of_with(
         brush: Option<&SharedBrush>,
         texture_bounds: Rect,
-        on_device: &dyn Fn(&SharedBitmapImpl) -> bool,
+        on_device: &dyn Fn(&SharedBitmapImpl) -> DeviceBitmap,
     ) -> MaterialBrush {
         let unsampled = MaterialBrush {
             shader: BrushShader::Solid,
@@ -374,8 +385,22 @@ impl MaterialBrush {
                 uniforms.metadata = [kind::IMAGE, 0.0, 0.0, 1.0];
                 return MaterialBrush { shader: BrushShader::Image, uniforms, texture: None, unsampled: false };
             };
-            if !on_device(&*bitmap) || !frame_uniforms(&mut uniforms, tile, &metadata, texture_bounds) {
+            let sampling = on_device(&*bitmap);
+            if sampling == DeviceBitmap::NotOnDevice
+                || !frame_uniforms(&mut uniforms, tile, &metadata, texture_bounds)
+            {
                 return unsampled;
+            }
+            if sampling == DeviceBitmap::Stored {
+                // The rows of a stored frame start at its top; the 2D path takes no other.
+                if !metadata.top_left_origin {
+                    return unsampled;
+                }
+                match (metadata.color, metadata.alpha) {
+                    (FrameColor::Srgb, _) => {}
+                    (FrameColor::Rec709Full, FrameAlpha::Opaque) => uniforms.metadata[2] = 1.0,
+                    _ => return unsampled,
+                }
             }
             let key = BrushTextureKey::Image {
                 identity: Arc::as_ptr(&bitmap) as *const () as usize,
@@ -463,7 +488,7 @@ impl MaterialBrush {
             let pixels = bitmap.pixel_size();
             if pixels.width <= 0
                 || pixels.height <= 0
-                || (bitmap.as_readable_bitmap().is_none() && !on_device(&*bitmap))
+                || (bitmap.as_readable_bitmap().is_none() && on_device(&*bitmap) == DeviceBitmap::NotOnDevice)
             {
                 return unsampled;
             }

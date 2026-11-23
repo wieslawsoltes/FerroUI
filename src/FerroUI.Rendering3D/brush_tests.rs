@@ -518,7 +518,8 @@ fn frame_material(
     let bitmap: Arc<ferroui_base::platform::SharedBitmapImpl> = Arc::new(FrameBitmap(400, 200));
     slot.publish(RefCountable::create(bitmap, || {}), frame);
     let brush = SharedBrush::from_frame_slot(&tile, slot).expect("a tile brush");
-    MaterialBrush::of_with(Some(&brush), UNIT, &|_| on_device)
+    let sampling = if on_device { DeviceBitmap::Converted } else { DeviceBitmap::NotOnDevice };
+    MaterialBrush::of_with(Some(&brush), UNIT, &|_| sampling)
 }
 
 #[test]
@@ -573,7 +574,7 @@ fn an_empty_slot_paints_nothing() {
     use ferroui_base::rendering::scene3d::Scene3DFrameSlot;
     let tile = ImmutableImageBrush::from_bitmap(None);
     let brush = SharedBrush::from_frame_slot(&tile, Scene3DFrameSlot::new()).expect("a tile brush");
-    let material = MaterialBrush::of_with(Some(&brush), UNIT, &|_| true);
+    let material = MaterialBrush::of_with(Some(&brush), UNIT, &|_| DeviceBitmap::Converted);
     assert!(!material.is_unsampled());
     assert!(material.texture().is_none());
     assert!(image_coordinate(material.uniforms(), [0.5, 0.5]).is_none());

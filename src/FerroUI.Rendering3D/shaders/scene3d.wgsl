@@ -395,6 +395,15 @@ fn fs_gradient_texture(input: VertexOutput, @builtin(front_facing) front_facing:
     return shade_color(draw.color * sample, input.world_normal, input.world_position, side);
 }
 
+// The frame of a video stored in full-range Rec. 709, on the curve of the canvas: the BT.1886
+// reference EOTF, then the sRGB curve (what the 2D path of Skia applies to such a frame).
+fn frame_transfer(c: vec3<f32>) -> vec3<f32> {
+    let v = pow(max(c, vec3<f32>(0.0)), vec3<f32>(2.4));
+    let low = v * 12.92;
+    let high = 1.055 * pow(v, vec3<f32>(1.0 / 2.4)) - vec3<f32>(0.055);
+    return select(high, low, v < vec3<f32>(0.0031308));
+}
+
 // An image brush (`BrushShader::Image`): premultiplied texels, sampled bilinearly with the edges
 // clamped by the sampler, divided by their alpha.
 @fragment
@@ -404,6 +413,10 @@ fn fs_image(input: VertexOutput, @builtin(front_facing) front_facing: bool) -> @
     var sample = vec4<f32>(0.0);
     if (coordinate.z > 0.5) {
         sample = unpremultiply(textureSampleLevel(brush_texture, brush_sampler, coordinate.xy, 0.0));
+        // A frame sampled as it is stored (step D7).
+        if (brush.metadata.z > 0.5) {
+            sample = vec4<f32>(frame_transfer(sample.xyz), sample.w);
+        }
     }
     return shade_color(draw.color * sample, input.world_normal, input.world_position, side);
 }
