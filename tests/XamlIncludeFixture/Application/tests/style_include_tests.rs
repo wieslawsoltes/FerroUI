@@ -241,7 +241,7 @@ fn style_include_from_code_behind_resolves_compiled() {
     let style_include = StyleInclude::with_service_provider(service_provider.clone());
     style_include.set_source(Some(UriRef::parse("ferres://Tests/Xaml/StyleWithServiceProvider.xaml").expect("a valid URI")));
 
-    let loaded = style_include.loaded();
+    let loaded = style_include.try_loaded().unwrap();
     let loaded = loaded.as_object().expect("the loaded style is an object of the class model");
     assert_is_type::<StyleWithServiceProvider>(loaded);
     let loaded: Ref<StyleWithServiceProvider> = loaded.to_ref().cast().expect("a StyleWithServiceProvider");

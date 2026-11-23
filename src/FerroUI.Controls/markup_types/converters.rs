@@ -155,23 +155,6 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <TreeViewItemIndentConverter as MarkupTyped>::MARKUP,
 ];
 
-/// Registers what the untyped value conversions need of the types of this file that
-/// no first use shows: the nullable forms and the casts of the types that members of
-/// markup types hold (compiled markup converts a value for such a member before it
-/// sets it, and setting it registers nothing). Every other type registers when it is
-/// first used ([`ValueTypeRegistration`](ferroui_base::data::core::ValueTypeRegistration)).
-pub(super) fn register_value_types() {
-    ValueTypes::register_cast::<Rc<CornerRadiusFilterConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<CornerRadiusToDoubleConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<EnumToBoolConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<MarginMultiplierConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<PlatformKeyGestureConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<BorderGapMaskConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<MenuScrollingVisibilityConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<StringFormatConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
-    ValueTypes::register_cast::<Rc<TreeViewItemIndentConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
-}
-
 /// Registers every type of this file that registers when it is first used: what the
 /// tables of types (`type-tables`) register at start-up.
 pub(super) fn register_value_type_table() {
@@ -189,54 +172,72 @@ pub(super) fn register_value_type_table() {
 impl ferroui_base::data::core::ValueTypeRegistration for CornerRadiusFilterConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<CornerRadiusFilterConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<CornerRadiusFilterConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for CornerRadiusToDoubleConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<CornerRadiusToDoubleConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<CornerRadiusToDoubleConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for EnumToBoolConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<EnumToBoolConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<EnumToBoolConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for MarginMultiplierConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<MarginMultiplierConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<MarginMultiplierConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for PlatformKeyGestureConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<PlatformKeyGestureConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<PlatformKeyGestureConverter>, Rc<dyn IValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for BorderGapMaskConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<BorderGapMaskConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<BorderGapMaskConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for MenuScrollingVisibilityConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<MenuScrollingVisibilityConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<MenuScrollingVisibilityConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for StringFormatConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<StringFormatConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<StringFormatConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
     }
 }
 
 impl ferroui_base::data::core::ValueTypeRegistration for TreeViewItemIndentConverter {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Rc<TreeViewItemIndentConverter>>();
+        // Registered by the construction of the first converter of the type (`converters`).
+        ValueTypes::register_cast::<Rc<TreeViewItemIndentConverter>, Rc<dyn IMultiValueConverter>>(|c| c.clone());
     }
 }
 

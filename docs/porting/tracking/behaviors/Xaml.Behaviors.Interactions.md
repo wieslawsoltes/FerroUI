@@ -133,7 +133,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `action_task.rs` | the task of the asynchronous actions (`System.Threading.Tasks.Task` of the reference) | `ActionTask`, `CatchUnwind`, `Delay`, `DelayState`, `TaskHandle` |
+| `action_task.rs` | the task of the asynchronous actions (`System.Threading.Tasks.Task` of the reference) | `ActionTask`, `CatchUnwind`, `Delay`, `DelayState`, `HandleState`, `Status`, `TaskHandle`, `Wakers` |
 | `background.rs` | the delivery of the results of background threads (file system watcher, network trigger, HTTP request) on the thread of the user interface |  |
 | `markup_types/converters.rs` | the markup metadata of the types of the crate (collections, enumerations, converters, attached accessors), which the reference gets from reflection |  |
 | `markup_types/enums.rs` | the markup metadata of the types of the crate (collections, enumerations, converters, attached accessors), which the reference gets from reflection |  |
@@ -141,4 +141,4 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `register_types.rs` | the type table of the crate for markup: its namespaces and classes (the `XmlnsDefinition`s of the reference's `Properties/AssemblyInfo.cs`) |  |
 | `rust_paths.rs` | the public Rust paths of the registered types, which the Rust emitter of the markup compiler reads |  |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `tests/core/action_logical_tree_lifetime_tests.rs`, `tests/core/call_method_action_tests.rs`, `tests/core/change_property_action_tests.rs`, `tests/core/command.rs`, `tests/core/data_trigger_behavior_tests.rs`, `tests/core/event_trigger_behavior_tests.rs`, `tests/core/invoke_command_action_tests.rs`, `tests/core/mod.rs`, `tests/core/multi_data_trigger_behavior_tests.rs`, `tests/core/observable_command.rs`, `tests/core/picker_action_base_tests.rs`, `tests/core/picker_behavior_base_tests.rs`, `tests/core/test_value_converter.rs`, `tests/mod.rs`, `tests/not_ported.rs`, `tests/support.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `tests/core/action_logical_tree_lifetime_tests.rs`, `tests/core/action_task_tests.rs`, `tests/core/call_method_action_tests.rs`, `tests/core/change_property_action_tests.rs`, `tests/core/command.rs`, `tests/core/data_trigger_behavior_tests.rs`, `tests/core/event_trigger_behavior_tests.rs`, `tests/core/invoke_command_action_tests.rs`, `tests/core/mod.rs`, `tests/core/multi_data_trigger_behavior_tests.rs`, `tests/core/observable_command.rs`, `tests/core/picker_action_base_tests.rs`, `tests/core/picker_behavior_base_tests.rs`, `tests/core/test_value_converter.rs`, `tests/core/timer_action_tests.rs`, `tests/mod.rs`, `tests/not_ported.rs`, `tests/support.rs`.

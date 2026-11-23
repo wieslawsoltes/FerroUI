@@ -1,4 +1,5 @@
 use super::{IAnimatedServerObject, ServerCompositor, ServerObject, ServerValueChange};
+use smallvec::SmallVec;
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
@@ -189,7 +190,10 @@ impl ServerRenderResourceCore {
 
     pub fn queued_invalidate(&self, this: &dyn IServerRenderResource) {
         self.pending_invalidation.set(false);
-        let observers: Vec<Rc<dyn IServerRenderResourceObserver>> = {
+        // The observers are copied out, since one may change the list while it is told; a
+        // resource has one or two, so the copy stays off the heap (FerroUI addition,
+        // desktop-performance.md, section 9.31).
+        let observers: SmallVec<[Rc<dyn IServerRenderResourceObserver>; 4]> = {
             let mut observers = self.observers.borrow_mut();
             observers.retain(|e| e.observer.strong_count() > 0);
             observers.iter().filter_map(|e| e.observer.upgrade()).collect()
@@ -472,3 +476,168 @@ macro_rules! __impl_server_render_resource {
 }
 
 pub use crate::__impl_server_render_resource as impl_server_render_resource;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A render resource with nothing but the core.
+    #[derive(Default)]
+    struct Resource {
+        core: ServerRenderResourceCore,
+    }
+
+    impl IServerRenderResourceObserver for Resource {
+        fn dependency_queued_invalidate(&self, _sender: &dyn IServerRenderResource) {}
+    }
+
+    impl IServerRenderResource for Resource {
+        fn add_observer(&self, observer: &Rc<dyn IServerRenderResourceObserver>) {
+            self.core.add_observer(observer);
+        }
+
+        fn remove_observer(&self, observer: &Rc<dyn IServerRenderResourceObserver>) {
+            self.core.remove_observer(observer);
+        }
+
+        fn queued_invalidate(&self) {
+            self.core.queued_invalidate(self);
+        }
+    }
+
+    type Action = Box<dyn Fn(&dyn IServerRenderResource)>;
+
+    /// Counts how often it is told, and may act on the sender while it is.
+    #[derive(Default)]
+    struct Observer {
+        told: Cell<u32>,
+        action: RefCell<Option<Action>>,
+    }
+
+    impl IServerRenderResourceObserver for Observer {
+        fn dependency_queued_invalidate(&self, sender: &dyn IServerRenderResource) {
+            self.told.set(self.told.get() + 1);
+            if let Some(action) = &*self.action.borrow() {
+                action(sender);
+            }
+        }
+    }
+
+    fn observer() -> (Rc<Observer>, Rc<dyn IServerRenderResourceObserver>) {
+        let observer = Rc::new(Observer::default());
+        (observer.clone(), observer)
+    }
+
+    fn told(observers: &[(Rc<Observer>, Rc<dyn IServerRenderResourceObserver>)]) -> Vec<u32> {
+        observers.iter().map(|(observer, _)| observer.told.get()).collect()
+    }
+
+    /// The copy of the observers stays inline up to four of them and goes to
+    /// the heap above (section 9.31): the count does not change who is told.
+    #[test]
+    fn every_observer_is_told_once_however_many_there_are() {
+        for count in [0, 1, 2, 4, 5, 9] {
+            let resource = Resource::default();
+            let observers: Vec<_> = (0..count).map(|_| observer()).collect();
+            for (_, handle) in &observers {
+                resource.add_observer(handle);
+            }
+            assert_eq!(resource.core.observer_count(), count);
+
+            resource.queued_invalidate();
+            assert_eq!(told(&observers), vec![1; count]);
+            resource.queued_invalidate();
+            assert_eq!(told(&observers), vec![2; count]);
+        }
+    }
+
+    #[test]
+    fn an_observer_added_twice_is_told_once_and_stays_until_it_is_removed_twice() {
+        let resource = Resource::default();
+        let (first, handle) = observer();
+        resource.add_observer(&handle);
+        resource.add_observer(&handle);
+        assert_eq!(resource.core.observer_count(), 1);
+
+        resource.queued_invalidate();
+        assert_eq!(first.told.get(), 1);
+
+        resource.remove_observer(&handle);
+        resource.queued_invalidate();
+        assert_eq!(first.told.get(), 2);
+
+        resource.remove_observer(&handle);
+        assert_eq!(resource.core.observer_count(), 0);
+        resource.queued_invalidate();
+        assert_eq!(first.told.get(), 2);
+    }
+
+    /// The observers of the moment the invalidation starts are told, whatever
+    /// one of them does to the list meanwhile.
+    #[test]
+    fn an_observer_may_remove_itself_and_others_while_it_is_told() {
+        let resource = Resource::default();
+        let observers: Vec<_> = (0..6).map(|_| observer()).collect();
+        for (_, handle) in &observers {
+            resource.add_observer(handle);
+        }
+        // The first removes itself and the last two.
+        let removed: Vec<Weak<dyn IServerRenderResourceObserver>> =
+            [0, 4, 5].iter().map(|index| Rc::downgrade(&observers[*index].1)).collect();
+        *observers[0].0.action.borrow_mut() = Some(Box::new(move |sender| {
+            for observer in removed.iter().filter_map(Weak::upgrade) {
+                sender.remove_observer(&observer);
+            }
+        }));
+
+        resource.queued_invalidate();
+        assert_eq!(told(&observers), [1, 1, 1, 1, 1, 1]);
+        assert_eq!(resource.core.observer_count(), 3);
+
+        resource.queued_invalidate();
+        assert_eq!(told(&observers), [1, 2, 2, 2, 1, 1]);
+    }
+
+    #[test]
+    fn an_observer_added_while_the_others_are_told_is_told_the_next_time() {
+        let resource = Resource::default();
+        let (first, first_handle) = observer();
+        let (late, late_handle) = observer();
+        resource.add_observer(&first_handle);
+        let added = Cell::new(false);
+        *first.action.borrow_mut() = Some(Box::new(move |sender| {
+            if !added.replace(true) {
+                sender.add_observer(&late_handle);
+            }
+        }));
+
+        resource.queued_invalidate();
+        assert_eq!((first.told.get(), late.told.get()), (1, 0));
+        assert_eq!(resource.core.observer_count(), 2);
+
+        resource.queued_invalidate();
+        assert_eq!((first.told.get(), late.told.get()), (2, 1));
+    }
+
+    #[test]
+    fn a_dropped_observer_is_pruned_and_a_disposed_resource_tells_nobody() {
+        let resource = Resource::default();
+        let (kept, kept_handle) = observer();
+        let (dropped, dropped_handle) = observer();
+        resource.add_observer(&dropped_handle);
+        resource.add_observer(&kept_handle);
+        let dropped_told = Rc::downgrade(&dropped);
+        drop((dropped, dropped_handle));
+        assert!(dropped_told.upgrade().is_none());
+        assert_eq!(resource.core.observer_count(), 1);
+
+        resource.queued_invalidate();
+        assert_eq!(kept.told.get(), 1);
+        assert_eq!(resource.core.observers.borrow().len(), 1);
+
+        resource.core.dispose();
+        resource.queued_invalidate();
+        assert_eq!(kept.told.get(), 1);
+        assert_eq!(resource.core.observer_count(), 0);
+    }
+}

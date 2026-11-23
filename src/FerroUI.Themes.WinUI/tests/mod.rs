@@ -3,6 +3,7 @@ mod control_templates;
 mod control_theme_tests;
 mod converter_tests;
 mod documents;
+mod high_contrast_tests;
 mod load_time;
 mod public_api_tests;
 mod resource_dictionary_tests;

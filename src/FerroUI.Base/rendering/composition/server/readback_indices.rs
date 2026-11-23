@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Mutex, MutexGuard, PoisonError};
 
@@ -19,6 +20,9 @@ use std::sync::{Mutex, MutexGuard, PoisonError};
 /// [`begin_write`]: Self::begin_write
 pub struct ReadbackIndices {
     lock: Mutex<()>,
+    /// Which readbacks the latest revisions wrote (not from upstream): what brings an index of
+    /// many visuals up to date without reading every visual (desktop-performance.md, 9.49).
+    written: Mutex<Written>,
 
     read_revision: AtomicU64,
     next_write_revision: AtomicU64,
@@ -30,6 +34,7 @@ impl ReadbackIndices {
     pub fn new() -> Self {
         Self {
             lock: Mutex::new(()),
+            written: Mutex::new(Written { floor: 0, entries: VecDeque::new() }),
             read_revision: AtomicU64::new(0),
             next_write_revision: AtomicU64::new(1),
             write_revision: AtomicU64::new(0),
@@ -69,6 +74,22 @@ impl ReadbackIndices {
         self.write_revision.store(revision, Ordering::SeqCst);
         ReadbackWriteScope { indices: self, _guard: guard }
     }
+
+    /// Adds the readbacks (their [`VisualReadback::key`]) written in the revisions after `after`
+    /// up to `upto`, a revision the reader has, to `keys`: a readback once for each revision that
+    /// wrote it. `false` when the revisions after `after` are not all listed any more; `keys` is
+    /// then left as it was, and the reader has to read every readback it follows.
+    ///
+    /// [`VisualReadback::key`]: super::VisualReadback::key
+    pub fn written_between(&self, after: u64, upto: u64, keys: &mut Vec<usize>) -> bool {
+        let written = self.written.lock().unwrap_or_else(PoisonError::into_inner);
+        if after < written.floor {
+            return false;
+        }
+        let newer = written.entries.iter().rev().take_while(|(revision, _)| *revision > after);
+        keys.extend(newer.filter(|(revision, _)| *revision <= upto).map(|(_, key)| *key));
+        true
+    }
 }
 
 impl Default for ReadbackIndices {
@@ -90,6 +111,55 @@ pub struct ReadbackWriteScope<'a> {
 impl ReadbackWriteScope<'_> {
     /// Completes the write and releases the lock (C# `EndWrite`).
     pub fn end_write(self) {}
+
+    /// Where the write lists the `count` readbacks it writes, for
+    /// [`written_between`](ReadbackIndices::written_between); `None` for a write of more
+    /// readbacks than a list is kept for, after which a reader reads every readback it follows.
+    pub fn written(&self, count: usize) -> Option<WrittenList<'_>> {
+        let revision = self.indices.write_revision.load(Ordering::SeqCst);
+        let mut written = self.indices.written.lock().unwrap_or_else(PoisonError::into_inner);
+        if count > WRITTEN_IN_A_REVISION {
+            written.floor = revision;
+            written.entries.clear();
+            return None;
+        }
+        // The oldest revisions leave whole: a revision is listed with all it wrote or not at all.
+        while written.entries.len() + count > WRITTEN_KEPT {
+            let Some(&(oldest, _)) = written.entries.front() else { break };
+            written.floor = oldest;
+            while written.entries.front().is_some_and(|(revision, _)| *revision == oldest) {
+                written.entries.pop_front();
+            }
+        }
+        Some(WrittenList { written, revision })
+    }
+}
+
+/// The most readbacks one revision is listed with: a frame that writes more changed so much that
+/// reading every readback is the work the frame asks for anyway.
+const WRITTEN_IN_A_REVISION: usize = 1024;
+/// The most entries the list keeps (16 bytes each).
+const WRITTEN_KEPT: usize = 4096;
+
+/// The readbacks the latest revisions wrote, oldest first.
+struct Written {
+    /// The revisions up to this one are not listed (any more).
+    floor: u64,
+    /// The revision and the key of the readback.
+    entries: VecDeque<(u64, usize)>,
+}
+
+/// The list of the readbacks of one write, from [`ReadbackWriteScope::written`].
+pub struct WrittenList<'a> {
+    written: MutexGuard<'a, Written>,
+    revision: u64,
+}
+
+impl WrittenList<'_> {
+    /// Lists the readback with the key `key` as written in this revision.
+    pub fn push(&mut self, key: usize) {
+        self.written.entries.push_back((self.revision, key));
+    }
 }
 
 impl Drop for ReadbackWriteScope<'_> {
@@ -107,6 +177,46 @@ mod tests {
     use std::sync::Arc;
 
     fn assert_send_sync<T: Send + Sync>() {}
+
+    #[test]
+    fn the_readbacks_of_the_latest_revisions_are_listed() {
+        let indices = ReadbackIndices::new();
+        let write = |keys: &[usize]| {
+            let scope = indices.begin_write();
+            let mut list = scope.written(keys.len());
+            if let Some(list) = list.as_mut() {
+                keys.iter().for_each(|key| list.push(*key));
+            }
+            drop(list);
+        };
+        let between = |after: u64, upto: u64| {
+            let mut keys = vec![0];
+            indices.written_between(after, upto, &mut keys).then_some(keys)
+        };
+        write(&[10, 11]);
+        write(&[12]);
+        write(&[10]);
+        assert_eq!(Some(vec![0, 10, 12, 11, 10]), between(0, 3));
+        assert_eq!(Some(vec![0, 12]), between(1, 2));
+        assert_eq!(Some(vec![0]), between(3, 3));
+
+        // A write of more than a list is kept for: the revisions up to it are not listed.
+        write(&vec![7; WRITTEN_IN_A_REVISION + 1]);
+        assert_eq!(None, between(3, 4));
+        assert_eq!(Some(vec![0]), between(4, 4));
+        write(&[13]);
+        assert_eq!(Some(vec![0, 13]), between(4, 5));
+
+        // The oldest revisions leave whole when the list is full.
+        for _ in 0..5 {
+            write(&vec![8; WRITTEN_IN_A_REVISION]);
+        }
+        assert_eq!(None, between(4, 10));
+        assert_eq!(None, between(5, 10));
+        assert_eq!(Some(WRITTEN_KEPT + 1), between(6, 10).map(|keys| keys.len()));
+        assert_eq!(Some(WRITTEN_IN_A_REVISION * 2 + 1), between(8, 10).map(|keys| keys.len()));
+        assert_eq!(Some(WRITTEN_IN_A_REVISION + 1), between(8, 9).map(|keys| keys.len()));
+    }
 
     #[test]
     fn is_send_and_sync() {

@@ -192,8 +192,8 @@ impl SmartbarView {
             bar_height: Cell::new(44.0),
             action_list: RefCell::new(None),
             emoji_search: RefCell::new(None),
-            hide_requested: HandlerList::with_ordered_ids(),
-            search_back_requested: HandlerList::with_ordered_ids(),
+            hide_requested: HandlerList::new(),
+            search_back_requested: HandlerList::new(),
         }
     }
     pub fn new(engine: Rc<KeyboardEngine>, scheduler: Rc<dyn IKeyboardScheduler>) -> Ref<Self> {

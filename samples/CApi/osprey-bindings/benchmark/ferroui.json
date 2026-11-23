@@ -1,0 +1,4 @@
+{
+  "layers": ["objects", "views"],
+  "classes": ["Border", "StackPanel", "TextBlock", "Button"]
+}

@@ -4,10 +4,21 @@ use ferroui_media::{frames::*, *};
 mod native_frame_tests {
     extern "C" {
         fn ferro_linux_test_frame_contracts() -> i32;
+        fn ferro_linux_test_recording() -> i32;
     }
     #[test]
     fn native_descriptor_extents_and_ownership() {
         assert_eq!(unsafe { ferro_linux_test_frame_contracts() }, 0);
+    }
+
+    #[test]
+    fn native_camera_sample_records_decodable_silent_mp4() {
+        let result = unsafe { ferro_linux_test_recording() };
+        if result < 0 {
+            eprintln!("Linux native recording fixture skipped without GStreamer recording plugins");
+        } else {
+            assert_eq!(result, 0);
+        }
     }
 }
 use ferroui_media_opengl::{NativeGlFrameProducer, NativeTextureView, ReadyGlFrame};
@@ -17,6 +28,8 @@ use std::{
     ptr::NonNull,
     rc::Rc,
     sync::Arc,
+    task::Poll,
+    time::Duration,
 };
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -37,10 +50,10 @@ pub struct NativeState {
 impl NativeState {
     pub fn error(&self) -> MediaError {
         MediaError::new(
-            if self.error_kind == 1 {
-                MediaErrorKind::Unsupported
-            } else {
-                MediaErrorKind::NativeFailure
+            match self.error_kind {
+                1 => MediaErrorKind::Unsupported,
+                3 => MediaErrorKind::DeviceLost,
+                _ => MediaErrorKind::NativeFailure,
             },
             unsafe { CStr::from_ptr(self.error.as_ptr()) }.to_string_lossy(),
         )
@@ -87,6 +100,13 @@ extern "C" {
     fn ferro_linux_alias_release(alias: *mut c_void, alive: i32);
     fn ferro_linux_convert(f: *mut c_void, display: isize, output: u32) -> i32;
     fn ferro_linux_photo_rgb(f: *mut c_void, rgb: *mut u8, capacity: u64) -> i32;
+    fn ferro_linux_can_record(s: *mut c_void) -> i32;
+    fn ferro_linux_record(s: *mut c_void) -> *mut c_void;
+    fn ferro_linux_record_finish(r: *mut c_void);
+    fn ferro_linux_record_cancel(r: *mut c_void);
+    fn ferro_linux_record_release(r: *mut c_void);
+    fn ferro_linux_record_poll(r: *mut c_void, out: *mut RecordingInfo) -> i32;
+    fn ferro_linux_record_copy(r: *mut c_void, bytes: *mut u8, length: u64) -> i32;
 
 }
 struct Session(NonNull<c_void>);
@@ -102,6 +122,22 @@ impl Drop for Session {
 #[derive(Clone)]
 pub struct NativeSession(Arc<Session>);
 impl NativeSession {
+    pub fn supports_recording(&self) -> bool {
+        unsafe { ferro_linux_can_record(self.0 .0.as_ptr()) != 0 }
+    }
+
+    pub fn record(&self) -> Result<NativeRecording, MediaError> {
+        if !self.supports_recording() {
+            return Err(MediaError::new(
+                MediaErrorKind::Unsupported,
+                "Native H.264 recording needs a supported linear camera format and GStreamer plugins",
+            ));
+        }
+        NonNull::new(unsafe { ferro_linux_record(self.0 .0.as_ptr()) })
+            .map(NativeRecording)
+            .ok_or_else(|| invalid("The native recording worker is unavailable"))
+    }
+
     pub fn open(
         source: &str,
         caps: &str,
@@ -159,6 +195,89 @@ impl NativeSession {
 fn invalid(s: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::NativeFailure, s)
 }
+#[repr(C)]
+struct RecordingInfo {
+    width: u32,
+    height: u32,
+    duration_ns: u64,
+    length: u64,
+    error: [c_char; 512],
+}
+
+pub struct EncodedRecording {
+    pub bytes: Arc<[u8]>,
+    pub width: u32,
+    pub height: u32,
+    pub duration: Duration,
+}
+
+pub struct NativeRecording(NonNull<c_void>);
+impl NativeRecording {
+    pub fn started(&self) -> Poll<Result<(), MediaError>> {
+        self.poll().map(|result| result.map(|_| ()))
+    }
+
+    pub fn finish(&self) {
+        unsafe { ferro_linux_record_finish(self.0.as_ptr()) }
+    }
+
+    pub fn cancel(&self) {
+        unsafe { ferro_linux_record_cancel(self.0.as_ptr()) }
+    }
+
+    fn poll(&self) -> Poll<Result<(i32, RecordingInfo), MediaError>> {
+        let mut info = std::mem::MaybeUninit::uninit();
+        let state = unsafe { ferro_linux_record_poll(self.0.as_ptr(), info.as_mut_ptr()) };
+        let info = unsafe { info.assume_init() };
+        match state {
+            0 => Poll::Pending,
+            1 | 2 => Poll::Ready(Ok((state, info))),
+            -2 => Poll::Ready(Err(MediaError::new(
+                MediaErrorKind::Cancelled,
+                "Recording cancelled",
+            ))),
+            _ => {
+                let message = unsafe { CStr::from_ptr(info.error.as_ptr()) }.to_string_lossy();
+                Poll::Ready(Err(invalid(format!(
+                    "GStreamer H.264 recording failed: {message}"
+                ))))
+            }
+        }
+    }
+
+    pub fn encoded(&self) -> Poll<Result<EncodedRecording, MediaError>> {
+        let (state, info) = match self.poll()? {
+            Poll::Ready(info) => info,
+            Poll::Pending => return Poll::Pending,
+        };
+        if state != 2 {
+            return Poll::Pending;
+        }
+        if !(1..=256 * 1024 * 1024).contains(&info.length) {
+            return Poll::Ready(Err(invalid("Invalid native recording length")));
+        }
+        let mut bytes = Arc::<[u8]>::new_uninit_slice(info.length as usize);
+        let destination = Arc::get_mut(&mut bytes).unwrap().as_mut_ptr().cast();
+        if unsafe { ferro_linux_record_copy(self.0.as_ptr(), destination, info.length) } == 0 {
+            return Poll::Ready(Err(MediaError::new(
+                MediaErrorKind::Cancelled,
+                "Recording cancelled",
+            )));
+        }
+        Poll::Ready(Ok(EncodedRecording {
+            bytes: unsafe { bytes.assume_init() },
+            width: info.width,
+            height: info.height,
+            duration: Duration::from_nanos(info.duration_ns),
+        }))
+    }
+}
+impl Drop for NativeRecording {
+    fn drop(&mut self) {
+        unsafe { ferro_linux_record_release(self.0.as_ptr()) }
+    }
+}
+
 struct Frame(NonNull<c_void>);
 // GstSample/GstBuffer are refcounted thread-safe, retained read-only until final
 // GPU consumers complete. Native frame metadata is immutable after acquisition.

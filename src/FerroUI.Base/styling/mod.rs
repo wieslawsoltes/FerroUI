@@ -31,11 +31,13 @@ mod property_equals_selector;
 mod property_setter_template_instance;
 mod screen_queries;
 mod selector;
+mod selector_candidates;
 mod selector_match;
 mod selectors;
 mod setter;
 mod setter_base;
 mod target_property_path;
+mod theme_candidates;
 mod style;
 mod style_base;
 mod style_children;
@@ -79,12 +81,15 @@ pub(crate) use property_equals_selector::PropertyEqualsSelector;
 pub(crate) use property_setter_template_instance::PropertySetterTemplateInstance;
 pub(crate) use screen_queries::{HeightQuery, WidthQuery};
 pub use selector::Selector;
+#[doc(hidden)]
+pub use selector_candidates::StyleCandidates;
 pub(crate) use selector::SelectorNode;
 pub use selector_match::{SelectorMatch, SelectorMatchResult};
 pub use selectors::Selectors;
 pub use setter::{Setter, SetterValue};
 pub use setter_base::{SetterBase, SetterInstance};
 pub use target_property_path::TargetPropertyPath;
+pub(crate) use theme_candidates::{Step as ThemeStep, ThemeCandidates};
 pub(crate) use setter_base::SetterInstanceKind;
 pub use style::Style;
 pub use style_base::{StyleBase, StyleBaseImpl, StyleBaseImplExt, StyleBaseVTable};
@@ -114,3 +119,9 @@ mod style_tests;
 
 #[cfg(test)]
 mod container_tests;
+
+#[cfg(test)]
+mod selector_candidate_tests;
+
+#[cfg(test)]
+mod theme_candidate_tests;

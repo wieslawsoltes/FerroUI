@@ -1,4 +1,4 @@
-//! The page-owned WebGL media profile; worker rendering remains unsupported.
+//! Browser media on the page or render worker, with opt-in QR analysis.
 use control_catalog::media_samples::MediaSampleProviders;
 use ferroui_media_browser::{BrowserTextureImporter, WebGlFrameProducer};
 use std::rc::Rc;
@@ -27,6 +27,6 @@ pub fn install() {
                 Rc::new(BrowserTextureImporter),
             ))
         }),
-        qr: None,
+        qr: Some(Rc::new(ferroui_media_browser::recognize_qr)),
     });
 }

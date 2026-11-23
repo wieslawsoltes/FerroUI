@@ -11,6 +11,20 @@ pub trait IStyle: IResourceNode {
     /// A snapshot of the collection of child styles.
     fn children(&self) -> Rc<Vec<Rc<dyn IStyle>>>;
 
+    /// Opts into reading this style's concrete, side-effect-free selector metadata.
+    /// Unknown adapters retain their ordinary source-order virtual calls.
+    #[doc(hidden)]
+    fn indexed_style(&self) -> Option<&super::Style> {
+        None
+    }
+
+    /// Candidate child styles for a style key. Custom implementations retain
+    /// their ordinary child traversal unless they explicitly opt into indexing.
+    #[doc(hidden)]
+    fn children_for_target<'a>(&self, _target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        super::StyleCandidates::all(self.children())
+    }
+
     /// The style as an object, when it is a class instance. Used for
     /// identity comparison and type tests.
     fn as_object(&self) -> Option<&FerroObject> {

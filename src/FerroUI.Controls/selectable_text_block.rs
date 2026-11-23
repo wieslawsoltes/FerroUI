@@ -97,7 +97,10 @@ impl FerroObjectImpl for SelectableTextBlock {
                 *this.inlines_invalidated.borrow_mut() = Some(subscription);
             }
 
-            this.on_text_or_inlines_changed();
+            // Not for the collection a first read makes: nothing of the content changed.
+            if !this.is_making_inlines() {
+                this.on_text_or_inlines_changed();
+            }
         } else if change.property() == TextBlock::text_property().as_property() {
             this.on_text_or_inlines_changed();
         } else if change.property() == Self::selection_start_property().as_property()
@@ -418,6 +421,13 @@ impl TextBlockImpl for SelectableTextBlock {
         let text_style_overrides: Option<Rc<[ValueSpan<Rc<dyn TextRunProperties>>]>> =
             text_style_overrides.map(Rc::from);
 
+        // The run cache of the text block (step 4 of docs/porting/text-layout-performance.md), so
+        // that a new layout at another width (a measure and the arrangement that follows) shapes
+        // the text once: what the block invalidates it for, a change of the selection and of its
+        // brush among it, is what the shaping is made of. A layout with the foreground of a
+        // selection shapes without it, so that no shaping of the cache holds those runs.
+        let run_cache = text_style_overrides.is_none().then(|| this.text_run_cache());
+
         let text_source: Rc<dyn ITextSource> = if this.has_complex_content() {
             Rc::new(InlinesTextSource::new(this.text_runs().unwrap_or_default(), text_style_overrides))
         } else {
@@ -437,7 +447,7 @@ impl TextBlockImpl for SelectableTextBlock {
             max_size.width,
             max_size.height,
             this.max_lines(),
-            None,
+            run_cache,
         ))
     }
 

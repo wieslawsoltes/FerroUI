@@ -17,7 +17,11 @@ operation. Navigation away retires playback/capture and rejects stale results.
   Native hosts run this static-image work off the UI thread with one outstanding
   image job. Apple desktop also supports explicitly started live Vision analysis
   through the bounded QR analysis gate. Results are text, never automatically
-  opened links. “Last detected” is history, not a geometric overlay.
+  opened links. The live preview is a `QrPreview`
+  (`ferroui-media-camera-controls`, feature `qr`): it outlines the detections
+  of the analyzed frame while the preview still shows that source, generation
+  and frame geometry, and an outline that analysis stops refreshing expires
+  after 250 ms. “Last detected” is history and stays after the outline is gone.
 
 ## Host bindings
 
@@ -77,6 +81,15 @@ window. A failure exits nonzero; success prints `CATALOG_MEDIA_SMOKE_PASS`.
 It does not start a camera or prompt for permission. Do not combine it with the
 catalog's other automatic navigation modes.
 
+`FERROUI_SMOKE_MEDIA_VIDEO_MS=<milliseconds>` (at most 30,000) adds a delivery
+measurement to the smoke on every platform: after the warm-up it counts the video
+frames that reach the presenter for that time and prints
+`CATALOG_VIDEO_DELIVERY frames=<f> elapsed_ms=<t> fps=<rate>` before the pass line.
+The native Windows build has a synthetic camera for the camera page
+(`FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA=1` with the feature
+`direct2d-media-test-fixtures`, see
+[the renderer guide](../porting/windows-native-renderer.md#environment-variables)).
+
 ```sh
 cargo test -p control-catalog --lib bundled_qr_image_decodes_two_independent_symbols
 FERROUI_SMOKE_RENDERING=metal \
@@ -109,6 +122,12 @@ accessibility names, tooltips, focus and keyboard behavior. Named visual parts
 include `MediaPlayPause`, `MediaStop`, `MediaMute`, `MediaSeek`, `MediaVolume`,
 `MediaTime`, `MediaStatus` and `MediaError`. Status text is no longer appended to
 the timestamp. Unsupported fullscreen/settings/subtitle actions are not shown.
+
+The WinUI theme now ports WinUI's own template: the parts keep WinUI's names
+(`PlayPauseButton`, `ProgressSlider`, `VolumeMuteButton` and the others, see
+[ISSUE-561.md](ISSUE-561.md)). The control still binds the names above, so the
+macOS and Material templates and application templates written for 0.5.0 keep
+working.
 
 The 12 video-control unit tests pass, including player ownership/source ordering,
 option synchronization and responsive overlay layout. A native Metal replay

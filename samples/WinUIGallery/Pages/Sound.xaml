@@ -1,0 +1,22 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:video="using:FerroUI.Media.Video.Controls" Spacing="12">
+  <TextBlock Text="Toggling Sound" FontSize="18" />
+  <CheckBox x:Name="GallerySoundEnabled" Content="Enable UI sounds" IsChecked="True" />
+  <Slider x:Name="GallerySoundVolume" Minimum="0" Maximum="1" Value="0.5" MaxWidth="300" AutomationProperties.Name="Sound volume" />
+  <TextBlock Text="Toggling Spatial Audio" FontSize="18" />
+  <CheckBox Content="Spatial audio" IsEnabled="False" />
+  <TextBlock Text="Not applicable: WinUI ElementSoundPlayer.SpatialAudioMode is a Windows UI service. The portable media provider has no spatial audio contract. These application-owned cues play in two dimensions."
+             TextWrapping="Wrap" />
+  <TextBlock Text="Play a specific sound" FontSize="18" />
+  <WrapPanel>
+    <Button x:Name="SoundFocus" Content="Focus" />
+    <Button x:Name="SoundInvoke" Content="Invoke" />
+    <Button x:Name="SoundShow" Content="Show" />
+    <Button x:Name="SoundHide" Content="Hide" />
+    <Button x:Name="SoundMovePrevious" Content="Move previous" />
+    <Button x:Name="SoundMoveNext" Content="Move next" />
+    <Button x:Name="SoundGoBack" Content="Go back" />
+  </WrapPanel>
+  <video:MediaPlayerElement x:Name="GallerySoundPlayer" AutoPlay="True" Height="0" />
+  <TextBlock x:Name="GallerySoundStatus" TextWrapping="Wrap" />
+</StackPanel>

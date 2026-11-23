@@ -481,6 +481,62 @@ fn native_top_level_preview_uses_the_same_sample_data_as_the_artboard() {
     session.close_native_preview();
 }
 
+/// An application lifetime with a single view and no windows, as a browser and a phone have.
+pub(crate) struct SingleView;
+
+impl ferroui_controls::application_lifetimes::IApplicationLifetime for SingleView {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_single_view_application_lifetime(
+        &self,
+    ) -> Option<&dyn ferroui_controls::application_lifetimes::ISingleViewApplicationLifetime> {
+        Some(self)
+    }
+}
+
+impl ferroui_controls::application_lifetimes::ISingleViewApplicationLifetime for SingleView {
+    fn main_view(&self) -> Option<ferroui_base::Ref<Control>> {
+        None
+    }
+
+    fn set_main_view(&self, _value: Option<ferroui_base::Ref<Control>>) {}
+}
+
+// A platform with a single view has no windows and stops the application when one is made (the
+// browser). The preview of such a platform is a control for the view, with the sample data of
+// the artboard; the window preview says that it cannot open, and makes no window.
+#[test]
+fn the_preview_of_a_single_view_application_is_a_control_and_makes_no_window() {
+    use ferroui_markup_xaml::FromXamlObject;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let application = ferroui_controls::Application::current().expect("an application");
+    assert!(DesignerSession::platform_shows_windows());
+    application.set_application_lifetime(Some(Rc::new(SingleView)));
+    assert!(!DesignerSession::platform_shows_windows());
+
+    let source = format!("<ItemsControl {NS} d:ItemsSource='{{d:SampleData ItemCount=4}}'/>");
+    let mut session = DesignerSession::new(source.clone(), ContentControl::new()).unwrap();
+    let error = session.open_native_preview().expect_err("no window on a single view");
+    assert!(error.contains("single view"), "{error}");
+
+    let control = session.open_view_preview().unwrap();
+    assert!(control.parent().is_none(), "the caller shows the control in its own view");
+    let content: ferroui_base::BoxedValue = Rc::new(control);
+    let items = ferroui_base::Ref::<ItemsControl>::from_xaml_object(&content).unwrap();
+    assert_eq!(items.items_source().unwrap().count(), 4);
+    assert_eq!(session.document().source(), source);
+
+    // A window document is shown as the artboard shows it: its content, without a window.
+    let window_source = format!("<Window {NS} Title='Main'><TextBlock Text='Inside'/></Window>");
+    let mut session = DesignerSession::new(window_source, ContentControl::new()).unwrap();
+    let control = session.open_view_preview().unwrap();
+    assert!(control.cast::<ferroui_controls::Window>().is_none());
+
+    application.set_application_lifetime(None);
+}
+
 #[test]
 fn root_design_size_hints_do_not_fix_native_root_layout_dimensions() {
     let _app = UnitTestApplication::start(TestServices::styled_window());

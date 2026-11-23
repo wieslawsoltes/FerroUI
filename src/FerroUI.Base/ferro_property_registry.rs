@@ -1,5 +1,6 @@
 use crate::direct_property::DirectPropertyDyn;
 use crate::{DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, TypeInfo};
+use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -17,6 +18,19 @@ struct Inner {
     attached_cache: HashMap<TypeKey, PropertyList>,
     direct_cache: HashMap<TypeKey, PropertyList>,
     inherited_cache: HashMap<TypeKey, PropertyList>,
+    /// The direct property a class answers for a property identity with:
+    /// what the walk of `direct` from the class to its bases finds, kept
+    /// for each (class, identity) that was asked about. Dropped whenever a
+    /// direct property is registered.
+    direct_for: FxHashMap<(TypeKey, u32), Option<&'static dyn DirectPropertyDyn>>,
+}
+
+/// The failure of [`FerroPropertyRegistry::get_registered_direct_for`], compiled once instead of
+/// once for each value type.
+#[cold]
+#[inline(never)]
+fn direct_not_registered(owner: &'static TypeInfo, property: &FerroProperty, o: &FerroObject) -> ! {
+    panic!("Property '{}.{}' not registered on '{}'", owner, property.name(), o.get_type())
 }
 
 /// Tracks registered property definitions.
@@ -100,6 +114,13 @@ impl FerroPropertyRegistry {
         }
 
         true
+    }
+
+    /// Whether a property of this name is registered on exactly `type_`, without running the
+    /// static initialisation of the type, which the other look-ups do.
+    #[cfg(test)]
+    pub(crate) fn has_registered_name(&self, type_: &'static TypeInfo, name: &str) -> bool {
+        self.inner.borrow().registered.get(&key(type_)).is_some_and(|props| props.values().any(|p| p.name() == name))
     }
 
     /// Gets all non-attached properties registered on a type (and its bases).
@@ -200,9 +221,10 @@ impl FerroPropertyRegistry {
         o: &FerroObject,
         property: &'static DirectPropertyBase<T>,
     ) -> &'static DirectPropertyBase<T> {
-        self.find_registered_direct(o, property).unwrap_or_else(|| {
-            panic!("Property '{}.{}' not registered on '{}'", property.owner(), property.name(), o.get_type())
-        })
+        match self.find_registered_direct(o, property) {
+            Some(registered) => registered,
+            None => direct_not_registered(property.owner(), property, o),
+        }
     }
 
     /// Finds the direct property registered on the type of `o` that shares
@@ -220,16 +242,27 @@ impl FerroPropertyRegistry {
                 return Some(property);
             }
         }
-        let inner = self.inner.borrow();
-        let mut current = Some(object_type);
+        self.direct_of(object_type, property.id())?.as_any().downcast_ref::<DirectPropertyBase<T>>()
+    }
+
+    /// The direct property with the identity `id` registered on `type_` or,
+    /// failing that, on the nearest of its base classes.
+    fn direct_of(&self, type_: &'static TypeInfo, id: u32) -> Option<&'static dyn DirectPropertyDyn> {
+        let mut inner = self.inner.borrow_mut();
+        if let Some(found) = inner.direct_for.get(&(key(type_), id)) {
+            return *found;
+        }
+        let mut found = None;
+        let mut current = Some(type_);
         while let Some(t) = current {
-            if let Some(found) = inner.direct.get(&key(t)).and_then(|m| m.get(&property.id())) {
-                let found: &'static dyn DirectPropertyDyn = *found;
-                return found.as_any().downcast_ref::<DirectPropertyBase<T>>();
+            if let Some(property) = inner.direct.get(&key(t)).and_then(|m| m.get(&id)) {
+                found = Some(*property);
+                break;
             }
             current = t.base_type();
         }
-        None
+        inner.direct_for.insert((key(type_), id), found);
+        found
     }
 
     /// Finds a registered property on a type by name.
@@ -283,6 +316,7 @@ impl FerroPropertyRegistry {
         if let Some(direct) = direct {
             inner.direct.entry(key(type_)).or_default().entry(base.id()).or_insert(direct);
             inner.direct_cache.clear();
+            inner.direct_for.clear();
         }
         inner.properties.entry(base.id()).or_insert(base);
         inner.registered_cache.clear();

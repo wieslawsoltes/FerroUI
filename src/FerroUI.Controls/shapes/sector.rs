@@ -31,43 +31,43 @@ ferro_impl_classes!(
 
 ferroui_base::ferro_impl_classes!(Sector: FerroObjectImpl);
 
+/// What the geometry of a sector is, by its angles and its size.
+enum SectorFigure {
+    /// A full turn or more: an ellipse in the rectangle.
+    Full(Rect),
+    /// No sweep: an empty stream geometry.
+    Empty,
+    /// A pie slice: an arc and the two lines to the centre.
+    Slice { start: Point, end: Point, centre: Point, radius: Size, is_large_arc: bool },
+}
+
 impl ShapeImpl for Sector {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
-        let rect = Rect::from_size(this.bounds().size());
-        let deflated_rect = rect.deflate(this.stroke_thickness() * 0.5);
-        let sweep = this.sweep_angle();
+        Some(match this.figure() {
+            SectorFigure::Full(rect) => EllipseGeometry::with_rect(rect).upcast(),
+            figure => {
+                let geometry = StreamGeometry::new();
+                Self::write(&geometry, figure);
+                geometry.upcast()
+            }
+        })
+    }
 
-        if sweep >= 360.0 || sweep <= -360.0 {
-            return Some(EllipseGeometry::with_rect(deflated_rect).upcast());
+    /// The ellipse of a full sector takes the rectangle, and the stream geometry of a slice or an
+    /// empty sector is written again (#805); a full sector that becomes a slice, or the other
+    /// way, makes another geometry.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        match this.figure() {
+            SectorFigure::Full(rect) => {
+                let Some(ellipse) = geometry.cast::<EllipseGeometry>() else { return false };
+                ellipse.set_rect(rect);
+            }
+            figure => {
+                let Some(stream) = geometry.cast::<StreamGeometry>() else { return false };
+                Self::write(&stream, figure);
+            }
         }
-
-        if sweep == 0.0 {
-            return Some(StreamGeometry::new().upcast());
-        }
-
-        let (start_angle, end_angle) = MathUtilities::get_min_max_from_delta(
-            MathUtilities::deg2rad(this.start_angle()),
-            MathUtilities::deg2rad(sweep),
-        );
-
-        let centre = Point::new(rect.width * 0.5, rect.height * 0.5);
-        let radius_x = deflated_rect.width * 0.5;
-        let radius_y = deflated_rect.height * 0.5;
-        let start_curve_point = MathUtilities::get_ellipse_point(centre, radius_x, radius_y, start_angle);
-        let end_curve_point = MathUtilities::get_ellipse_point(centre, radius_x, radius_y, end_angle);
-        let size = Size::new(radius_x, radius_y);
-
-        let stream_geometry = StreamGeometry::new();
-        {
-            let mut context = stream_geometry.open();
-            context.begin_figure(start_curve_point, true);
-            context.arc_to(end_curve_point, size, 0.0, sweep.abs() > 180.0, SweepDirection::Clockwise, true);
-            context.line_to(centre, true);
-            context.end_figure(true);
-            context.dispose();
-        }
-
-        Some(stream_geometry.upcast())
+        true
     }
 }
 
@@ -105,6 +105,50 @@ impl Sector {
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    /// What the geometry of the sector is now.
+    fn figure(&self) -> SectorFigure {
+        let rect = Rect::from_size(self.bounds().size());
+        let deflated_rect = rect.deflate(self.stroke_thickness() * 0.5);
+        let sweep = self.sweep_angle();
+
+        if sweep >= 360.0 || sweep <= -360.0 {
+            return SectorFigure::Full(deflated_rect);
+        }
+
+        if sweep == 0.0 {
+            return SectorFigure::Empty;
+        }
+
+        let (start_angle, end_angle) = MathUtilities::get_min_max_from_delta(
+            MathUtilities::deg2rad(self.start_angle()),
+            MathUtilities::deg2rad(sweep),
+        );
+
+        let centre = Point::new(rect.width * 0.5, rect.height * 0.5);
+        let radius_x = deflated_rect.width * 0.5;
+        let radius_y = deflated_rect.height * 0.5;
+        SectorFigure::Slice {
+            start: MathUtilities::get_ellipse_point(centre, radius_x, radius_y, start_angle),
+            end: MathUtilities::get_ellipse_point(centre, radius_x, radius_y, end_angle),
+            centre,
+            radius: Size::new(radius_x, radius_y),
+            is_large_arc: sweep.abs() > 180.0,
+        }
+    }
+
+    /// Writes the figures of a slice or an empty sector into `geometry`, in place of the ones it
+    /// has.
+    fn write(geometry: &StreamGeometry, figure: SectorFigure) {
+        let mut context = geometry.reopen();
+        if let SectorFigure::Slice { start, end, centre, radius, is_large_arc } = figure {
+            context.begin_figure(start, true);
+            context.arc_to(end, radius, 0.0, is_large_arc, SweepDirection::Clockwise, true);
+            context.line_to(centre, true);
+            context.end_figure(true);
+        }
+        context.dispose();
     }
 
     /// Gets the angle at which the sector's arc starts, in degrees.

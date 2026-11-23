@@ -75,6 +75,8 @@ fn main() {
 }
 ```
 
+`launch` uses the Fluent theme with the control theme of every control; `launch_themed` takes the theme of the application. An application that ships constructs its theme from the units it uses: a build script of one statement (`ferroui_build::Build::theme`) and `WinUITheme::with_parts` instead of `WinUITheme::new()`, as the hello world samples do (docs/xaml-themes.md, section 3, "An application without markup"). Hello world is 39 % smaller that way (docs/binary-size.md, section 4.24).
+
 ## 2. The crates
 
 | Crate | What it holds |
@@ -124,6 +126,14 @@ The element also has its own methods:
 | `with(|control| ..)` | The control once it was made (a call the class has no property for) |
 | `node_ref(r)` | Keeps the control in a `NodeRef` |
 | `row_definitions("Auto,*")`, `column_definitions(..)` | The rows and columns of a grid, as XAML writes them |
+
+The rows and columns are values of the grid in their text form (`GridDefinitionsText::rows_property()`,
+`columns_property()`): a component that runs again with another text, or a text that follows state
+(`.set(GridDefinitionsText::columns_property(), move || format!("{filled}*,{rest}*"))`), gives the grid
+the new sizes. Where the grid has as many definitions as the text names, each of the same kind (pixels,
+`Auto`, stars), the definitions it has take the new sizes and stay in the grid; otherwise the grid gets
+a new collection. A collection given to the grid directly (`Grid::set_column_definitions`) is always
+the one the grid then has.
 
 ### 4.1 What a setter takes
 

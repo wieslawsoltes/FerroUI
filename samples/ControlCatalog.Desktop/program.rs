@@ -3,6 +3,7 @@
 //!
 //! ```text
 //! cargo run -p control-catalog-desktop
+//! FERROUI_SMOKE_DEVTOOLS=target/devtools cargo run -p control-catalog-desktop --features diagnostics
 //! FERROUI_SMOKE_EXIT_MS=3000 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_EXIT_MS=20000 FERROUI_SMOKE_PAGES=150 cargo run -p control-catalog-desktop
 //! FERROUI_SMOKE_SCREENSHOTS=target/screenshots cargo run -p control-catalog-desktop
@@ -38,6 +39,11 @@
 //! the catalog are shown one after the other, `n` milliseconds each (the
 //! role of the `--full-headless` run of the managed original, which
 //! selects every page).
+//! `FERROUI_SMOKE_PAGE_SEQUENCE=Buttons,TextBox,Buttons` instead visits those headers
+//! in order (1500 ms each unless `FERROUI_SMOKE_PAGES` is set), without taking screenshots.
+//! Pair it with `FERROUI_SMOKE_EXIT_MS` to close the window after the sequence.
+//! `FERROUI_CATALOG_NAV_TIMING=1` prints cumulative navigation timings through `Loaded`
+//! and individual markup population times. These measure UI readiness, not GPU presentation.
 //!
 //! With `FERROUI_SMOKE_SCREENSHOTS=<directory>` pictures of some pages are
 //! written to the directory as PNG files and the main window is closed
@@ -78,6 +84,11 @@
 //! That run reads the screen under its own window: it is for a machine
 //! whose screen holds nothing but the run.
 //!
+//! With `FERROUI_SMOKE_MEDIA=1` the run is the media smoke run (`media_samples::smoke`, which lists
+//! its `FERROUI_SMOKE_MEDIA_*` variables): the video page plays its clip, then the camera page is
+//! checked. `FERROUI_SMOKE_MEDIA_VIDEO_MS=<n>` adds `n` milliseconds of playback after which the
+//! run prints the rate of delivered video frames (`CATALOG_VIDEO_DELIVERY`).
+//!
 //! With the command line switch `--vnc` the catalog runs on the headless
 //! platform, without a window on the screen, and a VNC server on port 5901
 //! of the loopback address shows its main window to a VNC viewer and passes
@@ -92,7 +103,7 @@
 //! yet: the command line switches `--wait-for-attach`,
 //! `--full-headless`, `--dxgi`, and of the application builder the data
 //! annotations validation, the X11, Vulkan and composition
-//! options, the Inter font, the developer tools and the native control
+//! options, the Inter font and the native control
 //! samples of `NativeControls/` for Windows and macOS
 //! (`EmbedSample.Implementation`). The one for Linux is ported
 //! (`NativeControls/Gtk`).
@@ -129,7 +140,16 @@ use ferroui_headless_vnc::HeadlessVncPlatformExtensions;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+#[cfg(feature = "animation-probe")]
+#[path = "../../scripts/perf/startup_probe.rs"]
+mod startup_probe;
+#[cfg(feature = "animation-probe")]
+#[path = "../../scripts/perf/connected_animation_probe.rs"]
+mod connected_animation_probe;
+
 fn main() -> std::process::ExitCode {
+    #[cfg(feature = "animation-probe")]
+    startup_probe::start();
     let args: Vec<String> = std::env::args().skip(1).collect();
 
     // Reserve the protocol writer before builder configuration can print platform diagnostics.
@@ -158,7 +178,17 @@ fn main() -> std::process::ExitCode {
         return std::process::ExitCode::from(exit_code as u8);
     }
 
+    #[cfg(feature = "animation-probe")]
+    let exit_code = builder.start_with_classic_desktop_lifetime_with(&args, |lifetime| {
+        startup_probe::watch_lifetime(lifetime);
+        connected_animation_probe::install();
+    });
+    #[cfg(not(feature = "animation-probe"))]
     let exit_code = builder.start_with_classic_desktop_lifetime(&args);
+    #[cfg(all(windows, feature = "direct2d"))]
+    if std::env::var_os("FERROUI_D3D_STATS").is_some() {
+        eprintln!("Direct2D [surfaces, paths, images, presents, readbacks, uploads, imports, copies, errors, completed media reads, compute dispatches, compute pixels]: {:?}", ferroui_direct2d::statistics());
+    }
     // With `FERROUI_VELLO_PERF` the Vello backend says where the time of its
     // frames went.
     #[cfg(feature = "vello")]
@@ -181,7 +211,7 @@ pub fn build_ferro_app() -> AppBuilder {
     let builder = use_wayland_of_the_environment(builder);
     #[cfg(feature = "vello")]
     let builder = use_renderer_of_the_environment(builder);
-    builder
+    let builder = builder
         .after_setup(|_| {
             if let Ok(title) = std::env::var("FERROUI_CATALOG_TITLE") {
                 ferroui_base::threading::DispatcherTimer::run_once(move || {
@@ -199,33 +229,30 @@ pub fn build_ferro_app() -> AppBuilder {
             smoke_run();
             #[cfg(feature = "cdp")]
             start_cdp();
-        })
-        .after_setup(attach_dev_tools)
-        .log_to_trace(LogEventLevel::Warning, &[])
+        });
+    #[cfg(feature = "diagnostics")]
+    let builder = builder.after_setup(attach_dev_tools);
+    builder.log_to_trace(LogEventLevel::Warning, &[])
 }
 
-/// DevTools on F12 in debug builds, as the reference (`AttachDevTools` with the startup screen 1),
-/// but on the framebuffer platform, whose lifetime has no windows.
+/// Attach F12 DevTools on platforms with windows.
+#[cfg(feature = "diagnostics")]
 fn attach_dev_tools(builder: &AppBuilder) {
-    #[cfg(debug_assertions)]
-    {
-        use ferroui_diagnostics::diagnostics::DevToolsOptions;
-        use ferroui_diagnostics::DevToolsExtensions;
+    use ferroui_diagnostics::diagnostics::DevToolsOptions;
+    use ferroui_diagnostics::DevToolsExtensions;
 
-        if std::env::args().any(|arg| arg == "--fbdev" || arg == "--drm") {
-            return;
-        }
-        if let Some(application) = builder.instance() {
-            let options = DevToolsOptions::new().with_startup_screen_index(Some(1));
-            // The pictures of a smoke run: a window large enough for every column of the grid.
-            let options = match std::env::var_os("FERROUI_SMOKE_DEVTOOLS") {
-                Some(_) => options.with_startup_screen_index(None).with_size(ferroui_base::Size::new(1600.0, 900.0)),
-                None => options,
-            };
-            application.attach_dev_tools_with_options(options);
-        }
+    if std::env::args().any(|arg| arg == "--fbdev" || arg == "--drm") {
+        return;
     }
-    let _ = builder;
+    if let Some(application) = builder.instance() {
+        let options = DevToolsOptions::new().with_startup_screen_index(Some(1));
+        // The pictures of a smoke run: a window large enough for every column of the grid.
+        let options = match std::env::var_os("FERROUI_SMOKE_DEVTOOLS") {
+            Some(_) => options.with_startup_screen_index(None).with_size(ferroui_base::Size::new(1600.0, 900.0)),
+            None => options,
+        };
+        application.attach_dev_tools_with_options(options);
+    }
 }
 
 /// The theme of the catalog asked for with `FERROUI_CATALOG_THEME` (`winui`, the default, `fluent`
@@ -1388,13 +1415,13 @@ fn accessibility_tree_run(path: PathBuf) {
     .detach();
 }
 
-/// `FERROUI_SMOKE_DEVTOOLS=<directory>` (debug builds): F12 goes to the input manager as the
+/// `FERROUI_SMOKE_DEVTOOLS=<directory>` (feature `diagnostics`): F12 goes to the input manager as the
 /// platform passes a key (a raw key down and up on the main window), which opens DevTools; the run
 /// then selects a text block in the combined tree and in the logical tree, records the click of a button of the catalog on
 /// the events page, goes from there to the button in the visual tree, shows the hot keys, and
 /// writes the frame of the DevTools window (and nothing else) an interval after each step, once it
 /// is laid out. The main window is closed at the end.
-#[cfg(debug_assertions)]
+#[cfg(feature = "diagnostics")]
 fn dev_tools_run(directory: PathBuf) {
     use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType};
     use ferroui_base::input::{IInputDevice, Key, RawInputModifiers, KeyDeviceType, KeyboardDevice, PhysicalKey};
@@ -1615,9 +1642,10 @@ fn dev_tools_run(directory: PathBuf) {
     .detach();
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(feature = "diagnostics"))]
 fn dev_tools_run(_directory: PathBuf) {
-    println!("DevTools: attached in debug builds only");
+    eprintln!("FERROUI_SMOKE_DEVTOOLS requires building control-catalog-desktop with --features diagnostics");
+    std::process::exit(1);
 }
 
 /// The smoke run asked for with `FERROUI_SMOKE_EXIT_MS`,
@@ -1647,6 +1675,11 @@ fn smoke_run() {
         screenshot_run(PathBuf::from(directory));
     } else if let Some(directory) = std::env::var_os("FERROUI_SMOKE_DEVTOOLS").filter(|directory| !directory.is_empty()) {
         dev_tools_run(PathBuf::from(directory));
+    } else if let Ok(sequence) = std::env::var("FERROUI_SMOKE_PAGE_SEQUENCE") {
+        // An ordered sequence permits first-visit/revisit comparisons without screenshot work.
+        let headers = sequence.split(',').map(str::trim).filter(|s| !s.is_empty()).map(str::to_string).collect();
+        let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
+        control_catalog::show_pages(headers, interval, |_, _| {}, || {});
     } else if let Some(ms) = environment_milliseconds("FERROUI_SMOKE_PAGES") {
         control_catalog::show_every_page(Duration::from_millis(ms));
     }

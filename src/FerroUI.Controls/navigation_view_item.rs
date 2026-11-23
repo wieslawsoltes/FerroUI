@@ -499,6 +499,9 @@ fn log_rejected_child(message: &str) {
 
 impl NavigationViewItem {
     fn static_constructor() {
+        // Selection indicators travel between items. Keep the scroll presenter's
+        // viewport clip, rather than clipping the animation to each item's row.
+        Visual::clip_to_bounds_property().override_default_value::<NavigationViewItem>(false);
         InputElement::focusable_property().override_default_value::<NavigationViewItem>(true);
     }
 

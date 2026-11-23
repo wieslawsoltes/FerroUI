@@ -17,20 +17,8 @@ impl<A: ?Sized> Default for Event<A> {
 }
 
 impl<A: ?Sized> Event<A> {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self { handlers: HandlerList::new() }
-    }
-
-    /// An event whose handler tokens come from `ids`, a counter shared with
-    /// other handler lists (see [`HandlerList::with_shared_ids`]).
-    pub fn with_shared_ids(ids: std::rc::Rc<std::cell::Cell<u64>>) -> Self {
-        Self { handlers: HandlerList::with_shared_ids(ids) }
-    }
-
-    /// An event whose handler tokens come from the counter of the process
-    /// (see [`HandlerList::with_ordered_ids`]).
-    pub fn with_ordered_ids() -> Self {
-        Self { handlers: HandlerList::with_ordered_ids() }
     }
 
     /// The current handlers with their tokens; later changes do not affect
@@ -61,9 +49,6 @@ impl<A: ?Sized> Event<A> {
 
     /// Invokes the handlers.
     pub fn raise(&self, args: &A) {
-        if self.handlers.is_empty() {
-            return;
-        }
         for (_, handler) in self.handlers.snapshot().iter() {
             handler(args);
         }

@@ -2,7 +2,7 @@
 //! states about itself for markup, its embedded documents and the loader
 //! of the documents with a class.
 
-use crate::accents::SystemAccentColors;
+use crate::accents::{SystemAccentColors, SystemColors};
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
 use crate::winui_theme::{DensityStyle, WinUITheme};
@@ -32,7 +32,7 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 
 const TYPES: &[&TypeInfo] =
-    &[WinUITheme::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
+    &[WinUITheme::TYPE, SystemAccentColors::TYPE, SystemColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
 
 const MARKUP_TYPES: &[&MarkupType] = &[
     <DensityStyle as MarkupTyped>::MARKUP,
@@ -48,6 +48,8 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_markup_xaml::register_types();
         ferroui_dialogs::register_types();
+        ferroui_media_camera_controls::register_types();
+        ferroui_media_video_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();

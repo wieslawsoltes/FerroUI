@@ -43,6 +43,7 @@ libc.workspace = true
 # IBus on a private session bus).
 [target.'cfg(unix)'.dev-dependencies]
 zbus.workspace = true
+futures-util.workspace = true
 
 [features]
 # Builds `examples/x11_window.rs`: a window with the Skia renderer in software, the HarfBuzz text

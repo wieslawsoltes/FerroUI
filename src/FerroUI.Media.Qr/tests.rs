@@ -55,27 +55,38 @@ fn slow_analysis_never_takes_a_second_slot_even_after_generation_change() {
         .begin(frame(128, 128, 3), Duration::from_secs(1))
         .is_ok());
 }
+/// Options whose age limit is far above what a test thread that is not scheduled for a while
+/// takes: an analysis also ends by the age of its frame against the clock of the machine, and
+/// the tests below are about the clock of the scheduler, which they set themselves. (With the
+/// default limit of a quarter of a second a loaded machine failed them.)
+fn patient_options() -> QrOptions {
+    QrOptions {
+        max_age: PATIENT_AGE,
+        ..QrOptions::default()
+    }
+}
+const PATIENT_AGE: Duration = Duration::from_secs(3_600);
 #[test]
 fn overlay_expires_and_acceptance_can_suppress_pending_publication() {
-    let gate = QrAnalysisGate::new(QrOptions::default());
+    let gate = QrAnalysisGate::new(patient_options());
     gate.activate(1, 1);
     let active = gate.begin(frame(128, 128, 1), Duration::ZERO).unwrap();
-    assert!(active.is_current(Duration::from_millis(249)));
-    assert!(!active.is_current(Duration::from_millis(251)));
+    assert!(active.is_current(PATIENT_AGE - Duration::from_secs(60)));
+    assert!(!active.is_current(PATIENT_AGE + Duration::from_millis(1)));
     gate.stop();
     assert!(!active.is_current(Duration::ZERO));
 }
 
 #[test]
 fn analysis_expiry_uses_acquisition_age_and_the_scheduler_clock_not_media_position() {
-    let gate = QrAnalysisGate::new(Default::default());
+    let gate = QrAnalysisGate::new(patient_options());
     gate.activate(1, 1);
     // Source PTS is zero while the host scheduler is already an hour old.
     let frame = frame(128, 128, 1);
     let now = Duration::from_secs(3600);
     let active = gate.begin(frame.clone(), now).unwrap();
     assert!(active.is_current(now + Duration::from_millis(100)));
-    assert!(!active.is_current(now + Duration::from_millis(251)));
+    assert!(!active.is_current(now + PATIENT_AGE + Duration::from_millis(1)));
     drop(active);
     assert!(matches!(
         gate.begin(frame, now + Duration::from_millis(200)),

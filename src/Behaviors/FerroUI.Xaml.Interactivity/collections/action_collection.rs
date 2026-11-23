@@ -15,6 +15,8 @@ use std::rc::Rc;
 #[derive(Clone, PartialEq)]
 pub struct ActionCollection(FerroList<Ref<FerroObject>>);
 
+ferroui_base::styled_value!(ActionCollection);
+
 impl ActionCollection {
     /// Initializes a new instance of the [`ActionCollection`] class.
     pub fn new() -> Self {

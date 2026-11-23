@@ -1,6 +1,7 @@
 use super::ICompositionHitTester;
 use crate::media::IntersectionResult;
 use crate::platform::{IGeometryImpl, LtrbRect};
+use crate::rendering::composition::drawing::CompositionRenderData;
 use crate::rendering::composition::CompositionVisual;
 use crate::{Matrix, Point};
 
@@ -16,6 +17,14 @@ impl ICompositionHitTester for PointCompositionHitTester {
 
     fn hit_test(visual: &CompositionVisual, input: &Point) -> IntersectionResult {
         if visual.hit_test(*input) {
+            IntersectionResult::FullyContains
+        } else {
+            IntersectionResult::Empty
+        }
+    }
+
+    fn hit_test_drawing(data: &CompositionRenderData, input: &Point) -> IntersectionResult {
+        if data.hit_test(*input) {
             IntersectionResult::FullyContains
         } else {
             IntersectionResult::Empty

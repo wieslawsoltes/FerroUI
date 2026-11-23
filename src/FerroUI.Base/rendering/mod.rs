@@ -30,6 +30,7 @@ pub use managed_hit_tester::ManagedHitTester;
 // ---- render loop / render timers / context manager ----
 #[cfg(not(target_family = "wasm"))]
 mod auto_reset_event;
+mod first_frame;
 mod default_render_timer;
 mod i_render_loop;
 mod i_render_loop_task;
@@ -47,6 +48,7 @@ mod swapchain_base;
 mod thread_proxy_render_timer;
 mod ui_thread_render_timer;
 
+pub use first_frame::FirstFramePipelines;
 pub use default_render_timer::{DefaultRenderTimer, DefaultRenderTimerImpl, RenderTimerSubscription};
 pub use i_render_loop::IRenderLoop;
 pub use i_render_loop_task::IRenderLoopTask;

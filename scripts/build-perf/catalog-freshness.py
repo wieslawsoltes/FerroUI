@@ -144,6 +144,23 @@ def definitions(record: dict, features: bool = True) -> list[dict]:
                    for unit in record["units"]), key=lambda value: json.dumps(value, sort_keys=True))
 
 
+def unit_key(unit: dict) -> str:
+    """What names a unit in the reports: its package, target and kind."""
+    return f"{unit.get('package')} {unit.get('name')} {','.join(unit.get('kind', []))}"
+
+
+def common_definitions(record: dict, other: dict) -> list[dict]:
+    """The units of a build that another build has too, without their freshness and features."""
+    keys = {unit_key(unit) for unit in other["units"]}
+    return definitions({"units": [unit for unit in record["units"] if unit_key(unit) in keys]}, features=False)
+
+
+def unit_changes(baseline: dict, candidate: dict) -> dict:
+    """The units only one of two builds has: those the candidate adds and those it no longer builds."""
+    before, after = {unit_key(unit) for unit in baseline["units"]}, {unit_key(unit) for unit in candidate["units"]}
+    return {"added": sorted(after - before), "removed": sorted(before - after)}
+
+
 def catalog_library(record: dict, package_id: str) -> dict:
     found = [unit for unit in record["units"] if unit["package"] == package_id
              and unit["name"] == "control_catalog" and "lib" in unit["kind"]]
@@ -415,9 +432,11 @@ def compare_evidence(reference: dict, candidate: dict, outputs_reference: dict |
         same_units = all(definitions(candidate[phase]) == definitions(reference["population"]) for phase in phases)
     else:
         # An acknowledged change (label build-output-changes) may build units with other features, as
-        # a pull request that adds or removes a feature of the catalog does: the units and their
-        # profiles are the baseline's, and each revision repeats its own graph.
-        same_units = all(definitions(candidate[phase], features=False) == definitions(reference["population"], features=False)
+        # a pull request that adds or removes a feature of the catalog does, and other units, as one
+        # that gives the catalog a dependency does: the units of both revisions keep their profiles,
+        # and each revision repeats its own graph.
+        same_units = all(common_definitions(candidate[phase], reference["population"])
+                         == common_definitions(reference["population"], candidate[phase])
                          and definitions(candidate[phase]) == definitions(outputs_reference["population"])
                          for phase in phases)
     result = {
@@ -455,6 +474,7 @@ def summarize(records: list[dict], accept_output_changes: bool = False) -> dict:
                    for row in records]
     return {"output_changes_acknowledged": accept_output_changes,
             "output_changes": output_changes(baseline[0], candidate[0]),
+            "unit_changes": unit_changes(baseline[0]["population"], candidate[0]["population"]),
             "baseline_repeat_seconds": base_times, "candidate_repeat_seconds": candidate_times,
             "baseline_repeat_median_seconds": statistics.median(base_times),
             "candidate_repeat_median_seconds": statistics.median(candidate_times),
@@ -487,7 +507,9 @@ def acknowledged_changes(summary: dict) -> str:
             "the graph is compared across revisions. Against the baseline the candidate changes "
             f"{len(generated)} generated Rust/metadata entries and {len(semantic)} first-party semantic entries; "
             f"asset table bytes differ: **{changes['asset_table_bytes_differ']}**.\n\n")
-    for title, names in (("Generated Rust/metadata", generated), ("First-party semantic files", semantic)):
+    for title, names in (("Generated Rust/metadata", generated), ("First-party semantic files", semantic),
+                         ("Units the candidate adds", summary["unit_changes"]["added"]),
+                         ("Units the candidate no longer builds", summary["unit_changes"]["removed"])):
         if names:
             text += f"{title}:\n\n" + "".join(f"- `{name}`\n" for name in names[:50])
             text += f"- ... {len(names) - 50} more\n\n" if len(names) > 50 else "\n"

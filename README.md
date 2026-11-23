@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Community chat](https://img.shields.io/badge/chat-Telegram-26A5E4?logo=telegram&logoColor=white)](https://t.me/+yQ69t8M7xgwyOGZk)
 
-FerroUI is a cross-platform UI framework for Rust: a retained-mode control library with a styled property system, data binding, XAML markup, control themes and a composition-based renderer. It is a port of the Avalonia UI framework to Rust that keeps the original architecture, contracts and behaviour, so that applications, themes and markup written against that model carry over with their structure intact.
+FerroUI is a cross-platform UI framework for Rust. It brings a complete control library, a styled property system with data binding, control themes for five design languages and a GPU composition renderer, and it runs on macOS, Windows, Linux, iOS, Android and in the browser from one code base. An interface is written declaratively in Rust: builders for every control, an `rsx!` macro, fine-grained signals in the manner of SolidJS and Leptos, and React-like components with hooks and a reconciler. It can also be written in XAML that is compiled to Rust when the application is built. Both drive the same controls, themes and bindings and can be mixed in one application.
 
-> **Status: 0.4.0.** `0.4.0` is the current release on crates.io. It adds a declarative Rust API for user interfaces without XAML: builders, the `rsx!` macro, signals, components with hooks and a reconciler, asynchronous data, error boundaries and a router ([docs/declarative-ui.md](docs/declarative-ui.md)). It also adds the [developer tools](#developer-tools), the native WinUI controls with the WinUI composition API and the VisualStateManager, rich text (RichTextBlock and RichEditBox with input methods on every platform), Cartesian and pie charts, the behaviors libraries, the macOS 26 and Material themes and hot reload, and makes the Vello backend faster ([CHANGELOG.md](CHANGELOG.md)). Every upstream file and member in scope is ported or waived with a recorded reason. The framework runs on macOS, Windows, Linux (X11, Wayland and the framebuffer), iOS, Android and in the browser. It was verified in continuous integration, in virtual machines, in the iOS simulator and on the Android emulator, not on a range of real devices. Within 0.4 the public API is kept; 0.5.0 may change it. See [Project status](#project-status).
+> **Status: 0.5.0.** `0.5.0` is the current release on crates.io. It adds compiled `{x:Bind}` with compiled bindings by default, custom effects as runtime shaders on Skia and Vello, the portable media crates (video, camera and QR), WPF-style 3D (`Viewport3D` and the Media3D scene model), experimental native renderers for macOS and Windows, smaller executables (theme trimming on by default, builds without unwinding), idiomatic Rust types under the .NET-named API, and faster starts and frames for large trees; the Designer Studio crates are published with it ([CHANGELOG.md](CHANGELOG.md)). The framework runs on macOS, Windows, Linux (X11, Wayland and the framebuffer), iOS, Android and in the browser. It was verified in continuous integration, in virtual machines, in the iOS simulator and on the Android emulator, not on a range of real devices. Within 0.5 the public API is kept; 0.6.0 may change it. See [Project status](#project-status).
 
 ![The ControlCatalog with the WinUI 3 theme on Windows 11, in a window with the Mica backdrop](docs/porting/images/control_catalog_winui_windows.png)
 
@@ -18,37 +18,38 @@ The ControlCatalog sample with the WinUI 3 theme (`ferroui-themes-winui`), its d
 
 ## Highlights
 
-- **Complete object model.** Styled and direct properties with value priorities, inheritance, coercion and change notification; logical and visual trees; routed events; layout; input, focus and gestures.
-- **Styling and theming.** Selectors, styles, control themes, resources, theme variants and transitions. The Fluent, Simple and WinUI 3 themes are included.
-- **Data binding.** Compiled and reflection-style binding paths, converters, multi-bindings, data validation and templates.
-- **Localization.** ProTranslate supplies native translation bindings, live culture switching, RTL, calendars, region and measurement services, generated typed catalogs, 13 translation file formats and a portable catalog editing/AI workflow engine ([guide](docs/protranslate.md), [port mapping](docs/porting/protranslate.md)).
-- **Visual XAML designer.** [Designer Studio](docs/designer/README.md) is a native designer built on the framework: an artboard with synchronized XAML, layers, editable properties, layout tools, preview stages, prototype flows and keyframe animation, on portable crates for lossless document editing, history, language services and collaboration. Run `cargo run -p designer-studio`. The designer crates are published from 0.5.
-- **XAML.** A port of the XamlX compiler front end with the framework's transformers and markup extensions. Documents are compiled to Rust source by the build script of a crate, or loaded at run time.
-- **Composition renderer.** A compositor with a render loop on its own thread, dirty-region tracking, server-side visuals and composition animations, drawing through a backend-neutral drawing context.
-- **Swappable backends.** Rendering and windowing sit behind contracts. Skia renders through Graphite on Metal, Ganesh on OpenGL, ANGLE, WebGL and Vulkan, or in software; an experimental Vello backend sits behind the same contracts; HarfBuzz shapes text.
-- **Declarative Rust UI.** `ferroui-view` writes user interfaces in Rust without XAML: builders generated for every control, an `rsx!` macro, fine-grained signals, and React-style components with hooks and a reconciler, with hot reload, an inspector and interoperation with XAML ([below](#declarative-rust-ui)).
+- **Declarative Rust UI, React-like.** `ferroui-view` writes user interfaces in plain Rust: builders generated for every control and an `rsx!` macro for the tree; fine-grained signals, memos and effects for state; function components with hooks (`use_signal`, `use_effect`, `use_memo`, `use_context`, `use_future`) and a reconciler that patches the controls when a component runs again; keyed lists, error boundaries, suspense and a router; hot reload and an inspector ([below](#declarative-rust-ui), [compared with React](docs/declarative-ui-react.md)).
+- **Or in XAML, compiled.** Markup is compiled to Rust source by the build script of a crate, with compiled bindings (`{x:Bind}`) and themes trimmed to what an application uses; it can also be loaded at run time. Rust and XAML views interoperate.
+- **A complete control library.** Buttons, text input, items controls with virtualization, menus, pickers, calendar, navigation, pages, dialogs, the TreeDataGrid, charts, rich text, inking and media, with automation peers for the accessibility APIs of the platforms.
+- **Themes for five design languages.** WinUI 3, Fluent, Material 3 Expressive, macOS 26 and Simple, for every control, with light and dark variants, on a styling system of selectors, styles, control themes, resources and transitions.
+- **GPU rendering.** A compositor with a render loop on its own thread, dirty-region tracking, server-side visuals and composition animations, effects as shaders, and WPF-style 3D. Skia renders through Graphite on Metal, Ganesh on OpenGL, ANGLE, WebGL and Vulkan, or in software; an experimental Vello backend sits behind the same contracts; HarfBuzz shapes text.
+- **A full object model.** Styled and direct properties with value priorities, inheritance, coercion and change notification; logical and visual trees; routed events; layout; input, focus and gestures.
+- **Data binding and MVVM.** Compiled and reflection-style binding paths, converters, multi-bindings, data validation and templates, with ReactiveUI, DynamicData and Rx as crates of the workspace.
+- **Localization.** ProTranslate supplies native translation bindings, live culture switching, RTL, calendars, region and measurement services, generated typed catalogs, 13 translation file formats and a portable catalog editing/AI workflow engine ([guide](docs/protranslate.md)).
+- **A visual designer.** [Designer Studio](docs/designer/README.md) is a native designer built on the framework: an artboard with synchronized XAML, layers, editable properties, layout tools, preview stages, prototype flows and keyframe animation, on portable crates for lossless document editing, history, language services and collaboration. Run `cargo run -p designer-studio`.
 - **Developer tools.** F12 opens the [developer tools](#developer-tools) on a running application: its trees, the properties of a control and where their values come from, its layout and styles, and the routed events.
+- **Small and measured.** Themes and type tables are trimmed to what an application uses, shipped builds abort instead of unwinding, and frame cost, start time and size are held by a local performance gate ([binary size](docs/binary-size.md), [performance notes](docs/porting/desktop-performance.md)).
 - **Safe Rust.** The controls, markup, XAML and theme crates contain no `unsafe` code. It is confined to a small part of the object model core and to the rendering, text shaping, platform and interop backends.
 
 ## Project status
 
-The state per subsystem is tracked in [docs/porting/CRITICAL-PATH.md](docs/porting/CRITICAL-PATH.md), the state per upstream member in [docs/porting/TRACKING.md](docs/porting/TRACKING.md), the upstream test suites per project in [docs/porting/TESTS.md](docs/porting/TESTS.md), and what is not ported in [docs/porting/REMAINING.md](docs/porting/REMAINING.md). The checks that still need real hardware or a person at the screen are listed in [docs/porting/manual-verification.md](docs/porting/manual-verification.md). Of the upstream projects in scope, every member has a counterpart or is waived with a reason (30354 present, 5856 waived, none missing); of every upstream project, in scope or not, the port has 81 percent of the members.
+The state per subsystem is tracked in [docs/porting/CRITICAL-PATH.md](docs/porting/CRITICAL-PATH.md). The checks that still need real hardware or a person at the screen are listed in [docs/porting/manual-verification.md](docs/porting/manual-verification.md). How the framework relates to the projects it grew from, member by member, is in [Origins](#origins).
 
 ### Framework
 
 | Area | State |
 |---|---|
-| Property system, trees, layout, input, styling, resources | Ported, with the upstream test suites |
-| Data binding, animation, transitions | Ported |
-| Media, text layout, fonts | Ported |
+| Property system, trees, layout, input, styling, resources | Complete, with the test suites of the model it follows |
+| Data binding, animation, transitions | Complete |
+| Media, text layout, fonts | Complete |
 | Portable video, camera and shared textures | Initial modular [FerroUI.Media implementation](docs/media/README.md): shared frame leases, Apple and browser providers; remaining native providers and release gates are unfinished |
-| Compositor and render loop | Ported, including composition animations, custom visuals and the import of external GPU objects; the render loop runs on its own thread on the desktop |
+| Compositor and render loop | Complete, including composition animations, custom visuals and the import of external GPU objects; the render loop runs on its own thread on the desktop |
 | Controls | The control set, including items controls, text input, menus, pickers, calendar, pages, the colour picker, the managed dialogs and automation peers |
-| XAML | The run-time loader with the upstream test suites, and compilation of markup to Rust source in build scripts (used by the themes, the dialogs and the ControlCatalog sample); hot reload and parts of the build integration are open |
+| XAML | The run-time loader with its test suites, and compilation of markup to Rust source in build scripts (used by the themes, the dialogs and the ControlCatalog sample); hot reload and parts of the build integration are open |
 | Themes | [Android Material 3 Expressive](docs/porting/material-theme.md), [macOS 26](docs/porting/macos26-theme.md), Fluent, Simple and WinUI 3, for every control (WinUI 3: [progress](docs/porting/winui-theme/PROGRESS.md), [deviations](docs/porting/winui-theme/DEVIATIONS.md), [comparison with native WinUI 3](docs/porting/winui-theme-gallery.md)) |
-| Skia and HarfBuzz backends | Ported; Skia is the default and reference renderer |
-| Developer tools | Ported from upstream's last open-source version (`ferroui-diagnostics`), with the TreeDataGrid as the property grid |
-| Behaviors | Xaml.Behaviors ported: the object model, the classic triggers and actions, about 330 custom behaviors, events, drag and drop, responsive classes and animations (`ferroui-xaml-behaviors`, [plan and progress](docs/porting/behaviors.md)) |
+| Skia and HarfBuzz backends | Complete; Skia is the default and reference renderer |
+| Developer tools | `ferroui-diagnostics`, attached with F12, with the TreeDataGrid as the property grid |
+| Behaviors | The object model of Xaml.Behaviors, the classic triggers and actions, about 330 custom behaviors, events, drag and drop, responsive classes and animations (`ferroui-xaml-behaviors`, [plan and progress](docs/porting/behaviors.md)) |
 | Vello backend | Experimental: CPU, hybrid and GPU modes, measured against Skia; open work in [vello-backend.md](docs/porting/vello-backend.md), section 13 |
 
 ### Platforms
@@ -89,10 +90,10 @@ FerroUI is a set of crates that are released together at one version. A desktop 
 
 ```toml
 [dependencies]
-ferroui-base = "=0.4.0"
-ferroui-controls = "=0.4.0"
-ferroui-desktop = "=0.4.0"
-ferroui-themes-fluent = "=0.4.0"
+ferroui-base = "=0.5.0"
+ferroui-controls = "=0.5.0"
+ferroui-desktop = "=0.5.0"
+ferroui-themes-fluent = "=0.5.0"
 ```
 
 The WinUI 3 theme is the crate `ferroui-themes-winui` (`WinUITheme`), used in place of `ferroui-themes-fluent` or beside it; the facade crate has it as the feature `winui-theme`.
@@ -107,11 +108,11 @@ Run the gallery with `cargo run -p material-theme-gallery --bin material-theme-g
 
 An application can also name one dependency instead: the facade crate `ferroui`. It re-exports the common crates under short names (`ferroui::base`, `ferroui::controls`, ...) with a prelude of the types of a minimal application; its default features are the desktop platforms and the Fluent theme, and further features add the Simple theme, XAML loading at run time, the colour picker, Charts, the TreeDataGrid, the dialogs, the browser platform, the WinUI 3 theme, the Vello backend, the headless platform and the graphics contracts ([docs/release.md](docs/release.md), section 2.1). In the repository it is used already: `cargo run -p ferroui --example hello`.
 
-The libraries for MVVM applications (Rx, DynamicData, ReactiveUI and their integration with the controls) are crates of the release as well: `ferroui-reactiveui-controls = "=0.4.0"` beside the crates above, or the facade crate with its feature `reactiveui` ([docs/mvvm.md](docs/mvvm.md)).
+The libraries for MVVM applications (Rx, DynamicData, ReactiveUI and their integration with the controls) are crates of the release as well: `ferroui-reactiveui-controls = "=0.5.0"` beside the crates above, or the facade crate with its feature `reactiveui` ([docs/mvvm.md](docs/mvvm.md)).
 
-The declarative API (`ferroui-view` with `ferroui-view-macros`, [docs/declarative-ui.md](docs/declarative-ui.md)) and the developer tools (`ferroui-diagnostics`) are crates of the release too: `ferroui-view = "=0.4.0"` and `ferroui-diagnostics = "=0.4.0"` beside the crates above (the facade has the developer tools as its feature `diagnostics`).
+The declarative API (`ferroui-view` with `ferroui-view-macros`, [docs/declarative-ui.md](docs/declarative-ui.md)) and the developer tools (`ferroui-diagnostics`) are crates of the release too: `ferroui-view = "=0.5.0"` and `ferroui-diagnostics = "=0.5.0"` beside the crates above (the facade has the developer tools as its feature `diagnostics`).
 
-The crates of a release depend on one another at exactly its version, so name the same version for every FerroUI crate, as above. `0.1.0` followed four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), pre-releases in the sense of semantic versioning, which Cargo selects only when they are named, `0.2.0`, `0.3.0` and `0.4.0` are the next minor versions, and `0.3.0` and `0.4.0` each followed one preview (`0.3.0-preview.1`, `0.4.0-preview.1`). The work towards the next one is published as previews of it (`0.5.0-preview.1` will be the first), which may change any part of the public API. The release process is described in [docs/release.md](docs/release.md) and the changes of each release in [CHANGELOG.md](CHANGELOG.md).
+The crates of a release depend on one another at exactly its version, so name the same version for every FerroUI crate, as above. `0.1.0` followed four previews (`0.1.0-preview.1` to `0.1.0-preview.4`), pre-releases in the sense of semantic versioning, which Cargo selects only when they are named, `0.2.0`, `0.3.0`, `0.4.0` and `0.5.0` are the next minor versions, and `0.3.0` and `0.4.0` each followed one preview (`0.3.0-preview.1`, `0.4.0-preview.1`). The work towards the next version is published as previews of it; a preview may change any part of the public API. No `0.5.x` release follows `0.5.0`: the work towards it is released in `0.6.0`. The release process is described in [docs/release.md](docs/release.md) and the changes of each release in [CHANGELOG.md](CHANGELOG.md).
 
 The platforms that are not part of platform detection are named by their own crates beside the others: `ferroui-wayland`, `ferroui-linuxframebuffer`, `ferroui-ios`, `ferroui-android`, `ferroui-browser`, `ferroui-winui` and `ferroui-headless-vnc`.
 
@@ -125,6 +126,7 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 
 | Crate | Description | Version | Downloads | Documentation |
 |---|---|---|---|---|
+| [`ferroui-ident-macros`](https://crates.io/crates/ferroui-ident-macros) | The macro that joins identifiers inside the declarative macros of FerroUI | [![version](https://img.shields.io/crates/v/ferroui-ident-macros.svg)](https://crates.io/crates/ferroui-ident-macros) | [![downloads](https://img.shields.io/crates/d/ferroui-ident-macros.svg)](https://crates.io/crates/ferroui-ident-macros) | [![docs.rs](https://img.shields.io/docsrs/ferroui-ident-macros)](https://docs.rs/ferroui-ident-macros) |
 | [`ferroui-protranslate-core`](https://crates.io/crates/ferroui-protranslate-core) | Framework-independent translation, culture and globalization services for FerroUI | [![version](https://img.shields.io/crates/v/ferroui-protranslate-core.svg)](https://crates.io/crates/ferroui-protranslate-core) | [![downloads](https://img.shields.io/crates/d/ferroui-protranslate-core.svg)](https://crates.io/crates/ferroui-protranslate-core) | [![docs.rs](https://img.shields.io/docsrs/ferroui-protranslate-core)](https://docs.rs/ferroui-protranslate-core) |
 | [`ferroui-protranslate-formats`](https://crates.io/crates/ferroui-protranslate-formats) | Loss-aware localization catalog import and export for ProTranslate | [![version](https://img.shields.io/crates/v/ferroui-protranslate-formats.svg)](https://crates.io/crates/ferroui-protranslate-formats) | [![downloads](https://img.shields.io/crates/d/ferroui-protranslate-formats.svg)](https://crates.io/crates/ferroui-protranslate-formats) | [![docs.rs](https://img.shields.io/docsrs/ferroui-protranslate-formats)](https://docs.rs/ferroui-protranslate-formats) |
 | [`ferroui-system`](https://crates.io/crates/ferroui-system) | The parts of the .NET base class library that FerroUI and its reusable libraries share: thread-local variables for every target, events, property and collection change notification, cancellation | [![version](https://img.shields.io/crates/v/ferroui-system.svg)](https://crates.io/crates/ferroui-system) | [![downloads](https://img.shields.io/crates/d/ferroui-system.svg)](https://crates.io/crates/ferroui-system) | [![docs.rs](https://img.shields.io/docsrs/ferroui-system)](https://docs.rs/ferroui-system) |
@@ -209,6 +211,7 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 | [`ferroui-metal`](https://crates.io/crates/ferroui-metal) | The Metal platform contracts of FerroUI: the device, the surface of a top-level and the import of external objects | [![version](https://img.shields.io/crates/v/ferroui-metal.svg)](https://crates.io/crates/ferroui-metal) | [![downloads](https://img.shields.io/crates/d/ferroui-metal.svg)](https://crates.io/crates/ferroui-metal) | [![docs.rs](https://img.shields.io/docsrs/ferroui-metal)](https://docs.rs/ferroui-metal) |
 | [`ferroui-pretext-media`](https://crates.io/crates/ferroui-pretext-media) | FerroUI font and shaping services for prepared text | [![version](https://img.shields.io/crates/v/ferroui-pretext-media.svg)](https://crates.io/crates/ferroui-pretext-media) | [![downloads](https://img.shields.io/crates/d/ferroui-pretext-media.svg)](https://crates.io/crates/ferroui-pretext-media) | [![docs.rs](https://img.shields.io/docsrs/ferroui-pretext-media)](https://docs.rs/ferroui-pretext-media) |
 | [`ferroui-harfbuzz`](https://crates.io/crates/ferroui-harfbuzz) | The HarfBuzz text shaping backend of FerroUI | [![version](https://img.shields.io/crates/v/ferroui-harfbuzz.svg)](https://crates.io/crates/ferroui-harfbuzz) | [![downloads](https://img.shields.io/crates/d/ferroui-harfbuzz.svg)](https://crates.io/crates/ferroui-harfbuzz) | [![docs.rs](https://img.shields.io/docsrs/ferroui-harfbuzz)](https://docs.rs/ferroui-harfbuzz) |
+| [`ferroui-direct2d`](https://crates.io/crates/ferroui-direct2d) | Windows system GPU rendering and text with Direct2D, Direct3D 11, DirectWrite and WIC | [![version](https://img.shields.io/crates/v/ferroui-direct2d.svg)](https://crates.io/crates/ferroui-direct2d) | [![downloads](https://img.shields.io/crates/d/ferroui-direct2d.svg)](https://crates.io/crates/ferroui-direct2d) | [![docs.rs](https://img.shields.io/docsrs/ferroui-direct2d)](https://docs.rs/ferroui-direct2d) |
 | [`ferroui-opengl`](https://crates.io/crates/ferroui-opengl) | The OpenGL platform contracts of FerroUI: contexts, surfaces and the entry points the framework itself uses | [![version](https://img.shields.io/crates/v/ferroui-opengl.svg)](https://crates.io/crates/ferroui-opengl) | [![downloads](https://img.shields.io/crates/d/ferroui-opengl.svg)](https://crates.io/crates/ferroui-opengl) | [![docs.rs](https://img.shields.io/docsrs/ferroui-opengl)](https://docs.rs/ferroui-opengl) |
 | [`ferroui-quartz`](https://crates.io/crates/ferroui-quartz) | Apple native renderer using Metal, Core Graphics, Core Text and ImageIO on macOS and iOS | [![version](https://img.shields.io/crates/v/ferroui-quartz.svg)](https://crates.io/crates/ferroui-quartz) | [![downloads](https://img.shields.io/crates/d/ferroui-quartz.svg)](https://crates.io/crates/ferroui-quartz) | [![docs.rs](https://img.shields.io/docsrs/ferroui-quartz)](https://docs.rs/ferroui-quartz) |
 | [`ferroui-render3d`](https://crates.io/crates/ferroui-render3d) | The renderer of FerroUI's 3D scenes: the CPU reference rasterizer, the shader and the wgpu executor, the shared uniform layouts and the output cache of Viewport3D | [![version](https://img.shields.io/crates/v/ferroui-render3d.svg)](https://crates.io/crates/ferroui-render3d) | [![downloads](https://img.shields.io/crates/d/ferroui-render3d.svg)](https://crates.io/crates/ferroui-render3d) | [![docs.rs](https://img.shields.io/docsrs/ferroui-render3d)](https://docs.rs/ferroui-render3d) |
@@ -233,7 +236,7 @@ Markup is loaded at run time with `ferroui-markup-xaml-loader` (the feature `xam
 | [`ferroui-media-video-linux`](https://crates.io/crates/ferroui-media-video-linux) | GStreamer native audio and video playback | [![version](https://img.shields.io/crates/v/ferroui-media-video-linux.svg)](https://crates.io/crates/ferroui-media-video-linux) | [![downloads](https://img.shields.io/crates/d/ferroui-media-video-linux.svg)](https://crates.io/crates/ferroui-media-video-linux) | [![docs.rs](https://img.shields.io/docsrs/ferroui-media-video-linux)](https://docs.rs/ferroui-media-video-linux) |
 | [`ferroui-android`](https://crates.io/crates/ferroui-android) | The Android platform of FerroUI: a view in an activity, rendered through EGL or to the native window | [![version](https://img.shields.io/crates/v/ferroui-android.svg)](https://crates.io/crates/ferroui-android) | [![downloads](https://img.shields.io/crates/d/ferroui-android.svg)](https://crates.io/crates/ferroui-android) | [![docs.rs](https://img.shields.io/docsrs/ferroui-android)](https://docs.rs/ferroui-android) |
 | [`ferroui-media-android`](https://crates.io/crates/ferroui-media-android) | Shared Android SurfaceTexture frame production without preview readback | [![version](https://img.shields.io/crates/v/ferroui-media-android.svg)](https://crates.io/crates/ferroui-media-android) | [![downloads](https://img.shields.io/crates/d/ferroui-media-android.svg)](https://crates.io/crates/ferroui-media-android) | [![docs.rs](https://img.shields.io/docsrs/ferroui-media-android)](https://docs.rs/ferroui-media-android) |
-| [`ferroui-media-camera-android`](https://crates.io/crates/ferroui-media-camera-android) | CameraX capture and native JPEG with shared Android GPU preview | [![version](https://img.shields.io/crates/v/ferroui-media-camera-android.svg)](https://crates.io/crates/ferroui-media-camera-android) | [![downloads](https://img.shields.io/crates/d/ferroui-media-camera-android.svg)](https://crates.io/crates/ferroui-media-camera-android) | [![docs.rs](https://img.shields.io/docsrs/ferroui-media-camera-android)](https://docs.rs/ferroui-media-camera-android) |
+| [`ferroui-media-camera-android`](https://crates.io/crates/ferroui-media-camera-android) | CameraX photo and silent video capture with shared Android GPU preview | [![version](https://img.shields.io/crates/v/ferroui-media-camera-android.svg)](https://crates.io/crates/ferroui-media-camera-android) | [![downloads](https://img.shields.io/crates/d/ferroui-media-camera-android.svg)](https://crates.io/crates/ferroui-media-camera-android) | [![docs.rs](https://img.shields.io/docsrs/ferroui-media-camera-android)](https://docs.rs/ferroui-media-camera-android) |
 | [`ferroui-media-qr-android`](https://crates.io/crates/ferroui-media-qr-android) | Optional bundled offline Android QR analysis of CameraX images | [![version](https://img.shields.io/crates/v/ferroui-media-qr-android.svg)](https://crates.io/crates/ferroui-media-qr-android) | [![downloads](https://img.shields.io/crates/d/ferroui-media-qr-android.svg)](https://crates.io/crates/ferroui-media-qr-android) | [![docs.rs](https://img.shields.io/docsrs/ferroui-media-qr-android)](https://docs.rs/ferroui-media-qr-android) |
 | [`ferroui-media-video-android`](https://crates.io/crates/ferroui-media-video-android) | Android native playback and audio with shared GPU frame output | [![version](https://img.shields.io/crates/v/ferroui-media-video-android.svg)](https://crates.io/crates/ferroui-media-video-android) | [![downloads](https://img.shields.io/crates/d/ferroui-media-video-android.svg)](https://crates.io/crates/ferroui-media-video-android) | [![docs.rs](https://img.shields.io/docsrs/ferroui-media-video-android)](https://docs.rs/ferroui-media-video-android) |
 | [`ferroui-native`](https://crates.io/crates/ferroui-native) | The macOS platform of FerroUI: windows, input, clipboard, drag and drop, menus and Metal and OpenGL graphics over a native library | [![version](https://img.shields.io/crates/v/ferroui-native.svg)](https://crates.io/crates/ferroui-native) | [![downloads](https://img.shields.io/crates/d/ferroui-native.svg)](https://crates.io/crates/ferroui-native) | [![docs.rs](https://img.shields.io/docsrs/ferroui-native)](https://docs.rs/ferroui-native) |
@@ -415,24 +418,9 @@ fn main() -> std::process::ExitCode {
 
 The complete programs are [`hello.rs`](src/FerroUI/examples/hello.rs) (the facade) and [`hello_window.rs`](src/FerroUI.Desktop/examples/hello_window.rs) (the crates one by one). The API is still changing; those examples are kept building and are the authoritative reference.
 
-### Markup
-
-Views can be written in XAML. FerroUI uses its own XML namespace:
-
-```xml
-<Window xmlns="https://github.com/ferroui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Hello">
-  <StackPanel Margin="16" Spacing="8">
-    <TextBlock Text="{Binding Greeting}" />
-    <Button Content="Click" Command="{Binding ClickCommand}" />
-  </StackPanel>
-</Window>
-```
-
 ### Declarative Rust UI
 
-`ferroui-view` writes user interfaces in Rust without XAML, on the same controls, themes, styles and bindings. A component can run once and let its properties follow signals (the model of SolidJS and Leptos), or run again when its state changes and let a reconciler patch the controls (the model of React):
+`ferroui-view` writes user interfaces in Rust, on the same controls, themes, styles and bindings as markup. A component can run once and let its properties follow signals (the model of SolidJS and Leptos), or run again when its state changes and let a reconciler patch the controls (the model of React):
 
 ```rust
 use ferroui_base::layout::Orientation;
@@ -497,6 +485,21 @@ For React developers, in short:
 
 The design is in [docs/declarative-ui.md](docs/declarative-ui.md), and the comparison with React in [docs/declarative-ui-react.md](docs/declarative-ui-react.md).
 
+### Markup
+
+Views can also be written in XAML, which the build compiles to Rust. FerroUI uses its own XML namespace:
+
+```xml
+<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Hello">
+  <StackPanel Margin="16" Spacing="8">
+    <TextBlock Text="{Binding Greeting}" />
+    <Button Content="Click" Command="{Binding ClickCommand}" />
+  </StackPanel>
+</Window>
+```
+
 ### MVVM with ReactiveUI
 
 FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one crate each, and an integration of ReactiveUI with the controls (`ferroui-reactiveui-controls`) that is set up with `use_reactive_ui` on the application builder. Only the integration depends on the user interface, so view models can be tested without a window. The guide [docs/mvvm.md](docs/mvvm.md) covers view models, property paths, commands, views, routing, reactive collections, threading and testing, with the two samples, `samples/ReactiveDemo` and `samples/ReactiveUIExample`.
@@ -505,11 +508,15 @@ FerroUI has ports of System.Reactive, DynamicData, Splat and ReactiveUI, one cra
 |---|---|
 | ![ReactiveDemo, the getting-started sample of ReactiveUI as a crate browser, with the WinUI 3 theme on macOS](docs/porting/images/reactive_demo_winui_macos.png) | ![The DynamicData page of the ReactiveUI example: a searchable list of features with favourites sorted first](docs/porting/images/reactiveui_example_dynamicdata_winui_macos.png) |
 
+### C and other languages
+
+The crate `ferroui-capi` is a C ABI for every language: integer handles, type, property and event IDs looked up once by name, scalar setters and getters, callbacks with an integer token or user data, and the UI thread rule, with a C header generated from its sources. The guide [docs/c-abi.md](docs/c-abi.md) has the rules and a hello world in C (`make -C samples/CApi run`), and [docs/c-abi-languages.md](docs/c-abi-languages.md) how to use it from your language (the fastest path for each kind of work, callbacks, the signal table, controls written in your language); bindings for C++, Go, Dart, C# and other languages are built on it (#636).
+
 ### Developer tools
 
 AI agents can inspect and drive a running application through the optional [MCP server](docs/mcp.md): visual, logical and automation trees, properties, styles, resources, input, screenshots and condition waits. ControlCatalog supports `--features mcp` with stdio or authenticated loopback HTTP, including headless runs.
 
-Press F12 in a window of a debug build to inspect the running application: its logical and visual trees, and a combined tree (the default view) that shows the parts of each template greyed out below the element, the properties of the selected control with where each value comes from and an editor for it, the styles and setters that apply, its layout, and the routed events as they travel. The tools are `ferroui-diagnostics`, a port of upstream's last open-source developer tools, in the WinUI 3 theme with TreeDataGrids for the trees and the property grid: a header in the title bar with a command bar for the common commands, a button that collapses the tree pane, and the views in a tab view.
+Press F12 in a window of an application that attaches the developer tools to inspect it: its logical and visual trees, and a combined tree (the default view) that shows the parts of each template greyed out below the element, the properties of the selected control with where each value comes from and an editor for it, the styles and setters that apply, its layout, and the routed events as they travel. The tools are `ferroui-diagnostics`, a port of upstream's last open-source developer tools, in the WinUI 3 theme with TreeDataGrids for the trees and the property grid: a header in the title bar with a command bar for the common commands, a button that collapses the tree pane, and the views in a tab view. The desktop ControlCatalog attaches them when it is built with its `diagnostics` feature: `cargo run -p control-catalog-desktop --features diagnostics`.
 
 ![The developer tools on the ControlCatalog on macOS: the header and command bar in the title bar, the combined tree with the parts of the templates greyed out, the properties of a text block with their priorities, its layout and its value frames](docs/images/diagnostics/devtools.png)
 
@@ -538,46 +545,59 @@ opt into a JavaScript transport bridge. See the guide for supported commands and
 
 ## Repository layout
 
-The layout follows the upstream project so that files can be compared side by side; the crate of each directory is in the table of crates above.
+The crate of each directory is in the table of crates above.
 
 | Path | Contents |
 |---|---|
 | `components/FerroBoard` | Detachable native on-screen keyboard, standalone sample and tests; try Text → FerroBoard in ControlCatalog |
-| `src` | The crates of the framework, one directory per upstream project (`src/FerroUI.Base`, `src/FerroUI.Controls`, `src/Markup/...`, `src/Skia/...`, `src/Windows/...`, ...) |
+| `src` | The crates of the framework, one directory per crate (`src/FerroUI.Base`, `src/FerroUI.Controls`, `src/Markup/...`, `src/Skia/...`, `src/Windows/...`, ...) |
 | `native/FerroUI.Native` | The Objective-C++ library of the macOS platform |
 | `external/XamlX` | The XAML compiler front end (`xamlx`) |
 | `samples` | The sample applications: the ControlCatalog with its hosts for the desktop, the browser, iOS and Android, the WinUI gallery, the gallery of the WinUI theme with its comparison against WinUI 3, and the smaller samples |
 | `tests` | Test crates: the XAML suites, the render tests, the leak tests, the benchmarks, the Windows integration tests and the comparison of the render backends |
-| `docs/porting` | The porting guide, the design and verification documents of each platform, and the tracking |
-| `scripts` | Code generators, upstream synchronisation, the status tooling, the release scripts and the build and run scripts of each platform |
+| `docs` | The guides (declarative UI, themes, bindings, MVVM, size, performance); under `docs/porting` the design and verification documents of each platform and subsystem, and the tracking against the projects FerroUI grew from |
+| `scripts` | Code generators, the status tooling, the release scripts and the build and run scripts of each platform |
 
 ## Documentation
 
-- [Porting guide](docs/porting/PORTING-GUIDE.md): the class model, naming and mapping rules, and the conventions every ported file follows.
-- [Critical path](docs/porting/CRITICAL-PATH.md): the state of each subsystem and what is open.
-- [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
-- [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
+Using the framework:
+
+- [Declarative Rust UI](docs/declarative-ui.md): `ferroui-view`, its builders, `rsx!`, signals, components, hooks, the reconciler, XAML interoperation, tools and the phases of the work; [compared with React](docs/declarative-ui-react.md).
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
 - [x:Bind](docs/porting/x-bind.md): compiled `{x:Bind}`, one core for FerroUI XAML and WinUI XAML in the run-time loader and the Rust emitter, its lifecycle, hot reload and the migration from `{Binding}` and the former WinUI adapter.
-- [LiveCharts2 port](docs/porting/livecharts2.md): the landing plan, the accounting of every upstream source, API member and test, and the [compiled sample](samples/LiveChartsDemo/README.md).
-- [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
-- [WinUI controls](docs/porting/winui-controls.md): the plan, inventory and rules of the native ports of WinUI 3 controls (icons, InfoBar, NumberBox, NavigationView and others), the WinUI-only templates, the symbol font and the two navigation models.
-- [Windows Calculator framework gaps](docs/porting/winui-calculator-gaps.md): the inventory, design and plan of VisualStateManager with state triggers and storyboards, ListView and GridView, SwipeControl, Pivot and system high contrast, the framework features the Calculator port found missing.
-- [Declarative Rust UI](docs/declarative-ui.md): `ferroui-view`, its builders, `rsx!`, signals, components, hooks, the reconciler, XAML interoperation, tools and the phases of the work; [compared with React](docs/declarative-ui-react.md).
-- [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the port of upstream's developer tools, attached with F12, member by member.
+- [Compiled XAML themes](docs/xaml-themes.md): how themes are compiled and trimmed, and the rules for writing or porting theme markup without reflection, extra size or start-up cost (compiled bindings, units, tables).
+- [The C ABI](docs/c-abi.md): `ferroui-capi` and its generated header, the rules of handles, IDs, values, errors, threads and callbacks, and a hello world in C.
+- [Using FerroUI from your language](docs/c-abi-languages.md): the fastest path for each kind of work, the FFI and the callbacks of each language, the signal table, and controls written in your language.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
-- [Idiomatic Rust under the .NET-named API](docs/idiomatic-rust.md): the names that stay .NET-like, the std and chosen-crate types that replace the ports of `System.*` types, the deprecation policy for 0.5 and the inventory of the work (#423).
+- [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the developer tools attached with F12, member by member.
+- [Binary size](docs/binary-size.md): what an executable is made of, the `dist` profile to ship with, and the settings that make it smaller.
+- [Build performance](docs/build-performance.md): measured Cargo-compatible build options, compiler caching, browser work reuse, and reproducible CI comparisons.
+- [Compiler cache (sccache)](docs/compiler-cache.md): installing and enabling sccache, cache location and size, what it caches, and its interplay with incremental compilation.
 - Platforms: [Windows](docs/porting/win32-platform.md), [WinUI](docs/porting/winui.md), [Linux on X11](docs/porting/x11-platform.md) with [AT-SPI](docs/porting/atspi.md), [Wayland](docs/porting/wayland-platform.md), [Linux framebuffer](docs/porting/linux-framebuffer-platform.md), [OpenGL on macOS and iOS](docs/porting/apple-opengl.md), [iOS](docs/porting/ios-platform.md), [Android](docs/porting/android-platform.md), [browser](docs/porting/browser-platform.md) with its [render worker](docs/porting/browser-render-worker.md), [headless VNC](docs/porting/headless-vnc.md), [Vulkan](docs/porting/vulkan.md).
 - Rendering: [render thread](docs/porting/render-thread.md), [Vello backend](docs/porting/vello-backend.md), [render tests](docs/porting/render-tests.md), [WPF-style 3D (Viewport3D and Media3D)](docs/porting/media3d.md).
-- [Compiler cache (sccache)](docs/compiler-cache.md): installing and enabling sccache, cache location and size, what it caches, and its interplay with incremental compilation.
-- [Build performance](docs/build-performance.md): measured Cargo-compatible build options, compiler caching, browser work reuse, and reproducible CI comparisons.
-- [Binary size](docs/binary-size.md): what an executable is made of, the `dist` profile to ship with, and the settings that make it smaller.
-- [Compiled XAML themes](docs/xaml-themes.md): how themes are compiled and trimmed, and the rules for writing or porting theme markup without reflection, extra size or start-up cost (compiled bindings, units, tables).
 - [Releasing](docs/release.md): the published crates, the version scheme and the release workflow; [changelog](CHANGELOG.md).
+
+Design, state and compatibility:
+
+- [Critical path](docs/porting/CRITICAL-PATH.md): the state of each subsystem and what is open.
+- [Porting guide](docs/porting/PORTING-GUIDE.md): the class model, naming and mapping rules, and the conventions every ported file follows.
+- [Tracking](docs/porting/TRACKING.md) and [what is left](docs/porting/REMAINING.md): generated per-file, per-type and per-member status.
+- [Deviations](docs/porting/DEVIATIONS.md): every place where FerroUI differs from the projects it follows, and why.
+- [Idiomatic Rust under the .NET-named API](docs/idiomatic-rust.md): the names that stay .NET-like, the std and chosen-crate types that replace the ports of `System.*` types, the deprecation policy for 0.5 and the inventory of the work (#423).
+- [WinUI controls](docs/porting/winui-controls.md): the plan, inventory and rules of the native ports of WinUI 3 controls (icons, InfoBar, NumberBox, NavigationView and others), the WinUI-only templates, the symbol font and the two navigation models.
+- [Windows Calculator framework gaps](docs/porting/winui-calculator-gaps.md): the inventory, design and plan of VisualStateManager with state triggers and storyboards, ListView and GridView, SwipeControl, Pivot and system high contrast, the framework features the Calculator port found missing.
+- [LiveCharts2 port](docs/porting/livecharts2.md): the landing plan, the accounting of every upstream source, API member and test, and the [compiled sample](samples/LiveChartsDemo/README.md).
+- [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
 
 ## Contributing
 
-Please open an issue to discuss a change before sending a pull request. Contributions are expected to follow the [porting guide](docs/porting/PORTING-GUIDE.md): port files one to one with their tests, keep behaviour identical to the reference implementation (or record the difference in [DEVIATIONS.md](docs/porting/DEVIATIONS.md)), and keep `cargo test --workspace` green. A large change can be sent as a [stack of pull requests](docs/stacked-pull-requests.md).
+Please open an issue to discuss a change before sending a pull request. Contributions follow the conventions of the code base (the class model, naming and mapping rules of the [guide](docs/porting/PORTING-GUIDE.md)), come with tests, record a change of behaviour that the framework shares with a reference implementation in [DEVIATIONS.md](docs/porting/DEVIATIONS.md), and keep `cargo test --workspace` green. A large change can be sent as a [stack of pull requests](docs/stacked-pull-requests.md).
+
+## Origins
+
+FerroUI started as a port of the Avalonia UI framework to Rust, and its object model, styling, layout, input and composition architecture follow that design; the XAML compiler front end comes from XamlX. Applications, themes and markup written against that model carry over with their structure. Other parts are native ports of their own sources: the WinUI 3 controls, theme and composition API, Xaml.Behaviors, the TreeDataGrid, LiveCharts2, Rx.NET, DynamicData, ReactiveUI and Splat. The declarative Rust layer, compiled `{x:Bind}`, theme trimming, the Material 3 and macOS 26 themes, the portable media stack, 3D and the performance work are FerroUI's own.
+
+What follows a source is tracked against it: the state per member in [docs/porting/TRACKING.md](docs/porting/TRACKING.md), the test suites per project in [docs/porting/TESTS.md](docs/porting/TESTS.md), what is not carried over in [docs/porting/REMAINING.md](docs/porting/REMAINING.md), and every difference in [docs/porting/DEVIATIONS.md](docs/porting/DEVIATIONS.md). Of the source projects in scope, every member has a counterpart or is waived with a reason (30354 present, 5856 waived, none missing), except 67 members, three types and one file that the idiomatic Rust cleanup (#423) renamed or made concrete and that the tracking data does not map yet.
 
 ## License
 

@@ -9,7 +9,7 @@ use crate::media::{
     TextHintingMode, TextOptions, TextRenderingMode, TranslateTransform,
 };
 use crate::rendering::{IPresentationSource, IRenderer};
-use crate::{Rect, Ref, Size, Visual};
+use crate::{FerroObjectImpl, Rect, Ref, Size, StyledElementImpl, Visual};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -324,25 +324,88 @@ fn opacity_and_render_transform_changes_invalidate_the_composition_properties_on
     assert_eq!((0, 4), (renderer.dirty.get(), renderer.properties.get()));
 }
 
-/// Desktop-performance.md section 9.13: moving a visual synchronizes its composition properties
-/// (the offset) without recording its drawing again; resizing it records the drawing again.
+/// A visual that draws: a class with a `render` of its own, which says nothing about what a new
+/// size does to it.
+#[repr(C)]
+struct Drawn {
+    base: Visual,
+}
+
+crate::ferro_class!(Drawn: Visual);
+crate::ferro_impl_classes!(Drawn: FerroObjectImpl, StyledElementImpl);
+
+impl crate::VisualImpl for Drawn {
+    fn render(_this: &Self, _context: &mut crate::media::DrawingContext) {}
+}
+
+/// Desktop-performance.md sections 9.13 and 9.89: moving a visual synchronizes its composition
+/// properties (the offset) without recording its drawing again; resizing one that draws records
+/// the drawing again, and resizing one that draws nothing synchronizes its properties.
 #[test]
 fn moving_a_visual_invalidates_its_composition_properties_and_resizing_it_its_drawing() {
+    let renderer = Rc::new(TestRenderer::default());
+    let drawn: Ref<Visual> = crate::instantiate(Drawn { base: Visual::construct() }).upcast();
+    let source: Rc<dyn IPresentationSource> = Rc::new(TestSource { root: drawn.clone(), renderer: renderer.clone() });
+    drawn.set_presentation_source_for_root_visual(Some(source));
+    let (plain, plain_renderer) = attached();
+
+    for (visual, renderer, draws) in [(&drawn, &renderer, true), (&plain, &plain_renderer, false)] {
+        visual.set_bounds(crate::Rect::new(0.0, 0.0, 10.0, 10.0));
+        renderer.dirty.set(0);
+        renderer.properties.set(0);
+
+        visual.set_bounds(crate::Rect::new(5.0, 7.0, 10.0, 10.0));
+        assert_eq!(0, renderer.dirty.get());
+        assert_eq!(1, renderer.properties.get());
+
+        // Another size: the drawing of a visual that draws, the properties of one that does not.
+        visual.set_bounds(crate::Rect::new(5.0, 7.0, 12.0, 10.0));
+        let expected = if draws { (1, 1) } else { (0, 2) };
+        assert_eq!(expected, (renderer.dirty.get(), renderer.properties.get()), "draws: {draws}");
+
+        // The same bounds again: nothing.
+        visual.set_bounds(crate::Rect::new(5.0, 7.0, 12.0, 10.0));
+        assert_eq!(expected, (renderer.dirty.get(), renderer.properties.get()), "draws: {draws}");
+    }
+}
+
+#[test]
+fn only_a_visual_with_a_value_that_tells_its_changes_keeps_subscriptions() {
     let (visual, renderer) = attached();
-    visual.set_bounds(crate::Rect::new(0.0, 0.0, 10.0, 10.0));
+
+    // A value that cannot change, taking a value away and the detach of a visual without
+    // subscriptions make none.
+    let effect: Rc<dyn IEffect> = Rc::new(ImmutableBlurEffect::new(4.0));
+    visual.set_effect(Some(effect));
+    visual.set_effect(None);
+    visual.set_render_transform(None);
+    assert!(!visual.has_subscriptions());
+    visual.set_presentation_source_for_root_visual(None);
+    assert!(!visual.has_subscriptions());
+    let source: Rc<dyn IPresentationSource> = Rc::new(TestSource { root: visual.clone(), renderer: renderer.clone() });
+    visual.set_presentation_source_for_root_visual(Some(source));
+    assert!(!visual.has_subscriptions());
+
+    // An effect and a transform that tell when they change make them, and both are heard.
+    let effect = BlurEffect::new();
+    visual.set_effect(Some(effect.clone().into()));
+    assert!(visual.has_subscriptions());
+    let transform = TranslateTransform::new();
+    visual.set_render_transform(Some((&transform).into()));
+
     renderer.dirty.set(0);
     renderer.properties.set(0);
-
-    visual.set_bounds(crate::Rect::new(5.0, 7.0, 10.0, 10.0));
-    assert_eq!(0, renderer.dirty.get());
-    assert_eq!(1, renderer.properties.get());
-
-    visual.set_bounds(crate::Rect::new(5.0, 7.0, 12.0, 10.0));
+    effect.set_radius(10.0);
     assert_eq!(1, renderer.dirty.get());
+    transform.set_x(5.0);
     assert_eq!(1, renderer.properties.get());
 
-    // The same bounds again: nothing.
-    visual.set_bounds(crate::Rect::new(5.0, 7.0, 12.0, 10.0));
-    assert_eq!(1, renderer.dirty.get());
-    assert_eq!(1, renderer.properties.get());
+    // Without the values nothing is heard.
+    visual.set_effect(None);
+    visual.set_render_transform(None);
+    renderer.dirty.set(0);
+    renderer.properties.set(0);
+    effect.set_radius(20.0);
+    transform.set_x(6.0);
+    assert_eq!((0, 0), (renderer.dirty.get(), renderer.properties.get()));
 }

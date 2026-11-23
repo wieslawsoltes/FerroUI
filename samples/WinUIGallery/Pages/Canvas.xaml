@@ -1,4 +1,44 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Canvas Width="160" Height="160" HorizontalAlignment="Left" Background="Gray"><Rectangle Fill="Red" Width="80" Height="80"/><Rectangle Fill="Blue" Width="80" Height="80" Canvas.Left="20" Canvas.Top="20" ZIndex="1"/><Rectangle Fill="Green" Width="80" Height="80" Canvas.Left="40" Canvas.Top="40" ZIndex="2"/><Rectangle Fill="Yellow" Width="80" Height="80" Canvas.Left="60" Canvas.Top="60" ZIndex="3"/></Canvas>
+<!-- Ported from the pinned Canvas example of WinUI Gallery (14061eea) and the handlers of
+     CanvasPage.xaml.cs (layout_samples.rs); see ../NOTICE.md. The red rectangle keeps the
+     source's OneWay x:Bind of the sliders (without the source's (x:Int32) cast of the z-index: the
+     x:Bind core's cast is a type test, and the binding converts the value). Canvas.ZIndex is the
+     shared ZIndex property. FerroUI's Slider has no Header (composed) and no StepFrequency: the
+     steps of 1 are TickFrequency with IsSnapToTickEnabled. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="CanvasExample1" Spacing="8">
+    <TextBlock Text="A Canvas control." FontSize="18" />
+    <Canvas x:Name="Control1" Width="140" Height="140" HorizontalAlignment="Left" VerticalAlignment="Top"
+            Background="Gray">
+      <Canvas.Styles>
+        <Style Selector="Rectangle">
+          <Setter Property="Height" Value="40" />
+          <Setter Property="Width" Value="40" />
+        </Style>
+      </Canvas.Styles>
+      <Rectangle x:Name="RedRectangle"
+                 Canvas.Left="{x:Bind LeftSlider.Value, Mode=OneWay}"
+                 Canvas.Top="{x:Bind TopSlider.Value, Mode=OneWay}"
+                 ZIndex="{x:Bind ZSlider.Value, Mode=OneWay}"
+                 Fill="Red" />
+      <Rectangle Canvas.Left="20" Canvas.Top="20" ZIndex="1" Fill="Blue" />
+      <Rectangle Canvas.Left="40" Canvas.Top="40" ZIndex="2" Fill="Green" />
+      <Rectangle Canvas.Left="60" Canvas.Top="60" ZIndex="3" Fill="Yellow" />
+    </Canvas>
+    <StackPanel Orientation="Horizontal">
+      <StackPanel>
+        <TextBlock Margin="0,0,0,10" Text="Canvas.Top" />
+        <Slider x:Name="TopSlider" Height="110" VerticalAlignment="Top" AutomationProperties.Name="Canvas.Top"
+                IsDirectionReversed="True" Maximum="100" Minimum="0" Orientation="Vertical"
+                IsSnapToTickEnabled="True" TickFrequency="1" />
+      </StackPanel>
+      <StackPanel Margin="16,0,0,0">
+        <TextBlock Text="Canvas.Left" />
+        <Slider x:Name="LeftSlider" Width="100" AutomationProperties.Name="Canvas.Left"
+                Maximum="100" Minimum="0" IsSnapToTickEnabled="True" TickFrequency="1" />
+        <TextBlock Text="Canvas.ZIndex" />
+        <Slider x:Name="ZSlider" Width="100" Maximum="4" Minimum="0" IsSnapToTickEnabled="True" TickFrequency="1" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

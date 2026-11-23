@@ -31,7 +31,8 @@
 //!   pushed last.
 //! * No draw call allocates: brushes and pens are passed as borrowed `Rc`
 //!   handles (the platform core derefs them, the recording core clones the
-//!   handle), and the state stack is taken from a per-thread pool.
+//!   handle), and the state stack is stored in the context itself (it
+//!   reaches for the heap only past sixteen nested states).
 
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::text_formatting::ITextDrawingSink;
@@ -46,7 +47,7 @@ use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::utilities::MathUtilities;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
-use std::cell::RefCell;
+use smallvec::SmallVec;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -194,16 +195,25 @@ enum CoreRef<'a> {
     Owned(Box<dyn IDrawingContextCore + 'a>),
 }
 
-crate::ferro_thread_local! {
-    static STATE_STACK_POOL: RefCell<Vec<Vec<PushedStateType>>> = const { RefCell::new(Vec::new()) };
-}
+/// How many pushed states a context keeps in itself. A visual pushes a few
+/// states at a time (a transform, a clip, an opacity), so the stack of a
+/// context practically never leaves the context.
+const INLINE_STATES: usize = 16;
 
-const STATE_STACK_POOL_LIMIT: usize = 16;
+/// The pushed states of a context, the innermost last. The first
+/// [`INLINE_STATES`] are stored in the context (not from upstream, which
+/// rents a stack from a pool): a push then writes memory that only the
+/// drawing thread touches and that is already in its cache, where a stack
+/// on the heap is a block of a few bytes that shares its cache line with
+/// whatever the allocator placed beside it (desktop-performance.md, 9.30).
+type StateStack = SmallVec<[PushedStateType; INLINE_STATES]>;
 
 /// The surface a visual draws itself onto during rendering.
 pub struct DrawingContext<'a> {
     core: CoreRef<'a>,
-    states: Option<Vec<PushedStateType>>,
+    /// `None` until the first push and again after the disposal, as the
+    /// stack of upstream is null then.
+    states: Option<StateStack>,
     disposed: bool,
 }
 
@@ -243,12 +253,6 @@ impl<'a> DrawingContext<'a> {
             while let Some(state) = states.pop() {
                 self.restore(state);
             }
-            STATE_STACK_POOL.with(|pool| {
-                let mut pool = pool.borrow_mut();
-                if pool.len() < STATE_STACK_POOL_LIMIT {
-                    pool.push(states);
-                }
-            });
         }
         if let CoreRef::Owned(core) = &mut self.core {
             core.dispose_core();
@@ -413,9 +417,7 @@ impl<'a> DrawingContext<'a> {
     // --- pushed states ----------------------------------------------------
 
     fn pushed(&mut self, state: PushedStateType) -> PushedState {
-        let states = self
-            .states
-            .get_or_insert_with(|| STATE_STACK_POOL.with(|pool| pool.borrow_mut().pop()).unwrap_or_default());
+        let states = self.states.get_or_insert_with(StateStack::new);
         states.push(state);
         PushedState { level: states.len() }
     }

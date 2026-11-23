@@ -155,8 +155,8 @@ impl TouchButton {
             repeat_interval: Cell::new(Duration::from_millis(50)),
             long_press_delay: Cell::new(Duration::from_millis(450)),
             value: RefCell::new(None),
-            click: HandlerList::with_ordered_ids(),
-            long_press: HandlerList::with_ordered_ids(),
+            click: HandlerList::new(),
+            long_press: HandlerList::new(),
         }
     }
     pub fn new() -> Ref<Self> {

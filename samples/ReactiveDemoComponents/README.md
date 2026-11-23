@@ -6,6 +6,11 @@ models and bindings. `samples/ReactiveDemo` is the port of the reference with Re
 sample shows the same application with components that run again and the API of phase 6
 (`docs/declarative-ui.md`, section 14). It runs in the WinUI 3 theme.
 
+The theme is constructed from the units the sample uses: the build script names the theme
+(`build.rs`, `ferroui_build::Build::theme`), the build finds the controls the sources make, and
+`shots.rs` constructs the theme with the table it wrote
+([docs/xaml-themes.md](../../docs/xaml-themes.md), section 3, "An application without markup").
+
 ## What it shows
 
 - **Asynchronous data** (`use_future`). The search is a future of the trimmed search text: it

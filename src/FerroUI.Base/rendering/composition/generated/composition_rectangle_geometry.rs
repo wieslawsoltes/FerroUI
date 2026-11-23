@@ -141,6 +141,10 @@ impl CompositionRectangleGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_rectangle_geometry.get().contains(CompositionRectangleGeometryChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_rectangle_geometry.set(self.changed_fields_of_composition_rectangle_geometry.get() & !CompositionRectangleGeometryChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -182,6 +186,10 @@ impl CompositionRectangleGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Size", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_rectangle_geometry.get().contains(CompositionRectangleGeometryChangedFields::SIZE_ANIMATED) {
+                    self.changed_fields_of_composition_rectangle_geometry.set(self.changed_fields_of_composition_rectangle_geometry.get() & !CompositionRectangleGeometryChangedFields::SIZE);
+                }
             }
         }
         self.size.set(value);
@@ -223,15 +231,17 @@ impl CompositionRectangleGeometryProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_rectangle_geometry.get();
         writer.write(changed);
+        if changed.contains(CompositionRectangleGeometryChangedFields::OFFSET) {
+            writer.write(self.offset.get());
+        }
         if changed.contains(CompositionRectangleGeometryChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRectangleGeometryProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionRectangleGeometryChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionRectangleGeometryChangedFields::SIZE) {
+            writer.write(self.size.get());
         }
         if changed.contains(CompositionRectangleGeometryChangedFields::SIZE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionRectangleGeometryProps::id_of_size_property().base()));
-        } else if changed.contains(CompositionRectangleGeometryChangedFields::SIZE) {
-            writer.write(self.size.get());
         }
         self.changed_fields_of_composition_rectangle_geometry.set(CompositionRectangleGeometryChangedFields::empty());
     }
@@ -343,6 +353,10 @@ impl ServerCompositionRectangleGeometryProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerCompositionRectangleGeometryHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionRectangleGeometryChangedFields>();
+        if changed.contains(CompositionRectangleGeometryChangedFields::OFFSET) {
+            let value = reader.read::<Vector>();
+            self.set_offset(host, value);
+        }
         if changed.contains(CompositionRectangleGeometryChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Offset` without an animation instance");
@@ -353,9 +367,10 @@ impl ServerCompositionRectangleGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRectangleGeometryChangedFields::OFFSET) {
+        }
+        if changed.contains(CompositionRectangleGeometryChangedFields::SIZE) {
             let value = reader.read::<Vector>();
-            self.set_offset(host, value);
+            self.set_size(host, value);
         }
         if changed.contains(CompositionRectangleGeometryChangedFields::SIZE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -367,9 +382,6 @@ impl ServerCompositionRectangleGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionRectangleGeometryChangedFields::SIZE) {
-            let value = reader.read::<Vector>();
-            self.set_size(host, value);
         }
         ServerCompositionRectangleGeometryHooks::on_fields_deserialized(host, changed);
     }

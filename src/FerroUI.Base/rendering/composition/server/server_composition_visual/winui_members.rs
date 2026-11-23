@@ -261,7 +261,7 @@ impl ServerCompositionVisual {
             }
             None => own,
         };
-        self.own_transform.set(transform);
+        self.set_own_transform(transform);
     }
 
     fn parent_for_transform_subscription(&self) -> ActSubscriber {

@@ -1,6 +1,8 @@
 use super::{FramePriority, FrameType, IValueEntry};
 use crate::data::BindingPriority;
+use crate::utilities::OptionCell;
 use crate::{FerroObject, FerroProperty, Ref, WeakRef};
+use smallvec::SmallVec;
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -8,7 +10,7 @@ use std::rc::Rc;
 /// State shared by all value frame kinds.
 pub(crate) struct ValueFrameBase {
     entries: RefCell<Vec<Rc<dyn IValueEntry>>>,
-    owner: RefCell<Option<WeakRef<FerroObject>>>,
+    owner: OptionCell<WeakRef<FerroObject>>,
     is_shared: Cell<bool>,
     priority: BindingPriority,
     frame_priority: FramePriority,
@@ -18,7 +20,7 @@ impl ValueFrameBase {
     pub fn new(priority: BindingPriority, type_: FrameType) -> Self {
         Self {
             entries: RefCell::new(Vec::new()),
-            owner: RefCell::new(None),
+            owner: OptionCell::new(),
             is_shared: Cell::new(false),
             priority,
             frame_priority: FramePriority::new(priority, type_),
@@ -41,7 +43,7 @@ impl ValueFrameBase {
     /// single owner.
     pub fn make_shared(&self) {
         self.is_shared.set(true);
-        *self.owner.borrow_mut() = None;
+        self.owner.set(None);
     }
 
     #[inline]
@@ -62,18 +64,17 @@ impl ValueFrameBase {
     /// The object whose value store owns the frame.
     pub fn owner(&self) -> Option<Ref<FerroObject>> {
         assert!(!self.is_shared.get(), "Cannot get owner for shared ValueFrame");
-        self.owner.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.owner.upgrade()
     }
 
     pub fn set_owner(&self, owner: Option<WeakRef<FerroObject>>) {
         if self.is_shared.get() {
             return;
         }
-        let mut current = self.owner.borrow_mut();
-        if current.is_some() && owner.is_some() {
+        if owner.is_some() && self.owner.is_some() {
             panic!("ValueFrame already has an owner.");
         }
-        *current = owner;
+        self.owner.set(owner);
     }
 
     pub fn contains(&self, property: &FerroProperty) -> bool {
@@ -101,8 +102,16 @@ impl ValueFrameBase {
         }
     }
 
+    /// Makes room for `additional` entries, and no more: the frame of a style
+    /// gets one for each of its setters, once.
+    pub fn reserve(&self, additional: usize) {
+        self.entries.borrow_mut().reserve_exact(additional);
+    }
+
     pub fn unsubscribe_all(&self) {
-        let entries: Vec<_> = self.entries.borrow().clone();
+        // The entries as they are now, out of the list while they unsubscribe; the frames of a control hold a
+        // few entries each, which need no allocation.
+        let entries: SmallVec<[Rc<dyn IValueEntry>; 16]> = self.entries.borrow().iter().cloned().collect();
         for entry in entries {
             entry.unsubscribe();
         }

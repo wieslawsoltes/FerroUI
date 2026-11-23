@@ -15,8 +15,9 @@ use crate::layout::LayoutableImpl;
 use crate::visual_tree::IHostedVisualTreeRoot;
 use crate::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, DirectProperty,
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElementImpl,
-    StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, PropertyChangeHandler, Ref,
+    StyledElementImpl, StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt,
+    VisualTreeAttachmentEventArgs,
 };
 use crate::collections::FerroList;
 use std::cell::{Cell, OnceCell, RefCell};
@@ -40,7 +41,8 @@ pub struct InputElement {
     gesture_recognizers: OnceCell<GestureRecognizerCollection>,
     /// The interactive effect the element routes its pointer input to, with
     /// the guards of its handlers (#455, E7; `input_element_effects.rs`).
-    pub(super) effect_input: RefCell<Option<super::input_element_effects::EffectInputAttachment>>,
+    // In a box: few elements have an interactive effect.
+    pub(super) effect_input: RefCell<Option<Box<super::input_element_effects::EffectInputAttachment>>>,
 }
 
 ferro_class! {
@@ -155,6 +157,11 @@ crate::ferro_class_info!(InputElement { new: InputElement::new });
 ferro_impl_classes!(InputElement: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
 crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
+    // The handler leaves where the property is not one it named (`reacts_to`).
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        property.has_change_handler(PropertyChangeHandler::InputElement).into()
+    });
+
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(Some(this.is_focused()), Some(this.is_pointer_over()));
@@ -163,15 +170,18 @@ crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        let property = change.property();
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::InputElement;
+        if !change.reaches(HANDLER) {
+            return;
+        }
 
-        if property == Self::is_focused_property().as_property() {
+        if change.is_for(HANDLER, Self::is_focused_property().as_property()) {
             this.update_pseudo_classes(Some(change.get_new_value::<bool>()), None);
-        } else if property == Self::is_pointer_over_property().as_property() {
+        } else if change.is_for(HANDLER, Self::is_pointer_over_property().as_property()) {
             this.update_pseudo_classes(None, Some(change.get_new_value::<bool>()));
-        } else if property == Self::is_keyboard_focus_within_property().as_property() {
-            this.pseudo_classes().set(":focus-within", change.get_new_value::<bool>());
-        } else if property == Visual::is_visible_property().as_property()
+        } else if change.is_for(HANDLER, Self::is_keyboard_focus_within_property().as_property()) {
+            this.set_pseudo_class(":focus-within", change.get_new_value::<bool>());
+        } else if change.is_for(HANDLER, Visual::is_visible_property().as_property())
             && !change.get_new_value::<bool>()
             && this.is_keyboard_focus_within()
         {
@@ -190,6 +200,12 @@ crate::ferro_overrides! { impl FerroObjectImpl for InputElement {
 } }
 
 impl VisualImpl for InputElement {
+    /// `render` is the one of the base class, and so is what a new size does to it: a class
+    /// that draws nothing is not drawn again when it is resized (section 9.89).
+    fn resize_changes_drawing(this: &Self, old: crate::Size, new: crate::Size) -> bool {
+        Self::parent_resize_changes_drawing(this, old, new)
+    }
+
     fn on_detached_from_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_detached_from_visual_tree_core(this, e);
 
@@ -583,6 +599,13 @@ impl InputElement {
     /// that route the input events to the `on_*` virtual members and the
     /// gesture synthesis.
     fn static_constructor() {
+        PropertyChangeHandler::InputElement.reacts_to(&[
+            Self::is_focused_property().as_property(),
+            Self::is_pointer_over_property().as_property(),
+            Self::is_keyboard_focus_within_property().as_property(),
+            Visual::is_visible_property().as_property(),
+        ]);
+
         // Register the routed events that no class handler below refers
         // to, so that the registry lists every event of the class once the
         // class is initialised.
@@ -878,7 +901,7 @@ impl InputElement {
 
     fn set_is_effectively_enabled(&self, value: bool) {
         self.set_and_raise_cell(Self::is_effectively_enabled_property(), &self.is_effectively_enabled, value);
-        self.pseudo_classes().set(":disabled", !value);
+        self.set_pseudo_class(":disabled", !value);
 
         if !self.is_effectively_enabled() {
             if let Some(focus_manager) = FocusManager::get_focus_manager(self) {
@@ -1109,9 +1132,16 @@ impl InputElement {
     /// Updates the `is_effectively_enabled` property based on the parent's
     /// `is_effectively_enabled`.
     fn update_is_effectively_enabled_from(&self, parent: Option<&InputElement>) {
-        self.set_is_effectively_enabled(
-            self.is_enabled_core() && parent.is_none_or(InputElement::is_effectively_enabled),
-        );
+        let value = self.is_enabled_core() && parent.is_none_or(InputElement::is_effectively_enabled);
+        // An addition (FerroUI deviation, desktop-performance.md section 9.21): upstream updates
+        // the entire hierarchy below every element whose parent or enabled state changes. The
+        // value of every child is derived from its parent's, and every change of it is passed
+        // down when it happens: when this element's value is unchanged, so are the values below
+        // it. A tree built from the leaves up visited each element once for every ancestor.
+        if value == self.is_effectively_enabled() {
+            return;
+        }
+        self.set_is_effectively_enabled(value);
 
         // PERF-SENSITIVE: this is called on the entire hierarchy.
         if let Some(children) = self.visual_children_snapshot() {
@@ -1125,12 +1155,12 @@ impl InputElement {
 
     fn update_pseudo_classes(&self, is_focused: Option<bool>, is_pointer_over: Option<bool>) {
         if let Some(is_focused) = is_focused {
-            self.pseudo_classes().set(":focus", is_focused);
-            self.pseudo_classes().set(":focus-visible", self.is_focus_visible.get());
+            self.set_pseudo_class(":focus", is_focused);
+            self.set_pseudo_class(":focus-visible", self.is_focus_visible.get());
         }
 
         if let Some(is_pointer_over) = is_pointer_over {
-            self.pseudo_classes().set(":pointerover", is_pointer_over);
+            self.set_pseudo_class(":pointerover", is_pointer_over);
         }
     }
 }

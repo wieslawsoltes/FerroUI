@@ -17,6 +17,8 @@ use std::rc::{Rc, Weak};
 #[derive(Clone)]
 pub struct BehaviorCollection(Rc<BehaviorCollectionState>);
 
+ferroui_base::styled_value!(BehaviorCollection);
+
 struct BehaviorCollectionState {
     list: FerroList<Ref<FerroObject>>,
     // Deviation (DEVIATIONS.md, Behaviors): the reference holds its host strongly; the host

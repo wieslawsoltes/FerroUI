@@ -13,7 +13,7 @@ use ferroui_media::{frames::*, *};
 pub use ferroui_media_opengl::NativeGlTextureImporter;
 use ferroui_media_opengl::{NativeGlFrameProducer, ReadyGlFrame};
 use ferroui_opengl::IGlContextExternalObjectsFeature;
-pub use native::{NativeFrame, NativeSession, NativeState};
+pub use native::{EncodedRecording, NativeFrame, NativeRecording, NativeSession, NativeState};
 use std::{cell::RefCell, rc::Rc, task::Poll, time::Duration};
 
 fn unsupported(message: impl Into<String>) -> MediaError {
