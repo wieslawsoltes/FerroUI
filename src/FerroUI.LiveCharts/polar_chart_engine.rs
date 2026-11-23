@@ -482,6 +482,7 @@ impl PolarChartEngine {
                     center: p,
                     value: c.primary_value,
                     label,
+                    label_parts: crate::scene::TooltipLabelParts::of(&s.name, &angular_label),
                 });
                 if s.data_labels {
                     let text = format_number(c.primary_value);

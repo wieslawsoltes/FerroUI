@@ -659,6 +659,7 @@ impl GeoMapChartEngine {
                     center,
                     value: geo_land.value(),
                     label: tooltip_label_with(&geo_land, tooltip_formatter),
+                    label_parts: Default::default(),
                 });
                 lands.push(geo_land);
             }

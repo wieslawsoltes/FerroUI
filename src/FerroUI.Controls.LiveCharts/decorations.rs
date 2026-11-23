@@ -3,7 +3,8 @@ use ferroui_base::media::{Color, FlowDirection, FormattedText, Typeface};
 use ferroui_base::utilities::Locale;
 use ferroui_base::{Point, Rect, Size};
 use ferroui_livecharts::{
-    Geometry, HeatLegend, HeatLegendSource, PaintStyle, Primitive, Scene, TextAnchor,
+    DefaultTooltip, Geometry, HeatLegend, HeatLegendSource, LegendItem, PaintStyle, PopUpPlacement,
+    Primitive, Scene, TextAnchor,
 };
 
 /// The room of the title above the plot.
@@ -191,66 +192,41 @@ pub(crate) fn decorate(
     }
 }
 
-/// The lines of the tooltip of the found points and its size in a control of `size`: a line for
-/// each point (a label of several lines, the land and its series values of a map, takes a line
-/// each), 12 px text padded by 12 and 8.
-pub(crate) fn tooltip_layout(size: Size, args: &ChartPointerEventArgs) -> (Vec<String>, Size) {
-    let lines: Vec<_> = args
-        .points
-        .iter()
-        .flat_map(|point| {
-            if point.label.is_empty() {
-                vec![ferroui_livecharts::axis::format_number(point.value)]
-            } else {
-                point.label.lines().map(str::to_owned).collect()
-            }
-        })
-        .collect();
-    let width = (lines
-        .iter()
-        .map(|s| text_size(s, 12.0).width)
-        .fold(0.0_f64, f64::max)
-        + 24.0)
-        .min(size.width.max(0.0));
-    let height = (lines.len() as f64 * 20.0 + 16.0).min(size.height.max(0.0));
-    (lines, Size::new(width, height))
+/// The default tooltip of the found points. The kinds whose rows are series have a miniature of
+/// the colour of the series; a node or a land has its own colours and writes its label alone.
+pub(crate) fn tooltip_layout(
+    args: &ChartPointerEventArgs,
+    legend: &[LegendItem],
+    kind: ChartKind,
+) -> DefaultTooltip {
+    let miniatures = matches!(
+        kind,
+        ChartKind::Cartesian | ChartKind::Pie | ChartKind::Polar
+    );
+    DefaultTooltip::new(&args.points, legend, miniatures, &mut text_size)
 }
 
-/// The tooltip of `lines` of `tooltip` size with its top left corner at `origin`.
+/// The scene of the tooltip at `origin`, with its wedge at `placement`.
 pub(crate) fn tooltip_scene(
     size: Size,
-    lines: &[String],
-    tooltip: Size,
+    tooltip: &DefaultTooltip,
     origin: Point,
+    placement: PopUpPlacement,
     color: Color,
 ) -> Scene {
     let mut scene = Scene::new(size, Rect::from_size(size));
-    let (width, height) = (tooltip.width, tooltip.height);
-    let rect = Rect::new(origin.x, origin.y, width, height);
-    scene.primitives.push(Primitive::new(
-        Geometry::Rectangle { rect, radius: 6.0 },
+    scene.primitives = tooltip.primitives(
+        origin,
+        placement,
+        size,
         PaintStyle {
             fill: Some(Color::from_argb(248, 255, 255, 255)),
             stroke: Some(Color::from_rgb(203, 213, 225)),
             stroke_width: 1.0,
             ..PaintStyle::default()
         },
-    ));
-    for (i, line) in lines.iter().enumerate() {
-        let y = origin.y + 8.0 + i as f64 * 20.0;
-        if y + 16.0 > origin.y + height {
-            break;
-        }
-        scene.primitives.push(
-            text(
-                Point::new(origin.x + 12.0, y),
-                fit_text(line, (width - 24.0).max(0.0), 12.0),
-                12.0,
-                color,
-            )
-            .clipped(rect),
-        );
-    }
+        color,
+    );
     scene
 }
 

@@ -383,6 +383,7 @@ impl TreemapChartEngine {
                         tile.value,
                         tile.node_index,
                     ),
+                    label_parts: Default::default(),
                 });
                 if !paint.data_labels || tile.name.is_empty() {
                     continue;

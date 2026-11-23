@@ -303,13 +303,17 @@ impl VisualImpl for Chart {
         let hovered = this.hover.borrow().clone();
         if let Some(hovered) = hovered {
             if this.tooltip_position() != TooltipPosition::Hidden && !hovered.points.is_empty() {
-                let (lines, tooltip) = crate::decorations::tooltip_layout(size, &hovered);
-                let origin = this.tooltip_origin(&hovered, tooltip, size);
+                let layout = crate::decorations::tooltip_layout(
+                    &hovered,
+                    &presentation.legend,
+                    this.chart_kind(),
+                );
+                let (origin, placement) = this.default_tooltip_location(&hovered, &layout, size);
                 let tooltip = crate::decorations::tooltip_scene(
                     size,
-                    &lines,
-                    tooltip,
+                    &layout,
                     origin,
+                    placement,
                     this.text_color(),
                 );
                 NativeScene::compile(&tooltip).render(context);
@@ -1112,10 +1116,34 @@ impl Chart {
         Ok(scene)
     }
 
-    /// The top left corner of the tooltip of the found points (`GetTooltipLocation` over their
-    /// hover areas, `SKDefaultGeoTooltip` about the centre of a land), kept inside the control.
-    fn tooltip_origin(&self, hovered: &ChartPointerEventArgs, tooltip: Size, size: Size) -> Point {
-        use ferroui_livecharts::tooltips::{geo_tooltip_location, tooltip_location};
+    /// Where the default tooltip goes and the side its wedge is at (`SKDefaultTooltip.Show`). The
+    /// wedge changes the size of the tooltip, so a placement other than the first is measured
+    /// and located again, and keeps its wedge.
+    fn default_tooltip_location(
+        &self,
+        hovered: &ChartPointerEventArgs,
+        layout: &ferroui_livecharts::DefaultTooltip,
+        size: Size,
+    ) -> (Point, ferroui_livecharts::PopUpPlacement) {
+        let first = ferroui_livecharts::PopUpPlacement::Top;
+        let location = self.tooltip_location(hovered, layout.size(first, size), size);
+        if location.placement == first {
+            return (location.origin, first);
+        }
+        let placement = location.placement;
+        let tooltip = layout.size(placement, size);
+        (self.tooltip_location(hovered, tooltip, size).origin, placement)
+    }
+
+    /// The location of the tooltip of the found points (`GetTooltipLocation` over their hover
+    /// areas, `SKDefaultGeoTooltip` about the centre of a land), kept inside the control.
+    fn tooltip_location(
+        &self,
+        hovered: &ChartPointerEventArgs,
+        tooltip: Size,
+        size: Size,
+    ) -> ferroui_livecharts::TooltipLocation {
+        use ferroui_livecharts::tooltips::geo_tooltip_location;
         let position = match self.tooltip_position() {
             TooltipPosition::Hidden => ferroui_livecharts::tooltips::TooltipPosition::Hidden,
             TooltipPosition::Auto => ferroui_livecharts::tooltips::TooltipPosition::Auto,
@@ -1128,7 +1156,7 @@ impl Chart {
         let kind = self.chart_kind();
         if kind == ChartKind::GeoMap {
             let center = hovered.points.first().map_or(hovered.position, |land| land.center);
-            return geo_tooltip_location(center, tooltip, size, position).origin;
+            return geo_tooltip_location(center, tooltip, size, position);
         }
         let measurement = self.measurement.borrow();
         let series = measurement.as_ref().map_or(&[][..], |m| &m.tooltip_series[..]);
@@ -1144,7 +1172,7 @@ impl Chart {
                 _ => TooltipHoverArea::of_region(hit),
             })
             .collect();
-        tooltip_location(&areas, tooltip, size, position).origin
+        ferroui_livecharts::tooltips::tooltip_location(&areas, tooltip, size, position)
     }
     pub fn find_points(&self, position: Point) -> Vec<HitRegion> {
         let size = self.bounds().size();

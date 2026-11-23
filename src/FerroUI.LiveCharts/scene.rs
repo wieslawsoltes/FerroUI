@@ -188,7 +188,49 @@ pub struct HitRegion {
     pub center: Point,
     pub value: f64,
     pub label: String,
+    /// Where the series name and the header end in `label`, for the table of the tooltip.
+    pub label_parts: TooltipLabelParts,
 }
+
+/// The lengths of the series name and the header at the start of a label written as the non-empty
+/// parts joined by `: `. The default has neither, so the whole label is the value. Lengths keep
+/// the parts of every point without a text of their own.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct TooltipLabelParts {
+    name: u32,
+    header: u32,
+}
+
+impl TooltipLabelParts {
+    /// The parts of a label that starts with `name` and `header`.
+    pub fn of(name: &str, header: &str) -> Self {
+        Self {
+            name: name.len() as u32,
+            header: header.len() as u32,
+        }
+    }
+
+    /// The name, the header and the value of `label`. A label these lengths do not fit is its
+    /// value alone.
+    pub fn split(self, label: &str) -> (&str, &str, &str) {
+        fn after_separator<'a>(part: &str, rest: &'a str) -> &'a str {
+            if part.is_empty() {
+                rest
+            } else {
+                rest.strip_prefix(": ").unwrap_or(rest)
+            }
+        }
+        let Some((name, rest)) = label.split_at_checked(self.name as usize) else {
+            return ("", "", label);
+        };
+        let rest = after_separator(name, rest);
+        let Some((header, rest)) = rest.split_at_checked(self.header as usize) else {
+            return ("", "", label);
+        };
+        (name, header, after_separator(header, rest))
+    }
+}
+
 impl HitRegion {
     pub fn contains(&self, point: Point) -> bool {
         self.shape.contains(point)
@@ -565,6 +607,7 @@ mod tests {
             center: Point::new(0.0, 0.0),
             value: 1.0,
             label: String::new(),
+            label_parts: Default::default(),
         };
         assert!(hit.contains(Point::new(5.0, 0.0)));
         assert!(!hit.contains(Point::new(0.0, 0.0)));
@@ -587,6 +630,7 @@ mod tests {
             shape,
             value: 0.0,
             label: String::new(),
+            label_parts: Default::default(),
         });
         scene
     }

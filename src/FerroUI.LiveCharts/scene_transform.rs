@@ -118,6 +118,7 @@ mod tests {
             center: Point::new(20.0, 20.0),
             value: 1.0,
             label: "land".into(),
+            label_parts: Default::default(),
         });
         scene.primitives.push(
             Primitive::new(

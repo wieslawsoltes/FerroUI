@@ -295,6 +295,7 @@ impl SceneTransition {
                     center: interpolate_point(old.center, target.center, geometry_progress),
                     value: target.value,
                     label: target.label.clone(),
+                    label_parts: target.label_parts,
                 }
             } else {
                 target.clone()
@@ -735,6 +736,7 @@ mod tests {
             center: Point::new(x + 10.0, 30.0),
             value: 1.0,
             label: "A".into(),
+            label_parts: Default::default(),
         });
         s
     }
@@ -1165,6 +1167,7 @@ mod tests {
             center: at(80.0, 45.0),
             value: 1.0,
             label: String::new(),
+            label_parts: Default::default(),
         };
         let empty = node_scene(Vec::new(), Vec::new());
         let full = node_scene(vec![arc, chord], vec![hit]);

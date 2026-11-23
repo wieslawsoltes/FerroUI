@@ -784,13 +784,14 @@ fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
         position: pointer,
         points: found.into_iter().cloned().collect(),
     };
-    let (_, tooltip) = crate::decorations::tooltip_layout(size, &hovered);
+    let tooltip = crate::decorations::tooltip_layout(&hovered, &scene.legend, ChartKind::Cartesian)
+        .size(ferroui_livecharts::PopUpPlacement::Top, size);
     chart.set_tooltip_position(TooltipPosition::Top);
-    let top = chart.tooltip_origin(&hovered, tooltip, size);
+    let top = chart.tooltip_location(&hovered, tooltip, size).origin;
     assert!((top.x + tooltip.width * 0.5 - (bar.x + bar.width * 0.5)).abs() < 1e-6);
     assert!((top.y + tooltip.height - bar.y).abs() < 1e-6);
     chart.set_tooltip_position(TooltipPosition::Bottom);
-    let bottom = chart.tooltip_origin(&hovered, tooltip, size);
+    let bottom = chart.tooltip_location(&hovered, tooltip, size).origin;
     assert!((bottom.y - bar.y).abs() < 1e-6, "the source anchors at the end of the bar");
     // A map anchors at the centre of the land.
     let map = Chart::new();
@@ -804,7 +805,7 @@ fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
         position: Point::new(10.0, 10.0),
         points: vec![land],
     };
-    let at = map.tooltip_origin(&hovered, tooltip, size);
+    let at = map.tooltip_location(&hovered, tooltip, size).origin;
     assert!((at.x - (150.0 - tooltip.width * 0.5)).abs() < 1e-6);
     assert!((at.y - (200.0 - tooltip.height)).abs() < 1e-6);
 }
