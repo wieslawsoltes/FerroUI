@@ -85,7 +85,7 @@ fn status_of(code: isize) -> CoreWebView2WebErrorStatus {
     }
 }
 
-struct DelegateState {
+struct ObserverState {
     events: Rc<dyn IWebViewEngineEvents>,
     next_navigation: Cell<u64>,
     navigation: Cell<u64>,
@@ -93,7 +93,7 @@ struct DelegateState {
     is_provisional: Cell<bool>,
 }
 
-impl DelegateState {
+impl ObserverState {
     fn finish(&self, is_success: bool, status: CoreWebView2WebErrorStatus) {
         self.is_provisional.set(false);
         self.events
@@ -116,10 +116,10 @@ define_class!(
     #[unsafe(super(NSObject))]
     #[thread_kind = MainThreadOnly]
     #[name = "FerroUIWebViewDelegate"]
-    #[ivars = DelegateState]
-    struct Delegate;
+    #[ivars = ObserverState]
+    struct EngineObserver;
 
-    impl Delegate {
+    impl EngineObserver {
         #[unsafe(method(webView:decidePolicyForNavigationAction:decisionHandler:))]
         fn decide_policy(&self, _web_view: *mut AnyObject, action: *mut AnyObject, handler: &DynBlock<dyn Fn(isize)>) {
             // SAFETY: WebKit passes a live WKNavigationAction.
@@ -181,15 +181,15 @@ define_class!(
             _change: *mut AnyObject,
             _context: *mut c_void,
         ) {
-            // SAFETY: the delegate observes the keys of its WKWebView only.
+            // SAFETY: the observer observes the keys of its WKWebView only.
             unsafe { self.observed(key_path, object) };
         }
     }
 );
 
-impl Delegate {
+impl EngineObserver {
     fn new(mtm: MainThreadMarker, events: Rc<dyn IWebViewEngineEvents>) -> Retained<Self> {
-        let this = Self::alloc(mtm).set_ivars(DelegateState {
+        let this = Self::alloc(mtm).set_ivars(ObserverState {
             events,
             next_navigation: Cell::new(1),
             navigation: Cell::new(0),
@@ -291,7 +291,7 @@ impl INativeControlHostDestroyableControlHandle for ViewHandle {
 struct AppleEngine {
     web_view: Retained<AnyObject>,
     controller: Retained<AnyObject>,
-    delegate: Retained<Delegate>,
+    observer: Retained<EngineObserver>,
     is_closed: Rc<Cell<bool>>,
 }
 
@@ -344,18 +344,18 @@ impl IWebViewEngine for AppleEngine {
         if self.is_closed.replace(true) {
             return;
         }
-        // SAFETY: each observer and handler was added once, in `create`; the delegate outlives
+        // SAFETY: each observer and handler was added once, in `create`; the observer outlives
         // these calls.
         unsafe {
             for key in OBSERVED_KEYS {
                 let key = ns_string(key);
                 let _: () =
-                    msg_send![&*self.web_view, removeObserver: &*self.delegate, forKeyPath: &*key];
+                    msg_send![&*self.web_view, removeObserver: &*self.observer, forKeyPath: &*key];
             }
             let name = ns_string(MESSAGE_HANDLER);
             let _: () = msg_send![&*self.controller, removeScriptMessageHandlerForName: &*name];
-            let no_delegate: Option<&AnyObject> = None;
-            let _: () = msg_send![&*self.web_view, setNavigationDelegate: no_delegate];
+            let no_observer: Option<&AnyObject> = None;
+            let _: () = msg_send![&*self.web_view, setNavigationDelegate: no_observer];
             let _: () = msg_send![&*self.web_view, stopLoading];
             let _: () = msg_send![&*self.web_view, removeFromSuperview];
         }
@@ -370,7 +370,7 @@ impl IWebViewEngine for AppleEngine {
             };
             let url: Option<Retained<AnyObject>> = msg_send![url_class, URLWithString: &*text];
             let Some(url) = url else {
-                self.delegate.ivars().events.navigation_completed(
+                self.observer.ivars().events.navigation_completed(
                     0,
                     false,
                     CoreWebView2WebErrorStatus::Unknown,
@@ -381,7 +381,7 @@ impl IWebViewEngine for AppleEngine {
                 return;
             };
             let request: Retained<AnyObject> = msg_send![request_class, requestWithURL: &*url];
-            self.delegate.ivars().is_provisional.set(false);
+            self.observer.ivars().is_provisional.set(false);
             let _: Option<Retained<AnyObject>> = msg_send![&*self.web_view, loadRequest: &*request];
         }
     }
@@ -389,7 +389,7 @@ impl IWebViewEngine for AppleEngine {
     fn navigate_to_string(&self, html: &str) {
         let text = ns_string(html);
         let base: Option<&AnyObject> = None;
-        self.delegate.ivars().is_provisional.set(false);
+        self.observer.ivars().is_provisional.set(false);
         // SAFETY: the base address of this method is nullable.
         unsafe {
             let _: Option<Retained<AnyObject>> =
@@ -398,7 +398,7 @@ impl IWebViewEngine for AppleEngine {
     }
 
     fn reload(&self) {
-        self.delegate.ivars().is_provisional.set(false);
+        self.observer.ivars().is_provisional.set(false);
         // SAFETY: a message without arguments to a live web view.
         unsafe {
             let _: Option<Retained<AnyObject>> = msg_send![&*self.web_view, reload];
@@ -413,7 +413,7 @@ impl IWebViewEngine for AppleEngine {
     }
 
     fn go_back(&self) {
-        self.delegate.ivars().is_provisional.set(false);
+        self.observer.ivars().is_provisional.set(false);
         // SAFETY: a message without arguments to a live web view.
         unsafe {
             let _: Option<Retained<AnyObject>> = msg_send![&*self.web_view, goBack];
@@ -421,7 +421,7 @@ impl IWebViewEngine for AppleEngine {
     }
 
     fn go_forward(&self) {
-        self.delegate.ivars().is_provisional.set(false);
+        self.observer.ivars().is_provisional.set(false);
         // SAFETY: a message without arguments to a live web view.
         unsafe {
             let _: Option<Retained<AnyObject>> = msg_send![&*self.web_view, goForward];
@@ -464,7 +464,7 @@ impl IWebViewEngineFactory for AppleEngineFactory {
         let web_view_class = class(c"WKWebView")?;
         let script_class = class(c"WKUserScript")?;
 
-        let delegate = Delegate::new(mtm, events.clone());
+        let observer = EngineObserver::new(mtm, events.clone());
         let is_closed = Rc::new(Cell::new(false));
         // SAFETY: the classes come from WebKit and every message matches its declaration there.
         let (web_view, controller) = unsafe {
@@ -483,7 +483,7 @@ impl IWebViewEngineFactory for AppleEngineFactory {
             ];
             let _: () = msg_send![&*controller, addUserScript: &*script];
             let name = ns_string(MESSAGE_HANDLER);
-            let handler: &AnyObject = delegate.as_ref();
+            let handler: &AnyObject = observer.as_ref();
             let _: () = msg_send![&*controller, addScriptMessageHandler: handler, name: &*name];
             let _: () = msg_send![&*web_view, setNavigationDelegate: handler];
             for key in OBSERVED_KEYS {
@@ -502,7 +502,7 @@ impl IWebViewEngineFactory for AppleEngineFactory {
         let engine = Rc::new(AppleEngine {
             web_view,
             controller,
-            delegate,
+            observer,
             is_closed: is_closed.clone(),
         });
         Dispatcher::ui_thread().post_local(
