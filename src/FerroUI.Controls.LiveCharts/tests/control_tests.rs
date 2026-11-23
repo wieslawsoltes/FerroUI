@@ -1140,6 +1140,42 @@ fn scatter_and_column_series_draw_their_geometry_svg_from_markup() {
     assert_eq!(paths(&chart, 1), 1);
 }
 
+/// `GeometrySvg` of a polar line series from markup: each marker is drawn as the path, and a
+/// change is one the chart observes.
+#[test]
+fn polar_line_series_draw_their_geometry_svg_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:PolarChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:PolarLineSeries GeometrySvg="M0,0 L10,0 L5,10 Z">
+            <lc:ChartPoint X="0" Y="1" />
+            <lc:ChartPoint X="1" Y="2" />
+          </lc:PolarLineSeries>
+        </lc:PolarChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<PolarChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let size = Size::new(400.0, 400.0);
+    let circles = |chart: &PolarChart| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| p.id.is_some() && matches!(p.geometry, ferroui_livecharts::Geometry::Ellipse(_)))
+            .count()
+    };
+    assert_eq!(circles(&chart), 0);
+    let series = chart.series().get(0).cast::<PolarLineSeries>().unwrap();
+    let revision = chart.revision();
+    series.set_geometry_svg(None);
+    assert!(chart.revision() > revision);
+    assert_eq!(circles(&chart), 2);
+}
+
 /// The tooltip text of a node (`GetPrimaryToolTipText` of `CoreSankeySeries` and
 /// `CoreTreemapSeries`): `<label>: <value>`, and the code-only `ToolTipLabelFormatter` of
 /// `SankeySeries` and `TreemapSeries`, which the chart observes.

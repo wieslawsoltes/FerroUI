@@ -322,7 +322,9 @@ node_props = {
      'StackedColumnSeries','StackedRowSeries','RangeColumnSeries','RangeRowSeries']},
  # The tooltip label formatters of CorePolarLineSeries (code only), read by the chart (#624).
  'PolarLineSeries':[('angle_tool_tip_label_formatter','AngleToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
-  ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None')]}
+  ('radius_tool_tip_label_formatter','RadiusToolTipLabelFormatter','Option<ChartPointFormatter>','None'),
+  # Its GeometrySvg: the SVG path data drawn in place of each marker, None for circles (#624).
+  ('geometry_svg','GeometrySvg','Option<String>','None')]}
 classes = HEADER + '''use crate::{ChartSeries,HeatLands,SankeyLinks,SankeyNodes,TreemapNodes};
 use ferroui_base::{ferro_class,ferro_class_info,ferro_properties,instantiate,FerroObjectImpl,FerroObjectImplExt,FerroProperty,Ref,StyledProperty,Thickness};
 use ferroui_base::media::Color;

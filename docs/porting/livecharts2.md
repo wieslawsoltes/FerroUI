@@ -176,6 +176,10 @@ The tooltip of a Cartesian point is written as `GetPrimaryToolTipText` and `GetS
 
 Differences from the source: the source writes the value of every series through the Y axis and the header of a row series through the X axis, which labels the length of a bar by the categories; the native text takes the value axis of a row and its category labels, as the source's range rows do. A financial, OHLC or box point keeps every value (through the value axis) and a heat cell its weight, where the source writes the primary value alone. `mapping.json` records the eight `RangeBarTooltipTests` as ported and `CartesianSeries` as partial.
 
+### #624: the SVG geometry of the polar line markers
+
+`GeometrySvg` of `PolarLineSeries` (the source's `CorePolarLineSeries` of `VariableSVGPathGeometry`) draws its path in place of each marker, fitted to the marker as `Svg.Draw`. `PolarChartEngine::draw_marker_geometries` replaces the circles of the scene, which stays on the GPU path of every other geometry; a series without a path keeps its circles, and path data the parser rejects is the chart's error.
+
 ### #624: the SVG geometries of the line, scatter and bar series
 
 `GeometrySvg` of the line, stacked area, scatter and bar series (the source's `LineSeries`, `ScatterSeries` and `BarSeries` of `VariableSVGPathGeometry`) is a property of the generated `LineSeries`, `AreaSeries`, `StackedAreaSeries`, `ScatterSeries`, `ColumnSeries`, `RowSeries`, `StackedColumnSeries`, `StackedRowSeries`, `RangeColumnSeries` and `RangeRowSeries` (markup and code), carried by `CartesianSeriesOptions::geometry_svg` as the heat cells' path. The engine reads the path data once and draws it in place of the marker of each point and of each bar, fitted to the visual as `Svg.Draw` (a rounded bar loses its corners, as the source's path replaces the geometry); the line and the area keep their paths. Path data the parser rejects is an error. The paths are drawn by the native renderer on the GPU path of every backend. The polar line markers and the legend and tooltip miniatures of the source have no SVG geometry natively.
@@ -184,5 +188,5 @@ Differences from the source: the source writes the value of every series through
 
 - Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
 - Polar: the source draws no axis names and has no polar sub-separators, so neither does the native chart.
-- Heat series and SVG geometries: the heat legend is not animated (`Easing`, `AnimationsSpeed`); the polar line markers have no SVG geometry (#624 gave the line, scatter and bar series theirs).
+- Heat series: the heat legend is not animated (`Easing`, `AnimationsSpeed`).
 - Tooltips: the layout of `SKDefaultTooltip` (its table of a miniature, the series name and the value under a header, its wedge, shadow and animation); the placement and the texts are the source's (#624). The animation suites compare frame-by-frame baselines of the source (`AnimationBaselines/*.json`) made with the `EasingFunction` of a chart and the per-point visuals of the source, which the native scene transition does not have; their first draws are ported where a visual starts away from its place (the heat colours, the financial bars).

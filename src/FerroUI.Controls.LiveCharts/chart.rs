@@ -40,7 +40,8 @@ use std::{
     time::Duration,
 };
 
-/// The `GeometrySvg` of a line, stacked area, scatter or bar series (`VariableSVGPathGeometry`).
+/// The `GeometrySvg` of a line, polar line, stacked area, scatter or bar series
+/// (`VariableSVGPathGeometry`).
 fn series_geometry_svg(model: &Ref<ChartSeries>) -> Option<String> {
     use crate::series_classes::*;
     macro_rules! svg {
@@ -52,6 +53,7 @@ fn series_geometry_svg(model: &Ref<ChartSeries>) -> Option<String> {
     }
     svg!(
         LineSeries,
+        PolarLineSeries,
         AreaSeries,
         StackedAreaSeries,
         ScatterSeries,
@@ -890,6 +892,8 @@ impl Chart {
                     crate::decorations::text_size,
                     &formatters,
                 )?;
+                let geometry_svg: Vec<_> = models.iter().map(series_geometry_svg).collect();
+                PolarChartEngine::draw_marker_geometries(&mut measured.scene, &geometry_svg)?;
                 if local {
                     let offset = Point::new(viewport.x, viewport.y);
                     measured.scene.translate(offset, size)?;

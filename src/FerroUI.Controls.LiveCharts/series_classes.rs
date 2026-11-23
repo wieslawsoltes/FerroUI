@@ -1215,6 +1215,9 @@ ferro_properties! { impl PolarLineSeries {
     pub fn radius_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
         FerroProperty::register::<PolarLineSeries, _>("RadiusToolTipLabelFormatter", None)
     }
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<PolarLineSeries, _>("GeometrySvg", None)
+    }
 } }
 impl PolarLineSeries {
     pub fn angle_tool_tip_label_formatter(&self) -> Option<ChartPointFormatter> {
@@ -1228,5 +1231,11 @@ impl PolarLineSeries {
     }
     pub fn set_radius_tool_tip_label_formatter(&self, value: Option<ChartPointFormatter>) {
         self.set_value(Self::radius_tool_tip_label_formatter_property(), value);
+    }
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
     }
 }

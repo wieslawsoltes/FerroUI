@@ -161,6 +161,33 @@ impl PolarChartEngine {
             &[],
         )
     }
+    /// `GeometrySvg` of the polar line series (the source's `CorePolarLineSeries` of
+    /// `VariableSVGPathGeometry`), in the order of the series: the path data is read once and drawn
+    /// in place of each marker of the series, fitted to the marker as `Svg.Draw`. A series without
+    /// a path keeps its circles. Path data the parser rejects is an error.
+    pub fn draw_marker_geometries(
+        scene: &mut Scene,
+        geometry_svg: &[Option<String>],
+    ) -> Result<(), ChartError> {
+        for (series, data) in geometry_svg.iter().enumerate() {
+            let Some(data) = data.as_deref() else {
+                continue;
+            };
+            let commands = crate::svg_path::parse(data)?;
+            let bounds = crate::svg_path::bounds(&commands);
+            for primitive in &mut scene.primitives {
+                if primitive.id.map(|id| id.series) != Some(series) {
+                    continue;
+                }
+                if let Geometry::Ellipse(rect) = primitive.geometry {
+                    primitive.geometry =
+                        Geometry::Path(crate::svg_path::fit(&commands, bounds, rect));
+                }
+            }
+        }
+        Ok(())
+    }
+
     /// [`Self::measure_with_axes_and_labels`] with the tooltip label formatters of the series,
     /// in their order; a series without an entry has none.
     pub fn measure_with_tool_tip_label_formatters(
@@ -1415,6 +1442,69 @@ mod tests {
             assert_eq!(hit.value, value);
         }
     }
+    #[test]
+    fn markers_draw_the_svg_geometry_of_their_series() {
+        let mut series = Series::from_values(SeriesKind::PolarLine, [2.0, 5.0, 3.0]);
+        series.geometry_size = 12.0;
+        let measure = || {
+            PolarChartEngine::measure_with_axes(
+                Size::new(300.0, 300.0),
+                std::slice::from_ref(&series),
+                &[hidden_axis(0.0, 3.0)],
+                &[hidden_axis(0.0, 10.0)],
+                &full_options(),
+            )
+            .unwrap()
+            .scene
+        };
+        let circles: Vec<Rect> = measure()
+            .primitives
+            .iter()
+            .filter_map(|p| match p.geometry {
+                Geometry::Ellipse(rect) => Some(rect),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(circles.len(), 3);
+
+        // No path: the circles stay.
+        let mut scene = measure();
+        PolarChartEngine::draw_marker_geometries(&mut scene, &[None]).unwrap();
+        assert_eq!(scene.primitives, measure().primitives);
+
+        // Another series' path leaves these alone.
+        let mut scene = measure();
+        let square = Some("M0,0 L10,0 L10,10 L0,10 Z".to_string());
+        PolarChartEngine::draw_marker_geometries(&mut scene, &[None, square.clone()]).unwrap();
+        assert_eq!(scene.primitives, measure().primitives);
+
+        // Each marker is the path, fitted to it.
+        let mut scene = measure();
+        PolarChartEngine::draw_marker_geometries(&mut scene, &[square]).unwrap();
+        assert!(!scene.primitives.iter().any(|p| matches!(p.geometry, Geometry::Ellipse(_))));
+        let firsts: Vec<Point> = scene
+            .primitives
+            .iter()
+            .filter(|p| p.id.is_some())
+            .filter_map(|p| match &p.geometry {
+                Geometry::Path(commands) => match commands.first() {
+                    Some(PathCommand::MoveTo(first)) => Some(*first),
+                    _ => None,
+                },
+                _ => None,
+            })
+            .collect();
+        for circle in &circles {
+            assert!(
+                firsts.iter().any(|p| (p.x - circle.x).abs() < 1e-9 && (p.y - circle.y).abs() < 1e-9),
+                "a path starts at the corner of {circle:?}"
+            );
+        }
+
+        let mut scene = measure();
+        assert!(PolarChartEngine::draw_marker_geometries(&mut scene, &[Some("M0,0 X".to_string())]).is_err());
+    }
+
     #[test]
     fn filled_paths_draw_before_markers_and_close_each_valid_run() {
         let mut s = Series::from_values(SeriesKind::PolarLine, [2.0; 7]);
