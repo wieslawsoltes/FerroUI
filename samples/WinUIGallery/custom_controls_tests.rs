@@ -158,9 +158,9 @@ fn validated_password_box_lays_out_its_template_in_a_window() {
     window.update_layout();
     let input = password
         .get_visual_descendants()
-        .find_map(|visual| visual.cast::<TextBox>())
+        .find_map(|visual| visual.cast::<ferroui_controls_password_box::PasswordBox>())
         .expect("the PasswordInput of the template");
-    input.set_text(Some("abc"));
+    input.set_password("abc");
     assert_eq!(password.password(), "abc");
     let lines = password
         .get_visual_descendants()

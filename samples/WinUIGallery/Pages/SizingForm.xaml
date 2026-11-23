@@ -1,5 +1,5 @@
 <!-- The source's two forms share controls and copy state on each navigation.
-     Header is composed; PasswordBox is the explicit native TextBox adaptation. -->
+     Header is composed; the password fields are the PasswordBox of ferroui-controls-password-box. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             Spacing="16" MaxWidth="420" HorizontalAlignment="Left">
@@ -14,11 +14,11 @@
   </StackPanel>
   <StackPanel Spacing="4">
     <TextBlock Text="Password:" />
-    <TextBox x:Name="Password" MinWidth="320" PasswordChar="●" AutomationProperties.Name="Password" />
+    <PasswordBox x:Name="Password" MinWidth="320" AutomationProperties.Name="Password" />
   </StackPanel>
   <StackPanel Spacing="4">
     <TextBlock Text="Confirm Password:" />
-    <TextBox x:Name="ConfirmPassword" MinWidth="320" PasswordChar="●" AutomationProperties.Name="Confirm Password" />
+    <PasswordBox x:Name="ConfirmPassword" MinWidth="320" AutomationProperties.Name="Confirm Password" />
   </StackPanel>
   <StackPanel Spacing="4">
     <TextBlock Text="Pick a date" />
