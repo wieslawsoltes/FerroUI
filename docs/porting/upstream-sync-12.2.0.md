@@ -36,8 +36,8 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (87 done, 26 planned) | 113 |
-| `already` | 17 |
+| `port` (89 done, 23 planned) | 112 |
+| `already` | 18 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
 | `not-applicable` | 27 |
@@ -76,7 +76,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | samples | 1 |  |  |  |  | 2 | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
 | text | 7 | 2 |  |  | 1 | 8 | 18 |
-| themes | 6 | 1 |  |  |  | 8 | 15 |
+| themes | 5 | 2 |  |  |  | 8 | 15 |
 | threading |  | 1 |  |  |  |  | 1 |
 <!-- /generated:areas -->
 
@@ -221,7 +221,7 @@ left out only with a recorded performance or better-code reason.
 | `74c62ffd26` | #22552 | 2026-10-22 | input | `port` (done) | input | Gesture unit tests that replace the removed integration tests. |
 | `78316701f3` | #22451 | 2026-10-22 | platform-android | `deferred` |  | Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation. |
 | `103cf72903` | #22520 | 2026-10-22 | platform-win32 | `port` (done) | win32 | Alt+Space opens the system menu unless handled. |
-| `52c057b1cd` | #22556 | 2026-10-22 | themes | `port` | themes | CommandBar overflow scrolls in Fluent and Simple. |
+| `52c057b1cd` | #22556 | 2026-10-22 | themes | `port` (done) | themes2 | CommandBar overflow scrolls in Fluent and Simple. |
 | `f874d44497` | #22435 | 2026-10-22 | platform-android | `port` (done) | android | `ACTION_SET_TEXT` replaces the text. |
 | `e7cd2df08e` | #22489 | 2026-10-22 | controls | `port` (done) | controls2 | Keyboard works inside the date, time and calendar picker popups. |
 | `d8f2fc7b9f` | #22554 | 2026-10-22 | text | `port` (done) | text | Bounded lookahead (4096) on the enumerator and on the break table of a run, so a long unbroken run does not rescan the rest of the text per line. |
@@ -235,7 +235,7 @@ left out only with a recorded performance or better-code reason.
 | `1def5f851b` | #22426 | 2026-10-25 | controls | `port` (done) | controls2 | PipsPager sizing and scroll reset. |
 | `b88f813a95` | #22595 | 2026-10-25 | controls | `port` (done) | controls | VirtualizingStackPanel: condition that was always true. |
 | `13c99cfe42` | #22594 | 2026-10-25 | platform-linux | `already` |  | `DBusTextInputMethodBase::dispose` takes the name first and logs a failed disconnect. |
-| `b7a70cd06b` | #22591 | 2026-10-25 | themes | `port` | themes | Fluent DropDownButton padding. Its Fluent 2 half follows commit bd835340fb. |
+| `b7a70cd06b` | #22591 | 2026-10-25 | themes | `already` |  | The Fluent DropDownButton already has its padding on the content presenter; the Fluent half of the commit is a comment, the rest is its Fluent 2 theme. |
 | `584ae6f3a7` | #22596 | 2026-10-25 | platform | `port` (done) | controls2 | `FallbackStorageProvider` under concurrent calls. |
 | `6b6c573a03` | #22579 | 2026-10-25 | controls | `port` (done) | controls2 | ColorPicker fixes. |
 | `99086ac183` | #22356 | 2026-10-26 | controls | `port` (done) | controls2 | AutoCompleteBox keeps focus when an item is picked. |
@@ -327,7 +327,7 @@ left out only with a recorded performance or better-code reason.
 | `60b1719596` | #22797 | 2026-11-13 | controls | `port` (done) | controls | No empty `SelectionChanged` during initialization. |
 | `53e461e07a` | #22466 | 2026-11-13 | controls | `port` (done) | controls2 | Tab strip stays reachable with Tab. |
 | `ab36f90feb` | #22701 | 2026-11-13 | controls | `port` (done) | controls | Grid: debug assertion allows a rounding residual. |
-| `5ea0586b32` | #22699 | 2026-11-13 | themes | `port` | themes | Fluent ButtonSpinner outer corner. |
+| `5ea0586b32` | #22699 | 2026-11-13 | themes | `port` (done) | themes2 | Fluent ButtonSpinner outer corner. |
 | `a05d9d0046` | #22812 | 2026-11-13 | themes | `port` | themes | Simple ComboBox and Slider show validation errors. |
 | `d0a3041701` | #22475 | 2026-11-13 | controls | `port` (done) | controls | RelativePanel chain with infinite available size. |
 | `ad90a07d03` | #22671 | 2026-11-13 | automation | `port` (done) | platforms2 | `LabeledBy` in Windows UI Automation. |
