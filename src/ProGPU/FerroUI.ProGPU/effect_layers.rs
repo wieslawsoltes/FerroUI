@@ -8,7 +8,7 @@
 
 use super::tile_brush::{address_modes, positive_start};
 use super::*;
-use crate::effect_passes::{LayerPass, ShaderArea, NOISE_TILE_SIDE};
+use crate::effect_passes::{LayerPass, ShaderPlacement, NOISE_TILE_SIDE};
 use crate::effect_records::{self as records, LightOutput};
 use ferroui_base::media::effects::ImmutableCustomEffect;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
@@ -310,13 +310,13 @@ impl ProGpuDrawingContext {
                 Some(Self::combine(&gpu, operation, result.clone(), content.clone(), size, to_local))
             }
             Operation::Shader { effect, whole, scale } => {
-                let shader = ShaderArea {
-                    origin: [(area.x - whole.x) as f32, (area.y - whole.y) as f32],
-                    size: [whole.width as f32, whole.height as f32],
+                let placement = ShaderPlacement {
+                    first_texel: [(area.x - whole.x) as f32, (area.y - whole.y) as f32],
+                    whole: [whole.width as f32, whole.height as f32],
                     scale: *scale,
-                    held: size,
+                    pixels: size,
                 };
-                passes.run_shader(&gpu, &content, effect, shader)
+                passes.run_shader(&gpu, &content, effect, placement)
             }
             Operation::Discard => None,
         };
