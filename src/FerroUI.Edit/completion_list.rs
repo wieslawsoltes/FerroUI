@@ -692,7 +692,7 @@ mod tests {
         crate::register_types();
         ferroui_markup_xaml::register_types();
         let list = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load(
-            r#"<edit:CompletionList xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit" IsFiltering="False" MinWidth="123" CompletionAcceptAction="PointerReleased"/>"#,
+            r#"<CompletionList xmlns="https://github.com/ferroui" IsFiltering="False" MinWidth="123" CompletionAcceptAction="PointerReleased"/>"#,
             Some(&crate::ASSEMBLY), None, None, false).unwrap();
         let list = from_markup_value::<Ref<CompletionList>>(&Some(list)).unwrap();
         assert!(!list.is_filtering());
@@ -702,7 +702,7 @@ mod tests {
             CompletionAcceptAction::PointerReleased
         );
         let insight = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load(
-            r#"<edit:OverloadInsightWindow xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit" CloseAutomatically="False"/>"#,
+            r#"<OverloadInsightWindow xmlns="https://github.com/ferroui" CloseAutomatically="False"/>"#,
             Some(&crate::ASSEMBLY), None, None, false).unwrap();
         let insight =
             from_markup_value::<Ref<crate::OverloadInsightWindow>>(&Some(insight)).unwrap();
@@ -723,18 +723,18 @@ mod tests {
         );
         crate::register_types();
         ferroui_markup_xaml::register_types();
-        let markup = r#"<edit:CompletionList xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit"
+        let markup = r#"<CompletionList xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-            <edit:CompletionList.ItemTemplate>
-                <DataTemplate x:DataType="edit:CompletionDataRef">
+            <CompletionList.ItemTemplate>
+                <DataTemplate x:DataType="CompletionDataRef">
                     <StackPanel>
                         <Image Source="{Binding Image}" Width="16" Height="16"/>
                         <TextBlock Text="{Binding Text}"/>
                         <ContentControl Name="Documentation" Content="{Binding Description}"/>
                     </StackPanel>
                 </DataTemplate>
-            </edit:CompletionList.ItemTemplate>
-        </edit:CompletionList>"#;
+            </CompletionList.ItemTemplate>
+        </CompletionList>"#;
         let list = FerroRuntimeXamlLoader::parse_as::<Ref<CompletionList>>(markup, None).unwrap();
         let icon: Rc<dyn IImage> = DrawingImage::new().into();
         let content: BoxedValue = Rc::new(String::from("Read Line"));

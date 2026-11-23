@@ -247,10 +247,10 @@ mod tests {
         let _scope = crate::tests::test_scope();
         crate::register_types();
         ferroui_markup_xaml::register_types();
-        let markup = r#"<UserControl xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit"
+        let markup = r#"<UserControl xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
             <StackPanel>
-                <edit:OverloadViewer x:Name="Viewer" Provider="{Binding}"/>
+                <OverloadViewer x:Name="Viewer" Provider="{Binding}"/>
                 <TextBlock x:Name="Signature" Text="{Binding CurrentHeader}"/>
             </StackPanel>
         </UserControl>"#;
