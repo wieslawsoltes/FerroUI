@@ -42,6 +42,9 @@ const SAMPLES_PER_FRAME: usize = 2;
 /// How often an interval is halved around a change of a value, such as a hold.
 const MOST_HALVINGS: u32 = 10;
 
+/// The progress the controller is at for the first frame.
+const FIRST_PROGRESS: f32 = 1e-6;
+
 /// The frame of a timeline at a progress of the animation.
 type Clock = Rc<dyn Fn(f64) -> f64>;
 /// A factor at a frame of the timeline of the shapes.
@@ -199,12 +202,19 @@ impl CompositionScene {
             return;
         }
         self.progress = progress;
-        self.controller.set_progress(progress as f32);
+        // At exactly 0 a key frame animation shows the value it started from, not its first key.
+        self.controller.set_progress((progress as f32).max(FIRST_PROGRESS));
         let mut live = std::mem::take(&mut self.live);
         for value in &mut live {
             self.update(value, progress);
         }
         self.live = live;
+    }
+
+    /// Sends the progress again. Animations of a tree that was not on screen start from the
+    /// values of their properties: the tree calls this when it is attached.
+    pub fn refresh(&self) {
+        self.controller.set_progress((self.progress.max(0.0) as f32).max(FIRST_PROGRESS));
     }
 
     /// Sets the colour of the paints bound to `name`. `None` keeps the colour they have.
@@ -692,24 +702,21 @@ impl CompositionScene {
             return;
         }
         let parts = TransformFit::new(transform, clock, self.frames);
+        // The first values are set too: an animation shows them only once it has been committed.
         shape.set_center_point(point_of(parts.anchor[0].1));
-        if is_constant(&parts.anchor) {
-        } else {
+        shape.set_offset(point_of(parts.offset[0].1));
+        shape.set_scale(point_of(parts.scale[0].1));
+        shape.set_rotation_angle_in_degrees(parts.rotation[0].1[0] as f32);
+        if !is_constant(&parts.anchor) {
             self.vector(&***shape, "CenterPoint", &parts.anchor);
         }
-        if is_constant(&parts.offset) {
-            shape.set_offset(point_of(parts.offset[0].1));
-        } else {
+        if !is_constant(&parts.offset) {
             self.vector(&***shape, "Offset", &parts.offset);
         }
-        if is_constant(&parts.scale) {
-            shape.set_scale(point_of(parts.scale[0].1));
-        } else {
+        if !is_constant(&parts.scale) {
             self.vector(&***shape, "Scale", &parts.scale);
         }
-        if is_constant(&parts.rotation) {
-            shape.set_rotation_angle_in_degrees(parts.rotation[0].1[0] as f32);
-        } else {
+        if !is_constant(&parts.rotation) {
             self.scalar(&***shape, "RotationAngleInDegrees", &parts.rotation);
         }
     }
@@ -730,19 +737,16 @@ impl CompositionScene {
         if !is_constant(&parts.anchor) {
             self.vector3(&*target, "CenterPoint", &parts.anchor, 0.0);
         }
-        if is_constant(&parts.offset) {
-            target.set_offset(vector3(parts.offset[0].1, 0.0));
-        } else {
+        target.set_offset(vector3(parts.offset[0].1, 0.0));
+        target.set_scale(vector3(parts.scale[0].1, 1.0));
+        target.set_rotation_angle_in_degrees(parts.rotation[0].1[0] as f32);
+        if !is_constant(&parts.offset) {
             self.vector3(&*target, "Offset", &parts.offset, 0.0);
         }
-        if is_constant(&parts.scale) {
-            target.set_scale(vector3(parts.scale[0].1, 1.0));
-        } else {
+        if !is_constant(&parts.scale) {
             self.vector3(&*target, "Scale", &parts.scale, 1.0);
         }
-        if is_constant(&parts.rotation) {
-            target.set_rotation_angle_in_degrees(parts.rotation[0].1[0] as f32);
-        } else {
+        if !is_constant(&parts.rotation) {
             self.scalar(&*target, "RotationAngleInDegrees", &parts.rotation);
         }
     }
@@ -759,9 +763,8 @@ impl CompositionScene {
         };
         let keys = fit(self.frames, 0.002, &value);
         let target: Rc<CompositionVisual> = visual.clone();
-        if is_constant(&keys) {
-            target.set_opacity(keys[0].1[0] as f32);
-        } else {
+        target.set_opacity(keys[0].1[0] as f32);
+        if !is_constant(&keys) {
             self.scalar(&*target, "Opacity", &keys);
         }
     }
@@ -1271,3 +1274,7 @@ fn blend_effect_mode(mode: BitmapBlendingMode) -> Option<BlendEffectMode> {
         _ => return None,
     })
 }
+
+#[cfg(test)]
+#[path = "scene_tests.rs"]
+mod tests;

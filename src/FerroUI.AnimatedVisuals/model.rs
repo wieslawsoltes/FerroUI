@@ -10,6 +10,9 @@ use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
 
+/// How far before the out point the last frame is taken.
+const LAST_FRAME_MARGIN: f64 = 1e-6;
+
 /// Why a document could not be read.
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
@@ -699,7 +702,9 @@ impl AnimatedVisual {
 
     /// The frame at `progress` of the animation (0 to 1).
     pub fn frame_at(&self, progress: f64) -> f64 {
-        self.in_point + (self.out_point - self.in_point) * progress.clamp(0.0, 1.0)
+        // The out point is the first frame after the animation: progress 1 shows the last one.
+        let frame = self.in_point + (self.out_point - self.in_point) * progress.clamp(0.0, 1.0);
+        if self.out_point > self.in_point { frame.min(self.out_point - LAST_FRAME_MARGIN) } else { frame }
     }
 
     /// The marker of this name.
