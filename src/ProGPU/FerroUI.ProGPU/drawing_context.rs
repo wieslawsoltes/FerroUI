@@ -12,6 +12,7 @@
 //! - Group opacity, layers and compositing blend modes are layers of the scene.
 
 use crate::bitmap::ProGpuBitmap;
+use crate::fragment::{moved, moved_rect, FragmentBrush, FragmentOp, FragmentRecorder, KeptRun, ProGpuFragment};
 use crate::geometry::{path_data_of, PathData};
 use crate::glyph_run::{Placement, ProGpuGlyphRun};
 use crate::gpu::{Gpu, Recording, SampledTexture};
@@ -22,7 +23,12 @@ use ferroui_base::media::effects::IEffect;
 use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use ferroui_base::media::{BoxShadows, Color, EdgeMode, GradientSpreadMethod, IBrush, IPen, RenderOptions, TextOptions, TextRenderingMode};
 use ferroui_base::platform::{
+<<<<<<< HEAD
     AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
+=======
+    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithFragments, IDrawingContextLayerImpl,
+    IDrawingFragment, IGeometryImpl, IGlyphRunImpl,
+>>>>>>> progpu/p5-image-formats
     IPlatformRenderInterfaceRegion, PixelFormat,
 };
 use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
@@ -229,6 +235,8 @@ pub struct ProGpuDrawingContext {
     text_options: Vec<TextOptions>,
     error: Option<SceneBuildError>,
     complete: Option<Box<dyn FnOnce(Recording)>>,
+    /// What is being kept as a fragment (`fragment.rs`).
+    fragment: Option<FragmentRecorder>,
 }
 
 impl ProGpuDrawingContext {
@@ -263,6 +271,7 @@ impl ProGpuDrawingContext {
             text_options: Vec::new(),
             error,
             complete,
+            fragment: None,
         }
     }
 
@@ -390,16 +399,40 @@ impl ProGpuDrawingContext {
         if raster.glyphs.is_empty() {
             return;
         }
-        let state = if upright { self.glyph_state() } else { self.state() };
-        let Some(state) = state else { return };
-        let Some(style) = self.text_style(color, aliased) else { return };
         let Some(font) = run.font() else { return };
-        let result = self.scene().add_glyph_keys(&font.face, &raster.keys);
-        let Some(resource) = self.record(result) else { return };
+        let bounds = transform_bounds(ferroui_base::platform::IGlyphRunImpl::bounds(run), &transform).inflate(1.0);
+        let device = if upright { transform.transform(origin) } else { origin };
+        let kept = KeptRun {
+            face: font.face.clone(),
+            raster,
+            color,
+            aliased,
+            upright,
+            base,
+            device,
+            atlas_to_logical_scale,
+            bounds,
+            transform,
+        };
+        if self.draw_kept_run(&kept, base, bounds) {
+            if let Some(fragment) = &mut self.fragment {
+                fragment.run(kept);
+            }
+        }
+    }
 
+    /// Draws the glyphs of `run` placed from `base`, over `bounds` in device pixels.
+    fn draw_kept_run(&mut self, run: &KeptRun, base: Point, bounds: Rect) -> bool {
+        let state = if run.upright { self.glyph_state() } else { self.state() };
+        let Some(state) = state else { return false };
+        let Some(style) = self.text_style(run.color, run.aliased) else { return false };
+        let result = self.scene().add_glyph_keys(&run.face, &run.raster.keys);
+        let Some(resource) = self.record(result) else { return false };
+
+        let (color, atlas_to_logical_scale) = (run.color, run.atlas_to_logical_scale);
         let mut positioned = std::mem::take(&mut self.positioned);
         positioned.clear();
-        positioned.extend(raster.glyphs.iter().map(|glyph| progpu_native_positioned_glyph {
+        positioned.extend(run.raster.glyphs.iter().map(|glyph| progpu_native_positioned_glyph {
             outline_index: glyph.outline,
             reserved: 0,
             position: progpu_native_point { x: (base.x + f64::from(glyph.x)) as f32, y: (base.y + f64::from(glyph.y)) as f32 },
@@ -411,10 +444,10 @@ impl ProGpuDrawingContext {
             italic_skew: 0.0,
             reserved2: 0.0,
         }));
-        let bounds = transform_bounds(ferroui_base::platform::IGlyphRunImpl::bounds(run), &transform).inflate(1.0);
         let result = self.scene().draw_glyph_run(resource, &positioned, image_rect(bounds), state, style);
-        self.record(result);
+        let drawn = self.record(result).is_some();
         self.positioned = positioned;
+        drawn
     }
 
     /// The brush of the scene for a brush of the base library, over `bounds` (the local box a
@@ -426,6 +459,9 @@ impl ProGpuDrawingContext {
         if let Some(solid) = brush.as_solid_color_brush() {
             let color = native_color(solid.color(), 1.0);
             let result = self.scene().add_solid_brush(color, opacity as f32);
+            if let Some(fragment) = &mut self.fragment {
+                fragment.set_brush(FragmentBrush::Solid { color, opacity: opacity as f32 });
+            }
             return self.record(result);
         }
         let (native, stops) = Self::gradient_record(brush, bounds)?;
@@ -519,13 +555,91 @@ impl ProGpuDrawingContext {
         let coordinate = brush_transform.try_invert().unwrap_or(Matrix::IDENTITY);
         native.coordinate_transform0 = [coordinate.m11 as f32, coordinate.m21 as f32, coordinate.m31 as f32, 0.0];
         native.coordinate_transform1 = [coordinate.m12 as f32, coordinate.m22 as f32, coordinate.m32 as f32, 0.0];
+<<<<<<< HEAD
         Some((native, stops))
+=======
+        let result = self.scene().add_brush(&native, &stops);
+        if let Some(fragment) = &mut self.fragment {
+            fragment.set_brush(FragmentBrush::Gradient { brush: Box::new(native), stops: stops.into_boxed_slice() });
+        }
+        self.record(result)
+    }
+
+    /// Adds the brush of a kept draw.
+    fn kept_brush(&mut self, brush: &FragmentBrush) -> Option<u32> {
+        let result = match brush {
+            FragmentBrush::Solid { color, opacity } => self.scene().add_solid_brush(*color, *opacity),
+            FragmentBrush::Gradient { brush, stops } => self.scene().add_brush(brush, stops),
+        };
+        self.record(result)
+>>>>>>> progpu/p5-image-formats
+    }
+
+    /// Draws `fragment` moved by `offset` device pixels, under the clips in force now.
+    fn replay(&mut self, fragment: &ProGpuFragment, offset: (f64, f64)) {
+        let transform = self.current.transform;
+        for op in &fragment.ops {
+            match op {
+                FragmentOp::Shape { primitive, brush, bounds, transform } => {
+                    let Some(index) = self.kept_brush(brush) else { continue };
+                    self.place(moved(transform, offset));
+                    self.analytic(*primitive, index, moved_rect(*bounds, offset));
+                }
+                FragmentOp::Path { path, segments, brush, bounds, transform } => {
+                    let Some(index) = self.kept_brush(brush) else { continue };
+                    self.place(moved(transform, offset));
+                    let Some(state) = self.state() else { continue };
+                    let result = self.scene().draw_paths(&[*path], segments, &[index], image_rect(*bounds), state);
+                    self.record(result);
+                }
+                FragmentOp::Run(run) => {
+                    self.place(moved(&run.transform, offset));
+                    let base = if run.upright { Point::new(run.base.x + offset.0, run.base.y + offset.1) } else { run.base };
+                    self.draw_kept_run(run, base, moved_rect(run.bounds, offset));
+                }
+                FragmentOp::PushClip(rect) => self.push_device_clip(moved_rect(*rect, offset)),
+                FragmentOp::PopClip => self.pop_clip(),
+                FragmentOp::PushLayer { bounds, opacity, blend_mode } => {
+                    self.push_device_layer(bounds.map(|bounds| moved_rect(bounds, offset)), *opacity, *blend_mode);
+                }
+                FragmentOp::PopLayer => self.pop_scene_layer(),
+            }
+        }
+        self.place(transform);
+    }
+
+    /// Sets the transform of the next draws.
+    fn place(&mut self, transform: Matrix) {
+        if self.current.transform != transform {
+            self.current.transform = transform;
+            self.changed();
+        }
+    }
+
+    /// What is drawn from here on cannot be kept in the fragment being recorded.
+    fn refuse_fragment(&mut self) {
+        if let Some(fragment) = &mut self.fragment {
+            fragment.refuse();
+        }
+    }
+
+    /// A clip rectangle in device pixels, within the clip in force.
+    fn push_device_clip(&mut self, target: Rect) {
+        self.clips.push(self.state_entry());
+        self.current.clip_rect = Some(match self.current.clip_rect {
+            Some(current) => intersect(current, target),
+            None => target,
+        });
+        self.changed();
     }
 
     fn analytic(&mut self, primitive: progpu_native_analytic_primitive, brush: u32, bounds: Rect) {
         let Some(state) = self.state() else { return };
         let result = self.scene().draw_analytic(&[primitive], &[brush], image_rect(bounds), state);
         self.record(result);
+        if let Some(fragment) = &mut self.fragment {
+            fragment.shape(primitive, bounds, self.current.transform);
+        }
     }
 
     /// Fills the canonical segments of `data` (its filled figures) with a brush.
@@ -561,6 +675,9 @@ impl ProGpuDrawingContext {
         };
         let result = self.scene().draw_paths(&[path], &segments, &[brush_index], image_rect(bounds), state);
         self.record(result);
+        if let Some(fragment) = &mut self.fragment {
+            fragment.path(path, segments, bounds, self.current.transform);
+        }
     }
 
     fn primitive(kind: u32, rect: Rect, radius: f64, stroke: f64) -> progpu_native_analytic_primitive {
@@ -616,6 +733,7 @@ impl ProGpuDrawingContext {
     /// The mask is a texture of the size of the target: the clips of rectangles and rounded
     /// rectangles do not come here (see `push_analytic_clip`).
     fn vector_mask(&mut self, data: &PathData, operation: u32) -> Option<u32> {
+        self.refuse_fragment();
         let segments = data.filled_segments();
         let bounds = data.bounds();
         let path = progpu_native_scene_clip_path {
@@ -649,11 +767,11 @@ impl ProGpuDrawingContext {
             }
             let sigma = blur_radius_to_sigma(shadow.blur);
             if shadow.is_inset {
-                self.inset_shadow(rect, shadow, sigma);
+                self.inset_shadow(rect, &shadow, sigma);
                 continue;
             }
             if !uniform {
-                self.outer_shadow_of_uneven_corners(rect, shadow, sigma, opaque);
+                self.outer_shadow_of_uneven_corners(rect, &shadow, sigma, opaque);
                 continue;
             }
             let spread = shadow.spread;
@@ -666,6 +784,9 @@ impl ProGpuDrawingContext {
             );
             let color = native_color(shadow.color, 1.0);
             let result = self.scene().add_solid_brush(color, 1.0);
+            if let Some(fragment) = &mut self.fragment {
+                fragment.set_brush(FragmentBrush::Solid { color, opacity: 1.0 });
+            }
             let Some(brush_index) = self.record(result) else { return };
             // The shadow is outside its element: under an element that is not opaque, a
             // difference mask of the element keeps it out.
@@ -906,6 +1027,7 @@ impl ProGpuDrawingContext {
     /// its texture) or a bitmap of pixels (copied into the stream), added once per scene. None
     /// (with a note) for what the backend cannot sample.
     fn image(&mut self, source: &dyn IBitmapImpl) -> Option<SceneImage> {
+        self.refuse_fragment();
         let any = source.as_any();
         if let Some(layer) = any.downcast_ref::<ProGpuLayer>() {
             let texture = layer.texture()?;
@@ -958,6 +1080,7 @@ impl ProGpuDrawingContext {
 
     /// A clip that leaves nothing: the clip of a shape without an area.
     fn push_empty_clip(&mut self) {
+        self.refuse_fragment();
         self.clips.push(self.state_entry());
         self.current.clip_rect = Some(Rect::new(0.0, 0.0, 0.0, 0.0));
         self.changed();
@@ -966,6 +1089,7 @@ impl ProGpuDrawingContext {
     /// A clip of a mask with a texture (a geometry): the mask of the state, or under another
     /// mask a layer masked by it.
     fn push_mask_clip(&mut self, mask: Option<u32>) {
+        self.refuse_fragment();
         let Some(mask) = mask else {
             // The scene has failed: the frame is not drawn, and the clip is kept for its pop.
             self.clips.push(self.state_entry());
@@ -982,6 +1106,7 @@ impl ProGpuDrawingContext {
 
     /// A clip as a layer masked by `mask`: how a mask nests in a mask it cannot join.
     fn push_masked_layer(&mut self, mask: u32) {
+        self.refuse_fragment();
         let layer = progpu_native_scene_layer {
             struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
             flags: 0,
@@ -1005,6 +1130,7 @@ impl ProGpuDrawingContext {
     /// in each other join in one chain of masks; past the length of a chain, and under a mask
     /// with a texture, the clip is a masked layer.
     fn push_analytic_clip(&mut self, rect: Rect, corner_radii_x: [f32; 4], corner_radii_y: [f32; 4]) {
+        self.refuse_fragment();
         if !has_area(rect) || !invertible(&self.current.transform) {
             self.push_empty_clip();
             return;
@@ -1054,6 +1180,14 @@ impl ProGpuDrawingContext {
 
     fn push_scene_layer(&mut self, bounds: Option<Rect>, opacity: f64, blend_mode: u32) {
         let target = bounds.map(|bounds| transform_bounds(bounds, &self.current.transform));
+        self.push_device_layer(target, opacity, blend_mode);
+    }
+
+    /// A layer with its bounds in device pixels.
+    fn push_device_layer(&mut self, target: Option<Rect>, opacity: f64, blend_mode: u32) {
+        if let Some(fragment) = &mut self.fragment {
+            fragment.push_layer(target, opacity, blend_mode);
+        }
         let layer = progpu_native_scene_layer {
             struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
             flags: if target.is_some() { PROGPU_NATIVE_SCENE_LAYER_BOUNDS as u32 } else { 0 },
@@ -1074,6 +1208,9 @@ impl ProGpuDrawingContext {
 
     fn pop_scene_layer(&mut self) {
         if self.layers.pop().is_some() {
+            if let Some(fragment) = &mut self.fragment {
+                fragment.pop_layer();
+            }
             let result = self.scene().pop_layer();
             self.record(result);
         }
@@ -1093,6 +1230,7 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn clear(&mut self, color: Color) {
+        self.refuse_fragment();
         if self.current.mask != NO_INDEX {
             // The engine clears through a clip rectangle; under a coverage mask it needs a layer.
             notes::note_once("clear-under-mask", "a clear under a rounded or geometry clip is not drawn by the ProGPU backend yet");
@@ -1150,12 +1288,19 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         self.record(result);
     }
 
+<<<<<<< HEAD
     fn draw_bitmap_with_mask(&mut self, source: &dyn IBitmapImpl, opacity_mask: &dyn IBrush, opacity_mask_rect: Rect, dest_rect: Rect) {
         let size = source.pixel_size();
         let source_rect = Rect::new(0.0, 0.0, f64::from(size.width), f64::from(size.height));
         self.push_brush_mask_layer(opacity_mask, opacity_mask_rect);
         self.draw_bitmap(source, 1.0, source_rect, dest_rect);
         self.pop_scene_layer();
+=======
+    fn draw_bitmap_with_mask(&mut self, _source: &dyn IBitmapImpl, _opacity_mask: &dyn IBrush, _opacity_mask_rect: Rect, _dest_rect: Rect) {
+        self.refuse_fragment();
+        // Step P5 of the plan.
+        notes::note_once("bitmap-mask", "bitmaps under an opacity mask are not drawn by the ProGPU backend yet");
+>>>>>>> progpu/p5-image-formats
     }
 
     fn draw_line(&mut self, pen: Option<&dyn IPen>, p1: Point, p2: Point) {
@@ -1278,12 +1423,10 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     fn push_clip(&mut self, clip: Rect) {
         if axis_aligned(&self.current.transform) {
             let target = transform_bounds(clip, &self.current.transform);
-            self.clips.push(self.state_entry());
-            self.current.clip_rect = Some(match self.current.clip_rect {
-                Some(current) => intersect(current, target),
-                None => target,
-            });
-            self.changed();
+            if let Some(fragment) = &mut self.fragment {
+                fragment.push_clip(target);
+            }
+            self.push_device_clip(target);
         } else {
             self.push_analytic_clip(clip, [0.0; 4], [0.0; 4]);
         }
@@ -1317,6 +1460,9 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn pop_clip(&mut self) {
+        if let Some(fragment) = &mut self.fragment {
+            fragment.pop_clip();
+        }
         match self.clips.pop() {
             Some(ClipEntry::State { clip_rect, mask, analytic }) => {
                 self.current.clip_rect = clip_rect;
@@ -1348,8 +1494,16 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         self.pop_scene_layer();
     }
 
+<<<<<<< HEAD
     fn push_opacity_mask(&mut self, mask: &dyn IBrush, bounds: Rect) {
         self.push_brush_mask_layer(mask, bounds);
+=======
+    fn push_opacity_mask(&mut self, _mask: &dyn IBrush, bounds: Rect) {
+        self.refuse_fragment();
+        // Opacity masks (a brush layer mask): step P5 of the plan; the layer keeps the stack.
+        notes::note_once("opacity-mask", "opacity masks are not applied by the ProGPU backend yet");
+        self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
+>>>>>>> progpu/p5-image-formats
     }
 
     fn pop_opacity_mask(&mut self) {
@@ -1357,6 +1511,7 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn push_geometry_clip(&mut self, clip: &dyn IGeometryImpl) {
+        self.refuse_fragment();
         let Some(data) = path_data_of(clip) else {
             self.clips.push(self.state_entry());
             return;
@@ -1410,7 +1565,11 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         None
     }
 
+<<<<<<< HEAD
     fn as_drawing_context_impl_with_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithEffects> {
+=======
+    fn as_drawing_context_impl_with_fragments(&mut self) -> Option<&mut dyn IDrawingContextImplWithFragments> {
+>>>>>>> progpu/p5-image-formats
         Some(self)
     }
 
@@ -1432,6 +1591,7 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 }
 
+<<<<<<< HEAD
 impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
         let target = clip_rect.map(|clip| transform_bounds(clip, &self.current.transform));
@@ -1464,5 +1624,30 @@ impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
 
     fn pop_effect(&mut self) {
         self.pop_scene_layer();
+=======
+impl IDrawingContextImplWithFragments for ProGpuDrawingContext {
+    fn begin_fragment(&mut self) {
+        self.fragment = Some(FragmentRecorder::new(self.current.transform, self.aliased_text()));
+    }
+
+    fn end_fragment(&mut self) -> Option<Rc<dyn IDrawingFragment>> {
+        let fragment = self.fragment.take()?.finish()?;
+        Some(Rc::new(fragment))
+    }
+
+    fn draw_fragment(&mut self, fragment: &Rc<dyn IDrawingFragment>) -> bool {
+        // Fragments do not nest: what is being kept is drawn from its commands.
+        if self.fragment.is_some() {
+            return false;
+        }
+        let Some(fragment) = fragment.as_any().downcast_ref::<ProGpuFragment>() else {
+            return false;
+        };
+        let Some(offset) = fragment.offset_to(&self.current.transform, self.aliased_text()) else {
+            return false;
+        };
+        self.replay(fragment, offset);
+        true
+>>>>>>> progpu/p5-image-formats
     }
 }
