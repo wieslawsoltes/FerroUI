@@ -1633,6 +1633,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-flip-view",
+ "ferroui-controls-icons",
+ "ferroui-controls-password-box",
+ "ferroui-controls-split-menu",
+ "ferroui-controls-teaching-tip",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-controls-flip-view"
 version = "0.6.0-preview.1"
 dependencies = [
