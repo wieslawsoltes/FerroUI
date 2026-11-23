@@ -394,6 +394,14 @@ Stage checks include `accessibility.tree`, `accessibility.tab_order`, and `acces
 
 In Designer Studio, `designer_preview_checks` reads the current canvas. `designer_preview_stage_checks` takes the current stage model. Studio reports `source` as a byte span in the authored document. [Preview Checks in VS Code](authoring.md#diagnose-a-design-time-issue)
 
+### Edit one keyframe component with MCP
+
+1. Read `designer_programs` through `designer_studio_query` with `include_keyframe_text: true`. Select the program, track, and an existing key with the channel in its `curve_values`. Designer Studio exposes `designer_programs` directly.
+2. Pass the program ID, track `target` and `property`, existing key time as `previous`, and the desired `time` and `easing` to `designer_keyframe_draft`. Supply `component: { "channel": "top_right", "value": 24 }`. Copy the reported `easing_text` and keep `time` equal to `previous` to change just the value component.
+3. Use the same draft with `action: "upsert_keyframe"` on `designer_program`. Use the current frame revision with VS Code’s `designer_studio_edit` or the current document revision in Studio. Each accepted edit takes one Undo.
+
+For App Preview, read the authored key from `designer_hosted_animations`. Use its generation and accepted revision and sequence for `designer_hosted_keyframe_draft` and `designer_hosted_keyframe`. The draft returns a UTF-16 source patch and the complete `resolvedKey` from the running app’s codec. Units match the Value graph. Use logical pixels for absolute distances, percentage points for relative coordinates, degrees for rotation, and values from 0 to 1 for color channels. [Curve graph workflow](motion.md#edit-a-curve-component)
+
 ### Edit property transitions with MCP
 
 From the current XAML or Rust canvas, read `designer_property_transitions` through `designer_studio_query` in VS Code. Pass the design `session` and `arguments: {"owner": 1}` using the node ID of the selected control, XAML style, theme, or authored collection. Studio calls `designer_property_transitions` directly. The response contains the transition `id`, authored ranges and values, `editableTiming`, and `canRetarget` for each row. Pass a registered `target_type` when `requiresTarget` is true and you need the compatible `properties` for a shared XAML collection.

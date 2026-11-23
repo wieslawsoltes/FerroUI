@@ -256,10 +256,13 @@ offsets, values and easing; collisions reject the
 entire edit. Choose seconds or 24/30/60 fps snapping. Double-click a lane to record, or use arrow
 keys to nudge selected keys. Escape and lost pointer capture cancel a drag without authoring it.
 Ctrl+wheel or +/- zooms the timeline; Shift+wheel or PageUp/PageDown pans the visible range.
-Choose **Value curves** from the **Animation graph** icon to graph scalar properties on the
-same ruler and playhead. Each track scales to its visible values, including overshoot. Drag a
-key to edit time and value in one undo step, or select it and edit in the inspector. Choose
-**Velocity curves** to graph signed property units per authored second. Drag a marker beneath
+Choose **Value curves** from the **Animation graph** icon to graph properties on the same
+ruler and playhead. Each track scales to its visible values, including overshoot. Drag an
+authored key to change its time and the selected component in one Undo step. Use Alt+Up or
+Alt+Down on a selected graph key to change its component by one percent of the visible range.
+Select the key to edit its complete value in the inspector. [Component workflows](vscode/motion.md#edit-a-curve-component)
+
+Choose **Velocity curves** to graph signed property units per authored second. Drag a marker beneath
 the trace to retime its key. Change its incoming easing in the inspector to shape the velocity.
 The fit icon frames a selection in either display. `designer_animation_curve` accepts
 `metric: "velocity"` for the same native samples.

@@ -69,7 +69,7 @@ The picker follows the open source document and uses the running app's registry.
 2. Select an animation in the program picker. To create one in XAML, select an authored control and choose **New animation program** from **More Animation Actions**. The same menu manages program names, targets, timing, duplication, and removal. **Timing and Playback** includes delays, repeat, speed, direction, fill, and easing. Duration changes scale the authored key times.
 3. Click the time ruler or drag the playhead to preview a pose. Enter an exact time in the seconds field and press Enter. **Previous keyframe** and **Next keyframe** step between authored keys. Use **Play** or **Pause** for the selected program. Open the gear icon, **Timeline view options**, for **Play all animations**, zoom, and keyframe snapping. **Stop** restores the underlying values. A compatible source edit can retain the paused pose and elapsed time.
 4. Click a key or focus it and press Enter. The key editor opens beside the tracks on a wide Panel and below them in a narrow dock. Change the time or value and [edit the easing](#shape-an-incoming-easing). **Seek to selected keyframe** previews its exact pose.
-5. Open the **Animation graph** icon and choose **Value curves** to see interpolated scalar values, including overshoot. Drag a key horizontally to retime it or vertically to change its value. The curve and keyframe editor use the same checked source transaction. Use **Fit selected keyframes** to zoom into a group of keys in the graph.
+5. Open the **Animation graph** icon and choose **Value curves** to see interpolated values, including overshoot. Drag a key to change its time or [one component of its value](#edit-a-curve-component). Use **Fit selected keyframes** to zoom into a group of keys in the graph.
 6. Toggle a target header to collapse its property tracks into a row of summary diamonds. On expanded tracks, round keys have incoming easing and diamonds mark linear keys. Open **Filter tracks** and type a property or target name, or turn on **Selected controls only** to follow the canvas and Outline selection. A filter expands matching groups while it is active. Clear the search and uncheck the selection filter to return to all tracks.
 7. Use the lock beside a target to protect its keys from Timeline edits. Locked keys still seek when you select them. Rectangle selection and Select All use displayed, unlocked property tracks. Unlock the tracks before arming **Record animation edits** for the canvas.
 
@@ -91,7 +91,17 @@ VS Code and Designer Studio agents can pass `metric: "velocity"` to `designer_an
 
 In **Value curves** or **Velocity curves**, choose a component beside a supported geometry track. Points and vectors offer X and Y. Size and rectangle tracks offer their dimensions. Thickness offers its four sides and corner radius offers its four corners. A rectangle also offers X and Y.
 
-Drag a marker beneath the graph to move its key in time. Select the marker and edit **Value** to change the complete geometry value in one source edit. Agents can read the track’s `curve_channels` from `designer_programs` and pass a channel such as `"top_left"` to `designer_animation_curve`.
+Choose **Value curves** and drag the authored key on the trace to edit the selected component. Select the marker and edit **Value** to change the complete geometry value. Agents can read the track’s `curve_channels` from `designer_programs` and pass a channel such as `"top_left"` to `designer_animation_curve`.
+
+### Edit a curve component
+
+1. Choose **Value curves** in the VS Code Timeline, Designer Studio, or App Preview. Select a track and a channel, such as **Top right** for CornerRadius or **Radius Y · Percent** for a radial gradient.
+2. Drag an authored key on the graph. Vertical movement changes the selected component. Horizontal movement retimes the same key. To make a small value change from the keyboard, focus the key in VS Code or select it in Studio and use Alt+Up or Alt+Down. Each press changes the value by one percent of the visible range.
+3. Use Undo to reverse one drag or keyboard edit. The other components and incoming easing remain on the key. Open the key inspector to enter the full value or easing.
+
+Handles cover literal geometry, color, built-in effects, gradient stops and fields, shadow layers, and individual transform operations. The trace for a combined transform matrix or a registered shader parameter has retiming markers beneath it. Velocity also uses the retiming row. Keys with a missing component or a different coordinate unit stay in that row. [MCP component editing](reference.md#edit-one-keyframe-component-with-mcp)
+
+![The VS Code Timeline shows the selected Top right radius at 1.2 seconds, its complete key in the inspector, and the resulting native corner](../images/vscode-timeline-curve-components.png)
 
 ### Animate a render transform
 
