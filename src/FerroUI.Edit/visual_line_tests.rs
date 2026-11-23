@@ -1064,6 +1064,22 @@ fn built_in_link_candidates_follow_an_extended_visual_line() {
 }
 
 #[test]
+fn a_link_takes_the_command_modifier_of_the_apple_keymap() {
+    use crate::visual_line_link_text::VisualLineLinkText;
+    use ferroui_base::input::platform::PlatformHotkeyConfiguration;
+    use ferroui_base::input::KeyModifiers;
+
+    let _scope = crate::tests::test_scope();
+    ferroui_base::FerroLocator::current_mutable()
+        .bind_to_self(Rc::new(PlatformHotkeyConfiguration::apple()));
+    let mut link = VisualLineLinkText::new(1, &*properties()).unwrap();
+    link.navigate_uri = url::Url::parse("https://example.org").ok();
+    assert!(link.link_is_clickable(KeyModifiers::META));
+    assert!(!link.link_is_clickable(KeyModifiers::CONTROL));
+    assert!(!link.link_is_clickable(KeyModifiers::NONE));
+}
+
+#[test]
 fn hyperlink_click_routes_the_native_uri_event_and_respects_modifiers() {
     use crate::visual_line_link_text::{OpenUriRoutedEventArgs, VisualLineLinkText};
     use ferroui_base::input::{
