@@ -13,7 +13,7 @@ layers and analytic shadows into offscreen targets and into the Metal drawables 
 behind `use_progpu()`, which also binds the text services of the backend (section 2.4: font
 manager, typefaces and the shaper of the engine) and draws text from a glyph atlas that is kept
 across frames, matched by measurement to the text of the Skia backend on macOS (section 2.4.1);
-images from files and effects are drawn as nothing and said once in the log (section 2.7). The owner's request of 2026-11-05: top priority; the PR is open from the start;
+what it does not draw yet is listed in section 2.7. The owner's request of 2026-11-05: top priority; the PR is open from the start;
 performance and published size are measured locally against Skia (no new workflows), with
 screenshots of the ControlCatalog.
 
@@ -295,6 +295,17 @@ rendered before the root pass begins.
 The stream and the C ABI do not change for this part; the pixels must not change either (the tests
 of the layers and of section 2.7 read back the same bytes before and after).
 
+**As built (R1).** The engine flag `PROGPU_NATIVE_ENGINE_GROUPS_BEFORE_ROOT_PASS` turns it on;
+FerroUI sets it with `FERROUI_PROGPU_GROUP_PAGES=1`, and it stays off until the gauntlet has been
+compared with it. A page is a texture of the size of the frame, one per nesting depth, and a group
+is drawn on it **at its own place on the frame** instead of being packed on shelves: its content
+needs no other coordinates, and groups of one depth that do not overlap share the page. A group
+goes on a page only if it and everything inside it is plain: no backdrop, effect, mask, cache or
+blend other than source-over, and only draws of the analytic, path, glyph, image, geometry and
+stroke families under states without a mask. Two overlapping groups of one depth cannot share a
+page, so the later one, with the plain groups around it, keeps its own passes. The pages take at
+most half of the layer budget, and a scene that would need more keeps its own passes.
+
 A cached group (a visual with a cache mode) needs no page of its own in the engine. The
 compositor already keeps it (`ServerCompositionVisualCache`): a layer of the backend, a texture of
 the device, drawn when its content changes, in part under the dirty rectangles, and sampled by
@@ -353,8 +364,8 @@ second before any of this; section 6.2 has the numbers after each part):
 |---|---|---|---|
 | 1 | Glyph outlines by identifier (section 2.3.8) and the word-wise hash of the content identities (section 2.3.9): built | engine, builder, bindings, backend | the engine tests of the registry and of keyed runs (the same pixels as the same run with its outlines in the stream); the text tests of the backend; the gauntlet frames of section 6.2 unchanged to the byte; frames a second and render thread time at tier 16 (section 6.2) |
 | 2 | The bundles and draws of section 2.3.10, in three parts: spans as command lists with bundles kept by content (built), fewer draws, `update_scene` with changed content only (R4) | engine | the engine tests of the lists, the replay and the kept bundles; a scene drawn again, sent again with other colours and sent again with other draws reads back the bytes of a new engine; the gauntlet frames of section 6.2 unchanged to the byte; draws a frame, frames a second and render thread time at tier 16 (section 6.2) |
-| R1 | Groups before the root pass | engine (`Scene/` render execution, layer resources) | the layer and clip tests read back the same bytes; pass and command-buffer counts of a frame with many groups; the gauntlet at tier 16 on a queue of the default capacity |
-| R3 | Scenes per target | engine C ABI | two targets on one engine keep their scenes: the second frame of each is a snapshot hit |
+| R1 | Groups before the root pass: written, behind a flag (section 2.3.5) | engine (`Scene/` render execution, layer resources) | the layer and clip tests read back the same bytes; pass and command-buffer counts of a frame with many groups; the gauntlet at tier 16 on a queue of the default capacity |
+| R3 | Scenes per target: written. With a byte budget (`progpu_native_engine_set_scene_budget`, default zero) an engine keeps the streams of the scenes it is not rendering; family buffers stay shared. FerroUI uses it with scene deltas, off by default | engine C ABI | two targets on one engine keep their scenes: the second frame of each is a snapshot hit |
 | R4 | Pages that upload only the ranges that changed (written, one family at a time). Chunked buffers and the placement table: **not adopted** (section 2.3.12) | engine (family page compilers, uploads) | read-back equality against whole uploads for every family; upload bytes of a frame with one changed span (the metrics of the engine report them); the counter of shifted uploads |
 | R5 | The delta call | engine C ABI, bindings, backend | the same frames through deltas and through whole streams; validation errors of a bad span leave the scene as it was |
 | R6 | Images by content identity (a table beside the ascending resource ids), damage, geometries drawn again by resource within a frame; cached groups are the compositor's layers (section 2.3.5). A registry of paths across frames is not built (section 2.3.12) | engine, backend | partial redraw scenarios of section 4; a path drawn again reads back like the path sent twice; a layer kept across frames and redrawn in part |
@@ -597,8 +608,9 @@ variant, no second strike) or document the exact difference in section 2.4.1.
 - **Paths across frames.** A geometry drawn several times in a frame is in the stream once. A
   registry of paths across frames, as glyph outlines have (section 2.3.8), is not built: path
   segments are read at about ten places of the render execution, and no profile shows them as a
-  cost, while the outlines it was built for were most of the render thread. It is reconsidered
-  if the gauntlet profile of the quiet window shows the hash or copy of path segments.
+  cost, while the outlines it was built for were most of the render thread. **The rule:** no
+  such registry unless the profile of gauntlet tier 16 shows the hash or the copy of path
+  segments as a cost.
 - **Chunked buffers and the placement table: not adopted.** Pages stay contiguous and upload the
   ranges that changed (R4). Two concrete reasons:
   - *The shared shaders.* A placement slot on every vertex changes the vertex formats of
@@ -902,15 +914,23 @@ being destroyed: the device, its engines and its textures are then left to the e
 call into the implementation on the thread, which the reverse order of destruction puts before the
 lock state. Objects released while the thread runs are released as usual.
 
-**Not drawn yet, said once in the log** (area `ProGPU`, `notes.rs`): bitmaps drawn under an
-opacity mask, inset shadows and the shadows of rectangles with different corner radii, and a clear
-under a rotated, rounded or geometry clip. Content under an opacity mask is drawn without the
-mask. The shadow of a translucent element under such a clip is drawn whole, also under the
-element (the state has one mask, and the clip keeps it). Image files other than PNG are refused
-when they are loaded, and bitmaps are not encoded (section 2.5).
-The backend refuses compositing layers with a blend mode (`try_push_compositing_layer` answers
-no); blend modes are step P5. A frame that fails is logged every time and leaves the target as it
-was. None of these crashes.
+**Not done yet.** This list is the state of the backend, checked against the code:
+
+| What | What happens now |
+|---|---|
+| Fills and strokes with an image brush or a visual brush | **not drawn, and not logged** |
+| Opacity masks of image and visual brushes | the content is drawn without the mask, said once in the log |
+| Custom effects (#455), effects other than blur and drop shadow | the content is drawn without the effect, said once in the log |
+| Acrylic (`IDrawingContextWithAcrylicLikeSupport`) | not implemented |
+| Blend and colour-matrix layers of WinUI composition effects (`IDrawingContextImplWithLayerEffects`) | not implemented |
+| 3D scenes (`IDrawingContextImplWithScene3D`) | not implemented: a scene draws nothing and is counted |
+| A clear under a rounded, rotated or geometry clip | not drawn, said once in the log |
+| An inset shadow under a geometry clip or many nested clips | not drawn, said once in the log |
+| Text: LCD raster, the sample grid of the rasterizer | grayscale, on the regular 8x8 grid (section 6.1) |
+| `IGlyphRunImpl::get_intersections` | returns nothing, so underlines do not skip descenders |
+| The Rust writer of `progpu-native` (P7) | not written; the backend uses the C ABI over the builder |
+
+A frame that fails is logged every time and leaves the target as it was. None of these crashes.
 
 **Known limits of the step.**
 - A layer drawn into a target and drawn into again before the target renders shows its later
@@ -1111,8 +1131,8 @@ The tables go into section 6 and the pull request as each step lands.
 | P2 | Drawing: rectangles, rounded rectangles, ellipses, lines, paths (fills and strokes, dashes), solid and gradient brushes, transforms, clips, opacity, layers and blend modes, through the C++ shim over the builder; the render tests of the drawing contracts against the CPU references | the drawing contract tests of the other backends pass | done for shapes, paths, brushes, clips, opacity, layers and analytic shadows, through the C ABI over the scene builder in the bindings; blend modes and masks move to P5 |
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
 | P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
-| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG, JPEG, GIF (first frame) and BMP decode, and PNG and JPEG encode, through the image module (section 2.5); blur, drop shadow, gradient and solid opacity masks, every blend mode of a compositing layer, inset shadows and the shadows of uneven corners are drawn (section 2.5.1); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: custom effects of #455, opacity masks of image and visual brushes, acrylic |
-| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2. R2 is built against the whole-stream call (section 2.3.6); R4 (range uploads), R5 (off by default) and R6 are written (section 2.3.7); R1 and R3 are open |
+| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG, JPEG, GIF (first frame) and BMP decode, and PNG and JPEG encode, through the image module (section 2.5); blur, drop shadow, gradient and solid opacity masks, every blend mode of a compositing layer, inset shadows and the shadows of uneven corners are drawn (section 2.5.1); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: image and visual brushes (fills and opacity masks), custom effects of #455, acrylic (section 2.7) |
+| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2. R2 is built against the whole-stream call (section 2.3.6); R1 (behind a flag), R3, R4 (range uploads), R5 (off by default) and R6 are written (section 2.3.7); spans with chunked buffers and placements are not adopted (section 2.3.12) |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | written (section 2.2), first compiled in CI; the catalog runs and the proof of cooperative resize in the VMs are open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | written (section 2.6), first compiled in CI; no browser run yet |
