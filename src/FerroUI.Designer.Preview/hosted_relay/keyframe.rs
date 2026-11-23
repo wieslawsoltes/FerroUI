@@ -16,7 +16,7 @@ impl Relay {
             (false, None, Some(easing), Some(component)) if draft.previous.is_some() && draft.preview_target.is_none() => {
                 let channel = serde_json::from_value(serde_json::to_value(component.channel).map_err(|error| error.to_string())?)
                     .map_err(|error| error.to_string())?;
-                (String::new(), easing, Some(DesignKeyframeComponent { channel, value: component.value }))
+                (String::new(), easing, Some(DesignKeyframeComponent { channel, value: component.value, step: None }))
             }
             _ => {
                 return Err(

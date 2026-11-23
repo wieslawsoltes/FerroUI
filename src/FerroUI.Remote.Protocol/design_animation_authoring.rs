@@ -57,11 +57,14 @@ bson_class!(DesignAnimationKeyframe as "DesignAnimationKeyframe" {
 pub struct DesignKeyframeComponent {
     pub channel: String,
     pub value: f64,
+    /// Optional unit step for authored Boolean or integer handles in catalogs.
+    pub step: Option<String>,
 }
 
 bson_class!(DesignKeyframeComponent as "DesignKeyframeComponent" {
     "Channel" => channel: String,
     "Value" => value: f64,
+    "Step" => step: Option<String>,
 });
 
 /// Plan a draft against the application build's registered codec. This request

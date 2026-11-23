@@ -123,6 +123,7 @@ fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
             CurvePoint::new(0.753, 40.0),
             CurvePoint::new(2.0, 0.0),
         ],
+        None,
         |window| {
             Ok([window.start, window.end]
                 .map(|time| CurvePoint::new(time, 20.0))
@@ -176,6 +177,7 @@ fn component_curve_drag_and_keyboard_edit_only_authored_handles() {
         CurveMetric::Value,
         "gradient/radius_y/percent".parse::<TrackCurveChannel>().unwrap(),
         vec![CurvePoint::new(0.5, 50.0)],
+        None,
         |window| Ok(vec![CurvePoint::new(window.start, 20.0), CurvePoint::new(window.end, 65.0)]),
         move |from, to, value| observed.borrow_mut().push((from, to, value)),
     );
@@ -198,6 +200,34 @@ fn component_curve_drag_and_keyboard_edit_only_authored_handles() {
 }
 
 #[test]
+fn integer_effect_curves_nudge_and_drag_in_whole_steps() {
+    use ferroui_designer_animation::{CurveMetric, CurvePoint, CurveStep, TrackCurveChannel};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(2.0, vec![0.5]);
+    let commits = Rc::new(RefCell::new(Vec::new()));
+    let observed = commits.clone();
+    lane.configure_curve(
+        CurveMetric::Value,
+        "effect_parameter/example/passes/value".parse::<TrackCurveChannel>().unwrap(),
+        vec![CurvePoint::new(0.5, 0.0)],
+        Some(CurveStep::Integer),
+        |window| Ok(vec![CurvePoint::new(window.start, 0.0), CurvePoint::new(window.end, 0.0)]),
+        move |from, to, value| observed.borrow_mut().push((from, to, value)),
+    );
+    lane.set_selected_keys(vec![0.5], Some(0.5));
+    key(&lane, Key::Down, KeyModifiers::ALT);
+    assert_eq!(commits.borrow().as_slice(), &[(0.5, 0.5, -1.0)]);
+
+    let driver = PointerDriver::new(lane.clone());
+    let start = Point::new(lane.x(0.5), lane.key_y(0.5).unwrap());
+    driver.press_at(start, 1, KeyModifiers::NONE);
+    driver.release_at(Point::new(start.x, start.y - 35.0));
+    assert_eq!(commits.borrow().last(), Some(&(0.5, 0.5, 1.0)));
+}
+
+#[test]
 fn velocity_curve_markers_retime_keys_without_editing_their_values() {
     use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint};
 
@@ -208,6 +238,7 @@ fn velocity_curve_markers_retime_keys_without_editing_their_values() {
         CurveMetric::Velocity,
         CurveChannel::Value,
         vec![CurvePoint::new(1.0, 40.0)],
+        None,
         |window| Ok(vec![CurvePoint::new(window.start, 20.0)]),
         |_, _, _| panic!("Velocity must not write a derived value into the keyframe"),
     );

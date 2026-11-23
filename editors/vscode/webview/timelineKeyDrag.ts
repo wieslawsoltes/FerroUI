@@ -1,5 +1,5 @@
 import type { FrameTarget } from '../src/protocol';
-import type { CurveChannel, KeyframeComponent, KeyframeLocation } from '../src/timelineProtocol';
+import type { CurveChannel, CurveStep, KeyframeComponent, KeyframeLocation } from '../src/timelineProtocol';
 import { create, labelButton } from './dom';
 import type { CurveScale } from './timelineCurveScale';
 import { clamp, timelinePercent, type TimelineViewport } from './timelineViewport';
@@ -19,6 +19,7 @@ export interface CurveHandle {
     scale: CurveScale;
     channel: CurveChannel;
     normalized: boolean;
+    step?: CurveStep;
     keyRow: number;
 }
 
@@ -37,7 +38,13 @@ export function curveEditValue(channel: CurveChannel, value: number): number | K
 
 function boundCurveValue(handle: CurveHandle, value: number): number {
     if (!Number.isFinite(value)) return handle.value;
+    if (handle.step === 'boolean') return Math.round(clamp(value, 0, 1));
+    if (handle.step === 'integer') return snapCurveInteger(value);
     return handle.normalized ? clamp(value, 0, 1) : value;
+}
+
+export function snapCurveInteger(value: number): number {
+    return clamp(Math.sign(value) * Math.round(Math.abs(value)), -2147483648, 2147483647);
 }
 
 /** Retiming in a lane moves the selection. A curve marker edits one time and value. */
@@ -145,7 +152,8 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
         if (!target || !handle) return;
         event.preventDefault();
         event.stopPropagation();
-        const value = boundCurveValue(handle, handle.scale.nudge(handle.value, event.key === 'ArrowUp'));
+        const up = event.key === 'ArrowUp';
+        const value = boundCurveValue(handle, handle.step ? handle.value + (up ? 1 : -1) : handle.scale.nudge(handle.value, up));
         if (value !== handle.value) curve.commit(initial, value, handle.channel, target);
     });
     button.addEventListener('click', event => {

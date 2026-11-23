@@ -314,7 +314,7 @@ Studio keeps direct objects and `Setter.Value` properties in their authored form
 Rust keys keep their immutable effect constructor. MCP exposes the same native curves
 and checked key edits. [Edit directional shadows and independent opacity](vscode/motion.md#edit-directional-shadows-and-independent-opacity)
 
-The same Effect lane plots named parameters from the native registry, including library shaders such as `spotlight`. Select a parameter in the graph and use the key inspector to edit the authored literal. [Animate registered shader parameters](vscode/motion.md#animate-registered-shader-parameters)
+The Effect lane plots named parameters from the native registry, including library shaders such as `spotlight`. Choose **Value curves**, select a parameter, and drag its key or use Alt+Up and Alt+Down. A graph edit keeps the other arguments and adds an explicit value when you change a default. The key inspector edits the complete literal. [Animate registered shader parameters](vscode/motion.md#animate-registered-shader-parameters)
 
 The contextual editor validates time, value and easing together before one undoable transaction.
 The **Add a keyframe at the playhead** icon command records the selected track's live property

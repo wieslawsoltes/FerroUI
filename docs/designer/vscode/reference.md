@@ -402,6 +402,8 @@ In Designer Studio, `designer_preview_checks` reads the current canvas. `designe
 
 For App Preview, read the authored key from `designer_hosted_animations`. Use its generation and accepted revision and sequence for `designer_hosted_keyframe_draft` and `designer_hosted_keyframe`. The draft returns a UTF-16 source patch and the complete `resolvedKey` from the running app’s codec. Units match the Value graph. Use logical pixels for absolute distances, percentage points for relative coordinates, degrees for rotation, and values from 0 to 1 for color channels. [Curve graph workflow](motion.md#edit-a-curve-component)
 
+For a registered shader, copy the exact channel from the key’s `curve_values`, for example `effect_parameter/spotlight/strength/value`. A Boolean handle reports `step: "boolean"` and accepts 0 or 1. An integer handle reports `step: "integer"` and accepts a signed 32-bit integer. App Preview resolves project-registered effects against the loaded application. [Registered shader workflow](motion.md#animate-registered-shader-parameters)
+
 ### Edit property transitions with MCP
 
 From the current XAML or Rust canvas, read `designer_property_transitions` through `designer_studio_query` in VS Code. Pass the design `session` and `arguments: {"owner": 1}` using the node ID of the selected control, XAML style, theme, or authored collection. Studio calls `designer_property_transitions` directly. The response contains the transition `id`, authored ranges and values, `editableTiming`, and `canRetarget` for each row. Pass a registered `target_type` when `requiresTarget` is true and you need the compatible `properties` for a shared XAML collection.

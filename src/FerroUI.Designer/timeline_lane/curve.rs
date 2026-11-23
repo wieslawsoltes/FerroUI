@@ -1,5 +1,5 @@
 use super::*;
-use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint, CurveWindow, RelativeUnit, TrackCurveChannel};
+use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint, CurveStep, CurveWindow, RelativeUnit, TrackCurveChannel};
 
 pub(super) const HEIGHT: f64 = 88.0;
 const VALUE_INSET: f64 = 12.0;
@@ -11,6 +11,7 @@ pub(super) struct Plot {
     metric: CurveMetric,
     channel: TrackCurveChannel,
     keys: Vec<CurvePoint>,
+    step: Option<CurveStep>,
     samples: Vec<CurvePoint>,
     scale: Option<Scale>,
     sample: Sample,
@@ -84,6 +85,7 @@ pub(super) struct ValueDrag {
     scale: Scale,
     height: f64,
     normalized: bool,
+    step: Option<CurveStep>,
 }
 
 impl ValueDrag {
@@ -101,7 +103,13 @@ impl ValueDrag {
 
     fn shift(&self, offset: f64) -> f64 {
         let value = self.scale.shift(self.origin, offset, self.height).unwrap_or(self.origin);
-        if self.normalized { value.clamp(0.0, 1.0) } else { value }
+        if let Some(step) = self.step {
+            step.snap(value)
+        } else if self.normalized {
+            value.clamp(0.0, 1.0)
+        } else {
+            value
+        }
     }
 }
 
@@ -111,6 +119,7 @@ impl TimelineLane {
         metric: CurveMetric,
         channel: impl Into<TrackCurveChannel>,
         keys: Vec<CurvePoint>,
+        step: Option<CurveStep>,
         sample: impl Fn(CurveWindow) -> Result<Vec<CurvePoint>, String> + 'static,
         edit: impl Fn(f64, f64, f64) + 'static,
     ) {
@@ -126,6 +135,7 @@ impl TimelineLane {
             metric,
             channel,
             keys,
+            step,
             samples: Vec::new(),
             scale: None,
             sample: Box::new(sample),
@@ -146,7 +156,8 @@ impl TimelineLane {
             Err(error) => error.clone(),
         };
         plot.samples = result.unwrap_or_default();
-        let color_value = plot.metric == CurveMetric::Value && plot.channel.uses_normalized_values() && !plot.samples.is_empty();
+        let normalized = plot.metric == CurveMetric::Value && !plot.samples.is_empty()
+            && (plot.channel.uses_normalized_values() || plot.step == Some(CurveStep::Boolean));
         plot.scale = Scale::from_values(
             plot.samples
                 .iter()
@@ -155,13 +166,18 @@ impl TimelineLane {
                     plot.keys
                         .iter()
                         .filter(|key| plot.edits_values() && (start..=end).contains(&key.time))
-                        .map(|key| key.value),
+                        .flat_map(|key| {
+                            let padding = (plot.step == Some(CurveStep::Integer)).then(|| {
+                                [CurveStep::Integer.snap(key.value - 1.0), CurveStep::Integer.snap(key.value + 1.0)]
+                            });
+                            std::iter::once(key.value).chain(padding.into_iter().flatten())
+                        }),
                 )
                 .chain(
                     (plot.metric == CurveMetric::Velocity && !plot.samples.is_empty())
                         .then_some(0.0),
                 )
-                .chain(color_value.then_some([0.0, 1.0]).into_iter().flatten()),
+                .chain(normalized.then_some([0.0, 1.0]).into_iter().flatten()),
         );
         ToolTip::set_tip(self, Some(Rc::new(help)));
         self.invalidate_visual();
@@ -244,6 +260,7 @@ impl TimelineLane {
             scale: plot.scale?,
             height: plot.height(self.bounds().height),
             normalized: plot.channel.uses_normalized_values(),
+            step: plot.step,
         })
     }
 
@@ -257,8 +274,12 @@ impl TimelineLane {
     pub(super) fn nudge_curve_key(&self, up: bool) -> bool {
         let Some(time) = self.selected.get() else { return false };
         let Some(handle) = self.start_curve_drag(time) else { return false };
-        let offset = plot_height(handle.height) * if up { -0.01 } else { 0.01 };
-        let value = handle.shift(offset);
+        let direction = if up { 1.0 } else { -1.0 };
+        let value = if let Some(step) = handle.step {
+            step.snap(handle.origin + direction)
+        } else {
+            handle.shift(-direction * plot_height(handle.height) * 0.01)
+        };
         if value != handle.origin {
             self.commit_curve_drag(time, time, value);
         }

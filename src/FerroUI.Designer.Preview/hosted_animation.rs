@@ -127,8 +127,13 @@ fn tracks(tracks: Vec<DesignAnimationTrack>) -> Vec<Value> {
         }),
         "keyframes": track.keys.into_iter().map(|key| json!({
             "time": key.time, "value_text": key.value, "easing_text": key.easing, "value_kind": key.value_kind,
-            "curve_values": key.curve_values.map(|values| values.into_iter().map(|value|
-                json!({"channel":value.channel,"value":value.value})).collect::<Vec<_>>()),
+            "curve_values": key.curve_values.map(|values| values.into_iter().map(|value| {
+                let mut component = json!({"channel": value.channel, "value": value.value});
+                if let Some(step) = value.step {
+                    component["step"] = json!(step);
+                }
+                component
+            }).collect::<Vec<_>>()),
         })).collect::<Vec<_>>(),
     })).collect()
 }

@@ -205,7 +205,10 @@ fn entities() -> Vec<Message> {
                         keys: vec![DesignAnimationKeyframe {
                             time: 1.25, value: "16".into(), easing: "Linear".into(),
                             value_kind: "CornerRadius".into(),
-                            curve_values: Some(vec![DesignKeyframeComponent { channel: "top_left".into(), value: 16.0 }]),
+                            curve_values: Some(vec![
+                                DesignKeyframeComponent { channel: "top_left".into(), value: 16.0, step: None },
+                                DesignKeyframeComponent { channel: "effect_parameter/outline/quality/value".into(), value: 2.0, step: Some("integer".into()) },
+                            ]),
                         }],
                         curve_channels: None,
                         can_sample: Some(true),
@@ -241,7 +244,7 @@ fn entities() -> Vec<Message> {
         Arc::new(DesignAnimationAuthoringRequest {
             revision: 40, request: 32, program: 6, target: 12, property: "CornerRadius".into(),
             previous: Some(1.25), time: 1.25, easing: "Linear".into(), sample: Some(true), sample_target: Some(14),
-            component: Some(DesignKeyframeComponent { channel: "top_left".into(), value: 18.0 }),
+            component: Some(DesignKeyframeComponent { channel: "top_left".into(), value: 18.0, step: None }),
             ..Default::default()
         }),
         Arc::new(DesignAnimationAuthoringResult {

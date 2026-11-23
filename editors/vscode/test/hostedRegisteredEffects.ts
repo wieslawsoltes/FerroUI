@@ -6,6 +6,7 @@ import { animationFixture } from './hostedAnimation';
 const identity = ({ revision, sequence }: HostedFrame) => ({ revision, sequence });
 const strength = 'effect_parameter/review-spotlight/strength/value';
 const color = 'effect_parameter/review-spotlight/color/green';
+const center = 'effect_parameter/review-spotlight/center-x/value';
 const literal = (amount: number) => `review-spotlight(strength=${amount}, color=#FF82CCF0)`;
 
 export async function verifyHostedRegisteredEffects(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {
@@ -22,12 +23,21 @@ export async function verifyHostedRegisteredEffects(preview: NativePreview, upda
     assert.equal(values.find(point => point.time === 1)?.value, .25, 'Use the app shader’s quadratic interpolation');
     const green = await preview.hostedCurve(identity(frame), { ...query, channel: color });
     assert.equal(green.find(point => point.time === 1)?.value, .8);
+    assert.equal(track.keyframes[1].curve_values?.find(value => value.channel === center)?.value, .55);
     const velocity = await preview.hostedCurve(identity(frame), { ...query, channel: strength, metric: 'velocity' });
     assert.ok(velocity.some(point => Math.abs(point.time - 1) < .02 && Math.abs(point.value - .5) < .02));
     await assert.rejects(preview.hostedCurve(identity(frame), {
         ...query, channel: 'effect_parameter/spotlight/strength/value',
     }), /curve channel/i);
     const key = { program: program.id, target: track.target, property: track.property, time: 1 };
+    const componentDraft = await preview.planHostedKeyframe(identity(frame), {
+        ...key, previous: 2, time: 2, component: { channel: center, value: .65 }, easing: 'LinearEasing',
+    });
+    assert.ok(componentDraft.patch);
+    const xaml = componentDraft.patch;
+    assert.equal(source.slice(xaml.start, xaml.end), xaml.expected);
+    assert.equal(source.slice(0, xaml.start) + xaml.replacement + source.slice(xaml.end),
+        source.replace(literal(1), literal(1).replace(')', ', center-x=0.65)')));
     await assert.rejects(preview.planHostedKeyframe(identity(frame), { ...key,
         value: 'review-spotlight(strength=NaN)', easing: 'LinearEasing' }), /finite/i);
     const pose = await preview.sampleHostedAnimation({ ...identity(frame), program: program.id, elapsed: 1, restart: true });
@@ -45,6 +55,7 @@ export async function verifyHostedRegisteredEffects(preview: NativePreview, upda
     assert.notEqual(base.image.png, reference.image.png, 'The shader changes the rendered pixels');
     await assert.rejects(preview.hostedCurve(identity(pose.frame), { ...query, channel: strength }), /frame changed/i);
 
+    const rustLiteral = ' Review_Spotlight ( Color = #FF82CCF0 ; Strength = 1 ) ';
     const rust = `fn other() { rsx! { TextBlock { text: "Keep 🧪" } } }
 fn view() { rsx! {
     StackPanel {
@@ -53,7 +64,7 @@ fn view() { rsx! {
                 .key_frame(0.0, |key| key.set(ferroui_base::Visual::effect_property(),
                     ferroui_base::media::Effect::parse("${literal(0)}").unwrap()))
                 .key_frame(1.0, |key| key.set(ferroui_base::Visual::effect_property(),
-                    ferroui_base::media::Effect::parse(/* project shader 🧪 */ r#"${literal(1)}"#).expect("registered shader")))
+                    ferroui_base::media::Effect::parse(/* project shader 🧪 */ r#"${rustLiteral}"#).expect("registered shader")))
                 .fill_mode(ferroui_base::animation::FillMode::Both)
         )],
         Border { name: "ReviewCard", width: 180.0, height: 100.0, background: "#305DB6" }
@@ -68,19 +79,24 @@ fn view() { rsx! {
     const mapped = await preview.renderHosted(request);
     const mappedTrack = effectTrack(mapped);
     assert.ok(mappedTrack.track.curve_channels?.includes(strength));
+    assert.equal(mappedTrack.track.keyframes[1].curve_values?.find(value => value.channel === strength)?.value, 1);
     const changed = await preview.planHostedKeyframe(identity(mapped), {
         program: mappedTrack.program.id, target: mappedTrack.track.target, property: 'Effect',
-        previous: 2, time: 2, value: literal(.5), easing: 'LinearEasing',
+        previous: 2, time: 2, component: { channel: strength, value: .5 }, easing: 'LinearEasing',
     });
     assert.ok(changed.patch);
     const { start, end, expected, replacement } = changed.patch;
     assert.equal(rust.slice(start, end), expected);
     const edited = rust.slice(0, start) + replacement + rust.slice(end);
-    assert.equal(edited, rust.replace(literal(1), literal(.5)), 'Keep comments, raw-string quotes and CRLF');
+    assert.equal(edited, rust.replace(rustLiteral, rustLiteral.replace('Strength = 1', 'Strength = 0.5')),
+        'Keep parameter aliases, whitespace, comments, raw-string quotes and CRLF');
     const next = await preview.renderHosted({ ...request, revision: 4024, document: { ...request.document, source: edited } });
     const nextTrack = effectTrack(next);
     const updated = await preview.hostedCurve(identity(next), { ...nextTrack.query, channel: strength });
     assert.equal(updated.find(point => point.time === 1)?.value, .125);
+    await assert.rejects(preview.planHostedKeyframe(identity(mapped), {
+        ...key, previous: 2, time: 2, component: { channel: strength, value: .7 }, easing: 'LinearEasing',
+    }), /frame changed/i);
     console.log('App Preview sampled, recorded and edited a project-registered shader in XAML and mapped Rust');
 }
 

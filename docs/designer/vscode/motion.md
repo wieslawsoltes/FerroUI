@@ -96,10 +96,10 @@ Choose **Value curves** and drag the authored key on the trace to edit the selec
 ### Edit a curve component
 
 1. Choose **Value curves** in the VS Code Timeline, Designer Studio, or App Preview. Select a track and a channel, such as **Top right** for CornerRadius or **Radius Y · Percent** for a radial gradient.
-2. Drag an authored key on the graph. Vertical movement changes the selected component. Horizontal movement retimes the same key. To make a small value change from the keyboard, focus the key in VS Code or select it in Studio and use Alt+Up or Alt+Down. Each press changes the value by one percent of the visible range.
+2. Drag an authored key on the graph. Vertical movement changes the selected component. Horizontal movement retimes the same key. To make a small value change from the keyboard, focus the key in VS Code or select it in Studio and use Alt+Up or Alt+Down. A continuous value changes by one percent of the visible range. Integer and Boolean keys move by one step.
 3. Use Undo to reverse one drag or keyboard edit. The other components and incoming easing remain on the key. Open the key inspector to enter the full value or easing.
 
-Handles cover literal geometry, color, built-in effects, gradient stops and fields, shadow layers, and individual transform operations. The trace for a combined transform matrix or a registered shader parameter has retiming markers beneath it. Velocity also uses the retiming row. Keys with a missing component or a different coordinate unit stay in that row. [MCP component editing](reference.md#edit-one-keyframe-component-with-mcp)
+Handles cover literal geometry, color, built-in effects, [registered shader parameters](#animate-registered-shader-parameters), gradient stops and fields, shadow layers, and individual transform operations. Combined transform matrices and velocity curves use the retiming row. Keys with a missing component or a different coordinate unit stay in that row. [MCP component editing](reference.md#edit-one-keyframe-component-with-mcp)
 
 ![The VS Code Timeline shows the selected Top right radius at 1.2 seconds, its complete key in the inspector, and the resulting native corner](../images/vscode-timeline-curve-components.png)
 
@@ -355,7 +355,8 @@ Agents can request `direction`, `shadow_depth`, and `shadow_opacity` from the sa
 
 1. Author two **Effect** keys that call the same registered effect. Use an effect string in a XAML setter or a literal string in a Rust `ferroui_base::media::Effect::parse` call. Library effects such as `spotlight` work in Studio and the isolated VS Code Timeline. Register your own effect in the app before opening its preview. Then open **App Preview** to use the running app’s registry and interpolator.
 2. In **Animation graph**, choose **Value curves** or **Velocity curves**. Select a channel such as **Strength**, **Center X**, or **Color Green** on the Effect lane. App Preview uses the native samples from the chosen target. Scrub to a point on the authored ruler to see the shader at that time.
-3. Open a key in the inspector, edit its effect string, and apply it. The registry checks names, parameter types, and finite numeric values. **Add Key at Playhead** records a snapshot the registry can read back. Each checked edit, including a mapped Rust string change, uses one source Undo step.
+3. In **Value curves**, drag a key vertically or use Alt+Up and Alt+Down to change the selected parameter. Color channels use 0 through 1, Boolean values use 0 and 1, and integer parameters move in whole steps. For points, vectors, sizes, and rectangles, choose the coordinate or dimension to change. The edit keeps the other arguments and writes a new argument when you change a default.
+4. Open a key in the inspector to enter the entire effect literal, including text arguments. Set shader images through the app’s Rust code. **Add Key at Playhead** records a snapshot the registry can read back. Each accepted edit uses one source Undo step. If a custom setter rejects the new value or changes another parameter, the edit is refused and the authored key stays in place.
 
 ![The VS Code Timeline plots spotlight strength with the XAML source and the rendered shader at 1.15 seconds](../images/vscode-timeline-registered-shader.png)
 

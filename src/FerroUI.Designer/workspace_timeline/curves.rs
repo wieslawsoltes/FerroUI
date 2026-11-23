@@ -79,12 +79,14 @@ impl DesignerWorkspace {
         let Some(program) = context.program else {
             return;
         };
-        let keys: Vec<_> = track
-            .keyframes
-            .iter()
-            .filter_map(|key| channel.authored_key_value(&key.value)
-                .map(|value| CurvePoint::new(key.time, value)))
-            .collect();
+        let mut keys = Vec::with_capacity(track.keyframes.len());
+        let mut step = None;
+        for key in &track.keyframes {
+            if let Some(component) = channel.authored_key_component(&key.value) {
+                keys.push(CurvePoint::new(key.time, component.value));
+                step = component.step;
+            }
+        }
         let target = track.target;
         let query = Rc::downgrade(self);
         let query_context = context.clone();
@@ -97,6 +99,7 @@ impl DesignerWorkspace {
             metric,
             channel.clone(),
             keys,
+            step,
             move |window| {
                 let workspace = query.upgrade().ok_or("The Timeline closed")?;
                 query_context.check(&workspace)?;

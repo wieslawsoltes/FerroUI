@@ -2,12 +2,14 @@ import type { FrameTarget, Range } from './protocol';
 import type { StateTransitionControl, StateTransitionPosition } from './stateTransitionProtocol';
 
 export interface KeyframeComponent { channel: CurveChannel; value: number }
+export type CurveStep = 'boolean' | 'integer';
+export interface KeyframeCurveValue extends KeyframeComponent { step?: CurveStep }
 export interface TimelineKeyframe {
     time: number;
     value_text: string;
     easing_text: string;
     value_kind?: string;
-    curve_values?: KeyframeComponent[] | null;
+    curve_values?: KeyframeCurveValue[] | null;
 }
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[]; curve_channels?: CurveChannel[] }
 export interface AnimationSourceIssue { range: Range; reason: string }

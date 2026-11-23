@@ -2,7 +2,7 @@ import type { FrameTarget } from '../src/protocol';
 import type { CurveChannel, CurveMetric, CurvePoint, TimelineCurveRequest, TimelineCurveResponse, TimelineKeyframe, TimelineTrack } from '../src/timelineProtocol';
 import { create } from './dom';
 import { CurveScale } from './timelineCurveScale';
-import { curveKeyPosition, type CurveHandle, type RenderedKeyframe } from './timelineKeyDrag';
+import { curveKeyPosition, snapCurveInteger, type CurveHandle, type RenderedKeyframe } from './timelineKeyDrag';
 import { timelinePercent, visibleTime, type TimelineViewport } from './timelineViewport';
 
 interface CurveSnapshot {
@@ -114,11 +114,16 @@ export class TimelineCurvePlot {
         const value = this.value(keyframe);
         if (value === undefined || !this.scale || this.painted?.metric !== 'value' || !current || !this.has(current)) return;
         return { value, scale: this.scale, channel: this.channel, normalized: this.normalized(),
+            step: this.component(keyframe)?.step,
             keyRow: this.channel === 'value' ? 0 : 20 };
     }
 
+    private component(keyframe: TimelineKeyframe) {
+        return keyframe.curve_values?.find(item => item.channel === this.channel);
+    }
+
     private value(keyframe: TimelineKeyframe): number | undefined {
-        const value = keyframe.curve_values?.find(item => item.channel === this.channel)?.value
+        const value = this.component(keyframe)?.value
             ?? (this.channel === 'value' && keyframe.value_kind === 'Number' ? Number(keyframe.value_text) : undefined);
         return value !== undefined && Number.isFinite(value) ? value : undefined;
     }
@@ -166,9 +171,12 @@ export class TimelineCurvePlot {
         const after = points?.find(point => point.time > (last?.time ?? view.start + view.span));
         const isVelocity = metric === 'velocity';
         const handles = this.keys.map(({ keyframe }) => isVelocity ? undefined : this.value(keyframe));
-        const keyValues = isVelocity ? [0] : this.normalized() ? [0, 1]
-            : handles.flatMap((value, index) =>
-                value !== undefined && visibleTime(view, this.keys[index].rendered.key.time) ? [value] : []);
+        const units = this.keys[0] && this.component(this.keys[0].keyframe)?.step;
+        const keyValues = isVelocity ? [0] : this.normalized() || units === 'boolean' ? [0, 1]
+            : handles.flatMap((value, index) => {
+                if (value === undefined || !visibleTime(view, this.keys[index].rendered.key.time)) return [];
+                return units === 'integer' ? [snapCurveInteger(value - 1), snapCurveInteger(value + 1)] : [value];
+            });
         const allValues = handles.filter(value => value !== undefined);
         const scale = this.scale = new CurveScale(visible.length || keyValues.length ? visible : points ?? [],
             keyValues.length || visible.length ? keyValues : allValues.length ? allValues : [0]);

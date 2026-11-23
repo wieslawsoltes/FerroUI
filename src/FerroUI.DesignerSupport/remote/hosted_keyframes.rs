@@ -305,6 +305,7 @@ fn tracks(program: &AnimationProgram, components: bool) -> Option<Vec<DesignAnim
                                 Some(DesignKeyframeComponent {
                                     channel: channel.as_str()?.to_owned(),
                                     value: value.value,
+                                    step: value.step.map(|step| step.as_str().into()),
                                 })
                             }).collect()
                         }),
