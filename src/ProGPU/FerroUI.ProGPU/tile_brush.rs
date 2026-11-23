@@ -13,9 +13,9 @@ use ferroui_base::media::{Colors, ISceneBrushContent, ITileBrush, MediaExtension
 use ferroui_base::rendering::utilities::TileBrushCalculator;
 use ferroui_base::RelativeUnit;
 
-/// The longest side a tile of scalable content is replayed at. A longer tile is replayed smaller,
-/// in the same proportions, and enlarged by the sampler.
-const MAX_SCALABLE_TILE_SIDE: f64 = 4096.0;
+/// The most pixels a tile of scalable content is replayed into (4 MP). A larger tile is replayed
+/// smaller, in the same proportions, and enlarged by the sampler.
+const MAX_SCALABLE_TILE_PIXELS: f64 = 4.0 * 1024.0 * 1024.0;
 
 /// The largest side of the layer of a tile.
 const MAX_TILE_SIDE: i32 = 8192;
@@ -302,9 +302,9 @@ impl ProGpuDrawingContext {
         if !(scale_x.is_finite() && scale_y.is_finite() && scale_x > 0.0 && scale_y > 0.0) {
             return None;
         }
-        let longest = (tile.width * scale_x).max(tile.height * scale_y);
-        if longest > MAX_SCALABLE_TILE_SIDE {
-            let fit = MAX_SCALABLE_TILE_SIDE / longest;
+        let wanted_pixels = (tile.width * scale_x) * (tile.height * scale_y);
+        if wanted_pixels > MAX_SCALABLE_TILE_PIXELS {
+            let fit = (MAX_SCALABLE_TILE_PIXELS / wanted_pixels).sqrt();
             scale_x *= fit;
             scale_y *= fit;
         }
