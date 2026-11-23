@@ -1003,6 +1003,13 @@ struct Emitter<'a> {
     /// The theme dictionaries the body assigned a key outside every unit (#853,
     /// [`theme_units::ThemeUnitPlan::keys_in_runs`]), by the local that holds them.
     keyed_theme_dictionaries: HashSet<String>,
+    /// The template parts registered so far in the deferred content being written (#1039): the
+    /// names of the control's parts, the position of the part and its local.
+    template_parts: Vec<(Rc<[String]>, usize, String)>,
+    /// A part was registered where a local of it is not visible at the end of the function.
+    template_parts_unavailable: bool,
+    /// How many of `load_conditions` were open when the current deferred content began.
+    template_parts_conditions: usize,
     /// The conditions of conditional namespaces tested around the code being written.
     load_conditions: Vec<xamlx::parsers::XamlLoadCondition>,
 }
@@ -3486,9 +3493,19 @@ impl<'a> Emitter<'a> {
         let declaration_aliases = node.namespace_scope().map(|scope| scope.aliases().clone())
             .unwrap_or_else(|| self.namespace_aliases.clone());
         let outer_aliases = std::mem::replace(&mut self.namespace_aliases, declaration_aliases.clone());
+        let outer_parts = std::mem::take(&mut self.template_parts);
+        let outer_unavailable = std::mem::take(&mut self.template_parts_unavailable);
+        // The tests around the declaration are outside the function of the content.
+        let outer_base = std::mem::replace(&mut self.template_parts_conditions, self.load_conditions.len());
         self.deferred_depth += 1;
         let body = self.deferred_body(deferred);
         self.deferred_depth -= 1;
+        self.template_parts_conditions = outer_base;
+        if body.is_ok() {
+            self.publish_template_parts();
+        }
+        self.template_parts = outer_parts;
+        self.template_parts_unavailable = outer_unavailable;
         self.namespace_aliases = outer_aliases;
         let body_lines = std::mem::replace(&mut self.lines, outer_lines);
         self.assignments = outer_assignments;
@@ -3601,6 +3618,27 @@ impl<'a> Emitter<'a> {
 
     /// The statements of the body of deferred content and the value it
     /// returns (the value as an object, as the interpreter evaluates it).
+    /// The last statement of a template whose parts the compiler resolved (#1039): its parts,
+    /// at the positions the control declares them. A template without such a part, or with one
+    /// whose local is not visible here, states nothing and keeps the name lookup.
+    fn publish_template_parts(&mut self) {
+        let parts = std::mem::take(&mut self.template_parts);
+        let Some((names, _, _)) = parts.first() else { return };
+        if self.template_parts_unavailable || parts.iter().any(|(other, _, _)| !Rc::ptr_eq(other, names)) {
+            return;
+        }
+        let literals: Vec<String> = names.iter().map(|name| rust_string_literal(name)).collect();
+        let values: Vec<String> = (0..names.len())
+            .map(|index| match parts.iter().find(|(_, position, _)| *position == index) {
+                Some((_, _, local)) => format!(
+                    "::core::option::Option::Some(::core::clone::Clone::clone(&{local}).upcast::<::ferroui_base::FerroObject>())"
+                ),
+                None => "::core::option::Option::None".to_string(),
+            })
+            .collect();
+        self.line(format!("rt::publish_template_parts(&[{}], &[{}]);", literals.join(", "), values.join(", ")));
+    }
+
     fn deferred_body(&mut self, deferred: &XamlDeferredContentNode) -> EmitResult<String> {
         let value_node = deferred.value().as_node();
         let value = self.value(&value_node)?;
@@ -5154,6 +5192,14 @@ impl<'a> Emitter<'a> {
             .ok_or_else(|| unsupported(node, "a name that is not text"))?
             .text();
         self.uses_name_scope = true;
+        if let Some((names, index)) = registration.template_part.borrow().clone() {
+            match (self.load_conditions.len() == self.template_parts_conditions, target.kind) {
+                (true, Kind::Class(_)) if is_identifier(&target.expr) => {
+                    self.template_parts.push((names, index, target.expr.clone()));
+                }
+                _ => self.template_parts_unavailable = true,
+            }
+        }
         let literal = rust_string_literal(&name);
         // The name of a styled element, set just before (`Name`, or `x:Name` that sets it): the
         // two statements are one call of the shared helper, which sets it and registers it.
@@ -5570,6 +5616,9 @@ pub fn emit_function<'a>(
         row_tables: Vec::new(),
         deferred_depth: 0,
         keyed_theme_dictionaries: HashSet::new(),
+        template_parts: Vec::new(),
+        template_parts_unavailable: false,
+        template_parts_conditions: 0,
         load_conditions: Vec::new(),
         theme_styles: theme_styles::StylePool::new(function_name, &document_name.replace('`', "'").replace(['\r', '\n'], " ")),
     };

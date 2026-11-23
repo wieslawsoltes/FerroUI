@@ -18,6 +18,11 @@ use crate::compiler_extensions::FerroXamlDiagnosticCodes;
 /// attributes of the templated control type.
 pub struct FerroXamlIlControlTemplatePartsChecker;
 
+/// The controls whose compiled templates hand over their parts (#1039, a prototype): each reads
+/// them with `TemplateAppliedEventArgs::part`, at the position of its `TemplatePart` attribute.
+const COMPILED_PART_CONTROLS: &[&str] =
+    &["FerroUI.Controls.ProgressBar", "FerroUI.Controls.ScrollViewer", "FerroUI.Controls.ToggleSwitch"];
+
 /// A resolved `TemplatePart` attribute: `(type, isRequired)` upstream.
 struct TemplatePart {
     name: String,
@@ -56,6 +61,15 @@ impl IXamlAstTransformer for FerroXamlIlControlTemplatePartsChecker {
 
         let mut visitor = NameScopeRegistrationVisitor::default();
         node.visit_children(&mut visitor)?;
+
+        if COMPILED_PART_CONTROLS.contains(&target_type.full_name().as_str()) {
+            let names: Rc<[String]> = template_parts.iter().map(|part| part.name.clone()).collect();
+            for (index, part) in template_parts.iter().enumerate() {
+                if let Some(registration) = visitor.registration(&part.name) {
+                    *registration.template_part.borrow_mut() = Some((names.clone(), index));
+                }
+            }
+        }
 
         for part in &template_parts {
             let name = &part.name;

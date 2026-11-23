@@ -1191,8 +1191,8 @@ impl ScrollViewer {
     }
 
     fn subscribe_to_scroll_bars(&self, e: &TemplateAppliedEventArgs) -> Option<Rc<dyn IDisposable>> {
-        let horizontal_scroll_bar = e.name_scope().find_as::<ScrollBar>("PART_HorizontalScrollBar");
-        let vertical_scroll_bar = e.name_scope().find_as::<ScrollBar>("PART_VerticalScrollBar");
+        let horizontal_scroll_bar = e.part::<ScrollBar>(0, "PART_HorizontalScrollBar");
+        let vertical_scroll_bar = e.part::<ScrollBar>(1, "PART_VerticalScrollBar");
 
         *self.horizontal_scroll_bar.borrow_mut() = horizontal_scroll_bar.clone();
         *self.vertical_scroll_bar.borrow_mut() = vertical_scroll_bar.clone();

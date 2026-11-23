@@ -19,6 +19,8 @@ use crate::compiler_extensions::transformers::{
 /// are kept in registration order here and exposed through the dictionary-like accessors.
 pub struct NameScopeRegistrationVisitor {
     entries: Vec<(String, (Rc<dyn IXamlType>, Rc<dyn IXamlLineInfo>))>,
+    /// The registration node of each name, the last one of a name first found.
+    registrations: Vec<(String, Rc<FerroNameScopeRegistrationXamlIlNode>)>,
     target_metadata_scope_level: i32,
     parents: Vec<Rc<dyn IXamlAstNode>>,
     metadata_scope_level: i32,
@@ -35,6 +37,7 @@ impl NameScopeRegistrationVisitor {
     pub fn new(initial_metadata_scope_level: i32, target_metadata_scope_level: i32) -> Self {
         Self {
             entries: Vec::new(),
+            registrations: Vec::new(),
             target_metadata_scope_level,
             parents: Vec::new(),
             metadata_scope_level: initial_metadata_scope_level,
@@ -59,6 +62,11 @@ impl NameScopeRegistrationVisitor {
 
     pub fn contains_key(&self, name: &str) -> bool {
         self.get(name).is_some()
+    }
+
+    /// The registration node of `name`.
+    pub fn registration(&self, name: &str) -> Option<&Rc<FerroNameScopeRegistrationXamlIlNode>> {
+        self.registrations.iter().find(|(key, _)| key == name).map(|(_, node)| node)
     }
 
     /// `Count`.
@@ -90,6 +98,8 @@ impl IXamlAstVisitor for NameScopeRegistrationVisitor {
                         .clone()
                         .unwrap_or_else(XamlPseudoType::unknown);
                     let text = text_node.text();
+                    self.registrations.retain(|(name, _)| *name != text);
+                    self.registrations.push((text.clone(), name_scope_registration.clone()));
                     self.set(&text, (type_, text_node));
                 }
             }

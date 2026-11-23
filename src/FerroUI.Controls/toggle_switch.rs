@@ -70,8 +70,8 @@ impl TemplatedControlImpl for ToggleSwitch {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
         Self::parent_on_apply_template(this, e);
 
-        *this.switch_knob.borrow_mut() = e.name_scope().find_as::<Panel>("PART_SwitchKnob");
-        let knobs_panel = e.name_scope().get_as::<Panel>("PART_MovingKnobs");
+        *this.switch_knob.borrow_mut() = e.part::<Panel>(3, "PART_SwitchKnob");
+        let knobs_panel = e.required_part::<Panel>(0, "PART_MovingKnobs");
         *this.knobs_panel.borrow_mut() = Some(knobs_panel.clone());
 
         // The handlers refer to the switch weakly: the panel is a part of

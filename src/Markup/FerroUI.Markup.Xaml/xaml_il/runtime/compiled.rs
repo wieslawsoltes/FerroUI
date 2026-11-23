@@ -2329,6 +2329,9 @@ mod tests {
 /// The answer of a custom condition of a conditional namespace, for generated code.
 pub use crate::xaml_conditions::evaluate_xaml_condition as xaml_condition;
 
+/// The parts of a template the compiler resolved, for its generated build function (#1039).
+pub use ferroui_controls::primitives::publish_compiled_template_parts as publish_template_parts;
+
 /// Generated code retains development keys only in an enabled debug runtime.
 #[inline]
 pub const fn development_keys_enabled() -> bool {

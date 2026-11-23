@@ -336,7 +336,7 @@ impl TemplatedControlImpl for ProgressBar {
             previous.dispose();
         }
 
-        let indicator = e.name_scope().get_as::<Border>("PART_Indicator");
+        let indicator = e.required_part::<Border>(0, "PART_Indicator");
         *this.indicator.borrow_mut() = Some(indicator.clone());
 
         // Listen to size changes of the indicator's track (parent) and update
