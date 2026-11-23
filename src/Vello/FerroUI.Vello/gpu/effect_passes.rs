@@ -448,6 +448,69 @@ fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
 }
 "#;
 
+/// The BT.1886 reference curve of Rec. 709 video turned into sRGB values (the curve of the Skia
+/// backend's colour filter, `leased_gpu_bitmap.rs`).
+const REC709_TO_SRGB_WGSL: &str = r#"
+fn rec709_to_srgb(c: vec3<f32>) -> vec3<f32> {
+    let v = pow(max(c, vec3<f32>(0.0)), vec3<f32>(2.4));
+    let low = 12.92 * v;
+    let high = 1.055 * pow(v, vec3<f32>(1.0 / 2.4)) - 0.055;
+    return select(high, low, v < vec3<f32>(0.0031308));
+}
+"#;
+
+/// A frame of NV12 in two textures of the device (`Nv12Conversion`, #575): the luma plane and the
+/// chroma plane at half the size, its samples beside the left luma column and between the rows
+/// (the siting of Rec. 709 video), read bilinearly by texel; the BT.709 matrix in full or limited
+/// range; then the curve of `FrameConversion`. The result is opaque.
+const NV12_CONVERSION_WGSL: &str = r#"
+struct Params {
+    // x: 1 for limited range, y: 1 when the first row is the bottom one.
+    mode: vec4<f32>,
+    // x, y: the size of the luma plane in pixels; z, w: that of the chroma plane.
+    size: vec4<f32>,
+}
+
+@group(0) @binding(0) var<uniform> params: Params;
+@group(0) @binding(1) var luma: texture_2d<f32>;
+@group(0) @binding(2) var chroma: texture_2d<f32>;
+
+fn chroma_texel(texel: vec2<i32>) -> vec2<f32> {
+    let last = vec2<i32>(params.size.zw) - vec2<i32>(1);
+    return textureLoad(chroma, clamp(texel, vec2<i32>(0), last), 0).rg;
+}
+
+fn chroma_at(pixel: vec2<i32>) -> vec2<f32> {
+    let place = vec2<f32>(f32(pixel.x) * 0.5, (f32(pixel.y) + 0.5) * 0.5 - 0.5);
+    let base = floor(place);
+    let t = place - base;
+    let texel = vec2<i32>(base);
+    let top = mix(chroma_texel(texel), chroma_texel(texel + vec2<i32>(1, 0)), t.x);
+    let bottom = mix(chroma_texel(texel + vec2<i32>(0, 1)), chroma_texel(texel + vec2<i32>(1, 1)), t.x);
+    return mix(top, bottom, t.y);
+}
+
+@fragment
+fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    let pixel = vec2<i32>(floor(fragment.xy));
+    if (f32(pixel.x) >= params.size.x || f32(pixel.y) >= params.size.y) {
+        return vec4<f32>(0.0);
+    }
+    var source = pixel;
+    if (params.mode.y > 0.5) {
+        source.y = i32(params.size.y) - 1 - pixel.y;
+    }
+    var y = textureLoad(luma, source, 0).r;
+    var c = chroma_at(source) - vec2<f32>(128.0 / 255.0);
+    if (params.mode.x > 0.5) {
+        y = (y - 16.0 / 255.0) * (255.0 / 219.0);
+        c = c * (255.0 / 224.0);
+    }
+    let rgb = vec3<f32>(y + 1.5748 * c.y, y - 0.1873 * c.x - 0.4681 * c.y, y + 1.8556 * c.x);
+    return vec4<f32>(rec709_to_srgb(clamp(rgb, vec3<f32>(0.0), vec3<f32>(1.0))), 1.0);
+}
+"#;
+
 /// A frame of a producer (a video or a camera) as premultiplied RGBA of the canvas
 /// (`FrameConversion`): read in whatever format its storage has (BGRA or RGBA), turned upright when
 /// its first row is the bottom one, made opaque when the frame is, and, for full-range Rec. 709
@@ -464,13 +527,6 @@ struct Params {
 
 @group(0) @binding(0) var<uniform> params: Params;
 @group(0) @binding(1) var frame: texture_2d<f32>;
-
-fn rec709_to_srgb(c: vec3<f32>) -> vec3<f32> {
-    let v = pow(max(c, vec3<f32>(0.0)), vec3<f32>(2.4));
-    let low = 12.92 * v;
-    let high = 1.055 * pow(v, vec3<f32>(1.0 / 2.4)) - 0.055;
-    return select(high, low, v < vec3<f32>(0.0031308));
-}
 
 @fragment
 fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
@@ -744,6 +800,7 @@ enum LayerProgram {
     PixelOperation,
     Convolution,
     FrameConversion,
+    Nv12Conversion,
 }
 
 impl LayerProgram {
@@ -754,6 +811,7 @@ impl LayerProgram {
             LayerProgram::PixelOperation => "FerroUI pixel operation",
             LayerProgram::Convolution => "FerroUI convolution",
             LayerProgram::FrameConversion => "FerroUI frame conversion",
+            LayerProgram::Nv12Conversion => "FerroUI NV12 conversion",
         }
     }
 
@@ -764,14 +822,17 @@ impl LayerProgram {
             LayerProgram::LightMultiply => format!("{LIGHT_COMMON_WGSL}{LIGHT_MULTIPLY_FRAGMENT_WGSL}"),
             LayerProgram::PixelOperation => format!("{LAYER_VERTEX_WGSL}{PIXEL_OPERATION_WGSL}"),
             LayerProgram::Convolution => format!("{LAYER_VERTEX_WGSL}{CONVOLUTION_WGSL}"),
-            LayerProgram::FrameConversion => format!("{LAYER_VERTEX_WGSL}{FRAME_CONVERSION_WGSL}"),
+            LayerProgram::FrameConversion => {
+                format!("{LAYER_VERTEX_WGSL}{REC709_TO_SRGB_WGSL}{FRAME_CONVERSION_WGSL}")
+            }
+            LayerProgram::Nv12Conversion => format!("{LAYER_VERTEX_WGSL}{REC709_TO_SRGB_WGSL}{NV12_CONVERSION_WGSL}"),
         }
     }
 
     /// The textures the program reads.
     fn inputs(self) -> usize {
         match self {
-            LayerProgram::PixelOperation => 2,
+            LayerProgram::PixelOperation | LayerProgram::Nv12Conversion => 2,
             _ => 1,
         }
     }
@@ -782,7 +843,7 @@ impl LayerProgram {
             LayerProgram::ColorMatrix => blocks::COLOR_MATRIX_FLOATS,
             LayerProgram::LightMultiply => blocks::LIGHTING_FLOATS,
             LayerProgram::PixelOperation => blocks::PIXEL_OPERATION_FLOATS,
-            LayerProgram::FrameConversion => 2 * 4,
+            LayerProgram::FrameConversion | LayerProgram::Nv12Conversion => 2 * 4,
             LayerProgram::Convolution => blocks::CONVOLUTION_FLOATS,
         }
     }
@@ -970,10 +1031,10 @@ fn run_layer_pass(
     inputs: &[&Arc<VelloDeviceTexture>],
 ) -> Option<Arc<VelloDeviceTexture>> {
     let first = inputs.first()?;
-    if inputs.len() != program.inputs()
-        || uniforms.len() != program.uniform_floats()
-        || inputs.iter().any(|input| input.width() != first.width() || input.height() != first.height())
-    {
+    // The chroma plane of NV12 is the one input with a size of its own.
+    let same_size = program == LayerProgram::Nv12Conversion
+        || inputs.iter().all(|input| input.width() == first.width() && input.height() == first.height());
+    if inputs.len() != program.inputs() || uniforms.len() != program.uniform_floats() || !same_size {
         return None;
     }
     let output = pooled_texture(device, first.width(), first.height());
@@ -1024,7 +1085,7 @@ fn run_layer_pass(
             pass.draw(0..3, 0..1);
         }
         device.queue().submit(Some(encoder.finish()));
-        if program == LayerProgram::FrameConversion {
+        if matches!(program, LayerProgram::FrameConversion | LayerProgram::Nv12Conversion) {
             // Each frame of a producer is converted once: its bind group would only keep the
             // frame's storage alive.
             pipeline.bind_groups.remove(index);
@@ -1054,6 +1115,30 @@ pub(crate) fn frame_conversion_texture(
     let flag = |value: bool| if value { 1.0 } else { 0.0 };
     let floats = [flag(rec709), flag(bottom_up), flag(opaque), 0.0, frame.width() as f32, frame.height() as f32, 0.0, 0.0];
     run_layer_pass(device, LayerProgram::FrameConversion, &floats, &[frame])
+}
+
+/// A frame of NV12 (`luma` and `chroma` wrap a producer's storage) as a texture of the pool of its
+/// size, in opaque RGBA: see [`NV12_CONVERSION_WGSL`]. As for
+/// [`frame_conversion_texture`], the storage is no longer read once the queue has done the pass.
+pub(crate) fn nv12_conversion_texture(
+    device: &Arc<VelloWgpuDevice>,
+    luma: &Arc<VelloDeviceTexture>,
+    chroma: &Arc<VelloDeviceTexture>,
+    limited_range: bool,
+    bottom_up: bool,
+) -> Option<Arc<VelloDeviceTexture>> {
+    let flag = |value: bool| if value { 1.0 } else { 0.0 };
+    let floats = [
+        flag(limited_range),
+        flag(bottom_up),
+        0.0,
+        0.0,
+        luma.width() as f32,
+        luma.height() as f32,
+        chroma.width() as f32,
+        chroma.height() as f32,
+    ];
+    run_layer_pass(device, LayerProgram::Nv12Conversion, &floats, &[luma, chroma])
 }
 
 /// `content` through `matrix` in `alpha_mode`.

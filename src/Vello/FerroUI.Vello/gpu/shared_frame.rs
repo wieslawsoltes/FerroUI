@@ -25,12 +25,16 @@ pub struct VelloSharedFrameBitmap {
     bottom_up: bool,
     opaque: bool,
     conversion: GpuTransferReason,
+    /// NV12 in limited range: the conversion expands it.
+    limited_range: bool,
     state: Mutex<State>,
 }
 
 struct State {
     /// The producer's storage as a texture of the device, until it is converted.
     source: Option<Arc<VelloDeviceTexture>>,
+    /// The chroma plane of a frame of NV12, whose luma plane is `source`, until it is converted.
+    chroma: Option<Arc<VelloDeviceTexture>>,
     /// The lease of the frame, until the conversion was read by the device.
     frame: Option<FrameLease>,
     /// The frame in premultiplied RGBA, once it was converted.
@@ -56,7 +60,23 @@ impl VelloSharedFrameBitmap {
             bottom_up: !metadata.top_left_origin,
             opaque: metadata.alpha == ferroui_base::rendering::composition::frames::FrameAlpha::Opaque,
             conversion,
-            state: Mutex::new(State { source: Some(source), frame: Some(frame), converted: None }),
+            limited_range: false,
+            state: Mutex::new(State { source: Some(source), chroma: None, frame: Some(frame), converted: None }),
+        }
+    }
+
+    /// The bitmap of a frame of NV12, whose planes `luma` and `chroma` wrap on their device (#575).
+    pub fn new_nv12(luma: Arc<VelloDeviceTexture>, chroma: Arc<VelloDeviceTexture>, frame: FrameLease) -> Self {
+        let metadata = frame.metadata();
+        Self {
+            device: luma.device().clone(),
+            pixel_size: PixelSize::new(metadata.width as i32, metadata.height as i32),
+            rec709: true,
+            bottom_up: !metadata.top_left_origin,
+            opaque: true,
+            conversion: GpuTransferReason::PixelFormatConversion,
+            limited_range: metadata.color == FrameColor::Rec709Limited,
+            state: Mutex::new(State { source: Some(luma), chroma: Some(chroma), frame: Some(frame), converted: None }),
         }
     }
 
@@ -78,8 +98,22 @@ impl VelloSharedFrameBitmap {
             return None;
         }
         let source = state.source.clone()?;
-        let converted =
-            crate::gpu::effect_passes::frame_conversion_texture(&self.device, &source, self.rec709, self.bottom_up, self.opaque)?;
+        let converted = match &state.chroma {
+            Some(chroma) => crate::gpu::effect_passes::nv12_conversion_texture(
+                &self.device,
+                &source,
+                chroma,
+                self.limited_range,
+                self.bottom_up,
+            )?,
+            None => crate::gpu::effect_passes::frame_conversion_texture(
+                &self.device,
+                &source,
+                self.rec709,
+                self.bottom_up,
+                self.opaque,
+            )?,
+        };
         frame.counters().gpu_conversion(self.conversion);
         // The pass was submitted: the lease goes with it until the queue has done it.
         let completion = GpuCompletion::new();
@@ -89,6 +123,7 @@ impl VelloSharedFrameBitmap {
         self.device.release_frames_after_submitted_work(completion);
         state.frame = None;
         state.source = None;
+        state.chroma = None;
         state.converted = Some(converted.clone());
         Some(converted)
     }
@@ -114,6 +149,7 @@ impl IBitmapImpl for VelloSharedFrameBitmap {
     fn dispose(&self) {
         let mut state = self.state.lock().unwrap_or_else(|e| e.into_inner());
         state.source = None;
+        state.chroma = None;
         state.frame = None;
         state.converted = None;
     }

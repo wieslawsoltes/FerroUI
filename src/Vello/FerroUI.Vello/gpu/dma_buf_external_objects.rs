@@ -12,6 +12,11 @@
 //! the queue has done that pass, as on macOS. Nothing goes through memory. An import that fails
 //! refuses the frame; there is no CPU path.
 //!
+//! **NV12** (what hardware decoders produce) is imported as two images, `R8` for luma and `R8G8`
+//! for chroma, each with the buffer, offset, pitch and modifier of its plane, and converted by one
+//! pass of `effect_passes.rs`. No sampler conversion of the driver is involved, and a modifier is
+//! offered for NV12 only where both formats sample it with a single memory plane.
+//!
 //! **Order.** The producer hands a frame over only once the implicit fences of its buffer have
 //! signalled (`ferro_linux_frame_ready`). Each image is then taken from the foreign queue family
 //! into `SHADER_READ_ONLY_OPTIMAL` by a command buffer submitted before the first pass reads it.
@@ -47,6 +52,9 @@ const MAX_FRAME_SIDE: u32 = 8192;
 const DRM_XR24: u32 = 0x3432_5258;
 /// `DRM_FORMAT_XBGR8888`: R, G, B, X in memory.
 const DRM_XB24: u32 = 0x3432_4258;
+
+/// `DRM_FORMAT_NV12`: a plane of luma and a plane of interleaved chroma at half the size.
+const DRM_NV12: u32 = 0x3231_564e;
 
 /// The device extensions of the import. All of them, or the route is not offered.
 const EXTENSIONS: [&CStr; 5] = [
@@ -110,8 +118,8 @@ pub(crate) fn request_device(
 /// The command buffers that take images from the foreign queue family.
 struct Transitions {
     pool: vk::CommandPool,
-    /// Those submitted, until their fence signals.
-    pending: Vec<(vk::CommandBuffer, vk::Fence)>,
+    /// Those submitted, with the image each takes, until their fence signals.
+    pending: Vec<(vk::CommandBuffer, vk::Fence, vk::Image)>,
 }
 
 /// The external objects feature of a Vulkan device made by [`request_device`].
@@ -123,7 +131,8 @@ pub struct VelloDmaBufExternalObjectsFeature {
     generation: u64,
     uuid: Vec<u8>,
     formats: Vec<PlatformGraphicsDrmFormat>,
-    transitions: Mutex<Transitions>,
+    /// Shared with the drop callback of each image, which waits for the image's transition.
+    transitions: Arc<Mutex<Transitions>>,
 }
 
 impl VelloDmaBufExternalObjectsFeature {
@@ -148,6 +157,12 @@ impl VelloDmaBufExternalObjectsFeature {
                         formats.push(PlatformGraphicsDrmFormat::new(drm, modifier));
                     }
                 }
+                let chroma = sampled_modifiers(instance, physical, vk::Format::R8G8_UNORM);
+                for modifier in sampled_modifiers(instance, physical, vk::Format::R8_UNORM) {
+                    if chroma.contains(&modifier) {
+                        formats.push(PlatformGraphicsDrmFormat::new(DRM_NV12, modifier));
+                    }
+                }
                 (api, memory_fd, hal_device.queue_family_index(), uuid, formats)
             };
             if formats.is_empty() {
@@ -165,7 +180,7 @@ impl VelloDmaBufExternalObjectsFeature {
                 generation: NEXT_GENERATION.fetch_add(1, Ordering::Relaxed),
                 uuid,
                 formats,
-                transitions: Mutex::new(Transitions { pool, pending: Vec::new() }),
+                transitions: Arc::new(Mutex::new(Transitions { pool, pending: Vec::new() })),
             })
         }
     }
@@ -173,7 +188,7 @@ impl VelloDmaBufExternalObjectsFeature {
     /// Frees the command buffers the device has finished.
     fn reap(&self, transitions: &mut Transitions) {
         let (api, pool) = (&self.api, transitions.pool);
-        transitions.pending.retain(|&(command_buffer, fence)| {
+        transitions.pending.retain(|&(command_buffer, fence, _)| {
             // SAFETY: the fence and command buffer are this pool's; a signalled one is not in use.
             unsafe {
                 if !matches!(api.get_fence_status(fence), Ok(true) | Err(_)) {
@@ -249,19 +264,19 @@ impl VelloDmaBufExternalObjectsFeature {
                 api.destroy_fence(fence, None);
                 return Err(free(failed("vkQueueSubmit", error)));
             }
-            transitions.pending.push((command_buffer, fence));
+            transitions.pending.push((command_buffer, fence, image));
         }
         Ok(())
     }
 
-    /// The buffer `fd` as a texture of the device.
+    /// The single-plane buffer `fd` as a texture of the device.
     fn import(
         &self,
         fd: i32,
-        (width, height): (u32, u32),
+        size: (u32, u32),
         drm_format: u32,
         modifier: u64,
-        (offset, stride): (u32, u32),
+        plane: (u32, u32),
     ) -> Result<Arc<VelloDeviceTexture>, String> {
         let (format, wgpu_format) = match drm_format {
             DRM_XR24 => (vk::Format::B8G8R8A8_UNORM, wgpu::TextureFormat::Bgra8Unorm),
@@ -271,6 +286,37 @@ impl VelloDmaBufExternalObjectsFeature {
         if !self.formats.contains(&PlatformGraphicsDrmFormat::new(drm_format, modifier)) {
             return Err(format!("the modifier {modifier:#x} is not sampled by this device"));
         }
+        self.import_plane(fd, size, (format, wgpu_format), modifier, plane)
+    }
+
+    /// The two planes of an NV12 buffer as textures of the device: luma, then chroma.
+    fn import_nv12(
+        &self,
+        fds: [i32; 2],
+        (width, height): (u32, u32),
+        modifier: u64,
+        planes: [(u32, u32); 2],
+    ) -> Result<(Arc<VelloDeviceTexture>, Arc<VelloDeviceTexture>), String> {
+        if !self.formats.contains(&PlatformGraphicsDrmFormat::new(DRM_NV12, modifier)) {
+            return Err(format!("the modifier {modifier:#x} is not sampled by this device for NV12"));
+        }
+        let luma_format = (vk::Format::R8_UNORM, wgpu::TextureFormat::R8Unorm);
+        let chroma_format = (vk::Format::R8G8_UNORM, wgpu::TextureFormat::Rg8Unorm);
+        let luma = self.import_plane(fds[0], (width, height), luma_format, modifier, planes[0])?;
+        let chroma_size = (width.div_ceil(2), height.div_ceil(2));
+        let chroma = self.import_plane(fds[1], chroma_size, chroma_format, modifier, planes[1])?;
+        Ok((luma, chroma))
+    }
+
+    /// One plane of the buffer `fd` as a texture of the device.
+    fn import_plane(
+        &self,
+        fd: i32,
+        (width, height): (u32, u32),
+        (format, wgpu_format): (vk::Format, wgpu::TextureFormat),
+        modifier: u64,
+        (offset, stride): (u32, u32),
+    ) -> Result<Arc<VelloDeviceTexture>, String> {
         let api = &self.api;
         let handle_type = vk::ExternalMemoryHandleTypeFlags::DMA_BUF_EXT;
         let failed = |what: &str, error: vk::Result| format!("{what} failed: {error:?}");
@@ -344,6 +390,7 @@ impl VelloDmaBufExternalObjectsFeature {
                 view_formats: Vec::new(),
             };
             let release = api.clone();
+            let transitions = self.transitions.clone();
             let hal_texture = {
                 let Some(hal_device) = self.device.device().as_hal::<hal::api::Vulkan>() else {
                     // The transition may still run: the device is lost or replaced with its objects.
@@ -353,6 +400,12 @@ impl VelloDmaBufExternalObjectsFeature {
                     image,
                     &hal_descriptor,
                     Some(Box::new(move || {
+                        // A frame dropped at once: the transition of its image may still be queued.
+                        let pending = transitions.lock().unwrap_or_else(|error| error.into_inner());
+                        if let Some(&(_, fence, _)) = pending.pending.iter().find(|entry| entry.2 == image) {
+                            let _ = release.wait_for_fences(&[fence], true, u64::MAX);
+                        }
+                        drop(pending);
                         release.destroy_image(image, None);
                         release.free_memory(memory, None);
                     })),
@@ -381,10 +434,10 @@ impl VelloDmaBufExternalObjectsFeature {
 
 impl Drop for VelloDmaBufExternalObjectsFeature {
     fn drop(&mut self) {
-        let transitions = self.transitions.get_mut().unwrap_or_else(|error| error.into_inner());
+        let mut transitions = self.transitions.lock().unwrap_or_else(|error| error.into_inner());
         // SAFETY: the objects are this feature's; each is waited for before it goes.
         unsafe {
-            for (_, fence) in transitions.pending.drain(..) {
+            for (_, fence, _) in transitions.pending.drain(..) {
                 let _ = self.api.wait_for_fences(&[fence], true, u64::MAX);
                 self.api.destroy_fence(fence, None);
             }
@@ -435,8 +488,10 @@ pub struct VelloDmaBufImportedImage {
     device: Arc<VelloWgpuDevice>,
     generation: u64,
     uuid: Vec<u8>,
-    /// The wrapped texture, or why the buffer could not be imported.
+    /// The wrapped texture (the luma plane of NV12), or why the buffer could not be imported.
     texture: Result<Arc<VelloDeviceTexture>, String>,
+    /// The chroma plane of an NV12 buffer.
+    chroma: Option<Arc<VelloDeviceTexture>>,
     format: PlatformGraphicsExternalImageFormat,
 }
 
@@ -458,6 +513,14 @@ impl IPlatformRenderInterfaceImportedImage for VelloDmaBufImportedImage {
         }
         if m.device != Some(DeviceIdentity::Uuid(self.uuid.clone())) {
             return Err(FrameError::DeviceMismatch);
+        }
+        if m.format == FrameFormat::Nv12 {
+            let chroma = self.chroma.as_ref().ok_or(FrameError::UnsupportedFormat)?;
+            if !matches!(m.color, FrameColor::Rec709Full | FrameColor::Rec709Limited) || m.alpha != FrameAlpha::Opaque {
+                return Err(FrameError::UnsupportedColor);
+            }
+            frame.counters().gpu_import();
+            return Ok(Arc::new(VelloSharedFrameBitmap::new_nv12(texture.clone(), chroma.clone(), frame)));
         }
         match m.color {
             FrameColor::Srgb => {}
@@ -541,7 +604,27 @@ impl IExternalObjectsRenderInterfaceContextFeature for VelloDmaBufExternalObject
             panic!("Importing this platform handle is not supported");
         }
         let (width, height) = (properties.width.max(0) as u32, properties.height.max(0) as u32);
+        let mut chroma = None;
         let texture = match &properties.dma_buf_properties {
+            Some(dma) if dma.plane_count == 2 && dma.drm_format == DRM_NV12 => {
+                let at = |values: &Option<Vec<u32>>, plane: usize| {
+                    values.as_ref().and_then(|values| values.get(plane).copied())
+                };
+                let fd = |plane: usize| {
+                    let given = dma.plane_fds.as_ref().and_then(|fds| fds.get(plane).copied());
+                    given.unwrap_or(handle.handle() as i32)
+                };
+                let layout = |plane: usize| Some((at(&dma.plane_offsets, plane)?, at(&dma.plane_strides, plane)?));
+                match (layout(0), layout(1)) {
+                    (Some(luma), Some(second)) => self
+                        .import_nv12([fd(0), fd(1)], (width, height), dma.drm_modifier, [luma, second])
+                        .map(|(luma, second)| {
+                            chroma = Some(second);
+                            luma
+                        }),
+                    _ => Err("the buffer has no plane layout".to_owned()),
+                }
+            }
             Some(dma) if dma.plane_count == 1 => {
                 let plane = |values: &Option<Vec<u32>>| values.as_ref().and_then(|values| values.first().copied());
                 match (plane(&dma.plane_offsets), plane(&dma.plane_strides)) {
@@ -555,7 +638,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for VelloDmaBufExternalObject
                     _ => Err("the buffer has no plane layout".to_owned()),
                 }
             }
-            _ => Err("only single-plane buffers are imported".to_owned()),
+            _ => Err("only NV12 and single-plane buffers are imported".to_owned()),
         };
         if let Err(error) = &texture {
             report_import_failure(error);
@@ -565,6 +648,7 @@ impl IExternalObjectsRenderInterfaceContextFeature for VelloDmaBufExternalObject
             generation: self.generation,
             uuid: self.uuid.clone(),
             texture,
+            chroma,
             format: properties.format,
         })
     }

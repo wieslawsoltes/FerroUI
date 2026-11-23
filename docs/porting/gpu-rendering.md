@@ -247,8 +247,9 @@ The route, in pull requests stacked on the Skia ones:
    - *Written, off by default: DMA-BUF frames on Vello's own Vulkan device on Linux* (#575,
      `gpu/dma_buf_external_objects.rs`, `ferroui-media-linux/dma_buf.rs`). It needs both
      `FERROUI_MEDIA_DMA_BUF=1` and `FERROUI_VELLO_DMA_BUF_IMPORT=1`, and has not run yet. The GL route
-     stays the default wherever the renderer has a context of OpenGL. **Not done:** NV12 frames
-     on this route, which is what hardware decoders usually produce.
+     stays the default wherever the renderer has a context of OpenGL. NV12, what hardware decoders
+     usually produce, is imported as an `R8` and an `R8G8` image and converted by one pass
+     (`nv12_conversion_texture`, BT.709 in full or limited range).
    - *Written, off by default: frames shared by an NT handle on Vello's Direct3D 12 device on
      Windows* (#575, `gpu/d3d12_external_objects.rs`, `WindowsFrameProducer::SharedHandle`). It needs
      both `FERROUI_MEDIA_NT_HANDLE=1` and `FERROUI_VELLO_NT_HANDLE_IMPORT=1`, and has not run yet.
