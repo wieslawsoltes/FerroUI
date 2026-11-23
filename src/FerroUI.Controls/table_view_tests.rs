@@ -1109,7 +1109,7 @@ fn a_sorted_table_follows_the_changes_of_its_source() {
     for value in ["b", "c", "a"] {
         list.add(value.to_string());
     }
-    let target = create_target(list.clone().into());
+    let target = create_target(Rc::new(list.clone()).into());
     let column = column();
     column.set_custom_sort_comparer(Some(Rc::new(|a, b| crate::table_view_sort::compare_values(a, b))));
     target.columns().add(column.clone());

@@ -219,6 +219,11 @@ ferro_markup_enum!(
 );
 ferro_markup_enum!(WindowStartupLocation { Manual, CenterScreen, CenterOwner }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(WindowState { Normal, Minimized, Maximized, FullScreen }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(SortDirection { None, Ascending, Descending }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(
+    TableViewSortCycle { AscendingDescending, AscendingDescendingNone, DescendingAscending, DescendingAscendingNone },
+    { namespace: "FerroUI.Controls" }
+);
 ferro_markup_enum!(
     WrapPanelItemsAlignment {
         Start, Center, End, Justify, Stretch, StretchAll,
@@ -386,6 +391,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <WindowResizeReason as MarkupTyped>::MARKUP,
     <WindowStartupLocation as MarkupTyped>::MARKUP,
     <WindowState as MarkupTyped>::MARKUP,
+    <SortDirection as MarkupTyped>::MARKUP,
+    <TableViewSortCycle as MarkupTyped>::MARKUP,
     <WrapPanelItemsAlignment as MarkupTyped>::MARKUP,
     <TitleBarDecorations as MarkupTyped>::MARKUP,
     <Corners as MarkupTyped>::MARKUP,
@@ -462,6 +469,8 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<WindowResizeReason>();
     ValueTypes::register_used::<WindowStartupLocation>();
     ValueTypes::register_used::<WindowState>();
+    ValueTypes::register_used::<SortDirection>();
+    ValueTypes::register_used::<TableViewSortCycle>();
     ValueTypes::register_used::<WrapPanelItemsAlignment>();
     ValueTypes::register_used::<TitleBarDecorations>();
     ValueTypes::register_used::<Corners>();
@@ -817,6 +826,18 @@ impl ferroui_base::data::core::ValueTypeRegistration for WindowStartupLocation {
 impl ferroui_base::data::core::ValueTypeRegistration for WindowState {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<WindowState>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SortDirection {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SortDirection>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for TableViewSortCycle {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<TableViewSortCycle>();
     }
 }
 

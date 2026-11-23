@@ -209,4 +209,8 @@ impl IItemsList for SortedItems {
     fn remove_collection_changed(&self, token: u64) {
         self.handlers.borrow_mut().retain(|(existing, _)| *existing != token);
     }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
