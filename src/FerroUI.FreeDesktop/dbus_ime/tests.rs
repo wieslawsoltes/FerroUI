@@ -644,7 +644,7 @@ fn ibus_takes_keys_commits_text_and_forwards_keys() {
 
     // A key the engine consumes: it commits text instead.
     assert!(handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 100), KEY_A, 38));
-    bus.expect_calls(&["ProcessKeyEvent(0x61, 38, 0x0)"]);
+    bus.expect_calls(&["ProcessKeyEvent(0x61, 30, 0x0)"]);
     assert_eq!(*recorded.commits.borrow(), ["あ"]);
 
     // Its release, and a key with modifiers, are not consumed.
@@ -655,7 +655,7 @@ fn ibus_takes_keys_commits_text_and_forwards_keys() {
         0x62,
         56
     ));
-    bus.expect_calls(&["ProcessKeyEvent(0x61, 38, 0x40000000)", "ProcessKeyEvent(0x62, 56, 0x5)"]);
+    bus.expect_calls(&["ProcessKeyEvent(0x61, 30, 0x40000000)", "ProcessKeyEvent(0x62, 48, 0x5)"]);
     assert_eq!(recorded.commits.borrow().len(), 1);
 
     // A key the engine hands back.
@@ -780,7 +780,7 @@ fn ibus_destroys_its_context_when_disposed_and_when_a_call_fails() {
     bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
     pump_until(|| im.is_connected());
     assert!(!handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 1), KEY_FAILS, 52));
-    bus.expect_calls(&["ProcessKeyEvent(0x7a, 52, 0x0)", "Destroy"]);
+    bus.expect_calls(&["ProcessKeyEvent(0x7a, 44, 0x0)", "Destroy"]);
     assert!(!im.is_connected());
     assert!(!handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 2), KEY_A, 38));
     bus.settle();
@@ -799,7 +799,7 @@ fn ibus_drops_the_signals_of_a_context_whose_call_failed() {
     bus.expect_calls(&["CreateInputContext(name)", &caps(IBusCapability::CAP_FOCUS)]);
     pump_until(|| im.is_connected());
     assert!(!handle(&im, key(RawKeyEventType::KeyDown, RawInputModifiers::empty(), 1), KEY_FAILS, 52));
-    bus.expect_calls(&["ProcessKeyEvent(0x7a, 52, 0x0)", "Destroy"]);
+    bus.expect_calls(&["ProcessKeyEvent(0x7a, 44, 0x0)", "Destroy"]);
     assert!(!im.is_connected());
     bus.emit(IBUS_CONTEXT_PATH, "org.freedesktop.IBus.InputContext", "CommitText", &(ibus_text("late"),));
     bus.settle();

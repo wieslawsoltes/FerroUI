@@ -2,13 +2,24 @@
 
 use super::at_spi_node::AtSpiNode;
 use super::at_spi_role::AtSpiRole;
-use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer};
+use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::automation::provider::IToggleProvider;
+use ferroui_controls::primitives::PopupRoot;
 
 impl AtSpiNode {
     pub(crate) fn to_at_spi_role(control_type: AutomationControlType, peer: Option<&AutomationPeer>) -> AtSpiRole {
         if peer.is_some_and(|peer| peer.get_heading_level() > 0) {
             return AtSpiRole::Heading;
+        }
+
+        // A frame has a title bar and border; a popup is a window without them.
+        if control_type == AutomationControlType::Window
+            && peer
+                .and_then(|peer| peer.downcast_ref::<ControlAutomationPeer>())
+                .and_then(|peer| peer.try_owner())
+                .is_some_and(|owner| owner.is::<PopupRoot>())
+        {
+            return AtSpiRole::Window;
         }
 
         Self::to_at_spi_role_with(control_type, || {

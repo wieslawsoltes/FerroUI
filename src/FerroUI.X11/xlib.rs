@@ -350,6 +350,10 @@ plain! {
     pub fn x_flush(display: XDisplay) -> c_int = XFlush;
 }
 plain! {
+    /// `XNextRequest`: the serial of the next request of the connection.
+    pub fn x_next_request(display: XDisplay) -> c_ulong = XNextRequest;
+}
+plain! {
     /// `XPending`: the number of events that were received and not yet
     /// taken from the queue.
     pub fn x_pending(display: XDisplay) -> c_int = XPending;
@@ -1083,6 +1087,8 @@ event_views! {
     key_event, key_event_mut => key: XKeyEvent;
     /// The event as a configure event.
     configure_event, configure_event_mut => configure: XConfigureEvent;
+    /// The event as a reparent event.
+    reparent_event, reparent_event_mut => reparent: xl::XReparentEvent;
     /// The event as a property event.
     property_event, property_event_mut => property: xl::XPropertyEvent;
     /// The event as a client message.
