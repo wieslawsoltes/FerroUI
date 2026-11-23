@@ -158,6 +158,25 @@ fn all_reviewed_native_adaptations_load_real_controls() {
 }
 
 #[test]
+fn map_control_example_shows_the_source_pin_on_the_offline_grid() {
+    use ferroui_controls_maps::{MapControl, MapElement};
+    let _application = start();
+    let root = examples::create(examples::find("MapControl").unwrap()).unwrap();
+    let map = root.get_control::<MapControl>("map1");
+    assert_eq!(map.map_service_token().as_deref(), Some("MapServiceToken"));
+    assert_eq!(map.zoom_level(), 1.0);
+    assert_eq!((map.center().latitude, map.center().longitude), (0.0, 0.0));
+    assert!(map.tile_source().is_some());
+    let layers = map.layers();
+    assert_eq!(layers.len(), 1);
+    let elements = layers[0].elements();
+    let [MapElement::Icon(icon)] = elements.as_slice() else {
+        panic!("the layer has the one pin of the source");
+    };
+    assert_eq!((icon.location.latitude, icon.location.longitude), (-30.034647, -51.217659));
+}
+
+#[test]
 fn adaptation_port_states_match_port_status() {
     // `port-status.json` is written with an indent of two spaces: a page is a key of `pages` and
     // its status is the first member of its entry.

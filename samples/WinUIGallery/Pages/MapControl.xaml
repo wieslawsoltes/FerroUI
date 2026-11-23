@@ -1,0 +1,10 @@
+<!-- Ported from the pinned MapControl example of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The control is the native MapControl of ferroui-controls-maps. No tile provider is built in:
+     the sample shows an offline grid, so the pin is on a grid and not on a map of the earth. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:maps="using:FerroUI.Controls.Maps"
+            x:Name="MapControlExample1" Spacing="8">
+  <TextBlock Text="Showing a pin on the map" FontSize="18" />
+  <maps:MapControl x:Name="map1" MapServiceToken="MapServiceToken" Height="600" />
+</StackPanel>
