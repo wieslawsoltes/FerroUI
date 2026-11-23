@@ -24,8 +24,8 @@ use std::sync::Arc;
 ///
 /// Geometries are the neutral geometry module of ProGPU; frames are scenes of its engine on a
 /// WebGPU device; text is the text stack of the engine and image files are read by its image
-/// module (PNG). What the engine does not have (other image formats, saving a bitmap) reports
-/// `Unsupported` and is noted in the log once.
+/// module (PNG, JPEG, GIF, BMP). What the engine does not have (other image formats, saving a
+/// bitmap) reports `Unsupported` and is noted in the log once.
 #[derive(Default)]
 pub struct ProGpuPlatformRenderInterface;
 

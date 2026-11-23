@@ -469,8 +469,27 @@ fn image_files_are_decoded_and_drawn() {
     let cut = damaged.len() - 20;
     damaged.truncate(cut);
     assert_eq!(std::io::ErrorKind::InvalidData, interface.load_bitmap(&mut std::io::Cursor::new(damaged)).err().expect("refused").kind());
-    let jpeg = vec![0xFF, 0xD8, 0xFF, 0xE0, 0, 16, b'J', b'F', b'I', b'F', 0];
-    assert_eq!(std::io::ErrorKind::Unsupported, interface.load_bitmap(&mut std::io::Cursor::new(jpeg)).err().expect("refused").kind());
+    let cut_jpeg = vec![0xFF, 0xD8, 0xFF, 0xE0, 0, 16, b'J', b'F', b'I', b'F', 0];
+    assert_eq!(std::io::ErrorKind::InvalidData, interface.load_bitmap(&mut std::io::Cursor::new(cut_jpeg)).err().expect("refused").kind());
+    let webp = b"RIFF\x10\0\0\0WEBPVP8 ".to_vec();
+    assert_eq!(std::io::ErrorKind::Unsupported, interface.load_bitmap(&mut std::io::Cursor::new(webp)).err().expect("refused").kind());
+
+    // A BMP of one row of two pixels: the formats of the image module come through the same way.
+    let mut bmp = Vec::new();
+    bmp.extend_from_slice(b"BM");
+    bmp.extend_from_slice(&62u32.to_le_bytes());
+    bmp.extend_from_slice(&0u32.to_le_bytes());
+    bmp.extend_from_slice(&54u32.to_le_bytes());
+    bmp.extend_from_slice(&40u32.to_le_bytes());
+    bmp.extend_from_slice(&2i32.to_le_bytes());
+    bmp.extend_from_slice(&1i32.to_le_bytes());
+    bmp.extend_from_slice(&1u16.to_le_bytes());
+    bmp.extend_from_slice(&24u16.to_le_bytes());
+    bmp.extend_from_slice(&[0u8; 24]);
+    bmp.extend_from_slice(&[30, 20, 10, 60, 50, 40, 0, 0]);
+    let decoded = crate::ProGpuBitmap::decode(&bmp).expect("a BMP is decoded");
+    assert_eq!(PixelSize::new(2, 1), ferroui_base::platform::IBitmapImpl::pixel_size(&decoded));
+    decoded.with_pixels(|pixels| assert_eq!(&pixels[..8], &[10, 20, 30, 255, 40, 50, 60, 255]));
 }
 
 /// A frame on a white surface of 96 pixels, drawn by `draw`.
