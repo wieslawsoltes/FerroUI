@@ -1,0 +1,36 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Rectangle x:Name="Opacity" Width="50" Height="50" Opacity="0.5">
+    <Rectangle.OpacityTransition>
+      <ScalarTransition Duration="0:0:0.5" />
+    </Rectangle.OpacityTransition>
+  </Rectangle>
+  <Rectangle x:Name="Rotation" Width="50" Height="50" Rotation="30">
+    <Rectangle.RotationTransition>
+      <ScalarTransition />
+    </Rectangle.RotationTransition>
+  </Rectangle>
+  <Rectangle x:Name="Scale" Width="50" Height="50" Scale="2,2,1">
+    <Rectangle.ScaleTransition>
+      <Vector3Transition />
+    </Rectangle.ScaleTransition>
+  </Rectangle>
+  <Rectangle x:Name="Translation" Width="50" Height="50" Translation="4,5,0">
+    <Rectangle.TranslationTransition>
+      <Vector3Transition />
+    </Rectangle.TranslationTransition>
+  </Rectangle>
+  <ContentPresenter x:Name="Presenter" Background="Blue" Width="50" Height="50">
+    <ContentPresenter.BackgroundTransition>
+      <BrushTransition />
+    </ContentPresenter.BackgroundTransition>
+  </ContentPresenter>
+  <Grid x:Name="Panel">
+    <Grid.BackgroundTransition>
+      <BrushTransition />
+    </Grid.BackgroundTransition>
+  </Grid>
+  <ParallaxView x:Name="Parallax" VerticalShift="100" HorizontalSourceOffsetKind="Absolute">
+    <Border />
+  </ParallaxView>
+</StackPanel>

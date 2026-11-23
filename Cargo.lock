@@ -1672,6 +1672,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-motion-markup-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-motion",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-controls-repeater"
 version = "0.6.0-preview.1"
 dependencies = [

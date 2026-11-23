@@ -777,6 +777,134 @@
         }
       ]
     },
+    "ImplicitTransition": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ImplicitTransition.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/motion_samples.rs",
+        "src/FerroUI.Controls.Motion/implicit_transitions.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/motion_samples_tests.rs",
+          "name": "each_implicit_transition_example_sets_its_facade_through_its_transition"
+        },
+        {
+          "path": "samples/WinUIGallery/motion_samples_tests.rs",
+          "name": "the_background_examples_change_their_brush_and_their_theme"
+        }
+      ],
+      "notes": "The six source examples use the WinUI names of the implicit transitions, markup aliases of ferroui-controls-motion. The markup follows the catalog's sample text; the option values of the source page were not compared. The theme of the last example is a ThemeVariantScope around the grid.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionAutomaticallyAnimateChangesOpacity.txt",
+          "source_sha256": "40d0e345c8f11db6c28cff0d39d3a01eaaf88cba9a068546ece4d12966b706d5",
+          "status": "ported",
+          "target_control": "Example1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_implicit_transition_example_sets_its_facade_through_its_transition"
+            }
+          ],
+          "notes": "OpacityTransition with a ScalarTransition; the button sets Opacity."
+        },
+        {
+          "source": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionAutomaticallyAnimateChangesRotation.txt",
+          "source_sha256": "451df820cf1683171f34504b0f012fa94a90fc3f0075abe00369185631e920e8",
+          "status": "ported",
+          "target_control": "Example2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_implicit_transition_example_sets_its_facade_through_its_transition"
+            }
+          ],
+          "notes": "RotationTransition with a ScalarTransition; the button sets Rotation in degrees."
+        },
+        {
+          "source": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionAutomaticallyAnimateChangesScale.txt",
+          "source_sha256": "4be4496fb4e0d68b276ab9d7a3365f32397a741bd41639235a3144ca5b1a1246",
+          "status": "ported",
+          "target_control": "Example3",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_implicit_transition_example_sets_its_facade_through_its_transition"
+            }
+          ],
+          "notes": "ScaleTransition with a Vector3Transition; the button sets Scale."
+        },
+        {
+          "source": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionAutomaticallyAnimateChangesTranslation.txt",
+          "source_sha256": "78055a43fbd11f4d3655c8340b20866979f7d37179ac331d6e0016fca41003da",
+          "status": "ported",
+          "target_control": "Example4",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_implicit_transition_example_sets_its_facade_through_its_transition"
+            }
+          ],
+          "notes": "TranslationTransition with a Vector3Transition; the button sets Translation."
+        },
+        {
+          "source": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionImplicitlyAnimateBackgroundChanges.txt",
+          "source_sha256": "0fa416d4c15743e976261ef3675c948e5aca5ba68e3f56bf9bb0ebf6fac5f659",
+          "status": "ported",
+          "target_control": "Example5",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "the_background_examples_change_their_brush_and_their_theme"
+            }
+          ],
+          "notes": "BackgroundTransition on a ContentPresenter; the button assigns a new blue or yellow brush."
+        },
+        {
+          "source": "WinUIGallery/Samples/ImplicitTransition/ImplicitTransitionImplicitlyAnimateGridTheme.txt",
+          "source_sha256": "9ba0557a85800aa287bd69ba3c4c53513c1b86739f03da32db669cb3e2c10021",
+          "status": "ported",
+          "target_control": "Example6",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "the_background_examples_change_their_brush_and_their_theme"
+            }
+          ],
+          "notes": "BackgroundTransition on a Grid; the button changes the RequestedThemeVariant of a ThemeVariantScope around it, the counterpart of RequestedTheme."
+        }
+      ]
+    },
     "Expander": {
       "status": "ported",
       "implementation": [
