@@ -189,6 +189,40 @@ fn the_names_of_the_states_are_those_of_the_winui_templates() {
     assert_eq!(state_name(false, false, Some(None)), "NormalIndeterminate");
 }
 
+#[test]
+fn the_catalog_pages_build_and_show_their_controls() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let player_page = crate::catalog_pages::player_page();
+    let _window = attach(player_page.clone().upcast());
+    let icon_page = crate::catalog_pages::icon_page();
+    let _other = attach(icon_page.clone().upcast());
+}
+
+#[test]
+fn the_gallery_handlers_play_and_set_states() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_markup_xaml::register_types();
+    crate::register_types();
+    let load = |page: &str| {
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(page, None)
+            .unwrap_or_else(|error| panic!("{error}"))
+    };
+    let root = load(include_str!("../../samples/WinUIGallery/Pages/AnimatedVisualPlayer.xaml"));
+    crate::gallery_samples::wire(&root);
+    let player = root.get_control::<AnimatedVisualPlayer>("Player");
+    let click = RoutedEventArgs::with_event(&Button::click_event());
+    root.get_control::<Button>("PlayButton").raise_event(&click);
+    assert!(player.is_playing());
+    root.get_control::<Button>("StopButton").raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    assert!(!player.is_playing());
+    let root = load(include_str!("../../samples/WinUIGallery/Pages/AnimatedIcon.xaml"));
+    crate::gallery_samples::wire(&root);
+    let icon = root.get_control::<AnimatedIcon>("SearchAnimatedIcon");
+    let first = icon.source().unwrap();
+    root.get_control::<ComboBox>("AnimatedVisualSourceKind").set_selected_index(1);
+    assert!(!first.ptr_eq(&icon.source().unwrap()), "the choice of visual changes the source");
+}
+
 /// The pages of the gallery, read by the runtime loader: the classes of this crate in markup.
 #[test]
 fn the_gallery_pages_load_with_the_classes_of_this_crate() {

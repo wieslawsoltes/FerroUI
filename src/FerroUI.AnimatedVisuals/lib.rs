@@ -37,3 +37,13 @@ pub use source::{
     AnimatedVisualSource, IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, ImageLoader,
     LottieDocumentSource, LottieVisualSource,
 };
+
+// The sample code of this crate, compiled here too: the samples are not built with it.
+#[cfg(test)]
+extern crate self as ferroui_animated_visuals;
+#[cfg(test)]
+#[path = "../../samples/ControlCatalog/Pages/animated_visuals_pages.rs"]
+mod catalog_pages;
+#[cfg(test)]
+#[path = "../../samples/WinUIGallery/animated_visual_samples.rs"]
+mod gallery_samples;

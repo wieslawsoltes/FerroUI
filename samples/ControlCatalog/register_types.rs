@@ -88,6 +88,7 @@ pub fn register_types() {
         #[cfg(feature = "lottie")]
         ferroui_controls_lottie::register_types();
         ferroui_controls_repeater::register_types();
+        ferroui_animated_visuals::register_types();
         ferroui_controls_livecharts::register_types();
         treedatagrid_demo::register_types();
         ferroui_opengl::register_types();
