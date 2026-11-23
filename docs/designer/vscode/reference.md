@@ -431,11 +431,13 @@ For an inline Rust collection, use the exact getter path from the `property` fie
 
 ### Edit and preview behaviors with MCP
 
-1. Open a designer for an XAML view. Use `designer_outline` to find the control and `designer_studio_query` with `tool: "designer_behaviors"` and `arguments: { owner }`. The report includes attached triggers, `actionRows` in source order, UTF-16 ranges, editing capabilities, and the active preview ID.
+1. Open an XAML or mapped RSX designer. Use `designer_outline` to find the control and `designer_studio_query` with `tool: "designer_behaviors"` and `arguments: { owner }`. The report includes attached triggers, `actionRows` in source order, UTF-16 ranges, editing capabilities, and the active preview ID.
 2. Use `designer_studio_edit` with the current frame revision and `tool: "designer_behavior"`. Use `upsert` to attach a complete trigger and `set_trigger` to change its fields. Use `append_action`, `set_action`, `move_action`, or `remove_action` for a single step. The move index is zero-based in the resulting action order. Read `designer_studio_tools` for the typed values and the `source` and `remove` actions.
 3. Call `designer_studio_present` with `tool: "designer_behavior"`, `action: "preview"`, and the behavior ID. Read the new frame before calling `clear_preview`. These operations execute or reset native actions on the isolated Design canvas without editing the buffer. Use `designer_view` with `view: "behaviors"` to open the dock.
 
 On Studio's MCP server, call `designer_behaviors` and `designer_behavior` directly. Supply the document revision for editing and preview. Running the trigger requires the server's `allow_input` permission. Call `designer_state_actions` to build the actions for a named visual state, then pass them when attaching a trigger. [Behavior workflow](authoring.md#edit-a-behavior)
+
+For Rust, pass simple data and command paths and literal names for optional targets. Use the mapped authoring actions from the current Rust catalog. The `source` edit applies to XAML subtrees. Use the returned ranges to navigate a Rust declaration. [Rust behavior workflow](authoring.md#edit-a-behavior-in-rust)
 
 ### Link Rust events to states with MCP
 

@@ -42,11 +42,13 @@ const actionFields: Record<string, readonly ActionField[]> = {
 export class BehaviorEditor {
     constructor(readonly context: StudioContext, readonly report: BehaviorReport) {}
 
+    private get rust(): boolean { return this.context.panel.language === 'rust'; }
+
     async attach(): Promise<void> {
         if (!this.report.canAttach) return;
         const owner = this.report.owner;
-        const trigger = await chooseTrigger(undefined, event => pickBehaviorEvent(this.context, owner, event));
-        const item = trigger && await chooseAction();
+        const trigger = await chooseTrigger(undefined, event => pickBehaviorEvent(this.context, owner, event), this.rust);
+        const item = trigger && await chooseAction(undefined, this.rust);
         if (item) await this.context.edit(BEHAVIOR_TOOL, { action: 'upsert', model: { owner, trigger, actions: [item] } });
     }
 
@@ -55,15 +57,18 @@ export class BehaviorEditor {
         const previous = behavior.trigger;
         if ('Event' in previous) {
             const current = previous.Event;
+            const sourceName = current.source?.replace(/^\{(?:Reflection)?Binding #([^}]+)\}$/, '$1');
+            const sourceText = this.rust ? sourceName : current.source;
             const field = await choose('Edit event trigger', [
                 { label: 'Event', key: 'event', description: current.event },
-                { label: 'Source', key: 'source', description: current.source ?? 'Selected control' },
+                { label: 'Source', key: 'source', description: sourceText ?? 'Selected control' },
             ]);
             if (!field) return;
-            const eventOwner = current.source && this.context.panel.nodes.find(node => node.name === current.source);
+            const eventOwner = sourceName && this.context.panel.nodes.find(node => node.name === sourceName);
             const next = field.key === 'event'
                 ? await pickBehaviorEvent(this.context, eventOwner ? eventOwner.id : behavior.owner, current.event)
-                : await editText('Name or binding for the event source', current.source ?? '', undefined, 'Event source');
+                : await editText(this.rust ? 'Control name for the event source' : 'Name or binding for the event source',
+                    sourceText ?? '', undefined, 'Event source');
             if (next !== undefined) await this.edit(behavior, { action: 'set_trigger',
                 trigger: { Event: { ...current, [field.key]: field.key === 'source' && !next.trim() ? null : next } },
             });
@@ -94,7 +99,7 @@ export class BehaviorEditor {
     }
 
     async append(behavior: AttachedBehavior): Promise<void> {
-        const item = behavior.canEditActions && await chooseAction();
+        const item = behavior.canEditActions && await chooseAction(undefined, this.rust);
         if (item) await this.edit(behavior, { action: 'append_action', item });
     }
 

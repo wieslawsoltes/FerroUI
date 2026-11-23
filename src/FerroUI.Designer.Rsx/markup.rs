@@ -19,6 +19,7 @@ pub struct RsxPreviewMarkup<'a> {
     pub controls: Vec<usize>,
     pub animations: Vec<(usize, &'a RsxAnimation)>,
     pub state_groups: Vec<(usize, &'a RsxStateGroup)>,
+    behavior_sources: Vec<(usize, SourceSpan)>,
     style_setters: Vec<(usize, SourceSpan)>,
 }
 
@@ -32,6 +33,7 @@ pub struct RsxSourceMap {
     controls: Vec<ControlSource>,
     animations: Vec<(usize, RsxAnimation)>,
     state_groups: Vec<(usize, RsxStateGroup)>,
+    behavior_sources: Vec<(usize, SourceSpan)>,
     style_setters: Vec<(usize, SourceSpan)>,
 }
 
@@ -72,6 +74,12 @@ impl RsxSourceMap {
     pub fn style_setter(&self, offset: usize) -> Option<SourceSpan> {
         let index = self.style_setters.binary_search_by_key(&offset, |(start, _)| *start).ok()?;
         Some(self.style_setters[index].1)
+    }
+
+    /// The original Rust constructor for the projected native trigger or action.
+    pub fn behavior_source(&self, offset: usize) -> Option<SourceSpan> {
+        let index = self.behavior_sources.binary_search_by_key(&offset, |(start, _)| *start).ok()?;
+        Some(self.behavior_sources[index].1)
     }
 
     pub fn can_create_animation(&self, offset: usize) -> bool {
@@ -132,6 +140,7 @@ impl RsxProjection<'_> {
                 .collect(),
             state_groups: markup.state_groups.into_iter().map(|(offset, group)| (offset, group.clone())).collect(),
             style_setters: markup.style_setters,
+            behavior_sources: markup.behavior_sources,
         };
         (markup.source, map)
     }
@@ -168,6 +177,7 @@ impl<'a> RsxPreviewMarkup<'a> {
         let groups = states.get(&index);
         let columns = nodes.get(index).and_then(|node| node.columns.as_ref()).filter(|columns| columns.projected());
         let transitions = nodes.get(index).and_then(|node| node.property_transitions.as_ref());
+        let behaviors = nodes.get(index).map_or(&[][..], |node| node.behaviors.entries.as_slice());
         self.source.push_str(&pad);
         let offset = self.source.len();
         self.controls.push(offset);
@@ -194,7 +204,7 @@ impl<'a> RsxPreviewMarkup<'a> {
         }
         let trigger_comments = triggers.comments(index);
         if element.children.is_empty() && rules.is_none() && groups.is_none() && columns.is_none()
-            && transitions.is_none() && trigger_comments.is_empty() {
+            && transitions.is_none() && trigger_comments.is_empty() && behaviors.is_empty() {
             self.source.push_str(" />");
             return;
         }
@@ -210,6 +220,7 @@ impl<'a> RsxPreviewMarkup<'a> {
         if let Some(transitions) = transitions {
             transitions.render(&mut self.source, &tag, &pad);
         }
+        self.behaviors(behaviors, &pad);
         for comment in trigger_comments {
             let _ = write!(self.source, "\n{pad}{INDENT}{comment}");
         }
@@ -218,6 +229,23 @@ impl<'a> RsxPreviewMarkup<'a> {
             self.control(child, nodes, styles, states, triggers, depth + 1);
         }
         let _ = write!(self.source, "\n{pad}</{tag}>");
+    }
+
+    fn behaviors(&mut self, behaviors: &[crate::RsxBehavior], pad: &str) {
+        if behaviors.is_empty() {
+            return;
+        }
+        let _ = write!(self.source, "\n{pad}{INDENT}<Interaction.Behaviors>");
+        for behavior in behaviors {
+            let _ = write!(self.source, "\n{pad}{INDENT}{INDENT}");
+            let offset = self.source.len();
+            self.behavior_sources.push((offset, behavior.span()));
+            self.behavior_sources.extend(behavior.action_offsets.iter().enumerate().filter_map(|(index, start)| {
+                Some((offset + start, behavior.action_span(index)?))
+            }));
+            self.source.push_str(&behavior.markup);
+        }
+        let _ = write!(self.source, "\n{pad}{INDENT}</Interaction.Behaviors>");
     }
 
     fn styles(&mut self, owner: &str, styles: &'a [RsxStyle], states: &[String], depth: usize) {

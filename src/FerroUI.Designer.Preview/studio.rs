@@ -4,7 +4,7 @@ use crate::protocol::{EditResult, Source};
 use crate::renderer::{Presentation, Renderer, Stage};
 use crate::rsx_animation;
 use ferroui_designer::mcp::{
-    DesignerMcp, LIBRARY_SCOPES, PROPERTY_TRANSITION_EDIT, PROPERTY_TRANSITIONS,
+    DesignerMcp, BEHAVIORS, BEHAVIOR_EDIT, LIBRARY_SCOPES, PROPERTY_TRANSITION_EDIT, PROPERTY_TRANSITIONS,
     RSX_COMMAND_EDIT, RSX_COMMANDS, RSX_STYLES, RSX_STYLE_EDIT,
 };
 use ferroui_designer_core::{NodeId, TextPatch};
@@ -55,10 +55,11 @@ pub(crate) fn catalog() -> Value {
         .into_iter()
         .partition(is_query);
     let presentations = edits.iter().cloned().filter_map(|tool| action_definition(tool, presentation_action)).collect::<Vec<_>>();
-    let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state" | "designer_item_template" | RSX_STYLE_EDIT | RSX_COMMAND_EDIT))).cloned()
+    let rsx_edits = edits.iter().filter(|tool| matches!(tool["name"].as_str(), Some("designer_program" | "designer_state" | "designer_item_template" | RSX_STYLE_EDIT | RSX_COMMAND_EDIT | BEHAVIOR_EDIT))).cloned()
         .filter_map(|tool| action_definition(tool, |name, action| rsx_animation::program_edit(name, action)
             || rsx_animation::keyframe_edit(name, action) || rsx_animation::state_edit(name, action)
-            || rsx_animation::clip_placement_edit(name, action) || rust_template_edit(name, action) || matches!(name, RSX_STYLE_EDIT | RSX_COMMAND_EDIT)))
+            || rsx_animation::clip_placement_edit(name, action) || rust_template_edit(name, action)
+            || rust_behavior_edit(name, action) || matches!(name, RSX_STYLE_EDIT | RSX_COMMAND_EDIT)))
         .collect::<Vec<_>>();
     json!({"tools":tools,"presentations":presentations,"rsxEdits":rsx_edits,
         "xamlEdits":edits.into_iter().filter(|tool| !matches!(tool["name"].as_str(), Some(RSX_STYLE_EDIT | RSX_COMMAND_EDIT)))
@@ -73,9 +74,6 @@ pub(crate) fn present(renderer: &mut Renderer, request: Present) -> Result<Prese
     let stage = renderer.stage(query.frame)?;
     if query.name == "designer_open_style_source" && stage.authored_rsx.is_some() {
         return Err("Edit Rust-owned style builders in Rust source.".into());
-    }
-    if query.name == "designer_behavior" && stage.authored_rsx.is_some() {
-        return Err("Behavior previews require an authored XAML view".into());
     }
     let mut arguments = query.arguments;
     let revision = stage.session.borrow().document().revision();
@@ -130,6 +128,12 @@ fn presentation_action(tool: &str, action: Option<&str>) -> bool {
     }
 }
 
+fn rust_behavior_edit(tool: &str, action: Option<&str>) -> bool {
+    tool == BEHAVIOR_EDIT && matches!(action, Some(
+        "upsert" | "remove" | "set_trigger" | "append_action" | "set_action" | "move_action" | "remove_action"
+    ))
+}
+
 fn is_query(tool: &Value) -> bool {
     tool["annotations"]["readOnlyHint"] == true
         && !matches!(
@@ -161,8 +165,11 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if query.name == "designer_preview_checks" {
         return crate::preview_checks::query(stage, &query.arguments);
     }
-    if query.name == "designer_behaviors" && stage.authored_rsx.is_some() {
-        return Err("Behavior collections use authored XAML".into());
+    if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == BEHAVIORS) {
+        stage.studio.validate(&query.name, &query.arguments)?;
+        return stage.sources.run(|| ferroui_designer::mcp::rust_behavior_report(
+            &stage.session.borrow(), rust.source(), &rust.projection()?, &query.arguments,
+        ));
     }
     if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == PROPERTY_TRANSITIONS) {
         stage.studio.validate(&query.name, &query.arguments)?;
@@ -260,6 +267,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_style = design.rsx.is_some() && query.name == RSX_STYLE_EDIT;
     let rust_command = design.rsx.is_some() && query.name == RSX_COMMAND_EDIT;
     let rust_transitions = design.rsx.is_some() && query.name == PROPERTY_TRANSITION_EDIT;
+    let rust_behavior = design.rsx.is_some() && rust_behavior_edit(&query.name, action);
     let rust_template = design.rsx.is_some() && rust_template_edit(&query.name, action);
     let rust_property = design.rsx.is_some() && query.name == "designer_property";
     let spacing = query.name == "designer_spacing_edit";
@@ -274,6 +282,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         && !rust_style
         && !rust_command
         && !rust_transitions
+        && !rust_behavior
         && !rust_template
         && !spacing
         && !wrapping
@@ -312,7 +321,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     if spacing {
         return crate::spacing::source_edit(stage, &design, &arguments);
     }
-    if rust_columns || rust_template || rust_style || rust_command || rust_transitions {
+    if rust_columns || rust_template || rust_style || rust_command || rust_transitions || rust_behavior {
         let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
         let (patches, selection) = {
             let session = stage.session.borrow();
@@ -327,6 +336,11 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
                 let patches = ferroui_designer::mcp::rust_command_source_plan(
                     &session, design.source, projection, &arguments,
                 )?;
+                (patches, None)
+            } else if rust_behavior {
+                let patches = stage.sources.run(|| ferroui_designer::mcp::rust_behavior_source_plan(
+                    &session, projection, &arguments,
+                ))?;
                 (patches, None)
             } else if rust_transitions {
                 let patches = stage.sources.run(|| ferroui_designer::mcp::rust_property_transition_source_plan(

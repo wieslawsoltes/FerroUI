@@ -32,6 +32,7 @@ import { verifyRsxColumns } from './rsxColumnsMcp';
 import { verifyRsxModuleColumns } from './rsxModuleColumnsMcp';
 import { verifyRsxTreeDataGrid } from './rsxTreeDataGridMcp';
 import { verifyStudioBehaviors } from './studioBehaviorsMcp';
+import { verifyRsxBehaviors } from './rsxBehaviorsMcp';
 import { verifyRsxItemTemplates } from './rsxItemTemplatesMcp';
 import { verifySharedRsxTemplates } from './rsxSharedTemplatesMcp';
 import { verifyItemTemplatesMcp } from './studioItemTemplatesMcp';
@@ -263,6 +264,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyRsxModuleColumns({ invoke, content });
         await verifyRsxTreeDataGrid({ invoke, content });
         await verifyStudioBehaviors({ invoke, content });
+        await verifyRsxBehaviors({ invoke, content });
         await verifyRsxItemTemplates({ invoke, content });
         await verifySharedRsxTemplates({ invoke, content });
         await verifyItemTemplatesMcp({ invoke, content });

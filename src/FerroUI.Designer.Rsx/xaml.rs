@@ -1,11 +1,13 @@
 use crate::project::{accepts_control, parse_draft};
 use crate::registered::RsxCatalog;
 use crate::tree::{Element, MAX_DEPTH, inline_content, replacement};
+use ferroui_designer_animation::{BehaviorModel, BehaviorSource};
 use ferroui_designer_core::design_fixtures::DESIGN_NAMESPACE;
 use ferroui_designer_core::{Document, Node, NodeId, NodeKind, SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 
 mod counterpart_properties;
+mod behavior_counterpart;
 
 const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 const COMPATIBILITY: &str = "http://schemas.openxmlformats.org/markup-compatibility/2006";
@@ -23,24 +25,36 @@ pub fn apply_rsx(document: &Document, draft: &str) -> Result<Vec<TextPatch>, Str
 
 impl RsxCatalog {
     pub fn xaml_to_rsx(&self, document: &Document) -> Result<String, String> {
-        let tree = XamlTree::authored(document, self)?.tree.rsx_body();
-        Ok(format!("rsx! {{\n    {}\n}}", tree.replace('\n', "\n    ")))
+        let current = XamlTree::authored(document, self)?;
+        let models = current.behavior_models();
+        let tree = current.tree.rsx_with_behaviors(&models);
+        let source = format!("rsx! {{\n    {}\n}}", tree.replace('\n', "\n    "));
+        if models.iter().any(|items| !items.is_empty()) {
+            // Validate that name-bound targets and any registered builders can round-trip.
+            parse_draft(&source, self)?;
+        }
+        Ok(source)
     }
 
     pub fn apply_rsx(&self, document: &Document, draft: &str) -> Result<Vec<TextPatch>, String> {
         let current = XamlTree::authored(document, self)?;
-        let next = parse_draft(draft, self)?;
+        let (next, models) = parse_draft(draft, self)?;
         if let Some(changes) = current.tree.changes(&next) {
-            let patches = current.plan_properties(document, changes)?;
+            let mut patches = current.plan_properties(document, changes)?;
+            patches.extend(current.plan_behaviors(document, &models)?);
             if !patches.is_empty() {
                 let source = TextPatch::apply_all(document.source(), patches.clone())
                     .map_err(|error| error.to_string())?;
                 let edited = Document::new(source).map_err(|error| error.to_string())?;
-                if XamlTree::authored(&edited, self)?.tree != next {
+                let accepted = XamlTree::authored(&edited, self)?;
+                if accepted.tree != next || accepted.behavior_models() != models {
                     return Err("The property edits do not match the authored XAML view".into());
                 }
             }
             return Ok(patches);
+        }
+        if models.iter().any(|items| !items.is_empty()) || current.origins.iter().any(|control| control.behaviors.is_some()) {
+            return Err("Use the canvas or Outline to arrange a view with behaviors".into());
         }
         if current.preserve_structure {
             return Err("Edit the structure in the XAML editor to keep its comments, processing instructions, and design metadata".into());
@@ -63,6 +77,7 @@ struct Origin {
 struct ControlOrigins {
     node: NodeId,
     properties: BTreeMap<String, Origin>,
+    behaviors: Option<Vec<BehaviorSource>>,
 }
 
 pub(crate) struct XamlTree {
@@ -73,7 +88,11 @@ pub(crate) struct XamlTree {
 
 impl XamlTree {
     pub(crate) fn parse(document: &Document, catalog: &RsxCatalog) -> Result<Self, String> {
-        Self::read(document, catalog, false, None)
+        Self::read(document, catalog, false, false, None)
+    }
+
+    pub(crate) fn counterpart(document: &Document, catalog: &RsxCatalog) -> Result<Self, String> {
+        Self::read(document, catalog, false, true, None)
     }
 
     pub(crate) fn fragment(
@@ -85,7 +104,7 @@ impl XamlTree {
             .ast()
             .node(node)
             .ok_or("Expected an inserted XAML control")?;
-        let tree = ParseTree::new(document, catalog, false, None).element(root, 0)?;
+        let tree = ParseTree::new(document, catalog, false, false, None).element(root, 0)?;
         Ok(tree.rsx_body())
     }
 
@@ -94,17 +113,18 @@ impl XamlTree {
         catalog: &RsxCatalog,
         state_classes: &BTreeMap<NodeId, (&str, bool)>,
     ) -> Result<Self, String> {
-        Self::read(document, catalog, false, Some(state_classes))
+        Self::read(document, catalog, false, true, Some(state_classes))
     }
 
     fn authored(document: &Document, catalog: &RsxCatalog) -> Result<Self, String> {
-        Self::read(document, catalog, true, None)
+        Self::read(document, catalog, true, true, None)
     }
 
     fn read(
         document: &Document,
         catalog: &RsxCatalog,
         authored: bool,
+        behaviors: bool,
         state_classes: Option<&BTreeMap<NodeId, (&str, bool)>>,
     ) -> Result<Self, String> {
         if !document.is_valid() {
@@ -114,7 +134,7 @@ impl XamlTree {
             .ast()
             .node(document.ast().root())
             .ok_or("Expected a XAML root")?;
-        let mut state = ParseTree::new(document, catalog, authored, state_classes);
+        let mut state = ParseTree::new(document, catalog, authored, behaviors, state_classes);
         let tree = state.element(root, 0)?;
         Ok(Self {
             tree,
@@ -129,6 +149,7 @@ struct ParseTree<'a> {
     catalog: &'a RsxCatalog,
     origins: Vec<ControlOrigins>,
     authored: bool,
+    behaviors: bool,
     state_classes: Option<&'a BTreeMap<NodeId, (&'a str, bool)>>,
     preserve_structure: bool,
 }
@@ -138,6 +159,7 @@ impl<'a> ParseTree<'a> {
         document: &'a Document,
         catalog: &'a RsxCatalog,
         authored: bool,
+        behaviors: bool,
         state_classes: Option<&'a BTreeMap<NodeId, (&'a str, bool)>>,
     ) -> Self {
         Self {
@@ -145,6 +167,7 @@ impl<'a> ParseTree<'a> {
             catalog,
             origins: Vec::new(),
             authored,
+            behaviors,
             state_classes,
             preserve_structure: false,
         }
@@ -218,7 +241,7 @@ impl<'a> ParseTree<'a> {
             }
         }
         let index = self.origins.len();
-        self.origins.push(ControlOrigins { node: node.id, properties: origins });
+        self.origins.push(ControlOrigins { node: node.id, properties: origins, behaviors: None });
         let placement = class.children();
         let text_property = class.text_property();
         for child in node
@@ -236,6 +259,12 @@ impl<'a> ParseTree<'a> {
                 }
                 NodeKind::Comment | NodeKind::ProcessingInstruction => {
                     self.preserve_structure = true
+                }
+                NodeKind::PropertyElement if self.behaviors && BehaviorModel::is_collection_property(child) => {
+                    if self.origins[index].behaviors.is_some() {
+                        return Err("A control can have one authored behavior collection".into());
+                    }
+                    self.origins[index].behaviors = Some(behavior_counterpart::read(self.document, node.id, child)?);
                 }
                 NodeKind::PropertyElement
                     if self.state_classes.is_some()

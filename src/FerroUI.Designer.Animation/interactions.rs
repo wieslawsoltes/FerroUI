@@ -190,18 +190,30 @@ impl BehaviorTrigger {
 }
 impl BehaviorModel {
     pub fn to_xaml(&self) -> Result<String> {
+        self.write_xaml(|_| {})
+    }
+
+    /// Encode the behavior together with the byte offset of each action in the fragment.
+    pub fn to_xaml_with_action_offsets(&self) -> Result<(String, Vec<usize>)> {
+        let mut offsets = Vec::with_capacity(self.actions.len());
+        let source = self.write_xaml(|offset| offsets.push(offset))?;
+        Ok((source, offsets))
+    }
+
+    fn write_xaml(&self, mut action_offset: impl FnMut(usize)) -> Result<String> {
         require(self.actions.len() <= 4096, "Too many behavior actions")?;
         let (name, properties) = self.trigger.attributes()?;
-        object_xml(
-            name,
-            &properties,
-            &self
-                .actions
-                .iter()
-                .map(BehaviorAction::to_xaml)
-                .collect::<Result<Vec<_>>>()?
-                .join("\n"),
-        )
+        let mut source = object_xml(name, &properties, "")?;
+        let closing_tag = source.split_off(source.len() - name.len() - "</>".len());
+        for (index, action) in self.actions.iter().enumerate() {
+            if index != 0 {
+                source.push('\n');
+            }
+            action_offset(source.len());
+            source.push_str(&action.to_xaml()?);
+        }
+        source.push_str(&closing_tag);
+        Ok(source)
     }
     pub fn read(document: &Document, owner: NodeId) -> Result<Vec<Self>> {
         Self::authored_nodes(document, owner)?

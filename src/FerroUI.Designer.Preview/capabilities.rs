@@ -68,6 +68,7 @@ pub(crate) fn initialize() -> Value {
         "rsxStateAuthoring",
         "rsxStateStructure",
         "rsxStateTriggers",
+        "rsxBehaviorAuthoring",
         "rsxPropertyTransitions",
     ]
     .into_iter()

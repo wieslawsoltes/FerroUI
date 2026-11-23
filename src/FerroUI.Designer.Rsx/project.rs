@@ -1,4 +1,5 @@
 use crate::animation::RsxAnimationIssue;
+use crate::behaviors::BehaviorFields;
 use crate::blocks::{blocks, contains_trivia, keep_comments, SourceDelimiters};
 use crate::catalog::Children;
 use crate::child_collection::{ChildEnvelope, CollectionSource, InlineChildren, control_expression};
@@ -16,6 +17,7 @@ use crate::states::{self, ProjectedStates};
 use crate::styles::{RsxStyle, RsxStyleIssue, projected_styles};
 use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
+use ferroui_designer_animation::BehaviorModel;
 use ferroui_designer_core::{Document, NodeId, NodeKind, SourceSpan, TextPatch};
 use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_tools::TableKind;
@@ -50,6 +52,7 @@ pub struct RsxNode {
     pub(crate) envelope: Option<ChildEnvelope>,
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
+    pub(crate) behaviors: BehaviorFields,
     pub(crate) state_triggers: crate::state_triggers::StateTriggers,
     pub(crate) property_transitions: Option<RsxPropertyTransitions>,
     pub(crate) columns: Option<ColumnSource>,
@@ -194,13 +197,15 @@ impl RsxProjection<'_> {
 
     pub fn matches_xaml(&self, source: &str) -> Result<bool, String> {
         let document = Document::new(source).map_err(|error| error.to_string())?;
-        Ok(self.tree == XamlTree::parse(&document, self.catalog)?.tree)
+        let counterpart = XamlTree::counterpart(&document, self.catalog)?;
+        Ok(self.tree == counterpart.tree && self.matches_behavior_models(&counterpart.behavior_models()))
     }
 
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
         self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_styles() && !self.has_projected_states()
             && !self.has_state_triggers() && !self.has_projected_columns() && !self.has_property_transitions()
+            && !self.has_projected_behaviors()
             && !self.has_explicit_child_lists() && !self.preserve_asset_expressions
     }
 
@@ -260,12 +265,14 @@ impl RsxProjection<'_> {
         }) {
             return Err("Keep comments and processing instructions in the authored format".into());
         }
-        let draft = XamlTree::parse(&document, self.catalog)?;
+        let draft = XamlTree::counterpart(&document, self.catalog)?;
+        let models = draft.behavior_models();
         if let Some(changes) = self.tree.changes(&draft.tree) {
             let mut patches = changes
                 .iter()
                 .map(|change| self.edit_property(change.index, change.name, change.value))
                 .collect::<Result<Vec<_>, _>>()?;
+            patches.extend(self.patch_behavior_models(&models)?);
             crate::source_edits::merge_insertions(&mut patches);
             if !patches.is_empty() {
                 let source = TextPatch::apply_all(self.source, patches.clone())
@@ -276,11 +283,14 @@ impl RsxProjection<'_> {
                     self.invocation.start,
                     modules.as_ref(),
                 )?;
-                if projected.omitted_count != 0 || projected.tree != draft.tree {
+                if projected.omitted_count != 0 || projected.tree != draft.tree || !projected.matches_behavior_models(&models) {
                     return Err("The property edits do not match the authored Rust view".into());
                 }
             }
             return Ok(patches);
+        }
+        if self.has_projected_behaviors() || models.iter().any(|items| !items.is_empty()) {
+            return Err("Use the canvas or Outline to arrange a view with behaviors".into());
         }
         if self.has_explicit_child_lists() {
             return Err("Use the canvas or Outline to edit the authored Rust child list".into());
@@ -358,7 +368,7 @@ impl RsxCatalog {
     }
 }
 
-pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element, String> {
+pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<(Element, Vec<Vec<BehaviorModel>>), String> {
     let tokens: TokenStream = source
         .parse()
         .map_err(|e| format!("Invalid RSX tokens: {e}"))?;
@@ -375,7 +385,8 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
     }
     let (tree, state) = parse_body(source, draft.mac.tokens, catalog, None)?;
     if !state.styles.is_empty() || !state.states.is_empty() || state.nodes.iter().any(|node| {
-        node.property_transitions.is_some() || node.columns.as_ref().is_some_and(ColumnSource::projected)
+        node.property_transitions.is_some() || !node.state_triggers.is_empty()
+            || node.columns.as_ref().is_some_and(ColumnSource::projected)
     }) {
         return Err("Edit native styles, transitions, animation, states, and columns in their authored scope".into());
     }
@@ -388,7 +399,8 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
     if contains_trivia(source, tokens, SourceSpan::new(0, source.len())) {
         return Err("Keep comments in the authored format".into());
     }
-    Ok(tree)
+    let models = state.nodes.iter().map(|node| node.behaviors.entries.iter().map(|entry| entry.model().clone()).collect()).collect();
+    Ok((tree, models))
 }
 
 #[derive(Default)]
@@ -510,6 +522,7 @@ impl State<'_> {
                 ArraySlot::Unavailable
             },
             state_triggers: crate::state_triggers::StateTriggers::default(),
+            behaviors: BehaviorFields::new(class.xaml_property(None, "behaviors").is_none()),
             property_transitions: None,
             style_slot: if class.xaml_property(None, "styles").is_none() {
                 ArraySlot::Missing
@@ -535,6 +548,10 @@ impl State<'_> {
                 Attribute::Call { name, arguments } => {
                     let setter = name.unraw().to_string();
                     let argument = arguments.first().filter(|_| arguments.len() == 1);
+                    if setter == "behaviors" && class.xaml_property(None, &setter).is_none() {
+                        self.project_behaviors(index, argument, &class);
+                        continue;
+                    }
                     let name = crate::animation::syntax::span(name);
                     let field = self.delimiters.calls.get(&name.start).copied();
                     if setter == "state_trigger" && class.xaml_property(None, &setter).is_none() {
@@ -610,6 +627,10 @@ impl State<'_> {
                     ArraySlot::Unavailable
                 };
                 state_fields.push(value.as_ref());
+                continue;
+            }
+            if owner.is_none() && setter == "behaviors" && class.xaml_property(None, &setter).is_none() {
+                self.project_behaviors(index, Some(value), &class);
                 continue;
             }
             let value_span = value.span().byte_range();
@@ -721,6 +742,14 @@ impl State<'_> {
             style_issues: self.style_issues.len() - style_issues_before,
         };
         Ok(result)
+    }
+
+    fn project_behaviors(&mut self, index: usize, value: Option<&syn::Expr>, class: &Class) {
+        let position = self.nodes[index].name.start;
+        let rust = self.local_rust.get_or_insert_with(|| LocalRust::parse(self.source, position, self.modules));
+        if !self.nodes[index].behaviors.read(value, rust) {
+            self.omit(format!("{class}.behaviors expression"));
+        }
     }
 
     fn project_template(
@@ -842,5 +871,20 @@ fn parse_body<'a>(
         ..State::default()
     };
     let tree = state.element(source, root, 0, catalog)?;
+    if state.nodes.iter().any(|node| !node.behaviors.entries.is_empty()) {
+        let mut names = BTreeMap::new();
+        let mut pending = vec![&tree];
+        while let Some(control) = pending.pop() {
+            if let Some(name) = control.properties.get("Name") {
+                *names.entry(name.as_str()).or_insert(0) += 1;
+            }
+            pending.extend(&control.children);
+        }
+        for index in 0..state.nodes.len() {
+            if !state.nodes[index].behaviors.retain_resolved_targets(&names) {
+                state.omit("Behavior with a missing or ambiguous control name".into());
+            }
+        }
+    }
     Ok((tree, state))
 }

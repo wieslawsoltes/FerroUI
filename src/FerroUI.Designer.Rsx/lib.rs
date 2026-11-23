@@ -2,6 +2,7 @@
 //! and the mapping is tied to the source snapshot used to construct it.
 
 mod animation;
+mod behaviors;
 mod blocks;
 mod catalog;
 mod commands;
@@ -32,6 +33,7 @@ mod wrap_edits;
 mod xaml;
 
 pub use animation::{RsxAnimation, RsxAnimationIssue};
+pub use behaviors::{RsxBehavior, RsxBehaviorEdit};
 pub use columns::RsxColumnDeclaration;
 pub use commands::{RsxCommandEdit, RsxCommandSelection, RsxCommandSlot, RsxCommandValue};
 pub use item_templates::{RsxItemTemplate, RsxTemplateBody, is_item_template_owner};

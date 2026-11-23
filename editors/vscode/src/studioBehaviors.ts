@@ -59,7 +59,8 @@ export function triggerLabel(trigger: Trigger): string {
     return trigger.Custom.type_name;
 }
 
-export async function chooseTrigger(previous?: Trigger, eventPicker?: (current: string) => Promise<string | undefined>): Promise<Trigger | undefined> {
+export async function chooseTrigger(previous?: Trigger, eventPicker?: (current: string) => Promise<string | undefined>,
+    rust = false): Promise<Trigger | undefined> {
     const kind = await choose('When should this behavior run?', [{ label: 'Routed event', event: true }, { label: 'Data condition', event: false }]);
     if (!kind) return;
     if (kind.event) {
@@ -68,12 +69,14 @@ export async function chooseTrigger(previous?: Trigger, eventPicker?: (current: 
             ? await eventPicker(current?.event ?? 'Click')
             : await editText('Routed event name', current?.event ?? 'Click');
         if (!event) return;
-        const source = await editText('Source name or binding. Leave empty for the selected control.', current?.source ?? '');
+        const source = await editText(rust ? 'Source control name. Leave empty for the selected control.'
+            : 'Source name or binding. Leave empty for the selected control.', current?.source ?? '');
         if (source !== undefined) return { Event: { event, source: source || null } };
         return;
     }
     const current = previous && 'Data' in previous ? previous.Data : undefined;
-    const binding = await editText('Data binding', current?.binding ?? '{Binding IsReady}');
+    const binding = await editText(rust ? 'Data-context path' : 'Data binding',
+        current?.binding ?? (rust ? 'IsReady' : '{Binding IsReady}'));
     if (!binding) return;
     const comparison = await choose('Comparison', comparisons.map(label => ({ label, picked: label === current?.comparison })));
     if (!comparison) return;
@@ -94,19 +97,21 @@ export function actionLabel(kind: string): string {
 
 export const actionKinds = ['ChangeProperty', 'InvokeCommand', 'CallMethod', 'AddClass', 'RemoveClass'];
 
-export async function chooseAction(previous?: BehaviorAction): Promise<BehaviorAction | undefined> {
+export async function chooseAction(previous?: BehaviorAction, rust = false): Promise<BehaviorAction | undefined> {
     const selection = await choose('What should this behavior do?', actionKinds
         .map(kind => ({ actionKind: kind, label: actionLabel(kind), picked: previous && kind in previous })));
     if (!selection) return;
     const fields = previous?.[selection.actionKind] as Record<string, string | null> | undefined;
     if (selection.actionKind === 'InvokeCommand') {
-        const command = await editText('Command binding', fields?.command ?? '{Binding SaveCommand}');
+        const command = await editText(rust ? 'Command path on the data context' : 'Command binding',
+            fields?.command ?? (rust ? 'SaveCommand' : '{Binding SaveCommand}'));
         if (!command) return;
         const parameter = await editText('Optional command parameter', fields?.parameter ?? '');
         if (parameter !== undefined) return { InvokeCommand: { command, parameter: parameter || null } };
         return;
     }
-    const destination = await editText('Target name or binding. Leave empty for the selected control.', fields?.target ?? '');
+    const destination = await editText(rust ? 'Target control name. Leave empty to use the trigger sender.'
+        : 'Target name or binding. Leave empty to use the trigger sender.', fields?.target ?? '');
     if (destination === undefined) return;
     const target = destination || null;
     switch (selection.actionKind) {

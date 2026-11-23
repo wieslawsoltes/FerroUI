@@ -22,6 +22,7 @@ import { verifyHostedStateRoutes } from './hostedStateRoutes';
 import { verifyHostedStateAuthoring } from './hostedStateAuthoring';
 import { verifyHostedStateValues } from './hostedStateValues';
 import { verifyHostedStateTrigger } from './hostedStateTriggers';
+import { verifyHostedRustBehaviors } from './hostedRustBehaviors';
 import { verifyHostedTransformCurves } from './hostedTransformCurves';
 import { verifyHostedTransformList } from './hostedTransformList';
 import { verifyHostedWorkspaceSources } from './hostedWorkspaceSources';
@@ -125,6 +126,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedRegisteredEffects(preview, update);
         await verifyHostedStateValues(preview, update);
         await verifyHostedStateTrigger(preview, { ...hostedRsx(4110), projectPath: '/ApprovalStateTrigger.rs' });
+        await verifyHostedRustBehaviors(preview, { ...hostedRsx(4112), projectPath: '/ApprovalBehavior.rs' });
         await verifyHostedTransformCurves(preview, update);
         await verifyHostedBoxShadows(preview, update);
         await verifyHostedTransformList(preview, update);

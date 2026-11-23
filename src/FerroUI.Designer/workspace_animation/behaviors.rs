@@ -23,7 +23,7 @@ impl DesignerWorkspace {
             return;
         };
         let writable = session.can_manipulate();
-        let can_attach = writable && BehaviorSource::can_attach(session.document(), owner);
+        let can_attach = session.can_attach_behavior(owner);
         drop(session);
 
         if behaviors.is_empty() {
@@ -94,6 +94,7 @@ impl DesignerWorkspace {
         let session = self.session.borrow();
         let previewable = session.can_preview_behavior(behavior.model.owner, index);
         let preview = session.active_behavior_preview();
+        let edit_markup = writable && !session.uses_rust_source();
         let edit_trigger_fields = behavior.can_edit_trigger(session.document());
         let source = session
             .document()
@@ -138,7 +139,7 @@ impl DesignerWorkspace {
                     .edit_behavior(id, BehaviorEdit::AppendAction(item()?))
             });
         }
-        if writable {
+        if edit_markup {
             let advanced = expander(panel, "Behavior XAML");
             let editor = code_field(&advanced, "Source", &source);
             scope.add(

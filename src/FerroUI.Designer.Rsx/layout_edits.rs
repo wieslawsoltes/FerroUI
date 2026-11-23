@@ -211,7 +211,9 @@ impl RsxProjection<'_> {
                 ))
             })
             .collect();
-        if actual.tree != XamlTree::layout(draft, self.catalog, &state_classes)?.tree
+        let expected = XamlTree::layout(draft, self.catalog, &state_classes)?;
+        if actual.tree != expected.tree
+            || !actual.matches_behavior_models(&expected.behavior_models())
             || program_count(self, &removed.indices) != program_count(&actual, &BTreeSet::new())
         {
             return Err("This placement cannot preserve the authored Rust layout".into());

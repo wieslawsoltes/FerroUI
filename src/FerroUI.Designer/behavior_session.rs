@@ -1,9 +1,10 @@
 //! Authored behavior edits and native trigger preview for a designer session.
 use crate::DesignerSession;
-use ferroui_base::{BoxedValue, Ref, StyledElement, Visual};
+use crate::rsx_behavior_authoring::BehaviorCommand;
+use ferroui_base::{BoxedValue, StyledElement};
 use ferroui_designer_animation::{BehaviorEdit, BehaviorModel, BehaviorSource};
 use ferroui_designer_core::NodeId;
-use ferroui_xaml_interactivity::{ActionCollection, ITrigger, Interaction};
+use ferroui_xaml_interactivity::{ActionCollection, EventTriggerBase, ITrigger, Interaction};
 use std::collections::BTreeSet;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
@@ -13,6 +14,17 @@ impl DesignerSession {
         BehaviorModel::read(&self.document, owner).unwrap_or_default()
     }
     pub fn upsert_behavior(&mut self, model: BehaviorModel) -> Result<NodeId, String> {
+        if self.uses_rust_source() {
+            let owner = model.owner;
+            let existing = self.behaviors(owner);
+            let index = match model.id {
+                Some(id) => existing.iter().position(|entry| entry.id == Some(id)).ok_or("Choose a behavior on this Rust control")?,
+                None => existing.len(),
+            };
+            self.apply_rust_behavior(BehaviorCommand::Upsert(model))?;
+            return self.behaviors(owner).get(index).and_then(|entry| entry.id)
+                .ok_or_else(|| "The authored Rust behavior is absent from the accepted preview".into());
+        }
         let before = self
             .behaviors(model.owner)
             .iter()
@@ -33,6 +45,9 @@ impl DesignerSession {
             .ok_or_else(|| "Created behavior was not found".into())
     }
     pub fn remove_behavior(&mut self, id: NodeId) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return self.apply_rust_behavior(BehaviorCommand::Remove(id));
+        }
         let edits = BehaviorModel::remove(&self.document, id).map_err(|error| error.to_string())?;
         self.apply("Remove behavior", edits)
             .map_err(|error| error.to_string())?;
@@ -42,8 +57,24 @@ impl DesignerSession {
         BehaviorSource::read(&self.document, owner).map_err(|error| error.to_string())
     }
 
+    pub(crate) fn can_attach_behavior(&self, owner: NodeId) -> bool {
+        if !self.can_manipulate() {
+            return false;
+        }
+        if let Some(rust) = &self.rust {
+            return rust.projection().is_ok_and(|projection| {
+                projection.control_index(self.document(), owner)
+                    .is_some_and(|index| projection.can_attach_behavior(index))
+            });
+        }
+        BehaviorSource::can_attach(&self.document, owner)
+    }
+
     pub fn edit_behavior(&mut self, id: NodeId, edit: BehaviorEdit) -> Result<(), String> {
-        if self.uses_rust_source() || !self.can_manipulate() {
+        if self.uses_rust_source() {
+            return self.apply_rust_behavior(BehaviorCommand::Edit(id, edit));
+        }
+        if !self.can_manipulate() {
             return Err("Open the current authored XAML preview to edit this behavior".into());
         }
         let edits =
@@ -57,6 +88,9 @@ impl DesignerSession {
     }
 
     pub fn set_behavior_source(&mut self, id: NodeId, source: &str) -> Result<(), String> {
+        if self.uses_rust_source() {
+            return Err("Edit the behavior's original Rust constructor in source".into());
+        }
         let edits = BehaviorSource::replace_source(&self.document, id, source)
             .map_err(|error| error.to_string())?;
         self.apply("Edit behavior XAML", edits)
@@ -80,8 +114,7 @@ impl DesignerSession {
             .iter()
             .position(|model| model.id == Some(id))
             .ok_or("Unknown behavior")?;
-        let (visual, actions) = self.behavior_actions(owner, index)?;
-        let sender: BoxedValue = Rc::new(visual);
+        let (sender, actions) = self.behavior_actions(owner, index)?;
         self.interactions.behavior_modified = true;
         // Isolate application code in the tool's unwinding builds. Restore the
         // authored graph if a later action fails.
@@ -128,7 +161,7 @@ impl DesignerSession {
         &self,
         owner: NodeId,
         index: usize,
-    ) -> Result<(Ref<Visual>, Option<ActionCollection>), String> {
+    ) -> Result<(BoxedValue, Option<ActionCollection>), String> {
         if !self.authored_is_valid()
             || !matches!(self.preview_status(), crate::PreviewStatus::Ready { revision } if *revision == self.document.revision())
         {
@@ -153,6 +186,8 @@ impl DesignerSession {
             .ok_or("The behavior is unavailable in the current preview")?;
         let trigger = <dyn ITrigger>::of(behavior)
             .ok_or("Use Interact to exercise this behavior's native event or lifecycle")?;
-        Ok((visual, trigger.actions()))
+        let sender = behavior.cast::<EventTriggerBase>().and_then(|event| event.resolved_source())
+            .unwrap_or_else(|| Rc::new(visual));
+        Ok((sender, trigger.actions()))
     }
 }

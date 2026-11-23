@@ -1,22 +1,25 @@
 use super::{decode, integer, node_id, schema as s, state, text, Permissions};
 use crate::DesignerSession;
+use crate::rsx_behavior_authoring::{mapped_behaviors, rust_behavior_plan, BehaviorCommand};
 use ferroui_designer_animation::{BehaviorEdit, BehaviorModel, BehaviorSource};
+use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_designer_language::LineIndex;
+use ferroui_designer_rsx::RsxProjection;
 use serde_json::{json, Value};
 
-const QUERY: &str = "designer_behaviors";
-const EDIT: &str = "designer_behavior";
+pub const BEHAVIORS: &str = "designer_behaviors";
+pub const BEHAVIOR_EDIT: &str = "designer_behavior";
 
 pub(super) fn handles(name: &str) -> bool {
-    matches!(name, QUERY | EDIT)
+    matches!(name, BEHAVIORS | BEHAVIOR_EDIT)
 }
 
 pub(super) fn tools() -> Vec<Value> {
     vec![
-        s::tool(QUERY,
+        s::tool(BEHAVIORS,
             "Read the selected element's attached behaviors, source ranges, typed actions and available native preview.",
             s::object(json!({"owner":s::id()}), &["owner"]), false),
-        s::actions(EDIT,
+        s::actions(BEHAVIOR_EDIT,
             "Edit attached behaviors using the current source revision. Action indices refer to the resulting order within a trigger. Preview runs its native actions in the designer and requires allow_input.",
             vec![
                 s::action("upsert", json!({"model":s::behavior()}), &["model"], true),
@@ -43,7 +46,10 @@ pub(super) fn call(
     args: &Value,
     permissions: Permissions,
 ) -> Result<Value, String> {
-    if name == QUERY {
+    if name == BEHAVIORS {
+        if let Some(rust) = &session.rust {
+            return rust_behavior_report(session, rust.source(), &rust.projection()?, args);
+        }
         return report(session, node_id(args, "owner")?);
     }
     let mut created = None;
@@ -88,6 +94,33 @@ fn change(action: &str, args: &Value) -> Result<BehaviorEdit, String> {
     })
 }
 
+pub fn rust_behavior_source_plan(
+    session: &DesignerSession, projection: &RsxProjection<'_>, arguments: &Value,
+) -> Result<Vec<TextPatch>, String> {
+    let action = text(arguments, "action")?;
+    let command = match action.as_str() {
+        "upsert" => BehaviorCommand::Upsert(decode(arguments, "model")?),
+        "remove" => BehaviorCommand::Remove(node_id(arguments, "behavior")?),
+        _ => BehaviorCommand::Edit(node_id(arguments, "behavior")?, change(&action, arguments)?),
+    };
+    rust_behavior_plan(session, projection, command)
+}
+
+pub fn rust_behavior_report(
+    session: &DesignerSession, source: &str, projection: &RsxProjection<'_>, arguments: &Value,
+) -> Result<Value, String> {
+    let owner = node_id(arguments, "owner")?;
+    let document = session.document();
+    let (control, entries) = mapped_behaviors(document, projection, owner)?;
+    let index = LineIndex::new(source);
+    let (_, map) = projection.mapped_markup();
+    let range = |id| {
+        let offset = document.ast().node(id)?.span.start;
+        index.range(map.behavior_source(offset)?).ok()
+    };
+    Ok(behavior_report(session, owner, entries, projection.can_attach_behavior(control), range))
+}
+
 fn report(session: &DesignerSession, owner: u64) -> Result<Value, String> {
     let document = session.document();
     if !document
@@ -104,8 +137,16 @@ fn report(session: &DesignerSession, owner: u64) -> Result<Value, String> {
             .node(id)
             .and_then(|node| index.range(node.span).ok())
     };
-    let editable = !session.uses_rust_source() && session.can_manipulate();
     let sources = session.behavior_sources(owner)?;
+    Ok(behavior_report(session, owner, sources, session.can_attach_behavior(owner), range))
+}
+
+fn behavior_report(
+    session: &DesignerSession, owner: NodeId, sources: Vec<BehaviorSource>, can_attach: bool,
+    range: impl Fn(NodeId) -> Option<ferroui_designer_language::Range>,
+) -> Value {
+    let document = session.document();
+    let editable = session.can_manipulate();
     let behaviors: Vec<_> =
         sources
             .iter()
@@ -124,9 +165,6 @@ fn report(session: &DesignerSession, owner: u64) -> Result<Value, String> {
                 row
             })
             .collect();
-    Ok(
-        json!({"revision":document.revision(),"owner":owner,"editable":editable,
-        "canAttach":editable && BehaviorSource::can_attach(document, owner),"behaviors":behaviors,
-        "activePreview":session.active_behavior_preview()}),
-    )
+    json!({"revision":document.revision(),"owner":owner,"editable":editable,
+        "canAttach":editable && can_attach,"behaviors":behaviors,"activePreview":session.active_behavior_preview()})
 }

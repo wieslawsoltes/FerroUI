@@ -72,6 +72,9 @@ impl RsxProjection<'_> {
         );
         references.visit(nodes, 0)?;
         let mut patches = references.into_patches();
+        if let Some(previous) = previous.as_deref().filter(|name| !name.is_empty()) {
+            patches.extend(self.rename_behavior_targets(previous, name)?);
+        }
         match (declaration, previous, name) {
             (Some(span), Some(previous), Some(name)) if !previous.is_empty() => {
                 patches.extend(rewrite_literal(

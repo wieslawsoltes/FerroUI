@@ -366,9 +366,7 @@ impl DesignerWorkspace {
         ] {
             self.root.get_control::<Button>(name).set_is_visible(!rust && !clips);
         }
-        for name in ["BehaviorsMode", "SetAnimationSelector"] {
-            self.root.get_control::<Button>(name).set_is_visible(!rust);
-        }
+        self.root.get_control::<Button>("SetAnimationSelector").set_is_visible(!rust);
         self.root.get_control::<Button>("TimelineCurves").set_is_visible(!clips);
         self.root.get_control::<Button>("PlayAll").set_is_visible(!clips);
         self.root.get_control::<Button>("TimelineRange").set_is_visible(
@@ -452,12 +450,7 @@ impl DesignerWorkspace {
         let panel = self.root.get_control::<StackPanel>("AuthoringPanel");
         panel.children().clear();
         panel.set_spacing(8.0);
-        let mut authoring = self.authoring.borrow_mut();
-        if self.session.borrow().uses_rust_source() && authoring.mode == 2 {
-            authoring.mode = 0;
-        }
-        let mode = authoring.mode;
-        drop(authoring);
+        let mode = self.authoring.borrow().mode;
         self.root
             .get_control::<Grid>("InspectorDesignPane")
             .set_is_visible(mode == 0);

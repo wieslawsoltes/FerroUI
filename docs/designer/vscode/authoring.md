@@ -260,11 +260,11 @@ Try the StackPanel, Grid, and Border in [LayoutHelpers.xaml](../samples/LayoutHe
 | --- | --- |
 | **Properties** | Select a control and search its common and additional fields. Compare measured bounds to authored values. Edit a common field across selected controls, inspect effective values and their sources, or reset an authored value. Use **Edit binding**, **Edit brush**, or **Promote to resource** when available for the property. |
 | **Events** | Assign or clear an XAML handler name or supported RSX expression. Create a Rust code-behind handler for an XAML event with a project registration, or open its declaration. |
-| **Behaviors** | Attach an event or data trigger to an XAML control, edit and order its actions, and run the actions on the native Design canvas. |
+| **Behaviors** | Attach an event or data trigger to an authored XAML or mapped Rust control, edit and order its actions, and run the actions on the native Design canvas. |
 | **Resources** | Filter to the current selection’s XAML scope. Inspect usage, reveal the definition, or apply a compatible static or dynamic reference. Use the rename icon to review a key and its project references. Extract the containing dictionary into a reusable file, or use **Promote to resource** to replace a literal with a reference. |
 | **Library** | Browse reusable XAML definitions across the project. In the active design, browse definitions by kind or XAML and mapped Rust objects by owning scope. Open a scoped native preview, find uses, or reveal the original declaration. |
 | **Assets** | Import and browse images, fonts, media, and markup. Open a file, preview a raster image, or copy its path or published Cargo address. Drop a raster image on the canvas or Outline, or use **Choose image placement**. Workspace files use relative XAML URIs or an `embedded_image` call in mapped RSX. [Published assets](#place-a-published-cargo-asset) use a `ferres://` address. |
-| **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. Open **Behaviors** to edit the selected XAML control’s triggers. |
+| **Studio** | In **Focus and Labels**, set tab stops, change traversal order, and link a label to its target. Enable **Focus Order Overlay** from canvas actions and use Tab and Enter to reach and reveal badges. Open **Behaviors** to edit the selected control’s triggers. |
 
 To change an authored image, select it in **Design** or **Outline**. Select a raster file in **Assets** and choose **Use as image source**. The action is available for an empty or literal image source. XAML writes the document-relative URI. On an existing mapped RSX source, the edit changes the path inside `include_bytes!` and preserves the surrounding call, comments, and compatible raw-string delimiters. One Undo restores the previous source.
 
@@ -289,6 +289,22 @@ When editing XAML directly, completion recognizes the framework’s trigger and 
 To wire an event to a visual state, select the control that raises the event. In **Studio → States**, choose the destination state and **Attach event trigger…**. Choose the routed event. The generated XAML actions use the selected state group. [Designer Studio workflow](../native-controls.md#edit-behaviors) · [MCP workflow](reference.md#edit-and-preview-behaviors-with-mcp)
 
 ![The Behaviors dock lists the Click trigger and its ordered actions beside the authored XAML and native preview](../images/vscode-behaviors-preview.jpg)
+
+### Edit a behavior in Rust
+
+Enable the `behaviors` feature on `ferroui-view` in your Cargo dependencies. Open the [Release approval sample](../../../samples/TodoWorkbench/app_preview/behaviors.rs) and select **Approve** in Design or Outline. **FerroUI: Edit Behaviors** opens the trigger and its ordered actions.
+
+Use the same plus, preview, reset, source, and remove icons as for a XAML behavior. Drag actions to reorder them or use **Move Action Earlier** and **Move Action Later** from the row menu. Source reveal selects the Rust trigger or action, and one Undo restores the authored Rust.
+
+Use literal control names for event sources and action targets. A blank target uses the trigger sender. Data conditions and command actions use reflection paths such as `IsReady` or `Review.SaveCommand`. Property values, comparison values, and optional command parameters use native literal text. Supported constructors use the inline array under `ferroui_view::behavior`. Imported names and aliases continue to work after an edit. Computed behavior entries stay in source and the preview reports them as partial.
+
+For a fully mapped view, open the **XAML** tab to edit literal behavior arguments and apply them to Rust. An authored XAML view with supported literal behaviors also offers an editable **Rust** tab. A named XAML target uses a binding such as `{Binding #Status}`. To change an attached collection or action list, use **Behaviors**. To arrange controls, use Design or Outline.
+
+Use **Interact** to test the event. To run the sample's compiled Rust behavior in **App Preview**, choose the **Compiled approval** fixture in Todo Workbench with `app-preview` enabled. For the current source draft, clear the fixture and interact with the projected view. Save a behavior change to apply it through Cargo hot reload's rebuild path.
+
+[Rust behavior API](../../declarative-ui.md#attach-native-behaviors) · [MCP workflow](reference.md#edit-and-preview-behaviors-with-mcp)
+
+![VS Code shows the native release approval preview after its Click actions, with Behaviors and the original Rust source open](../images/vscode-rsx-behaviors.png)
 
 ### Find reusable XAML definitions
 

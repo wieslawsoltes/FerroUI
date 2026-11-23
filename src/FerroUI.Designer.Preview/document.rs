@@ -137,6 +137,7 @@ impl<'a> DesignDocument<'a> {
             let styled = rsx.has_projected_styles();
             let states = rsx.has_projected_states();
             let columns = rsx.has_projected_columns();
+            let behaviors = rsx.has_projected_behaviors();
             let complete = rsx.omitted_count == 0;
             let reason = if columns {
                 Some("Edit authored Rust column collections in Columns")
@@ -148,6 +149,8 @@ impl<'a> DesignDocument<'a> {
                 Some("Edit mapped Rust styles in Styles & Themes")
             } else if !complete {
                 Some("Edit mapped literals in Properties or change the Rust source")
+            } else if behaviors {
+                Some("Edit literal values here. Use Behaviors to change action lists.")
             } else if !rsx.can_replace_structure() {
                 Some("Edit mapped properties here. Use the canvas or Outline to arrange controls.")
             } else {

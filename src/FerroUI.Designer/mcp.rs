@@ -14,6 +14,7 @@ mod authoring;
 pub use authoring::{keyframe_value, property_value};
 #[path = "mcp_behaviors.rs"]
 mod behaviors;
+pub use behaviors::{rust_behavior_report, rust_behavior_source_plan, BEHAVIORS, BEHAVIOR_EDIT};
 #[path = "mcp_binding.rs"]
 mod binding;
 #[path = "mcp_brush.rs"]

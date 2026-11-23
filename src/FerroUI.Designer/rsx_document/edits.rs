@@ -13,6 +13,7 @@ impl RustDocument {
         map.control(offset)
             .map(|(_, span)| span)
             .or_else(|| map.animation(offset).map(|clip| clip.declaration))
+            .or_else(|| map.behavior_source(offset))
     }
 
     pub(crate) fn animation(

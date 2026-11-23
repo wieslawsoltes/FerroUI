@@ -393,11 +393,16 @@ returns `Option<Rc<AssetToolbox>>` for hosts that need these browsing controls.
 
 ## Edit behaviors
 
-1. Select an authored XAML control in Design or Layers and choose **Behaviors** in the inspector. When no behavior is attached, the inspector opens the trigger and first action fields.
+1. Select an authored XAML or mapped RSX control in Design or Layers and choose **Behaviors** in the inspector. When the control has an editable collection and no attached behavior, the inspector opens the trigger and first action fields.
 2. Choose an existing trigger from **Behavior**. Open **Edit trigger** to set its routed event and source or its binding, comparison, and restore behavior. Use **Action** to choose a step, then open **Edit action** to edit it. The arrow icons move the action within its collection. Use **Add action** to append a step and the check or plus icon to apply the fields.
 3. Use **Preview actions** to execute the native actions on the artboard and **Reset behavior preview** to restore the authored view. The source icon reveals the selected trigger or action. **Behavior XAML** opens the exact subtree for an advanced edit, including custom trigger types and nested objects.
 
 Choose **Attach behavior** to create another trigger. Studio applies each edit as one source transaction. [VS Code workflow](vscode/authoring.md#edit-a-behavior) · [MCP workflow](vscode/reference.md#edit-and-preview-behaviors-with-mcp)
+
+For Rust, enable `ferroui-view/behaviors` in your project and use an inline array of the native
+behavior constructors. Source reveal opens the original Rust arguments. The typed editors apply
+the new trigger or action to that array, preserving the surrounding invocation.
+[Mapped Rust workflow](vscode/authoring.md#edit-a-behavior-in-rust)
 
 ## Timeline tracks and ruler
 

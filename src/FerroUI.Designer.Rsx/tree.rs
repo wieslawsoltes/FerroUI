@@ -1,4 +1,5 @@
 use crate::{literal::Literal, registered::Class};
+use ferroui_designer_animation::BehaviorModel;
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 use std::fmt::Write;
@@ -27,12 +28,16 @@ impl Element {
     }
 
     pub(crate) fn rsx_body(&self) -> String {
+        self.rsx_with_behaviors(&[])
+    }
+
+    pub(crate) fn rsx_with_behaviors(&self, behaviors: &[Vec<BehaviorModel>]) -> String {
         let mut output = String::new();
-        self.write_rsx(&mut output, 0);
+        self.write_rsx(&mut output, 0, &mut behaviors.iter());
         output
     }
 
-    fn write_rsx(&self, output: &mut String, depth: usize) {
+    fn write_rsx(&self, output: &mut String, depth: usize, models: &mut std::slice::Iter<'_, Vec<BehaviorModel>>) {
         let pad = INDENT.repeat(depth);
         let _ = write!(output, "{pad}{} {{", self.class.rust_name());
         for (name, value) in &self.properties {
@@ -43,11 +48,21 @@ impl Element {
                 self.class.setter(name)
             );
         }
+        let behaviors = models.next().filter(|models| !models.is_empty());
+        if let Some(behaviors) = behaviors {
+            let _ = write!(output, "\n{pad}{INDENT}behaviors: [");
+            let indent = format!("{pad}{INDENT}{INDENT}");
+            for model in behaviors {
+                let expression = crate::behaviors::declaration(model, &indent, "\n").expect("normalized behavior");
+                let _ = write!(output, "\n{indent}{expression},");
+            }
+            let _ = write!(output, "\n{pad}{INDENT}],");
+        }
         for child in &self.children {
             output.push('\n');
-            child.write_rsx(output, depth + 1);
+            child.write_rsx(output, depth + 1, models);
         }
-        if !self.properties.is_empty() || !self.children.is_empty() {
+        if behaviors.is_some() || !self.properties.is_empty() || !self.children.is_empty() {
             let _ = write!(output, "\n{pad}");
         }
         output.push('}');

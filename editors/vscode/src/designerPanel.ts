@@ -38,6 +38,7 @@ interface Frame {
     guideAnchor?: GuideAnchor;
     columnAuthoring: boolean;
     behaviorAuthoring: boolean;
+    rsxBehaviorAuthoring: boolean;
     libraryScopes: boolean;
     itemTemplateAuthoring: boolean;
     controlTemplateAuthoring: boolean;
@@ -321,7 +322,9 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsSelectionWrapping(): boolean { return Boolean(this.frame?.canvas.wrapAvailable); }
     get supportsColumnAuthoring(): boolean { return Boolean(this.frame?.columnAuthoring); }
     get supportsItemTemplates(): boolean { return Boolean(this.frame?.itemTemplateAuthoring); }
-    get supportsBehaviorAuthoring(): boolean { return this.language === 'xaml' && Boolean(this.frame?.behaviorAuthoring); }
+    get supportsBehaviorAuthoring(): boolean {
+        return Boolean(this.language === 'xaml' ? this.frame?.behaviorAuthoring : this.frame?.rsxBehaviorAuthoring);
+    }
     get supportsLibraryScopes(): boolean { return Boolean(this.frame?.libraryScopes); }
     get supportsControlTemplate(): boolean { return Boolean(this.frame?.controlTemplateAuthoring); }
     get supportsPropertyTrace(): boolean { return Boolean(this.frame?.propertyTrace); }
@@ -649,17 +652,18 @@ export class DesignerPanel implements vscode.Disposable {
                 if (name === 'designer_item_template') return this.supportsItemTemplates;
                 if (name === 'designer_rsx_style_edit') return this.supportsRustStyles;
                 if (name === 'designer_rsx_command_edit') return true;
+                if (name === 'designer_behavior') return this.supportsBehaviorAuthoring;
                 return this.supportsTimelineKeyframeDrafts || this.supportsRustAnimationPrograms || this.supportsTimelineClipPlacement;
             }),
         ];
         const availablePresentations = presentations?.filter(tool =>
-            (tool as { name: string }).name !== 'designer_behavior' || (this.language === 'xaml' && client.capabilities.behaviorAuthoring));
+            (tool as { name: string }).name !== 'designer_behavior' || this.supportsBehaviorAuthoring);
         const queries = tools.filter(tool => {
             const { name } = tool as { name: string };
             if (name === 'designer_rsx_styles') return this.language === 'rust' && this.supportsRustStyles;
             if (name === 'designer_rsx_commands') return this.language === 'rust';
             if (name === 'designer_property_transitions') return this.language === 'xaml' || this.supportsRustPropertyTransitions;
-            return this.language === 'xaml' || name !== 'designer_behaviors';
+            return name !== 'designer_behaviors' || this.supportsBehaviorAuthoring;
         });
         return { tools: queries, presentations: availablePresentations ?? [], edits };
     }
@@ -697,7 +701,9 @@ export class DesignerPanel implements vscode.Disposable {
         const rustPlacement = name === 'designer_program' && action === 'place_clips' && this.supportsTimelineClipPlacement;
         const rustTemplate = name === 'designer_item_template' && this.supportsItemTemplates
             && (action === 'create_inline' || action === 'reset');
-        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !rustPlacement && !rustTemplate && !this.mappedStudioEdit(name)) {
+        const rustBehavior = name === 'designer_behavior' && this.supportsBehaviorAuthoring && action !== 'source';
+        if (this.language === 'rust' && !rustKeyframe && !rustProgram && !rustState && !rustPlacement && !rustTemplate
+            && !rustBehavior && !this.mappedStudioEdit(name)) {
             throw new Error('This Studio operation requires mapped RSX source or XAML.');
         }
         if (this.editing) throw new Error('A designer edit is already in progress.');
@@ -1047,6 +1053,7 @@ export class DesignerPanel implements vscode.Disposable {
                 guideCatalog: client.canvasGuides, guideAnchor: this.guideAnchor(snapshot, snapshot.definitionScope),
                 columnAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxColumnAuthoring : client.capabilities.columnAuthoring),
                 behaviorAuthoring: Boolean(client.capabilities.behaviorAuthoring),
+                rsxBehaviorAuthoring: Boolean(client.capabilities.rsxBehaviorAuthoring),
                 libraryScopes: Boolean(client.capabilities.libraryScopes),
                 itemTemplateAuthoring: Boolean(this.language === 'rust' ? client.capabilities.rsxItemTemplateAuthoring : client.capabilities.itemTemplateAuthoring),
                 controlTemplateAuthoring: Boolean(client.capabilities.controlTemplateAuthoring),
