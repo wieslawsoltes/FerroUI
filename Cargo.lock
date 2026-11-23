@@ -1693,10 +1693,12 @@ name = "ferroui-controls-webview"
 version = "0.6.0-preview.1"
 dependencies = [
  "block2",
+ "ferroui-android",
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-system",
+ "jni-sys 0.4.1",
  "libc",
  "objc2",
  "windows-sys 0.61.2",

@@ -154,7 +154,7 @@ impl JavaObject {
     /// `raw` is null or a reference that is valid on the calling thread (an
     /// argument of the native method that is running, a local or a global
     /// reference).
-    pub(crate) unsafe fn from_raw(raw: jobject) -> Option<JavaObject> {
+    pub unsafe fn from_raw(raw: jobject) -> Option<JavaObject> {
         if raw.is_null() {
             return None;
         }
@@ -310,6 +310,30 @@ impl JavaClass {
         let class = local.to_global();
         classes.lock().unwrap_or_else(PoisonError::into_inner).insert(name.to_string(), class.clone());
         JavaClass { class, name: name.to_string() }
+    }
+
+    /// The class of the given name, or `None` when the application does not contain it: a
+    /// class of an optional package whose Java sources the application may not have added.
+    pub fn try_find(name: &str) -> Option<JavaClass> {
+        let classes = CLASSES.get_or_init(|| Mutex::new(HashMap::new()));
+        if let Some(class) = classes.lock().unwrap_or_else(PoisonError::into_inner).get(name) {
+            return Some(JavaClass { class: class.clone(), name: name.to_string() });
+        }
+        let env = env();
+        let name_c = CString::new(name).expect("a class name has no NUL");
+        // SAFETY: `env` is the environment of this thread and the name is a terminated
+        // string; the exception of a missing class is cleared before any other call.
+        let local = unsafe {
+            let raw = jni!(env, FindClass, name_c.as_ptr());
+            if jni!(env, ExceptionCheck) {
+                jni!(env, ExceptionClear);
+                return None;
+            }
+            JavaLocal::from_raw(raw)
+        }?;
+        let class = local.to_global();
+        classes.lock().unwrap_or_else(PoisonError::into_inner).insert(name.to_string(), class.clone());
+        Some(JavaClass { class, name: name.to_string() })
     }
 
     /// Resolves classes on the thread that can find them.
@@ -720,7 +744,7 @@ pub(crate) fn raw_env() -> *mut c_void {
 }
 
 /// A native method of a class of the Java layer.
-pub(crate) struct NativeMethod {
+pub struct NativeMethod {
     pub name: &'static CStr,
     pub signature: &'static CStr,
     pub function: *mut c_void,
@@ -734,7 +758,7 @@ pub(crate) struct NativeMethod {
 ///
 /// # Panics
 /// Panics when the class does not declare one of the methods.
-pub(crate) unsafe fn register_natives(class: &JavaClass, methods: &[NativeMethod]) {
+pub unsafe fn register_natives(class: &JavaClass, methods: &[NativeMethod]) {
     let env = env();
     let table: Vec<JNINativeMethod> = methods
         .iter()
@@ -752,6 +776,12 @@ pub(crate) unsafe fn register_natives(class: &JavaClass, methods: &[NativeMethod
     if status != JNI_OK {
         panic!("The native methods of {} could not be registered (status {status}).", class.name);
     }
+}
+
+/// Runs the body of a native method of a package outside this crate: a panic becomes a Java
+/// exception and `default` is returned.
+pub fn run_native_method<T>(default: T, body: impl FnOnce() -> T) -> T {
+    super::natives::guard(default, body)
 }
 
 /// Throws a `java.lang.RuntimeException` on the calling thread, which the

@@ -77,7 +77,7 @@ pub(crate) fn sdk_int() -> i32 {
 
 /// Runs the body of a native method; a panic becomes a Java exception and
 /// `default` is returned.
-fn guard<T>(default: T, body: impl FnOnce() -> T) -> T {
+pub(super) fn guard<T>(default: T, body: impl FnOnce() -> T) -> T {
     // Boundary (#567): the body of a JNI native method, which a panic must not unwind
     // through; the panic becomes a Java exception.
     match catch_unwind(AssertUnwindSafe(body)) {
