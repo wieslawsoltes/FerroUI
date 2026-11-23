@@ -370,8 +370,8 @@ fn slider_examples_keep_the_source_bindings_and_snapping() {
         (500.0, 1000.0, 800.0)
     );
     assert_eq!(slider_output(&root, "Slider2").as_deref(), Some("800"));
-    assert_eq!((range.tick_frequency(), range.small_change()), (10.0, 10.0));
-    assert!(range.is_snap_to_tick_enabled());
+    assert_eq!((range.step_frequency(), range.small_change()), (10.0, 10.0));
+    assert_eq!(range.snaps_to(), SliderSnapsTo::StepValues);
     root.get_control::<NumberBox>("MaximumValue")
         .set_numeric_value(900.0);
     root.get_control::<NumberBox>("StepFrequencyValue")
@@ -381,19 +381,19 @@ fn slider_examples_keep_the_source_bindings_and_snapping() {
     assert_eq!(
         (
             range.maximum(),
-            range.tick_frequency(),
+            range.step_frequency(),
             range.small_change()
         ),
         (900.0, 20.0, 5.0)
     );
-    // SnapsTo: StepValues does not snap to the ticks, Ticks does.
+    // SnapsToRadioButtons_SelectionChanged.
     let ticks = root.get_control::<Slider>("Slider3");
-    assert!(!ticks.is_snap_to_tick_enabled());
+    assert_eq!(ticks.snaps_to(), SliderSnapsTo::StepValues);
     let snaps_to = root.get_control::<RadioButtons>("SnapsToRadioButtons");
     snaps_to.set_selected_index(1);
-    assert!(ticks.is_snap_to_tick_enabled());
+    assert_eq!(ticks.snaps_to(), SliderSnapsTo::Ticks);
     snaps_to.set_selected_index(0);
-    assert!(!ticks.is_snap_to_tick_enabled());
+    assert_eq!(ticks.snaps_to(), SliderSnapsTo::StepValues);
     let vertical = root.get_control::<Slider>("Slider4");
     assert_eq!((vertical.minimum(), vertical.maximum()), (-50.0, 50.0));
     vertical.set_range_value(-20.0);

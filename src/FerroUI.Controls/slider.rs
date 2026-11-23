@@ -42,6 +42,17 @@ pub enum TickPlacement {
     Outside = 3,
 }
 
+/// What the thumb of a [`Slider`] stops at (WinUI `SliderSnapsTo`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum SliderSnapsTo {
+    /// The multiples of [`Slider::step_frequency`] from the minimum.
+    #[default]
+    StepValues = 0,
+    /// The tick marks.
+    Ticks = 1,
+}
+
 /// A control that lets the user select from a range of values by moving a
 /// thumb control along a track.
 #[repr(C)]
@@ -287,6 +298,20 @@ ferroui_base::ferro_properties! { impl Slider {
     );
 
     ferro_property!(
+        /// Defines the `StepFrequency` property.
+        pub fn step_frequency_property() -> StyledProperty<f64> {
+            FerroProperty::register::<Slider, _>("StepFrequency", 0.0)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `SnapsTo` property.
+        pub fn snaps_to_property() -> StyledProperty<SliderSnapsTo> {
+            FerroProperty::register::<Slider, _>("SnapsTo", SliderSnapsTo::StepValues)
+        }
+    );
+
+    ferro_property!(
         /// Defines the `TickFrequency` property.
         pub fn tick_frequency_property() -> StyledProperty<f64> {
             FerroProperty::register::<Slider, _>("TickFrequency", 0.0)
@@ -393,8 +418,38 @@ impl Slider {
         self.set_value(Self::is_snap_to_tick_enabled_property(), value)
     }
 
-    /// The interval between tick marks.
-    pub fn tick_frequency(&self) -> f64 {
+    /// The interval of the values the thumb stops at when [`snaps_to`](Self::snaps_to) is
+    /// `StepValues`, counted from the minimum. `0`, the default, is no steps (WinUI's default is
+    /// 1: a slider of FerroUI does not snap unless it is asked to).
+    pub fn step_frequency(&self) -> f64 {
+        self.get_value(Self::step_frequency_property())
+    }
+
+    pub fn set_step_frequency(&self, value: f64) {
+        self.set_value(Self::step_frequency_property(), value)
+    }
+
+    /// What the thumb stops at: the step values or the tick marks.
+    pub fn snaps_to(&self) -> SliderSnapsTo {
+        self.get_value(Self::snaps_to_property())
+    }
+
+    pub fn set_snaps_to(&self, value: SliderSnapsTo) {
+        self.set_value(Self::snaps_to_property(), value)
+    }
+
+    /// Whether the thumb stops at the tick marks.
+    fn snaps_to_ticks(&self) -> bool {
+        self.is_snap_to_tick_enabled() || self.snaps_to() == SliderSnapsTo::Ticks
+    }
+
+    /// The step of the values the thumb stops at, when it stops at step values.
+    fn step_interval(&self) -> Option<f64> {
+        let step = self.step_frequency();
+        (!self.snaps_to_ticks() && step.is_finite() && MathUtilities::greater_than(step, 0.0)).then_some(step)
+    }
+
+    /// The interval between tick marks. -> f64 {
         self.get_value(Self::tick_frequency_property())
     }
 
@@ -445,8 +500,9 @@ impl Slider {
             // Stop if searching down if already at Min.
             && !(!greater_than && (value - minimum).abs() < TOLERANCE)
         {
-            let ticks = self.ticks().filter(|ticks| ticks.count() > 0);
-            let tick_frequency = self.tick_frequency();
+            let step = self.step_interval();
+            let ticks = self.ticks().filter(|ticks| step.is_none() && ticks.count() > 0);
+            let tick_frequency = step.unwrap_or_else(|| self.tick_frequency());
 
             // If the ticks collection is available, use it. Note that the
             // ticks may be unsorted.
@@ -530,13 +586,20 @@ impl Slider {
 
         self.set_current_value(
             RangeBase::value_property(),
-            if self.is_snap_to_tick_enabled() { self.snap_to_tick(final_value) } else { final_value },
+            self.snap_to_tick(final_value),
         );
     }
 
     /// Snaps the input value to the closest tick.
     fn snap_to_tick(&self, mut value: f64) -> f64 {
-        if self.is_snap_to_tick_enabled() {
+        if let Some(step) = self.step_interval() {
+            let (minimum, maximum) = (self.minimum(), self.maximum());
+            let previous = minimum + ((value - minimum) / step).floor() * step;
+            let next = f64::min(maximum, previous + step);
+            return if MathUtilities::greater_than_or_close(value, (previous + next) * 0.5) { next } else { previous };
+        }
+
+        if self.snaps_to_ticks() {
             let mut previous = self.minimum();
             let mut next = self.maximum();
 

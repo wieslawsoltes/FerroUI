@@ -8448,6 +8448,16 @@ pub trait SliderProps: ElementBuilder {
         self.prop(<ferroui_controls::Slider>::is_snap_to_tick_enabled_property(), value)
     }
 
+    /// Sets [`Slider::step_frequency_property`](ferroui_controls::Slider::step_frequency_property).
+    fn step_frequency<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::Slider>::step_frequency_property(), value)
+    }
+
+    /// Sets [`Slider::snaps_to_property`](ferroui_controls::Slider::snaps_to_property).
+    fn snaps_to<M>(self, value: impl IntoProp<ferroui_controls::SliderSnapsTo, M>) -> Self {
+        self.prop(<ferroui_controls::Slider>::snaps_to_property(), value)
+    }
+
     /// Sets [`Slider::tick_frequency_property`](ferroui_controls::Slider::tick_frequency_property).
     fn tick_frequency<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::Slider>::tick_frequency_property(), value)

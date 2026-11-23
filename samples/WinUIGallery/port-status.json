@@ -1378,7 +1378,7 @@
       "examples": []
     },
     "Slider": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Slider.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1398,7 +1398,7 @@
           "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "All four source examples use native Slider with the source's OneWay x:Bind of the outputs and of the range options (Minimum, Maximum, SmallChange and the step), and SnapsToRadioButtons_SelectionChanged in Rust; the source's Value.ToString() is the bound Value. Missing: FerroUI's Slider has no Header (composed), no StepFrequency (TickFrequency with IsSnapToTickEnabled instead) and no SnapsTo: Ticks is IsSnapToTickEnabled, and StepValues, the integer steps of the source, has no counterpart (the slider does not snap), so the page stays partial. FerroUI's RangeBase coerces the markup's Value against the default range before the x:Bind of the range runs; the code behind sets the range example's 800 after the range.",
+      "notes": "All four source examples use native Slider with the source's OneWay x:Bind of the outputs and of the range options (Minimum, Maximum, SmallChange and the step), and SnapsToRadioButtons_SelectionChanged in Rust; the source's Value.ToString() is the bound Value. StepFrequency and SnapsTo are the Slider's, with the step stated because FerroUI's default is no steps; the Header is composed above the slider. FerroUI's RangeBase coerces the markup's Value against the default range before the x:Bind of the range runs; the code behind sets the range example's 800 after the range.",
       "examples": []
     },
     "Spacing": {

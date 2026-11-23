@@ -1,16 +1,14 @@
 <!-- Adapted from the four pinned Slider examples of WinUI Gallery (14061eea) and
      SnapsToRadioButtons_SelectionChanged of SliderPage.xaml.cs (button_samples.rs); see
      ../NOTICE.md. The outputs and the range options keep the source's OneWay x:Bind (Value is
-     bound as it is; the source calls Value.ToString()). FerroUI's Slider has no Header (composed),
-     no StepFrequency and no SnapsTo: StepFrequency is TickFrequency with IsSnapToTickEnabled, and
-     SnapsTo Ticks is IsSnapToTickEnabled; SnapsTo StepValues (integer steps) has no counterpart,
-     so the page is partial. -->
+     bound as it is; the source calls Value.ToString()). FerroUI's Slider has no Header (composed).
+     WinUI's StepFrequency defaults to 1 and FerroUI's to no steps, so the examples state it. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="SliderExample1" Spacing="8">
     <TextBlock Text="A simple Slider." FontSize="18" />
     <StackPanel Orientation="Horizontal">
-      <Slider x:Name="Slider1" Width="200" AutomationProperties.Name="Simple example" />
+      <Slider x:Name="Slider1" Width="200" StepFrequency="1" AutomationProperties.Name="Simple example" />
     </StackPanel>
     <TextBlock x:Name="Slider1Output" Text="{x:Bind Slider1.Value, Mode=OneWay}" />
   </StackPanel>
@@ -24,11 +22,10 @@
               Margin="0,0,10,0"
               HorizontalAlignment="Left"
               AutomationProperties.Name="Control header"
-              IsSnapToTickEnabled="True"
               Maximum="{x:Bind MaximumValue.Value, Mode=OneWay}"
               Minimum="{x:Bind MinimumValue.Value, Mode=OneWay}"
               SmallChange="{x:Bind SmallChangeValue.Value, Mode=OneWay}"
-              TickFrequency="{x:Bind StepFrequencyValue.Value, Mode=OneWay}"
+              StepFrequency="{x:Bind StepFrequencyValue.Value, Mode=OneWay}"
               Value="800" />
     </StackPanel>
     <TextBlock x:Name="Slider2Output" Text="{x:Bind Slider2.Value, Mode=OneWay}" />
@@ -56,6 +53,7 @@
     <StackPanel Orientation="Horizontal">
       <Slider x:Name="Slider3"
               Width="290"
+              StepFrequency="1"
               AutomationProperties.Name="Example with ticks"
               TickFrequency="20"
               TickPlacement="Outside" />
@@ -72,6 +70,7 @@
     <StackPanel Orientation="Horizontal">
       <Slider x:Name="Slider4"
               Width="100"
+              StepFrequency="1"
               Height="100"
               AutomationProperties.Name="Vertical example"
               Maximum="50"

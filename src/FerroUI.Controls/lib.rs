@@ -230,7 +230,7 @@ mod user_control;
 pub use user_control::UserControl;
 pub use progress_bar::{ProgressBar, ProgressBarTemplateSettings};
 pub use separator::Separator;
-pub use slider::{Slider, SliderImpl, SliderImplExt, SliderVTable, TickPlacement};
+pub use slider::{Slider, SliderImpl, SliderImplExt, SliderSnapsTo, SliderVTable, TickPlacement};
 mod tick_bar;
 pub use tick_bar::{TickBar, TickBarPlacement, TickList};
 #[cfg(test)]

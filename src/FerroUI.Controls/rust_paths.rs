@@ -488,6 +488,7 @@ ferroui_base::ferro_rust_paths! {
         crate::ShutdownMode,
         crate::SizeChangedEventArgs,
         crate::SizeToContent,
+        crate::SliderSnapsTo,
         crate::SpinDirection,
         crate::SpinEventArgs,
         crate::SplitViewDisplayMode,

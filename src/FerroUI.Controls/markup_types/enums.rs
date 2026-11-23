@@ -173,6 +173,7 @@ ferro_markup_enum!(
 ferro_markup_enum!(SplitViewPanePlacement { Left, Right, Top, Bottom }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(TabPlacement { Auto, Top, Bottom, Left, Right }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(TickBarPlacement { Left, Top, Right, Bottom }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(SliderSnapsTo { StepValues, Ticks }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(TickPlacement { None, TopLeft, BottomRight, Outside }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(flags ValidSpinDirections {
     None = ValidSpinDirections::NONE,
@@ -377,6 +378,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <SplitViewPanePlacement as MarkupTyped>::MARKUP,
     <TabPlacement as MarkupTyped>::MARKUP,
     <TickBarPlacement as MarkupTyped>::MARKUP,
+    <SliderSnapsTo as MarkupTyped>::MARKUP,
     <TickPlacement as MarkupTyped>::MARKUP,
     <ValidSpinDirections as MarkupTyped>::MARKUP,
     <Win32HitTestValue as MarkupTyped>::MARKUP,
@@ -455,6 +457,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<SplitViewPanePlacement>();
     ValueTypes::register_used::<TabPlacement>();
     ValueTypes::register_used::<TickBarPlacement>();
+    ValueTypes::register_used::<SliderSnapsTo>();
     ValueTypes::register_used::<TickPlacement>();
     ValueTypes::register_used::<ValidSpinDirections>();
     ValueTypes::register_used::<Win32HitTestValue>();
@@ -757,6 +760,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for TabPlacement {
 impl ferroui_base::data::core::ValueTypeRegistration for TickBarPlacement {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<TickBarPlacement>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for SliderSnapsTo {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<SliderSnapsTo>();
     }
 }
 

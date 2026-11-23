@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -9012903893089005959;
+pub(crate) const API_FINGERPRINT: i64 = 8976744649086772097;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 507] = [
@@ -519,7 +519,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1043] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -1316,6 +1316,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1043] = [
     "SmallChange",
     "SmallDisplayPicture",
     "SmallerPaneToggleButtonWidth",
+    "SnapsTo",
     "SnapsToDevicePixels",
     "Source",
     "SourceDisplayPicture",
@@ -1329,6 +1330,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1043] = [
     "StartAngle",
     "StartPoint",
     "StaysOpenOnClick",
+    "StepFrequency",
     "Storyboard.TargetName",
     "Storyboard.TargetProperty",
     "Stretch",

@@ -22178,6 +22178,23 @@
         ],
         "attached": false
       },
+      "StepFrequency": {
+        "name": "StepFrequency",
+        "type_name": "f64",
+        "documentation": "Slider.StepFrequency: f64",
+        "values": [],
+        "attached": false
+      },
+      "SnapsTo": {
+        "name": "SnapsTo",
+        "type_name": "SliderSnapsTo",
+        "documentation": "Slider.SnapsTo: SliderSnapsTo",
+        "values": [
+          "StepValues",
+          "Ticks"
+        ],
+        "attached": false
+      },
       "TickFrequency": {
         "name": "TickFrequency",
         "type_name": "f64",
