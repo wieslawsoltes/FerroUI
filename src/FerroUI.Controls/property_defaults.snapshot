@@ -920,6 +920,8 @@ FerroUI.Controls.Slider overrides FerroUI.Automation.AutomationProperties.Contro
 FerroUI.Controls.Slider overrides FerroUI.Controls.Primitives.ScrollBar.Orientation = Horizontal; OneWay
 FerroUI.Controls.Slider overrides FerroUI.Input.InputElement.Focusable = True; OneWay
 FerroUI.Controls.Slider.IsSnapToTickEnabled: bool = False; OneWay
+FerroUI.Controls.Slider.SnapsTo: SliderSnapsTo = StepValues; OneWay
+FerroUI.Controls.Slider.StepFrequency: f64 = 0; OneWay
 FerroUI.Controls.Slider.TickFrequency: f64 = 0; OneWay
 FerroUI.Controls.Slider.TickPlacement: TickPlacement = None; OneWay
 FerroUI.Controls.Spinner.ValidSpinDirection: ValidSpinDirections = FerroUI.Controls.ValidSpinDirections; OneWay
