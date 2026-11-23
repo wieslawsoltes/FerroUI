@@ -117,6 +117,8 @@ pub(crate) fn affine(matrix: &Matrix) -> progpu_native_affine_2d {
 mod tile_brush;
 #[path = "effect_layers.rs"]
 mod effect_layers;
+#[path = "lcd_text.rs"]
+mod lcd_text;
 
 fn identity() -> progpu_native_affine_2d {
     affine(&Matrix::IDENTITY)
@@ -257,6 +259,8 @@ pub struct ProGpuDrawingContext {
     origin: (f64, f64),
     /// The size in pixels of what the scene being recorded is rendered into.
     target_size: Option<(u32, u32)>,
+    /// The target of the frame shows no transparency: text may have a coverage per channel.
+    opaque_target: bool,
 }
 
 impl ProGpuDrawingContext {
@@ -301,7 +305,15 @@ impl ProGpuDrawingContext {
             path_resources: HashMap::new(),
             origin: (0.0, 0.0),
             target_size: None,
+            opaque_target: false,
         }
+    }
+
+    /// Says what the frame is composed with: a target without transparency is opaque.
+    pub(crate) fn with_scene_info(mut self, scene_info: &ferroui_base::platform::RenderTargetSceneInfo) -> Self {
+        use ferroui_base::rendering::composition::CompositionTransparencyLevel;
+        self.opaque_target = scene_info.transparency_level == CompositionTransparencyLevel::None;
+        self
     }
 
     /// Says how large the target of the frame is: what a layer with an effect that has no bounds
@@ -432,6 +444,9 @@ impl ProGpuDrawingContext {
             let scale = 2f64.powf((scale.log2() * FREE_SCALE_STEPS).round() / FREE_SCALE_STEPS) as f32;
             (Placement::Free { scale }, origin, 1.0 / scale)
         };
+        if upright && self.subpixel_text(aliased) && self.draw_lcd_run(run, placement, base, color) {
+            return;
+        }
         let Some(raster) = run.raster(placement) else { return };
         if raster.glyphs.is_empty() {
             return;

@@ -423,6 +423,30 @@ impl SceneBuilder {
         self.check("draw_glyph_run", ok)
     }
 
+    /// Draws glyphs with a coverage for each colour channel, inside an opaque layer.
+    pub(crate) fn draw_rgb_glyph_run(
+        &mut self,
+        glyph_resource_index: u32,
+        draw: &progpu_native_scene_rgb_glyph_draw,
+        glyphs: &[progpu_native_scene_rgb_glyph_tile],
+        bounds: progpu_native_image_rect,
+        state_index: u32,
+    ) -> Result<(), SceneBuildError> {
+        // SAFETY: the record and the span are borrowed for the call.
+        let ok = unsafe {
+            progpu_native_scene_builder_draw_rgb_glyph_run(
+                self.raw,
+                glyph_resource_index,
+                draw,
+                glyphs.as_ptr(),
+                glyphs.len(),
+                bounds,
+                state_index,
+            )
+        };
+        self.check("draw_rgb_glyph_run", ok)
+    }
+
     /// Builds the stream of what was recorded into the builder's buffer (reused across
     /// generations) and returns it.
     pub fn build(&mut self) -> Result<&[u8], SceneBuildError> {

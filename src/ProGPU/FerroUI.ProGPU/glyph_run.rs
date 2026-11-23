@@ -10,7 +10,8 @@ use ferroui_base::media::{FontSimulations, GlyphTypeface};
 use ferroui_base::platform::{IGeometryContext, IGlyphRunImpl};
 use ferroui_base::{Point, Rect};
 use progpu_native_sys::progpu::{
-    progpu_native_glyph_outline_key, progpu_native_path_segment, progpu_native_scene_glyph_key, PROGPU_NATIVE_PATH_SEGMENT_CUBIC,
+    progpu_native_glyph_outline_key, progpu_native_path_segment, progpu_native_scene_glyph_key,
+    progpu_native_scene_glyph_outline, PROGPU_NATIVE_PATH_SEGMENT_CUBIC,
     PROGPU_NATIVE_PATH_SEGMENT_LINE, PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC,
 };
 use std::any::Any;
@@ -107,6 +108,37 @@ pub(crate) struct RunRaster {
     pub glyphs: Vec<PlacedGlyph>,
 }
 
+/// A glyph of an LCD run: which outline, the frame of its raster and its place.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct LcdTile {
+    pub outline: u32,
+    pub width: u32,
+    pub height: u32,
+    pub x_start: f32,
+    pub y_start: f32,
+    pub scale: f32,
+    pub subpixel_x: f32,
+    /// Whole device pixels from the pixel of the origin of the run to the top left of the raster.
+    pub x: i32,
+    pub y: i32,
+}
+
+/// What a run needs to be drawn with a coverage for each colour channel: its outlines with their
+/// segments, and a tile for every glyph.
+pub(crate) struct LcdRun {
+    placement: Placement,
+    pub outlines: Vec<progpu_native_scene_glyph_outline>,
+    pub segments: Vec<progpu_native_path_segment>,
+    pub tiles: Vec<LcdTile>,
+}
+
+/// The pixels a raster of an LCD run has beyond its outline: the quarter-pixel phase, and the two
+/// subpixels the filter reads to either side.
+const LCD_PADDING_X: f32 = 2.0;
+const LCD_PADDING_Y: f32 = 1.0;
+/// The largest side of a tile the engine takes.
+const LCD_MAX_SIDE: f32 = 4096.0;
+
 /// A glyph run: its font, its size, its origin, its glyphs and a box that holds them.
 pub struct ProGpuGlyphRun {
     font: Option<RunFont>,
@@ -117,6 +149,8 @@ pub struct ProGpuGlyphRun {
     /// What the run was drawn from last: a run is drawn at the same placement frame after
     /// frame.
     raster: Mutex<Option<Arc<RunRaster>>>,
+    /// The LCD form of the run at the placement it was last drawn at.
+    lcd: Mutex<Option<Arc<LcdRun>>>,
 }
 
 impl ProGpuGlyphRun {
@@ -148,7 +182,15 @@ impl ProGpuGlyphRun {
             }
         };
 
-        ProGpuGlyphRun { font, font_rendering_em_size, baseline_origin, glyphs, bounds, raster: Mutex::new(None) }
+        ProGpuGlyphRun {
+            font,
+            font_rendering_em_size,
+            baseline_origin,
+            glyphs,
+            bounds,
+            raster: Mutex::new(None),
+            lcd: Mutex::new(None),
+        }
     }
 
     /// What the engine draws the run from at `placement`: made once and kept while the
@@ -162,6 +204,62 @@ impl ProGpuGlyphRun {
         let raster = Arc::new(self.build_raster(font, placement));
         *kept = Some(raster.clone());
         Some(raster)
+    }
+
+    /// The run for a coverage per colour channel at `placement` (upright text): the glyphs and
+    /// quarter-pixel phases of [`raster`](Self::raster), with the same weighted outlines. None
+    /// for a run of another font manager or with a glyph too large for a tile.
+    pub(crate) fn lcd(&self, placement: Placement) -> Option<Arc<LcdRun>> {
+        let mut kept = self.lcd.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
+        if let Some(run) = kept.as_ref().filter(|run| run.placement == placement) {
+            return Some(run.clone());
+        }
+        let font = self.font.as_ref()?;
+        let raster = self.raster(placement)?;
+        let mut run = LcdRun { placement, outlines: Vec::new(), segments: Vec::new(), tiles: Vec::new() };
+        let mut frames = Vec::with_capacity(raster.keys.len());
+        for key in &raster.keys {
+            let variant = key.outline.variant;
+            let (weight, oblique) = ((variant & 0xFF) as u8, variant & 0x100 != 0);
+            let outline = font.face.cached_outline(key.outline.glyph as u16, &font.coordinates, weight, oblique)?;
+            let scale = key.raster_scale;
+            let x_start = (outline.min_x * scale).floor() - LCD_PADDING_X;
+            let y_start = (-outline.max_y * scale).floor() - LCD_PADDING_Y;
+            let width = (outline.max_x * scale).ceil() + LCD_PADDING_X + 1.0 - x_start;
+            let height = (-outline.min_y * scale).ceil() + LCD_PADDING_Y - y_start;
+            if !(width > 0.0 && height > 0.0 && width <= LCD_MAX_SIDE && height <= LCD_MAX_SIDE) {
+                return None;
+            }
+            frames.push((x_start, y_start, width as u32, height as u32, scale, key.subpixel_x));
+            run.outlines.push(progpu_native_scene_glyph_outline {
+                segment_offset: run.segments.len() as u64,
+                segment_count: outline.segments.len() as u64,
+                min_x: outline.min_x,
+                min_y: outline.min_y,
+                max_x: outline.max_x,
+                max_y: outline.max_y,
+                raster_scale: scale,
+                subpixel_x: key.subpixel_x,
+            });
+            run.segments.extend_from_slice(&outline.segments);
+        }
+        for glyph in &raster.glyphs {
+            let (x_start, y_start, width, height, scale, subpixel_x) = *frames.get(glyph.outline as usize)?;
+            run.tiles.push(LcdTile {
+                outline: glyph.outline,
+                width,
+                height,
+                x_start,
+                y_start,
+                scale,
+                subpixel_x,
+                x: (glyph.x + x_start) as i32,
+                y: (glyph.y + y_start) as i32,
+            });
+        }
+        let run = Arc::new(run);
+        *kept = Some(run.clone());
+        Some(run)
     }
 
     fn build_raster(&self, font: &RunFont, placement: Placement) -> RunRaster {
