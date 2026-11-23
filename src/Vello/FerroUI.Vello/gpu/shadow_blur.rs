@@ -6,8 +6,16 @@
 
 use super::effect_passes::{pooled_size, pooled_texture};
 use super::{log_render_failure, VelloDeviceTexture, VelloGpuTexture, VelloWgpuDevice};
-use crate::scene::{IVelloSceneSink, VelloGpuSceneSink, VelloScenePaint};
-use crate::shadow_gaussian::{gaussian_weights, reduction_for, REACH, WEIGHTS};
+use crate::drawing_context_impl::box_shadows::ShadowKey;
+use crate::scene::{IVelloSceneSink, VelloScenePaint};
+#[cfg(feature = "gpu")]
+use crate::scene::VelloGpuSceneSink;
+#[cfg(feature = "hybrid")]
+use crate::scene::VelloHybridSceneSink;
+use crate::shadow_gaussian::{gaussian_weights, ShadowRaster, WEIGHTS};
+#[cfg(feature = "gpu")]
+use crate::shadow_gaussian::{reduction_for, REACH};
+use crate::vello_options::VelloRenderingMode;
 use kurbo::{Affine, BezPath};
 use peniko::color::{AlphaColor, Srgb};
 use peniko::{BlendMode, Fill};
@@ -200,6 +208,7 @@ fn blur_pass(
 }
 
 /// A blurred shape in a texture of the device.
+#[cfg(feature = "gpu")]
 pub(crate) struct BlurredShape {
     pub(crate) texture: Arc<VelloDeviceTexture>,
     /// From the texels of the texture to the pixels of the area.
@@ -212,6 +221,7 @@ pub(crate) struct BlurredShape {
 /// `color`, for an area of `width` by `height` pixels that `to_area` maps the path to. The texture
 /// also holds what lies a reach around the area, which blurs into it. `None` when the device
 /// failed to render it, which is logged.
+#[cfg(feature = "gpu")]
 pub(crate) fn blurred_shape(
     device: &Arc<VelloWgpuDevice>,
     path: &BezPath,
@@ -250,4 +260,142 @@ pub(crate) fn blurred_shape(
         to_area: Affine::scale(reduction) * Affine::translate((-margin, -margin)),
         reduced: reduction > 1.0,
     })
+}
+
+/// The most pictures a thread keeps, and the most bytes of their textures.
+const MOST_PICTURES: usize = 64;
+const MOST_BYTES: usize = 32 * 1024 * 1024;
+
+struct KeptPicture {
+    device: Weak<VelloWgpuDevice>,
+    key: ShadowKey,
+    texture: Arc<VelloDeviceTexture>,
+    used: u64,
+    bytes: usize,
+}
+
+#[derive(Default)]
+struct KeptPictures {
+    kept: Vec<KeptPicture>,
+    uses: u64,
+    bytes: usize,
+}
+
+impl KeptPictures {
+    /// Lets go of the pictures of devices that are gone or lost.
+    fn trim(&mut self) {
+        let mut bytes = 0;
+        self.kept.retain(|picture| {
+            let alive = picture.device.upgrade().is_some_and(|device| !device.is_lost());
+            bytes += if alive { picture.bytes } else { 0 };
+            alive
+        });
+        self.bytes = bytes;
+    }
+
+    fn get(&mut self, device: &Arc<VelloWgpuDevice>, key: &ShadowKey) -> Option<Arc<VelloDeviceTexture>> {
+        self.trim();
+        self.uses += 1;
+        let uses = self.uses;
+        let found = self
+            .kept
+            .iter_mut()
+            .find(|picture| std::ptr::eq(picture.device.as_ptr(), Arc::as_ptr(device)) && picture.key == *key)?;
+        found.used = uses;
+        Some(found.texture.clone())
+    }
+
+    fn insert(&mut self, device: &Arc<VelloWgpuDevice>, key: ShadowKey, texture: Arc<VelloDeviceTexture>) {
+        let bytes = texture.width() as usize * texture.height() as usize * 4;
+        if bytes > MOST_BYTES {
+            return;
+        }
+        while self.kept.len() >= MOST_PICTURES || self.bytes + bytes > MOST_BYTES {
+            let Some(oldest) = (0..self.kept.len()).min_by_key(|&index| self.kept[index].used) else {
+                break;
+            };
+            self.bytes -= self.kept.swap_remove(oldest).bytes;
+        }
+        self.uses += 1;
+        self.bytes += bytes;
+        self.kept.push(KeptPicture { device: Arc::downgrade(device), key, texture, used: self.uses, bytes });
+    }
+}
+
+ferroui_base::ferro_thread_local! {
+    static KEPT_PICTURES: RefCell<Option<KeptPictures>> = const { RefCell::new(None) };
+}
+
+#[cfg(test)]
+ferroui_base::ferro_thread_local! {
+    static PICTURES_MADE: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
+
+/// Lets go of the pictures this thread keeps, so that a test sees a mode make its own.
+#[cfg(test)]
+pub(crate) fn forget_pictures() {
+    KEPT_PICTURES.with(|pictures| pictures.borrow_mut().take());
+}
+
+/// The pictures of shadows this thread has blurred so far.
+#[cfg(test)]
+pub(crate) fn pictures_made() -> usize {
+    PICTURES_MADE.with(std::cell::Cell::get)
+}
+
+/// A scene of the renderer of `mode` on the device, for the coverage of a shape.
+fn coverage_scene(
+    device: &Arc<VelloWgpuDevice>,
+    mode: VelloRenderingMode,
+    width: u16,
+    height: u16,
+) -> Option<Box<dyn IVelloSceneSink>> {
+    let _ = (device, width, height);
+    match mode {
+        #[cfg(feature = "gpu")]
+        VelloRenderingMode::Gpu => Some(Box::new(VelloGpuSceneSink::new(device.clone(), width, height))),
+        #[cfg(feature = "hybrid")]
+        VelloRenderingMode::Hybrid => Some(Box::new(VelloHybridSceneSink::new(device.clone(), width, height))),
+        _ => None,
+    }
+}
+
+/// The picture of a blurred shape for `raster`, the kept one when there is one, so a shadow under
+/// an animated transform is blurred once. `made` is called when a new one is blurred. `None` when
+/// the device failed to render it, which is logged.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn kept_picture(
+    device: &Arc<VelloWgpuDevice>,
+    mode: VelloRenderingMode,
+    path: &BezPath,
+    fill_rule: Fill,
+    raster: &ShadowRaster,
+    key: ShadowKey,
+    color: AlphaColor<Srgb>,
+    made: impl FnOnce(),
+) -> Option<Arc<VelloDeviceTexture>> {
+    let kept = KEPT_PICTURES.with(|pictures| pictures.borrow_mut().get_or_insert_with(Default::default).get(device, &key));
+    if kept.is_some() {
+        return kept;
+    }
+    made();
+    #[cfg(test)]
+    PICTURES_MADE.with(|count| count.set(count.get() + 1));
+    let (width, height) = pooled_size(device, raster.size.0, raster.size.1);
+    let mut scene = coverage_scene(device, mode, width.min(u32::from(u16::MAX)) as u16, height.min(u32::from(u16::MAX)) as u16)?;
+    let opaque = VelloScenePaint::solid(AlphaColor::from_rgba8(255, 255, 255, 255));
+    scene.fill(path, fill_rule, raster.to_texels, &opaque, BlendMode::default(), true);
+    let content = pooled_texture(device, width, height);
+    if let Err(error) = scene.render_to_texture(&VelloGpuTexture { texture: content.texture() }) {
+        log_render_failure("shadow", &error);
+        return None;
+    }
+    let across = blur_pass(device, &content, (1.0, 0.0), raster.deviation, [1.0; 4]);
+    let [red, green, blue, alpha] = color.components;
+    let premultiplied = [red * alpha, green * alpha, blue * alpha, alpha];
+    let texture = blur_pass(device, &across, (0.0, 1.0), raster.deviation, premultiplied);
+    KEPT_PICTURES.with(|pictures| {
+        pictures.borrow_mut().get_or_insert_with(Default::default).insert(device, key, texture.clone())
+    });
+    Some(texture)
 }

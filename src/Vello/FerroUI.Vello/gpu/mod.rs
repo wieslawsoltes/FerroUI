@@ -14,7 +14,6 @@ pub(crate) mod effect_passes;
 pub mod external_objects;
 mod i_vello_gpu;
 pub(crate) mod shared_frame;
-#[cfg(feature = "gpu")]
 pub(crate) mod shadow_blur;
 #[cfg(feature = "media3d")]
 pub mod scene3d_passes;
