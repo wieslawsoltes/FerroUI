@@ -111,6 +111,7 @@ members = [
     "src/FerroUI.Controls.Repeater",
     "src/FerroUI.Controls.Inking",
     "src/FerroUI.AnimatedVisuals",
+    "tests/FerroUI.AnimatedVisuals.Markup.Tests",
     "src/FerroUI.Controls.Lottie",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",

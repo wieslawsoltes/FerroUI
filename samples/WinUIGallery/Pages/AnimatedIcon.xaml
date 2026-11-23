@@ -1,17 +1,16 @@
 <!-- Ported from both pinned AnimatedIcon examples; see ../NOTICE.md. The pointer handlers of the
      button are in animated_visual_samples.rs; the combo box stands for $(AnimatedVisualSourceKind). -->
 <StackPanel xmlns="https://github.com/ferroui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:animatedvisuals="https://ferroui.dev/animated-visuals" Spacing="24">
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <TextBlock Text="Adding AnimatedIcon to a button" FontSize="18" />
   <StackPanel Orientation="Horizontal" Spacing="24">
     <Button x:Name="AnimatedIconButton" Width="75" AutomationProperties.Name="Animated icon">
-      <animatedvisuals:AnimatedIcon x:Name="SearchAnimatedIcon" Width="20" Height="20">
-        <animatedvisuals:AnimatedFindVisualSource />
-        <animatedvisuals:AnimatedIcon.FallbackIconSource>
+      <AnimatedIcon x:Name="SearchAnimatedIcon" Width="20" Height="20">
+        <AnimatedFindVisualSource />
+        <AnimatedIcon.FallbackIconSource>
           <SymbolIconSource Symbol="Find" />
-        </animatedvisuals:AnimatedIcon.FallbackIconSource>
-      </animatedvisuals:AnimatedIcon>
+        </AnimatedIcon.FallbackIconSource>
+      </AnimatedIcon>
     </Button>
     <ComboBox x:Name="AnimatedVisualSourceKind" Width="280" SelectedIndex="5"
               AutomationProperties.Name="Animated visual source">
@@ -31,12 +30,12 @@
     <NavigationView.MenuItems>
       <NavigationViewItem Content="Game Settings">
         <NavigationViewItem.Icon>
-          <animatedvisuals:AnimatedIcon x:Name="NavigationAnimatedIcon">
-            <animatedvisuals:AnimatedSettingsVisualSource />
-            <animatedvisuals:AnimatedIcon.FallbackIconSource>
+          <AnimatedIcon x:Name="NavigationAnimatedIcon">
+            <AnimatedSettingsVisualSource />
+            <AnimatedIcon.FallbackIconSource>
               <FontIconSource Glyph="&#xE713;" />
-            </animatedvisuals:AnimatedIcon.FallbackIconSource>
-          </animatedvisuals:AnimatedIcon>
+            </AnimatedIcon.FallbackIconSource>
+          </AnimatedIcon>
         </NavigationViewItem.Icon>
       </NavigationViewItem>
     </NavigationView.MenuItems>

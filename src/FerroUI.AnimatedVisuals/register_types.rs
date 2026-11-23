@@ -1,13 +1,13 @@
 use crate::icons::ICON_SOURCE_TYPES;
 use crate::{AnimatedIcon, AnimatedIconSource, AnimatedVisualPlayer, AnimatedVisualSource, LottieVisualSource};
-use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition};
+use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::TypeInfo;
 
 pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "FerroUI.AnimatedVisuals",
     crate_name: "ferroui_animated_visuals",
     xmlns_definitions: &[XmlnsDefinition {
-        xml_namespace: "https://ferroui.dev/animated-visuals",
+        xml_namespace: FERRO_XML_NAMESPACE,
         namespace: "FerroUI.AnimatedVisuals",
     }],
     xmlns_prefixes: &[],

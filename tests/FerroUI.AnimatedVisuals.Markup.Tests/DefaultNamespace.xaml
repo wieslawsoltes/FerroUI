@@ -1,0 +1,21 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <AnimatedAcceptVisualSource x:Key="Accept" />
+    <AnimatedBackVisualSource x:Key="Back" />
+    <AnimatedChevronDownSmallVisualSource x:Key="ChevronDown" />
+    <AnimatedChevronRightDownSmallVisualSource x:Key="ChevronRightDown" />
+    <AnimatedChevronUpDownSmallVisualSource x:Key="ChevronUpDown" />
+    <AnimatedFindVisualSource x:Key="Find" />
+    <AnimatedGlobalNavigationButtonVisualSource x:Key="GlobalNavigation" />
+    <AnimatedSettingsVisualSource x:Key="Settings" />
+    <LottieVisualSource x:Key="Lottie" />
+    <AnimatedIconSource x:Key="IconSource" />
+  </StackPanel.Resources>
+  <AnimatedVisualPlayer x:Name="Player" AutoPlay="False">
+    <AnimatedSettingsVisualSource />
+  </AnimatedVisualPlayer>
+  <AnimatedIcon x:Name="Icon">
+    <AnimatedFindVisualSource />
+  </AnimatedIcon>
+</StackPanel>
