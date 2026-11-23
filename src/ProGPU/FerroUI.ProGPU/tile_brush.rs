@@ -82,7 +82,7 @@ fn with_brush_transforms(mut matrix: Matrix, brush: &dyn IBrush, target: Rect) -
 }
 
 /// The address mode of the sampler along an axis of a tile mode.
-fn address_modes(mode: TileMode) -> (u32, u32) {
+pub(super) fn address_modes(mode: TileMode) -> (u32, u32) {
     let along = |flipped: bool| {
         if mode == TileMode::None {
             PROGPU_NATIVE_IMAGE_ADDRESS_CLAMP
@@ -100,7 +100,7 @@ fn address_modes(mode: TileMode) -> (u32, u32) {
 
 /// The start of a source range moved by whole periods of the mirrored tile to be at least zero:
 /// the sampler repeats, and the engine asks for a source that does not start before the image.
-fn positive_start(start: f64, tile: f64) -> f64 {
+pub(super) fn positive_start(start: f64, tile: f64) -> f64 {
     let period = tile * 2.0;
     start + (-start / period).ceil().max(0.0) * period
 }

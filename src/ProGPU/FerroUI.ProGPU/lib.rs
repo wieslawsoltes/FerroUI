@@ -8,6 +8,8 @@ mod canvas_target;
 mod context;
 mod device;
 mod drawing_context;
+mod effect_passes;
+mod effect_records;
 mod font;
 mod font_manager;
 mod fragment;

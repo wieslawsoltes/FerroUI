@@ -2,6 +2,7 @@
 //! targets, the textures and the rendering of a recorded scene.
 
 use crate::device::{ExternalImage, ProGpuDevice, ProGpuDeviceError, ProGpuEngine, TargetFormat};
+use crate::effect_passes::EffectPasses;
 use crate::image_textures::ImageTextures;
 use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder};
@@ -169,15 +170,21 @@ pub(crate) struct Gpu {
     offscreen: OnceCell<Option<Rc<ProGpuEngine>>>,
     /// The textures of the bitmaps this device draws.
     images: ImageTextures,
+    /// The passes of the layers with an effect.
+    passes: EffectPasses,
 }
 
 impl Gpu {
     pub(crate) fn new(device: ProGpuDevice) -> Rc<Self> {
-        Rc::new(Self { device: Rc::new(device), offscreen: OnceCell::new(), images: ImageTextures::default() })
+        Rc::new(Self { device: Rc::new(device), offscreen: OnceCell::new(), images: ImageTextures::default(), passes: EffectPasses::default() })
     }
 
     pub(crate) fn images(&self) -> &ImageTextures {
         &self.images
+    }
+
+    pub(crate) fn passes(&self) -> &EffectPasses {
+        &self.passes
     }
 
     pub(crate) fn device(&self) -> &Rc<ProGpuDevice> {

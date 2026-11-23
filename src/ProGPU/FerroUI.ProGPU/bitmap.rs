@@ -549,7 +549,8 @@ impl IRenderTargetBitmapImpl for ProGpuBitmap {
                     Err(error) => notes::failure(&format!("a render-target bitmap was not drawn: {error}")),
                 }
             })),
-        );
+        )
+        .with_target_size(width, height);
         // What was drawn before stays under what is drawn now, also while its pixels are on
         // their way back from the GPU.
         if self.version() != 0 || self.kept_frame().is_some() {
