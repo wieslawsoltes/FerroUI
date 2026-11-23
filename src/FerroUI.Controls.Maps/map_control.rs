@@ -168,15 +168,19 @@ ferro_properties! { impl MapControl {
 impl MapControl {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
+        Self::construct_with(|bytes| {
+            let mut stream = std::io::Cursor::new(bytes);
+            Bitmap::from_stream(&mut stream)
+                .ok()
+                .map(|bitmap| (bitmap, DECODED_TILE_BYTES))
+        })
+    }
+
+    fn construct_with(decode: impl Fn(&[u8]) -> Option<(Bitmap, u64)> + 'static) -> Self {
         Self {
             base: Control::construct(),
             camera: RefCell::new(MapCamera::default()),
-            store: TileStore::new(MEMORY_BUDGET, |bytes| {
-                let mut stream = std::io::Cursor::new(bytes);
-                Bitmap::from_stream(&mut stream)
-                    .ok()
-                    .map(|bitmap| (bitmap, DECODED_TILE_BYTES))
-            }),
+            store: TileStore::new(MEMORY_BUDGET, decode),
             layers: RefCell::new(Vec::new()),
             layer_listener: RefCell::new(None),
             tile_source: RefCell::new(None),
@@ -192,7 +196,18 @@ impl MapControl {
 
     /// Creates a map.
     pub fn new() -> Ref<Self> {
-        let this = instantiate(Self::construct());
+        Self::set_up(instantiate(Self::construct()))
+    }
+
+    /// A map whose tiles are made by `decode`, for a renderer that cannot read images.
+    #[cfg(test)]
+    pub(crate) fn with_decoder(
+        decode: impl Fn(&[u8]) -> Option<(Bitmap, u64)> + 'static,
+    ) -> Ref<Self> {
+        Self::set_up(instantiate(Self::construct_with(decode)))
+    }
+
+    fn set_up(this: Ref<Self>) -> Ref<Self> {
         this.set_focusable(true);
         this.set_clip_to_bounds(true);
         let weak = this.downgrade();

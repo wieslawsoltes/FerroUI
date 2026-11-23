@@ -339,7 +339,12 @@ mod input {
     }
 
     fn map() -> Placed {
-        let map = MapControl::new();
+        let placed = place_in_window(MapControl::new());
+        placed.set_zoom_level(4.0);
+        placed
+    }
+
+    fn place_in_window(map: Ref<MapControl>) -> Placed {
         map.set_width(WIDTH);
         map.set_height(HEIGHT);
         map.set_horizontal_alignment(HorizontalAlignment::Left);
@@ -349,7 +354,6 @@ mod input {
         window.show();
         window.update_layout();
         assert_eq!(map.bounds().size(), Size::new(WIDTH, HEIGHT));
-        map.set_zoom_level(4.0);
         Placed {
             _window: window,
             map,
@@ -484,6 +488,132 @@ mod input {
                 near(drawn.y, expected_y, 1e-6);
             }
         }
+    }
+
+    /// Draws the map on a context that records what it is asked.
+    fn drawn(map: &MapControl) -> Vec<String> {
+        use ferroui_base::media::{DrawingContext, PlatformDrawingContext};
+        use ferroui_base::rendering::testing::{DrawingLog, MockDrawingContextImpl};
+        let log = DrawingLog::new();
+        let mut platform = MockDrawingContextImpl::new(log.clone());
+        {
+            let mut core = PlatformDrawingContext::borrowed(&mut platform);
+            let mut context = DrawingContext::new(&mut core);
+            <MapControl as ferroui_base::VisualImpl>::render(map, &mut context);
+        }
+        log.take()
+    }
+
+    /// A map on the offline grid whose tiles are blank bitmaps, with one of each element.
+    fn drawing_map() -> Placed {
+        use ferroui_base::media::imaging::Bitmap;
+        use ferroui_base::platform::{AlphaFormat, PixelFormat};
+        use ferroui_base::{PixelSize, Vector};
+        let map = MapControl::with_decoder(|_| {
+            let pixels = vec![0u8; 256 * 256 * 4];
+            let bitmap = Bitmap::from_pixels(
+                PixelFormat::RGBA8888,
+                AlphaFormat::Premul,
+                &pixels,
+                PixelSize::new(256, 256),
+                Vector::new(96.0, 96.0),
+                256 * 4,
+            );
+            Some((bitmap, 256 * 256 * 4))
+        });
+        let placed = place_in_window(map);
+        let source = RasterTileSource::new("tile://grid/{z}/{x}/{y}", "").unwrap();
+        placed.set_tile_source(Some(Rc::new(source)), Some(Rc::new(GridTileLoader)));
+        let layer = MapElementsLayer::new();
+        let spot = BasicGeoposition {
+            latitude: 3.0,
+            longitude: 4.0,
+        };
+        layer.add(MapElement::Polygon(MapPolygon::new(vec![
+            spot,
+            BasicGeoposition {
+                latitude: 3.0,
+                longitude: 8.0,
+            },
+            BasicGeoposition {
+                latitude: 6.0,
+                longitude: 8.0,
+            },
+        ])));
+        layer.add(MapElement::Polyline(MapPolyline::new(vec![
+            spot,
+            BasicGeoposition {
+                latitude: -3.0,
+                longitude: -4.0,
+            },
+        ])));
+        layer.add(MapElement::Icon(MapIcon::new(spot)));
+        placed.add_layer(layer);
+        // The first pass asks for the tiles, the jobs load them, the second pass draws them.
+        drawn(&placed);
+        for _ in 0..8 {
+            run_jobs();
+            drawn(&placed);
+        }
+        run_jobs();
+        placed
+    }
+
+    #[test]
+    fn a_north_up_map_draws_its_tiles_without_a_transform() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = drawing_map();
+        let log = drawn(&map);
+        let tiles = map.view().tiles(19).len();
+        assert!(tiles > 0);
+        assert_eq!(
+            log.iter()
+                .filter(|entry| entry.starts_with("DrawBitmap"))
+                .count(),
+            tiles
+        );
+        assert!(
+            !log.iter().any(|entry| entry.starts_with("SetTransform")),
+            "{log:?}"
+        );
+    }
+
+    #[test]
+    fn a_turned_map_turns_its_tiles_and_keeps_its_elements_in_view_coordinates() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = drawing_map();
+        map.set_heading(30.0);
+        for _ in 0..8 {
+            drawn(&map);
+            run_jobs();
+        }
+        let log = drawn(&map);
+        let view = map.view();
+        let position = |prefix: &str| log.iter().position(|entry| entry.starts_with(prefix));
+        let last_bitmap = log
+            .iter()
+            .rposition(|entry| entry.starts_with("DrawBitmap"))
+            .unwrap();
+        let first_bitmap = position("DrawBitmap").unwrap();
+        let first_element = position("DrawGeometry").unwrap();
+        assert_eq!(
+            log.iter()
+                .filter(|entry| entry.starts_with("DrawBitmap"))
+                .count(),
+            view.tiles(19).len()
+        );
+        assert_eq!(
+            log[first_bitmap - 1],
+            format!("SetTransform {}", content_transform(&view))
+        );
+        assert_eq!(
+            log[last_bitmap + 1],
+            format!("SetTransform {}", ferroui_base::Matrix::IDENTITY)
+        );
+        assert!(
+            first_element > last_bitmap,
+            "the elements are drawn over the tiles, unturned"
+        );
     }
 
     #[test]
