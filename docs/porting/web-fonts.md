@@ -94,7 +94,7 @@ core (phases B and C). Section 12 lists what is deliberately left out.
 | `font-language-override` | Applied as the culture of the run, from a table of registered tags (section 3.6); at risk in the standard | B |
 | `ascent-override`, `descent-override`, `line-gap-override` | Full | B |
 | `size-adjust` | Full | B |
-| Level 5 `font-size` range | Parsed and **not applied**: the lookup of the font manager has no size. A face limited to a size is used only when the family has no face for any size, and then the range nearest 16 px. Size-aware lookup is #1292 (0.7.0) | C |
+| Level 5 `font-size` range | Applied by the wrapper shaper, which shapes a run in the face for its size, with no change to `ferroui-base` (#1292). No face in range: the nearest range, as the standard leaves this open. Before a run has a size: `auto`, or the range nearest 16 px. The line metrics of a run stay those of the face the lookup found | C |
 | Level 5 superscript and subscript overrides | Parsed; used where synthesis exists | C |
 
 ### 3.2 `format()` and `tech()`
