@@ -85,6 +85,22 @@ jobs:
           -p ferroui-browser --features vello --examples
           && cargo check --locked --target wasm32-unknown-emscripten
           -p control-catalog-browser --features vello
+      # A module on Vello alone: the browser crates and the facade compile without Skia and do not
+      # link it (#306).
+      - name: Check the browser crates with Vello alone, without Skia
+        run: |
+          cargo check --locked --target wasm32-unknown-emscripten --no-default-features --features vello \
+            -p ferroui-browser -p ferroui-media-browser -p ferroui-media-video-browser -p ferroui-media-camera-browser
+          cargo check --locked --target wasm32-unknown-emscripten --no-default-features --features browser-vello -p ferroui
+          for selection in "ferroui-browser vello" "ferroui-media-browser vello" "ferroui-media-video-browser vello" \
+                           "ferroui-media-camera-browser vello" "ferroui browser-vello"; do
+            set -- $selection
+            if cargo tree --locked --target wasm32-unknown-emscripten -e normal -p "$1" --no-default-features \
+                 --features "$2" -i ferroui-skia > /dev/null 2>&1; then
+              echo "$1 with $2 links Skia"
+              exit 1
+            fi
+          done
       # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
       - name: Check the catalog host with the CDP bridge
         run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp

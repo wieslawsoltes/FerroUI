@@ -10,15 +10,15 @@ path = "main.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
-ferroui-browser.workspace = true
+ferroui-browser = { workspace = true, features = ["skia"] }
 ferroui-media.workspace = true
-ferroui-media-browser = {workspace=true,features=["controls"]}
+ferroui-media-browser = {workspace=true,features=["controls","skia"]}
 ferroui-media-controls.workspace = true
 ferroui-media-video.workspace = true
 ferroui-media-video-controls.workspace = true
-ferroui-media-video-browser = {workspace=true,features=["controls"]}
+ferroui-media-video-browser = {workspace=true,features=["controls","skia"]}
 ferroui-media-camera.workspace = true
-ferroui-media-camera-browser = {workspace=true,features=["controls"]}
+ferroui-media-camera-browser = {workspace=true,features=["controls","skia"]}
 ferroui-themes-fluent.workspace = true
 # The runtime library of markup: the table of the units of the theme the build writes
 # (`build.rs`) names the type of a unit.

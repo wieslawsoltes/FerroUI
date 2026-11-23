@@ -22,6 +22,10 @@ ferroui-media-controls = {workspace=true,optional=true}
 ferroui-media-qr = { workspace = true, default-features = false, optional = true }
 serde_json = { workspace = true, optional = true }
 [features]
+# The render backend of the browser crate: an application on Vello alone turns the default off.
+default = ["skia"]
+skia = ["ferroui-browser/skia"]
+vello = ["ferroui-browser/vello"]
 controls = ["dep:ferroui-media-controls"]
 qr = ["dep:ferroui-media-qr", "dep:serde_json"]
 [package.metadata.release]

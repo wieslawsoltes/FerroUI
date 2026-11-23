@@ -57,7 +57,9 @@ reactive = ["dep:ferroui-system", "dep:ferroui-reactive"]
 dynamic-data = ["reactive", "dep:ferroui-dynamic-data"]
 reactiveui = ["reactive", "dep:ferroui-splat", "dep:ferroui-reactiveui", "dep:ferroui-reactiveui-controls"]
 # The browser platform (wasm32-unknown-emscripten), with Skia and HarfBuzz as on the desktop.
-browser = ["dep:ferroui-browser", "dep:ferroui-skia", "dep:ferroui-harfbuzz"]
+browser = ["dep:ferroui-browser", "ferroui-browser/skia", "dep:ferroui-skia", "dep:ferroui-harfbuzz"]
+# The browser platform with Vello alone: no Skia in the module.
+browser-vello = ["dep:ferroui-browser", "ferroui-browser/vello", "dep:ferroui-harfbuzz", "vello"]
 # The Vello render backend: its CPU mode, and its two GPU modes.
 vello = ["dep:ferroui-vello"]
 vello-hybrid = ["vello", "ferroui-vello/hybrid"]

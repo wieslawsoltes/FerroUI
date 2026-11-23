@@ -20,6 +20,10 @@ ferroui-browser.workspace = true
 serde_json.workspace = true
 wasm-bindgen.workspace = true
 [features]
+# The render backend of the browser crate: an application on Vello alone turns the default off.
+default = ["skia"]
+skia = ["ferroui-browser/skia", "ferroui-media-browser/skia"]
+vello = ["ferroui-browser/vello", "ferroui-media-browser/vello"]
 controls = ["ferroui-media-browser/controls"]
 [package.metadata.release]
 group = "platforms"

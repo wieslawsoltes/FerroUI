@@ -302,9 +302,9 @@ ferroui-media-video-apple = { version = "=0.6.0-preview.1", path = "src/FerroUI.
 ferroui-media-camera-apple = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Camera.Apple" }
 ferroui-media-controls = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Controls" }
 ferroui-media-apple = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Apple" }
-ferroui-media-browser = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Browser" }
-ferroui-media-video-browser = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Video.Browser" }
-ferroui-media-camera-browser = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Camera.Browser" }
+ferroui-media-browser = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Browser", default-features = false }
+ferroui-media-video-browser = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Video.Browser", default-features = false }
+ferroui-media-camera-browser = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media.Camera.Browser", default-features = false }
 ferroui-media = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media" }
 ferroui-media3d = { version = "=0.6.0-preview.1", path = "src/FerroUI.Media3D" }
 ferroui-render3d = { version = "=0.6.0-preview.1", path = "src/FerroUI.Rendering3D" }
@@ -398,7 +398,7 @@ ferroui-wayland = { version = "=0.6.0-preview.1", path = "src/FerroUI.Wayland" }
 ferroui-ios = { version = "=0.6.0-preview.1", path = "src/iOS/FerroUI.iOS", default-features = false }
 ferroui-freedesktop = { version = "=0.6.0-preview.1", path = "src/FerroUI.FreeDesktop" }
 ferroui-android = { version = "=0.6.0-preview.1", path = "src/Android/FerroUI.Android" }
-ferroui-browser = { version = "=0.6.0-preview.1", path = "src/Browser/FerroUI.Browser" }
+ferroui-browser = { version = "=0.6.0-preview.1", path = "src/Browser/FerroUI.Browser", default-features = false }
 ferroui-headless = { version = "=0.6.0-preview.1", path = "src/Headless/FerroUI.Headless" }
 ferroui-headless-vnc = { version = "=0.6.0-preview.1", path = "src/Headless/FerroUI.Headless.Vnc" }
 # Reserved names: empty placeholders until the ports exist (docs/release.md, section 2.2).
