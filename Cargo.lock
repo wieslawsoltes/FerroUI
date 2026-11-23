@@ -8008,6 +8008,7 @@ dependencies = [
  "ferroui-controls-inking",
  "ferroui-controls-livecharts",
  "ferroui-controls-repeater",
+ "ferroui-controls-teaching-tip",
  "ferroui-desktop",
  "ferroui-harfbuzz",
  "ferroui-headless",
