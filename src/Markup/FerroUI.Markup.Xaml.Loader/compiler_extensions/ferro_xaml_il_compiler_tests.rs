@@ -58,6 +58,7 @@ fn pipeline_has_the_upstream_order() {
             "XBindDirectivesTransformer",
             "MarkupExtensionTransformer",
             "TextNodeMerger",
+            "FerroXamlIlPropertyAliasTransformer",
             "FerroXamlIlResolveClassesPropertiesTransformer",
             "FerroXamlIlTransformRoutedEvent",
             "FerroXamlIlTransformInstanceAttachedProperties",

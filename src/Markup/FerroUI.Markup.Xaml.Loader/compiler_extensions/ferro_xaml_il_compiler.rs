@@ -235,6 +235,7 @@ impl FerroXamlIlCompiler {
         insert_before::<PropertyReferenceResolver>(
             &mut transformers,
             vec![
+                Box::new(FerroXamlIlPropertyAliasTransformer),
                 Box::new(FerroXamlIlResolveClassesPropertiesTransformer),
                 Box::new(FerroXamlIlTransformInstanceAttachedProperties),
                 Box::new(FerroXamlIlTransformSyntheticCompiledBindingMembers),

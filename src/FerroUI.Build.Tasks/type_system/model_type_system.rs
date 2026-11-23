@@ -8,7 +8,7 @@ use std::cell::{OnceCell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::rc::{Rc, Weak};
 
-use ferroui_base::metadata::attributes;
+use ferroui_base::metadata::{attributes, MarkupAssembly};
 use ferroui_markup_xaml_loader::core_table::{
     self, attribute_type_name, CoreBody, CoreKind, CoreMember, CoreRef, CoreType, FERRO_DICTIONARY_DEFINITION, FERRO_LIST_CONVERTER_DEFINITION,
     FERRO_LIST_DEFINITION, KNOWN_ATTRIBUTES, LIST_DEFINITION, PROPERTY_NAMESPACE,
@@ -283,17 +283,23 @@ impl ModelTypeSystem {
     pub(crate) fn assembly_attributes(&self, assembly: &ModelAssembly) -> Vec<Rc<dyn IXamlCustomAttribute>> {
         let Some(model) = assembly.model else { return Vec::new() };
         let xmlns_definition = self.attribute_type("XmlnsDefinition");
-        self.set.models()[model]
-            .xmlns_definitions
-            .iter()
-            .map(|definition| {
-                ModelCustomAttribute::new(
-                    xmlns_definition.clone(),
-                    vec![XamlValue::String(definition.xml_namespace.clone()), XamlValue::String(definition.namespace.clone())],
-                    Vec::new(),
-                )
-            })
-            .collect()
+        let model = &self.set.models()[model];
+        let definitions = model.xmlns_definitions.iter().map(|definition| {
+            ModelCustomAttribute::new(
+                xmlns_definition.clone(),
+                vec![XamlValue::String(definition.xml_namespace.clone()), XamlValue::String(definition.namespace.clone())],
+                Vec::new(),
+            )
+        });
+        // The property aliases the crate declares, which the markup compiler reads.
+        let aliases = model.metadata.iter().filter(|(key, _)| key == MarkupAssembly::PROPERTY_ALIAS).map(|(key, value)| {
+            ModelCustomAttribute::new(
+                self.attribute_type("AssemblyMetadata"),
+                vec![XamlValue::String(key.clone()), XamlValue::String(value.clone())],
+                Vec::new(),
+            )
+        });
+        definitions.chain(aliases).collect()
     }
 
     // --- type shells --------------------------------------------------------

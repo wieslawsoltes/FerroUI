@@ -148,7 +148,7 @@ impl RuntimeTypeSystem {
             });
             self.assemblies.borrow_mut().push(assembly.clone());
             let xmlns_definition = self.attribute_type("XmlnsDefinition");
-            let attributes: Vec<Rc<dyn IXamlCustomAttribute>> = registered
+            let mut attributes: Vec<Rc<dyn IXamlCustomAttribute>> = registered
                 .xmlns_definitions
                 .iter()
                 .map(|definition| {
@@ -162,6 +162,14 @@ impl RuntimeTypeSystem {
                     )
                 })
                 .collect();
+            // The property aliases the crate declares, which the markup compiler reads.
+            for (key, value) in registered.metadata.iter().filter(|(key, _)| *key == MarkupAssembly::PROPERTY_ALIAS) {
+                attributes.push(RuntimeCustomAttribute::new(
+                    self.attribute_type("AssemblyMetadata"),
+                    vec![XamlValue::String((*key).to_string()), XamlValue::String((*value).to_string())],
+                    Vec::new(),
+                ));
+            }
             *assembly.attributes.borrow_mut() = attributes;
         }
     }

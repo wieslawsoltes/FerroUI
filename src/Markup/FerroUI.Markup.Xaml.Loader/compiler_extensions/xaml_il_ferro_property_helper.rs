@@ -29,7 +29,7 @@ use xamlx::type_system::{
 use xamlx::{xaml_ast_node_members, xaml_line_info_impl, xaml_query_interface};
 
 use crate::compiler_extensions::transformers::{
-    FerroXamlIlWellKnownTypes, FerroXamlIlWellKnownTypesExtensions,
+    FerroXamlIlPropertyAliasTransformer, FerroXamlIlWellKnownTypes, FerroXamlIlWellKnownTypesExtensions,
 };
 use crate::parsers::PropertyParser;
 
@@ -147,6 +147,15 @@ impl XamlIlFerroPropertyHelper {
                     .into_iter()
                     .find(|f| f.is_static() && f.is_public() && f.name() == property_field_name);
                 let Some(found) = found else {
+                    // `Rectangle.OpacityTransition`: an alias of the type.
+                    let reference: Rc<dyn IXamlAstTypeReference> = tref.clone();
+                    let forged = XamlAstNamePropertyReference::new(line_info, reference.clone(), &name, reference);
+                    let aliased = FerroXamlIlPropertyAliasTransformer.transform(context, forged)?;
+                    if let Some(aliased) = aliased.cast::<XamlAstNamePropertyReference>() {
+                        if aliased.name() != name {
+                            return Self::property_node(context, PropertyReferenceResolver.transform(context, aliased)?, line_info);
+                        }
+                    }
                     return Err(XamlError::transform_exception(
                         format!(
                             "Unable to find {property_field_name} field on type {}",
@@ -163,7 +172,16 @@ impl XamlIlFerroPropertyHelper {
             }
         };
 
-        let transformed = PropertyReferenceResolver.transform(context, forged_reference)?;
+        let aliased = FerroXamlIlPropertyAliasTransformer.transform(context, forged_reference)?;
+        Self::property_node(context, PropertyReferenceResolver.transform(context, aliased)?, line_info)
+    }
+
+    /// The property node of a resolved reference.
+    fn property_node(
+        context: &AstTransformationContext,
+        transformed: Rc<dyn IXamlAstNode>,
+        line_info: &dyn IXamlLineInfo,
+    ) -> XamlResult<Rc<dyn IXamlIlFerroPropertyNode>> {
         let transformed_type_name = transformed.type_name();
         let clr_property = transformed.cast::<XamlAstClrProperty>().ok_or_else(|| {
             XamlError::invalid_cast(format!(
