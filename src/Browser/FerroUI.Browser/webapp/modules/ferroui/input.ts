@@ -1,7 +1,9 @@
 import { CaretHelper } from "./caretHelper";
 import { FerroExports } from "./ferroExports";
 import { StorageItem } from "../storage/storageItem";
-import { applyMaskedInput, applyTextInputOptions, isUnforwardedMaskedInsertion } from "./inputOptions";
+import {
+    applyMaskedInput, applyTextInputOptions, isUnforwardedMaskedInsertion, rememberMaskedText, restoreMaskedText
+} from "./inputOptions";
 import { ViewBox, viewBoxOf, viewPoint } from "./pointerPosition";
 import { setTextInputState as writeTextInputState, subscribeTextInput, TextInputElement } from "./textInput";
 
@@ -546,9 +548,7 @@ export class InputHelper {
         // their DOM default is prevented. Emoji pickers, dictation and virtual
         // keyboards can instead send insertText without a keydown. Forward the
         // insertion, never the input's potentially stale surrounding value.
-        const inputHandler = (event: Event) => {
-            const args = event as InputEvent;
-            if (isTextInputElement(args.target)) return;
+        const forwardInput = (args: InputEvent) => {
             if (typeof args.inputType !== "string" || composing || args.isComposing || args.inputType.includes("Composition")) {
                 return;
             }
@@ -557,6 +557,13 @@ export class InputHelper {
             if (args.inputType === "insertText" && !isCompositionCommit && args.data) {
                 FerroExports.InputHelper?.OnTextInput(topLevelId, args.data);
             }
+        };
+        const inputHandler = (event: Event) => {
+            const args = event as InputEvent;
+            if (isTextInputElement(args.target)) return;
+            forwardInput(args);
+            // Outside a composition a masked element holds only the mask the framework wrote.
+            if (!composing && !args.isComposing) restoreMaskedText(element);
         };
         element.addEventListener("input", inputHandler);
 
@@ -593,6 +600,13 @@ export class InputHelper {
                 compositionCommitTimer = setTimeout(clearCompositionCommit, 0);
             }
             args.preventDefault();
+            // Browsers differ in whether the commit reaches the element before or after this event.
+            restoreMaskedText(element);
+            if (element.type === "password") {
+                setTimeout(() => {
+                    if (!composing) restoreMaskedText(element);
+                }, 0);
+            }
         };
         element.addEventListener("compositionend", compositionEndHandler);
 
@@ -908,6 +922,7 @@ export class InputHelper {
 
         inputElement.value = text;
         inputElement.setSelectionRange(start, end);
+        rememberMaskedText(inputElement, text, start, end);
         inputElement.style.width = "20px";
         inputElement.style.width = `${inputElement.scrollWidth}px`;
     }

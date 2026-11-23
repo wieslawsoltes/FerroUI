@@ -426,6 +426,11 @@ impl BrowserTextInputMethod {
                 input_handler.raw_text_event(data);
             }
         }
+        // A commit that changed nothing raises no change of the text, and the element must
+        // not keep what was composed in it.
+        if self.masks_mirrored_text() {
+            self.surrounding_text_changed();
+        }
     }
 
     /// The textarea of a connection client started composing: a composition session of the
@@ -928,6 +933,22 @@ mod tests {
         client.selection.set(TextSelection::new(6, 6));
         client.raise_surrounding_text_changed();
         assert_eq!(vec![format!("text '{}' 6 6", "\u{2022}".repeat(6))], fixture.take_calls());
+    }
+
+    #[test]
+    fn the_end_of_a_composition_writes_the_mask_again() {
+        let fixture = Fixture::new();
+        fixture.method.set_options(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() });
+        let client = TestClient::new("abc", 1, 1);
+        fixture.set_client(&client);
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("x"));
+        fixture.take_calls();
+
+        // A canceled composition commits nothing, so no change of the text follows.
+        fixture.method.on_composition_end(None);
+        let masked = format!("text '{}' 1 1", "\u{2022}".repeat(3));
+        assert!(fixture.take_calls().contains(&masked));
     }
 
     #[test]

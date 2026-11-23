@@ -7,7 +7,9 @@ import { transform } from "esbuild";
 
 const source = await readFile(new URL("../modules/ferroui/inputOptions.ts", import.meta.url), "utf8");
 const { code } = await transform(source, { loader: "ts", format: "esm", target: "es2020" });
-const { applyMaskedInput, applyTextInputOptions, isUnforwardedMaskedInsertion } = await import(`data:text/javascript;base64,${Buffer.from(code).toString("base64")}`);
+const {
+    applyMaskedInput, applyTextInputOptions, isUnforwardedMaskedInsertion, rememberMaskedText, restoreMaskedText
+} = await import(`data:text/javascript;base64,${Buffer.from(code).toString("base64")}`);
 
 function composingInput() {
     const attributes = new Map([["type", "text"]]);
@@ -116,4 +118,31 @@ test("a masked field refuses the insertions that are not forwarded to the real t
     for (const inputType of ["insertText", "insertCompositionText", "deleteContentBackward"]) {
         assert.equal(isUnforwardedMaskedInsertion("password", inputType), false, inputType);
     }
+});
+
+test("composed text does not stay in a masked element", () => {
+    const selections = [];
+    const input = { type: "password", value: "", setSelectionRange(start, end) { selections.push([start, end]); } };
+
+    rememberMaskedText(input, "\u2022\u2022", 1, 2);
+    input.value = "\u2022composed\u2022";
+    restoreMaskedText(input);
+    assert.equal(input.value, "\u2022\u2022");
+    assert.deepEqual(selections, [[1, 2]]);
+
+    // Nothing to do when the element already holds the mask.
+    restoreMaskedText(input);
+    assert.equal(selections.length, 1);
+
+    // An element the framework never wrote a mask into holds nothing.
+    const fresh = { type: "password", value: "composed", setSelectionRange() {} };
+    restoreMaskedText(fresh);
+    assert.equal(fresh.value, "");
+
+    // A text input is not touched.
+    const plain = { type: "text", value: "visible", setSelectionRange() { assert.fail("not a masked input"); } };
+    rememberMaskedText(plain, "visible", 0, 0);
+    plain.value = "edited";
+    restoreMaskedText(plain);
+    assert.equal(plain.value, "edited");
 });

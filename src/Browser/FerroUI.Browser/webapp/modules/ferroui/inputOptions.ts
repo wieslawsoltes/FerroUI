@@ -50,3 +50,23 @@ export function isUnforwardedMaskedInsertion(elementType: string, inputType: str
         inputType !== "insertText" &&
         !inputType.includes("Composition");
 }
+
+type MaskedInput = Pick<HTMLInputElement, "type" | "value" | "setSelectionRange">;
+const maskedTexts = new WeakMap<MaskedInput, { value: string; start: number; end: number }>();
+
+// The last mask the framework wrote into a password input; it never holds real text.
+export function rememberMaskedText(input: MaskedInput, value: string, start: number, end: number): void {
+    if (input.type === "password") maskedTexts.set(input, { value, start, end });
+    else maskedTexts.delete(input);
+}
+
+// Composed text can stay in the element when its commit changes nothing in the framework, or
+// arrives after the end of the composition. The element goes back to the mask.
+export function restoreMaskedText(input: MaskedInput): void {
+    if (input.type !== "password") return;
+    const masked = maskedTexts.get(input);
+    const value = masked?.value ?? "";
+    if (input.value === value) return;
+    input.value = value;
+    input.setSelectionRange(masked?.start ?? 0, masked?.end ?? 0);
+}
