@@ -86,7 +86,8 @@ mod connected_animation_samples_tests;
 #[cfg(test)]
 mod media_samples_tests;
 
-#[cfg(test)]
+// The containers of the examples need the control themes of the WinUI theme.
+#[cfg(all(test, feature = "theme"))]
 mod items_view_samples_tests;
 #[cfg(test)]
 mod materials_samples_tests;
