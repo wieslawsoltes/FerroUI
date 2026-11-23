@@ -33,6 +33,13 @@ int ferro_windows_set_rate(FerroWindowsSession *s,double rate);
 FerroWindowsFrame *ferro_windows_take(FerroWindowsSession *s);
 void ferro_windows_frame_info(FerroWindowsFrame *f,FerroWindowsFrameInfo *out);
 void ferro_windows_frame_release(FerroWindowsFrame *f);
+/* A D3D11 device on the adapter of an 8-byte LUID, for a renderer on another API; NULL if none. */
+void *ferro_windows_device_for_luid(const uint8_t *luid);
+/* Copies the frame into a new texture shared by an NT handle (owned by the result) and submits it. */
+void *ferro_windows_frame_share(FerroWindowsFrame *f, intptr_t *handle);
+/* 1 when the copy has completed, 0 while it runs, -1 on a failure. Does not wait. */
+int ferro_windows_share_ready(void *copy);
+void ferro_windows_share_release(void *copy);
 void *ferro_windows_frame_texture(FerroWindowsFrame *f,uint32_t *slice);
 void *ferro_windows_alias(FerroWindowsFrame *f,intptr_t display,const FerroWindowsEgl *egl,uint32_t *texture);
 void ferro_windows_alias_release(void *alias,int alive);

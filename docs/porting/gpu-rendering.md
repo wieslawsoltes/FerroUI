@@ -249,6 +249,11 @@ The route, in pull requests stacked on the Skia ones:
      `FERROUI_MEDIA_DMA_BUF=1` and `FERROUI_VELLO_DMA_BUF_IMPORT=1`, and has not run yet. The GL route
      stays the default wherever the renderer has a context of OpenGL. **Not done:** NV12 frames
      on this route, which is what hardware decoders usually produce.
+   - *Written, off by default: frames shared by an NT handle on Vello's Direct3D 12 device on
+     Windows* (#575, `gpu/d3d12_external_objects.rs`, `WindowsFrameProducer::SharedHandle`). It needs
+     both `FERROUI_MEDIA_NT_HANDLE=1` and `FERROUI_VELLO_NT_HANDLE_IMPORT=1`, and has not run yet.
+     The GL route stays the default wherever the renderer has a context of OpenGL. The decoder's
+     texture arrays are not shareable, so each frame costs one GPU copy.
    - *Next*, in the same way: the page transitions (the shader effects with images) and the shader
      effects of an application, which keep their CPU references; the lighting fill of a scene
      lighting effect (`draw_lighting`). Until each lands, WebGL2 draws it with the CPU path.

@@ -16,13 +16,14 @@ path = "lib.rs"
 ferroui-base.workspace = true
 ferroui-media.workspace = true
 ferroui-media-opengl.workspace = true
+ferroui-media-controls = { workspace = true, optional = true }
 ferroui-opengl.workspace = true
 ferroui-direct2d = { workspace = true, optional = true }
 ferroui-win32 = { workspace = true, features = ["angle"], optional = true }
 [build-dependencies]
 cc.workspace = true
 [features]
-controls = ["ferroui-media-opengl/controls"]
+controls = ["dep:ferroui-media-controls", "ferroui-media-opengl/controls"]
 direct2d = ["dep:ferroui-direct2d"]
 native-frame-tests = ["dep:ferroui-win32"]
 synthetic-camera = []

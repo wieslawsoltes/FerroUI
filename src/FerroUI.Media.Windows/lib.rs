@@ -11,8 +11,53 @@ use ferroui_base::{
     threading::{DispatcherPriority, DispatcherTimer},
 };
 use ferroui_media::{frames::*, *};
+/// The importer of the frames of a [`WindowsFrameProducer`] on a renderer with a context of OpenGL
+/// or on another API: a frame of the NT handle route by its handle, any other by the GL importer.
 #[cfg(feature = "controls")]
-pub use ferroui_media_opengl::NativeGlTextureImporter;
+pub struct NativeGlTextureImporter;
+#[cfg(feature = "controls")]
+impl ferroui_media_controls::TextureFrameImporter for NativeGlTextureImporter {
+    fn import(
+        &self,
+        interop: &dyn ferroui_base::rendering::composition::ICompositionGpuInterop,
+        frame: &FrameLease,
+    ) -> Result<ferroui_media_controls::ImportedTextureFrame, MediaError> {
+        use ferroui_base::platform::{
+            KnownPlatformGraphicsExternalImageHandleTypes, LeasedPlatformHandle,
+            PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
+        };
+        use ferroui_media_controls::TextureFrameImporter as _;
+        let Some(shared) = frame.resource::<frame_producer::SharedHandleFrame>() else {
+            return ferroui_media_opengl::NativeGlTextureImporter.import(interop, frame);
+        };
+        let m = frame.metadata();
+        if m.device_generation != interop.shared_context_generation()
+            || m.device != interop.device_luid().map(DeviceIdentity::Luid)
+        {
+            return Err(unsupported("Frame and renderer devices differ"));
+        }
+        let handle = LeasedPlatformHandle::new(
+            shared.0.handle(),
+            Some(KnownPlatformGraphicsExternalImageHandleTypes::D3D11_TEXTURE_NT_HANDLE),
+            frame.clone(),
+        );
+        let image = interop.import_image(
+            Rc::new(handle),
+            PlatformGraphicsExternalImageProperties {
+                width: m.width as i32,
+                height: m.height as i32,
+                format: PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
+                top_left_origin: m.top_left_origin,
+                memory_size: m.retained_bytes,
+                ..Default::default()
+            },
+        );
+        // The stream hands a frame over only once its GPU copy has completed.
+        let producer_ready = GpuCompletion::new();
+        producer_ready.complete();
+        Ok(ferroui_media_controls::ImportedTextureFrame { image, producer_ready })
+    }
+}
 pub use native::{
     EncodedRecording, NativeDevice, NativeFrame, NativeRecording, NativeSession, NativeState,
 };
