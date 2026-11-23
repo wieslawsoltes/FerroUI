@@ -21,7 +21,6 @@ const HAS_FORMAT: u8 = 1 << 3;
 const HAS_CODE_POINTS: u8 = 1 << 4;
 const HAS_BIAS: u8 = 1 << 5;
 pub(super) const IGNORED: u8 = 1 << 6;
-const RESERVED: u8 = 1 << 7;
 
 /// The patch format of glyph-keyed patches; 1 and 2 are table-keyed.
 pub(super) const GLYPH_KEYED: u8 = 3;
@@ -129,7 +128,10 @@ pub fn parse_patch_map(tag: Tag, table: &[u8]) -> Result<PatchMap, FontDecodeErr
     let template_length = cursor.u16()? as usize;
     debug_assert_eq!(cursor.position, HEADER_LENGTH);
     let template = table.get(HEADER_LENGTH..HEADER_LENGTH + template_length).ok_or(FontDecodeError::Truncated)?;
-    validate_template(template)?;
+    // A template is expanded for each entry, so that is when a bad one is an error.
+    if entry_count > 0 {
+        validate_template(template)?;
+    }
     cursor.position = HEADER_LENGTH + template_length;
     let cff_charstrings = if flags & 1 != 0 { Some(cursor.u32()?) } else { None };
     let cff2_charstrings = if flags & 2 != 0 { Some(cursor.u32()?) } else { None };
@@ -175,10 +177,8 @@ struct EntryParser<'a> {
 impl EntryParser<'_> {
     fn entry(&mut self, index: usize) -> Result<PatchEntry, FontDecodeError> {
         let flags_offset = u32::try_from(self.cursor.position).map_err(|_| MALFORMED)?;
+        // Bit 7 is reserved, and is not read.
         let flags = self.cursor.u8()?;
-        if flags & RESERVED != 0 {
-            return Err(MALFORMED);
-        }
         let (mut features, mut design_space) = (Vec::new(), Vec::new());
         if flags & HAS_FEATURES != 0 {
             let count = self.cursor.u8()?;
@@ -400,7 +400,7 @@ fn ranges_overlap(a: &[(u32, u32)], b: &[(u32, u32)]) -> bool {
 
 /// Whether each entry intersects the target, children included. Children come before their
 /// parent, so one pass is enough and a hostile graph cannot make this exponential.
-fn matching_entries(map: &PatchMap, target: &SubsetTarget) -> Vec<bool> {
+pub(super) fn matching_entries(map: &PatchMap, target: &SubsetTarget) -> Vec<bool> {
     let mut matches: Vec<bool> = Vec::with_capacity(map.entries.len());
     for entry in &map.entries {
         let own = target.intersects(entry);
@@ -415,28 +415,57 @@ fn matching_entries(map: &PatchMap, target: &SubsetTarget) -> Vec<bool> {
     matches
 }
 
-/// The URLs, as the map writes them, of the patches a target needs, in the order of the maps.
-/// `skip` says which were already applied or failed.
-pub fn patches_to_load(
+/// A patch to apply: the URL the map writes for it, and the table that lists it, whose
+/// compatibility id the patch has to carry.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PlannedPatch {
+    pub url: String,
+    pub table: Tag,
+}
+
+/// What a target needs next (steps 5 to 9 of the extension algorithm, section 4.3).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct PatchPlan {
+    /// The first URL of each entry the target needs, in the order of the maps, `IFT ` first.
+    pub apply: Vec<PlannedPatch>,
+    /// The other URLs of those entries: they are loaded ahead, as later iterations will need them,
+    /// and are applied only when they are the first URL of an entry that is chosen.
+    pub prefetch: Vec<String>,
+}
+
+/// The patches a target needs. An entry with a URL that was already applied is left out, as the
+/// algorithm says, whichever of its URLs that is.
+pub fn plan_patches(
     maps: &[PatchMap],
     target: &SubsetTarget,
-    skip: impl Fn(&str) -> bool,
-) -> Result<Vec<String>, FontDecodeError> {
-    let mut seen = HashSet::new();
-    let mut urls = Vec::new();
+    applied: impl Fn(&str) -> bool,
+) -> Result<PatchPlan, FontDecodeError> {
+    let mut plan = PatchPlan::default();
+    let (mut firsts, mut others) = (HashSet::new(), HashSet::new());
     for map in maps {
         let matches = matching_entries(map, target);
         for (entry, matched) in map.entries.iter().zip(matches) {
             if !matched || entry.ignored {
                 continue;
             }
-            for url in map.urls(entry) {
-                let url = url?;
-                if !skip(&url) && seen.insert(url.clone()) {
-                    urls.push(url);
+            let urls = map.urls(entry).collect::<Result<Vec<String>, FontDecodeError>>()?;
+            if urls.iter().any(|url| applied(url)) {
+                continue;
+            }
+            let mut urls = urls.into_iter();
+            let Some(first) = urls.next() else {
+                continue;
+            };
+            if firsts.insert(first.clone()) {
+                plan.apply.push(PlannedPatch { url: first, table: map.tag });
+            }
+            for url in urls {
+                if others.insert(url.clone()) {
+                    plan.prefetch.push(url);
                 }
             }
         }
     }
-    Ok(urls)
+    plan.prefetch.retain(|url| !firsts.contains(url));
+    Ok(plan)
 }

@@ -1,3 +1,4 @@
+use super::map::matching_entries;
 use super::patch::GlyphPatchJob;
 use super::sparse::decode_sparse_bit_set;
 use super::template::{expand_template, validate_template, EntryId};
@@ -41,9 +42,19 @@ fn same(data: &[u8]) -> Vec<u8> {
     data.to_vec()
 }
 
+fn listed(patches: Vec<(String, Vec<u8>)>) -> Vec<(PlannedPatch, Vec<u8>)> {
+    patches.into_iter().map(|(url, bytes)| (PlannedPatch { url, table: IFT_TABLE }, bytes)).collect()
+}
+
+/// The URLs a target needs, those to apply first.
+fn planned(maps: &[PatchMap], target: &SubsetTarget) -> Vec<String> {
+    let plan = plan_patches(maps, target, |_| false).unwrap();
+    plan.apply.into_iter().map(|patch| patch.url).chain(plan.prefetch).collect()
+}
+
 fn apply(fixture: &[u8], patches: Vec<(String, Vec<u8>)>) -> Result<Vec<u8>, FontDecodeError> {
     let maps = read_patch_maps(fixture, &WebFontLimits::DEFAULT)?;
-    let mut job = GlyphPatchJob::new(fixture.to_vec(), maps, patches, plain, WebFontLimits::DEFAULT)?;
+    let mut job = GlyphPatchJob::new(fixture.to_vec(), maps, listed(patches), plain, WebFontLimits::DEFAULT)?;
     loop {
         if let Some(font) = job.step(usize::MAX)? {
             return Ok(font);
@@ -82,7 +93,7 @@ fn a_sparse_node_of_zeros_is_its_whole_interval() {
 #[test]
 fn a_sparse_set_refuses_bad_input_and_drops_what_is_past_unicode() {
     assert!(decode_sparse_bit_set(&[], 0, &mut 10).is_err());
-    assert!(decode_sparse_bit_set(&[0x80], 0, &mut 10).is_err(), "the reserved bit");
+    assert_eq!(decode_sparse_bit_set(&[0x80], 0, &mut 10).unwrap(), (Vec::new(), 1), "the reserved bit is not read");
     assert!(decode_sparse_bit_set(&[0b11 | 8 << 2], 0, &mut 10).is_err(), "too high");
     assert!(decode_sparse_bit_set(&[0b01 | 2 << 2], 0, &mut 10).is_err(), "no bits");
     assert_eq!(decode_sparse_bit_set(&[0b01], 0, &mut 10).unwrap(), (Vec::new(), 1), "height zero is empty");
@@ -116,7 +127,7 @@ fn a_bad_template_is_refused() {
 fn urls(map: &[u8], points: &[u32]) -> Vec<String> {
     let maps = [parse_patch_map(IFT_TABLE, map).unwrap()];
     let target = SubsetTarget::new(points.iter().copied(), DEFAULT_FEATURES.iter().copied(), Vec::new());
-    patches_to_load(&maps, &target, |_| false).unwrap()
+    planned(&maps, &target)
 }
 
 #[test]
@@ -152,7 +163,7 @@ fn numeric_ids_follow_their_deltas() {
     let body = [0, 1 << 2, 0, 0, 10, 1 << 2, 0xFF, 0xFF, 0xFC];
     let map = parse_patch_map(IFT_TABLE, &map_with(3, &body, &[])).unwrap();
     let target = SubsetTarget::new([], [], Vec::new());
-    let found = patches_to_load(&[map], &target, |_| false).unwrap();
+    let found = planned(&[map], &target);
     let expect: Vec<String> =
         [1, 7, 6].iter().map(|id| expand_template(&[128], EntryId::Number(*id)).unwrap()).collect();
     assert_eq!(found, expect);
@@ -160,13 +171,169 @@ fn numeric_ids_follow_their_deltas() {
 
 #[test]
 fn one_entry_can_name_several_patches_and_string_ids() {
-    // Two lengths in one entry (the first has the continuation bit), then an entry that repeats.
+    // Two lengths in one entry: the first has the continuation bit.
+    let body = [1 << 2, 0x80, 0, 1, 0, 0, 2];
+    let map = parse_patch_map(IFT_TABLE, &map_with(1, &body, b"abc")).unwrap();
+    let target = SubsetTarget::new([], [], Vec::new());
+    let plan = plan_patches(&[map], &target, |_| false).unwrap();
+    let id = |bytes: &[u8]| expand_template(&[128], EntryId::Bytes(bytes)).unwrap();
+    assert_eq!(plan.apply, [PlannedPatch { url: id(b"a"), table: IFT_TABLE }], "only the first is applied");
+    assert_eq!(plan.prefetch, [id(b"bc")], "the other is loaded ahead");
+    // A second entry without ids repeats the last one, so that URL is the first of an entry.
     let body = [1 << 2, 0x80, 0, 1, 0, 0, 2, 0];
     let map = parse_patch_map(IFT_TABLE, &map_with(2, &body, b"abc")).unwrap();
+    let plan = plan_patches(&[map], &target, |_| false).unwrap();
+    let urls: Vec<&str> = plan.apply.iter().map(|patch| patch.url.as_str()).collect();
+    assert_eq!(urls, [id(b"a"), id(b"bc")]);
+    assert!(plan.prefetch.is_empty());
+}
+
+#[test]
+fn an_entry_with_any_url_already_applied_is_left_out() {
+    let body = [1 << 2, 0x80, 0, 1, 0, 0, 2];
+    let map = parse_patch_map(IFT_TABLE, &map_with(1, &body, b"abc")).unwrap();
+    let id = expand_template(&[128], EntryId::Bytes(b"bc")).unwrap();
     let target = SubsetTarget::new([], [], Vec::new());
-    let found = patches_to_load(&[map], &target, |_| false).unwrap();
-    let id = |bytes: &[u8]| expand_template(&[128], EntryId::Bytes(bytes)).unwrap();
-    assert_eq!(found, [id(b"a"), id(b"bc")]);
+    assert!(plan_patches(&[map], &target, |url| url == id).unwrap().apply.is_empty());
+}
+
+#[test]
+fn reserved_bits_of_an_entry_are_not_read() {
+    assert!(parse_patch_map(IFT_TABLE, &map_with(1, &[0x80], &[])).is_ok());
+}
+
+#[test]
+fn a_bad_template_is_an_error_only_when_it_is_expanded() {
+    let mut empty = map_with(0, &[], &[]);
+    empty[35] = 0;
+    assert!(parse_patch_map(IFT_TABLE, &empty).is_ok());
+    let mut one = map_with(1, &[0], &[]);
+    one[35] = 0;
+    assert!(parse_patch_map(IFT_TABLE, &one).is_err());
+}
+
+/// The examples of section 5.3.3.
+#[test]
+fn the_sparse_sets_of_the_standard_decode() {
+    let decode = |bytes: &[u8]| decode_sparse_bit_set(bytes, 0, &mut 1000).unwrap();
+    let bytes = [0b00001110, 0b00100001, 0b00010001, 0b00000001, 0b00000100, 0b00000010, 0b00001000];
+    assert_eq!(decode(&bytes), (vec![(2, 2), (33, 33), (323, 323)], bytes.len()));
+    assert_eq!(decode(&[0]), (Vec::new(), 1));
+    assert_eq!(decode(&[0b00001101, 0b00000011, 0b00110001]), (vec![(0, 17)], 3));
+}
+
+/// The examples of section 5.3.4.
+#[test]
+fn the_url_templates_of_the_standard_expand() {
+    let foo_bar = |op: u8| {
+        let mut template = vec![10];
+        template.extend_from_slice(b"//foo.bar/");
+        template.push(op);
+        template
+    };
+    let digits = |prefix: &[u8], ops: &[u8]| {
+        let mut template = vec![prefix.len() as u8];
+        template.extend_from_slice(prefix);
+        for op in ops {
+            template.extend_from_slice(&[*op, 1, b'/']);
+        }
+        template.push(128);
+        template
+    };
+    let number = |template: &[u8], id: u32| expand_template(template, EntryId::Number(id)).unwrap();
+    let bytes = |template: &[u8], id: &[u8]| expand_template(template, EntryId::Bytes(id)).unwrap();
+    let mut query = vec![8];
+    query.extend_from_slice(b"foo?bar=");
+    query.push(128);
+    assert_eq!(number(&query, 123), "foo?bar=FC");
+    assert_eq!(number(&foo_bar(128), 0), "//foo.bar/00");
+    assert_eq!(number(&digits(b"/foo/", &[129, 130]), 478), "/foo/0/F/07F0");
+    assert_eq!(number(&digits(b"/foo/", &[129, 130, 131]), 123), "/foo/C/F/_/FC");
+    assert_eq!(bytes(&digits(b"foo/", &[129, 130, 131]), b"baz"), "foo/K/N/G/C9GNK");
+    assert_eq!(bytes(&digits(b"foo/", &[129, 130, 131]), b"z"), "foo/8/F/_/F8");
+    assert_eq!(number(&foo_bar(133), 14_000_000), "//foo.bar/1Z-A");
+    assert_eq!(number(&foo_bar(133), 0), "//foo.bar/AA%3D%3D");
+    assert_eq!(number(&foo_bar(133), 17_000_000), "//foo.bar/AQNmQA%3D%3D");
+    assert_eq!(bytes(&foo_bar(133), &[0xC3, 0xA0, 0x62, 0x63]), "//foo.bar/w6BiYw%3D%3D");
+    for bad in [
+        &[4, b'f', b'o', b'o', b'/', 150][..],
+        &[4, b'f', b'o', b'o', b'/', 0, 128],
+        &[10, b'f', b'o', b'o', b'/', 128],
+        &[4, b'f', b'o', b'o', 0x85, 128],
+    ] {
+        assert!(expand_template(bad, EntryId::Number(123)).is_err(), "{bad:?}");
+    }
+}
+
+/// The table of examples of "Check entry intersection", section 4.3.
+#[test]
+fn entries_intersect_as_in_the_standard() {
+    let set = |points: &[u32]| encode_sparse_bit_set(points);
+    let mut body = Vec::new();
+    for points in [&[1, 2, 3][..], &[4, 5, 6], &[1, 2, 3], &[1, 2, 3]] {
+        body.push(1 << 4);
+        body.extend_from_slice(&set(points));
+    }
+    body.extend_from_slice(&[1 << 1 | 1 << 4, 1, 0, 0, 1]);
+    body.extend_from_slice(&set(&[1, 2, 3]));
+    for _ in 0..2 {
+        body.extend_from_slice(&[1 << 1, 0x82, 0, 0, 0, 0, 0, 1]);
+    }
+    let map = parse_patch_map(IFT_TABLE, &map_with(7, &body, &[])).unwrap();
+    let check = |index: usize, points: &[u32], features: &[Tag]| {
+        let target = SubsetTarget::new(points.iter().copied(), features.iter().copied(), Vec::new());
+        matching_entries(&map, &target)[index]
+    };
+    assert!(check(0, &[2], &[]));
+    assert!(!check(1, &[2], &[]));
+    assert!(check(2, &[2], &[*b"smcp"]));
+    assert!(!check(3, &[], &[*b"smcp"]));
+    assert!(!check(4, &[5], &[]));
+    assert!(!check(5, &[2], &[]));
+    assert!(check(6, &[2, 6], &[]));
+}
+
+#[test]
+fn a_patch_must_carry_the_id_of_the_table_that_lists_it() {
+    let inter = font(INTER);
+    let fixture = incremental_font(&inter, &[&code_points("a")], &same);
+    let other = *b"another font id!";
+    let second = patch_map(&other, &[128], &[&[98]], 3, None);
+    let file = add_table(&fixture.font, IFTX_TABLE, second);
+    let (url, bytes) = fixture.patches[0].clone();
+    let maps = read_patch_maps(&file, &WebFontLimits::DEFAULT).unwrap();
+    let wrong = vec![(PlannedPatch { url, table: IFTX_TABLE }, bytes)];
+    assert!(GlyphPatchJob::new(file.clone(), maps, wrong, plain, WebFontLimits::DEFAULT).is_err());
+}
+
+#[test]
+fn a_glyph_past_the_end_of_the_table_is_ignored() {
+    let inter = font(INTER);
+    let fixture = incremental_font(&inter, &[&code_points("a")], &same);
+    let url = fixture.patches[0].0.clone();
+    let patch = glyph_patch(&FIXTURE_ID, &[(*b"glyf", vec![(0xFFFF, vec![1, 2])])], &same);
+    let patched = apply(&fixture.font, vec![(url, patch)]).unwrap();
+    assert_eq!(outlines(&patched), outlines(&fixture.font));
+}
+
+#[test]
+fn a_charstrings_index_that_is_not_last_is_refused() {
+    let (file, start) = with_index(*b"CFF ", 2);
+    let mut table = font_table(&file, b"CFF ").unwrap();
+    table.extend_from_slice(b"more");
+    let moved = add_table_replacing(&file, *b"CFF ", table);
+    let patch = glyph_patch(&FIXTURE_ID, &[(*b"CFF ", vec![(1, vec![1])])], &same);
+    let url = expand_template(&[128], EntryId::Number(1)).unwrap();
+    assert!(apply(&moved, vec![(url, patch)]).is_err(), "INDEX at {start}");
+}
+
+/// `font` with a table replaced.
+fn add_table_replacing(font: &[u8], tag: Tag, table: Vec<u8>) -> Vec<u8> {
+    let mut tables = font_tables(font);
+    tables.retain(|(name, _)| *name != tag);
+    tables.push((tag, table));
+    let mut references: Vec<(Tag, &[u8])> = tables.iter().map(|(tag, data)| (*tag, data.as_slice())).collect();
+    assemble(TRUETYPE, &mut references, &WebFontLimits::DEFAULT).unwrap()
 }
 
 #[test]
@@ -208,7 +375,7 @@ fn features_and_design_space_narrow_an_entry() {
     body.extend_from_slice(&(700i32 << 16).to_be_bytes());
     let map = |target: &SubsetTarget| {
         let maps = [parse_patch_map(IFT_TABLE, &map_with(1, &body, &[])).unwrap()];
-        patches_to_load(&maps, target, |_| false).unwrap().len()
+        planned(&maps, target).len()
     };
     let axis = |first: i32, last: i32| vec![(*b"wght", first << 16, last << 16)];
     assert_eq!(map(&SubsetTarget::new([], [*b"smcp"], axis(500, 600))), 1);
@@ -266,11 +433,11 @@ fn a_patch_brings_back_its_glyphs_and_leaves_the_others() {
     assert_eq!(after[x], before[x], "the glyph of the other patch is still out");
     let maps = read_patch_maps(&patched, &WebFontLimits::DEFAULT).unwrap();
     let target = SubsetTarget::new(code_points("ax"), DEFAULT_FEATURES.iter().copied(), Vec::new());
-    assert_eq!(patches_to_load(&maps, &target, |_| false).unwrap(), [fixture.patches[1].0.clone()], "applied");
+    assert_eq!(planned(&maps, &target), [fixture.patches[1].0.clone()], "applied");
     let done = apply(&patched, vec![fixture.patches[1].clone()]).unwrap();
     assert_eq!(outlines(&done), original, "every glyph is back");
     let maps = read_patch_maps(&done, &WebFontLimits::DEFAULT).unwrap();
-    assert!(patches_to_load(&maps, &target, |_| false).unwrap().is_empty());
+    assert!(planned(&maps, &target).is_empty());
 }
 
 #[test]
@@ -302,7 +469,8 @@ fn working_in_small_steps_gives_the_same_font() {
     let whole = apply(&fixture.font, fixture.patches.clone()).unwrap();
     let maps = read_patch_maps(&fixture.font, &WebFontLimits::DEFAULT).unwrap();
     let mut job =
-        GlyphPatchJob::new(fixture.font.clone(), maps, fixture.patches.clone(), plain, WebFontLimits::DEFAULT).unwrap();
+        GlyphPatchJob::new(fixture.font.clone(), maps, listed(fixture.patches.clone()), plain, WebFontLimits::DEFAULT)
+            .unwrap();
     let mut steps = 0;
     let stepped = loop {
         steps += 1;
@@ -396,7 +564,6 @@ fn a_patch_for_another_font_or_with_bad_structure_is_refused() {
     refused(short);
     let id = FIXTURE_ID;
     let glyph = |id_value: u16| (id_value, vec![0u8; 2]);
-    refused(glyph_patch(&id, &[(*b"glyf", vec![glyph(0xFFFF)])], &same));
     refused(glyph_patch(&id, &[(*b"glyf", vec![glyph(5), glyph(5)])], &same));
     refused(glyph_patch(&id, &[(*b"glyf", vec![glyph(5), glyph(4)])], &same));
     refused(glyph_patch(&id, &[(*b"gvar", vec![glyph(1)])], &same));
@@ -463,7 +630,7 @@ fn corrupt_maps_and_patches_never_panic() {
             bytes.truncate(random(&mut state) as usize % bytes.len());
         }
         if let Ok(parsed) = parse_patch_map(IFT_TABLE, &bytes) {
-            let _ = patches_to_load(&[parsed], &target, |_| false);
+            let _ = plan_patches(&[parsed], &target, |_| false);
         }
     }
     for _ in 0..300 {

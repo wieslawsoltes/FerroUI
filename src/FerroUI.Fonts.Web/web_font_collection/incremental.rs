@@ -9,13 +9,14 @@
 
 use super::*;
 use ferroui_fonts_web_core::ift::{
-    patch_maps_from_tables, patches_to_load, read_patch_maps, GlyphPatchJob, PatchMap, SubsetTarget, DEFAULT_FEATURES,
+    patch_maps_from_tables, plan_patches, read_patch_maps, GlyphPatchJob, PatchMap, SubsetTarget, DEFAULT_FEATURES,
     IFTX_TABLE, IFT_TABLE, MAX_PATCHES,
 };
 use ferroui_base::media::FontFeature;
 use ferroui_base::platform::ITextShaperImpl;
+use ferroui_fonts_web_core::ift::PlannedPatch;
 use ferroui_fonts_web_core::sfnt::Tag;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 /// The patches of one font fetched at once. The rest follow when these are applied.
 const MAX_PATCH_FETCHES: usize = 8;
@@ -29,11 +30,17 @@ pub(super) struct IncrementalState {
     target: HashSet<u32>,
     features: Vec<Tag>,
     design_space: Vec<(Tag, i32, i32)>,
-    /// The patches already asked for, as the map writes their URLs.
+    /// Every URL asked for, as the map writes it: a URL is never requested twice (section 9).
     requested: HashSet<String>,
+    /// The patches applied.
+    applied: HashSet<String>,
+    /// What failed to load.
+    failed: HashSet<String>,
+    /// Patches that arrived and wait to be applied.
+    loaded: HashMap<String, Vec<u8>>,
+    /// The patches asked for in this run of the extension algorithm.
+    run_requests: usize,
     in_flight: usize,
-    failed: bool,
-    received: Vec<(String, Vec<u8>)>,
     pub(super) applying: bool,
     dirty: bool,
 }
@@ -119,9 +126,11 @@ impl Shared {
                 features,
                 design_space,
                 requested: HashSet::new(),
+                applied: HashSet::new(),
+                failed: HashSet::new(),
+                loaded: HashMap::new(),
+                run_requests: 0,
                 in_flight: 0,
-                failed: false,
-                received: Vec::new(),
                 applying: false,
                 dirty: false,
             }));
@@ -181,7 +190,8 @@ impl Shared {
         }
     }
 
-    /// Asks for the patches the target needs, when none are on their way.
+    /// One turn of the extension algorithm (section 4.3): applies the patches that are here, or
+    /// asks for the ones the target still needs, when nothing is on its way.
     fn extend(this: &Rc<Self>, id: FontFaceId) {
         let plan = this.with_slot(id, |slot| {
             let typeface = slot.glyph_typeface.clone()?;
@@ -191,77 +201,117 @@ impl Shared {
                 return None;
             }
             state.dirty = false;
+            if state.target.is_empty() {
+                return None;
+            }
             let target = SubsetTarget::new(
                 state.target.iter().copied(),
                 state.features.iter().copied(),
                 state.design_space.clone(),
             );
-            Some((typeface, target, state.requested.clone(), state.url.clone(), state.generation))
+            Some((typeface, target, state.applied.clone(), state.url.clone(), state.generation))
         });
-        let Some(Some((typeface, target, requested, font_url, generation))) = plan else {
+        let Some(Some((typeface, target, applied, font_url, generation))) = plan else {
             return;
         };
-        let wanted = maps_of(&typeface).and_then(|maps| patches_to_load(&maps, &target, |url| requested.contains(url)));
-        let Ok(mut urls) = wanted else {
+        let plan = maps_of(&typeface).and_then(|maps| plan_patches(&maps, &target, |url| applied.contains(url)));
+        let Ok(plan) = plan else {
             return Self::fail_extension(this, id);
         };
-        if urls.is_empty() {
-            return;
+        enum Next {
+            Done,
+            Fail,
+            Apply(Vec<(PlannedPatch, Vec<u8>)>),
+            Fetch(Vec<String>),
         }
-        if requested.len() + urls.len() > MAX_PATCHES {
-            return Self::fail_extension(this, id);
-        }
-        let more = urls.len() > MAX_PATCH_FETCHES;
-        urls.truncate(MAX_PATCH_FETCHES);
-        let resolved: Option<Vec<String>> = urls.iter().map(|url| patch_url(&font_url, url)).collect();
-        let (Some(resolved), Some(fetcher)) = (resolved, this.fetcher.borrow().clone()) else {
-            return Self::fail_extension(this, id);
-        };
-        this.with_slot(id, |slot| {
-            if let Some(state) = slot.incremental.as_mut() {
-                state.requested.extend(urls.iter().cloned());
-                state.in_flight = urls.len();
-                state.dirty = more;
+        let limit = this.options.limits.max_decoded_size;
+        let next = this.with_slot(id, |slot| {
+            let Some(state) = slot.incremental.as_mut() else {
+                return Next::Done;
+            };
+            if plan.apply.is_empty() {
+                // The run is over. What was loaded ahead and is not needed is let go.
+                state.loaded.clear();
+                state.run_requests = 0;
+                return Next::Done;
             }
+            if plan.apply.iter().any(|patch| state.failed.contains(&patch.url)) {
+                return Next::Fail;
+            }
+            let ready: Vec<(PlannedPatch, Vec<u8>)> = plan
+                .apply
+                .iter()
+                .filter_map(|patch| state.loaded.remove(&patch.url).map(|bytes| (patch.clone(), bytes)))
+                .collect();
+            if !ready.is_empty() {
+                return Next::Apply(ready);
+            }
+            let held: usize = state.loaded.values().map(Vec::len).sum();
+            let ahead = plan.prefetch.iter().filter(|_| held < limit);
+            let wanted = plan.apply.iter().map(|patch| &patch.url).chain(ahead);
+            let urls: Vec<String> =
+                wanted.filter(|url| !state.requested.contains(*url)).take(MAX_PATCH_FETCHES).cloned().collect();
+            if urls.is_empty() || state.run_requests + urls.len() > MAX_PATCHES {
+                return Next::Fail;
+            }
+            state.run_requests += urls.len();
+            state.requested.extend(urls.iter().cloned());
+            state.in_flight = urls.len();
+            Next::Fetch(urls)
         });
-        for (url, location) in urls.into_iter().zip(resolved) {
-            let weak = Rc::downgrade(this);
-            fetcher.fetch(
-                &location,
-                Box::new(move |result| {
-                    if let Some(this) = weak.upgrade() {
-                        Shared::patch_fetched(&this, id, generation, url, result);
-                    }
-                }),
-            );
+        match next {
+            None | Some(Next::Done) => {}
+            Some(Next::Fail) => Self::fail_extension(this, id),
+            Some(Next::Apply(patches)) => Self::apply_patches(this, id, patches),
+            Some(Next::Fetch(urls)) => {
+                let resolved: Option<Vec<String>> = urls.iter().map(|url| patch_url(&font_url, url)).collect();
+                let (Some(resolved), Some(fetcher)) = (resolved, this.fetcher.borrow().clone()) else {
+                    return Self::fail_extension(this, id);
+                };
+                for (url, location) in urls.into_iter().zip(resolved) {
+                    let weak = Rc::downgrade(this);
+                    fetcher.fetch(
+                        &location,
+                        Box::new(move |result| {
+                            if let Some(this) = weak.upgrade() {
+                                Shared::patch_fetched(&this, id, generation, url, result);
+                            }
+                        }),
+                    );
+                }
+            }
         }
     }
 
     fn patch_fetched(this: &Rc<Self>, id: FontFaceId, generation: u64, url: String, result: FontFetchResult) {
-        let ready = this.with_slot(id, |slot| {
+        let finished = this.with_slot(id, |slot| {
             let state = slot.incremental.as_mut().filter(|state| state.generation == generation)?;
             state.in_flight = state.in_flight.saturating_sub(1);
             match result {
-                Ok(bytes) => state.received.push((url, bytes)),
-                Err(_) => state.failed = true,
+                Ok(bytes) => {
+                    state.loaded.insert(url, bytes);
+                }
+                // Only an error for a patch the target needs: the next turn looks at that.
+                Err(_) => {
+                    state.failed.insert(url);
+                }
             }
-            (state.in_flight == 0).then(|| std::mem::take(&mut state.failed))
+            Some(state.in_flight == 0)
         });
-        match ready {
-            Some(Some(true)) => Self::fail_extension(this, id),
-            Some(Some(false)) => Self::apply_patches(this, id),
-            _ => {}
+        if matches!(finished, Some(Some(true))) {
+            Self::schedule_extension(this, id);
         }
     }
 
-    fn apply_patches(this: &Rc<Self>, id: FontFaceId) {
+    fn apply_patches(this: &Rc<Self>, id: FontFaceId, patches: Vec<(PlannedPatch, Vec<u8>)>) {
         let taken = this.with_slot(id, |slot| {
             let typeface = slot.glyph_typeface.clone()?;
             let state = slot.incremental.as_mut()?;
             state.applying = true;
-            Some((typeface, std::mem::take(&mut state.received), state.generation))
+            state.applied.extend(patches.iter().map(|(patch, _)| patch.url.clone()));
+            Some((typeface, state.generation))
         });
-        let Some(Some((typeface, patches, generation))) = taken else {
+        let Some(Some((typeface, generation))) = taken else {
             return;
         };
         let limits = this.options.limits;
@@ -387,8 +437,8 @@ impl Shared {
         let Some(Some((typeface, target))) = found else {
             return false;
         };
-        let wanted = maps_of(&typeface).and_then(|maps| patches_to_load(&maps, &target, |_| false));
-        wanted.map_or(true, |urls| !urls.is_empty())
+        let plan = maps_of(&typeface).and_then(|maps| plan_patches(&maps, &target, |_| false));
+        plan.map_or(true, |plan| !plan.apply.is_empty())
     }
 }
 
