@@ -16,7 +16,9 @@ use crate::shadow_gaussian::{gaussian_weights, ShadowRaster, WEIGHTS};
 #[cfg(feature = "gpu")]
 use crate::shadow_gaussian::{reduction_for, REACH};
 use crate::vello_options::VelloRenderingMode;
-use kurbo::{Affine, BezPath};
+#[cfg(feature = "gpu")]
+use kurbo::Affine;
+use kurbo::BezPath;
 use peniko::color::{AlphaColor, Srgb};
 use peniko::{BlendMode, Fill};
 use std::cell::RefCell;

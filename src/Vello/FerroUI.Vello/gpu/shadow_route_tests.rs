@@ -72,6 +72,7 @@ fn draw_under(
     draw_into_under(sink, mode, shape, shadows, transform)
 }
 
+#[cfg(feature = "gpu")]
 fn draw_into(
     sink: Box<dyn IVelloSceneSink>,
     mode: VelloRenderingMode,
