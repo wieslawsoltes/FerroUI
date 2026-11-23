@@ -37,11 +37,15 @@ impl AnimatedVisual {
     }
 }
 
+/// Gives the bytes of an image of a document that is in a file, by its path in the document.
+pub type ImageLoader = dyn Fn(&str) -> Option<Vec<u8>>;
+
 /// A source of a Lottie document. It is read once, when it is first asked for.
 #[derive(Default)]
 pub struct LottieVisualSource {
     json: RefCell<Option<Rc<str>>>,
     visual: RefCell<Option<Rc<AnimatedVisual>>>,
+    image_loader: RefCell<Option<Rc<ImageLoader>>>,
     invalidated: RefCell<Vec<Rc<dyn Fn()>>>,
 }
 
@@ -65,9 +69,20 @@ impl LottieVisualSource {
         Ok(())
     }
 
+    /// Sets what loads the images a document keeps in files. Without it those images are not
+    /// drawn. Players of this source make their visual again.
+    pub fn set_image_loader(&self, loader: Option<Rc<ImageLoader>>) {
+        *self.image_loader.borrow_mut() = loader;
+        self.invalidate();
+    }
+
     /// Replaces the document; players of this source make their visual again.
     pub fn set_source(&self, json: &str) {
         *self.json.borrow_mut() = Some(Rc::from(json));
+        self.invalidate();
+    }
+
+    fn invalidate(&self) {
         self.visual.borrow_mut().take();
         let handlers = self.invalidated.borrow().clone();
         for handler in handlers {
@@ -82,7 +97,16 @@ impl IAnimatedVisualSource for LottieVisualSource {
             return Ok(visual.clone());
         }
         let json = self.json.borrow().clone().ok_or(AnimatedVisualError::Invalid("source"))?;
-        let visual = Rc::new(AnimatedVisual::parse(&json)?);
+        let mut visual = AnimatedVisual::parse(&json)?;
+        let loader = self.image_loader.borrow().clone();
+        if let Some(loader) = loader {
+            for (id, path) in visual.image_files() {
+                if let Some(bytes) = loader(&path) {
+                    visual.set_image_bytes(&id, bytes);
+                }
+            }
+        }
+        let visual = Rc::new(visual);
         *self.visual.borrow_mut() = Some(visual.clone());
         Ok(visual)
     }

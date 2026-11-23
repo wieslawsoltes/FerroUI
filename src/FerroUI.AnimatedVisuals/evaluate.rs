@@ -1,10 +1,13 @@
 //! A frame of an animated visual as a list of drawing commands, in the space of the composition.
 
+use crate::content::{document_at, lines_of, Glyph, ImageAsset, TextDocument};
 use crate::model::{AnimatedVisual, GradientModel, Layer, LayerKind, MatteMode, ShapeItem, StrokeModel};
 use crate::path::PathData;
 use crate::value::{Animated, Components};
 use ferroui_base::media::Color;
 use ferroui_base::{Matrix, Point};
+use std::collections::HashMap;
+use std::rc::Rc;
 
 /// How deep precompositions nest: a document that refers to itself stops here.
 const MAX_DEPTH: usize = 32;
@@ -45,6 +48,25 @@ pub struct ShapeDraw {
     pub opacity: f64,
 }
 
+/// Text of a font the document does not carry the glyphs of, drawn by the text stack of the
+/// backend: `lines` from the baseline of the first at the origin of the layer.
+#[derive(Clone, Debug, PartialEq)]
+pub struct TextDraw {
+    pub lines: Vec<String>,
+    pub family: String,
+    pub size: f64,
+    pub fill: Option<Color>,
+    pub stroke: Option<(Color, f64)>,
+    pub stroke_over_fill: bool,
+    /// 0 left, 1 right, 2 centre.
+    pub justify: u8,
+    pub line_height: f64,
+    /// Added after each character, in the units of the layer.
+    pub tracking: f64,
+    pub baseline_shift: f64,
+    pub opacity: f64,
+}
+
 /// How a mask combines with the masks before it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MaskMode {
@@ -66,6 +88,9 @@ pub enum FrameCommand {
     BeginMatte(MatteMode),
     EndMatteSource,
     Draw(ShapeDraw),
+    /// An image at the origin of the current space, at the size of the asset.
+    DrawImage(Rc<ImageAsset>),
+    DrawText(TextDraw),
     Pop,
 }
 
@@ -414,12 +439,101 @@ impl AnimatedVisual {
                     self.evaluate_layers(inner, inner_frame, depth + 1, out);
                 }
             }
+            LayerKind::Image { reference } => {
+                if let Some(image) = self.images.get(reference) {
+                    out.push(FrameCommand::DrawImage(image.clone()));
+                }
+            }
+            LayerKind::Text(documents) => {
+                if let Some(document) = document_at(documents, local) {
+                    match self.fonts.glyphs_for(&document.font, &document.text) {
+                        Some(glyphs) => glyph_draws(document, glyphs, local, out),
+                        None => out.push(FrameCommand::DrawText(text_draw(document, self.fonts.family_of(&document.font)))),
+                    }
+                }
+            }
             LayerKind::Null | LayerKind::NotDrawn => {}
         }
         for _ in 0..pushed {
             out.push(FrameCommand::Pop);
         }
     }
+}
+
+fn text_color(components: Option<crate::value::Components>) -> Option<Color> {
+    components.map(|value| color(value, value[3].clamp(0.0, 1.0)))
+}
+
+fn text_draw(document: &TextDocument, family: &str) -> TextDraw {
+    TextDraw {
+        lines: lines_of(&document.text).map(str::to_owned).collect(),
+        family: family.to_owned(),
+        size: document.size,
+        fill: text_color(document.fill),
+        stroke: text_color(document.stroke).filter(|_| document.stroke_width > 0.0).map(|paint| (paint, document.stroke_width)),
+        stroke_over_fill: document.stroke_over_fill,
+        justify: document.justify,
+        line_height: document.line_height,
+        tracking: document.tracking * document.size / 1000.0,
+        baseline_shift: document.baseline_shift,
+        opacity: 1.0,
+    }
+}
+
+/// The text from the shapes the document carries: one path per paint, placed line by line.
+fn glyph_draws(document: &TextDocument, glyphs: &HashMap<char, Glyph>, frame: f64, out: &mut Vec<FrameCommand>) {
+    let scale = document.size / 100.0;
+    let tracking = document.tracking * document.size / 1000.0;
+    let mut path = PathData::default();
+    for (index, line) in lines_of(&document.text).enumerate() {
+        let width: f64 = line.chars().map(|character| glyphs[&character].advance * scale + tracking).sum();
+        let mut x = match document.justify {
+            1 => -width,
+            2 => -width * 0.5,
+            _ => 0.0,
+        };
+        let y = index as f64 * document.line_height - document.baseline_shift;
+        for character in line.chars() {
+            let glyph = &glyphs[&character];
+            let matrix = Matrix::create_scale(scale, scale) * Matrix::create_translation(x, y);
+            let (mut geometry, mut ignored) = (Vec::new(), Vec::new());
+            evaluate_items(&glyph.shapes, frame, matrix, 1.0, &mut geometry, &mut ignored);
+            for part in &geometry {
+                path.append(part);
+            }
+            x += glyph.advance * scale + tracking;
+        }
+    }
+    if path.is_empty() {
+        return;
+    }
+    let fill = text_color(document.fill).map(|paint| {
+        FrameCommand::Draw(ShapeDraw {
+            path: path.clone(),
+            paint: Paint::Solid(Color::from_rgb(paint.r, paint.g, paint.b)),
+            stroke: None,
+            even_odd: false,
+            opacity: f64::from(paint.a) / 255.0,
+        })
+    });
+    let stroke = text_color(document.stroke).filter(|_| document.stroke_width > 0.0).map(|paint| {
+        FrameCommand::Draw(ShapeDraw {
+            path: path.clone(),
+            paint: Paint::Solid(Color::from_rgb(paint.r, paint.g, paint.b)),
+            stroke: Some(StrokeStyle {
+                width: document.stroke_width,
+                cap: 1,
+                join: 2,
+                miter: 4.0,
+                dashes: Vec::new(),
+                dash_offset: 0.0,
+            }),
+            even_odd: false,
+            opacity: f64::from(paint.a) / 255.0,
+        })
+    });
+    let ordered = if document.stroke_over_fill { [fill, stroke] } else { [stroke, fill] };
+    out.extend(ordered.into_iter().flatten());
 }
 
 fn visible(layer: &Layer, frame: f64) -> bool {

@@ -3,6 +3,7 @@
 //! composition. It knows no render backend: what it produces are paths, paints, transforms, clips
 //! and mattes, which every backend draws on its GPU.
 
+mod content;
 mod evaluate;
 mod model;
 mod path;
@@ -12,10 +13,11 @@ mod render;
 mod source;
 mod value;
 
-pub use evaluate::{FrameCommand, FrameCommands, GradientKind, MaskMode, Paint, ShapeDraw, StrokeStyle};
+pub use content::ImageAsset;
+pub use evaluate::{FrameCommand, FrameCommands, GradientKind, MaskMode, Paint, ShapeDraw, StrokeStyle, TextDraw};
 pub use model::{AnimatedVisual, AnimatedVisualError, MatteMode, Marker};
 pub use path::{PathCommand, PathData};
 pub use playback::AnimatedIconAnimationQueueBehavior;
 pub use player::{AnimatedIcon, AnimatedVisualPlayer, PlayCompletion};
 pub use render::VisualRenderer;
-pub use source::{IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, LottieVisualSource};
+pub use source::{IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, ImageLoader, LottieVisualSource};

@@ -2,19 +2,22 @@
 //! implements on its GPU. Geometry and brushes are kept between frames: a path that does not
 //! change is built once, and a frame of a moving transform only pushes a matrix.
 
-use crate::evaluate::{FrameCommand, FrameCommands, GradientKind, MaskMode, Paint, ShapeDraw, StrokeStyle};
+use crate::content::ImageAsset;
+use crate::evaluate::{FrameCommand, FrameCommands, GradientKind, MaskMode, Paint, ShapeDraw, StrokeStyle, TextDraw};
 use crate::model::MatteMode;
 use crate::path::{PathCommand, PathData};
-use ferroui_base::media::imaging::BitmapBlendingMode;
+use ferroui_base::media::imaging::{Bitmap, BitmapBlendingMode};
 use ferroui_base::media::immutable::{
     ImmutableDashStyle, ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen,
     ImmutableRadialGradientBrush, ImmutableSolidColorBrush,
 };
 use ferroui_base::media::{
-    Color, DrawingContext, FillRule, Geometry, GradientSpreadMethod, IBrush, IEffect, IImmutableBrush, IPen,
-    ImmutableLuminanceToAlphaEffect, PenLineCap, PenLineJoin, PushedState, StreamGeometry,
+    Color, DrawingContext, FillRule, FlowDirection, FontFamily, FormattedText, Geometry, GradientSpreadMethod, IBrush,
+    IEffect, IImmutableBrush, IPen, ImmutableLuminanceToAlphaEffect, PenLineCap, PenLineJoin, PushedState,
+    StreamGeometry, Typeface,
 };
 use ferroui_base::platform::IGeometryContext;
+use ferroui_base::utilities::Locale;
 use ferroui_base::{Matrix, Point, Rect, Ref, RelativePoint, RelativeScalar, RelativeUnit};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
@@ -47,6 +50,8 @@ struct KeptGeometry {
 pub struct VisualRenderer {
     geometries: HashMap<u64, KeptGeometry>,
     solid_brushes: HashMap<u32, Rc<ImmutableSolidColorBrush>>,
+    /// The decoded images, by asset. An image that does not decode is kept as `None`.
+    images: HashMap<usize, Option<Rc<Bitmap>>>,
     frame: u64,
     built: u64,
 }
@@ -230,6 +235,80 @@ impl VisualRenderer {
         }
     }
 
+    /// An image, decoded once and then a texture of the backend.
+    fn draw_image(&mut self, image: &Rc<ImageAsset>, context: &mut DrawingContext<'_>) {
+        let key = Rc::as_ptr(image) as usize;
+        let bitmap = self.images.entry(key).or_insert_with(|| {
+            let bytes = image.bytes.as_ref()?;
+            Bitmap::from_stream(&mut &bytes[..]).ok().map(Rc::new)
+        });
+        if let Some(bitmap) = bitmap {
+            context.draw_image(&**bitmap, Rect::new(0.0, 0.0, image.width, image.height));
+        }
+    }
+
+    /// One line, or one character at a time when the text is tracked, which the text stack does
+    /// not do for a whole line.
+    fn draw_text(&mut self, text: &TextDraw, context: &mut DrawingContext<'_>) {
+        let Ok(family) = FontFamily::parse(&text.family).or_else(|_| FontFamily::parse("Default")) else {
+            return;
+        };
+        if !(text.size > 0.0) {
+            return;
+        }
+        let typeface = Typeface::new(family);
+        let format = |value: &str, brush: Option<Rc<dyn IBrush>>| {
+            FormattedText::new(value, Locale::UNKNOWN, FlowDirection::LeftToRight, typeface.clone(), text.size, brush)
+        };
+        let fill: Option<Rc<dyn IBrush>> = text.fill.map(|color| -> Rc<dyn IBrush> { self.solid(with_opacity(color, text.opacity)) });
+        let stroke = text.stroke.map(|(color, width)| {
+            let brush: Rc<dyn IImmutableBrush> = self.solid(with_opacity(color, text.opacity));
+            let style =
+                StrokeStyle { width, cap: 1, join: 2, miter: 4.0, dashes: Vec::new(), dash_offset: 0.0 };
+            pen_of(&style, brush)
+        });
+        for (index, line) in text.lines.iter().enumerate() {
+            let parts: Vec<String> = if text.tracking != 0.0 {
+                line.chars().map(String::from).collect()
+            } else {
+                vec![line.clone()]
+            };
+            let placed: Vec<(FormattedText, f64)> = parts
+                .iter()
+                .map(|part| {
+                    let formatted = format(part, fill.clone());
+                    let advance = formatted.width_including_trailing_whitespace() + text.tracking;
+                    (formatted, advance)
+                })
+                .collect();
+            let width: f64 = placed.iter().map(|(_, advance)| advance).sum();
+            let mut x = match text.justify {
+                1 => -width,
+                2 => -width * 0.5,
+                _ => 0.0,
+            };
+            let y = index as f64 * text.line_height - text.baseline_shift;
+            for (formatted, advance) in &placed {
+                let origin = Point::new(x, y - formatted.baseline());
+                let outline = stroke.as_ref().and_then(|pen| Some((pen, formatted.build_geometry(origin)?)));
+                if !text.stroke_over_fill {
+                    if let Some((pen, geometry)) = &outline {
+                        context.draw_geometry(None, Some(pen), geometry);
+                    }
+                }
+                if fill.is_some() {
+                    context.draw_text(formatted, origin);
+                }
+                if text.stroke_over_fill {
+                    if let Some((pen, geometry)) = &outline {
+                        context.draw_geometry(None, Some(pen), geometry);
+                    }
+                }
+                x += advance;
+            }
+        }
+    }
+
     /// The area of a mask: its path, or for an inverted mask everything but it.
     fn mask_area(&mut self, path: &PathData, inverted: bool) -> Ref<Geometry> {
         if !inverted {
@@ -321,6 +400,8 @@ impl VisualRenderer {
                     scopes.push((scope, bounds));
                 }
                 FrameCommand::Draw(draw) => self.draw(draw, context),
+                FrameCommand::DrawImage(image) => self.draw_image(image, context),
+                FrameCommand::DrawText(text) => self.draw_text(text, context),
                 FrameCommand::Pop => {
                     if let Some((scope, outer)) = scopes.pop() {
                         self.end_scope(scope, outer, context);
@@ -557,6 +638,64 @@ mod tests {
         let subtracted = draw(&mut renderer, &visual(layer("s")), 0.0);
         assert!(pixel(&subtracted, 10, 20).3.abs_diff(128) <= 1, "{:?}", pixel(&subtracted, 10, 20));
         assert_eq!(pixel(&subtracted, 30, 20).3, 255);
+    }
+
+    /// A red image of 2 by 2 pixels.
+    const RED_PNG: &str = "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR4nGP4z8DwH4QZYAwAR8oH+WdZbrcAAAAASUVORK5CYII=";
+
+    #[test]
+    fn an_image_layer_draws_its_asset_at_its_size() {
+        let document = AnimatedVisual::parse(&json!({"fr": 30, "ip": 0, "op": 30, "w": SIZE, "h": SIZE,
+            "assets": [{"id": "picture", "w": 20, "h": 20, "p": format!("data:image/png;base64,{RED_PNG}")}],
+            "layers": [{"ty": 2, "ind": 1, "refId": "picture", "ip": 0, "op": 30, "ks": {"p": {"k": [10, 10]}}}]
+        }).to_string()).unwrap();
+        let mut renderer = VisualRenderer::new();
+        let target = draw(&mut renderer, &document, 0.0);
+        assert_eq!(pixel(&target, 20, 20), (255, 0, 0, 255));
+        assert_eq!(pixel(&target, 5, 5).3, 0);
+        assert_eq!(pixel(&target, 35, 35).3, 0);
+    }
+
+    #[test]
+    fn text_with_the_glyphs_of_its_document_is_drawn_from_them() {
+        // A square glyph of 100 units, advancing 100: at size 10 each character is 10 wide.
+        let glyph = json!({"ch": "A", "fFamily": "Shapes", "size": 100, "w": 100, "data": {"shapes": [{"ty": "gr", "it": [
+            {"ty": "sh", "ks": {"k": {"c": true, "v": [[0, 0], [100, 0], [100, -100], [0, -100]],
+                "i": [[0, 0], [0, 0], [0, 0], [0, 0]], "o": [[0, 0], [0, 0], [0, 0], [0, 0]]}}},
+            {"ty": "tr"}
+        ]}]}});
+        let document = AnimatedVisual::parse(&json!({"fr": 30, "ip": 0, "op": 30, "w": SIZE, "h": SIZE,
+            "fonts": {"list": [{"fName": "Shapes-Regular", "fFamily": "Shapes"}]}, "chars": [glyph],
+            "layers": [{"ty": 5, "ind": 1, "ip": 0, "op": 30, "ks": {"p": {"k": [20, 20]}},
+                "t": {"d": {"k": [{"t": 0, "s": {"t": "AA", "f": "Shapes-Regular", "s": 10, "j": 2, "fc": [0, 1, 0]}}]}}}]
+        }).to_string()).unwrap();
+        let mut commands = FrameCommands::default();
+        document.evaluate(0.0, &mut commands);
+        assert!(!commands.commands.iter().any(|command| matches!(command, FrameCommand::DrawText(_))));
+        let mut renderer = VisualRenderer::new();
+        let target = draw(&mut renderer, &document, 0.0);
+        // Centred on x = 20, above the baseline at y = 20.
+        assert_eq!(pixel(&target, 12, 15), (0, 255, 0, 255));
+        assert_eq!(pixel(&target, 27, 15), (0, 255, 0, 255));
+        assert_eq!(pixel(&target, 8, 15).3, 0);
+        assert_eq!(pixel(&target, 20, 25).3, 0);
+    }
+
+    #[test]
+    fn text_without_glyphs_goes_to_the_text_stack_of_the_backend() {
+        let document = AnimatedVisual::parse(&json!({"fr": 30, "ip": 0, "op": 30, "w": SIZE, "h": SIZE,
+            "fonts": {"list": [{"fName": "Body-Regular", "fFamily": "Body"}]},
+            "layers": [{"ty": 5, "ind": 1, "ip": 0, "op": 30, "ks": {},
+                "t": {"d": {"k": [{"t": 0, "s": {"t": "one\rtwo", "f": "Body-Regular", "s": 10, "tr": 100, "fc": [1, 0, 0]}}]}}}]
+        }).to_string()).unwrap();
+        let mut commands = FrameCommands::default();
+        document.evaluate(0.0, &mut commands);
+        let text = commands.commands.iter().find_map(|command| match command {
+            FrameCommand::DrawText(text) => Some(text),
+            _ => None,
+        });
+        let text = text.expect("the text is drawn by the backend");
+        assert_eq!((text.lines.as_slice(), text.family.as_str(), text.tracking), (&["one".to_owned(), "two".to_owned()][..], "Body", 1.0));
     }
 
     #[test]

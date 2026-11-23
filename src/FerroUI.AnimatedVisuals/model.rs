@@ -1,11 +1,13 @@
 //! The model of a Lottie document, read once: layers, shapes, transforms and markers.
 
+use crate::content::{text_documents, DocumentFonts, ImageAsset, TextDocument};
 use crate::path::{BezierShape, PathData};
 use crate::value::{keyframes, parse_eases, Animated, Components, Ease};
 use ferroui_base::Matrix;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
+use std::rc::Rc;
 
 /// Why a document could not be read.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -314,7 +316,7 @@ fn gradient_model(item: &Value) -> Option<GradientModel> {
 
 const FULL: Components = [100.0, 0.0, 0.0, 0.0];
 
-fn shape_items(items: Option<&Value>) -> Vec<ShapeItem> {
+pub(crate) fn shape_items(items: Option<&Value>) -> Vec<ShapeItem> {
     let Some(items) = items.and_then(Value::as_array) else {
         return Vec::new();
     };
@@ -392,7 +394,10 @@ pub(crate) enum LayerKind {
     Solid { color: Components, width: f64, height: f64 },
     Null,
     Precomposition { reference: String, width: f64, height: f64, time_remap: Option<Animated> },
-    /// A kind this runtime does not draw (an image or text): its transform can still be a parent.
+    Image { reference: String },
+    Text(Vec<(f64, TextDocument)>),
+    /// A kind this runtime does not draw (audio, data and the like): its transform can still be
+    /// a parent.
     NotDrawn,
 }
 
@@ -436,8 +441,10 @@ fn layer(value: &Value) -> Option<Layer> {
             width: float("sw", 0.0),
             height: float("sh", 0.0),
         },
+        2 => LayerKind::Image { reference: text("refId")?.to_owned() },
         3 => LayerKind::Null,
         4 => LayerKind::Shape(shape_items(value.get("shapes"))),
+        5 => LayerKind::Text(text_documents(value)),
         _ => LayerKind::NotDrawn,
     };
     let matte = match value.get("tt").and_then(Value::as_u64) {
@@ -500,6 +507,8 @@ pub struct AnimatedVisual {
     pub markers: Vec<Marker>,
     pub(crate) layers: Vec<Layer>,
     pub(crate) precompositions: HashMap<String, Vec<Layer>>,
+    pub(crate) images: HashMap<String, Rc<ImageAsset>>,
+    pub(crate) fonts: DocumentFonts,
 }
 
 impl AnimatedVisual {
@@ -518,9 +527,12 @@ impl AnimatedVisual {
             return Err(AnimatedVisualError::Invalid("layers"));
         }
         let mut precompositions = HashMap::new();
+        let mut images = HashMap::new();
         for asset in root.get("assets").and_then(Value::as_array).into_iter().flatten() {
             if let (Some(id), Some(_)) = (asset.get("id").and_then(Value::as_str), asset.get("layers")) {
                 precompositions.insert(id.to_owned(), layers(asset.get("layers")));
+            } else if let Some(image) = ImageAsset::parse(asset) {
+                images.insert(image.id.clone(), Rc::new(image));
             }
         }
         let markers = root
@@ -539,7 +551,25 @@ impl AnimatedVisual {
                     .collect()
             })
             .unwrap_or_default();
-        Ok(Self { width, height, frame_rate, in_point, out_point, markers, layers: layers(root.get("layers")), precompositions })
+        let fonts = DocumentFonts::parse(&root);
+        Ok(Self { width, height, frame_rate, in_point, out_point, markers, layers: layers(root.get("layers")), precompositions, images, fonts })
+    }
+
+    /// The images that are in files, by id and path: a loader gives their bytes to
+    /// [`set_image_bytes`](Self::set_image_bytes).
+    pub fn image_files(&self) -> Vec<(String, String)> {
+        self.images
+            .values()
+            .filter(|image| image.bytes.is_none())
+            .filter_map(|image| Some((image.id.clone(), image.path.clone()?)))
+            .collect()
+    }
+
+    /// Gives an image that is in a file its encoded bytes.
+    pub fn set_image_bytes(&mut self, id: &str, bytes: Vec<u8>) {
+        if let Some(image) = self.images.get_mut(id) {
+            Rc::make_mut(image).bytes = Some(Rc::from(bytes));
+        }
     }
 
     /// The length of the animation in seconds.
