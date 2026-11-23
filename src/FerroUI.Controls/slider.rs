@@ -450,7 +450,7 @@ impl Slider {
     }
 
     /// The interval between tick marks. -> f64 {
-        self.get_value(Self::tick_frequency_property())
+    pub fn tick_frequency(&self)        self.get_value(Self::tick_frequency_property())
     }
 
     pub fn set_tick_frequency(&self, value: f64) {

@@ -7,6 +7,7 @@ use crate::{examples, tests::start, GalleryView};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::Ref;
 use ferroui_controls::primitives::ToggleButton;
+use ferroui_controls::SliderSnapsTo;
 use ferroui_controls::{
     Button, CheckBox, Control, HyperlinkButton, Image, RepeatButton, TextBlock,
 };
