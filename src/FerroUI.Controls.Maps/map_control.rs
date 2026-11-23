@@ -1,17 +1,20 @@
 //! The `MapControl` control.
 
 use crate::camera::{MapCamera, MAX_ZOOM};
+use crate::map_automation::MapControlAutomationPeer;
 use crate::map_elements::{
-    hit_test, view_path, MapElement, MapElementClickEventArgs, MapElementsLayer, ICON_RADIUS,
+    hit_test, neighbour, view_path, MapElement, MapElementClickEventArgs, MapElementsLayer,
+    ICON_RADIUS,
 };
 use crate::projection::{shortest_turn, BasicGeoposition, MapView, TILE_SIZE};
 use crate::tile_source::{RasterTileSource, SharedTileLoader};
 use crate::tile_store::{TileStore, MEMORY_BUDGET};
 use ferroui_base::input::gesture_recognizers::PinchGestureRecognizer;
 use ferroui_base::input::{
-    IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
-    PinchEndedEventArgs, PinchEventArgs, PointerCaptureLostEventArgs, PointerEventArgs,
-    PointerPressedEventArgs, PointerReleasedEventArgs, PointerType, PointerWheelEventArgs,
+    FocusChangedEventArgs, IPointer, InputElement, InputElementImpl, InputElementImplExt, Key,
+    KeyEventArgs, KeyModifiers, PinchEndedEventArgs, PinchEventArgs, PointerCaptureLostEventArgs,
+    PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs, PointerType,
+    PointerWheelEventArgs,
 };
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
@@ -28,10 +31,7 @@ use ferroui_base::{
     instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
     Matrix, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty, VisualImpl,
 };
-use ferroui_controls::automation::peers::{
-    AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer,
-    ControlAutomationPeerImpl,
-};
+use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::{Control, ControlImpl};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
@@ -104,6 +104,8 @@ pub struct MapControl {
     pinch_start: Cell<Option<f64>>,
     /// The bearing of the two fingers at the last pinch event.
     pinch_angle: Cell<Option<f64>>,
+    /// The element with the keyboard focus, while the map has it.
+    focused_element: RefCell<Option<(Weak<MapElementsLayer>, usize)>>,
 }
 
 ferro_class!(MapControl: Control);
@@ -191,6 +193,7 @@ impl MapControl {
             gesture: RefCell::new(None),
             pinch_start: Cell::new(None),
             pinch_angle: Cell::new(None),
+            focused_element: RefCell::new(None),
         }
     }
 
@@ -219,7 +222,7 @@ impl MapControl {
         let weak = this.downgrade();
         *this.layer_listener.borrow_mut() = Some(Rc::new(move || {
             if let Some(this) = weak.upgrade() {
-                this.invalidate_visual();
+                this.on_layers_changed();
             }
         }));
         this.gesture_recognizers()
@@ -387,7 +390,7 @@ impl MapControl {
             layer.add_listener(listener.clone());
         }
         self.layers.borrow_mut().push(layer);
-        self.invalidate_visual();
+        self.on_layers_changed();
     }
 
     /// Removes a layer. Returns whether the map had it.
@@ -402,7 +405,7 @@ impl MapControl {
             if let Some(listener) = self.layer_listener.borrow().as_ref() {
                 layer.remove_listener(listener);
             }
-            self.invalidate_visual();
+            self.on_layers_changed();
         }
         removed
     }
@@ -531,6 +534,190 @@ impl MapControl {
             assert!(steps < 2000, "the motion does not end");
         }
         self.sync_from_camera();
+    }
+
+    /// The automation peer, if a client has asked for one. Never makes one.
+    fn existing_peer(&self) -> Option<Ref<AutomationPeer>> {
+        ControlAutomationPeer::from_element(self)
+    }
+
+    fn on_layers_changed(&self) {
+        self.invalidate_visual();
+        // A focused element that went away gives the focus back to the map.
+        let held = self.focused_element.borrow().is_some();
+        if held && self.focused_element().is_none() {
+            self.focused_element.borrow_mut().take();
+            self.raise_focused_element_changed();
+        }
+        if let Some(peer) = self
+            .existing_peer()
+            .and_then(|peer| peer.cast::<ControlAutomationPeer>())
+        {
+            peer.invalidate_children();
+        }
+    }
+
+    fn raise_focused_element_changed(&self) {
+        if let Some(peer) = self
+            .existing_peer()
+            .and_then(|peer| peer.cast::<MapControlAutomationPeer>())
+        {
+            peer.raise_focused_element_changed();
+        }
+    }
+
+    /// The element with the keyboard focus, if it is still there and visible.
+    pub fn focused_element(&self) -> Option<(Rc<MapElementsLayer>, usize)> {
+        let focused = self.focused_element.borrow();
+        let (layer, index) = focused.as_ref()?;
+        let layer = layer.upgrade()?;
+        let is_shown = self
+            .layers
+            .borrow()
+            .iter()
+            .any(|item| Rc::ptr_eq(item, &layer));
+        (is_shown && layer.can_focus(*index)).then_some((layer, *index))
+    }
+
+    /// Moves the keyboard focus to an element of the map, or back to the map with `None`, and
+    /// brings the element into view.
+    pub fn set_focused_element(&self, element: Option<(Rc<MapElementsLayer>, usize)>) {
+        let element = element.filter(|(layer, index)| {
+            layer.can_focus(*index)
+                && self
+                    .layers
+                    .borrow()
+                    .iter()
+                    .any(|item| Rc::ptr_eq(item, layer))
+        });
+        let is_same = match (&element, self.focused_element()) {
+            (Some((new, new_index)), Some((old, old_index))) => {
+                Rc::ptr_eq(new, &old) && *new_index == old_index
+            }
+            (None, None) => true,
+            _ => false,
+        };
+        *self.focused_element.borrow_mut() = element
+            .as_ref()
+            .map(|(layer, index)| (Rc::downgrade(layer), *index));
+        if let Some((layer, index)) = &element {
+            self.reveal_element(layer, *index);
+        }
+        if !is_same {
+            self.invalidate_visual();
+            self.raise_focused_element_changed();
+        }
+    }
+
+    /// Centers the map on an element that is out of the view.
+    pub(crate) fn reveal_element(&self, layer: &Rc<MapElementsLayer>, index: usize) {
+        let view = self.view();
+        let Some(anchor) = layer
+            .element(index)
+            .and_then(|element| element.view_anchor(&view))
+        else {
+            return;
+        };
+        let is_in_view =
+            anchor.0 >= 0.0 && anchor.0 <= view.width && anchor.1 >= 0.0 && anchor.1 <= view.height;
+        if !is_in_view {
+            let place = view.view_to_place(anchor.0, anchor.1);
+            let zoom = self.camera.borrow().zoom();
+            self.camera.borrow_mut().set_view(place, zoom);
+            self.sync_from_camera();
+        }
+    }
+
+    /// Raises the click of an element, as a keyboard or an automation client activates it.
+    pub(crate) fn activate_element(&self, layer: &Rc<MapElementsLayer>, index: usize) {
+        let view = self.view();
+        let Some(element) = layer.element(index) else {
+            return;
+        };
+        let Some(anchor) = element.view_anchor(&view) else {
+            return;
+        };
+        let location = view.view_to_place(anchor.0, anchor.1);
+        layer.raise_click(&MapElementClickEventArgs { element, location });
+    }
+
+    /// Moves the focus to the next or the previous element. Returns whether the key is used: past
+    /// the last element it is not, so Tab goes on to the next control and never gets stuck.
+    fn move_element_focus(&self, forward: bool) -> bool {
+        let (target, had_focus) = {
+            let layers = self.layers.borrow();
+            let current = self.focused_element().and_then(|(layer, index)| {
+                layers
+                    .iter()
+                    .position(|item| Rc::ptr_eq(item, &layer))
+                    .map(|at| (at, index))
+            });
+            (
+                neighbour(&layers, current, forward).map(|(at, index)| (layers[at].clone(), index)),
+                current.is_some(),
+            )
+        };
+        let moved = target.is_some();
+        self.set_focused_element(target);
+        // Back past the first element, the focus is on the map itself.
+        moved || (!forward && had_focus)
+    }
+
+    fn draw_focus(&self, context: &mut DrawingContext<'_>, view: &MapView) {
+        if !self.is_focused() {
+            return;
+        }
+        let Some((layer, index)) = self.focused_element() else {
+            return;
+        };
+        let Some(element) = layer.element(index) else {
+            return;
+        };
+        // Two colors, so the ring shows on any tile.
+        let outer = pen(Color::from_rgb(0x00, 0x00, 0x00), 2.0);
+        let inner = pen(Color::from_rgb(0xFF, 0xFF, 0xFF), 1.0);
+        match &element {
+            MapElement::Icon(icon) => {
+                let point = view_path(&[icon.location], view)[0];
+                for (stroke, radius) in [(&outer, ICON_RADIUS + 4.0), (&inner, ICON_RADIUS + 2.5)] {
+                    let bounds = Rect::new(
+                        point.0 - radius,
+                        point.1 - radius,
+                        radius * 2.0,
+                        radius * 2.0,
+                    );
+                    context.draw_ellipse(None, Some(stroke), bounds);
+                }
+            }
+            MapElement::Polyline(line) => {
+                let points = view_path(&line.path, view);
+                let wide = pen(
+                    Color::from_rgb(0x00, 0x00, 0x00),
+                    line.stroke_thickness + 4.0,
+                );
+                let narrow = pen(
+                    Color::from_rgb(0xFF, 0xFF, 0xFF),
+                    line.stroke_thickness + 2.0,
+                );
+                draw_path(context, &points, false, None, Some(&wide));
+                draw_path(context, &points, false, None, Some(&narrow));
+                let stroke = pen(line.stroke, line.stroke_thickness);
+                draw_path(context, &points, false, None, Some(&stroke));
+            }
+            MapElement::Polygon(polygon) => {
+                let points = view_path(&polygon.path, view);
+                let wide = pen(
+                    Color::from_rgb(0x00, 0x00, 0x00),
+                    polygon.stroke_thickness + 4.0,
+                );
+                let narrow = pen(
+                    Color::from_rgb(0xFF, 0xFF, 0xFF),
+                    polygon.stroke_thickness + 2.0,
+                );
+                draw_path(context, &points, true, None, Some(&wide));
+                draw_path(context, &points, true, None, Some(&narrow));
+            }
+        }
     }
 
     /// Raises the click of the topmost element at a point of the view.
@@ -790,6 +977,7 @@ impl VisualImpl for MapControl {
         }
         // Elements are placed through the view and stay upright; so does the attribution.
         this.draw_elements(context, &view);
+        this.draw_focus(context, &view);
         this.draw_attribution(context, size);
     }
 }
@@ -820,6 +1008,8 @@ impl InputElementImpl for MapControl {
             GestureKind::Click
         };
         this.focus();
+        // The focus ring belongs to the keyboard.
+        this.set_focused_element(None);
         this.camera.borrow_mut().stop();
         let position = e.get_position(Some(this));
         let mut samples = VecDeque::new();
@@ -927,8 +1117,37 @@ impl InputElementImpl for MapControl {
         e.set_handled(true);
     }
 
+    fn on_lost_focus(this: &Self, e: &FocusChangedEventArgs) {
+        Self::parent_on_lost_focus(this, e);
+        this.set_focused_element(None);
+    }
+
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
+        match e.key {
+            Key::Tab => {
+                let forward = !e.key_modifiers.contains(KeyModifiers::SHIFT);
+                if this.move_element_focus(forward) {
+                    e.set_handled(true);
+                }
+                return;
+            }
+            Key::Enter | Key::Space => {
+                if let Some((layer, index)) = this.focused_element() {
+                    this.activate_element(&layer, index);
+                    e.set_handled(true);
+                }
+                return;
+            }
+            Key::Escape => {
+                if this.focused_element().is_some() {
+                    this.set_focused_element(None);
+                    e.set_handled(true);
+                }
+                return;
+            }
+            _ => {}
+        }
         let is_control = e.key_modifiers.contains(KeyModifiers::CONTROL);
         let turn = match e.key {
             Key::Left if is_control => Some(-KEY_TURN),
@@ -983,33 +1202,5 @@ impl InputElementImpl for MapControl {
 impl ControlImpl for MapControl {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         MapControlAutomationPeer::new(this).upcast()
-    }
-}
-
-/// The automation peer of a map: a pane named after what the map shows.
-#[repr(C)]
-pub struct MapControlAutomationPeer {
-    base: ControlAutomationPeer,
-}
-
-ferro_class!(MapControlAutomationPeer: ControlAutomationPeer);
-ferro_class_info!(MapControlAutomationPeer {});
-ferro_impl_classes!(MapControlAutomationPeer: FerroObjectImpl, ControlAutomationPeerImpl);
-
-impl AutomationPeerImpl for MapControlAutomationPeer {
-    fn get_automation_control_type_core(_: &Self) -> AutomationControlType {
-        AutomationControlType::Pane
-    }
-
-    fn get_class_name_core(_: &Self) -> String {
-        "MapControl".into()
-    }
-}
-
-impl MapControlAutomationPeer {
-    pub fn new(owner: &MapControl) -> Ref<Self> {
-        instantiate(Self {
-            base: ControlAutomationPeer::construct(owner),
-        })
     }
 }

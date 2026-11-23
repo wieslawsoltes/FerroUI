@@ -5,6 +5,7 @@
 
 mod camera;
 mod grid_tiles;
+mod map_automation;
 mod map_control;
 mod map_elements;
 mod projection;
@@ -17,7 +18,8 @@ mod tests;
 
 pub use camera::{MapCamera, MAX_ZOOM, MIN_ZOOM};
 pub use grid_tiles::{grid_tile_source, GridTileLoader};
-pub use map_control::{MapControl, MapControlAutomationPeer, MapInteractionMode};
+pub use map_automation::{MapControlAutomationPeer, MapElementAutomationPeer};
+pub use map_control::{MapControl, MapInteractionMode};
 pub use map_elements::{
     MapElement, MapElementClickEventArgs, MapElementsLayer, MapIcon, MapPolygon, MapPolyline,
 };
@@ -45,10 +47,14 @@ pub static ASSEMBLY: ferroui_base::metadata::MarkupAssembly =
         metadata: &[],
     };
 ferroui_base::ferro_rust_paths! {
-    classes: [crate::MapControl, crate::MapControlAutomationPeer],
+    classes: [crate::MapControl, crate::MapControlAutomationPeer, crate::MapElementAutomationPeer],
     types: [crate::MapInteractionMode], contracts: [], generics: [], generic_contracts: [],
 }
-const TYPES: &[&ferroui_base::TypeInfo] = &[MapControl::TYPE, MapControlAutomationPeer::TYPE];
+const TYPES: &[&ferroui_base::TypeInfo] = &[
+    MapControl::TYPE,
+    MapControlAutomationPeer::TYPE,
+    MapElementAutomationPeer::TYPE,
+];
 
 /// Registers the namespace, the assembly and the table of types of this crate and of the crates
 /// it is built on. Cheap and idempotent.
