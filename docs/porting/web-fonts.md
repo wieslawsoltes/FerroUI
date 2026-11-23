@@ -5,7 +5,7 @@ an application declares the way a web page does (`@font-face`), loads with the A
 Font Loading module (`FontFace`, `FontFaceSet`), and ships or fetches as WOFF or WOFF2, on every
 platform and rendering backend.
 
-Tracking issue: #1205. Milestone: 0.6.0. Status: plan. Nothing in this document is implemented yet unless a later
+Tracking issue: #1205. Milestone: 0.6.0 (Incremental Font Transfer: 0.7.0). Status: being implemented. Nothing in this document is implemented yet unless a later
 revision says so, and no number in it is a measurement. Section 11 lists what must be measured.
 
 ## 1. Why, and what exists today
@@ -103,7 +103,7 @@ core (phases B and C). Section 12 lists what is deliberately left out.
 | --- | --- |
 | `truetype`, `opentype`, `collection` | Supported, sanitized |
 | `woff` | Supported |
-| `woff2` | Supported once the Brotli decoder is approved |
+| `woff2` | Supported, with `brotli-decompressor` 5.0.3 behind the feature `woff2` |
 | `embedded-opentype`, `svg` (the SVG font format) | Not supported, skipped as the standard allows |
 | `variations` | Supported on every backend |
 | `features-opentype` | Supported through HarfBuzz |
@@ -328,9 +328,18 @@ approach of OTS: parse, validate, and write out a new font containing only what 
 - The table directory is rebuilt: sorted, no overlaps, every range inside the file, checksums
   recomputed.
 - Required tables are validated, including `head`, `maxp`, `hhea`, `hmtx`, `cmap`, `loca` and
-  `glyf` bounds, composite depth and point counts.
-- Tables outside a known list are dropped.
-- Hinting programs are kept only behind an option, since no GPU path here needs them.
+  `glyf` bounds, composite depth and cycles, and point counts. A font that fails is refused.
+- An optional table that fails is dropped and the font lives. A variation table goes with an
+  invalid `fvar`.
+- Tables outside a known list are dropped, `DSIG` included.
+- Hinting is kept by default, as in browsers, because removing it changes how text looks and
+  would break the rule that a font renders the same from TTF, WOFF and WOFF2.
+  `SanitizeOptions::strip_hinting` removes the programs and the instructions of each glyph.
+- **The limit of this sanitizer.** For `GSUB`, `GPOS`, `GDEF`, `CFF `, `CFF2`, `COLR`, `CPAL`,
+  `sbix`, `gvar` and the other complex tables it checks headers, counts and offsets. It does not
+  validate their full content as OTS does. That depth stays with the readers: the sanitizer of
+  HarfBuzz, `read-fonts`, FreeType, Core Text and DirectWrite. Deeper validation of a table is
+  added here if a reader turns out to need it.
 - Decompression output is bounded by the declared size and by the limits below, before any
   allocation. No code path panics on input; a fuzz target covers the decoders.
 - Failure marks the face as `error` and the next `src` entry is tried.
@@ -353,7 +362,8 @@ no origin, so the limits above and the HTTPS default are its protection.
 
 ## 9. Incremental Font Transfer
 
-IFT is in scope and implemented last. The recommendation is that it should not block 0.6.0:
+IFT is implemented last, in milestone 0.7.0 (#1204). It does not block 0.6.0, by the owner's
+decision, for these reasons:
 
 - It is a Candidate Recommendation Draft whose test suite is still in development.
 - Table-keyed patches use the LZ77 dictionary of the Shared Brotli format (draft 15, section
@@ -399,7 +409,7 @@ Each step is one draft pull request, stacked on the one below.
 
 16. Color capability answers, `@font-palette-values` and `font-palette`.
 17. Level 5 descriptors and Local Font Access.
-18. Incremental Font Transfer, glyph-keyed patches only.
+18. Incremental Font Transfer, glyph-keyed patches only (milestone 0.7.0).
 
 ## 11. What must be measured
 
@@ -429,8 +439,6 @@ Nothing below has been measured yet.
   dropped or never shipped widely. They are skipped so that the next `src` entry is used.
 - **A CPU glyph path for any format.** A font that cannot be drawn on a backend's GPU path gets
   no new CPU path.
-- **Keeping hinting programs by default.** They are the riskiest part of a font, and the GPU
-  paths here do not need them.
 - **Table-keyed IFT patches.** They need the Shared Brotli LZ77 dictionary, which the planned
   decoder does not implement. Such a font falls through to the next `src` entry.
 - **Sharing fetched fonts between applications**, as Android's provider model does. It needs a
