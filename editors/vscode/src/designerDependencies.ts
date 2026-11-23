@@ -2,19 +2,16 @@ import { watch, type FSWatcher } from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { PreviewSourceBuffer } from './protocol';
+import { fileKey } from './workspacePaths';
 
 export function xamlPath(uri: vscode.Uri): string | undefined {
     if (uri.scheme !== 'file' || !uri.path.toLowerCase().endsWith('.xaml')) return;
-    return fileKey(uri);
+    return uri.fsPath;
 }
 
 function previewPath(uri: vscode.Uri, rust: boolean): string | undefined {
     if (!rust || uri.scheme !== 'file' || !uri.path.toLowerCase().endsWith('.rs')) return xamlPath(uri);
-    return fileKey(uri);
-}
-
-function fileKey(uri: vscode.Uri): string {
-    return process.platform === 'win32' ? uri.fsPath.toLowerCase() : uri.fsPath;
+    return uri.fsPath;
 }
 
 export class DesignerDependencies implements vscode.Disposable {
@@ -25,8 +22,9 @@ export class DesignerDependencies implements vscode.Disposable {
     constructor(private readonly rust = false, private readonly assetChanged?: () => void) {}
 
     change(uri: vscode.Uri): boolean {
-        const key = this.assetChanged && uri.scheme === 'file' ? fileKey(uri) : previewPath(uri, this.rust);
-        if (!key) return false;
+        const source = this.assetChanged && uri.scheme === 'file' ? uri.fsPath : previewPath(uri, this.rust);
+        if (!source) return false;
+        const key = fileKey(source);
         this.duringRender?.add(key);
         return this.watched.has(key);
     }
@@ -39,11 +37,11 @@ export class DesignerDependencies implements vscode.Disposable {
         for (const value of uris) {
             const uri = vscode.Uri.parse(value, true);
             const source = previewPath(uri, this.rust);
-            if (source) watched.add(source);
+            if (source) watched.add(fileKey(source));
             else if (this.assetChanged && uri.scheme === 'file') {
-                watched.add(fileKey(uri));
+                watched.add(fileKey(uri.fsPath));
                 const folder = vscode.Uri.file(path.dirname(uri.fsPath));
-                assetFolders.set(fileKey(folder), folder);
+                assetFolders.set(fileKey(folder.fsPath), folder);
             }
         }
         this.watched = watched;

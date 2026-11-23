@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { realpath } from 'node:fs/promises';
 import * as vscode from 'vscode';
 import type { TableColumns } from '../src/columnEditor';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
@@ -55,7 +56,8 @@ fn view() { rsx! { StackPanel {
     };
     const { model, revision } = await read('Accounts');
     assert.equal(model.factory, 'shared');
-    assert.ok(model.sourceUri && vscode.Uri.parse(model.sourceUri, true).fsPath === owner.uri.fsPath);
+    assert.ok(model.sourceUri);
+    assert.equal(await realpath(vscode.Uri.parse(model.sourceUri, true).fsPath), await realpath(owner.uri.fsPath));
     assert.equal(model.columns[0].label, 'Draft account');
     assert.match(owner.getText(asRange(model.sourceRange!)), /^list\(\[/);
     const header = model.columns[0].fields.find(field => field.name === 'Header');
@@ -93,10 +95,10 @@ fn view() { rsx! { StackPanel {
         };
         await undo();
         assert.equal(owner.getText(), draft);
-        assert.equal((await read('Recent')).model.columns[0].label, 'Draft account');
+        await until(async () => (await read('Recent')).model.columns[0].label === 'Draft account');
         await undo();
         assert.equal(owner.getText(), columnSource);
-        assert.equal((await read('Accounts')).model.columns[0].label, 'Account');
+        await until(async () => (await read('Accounts')).model.columns[0].label === 'Account');
     } finally {
         panel.panel.dispose();
     }
