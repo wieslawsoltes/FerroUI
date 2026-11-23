@@ -45,6 +45,7 @@ ferroui-controls-inking = { workspace = true, features = ["document-assets"] }
 ferroui-controls-livecharts = { workspace = true }
 ferroui-controls-flip-view = { workspace = true, features = ["document-assets"] }
 ferroui-controls-icons = { workspace = true }
+ferroui-controls-password-box = { workspace = true }
 ferroui-controls-teaching-tip = { workspace = true, features = ["document-assets"] }
 ferroui-controls-repeater = { workspace = true }
 ferroui-markup-xaml = { workspace = true }

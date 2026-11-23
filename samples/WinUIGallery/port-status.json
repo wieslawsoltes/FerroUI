@@ -994,7 +994,7 @@
       ]
     },
     "PasswordBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/PasswordBox.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1014,7 +1014,7 @@
           "name": "password_box_examples_keep_the_source_characters"
         }
       ],
-      "notes": "All three source examples with PasswordBox_PasswordChanged and RevealModeCheckbox_Changed of PasswordBoxPage.xaml.cs in Rust (input_samples.rs): the validation of an empty or 'Password' value, the header (composed), placeholder and custom character, and the reveal check box. FerroUI has no PasswordBox: each box is a TextBox with a PasswordChar whose Text, text changes and RevealPassword stand for Password, PasswordChanged and PasswordRevealMode, so the page is partial.",
+      "notes": "All three source examples with PasswordBox_PasswordChanged and RevealModeCheckbox_Changed of PasswordBoxPage.xaml.cs in Rust (input_samples.rs): the validation of an empty or 'Password' value, the header (composed), placeholder and custom character, and the reveal check box. Each box is the PasswordBox of ferroui-controls-password-box, with Password, PasswordChanged and PasswordRevealMode.",
       "examples": []
     },
     "PagerControl": {
