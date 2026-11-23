@@ -8,12 +8,12 @@
   </o:OverlayHost.Overlays>
   <o:OverlayHost.OverlayLayers>
     <o:OverlayLayerCollection>
-      <o:OverlayLayer ZIndex="4" BlocksInput="False" StyleKey="{x:Static o:OverlayLayerStyleKeys.BusyLayerThemeKey}">
+      <o:DockOverlayLayer ZIndex="4" BlocksInput="False" StyleKey="{x:Static o:OverlayLayerStyleKeys.BusyLayerThemeKey}">
         <Control />
-      </o:OverlayLayer>
-      <o:OverlayLayer ZIndex="10">
+      </o:DockOverlayLayer>
+      <o:DockOverlayLayer ZIndex="10">
         <Border />
-      </o:OverlayLayer>
+      </o:DockOverlayLayer>
     </o:OverlayLayerCollection>
   </o:OverlayHost.OverlayLayers>
   <Border />

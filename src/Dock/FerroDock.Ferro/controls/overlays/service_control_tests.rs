@@ -324,11 +324,11 @@ fn actual_service_controls_participate_in_host_content_pipeline_and_native_contr
             (10, dialog.clone().upcast()),
             (20, confirmation.clone().upcast()),
         ] {
-            let layer = OverlayLayer::new();
+            let layer = DockOverlayLayer::new();
             layer.set_z_index(z);
             layer.set_overlay(Some(control));
             layer.set_blocks_input(false);
-            layers.add(Some(OverlayLayer::as_layer(layer)));
+            layers.add(Some(DockOverlayLayer::as_layer(layer)));
         }
         let host = OverlayHost::new();
         host.set_use_service_layers(false);

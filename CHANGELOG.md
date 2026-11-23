@@ -196,6 +196,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 - **The camera preview on iOS is upright in every interface orientation** (`ferroui-media-camera-apple`): the preview showed the buffers in the orientation of the sensor, a quarter turn off in a portrait interface, and did not follow the interface when the device turned. Each frame now carries the rotation the presenter applies on the GPU, from the interface orientation and the mounting of the selected camera (on iOS 17 and later, the rotation coordinator of AVFoundation, read per frame); before iOS 17 the connection rotates the buffers, and a turn during a recording waits for its end. macOS is unchanged.
 
+### Migration
+
+- **Dock's `OverlayLayer` and `DragPreviewWindow` are `DockOverlayLayer` and `DockDragPreviewWindow`** (#1279, `ferrodock-ferro`): the framework has types with those names in the default XML namespace. Rename them in Rust and in markup (`<overlays:OverlayLayer>` becomes `<overlays:DockOverlayLayer>`, `{x:Type d:DragPreviewWindow}` becomes `{x:Type d:DockDragPreviewWindow}`).
+
 ## [0.5.0] - 2026-11-14
 
 The fifth release. It adds, among the entries below:

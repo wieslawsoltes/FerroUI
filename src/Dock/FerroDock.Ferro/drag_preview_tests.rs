@@ -1,5 +1,5 @@
 //! Native original drag preview state, inheritance and accessibility behavior.
-use crate::controls::{DragPreviewControl, DragPreviewWindow};
+use crate::controls::{DragPreviewControl, DockDragPreviewWindow};
 use ferrodock_model::core::IDockable;
 use ferrodock_model_reactiveui::controls::Document;
 use ferroui_base::{
@@ -52,9 +52,9 @@ ferroui_base::ferro_class_info!(DerivedPreview {});
 ferro_impl_classes!(DerivedPreview:FerroObjectImpl,StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl,TemplatedControlImpl);
 #[repr(C)]
 struct DerivedWindow {
-    base: DragPreviewWindow,
+    base: DockDragPreviewWindow,
 }
-ferro_class!(DerivedWindow:DragPreviewWindow);
+ferro_class!(DerivedWindow:DockDragPreviewWindow);
 ferroui_base::ferro_class_info!(DerivedWindow {});
 ferro_impl_classes!(DerivedWindow:FerroObjectImpl,StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl,TemplatedControlImpl,ContentControlImpl,TopLevelImpl,WindowBaseImpl,WindowImpl);
 #[test]
@@ -117,12 +117,12 @@ fn derived_preview_and_window_keep_source_constructor_peer_and_window_style_key(
             "DragPreviewControl"
         );
         let w: Ref<DerivedWindow> = instantiate(DerivedWindow {
-            base: DragPreviewWindow::construct(),
+            base: DockDragPreviewWindow::construct(),
         });
-        assert_eq!(w.style_key(), DragPreviewWindow::TYPE);
+        assert_eq!(w.style_key(), DockDragPreviewWindow::TYPE);
         assert_eq!(
             ControlAutomationPeer::create_peer_for_element(&w).get_class_name(),
-            "DragPreviewWindow"
+            "DockDragPreviewWindow"
         );
         w.close();
     });
@@ -249,9 +249,9 @@ fn preview_status_event_callbacks_observe_committed_state_and_can_reenter() {
 #[test]
 fn transient_window_peer_reports_original_state_but_excludes_control_and_content_roles() {
     run(|| {
-        let window = DragPreviewWindow::new();
+        let window = DockDragPreviewWindow::new();
         let peer = ControlAutomationPeer::create_peer_for_element(&window);
-        assert_eq!(peer.get_class_name(), "DragPreviewWindow");
+        assert_eq!(peer.get_class_name(), "DockDragPreviewWindow");
         assert_eq!(peer.get_name(), window.title().unwrap());
         window.set_title(Some(String::new()));
         assert_eq!(peer.get_name(), "Drag preview window");
@@ -276,7 +276,7 @@ fn transient_window_peer_reports_original_state_but_excludes_control_and_content
 #[test]
 fn source_drag_preview_and_adorner_windows_are_noninteractive_panes() {
     run(|| {
-        let preview = DragPreviewWindow::new();
+        let preview = DockDragPreviewWindow::new();
         let adorner = crate::controls::DockAdornerWindow::new();
         for (window, text) in [
             (
@@ -300,7 +300,7 @@ fn source_drag_preview_and_adorner_windows_are_noninteractive_panes() {
         for (window, class_name) in [
             (
                 preview.clone().upcast::<ferroui_controls::Window>(),
-                "DragPreviewWindow",
+                "DockDragPreviewWindow",
             ),
             (
                 adorner.clone().upcast::<ferroui_controls::Window>(),

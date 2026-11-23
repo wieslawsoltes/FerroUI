@@ -15,25 +15,25 @@ use ferroui_controls::{
 };
 /// Original transient window used to display drag-preview content.
 #[repr(C)]
-pub struct DragPreviewWindow {
+pub struct DockDragPreviewWindow {
     base: Window,
 }
-ferro_class!(DragPreviewWindow:Window);
-ferro_class_info!(DragPreviewWindow {
-    new: DragPreviewWindow::new
+ferro_class!(DockDragPreviewWindow:Window);
+ferro_class_info!(DockDragPreviewWindow {
+    new: DockDragPreviewWindow::new
 });
-ferro_impl_classes!(DragPreviewWindow:FerroObjectImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,TemplatedControlImpl,ContentControlImpl,TopLevelImpl,WindowBaseImpl,WindowImpl);
-impl StyledElementImpl for DragPreviewWindow {
+ferro_impl_classes!(DockDragPreviewWindow:FerroObjectImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,TemplatedControlImpl,ContentControlImpl,TopLevelImpl,WindowBaseImpl,WindowImpl);
+impl StyledElementImpl for DockDragPreviewWindow {
     fn style_key_override(_this: &Self) -> &'static ferroui_base::TypeInfo {
         <Self as ferroui_base::StaticType>::TYPE
     }
 }
-impl ControlImpl for DragPreviewWindow {
+impl ControlImpl for DockDragPreviewWindow {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         DragPreviewWindowAutomationPeer::new(this).upcast()
     }
 }
-impl DragPreviewWindow {
+impl DockDragPreviewWindow {
     /// Constructs the original native window base for inheritance.
     pub fn construct() -> Self {
         Self {
