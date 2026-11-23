@@ -79,7 +79,7 @@ fn reports_cycles_invalid_paths_conflicts_and_unsupported_values() {
         ("a-b", "Duplicate"),
         ("stretch", "pixelsPerRem"),
         ("gamut", "sRGB"),
-        ("typography", "No XAML"),
+        ("typography", "Missing fontFamily"),
         ("variants", "inheritance"),
     ] {
         assert!(

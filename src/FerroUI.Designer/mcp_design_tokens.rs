@@ -14,7 +14,7 @@ pub(super) const CREATE: &str = "designer_create_design_token_file";
 pub(super) fn tool() -> Value {
     s::tool(
         NAME,
-        "Review colors, numbers, dimensions, durations, gradient brushes, layered shadows and key splines between DTCG and XAML. Returns generated source, mappings and issues. options.mappings is keyed by token path during import and resource key during export.",
+        "Review colors, numbers, dimensions, durations, gradients, layered shadows, easing curves, font families, weights and typography between DTCG and XAML. Returns generated source, mappings and issues. options.mappings is keyed by token path during import and resource key during export.",
         request_schema(),
         false,
     )

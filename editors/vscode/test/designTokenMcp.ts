@@ -13,14 +13,16 @@ export async function verifyDesignTokens({ invoke, content }: McpFixture): Promi
     const plan = content<TokenPlan>(await invoke('designer_design_tokens', { direction: 'import', source, options: {
         mappings: { 'brand.card': { key: 'CustomerCardBrush' }, 'brand.banner': { xamlType: 'RadialGradientBrush' } }, pixelsPerRem: 16,
     } }));
-    assert.equal(plan.mappings.length, 8);
-    assert.equal(plan.issues.length, 1);
-    assert.equal(plan.issues[0].path, 'controls.title');
+    assert.equal(plan.mappings.length, 11);
+    assert.deepEqual(plan.issues, []);
     assert.equal(plan.mappings.find(row => row.key === 'CustomerCardBrush')?.value, '#2D6A51');
     assert.equal(plan.mappings.find(row => row.key === 'layout.padding')?.value, '24');
     assert.equal(plan.mappings.find(row => row.key === 'brand.banner')?.xamlType, 'RadialGradientBrush');
     assert.equal(plan.mappings.find(row => row.key === 'depth.card')?.xamlType, 'BoxShadows');
     assert.equal(plan.mappings.find(row => row.key === 'motion.settle')?.value, '0.2,0.8,0.3,1.18');
+    assert.equal(plan.mappings.find(row => row.key === 'text.title')?.xamlType, 'ControlTheme');
+    assert.equal(plan.mappings.find(row => row.key === 'text.family')?.value, 'Inter, Arial, DejaVu Sans');
+    assert.equal(plan.mappings.find(row => row.key === 'text.emphasis')?.value, '600');
     assert.equal(document.getText(), source);
     const dictionary = 'CustomerTokens.xaml';
     const create = { path: dictionary, source: plan.source };
@@ -32,7 +34,13 @@ export async function verifyDesignTokens({ invoke, content }: McpFixture): Promi
         <Border.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>
             <ResourceInclude Source="${dictionary}"/>
         </ResourceDictionary.MergedDictionaries></ResourceDictionary></Border.Resources>
-        <Border Name="Banner" Background="{StaticResource brand.banner}" Padding="18" CornerRadius="8"><TextBlock Text="Customer review" Foreground="White"/></Border>
+        <Border Name="Banner" Background="{StaticResource brand.banner}" Padding="18" CornerRadius="8">
+            <StackPanel Spacing="4">
+                <TextBlock Name="Heading" Theme="{StaticResource text.title}" Text="Customer review" Foreground="White"/>
+                <TextBlock Name="Subtitle" FontFamily="{StaticResource text.family}" FontWeight="{StaticResource text.emphasis}"
+                           Text="Accounts and renewals" Foreground="White"/>
+            </StackPanel>
+        </Border>
     </Border>` }));
     const { session } = content<{ session: number }>(await invoke('designer_open', { path: view }));
     const { revision, nodes } = content<{ revision: number; nodes: { name: string | null; id: number }[] }>(await invoke('designer_outline', { session }));
@@ -42,6 +50,26 @@ export async function verifyDesignTokens({ invoke, content }: McpFixture): Promi
     const { properties } = content<{ properties: PropertyField[] }>(await invoke('designer_inspect', { session, node: card.id }));
     assert.equal(properties.find(field => field.name === 'Background')?.effective, '#FF2D6A51');
     assert.equal(properties.find(field => field.name === 'Width')?.effective, '320');
+    const textProperties = async (name: string) => {
+        const node = nodes.find(node => node.name === name);
+        assert.ok(node);
+        const result = content<{ properties: PropertyField[] }>(await invoke('designer_inspect', { session, node: node.id }));
+        return (property: string) => result.properties.find(field => field.name === property)?.effective;
+    };
+    const heading = await textProperties('Heading');
+    assert.equal(heading('FontSize'), '20');
+    assert.equal(heading('LineHeight'), '24');
+    assert.equal(heading('LetterSpacing'), '0.25');
+    assert.match(heading('FontFamily') ?? '', /Inter, Arial, DejaVu Sans$/);
+    assert.match(heading('FontWeight') ?? '', /^(600|SemiBold)$/);
+    const subtitle = await textProperties('Subtitle');
+    assert.equal(subtitle('FontFamily'), heading('FontFamily'));
+    assert.equal(subtitle('FontWeight'), heading('FontWeight'));
+    const trace = content<{ effective: string; contributors: { kind: string; state: string }[] }>(
+        await invoke('designer_studio_query', { session, tool: 'designer_property_trace',
+            arguments: { node: nodes.find(node => node.name === 'Heading')!.id, property: 'FontSize' } }));
+    assert.equal(trace.effective, '20');
+    assert.ok(trace.contributors.some(row => row.kind === 'theme' && row.state === 'effective'));
     const stageModel = () => invoke('designer_stages', { session }).then(content<StageModel>);
     const firstBoard = content<StageModel>(await invoke('designer_stages_open', { session }));
     const board = content<StageModel>(await invoke('designer_stage_change', { session, expected_epoch: firstBoard.epoch,
@@ -101,6 +129,10 @@ export async function verifyDesignTokens({ invoke, content }: McpFixture): Promi
     assert.deepEqual(exportedJson.motion.settle.$value, [0.2, 0.8, 0.3, 1.18]);
     assert.equal(exportedJson['depth'].card.$value[1].inset, true);
     assert.equal(exportedJson.brand.banner.$extensions['com.github.ferroui'].xamlType, 'RadialGradientBrush');
+    assert.deepEqual(exportedJson.text.title.$value, {
+        fontFamily: ['Inter', 'Arial', 'DejaVu Sans'], fontSize: { value: 20, unit: 'px' },
+        fontWeight: 600, letterSpacing: { value: 0.25, unit: 'px' }, lineHeight: 1.2,
+    });
     const roundtrip = content<TokenPlan>(await invoke('designer_design_tokens', { direction: 'import', source: exported.source }));
     assert.equal(roundtrip.issues.length, 0);
     assert.equal(roundtrip.mappings.find(row => row.key === 'CustomerCardBrush')?.value, '#2D6A51');
@@ -114,7 +146,8 @@ export async function verifyDesignTokens({ invoke, content }: McpFixture): Promi
     const generated = vscode.workspace.textDocuments.find(document => document.uri.scheme === 'ferroui-token-review' && document.uri.path.endsWith('/DesignTokens.xaml'));
     assert.match(generated?.getText() ?? '', /<LinearGradientBrush/);
     assert.match(generated?.getText() ?? '', /<KeySpline/);
+    assert.match(generated?.getText() ?? '', /<ControlTheme x:Key="text.title" TargetType="TextBlock">/);
     const reviewTabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab => tab.label === reviewLabel || tab.label === 'DesignTokens.xaml');
     await vscode.window.tabGroups.close(reviewTabs);
-    console.log('VS Code rendered DTCG resources in the canvas and Stages, retained good frames through an invalid include, and exported the reverse mapping');
+    console.log('VS Code rendered DTCG resources and typography in the canvas and Stages, retained good frames through an invalid include, and exported the reverse mapping');
 }

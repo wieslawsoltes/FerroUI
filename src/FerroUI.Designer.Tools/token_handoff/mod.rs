@@ -2,12 +2,14 @@
 //! Both directions return a candidate; a host chooses when and where to write it.
 mod bezier;
 mod export;
+mod font;
 mod gradient;
 mod gradient_geometry;
 mod import;
 mod references;
 mod scalars;
 mod shadow;
+mod typography;
 
 pub use export::plan_export;
 pub use import::plan_import;
@@ -136,3 +138,5 @@ fn native_type(node: &Node, namespace: &str) -> bool {
 mod compound_tests;
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod typography_tests;

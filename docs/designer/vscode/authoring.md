@@ -680,6 +680,9 @@ In Designer Studio, open **Project** and choose **Review design tokens**. Use th
 | Shadow | `BoxShadows`, including ordered layers and inset shadows |
 | Gradient | `LinearGradientBrush`, `RadialGradientBrush`, or `ConicGradientBrush` |
 | Cubic Bézier | `KeySpline`. The editor preserves finite Y coordinates outside the unit interval for overshoot. |
+| Font family | `FontFamily` with the primary installed family followed by its fallbacks |
+| Font weight | `FontWeight` with a whole number from 1 to 1000. DTCG aliases such as `semi-bold` import as their numeric weights. |
+| Typography | A keyed `ControlTheme` for `TextBlock` with font family, size, weight, letter spacing, and line height |
 
 Standard DTCG stops import as a horizontal linear gradient by default. You can choose another brush type in the mapping. A FerroUI export also records brush geometry, opacity, and spread in the `com.github.ferroui` extension. Import preserves those values when the brush type matches. If you choose a different type, the review shows the new geometry and keeps the stops, opacity, and spread. Literal colors in XAML composites use hexadecimal sRGB. Dynamic resources, unsupported brush properties, and XAML stop positions outside zero to one appear under skipped entries. DTCG positions outside that range are clamped on import and recorded in the review. [DTCG gradient and shadow definitions](https://www.designtokens.org/tr/2025.10/format/#composite-types)
 
@@ -688,6 +691,18 @@ Include the new dictionary with `ResourceInclude`, then reference a brush or sha
 ![VS Code reviews eight design tokens beside the generated XAML dictionary, including a gradient, an inset shadow, and a key spline.](../images/vscode-design-token-import.png)
 
 The reverse review shows the DTCG values and the preserved FerroUI gradient properties. [VS Code export review](../images/vscode-design-token-export.png) · [Studio export review](../images/studio-design-token-review.png)
+
+### Apply typography tokens
+
+1. Import the example tokens and set **Logical pixels per rem** to `16`. Save the review as `CustomerTokens.xaml` beside the view and include it in the view's resource dictionary with `<ResourceInclude Source="CustomerTokens.xaml" />`.
+2. Set `Theme="{StaticResource text.title}"` on a `TextBlock` for the complete style. Use `FontFamily="{StaticResource text.family}"` or `FontWeight="{StaticResource text.emphasis}"` to reuse those values independently. Select the text on the canvas and inspect the effective values in **Properties**. Trace **FontSize** to see the supplying control theme.
+3. Open the generated dictionary and choose **Export Design Tokens** to review the reverse mapping. Export converts `LineHeight` from logical pixels to a ratio of `FontSize`. For example, a `24` pixel line height with a `20` pixel font becomes a DTCG `lineHeight` of `1.2`. Font size and letter spacing export in `px`.
+
+Import resolves typed aliases inside typography values. Export reads a keyed `TextBlock` theme with the five literal setters. Themes that inherit from another theme or use resource expressions, additional setters, or templates appear under skipped entries. The font review also reports asset-backed families, FerroUI's `$Default` placeholder, and fractional weights. Use design handoff to transfer font files separately. [Example tokens](../../../editors/vscode/test/fixtures/customer-design.tokens.json) · [DTCG typography](https://www.designtokens.org/tr/2025.10/format/#typography)
+
+![VS Code reviews the family fallbacks, weight, and complete typography theme beside the generated XAML.](../images/vscode-design-typography.png)
+
+The generated theme styles the heading and the standalone font resources style the subtitle. Studio can export the dictionary back to the typography tokens. [Native preview](../images/native-design-typography.png) · [Studio export review](../images/studio-design-typography.png)
 
 ## Review design handoff
 

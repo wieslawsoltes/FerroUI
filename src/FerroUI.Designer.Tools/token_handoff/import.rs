@@ -1,8 +1,8 @@
 use super::references::{Token, Tokens};
 use super::scalars::{color, dimension, duration, finite};
 use super::{
-    bezier, gradient, shadow, simple_key, size, valid_key, Conversion, Issue, Options, Plan,
-    ValueResult, EXTENSION, MAX_SOURCE_BYTES,
+    bezier, font, gradient, shadow, simple_key, size, typography, valid_key, Conversion, Issue,
+    Options, Plan, ValueResult, EXTENSION, MAX_SOURCE_BYTES,
 };
 use crate::components::{escape, FRAMEWORK, XAML};
 use crate::{Result, ToolError};
@@ -115,26 +115,37 @@ fn conversion(
         .reference
         .map(|reference| format!("Resolved {reference}"));
     let target = mapping.and_then(|mapping| mapping.xaml_type.as_deref());
-    let (xaml_type, value, xaml) = if kind == "gradient" {
-        let brush = gradient::import(tokens, &resolved, target, &mut note)?;
-        (brush.kind, brush.summary(), brush.xaml(&key))
-    } else {
-        let (element, value) = scalar_resource(
-            kind,
-            tokens,
-            resolved.value,
-            target.or_else(|| identity["xamlType"].as_str()),
-            options,
-            &mut note,
-        )?;
-        let escaped_key = escape(&key);
-        let escaped_value = escape(&value);
-        let xaml = if element == "SolidColorBrush" {
-            format!("    <{element} x:Key=\"{escaped_key}\" Color=\"{escaped_value}\"/>\n")
-        } else {
-            format!("    <{element} x:Key=\"{escaped_key}\">{escaped_value}</{element}>\n")
-        };
-        (element, value, xaml)
+    let (xaml_type, value, xaml) = match kind {
+        "gradient" => {
+            let brush = gradient::import(tokens, &resolved, target, &mut note)?;
+            (brush.kind, brush.summary(), brush.xaml(&key))
+        }
+        "typography" => {
+            if target.is_some_and(|target| target != "ControlTheme") {
+                return Err("Map typography to a TextBlock ControlTheme".into());
+            }
+            let style =
+                typography::import(tokens, resolved.value, options.pixels_per_rem, &mut note)?;
+            ("ControlTheme", style.summary(), style.xaml(&key))
+        }
+        _ => {
+            let (element, value) = scalar_resource(
+                kind,
+                tokens,
+                resolved.value,
+                target.or_else(|| identity["xamlType"].as_str()),
+                options,
+                &mut note,
+            )?;
+            let escaped_key = escape(&key);
+            let escaped_value = escape(&value);
+            let xaml = if element == "SolidColorBrush" {
+                format!("    <{element} x:Key=\"{escaped_key}\" Color=\"{escaped_value}\"/>\n")
+            } else {
+                format!("    <{element} x:Key=\"{escaped_key}\">{escaped_value}</{element}>\n")
+            };
+            (element, value, xaml)
+        }
     };
     Ok((
         Conversion {
@@ -172,6 +183,8 @@ fn scalar_resource<'a>(
             dimension(tokens, value, options.pixels_per_rem, note)?.to_string(),
         ),
         "duration" => ("sys:TimeSpan", duration(tokens, value)?),
+        "fontFamily" => ("FontFamily", font::import_family(value)?),
+        "fontWeight" => ("FontWeight", font::import_weight(value)?.to_string()),
         "shadow" => (
             "BoxShadows",
             shadow::import(tokens, value, options.pixels_per_rem, note)?,

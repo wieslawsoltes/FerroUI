@@ -28,7 +28,12 @@
         "blur": { "value": 2, "unit": "px" }, "spread": { "value": 0, "unit": "px" }, "inset": true }
     ] }
   },
-  "controls": {
-    "title": { "$type": "typography", "$value": { "fontFamily": "Inter", "fontSize": { "value": 20, "unit": "px" }, "fontWeight": 600, "letterSpacing": { "value": 0, "unit": "px" }, "lineHeight": 1.2 } }
+  "text": {
+    "family": { "$type": "fontFamily", "$value": ["Inter", "Arial", "DejaVu Sans"] },
+    "emphasis": { "$type": "fontWeight", "$value": "semi-bold" },
+    "title": { "$type": "typography", "$value": {
+      "fontFamily": "{text.family}", "fontSize": { "value": 20, "unit": "px" },
+      "fontWeight": "{text.emphasis}", "letterSpacing": { "value": 0.25, "unit": "px" }, "lineHeight": 1.2
+    } }
   }
 }

@@ -1,8 +1,8 @@
 use super::scalars::{duration_ms, hex_color, literal_number};
 use super::GRADIENT_PROPERTIES;
 use super::{
-    bezier, gradient, gradient_geometry, native_type, shadow, size, valid_token_name, Conversion,
-    Issue, Options, Plan, ValueResult, EXTENSION,
+    bezier, font, gradient, gradient_geometry, native_type, shadow, size, typography,
+    valid_token_name, Conversion, Issue, Options, Plan, ValueResult, EXTENSION,
 };
 use crate::components::{framework, key_attribute, literal_key, XAML};
 use crate::{Result, ToolError};
@@ -110,6 +110,16 @@ fn conversion(
             note: Some("Retained FerroUI gradient properties in the token extensions".into()),
             gradient_properties: Some(json!(brush.properties)),
         }
+    } else if name == "ControlTheme" && framework(node) {
+        let style = typography::export(document, node)?;
+        ExportedResource {
+            kind: "typography".into(),
+            xaml_type: "ControlTheme",
+            value: style.token_value()?,
+            display: style.summary(),
+            note: Some("Converted XAML LineHeight to a multiplier of FontSize".into()),
+            gradient_properties: None,
+        }
     } else {
         scalar_resource(
             document,
@@ -175,6 +185,12 @@ fn scalar_resource(
             json!({"value":duration_ms(&content)?,"unit":"ms"}),
             content,
         ),
+        "FontFamily" if media && plain => {
+            ("fontFamily", "FontFamily", font::export_family(&content)?, content)
+        }
+        "FontWeight" if media && plain => {
+            ("fontWeight", "FontWeight", json!(font::export_weight(&content)?), content)
+        }
         "BoxShadows" if media && plain => {
             ("shadow", "BoxShadows", shadow::export(&content)?, content)
         }
