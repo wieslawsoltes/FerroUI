@@ -157,22 +157,7 @@ fn drawing(device: &Arc<VelloWgpuDevice>, mode: VelloRenderingMode, pixels: &Rc<
 /// device route leaves this list, and one that starts to reach the CPU fails the test.
 fn known_on_the_cpu() -> &'static [&'static str] {
     // A multiply layer of factors takes an image of the processor in every mode.
-    if cfg!(feature = "hybrid") {
-        &["multiply layer of factors"]
-    } else {
-        &[
-            "blur effect",
-            "drop shadow effect",
-            "luminance to alpha",
-            "shader effect",
-            "effect graph",
-            "colour matrix layer",
-            "multiply layer of factors",
-            "convolution layer",
-            "lit layer",
-            "pixel operation",
-        ]
-    }
+    &["multiply layer of factors"]
 }
 
 #[test]

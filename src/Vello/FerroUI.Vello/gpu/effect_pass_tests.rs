@@ -36,7 +36,10 @@ use std::sync::Arc;
 const SIZE: u16 = 96;
 
 fn device_modes(device: &Arc<VelloWgpuDevice>) -> Vec<VelloRenderingMode> {
-    let mut modes = vec![VelloRenderingMode::Hybrid];
+    let mut modes = Vec::new();
+    if cfg!(feature = "hybrid") {
+        modes.push(VelloRenderingMode::Hybrid);
+    }
     if cfg!(feature = "gpu") && device.supports_compute() {
         modes.push(VelloRenderingMode::Gpu);
     }
