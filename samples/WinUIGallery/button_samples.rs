@@ -14,7 +14,7 @@ use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{
     Border, Button, ComboBox, Control, Image, NumberBox, RadioButtons, RepeatButton, RichEditBox,
-    Slider, SplitButton, Symbol, SymbolIcon, TextBlock, ToggleSplitButton,
+    Slider, SliderSnapsTo, SplitButton, Symbol, SymbolIcon, TextBlock, ToggleSplitButton,
 };
 use std::cell::Cell;
 use std::rc::Rc;
@@ -331,7 +331,11 @@ fn wire_slider(root: &Ref<Control>) {
             .as_ref()
             .and_then(|item| item.downcast_ref::<String>())
             .map(String::as_str);
-        slider.set_is_snap_to_tick_enabled(step_values != Some("StepValues"));
+        slider.set_snaps_to(if step_values == Some("StepValues") {
+            SliderSnapsTo::StepValues
+        } else {
+            SliderSnapsTo::Ticks
+        });
     });
 }
 

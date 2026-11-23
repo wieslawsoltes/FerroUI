@@ -220,7 +220,7 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 | `FontIcon.IsTextScaleFactorEnabled`, `FontIconSource.IsTextScaleFactorEnabled` | Not ported. | Missing | FerroUI has no text scale factor. |
 | `FontIconSource.FontFamily` is a nullable font family; null leaves the icon's own. | `Option<FontFamily>`, `None` by default; a change to `None` clears the value it had set on the icons. | Representation | Rust has no null font family. |
 | `IconSource::CreateIconElementCore` of the abstract base returns `E_NOTIMPL`, and `CreateIconElement` no element. | `create_icon_element` returns `Option<Ref<IconElement>>`: `None` for the base. | Representation | #286 panicked there; WinUI's base creates no element. |
-| `BitmapIconSource`, `ImageIconSource`, `AnimatedIconSource`, `BitmapIcon`, `ImageIcon`, `AnimatedIcon` | Not ported. | Missing | Not in #286; candidates for later. |
+| `AnimatedIconSource`, `AnimatedIcon` | Not ported. | Missing | Not in #286; candidates for later. |
 
 ### 10.2 Status (W5)
 
@@ -301,7 +301,8 @@ Where #286 differed from WinUI, the port follows WinUI: the text of NumberBox's 
 | Setting `Frame.SourcePageType` navigates; a null or invalid type fails with the error of `Navigate`. | The setter of the property (markup) logs the error and leaves the frame as it is; `set_source_page_type` returns it. | Behaviour | #286 panicked in the setter; a value from markup must not end the application. |
 | `Navigate`, `GoBack`, `GoForward` return `bool` or fail with an `HRESULT`; the page is activated from its type name. | `Result<bool, NavigationError>` and `Result<(), NavigationError>`; the page comes from a `PageFactory` registered for its type (`register_page_factory`) or from the default constructor of the type; a factory of another type is `FactoryTypeMismatch`. | Representation | Rust errors; FerroUI types have no activation by name, and a factory lets an application inject its pages. |
 | A navigation requested from a handler of a navigation. | Ignored: `navigate` returns `Ok(false)`, `go_back` and `go_forward` `Ok(())`. | Behaviour | #286's guard of the synchronous navigation. |
-| `Navigate(Type, Object, NavigationTransitionInfo)`, `FrameNavigationOptions.TransitionInfoOverride`, `PageStackEntry.NavigationTransitionInfo`, `ContentTransitions`, `RecommendedNavigationTransitionInfo` of the arguments of NavigationView. | Not ported. | Missing | FerroUI's frame has no navigation transitions. |
+| `Navigate(Type, Object, NavigationTransitionInfo)`, `PageStackEntry.NavigationTransitionInfo`. | `Frame::navigate_with_transition`, `PageStackEntry::navigation_transition_info`, `NavigationTransitionInfo` (Entrance, DrillIn, Suppress, SlideFromRight, SlideFromLeft, SlideFromBottom). | Adapted | The new page's opacity and translation animate for 300 ms; going back plays the reverse of the entry's slide. DrillIn fades without WinUI's scale. |
+| `FrameNavigationOptions.TransitionInfoOverride`, `ContentTransitions`, `RecommendedNavigationTransitionInfo` of the arguments of NavigationView. | Not ported. | Missing | The transition is passed to the navigation; there is no transition collection on the frame. |
 | `Frame.GetNavigationState`, `SetNavigationState`; `Page.TopAppBar`, `BottomAppBar`. | Not ported. | Missing | No serialization of the journal; no app bars of pages. |
 | The events of `Frame` and `NavigationView` are `EventHandler` and `TypedEventHandler` events. | Handler lists (`navigating`, `navigated`, `selection_changed`, ...) that return a `Subscription` guard (dropping it removes the handler, `detach()` keeps it); markup subscribes with the event names and gets the sender. Clones of the arguments share `Cancel` and `Handled`. | Representation | The plain events of FerroUI's controls. |
 | `Frame.BackStack` and `ForwardStack` are `IVector<PageStackEntry>`. | `navigation::NavigationStack`, a live list whose edits return a `Result` (`NavigationPending`, `IndexOutOfRange`, `EntryOwnedByAnotherFrame`); it is also an items source of bindings. | Representation | Rust errors where WinUI fails a collection call. |
@@ -448,15 +449,17 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | ToggleSplitButton | 1 partial: RichEditBox has no paragraph list type | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | CheckBox | 3 of 3 | ported | `input_samples.rs` | `tests.rs` |
 | RadioButton | 2 of 2 | ported | `examples.rs` | `tests.rs` |
+| SelectorBar | 3 of 3; the third example's ItemsView is an ItemsControl | ported | `selector_bar_samples.rs` | `selector_bar_samples_tests.rs` |
 | Slider | 2 ported, 2 partial: no StepFrequency, SnapsTo or Header | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | ToggleSwitch | 2 of 2 | ported | `Pages/ToggleSwitch.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
 | ComboBox | 2 ported, 1 partial: no TextSubmitted, no ContentDialog | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| ContentDialog | 2 of 2 | ported | `content_dialog_samples.rs` | `content_dialog_samples_tests.rs` |
 | Border | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | Canvas | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | Grid | 1 of 1 | ported | `Pages/Grid.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
 | StackPanel | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | RelativePanel | 1 of 1 | ported | `Pages/RelativePanel.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
-| TextBlock | 4 ported, 1 partial: no IsTextSelectionEnabled on TextBlock (a RichTextBlock) | partial | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| TextBlock | 5 of 5; the selectable text is a `SelectableTextBlock` with `IsTextSelectionEnabled` | ported | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
 | TextBox | 3 ported, 1 partial: no IsSpellCheckEnabled | partial | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
 | PasswordBox | 3 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `input_samples.rs` | `tests.rs`, `text_input_samples_tests.rs` |
 | NumberBox | 3 of 3 | ported | `text_input_samples.rs` | `text_input_samples_tests.rs` |
@@ -478,7 +481,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | CalendarView | 1 partial: no IsGroupLabelVisible, IsOutOfScopeEnabled, CalendarIdentifier or Language | partial | `date_samples.rs` | `date_samples_tests.rs` |
 | AutoSuggestBox | 2 of 2 | ported | `control_samples.rs` | `tests.rs` |
 | ListView | 5 ported, 5 partial: a ListBox; no grouping or sticky headers, no IsTextTrimmed, no ItemsUpdatingScrollMode, no None selection mode or check boxes | partial | `list_samples.rs` | `list_samples_tests.rs` |
-| TreeView | 3 ported, 1 partial: no drag and drop of the items | partial | `tree_samples.rs` | `tree_samples_tests.rs` |
+| TreeView | 4 of 4; the first tree's drag and drop is in the sample | ported | `tree_samples.rs` | `tree_samples_tests.rs` |
 | SplitView | 1 of 1 | ported | `split_view_samples.rs` | `split_view_samples_tests.rs`, `x_bind_tests.rs` |
 | ScrollViewer | 1 of 1 | ported | `scroll_samples.rs` | `scroll_samples_tests.rs` |
 | Shape | 3 of 3 | ported | `Pages/Shape.xaml` (no code-behind upstream) | `shape_samples_tests.rs` |
@@ -493,7 +496,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | CustomUserControls | 2 ported, 1 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `custom_controls.rs` | `custom_controls_tests.rs` |
 | XamlResources | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
 | XamlStyles | 2 of 2 | ported | `Pages/XamlStyles.xaml` (no code-behind upstream) | `binding_samples_tests.rs` |
-| PageTransition | 1 partial: no navigation transitions on Frame | partial | `frame_sample.rs` | `tests.rs` |
+| PageTransition | 1 ported: `Frame::navigate_with_transition` plays the selected `NavigationTransitionInfo`, reversed going back | ported | `frame_sample.rs` | `tests.rs` |
 | Pivot | 1 of 1 | ported | `Pages/Pivot.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
 | InfoBadge | 4 of 4 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
 | ProgressRing | 2 of 2 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs`, `x_bind_tests.rs` |

@@ -97,6 +97,8 @@ mod settings_page;
 mod slider_page;
 mod split_view_page;
 mod tab_control_page;
+mod content_dialog_page;
+mod selector_bar_page;
 mod tab_strip_page;
 mod text_block_page;
 mod text_box_page;
@@ -272,6 +274,8 @@ pub use settings_page::SettingsPage;
 pub use slider_page::SliderPage;
 pub use split_view_page::SplitViewPage;
 pub use tab_control_page::TabControlPage;
+pub use content_dialog_page::ContentDialogPage;
+pub use selector_bar_page::SelectorBarPage;
 pub use tab_strip_page::TabStripPage;
 pub use tabbed_demo_page::TabbedDemoPage;
 pub use table_view_page::TableViewPage;
@@ -427,6 +431,8 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     SliderPage::TYPE,
     SplitViewPage::TYPE,
     TabControlPage::TYPE,
+    ContentDialogPage::TYPE,
+    SelectorBarPage::TYPE,
     TabStripPage::TYPE,
     TextBlockPage::TYPE,
     TextBoxPage::TYPE,
@@ -535,6 +541,8 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &SliderPage::XAML_CLASS,
     &SplitViewPage::XAML_CLASS,
     &TabControlPage::XAML_CLASS,
+    &ContentDialogPage::XAML_CLASS,
+    &SelectorBarPage::XAML_CLASS,
     &TabStripPage::XAML_CLASS,
     &TextBlockPage::XAML_CLASS,
     &TextBoxPage::XAML_CLASS,

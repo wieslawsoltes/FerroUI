@@ -230,7 +230,7 @@ mod user_control;
 pub use user_control::UserControl;
 pub use progress_bar::{ProgressBar, ProgressBarTemplateSettings};
 pub use separator::Separator;
-pub use slider::{Slider, SliderImpl, SliderImplExt, SliderVTable, TickPlacement};
+pub use slider::{Slider, SliderImpl, SliderImplExt, SliderSnapsTo, SliderVTable, TickPlacement};
 mod tick_bar;
 pub use tick_bar::{TickBar, TickBarPlacement, TickList};
 #[cfg(test)]
@@ -670,6 +670,18 @@ mod selection_mode;
 mod selection_indicator_animation;
 mod selection_indicator;
 pub use selection_indicator::SelectionIndicator;
+mod content_dialog;
+pub use content_dialog::{
+    ContentDialog, ContentDialogButton, ContentDialogButtonClickEventArgs, ContentDialogClosedEventArgs,
+    ContentDialogClosingEventArgs, ContentDialogDeferral, ContentDialogError, ContentDialogOperation,
+    ContentDialogResult,
+};
+#[cfg(test)]
+mod content_dialog_tests;
+mod selector_bar;
+pub use selector_bar::{SelectorBar, SelectorBarItem};
+#[cfg(test)]
+mod selector_bar_tests;
 mod tab_control;
 mod tab_item;
 mod tree_view;
@@ -878,7 +890,10 @@ pub use page::{DrawerBehavior, DrawerClosingEventArgs, DrawerLayoutBehavior, Dra
 
 // --- pipspager ---
 mod pips_pager;
-pub use pips_pager::{PipsPager, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings};
+pub use pips_pager::{
+    PipsPager, PipsPagerButtonVisibility, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings,
+    PipsPagerWrapMode,
+};
 
 // --- connected-animation ---
 
