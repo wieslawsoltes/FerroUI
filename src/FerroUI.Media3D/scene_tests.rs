@@ -585,3 +585,73 @@ fn a_drawing_brush_is_recorded_again_only_when_its_content_changes() {
     let (third_id, _) = first_content(&third).expect("the new brush recorded");
     assert_ne!(id, third_id);
 }
+
+/// #608 D7: a visual brush over an element that shows frames samples its slot instead of being
+/// recorded, and a new frame draws the scene again without a new snapshot.
+#[test]
+fn a_visual_brush_over_a_video_samples_its_frames_and_a_frame_is_no_change_of_the_scene() {
+    use ferroui_base::media::VisualBrush;
+    use ferroui_base::reactive::{Disposable, Subscription};
+    use ferroui_base::rendering::scene3d::{register_frame_provider, IScene3DFrameProvider, Scene3DFrameSlot};
+    use ferroui_base::rendering::testing::MockPlatformRenderInterface;
+    use ferroui_base::Visual;
+    use ferroui_controls::{Border, Decorator};
+    use std::cell::{Cell, RefCell};
+
+    #[derive(Default)]
+    struct Frames {
+        slot: Option<Arc<Scene3DFrameSlot>>,
+        asked: Cell<u32>,
+        handlers: RefCell<Vec<Rc<dyn Fn()>>>,
+    }
+    impl IScene3DFrameProvider for Frames {
+        fn frame_slot(&self) -> Arc<Scene3DFrameSlot> {
+            self.asked.set(self.asked.get() + 1);
+            self.slot.clone().expect("the slot of the test")
+        }
+        fn subscribe_frames(&self, handler: Rc<dyn Fn()>) -> Subscription {
+            self.handlers.borrow_mut().push(handler);
+            Subscription::new(Disposable::create(|| {}))
+        }
+    }
+
+    let (_scope, _) = MockPlatformRenderInterface::install();
+    let slot = Scene3DFrameSlot::new();
+    let frames = Rc::new(Frames { slot: Some(slot.clone()), ..Frames::default() });
+    let provider: Rc<dyn IScene3DFrameProvider> = frames.clone();
+    // The element with the frames is a child of what the brush paints.
+    let inner = Border::new();
+    let outer = Decorator::new();
+    outer.set_child(&inner);
+    let inner_visual: Ref<Visual> = inner.clone().upcast();
+    register_frame_provider(&inner_visual, &provider);
+
+    let brush = VisualBrush::new();
+    brush.set_visual(&outer);
+    let handle: Rc<dyn IBrush> = brush.clone().into();
+    let material = DiffuseMaterial::with_brush(Some(handle));
+    let model = GeometryModel3D::with_geometry_and_material(cube().upcast(), material.clone().upcast());
+    let camera = camera_at(5.0);
+    let visual = scene(model.upcast(), camera.clone().upcast());
+
+    let first = visual.snapshot();
+    let layer_brush = first.models[0].front[0].brush.as_ref().expect("a brush");
+    assert!(layer_brush.frame_slot().is_some_and(|held| Arc::ptr_eq(held, &slot)));
+    assert!(layer_brush.scene_content().is_none(), "the element is not recorded");
+    assert_eq!(1, frames.asked.get());
+
+    // A new frame: heard by the scene, with the same snapshot and generations.
+    let heard = Rc::new(Cell::new(0));
+    let count = heard.clone();
+    let _guard = visual.changed(move |change| {
+        assert_eq!(Scene3DChange::Output, change);
+        count.set(count.get() + 1);
+    });
+    let handlers: Vec<Rc<dyn Fn()>> = frames.handlers.borrow().clone();
+    assert_eq!(1, handlers.len());
+    handlers[0]();
+    assert_eq!(1, heard.get());
+    let again = visual.snapshot();
+    assert!(Arc::ptr_eq(&first, &again), "the snapshot is kept");
+    assert_eq!(1, frames.asked.get(), "the provider is not looked for again");
+}
