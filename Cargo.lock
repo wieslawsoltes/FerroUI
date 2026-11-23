@@ -2531,7 +2531,9 @@ name = "ferroui-metal"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-render3d",
  "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -2786,6 +2788,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-metal",
  "ferroui-render3d",
  "ferroui-skia",
  "ferroui-themes-fluent",
