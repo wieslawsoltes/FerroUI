@@ -449,8 +449,9 @@ impl Slider {
         (!self.snaps_to_ticks() && step.is_finite() && MathUtilities::greater_than(step, 0.0)).then_some(step)
     }
 
-    /// The interval between tick marks. -> f64 {
-    pub fn tick_frequency(&self)        self.get_value(Self::tick_frequency_property())
+    /// The interval between tick marks.
+    pub fn tick_frequency(&self) -> f64 {
+        self.get_value(Self::tick_frequency_property())
     }
 
     pub fn set_tick_frequency(&self, value: f64) {
