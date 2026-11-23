@@ -560,3 +560,17 @@ fn json_strings_round_trip() {
         assert_eq!(crate::json::parse_string(bad), None, "{bad}");
     }
 }
+
+#[test]
+fn the_run_time_loader_resolves_the_control_without_a_prefix() {
+    use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    crate::register_types();
+    let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(
+        r#"<WebView2 xmlns="https://github.com/ferroui" Source="https://example.test/page" />"#,
+        None,
+    )
+    .expect("the document loads without a prefix");
+    let view = root.cast::<WebView2>().expect("a web view");
+    assert_eq!(view.source().as_deref(), Some("https://example.test/page"));
+}

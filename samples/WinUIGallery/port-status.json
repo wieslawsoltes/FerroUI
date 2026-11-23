@@ -4160,6 +4160,41 @@
       ],
       "notes": "The seven two-dimensional UI sound actions play application-owned PCM cues through the native portable MediaPlayer. The toggle and volume operate that player. SpatialAudioMode is explicitly not applicable: it is a Windows UI service without a portable provider contract.",
       "examples": []
+    },
+    "WebView2": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/WebView2.xaml",
+        "samples/WinUIGallery/examples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "web_view2_example_uses_the_native_control_with_the_source_address"
+        }
+      ],
+      "notes": "The source example uses the native WebView2 of ferroui-controls-webview with the source's address. The page stays partial until the engines are validated on each platform (#555).",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/WebView2/SimpleWebview2.txt",
+          "status": "partial",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "web_view2_example_uses_the_native_control_with_the_source_address"
+            }
+          ],
+          "notes": "The native control with the source's address. Loading the page in a real engine is not validated yet on every platform (#555)."
+        }
+      ]
     }
   }
 }

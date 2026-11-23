@@ -1,0 +1,11 @@
+<!-- Ported from the pinned WebView2 example of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream. The control is the native WebView2 of
+     ferroui-controls-webview, on the web engine of the platform. -->
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      x:Name="WebView2Example1" Height="480">
+  <WebView2 x:Name="MyWebView2"
+            Source="https://learn.microsoft.com/windows/apps/winui/winui3/"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch" />
+</Grid>

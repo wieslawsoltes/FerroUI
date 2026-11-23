@@ -1,0 +1,11 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="WebView2"
+             x:Class="ControlCatalog.Pages.WebViewPage">
+  <Grid x:Name="LayoutRoot" RowDefinitions="Auto,Auto,400">
+    <TextBlock Margin="0,0,0,8" TextWrapping="Wrap"
+               Text="A document in the web engine of the platform, as a native child view. The document is local: the catalog makes no network requests." />
+    <TextBlock x:Name="Status" Grid.Row="1" Margin="0,0,0,8" TextWrapping="Wrap" Text="Starting the web engine." />
+    <WebView2 x:Name="View" Grid.Row="2" />
+  </Grid>
+</ContentPage>

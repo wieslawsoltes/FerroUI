@@ -57,6 +57,7 @@ ferroui-build-scan.workspace = true
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 
 # A real engine in a run loop; see the file for how to run it.
 [[test]]

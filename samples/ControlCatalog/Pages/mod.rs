@@ -108,6 +108,7 @@ mod transitioning_content_control_page;
 mod tree_data_grid_page;
 mod tree_view_page;
 mod viewbox_page;
+mod web_view_page;
 mod window_customizations_page;
 mod wrap_panel_page;
 
@@ -296,6 +297,7 @@ pub use transitioning_content_control_page::TransitioningContentControlPage;
 pub use tree_data_grid_page::TreeDataGridPage;
 pub use tree_view_page::TreeViewPage;
 pub use viewbox_page::ViewboxPage;
+pub use web_view_page::WebViewPage;
 pub use window_customizations_page::WindowCustomizationsPage;
 pub use wrap_panel_page::WrapPanelPage;
 
@@ -437,6 +439,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     TreeDataGridPage::TYPE,
     TreeViewPage::TYPE,
     ViewboxPage::TYPE,
+    WebViewPage::TYPE,
     WindowCustomizationsPage::TYPE,
     WrapPanelPage::TYPE,
 ];
@@ -545,6 +548,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &TreeDataGridPage::XAML_CLASS,
     &TreeViewPage::XAML_CLASS,
     &ViewboxPage::XAML_CLASS,
+    &WebViewPage::XAML_CLASS,
     &WindowCustomizationsPage::XAML_CLASS,
     &WrapPanelPage::XAML_CLASS,
 ];
