@@ -527,6 +527,12 @@ fn check_move(document: &str) {
             model(v).is_some_and(|v| v.id() == "Documents")
         })
         .unwrap();
+    // The steps below click points taken from the layout. The expansion of the Browser tabs
+    // after a removal comes a second later on the wall clock and moves them, so on a slow
+    // machine it could land between a point and its click. The panel has tests of its own.
+    if let Some(panel) = strip.find_descendant_of_type::<ferrodock_ferro::controls::DelayedUniformTabPanel>(false) {
+        panel.set_expansion_delay(std::time::Duration::from_secs(3600));
+    }
     reorder_tabs(&scene, &strip, documents.clone());
     assert_eq!(strip.selected_index(), 1);
     let source = tab(&scene, "Documents", 1);
