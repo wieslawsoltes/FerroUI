@@ -694,8 +694,7 @@ fn a_plain_navigation_and_suppress_play_nothing() {
         .navigate_with_transition(SecondPage::TYPE, None, NavigationTransitionInfo::Suppress)
         .unwrap();
     assert_eq!(frame.last_transition(), None);
-    let page = frame.content().and_then(|content| content.cast::<ferroui_base::Visual>());
-    assert_eq!(page.map(|page| page.opacity()), Some(1.0));
+    assert_eq!(frame.current_page().map(|page| page.opacity()), Some(1.0));
 }
 
 #[test]
@@ -705,5 +704,65 @@ fn the_reverse_of_each_transition_is_its_mirror() {
     assert_eq!(SlideFromLeft.reversed(), SlideFromRight);
     for same in [Entrance, DrillIn, Suppress, SlideFromBottom] {
         assert_eq!(same.reversed(), same);
+    }
+}
+
+mod transition_animation {
+    use super::*;
+    use crate::testing::{TestServices, UnitTestApplication};
+    use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
+    use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
+    use ferroui_base::FerroLocator;
+    use std::cell::Cell;
+    use std::rc::Rc;
+
+    struct TestClock {
+        subject: LightweightSubject<SignedDuration>,
+        play_state: Cell<PlayState>,
+    }
+
+    impl IObservable<SignedDuration> for TestClock {
+        fn subscribe(&self, observer: Rc<dyn IObserver<SignedDuration>>) -> Rc<dyn IDisposable> {
+            self.subject.subscribe(observer)
+        }
+    }
+
+    impl IClock for TestClock {
+        fn play_state(&self) -> PlayState {
+            self.play_state.get()
+        }
+
+        fn set_play_state(&self, value: PlayState) {
+            self.play_state.set(value)
+        }
+    }
+
+    impl IGlobalClock for TestClock {}
+
+    #[test]
+    fn a_slide_moves_the_new_page_in_and_ends_in_its_place() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let clock = Rc::new(TestClock {
+            subject: LightweightSubject::new(),
+            play_state: Cell::new(PlayState::Run),
+        });
+        let global_clock: Rc<dyn IGlobalClock> = clock.clone();
+        FerroLocator::current_mutable().bind::<dyn IGlobalClock>().to_constant(global_clock);
+        let tick = |milliseconds: f64| clock.subject.on_next(SignedDuration::from_milliseconds(milliseconds));
+
+        let frame = frame();
+        frame
+            .navigate_with_transition(FirstPage::TYPE, None, NavigationTransitionInfo::SlideFromRight)
+            .unwrap();
+        let page = frame.current_page().unwrap();
+        tick(0.0);
+        tick(30.0);
+        let offset = |page: &Ref<FramePage>| page.render_transform().map_or(0.0, |transform| transform.value().m31);
+        assert!(page.opacity() > 0.0 && page.opacity() < 1.0, "opacity {}", page.opacity());
+        assert!(offset(&page) > 0.0, "the page starts to the right of its place");
+
+        tick(400.0);
+        assert_eq!(page.opacity(), 1.0);
+        assert_eq!(offset(&page), 0.0);
     }
 }

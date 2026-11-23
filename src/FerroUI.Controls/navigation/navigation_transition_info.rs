@@ -4,11 +4,14 @@
 //! [`Frame`](crate::Frame). The animations run on the render transform and the opacity of the
 //! page, which the compositor draws on the GPU.
 
-use ferroui_base::animation::{Animation, Cue, FillMode, KeyFrame, SignedDuration, SplineEasing};
-use ferroui_base::media::{ITransform, TranslateTransform};
+use ferroui_base::animation::easings::{Easing, SplineEasing};
+use ferroui_base::animation::{
+    Animation, Cue, FillMode, IAnimationSetter, IGlobalClock, KeyFrame, SignedDuration,
+};
+use ferroui_base::media::TranslateTransform;
 use ferroui_base::styling::Setter;
 use ferroui_base::threading::CancellationToken;
-use ferroui_base::{Ref, Vector, Visual};
+use ferroui_base::{FerroLocator, LocatorExtensions, Ref, Vector, Visual};
 use std::rc::Rc;
 
 /// How far an entering page travels, in device-independent pixels.
@@ -61,17 +64,19 @@ impl NavigationTransitionInfo {
         if self == Self::Suppress {
             return;
         }
-        let offset = self.start_offset();
-        if offset != Vector::new(0.0, 0.0) {
-            ensure_translate_transform(page);
+        // Without a clock (no application is running) there is no time to animate on: the page
+        // is shown in its place.
+        if page.clock().is_none() && FerroLocator::current().get_service::<dyn IGlobalClock>().is_none() {
+            return;
         }
+        let offset = self.start_offset();
         let animation = Animation::new();
         animation.set_fill_mode(FillMode::None);
         animation.set_duration(SignedDuration::from_milliseconds(DURATION_MS));
         // WinUI's deceleration curve of page transitions.
-        animation.set_easing(SplineEasing::with_points(0.1, 0.9, 0.2, 1.0));
+        animation.set_easing(Easing::new(SplineEasing::with_points(0.1, 0.9, 0.2, 1.0)));
         let frame = |cue: f64, x: f64, y: f64, opacity: f64| {
-            let mut setters = vec![Setter::new(Visual::opacity_property(), opacity)];
+            let mut setters: Vec<Rc<dyn IAnimationSetter>> = vec![Setter::new(Visual::opacity_property(), opacity)];
             if offset.x != 0.0 {
                 setters.push(Setter::new(TranslateTransform::x_property(), x));
             }
@@ -83,17 +88,5 @@ impl NavigationTransitionInfo {
         animation.children().add(frame(0.0, offset.x, offset.y, 0.0));
         animation.children().add(frame(1.0, 0.0, 0.0, 1.0));
         drop(animation.run_async_with_clock(page, None, cancellation_token));
-    }
-}
-
-fn ensure_translate_transform(page: &Ref<Visual>) {
-    let has_one = page
-        .render_transform()
-        .and_then(|transform| transform.as_object().and_then(|object| object.to_ref().cast::<TranslateTransform>()))
-        .is_some();
-    if !has_one {
-        let transform = TranslateTransform::new();
-        let handle: Rc<dyn ITransform> = (&transform).into();
-        page.set_render_transform(Some(handle));
     }
 }
