@@ -1,10 +1,12 @@
 //! The scripts that give engines other than WebView2 its page interface: `window.chrome.webview`
 //! with `postMessage` and `addEventListener`, and script results as JSON.
 
+use crate::engine::WebViewError;
 use crate::json;
 
 /// The script run at the start of every document. `post` is a JavaScript expression of a
 /// function taking the message as a JSON string.
+#[cfg_attr(windows, allow(dead_code))]
 pub(crate) fn document_script(post: &str) -> String {
     format!(
         "(function(){{\
@@ -26,6 +28,7 @@ window.chrome.webview=webview;\
 }
 
 /// The script that hands the page a message given as JSON.
+#[cfg_attr(windows, allow(dead_code))]
 pub(crate) fn deliver_script(message_json: &str) -> String {
     format!(
         "window.chrome.webview.__ferrouiDeliver({});",
@@ -33,12 +36,24 @@ pub(crate) fn deliver_script(message_json: &str) -> String {
     )
 }
 
-/// Runs `script` in the global scope and evaluates to its result as a JSON string.
+/// Runs `script` in the global scope. The value is a string for [`parse_result`], so that a
+/// script that throws is reported the same way by every engine.
 pub(crate) fn result_script(script: &str) -> String {
     format!(
-        "(function(){{var text=JSON.stringify((0,eval)({}));return text===undefined?'null':text;}})()",
+        "(function(){{try{{var text=JSON.stringify((0,eval)({}));\
+return 'v'+(text===undefined?'null':text);\
+}}catch(error){{return 'e'+String(error);}}}})()",
         json::quote(script)
     )
+}
+
+/// The result of a [`result_script`].
+pub(crate) fn parse_result(text: &str) -> Result<String, WebViewError> {
+    match text.split_at_checked(1) {
+        Some(("v", value)) => Ok(value.to_owned()),
+        Some(("e", message)) => Err(WebViewError::Engine(message.to_owned())),
+        _ => Err(WebViewError::Engine("the script gave no result".to_owned())),
+    }
 }
 
 #[cfg(test)]
@@ -53,5 +68,13 @@ mod tests {
             "window.chrome.webview.__ferrouiDeliver(\"{\\\"a\\\":\\\"b\\\"}\");"
         );
         assert!(result_script("say(\"x\")").contains("(0,eval)(\"say(\\\"x\\\")\")"));
+    }
+
+    #[test]
+    fn a_result_is_a_value_or_the_error_of_the_script() {
+        assert_eq!(parse_result("v{\"a\":1}"), Ok("{\"a\":1}".to_owned()));
+        assert_eq!(parse_result("eError: boom"), Err(WebViewError::Engine("Error: boom".to_owned())));
+        assert!(parse_result("").is_err());
+        assert!(parse_result("x1").is_err());
     }
 }

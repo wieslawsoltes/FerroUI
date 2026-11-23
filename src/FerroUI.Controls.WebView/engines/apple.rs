@@ -309,7 +309,7 @@ impl AppleEngine {
                     // script, or an NSError.
                     let outcome = unsafe {
                         if error.is_null() {
-                            Ok(string_of(result).unwrap_or_else(|| "null".to_owned()))
+                            bridge::parse_result(&string_of(result).unwrap_or_default())
                         } else {
                             let text: *mut AnyObject = msg_send![error, localizedDescription];
                             Err(WebViewError::Engine(string_of(text).unwrap_or_default()))
