@@ -637,14 +637,19 @@
             break;
 
             case NSEventTypeMouseEntered:
-            {
-                parent->UpdateCursor();
-            }
-                break;
-
             case NSEventTypeMouseExited:
             {
-                [[NSCursor arrowCursor] set];
+                // Only react to our own view's tracking area. Other views in the window (the theme
+                // frame, the titlebar, native control hosts) have tracking areas of their own, and
+                // reacting to those would reset the cursor to the arrow in the middle of the content.
+                NSTrackingArea* area = event.trackingArea;
+                if (area != nil && area.owner != parent->View)
+                    break;
+
+                if (event.type == NSEventTypeMouseEntered)
+                    parent->UpdateCursor();
+                else
+                    [[NSCursor arrowCursor] set];
             }
                 break;
 
