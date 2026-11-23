@@ -691,7 +691,7 @@ fn additional_navigation_buttons_get_their_automation_names() {
     assert_eq!(Some("Next page".to_string()), crate::automation::AutomationProperties::get_name(&next_button));
 }
 
-fn pager_with_buttons(pages: i32) -> (Ref<PipsPager>, TestRoot, Ref<Button>, Ref<Button>) {
+fn pager_with_buttons(pages: i32) -> (Ref<PipsPager>, Ref<TestRoot>, Ref<Button>, Ref<Button>) {
     let target = PipsPager::new();
     target.set_template(Some(get_template()));
     target.set_number_of_pages(pages);
