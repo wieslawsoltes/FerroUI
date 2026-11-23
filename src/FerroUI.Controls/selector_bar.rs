@@ -51,7 +51,10 @@ pub struct SelectorBarItem {
 }
 
 ferro_class!(SelectorBarItem: TabStripItem);
-ferro_class_info!(SelectorBarItem { new: SelectorBarItem::new });
+ferro_class_info!(SelectorBarItem {
+    new: SelectorBarItem::new,
+    markup: { namespace: "FerroUI.Controls" },
+});
 ferro_impl_classes!(
     SelectorBarItem: VisualImpl,
     LayoutableImpl,
@@ -172,7 +175,10 @@ pub struct SelectorBar {
 }
 
 ferro_class!(SelectorBar: TabStrip);
-ferro_class_info!(SelectorBar { new: SelectorBar::new });
+ferro_class_info!(SelectorBar {
+    new: SelectorBar::new,
+    markup: { namespace: "FerroUI.Controls" },
+});
 ferro_impl_classes!(
     SelectorBar: FerroObjectImpl,
     VisualImpl,
