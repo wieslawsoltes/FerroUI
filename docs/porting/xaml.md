@@ -353,7 +353,11 @@ Because generated code is included in the class's own module, private fields and
 
 - `d:DesignWidth`, `d:DataContext`, `Design.PreviewWith` etc.: `AvaloniaXamlIlDesignPropertiesTransformer` ports; active only when `IsDesignMode` (runtime loader option).
 - `mc:Ignorable` prefixes are dropped by `CompatibleXmlReader` as upstream.
-- Platform switches are the `On*` extensions (3.3). XAML conditional namespaces (`?ApiInformation...`) are not supported upstream either.
+- Platform switches are the `On*` extensions (3.3).
+- Conditional XAML namespaces (`xmlns:new="uri?IsTypePresent(A.B)"`, #559) work in the compiler and the run-time loader with the same results. The elements and attributes in such a namespace are kept or left out, and the namespace reads as the part before `?`; a namespace whose text after `?` is not `name(..)` is an ordinary namespace.
+  - Built-in conditions ask the type system in both paths, so a false one hides a type that does not exist: `IsTypePresent` / `IsTypeNotPresent` (a full name, or a short name of the framework namespace), `IsPropertyPresent` / `IsPropertyNotPresent` (type, property), `IsApiContractPresent` / `IsApiContractNotPresent` (name, major, optional minor: only `FerroUI.ApiContract`, up to the version of the release).
+  - Custom conditions are written `prefix:Name(argument)`, implement `IXamlCondition` and are registered with `register_xaml_condition`. The prefix is not resolved. The loader evaluates them while it parses; the compiler keeps both branches and writes a test around them (`rt::xaml_condition`), so **a branch of a custom condition must compile whatever the answer is** (only a built-in condition can hide an unknown type). The result of a (name, argument) pair is kept per thread; an unregistered condition is false, with a warning.
+  - If two conditions that are both true set one attribute, the last one wins in both paths (WinUI reports an error). A conditional root element is an error. A theme entry under a custom condition stays out of the trimmed units.
 
 ## 4. Diagnostics and tooling
 

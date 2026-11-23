@@ -26,6 +26,7 @@ use xamlx::transform::XamlDiagnosticsHandler;
 use xamlx::type_system::{IXamlAssembly, IXamlType, IXamlTypeSystem};
 
 use crate::compiler_extensions::{
+    CustomConditions,
     FerroXamlDiagnosticCodes, FerroXamlIlCompiler, FerroXamlIlCompilerConfiguration, FerroXamlIlLanguage,
     IXamlDocumentResource, IXamlDocumentTypeBuilderProvider, XamlDocumentResource,
 };
@@ -110,8 +111,11 @@ ferroui_base::ferro_thread_local! {
 fn group_key(sources: &[DocumentSource], configuration: &RuntimeXamlLoaderConfiguration) -> String {
     use std::fmt::Write as _;
     use std::hash::{Hash as _, Hasher as _};
+    // The loader answers custom conditions while it parses: a condition registered since then
+    // can change what a document reads as.
     let mut key = format!(
-        "{}|{}|{}|{}",
+        "{}|{}|{}|{}|{}",
+        ferroui_markup_xaml::xaml_conditions_generation(),
         configuration.design_mode,
         configuration.use_compiled_bindings_by_default,
         configuration.create_source_info(),
@@ -333,6 +337,7 @@ impl FerroXamlIlRuntimeCompiler {
         compiler.set_default_compile_bindings(configuration.use_compiled_bindings_by_default);
         compiler.set_is_design_mode(configuration.design_mode);
         compiler.set_create_source_info(configuration.create_source_info());
+        compiler.set_custom_conditions(CustomConditions::Evaluate(ferroui_markup_xaml::evaluate_xaml_condition));
 
         let interpreter =
             framework::create_interpreter(transformer_configuration.clone(), runtime_type_system.clone(), &emit_mappings)?;

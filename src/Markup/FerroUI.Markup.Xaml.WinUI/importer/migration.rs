@@ -440,7 +440,10 @@ impl Migration<'_, '_> {
             if qname == "xmlns" || qname.starts_with("xmlns:") {
                 let prefix = qname.strip_prefix("xmlns:");
                 if let Some(uri) = node.lookup_namespace_uri(prefix) {
-                    if let Some(target) = self.namespace(uri) {
+                    // A conditional namespace keeps its condition: only the part before it maps.
+                    let (base, condition) = uri.split_once('?').map_or((uri, None), |(base, rest)| (base, Some(rest)));
+                    if let Some(target) = self.namespace(base) {
+                        let target = condition.map_or(target.clone(), |condition| format!("{target}?{condition}"));
                         self.edit(attribute.value, escape_attribute(&target));
                     }
                 }

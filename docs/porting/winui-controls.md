@@ -493,6 +493,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | Binding | 7 of 7 | ported | `binding_samples.rs` | `x_bind_tests.rs`, `binding_samples_tests.rs` |
 | Templates | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
 | CustomUserControls | 2 ported, 1 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `custom_controls.rs` | `custom_controls_tests.rs` |
+| CustomXamlConditionals | 3 of 3 | ported | `Pages/CustomXamlConditionals.xaml`, `binding_samples.rs` | `binding_samples_tests.rs` |
 | XamlResources | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
 | XamlStyles | 2 of 2 | ported | `Pages/XamlStyles.xaml` (no code-behind upstream) | `binding_samples_tests.rs` |
 | PageTransition | 1 partial: no navigation transitions on Frame | partial | `frame_sample.rs` | `tests.rs` |

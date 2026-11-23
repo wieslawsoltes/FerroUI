@@ -31,6 +31,19 @@ fn namespaces_change_only_declarations_not_comments_literals_cdata_or_text() {
 }
 
 #[test]
+fn conditional_namespaces_map_their_base_and_keep_the_condition() {
+    let condition = "?cond:FeatureFlagCondition(NewExperience)";
+    let original = format!(
+        "<Grid xmlns='{WINUI_PRESENTATION_NAMESPACE}' xmlns:new='{WINUI_PRESENTATION_NAMESPACE}{condition}'>\
+         <new:Button Content='a'/></Grid>"
+    );
+    let result = migrate_winui_xaml(&original, &WinUIXamlOptions::default()).unwrap();
+    assert!(!result.has_errors());
+    assert!(result.xaml.contains(&format!("xmlns:new='{FERRO_XML_NAMESPACE}{condition}'")), "{}", result.xaml);
+    assert!(result.xaml.contains("<new:Button"), "{}", result.xaml);
+}
+
+#[test]
 fn native_documents_are_identity_and_migration_is_idempotent() {
     let original = "<TextBox xmlns='https://github.com/ferroui' Text='{Binding Name}'/>";
     let result = migrate_winui_xaml(original, &WinUIXamlOptions::default()).unwrap();
