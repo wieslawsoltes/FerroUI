@@ -2,8 +2,10 @@ use crate::generators::RecycleKey;
 use crate::presenters::table_view_layout_helper::TableViewLayoutHelper;
 use crate::presenters::TableViewColumnHeadersPresenter;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
+use crate::table_view_sort::SortedItems;
 use crate::templates::IDataTemplate;
 use crate::{
+    SortDirection,
     AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ListBox, TableViewColumn, TableViewRow,
 };
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, ResetBehavior};
@@ -11,6 +13,7 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledElement,
@@ -28,6 +31,11 @@ pub struct TableView {
     /// The presenter of the column headers of the template; it is part of
     /// the tree below the control and held weakly.
     headers_presenter: RefCell<Option<WeakRef<TableViewColumnHeadersPresenter>>>,
+    /// The column the rows are sorted by, and its view of the items source.
+    sort: RefCell<Option<(Ref<TableViewColumn>, SortDirection)>>,
+    /// Set while the control replaces the source of its items for a sort.
+    applying_sort: Cell<bool>,
+    sorted_handlers: Rc<HandlerList<dyn Fn(&Ref<TableViewColumn>, SortDirection)>>,
 }
 
 ferro_class!(TableView: ListBox);
@@ -53,6 +61,9 @@ impl FerroObjectImpl for TableView {
                     column.update_can_user_effectively_resize();
                 }
             }
+        } else if change.property() == ItemsControl::items_source_property().as_property() {
+            // A new source of the application, in the order of the column it is sorted by.
+            this.apply_sort();
         }
     }
 }
@@ -122,6 +133,12 @@ ferro_properties! {
         pub fn can_user_resize_columns_property() -> StyledProperty<bool> {
             FerroProperty::register::<TableView, _>("CanUserResizeColumns", true)
         }
+
+        /// Defines the `CanUserSortColumns` property. Off by default, unlike WinUI: a table
+        /// view of FerroUI does not sort unless it is asked to.
+        pub fn can_user_sort_columns_property() -> StyledProperty<bool> {
+            FerroProperty::register::<TableView, _>("CanUserSortColumns", false)
+        }
     }
 }
 
@@ -133,6 +150,9 @@ impl TableView {
             columns_subscription: RefCell::new(None),
             columns: RefCell::new(None),
             headers_presenter: RefCell::new(None),
+            sort: RefCell::new(None),
+            applying_sort: Cell::new(false),
+            sorted_handlers: Rc::new(HandlerList::new()),
         }
     }
 
@@ -211,6 +231,88 @@ impl TableView {
 
     pub fn set_can_user_resize_columns(&self, value: bool) {
         self.set_value(Self::can_user_resize_columns_property(), value)
+    }
+
+    /// Gets or sets whether a click on a column header sorts the rows. The default is false.
+    pub fn can_user_sort_columns(&self) -> bool {
+        self.get_value(Self::can_user_sort_columns_property())
+    }
+
+    pub fn set_can_user_sort_columns(&self, value: bool) {
+        self.set_value(Self::can_user_sort_columns_property(), value)
+    }
+
+    /// Occurs after the rows were sorted, with the column and its direction
+    /// ([`SortDirection::None`] when they are back in the order of the source).
+    pub fn sorted(&self, handler: impl Fn(&Ref<TableViewColumn>, SortDirection) + 'static) -> Subscription {
+        let handlers = self.sorted_handlers.clone();
+        let token = handlers.add(Rc::new(handler));
+        Subscription::new(Disposable::create(move || {
+            handlers.remove(token);
+        }))
+    }
+
+    /// Sorts the rows by `column`, which must be a column of this table with a comparer or a
+    /// binding, or puts them back in the order of the source with [`SortDirection::None`]. The
+    /// items source is not changed, and the selected items stay selected. Returns whether the
+    /// sort was applied; it needs an `ItemsSource`.
+    pub fn sort_by_column(&self, column: &Ref<TableViewColumn>, direction: SortDirection) -> bool {
+        if self.columns().index_of(column).is_none() || self.items_source().is_none() {
+            return false;
+        }
+        if direction != SortDirection::None && !column.is_sortable() {
+            return false;
+        }
+        for other in self.columns().snapshot().iter() {
+            let value = if other == column { direction } else { SortDirection::None };
+            if other.sort_direction() != value {
+                other.set_sort_direction(value);
+                self.refresh_column_headers(other);
+            }
+        }
+        *self.sort.borrow_mut() = (direction != SortDirection::None).then(|| (column.clone(), direction));
+        self.apply_sort();
+        for (_, handler) in self.sorted_handlers.snapshot().iter() {
+            handler(column, direction);
+        }
+        true
+    }
+
+    /// A click on the header of `column`: the next direction of its cycle.
+    pub(crate) fn toggle_sort_from_header(&self, column: &Ref<TableViewColumn>) -> bool {
+        if !self.can_user_sort_columns() || !column.is_sortable() {
+            return false;
+        }
+        self.sort_by_column(column, column.sort_cycle().next(column.sort_direction()))
+    }
+
+    /// Gives the items the source of the application, in the order of the current sort.
+    fn apply_sort(&self) {
+        if self.applying_sort.get() {
+            return;
+        }
+        let source = self.items_source();
+        let sort = self.sort.borrow().clone();
+        let view = match (&source, sort) {
+            (Some(source), Some((column, direction))) => {
+                SortedItems::new(source.clone(), column, direction).map(|items| ItemsSource::new(items))
+            }
+            _ => None,
+        };
+        let Some(target) = view.or(source) else { return };
+
+        let selected: Vec<Option<BoxedValue>> =
+            self.selected_items().map(|items| items.to_vec()).unwrap_or_default();
+        self.applying_sort.set(true);
+        self.items().set_items_source(Some(target));
+        self.applying_sort.set(false);
+        if let Some(items) = self.selected_items() {
+            for item in selected {
+                if self.items_view().index_of(&item) >= 0 && !items.contains(&item) {
+                    items.add(item);
+                }
+            }
+        }
     }
 
     pub(crate) fn headers_presenter(&self) -> Option<Ref<TableViewColumnHeadersPresenter>> {

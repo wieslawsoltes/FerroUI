@@ -1,7 +1,12 @@
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt, Thumb};
 use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_display};
-use crate::{ContentControl, ContentControlImpl, ControlImpl, GridLength, GridUnitType, TableViewColumn};
-use ferroui_base::input::{InputElementImpl, VectorEventArgs};
+use crate::{
+    ContentControl, ContentControlImpl, ControlImpl, GridLength, GridUnitType, SortDirection, TableViewColumn,
+};
+use ferroui_base::input::{
+    InputElementImpl, InputElementImplExt, MouseButton, PointerPressedEventArgs, PointerReleasedEventArgs,
+    VectorEventArgs,
+};
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::utilities::math_utilities::max;
@@ -9,9 +14,11 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, DirectProperty, FerroObjectImpl,
     FerroProperty, Ref, StyledElement, StyledElementImpl, Visual, VisualImpl,
 };
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 const PART_RESIZER: &str = "PART_Resizer";
+const PC_SORT_ASCENDING: &str = ":sort-ascending";
+const PC_SORT_DESCENDING: &str = ":sort-descending";
 
 /// Represents the header of a [`TableViewColumn`].
 #[repr(C)]
@@ -20,13 +27,18 @@ pub struct TableViewColumnHeader {
     column: RefCell<Option<Ref<TableViewColumn>>>,
     /// The resizer of the template and the handler of its drags.
     resizer: RefCell<Option<(Ref<Thumb>, RoutedEventHandlerToken)>>,
+    /// Whether a left press on the header (not on its resizer) waits for its release.
+    sort_pressed: Cell<bool>,
 }
 
 ferro_class!(TableViewColumnHeader: ContentControl);
 ferro_class_info!(TableViewColumnHeader {
     new: TableViewColumnHeader::new,
     markup: {
-        attributes: [TemplatePart("PART_Resizer", type(Ref<Thumb>))],
+        attributes: [
+            TemplatePart("PART_Resizer", type(Ref<Thumb>)),
+            PseudoClasses(":sort-ascending", ":sort-descending"),
+        ],
     },
 });
 ferro_impl_classes!(
@@ -35,10 +47,42 @@ ferro_impl_classes!(
     VisualImpl,
     LayoutableImpl,
     InteractiveImpl,
-    InputElementImpl,
     ControlImpl,
     ContentControlImpl
 );
+
+impl InputElementImpl for TableViewColumnHeader {
+    fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
+        Self::parent_on_pointer_pressed(this, e);
+        let on_resizer = this.resizer.borrow().as_ref().is_some_and(|(resizer, _)| {
+            e.source().and_then(|source| source.cast::<Visual>()).is_some_and(|source| {
+                source.ptr_eq_visual(resizer) || resizer.is_visual_ancestor_of(&source)
+            })
+        });
+        let left = e.get_current_point(Some(this)).properties.is_left_button_pressed;
+        this.sort_pressed.set(left && !on_resizer && !e.handled());
+    }
+
+    fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
+        Self::parent_on_pointer_released(this, e);
+        if !this.sort_pressed.replace(false) || e.initial_press_mouse_button() != MouseButton::Left {
+            return;
+        }
+        let position = e.get_position(Some(this));
+        let size = this.bounds().size();
+        let inside = position.x >= 0.0 && position.y >= 0.0 && position.x <= size.width && position.y <= size.height;
+        if !inside {
+            return;
+        }
+        if let Some(column) = this.column() {
+            if let Some(table_view) = column.table_view() {
+                if table_view.toggle_sort_from_header(&column) {
+                    e.set_handled(true);
+                }
+            }
+        }
+    }
+}
 
 impl TemplatedControlImpl for TableViewColumnHeader {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
@@ -72,7 +116,12 @@ ferro_properties! {
 impl TableViewColumnHeader {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: ContentControl::construct(), column: RefCell::new(None), resizer: RefCell::new(None) }
+        Self {
+            base: ContentControl::construct(),
+            column: RefCell::new(None),
+            resizer: RefCell::new(None),
+            sort_pressed: Cell::new(false),
+        }
     }
 
     pub fn new() -> Ref<Self> {
@@ -136,6 +185,7 @@ impl TableViewColumnHeader {
         self.clear_value(ContentControl::horizontal_content_alignment_property());
         self.clear_value(ContentControl::content_template_property());
         self.clear_value(ContentControl::content_property());
+        self.update_sort_classes(SortDirection::None);
     }
 
     fn set_properties(&self, column: &TableViewColumn) {
@@ -157,6 +207,13 @@ impl TableViewColumnHeader {
             Some(header) => self.set_value(ContentControl::content_property(), Some(header)),
             None => self.clear_value(ContentControl::content_property()),
         }
+
+        self.update_sort_classes(column.sort_direction());
+    }
+
+    fn update_sort_classes(&self, direction: SortDirection) {
+        self.pseudo_classes().set(PC_SORT_ASCENDING, direction == SortDirection::Ascending);
+        self.pseudo_classes().set(PC_SORT_DESCENDING, direction == SortDirection::Descending);
     }
 
     pub(crate) fn refresh(&self) {
