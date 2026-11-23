@@ -18,5 +18,8 @@ path = "lib.rs"
 ferroui-base.workspace = true
 serde_json.workspace = true
 
+[dev-dependencies]
+ferroui-vello.workspace = true
+
 [package.metadata.release]
 group = "controls"

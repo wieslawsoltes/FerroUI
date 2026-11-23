@@ -351,6 +351,8 @@ impl AnimatedVisual {
             out.push(FrameCommand::PushOpacity(opacity));
             pushed += 1;
         }
+        // Added masks are a union, which nested clips are not: they are one path.
+        let mut added = PathData::default();
         for mask in &layer.masks {
             let mode = match mask.mode {
                 b'a' => MaskMode::Add,
@@ -359,8 +361,16 @@ impl AnimatedVisual {
                 _ => continue,
             };
             let path = mask.path.path_at(local);
+            if mode == MaskMode::Add && !mask.inverted {
+                added.append(&path);
+                continue;
+            }
             let opacity = (mask.opacity.at(local)[0] / 100.0).clamp(0.0, 1.0);
             out.push(FrameCommand::PushMask { path, mode, inverted: mask.inverted, opacity });
+            pushed += 1;
+        }
+        if !added.is_empty() {
+            out.push(FrameCommand::PushMask { path: added, mode: MaskMode::Add, inverted: false, opacity: 1.0 });
             pushed += 1;
         }
         match &layer.kind {
