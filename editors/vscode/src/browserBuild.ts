@@ -6,7 +6,7 @@ import { createInterface } from 'node:readline';
 import * as vscode from 'vscode';
 import type { DevelopmentBrowserApp } from './browserTargets';
 import { inCargoBuildSlot } from './cargoBuildGate';
-import { browserCargoTarget, type CargoTarget } from './cargoTarget';
+import { browserCargoTarget, type CargoTarget, type DiscoveredCargoTarget } from './cargoTarget';
 import { OwnedProcess } from './ownedProcess';
 import type { ProcessOutput } from './reloadLog';
 import type { ProjectMetadata } from './reloadProcess';
@@ -16,7 +16,7 @@ export interface BrowserBuildTarget {
     script: string;
     toolkit: string;
     workspace: string;
-    cargo: CargoTarget;
+    cargo: DiscoveredCargoTarget;
     hostPage: string;
     workspaceInputs: string[];
 }
@@ -36,13 +36,13 @@ export async function resolveBrowserBuild(app: DevelopmentBrowserApp, signal: Ab
     const script = path.join(toolkit, 'scripts', 'build-browser.sh');
     if (!await stat(script).then(info => info.isFile(), () => false)) throw new Error('Choose a FerroUI browser toolchain with scripts/build-browser.sh.');
     const example = path.join(toolkit, 'src', 'Browser', 'FerroUI.Browser', 'examples', application);
-    const isExample = await stat(example).then(info => info.isDirectory(), () => false);
+    const exampleWorkspace = await stat(example).then(info => info.isDirectory(), () => false) ? toolkit : undefined;
     const cargo = await browserCargoTarget(folder, {
-        manifestPath, package: isExample ? 'ferroui-browser' : application, binary: application, label: app.label, features,
-    }, isExample ? 'example' : 'bin', signal);
+        manifestPath, package: application, binary: application, label: app.label, features,
+    }, exampleWorkspace, signal);
     const workspace = path.dirname(cargo.sources?.workspaceManifest ?? cargo.discoveryManifest);
     return { script, toolkit, cargo, workspace,
-        hostPage: fileKey(path.join(isExample ? example : path.dirname(cargo.manifest), 'wwwroot')),
+        hostPage: fileKey(path.join(cargo.kind === 'example' ? example : path.dirname(cargo.manifest), 'wwwroot')),
         workspaceInputs: ['Cargo.lock', '.cargo/config', '.cargo/config.toml'].map(file => fileKey(path.join(workspace, file))) };
 }
 

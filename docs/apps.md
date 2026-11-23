@@ -184,6 +184,8 @@ source ~/browser-tools/env.sh     # the pinned toolchain (FerroUI/scripts/browse
 FERROUI_BROWSER_WORKSPACE=$PWD FerroUI/scripts/build-browser.sh my-app-browser
 ```
 
+An external Cargo workspace can use the same binary name as a bundled FerroUI browser example. The build selects the binary from the external workspace.
+
 The site is written to `target/browser/my-app-browser`; serve that directory with any static web
 server. `node FerroUI/scripts/apps/smoke-site.mjs target/browser/my-app-browser` runs the smoke test of
 CI against it (Chrome is found on the system, or set `CHROME`).

@@ -18,6 +18,7 @@ import { verifyIosSimulatorMcp } from './iosSimulatorMcp';
 import { verifyAndroidMcp } from './androidMcp';
 import { verifyBrowserMcp } from './browserMcp';
 import { verifyBrowserReload } from './browserReloadMcp';
+import { verifyBrowserBuildTarget } from './browserBuildTarget';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
@@ -50,6 +51,7 @@ export async function run(): Promise<void> {
         await verifyBrowserReload();
         return;
     }
+    await verifyBrowserBuildTarget(workspace);
     await verifyRsxRecovery(workspace);
     verifyTimelineViewport();
     await verifyProcessShutdown();

@@ -194,8 +194,10 @@ fi
 OUT="${OUT:-$TARGET_DIR/browser$SITE_SUFFIX/$APPLICATION}"
 
 command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
-# An example of the browser crate, or else the binary of the workspace package of that name.
-if [ -d "$CRATE/examples/$APPLICATION" ]; then
+ROOT_REAL="$(cd "$ROOT" && pwd -P)"
+WORKSPACE_REAL="$(cd "$WORKSPACE" && pwd -P)"
+# Bundled examples belong to the toolkit workspace. An external workspace can use the same name.
+if [ "$WORKSPACE_REAL" = "$ROOT_REAL" ] && [ -d "$CRATE/examples/$APPLICATION" ]; then
   KIND="example"
   WWWROOT="$CRATE/examples/$APPLICATION/wwwroot"
   CARGO_SELECTION=(-p ferroui-browser --example "$APPLICATION")
@@ -227,8 +229,6 @@ abspath() {
     console.log(path.join(fs.realpathSync(p), ...rest));' "$1"
 }
 [ -n "$OUT" ] || { echo "the output directory is empty" >&2; exit 2; }
-ROOT_REAL="$(cd "$ROOT" && pwd -P)"
-WORKSPACE_REAL="$(cd "$WORKSPACE" && pwd -P)"
 TARGET_REAL="$(abspath "$TARGET_DIR")"
 OUT_REAL="$(abspath "$OUT")"
 case "$OUT_REAL" in
@@ -342,7 +342,7 @@ trap 'rm -f -- "$MESSAGES"' EXIT
 # Outside this repository cargo finds the configuration of the browser target only when the
 # configuration of the application includes it (docs/apps.md); otherwise it is given here. Given
 # twice, its link arguments would be repeated.
-if [ "$WORKSPACE" != "$ROOT" ] \
+if [ "$WORKSPACE_REAL" != "$ROOT_REAL" ] \
     && ! grep -qsF "${ROOT_REAL#"$WORKSPACE_REAL"/}/.cargo/config.toml" "$WORKSPACE/.cargo/config.toml"; then
   FLAGS+=(--config "$ROOT/.cargo/config.toml")
 fi
