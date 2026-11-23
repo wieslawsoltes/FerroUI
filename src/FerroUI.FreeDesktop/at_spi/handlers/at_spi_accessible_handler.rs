@@ -118,7 +118,7 @@ impl AtSpiAccessibleHandler {
     }
 
     pub(crate) fn get_attributes_async(node: &AtSpiNode) -> AtSpiAttributeSet {
-        AtSpiNode::get_attributes(node.peer())
+        node.get_attributes()
     }
 
     pub(crate) fn get_interfaces_async(node: &AtSpiNode) -> Vec<String> {

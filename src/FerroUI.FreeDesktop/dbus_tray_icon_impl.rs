@@ -740,7 +740,7 @@ impl StatusNotifierItemDbusObjImpl {
 
     #[zbus(property)]
     fn tool_tip(&self) -> ToolTip {
-        (String::new(), Vec::new(), String::new(), String::new())
+        (String::new(), Vec::new(), self.state().title.clone(), String::new())
     }
 
     fn context_menu(&self, _x: i32, _y: i32) {}

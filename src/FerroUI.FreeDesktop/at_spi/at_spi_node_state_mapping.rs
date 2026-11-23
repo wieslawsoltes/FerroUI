@@ -27,6 +27,8 @@ pub(crate) struct StateFacts {
     pub(crate) value_read_only: Option<bool>,
     pub(crate) range_value_read_only: bool,
     pub(crate) is_required_for_form: bool,
+    /// The owner is a window that is active now.
+    pub(crate) is_active_window: bool,
     pub(crate) control_type: AutomationControlType,
 }
 
@@ -54,6 +56,11 @@ impl AtSpiNode {
             range_value_read_only: peer
                 .get_provider::<dyn IRangeValueProvider>()
                 .is_some_and(|range| range.is_read_only()),
+            is_active_window: peer
+                .cast::<ControlAutomationPeer>()
+                .and_then(|control_peer| control_peer.try_owner())
+                .and_then(|owner| owner.cast::<ferroui_controls::WindowBase>())
+                .is_some_and(|window| window.is_active()),
             is_required_for_form: peer
                 .cast::<ControlAutomationPeer>()
                 .and_then(|control_peer| control_peer.try_owner())
@@ -139,7 +146,7 @@ pub(crate) fn states_of(facts: &StateFacts) -> Vec<AtSpiState> {
     }
 
     // Window-level active state and text entry states
-    if facts.control_type == AutomationControlType::Window {
+    if facts.is_active_window {
         states.push(AtSpiState::Active);
     }
     if facts.control_type == AutomationControlType::Edit {
@@ -167,6 +174,7 @@ mod tests {
             value_read_only: None,
             range_value_read_only: false,
             is_required_for_form: false,
+            is_active_window: false,
             control_type: AutomationControlType::None,
         }
     }
@@ -228,9 +236,14 @@ mod tests {
     }
 
     #[test]
-    fn a_window_is_active_and_an_edit_is_a_single_line() {
+    fn only_an_active_window_is_active_and_an_edit_is_a_single_line() {
+        assert_eq!(states_of(&StateFacts { control_type: AutomationControlType::Window, ..facts() }), vec![]);
         assert_eq!(
-            states_of(&StateFacts { control_type: AutomationControlType::Window, ..facts() }),
+            states_of(&StateFacts {
+                control_type: AutomationControlType::Window,
+                is_active_window: true,
+                ..facts()
+            }),
             vec![AtSpiState::Active]
         );
         assert_eq!(

@@ -76,6 +76,12 @@ impl RootAtSpiNode {
         platform_impl.as_window_base_impl().map(f)
     }
 
+    /// The X11 window of the root, for a client that matches a node to its window.
+    pub(crate) fn x11_window_id(&self) -> Option<isize> {
+        let handle = self.root_provider.platform_impl()?.handle()?;
+        (handle.handle_descriptor() == Some("XID")).then(|| handle.handle())
+    }
+
     pub(crate) fn app_root(&self) -> Option<Rc<ApplicationAtSpiNode>> {
         self.app_root.borrow().clone()
     }
