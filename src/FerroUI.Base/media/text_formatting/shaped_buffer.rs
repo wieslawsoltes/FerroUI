@@ -793,6 +793,26 @@ impl ShapedBuffer {
         )
     }
 
+    /// Another buffer over the same glyphs, with an owner of its own: disposing either leaves the
+    /// other as it is. Nothing is copied.
+    pub(crate) fn shared_view(self: &Rc<Self>) -> Rc<ShapedBuffer> {
+        let (start_idx, count) = {
+            let cache = self.cache.borrow();
+            (cache.start_idx, cache.count)
+        };
+
+        Self::from_source(
+            self,
+            self.text.clone(),
+            self.glyph_infos.clone(),
+            self.glyph_indices.clone(),
+            self.bidi_level,
+            true,
+            start_idx,
+            count,
+        )
+    }
+
     /// Creates a writable copy of this buffer backed by freshly allocated
     /// storage. Use this when the caller needs to mutate glyph advances (e.g.
     /// justification, letter spacing) without affecting other buffers that

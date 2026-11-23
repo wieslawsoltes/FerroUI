@@ -122,6 +122,34 @@ fn cache_hit_produces_identical_layout() {
 }
 
 #[test]
+fn restyle_keeps_the_shaping_under_a_new_foreground() {
+    let _scope = TextTestScope::new();
+    let text = "Hello restyle";
+    let default_properties = default_properties();
+    let paragraph_properties = paragraph_properties(&default_properties, TextWrapping::NoWrap);
+    let text_source = SingleBufferTextSource::new(text, default_properties.clone());
+    let cache = TextRunCache::new();
+    let first = format_line(&text_source, 0, f64::INFINITY, &paragraph_properties, Some(&cache));
+
+    let foreground: Rc<dyn crate::media::IBrush> = crate::media::Brushes::red();
+    assert!(cache.restyle(Some(&foreground), None));
+
+    // The line comes from the cache, with the same glyphs and the new brush.
+    let second = format_line(&text_source, 0, f64::INFINITY, &paragraph_properties, Some(&cache));
+    assert_same_glyphs(&*first, &*second);
+    let run_foreground = |line: &Rc<dyn TextLine>| {
+        line.text_runs()[0].downcast_ref::<ShapedTextRun>().and_then(|run| run.run_properties().foreground_brush().cloned())
+    };
+    assert!(run_foreground(&second).is_some_and(|brush| Rc::ptr_eq(&brush, &foreground)));
+
+    // The line before keeps its style, and its end leaves the glyphs of the new runs alone.
+    assert!(!run_foreground(&first).is_some_and(|brush| Rc::ptr_eq(&brush, &foreground)));
+    first.dispose();
+    let run = second.text_runs()[0].downcast_ref::<ShapedTextRun>().expect("a shaped run").shaped_buffer().clone();
+    assert_eq!(run.length(), text.len());
+}
+
+#[test]
 fn full_invalidation_clears_cache() {
     let scope = TextTestScope::new();
 

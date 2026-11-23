@@ -161,8 +161,12 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
         match change.property().name() {
             // Properties that affect shaping: invalidate the run cache + layout.
             "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FlowDirection"
-            | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground" => {
+            | "LetterSpacing" | "FontFeatures" => {
                 this.invalidate_text_layout();
+            }
+            // What the text is drawn with: the shaped runs stay, with the new style.
+            "TextDecorations" | "Foreground" => {
+                this.invalidate_text_layout_for_style();
             }
             // The text: the shaped runs go, the run and paragraph properties are not made of it.
             "Text" => {
@@ -1405,6 +1409,29 @@ impl TextBlock {
         self.text_runs_embed_controls.set(true);
         if self.has_text_layout() {
             ferroui_base::perf_count!(TextBlockLayoutDropsShaping);
+        }
+        self.dispose_text_layout();
+        self.invalidate_visual();
+        self.invalidate_measure();
+    }
+
+    /// Invalidates the text layout for a new foreground or new decorations, which do not change
+    /// the shaping of a plain text: its shaped runs are kept with the new style (step 4 of
+    /// docs/porting/text-layout-performance.md). The runs of inlines have styles of their own.
+    fn invalidate_text_layout_for_style(&self) {
+        if self.has_complex_content() {
+            self.invalidate_text_layout();
+            return;
+        }
+        self.run_properties.set(None);
+        self.paragraph_properties.set(None);
+        if let Some(text_run_cache) = self.text_run_cache.get().as_ref() {
+            text_run_cache.restyle(self.foreground().as_ref(), self.text_decorations().as_ref());
+        }
+        *self.text_runs.borrow_mut() = None;
+        self.text_runs_embed_controls.set(true);
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsParagraph);
         }
         self.dispose_text_layout();
         self.invalidate_visual();

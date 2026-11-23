@@ -40,6 +40,63 @@ fn infinity() -> Size {
     Size::new(f64::INFINITY, f64::INFINITY)
 }
 
+/// A new foreground is laid out from the kept runs: nothing is shaped again.
+#[cfg(feature = "perf-counters")]
+#[test]
+fn a_new_foreground_does_not_shape_a_plain_text_again() {
+    use ferroui_base::diagnostics::perf_counters::{self, PerfCounter};
+
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let target = text_block("Hello kept shaping");
+    target.set_foreground(Some(Brushes::red()));
+    target.measure(Size::new(200.0, 200.0));
+    let _ = target.text_layout();
+
+    let before = perf_counters::snapshot();
+    target.set_foreground(Some(Brushes::blue()));
+    target.measure(Size::new(200.0, 200.0));
+    let _ = target.text_layout();
+    let counted = perf_counters::snapshot().since(&before);
+    assert_eq!(0, counted.get(PerfCounter::TextRunCacheMisses));
+    assert!(counted.get(PerfCounter::TextRunCacheHits) >= 1);
+}
+
+#[test]
+fn a_new_foreground_and_new_decorations_reach_the_kept_shaping_of_a_plain_text() {
+    use ferroui_base::media::text_formatting::{ShapedTextRun, TextLine};
+
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let red: Rc<dyn ferroui_base::media::IBrush> = Brushes::red();
+    let blue: Rc<dyn ferroui_base::media::IBrush> = Brushes::blue();
+    let target = text_block("Hello");
+    target.set_foreground(Some(red.clone()));
+    target.measure(Size::new(200.0, 200.0));
+    let style = |target: &TextBlock| {
+        let layout = target.text_layout();
+        let lines = layout.text_lines();
+        let line: &dyn TextLine = &*lines[0];
+        let runs = line.text_runs();
+        let run = runs[0].downcast_ref::<ShapedTextRun>().expect("a shaped run");
+        (run.run_properties().foreground_brush().cloned(), run.run_properties().text_decorations().cloned())
+    };
+    assert!(style(&target).0.is_some_and(|brush| Rc::ptr_eq(&brush, &red)));
+    // The runs of a text block end with the end of the paragraph, which a restyle keeps.
+    assert!(target.text_run_cache().restyle(Some(&red), None));
+
+    target.set_foreground(Some(blue.clone()));
+    target.measure(Size::new(200.0, 200.0));
+    assert!(style(&target).0.is_some_and(|brush| Rc::ptr_eq(&brush, &blue)));
+
+    target.set_text_decorations(Some(TextDecorations::underline()));
+    target.measure(Size::new(200.0, 200.0));
+    assert!(style(&target).1.is_some());
+    target.set_text_decorations(None);
+    target.measure(Size::new(200.0, 200.0));
+    assert!(style(&target).1.is_none());
+}
+
 #[test]
 fn default_binding_mode_should_be_one_way() {
     let _scope = test_scope();

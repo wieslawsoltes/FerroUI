@@ -6,8 +6,10 @@ use std::sync::Arc;
 
 use crate::media::i_immutable_glyph_run_reference::release_platform_impl;
 use crate::media::text_formatting::shaped_buffer::GlyphRange;
-use crate::media::text_formatting::{ShapedBuffer, ShapedTextRun, TextLineMetricsMode, TextRun, TextShaperOptions};
-use crate::media::{FlowDirection, GlyphInfoList};
+use crate::media::text_formatting::{
+    ShapedBuffer, ShapedTextRun, TextEndOfLine, TextEndOfParagraph, TextLineMetricsMode, TextRun, TextShaperOptions,
+};
+use crate::media::{FlowDirection, GlyphInfoList, IBrush, TextDecorationCollection};
 use crate::platform::IGlyphRunImpl;
 
 /// Caches shaped text runs and bidi processing results to avoid redundant
@@ -141,6 +143,56 @@ impl TextRunCache {
             release_glyph_runs(&mut long.previous_line_runs);
         }
         Self::invalidate_entries(&mut state);
+    }
+
+    /// The foreground or the decorations of the text changed, which do not change its shaping: the
+    /// cached runs are kept with the new style, over the same glyphs. Returns `false`, with the
+    /// cache emptied, when a cached run is not a shaped run.
+    pub fn restyle(
+        &self,
+        foreground: Option<&Rc<dyn IBrush>>,
+        decorations: Option<&TextDecorationCollection>,
+    ) -> bool {
+        let restyled = |result: &CachedShapingResult| -> Option<CachedShapingResult> {
+            let runs = result
+                .shaped_runs
+                .iter()
+                .map(|run| match run.downcast_ref::<ShapedTextRun>() {
+                    Some(shaped) => Some(Rc::new(shaped.restyled(foreground, decorations)) as Rc<dyn TextRun>),
+                    // The end of a line or a paragraph draws nothing: its style does not show.
+                    None if run.is::<TextEndOfLine>() || run.is::<TextEndOfParagraph>() => Some(run.clone()),
+                    None => None,
+                })
+                .collect::<Option<Vec<_>>>()?;
+            Some(CachedShapingResult { shaped_runs: runs.into(), ..result.clone() })
+        };
+        let mut state = self.state.borrow_mut();
+        let single = match &state.single {
+            Some((key, result)) => restyled(result).map(|new| Some((*key, new))),
+            None => Some(None),
+        };
+        let entries = match &state.entries {
+            Some(entries) => entries
+                .iter()
+                .map(|(key, result)| restyled(result).map(|new| (*key, new)))
+                .collect::<Option<HashMap<_, _>>>()
+                .map(Some),
+            None => Some(None),
+        };
+        let (Some(single), Some(entries)) = (single, entries) else {
+            drop(state);
+            self.invalidate();
+            return false;
+        };
+        if let Some((_, old)) = std::mem::replace(&mut state.single, single) {
+            Self::dispose_cached_runs(&old);
+        }
+        if let Some(old) = std::mem::replace(&mut state.entries, entries) {
+            for result in old.values() {
+                Self::dispose_cached_runs(result);
+            }
+        }
+        true
     }
 
     /// A layout starts: the platform glyph runs of the lines of the layout before are kept until
