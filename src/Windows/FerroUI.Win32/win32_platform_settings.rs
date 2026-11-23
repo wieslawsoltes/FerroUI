@@ -55,7 +55,13 @@ pub(crate) fn accent_shades_from_ui_colors(colors: [Color; 6]) -> AccentColorSha
 /// Serializes the tests that read the colours of the system through `UISettings`. On a Windows
 /// runner `GetColorValue(Accent)` of a new `UISettings` reported opaque black, with valid shades,
 /// in up to half of the runs while another thread of the process read the same settings, and
-/// never in a run alone. The product reads them on its UI thread.
+/// never in a run alone.
+///
+/// Only tests read them on several threads, each with a platform of its own. In an application
+/// this file is the only reader, on one thread: `Win32PlatformSettings` is not `Send`, it is made
+/// by `Win32Platform::initialize`, which a process can call once, and the messages that refresh it
+/// arrive on the thread of its message window. Windows share that thread and the render thread
+/// does not read it. Code outside the framework reading `UISettings` is not serialized by this.
 #[cfg(test)]
 #[cfg_attr(not(windows), allow(dead_code))]
 pub(crate) fn ui_settings_test_lock() -> std::sync::MutexGuard<'static, ()> {
