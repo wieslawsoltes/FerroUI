@@ -89,6 +89,10 @@ mod app {
         }
     }
 
+    fn review_next_contact(reviewed: &mut i32) {
+        *reviewed += 1;
+    }
+
     #[component(rerender)]
     fn ContactReview() -> Element {
         let reviewed = use_signal(|| 0);
@@ -100,7 +104,7 @@ mod app {
                         StackPanel { spacing: 12.0,
                             TextBlock { text: "Renewal queue", foreground: "#214B40", font_size: 19.0 }
                             TextBox { name: "Search", placeholder_text: "Filter customers" }
-                            Button { name: "ReviewContact", on_click: move |_| reviewed.update(|value| *value += 1), "Review next contact" }
+                            Button { name: "ReviewContact", on_click: move |_| reviewed.update(review_next_contact), "Review next contact" }
                             TextBlock { name: "ReviewedCount", text: format!("{} contacts reviewed", reviewed.get()), foreground: "#3E6158" }
                         }
                     }

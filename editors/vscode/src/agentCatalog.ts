@@ -415,6 +415,8 @@ export const agentCatalog = {
         { folder: text }),
     ferroui_ios_simulator_run: tool('Launch or restart the configured app on the selected booted iOS simulator. Waits for an authenticated native inspector and returns the session.',
         { device: { type: 'string', maxLength: 36 }, profile: { type: 'string', maxLength: 64 }, folder: text }, ['device', 'profile'], true),
+    ferroui_ios_simulator_debug: tool('Attach the configured Rust debugger to an accepted iOS simulator app. Pass its exact runtime and generation. Select the launch.json configuration by name when several are available.',
+        { runtime: runtimeArgument, expected_generation: integer(1), debug_configuration: text }, ['runtime', 'expected_generation'], true, false),
     ferroui_ios_simulator_stop: tool('Stop the iOS app launched by this workspace and retire its exact Live App session.',
         { runtime: runtimeArgument }, ['runtime'], true),
     ferroui_android_targets: tool('List Android devices and configured Android apps on the workspace host. Choose an ADB device with status device.',

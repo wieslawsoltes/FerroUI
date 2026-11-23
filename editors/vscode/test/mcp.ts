@@ -92,7 +92,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_templates'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_template_source'));
-        for (const name of ['targets', 'run', 'stop']) assert.ok(tools.some(tool => tool.name === `ferroui_ios_simulator_${name}`));
+        for (const name of ['targets', 'run', 'debug', 'stop']) assert.ok(tools.some(tool => tool.name === `ferroui_ios_simulator_${name}`));
         for (const name of ['targets', 'run', 'attach', 'stop']) assert.ok(tools.some(tool => tool.name === `ferroui_android_${name}`));
         for (const name of ['targets', 'run', 'attach', 'stop']) assert.ok(tools.some(tool => tool.name === `ferroui_browser_${name}`));
         if (process.platform !== 'darwin') {

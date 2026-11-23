@@ -2,6 +2,7 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import type { RuntimeSummary } from '../src/runtimeConnections';
 import type { RuntimeNode } from '../src/runtimeProtocol';
+import { verifyIosSimulatorDebug } from './iosSimulatorDebugMcp';
 import { openEditorMcp } from './mcpFixture';
 import { until } from './wait';
 
@@ -14,7 +15,8 @@ export async function verifyIosSimulatorMcp(device: string): Promise<void> {
     await vscode.window.showTextDocument(document);
     await vscode.commands.executeCommand('ferroui.showAppSessions');
 
-    const { invoke, content, close } = await openEditorMcp(40_000);
+    const mcp = await openEditorMcp(40_000);
+    const { invoke, content, close } = mcp;
     const config = vscode.workspace.getConfiguration('ferroui.mcp');
     const previous = config.inspect<boolean>('allowWrites')?.globalValue;
     const request = { device, profile, folder: folder.toString() };
@@ -38,6 +40,12 @@ export async function verifyIosSimulatorMcp(device: string): Promise<void> {
         assert.equal(started.available, true);
         assert.ok(generation);
         assert.equal(content<RuntimeSummary>(await invoke('ferroui_ios_simulator_run', request)).runtime, runtime);
+        const debug = { runtime, expected_generation: generation };
+        await config.update('allowWrites', false, vscode.ConfigurationTarget.Global);
+        assert.match((await invoke('ferroui_ios_simulator_debug', debug)).content[0]?.text ?? '', /allowWrites/);
+        await config.update('allowWrites', true, vscode.ConfigurationTarget.Global);
+        assert.match((await invoke('ferroui_ios_simulator_debug', { ...debug, expected_generation: generation + 1 })).content[0]?.text ?? '',
+            /current accepted iOS simulator generation/);
         const query = async <T>(tool: string, args: object = {}) =>
             content<{ result: T }>(await invoke('ferroui_runtime_query', {
                 runtime, expected_generation: generation, tool, arguments: args,
@@ -74,6 +82,7 @@ export async function verifyIosSimulatorMcp(device: string): Promise<void> {
             name: 'ReviewedCount', text: '1 contacts reviewed', timeout_ms: 200,
         })).matched);
         assert.notDeepEqual(await screenshot(), before, 'The native frame reflects the interaction');
+        if (process.env.FERROUI_TEST_IOS_DEBUG) await verifyIosSimulatorDebug(mcp, started, document, button.node_id);
         const stale = await invoke('ferroui_runtime_query', { runtime, expected_generation: generation + 1, tool: 'list_windows' });
         assert.match(stale.content[0]?.text ?? '', /application connection changed/);
         assert.match((await invoke('ferroui_runtime_detach', { runtime })).content[0]?.text ?? '', /simulator/i);

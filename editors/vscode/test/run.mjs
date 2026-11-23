@@ -1,4 +1,5 @@
 import { runTests } from '@vscode/test-electron';
+import { execFileSync } from 'node:child_process';
 import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -14,6 +15,7 @@ const profile = join(sandbox, 'profile');
 const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../target/debug'));
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
+const simulatorDebugExtensions = process.env.FERROUI_TEST_IOS_DEBUG_EXTENSIONS;
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 const browser = process.env.FERROUI_TEST_BROWSER_URL;
 const browserBuild = process.env.FERROUI_TEST_BROWSER_BUILD;
@@ -23,6 +25,7 @@ try {
     let target = workspace;
     let targetSettings = {};
     let targetEnv;
+    if (simulatorDebugExtensions && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for simulator debugger acceptance.');
     if ([simulator, android, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
         throw new Error('Choose one platform acceptance fixture per run.');
     }
@@ -37,6 +40,12 @@ try {
             appPath: resolve(appPath), args: ['--mcp', '--mcp-input'],
         }] };
         targetEnv = { FERROUI_TEST_IOS_SIMULATOR: simulator };
+        if (simulatorDebugExtensions) {
+            targetSettings['lldb-dap.executable-path'] = execFileSync('/usr/bin/xcrun', ['--find', 'lldb-dap'], { encoding: 'utf8' }).trim();
+            targetSettings.launch = { configurations: [{ name: 'Attach to Contact Review', type: 'lldb-dap', request: 'attach',
+                pid: '${command:ferroui.hotReload.processId}' }] };
+            targetEnv.FERROUI_TEST_IOS_DEBUG = '1';
+        }
     } else if (android) {
         const apkPath = process.env.FERROUI_TEST_ANDROID_APK;
         const adbPath = process.env.FERROUI_TEST_ANDROID_ADB;
@@ -83,6 +92,7 @@ try {
             'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGNMjb3OAANMcBZeDgBQdAGhOsFZtwAAAABJRU5ErkJggg==', 'base64'));
     }
     await mkdir(join(profile, 'User'), { recursive: true });
+    const extensions = simulatorDebugExtensions ?? browserDwarfExtensions;
     await writeFile(join(profile, 'User/settings.json'), JSON.stringify({
         ...targetSettings,
         'ferroui.languageServer.path': executable('ferroui-xaml-lsp'),
@@ -100,7 +110,7 @@ try {
             extensionDevelopmentPath: extension,
         }),
         extensionTestsEnv: targetEnv,
-        launchArgs: [target, '--user-data-dir', profile, '--extensions-dir', browserDwarfExtensions ? resolve(browserDwarfExtensions) : join(sandbox, 'extensions'),
+        launchArgs: [target, '--user-data-dir', profile, '--extensions-dir', extensions ? resolve(extensions) : join(sandbox, 'extensions'),
             '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'],
     });
 } finally {

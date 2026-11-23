@@ -141,6 +141,12 @@
         "icon": "$(device-mobile)"
       },
       {
+        "command": "ferroui.iosSimulator.debug",
+        "title": "Run and Debug iOS Simulator App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
         "command": "ferroui.appSessions.mobile",
         "title": "Open Mobile App",
         "category": "FerroUI",
@@ -873,6 +879,10 @@
           "when": "isWorkspaceTrusted && ferroui.iosSimulatorHost"
         },
         {
+          "command": "ferroui.iosSimulator.debug",
+          "when": "isWorkspaceTrusted && ferroui.iosSimulatorHost"
+        },
+        {
           "command": "ferroui.appSessions.mobile",
           "when": "isWorkspaceTrusted && ferroui.mobileAppProfiles"
         },
@@ -1410,7 +1420,7 @@
         },
         {
           "command": "ferroui.appSessions.debug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|browser(-development)?-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|browser(-development)?-debug)$/",
           "group": "1_apps@2"
         },
         {

@@ -4,7 +4,7 @@ import type { RuntimeSummary } from './runtimeConnections';
 import type { AppRuntime } from './runtimeTargets';
 
 export async function connectApp<T>(title: string, choose: () => T | Promise<T | undefined>,
-    launch: (request: T, signal: AbortSignal) => Promise<RuntimeSummary>, open: (runtime: AppRuntime) => void): Promise<void> {
+    launch: (request: T, signal: AbortSignal) => Promise<RuntimeSummary>, open: (runtime: AppRuntime) => void | Promise<void>): Promise<void> {
     try {
         const request = await choose();
         if (!request) return;
@@ -17,6 +17,6 @@ export async function connectApp<T>(title: string, choose: () => T | Promise<T |
                 catch (error) { if (!controller.signal.aborted) throw error; }
                 finally { subscription.dispose(); }
             });
-        if (runtime) open(runtime.runtime);
+        if (runtime) await open(runtime.runtime);
     } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
 }

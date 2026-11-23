@@ -5,6 +5,7 @@ import type { BrowserSessions } from './browserSessions';
 import { DeviceAppCommands } from './deviceAppCommands';
 import type { HotReload } from './hotReload';
 import type { IosSimulatorSessions } from './iosSimulatorSessions';
+import { errorMessage } from './protocol';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import type { RuntimePanels } from './runtimePanels';
 import { RuntimeMcpActions } from './runtimeMcpActions';
@@ -57,9 +58,7 @@ export class AppSessions implements vscode.Disposable {
             new BrowserAppCommands(browser, runtime => this.open(runtime)),
             command('preview', session => this.open(session.runtime)),
             managed('select'),
-            command('debug', session => session.browser && session.generation !== null
-                ? this.browser.debug(session.runtime, session.generation)
-                : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.debug', session.app_session)),
+            command('debug', session => this.debug(session)),
             command('rebuild', session => session.browser?.development ? this.browser.rebuild(session.runtime)
                 : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.rebuild', session.app_session)),
             command('showOutput', session => session.browser?.development || session.browser?.debuggable ? this.browser.showOutput()
@@ -76,6 +75,14 @@ export class AppSessions implements vscode.Disposable {
     view(runtime: AppRuntime) { return this.panels.view(runtime); }
     controlView(runtime: AppRuntime, generation: number, revision: number, change: RuntimeViewChange, signal: AbortSignal) {
         return this.panels.control(runtime, generation, revision, change, signal);
+    }
+
+    private async debug(session: RuntimeSummary): Promise<void> {
+        try {
+            if (session.app_session) await vscode.commands.executeCommand('ferroui.hotReload.debug', session.app_session);
+            else if (session.browser && session.generation !== null) await this.browser.debug(session.runtime, session.generation);
+            else if (session.simulator && session.generation !== null) await this.simulators.debug(session.runtime, session.generation, { interactive: true });
+        } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
     }
 
     private stop(session: RuntimeSummary) {

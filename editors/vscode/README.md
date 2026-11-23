@@ -88,6 +88,8 @@ npm test
 
 To check the simulator workflow, build the Contact Review fixture and boot an iOS simulator. Run `npm test` with `FERROUI_TEST_IOS_SIMULATOR` set to the simulator’s UDID and `FERROUI_TEST_IOS_SIMULATOR_APP` set to the built `.app` path. Use a test device because this launches and stops the fixture on the selected simulator. [Build and run the Contact Review fixture](../../docs/designer/vscode/runtime.md#run-an-app-on-an-ios-simulator)
 
+Set `FERROUI_TEST_IOS_DEBUG_EXTENSIONS` to an isolated extensions directory containing `llvm-vs-code-extensions.lldb-dap` to add simulator debugger acceptance. The test uses Xcode’s `lldb-dap`, stops at the Rust contact review callback, and checks that detaching and reattaching preserve the running session. [Debug Rust on an iOS simulator](../../docs/designer/vscode/runtime.md#debug-rust-on-an-ios-simulator)
+
 For the Android workflow, build Service Review and select a test emulator or device. Run `npm test` with `FERROUI_TEST_ANDROID_DEVICE` set to its ADB serial, `FERROUI_TEST_ANDROID_APK` to the built APK, and `FERROUI_TEST_ANDROID_ADB` to the ADB executable. The test deploys and stops the fixture on that device. [Build and run Service Review](../../docs/designer/vscode/runtime.md#run-or-attach-an-android-app)
 
 For Browser Live App, build and serve the Dispatch Desk debug example. Run `npm test` with `FERROUI_TEST_BROWSER_URL` set to its full loopback URL. The test discovers Chromium or uses `FERROUI_TEST_BROWSER_EXECUTABLE` when provided. It exercises the managed browser and a separate temporary debug profile. [Build and run Dispatch Desk](../../docs/designer/vscode/runtime.md#run-or-attach-a-browser-app)

@@ -246,6 +246,8 @@ export class AgentTools {
         if (tool === 'ferroui_app_sessions') return this.appSessions.list();
         if (tool === 'ferroui_ios_simulator_targets') return this.appSessions.simulators.targets((input as { folder?: string }).folder, signal);
         if (tool === 'ferroui_ios_simulator_run') return this.appSessions.simulators.start(input as IosSimulatorRun, signal);
+        if (tool === 'ferroui_ios_simulator_debug') return this.appSessions.simulators.debug(args.runtime as AppRuntime,
+            args.expected_generation, { configuration: args.debug_configuration, signal });
         if (tool === 'ferroui_ios_simulator_stop') {
             await this.appSessions.simulators.stop(args.runtime as AppRuntime);
             return { stopped: true };

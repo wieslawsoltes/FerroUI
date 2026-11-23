@@ -198,6 +198,33 @@ A launch starts or restarts the chosen bundle on the selected simulator. Multipl
 
 ![The Contact Review app on iOS 26.4 in App Sessions, with its Rust source, portrait Live App frame, and visual tree](../images/vscode-ios-simulator-live-app.png)
 
+#### Debug Rust on an iOS simulator
+
+Build the simulator bundle with Rust debug symbols, such as the Contact Review example’s default `dev` build. Keep the matching build outputs for source breakpoints. Install **LLDB DAP** in VS Code on the workspace Mac. If the adapter needs an explicit executable path, run `xcrun --find lldb-dap` and use that path in `lldb-dap.executable-path`. [LLDB DAP setup](https://lldb.llvm.org/use/lldbdap.html)
+
+Add an attach configuration to the app’s workspace folder in `.vscode/launch.json`.
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Contact Review",
+      "type": "lldb-dap",
+      "request": "attach",
+      "pid": "${command:ferroui.hotReload.processId}"
+    }
+  ]
+}
+```
+
+1. Choose **FerroUI: Run and Debug iOS Simulator App** from the Command Palette or **Open Mobile App**. Pick the app profile and booted simulator. For a running simulator session, use **Attach Debugger to This App** in its App Sessions context menu.
+2. If several attach configurations are available, choose the one for the app’s workspace folder. FerroUI waits for the app’s first frame and supplies the PID of the installed app that owns the session’s authenticated inspector.
+3. Set a breakpoint in an event handler in your Rust source. In Contact Review, set it inside `review_next_contact` and choose **Review next contact** in Simulator or through **Live App → Interact**. Use **Continue** to resume the app and its inspector.
+4. Use **Stop Debugging** to detach and keep the simulator app running. To end both the debugger and the app, choose **Stop or Disconnect This App**. To deploy a new build, stop the session before running the updated bundle.
+
+[Attach a simulator debugger from an agent](reference.md#run-an-ios-simulator-app-with-mcp)
+
 ### Run or attach an Android app
 
 Install Android SDK Platform Tools on the workspace host. Start an emulator or authorize a connected device in ADB. Use a debuggable APK that enables the FerroUI Live App inspector. To try Service Review on an ARM64 device from the FerroUI checkout, install the SDK and NDK for the Android build and run:

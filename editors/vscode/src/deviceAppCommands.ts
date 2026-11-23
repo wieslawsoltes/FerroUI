@@ -20,8 +20,12 @@ export class DeviceAppCommands implements vscode.Disposable {
             vscode.workspace.onDidChangeWorkspaceFolders(context),
             vscode.workspace.onDidChangeConfiguration(event => { if (event.affectsConfiguration('ferroui.android.apps')) context(); }),
             vscode.commands.registerCommand('ferroui.appSessions.mobile', () => this.chooseAction()),
-            vscode.commands.registerCommand('ferroui.iosSimulator.run', (selection?: IosSimulatorRun) =>
-                connectApp('Connecting to the iOS simulator app', () => selection ?? this.chooseIosApp(), (request, signal) => this.ios.start(request, signal), open)),
+            ...(['run', 'debug'] as const).map(mode => vscode.commands.registerCommand(`ferroui.iosSimulator.${mode}`, (selection?: IosSimulatorRun) =>
+                connectApp('Connecting to the iOS simulator app', () => selection ?? this.chooseIosApp(mode),
+                    (request, signal) => this.ios.start(request, signal), async runtime => {
+                        open(runtime);
+                        if (mode === 'debug') await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
+                    }))),
             ...(['run', 'attach'] as const).map(mode => vscode.commands.registerCommand(`ferroui.android.${mode}`, (selection?: AndroidRequest) =>
                 connectApp('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode), (request, signal) => this.android.open(request, mode, signal), open))),
         ];
@@ -29,7 +33,10 @@ export class DeviceAppCommands implements vscode.Disposable {
 
     private async chooseAction(): Promise<void> {
         const actions: { label: string; command: string }[] = [];
-        if (this.ios.supported) actions.push({ label: 'Run iOS Simulator App', command: 'ferroui.iosSimulator.run' });
+        if (this.ios.supported) actions.push(
+            { label: 'Run iOS Simulator App', command: 'ferroui.iosSimulator.run' },
+            { label: 'Run and Debug iOS Simulator App', command: 'ferroui.iosSimulator.debug' },
+        );
         if (hasAndroidProfiles()) actions.push(
             { label: 'Run Android App', command: 'ferroui.android.run' },
             { label: 'Attach to Android App', command: 'ferroui.android.attach' },
@@ -39,7 +46,7 @@ export class DeviceAppCommands implements vscode.Disposable {
         if (action) await vscode.commands.executeCommand(action.command);
     }
 
-    private async chooseIosApp(): Promise<IosSimulatorRun | undefined> {
+    private async chooseIosApp(mode: 'run' | 'debug'): Promise<IosSimulatorRun | undefined> {
         const { supported, devices, apps } = await this.ios.targets(undefined, AbortSignal.timeout(10_000));
         if (!supported) throw new Error('iOS simulator sessions require a macOS workspace host.');
         if (!apps.length) throw new Error('Add a launch profile to ferroui.iosSimulator.apps in Workspace Settings.');
@@ -47,7 +54,8 @@ export class DeviceAppCommands implements vscode.Disposable {
         if (!booted.length) throw new Error('Boot an iOS simulator in Xcode or Simulator on the workspace Mac.');
         const app = await vscode.window.showQuickPick(apps.map(app => ({
             label: app.label, description: app.bundleId, detail: vscode.Uri.parse(app.folder).fsPath, app,
-        })), { title: 'Run iOS Simulator App', placeHolder: 'Choose the configured app to launch or restart' });
+        })), { title: mode === 'debug' ? 'Run and Debug iOS Simulator App' : 'Run iOS Simulator App',
+            placeHolder: 'Choose the configured app' });
         if (!app) return;
         const device = await vscode.window.showQuickPick(booted.map(device => ({
             label: device.name, description: device.system, detail: device.id, device,

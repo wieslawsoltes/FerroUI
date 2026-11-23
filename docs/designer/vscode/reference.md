@@ -267,7 +267,9 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 
 1. Call `ferroui_ios_simulator_targets` on the workspace Mac. Supply `folder` if you want profiles from a particular workspace folder. Choose a device with `booted: true` and take a profile’s `id` and `folder`.
 2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_ios_simulator_run` with the device ID as `device`, the profile ID as `profile`, and its `folder`. The tool waits for the authenticated app inspector and its first native frame. It returns the exact simulator `runtime` and `generation`.
-3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s own permissions still apply. Call `ferroui_ios_simulator_stop` with the simulator runtime ID to stop the session. A new launch returns a new runtime identity. [Configure and run an iOS simulator app](runtime.md#run-an-app-on-an-ios-simulator)
+3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s own permissions still apply. [Configure and run an iOS simulator app](runtime.md#run-an-app-on-an-ios-simulator)
+4. To debug a build with Rust symbols, configure an attach adapter in the profile’s workspace folder. With writes enabled, call `ferroui_ios_simulator_debug` with `runtime` and `expected_generation`. Set `debug_configuration` to the exact `launch.json` name when there are several attach configurations. The result includes the verified `pid` and the accepted `generation`. [Debug Rust on an iOS simulator](runtime.md#debug-rust-on-an-ios-simulator)
+5. Call `ferroui_ios_simulator_stop` with the simulator runtime ID to stop the app and close its debugger. A new launch returns a new runtime identity.
 
 ### Run or attach an Android app with MCP
 
@@ -531,7 +533,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Resolve component mappings and transfer assets | **Review Design Handoff** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
-| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run Android App**, **Attach to Android App** |
+| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run and Debug iOS Simulator App**, **Run Android App**, **Attach to Android App** |
 | Manage an external MCP connection | **Connect to Running MCP Server**, **Disconnect Running MCP Server** |
 
 ## Configure the workspace
