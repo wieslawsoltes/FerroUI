@@ -407,7 +407,8 @@ fn fallback_provider_concurrent_callers_share_one_run_of_each_factory() {
 #[test]
 fn fallback_provider_a_dropped_caller_gives_its_factory_back() {
     let (gate, runs) = (Rc::new(Cell::new(false)), Rc::new(Cell::new(0)));
-    let provider = FallbackStorageProvider::new(vec![gated_factory(gate.clone(), runs.clone(), Some("file:///known/"))]);
+    let provider =
+        FallbackStorageProvider::new(vec![gated_factory(gate.clone(), runs.clone(), Some("file:///known/"))]);
     let known = Url::parse("file:///known/").unwrap();
     let mut cx = Context::from_waker(Waker::noop());
 
