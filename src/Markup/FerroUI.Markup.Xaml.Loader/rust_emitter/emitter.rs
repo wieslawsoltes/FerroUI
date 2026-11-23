@@ -3631,7 +3631,8 @@ impl<'a> Emitter<'a> {
         let values: Vec<String> = (0..names.len())
             .map(|index| match parts.iter().find(|(_, position, _)| *position == index) {
                 Some((_, _, local)) => format!(
-                    "::core::option::Option::Some(::core::clone::Clone::clone(&{local}).upcast::<::ferroui_base::FerroObject>())"
+                    "::core::option::Option::Some(::core::clone::Clone::clone(&{local})\
+                     .upcast::<::ferroui_base::FerroObject>())"
                 ),
                 None => "::core::option::Option::None".to_string(),
             })

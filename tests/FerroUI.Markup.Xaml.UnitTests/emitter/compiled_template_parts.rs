@@ -58,7 +58,8 @@ fn sources() -> Vec<(&'static str, &'static str)> {
 }
 
 fn generate() -> GeneratedFile {
-    generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &sources(), &RuntimeXamlLoaderConfiguration::new(), &[])
+    let configuration = RuntimeXamlLoaderConfiguration::new();
+    generate_file(generated::ASSEMBLY_NAME, generated::ROOT_URI, &sources(), &configuration, &[])
 }
 
 fn build_generated(name: &str) -> BoxedValue {
