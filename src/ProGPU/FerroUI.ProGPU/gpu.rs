@@ -78,6 +78,9 @@ pub(crate) struct Recording {
     pub(crate) scene: SceneBuilder,
     pub(crate) error: Option<SceneBuildError>,
     pub(crate) images: Vec<SampledTexture>,
+    /// What the frame changes of a target that keeps its content, for a scene the engine can
+    /// replay in part (`ProGpuDrawingContext::set_frame_damage`).
+    pub(crate) damage: Option<ferroui_base::Rect>,
 }
 
 impl Recording {
@@ -108,7 +111,13 @@ impl Recording {
         images.sort_by_key(|image| image.resource_id);
         engine.bind_external_images(&images)?;
         let rendering = started.map(|_| Instant::now());
-        let frame_metrics = engine.render_scene(scene_id, generation, view, width, height, preserve)?;
+        // Inside the target, or not at all: the engine refuses a rectangle without an area.
+        let damage = self.damage.and_then(|damage| {
+            let (left, top) = (damage.x.max(0.0), damage.y.max(0.0));
+            let (right, bottom) = ((damage.x + damage.width).min(f64::from(width)), (damage.y + damage.height).min(f64::from(height)));
+            (right > left && bottom > top).then_some([left as f32, top as f32, (right - left) as f32, (bottom - top) as f32])
+        });
+        let frame_metrics = engine.render_scene_damaged(scene_id, generation, view, width, height, preserve, damage)?;
         if let (Some(started), Some(updated), Some(rendering)) = (started, updated, rendering) {
             crate::perf::scene(stream_bytes, updated - started, &scene_metrics, rendering.elapsed(), &frame_metrics);
         }

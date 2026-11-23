@@ -644,10 +644,15 @@ impl ServerCompositionTarget {
                 if draws {
                     self.begin_scene(render_bounds, pixel_size);
                 }
+                // What a frame that is not a full redraw changes of a target that keeps its content.
+                let damage = (draws && !full_redraw).then(|| self.dirty_rects.combined_rect().to_rect());
                 match layer {
                     Some(layer) => {
                         if draws {
                             let mut context = layer.create_drawing_context();
+                            if let Some(damage) = damage {
+                                context.set_frame_damage(damage);
+                            }
                             self.render_root_to_context_with_clip(&compositor, &mut *context, &root);
                             context.dispose();
                         } else if !drawn_ahead {
@@ -668,6 +673,9 @@ impl ServerCompositionTarget {
                     }
                     // Without a layer no frame is held back: the tick draws.
                     None => {
+                        if let Some(damage) = damage {
+                            render_target_context.set_frame_damage(damage);
+                        }
                         self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);
                         self.overlays.draw(self, &mut *render_target_context, false);
                     }
