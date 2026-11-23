@@ -99,7 +99,8 @@ fn a_code_block_keeps_its_lines() {
     let blocks = paragraphs(&target);
 
     assert_eq!(1, blocks.len());
-    assert_eq!("fn a() {}\n\n  b", text(&blocks[0]).replace("\r\n", "\n"));
+    // A line break is U+000B in the text of a rich text element.
+    assert_eq!("fn a() {}\u{b}\u{b}  b", text(&blocks[0]));
 }
 
 #[test]
