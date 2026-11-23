@@ -36,6 +36,17 @@ pub(crate) fn deliver_script(message_json: &str) -> String {
     )
 }
 
+/// `html` with `script` as its first element: after a doctype, which must stay first for the
+/// page to keep its rendering mode.
+#[cfg(any(target_os = "android", target_arch = "wasm32", test))]
+pub(crate) fn with_document_script(html: &str, script: &str) -> String {
+    let start = html.len() - html.trim_start().len();
+    let rest = &html[start..];
+    let is_doctype = rest.get(..9).is_some_and(|head| head.eq_ignore_ascii_case("<!doctype"));
+    let insert = if is_doctype { rest.find('>').map_or(start, |end| start + end + 1) } else { start };
+    format!("{}<script>{script}</script>{}", &html[..insert], &html[insert..])
+}
+
 /// Runs `script` in the global scope. The value is a string for [`parse_result`], so that a
 /// script that throws is reported the same way by every engine.
 pub(crate) fn result_script(script: &str) -> String {
@@ -68,6 +79,18 @@ mod tests {
             "window.chrome.webview.__ferrouiDeliver(\"{\\\"a\\\":\\\"b\\\"}\");"
         );
         assert!(result_script("say(\"x\")").contains("(0,eval)(\"say(\\\"x\\\")\")"));
+    }
+
+    #[test]
+    fn the_document_script_comes_first_but_after_a_doctype() {
+        assert_eq!(with_document_script("<p>a</p>", "s"), "<script>s</script><p>a</p>");
+        assert_eq!(
+            with_document_script("  <!DOCTYPE html><p>a</p>", "s"),
+            "  <!DOCTYPE html><script>s</script><p>a</p>"
+        );
+        assert_eq!(with_document_script("", "s"), "<script>s</script>");
+        assert_eq!(with_document_script("<!doctype", "s"), "<script>s</script><!doctype");
+        assert_eq!(with_document_script("é<p>", "s"), "<script>s</script>é<p>");
     }
 
     #[test]

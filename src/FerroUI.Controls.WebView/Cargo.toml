@@ -39,6 +39,14 @@ windows-sys = { workspace = true, features = [
     "Win32_UI_WindowsAndMessaging",
 ] }
 
+# The Java class is added by `packaging.gradle`; without it the control reports `Unavailable`.
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android.workspace = true
+
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+ferroui-browser.workspace = true
+wasm-bindgen.workspace = true
+
 [build-dependencies]
 ferroui-build-scan.workspace = true
 
