@@ -213,7 +213,7 @@ impl ComponentDraft {
             let channel = field.channel.clone();
             if field.step == Some(CurveStep::Boolean) {
                 let input = CheckBox::new();
-                input.set_name(Some(name.into()));
+                input.set_name(Some(name));
                 input.set_content(Some(Rc::new(label.clone())));
                 input.set_font_size(11.0);
                 input.set_is_checked(Some(initial == "1"));
