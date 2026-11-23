@@ -24,6 +24,24 @@ fn total_seconds(ticks: i64) -> f64 {
     ticks as f64 / 10_000_000.0
 }
 
+/// `Math.Min` and `Math.Max` of .NET, which return NaN when an argument is
+/// NaN.
+fn net_min(a: f64, b: f64) -> f64 {
+    if a.is_nan() || b.is_nan() {
+        f64::NAN
+    } else {
+        a.min(b)
+    }
+}
+
+fn net_max(a: f64, b: f64) -> f64 {
+    if a.is_nan() || b.is_nan() {
+        f64::NAN
+    } else {
+        a.max(b)
+    }
+}
+
 /// Server-side counterpart of KeyFrameAnimation with values baked-in
 ///
 /// Times are kept in ticks, as upstream computes with `TimeSpan` ticks; the
@@ -252,9 +270,10 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
             }
         }
 
-        let key_progress = ((iteration_progress - left.key as f64)
-            / (right.key as f64 - left.key as f64))
-            .clamp(0.0, 1.0);
+        let key_progress = net_max(
+            0.0,
+            net_min(1.0, (iteration_progress - left.key as f64) / (right.key as f64 - left.key as f64)),
+        );
 
         let eased = right.easing_function.as_ref().map_or(key_progress, |easing| easing.ease(key_progress));
         let eased_key_progress = eased as f32;
