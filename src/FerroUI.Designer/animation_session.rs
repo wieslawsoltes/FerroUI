@@ -12,6 +12,11 @@ use ferroui_markup::markup::parsers::SelectorParser;
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
+pub(crate) enum AnimationProgramEdit<'a> {
+    Update(&'a [(KeyframeLocation, KeyframeLocation)]),
+    Record,
+}
+
 pub(crate) struct AnimationSession {
     pub(crate) native: crate::animation_runtime::NativeAnimations,
     pub(crate) timeline: Timeline,
@@ -263,7 +268,7 @@ impl DesignerSession {
         id: NodeId,
         timeline: Timeline,
     ) -> Result<(), String> {
-        let edits = self.program_edits(id, &timeline, &[])?;
+        let edits = self.program_edits(id, &timeline, AnimationProgramEdit::Update(&[]))?;
         self.apply_program_edits(id, edits)
     }
     pub(crate) fn apply_program_edits(&mut self, id: NodeId, edits: Vec<Edit>) -> Result<(), String> {
@@ -934,7 +939,7 @@ impl DesignerSession {
         &self,
         id: NodeId,
         timeline: &Timeline,
-        retimed: &[(KeyframeLocation, KeyframeLocation)],
+        edit: AnimationProgramEdit<'_>,
     ) -> Result<Vec<Edit>, String> {
         if self.uses_rust_source() {
             return Err("Edit the Rust program in source or choose mapped keyframes in Timeline".into());
@@ -945,14 +950,22 @@ impl DesignerSession {
             .iter()
             .find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
+        let retimed = match edit {
+            AnimationProgramEdit::Update(retimed) => retimed,
+            AnimationProgramEdit::Record => &[],
+        };
         if let Some(patches) = ferroui_designer_animation::native_keyframe_patches(
             &self.document, program, timeline, retimed, || self.animation_import_options(program),
         )
-            .map_err(|error| error.to_string())?
+        .map_err(|error| error.to_string())?
         {
-            return Ok(patches.into_iter().rev()
+            let mut edits: Vec<_> = patches.into_iter().rev()
                 .map(|patch| Edit::Text { span: patch.span, replacement: patch.replacement })
-                .collect());
+                .collect();
+            if matches!(edit, AnimationProgramEdit::Record) && !timeline.tracks.is_empty() {
+                edits.extend(program.setter_target_edits(&self.document).map_err(|error| error.to_string())?);
+            }
+            return Ok(edits);
         }
         let generated = self
             .animation
@@ -1013,7 +1026,7 @@ impl DesignerSession {
             let mut timeline = candidate.clone();
             timeline.tracks.retain(|track| track.target == target);
             if Some(target) == primary {
-                edits.extend(self.program_edits(active.expect("active"), &timeline, &[])?);
+                edits.extend(self.program_edits(active.expect("active"), &timeline, AnimationProgramEdit::Record)?);
             } else {
                 let owner = self
                     .document

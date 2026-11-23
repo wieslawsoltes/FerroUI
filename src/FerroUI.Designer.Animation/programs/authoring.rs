@@ -3,7 +3,7 @@ use super::{
     NativeAnimationCodec,
 };
 use crate::{AnimationCodec, Result, Timeline};
-use ferroui_designer_core::{Document, Edit};
+use ferroui_designer_core::{Document, Edit, NodeId};
 
 const XAML_NS: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 
@@ -41,23 +41,32 @@ impl AnimationCodecRegistry {
         if program.codec.as_deref() == Some(NativeAnimationCodec.id())
             && !timeline.tracks.is_empty()
         {
-            return retain_setter_target(document, program, generated);
+            let mut output = Document::new(generated).map_err(core_error)?;
+            let edits = setter_target_edits(document, program, &output, output.ast().root())?;
+            output.apply("Retain animation setter target type", edits).map_err(core_error)?;
+            return Ok(output.source().to_owned());
         }
         Ok(generated)
     }
 }
 
-fn retain_setter_target(
+impl AnimationProgram {
+    /// Preserve the native setter target type when recording into an existing program.
+    pub fn setter_target_edits(&self, document: &Document) -> Result<Vec<Edit>> {
+        setter_target_edits(document, self, document, self.id)
+    }
+}
+
+fn setter_target_edits(
     document: &Document,
     program: &AnimationProgram,
-    generated: String,
-) -> Result<String> {
-    let mut output = Document::new(generated).map_err(core_error)?;
-    let root = output.ast().root();
+    output: &Document,
+    animation: NodeId,
+) -> Result<Vec<Edit>> {
     let existing = output
         .ast()
-        .node(root)
-        .expect("root")
+        .node(animation)
+        .ok_or_else(|| AnimationError("Animation program source disappeared".into()))?
         .attributes
         .iter()
         .any(|attribute| {
@@ -65,25 +74,30 @@ fn retain_setter_target(
                 && attribute.name.rsplit(':').next() == Some("SetterTargetType")
         });
     if existing {
-        return Ok(output.source().to_owned());
+        return Ok(Vec::new());
     }
 
     let target = document
         .ast()
         .node(program.primary_target())
         .ok_or_else(|| AnimationError("Animation target source disappeared".into()))?;
-    let mut namespaces = output.ast().namespaces(root);
+    let root = output.ast().root();
+    let mut namespaces = output.ast().namespaces(animation);
+    let mut edits = Vec::new();
     let prefix = namespaces
         .iter()
         .find(|(prefix, uri)| !prefix.is_empty() && uri.as_str() == XAML_NS)
         .map(|(prefix, _)| prefix.clone())
-        .unwrap_or_else(|| free_prefix("x", &namespaces));
-    namespaces.insert(prefix.clone(), XAML_NS.into());
-    let mut edits = vec![Edit::SetAttribute {
-        node: root,
-        name: format!("xmlns:{prefix}"),
-        value: XAML_NS.into(),
-    }];
+        .unwrap_or_else(|| {
+            let prefix = free_prefix("x", &namespaces);
+            namespaces.insert(prefix.clone(), XAML_NS.into());
+            edits.push(Edit::SetAttribute {
+                node: root,
+                name: format!("xmlns:{prefix}"),
+                value: XAML_NS.into(),
+            });
+            prefix
+        });
     let (target_prefix, target_local) = target
         .name
         .split_once(':')
@@ -101,14 +115,11 @@ fn retain_setter_target(
         }
     }
     edits.push(Edit::SetAttribute {
-        node: root,
+        node: animation,
         name: format!("{prefix}:SetterTargetType"),
         value: target_type,
     });
-    output
-        .apply("Retain animation setter target type", edits)
-        .map_err(core_error)?;
-    Ok(output.source().to_owned())
+    Ok(edits)
 }
 
 fn free_prefix(preferred: &str, namespaces: &std::collections::BTreeMap<String, String>) -> String {

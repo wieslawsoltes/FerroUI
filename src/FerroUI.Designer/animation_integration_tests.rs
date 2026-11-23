@@ -658,7 +658,19 @@ fn timeline_transition_seek_reconstructs_native_route_after_visiting_its_endpoin
 #[test]
 fn animation_setter_target_type_uses_a_fresh_alias_when_source_prefixes_are_shadowed() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let mut session = DesignerSession::new("<Canvas xmlns='https://github.com/ferroui'><Canvas.Styles><Style Selector='Button'><Style.Animations><Animation xmlns:p='using:FerroUI.Animation' Duration='0:0:2'><KeyFrame Cue='0%'><Setter Property='Width' Value='10'/></KeyFrame></Animation></Style.Animations></Style></Canvas.Styles><p:Button xmlns:p='using:FerroUI.Controls' Name='A' Width='100'/></Canvas>", ContentControl::new()).unwrap();
+    let source = "<Canvas xmlns='https://github.com/ferroui'>
+        <Canvas.Styles>
+            <Style Selector='Button'>
+                <Style.Animations>
+                    <Animation xmlns:p='using:FerroUI.Animation' Duration='0:0:2'>
+                        <KeyFrame Cue='0%'><!-- Preserve the original key --><Setter Property='Width' Value='10'/></KeyFrame>
+                    </Animation>
+                </Style.Animations>
+            </Style>
+        </Canvas.Styles>
+        <p:Button xmlns:p='using:FerroUI.Controls' Name='A' Width='100'/>
+    </Canvas>";
+    let mut session = DesignerSession::new(source, ContentControl::new()).unwrap();
     assert!(
         matches!(session.preview_status(), PreviewStatus::Ready { .. }),
         "{:?}",
@@ -696,6 +708,11 @@ fn animation_setter_target_type_uses_a_fresh_alias_when_source_prefixes_are_shad
         namespaces.get(prefix).map(String::as_str),
         Some("using:FerroUI.Controls")
     );
+    assert!(session.document().source().contains(
+        "<KeyFrame Cue='0%'><!-- Preserve the original key --><Setter Property='Width' Value='20'/></KeyFrame>"
+    ));
+    session.undo().unwrap();
+    assert_eq!(session.document().source(), source);
 }
 
 #[test]

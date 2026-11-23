@@ -1,3 +1,4 @@
+use crate::animation_session::AnimationProgramEdit;
 use crate::DesignerSession;
 use ferroui_designer_animation::{
     AnimationError, AnimationValue, KeyframeComponentEdit, KeyframeEdit, KeyframeGroupEdit,
@@ -88,7 +89,7 @@ impl DesignerSession {
                 } else {
                     Vec::new()
                 };
-                let edits = self.program_edits(id, &timeline, &retimed)?;
+                let edits = self.program_edits(id, &timeline, AnimationProgramEdit::Update(&retimed))?;
                 self.apply_program_edits(id, edits)?;
             }
             changed
@@ -115,7 +116,7 @@ impl DesignerSession {
             return Ok(());
         }
         let retimed = edit.retiming(target, property);
-        let edits = self.program_edits(program, &timeline, retimed.as_slice())?;
+        let edits = self.program_edits(program, &timeline, AnimationProgramEdit::Update(retimed.as_slice()))?;
         self.apply_program_edits(program, edits)
     }
 
@@ -170,7 +171,8 @@ impl DesignerSession {
             }
             rust.keyframe(&self.document, program, property, draft)?;
         } else {
-            self.program_edits(program, &timeline, draft.retiming(target, property).as_slice())?;
+            let retimed = draft.retiming(target, property);
+            self.program_edits(program, &timeline, AnimationProgramEdit::Update(retimed.as_slice()))?;
         }
         serde_json::to_value(
             timeline
