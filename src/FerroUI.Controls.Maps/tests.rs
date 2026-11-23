@@ -8,6 +8,15 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 
+ferroui_base::ferro_thread_local! {
+    static ELEMENT_PEERS_MADE: Cell<usize> = const { Cell::new(0) };
+}
+
+/// Counts the peers of elements this thread made: none may exist without a client.
+pub(crate) fn count_element_peer() {
+    ELEMENT_PEERS_MADE.with(|count| count.set(count.get() + 1));
+}
+
 /// Answers from a table; an address it does not have is `NotFound`.
 #[derive(Default)]
 struct FakeLoader {
@@ -318,6 +327,10 @@ mod input {
     use ferroui_base::interactivity::Interactive;
     use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
     use ferroui_base::{Point, Ref, Size, Visual};
+    use ferroui_controls::automation::peers::{
+        AutomationControlType, AutomationPeer, ControlAutomationPeer,
+    };
+    use ferroui_controls::automation::provider::{IInvokeProvider, IRootProvider};
     use ferroui_controls::testing::MockWindowingPlatform;
     use ferroui_controls::{Control, Window};
 
@@ -448,6 +461,45 @@ mod input {
         assert!((a - b).abs() <= tolerance, "{a} is not {b}");
     }
 
+    fn finger_with_barrel(map: &Ref<MapControl>, from: (f64, f64), to: (f64, f64)) {
+        let pointer = Pointer::new(Pointer::get_next_free_id(), PointerType::Pen, true);
+        let held = RawInputModifiers::LEFT_MOUSE_BUTTON | RawInputModifiers::PEN_BARREL_BUTTON;
+        let root = root_of(map);
+        map.raise_event(&PointerPressedEventArgs::new(
+            map.clone().upcast::<Interactive>(),
+            pointer.clone(),
+            &root,
+            Point::new(from.0, from.1),
+            1000,
+            PointerPointProperties::new(held, PointerUpdateKind::LeftButtonPressed),
+            KeyModifiers::NONE,
+            1,
+        ));
+        map.raise_event(&PointerEventArgs::new(
+            Some(InputElement::pointer_moved_event()),
+            map.clone().upcast::<Interactive>(),
+            pointer.clone(),
+            Some(&*root),
+            Point::new(to.0, to.1),
+            1016,
+            PointerPointProperties::new(held, PointerUpdateKind::Other),
+            KeyModifiers::NONE,
+        ));
+        map.raise_event(&PointerReleasedEventArgs::new(
+            map.clone().upcast::<Interactive>(),
+            pointer,
+            &root,
+            Point::new(to.0, to.1),
+            1032,
+            PointerPointProperties::new(
+                RawInputModifiers::NONE,
+                PointerUpdateKind::LeftButtonReleased,
+            ),
+            KeyModifiers::NONE,
+            MouseButton::Left,
+        ));
+    }
+
     fn press_key(map: &MapControl, key: Key, modifiers: KeyModifiers) -> bool {
         let mut args = KeyEventArgs::new();
         args.key = key;
@@ -470,6 +522,310 @@ mod input {
                 store.borrow_mut().push(args.clone());
             }));
         seen
+    }
+
+    fn peer_of(map: &Ref<MapControl>) -> Ref<AutomationPeer> {
+        ControlAutomationPeer::create_peer_for_element(map)
+    }
+
+    /// A map with an icon, a titled line and an area, all in view.
+    fn map_with_elements() -> (Placed, Rc<MapElementsLayer>) {
+        let map = map();
+        let layer = MapElementsLayer::new();
+        let place = |latitude, longitude| BasicGeoposition {
+            latitude,
+            longitude,
+        };
+        layer.add(MapElement::Icon(MapIcon::new(place(2.0, 3.0))));
+        let mut line = MapPolyline::new(vec![place(-2.0, -8.0), place(-2.0, 8.0)]);
+        line.title = Some("Ferry".to_owned());
+        layer.add(MapElement::Polyline(line));
+        layer.add(MapElement::Polygon(MapPolygon::new(vec![
+            place(5.0, -6.0),
+            place(5.0, -2.0),
+            place(8.0, -2.0),
+        ])));
+        map.add_layer(layer.clone());
+        (map, layer)
+    }
+
+    #[test]
+    fn no_peer_exists_until_a_client_asks() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let before = ELEMENT_PEERS_MADE.with(Cell::get);
+        let (map, layer) = map_with_elements();
+        layer.add(MapElement::Icon(MapIcon::new(BasicGeoposition::default())));
+        layer.set_is_visible(false);
+        layer.set_is_visible(true);
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert!(press_key(&map, Key::Enter, KeyModifiers::NONE));
+        map.set_heading(45.0);
+        drawn(&map);
+        assert!(
+            ControlAutomationPeer::from_element(&map).is_none(),
+            "no peer of the map"
+        );
+        assert_eq!(
+            ELEMENT_PEERS_MADE.with(Cell::get),
+            before,
+            "no peer of an element"
+        );
+        peer_of(&map).get_children();
+        assert_eq!(ELEMENT_PEERS_MADE.with(Cell::get), before + 4);
+    }
+
+    #[test]
+    fn the_elements_are_children_with_a_name_a_type_and_bounds() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, _layer) = map_with_elements();
+        let peer = peer_of(&map);
+        let children = peer.get_children();
+        assert_eq!(children.len(), 3);
+        assert_eq!(children[0].get_name(), "Map icon at 2.000, 3.000");
+        assert_eq!(children[1].get_name(), "Ferry");
+        assert_eq!(children[0].get_class_name(), "MapIcon");
+        assert_eq!(children[2].get_class_name(), "MapPolygon");
+        assert_eq!(
+            children[0].get_automation_control_type(),
+            AutomationControlType::Button
+        );
+        assert_eq!(children[0].get_parent(), Some(peer.clone()));
+        let at = map.view().place_to_view(BasicGeoposition {
+            latitude: 2.0,
+            longitude: 3.0,
+        });
+        let bounds = children[0].get_bounding_rectangle();
+        near(bounds.x + bounds.width / 2.0, at.0, 1e-6);
+        near(bounds.y + bounds.height / 2.0, at.1, 1e-6);
+        assert!(!children[0].is_offscreen());
+    }
+
+    #[test]
+    fn the_bounds_follow_the_heading_and_an_element_out_of_view_is_offscreen() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, _layer) = map_with_elements();
+        let peer = peer_of(&map);
+        let icon = peer.get_children()[0].clone();
+        let north_up = icon.get_bounding_rectangle();
+        map.set_heading(90.0);
+        let turned = icon.get_bounding_rectangle();
+        let at = map.view().place_to_view(BasicGeoposition {
+            latitude: 2.0,
+            longitude: 3.0,
+        });
+        near(turned.x + turned.width / 2.0, at.0, 1e-6);
+        near(turned.y + turned.height / 2.0, at.1, 1e-6);
+        assert_ne!(north_up, turned);
+        map.set_center(BasicGeoposition {
+            latitude: 50.0,
+            longitude: 120.0,
+        });
+        assert!(icon.is_offscreen());
+        assert!(icon.get_bounding_rectangle().is_empty());
+    }
+
+    #[test]
+    fn invoke_raises_the_click_of_the_element() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, layer) = map_with_elements();
+        let seen = clicks(&layer);
+        let children = peer_of(&map).get_children();
+        let invoke = children[1]
+            .get_provider::<dyn IInvokeProvider>()
+            .expect("Invoke");
+        invoke.invoke().unwrap();
+        let seen_now = seen.borrow();
+        assert_eq!(seen_now.len(), 1);
+        assert!(
+            matches!(&seen_now[0].element, MapElement::Polyline(line) if line.title.as_deref() == Some("Ferry"))
+        );
+        drop(seen_now);
+        map.set_is_enabled(false);
+        assert!(invoke.invoke().is_err(), "a disabled map refuses");
+        assert_eq!(seen.borrow().len(), 1);
+    }
+
+    #[test]
+    fn the_children_follow_the_layers_and_a_kept_element_keeps_its_peer() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, layer) = map_with_elements();
+        let peer = peer_of(&map);
+        let first = peer.get_children()[0].clone();
+        let changes = Rc::new(Cell::new(0));
+        let count = changes.clone();
+        peer.children_changed(move || count.set(count.get() + 1))
+            .detach();
+        layer.add(MapElement::Icon(MapIcon::new(BasicGeoposition::default())));
+        assert_eq!(changes.get(), 1);
+        let children = peer.get_children();
+        assert_eq!(children.len(), 4);
+        assert_eq!(children[0], first);
+        layer.set_is_visible(false);
+        assert!(peer.get_children().is_empty());
+        layer.set_is_visible(true);
+        assert!(map.remove_layer(&layer));
+        assert!(peer.get_children().is_empty());
+        assert!(!first.is_keyboard_focusable() || first.get_name() == "Map icon at 2.000, 3.000");
+    }
+
+    #[test]
+    fn tab_walks_the_elements_and_leaves_the_map_at_the_end() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, layer) = map_with_elements();
+        let at = |map: &Placed| map.focused_element().map(|(_, index)| index);
+        assert_eq!(at(&map), None);
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert_eq!(at(&map), Some(0));
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert_eq!(at(&map), Some(2));
+        assert!(press_key(&map, Key::Tab, KeyModifiers::SHIFT));
+        assert_eq!(at(&map), Some(1));
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert!(
+            !press_key(&map, Key::Tab, KeyModifiers::NONE),
+            "past the last, Tab leaves the map"
+        );
+        assert_eq!(at(&map), None);
+        assert!(
+            !press_key(&map, Key::Tab, KeyModifiers::SHIFT),
+            "from the map, Shift+Tab leaves it"
+        );
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert!(
+            press_key(&map, Key::Tab, KeyModifiers::SHIFT),
+            "back past the first, on the map"
+        );
+        assert_eq!(at(&map), None);
+        assert!(Rc::strong_count(&layer) >= 1);
+    }
+
+    #[test]
+    fn enter_and_space_activate_and_escape_gives_the_focus_back() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, layer) = map_with_elements();
+        let seen = clicks(&layer);
+        assert!(
+            !press_key(&map, Key::Enter, KeyModifiers::NONE),
+            "no element: the key is free"
+        );
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert!(press_key(&map, Key::Enter, KeyModifiers::NONE));
+        assert!(press_key(&map, Key::Space, KeyModifiers::NONE));
+        assert_eq!(seen.borrow().len(), 2);
+        near(seen.borrow()[0].location.latitude, 2.0, 1e-6);
+        near(seen.borrow()[0].location.longitude, 3.0, 1e-6);
+        assert!(press_key(&map, Key::Escape, KeyModifiers::NONE));
+        assert!(map.focused_element().is_none());
+        assert!(!press_key(&map, Key::Escape, KeyModifiers::NONE));
+    }
+
+    #[test]
+    fn focus_brings_an_element_into_view() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let far = BasicGeoposition {
+            latitude: 40.0,
+            longitude: 100.0,
+        };
+        let layer = MapElementsLayer::new();
+        layer.add(MapElement::Icon(MapIcon::new(far)));
+        map.add_layer(layer);
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        let (x, y) = map.view().place_to_view(far);
+        assert!(
+            (0.0..=WIDTH).contains(&x) && (0.0..=HEIGHT).contains(&y),
+            "({x}, {y})"
+        );
+    }
+
+    #[test]
+    fn a_focused_element_that_goes_away_gives_the_focus_back_to_the_map() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, layer) = map_with_elements();
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        layer.clear();
+        assert!(map.focused_element().is_none());
+        assert!(!press_key(&map, Key::Enter, KeyModifiers::NONE));
+    }
+
+    #[test]
+    fn a_press_of_a_pointer_ends_the_keyboard_focus_of_an_element() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let (map, _layer) = map_with_elements();
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        let finger = Finger::new(PointerType::Mouse, MouseButton::Left);
+        finger.down(&map, (40.0, 40.0));
+        finger.up(&map, (40.0, 40.0));
+        assert!(map.focused_element().is_none());
+    }
+
+    #[test]
+    fn the_root_of_the_tree_reports_and_follows_the_focused_element() {
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let (map, _layer) = map_with_elements();
+        let root_peer = ControlAutomationPeer::create_peer_for_element(&map._window);
+        let root = root_peer
+            .get_provider::<dyn IRootProvider>()
+            .expect("a root");
+        let changes = Rc::new(Cell::new(0));
+        let count = changes.clone();
+        let _subscription = root.focus_changed(Rc::new(move || count.set(count.get() + 1)));
+        assert!(map.focus());
+        let map_peer = peer_of(&map);
+        assert_eq!(root.get_focus(), Some(map_peer.clone()));
+        let after_focus = changes.get();
+
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        let children = map_peer.get_children();
+        assert_eq!(root.get_focus(), Some(children[0].clone()));
+        assert!(children[0].has_keyboard_focus());
+        assert_eq!(changes.get(), after_focus + 1);
+
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert_eq!(root.get_focus(), Some(children[1].clone()));
+        assert!(!children[0].has_keyboard_focus());
+        assert_eq!(changes.get(), after_focus + 2);
+
+        assert!(press_key(&map, Key::Escape, KeyModifiers::NONE));
+        assert_eq!(root.get_focus(), Some(map_peer));
+        assert_eq!(changes.get(), after_focus + 3);
+    }
+
+    #[test]
+    fn set_focus_of_a_peer_focuses_its_element() {
+        let _app = UnitTestApplication::start(TestServices::focusable_window());
+        let (map, _layer) = map_with_elements();
+        let children = peer_of(&map).get_children();
+        children[2].set_focus();
+        assert_eq!(map.focused_element().map(|(_, index)| index), Some(2));
+        assert!(map.is_focused());
+        assert!(children[2].has_keyboard_focus());
+    }
+
+    #[test]
+    fn the_focus_ring_is_drawn_only_for_a_focused_element() {
+        use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
+        let _app = UnitTestApplication::start(
+            TestServices::styled_window()
+                .with_keyboard_device(|| Some(KeyboardDevice::new() as Rc<dyn IKeyboardDevice>)),
+        );
+        let (map, _layer) = map_with_elements();
+        assert!(map.focus());
+        let ellipses = |log: &[String]| {
+            log.iter()
+                .filter(|entry| entry.starts_with("DrawEllipse"))
+                .count()
+        };
+        let without = ellipses(&drawn(&map));
+        assert!(press_key(&map, Key::Tab, KeyModifiers::NONE));
+        assert_eq!(
+            ellipses(&drawn(&map)),
+            without + 2,
+            "two rings around the icon"
+        );
+        assert!(press_key(&map, Key::Escape, KeyModifiers::NONE));
+        assert_eq!(ellipses(&drawn(&map)), without);
     }
 
     #[test]
@@ -679,6 +1035,31 @@ mod input {
         finger.to(&map, (200.0, 50.0));
         finger.up(&map, (200.0, 50.0));
         near(map.heading(), 90.0, 1e-6);
+    }
+
+    #[test]
+    fn the_barrel_button_of_a_pen_turns_the_map() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let center = map.center();
+        finger_with_barrel(&map, (300.0, 150.0), (200.0, 50.0));
+        near(map.heading(), 90.0, 1e-6);
+        assert_eq!(
+            map.center(),
+            center,
+            "the barrel button turns and does not drag"
+        );
+    }
+
+    #[test]
+    fn the_barrel_button_does_nothing_when_rotation_is_disabled() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        map.set_rotate_interaction_mode(MapInteractionMode::Disabled);
+        let center = map.center();
+        finger_with_barrel(&map, (300.0, 150.0), (200.0, 50.0));
+        assert_eq!(map.heading(), 0.0);
+        assert_eq!(map.center(), center);
     }
 
     #[test]

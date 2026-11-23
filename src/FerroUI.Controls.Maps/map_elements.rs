@@ -33,6 +33,8 @@ impl MapIcon {
 #[derive(Clone, Debug, PartialEq)]
 pub struct MapPolyline {
     pub path: Vec<BasicGeoposition>,
+    /// What assistive technology calls the line.
+    pub title: Option<String>,
     pub stroke: Color,
     pub stroke_thickness: f64,
 }
@@ -41,6 +43,7 @@ impl MapPolyline {
     pub fn new(path: Vec<BasicGeoposition>) -> Self {
         Self {
             path,
+            title: None,
             stroke: Color::from_rgb(0x00, 0x78, 0xD4),
             stroke_thickness: 3.0,
         }
@@ -51,6 +54,8 @@ impl MapPolyline {
 #[derive(Clone, Debug, PartialEq)]
 pub struct MapPolygon {
     pub path: Vec<BasicGeoposition>,
+    /// What assistive technology calls the area.
+    pub title: Option<String>,
     pub fill: Color,
     pub stroke: Color,
     pub stroke_thickness: f64,
@@ -60,6 +65,7 @@ impl MapPolygon {
     pub fn new(path: Vec<BasicGeoposition>) -> Self {
         Self {
             path,
+            title: None,
             fill: Color::from_argb(0x55, 0x00, 0x78, 0xD4),
             stroke: Color::from_rgb(0x00, 0x78, 0xD4),
             stroke_thickness: 2.0,
@@ -73,6 +79,102 @@ pub enum MapElement {
     Icon(MapIcon),
     Polyline(MapPolyline),
     Polygon(MapPolygon),
+}
+
+impl MapElement {
+    fn title(&self) -> Option<&str> {
+        match self {
+            Self::Icon(icon) => icon.title.as_deref(),
+            Self::Polyline(line) => line.title.as_deref(),
+            Self::Polygon(polygon) => polygon.title.as_deref(),
+        }
+    }
+
+    fn first_place(&self) -> Option<BasicGeoposition> {
+        match self {
+            Self::Icon(icon) => Some(icon.location),
+            Self::Polyline(line) => line.path.first().copied(),
+            Self::Polygon(polygon) => polygon.path.first().copied(),
+        }
+    }
+
+    /// Whether it has anything to focus: a line or an area may have an empty path.
+    pub(crate) fn has_place(&self) -> bool {
+        self.first_place().is_some()
+    }
+
+    /// The name of the kind of element, for automation.
+    pub(crate) fn class_name(&self) -> &'static str {
+        match self {
+            Self::Icon(_) => "MapIcon",
+            Self::Polyline(_) => "MapPolyline",
+            Self::Polygon(_) => "MapPolygon",
+        }
+    }
+
+    /// Its title, or what it is and where.
+    pub(crate) fn accessible_name(&self) -> String {
+        if let Some(title) = self.title().filter(|title| !title.trim().is_empty()) {
+            return title.to_owned();
+        }
+        let kind = match self {
+            Self::Icon(_) => "Map icon",
+            Self::Polyline(_) => "Map line",
+            Self::Polygon(_) => "Map area",
+        };
+        match self.first_place() {
+            Some(place) => format!("{kind} at {:.3}, {:.3}", place.latitude, place.longitude),
+            None => kind.to_owned(),
+        }
+    }
+
+    /// The point of the view that stands for the element: an icon, the middle point of a line,
+    /// the average of the corners of an area.
+    pub(crate) fn view_anchor(&self, view: &MapView) -> Option<(f64, f64)> {
+        match self {
+            Self::Icon(icon) => Some(view_path(&[icon.location], view)[0]),
+            Self::Polyline(line) => {
+                let points = view_path(&line.path, view);
+                points.get(points.len() / 2).copied()
+            }
+            Self::Polygon(polygon) => {
+                let points = view_path(&polygon.path, view);
+                if points.is_empty() {
+                    return None;
+                }
+                let count = points.len() as f64;
+                let sum = points
+                    .iter()
+                    .fold((0.0, 0.0), |sum, point| (sum.0 + point.0, sum.1 + point.1));
+                Some((sum.0 / count, sum.1 / count))
+            }
+        }
+    }
+
+    /// Left, top, right and bottom of what is drawn, in pixels of the view.
+    pub(crate) fn view_bounds(&self, view: &MapView) -> Option<(f64, f64, f64, f64)> {
+        let (points, reach) = match self {
+            Self::Icon(icon) => (view_path(&[icon.location], view), ICON_RADIUS),
+            Self::Polyline(line) => (view_path(&line.path, view), line.stroke_thickness / 2.0),
+            Self::Polygon(polygon) => (
+                view_path(&polygon.path, view),
+                polygon.stroke_thickness / 2.0,
+            ),
+        };
+        let first = *points.first()?;
+        let (left, top, right, bottom) =
+            points
+                .iter()
+                .fold((first.0, first.1, first.0, first.1), |bounds, point| {
+                    (
+                        bounds.0.min(point.0),
+                        bounds.1.min(point.1),
+                        bounds.2.max(point.0),
+                        bounds.3.max(point.1),
+                    )
+                });
+        Some((left - reach, top - reach, right + reach, bottom + reach))
+    }
 }
 
 /// What a click on a map element reports.
@@ -104,6 +206,31 @@ impl MapElementsLayer {
 
     pub fn elements(&self) -> Vec<MapElement> {
         self.elements.borrow().clone()
+    }
+
+    /// How many elements the layer has.
+    pub fn len(&self) -> usize {
+        self.elements.borrow().len()
+    }
+
+    /// Whether the layer has no elements.
+    pub fn is_empty(&self) -> bool {
+        self.elements.borrow().is_empty()
+    }
+
+    /// The element at `index`.
+    pub fn element(&self, index: usize) -> Option<MapElement> {
+        self.elements.borrow().get(index).cloned()
+    }
+
+    /// Whether the element at `index` can have the keyboard focus. Reads it in place.
+    pub(crate) fn can_focus(&self, index: usize) -> bool {
+        self.is_visible()
+            && self
+                .elements
+                .borrow()
+                .get(index)
+                .is_some_and(MapElement::has_place)
     }
 
     pub fn add(&self, element: MapElement) {
@@ -149,6 +276,41 @@ impl MapElementsLayer {
         let listeners = self.on_changed.borrow().clone();
         for listener in listeners {
             listener();
+        }
+    }
+}
+
+/// The next element that can have the focus, as positions of layer and element, in the order
+/// they are drawn. Going back from nothing, or past either end, gives `None`.
+pub(crate) fn neighbour(
+    layers: &[Rc<MapElementsLayer>],
+    from: Option<(usize, usize)>,
+    forward: bool,
+) -> Option<(usize, usize)> {
+    if forward {
+        let (mut layer, mut index) = from.map_or((0, 0), |(layer, index)| (layer, index + 1));
+        while layer < layers.len() {
+            while index < layers[layer].len() {
+                if layers[layer].can_focus(index) {
+                    return Some((layer, index));
+                }
+                index += 1;
+            }
+            layer += 1;
+            index = 0;
+        }
+        None
+    } else {
+        let (mut layer, mut end) = from?;
+        loop {
+            while end > 0 {
+                end -= 1;
+                if layers[layer].can_focus(end) {
+                    return Some((layer, end));
+                }
+            }
+            layer = layer.checked_sub(1)?;
+            end = layers[layer].len();
         }
     }
 }
@@ -367,6 +529,88 @@ mod tests {
         assert!(Rc::ptr_eq(&hit_test(&layers, &view, at).unwrap().0, &under));
         under.set_is_visible(false);
         assert!(hit_test(&layers, &view, at).is_none());
+    }
+
+    #[test]
+    fn focus_moves_through_the_elements_in_drawing_order() {
+        let first = MapElementsLayer::new();
+        first.add(MapElement::Icon(MapIcon::new(place(0.0, 0.0))));
+        first.add(MapElement::Polyline(MapPolyline::new(Vec::new())));
+        first.add(MapElement::Icon(MapIcon::new(place(1.0, 1.0))));
+        let hidden = MapElementsLayer::new();
+        hidden.add(MapElement::Icon(MapIcon::new(place(2.0, 2.0))));
+        hidden.set_is_visible(false);
+        let empty = MapElementsLayer::new();
+        let last = MapElementsLayer::new();
+        last.add(MapElement::Icon(MapIcon::new(place(3.0, 3.0))));
+        let layers = [first, hidden, empty, last];
+
+        let mut seen = Vec::new();
+        let mut at = None;
+        while let Some(next) = neighbour(&layers, at, true) {
+            seen.push(next);
+            at = Some(next);
+        }
+        assert_eq!(
+            seen,
+            [(0, 0), (0, 2), (3, 0)],
+            "an empty path and a hidden layer are passed"
+        );
+
+        let mut back = Vec::new();
+        while let Some(previous) = neighbour(&layers, at, false) {
+            back.push(previous);
+            at = Some(previous);
+        }
+        assert_eq!(back, [(0, 2), (0, 0)]);
+        assert_eq!(neighbour(&layers, None, false), None);
+    }
+
+    #[test]
+    fn an_element_is_named_by_its_title_or_by_what_and_where_it_is() {
+        let mut icon = MapIcon::new(place(1.5, -2.25));
+        assert_eq!(
+            MapElement::Icon(icon.clone()).accessible_name(),
+            "Map icon at 1.500, -2.250"
+        );
+        icon.title = Some("   ".to_owned());
+        assert_eq!(
+            MapElement::Icon(icon.clone()).accessible_name(),
+            "Map icon at 1.500, -2.250"
+        );
+        icon.title = Some("Harbour".to_owned());
+        assert_eq!(MapElement::Icon(icon).accessible_name(), "Harbour");
+        let mut line = MapPolyline::new(vec![place(0.0, 1.0)]);
+        assert_eq!(
+            MapElement::Polyline(line.clone()).accessible_name(),
+            "Map line at 0.000, 1.000"
+        );
+        line.title = Some("Ferry".to_owned());
+        assert_eq!(MapElement::Polyline(line).accessible_name(), "Ferry");
+        assert_eq!(
+            MapElement::Polygon(MapPolygon::new(Vec::new())).accessible_name(),
+            "Map area"
+        );
+    }
+
+    #[test]
+    fn the_bounds_of_an_element_include_what_is_drawn() {
+        let view = view(place(0.0, 0.0), 4.0, 0.0);
+        let icon = MapElement::Icon(MapIcon::new(place(0.0, 0.0)));
+        assert_eq!(icon.view_bounds(&view), Some((193.0, 143.0, 207.0, 157.0)));
+        let line =
+            MapElement::Polyline(MapPolyline::new(vec![place(0.0, -10.0), place(0.0, 10.0)]));
+        let (left, top, right, bottom) = line.view_bounds(&view).unwrap();
+        assert!(
+            left < 200.0
+                && right > 200.0
+                && (top - 148.5).abs() < 1e-6
+                && (bottom - 151.5).abs() < 1e-6
+        );
+        assert_eq!(
+            MapElement::Polygon(MapPolygon::new(Vec::new())).view_bounds(&view),
+            None
+        );
     }
 
     #[test]

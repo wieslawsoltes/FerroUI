@@ -9,6 +9,7 @@
 
 mod i_embedded_root_provider;
 mod i_expand_collapse_provider;
+mod i_focused_descendant_provider;
 mod i_invoke_provider;
 mod i_range_value_provider;
 mod i_root_provider;
@@ -32,6 +33,8 @@ mod text_range_support;
 
 pub use i_embedded_root_provider::IEmbeddedRootProvider;
 pub use i_expand_collapse_provider::IExpandCollapseProvider;
+pub(crate) use i_focused_descendant_provider::focused_descendant_or_self;
+pub use i_focused_descendant_provider::IFocusedDescendantProvider;
 pub use i_invoke_provider::IInvokeProvider;
 pub use i_range_value_provider::IRangeValueProvider;
 pub use i_root_provider::IRootProvider;
@@ -81,6 +84,7 @@ macro_rules! conversions {
 conversions! {
     as_embedded_root_provider: IEmbeddedRootProvider,
     as_expand_collapse_provider: IExpandCollapseProvider,
+    as_focused_descendant_provider: IFocusedDescendantProvider,
     as_invoke_provider: IInvokeProvider,
     as_range_value_provider: IRangeValueProvider,
     as_root_provider: IRootProvider,
