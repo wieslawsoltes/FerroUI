@@ -159,6 +159,7 @@ members = [
     "src/Behaviors/FerroUI.Xaml.Interactions.Events",
     "src/Behaviors/FerroUI.Xaml.Interactions.Responsive",
     "src/FerroUI.Svg",
+    "tests/FerroUI.Svg.Markup.Tests",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",

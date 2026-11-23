@@ -152,6 +152,7 @@ pub fn find(page_id: &str) -> Option<&'static PageAdaptation> {
 /// behavior in Rust. No alternate drawing or input system is used.
 pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::assets::register();
+    ferroui_svg::register_types();
     ferroui_controls_color_picker::register_types();
     ferroui_controls_repeater::register_types();
     ferroui_controls_inking::register_types();

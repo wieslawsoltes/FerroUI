@@ -14,6 +14,9 @@
 //!   `image`, `script`, `style`, `foreignObject` and every other element it does not draw are
 //!   skipped.
 //!
+//! In markup the image is `{SvgImage}`, from the default XML namespace with no prefix, and reads
+//! only the assets of the application: `<Image Source="{SvgImage /Assets/logo.svg}" />`.
+//!
 //! Drawn: `svg`, `g`, `a`, `switch`, `use`, `symbol`, `path`, `rect`, `circle`, `ellipse`, `line`,
 //! `polyline`, `polygon`, linear and radial gradients, `clipPath`, and the presentation attributes
 //! of those, as attributes or in a `style` attribute. Not drawn: text, embedded images, masks,
@@ -24,6 +27,8 @@ mod decoder;
 mod document;
 mod numbers;
 mod path;
+mod register_types;
+mod svg_image_extension;
 mod transform;
 
 #[cfg(test)]
@@ -32,3 +37,5 @@ mod render_tests;
 mod tests;
 
 pub use document::{SvgDocument, SvgError, SvgLimits};
+pub use register_types::{register_types, ASSEMBLY};
+pub use svg_image_extension::SvgImageExtension;

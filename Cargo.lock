@@ -2788,6 +2788,7 @@ dependencies = [
  "ferroui-headless",
  "ferroui-render3d",
  "ferroui-skia",
+ "ferroui-svg",
  "ferroui-themes-fluent",
  "ferroui-vello",
  "gif",
@@ -2932,8 +2933,23 @@ name = "ferroui-svg"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-markup-xaml",
  "ferroui-vello",
  "roxmltree 0.20.0",
+ "url",
+]
+
+[[package]]
+name = "ferroui-svg-markup-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-svg",
 ]
 
 [[package]]
@@ -8006,6 +8022,7 @@ dependencies = [
  "ferroui-media-windows",
  "ferroui-native",
  "ferroui-skia",
+ "ferroui-svg",
  "ferroui-themes-winui",
  "ferroui-x11",
 ]

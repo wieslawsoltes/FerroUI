@@ -774,7 +774,7 @@
           "name": "icon_element_monochrome_option_draws_the_bitmap_icon_in_one_color"
         }
       ],
-      "notes": "All six source examples with MonochromeButton_CheckedChanged of IconElementPage.xaml.cs in Rust (brush_samples.rs): the FontIcon with the source's font family and glyph, the PathIcon and the SymbolIcon in their buttons use the native icons. FerroUI has no BitmapIcon or ImageIcon: the bitmap icon is an Image of the source's Slices.png whose ShowAsMonochrome is a rectangle of the foreground brush masked by the bitmap (the check box toggles it), and the PNG image icon is an Image in its button. FerroUI decodes no SVG and the remote SVG of the source is not loaded: its button says so. Those substitutes make the page partial. The glyphs need the source's icon fonts.",
+      "notes": "All six source examples with MonochromeButton_CheckedChanged of IconElementPage.xaml.cs in Rust (brush_samples.rs): the FontIcon with the source's font family and glyph, the PathIcon and the SymbolIcon in their buttons use the native icons. FerroUI has no BitmapIcon or ImageIcon: the bitmap icon is an Image of the source's Slices.png whose ShowAsMonochrome is a rectangle of the foreground brush masked by the bitmap (the check box toggles it), and the PNG image icon is an Image in its button. An SVG is read only from the application's assets, so the remote SVG of the source is replaced in its button by the SVG asset of the gallery, drawn as vectors by {SvgImage} (ferroui-svg). The bitmap and image icon substitutes make the page partial. The glyphs need the source's icon fonts.",
       "examples": []
     },
     "InfoBar": {
@@ -2690,7 +2690,7 @@
           "name": "media_page_callbacks_do_not_keep_the_page_and_controls_alive"
         }
       ],
-      "notes": "All six original source compositions are represented with native Image controls and explicit adaptation states. Basic bitmap loading, rendering-size decode, all four Stretch options and fixed nine-grid drawings use existing native APIs. The SVG example remains pending with the original asset and an explicit unavailable-decoder diagnostic. All three animated GIF positions are static first-frame previews only; playback controls are disabled. BitmapImage URI lifecycle/events, generalized Image.NineGrid, SVG decoding, animated playback, exact pixels and host accessibility remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
+      "notes": "All six original source compositions are represented with native Image controls and explicit adaptation states. Basic bitmap loading, rendering-size decode, all four Stretch options and fixed nine-grid drawings use existing native APIs. The SVG example draws the original asset as vectors with {SvgImage}. All three animated GIF positions are static first-frame previews only; playback controls are disabled. BitmapImage URI lifecycle/events, generalized Image.NineGrid, animated playback, exact pixels and host accessibility remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/Image/BasicImageLocalFile.txt",
@@ -2763,7 +2763,7 @@
         {
           "source": "WinUIGallery/Samples/Image/SvgImage.txt",
           "source_sha256": "db60168af9cb6fc84ac39c26e9b31280cb20726dfab6c7716beeece7ea9ab4cc",
-          "status": "pending",
+          "status": "ported",
           "target_control": "ImageExample5",
           "tests": [
             {
@@ -2771,7 +2771,7 @@
               "name": "image_page_preserves_all_six_compositions_and_marks_unavailable_decoders"
             }
           ],
-          "notes": "Pending: original MirrorPCConsent.svg bytes are retained, but the native host has no SVG image decoder. SvgImage remains empty and SvgImageDiagnostic explicitly explains the limitation; no raster substitute or implemented SVG rendering is claimed."
+          "notes": "The original MirrorPCConsent.svg is drawn as vectors through the drawing context by {SvgImage} (ferroui-svg), from the default XML namespace."
         },
         {
           "source": "WinUIGallery/Samples/Image/AnimatedGif.txt",

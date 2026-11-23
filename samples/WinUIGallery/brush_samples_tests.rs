@@ -63,7 +63,7 @@ fn icon_element_monochrome_option_draws_the_bitmap_icon_in_one_color() {
         .is_some());
     check.set_is_checked(Some(false));
     assert!(!is_monochrome(&root));
-    assert!(root.get_control::<TextBlock>("SvgUnavailable").text().is_some());
+    assert!(root.get_control::<Image>("ImageExample2Icon").source().is_some(), "the SVG in its button");
 }
 
 #[test]

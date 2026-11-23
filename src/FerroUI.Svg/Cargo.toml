@@ -10,13 +10,20 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
+build = "build.rs"
+links = "ferroui_svg_xaml"
 
 [lib]
 path = "lib.rs"
 
 [dependencies]
 ferroui-base.workspace = true
+ferroui-markup-xaml.workspace = true
 roxmltree.workspace = true
+url.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
