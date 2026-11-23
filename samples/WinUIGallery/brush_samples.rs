@@ -12,7 +12,8 @@ use ferroui_base::media::{GradientSpreadMethod, IImage, RadialGradientBrush};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Ref, RelativePoint, RelativeScalar, RelativeUnit};
 use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
-use ferroui_controls::{ComboBox, Control, Slider};
+use ferroui_controls::shapes::Rectangle;
+use ferroui_controls::{ComboBox, Control, Image, Slider};
 use ferroui_controls_icons::{BitmapIcon, ImageIcon};
 use std::rc::Rc;
 
