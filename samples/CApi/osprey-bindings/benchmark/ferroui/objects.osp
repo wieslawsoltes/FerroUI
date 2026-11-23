@@ -20,9 +20,9 @@ fn border() = ferro_create(typeId: 25)
 fn button() = ferro_create(typeId: 28)
 // stackPanel() -> int: creates a StackPanel. A panel which lays out its children horizontally
 // or vertically.
-fn stackPanel() = ferro_create(typeId: 387)
+fn stackPanel() = ferro_create(typeId: 389)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 429)
+fn textBlock() = ferro_create(typeId: 431)
 
 // ---- properties ----------------------------------------------------------------------------
 
@@ -621,15 +621,15 @@ fn templatedControlIsTemplateFocusTarget(object, value) = {
 // read fails (`failure()` tells): a plain value, no Result.
 fn getTemplatedControlIsTemplateFocusTarget(object) = ferro_get_bool_or(object: object, property: 844, fallback: toInt8(0)) != toInt8(0)
 // text(object: int, value: string) -> int: sets Text (AutoCompleteBox, AutoSuggestBox,
-// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter). Identifies the `Text` property.
+// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SelectorBarItem,
+// SwipeItem, TextBlock, TextBox, TextPresenter). Identifies the `Text` property.
 fn text(object, value) = {
     let _ = ferro_set_str(object: object, property: 846, text: value, length: -1)
     object
 }
 // getText(object: int) -> string: reads Text (AutoCompleteBox, AutoSuggestBox,
-// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter); the fallback of its kind when the read fails
+// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SelectorBarItem,
+// SwipeItem, TextBlock, TextBox, TextPresenter); the fallback of its kind when the read fails
 // (`failure()` tells): a plain value, no Result.
 fn getText(object) = "${ferro_get_cstr_or(object: object, property: 846, fallback: "")}"
 // textBlockBaselineOffset(object: int, value: float) -> int: sets TextBlock.BaselineOffset

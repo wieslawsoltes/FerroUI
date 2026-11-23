@@ -21878,6 +21878,45 @@
     ]
   },
   {
+    "name": "SelectorBar",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SelectorBar",
+    "base": "TabStrip",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SelectorBarItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SelectorBarItem",
+    "base": "TabStripItem",
+    "constructible": true,
+    "properties": {
+      "Text": {
+        "name": "Text",
+        "type_name": "Option<String>",
+        "documentation": "SelectorBarItem.Text: Option<String>",
+        "values": [],
+        "attached": false
+      },
+      "Icon": {
+        "name": "Icon",
+        "type_name": "Option<Ref<IconElement>>",
+        "documentation": "SelectorBarItem.Icon: Option<Ref<IconElement>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Separator",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Separator",

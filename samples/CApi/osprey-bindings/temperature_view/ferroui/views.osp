@@ -14,19 +14,19 @@ import ferroui::*
 
 // stackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class StackPanel. A panel which lays out its children horizontally or vertically.
-fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs, elementChildren: children }
+fn stackPanel(attrs, children) = Element { elementType: 389, elementAttrs: attrs, elementChildren: children }
 // textBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBlock. A control
 // that displays a block of text.
-fn textBlock(attrs) = Element { elementType: 429, elementAttrs: attrs, elementChildren: [] }
+fn textBlock(attrs) = Element { elementType: 431, elementAttrs: attrs, elementChildren: [] }
 // textBox(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBox. Represents a
 // control that can be used to display or edit unformatted text. Template parts:
 // `PART_TextPresenter` (a [`TextPresenter`], required) and `PART_ScrollViewer` (a
 // [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every text position
 // (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code unit index.
-fn textBox(attrs) = Element { elementType: 431, elementAttrs: attrs, elementChildren: [] }
+fn textBox(attrs) = Element { elementType: 433, elementAttrs: attrs, elementChildren: [] }
 // window(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Window. A top-level window.
-fn window(attrs, children) = Element { elementType: 497, elementAttrs: attrs, elementChildren: children }
+fn window(attrs, children) = Element { elementType: 499, elementAttrs: attrs, elementChildren: children }
 
 // ---- attributes of properties ----------------------------------------------------------------
 
@@ -134,7 +134,8 @@ fn horizontalAlignment(value) = AttrText { attrTextProperty: 339, attrTextValue:
 // ContentPresenter, DrawerPage, NumericUpDown, TabControl, TableViewColumn, TextBox).
 fn horizontalContentAlignment(value) = AttrText { attrTextProperty: 340, attrTextValue: horizontalAlignmentName(value: value) }
 // icon(value: string) -> Attr<M>: sets Icon (CommandBarButton, CommandBarToggleButton,
-// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TrayIcon, Window).
+// MenuItem, NativeMenuItem, NavigationViewItem, Page, SelectorBarItem, TabItem, TrayIcon,
+// Window).
 fn icon(value) = AttrText { attrTextProperty: 346, attrTextValue: value }
 // inlines(value: string) -> Attr<M>: sets Inlines (Span, TextBlock).
 fn inlines(value) = AttrText { attrTextProperty: 369, attrTextValue: value }
@@ -247,8 +248,8 @@ fn tag(value) = AttrText { attrTextProperty: 838, attrTextValue: value }
 // TemplatedControl.IsTemplateFocusTarget (TemplatedControl).
 fn templatedControlIsTemplateFocusTarget(value) = AttrBool { attrBoolProperty: 844, attrBoolValue: value }
 // text(value: string) -> Attr<M>: sets Text (AutoCompleteBox, AutoSuggestBox,
-// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter).
+// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SelectorBarItem,
+// SwipeItem, TextBlock, TextBox, TextPresenter).
 fn text(value) = AttrText { attrTextProperty: 846, attrTextValue: value }
 // textBlockBaselineOffset(value: float) -> Attr<M>: sets TextBlock.BaselineOffset (TextBlock).
 fn textBlockBaselineOffset(value) = AttrNumber { attrNumberProperty: 848, attrNumberValue: value }

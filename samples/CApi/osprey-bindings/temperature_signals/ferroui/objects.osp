@@ -15,17 +15,17 @@ import ferroui::*
 
 // stackPanel() -> int: creates a StackPanel. A panel which lays out its children horizontally
 // or vertically.
-fn stackPanel() = ferro_create(typeId: 387)
+fn stackPanel() = ferro_create(typeId: 389)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 429)
+fn textBlock() = ferro_create(typeId: 431)
 // textBox() -> int: creates a TextBox. Represents a control that can be used to display or
 // edit unformatted text. Template parts: `PART_TextPresenter` (a [`TextPresenter`], required)
 // and `PART_ScrollViewer` (a [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every
 // text position (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code
 // unit index.
-fn textBox() = ferro_create(typeId: 431)
+fn textBox() = ferro_create(typeId: 433)
 // window() -> int: creates a Window. A top-level window.
-fn window() = ferro_create(typeId: 497)
+fn window() = ferro_create(typeId: 499)
 
 // ---- properties ----------------------------------------------------------------------------
 
@@ -453,22 +453,23 @@ fn horizontalContentAlignment(object, value) = {
     object
 }
 // icon(object: int, value: string) -> int: sets Icon (CommandBarButton,
-// CommandBarToggleButton, MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem,
-// TrayIcon, Window). Defines the `Icon` property.
+// CommandBarToggleButton, MenuItem, NativeMenuItem, NavigationViewItem, Page, SelectorBarItem,
+// TabItem, TrayIcon, Window). Defines the `Icon` property.
 fn icon(object, value) = {
     let _ = ferro_set_str(object: object, property: 346, text: value, length: -1)
     object
 }
 // iconObject(object: int, value: int) -> int: sets Icon (CommandBarButton,
-// CommandBarToggleButton, MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem,
-// TrayIcon, Window) to an object; 0 is null.
+// CommandBarToggleButton, MenuItem, NativeMenuItem, NavigationViewItem, Page, SelectorBarItem,
+// TabItem, TrayIcon, Window) to an object; 0 is null.
 fn iconObject(object, value) = {
     let _ = ferro_set_handle(object: object, property: 346, value: value)
     object
 }
 // getIcon(object: int) -> string: reads Icon (CommandBarButton, CommandBarToggleButton,
-// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TrayIcon, Window); the fallback
-// of its kind when the read fails (`failure()` tells): a plain value, no Result.
+// MenuItem, NativeMenuItem, NavigationViewItem, Page, SelectorBarItem, TabItem, TrayIcon,
+// Window); the fallback of its kind when the read fails (`failure()` tells): a plain value, no
+// Result.
 fn getIcon(object) = "${ferro_get_cstr_or(object: object, property: 346, fallback: "")}"
 // inlines(object: int, value: string) -> int: sets Inlines (Span, TextBlock). Defines the
 // `Inlines` property.
@@ -932,15 +933,15 @@ fn templatedControlIsTemplateFocusTarget(object, value) = {
 // read fails (`failure()` tells): a plain value, no Result.
 fn getTemplatedControlIsTemplateFocusTarget(object) = ferro_get_bool_or(object: object, property: 844, fallback: toInt8(0)) != toInt8(0)
 // text(object: int, value: string) -> int: sets Text (AutoCompleteBox, AutoSuggestBox,
-// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter). Identifies the `Text` property.
+// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SelectorBarItem,
+// SwipeItem, TextBlock, TextBox, TextPresenter). Identifies the `Text` property.
 fn text(object, value) = {
     let _ = ferro_set_str(object: object, property: 846, text: value, length: -1)
     object
 }
 // getText(object: int) -> string: reads Text (AutoCompleteBox, AutoSuggestBox,
-// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter); the fallback of its kind when the read fails
+// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SelectorBarItem,
+// SwipeItem, TextBlock, TextBox, TextPresenter); the fallback of its kind when the read fails
 // (`failure()` tells): a plain value, no Result.
 fn getText(object) = "${ferro_get_cstr_or(object: object, property: 846, fallback: "")}"
 // textBlockBaselineOffset(object: int, value: float) -> int: sets TextBlock.BaselineOffset

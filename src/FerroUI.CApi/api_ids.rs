@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = 8976744649086772097;
+pub(crate) const API_FINGERPRINT: i64 = -2770019047624328508;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 507] = [
+pub(crate) static TYPE_NAMES: [&str; 509] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -378,6 +378,8 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
     "SelectingItemsControlAutomationPeer",
     "SelectingMultiPage",
     "SelectionIndicator",
+    "SelectorBar",
+    "SelectorBarItem",
     "Separator",
     "Shadow",
     "Shape",

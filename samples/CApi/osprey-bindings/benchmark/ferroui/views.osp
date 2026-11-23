@@ -20,10 +20,10 @@ fn border(attrs, children) = Element { elementType: 25, elementAttrs: attrs, ele
 fn button(attrs, children) = Element { elementType: 28, elementAttrs: attrs, elementChildren: children }
 // stackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class StackPanel. A panel which lays out its children horizontally or vertically.
-fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs, elementChildren: children }
+fn stackPanel(attrs, children) = Element { elementType: 389, elementAttrs: attrs, elementChildren: children }
 // textBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBlock. A control
 // that displays a block of text.
-fn textBlock(attrs) = Element { elementType: 429, elementAttrs: attrs, elementChildren: [] }
+fn textBlock(attrs) = Element { elementType: 431, elementAttrs: attrs, elementChildren: [] }
 
 // ---- attributes of properties ----------------------------------------------------------------
 
@@ -171,8 +171,8 @@ fn tag(value) = AttrText { attrTextProperty: 838, attrTextValue: value }
 // TemplatedControl.IsTemplateFocusTarget (TemplatedControl).
 fn templatedControlIsTemplateFocusTarget(value) = AttrBool { attrBoolProperty: 844, attrBoolValue: value }
 // text(value: string) -> Attr<M>: sets Text (AutoCompleteBox, AutoSuggestBox,
-// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter).
+// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SelectorBarItem,
+// SwipeItem, TextBlock, TextBox, TextPresenter).
 fn text(value) = AttrText { attrTextProperty: 846, attrTextValue: value }
 // textBlockBaselineOffset(value: float) -> Attr<M>: sets TextBlock.BaselineOffset (TextBlock).
 fn textBlockBaselineOffset(value) = AttrNumber { attrNumberProperty: 848, attrNumberValue: value }

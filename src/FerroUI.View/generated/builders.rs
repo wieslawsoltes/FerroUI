@@ -1609,6 +1609,32 @@ pub fn selection_indicator() -> El<ferroui_controls::SelectionIndicator> {
     El::new()
 }
 
+pub use ferroui_controls::SelectorBar;
+
+impl ViewClass for ferroui_controls::SelectorBar {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SelectorBar>::new()
+    }
+}
+
+/// Starts an element of [`SelectorBar`](ferroui_controls::SelectorBar).
+pub fn selector_bar() -> El<ferroui_controls::SelectorBar> {
+    El::new()
+}
+
+pub use ferroui_controls::SelectorBarItem;
+
+impl ViewClass for ferroui_controls::SelectorBarItem {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SelectorBarItem>::new()
+    }
+}
+
+/// Starts an element of [`SelectorBarItem`](ferroui_controls::SelectorBarItem).
+pub fn selector_bar_item() -> El<ferroui_controls::SelectorBarItem> {
+    El::new()
+}
+
 pub use ferroui_controls::Separator;
 
 impl ViewClass for ferroui_controls::Separator {
@@ -8372,6 +8398,20 @@ pub trait SelectingMultiPageProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::SelectingMultiPage>> SelectingMultiPageProps for El<T> {}
+
+/// The properties and routed events of [`SelectorBarItem`](ferroui_controls::SelectorBarItem).
+pub trait SelectorBarItemProps: ElementBuilder {
+    /// Sets [`SelectorBarItem::text_property`](ferroui_controls::SelectorBarItem::text_property).
+    fn text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::SelectorBarItem>::text_property(), value)
+    }
+
+    /// Sets [`SelectorBarItem::icon_property`](ferroui_controls::SelectorBarItem::icon_property).
+    fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::IconElement>>, M>) -> Self {
+        self.prop(<ferroui_controls::SelectorBarItem>::icon_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SelectorBarItem>> SelectorBarItemProps for El<T> {}
 
 /// The properties and routed events of [`Shape`](ferroui_controls::shapes::Shape).
 pub trait ShapeProps: ElementBuilder {

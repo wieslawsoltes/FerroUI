@@ -451,6 +451,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | ToggleSplitButton | 1 partial: RichEditBox has no paragraph list type | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | CheckBox | 3 of 3 | ported | `input_samples.rs` | `tests.rs` |
 | RadioButton | 2 of 2 | ported | `examples.rs` | `tests.rs` |
+| SelectorBar | 3 of 3; the third example's ItemsView is an ItemsControl | ported | `selector_bar_samples.rs` | `selector_bar_samples_tests.rs` |
 | Slider | 2 ported, 2 partial: no StepFrequency, SnapsTo or Header | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | ToggleSwitch | 2 of 2 | ported | `Pages/ToggleSwitch.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
 | ComboBox | 2 ported, 1 partial: no TextSubmitted, no ContentDialog | partial | `button_samples.rs` | `button_samples_tests.rs` |
