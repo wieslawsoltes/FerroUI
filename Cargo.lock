@@ -1672,6 +1672,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-markdown-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-markdown",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-controls-repeater"
 version = "0.6.0-preview.1"
 dependencies = [

@@ -76,6 +76,7 @@ members = [
     "src/Dock/FerroDock.Serializer.SystemTextJson.Generators.Rust",
     "src/Dock/FerroDock.Serializer.SystemTextJson.ReactiveUI",
     "src/Dock/FerroDock.Settings",
+    "tests/FerroUI.Controls.Markdown.DefaultNamespace.Tests",
     "tests/Dock/FerroDock.Markup.Tests",
     "tests/Dock/FerroDock.Serializer.Generated.Tests",
     "tests/Dock/FerroDock.Settings.Markup.Tests",
