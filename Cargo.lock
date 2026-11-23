@@ -2567,6 +2567,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-render3d",
  "libc",
 ]
 

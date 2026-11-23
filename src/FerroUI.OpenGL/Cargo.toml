@@ -23,6 +23,8 @@ path = "lib.rs"
 ferroui-base.workspace = true
 # The OpenGL control is a control: the upstream project references the controls project.
 ferroui-controls.workspace = true
+# The 3D scenes of the Skia backend on Ganesh GL (feature `scene3d`, #608 D8).
+ferroui-render3d = { workspace = true, features = ["glsl"], optional = true }
 
 # `EglInterface::from_library`: the EGL library of the system is loaded by name (`dlopen`).
 [target.'cfg(all(unix, not(target_os = "emscripten")))'.dependencies]
@@ -32,6 +34,10 @@ libc.workspace = true
 # The source scanner and the export of the type model: the standard library and `syn`, nothing of the
 # framework.
 ferroui-build-scan = { workspace = true }
+
+[features]
+# The GL executor of 3D scenes (`scene3d`, #608 D8), which `ferroui-skia/media3d` turns on.
+scene3d = ["dep:ferroui-render3d"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
