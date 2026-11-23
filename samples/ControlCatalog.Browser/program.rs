@@ -689,7 +689,7 @@ mod tests {
 
     #[test]
     fn an_unknown_mode_fails_the_parse() {
-        assert_eq!(None, parse_args(&["http://localhost/?RenderingMode=WebGL2;WebGPU"]));
+        assert_eq!(None, parse_args(&["http://localhost/?RenderingMode=WebGL2;WebGL3"]));
     }
 
     #[test]
