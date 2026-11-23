@@ -3,6 +3,7 @@
 //! enumeration (and set of flags) that markup can name or that is the type of
 //! a property, with the member names of the managed original.
 
+use crate::ContentDialogButton;
 use crate::automation::peers::*;
 use crate::automation::*;
 use crate::chrome::*;
@@ -222,6 +223,7 @@ ferro_markup_enum!(WindowStartupLocation { Manual, CenterScreen, CenterOwner }, 
 ferro_markup_enum!(WindowState { Normal, Minimized, Maximized, FullScreen }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(PipsPagerButtonVisibility { Visible, VisibleOnPointerOver, Collapsed }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(PipsPagerWrapMode { None, Wrap }, { namespace: "FerroUI.Controls" });
+ferro_markup_enum!(ContentDialogButton { None, Primary, Secondary, Close }, { namespace: "FerroUI.Controls" });
 ferro_markup_enum!(
     WrapPanelItemsAlignment {
         Start, Center, End, Justify, Stretch, StretchAll,
@@ -392,6 +394,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <WindowState as MarkupTyped>::MARKUP,
     <PipsPagerButtonVisibility as MarkupTyped>::MARKUP,
     <PipsPagerWrapMode as MarkupTyped>::MARKUP,
+    <ContentDialogButton as MarkupTyped>::MARKUP,
     <WrapPanelItemsAlignment as MarkupTyped>::MARKUP,
     <TitleBarDecorations as MarkupTyped>::MARKUP,
     <Corners as MarkupTyped>::MARKUP,
@@ -471,6 +474,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<WindowState>();
     ValueTypes::register_used::<PipsPagerButtonVisibility>();
     ValueTypes::register_used::<PipsPagerWrapMode>();
+    ValueTypes::register_used::<ContentDialogButton>();
     ValueTypes::register_used::<WrapPanelItemsAlignment>();
     ValueTypes::register_used::<TitleBarDecorations>();
     ValueTypes::register_used::<Corners>();
@@ -832,6 +836,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for WindowStartupLocation {
 impl ferroui_base::data::core::ValueTypeRegistration for WindowState {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<WindowState>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for ContentDialogButton {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<ContentDialogButton>();
     }
 }
 

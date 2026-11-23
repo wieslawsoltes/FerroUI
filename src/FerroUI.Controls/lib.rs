@@ -670,6 +670,14 @@ mod selection_mode;
 mod selection_indicator_animation;
 mod selection_indicator;
 pub use selection_indicator::SelectionIndicator;
+mod content_dialog;
+pub use content_dialog::{
+    ContentDialog, ContentDialogButton, ContentDialogButtonClickEventArgs, ContentDialogClosedEventArgs,
+    ContentDialogClosingEventArgs, ContentDialogDeferral, ContentDialogError, ContentDialogOperation,
+    ContentDialogResult,
+};
+#[cfg(test)]
+mod content_dialog_tests;
 mod selector_bar;
 pub use selector_bar::{SelectorBar, SelectorBarItem};
 #[cfg(test)]
