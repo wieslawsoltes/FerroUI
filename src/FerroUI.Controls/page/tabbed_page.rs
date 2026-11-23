@@ -183,7 +183,7 @@ impl InputElementImpl for TabbedPage {
             && !KeyboardDevice::instance()
                 .and_then(|keyboard| keyboard.focused_element())
                 .and_then(|focused| focused.cast::<TabItem>())
-                .is_some_and(|item| tab_control.logical_children().iter().any(|child| child.ptr_eq(&item)));
+                .is_some_and(|item| tab_control.logical_children().contains(&item.upcast()));
 
         let resolved = this.resolve_tab_placement();
         let is_horizontal = resolved == TabPlacement::Top || resolved == TabPlacement::Bottom;

@@ -5,7 +5,7 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use crate::templates::IDataTemplate;
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref, StyledElementImpl,
+    ferro_class, ferro_impl_classes, ferro_property, instantiate, BoxedValue, FerroObjectImpl, FerroProperty, Ref, StyledElementImpl,
     StyledProperty, VisualImpl,
 };
 use std::rc::Rc;

@@ -131,7 +131,7 @@ impl TableViewLayoutHelper {
         };
 
         loop {
-            let open = || columns.iter().zip(&widths).filter(|(column, width)| is_open(column, **width));
+            let open = || columns.iter().zip(&widths).filter(move |(column, width)| is_open(column, **width));
             let max_weight = open().fold(0.0_f64, |weight, (column, _)| weight.max(raw_weight(column)));
             let weight = |column: &Ref<TableViewColumn>| {
                 if max_weight > 0.0 { raw_weight(column) / max_weight } else { 0.0 }
