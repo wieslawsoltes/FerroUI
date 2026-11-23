@@ -147,8 +147,9 @@ pub struct ProGpuEngine {
     thread: Cell<ThreadId>,
     /// The entry of the outline log the engine holds the glyph outlines up to.
     outlines_seen: Cell<u64>,
-    /// The stream the engine retains, kept only while scene deltas are on.
-    retained_stream: RefCell<Option<Vec<u8>>>,
+    /// The streams the engine keeps, by scene, only while scene deltas are on: a delta is made
+    /// against the last stream of the same target.
+    retained_streams: RefCell<RetainedStreams>,
 }
 
 /// Whether frames are sent as the bytes that differ from the frame before
@@ -157,6 +158,40 @@ pub struct ProGpuEngine {
 fn scene_deltas_enabled() -> bool {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
     *ENABLED.get_or_init(|| std::env::var_os("FERROUI_PROGPU_SCENE_DELTA").is_some_and(|value| value == "1"))
+}
+
+/// The bytes of the streams an engine keeps for the targets it is not rendering, while scene deltas
+/// are on (the same bound here and in the engine). Without deltas it keeps one scene.
+const KEPT_SCENES_BUDGET: u64 = 64 * 1024 * 1024;
+
+/// The last stream of every scene, within [`KEPT_SCENES_BUDGET`] beside the active one.
+#[derive(Default)]
+struct RetainedStreams {
+    streams: std::collections::HashMap<u64, Vec<u8>>,
+    bytes: u64,
+}
+
+impl RetainedStreams {
+    fn get(&self, scene: u64) -> Option<&[u8]> {
+        self.streams.get(&scene).map(Vec::as_slice)
+    }
+
+    fn keep(&mut self, scene: u64, stream: &[u8]) {
+        self.remove(scene);
+        // Past the bound the other streams go: their next frames are sent whole.
+        if self.bytes + stream.len() as u64 > KEPT_SCENES_BUDGET {
+            self.streams.clear();
+            self.bytes = 0;
+        }
+        self.bytes += stream.len() as u64;
+        self.streams.insert(scene, stream.to_vec());
+    }
+
+    fn remove(&mut self, scene: u64) {
+        if let Some(stream) = self.streams.remove(&scene) {
+            self.bytes -= stream.len() as u64;
+        }
+    }
 }
 
 /// The unit in which two streams are compared for a delta.
@@ -729,13 +764,17 @@ impl ProGpuEngine {
         // SAFETY: the options are borrowed for the call; the handles are those of the device.
         let status = unsafe { Self::create(device, format, &mut engine) };
         if status == PROGPU_NATIVE_STATUS_SUCCESS {
+            if scene_deltas_enabled() {
+                // SAFETY: the engine was just created on this thread.
+                unsafe { progpu_native_engine_set_scene_budget(engine, KEPT_SCENES_BUDGET) };
+            }
             Ok(Self {
                 device: device.clone(),
                 engine,
                 format,
                 thread: Cell::new(std::thread::current().id()),
                 outlines_seen: Cell::new(0),
-                retained_stream: RefCell::new(None),
+                retained_streams: RefCell::default(),
             })
         } else {
             Err(ProGpuDeviceError::Engine(status))
@@ -904,12 +943,14 @@ impl ProGpuEngine {
     /// Sends `stream` as the bytes that differ from the stream the engine retains when it is the
     /// next generation of that scene, and whole otherwise or if the engine refuses the delta.
     pub(crate) fn update_scene_by_delta(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
-        let mut retained = self.retained_stream.borrow_mut();
-        let follows = retained.as_deref().and_then(stream_identity).zip(stream_identity(stream)).is_some_and(
+        let mut retained = self.retained_streams.borrow_mut();
+        let identity = stream_identity(stream);
+        let base = identity.and_then(|(scene, _)| retained.get(scene));
+        let follows = base.and_then(stream_identity).zip(identity).is_some_and(
             |((scene, generation), (next_scene, next_generation))| scene == next_scene && generation < next_generation,
         );
         if follows {
-            let previous = retained.as_deref().unwrap_or_default();
+            let previous = base.unwrap_or_default();
             let base_generation = stream_identity(previous).map_or(0, |(_, generation)| generation);
             let (ranges, bytes) = scene_delta_ranges(previous, stream);
             let engine = self.enter();
@@ -931,17 +972,27 @@ impl ProGpuEngine {
                 (progpu_native_engine_update_scene_delta(engine, &delta, &mut metrics), metrics)
             };
             if status == PROGPU_NATIVE_STATUS_SUCCESS {
-                let kept = retained.get_or_insert_with(Vec::new);
-                kept.clear();
-                kept.extend_from_slice(stream);
+                if let Some((scene, _)) = identity {
+                    retained.keep(scene, stream);
+                }
                 return Ok(metrics);
             }
         }
         let metrics = self.update_whole_scene(stream)?;
-        let kept = retained.get_or_insert_with(Vec::new);
-        kept.clear();
-        kept.extend_from_slice(stream);
+        if let Some((scene, _)) = identity {
+            retained.keep(scene, stream);
+        }
         Ok(metrics)
+    }
+
+    /// Forgets what the engine keeps for a scene whose target is gone.
+    pub(crate) fn release_scene(&self, scene_id: u64) {
+        if thread_is_ending() || !scene_deltas_enabled() {
+            return;
+        }
+        self.retained_streams.borrow_mut().remove(scene_id);
+        // SAFETY: the engine is alive.
+        unsafe { progpu_native_engine_release_scene(self.enter(), scene_id) };
     }
 
     fn update_whole_scene(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
