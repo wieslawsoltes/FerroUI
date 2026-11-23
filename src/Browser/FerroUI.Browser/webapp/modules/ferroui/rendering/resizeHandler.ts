@@ -62,14 +62,14 @@ export class ResizeHandler {
         this.resolutionQuery?.addEventListener("change", this.onDprChanged);
     }
 
-    private static onDprChanged = (): void => {
+    private static readonly onDprChanged = (): void => {
         if (!this.resizeObserver?.callbacks.size || this.currentDpr() === this.observedDpr) { return; }
         // A content-box observer need not fire when moving between displays or
         // changing emulation DPR without changing CSS size. Re-arm the query at
         // the new ratio and measure current CSS, never a cached device box.
         this.watchDpr();
-        this.resizeObserver?.callbacks.forEach((callback, element) => {
-            callback(...this.getInitialSize(element as HTMLElement));
+        this.resizeObserver?.callbacks.forEach((resize, element) => {
+            resize(...this.getInitialSize(element as HTMLElement));
         });
     };
 
