@@ -105,9 +105,9 @@ pub(super) struct DeviceLayer {
     scene_width: u16,
     scene_height: u16,
     /// The blur or drop shadow the content goes through in the compute mode, which has no filter
-    /// layers, with the lengths of a unit of the filter along each axis of the target.
+    /// layers, with the linear part (a, b, c, d) of the transform to the target.
     #[cfg(feature = "gpu")]
-    filter: Option<(VelloSceneFilter, (f64, f64))>,
+    filter: Option<(VelloSceneFilter, [f64; 4])>,
     /// The bounds of the layer in the coordinates of the context when it
     /// was pushed, with the transform from them to the pixels of the scene
     /// it was pushed in; `None` for the whole area.
@@ -1391,7 +1391,7 @@ impl DrawingContextImpl {
             return false;
         };
         let [a, b, c, d, _, _] = self.device_transform().as_coeffs();
-        layer.filter = Some((filter, (a.hypot(b), c.hypot(d))));
+        layer.filter = Some((filter, [a, b, c, d]));
         let outer = self.enter_device_scene(&layer);
         self.sink().push_layer(BlendMode::default(), 1.0);
         self.effect_stack.push(EffectFrame {
@@ -1413,9 +1413,10 @@ impl DrawingContextImpl {
     /// scene the layer was pushed in, over the shadow of the content for a drop shadow.
     fn end_compute_filter(&mut self, scene: Box<dyn IVelloSceneSink>, layer: DeviceLayer) {
         use crate::gpu::shadow_blur::blurred_content;
-        let Some((filter, (scale_x, scale_y))) = layer.filter else {
+        let Some((filter, [a, b, c, d])) = layer.filter else {
             return;
         };
+        let (scale_x, scale_y) = (a.hypot(b), c.hypot(d));
         let Some(content) = Self::render_device_scene(scene, &layer) else {
             return;
         };
@@ -1431,7 +1432,11 @@ impl DrawingContextImpl {
                 let tint = [red * alpha, green * alpha, blue * alpha, alpha];
                 let deviations = (deviation * scale_x, deviation * scale_y);
                 let shadow = blurred_content(&layer.device, &content, deviations, Some(tint));
-                self.paint_compute_layer(&layer, shadow, (f64::from(dx) * scale_x, f64::from(dy) * scale_y));
+                // The offset turns with the content, and moves by whole pixels as in the filter
+                // of the CPU renderer.
+                let (dx, dy) = (f64::from(dx), f64::from(dy));
+                let offset = ((a * dx + c * dy).round(), (b * dx + d * dy).round());
+                self.paint_compute_layer(&layer, shadow, offset);
                 self.paint_compute_layer(&layer, content, (0.0, 0.0));
             }
         }
