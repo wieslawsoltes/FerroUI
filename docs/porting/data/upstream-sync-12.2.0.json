@@ -1,0 +1,1703 @@
+{
+ "from": "66b7273b9a2b5ba8416feb4376b9cdc3078b8573",
+ "to": "5d9e6d1b0e87337f74f233bead580db186412357",
+ "tag": "12.2.0",
+ "commits": [
+  {
+   "hash": "dd91d9dc44557e2dbe87d8fe5c881d33ba0d6f33",
+   "pr": 22448,
+   "date": "2026-10-19",
+   "area": "platform-x11",
+   "class": "port",
+   "note": "Read _NET_WORKAREA through the typed property helper; `update_work_area` still asks for any type.",
+   "part": "x11",
+   "state": "planned"
+  },
+  {
+   "hash": "612785a8e2d87f2ccf7ce0dda6b4ed0e8f55a8cc",
+   "pr": 22468,
+   "date": "2026-10-19",
+   "area": "platform-browser",
+   "class": "port",
+   "note": "Command-based hotkeys on Apple platforms in the browser; shared Apple gesture tables.",
+   "part": "browser",
+   "state": "planned"
+  },
+  {
+   "hash": "f5807681dcad9dd2a4da9fe92354a5b88d60cba4",
+   "pr": 22488,
+   "date": "2026-10-19",
+   "area": "controls",
+   "class": "port",
+   "note": "Window content measured again when the platform constrains the size.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "d9311668349b0c192c5486f3218a6f8feaaf0317",
+   "pr": 22337,
+   "date": "2026-10-19",
+   "area": "controls",
+   "class": "port",
+   "note": "TabbedPage leaves arrow keys to a focused child.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "edc20c924d1e29ccfdc2c37cc77bc3614ed297b6",
+   "pr": 22412,
+   "date": "2026-10-19",
+   "area": "platform-ios",
+   "class": "port",
+   "note": "Touch drags and trackpad momentum at the display refresh rate.",
+   "part": "ios",
+   "state": "planned"
+  },
+  {
+   "hash": "82c96fe15daaead9c53d28b2f71a4791fec43859",
+   "pr": 22419,
+   "date": "2026-10-19",
+   "area": "platform-win32",
+   "class": "already",
+   "note": "`get_dpi_for_monitor` in `interop/unmanaged_methods.rs` already declares the 32-bit HRESULT."
+  },
+  {
+   "hash": "33371cbfb7bcadc54a3072866adec4cabec1eee8",
+   "pr": 22517,
+   "date": "2026-10-19",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "`automation.mm`: menu role for context menus.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "19952840c5704831de8f853acf4a3ca416955af6",
+   "pr": 22478,
+   "date": "2026-10-19",
+   "area": "platform-browser",
+   "class": "not-applicable",
+   "note": "Queue between a managed UI thread and the DOM thread. FerroUI dispatches input inside the DOM event (`browser-render-worker.md`, `browser_input_handler.rs`)."
+  },
+  {
+   "hash": "da7ea04e6d307d5424ab25dc5ec7f32d742801ff",
+   "pr": 22497,
+   "date": "2026-10-19",
+   "area": "controls",
+   "class": "already",
+   "note": "`ClassicDesktopStyleApplicationLifetime::start` takes the token after showing the window and skips the loop when it is gone."
+  },
+  {
+   "hash": "b72f1fd4d8665aeffe8022f7881eaf8f6d56fe7d",
+   "pr": 22470,
+   "date": "2026-10-19",
+   "area": "platform-browser",
+   "class": "port",
+   "note": "Blob stream: seeking, bounded reads, write position.",
+   "part": "browser",
+   "state": "planned"
+  },
+  {
+   "hash": "b6ed89b8d946a2fd1481995c971c2a59899049bd",
+   "pr": 22457,
+   "date": "2026-10-19",
+   "area": "controls",
+   "class": "port",
+   "note": "`Popup`: the Y scale read M11/M12.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "b13194be254247a1646bd5c59ef817f1f26dc210",
+   "pr": 22453,
+   "date": "2026-10-19",
+   "area": "platform-x11",
+   "class": "port",
+   "note": "X11 dispatcher: explicit background processing.",
+   "part": "x11",
+   "state": "planned"
+  },
+  {
+   "hash": "f54736962114d0d83d4513dc58079612c6725135",
+   "pr": 22496,
+   "date": "2026-10-19",
+   "area": "threading",
+   "class": "port",
+   "note": "Dispatcher clock stays continuous when the implementation is replaced.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "ee85f0604a7d4ffdc0f6783da840674cff32668c",
+   "pr": 22504,
+   "date": "2026-10-19",
+   "area": "rendering",
+   "class": "port",
+   "note": "Skia geometry: path bounds computed before sharing; stroke cache kept valid on failure.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "9b3e9c881b6a91a0a6fcf9cded61c4df819cbc71",
+   "pr": 22499,
+   "date": "2026-10-19",
+   "area": "rendering",
+   "class": "port",
+   "note": "Compositor output rotation through `RenderTargetProperties`.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "be0c42891f160e0f5a6fafeb35991739f69e0364",
+   "pr": 22522,
+   "date": "2026-10-19",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream repository workflow."
+  },
+  {
+   "hash": "b515c3ae17a2aa420475215aa01caf70be6d1313",
+   "pr": 22523,
+   "date": "2026-10-20",
+   "area": "controls",
+   "class": "port",
+   "note": "Per-area log verbosity for `log_to_trace` and `log_to_delegate`.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "ba4fedb31ee682f1cf245a0400a942a74ea8dfb2",
+   "pr": 22529,
+   "date": "2026-10-20",
+   "area": "platform-ios",
+   "class": "port",
+   "note": "Keyboard stays up when focus moves between text boxes.",
+   "part": "ios",
+   "state": "planned"
+  },
+  {
+   "hash": "ae55790316720c4d81dcbb5a371720cbcbde558f",
+   "pr": 22526,
+   "date": "2026-10-20",
+   "area": "platform-ios",
+   "class": "port",
+   "note": "Touches in progress are cancelled when the view leaves its window.",
+   "part": "ios",
+   "state": "planned"
+  },
+  {
+   "hash": "45693b17133ed792ada8e35dce95d945c8f9ac42",
+   "pr": 22196,
+   "date": "2026-10-20",
+   "area": "build",
+   "class": "not-applicable",
+   "note": ".NET 11 SDK and .NET WebAssembly runtime."
+  },
+  {
+   "hash": "fa6d6f069e962c1f456e97e63114cfd209e30c60",
+   "pr": 22532,
+   "date": "2026-10-20",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "`automation.mm`: AXFocused settable only on keyboard-focusable elements.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "dc0105179bcd9db1110dd20d2612859a7c4ae3ca",
+   "pr": 22519,
+   "date": "2026-10-20",
+   "area": "platform-macos",
+   "class": "deferred",
+   "note": "Reference-counting refactor of the whole native layer (1,844 lines). Needs smart-pointer output from the FerroUI IDL generator and a macOS hand check."
+  },
+  {
+   "hash": "1fd3c0830edd6076edfe4b5d03e8e9c91d645c32",
+   "pr": 22227,
+   "date": "2026-10-20",
+   "area": "data",
+   "class": "port",
+   "note": "Indexer bindings refresh on `Item[]` and `Item[key]`.",
+   "part": "data",
+   "state": "planned"
+  },
+  {
+   "hash": "06c2072375c83d17718d2dfc49a394669c6d86c7",
+   "pr": 22531,
+   "date": "2026-10-20",
+   "area": "platform-win32",
+   "class": "port",
+   "note": "OLE data object accepts a combination of media.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "5eedd4afe52a90964763a901ca7c08afbf3d287d",
+   "pr": 22463,
+   "date": "2026-10-20",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "`automation.mm`: no announcement for an empty live region.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "fa9c3c1572aa848cb2e08ad056552f23d9072aae",
+   "pr": 22540,
+   "date": "2026-10-20",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream NuGet publishing action."
+  },
+  {
+   "hash": "a9c52297f5991a82500cb7663142a82ec9918dc2",
+   "pr": 22548,
+   "date": "2026-10-21",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "`automation.mm`: accessibility activation point.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "51f5c8f1230e98ce2010d665be504cf617e22b13",
+   "pr": 22458,
+   "date": "2026-10-21",
+   "area": "automation",
+   "class": "port",
+   "note": "A masked TextBox must not report its text in clear. Security-relevant.",
+   "part": "automation",
+   "state": "planned"
+  },
+  {
+   "hash": "6cef02f424065dc3a968cc56e4c2a4398ea7d72b",
+   "pr": 22427,
+   "date": "2026-10-21",
+   "area": "input",
+   "class": "port",
+   "note": "Tap and hold compare root positions, so a moving target still taps.",
+   "part": "input",
+   "state": "planned"
+  },
+  {
+   "hash": "565b1cf0b100dc771ccefe592a7d2739e1b4471d",
+   "pr": 22428,
+   "date": "2026-10-21",
+   "area": "controls",
+   "class": "port",
+   "note": "ComboBox clears `:pressed` on capture loss.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "d3fcf74a91ae37bf8828d9f7cf5a5077e603e8ef",
+   "pr": 22553,
+   "date": "2026-10-21",
+   "area": "text",
+   "class": "port",
+   "note": "Paragraph end in bidirectional lines (rule L1).",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "88a7967b3e5fba20518e2f9f8d5e47958943ae76",
+   "pr": 22487,
+   "date": "2026-10-21",
+   "area": "text",
+   "class": "port",
+   "note": "`Typeface` tolerates repeated whitespace in family names.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "4573d1f752ea5a4be8d174ec960d18c403f7fb54",
+   "pr": 22455,
+   "date": "2026-10-21",
+   "area": "controls",
+   "class": "port",
+   "note": "NUL characters removed from window titles.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "c4dfde67c35e6fb4732d8b4770cae9fbe56957fd",
+   "pr": 22456,
+   "date": "2026-10-21",
+   "area": "controls",
+   "class": "port",
+   "note": "Space key up clicks only a pressed button.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "c2a6e2916e39e9a4313839bcead0c9d4538e1fe7",
+   "pr": 22555,
+   "date": "2026-10-21",
+   "area": "platform-x11",
+   "class": "port",
+   "note": "Window position read again after reparenting.",
+   "part": "x11",
+   "state": "planned"
+  },
+  {
+   "hash": "72ebf9aad907a52c1dcdcc05b4da6554472a9c3b",
+   "pr": 22438,
+   "date": "2026-10-21",
+   "area": "platform-android",
+   "class": "port",
+   "note": "Cursors on Android (`cursor_factory.rs` is a stub).",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "0d6c2aaa816eb0c992c5785f74843b0e73c939e6",
+   "pr": 22433,
+   "date": "2026-10-21",
+   "area": "text",
+   "class": "port",
+   "note": "`TextLayout::hit_test_point` inside test for multi-line and aligned text.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "26b4ed5b35bad7313686e58e4c4c5484429f2419",
+   "pr": 22491,
+   "date": "2026-10-21",
+   "area": "layout",
+   "class": "port",
+   "note": "Layout pass tolerates a control moved to another top level.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "913517076982123e42bae247cb1e6cf6eff8b7e6",
+   "pr": 22557,
+   "date": "2026-10-21",
+   "area": "rendering",
+   "class": "port",
+   "note": "`ICustomHitTest` documentation: local coordinates.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "74c62ffd26183f00117d78ea8bad280e4c453059",
+   "pr": 22552,
+   "date": "2026-10-22",
+   "area": "input",
+   "class": "port",
+   "note": "Gesture unit tests that replace the removed integration tests.",
+   "part": "input",
+   "state": "planned"
+  },
+  {
+   "hash": "78316701f30502904076d195a543da2e51dd3b2e",
+   "pr": 22451,
+   "date": "2026-10-22",
+   "area": "platform-android",
+   "class": "deferred",
+   "note": "Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation."
+  },
+  {
+   "hash": "103cf7290371d43c4af65705335718aa195fcac4",
+   "pr": 22520,
+   "date": "2026-10-22",
+   "area": "platform-win32",
+   "class": "port",
+   "note": "Alt+Space opens the system menu unless handled.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "52c057b1cdcaf0393e89f81abd8258d1d408ad02",
+   "pr": 22556,
+   "date": "2026-10-22",
+   "area": "themes",
+   "class": "port",
+   "note": "CommandBar overflow scrolls in Fluent and Simple.",
+   "part": "themes",
+   "state": "planned"
+  },
+  {
+   "hash": "f874d44497bc6b5ff92d3bb8e2f803597f542bb6",
+   "pr": 22435,
+   "date": "2026-10-22",
+   "area": "platform-android",
+   "class": "port",
+   "note": "`ACTION_SET_TEXT` replaces the text.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "e7cd2df08ec2bcf58e816fbdcd829643b62ed905",
+   "pr": 22489,
+   "date": "2026-10-22",
+   "area": "controls",
+   "class": "port",
+   "note": "Keyboard works inside the date, time and calendar picker popups.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "d8f2fc7b9fec9bf2f0896efa5f942cc66b32546f",
+   "pr": 22554,
+   "date": "2026-10-22",
+   "area": "text",
+   "class": "port",
+   "note": "Line break search limited to the reach of the current line. Removes quadratic work on long unbroken runs.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "e4452b5bdb90ccbc7045ae91b43ca22a9fe7ef2b",
+   "pr": 22429,
+   "date": "2026-10-22",
+   "area": "input",
+   "class": "port",
+   "note": "Double tap needs the same button for both clicks.",
+   "part": "input",
+   "state": "planned"
+  },
+  {
+   "hash": "bd835340fb37db8aea82596777ad99fd6110fd73",
+   "pr": 21771,
+   "date": "2026-10-22",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Fluent 2 theme (16,105 lines). New theme crate; overlaps `ferroui-themes-winui`. Owner decision, see the document."
+  },
+  {
+   "hash": "136efefc7de1d7e2b9844c67a97e116a8f642722",
+   "pr": 22378,
+   "date": "2026-10-22",
+   "area": "automation",
+   "class": "port",
+   "note": "ContentControl name no longer falls back to a type name.",
+   "part": "automation",
+   "state": "planned"
+  },
+  {
+   "hash": "7fda9c36a58311a8a44e83df34e9f565857016be",
+   "pr": 22562,
+   "date": "2026-10-23",
+   "area": "automation",
+   "class": "port",
+   "note": "UI Automation Invoke returns immediately.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "74b4e97962b040b1f265cb858af8faa2deae1ee9",
+   "pr": 22400,
+   "date": "2026-10-23",
+   "area": "samples",
+   "class": "deferred",
+   "note": "Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work."
+  },
+  {
+   "hash": "6a25cf4d9b8ee276427abe2db01dcb45bb1b4858",
+   "pr": 22399,
+   "date": "2026-10-23",
+   "area": "controls",
+   "class": "port",
+   "note": "A delayed submenu action no longer closes a reopened menu.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "c1e4fab24c38be5d74aba5a8ec1ac9f04bfd5baf",
+   "pr": 22577,
+   "date": "2026-10-23",
+   "area": "collections",
+   "class": "not-applicable",
+   "note": "`FerroList::contains` and `index_of` take `&T`; an invalid item cannot be passed."
+  },
+  {
+   "hash": "1def5f851b89da57589dc4440adc9e6ca422ad72",
+   "pr": 22426,
+   "date": "2026-10-25",
+   "area": "controls",
+   "class": "port",
+   "note": "PipsPager sizing and scroll reset.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "b88f813a95b80739603d9778368f5afbee16b127",
+   "pr": 22595,
+   "date": "2026-10-25",
+   "area": "controls",
+   "class": "port",
+   "note": "VirtualizingStackPanel: condition that was always true.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "13c99cfe42c799b86ff25bd0cb2f5203087af10c",
+   "pr": 22594,
+   "date": "2026-10-25",
+   "area": "platform-linux",
+   "class": "port",
+   "note": "D-Bus input method: dispose does not leave a failure unobserved.",
+   "part": "linux",
+   "state": "planned"
+  },
+  {
+   "hash": "b7a70cd06bab900a8f799b185e828ab600229bb6",
+   "pr": 22591,
+   "date": "2026-10-25",
+   "area": "themes",
+   "class": "port",
+   "note": "Fluent DropDownButton padding. Its Fluent 2 half follows commit bd835340fb.",
+   "part": "themes",
+   "state": "planned"
+  },
+  {
+   "hash": "584ae6f3a73af5c0cad22f360b9e189b7a8cddc7",
+   "pr": 22596,
+   "date": "2026-10-25",
+   "area": "platform",
+   "class": "port",
+   "note": "`FallbackStorageProvider` under concurrent calls.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "6b6c573a03599510b568033757f59c908f7328a7",
+   "pr": 22579,
+   "date": "2026-10-25",
+   "area": "controls",
+   "class": "port",
+   "note": "ColorPicker fixes.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "99086ac183b36b60ab04de525bf604e493e18615",
+   "pr": 22356,
+   "date": "2026-10-26",
+   "area": "controls",
+   "class": "port",
+   "note": "AutoCompleteBox keeps focus when an item is picked.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "fb506057eab820e7068d2f4c1ca643335ba7a07d",
+   "pr": 22608,
+   "date": "2026-10-26",
+   "area": "automation",
+   "class": "port",
+   "note": "Automation peers use `set_current_value`, so bindings survive.",
+   "part": "automation",
+   "state": "planned"
+  },
+  {
+   "hash": "e61863dff76f565c9956e09ed16f0d3884900d40",
+   "pr": 22612,
+   "date": "2026-10-27",
+   "area": "samples",
+   "class": "port",
+   "note": "Catalog date picker sample validation.",
+   "part": "samples",
+   "state": "planned"
+  },
+  {
+   "hash": "0a728569fca5c31a84278646bb976f30afe75f5e",
+   "pr": 22619,
+   "date": "2026-10-27",
+   "area": "tests",
+   "class": "not-applicable",
+   "note": "Dispatcher leak in the upstream xUnit fixtures."
+  },
+  {
+   "hash": "c67550d9ec51d82143a82bc4946b7f5d948140e7",
+   "pr": 22604,
+   "date": "2026-10-27",
+   "area": "base",
+   "class": "already",
+   "note": "Rust `str` comparisons are ordinal (`iteration_count.rs`, `classes.rs`)."
+  },
+  {
+   "hash": "6b41bcb0be790f15293da1b9b3d937728ee378ac",
+   "pr": 22593,
+   "date": "2026-10-27",
+   "area": "platform-win32",
+   "class": "port",
+   "note": "`Screen.DisplayName` on Windows: topology argument.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "db0a9a9cdb8495f2ce6de41735b57fda40569ca7",
+   "pr": 22115,
+   "date": "2026-10-27",
+   "area": "platform-win32",
+   "class": "deferred",
+   "note": "`UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement."
+  },
+  {
+   "hash": "75ea7e186c01c86fe6af6be27257719ebbfe04b6",
+   "pr": 22549,
+   "date": "2026-10-27",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Roslyn analyzer. Rust has no unchecked cast to warn about."
+  },
+  {
+   "hash": "951ee3f06716bca97deb52aa73bd7596f9b13a76",
+   "pr": 22609,
+   "date": "2026-10-27",
+   "area": "controls",
+   "class": "port",
+   "note": "Calendar waits for a whole wheel notch.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "626c94d77c1b5b746f3b9b149ff5baa5d506a3a8",
+   "pr": 22545,
+   "date": "2026-10-27",
+   "area": "text",
+   "class": "port",
+   "note": "Bidi W2 in one forward pass.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "f3eca207d04693ec60bcb40c13818d4d0e0b0131",
+   "pr": 22307,
+   "date": "2026-10-27",
+   "area": "samples",
+   "class": "deferred",
+   "note": "Catalog theme switching. Depends on the Fluent 2 decision."
+  },
+  {
+   "hash": "b6fa4b12eab4efb0f1aecee690c08553b0b32fde",
+   "pr": 22621,
+   "date": "2026-10-27",
+   "area": "controls",
+   "class": "port",
+   "note": "DrawerPage and NavigationPage template parts relaxed to Decorator.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "7e8b76db3c6a9392347e85f51197dd2e3b4cb66c",
+   "pr": 22379,
+   "date": "2026-10-27",
+   "area": "platform-x11",
+   "class": "port",
+   "note": "AT-SPI windows added on the UI thread.",
+   "part": "x11",
+   "state": "planned"
+  },
+  {
+   "hash": "a9d935b5c73bb62fbe4d04f8a00b8f1f3786c39d",
+   "pr": 22423,
+   "date": "2026-10-27",
+   "area": "controls",
+   "class": "port",
+   "note": "`ComboBox.WrapSelection` with nothing to select.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "ca9149f2facc3be4dcd8f3aa8c89b7c00d1f6a6d",
+   "pr": 22625,
+   "date": "2026-10-28",
+   "area": "platform-linux",
+   "class": "port",
+   "note": "IBus expects evdev keycodes (X11 keycode minus 8).",
+   "part": "linux",
+   "state": "planned"
+  },
+  {
+   "hash": "da1dafcdfbd94250c061d86125230fcb9be5538d",
+   "pr": 22629,
+   "date": "2026-10-28",
+   "area": "tests",
+   "class": "not-applicable",
+   "note": "Removal of the upstream Appium suite."
+  },
+  {
+   "hash": "0e0dad08ca63065497a189a1fa345fa884939165",
+   "pr": 22631,
+   "date": "2026-10-28",
+   "area": "themes",
+   "class": "already",
+   "note": "`SystemAccentColors::try_get_resource` matches typed resource keys; no culture comparison."
+  },
+  {
+   "hash": "b0ad044a6554a2bf7544d4e94b4396ca71d43881",
+   "pr": 22626,
+   "date": "2026-10-28",
+   "area": "text",
+   "class": "not-applicable",
+   "note": "Pooled-buffer disposal. `ShapedBuffer` halves are `Rc` handles released by ownership."
+  },
+  {
+   "hash": "5d6b56563bf231c74bee9db12404cc7e756174a9",
+   "pr": 22630,
+   "date": "2026-10-28",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Fluent 2 resource providers; follows the Fluent 2 decision."
+  },
+  {
+   "hash": "5865a87387d2c23786390e50d2de7ebca980b307",
+   "pr": 22632,
+   "date": "2026-10-28",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream test projects removed."
+  },
+  {
+   "hash": "1efe0dfabb7050a28b106794997c97ff321eba0b",
+   "pr": 22633,
+   "date": "2026-10-28",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream Xcode target. FerroUI sets its own minimum in `src/FerroUI.Native/build.rs`; raising it is an owner decision."
+  },
+  {
+   "hash": "725b5975e4f054115de038490db53adbc512d239",
+   "pr": 22611,
+   "date": "2026-10-28",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Fluent 2 brushes; follows the Fluent 2 decision."
+  },
+  {
+   "hash": "d1cc67f3ae7476c4d32a31e1cde1f5555d877d10",
+   "pr": 22634,
+   "date": "2026-10-28",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream solution filter."
+  },
+  {
+   "hash": "1c82a11d875b53d2fb7b268329780c369b437559",
+   "pr": 22636,
+   "date": "2026-10-28",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Fluent 2 resources; follows the Fluent 2 decision."
+  },
+  {
+   "hash": "c85e221c6082e740968b12c8b6d01a7214e0b48b",
+   "pr": 22565,
+   "date": "2026-10-28",
+   "area": "automation",
+   "class": "port",
+   "note": "TreeViewItem expand and collapse provider.",
+   "part": "automation",
+   "state": "planned"
+  },
+  {
+   "hash": "23dce09edcf1d7aae7131714447d3abb809e5aa2",
+   "pr": 22569,
+   "date": "2026-10-29",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Fluent 2 ColorPicker themes; follows the Fluent 2 decision."
+  },
+  {
+   "hash": "c9c7b90053345d16232aa41f9e78fe488323cecc",
+   "pr": 22641,
+   "date": "2026-10-29",
+   "area": "platform-linux",
+   "class": "port",
+   "note": "AT-SPI: popups report the window role.",
+   "part": "linux",
+   "state": "planned"
+  },
+  {
+   "hash": "5aa47e4f7ff7179cea0bfe0e87ad8112e14c8292",
+   "pr": 22642,
+   "date": "2026-10-29",
+   "area": "platform-linux",
+   "class": "port",
+   "note": "AT-SPI: active state only for the active window.",
+   "part": "linux",
+   "state": "planned"
+  },
+  {
+   "hash": "1968b08e1889df87084af827f3320fadc65bdae4",
+   "pr": 22578,
+   "date": "2026-10-29",
+   "area": "themes",
+   "class": "port",
+   "note": "ColorPicker fixes backported to the Fluent and Simple themes.",
+   "part": "themes",
+   "state": "planned"
+  },
+  {
+   "hash": "719787dc699b48b1d6d91d538fb56224ee0f667a",
+   "pr": 22637,
+   "date": "2026-10-29",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first."
+  },
+  {
+   "hash": "55129e06595f1637eb7b94ddad323a67ed3e39f6",
+   "pr": 22229,
+   "date": "2026-10-30",
+   "area": "platform-win32",
+   "class": "port",
+   "note": "Move and resize drags work with touch.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "2a38dc63ebc69956b0e16e0120a5d2c5709ed155",
+   "pr": 22624,
+   "date": "2026-10-30",
+   "area": "controls",
+   "class": "port",
+   "note": "Popup with pointer placement resizes with its content.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "eae84c140368f18e234fe9211044e8b0a2b6f1eb",
+   "pr": 22179,
+   "date": "2026-10-30",
+   "area": "text",
+   "class": "deferred",
+   "note": "Variable fonts: fvar and avar axis API. `FontVariationSettings` and backend variation exist; needs a design on top of them and PR 1252."
+  },
+  {
+   "hash": "d2ee79eb4620943466e998ccd8704e64450c4704",
+   "pr": 22180,
+   "date": "2026-10-30",
+   "area": "text",
+   "class": "deferred",
+   "note": "Variable fonts: `GlyphTypeface` variation clones."
+  },
+  {
+   "hash": "64b21ba1cc4ae2039018a13a09a88724396d5bf9",
+   "pr": 22181,
+   "date": "2026-10-30",
+   "area": "text",
+   "class": "deferred",
+   "note": "Variable fonts: gvar outlines for managed glyph geometry. Skia and Vello already apply variations when drawing."
+  },
+  {
+   "hash": "9ce8ffda396149ed656d2f94570a2225a3afb108",
+   "pr": 22182,
+   "date": "2026-10-30",
+   "area": "text",
+   "class": "deferred",
+   "note": "Variable fonts: HVAR advances."
+  },
+  {
+   "hash": "ee4f35bfdd5841dda194f1f1aaab4e8ec72b85aa",
+   "pr": 22183,
+   "date": "2026-10-30",
+   "area": "text",
+   "class": "deferred",
+   "note": "Variable fonts: MVAR metrics."
+  },
+  {
+   "hash": "408f2494f09c1c530ab4bca8b0e84e9d52e736eb",
+   "pr": 22184,
+   "date": "2026-10-30",
+   "area": "text",
+   "class": "deferred",
+   "note": "Variable fonts: VVAR advances."
+  },
+  {
+   "hash": "dfee7f224b3e61ba4ee3ec8bbe32b5fad9bbdbb5",
+   "pr": 22185,
+   "date": "2026-10-30",
+   "area": "text",
+   "class": "deferred",
+   "note": "Variable fonts: `FontVariations` property, markup and animation."
+  },
+  {
+   "hash": "37279ab42060546f6a33b0b9b61fe6c384129fc9",
+   "pr": 22650,
+   "date": "2026-10-30",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Fluent 2 embedded root; follows the Fluent 2 decision."
+  },
+  {
+   "hash": "432480ae82f36f40caf8693e1dfb11d4040404ea",
+   "pr": 22574,
+   "date": "2026-10-30",
+   "area": "controls",
+   "class": "port",
+   "note": "`TabStripItem.Icon` and the icon in the tab themes.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "5b36bbe0ad5630dc1571aa2ebdb943b98111444b",
+   "pr": 22683,
+   "date": "2026-11-03",
+   "area": "platform-ios",
+   "class": "port",
+   "note": "Accessibility traversal skips interop peers.",
+   "part": "ios",
+   "state": "planned"
+  },
+  {
+   "hash": "99b0962977b65fef3c355d225900ebdb299cf5ab",
+   "pr": 22686,
+   "date": "2026-11-03",
+   "area": "rendering",
+   "class": "already",
+   "note": "`immutable_bitmap.rs` returns an error from `Codec::from_data` on null."
+  },
+  {
+   "hash": "0a53cc4730e7fd2c77ffd5cebc789a3922707c95",
+   "pr": 22687,
+   "date": "2026-11-03",
+   "area": "platform-linux",
+   "class": "port",
+   "note": "AT-SPI: X11 window id attribute.",
+   "part": "linux",
+   "state": "planned"
+  },
+  {
+   "hash": "c3b6f5cf614fa280c08aa4bc34b84e2888e6456a",
+   "pr": 22710,
+   "date": "2026-11-05",
+   "area": "markup",
+   "class": "port",
+   "note": "XamlX update: inline generics in `x:Type` and `x:Static`; compare with the FerroUI compiler.",
+   "part": "markup",
+   "state": "planned"
+  },
+  {
+   "hash": "c9188ebe5f602f9b8de64b347784b33bf322a911",
+   "pr": 22724,
+   "date": "2026-11-05",
+   "area": "markup",
+   "class": "not-applicable",
+   "note": "IL emitter overload choice on Mono."
+  },
+  {
+   "hash": "330e6021797dc6ad9e08d00e4e7dfc98f9c67e9b",
+   "pr": 22652,
+   "date": "2026-11-05",
+   "area": "input",
+   "class": "port",
+   "note": "Alt with another modifier does not open the menu.",
+   "part": "input",
+   "state": "planned"
+  },
+  {
+   "hash": "60cb9d62b2ca90f2e3aafbc0031e082ff49b3cb0",
+   "pr": 22731,
+   "date": "2026-11-06",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream package feeds."
+  },
+  {
+   "hash": "f5af0ebf98a9074e6854b73e865c018d7a134238",
+   "pr": 22707,
+   "date": "2026-11-06",
+   "area": "controls",
+   "class": "port",
+   "note": "TableViewColumn minimum and maximum widths.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "c4d24e9dab0310935664d0d3479ca7775b229228",
+   "pr": 22709,
+   "date": "2026-11-06",
+   "area": "automation",
+   "class": "port",
+   "note": "TableView row automation name from visible cells.",
+   "part": "automation",
+   "state": "planned"
+  },
+  {
+   "hash": "727fea612519de34c84851172f71b3966aaf24e8",
+   "pr": 22741,
+   "date": "2026-11-07",
+   "area": "platform-browser",
+   "class": "already",
+   "note": "`webapp/modules/ferroui/dom.ts` already returns left, top, right, bottom."
+  },
+  {
+   "hash": "a81ceeaf3cf09a515fef04791a4a2278e5f1d93e",
+   "pr": 22656,
+   "date": "2026-11-09",
+   "area": "platform-browser",
+   "class": "port",
+   "note": "Clipboard in non-secure contexts.",
+   "part": "browser",
+   "state": "planned"
+  },
+  {
+   "hash": "48132c0500826f5c21e08cf1a574432a8d92bd2f",
+   "pr": 22716,
+   "date": "2026-11-09",
+   "area": "controls",
+   "class": "port",
+   "note": "`IsActive` set before `Activated` is raised.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "69be03931f0cbeab1d248e519b4bd27524ff3ed7",
+   "pr": 22736,
+   "date": "2026-11-09",
+   "area": "platform",
+   "class": "port",
+   "note": "Documentation of glob patterns.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "c9b5ae7b211c0449b429b40f0049c1955da2d6d8",
+   "pr": 22746,
+   "date": "2026-11-09",
+   "area": "controls",
+   "class": "already",
+   "note": "`Span::on_property_changed` compares the property, so `on_inlines_changed` runs."
+  },
+  {
+   "hash": "ae5ae6124e62ac22ce310b823211cf6d6a4386c5",
+   "pr": 22757,
+   "date": "2026-11-09",
+   "area": "rendering",
+   "class": "port",
+   "note": "Native memory and resource checks (bitmap copies and others); each checked against the Rust code.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "dc061bc3ef9f2ba405654f61f9c986b843890070",
+   "pr": 22698,
+   "date": "2026-11-09",
+   "area": "rendering",
+   "class": "already",
+   "note": "`sk_round_rect_cache.rs` passes the radii without a heap array."
+  },
+  {
+   "hash": "1b53d56525fabaa8f2ac9a1972d76f5b7b943693",
+   "pr": 22688,
+   "date": "2026-11-09",
+   "area": "platform-android",
+   "class": "port",
+   "note": "Storage cursors closed.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "5bbaa8e33189a06d6ecbc8ce816ac227fde91279",
+   "pr": 22743,
+   "date": "2026-11-09",
+   "area": "rendering",
+   "class": "already",
+   "note": "`LockGuard` in `vulkan_khr_surface_render_target.rs` releases the lock on every exit."
+  },
+  {
+   "hash": "9186fcf61f1032ae31e7c8990b0a43f924477574",
+   "pr": 22756,
+   "date": "2026-11-09",
+   "area": "themes",
+   "class": "deferred",
+   "note": "Fluent 2 calendar; follows the Fluent 2 decision."
+  },
+  {
+   "hash": "66f1f2a9dd08c9d96388a463ef60ab3ca44d3666",
+   "pr": 22763,
+   "date": "2026-11-09",
+   "area": "rendering",
+   "class": "port",
+   "note": "`ImmutableRadialGradientBrush` copied `radius_x` into `radius_y`.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "c93b0d6c526d585dc7204859bfd494355b77671c",
+   "pr": 22764,
+   "date": "2026-11-09",
+   "area": "rendering",
+   "class": "port",
+   "note": "Visual cache layer: the vertical scale was the horizontal one.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "45ddd45380c85058b5471a5ee8e240ed38109a65",
+   "pr": 22659,
+   "date": "2026-11-09",
+   "area": "rendering",
+   "class": "not-applicable",
+   "note": "Finalizer race of the .NET Skia binding. Rust ownership keeps the stream alive."
+  },
+  {
+   "hash": "b6a5fbc19131c4bf017ca5b58f06856b295f194a",
+   "pr": 22740,
+   "date": "2026-11-09",
+   "area": "rendering",
+   "class": "not-applicable",
+   "note": "`GC.KeepAlive`. Rust borrows keep the bitmap alive."
+  },
+  {
+   "hash": "b490bc6733ec7fd26ee33e3f2c8cf5f4410312c4",
+   "pr": 22748,
+   "date": "2026-11-10",
+   "area": "platform-x11",
+   "class": "port",
+   "note": "Two-finger scrolling with the synaptics driver.",
+   "part": "x11",
+   "state": "planned"
+  },
+  {
+   "hash": "2061fb509005ce6043389979f773537677281e83",
+   "pr": 22760,
+   "date": "2026-11-10",
+   "area": "text",
+   "class": "port",
+   "note": "Wrap opportunities between text runs.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "bdeeeef0a7f38cef7a280837f597d3f9d7a0fca8",
+   "pr": 22693,
+   "date": "2026-11-10",
+   "area": "platform-ios",
+   "class": "port",
+   "note": "Embedded native controls in accessibility.",
+   "part": "ios",
+   "state": "planned"
+  },
+  {
+   "hash": "80c4f31848f6dd404d497cd7fec8b35fb3b6d795",
+   "pr": 22462,
+   "date": "2026-11-10",
+   "area": "platform-x11",
+   "class": "port",
+   "note": "ConfigureNotify older than our last resize ignored.",
+   "part": "x11",
+   "state": "planned"
+  },
+  {
+   "hash": "0dc28102b44fa06f33011b5ecfc0fc5c05c0a311",
+   "pr": 22566,
+   "date": "2026-11-10",
+   "area": "platform-linux",
+   "class": "port",
+   "note": "DRM: no block on the page flip just queued.",
+   "part": "linux",
+   "state": "planned"
+  },
+  {
+   "hash": "8dae868308851046bb384c45769c45f55798d536",
+   "pr": 22628,
+   "date": "2026-11-10",
+   "area": "input",
+   "class": "deferred",
+   "note": "Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked."
+  },
+  {
+   "hash": "5ef345810e89d1a4a3b7ff38b62587a450e7da93",
+   "pr": 22782,
+   "date": "2026-11-12",
+   "area": "platform-win32",
+   "class": "port",
+   "note": "Virtual key mapping behind the keyboard layout tests.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "3ecf2a3fd87021335e0896d3f876278af7b90a8f",
+   "pr": 22777,
+   "date": "2026-11-12",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Empty upstream CI commit."
+  },
+  {
+   "hash": "b04cec5ef5544eb5b00a3529b6e14958f6a31e97",
+   "pr": 22801,
+   "date": "2026-11-12",
+   "area": "build",
+   "class": "not-applicable",
+   "note": ".NET SDK update."
+  },
+  {
+   "hash": "dc2253658c726bca7cec3d24f883c19df98d7461",
+   "pr": 22674,
+   "date": "2026-11-12",
+   "area": "markup",
+   "class": "port",
+   "note": "Compact IL names do not apply; the enum whitespace fix in its XamlX update does.",
+   "part": "markup",
+   "state": "planned"
+  },
+  {
+   "hash": "27b11793211138273e4721bccddd972da3fda1ff",
+   "pr": 22558,
+   "date": "2026-11-12",
+   "area": "platform-linux",
+   "class": "port",
+   "note": "StatusNotifierItem tooltip text.",
+   "part": "linux",
+   "state": "planned"
+  },
+  {
+   "hash": "22e9912b75188097c285939a6c0b091c7c573fe4",
+   "pr": 22725,
+   "date": "2026-11-12",
+   "area": "markup",
+   "class": "not-applicable",
+   "note": "Exact signature lookups in the IL compiler."
+  },
+  {
+   "hash": "050d3fb9411b3b16a6e2c67c35656ac5f550af54",
+   "pr": 22798,
+   "date": "2026-11-12",
+   "area": "rendering",
+   "class": "port",
+   "note": "Skia: one layer less for each opacity mask. Performance gain.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "ee79f65f265a0755764ac3c2a8eadadb598d7b16",
+   "pr": 22685,
+   "date": "2026-11-12",
+   "area": "platform-android",
+   "class": "port",
+   "note": "Input type no longer forced to a password variation.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "84f262c218db34327e0c7aa1cc61df3d9c502b2c",
+   "pr": 22676,
+   "date": "2026-11-12",
+   "area": "markup",
+   "class": "not-applicable",
+   "note": "Function-pointer factories for IL-compiled property info. FerroUI generates Rust."
+  },
+  {
+   "hash": "24b6c7b41046b349de3f0c8ed007ad1e777ed20b",
+   "pr": 22610,
+   "date": "2026-11-12",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "`updateLayer` flushes the render pass synchronously.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "070c3be990b3acab48023a65c7373cc7cfd1e58b",
+   "pr": 22501,
+   "date": "2026-11-12",
+   "area": "rendering",
+   "class": "deferred",
+   "note": "Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android."
+  },
+  {
+   "hash": "ca61365d753e4f01c4ff7605f3d32c410b2aae3c",
+   "pr": 22538,
+   "date": "2026-11-12",
+   "area": "rendering",
+   "class": "port",
+   "note": "Animated value written even when an expression has read it.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "61c3aaa8762c9f13cb9dbfa6efd0167a33c984db",
+   "pr": 22810,
+   "date": "2026-11-13",
+   "area": "rendering",
+   "class": "port",
+   "note": "Remove `CompositorDrawingContextProxy`: on main only its own tests construct it.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "6350ac83e644ea7670b380d4529b59dd3333bd2d",
+   "pr": 22774,
+   "date": "2026-11-13",
+   "area": "text",
+   "class": "port",
+   "note": "Collapsed lines own the runs they split; check against `dispose` in the Rust text line.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "a4f832f5d67f46ee031a9a9c440a4c4c802434fe",
+   "pr": 22795,
+   "date": "2026-11-13",
+   "area": "input",
+   "class": "port",
+   "note": "Tab navigation skips disabled elements.",
+   "part": "input",
+   "state": "planned"
+  },
+  {
+   "hash": "e73a976afd392e7b14ab41709d1dddcca97cde1e",
+   "pr": 22796,
+   "date": "2026-11-13",
+   "area": "platform-macos",
+   "class": "already",
+   "note": "`trayicon.mm` already tests the text for null."
+  },
+  {
+   "hash": "60b1719596312b69bf601c1877ae5c61d25e5776",
+   "pr": 22797,
+   "date": "2026-11-13",
+   "area": "controls",
+   "class": "port",
+   "note": "No empty `SelectionChanged` during initialization.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "53e461e07a7adc6b64a85eec20d2fda587040c04",
+   "pr": 22466,
+   "date": "2026-11-13",
+   "area": "controls",
+   "class": "port",
+   "note": "Tab strip stays reachable with Tab.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "ab36f90feb89dfa53cbde45839b77fd0d44d608c",
+   "pr": 22701,
+   "date": "2026-11-13",
+   "area": "controls",
+   "class": "port",
+   "note": "Grid: debug assertion allows a rounding residual.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "5ea0586b322b7d53c1abd4c6ade093ad66b6dfdb",
+   "pr": 22699,
+   "date": "2026-11-13",
+   "area": "themes",
+   "class": "port",
+   "note": "Fluent ButtonSpinner outer corner.",
+   "part": "themes",
+   "state": "planned"
+  },
+  {
+   "hash": "a05d9d004625878081168576258bf80762b99f18",
+   "pr": 22812,
+   "date": "2026-11-13",
+   "area": "themes",
+   "class": "port",
+   "note": "Simple ComboBox and Slider show validation errors.",
+   "part": "themes",
+   "state": "planned"
+  },
+  {
+   "hash": "d0a30417019e5cba8c0d6253a2126a374022599b",
+   "pr": 22475,
+   "date": "2026-11-13",
+   "area": "controls",
+   "class": "port",
+   "note": "RelativePanel chain with infinite available size.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "ad90a07d030883f5c2ae475a002373ab893384fd",
+   "pr": 22671,
+   "date": "2026-11-13",
+   "area": "automation",
+   "class": "port",
+   "note": "`LabeledBy` in Windows UI Automation.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "10a2fb0ac56b4685041ecdb60d94ebf919d9cbfd",
+   "pr": 22682,
+   "date": "2026-11-13",
+   "area": "platform-win32",
+   "class": "port",
+   "note": "Clipboard read retried while another process holds it.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "e08cd2521268bab75b5295c97f8668af8a76e68f",
+   "pr": 21826,
+   "date": "2026-11-13",
+   "area": "rendering",
+   "class": "deferred",
+   "note": "Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code."
+  },
+  {
+   "hash": "80659c4c3e3a6ff985540e86ce10fe9c19bcd0ec",
+   "pr": 22773,
+   "date": "2026-11-13",
+   "area": "text",
+   "class": "deferred",
+   "note": "Platform-simulated typefaces. Touches font matching beside the open web fonts stack; follows that stack."
+  },
+  {
+   "hash": "02d7bc35e34fa1207a93d540b1639e42e4e88f57",
+   "pr": 22662,
+   "date": "2026-11-13",
+   "area": "text",
+   "class": "port",
+   "note": "Runs of different scripts shaped in separate buffers.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "9d6cb1ea625b9f1db888f0c46e631f7f2d14bd28",
+   "pr": 22015,
+   "date": "2026-11-13",
+   "area": "rendering",
+   "class": "port",
+   "note": "ContentPresenter and acrylic clip to rounded bounds.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "d379b92b87d8365617531fe0366a8bc500b17ac3",
+   "pr": 22694,
+   "date": "2026-11-13",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "`automation.mm`: tab button subrole.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "500e78afef78a82eb6df3270d02ec2a144813d11",
+   "pr": 22679,
+   "date": "2026-11-13",
+   "area": "data",
+   "class": "port",
+   "note": "TwoWay binding does not write a just-published value back.",
+   "part": "data",
+   "state": "planned"
+  },
+  {
+   "hash": "8035f14fd356beb7d7e7d8243dc8ce98dfc27551",
+   "pr": 22690,
+   "date": "2026-11-13",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "`FrnWindow.mm`: only the view tracking area resets the cursor.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "4ae41027c062e30a2383ba820e065273b85c8a3e",
+   "pr": 22820,
+   "date": "2026-11-16",
+   "area": "platform-win32",
+   "class": "port",
+   "note": "`dcomp.idl`: `BOOL`, not `bool`, for `CreateTargetForHwnd`.",
+   "part": "win32",
+   "state": "planned"
+  },
+  {
+   "hash": "7011f50c27560e7d9c3db93c2a7479f57b3fb4a0",
+   "pr": 22305,
+   "date": "2026-11-16",
+   "area": "controls",
+   "class": "port",
+   "note": "`AutoCompleteBox.UseFloatingPlaceholder`.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "9f6a652216f2de72448265f0ac7aea74862e16d7",
+   "pr": 22846,
+   "date": "2026-11-16",
+   "area": "platform-browser",
+   "class": "already",
+   "note": "`webapp/modules/ferroui/timer.ts` already passes the timestamp."
+  },
+  {
+   "hash": "16d8678a44162a40fee756c0173871a6c1c72997",
+   "pr": 22835,
+   "date": "2026-11-16",
+   "area": "rendering",
+   "class": "port",
+   "note": "Skia: multiply opacity applied once below an opacity mask.",
+   "part": "rendering",
+   "state": "planned"
+  },
+  {
+   "hash": "ab578c3ea03d28b3affe1b9023d4f5ddbd924e57",
+   "pr": 22793,
+   "date": "2026-11-17",
+   "area": "platform",
+   "class": "port",
+   "note": "Assembly resolved by exact name.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "75497e363451e05882adcc5491d293531bb0d47c",
+   "pr": 22857,
+   "date": "2026-11-17",
+   "area": "themes",
+   "class": "port",
+   "note": "Simple theme: missing resources.",
+   "part": "themes",
+   "state": "planned"
+  },
+  {
+   "hash": "a49cbefe8b787eda66229063115aacb2c6021f9d",
+   "pr": 22864,
+   "date": "2026-11-17",
+   "area": "automation",
+   "class": "port",
+   "note": "Peer parent kept after a move.",
+   "part": "automation",
+   "state": "planned"
+  },
+  {
+   "hash": "281e59e13854766c4a8152c944ce0ab8063b7525",
+   "pr": 22866,
+   "date": "2026-11-17",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream contribution bot."
+  },
+  {
+   "hash": "fda56217a574335923db9ad946e0b70a1c0e964c",
+   "pr": 22872,
+   "date": "2026-11-18",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream workflows."
+  },
+  {
+   "hash": "251fda615505e6516b675a8a266117d28314da13",
+   "pr": null,
+   "date": "2026-11-18",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream contribution bot."
+  },
+  {
+   "hash": "a096f9bbde86a0d7e1d3ee68262cec931fafa3d7",
+   "pr": 22862,
+   "date": "2026-11-18",
+   "area": "platform-android",
+   "class": "port",
+   "note": "Accessibility node position.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "92dc2b7207e63f6a0edf7ee1a2ec458e97cc05b7",
+   "pr": 22849,
+   "date": "2026-11-18",
+   "area": "platform-android",
+   "class": "port",
+   "note": "Accessibility focus changes reported.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "70072230024b4d107304eae788ebdb14c6589e52",
+   "pr": 22871,
+   "date": "2026-11-18",
+   "area": "controls",
+   "class": "port",
+   "note": "FlexPanel relative basis is a fraction. Behaviour change for existing values.",
+   "part": "controls",
+   "state": "planned"
+  },
+  {
+   "hash": "192e7a0ba515e916c770d70d627230fcf0e6f636",
+   "pr": 22880,
+   "date": "2026-11-18",
+   "area": "platform-macos",
+   "class": "port",
+   "note": "Leaf nodes are not reported as expandable.",
+   "part": "macos",
+   "state": "planned"
+  },
+  {
+   "hash": "2d340861036fc489d1d6e7a4ae9c7a79ea46843d",
+   "pr": 22883,
+   "date": "2026-11-19",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream contribution guide."
+  },
+  {
+   "hash": "ea6f0daf9b7010aefa9f8a856f8ce72b68ba22e1",
+   "pr": 22888,
+   "date": "2026-11-19",
+   "area": "platform-android",
+   "class": "port",
+   "note": "Start-up does not wait for the Choreographer thread.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "5032926e38cd95752041a34a3a15cf502e8dae79",
+   "pr": 22865,
+   "date": "2026-11-19",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream readme."
+  },
+  {
+   "hash": "3f984fa0d96d2e66ad6f8fb62361b780e44d55fc",
+   "pr": 22870,
+   "date": "2026-11-19",
+   "area": "text",
+   "class": "port",
+   "note": "Paragraph and first-line indents.",
+   "part": "text",
+   "state": "planned"
+  },
+  {
+   "hash": "debc815ba9dff30a283135b1764e5fdfb609bb91",
+   "pr": 22914,
+   "date": "2026-11-21",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream build services package."
+  },
+  {
+   "hash": "605e16101924eb87c337cdf5fcc0997fb9af84b1",
+   "pr": 22738,
+   "date": "2026-11-23",
+   "area": "platform-android",
+   "class": "port",
+   "note": "Render call synchronized with surface create and destroy.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "51dae7305e4e5de4e906cad8f80453605a171d2a",
+   "pr": 22681,
+   "date": "2026-11-23",
+   "area": "platform-android",
+   "class": "port",
+   "note": "TalkBack roles.",
+   "part": "android",
+   "state": "planned"
+  },
+  {
+   "hash": "5d9e6d1b0e87337f74f233bead580db186412357",
+   "pr": null,
+   "date": "2026-11-23",
+   "area": "build",
+   "class": "not-applicable",
+   "note": "Upstream version number."
+  }
+ ]
+}
