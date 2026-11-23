@@ -1,3 +1,4 @@
+import type { AnimationGraphMessage, TimelineGraphReady } from './animationGraph';
 import type { FrameTarget, Range } from './protocol';
 import type { StateTransitionControl, StateTransitionPosition } from './stateTransitionProtocol';
 
@@ -140,6 +141,7 @@ export type TimelineControl = TimelineTransportControl
 
 export type FromTimeline =
     | { type: 'ready' }
+    | AnimationGraphMessage | TimelineGraphReady
     | { type: 'control'; frame: FrameTarget; control: TimelineControl }
     | { type: 'transitionControl'; frame: FrameTarget; control: StateTransitionControl }
     | { type: 'programActions'; frame: FrameTarget; program: number | undefined }
@@ -154,7 +156,7 @@ export type FromTimeline =
     | { type: 'keyframeGroup'; frame: FrameTarget; program: number; keys: KeyframeLocation[]; edit?: TimelineKeyAction; destinations?: number[] }
     | { type: 'keyframe'; frame: FrameTarget; program: number; track: number; time: number };
 
-export type ToTimeline = { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }
+export type ToTimeline = AnimationGraphMessage | { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }
     | { type: 'clipsPlaced'; before: FrameTarget }
     | { type: 'keyframesEdited'; keys?: KeyframeLocation[]; before: FrameTarget }
     | TimelineKeyframeResponse

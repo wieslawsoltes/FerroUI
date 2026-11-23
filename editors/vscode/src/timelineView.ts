@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { availableGraphModes, isAnimationGraphMode, type AnimationGraphMode } from './animationGraph';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
 import { errorMessage, type FrameTarget } from './protocol';
@@ -16,6 +17,7 @@ import type { AnimationSourceIssue, CurvePoint, FromTimeline, KeyframeLocation, 
 import { timelineHtml } from './view';
 
 export const TIMELINE_VIEW = 'ferroui.timeline';
+const GRAPH_MODE = 'ferroui.timeline.graphMode';
 
 interface Catalog {
     key: string;
@@ -37,9 +39,12 @@ export class TimelineView implements vscode.Disposable {
     private file = '';
     private catalog?: Catalog;
     private shown?: string;
+    private graphMode?: AnimationGraphMode;
 
-    constructor(root: vscode.Uri, private readonly changed: () => void) {
-        this.view = new DockView(root, timelineHtml, changed, message => { void this.receive(message); });
+    constructor(root: vscode.Uri, private readonly changed: () => void, private readonly preferences: vscode.Memento) {
+        const saved = preferences.get(GRAPH_MODE);
+        if (isAnimationGraphMode(saved)) this.graphMode = saved;
+        this.view = new DockView(root, timelineHtml, () => { changed(); this.showGraph(); }, message => { void this.receive(message); });
         this.playback = new TimelinePlayback(position => {
             this.view.post({ type: 'position', position, frame: this.frame() });
             if (!position?.busy) this.refresh();
@@ -62,6 +67,30 @@ export class TimelineView implements vscode.Disposable {
 
     recordingTime(panel: DesignerPanel | undefined): number | undefined {
         return panel?.animationRecordingTime;
+    }
+
+    graphDisplay(panel: DesignerPanel) {
+        return { mode: this.graphMode ?? 'keys', revision: panel.currentToken,
+            available_modes: availableGraphModes(panel.supportsTimelineCurves, panel.supportsTimelineCurveVelocity) };
+    }
+
+    async setGraphMode(panel: DesignerPanel, frame: FrameTarget, mode: AnimationGraphMode) {
+        if (this.panel !== panel || !panel.canUse(frame)) throw new Error('Read the current designer revision.');
+        const display = this.graphDisplay(panel);
+        if (!display.available_modes.includes(mode)) throw new Error('The current preview does not support that graph mode.');
+        await this.saveGraph(mode);
+        return { ...display, mode };
+    }
+
+    private showGraph(): void {
+        if (this.graphMode) this.view.post({ type: 'animationGraphMode', mode: this.graphMode });
+    }
+
+    private async saveGraph(mode: AnimationGraphMode): Promise<void> {
+        const changed = this.graphMode !== mode;
+        this.graphMode = mode;
+        this.showGraph();
+        if (changed) await this.preferences.update(GRAPH_MODE, mode);
     }
 
     async previewMarkers(panel: DesignerPanel, frame: FrameTarget, id: number | undefined, signal: AbortSignal, edit?: TimelineMarkerAction) {
@@ -221,6 +250,14 @@ export class TimelineView implements vscode.Disposable {
     }
 
     private async receive(message: FromTimeline): Promise<void> {
+        if (message.type === 'animationGraphReady' || message.type === 'animationGraphMode') {
+            try {
+                if (message.type === 'animationGraphMode' && isAnimationGraphMode(message.mode)) await this.saveGraph(message.mode);
+                else if (message.type === 'animationGraphReady' && !this.graphMode && isAnimationGraphMode(message.saved)) await this.saveGraph(message.saved);
+                else this.showGraph();
+            } catch (error) { this.report(error); }
+            return;
+        }
         const panel = this.panel;
         if (!panel || message.type === 'ready' || message.frame.session !== panel.session) return;
         try {

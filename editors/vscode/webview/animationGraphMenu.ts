@@ -1,24 +1,21 @@
-import type { CurveMetric } from '../src/timelineProtocol';
+import { isAnimationGraphMode, type AnimationGraphMode } from '../src/animationGraph';
 import { anchorPopover, element, labelButton } from './dom';
-
-export type AnimationGraphMode = 'keys' | CurveMetric;
 
 export class AnimationGraphMenu {
     private readonly button: HTMLButtonElement;
     private readonly options: HTMLButtonElement[];
     private velocity = false;
 
-    constructor(prefix: string, private selected: AnimationGraphMode, changed: () => void) {
+    constructor(prefix: string, private selected: AnimationGraphMode, choose: (mode: AnimationGraphMode) => void) {
         this.button = element(`${prefix}-animation-graph`);
         const popup = element(`${prefix}-graph-modes`);
         this.options = [...popup.querySelectorAll<HTMLButtonElement>('button')];
         anchorPopover(this.button, popup);
         popup.addEventListener('toggle', event => this.button.setAttribute('aria-expanded', String(event.newState === 'open')));
         for (const item of this.options) item.onclick = () => {
-            this.selected = item.value as AnimationGraphMode;
             popup.hidePopover();
             this.button.focus({ preventScroll: true });
-            changed();
+            if (isAnimationGraphMode(item.value)) choose(item.value);
         };
     }
 
@@ -27,6 +24,12 @@ export class AnimationGraphMenu {
     }
 
     get preference(): AnimationGraphMode { return this.selected; }
+
+    apply(mode: AnimationGraphMode): boolean {
+        if (this.selected === mode) return false;
+        this.selected = mode;
+        return true;
+    }
 
     show(available: boolean, velocity: boolean): void {
         this.velocity = velocity;

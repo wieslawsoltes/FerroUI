@@ -1,3 +1,4 @@
+import type { AnimationGraphMode } from '../src/animationGraph';
 import type { HostedAnimationFrame, HostedAnimationProgram, HostedAnimationTarget, HostedKeyframeSelection } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import type { CurveChannel, CurveMetric, KeyframeComponent, TimelineTrack } from '../src/timelineProtocol';
@@ -15,7 +16,7 @@ interface TrackChoice {
 }
 
 export class HostedCurves {
-    private readonly graph = new AnimationGraphMenu('hosted', 'keys', () => this.paint());
+    private readonly graph = new AnimationGraphMenu('hosted', 'keys', mode => this.send({ type: 'animationGraphMode', mode }));
     private readonly panel = element('hosted-curves');
     private readonly select = element<HTMLSelectElement>('hosted-curve-track');
     private readonly lane = element('hosted-curve-lane');
@@ -56,6 +57,10 @@ export class HostedCurves {
             } else return;
             event.preventDefault();
         }, { passive: false });
+    }
+
+    setGraphMode(mode: AnimationGraphMode): void {
+        if (this.graph.apply(mode)) this.paint();
     }
 
     follow(program: HostedAnimationProgram | undefined, targets: HostedAnimationTarget[], frame: HostedAnimationFrame | undefined,

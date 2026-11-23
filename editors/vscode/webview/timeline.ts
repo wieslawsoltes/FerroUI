@@ -1,8 +1,9 @@
+import type { AnimationGraphMode } from '../src/animationGraph';
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineKeyAction, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
 import { TimelineClips } from './timelineClips';
 import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelinePrograms';
-import { AnimationGraphMenu, type AnimationGraphMode } from './animationGraphMenu';
+import { AnimationGraphMenu } from './animationGraphMenu';
 import { anchorPopover, element, labelButton } from './dom';
 import { TimelineChannels } from './timelineChannels';
 import { curveChannels, TimelineCurves } from './timelineCurves';
@@ -54,7 +55,7 @@ const saved = vscode.getState();
 let remembered = typeof saved === 'number' ? { id: saved } : saved;
 let frameRate = [24, 30, 60].find(rate => typeof saved === 'object' && rate === saved.frameRate) ?? 0;
 const graph = new AnimationGraphMenu('timeline', typeof saved === 'object'
-    ? saved.graph ?? (saved.curves ? 'value' : 'keys') : 'keys', () => { saveTimeline(); showCurves(); });
+    ? saved.graph ?? (saved.curves ? 'value' : 'keys') : 'keys', mode => vscode.postMessage({ type: 'animationGraphMode', mode }));
 snap.value = String(frameRate);
 let program: number | undefined;
 let timedProgramSession: number | undefined;
@@ -231,6 +232,8 @@ window.addEventListener('message', event => {
         showStatus(model.message);
         showTracks();
         seek();
+    } else if (message.type === 'animationGraphMode') {
+        if (graph.apply(message.mode)) { saveTimeline(); showCurves(); }
     } else if (message.type === 'position') {
         model.position = message.position;
         model.frame = message.frame;
@@ -261,6 +264,7 @@ window.addEventListener('message', event => {
     }
 });
 vscode.postMessage({ type: 'ready' });
+vscode.postMessage({ type: 'animationGraphReady', saved: graph.preference });
 
 function current(): TimelineProgram | undefined { return model.programs.find(item => item.id === program); }
 

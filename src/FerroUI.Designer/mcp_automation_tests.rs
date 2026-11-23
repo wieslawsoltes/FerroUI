@@ -23,6 +23,53 @@ fn write() -> Permissions {
 }
 
 #[test]
+fn studio_mcp_graph_mode_drives_the_native_menu_and_keeps_source_history() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{MenuFlyout, MenuItem};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    workspace.set_timeline_visible(false);
+    let session = workspace.session();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    assert!(!DesignerMcp::new(&session).tools().iter().any(|tool| tool["name"] == "designer_timeline_view"));
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    assert_eq!(before["mode"], "keys");
+    assert_eq!(before["visible"], false);
+    let edit = |uri: &Value, revision: u64, mode: &str, permissions| {
+        provider.call("designer_timeline_set_graph", &json!({"expected_uri":uri,
+            "expected_revision":revision, "graph_mode":mode}), permissions)
+    };
+    let uri = &before["uri"];
+    let revision = before["revision"].as_u64().unwrap();
+    assert!(edit(uri, revision, "velocity", Permissions::default()).unwrap_err().contains("allow_property_writes"));
+    assert!(edit(uri, revision + 1, "velocity", write()).unwrap_err().contains("revision changed"));
+    assert!(edit(&json!("file:///Previous.xaml"), revision, "velocity", write()).is_err());
+    assert_eq!(read(), before);
+
+    let result = edit(uri, revision, "velocity", write()).unwrap();
+    assert_eq!(result["mode"], "velocity");
+    assert_eq!(result["visible"], true);
+    let graph = workspace.control().get_control::<Button>("TimelineCurves");
+    let menu = graph.flyout().unwrap().cast::<MenuFlyout>().unwrap();
+    let items = menu.items().to_vec().into_iter().flatten()
+        .map(|entry| Control::from_boxed(&entry).unwrap().cast::<MenuItem>().unwrap()).collect::<Vec<_>>();
+    assert!(!items[0].is_checked() && !items[1].is_checked() && items[2].is_checked());
+    items[1].raise_event(&RoutedEventArgs::with_event(MenuItem::click_event()));
+    assert_eq!(read()["mode"], "value");
+    assert!(items[1].is_checked() && !items[2].is_checked());
+    workspace.set_timeline_visible(false);
+    workspace.set_timeline_visible(true);
+    assert_eq!(read()["mode"], "value");
+    let session = session.borrow();
+    assert_eq!(session.document().revision(), revision);
+    assert_eq!(session.document().source(), source);
+    assert!(!session.document().can_undo());
+}
+
+#[test]
 fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");

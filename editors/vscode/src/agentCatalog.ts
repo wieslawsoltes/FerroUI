@@ -1,4 +1,5 @@
 import { choice, integer, object, text, tool, truth, type Schema } from './agentSchema';
+import { animationGraphModes } from './animationGraph';
 import { hostedPaletteCatalog } from './hostedPaletteCatalog';
 import { hostedStylesCatalog } from './hostedStylesCatalog';
 import { hostedTemplateCatalog } from './hostedTemplateCatalog';
@@ -59,6 +60,7 @@ const hostedGesture: Schema = { oneOf: [
         properties: { type: choice('text'), text: { type: 'string', maxLength: 8192 } } },
 ] };
 const time = { type: 'number', minimum: 0 };
+const graphMode = choice(...animationGraphModes);
 const previewRange = { type: 'object', additionalProperties: false, required: ['start', 'end', 'loop'],
     properties: { start: time, end: time, loop: truth } };
 const markerAction = { type: 'object', additionalProperties: false, required: ['action', 'name'],
@@ -212,6 +214,9 @@ export const agentCatalog = {
         ...frame, expected_generation: integer(1), fixture: { type: 'string', maxLength: 128 },
     }, ['session', 'expected_generation', 'expected_revision'], true, false),
     designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, frame, elapsed time, and named markers.', session, ['session']),
+    designer_hosted_timeline_view: tool('Read the App Preview graph preference, available modes, generation, and revision.', session, ['session']),
+    designer_hosted_timeline_set_graph: tool('Choose Keys, Value, or Velocity for the visible App Preview graph. Use the generation and revision from designer_hosted_timeline_view.',
+        { ...frame, expected_generation: integer(1), graph_mode: graphMode }, ['session', 'expected_generation', 'expected_revision', 'graph_mode'], true, false),
     designer_hosted_image: tool('Capture the current App Preview frame as PNG with its app generation, source revision, and frame sequence.', session, ['session']),
     designer_hosted_input: tool('Interact with the current App Preview. Click or scroll at normalized x and y, or send text to the focused native control. Pass the current app generation, revision, and frame sequence.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), input: hostedGesture },
@@ -342,6 +347,9 @@ export const agentCatalog = {
             properties: { action: choice('seek', 'scrub_all', 'play', 'play_range', 'play_all', 'pause', 'stop', 'record'), program: node, enabled: truth, time,
                 range: previewRange } } },
         ['session', 'expected_revision', 'arguments'], true, false),
+    designer_timeline_view: tool('Read the Timeline graph preference, available modes, and current designer revision.', session, ['session']),
+    designer_timeline_set_graph: tool('Open the Timeline and choose Keys, Value, or Velocity. Use the current designer revision.',
+        { ...frame, graph_mode: graphMode }, ['session', 'expected_revision', 'graph_mode'], true, false),
     designer_timeline_markers: tool('List the named preview markers for a typed Timeline clip or the shared ruler. Use the current designer revision and supply program or set all to true.',
         { ...frame, program: node, all: truth }, ['session', 'expected_revision']),
     designer_timeline_marker_edit: tool('Set, remove, or seek to a session-local Timeline marker by name. Supply program for authored seconds or set all to true for elapsed seconds.',

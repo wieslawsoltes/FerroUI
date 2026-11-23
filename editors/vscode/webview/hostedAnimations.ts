@@ -1,3 +1,4 @@
+import type { AnimationGraphMode } from '../src/animationGraph';
 import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationState } from '../src/hostedAnimationProtocol';
 import type { HostedAnimationProgram } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
@@ -168,6 +169,8 @@ export class HostedAnimationView {
     }
 
     curve(reply: Extract<ToHosted, { type: 'curveReply' }>) { this.curves.receive(reply); }
+
+    setGraphMode(mode: AnimationGraphMode): void { this.curves.setGraphMode(mode); }
 
     private canUse(interrupt = false): boolean {
         const frame = this.state.frame;

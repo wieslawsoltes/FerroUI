@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import * as path from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
+import { availableGraphModes, isAnimationGraphMode, type AnimationGraphMode } from './animationGraph';
 import type { BuiltProject } from './builtProjects';
 import { inCargoBuildSlot } from './cargoBuildGate';
 import { type CargoSelection, type CargoTarget, discoverCargoTargets, selectCargoTarget } from './cargoTarget';
@@ -124,6 +125,19 @@ export class HostedDesign implements vscode.Disposable {
         const frame = current?.revision === state.frame?.revision && current?.sequence === state.frame?.sequence
             ? state.frame : undefined;
         return { generation: session.generation, status: session.message, ...state, frame };
+    }
+
+    graphDisplay(uri: vscode.Uri) { return this.session(uri).graphDisplay(); }
+
+    setGraphMode(uri: vscode.Uri, generation: number, revision: number, mode: AnimationGraphMode) {
+        const session = this.session(uri);
+        const display = session.graphDisplay();
+        if (display.generation !== generation) throw new Error('Read the current application preview generation.');
+        if (session.currentFrame?.revision !== revision) throw new Error('Read the current application preview revision.');
+        if (!display.available_modes.includes(mode)) throw new Error('The current App Preview does not support that graph mode.');
+        session.panel.reveal(session.panel.viewColumn, true);
+        session.setGraphMode(mode);
+        return { ...display, mode };
     }
 
     image(uri: vscode.Uri) {
@@ -367,6 +381,7 @@ class HostedSession {
     private ready = false;
     private disposed = false;
     private status = 'Building the selected Cargo target…';
+    private graphMode: AnimationGraphMode = 'keys';
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
@@ -453,6 +468,18 @@ class HostedSession {
     refresh(): HostedFixtureCatalog {
         this.update();
         return this.fixtures();
+    }
+
+    graphDisplay() {
+        const { programs } = this.animations.state;
+        return { mode: this.graphMode, generation: this.generation, revision: this.revision,
+            available_modes: availableGraphModes(programs.some(program => Boolean(program.curveTracks?.length)),
+                Boolean(this.client?.capabilities.timelineCurveVelocity)) };
+    }
+
+    setGraphMode(mode: AnimationGraphMode): void {
+        this.graphMode = mode;
+        this.post({ type: 'animationGraphMode', mode });
     }
 
     private update(): void {
@@ -872,10 +899,15 @@ class HostedSession {
     private async receive(message: FromHosted): Promise<void> {
         if (message.type === 'ready') {
             this.ready = true;
+            this.post({ type: 'animationGraphMode', mode: this.graphMode });
             if (this.frame) this.post({ type: 'frame', frame: this.frame });
             this.showAnimations(this.animations.state);
             this.report(this.status, this.frame?.revision === this.revision && Boolean(this.client));
             this.schedule(0);
+            return;
+        }
+        if (message.type === 'animationGraphMode') {
+            if (isAnimationGraphMode(message.mode)) this.setGraphMode(message.mode);
             return;
         }
         if (message.type === 'refresh') { this.refresh(); return; }

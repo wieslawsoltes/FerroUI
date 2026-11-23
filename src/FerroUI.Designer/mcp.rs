@@ -75,6 +75,8 @@ mod prototype;
 mod schema;
 #[path = "mcp_timeline_markers.rs"]
 mod timeline_markers;
+#[path = "mcp_timeline_view.rs"]
+mod timeline_view;
 #[path = "mcp_selection_workflows.rs"]
 mod selection_workflows;
 #[path = "mcp_spacing.rs"]
@@ -352,6 +354,7 @@ impl UiToolProvider for DesignerMcp {
         tools.push(design_tokens::tool());
         if self.workspace.is_some() {
             tools.extend(workspace_tools::tools());
+            tools.extend(timeline_view::tools());
             tools.extend(preview_appearance::tools());
             tools.extend(preview_stages::tools());
             tools.extend(prototype::tools());
@@ -370,6 +373,7 @@ impl UiToolProvider for DesignerMcp {
             || behaviors::handles(name)
             || property_transitions::handles(name)
             || timeline_markers::handles(name)
+            || timeline_view::handles(name)
             || binding::handles(name)
             || name == brush::NAME
             || grid::handles(name)
@@ -558,7 +562,7 @@ impl UiToolProvider for DesignerMcp {
             let mut session = owner.try_borrow_mut().map_err(|_| "Designer is already processing a transaction")?;
             return placement::call(&mut session, workspace.as_deref(), name, args);
         }
-        if preview_appearance::handles(name) || preview_stages::handles(name) || prototype::handles(name) {
+        if preview_appearance::handles(name) || preview_stages::handles(name) || prototype::handles(name) || timeline_view::handles(name) {
             let workspace = self
                 .workspace
                 .as_ref()
@@ -573,6 +577,9 @@ impl UiToolProvider for DesignerMcp {
             );
             if preview_appearance::handles(name) {
                 return preview_appearance::call(&workspace, name, args);
+            }
+            if timeline_view::handles(name) {
+                return timeline_view::call(&workspace, name, args);
             }
             return if prototype::handles(name) {
                 prototype::call(&workspace, name, args, permissions)

@@ -271,6 +271,11 @@ the trace to retime its key. Change its incoming easing in the inspector to shap
 The fit icon frames a selection in either display. `designer_animation_curve` accepts
 `metric: "velocity"` for the same native samples.
 
+To change the visible Studio graph through MCP, read `designer_timeline_view` and pass its document
+URI and revision to `designer_timeline_set_graph` with `graph_mode` set to `keys`, `value`, or
+`velocity`. The same graph menu reflects the selection.
+[Graph display tools](vscode/motion.md#choose-the-graph-display-from-an-agent)
+
 For transform component tracks such as `RotateTransform.Angle` or
 `TranslateTransform.X`, the graph samples the matching native transform object.
 Use the key inspector to edit its value or add a sampled key at the playhead.

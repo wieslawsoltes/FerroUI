@@ -85,6 +85,14 @@ The key markers stay under the velocity trace. Drag them horizontally to change 
 
 VS Code and Designer Studio agents can pass `metric: "velocity"` to `designer_animation_curve`. Use `metric: "value"` or omit `metric` to return property values. The query uses the accepted program and target and leaves the authored source and playhead intact.
 
+### Choose the graph display from an agent
+
+1. Read `designer_timeline_view` for the current graph preference, available modes, and `revision`. In VS Code, pass the open design’s `session`. In standalone Designer Studio, use the active document and the returned `uri`.
+2. Call `designer_timeline_set_graph` with `graph_mode` set to `keys`, `value`, or `velocity` and pass that revision as `expected_revision`. Pass the same `session` in VS Code or the reported `uri` as `expected_uri` in Studio. The command opens the Timeline and sets the toolbar selection.
+3. In App Preview, use `designer_hosted_timeline_view` and `designer_hosted_timeline_set_graph`. Pass the App Preview `generation` and `revision` as `expected_generation` and `expected_revision` along with `session` and `graph_mode`. Choose an animation and a compatible track to display its curve.
+
+The regular Timeline remembers its graph choice in the VS Code workspace. Each App Preview keeps its own choice. The graph controls leave authored content, playback and Undo history intact. While comparing clips, switch back to tracks to see the selected graph. [MCP permissions and tool reference](reference.md#drive-an-editor-workflow)
+
 ### Inspect one part of a geometry value
 
 ![The Bottom left radius curve beneath the XAML source and its native artboard at the selected key](../images/vscode-geometry-channels.png)

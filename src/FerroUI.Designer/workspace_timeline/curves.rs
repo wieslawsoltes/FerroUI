@@ -5,15 +5,17 @@ use super::*;
 use ferroui_controls::{MenuFlyout, MenuItem, MenuItemToggleType};
 use ferroui_designer_animation::{CurvePoint, KeyframeComponentEdit, KeyframeEdit};
 
+const GRAPH_CHOICES: [(&str, Option<CurveMetric>); 3] = [
+    ("Keyframes", None),
+    ("Value curves", Some(CurveMetric::Value)),
+    ("Velocity curves", Some(CurveMetric::Velocity)),
+];
+
 impl DesignerWorkspace {
     pub(in crate::workspace) fn connect_timeline_curves(self: &Rc<Self>) {
         let button = self.root.get_control::<Button>("TimelineCurves");
         let menu = MenuFlyout::new();
-        for (label, metric) in [
-            ("Keyframes", None),
-            ("Value curves", Some(CurveMetric::Value)),
-            ("Velocity curves", Some(CurveMetric::Velocity)),
-        ] {
+        for (label, metric) in GRAPH_CHOICES {
             let item = MenuItem::new();
             item.set_header(Some(Rc::new(label.to_owned())));
             item.set_toggle_type(MenuItemToggleType::Radio);
@@ -30,7 +32,12 @@ impl DesignerWorkspace {
         crate::chrome::apply_designer_menu_resources(&button, &self.root);
     }
 
-    fn set_timeline_curves(self: &Rc<Self>, metric: Option<CurveMetric>) {
+    #[cfg(feature = "mcp")]
+    pub(crate) fn timeline_curve_metric(&self) -> Option<CurveMetric> {
+        self.timeline_ui.borrow().curves
+    }
+
+    pub(crate) fn set_timeline_curves(self: &Rc<Self>, metric: Option<CurveMetric>) {
         self.timeline_ui.borrow_mut().curves = metric;
         let button = self.root.get_control::<Button>("TimelineCurves");
         button.classes().set("designer-motion", metric.is_some());
@@ -39,6 +46,15 @@ impl DesignerWorkspace {
             Some(CurveMetric::Value) => "Animation graph · Value",
             Some(CurveMetric::Velocity) => "Animation graph · Velocity",
         };
+        if let Some(menu) = button.flyout().and_then(|flyout| flyout.cast::<MenuFlyout>()) {
+            for (entry, (_, choice)) in menu.items().to_vec().into_iter().zip(GRAPH_CHOICES) {
+                if let Some(item) = entry.as_ref().and_then(Control::from_boxed)
+                    .and_then(|control| control.cast::<MenuItem>())
+                {
+                    item.set_is_checked(metric == choice);
+                }
+            }
+        }
         AutomationProperties::set_name(&button, Some(label));
         ToolTip::set_tip(&button, Some(Rc::new(label.to_owned())));
         self.rebuild_tracks();

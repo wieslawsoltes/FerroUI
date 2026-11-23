@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { HostedGesture } from '../src/hostedProtocol';
 import type { McpFixture } from './mcp';
+import { verifyTimelineGraphMcp } from './timelineGraphMcp';
 import { until } from './wait';
 
 const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design"
@@ -22,6 +23,18 @@ const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:Tod
             </StackPanel>
         </ScrollViewer>
     </Grid>
+</Window>`;
+
+const motion = `<Window xmlns="https://github.com/ferroui" Width="420" Height="240" Background="#F2F6FB">
+    <Window.Styles><Style Selector="Border#Ticket"><Style.Animations>
+        <Animation Duration="0:0:2" FillMode="Both">
+            <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25"/></KeyFrame>
+            <KeyFrame Cue="100%" KeySpline="0.25,0.2,0.7,1.4"><Setter Property="Opacity" Value="1"/></KeyFrame>
+        </Animation>
+    </Style.Animations></Style></Window.Styles>
+    <Border Name="Ticket" Background="#FFFFFF" Margin="32" Padding="24" CornerRadius="12">
+        <TextBlock Text="Order confirmed" FontSize="26" Foreground="#194779"/>
+    </Border>
 </Window>`;
 
 interface Capture {
@@ -105,6 +118,15 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         assert.equal(document.version, version);
         assert.equal(document.getText(), original);
         console.log('VS Code MCP focused, typed, scrolled, and refreshed the native App Preview while rejecting stale requests');
+
+        content(await invoke('designer_source', { session, expected_version: document.version, source: motion }));
+        try {
+            await image(refreshed);
+            await verifyTimelineGraphMcp({ invoke, content }, session, document, generation);
+        } finally {
+            content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+        }
+        assert.equal(document.getText(), original);
     } finally {
         try {
             const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
