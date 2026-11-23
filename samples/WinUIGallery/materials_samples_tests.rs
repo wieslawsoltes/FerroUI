@@ -143,6 +143,7 @@ fn system_backdrop_element_follows_the_backdrop_type_and_the_corner_radius() {
     combo.set_selected_index(0);
     assert!(host.system_backdrop().is_some_and(|backdrop| backdrop.cast::<DesktopAcrylicBackdrop>().is_some()));
 
-    root.get_control::<Slider>("CornerRadiusSlider").set_value(20.0);
+    root.get_control::<Slider>("CornerRadiusSlider")
+        .set_value(ferroui_controls::primitives::RangeBase::value_property(), 20.0);
     assert_eq!(host.corner_radius(), CornerRadius::uniform(20.0));
 }
