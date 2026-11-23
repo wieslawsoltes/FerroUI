@@ -117,8 +117,38 @@ unsafe extern "C" fn on_pipeline_checked(
     check.done.set(true);
 }
 
-fn text(value: &str) -> WGPUStringView {
+pub(crate) fn text(value: &str) -> WGPUStringView {
     WGPUStringView { data: value.as_ptr() as *const c_char, length: value.len() }
+}
+
+/// Runs `f` under a validation error scope and returns what the scope caught. On a page the answer
+/// comes later from the event loop, so an error reaches the handler of the device instead.
+pub(crate) fn with_error_scope<R>(device: &ProGpuDevice, f: impl FnOnce() -> R) -> (R, Option<String>) {
+    let raw = device.device();
+    let check = Rc::new(PipelineCheck::default());
+    // SAFETY: the device is alive.
+    unsafe { wgpuDevicePushErrorScope(raw, WGPUErrorFilter_Validation) };
+    let result = f();
+    let reference = Rc::into_raw(check.clone());
+    // SAFETY: the callback takes the reference back exactly once.
+    unsafe {
+        wgpuDevicePopErrorScope(
+            raw,
+            WGPUPopErrorScopeCallbackInfo {
+                nextInChain: ptr::null_mut(),
+                mode: WGPUCallbackMode_AllowSpontaneous,
+                callback: Some(on_pipeline_checked),
+                userdata1: reference as *mut c_void,
+                userdata2: ptr::null_mut(),
+            },
+        );
+        #[cfg(not(target_os = "emscripten"))]
+        if !check.done.get() {
+            wgpuDevicePoll(raw, 1, ptr::null());
+        }
+    }
+    let error = check.error.borrow().clone();
+    (result, error)
 }
 
 /// One binding of a pass, in the order of the layout.

@@ -16,9 +16,10 @@ use ferroui_base::media::{
     AcrylicBackgroundSource, ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix, IExperimentalAcrylicMaterial, TileMode,
 };
 use ferroui_base::platform::{
-    IDrawingContextImplWithLayerEffects, IDrawingContextWithAcrylicLikeSupport, LightingParameters,
-    MultiplyLayerFactors, PixelOperation,
+    IDrawingContextImplWithLayerEffects, IDrawingContextImplWithScene3D, IDrawingContextWithAcrylicLikeSupport,
+    LightingParameters, MultiplyLayerFactors, PixelOperation,
 };
+use ferroui_base::rendering::scene3d::Scene3DFrame;
 
 /// What a layer does to its content when it closes.
 pub(super) enum Operation {
@@ -144,7 +145,7 @@ fn acrylic_noise() -> Option<Rc<ProGpuBitmap>> {
 
 impl ProGpuDrawingContext {
     /// The device, when it can run passes.
-    fn pass_device(&self) -> Option<Rc<Gpu>> {
+    pub(super) fn pass_device(&self) -> Option<Rc<Gpu>> {
         self.gpu.clone().filter(|gpu| gpu.offscreen().is_some())
     }
 
@@ -474,6 +475,51 @@ impl IDrawingContextImplWithLayerEffects for ProGpuDrawingContext {
 
     fn pop_pixel_operation(&mut self) {
         self.pop_scene_layer();
+    }
+}
+
+impl IDrawingContextImplWithScene3D for ProGpuDrawingContext {
+    /// The scene drawn on the device (`scene3d.rs`) into a texture, which is drawn over the bounds
+    /// like an image, under the transform, clips and layers of the context.
+    fn draw_scene_3d(&mut self, frame: &Scene3DFrame) -> bool {
+        let bounds = frame.bounds;
+        if bounds.width <= 0.0 || bounds.height <= 0.0 {
+            return true;
+        }
+        let Some(gpu) = self.pass_device() else { return false };
+        self.refuse_fragment();
+        let m = self.current.transform;
+        let (size, scale) = ferroui_render3d::scene_pixel_size(bounds, (m.m11, m.m12), (m.m21, m.m22));
+        let antialiased = self.render_options.last().is_none_or(|options| options.edge_mode != EdgeMode::Aliased);
+        // The pixel of the target at the corner of the viewport names the viewport.
+        let whole = self.transform();
+        let corner = (
+            bounds.x * whole.m11 + bounds.y * whole.m21 + whole.m31,
+            bounds.x * whole.m12 + bounds.y * whole.m22 + whole.m32,
+        );
+        let origin = (corner.0.round() as i32, corner.1.round() as i32);
+        let Some(drawn) = gpu.scenes_3d().scene_texture(&gpu, &frame.scene, size, scale, antialiased, origin) else {
+            return false;
+        };
+        let Some(image) = self.sampled_texture(&drawn.texture, false) else { return false };
+        let source = Rect::new(0.0, 0.0, f64::from(drawn.size.0), f64::from(drawn.size.1));
+        let draw = progpu_native_scene_image_draw {
+            struct_size: std::mem::size_of::<progpu_native_scene_image_draw>() as u32,
+            flags: PROGPU_NATIVE_SCENE_IMAGE_SOURCE_PREMULTIPLIED as u32,
+            image_width: image.width,
+            image_height: image.height,
+            row_bytes: image.row_bytes,
+            sampling: PROGPU_NATIVE_IMAGE_SAMPLING_LINEAR as u32,
+            source_rect: image_rect(source),
+            destination_rect: image_rect(bounds),
+            transform: identity(),
+            opacity: 1.0,
+            max_anisotropy: 1,
+        };
+        let device_bounds = transform_bounds(bounds, &self.current.transform);
+        let Some(state) = self.state() else { return false };
+        let result = self.scene().draw_image(image.index, &draw, image_rect(device_bounds), state);
+        self.record(result).is_some()
     }
 }
 

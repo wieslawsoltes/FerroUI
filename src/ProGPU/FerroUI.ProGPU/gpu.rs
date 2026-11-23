@@ -6,6 +6,7 @@ use crate::effect_passes::EffectPasses;
 use crate::image_textures::ImageTextures;
 use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder};
+use crate::scene3d::Scene3DPasses;
 use progpu_native_sys::webgpu::*;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -188,11 +189,19 @@ pub(crate) struct Gpu {
     images: ImageTextures,
     /// The passes of the layers with an effect.
     passes: EffectPasses,
+    /// The executor of 3D scenes and its kept outputs. It holds textures of the pool.
+    scenes_3d: Scene3DPasses,
 }
 
 impl Gpu {
     pub(crate) fn new(device: ProGpuDevice) -> Rc<Self> {
-        Rc::new(Self { device: Rc::new(device), offscreen: OnceCell::new(), images: ImageTextures::default(), passes: EffectPasses::default() })
+        Rc::new(Self {
+            device: Rc::new(device),
+            offscreen: OnceCell::new(),
+            images: ImageTextures::default(),
+            passes: EffectPasses::default(),
+            scenes_3d: Scene3DPasses::default(),
+        })
     }
 
     pub(crate) fn images(&self) -> &ImageTextures {
@@ -201,6 +210,10 @@ impl Gpu {
 
     pub(crate) fn passes(&self) -> &EffectPasses {
         &self.passes
+    }
+
+    pub(crate) fn scenes_3d(&self) -> &Scene3DPasses {
+        &self.scenes_3d
     }
 
     pub(crate) fn device(&self) -> &Rc<ProGpuDevice> {

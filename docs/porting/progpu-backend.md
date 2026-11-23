@@ -694,7 +694,8 @@ so a later rule still applied (the colon between a lower case letter and a capit
 - A text context copies the bytes of its font: a face of a large system collection that is used
   for shaping costs its file size in memory once.
 - The catalog is read once for the process: fonts installed later are not seen.
-- `get_intersections` of a glyph run answers nothing, so an underline does not skip the ink.
+- `get_intersections` of a glyph run measures curves on 16 line pieces each, far below what an
+  underline can show.
 - A typeface of another font manager is shaped, but its glyph run draws nothing and has no outline
   geometry.
 
@@ -921,14 +922,15 @@ lock state. Objects released while the thread runs are released as usual.
 |---|---|
 | Fills and strokes with an image or visual brush | drawn on the GPU through the outline of the shape; a brush kind the backend does not know is said once in the log |
 | Opacity masks of image and visual brushes | drawn on the GPU as a destination-in layer of the tiled brush |
-| Custom effects (#455), effects other than blur and drop shadow | the content is drawn without the effect, said once in the log |
-| Acrylic (`IDrawingContextWithAcrylicLikeSupport`) | not implemented |
-| Blend and colour-matrix layers of WinUI composition effects (`IDrawingContextImplWithLayerEffects`) | not implemented |
-| 3D scenes (`IDrawingContextImplWithScene3D`) | not implemented: a scene draws nothing and is counted |
+| Custom effects (#455), luminance to alpha | passes of the backend on the device (`effect_passes.rs`); a program that does not compile, or whose uniforms are not those of the convention, is said once and its content is drawn unchanged |
+| Acrylic (`IDrawingContextWithAcrylicLikeSupport`) | the tint, then the noise tile repeated by the sampler |
+| Layers of WinUI composition effects (`IDrawingContextImplWithLayerEffects`) | blend modes are layers of the scene; colour matrix, multiply, convolution, lighting and pixel operations are passes on the device |
+| 3D scenes (`IDrawingContextImplWithScene3D`) | the executor of `ferroui-render3d` on the WebGPU C ABI (`scene3d.rs`). A frame of a video has no texture of this device yet: its layer is drawn with its colour, said once |
 | A clear under a rounded, rotated or geometry clip | drawn on the GPU: a destination-out layer, then a plus layer, both under the clip mask |
 | An inset shadow under a geometry clip | drawn on the GPU in a layer masked by the clip; more nested rounded clips than one chain holds are said once in the log |
-| Text: LCD raster, the sample grid of the rasterizer | grayscale, on the regular 8x8 grid (section 6.1) |
-| `IGlyphRunImpl::get_intersections` | returns nothing, so underlines do not skip descenders |
+| Text: LCD raster | grayscale. The decided route is a filtered LCD raster in the engine that keeps the quarter-pixel phases and the measured weight transfer, used only where the resolved mode is subpixel and the target is opaque |
+| Text: the sample grid of the rasterizer | the regular 8x8 grid (section 6.1). Rule: revisit only after the LCD raster is measured against Skia, because a new grid changes all glyph coverage |
+| `IGlyphRunImpl::get_intersections` | the outlines of each glyph against the band, so underlines skip descenders |
 | The Rust writer of `progpu-native` (P7) | not written; the backend uses the C ABI over the builder |
 
 A frame that fails is logged every time and leaves the target as it was. None of these crashes.

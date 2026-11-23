@@ -1877,6 +1877,12 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         Some(self)
     }
 
+    fn as_drawing_context_impl_with_scene_3d(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithScene3D> {
+        Some(self)
+    }
+
     fn as_drawing_context_with_acrylic_like_support(
         &mut self,
     ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextWithAcrylicLikeSupport> {

@@ -19,6 +19,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# The shader, the uniforms and the brushes of 3D scenes (no wgpu: the executor here is on the C ABI).
+ferroui-render3d.workspace = true
 progpu-native-sys.workspace = true
 
 # The Metal device and the Metal surfaces of the platform, which the engine draws windows into.
