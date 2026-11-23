@@ -299,6 +299,21 @@ static void recycle_texture(id<MTLTexture> texture, uint64_t generation);
 @end
 @implementation QGlyphImage
 @end
+// What is kept for one font at one size: glyph images, glyph paths or prepared
+// runs. The caches drop the strikes used longest ago, so a frame with many
+// sizes does not empty them.
+@interface QStrikeCache : NSObject
+@property(nonatomic, strong) NSMutableDictionary *entries;
+@property(nonatomic) uint64_t lastUse;
+@property(nonatomic) NSUInteger cost;
+@end
+@implementation QStrikeCache
+- (instancetype)init {
+  if ((self = [super init]))
+    _entries = [NSMutableDictionary new];
+  return self;
+}
+@end
 @interface QPreparedDraw : NSObject
 @property(nonatomic) NSMutableData *params, *edges, *images;
 @property(nonatomic) id<MTLTexture> image;
@@ -372,6 +387,8 @@ static void recycle_texture(id<MTLTexture> texture, uint64_t generation);
 // by identity: one copy a strike, and they retain their keys.
 @property(nonatomic) CFMutableDictionaryRef strikes;
 @property(nonatomic) QPreparedDraw *capture;
+@property(nonatomic) uint64_t strikeClock;
+@property(nonatomic) NSUInteger glyphPathCount;
 @property(nonatomic) NSUInteger preparedBytes, pathBytes, pathEntries,
     coverageBytes, coveragePathBytes;
 @property(nonatomic)
@@ -1897,7 +1914,7 @@ uint64_t qm_configure(void *device) {
     r.edgeCacheBytes = 0;
     CFDictionaryRemoveAllValues(r.glyphCache);
     CFDictionaryRemoveAllValues(r.glyphImages);
-    r.glyphImageBytes = 0;
+    r.glyphImageBytes = r.glyphPathCount = 0;
     CFDictionaryRemoveAllValues(r.preparedRuns);
     CFDictionaryRemoveAllValues(r.pathCache);
     clear_coverage_paths(r);
@@ -2539,12 +2556,61 @@ void qm_draw_image(void *surface, CGImageRef image, double sx, double sy,
   CFRelease(tmp);
   UNLOCK
 }
+// How many strikes a glyph cache keeps, and what the caches may hold in all.
+enum {
+  QMostGlyphStrikes = 256,
+  QMostGlyphPaths = 16384,
+  QGlyphBytes = 16 * 1024 * 1024,
+};
+typedef struct {
+  const void *key;
+  uint64_t lastUse;
+  NSUInteger cost;
+} QStrikeAge;
+static int compare_strike_age(const void *a, const void *b) {
+  uint64_t x = ((const QStrikeAge *)a)->lastUse,
+           y = ((const QStrikeAge *)b)->lastUse;
+  return x < y ? -1 : x > y;
+}
+// Drops the strikes used longest ago, all but `keep`, until a quarter of the
+// room is free: a cache at its limit is not scanned again on the next draw.
+static void evict_strikes(CFMutableDictionaryRef strikes, const void *keep,
+                          NSUInteger *total, NSUInteger budget) {
+  CFIndex n = CFDictionaryGetCount(strikes);
+  if (n < 2)
+    return;
+  const void **keys = malloc(n * sizeof(*keys));
+  const void **values = malloc(n * sizeof(*values));
+  QStrikeAge *ages = malloc(n * sizeof(*ages));
+  if (keys && values && ages) {
+    CFDictionaryGetKeysAndValues(strikes, keys, values);
+    for (CFIndex i = 0; i < n; i++) {
+      QStrikeCache *strike = (__bridge QStrikeCache *)values[i];
+      ages[i] = (QStrikeAge){keys[i], strike.lastUse, strike.cost};
+    }
+    qsort(ages, n, sizeof(*ages), compare_strike_age);
+    NSUInteger count = n, held = *total;
+    for (CFIndex i = 0; i < n; i++) {
+      if (count <= QMostGlyphStrikes * 3 / 4 && held <= budget * 3 / 4)
+        break;
+      if (ages[i].key == keep)
+        continue;
+      held -= MIN(held, ages[i].cost);
+      CFDictionaryRemoveValue(strikes, ages[i].key);
+      count--;
+    }
+    *total = held;
+  }
+  free(keys);
+  free(values);
+  free(ages);
+}
 // Core Text's public rasterizer supplies native hinted and color glyph inputs.
 // The canvas, clipping, tint and composition remain GPU operations. Cached
 // masks are bounded by total pixel bytes and are independent of the brush
 // color.
 static BOOL alpha_glyph(QGlyphImage *image, const uint8_t *pixels, NSUInteger w,
-                        NSUInteger h, NSMutableDictionary *images) {
+                        NSUInteger h, QStrikeCache *strike) {
   if (!glyph_atlas_enabled() || !pixels || w > 1024 || h > 1024)
     return NO;
   // Preserve color/subpixel rasterization verbatim. Only exact white masks
@@ -2563,7 +2629,8 @@ static BOOL alpha_glyph(QGlyphImage *image, const uint8_t *pixels, NSUInteger w,
   if (!r.monoAtlas || r.monoY + h > 1024) {
     if (r.atlasBytes + 1024 * 1024 > glyph_atlas_limit()) {
       flush_draws();
-      [images removeAllObjects];
+      [strike.entries removeAllObjects];
+      strike.cost = 0;
       CFDictionaryRemoveAllValues(r.glyphImages);
       CFDictionaryRemoveAllValues(r.preparedRuns);
       r.glyphImageBytes = r.preparedBytes = r.atlasBytes = 0;
@@ -2585,20 +2652,25 @@ static BOOL alpha_glyph(QGlyphImage *image, const uint8_t *pixels, NSUInteger w,
     r.atlasBytes += 1024 * 1024;
   }
   NSUInteger pitch = (w + 255) & ~255, bytes = pitch * h;
-  id<MTLBuffer> upload =
-      [r.device newBufferWithLength:bytes options:MTLResourceStorageModeShared];
-  if (!upload)
+  uint8_t *out = calloc(bytes, 1);
+  if (!out)
     return NO;
-  uint8_t *out = upload.contents;
   for (NSUInteger y = 0; y < h; y++)
     for (NSUInteger x = 0; x < w; x++)
       out[y * pitch + x] = pixels[(y * w + x) * 4 + 3];
   if (r.pendingBytes && r.pendingBytes + bytes > 64 * 1024 * 1024)
     flush_batch();
   r.pendingBytes += bytes;
-  id<MTLBlitCommandEncoder> copy = [batch_buffer() blitCommandEncoder];
+  // A slice of the arena of the command buffer, not a buffer per glyph.
+  id<MTLCommandBuffer> uploads = batch_buffer();
+  NSUInteger uploadOffset = 0;
+  id<MTLBuffer> upload = upload_slice(out, bytes, uploads, &uploadOffset);
+  free(out);
+  if (!upload)
+    return NO;
+  id<MTLBlitCommandEncoder> copy = [uploads blitCommandEncoder];
   [copy copyFromBuffer:upload
-             sourceOffset:0
+             sourceOffset:uploadOffset
         sourceBytesPerRow:pitch
       sourceBytesPerImage:bytes
                sourceSize:MTLSizeMake(w, h, 1)
@@ -2617,8 +2689,9 @@ static BOOL alpha_glyph(QGlyphImage *image, const uint8_t *pixels, NSUInteger w,
   return YES;
 }
 static QGlyphImage *glyph_image(QMetalSurface *target, CTFontRef font,
-                                CGGlyph glyph, NSMutableDictionary *images) {
+                                CGGlyph glyph, QStrikeCache *strike) {
   CTFontRef f = font;
+  NSMutableDictionary *images = strike.entries;
   QMetalRenderer *r = renderer();
   NSNumber *key = @(glyph | ((target.state.hinting > 1) << 16) |
                     (target.state.aliased << 17));
@@ -2649,7 +2722,7 @@ static QGlyphImage *glyph_image(QMetalSurface *target, CTFontRef font,
         image = [QGlyphImage new];
         image.bounds = b;
         BOOL packed =
-            alpha_glyph(image, CGBitmapContextGetData(c), w, h, images);
+            alpha_glyph(image, CGBitmapContextGetData(c), w, h, strike);
         if (!packed) {
           void *surface = qm_surface(w, h);
           image.surface = CFBridgingRelease(surface);
@@ -2666,6 +2739,7 @@ static QGlyphImage *glyph_image(QMetalSurface *target, CTFontRef font,
               if (r.atlasBytes + 4 * 1024 * 1024 > glyph_atlas_limit()) {
                 flush_draws();
                 [images removeAllObjects];
+                strike.cost = 0;
                 CFDictionaryRemoveAllValues(r.glyphImages);
                 CFDictionaryRemoveAllValues(r.preparedRuns);
                 r.glyphImageBytes = r.preparedBytes = r.atlasBytes = 0;
@@ -2703,8 +2777,14 @@ static QGlyphImage *glyph_image(QMetalSurface *target, CTFontRef font,
         if (image.atlas)
           image.surface = nil;
         NSUInteger cost = w * h * (packed ? 1 : 4);
-        if (r.glyphImageBytes + cost <= 16 * 1024 * 1024) {
+        if (r.glyphImageBytes + cost <= QGlyphBytes) {
+          // A full atlas emptied the cache: the strike being drawn stays in it.
+          if (CFDictionaryGetValue(r.glyphImages, f) !=
+              (__bridge const void *)strike)
+            CFDictionarySetValue(r.glyphImages, f,
+                                 (__bridge const void *)strike);
           images[key] = image;
+          strike.cost += cost;
           r.glyphImageBytes += cost;
         }
       }
@@ -2766,12 +2846,13 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
   // complete glyph and position bytes, face, transform, paint and clip bounds;
   // pointer reuse and changing DPI/AA/viewport cannot reuse stale geometry.
   NSMutableData *runKey = nil;
-  NSMutableDictionary *runs = nil;
+  QStrikeCache *preparedStrike = nil;
   if (font && !s.storage.cropped && s.state.hinting >= 2 && n && n <= 4096) {
-    if (r.preparedBytes >= 16 * 1024 * 1024 ||
-        CFDictionaryGetCount(r.preparedRuns) >= 32) {
-      CFDictionaryRemoveAllValues(r.preparedRuns);
-      r.preparedBytes = 0;
+    if (r.preparedBytes >= QGlyphBytes ||
+        CFDictionaryGetCount(r.preparedRuns) >= QMostGlyphStrikes) {
+      NSUInteger held = r.preparedBytes;
+      evict_strikes(r.preparedRuns, font, &held, QGlyphBytes);
+      r.preparedBytes = held;
     }
     QParams keyParams = params(s);
     keyParams.color = (vector_float4){red, green, blue, alpha};
@@ -2786,9 +2867,10 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     discriminator =
         content_hash((const uint8_t *)runKey.bytes + 8, runKey.length - 8);
     memcpy(runKey.mutableBytes, &discriminator, 8);
-    runs = (__bridge NSMutableDictionary *)CFDictionaryGetValue(r.preparedRuns,
-                                                                font);
-    QPreparedDraw *ready = runs[runKey];
+    preparedStrike =
+        (__bridge QStrikeCache *)CFDictionaryGetValue(r.preparedRuns, font);
+    preparedStrike.lastUse = ++r.strikeClock;
+    QPreparedDraw *ready = preparedStrike.entries[runKey];
     if (!ready) {
       // Prepare a run when it repeats: one seen once is remembered by its
       // hash and drawn directly. Text that changes or moves every frame never
@@ -2845,7 +2927,7 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
   QSmallKey strikeLookup = small_key(&strikeKey, sizeof(strikeKey));
   CFArrayRef strike = small_get(r.strikes, &strikeLookup);
   if (!strike) {
-    if (CFDictionaryGetCount(r.strikes) >= 64)
+    if (CFDictionaryGetCount(r.strikes) >= QMostGlyphStrikes)
       CFDictionaryRemoveAllValues(r.strikes);
     CTFontRef sized = CTFontCreateCopyWithAttributes(font, size, NULL, NULL);
     CTFontRef scaled =
@@ -2867,40 +2949,38 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
     CFAutorelease(strike);
   }
   CTFontRef f = CFArrayGetValueAtIndex(strike, 1);
+  if (r.glyphPathCount >= QMostGlyphPaths ||
+      CFDictionaryGetCount(r.glyphCache) >= QMostGlyphStrikes) {
+    NSUInteger held = r.glyphPathCount;
+    evict_strikes(r.glyphCache, f, &held, QMostGlyphPaths);
+    r.glyphPathCount = held;
+  }
+  QStrikeCache *pathStrike =
+      (__bridge QStrikeCache *)CFDictionaryGetValue(r.glyphCache, f);
+  if (!pathStrike) {
+    pathStrike = [QStrikeCache new];
+    CFDictionarySetValue(r.glyphCache, f, (__bridge const void *)pathStrike);
+  }
+  pathStrike.lastUse = ++r.strikeClock;
   CFMutableDictionaryRef glyphsOfFont =
-      (CFMutableDictionaryRef)CFDictionaryGetValue(r.glyphCache, f);
-  if (!glyphsOfFont) {
-    if (CFDictionaryGetCount(r.glyphCache) >= 32)
-      CFDictionaryRemoveAllValues(r.glyphCache);
-    glyphsOfFont =
-        CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks,
-                                  &kCFTypeDictionaryValueCallBacks);
-    if (!glyphsOfFont)
-      return;
-    CFDictionarySetValue(r.glyphCache, f, glyphsOfFont);
-    CFRelease(glyphsOfFont);
-  }
+      (__bridge CFMutableDictionaryRef)pathStrike.entries;
   CTFontRef scaledFont = CFArrayGetValueAtIndex(strike, 2);
-  if (CFDictionaryGetCount(r.glyphImages) >= 32 ||
-      r.glyphImageBytes >= 16 * 1024 * 1024) {
+  if (r.glyphImageBytes >= QGlyphBytes ||
+      CFDictionaryGetCount(r.glyphImages) >= QMostGlyphStrikes) {
+    // The atlases stay: what they hold is reused by the prepared runs.
     flush_draws();
-    CFDictionaryRemoveAllValues(r.glyphImages);
-    r.glyphImageBytes = 0;
-    CFDictionaryRemoveAllValues(r.preparedRuns);
-    r.preparedBytes = 0;
-    runs = nil;
-    r.glyphAtlas = nil;
-    r.atlasX = r.atlasY = r.atlasRow = r.atlasBytes = 0;
-    r.monoAtlas = nil;
-    r.monoX = r.monoY = r.monoRow = 0;
+    NSUInteger held = r.glyphImageBytes;
+    evict_strikes(r.glyphImages, scaledFont, &held, QGlyphBytes);
+    r.glyphImageBytes = held;
   }
-  NSMutableDictionary *images =
-      (__bridge NSMutableDictionary *)CFDictionaryGetValue(r.glyphImages,
-                                                           scaledFont);
+  QStrikeCache *images =
+      (__bridge QStrikeCache *)CFDictionaryGetValue(r.glyphImages, scaledFont);
   if (!images) {
-    images = [NSMutableDictionary new];
-    CFDictionarySetValue(r.glyphImages, scaledFont, (__bridge CFTypeRef)images);
+    images = [QStrikeCache new];
+    CFDictionarySetValue(r.glyphImages, scaledFont,
+                         (__bridge const void *)images);
   }
+  images.lastUse = ++r.strikeClock;
   if (runKey) {
     r.capture = [QPreparedDraw new];
     r.capture.params = [NSMutableData new];
@@ -2916,10 +2996,15 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
         CFDictionaryGetValue(glyphsOfFont, (__bridge CFNumberRef)key);
     if (!value) {
       CGPathRef outline = CTFontCreatePathForGlyph(f, glyphs[i], NULL);
-      if (CFDictionaryGetCount(glyphsOfFont) >= 1024)
+      if (CFDictionaryGetCount(glyphsOfFont) >= 1024) {
+        r.glyphPathCount -= MIN(r.glyphPathCount, pathStrike.cost);
+        pathStrike.cost = 0;
         CFDictionaryRemoveAllValues(glyphsOfFont);
+      }
       value = outline ? (CFTypeRef)outline : kCFNull;
       CFDictionarySetValue(glyphsOfFont, (__bridge CFNumberRef)key, value);
+      pathStrike.cost++;
+      r.glyphPathCount++;
       if (outline)
         CGPathRelease(outline);
     }
@@ -2936,13 +3021,22 @@ void qm_glyphs(void *surface, void *font, double size, const uint16_t *glyphs,
   QPreparedDraw *captured = r.capture;
   r.capture = nil;
   if (runKey && captured.params.length) {
-    if (!runs) {
-      runs = [NSMutableDictionary new];
-      CFDictionarySetValue(r.preparedRuns, font, (__bridge CFTypeRef)runs);
+    QStrikeCache *current =
+        (__bridge QStrikeCache *)CFDictionaryGetValue(r.preparedRuns, font);
+    // A strike emptied while this run was drawn does not take its capture.
+    if (!preparedStrike || current == preparedStrike) {
+      if (!current) {
+        current = [QStrikeCache new];
+        current.lastUse = ++r.strikeClock;
+        CFDictionarySetValue(r.preparedRuns, font,
+                             (__bridge const void *)current);
+      }
+      NSUInteger bytes = runKey.length + captured.params.length +
+                         captured.edges.length + captured.images.length;
+      current.entries[runKey] = captured;
+      current.cost += bytes;
+      r.preparedBytes += bytes;
     }
-    runs[runKey] = captured;
-    r.preparedBytes += runKey.length + captured.params.length +
-                       captured.edges.length + captured.images.length;
   }
   if (!CGPathIsEmpty(combined))
     qm_fill(surface, combined, 0, red, green, blue, alpha);
@@ -3260,14 +3354,20 @@ static void filter_compute(QMetalSurface *s,
   // The ABI data are scalars padded to float4 alignment; no shader reads past
   // the documented parameters for its operation.
   size_t size = MAX(16, (length + 15) & ~15);
-  id<MTLBuffer> parameters =
-      [r.device newBufferWithLength:size options:MTLResourceStorageModeShared];
-  if (!parameters || !parameters.contents) {
+  uint8_t *padded = calloc(size, 1);
+  if (!padded) {
     qm_record_fault(qm_generation());
     return;
   }
-  memcpy(parameters.contents, data ?: &zero, length);
+  memcpy(padded, data ?: (const void *)&zero, data ? length : MIN(length, sizeof(zero)));
   id<MTLCommandBuffer> cb = batch_buffer();
+  NSUInteger parametersOffset = 0;
+  id<MTLBuffer> parameters = upload_slice(padded, size, cb, &parametersOffset);
+  free(padded);
+  if (!parameters) {
+    qm_record_fault(qm_generation());
+    return;
+  }
   id<MTLComputeCommandEncoder> e = [cb computeCommandEncoder];
   if (!e) {
     qm_record_fault(qm_generation());
@@ -3277,7 +3377,7 @@ static void filter_compute(QMetalSurface *s,
   [e setTexture:out atIndex:0];
   [e setTexture:s.texture atIndex:1];
   [e setTexture:secondary ?: r.white atIndex:2];
-  [e setBuffer:parameters offset:0 atIndex:0];
+  [e setBuffer:parameters offset:parametersOffset atIndex:0];
   [e setBytes:&kind length:4 atIndex:1];
   [e dispatchThreads:MTLSizeMake(out.width, out.height, 1)
       threadsPerThreadgroup:MTLSizeMake(8, 8, 1)];
