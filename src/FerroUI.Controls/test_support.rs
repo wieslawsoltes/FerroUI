@@ -59,6 +59,65 @@ impl IRenderer for TestRenderer {
     fn dispose(&self) {}
 }
 
+/// A renderer that keeps how each visual was marked: drawn again, or its properties alone.
+#[derive(Default)]
+pub struct MarkingRenderer {
+    drawn_again: std::cell::RefCell<Vec<usize>>,
+    properties: std::cell::RefCell<Vec<usize>>,
+}
+
+impl MarkingRenderer {
+    fn key(visual: &Visual) -> usize {
+        visual as *const Visual as usize
+    }
+
+    /// How often `visual` was marked to be drawn again, and for its properties alone, since
+    /// the last call.
+    pub fn take(&self, visual: &Visual) -> (usize, usize) {
+        let key = Self::key(visual);
+        let count = |marks: &std::cell::RefCell<Vec<usize>>| {
+            let mut marks = marks.borrow_mut();
+            let before = marks.len();
+            marks.retain(|mark| *mark != key);
+            before - marks.len()
+        };
+        (count(&self.drawn_again), count(&self.properties))
+    }
+}
+
+impl IRenderer for MarkingRenderer {
+    fn diagnostics(&self) -> Rc<ferroui_base::rendering::RendererDiagnostics> {
+        ferroui_base::rendering::RendererDiagnostics::new()
+    }
+    fn scene_invalidated(
+        &self,
+        _handler: Rc<dyn Fn(&ferroui_base::rendering::SceneInvalidatedEventArgs)>,
+    ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
+        ferroui_base::reactive::Disposable::empty()
+    }
+    fn try_get_render_interface_feature(
+        &self,
+        _feature_type: std::any::TypeId,
+    ) -> ferroui_base::rendering::composition::LocalFuture<
+        Option<ferroui_base::rendering::composition::RenderInterfaceFeature>,
+    > {
+        Box::pin(std::future::ready(None))
+    }
+    fn add_dirty(&self, visual: &Visual) {
+        self.drawn_again.borrow_mut().push(Self::key(visual));
+    }
+    fn add_dirty_for_layout(&self, _visual: &Visual) {}
+    fn add_dirty_properties(&self, visual: &Visual) {
+        self.properties.borrow_mut().push(Self::key(visual));
+    }
+    fn recalculate_children(&self, _visual: &Visual) {}
+    fn resized(&self, _size: Size) {}
+    fn paint(&self, _rect: Rect) {}
+    fn start(&self) {}
+    fn stop(&self) {}
+    fn dispose(&self) {}
+}
+
 /// The presentation source and layout root of a [`TestRoot`].
 pub struct TestSource {
     this: Weak<TestSource>,

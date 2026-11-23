@@ -26,10 +26,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -98,7 +98,7 @@ pub struct DropShadowProps {
     changed_fields_of_drop_shadow: Cell<DropShadowChangedFields>,
     blur_radius: Cell<f32>,
     color: Cell<Color>,
-    mask: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    mask: OptionCell<Rc<dyn ICompositionObject>>,
     offset: Cell<Vector3D>,
     opacity: Cell<f32>,
     source_policy: Cell<CompositionDropShadowSourcePolicy>,
@@ -119,7 +119,7 @@ impl DropShadowProps {
             changed_fields_of_drop_shadow: Cell::new(DropShadowChangedFields::empty()),
             blur_radius: Cell::new(Default::default()),
             color: Cell::new(Default::default()),
-            mask: RefCell::new(None),
+            mask: OptionCell::new(),
             offset: Cell::new(Default::default()),
             opacity: Cell::new(Default::default()),
             source_policy: Cell::new(Default::default()),
@@ -173,6 +173,10 @@ impl DropShadowProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "BlurRadius", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_drop_shadow.get().contains(DropShadowChangedFields::BLUR_RADIUS_ANIMATED) {
+                    self.changed_fields_of_drop_shadow.set(self.changed_fields_of_drop_shadow.get() & !DropShadowChangedFields::BLUR_RADIUS);
+                }
             }
         }
         self.blur_radius.set(value);
@@ -214,6 +218,10 @@ impl DropShadowProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Color", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_drop_shadow.get().contains(DropShadowChangedFields::COLOR_ANIMATED) {
+                    self.changed_fields_of_drop_shadow.set(self.changed_fields_of_drop_shadow.get() & !DropShadowChangedFields::COLOR);
+                }
             }
         }
         self.color.set(value);
@@ -224,24 +232,24 @@ impl DropShadowProps {
 
     /// `Mask` (FerroUI overlay).
     pub fn mask(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.mask.borrow().clone()
+        self.mask.get()
     }
 
     /// Sets `Mask` (FerroUI overlay).
     pub fn set_mask(&self, host: &dyn DropShadowHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.mask.borrow().clone();
+        let old_value = self.mask.get();
         if old_value.differs(&value) {
             DropShadowHooks::validate_mask_change(host, &old_value, &value);
             DropShadowHooks::on_mask_changing(host);
             changed = true;
             // Update the backing value
-            *self.mask.borrow_mut() = value.clone();
+            self.mask.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_drop_shadow.set(self.changed_fields_of_drop_shadow.get() | DropShadowChangedFields::MASK);
             host.register_for_serialization();
         }
-        *self.mask.borrow_mut() = value;
+        self.mask.set(value);
         if changed {
             DropShadowHooks::on_mask_changed(host);
         }
@@ -280,6 +288,10 @@ impl DropShadowProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_drop_shadow.get().contains(DropShadowChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_drop_shadow.set(self.changed_fields_of_drop_shadow.get() & !DropShadowChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -321,6 +333,10 @@ impl DropShadowProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Opacity", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_drop_shadow.get().contains(DropShadowChangedFields::OPACITY_ANIMATED) {
+                    self.changed_fields_of_drop_shadow.set(self.changed_fields_of_drop_shadow.get() & !DropShadowChangedFields::OPACITY);
+                }
             }
         }
         self.opacity.set(value);
@@ -400,28 +416,32 @@ impl DropShadowProps {
     pub fn serialize_changes_core(&self, host: &dyn DropShadowHooks, writer: &mut BatchStreamWriter<'_>) {
         let changed = self.changed_fields_of_drop_shadow.get();
         writer.write(changed);
+        if changed.contains(DropShadowChangedFields::BLUR_RADIUS) {
+            writer.write(self.blur_radius.get());
+        }
         if changed.contains(DropShadowChangedFields::BLUR_RADIUS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDropShadowProps::id_of_blur_radius_property().base()));
-        } else if changed.contains(DropShadowChangedFields::BLUR_RADIUS) {
-            writer.write(self.blur_radius.get());
+        }
+        if changed.contains(DropShadowChangedFields::COLOR) {
+            writer.write(self.color.get());
         }
         if changed.contains(DropShadowChangedFields::COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDropShadowProps::id_of_color_property().base()));
-        } else if changed.contains(DropShadowChangedFields::COLOR) {
-            writer.write(self.color.get());
         }
         if changed.contains(DropShadowChangedFields::MASK) {
-            writer.write_server_object(self.mask.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.mask.get().map(|o| o.server()));
+        }
+        if changed.contains(DropShadowChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(DropShadowChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDropShadowProps::id_of_offset_property().base()));
-        } else if changed.contains(DropShadowChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(DropShadowChangedFields::OPACITY) {
+            writer.write(self.opacity.get());
         }
         if changed.contains(DropShadowChangedFields::OPACITY_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerDropShadowProps::id_of_opacity_property().base()));
-        } else if changed.contains(DropShadowChangedFields::OPACITY) {
-            writer.write(self.opacity.get());
         }
         if changed.contains(DropShadowChangedFields::SOURCE_POLICY) {
             writer.write(self.source_policy.get());
@@ -447,7 +467,7 @@ pub trait ServerDropShadowHooks: IServerAnimatedPropertyHost {
 pub struct ServerDropShadowProps {
     blur_radius: Cell<f32>,
     color: Cell<Color>,
-    mask: RefCell<Option<Rc<dyn IServerObject>>>,
+    mask: OptionCell<Rc<dyn IServerObject>>,
     offset: Cell<Vector3D>,
     opacity: Cell<f32>,
     source_policy: Cell<CompositionDropShadowSourcePolicy>,
@@ -466,7 +486,7 @@ impl ServerDropShadowProps {
         Self {
             blur_radius: Cell::new(Default::default()),
             color: Cell::new(Default::default()),
-            mask: RefCell::new(None),
+            mask: OptionCell::new(),
             offset: Cell::new(Default::default()),
             opacity: Cell::new(Default::default()),
             source_policy: Cell::new(Default::default()),
@@ -539,8 +559,8 @@ impl ServerDropShadowProps {
             CompositionProperty::register::<ServerDropShadowProps, Option<Rc<dyn IServerObject>>>(
                 "Mask",
                 "ServerDropShadow",
-                |obj| props_of::<ServerDropShadowProps>(obj).mask.borrow().clone(),
-                |obj, v| *props_of::<ServerDropShadowProps>(obj).mask.borrow_mut() = v,
+                |obj| props_of::<ServerDropShadowProps>(obj).mask.get(),
+                |obj, v| props_of::<ServerDropShadowProps>(obj).mask.set(v),
                 None,
                 None,
             )
@@ -549,11 +569,11 @@ impl ServerDropShadowProps {
 
     /// `Mask`.
     pub fn mask(&self) -> Option<Rc<dyn IServerObject>> {
-        self.mask.borrow().clone()
+        self.mask.get()
     }
 
     pub fn set_mask(&self, host: &dyn ServerDropShadowHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.mask.borrow().clone();
+        let old_value = self.mask.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerDropShadowHooks::on_mask_changing(host);
@@ -565,7 +585,7 @@ impl ServerDropShadowProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.mask.borrow_mut() = value.clone(),
+                assign: &mut || self.mask.set(value.clone()),
             },
         );
         if changed {
@@ -675,6 +695,10 @@ impl ServerDropShadowProps {
         let compositor = host.server_compositor();
         ServerDropShadowHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<DropShadowChangedFields>();
+        if changed.contains(DropShadowChangedFields::BLUR_RADIUS) {
+            let value = reader.read::<f32>();
+            self.set_blur_radius(host, value);
+        }
         if changed.contains(DropShadowChangedFields::BLUR_RADIUS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `BlurRadius` without an animation instance");
@@ -685,9 +709,10 @@ impl ServerDropShadowProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DropShadowChangedFields::BLUR_RADIUS) {
-            let value = reader.read::<f32>();
-            self.set_blur_radius(host, value);
+        }
+        if changed.contains(DropShadowChangedFields::COLOR) {
+            let value = reader.read::<Color>();
+            self.set_color(host, value);
         }
         if changed.contains(DropShadowChangedFields::COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -699,13 +724,14 @@ impl ServerDropShadowProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DropShadowChangedFields::COLOR) {
-            let value = reader.read::<Color>();
-            self.set_color(host, value);
         }
         if changed.contains(DropShadowChangedFields::MASK) {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_mask(host, value);
+        }
+        if changed.contains(DropShadowChangedFields::OFFSET) {
+            let value = reader.read::<Vector3D>();
+            self.set_offset(host, value);
         }
         if changed.contains(DropShadowChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -717,9 +743,10 @@ impl ServerDropShadowProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DropShadowChangedFields::OFFSET) {
-            let value = reader.read::<Vector3D>();
-            self.set_offset(host, value);
+        }
+        if changed.contains(DropShadowChangedFields::OPACITY) {
+            let value = reader.read::<f32>();
+            self.set_opacity(host, value);
         }
         if changed.contains(DropShadowChangedFields::OPACITY_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -731,9 +758,6 @@ impl ServerDropShadowProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(DropShadowChangedFields::OPACITY) {
-            let value = reader.read::<f32>();
-            self.set_opacity(host, value);
         }
         if changed.contains(DropShadowChangedFields::SOURCE_POLICY) {
             let value = reader.read::<CompositionDropShadowSourcePolicy>();

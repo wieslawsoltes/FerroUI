@@ -40,9 +40,15 @@ pub fn style_of(selector: Selector) -> StyleBuilder {
 
 /// Parses a selector in the syntax of XAML, nested selectors (`^.selected`,
 /// `^:pointerover > Button`) included.
+///
+/// A type name is the class of that name: looked up among the classes that are known when the
+/// selector is parsed, and matched by its name when it is not known yet (no object of it was
+/// made). The tables of every type of the framework are not registered for it, so a style in
+/// text keeps no control in the application that the application does not make
+/// (docs/binary-size.md, section 4.23).
 pub fn parse_selector(selector: &str) -> Result<Selector, String> {
-    ferroui_controls::register_types();
-    let parser = ferroui_markup::markup::parsers::SelectorParser::new(|_namespace, name| TypeInfo::find_by_name(name));
+    use ferroui_markup::markup::parsers::SelectorParser;
+    let parser = SelectorParser::new(|_namespace, name| TypeInfo::find_by_name(name)).unknown_types_by_name();
     match parser.parse(selector) {
         Ok(Some(selector)) => Ok(selector),
         Ok(None) => Err(String::from("an empty selector")),

@@ -618,10 +618,10 @@ ambient_color + diffuse))` with the alpha of the colour; for a specular layer `s
 specular)` with alpha 0; for an emissive layer the colour with alpha 0. The view direction is toward
 the camera's position, or the one direction of an orthographic camera.
 
-**Brushes.** A solid colour brush is its colour and opacity. Any other brush (gradients, images,
-and the visual and drawing brushes without a shared form) is drawn with the layer's `Color` and the
-brush's opacity, counted (`ferroui_render3d::layers_with_unsampled_brushes`) and reported once,
-until D6.
+**Brushes.** A solid colour brush is its colour and opacity. As built in D3, any other brush was
+drawn with the layer's `Color` and the brush's opacity, counted
+(`ferroui_render3d::layers_with_unsampled_brushes`) and reported once; D6 samples gradients and
+images (section 3.18).
 
 **Performance.** Nothing is allocated per pixel or per triangle: a `CpuRasterizer` keeps its
 vertex, triangle, pass, bin and tile buffers from one render to the next; rows are slices of the
@@ -705,8 +705,8 @@ device textures, the kept outputs, the painting) in `gpu/scene3d_passes.rs`.
   sample count, the colour and depth formats), made on first demand inside an error scope and kept
   in a `HashMap` of the executor, so at most eight per sample count and device, and one resolve
   pipeline; counted (`pipelines_created`). The shader module, the three bind group layouts and the
-  two pipeline layouts are made once with the executor. The brush kind and the frame-sampling
-  variant join the key with D6 and D7.
+  two pipeline layouts are made once with the executor. The brush shader joins the key with D6
+  (section 3.18), the frame-sampling variant with D7.
 - **Meshes** by `(id, version)`: an interleaved vertex buffer and an index buffer, uploaded with
   `Queue::write_buffer` when the pair is new; a new version of a mesh reuses the buffers of the
   version it replaces when they are large enough. Meshes and targets not drawn for 240 renders go.
@@ -765,6 +765,307 @@ the same or the other mode, which draws on the same device, makes none). The uni
 and an emissive layer (and three again on a second device), and a moving camera writing only the
 frame block.
 
+### 3.16 The hit testing as built (D10)
+
+**Where.** `src/FerroUI.Media3D/hit_testing/`: `mod.rs` (the public types and the walk of the
+tree), `ray.rs` (the ray of a viewport point), `bvh.rs` (the hierarchy of a mesh and the
+intersection), `tests.rs`. On the CPU and the UI thread, as WPF.
+
+| WPF | Rust |
+|---|---|
+| `RayHitTestParameters` (`Origin`, `Direction`) | `RayHitTestParameters` (`new`, `origin`, `direction`) |
+| `HitTestResult` (`VisualHit`), `RayHitTestResult` (`ModelHit`, `PointHit`, `DistanceToRayOrigin`) | the traits `HitTestResult` and `RayHitTestResult` |
+| `RayMeshGeometry3DHitTestResult` (`MeshHit`, `VertexIndex1..3`, `VertexWeight1..3`) | the struct `RayMeshGeometry3DHitTestResult` (`visual_hit`, `model_hit` as the `GeometryModel3D`, `mesh_hit`, `point_hit`, `distance_to_ray_origin`, `vertex_index_1..3`, `vertex_weight_1..3`; and `is_front_face`) |
+| `HitTestResultBehavior`, `HitTestFilterBehavior` | enums with WPF's members |
+| `HitTestFilterCallback`, `HitTestResultCallback` | `&mut dyn FnMut(&Ref<Visual3D>) -> HitTestFilterBehavior`, `&mut dyn FnMut(&RayMeshGeometry3DHitTestResult) -> HitTestResultBehavior` |
+| `VisualTreeHelper.HitTest(Visual, Point)` on a viewport | `VisualTreeHelper::hit_test(viewport, point) -> Option<RayMeshGeometry3DHitTestResult>` |
+| `VisualTreeHelper.HitTest(Visual, filter, result, PointHitTestParameters)` | `VisualTreeHelper::hit_test_point(viewport, filter, result, point)` |
+| `VisualTreeHelper.HitTest(Visual3D, filter, result, HitTestParameters3D)` | `VisualTreeHelper::hit_test_ray(visual, filter, result, &RayHitTestParameters)` |
+
+A viewport is a `Viewport3DVisual` or a `Viewport3D` (the trait `Viewport3DHitTestTarget`); the
+point is in the coordinates of the element (those of `Viewport3DVisual::viewport`).
+
+**The ray of a point.** From the snapshot of the viewport (`Viewport3DVisual::snapshot`): its
+camera's view and projection, widened to double precision, with the planes the snapshot fitted
+to the scene (section 3.13), so the ray is the one rendering draws with. The point is mapped to
+the device coordinates as the rasterizer maps them (x to the right, rows down) and unprojected
+at the clip depths 0 and 0.5 (finite also under an infinite far plane). The origin is the
+position of a perspective camera; for an orthographic camera the point of the plane through its
+position (of the near plane, when that is behind the camera); for a matrix camera the point of
+the near plane. A hit counts only between the near and the far plane (`0 <= z <= w` in the clip
+space, with a tolerance of a millionth of `w`) and inside the viewport, as only that is drawn.
+Without a camera, with an empty viewport or matrices without an inverse nothing is hit.
+
+**The walk** follows the scene objects, not the records of the snapshot (which gives only the
+camera): the filter is asked of visuals, a model whose material draws nothing is still hit, and
+the positions are those of the mesh in double precision. The visuals in tree order, the filter asked of each before it is tested
+(`ContinueSkipSelfAndChildren`, `ContinueSkipChildren`, `ContinueSkipSelf`, `Continue`, `Stop`:
+the walk ends, the hits found so far are reported); the content of a `ModelVisual3D` (its models,
+groups flattened) and then its children; the depth limit of the snapshot compiler (256). The ray
+of `hit_test_ray` is in the coordinates of the parent of the visual (its own transform applies).
+Each `GeometryModel3D` whose geometry is a `MeshGeometry3D` is tested in the coordinates of its
+mesh: the ray through the inverse of its world matrix (the transforms of the model, its groups and
+its visuals); a world matrix without an inverse covers nothing. The hits are sorted by their
+distance (stable: tree order at equal distances) and handed to the result callback until it
+returns `Stop`. A ray through an edge or a vertex shared by triangles hits each of them.
+
+**The sides** (WPF): a triangle is hit on its front (counterclockwise toward the origin of the
+ray) when the model has a `Material`, on its back when it has a `BackMaterial`, also a material
+that draws nothing (no brush). A transform that mirrors turns the faces over, as on the screen.
+
+**The hierarchy.** Built when a mesh is first hit and kept by the `MeshGeometry3D` until its next
+version (`(id, version)`, shared by every model of the mesh): the positions in double precision
+and the triangles of its `MeshData` (a triangle with an index out of range is left out, as
+rendering leaves it out), split at the median of the centres along the longest axis, at most
+four triangles a leaf, one vector of nodes. The traversal visits every box the ray enters (all
+hits are reported), with a slab test that keeps a ray in the plane of a face of a box. The
+triangle test is Moller-Trumbore in double precision: a triangle parallel to the ray or without
+area (the determinant below 1e-12 of the product of the lengths of its edges and the direction)
+or with a coordinate that is not a number is not hit. `PointHit` is the sum of the positions
+times the weights (`VertexWeight1` is `1 - u - v`, `VertexWeight2` `u`, `VertexWeight3` `v`), in
+the coordinates of the mesh; `DistanceToRayOrigin` is the distance from the origin to the point
+transformed back by the world matrix, in the coordinates of the ray.
+
+**Tests** (`hit_testing/tests.rs`): a known triangle with its weights, point and distance (also a
+slanted ray and a longer direction); the sides with a `Material`, a `BackMaterial`, both, none,
+and a material without a brush; nested transforms of a model, a group and two visuals, a rotation
+and a mirror; the nearest first and all hits in order through stacked squares and a cube, and a
+stop after the first; misses (beside, behind, in the plane, a zero direction, no geometry, a
+flattened model); degenerate triangles (on a line, a repeated vertex, an index out of range, an
+incomplete triangle, a position that is not a number); each behaviour of the filter; the rays of
+perspective, orthographic and matrix cameras (a matrix camera with a perspective camera's
+matrices hits the same points), the planes, the viewport bounds, a `Viewport3D`; the hierarchy
+built once per version and shared by two models; a mesh of 101,250 triangles hit after at most 32
+triangle tests; and picks held to the CPU reference: a turned cube under a perspective camera in
+a wide viewport, and an orthographic scene of overlapping squares, a square turned away and one
+drawn on its back, rasterized with one sample at the centre of each pixel. Every pixel whose
+neighbours agree is hit when it is drawn and missed when it is not, and its colour names the
+model hit.
+
+### 3.17 Interactive 3D as built (D11, the model part)
+
+**Classes** (`src/FerroUI.Media3D/ui_element_3d.rs`): `UIElement3D` (a `Visual3D`, WPF's base of
+the 3D elements with input; `IsHitTestVisible`, `is_pointer_over`, `is_pointer_captured`,
+`capture_pointer`, `release_pointer_capture` and the pointer events), `ModelUIElement3D` (its
+`Model`, the content property of markup) and `ContainerUIElement3D` (its `Children`). Both draw as
+a `ModelVisual3D` with the same content: the snapshot compiler, `descendant_bounds` and the hit
+testing read what a visual shows through one function of `visual_3d.rs`, and the changes are of
+the structure (a model, a child) or of a record (a transform), as for a `ModelVisual3D`. The
+three classes are registered for markup (`<ContainerUIElement3D>`, `<ModelUIElement3D>` with its
+model as content, `IsHitTestVisible`).
+
+**Events.** `pointer_entered`, `pointer_exited`, `pointer_moved`, `pointer_pressed`,
+`pointer_released` and `pointer_capture_lost` take a handler `Fn(&Ref<UIElement3D>,
+&Pointer3DEventArgs)` and return a `Subscription`. `Pointer3DEventArgs` carries the source (the
+innermost element of the route), the `Viewport3D`, the pointer, the 2D event of the viewport (its
+point, buttons and modifiers), the position in the viewport's coordinates, the nearest hit under
+the pointer and the handled flag. WPF's 3D elements raise the routed mouse events of 2D; the 3D
+elements of the port are not `InputElement`s (a `Visual3D` is not a 2D visual), so their events
+are lists of handlers that the viewport raises in WPF's order (recorded in DEVIATIONS.md).
+
+**Routing** (`controls/viewport_3d_input.rs`). The 2D hit testing hits a `Viewport3D` only where
+one of its models is (its `custom_hit_test` is the 3D hit test), so the input system gives it the
+pointer there, as WPF's `Viewport3DVisual` is hit. For each 2D pointer event of the viewport (its
+`InputElementImpl` overrides): the nearest hit at the pointer's position (`IsHitTestVisible`
+false lets the pointer through an element and its descendants), the route of the hit (the
+`UIElement3D`s from the visual hit to the root of the scene, innermost first); the elements the
+pointer is over become that route (exited on the elements it left, innermost first, then entered
+on the new ones, outermost first, each on the element alone); a move, press or release is raised
+on the route, innermost first, until a handler handles it, and then the 2D event is handled too.
+A hit in a plain `ModelVisual3D` outside any element is in front of what is behind it and reaches
+no element. The pointer leaving the viewport leaves every element.
+
+**Capture.** `capture_pointer` takes the 2D capture of the pointer for the viewport (keeping an
+implicit capture of a press) and routes the pointer's events to the element and the elements
+that hold it, wherever the pointer is; the element is then the only one the pointer can be over,
+and only while the nearest hit is in it. Another element's capture takes it over (capture lost
+on the first); `release_pointer_capture` raises capture lost and releases the 2D capture; the
+end of the 2D capture of the viewport (the release of the button ends the implicit capture, as
+the input system does) ends the 3D capture with capture lost. An element captures through the
+viewport that last routed input to it; before any, `capture_pointer` returns false.
+
+**Not built: `Viewport2DVisual3D`.** Its rendering (a 2D visual as the material of a mesh) needs
+the materials from visuals of step D6, which is not done; its input (the texture coordinate of
+the hit mapped to a point of the hosted visual, and the input routed into it through a
+transformed hit-test path) is left with it. Keyboard focus of 3D elements is not part of this
+step either.
+
+**Tests** (`ui_element_3d_tests.rs`, in a window of the unit test application with the 2D
+pointer events raised on the viewport as the input system raises them, with the implicit capture
+of a press): the 2D hit test over models only; a press reaching the element under the pointer and
+bubbling to its container, with the hit and the position; a handled press stopping there and
+handling the 2D event; entered and exited following the pointer across two elements, the gap and
+the edge of the viewport; a capture keeping the events on the capturing element over the other
+one, ended by the release, released explicitly, and taken over by another element; a plain visual
+in front taking no input and hiding what is behind, an element that is not hit-test visible
+letting the pointer through; the elements' models drawn, their changes of the structure and the
+records; and the classes loaded from XAML (`xaml_tests.rs`).
+
+### 3.18 Materials from brushes as built (D6)
+
+**The description** (`src/FerroUI.Rendering3D/brush.rs`). The snapshot keeps the brush of a
+layer in its shared form (`SharedBrush`: the values of a solid colour, a gradient with its stops,
+an image brush with its tile settings and a counted reference to its bitmap). What a draw samples
+is made of it on the render thread, the same for the CPU reference and the executors:
+`MaterialBrush::of(brush, texture_bounds)` gives the variant of the shader (`BrushShader`:
+`Solid`, `Gradient`, `GradientTexture`, `Image`), the uniforms (`BrushUniforms`) and, where the
+brush samples a texture, its source (`BrushTextureSource`) with the key of the texture
+(`BrushTextureKey`).
+
+| Brush | Sampled as |
+|---|---|
+| `SolidColorBrush` | the colour of the draw uniforms, as in D3 (`BrushShader::Solid`) |
+| `LinearGradientBrush`, `RadialGradientBrush` with up to 8 stops | the stops inline in the uniforms (`BrushShader::Gradient`) |
+| the same with more stops | a lookup texture of 256 by 1 straight RGBA8 texels, texel `i` the colour at `i / 255`, sampled with linear filtering at the centre of texel `t * 255` (`BrushShader::GradientTexture`); made once per set of stops (`BrushTextureKey::Gradient`, a hash of the sorted offsets and colours) |
+| `ImageBrush` | the pixels of its bitmap, premultiplied RGBA8 (8-bit RGBA or BGRA, premultiplied, straight or opaque, read through the bitmap's framebuffer), sampled bilinearly with the edges clamped and divided by the alpha (`BrushShader::Image`); read once per `(identity, version)` of the bitmap (`BrushTextureKey::Image`) |
+| an `ImageBrush` without an image | nothing (transparent), as in 2D |
+| a conic gradient, an image whose pixels cannot be read, a visual or drawing brush (until the third part of D6) | the layer's `Color` with the brush's opacity, counted (`layers_with_unsampled_brushes`) and reported once |
+
+**The mapping** is WPF's: the texture coordinate of a point is a point of the brush's 2D space,
+and a brush relative to its bounding box (the default of `RelativePoint`, `RelativeRect` and
+`RelativeScalar`) is mapped onto the bounding box of the mesh's texture coordinates
+(`texture_coordinate_bounds`; a mesh without texture coordinates has the empty box at the origin);
+an absolute brush takes the texture coordinates as they are. The brush's `RelativeTransform`
+(conjugated into the box) and `Transform` (about its `TransformOrigin`) apply in that space as
+they do over the bounds of a 2D element (the composition of Skia's brushes); the uniforms hold
+their inverse, the texture coordinate to the brush's space, as two rows.
+
+**Gradients.** A linear gradient's parameter is the projection onto its axis; a radial gradient's
+is, in the unit circle of its ellipse, the distance from the focus (`GradientOrigin`) over the
+distance from the focus to the circle along the same ray (the focus is moved inside the circle
+when it is outside). The spread method (`Pad`, `Reflect`, `Repeat`) applies to the parameter;
+the stops, sorted by offset (stable), are interpolated as straight colours in WPF's space (the
+gamma-encoded components).
+
+**Image brushes.** The tile is the brush's `DestinationRect` (WPF's `Viewport`) in the brush's
+space; the `SourceRect` (WPF's `Viewbox`) of the bitmap (in device-independent pixels, its pixels
+at 96 DPI) is stretched (`Stretch`) and aligned (`AlignmentX`, `AlignmentY`) into it as a 2D tile
+brush places it (`MediaExtensions::calculate_scaling`, `TileBrushCalculator::calculate_translate`);
+outside the viewbox the tile is transparent, outside the tile of `TileMode::None` the brush is;
+the other tile modes repeat the tile, `FlipX`, `FlipY` and `FlipXY` mirroring its odd columns,
+rows or both.
+
+**Colour.** A sample is a straight colour that multiplies the colour of the draw (the material's
+`Color` and the brush's opacity), which `lighting::shade_color` lights: a diffuse layer lit, a
+specular layer times its highlight, an emissive layer added without light. The specular and
+emissive layers of a `MaterialGroup` paint with their brushes like the diffuse layers.
+
+**The CPU reference** samples the brush per sample at the perspective-correct texture coordinate
+(the attributes of D3) and keeps the texels of each `BrushTextureKey` while it draws them
+(`cpu::brush_textures_read` counts the reads), with a weak handle to the bitmap so that its
+address names one bitmap while the texels are kept. The output caches of the backends also key on
+the identities and versions of the bitmaps of a scene (`brush::scene_texture_inputs`): new pixels
+of a bitmap change no generation of the snapshot.
+
+**The shader** (`scene3d.wgsl`) has the same functions (`brush_point`, `spread`, `gradient_t`,
+`inline_gradient`, `gradient_texture_coordinate`, `image_coordinate`, `unpremultiply`,
+`shade_color`) in the same order of operations, and one fragment entry point per variant of the
+brush shader: `fs_main` (solid colours, unchanged), `fs_gradient`, `fs_gradient_texture` and
+`fs_image`. Within the limits of section 3.4: the brush uniforms are a second uniform block of
+group 1 (`@binding(1)`, 256 bytes, at a dynamic offset of its own), the texture of a brush and one
+sampler are group 2, the inline stops a loop of at most 8, and textures are read with
+`textureSampleLevel` at level 0 (no derivatives, `textureLod` in GLSL ES 3.00). The tests of
+`shader.rs` validate the seven entry points, translate the new ones to GLSL ES 3.00 for WebGL2
+(three uniform blocks; one texture for the lookup and the image) and check the layout of
+`BrushUniforms` as naga lays it out.
+
+**The wgpu executor** (`wgpu_executor.rs`):
+
+- **Pipelines** are keyed by `Scene3DPipelineKey` and the `BrushShader` of the draw (the fragment
+  entry point, and the pipeline layout: with the group of the brush texture for
+  `GradientTexture` and `Image`), made on first demand and kept per device: at most 32 per sample
+  count, and the resolve.
+- **Uniforms.** The `BrushUniforms` of the draws are in a third buffer of the viewport, at the
+  stride of the device's offset alignment (256 bytes), bound with the draw uniforms in one bind
+  group with two dynamic offsets, and written like them only where they changed: a new stop colour
+  writes the 256 bytes of its draw.
+- **Textures** of brushes are uploaded once per `BrushTextureKey` and device (RGBA8, no mipmaps,
+  one linear sampler with the edges clamped), with the texels the CPU reference reads; a new version
+  of a bitmap is written into the texture of the version it replaces when it has the same size (no
+  texture made). A texture whose texels cannot be read, or that is larger than the device takes
+  (`max_texture_dimension_2d`), is refused, not asked again for 240 renders, and its layer drawn
+  with its colour and counted. Textures not drawn for 240 renders, and those of bitmaps that are
+  gone, go. `wgpu_executor::texture_counters()` counts the uploads, their bytes and the refusals.
+- **Vello** (`gpu/scene3d_passes.rs`) also keys a kept output on `brush::scene_texture_inputs`, so
+  new pixels of a bitmap draw the scene again (one 3D pass that uploads the new pixels alone), and
+  a render that uploaded a texture is not counted as uniform-only.
+
+**Visual and drawing brushes** (the third part of D6). The model side is built; the renderers'
+offscreen 2D renders are hooks the backends fill (below, "Left").
+
+- **The description.** A `VisualBrush` (the rendering of its visual) or a `DrawingBrush` (its
+  drawing) of a material is recorded on the UI thread into a `Scene3DBrushContent`
+  (`ferroui_base::rendering::scene3d`): the operations of the immediate recording as they are, and
+  each resource in a form that crosses threads (brushes and pens by their shared values,
+  geometries by their platform geometries, glyph runs, bitmaps, effects, custom operations and 3D
+  scenes as their shared handles). It has an identity and a generation, the bounds of the content,
+  and `render(context, transform)` replays it into any drawing context, on any thread. The layer
+  holds it as `SharedBrush::from_scene_content` (the tile settings, opacity and transforms of the
+  brush over the content; `SharedBrush::scene_content` reads it). A nested visual or drawing brush
+  inside the content has no shared form and draws without its brush.
+- **Dirty tracking.** The material keeps the recording of its brush and records it again only when
+  it is dirty: a change of a property of the brush (its invalidation) or of what it draws (the
+  drawing of a `DrawingBrush`, followed through `ISceneBrush::subscribe_content_changed`) marks it
+  dirty and is a change of a record; the next snapshot records a new generation of the same
+  identity, and every other snapshot (a moving camera, another record) takes the kept recording.
+  A new brush is a new identity. The generations of the snapshot (section 3.13) are unchanged by
+  this: the content's own generation names what changed, as a bitmap's version does.
+- **Sampling.** `MaterialBrush::of` samples a content as an image (`BrushShader::Image`) of the size
+  of its bounds, with the brush's tile settings (`BrushTextureKey::Content { id, generation }`);
+  `brush::scene_texture_inputs` includes the identities and generations of the contents, so a kept
+  output is drawn again only for a new generation.
+- **The CPU reference** renders a content through a `cpu::ContentRenderer` it is given
+  (`CpuRasterizer::set_content_renderer`, `Scene3DOutputCache::set_content_renderer`): the
+  backend's 2D renderer paints the content's bounds stretched over premultiplied RGBA8 texels of
+  `BrushTextureSource::content_pixel_size(scale)` pixels (the bounds at the render's pixels per
+  unit, at most 4096 a side). It is asked once per identity, generation and size. Without a
+  renderer the layer is drawn with its colour and counted.
+- **The wgpu executor** refuses a content's texture (its texels need the 2D renderer of the
+  device, below): the layer is drawn with its colour and counted (`textures_refused`).
+
+Left for the backends: (1) Skia raster and the CPU mode of Vello set a `ContentRenderer` on their
+output caches that makes a raster target of the given size, scales the content's bounds onto it
+and calls `Scene3DBrushContent::render`, returning its premultiplied pixels; (2) Vello's hybrid and
+GPU modes render the content into a texture of the device pool (`effect_passes::pooled_texture`)
+with a Vello scene of the device (the route of the effect passes' device layers), keep it by
+`BrushTextureKey::Content` with the output's slot, and hand it to the executor as the texture of
+the key (an executor entry point that takes a texture view for a key in place of texels); (3) Skia
+Graphite and Ganesh draw the content into a GPU surface of their context and import it into their
+executors (D5, D8); (4) a change inside the visual of a `VisualBrush` (a property of an element of
+its subtree) does not invalidate the brush; following it needs the visual's render invalidation
+(the 2D compositor finds it through its dirty visuals).
+
+**Tests.** `brush_tests.rs`: the layout of `BrushUniforms` and its WGSL declaration, relative and
+absolute linear gradients, the spread methods, radial gradients with a moved focus, sorted stops
+with straight colours, the lookup texture (its ends, within the rounding of its texels, one key per
+set of stops), the relative transform and the transform, image brushes (fill, viewbox, uniform
+stretch, tiles, `FlipX`), an image brush without an image, the reading of BGRA straight pixels, the
+key of a bitmap and the inputs of a scene following its version, the box of the texture
+coordinates. `cpu/tests.rs`: a diffuse gradient with 2 and 12 stops over a quad, the specular and
+emissive layers of a group painting with a gradient and an image, the texels read once while kept
+and again for a new version. The comparison scenes (`scene3d_scenes.rs`): `linear-gradient`,
+`radial-gradient`, `gradient-lookup-absolute` (12 stops through the lookup texture, absolute
+mapping over half of the gradient), `image-brush-tiles` (`FlipX` tiles of half the box),
+`image-brush-viewbox` (the bottom half of the bitmap, `Uniform` into a box of 1 by 2.1, so that no
+edge of the viewbox is on the centre of a row of pixels, where the GPU and the CPU reference round
+the interpolated texture coordinates apart)
+and `brush-material-group` (a grey diffuse layer, a specular layer with a gradient and an emissive
+layer with an image), with probes computed from the formulas in double precision, held to the CPU
+reference in every backend and mode (the GPU modes within the interior levels of section 3.15).
+Visual and drawing brushes: `brush_content.rs` (a drawing brush recorded and replayed on another
+thread, its shared form, the changes of its drawing reported), `scene_tests.rs` of
+`ferroui-media3d` (a drawing brush recorded again only when its content changes: the same
+identity and generation across a camera change, a new generation after a change of its drawing, a
+new identity for a new brush) and `cpu/tests.rs` (a content rendered once per generation at the
+resolution of the render and sampled as an image; without a renderer, the colour).
+The steady state and compile once (`scene3d_tests.rs`):
+`steady_frames_of_a_moving_camera_over_brushes_upload_no_texture`,
+`a_static_viewport_of_brushes_issues_no_3d_pass_and_uploads_nothing`,
+`a_new_version_of_a_bitmap_uploads_only_its_texture` and `pipelines_are_created_once_per_device`
+with the four brush shaders; the unit tests of `wgpu_executor.rs`: the brush stride, a texture
+uploaded once per key and device and a new version into the same texture, a change of a brush
+writing only the uniforms of its draw.
+
 ## 4. Steps
 
 Each step is one pull request from main. Each updates the row "3D scenes (Viewport3D)" of
@@ -779,12 +1080,12 @@ this page.
 | D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | in review |
 | D4 | `scene3d.wgsl` and the wgpu executor (section 3.15): `ferroui-render3d`'s `shader` module and feature `wgpu` (the pipeline cache by a `Copy` key, the mesh cache by `(id, version)`, uniform buffers with dynamic offsets written only where they changed, the depth, MSAA and resolve pools, the fallback to one sample), and Vello's hybrid and GPU modes drawing on the device (`gpu/scene3d_passes.rs`: the outputs kept per device, painted as textures of the device, the CPU reference as the reported and counted last resort). Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode` and `the_backends_draw_every_scene_3d_alike` with the GPU modes, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation and GLSL ES 3.00 of the shader; run by `vello.yml` on Metal (its paths now include `src/FerroUI.Rendering3D/`), Vulkan with D9 | additions (the module `wgpu_executor`, `ferroui_vello::gpu::scene3d_counters`) | high: the first GPU route; the uniform layout and alignment (dynamic offsets at the device's alignment) | in review |
 | D5 | Skia Graphite on Metal: the Metal executor (MSL from naga at build time) in or next to `ferroui-metal`, `ferroui-skia/gpu/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, ordered before `insert_recording`, the prewarm hook. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` (`gpu/metal/tests.rs`), the steady state, compile once; iOS simulator and device measurements | none new | high: cross-API ordering on Apple | planned |
-| D6 | Materials from brushes: gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | none new | medium | planned |
+| D6 | Materials from brushes (section 3.18): gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | additions (the module `brush`, `cpu::brush_textures_read`, `lighting::shade_color`) | medium | in review, in three parts: the description and the CPU reference (part 1); the shader and the wgpu executor (part 2: `brush_uniforms_stride`, `texture_counters`, `Scene3DTextureCounters`, `Scene3DWgpuExecutor::texture_count`, the entry points of `shader`); visual and drawing brushes (part 3: the model side and the CPU reference's hook, `Scene3DBrushContent`, `SharedBrush::from_scene_content` and `scene_content`, `ISceneBrush::subscribe_content_changed`, `cpu::ContentRenderer`, `set_content_renderer`; the backends' offscreen renders left, section 3.18) |
 | D7 | Video and shared-texture materials, Metal routes first: `ISharedGpuTexture` and `GpuTextureRef` in `src/FerroUI.Base/platform/`, the accessors of `LeasedGpuBitmap`, `VelloSharedFrameBitmap` and `SharedFrameTexture`, the import cache by `FrameIdentity` that `TexturePresenter` also uses, `VideoBrush` and the visual-brush fast path, `sample_frame()`. Tests: `a_video_material_samples_the_frame_without_a_copy` (`FrameTransferCounters`: `gpu_import` only on Graphite, one shared `gpu_conversion` on Vello), one import for a frame shown flat and on a cube, the lease released after GPU completion, no mesh or record upload for a new frame; a "video on a cube" scene in `samples/PortableMedia` | additions | high: lifetimes across 2D and 3D | planned |
 | D8 | The GL executor (Skia Ganesh GL everywhere: ANGLE, EGL, Android GLES, CGL, WebGL2): GLSL ES 3.00 from naga at build time, framebuffer, depth renderbuffer and MSAA resolve, the reset of Skia's GL state after drawing, video through `SharedFrameTexture` ids on the same context. Tests: the comparison scenes under ANGLE on WARP (Windows CI), llvmpipe EGL (Linux CI), the Android emulator, a browser smoke run; browser and Android frame times | none new | high: Skia's GL state | planned |
 | D9 | Vello on Vulkan, DX12 and GLES, validated in the Windows and Linux virtual machines (one at a time); the Vulkan executor (SPIR-V) for Skia Vulkan with lavapipe in CI. The video gaps of those routes stay recorded gaps | none new | medium | planned |
-| D10 | Hit testing (`src/FerroUI.Media3D/hit_testing/`): the ray from the camera, the hierarchy per mesh, `RayMeshGeometry3DHitTestResult`, the `VisualTreeHelper::hit_test` overloads. Tests: hits on known triangles with weights and distance, the front and back material rules, a pick that matches the rendered pixel of the CPU reference, a 100k-triangle mesh. Can follow D2 in parallel | additions | medium | planned |
-| D11 | Interactive 3D: `UIElement3D`, `ModelUIElement3D` and `ContainerUIElement3D` input events; `Viewport2DVisual3D` rendering (the D6 path) and input routing. Tests: pointer events reach a `Button` on a rotated `Viewport2DVisual3D` plane; capture and focus | additions | high: a transformed hit-test path in the input system | planned |
+| D10 | Hit testing (section 3.16, `src/FerroUI.Media3D/hit_testing/`): the ray from the camera with the fitted planes of the snapshot, the hierarchy per mesh by `(id, version)`, Moller-Trumbore with weights and distance, WPF's front and back material rules, the transforms of the tree, `RayMeshGeometry3DHitTestResult` and its base types, `VisualTreeHelper::hit_test`, `hit_test_point` and `hit_test_ray` with the filter and result callbacks. Tests: hits on known triangles with weights and distance, the front and back material rules, nested transforms, the order of the hits, misses, degenerate triangles, the filters, the cameras, picks that match the rendered pixels of the CPU reference, a 100k-triangle mesh | additions (`VisualTreeHelper`, `RayHitTestParameters`, the result types and behaviours, `Viewport3DHitTestTarget`) | medium | in review |
+| D11 | Interactive 3D (section 3.17): `UIElement3D`, `ModelUIElement3D` and `ContainerUIElement3D` with their pointer events (entered, exited, moved, pressed, released, capture lost) routed from a `Viewport3D` through the D10 hit test, pointer over and capture; the 2D hit test of `Viewport3D` over its models. Left for after D6: `Viewport2DVisual3D` rendering (the D6 path) and input routing (pointer events reaching a `Button` on a rotated `Viewport2DVisual3D` plane), and focus | additions (the three classes, `Pointer3DEventArgs`) | high: a transformed hit-test path in the input system (for `Viewport2DVisual3D`) | in review (the model part); `Viewport2DVisual3D` planned after D6 |
 | D12 | Catalog pages, one per control, in a "3D" section (a `Viewport3D` page with cameras, lights, materials, transforms and an animated `RotateTransform3D`; a `Viewport2DVisual3D` page) and a "video material" page in the Media section (docs/media/CONTROL-CATALOG.md); a `samples/Media3D` application with procedural meshes, run on device and simulator | none (samples) | low | planned |
 | D13 | Later: Vello hybrid-webgl 3D after route step 3; the ProGPU backend mapping (#369); browser WebGPU; Vello's perspective gap C7 through the 3D executor; an inventory of WinUI's `Microsoft.UI.Composition.Scenes` in winui-composition.md | to be stated | medium | planned |
 
@@ -842,7 +1143,13 @@ To be checked against WPF's documentation and behaviour before the tests freeze 
 - The `SpotLight` angle convention (full cone angles) and the falloff between the cones.
 - The order and blending of the passes of a `MaterialGroup` (diffuse, specular, emissive).
 - The mapping of a relative brush onto the bounding box of the texture coordinates.
-- The hit-testing rules for front and back faces (`Material` and `BackMaterial`).
+- What WPF draws for a non-solid brush on a mesh without texture coordinates (the port takes the
+  colour at the brush's origin), and for a radial gradient whose origin is outside its ellipse.
+- Whether WPF interpolates the stops of a material's gradient straight or premultiplied (the port:
+  straight, as its 2D backends).
+- The hit-testing rules for front and back faces (`Material` and `BackMaterial`), also under a
+  transform that mirrors (D10 turns the faces over, as the screen does); the origin of the ray of
+  an orthographic and a matrix camera, which `DistanceToRayOrigin` is measured from.
 - No sorting of transparent models.
 - `Viewport3D.ClipToBounds` true by default.
 - Whether `RenderOptions.EdgeMode` affects 3D antialiasing.

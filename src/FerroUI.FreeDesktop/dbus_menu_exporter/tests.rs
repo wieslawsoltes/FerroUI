@@ -6,8 +6,9 @@
 use super::*;
 use crate::test_support::{expect_calls, log, peer_call, peer_property, pump_until, scope, show, Log, TestConnections};
 use ferroui_base::input::{Key, KeyGesture};
+use futures_util::StreamExt;
 use std::sync::{Arc, Mutex};
-use zbus::zvariant::{OwnedObjectPath, OwnedValue};
+use zbus::{OwnedObjectPath, OwnedVariant};
 
 const INTERFACE: &str = "com.canonical.dbusmenu";
 
@@ -59,24 +60,24 @@ impl Fixture {
     fn layout(&self, exporter: &DBusMenuExporterImpl, parent: i32, depth: i32, names: &[&str]) -> Option<(u32, String)> {
         let names: Vec<String> = names.iter().map(|name| name.to_string()).collect();
         let reply = peer_call(&self.connections, exporter.path(), INTERFACE, "GetLayout", (parent, depth, names)).ok()?;
-        let (revision, (id, properties, children)): (u32, (i32, HashMap<String, OwnedValue>, Vec<OwnedValue>)) =
+        let (revision, (id, properties, children)): (u32, (i32, HashMap<String, OwnedVariant>, Vec<OwnedVariant>)) =
             reply.body().deserialize().unwrap();
         Some((revision, show_layout(id, &properties, &children)))
     }
 
     fn event(&self, exporter: &DBusMenuExporterImpl, id: i32, event_id: &str) {
-        let body = (id, event_id.to_string(), Value::I32(0), 0u32);
+        let body = (id, event_id.to_string(), Variant::I32(0), 0u32);
         peer_call(&self.connections, exporter.path(), INTERFACE, "Event", body).unwrap();
     }
 }
 
-fn show_properties(properties: &HashMap<String, OwnedValue>) -> String {
+fn show_properties(properties: &HashMap<String, OwnedVariant>) -> String {
     let mut entries: Vec<String> = properties.iter().map(|(key, value)| format!("{key}={}", show(value))).collect();
     entries.sort();
     format!("{{{}}}", entries.join(","))
 }
 
-fn show_layout(id: i32, properties: &HashMap<String, OwnedValue>, children: &[OwnedValue]) -> String {
+fn show_layout(id: i32, properties: &HashMap<String, OwnedVariant>, children: &[OwnedVariant]) -> String {
     let children: Vec<String> = children.iter().map(|child| show(child)).collect();
     format!("({id},{},[{}])", show_properties(properties), children.join(","))
 }
@@ -168,13 +169,13 @@ fn dbus_the_layout_of_a_menu_is_what_a_host_is_told() {
     // GetGroupProperties and GetProperty.
     let body = (vec![2i32, 3, 99], vec!["label".to_string(), "type".to_string()]);
     let reply = peer_call(&fixture.connections, exporter.path(), INTERFACE, "GetGroupProperties", body).unwrap();
-    let groups: Vec<(i32, HashMap<String, OwnedValue>)> = reply.body().deserialize().unwrap();
+    let groups: Vec<(i32, HashMap<String, OwnedVariant>)> = reply.body().deserialize().unwrap();
     let groups: Vec<String> = groups.iter().map(|(id, properties)| format!("{id}{}", show_properties(properties))).collect();
     assert_eq!(groups, ["2{label=Open}", "3{type=separator}", "99{}"]);
 
     let property = |id: i32, name: &str| {
         let reply = peer_call(&fixture.connections, exporter.path(), INTERFACE, "GetProperty", (id, name.to_string())).unwrap();
-        let value: OwnedValue = reply.body().deserialize().unwrap();
+        let value: OwnedVariant = reply.body().deserialize().unwrap();
         show(&value)
     };
     assert_eq!(property(4, "toggle-type"), "checkmark");
@@ -214,7 +215,7 @@ fn dbus_a_click_event_raises_the_click_of_an_enabled_item() {
     assert_eq!(clicks.get(), 1);
 
     // A group of events.
-    let events = vec![(2i32, "clicked".to_string(), Value::I32(0), 0u32), (2, "clicked".to_string(), Value::I32(0), 0)];
+    let events = vec![(2i32, "clicked".to_string(), Variant::I32(0), 0u32), (2, "clicked".to_string(), Variant::I32(0), 0)];
     let reply = peer_call(&fixture.connections, exporter.path(), INTERFACE, "EventGroup", (events,)).unwrap();
     assert!(reply.body().deserialize::<Vec<i32>>().unwrap().is_empty());
     assert_eq!(clicks.get(), 3);
@@ -251,15 +252,13 @@ fn dbus_a_change_of_the_menu_resets_the_layout_once_and_tells_the_host() {
             let rule = zbus::MatchRule::builder()
                 .msg_type(zbus::message::Type::Signal)
                 .interface(INTERFACE)
-                .unwrap()
                 .member("LayoutUpdated")
-                .unwrap()
                 .path(path)
-                .unwrap()
-                .build();
-            let mut signals = zbus::blocking::MessageIterator::for_match_rule(rule, &service, None).unwrap();
+                .build()
+                .unwrap();
+            let mut signals = zbus::block_on(zbus::MessageStream::for_match_rule(rule, &service, None)).unwrap();
             ready_sender.send(()).unwrap();
-            let signal = signals.next().unwrap().unwrap();
+            let signal = zbus::block_on(signals.next()).unwrap().unwrap();
             signal.body().deserialize::<(u32, i32)>().unwrap()
         })
     };

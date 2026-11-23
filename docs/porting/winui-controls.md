@@ -96,8 +96,22 @@ A separate namespace for the controls (`ferroui_controls::winui`, `FerroUI.Contr
 | `NavigationViewItemSeparator` | WinUI's NavigationViewItemSeparator: its template is converted from WinUI's NavigationView.xaml into the WinUI theme and its derived themes | W8 |
 | `RichEditBox` | WinUI's RichEditBox: its template is ported from WinUI's RichEditBox_themeresources.xaml into the WinUI theme (docs/porting/winui-rich-text.md, decision D4) | R8 of #243 |
 | `TitleBar` | WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes | W8c |
+| `ListView` | WinUI's ListView: its template is ported from the ListView style of WinUI's generic.xaml into the WinUI theme and its derived themes | LV-1 (#443) |
+| `ListViewItem` | WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes | LV-1 (#443) |
+| `GridView` | WinUI's GridView: its template is ported from the GridView style of WinUI's generic.xaml into the WinUI theme and its derived themes | LV-2 (#443) |
+| `GridViewItem` | WinUI's GridViewItem: its template is ported from WinUI's GridViewItem_themeresources.xaml into the WinUI theme and its derived themes | LV-2 (#443) |
+| `Pivot` | WinUI's Pivot: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
+| `PivotItem` | WinUI's PivotItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
+| `PivotHeaderItem` | WinUI's PivotHeaderItem: its template is ported from WinUI's Pivot_themeresources.xaml into the WinUI theme and its derived themes | PV-3 (#443) |
+| `SwipeControl` | WinUI's SwipeControl: its template is converted from WinUI's SwipeControl.xaml into the WinUI theme and its derived themes | SW-1 (#443) |
 <!-- winui-only:end -->
 - The tables of `winui-theme.md` that say "no FerroUI control" for these controls (NavigationView and its items, RadioButtons, RatingControl; DRP-1, DRP-2, DRP-11, DRP-13, NVP-1 and G-23 of the theme's DEVIATIONS) are updated in the pull request that lands each control; W5 updated them for InfoBar, InfoBadge and ProgressRing, W6 for RadioButtons and RatingControl, W8 for NavigationView and its items.
+
+The optional media controls (`MediaPlayerElement`, `MediaPlayerPresenter`,
+`MediaTransportControls` and `CameraCaptureUI`) are listed in their respective
+media control crates' `WINUI_ONLY_CONTROLS` constants. The WinUI family supplies
+transport and capture templates. The element and presenter use the portable
+composition surface directly. See [portable media controls](../media/ISSUE-561.md).
 
 ### 5.2 The symbol font
 
@@ -295,7 +309,7 @@ Where #286 differed from WinUI, the port follows WinUI: the text of NumberBox's 
 | `Frame.BackStack` and `ForwardStack` are `IVector<PageStackEntry>`. | `navigation::NavigationStack`, a live list whose edits return a `Result` (`NavigationPending`, `IndexOutOfRange`, `EntryOwnedByAnotherFrame`); it is also an items source of bindings. | Representation | Rust errors where WinUI fails a collection call. |
 | `Page.Frame` and the entries of the journal reference their frame. | Held weakly: a page or a journal kept by the application keeps no frame alive. | Representation | Reference counting without cycles. |
 | NavigationView realizes its items with `ItemsRepeater`s and selects with a hierarchical `SelectionModel` (`IndexPath`); `NavigationViewItemsFactory`. | Stack panels whose children the control realizes from `MenuItems`, `MenuItemsSource`, `FooterMenuItems` and the child items; the containers of data items are reused across edits; the selection is `SelectedItem` with `IsSelected` and `IsChildSelected` of the containers. | Missing | Follow-up F1, on the repeater crate (#269). |
-| `NavigationViewItemPresenter` (primitives) and `NavigationViewItemPresenterTemplateSettings` (`IconWidth`, `SmallerIconWidth`). | Not ported: the template of the item holds the presenter's template, the item sets the presenter's states; the icon column is bound to `SmallerPaneToggleButtonWidth` of the navigation view, the same value (NVI-1, NVI-4). | Missing | The presenter is a template part of WinUI's item with no use of its own; a public presenter type is a candidate for F1. |
+| `NavigationViewItemPresenter` (primitives) and `NavigationViewItemPresenterTemplateSettings` (`IconWidth`, `SmallerIconWidth`). | Not ported: the template of the item holds the presenter's template, the item sets the presenter's states, and the pointer-over state is that of the row (`LayoutRoot:pointerover`), since an item is under the pointer while an item below its row is; the icon column is bound to `SmallerPaneToggleButtonWidth` of the navigation view, the same value (NVI-1, NVI-4). | Missing | The presenter is a template part of WinUI's item with no use of its own; a public presenter type is a candidate for F1. |
 | The overflow of the top pane: `TopNavOverflowButton` and its flyout, `TopNavigationViewDataProvider`, `OverflowLabelMode`, the measure that moves items to the overflow. | Not ported: every item stays in `TopNavMenuItemsHost` (NVW-4). | Missing | A candidate for later. |
 | The selection indicator (`AnimateSelectionChanged`, `PlayIndicatorAnimations`). | Composition scalar keyframes of `Offset`, `Scale`, `CenterPoint` and outgoing `Opacity`, completed by a composition scoped batch. Shared with TabControl templates that expose an indicator. | Representation | The original keyframes include the indicator's local layout offset. See [selection-indicator-animations.md](selection-indicator-animations.md). |
 | The remaining animations: the pane and its shadow, the header text, the `AnimatedIcon`s of the chevron, the settings item and the back button. | Not ported; the chevron glyph turns by a rotation (NVI-3, NVI-6). | Missing | Separate pane motion and Lottie work. |
@@ -417,6 +431,79 @@ Phase G2 ports the WinUI controls the pending pages need, one control (or one sm
 | PagerControl | 3 of 3 | ported | `Pages/PagerControl.xaml` (no code-behind upstream) | `feedback_samples_tests.rs` |
 | PersonPicture | 1 of 1 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
 
+#### G4: the partial pages (#418)
+
+Phase G4 completes the pages that had native examples for a reviewed subset only: each catalog example of the source page gets its native adaptation with the handlers of the page's code behind in Rust and the source's x:Bind, as for G1. Where the source's x:Bind path is one the x:Bind core does not compile, the page records the binding it uses instead: `IsChecked.Value.Equals(x:False)` (there is no member `Value` on a nullable boolean) is the OneWay x:Bind of `IsChecked` with the `BoolConverters.Not` converter, and a cast to a number (`(x:Int32)Slider.Value`, a type test on the core) is the path without the cast, which the binding converts. A button that opens another page of the gallery, as the source's `App.MainWindow.Navigate`, is listed in `examples::GALLERY_LINKS` and wired by the gallery. A container FerroUI does not have is composed from one it has and recorded in the page's notes: GridView and VariableSizedWrapGrid of the SplitButton flyouts are a UniformGrid of buttons, as on the RichEditBox page. An x:Bind of a static member of a .NET type (`sys:DateTime.Now.TimeOfDay`), which the core does not compile, is the value set once in Rust, as that OneTime binding. A `KeyboardAccelerator` is the `HotKey` of the button, the key gesture FerroUI's buttons invoke. WinUI's `CharacterSpacing`, in thousandths of an em, is FerroUI's `LetterSpacing` in pixels: the value times the font size over 1000 (200 at 24 is 4.8). WinUI's ListView is FerroUI's ListBox: Multiple is Multiple with Toggle (a click toggles an item), Extended is Multiple, and None, which FerroUI's SelectionMode does not have, is a class of the page whose items are not selected, hit or focused. WinUI's TreeViewNodes are TreeViewItems with the node's content as the Header, and an item template that is a TreeViewItem with the x:Bind of its children is a hierarchical data template (`FuncTreeDataTemplate`). A `DataTemplateSelector` is a pair of data templates that match the items, which an items control picks from its `DataTemplates`. As for the ItemsRepeater page, a template of a code-behind model binds with `{Binding}` over the markup types of the sample module. A page's `VisualStateManager` states whose setters change one element are classes of that element with the setters as styles, set by the handlers that call `GoToState`. WinUI's `ScrollMode` of an axis, which FerroUI's ScrollViewer does not have, is the bar's visibility: Disabled turns the axis's scrolling off. The `X1`, `Y1`, `X2` and `Y2` of a WinUI Line are FerroUI's `StartPoint` and `EndPoint`, set by the sample from the coordinates. An image of a page's `ThemeDictionaries` is set by the sample for the page's theme and again when the theme changes. A brush's `MappingMode` is the unit of its points and radii. A custom control of a page (CustomUserControls) is a Rust class with styled properties whose default style is a control theme of the page; the sample creates it in its host, since a native page has no XAML namespace of its own types. `SetThemeResourceBinding` is a resource observable of the element bound to the property, and a Color resource set as a brush is the Color of a SolidColorBrush. A keyed `Style` based on a control's default style is the style of a class that the control applies with `Classes`, and an implicit `Style` of a type is the style of that type's selector in the panel's `Styles`. A ToolTip's own `Placement`, `VerticalOffset` and `HorizontalOffset` are the attached `ToolTip` properties of its element, and a `PlacementRect` that is the element's bounds is the element as the target of the placement. A native page has no `x:Class`: an x:Bind of the page's own members (a property, a function, a view model) is the code behind in Rust, and a view model is the page's `DataContext`, read with `{Binding}` over a markup type.
+
+| Page | Examples | State | Rust | Tests |
+|---|---:|---|---|---|
+| AccessibilityColorContrast | the page (no catalog example): partial, no WinUI ColorPicker (a ColorView) | partial | `accessibility_samples.rs`, `contrast.rs` | `tests.rs` |
+| AccessibilityKeyboard | 4 ported, 2 partial: no Key Tips (access keys are letters of the header), no accelerator tooltips | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
+| AccessibilityScreenReader | 9 ported, 2 partial: no FullDescription (HelpText), no Custom landmark or LocalizedLandmarkType, no TextBox Header (LabeledBy) | partial | `accessibility_samples.rs` | `accessibility_samples_tests.rs` |
+| Clipboard | 4 ported, 2 partial: no clipboard history, roaming or ContentChanged | partial | `platform_samples.rs` | `tests.rs` |
+| Button | 4 of 4 | ported | `button_samples.rs` | `tests.rs`, `button_samples_tests.rs` |
+| RepeatButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| HyperlinkButton | 2 of 2 | ported | `gallery.rs` (`examples::GALLERY_LINKS`) | `button_samples_tests.rs` |
+| ToggleButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| DropDownButton | 2 of 2 | ported | `Pages/DropDownButton.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
+| SplitButton | 2 of 2 | ported | `button_samples.rs` | `button_samples_tests.rs` |
+| ToggleSplitButton | 1 partial: RichEditBox has no paragraph list type | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| CheckBox | 3 of 3 | ported | `input_samples.rs` | `tests.rs` |
+| RadioButton | 2 of 2 | ported | `examples.rs` | `tests.rs` |
+| Slider | 2 ported, 2 partial: no StepFrequency, SnapsTo or Header | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| ToggleSwitch | 2 of 2 | ported | `Pages/ToggleSwitch.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
+| ComboBox | 2 ported, 1 partial: no TextSubmitted, no ContentDialog | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| Border | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
+| Canvas | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
+| Grid | 1 of 1 | ported | `Pages/Grid.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
+| StackPanel | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
+| RelativePanel | 1 of 1 | ported | `Pages/RelativePanel.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
+| TextBlock | 4 ported, 1 partial: no IsTextSelectionEnabled on TextBlock (a RichTextBlock) | partial | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| TextBox | 3 ported, 1 partial: no IsSpellCheckEnabled | partial | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| PasswordBox | 3 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `input_samples.rs` | `tests.rs`, `text_input_samples_tests.rs` |
+| NumberBox | 3 of 3 | ported | `text_input_samples.rs` | `text_input_samples_tests.rs` |
+| ProgressBar | 1 ported, 1 partial: no ShowPaused or ShowError | partial | `status_samples.rs` | `status_samples_tests.rs` |
+| InfoBar | 3 of 3 | ported | `control_samples.rs` | `tests.rs`, `x_bind_tests.rs` |
+| Expander | 2 of 2 | ported | `status_samples.rs` | `status_samples_tests.rs` |
+| PipsPager | 2 partial: no FlipView (a Carousel), no VisibleOnPointerOver or WrapMode | partial | `status_samples.rs` | `status_samples_tests.rs` |
+| AppBarButton | 5 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
+| AppBarToggleButton | 3 ported, 1 partial: no BitmapIcon (an Image) | partial | `command_samples.rs` | `command_samples_tests.rs` |
+| AppBarSeparator | 1 of 1 | ported | `Pages/AppBarSeparator.xaml` (no code-behind upstream) | `command_samples_tests.rs` |
+| CommandBar | 1 of 1 | ported | `command_samples.rs` | `command_samples_tests.rs` |
+| Flyout | 1 of 1 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
+| MenuFlyout | 6 ported, 1 partial: no SplitMenuFlyoutItem | partial | `menu_samples.rs` | `menu_samples_tests.rs` |
+| MenuBar | 3 of 3 | ported | `menu_samples.rs` | `menu_samples_tests.rs` |
+| Popup | 1 of 1 | ported | `platform_samples.rs` | `menu_samples_tests.rs`, `x_bind_tests.rs` |
+| DatePicker | 2 of 2 | ported | `date_samples.rs` | `date_samples_tests.rs` |
+| TimePicker | 3 of 3 | ported | `date_samples.rs` (no code-behind upstream) | `date_samples_tests.rs` |
+| CalendarDatePicker | 1 of 1 | ported | `Pages/CalendarDatePicker.xaml` (no code-behind upstream) | `date_samples_tests.rs` |
+| CalendarView | 1 partial: no IsGroupLabelVisible, IsOutOfScopeEnabled, CalendarIdentifier or Language | partial | `date_samples.rs` | `date_samples_tests.rs` |
+| AutoSuggestBox | 2 of 2 | ported | `control_samples.rs` | `tests.rs` |
+| ListView | 5 ported, 5 partial: a ListBox; no grouping or sticky headers, no IsTextTrimmed, no ItemsUpdatingScrollMode, no None selection mode or check boxes | partial | `list_samples.rs` | `list_samples_tests.rs` |
+| TreeView | 3 ported, 1 partial: no drag and drop of the items | partial | `tree_samples.rs` | `tree_samples_tests.rs` |
+| SplitView | 1 of 1 | ported | `split_view_samples.rs` | `split_view_samples_tests.rs`, `x_bind_tests.rs` |
+| ScrollViewer | 1 of 1 | ported | `scroll_samples.rs` | `scroll_samples_tests.rs` |
+| Shape | 3 of 3 | ported | `Pages/Shape.xaml` (no code-behind upstream) | `shape_samples_tests.rs` |
+| Line | 4 of 4 | ported | `shape_samples.rs` (no code-behind upstream) | `shape_samples_tests.rs` |
+| Geometry | 1 partial: no TeachingTip (a Flyout) | partial | `shape_samples.rs` | `shape_samples_tests.rs` |
+| RadialGradientBrush | 1 of 1 | ported | `brush_samples.rs` | `brush_samples_tests.rs` |
+| IconElement | 3 ported, 3 partial: no BitmapIcon or ImageIcon (Images), no SVG | partial | `brush_samples.rs` | `tests.rs`, `brush_samples_tests.rs` |
+| Spacing | 1 of 1 | ported | `brush_samples.rs` (no code-behind upstream) | `brush_samples_tests.rs` |
+| Typography | 1 partial: no TeachingTip (a Flyout) | partial | `brush_samples.rs` | `brush_samples_tests.rs` |
+| Binding | 7 of 7 | ported | `binding_samples.rs` | `x_bind_tests.rs`, `binding_samples_tests.rs` |
+| Templates | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
+| CustomUserControls | 2 ported, 1 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `custom_controls.rs` | `custom_controls_tests.rs` |
+| XamlResources | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
+| XamlStyles | 2 of 2 | ported | `Pages/XamlStyles.xaml` (no code-behind upstream) | `binding_samples_tests.rs` |
+| PageTransition | 1 partial: no navigation transitions on Frame | partial | `frame_sample.rs` | `tests.rs` |
+| Pivot | 1 of 1 | ported | `Pages/Pivot.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
+| InfoBadge | 4 of 4 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs` |
+| ProgressRing | 2 of 2 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs`, `x_bind_tests.rs` |
+| RatingControl | 2 of 2 | ported | `feedback_samples.rs` | `feedback_samples_tests.rs`, `x_bind_tests.rs` |
+| ToolTip | 3 of 3 | ported | `status_samples.rs` (no code-behind upstream) | `status_samples_tests.rs` |
+| Viewbox | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs`, `x_bind_tests.rs` |
+| WrapPanel | 1 ported, 1 partial: no ItemsStretch (and no Padding: the host Border's) | partial | `layout_samples.rs` | `layout_samples_tests.rs` |
+
 ### 10.8 WinUI API and Gallery scanner (W10b)
 
 `scripts/winui-gallery/scan.py` (from #286) compares the public API of WinUI and the pages of WinUI Gallery with FerroUI's sources at the pins of `docs/porting/winui-gallery/data/sources.lock.json` (WinUI `7e4b0c2`, O13; Gallery `14061eea`). Its result is a report of candidates: 1,545 public WinUI types and 7,462 public members are scanned, a same-name Rust type or member in the mapped namespace is a *candidate*, and no candidate counts as behaviour, which the tests of the controls and of the sample establish. The pages have the states of `samples/WinUIGallery/port-status.json`.
@@ -447,7 +534,7 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 
 ### 10.10 PersonPicture (G2a)
 
-`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`.
+`src/FerroUI.Controls/person_picture.rs`, `primitives/person_picture_template_settings.rs`, `automation/peers/person_picture_automation_peer.rs` and `utils/initials_generator.rs`, from `controls/dev/PersonPicture`, and `contact.rs`. The tests are WinUI's API tests (`APITests/PersonPictureTests.cs`), the behaviour of the badges, the contact and the circle (`person_picture_tests.rs`), the rules of the initials (`utils/initials_generator.rs`), and the template of the WinUI theme in `the_person_picture_gets_its_parts_and_states_from_the_theme`. The class does not clip to its bounds, where a templated control does by default: the badge of the template is 4 units above and to the right of the picture (`PersonPictureBadgeGridMargin`), as in WinUI, whose controls do not clip.
 
 | WinUI | FerroUI | Why |
 |---|---|---|
@@ -456,3 +543,5 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The visual states of `VisualStateManager`; the `ImageBrush` BadgeImageBrush is declared in the setter of the state BadgeWithImageSource. | Pseudo-classes (`:photo`, `:nophotoorinitials`, `:group`, `:badge`, `:badgeimage`); the control owns the badge brush and sets it as the fill of BadgingEllipse. | The convention of the WinUI theme (section 5.1). |
 | The initials generator reads UTF-16 code units, so the CJK ranges outside the basic multilingual plane never match. | It reads characters, so those ideographs are symbolic, as the ranges intend. | The intent of the ranges. |
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
+| The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
+| `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |

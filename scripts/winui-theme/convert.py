@@ -507,10 +507,10 @@ def convert(root):
         "The resources of WinUI's compact density (compact_themeresources.xaml: the theme resources with these documents merged last), with its implicit TextBlock style as the default control theme of TextBlock; WinUITheme looks them up first when its DensityStyle is Compact.",
     )
 
-    # The includes of the theme document: the system resources, the converted documents in the
-    # order of the merge of WinUI, the theme shadows and the outlines of the glyphs.
-    order = ["Resources/SystemResources.xaml"]
-    order += [port_path(source) for source, _ in theme.documents if port_path(source) in documents]
+    # The includes of the theme document: the converted documents in the order of the merge of
+    # WinUI, the theme shadows and the outlines of the glyphs. (The system colours are the
+    # resource provider Accents/SystemColors, merged before the markers.)
+    order = [port_path(source) for source, _ in theme.documents if port_path(source) in documents]
     order += [port_path(source) for source in OUTSIDE_THE_MERGE]
     order += ["Resources/ThemeShadows.xaml", "Resources/Glyphs.xaml"]
     theme_path = os.path.join(CRATE, THEME_DOCUMENT)

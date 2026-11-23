@@ -1446,7 +1446,7 @@ impl TreeDataGridPresenterBase {
         let this_element: Ref<StyledElement> = control.to_ref().upcast();
         let item_count = hooks.item_count().unwrap_or(0);
 
-        for child in control.logical_children().snapshot().iter() {
+        for child in control.get_logical_children().iter() {
             if let Some(child) = child.cast::<Control>().filter(|child| !child.is_visible()) {
                 hooks.finalize_recycled_element(&child);
             }

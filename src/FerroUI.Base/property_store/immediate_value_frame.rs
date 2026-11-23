@@ -1,7 +1,8 @@
 use super::{BindingEntry, BindingSource, BoxedBindingEntry, FrameType, IValueEntry, ValueFrame, ValueFrameBase};
 use crate::data::BindingPriority;
 use crate::reactive::{IDisposable, IObservable};
-use crate::{BoxedValue, FerroProperty, PropertyValue, StyledProperty};
+use super::effective_value::box_stored;
+use crate::{BoxedValue, FerroProperty, StyledProperty, StyledValue};
 use std::any::Any;
 use std::rc::{Rc, Weak};
 
@@ -17,7 +18,7 @@ impl ImmediateValueFrame {
         Rc::new_cyclic(|this| Self { base: ValueFrameBase::new(priority, FrameType::Style), this: this.clone() })
     }
 
-    pub(crate) fn add_binding<T: PropertyValue>(
+    pub(crate) fn add_binding<T: StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         source: BindingSource<T>,
@@ -41,11 +42,13 @@ impl ImmediateValueFrame {
         entry
     }
 
-    pub(crate) fn add_value<T: PropertyValue>(
+    /// Adds a value of `property`, as the store keeps it (`S` is the storage type of the value
+    /// type of the property).
+    pub(crate) fn add_value<S: StyledValue>(
         &self,
-        property: &'static StyledProperty<T>,
-        value: T,
-    ) -> Rc<ImmediateValueEntry<T>> {
+        property: &'static FerroProperty,
+        value: S,
+    ) -> Rc<ImmediateValueEntry<S>> {
         let entry = Rc::new(ImmediateValueEntry { owner: self.this.clone(), property, value });
         self.base.add(entry.clone());
         entry
@@ -80,15 +83,16 @@ impl ValueFrame for ImmediateValueFrame {
     }
 }
 
-/// A constant value in an [`ImmediateValueFrame`]. Disposing it removes the
-/// value.
-pub(crate) struct ImmediateValueEntry<T: PropertyValue> {
+/// A constant value in an [`ImmediateValueFrame`], kept as the store keeps the
+/// values of the property (`T` is the storage type of its value type).
+/// Disposing it removes the value.
+pub(crate) struct ImmediateValueEntry<T: StyledValue> {
     owner: Weak<ImmediateValueFrame>,
-    property: &'static StyledProperty<T>,
+    property: &'static FerroProperty,
     value: T,
 }
 
-impl<T: PropertyValue> IValueEntry for ImmediateValueEntry<T> {
+impl<T: StyledValue> IValueEntry for ImmediateValueEntry<T> {
     fn property(&self) -> &'static FerroProperty {
         self.property
     }
@@ -108,13 +112,13 @@ impl<T: PropertyValue> IValueEntry for ImmediateValueEntry<T> {
     }
 
     fn get_value_boxed(&self) -> Option<BoxedValue> {
-        Some(Rc::new(self.value.clone()))
+        Some(box_stored(self.property, &self.value))
     }
 
     fn unsubscribe(&self) {}
 }
 
-impl<T: PropertyValue> IDisposable for ImmediateValueEntry<T> {
+impl<T: StyledValue> IDisposable for ImmediateValueEntry<T> {
     fn dispose(&self) {
         if let Some(owner) = self.owner.upgrade() {
             owner.on_entry_disposed(self.property);

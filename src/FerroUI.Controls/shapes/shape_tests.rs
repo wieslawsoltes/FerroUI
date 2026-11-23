@@ -1,4 +1,4 @@
-use super::{Shape, ShapeImpl};
+use super::{Rectangle, Shape, ShapeImpl};
 use crate::test_support_shapes::MockRenderInterfaceScope;
 use crate::ControlImpl;
 use ferroui_base::input::InputElementImpl;
@@ -42,6 +42,35 @@ impl ShapeImpl for TestShape {
 impl TestShape {
     fn new() -> Ref<Self> {
         instantiate(Self { base: Shape::construct() })
+    }
+}
+
+/// A rectangle with a geometry of its own (inset by five) and no update of it.
+#[repr(C)]
+struct InsetRectangle {
+    base: Rectangle,
+}
+
+ferro_class!(InsetRectangle: Rectangle);
+ferro_impl_classes!(
+    InsetRectangle: FerroObjectImpl,
+    StyledElementImpl,
+    VisualImpl,
+    LayoutableImpl,
+    InteractiveImpl,
+    InputElementImpl,
+    ControlImpl
+);
+
+impl ShapeImpl for InsetRectangle {
+    fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
+        Some(RectangleGeometry::with_rect(Rect::from_size(this.bounds().size()).deflate(5.0)).upcast())
+    }
+}
+
+impl InsetRectangle {
+    fn new() -> Ref<Self> {
+        instantiate(Self { base: Rectangle::construct() })
     }
 }
 
@@ -196,4 +225,167 @@ fn no_stroke_produces_no_pen() {
     let pen = render_and_get_pen(&shape);
 
     assert!(pen.is_none());
+}
+
+/// Section 9.88: a shape that makes its own geometry gives the geometry it has what it is now,
+/// when a property the geometry is made of changes: the geometry is the same object, built
+/// again, and the shape is measured again.
+#[test]
+fn a_shape_whose_geometry_properties_change_keeps_its_geometry() {
+    use super::{Ellipse, Line};
+    use ferroui_base::media::{EllipseGeometry, LineGeometry, RectangleGeometry};
+    use ferroui_base::{Point, Rect, Size};
+
+    let _scope = crate::test_support::test_scope();
+    let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+    let arranged = |shape: &Shape, size: Size| {
+        shape.measure(Size::INFINITY);
+        shape.arrange(Rect::from_size(size));
+    };
+
+    // A rectangle that is resized, and whose radii change.
+    let rectangle = Rectangle::new();
+    rectangle.set_stroke_thickness(2.0);
+    arranged(&rectangle, Size::new(100.0, 40.0));
+    let geometry = rectangle.defining_geometry().expect("a geometry");
+    let changes = std::rc::Rc::new(std::cell::Cell::new(0));
+    let counted = changes.clone();
+    geometry.changed(move || counted.set(counted.get() + 1)).detach();
+    arranged(&rectangle, Size::new(140.0, 40.0));
+    let kept = rectangle.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry), "the same geometry");
+    assert!(changes.get() >= 1, "the geometry says it changed");
+    assert_eq!(kept.cast::<RectangleGeometry>().expect("a rectangle").rect(), Rect::new(1.0, 1.0, 138.0, 38.0));
+    rectangle.set_radius_x(6.0);
+    assert!(!rectangle.is_measure_valid());
+    let kept = rectangle.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    assert_eq!(kept.cast::<RectangleGeometry>().expect("a rectangle").radius_x(), 6.0);
+
+    // An ellipse that is resized.
+    let ellipse = Ellipse::new();
+    arranged(&ellipse, Size::new(50.0, 50.0));
+    let geometry = ellipse.defining_geometry().expect("a geometry");
+    arranged(&ellipse, Size::new(80.0, 60.0));
+    let kept = ellipse.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    let stroke = ellipse.stroke_thickness();
+    assert_eq!(
+        kept.cast::<EllipseGeometry>().expect("an ellipse").rect(),
+        Rect::from_size(Size::new(80.0, 60.0)).deflate(stroke / 2.0)
+    );
+
+    // A line whose end moves.
+    let line = Line::new();
+    line.set_end_point(Point::new(10.0, 10.0));
+    line.measure(Size::INFINITY);
+    let geometry = line.defining_geometry().expect("a geometry");
+    line.set_end_point(Point::new(30.0, 5.0));
+    assert!(!line.is_measure_valid());
+    let kept = line.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    assert_eq!(kept.cast::<LineGeometry>().expect("a line").end_point(), Point::new(30.0, 5.0));
+
+    // The indicator of a selection fits its radii to its size, in the geometry it keeps too.
+    let indicator = crate::SelectionIndicator::new();
+    indicator.set_radius_x(8.0);
+    indicator.set_radius_y(8.0);
+    arranged(&indicator, Size::new(3.0, 16.0));
+    let geometry = indicator.defining_geometry().expect("a geometry");
+    arranged(&indicator, Size::new(3.0, 24.0));
+    let kept = indicator.defining_geometry().expect("a geometry");
+    assert!(kept.ptr_eq(&geometry));
+    let drawn = Rect::from_size(Size::new(3.0, 24.0)).deflate(indicator.stroke_thickness() / 2.0);
+    let kept = kept.cast::<RectangleGeometry>().expect("a rectangle");
+    assert_eq!(kept.rect(), drawn);
+    assert_eq!(kept.radius_x(), drawn.width / 2.0, "the radius is fitted to the width");
+    assert_eq!(kept.radius_y(), 8.0);
+}
+
+/// Section 9.88: an update describes one `create_defining_geometry`. A class that makes a
+/// geometry of its own and says nothing of an update does not take the update of its base
+/// class: its geometry is made again, by its own code, as before.
+#[test]
+fn a_shape_with_a_geometry_of_its_own_does_not_take_the_update_of_its_base_class() {
+    use ferroui_base::Size;
+
+    let _scope = crate::test_support::test_scope();
+    let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+    let shape = InsetRectangle::new();
+    shape.measure(Size::INFINITY);
+    shape.arrange(Rect::from_size(Size::new(100.0, 40.0)));
+    let first = shape.defining_geometry().expect("a geometry");
+    assert_eq!(first.cast::<RectangleGeometry>().expect("a rectangle").rect(), Rect::new(5.0, 5.0, 90.0, 30.0));
+    shape.measure(Size::INFINITY);
+    shape.arrange(Rect::from_size(Size::new(140.0, 40.0)));
+    let second = shape.defining_geometry().expect("a geometry");
+    assert!(!second.ptr_eq(&first), "a new geometry, made by the class");
+    assert_eq!(second.cast::<RectangleGeometry>().expect("a rectangle").rect(), Rect::new(5.0, 5.0, 130.0, 30.0));
+}
+
+
+/// #805: an arc or a sector whose angle changes, or that is resized, writes the stream geometry
+/// it has again; a full turn is an ellipse, and a change between the two makes another geometry.
+#[test]
+fn an_arc_or_a_sector_whose_angle_changes_keeps_its_stream_geometry() {
+    use super::{Arc as ArcShape, Sector};
+    use ferroui_base::media::{EllipseGeometry, StreamGeometry};
+    use ferroui_base::Size;
+
+    let _scope = crate::test_support::test_scope();
+    let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+    let arranged = |shape: &Shape, size: Size| {
+        shape.measure(Size::INFINITY);
+        shape.arrange(Rect::from_size(size));
+    };
+
+    let arc = ArcShape::new();
+    arc.set_start_angle(-90.0);
+    arc.set_sweep_angle(90.0);
+    let sector = Sector::new();
+    sector.set_start_angle(-90.0);
+    sector.set_sweep_angle(90.0);
+    let shapes: [(&str, Ref<Shape>, fn(&Ref<Shape>, f64)); 2] = [
+        ("arc", arc.upcast(), |shape, sweep| shape.cast::<ArcShape>().expect("an arc").set_sweep_angle(sweep)),
+        ("sector", sector.upcast(), |shape, sweep| shape.cast::<Sector>().expect("a sector").set_sweep_angle(sweep)),
+    ];
+
+    for (name, shape, set_sweep) in shapes {
+        arranged(&shape, Size::new(40.0, 40.0));
+        let geometry = shape.defining_geometry().expect("a geometry");
+        assert!(geometry.cast::<StreamGeometry>().is_some(), "{name}: a stream geometry");
+        let changes = std::rc::Rc::new(std::cell::Cell::new(0));
+        let counted = changes.clone();
+        geometry.changed(move || counted.set(counted.get() + 1)).detach();
+        let quarter = geometry.bounds();
+
+        // Another angle: the same geometry, written again.
+        set_sweep(&shape, 180.0);
+        assert!(!shape.is_measure_valid(), "{name}: measured again");
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&geometry), "{name}: the same geometry");
+        assert!(changes.get() >= 1, "{name}: the geometry says it changed");
+        assert_ne!(kept.bounds(), quarter, "{name}: the figure of the new angle");
+
+        // Another size.
+        let half = kept.bounds();
+        arranged(&shape, Size::new(80.0, 80.0));
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&geometry), "{name}: kept when resized");
+        assert_ne!(kept.bounds(), half, "{name}: the figure of the new size");
+
+        // No sweep: an empty figure in the same geometry.
+        set_sweep(&shape, 0.0);
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&geometry), "{name}: kept without a sweep");
+
+        // A full turn is an ellipse: another geometry, which is kept in turn.
+        set_sweep(&shape, 360.0);
+        let full = shape.defining_geometry().expect("a geometry");
+        assert!(!full.ptr_eq(&geometry), "{name}: a full turn is another geometry");
+        assert!(full.cast::<EllipseGeometry>().is_some(), "{name}: an ellipse");
+        arranged(&shape, Size::new(60.0, 60.0));
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&full), "{name}: the ellipse is kept when resized");
+    }
 }

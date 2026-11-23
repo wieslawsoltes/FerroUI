@@ -1904,7 +1904,7 @@ fn component_refresh_replaces_cached_controls_and_disposes_subscriptions_transac
 #[test]
 fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     use ferroui_base::{
-        styling::{style_ptr_eq, IStyle},
+        styling::{style_ptr_eq, IStyle, Style, Styles},
         threading::Dispatcher,
     };
     use ferroui_controls::Border;
@@ -1915,8 +1915,9 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
     let source = |width| {
+        let unrelated = r#"<Style Selector="Button"/>"#.repeat(8);
         format!(
-            r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Border.active"><Setter Property="Width" Value="{width}"/></Style></Styles>"#
+            r#"<Styles xmlns="https://github.com/ferroui">{unrelated}<Style Selector="Border.active"><Setter Property="Width" Value="{width}"/></Style></Styles>"#
         )
     };
     let load = |text: &str| {
@@ -1929,6 +1930,20 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
         )
         .unwrap()
     };
+    // The styles of a document as a generated theme table builds them: each style is
+    // index-enabled before it joins its collection, so the collection leaves out the styles
+    // whose selector cannot match the type of an element. The documents a reload loads at run
+    // time are not index-enabled: each replacement is traversed whole.
+    let generated = |loaded: Rc<dyn IStyle>| {
+        let styles = Styles::new();
+        for style in loaded.children().iter() {
+            if let Some(style) = style.as_object().and_then(|o| o.downcast_ref::<Style>()) {
+                style.enable_selector_index();
+            }
+            styles.add(style.clone());
+        }
+        styles
+    };
     let root = Border::new();
     let child = Border::new();
     root.set_child(child.clone());
@@ -1936,8 +1951,10 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
     let application = load(
         r#"<Style xmlns="https://github.com/ferroui" Selector="Border"><Setter Property="Height" Value="33"/></Style>"#,
     );
-    root.styles().add(load(&source(10)));
+    root.styles().add(generated(load(&source(10))));
     root.styles().add(application.clone());
+    // Of the nine styles of the document, a Border is offered the one that names it.
+    assert_eq!(root.styles().get(0).children_for_target(&child).count(), 1);
     root.apply_styling();
     child.apply_styling();
     assert_eq!(child.width(), 10.0);
@@ -1960,6 +1977,8 @@ fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
         session.submit(uri.into(), source(width));
         let outcome = session.apply_pending().unwrap();
         assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        // The replacement goes through the ordinary matcher, style by style.
+        assert_eq!(root.styles().get(0).children_for_target(&child).count(), 9);
         root.apply_styling();
         child.apply_styling();
         assert_eq!(child.width(), width as f64);
@@ -3524,4 +3543,104 @@ fn a_document_reached_by_two_spellings_is_one_document() {
     // A `file:` URL of a drive keeps its drive for a rooted include (the URL standard).
     let base = document_url("file:///C:/App/Views/Main.xaml").unwrap();
     assert_eq!(include_key(&base, "/Styles/Base.xaml").as_deref(), Some("file:///C:/Styles/Base.xaml"));
+}
+
+/// Not from upstream (#567): an error raised in a step of a reload (a resource lookup of a
+/// candidate, which has no error channel) is the error of the step, without unwinding: the step
+/// goes on with the fallback of the lookup, the first error raised is kept, and the scopes of
+/// nested steps are their own. Outside a step the error is raised as a panic, as before.
+#[test]
+fn an_error_raised_in_a_reload_step_is_its_error_without_unwinding() {
+    let went_on = Cell::new(false);
+    let result: Result<u32, ReloadError> = catch_reload(|| {
+        raise_reload_error(ReloadError::RestartRequired("first".into()));
+        raise_reload_error(ReloadError::Failed("second".into()));
+        // A nested step keeps its own error and leaves the outer one as it is.
+        let nested: Result<(), ReloadError> = catch_reload(|| {
+            raise_reload_error(ReloadError::Failed("nested".into()));
+            Ok(())
+        });
+        assert_eq!(nested, Err(ReloadError::Failed("nested".into())));
+        went_on.set(true);
+        Ok(1)
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::RestartRequired("first".into())));
+    // A step whose action fails without a raised error gives that error; one that raises
+    // nothing gives its value.
+    let own = ReloadError::Failed("own".into());
+    assert_eq!(catch_reload(|| Err::<(), _>(own.clone())), Err(own));
+    assert_eq!(catch_reload(|| Ok(2)), Ok(2));
+
+    // Outside a step the error goes to the dispatcher (#567); unhandled, it unwinds with its
+    // message.
+    let outside = std::panic::catch_unwind(|| raise_reload_error(ReloadError::Failed("outside".into())));
+    let payload = outside.expect_err("raised outside a step");
+    assert_eq!(payload.downcast_ref::<String>().map(String::as_str), Some("The reload failed: outside"));
+}
+
+/// Not from upstream (#567): an error the XAML runtime reports in a step of a reload (a deferred
+/// resource, include or template of the candidate that fails) is the error of the step, with the
+/// message its throw panicked with, without unwinding. A reload error raised before it wins; one
+/// raised after it is left out, as when the throw ended the step; an error scope opened inside
+/// the step keeps its own error.
+#[test]
+fn an_error_the_xaml_runtime_reports_in_a_reload_step_is_its_error_without_unwinding() {
+    use ferroui_markup_xaml::{xaml_error_scope, XamlLoadError};
+    let report = |message: &str| xaml_error_scope::report(XamlLoadError::with_message(message)).unwrap();
+
+    let went_on = Cell::new(false);
+    let result: Result<u32, ReloadError> = catch_reload(|| {
+        report("Unable to resolve the resource");
+        report("A later consequence");
+        raise_reload_error(ReloadError::RestartRequired("after".into()));
+        went_on.set(true);
+        Err(ReloadError::Failed("own".into()))
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::Failed("Unable to resolve the resource".into())));
+
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        raise_reload_error(ReloadError::RestartRequired("before".into()));
+        report("Unable to resolve the resource");
+        Ok(())
+    });
+    assert_eq!(result, Err(ReloadError::RestartRequired("before".into())));
+
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        let inner: Result<(), XamlLoadError> = xaml_error_scope::with_xaml_errors(|| {
+            report("inner");
+            raise_reload_error(ReloadError::RestartRequired("in an inner scope".into()));
+            Ok(())
+        });
+        assert_eq!(inner.unwrap_err().message(), "inner");
+        Ok(())
+    });
+    assert_eq!(result, Err(ReloadError::RestartRequired("in an inner scope".into())));
+    assert_eq!(xaml_error_scope::depth(), 0);
+}
+
+#[test]
+fn an_error_the_application_raises_on_the_dispatcher_in_a_reload_step_is_its_error_without_unwinding() {
+    use ferroui_base::threading::Dispatcher;
+    let _scope = Dispatcher::unit_test_scope();
+    let went_on = Cell::new(false);
+    let result: Result<(), ReloadError> = catch_reload(|| {
+        // A handler or callback of the candidate that returns its error (#567).
+        Dispatcher::current_dispatcher().raise_unhandled_exception("the handler of the candidate failed");
+        went_on.set(true);
+        Ok(())
+    });
+    assert!(went_on.get());
+    assert_eq!(result, Err(ReloadError::Failed("the handler of the candidate failed".into())));
+
+    // A `ReloadError` raised outside every step goes to the dispatcher, without a panic.
+    let raised = Rc::new(RefCell::new(None::<ReloadError>));
+    let seen = raised.clone();
+    let _handler = Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.error().and_then(|error| error.downcast_ref::<ReloadError>()).cloned();
+        args.set_handled(true);
+    });
+    raise_reload_error(ReloadError::RestartRequired("outside".into()));
+    assert_eq!(raised.take(), Some(ReloadError::RestartRequired("outside".into())));
 }

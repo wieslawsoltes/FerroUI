@@ -153,6 +153,8 @@ pub struct DesignSurface {
     focus_order_visible: Cell<bool>,
     helper_epoch: Cell<u64>,
     helper_cache: RefCell<Option<helpers::HelperCache>>,
+    /// A snapshot of the layout helpers is being made after a render found none kept.
+    helper_refresh_queued: Cell<bool>,
     helper_preview: RefCell<Option<Rc<crate::LayoutEditPreview>>>,
     helper_error: RefCell<Option<String>>,
     helper_focus: Cell<Option<usize>>,
@@ -656,6 +658,7 @@ impl Default for DesignSurface {
             focus_order_visible: Cell::new(false),
             helper_epoch: Cell::new(0),
             helper_cache: RefCell::new(None),
+            helper_refresh_queued: Cell::new(false),
             helper_preview: RefCell::new(None),
             helper_error: RefCell::new(None),
             helper_focus: Cell::new(None),

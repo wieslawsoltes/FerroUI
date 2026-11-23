@@ -153,16 +153,38 @@ fn a_unit_defines_its_keys_and_type_keys_and_references_the_keys_it_names() {
 }
 
 #[test]
-fn a_unit_constructs_and_selects_the_types_of_its_elements_targets_selectors_and_type_extensions() {
+fn a_unit_constructs_the_types_of_its_elements_targets_and_type_extensions_and_not_those_it_selects() {
     let plan = plan(&theme(), &merged()).expect("units");
     let button = unit(&plan, "Controls/Button.xaml");
-    // The elements (template content included), the targets, the type selectors and the
-    // `{x:Type}` of `BasedOn`; nothing of `Design.PreviewWith`, no class, name or pseudo-class
-    // of a selector.
+    // The elements (template content included), the targets and the `{x:Type}` of `BasedOn`;
+    // nothing of `Design.PreviewWith`, and nothing of a selector: neither its classes, names and
+    // pseudo-classes nor the types it selects.
     assert_eq!(button.types, strings(&["Button", "ContentPresenter", "ControlTemplate", "ControlTheme", "ResourceDictionary", "Setter", "Style"]));
     assert!(!button.types.iter().any(|name| name == "Border" || name == "PART_ContentPresenter" || name == "pointerover"));
+    // A global style that selects a menu item and its icon constructs neither: the ambient unit,
+    // which every application keeps, does not make the menu item a type of every application.
     let ambient = unit(&plan, AMBIENT);
-    assert!(ambient.types.contains(&"MenuItem".to_string()) && ambient.types.contains(&"PathIcon".to_string()), "{:?}", ambient.types);
+    assert!(!ambient.types.iter().any(|name| name == "MenuItem" || name == "PathIcon"), "{:?}", ambient.types);
+}
+
+#[test]
+fn a_tool_tip_set_on_an_element_constructs_a_tool_tip() {
+    // As an attribute and as a property element; another attached property constructs nothing.
+    let attribute = r#"<Panel xmlns="https://github.com/ferroui"><Button ToolTip.Tip="Close" Grid.Row="1" /></Panel>"#;
+    let element =
+        r#"<Panel xmlns="https://github.com/ferroui"><Path><ToolTip.Tip><TextBlock /></ToolTip.Tip></Path></Panel>"#;
+    for xaml in [attribute, element] {
+        let references = document_references(xaml).expect("plain XML");
+        assert!(references.types.contains("ToolTip"), "{:?}", references.types);
+        assert!(!references.types.contains("Grid"), "{:?}", references.types);
+    }
+}
+
+#[test]
+fn the_document_of_an_application_roots_the_types_its_selectors_name() {
+    let styles = r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="MenuItem > PathIcon" /></Styles>"#;
+    let references = document_references(styles).expect("plain XML");
+    assert!(references.types.contains("MenuItem") && references.types.contains("PathIcon"), "{:?}", references.types);
 }
 
 #[test]
@@ -260,4 +282,70 @@ fn an_application_document_names_its_types_and_keys() {
     }
     assert!(!references.keys.contains("Ignored"), "{:?}", references.keys);
     assert_eq!(document_references("<!DOCTYPE Window [<!-- x -->]><Window />"), None);
+}
+
+/// Not from upstream (#848): the argument of a resource extension is a reference of its unit also
+/// when no document of the group defines the key (another theme, or the application, provides
+/// it); a token that spells no key of the group is not.
+#[test]
+fn a_resource_extension_references_a_key_of_another_theme() {
+    let documents = vec![
+        document(
+            "Theme.xaml",
+            format!(
+                r#"<Styles {NAMESPACES} x:Class="Tests.Theme"><Styles.Resources><ResourceDictionary>
+                <ResourceDictionary.MergedDictionaries><MergeResourceInclude Source="/Brushes.xaml" /></ResourceDictionary.MergedDictionaries>
+                </ResourceDictionary></Styles.Resources></Styles>"#
+            ),
+        ),
+        document(
+            "Brushes.xaml",
+            dictionary(r#"<SolidColorBrush x:Key="LocalBrush" Color="{DynamicResource ElsewhereColor}" Opacity="Elsewhere" />"#),
+        ),
+    ];
+    let plan = plan(&documents, &[uri("Brushes.xaml")]).expect("units");
+    let brushes = unit(&plan, "Brushes.xaml");
+    assert_eq!(brushes.keys, strings(&["LocalBrush"]));
+    assert_eq!(brushes.references, strings(&["ElsewhereColor"]));
+}
+
+/// The names in the template of the drawn decorations of a window are in the scope of the template
+/// (#1002), as in a control template: the document that defines their theme is a unit keyed by
+/// `WindowDrawnDecorations`, not ambient; a name outside a template keeps a document ambient.
+#[test]
+fn names_in_a_template_of_the_drawn_decorations_do_not_make_a_document_ambient() {
+    let theme = |decorations: &str| {
+        vec![
+            document(
+                "Theme.xaml",
+                format!(
+                    r#"<Styles {NAMESPACES} x:Class="Tests.Theme"><Styles.Resources><ResourceDictionary>
+                    <ResourceDictionary.MergedDictionaries>
+                      <MergeResourceInclude Source="/Controls/WindowDrawnDecorations.xaml" />
+                      <MergeResourceInclude Source="/Controls/Border.xaml" />
+                    </ResourceDictionary.MergedDictionaries>
+                    </ResourceDictionary></Styles.Resources></Styles>"#
+                ),
+            ),
+            document("Controls/WindowDrawnDecorations.xaml", dictionary(decorations)),
+            document("Controls/Border.xaml", dictionary(r#"<ControlTheme x:Key="{x:Type Border}" TargetType="Border" />"#)),
+        ]
+    };
+    let merged = vec![uri("Controls/WindowDrawnDecorations.xaml"), uri("Controls/Border.xaml")];
+    let templated = theme(
+        r#"<ControlTheme x:Key="{x:Type WindowDrawnDecorations}" TargetType="WindowDrawnDecorations">
+          <Setter Property="Template"><WindowDrawnDecorationsTemplate><WindowDrawnDecorationsContent>
+            <WindowDrawnDecorationsContent.Overlay><Button x:Name="PART_CloseButton" /></WindowDrawnDecorationsContent.Overlay>
+          </WindowDrawnDecorationsContent></WindowDrawnDecorationsTemplate></Setter>
+        </ControlTheme>"#,
+    );
+    let units = plan(&templated, &merged).expect("units");
+    let decorations = unit(&units, "Controls/WindowDrawnDecorations.xaml");
+    assert_eq!(decorations.type_keys, strings(&["WindowDrawnDecorations"]));
+    assert!(decorations.types.contains(&"Button".to_string()), "{:?}", decorations.types);
+    assert!(!unit(&units, AMBIENT).documents.contains(&"Controls/WindowDrawnDecorations.xaml".to_string()));
+
+    let named = theme(r#"<Border x:Key="Frame"><Button x:Name="PART_CloseButton" /></Border>"#);
+    let units = plan(&named, &merged).expect("units");
+    assert!(unit(&units, AMBIENT).documents.contains(&"Controls/WindowDrawnDecorations.xaml".to_string()));
 }

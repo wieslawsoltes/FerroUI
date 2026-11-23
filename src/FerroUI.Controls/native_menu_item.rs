@@ -1,6 +1,6 @@
 use crate::i_native_menu_item_exporter_events_impl_bridge::INativeMenuItemExporterEventsImplBridge;
 use crate::utils::debug_display::{append_optional_value, debug_type_name};
-use crate::{MenuItem, MenuItemToggleType, NativeMenu, NativeMenuItemBase};
+use crate::{Button, MenuItemToggleType, NativeMenu, NativeMenuItemBase};
 use ferroui_base::input::{ICommand, KeyGesture};
 use ferroui_base::media::imaging::IBitmap;
 use ferroui_base::utilities::WeakEvents;
@@ -107,8 +107,14 @@ ferro_properties! {
         }
 
         /// Defines the `IsChecked` property.
+        ///
+        /// Deviation (DEVIATIONS.md, Native menu): upstream adds the native menu item as an owner
+        /// to `IsChecked` of the menu item. Here it is a property of the native menu item alone:
+        /// adding an owner to a property of the menu item initialises the menu item, and an
+        /// application with a native menu and no menu (every application on macOS) would keep
+        /// the menu classes.
         pub fn is_checked_property() -> StyledProperty<bool> {
-            MenuItem::is_checked_property().add_owner::<NativeMenuItem>()
+            FerroProperty::register::<NativeMenuItem, _>("IsChecked", false)
         }
 
         /// Defines the `ToggleType` property.
@@ -118,13 +124,15 @@ ferro_properties! {
 
         /// Defines the `Command` property.
         pub fn command_property() -> StyledProperty<Option<Rc<dyn ICommand>>> {
-            MenuItem::command_property()
+            // Deviation (DEVIATIONS.md, Native menu): upstream adds the owner to the property of the
+            // menu item, which is this property of the button; naming the menu item would keep it.
+            Button::command_property()
                 .add_owner_with::<NativeMenuItem>(StyledPropertyMetadata::new(None).with_enable_data_validation(true))
         }
 
         /// Defines the `CommandParameter` property.
         pub fn command_parameter_property() -> StyledProperty<Option<BoxedValue>> {
-            MenuItem::command_parameter_property().add_owner::<NativeMenuItem>()
+            Button::command_parameter_property().add_owner::<NativeMenuItem>()
         }
 
         /// Defines the `IsEnabled` property.

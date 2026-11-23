@@ -83,10 +83,16 @@ python3 FerroUI/scripts/apps/sync-workspace.py --check   # what CI runs
   of this repository (`FerroUI/samples/SampleSupport`, `SampleBuild`, `SampleTesting`) are path
   dependencies.
 - **Profiles.** `release` (thin LTO), `fast-release` (for running locally), `dist` (what is shipped
-  and measured) and `browser` (size-optimised, with the per-package optimisation levels of the
-  framework's hot crates; docs/porting/browser-platform.md, section 18). Cargo warns about a
-  per-package override whose package the application does not use (for example the Vello crates);
-  the warning is harmless.
+  and measured, with the theme crates at `opt-level = "z"`; docs/binary-size.md, section 4.14) and
+  `browser` (size-optimised, with the per-package optimisation levels of the framework's hot
+  crates; docs/porting/browser-platform.md, section 18), with `release-unwind` and `dist-unwind`.
+  Cargo reads profiles only from the root manifest of the workspace it builds, so these settings
+  reach the application through the block alone: without it a `dist` build of the application is
+  its own profile (or none), with every crate at the level it states and unwinding on panic.
+  Cargo warns about a per-package override whose package the application does not use (for
+  example the Vello crates); the warning is harmless. An application outside such a repository
+  (from crates.io or a git dependency) copies the sections by hand (docs/binary-size.md,
+  section 6).
 - **Lock file.** Start `Cargo.lock` from FerroUI's, so that the application resolves the same
   versions the framework is tested with, then let cargo prune and complete it:
 
@@ -116,6 +122,42 @@ The opt-in files of FerroUI work for the application as they do here
 cargo --config FerroUI/.cargo/compiler-cache.toml build --locked   # sccache as rustc wrapper
 cargo --config FerroUI/.cargo/build-tools.toml build --locked      # optimised source scanner
 ```
+
+### The Graphite Metal ownership fix
+
+On macOS FerroUI draws with Skia's Graphite on Metal, and the Skia that `skia-bindings` 0.153.3
+publishes leaks the shader functions and descriptors of every Metal pipeline it makes (#622;
+`docs/media/MACOS-VERIFICATION.md`, "Graphite dependency ownership"). The FerroUI repository fixes
+it with a patched copy of the binding (`external/rust-skia-bindings`, `FERROUI-PATCH.md`), which
+builds Skia from source with the fix on macOS, chosen by a `[patch.crates-io]` of its root
+manifest. Cargo applies a patch only in the workspace that declares it:
+
+- **An application with FerroUI as a submodule** gets it from `sync-workspace.py`, which copies the
+  `[patch.*]` sections of FerroUI's manifest into the settings block, with the path made relative
+  to the application (`FerroUI/external/rust-skia-bindings`). Nothing else is needed.
+- **An application built from the published crates** has to declare the patch itself, until a
+  released `skia-bindings` carries the fix. The binding of the FerroUI release the application
+  uses is the one to take: copy `external/rust-skia-bindings` of that release into the application
+  (for example as `third_party/skia-bindings`) and name it in the root manifest:
+
+  ```toml
+  [patch.crates-io]
+  skia-bindings = { path = "third_party/skia-bindings" }
+  ```
+
+  The build of the binding on macOS then needs what a source build of Skia needs (the command-line
+  tools of Xcode, Python and Ninja, and the network the first time, for Skia's sources).
+
+**How a build tells.** The patched binding passes `graphite_metal_ownership=fixed` to the crates
+that depend on it, and `ferroui-skia` is built knowing it. Without it, the build of
+`ferroui-skia` warns (cargo shows the warnings of path dependencies only), the platform logs a
+warning when it makes its first Graphite context (area `Visual`), and
+`ferroui_skia::graphite_metal_ownership_fixed()` answers `Some(false)` (`None` where the build has
+no Graphite on Metal), which a test of the application can assert.
+
+**iOS.** The patched binding applies the fix to builds for macOS (`darwin`) only; a build for iOS
+takes Skia's published archive, with or without the patch, and its pipelines leak as well
+(`graphite_metal_ownership_fixed()` says `Some(false)` there).
 
 ## 4. Conventions
 
@@ -210,8 +252,34 @@ Inputs: `test`, `check`, `apt-packages` (extra Ubuntu packages), `script`, `brow
 `browser-features`, `browser-script`, `smoke` (default `true`), `smoke-ignore` (regular expressions,
 one per line, of smoke errors to leave out), `browser-tests`, `browser-tests-pull-request` (the
 lines for pull requests when they differ, for example fewer of the slow ones) and `browser-tests-setup`, `android` and
-`ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`). The actions are pinned by commit, as
-in the workflows of this repository.
+`ios` (the arguments of the packaging scripts; empty: no package), `pages` (default `true`),
+`size-report` (default `false`: what the module of the site is made of, see below). The actions
+are pinned by commit, as in the workflows of this repository.
+
+What the WebAssembly module is made of: with `size-report: true` the browser job links the
+browser package a second time with the names of its functions and a link map, and
+`scripts/browser/wasm-size-report.py` writes the code by crate and by generic family (with what
+each row saves with gzip) and the largest functions into the summary of the run; the named module,
+the map and the report are the artifact `size-report`. The published site is the one built
+without names. An application turns it on for a run by hand with an input of its own:
+
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      size-report:
+        type: boolean
+        default: false
+
+jobs:
+  app:
+    uses: wieslawsoltes/FerroUI/.github/workflows/app.yml@main
+    with:
+      browser-package: my-app-browser
+      size-report: ${{ inputs.size-report || false }}
+```
+
+and `gh workflow run ci.yml -f size-report=true`.
 
 GitHub Pages is enabled once, with GitHub Actions as its source:
 
@@ -219,7 +287,8 @@ GitHub Pages is enabled once, with GitHub Actions as its source:
 gh api -X POST repos/FerroUI/MyApp/pages -f build_type=workflow
 ```
 
-The site is then published at `https://ferroui.github.io/MyApp/` by every push to main.
+The site is then published at `https://ferroui.com/MyApp/` (the custom domain of the
+organization Pages site) by every push to main.
 
 ## 7. Updating FerroUI
 

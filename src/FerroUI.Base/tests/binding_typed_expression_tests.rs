@@ -1162,3 +1162,72 @@ fn a_conversion_asks_whom_to_log_against_only_after_the_converter_has_failed() {
     assert!(converted.is_some_and(|converted| converted.is::<crate::UnsetValueType>()));
     assert_eq!(calls.take(), vec!["convert back", "log target"]);
 }
+
+/// An expression keeps what few expressions have (an error, the default value of the target
+/// property, the adapter of an observed expression) in a state it makes with the first of
+/// them, and a template binding its converter and what it needs to write to its source: a
+/// template makes an expression for every binding of every control it builds.
+#[test]
+fn an_expression_makes_the_state_few_expressions_have_with_the_first_of_it() {
+    use crate::data::core::{ExpressionError, Publish, UntypedBindingExpression, UntypedBindingExpressionBase};
+    use crate::data::{BindingErrorType, TemplateBindingExpression};
+
+    #[cfg(target_pointer_width = "64")]
+    {
+        // Without a copy of the target type, which is read from the target property.
+        assert!(std::mem::size_of::<UntypedBindingExpressionBase>() <= 112);
+        assert!(std::mem::size_of::<TemplateBindingExpression>() <= 192);
+        assert!(std::mem::size_of::<BindingExpression>() <= 264);
+    }
+
+    let expression = TemplateBindingExpression::new(None, None, None, None, BindingMode::OneWay);
+    let base = expression.base();
+    BindingExpressionBase::start(&*expression, false);
+    assert!(!base.has_rare_state());
+
+    // A value, a null value, and no error where there was none: nothing is made.
+    let value = boxed(s("a"));
+    base.publish_value(Publish::Value(Some(value.clone())), None, false);
+    base.publish_value(Publish::Value(None), None, false);
+    base.publish_value(Publish::Unchanged, None, false);
+    assert_eq!(base.error_type(), BindingErrorType::None);
+    assert!(base.error().is_none());
+    assert!(!base.has_rare_state());
+
+    // An error makes it, and is read back.
+    let error = ExpressionError::new(BindingError::message("It failed."), BindingErrorType::DataValidationError);
+    base.publish_value(Publish::Unchanged, Some(error), false);
+    assert!(base.has_rare_state());
+    assert_eq!(base.error_type(), BindingErrorType::DataValidationError);
+    assert!(base.error().is_some_and(|error| error.error_type == BindingErrorType::DataValidationError));
+
+    // The next value without an error takes the error away.
+    base.publish_value(Publish::Value(Some(value)), None, false);
+    assert_eq!(base.error_type(), BindingErrorType::None);
+    assert!(base.error().is_none());
+}
+
+/// A template binding in a template, bound to a control that has its templated parent and
+/// following it, has made none of the state few expressions have. One that has no value,
+/// because its target has lost the parent, has: the default value of the target property,
+/// which it then stands for, is kept there.
+#[test]
+fn a_template_binding_that_follows_its_parent_makes_no_rare_state() {
+    let parent = TextBlock::new();
+    parent.set_text(Some("one"));
+    let target = TextBlock::new();
+    target.set_templated_parent(&parent);
+    let expression =
+        target.bind_binding(TextBlock::text_property(), &crate::data::TemplateBinding::new(TextBlock::text_property()));
+    let base = expression.as_untyped().expect("a template binding is an untyped expression").base();
+    assert_eq!(target.text(), Some(s("one")));
+    parent.set_text(Some("two"));
+    assert_eq!(target.text(), Some(s("two")));
+    assert!(!base.has_rare_state());
+
+    target.set_templated_parent(Option::<Ref<FerroObject>>::None);
+    assert_eq!(target.text(), None);
+    assert!(base.has_rare_state());
+    target.set_templated_parent(&parent);
+    assert_eq!(target.text(), Some(s("two")));
+}

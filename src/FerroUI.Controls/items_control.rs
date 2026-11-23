@@ -28,7 +28,7 @@ use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, AnyValue, AttachedProperty, BoxedValue,
     DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
-    ObjectType, PropertyValue, Ref, StyledElement, StyledElementImpl, StyledProperty, Upcast, Visual, VisualImpl,
+    ObjectType, Ref, StyledElement, StyledElementImpl, StyledProperty, Upcast, Visual, VisualImpl,
     WeakRef,
 };
 use std::cell::{Cell, OnceCell, RefCell};
@@ -862,7 +862,7 @@ impl ItemsControl {
         }
     }
 
-    pub(crate) fn set_if_unset<T: PropertyValue>(target: &FerroObject, property: &'static StyledProperty<T>, value: T) {
+    pub(crate) fn set_if_unset<T: ferroui_base::StyledValue>(target: &FerroObject, property: &'static StyledProperty<T>, value: T) {
         if !target.is_set(property.as_property()) {
             target.set_current_value(property, value);
         }

@@ -11,6 +11,10 @@ pub struct MinMax {
 }
 
 impl MinMax {
+    // Always inlined: the measure and the arrange of every element make one, and whether the
+    // compiler inlined it by itself turned on code that has nothing to do with it
+    // (docs/porting/desktop-performance.md, section 9.73).
+    #[inline(always)]
     pub fn new(e: &Layoutable) -> Self {
         let (min_width, max_width) = Self::calc_min_max(e.width(), e.min_width(), e.max_width());
         let (min_height, max_height) = Self::calc_min_max(e.height(), e.min_height(), e.max_height());

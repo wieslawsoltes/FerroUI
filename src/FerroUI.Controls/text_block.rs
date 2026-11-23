@@ -7,14 +7,15 @@ use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, LayoutableImpl, LayoutableImplExt, VerticalAlignment};
 use ferroui_base::media::text_formatting::{
     FormattedTextSource, GenericTextParagraphProperties, GenericTextRunProperties, ITextSource, TextCharacters,
-    TextEndOfParagraph, TextLayout, TextLineImpl, TextRun, TextRunCache, TextRunProperties,
+    TextEndOfParagraph, TextLayout, TextLineImpl, TextParagraphProperties, TextRun, TextRunCache,
+    TextRunProperties,
 };
 use ferroui_base::media::{
     DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment,
     TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::Subscription;
-use ferroui_base::utilities::{MathUtilities, ReadOnlyMemory, ValueSpan};
+use ferroui_base::utilities::{MathUtilities, OptionCell, ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
     ferro_class, ferro_property, instantiate, AttachedProperty, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty,
@@ -27,19 +28,32 @@ use std::rc::Rc;
 #[repr(C)]
 pub struct TextBlock {
     base: Control,
-    text_layout: RefCell<Option<Rc<TextLayout>>>,
+    // The six fields that follow that are option cells were cells with a borrow flag, and the
+    // two subscriptions were inline (docs/porting/desktop-performance.md, section 9.71).
+    text_layout: OptionCell<Rc<TextLayout>>,
     /// The default run properties of the layouts, kept until a property they are made of changes
     /// (`invalidate_text_layout`): a layout of a new constraint reuses them, and with them the
     /// glyph typeface they resolved (FerroUI deviation, desktop-performance.md, section 9.8).
-    run_properties: RefCell<Option<Rc<dyn TextRunProperties>>>,
+    run_properties: OptionCell<Rc<dyn TextRunProperties>>,
     /// The paragraph properties of the layouts, with the alignment they were made with, kept until
     /// a property they are made of changes (desktop-performance.md, section 9.8).
-    paragraph_properties: RefCell<Option<(TextAlignment, Rc<GenericTextParagraphProperties>)>>,
-    text_run_cache: RefCell<Option<Rc<TextRunCache>>>,
+    paragraph_properties: OptionCell<(TextAlignment, Rc<GenericTextParagraphProperties>)>,
+    text_run_cache: OptionCell<Rc<TextRunCache>>,
     constraint: Cell<Size>,
     text_runs: RefCell<Option<Rc<Vec<Rc<dyn TextRun>>>>>,
+    /// Whether `text_runs` has a control among them (true while they are not built).
+    text_runs_embed_controls: Cell<bool>,
     inlines: RefCell<Option<InlineCollection>>,
-    inlines_invalidated: RefCell<Option<Subscription>>,
+    /// Whether `inlines` holds the collection made on first use or one set. An addition
+    /// (FerroUI deviation, desktop-performance.md section 9.21): upstream makes the collection,
+    /// its logical children and its subscription in the constructor of every text block; most
+    /// text blocks show `Text` and never use it.
+    inlines_made: Cell<bool>,
+    /// Set while the first use of `inlines` makes the collection and raises the change that
+    /// connects it: an empty collection in place of none changes nothing of what the text block
+    /// shows, so the change invalidates nothing (a read of a property does not invalidate).
+    making_inlines: Cell<bool>,
+    inlines_invalidated: OptionCell<Box<Subscription>>,
     inline_host: OnceCell<Rc<dyn IInlineHost>>,
     clear_text_internal: Cell<bool>,
     /// The (resolved) text alignment the cached layout was created with.
@@ -52,7 +66,7 @@ pub struct TextBlock {
     /// created on the first request.
     alpha_mask: OnceCell<Box<ferroui_base::rendering::composition::AlphaMask>>,
     /// The subscription to the changes of the `FontFeatures` collection.
-    font_features_subscription: RefCell<Option<Subscription>>,
+    font_features_subscription: OptionCell<Box<Subscription>>,
 }
 
 ferro_class! {
@@ -72,7 +86,7 @@ ferroui_base::ferro_impl_classes!(TextBlock: InteractiveImpl);
 ferroui_base::ferro_impl_classes!(TextBlock: InputElementImpl);
 impl Drop for TextBlock {
     fn drop(&mut self) {
-        if let Some(subscription) = self.font_features_subscription.get_mut().take() {
+        if let Some(subscription) = self.font_features_subscription.take() {
             subscription.dispose();
         }
     }
@@ -86,13 +100,40 @@ impl ControlImpl for TextBlock {
 ferroui_base::ferro_impl_classes!(TextBlock: StyledElementImpl);
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
+    // What the handler below compares with: the typography properties and the names it
+    // matches. A name added to the handler is added here.
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        (Typography::is_property(property)
+            || matches!(
+                property.name(),
+                "FontSize"
+                    | "FontWeight"
+                    | "FontStyle"
+                    | "FontFamily"
+                    | "FontStretch"
+                    | "FlowDirection"
+                    | "LetterSpacing"
+                    | "TextDecorations"
+                    | "FontFeatures"
+                    | "Foreground"
+                    | "Text"
+                    | "TextWrapping"
+                    | "TextTrimming"
+                    | "TextAlignment"
+                    | "Padding"
+                    | "LineHeight"
+                    | "LineSpacing"
+                    | "MaxLines"
+                    | "TextLineBounds"
+                    | "LayoutRoundingPlacement"
+                    | "Inlines"
+            ))
+        .into()
+    });
+
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
-
-        let inlines = InlineCollection::new();
-        inlines.set_logical_children(Some(this));
-        inlines.set_inline_host(Some(this.as_inline_host()));
-        this.set_inlines(Some(inlines));
+        // The inline collection is made on first use (`inlines`), not here.
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -116,11 +157,16 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
             }
         }
 
+        // A name added here is added to `inherited_reactions` above.
         match change.property().name() {
             // Properties that affect shaping: invalidate the run cache + layout.
             "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FlowDirection"
-            | "LetterSpacing" | "Text" | "TextDecorations" | "FontFeatures" | "Foreground" => {
+            | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground" => {
                 this.invalidate_text_layout();
+            }
+            // The text: the shaped runs go, the run and paragraph properties are not made of it.
+            "Text" => {
+                this.invalidate_text_layout_for_text();
             }
             // Properties that do not affect shaping: preserve the run cache.
             "TextWrapping" | "TextTrimming" | "TextAlignment" | "Padding" | "LineHeight" | "LineSpacing"
@@ -140,7 +186,13 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
             "Inlines" => {
                 let (old_value, new_value) = change.get_old_and_new_value::<Option<InlineCollection>>();
                 this.on_inlines_changed(old_value, new_value);
-                this.invalidate_text_layout();
+                // The collection made by a first read is empty and replaces none: the text and
+                // its layout are what they were. Invalidating here made a read of the property
+                // (an inspector listing the properties of a text block, from a render) an
+                // invalidation in the render pass.
+                if !this.is_making_inlines() {
+                    this.invalidate_text_layout();
+                }
             }
             _ => {}
         }
@@ -161,6 +213,24 @@ impl VisualImpl for TextBlock {
         }
     }
 
+    /// The text is drawn from the padding with the layout the block has, whatever its size: a
+    /// block without a background that is as tall as its text before and after draws the same.
+    /// (Below the height of its text the vertical alignment moves the text.) A new layout is a
+    /// new drawing, and says so where it is made: `measure_override` and `arrange_override`
+    /// invalidate the visual when they make one. The classes derived from this one draw more
+    /// than the text (a selection, an access key) and keep the default.
+    fn resize_changes_drawing(this: &Self, old: Size, new: Size) -> bool {
+        if !std::ptr::eq(this.get_type(), <TextBlock as ferroui_base::StaticType>::TYPE)
+            || this.with_value(Self::background_property(), Option::is_some)
+            || this.has_complex_content()
+        {
+            return true;
+        }
+        let Some(text_layout) = this.text_layout.get() else { return true };
+        let text_height = text_layout.height();
+        old.height < text_height || new.height < text_height
+    }
+
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
     }
@@ -174,7 +244,10 @@ impl VisualImpl for TextBlock {
 
 impl LayoutableImpl for TextBlock {
     fn on_measure_invalidated(this: &Self) {
-        this.dispose_text_layout();
+        if this.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsMeasureInvalidated);
+        }
+        this.drop_drawn_text_layout();
 
         Self::parent_on_measure_invalidated(this);
     }
@@ -184,10 +257,10 @@ impl LayoutableImpl for TextBlock {
     /// left-aligned text that neither wraps nor trims) and the heights its lines fit when none
     /// was left out, with the padding (desktop-performance.md section 9.15).
     fn measure_hold_override(this: &Self, _constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
-        if this.has_complex_content() || this.layout_text_alignment.get() != TextAlignment::Left {
+        if this.has_embedded_controls() || this.layout_text_alignment.get() != TextAlignment::Left {
             return None;
         }
-        let text_layout = this.text_layout.borrow().clone()?;
+        let text_layout = this.text_layout.get()?;
         let mut padding = this.padding();
         if this.use_layout_rounding() {
             let scale = LayoutHelper::get_layout_scale(this);
@@ -199,6 +272,9 @@ impl LayoutableImpl for TextBlock {
             && Rc::ptr_eq(&this.text_trimming(), &<dyn TextTrimming>::none())
         {
             (LEAST, f64::INFINITY)
+        } else if this.is_unwrapped_and_untrimmed(&text_layout) {
+            // Any width its lines fit (section 9.27).
+            (text_layout.width_including_trailing_whitespace().max(LEAST), f64::INFINITY)
         } else {
             let (low, high) = text_layout.width_hold()?;
             (low.max(LEAST), high)
@@ -228,7 +304,10 @@ impl LayoutableImpl for TextBlock {
             // Deviation (DEVIATIONS.md, Text block): unless the layout is the
             // one the new constraint would create (`keeps_text_layout_for`).
             if !this.keeps_text_layout_for(deflated_size) {
-                this.dispose_text_layout();
+                if this.has_text_layout() {
+                    ferroui_base::perf_count!(TextBlockLayoutDropsMeasureConstraint);
+                }
+                this.drop_drawn_text_layout();
             }
             this.constraint.set(deflated_size);
 
@@ -242,11 +321,17 @@ impl LayoutableImpl for TextBlock {
             // A line snapshots its metrics when it is formatted, so an
             // existing layout still reports the width and height the child
             // had before it was measured again.
-            this.dispose_text_layout();
+            if this.has_text_layout() {
+                ferroui_base::perf_count!(TextBlockLayoutDropsEmbeddedControls);
+            }
+            this.drop_drawn_text_layout();
         }
 
         // This implicitly recreates the text layout with a new constraint if
         // we previously reset it.
+        if !this.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutsCreatedByMeasure);
+        }
         let text_layout = this.text_layout();
 
         // The text width used here is matching that the text presenter uses
@@ -275,16 +360,25 @@ impl LayoutableImpl for TextBlock {
         // invalidated since) is that layout already, so it is kept: nothing
         // is laid out again when the arranged size is the measured one.
         if this.layout_text_alignment.get() != this.resolve_text_alignment(this.text_alignment()) {
-            this.dispose_text_layout();
+            if this.has_text_layout() {
+                ferroui_base::perf_count!(TextBlockLayoutDropsArrangeAlignment);
+            }
+            this.drop_drawn_text_layout();
             this.constraint.set(available_size);
         } else if this.constraint.get() != available_size {
             if !this.keeps_text_layout_for(available_size) {
-                this.dispose_text_layout();
+                if this.has_text_layout() {
+                    ferroui_base::perf_count!(TextBlockLayoutDropsArrangeConstraint);
+                }
+                this.drop_drawn_text_layout();
             }
             this.constraint.set(available_size);
         }
 
         // This implicitly recreates the text layout with a new constraint.
+        if !this.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutsCreatedByArrange);
+        }
         let text_layout = this.text_layout();
 
         if this.has_complex_content() {
@@ -373,19 +467,34 @@ impl TextBlockImpl for TextBlock {
             &default_properties,
         );
 
-        let text_source: Rc<dyn ITextSource> = if this.has_complex_content() {
-            this.ensure_text_runs();
-
-            let text_runs = this.text_runs.borrow().clone().unwrap_or_default();
-
-            Rc::new(InlinesTextSource::new(text_runs, None))
-        } else {
-            Rc::new(SimpleTextSource::new(this.utf16_text(text.unwrap_or("")), default_properties))
-        };
-
         let max_size = this.get_max_size_from_constraint();
 
-        let text_run_cache = this.text_run_cache.borrow_mut().get_or_insert_with(|| Rc::new(TextRunCache::new())).clone();
+        let text_run_cache = this.text_run_cache();
+
+        if !this.has_complex_content() {
+            // A plain text: the layout the font manager keeps for this text with these
+            // properties and this constraint, made now when there is none (a FerroUI addition,
+            // docs/porting/desktop-performance.md, section 9.29).
+            let text = text.unwrap_or("");
+            let paragraph_properties: Rc<dyn TextParagraphProperties> = paragraph_properties;
+
+            return TextLayout::shared_plain(
+                text,
+                || Rc::new(SimpleTextSource::new(this.utf16_text(text), default_properties)),
+                &paragraph_properties,
+                &this.text_trimming(),
+                max_size.width,
+                max_size.height,
+                this.max_lines(),
+                Some(text_run_cache),
+            );
+        }
+
+        this.ensure_text_runs();
+
+        let text_runs = this.text_runs.borrow().clone().unwrap_or_default();
+
+        let text_source: Rc<dyn ITextSource> = Rc::new(InlinesTextSource::new(text_runs, None));
 
         Rc::new(TextLayout::from_text_source(
             text_source,
@@ -399,13 +508,89 @@ impl TextBlockImpl for TextBlock {
     }
 }
 
+/// The default run properties of text blocks that are kept to be shared, by the last use.
+const SHARED_RUN_PROPERTIES: usize = 8;
+
+ferroui_base::ferro_thread_local! {
+    /// The default run properties made last that hold nothing but values: a typeface, a size and
+    /// a foreground brush.
+    static RUN_PROPERTIES: RefCell<Vec<Rc<dyn TextRunProperties>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The default run properties of a text block: the ones another text block made for the same
+/// typeface, size and foreground brush, where there are such, else new ones.
+///
+/// The text blocks of a screen give their texts a few fonts, sizes and brushes, and each made
+/// an object of its own for them (docs/porting/desktop-performance.md, the run properties of
+/// #811). The properties are immutable, so equal ones can be one object, which also finds its
+/// glyph typeface once. Only properties that hold values are shared: a foreground is the same
+/// brush (a brush can change, and the text of each block follows its own), and properties with
+/// decorations or font features (collections) are made for their block alone. The last
+/// [`SHARED_RUN_PROPERTIES`] are kept on the thread; a new one takes the place at the end.
+fn shared_run_properties(
+    typeface: Typeface,
+    font_size: f64,
+    text_decorations: Option<TextDecorationCollection>,
+    foreground: Option<Rc<dyn IBrush>>,
+    font_features: Option<FontFeatureCollection>,
+) -> Rc<dyn TextRunProperties> {
+    let shareable = text_decorations.is_none() && font_features.is_none();
+    let same_brush = |kept: Option<&Rc<dyn IBrush>>| match (kept, foreground.as_ref()) {
+        (None, None) => true,
+        (Some(kept), Some(brush)) => Rc::ptr_eq(kept, brush),
+        _ => false,
+    };
+    if shareable {
+        let found = RUN_PROPERTIES.try_with(|kept| {
+            let mut kept = kept.borrow_mut();
+            let index = kept.iter().position(|properties| {
+                properties.font_rendering_em_size() == font_size
+                    && same_brush(properties.foreground_brush())
+                    && *properties.typeface() == typeface
+            })?;
+            // Towards the front, so that the properties in use stay.
+            if index > 0 {
+                kept.swap(index, index - 1);
+            }
+            Some(kept[index.saturating_sub(1)].clone())
+        });
+        if let Ok(Some(found)) = found {
+            return found;
+        }
+    }
+    let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+        typeface,
+        font_size,
+        text_decorations,
+        foreground,
+        None,
+        Default::default(),
+        None,
+        font_features,
+    ));
+    if shareable {
+        let _ = RUN_PROPERTIES.try_with(|kept| {
+            let mut kept = kept.borrow_mut();
+            if kept.len() == SHARED_RUN_PROPERTIES {
+                kept.pop();
+            }
+            kept.push(properties.clone());
+        });
+    }
+    properties
+}
+
 /// The handle through which the inlines of a text block reach it.
 struct TextBlockInlineHost(WeakRef<TextBlock>);
 
 impl IInlineHost for TextBlockInlineHost {
     fn invalidate(&self) {
         if let Some(text_block) = self.0.upgrade() {
-            text_block.invalidate_text_layout();
+            // The collection a first read makes is given its host, which invalidates the host:
+            // nothing of the text changed with an empty collection.
+            if !text_block.is_making_inlines() {
+                text_block.invalidate_text_layout();
+            }
         }
     }
 
@@ -634,27 +819,30 @@ impl TextBlock {
     pub fn construct() -> Self {
         Self {
             base: Control::construct(),
-            text_layout: RefCell::new(None),
-            run_properties: RefCell::new(None),
-            paragraph_properties: RefCell::new(None),
-            text_run_cache: RefCell::new(None),
+            text_layout: OptionCell::new(),
+            run_properties: OptionCell::new(),
+            paragraph_properties: OptionCell::new(),
+            text_run_cache: OptionCell::new(),
             constraint: Cell::new(Size::new(f64::NAN, f64::NAN)),
             text_runs: RefCell::new(None),
+            text_runs_embed_controls: Cell::new(true),
             inlines: RefCell::new(None),
-            inlines_invalidated: RefCell::new(None),
+            inlines_made: Cell::new(false),
+            making_inlines: Cell::new(false),
+            inlines_invalidated: OptionCell::new(),
             inline_host: OnceCell::new(),
             clear_text_internal: Cell::new(false),
             layout_text_alignment: Cell::new(TextAlignment::Left),
             utf16_text: RefCell::new(None),
             alpha_mask: OnceCell::new(),
-            font_features_subscription: RefCell::new(None),
+            font_features_subscription: OptionCell::new(),
         }
     }
 
     /// Deviation (DEVIATIONS.md, Text block): upstream does not lay the text out again
     /// when the `FontFeatures` collection it has changes; the text block follows it.
     fn refresh_font_features_subscription(&self) {
-        let previous = self.font_features_subscription.borrow_mut().take();
+        let previous = self.font_features_subscription.take();
         if let Some(previous) = previous {
             previous.dispose();
         }
@@ -666,14 +854,14 @@ impl TextBlock {
                 }
             })
         });
-        *self.font_features_subscription.borrow_mut() = subscription;
+        self.font_features_subscription.set(subscription.map(Box::new));
     }
 
     /// Baseline of the current measured text, without creating a layout or
     /// invoking its formatter. Embedded rich objects use the rendered origin,
     /// including padding and the existing layout-rounding placement policy.
     pub(crate) fn cached_text_baseline(&self) -> Option<f64> {
-        let layout = self.text_layout.borrow().clone()?;
+        let layout = self.text_layout.get()?;
         let mut padding = self.padding();
         let mut scale = None;
         if self.use_layout_rounding() {
@@ -710,8 +898,8 @@ impl TextBlock {
     /// The layout is cached until a property it depends on, the measure of
     /// the control or its constraint changes.
     pub fn text_layout(&self) -> Rc<TextLayout> {
-        if let Some(text_layout) = self.text_layout.borrow().as_ref() {
-            return text_layout.clone();
+        if let Some(text_layout) = self.text_layout.get() {
+            return text_layout;
         }
 
         // The alignment `create_text_layout` uses: text is left aligned
@@ -720,7 +908,7 @@ impl TextBlock {
         self.layout_text_alignment.set(self.resolve_text_alignment(text_alignment));
 
         let text_layout = self.create_text_layout_core();
-        *self.text_layout.borrow_mut() = Some(text_layout.clone());
+        self.text_layout.set(Some(text_layout.clone()));
         text_layout
     }
 
@@ -798,6 +986,10 @@ impl TextBlock {
         self.get_value(Self::font_size_property())
     }
 
+    // A call of its own, as it was: inlined into a caller, the caller kept the text block it had
+    // just made on another place of its stack and copied it over (pinned: the inlining shifted
+    // with unrelated changes of the property store, #986).
+    #[inline(never)]
     pub fn set_font_size(&self, value: f64) {
         self.set_value(Self::font_size_property(), value)
     }
@@ -922,10 +1114,35 @@ impl TextBlock {
 
     /// The inlines.
     pub fn inlines(&self) -> Option<InlineCollection> {
+        if !self.inlines_made.get() {
+            // Made on first use and set as upstream's constructor sets it: the change it raises
+            // connects the collection (here and in derived controls).
+            self.inlines_made.set(true);
+            // The flag is cleared by a guard: a handler of the change may panic in a test.
+            struct Made<'a>(&'a Cell<bool>);
+            impl Drop for Made<'_> {
+                fn drop(&mut self) {
+                    self.0.set(false);
+                }
+            }
+            self.making_inlines.set(true);
+            let _made = Made(&self.making_inlines);
+            self.set_and_raise(Self::inlines_property(), &self.inlines, Some(InlineCollection::new()));
+        }
         self.inlines.borrow().clone()
     }
 
+    /// Whether the change of `Inlines` being raised is the collection made on first use: no
+    /// content changed, and a handler has nothing to lay out or draw again for it.
+    pub(crate) fn is_making_inlines(&self) -> bool {
+        self.making_inlines.get()
+    }
+
     pub fn set_inlines(&self, value: Option<InlineCollection>) {
+        if !self.inlines_made.get() {
+            // The collection a getter would make is replaced: it is the old value.
+            self.inlines();
+        }
         self.set_and_raise(Self::inlines_property(), &self.inlines, value);
     }
 
@@ -1117,25 +1334,33 @@ impl TextBlock {
         self.set_current_value(Self::text_property(), None);
     }
 
+    /// The run cache of the layouts of the block, made with the first layout: the shaped runs of
+    /// its text are kept between layouts at other widths and dropped when what they were shaped
+    /// from changes (`invalidate_text_layout`).
+    pub(crate) fn text_run_cache(&self) -> Rc<TextRunCache> {
+        self.text_run_cache.get().unwrap_or_else(|| {
+            let text_run_cache = Rc::new(TextRunCache::new());
+            self.text_run_cache.set(Some(text_run_cache.clone()));
+            text_run_cache
+        })
+    }
+
     /// The default run properties of the layouts: the ones kept since a property they are made of
     /// last changed, else new ones.
     pub(crate) fn default_run_properties(&self) -> Rc<dyn TextRunProperties> {
-        if let Some(properties) = self.run_properties.borrow().as_ref() {
-            return properties.clone();
+        if let Some(properties) = self.run_properties.get() {
+            return properties;
         }
         let typeface =
             Typeface::with_style(self.font_family(), self.font_style(), self.font_weight(), self.font_stretch());
-        let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+        let properties = shared_run_properties(
             typeface,
             self.font_size(),
             self.text_decorations(),
             self.foreground(),
-            None,
-            Default::default(),
-            None,
             Typography::effective_font_features(self),
-        ));
-        *self.run_properties.borrow_mut() = Some(properties.clone());
+        );
+        self.run_properties.set(Some(properties.clone()));
         properties
     }
 
@@ -1146,7 +1371,7 @@ impl TextBlock {
         text_alignment: TextAlignment,
         default_properties: &Rc<dyn TextRunProperties>,
     ) -> Rc<GenericTextParagraphProperties> {
-        if let Some((alignment, properties)) = self.paragraph_properties.borrow().as_ref() {
+        if let Some((alignment, properties)) = self.paragraph_properties.get().as_ref() {
             if *alignment == text_alignment {
                 return properties.clone();
             }
@@ -1165,33 +1390,70 @@ impl TextBlock {
         properties.set_line_spacing(self.line_spacing());
         properties.set_text_line_bounds(self.text_line_bounds());
         let properties = Rc::new(properties);
-        *self.paragraph_properties.borrow_mut() = Some((text_alignment, properties.clone()));
+        self.paragraph_properties.set(Some((text_alignment, properties.clone())));
         properties
     }
 
     /// Invalidates the text layout and the shaped runs it was built from.
     pub fn invalidate_text_layout(&self) {
-        *self.run_properties.borrow_mut() = None;
-        *self.paragraph_properties.borrow_mut() = None;
-        if let Some(text_run_cache) = self.text_run_cache.borrow().as_ref() {
+        self.run_properties.set(None);
+        self.paragraph_properties.set(None);
+        if let Some(text_run_cache) = self.text_run_cache.get().as_ref() {
             text_run_cache.invalidate();
         }
         *self.text_runs.borrow_mut() = None;
+        self.text_runs_embed_controls.set(true);
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsShaping);
+        }
+        self.dispose_text_layout();
+        self.invalidate_visual();
+        self.invalidate_measure();
+    }
+
+    /// Invalidates the text layout and the shaped runs it was built from, for a new text: the
+    /// run properties and the paragraph properties, which are not made of the text, are kept
+    /// (a FerroUI addition, docs/porting/desktop-performance.md, section 9.29).
+    fn invalidate_text_layout_for_text(&self) {
+        // The shapings of a long text are kept for the new one: an edit shapes again only what it
+        // changed (step 7 of docs/porting/text-layout-performance.md).
+        if let Some(text_run_cache) = self.text_run_cache.get().as_ref() {
+            text_run_cache.retire();
+        }
+        *self.text_runs.borrow_mut() = None;
+        self.text_runs_embed_controls.set(true);
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsShaping);
+        }
         self.dispose_text_layout();
         self.invalidate_visual();
         self.invalidate_measure();
     }
 
     fn invalidate_text_layout_keep_cache(&self) {
-        *self.paragraph_properties.borrow_mut() = None;
+        self.paragraph_properties.set(None);
+        if self.has_text_layout() {
+            ferroui_base::perf_count!(TextBlockLayoutDropsParagraph);
+        }
         self.dispose_text_layout();
         self.invalidate_visual();
         self.invalidate_measure();
     }
 
-    #[allow(dead_code)] // read by the tests
     pub(crate) fn has_text_layout(&self) -> bool {
-        self.text_layout.borrow().is_some()
+        self.text_layout.is_some()
+    }
+
+    /// Lets go of the layout the block has, which layout makes again, and says that the block
+    /// draws something else: a new layout is a new drawing whether the size of the block
+    /// changes or not (`resize_changes_drawing`). A block that has no layout says nothing:
+    /// what let its layout go said so (a text or a font that changed invalidates the visual
+    /// itself), or the block was never drawn.
+    fn drop_drawn_text_layout(&self) {
+        if self.has_text_layout() {
+            self.dispose_text_layout();
+            self.invalidate_visual();
+        }
     }
 
     /// Whether the current text layout is the one a layout created for
@@ -1205,7 +1467,7 @@ impl TextBlock {
     /// one it was created for, or for any height it fits when it was created
     /// without a maximum height.
     fn keeps_text_layout_for(&self, constraint: Size) -> bool {
-        let Some(text_layout) = self.text_layout.borrow().clone() else {
+        let Some(text_layout) = self.text_layout.get() else {
             return false;
         };
 
@@ -1230,8 +1492,14 @@ impl TextBlock {
             || (left
                 && text_layout.width_including_trailing_whitespace() <= constraint.width
                 && (constraint.width <= created_for.width || created_for.width == f64::INFINITY))
-            || (left && text_layout.holds_width(constraint.width));
-        if self.has_complex_content()
+            || (left && text_layout.holds_width(constraint.width))
+            // - a left-aligned layout that does not wrap and has no trimmed line has the same
+            //   lines at any width they fit (section 9.27).
+            || (left
+                && text_layout.width_including_trailing_whitespace() <= constraint.width
+                && self.is_unwrapped_and_untrimmed(&text_layout));
+        // Inlines without a control among them are laid out as a text is (section 9.27).
+        if self.has_embedded_controls()
             || !same_lines
             || created_for.width.is_nan()
             || created_for.height.is_nan()
@@ -1261,7 +1529,7 @@ impl TextBlock {
     }
 
     fn dispose_text_layout(&self) {
-        let text_layout = self.text_layout.borrow_mut().take();
+        let text_layout = self.text_layout.take();
         if let Some(text_layout) = text_layout {
             text_layout.dispose();
         }
@@ -1281,7 +1549,23 @@ impl TextBlock {
             }
         }
 
+        self.text_runs_embed_controls
+            .set(text_runs.iter().any(|run| run.downcast_ref::<EmbeddedControlRun>().is_some()));
         *self.text_runs.borrow_mut() = Some(Rc::new(text_runs));
+    }
+
+    /// Whether the inlines have a control among them, or may have (their text runs are not
+    /// built). The layout of inlines without one depends on the constraint the way the layout
+    /// of a text does (desktop-performance.md section 9.27).
+    fn has_embedded_controls(&self) -> bool {
+        self.has_complex_content() && (self.text_runs_embed_controls.get() || self.text_runs.borrow().is_none())
+    }
+
+    /// Whether the layout is of text that does not wrap and no line of it was trimmed: it has
+    /// the same lines at any width they fit (a line is trimmed only when it does not fit, or
+    /// when lines after it are left out, which the width does not decide without wrapping).
+    fn is_unwrapped_and_untrimmed(&self, text_layout: &TextLayout) -> bool {
+        self.text_wrapping() == TextWrapping::NoWrap && !text_layout.has_collapsed_lines()
     }
 
     fn measure_embedded_controls(&self, constraint: Size) -> bool {
@@ -1313,12 +1597,17 @@ impl TextBlock {
     }
 
     fn on_inlines_changed(&self, old_value: Option<InlineCollection>, new_value: Option<InlineCollection>) {
-        self.visual_children().clear();
+        // The visual children are the controls the inlines embed. The collection a first read makes
+        // replaces none: there are no such controls, and clearing the list would tell the renderer
+        // that the children changed.
+        if !self.is_making_inlines() {
+            self.visual_children().clear();
+        }
 
         if let Some(old_value) = old_value {
             old_value.set_logical_children(None);
             old_value.set_inline_host(None);
-            if let Some(subscription) = self.inlines_invalidated.borrow_mut().take() {
+            if let Some(subscription) = self.inlines_invalidated.take() {
                 subscription.dispose();
             }
         }
@@ -1327,11 +1616,11 @@ impl TextBlock {
             new_value.set_logical_children(Some(self));
             new_value.set_inline_host(Some(self.as_inline_host()));
             let weak = self.to_ref().downgrade();
-            *self.inlines_invalidated.borrow_mut() = Some(new_value.invalidated(move || {
+            self.inlines_invalidated.set(Some(Box::new(new_value.invalidated(move || {
                 if let Some(this) = weak.upgrade() {
                     this.invalidate_text_layout();
                 }
-            }));
+            }))));
         }
     }
 
@@ -1458,7 +1747,8 @@ impl TextBlock {
         build_base_debug_display(self, builder);
 
         if include_content {
-            let text = self.text().or_else(|| self.inlines().and_then(|inlines| inlines.text()));
+            let inlines = self.inlines.borrow().clone();
+            let text = self.text().or_else(|| inlines.and_then(|inlines| inlines.text()));
             append_optional_value(builder, "Text", text.as_deref());
         }
     }

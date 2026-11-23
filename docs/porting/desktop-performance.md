@@ -513,11 +513,14 @@ code.
 
 ## 8. The cross-framework gauntlet (2026-11-08)
 
-`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the Cranpose
-benchmark ([cranpose-comparison.md](cranpose-comparison.md)): the same screens, per-frame work and
+`samples/GauntletBenchmark` is FerroUI's port of the gauntlet and the still wall of the
+comparison's benchmark ([performance-comparison.md](performance-comparison.md)): the same screens,
+per-frame work and
 `PERF_*` environment as the benchmark's desktop apps, so its harness (`desktop.py`) measures it
-beside the other frameworks. `PERF_REPORT=1` prints the frame rate the app's animation-frame
-callback sees, for A/B runs of FerroUI builds:
+beside the other frameworks. `PERF_REPORT=1` prints how often the app's animation-frame
+callback runs (`PERF fps`), for A/B runs of FerroUI builds; a build with the feature `counters`
+prints beside it the batches the compositor committed (`PERF batches`), which are the frames
+(section 9.46: the two differed by a factor of two until that section):
 
 ```sh
 PERF_SCENARIO=gauntlet PERF_TIER=16 PERF_REPORT=1 PERF_FONTS=<folder of Roboto-*.ttf> \
@@ -547,20 +550,69 @@ is run locally, on a quiet machine (no other build, no VM or emulator, on mains 
 python3 scripts/perf/gate.py                                   # base: merge-base with origin/main
 python3 scripts/perf/gate.py --base main --markdown target/perf-gate.md
 python3 scripts/perf/gate.py --only gauntlet                   # the frame gate alone
+python3 scripts/perf/gate.py --only frames,framework           # FerroUI's own regression benchmarks
+python3 scripts/perf/gate.py --only window --window-scenes text,wall
+python3 scripts/perf/gate.py --quick --only frames,framework --frames-filter 'start_of_*' \
+    --framework-filter styling_subsystem::ControlThemeApply   # tier 1: only what the change can move
+python3 scripts/perf/gate.py --batch --base origin/main        # tier 2: a batch of stacks
 python3 scripts/perf/gate.py --only tdg --tdg-filter VirtualizationBenchmarks
+python3 scripts/perf/gate.py --only counters                   # the counter checks alone
+python3 scripts/perf/gate.py --only browser --browser-site target/browser/control-catalog-browser
 python3 scripts/perf/gate.py --dry-run                         # the plan and the commands
 ```
+
+**Which gate a change gets.** A gate run is the build of both sides (up to about 14 minutes) and,
+per round of both sides together, the framework classes (about 12 minutes) and the frame scenes
+(under 2 minutes). Instructions decide for the micro-benchmarks, and they move little between
+rounds, so a part of a stack gets CI and its size run, and the stacks that are ready are gated
+together:
+
+| Tier | For | Run | About |
+|---|---|---|---|
+| 0 | docs, scripts, CI, a change whose runtime code is byte-equal (a build-time decision that only removes unreached code: compare the generated files or the executables) | no gate; the size run | 0 |
+| 1 | a narrow change, a part of a stack | `--quick` (2 rounds, a third only for a metric within the spread of its rounds; 120 frames a scene) with `--frames-filter` (scene names or prefixes ending in `*`; a filter that names no scene stops the gate) and a `--framework-filter` of the classes it can move | 15 to 20 minutes |
+| 2 | the stacks that are ready, merged into one temporary branch; a change of a hot path everywhere (the property store, layout, rendering) | `--batch`: every scene in 3 timed rounds, every class in 1 round | about 25 minutes |
+| 3 | a release | every scene and class in 3 timed rounds (`--profile dist --rounds 3 --max-rounds 4`) with `window` and `tdg`, on every platform (section 8.3) | hours |
+
+Tiers 1 and 2 build with `release`, for short builds and symbols to sample. Tier 3 measures `dist`, the build that ships: fat LTO in one code generation unit can inline differently, so a line can move there that did not move in `release`. Its first run in a target folder builds native Skia there, and a device build keeps `release`.
+
+A regression that a tier 1 gate did not look for is found by the tier 2 gate of its batch before
+the stacks are merged. When a batch fails, the failing lines are measured on each stack alone
+(tier 1, with their scenes and classes as filters) to find the one that adds them.
+
+**The batch gate.** A micro-benchmark line is decided by its instructions. One that takes more is
+measured again alone, up to 3 rounds, so that a benchmark whose count differs from one process to
+the next does not stop the gate; if it still takes more it fails. A time that moved with the same
+instructions is reported as `time alone (does not block)`. Instructions do not see the memory
+caches, a contended lock or the GPU, so the frame scenes stay timed and can fail the gate on time,
+and the tier 3 gate before a release decides on the time of every line. The first round of the
+base's micro-benchmarks is kept under `<scratch>/base-cache`, by commit and compiler, and the next
+batch on the same base does not measure it again (`--no-base-cache` measures it; a base that runs
+the candidate's copy of the benchmarks never reuses it).
 
 The script checks the base out, detached, in a git worktree of its own under the scratch folder
 (`--scratch`, default `ferroui-gate-scratch` beside the checkout, reused between runs and safe to
 delete), builds the base and the candidate (this checkout as it is, uncommitted changes included)
-with a target folder each, then runs them alternately, base then candidate, for `--rounds` rounds
-(default 3), and compares the medians of the rounds. A metric over its tolerance by less than the
+with a target folder each, then runs them alternately for `--rounds` rounds (default 3), and
+compares the medians of the rounds. The side that runs first changes with the round (base then
+candidate in the first, candidate then base in the second): what a run leaves behind, the caches
+of the system and the heat of the machine, is then not always the start of the same side. A metric over its tolerance by less than the
 spread of its own rounds on either side is not decided yet: one disturbed round can move a median
 of three that far (a still wall run beside a busy machine went from 1.7 to 2.2 ms on one side
-only). The gate then measures another round of that suite, alternately again, until the change is
+only). The gate then measures another round of the scenes and classes of those metrics, alternately again, until the change is
 larger than the spread or `--max-rounds` (default 9) is reached, and decides on the medians of all
-the rounds. Cargo runs through `FERROUI_CARGO` when it is
+the rounds. Two things end a run sooner than its rounds. A line that takes more instructions, or a
+scaling pair over its limit, after the first round takes them in every round: the gate stops there
+and says so, a third of the way in (`--keep-going` measures the other rounds all the same). And a
+run that measures prints a line for each benchmark or scene it finishes; one that prints nothing
+for six minutes is stuck (a process that cannot read its own program back from a drive that
+faulted spins there for ever), and is stopped and started once more, where the whole gate used to
+wait with it. A run whose files cannot be read (the drive left) waits up to ten minutes for its
+source tree to be there again and runs again. With `--resume <folder>` what each measuring run
+printed is kept in the folder, and a gate that was stopped half way and is started again with
+the same folder measures only what it does not have: the folder belongs to one gate (the same
+base, the same candidate, the same options), and a run is found there by its side, its commit,
+its arguments and its environment. Cargo runs through `FERROUI_CARGO` when it is
 set (a wrapper that serialises the builds of the machine; the runs go through it too, so no other
 build starts during a measurement), else `cargo`. The logs of every build and run are kept under
 `<scratch>/logs`. Exit status: 0 when nothing regressed beyond its tolerance, 1 when something
@@ -568,6 +620,24 @@ did or a benchmark failed on the candidate, 2 when a build or a run failed.
 
 What it measures:
 
+- **The counter checks** (suite `counters`): unit tests that assert exact numbers of units of
+  work, read from the performance counters of `ferroui-base`
+  (`diagnostics::perf_counters`). The counters compile to nothing without the feature
+  `perf-counters`, so the workspace test run of CI builds these tests with their counts switched
+  off (`assert_count` asserts only when the counters are compiled in) and checks the behaviour
+  alone; the gate builds and runs them with the feature on. The list is `COUNTER_CHECKS` in
+  `gate.py` (package, features, test filter); today the style work tests of the property store
+  (`src/FerroUI.Base/tests/property_store/style_work_tests.rs`, section 9.25). Alone:
+
+  ```sh
+  cargo test -p ferroui-base --features perf-counters --lib style_work
+  ```
+
+  The checks are deterministic: they run once, on the candidate only, before the measured
+  suites, need no base and no quiet machine, and have no tolerance. A test that fails, a run that
+  fails or a filter that selects no test is a row `FAILED` in the table and exit status 1; a
+  build that fails is exit status 2. A change that adds a counter-asserting test adds its filter
+  to `COUNTER_CHECKS`.
 - **The frame gate** (`samples/GauntletBenchmark/tests/frame_gate.rs`): the gauntlet at tier 16
   and the still wall at tier 20 in a headless window of 1280 x 820 points at a scaling of 2, as
   the desktop program opens them, rendered through the compositor into a raster Skia framebuffer
@@ -586,12 +656,204 @@ What it measures:
   is copied into the base worktree, and added to its workspace members when needed, so both sides
   run the same benchmark code; the output says so. `--copy-gate` does the same when the base has
   a gate of its own.
+- **The frame benchmarks** (`tests/FerroUI.FrameBenchmarks`, suite `frames`): FerroUI's own
+  regression scenes, kept apart from the ports of other frameworks' benchmarks (the gauntlet
+  follows the comparison's benchmark and is synced with it). Each scene does one kind of per-frame work
+  of a heavy screen, so that a change of that work shows in its own numbers, and each names the
+  sections of chapter 9 it guards: `text` (text that changes every frame), `paragraph` (a long
+  paragraph one word of which changes every frame), `list` (a scrolling list of shadowed cards),
+  `transforms` (panels moved by their render transform and opacity), `width` (a layout under a
+  changing width), `wall` and `wall+pointer` (a still wall), `moves` (tiles of a
+  canvas that move), `lines` (charts whose lines change every frame), `items` (boxes drawn as items
+  of the composition visual above them, some of which are drawn anew, move, and leave the tree and
+  come back every frame), and the per-frame work of the patches of a patchwork screen, each on a
+  whole window: `recolor` (a row of the tiles of a wall filled anew), `cards` (cards of tiles that
+  move by a transform, one of which leaves the tree, shows another card and comes back when a move
+  begins), `reorder` (two children of a wrapping panel of 6,000 that change places), `deep`
+  (numbers twelve boxes deep, a row of which changes), `rows` (a list of rows of 150 tiles that
+  scrolls a row a frame and recycles none), `pile` (translucent tiles lying over one another,
+  one of which is opaque in turn) and `grow` (a still wall beside a label whose size changes
+  every frame, which invalidates the layout up to the root). The harness is the frame gate's; besides the times a frame,
+  every scene reports the time it takes to build (`build_ms`) and the window to show it (`show_ms`: its first
+  layout, recording and commit) and their sum (`startup_ms`). Alone:
+
+  ```sh
+  cargo test -p ferroui-frame-benchmarks --release --test frames -- --ignored --nocapture --test-threads=1
+  ```
+
+  The scenes of the start (`startup/tiles`: 58,696 tiles of six elements on a canvas, 352,187
+  elements; `startup/controls`: 1,600 templated controls of the Fluent theme, 24,017 visuals) are
+  shown once and measured to their first frame: the build, the show, the time from the show to
+  the first frame (`first_frame_ms`) and their sum, and the resident memory each of them added
+  (`build_mb`, `show_mb`, `first_frame_mb`, `startup_mb`). `sizes_of_an_element` prints the
+  sizes of the objects an element is made of (the element class by class, its composition visual
+  and the visual of the render thread); the gate compares each. With the `counters` feature
+  (`--features counters`) a start also prints the allocations of each phase and the blocks it
+  left alive by size class, and the counters of the framework (section 9.40). With
+  `FERROUI_HEAP_SITES=build|show|first|all` beside the feature it keeps, for every block of that
+  phase, the frames of the call that allocated it, and prints the blocks still allocated at the
+  first frame by those frames; `python3 scripts/perf/heap-sites.py <output>` names them and adds
+  them up by the function that owns them. With `FERROUI_GATE_CLOSE=1` a start goes on after its
+  first frame: the content is taken out of the window, the two threads run for half a second,
+  and the heap and the resident memory that are left of the scene are printed
+  (`FERROUI_HEAP_SITES=close` keeps the sites of the blocks the close itself allocates and
+  keeps; section 9.98). The gate runs every test of the frame benchmarks in
+  a process of its own: a start is the start of a process that
+  has built nothing yet, and a scene leaves the heap and the caches of the process in a state
+  that moves what is measured after it. The `text` scene builds in 3.65 ms in a process of the
+  frames alone and in 4.2 to 5.0 ms after the two starts; the `list` scene, measured after six
+  others in one process, was built in 1.6 ms by one side of a comparison and in 2.7 ms by the
+  other, whose scenes before it had left other blocks free, and in 1.2 and 1.1 ms by the two in
+  processes of their own (section 9.42). Before the first scene of the frames a
+  process measures, the harness shows a small scene made of what the scenes use (text, rounded
+  borders, polylines, panels) and runs 30 frames of it, once: what a process does once is then in
+  no scene's `build_ms` and `show_ms`. Without it the first scene carried the state the process
+  started in: `lines`, the first by its name, was built and shown in 0.9 and 1.4 ms in a process
+  started right after another and in 1.3 and 1.9 ms after 20 seconds of rest or 3.0 and 5 to
+  6.6 ms after a large process; with it, in 0.8 and 1.3 ms in each case. Before that, and before
+  each start, the harness reads one byte of every page of the program's own file
+  (`page_in_the_program`): the system reads a page of a program from the disk when the process
+  first runs through it, and a build or a show, measured once a process, then timed the disk
+  whenever the system did not hold the file, which it does not after it was just written or after
+  a large process pushed it out. `list` was built and shown in 1.1 and 1.7 ms with the file in
+  memory and in 1.6 and 2.3 ms with about 1,150 pages read inside the two, and of two builds of
+  the same scene the larger program paid more of it.
+
+  The UI thread, render thread and wall time the gate compares are those of a frame the surface received
+  (the time for a frame of the clock times `frames / rendered` of the `GATE` line, when fewer
+  frames were received than the clock had). The loop of the benchmark does not wait for a
+  display: a frame of the clock that starts while the render thread still has the batch before
+  it commits nothing and costs close to nothing, so a side that presents fewer of its frames
+  looked faster by the frames it did not draw (section 9.42: 226 to 228 of 240 frames on one
+  side, 237 to 239 on the other, which read as 5 to 7 % of wall time). The UI thread time is
+  compared the same way: the work of a frame of the clock that committed nothing is work for
+  the picture after it, and a side that ran two frames of the clock for each picture showed
+  half its UI thread time for a frame (section 9.46). The frame gate itself fails when the
+  surface receives fewer than nine in ten of the frames of a scenario.
+- **The tree benchmarks** (`tests/FerroUI.Benchmarks`, category `trees`, suite `framework`): the
+  framework's tree mechanics on walls of small tiles, in an application with a desktop's services
+  (the Fluent theme, Skia's fonts, HarfBuzz): building, attaching (from the leaves up and from the
+  root down), laying out, detaching and clearing; inherited properties, the enabled and visible
+  states, the flow direction, the data context, the theme variant and styles passed down an
+  attached wall; class styles and resources on it; and the text of many short labels. The suite
+  runs `trees::` and `layout::ElementConstructionBenchmark` (`--framework-filter`) with the
+  TreeDataGrid suite's iterations, and with them the benchmarks of the subsystems and of the
+  declarative layer (`declarative::ViewBenchmark`: a thousand rows mounted and run again with
+  `ferroui-view`, beside the same controls made directly; section 9.91). When the base has no `trees` category, the candidate's
+  `tests/FerroUI.Benchmarks` is copied into it.
+- **The window suite** (`window`): the desktop program of the frame benchmarks (`frame-benchmarks`)
+  opened once per scene (`--window-scenes`, default `text,list,transforms,wall`) for
+  `--window-seconds` (12): the time from the start of the process to its first animation frame
+  (`first_frame_ms`) and to its second (`second_frame_ms`), and its time a frame (`ms_per_frame`,
+  from its frame rate after the first three seconds) on the backend of the platform (Skia with
+  Graphite on macOS). It measures what the raster frame benchmarks cannot: the GPU backends and the
+  start of a real process. The first animation frame comes before the scene has been drawn; the
+  first commit of the composition tree, the first drawing and whatever the platform asks to be
+  painted when a window is shown keep the thread until the second, which is the time by which the
+  scene is on the screen and the application answers. A scene that holds the display's rate shows
+  no change of its time a frame; its first frames still do.
+- **The browser suite** (`browser`, only when it is named, with `--browser-site`): what a switch
+  between pages of the control catalog asks of WebGL in headless Chrome
+  (`scripts/browser/navigation-cost.mjs`; section 9.56). The site is a folder
+  (`scripts/build-browser.sh control-catalog-browser` makes it) or an address, the published site
+  among them; nothing is built for it. The masks a switch uploads and their pixels are held against
+  the budget of the page (`browser/<page> <visit> budget of masks`, `OVER BUDGET`), on the
+  candidate alone. With `--browser-base-site` the masks, their pixels and the time to the paint of
+  each switch are compared with those of another site as well: a count has five times the
+  tolerance (a quarter with the default) and a floor (8 masks, 250,000 pixels), since an animation
+  runs a frame more or less from run to run, and a time ten times the tolerance and 50 ms, since
+  the time of a switch in headless Chrome says little (section 9.56). The counts are those of the
+  module without threads, drawn on the thread of the page. A folder is opened that way by the
+  script; an address is opened as it is given, so the published site of a module with threads is
+  given as `<address>/?Threads=false`.
 - **The TreeDataGrid benchmarks** (`tests/FerroUI.TreeDataGrid.Benchmarks`, `run_benchmarks`): the
   median time of one operation of each benchmark, read from the tables of the harness. The gate
   runs the harness with shorter iterations than its defaults (7 iterations of at least 250 ms
   after 2 of warm-up; `--tdg-iterations`, `--tdg-min-iteration-ms`, `--tdg-warmup`) so that a
   full run of both sides takes minutes rather than an hour; `--tdg-filter` selects benchmarks as
   `FERROUI_BENCH_FILTER` does.
+
+The two suites of the benchmark harness (`framework` and `tdg`) run each class of benchmarks in a
+process of its own (`FERROUI_BENCH_CLASS`, one run a class of the names `FERROUI_BENCH_LIST`
+prints). A benchmark starts from the heap, the caches and the threads the benchmarks before it in
+its process left: `trees::Propagation.font_family[Tiles=2000]` of one build took 1.82 ms in one
+process that had run the hundred and more benchmarks before it and 1.40 ms in the next, and is
+within a few percent after the benchmarks of its class alone. When the harness of the base is
+from before it could run one class, both sides run in one process, and the output says so.
+
+Beside the time, the harness counts the instructions the processor retires for an operation,
+where the system counts them for a process (macOS; `harness::processor`), and the table of the
+gate has their change in the column `Instructions`, on the line of the time. The count is of the
+work alone: it does not move with the frequency of the cores, the caches or where a build put
+the code and the data. Of 336 pairs of runs of the same build in two processes the median
+difference was 0.01 % and the largest 0.74 %, where the cycles of 49 of the pairs differed by
+more than 5 %. The verdicts of a benchmark with the count:
+
+- `REGRESSED`: the time is over its tolerance and so are the instructions. The change does more
+  work.
+- `REGRESSED (instructions)`: the instructions are over their tolerance and the time is not.
+  The change does more work that this machine hides. The instructions are over their tolerance
+  when the median of the candidate is 2 % and more than one instruction an operation over that
+  of the base, and every round of the candidate counted more than every round of the base: a
+  few benchmarks count differently from one process to the next, because the order of a hash
+  table follows a seed the process draws (`trees::Propagation.styles_changed` counted 13.70 to
+  14.51 million instructions in four runs of one build), and rounds that overlap say nothing.
+- `REGRESSED (time alone)`: the time is over its tolerance and the instructions are not. The
+  work is the same. What is left is how the processor runs it: the alignment of a loop, the
+  cache lines of the data a benchmark walks, a branch the predictor loses, all of which move
+  with any change of a build, in code the change does not touch as well
+  (`styling_subsystem::SelectorMatch.none`, measured by the gate at +10.7 % for a change that
+  touched no styling code, retired 0.95 % fewer instructions).
+
+Each of the three fails the gate. A benchmark that took less time with the instructions of the
+base is `faster (time alone)`: a quieter round, or memory and code that lie better, and not
+less work.
+
+The frame scenes are counted as well (#783). A scene prints the instructions of a frame
+(`instructions_per_frame` in its `GATE` line: those the process retired over the measured
+frames, of every thread, read as the harness of the benchmarks reads them), and the gate
+judges the three times of a frame of the scene with them, so a scene whose UI thread took
+longer for the same work says `time alone`, and one that does more work says so at 2 %. The
+count is the steadier of the two by far: five runs of one build gave `frames/text` 97.62 to
+97.89 million instructions a frame (0.3 %) and 4.13 to 4.66 ms on the UI thread (13 %),
+`frames/reorder` 40.08 to 40.15 million (0.2 %) and 1.76 to 1.93 ms, `frames/wall` 21.904 to
+21.906 million, `frames/items` 157.4 to 158.0 million (0.4 %). A base whose frame scenes do
+not count is judged by its times alone, as before (`--copy-gate` gives it the scenes of the
+candidate). What the counts are for: one round of the main branch against itself with other
+benchmark code (two builds of the same framework) had nine lines of the frame scenes over
+their tolerance in time, by 7 to 43 % (`frames/reorder ui_ms_per_frame` 1.467 and 1.869 ms,
+`frames/text` 3.656 and 4.139 ms, `frames/width` 0.358 and 0.414 ms), every one of them
+within 0.2 % in instructions. The time of a scene differs from build to build by more than
+its tolerance; its instructions do not, and a line now says which of the two moved.
+
+The parts of a start are counted too. The build, the show and the first frame of a scene are
+each measured once in a process, so their times were the least steady lines of the gate: the
+show and the start of the large scenes moved by 6 to 12 % between two runs of one change
+(section 9.98), and a start that did more work could not be told from one that waited for the
+disk. A scene of the start prints the instructions of its build, of the taking of its content,
+of its show and of its first frame, and their sum (`build_instructions`,
+`content_instructions`, `show_instructions`, `first_frame_instructions`,
+`startup_instructions`, of every thread of the process); a frame scene prints those of its
+build and its show. The gate judges `build_ms`, `show_ms`, `first_frame_ms` and `startup_ms`
+with them. Three starts of one build: `startup/tiles` 20.735, 20.740 and 20.754 billion
+instructions from the build to the first frame (0.09 %) with 1,655 to 1,790 ms (8 %);
+`startup/controls` 2.695 to 2.714 billion (0.7 %, the first start of a new file the largest)
+with 243 to 340 ms.
+
+Scaling pairs. A benchmark compared at one size cannot tell a cost that is linear at that size
+and quadratic above it. The benchmarks of `trees::Scaling` (the start of a wall of tiles, its
+attachment, its detachment, the clearing of a canvas, the removal of every second child, a class
+set on every tile, a resource of the root replaced) and `layout_subsystem::ScrollContent.offset`
+are measured at a size and at four times that size, each one whole operation, and the gate adds
+a line for each pair, `scaling/<benchmark>[<parameter>=<size>..<four times the size>]`: the
+instructions at the larger size over those at the smaller, for the base and for the candidate. A
+cost linear in the size has 4 or less (the fixed part of an operation does not grow), one that
+grows with the size times its logarithm 4.8 at these sizes, a quadratic one 16. The limit is 4.6.
+A pair over it is `REGRESSED (scaling)` and fails the gate, unless the base is over it too and
+the candidate is not further over than the tolerance of the instructions: that is
+`over its limit (as the base)`, a finding that is on the base already, shown in every table until
+it is fixed. The pairs need the instructions, so they are there where the system counts them.
+Section 9.80 has the pairs of the main branch.
 
 Tolerances. A metric regresses when the candidate is slower than the base by more than
 `--tolerance` (default 5 %) times the factor of the metric, and by more than a floor below which
@@ -601,10 +863,323 @@ the measurement resolves nothing (0.05 ms a frame, 2 ns an operation):
 |---|---:|---|
 | UI thread and wall time of a frame | 1 | hundreds of frames of a deterministic CPU workload |
 | Render thread time of a frame | 1.5 | it runs beside the UI thread and moves with core placement and glyph cache state |
-| TreeDataGrid operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| UI thread, render thread and wall time of a frame benchmark | as above | compared for a frame the surface received, not for a frame of the clock |
+| TreeDataGrid and tree benchmark operation | 2 (3 under 100 ns) | short iterations in a new process per run; heap and code layout move a benchmark by several percent, and the shortest operations are near the timer |
+| Instructions of such an operation | 2 % whatever `--tolerance` is | a count, the same to a hundredth of a percent between two processes of a build (floor one instruction) |
+| Build and show of a scene (`build_ms`, `show_ms`) | 1.5 | measured once a run: one sample a round (floor 0.5 ms) |
+| Start of a scene (`startup_ms`) | 1 | the sum of the two (floor 0.5 ms) |
+| First frame of a scene of the start (`first_frame_ms`) | 1.5 | measured once a run |
+| Memory of a start (`build_mb`, `show_mb`, `first_frame_mb`; `startup_mb`) | 2; 1 | resident memory moves with what the allocator returns to the system; the sum less (floor 1 MB) |
+| Size of an object of an element (`sizes/...`) | 0 | exact: any growth is a regression |
+| Scaling pair (`scaling/...`) | a ratio of at most 4.6 | instructions at four times the size over those at the size: 4 is linear |
+| Window: first frame and time a frame | 2 | a real process: the display, the system compositor, the disk and the shader caches (floors 20 ms and 0.5 ms) |
 
 A regression the gate reports after its extra rounds is a real one; a change that is meant to
-cost time says so in the pull request, with the table.
+cost time says so in the pull request, with the table. A benchmark that regressed in time alone
+is looked at before the pull request goes up: its counts on the two sides, the sizes of the
+objects it uses (`sizes/...`), and a second run of it. When the counts and the sizes are those of
+the base and the code the benchmark runs is not what the change touches, the time is that of
+where this build put the code and the data; the pull request shows the line with its counts and
+says so. The gate is not told to pass it. Where the line stays over its tolerance in the second
+run, a third check settles it: the candidate built once more with a few bytes in front of the
+code of the libraries (`core::arch::global_asm!(".section __TEXT,__text,regular,pure_instructions",
+".space 36", ".p2align 2");` at the end of the `lib.rs` of the benchmark crate, not committed),
+and the line run with that program and the two of the gate (`FERROUI_BENCH_FILTER`,
+`FERROUI_BENCH_ITERATIONS`, the cycles beside the instructions). Code that is slower for what it
+does is slower wherever it is put; section 9.57 has a case that was not.
+
+### 8.2 The gate on every platform
+
+The gate of section 8.1 runs on the machine of whoever changes the code, which is a Mac. A
+regression that only one platform has is not seen there: section 9.56 is one that only the browser
+had. So the gate runs on every platform the framework supports before a release (`docs/release.md`,
+section 8.4), and whenever a change is about one platform. It is the same script everywhere; what
+differs is where the window suite runs and where the sources come from.
+
+| Platform | The suites | How it is run |
+|---|---|---|
+| macOS | all | `python3 scripts/perf/gate.py --base <base>` |
+| Linux | all | the same, in a display: `xvfb-run -a python3 scripts/perf/gate.py ...` |
+| Windows | all | the same, in the session of a signed-in user (a window needs a desktop) |
+| Android | `window` | `--only window --window-device android`, an emulator or a device that runs |
+| iOS | `window` | `--only window --window-device ios`, a simulator that is booted |
+| Browser | `browser` | `--only browser --browser-site <folder or address>`, headless Chrome |
+
+The window suite draws with the GPU backend the platform's applications get, whatever that is on
+the machine, the emulator or the simulator; the browser suite counts what WebGL is asked for.
+
+- **The suites without a window** (`counters`, `gauntlet`, `frames`, `framework`, `tdg`) draw into
+  a raster framebuffer and need no display: they are the same on macOS, Linux and Windows, and say
+  what the compiler and the allocator of each platform make of the same code. On a device and in a
+  browser they do not run: a test binary is not an application there.
+- **The window suite on a device** (`--window-device android` or `ios`, with `--device-id` when
+  more than one is running): the scenes are those of the desktop program, in an application of
+  their own, `tests/FerroUI.FrameBenchmarks.Android` (a native library of an activity) and
+  `tests/FerroUI.FrameBenchmarks.iOS`. Both are a few lines: the application, the scenes and the
+  report are in `tests/FerroUI.FrameBenchmarks` (`App`, `report_to`, `scene_from`), and the fonts
+  are part of the program, since an application on a device has no folder of the repository. The
+  gate builds the host of each side with cargo (the environment of `scripts/android/env.sh`, the
+  SDK of the simulator), packages it with `scripts/android/apk.sh package --no-cargo` or
+  `scripts/ios/bundle.sh --no-build`, and installs both sides under ids of their own
+  (`org.ferroui.framebenchmarks.base`, `.candidate`). A scene is started with the command of the
+  platform: on Android `am start` with the scene as an extra of the intent (`FRAMES_SCENE`), the
+  `PERF` lines read from the log of the device (tag `ferroui-frames`); on iOS `simctl launch` with
+  the scene in the environment of the process, the lines read from its console. The program says
+  which scene it shows (`PERF scene`), and the gate fails when it is not the one asked for.
+- **The first frames of a device are timed where they happen.** On iOS the times are from the
+  command that starts the scene, as on the desktop: the simulator runs on the machine of the
+  gate, and its console is a pipe. On Android they are those of the log of the device
+  (`logcat -v threadtime`), from the line with which the activity manager says it started the
+  process (`Start proc`) to the `PERF` lines of that process, and of no other. A time taken on
+  the machine of the gate has in it what `adb` takes to start the scene and what a line takes
+  to arrive, and the second is not the same for every line. The log of a run keeps the time
+  each line arrived at in front of it.
+- **A side begins its scenes on a device with a launch that is not measured** (`warm_device`,
+  three seconds of its first scene). An application started after another one ran starts later,
+  before a line of its code runs, and its second launch does not. The sides take turns, so the
+  first scene of a side was timed by which side went before it. Nine rounds on the emulator, the
+  text scene, from the start of the process to the line with which the program names its scene
+  and to its first frame:
+
+  | The text scene of the candidate | To its scene, ms | To its first frame, ms |
+  | --- | ---: | ---: |
+  | After the scenes of the base (five rounds) | 277 to 298 | 292 to 311 |
+  | After its own scenes of the round before (four rounds) | 87 to 109 | 97 to 121 |
+  | The base, in either place | 84 to 109 | 103 to 134 |
+
+  The median of the nine was 292 ms against 131 ms, a first frame twice as late that no frame
+  was part of: from the scene to the first frame the candidate took 14 ms and the base 22 ms.
+  The base did not show it. The likely cause, not proven, is the memory of the emulator: the
+  last scene of a side, the lines, is much the heavier one on the base of that run, and what it
+  takes is taken from the pages of the other application. With the launch that does not count
+  both sides start their first scene as they start every other one.
+- **Where the candidate is not a git checkout** (a machine that gets its sources as a copy:
+  `scripts/windows/vm-sync.sh <commit> <folder>` makes one, on any system), the base is a second
+  copy, passed with `--base-dir`; the gate checks nothing out and names each side by the commit
+  its copy was made from. `--copy-gate` copies the candidate's benchmark code into that tree as it
+  does into a worktree.
+- **The numbers of an emulator, a simulator and a virtual machine** are those of the machine
+  below them and of its drivers: they are compared with the other side on the same one, in the
+  same run, and never with the numbers of another platform. A virtual machine or an emulator runs
+  alone while it is measured.
+
+### 8.3 The comparison's own FerroUI application, from this checkout and from the published crates
+
+The comparison publishes numbers for a FerroUI application of its own, written on the
+declarative layer, and not for `samples/GauntletBenchmark` (section 9.82 has what differs).
+`benchmarks/comparison` builds that application, unchanged, two ways: from the FerroUI of
+this checkout (`ferroui-local/Cargo.toml`) and from the published crates its own manifest
+names. Its sources are a submodule that a clone does not fetch
+(`git submodule update --init --checkout benchmarks/comparison/upstream`).
+`benchmarks/comparison/compare.py build` builds the two, and `compare.py run --scenario
+gauntlet:16 --rounds 2` runs the comparison's harness on each and prints them beside each
+other. The first run, a display with other windows on it (`--diagnostic`), the main branch
+against 0.5.0:
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 33.8 | 28.4 |
+| First start: first frame | 1.39 s | 2.02 s |
+| Second start: frames a second over the run | 37.5 | 35.0 |
+| Second start: first frame | 0.56 s | 0.55 s |
+| Second start: CPU a frame | 67.1 ms | 70.3 ms |
+
+The same run at the end of that day, three starts each, with what sections 9.81 to 9.83
+and section 4.23 of `docs/binary-size.md` changed on the main branch (the pipelines of a
+frame compiled side by side, the reactive runtime, the records of pipelines, the selectors
+by name):
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 39.9 | 28.7 |
+| First start: first frame | 1.12 s | 2.03 s |
+| First start: CPU a frame | 58.8 ms | 69.2 ms |
+| Second start: frames a second over the run | 43.3 | 34.9 |
+| Second start: first frame | 0.53 s | 0.56 s |
+| Second start: CPU a frame | 58.1 ms | 67.4 ms |
+
+What was left in the steady rate of that application then (a sample of its UI thread, the
+time of each class's own layout, beside the sample of this repository): text measured, 537
+ms against 428; the shapes of its sparklines measured every frame, 114 ms against none; its
+grids measured, 112 ms against 22.
+
+The same run a day later, three starts each, with sections 9.82 (a run of an effect asks for
+no memory) and 9.84 to 9.86 on the main branch (texts of one colour share their layouts,
+shader libraries made when the application is built, measure holds of a canvas, of a grid of
+one star row and of an axis that is cut):
+
+| Gauntlet, tier 16 | This checkout | Published 0.5.0 |
+| --- | ---: | ---: |
+| First start: frames a second over the run | 46.8 | 28.7 |
+| First start: first frame | 1.04 s | 2.08 s |
+| First start: CPU a frame | 51.3 ms | 69.0 ms |
+| Second start: frames a second over the run | 49.5 | 35.7 |
+| Second start: first frame | 0.52 s | 0.56 s |
+| Second start: CPU a frame | 51.2 ms | 65.9 ms |
+
+What is left in its steady rate: its UI thread is busy 88 % of the time and its render
+thread 48 %, so the UI thread sets the rate. A frame of it runs 2,410 measures against 1,148
+of the sample of this repository and makes 1,122 objects against 493 (each card replaces
+the two column definitions of its progress bar and the geometries of two shapes); the rest
+is recording, text and the reactive runtime, none of them above a quarter. What is left of
+its first start is the system's check of a program it never ran and the application's own
+start (section 9.85).
+
+The harness measures a window on a display from outside the application, so this is not a
+suite of the gate; it is where a change to the declarative layer or to the start is measured
+as the comparison will measure it.
+
+### 8.4 The rules of an optimization
+
+These hold for every change that is made for speed, memory or size.
+
+1. **Hard rule: not for the benchmark alone.** A benchmark is where a cost is found, not what
+   the change is for. The change is made in the mechanism that has the cost, so that every
+   user of the mechanism gets it, and not in the one path the benchmark runs. Before the pull
+   request goes up, the places connected to it are looked for: the other classes that go
+   through the same code, the other callers of the same function, the same pattern in the
+   sibling backends and platforms. They get the change in the same pull request or in the
+   next part of its stack. (Section 9.88: the cost was found in the polylines of one
+   screen; the change is in `Shape`, and rectangles, ellipses and lines that are resized or
+   moved got it too.)
+2. **The search has an end.** One pass over the same mechanism: its classes, its callers,
+   its siblings. What that pass finds and does not change is written down, with the reason,
+   in the section of the change; nothing further is hunted. A place that would need a design
+   of its own is a ticket, not a detour.
+3. **Every optimization has a benchmark in the gate.** If no suite of the gate runs the code
+   that was changed, a benchmark that does is part of the change (section 8.1), so that the
+   gain is held and the general case is measured, not only the screen that showed the cost.
+4. **Drawing stays on the GPU.** Nothing that is drawn by the GPU is moved to the CPU for a
+   number, in any backend.
+5. **The pictures and the public API are the same.** A change that draws another picture or
+   changes a signature is not an optimization; what a deviation from the reference changes is
+   in `DEVIATIONS.md`.
+6. **Measured, both ways.** The numbers before and after are in the section of the change; a
+   change that does not improve what it was made for is left out, with its numbers.
+7. **The gate.** A narrow change gets a gate of the suites that run it; the whole gate runs on
+   the last part of a stack of changes, before the stack lands (section 8.1).
+
+### 8.5 The goal: a smooth 60 frames a second in the scenes of the comparison
+
+The goal (#807) is that the FerroUI program of the framework comparison, which is written on
+the declarative layer, holds 60 frames a second in its three scenes (the gauntlet, the still
+wall, the patchwork) at the tiers the comparison publishes, on a first and on a second start,
+and shows its first frame as soon as the fastest programs do. The sample of this repository,
+written on the controls, runs the same gauntlet at 55 to 60; the difference is what the
+declarative layer and the paths it takes through the controls still cost.
+
+Where it stands, with the harness of the comparison (gauntlet, tier 16, three starts each,
+the median):
+
+| | Published 0.5.0 | Main branch | With sections 9.87 to 9.89 |
+| --- | ---: | ---: | ---: |
+| Second start: frames a second | 35.7 | 49.7 | 51.9 |
+| First start: frames a second | 28.7 | 46.4 | 49.6 |
+| First start: first frame | 2.08 s | 1.04 s | 1.03 s |
+| Second start: first frame | 0.56 s | 0.52 s | 0.49 s |
+| Second start: CPU a frame | 65.9 ms | 51.5 ms | 49.4 ms |
+
+The leader of the comparison runs the scene at 54 to 58 with a first frame at 0.66 to
+0.87 s.
+
+**The three scenes** (#801; the main branch with sections 9.87 to 9.89, the harness of the
+comparison, three rounds, the median). A run of the harness is 10 s and its rate counts the
+time before the first frame:
+
+| Scene | First start | Second start | First frame, first / second start | CPU a frame |
+| --- | ---: | ---: | ---: | ---: |
+| Gauntlet, tier 16 | 49.5 | 52.4 | 1.01 s / 0.51 s | 49.5 ms |
+| Wall, tier 20 | 45.5 | 48.6 | 2.41 s / 1.91 s | 26.2 ms |
+| Patchwork, tier 12 | 54.5 | 57.4 | 0.93 s / 0.42 s | 20.4 ms |
+| Patchwork, tier 17 | 52.1 | 55.4 | 1.26 s / 0.74 s | 41.3 ms |
+| Patchwork, tier 20 | 31.8 | 34.3 | 1.65 s / 1.12 s | 79.4 ms |
+
+The wall at tier 20 and the patchwork at tiers 12 and 17 lose no frame once they run: their
+rate is 60 less the share of the run before the first frame (60 x (1 - 1.91 / 10) = 48.5 for
+the wall; 57.5 and 55.6 for the patchworks). On these three the whole distance to 60 is the
+time to the first frame. The gauntlet loses about 3 frames a second to its start and about
+4.5 to frames that are late. The patchwork at tier 20 is the one scene its steady rate
+limits.
+
+**What sets the rate.** The UI thread: on the main branch it is busy 88 % of the time and
+the render thread 48 %. A frame has 16.7 ms, and a frame that misses the display takes two,
+so the rate falls in steps: 52 frames a second is one frame in seven late, not a frame that
+is 15 % too slow. What a frame of the declarative program does, counted with
+`perf-counters`, beside the sample of this repository:
+
+| A frame, gauntlet tier 16 | The declarative program | Before sections 9.84 to 9.89 | The sample | What is left |
+| --- | ---: | ---: | ---: | --- |
+| Measures | 2,410 | 4,457 | 1,148 | #802 |
+| Objects made | 602 | 1,116 | 493 | #803, #805 |
+| Property changes raised | 11,800 | 12,280 | 6,080 | #803 |
+| Runs of effects of the declarative layer | about 2,000 | about 2,000 | none | #804 |
+| Visuals recorded | 3,387 | 5,695 | 4,968 | |
+| Text blocks drawn | 836 | 1,708 | | |
+| Text layouts made | 435 | 781 | 431 | |
+| Objects of a batch to the render thread | 7,391 | 10,587 | | |
+
+**What is missing**, in the order of what it is expected to give:
+
+1. **Measures** (#802). A cell of a star column holds over the widths of the grid at which
+   the column keeps the cell inside the cell's own hold, and under layout rounding the grid
+   takes one rounding step off each side of that range. At tier 16 every size is multiplied
+   by 0.12: a wrapped title holds one or two pixels of width, the two steps take all of it,
+   the header grid of every card holds one width, and so does the card. About a thousand of
+   the 2,410 measures are cards that could have held.
+2. **Notifications and objects** (#803). Each card replaces the two column definitions of its
+   progress bar every frame: 545 definitions made and dropped. A definition that gets an
+   inheritance parent is told every inherited value of the tree above it, whether or not
+   something hears it: about 4,200 of the 11,800 property changes.
+3. **The declarative layer** (#804). A property that follows a closure boxes the value of
+   every run and sets it through the untyped setter: about 2,000 runs a frame, and the
+   runtime is 17 % of the UI thread, two thirds of it in these runs.
+4. **Geometries that are written again** (#805). Section 9.88 keeps the geometry of the
+   shapes whose geometry is a rectangle, an ellipse, a line or a list of points; the stream
+   geometries (arcs, sectors, a border with unequal corners) are still made new. Done since:
+   section 9.105.
+5. **The bands of a frame** (#810). The patchwork at tier 20 is limited by drawing: its UI
+   thread is busy 29 % of the time, its render thread 50 %, and the two threads that record
+   the bands of a frame 87 and 81 %. With the default of the bands changed for the
+   measurement (second start, frames a second and CPU a frame):
+
+   | Bands | Patchwork 20 | Gauntlet 16 | Patchwork 17 |
+   | --- | ---: | ---: | ---: |
+   | 2 (the default) | 34.3, 79 ms | 52.4, 50 ms | 55.4, 41 ms |
+   | 3 | 43.2, 81 ms | 52.3, 55 ms | 55.5, 48 ms |
+   | 4 | 45.0, 92 ms | 51.4, 58 ms | 45.2, 61 ms |
+
+   A third band gives the frame that does not fit a quarter more frames; the frames that fit
+   pay a tenth more CPU for nothing, and a fourth band costs the patchwork of tier 17 ten
+   frames a second (six busy threads on five performance cores). The number of bands has to
+   follow what the frame costs.
+6. **The start of a large tree** (#811). The wall at tier 20 is 293,480 elements (58,696
+   tiles of a border, a grid, two text blocks and a dot) and the rows that hold them. At
+   its first frame the program holds 2.1 GB of heap in 13.7 million blocks: 47 blocks and
+   7.5 kB an element. Of its UI
+   thread's start, building the tree is about 40 %, the first layout 22 %, recording and the
+   commit 25 %. By the function that asked (a tile of the wall at tier 10, 266 blocks and
+   46 kB): the five elements 6.4 kB in 5 blocks; the owners of the declarative layer 4.9 kB
+   in 24; the effective values of the properties 4.7 kB in 32; the nodes of the reactive
+   runtime 3.1 kB (two owners for every element, with or without handlers); the recorded
+   drawings 4.2 kB in 20; the text layouts of the two texts 4.2 kB in 21; the properties of
+   the builder 1.1 kB in 27; a font family made for every text block 0.8 kB; the default
+   run properties of every text block 0.6 kB. A static element need not keep an owner, a
+   node or the boxed properties it was built from.
+7. **The first start** (#806, #786). Of the 1.03 s to the first frame, the system's check of
+   a program it never ran is about 0.19 s and 8 ms for every megabyte of the program
+   (23.0 MB), the application's own start is about 0.3 s, and the states of the pipelines
+   are still made on the first frames (the libraries are not, section 9.85).
+
+**The order of the work.** The changes that are open and the experiments that were planned
+before (#763) are finished first; the experiments of this goal follow them (#801, the
+measurement, is the table above); the work on the size of the binary (#570) goes on beside
+both, and each megabyte it takes off is also time off the first start.
+
+**The goal is reached** when the three scenes hold 60 frames a second at the published tiers
+on a second start, with a first start within two frames a second of it, or when each scene
+that does not has what limits it named and measured. The rules of section 8.4 hold for every
+step: the change is in the mechanism, the connected places get it, a benchmark of the gate
+holds it.
 
 ## 9. Deviations from upstream for frame cost
 
@@ -816,7 +1391,7 @@ lists that scroll at a fixed width, where every moved item is no longer recorded
 
 A visual recorded again often draws exactly what it drew before: a left-aligned text block
 without a background, resized while its layout was kept (section 9.12), draws the same lines at
-the same places. `RenderDataDrawingContext::get_render_results_unless_same` compares the new
+the same places. `RenderDataDrawingContext::get_render_results_for` compares the new
 recording with the render data the visual has: the same operations on the same resources, by
 identity, none of them a custom draw operation (which a dropped recording disposes) or a
 resource not sent. When they are the same, the new recording is dropped, its references
@@ -996,3 +1571,6768 @@ A/B: 3.7 (section 9.19) to 4.0 (rounded boxes), 5.1 (glyph shapes), 5.7 (glyph s
 mask clips), 6.3 (turned boxes), 6.65 (turned clips), 8.5 (repeated runs). The still wall stays at
 the display's rate. The uploads and the batches change the frame rate by less than the noise; the
 gauntlet's frame is now held about evenly by the render thread and by the GPU.
+
+### 9.21 Walks of the tree stop where nothing changes; per-element work made on use
+
+Building a large tree from its leaves up and attaching it (the still wall: 58,696 tiles of seven
+elements) did work that grows with the number of elements times their depth, or that most elements
+never need. Each change keeps upstream's observable behaviour: the same values, events and order
+for every element; what differs is the work done where nothing could change.
+
+- **Measure invalidation.** Every element whose visual parent changes invalidates its own measure
+  and that of its whole subtree (`LayoutHelper::invalidate_self_and_children_measure`); a tree
+  built from the leaves up was walked once for every level above each element. An element whose
+  subtree that walk invalidated, and which has not been measured since
+  (`Layoutable::subtree_measure_invalid`), ends the walk; the flag is cleared when the element or
+  one below it is measured. The flagged elements are closed downwards, so clearing stops at the
+  first ancestor without it.
+- **Effective enabled state.** `InputElement::update_is_effectively_enabled_from` updated the whole
+  subtree of every element whose parent or enabled state changed. A child's value is derived from
+  its parent's and every change is passed down as it happens: an unchanged value ends the walk.
+- **Inline collections.** Every text block made an inline collection, its logical children and its
+  subscription when constructed; most show their `Text`. The collection is made, and its change
+  raised, on first use of `inlines()`.
+- **Styling passes.** Every styling pass ended with a re-evaluation of every value of the element
+  (`ValueStore::end_styling`), even when no style applied. The store remembers whether a
+  re-evaluation was put off, or a frame inserted, during the pass, and re-evaluates only then
+  (section 9.25 describes the flag and has its tests).
+- **Classes.** Every input element removed its focus, pointer-over and disabled pseudoclasses when
+  constructed, which made its collection of classes. Removing a pseudoclass from an element without
+  classes makes nothing (`StyledElement::set_pseudo_class`).
+- **Removing many children.** `FerroList::remove_all` searched the removed items for every item of
+  the list, and every child unlinked from its inheritance parent was searched for among its
+  siblings: clearing a panel was quadratic. Items that are one run of the list are removed as that
+  run (the one notification the search raised for it); the inheritance children are a deque
+  searched from both ends.
+- **Control themes.** Every styled element looks up the control theme of its type when attached;
+  most types have none, and each lookup walked the whole of the theme's styles at the application
+  to find nothing. The application keeps the result of each type-key lookup by theme variant and
+  forgets them whenever a dictionary or style it owns changes (`notify_hosted_resources_changed`)
+  or its dictionary is replaced.
+  A memory of the lookup at each element, tried as well, is not kept: it made attaching slower
+  (5 to 7 % from the leaves up, 4.7 % from the root down, 5.1 % for a changed resource), since
+  every element then holds and clears state that the application's table already answers.
+- **Inherited properties no element sets.** A property no store holds (the flow direction of most
+  trees) was looked up through every ancestor holding inherited values, and the per-store results
+  are forgotten whenever an inheritance changes anywhere. Each inheriting property counts the
+  stores holding an effective value of it (`FerroProperty::holders`, shared with the properties
+  added to other owners); while none does, a lookup returns the default at once.
+
+Tests: the tests of the base and controls crates, and tests of the inline collection made on use
+(`selectable_text_block_tests`), of type-key lookups following the application's resources
+(`application_tests`) and of inherited values held through another owner and released with their
+holder (`text_block_tests`). Measured with the `trees` benchmarks (2,000 tiles, against the commit
+before): attach -33 %, first layout -44 % (part of it the benchmark itself, which freed the
+previous wall inside the measurement), detach -25 %, clear -38 %, attach with class styles -19 %, a
+style added to the root -20 %. Still wall (tier 20), launch to first frame: 2.26 s to about 1.9 s.
+
+### 9.22 Skia: a glyph run's first draw skips the text blob cache
+
+A text blob is a key of Skia's text blob cache: drawing one hashes it, keeps the GPU blob made of it
+and posts a purge message when it is dropped. Text that changes every frame makes runs that are
+drawn once, and each paid for the cache for nothing. A run's first draw is of its glyphs alone
+(`Canvas::draw_glyphs_at`), which Skia draws without the cache; the blob is made, and cached by
+Skia, when the run is drawn again (`GlyphRunImpl::draw`). The pixels are the same: both draw the
+same glyphs at the same positions with the same font. Tests: the Skia backend's tests. Gauntlet
+(tier 16), Skia window, interleaved A/B: 27.4 to 31.2 frames a second.
+
+### 9.23 macOS: a render target made by a paint is drawn once
+
+The Metal render target of a window is made by its first paint (`TopLevelImpl::CreateMetalRenderTarget`
+needs the main thread, and the paint is the first that needs the target). Giving the view its target
+(`-[FrnView setRenderTarget:]`) asked for the new layer to be displayed, and so did the target's
+`resize:withScale:`; both requests came from inside the paint that was about to draw that layer, so
+every window was painted twice when shown, the second time with the same content at the same size
+in the same transaction. For a small scene that is a frame; for the still wall it is the whole
+first drawing again, about 100 ms on the UI thread.
+
+The view now knows when it is inside the paint of its top level (`updateLayer`). A target set
+during a paint is given its size and no display request; the paint that set it draws it. At the end
+of that paint the view asks for the display itself if the target has begun no frame on the main
+thread since (`mainThreadFrames` of the render target protocol, counted by the Metal target in
+`BeginDrawing`): a paint that made a target and drew nothing still gets the display it had before.
+The request is the view's (`requestDisplay`: the target's layer and the view), no longer a side
+effect of the target's resize. Every other request is unchanged: a change of the frame size or of
+the backing properties, also inside a paint (the second display of a cooperative resize), and
+`Invalidate` of the top level. The IOSurface target counts no frames, so its windows are asked to
+display as before. Upstream's sources are changed by
+`native/FerroUI.Native/patches/0005-one-display-for-a-render-target-set-in-a-paint.patch`. Test:
+`src/FerroUI.Native/tests/first_paint.rs` counts the paints of a real window (one when shown with
+Metal, where it counted two before; another for a changed size; none while nothing changes).
+
+Measured with the window program of the frame benchmarks (the still wall, 60 Hz, six launches each,
+alternately): the second animation frame 1.30 to 1.33 s after the start of the process before, 1.11
+to 1.18 s after; the frame rate of the first second 28 to 30 against 37 to 39. The first animation
+frame is unchanged (0.73 to 0.76 s), which is why the gate's window suite now also measures the
+second (`second_frame_ms`).
+
+The comparison found a fault of the build: `ferroui-native` carries its static libraries
+(`+whole-archive`), and nothing in the command line of the Rust compiler names their content, so a
+compiler cache (sccache) gave the crate compiled before a change of the native sources back after
+it, and the program ran the other side's native code. The build script now writes a fingerprint of
+what the library is compiled from (the script, the generated header, the headers and the sources)
+as a Rust source of the crate (`interop::NATIVE_SOURCES`), which every such cache reads.
+
+### 9.24 A render walk asks once whether a light is registered
+
+The lights of the composition (`CompositionLight` and its targets, the WinUI lighting API) are
+applied where a visual is drawn: `LitContent::begin` looked, for every visual of every walk, through
+the lights registered with the compositor for those that light the visual (`light_map_of`). An
+application that registers no light, which is most, paid for the look at every visual: 2.5 % of the
+render thread of the gauntlet. The walk now asks the compositor once, when its context is made
+(`ServerCompositor::has_registered_lights`, kept in `RenderContext::lights_registered`), and looks
+for the lights of a visual only when one is registered and alive. Lights are registered while
+batches are applied, never during a walk, so the answer holds for the whole walk. With a light
+registered nothing changes. Tests: the lighting tests of the composition
+(`composition_light_tests.rs`, `composition_winui_lighting_tests.rs`). Gauntlet (tier 16), Skia
+window, render thread: the light lookups go from about 70 to 0 of about 3,070 samples.
+
+### 9.25 A styling batch that changed nothing does not reevaluate; compiled resource rows share one deferred group
+
+Two changes to what applying styles and loading a compiled dictionary cost.
+
+**Styling batches.** Upstream's `ValueStore.EndStyling` reevaluates every effective value of the
+store when the outermost batch ends, whatever the batch did. An element opens a batch when its
+styles are applied, when its styles or its control theme are invalidated and when styles are
+detached from it, and many of these batches change nothing: no style or theme matches the
+element, or it holds no frame of the kind that is removed (an invalidation that recurses over a
+tree). The reevaluation of such a batch visits every effective value and every entry of every
+frame of the element to arrive at the values it started from.
+`ValueStore` now keeps a flag (`reevaluation_pending`, `property_store/value_store.rs`), set
+while a batch is open by the three things that can change an effective value during it: a frame
+inserted (`insert_frame`), and a reevaluation of one property or of the store put off because the
+batch is open (a frame removed, a binding of a frame that produced a value, a style whose
+activator changed). `end_styling` of the outermost batch reevaluates when the flag is set, and
+clears it. The values and the notifications of a batch that changed something are
+upstream's; a batch that changed nothing raises nothing, as before, and now does no work.
+
+Tests: `style_work_tests.rs` (a clean batch completes one pass with no reevaluation and leaves
+the generation of the values as it was; a frame added in a nested batch, a frame removed, a
+binding update and a style activation during a batch are applied at the end of the outermost
+one). The counts are asserted with `perf-counters` on, by the counter checks of the local gate
+(section 8.1): `StylingPassesCompleted`, `FullValueReevaluations`, `SingleValueReevaluations`,
+`ReevaluatedEffectiveValues`, `ReevaluatedFrameEntries`. `scripts/perf/style-work.py` runs the
+probe of the same file (`style_work_probe`) from two builds in alternation.
+
+**Compiled resource rows.** Upstream's generated code gives every deferred resource of a
+dictionary a deferred content of its own (`XamlIlRuntimeHelpers.DeferredTransformationFactoryV3`):
+an object holding the builder, the resource nodes above the declaration, the root object and the
+name scope, added with `ResourceDictionary.AddDeferred`. The rows of a compiled dictionary that
+are built on first use (the brushes with a literal, static or dynamic colour and the
+`{StaticResource}` aliases of a row table, [xaml-themes.md](../xaml-themes.md), section 2.2) did
+the same, one allocation a row at load, for rows of which an application reads a fraction. A
+table is now one group (`IDeferredResourceGroup`, `controls/i_deferred_content.rs`) that holds
+the static rows and one capture a row in a vector, and each row's dictionary entry is the group
+and the index of the row (`ResourceDictionary::add_indexed_deferred`, the item
+`IndexedDeferred`), the size of an entry with deferred content. A lookup builds the row through
+the group with the capture of that row, keeps the value in the entry as for any deferred
+resource, and tells the group to drop the capture (`IDeferredResourceGroup::release`); a build
+that fails keeps the entry and the capture, and the next lookup builds again.
+
+What is kept of the per-row form, because the difference would be observable:
+
+- The capture of each row is taken immediately before the row is added, as upstream's is: a
+  handler of the dictionary's change notification can change the parents between two rows.
+- A row whose capture owns a value (a root object or a parent that is a plain value, which
+  `WeakValue` holds by value) is added as ordinary deferred content, so that value is released
+  when that resource is built, not when the last row of the group is.
+- A development build with hot reload, and a build with source overlays (the designer), keep
+  deferred content for every row, with its reload hooks. A reload can also put a saved deferred
+  entry back in place of a built value, so the dictionary does not call `release` in a
+  development build with hot reload.
+
+Tests: `theme_resources_tests.rs` (the rows are lazy, shared per dictionary and do not keep
+their owners alive; each declaration is captured after reentrant notifications; a mixed group
+releases an owned root per resource; a realized row releases its capture and the rows around it
+keep their indices) and `resource_dictionary.rs` (the group is told of a realized row and not of
+a failed build; the destruction of a source can reenter the dictionary). The workspace test run
+builds `ferroui-markup-xaml` with hot reload and source overlays on, so CI runs the library
+tests of the crate on its own as well. `tests/FerroUI.ResourceBenchmarks` with
+`scripts/perf/resource-descriptors.py` measures the load and the allocations of the two forms
+from two builds.
+
+### 9.26 A collection of styles offers an element the styles whose selector can match its type
+
+Upstream applies a style to an element by matching the selector of every child style against
+it (`StyledElement.ApplyStyle` walks `IStyle.Children`, and `Style.TryAttach` evaluates the
+selector). A control theme of a control with a large template has many nested styles, most of
+which name a part of another type than the element at hand, so most of these matches fail at
+the type test of the selector's last compound, once for each style and each element of the
+template.
+
+A collection of styles (`StyleChildren`, `Styles`) can now keep, for a style key, the list of
+its entries that can match an element of that key (`styling/selector_candidates.rs`), and
+`StyledElement::apply_style` visits the entries of the list in source order.
+
+- **What is left out.** Only a style that is index-enabled (`Style::enable_selector_index`,
+  hidden; the compiled control theme tables call it for each nested style they build), has no
+  child styles, and whose selector requires a type that rules the key out. The type is read from
+  the last compound of the selector, which must start with it (`Selector::type_candidate`):
+  exact for a type selector, with the derived types for `:is()`. A selector with an OR, a
+  `:not()`, a nesting or a custom node at the start of that compound gives none, and so does a
+  style whose parent is a container query. Every other entry is in every list: styles that are
+  not index-enabled, styles with children, nested collections, custom `IStyle` implementations
+  (which the index does not call). The matcher evaluates the whole selector of every listed
+  style, activators included; the index does not replace any part of it.
+- **Where the lists live.** A collection and the index-enabled styles added to it share one
+  state (`IndexState`: the number of such styles, a generation, the lists); the collection
+  allocates it when the first such style is added, and each `Style` holds a weak pointer to the
+  state of the collection that counts it. A collection without index-enabled styles has no state:
+  `CandidateCache::select` returns the whole snapshot after one check, with no scan and no
+  allocation. A collection with fewer than eight entries is traversed whole as well.
+- **Invalidation.** The generation of a state advances, and its lists are dropped, when the
+  collection changes, when a style it counts gets a selector, is enabled again or gets a parent,
+  and when the children of such a style change. No state is shared between collections, so a
+  change of one collection or of its styles does not invalidate the lists of another. A list is
+  used only for the snapshot of the collection and the generation it was computed for; a
+  traversal re-reads the element's style key and the generation before each step and, when
+  either changed, goes on from its position through every remaining entry of its snapshot.
+- **Memory.** The lists of a collection are kept by style key, up to 1024 keys; a list is a
+  shared slice of entry indices (`u32`), and keys with the same candidates share one slice. A
+  key beyond the bound is computed at each use and nothing is dropped for it, so a rotation of
+  more keys than the bound does not empty the lists of the others.
+- **A restriction.** A collection counts a style when the style is added to it while it is
+  index-enabled. A style enabled for the first time afterwards is a candidate for every key
+  until it is added again; a style in two collections is narrowed by the first one. Generated
+  code enables a nested style before it adds it.
+
+The values and the order in which styles apply are upstream's: an entry that is left out is one
+the matcher rejects by type. Tests: `styling/selector_candidate_tests.rs` (the lists for exact,
+derived and overridden style keys; selectors that give no type; edits of the collection, of a
+selector, of the children and of the parent, during a traversal too; a collection without
+index-enabled styles is never scanned and allocates nothing; 200 style keys in rotation are
+scanned once each; keys beyond the bound; a change of another collection invalidates nothing;
+a style the index cannot leave out and one it can apply in source order, with the same values
+as without the index), `theme_styles_tests.rs` of `ferroui-markup-xaml` (a generated theme) and
+the style reload test of `ferroui-hot-reload` (an indexed collection replaced by one loaded at
+run time). `tests/FerroUI.ResourceBenchmarks/selectors.rs` with
+`scripts/perf/selector-candidates.py` measures the application of a generated theme from two
+builds, for selectors with a type, with a type and a pseudo-class, and without a type.
+
+### 9.27 A text block keeps a layout that trimming and the line limit left whole
+
+At the gauntlet's tier 16 every card is about 60 px wide. A text block is measured at the width
+its parent has left, which is not rounded (59.763), and arranged at its layout-rounded width
+(60.0), so every text block saw two constraints a pass. The rules that keep a layout over a new
+constraint (sections 9.7, 9.12 and 9.15) refused every text of the gauntlet: the paragraphs wrap
+with a character ellipsis and a line limit, the subtitles are four inlines on one line with an
+ellipsis. Of 1,793 text layouts a pass, 1,048 were of a text that had not changed.
+
+- `TextLayout::width_hold` no longer excludes trimming and a line limit. A line is trimmed in two
+  cases only: it does not fit the width (the hold already excludes a layout with a collapsed or
+  overflowed line), or lines after it were left out for the maximum height
+  (`is_truncated_by_height`, already excluded) or for the line limit. The new
+  `TextLayout::is_truncated_by_max_lines` tells the last case, with or without trimming, and
+  such a layout has no hold. A layout that left nothing out is the layout of the same text
+  without trimming and without a limit, and inside the hold a new layout has the same lines, so
+  the same count: nothing is left out there either.
+- A text block that does not wrap keeps a left-aligned layout without a collapsed line
+  (`TextLayout::has_collapsed_lines`) at any width its lines fit, and reports the measure hold
+  from that width upwards: without wrapping the width decides nothing but whether a line is
+  trimmed, and a line that fits is not. Lines left out by the line limit do not depend on the
+  width without wrapping.
+- Inlines without a control among them (`EmbeddedControlRun`) follow the rules of a text: their
+  layout depends on the constraint the way a text's does. The text block remembers whether its
+  text runs hold a control when it builds them; while the runs are not built, and with a control,
+  a layout is not kept, as before.
+
+A measure that holds over more constraints showed a defect of the grid that upstream shares: the
+definitions of a grid are made when they are first read, a read invalidates nothing, and the
+arrange took a grid with definitions for one measured with them. A cell of a keyboard (a grid
+without definitions around an unwrapped text) whose definitions a test helper had read was
+arranged at a new size without a measure and failed on definition structures that were never
+validated. The grid now arranges, and reports its hold, by the measure that ran
+(`Grid::is_measured_with_definitions`; DEVIATIONS.md, "Grid").
+
+The same change set makes three representations cheaper without changing what they do. The sets
+of addresses of the compositor (the objects to serialize, the visuals of the renderer, the
+resources of a recording) hash with `rustc_hash` instead of SipHash; an address needs no defence
+against chosen keys. `RenderDataResources::intern` searches the table of a recording while it has
+at most eight resources and builds its map only beyond that: a recording of a control has a brush,
+a pen and a glyph run, and paid for a map. `Visual::synchronize_composition_properties` reads the
+styled values it follows (opacity, clip to bounds, and whether a clip, an opacity mask, a cache
+mode, an effect and a render transform are set) from a snapshot kept while the value store of the
+visual is unchanged (`HotValue`, section 9.9); an object that is set is read as before, since it
+can change without the store changing.
+
+Tests: `text_layout_width_hold_tests.rs`
+(`a_trimmed_limited_layout_makes_the_same_lines_at_every_width_it_holds`: over the texts of
+section 9.12 and line limits of 1 to 40, a layout with a hold left nothing out and has no
+collapsed line, has the lines of the plain text, and a new layout at every width it holds, in
+half-pixel steps, has the same lines, none collapsed, none left out;
+`layouts_the_hold_does_not_describe_have_none`), and `text_block_tests.rs`
+(`a_trimmed_limited_layout_that_left_nothing_out_is_kept_at_a_width_it_holds`,
+`a_layout_that_left_text_out_for_the_line_limit_is_created_again`,
+`an_unwrapped_layout_that_was_not_trimmed_is_kept_at_any_width_it_fits`,
+`inlines_without_a_control_are_kept_the_way_a_text_is`: the kept layout has the lines and the
+desired size of a new text block at the new constraint).
+
+Gauntlet (tier 16), Skia window, per render pass: text layouts created 1,793 to 779 (the rest are
+texts that changed), layouts dropped for a new measure constraint 541 to 18 and for a new arrange
+constraint 506 to 15, measures executed 4,671 to 3,506. UI thread, from samples: about 23 to about
+17 ms a frame. The frame rate does not change (31.5 to 32.3 frames a second before and after):
+the render thread is busy for the whole frame and sets it.
+
+### 9.28 The UI thread of a frame: values read in place, events nobody hears, a drawing kept by its render data
+
+After section 9.27 the render thread and the UI thread of the gauntlet cost about the same, and
+with the render thread no longer the only limit the UI thread's share of a frame decides the frame
+rate as well. Its samples show no single cost; they show the same small work done for every one of
+about 13,500 visuals a frame. This section removes that work where it has no effect. None of the
+changes alters a value, an event, a drawing or an order.
+
+Values read where they are kept:
+
+- The generation of inherited values and the generation of property metadata are one for the
+  process (an atomic) and no longer one a thread. Every read of an inherited value and every
+  `HotValue` compares them, and the address of a thread-local value costs more than the load of a
+  static. A change on one thread makes the stores of every thread look their values up once more;
+  no store misses a change.
+- `HotValue` (section 9.9) is public and hidden from the documentation, with `get_for(object,
+  read)`, so that the controls crate keeps values the way the base crate does. A layoutable keeps
+  its two alignments with its sizes and margin. A border keeps its thickness, corner radius and
+  background sizing, a decorator its padding, and a row or column definition its user size,
+  minimum and maximum: a grid reads the three of every definition in every pass of its layout.
+  Each kept value is read again whenever the value store of its object changes.
+- Layout asks for the layout scale of every element it rounds. `IPresentationSource` has
+  `layout_root_scaling()` (default: the scaling of its layout root), and
+  `Visual::layout_scaling_of_presentation_source` reads it in place, where
+  `LayoutHelper::get_layout_scale` handed out the layout root as a counted reference for every
+  element.
+- An assignment of an animated property returns at once when the object has no animation
+  controller, and the transitions of composition facades are asked only of a visual that has
+  facades.
+
+Work that has no receiver:
+
+- A routed event counts its instance handlers (`RoutedEvent::has_instance_handlers`): adding a
+  handler, removing it and dropping an interactive that holds handlers keep the count. Building a
+  route for an event that has neither a class handler nor an instance handler returns the empty
+  route without walking the ancestors. A stack panel raises its snap-points events, which bubble,
+  in every arrange as upstream does; in the gauntlet that walked the ancestors of every stack
+  panel a frame for nobody. Handlers added later are found: the count is read when a route is
+  built.
+- `Visual::synchronize_composition_child_visuals` answers a visual with no visual child, no child
+  composition visual and no facades without building the lists it compares.
+- The compositor asks for a commit only when none is pending (`ensure_commit_requested`), where
+  every change of every object handed the pending batch out and dropped it.
+
+A drawing kept by its render data:
+
+- A recorder keeps the stream of a recording it discards (nothing drawn, or the drawing the
+  visual already has, section 9.14) and records the next visual into the same storage
+  (`RenderDataStream::recycle`). Storage beyond 512 bytes is not kept, so that a recording does
+  not hold much more than it needs.
+- A visual whose drawing changed gives the new recording to the render data it already has
+  (`CompositionRenderData::replace_recording`, through
+  `RenderDataDrawingContext::get_render_results_for`, which returns a `RecordedDrawing`: the same
+  drawing, updated in place, or a new render data). Upstream, and FerroUI until here, creates a
+  render data for every changed drawing and disposes the old one: a server object created and
+  one disposed, an allocation and a registration for each of the visuals a frame draws. The
+  server-side render data already resets itself and reads a new stream whenever it is
+  serialized, which is how it received its first recording; the visual tells its server-side
+  visual that its content changed (the change code of an unchanged drawing list), so bounds and
+  the kept fragment follow as for a new render data. The resources of the old recording are
+  released as `dispose` releases them: by the render data when the recording was not sent yet,
+  by the server-side render data when it reads the next one. A render data that something else
+  than its visual and the renderer holds is not written to: the recording gets its own, as
+  before. A visual that stops drawing has no render data, as before.
+
+The Skia backend sets the transform of its canvas when something is drawn with it:
+
+- `DrawingContextImpl` keeps the transform it is given and applies it to the canvas before the
+  first operation that depends on it (a draw, a clip, a layer, a save, a lease of the canvas).
+  The render walk sets a transform for every visual and sets it back after it, and a visual
+  outside the dirty area or without a drawing recorded two matrix operations for nothing. What is
+  recorded is what is drawn with, in the same order; Skia's API is used as before, only less
+  often. When the canvas can be leased (`ISkiaSharpApiLeaseFeature`) the canvas follows at once.
+
+Tests: `interactive_tests.rs`
+(`the_count_of_instance_handlers_follows_added_removed_and_dropped_handlers`,
+`a_class_handler_is_reached_when_no_instance_handler_is_attached`), `render_data_tests.rs`
+(`a_changed_recording_goes_to_the_render_data_the_visual_has`: the server-side render data keeps
+its id, is not disposed, has the bounds and replays the operations of the new recording, also
+after two recordings before one batch; `an_equal_recording_leaves_the_render_data_as_it_is`;
+`a_shared_render_data_and_an_empty_drawing_are_not_recorded_in_place`;
+`the_custom_operations_of_a_replaced_recording_are_released`), `hot_value_tests.rs`
+(`the_kept_alignments_follow_their_changes`), `kept_value_tests.rs` of the controls
+(`the_kept_values_of_a_border_follow_local_style_and_cleared_values`,
+`the_kept_sizes_of_a_definition_follow_its_properties`) and
+`drawing_context_transform_tests.rs` of the Skia backend
+(`drawing_uses_the_last_transform_set`, `a_transform_that_nothing_is_drawn_with_is_not_recorded`,
+`the_canvas_follows_the_transform_at_once_when_the_api_can_be_leased`). Counters: `routed event
+routes skipped (nothing listens)`, `visuals recorded into their render data`, and the transforms
+applied to the canvas beside the transforms set.
+
+Gauntlet (tier 16, GPU Skia, 60 Hz, this machine, sampled, per frame), before and with the
+section:
+
+| Per frame | Before | With |
+|---|---|---|
+| UI thread | 18.4 ms | 16.7 ms |
+| Layout pass | 9.28 ms | 8.59 ms |
+| `Compositor::commit` | 7.55 ms | 6.53 ms |
+| `ValueStore::get_value` | 1.36 ms | 0.74 ms |
+| Routed events | 0.37 ms | 0.14 ms |
+| Render thread | 35.3 ms | 33.4 ms |
+| Frames per second | 31.8 to 34.2 | 33.6 to 34.3 |
+
+The frame rate hardly moves because the render thread sets it while it draws directly; the UI
+thread's share is what a pipelined frame gets back.
+
+### 9.29 A plain text is laid out once for the texts that are the same
+
+After section 9.28 text is a third of the UI thread of a gauntlet frame (about 5.6 of 16.7 ms).
+A frame makes 796 layouts, 744 of them because the text of a block changed, and each is made
+from nothing: the characters are split into runs, shaped, broken into lines and given their
+metrics, and the layout the block had is released. Most of that is work that was done before.
+The texts are short (95 % have six bytes or fewer) and they repeat: only 4 % of the layouts a
+frame makes are of a text that was never laid out with the same font, size, brush, wrapping and
+constraint. The repeats are spread over time, so a layout has to be kept for a while to be
+found again:
+
+| Layouts kept while nothing shows them | Layouts found instead of made |
+|---|---|
+| 1,024 | 31 % |
+| 2,048 | 38 % |
+| 4,096 | 42 % |
+| 8,192 | 47 % |
+| 16,384 | 53 % |
+
+Upstream makes a layout for every text block and every change. egui keeps its laid-out texts
+(galleys) by their content for the frames that use them, and the comparison keeps its measured texts
+the same way. FerroUI keeps the layout itself, the object the formatter makes, so nothing about
+shaping, line breaking or drawing is done another way: a layout that is found is the layout
+that would have been made.
+
+What is kept and where:
+
+- The font manager of a thread keeps the layouts (`TextLayoutCache`, a field of `FontManager`,
+  `media/text_formatting/text_layout_cache.rs`). `TextLayout::shared_plain` asks it for the
+  layout of a plain text and makes the layout with `TextLayout::from_text_source` when there is
+  none. The default `TextBlock::create_text_layout` calls it for a text without inlines.
+- A layout is found by everything it is made of: the text, the run properties (typeface,
+  requested family, size, font scale, baseline alignment, culture), the paragraph properties
+  (flow direction, alignment, wrapping, line height, line spacing, indents, letter spacing,
+  line bounds and metrics mode), the trimming, and the exact maximum width, maximum height and
+  line limit. The foreground and background brush are compared as objects, never by their
+  colour: a layout draws with the brush object it was made with, and a brush of the same colour
+  that is another object can change later. Shared brushes (a theme's, `Brushes::black()`) are
+  what makes layouts of different blocks the same.
+- A layout that can change after it was made is not kept and belongs to its block as before: a
+  text with text decorations or font features (collections that are observed), a paragraph
+  with tab stops, a text longer than 256 bytes, and every text with inlines. A text block that
+  makes its own layout (`SelectableTextBlock`, `AccessText`, an override of
+  `create_text_layout`) does not ask the cache.
+- A kept layout is shared (`TextLayout::is_shared`): `TextLayout::dispose` leaves it as it is,
+  because another block may show it, and the cache releases its lines when it lets the layout
+  go. A layout something holds is never let go. Of the layouts nothing holds the cache keeps
+  the 4,096 used last, as far as their text is within 64 KiB (what a layout keeps grows with
+  its text, so long texts go sooner); it looks for the ones to release once in 1,024 new
+  layouts or 16 KiB of new text, so keeping them costs a constant amount for a layout made. A
+  shared layout does not keep the run cache of the block that made it.
+- A cache that is full keeps a text from the second time it is asked for. Full means that the
+  last look for layouts to release found 4,096 that nothing holds, or 64 KiB of their text:
+  from then on a layout that is added takes the place of another. The layout of a text that is
+  asked for once (a clock, a counter, a value that never comes back) is then made for its block
+  alone, as a layout that cannot be shared is, and the block releases it. Without that every
+  such text pushed out a layout that could have been found again, and was itself released by
+  the cache long after its memory was last used: the benchmark with texts that are new every
+  time cost 14.0 % more than without a cache, and costs 3.8 % less with this rule (alternating
+  runs against the commit before section 9.27; the texts that repeat went from 10.8 % to
+  13.6 % less). The cache remembers the
+  texts it was asked for and did not keep by sixteen bits of the hash of the request, four to
+  a slot of 16,384 (128 KiB, made when the cache is first full); a text that looks like one of
+  them is kept at its first request, which is what happens to every text while there is room.
+  A program with fewer texts than the cache keeps never sees any of this.
+- Every change of the fonts of a thread (a font collection added or removed, glyph typefaces
+  invalidated: the generation the glyph typeface lookups already follow) lets all kept layouts
+  go, so no layout shaped with a font that is gone is found. A layout that is still shown stays
+  whole for the block that shows it and is made again when that block asks for a layout.
+
+A new text keeps what is not made of it: `TextBlock` no longer drops its run properties and
+paragraph properties when its `Text` changes (they are made of the font, the brushes and the
+paragraph values), only its layout and runs.
+
+What a program can see: two text blocks that show the same text the same way return the same
+object from `TextBlock::text_layout`, and `TextLayout::dispose` does nothing to a shared layout.
+Measured sizes, lines, hit tests and drawing are the ones of a layout made for the block.
+
+Tests: `text_layout_cache_tests.rs` (`the_same_text_with_the_same_properties_is_one_layout`,
+`what_a_layout_is_made_of_tells_layouts_apart`: each part of the key on its own,
+`a_layout_is_shared_for_the_same_brush_object_only`,
+`a_layout_made_of_what_can_change_is_not_shared`,
+`disposing_a_shared_layout_leaves_it_to_its_other_holders`,
+`the_layouts_nothing_holds_are_let_go_from_the_oldest`,
+`a_full_cache_keeps_a_text_from_its_second_request`,
+`long_texts_nothing_holds_are_let_go_by_their_length`,
+`a_change_of_the_fonts_lets_every_layout_go`) and `text_block_tests.rs`
+(`text_blocks_that_show_the_same_text_the_same_way_share_a_layout`,
+`a_text_that_comes_back_has_the_layout_it_had`,
+`a_shared_layout_outlives_a_block_that_lets_it_go`,
+`a_layout_made_of_more_than_a_plain_text_is_not_shared`). The gate measures it with
+`text::TextBlockChangingTextBenchmark` (`change_and_measure`: a text block whose text changes
+and is measured, with texts that repeat and with texts that are new every time; the second is
+the cost the cache adds to a layout it cannot find).
+
+Counters (`--features counters`): `text layout cache hits`, `text layout cache misses`,
+`text layout cache evictions` and `text layout cache: first requests of a text, not kept`,
+beside `text layouts created`.
+
+Gauntlet (tier 16), Skia window, per render pass: text layouts created 796 to 450 (346 found,
+446 made and kept, 418 let go: the cache is full and turns over, as the table of this section
+says it would at 4,096), text runs shaped 768 to 427, text lines formatted 856 to 507. With
+the rule for a full cache the same frames find as many layouts (346), keep 242 of the ones
+they make and let 244 go; 186 are first requests, whose layout stays with its block.
+
+| Gauntlet, tier 16, direct drawing | Frames a second | UI thread, ms a frame | Render thread, ms a frame |
+|---|---|---|---|
+| Section 9.28 | 33.9 | 16.7 | 33.4 |
+| With the kept layouts | 36.6 | 14.5 | 27.3 |
+
+The thread times are from samples (about a tenth above the real ones). The render thread gains
+more than the UI thread: text blocks that show the same text hold one layout, so they draw the
+same glyph runs, and the renderer finds what it keeps for a glyph run more often (a reading of
+the numbers, not measured apart).
+
+What the layouts that are not found are (every lookup of 20 seconds of the gauntlet written out,
+the second half counted: 139,577 lookups, 54,874 different keys):
+
+| Text | Lookups | Different keys | Found with 4,096 kept | Found with every layout kept |
+|---|---|---|---|---|
+| A price (`611.26`) | 67,901 | 45,538 | 5.0% | 32.9% |
+| A change (`+0.94%`) | 49,008 | 2,712 | 94.5% | 94.5% |
+| A share (`96%`) | 13,552 | 100 | 99.3% | 99.3% |
+| The rest (titles, wrapped paragraphs) | 8,599 | 6,007 | 29.4% | 30.1% |
+| All | 139,577 | 54,874 | 41.3% | 60.7% |
+
+Four in five of the layouts that are not found are prices, numbers that were not shown before:
+no number of kept layouts finds them (16,384 kept layouts find 51% of all lookups, every layout
+kept 61%), so the number stays at 4,096. The wrapped paragraphs are not found because their
+width changes with every frame of an animation; they are shaped once all the same, by the text
+run cache of their text block (upstream), and only wrapped again. What is left of the cost of a
+changing text is the cost of making a layout of a short text, of which shaping is a seventh and
+allocation a quarter.
+
+### 9.30 The pushed states of a drawing context and the readback pass
+
+Two costs of a frame that are not work on the scene but the way two small pieces of state are
+kept. Both were found by sampling the gauntlet with the Graphite stage moved off the render
+thread, where the render thread itself is what limits the rate.
+
+**The pushed states of a drawing context.** A `DrawingContext` remembers what was pushed (a
+transform, a clip, an opacity) to pop it in reverse order. Upstream rents that stack from a
+pool, and FerroUI took it from a pool of the thread: a lookup of the thread's storage, a
+borrow, and a block on the heap of a few bytes for every context that pushes, which is every
+visual that draws. The states are now stored in the context itself
+(`StateStack = SmallVec<[PushedStateType; 16]>`, `media/drawing_context.rs`); a context with
+more than sixteen nested states moves them to the heap as a vector does. Nothing about the
+order of pushes and pops changes, and `states` is `None` before the first push and after the
+disposal as before.
+
+**The readback pass.** The UI thread reads four values of a server visual back (its matrix to
+the root, its target, whether it is visible, and its subtree bounds). Upstream collects the
+visuals whose values changed in a queue and visits each one more time after the targets were
+rendered (`ServerCompositionVisual.UpdateReadback`). In the gauntlet that is several thousand
+visuals a frame, and each visit touches three places that are not in the cache any more: the
+visual, the readback it shares with the UI thread, and the lock of that. FerroUI keeps the
+pass and its place in the frame, and changes what it has to touch:
+
+- The update walk takes the copy of the four values at the moment it has finalized the bounds
+  of a visual (`readback.rs`, `snapshot_for_readback_update`), when the visual is being worked on anyway.
+  The queue of the pass holds the copy beside the readback it is written to
+  (`ReadbackQueueEntry`, `server/server_compositor.rs`), so the pass writes without visiting
+  the visual.
+- A change that is announced after the copy was taken (an adorner, a value set by a later
+  pass) turns the entry of the visual back into a visit, so the pass writes what upstream's
+  pass would have read.
+- A visual is in the queue once for a pass by the number of the pass, where upstream sets a
+  flag in the visual and the pass clears it in every visual again.
+- The two slots of a readback are atomics. The protocol of the slots is upstream's (one
+  writer, one reader, the reader never reads the slot that is written), and the lock of the
+  readback indices, held for the whole write and taken by the reader to move to a newer
+  revision, still orders the write of a revision before every read of it. What went away is a
+  lock for each slot that this protocol never contended.
+
+The copy relies on two things the code states where it takes it: the own transform of a visual
+is written only through `set_own_transform` and before the update walk, and the values the
+copy holds are final once the walk has finalized the bounds of the visual.
+
+What it measures (M3 Pro, gauntlet at tier 16, cycle-aligned means of alternating runs):
+
+| | Before | After |
+|---|---|---|
+| Readback pass, render thread, Graphite stage on its own threads | about 1.5 ms a frame (7.4 % of the thread) | about 0.75 ms a frame (3.9 %) |
+| Frame rate, Graphite stage on the render thread | 34.9 fps | 35.4 fps (inside the noise of the runs) |
+
+With the Graphite stage on the render thread the frame is bound by Skia's own work and neither
+change moves the rate. They are kept for the configuration in which the render thread's own
+passes are the limit, and because neither adds a code path: the stack is the same stack in
+another place and the pass is the same pass with fewer places to touch.
+
+What a program can see: nothing. The values the UI thread reads back and the revision they
+belong to are the same, and so is the order in which states pop.
+
+Tests: `drawing_context_tests.rs`
+(`more_states_than_the_context_stores_in_itself_pop_in_reverse_order`) and
+`server_composition_visual/readback_tests.rs` (`nothing_is_read_before_the_first_write`,
+`every_value_survives_a_slot`, `a_reader_keeps_its_revision_while_newer_ones_are_written`,
+`two_writes_of_one_revision_leave_the_last`, `the_pass_writes_what_the_update_walk_left`,
+`a_change_announced_after_the_copy_is_read_by_the_pass`,
+`a_visual_is_in_the_queue_once_per_pass`, `the_visuals_of_a_pass_share_its_revision`).
+
+### 9.31 A render data that is read again, the observers of a resource, the paint of a solid fill
+
+Three costs on the render thread that are storage handed back and fetched again for every
+visual whose drawing changed, every frame. They were found by sampling the gauntlet with the
+Graphite stage on its own threads: the largest single entry of the render thread's self time
+was the allocator's `free`, and the copy and the reset of `SkPaint` followed it.
+
+**A render data that is read again.** Since section 9.28 a visual whose drawing changed keeps
+its render data, and the server-side object reads the new recording when the batch arrives
+(`ServerCompositionRenderData::deserialize_changes_core`). Upstream's shape of that read is a
+reset followed by a new stream, whose resources are walked afterwards to observe them: the
+buffer of the operations, the table of the resources and the list of the resources the data
+observes are freed and allocated again. Now the object lets go of what it drew and keeps where it was stored
+(`release_content`: the subscriptions are removed, the custom draw operations disposed, the
+stream emptied by `RenderDataStream::recycle`, which already bounds what a recycled stream may
+keep), reads the new recording into that storage, and subscribes to each server-side resource
+at the moment the stream resolves it. `reset`, which a disposal uses, releases the storage as
+before.
+
+**The observers of a resource.** A render resource tells its observers when it was
+invalidated. Upstream walks its dictionary in place; here the list is behind a `RefCell` and
+an observer may change it while it is told, so it is copied first. The copy was a vector on the heap for every invalidated resource in every frame; a resource has
+one or two observers, so the copy is now a `SmallVec` of four on the stack
+(`ServerRenderResourceCore::queued_invalidate`). Who is told is the same: every observer
+that is in the list when the invalidation starts, once.
+
+**The paint of a solid fill.** The Skia drawing context keeps one paint for fills and resets
+it after each (`PaintWrapper::dispose`), which is a destruction and a construction of a
+`SkPaint`. A solid colour fill sets two things on the paint, the anti-aliasing and the colour,
+and every fill sets both before anything else. So the paint of a solid fill goes back
+unreset (`PaintWrapper::release_fill`) and the next fill starts from it. The wrapper knows
+that it is still such a paint because its paint is private: `paint_mut`, the only way to
+configure it further, clears the mark, and a fill with a shader, a stroke, a blend mode or
+anything else is reset as before. The one other user of the kept paint, the acrylic material
+rectangle, resets what it takes. No Skia behaviour is replaced and no Skia call is made that
+was not made before; one call is left out where its result is already there.
+
+What it measures (M3 Pro, gauntlet at tier 16, Graphite stage on its own threads, the same
+binary without and with the three changes, 51 s each, cycle-aligned means):
+
+| | Before | After |
+|---|---|---|
+| Frame rate | 52.6 to 52.9 fps | 54.5 fps |
+| Render thread, per frame | | 0.6 to 0.8 ms less |
+
+With the Graphite stage on the render thread the frame is bound by Skia's own work and the
+rate does not move.
+
+What a program can see: nothing. A render data draws its last recording and follows the
+resources of that recording only, the observers of a resource are told as before, and every
+fill has the pixels it had.
+
+Tests: `render_resource_tests.rs`
+(`a_replaced_recording_observes_the_resources_of_the_new_drawing`),
+`render_data_tests.rs` (`the_custom_operations_of_a_replaced_recording_are_released`, which
+now runs through the kept storage), `server/server_render_resource.rs`
+(`every_observer_is_told_once_however_many_there_are`,
+`an_observer_added_twice_is_told_once_and_stays_until_it_is_removed_twice`,
+`an_observer_may_remove_itself_and_others_while_it_is_told`,
+`an_observer_added_while_the_others_are_told_is_told_the_next_time`,
+`a_dropped_observer_is_pruned_and_a_disposed_resource_tells_nobody`) and the Skia render
+tests (`a_fill_draws_the_same_after_any_other_fill`, six kinds of fill in all thirty-six
+orders compared pixel by pixel with the fill drawn first in a context, and
+`consecutive_solid_fills_each_have_their_colour_opacity_and_edge_mode`).
+
+### 9.32 A visual that leaves its tree for a moment or for a pool keeps its composition visual
+
+A virtualizing panel that recycles a row takes the row out of the visual tree
+(`VirtualizingStackPanel::recycle_element`, as upstream: the container is cleared, pooled, hidden
+and removed) and puts it back when the next item needs a container, in the same layout pass
+or in a later one. Leaving the tree ran `Visual::detach_from_compositor` for the row and for every element
+under it, which lets go of the composition visual, and entering it again created a new one. A
+gauntlet frame recycles rows all the time, so every frame made and released composition
+visuals and their server-side objects by the hundred: allocations on the UI thread, a
+serialized object each, and on the render thread the same again plus the removal of the old
+ones. The new objects are wherever the allocator had room, so the walks of the UI thread and
+of the render thread lost their locality as the run went on: the recording of a frame took
+5.4 ms at the start of a run and 7.8 ms forty seconds later.
+
+**What is kept for a pass.** A visual that leaves its tree asks its renderer to keep its composition
+visual until the renderer's next update pass (`IRenderer::keep_departed_composition_visual`).
+The renderer holds the composition visual beside a weak reference to the visual, so it keeps
+no visual alive, and it queues an update pass. A visual that is in a tree again before that
+pass, with the same compositor, rejoins with the composition visual it had
+(`Visual::attach_to_compositor_core`): the object, its server-side object, its render data
+and its place under its parent are the ones from before, and the synchronisation that follows
+any attachment writes whatever changed meanwhile. A visual that is not back by then is
+released in that pass exactly as it was released at once before
+(`CompositingRenderer::release_departed`, which also runs when the renderer stops or is
+disposed), and so is the composition visual of a visual that was dropped. The update pass
+always comes before the commit that would send the batch, so the render thread never sees a
+composition visual that waits.
+
+**What is kept for a pool.** One pass is not enough for a list whose rows are of more than
+one kind. A recycled row waits in the pool of its recycle key until an item of its kind needs
+a container, and that is often a later frame: with only the rule above, a gauntlet frame
+still created 35 composition visuals and kept 2.4. So the element that pools says so.
+`Visual::leave_tree_keeping_composition_visuals(leave)` runs `leave`, which takes the visual
+out of its tree, and hands back what the visual and everything under it would have given to
+the renderer for one pass, as a `KeptCompositionVisuals`
+(`IRenderer::keep_composition_visuals_departing_in`; a renderer without composition runs
+`leave` and keeps nothing). Whoever holds that value decides how long the composition
+visuals wait, and releases them by dropping it: what is back in a tree by then is left
+alone, and everything else is released exactly as the update pass releases what it kept.
+`VirtualizingStackPanel` holds one beside each element of its recycle pool
+(`remove_pooled_child`), lets go of it right after the element is a child again
+(`get_recycled_element`), and lets go of all of them when the panel itself leaves the visual
+tree. What waits is bounded by the pool, which already keeps the far larger elements
+themselves: a composition visual and its server-side object for each visual of a pooled
+element, with the render data it last had. The same conditions as for one pass decide what
+may be kept, the calls nest (a removal inside another collects for itself), and a removal
+that unwinds leaves what it collected to the next update pass.
+
+**When it is not kept.** Only a composition visual that nothing but the synchronisation of
+the visual tree wrote to is kept, because only then is the kept one the same as a new one
+would be after its first synchronisation. It is released at once, as before, when
+
+- it was handed out: `Visual::composition_visual` and the public `attach_to_compositor`
+  mark it (`ElementCompositionPreview`, animations, lights, effects and an application ask
+  that way); the synchronisation itself reads it with `own_composition_visual`, which marks
+  nothing;
+- the visual has a child composition visual or composition extras (facades, transitions,
+  lights, a theme shadow, a layer, unloading visuals, show or hide requests);
+- the composition visual draws acrylic, or has an extension that does not say that it follows
+  its control out of the tree
+  (`ICompositionDrawListVisualExtension::follows_control_out_of_tree`, `false` unless
+  overridden). The border's does: `Border` writes its corner radius to it whether or not the
+  border is in a tree;
+- the renderer is stopped, disposed or in its update pass (no pass will follow in which to
+  release it), or the renderer has none of this (the default of the two new `IRenderer`
+  methods is to refuse).
+
+A visual that returns under another renderer rejoins only when the composition visual is not
+in the tree of another target (`IRenderer::rejoins_departed_composition_visual`); under
+another compositor it never does. A visual that returns under another parent in the same pass
+keeps its composition visual and leaves the children of the old composition parent at once,
+since a composition visual has one parent.
+
+**While it waits.** A visual out of the tree has no composition visual: `composition_visual`
+answers `None` as before, the renderer's dirty lists ignore the visual, and hit testing does
+not find it. The last point needs care, because the composition visual is still a child of
+its parent until the update pass: a waiting draw list visual reports no draw list to the hit
+test and its children are not visited (`DrawListData::departed`,
+`CompositionTarget::hit_test_children`, `hit_test_first_core`). What waits for a pool goes
+through update passes: in the first of them its topmost composition visual leaves the
+children of its composition parent, as that of any removed visual does, and from then on the
+kept visuals are a subtree of their own that is in no tree, which the render thread neither
+walks nor draws. Where the visual was shown is redrawn in that pass, as for any visual that
+leaves.
+
+**An empty record for every visual that left a tree.** `detach_from_compositor` first releases
+the theme shadow visual, and that release went through the accessor that creates the
+composition extras of a visual when it has none. So every visual that left a tree once had
+extras from then on, empty ones, and missed every short path that asks whether a visual has
+extras: the child synchronisation of section 9.28 and the transitions check among them. The
+release, the end of a show or hide request, the removal of an unloading visual and the change
+of the transitions now leave a visual without extras as it is
+(`Visual::change_composition_extras`).
+
+**The bounds of a server-side visual that changes its parent.** A server-side visual
+remembers the bounds of its subtree in the space of its parent, and hands them to the parent
+as an extra dirty rectangle when the parent changes
+(`ServerCompositionVisual.OnParentChanging`), so that the place it leaves is redrawn. It
+went on remembering them, and the next update under the new parent added the same bounds to
+the dirty region again, now read in the space of the new parent: a rectangle that belongs to
+no place the visual is or was. Upstream does the same; there it is a redraw of a few pixels
+too many after a rare reparenting, here every row that comes back from a pool is reparented.
+The bounds are now forgotten when they are handed to the old parent
+(`on_parent_changing_core`), and the next update computes them for the place the visual is
+in.
+
+What it measures (M3 Pro, gauntlet at tier 16, Graphite stage on its own threads, the build of
+section 9.31 against the same with this section, cycle-aligned means):
+
+| Measure | Section 9.31 | With this section |
+|---|---|---|
+| Frames per second, two runs each | 53.7, 54.0 | 58.5, 59.4 |
+| UI thread pass, ms | 17.3 to 17.5 | 15.9 to 16.6 |
+| Render tick, ms | 17.0 to 18.0 | 14.4 to 15.1 |
+| Picture recording, ms, at the start and at the end of a run | 5.4 and 7.9, 5.6 and 8.1 | 4.9 to 5.5 throughout |
+| Composition visuals created per pass, after the first 300 passes | 35.3 | 0.0 |
+| Composition visuals kept per pass | 0 | 37.8 to 47.0 |
+
+The recording time that grew over a run no longer grows: the server visuals
+that the rows left behind and made again are the same ones now, and the dirty rectangle of a
+row that comes back is the rectangle of the place it is in. The display runs at 60 frames per
+second, so 60 is the most this measure can show.
+
+What a program can see: a composition visual that the program asked for is never kept, so
+whatever a program holds or changed is released when its visual leaves the tree, as before.
+The identity of a composition visual that nobody asked for now survives a removal and an
+addition within one update pass, which a program can only observe by walking the composition
+tree down from a composition visual it did ask for; what it changes on a visual reached that
+way stays changed on the kept one, where a new one would have started over. The diagnostic
+tools ask for the composition visuals they show, which only means that what they inspect is
+not kept. A row that comes out of a recycle pool has the composition visuals it went in
+with, under the same rule; a pooled element whose composition visual a program asked for is
+not kept, so nothing changes for it.
+
+Tests: `compositor_tests.rs`
+(`visual_back_before_the_update_pass_keeps_its_composition_visuals`,
+`visual_back_in_the_tree_is_synchronized_with_what_changed_meanwhile`,
+`visual_not_back_by_the_update_pass_releases_its_composition_visuals`,
+`composition_visuals_kept_for_a_dropped_visual_are_released`,
+`composition_visual_handed_out_is_released_when_its_visual_leaves`,
+`composition_visual_is_not_kept_with_a_child_visual_or_while_rendering_is_stopped`,
+`visual_out_of_the_tree_is_not_hit_through_what_is_kept_for_it`,
+`visual_moved_to_another_parent_in_one_pass_keeps_its_composition_visuals`,
+`child_removed_while_its_parent_is_out_of_the_tree_releases_its_composition_visual`,
+`composition_visual_kept_for_one_compositor_is_not_used_with_another`,
+`visual_that_leaves_its_tree_gains_no_composition_extras`; for a pool
+`visual_taken_out_for_a_pool_keeps_its_composition_visuals_across_update_passes`,
+`composition_visuals_kept_for_a_pool_are_released_by_what_holds_them`,
+`composition_visuals_kept_for_a_pool_outlive_no_visual`,
+`child_that_left_a_pooled_visual_releases_its_composition_visual_with_the_pool`,
+`visuals_taken_out_inside_one_another_are_kept_by_the_innermost`,
+`nothing_is_kept_for_a_pool_outside_of_a_tree_or_while_rendering_is_stopped`,
+`composition_visuals_kept_for_a_pool_are_not_used_by_a_disposed_renderer`; for the bounds
+`visual_moved_to_another_parent_and_place_redraws_where_it_was_and_where_it_is`) and the
+counter checks `composition_work_of_a_row_taken_out_of_the_tree_and_put_back`
+(`compositor_tests.rs`) and `composition_work_of_rows_that_wait_in_the_recycle_pool`
+(`virtualizing_stack_panel_tests.rs`), which the performance gate runs with the counters
+`composition visuals created` and `composition visuals kept` (`scripts/perf/gate.py`,
+`COUNTER_CHECKS`).
+
+### 9.33 The UI thread starts on its next frame when its batch is taken, and a late frame layer draws while the frame before it is presented
+
+After sections 9.26 to 9.32 a gauntlet frame at tier 16 cost the UI thread about 15 ms and
+the render thread about 38 ms, and the two ran one after the other more than they had to: the
+UI thread held its next commit back until the render thread had deserialized the batch
+before, and the render thread spent most of its tick inside Graphite, which sorts the draws
+of a frame, prepares their text and builds its passes on the thread that draws and snaps.
+Neither is work that can be made much smaller without repeating what Skia does. What can
+change is when it runs and on which thread. This section has three parts: when a commit may
+follow the one before it, what happens to a batch that just misses its tick, and a frame
+layer of the Skia backend that draws on threads of its own.
+
+**A batch is accepted when the render thread takes it.** `CompositionBatch` has a third
+completion, `accepted`, before `processed` and `rendered`: the render thread raises it when it
+takes the batch from the queue (`ServerCompositor::apply_pending_batches`), before it reads
+the first change. From then on the batch belongs to the frame that thread is starting, and a
+batch committed now is applied by the frame after it. `MediaContext` holds the next commit
+back until the batch before it is accepted, where upstream waits until it is processed
+(`MediaContext::commit_compositor`). The UI thread therefore prepares its next batch while the
+render thread applies and draws this one. One batch at most waits in the queue either way,
+so nothing piles up, and nothing of an accepted batch can be observed: whoever needs its
+effects still waits for `processed` or `rendered`. A batch that is completed without being
+applied raises `accepted` too. The compositor holds the request for the next commit back by
+the same signal (section 9.46; until that section it waited for `processed`, and every
+picture took two render passes).
+
+**A batch that follows an idle tick is drawn in the display frame it was made for.** With a
+render thread, a batch that is committed a moment after the tick of its display frame waits
+for the next tick, a whole display frame, although the render thread has nothing to do. The
+queue remembers a tick that applied no batch and drew no frame (`BatchQueue::note_idle_tick`),
+and the first batch enqueued after such a tick asks the render loop for a tick out of turn
+(`Compositor::enqueue_batch`, `IRenderLoop::request_frame_out_of_turn`, which
+`ThreadProxyRenderTimer::request_tick_out_of_turn` serves on the timer thread). One idle tick
+answers one batch, so no display frame gets a second frame, and a compositor that renders on
+the thread that commits asks for nothing.
+
+**A frame layer that holds a frame back.** `IDrawingContextLayerImpl` has two new methods,
+both with defaults that change nothing: `has_pending_frame` (the frame drawn into the layer
+last is not what `blit` shows yet) and `complete_pending_frame`. A layer that says so is
+presented once more by its owner when no further frame follows:
+
+- `ServerCompositionTarget::render_frame` presents in a tick that has nothing to draw when
+  its layer holds a frame back, after `complete_pending_frame`;
+- `ServerCompositor` asks for another tick while a layer of an active target holds a frame
+  back (`has_pending_frames`), never while rendering is stopped;
+- the batches a tick applied are reported as `rendered` at the end of that tick, unless a
+  layer holds the frame of the tick back: then they are reported at the end of the next
+  tick, which presents their frame (`ServerCompositor::notify_batches_rendered`). They wait
+  one tick and never longer, and a compositor that is dropped answers them;
+- a synchronous render (`Compositor::render` on the thread of the compositor, and the wait
+  of `MediaContext::immediate_render_requested` for `rendered`) returns with the committed
+  frame presented, as before.
+
+**The pipelined frame layer of Graphite on Metal.** The frame layer of a window (the layer a
+render target context creates, no other surface) is a `PipelinedLayerSurface`
+(`gpu/graphite/pipelined_layer.rs`) unless `SkiaOptions::frame_pipelining` is `Off`. It draws
+its frames in one of two ways:
+
+- *directly*, as an ordinary layer: the drawing context draws on the surface of the layer
+  with the recorder of the context. Every layer begins like this;
+- *pipelined*: the drawing context records the frame as a picture
+  (`ISkiaSurface::begin_recorded_frame`). When it is disposed, the picture goes to the band
+  threads of the context: the layer is divided into horizontal bands of equal height, two
+  by default, and each band has a thread. Each thread owns a Graphite recorder and a surface
+  that wraps the texture of the layer, plays the picture under the clip of its band, snaps
+  its recorder and keeps the recording. The render thread does not
+  wait: it draws the layer onto the target as the frame before left it, flushes, and then
+  tells the threads to insert their recordings. The frame is on the screen one frame later
+  than it was drawn, and the render thread is free for the next one in the meantime.
+
+Nothing of Skia is repeated: the picture, the clip and the playback are Skia's, and the
+bands differ from one playback only in the clip Skia applies. What changed is the thread that
+asks.
+
+`SkiaOptions::frame_pipelining` is a `SkiaFramePipelining`: `Off`, `Adaptive` (the default)
+or `On` (every frame, for tests and measurements). An adaptive layer pipelines after four
+frames in a row that were late (a frame is late when it cost more than half of the time to
+the frame after it, and 4 ms at least), draws directly again after ninety light frames in a
+row, starts over after a pause of 100 ms (the time between the beginnings of two frames
+that the first of them did not cost, section 9.52), and stays direct for 120 frames after a
+frame that only the recorder of the context draws. An application whose frames are light never
+pipelines one, has no threads for it, and shows every frame in the tick that drew it, as
+upstream does.
+
+`SkiaOptions::frame_pipelining_bands` is the number of bands, and of threads: two by default
+(`DEFAULT_FRAME_PIPELINING_BANDS`), and a value outside 1 to 16
+(`MAX_FRAME_PIPELINING_BANDS`) is brought into that range
+(`SkiaOptions::effective_frame_pipelining_bands`). With one band the whole frame is drawn by
+one thread beside the render thread. A band is 64 pixels high at least, so a layer has the
+bands it is asked for or as many as fit it (`band_count`): a layer of 200 rows that is asked
+for eight has three. A layer that is asked to be divided and has room for one band only, and
+a layer lower than 64 pixels, is an ordinary layer. The threads belong to the GPU context
+and are made once, by its first layer that pipelines a frame, as many as that layer has
+bands; a layer of the same context that asks for more draws in as many bands as there are
+threads. What the number of bands buys and costs is measured below.
+
+**Frames only the recorder of the context draws.** A pipelined layer draws such a frame
+directly (the recorded picture is played on the recorder of the context), and because the
+same draws are counted in direct frames (`ISkiaGrContext::note_direct_only_draw`), a layer
+whose frames keep having them never begins to pipeline:
+
+- a draw with an image filter: a filter reads around the pixels it writes, across the clip
+  of a band;
+- a lease of the Skia API (`ISkiaApiLeaseFeature`): what the client draws belongs to the
+  recorder the lease hands out. In a recorded frame the lease records what its client draws
+  into a picture of its own (`RecordedLeases`), which the context draws into the frame in
+  its place, and the frame is then played on the recorder of the context. What a client of
+  a lease can see in such a frame: the lease has no surface, the canvas does not carry the
+  clip of the context (the drawing is clipped all the same), and the state it leaves on the
+  canvas does not last to its next `with_sk_canvas`;
+- a frame of a retained GPU producer, whose storage is held until the next flush of the
+  context only.
+
+**The order on the GPU** is the order of insertion: what the recorder of the context has
+pending when the frame ends, the draw of the layer onto the target with the flush of the
+tick, then the recordings of the bands, from the top band down (`InsertOrder`). The next frame
+of the layer, the next read of the layer and the next flush of the context wait for the
+bands before they add anything, so a second window that shares the context waits for the
+frame in the threads (at most what is left of it) before its own flush. The fixed order of
+the bands costs nothing, because the insertions are serialized by the lock of the context
+anyway, and it is what makes a frame the same every time it is drawn: Graphite resolves the
+pixel where an antialiased edge crosses the boundary between two clips in favour of the band
+that is inserted second, so with the bands racing for the lock that one pixel differed from
+run to run (by 6 of 255 in the test scene).
+
+**What the pixels are.** A pipelined frame is, byte for byte, the frame the ordinary layer
+draws when it draws the same content band by band, under the same clips, with the recorder
+of the context and each band a recording of its own
+(`a_pipelined_frame_shows_what_the_layer_draws_band_by_band`,
+`a_frame_in_any_number_of_bands_shows_what_the_layer_draws_band_by_band` for one, three and
+four bands, `the_frames_of_a_pipelined_layer_follow_each_other_in_order`). Against a frame drawn in one
+piece it differs as any frame Skia draws under a clip differs: a gradient fill rounds
+differently by 1 of 255 at isolated pixels, and the pixel where an antialiased edge crosses
+the clip boundary differs by about the coverage of one sample. In the test scene (rounded
+rectangles, gradients, antialiased lines and text across the boundary) that is 7 of 81,920
+pixels and 6 of 255 at most (`a_pipelined_frame_differs_from_an_unclipped_frame_as_any_clipped_frame_does`,
+which bounds it). Direct frames have drawn under such clips all along: every partial redraw
+draws under the clip of its dirty rectangle. Text is drawn by the same Skia code from the
+same strikes; each band has a glyph atlas of its own, so a glyph that several bands draw is
+rasterized and uploaded once for each, with the same result.
+
+**A band is a recording of its own, and Graphite decides about multisampling for each
+recording.** Graphite draws the draws of a recording in passes it builds for that recording.
+When one draw of a pass needs multisampling (in the test scene a stroked ellipse that is
+not a circle), the whole pass is multisampled, and the shapes Graphite otherwise draws with
+coverage it computes (lines, rectangles) get the edges multisampling gives them. A frame
+that is drawn directly is one recording, so one such draw anywhere in the frame decides
+for all of it. Of a pipelined frame, the bands that contain such a draw are multisampled
+and the others are not: every band is drawn exactly as a frame that contains the draws of
+that band alone. Both renderings are Skia's own for the same draws, and which one a shape
+gets already depends on what else is in its frame when frames are drawn directly; with
+bands it depends on what else is in its band. In the test scene, in four bands, the two
+bands with the ellipse are byte for byte the frame drawn as one recording, and in the two
+without it the antialiased edge pixels of lines and rectangles differ, by up to 52 of 255
+(`a_band_is_drawn_as_a_frame_with_its_draws_alone_is`, which bounds it at half a percent of
+the pixels). This holds for the default two bands as for any other number, and it is the
+one place where a pipelined frame can be told from a direct one by more than a clip does.
+
+**When the threads are not used.** A band that fails to record or to insert ends the
+threads of the context (a recording that was snapped and never inserted would make every
+later recording of its recorder fail), the frame is replayed on the recorder of the context,
+and the layers of that context draw directly from then on. A frame that ends while the
+context is in use or disposed is played directly. A layer that is disposed with a frame in
+the threads waits for it and leaves the context usable
+(`a_layer_disposed_with_a_frame_pending_leaves_the_context_usable`).
+
+What a program can see: with the default, a window whose frames cost the render thread more
+than half a refresh interval four times in a row shows its frames one refresh later than
+before and at the rate of the display instead of half of it; a `rendered` completion of such a
+frame is raised one tick later, when the frame is presented. A program that needs every frame
+in the tick that drew it sets `SkiaOptions { frame_pipelining: SkiaFramePipelining::Off, .. }`.
+A custom drawing operation that leases the Skia API keeps its frame on the recorder of the
+context, with the differences listed above when the frame was recorded. The counters `skia:
+layers that began to pipeline their frames`, `skia: frames pipelined`, `skia: recorded frames
+played on the recorder of the context` and `skia: reads of a pipelined layer while a frame is
+drawn` tell what a run did.
+
+What it measures (M3 Pro, gauntlet at tier 16, 60 Hz, quiet machine, runs of 51 s, two runs
+each; the frames per second are the mean of a run):
+
+| Configuration | Frames per second |
+|---|---|
+| Section 9.32, every frame drawn directly | 39.60 / 39.52 |
+| This section, the defaults (`Adaptive`, two bands) | 59.99 / 59.95 |
+
+The frames per second of this table, of the table of bands below and of section 9.34 are
+callbacks of the animation frame, which is what `PERF fps` counts, and not pictures: with
+the defaults of this section the compositor committed a batch for every second callback
+(section 9.46), so the surface received about thirty frames a second where these tables say
+sixty. The times of the stages are not affected. What the number
+of bands changes is where the time goes (the stage timed by a build made for the
+measurement; the processor time is that of the whole process for a frame):
+
+| Bands | Frames per second | Slowest band | All bands together | Inserting the recordings | Processor time for a frame |
+|---|---|---|---|---|---|
+| 1 | 60.08 / 59.85 | 13.4 ms | 13.4 ms | 2.2 ms | 27.5 ms |
+| 2 (default) | 59.93 / 59.98 | 8.2 ms | 15.6 ms | 2.4 ms | 29.0 ms |
+| 3 | | 9.0 ms | 25.3 ms | 2.4 ms | |
+| 4 | 60.05 / 59.94 | 8.0 ms | 27.1 ms | 2.5 ms | 32.3 ms |
+| 6 | | 9.3 ms | 43.1 ms | 2.7 ms | |
+| 8 | 60.03 / 60.05 | 9.5 ms | 57.4 ms | 2.8 ms | 43.8 ms |
+
+Two bands are the default because nothing is gained after them in this frame: the slowest
+band, which is what a frame waits for, is as slow with four or eight bands as with two, and
+every further band costs about 4.5 ms of a core whatever its share of the frame is (with
+eight bands the threads spill onto the efficiency cores). One band already frees the render
+thread, and is the choice for a machine with few cores; its recording takes 13.4 ms, which
+fits a 60 Hz frame and does not fit a 120 Hz frame, where two bands do.
+
+**The bands meet where the cost of the frame divides evenly.** The bands begin as equal
+strips, and a frame is in the context when its slowest band is. What a frame costs is rarely
+spread evenly over the rows of a window: in the patchwork of the benchmark at tier 17 the
+lower band of two worked three times as long as the upper one, and the frame took the time
+of the slow one. The threads tell how long each band took, and the layer keeps from that
+what a strip of rows costs (`BandBalance`); when the slowest band works 15 % longer
+than the mean over a run of frames, the bands are moved to the rows that divide the kept
+cost evenly, each band of the least height a band may have at least. The frames after a
+move correct the strips again, so the rows close in on the cost wherever it lies; a cost
+that cannot be divided (all of it in a strip lower than a band may be) stops the moves,
+which are then tried at intervals that double. The bands stay disjoint and cover the layer,
+so a frame is drawn as before (the differences of a band from a direct frame are those
+listed below, wherever the bands meet). Measured with the harness of the benchmark (first /
+second launch, before section 9.46): the patchwork at tier 17 went from 28.9 / 33.3 to
+36.0 / 42.6 frames a second; the patchwork at tier 12 (48 / 57) and the gauntlet at tier 16
+did not change, their bands already work as long as each other. With three balanced bands
+the patchwork at tier 17 reached 36.0 / 49.7 at more processor time for a frame (68 to 76 ms
+against 64 to 66 ms), and with four it fell back; two bands stay the default. The counter
+`skia: bands of pipelined frames moved` tells how often a layer moved its bands. Tests:
+`pipelined_layer.rs` (`the_bands_move_to_where_the_cost_is`,
+`the_bands_follow_a_cost_that_moves`, `a_cost_that_cannot_be_divided_stops_moving_the_bands`,
+`bands_that_work_as_long_as_each_other_stay`, `the_bands_of_light_frames_stay`,
+`frames_after_a_move_and_of_other_bands_are_not_counted`) and, on the device,
+`the_bands_move_to_the_rows_that_cost_and_every_frame_is_drawn_as_before`.
+
+**The picture of a frame is recorded without a bounding hierarchy.** Skia can keep the
+bounds of the draws of a picture in a tree, so that a playback under a clip skips the draws
+outside it without looking at them (`begin_recording(bounds, true)`). Measured the same way:
+building the tree costs the render thread 3.2 ms a frame, when the picture is finished, and
+saves the slowest band 0.7 ms with two bands, 1.2 ms with four and 1.6 ms with eight (all
+bands together 1.4 ms, 5.4 ms and 14 ms). The render thread is the thread the stage exists
+to free, so the picture is recorded without the tree; the cost of a band is mostly what
+Graphite does for a recording of its own, not the walk over the draws outside it.
+
+Tests: `render_thread_tests.rs` (`a_batch_is_accepted_when_the_render_thread_takes_it`,
+`a_batch_that_follows_an_idle_tick_asks_for_a_frame_out_of_turn`,
+`a_compositor_that_renders_on_its_own_thread_asks_for_no_frame_out_of_turn`),
+`thread_proxy_render_timer.rs` (`ticks_out_of_turn_on_its_own_thread_while_started`),
+`compositor_tests.rs` (`a_frame_a_layer_holds_back_is_presented_by_the_tick_after`,
+`the_batches_of_a_stream_of_held_frames_are_rendered_a_tick_later`,
+`a_synchronous_render_presents_the_frame_a_layer_holds_back`,
+`no_batch_waits_for_a_held_frame_once_rendering_is_stopped`), `pipelined_layer.rs`
+(`a_layer_pipelines_after_four_late_frames_in_a_row`,
+`a_late_frame_costs_half_its_period_and_four_milliseconds_at_least`,
+`a_pipelined_layer_draws_directly_again_after_ninety_light_frames`,
+`a_pause_begins_a_new_stream_that_is_drawn_directly`,
+`frames_that_each_take_longer_than_a_pause_are_a_stream`,
+`a_frame_that_needs_the_recorder_of_the_context_holds_the_layer_off`,
+`the_options_can_ask_for_pipelined_frames_always_or_never`,
+`the_threads_insert_in_the_order_the_bands_were_sent_in`,
+`a_turn_that_is_dropped_passes_to_the_next`) and, on a Metal device,
+`gpu/metal/tests/pipelined_frames.rs` (the pixel tests named above,
+`a_layer_has_the_bands_it_is_asked_for_as_far_as_they_fit_it`,
+`a_layer_has_no_more_bands_than_its_context_has_threads`,
+`the_options_ask_for_two_bands_by_default_and_for_sixteen_at_most`,
+`the_bands_of_a_layer_are_disjoint_and_cover_it`,
+`a_pending_frame_is_completed_on_request`,
+`a_frame_with_an_image_filter_is_drawn_by_the_recorder_of_the_context`,
+`a_frame_that_leases_the_skia_api_is_drawn_by_the_recorder_of_the_context`,
+`an_adaptive_layer_draws_its_first_frames_directly`,
+`a_layer_is_ordinary_when_pipelining_is_off_or_the_layer_is_too_low`,
+`a_layer_disposed_with_a_frame_pending_leaves_the_context_usable`).
+
+### 9.34 Layout and text shaping on worker threads: measured, not adopted
+
+Section 9.33 moved render work to threads beside the render thread. The same question was
+asked of the UI thread, which after it is the limit of a gauntlet frame (about 14.4 ms at
+tier 16, half of it in the layout pass): can the layout pass or the text it lays out be
+computed by worker threads while the UI thread goes on? Two prototypes were built and
+measured. Neither is in the tree as a mechanism; what they measured is recorded here so the
+question is not asked twice, and the benchmark of the second stays as its record.
+
+**Plain texts shaped ahead of the layout pass.** A text block whose text changes announced
+the text, its typeface, size, features and culture to the shaper, which handed batches of
+sixteen runs to worker threads; the layout pass then took the shaped glyphs of a run that
+was ready and shaped the others itself. The glyphs were the same byte for byte (the same
+HarfBuzz font data, shared, the same features). In a gauntlet frame 468 texts were
+announced, 401 shaped by workers and 295 of those used; none was shaped twice. Three runs
+each way, interleaved, on a quiet machine:
+
+| Text preparation | fps | UI thread per frame |
+|---|---|---|
+| on | 59.49 / 59.93 / 59.88 | 15.0 / 14.4 / 14.3 ms |
+| off | 59.91 / 59.99 / 61.45 | 14.2 / 14.3 / 13.8 ms |
+
+Shaping on the UI thread fell from 3.1 % to 2.4 % of its frame (about 0.12 ms), and the
+announcement cost about 0.23 ms: the copy of the text, the language of its culture and the
+wake of a worker cost a text about as much as HarfBuzz costs for the short texts a busy
+frame is made of (about 0.7 µs each). A hand-off pays only for work that is much larger than
+the hand-off, and a single short run is not. The larger cost of a plain text layout is
+outside the shaper: about 4 µs of formatting for each of the 430 layouts of a frame, which
+is work of one thread whatever shapes the glyphs.
+
+**The measure and arrange of a panel tree, computed apart from the elements.** The second
+prototype is the benchmark `layout::ComputeApplySpike`: a tree of 10,101 elements (a stack
+panel of borders, each with a stack panel of borders) whose layout it computes three ways.
+`existing` is the layout pass of the framework. `extract` copies the inputs of every element
+(sizes, limits, margin, alignment, visibility, padding, border, orientation, spacing) into
+plain data, `compute` runs the measure and arrange algorithms of the same panels over that
+data on one, two or four threads, and `apply` writes the results back. The setup asserts
+that the computed sizes and bounds are the framework's exactly. In nanoseconds per element:
+
+| Step | ns per element |
+|---|---|
+| `existing`, every element invalid | 487.1 |
+| `existing_incremental`, one width changed | 54.7 |
+| `extract` | 158.4 |
+| `compute`, one thread | 16.2 |
+| `compute`, two threads | 13.0 |
+| `compute`, four threads | 10.1 |
+| `apply` | 20.4 |
+| starting the scoped threads, two / four | 2.7 / 4.9 |
+
+The arithmetic of layout is 3 % of a layout pass, and four threads take 6 ns per element
+off it. What a pass costs is reading the properties of each element and keeping its state:
+`extract` alone, which reads each property once, is a third of the pass. A design that
+computes layout on other threads has to extract first and apply afterwards on the UI
+thread, so it can save at most the 16 ns it parallelizes, and `apply` here is a lower
+bound (it has no setter for the previous constraints and the measure hold of an element).
+The work is therefore in what a pass reads, not in where it computes: a profile of
+`existing` shows the values the pass still reads through the value store for every element
+(the inherited `UseLayoutRounding`, the container query provider, the layout scale of the
+root) at about a quarter of the pass, beside the sizes, margin, alignment and visibility
+that are kept copies since section 9.15.
+
+**The benchmarks of the two subsystems.** The classes of `layout_subsystem::` and
+`styling_subsystem::` in `tests/FerroUI.Benchmarks` measure one mechanism each (the measure
+and arrange of each panel, depth, invalidation, the passes of the layout manager, size
+changes, visibility, scrolled content, attached layout properties and layout listeners;
+selector matching, the styles in scope, activation, setters, control themes, resources,
+attaching and detaching, and changes of the style collections). They are in the framework
+group of the local gate (`scripts/perf/gate.py --only framework`), so a change to what a
+layout or styling pass reads is measured against the commit before it.
+
+### 9.35 What a read and a write of a property cost a control
+
+The layout pass of section 9.34 spends about a fifth of its time reading properties, so the
+property system was measured on its own, on controls and not on objects that have nothing
+but properties. The classes `property_subsystem::ControlRead` and
+`property_subsystem::ControlWrite` of `tests/FerroUI.Benchmarks` measure one read and one
+write, and are in the framework group of the local gate. M3 Pro, quiet machine; a walk over
+16 controls stays in the first cache of the processor, a walk over 10,000 does not:
+
+| One read of | 16 controls | 10,000 controls |
+|---|---|---|
+| `Width`, a kept copy (section 9.9) | 0.7 ns | 4.0 ns |
+| `Opacity`, unset, the store empty | 4.1 ns | 4.1 ns |
+| `Opacity`, unset, six other values in the store | 4.0 ns | 7.5 ns |
+| `Opacity`, a local value | 4.1 ns | 5.4 ns |
+| `Background`, a shared brush | 3.5 ns | 10.4 ns |
+| `UseLayoutRounding`, inherited, held by no control | 5.4 ns | 9.4 ns |
+| the font size, inherited, held by the panel above | 7.2 ns | 16.3 ns |
+| `Canvas.Left`, attached, unset | 4.0 ns | 7.9 ns |
+
+| One write of | Border | Button |
+|---|---|---|
+| `Opacity`, changed | 34.9 ns | 45.0 ns |
+| `Opacity`, unchanged | 9.8 ns | |
+| `Width`, changed | 35.7 ns | 47.6 ns |
+| `Background`, changed | 85.5 ns | |
+| `Canvas.Left`, changed | 38.5 ns | |
+| the font size, changed, on a control without children | 33.4 ns | |
+| `Opacity` with the priority of a style, set and taken back | 206.5 ns | |
+| `Opacity`, set and cleared | 109.5 ns | |
+
+What the numbers say:
+
+- **A read is a few nanoseconds; a pass pays for how many it makes and for the memory they
+  reach.** A read that finds its value walks from the object to the buffer of its values and
+  from there to the allocation of the value: three places. A kept copy is in the object. In
+  a walk over many controls the difference is the memory, not the instructions: the copy
+  costs what reaching the object costs.
+- **A control is large.** A `Border` is 2,224 bytes (a `FerroObject` 344, a `Visual` 1,248,
+  a `Layoutable` 1,648, a `Control` 1,888), thirty-five cache lines, of which a pass touches
+  the few that hold what it reads. A kept copy of every property of every class would add
+  about a kilobyte to each control and move what a pass reads further apart; the copies are
+  for the values the passes read, kept together.
+- **A value that is set costs about 216 bytes** (an allocation of 192 bytes for a number, with
+  its priorities, its base value and its entries, and 24 bytes in the buffer of the store); a
+  property at its default costs nothing.
+- **A write is mostly its notification.** Of the 45 ns of a changed `Opacity` on a button,
+  the store takes about a quarter. The rest is the chain of class handlers
+  (`on_property_changed` of each class of the hierarchy, eight for a button), each of which
+  compares the changed property with the properties of its class, and each comparison reads
+  the property from the storage of the thread (17 % of the write is that lookup alone).
+- **A changed brush allocates twice.** The visual subscribes to the invalidation of the new
+  value, and builds the handler of the subscription before it knows that an immutable brush
+  has nothing to subscribe to.
+- **A value set with a priority other than the local one costs about six local writes:** an
+  entry and, for the first of an object, a frame are allocated, and the effective value is
+  made and destroyed with it.
+
+
+### 9.36 The kept copies of a layoutable share one stamp, and two more values are kept
+
+Two of the findings of section 9.35 were acted on first, with the pattern of section 9.9 and
+nothing new beside it: a value a pass reads is kept in the object as a copy, and the copy is
+the value for as long as the generation of the store and of the metadata it was read at.
+
+**The handler of a brush is made for a brush that can change.** A change of a property that
+affects rendering subscribed the visual to the invalidation of the new value, and built the
+handler of that subscription, a reference-counted closure over a weak handle of the visual,
+before it asked whether the value can be subscribed to. An immutable brush, the common
+value, cannot. The visual asks first.
+
+| One write of | Before | After |
+|---|---|---|
+| `Background`, changed, on a `Border` | 85.5 ns | 64.8 ns |
+
+**One stamp for the copies of a layoutable.** Each of the nine kept values of a
+`Layoutable` (the six sizes, the margin and the two alignments) had a stamp of its own,
+eight bytes each, and a measure that read all nine compared nine stamps that are equal by
+construction: they are all the generation of the same store. They share one stamp now
+(`property_store::HotStamp`) with a mask that says which of the copies were read at it. A
+changed generation empties the mask. The stamp, the mask and the six sizes are the first
+sixty-four bytes of the group, one cache line for what a measure reads first.
+
+**`UseLayoutRounding` and `Container.Sizing` are kept.** A measure and an arrange read both
+for every element, and neither was a kept copy: the first because it inherits, the second
+because it is attached. An inherited value depends on the stores of the ancestors, which
+the stamp of the element does not cover, so the copy is used in one case only: while no
+store of the thread holds a value of the property (`FerroProperty::holders`, the count the
+inherited lookup already keeps). Then the value is the default of the class, which only its
+metadata changes, and the metadata is in the stamp. As soon as any element sets the
+property every read goes through the store again, as before. `Container.Sizing` does not
+inherit and is kept as the sizes are.
+
+Median of three interleaved rounds of the build before and the build after, M3 Pro, quiet
+machine:
+
+| One read of | Before | After |
+|---|---|---|
+| `UseLayoutRounding`, held by no control, 16 controls | 5.42 ns | 0.98 ns |
+| `UseLayoutRounding`, held by no control, 10,000 controls | 9.10 ns | 4.79 ns |
+| `Width`, a kept copy, 16 controls | 0.66 ns | 0.71 ns |
+| `Width`, a kept copy, 10,000 controls | 3.56 ns | 4.26 ns |
+
+| Measure and arrange of a panel with 1,000 children | Before | After | |
+|---|---|---|---|
+| `StackPanel`, vertical | 108.50 us | 101.17 us | -6.8 % |
+| `StackPanel`, horizontal | 109.17 us | 99.62 us | -8.7 % |
+| `Grid` | 126.92 us | 118.71 us | -6.5 % |
+| `Grid` with spans | 140.80 us | 127.07 us | -9.7 % |
+| `DockPanel` | 124.03 us | 113.30 us | -8.7 % |
+| `WrapPanel` | 109.77 us | 103.80 us | -5.4 % |
+| `Canvas` | 107.92 us | 102.11 us | -5.4 % |
+| `UniformGrid` | 98.72 us | 92.77 us | -6.0 % |
+
+The passes over a nested tree (`NestedDepth`) and the layout listeners did not move beyond
+the noise of the measurement.
+
+What it costs, and what it does not:
+
+- **A kept read alone is slower by the test of one bit**: 0.05 ns in the cache, 0.7 ns in a
+  walk over 10,000 controls that reads nothing else of each. A pass reads several values of
+  an element, and there the one comparison in place of nine is the larger effect, which is
+  what the panels measure.
+- **Memory goes down.** The group was 168 bytes with nine stamps; it is 104 bytes with one
+  stamp and two more values: 64 bytes less for every layoutable.
+- **Nothing else is kept.** A copy of every property would add about a kilobyte to a
+  control (section 9.35); the two values added here are the two a pass reads for every
+  element that had no copy.
+
+
+### 9.37 A control theme keeps, for each style key, the nested styles that can match it
+
+A control theme is applied to the control it themes and to every part of the template of
+that control: the theme of a `CheckBox` is asked about the check box, and then about the
+border, the grid, the path and the content presenter its template makes. The index of
+section 9.26 leaves a nested style out of such an application when its selector begins
+with a type that rules the element out and the style has no styles nested in it. The
+styles of a theme are mostly not of that kind. They begin with the nesting selector
+(`^:checked`), which names no type of its own, and they hold the styles for the parts of
+the template (`^ /template/ Border#NormalRectangle`), each in a collection that was looked
+up on its own. A part that no style selects still paid for those, one selector match each,
+which ends at the type the selector requires.
+
+**A plan for a style key.** The theme keeps, for each style key it is applied to, the list
+of its nested styles whose selector does not rule that key out, in the order the traversal
+of all of them visits them in (`styling::theme_candidates`). An application reads the plan
+of the key of its element and visits those entries and no other. An entry says one of three
+things: the style is attached if it matches and what is nested in it follows in the plan;
+the style cannot match and only what is nested in it follows; or the entry is applied by
+the ordinary traversal with everything below it.
+
+**What is left out, and why that is what the traversal would do.** A style is left out
+only when the type its selector requires is known and rules the key out. That type is the
+type of the first node of the target compound of the selector, or, for a selector that
+begins with the nesting selector, the type the selector of the parent style requires, up to
+the target type of the theme. Either is what the matcher evaluates first, and a mismatch
+ends the match there, before it subscribes to anything: a style left out is a style the
+traversal would have rejected with no other effect. Only a `Style` whose selector was
+index-enabled (section 9.26) has such a type. A selector that says nothing of a type, a
+container query, another implementation of `IStyle` and a style whose parent is not the
+style that holds it are never left out; the last three are applied by the ordinary
+traversal, in their place.
+
+**When a plan is not used.** The plans of a theme carry the version of the theme they were
+made at. A changed collection of nested styles, a replaced selector, a changed parent and
+a changed target type advance the version, and the plans of an older version are dropped.
+Attaching a style can run code that makes such a change, or that changes the style key of
+the element, so the version and the key are compared after every entry that was attached.
+After a change the plan is left, and the traversal goes on from that entry as the ordinary
+one does: with the nested styles the entry has now, then with every style that follows it
+in its collection and in the collections of the styles that hold it. A theme nested deeper
+than sixteen levels, and a key beyond the sixty-four a theme remembers, are applied by the
+ordinary traversal.
+
+**The key of a dynamic resource is converted once.** A `DynamicResource` in a template
+makes one expression for every control the template is built for, and each converted the
+key of the extension, a text, into a key of its own. The extension keeps the converted key,
+and the expressions share it.
+
+Median of three interleaved rounds of the build before and the build after, M3 Pro, quiet
+machine (`styling_subsystem::ControlThemeApply`, 200 controls of the Fluent theme):
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the theme attached | 1.21 ms | 1.13 ms | -6.8 % |
+| `Button`, the template applied | 2.45 ms | 2.39 ms | -2.5 % |
+| `CheckBox`, the theme attached | 1.56 ms | 1.27 ms | -18.5 % |
+| `CheckBox`, the template applied | 13.10 ms | 11.41 ms | -12.9 % |
+| `TextBox`, the theme attached | 2.41 ms | 2.34 ms | -2.8 % |
+| `TextBox`, the template applied | 13.28 ms | 12.73 ms | -4.1 % |
+
+Re-attaching the controls (`reattach`), a change of the theme variant and the other classes
+of `styling_subsystem` did not move beyond the noise of the measurement (five interleaved
+rounds of `reattach`: `Button` +2.3 %, `CheckBox` -8.5 %, `TextBox` -3.5 %).
+
+What it costs, and what it does not:
+
+- **Memory: sixteen bytes for a theme, and the plans of the themes in use.** A plan is
+  three numbers for an entry, and keys with the same entries share one plan: two to three
+  kilobytes for a theme of the size of the `CheckBox` theme once its control and the parts
+  of its template were styled. A theme no control uses has no plan. Nothing is added to an
+  element; a `Style` is the size it was (the type its selector requires was already kept,
+  and the same field now says "the parent's" as well).
+- **A change of the nested styles of a theme costs a walk to the theme**, at most the depth
+  of the nesting, and the plans are made again by the next application. Themes are built
+  once and not changed afterwards, so the plans of a theme are made once for each key.
+- **A re-attached control does not gain.** Re-attaching does not apply styles again; its
+  time goes to the dynamic resources and the template bindings that publish their values
+  again (a `TextBox`: 38 us), which is the subject of the template work that follows this.
+- **The styles of an application or a control (`Styles`) are not touched.** They are
+  filtered by the index of section 9.26, one collection at a time. The plan is that idea
+  for a theme as a whole: it knows the target type of the theme, which is the type a
+  nesting selector stands for, and it follows the nesting, so a style with nested styles
+  can be left out with them.
+
+### 9.38 A template build binds its resources and template bindings without the extension objects
+
+The content of a control template is built by generated code for every control the template
+is applied to. For a `CheckBox` of the Fluent theme that is five
+`{DynamicResource}` values and nine `{TemplateBinding}` values, and each was bound by the
+statements the loader runs for a markup extension: create the extension, box the key and the
+property, ask the extension to provide a value in the context of the build, convert the
+provided value to its untyped form, cast that back to a binding, and bind it. The extension
+was reachable from nothing afterwards: the expression of a dynamic resource keeps the key,
+the anchor, the theme variant and the priority, and the expression of a template binding
+copies what it reads from the binding.
+
+**The two binds make the expression from what the extension would have read.**
+`compiled::bind_dynamic_resource` reads the place of the declaration from the service
+provider of the build with the lookups `DynamicResourceExtension::provide_value` makes, in
+the same order (one function, `Place::of`, is now the body of both): whether a control
+template is being built, the anchor when the target is not an element, and the theme
+variant of the theme dictionary the declaration is in. It binds a binding that lives on the
+stack for the call and creates the expression from those. `compiled::bind_template_binding`
+binds a `TemplateBinding` that lives on the stack for the call. Neither can fail where the
+statements could not: the value an extension provides is a binding by its type, so the cast
+the binding setter made always succeeded.
+
+A development build with hot reload keeps the statements for a dynamic resource: it records
+the extension, to move its anchor when the document is loaded again.
+
+**The parents of the build are handed out, not copied.** The theme variant of a dynamic
+resource is found by walking the parents of the declaration from the nearest one. The
+context of the build copied its parent stack twice for each walk (the stack, then the
+entries of it that are not null). It now keeps the second list beside the first, changed
+by the same push and pop, and hands it out shared, as the contract of the eager parent
+stack provider describes; a push copies it only while a walk still holds it, which no walk
+does.
+
+**`ValueTypes::as_object` asks one table when the first answers.** A value is viewed as an
+object by the table its type is in, one of three. All three were asked for every value; the
+tables after the one that has the type are no longer asked.
+
+Median of three interleaved rounds of the build before and the build after, M3 Pro, quiet
+machine (`styling_subsystem::ControlThemeApply`, 200 controls of the Fluent theme):
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the template applied | 2.46 ms | 2.29 ms | -6.9 % |
+| `CheckBox`, the template applied | 11.41 ms | 10.83 ms | -5.1 % |
+| `TextBox`, the template applied | 13.34 ms | 12.41 ms | -7.0 % |
+
+Attaching the theme (five rounds: -0.2 %, -1.0 %, -1.8 %) and re-attaching a control
+(+2.5 %, -1.0 %, +0.5 %) are within the noise of the runs: neither builds a template.
+
+Two smaller costs of the same build were found in the profile of the result and removed
+after it.
+
+**The base URI of a document is parsed once.** Each build of a template makes a context
+for its content, and the context keeps the base URI of the document as a parsed URI. The
+text was parsed for every build. A document is a constant of the generated code, so the
+parsed URI is kept for the document (by the address and the length of its text) and
+copied into the context of each build; a context whose base URI is changed afterwards
+changes its own copy.
+
+**The registry keeps the direct property a class answers with.** A direct property is
+registered for its owner and for every class it was added to, and a read or a write on an
+object of a derived class walked the classes from the class of the object to the one that
+has the property, one table lookup each (a template binding to `IsChecked` on a
+`CheckBox`: three). The registry keeps the answer of that walk for each pair of a class
+and a property identity it was asked about, "none" included, and drops all of them when
+a direct property is registered, as it does with its other lists. A property asked for on
+its owner never reached the walk and does not reach the table.
+
+In the profile of the `CheckBox` build (about 3 250 samples) the lookup of a direct
+property went from 43 samples to 5 and the creation of the context from 47 to 25. Median
+of five interleaved rounds of the build with the binds above and the build with these two
+as well:
+
+| | Before | After | |
+|---|---|---|---|
+| `Button`, the template applied | 2.31 ms | 2.17 ms | -6.1 % |
+| `CheckBox`, the template applied | 10.83 ms | 10.86 ms | +0.3 % |
+| `TextBox`, the template applied | 12.01 ms | 11.98 ms | -0.3 % |
+
+About 0.6 us is saved for a build. The template of a `Button` is built in 11 us, where
+that is one part in twenty and every round was lower; the two large templates are built
+in 54 us and 60 us, where it is below the noise of the runs. `DirectPropertyBenchmark`
+(a read and a write on the owner) is unchanged: -0.2 % and -0.1 %.
+
+What it costs, and what it does not:
+
+- **Memory: one more list for a context, while it builds.** The list of the parents that
+  are not null holds one reference for each parent on the stack, and goes with the context
+  when the build returns. An element, a style, a template and an expression are the size
+  they were, and a built template holds one object less for each dynamic resource and each
+  template binding only while it is built (the extension was dropped after the bind).
+  One parsed URI is kept for each document a deferred build was made from, and one entry
+  of thirty-two bytes for each pair of a class and a direct property that was asked for
+  on a class other than the owner; the entries are dropped by the next registration of a
+  direct property.
+- **The run-time loader is not changed.** It creates the extension and calls
+  `ProvideValue`, as before; so does generated code for an extension with any other
+  argument than a text key, and for a setter whose value is a dynamic resource.
+- **Each bind is compared with the statements it stands for** (`compiled_tests`,
+  `template_binds`): the priority in and outside a control template, the anchor of an
+  object that is not an element, the variant of a theme dictionary, the target property
+  cleared after the bind, and a template binding before and after its templated parent is
+  set. The kept base URI is compared with the one a context of the document parses
+  itself, for two documents, a relative text and no URI; the kept direct property is
+  compared for a derived class, for a class the property is added to after the answer
+  was kept, and for a class outside its owners.
+
+### 9.39 The bidi algorithm is linear in the length of a paragraph
+
+The levels of a paragraph are resolved by `BidiAlgorithm` (`media/text_formatting/unicode/`)
+once for every paragraph the text formatter is given. Three of its steps cost more for a
+character the longer the paragraph was, and one of them made a paragraph of numbers cost
+the square of its length. It was found in the profile of a text block whose text is digits
+only (the paragraph patch of the patchwork benchmark of the cross-framework comparison,
+section 8), where rule W2 was the first entry.
+
+- **Rule W2** changes a European number to an Arabic number when the last strong class
+  before it is an Arabic letter. It was resolved by a search backward from each European
+  number to the last strong class or the start of the run sequence. Text with no strong
+  class before its numbers (digits, spaces and separators only) searched to the start for
+  every digit.
+- **A level run was removed from the list when a run sequence took it.** The runs of a
+  paragraph are in a list; every sequence removed its runs from it (`RemoveAt`), which
+  moves all later runs down, once for each run.
+- **The run an isolate continues in was found by reading the list** (`FindRunForIndex`),
+  from its start, for every isolate initiator that has a matching end.
+
+**Each is now one pass or one lookup.** Rule W2 walks the sequence forward and remembers
+whether the last strong class was an Arabic letter. A level run has a flag that says a
+sequence took it: the list is not changed while the sequences are made, and it is cleared
+when they all are (`LevelRun` is the size it was, 24 bytes). The runs are in the order of
+the text, so the run that starts at an index is found by halving the list.
+
+`text::BidiScalingBenchmark` (`tests/FerroUI.Benchmarks`) resolves seven shapes of text at
+1 024 and 16 384 code units, so that the cost for a character can be compared between the
+two lengths. One run of each build on the same machine, which was not quiet (the figures
+of the shapes that did not change differ by its load):
+
+| Shape | 1 024 before | 1 024 after | 16 384 before | 16 384 after | |
+|---|---|---|---|---|---|
+| Prose | 6.72 us | 6.55 us | 110.2 us | 108.1 us | |
+| Numbers and spaces | 302.4 us | 6.84 us | 76 487 us | 109.0 us | 702 times |
+| Arabic with numbers | 10.41 us | 9.52 us | 167.9 us | 153.0 us | |
+| Hebrew, Latin, numbers | 8.59 us | 7.93 us | 138.7 us | 126.5 us | |
+| Brackets | 11.55 us | 10.57 us | 197.1 us | 179.7 us | |
+| Isolates | 66.56 us | 18.93 us | 13 462 us | 331.0 us | 40.7 times |
+| Embeddings | 15.82 us | 9.94 us | 1 471 us | 159.1 us | 9.2 times |
+
+Before, sixteen times the text cost 253 times as much for numbers, 202 times for isolates
+and 93 times for embeddings; after, between 15.9 and 17.5 times for every shape. The
+benchmark is part of the framework filter of the local gate (`scripts/perf/gate.py`).
+
+What it costs, and what it does not:
+
+- **Memory: none.** The flag of a level run is in the padding the structure had; nothing
+  else is kept.
+- **The levels are the ones the old code gave.** The two versions were run side by side
+  (the old file as a module of a test build, not kept in the tree) over every sequence of
+  up to five of the twenty-three classes at a left to right, a right to left and an
+  automatic paragraph level (20.2 million cases), four million random sequences of six to
+  forty-eight classes and one and a half million sequences of isolates, embeddings and
+  overrides of up to three hundred classes: the resolved levels, the classes the weak
+  rules changed and the paragraph level were equal for every one, and so was the one case
+  in which the old code stops with an error (below). The sequences had no bracket pairs;
+  the rule of the brackets is not changed.
+- **Three tests are kept** (`bidi_algorithm_tests`):
+  `a_european_number_becomes_arabic_after_an_arabic_letter` (rule W2 across a run
+  sequence), `resolves_a_long_paragraph_of_numbers` and
+  `resolves_a_long_paragraph_of_isolates_and_embeddings`, which resolve paragraphs long
+  enough that the old cost would not finish in the time of a test.
+- **Not changed:** an isolate whose end is after a paragraph separator, in classes given
+  to `process_classes` directly, stops with "Internal error" as it did. The text formatter
+  gives the algorithm one paragraph at a time, where it cannot happen.
+
+
+### 9.40 The start of a large tree: what an element costs before its first frame
+
+The frames of a scene were measured from the first; what a window costs until it shows its
+first frame was not. Two scenes of the start are measured now, phase by phase and with the
+memory each phase adds (section 7): `startup/tiles`, 58,696 tiles of six elements on a
+canvas (352,187 elements), and `startup/controls`, 1,600 templated controls of the Fluent
+theme (24,017 visuals). The tiles start is the one that shows what an element costs: it
+took 2.6 seconds and 3.7 GB, about 10.5 KB for an element, of which the element itself was
+under 2.2 KB. The rest was its composition visual on the two threads, the batch that
+carried it and the queues the first pass filled.
+
+Seven changes, each measured before the next:
+
+- **The dirty sets of the renderer are stamps on the visuals.** `CompositingRenderer` kept
+  the visuals to update, those whose properties changed and those whose children are
+  recalculated in three hash sets of handles: every invalidation of every element hashed a
+  handle and probed a table. A visual now carries the epoch of the sets of its renderer and
+  one bit for each (`Visual::renderer_sets`); the sets are lists in the order of adding
+  (`VisualSets`), and emptying them takes a new epoch and visits no visual.
+- **A new composition visual does not send its defaults.** The constructor set eight
+  defaults through the setters, so the first batch of every visual carried them: about 130
+  bytes a visual, 48 MB for the tiles. The generator writes the defaults into the fields of
+  both sides (one table, `DIRECT_DEFAULTS`), and the first changes a server visual reads
+  report the eight fields as changed, so the same inputs are dirty in the same pass.
+- **A list of handlers is one pointer wide.** `HandlerList` (`ferroui-system`) held a cell
+  with a borrow flag and the source of its tokens, thirty-two bytes for an event nobody
+  listens to, and an element has twelve of them in its base classes. The list is the
+  pointer alone, taken out of its cell for the length of an operation; the tokens come
+  from one counter of the process, so they are unique and increasing across lists.
+- **The coercion fields of an effective value are boxed, and so is the hit test index of a
+  visual.** An effective value kept the two uncoerced values of a property with a coercion
+  callback inline in every value (a `Thickness` value is 176 bytes instead of 264, a
+  reference 144 instead of 200); a visual kept the index of its children for hit testing
+  inline, 120 bytes that only a visual with thirty-two children or more uses.
+- **The handles of a generated property block are in a cell without a borrow flag.**
+  `OptionCell` is what `RefCell<Option<Rc<_>>>` was used for (a read clones, a write
+  replaces), eight bytes smaller for each of the eight handles of a visual on each side.
+- **An emptied transport buffer keeps at most four megabytes.** The streams of a batch,
+  the readback queue, the serialization queue and its set, the own-properties queue and
+  the loaded queue grew to the size of the first batch and kept it for the life of the
+  window, about 390 MB for the tiles. Each gives back what is beyond
+  `RETAINED_BUFFER_BYTES` when it is emptied (`utilities::ReleaseExcess`). The largest
+  batch of the steady-state scenes is under three percent of the limit.
+- **The rarely set properties of a visual are in a second block.** The transform other
+  than the offset, the geometry clip, the opacity mask, the effect, the cache mode, the
+  adorner link and the WinUI additions (twenty-one properties, `RARE_FIELDS` of
+  `scripts/generate_composition.py`) are about four hundred bytes on each side, and few
+  visuals set any of them. The block is made, on both threads, when one of them is first
+  given another value than the one it is made with (`has_rare_properties`).
+
+The sizes, in bytes (`sizes_of_an_element`, kept exact by the gate):
+
+| Object | Before | After |
+|---|---:|---:|
+| `Border` | 2168 | 1880 |
+| `TextBlock` | 2136 | 1848 |
+| `StackPanel` | 1864 | 1576 |
+| `CompositionVisual` (UI thread) | 1032 | 480 |
+| `ServerCompositionVisual` | 1080 | 624 |
+
+The tiles start, median of five runs alternating the two builds on a quiet machine:
+
+| Figure | Before | After | Change |
+|---|---:|---:|---:|
+| Build of the tree (`build_ms`) | 470.1 | 409.6 | -12.9 % |
+| Show: attach, styles, layout (`show_ms`) | 899.5 | 732.0 | -18.6 % |
+| First frame, UI thread (`first_ui_ms`) | 374.3 | 337.1 | -9.9 % |
+| First frame, render thread (`first_render_ms`) | 731.9 | 632.5 | -13.6 % |
+| Show to first frame (`first_frame_ms`) | 1035.3 | 898.1 | -13.3 % |
+| Start (`startup_ms`) | 2596.1 | 2201.7 | -15.2 % |
+| Memory of the build (`build_mb`) | 1422.2 | 1129.8 | -20.6 % |
+| Memory of the show (`show_mb`) | 1005.7 | 713.1 | -29.1 % |
+| Memory of the first frame (`first_frame_mb`) | 1277.4 | 1009.0 | -21.0 % |
+| Memory of the start (`startup_mb`) | 3705.3 | 2851.9 | -23.0 % |
+
+The controls start, where an element is a small part of what a control costs, was measured
+for the last change alone: 302.6 to 297.9 ms and 367.2 to 350.5 MB.
+
+What it costs, and what it does not:
+
+- **Resident memory does not show the transport buffers.** The buffers that are given
+  back are about 230 MB of heap for the tiles, and the macOS allocator keeps freed large
+  blocks resident until the system asks for memory: `first_frame_mb` is the same with and
+  without that change. What lowers the footprint is not making them, which is later work.
+- **A visual that sets a rare property pays one allocation for the block,** once, and a
+  read of such a property of a visual without the block returns the value it would be
+  made with. A visual that sets none of them never has it.
+- **A removed visual stays in a set of the renderer until the set is compacted** (when
+  the stale entries are half of the list, or the set is read), not until the removal.
+- **`HandlerList::with_shared_ids` and `with_ordered_ids` are gone:** every list has what
+  they asked for.
+- **Tests:** `object_size_tests` keeps the two visuals in the allocator blocks they fit in
+  now; `compositor_tests` covers the rare block on both threads and the defaults of a new
+  visual; `release_excess` and `option_cell` have their own.
+
+### 9.41 Composition visuals on demand: an element that draws nothing and sets nothing has none
+
+Every attached element had a composition visual on the UI thread and a server visual on the
+render thread, made when it joined the tree. A third of the elements of the tiles start
+(117,399 of 352,187) record no drawing and set nothing the compositor applies: a panel
+without a background, a presenter, a decorator. Their two visuals did nothing but move
+their children, which an offset does as well.
+
+An attached element now has a composition visual or has none yet. It gets one, and keeps
+it until it leaves the tree, when one of these holds (`Visual::needs_own_composition_visual`):
+
+- it is the root of its presentation source;
+- its recording is not empty (`RenderDataDrawingContext::recorded_nothing`);
+- it sets something the compositor applies: an opacity other than one, a clip (to its bounds or a
+  geometry), an opacity mask, an effect, a cache mode, a render transform, a mirror or manipulation transform,
+  render or text options other than the defaults, or it is not visible;
+- it has composition extras (a layer, unloading visuals, facades, a translation, implicit
+  animations) or a child composition visual, or it casts a theme shadow (the shadow asks
+  for the visual of its caster);
+- it has a custom hit test, or its class says so (`requires_composition_visual`, a new
+  virtual beside `create_composition_visual`);
+- it is asked for: `composition_visual()` and `attach_to_compositor` make it. The parent
+  of an element whose visual was handed out has one as well, so that the `Offset` and the
+  `Parent` a caller reads keep their meaning.
+
+What an element without a composition visual changes for the others:
+
+- **Offsets.** The offset of a composition visual is the position of its element plus the
+  positions of the elements without one between it and the nearest ancestor that has one.
+  An element without a visual that moves moves the offsets of the nearest visuals below
+  it (up to eight visuals and thirty-two elements; beyond that it gets a visual).
+- **Children.** The children of a composition visual are the nearest composition visuals
+  below its element, in the Z order of each level.
+- **The update pass.** The renderer records an element first and decides then
+  (`CompositingRenderer::update_core`): an element that recorded nothing and needs nothing
+  is passed over, and the nearest ancestor with a visual synchronizes its children. A
+  visual that is made in a pass, or between two passes, is placed by the renderer
+  (`IRenderer::composition_visual_materialized`): its children leave the ancestor that
+  showed them and their offsets are taken from it.
+- **Hit testing.** The filter of a hit test is asked for the elements without a visual
+  between a visual and the element of its parent visual as well. A hit test from a root
+  without a visual tests the nearest visuals below it, topmost first. A composition visual
+  that was made for an element the compositor already showed without one has no readback
+  until the first frame with it: until then a hit test goes through it to its children
+  with the input of its parent, so what is under the pointer is found in the frame between.
+
+The process-wide switch `Visual::set_composition_visuals_on_demand(false)` gives every
+element a visual again; the start scenes are measured with both.
+
+The two start scenes, the median of seven runs that alternate the two settings of the
+switch in one build (Apple M3 Pro, release build, a quiet machine; the live heap and the
+counts are from the build with counters):
+
+| The tiles start (352,187 elements) | Every element has one | On demand | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 352,187 | 234,791 | -33.3 % |
+| Objects in the first batch | 4,284,937 | 3,228,373 | -24.7 % |
+| Show: attach, styles, layout (ms) | 753.7 | 669.1 | -11.2 % |
+| First frame, UI thread (ms) | 394.6 | 459.1 | +16.3 % |
+| First frame, render thread (ms) | 733.5 | 586.6 | -20.0 % |
+| Show to first frame (ms) | 1080.3 | 966.8 | -10.5 % |
+| Start (ms) | 2399.6 | 2234.0 | -6.9 % |
+| Memory of the start (MB) | 2578.7 | 2439.3 | -5.4 % |
+| Live heap after the first frame (MB) | 2322.4 | 2098.4 | -9.6 % |
+
+| The controls start (24,017 visuals) | Every element has one | On demand | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 24,017 | 14,811 | -38.3 % |
+| Objects in the first batch | 253,580 | 171,926 | -32.2 % |
+| Show: attach, styles, layout (ms) | 227.7 | 222.0 | -2.5 % |
+| First frame, UI thread (ms) | 28.0 | 30.1 | +7.5 % |
+| First frame, render thread (ms) | 24.1 | 19.2 | -20.5 % |
+| Show to first frame (ms) | 48.7 | 45.8 | -5.9 % |
+| Start (ms) | 295.5 | 288.7 | -2.3 % |
+| Memory of the start (MB) | 350.6 | 329.7 | -6.0 % |
+| Live heap after the first frame (MB) | 302.4 | 283.3 | -6.3 % |
+
+The UI thread part of the first frame grows because the visuals that are made are made
+there, in the first pass of the renderer, and no longer in the show, which shrinks by
+more. What remains is what the visuals that draw cost: in the tiles start the first frame
+leaves 799 MB allocated for 234,791 of them, 3.4 KB each on the two threads.
+
+What it costs, and what it does not:
+
+- **`composition_visual()` of an element that had none makes it,** and the server has it
+  after the next batch: code that reads the server visual right after asking waits for the
+  commit, as it does for any new visual.
+- **A visual asked for after a pass is synchronized when it is made** (offset, size, the
+  children around it), and the next pass does not synchronize its properties again: what
+  the caller sets on it in between, the `Offset` an entrance animation starts from, stays,
+  as it does on a visual that existed all along (`CompositingRenderer::place_materialized`).
+- **A class that overrides `create_composition_visual` to show something itself** (as
+  `ExperimentalAcrylicBorder` does) overrides `requires_composition_visual` to return
+  `true`; a class whose `custom_hit_test` answers only for some points does the same.
+- **The children list of a visual can be longer:** the canvas of the tiles start has the
+  visuals of the parts of its tiles as children, not the tiles. A change of the list is
+  the clear and refill it was; the hit test index is the one of a visual with thirty-two
+  children or more.
+- **The cache mode invalidates the composition properties** when it changes (it had no
+  change handler), so an element that gets one gets its visual in the next pass.
+- **A value assigned before an animation is started, in one batch, is sent ahead of the
+  animation.** The transport carried the animation or else the value, so the value was
+  lost and the server kept its own for the components a sub-channel animation does not
+  write. Nothing showed it while the two were equal. The selection indicator of a top
+  navigation view asks for the visual of its indicator, which gives the parent panel a
+  visual and moves the position of the panel out of the offset of the indicator, resets
+  `Offset` and animates `Offset.X`: the server kept the old `Y` and drew the indicator
+  below the clip of the pane. The generated serialization now writes the value and then
+  the animation; an implicit animation still starts from the value the server has
+  (DEVIATIONS.md).
+- **Tests:** `compositor_tests` covers the elements without a visual (offsets through
+  them, flattened children, an element that starts to draw, one that is asked for its
+  visual in and out of a pass, an offset set on a visual asked for after a pass, hit
+  tests from a root without a visual and through a new visual before its first frame);
+  the counter check `composition_work` counts the visuals made.
+
+### 9.42 Drawing items: an element that only draws has no composition visual
+
+After section 9.41 the composition visuals that are left are those of the elements that
+draw, and most of those need nothing else of one: a text block, a border, a shape records
+a drawing and its layout says where it is. Each still had a `CompositionVisual` and a
+draw list on the UI thread and a `ServerCompositionVisual` on the render thread, with a
+transform, bounds, a dirty state, a readback and a place in two lists of children of its
+own: in the tiles start 1.7 KB of live memory on the two threads beside the drawing
+itself, for an offset.
+
+An element that draws, and needs a composition visual for nothing else, now has none
+(`Visual::needs_own_composition_visual` no longer asks whether the recording is empty).
+What it drew is a *drawing item* of the composition visual of the nearest element above
+it that has one, the holder: the render data, where the drawing is in the holder (the
+position of the element plus the positions of the elements without a visual between), and
+the size of the element when it clips to its bounds. `Visual::has_composition_item` says
+that an element is shown this way.
+
+- **Which elements.** The rule of section 9.41 without its second line. An element that
+  clips to its bounds is an item while nothing is under it: the clip of an item is the
+  rectangle of its size, and an element that clips its children keeps its composition
+  visual, which clips them. A class whose drawing needs its composition visual says so
+  with `requires_composition_visual`: a `Border` that clips to its bounds (the clip follows
+  its corner radius) and the selection indicator (its content draws it) do.
+- **Which holders.** A draw-list visual, with or without an extension that says it shows
+  items (`ICompositionDrawListVisualExtension::holds_drawing_items`, `false` by default;
+  the border's says `true`). A visual that draws acrylic, or one with another extension,
+  shows its own drawing only: the elements below it that draw get composition visuals as
+  before.
+- **The order.** The items and the child visuals of a holder are painted in one order,
+  that of the visual tree below the holder (the Z order of each level). The holder keeps
+  the items in that order and, for each child visual, the number of items painted before
+  it.
+- **From an item to a visual, and not back.** An element that comes to need a composition
+  visual (an opacity, a transform, something under an element that clips, a caller that
+  asks for `composition_visual()`) gets one, as in section 9.41: its item leaves the
+  holder and the drawing it has becomes the draw list of the visual, without a new
+  recording. It keeps the visual until it leaves the tree. An element without a visual
+  that gets one above its items becomes their holder, and they move to it.
+- **Moves.** An item moves with its element and with the elements without a visual above
+  it; it counts as a visual in the bound of section 9.41 (eight visuals and thirty-two
+  elements below an element that moves, beyond which that element gets a visual).
+- **Out of the tree.** The item of an element that leaves its tree is kept where the
+  composition visual of an element is kept (section 9.32: until the next pass of the
+  renderer, or beside a row in a recycle pool) and is listed again with the drawing it
+  has when the element is back (`IRenderer::keep_departed_composition_item`; the counter
+  `drawing items kept` counts the items that come back this way).
+
+**The transport.** The serialization of a holder carries the changes of its items: the
+one range of the list that was replaced (where it starts, how many items it removes, and
+the items that take their place: the render data, the offset, the clip), the positions of
+the child visuals when they changed, and for each item that stays and changed its index
+and what changed (another drawing, the same drawing recorded again, the offset, the
+clip). An item is not an object of the compositor: it has no identifier, is not
+registered for serialization and has no readback.
+
+**The render thread.** A `ServerCompositionDrawListVisual` has the items of its holder
+(`ServerDrawItems`): for each the render data, the fragment the backend kept of it (as
+for a draw list), the offset, the clip and the bounds it last reported.
+
+- The bounds of the own content of the holder are those of its drawing and of its items.
+- A change of an item makes dirty where the item was and where it is, not the holder: a
+  holder of thousands of items whose one item changes redraws that item and what
+  overlaps it. The rectangles of removed items are kept until the next frame (sixteen
+  apart, the rest united with the last).
+- The holder draws its own drawing, the items before its first child visual, the child,
+  the items before the next, and the rest after the last child. An item outside the clip
+  or the dirty region of the frame is passed over. An item is drawn with the transform of
+  the holder moved by its offset, inside its clip when it has one.
+- An item observes its render data: a resource of the drawing that changes (a brush that
+  is animated) drops the fragment of that item and makes its bounds dirty.
+- The bitmap cache of a visual above is rendered again when an item
+  below it changes, as for a visual.
+
+**Hit testing.** The signatures of the hit tests are the same, and an item is found as
+its element. The items and the child visuals of a holder are tested in one order, from
+the last painted: the items after a child, the child, the items before it. An item is
+tested with the input in the coordinates of the holder moved by its offset, against its
+clip and then its drawing; the filter is asked for the element of the item and for the
+elements without a visual between it and the holder. A geometry is tested against a
+drawing only when it meets the bounds of that drawing
+(`ICompositionHitTester::drawing_bounds_match`), which is what the bounds of the subtree
+of a composition visual did for the drawing of that visual. The hit test of the
+composition API (`CompositionTarget::try_hit_test`) answers with the holder, once, for
+any number of its items that are hit. An item is where the last layout put it; a
+composition visual is where the last frame drew it (DEVIATIONS.md).
+
+A holder with 32 child visuals and more looks them up in the index of its children
+(`CompositionHitTestAabbTree`) as a visual without items does: the index answers with each child and where it is
+among the children, and the items painted after that child, down to the child the index
+answered with before, are tested ahead of it. A holder of 32 items and more keeps the
+bounds of every 32 items that follow each other (`DrawItemList::chunk_bounds`), calculated
+when a hit test first asks for them and again for a chunk after one of its items changed
+(a drawing, an offset, a clip) or the list changed from that chunk on; a test passes over
+the chunks whose bounds the input misses. A list of fewer items has no such bounds, and
+none is kept for a holder that was never hit tested.
+
+**A holder that is drawn again.** Upstream lists the child composition visuals of every
+visual that was drawn again in a pass, which is a walk over the children of that visual. The
+walk of a holder goes down through every element without a composition visual to the nearest
+ones that have one: the root of the `width` scene, drawn again every frame, walked the 1,200
+elements below it every frame to make the lists it had (0.127 ms of UI time a frame
+where the base has 0.074 ms). A visual with a composition visual now remembers that
+its lists are those of the tree below it (a bit of the state a visual has for section 9.41;
+a visual is no larger), and a pass does not list it again when it was only drawn again
+(0.064 ms). What makes it forget:
+
+- the renderer is told that its children changed (`IRenderer::recalculate_children`: a
+  child attached, the Z order of a child, a visual below without a composition visual that
+  gained, lost or moved a child);
+- an item of it came, left, was released or stopped being drawn, or a visual below it got a
+  composition visual;
+- its own visual children changed (a child removed or moved, which upstream leaves to the
+  listing of a visual that is drawn again);
+- it left its tree.
+
+A debug build lists it all the same and fails when a list changed (the child visuals, the
+items, the positions of the child visuals among the items), so every test that runs a pass
+of the renderer checks the rule; the counter `composition children listed` counts the
+listings, and `composition_work_of_a_holder_that_is_drawn_again` asserts them for a holder
+drawn again, for each of the changes above and for the passes after each.
+
+The two start scenes, before (section 9.41, the base of the gate) and after, the medians
+of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release
+build; the counts and the live heap are from the build with counters):
+
+| The tiles start (352,187 elements) | Section 9.41 | Drawing items | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 234,791 | 58,699 | -75.0 % |
+| Drawing items | 0 | 176,092 |  |
+| Objects in the first batch | 3,228,373 | 1,760,940 | -45.5 % |
+| Build (ms) | 423.2 | 425.0 | +0.4 % |
+| Show: attach, styles, layout (ms) | 644.2 | 646.4 | +0.3 % |
+| First frame, UI thread (ms) | 421.5 | 370.6 | -12.1 % |
+| First frame, render thread (ms) | 581.8 | 470.4 | -19.2 % |
+| Show to first frame (ms) | 932.6 | 767.7 | -17.7 % |
+| Start (ms) | 2158.1 | 1981.6 | -8.2 % |
+| Memory of the first frame (MB) | 1017.5 | 594.4 | -41.6 % |
+| Memory of the start (MB) | 2434.9 | 1974.3 | -18.9 % |
+| Live heap after the first frame (MB) | 2098.4 | 1803.0 | -14.1 % |
+
+| The controls start (24,017 visuals) | Section 9.41 | Drawing items | Change |
+|---|---:|---:|---:|
+| Composition visuals made | 14,811 | 9,073 | -38.7 % |
+| Drawing items | 0 | 5,738 |  |
+| Objects in the first batch | 171,926 | 123,487 | -28.2 % |
+| Build (ms) | 3.5 | 3.4 | -1.4 % |
+| Show: attach, styles, layout (ms) | 225.1 | 227.0 | +0.9 % |
+| First frame, UI thread (ms) | 32.1 | 30.7 | -4.1 % |
+| First frame, render thread (ms) | 20.0 | 17.4 | -13.3 % |
+| Show to first frame (ms) | 48.0 | 44.3 | -7.8 % |
+| Start (ms) | 292.6 | 290.4 | -0.8 % |
+| Memory of the first frame (MB) | 90.5 | 77.6 | -14.3 % |
+| Memory of the start (MB) | 322.5 | 309.6 | -4.0 % |
+| Live heap after the first frame (MB) | 283.3 | 272.5 | -3.8 % |
+
+**What the first gate run measured.** The first run of the gate for this change reported the
+build of the `list` scene 67 % slower and the wall time of a frame of `list` and `width` 5 to
+6 % slower. Neither is a cost of the change, and the gate measures both differently now
+(section 8.1):
+
+- The scenes of the frames ran in one process, and `list` was built after six others. With
+  fewer composition objects the scenes before it left other blocks free, and its build moved
+  from 1.6 to 2.7 ms; in processes of their own the two sides build it in 1.19 and 1.10 ms.
+  Every test of the frame benchmarks now runs in a process of its own.
+- The loop of the benchmark does not wait for a display. The clock of the UI thread goes on
+  when the render thread has accepted a batch, and a commit waits until the batch before it
+  is processed (as upstream), so a frame of the clock that starts in between commits
+  nothing (section 9.46 moved the commit to the acceptance too, and no frame of the clock
+  commits nothing since). With the batch of a thousand visuals of these two scenes the base presented 226
+  to 228 of its 240 frames; with the batch of one holder the candidate presents 237 to 240.
+  The base was faster by the frames it did not draw: for a frame the surface received the
+  two are within 2 % (`width` 3.72 and 3.73 ms, `list` 3.57 and 3.51 ms; 6,000 frames of
+  `width`: 3.906 and 3.859 ms). The gate now compares the render thread and wall time for a
+  frame the surface received. The scenes whose render thread is slower than their UI thread
+  present every second or third frame of the clock on both sides (`lines`, `moves` and
+  `items` 120 of 240, `text` 160), so their render and wall times in the tables of the gate
+  are from here on two and one and a half times those of the sections before.
+
+What it costs, and what it does not:
+
+- **A holder lists its items again when the tree below it changes** (an element added,
+  removed or moved, an element that starts or stops drawing, an item that becomes a
+  visual), and not when it is only drawn again: the walk is over the elements below it
+  down to the nearest composition visuals, and the difference to the list the server has
+  is sent as one range. A holder of thousands of items of which a few come and leave every
+  frame pays the walk every frame (the `items` scene measures it); the positions of the
+  child visuals are sent whole when they change.
+- **The items of a chunk that the input meets are tested one by one**, from the last: a
+  holder of thousands of items that lie over each other tests them all, as a visual does
+  the children whose bounds overlap. The bounds of a drawing are calculated from its
+  recording for a geometry test and for the bounds of its chunk.
+- **`composition_visual()` of an element that is an item makes its visual**, as for an
+  element that had none (section 9.41). Code that walks the composition tree finds the
+  holder where it found a visual of each element; the element says which with
+  `has_composition_visual` and `has_composition_item`.
+- **A custom extension of a draw-list visual** whose server content draws the render data
+  of the visual itself shows no items unless both sides say so
+  (`holds_drawing_items`, and `IServerVisualContent::draw_items` on the render thread).
+- **Sizes.** An item is 72 bytes on the UI thread (a block of 96) and 120 on the render
+  thread (a block of 144), where the two visuals were in blocks of 512 and 640 bytes
+  with their handles and lists around them (`object_size_tests`). The list of a holder
+  is made with its first item.
+- **Tests:** `compositor_tests` covers an element that draws as an item, the clip of an
+  item, the paint and hit order of items and child visuals, a geometry that meets and
+  misses the bounds of items, items among indexed child visuals, the bounds of the chunks
+  of a long list of items and what makes them stale, items that follow their elements and the elements above
+  them, an item that moves to the visual an element above it gets, an item that becomes
+  a visual with its drawing, an item kept while its element is out of the tree, the
+  dirty rectangles of changed and removed items, the items drawn in a dirty area and a
+  bitmap cache above an item that changes; the counter checks `composition_work` count
+  the items recorded and drawn and the listings of a holder; the frame scene `items` (section 8.1) measures a holder
+  of 6,000 items of which some are drawn anew, some move and some leave the tree and
+  come back every frame.
+### 9.43 The binding of a setter is instanced when its value is first asked for
+
+A setter whose value is a binding (a `{DynamicResource}`, a `{Binding}`, a
+`{TemplateBinding}` in a style) gave the frame of its style instance a binding
+expression as the entry of its property, as upstream does: the expression was created
+and attached when the style was attached, and started when the store first asked the
+entry for a value. Most of them are never asked. A style that is not active (a
+`:pointerover` or `:pressed` style of a control nobody points at) is not evaluated,
+and neither is a setter below the effective value (a local value, a style later in the
+order, a control theme under a style). In the start of the controls scene
+45,198 of the 120,487 binding expressions that were created were never
+started, every one of them the dynamic resource of a setter, and the expression is the
+largest object a style attach creates: a block of 512 bytes, about 23 MB (45,198 blocks of 512 bytes) of live
+heap at the first frame for expressions that did nothing.
+
+The entry of such a setter is now a `SetterBindingEntry`: the binding, the property,
+the owner and the priority of the frame, 64 bytes (a block of 80). It makes the
+expression from the binding and attaches it the first time the store asks it for a
+value (`has_value`, `try_get_value`, `get_value_boxed`) or for the expression itself
+(`BindingOperations::get_binding_expression_base` of a property whose value comes from
+the setter), and from then on answers with the expression.
+
+- **The entry stays the entry.** The store compares entries by identity (the entry of
+  an effective value, the order of two entries of one priority), so the record is the
+  entry of the frame before and after the expression exists, and it is the sink of its
+  expression: a change of the expression reaches the store as a change of the record
+  (`ValueStore::on_entry_changed`, which `on_expression_changed` now calls for an
+  expression that is its own entry).
+- **What is asked of an expression that was never started** is its property and to stop
+  (`unsubscribe`, when the style is deactivated or detached). The record answers both
+  without an expression.
+- **An inactive frame instances nothing.** `get_expression` asks the entries of the
+  active frames only, as the evaluation of the effective value does.
+- **A direct property** has no value entries; its setter binds as before.
+
+What does not change: when a binding of a setter is started (when its value is first
+evaluated), stopped (when the style is deactivated or detached, or the value is no
+longer the effective one) and started again, the priority its value has, the expression
+`get_binding_expression_base` answers with, and data validation.
+
+The start of the controls scene, before (main, the base of the gate) and after; the
+medians of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release
+build), and the counts and the live heap from one run of each with counters:
+
+| `startup/controls` | Before | After | Change |
+|---|---:|---:|---:|
+| Show | 225.7 ms | 223.3 ms | -1.0 % |
+| Start (to the first frame) | 292.4 ms | 289.9 ms | -0.8 % |
+| Memory of the show | 228.3 MB | 210.7 MB | -7.7 % |
+| Memory of the start | 329.6 MB | 312.5 MB | -5.2 % |
+| Live heap the show leaves (counters) | 189.1 MB | 174.4 MB | -7.8 % |
+
+| Counted in the start of the controls scene | Before | After |
+|---|---:|---:|
+| Binding expressions created | 120,487 | 75,289 |
+| Binding expressions started | 75,289 | 75,289 |
+| Dynamic resource expressions created | 69,239 | 24,041 |
+| Dynamic resource expressions started | 24,041 | 24,041 |
+| Setter binding entries created | | 60,816 |
+
+The time hardly moves: an expression that is never started costs its allocation and its
+attach, and the time of the show is in the expressions that start (the resource lookup
+of each, its subscriptions) and in the rest of the styling. The other scenes of the gate
+do not change beyond their tolerances (`startup/tiles` has no styles with bindings).
+
+- **Tests:** `binding_setter_tests`: a setter below the effective value is not
+  instanced, also after the style is detached; a setter of an inactive style is
+  instanced once when the style becomes active and keeps its expression while the
+  style goes inactive and active again; a setter below a local value is instanced when
+  the local value is cleared; the value follows its source and replaces a current
+  value; the expression of the property is the expression of the entry; the size of
+  the record. The counter check `setter_binding_work_of_styles_that_are_not_evaluated` asserts the expressions created and
+  started in the start of the controls scene.
+
+### 9.44 A dynamic resource does not look up again for a change it has seen
+
+A dynamic resource follows the resources and the theme variant of its host: it subscribes
+to both and looks its resource up again for every notification. When an element is
+attached to a tree its dynamic resources were updated twice there. Setting the parent sets
+the inheritance parent first, and the theme variant the element inherits from it makes
+each of its dynamic resources look up (with the new styling parent, since the walk of a
+lookup goes up the inheritance parents); then the attachment applies the styles of the
+element, whose setters start their dynamic resources, and makes a notification of changed
+resources, which makes every dynamic resource of the element look up again. The second
+lookup sees the tree the first saw and publishes the value the first published.
+
+- **The notification of an attachment is numbered when the element gets its parent.**
+  `set_parent` makes it (`ResourcesChangedEventArgs::create`) before it sets the
+  inheritance parent, and every element of the attached subtree receives that one
+  notification (`LogicalTreeAttachmentEventArgs` carries it to the elements below and to
+  the template children). Each element made its own, after its styles were applied.
+- **A dynamic resource remembers when it looked up.** `DynamicResourceExpression` takes
+  the last sequence number of the notifications
+  (`ResourcesChangedEventArgs::last_sequence_number`) before each lookup and does not
+  look up again for a notification that is not newer
+  (`ResourcesChangedEventArgs::is_newer_than`).
+
+Why it is correct: every notification of the framework is made after the change it
+describes, as upstream's is (a dictionary that is changed, a dictionary or a style that
+gets or loses its owner, the accent or the density of a theme, an element that gets or
+loses its parent, the application forwarding its own). A lookup made after the
+notification was numbered was made after the change, and saw it. The number is taken
+before the lookup, so a change notified while the lookup runs is newer. Arguments that
+`create` did not number (the default) are newer than any moment.
+
+The start of the controls scene and the `list` scene, before (section 9.43, the base of the
+gate) and after; the medians of the gate (5 rounds that alternate the two builds; Apple M3
+Pro, release build), and the counts from one run of each build with counters:
+
+| Scene | Before | After | Change |
+|---|---:|---:|---:|
+| `startup/controls` show | 223.7 ms | 216.8 ms | -3.1 % |
+| `startup/controls` start (to the first frame) | 292.1 ms | 281.9 ms | -3.5 % |
+| `frames/list` show | 2.79 ms | 2.00 ms | -28.2 % |
+| `frames/list` start | 4.02 ms | 3.11 ms | -22.7 % |
+
+| Counted in the start of the controls scene | Before | After |
+|---|---:|---:|
+| Resource lookups | 79,670 | 56,059 |
+| Resource hosts probed | 1,127,451 | 778,141 |
+| Lookups of dynamic resources | 56,853 | 33,242 |
+| Notifications already seen | | 23,611 |
+| Binding values published | 112,904 | 89,293 |
+| Property changes raised | 426,905 | 426,905 |
+
+The property changes are the same: the lookups that are left out published the value the
+property had. The memory of the starts does not change.
+
+The framework benchmark `styling_subsystem::DynamicResources` guards it: a section of 1,000
+texts whose tags are a dynamic resource of the root, in a theme variant scope, detached and
+attached again (the gate, base section 9.43, 5 rounds):
+
+| `styling_subsystem::DynamicResources` | Before | After | Change |
+|---|---:|---:|---:|
+| `reattach` | 1.862 ms | 1.693 ms | -9.1 % |
+| `detach` | 1.470 ms | 1.377 ms | -6.3 % |
+| `reattach_with_inactive_setters` (four dynamic-resource setters of a style that does not match yet) | 2.331 ms | 2.127 ms | -8.8 % |
+
+- **Tests:** `resource_tests::a_notification_is_newer_than_the_moments_before_it_was_made`;
+  `dynamic_resource_expression_tests::attachment` attaches a group of elements with
+  dynamic resources to a root, with and without a theme variant to inherit, and checks
+  the values after the attachment, a later change and the detachment; with the counters
+  it asserts one lookup for each resource in the attachment.
+
+### 9.45 A template binding is told of its templated parent by the store of its target
+
+A template binding reads a property of the templated parent of its target. To see the
+templated parent change, upstream's expression subscribes to every property change of its
+target, and so did this one: a handler (a closure in a block of its own) on the handler list
+of the target for each template binding, called for every property change of the target to
+compare the property with `TemplatedParent`. An element of a control template has several
+template bindings (a border of a button binds its background, its border brush and
+thickness, its corner radius and its padding), and its properties change many times while the
+template is applied and laid out. The start of the controls scene has 45,214 template
+bindings.
+
+- **The store tells them.** `StyledElement::set_templated_parent` asks the value store of the
+  element to tell its binding expressions (`ValueStore::templated_parent_changed`): the local
+  value bindings, and the entries of the frames the element does not share. A template
+  binding that runs reads the new templated parent, subscribes to it and publishes, as it did
+  in its handler. A setter entry of a style (section 9.43) tells the expression it made, and a
+  multi-binding the expressions of its bindings, which have its target and are no entries of
+  the store.
+- **A template binding that writes to the source** (`TwoWay`, `OneWayToSource`) still
+  subscribes to the property changes of its target, for its target property.
+
+The store is told before the property change of `TemplatedParent` is raised, where the
+handler ran with the other handlers of the target: the values the template bindings publish
+are in place when the handlers of `TemplatedParent` run.
+
+The start of the controls scene, before (section 9.44, the base of the gate) and after; the
+medians of the gate (5 rounds that alternate the two builds; Apple M3 Pro, release build):
+
+| `startup/controls` | Before | After | Change |
+|---|---:|---:|---:|
+| Show | 219.8 ms | 221.3 ms | +0.7 % |
+| Start (to the first frame) | 286.3 ms | 288.5 ms | +0.8 % |
+| Memory of the show | 210.8 MB | 207.1 MB | -1.8 % |
+| Memory of the start | 312.3 MB | 308.9 MB | -1.1 % |
+
+The time does not change beyond the noise (an earlier run of the gate measured -0.8 %): the
+handlers it removes were short calls, and the work of a template binding is the one value it
+publishes when its templated parent is set (section 9.43, the profile). What it removes is the
+handler block of each template binding and the entries on the handler lists of its target,
+3.4 MB in the start of the controls scene.
+
+- **Tests:** `binding_model_tests::template_binding_follows_the_templated_parent_without_observing_its_target`
+  (a template binding follows a templated parent set, replaced and cleared, with no handler
+  on its target, and a two-way one with one);
+  `a_template_binding_of_a_style_setter_follows_the_templated_parent`.
+
+### 9.46 A commit is asked for when the batch before it is accepted: one render pass for a picture
+
+Section 9.33 let the media context start its next render pass when the render thread accepts
+a batch (takes it from the queue), not when it has processed it. The compositor kept
+upstream's rule for the other half: a change made while a batch is in flight asks the
+scheduler for a commit only once that batch is processed
+(`Compositor::request_composition_batch_commit_async`). The two no longer met. The pass that
+acceptance starts runs the animation frame callbacks and the layout while the render thread
+is still reading the batch; the first change of that pass finds the batch in flight and
+defers its request; the pass reaches its commit step with no commit asked for and ends. The
+request arrives when the batch is processed, and a second pass, with a second run of the
+animation frame callbacks and a second layout, commits what the first one changed.
+
+Every picture of an animated screen therefore cost two render passes. The gauntlet at tier
+16 ran its animation frame callback sixty times a second and the compositor committed
+thirty batches; at tier 12 it was 120 callbacks for 60 batches. `PERF fps` counts callbacks,
+which is why the tables of section 9.33 read sixty. The harness of the benchmark, which
+counts presented frames from outside, and the frame gate, whose `GATE` lines said
+`"frames":240` and `"rendered":120`, both had it; the gate compared the UI thread time for a
+frame of the clock, so two half-empty frames read as one cheap one.
+
+**The change.** The request for a commit is held back until the batch before it is
+accepted, the signal the media context starts its pass on, and is made at once when it
+already is. The compositor reads the completion itself (`is_completed`) instead of relying
+on a continuation having run, so the order in which the continuations of a batch run does
+not decide which pass commits. One batch at most is still in flight beside the one being
+prepared (the commit itself waits for the acceptance in `MediaContext::commit_compositor`),
+and what observes the effects of a batch still waits for `processed` or `rendered`.
+
+What it measures (M3 Pro, 60 Hz, the harness of the benchmark with FerroUI and the comparison in
+the same run, first and second launch; the machine was not quiet, so the figures compare
+the columns and are not calibrated; the column after also has the balanced bands of the
+Skia layer):
+
+| Scene | FerroUI before | FerroUI after | The comparison |
+|---|---|---|---|
+| gauntlet, tier 16, frames per second | 21.8 to 22.8 / 27.5 to 29.1 | 37.1 / 47.1 | 55.5 / 58.1 |
+| gauntlet, tier 16, processor time for a frame | 61 to 69 ms | 51.3 to 51.5 ms | 20.4 to 20.5 ms |
+| patchwork, tier 17, frames per second | 33.1 to 36.7 / 42.6 to 46.2 | 38.1 / 48.2 | 28.2 / 30.0 |
+| patchwork, tier 12, frames per second | 48.3 / 57.2 | 48.7 / 57.3 | 55.7 / 57.5 |
+
+Run alone, the gauntlet at tier 16 commits 44 to 48 batches a second for as many callbacks
+(30 for 60 before), and at tier 12 sixty for sixty (60 for 120): the UI thread does half the
+work for the same pictures. The frame gate's gauntlet (raster Skia, no display) receives 240
+of 240 frames where it received 120, at 14.3 ms of UI thread time for a frame received
+where it was 20.4, and 34.2 ms of wall time where it was 37.0.
+
+The gauntlet at tier 16 is not at the rate of the display yet. A frame costs the UI thread
+about 15 ms (the recording of the render data 7.4 ms, layout 6.9 ms), which leaves no room
+in a refresh interval beside the wait for the acceptance, and the render thread waits about
+9 ms of a frame for a drawable of the layer.
+
+- **Tests:** `render_thread_tests::a_commit_is_asked_for_at_once_when_the_batch_before_is_accepted`
+  (the render thread is held between the acceptance and the processing of a batch: a change
+  made then reaches the scheduler at once; it failed before the change) and
+  `a_commit_asked_for_before_the_batch_before_is_accepted_waits_for_the_acceptance`.
+- **Gate:** the frame gate fails a scenario whose surface receives fewer than nine in ten of
+  its frames, and `scripts/perf/gate.py` compares the UI thread time, as the render thread and
+  wall time, for a frame the surface received.
+
+### 9.47 Where an item is, is found once for the visuals of a pass
+
+A visual without a composition visual has what it draws shown as an item of the nearest
+visual above it that has one (section 9.42), at the sum of the positions of the visuals in
+between (section 9.41). Both were found by a walk up the visual parents: one for the visual
+that shows the item, one for the offset, for every visual a pass recorded; and one more for
+every composition visual and item below a visual that moved, each child walking up through
+the parent that had just been walked. The visuals of a screen are mostly below the same few
+visuals and deep (about 25 visuals between a row of the gauntlet and the composition visual
+that shows it), so the walks were a quarter of the commit: at tier 16, of 1,293 samples
+under `Compositor::commit`, 308 were in `composition_offset` itself and 185 in
+`nearest_composition_ancestor` itself.
+
+**The change.**
+
+- *Recording.* The renderer keeps, for the length of an update pass, where each visual
+  without a composition visual is in the visual that shows it (`CompositionItemPlacements`:
+  the address of the visual, the showing visual, the origin). A recorded visual asks for its
+  parent's entry; a parent without one asks its own parent and adds its position, so the
+  walk is made once for each visual on the way and ends at the first one already known. The
+  entries are kept only while nothing that decides them changes: a counter of the bounds of
+  visuals and a counter of the composition visuals that come, go, attach or detach are
+  compared at every use, and the entries are dropped at the end of the pass, so none
+  outlives a visual.
+- *Moving.* The walk down the visuals below a visual that moved carries the origin with it
+  (`synchronize_composition_offsets_below`), so a child adds its position to what it is
+  given. A visual whose position alone changed takes its own origin from the entries of the
+  pass (`move_composition_offsets_below`, `synchronize_composition_item`).
+
+The offsets written are the same ones: in a debug build every placement taken from the
+entries and every origin carried down is compared with the walk up it replaces
+(`debug_assert!` in `composition_item_placement`, `synchronize_composition_offset` and
+`move_composition_offsets_below`), under every test of the crate.
+
+What it measures (M3 Pro, 60 Hz, the harness of the benchmark, the two binaries run in
+turn, first and second launch; the comparison from the run of section 9.46):
+
+| Gauntlet, tier 16 | Before | After | The comparison |
+|---|---|---|---|
+| frames per second | 39.2 to 40.0 / 48.1 to 48.7 | 42.6 to 42.8 / 53.8 to 54.3 | 55.5 / 58.1 |
+| processor time for a frame | 49.2 to 51.5 / 47.7 to 50.6 ms | 46.9 to 48.4 / 47.0 to 47.3 ms | 20.4 to 20.5 ms |
+
+- **Tests:** `compositor_tests::the_place_of_an_item_is_kept_for_the_visuals_above_it_until_one_of_them_changes`
+  (the entries give the place a walk gives, follow a visual that moves, are dropped when a
+  visual between gets a composition visual or leaves the tree, and none is left after the
+  pass), and the assertions above under the tests of sections 9.41 and 9.42.
+- **Not upstream:** upstream gives every visual a composition visual, whose offset is its
+  position in its parent, and has no walk to shorten.
+
+### 9.48 Children tables: the update pass and the render walk leave out children with nothing to do
+
+A composition visual with many children (the items of a wall, the rows of a long list that
+have visuals of their own) was walked child by child twice in every frame, as upstream
+walks it. The update pass called `pre_subgraph` for every child and returned at once for
+the ones without a flag; the render walk called `handle_pre_graph_transform_clip_opacity`
+for every child and left the ones whose bounds do not meet the dirty region. Neither does
+any work for such a child, but each reads the visual (the flags, the bounds, the
+transform), and a visual is 640 bytes somewhere on the heap: with twenty thousand children
+and one that changed, a frame brought twenty thousand visuals into the cache twice. On the
+still wall of the frame gate (`wall/20`: 20 000 items, a few change in a frame) this was
+most of the render thread's frame.
+
+**The change.** A collection of 32 children or more (`TABLE_FROM`) keeps a table beside
+the list of its children (`ChildrenTable` in `server_composition_visual_collection.rs`),
+with a row for each child in the order of the children:
+
+- whether the update pass has something to do in the child or below it (one byte);
+- the bounds of the child's subtree in the space of the holder, its
+  `transformed_sub_tree_bounds` (32 bytes; a child without bounds has bounds that meet
+  nothing).
+
+Each visual knows its place among the children (`index_in_parent`, 32 bits; the index of
+the visual in the readback queue became 32 bits too, and the visual keeps its block of 640
+bytes). The table is read from the children whenever the list is (`read_table`), and a
+row is written from three places:
+
+- `propagate_flags`, which every change of a visual ends in, marks the row of the visual
+  and the row of each ancestor it gives a flag to;
+- `post_subgraph` of the update pass clears the row of the visual it leaves and, when it
+  computed bounds, writes them;
+- nothing else: a write checks that the child is where it says in the list, and a child
+  that is not ends the table until the list is read again, so that a table that is wrong
+  is not used.
+
+The walker has one more question for its visitor, asked at each step over the children of
+a holder with a table: `next_child(holder, from, count)`, the next child to visit.
+
+- The update pass answers with the next marked row (`next_dirty_child`). The bounds of
+  the holder, which upstream unites child by child, are united from the rows when the
+  holder computes its bounds (`bounds_of_children`): a pass over 32-byte rows that are
+  next to each other, not over the visuals.
+- The render walk answers with the next row whose bounds meet the clip of the walk
+  (`next_child_in`). The clip of the walk is in the space of the world and the rows are in
+  the space of the holder, so the clip is mapped into the holder's space, made larger by
+  more than the arithmetic of the two directions can differ: the test leaves out only
+  children that the exact test of the visual leaves out as well. A holder whose transform
+  turns or skews, a render that stops at a visual and a visual drawn without its transform
+  ask every child, as before. The drawing items of the holder that come before a child
+  that is left out are drawn as they are before one that is visited, and the child counts
+  as visited in the debug events.
+
+One thing the exact test does had to be kept. A child with a clip of its own that lies
+outside the clip of the walk gets the empty rectangle at the origin of the world as its
+clip (`intersect_or_empty`), and bounds that lie around the origin of the world meet that
+rectangle: such a child is entered, and what it draws is clipped away. The row test
+therefore keeps the children whose bounds lie at or around the origin of the world, and
+the exact test decides for them as before. It is one child in most scenes; taking the
+visit away would change what the debug events count and is left for a change of its own.
+
+In a debug build the update pass checks, for every child it leaves out, that the visual
+has no flag: a flag set by a path that does not end in `propagate_flags` fails the tests
+instead of leaving a visual stale.
+
+**Other backends.** All of it is in `ferroui_base`, in the server side of the composition
+that every rendering backend runs (Skia, Vello, ProGPU, the browser): no backend has
+anything to implement, and the drawing contexts see the same calls in the same order for
+the children that are drawn.
+
+**Measured** with the local gate (nine rounds, the two sides alternately, the medians;
+base `cc82b74b96`):
+
+| Metric | Before | After | Change |
+|---|---:|---:|---:|
+| `wall/20` render thread, ms a frame | 4.682 | 1.670 | -64.3 % |
+| `wall/20` wall time, ms a frame | 4.685 | 1.672 | -64.3 % |
+| `wall/20` UI thread, ms a frame | 0.067 | 0.026 | -61.4 % |
+| `wall/20+pointer` render thread, ms a frame | 4.804 | 1.738 | -63.8 % |
+| `wall/20+pointer` wall time, ms a frame | 4.798 | 1.855 | -61.3 % |
+| `wall/20+pointer` UI thread, ms a frame | 0.872 | 1.163 | +33.5 % |
+| `frames/wall` render thread, ms a frame | 2.453 | 1.827 | -25.5 % |
+| `frames/recolor` render thread, ms a frame | 2.880 | 2.370 | -17.7 % |
+| `frames/pile` render thread, ms a frame | 1.701 | 1.520 | -10.7 % |
+| `gauntlet/16` render thread, ms a frame | 34.293 | 34.411 | +0.3 % |
+| `gauntlet/16` UI thread, ms a frame | 14.418 | 14.541 | +0.9 % |
+
+The gauntlet has no holder of many child visuals whose children stand still (its rows are
+drawing items of their lists), so it is unchanged, as are the other scenes of the gate.
+
+The one metric that rose, the UI thread's time in `wall/20+pointer`, is the hit test of
+the pointer, not the tables. With the pointer in the window every frame that was rendered
+is followed by two hit tests on the UI thread (pointer-over and the tooltip), and a hit
+test brings its index of the holder's children up to date whenever the render thread has
+written a newer revision of the readback: a walk over every child of the holder
+(`CompositionHitTestAabbTree::update_bucket`). Before, the render thread took 4.7 ms a
+frame and the two hit tests of a frame saw one revision, so the second one found its index
+up to date; now a frame takes 1.7 ms, the next revision is there between the two hit tests
+of nearly half of the frames, and the second hit test walks the children again (in the
+profile of the UI thread: 9 samples of 487 in the tooltip's hit test before, 501 of 1660
+after). The frame gate runs frames as fast as they render; on a display the two hit tests
+of a frame see one revision as before. The walk itself is the cost that should go (a hit
+test index that hears which children were written, as the tables hear which children
+changed), and that is the change after this one (section 9.49).
+
+**Tests.** `many_children_are_updated_and_rendered_as_without_their_table`: holders of 36
+to 400 children, clipped and not, scaled, mirrored and turned, through 160 frames of
+random moves, visibility, backgrounds, opacity, added, removed and nested children and
+moves of the holder, once with tables and once without (`set_without_children_tables`):
+the invalidated rectangles, the visited and rendered visuals, the bounds of the holder and
+every drawing call are the same frame by frame, and the run with tables left children out
+of both passes. `one_child_that_changes_leaves_the_other_children_out_of_both_passes`: of
+200 children, a frame without a change leaves nothing to visit, a change of one child
+leaves 199 out of both passes, and a child moved over its neighbour leaves 199 out of the
+update pass and 198 out of the render walk. `a_visual_of_the_server_fits_a_block_of_640_bytes`
+keeps the size of the visual.
+
+**Gate.** `wall/20` and `wall/20+pointer` of the frame gate (`scripts/perf/gate.py --only
+gauntlet`) hold the render thread's time of a holder of 20 000 children with a few that
+change.
+
+### 9.49 The hit-test index hears which children the render thread wrote
+
+A holder of 32 children or more answers a hit test from an index of its children
+(`CompositionHitTestAabbTree`, as upstream has it: buckets of 32 children in the order of
+the children, a tree of bounds in each). The bounds come from the readback of each child,
+which the render thread writes and the UI thread reads at a revision (`ReadbackIndices`).
+A bucket remembers the revision it was read at, and a hit test at a newer revision read
+every child of every bucket it came to before it asked the tree: for a point over the
+holder that is every child of the holder. A child whose readback was not written since
+returns after comparing two revisions (section 9.6), but the comparison reads the visual,
+and the walk is as long as the list of children whatever changed. On the still wall with
+the pointer in the window (`wall/20+pointer`: 20 000 items, two hit tests after each
+frame) this walk was the UI thread's frame, and it grew when the render thread became
+faster (section 9.48).
+
+**The change.** The readback pass says which readbacks it wrote, and the index reads
+those.
+
+- `ReadbackIndices` keeps a list of the readbacks written in the latest revisions
+  (`Written`: pairs of the revision and the key of the readback, the oldest first). The
+  key of a readback is its address: the UI visual and the server visual share one
+  readback, and it stays where it is while either of them lives. The pass
+  (`ServerCompositor::visual_readback_update_pass`) asks its write scope for the list
+  (`ReadbackWriteScope::written`) and adds the key of each readback it writes, visual or
+  snapshot, before the revision is published.
+- The list is bounded. A pass that writes more than 1 024 readbacks
+  (`WRITTEN_IN_A_REVISION`) lists none of them, and the list keeps at most 4 096 keys
+  (`WRITTEN_KEPT`), dropping whole revisions from the old end. Both move the floor of the
+  list, the revision from which it is complete, and a question about revisions before the
+  floor (`written_between`) is answered with "not known".
+- The index keeps its entries by the key of the child's readback, the revision it last
+  heard at (`heard`) and the set of the children it has not settled: the ones whose
+  entry was made without a readback (a child the render thread has not written yet, and
+  one that a hit test passes through until it has a readback, section 9.41).
+- At the start of a hit test of the holder the index hears (`hear_written`): it asks for
+  the readbacks written after `heard` up to the revision of the hit test and reads those
+  of them that are its children, and the children that are not settled. When the answer
+  was complete and every child was where its entry says, each bucket that was current at
+  `heard` is current at the revision of the hit test, without a walk.
+- Anything else falls back to the walk, bucket by bucket as before: a list that does not
+  reach back to `heard` (a pass that wrote more than the list takes, or a holder that was
+  not hit-tested for many frames), a key whose child is no longer at its place, and a
+  bucket that was not current at `heard`. A bucket that is made while the index is in use
+  starts at `heard`, because each entry that comes to it is read as it comes or is not
+  settled.
+
+What a hit test finds is what the walk finds: the walk changes an entry only for a child
+whose readback has a newer revision than the entry, a readback gets a newer revision only
+in a pass, and every pass since `heard` is in the list or moved its floor. The statement
+kept between hit tests is that a bucket whose revision is `heard` has every entry either
+read at `heard` or later, or in the set of the children that are not settled.
+
+**Other backends.** The list is in the readback bookkeeping of `ferroui_base` and the
+index is on the UI side of the composition: every rendering backend (Skia, Vello, ProGPU,
+the browser) runs the same readback pass, and none has anything to implement.
+
+**Measured.** In the tests, the buckets walked by four hit tests a frame through random
+frames (a frame in sixteen moves every child, the others add, remove, hide and move a
+few), with the list and without:
+
+| Children | Frames | Bucket walks without the list | With the list |
+|---:|---:|---:|---:|
+| 40 | 80 | 92 | 0 |
+| 200 | 120 | 518 | 0 |
+| 1 200 | 40 | 950 | 418 |
+
+With 1 200 children the frames that move every child write more than the list takes, and
+those are the walks that remain.
+
+With the local gate (the two sides alternately, the medians; base `2cc3671f21`, the
+children tables of section 9.48):
+
+| Metric | Before | After | Change |
+|---|---:|---:|---:|
+| `wall/20+pointer` UI thread, ms a frame | 1.220 | 0.039 | -96.8 % |
+| `wall/20+pointer` wall time, ms a frame | 1.902 | 1.633 | -14.1 % |
+| `wall/20+pointer` render thread, ms a frame | 1.752 | 1.632 | -6.9 % |
+| `frames/wall+pointer` UI thread, ms a frame | 0.092 | 0.028 | -69.1 % |
+| `wall/20` UI thread, ms a frame | 0.027 | 0.024 | -9.4 % |
+| `wall/20` render thread, ms a frame | 1.659 | 1.626 | -2.0 % |
+| `gauntlet/16` UI thread, ms a frame | 14.614 | 14.469 | -1.0 % |
+| `gauntlet/16` render thread, ms a frame | 34.331 | 34.166 | -0.5 % |
+
+The UI thread's frame with the pointer in the window is now what it is without the
+pointer, to a hundredth of a millisecond: the two hit tests of a frame read the few
+children that were written. Against the commit before the children tables the same
+metric went from 0.872 ms to 0.039 ms. None of the 121 metrics of the gate is over its
+tolerance.
+
+**Found on the way.** A child added to or removed from a holder has the UI side clear the
+holder's composition children and add them all again
+(`Visual::synchronize_composition_child_visuals`, as upstream does on any difference).
+The index is emptied with the list, and the next readback pass writes every sibling: one
+child added among 200 lists about 205 readbacks. The index handles it (the children come
+back unsettled and are read once), but the cost is that of the whole list for one child,
+on both threads. Making the synchronization insert and remove the children that differ
+is a change of its own, to be measured on a list that grows and shrinks.
+
+**Tests.** `the_readbacks_of_the_latest_revisions_are_listed`: what the list answers for
+ranges of revisions, a pass over the limit, and the oldest revisions leaving at the bound.
+`a_hit_test_index_that_hears_the_written_children_finds_what_one_that_reads_every_child_finds`:
+40, 200 and 1 200 children through random frames (moves of every child, children added,
+removed, hidden and resized, frames without a render), four hit tests a frame, once with
+the list and once without (`HEARS_WRITTEN`): the same visuals in the same order every
+time, and fewer walks with the list.
+`a_child_that_changes_among_many_does_not_have_the_index_read_the_other_children`: of
+2 000 children one moves in each of 20 frames; the hit tests find it at its new place and
+the last child at its own, and no bucket is walked after the first hit test.
+
+**Gate.** `wall/20+pointer` of the frame gate holds the UI thread's time of the hit tests
+over a holder of 20 000 children.
+
+### 9.50 Tried and left out: the drawings of items kept as pictures of the backend
+
+The first of the changes of architecture that were proposed for the frame: what an item
+draws is kept by the render thread in the form the backend draws it in, and drawn again
+from that form while the item does not change, instead of its commands being walked in
+every frame. The interface was there (`IDrawingContextImplWithFragments`, the fragments of
+draw list visuals); the trial gave it to the items of a holder (section 9.42) and to Skia.
+It is recorded here with what it measured. It is not merged: in the window it draws no
+frame sooner and costs processor time. The code is on the branch `perf/skia-item-pictures`.
+
+**What was tried.** The policy is in `ferroui_base` and the same for every backend:
+
+- `FragmentKeeping` (`None`, `Each`, `Settled`), asked of the context by
+  `IDrawingContextImplWithFragments::fragment_keeping`: whether the backend gains from a
+  fragment at all, from one of every drawing, or only from one of a drawing that was drawn
+  twice as it was. `DrawingContextProxy` forwards it.
+- `KeptFragment` (`server_draw_items.rs`): the fragment of one item beside its commands,
+  the frames it waited (`SETTLED_AFTER = 1`), and, for a backend that refused to draw the
+  fragment again, how long before it is asked once more (doubling up to `LONGEST_WAIT = 64`
+  frames), so that an item whose place changes by a fraction of a pixel in every frame is
+  not recorded in every frame.
+- Skia (`drawing_context_impl/fragments.rs`): a fragment is an `SkPicture` of the commands,
+  recorded by a recorder of its own that starts with the matrix of the frame's canvas. It
+  is drawn again in the state it was made in and with the matrix it was made with, or with
+  that matrix moved by whole pixels when nothing in it was laid out in the pixels of the
+  device (text placed on the pixel grid, hairlines). Skia answers `Settled` only for a
+  context that records (the pipelined layer of a window, a picture render target) and
+  `None` for a surface, where a picture is played back call by call.
+
+**Measured** (M3 Pro, 60 Hz, `release`, the gauntlet benchmark in its window, 14 seconds a
+run, two alternating rounds; main is 01e1c3f24, with sections 9.46 and 9.47 and the
+balanced bands):
+
+| | main | with kept pictures |
+|---|---:|---:|
+| gauntlet, tier 16, frames a second | 55.1, 55.2 | 53.1, 52.7 |
+| gauntlet, tier 16, processor time of the run | 26.5 s, 30.0 s | 28.9 s, 31.6 s |
+| still wall, tier 20, frames a second | 60.0, 60.0 | 60.0, 60.0 |
+| still wall, tier 20, processor time of the run | 8.6 s, 9.2 s | 9.1 s, 9.4 s |
+| gauntlet, tier 16, render thread drawing items (5 s sampled) | 621 ms | 722 ms |
+
+Of the 722 ms, 42 are spent ending recordings. The window suite of the gate shows every one
+of its five scenes at the display's 16.667 ms a frame on both sides. The headless gate
+(raster surface, where no fragment is made) is unchanged: 121 metrics, none regressed.
+
+**Why it gains nothing.** A picture of Skia is a list of operations, not pixels and not
+commands of the graphics processor. Drawing a kept picture into the picture of the frame
+saves recording the item's few operations (a rectangle, a run of glyphs) and costs a
+reference to the picture with a save, a matrix and a restore around it, which is about the
+same; when the frame's picture is played into the Graphite recorder, every operation of
+the kept picture is drawn as if it had been recorded directly. What the render thread
+spends on an item is spent after the recording, and a picture keeps none of it. On the
+gauntlet most items change or move by fractions of a pixel in every frame, so pictures are
+also made that are never drawn again. And at tier 16 the UI thread's pass, not the render
+thread, bounds the frame rate (section 9.46), so even a saving there would not show as
+frames.
+
+**Other backends.** The policy is where a backend whose fragments hold more than a list of
+operations finds it: an engine with a retained scene (ProGPU: the scene nodes and their
+buffers of an item, drawn again by reference) or one whose scene is appended by copying an
+encoding (Vello) would answer `Each` or `Settled` and implement `begin_fragment`,
+`end_fragment` and `draw_fragment`; nothing in `KeptFragment` knows Skia. It is to be taken
+from the branch with the first backend that measures a gain from it.
+
+**What would keep work in Skia** is the pixels of a settled subtree in a texture. That is a
+different trade: memory for every kept subtree, text that is no longer placed on the pixel
+grid of the window when the subtree moves by a fraction of a pixel or is scaled, and a
+texture to draw again whenever anything in the subtree changes. The scenes measured here do
+not ask for it (the still wall is at the display's rate, the gauntlet changes everywhere),
+so it is not proposed.
+
+**Tests on the branch.** Six in `server_draw_items_tests.rs` (a context without fragments
+draws the commands; a fragment with every drawing for `Each`; for `Settled` a fragment when
+the drawing is drawn again; after a refusal a wait that doubles; a drawing the context
+makes no fragment of is not asked for again) and nine in `fragment_tests.rs` (a fragment is
+what its commands draw, also where the drawing moved to by whole pixels; it is refused
+where the pixels would differ; one laid out in the pixels of the device stays where it is;
+pushes left open or popped across the fragment are not kept; only a context that records
+makes fragments).
+
+### 9.51 A tick that only presents leaves its display frame open, and a stream that misses frames draws its layer before it waits for the target
+
+At tier 16 of the gauntlet in a window the benchmark showed 55 frames a second on a display
+of 60 (section 9.47), with no thread saturated: the UI thread's pass took 13.5 ms in the
+median, the render thread's tick 12.4 ms. A trace of the render thread's ticks said where
+the five frames went. (The trace, like the 55 frames a second, is of the benchmark built
+with its counters, the feature `counters`, which the batch statistics need; the counting
+costs the UI thread about a tenth of its time. Without it the same build shows 58 frames a
+second; both builds are in the results below.)
+
+| Of a second at tier 16 (before) | |
+| --- | ---: |
+| Ticks of the render timer | 59.9 |
+| Ticks that applied a batch and drew it | 54.3 |
+| Ticks that had no batch and presented the frame the layer held back | 5.6 |
+
+| Of a tick that drew (median) | ms |
+| --- | ---: |
+| The batch is applied | 1.47 |
+| The target is asked for its drawing context (`nextDrawable` of the Metal layer) | 6.89 |
+| The frame is recorded into the layer | 3.84 |
+| The frame before it is blitted and presented | 0.10 |
+
+Two things follow from it.
+
+- **A pass that ends just after the tick waits a display frame.** The UI thread's pass is
+  as long as the display frame in one pass of ten (16.6 ms at the ninetieth percentile). Its
+  batch then comes a moment after the tick. Section 9.33 gave such a batch a tick out of
+  turn, but only after a tick that drew nothing at all; in a stream of a pipelined layer the
+  tick the batch missed presented the frame the layer held back, counted as a tick that
+  drew, and the batch waited for the next tick of the display: 16.7 ms in which the render
+  thread had nothing to do.
+- **More than half of a tick is a wait that comes first.** The window's layer hands out
+  its next surface when the display has taken the one before it, and the render thread
+  asked for it before it drew: the recording of the frame, which needs the surface for
+  nothing (it goes into the layer of the target, and from there to the band threads),
+  started seven milliseconds into the tick.
+
+**The change.** Three rules, all of them in the compositor (`ferroui_base`); a backend
+opts in with two methods.
+
+1. *A tick that only presented leaves its display frame open.* A tick that applied no
+   batch and drew no scene (it drew nothing, or it only presented the frame a layer held
+   back: `ServerCompositionTarget::only_presented_held_frame`) notes itself in the queue
+   (`BatchQueue::note_idle_tick`), and the first batch after it asks for a tick out of turn,
+   as in section 9.33. A batch that came while such a tick presented is found by the note
+   itself, which then returns `true`: the render thread asks its loop for the tick when
+   the one it is in ends (`ServerCompositor::take_late_batch_tick_request`,
+   `RenderThreadLoopTask::render`). One tick out of turn at most answers one such tick, as
+   before.
+2. *The layer is drawn before the target is asked for its context.* Where the render
+   target says a frame may be prepared before its context exists
+   (`IRenderTarget::prepare_frame_ahead`) and the layer of the target says it is drawn
+   apart from the target (`IDrawingContextLayerImpl::draws_ahead_of_target`),
+   `ServerCompositionTarget::render_frame` draws the tree into the layer first and asks the
+   target for its context afterwards, to blit and present. The wait for the surface comes
+   after the work, and the threads that play the frame work during it.
+3. *A frame drawn into a layer that held nothing is not presented by its tick.* Such a
+   layer holds the new frame back (section 9.33), so a blit would show the frame the
+   window already shows. The tick ends without asking the target for anything: no wait for
+   a surface, no present. The target remembers that its layer holds a frame the window has
+   not seen (`layer_unpresented`), and the next tick presents it, with the next frame
+   drawn before it when there is one.
+
+Rule 1 alone gained nothing (54.5 and 54.6 frames a second before, 53.0 and 54.0 with it):
+the tick out of turn still began with the wait for a surface, and ended where the tick of
+the display would have. With rules 2 and 3 the tick out of turn records the late frame at
+once, the tick of the display that follows presents it, and the stream is back in step.
+
+**Only a stream that misses frames is drawn ahead.** Drawn ahead in every tick, tier 12
+(which holds 60 frames a second either way) cost 10 to 19 per cent more processor time
+(in the build with counters): 13.0 and 11.9 s of thread time in twelve seconds before, 14.0
+and 14.2 s after, on every thread, the UI thread most (4.2 s to 5.0 s). The work is the same, and so is the number of
+ticks (120 ticks in two seconds, each with a batch, none out of turn); what changed is
+when the render thread records. Asking for the surface first, it waits while the UI thread
+is in the first half of its pass and records in the second; drawing first, it records
+while the UI thread builds the next frame. The likely cause, not proven, is that the two
+threads then slow each other down: they allocate and release the same kind of small blocks
+and read and write the reference counts of the same shared values, and the profile shows
+the added time spread over all of that, with no single place. So the compositor draws
+layers ahead only while the stream
+of batches misses display frames (`ServerCompositor::draws_layers_ahead`): for 120 ticks
+(`DRAW_AHEAD_TICKS`) after a tick that had no batch and presented the frame a layer held
+back, which is the mark of a missed frame in such a stream. A stream that keeps the rhythm
+of the display is drawn as before, and costs what it did.
+
+**Measured** in the window of the benchmark on a display of 60 Hz, base and candidate in
+turn; the base is the main branch with sections 9.48 and 9.49 in it (frames a second,
+and the processor time of all threads over the run):
+
+| Scene | Before | After |
+| --- | ---: | ---: |
+| Gauntlet tier 16, frames a second | 58.4, 57.8, 57.6, 57.8 | 59.5, 59.5, 58.8, 59.4 |
+| Gauntlet tier 16, thread time in 14 s | 27.6 s, 30.3 s | 28.4 s, 30.5 s |
+| Gauntlet tier 14, frames a second | 60.0, 60.1 | 60.0, 60.0 |
+| Gauntlet tier 14, thread time in 12 s | 18.1 s, 20.4 s | 18.2 s, 18.4 s |
+| Gauntlet tier 12, frames a second | 60.0, 60.0 | 60.0, 60.0 |
+| Gauntlet tier 12, thread time in 12 s | 11.4 s, 11.5 s | 11.5 s, 11.4 s |
+| Still wall tier 20, frames a second | 60.0 | 60.1 |
+| Still wall tier 20, thread time in 12 s | 4.5 s | 4.7 s |
+
+Of the two display frames in sixty that tier 16 missed, the change gets back more than
+one; the processor time for a frame stays what it was (0.034 s and 0.037 s before, 0.034 s
+and 0.037 s after).
+
+The same pair built with the counters of the benchmark, where the UI thread's pass is a
+tenth longer and misses the tick more often, shows what the rules are worth to a stream
+that is later still:
+
+| Scene, built with counters | Before | After |
+| --- | ---: | ---: |
+| Gauntlet tier 16, frames a second | 55.9, 54.5 | 58.5, 58.4 |
+| Gauntlet tier 16, thread time in 14 s | 27.2 s, 29.3 s | 28.7 s, 30.8 s |
+| Gauntlet tier 14, frames a second | 59.8, 59.9 | 59.9, 60.0 |
+
+**The local gate** (counters, the gauntlet and the frame scenes without a window, the
+scenes in a window): 139 metrics, one over its tolerance, the still wall at tier 20 without
+a window (4.46 ms a frame before, 4.72 ms after, +5.9 % against 5 %). That scene draws into
+a framebuffer, with no layer that holds frames back, and none of the three rules applies
+to it; its rounds spread from 4.26 ms to 5.25 ms. Run again alone, four rounds in turn, it
+gave 5.15 to 5.77 ms before and 4.48 to 5.41 ms after: the noise of the machine. The
+gauntlet at tier 16 without a window is where it was (33.45 ms and 33.25 ms a frame).
+
+**What stays as it was.** The frames are presented in the order they were drawn, each one
+once. A frame of a layer that holds frames back is presented one tick after it was drawn,
+as before; a batch is reported as rendered at the end of the tick that presents its frame
+(section 9.33). A target that is not ready when a frame was drawn ahead keeps the frame in
+its layer and presents it with the first tick that has the target. A layer that does not
+answer `draws_ahead_of_target`, a target with overlays (the frame-rate and dirty-rectangle
+overlays are drawn over the layer on the target), a compositor without a render thread and
+a synchronous render are untouched: the frame is drawn inside the context of the target.
+
+**In the Skia backend** `SkiaGpuRenderTarget::prepare_frame_ahead` sets the text rendering
+of the frame, which is all its context did for the layer, and only a pipelined layer
+(`PipelinedLayerSurface` while its policy pipelines) answers `draws_ahead_of_target`: its
+frame is a picture for the band threads, and nothing of it touches the surface of the
+window. A layer drawn directly keeps the order it had; its drawing and the blit share the
+recorder of the context and one flush.
+
+**Other backends.** Nothing in the three rules or in the condition knows Skia. Every
+backend that presents through a queue of surfaces has the same wait in the same place:
+`get_current_texture` of a wgpu surface (Vello, ProGPU), `vkAcquireNextImageKHR` of a
+Vulkan swapchain, `eglSwapBuffers` behind a throttled buffer queue. A backend opts in with
+the two methods when its layer is a target of its own that can be drawn, or recorded,
+without the surface of the window: a retained scene that is encoded before the surface
+texture is acquired (Vello encodes its scene on the processor, ProGPU builds its frame
+graph), or an offscreen texture. `prepare_frame_ahead` is where it does what its drawing
+context would have done for the layer before the first draw; a layer that also holds
+frames back (`has_pending_frame`) gets rule 3 with it. The policy, the bookkeeping of
+what is presented and the notifications stay in `ferroui_base`.
+
+**Not upstream.** Upstream's target asks for its drawing context and draws inside it, in
+every frame; `DEVIATIONS.md` has the rows.
+
+**Tests.** `compositor_tests.rs`: a frame drawn into a layer that holds nothing asks
+nothing of the target, and the next tick presents it; a layer drawn ahead is drawn before
+the target is asked for a context; a layer is drawn ahead only while the batches miss
+display frames, and for `DRAW_AHEAD_TICKS` ticks; a layer that does not ask is drawn inside
+the context of the target; a frame drawn ahead is presented once a target that was not
+ready is. `render_thread_tests.rs`: a batch that follows a tick that only presented asks
+for a frame out of turn, and so does one that comes while such a tick presents.
+`pipelined_frames.rs` (Metal): only a layer that hands its frames to threads is drawn
+ahead of its target.
+
+### 9.52 A frame that takes longer than a pause is not a pause
+
+The benchmark measures ten seconds from the launch, so the first seconds of a scene count
+as much as the rest. Frames a second in each second of the patchwork scene in a window, on
+a display of 60 Hz, before this section and the next:
+
+| Scene | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Patchwork tier 17 | 26.0 | 32.8 | 48.6 | 60.0 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 20 | 11.8 | 11.6 | 11.7 | 12.6 | 10.5 | 15.7 | 37.7 |
+
+Tier 20 is a scene the adaptive layer of section 9.33 is made for: its frames cost the
+render thread several display frames each. The layer drew them directly for six seconds
+all the same. The policy starts over after a pause (`STREAM_GAP`, 100 ms), and it took the
+time between the beginnings of two frames for the pause. The frames of those seconds took
+around a tenth of a second each; every one that took longer was a pause, the count of late
+frames began again, and four late frames in a row came together only by chance.
+
+**The change.** A pause is the time between the beginnings of two frames that the first
+of them did not cost (`PipelinePolicy::frame_begins`: the period less the cost of the
+frame before it, compared with `STREAM_GAP`). Frames that each take longer than the gap,
+one after the other, are a stream, and the layer pipelines after four of them. A frame
+whose cost is not known counts with its whole period, as before, and so does every frame
+of a stream of light frames: the rule is the old one wherever a frame costs less than the
+gap.
+
+**Measured**, with this rule alone (two runs; the rule of the next section is not in):
+
+| Scene | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Patchwork tier 17 | 26.2 | 32.5 | 48.9 | 60.0 | 60.0 | 59.9 | 60.0 |
+| Patchwork tier 20 | 14.4 | 19.4 | 20.0 | 22.7 | 37.9 | 35.0 | 37.7 |
+| Patchwork tier 20, second run | 14.0 | 19.9 | 19.8 | 21.0 | 38.4 | 36.7 | 38.0 |
+
+Tier 20 pipelines from its fifth frame on and reaches its rate two seconds earlier; what
+holds the first seconds at 20 is the subject of the next section. Tier 17, whose frames
+are shorter than the gap, is where it was.
+
+**Other backends.** The policy takes times and costs, and nothing of Skia but the option
+that turns it off or on (`SkiaFramePipelining`). It lives with the one layer that
+pipelines; a second backend whose layer hands its frames to threads takes it as it is,
+and it moves to `ferroui_base` with that backend.
+
+**Not upstream.** Upstream has no pipelined layer; the row of section 9.33 in
+`DEVIATIONS.md` covers the policy.
+
+**Tests.** `pipelined_layer.rs`: `frames_that_each_take_longer_than_a_pause_are_a_stream`
+(frames of 118 ms every 120 ms pipeline with the fourth; the same frames with more than
+the gap between the end of one and the beginning of the next never do), and
+`a_pause_begins_a_new_stream_that_is_drawn_directly`, which now leaves the cost of the
+frame out of its pause and checks a frame of unknown cost as well.
+
+### 9.53 A visual invalidated with its layout alone is drawn again only when it draws something else
+
+With the layer pipelined, the first seconds of the patchwork scene were still at half the
+rate of the rest. A trace of the dirty rectangles said why: in the first eighty frames or
+so, every frame drew the whole window again, 1280 by 820, where the frames after them draw
+the cells that changed. A frame of the whole window costs about 2.4 times as much.
+
+The rectangle was that of the root. While the data of the scene arrives, the desired size
+of some element changes in almost every frame. `Layoutable::measure` invalidates the
+measure of the parent of such an element, and so on up to the root, and an invalidated
+measure invalidates the visual, as upstream does. The root is recorded again and draws what
+it drew: its background. Section 9.14 does not send such a drawing again, but it has the
+server draw the area of the visual again, because an invalidation can come from something
+the drawing does not contain. For the root, that area is the window.
+
+**The change.** An invalidation says why it was made, and the renderer draws the area of
+an unchanged drawing again only when the visual itself was invalidated.
+
+- `Layoutable::invalidate_measure` and `invalidate_arrange` call
+  `Visual::invalidate_visual_for_layout`, which marks the visual with
+  `IRenderer::add_dirty_for_layout`. The default of that method is `add_dirty`: a renderer
+  that does not know what a visual drew behaves as before.
+- `CompositingRenderer` keeps one bit for a dirty visual, beside the bits of its sets in
+  the word the visual already has (`VisualSets::REDRAW`; no list, and no memory for it).
+  `add_dirty` sets it, `add_dirty_for_layout` does not, and a visual marked in both ways,
+  in either order, has it. The bit goes with the dirty mark when the pass takes the visual.
+- The update pass records every dirty visual again, as before. A drawing that is another
+  one is sent, and its area drawn again, as before. A drawing that is the same
+  (`RecordedDrawing::Same`) has its area drawn again when the bit is set, and nothing at
+  all when it is not.
+
+Nothing that changes what is on the screen relies on the layout invalidation. A visual
+whose size changes in the arrange that follows is invalidated by the change of its bounds,
+and one that only moves has the offset of its composition visual or item changed, with a
+dirty mark of its own (section 9.13); a property that affects the rendering, an opacity
+mask, an effect or a clip invalidates the visual itself; and a child that draws something
+else is recorded and compared for itself. What is left for the layout invalidation is to
+have the drawing recorded again, because the layout may have changed what the visual
+draws, and that it still does.
+
+**Measured** in the window of the benchmark on a display of 60 Hz, with this section, the
+one before it and the one after it, frames a second in each second from the launch (two
+runs a side):
+
+| Scene | 1st | 2nd | 3rd | 4th | 5th | 6th | 7th |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Patchwork tier 17, before | 26.0 | 32.8 | 48.6 | 60.0 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 17, before | 26.1 | 32.6 | 48.7 | 60.0 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 17, after | 33.6 | 59.9 | 59.9 | 60.1 | 60.0 | 60.0 | 60.0 |
+| Patchwork tier 17, after | 42.3 | 60.0 | 60.0 | 60.0 | 59.8 | 60.1 | 60.0 |
+| Patchwork tier 20, before | 11.8 | 11.6 | 11.7 | 12.6 | 10.5 | 15.7 | 37.7 |
+| Patchwork tier 20, after | 17.5 | 38.4 | 37.8 | 38.4 | 36.0 | 40.3 | 38.1 |
+| Patchwork tier 20, after | 20.6 | 38.2 | 37.6 | 38.9 | 35.5 | 40.0 | 38.3 |
+
+The gauntlet at tier 16 has no such seconds, and is where it was (measured with this
+section and the one before it): 52.9, 48.4, 52.9, 52.9, 53.5 and 54.0 frames in the first
+second of six runs before, 53.2, 51.4, 54.0, 53.6 and 53.6 in five runs after (and 33.0 in
+one), 59 to 60 in every second after it on both sides.
+
+The harness of the benchmark, ten seconds from the launch, first launch and second (frames
+a second; the processor time of all threads for a frame; the 99th percentile of the frame
+time), with the other framework of the benchmark from its run on the same machine:
+
+| Scene | Before | After | The comparison |
+| --- | ---: | ---: | ---: |
+| Gauntlet tier 16, frames a second | 44.3, 55.4 | 43.3, 54.8 | 55.3, 58.2 |
+| Gauntlet tier 16, processor ms a frame | 47.2, 46.0 | 47.2, 46.7 | |
+| Gauntlet tier 16, 99th percentile, ms | 34.4, 33.5 | 34.1, 33.6 | |
+| Patchwork tier 12, frames a second | 48.8, 57.4 | 48.2, 57.4 | 56.1, 57.3 |
+| Patchwork tier 12, processor ms a frame | 23.6, 21.4 | 20.4, 21.0 | |
+| Patchwork tier 12, 99th percentile, ms | 32.5, 20.0 | 33.4, 20.2 | |
+| Patchwork tier 17, frames a second | 38.9, 48.3 | 44.6, 54.2 | 27.8, 29.2 |
+| Patchwork tier 17, processor ms a frame | 57.9, 54.9 | 52.0, 50.9 | |
+| Patchwork tier 17, 99th percentile, ms | 67.8, 51.2 | 34.2, 33.3 | |
+| Patchwork tier 20, frames a second | 11.4, 17.5 | 25.8, 32.0 | 9.4, 10.2 |
+| Patchwork tier 20, processor ms a frame | 123.3, 104.3 | 91.8, 87.4 | |
+| Patchwork tier 20, 99th percentile, ms | 167.0, 166.9 | 66.5, 50.5 | |
+
+The time to the first frame is what it was (2.0 s in a first launch, 0.5 to 0.8 s in a
+second; 2.5 s and 1.3 s at tier 20 of the patchwork): what is left between the first
+launch and the second is the first frame, not the frames after it.
+
+**The frame scenes without a window** (the render thread, ms for a frame it drew; three
+runs a side, in turn):
+
+| Scene | Before | After |
+| --- | ---: | ---: |
+| `grow`: a still wall of 14,400 tiles beside a label whose size changes every frame | 80.2, 81.0, 80.0 | 1.76, 1.76, 1.76 |
+| `width`: 300 cards in a panel whose width changes every frame | 3.77, 3.71, 3.94 | 3.40, 3.36, 3.31 |
+| `width`: frames drawn of 240 | 240 | 12 |
+
+`grow` is new with this section, and is what the first seconds of the patchwork were: a
+change of a desired size that reaches the root. `width` lays its cards out again in every
+frame, and they move only when a line of them wraps another way; the 228 frames in which
+none moves are no longer drawn at all. Two other scenes, `text` and `list`, were slower
+with this section alone, for what their dirty area had become; section 9.54 is about them.
+
+**What stays as it was.** A visual invalidated itself has its area drawn again whatever
+it draws, as section 9.14 says, also when its layout was invalidated in the same pass. A
+drawing that is another one is sent and drawn. The layout pass, the order of its
+invalidations and what `invalidate_measure` and `invalidate_arrange` do to the layout are
+untouched; `invalidate_visual` is public and does what it did. A renderer other than the
+compositing renderer gets `add_dirty` through the default.
+
+**Other backends.** All of it is in `ferroui_base`: the invalidation, the bit and the
+update pass. The dirty rectangles of a frame are made there for every backend, so Skia,
+Vello and ProGPU draw the same smaller area, with no code of their own.
+
+**Not upstream.** Upstream invalidates the visual from `InvalidateMeasure` and
+`InvalidateArrange`, and its area is drawn again whatever it draws; `DEVIATIONS.md` has
+the row.
+
+**Tests.** `compositor_tests.rs`:
+`a_visual_invalidated_with_its_layout_alone_is_drawn_again_only_when_it_draws_something_else`
+(an item and a visual with a layer: the layout alone and the same drawing draw nothing; the
+layout and the visual, in either order, draw its bounds; the request does not outlive the
+pass; another drawing after a layout invalidation is drawn). `visual_tests.rs` of the
+controls: `invalidating_the_layout_invalidates_the_visual_for_its_layout`. The frame gate
+has the scene `grow`.
+
+### 9.54 The dirty area of a frame is one rectangle where its rectangles fill their union, and the surface where it is all but the surface
+
+Before section 9.53 a scene whose layout changed in every frame had the window for its
+dirty area, by the root. With it, the area of such a frame is what the tracker makes of
+the visuals that changed, and two frame scenes without a window were slower for it on the
+render thread (ms a frame, three runs):
+
+| Scene | Main | With section 9.53 alone |
+| --- | ---: | ---: |
+| `text` | 6.09 | 7.08, 7.04, 7.08 |
+| `list` | 3.52 | 3.76, 3.77, 3.76 |
+
+A trace of the rectangles of their frames said what the area had become.
+
+- **`text`: eight rectangles that are nearly one.** The scene changes the text of 480
+  tiles all over the window. The tracker of the default (`MultiDirtyRectTracker`, eight
+  rectangles at most) ends with eight that cover 92 to 95 per cent of their union, and
+  the union is 98 per cent of the surface. The frame draws almost all it drew before, but
+  under a clip of a region where it had a clip of a rectangle, and every drawing of the
+  frame is clipped against the region.
+- **`list`: one rectangle that is all but the surface.** The list scrolls, and its
+  rectangle is 99.3 per cent of the surface. A frame of the whole surface is cleared; a
+  frame of less keeps what the frame before drew, and its clear is a drawing under the
+  clip. The seven thousandths of the surface it did not draw cost more than they saved.
+
+**The change.** The dirty area is made simple where it is made final for the frame
+(`IDirtyRectTracker::finalize_frame`), in `ferroui_base`, with two rules
+(`simplify_dirty_rects`, `surface_or_rect`):
+
+1. *Rectangles that fill their union are replaced with it.* When the rectangles of the
+   frame cover seven eighths of their union or more (`UNION_SHARE`; the area they cover,
+   each point counted once), the frame draws the union. What it draws besides is a
+   seventh of what it drew anyway at most, and its clip is a rectangle. The rectangles of
+   `text` fill 0.92 to 0.95 of their union. Those of the `width` scene in the frames it
+   draws, cards that moved in some lines of a panel, fill 0.81 of it and stay eight
+   rectangles: there the region saves more than it costs.
+2. *A rectangle that is all but the surface is replaced with the surface.* One rectangle
+   that covers 96 per cent of the surface or more (`SURFACE_SHARE`) becomes the surface,
+   and the frame is one of the whole surface for the tracker, the target and the backend:
+   cleared whole, with no clip to draw under.
+
+`MultiDirtyRectTracker` applies both, in that order, so that rectangles that fill a union
+that is all but the surface become the surface; `SingleDirtyRectTracker`, the tracker of a
+platform without regions, applies the second. `RegionDirtyRectTracker`, the exact region
+an application asks for with `max_dirty_rects` of zero or less, is left as it is. The
+area of a frame only grows by the rules, and never past the surface: what is drawn besides
+shows what it showed.
+
+**The backdrops.** A dirty rectangle that touches the area a backdrop reads is widened to
+the whole of that area (`winui-materials.md`: a blurred backdrop drawn in part would mix
+the new pixels with the old ones). The target
+did that before the tracker made its area final, and asked the tracker which areas the
+rectangles touched; but `MultiDirtyRectTracker` answers `intersects` from its final
+rectangles, which do not exist before `finalize_frame`, and `SingleDirtyRectTracker` from
+the final rectangle of the frame before. With the default tracker a change under a
+backdrop drew the backdrop inside the rectangle of the change only. The target now makes
+the area final first and widens it afterwards (`ServerCompositionTarget::begin_scene`),
+with a method the trackers got for it: `IDirtyRectTracker::include` adds a rectangle to
+the final area, and applies the rules above again.
+
+**Measured**, the frame scenes without a window, base and candidate in turn (the render
+thread, ms for a frame it drew; three runs a side):
+
+| Scene | Main | Sections 9.53 and 9.54 |
+| --- | ---: | ---: |
+| `text` | 6.35, 6.09, 6.10 | 6.13, 6.16, 6.19 |
+| `list` | 3.54, 3.53, 3.50 | 3.48, 3.53, 3.53 |
+| `recolor` | 2.34, 2.34, 2.35 | 2.34, 2.34, 2.34 |
+| `width` | 3.77, 3.71, 3.94 | 3.40, 3.36, 3.31 |
+| `grow` | 80.2, 81.0, 80.0 | 1.76, 1.76, 1.76 |
+
+The window of the benchmark is in section 9.53; its numbers are those of the three
+sections together.
+
+**The local gate** (counters, the gauntlet and the frame scenes without a window, the
+three sections together): 130 metrics, six over their tolerance, none of them work the
+change adds.
+
+- *`width`, the UI time and the wall time for a presented frame* (0.056 ms to 0.484 ms and
+  3.74 ms to 3.96 ms). The gate divides the time of a run by the frames that were drawn,
+  and the scene now draws 12 of its 240 frames where it drew every one. For a frame of the
+  clock the UI thread takes 0.024 ms where it took 0.056 ms, and the render thread 0.17 ms
+  where it took 3.74 ms. With this section on both sides the two counts are the same again.
+- *The start of `cards` and of `grow`* (+5.8 % and +5.9 % against 5 %) *and the UI time of
+  `reorder`* (1.78 ms to 1.91 ms, +7.1 %, and with it its wall time). The scenes with many
+  elements take 3 to 5 per cent longer to build and to show on this side, every one of them
+  (`wall`: 140.5 ms to 145.0 ms to build), though no element has a renderer while it is
+  built and the code that builds it is the same. Counted for the whole process, four runs a
+  side: `wall` retires 18.61 to 18.64 thousand million instructions before and 18.61 to
+  18.62 after, `reorder` 19.58 before and 19.37 after (1 % fewer); the peak of memory is
+  the same (792.2 MB, 54 226 pages); the cycles of `wall` are 0.9 % more. The same work in
+  a little more time is where the code lies in this binary, and the next change moves it
+  again: the gate of section 9.51 built the same scenes within 2.5 % either way.
+
+What the rules of this section and the one before it gain shows in the scenes that were
+not made for them: the render thread takes 13.1 % less for a frame of `lines` (17.67 ms to
+15.34 ms) and 13.7 % less for one of `moves` (25.37 ms to 21.88 ms), whose rectangles fill
+their union, and `grow` goes from 81.2 ms to 1.74 ms. The gauntlet at tier 16 is where it
+was (11.91 ms and 11.73 ms on the UI thread, 33.47 ms and 33.53 ms on the render thread),
+and so is the still wall at tier 20 (1.63 ms and 1.60 ms).
+
+**Other backends.** The rules and the widening over backdrops are in the trackers and the
+target of `ferroui_base`, and the area they make is the one every backend draws: Skia,
+Vello and ProGPU get a clip of a rectangle where they had a region, and a frame of the
+whole surface where they had nearly one, with no code of their own. A backend that tells
+a frame of the whole surface from a part of one (a target it clears where it would load
+it) gains from the second rule by itself.
+
+**Not upstream.** Upstream's trackers draw the rectangles they collected as they are;
+`DEVIATIONS.md` has the row. The backdrops and the widening over them are FerroUI's own
+(`winui-materials.md`), and so is `IDirtyRectTracker::include`.
+
+**Tests.** `i_dirty_rect_tracker.rs`: `the_covered_area_counts_every_point_once`,
+`rectangles_that_fill_their_union_are_replaced_with_it`,
+`a_rectangle_that_is_all_but_the_surface_is_replaced_with_the_surface`. The trackers:
+`rectangles_that_fill_their_union_are_drawn_as_one_rectangle`,
+`rectangles_that_are_all_but_the_surface_are_drawn_as_the_surface`,
+`a_rectangle_that_is_all_but_the_surface_is_drawn_as_the_surface` and, of each tracker,
+that an included rectangle joins the final area. `composition_winui_material_tests.rs`:
+`a_dirty_rectangle_under_a_backdrop_redraws_all_of_it` (what lies under the backdrop away
+from the change is drawn for itself and for the backdrop; it failed with the widening
+before the final area) and
+`a_dirty_rectangle_away_from_a_backdrop_leaves_the_backdrop_as_it_is`. The frame gate has
+`text`, `list` and `grow`.
+
+### 9.55 A census of the elements of tier 16: what is left to draw as an item
+
+Sections 9.41 and 9.42 gave a visual a composition visual only when it sets something the
+compositor applies, and drew every other visual as an item of the composition visual above
+it; stage B of the startup work extended that to the visuals that clip and have nothing
+under them. The third of the architecture proposals was to move more elements there. Before
+any code, the elements of the gauntlet at tier 16 were counted by what they are in the
+composition (a count over the visual tree of the window after two seconds of the run; the
+count is not part of the benchmark).
+
+| Elements of tier 16 | | Share |
+| --- | ---: | ---: |
+| All | 13,393 | |
+| Drawn as an item of a composition visual above | 9,746 | 72.8 % |
+| Draw nothing and have no composition visual (panels) | 2,964 | 22.1 % |
+| Have a composition visual | 683 | 5.1 % |
+
+| The items | |
+| --- | ---: |
+| `TextBlock` | 5,508 |
+| `Border` | 2,776 |
+| Bars of the charts | 620 |
+| Ticker tiles | 400 |
+| `Image` | 220 |
+| Sparklines | 220 |
+| Others | 2 |
+
+| The composition visuals, by what asks for one | |
+| --- | ---: |
+| A clip with visuals under it (the avatar of a card, the scroll viewer, the window) | 225 |
+| An opacity (the badge of a card) | 221 |
+| The cards and the rows that hold those (209 cards, 14 rows) | 223 |
+| A render transform (the tilted and the stacked layers) | 12 |
+| Others | 2 |
+
+**The result: nothing is left to move.** 95 of 100 elements have no composition visual. Of
+the 683 that have one, 458 set what only the compositor applies: a clip over children, an
+opacity, a transform. An item cannot carry those without becoming a visual again under
+another name (a clip or an opacity over children is a layer of the frame, and a transform
+that changes every frame is what a composition visual exists to change without a new
+recording). The 223 cards and rows are the parents of those: 16 visuals a row, against the
+9,746 items they hold. Taking the visual from a card would save one object in the batch of
+a frame in forty-eight (10,619 objects a frame at this tier), and would make the card's
+content part of the recording of the row, which then is recorded again whenever one card
+changes.
+
+So this proposal is closed without a change: stage B was the change. What the count shows
+is where the frame's work is now, which is not in the number of composition visuals: 9,746
+items, of which 3,648 are recorded again in a frame (4,927 visuals are visited by the
+recording, 997 of them unchanged), and 5,508 text blocks, of which about 430 lay their text
+out again in a frame. Sections on the layout and on the frame's data take it from there.
+
+**Other backends.** The count is of the compositor's tree in `ferroui_base`, and is the
+same whichever backend draws it.
+
+### 9.56 Where a backend clips a region for every draw, a frame is drawn one dirty rectangle at a time
+
+The site of the control catalog, built from the main branch with sections 9.53 and 9.54 in
+it, took visibly longer to show a page than the site before them: the Buttons page most,
+and nearly every page, on every switch, also back to a page that had been shown. Nothing
+of it showed on the desktop, in the gate or in a window.
+
+The site draws with WebGL, so what a switch asks of the driver can be counted in the page
+(`scripts/browser/gl-work.mjs`). A switch in headless Chrome, 1400 by 900, the module
+without threads, from the click to the last frame of the switch (the median of three
+rounds; a mask is a texture of one channel, which is how Skia uploads coverage it
+rasterised on the processor):
+
+| Switch | | Before 9.53 | Main |
+| --- | --- | ---: | ---: |
+| Buttons, first visit | draw calls | 71 | 215 to 227 |
+| | masks | 34 | 190 |
+| | pixels of masks | 169,284 | 3,333,194 |
+| CheckBox, first visit | masks | 2 | 29 to 38 |
+| | pixels of masks | 21,328 | 1,304,000 |
+| Buttons, shown again | masks | 18 | 120 to 127 |
+| | pixels of masks | 111,522 | 2.5 to 3.0 million |
+| CheckBox, shown again | masks | 2 | 27 to 36 |
+| | pixels of masks | 21,328 | 1,270,000 |
+| Home, shown again | masks | 93 to 98 | 422 to 443 |
+| | pixels of masks | 22 to 23 million | 76 to 79 million |
+
+Before section 9.53 a switch invalidated the layout up to the root, and the dirty area of
+its frames was the window: one rectangle. Since then it is what changed, the content area
+and the rows of the drawer that lose and get the selection, and since they do not fill
+their union (section 9.54) the frame is drawn under a clip of a region
+(`MultiDirtyRectTracker`, `push_clip_region`).
+
+What a clip of a region costs depends on the backend. Graphite, which the desktop draws
+with, applies a clip in the shader of the draw, and the scissor where the clip is a
+rectangle; a region of a few rectangles costs it next to nothing, and the frame gains what
+it does not draw. Ganesh, which a WebGL context is drawn with, has no such clip: a region
+that is not a rectangle becomes the path of its outline, and the coverage of that path is
+rasterised on the processor into a mask, uploaded as a texture and sampled, for each draw
+under the clip. A frame of a page then uploads a mask for nearly every draw it makes, and
+the masks of the larger draws are as large as the content area. The saving of the smaller
+area is lost many times over.
+
+**The change.** A render target says whether its backend pays for a clip of a region with
+every draw, and a frame of such a target is drawn one dirty rectangle at a time, each under
+a clip that is that rectangle: the scissor, on Ganesh.
+
+- `IRenderTarget::clips_regions_per_draw` (`false` by default) is the question, asked with
+  every frame (`ServerCompositionTarget::render_frame`).
+- `IDirtyRectTracker::separate_rects` gives the rectangles of the finalized frame as such a
+  target draws them: on whole pixels, without overlap, and covering what the dirty
+  rectangles cover (`separate_dirty_rects`). Rectangles close to each other are first
+  joined into the rectangle that holds them (below). Of what is left the largest stay
+  whole, and a smaller one keeps what is outside them, in at most four pieces for each of
+  them; the rectangles of a tracker are inflated by a pixel, so two that touch overlap,
+  and those of `MultiDirtyRectTracker` may overlap as they are. More than eight pieces
+  (`SEPARATE_RECTS`), or more than thirty-two rectangles to begin with, become the one
+  rectangle that holds them all.
+- `ServerCompositionTarget::render_root_to_context_with_clip` draws a pass for each
+  rectangle: the clip, the clear, and the walk of the tree with the rectangle as its clip,
+  which draws the visuals that reach into it. The walk changes nothing in the tree, so a
+  frame may walk it more than once. The trackers collect, test and report what they did,
+  and clip with their region wherever they are asked to clip.
+- A frame with a backdrop in its dirty area is one pass under the rectangle that holds its
+  rectangles. A backdrop is drawn whole (section 9.54) and reads what the frame drew under
+  it and around it; cut into passes it would read what a pass has yet to draw.
+- In the Skia backend `SkiaGpuRenderTarget` answers `true` for a context of Ganesh (WebGL
+  in a browser, OpenGL and Vulkan where Graphite is not used) and `false` for Graphite
+  and for the raster surface.
+
+The rules of section 9.54 are untouched and run first: where the rectangles fill their
+union the area is one rectangle on every backend, and this section is about the frames
+where they do not, on the backends that pay for a region.
+
+**One rectangle for the frame was the first form of this section, and the wrong one.** It
+drew such a frame under the one rectangle that holds its dirty rectangles. That is right
+where the rectangles nearly fill it, as in a page switch, and wrong where they are small
+and far apart: the rectangle between them is drawn again in every frame. The gate of the
+platforms (section 8.2) found it with its first run, on Android, where the window is drawn
+with Ganesh on OpenGL. The still wall of the frame benchmarks changes a clock in one
+corner and moves a cursor in every frame (`window/wall`, the emulator of section 8.2, the
+median of nine rounds, each side against the commit the frame benchmarks came with):
+
+| Android, the still wall in a window | ms a frame |
+| --- | ---: |
+| The region clip (before this section) | 16.667 |
+| One rectangle for the frame | 29.240 |
+| A pass for every rectangle | 16.667 |
+| One rectangle at a time, those close to each other joined | 16.667 |
+
+In the gate of the last row the other scenes in a window (text, list, transforms, lines)
+are where they were as well, 16.667 ms a frame on both sides, and the first frame of the
+wall comes after 685 ms where it came after 972 ms.
+
+**Rectangles close to each other are one rectangle.** A pass for every dirty rectangle was
+the second form, and the site said what was wrong with it. The banner of the Home page
+clips its content with rounded corners, and four pictures float in it: four dirty
+rectangles in every frame, all inside the banner. The masks of such a frame are made for
+each of its passes: a frame of four passes uploaded about five masks where a frame of one
+rectangle uploads one, 286 masks in a switch to that page against 46 under one rectangle
+and a budget of 220. A pass of its own is a walk of the tree, a clear, and
+once more every draw that reaches into it and into its neighbour, a background or the mask
+of a clip both are under. That is worth it for what is far apart, and not for what is
+close.
+
+So two rectangles that fill a quarter of the rectangle that holds them both
+(`JOINED_SHARE`) are drawn as that rectangle, the pair that fills the most of it first,
+until no pair does (`join_dirty_rects`). A rectangle made of others counts with the area
+of those, not with its own, so a chain of small rectangles does not grow over what is
+empty. The four pictures become the banner. A page switch, the content area and the two
+rows of the drawer, becomes the window, which is what the first form drew and what the
+counts below were good for. The clock and the cursor of the still wall fill next to
+nothing of the rectangle between them and stay two passes.
+
+**Measured** with the sites of the three forms, each built and walked by the browser job of
+its pull request (a runner of the CI, Linux, headless Chrome with its software rasteriser;
+the median of three rounds), beside the two sites of the table above:
+
+| Switch | | Before 9.53 | Main | One rectangle | A pass for each | Joined |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Buttons, first visit | masks (pixels) | 34 (169,284) | 190 (3,333,194) | 35 (482,382) | 39 (250,877) | 34 (167,172) |
+| CheckBox, first visit | masks (pixels) | 2 (21,328) | 29 to 38 (1,304,000) | 2 (16,216) | 2 (16,216) | 2 (16,216) |
+| Buttons, shown again | masks (pixels) | 18 (111,522) | 120 to 127 (2.5 to 3.0 million) | 17 (73,848) | 19.5 (115,624) | 18 (624,669) |
+| CheckBox, shown again | masks (pixels) | 2 (21,328) | 27 to 36 (1,270,000) | 1 (9,362) | 1 (9,362) | 1 (9,362) |
+| Home, shown again | masks (pixels) | 93 to 98 (22 to 23 million) | 422 to 443 (76 to 79 million) | 46 (11.8 million) | 286 (4,760,866) | 48 (11,374,694) |
+
+The masks of a switch are again those of its glyphs and paths. The draw calls are more
+than before section 9.53 because a switch has more frames than it had then (20 to 29 on
+the runner, two or three in the build before 9.53: the animations of the pages that came
+since), each of a few draws; the masks do not grow with them. The Home page uploads a
+mask in every frame of its animation, a path Ganesh rasterises on the processor, on every
+side; the runner draws fewer frames of it in the time of a switch (47 against 94 to 100),
+so its count is not to be compared with the two columns beside it.
+
+Times are left out on purpose. On the machine of these numbers a switch ends after 500 to
+630 ms and is painted after 860 to 900 ms on both sides, with the software rasteriser of
+headless Chrome, with the GPU of the machine and with the processor slowed down six
+times: the wait for the page's assets and the animation of the switch are most of it, and
+a desktop processor rasterises and uploads the masks inside the frames it has. The delay
+that was reported is what a slower processor and a slower upload make of the same masks,
+which is why the gate counts them.
+
+**The gate.** The count is the regression test and the benchmark gate of this section.
+
+- `scripts/browser/tests/navigation_cost.test.mjs` opens the site in headless Chrome,
+  walks Buttons, CheckBox and Home three times and holds the masks and the pixels of masks
+  of every switch against the budget of its page (`BUDGET` of
+  `scripts/browser/navigation-cost.mjs`: about twice what a frame of one rectangle
+  uploads, a third of what the frames of regions did). It also checks that the frames are
+  drawn with WebGL on the thread of the page, where they are counted, and that a page
+  shown again links no program and uploads no more than its first visit. It runs in the
+  browser job of every pull request, in the browser workflow for the modules without and
+  with threads, and in the Pages workflow before the site is published.
+- `scripts/perf/gate.py --only browser --browser-site <folder or address>` puts the same
+  budget into the table of the local gate, and with `--browser-base-site` compares the
+  counts of two sites (section 8.1).
+- `node scripts/browser/navigation-cost.mjs <folder or address>` prints the table of a
+  site; `--gate` fails over the budget, and it takes the address of the published site as
+  well as a folder.
+
+Both fail on the site of the main branch before this section (190 masks against 80 on the
+first visit of Buttons) and on the site of the second form (286 masks against 220 on the
+Home page), and pass on the sites of the first form and of this one.
+
+**What stays as it was.** What is on the screen: a frame draws its dirty rectangles, on
+whole pixels, and what lies between those that are close to each other, never less, and
+what it draws there is drawn as it was. The rectangles a tracker collects, the rules of
+section 9.54 and the widening over backdrops are untouched. A target that does not answer
+the question draws regions as before, which is every target of the desktop with Graphite,
+the raster surface and the targets of the other backends.
+
+**Other backends.** The question and the rule are in `ferroui_base`
+(`IRenderTarget`, `IDirtyRectTracker`, the composition target); a backend answers with one
+method. Vello and ProGPU clip in the shader or by the scissor and keep the default.
+A backend whose clip of a region is a mask, a stencil pass or a layer for each draw
+(Ganesh; Direct2D with a geometry clip, should its target be given regions) answers
+`true` and gets its frames one rectangle at a time, each under a clip it has a scissor
+for, with no code of its own.
+
+**Not upstream.** Upstream's trackers clip with the region they collected on every
+backend; `DEVIATIONS.md` has the row.
+
+**Tests.** `i_dirty_rect_tracker.rs`: `rectangles_apart_stay_as_they_are_the_largest_first`,
+`rectangles_close_to_each_other_are_drawn_as_the_rectangle_that_holds_them` (the four
+pictures of a banner, a page switch, a quarter of the rectangle and less than a quarter, a
+joined rectangle that counts with the area of its members),
+`rectangles_that_overlap_are_cut_into_pieces_that_do_not` (the pieces never overlap and
+cover what the rectangles covered, and no more where nothing is joined) and
+`more_pieces_than_a_frame_is_drawn_in_are_their_union`. `multi_dirty_rect_tracker.rs`:
+`the_rectangles_of_a_frame_drawn_one_at_a_time_are_its_dirty_rectangles_apart`.
+`region_dirty_rect_tracker.rs`:
+`the_rectangles_of_a_frame_drawn_one_at_a_time_are_those_of_its_region_apart`.
+`compositor_tests.rs`:
+`target_that_clips_regions_per_draw_renders_each_dirty_rectangle_under_its_own_clip` (two
+dirty rectangles apart from each other: a target that answers `true` gets a pass for each
+under a clip of its rectangle, no clip of a region, and nothing of the visual between
+them; one that does not gets the region). `composition_winui_material_tests.rs`:
+`a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle`.
+`skia_gpu_render_target.rs`: `only_a_ganesh_context_clips_regions_per_draw`. In a
+browser: `navigation_cost.test.mjs`, above.
+
+### 9.57 A hold is inherited with the measure it describes, and a grid of several star columns holds what its cells hold at their share
+
+The layout pass is the largest part of the UI thread's frame at tier 16 of the gauntlet
+(40.7 per cent of its samples; the commit of the compositor 29.8, the creation of text
+layouts 14.5). The content width of that scene changes in every frame, so what a pass costs
+is what its measure holds (section 9.15) do not stop. A count of the measures of one pass
+that ran and returned the desired size they had returned before, at another constraint,
+by the type of the element:
+
+| Measured again for the same desired size, a pass | |
+| --- | ---: |
+| `Grid` | 352 |
+| `Border` | 296 |
+| `StackPanel` | 202 |
+| The sparkline of a card | 118 |
+| The bar of a card | 118 |
+| The card | 84 |
+| All | about 1,170 |
+
+Two rules of section 9.15 were behind all of them.
+
+- **An element whose class does not override the measure held nothing.** The measure of
+  `Layoutable` gives every visual child the constraint it got and returns the largest of
+  their desired sizes: a control without children returns nothing at every constraint, and
+  one with children returns the same as long as each child does. It could not say so. A
+  hold is a statement about one `measure_override`, and a virtual member is inherited by
+  every class below: had the root class reported the hold of its measure, a class that
+  overrides `measure_override` alone would have inherited a hold that describes a measure
+  it no longer runs. So the root reported none, and every class without a measure of its
+  own (the sparkline, the bar, a user control, a panel that only arranges) was measured
+  again at every constraint, and so was every border and stack that holds one, since they
+  hold what their children hold.
+- **A grid with more than one star column held its own size only.** The header of a card
+  and its rows of values are such grids.
+
+**The change**, in two parts.
+
+1. *A member of a class may follow another one* (`ferro_class!`, in `ferroui_base`): a
+   virtual member declared `follows <member> else <fallback>` is inherited only together
+   with the member it follows. An implementation that states what it overrides
+   (`ferro_impl_classes!`, `ferro_overrides!`) and overrides neither of the two takes both
+   from its base class; one that overrides the followed member alone gets the fallback in
+   its slot; one that overrides the following member has its own, as before. An
+   implementation that does not state what it overrides (a plain `impl`) cannot be asked
+   which of the two it has, and gets the fallback unless it overrides the following member:
+   the safe answer. `parent_<member>` is unchanged.
+
+   `LayoutableImpl::measure_hold_override` follows `measure_override`, with "holds
+   nothing" as its fallback, and the root class reports the hold of its measure: the
+   intersection of the holds of its visible visual children, and every size without one. The
+   classes that report a hold of their own (section 9.15) are as they were. The same rule
+   closes a hazard those classes had: a class derived from `Border`, `Decorator`,
+   `StackPanel` or `Grid` that overrides `measure_override` alone used to inherit the hold
+   of the measure it replaced, and now holds nothing until it says what it holds.
+
+2. *A grid of several star columns holds what its cells hold at their share.* A cell of
+   weight `w` among star columns of weight `Σw` gets `(W − fixed) · w / Σw` of the width
+   `W` of the grid, where `fixed` is the width of the other columns and the spacing. Its
+   hold in its own space is a range of that share; in the space of the grid it is the range
+   divided by the share (`hold · Σw / w`), moved by `fixed`, and narrowed on each side by a
+   rounding step (when the layout is rounded) and by a slack of 1/65536 for the division
+   (`STAR_SHARE_SLACK`), both divided by the share as well. The grid holds the intersection
+   over its cells. With one star column the share is one and the slack nothing: the hold of
+   section 9.15, bit for bit. The conditions are those of section 9.15 (no limits or shared
+   sizes on the star columns, auto or pixel rows, no spans, a finite width).
+
+**Measured** with the local gate (section 8.1) against the main branch it was made from:
+the median of three to nine rounds, the two sides in turn, time and where they are counted
+the instructions.
+
+| Line | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| Gauntlet tier 16, the UI thread, ms a frame | 11.584 | 10.540 | -9.0 % | |
+| Gauntlet tier 16, the render thread, ms a frame | 33.330 | 32.865 | -1.4 % | |
+| `SizeChange.star_grid[Leaves=1000]` | 125.2 us | 108.3 us | -13.5 % | -12.86 % |
+| `AttachedLayoutProperties.grid_cell[Children=1000]` | 84.2 us | 79.7 us | -5.3 % | -5.19 % |
+| `ScrollContent.viewport[Rows=1000]` | 3.549 us | 3.460 us | -2.5 % | -1.00 % |
+| `PanelMeasureArrange`, its eight panels | | | -1.7 to +0.2 % | -0.64 to -0.89 % |
+
+The UI thread has a millisecond more of every frame of the gauntlet. The rate of its
+window is set by the render thread at this tier, which is where it was, so the frames a
+second are too. The frame benchmarks and the windows of the gate are inside their
+tolerances.
+
+The first form of the grid's hold cost a line of its own. It read the length of the
+column of every cell, a property of the column definition, to see whether the cell is in
+a star column: `grid_cell`, a grid of a thousand cells in columns of a length in pixels,
+went up by 2.27 per cent of its instructions, the one line of the 387 of the gate over
+its tolerance there. The hold now reads the column of a cell only in a grid that has a
+star column, and the length of that column only where there are several of them; a grid
+without one reads neither, which it did before this section, and the line is 5.19 per
+cent under the main branch.
+
+Nine lines of the `trees` suite were over their tolerance in time alone in that run, by 10
+to 39 per cent, with the instructions of the main branch (between -0.06 and +0.16 per
+cent). A second run of the suite, against the main branch of that day, had six of them
+inside their tolerance and three over it again: a font family and a font weight set on
+the root of 2,000 tiles, and a class toggled on them. They were looked at by the rule of
+section 8.1. No object the benchmarks use has changed its size, the instructions are those
+of the main branch, and a profile of the two programs has the same share of the time in
+every function, in the change that is timed and in the layout pass after it: the whole of
+it was slower by a sixth, and nothing in particular. The program of the branch was then
+built once more with 36 bytes in front of the code of the libraries (a `global_asm!` of
+`.space 36` in the benchmark crate), which moves every function and changes none. The
+medians of 600 iterations, the two programs of the gate and that one, run directly:
+
+| Line | | Main | Branch | Branch, moved by 36 bytes |
+| --- | --- | ---: | ---: | ---: |
+| `Propagation.font_family[Tiles=2000]` | time | 1.15 to 1.19 ms | 1.52 ms | 1.13 to 1.17 ms |
+| | cycles | 4.30 to 4.47 million | 5.73 million | 4.25 to 4.42 million |
+| | instructions | 12,585,453 | 12,579,623 | 12,581,527 |
+| `Propagation.font_weight[Tiles=2000]` | time | 1.15 to 1.16 ms | 1.50 ms | 1.14 to 1.22 ms |
+| | cycles | 4.34 to 4.36 million | 5.63 million | 4.32 to 4.59 million |
+| | instructions | 12,540,727 | 12,536,814 | 12,539,026 |
+| `Styling.toggle_class[Tiles=2000]` | time | 339 to 340 us | 388 us | 330 to 333 us |
+| | cycles | 1.28 million | 1.46 million | 1.25 to 1.26 million |
+
+The same code 36 bytes further on runs at the speed of the main branch. The time of these
+three lines is that of where a build puts the code, not of what the code does; an earlier
+build of the main branch took 4.94 million cycles for the first of them at the same
+instructions. The gate is not told to pass them, and the pull
+request shows them with their counts.
+
+**What stays as it was.** The desired sizes and the arranged bounds: a hold only says that
+a measure would return what it returned. The layout pass, its order and its invalidations
+are untouched, and so is every `measure_override`. A class that reported a hold reports the
+same one. A class with a plain `impl` that overrides `measure_override` holds nothing, as
+before, and one that overrides only `arrange_override` in a plain `impl` holds nothing
+either, as before; `ReversibleStackPanel` and the preview adorner of `GridSplitter`, which
+keep the measure of their base class, now state their overrides and keep its hold.
+
+**Other backends.** All of it is in `ferroui_base` and the controls; the layout does not
+know what draws it, and Skia, Vello and ProGPU get the same smaller pass.
+
+**Not upstream.** Upstream has no holds (section 9.15) and its virtual members are
+inherited one by one; `DEVIATIONS.md` has the row.
+
+**Tests.** `virtual_dispatch_tests.rs`:
+`member_that_follows_another_is_inherited_only_with_the_member_it_follows` (nine classes:
+which of the two members each overrides, stated or in a plain `impl`, directly and below a
+class that overrides the followed one; the results and the slots). `measure_hold_tests.rs`
+of the controls: `a_hold_is_inherited_only_with_the_measure_it_describes` (a decorator
+holds; a decorator class that overrides the measure holds nothing and is measured again;
+one that states an arrange alone holds; a control without children holds every width; a
+panel holds what its visible children hold);
+`a_grid_of_several_star_columns_holds_what_its_cells_hold_at_their_share` (the hold of the
+grid against the hold of its cell at shares of a half, two thirds and a quarter, at 58
+widths); `a_grid_of_several_star_columns_measured_inside_its_holds_lays_out_as_a_new_one`
+(seven grids, among them weights of 1.5 and 3, a fixed and an auto column between the star
+columns, spacings and cells that are panels without a measure of their own; with and
+without layout rounding: measured at a width and then at every width a quarter pixel apart
+around it, each has the desired sizes and the arranged bounds of a tree laid out at that
+width from nothing, and holds at more than fifty of those widths).
+
+### 9.58 Tried and left out: a shared resource of a recording as the slot of its batch
+
+The frame data that crosses from the UI thread to the render thread was the subject of a
+proposal of its own: publish it as shared blocks that are not written and read again, with
+a difference in place of the whole. The profile was asked first what there is to gain (tier
+16 of the gauntlet, the share of the samples of each thread):
+
+| Tier 16 | |
+| --- | ---: |
+| UI thread: writing render data and visuals into the batch | 2.7 % |
+| Render thread: reading them, and releasing the content they replace | 4.0 % |
+| UI thread: the commit as a whole | 29.8 % |
+| UI thread: recording the drawings that changed (inside the commit) | 15 % |
+
+The transport is a small part of a frame, and most of what the proposal describes is how
+it already works. A batch carries only what changed since the batch before it (the visuals
+and the drawings that are dirty), which is the difference. The resources of a recording
+(brushes, pens, glyph runs, bitmaps, geometries) cross by reference and are never copied.
+The opcodes of a recording are a short copy into a buffer that is kept between frames. A
+form in which a recording itself is one shared block was looked at and left: the render
+thread reads a recording once into the server render data, which is what it draws from in
+every frame after, so a block would save one short copy into a buffer that is kept and
+cost an allocation for every recording that is sent.
+
+What the transport does pay for is a box for every resource: one allocation on the UI
+thread and one release on the render thread for each brush, pen, glyph run and bitmap of
+each recording that is sent. That was the part worth a trial. It is recorded here with what
+it measured. It is not merged: no line of the gate says a frame is shorter for it. The code
+is on the branch `perf/frame-blocks-slots`.
+
+**What was tried.** A resource that is one counted reference to a value both threads read
+is the slot of the batch itself (`BatchObject::Shared`, an `Arc<dyn Any + Send + Sync>`):
+the shared form of a brush or a pen, a glyph run, a bitmap, the snapshot of a 3D scene.
+Nothing is allocated for the slot, and nothing is released for it on the render thread but
+the reference. A resource that is a reference to a trait object (a geometry, an effect, a
+custom draw operation) crosses in a box as before. What a batch carries and the order it
+is read in are untouched, the server render data holds what it held, and a backend sees
+nothing of it.
+
+**Measured** with the local gate (section 8.1; every suite, nine rounds, against the main
+branch the trial was made from):
+
+| | Main | The slots | |
+| --- | ---: | ---: | ---: |
+| Gauntlet, tier 16: UI thread, ms a frame | 11.680 | 11.595 | −0.7 % |
+| Gauntlet, tier 16: render thread, ms a frame | 33.236 | 33.299 | +0.2 % |
+| Gauntlet, tier 16: ms a frame | 33.243 | 33.306 | +0.2 % |
+| Start of the items scene (`frames/items startup_ms`), ms | 11.709 | 10.901 | −6.9 % |
+| Start of the tiles scene (`startup/tiles startup_ms`), ms | 2062.7 | 2014.4 | −2.3 % |
+| Its first frame, resident memory (`first_frame_mb`), MB | 470.6 | 616.9 | +31.1 % |
+| `forced_stationary_vertical_layouts` of the TreeDataGrid, instructions | | | +2.6 % |
+
+- **The frame is what it was.** The UI thread's 0.7 per cent is inside what two runs of
+  one build differ by, and the render thread, which sets the rate of the window at this
+  tier, did not move. What the boxes cost is below what the gate can tell of a frame.
+- **The start of the items scene** is the one line the gate called faster, and more than
+  half of it is the base of this run: a gate of the same base commit a few hours before
+  measured 11.235 ms for it, and 11.056 ms for a change that does not touch the transport.
+  What is left is about three per cent of eleven milliseconds.
+- **The memory of the first frame** is the allocator, not the slots: the same base commit
+  held 572.2 MB there in the gate a few hours before and 470.6 MB in this one, and the
+  whole start differs by 3.9 per cent (1895.4 and 1969.9 MB), inside its tolerance. A slot
+  holds a reference in place of a box, so there is nothing in the change that could keep
+  146 MB.
+- **The instructions of the TreeDataGrid line** rose by 2.56 and 2.63 per cent in a
+  benchmark that invalidates a measure and runs the layout pass: it sends no batch, and
+  the code of the trial is not on its path. That leaves the build (what the compiler puts
+  where once a crate has another variant and four more functions) as the cause. It was
+  not followed further for a change that is not merged.
+
+**Why it is left out.** A change of the transport is merged for a shorter frame, and this
+one does not make one. It adds a variant to a public enum of `ferroui_base` and a second
+way for a resource to cross, for an allocation whose cost the gate does not find.
+
+**Other backends.** The batch and its slots are in `ferroui_base`; Skia, Vello and ProGPU
+read the same server render data, and none of them would see the change. Should a backend
+or a scene measure the boxes (a start that sends hundreds of thousands of recordings in
+one batch is where they are most), the branch is where to take it from.
+
+**Not upstream.** Upstream's batch stream carries its objects as references of the managed
+heap, where a slot costs nothing; the box is a cost of this port.
+
+**Tests on the branch.** `batch_stream.rs`: `a_shared_payload_is_its_own_slot`.
+`render_data_tests.rs`: `shared_resources_cross_a_batch_as_its_slots`.
+
+### 9.59 A class names the properties its `on_property_changed` reacts to
+
+A change of a property is told to the object it changed on
+(`FerroObject::notify_property_changed`), and the object hands it to
+`on_property_changed`, a virtual member every class of the object may override; each
+override calls the one of its base class first. A `TextBlock` has seven
+of them. At tier 16 of the gauntlet the notification is 6.0 per cent of the samples of the
+UI thread, and what the handlers do for the change is the smaller part of it:
+
+| Of the UI thread at tier 16 | per cent |
+| --- | ---: |
+| `notify_property_changed`, all of it | 6.0 |
+| of it from `Layoutable::arrange_core`, the bounds after an arrange | 2.7 |
+| The handlers of the six base classes, their own time | 1.1 |
+| Lookups of thread-local cells from those handlers | 0.55 |
+
+The six handlers of the base classes (`Animatable`, `StyledElement`, `Visual`, `Layoutable`,
+`InputElement`, `Control`) each compare the property of the change with the properties
+their class reacts to, one after the other: thirteen comparisons, and each of them calls
+the accessor of a property, which reads a cell of the thread. For the changes a frame of
+the scene makes (a text, a width, the bounds) none of the thirteen is true, except the
+bounds for `Control`.
+
+**The change.** A class names the properties its handler reacts to, once, and the handler
+asks whether the property of a change is one of them before it compares.
+
+- `PropertyChangeHandler` has a variant for each of the six classes.
+  `PropertyChangeHandler::reacts_to(&[..])`, called from the static constructor of the
+  class, sets the bit of the handler on each property it is given.
+- `FerroPropertyChangedEventArgs::reaches(handler)` is the question: a load and a test of
+  a bit. A handler leaves when the answer is no.
+- `FerroPropertyChangedEventArgs::is_for(handler, property)` is the comparison a handler
+  makes, and `FerroProperty::has_change_handler` reads the bit.
+
+The static constructor of a class runs before the first instance of the class exists, and
+those of its base classes before it, so a handler never runs before its properties are
+named.
+
+**No memory for it.** The bits are a word in the state a property shares with the
+properties added to other owners, beside the count of its holders (section 9.21): the
+shared block is two words where it was one, once for each registered property. The
+property struct, the value store and the objects are the sizes they were
+(`sizes_of_an_element` of the frame benchmarks prints the same on both sides:
+`FerroObject` 320 bytes, `Layoutable` 1304, `Control` 1544).
+
+**A handler that reacts to a property its class did not name** would miss the change in a
+release build. A debug build therefore answers `reaches` with yes for every change, runs
+the comparisons, and `is_for` fails, with the names of the property and of the handler,
+when a comparison is true for a property that was not named. Every test that changes such
+a property finds the missing name.
+
+**Measured** with the local gate against the main branch (section 8.1, the median of
+three rounds; 387 lines in four runs, none over its tolerance):
+
+| Line | Main | Branch | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlWrite.local_changed`, `Border` | 35.68 ns | 25.42 ns | -28.8 % | -29.22 % |
+| `ControlWrite.local_changed`, `Button` | 45.68 ns | 35.18 ns | -23.0 % | -23.74 % |
+| `ControlWrite.local_changed_affects_measure`, `Border` | 36.00 ns | 24.82 ns | -31.1 % | -28.94 % |
+| `ControlWrite.attached_changed`, `Border` | 39.18 ns | 27.55 ns | -29.7 % | -29.68 % |
+| `ControlWrite.inherited_changed`, `Border` | 33.35 ns | 23.42 ns | -29.8 % | -30.37 % |
+| `ControlWrite.non_copy_changed`, `Border` | 64.66 ns | 50.81 ns | -21.4 % | -20.19 % |
+| `ControlWrite.set_and_clear`, `Border` | 111.76 ns | 88.21 ns | -21.1 % | -17.90 % |
+| `SetterApply.plain`, 1000 controls, 8 setters | 681.4 us | 580.4 us | -14.8 % | -12.86 % |
+| `SetterApply.plain`, 1000 controls, 32 setters | 2.399 ms | 2.064 ms | -14.0 % | -14.02 % |
+| `Propagation.theme_variant`, 2000 tiles | 1.340 ms | 876.0 us | -34.6 % | -24.90 % |
+| `Propagation.data_context`, 2000 tiles | 1.302 ms | 967.3 us | -25.7 % | -22.73 % |
+| `Propagation.is_enabled`, 2000 tiles | 2.009 ms | 1.634 ms | -18.7 % | -11.85 % |
+| `Propagation.flow_direction`, 2000 tiles | 2.329 ms | 2.092 ms | -10.2 % | -10.80 % |
+| `SizeChange.wrap`, 1000 leaves | 83.40 us | 70.79 us | -15.1 % | -10.63 % |
+| `AttachedLayoutProperties.dock`, 1000 children | 101.96 us | 87.09 us | -14.6 % | -10.67 % |
+| `Visibility.stack_panel`, 1000 children | 93.02 us | 81.11 us | -12.8 % | -10.50 % |
+| `Text.narrow_and_lay_out`, 2000 labels | 51.48 us | 44.98 us | -12.6 % | -8.85 % |
+
+A write of a property that changes its value is a quarter to a third shorter, and so is
+everything made of such writes: the setters of a style, an inherited value on its way down
+a tree, the bounds of the children of a panel after an arrange. In the frame benchmarks it
+is the build of a scene and its start:
+
+| Frame benchmarks | Main | Branch | |
+| --- | ---: | ---: | ---: |
+| `frames/items`, build | 5.963 ms | 4.994 ms | -16.3 % |
+| `frames/items`, start | 11.545 ms | 10.004 ms | -13.3 % |
+| `frames/deep`, build | 28.769 ms | 25.480 ms | -11.4 % |
+| `frames/cards`, build | 23.944 ms | 21.625 ms | -9.7 % |
+| `frames/wall`, build | 140.861 ms | 128.212 ms | -9.0 % |
+| `startup/tiles`, build | 422.164 ms | 383.747 ms | -9.1 % |
+| `frames/rows`, start | 236.063 ms | 218.124 ms | -7.6 % |
+| `frames/recolor`, start | 291.796 ms | 271.381 ms | -7.0 % |
+| `gauntlet/16`, the UI thread a frame | 11.933 ms | 11.916 ms | -0.1 % |
+
+The frame of tier 16 is what it was. The profile gave the six handlers 1.1 per cent of its
+UI thread and their lookups 0.55, and a frame of that scene changes few properties beside
+the bounds, which `Control` reacts to as before: what is saved there is below what the
+gate tells apart. The gain is where properties are written in numbers.
+
+Two lines are faster in time alone, at the instructions of the main branch
+(`Propagation.is_visible` -13.5 per cent, `Styling.resource_changed` -26.3): where the
+build put the code, as in section 9.57 and in the other direction. They are not counted.
+The benchmarks of the tree data grid have two lines of it, the recycling of template
+cells (`same_template_provider` 1.190 to 1.022 us, -14.0 per cent in time and -11.65 in
+instructions; `alternating_template_providers` -15.0 and -12.12). In a window the frames
+are those of the display on both sides; the first frame of the wall comes after 586 ms
+where it came after 631, and that of the list after 187 where it came after 206, both
+inside the tolerance of the gate.
+
+**What stays as it was.** What a handler does for a property it reacts to, the order of
+the handlers, and every handler of a class outside the six, which compares as before. A
+class derived from one of the six is called as before: the base handler returns early,
+the override goes on.
+
+**Proposal 8, handles of a pass instead of lookups in the thread, is closed with this
+section.** The lookups of thread-local cells are 1.3 per cent of the UI thread at tier 16
+(`_tlv_get_addr`, its own time). The six handlers were 0.55 of it. What is left is spread
+over more than twenty callers, the largest `Visual::cache_mode` with 0.15 per cent and
+`Layoutable::use_layout_rounding` with 0.09, the rest 0.02 to 0.07 each: accessors of
+properties in the measure, the arrange and the render of single controls. A handle handed
+down the layout pass would replace none of them, since what they look up is the property,
+not the pass, and there is no place left that is worth an API of its own.
+
+**Other backends.** All of it is in `ferroui_base` and the controls; nothing of it knows
+what draws.
+
+**Not upstream.** Upstream's `OnPropertyChanged` compares in every class;
+`DEVIATIONS.md` has the row.
+
+**Tests.** `property_change_handler_tests.rs` of the base crate:
+`a_class_names_the_properties_its_handler_reacts_to`,
+`a_property_added_to_another_owner_is_named_with_the_property_it_was_added_from`,
+`a_change_reaches_the_handlers_its_property_was_named_for`,
+`a_handler_that_reacts_to_a_property_its_class_did_not_name_fails_in_a_debug_build`.
+`property_change_handler_tests.rs` of the controls:
+`control_names_the_bounds_for_its_handler_and_no_class_names_a_text`,
+`a_change_of_the_bounds_still_raises_size_changed`.
+
+### 9.60 A dynamic resource follows its element by a token, and a style instance is made with room for its setters
+
+Styling is the seventh of the architecture proposals. It is 0.4 to 0.5 per cent of the UI
+thread at tier 16 of the gauntlet, whose controls are styled once and then only laid out
+and drawn, so the window benchmarks cannot measure it; the benchmarks of the styling
+subsystem can (`styling_subsystem::`, section 8). What they time is the cost of a page
+shown for the first time, a list that realizes its rows and a theme that is changed: the
+theme of a control attached, its template applied, the control taken out of a tree and put
+back.
+
+A profile of the timed part of `ControlThemeApply.attach[TextBox, 200]`, the theme of a
+text box attached to 200 of them (1.93 ms, 9.7 µs a control), by what the time is spent in
+(a function counts with what it calls, so the lines overlap):
+
+| Of the attach of a control theme | per cent |
+| --- | ---: |
+| The effective values are evaluated again (`reevaluate_effective_values`) | 75.8 |
+| A dynamic resource is started (`DynamicResourceExpression::start_core`) | 37.5 |
+| of that, the resource is looked up, converted and published | 20.6 |
+| of that, the expression subscribes to its element | 14.3 |
+| The new values are stored and their changes raised | 28.4 |
+| of that, the handlers of the classes for a changed property | 13.0 |
+| The style is instanced (`StyleBase::try_attach_instance`) | 9.3 |
+| The expressions of the setters are made | 6.2 |
+
+Nearly half of an attach is the dynamic resources of the theme's setters: a brush, a
+thickness or a font size the theme takes from the resources of the application, each one
+an expression that looks its resource up from the control, converts it for the property
+and follows the resources and the theme variant of the control from then on.
+
+**What a started expression allocated.** To follow its element it made two closures, a
+subscription for each of them (the closure that removes the handler again, shared and
+counted), and a list for the two subscriptions: five allocations, released again when the
+expression stops. The subscriptions are what the public events of an element return, and
+are right for a subscriber that may outlive the element or forget it. An expression does
+neither: it is owned by the value store of the object it is the value of, it knows the
+element it follows, and it stops before it lets go of it.
+
+**The change**, in four parts, none of which changes what a property reads.
+
+1. *A dynamic resource follows a styled element by a token.* `StyledElement` gives out the
+   token of a handler (`add_resources_changed_handler`,
+   `add_actual_theme_variant_changed_handler`, and the two that remove; hidden from the
+   documentation, for the markup crate) and the expression keeps the two tokens where it
+   kept the list. A started expression allocates its two closures and nothing else. An
+   expression released while it runs takes its handlers out as the subscriptions did
+   (`Drop`), and a host that is no styled element, the application, is subscribed to as
+   before.
+2. *A style instance is made with room for its setters.* The entries of an instance were
+   pushed one by one into a list that grew as it went, four or five times for the theme of
+   a control; it is now made once, with the number of the style's setters, and no larger.
+3. *The entries of a frame unsubscribe without a copy of the list on the heap.* A frame
+   that is removed copied its entries to unsubscribe them; the copy is now on the stack
+   for frames of up to sixteen entries.
+4. *A handler is found by its token with a binary search.* The tokens of every list come
+   from one counter and a handler is added at the end, so a list is in the order of its
+   tokens. A control with thirty dynamic resources has thirty handlers in each of two
+   lists, and each expression that stops removes one from each.
+
+**Measured** with the benchmarks of the styling subsystem in the local gate, the commit
+before this section against it, three rounds a side (the median; instructions are those
+the processor counted for the timed part, which a busy machine does not move):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlThemeApply.attach[Button, 200]` | 924 µs | 878 µs | -5.0 % | -8.0 % |
+| `ControlThemeApply.attach[CheckBox, 200]` | 987 µs | 939 µs | -4.9 % | -7.3 % |
+| `ControlThemeApply.attach[TextBox, 200]` | 1.888 ms | 1.833 ms | -2.9 % | -6.1 % |
+| `StylesChanged.remove_from_root[1000]` | 212 µs | 192 µs | -9.3 % | -11.3 % |
+| `Activation.pseudo_class_set_unobserved[1000]` | 40.1 µs | 35.6 µs | -11.3 % | -5.2 % |
+| `Activation.pseudo_class_set[1000]` | 154 µs | 152 µs | -1.8 % | -1.8 % |
+| `SetterApply.template[1000, 8]` | 1.051 ms | 1.018 ms | -3.1 % | -3.8 % |
+| `SetterApply.binding[1000, 8]` | 1.422 ms | 1.377 ms | -3.2 % | -2.7 % |
+| `DetachReattach.detach[1000]` | 746 µs | 745 µs | -0.2 % | -2.9 % |
+| `DetachReattach.move_same_styles[1000]` | 2.129 ms | 2.085 ms | -2.1 % | -0.8 % |
+| `ControlThemeApply.switch_theme_variant[Button, 200]` | 721 µs | 741 µs | +2.7 % | -1.4 % |
+| `StylesInScope.inactive_by_class[100]` | 16.03 ms | 16.02 ms | -0.0 % | +0.9 % |
+| `SelectorMatch.pseudo_class[1000]` | 358 µs | 359 µs | +0.3 % | +0.6 % |
+| `ResourceLookup.switch_theme_variant[1000]` | 778 µs | 816 µs | +4.9 % | +0.5 % |
+| `DynamicResources.detach[1000]` | 1.397 ms | 1.389 ms | -0.6 % | +0.5 % |
+
+The gate measured 62 lines and none is over its tolerance. The attach of a theme executes
+6 to 8 per cent less, which is what the profile promised for the subscriptions and the
+list of the instance, and a style collection taken from the root 11 per cent less: every
+frame it removes unsubscribes its entries without a list of its own. The last four lines
+stand for the ones that execute more, none of them by one per cent: the selectors with a
+class and the styles that are not active, and the resources of a control that is detached
+or changes its theme variant. The likely causes, not profiled: a style of one setter asks
+for its room before its first entry where the list used to ask with it, and an expression
+looks its element up to take its handlers out. Of the 47 lines that are not in the table
+none executes one per cent more, most are within a tenth of a per cent, and the times are
+within the noise of the machine (`SelectorMatch.none`, which executes the same
+instructions to the last, is 4.5 per cent apart).
+
+**What was looked at and left.** Three larger changes were sized and are not in this
+section; they belong to the shared styled values of the work that follows, and each has a
+hazard that a bounded change does not.
+
+- *A memo of the resolved resources of the application.* The lookup, the conversion of a
+  colour to a brush and the cast to the type of the property are 13 per cent of an attach,
+  and the same few hundred resources are resolved for every control. A memo by key, theme
+  variant and target type would answer them. It needs to know that the value came from
+  the application and not from a dictionary between the control and it, an epoch that
+  every change of a resource moves, and an answer for resources that give a new object for
+  each lookup; and the brushes made from colours would become shared objects.
+- *The instance of a style that is not active, made when it becomes active.* A control
+  holds the entries and expressions of every pointer-over, pressed and disabled style of
+  its theme from its first attach on. The errors of a setter are reported while it is
+  instanced, the value store and the developer tools read the entries of a frame that is
+  not active, and a binding may have effects when it is instanced.
+- *The notification of a control taken out of its tree.* Every dynamic resource of the
+  control looks its resource up again and publishes that there is none, which costs about
+  what the attach of the theme cost. Leaving it out would change what the properties of a
+  detached control read, which upstream does not do either.
+
+The other half of the seventh proposal, compiled bindings by default, was merged before
+the proposals were written (#603, PR 637); what is left of that ticket is about the size
+of the binary.
+
+**What stays as it was.** The value of every property, the order of the notifications and
+the handlers, and what the public events of an element return. An object of the class
+model is as large as it was: the tokens are kept by the expression, and the element has
+the two handler lists it had.
+
+**Other backends.** All of it is in `ferroui_system`, `ferroui_base` and the markup crate;
+styling does not know what draws it.
+
+**Not upstream.** Upstream's expression subscribes to the events of its host;
+`DEVIATIONS.md` has the row.
+
+**Tests.** `handler_list.rs`:
+`a_handler_is_removed_by_its_token_wherever_it_is_in_the_list`.
+`dynamic_resource_expression_tests.rs`:
+`an_expression_takes_its_handlers_out_of_the_element_it_follows` (two expressions of an
+element stopped in turn, one stopped twice, one released while it runs with the object it
+is the value of, and one whose element is gone before it stops).
+
+### 9.61 A binding expression keeps the state few expressions have apart
+
+The first frame of a start is on the screen with the heap its controls left, and how much
+that is decides how many controls a page can have before memory, not time, is what a
+start costs. The start of the controls scene of the frame benchmarks (`startup/controls`,
+1,600 templated controls: buttons, check boxes, text boxes, sliders and progress bars
+under the Fluent theme) leaves 192,057,582 bytes in 1,453,268 blocks when its window is
+shown. The census of the heap by allocation site (section 8, `FERROUI_HEAP_SITES=show`
+and `scripts/perf/heap-sites.py`) says whose they are:
+
+| Left by the show of 1,600 templated controls | MB | blocks | bytes a block |
+| --- | ---: | ---: | ---: |
+| The elements (`type_system::instantiate`) | 39.08 | 29,229 | 1,402 |
+| Effective values (`ValueStore::create_effective_value`) | 19.77 | 134,509 | 154 |
+| Template binding expressions | 18.97 | 45,214 | 440 |
+| Style instances (`StyleBase::try_attach_instance`) | 9.97 | 76,832 | 136 |
+| Lists of children and classes (`FerroList::new`) | 6.79 | 103,930 | 69 |
+| Dynamic resource expressions of setters | 6.57 | 14,838 | 464 |
+| The tables of the effective values of an element | 6.46 | 25,651 | 264 |
+| Setter instances (`Setter::instance`) | 4.69 | 61,616 | 80 |
+| Class activators of selectors | 4.48 | 45,204 | 104 |
+| Dynamic resource expressions of elements | 4.47 | 18,406 | 255 |
+| The handlers of the lists (`add_collection_changed`) | 3.48 | 45,626 | 80 |
+| All | 183.16 | 1,453,268 | 126 |
+
+This section is the first of a series that takes the rows of that table in turn, each
+measured by the same number. It starts with the expressions: a template makes one for
+every `TemplateBinding` of every control it builds, 28 for each control of the scene, and
+a theme one for every dynamic resource of its setters.
+
+**What an expression carried.** Every expression has the state of
+`UntypedBindingExpressionBase`, 248 bytes, and a template binding 424 with its own. Most
+of it is for what few expressions do:
+
+- an error, the default value of the target property (read when the expression has no
+  value) and the adapter of an expression that is observed instead of bound: three fields
+  and 64 bytes, of which a template binding that follows its parent uses none;
+- the sink, the frame, the target and the value, each a `RefCell` of an option whose
+  reads clone and whose writes replace: a borrow flag of eight bytes each;
+- in a template binding, a converter with its culture and its parameter (56 bytes), and
+  the handler and the subscription for the property changes of the target (40 bytes),
+  which only the modes that write to the source have.
+
+**The change.**
+
+- `UntypedBindingExpressionBase` keeps the error, the default value and the adapter in a
+  `RareState` it makes with the first of them (one `OptionCell<Box<RareState>>`). No
+  error where there was none makes nothing. The sink, the frame, the target and the value
+  are `OptionCell`s (section 9.40); a null value is the empty cell.
+- `TemplateBindingExpression` keeps the converter, its culture and its parameter in a
+  `Conversion`, boxed, of an expression that has a converter; the culture and the
+  parameter are read for a converter alone. The handler and the subscription of the
+  target are a `TargetLink` made when an expression of a mode that writes to the source
+  starts for the first time. The subscription to the templated parent is an `OptionCell`.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `UntypedBindingExpressionBase` | 248 | 144 |
+| `TemplateBindingExpression` | 424 | 224 |
+| `BindingExpression` | 400 | 296 |
+
+**Measured** with the census of the same start:
+
+| The show of 1,600 templated controls | Before | After | |
+| --- | ---: | ---: | ---: |
+| Bytes left | 192,057,582 | 180,032,550 | -6.3 % |
+| Blocks left | 1,453,268 | 1,456,096 | +0.2 % |
+| Template binding expressions, MB | 18.97 | 10.35 | -45 % |
+| Dynamic resource expressions of setters, MB | 6.57 | 5.09 | -23 % |
+| Dynamic resource expressions of elements, MB | 4.47 | 3.56 | -20 % |
+| Binding expressions, MB | 2.38 | 1.82 | -24 % |
+
+The blocks that are new are the states that were made: 2,028 expressions of the scene
+publish an error and have a `RareState` of 56 bytes (0.11 MB), and its 1,600 template
+bindings that write to their source have a `TargetLink` of 32 (0.05 MB).
+
+**The gate** (section 8.1; macOS, the base with the census of the heap in it):
+
+| Part | Metrics | Over tolerance |
+| --- | ---: | --- |
+| Framework benchmarks | 171 | none in the second run (three in time alone in the first) |
+| Counters, gauntlet, frames | 130 | 14, in time alone (below) |
+| TreeDataGrid | 71 | none |
+| Window | 15 | none |
+
+| `startup/controls` | Base | This section | |
+| --- | ---: | ---: | ---: |
+| `show_ms` | 206.958 | 206.638 | -0.2 % |
+| `startup_ms` | 266.157 | 265.377 | -0.3 % |
+| `show_mb` (resident) | 198.2 | 186.0 | -6.2 % |
+| `startup_mb` (resident) | 285.0 | 272.9 | -4.2 % |
+
+*The three lines of the framework benchmarks.* `trees::Propagation.is_visible`,
+`trees::Styling.toggle_class` and `trees::Styling.resource_changed` at 2,000 tiles were 11
+to 27 per cent over in time with the instructions of the base (+0.83, +0.08 and +0.00 per
+cent). The second run, five rounds, has them at -0.8, -4.4 and +0.6 per cent.
+
+*The fourteen lines of the frames.* The show of the scenes of tiles (`frames/wall`,
+`wall+pointer`, `grow`, `pile`, `recolor`, and `startup/tiles`) took 9 to 12 per cent
+longer, and their start, and that of `moves` and `reorder`, 5.5 to 8.5 per cent. These
+scenes have no binding: a profile of `startup/tiles` has no frame of an expression on
+either side, so the code of this section does not run in them. The checks of section 8.1,
+with `frames/wall` (the test program of the gate, run by itself, the sides in turn):
+
+| `frames/wall` | Base | This section | Padded by 36 bytes | Padded by 100 bytes |
+| --- | ---: | ---: | ---: | ---: |
+| Instructions of the process, million | 18,614 | 18,624 | 18,639 | |
+| Cycles of the process, million | 6,070 | 6,268 | 6,171 | 6,207 |
+| `show_ms`, the median | 252.6 | 288.6 | 271.8 | 273.2 |
+| `show_ms`, the runs | 250 to 262 | 255 to 296 | 257 to 290 | 260 to 284 |
+
+(The medians are of nine rounds; the last column is of a run of seven, in which the base
+showed the scene in 257.0 ms and this section in 288.0.) The instructions are those of the
+base. The program of this section showed the scene in
+255 ms in one of its 26 runs and in under 272 in four more, and the same sources with a
+few bytes in front of the code of the libraries are in between: the time moves with where
+the build put code that this section did not change. The gate is not told to pass these
+lines; they are here with their counts.
+
+**What stays as it was.** What an expression publishes, when, and in which order; the
+errors it reports and logs; the public API of the expressions. An expression that has no
+value still reads the default value of its target property once and keeps it, now in the
+state it makes for it.
+
+**Other backends.** All of it is in `ferroui_base`; the expressions do not know what
+draws their targets, and Skia, Vello and ProGPU start with the same smaller heap.
+
+**Tests.** `binding_typed_expression_tests.rs`:
+`an_expression_makes_the_state_few_expressions_have_with_the_first_of_it` (the three
+sizes; a value, a null value and no error make nothing; an error makes the state, is read
+back and is taken away by the next value without one) and
+`a_template_binding_that_follows_its_parent_makes_no_rare_state` (bound to a control with
+a templated parent and following it; the default value of a binding that lost its parent
+is kept in the state).
+
+### 9.62 An effective value keeps its base value only where an animation is over it
+
+The second row of the table of section 9.61 is the effective values: 134,509 of them at
+the show of 1,600 templated controls, 19.77 MB, 154 bytes each on average. An effective
+value is what a property of an element currently is, with the priority it came from. It
+also has a base value: what the property would be without its animations, which is what
+a transition starts from and what `get_base_value` returns.
+
+**What an effective value carried.** Two values of the property's type, the value and the
+base value, each with its priority, and the two entries they came from, each a `RefCell`
+of an option. Nearly every value of a tree has no animation over it, and then the base
+value is the value: a second copy of a thickness, a brush reference or a string, kept in
+step with the first by a clone and a comparison in every set.
+
+**The change.** The base value is a field only of a value that has one of its own.
+
+- `EffectiveValueState::base_is_value` says that the base value is the value. It is set
+  by a set at a priority that is a base priority (local value or below) which nothing
+  above overrides, and cleared by an animation that takes the value alone.
+- `EffectiveValue<T>::base_value` is an `OptionCell<Rc<T>>` (section 9.40), empty while
+  the flag is set and while there is no base value at all. It is filled when an
+  animation is put over a value (the value that was moves there), and emptied when the
+  last animation leaves and the base value becomes the value again.
+- The two entries are `OptionCell`s as well.
+
+The three states are told apart by the flag and the cell: neither (no base value: an
+animation alone), the flag (the base value is the value), the cell (a base value of its
+own, under an animation). Both at once is not a state, and the tests assert it wherever
+they read one.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `EffectiveValue<bool>` | 120 | 96 |
+| `EffectiveValue<f64>` | 128 | 96 |
+| `EffectiveValue<Option<BoxedValue>>` | 144 | 104 |
+| `EffectiveValue<Thickness>` | 176 | 120 |
+
+A set without an animation over it now makes one clone and one comparison of the value
+fewer than it did.
+
+**Measured** with the census of section 9.61 (what the show of 1,600 templated controls
+leaves allocated), on a branch with sections 9.61 to 9.66 together against section 9.61
+alone. The five sections change different owners, so each is read from its own rows; the
+whole and the gate are at the end of section 9.66.
+
+| Left by the show | MB before | MB after | blocks |
+| --- | ---: | ---: | ---: |
+| `ValueStore::create_effective_value` | 19.77 | 15.21 | 134,509 |
+
+119 bytes a value where they were 154, 4.56 MB.
+
+**What stays as it was.** The value, the base value and their priorities as every reader
+sees them (`get_value`, `get_base_value`, the changes raised to
+`on_property_changed_core` with their old and new base values, the transitions that start
+from the base value); coercion, which coerces both. The construction and the coercion
+oracles of the tests, which state the rules of upstream's `EffectiveValue` member by
+member, run against the new representation unchanged in what they expect.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream's `EffectiveValue<T>` has both values inline; `DEVIATIONS.md`
+has the row.
+
+**Tests.** `effective_value_base_tests.rs`:
+`an_effective_value_has_no_field_for_a_base_value_that_is_the_value` (the sizes),
+`a_value_without_an_animation_over_it_is_kept_once` (counted by the live copies of a
+value type that counts them), `an_animation_over_a_value_leaves_the_value_as_the_base_value`
+and `a_value_set_under_an_animation_that_came_first_is_the_base_value_alone`; the
+construction and coercion suites of the effective values (sections 9.28 and 9.59).
+
+### 9.63 The logical children of an element are read without making their collection
+
+The collection of the logical children of an element is made by the first to ask for it
+(`StyledElement::logical_children`): a list, the vector it shares with its snapshots, and
+the handler that keeps the logical tree, three blocks and about 210 bytes. That is right
+for the code that adds a child. It was also what a read cost, and one read is made of
+every element of every template: `TemplatedControl::apply_templated_parent` gives an
+element its templated parent and walks on to its logical children. Most elements of a
+template are leaves (a text, a rectangle, a path, a presenter without content), and each
+of them kept from then on the collection the walk had asked for. The census of the start
+of section 9.61 gave that function the lists of 12,008 elements:
+
+| Left by the show of 1,600 templated controls | MB | blocks |
+| --- | ---: | ---: |
+| Lists made by `apply_templated_parent` | 1.56 | 24,016 |
+| Their handlers | 0.92 | 12,008 |
+
+**The change.** `StyledElement::logical_children_snapshot` gives the children of an
+element that has a collection and `None` for one that never had it, and
+`logical_children_count` the number; neither makes anything. They are what
+`Visual::visual_children_snapshot` and `visual_children_count` are for the visual
+children. The readers ask them: `apply_templated_parent`, the members of
+the logical tree extensions (`get_logical_children`, `get_logical_siblings`,
+`get_logical_descendants`, `find_logical_descendant_of_type`), the group of a radio
+button, the scroll viewer a selection adapter looks for and the recycled rows of a
+`TreeDataGrid` presenter. `logical_children` is unchanged and is for the code that adds
+or removes.
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| `FerroList::new` | 6.85 | 5.29 | 104,734 | 80,718 |
+| `FerroList::add_collection_changed` | 3.48 | 2.56 | 45,626 | 33,618 |
+| `TemplatedControl::apply_templated_parent` | 0.37 | none | 12,008 | none |
+
+The 24,016 blocks of the lists and the 12,008 handlers are gone, and with them the 12,008
+blocks of 32 bytes the function itself was counted for: 2.85 MB and 48,032 blocks.
+
+**What stays as it was.** What a read returns: an element without a collection has no
+children. The collection, its handler and the order of the logical tree events of an
+element that gets a child. The public API: two methods are new.
+
+**Other backends.** All of it is in `ferroui_base` and the controls.
+
+**Not upstream.** Upstream makes the collection with the element. Here it is made for
+the first to ask, and this section is the read that does not count as asking.
+
+**Tests.** `logical_extensions_tests.rs`:
+`reading_the_children_of_a_leaf_makes_it_no_collection` (the readers on a leaf and on its
+tree, then the same readers after the first child). `templated_control_tests.rs`:
+`templated_children_without_children_get_no_logical_children_collection` (a template of a
+decorator, a panel and two leaves: all four have the templated parent, and the leaves no
+collection).
+
+### 9.64 A style instance keeps what only a style with animations needs in a box
+
+A style that matches a control leaves an instance on it: a value frame with the entries of
+its setters and the activator of its selector (`StyleBase::try_attach_instance`). The
+census of the start of section 9.61 has 38,416 of them, 240 bytes each with the counts of
+their `Rc`, 8.79 MB.
+
+128 of the 224 bytes of a `StyleInstance` were four fields that an instance of a theme
+style never uses: the setter instances that are no value entries, the animations of the
+style, what applying them made, and the subject that triggers them. A style of value
+setters, which is nearly every style of a theme, has entries and an activator and nothing
+else.
+
+**The change.**
+
+- `StyleInstance` keeps the four in a box of their own (`StyleInstanceExtras`), made for
+  the first of them (`update_extras`). An instance of value setters alone has no box and
+  one word for it.
+- `ValueFrameBase::owner` is an `OptionCell` instead of a `RefCell` of an option: one word
+  less in every frame, the style instances and the others.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `StyleInstance` | 224 | 112 |
+| `ValueFrameBase` | 64 | 56 |
+| `ImmediateValueFrame` | 72 | 64 |
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| `StyleBase::try_attach_instance` | 8.79 | 5.87 | 38,416 | 76,832 |
+| `ValueFrameBase::reserve` | 1.18 | none | 38,416 | none |
+
+The second row is the vector of the entries of an instance, which the build with this
+section counts for the first: the same 76,832 blocks, 9.97 MB before and 5.87 MB after.
+
+**What stays as it was.** What an instance does: the order of its entries, its
+activation, its animations and their disposal on detach. An instance with animations pays
+one allocation more, once. No public API changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream's `StyleInstance` has the four as fields; the fields and what
+they do are the same, and where they are kept is not.
+
+**Tests.** `style_animation_tests.rs`: `only_a_style_instance_with_animations_keeps_extras`
+(of two instances with the same activator only the one of the style with an animation has
+extras; both are activated and deactivated together, the animation runs and stops, and
+both are gone on detach; the sizes of a frame and of an instance are held against their
+fields).
+
+### 9.65 The layers of an element keep what few elements have behind one word
+
+The elements themselves are the largest owner of the census of section 9.61:
+`type_system::instantiate` leaves 39.08 MB, 29,229 elements of 1,402 bytes on average. An
+element carries the fields of every layer below its class (`FerroObject`, `Animatable`,
+`StyledElement`, `Visual`, `Layoutable`, `Interactive`, `InputElement`), and several of
+those fields are state that few elements ever have: every text block had 120 bytes for
+transitions it is never given.
+
+**The change.** Such state is kept behind one word and made when it is first needed.
+
+| Layer | What | Before | After |
+| --- | --- | ---: | ---: |
+| `Animatable` | The transitions: their states, the subscriptions to the collection, the instance being applied, the context (`TransitionData`) | 120 | 8 |
+| `Visual` | The subscriptions to the render transform and to the values that affect the rendering (`VisualSubscriptions`) | 64 | 8 |
+| `Visual` | The composition visual of the children | 16 | 8 |
+| `Layoutable` | The subscription to the layout manager for `layout_updated` | 32 | 8 |
+| `InputElement` | The attachment of an interactive effect | 40 | 16 |
+| `StyledElement` | The name | 32 | 16 |
+| `StyledElement` | The resources | 16 | 8 |
+
+- The transitions are in a `OnceCell` of a box, with the cells they had inside it: a
+  transition that is applied calls back into the object, and the context is entered across
+  that call, so the data has to stay where it is while it is read. The box is made by the
+  first transitions that are added while transitions are enabled, and stays. The path of
+  every property change reads one pointer and returns where there is no box.
+- The subscriptions of a visual are in an `OptionCell` of a box that stays once made: a
+  visual whose brush changes with every frame makes it once. Removing a subscription from
+  a visual that has none makes no box. They are not part of the composition extras of the
+  visual, whose existence says that the visual needs a composition visual of its own.
+
+The layers, each with the layers below it:
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `Animatable` | 440 | 336 |
+| `StyledElement` | 712 | 584 |
+| `Visual` | 1,016 | 824 |
+| `Layoutable` | 1,304 | 1,088 |
+| `Interactive` | 1,336 | 1,120 |
+| `InputElement` | 1,408 | 1,160 |
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| `type_system::instantiate`, with `RepeatButton::new` | 40.45 | 35.34 | 30,029 | 30,043 |
+| `Visual::update_affects_render_subscription` | 0.85 | 1.15 | 15,206 | 21,609 |
+| `Animatable::subscribe_to_collection` | 0.07 | 0.16 | 1,602 | 2,403 |
+| `Layoutable::subscribe_layout_updated` | 0.01 | 0.02 | 401 | 802 |
+
+The first row is the elements: 1,233 bytes on average where they were 1,412 (the 800
+repeat buttons of the scene are counted for their constructor in the first build and for
+`instantiate` in the second, so the row has both). The other rows are the boxes of the
+elements that have the state: 6,403 visuals with a subscription, 801 objects with
+transitions and 401 elements with a `layout_updated` handler. 5.11 MB less in the
+elements and 0.40 MB more in the boxes.
+
+**The blocks.** The census counts the bytes that were asked for. What the process keeps is
+the block the allocator gives, and above 1,008 bytes the allocator of macOS has four block
+sizes for each doubling: 1,024, 1,280, 1,536, 1,792, 2,048, 2,560 and so on (`malloc_size`
+of blocks of every size). An element is allocated with its two counts, 16 bytes, and nearly
+every element type moves to the size below:
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `ScrollViewer` | 1,888 | 1,640 | 2,048 | 1,792 |
+| `Border` | 1,880 | 1,632 | 2,048 | 1,792 |
+| `TextBlock`, `ContentPresenter` | 1,848 | 1,600 | 2,048 | 1,792 |
+| `Grid` | 1,840 | 1,592 | 2,048 | 1,792 |
+| `ScrollBar`, `Slider` | 1,816 | 1,568 | 2,048 | 1,792 |
+| `Button`, `CheckBox`, `ToggleButton` | 1,760 | 1,512 | 1,792 | 1,536 |
+| `Rectangle`, `Path` | 1,728 | 1,480 | 1,792 | 1,536 |
+| `ItemsPresenter` | 1,680 | 1,432 | 1,792 | 1,536 |
+| `ContentControl`, `Thumb` | 1,592 | 1,344 | 1,792 | 1,536 |
+| `Panel`, `StackPanel`, `Canvas` | 1,576 | 1,328 | 1,792 | 1,536 |
+| `RepeatButton` | 1,776 | 1,528 | 1,792 | 1,792 |
+| `TextBox` | 2,032 | 1,784 | 2,048 | 2,048 |
+
+So an element of nearly every type keeps 256 bytes less, which is a little more than the
+248 bytes it asks less for. `RepeatButton` is 8 bytes and `TextBox` 8 bytes short of the
+size below; section 9.67 takes them there.
+
+**Two lines of the gate in time alone.** The gate of this change alone against the commit
+before it has two lines over tolerance, with the instructions of the base, in benchmarks
+that read 10,000 controls that are not in the cache:
+
+| Read of 10,000 controls | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlRead.hot_copy` | 4.45 ns | 2.38 ns | -46.5 % | +0.00 % |
+| `ControlRead.unset_beside_values` | 6.89 ns | 6.24 ns | -9.4 % | +0.00 % |
+| `ControlRead.local_value` | 5.95 ns | 5.00 ns | -16.0 % | +0.00 % |
+| `ControlRead.non_copy_value` | 8.66 ns | 7.41 ns | -14.4 % | +0.00 % |
+| `ControlRead.inherited_unheld` | 4.15 ns | 3.48 ns | -16.1 % | +0.00 % |
+| `ControlRead.attached_unset` | 7.11 ns | 6.25 ns | -12.1 % | +0.00 % |
+| `ControlRead.inherited_held` | 10.29 ns | 12.89 ns | +25.3 % | +0.65 % |
+| `TextBlockConstraintBenchmark.measure_then_arrange_rounded[Texts=Paragraph]` | 2.712 us | 3.163 us | +16.6 % | +0.00 % |
+
+Six reads get faster and one slower; the same reads of 16 controls, which stay in the
+cache, do not move. The two lines stayed in a second run, so they were checked as section
+8.1 asks, and a step further:
+
+- *The code.* The read of an inherited value touches no field of this change, and the
+  value store of an element is at the same offset before and after (the layouts of both
+  builds, `-Zprint-type-sizes`).
+- *Where the blocks are.* The 10,000 borders of the benchmark are made one after another.
+  Their blocks are 2,048 bytes apart before and 1,792 after (the addresses in both
+  builds). The blocks of their values and of their inherited lookups are where they were,
+  192 and 96 bytes apart in both.
+- *The block size alone.* The commit of this change against itself with 192 unused bytes
+  at the end of `Border` and `TextBlock`, which puts them back into blocks of 2,048 bytes:
+  `inherited_held` 15.17 to 10.61 ns, `Paragraph` 3.155 to 2.766 us, `hot_copy` 2.87 to
+  4.28 ns. All three go back to what the base measures.
+
+So the lines are what a walk over blocks 1,792 bytes apart costs on this processor against
+one over blocks 2,048 bytes apart: the same instructions over the same fields at other
+addresses, faster for six reads and slower for two. Nothing of the change is slower by
+itself, and the tree of an application is not 10,000 blocks at one distance. The lines are
+recorded here as they are; the gate is not told to pass them.
+
+**What stays as it was.** What the elements do: transitions run, are interrupted and
+removed as before, a visual hears the changes of its brushes, effects and transforms, and
+`layout_updated` is raised. An object with transitions, a visual with a subscription and
+an element with a `layout_updated` handler pay one allocation more, once. No public API
+changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream has these as fields of the classes; what they hold is the
+same.
+
+**Tests.** `transitions_tests.rs`: `only_an_object_with_transitions_keeps_data_for_them`.
+`visual_render_tests.rs`:
+`only_a_visual_with_a_value_that_tells_its_changes_keeps_subscriptions`. The transition,
+rendering, layout, effect and resource suites cover the rest.
+
+### 9.66 The activator of a class selector is the listener of the classes of its control
+
+A control has an activator for every style with a class selector that matches its type
+(`TypeNameAndClassSelector`), whether or not it has the class: the activator is what
+turns the style on when the class is set. The census of the start of section 9.61 has
+45,204 of them, 104 bytes each with the counts of their `Rc`, 4.48 MB, and 45,204 closures
+of 24 bytes beside them, 1.03 MB: what the classes of the control called when they
+changed was a routine that held the activator weakly and called it.
+
+**The change.**
+
+- `Classes` tells objects (`IClassesChangedListener`, internal to `ferroui_base`), and a
+  `StyleClassActivator` is added as itself (`add_changed_listener`): no closure, no block.
+  `Classes::add_listener` takes a routine as before and wraps it.
+- The token the activator listens with is an `Option<NonZeroU64>`: the tokens of a
+  `HandlerList` start at one, so none needs no word of its own.
+- The sink of `StyleActivatorBase` is an `OptionCell` instead of a `RefCell` of an option:
+  no borrow flag, in every activator and not only those of classes.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `StyleClassActivator` | 88 | 72 |
+| `StyleActivatorBase` | 32 | 24 |
+
+**Measured** as in section 9.62:
+
+| Left by the show | MB before | MB after | blocks before | blocks after |
+| --- | ---: | ---: | ---: | ---: |
+| The activators (`TypeNameAndClassSelector`, `evaluate`) | 4.48 | 3.79 | 45,204 | 45,204 |
+| Their closures (`StyleClassActivator`, `initialize`) | 1.03 | none | 45,204 | none |
+
+1.72 MB and 45,204 blocks.
+
+**Sections 9.61 to 9.66 together.** What the show of 1,600 templated controls leaves
+allocated:
+
+| | bytes | blocks |
+| --- | ---: | ---: |
+| Before section 9.61 | 192,057,582 | 1,453,268 |
+| Section 9.61 | 180,032,550 | 1,456,096 |
+| Sections 9.61 to 9.66 | 160,852,624 | 1,368,851 |
+
+16.2 per cent of the bytes and 84,417 blocks less than before section 9.61.
+
+**The gate** (section 8.1), run once for sections 9.62 to 9.66 together on top of section
+9.61, against the commit before section 9.61:
+
+| Part | Metrics | Over tolerance |
+| --- | ---: | --- |
+| Framework | 171 | 3 (below) |
+| Counters, gauntlet, frames | 130 | none |
+| TreeDataGrid | 71 | none |
+| Window | 15 | none |
+
+The start of 1,600 templated controls in that run:
+
+| `startup/controls` | Before | After | |
+| --- | ---: | ---: | ---: |
+| `show_mb` | 198.0 | 166.9 | -15.7 % |
+| `startup_mb` | 285.0 | 252.8 | -11.3 % |
+| `show_ms` | 203.4 | 195.9 | -3.7 % |
+| `startup_ms` | 262.6 | 254.8 | -3.0 % |
+
+The three framework lines:
+
+- `ControlRead.inherited_held[Objects=10000]` and
+  `TextBlockConstraintBenchmark.measure_then_arrange_rounded[Texts=Paragraph]`, in time
+  alone. They stayed in a second run and are the block size of section 9.65, where they
+  are followed to their cause.
+- `ResourceLookup.find_merged[Depth=8, Merged=16]`, +6.3 per cent of instructions with the
+  time unchanged: the hash of a resource key was a call where it had been inlined into the
+  lookup of a dictionary. No code of that path changed, and the build of section 9.61
+  alone has the call as well. Marking the hash and the comparison of `ResourceKey`
+  `#[inline]` was tried and does not bring the count back (5,549 instructions without it,
+  5,616 with it, against 5,220 before section 9.61), so it was not made; the count of
+  today is the base of the gate from here. What would take more off that lookup than the
+  line added is hashing the key once for a lookup through merged dictionaries, which
+  hashes it for each of them today.
+
+**What stays as it was.** When an activator is told and what it tells its sink. The
+classes hold the activator that listens, where they held a closure with a weak reference
+to it: until it unsubscribes, which a style instance does on detach, or until the control
+goes away. The activator holds its control weakly, so the two make no cycle. No public API
+changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream's activator is the listener of the classes as well
+(`IClassesChangedListener`); this section brings the port back to that shape. The option
+cell and the token are of this port.
+
+**Tests.** `classes.rs`: `an_object_that_listens_is_notified_and_held_until_it_is_removed`.
+`style_class_activator.rs`:
+`the_activator_listens_to_the_classes_itself_while_it_is_subscribed` (one listener and the
+activator held while subscribed, the sink told once for each change of the match, nothing
+after unsubscribing, and let go when the control goes away),
+`an_activator_keeps_no_word_for_what_is_absent`.
+
+### 9.67 An element fits the block below: parents without a borrow flag, rare lists behind a word
+
+Section 9.65 showed that what the process keeps for an element is the block the allocator
+gives it, one of four sizes for each doubling (1,280, 1,536, 1,792, 2,048), and that
+several element types asked for a little more than the size below:
+
+| Element, with its counts | Bytes | Block | Over the block below |
+| --- | ---: | ---: | ---: |
+| `TextBox` | 1,800 | 2,048 | 8 |
+| `RepeatButton` | 1,544 | 1,792 | 8 |
+| `ScrollBar`, `Slider` | 1,584 | 1,792 | 48 |
+| `Grid` | 1,608 | 1,792 | 72 |
+| `TextBlock`, `ContentPresenter` | 1,616 | 1,792 | 80 |
+| `Border` | 1,648 | 1,792 | 112 |
+| `ScrollViewer` | 1,656 | 1,792 | 120 |
+| `Control` | 1,312 | 1,536 | 32 |
+| `Panel`, `StackPanel`, `Canvas` | 1,344 | 1,536 | 64 |
+| `Decorator` | 1,352 | 1,536 | 72 |
+| `ContentControl`, `Thumb` | 1,360 | 1,536 | 80 |
+| `Track` | 1,400 | 1,536 | 120 |
+
+So the bytes that matter are the ones between an element type and the size below it. The
+fields of the layers were read again for words that buy nothing.
+
+**The change**, in three parts, all in the fields of the layers.
+
+1. *A parent is a cell without a borrow flag.* The visual parent, the logical parent, the
+   logical root, the templated parent, the inheritance parent, the inheritance ancestor of
+   the value store and the presentation source of a visual were a `RefCell` of an option:
+   the value and eight bytes of borrow flag. Each is read by upgrading or cloning and
+   written whole, which is what `OptionCell` is for (section 9.40). A read that calls out
+   while it holds the value (the renderer asked whether it keeps a departed composition
+   visual, the layout scaling of the presentation source) clones the handle first, so what
+   it calls can read the field.
+2. *The local value bindings of a value store are made with the first one.* The store kept
+   two lists, the local value bindings and those of them that are binding expressions: 64
+   bytes of every object, used by 2,421 of the 30,043 elements of the scene. They are one
+   box behind a `OnceCell` (`LocalBindings`). The questions about them (is there one for
+   this property, which expression) answer without it where there is none.
+3. *The events few elements have a handler for are made with the first handler.* A handler
+   list is one word. `StyledElement` had six and `Visual` three. Attached to and detached
+   from the logical tree, the data context changed and initialized are one box of the
+   styled element; attached to and detached from the visual tree and the effective
+   visibility changed are one box of the visual (`RareEvents`, a `OnceCell` of a box each).
+   The resources changed and the theme variant changed stay in the element: every dynamic
+   resource subscribes to them, 15,248 lists in the scene.
+
+152 bytes less for every element:
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `FerroObject` (its value store 216 to 152) | 320 | 248 |
+| `Animatable` | 336 | 264 |
+| `StyledElement` | 584 | 464 |
+| `Visual` | 824 | 672 |
+| `Layoutable` | 1,088 | 936 |
+| `InputElement` | 1,160 | 1,008 |
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `TextBox` | 1,800 | 1,648 | 2,048 | 1,792 |
+| `ScrollViewer` | 1,656 | 1,504 | 1,792 | 1,536 |
+| `Border` | 1,648 | 1,496 | 1,792 | 1,536 |
+| `TextBlock`, `ContentPresenter` | 1,616 | 1,464 | 1,792 | 1,536 |
+| `Grid` | 1,608 | 1,456 | 1,792 | 1,536 |
+| `ScrollBar`, `Slider` | 1,584 | 1,432 | 1,792 | 1,536 |
+| `RepeatButton` | 1,544 | 1,392 | 1,792 | 1,536 |
+| `Track` | 1,400 | 1,248 | 1,536 | 1,280 |
+| `ContentControl`, `Thumb` | 1,360 | 1,208 | 1,536 | 1,280 |
+| `Decorator` | 1,352 | 1,200 | 1,536 | 1,280 |
+| `Panel`, `StackPanel`, `Canvas` | 1,344 | 1,192 | 1,536 | 1,280 |
+| `Control` | 1,312 | 1,160 | 1,536 | 1,280 |
+| `Button`, `CheckBox`, `ToggleButton` | 1,528 | 1,376 | 1,536 | 1,536 |
+| `Rectangle`, `Path` | 1,496 | 1,344 | 1,536 | 1,536 |
+| `ItemsPresenter` | 1,448 | 1,296 | 1,536 | 1,536 |
+
+The last three rows stay in their block, 96, 64 and 16 bytes over the one below; section
+9.68 takes them there.
+
+**The order of the fields of a value store was measured and left to the compiler.** With
+152 bytes less, the fields a read touches (the effective values, the inherited lookups and
+their generation) are no longer in one cache line of 128 bytes: the compiler puts the
+lookups across the end of the first one. A store with the order written out (`repr(C)`:
+the generation, the ancestor, the effective values and the lookups in the first 88 bytes)
+against the store as the compiler lays it out, the reads of 10,000 controls that are not in
+the cache: the inherited read of a held value 9.44 to 8.90 ns, that of a value nobody holds
+2.49 to 2.72 ns, a value that is not copied 6.13 to 6.37 ns, the other five within a
+fiftieth of a nanosecond; the eight together 40.78 ns on both sides. It moves time from one
+read to another and wins nothing, so the order stays the compiler's.
+
+**Measured** as in section 9.62, against sections 9.61 to 9.66:
+
+The census and the gate of this change and of the five after it are at the end of section
+9.72.
+
+**A parent is read where it is.** A read of an option cell takes the value out, reads it
+and puts it back, which is more than the borrow flag it replaced where the value is only
+looked at. The parents of an element are read in every walk up a tree, and the first gate
+of this change said so: the effective viewport of 1,000 listeners, which reads the visual
+parent of each, took 9.3 per cent more instructions
+(`LayoutListeners.effective_viewport_idle`). A cell of a weak handle now upgrades it in
+place (`OptionCell::upgrade`), and `is_some` looks without taking. Both read through the
+pointer of the cell, in two lines of `unsafe`: the cell is not `Sync`, and an upgrade
+reads and writes the counts of the allocation the handle points to and runs no code of the
+object, so nothing can write to the cell while it is looked at. The eight reads of a
+parent use it (the visual parent, the logical parent and root, the templated parent, the
+inheritance parent and ancestor, the owner of a value frame, the target of a binding
+expression). The same benchmark then takes 10.0 per cent fewer instructions than before
+the change, and `effective_viewport_moved` 3.6 per cent fewer.
+
+**One frame scene in time alone.** `frames/reorder` (a wrapping panel of thousands of
+tiles, two of which change places in every frame) is over tolerance in the UI thread and
+in wall time, in every run:
+
+| `frames/reorder`, a frame | Before | This change alone | Sections 9.67 to 9.72 |
+| --- | ---: | ---: | ---: |
+| UI thread | 1.34 ms | 1.62 ms (+20.7 %) | 1.65 ms (+23.3 %) |
+| Render thread | 2.39 ms | | 2.35 ms (-1.4 %) |
+| Wall time | 2.39 ms | | 3.27 ms (+36.5 %) |
+
+The checks of section 8.1:
+
+- *The instructions.* The scene retires the same instructions on both sides: 19.45 and
+  19.30 thousand million in two runs of the base, 19.31 and 19.34 with the change
+  (`/usr/bin/time -l` of the benchmark of the scene, the whole process). The cycles are 3
+  to 5 per cent more.
+- *The block size alone.* The change with 152 unused bytes at the end of every element,
+  which puts the elements back into the blocks they had, against the base, three runs of
+  each side twice: 1.30 to 1.44 ms of UI thread and 2.36 to 2.50 ms of wall time a frame,
+  where the base has 1.24 to 1.35 and 2.36 to 2.48, and the change without the bytes 1.40
+  to 1.57 and 2.84 to 3.19.
+- *What the wall time is.* The scene runs without a display clock, as fast as its two
+  threads go. On the base a frame takes what the render thread takes (2.39 ms of wall
+  time, 2.39 ms of render thread): the UI thread has its next batch ready before the
+  render thread asks. With the change the render thread waits for the batch in every
+  frame (3.27 ms of wall time, 2.35 ms of render thread), though the UI thread works 1.65
+  ms of them.
+
+So the line is the walk over the tiles in blocks at another distance, a few per cent of
+cycles as in section 9.65, and what the hand-over between the two threads of a scene
+without a display clock makes of them. Nothing of the change does more work. The line is
+recorded as it is; the gate is not told to pass it. That the wall time of the scene turns
+on a few per cent of its UI thread is a finding of its own, for the frame pacing.
+
+**What stays as it was.** What the fields hold and when the events are raised. An element
+without a handler for those events reads one pointer where it read the list; one with a
+handler pays one allocation, once, and the box stays. A local value binding pays the box
+of the two lists once for its object. No public API changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Not upstream.** Upstream has these as fields of the classes; what they hold is the
+same.
+
+**Tests.** `tree_tests.rs`:
+`only_an_element_with_a_handler_keeps_the_events_few_elements_have_one_for` (two leaves
+through the same life in the trees: the one with handlers hears all of it, the other one
+makes no box, and a handler taken away hears nothing).
+`ferro_object_tests_binding.rs`:
+`only_an_object_with_a_local_value_binding_keeps_the_lists_of_them`. The tree, binding,
+styling and rendering suites cover the rest.
+
+### 9.68 A control keeps what few controls have behind one word
+
+After section 9.67 `Button`, `Rectangle`, `Path` and `ItemsPresenter` were 96, 64 and 16
+bytes over the block below theirs, and `Control` had four fields that few controls ever
+use, 120 bytes of every control:
+
+| Field | Bytes | Used by |
+| --- | ---: | --- |
+| The focus adorner | 24 | A control that has the keyboard focus from the keyboard |
+| The handlers of a context flyout | 24 | A control with a context flyout |
+| The handlers of a context menu | 48 | A control with a context menu |
+| The automation peer | 24 | A control an accessibility client asked about |
+
+**The change.** The four are one box (`RareState`) behind a `OnceCell`, made with the first
+of them. A control without any reads one pointer where it read the field; taking away a
+context menu or a context flyout that was never set makes no box. The cells of the
+handlers were handed out by `Control`; it now has a method that takes them and one that
+sets them, so that the read does not make the box.
+
+112 bytes less for every control:
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `Button`, `CheckBox`, `ToggleButton` | 1,376 | 1,264 | 1,536 | 1,280 |
+| `Rectangle`, `Path` | 1,344 | 1,232 | 1,536 | 1,280 |
+| `ItemsPresenter` | 1,296 | 1,184 | 1,536 | 1,280 |
+| `Border` | 1,496 | 1,384 | 1,536 | 1,536 |
+| `TextBlock`, `ContentPresenter` | 1,464 | 1,352 | 1,536 | 1,536 |
+| `Grid` | 1,456 | 1,344 | 1,536 | 1,536 |
+| `Panel`, `StackPanel`, `Canvas` | 1,192 | 1,080 | 1,280 | 1,280 |
+
+The last four rows stay in their block and come closer to the one below; sections 9.69 to
+9.71 take the first three of them there.
+
+**One line of the gate in instructions.** `ScrollContent.offset[Rows=1000]` (the offset of a
+scroll viewer over 1,000 rows changes) takes 224,482 instructions before sections 9.67 to
+9.72 and 232,474 with them, 8 for a row and 3.6 per cent more; its time is inside its
+tolerance. What was established, each branch against the same base:
+
+| Branch | Instructions of `ScrollContent.offset` |
+| --- | ---: |
+| Section 9.67 alone | -0.08 % |
+| Section 9.72 alone | +0.01 % |
+| Sections 9.67 and 9.69 | -0.04 % |
+| Sections 9.67 and 9.70 | -0.03 % |
+| Sections 9.67 and 9.71 | -0.05 % |
+| Sections 9.67 to 9.71 before the parent read of section 9.67 | +0.04 % |
+| Section 9.67 and this section | +3.55 % |
+| The same, `Control` padded back to its size | +3.48 % |
+
+So it needs this change and the parent read of section 9.67 together, it is not the size of
+the control, and no code of this change is on that path: layout reads neither the focus
+adorner nor the context handlers nor the automation peer. Forcing the two reads of the
+option cell inline, and the walk to the visual parent of `Visual::elided_origin` written
+without a closure, do not move it. It is in the code the compiler makes of the controls
+crate for that combination; which function was not found. The line is recorded as it is,
+and the gate is not told to pass it.
+
+**What stays as it was.** When a focus adorner is built and removed, what the context menu
+and the context flyout handle, and when an automation peer is made. A control with one of
+them pays one allocation, once, of 128 bytes. No public API changes.
+
+**Other backends.** All of it is in `ferroui_controls`.
+
+**Not upstream.** Upstream has these as fields of `Control`; what they hold is the same.
+
+**Tests.** `context_menu_tests.rs`:
+`only_a_control_with_a_context_menu_keeps_the_state_few_controls_have`. The context menu,
+flyout, focus and automation suites cover the rest.
+
+### 9.69 A border makes its renderer with the first render that has something to draw
+
+A `Border` and a `ContentPresenter` each held a `BorderRenderHelper`, 144 bytes: the
+geometries, the pen and the values it was last asked to draw with. An element with no
+background, no border brush and no shadow never asks it for anything: `DrawingContext`
+leaves a draw without a brush, a visible pen and a shadow out. A content presenter is such
+an element nearly always, and so is a border that is there for its padding or its layout.
+
+**The change.** The renderer of the two is one word and a box made by the first render
+that has a brush or a shadow (`LazyBorderRenderHelper`, in the crate). A render with none
+returns before it, where it updated the geometries of the renderer for nothing. What is
+drawn is the same. `BorderRenderHelper` and its public API are untouched; the other
+elements that hold one (a layout panel, the ink toolbar, the text field border of the
+Material theme) keep it as a field.
+
+136 bytes less for every border and content presenter:
+
+| Element, with its counts | Bytes before | Bytes after | Block before | Block after |
+| --- | ---: | ---: | ---: | ---: |
+| `Border` | 1,384 | 1,248 | 1,536 | 1,280 |
+| `ContentPresenter` | 1,352 | 1,216 | 1,536 | 1,280 |
+
+A border that draws keeps 1,280 and 176 bytes where it kept 1,536.
+
+**What stays as it was.** What a border and a content presenter draw, and when. One that
+draws pays one allocation, once, of 176 bytes, and reads one pointer more in its render;
+the gate below has the frames. No public API changes.
+
+**Other backends.** All of it is in `ferroui_controls`.
+
+**Not upstream.** Upstream has the renderer as a field of both classes.
+
+**Tests.** `compositor_hit_testing_tests.rs`:
+`only_a_border_with_something_to_draw_makes_its_renderer` (a border with a background
+inside the compositor makes its renderer, the one without does not until it is given a
+brush).
+
+### 9.70 The extended data of a grid is in a box made on demand
+
+A grid kept its extended data (the definitions, the cell caches and the cell groups)
+inline behind a `OnceCell`: 168 bytes of every grid, also of one without definitions, which
+never makes it. With sections 9.67 and 9.68 a grid with its counts was 1,344 bytes, 64 over
+the block of 1,280, and the start of 1,600 templated controls has 3,201 of them.
+
+**The change.** The extended data is a box made on demand, as upstream has it in an object
+of its own. A grid with definitions pays one allocation of 160 bytes when they are first
+read. 160 bytes less for every grid: 1,184 with its counts, in a block of 1,280.
+
+**What stays as it was.** When the extended data is made and what it holds. No public API
+changes.
+
+**Other backends.** All of it is in `ferroui_controls`.
+
+**Tests.** `grid_tests.rs`: `a_grid_without_definitions_makes_no_extended_data`.
+
+### 9.71 A text block keeps its layout state in cells without a borrow flag
+
+With sections 9.67 and 9.68 a `TextBlock` with its counts was 1,352 bytes, 72 over the
+block of 1,280.
+
+**The change.**
+
+| Field of `TextBlock` | Before | After |
+| --- | ---: | ---: |
+| The text layout | 16 | 8 |
+| The run properties | 24 | 16 |
+| The paragraph properties | 24 | 16 |
+| The text run cache | 16 | 8 |
+| The subscription to the inlines | 32 | 8 |
+| The subscription to the font features | 32 | 8 |
+
+The first four are read by cloning and written whole: an `OptionCell` (section 9.40), eight
+bytes less than a `RefCell` of an option. The two subscriptions, which few text blocks
+have, are a box each. 80 bytes less for every text block: 1,272 with its counts, in a block
+of 1,280.
+
+`OptionCell` was private to `ferroui_base` and is public in `ferroui_base::utilities`, so
+that the controls can use it: the one addition to the public API.
+
+**What stays as it was.** When a layout, its properties and its run cache are made, kept
+and dropped. A read of the layout clones the handle as before.
+
+**Other backends.** The fields are in `ferroui_controls`, the cell in `ferroui_base`.
+
+**Tests.** The text block, selectable text block and text layout suites.
+
+### 9.72 A binding expression reads its target type from the target property
+
+The second block of the census of section 9.61: `TemplateBindingExpression::new` leaves
+10.35 MB in the start of 1,600 templated controls, 45,214 expressions of 224 bytes.
+
+**The change.** Every binding expression kept a copy of the type its values are converted
+to (`target_type: Cell<ValueType>`, 32 bytes). It was always the type and the type name of
+the target property, or `object` where there is none, set where the property is set.
+`UntypedBindingExpressionBase::target_type` reads it from the property: two fields behind
+a pointer the expression already has.
+
+| Bytes | Before | After |
+| --- | ---: | ---: |
+| `UntypedBindingExpressionBase` | 144 | 112 |
+| `TemplateBindingExpression` | 224 | 192 |
+| `BindingExpression` | 296 | 264 |
+
+`TemplateBindingExpression::new` leaves 8.97 MB where it left 10.35 MB.
+
+**What stays as it was.** What the type is, and when it changes: with the target property.
+No public API changes.
+
+**Other backends.** All of it is in `ferroui_base`.
+
+**Tests.** `binding_typed_expression_tests.rs`:
+`an_expression_makes_the_state_few_expressions_have_with_the_first_of_it` holds the three
+sizes.
+
+**Sections 9.67 to 9.72 together.** The six changes were measured as one branch. The heap
+the show of 1,600 templated controls leaves:
+
+| | Before | After |
+| --- | ---: | ---: |
+| Bytes asked for | 160,852,624 | 151,028,736 (-6.1 %) |
+| Kept in the blocks of the allocator (`heap-sites.py --kept`, an estimate) | 160.90 MB | 150.35 MB |
+| Elements in blocks of 1,792 bytes | 14,008 | 803 |
+| Elements in blocks of 1,536 bytes | 8,011 | 2,803 |
+| Elements in blocks of 1,280 bytes | 2 | 18,816 |
+| The blocks of the elements | 35.68 MB | 28.49 MB |
+
+`heap-sites.py --kept` counts the blocks the allocator gives instead of the bytes asked
+for: every site is taken as blocks of its average size, and a block as the size the
+allocator of macOS gives for it.
+
+**The gate** (section 8.1):
+
+| Part | Metrics | Over tolerance |
+| --- | ---: | --- |
+| Framework | 171 | 1: `ScrollContent.offset`, in instructions (section 9.68) |
+| Counters, gauntlet, frames | 130 | 2: `frames/reorder`, UI thread and wall time, in time alone (section 9.67) |
+| TreeDataGrid | 71 | none |
+| Window | 15 | none |
+
+The TreeDataGrid and window parts are from the run of sections 9.67 to 9.71 before the
+parent read of section 9.67 and without section 9.72. The framework table is the median of
+three rounds of the base and of two and a half rounds of the branch: a disk fault ended
+the last round, and the table was made from the logs of the rounds.
+
+| `startup/controls` | Before | After | |
+| --- | ---: | ---: | ---: |
+| `show_mb` | 166.8 | 157.7 | -5.5 % |
+| `startup_mb` | 252.7 | 243.2 | -3.8 % |
+| `show_ms` | 197.7 | 193.1 | -2.3 % |
+| `first_frame_ms` | 42.2 | 40.6 | -3.9 % |
+| `startup_ms` | 255.0 | 247.9 | -2.8 % |
+
+What the smaller blocks and the cells without a flag do for the walks of a tree:
+
+| Framework benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ControlRead.inherited_held[Objects=10000]` | 13.16 ns | 8.45 ns | -35.8 % | -2.56 % |
+| `ControlRead.inherited_unheld[Objects=10000]` | 3.48 ns | 2.30 ns | -33.9 % | +0.00 % |
+| `ControlRead.hot_copy[Objects=10000]` | 2.39 ns | 1.73 ns | -27.6 % | +0.00 % |
+| `trees::Lifetime.detach[Tiles=2000]` | 4.520 ms | 3.316 ms | -26.6 % | -2.76 % |
+| `trees::Lifetime.attach[Tiles=2000]` | 5.345 ms | 4.000 ms | -25.2 % | -5.86 % |
+| `trees::Propagation.font_family[Tiles=2000]` | 1.387 ms | 1.018 ms | -26.6 % | -1.94 % |
+| `trees::Lifetime.lay_out[Tiles=2000]` | 7.271 ms | 6.454 ms | -11.2 % | -0.10 % |
+| `ElementConstructionBenchmark.create_attach_and_lay_out[Tiles=1000]` | 16.783 ms | 15.215 ms | -9.3 % | -2.74 % |
+| `PanelMeasureArrange.canvas[Children=1000]` | 101.440 us | 92.156 us | -9.2 % | +0.27 % |
+| `LayoutListeners.effective_viewport_idle[Leaves=1000]` | 6.348 us | 6.658 us | +4.9 % | -10.01 % |
+
+The inherited read of a held value, which section 9.65 left slower by the distance between
+its blocks, is faster than before that section.
+
+### 9.73 The size limits of an element are made in the measure and the arrange, not in a call
+
+The search for the scroll line of section 9.68 compared the functions of two builds, and
+one that came and went between them was `MinMax::new`: the four limits of an element (its
+width and height with their minima and maxima), which `measure_core` and `arrange_core`
+make for every element they lay out. It reads six values the element keeps (section 9.28)
+and clamps them. Whether the compiler inlined it turned on code that has nothing to do
+with it, and on the main branch it was a call.
+
+**The change.** `MinMax::new` is `#[inline(always)]`.
+
+**Measured** against the commit before it (the framework part of the gate, the layout
+benchmarks):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `PanelMeasureArrange.stack_vertical[Children=1000]` | 99.160 us | 90.745 us | -8.5 % | -8.18 % |
+| `PanelMeasureArrange.stack_horizontal[Children=1000]` | 97.408 us | 90.165 us | -7.4 % | -8.13 % |
+| `PanelMeasureArrange.grid[Children=1000]` | 117.455 us | 105.147 us | -10.5 % | -7.10 % |
+| `PanelMeasureArrange.grid_spans[Children=1000]` | 129.378 us | 116.605 us | -9.9 % | -6.91 % |
+| `PanelMeasureArrange.dock[Children=1000]` | 114.793 us | 106.456 us | -7.3 % | -7.76 % |
+| `PanelMeasureArrange.wrap[Children=1000]` | 100.438 us | 93.729 us | -6.7 % | -7.76 % |
+| `PanelMeasureArrange.canvas[Children=1000]` | 101.510 us | 93.743 us | -7.7 % | -8.14 % |
+| `PanelMeasureArrange.uniform_grid[Children=1000]` | 91.089 us | 82.122 us | -9.8 % | -8.75 % |
+| `NestedDepth.remeasure_rearrange[Depth=200]` | 45.072 us | 43.227 us | -4.1 % | -5.67 % |
+| `NestedDepth.remeasure_rearrange_unrounded[Depth=200]` | 42.889 us | 41.188 us | -4.0 % | -6.33 % |
+| `SizeChange.wrap[Leaves=1000]` | 72.079 us | 70.233 us | -2.6 % | -5.07 % |
+| `SizeChange.stretch_stack[Leaves=1000]` | 101.298 us | 97.432 us | -3.8 % | -3.94 % |
+| `SizeChange.star_grid[Leaves=1000]` | 98.237 us | 94.783 us | -3.5 % | -4.04 % |
+| `trees::Lifetime.lay_out[Tiles=2000]` | 7.027 ms | 7.303 ms | +3.9 % | -2.45 % |
+
+30 metrics of the layout, scroll, tree and construction benchmarks, none over tolerance.
+The scroll line of section 9.68 is not this: `ScrollContent.offset` is at -0.12 per cent
+of instructions with it alone, and stays where it was with it on top of sections 9.67 and
+9.68.
+
+**What stays as it was.** The limits and where they are made. No public API changes.
+
+**Other backends.** It is in `ferroui_base`.
+
+### 9.74 An element that only moves keeps the arrangement of its inside
+
+Experiment #757 asked whether a scroll can move the content as one unit.
+`ScrollContent.offset[Rows=1000]` took about 232,000 instructions on the main branch, 230
+for every row of the content, though no row changes its place in the content. The presenter of a
+scroll viewer arranges its content at another place when the offset changes, with the size
+the content had. `Layoutable::arrange` saw another rectangle and ran `arrange_core`, which
+arranges the inside of the element: the stack asked each of its thousand rows to arrange
+itself where it already was, and each answered that it is valid. Upstream does the same.
+
+**The change.** An element that is arranged at another place keeps the arrangement of its
+inside when all of this holds: its arrangement is valid, the rectangle it is given has the
+size of the rectangle it was arranged at, and it is in a visual tree. `arrange_core` then
+takes the size the element took last time (the size of its bounds) where it would call
+`arrange_override`, and computes the place as it always does, with the margin, the alignment
+and the rounding. Nothing the arrangement of the inside reads can have changed: a property
+that affects it invalidates the arrangement, a child that desires another size invalidates
+the measure of its parent, and an invalid element is not taken this way.
+
+- An element below it whose arrangement is invalid is in the queue of the layout manager and
+  is arranged in the same pass, as it is below any valid element.
+- An element that is in no tree has no layout manager. A tree that is measured and arranged
+  by hand relies on the visit to reach what is invalid below, so it is visited as before
+  (a test of the scroll presenter arranges such a tree).
+- The classes that override `arrange_core` (the window base, the handle of a text selection,
+  the remote widget, the tray icon of Windows) are as they were unless they call the base.
+- The flag that says so (`arrange_moved_only`) is a byte among the flags of `Layoutable`,
+  where four bytes were free: the element is as large as it was.
+
+The test of an element that stays where it is, which most elements of a pass are, is the
+test it was. The arrangement itself moved out of line (`arrange_at`): with it in `arrange`
+the function was no longer inlined into the loop of a panel, and a pass that visits four
+thousand children for one that changed retired 3 per cent more instructions
+(`Invalidation.resize_one_leaf`).
+
+**Measured** against the commit before it (`scripts/perf/gate.py`, 3 rounds):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `ScrollContent.offset[Rows=1000]` | 9.682 us | 1.182 us | -87.8 % | -90.65 % |
+| `ScrollContent.offset[Rows=4000]` (added) | | 1.19 us | | |
+| `LayoutListeners.moved[Leaves=1000]` | 11.634 us | 269.39 ns | -97.7 % | -97.67 % |
+| `LayoutListeners.effective_viewport_moved[Leaves=1000]` | 23.988 us | 11.793 us | -50.8 % | -53.10 % |
+| `SizeChange.wrap[Leaves=1000]` | 69.970 us | 63.679 us | -9.0 % | -11.21 % |
+| `trees::Text.narrow_and_lay_out[Labels=2000]` | 45.050 us | 35.032 us | -22.2 % | -24.06 % |
+| `Invalidation.resize_one_leaf[Leaves=4000]` | 47.683 us | 46.559 us | -2.4 % | -0.91 % |
+| `ScrollContent.content_resized[Rows=1000]` | 18.745 us | 18.503 us | -1.3 % | +0.01 % |
+| `ScrollContent.viewport[Rows=1000]` | 3.164 us | 3.178 us | +0.4 % | +0.08 % |
+| `frames/reorder`, UI thread and wall time of a frame | 1.822 ms, 3.433 ms | 1.616 ms, 2.604 ms | -11.3 %, -24.1 % | |
+| `frames/moves`, UI thread time of a frame | 0.974 ms | 0.900 ms | -7.6 % | |
+| TreeDataGrid `forced_stationary_vertical_layouts` | 1.791 us | 1.426 us | -20.4 % | +0.50 % |
+
+The cost of a scroll step no longer depends on the number of rows: a thousand rows and four
+thousand take the same 1.2 microseconds. What is left of the step is the presenter, the
+content and the offset of the viewer. The gain reaches further than scrolling: a wrap panel
+whose rows shift, a child that moves in a canvas, the items after two that change places.
+
+**What stays as it was.** The bounds every element gets, the order in which invalid elements
+are measured and arranged by the layout manager, the events of the layout. No public API
+changes. The deviation is recorded in `DEVIATIONS.md` (Layout).
+
+**Other backends.** It is in `ferroui_base`.
+
+### 9.75 A child added to a panel makes no list of itself
+
+Experiment #754 asked whether a parent that is given many children can take them in one
+operation, and whether anything in the attachment of a child grows faster than the number of
+children.
+
+**The benchmark.** `trees::Children` adds 64, 256 and 1,024 children to an empty panel, one
+by one (`children().add`) and as one range (`children().add_range`), to a panel a root shows
+and to a panel in no tree. The time is that of one child. On the main branch:
+
+| Per child | 64 | 256 | 1,024 |
+| --- | ---: | ---: | ---: |
+| One by one, attached | 394 ns | 373 ns | 367 ns |
+| Range, attached | 283 ns | 273 ns | 274 ns |
+| One by one, detached | 168 ns | 155 ns | 149 ns |
+| Range, detached | 76 ns | 78 ns | 78 ns |
+
+The cost of a child does not grow with the number of children: nothing here grows faster
+than its input. A range is one change, one invalidation and one walk of the lists of the
+parent already, and it is a quarter cheaper for an attached parent and half for a detached
+one. What was left to explain is what a single `add` pays beside the attachment of the
+child, 70 to 90 nanoseconds.
+
+**What it paid.** A panel put the child of an `Add` into its logical and its visual children
+with `insert_range`, which collects what it is given into a list before it inserts it: two
+allocations for every child added one at a time, which is how markup and most code add
+children.
+
+**The change.** A panel inserts one child as one item (`insert`); the lists raise the change
+they raised. `FerroList::insert_range` collects a range of up to four items without the
+heap, and a longer one, or one that does not say how long it is, as before.
+
+**Measured** against the commit before it (`scripts/perf/gate.py`, 3 rounds):
+
+| Benchmark | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `Children.one_by_one[Children=1024, Parent=detached]` | 148.8 ns | 106.2 ns | -28.6 % | |
+| `Children.one_by_one[Children=256, Parent=detached]` | 155.3 ns | 110.6 ns | -28.8 % | |
+| `Children.one_by_one[Children=64, Parent=detached]` | 167.9 ns | 127.2 ns | -24.3 % | |
+| `Children.one_by_one[Children=1024, Parent=attached]` | 366.6 ns | 347.4 ns | -5.3 % | |
+| `ElementConstructionBenchmark.create[Tiles=1000]` | 5.054 ms | 4.876 ms | -3.5 % | -4.95 % |
+| `ElementConstructionBenchmark.create_and_attach[Tiles=1000]` | 7.301 ms | 7.180 ms | -1.7 % | -3.70 % |
+| `ElementConstructionBenchmark.create_attach_and_lay_out[Tiles=1000]` | 14.907 ms | 14.956 ms | +0.3 % | -2.59 % |
+| `ElementConstructionBenchmark.create[Tiles=10000]` | 57.186 ms | 55.858 ms | -2.3 % | -4.95 % |
+| `ElementConstructionBenchmark.create_attach_and_lay_out[Tiles=10000]` | 178.118 ms | 172.942 ms | -2.9 % | -2.63 % |
+| `trees::Lifetime.build[Tiles=2000]` | 10.887 ms | 10.630 ms | -2.4 % | -4.99 % |
+| `trees::Lifetime.attach_top_down[Tiles=2000]` | 11.895 ms | 11.651 ms | -2.1 % | -4.87 % |
+
+The rows of `Children` are five alternating runs of the two programs (the benchmark is new,
+so the gate has no base for it). 182 metrics of the trees, element construction, the layout,
+the counters, the gauntlet and the frame benchmarks; four of the eight `trees::Propagation`
+lines were over in time alone with the instructions of the base (11 to 36 per cent), and a
+second run of nine rounds had them between -1.0 and +9.8 per cent and others of the eight 11
+to 13 per cent faster. The eight move together with any build: they did so for the three
+changes before this one, which touch no propagation either.
+
+**Left out.** Markup could add the children of a panel as one range. It would save what is
+left between the two ways (about 30 ns a child now) and change the order in which a child is
+attached and its next sibling is built, for less than one per cent of the build of a tile.
+
+**What stays as it was.** The changes the lists raise, their order, the order of the
+children. No public API changes.
+
+**Other backends.** It is in `ferroui_base` and `ferroui_controls`.
+
+### 9.76 What a tree records when it is attached for its first frame (left out)
+
+Experiment #753 supposed that a tree shown for the first time makes records visual by visual
+(dirty rectangles, composition changes, entries of the layout and render queues) that the
+first frame does not need, because that frame draws the whole window, and that the root
+could stand for all of them.
+
+**Counted** between the build and the first frame of the two start scenes, with the counters
+of the framework and four more for this measurement (the requests of a visual to be drawn
+again, the visuals put into the dirty set of the renderer, the requests for a place in the
+queues of the layout manager, the entries of those queues). The four are not kept: the
+counters are a public enumeration, and a patch release adds nothing to one (section 3.1 of
+`docs/release.md`); they can come back with the next minor version.
+
+| | `startup/controls` | `startup/tiles` |
+| --- | ---: | ---: |
+| Elements attached | 23,616 | 352,186 |
+| Layout queue requests, entries | 400, 800 | 0, 0 |
+| Measures, arranges executed | 24,418, 23,217 | 352,187, 352,187 |
+| Visual invalidations requested | 46,569 | 704,376 |
+| Visuals queued for the update pass | 24,017 | 352,187 |
+| Visuals recorded | 24,017 | 352,187 |
+| Composition visuals created | 9,073 | 58,699 |
+| Composition batch objects | 123,487 | 1,760,940 |
+| Composition batch value bytes | 1.18 MB | 28.2 MB |
+| Dirty rectangles on the UI thread | none | none |
+| Shown in, memory of the show | 261 ms, 158 MB | 757 ms, 295 MB |
+
+**What the counts say.**
+
+- The layout queues are not filled element by element. A tree that is attached is measured
+  and arranged from its root, each element once; the 800 entries of the controls scene are
+  400 elements that invalidate their measure during the pass, each queued for its measure
+  and then for its arrange.
+- The record of a visual for the update pass is one entry of eight bytes in the dirty set
+  and a few bits in the visual. A visual asks about twice; the second request finds the bits
+  set. The set of the tiles scene is 2.8 MB at its largest (352,187 entries of eight bytes),
+  one per cent of the memory of the show, and a request is a few loads and a test of the
+  bits.
+- The UI thread makes no dirty rectangles: the render side computes them, and its first
+  frame draws the target whole.
+- What is large is the composition batch: 14 objects for each composition visual of the
+  controls and 30 for each of the tiles, 28 MB in the tiles scene. It is the state the first
+  frame draws from (the properties and the drawing of each visual), so the root cannot stand
+  for it.
+- The containers of that burst give their storage back already: the serialization queues of
+  the compositor, the streams of a batch and the passes of the server compositor release
+  what they hold beyond 4 MB (`ReleaseExcess`).
+
+**Outcome.** Nothing is changed in the renderer. Marking the root in place of the visuals
+would save the requests and the entries of the dirty set, which the counts show to be small
+beside the show, and the update pass would walk the tree to find what the set lists now. The
+time of the requests alone was not measured.
+
+**Other backends.** Nothing changed.
+
+### 9.77 A census of the construction of an element (one change tried and left out)
+
+Experiment #756 supposed that part of the construction of an element is repeated or empty
+for most elements, and asked for a census of it.
+
+**The census.** `layout::ElementCensus` constructs a thousand elements of a class, with
+nothing set and not attached, and reports the instructions and the time of one. The
+difference between a class and its base is what the class adds to every element of it.
+
+| Class | Instructions | Time |
+| --- | ---: | ---: |
+| `Visual` | 782 | 39 ns |
+| `Layoutable` | 958 | 57 ns |
+| `Interactive` | 984 | 61 ns |
+| `Control` | 1,082 | 69 ns |
+| `Decorator` | 1,093 | 73 ns |
+| `Border` | 1,160 | 84 ns |
+| `TextBlock` | 1,188 | 91 ns |
+| `Rectangle` | 1,162 | 97 ns |
+| `Panel` | 2,589 | 135 ns |
+| `StackPanel`, `Canvas`, `Grid` | 2,595, 2,594, 2,640 | 143 to 156 ns |
+| `ContentControl` | 3,111 | 171 ns |
+| `ContentPresenter` | 3,172 | 187 ns |
+| `Button` | 3,184 | 174 ns |
+
+The steps after the construction, for the elements of a tile of the wall:
+
+| Step | Instructions |
+| --- | ---: |
+| The first value of a border (`Width`) | 1,249 |
+| The five values a tile sets on its border | 5,616 |
+| The three values a label sets on its text block | 5,205 |
+| Drop of a border, a text block, a stack panel, a button with nothing set | 485, 540, 1,604, 1,532 |
+| Drop of a border with five values, of a text block with three | 2,088, 1,968 |
+
+A tile of seven elements is 87,065 instructions to create and drop
+(`ElementConstructionBenchmark.create[Tiles=1000]`). Its seven constructions are 9,886 of
+them, 11 per cent. The values it sets are about a third (about 1,100 instructions a value,
+1,700 for the values of a text), and the rest is the children it adds and the drop.
+
+**What the census points at.**
+
+- A panel adds 1,500 instructions to a control when it is constructed and 1,100 when it is
+  dropped: its list of children, the handler of the changes of that list, and a list of the
+  handlers of the changes of its child indexes.
+- A content control, a content presenter and a button add 2,000: the `:empty` pseudo-class
+  they set when they are constructed makes the classes of the element. Styles select
+  `:empty`, so it stays.
+- The lookups that find nothing are not in the construction. The implicit theme and the
+  styles are looked up when an element is attached (section 9.76 has the counts of a start).
+
+**Tried and left out.** A panel that makes the list of the handlers of its child indexes
+with the first handler (few panels get one: a style that selects a child by its position
+asks for it) is 234 instructions less to construct and 213 less to drop, and a thousand
+tiles are 86,178,623 instructions in place of 87,064,804 to create and drop (-1.0 per cent).
+The frame benchmarks of the gate said otherwise about the start of a scene, over nine
+rounds:
+
+| Start of a scene | Before | After | Change |
+| --- | ---: | ---: | ---: |
+| `frames/wall`, built in | 104.900 ms | 109.268 ms | +4.2 % |
+| `frames/wall`, shown in | 204.492 ms | 221.078 ms | +8.1 % |
+| `frames/wall+pointer`, shown in | 204.299 ms | 223.228 ms | +9.3 % |
+| `frames/reorder`, shown in | 59.479 ms | 64.036 ms | +7.7 % |
+| `frames/grow`, shown in | 148.994 ms | 160.256 ms | +7.6 % |
+| `frames/recolor`, shown in | 148.237 ms | 157.746 ms | +6.4 % |
+| `frames/cards`, shown in | 30.635 ms | 32.634 ms | +6.5 % |
+| `startup/controls`, shown in | 195.208 ms | 189.933 ms | -2.7 % |
+
+Eleven lines were over their tolerance, all of them the start of a scene with many panels.
+The wall run by itself retired the instructions of the base (18.0 thousand million for the
+process on both sides) in the memory of the base (750 MB) and was shown in 226 ms against
+215. The work is the same; what differs is where the elements lie on the heap (the candidate
+has one small block less between a panel and what is allocated after it), which was not
+looked into further. A change that removes instructions and makes the start of a wall slower
+is not kept.
+
+**Not tried.** The list of children of a panel and its handler (four allocations) could be
+one allocation with the panel, which would take about 600 more instructions off a panel; it
+changes the list every collection of the framework is made of. The classes of an element
+could keep the well-known pseudo-classes as bits. Neither is done here, and the result above
+says that a change of what a panel allocates is measured on the start of a scene before
+anything else.
+
+**What stays as it was.** Everything: the pull request adds the benchmark.
+
+**Other backends.** Nothing changed.
+
+### 9.78 The first frame of a first launch, measured again (nothing to change)
+
+Experiment #759 started from a first frame that took 2.1 to 2.6 seconds on a first launch of
+the gauntlet against half a second on a later one, with the pipelines of the first frame
+compiled on the UI thread inside the first paint, and proposed to compile them on the
+prewarm thread and to keep a record of them between launches.
+
+**Measured** on the main branch before anything was changed: the time from the start of the
+process to the first frame of the benchmark application (Metal, macOS), a first launch being
+one after the cache of compiled Metal shaders of unbundled applications is removed, as the
+comparison's harness makes one.
+
+| Scene | First launch | Later launch |
+| --- | ---: | ---: |
+| Gauntlet, tier 16 (five launches each) | 0.242 to 0.280 s | 0.209 to 0.230 s |
+| Patchwork, tier 17 (three launches each) | 0.409 to 0.436 s | 0.384 to 0.402 s |
+
+A first launch is three hundredths of a second behind a later one. The gap the experiment
+set out to close is not there: a first launch no longer waits for Metal. (The numbers of the
+experiment were the harness's of 13 November; what moved the compilation since then was not
+traced back.)
+
+One launch is slow, and it is not the one the harness measures: the first run of an
+executable file the system has not run before. The file just built took 1.66 s to its first
+frame, and a copy of the same file at another path, with the caches of Metal in place, 1.06
+s, then 0.24 and 0.22 s. A sample of that launch has about 0.8 s in the loader of the system
+before the program starts (`_dyld_start`) and no compilation of a Metal library or pipeline
+on any thread of the application. That time belongs to the system's first run of a new
+executable, and what an application can do about it is to be a smaller file.
+
+**Not measured.** A machine on which Metal has never seen the shaders (its front-end cache
+empty as well). The harness does not remove that cache, and it is shared by every
+application of the user; removing it is the owner's call.
+
+**Outcome.** Nothing is changed: there is no first-launch cost of this size left to move to
+another thread. The prewarm of the effects of a theme and of the frame stays as it is.
+
+**Correction (section 9.81).** The launches measured here started the same file again, and
+that is not a first start: the system had run the program before, and Metal's own cache of
+compiled sources, which is not the one removed here, still had every shader. A first start
+of a program the system has never run does wait, for both, and section 9.81 measures it.
+
+**Other backends.** The browser's first frame (step 4 of the experiment: one draw, not one
+to find the pipelines and one to show) was not measured and stays open.
+
+### 9.79 The frames drawn whole at launch, counted (nothing to remove)
+
+Experiment #758 asked how many frames a launch draws whole, and why: a frame drawn whole
+after the first one is work a window should not do (section 9.53 removed one such cause on
+the patchwork screen, which drew the whole window in every frame of its first seconds).
+
+**Counted** on the main branch with a line a drawn frame, written for the measurement and
+not kept: the share of the target inside the bounds of the dirty region, and what made the
+frame whole when it was (a new layer, a change of the target that asks for a whole frame, a
+target that keeps no frame, or a dirty region that covers the target by itself).
+
+| Launch | Frames | Whole | Share of the target in the frames after the first (median) |
+| --- | ---: | ---: | ---: |
+| macOS, Metal: gauntlet, tier 16, 4 s | 213 | 1 | 89 % |
+| macOS, Metal: still wall, tier 16, 4 s | 188 | 1 | 9 % |
+| macOS, Metal: patchwork, tier 17, 4 s | 198 | 1 | 92 % |
+| macOS, Metal: control catalog, 5 s | 138 | 1 | 20 % |
+| Android, OpenGL ES (emulator): wall, 6 s | 35 | 1 | 10 % |
+| Android, OpenGL ES (emulator): text, 6 s | 86 | 1 | 84 % |
+| Android, OpenGL ES (emulator): transforms, 6 s | 41 | 1 | 78 % |
+| Android, OpenGL ES (emulator): list, 6 s | 47 | 1 | 90 % |
+
+The Android rows are the scenes of the frame benchmarks (`tests/FerroUI.FrameBenchmarks`),
+each started twice; both launches of every scene have one whole frame.
+
+**The one whole frame** of every launch is its first: the target has just been given its
+size and its root, which asks for a whole frame, and the layer the frame is drawn into is
+new. It is the frame that carries the content, so there is no frame to make partial.
+
+**The frames after it** are as large as what changes. The gauntlet and the patchwork animate
+across the window, and the bounds of what moves are nine tenths of it; the wall changes a
+few tiles a frame. The control catalog draws 128 frames of a fifth of its window in its
+first 2.3 seconds and then stops: three elements of its first page animate, and the fifth is
+the bounds of the three together (their rectangles move by a fraction of a pixel a frame).
+None of these frames waits for a policy before it is partial: the first frame after the
+whole one already is.
+
+**Why there is no second whole frame.** A window target of the Skia backends is drawn
+through a layer that keeps the frame (`RenderTargetProperties::default()`: the target is
+not drawn directly), so a surface that hands out a cleared image each frame costs a blit of
+the layer and not a redraw of the tree. A whole frame is drawn again when the layer is made
+again (a change of size, a lost context) or when the target changes (its size, its scaling,
+its transparency), and a launch does neither after its first frame.
+
+**Outcome.** Nothing is changed and no counter is added. A frame drawn whole after the first
+one would show as a time in the window suite of the gate (`first frame`, `second frame` and
+the frame times of a scene).
+
+**Not counted.** The browser (WebGL): the build needs a toolchain that is not on the
+measuring machine. Its window target is the same Skia target drawn through a layer, so the
+same rule holds by construction, with one case of its own, a resize of the canvas, which
+makes the layer again.
+
+### 9.80 Scaling pairs in the gate, and a panel that loses its children one at a time
+
+Experiment #755. The regressions that cost the most were quadratic: the disposal queue, the
+buckets of the hit test, the removal of every child of a parent. Each was linear at the size
+its benchmark had. The gate compared a branch with the main branch at one size, so a cost of
+that kind passed as long as the size of the benchmark was below the knee.
+
+**What is added.** `trees::Scaling` (`tests/FerroUI.Benchmarks/trees/scaling.rs`): seven
+operations on a wall of tiles at 1,000 and at 4,000 tiles, each one whole operation, built
+from the benchmarks of `trees::Lifetime` and `trees::Styling`. The gate pairs the two sizes
+of a benchmark (and those of `layout_subsystem::ScrollContent.offset`, which has both sizes
+since section 9.74) and reports the instructions at the larger size over those at the
+smaller, with a limit of 4.6 (section 8.1, "Scaling pairs"). The verdict reads instructions
+and not times, so it does not move with the machine: two runs of one build differ by a
+hundredth of a percent.
+
+**The pairs of the main branch**, before the fix below.
+
+| Pair | Instructions at 1,000 | at 4,000 | Ratio | Time at 1,000 | at 4,000 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `start` (build, show, lay out) | 129.3 M | 517.0 M | 4.00 | 7.74 ms | 42.1 ms |
+| `attach` | 24.9 M | 99.9 M | 4.00 | 1.67 ms | 10.2 ms |
+| `detach` | 12.0 M | 47.9 M | 4.00 | 1.06 ms | 9.39 ms |
+| `clear` | 24.1 M | 96.5 M | 4.00 | 1.53 ms | 9.07 ms |
+| `remove_half` | 38.2 M | 450.0 M | **11.77** | 1.83 ms | 21.9 ms |
+| `toggle_class` | 2.14 M | 8.57 M | 4.00 | 150 us | 819 us |
+| `resource_changed` | 0.44 M | 1.74 M | 3.99 | 78 us | 833 us |
+| `ScrollContent.offset` (rows) | 21,633 | 21,619 | 1.00 | 1.20 us | 1.19 us |
+
+Seven of the eight are linear to the third digit, and the scroll offset does not grow with
+the rows at all (section 9.74).
+
+**The finding: a child removed from a panel.** Removing half the children of a panel one at
+a time took 11.8 times the instructions for four times the children: 76,000 instructions a
+removal among 1,000 children and 225,000 among 4,000, about 50 for every child the panel
+has, on top of what the tile itself costs to take out. `Panel::children_changed` removed
+the child from the logical and from the visual children with `FerroList::remove_all`, which
+walks the whole list for the items to remove, whatever their number and wherever they are:
+two lists, every child of each, once a removal. Where the child was did not matter; the
+last child cost as much as the first.
+
+**The fix.** The two lists mirror the children of the panel, and the change says where the
+children had what they lost. The panel removes that range from each list when the list has
+the children there, and falls back to the search when it does not (a derived panel that
+keeps a visual of its own among them). The lists report the same change either way.
+
+| Removal of half the children, one at a time | Main: 1,000 | 4,000 | Ratio | Fix: 1,000 | 4,000 | Ratio |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| the one before the last (`remove_half`) | 38.2 M | 450.0 M | 11.77 | 13.1 M | 52.4 M | 4.00 |
+| the last | 38.2 M | 449.6 M | 11.79 | 13.0 M | 52.1 M | 4.00 |
+| every second, from the last down | 42.8 M | 525.9 M | 12.28 | 17.7 M | 128.3 M | 7.25 |
+| the first | 41.5 M | 503.7 M | 12.13 | 16.4 M | 106.1 M | 6.47 |
+
+In time, at 4,000 children: 21.9 to 4.95 ms for the pair of the gate (-77 %), 26.9 to 10.5 ms
+for every second child (-61 %), 23.8 to 9.2 ms for the first (-61 %).
+
+**What is left** in the last two rows is the list itself. A child taken from the middle or
+the front of an array has what follows it moved down, in the children of the panel and in
+the two lists that mirror them: a sample of the removal of the first child has half its time
+in that move, and nothing else that grows. That is about 7 instructions for every child the
+panel has, against the 50 before, and it is what the reference's list does as well. The pair
+of the gate removes the child before the last, which moves one child and still fails for
+anything that walks or searches the children for every removal (it had 11.77 on the main
+branch).
+
+**Tests.** `panel_tests.rs`:
+`children_removed_one_at_a_time_and_as_a_range_leave_the_lists_in_step` (the lists and the
+changes they report) and `a_child_is_removed_from_a_list_that_has_it_at_another_index`.
+
+**The times.** Four of the linear pairs take 5.5 to 10.6 times the time for four times the
+instructions (`detach` 8.9, `resource_changed` 10.6): the elements of 4,000 tiles no longer
+fit the caches that hold those of 1,000. That is the memory an element takes, which the heap
+census of the start is about, and not a cost that grows faster than the tree; the pairs do
+not judge it.
+
+**`measure` and `arrange` say what is inline.** The gate of this change failed on lines the
+change does not run: `Invalidation.resize_one_leaf` took 4.4 % more instructions,
+`ScrollContent.content_resized` 3.2 % and the forced layouts of the TreeDataGrid 3.3 %. A
+few new functions in the file of the panel had moved where the compiler cut the crate, and
+with it whether `Layoutable::measure` and `arrange` were inlined into the decorators that
+call them for their child. That is not a thing to leave to where a build puts its code.
+Both now have the same shape: the test for what most calls of a pass are (an element offered
+the size it was measured at, or one inside its hold; an element arranged where it is) is
+`#[inline]` and is all a caller gets, and everything else is one function out of line
+(`measure_at`, `arrange_at`), the checks for a size or a rectangle that is not one included:
+such a value was never the one an element had, so it reaches them. Against the main branch,
+in instructions: `resize_one_leaf` -11.7 %, `content_resized` -15.7 %, the text block
+measured at one width and arranged at another -52.9 %, the forced layouts of the
+TreeDataGrid +1.5 %, the panels within 0.2 %.
+
+### 9.81 A first start: the pipelines of the first frame compile side by side
+
+The published comparison of 0.5.0 has the first frame of the gauntlet 2.6 seconds after a
+first start, against 0.7 to 1.2 seconds for the frameworks that lead it, and a rate over
+the ten seconds of the run that the wait takes a quarter of. Section 9.78 looked for that
+wait and did not find it, because it did not make a first start.
+
+**What a first start is.** The comparison's harness copies the program, signs the copy
+again with a code hash the system has not seen, removes the cache of compiled Metal shaders
+and launches it; the first frame is the first picture of the window, taken from outside the
+application. Measured here the same way, with the comparison's own FerroUI application
+(the declarative layer, the Simple theme, a 46 MB program) built from the main branch, the
+gauntlet at tier 16, a display at 60 Hz with other windows on it:
+
+| | First frame, first start | Rate of the run | First frame, second start | Rate |
+| --- | ---: | ---: | ---: | ---: |
+| Main | 2.30 s (2.35, 2.24) | 29.3 fps | 0.57 s | 37.0 fps |
+
+**Where the 2.3 seconds go** (a sample of the main thread of a first start; a sampled start
+is slower, so these are shares more than times):
+
+| Part | Sampled time |
+| --- | ---: |
+| Before the first instruction of the program: the system checks a program it never ran | 420 to 630 ms |
+| The first paint, waiting for Metal: libraries compiled from source | 550 to 700 ms |
+| The first paint, waiting for Metal: pipeline states | 215 to 260 ms |
+| The application: platform set-up, mount of the tree, first layout | about 300 ms |
+| From the application's first tick to the window on the display | about 300 ms |
+
+The check before the first instruction grows with the size of the program (the harness's
+own notes have 214 ms for 3 MB, 270 ms for 12 MB and 380 ms for 24 MB, about 8 ms a
+megabyte), so the size of an application is a part of its first start: the comparison's
+application is 30.5 MB stripped, 10 MB of code more than hello world, because the
+declarative layer keeps the tables of types and with them every control.
+
+A sample also shows 120 to 180 ms in `-[NSApplication finishLaunching]`, where AppKit loads
+a library for the text input items of the main menu. That time is the sampler's: the
+system tells an attached sampler of every library a process loads and waits for its answer
+(`notifyDebuggerLoad`). It is not a cost of a start that nothing watches.
+
+**The first paint.** Graphite makes the pipeline of a draw when the recording that holds it
+is added to the context, and without a thread pool it makes them one after another on the
+thread that does that: on a first start the UI thread, inside the first paint. Each pipeline
+is two Metal libraries compiled from source and a pipeline state, tens of milliseconds
+each, and the first frame of the gauntlet needs a few dozen.
+
+**The change.** The Graphite context of the process is given a thread pool
+(`ContextOptions::fExecutor`, `skia_metal_gpu.rs`), which Graphite's pipeline manager uses
+as it is: the pipelines a recording needs become tasks of the pool, and the thread that
+adds the recording waits for the last of them. The Skia binding has the option as a field
+and no way to make an executor, so a file of its own asks Skia for one
+(`gpu/graphite/pipeline_executor.cpp`). One pool for the process, a thread for each core
+and eight at most; `FERROUI_PIPELINE_THREADS` sets the number, and 0 leaves Graphite as it
+was. The threads sleep when nothing compiles.
+
+| Pipeline threads | First frame, first start (two starts) | Rate of the run |
+| ---: | ---: | ---: |
+| none (before) | 2.35, 2.24 s | 28.4, 30.1 fps |
+| 2 | 1.83, 1.78 s | 32.0, 32.2 |
+| 4 | 1.61, 1.43 s | 32.5, 32.9 |
+| 8 (the default on this machine) | 1.38, 1.37 s | 33.6, 33.9 |
+| 12 | 1.56, 1.44 s | 32.4, 32.0 |
+
+The first paint of the sampled first start goes from 814 ms to 259 ms, 194 of them the
+wait for the pool. The second start is the same with and without (0.54 to 0.57 s, 37 to 38
+fps): its pipelines come from Metal's cache.
+
+**What is left of a first start**, in the order of what it costs: the system's check of
+the program (its size), the application's own start, and the wait for the pool (pipelines
+that could be asked for before the first paint).
+
+**Tests.** `gpu/metal/tests.rs`: `the_pipeline_threads_follow_the_cores_and_the_environment`
+and `the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none`; the drawing
+tests of that file make their contexts with the pool and read their pixels back.
+
+### 9.82 The declarative layer: an effect that runs again does not search the subscribers of its sources
+
+The published comparison measures a gauntlet written on the declarative layer
+(`ferroui-view`: signals, effects, a keyed list), which is not the program of
+`samples/GauntletBenchmark` (the controls themselves, a virtualizing list that recycles its
+rows, bars and sparklines that draw themselves). The two draw the same screen; at tier 16
+the sample of this repository runs at 53 to 60 frames a second and the declarative program
+at 37 to 38.
+
+**Where the declarative program was** (a sample of its UI thread in the steady state, four
+seconds): 45 % in the layout pass, 34 % in the reactive runtime of the declarative layer,
+2 % idle, against 32 %, none and 30 % for the sample of this repository. Two thirds of the
+time in the runtime was bookkeeping: `Runtime::clear_sources` and `Runtime::track`.
+
+**The cause.** A screen like this has one frame signal that thousands of effects read. An
+effect that ran again first left the subscribers of every source it had
+(`subscribers.retain`, a walk of the whole list of the signal) and then, as it read the
+signal again, asked whether it was among them (`subscribers.contains`, another walk) and
+was appended. Every frame each of N effects walked a list of N twice.
+
+**The change** (`src/FerroUI.View/reactive.rs`). A node is among the subscribers of exactly
+what it has as a source, so whether it follows a source is a question to its own few
+sources. A run keeps what the run before read (`previous`): a source read again, in the
+order of the run before or in another, is taken from there and the subscribers of the
+source are not touched; a source read for the first time is appended to them; what the run
+did not read again is left at its end, which is the one walk that remains and happens only
+when an effect stops reading something. The order in which the effects of a signal run is
+the order they were made in and no longer rotates.
+
+| The comparison's FerroUI program, gauntlet tier 16, its harness (two starts each) | Before | After |
+| --- | ---: | ---: |
+| Second start: frames a second over the run | 37.8, 37.4 | 42.5, 43.4 |
+| Second start: CPU a frame | 64.6, 65.4 ms | 60.3, 58.0 ms |
+| First start: frames a second over the run | 33.2, 33.8 | 37.1, 38.1 |
+| UI thread in the reactive runtime (sampled) | 34 % | 13 % |
+| UI thread idle (sampled) | 2 % | 14 % |
+
+**What is next for that program**: the layout pass (48 % of its UI thread), of which a
+quarter makes text layouts again every frame.
+
+**A run asks for no memory** (a later change to the same lists). The start of a run moved
+what the run before read into `previous` and left the list of the run empty, without its
+room, and `Vec::split_off(0)` on the emptied `previous` made a list of the same room to
+throw away: every run of every effect made two lists and freed two. The two lists now
+change places at the start of a run (`begin_tracking`: `swap`, then `append` for what a run
+that did not end left unread), so a run fills the list of two runs ago. The comparison's
+program runs about two thousand effects a frame; over three starts each its frames a second
+go from 44.0 to 44.5 on a second start and from 40.8 to 41.6 on a first one, and its CPU a
+frame from 57.2 to 56.7 ms: one in a hundred, for nothing.
+
+**Tests.** `src/FerroUI.View/tests/reactive_tests.rs`:
+`effects_that_run_again_stay_one_subscriber_each_in_the_order_they_were_made`,
+`a_source_a_run_does_not_read_again_is_followed_no_more`,
+`sources_read_in_another_order_are_all_kept`,
+`a_source_disposed_while_its_subscriber_runs_is_forgotten` and
+`an_effect_that_runs_again_fills_the_list_of_two_runs_ago`.
+
+### 9.83 A first start: pipelines from a record, asked for when the platform starts
+
+After section 9.81 the first paint of a first start still waits for the pipelines of the
+frame, side by side on the pool. This section asks for them before the first paint.
+
+**What other renderers do** (the research is in #786). A renderer with a closed set of
+shaders compiles them when it is built (Flutter's Impeller, Qt's shader tool). One with an
+open set records what an application draws and compiles the record before it is needed
+(Unreal's bundled pipeline caches, Chrome's start with Skia Graphite, the framework that
+leads the published comparison, which also draws its first frames with a few simple
+pipelines compiled first and alone). Skia is of the second kind. All of them draw the first
+frame on the GPU, and so does this.
+
+**The record.** Graphite reports every pipeline it makes with a key that can be stored, and
+makes a pipeline from such a key before a draw needs it. A record is the keys of the
+pipelines an application made: `FERROUI_PIPELINE_RECORD=<file>` writes one, an application
+ships its own (`ferroui_skia::register_pipeline_record`), and the Skia crate carries one of
+ordinary drawing, 37 pipelines in 2.3 kB (fills, rounded rectangles, borders, text, the
+shadow of a box, a small gradient, clips), for macOS on Apple silicon, where it was
+recorded. When the context is made, the keys go to the pipeline pool on a thread of their
+own.
+
+**The context, sooner.** The render context was made by the first frame. With
+`FirstFramePipelines::Prewarm` (the default; `FERROUI_FIRST_FRAME=wait` is the behaviour
+before) the native platform makes it when it starts (`Compositor::prepare_render_interface`),
+so the record compiles while the application builds its first screen.
+
+**What a record cannot hold** in the pinned Skia: a pipeline that samples a texture (14 of
+the gauntlet's 45: the path from a key fails in the snippet that normalises the coordinates
+and the process ends) and Skia's own runtime effects (the passes of a blur: refused in a
+context that has not drawn with them). They are made at their first draw, on the pool.
+
+**Measured** as section 9.81 measures a first start (the comparison's own application built
+from the branch, gauntlet tier 16, three starts each):
+
+| | `wait` | `prewarm` |
+| --- | ---: | ---: |
+| First frame, first start | 1.370, 1.385, 1.391 s | 1.345, 1.418, 1.259 s |
+| First frame, second start | 0.562, 0.572, 0.556 s | 0.553, 0.565, 0.600 s |
+| First paint of a sampled first start | 259 ms | 137 ms |
+| of it, the wait for pipelines | 194 ms | 70 ms |
+
+The first paint is half of what it was, and the first frame moves by less than its own
+scatter (0.04 s at the median): a first start of this application is now the system's
+check of a 30 MB program it never ran (0.42 s), the application's own start and the time
+to the window on the display. The context made sooner without a record changes nothing
+(1.39 and 1.40 s).
+
+**What is next for the pipelines** (#786): the texture pipelines, through the form of
+Graphite's precompile that takes paint options (what Chrome uses), and shader libraries
+compiled when the application is built, loaded where Skia hands text to Metal. Both need the
+patched Skia binding. **And for the first start**: the size of an application on the
+declarative layer, which keeps every control because one selector is a string.
+
+**Tests.** `gpu/graphite/pipeline_record.rs` (the format of a record; what stays out of
+one), `gpu/metal/tests.rs`: `the_record_of_ordinary_drawing_is_taken_whole_where_it_is_used`
+(a Metal device takes every key of the record the crate carries; it found the refused blur
+keys), `rendering/first_frame.rs` (the names of the environment). The Metal drawing tests
+make their contexts with the record asked for.
+
+### 9.84 The declarative program: texts of one colour share their layouts
+
+**What was counted.** The comparison's own FerroUI program and the sample of this repository
+were built with the counters of the UI thread (`perf-counters`, `FERROUI_FRAME_TIMES=1`) and
+run at tier 16. A frame of each, side by side:
+
+| A frame, gauntlet tier 16 | The declarative program | The sample of this repository |
+| --- | ---: | ---: |
+| Text blocks whose layout was dropped for a new text | 732 | 745 |
+| Text layouts made | 781 | 431 |
+| Layouts found in the cache of the font manager (section 9.29) | 7 | 347 |
+| Measures run | 4,457 | 1,148 |
+| Objects made | 1,122 | 493 |
+
+Both change the same 740 texts a frame (400 quotes of two texts each). The sample finds 45 %
+of them in the cache; the declarative program found one in a hundred.
+
+**The cause.** The cache told brushes apart as objects, because a brush that can change may
+get another colour after a layout was made with it. An element of the declarative layer
+that is written `.foreground("#64748B")` made a brush of its own from the text, so 400 quotes
+of one colour had 400 brushes and no two of them could share the layout of `+0.12%`. The
+sample holds one brush a colour.
+
+**The change**, two parts.
+
+- `text_layout_cache.rs`, `same_brush`: two brushes are the same brush to the cache when they
+  are one object, or when neither can change (`IBrush::as_immutable_brush`) and they are
+  equal (`IBrush::equals`: for an immutable solid colour brush its colour, opacity and
+  transforms) with the same transform origin. A brush that can change is still told apart
+  from every other object. This holds for any application: a colour written in a data
+  template or parsed for each item is an immutable brush of its own.
+- `src/FerroUI.View/conversions.rs`, `brush_of`: a colour given to a setter of the
+  declarative layer (a `Color`, `"#1E293B"`, a name) is one brush for the thread, for the
+  first 1,024 colours; a value that runs through colours gets brushes of its own past that.
+  A screen of ten thousand elements in a dozen colours holds a dozen brushes.
+
+**Measured** (the comparison's program built from the branch with its own profile, its
+harness, gauntlet tier 16, three starts each, the median; the counters from the build with
+counters):
+
+| | Before | After |
+| --- | ---: | ---: |
+| Text layouts made a frame | 781 | 435 |
+| Layouts found in the cache a frame | 7 | 353 |
+| Second start: frames a second over the run | 44.4 | 48.9 |
+| Second start: CPU a frame | 57.3 ms | 52.6 ms |
+| First start: frames a second over the run | 41.1 | 45.5 |
+| First start: first frame | 1.12 s | 1.14 s |
+
+**What is left in that program**: four times the measures of the sample. Its quotes hug
+their texts, so a text that changes its width measures the tile around it; each card
+replaces the two column definitions of its progress bar every frame (545 definitions made a
+frame) and sets the points of two shapes, which measure for them.
+
+**Tests.** `text_layout_cache_tests.rs`:
+`a_layout_is_shared_for_the_same_brush_and_for_equal_brushes_that_cannot_change` (equal
+immutable brushes share, another colour or opacity does not, two brushes that can change do
+not). `src/FerroUI.View/tests/builder_tests.rs`:
+`elements_that_name_a_color_share_its_brush`.
+
+### 9.85 A first start: shader libraries made when the application is built
+
+**Where the time of a pipeline goes.** After sections 9.81 and 9.83 the pipelines of a first
+start are made on eight threads, most of them before the first frame asks. A sample of those
+threads (the comparison's program, a first start): of the time in
+`MtlGraphicsPipeline::Make`, three quarters is `newLibraryWithSource:` (313 of 424 samples
+on a thread, the same on each), Metal compiling the text of a shader in a helper process,
+and a quarter is `newRenderPipelineStateWithDescriptor:`.
+
+**The change.** The first part is done ahead. The Metal compiler of Xcode makes the same
+library from the same text (`scripts/perf/metal-libraries.py`), a table holds the libraries
+by their text, and the device is asked through a front on its own
+`newLibraryWithSource:options:error:` (`gpu/metal/shader_libraries.m`), which loads the
+library of a text the table has and lets the device compile any other. The crate carries
+the table of ordinary drawing for macOS on Apple silicon, 77 libraries, 115 KB packed;
+an application registers the table of its own screens beside it
+(`ferroui_skia::register_metal_libraries`). The mechanism, why it is a front on the device
+and not a change of Skia, and what the other platforms have, are in
+`docs/porting/gpu-rendering.md` ("Pipelines made ahead of their first draw").
+
+**Measured** (the comparison's own program built from the branch with its profile, its
+harness, gauntlet tier 16, five starts each of one binary, the table of the crate asked
+and, with `FERROUI_METAL_LIBRARIES=off`, not asked; the median, and the five):
+
+| | Table off | Table of the crate |
+| --- | ---: | ---: |
+| First start: first frame | 1.246 s | 1.018 s |
+| the five | 1.142, 1.147, 1.246, 1.269, 1.320 | 1.003, 1.005, 1.018, 1.024, 1.081 |
+| First start: frames a second over the run | 40.6 | 42.1 |
+| Second start: first frame | 0.524 s | 0.523 s |
+| Second start: frames a second over the run | 44.0 | 44.3 |
+| The program | 23,064,208 bytes | 23,180,752 bytes |
+
+A first start shows its first frame 0.23 s sooner and its starts differ by 0.08 s where
+they differed by 0.18 s; a second start, which finds what the system kept of the first, is
+the same. The pictures are the same: no pixel differs between a frame drawn with the table
+and one drawn without (gauntlet tier 5 and patchwork tier 5, frame 120). The texts are the
+same from run to run and from build to build (two recordings of 71 texts, the same 71 keys),
+and the 71 of the comparison's program are among the 77 the sample of this repository
+writes.
+
+**What is left of a first start**: the system's check of a program it never ran, the
+pipeline states themselves (a quarter of a pipeline; Metal's binary archives are of one GPU
+and one system version, so they are not shipped), and the application's own start.
+
+**Tests.** `metal_libraries.rs` (the key, the table, a packed table unpacked by the system,
+what a library is given for, the table the crate carries), `gpu/metal/tests.rs`:
+`the_libraries_of_ordinary_drawing_are_found_by_the_pipelines_of_the_record` (fails when
+Skia writes other texts than the table was made of). The 648 tests of the crate, the Metal
+drawing tests among them, run with the table in front of the device.
+
+### 9.86 Measure holds: a canvas, star rows at a set height, an axis cut to the available size
+
+**What was counted.** After section 9.84 the declarative program of the comparison still ran
+4,457 measures a frame at tier 16, against 1,148 of the sample of this repository, on a
+screen whose width changes every frame: the case measure holds are for (section 9.15). A
+count by class and by reason (a temporary one) said why its cards were measured again: 926
+borders, 573 grids and 200 stack panels a frame were valid and offered a width outside their
+hold, and 386 more borders had none. Three rules gave up where they need not.
+
+- *A canvas held nothing.* `Canvas` has a measure of its own (every child at an infinite
+  size, no desired size) and no hold, so it held at the width it got and nowhere else, and so did
+  the stack around it: one sparkline in a card, and the card was measured at every width. Its
+  measure does not read the constraint: it now holds at every size (`MeasureHold::ANY`).
+- *A grid of one star row at a finite height held nothing.* A grid without row definitions
+  has one star row; in a box of a set height (the track of a progress bar) that row has a
+  finite height, and the grid reported no hold at all. The row is the height of the grid, so
+  at the same height every cell gets the height it got: such a grid now holds at that height
+  alone, over the widths its columns give it. A grid of several rows of which some are star
+  rows holds nothing at a finite height, as before: the first form of this change held there
+  too, and the walk of the cells it needs cost a grid of a thousand cells 17 % more
+  instructions a measure (`PanelMeasureArrange.grid` of the gate), for a hold a grid of rows
+  seldom needs.
+- *An element cut on one axis held nothing on either.* A desired size larger than the
+  available size is cut to it, so that axis depends on the available size; the hold of the
+  other axis was dropped with it. At tier 16 every size is multiplied by 0.12, a bar is 0.72
+  of a pixel high, its rounded height is one pixel, and so every fill was cut and nothing
+  above it held. The cut axis now holds at the available size it was measured at
+  (`map_axis_or_its_size`) and the other over its range.
+
+With the third rule an element that is cut has a hold where it had none, and a measure asked
+its hold before it looked whether the size was the one it had: `Layoutable::measure` now
+looks at that first, which is what most measures of a pass are, and asks the hold only for
+another size.
+
+What is left is the rounding step a grid takes from the hold of a cell of a star column on
+each side: at 0.12 the hold of a wrapped title is narrower than two pixels and nothing of
+it is left, so the header of a card, and with it the card, still holds one width. At the
+sizes applications have, a hold is tens of pixels wide.
+
+**Measured** (the comparison's program at tier 16; the counts from a build with counters,
+the rates from its harness, three starts each, the median, against the same commit without
+the change):
+
+| | Before | After |
+| --- | ---: | ---: |
+| Measures a frame | 4,457 | 2,410 |
+| Second start: frames a second over the run | 49.0 | 50.0 |
+| First start: frames a second over the run | 45.1 | 46.0 |
+| Second start: CPU a frame | 52.4 ms | 51.1 ms |
+
+Half the measures and a fiftieth of the frame: a measure that returns what it had costs
+about a third of a microsecond. The rules hold for any tree: a canvas inside a stack no
+longer makes the stack measure at every width of a window that is resized.
+
+**Tests.** `measure_hold_tests.rs`:
+`a_canvas_holds_at_every_size_and_the_stack_around_it_what_its_other_children_hold`,
+`a_bar_of_two_star_columns_in_a_track_of_a_set_height_holds_at_other_widths` (a bar 6 and
+0.72 high, rounded and not), and four grids in a box of a set height among the grids of
+`a_grid_of_several_star_columns_measured_inside_its_holds_lays_out_as_a_new_one`, which lays
+each out at every quarter of a pixel around a width and compares it with a tree made for
+that width (one box is lower than a line of text: its texts are cut and hold nothing).
+`layout/measure_hold.rs`: `an_axis_cut_to_the_available_size_holds_at_that_size`.
+
+### 9.87 A text block that is only resized is not drawn again
+
+**What was counted.** After section 9.86 recording for the render thread is the largest part
+of the UI thread of the declarative gauntlet (a third of its busy time). A count of the
+drawings that come out the same as the one before, by class: 880 text blocks a frame were
+invalidated, recorded again and drew what they had drawn. They are the texts of the cards:
+the width of the screen changes every frame, each block is arranged as wide as its column,
+and a visual whose size changes is drawn again (section 9.13 took the position out of that
+rule, not the size). A text block draws its layout from its padding; as long as it keeps the
+layout, a new width draws the same glyphs at the same places.
+
+**The change.**
+
+- `Visual` has a member a class can override, `resize_changes_drawing(old, new)`: whether a
+  change of size alone changes what `render` draws. The default is that it does. When a
+  class says it does not, a resize marks the visual for its composition properties and not
+  for its drawing: the new size, and with it the clip to the bounds, reaches the compositor
+  as the offset does (section 9.13), and nothing is recorded.
+- `TextBlock` says so when it has no background, no inlines, and is as tall as its text
+  before and after (below that height the vertical alignment moves the text). The classes
+  derived from it draw more than the text and keep the default.
+- A new layout is a new drawing whether the size changes or not, so `measure_override` and
+  `arrange_override` of the text block invalidate the visual where they make one. Before,
+  a block whose layout was made again at the same size was drawn again only because
+  something else had invalidated it.
+
+**Measured** (the declarative gauntlet of the comparison, tier 16; the counts from a build
+with counters, the rates from its harness, three starts each, the median, against the branch
+below):
+
+| | Before | After |
+| --- | ---: | ---: |
+| Text blocks drawn a frame | 1,708 | 836 |
+| Visuals recorded a frame | 5,695 | 4,812 |
+| of them, drawings that came out the same | 1,316 | 441 |
+| Second start: frames a second over the run | 49.3 | 50.7 |
+| First start: frames a second over the run | 45.1 | 46.9 |
+| Second start: CPU a frame | 51.6 ms | 50.4 ms |
+
+No pixel differs between a frame of the two builds (gauntlet tier 5 and patchwork tier 5,
+frame 120, taken twice each).
+
+**Left out: an assignment of the value a property has** (the first part of experiment
+#761). The setters of the animated properties of a composition visual send the property
+again when it is assigned the value it has, to stop an animation; that would be wasted for
+a visual that never had one. Counted in the same program: 760 assignments a frame, none of
+them of the value the property had (section 9.59 stops them before the setter). There is
+nothing to drop, and the change was not made.
+
+**Tests.** `text_block_tests.rs`:
+`a_text_block_that_is_resized_and_keeps_its_layout_is_not_drawn_again` (a renderer that
+keeps how each visual was marked: a plain and a wrapped block resized within their layout
+get their properties alone; a block with a background, a block whose layout is made again
+and a block lower than its text are drawn again).
+
+### 9.88 A shape keeps its geometry when what the geometry is made of changes
+
+**What was counted.** The declarative gauntlet draws a sparkline in every card as a
+`Polygon` and a `Polyline` whose `Points` it replaces every frame: 522 geometries a frame.
+A sample of its UI thread has the two shapes at 7 % of its busy time: their measure (which
+builds the geometry), the invalidation of the shape, and the geometries let go while the
+frame is recorded.
+
+**The cause, which is not the polyline's.** A shape drops its geometry when a property its
+geometry is made of changes (`Shape::affects_geometry`), and makes another when it needs
+one. That is every shape that makes its own geometry: a `Rectangle` or an `Ellipse` whose
+size changes (the size is one of those properties), a `Line` whose end moves, a `Polyline`
+or `Polygon` given other points. Each change was a subscription to the geometry dropped,
+the geometry object dropped, a new object made, and a new subscription; for the two shapes
+with points also a copy of the points that the new geometry let go at once, because it was
+given the live collection right after.
+
+**The change** is in `Shape`, for every shape (section 8.4, rule 1).
+
+- `ShapeImpl::update_defining_geometry(geometry)`: a class gives the geometry the shape has
+  what the shape is now, and says whether it could. `Shape` asks it when a property of the
+  geometry changes: the geometry is then kept and builds itself again (its own properties
+  invalidate it), and the shape is measured again as before. A class that cannot, and the
+  default, lets the geometry go as before.
+- `Rectangle` (the rectangle and the radii), `Ellipse` (the rectangle), `Line` (the two
+  points), `Polyline` and `Polygon` (the collection of points, which the geometry then
+  follows; another fill rule is another geometry) implement it.
+- `PolylineGeometry::of_points`: a polyline geometry of a collection, which it follows.
+  `Polyline` and `Polygon` make their geometry of their own collection; nothing is copied.
+  `PolylineGeometry` builds its figure from the collection in place.
+- **An update is inherited only with the geometry it updates.** `update_defining_geometry`
+  follows `create_defining_geometry` in the declaration of the class: a class that derives
+  from one of these shapes and makes a geometry of its own has no update unless it says how,
+  so its geometry is made again by its own code, as before, and never filled by the code of
+  its base class. `SelectionIndicator` is such a class in this repository (a rectangle whose
+  radii are fitted to its size): a render test of the navigation indicator showed the caps of
+  a plain rectangle in its place before the rule, and it now updates its own geometry with
+  the fitted radii.
+
+**Looked at and not changed** (section 8.4, rule 2). `Arc` and `Sector` build a stream
+geometry, or an ellipse, by their angles: keeping one means writing a stream geometry again
+in place, which no geometry does yet. `Path` draws the geometry it is given and makes none.
+`Border` draws equal corners and thicknesses without a geometry; for unequal ones its
+render helper keeps two stream geometries by the size and makes them again when the size
+changes, which is the case of `Arc` and `Sector`. A stream geometry written again in place
+would serve all three, and is a change of its own.
+
+**The benchmark of the gate** (section 8.4, rule 3): `layout_subsystem::ShapeGeometry`, 500
+shapes on a canvas, each changed, laid out and asked for the geometry it draws:
+`polyline_points_replaced`, `polygon_points_replaced`, `rectangle_resized`,
+`ellipse_resized`, `line_moved`. Against the main branch (the benchmark copied to the base,
+two rounds):
+
+| `layout_subsystem::ShapeGeometry`, 500 shapes | Main | This change | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `polyline_points_replaced` | 636.2 us | 461.4 us | -27.5 % | -24.6 % |
+| `polygon_points_replaced` | 615.1 us | 428.6 us | -30.3 % | -26.0 % |
+| `rectangle_resized` | 796.3 us | 643.5 us | -19.2 % | -19.4 % |
+| `ellipse_resized` | 481.6 us | 401.7 us | -16.6 % | -18.0 % |
+| `line_moved` | 388.6 us | 276.1 us | -28.9 % | -28.3 % |
+
+**Tests.** `shapes/shape_tests.rs`:
+`a_shape_whose_geometry_properties_change_keeps_its_geometry` (a rectangle resized and given
+other radii, an ellipse resized, a line whose end moves: the same geometry object, with the
+new values, and a change reported). `shapes/polyline_tests.rs`:
+`a_polyline_given_other_points_keeps_its_geometry_which_takes_them` (the new collection is
+followed; without points the geometry is let go) and
+`the_geometry_of_a_polyline_has_the_collection_of_the_polyline`.
+
+### 9.89 A visual that draws nothing of its size is not drawn again when it is resized
+
+**The rule of section 9.87, where it belongs** (section 8.4, rule 1). Section 9.87 found
+text blocks that were recorded again for a new width and drew what they had drawn, and gave
+`Visual` a member a class can answer: whether a new size alone changes its drawing. The
+text block was the class the count named. The same holds for every visual whose `render`
+does not read its size, and on a screen that is resized most visuals are of that kind: the
+panels, borders and presenters that hold the layout together and draw nothing.
+
+**The change.**
+
+- `VisualImpl::resize_changes_drawing` is declared as following `render`: a class has the
+  answer of its base class only where it has the `render` of its base class. `Visual`
+  draws nothing and answers that a new size changes nothing; a class that overrides
+  `render` without answering, and any class written as a plain `impl`, is drawn again when
+  it is resized, as every visual was. `Layoutable`, `InputElement` and `Control`, which do
+  not draw, pass the answer of the base on.
+- `Panel`: draws its background, as large as it is; without one a new size is not a new
+  drawing.
+- `Border` and `ContentPresenter`: draw a background, a border and shadows; with none of
+  them, nothing.
+- `Shape`: draws its geometry under the transform of its arrange, not its size. A geometry
+  that changes has the shape measured and recorded again (also the geometry of a rectangle
+  or an ellipse, which is made of the size), and a transform that changes now invalidates
+  the visual where the arrange sets it.
+- A visual that is not drawn again has its size, and the clip to its bounds, sent to the
+  compositor as properties, as its position is (section 9.13).
+
+**Looked at and not changed** (rule 2). `Image` draws its source scaled to its size.
+`TemplatedControl` and the controls derived from it draw nothing themselves and get the
+answer of `Visual`. A control with a `render` of its own that this pass did not read keeps
+the answer every visual had.
+
+**Measured** (the declarative gauntlet of the comparison, tier 16; the counts from a build
+with counters, the rates from its harness, three starts each, the median). The column
+before is the stack below this change (sections 9.87 and 9.88); the main branch is beside
+it:
+
+| | Main | Before | After |
+| --- | ---: | ---: | ---: |
+| Visuals recorded a frame | 5,695 | 4,812 | 3,387 |
+| Objects sent to the render thread a frame | 10,587 | 10,641 | 7,391 |
+| Objects made a frame | 1,116 | 1,122 | 602 |
+| Second start: frames a second over the run | 49.7 | 50.4 | 51.9 |
+| First start: frames a second over the run | 46.4 | 46.4 | 49.6 |
+| Second start: CPU a frame | 51.5 ms | 51.2 ms | 49.4 ms |
+
+No pixel of the content differs between the bottom and the top of the stack on frozen
+frames of five scenes (gauntlet tier 5, frame 120; gauntlet tier 12, frame 300; patchwork
+tier 5; wall tier 8; chat), the two that are redrawn most taken three times on each build.
+(A frame taken right after a program is built can differ from every other frame of the same
+program: it is taken again.)
+
+**What the question costs, and what the gate found.** The whole gate on the stack stopped
+after its first round: a resize of a thousand borders took 2.9 and 4.1 % more instructions
+(`layout_subsystem::SizeChange.stretch_stack` and `star_grid`), the first layout of two
+thousand tiles 2.2 % (`trees::Lifetime.lay_out`) and a forced layout of the rows of a
+TreeDataGrid 2.2 %. A layout benchmark records nothing, so it shows the question and not
+what the answer saves; the question was made cheap where it is asked:
+
+- A visual that had no size is not asked: it gets its first size (every element of a tree
+  that is laid out for the first time) and is drawn, as before.
+- `Panel`, `ContentPresenter` and `TextBlock` look at their brush where it is
+  (`with_value`) and do not take a reference to it.
+- `Border` keeps its answer with the values it keeps for layout (section 9.28), and the
+  read of those values from the value store is a function of its own, out of line. It was
+  part of every reader before: a reader that found the values kept still carried the six
+  reads of the store. That was 42 of the 65 instructions the question cost a border, and
+  it was in every measure and arrange of a border on the main branch as well.
+  `Visual::composition_styled_inputs`, the other group of kept values that is read from
+  several properties, reads them out of line too; the kept values that are one property
+  (`Decorator::padding`, the sizes of a grid definition, `Visual::is_visible`) are left.
+
+Against the main branch after that (two rounds, instructions): the forced layout of the
+TreeDataGrid -0.15 %, `trees::Lifetime.lay_out` +1.1 %, and the resize of a thousand
+borders +0.7 % against the bottom of the stack, of which the question is a virtual call
+and a comparison of two generations.
+
+**A follow-up: said once.** The whole gate of the stack had `frames/text` at the same
+picture for 0.18 % more instructions a frame (97.57 and 97.75 million). Two things were done
+twice for a text block whose text changes and whose size changes with it:
+
+- A new layout is a new drawing, and since section 9.87 a new size alone is not, so the
+  block has to say so. It said so where the layout was made, in `measure_override` and
+  `arrange_override`, also when the text or the font had changed and had invalidated the
+  visual already. It now says so where the layout is let go (a measure that was
+  invalidated, a constraint or an alignment that no longer fits, embedded controls measured
+  again), and only when there was a layout to let go
+  (`TextBlock::drop_drawn_text_layout`).
+- A visual whose size or place changed is put in the set of the visuals whose composition
+  properties are synchronized. The pass leaves out of that set the visuals whose drawing it
+  records again, which it synchronizes there; such a visual is not put in the set to begin
+  with (`CompositingRenderer::add_dirty_properties`).
+
+The local gate (the gauntlet, the frame scenes, the text and layout benchmarks, the forced
+layouts of the TreeDataGrid; two rounds; the frame scenes with the instructions of a frame,
+section 8.1): 343 metrics. `frames/text` takes 0.18 % fewer instructions a frame, what it
+had gained, and 3.561 ms on the UI thread where it took 3.721 ms. Two lines were over their
+tolerance, `wall/20 render_ms_per_frame` and `wall_ms_per_frame` of the sample (+8.3 %,
+1.637 and 1.773 ms; the sample does not count instructions). Counted and measured again
+(section 8.1): the two programs of that gate, run three times in turn, retire 204.30 to
+204.71 and 204.08 to 204.67 thousand million instructions for the whole run, and the line is
+1.62, 1.68, 1.62 ms against 1.64, 1.69, 1.69 ms.
+
+**Tests.** `panel_tests.rs`:
+`a_visual_that_draws_nothing_of_its_size_is_not_drawn_again_when_it_is_resized` (a renderer
+that keeps how each visual was marked; of a panel with and without a background, a border
+with and without a border, a decorator, a content presenter, a rectangle and a polyline,
+resized, the panel with a background and the border with a border are drawn again).
+
+### 9.90 The drawing items of a composition visual are asked by ranges whose bounds are kept
+
+Experiment #762, in two halves: one left out, one kept.
+
+**Left out: a finer rule for joining the dirty rectangles of a frame.** The hypothesis was
+that a frame with many small changes far apart draws what lies between them, and that more
+rectangles, joined by the pixels a join adds, would draw less. Traced on the declarative
+program of the framework comparison (what the rectangles a frame adds cover, each point
+once, beside what the frame draws with the eight rectangles of the default tracker and the
+rules of section 9.54):
+
+| Scene | Rectangles added a frame | They cover | The frame draws |
+| --- | ---: | ---: | ---: |
+| Patchwork, tier 12 | 268 | 25 to 41 % | 32 to 43 % |
+| Patchwork, tier 17 | 354 | 19 to 40 % | 26 to 42 % |
+| Patchwork, tier 20 | 430 | 19 to 40 % | 23 to 42 % |
+| Still wall, tier 20 | 4 | 0.1 % | 0.1 % (three rectangles) |
+| Gauntlet, tier 16 | 2,500 to 3,500 | 86 to 92 % | 87 to 93 % (one rectangle) |
+
+A frame draws between a point and seven points of the surface more than what changed. No
+rule can win more than that, and each further rectangle is a further clip for every drawing
+of the frame (section 9.54). (The counter `render: pixels of the dirty bounds` says 92 % for
+the patchwork: it is the box around the rectangles, not what is drawn.)
+
+**Kept: a frame does not look at every item.** A composition visual shows the drawings of
+the visuals below it that have no composition visual of their own as its drawing items
+(section 9.42); a wall of tiles is one composition visual with an item for every drawing.
+A frame looked at every item of it three times: for the bounds of the content
+(`ServerDrawItems::bounds`, in the update pass), for the items that changed
+(`drain_dirty_rects`), and for the items that meet the clip and the dirty area (`render`:
+the bounds of the item, moved into the space of the walk, against the clip and against the
+region). The still wall at tier 20 has about 290,000 items and draws 13 of them in a frame; the
+three walks were a third of what its render thread did.
+
+The items are in the order they are painted in, which is the order of the tree, so the
+items of a range lie close together. `ServerDrawItems` keeps, for each range of 64 items,
+the bounds of the range and whether an item of it changed. The bounds of the content are
+the union of the ranges; the dirty region is told of the items of the ranges that changed;
+the render walk asks a range first and looks at its items only when the range meets the
+clip and the dirty area. An item knows where it is among the items and tells its range when
+its drawing, its place or its clip changes, or a resource of its drawing; items that come
+or go move the ones after them, whose ranges are made again. A range that was told nothing
+has the bounds it had, so the pictures are the same: an item is drawn when its own bounds
+meet the area, as before.
+
+**Measured** (the declarative program of the comparison, its harness, two rounds, second
+start; CPU a frame, the frames a second are the same):
+
+| Scene | Main | This change |
+| --- | ---: | ---: |
+| Still wall, tier 20 | 26.2 ms | 14.7 ms |
+| Patchwork, tier 20 | 79.4 ms | 74.9 ms |
+| Patchwork, tier 17 | 41.3 ms | 39.8 ms |
+| Gauntlet, tier 16 | 49.5 ms | 50.2 ms |
+
+The local gate (the gauntlet and the frame scenes, two rounds): 127 metrics, none over its
+tolerance, seven faster. The scenes of the gate that have many items under one composition
+visual hold the change (section 8.4, rule 3):
+
+| Line of the gate | Main | This change | |
+| --- | ---: | ---: | ---: |
+| `frames/deep render_ms_per_frame` | 2.187 ms | 1.585 ms | -27.5 % |
+| `frames/deep ui_ms_per_frame` | 0.244 ms | 0.181 ms | -25.7 % |
+| `wall/20 wall_ms_per_frame` | 1.713 ms | 1.614 ms | -5.8 % |
+| `startup/tiles show_ms` | 550.7 ms | 499.5 ms | -9.3 % |
+| `gauntlet/16 render_ms_per_frame` | 33.282 ms | 33.408 ms | +0.4 % |
+
+**Looked at and not changed** (section 8.4, rule 2). The child composition visuals of a
+visual are walked one by one in the same passes (`ServerCompositionVisual::render`, the
+update pass): they carry their own bounds and the walk leaves a child whose bounds miss the
+area at once, without looking below it. The hit test on the UI thread has its own index
+(sections 9.2 and 9.49).
+
+**Tests.** `compositor_tests.rs`: `an_item_among_many_is_found_and_drawn_where_it_is` (300
+items in more than four ranges: an item that changes is the one rectangle of the dirty
+region and the one drawing of the frame, at the ends of the ranges and in their middle, after
+items before it went, and after it moved).
+
+### 9.91 A mounted control without handlers has no owner for them
+
+The first step of experiment #811 (the start of a large tree of the declarative layer,
+section 8.5). The wall of the framework comparison at tier 20 mounts 293,480 controls and
+holds 2.1 GB at its first frame; by the function that asked, the declarative layer itself
+has about 2 kB and 14 blocks of an element (its owners, the nodes of the runtime, the slots
+and the properties of the builder).
+
+`mount_control` made two owners for every control: one for what the control owns (its
+effects, its children) and one for its handlers, so that a patch with other handlers can
+let the old ones go. The second was made whether the element had handlers or not, and most
+elements of a tree have none: a label, a border, a panel. A node of the runtime for each
+was the price. The owner for the handlers is now made when an element has handlers, at the
+mount and at a patch (`ControlState::handlers` is an `Option`); an element that gets its
+first handlers in a patch gets its owner then, and one that loses them all lets it go.
+
+**Measured.** The allocation sites of the wall at tier 10 (5,025 tiles of five controls;
+the stacks of the system's allocator), for a tile:
+
+| | Main | This change |
+| --- | ---: | ---: |
+| The nodes of the reactive runtime: bytes | 3,078 | 1,525 |
+| The nodes of the reactive runtime: blocks | 5.0 | 2.0 |
+| The heap of the scene at its first frame | 229.6 MB | 221.6 MB |
+
+The benchmark of the gate is `declarative::ViewBenchmark` (a thousand rows mounted on the
+declarative layer, beside the same controls made directly), which the gate now runs by
+default (`FRAMEWORK_FILTER`, section 8.1). Two rounds against the main branch:
+
+| `declarative::ViewBenchmark` | Main | This change | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `mount_list_run_once` | 733.7 us | 681.9 us | -7.1 % | -6.75 % |
+| `mount_list_rerender` | 734.4 us | 683.8 us | -6.9 % | -6.69 % |
+| `mount_list_controls` (the controls made directly) | 407.0 us | 410.5 us | +0.8 % | +0.05 % |
+
+The other seven lines of the class are within 0.2 % in instructions. A row mounted on the
+declarative layer still costs 1.7 times the control alone: what else an element keeps is
+the rest of the experiment (its own owner where it owns nothing, the boxed properties it
+was built from, a font family made for every text block).
+
+**Tests.** The tests of `ferroui-view` (79): handlers attached at the mount, swapped by a
+patch with the same identities, attached again by a patch with other ones, and let go with
+the control.
+
+### 9.92 The number of bands of a frame follows what the frame costs
+
+Experiment #810. A frame of a pipelined layer is recorded in horizontal bands, each by a
+thread of its own, and is in the context when its slowest band is (section 9.33). The
+number of bands was the number of the options, two by default: at the gauntlet of tier 16
+the slowest band was as slow with four bands as with two, and every further band cost 4.5
+ms of a core. A frame that costs more than two bands record between two frames ran at half
+the rate of the display: the patchwork of the declarative program of the comparison at tier
+20 had its UI thread busy 29 % of the time, its render thread 50 %, and its two band
+threads 87 and 81 %. A fixed higher number is wrong the other way (section 8.5): three
+bands cost the frames that fit a tenth more processor time for nothing, and four cost the
+patchwork at tier 17 ten frames a second, six busy threads on five performance cores.
+
+**The rule** (`BandBalance::recount`). The layer already measures how long each band works,
+to move the rows the bands meet at. It has no clock of the display, as the policy that
+decides whether a layer pipelines has none; what it adds is how far apart its frames are.
+At every look (eight frames):
+
+- when the slowest band worked for six tenths of the time between two frames or more
+  (`GROW_SHARE`), three looks in a row, the layer takes a band more, up to the most it may
+  have. Such a band is what the frames wait for, whether they come one display interval
+  apart or two;
+- the band taken last has to make the slowest band a tenth faster by the next look
+  (`GROW_GAIN`). If it does not, it is given back, and the layer asks again after looks
+  that double, up to 64: a cost that cannot be divided stays in one band however many
+  there are;
+- when the bands, one fewer of them, would fit four tenths of the time between two frames
+  (`SHRINK_SHARE`, with a quarter added for what a band of fewer does more), eight looks in
+  a row, the layer gives a band back.
+
+The bands of a new number start at the rows that divide the cost kept so far evenly
+(`resize`), and the frames after a change are not counted while each band draws the glyphs
+that are new to its recorder.
+
+**How many a layer may take** (`most_bands`). The performance cores of the machine less the
+UI thread and the render thread, and two more than the default at most: three on a machine
+of five performance cores. A band on an efficiency core finishes after the others and is
+what the frame waits for. Only a layer with the default number follows its frames; a number
+an application sets in `SkiaOptions::frame_pipelining_bands` is kept as it is. The threads
+of a context are made for the most its first layer may take: one thread and one recorder
+more than before on that machine, idle until a frame needs them.
+
+**Measured** (the declarative program of the comparison, its harness, second start, two
+rounds; frames a second):
+
+| Scene | Two bands (main) | Three bands, fixed | Four bands, fixed | This change |
+| --- | ---: | ---: | ---: | ---: |
+| Patchwork, tier 20 | 34.3 | 43.2 | 45.0 | 41.7, 42.4 |
+| Patchwork, tier 17 | 55.4 | 55.5 | 45.2 | 55.3, 54.9 |
+| Patchwork, tier 12 | 57.4 | | | 57.4, 57.4 |
+| Gauntlet, tier 16 | 52.4 | 52.3 | 51.4 | 50.9, 51.5 |
+| Still wall, tier 20 | 48.6 | | | 48.4, 48.1 |
+
+The run of this change was made while the machine indexed its drive (three to six cores of
+other processes, where the other columns had half a core); the scene that was limited by
+its bands gained what a fixed third band gave it, and the scenes that fit kept their bands.
+
+The local gate (the window scenes, which draw through a pipelined layer, and the gauntlet;
+two rounds): 24 metrics, none over its tolerance; every window scene keeps its 16.667 ms a
+frame. (The first frames of two of the window scenes came sooner in that run, 1.03 to 0.71 s
+and 0.22 to 0.17 s; the machine was busy and nothing is claimed for them.)
+
+**Looked at and not changed** (section 8.4, rule 2). The layers of the other backends are
+not pipelined (the pipelined layer is the Metal layer of Graphite), so there is no number
+of bands to follow there. The picture of a frame is replayed by every band without a
+spatial index; whether an index makes a third band cheaper is experiment #817.
+
+**Tests.** `pipelined_layer.rs`:
+`a_layer_takes_bands_while_its_frames_wait_for_the_slowest_and_gives_them_back` (frames of
+an even cost at the pace of a display: two bands become four, the most, and two again when
+the frames are light), `a_layer_whose_frames_fit_keeps_its_bands`,
+`a_band_that_does_not_help_is_given_back` (a cost in one strip of rows: the band is given
+back, and after three thousand frames the layer asks once in five hundred),
+`a_layer_with_a_fixed_number_of_bands_keeps_it`. `pipelined_frames.rs`: a frame in any
+number of bands shows what the layer draws; a layer has no more bands than its context has
+threads.
+
+### 9.93 Tried and left out: the rounding step in the hold of a star column, and what the measures of the gauntlet are
+
+Experiment #802. The hold of a cell in a star column of a grid maps back to the widths of
+the grid less a margin on each side, and under layout rounding the margin had a rounding
+step in it (section 9.57). At the sizes of the gauntlet at tier 16, where a wrapped title
+holds a pixel or two of width, two steps are all of the hold, and the hypothesis was that
+about a thousand of the 2,400 measures of a frame are cards that could have held.
+
+**The step is not needed.** A measure gives a cell of a star column its share as it is; the
+columns are rounded when they are arranged, which a hold says nothing about. Without the
+step the two sweeps of `measure_hold_tests.rs` pass as before (a tree laid out again inside
+its holds is the tree made for that width: eleven shapes of grids, the layout rounded and
+not, every quarter of a pixel), and so does a sweep of narrow trees at every sixteenth. The
+change is on the branch `perf/grid-hold-under-rounding`.
+
+**It is not what costs the measures.** The declarative gauntlet runs 2,402 measures a frame
+on the main branch and 2,401 with the exact hold. The measures are not elements that were
+offered a size outside their hold: they are invalidated. A frame invalidates 2,054
+measures, counted by class and by what invalidated them:
+
+| Class | A frame | By |
+| --- | ---: | --- |
+| `TextBlock` | 758 | itself: its text changes |
+| `Border` | 399 | itself: a size set by an effect |
+| `Grid` | 264 | itself: the column definitions of a progress bar replaced (#803) |
+| `Polyline` | 259 | itself: the points of a sparkline replaced |
+| `Polygon` | 259 | itself: the points of a sparkline replaced |
+| `Canvas` | 88 | a child whose desired size changed |
+| Others | 27 | |
+
+A card holds nothing because what is in it changes, not because its hold is too narrow. The
+change is left out (section 8.4, rule 6): it does not improve what it was made for. What is
+left to win in the measures of this scene is in the grids whose definitions are replaced
+every frame and in the shapes that are measured again for every change of their points.
+
+### 9.94 The value of a reactive property is written into the box of the run before
+
+A first step of experiment #804. A property of the declarative layer that follows a signal,
+a memo or a closure is an effect: when what it read changes it computes the value again,
+puts it in a box (`BoxedValue`, an allocation) and sets the property from the box, which
+takes a copy of the value; the box is then dropped. The declarative gauntlet of the
+comparison runs about 2,000 such effects a frame: 2,000 boxes asked of the allocator and
+given back.
+
+The closure that computes the value keeps the box of the run before (`KeptBox` in
+`builder.rs`): a run writes its value into that box when nothing else holds it any more,
+and makes a new one only then. A property that is computed once keeps nothing: the box is
+kept from the second run on, so a tree of rows that each follow a signal that never changes
+holds what it held. The representation of a property value (`PropValue`) is the same, and
+so is the untyped setter the value goes through; the typed path of #804 is what is left.
+
+**Measured** with the gate, against the commit that adds the benchmark (two rounds):
+
+| `declarative::ViewBenchmark` | Before | After | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `shared_signal_changed` (a thousand properties follow one signal, the signal written) | 84.7 us | 70.6 us | -16.7 % | -22.50 % |
+| `fine_grained_one_row_changed` (one text follows its signal) | 213.4 ns | 190.4 ns | -10.8 % | -9.53 % |
+
+The other nine lines of the class are within 0.2 % in instructions (one within 1.3 %).
+
+**Tests.** The 79 tests of `ferroui-view`; the benchmark `shared_signal_changed` is new and
+runs with the gate (section 9.91).
+
+### 9.95 A figure of points is given to the path of the backend as one run of lines
+
+Experiment #819. A shape keeps its geometry when its points change (section 9.88), which
+saved the objects of the framework. The path of the backend was still built point by point:
+`PolylineGeometry` read each point from its collection and called `line_to` on the geometry
+context, a virtual call and one or two calls into Skia for every point (one for the path of
+the stroke, one more for the path of the fill where the two are apart), each time the path
+was made again. A frame of the declarative gauntlet makes the paths of 518 sparkline shapes
+again (section 9.93).
+
+`IGeometryContext` gets `lines_to(points, is_stroked)`, with `line_to` for every point as
+its default, so every context is right without knowing of it. `PolylineGeometry` reads its
+points once (the snapshot of the collection) and gives the figure as one run. The Skia path
+builder takes a run of stroked lines with one call for each of its paths (`polyline_to`),
+which is what Skia has for it: nothing of Skia is done again here, fewer calls are made.
+
+**Measured** with the gate (`layout_subsystem::ShapeGeometry`, 500 shapes of 24 points, each
+changed, laid out and asked for the geometry it draws; two rounds):
+
+| `layout_subsystem::ShapeGeometry` | Main | This change | Time | Instructions |
+| --- | ---: | ---: | ---: | ---: |
+| `polyline_points_replaced` | 452.1 us | 431.8 us | -4.5 % | -8.55 % |
+| `polygon_points_replaced` | 431.0 us | 407.0 us | -5.6 % | -9.20 % |
+| `rectangle_resized` | 643.0 us | 647.7 us | +0.7 % | +0.49 % |
+| `ellipse_resized` | 399.3 us | 402.6 us | +0.8 % | +0.70 % |
+| `line_moved` | 276.9 us | 276.0 us | -0.4 % | +0.66 % |
+
+**Looked at and not changed** (section 8.4, rule 2). The other backends keep the default
+until they are measured: a run is the same lines there. `PathGeometry` and the parser of
+path markup give their segments one by one as they read them; a run of line segments in a
+path figure could use the same operation and is not done here.
+
+**Tests.** `stream_geometry_builder.rs`: `a_run_of_lines_is_the_path_of_its_lines` (figures
+of 1, 2, 3 and 48 points, filled and not, closed and open: the path of the stroke and the
+path of the fill are the ones the same lines give point by point). The tests of the shapes
+and of the geometries.
+
+### 9.96 An effect leaves a signal of many subscribers without a search
+
+Experiment #818. The reactive runtime of the declarative layer keeps, for a signal, the list of
+the effects that read it, and for an owner the list of what it owns. An effect that was
+disposed, or that stopped reading a signal, was searched for in the list of the signal
+(`retain`), and a node disposed by itself in the list of its owner. A signal every element of a
+screen follows (a frame counter, a theme, a selection) has as many subscribers as the screen has
+elements, so each element that went cost the size of the screen, and a screen of n elements
+cost n squared to dispose. Counted with a new pair of benchmarks (below): at 4,000 effects the
+three ways of leaving cost 14 times what they cost at 1,000.
+
+**The change** (`src/FerroUI.View/reactive.rs`). A list of up to 16 entries is searched as
+before. A longer list keeps the entry of what left it and is marked (`Runtime::leave`); it is
+swept (`Runtime::sweep`) in one pass:
+
+- before the source notifies its subscribers, so nothing that left is run or even looked at
+  twice;
+- before a subscriber is added to a list that is full, so a list is never longer than what it
+  had room for (a list did not give its room back before either);
+- before a node that may have an entry among what left follows the source again, so a node
+  has one entry.
+
+Nothing is recorded for an entry. A disposed node is told from the others by its generation,
+which its entry carries; a node that stopped reading is told by what it follows now (its own few
+sources), and the list remembers only whether such a node may be in it. The list of what an
+owner owns is swept of disposed nodes before it would grow. A node of the runtime is no larger
+(216 bytes, held by a test), and the order in which a signal notifies is the order in which its
+subscribers came, as before.
+
+**Measured** (`declarative::Leaving`, instructions of one whole operation; the pair is the
+larger size over the smaller, 4.0 for a cost that is linear):
+
+| `declarative::Leaving` | Main, 1,000 | Main, 4,000 | Pair | This change, 1,000 | 4,000 | Pair |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `rows_leave` (rows disposed one by one) | 9.25 M | 133.02 M | 14.4 | 1.21 M | 4.86 M | 4.0 |
+| `owner_disposed` (a screen disposed) | 5.23 M | 74.92 M | 14.3 | 0.72 M | 2.89 M | 4.0 |
+| `stop_reading` (a condition goes) | 4.97 M | 67.88 M | 13.7 | 0.96 M | 3.83 M | 4.0 |
+| `broadcast` (the signal is written) | 0.615 M | 2.455 M | 4.0 | 0.617 M | 2.463 M | 4.0 |
+
+At 4,000 effects (the gate, two rounds) rows that leave take 0.21 ms where they took 5.07 ms, a
+disposed screen 0.12 ms where it took 2.49 ms, and effects that stop reading 0.15 ms where they
+took 2.69 ms. A write of the signal costs 0.3 % more instructions (2 for each subscriber), and
+a write of a signal with one subscriber as much as before (`fine_grained_one_row_changed`,
++0.28 %): the sweeps are out of line, so the usual path is one look at the mark. The first
+version looked the source up twice there and cost that benchmark 2.0 %, which the gate
+refused. The gate holds the three pairs from now on (`SCALING_CLASSES`).
+
+A mounted screen, measured once with a benchmark that is not kept: a panel of text blocks whose
+opacity follows one signal, mounted and then disposed with its owner. Disposing 4,000 rows took
+89.4 M instructions (3.35 ms) and takes 17.4 M (0.92 ms); the pair of the two sizes was 10.1 and
+is 4.0, so nothing else in the unmounting of controls grows faster than the rows. Mounting is
+the same (45.0 M against 44.9 M).
+
+**Looked at and not changed** (section 8.4, rule 2). `dispose` of a source takes itself out of
+the sources of each subscriber, a search of the few sources of a node. The queue of dirty
+effects and the cleanups of an owner are not searched. `notify` copies the list of
+subscribers for each write, which is linear and is what a write costs.
+
+**Tests.** `reactive_tests.rs`: rows that leave a signal of many subscribers are not notified,
+nor are effects that take their places in the runtime, and the rows that stay are notified in
+the order they came; the lists do not grow with what comes and goes; effects that stop reading
+are not run by the signal, and one that reads it again has one entry and runs once; a memo of
+many subscribers and an owner of many forget what left, and each cleanup runs once; the size
+of a node.
+
+### 9.97 Counted and left out: drawing items replaced one for one
+
+Experiment #820. When the drawing items of a composition visual come or go,
+`ServerDrawItems::deserialize` gives every item after the change its new place and makes every
+range of 64 items after it unknown (section 9.90). That is what an insertion or a removal
+needs; a replacement of as many items as it removes moves nothing and would not need it. The
+experiment was to count how the changes of real frames divide before writing that case.
+
+**Counted** (a temporary count in `deserialize`, removed; the declarative program of the
+framework comparison, nine seconds of each scene):
+
+| Scene | Changes of the items | As many added as removed | Only added | Only removed | Both, unequal | Items after a change |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| gauntlet, tier 16 | 4,000 | 0 | 2,702 | 1,292 | 6 | 22 in all |
+| patchwork, tier 17 | fewer than 2,000 | | | | | |
+| wall, tier 20 | fewer than 2,000 | | | | | |
+
+No change of the gauntlet replaces items one for one, and no insertion or removal has an item
+after it: rows come and go at the end of the items of their holder, and what changes in a row
+that stays is an update of its item (its content, its offset, its clip), which touches one
+range already. The patchwork and the wall change their items so seldom that the count, which
+prints at every 2,000 changes, printed nothing.
+
+**Left out.** The walk of the items after a change and the ranges made again after it cost
+nothing in these scenes, because nothing is after a change. The case of an equal replacement is
+not written: no frame has one. What would have one is an element replaced by another at its
+place among many siblings that share a holder (a tile of a wall given another control); a scene
+of that kind is the measurement to make first if it is taken up again.
+
+### 9.98 What a closed screen leaves: idle text layouts and the queues of its passes
+
+Experiment #761, part (b). Whether memory comes back after a burst was not measured: the
+starts (section 9.40) end at the first frame. A start can now go on (`FERROUI_GATE_CLOSE=1`,
+section 8.1): the content is taken out of the window, the two threads run for half a second,
+and the heap that is left of the scene is printed, with the allocation sites of what was
+allocated before and during the close and is still there.
+
+**Counted** on main. `startup/tiles` (58,696 tiles, 352,187 elements) has 1,600 MB allocated at
+its first frame; after the close 350.0 MB in 1.61 million blocks were left. `startup/controls`
+(1,600 templated controls) left 38.4 MB of 211 MB.
+
+| What kept it, `startup/tiles` after the close | MB |
+| --- | ---: |
+| Text layouts of the 59,696 text blocks, in the cache of the font manager, with their runs and glyphs | 198 |
+| The layout queues: the entries of a loop and the queue (`LayoutQueue`) | 65 |
+| Emptied buffers of the compositor, the renderer and the render thread, up to 4 MB each (section 9.40) | about 64 |
+| The frame buffers of the surface | 16 |
+| The queue of the loaded controls (a hash table kept at 6.5 MB) | 6 |
+
+**The text layouts.** The cache of plain text layouts (section 9.29) keeps the layouts
+something holds and, of the ones nothing holds, the 4,096 used last. It looked for idle
+layouts when layouts were added. A screen that is closed makes every layout of its texts idle
+and adds none, so they stayed until other text was laid out. A holder that lets a shared layout
+go says so already (`TextLayout::dispose`, which a text block calls when it leaves the tree
+and before it asks for another layout). The cache now counts, on the thread, how many of its
+layouts may be idle: a holder that lets one go adds one, a request that finds an idle layout
+takes one off, and a look sets the number that is. When 4,096 more than the cache keeps idle
+may be idle, and at least a quarter of the layouts kept more, the cache looks for idle layouts
+as an addition does. A look goes over every kept layout, so it costs each holder that left at
+most four layouts looked at. The idle layouts are then at most the 4,096 and as many more.
+
+The first version counted the holders that left and nothing else, and looked at every 4,096 of
+them. A text block lets its layout go between its measure and its arrangement and gets the same
+one back, so the show of the tiles looked through a cache of up to 59,696 held layouts ten
+times and found nothing: 31 ms of a show of 485 ms (sampled), which the gate refused
+(`startup/tiles show_ms` +10.3 %, and the shows of five frame scenes by 6 to 12 %). With the
+count of the layouts that may be idle the show looks for nothing: five starts of each side in
+turn gave a show of 485 to 518 ms for main and 489 to 515 ms for the change.
+
+**The queues.** `LayoutQueue` kept the entries of its largest loop (a list and a hash table of
+every element of a first layout, and again of the layout that follows a removal) and its
+queue; the renderer kept the list of the visuals that left the tree. They give back what is
+beyond what an emptied buffer keeps, as the other queues of a first frame do.
+
+**Measured.**
+
+| After the close | Main | This change |
+| --- | ---: | ---: |
+| `startup/tiles`: heap left of the scene | 350.0 MB in 1,612,591 blocks | 135.2 MB in 164,608 blocks |
+| `startup/controls`: heap left of the scene | 38.4 MB | 38.4 MB |
+
+The gate (counters, frames and the gauntlet; 130 metrics, two rounds) has no line of a show
+or a start over its tolerance: `startup/tiles` shows in 494 ms where main takes 505 ms and
+starts in 1,636 ms against 1,647 ms. Two lines of a run were over in time (`frames/cards` on
+the UI thread with the instructions of main, and the first frame of `startup/controls`);
+seven starts of each side in turn gave a first frame of 39.7 ms for main and 39.6 ms for the
+change.
+
+**Tried and left out: a smaller buffer kept.** With 1 MB kept for an emptied buffer instead of
+4 MB (and a hash table shrunk to what fits in it: a table shrunk to a number of items has up to
+sixteen sevenths of it in places, which is how the limit of 4 MB keeps tables of 6.5 MB) the
+tiles left 87.8 MB and the controls 33.5 MB. The gate refused it (130 metrics, two rounds,
+against the change above): eight lines over, all of them the show and the start of scenes with
+many elements (`startup/tiles` `show_ms` +12.2 % and `startup_ms` +7.0 %, `frames/reorder`
+`show_ms` +9.9 %, `frames/cards` `show_ms` +8.6 %, the starts of `grow` and `pile` +5 to 6 %),
+none a steady frame. A show runs several passes, and a buffer that is shrunk at the end of one
+is grown again by the next. The limit stays at 4 MB.
+
+**What is left, and what it would take.** About 95 MB of the 135 MB are emptied buffers at
+their limit, about 24 MB the idle layouts the cache keeps by design, 16 MB the frame buffers.
+The buffers could go lower without the cost above if they were released once, when the burst
+is over, and not at the end of each pass: one job at the idle priority of the dispatcher,
+posted when a buffer is emptied above its limit. Every buffer would have to be known to that
+job, which is a change of its own. Resident memory does not follow the heap: it was 1,898 MB at
+the first frame and 1,855 MB after the close with 1,465 MB freed, because the allocator keeps
+the pages it was given.
+
+**Part (a) of the experiment, counted and left out: writes that change nothing.** A setter of
+a composition visual sends nothing for a value equal to the one it has, except the fifteen
+properties that can be animated, which send it to stop an animation of the property. Counted
+in those setters (a temporary count, removed; the declarative program of the framework
+comparison, nine seconds of each scene): none of the 550,000 writes of the gauntlet at tier 16
+and none of the 100,000 of the patchwork at tier 17 had the value the visual had; the wall at
+tier 20 wrote fewer than 50,000 times. Values that do not change are stopped before the setter
+(section 9.59), so a batch carries no equal write to drop.
+
+**Looked at and not changed** (section 8.4, rule 2). The other holders of text layouts
+(`TextPresenter`) call `TextLayout::dispose` already. The reactive runtime of `ferroui-view`
+keeps its table of nodes at the size of the largest screen (216 bytes a node); its slots are
+used again, and giving them back needs the generations kept apart from the nodes.
+
+**Tests.** `text_layout_cache_tests.rs`:
+`the_layouts_of_holders_that_leave_are_let_go_without_an_addition` (12,288 held layouts whose
+holders dispose them: at most 8,192 are kept, all idle, the ones let go last).
+
+### 9.99 A font family is read from its text once
+
+Experiment #811, part (c). An application writes the family of a text where the text is built
+(`FontFamily::from("Inter")` for every text block of a list), and markup compiled for a
+template names it once for every element made from the template. `FontFamily::new` read the
+text each time: the list of its sources, its collection of names and, for a list of names or a
+font of the application, its key with their URLs. A family of one name took 123 ns and 2,786
+instructions and left 385 bytes in five blocks; the declarative program of the framework
+comparison had 769 bytes of families for every tile of its wall (section 8.5).
+
+**The change** (`src/FerroUI.Base/media/font_family.rs`). A family is what its text and its
+base URI make it and never changes. A thread keeps the families it made by their text
+(`Made`, at most 256 families, emptied when it is full, so text that is made up at run time
+costs a bounded memory; a text of more than 256 bytes is read each time). `FontFamily::new`
+and `with_base_uri` return the family made first. A text with a source that is resolved
+against the base URI has one family for each base URI; any other text has one family whatever
+base URI it is given. `FontFamily::ptr_eq` holds for families made from the same text, where it
+held only for copies of one family before; the equality and the hash of a family are the same,
+and are found by the first comparison (the same instance) where they compared the names.
+
+**Measured** (`property_subsystem::FontFamilyMade`, a thousand families made in turn):
+
+| `property_subsystem::FontFamilyMade` | Main | This change | Instructions, main | This change |
+| --- | ---: | ---: | ---: | ---: |
+| `named` (`"Inter"`) | 122.8 ns | 7.5 ns | 2,786 | 204 |
+| `list` (`"Inter, Arial"`) | 768.6 ns | 7.8 ns | 16,306 | 201 |
+| `sourced` (`"resm:Application.Fonts#Inter"`) | 336.9 ns | 10.1 ns | 7,263 | 221 |
+| `set_unchanged` (the family of a control set to one made from its name) | 126.3 ns | 14.9 ns | 2,970 | 390 |
+
+The gate (`property_subsystem`, `declarative`, the text block benchmarks and the construction
+of elements; 63 metrics, two rounds) has nothing over its tolerance; the four lines above take
+92.5, 98.8, 97.0 and 86.9 % fewer instructions.
+
+**Looked at and not changed** (section 8.4, rule 2). `FontFamily::default_family` is one family
+of a thread already. `Typeface` and the key of a glyph typeface hold a family and compare it:
+they find equal families of one text by the instance now. The other values an application
+makes from text for every element (a brush from a colour name, a thickness) are plain values
+without a block of their own, or are made once by the compiled markup.
+
+**Tests.** `font_family.rs`: `a_text_is_read_once_on_a_thread` (the instance, the base URI of
+a relative source, a family without a base URI), `the_families_a_thread_keeps_are_bounded`.
+
+### 9.100 What a static element costs on the declarative layer: no owner, shared boxes
+
+Experiment #811, parts (a) and (b). The wall of the declarative program of the framework
+comparison builds 293,480 elements before its first frame, and building them is about 40 % of
+its start (section 8.5). Two benchmarks now hold what the declarative layer adds to that
+(`declarative::ViewBenchmark`): a wall of a thousand tiles of five elements, with the
+properties an application writes for them (a size, a corner radius, a fill, a font, a font
+size, a weight, alignments, margins), made of controls directly and let go
+(`mount_wall_controls`), and the same wall as elements, mounted and taken out
+(`mount_wall_run_once`).
+
+**Counted.** The wall of elements took 147.5 million instructions and 9.2 ms where the wall of
+controls takes 86.7 million and 4.8 ms. Sampled, function by function against the wall of
+controls (self time for the thousand tiles): the allocator has 2.2 ms more (`free` 0.9, `malloc`
+0.85, the clearing of new blocks 0.2), the mounting itself about 1.0 ms (`mount_instance`, the
+collecting of the properties and children, `Runtime::create`, `Owner::with`). The setting of
+the properties, the adding of the children and the controls themselves cost what they cost the
+wall of controls. So what the layer adds is blocks: the description of an element (a box for
+every value, lists) and what it keeps mounted (an owner, an instance, its slot, its values).
+
+**An element that starts nothing has no owner.** Every mounted control had an owner in the
+reactive runtime: a node, a cleanup that kept the instance alive, an entry in what the owner
+above owns. An owner is for what an element starts: the effects of the values that follow
+state, the handlers, what its mount hooks registered. An element with values only, no handler
+and no mount hook starts nothing, and most elements of a tree are of this kind. It is mounted
+without an owner (`ControlInstance::owner` is an option): what is mounted below it belongs to
+the nearest owner above, as does what a patch starts for it later, and taking the instance out
+takes those out one by one (`ControlInstance::dispose`). Section 9.91 did this for the second
+owner an element had for its handlers; this is the first.
+
+**Elements that give a property the same plain value share its box.** A value an element gives
+a property is described as a box (`PropValue::Value`), which cannot change and is compared by
+its value. The boxes of the last eight values of a type are kept on the thread, and a value
+among them takes its box from there (`builder::boxed`). Only for plain values of up to 32
+bytes that own nothing: a number, an alignment, a weight, a margin, a corner radius. A value
+that owns something (a text, a brush, a font family) is as costly to compare as to box and is
+boxed as before; brushes and font families are shared one level below (the brush of a colour,
+section 9.99 for a family). A new value takes the place at the end of the eight and moves
+towards the front as it is used again, so values that come once pass through one place. Of the
+27 values of a tile of the benchmark, 19 take a box that is there.
+
+**Two lists.** `flatten` made a new list of the children of every element, to take fragments
+and lists apart, also where none was among them: a list that is flat already is the one given.
+The list of the values of an element grew from nothing to four to eight entries as its setters
+ran; it takes room for eight once.
+
+**Measured** (`declarative::ViewBenchmark`, the gate, two rounds for each step against the step
+before; the change of the instructions):
+
+| `declarative::ViewBenchmark` | No owner | Shared boxes | Two lists |
+| --- | ---: | ---: | ---: |
+| `mount_wall_run_once` | -5.73 % | -4.23 % | -4.28 % |
+| `mount_list_run_once` | -11.58 % | +0.03 % | -0.43 % |
+| `mount_list_rerender` | -11.50 % | +0.17 % | -0.40 % |
+| `run_parent_of_components[memoized by default]` | +0.86 % | -3.67 % | -5.55 % |
+| `run_unchanged` | -1.24 % | +0.15 % | -1.28 % |
+| `mount_wall_controls` (the wall of controls) | +0.01 % | +0.00 % | -0.01 % |
+
+The wall of elements took 9.16 ms before the three steps and takes 7.25 ms. With the font
+family of section 9.99, which both walls make for every text, it takes 122.9 million
+instructions against 81.7 million for the wall of controls: one and a half times, where it was
+1.7 times. None of the three gates (25 metrics each) has a line over its tolerance.
+
+**Looked at and not changed** (section 8.4, rule 2). A dynamic list and a component that runs
+again keep their owners: they start an effect. The instance of a control, its slot and the
+lists of what a parent mounted are two to six blocks an element more than a control needs; a
+description that is mounted once and never patched would not need to be kept at all, which is
+the part of (b) that is left, with the typed setter of #804.
+
+**Tests.** `rerender_tests.rs`:
+`an_element_that_starts_nothing_has_no_owner_and_takes_out_what_is_below_it` (twenty-one
+static elements make no node of the runtime; a row without an owner that goes takes the effect
+of the text below it and the one a patch started for it). `builder_tests.rs`:
+`elements_that_give_the_same_plain_value_share_its_box`.
+
+### 9.101 An inherited value is raised on an object only where something there can hear it
+
+Experiment #803, part (a). A value of an inherited property that a root or a theme sets (the
+font, the foreground, the theme variant, the colour of the system bars) is a change for every
+element below: each one is told when the value changes above it, and each one is told again
+when it gets or loses its inheritance parent. Telling is a change notification like any other:
+the change handlers of every class of the element (`on_property_changed`, seven classes deep
+for a border), the handlers of the property for classes, the listeners of the object. Most
+elements do nothing with it: a border has no use for a font.
+
+**Counted** (the start of the wall of tiles of the gate, 58,696 tiles of a border, a panel and
+two texts; a temporary count in the two walks, `ValueStore::inherited_value_changed` for an
+object that gets a parent and `on_ancestor_inherited_value_changed` for a value that changes
+above):
+
+| | Notifications |
+| --- | ---: |
+| Reached an object, all | 1,760,930 |
+| Stopped at a value the object sets itself | 234,784 |
+| Raised on a border or a panel, which do nothing with them | 1,173,924 |
+| Raised on a text for the font family, which it uses | 117,392 |
+| Raised on a text for the theme variant and the colour of the system bars | 234,784 |
+
+A sample of that start has 163 ms in the two walks: about 100 ms in the notifications (43 in
+the change handlers of the classes, 39 in the handlers of the properties) and 24 ms in the
+typed copies of the two values and their comparison before a change is raised.
+
+**What can hear a change.** Three things, and all three can be asked before the change is
+raised:
+
+- *The listeners of the object*: a list that is empty for most objects.
+- *The handlers of the property* (`PropertyChangedObservable`): each is for a class
+  (`add_class_handler`) or for every class (`subscribe`). The observable of an inherited
+  property now keeps the class of each handler. `affects_measure`, `affects_arrange` and
+  `affects_render` were handlers for every class that looked at the class themselves; they are
+  class handlers.
+- *The change handlers of the classes of the object*. The type information of a class now says
+  what the handlers of the class itself are (`ChangeHandlerLayer`): absent (the class overrides
+  neither `on_property_changed` nor `on_property_changed_core`, which
+  `ferro_impl_classes!` and `ferro_overrides!` state already for the table of the class),
+  stated, or unknown. A class states its reactions in the block that holds its handlers:
+
+  ```rust
+  ferro_overrides! { impl FerroObjectImpl for Border {
+      inherited_reactions: InheritedReactions::to(|property| {
+          matches!(property.name(), "UseLayoutRounding" | "BorderThickness" | "CornerRadius").into()
+      });
+
+      fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+          // ..
+      }
+  } }
+  ```
+
+  The answer for a property is never, always, or while a question to the object is true
+  (`InheritedReaction`): an animatable follows every value while it has transitions under way,
+  a styled element passes the theme variant on while it has listeners for it, a visual redraws
+  for the theme variant while it may cast the shadow of the theme. A class that states nothing,
+  and every class written as a plain `impl`, is taken to react to everything, as before.
+
+The six base classes already named the properties their handlers compare with (section 9.59)
+and state exactly that; `Border`, `Shape` and `TextBlock` state the names their handlers
+match. The handler of the colour of the system bars was a class handler for every control that
+did something only for a top level and for the control right below one: it says so
+(`add_class_handler_where`, a class handler with a condition on the object).
+
+**The answer is kept by class.** For an inherited property the observable keeps, for each class
+it was asked for, whether a change reaches anything in an object of that class: no, yes, or the
+question to ask the object (three questions at most; more are a yes). It is found the first
+time an object of the class is reached (the handlers of the property for the class, then the
+layers of the class up to the root) and dropped when a handler of the property comes or goes. A
+walk finds it in a table of eight places by the address of the class, and in a map where two
+classes share a place. The two walks raise the change where the answer is yes or the object has
+a listener, and go on to the children in every case: a value below an object that does not
+hear it is passed on as before, and reads of the value never depended on the notification.
+
+**A question has to cost less than the change it saves.** The handlers of the six base classes
+already leave after a test of a bit (section 9.59), so raising a change nothing reacts to is a
+hundred instructions or so, most of them the two copies of the value and the list of the
+handlers of the property. The first version asked its questions with a checked cast (a walk up
+the classes of the object) through a list behind a cell, and a change of the font family took
+2 % more instructions than before although two thirds of the notifications were gone. A
+question is only asked for objects of the class that states it, so it takes the object as that
+class without the walk, and a single question is called directly.
+
+Nothing is kept for an object, and a property that does not inherit keeps nothing. The type
+information of a class is 16 bytes larger.
+
+**Counted again**, the same start: of the 1,526,146 notifications that did not stop at a value
+of the object, about 1.41 million are not raised; what is left is the font family on the texts
+(117,392).
+
+**Measured** (the gate, two rounds, against the commit before the change; the change of the
+instructions):
+
+| | Instructions |
+| --- | ---: |
+| `trees::Propagation.theme_variant` (the theme variant of a scope above 2,000 tiles) | -49.8 % |
+| `trees::Propagation.font_family`, `font_weight` | -10.6 %, -10.5 % |
+| `property_subsystem::InheritanceParent.definitions_replaced` | -10.7 % |
+| `property_subsystem::InheritanceParent.leaf_moved` | -10.5 % |
+| `property_subsystem::InheritanceParent.text_moved` (a text hears the font) | +1.6 % |
+| `styling_subsystem::ResourceLookup.switch_theme_variant` | -9.7 % |
+| `styling_subsystem::DynamicResources.detach`, `reattach` | -9.0 %, -6.3 % |
+| `startup/tiles`: build, show, first frame, the whole start | -4.8 %, -2.4 %, -3.3 %, -3.8 % |
+| The show of the frame scenes (`items`, `moves`, `deep`, `pile`, `wall`, `cards`, `rows`) | -8.2 % to -4.0 % |
+| `startup/controls` show | -2.2 % |
+| `trees::Propagation.flow_direction` | +2.4 % |
+| The lines of `layout_subsystem` | within 0.7 % |
+
+`InheritanceParent` is new (`tests/FerroUI.Benchmarks/property_subsystem/inheritance_parent.rs`):
+the column definitions of a grid replaced, a border and a text moved from one parent to another,
+below a panel that holds the values the theme of a window gives it.
+
+The flow direction is the case the rule costs: every visual reacts to it (it mirrors its
+transform), so every change is raised as before and the question is added for every element.
+
+The times of the two last runs of the gate are not given: other work ran on the machine and
+moved them by tens of per cent in both directions. A run of an earlier state of the change on a
+quiet machine had the show of the tile start at 514 ms where it was 559 ms.
+
+The harness of the framework comparison does not resolve the change (two rounds in turn, the
+commit before against the change, on a machine that idled at 1.3 to 2 cores; second start):
+
+| Scene | First frame before | After | Frames a second before | After |
+| --- | ---: | ---: | ---: | ---: |
+| Wall, tier 20 | 1.77 s, 1.86 s | 1.82 s, 1.84 s | 49.4, 48.9 | 49.1, 49.0 |
+| Gauntlet, tier 16 | 0.51 s, 0.55 s | 0.50 s, 0.53 s | 52.1, 50.8 | 52.6, 50.7 |
+| Patchwork, tier 17 | 0.71 s, 0.73 s | 0.70 s, 0.74 s | 55.2, 55.2 | 55.5, 55.1 |
+
+The program of the comparison is 16.5 kB larger (23,296,928 to 23,313,472 bytes).
+
+Counted in that program (the gauntlet at tier 16, the counters of a build with them, 1,500 layout
+passes): 11,668 property changes are raised a frame before the change and 8,258 after it. The
+column definitions the cards replace every frame still walk (1,036 changes of an inheritance
+ancestor a frame, 4,142 inherited values that differ, 4,663 objects visited): 3,410 of those
+values are no longer raised on a definition, which has no use for a font. What is left of part
+(b) of the experiment is that walk.
+
+**Two reads found by the gate.** The first runs had the lines of the layout benchmarks 2 to 5 %
+up in instructions, which the change does not touch. Sampled, base against candidate: a small
+accessor on the path of every child was a call where it had been inlined
+(`StackPanel::orientation`, read for every child of an arrangement to hand it to
+`arrange_child`; then `Decorator::padding` and `Decorator::child`, which the measure of every
+border reads). What the optimizer inlines moves with code elsewhere in the crate; the reads no
+longer depend on it: the orientation is read once for an arrangement, and the two accessors are
+inline by statement. Reading the orientation once is a gain of its own: resizing one leaf of a
+wall of stack panels takes 18.9 % fewer instructions than before the change
+(`layout_subsystem::Invalidation.resize_one_leaf`), a resized row of a scrolled list 11.4 %
+(`ScrollContent.content_resized`).
+
+**Not a change of what an application sees.** A handler that reacts is called as it was, with
+the same values in the same order. What is not called did nothing. An application class written
+as a plain `impl`, or one that overrides the change handlers without stating its reactions,
+hears every change, as do the objects below it.
+
+### 9.102 A property that follows a closure is set with the value of its type
+
+The second step of experiment #804, after section 9.94. Counted first in the gauntlet of the
+framework comparison at tier 16: about 900,000 runs of the effects of reactive properties in
+14 seconds, 31 % of them giving a value equal to the one the property had; by property `Text`
+45 % of the runs (31 % of them equal), `Points` 22 % (none equal), `Width` 17 % (5 % equal) and
+`Foreground` 17 % (99 % equal).
+
+The closure that the builders make for a reactive property knows the type of its value. Run by
+the effect of the property, it finds the control and the property on the thread and sets the
+property through the typed setter (`FerroObject::try_set_value_typed`), where every run put the
+value in a box and the untyped setter looked it up by type and took a copy of it out of the box
+(a text was cloned for every run). `PropValue` is unchanged: a closure written by hand is set
+untyped as before, and a closure run outside its effect returns its value boxed. An equal value
+is still computed and compared by the property store, which raises nothing; the copy before the
+comparison is gone.
+
+**Measured** (the gate, `declarative::`, two rounds, against the commit that adds the
+benchmarks; the change of the instructions):
+
+| `declarative::ViewBenchmark` | Instructions |
+| --- | ---: |
+| `shared_text_changed` (a thousand texts from one signal, each new) | -13.92 % |
+| `shared_text_equal` (each text equal to the one before) | -20.03 % |
+| `fine_grained_one_row_changed` | -11.71 % |
+| `shared_brush_equal` (a thousand foregrounds, each the same brush) | -2.47 % |
+| `shared_signal_changed` | -1.78 % |
+| The other lines of `declarative::` | within 0.3 % |
+
+The times of that run are not given: other builds ran on the machine. New:
+`FerroObject::try_set_value_typed`, `FerroProperty::as_direct`.
+
+### 9.103 Three measured steps of 0.5.1: grid text in place, run-once descriptions, selectable text runs
+
+Each was gated against its own benchmark commit or its base on main (`scripts/perf/gate.py`, two
+rounds; the change of the instructions; the times of those runs are not given, other builds ran on
+the machine).
+
+- **Grid definitions given as text take new sizes in place** (#803 part (b)). The rows and columns
+  a declarative element gives a grid as text are values of the grid (`GridDefinitionsText`): a new
+  text with the same count and kinds of definitions writes the sizes into the definitions the grid
+  has, where an effect gave the grid new definitions. `declarative::ViewBenchmark`: a thousand bars
+  that follow one signal take 7.50 million instructions as text (`grid_definitions_followed`)
+  against 14.28 million with new definitions (`grid_definitions_replaced`), -47.5 %; the other
+  lines of the class within 0.7 %. `Grid::set_column_definitions` is unchanged: a program that
+  calls it in an effect of its own (as the declarative program of the framework comparison does)
+  replaces the definitions as before.
+- **An element that no reconciler reaches again keeps no description of its values** (#811, the
+  rest of part (b) and part (c)). Text blocks with the same typeface, size and foreground share
+  their default run properties. No line of the gate is worse; `trees::Text.create_and_measure`
+  -5.56 %, `change_and_lay_out` -1.83 %. What the descriptions kept is memory, which this gate does
+  not count; it is to be counted with the heap of the wall.
+- **A selectable text block keeps the shaped runs of its text between layouts** (#649, the first
+  fix of step 4): `text::SelectableTextBlockWidths.measure_at_the_other_width` -72.4 %; the rest of
+  `text::` and `trees::Text` within its tolerance (the largest rise +1.5 %).
+
+
+### 9.104 Left out: a spatial index in the picture of a frame for its bands (#817)
+
+The picture of a frame was recorded with Skia's bounding-box hierarchy (`begin_recording` with a
+bounding-box factory), so that each band of a pipelined frame replays only the commands that touch
+it. The index was on from 2,000 commands of the picture before; `FERROUI_BAND_PICTURE_INDEX`
+(`off`, `always`, a count) chose it for a run without a new build.
+
+Measured with the harness of the framework comparison on the binary of the change, second start,
+two rounds a mode on a quiet machine (frames a second, and the CPU a frame in brackets):
+
+| Mode | patchwork, tier 17 | patchwork, tier 20 | gauntlet, tier 16 |
+|---|---|---|---|
+| off (the picture of main) | 52.6, 52.2 (57.5, 61.9 ms) | 37.4, 34.9 (94.2, 102.6 ms) | 41.7, 41.2 (68.7, 70.2 ms) |
+| always | 52.1, 52.4 (63.1, 64.3 ms) | 34.9, 31.4 (102.5, 114.9 ms) | 39.0, 39.5 (70.4, 74.0 ms) |
+| default (from 2,000 commands) | 51.6, 52.1 (64.4, 66.0 ms) | 29.3, 35.4 (121.1, 101.6 ms) | 33.8, 39.2 (84.6, 70.4 ms) |
+
+At tier 17 the rate is the same and the CPU a frame grows by 5 to 10 %; at tier 20 and in the
+gauntlet the rate falls. The hierarchy is built when the picture is recorded, on the render thread,
+and the bands of these scenes cross most of the commands of the picture, so it culls little of what
+a band replays. Left out (PR 872 closed); the bands keep replaying the whole picture under their
+clip, which Skia's canvas rejects per draw.
+
+### 9.105 A stream geometry written again in place: arcs, sectors, borders (#805)
+
+Section 9.88 keeps the geometry of a shape and gives it what the shape is now, for rectangles,
+ellipses, lines, polylines and polygons. Three places were left, because a stream geometry could
+not be written again: `Arc`, `Sector`, and `Border` when it draws with geometries.
+
+- `StreamGeometry::reopen` opens the geometry to define it again. The figures written on the
+  context replace the ones it has; the object, its transform and what listens to it are kept, and
+  it raises its change once, when the context is disposed. `open` keeps its meaning: it adds
+  figures, as in the source.
+- `Arc` and `Sector` write the stream geometry they have when an angle, the size or the stroke
+  thickness changes (`ShapeImpl::update_defining_geometry`). A change between a full turn and a
+  partial figure makes another geometry, as before.
+- `BorderRenderHelper`: a border drawn with geometries that is resized writes its background
+  geometry and the two stream geometries of its combined border geometry again. After a size with
+  no geometry (an empty rectangle) new ones are made. Unequal corners with one thickness and the
+  default sizing make no geometry on Skia and Vello, so the benchmark's border has unequal
+  thicknesses too.
+
+The local gate (macOS arm64, four rounds), against the commit that adds the three scenes of
+`layout_subsystem::ShapeGeometry`:
+
+| Line | Before | After | Time | Instructions |
+|---|---:|---:|---:|---:|
+| `arc_swept[Shapes=500]` | 455.8 us | 392.7 us | -13.9 % | -14.94 % |
+| `sector_swept[Shapes=500]` | 428.6 us | 363.2 us | -15.3 % | -15.74 % |
+| `border_unequal_resized[Shapes=500]` | 5.325 ms | 5.010 ms | -5.9 % | -6.01 % |
+| The five scenes of section 9.88 | | | -1.4 to +1.4 % | -0.62 to +0.05 % |
+
+Against the `main` of that day, frames and framework suites, 364 metrics: the one line that takes
+more instructions is `ResourceLookup.switch_theme_variant` (+2.89 %). This change does not run it,
+and another pull request showed the same amount against the same base. Resident memory of
+`startup/tiles` varies within each side, and the other lines over their tolerance moved in time
+alone.
+
+An earlier two-round gate reported `frames/recolor` at +3.53 % instructions a frame. It came from
+one disturbed round that presented 223 of its 240 frames, which the gate scales by. Three more
+alternating runs of the same two binaries, each presenting 239 or 240 frames, gave +0.1 % a frame
+and +0.3 % for the show.
+
+The objects made a frame by an animated progress ring and by a resized border, which the ticket
+also names, were not counted. Kept (PR 871).

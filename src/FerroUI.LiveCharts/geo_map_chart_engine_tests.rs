@@ -429,3 +429,43 @@ fn heat_maps_need_two_colours() {
     )
     .is_err());
 }
+
+/// GeoMap_TooltipFormatter_IsAppliedToEachValue: the source's two series of France on a 600 by
+/// 600 Mercator map; the `TooltipFormatter` of the map writes the line of each value of the
+/// tooltip, once per value and in the order of the series, under the name of the land.
+#[test]
+fn source_geo_map_tooltip_formatter_is_applied_to_each_value() {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    let mut population = heat(&[("fra", 67.5)]);
+    population.series.name = "Pop".into();
+    let mut gdp = heat(&[("fra", 2937.0)]);
+    gdp.series.name = "GDP".into();
+    let calls = Rc::new(RefCell::new(Vec::new()));
+    let sink = calls.clone();
+    let formatter = GeoTooltipFormatter::new(move |value| {
+        sink.borrow_mut().push(value.series_name.clone());
+        format!("[{}] {:.1}", value.series_name, value.value)
+    });
+    let measured = GeoMapChartEngine::measure_with_tooltip_formatter(
+        Size::new(600.0, 600.0),
+        world(),
+        &[population, gdp],
+        &[],
+        &mercator(),
+        Some(&formatter),
+    )
+    .unwrap();
+    let paris = mercator_pixel(600.0, 600.0, 2.35, 48.85);
+    let land = measured.find_land_at(paris).expect("Paris hits France");
+    assert_eq!(land.short_name, "fra");
+    let region = measured.scene.hits.iter().find(|h| h.id == land.id).unwrap();
+    assert_eq!(region.label, "France\n[Pop] 67.5\n[GDP] 2937.0");
+    assert_eq!(*calls.borrow(), vec!["Pop".to_owned(), "GDP".to_owned()]);
+    // Without a formatter the lines are the source's `{name}: {value:N2}`.
+    assert_eq!(
+        tooltip_label_with(land, None),
+        "France\nPop: 67.50\nGDP: 2,937.00"
+    );
+    assert_eq!(formatter, formatter.clone());
+}

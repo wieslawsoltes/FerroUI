@@ -69,9 +69,24 @@ pub fn register_types() {
         MarkupAssembly::register_table(&ASSEMBLY);
         // The assets (`Assets/`) and the loader table of the compiled markup, which the build
         // of the crate generates: a load of the document of a class by its URI creates an
-        // instance of the class, whose constructor populates it.
-        crate::compiled_markup::register();
+        // instance of the class, whose constructor populates it. Up front only with the tables
+        // of types, where a document is loaded by a URI nothing in the code names (the run-time
+        // loader, the designer, hot reload). Without them the constructor of the dialog
+        // registers them (`register_compiled_markup`): every theme registers the types of this
+        // crate, and registered here the dialog, its document and its font were linked into
+        // every application with a theme (docs/binary-size.md, section 4.18).
+        if ValueTypes::TYPE_TABLES {
+            register_compiled_markup();
+        }
     });
+}
+
+/// Registers the assets and the loader table of the compiled markup of this crate. Cheap and
+/// idempotent; called by what needs them: the constructor of [`AboutFerroDialog`], whose document
+/// names the font of the assets.
+pub(crate) fn register_compiled_markup() {
+    static ONCE: std::sync::Once = std::sync::Once::new();
+    ONCE.call_once(crate::compiled_markup::register);
 }
 
 /// What the untyped value conversions must know about the types of this

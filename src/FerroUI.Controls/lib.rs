@@ -2,6 +2,7 @@
 //! and the windowing platform contracts.
 
 pub mod animation;
+mod swipe_control;
 pub mod application_lifetimes;
 pub mod automation;
 pub mod chrome;
@@ -161,6 +162,10 @@ pub use i_clickable_control::{as_clickable_control, register_clickable_control};
 pub use i_command_source::{as_command_source, register_command_source};
 pub use button_spinner::{ButtonSpinner, ButtonSpinnerImpl, ButtonSpinnerImplExt, ButtonSpinnerVTable, Location};
 pub use check_box::CheckBox;
+pub use swipe_control::{
+    ExecuteItemsHaveOneItem, SwipeBehaviorOnInvoked, SwipeControl, SwipeItem, SwipeItemInvokedEventArgs, SwipeItems,
+    SwipeMode,
+};
 pub use drop_down_button::DropDownButton;
 pub use hyperlink_button::HyperlinkButton;
 pub use split_button::{
@@ -191,6 +196,8 @@ pub use radio_button::RadioButton;
 pub use repeat_button::RepeatButton;
 #[cfg(test)]
 mod button_tests;
+#[cfg(test)]
+mod property_change_handler_tests;
 #[cfg(test)]
 mod property_defaults_tests;
 #[cfg(test)]
@@ -313,6 +320,20 @@ mod info_badge_tests;
 mod info_bar_tests;
 #[cfg(test)]
 mod progress_ring_tests;
+// WinUI's ListView (docs/porting/winui-calculator-gaps.md, section 6).
+mod list_view;
+pub use list_view::{
+    ChoosingItemContainerEventArgs, ContainerContentChangingEventArgs, GridView, GridViewItem, GridViewItemTemplateSettings,
+    GroupHeaderPlacement, IncrementalLoadingTrigger, ItemClickEventArgs, ItemIndexRange, ItemsStackPanel, ItemsWrapGrid, ItemsUpdatingScrollMode, ListView, ListViewBase,
+    ListViewBaseItem, ListViewItem, ListViewItemTemplateSettings, ListViewReorderMode, ListViewSelectionMode,
+    ScrollIntoViewAlignment,
+};
+// WinUI's Pivot (docs/porting/winui-calculator-gaps.md, section 7.1).
+mod pivot;
+pub use pivot::{
+    Pivot, PivotHeaderFocusVisualPlacement, PivotHeaderItem, PivotHeaderPanel, PivotItem, PivotItemEventArgs, PivotPanel,
+    PivotSlideInAnimationGroup,
+};
 // WinUI's title bar (docs/porting/winui-controls.md).
 mod title_bar;
 pub use title_bar::TitleBar;
@@ -456,6 +477,10 @@ pub(crate) mod test_support;
 
 #[cfg(test)]
 mod border_tests;
+#[cfg(test)]
+mod element_size_tests;
+#[cfg(test)]
+mod kept_value_tests;
 #[cfg(test)]
 mod canvas_tests;
 #[cfg(test)]
@@ -643,6 +668,8 @@ mod navigable_containers;
 mod selection_changed_event_args;
 mod selection_mode;
 mod selection_indicator_animation;
+mod selection_indicator;
+pub use selection_indicator::SelectionIndicator;
 mod tab_control;
 mod tab_item;
 mod tree_view;
@@ -871,7 +898,7 @@ pub mod visual_state;
 pub use visual_state::{
     AdaptiveTrigger, StateTrigger, StateTriggerBase, VisualState, VisualStateChangedEventArgs, VisualStateGroup,
     VisualStateGroupCollection, VisualStateManager, VisualStateManagerImpl, VisualStateManagerImplExt,
-    VisualStateManagerVTable,
+    VisualStateManagerVTable, VisualTransition,
 };
 #[cfg(test)]
 mod table_view_column_header_tests;

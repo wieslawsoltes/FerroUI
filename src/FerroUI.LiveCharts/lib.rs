@@ -10,7 +10,9 @@ pub mod easing_functions;
 pub mod geo;
 pub mod geo_map_chart_engine;
 pub mod heat_functions;
+pub mod heat_legend;
 pub mod kernel;
+pub mod label_lines;
 pub mod labelers;
 pub mod measure;
 pub mod motion;
@@ -21,6 +23,8 @@ pub mod sankey_chart_engine;
 pub mod scene;
 mod scene_transform;
 pub mod series;
+mod svg_path;
+pub mod tooltips;
 pub mod treemap_chart_engine;
 pub mod visual_states;
 
@@ -29,7 +33,8 @@ pub use axis::{
     POLAR_LABELS_PADDING,
 };
 pub use cartesian_chart_engine::{
-    CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds, Section,
+    CartesianChartEngine, CartesianMeasurement, CartesianOptions, CartesianSeriesBounds,
+    CartesianSeriesOptions, Section,
 };
 pub use easing_functions::{EasingFunctions, KeyFrame};
 pub use geo::{
@@ -37,28 +42,38 @@ pub use geo::{
     Maps,
 };
 pub use geo_map_chart_engine::{
-    GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions, GeoMarker, GeoTooltipValue,
-    HeatLand, HeatLandSeries, MapViewport, ZoomDirection,
+    GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions, GeoMarker, GeoTooltipFormatter,
+    GeoTooltipValue, HeatLand, HeatLandSeries, MapViewport, ZoomDirection,
 };
 pub use heat_functions::HeatFunctions;
+pub use heat_legend::{HeatLegend, HeatLegendSource};
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
-pub use labelers::{as_date, as_time_span, Labeler, Labelers};
+pub use labelers::{
+    as_date, as_time_span, ChartPointFormatter, Labeler, Labelers, NodeTooltipFormatter,
+    NodeTooltipPoint,
+};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;
 pub use pie_chart_engine::{AngularTicks, Needle, PieChartEngine, PieOptions, PieVisual};
 pub use polar_chart_engine::{
-    PolarChartEngine, PolarMeasurement, PolarOptions, PolarScale, COTANGENT_ANGLE, TANGENT_ANGLE,
+    PolarChartEngine, PolarMeasurement, PolarOptions, PolarScale, PolarToolTipLabelFormatters,
+    COTANGENT_ANGLE, TANGENT_ANGLE,
 };
 pub use sankey_chart_engine::{
     SankeyChartEngine, SankeyLabelPosition, SankeyLayoutKind, SankeyLink, SankeyNode,
-    SankeyOptions, SankeySeries,
+    SankeyOptions, SankeySeries, SankeySeriesOptions,
 };
 pub use scene::{
     ChartError, FindingStrategy, Geometry, HitRegion, HitShape, LegendItem, PaintStyle,
     PathCommand, PointId, Primitive, Scene, TextAnchor,
 };
-pub use series::{PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
-pub use treemap_chart_engine::{TreemapChartEngine, TreemapNode, TreemapOptions, TreemapSeries};
+pub use series::{DataLabelsPosition, PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
+pub use tooltips::{
+    geo_tooltip_location, tooltip_location, PopUpPlacement, TooltipHoverArea, TooltipLocation,
+};
+pub use treemap_chart_engine::{
+    TreemapChartEngine, TreemapNode, TreemapOptions, TreemapSeries, TreemapSeriesOptions,
+};
 pub use visual_states::{
     DrawnPropertiesDictionary, DrawnPropertySetter, IStateBehavior, StateBehavior, StateOrigin,
     VisualStatesDictionary,
@@ -72,3 +87,5 @@ mod cartesian_series_tests;
 mod upstream_regression_tests;
 #[cfg(test)]
 mod pie_series_tests;
+#[cfg(test)]
+mod tooltip_tests;

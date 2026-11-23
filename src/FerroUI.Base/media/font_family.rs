@@ -1,7 +1,10 @@
+use std::cell::RefCell;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 use std::str::FromStr;
+
+use rustc_hash::FxHashMap;
 
 use crate::media::composite_font_family_key::CompositeFontFamilyKey;
 use crate::media::font_source_identifier::FontSourceIdentifier;
@@ -20,6 +23,47 @@ struct FontFamilyInner {
 #[derive(Clone)]
 pub struct FontFamily(Rc<FontFamilyInner>);
 
+/// The families a thread made from text, by the text ([`FontFamily::with_base_uri`]).
+#[derive(Default)]
+struct Made {
+    /// For a text, the families made from it: one, unless the text names a source that is
+    /// resolved against the base URI, which then tells them apart (`None` for a family that
+    /// does not depend on the base URI it was made with).
+    families: FxHashMap<Box<str>, Vec<(Option<url::Url>, FontFamily)>>,
+    /// How many families the table holds.
+    count: usize,
+}
+
+impl Made {
+    /// The families the table holds at most: an application names a handful. A table that is
+    /// full is emptied, so text that is made up at run time costs a bounded memory.
+    const CAPACITY: usize = 256;
+
+    /// The longest text the table keeps a family for.
+    const MAX_TEXT: usize = 256;
+
+    fn find(&self, base_uri: Option<&url::Url>, name: &str) -> Option<FontFamily> {
+        let families = self.families.get(name)?;
+        families.iter().find(|(base, _)| base.is_none() || base.as_ref() == base_uri).map(|(_, family)| family.clone())
+    }
+
+    fn keep(&mut self, base_uri: Option<url::Url>, name: &str, family: &FontFamily) {
+        if name.len() > Self::MAX_TEXT {
+            return;
+        }
+        if self.count >= Self::CAPACITY {
+            self.families.clear();
+            self.count = 0;
+        }
+        self.families.entry(name.into()).or_default().push((base_uri, family.clone()));
+        self.count += 1;
+    }
+}
+
+crate::ferro_thread_local! {
+    static MADE: RefCell<Made> = RefCell::new(Made::default());
+}
+
 impl FontFamily {
     /// The name of the placeholder family that resolves to the font manager's
     /// default font family.
@@ -36,21 +80,44 @@ impl FontFamily {
     /// Creates a font family whose relative sources are resolved against
     /// `base_uri` (the URL of the document that names the family).
     ///
+    /// A family is what its text and its base URI make it and never changes, so a text is read
+    /// once on a thread: the families made from it afterwards are the one made first
+    /// ([`ptr_eq`](Self::ptr_eq) holds for them). An application writes the family of a text
+    /// where the text is built, and a template names it once for every element made from it
+    /// (a FerroUI addition, docs/porting/desktop-performance.md, section 9.99).
+    ///
     /// Panics when `name` is empty.
     pub fn with_base_uri(base_uri: Option<&url::Url>, name: &str) -> Self {
         if name.is_empty() {
             panic!("name must not be empty");
         }
 
+        if let Some(made) = MADE.with(|made| made.borrow().find(base_uri, name)) {
+            return made;
+        }
+        let (family, uses_base_uri) = Self::read(base_uri, name);
+        let base_uri = if uses_base_uri { base_uri.cloned() } else { None };
+        // A family that depends on a base URI it was not given is kept for that: `None` is the
+        // mark of the families that do not depend on one.
+        if !uses_base_uri || base_uri.is_some() {
+            MADE.with(|made| made.borrow_mut().keep(base_uri, name, &family));
+        }
+        family
+    }
+
+    /// Reads the family `name` describes, and whether it depends on `base_uri`.
+    fn read(base_uri: Option<&url::Url>, name: &str) -> (Self, bool) {
         let font_sources = Self::get_font_source_identifier(name);
 
         let family_names = FamilyNameCollection::from_font_sources(&font_sources);
 
+        let mut uses_base_uri = false;
         let key = if font_sources.len() == 1 {
             let single_source = &font_sources[0];
 
             single_source.source.as_ref().map(|source| {
                 if source.is_relative() {
+                    uses_base_uri = true;
                     FontFamilyKey::with_base_uri(source.clone(), base_uri.cloned())
                 } else {
                     FontFamilyKey::new(source.clone())
@@ -60,7 +127,10 @@ impl FontFamily {
             let keys = font_sources
                 .iter()
                 .map(|font_source| match &font_source.source {
-                    Some(source) => FontFamilyKey::with_base_uri(source.clone(), base_uri.cloned()),
+                    Some(source) => {
+                        uses_base_uri = true;
+                        FontFamilyKey::with_base_uri(source.clone(), base_uri.cloned())
+                    }
                     None => FontFamilyKey::new(UriRef::from(named_font_url(
                         FontManager::SYSTEM_FONT_SCHEME,
                         &font_source.name,
@@ -73,7 +143,7 @@ impl FontFamily {
             Some(CompositeFontFamilyKey::new(source, keys))
         };
 
-        FontFamily(Rc::new(FontFamilyInner { family_names, key }))
+        (FontFamily(Rc::new(FontFamilyInner { family_names, key })), uses_base_uri)
     }
 
     /// Represents the default font family.
@@ -104,7 +174,8 @@ impl FontFamily {
         FontManager::current().get_family_typefaces(self)
     }
 
-    /// Whether both handles refer to the same instance (C# `ReferenceEquals`).
+    /// Whether both handles refer to the same instance (C# `ReferenceEquals`). Families made
+    /// from the same text on a thread are the same instance.
     pub fn ptr_eq(&self, other: &FontFamily) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
     }
@@ -262,6 +333,52 @@ mod tests {
         let font_family: FontFamily = "Arial".into();
 
         assert_eq!(font_family, FontFamily::new("Arial"));
+    }
+
+    /// Not from upstream: a text is read once on a thread, and the families made from it later
+    /// are the one made first. A source that is resolved against the base URI tells families of
+    /// one text apart; a family that does not depend on a base URI is one whatever it was given.
+    #[test]
+    fn a_text_is_read_once_on_a_thread() {
+        for s in NAMES {
+            assert!(FontFamily::new(s).ptr_eq(&FontFamily::new(s)), "{s}");
+        }
+        let first = url::Url::parse("ferres://First/Views/Main.xaml").unwrap();
+        let second = url::Url::parse("ferres://Second/Views/Main.xaml").unwrap();
+
+        let plain = FontFamily::with_base_uri(Some(&first), "Font A");
+        assert!(plain.ptr_eq(&FontFamily::with_base_uri(Some(&second), "Font A")));
+        assert!(plain.ptr_eq(&FontFamily::new("Font A")));
+
+        let relative = "/Assets/Fonts#MyFont";
+        let of_first = FontFamily::with_base_uri(Some(&first), relative);
+        let of_second = FontFamily::with_base_uri(Some(&second), relative);
+        assert_ne!(of_first, of_second);
+        assert!(of_first.ptr_eq(&FontFamily::with_base_uri(Some(&first), relative)));
+        assert!(of_second.ptr_eq(&FontFamily::with_base_uri(Some(&second), relative)));
+        // Without a base URI the family is not the one of either, and is equal to itself.
+        let without = FontFamily::new(relative);
+        assert!(without != of_first && without != of_second);
+        assert_eq!(without, FontFamily::new(relative));
+    }
+
+    /// Not from upstream: text made up at run time does not grow the table of a thread without
+    /// bound, and a family is the same value whether it comes from the table or not.
+    #[test]
+    fn the_families_a_thread_keeps_are_bounded() {
+        let first = FontFamily::new("Kept 0");
+        for index in 0..3 * Made::CAPACITY {
+            let name = format!("Kept {index}");
+            assert_eq!(FontFamily::new(&name).name(), name);
+        }
+        assert!(MADE.with(|made| made.borrow().count) <= Made::CAPACITY);
+        // Read again after the table was emptied: another instance, the same family.
+        let again = FontFamily::new("Kept 0");
+        assert!(!again.ptr_eq(&first) && again == first && hash_of(&again) == hash_of(&first));
+        // A text beyond what the table keeps is read each time.
+        let long = "Long ".repeat(Made::MAX_TEXT);
+        assert!(!FontFamily::new(&long).ptr_eq(&FontFamily::new(&long)));
+        assert_eq!(FontFamily::new(&long), FontFamily::new(&long));
     }
 
     #[test]

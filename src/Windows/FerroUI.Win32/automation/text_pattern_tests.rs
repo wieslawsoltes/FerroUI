@@ -1066,32 +1066,61 @@ fn native_public_text_edit_reentrant_release_and_source_change_preserve_each_eve
     assert_eq!(events[1].changed_data, ["nested"]);
 }
 
+fn pattern_availability(node: &ComPtr<IRawElementProviderSimple>, property: UiaPropertyId) -> Option<VariantValue> {
+    let mut available = node.get_property_value(property.0).unwrap();
+    // SAFETY: the call returned an owned VARIANT, released once after copy.
+    unsafe {
+        let value = available.as_object().unwrap();
+        available.dispose();
+        value
+    }
+}
+
 #[test]
-fn a_text_box_node_keeps_the_value_pattern_only() {
-    // R9a of #243: the Text pattern is for peers that provide `ITextProvider`
-    // (RichTextBlock, RichEditBox); a TextBox's node is the upstream one.
+fn a_text_box_node_has_the_value_and_text_patterns_and_raises_text_events() {
+    // #430: a TextBox's node answers the Text and Text2 patterns over the plain
+    // text provider of its peer (upstream: the Value pattern only), and raises
+    // the text events through the same subscriptions as a rich editor's node.
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let _recording = RecordingScope::new();
+    let recording = RecordingScope::new();
     let text_box = ferroui_controls::TextBox::new();
     text_box.set_text(Some("plain"));
     let node = native_node(&text_box);
-    assert!(node.get_pattern_provider(UiaPatternId::Value.0).unwrap().is_some());
-    for pattern in [UiaPatternId::Text, UiaPatternId::Text2, UiaPatternId::TextChild, UiaPatternId::TextEdit] {
+    for pattern in [UiaPatternId::Value, UiaPatternId::Text, UiaPatternId::Text2] {
+        assert!(node.get_pattern_provider(pattern.0).unwrap().is_some(), "{pattern:?}");
+    }
+    for pattern in [UiaPatternId::TextChild, UiaPatternId::TextEdit] {
         assert!(node.get_pattern_provider(pattern.0).unwrap().is_none(), "{pattern:?}");
     }
-    for property in [
-        UiaPropertyId::IsTextPatternAvailable,
-        UiaPropertyId::IsTextPattern2Available,
-        UiaPropertyId::IsTextChildPatternAvailable,
-        UiaPropertyId::IsTextEditPatternAvailable,
+    for (property, expected) in [
+        (UiaPropertyId::IsTextPatternAvailable, true),
+        (UiaPropertyId::IsTextPattern2Available, true),
+        (UiaPropertyId::IsTextChildPatternAvailable, false),
+        (UiaPropertyId::IsTextEditPatternAvailable, false),
     ] {
-        let mut available = node.get_property_value(property.0).unwrap();
-        // SAFETY: the call returned an owned VARIANT, released once after copy.
-        unsafe {
-            assert_eq!(available.as_object().unwrap(), Some(VariantValue::Bool(false)), "{property:?}");
-            available.dispose();
-        }
+        assert_eq!(pattern_availability(&node, property), Some(VariantValue::Bool(expected)), "{property:?}");
     }
+    recording.take();
+    text_box.set_caret_index(2);
+    assert!(recording.take().contains(&UiaEventId::Text_TextSelectionChanged.0));
+    text_box.set_text(Some("other"));
+    assert!(recording.take().contains(&UiaEventId::Text_TextChanged.0));
+
+    // A password box has neither pattern and raises no text events.
+    text_box.set_password_char('*');
+    recording.take();
+    for pattern in [UiaPatternId::Value, UiaPatternId::Text, UiaPatternId::Text2] {
+        assert!(node.get_pattern_provider(pattern.0).unwrap().is_none(), "{pattern:?}");
+    }
+    assert_eq!(
+        pattern_availability(&node, UiaPropertyId::IsTextPatternAvailable),
+        Some(VariantValue::Bool(false))
+    );
+    text_box.set_text(Some("secret"));
+    text_box.set_caret_index(3);
+    let events = recording.take();
+    assert!(!events.contains(&UiaEventId::Text_TextChanged.0));
+    assert!(!events.contains(&UiaEventId::Text_TextSelectionChanged.0));
 }
 
 #[test]

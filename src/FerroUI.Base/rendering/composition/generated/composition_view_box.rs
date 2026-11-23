@@ -159,6 +159,10 @@ impl CompositionViewBoxProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "HorizontalAlignmentRatio", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_view_box.get().contains(CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO_ANIMATED) {
+                    self.changed_fields_of_composition_view_box.set(self.changed_fields_of_composition_view_box.get() & !CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO);
+                }
             }
         }
         self.horizontal_alignment_ratio.set(value);
@@ -200,6 +204,10 @@ impl CompositionViewBoxProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_view_box.get().contains(CompositionViewBoxChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_view_box.set(self.changed_fields_of_composition_view_box.get() & !CompositionViewBoxChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -241,6 +249,10 @@ impl CompositionViewBoxProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Size", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_view_box.get().contains(CompositionViewBoxChangedFields::SIZE_ANIMATED) {
+                    self.changed_fields_of_composition_view_box.set(self.changed_fields_of_composition_view_box.get() & !CompositionViewBoxChangedFields::SIZE);
+                }
             }
         }
         self.size.set(value);
@@ -307,6 +319,10 @@ impl CompositionViewBoxProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "VerticalAlignmentRatio", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_view_box.get().contains(CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO_ANIMATED) {
+                    self.changed_fields_of_composition_view_box.set(self.changed_fields_of_composition_view_box.get() & !CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO);
+                }
             }
         }
         self.vertical_alignment_ratio.set(value);
@@ -361,28 +377,32 @@ impl CompositionViewBoxProps {
     pub fn serialize_changes_core(&self, host: &dyn CompositionViewBoxHooks, writer: &mut BatchStreamWriter<'_>) {
         let changed = self.changed_fields_of_composition_view_box.get();
         writer.write(changed);
+        if changed.contains(CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
+            writer.write(self.horizontal_alignment_ratio.get());
+        }
         if changed.contains(CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionViewBoxProps::id_of_horizontal_alignment_ratio_property().base()));
-        } else if changed.contains(CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
-            writer.write(self.horizontal_alignment_ratio.get());
+        }
+        if changed.contains(CompositionViewBoxChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionViewBoxChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionViewBoxProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionViewBoxChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionViewBoxChangedFields::SIZE) {
+            writer.write(self.size.get());
         }
         if changed.contains(CompositionViewBoxChangedFields::SIZE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionViewBoxProps::id_of_size_property().base()));
-        } else if changed.contains(CompositionViewBoxChangedFields::SIZE) {
-            writer.write(self.size.get());
         }
         if changed.contains(CompositionViewBoxChangedFields::STRETCH) {
             writer.write(self.stretch.get());
         }
+        if changed.contains(CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO) {
+            writer.write(self.vertical_alignment_ratio.get());
+        }
         if changed.contains(CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionViewBoxProps::id_of_vertical_alignment_ratio_property().base()));
-        } else if changed.contains(CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO) {
-            writer.write(self.vertical_alignment_ratio.get());
         }
         self.changed_fields_of_composition_view_box.set(CompositionViewBoxChangedFields::empty());
     }
@@ -586,6 +606,10 @@ impl ServerCompositionViewBoxProps {
     ) {
         ServerCompositionViewBoxHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionViewBoxChangedFields>();
+        if changed.contains(CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
+            let value = reader.read::<f32>();
+            self.set_horizontal_alignment_ratio(host, value);
+        }
         if changed.contains(CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `HorizontalAlignmentRatio` without an animation instance");
@@ -596,9 +620,10 @@ impl ServerCompositionViewBoxProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionViewBoxChangedFields::HORIZONTAL_ALIGNMENT_RATIO) {
-            let value = reader.read::<f32>();
-            self.set_horizontal_alignment_ratio(host, value);
+        }
+        if changed.contains(CompositionViewBoxChangedFields::OFFSET) {
+            let value = reader.read::<Vector>();
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionViewBoxChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -610,9 +635,10 @@ impl ServerCompositionViewBoxProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionViewBoxChangedFields::OFFSET) {
+        }
+        if changed.contains(CompositionViewBoxChangedFields::SIZE) {
             let value = reader.read::<Vector>();
-            self.set_offset(host, value);
+            self.set_size(host, value);
         }
         if changed.contains(CompositionViewBoxChangedFields::SIZE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -624,13 +650,14 @@ impl ServerCompositionViewBoxProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionViewBoxChangedFields::SIZE) {
-            let value = reader.read::<Vector>();
-            self.set_size(host, value);
         }
         if changed.contains(CompositionViewBoxChangedFields::STRETCH) {
             let value = reader.read::<CompositionStretch>();
             self.set_stretch(host, value);
+        }
+        if changed.contains(CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO) {
+            let value = reader.read::<f32>();
+            self.set_vertical_alignment_ratio(host, value);
         }
         if changed.contains(CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -642,9 +669,6 @@ impl ServerCompositionViewBoxProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionViewBoxChangedFields::VERTICAL_ALIGNMENT_RATIO) {
-            let value = reader.read::<f32>();
-            self.set_vertical_alignment_ratio(host, value);
         }
         ServerCompositionViewBoxHooks::on_fields_deserialized(host, changed);
     }

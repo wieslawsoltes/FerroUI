@@ -244,6 +244,9 @@ document_tests! {
     resources_person_picture_themeresources => "/Resources/PersonPicture_themeresources.xaml";
     resources_pager_control_themeresources => "/Resources/PagerControl_themeresources.xaml";
     resources_rich_edit_box_themeresources => "/Resources/RichEditBox_themeresources.xaml";
+    resources_grid_view_item_themeresources => "/Resources/GridViewItem_themeresources.xaml";
+    resources_pivot_themeresources => "/Resources/Pivot_themeresources.xaml";
+    resources_swipe_control_themeresources => "/Resources/SwipeControl_themeresources.xaml";
     strings_invariant_resources => "/Strings/InvariantResources.xaml";
     macos_theme => "/MacOSTheme.xaml";
     // B2: buttons, ranges and expanders
@@ -265,11 +268,18 @@ document_tests! {
     controls_radio_buttons => "/Controls/RadioButtons.xaml";
     controls_rating_control => "/Controls/RatingControl.xaml";
     controls_person_picture => "/Controls/PersonPicture.xaml";
+    // The media controls (docs/media/ISSUE-561.md)
+    controls_camera_capture_ui => "/Controls/CameraCaptureUI.xaml";
+    controls_media_transport_controls => "/Controls/MediaTransportControls.xaml";
     controls_pager_control => "/Controls/PagerControl.xaml";
     controls_rich_edit_box => "/Controls/RichEditBox.xaml";
     controls_frame => "/Controls/Frame.xaml";
     controls_navigation_view => "/Controls/NavigationView.xaml";
     controls_title_bar => "/Controls/TitleBar.xaml";
+    controls_list_view => "/Controls/ListView.xaml";
+    controls_grid_view => "/Controls/GridView.xaml";
+    controls_pivot => "/Controls/Pivot.xaml";
+    controls_swipe_control => "/Controls/SwipeControl.xaml";
 }
 
 #[test]

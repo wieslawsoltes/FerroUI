@@ -509,7 +509,50 @@ impl RuntimePreview {
     pub fn is_window_projection(&self) -> bool {
         self.window_projection
     }
+    /// Whether the application shows windows. An application with a single view (in a browser, on
+    /// a phone) has none: its platform refuses to make one, so the preview is shown in the view
+    /// (`open_in_view`).
+    pub fn platform_shows_windows() -> bool {
+        ferroui_controls::Application::current()
+            .and_then(|application| application.application_lifetime())
+            .is_none_or(|lifetime| lifetime.as_single_view_application_lifetime().is_none())
+    }
+
+    /// The preview of `source` as a control for the caller to show in its own view: what
+    /// `open_native` shows in a window, for a platform without windows. A window document is
+    /// shown as the artboard shows it, without the window.
+    pub fn open_in_view(&mut self, source: String) -> Result<Ref<Control>, String> {
+        let _design_mode =
+            crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
+        let document = Document::new(&source).map_err(|error| error.to_string())?;
+        let projection = crate::preview_source::project(&document)?;
+        let design = crate::design_time::project(
+            &document,
+            &projection.source,
+            self.options.design_time_data,
+        )?;
+        let control = self.options.control(
+            design
+                .as_ref()
+                .map_or(projection.source.as_str(), |design| design.document.valid_source()),
+            &self.uri,
+        )?;
+        if let Some(design) = design {
+            let mut state = crate::design_time_samples::SampleState::default();
+            self.notices
+                .extend(crate::design_time_samples::apply_projection(&control, &design, &mut state));
+        }
+        Ok(control)
+    }
+
     pub fn open_native(&mut self, source: String) -> Result<Ref<ferroui_controls::Window>, String> {
+        // Making a window where the platform has none is an error of the platform, which a
+        // browser reports by stopping the application.
+        if !Self::platform_shows_windows() {
+            return Err(
+                "This platform shows a single view and has no windows: the preview opens in the view".into(),
+            );
+        }
         let _design_mode =
             crate::preview_host::DesignModeGuard::new(self.options.configuration.design_mode);
         let document = Document::new(&source).map_err(|error| error.to_string())?;

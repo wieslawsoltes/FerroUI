@@ -1,6 +1,7 @@
 use super::activators::StyleClassActivator;
+use super::selector_candidates::CandidateType;
 use super::{Selector, SelectorMatch, SelectorNode, Style, StyleBase};
-use crate::{StyledElement, TypeInfo};
+use crate::{StyledElement, TypeIdentity, TypeInfo};
 use std::any::Any;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
@@ -14,9 +15,35 @@ pub(crate) struct TypeNameAndClassSelector {
     previous: Option<Selector>,
     classes: RefCell<Rc<[String]>>,
     target_type: Option<&'static TypeInfo>,
+    /// The class to match, by its identity alone ([`of_identity`](Self::of_identity)): the
+    /// selector then has no `target_type` of its own and does not keep the class in the
+    /// executable.
+    target_identity: Option<&'static TypeIdentity>,
+    /// The class to match, by its name alone ([`of_type_name`](Self::of_type_name)): a selector
+    /// written as text for a class that is not known yet, which is every class no object of was
+    /// made in an application that keeps no tables of types.
+    target_name: Option<&'static str>,
+    /// The class of `target_identity` or of `target_name`, once it was found initialised.
+    identity_type: Cell<Option<&'static TypeInfo>>,
     is_concrete_type: Cell<bool>,
     name: RefCell<Option<String>>,
     selector_string: OnceCell<String>,
+}
+
+/// The name of a class a selector knows by name, kept for the life of the process: one copy a
+/// name, however many selectors name it.
+fn class_name(name: &str) -> &'static str {
+    static NAMES: std::sync::Mutex<std::collections::BTreeSet<&'static str>> =
+        std::sync::Mutex::new(std::collections::BTreeSet::new());
+    let mut names = NAMES.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    match names.get(name) {
+        Some(known) => known,
+        None => {
+            let kept: &'static str = Box::leak(name.to_owned().into_boxed_str());
+            names.insert(kept);
+            kept
+        }
+    }
 }
 
 impl TypeNameAndClassSelector {
@@ -25,6 +52,9 @@ impl TypeNameAndClassSelector {
             previous,
             classes: RefCell::new(Rc::from(Vec::new())),
             target_type,
+            target_identity: None,
+            target_name: None,
+            identity_type: Cell::new(None),
             is_concrete_type: Cell::new(is_concrete_type),
             name: RefCell::new(None),
             selector_string: OnceCell::new(),
@@ -39,6 +69,25 @@ impl TypeNameAndClassSelector {
         Self::new(previous, Some(target_type), false)
     }
 
+    /// A selector for the class with the identity `identity`: that class exactly, or with
+    /// `derived` also the classes derived from it. It matches what [`of_type`](Self::of_type)
+    /// and [`is`](Self::is) match with the `TypeInfo` of the class, without naming it.
+    pub fn of_identity(previous: Option<Selector>, identity: &'static TypeIdentity, derived: bool) -> Self {
+        let mut result = Self::new(previous, None, !derived);
+        result.target_identity = Some(identity);
+        result
+    }
+
+    /// A selector for the class named `name`: that class exactly, or with `derived` also the
+    /// classes derived from it. It matches what [`of_type`](Self::of_type) and [`is`](Self::is)
+    /// match with the `TypeInfo` of the class, for a class whose `TypeInfo` cannot be looked up
+    /// when the selector is made. Two classes of one name are both matched.
+    pub fn of_type_name(previous: Option<Selector>, name: &str, derived: bool) -> Self {
+        let mut result = Self::new(previous, None, !derived);
+        result.target_name = Some(class_name(name));
+        result
+    }
+
     pub fn for_name(previous: Option<Selector>, name: &str) -> Self {
         let result = Self::new(previous, None, false);
         result.set_name(name);
@@ -49,6 +98,31 @@ impl TypeNameAndClassSelector {
         let result = Self::new(previous, None, false);
         result.add_class(class_name);
         result
+    }
+
+    /// The type this node itself requires, if it requires one.
+    pub(super) fn own_candidate_type(&self) -> Option<CandidateType> {
+        self.target_identity
+            .map(CandidateType::Identity)
+            .or_else(|| self.target_name.map(CandidateType::Name))
+            .or_else(|| self.target_type.map(CandidateType::Type))
+    }
+
+    /// The class a node names by its identity, once the class is initialised.
+    fn identity_type(&self) -> Option<&'static TypeInfo> {
+        let found = self
+            .identity_type
+            .get()
+            .or_else(|| self.target_identity?.registered_type())
+            .or_else(|| TypeInfo::find_by_name(self.target_name?));
+        self.identity_type.set(found);
+        found
+    }
+
+    /// The name of the class this node itself requires.
+    fn own_target_name(&self) -> Option<&'static str> {
+        let named = self.target_identity.map(TypeIdentity::name).or(self.target_name);
+        named.or_else(|| self.target_type.map(TypeInfo::name))
     }
 
     /// The name of the control to match.
@@ -87,12 +161,14 @@ impl TypeNameAndClassSelector {
             builder.push_str(&previous.to_string_with_next(owner, true));
         }
 
-        if let Some(target_type) = SelectorNode::target_type(self) {
+        let target_name =
+            self.own_target_name().or_else(|| SelectorNode::target_type(self).map(TypeInfo::name));
+        if let Some(target_name) = target_name {
             if self.is_concrete_type() {
-                builder.push_str(target_type.name());
+                builder.push_str(target_name);
             } else {
                 builder.push_str(":is(");
-                builder.push_str(target_type.name());
+                builder.push_str(target_name);
                 builder.push(')');
             }
         }
@@ -123,7 +199,12 @@ impl SelectorNode for TypeNameAndClassSelector {
     }
 
     fn target_type(&self) -> Option<&'static TypeInfo> {
-        self.target_type.or_else(|| self.previous.as_ref().and_then(Selector::target_type))
+        // Deviation (DEVIATIONS.md, Type system): upstream has the type from the start. A class
+        // required by its identity is known once it is initialised; before that no element is
+        // of the class.
+        self.target_type
+            .or_else(|| self.identity_type())
+            .or_else(|| self.previous.as_ref().and_then(Selector::target_type))
     }
 
     fn to_string(&self, owner: Option<&Style>) -> String {
@@ -131,7 +212,27 @@ impl SelectorNode for TypeNameAndClassSelector {
     }
 
     fn evaluate(&self, control: &StyledElement, _parent: Option<&StyleBase>, subscribe: bool) -> SelectorMatch {
-        if let Some(target_type) = SelectorNode::target_type(self) {
+        if let Some(name) = self.target_name {
+            let control_type = control.style_key();
+            let matches = if self.is_concrete_type() {
+                control_type.name() == name
+            } else {
+                control_type.is_or_derives_from_named(name)
+            };
+            if !matches {
+                return SelectorMatch::NEVER_THIS_TYPE;
+            }
+        } else if let Some(identity) = self.target_identity {
+            let control_type = control.style_key();
+            let matches = if self.is_concrete_type() {
+                control_type.identity().is_some_and(|own| std::ptr::eq(own, identity))
+            } else {
+                control_type.derives_from(identity)
+            };
+            if !matches {
+                return SelectorMatch::NEVER_THIS_TYPE;
+            }
+        } else if let Some(target_type) = SelectorNode::target_type(self) {
             let control_type = control.style_key();
 
             if self.is_concrete_type() {

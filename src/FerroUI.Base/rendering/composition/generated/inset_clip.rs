@@ -156,6 +156,10 @@ impl InsetClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "LeftInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_inset_clip.get().contains(InsetClipChangedFields::LEFT_INSET_ANIMATED) {
+                    self.changed_fields_of_inset_clip.set(self.changed_fields_of_inset_clip.get() & !InsetClipChangedFields::LEFT_INSET);
+                }
             }
         }
         self.left_inset.set(value);
@@ -197,6 +201,10 @@ impl InsetClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TopInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_inset_clip.get().contains(InsetClipChangedFields::TOP_INSET_ANIMATED) {
+                    self.changed_fields_of_inset_clip.set(self.changed_fields_of_inset_clip.get() & !InsetClipChangedFields::TOP_INSET);
+                }
             }
         }
         self.top_inset.set(value);
@@ -238,6 +246,10 @@ impl InsetClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RightInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_inset_clip.get().contains(InsetClipChangedFields::RIGHT_INSET_ANIMATED) {
+                    self.changed_fields_of_inset_clip.set(self.changed_fields_of_inset_clip.get() & !InsetClipChangedFields::RIGHT_INSET);
+                }
             }
         }
         self.right_inset.set(value);
@@ -279,6 +291,10 @@ impl InsetClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "BottomInset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_inset_clip.get().contains(InsetClipChangedFields::BOTTOM_INSET_ANIMATED) {
+                    self.changed_fields_of_inset_clip.set(self.changed_fields_of_inset_clip.get() & !InsetClipChangedFields::BOTTOM_INSET);
+                }
             }
         }
         self.bottom_inset.set(value);
@@ -334,25 +350,29 @@ impl InsetClipProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_inset_clip.get();
         writer.write(changed);
+        if changed.contains(InsetClipChangedFields::LEFT_INSET) {
+            writer.write(self.left_inset.get());
+        }
         if changed.contains(InsetClipChangedFields::LEFT_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerInsetClipProps::id_of_left_inset_property().base()));
-        } else if changed.contains(InsetClipChangedFields::LEFT_INSET) {
-            writer.write(self.left_inset.get());
+        }
+        if changed.contains(InsetClipChangedFields::TOP_INSET) {
+            writer.write(self.top_inset.get());
         }
         if changed.contains(InsetClipChangedFields::TOP_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerInsetClipProps::id_of_top_inset_property().base()));
-        } else if changed.contains(InsetClipChangedFields::TOP_INSET) {
-            writer.write(self.top_inset.get());
+        }
+        if changed.contains(InsetClipChangedFields::RIGHT_INSET) {
+            writer.write(self.right_inset.get());
         }
         if changed.contains(InsetClipChangedFields::RIGHT_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerInsetClipProps::id_of_right_inset_property().base()));
-        } else if changed.contains(InsetClipChangedFields::RIGHT_INSET) {
-            writer.write(self.right_inset.get());
+        }
+        if changed.contains(InsetClipChangedFields::BOTTOM_INSET) {
+            writer.write(self.bottom_inset.get());
         }
         if changed.contains(InsetClipChangedFields::BOTTOM_INSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerInsetClipProps::id_of_bottom_inset_property().base()));
-        } else if changed.contains(InsetClipChangedFields::BOTTOM_INSET) {
-            writer.write(self.bottom_inset.get());
         }
         self.changed_fields_of_inset_clip.set(InsetClipChangedFields::empty());
     }
@@ -518,6 +538,10 @@ impl ServerInsetClipProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerInsetClipHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<InsetClipChangedFields>();
+        if changed.contains(InsetClipChangedFields::LEFT_INSET) {
+            let value = reader.read::<f32>();
+            self.set_left_inset(host, value);
+        }
         if changed.contains(InsetClipChangedFields::LEFT_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `LeftInset` without an animation instance");
@@ -528,9 +552,10 @@ impl ServerInsetClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(InsetClipChangedFields::LEFT_INSET) {
+        }
+        if changed.contains(InsetClipChangedFields::TOP_INSET) {
             let value = reader.read::<f32>();
-            self.set_left_inset(host, value);
+            self.set_top_inset(host, value);
         }
         if changed.contains(InsetClipChangedFields::TOP_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -542,9 +567,10 @@ impl ServerInsetClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(InsetClipChangedFields::TOP_INSET) {
+        }
+        if changed.contains(InsetClipChangedFields::RIGHT_INSET) {
             let value = reader.read::<f32>();
-            self.set_top_inset(host, value);
+            self.set_right_inset(host, value);
         }
         if changed.contains(InsetClipChangedFields::RIGHT_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -556,9 +582,10 @@ impl ServerInsetClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(InsetClipChangedFields::RIGHT_INSET) {
+        }
+        if changed.contains(InsetClipChangedFields::BOTTOM_INSET) {
             let value = reader.read::<f32>();
-            self.set_right_inset(host, value);
+            self.set_bottom_inset(host, value);
         }
         if changed.contains(InsetClipChangedFields::BOTTOM_INSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -570,9 +597,6 @@ impl ServerInsetClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(InsetClipChangedFields::BOTTOM_INSET) {
-            let value = reader.read::<f32>();
-            self.set_bottom_inset(host, value);
         }
         ServerInsetClipHooks::on_fields_deserialized(host, changed);
     }

@@ -2,17 +2,25 @@
 
 This sample is a port of the .NET desktop app of the framework comparison benchmark of the
 Cranpose project (https://github.com/samoylenkodmitry/Cranpose, `benchmarks/compose-vs-cranpose`),
-and of the shared C# data file every .NET app of that benchmark compiles.
+and of the shared C# data files every .NET app of that benchmark compiles.
 
-- `perf_data.rs` is the port of the shared data file: the deterministic generator, the tiers and
-  the per-frame arithmetic of the frame index, bit for bit.
+- `perf_data.rs` is the port of the gauntlet's shared data file: the deterministic generator, the
+  tiers and the per-frame arithmetic of the frame index, bit for bit.
+- `patchwork_data.rs` and `chat_data.rs` are the ports of the shared data files of the patchwork
+  and of its chat: the patches, the cards' moves, the turn of the chat, its tokens and the colored
+  stretches of its code, bit for bit.
+- `chat_gif.rs` is the port of the shared GIF decoder of the chat's animated picture, bit for bit.
 - `gauntlet.rs` and `wall.rs` are the ports of the gauntlet and the still wall screens, control for
   control.
+- `patchwork.rs` and `chat.rs` are the ports of the patchwork screen and of the chat beside it,
+  control for control.
 - `app.rs` and `program.rs` are the ports of the application class, its launch options and its
   desktop entry point.
 
-The fonts the sample loads at run time (Roboto, from the folder `PERF_FONTS` names) are not part of
-this sample; the benchmark ships them in its `fonts` folder under their own license.
+The fonts the sample loads at run time (Roboto and DejaVu Sans Mono, from the folder `PERF_FONTS`
+names) are not part of this sample; the benchmark ships them in its `fonts` folder under their own
+licenses. Nor are the chat's pictures (`spin.gif` and `progress.svg`, from the folder `PERF_CHAT`
+names), which the benchmark ships in its `chat-assets` folder.
 
 The original code is licensed under the MIT license:
 

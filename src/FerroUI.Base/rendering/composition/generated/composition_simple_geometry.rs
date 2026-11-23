@@ -16,9 +16,9 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
-use std::cell::RefCell;
 use std::sync::Arc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -55,7 +55,7 @@ pub trait ServerCompositionSimpleGeometryHooks: IServerPropertyHost {
 
 /// The server-side properties of `ServerCompositionSimpleGeometry`.
 pub struct ServerCompositionSimpleGeometryProps {
-    geometry_impl: RefCell<Option<Arc<dyn IGeometryImpl>>>,
+    geometry_impl: OptionCell<Arc<dyn IGeometryImpl>>,
 }
 
 impl Default for ServerCompositionSimpleGeometryProps {
@@ -69,7 +69,7 @@ impl ServerCompositionSimpleGeometryProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            geometry_impl: RefCell::new(None),
+            geometry_impl: OptionCell::new(),
         }
     }
 
@@ -89,8 +89,8 @@ impl ServerCompositionSimpleGeometryProps {
             CompositionProperty::register::<ServerCompositionSimpleGeometryProps, Option<Arc<dyn IGeometryImpl>>>(
                 "GeometryImpl",
                 "ServerCompositionSimpleGeometry",
-                |obj| props_of::<ServerCompositionSimpleGeometryProps>(obj).geometry_impl.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSimpleGeometryProps>(obj).geometry_impl.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSimpleGeometryProps>(obj).geometry_impl.get(),
+                |obj, v| props_of::<ServerCompositionSimpleGeometryProps>(obj).geometry_impl.set(v),
                 None,
                 None,
             )
@@ -99,11 +99,11 @@ impl ServerCompositionSimpleGeometryProps {
 
     /// `GeometryImpl`.
     pub fn geometry_impl(&self) -> Option<Arc<dyn IGeometryImpl>> {
-        self.geometry_impl.borrow().clone()
+        self.geometry_impl.get()
     }
 
     pub fn set_geometry_impl(&self, host: &dyn ServerCompositionSimpleGeometryHooks, value: Option<Arc<dyn IGeometryImpl>>) {
-        let old_value = self.geometry_impl.borrow().clone();
+        let old_value = self.geometry_impl.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSimpleGeometryHooks::on_geometry_impl_changing(host);
@@ -115,7 +115,7 @@ impl ServerCompositionSimpleGeometryProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || *self.geometry_impl.borrow_mut() = value.clone(),
+                assign: &mut || self.geometry_impl.set(value.clone()),
             },
         );
         if changed {

@@ -11,14 +11,22 @@ use std::rc::Rc;
 /// are the scroll bar visibility, the offset, the extent and the viewport;
 /// the parameter is the percentage of the scroll range at which the button
 /// is no longer needed.
-#[derive(Default)]
+// Made only through `default` (`non_exhaustive`), which registers the casts of the converter.
+#[non_exhaustive]
 pub struct MenuScrollingVisibilityConverter;
+
+impl Default for MenuScrollingVisibilityConverter {
+    fn default() -> Self {
+        register_casts!(Self);
+        Self
+    }
+}
 
 impl MenuScrollingVisibilityConverter {
     /// The shared instance of the converter.
     pub fn instance() -> Rc<MenuScrollingVisibilityConverter> {
         ferroui_base::ferro_thread_local! {
-            static INSTANCE: Rc<MenuScrollingVisibilityConverter> = Rc::new(MenuScrollingVisibilityConverter);
+            static INSTANCE: Rc<MenuScrollingVisibilityConverter> = Rc::new(MenuScrollingVisibilityConverter::default());
         }
         INSTANCE.with(Rc::clone)
     }

@@ -100,6 +100,8 @@
 //! `runtime_types`) is the `emitter` feature, which adds the `runtime` feature
 //! and the accessor table of the base crate.
 
+mod bytecode_image;
+pub use bytecode_image::BytecodeImage;
 mod compiled;
 mod compiled_resources;
 pub mod emit_types;
@@ -121,14 +123,20 @@ pub use compiled::{
     ClassGroup, CompiledDocument, EmitterHost, GeneratedFile, CLASS_GROUP_NOT_TRANSFORMED, GROUP_NOT_TRANSFORMED,
 };
 #[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
-pub use runtime_host::{compile_documents, generate_class_file, generate_file};
+pub use runtime_host::{compile_documents, generate_class_file, generate_file, generate_file_with_runtime_types};
 #[cfg(all(any(test, feature = "testing"), any(feature = "emitter", all(test, feature = "runtime"))))]
 pub use runtime_host::{transformed_class_group, transformed_tree};
 pub use transform::{
-    transform_group, DiagnosticHandler, DocumentSource, NamespaceTable, ThemePartsTables, TransformOptions, TransformedDocument, METHOD_NOT_FOUND,
+    transform_group, DiagnosticHandler, DocumentSource, NamespaceTable, ThemePartsTables, TransformOptions,
+    TransformedDocument, XamlBackend, METHOD_NOT_FOUND, PARTS_CONSTRUCTOR, with_xaml_backend,
 };
 pub use compiled_resources::CompiledMarkupTypeSystem;
 pub use compiled_resources::CompiledDocumentBuildMethod;
-pub use emitter::{emit_document, UnsupportedNode};
+pub use emitter::{emit_document, set_compile_time_declared_properties, UnsupportedNode};
+pub use emitter::theme_styles::{
+    resolves_template_bindings, with_resolved_template_bindings, DEFAULT_RESOLVED_TEMPLATE_BINDINGS,
+};
+pub use emitter::theme_units::{with_theme_unit_plan, ThemeUnitPlan, DEFAULT_THEME_UNIT_PLAN};
+pub use emitter::theme_rows::{packed_theme_rows, with_packed_theme_rows, DEFAULT_PACKED_THEME_ROWS};
 pub use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitModel, ThemeUnitsModel, XamlMetadata};
-pub use source::{function_name_of, rust_string_literal};
+pub use source::{allocate_names, function_name_of, rust_string_literal};

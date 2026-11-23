@@ -189,6 +189,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Left", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::LEFT_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::LEFT);
+                }
             }
         }
         self.left.set(value);
@@ -230,6 +234,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Top", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::TOP_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::TOP);
+                }
             }
         }
         self.top.set(value);
@@ -271,6 +279,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Right", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::RIGHT_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::RIGHT);
+                }
             }
         }
         self.right.set(value);
@@ -312,6 +324,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Bottom", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::BOTTOM_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::BOTTOM);
+                }
             }
         }
         self.bottom.set(value);
@@ -353,6 +369,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TopLeftRadius", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::TOP_LEFT_RADIUS_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::TOP_LEFT_RADIUS);
+                }
             }
         }
         self.top_left_radius.set(value);
@@ -394,6 +414,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TopRightRadius", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::TOP_RIGHT_RADIUS_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::TOP_RIGHT_RADIUS);
+                }
             }
         }
         self.top_right_radius.set(value);
@@ -435,6 +459,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "BottomLeftRadius", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::BOTTOM_LEFT_RADIUS_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::BOTTOM_LEFT_RADIUS);
+                }
             }
         }
         self.bottom_left_radius.set(value);
@@ -476,6 +504,10 @@ impl RectangleClipProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "BottomRightRadius", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_rectangle_clip.get().contains(RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS_ANIMATED) {
+                    self.changed_fields_of_rectangle_clip.set(self.changed_fields_of_rectangle_clip.get() & !RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS);
+                }
             }
         }
         self.bottom_right_radius.set(value);
@@ -559,45 +591,53 @@ impl RectangleClipProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_rectangle_clip.get();
         writer.write(changed);
+        if changed.contains(RectangleClipChangedFields::LEFT) {
+            writer.write(self.left.get());
+        }
         if changed.contains(RectangleClipChangedFields::LEFT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_left_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::LEFT) {
-            writer.write(self.left.get());
+        }
+        if changed.contains(RectangleClipChangedFields::TOP) {
+            writer.write(self.top.get());
         }
         if changed.contains(RectangleClipChangedFields::TOP_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_top_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::TOP) {
-            writer.write(self.top.get());
+        }
+        if changed.contains(RectangleClipChangedFields::RIGHT) {
+            writer.write(self.right.get());
         }
         if changed.contains(RectangleClipChangedFields::RIGHT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_right_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::RIGHT) {
-            writer.write(self.right.get());
+        }
+        if changed.contains(RectangleClipChangedFields::BOTTOM) {
+            writer.write(self.bottom.get());
         }
         if changed.contains(RectangleClipChangedFields::BOTTOM_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_bottom_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::BOTTOM) {
-            writer.write(self.bottom.get());
+        }
+        if changed.contains(RectangleClipChangedFields::TOP_LEFT_RADIUS) {
+            writer.write(self.top_left_radius.get());
         }
         if changed.contains(RectangleClipChangedFields::TOP_LEFT_RADIUS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_top_left_radius_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::TOP_LEFT_RADIUS) {
-            writer.write(self.top_left_radius.get());
+        }
+        if changed.contains(RectangleClipChangedFields::TOP_RIGHT_RADIUS) {
+            writer.write(self.top_right_radius.get());
         }
         if changed.contains(RectangleClipChangedFields::TOP_RIGHT_RADIUS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_top_right_radius_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::TOP_RIGHT_RADIUS) {
-            writer.write(self.top_right_radius.get());
+        }
+        if changed.contains(RectangleClipChangedFields::BOTTOM_LEFT_RADIUS) {
+            writer.write(self.bottom_left_radius.get());
         }
         if changed.contains(RectangleClipChangedFields::BOTTOM_LEFT_RADIUS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_bottom_left_radius_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::BOTTOM_LEFT_RADIUS) {
-            writer.write(self.bottom_left_radius.get());
+        }
+        if changed.contains(RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS) {
+            writer.write(self.bottom_right_radius.get());
         }
         if changed.contains(RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerRectangleClipProps::id_of_bottom_right_radius_property().base()));
-        } else if changed.contains(RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS) {
-            writer.write(self.bottom_right_radius.get());
         }
         self.changed_fields_of_rectangle_clip.set(RectangleClipChangedFields::empty());
     }
@@ -871,6 +911,10 @@ impl ServerRectangleClipProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerRectangleClipHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<RectangleClipChangedFields>();
+        if changed.contains(RectangleClipChangedFields::LEFT) {
+            let value = reader.read::<f32>();
+            self.set_left(host, value);
+        }
         if changed.contains(RectangleClipChangedFields::LEFT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Left` without an animation instance");
@@ -881,9 +925,10 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::LEFT) {
+        }
+        if changed.contains(RectangleClipChangedFields::TOP) {
             let value = reader.read::<f32>();
-            self.set_left(host, value);
+            self.set_top(host, value);
         }
         if changed.contains(RectangleClipChangedFields::TOP_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -895,9 +940,10 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::TOP) {
+        }
+        if changed.contains(RectangleClipChangedFields::RIGHT) {
             let value = reader.read::<f32>();
-            self.set_top(host, value);
+            self.set_right(host, value);
         }
         if changed.contains(RectangleClipChangedFields::RIGHT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -909,9 +955,10 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::RIGHT) {
+        }
+        if changed.contains(RectangleClipChangedFields::BOTTOM) {
             let value = reader.read::<f32>();
-            self.set_right(host, value);
+            self.set_bottom(host, value);
         }
         if changed.contains(RectangleClipChangedFields::BOTTOM_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -923,9 +970,10 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::BOTTOM) {
-            let value = reader.read::<f32>();
-            self.set_bottom(host, value);
+        }
+        if changed.contains(RectangleClipChangedFields::TOP_LEFT_RADIUS) {
+            let value = reader.read::<Vector>();
+            self.set_top_left_radius(host, value);
         }
         if changed.contains(RectangleClipChangedFields::TOP_LEFT_RADIUS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -937,9 +985,10 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::TOP_LEFT_RADIUS) {
+        }
+        if changed.contains(RectangleClipChangedFields::TOP_RIGHT_RADIUS) {
             let value = reader.read::<Vector>();
-            self.set_top_left_radius(host, value);
+            self.set_top_right_radius(host, value);
         }
         if changed.contains(RectangleClipChangedFields::TOP_RIGHT_RADIUS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -951,9 +1000,10 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::TOP_RIGHT_RADIUS) {
+        }
+        if changed.contains(RectangleClipChangedFields::BOTTOM_LEFT_RADIUS) {
             let value = reader.read::<Vector>();
-            self.set_top_right_radius(host, value);
+            self.set_bottom_left_radius(host, value);
         }
         if changed.contains(RectangleClipChangedFields::BOTTOM_LEFT_RADIUS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -965,9 +1015,10 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::BOTTOM_LEFT_RADIUS) {
+        }
+        if changed.contains(RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS) {
             let value = reader.read::<Vector>();
-            self.set_bottom_left_radius(host, value);
+            self.set_bottom_right_radius(host, value);
         }
         if changed.contains(RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -979,9 +1030,6 @@ impl ServerRectangleClipProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(RectangleClipChangedFields::BOTTOM_RIGHT_RADIUS) {
-            let value = reader.read::<Vector>();
-            self.set_bottom_right_radius(host, value);
         }
         ServerRectangleClipHooks::on_fields_deserialized(host, changed);
     }

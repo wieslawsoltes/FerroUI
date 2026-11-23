@@ -627,6 +627,7 @@ Recorded by the XAML back-end work; each follows "exact upstream behaviour, idio
 25. **Fallible initialization**: `EndInit` of markup is `ISupportInitialize::try_end_init`; a duplicate setter of a style or control theme is `InitializationError::DuplicateSetter` out of `StyledElement::try_end_init` / `try_apply_styling` and surfaces as the error of the load. The panicking forms are built on the fallible ones.
 26. **Composite format and cultures**: `composite_format::format_with` / `format_arg_with` / `format_values_with` take a `CultureInfo`; numbers use its `NumberFormatInfo`, `Decimal`, `DateTime`, `DateTimeOffset` and `TimeSpan` arguments take their format strings. `format_values` (the string format of bindings) uses the current culture until the converter culture of bindings is ported; `format` / `format_arg` stay invariant.
 27. **Text to typed values**: `ValueTypes::try_convert` ends with the `parse:` of the markup metadata of the target type (also for classes of the object model, walking base classes), so every conversion of a binding value consults it as upstream consults the type converter; the reverse direction is the registered display form.
+28. **A merged theme dictionary does not assign its key again** (#994). Upstream's `XamlMergeResourceGroupTransformer` appends every manipulation of a merged `ThemeDictionaries` entry to the entry of the same key in the including dictionary, the assignment of its `Key` included. The merge joins only dictionaries whose keys are equal (`theme_variant_node_equals`), so that assignment stores the key the dictionary already has. The port leaves out an assignment of `Key` that is equal to the one the including entry already makes, and keeps every other manipulation in its order. The WinUI theme assigned its key 207 times more (one for each merged `*_themeresources.xaml`), with two casts each, in the function every application of the theme links; the generated themes now assign it once per theme variant.
 
 ## 9. Rust emitter back end: design
 
@@ -842,7 +843,7 @@ mod __main_window_xaml {
                 // MainWindow.xaml(11,6) Style
                 let style_0: Ref<Style> = Style::new();
                 // MainWindow.xaml(11,13) Selector
-                style_0.set_selector(Some(Selectors::class(Some(Selectors::of_type_info(None, TextBlock::TYPE)), "title")));
+                style_0.set_selector(Some(Selectors::class(Some(Selectors::of_type_identity(None, TextBlock::IDENTITY)), "title")));
                 // MainWindow.xaml(12,8) Setter
                 let setter_0: Rc<Setter> = Setter::empty();
                 // MainWindow.xaml(12,16) Property
@@ -1111,6 +1112,41 @@ Statement sequences that recur at thousands of sites are calls of one helper of 
 - **`{TemplateBinding source}` as the value of a registered property** (2026-10-23): `rt::bind_template_binding(target, property, rt::property(source), line, position)?` in place of `TemplateBinding::__markup_new_1`, its `ProvideValue` and `rt::bind` of the provided binding (1,400 sites in the control themes of the WinUI theme).
 - **Deferred content that is `{StaticResource key}` alone** (2026-10-23; a resource of a dictionary that names another one, 3,435 of the 5,850 deferred builds of the WinUI theme): the build function is one call, `rt::static_resource_content(service_provider, &DOCUMENT, key, line, position)`, which creates the context, creates the extension with `__markup_new_0`, sets `ResourceKey` and calls `ProvideValue` with the error of an invoked member at the position, as the statements did.
 - **A deferred resource added to a dictionary under a text key** (2026-10-23): `rt::add_deferred_resource(dictionary, key, type, &context, build, line, position)?` in place of `let deferred = rt::defer(..)?` and `rt::invoked(ResourceDictionary::__markup_AddDeferred_1(..))?` at the same position. The deferred content is moved into the dictionary instead of cloned, so the handle of the function is dropped when the helper returns, which only reference counting observes.
+- **The statements of a styled element** (2026-11-19, #568): for an element of a template or a
+  document that is a styled element held in a local, the statements that are the same at every
+  element are calls of helpers. `rt::push_parent(&context, &x)` and
+  `rt::set_intermediate_root(&context, &x)` stand for `context.push_parent(rt::to_value(x.clone()))`
+  and `context.set_intermediate_root_object(rt::to_value(x.clone()))`;
+  `rt::pop_parent_end_init(&context, &x, line, position)?` and `rt::end_init(&x, line, position)?`
+  for `context.pop_parent()` (when the element is on the parent stack) and
+  `rt::invoked(x.try_end_init(), line, position)?`; `rt::name_element(name_scope.as_ref(), &x, &x,
+  name, line, position)?` for the set of `StyledElement.Name` followed by
+  `rt::register_name_value(..)` with the same name. The helpers of the parent stack and of the
+  name are generic over the class of the element (one instance per class, not per site), so that
+  the value they box is the handle the statements boxed; the others are not generic. Objects that
+  are no styled element (setters, brushes, control themes, whose statements the theme tables read)
+  and the construction programs of the bytecode backend keep the statements.
+- **`{CompiledBinding path}` as the value of a registered property** (2026-11-19, #568):
+  `rt::bind_compiled_binding(&context, target, property, path, line, position)?` in place of
+  `CompiledBindingExtension::__markup_new_1` with the path, the target property set with
+  `rt::property_value(property)`, `ProvideValue` with the context, the target property cleared and
+  `rt::bind` of the provided binding, when no other member of the extension is set. The extension
+  is dropped when the helper returns instead of at the end of the function, which only reference
+  counting observes.
+- **A run of `{DynamicResource key}` values on one object** (2026-11-19, #568): two or more
+  consecutive `rt::bind_dynamic_resource(..)?` on the same object of the body of deferred content
+  (with only position markers between them) are one call of `rt::bind_dynamic_resources(&context,
+  target, TABLE)?` over a static table of `rt::DynamicResourceRow` (the accessor of the property,
+  shared in the function, the key, the position), as the runs of template bindings are
+  (`rt::bind_template_bindings`). The rows are bound in order with the same function, the property
+  read before each, and the first failure is the error. A dynamic resource alone keeps its call.
+- **The value of `{StaticResource key}` for a registered property** in the body of deferred
+  content written as native code (2026-11-19, #568): the extension created with the key,
+  `rt::provide_value_invoked` with `rt::property_value(property)` and the provided value held as
+  the value of a node are `let value = rt::static_resource_value(&context, property, key, line,
+  position)?;`; the assignment that follows (the setter chosen at run time,
+  `rt::assign_resource_value`) stays. The pass runs after the shapes of the row tables and of the
+  control themes were read, so they read the statements as they were.
 - **The description of `Setter.Value`** as the provide-value target property is `rt::setter_value_property()`. `rt::clr_property_info` keeps one description per declared property and thread, created on first use, as upstream keeps one per property in a static field of the generated helper type of the assembly (`XamlIlClrPropertyInfoEmitter`, `<Type>.<Name>!Field`). The interpreter creates one per evaluation; nothing compares descriptions by identity.
 - **The document of a context**: each document has `static <FUNCTION>_DOCUMENT: rt::DocumentInfo` with its base URI and its XML namespace table; `rt::populate_context` and `rt::deferred_context` take a reference to it.
 - **Split functions**: a build or populate function with more than 1,024 top-level statements is split into functions `<function>_part_<n>` of at most 256 statements each, called in place, with the locals of the function that a part uses passed to it as cloned handles, in the order the part first names them (the output does not depend on hashing; the drift tests compare it byte for byte). A part never declares a local a later statement uses; a statement that names a local whose Rust type the emitter does not state (the `let` of an object created with its default constructor, a `let` with a type, `context`, `name_scope`, `root`) stays in the function. The statements run in the same order with the same errors; a local of a part is dropped when the part returns instead of at the end of the function, which reference counting only observes as an earlier decrement of a handle that the object tree still holds (upstream has no deterministic destruction to compare with). Only the populate function of the Fluent theme is that large.
@@ -1513,7 +1549,7 @@ Written without a build (the validating session builds it; HANDOVER.md section 1
 | functions | `impl X { fn .. }`, `ferro_routed_event!` in an `impl` block | `Scan::functions`: owner, name, visibility, receiver, parameter and return types as written (for 9.5.3 form B and for the handlers of 9.4.4) |
 | public paths | `mod`, `pub use` (names, lists, globs), `pub` items | the shortest public path of each item, by the rule of `scripts/rust_paths.py`; the entries of `ferro_rust_paths!` are compared with it (`FRN9024` where they differ) |
 
-*Type text (9.5.2, step 1).* A path is resolved against the items of the module, its `use` items (an explicit import before a glob) and the glob imports of modules of the crate, followed through re-exports to the module that declares the item, and written absolute (`::ferroui_controls::border::Border`). A path into another crate is absolute as the `use` item spells it; it is not followed to the declaring module, which needs that crate's model. Primitive types and `String`, `Option`, `Vec`, `Box`, `Result` stay as they are. Not resolved, and kept as written with a `FRN9020` warning: a name that nothing of the module declares or imports (in a file with a glob import of another crate every such name may come from the glob), and a path whose unknown head is not the name of a crate.
+*Type text (9.5.2, step 1).* A path is resolved against the items of the module, its `use` items (an explicit import before a glob) and the glob imports of modules of the crate, followed through re-exports to the module that declares the item, and written absolute (`::ferroui_controls::border::Border`). Among the glob imports of a module, the one whose module declares the name wins over one that brings it only as the path of an import taken as written (a module with `use crate::Name;` that the root imports with `pub use module::*`, where `Name` is declared in a module a later glob imports). A path into another crate is absolute as the `use` item spells it; it is not followed to the declaring module, which needs that crate's model. Primitive types and `String`, `Option`, `Vec`, `Box`, `Result` stay as they are. Not resolved, and kept as written with a `FRN9020` warning: a name that nothing of the module declares or imports (in a file with a glob import of another crate every such name may come from the glob), and a path whose unknown head is not the name of a crate.
 
 *Macros of the crate.* The scanner does not expand macros, with one exception: an invocation of a `macro_rules!` macro the crate defines, whose rule takes only identifiers, types, a visibility, literals and attributes, is expanded by substitution, and the types (`pub struct $name`) and declaration macros at the top level of the expansion are read. `ferro_transition_class!` and `ferro_markup_list!` have that form. A macro of the crate that declares through a declaration macro and is not expanded (a repetition in its rule) is a `FRN9012` warning. (Since 9.5.16: a macro another crate exports is expanded the same way, with the rules the model of that crate has; and a rule that repeats is expanded for what a function registers with the untyped value conversions.)
 
@@ -2548,7 +2584,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `FerroXamlIlContextNameScopeField` | `FerroNameScopeField` filled from the parent provider | `ctx.name_scope()` (field of `XamlIlContext`, filled in `new`) | — |
 | `FerroXamlIlContextEagerParentStackProvider` | `IFerroXamlIlEagerParentStackProvider` on the context | implemented by `XamlIlContext` | — |
 | `XamlIlSelectorInitialNode` | `None` | `None` | — |
-| `XamlIlTypeSelector` | `Selectors::of_type_info` / `is_type_info` | same calls with `T::TYPE` | — |
+| `XamlIlTypeSelector` | `Selectors::of_type_info` / `is_type_info` | `Selectors::of_type_identity` / `is_type_identity` with `<T as ObjectType>::IDENTITY`: the selector does not keep the class (`docs/binary-size.md`, 4.20) | — |
 | `XamlIlStringSelector` | `Selectors::class` / `name` | same | — |
 | `XamlIlCombinatorSelector` | `Selectors::child` / `descendant` / `template` | same | — |
 | `XamlIlNotSelector` | `Selectors::not(previous, argument)` | same | null argument is a build error |
