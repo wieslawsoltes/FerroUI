@@ -43,9 +43,8 @@ windows-sys = { workspace = true, features = [
 [target.'cfg(target_os = "android")'.dependencies]
 ferroui-android.workspace = true
 
-# Without its default features: the application chooses the render backend.
 [target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
-ferroui-browser = { workspace = true, default-features = false }
+ferroui-browser.workspace = true
 wasm-bindgen.workspace = true
 
 [build-dependencies]
