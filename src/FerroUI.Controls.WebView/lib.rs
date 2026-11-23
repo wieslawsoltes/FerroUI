@@ -28,6 +28,20 @@ pub use web_view2::WebView2;
 
 // Shared by the registration at run time and the scanner of the build-time XAML metadata.
 const NAMESPACES: &[(&str, &str)] = &[("ferroui_controls_webview", "FerroUI.Controls.WebView")];
+pub static ASSEMBLY: ferroui_base::metadata::MarkupAssembly = ferroui_base::metadata::MarkupAssembly {
+    name: "FerroUI.Controls.WebView",
+    crate_name: "ferroui_controls_webview",
+    xmlns_definitions: &[ferroui_base::metadata::XmlnsDefinition {
+        xml_namespace: ferroui_base::metadata::FERRO_XML_NAMESPACE,
+        namespace: "FerroUI.Controls.WebView",
+    }],
+    xmlns_prefixes: &[],
+    metadata: &[],
+};
+ferroui_base::ferro_rust_paths! {
+    classes: [crate::WebView2],
+    types: [], contracts: [], generics: [], generic_contracts: [],
+}
 const TYPES: &[&ferroui_base::TypeInfo] = &[WebView2::TYPE];
 
 /// Registers the namespace and the table of types of this crate and of the crates it is built
@@ -37,6 +51,8 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_controls::register_types();
         ferroui_base::TypeInfo::register_namespaces(NAMESPACES);
+        ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
+        register_rust_paths();
         ferroui_base::TypeInfo::register_table(TYPES);
     });
 }
