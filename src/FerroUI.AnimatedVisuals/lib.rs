@@ -11,6 +11,7 @@ mod path;
 mod playback;
 mod player;
 mod register_types;
+mod ring;
 #[cfg(test)]
 mod render;
 mod scene;
@@ -27,7 +28,7 @@ pub use icons::{
 pub use model::{AnimatedVisual, AnimatedVisualError, MatteMode, Marker};
 pub use path::{PathCommand, PathData};
 pub use playback::AnimatedIconAnimationQueueBehavior;
-pub use player::{AnimatedIcon, AnimatedVisualPlayer, PlayCompletion};
+pub use player::{AnimatedIcon, AnimatedIconSource, AnimatedVisualPlayer, PlayCompletion};
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(test)]
 pub(crate) use render::VisualRenderer;

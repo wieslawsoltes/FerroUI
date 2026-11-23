@@ -6,13 +6,15 @@
 WinUI ships these icons as generated C++ that builds a composition tree. The tree has few kinds of
 node, so each file is read back into that tree and written as a document the animated-visual
 runtime plays. A colour bound to the theme keeps its binding as `{color:Foreground}` in the name of
-the paint. A key whose value is a Bezier expression is sampled, four times per frame.
+the paint. The two documents of `ProgressRing` are written from the values of its generated
+sources. A key whose value is a Bezier expression is sampled, four times per frame.
 """
 import json
 import math
 import pathlib
 import re
 import sys
+import types
 
 FLOAT = r"-?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?F"
 SAMPLES_PER_FRAME = 4
@@ -513,6 +515,71 @@ def convert(path):
     }
 
 
+def ring_keys(frames, keys):
+    """Lottie keys from key frames of the generated ring: (progress, value, easing to it)."""
+    source = types.SimpleNamespace(frames=frames, parameters={}, name="ProgressRing")
+    return Animation(source, keys, keys[0][1])
+
+
+LINEAR_BEZIER = (0.166999996, 0.166999996, 0.833000004, 0.833000004)
+
+
+def ring_stroke(color, opacity, cap):
+    return {"ty": "st", "nm": f"{{color:{color}}}", "c": FOREGROUND, "o": opacity, "w": constant(1.5), "lc": cap, "lj": 1, "ml": 4.0}
+
+
+def ring_item(radius, trim, stroke, transform_part):
+    items = [{"ty": "el", "p": constant((0.0, 0.0)), "s": constant((radius * 2, radius * 2))}]
+    if trim:
+        items.append({"ty": "tm", "s": trim[0], "e": trim[1], "o": constant(0.0), "m": 1})
+    items.append(stroke)
+    items.append({"ty": "tr", **transform_part})
+    return {"ty": "gr", "it": items}
+
+
+def ring_transform(x, scale, rotation):
+    return {"a": constant((0.0, 0.0)), "p": constant((x, x)), "s": constant((scale, scale)), "r": constant(rotation)}
+
+
+def ring_document(size, frames, shapes):
+    layer = {"ty": 4, "ind": 1, "ip": 0, "op": frames + 1, "st": 0, "ks": {"o": constant(100.0)}, "shapes": shapes}
+    return {"v": "5.7.0", "fr": 60.0, "ip": 0, "op": frames, "w": size, "h": size, "assets": [], "layers": [layer], "markers": []}
+
+
+def progress_ring_indeterminate():
+    """`ProgressRingIndeterminate.cpp`: the track, and an arc that grows, turns and shrinks."""
+    frames = 120.0
+    show = ring_keys(frames, [(0.0, 0.0, "hold"), (0.5, 1.0, "hold")]).lottie(100.0)
+    hide = ring_keys(frames, [(0.0, 1.0, "hold"), (0.5, 0.0, "hold")]).lottie(100.0)
+    start = ring_keys(frames, [(0.0, 0.0, "step"), (0.5, 0.0, "hold"), (1.0, 0.5, LINEAR_BEZIER)]).lottie(100.0)
+    end = ring_keys(frames, [(0.0, 0.0001, "hold"), (0.5, 0.5, LINEAR_BEZIER)]).lottie(100.0)
+    turn = ring_keys(frames, [(0.0, 0.0, "hold"), (0.5, 450.0, LINEAR_BEZIER), (1.0, 900.0, LINEAR_BEZIER)]).lottie()
+    plain = {"a": constant((0.0, 0.0)), "p": constant((0.0, 0.0)), "s": constant((100.0, 100.0)), "r": constant(0.0)}
+    second = ring_item(7.0, (start, constant(0.5, 100.0)), ring_stroke("Foreground", show, 2), plain)
+    third = ring_item(7.0, (constant(0.0), end), ring_stroke("Foreground", hide, 2), plain)
+    arc = {"ty": "gr", "it": [third, second, {"ty": "tr", "a": constant((0.0, 0.0)), "p": constant((40.0, 40.0)), "s": constant((500.0, 500.0)), "r": turn}]}
+    track = ring_item(7.0, None, ring_stroke("Background", constant(100.0), 1), ring_transform(40.0, 500.0, 0.0))
+    return ring_document(80.0, frames, [arc, track])
+
+
+def progress_ring_determinate():
+    """`ProgressRingDeterminate.cpp`: the track, and an arc that ends at the progress."""
+    frames = 120.0
+    first = 0.00833333377
+    tilt = -0.008387561908827789
+    end = ring_keys(frames, [
+        (0.0, 0.0001, "step"), (first, 0.0001, "hold"), (0.25, 0.25, LINEAR_BEZIER), (0.5, 0.5, LINEAR_BEZIER),
+        (0.75, 0.75, LINEAR_BEZIER), (0.983333349, 0.96666666, LINEAR_BEZIER), (0.991666675, 1.0, LINEAR_BEZIER),
+    ]).lottie(100.0)
+    shown = ring_keys(frames, [(0.0, 0.0, "hold"), (first, 1.0, "hold")]).lottie(100.0)
+    scale = {"a": 1, "k": [{"t": key["t"], "s": [key["s"][0], key["s"][0]], "h": 1} for key in shown["k"]]}
+    part = ring_transform(16.0, 177.0, tilt)
+    arc = ring_item(8.0, (constant(0.0), end), ring_stroke("Foreground", constant(100.0), 2), part)
+    group = {"ty": "gr", "it": [arc, {"ty": "tr", "a": constant((0.0, 0.0)), "p": constant((0.0, 0.0)), "s": scale, "r": constant(0.0)}]}
+    track = ring_item(8.0, None, ring_stroke("Background", constant(100.0), 1), part)
+    return ring_document(32.0, frames, [group, track])
+
+
 def main():
     folder, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
     out.mkdir(parents=True, exist_ok=True)
@@ -521,6 +588,10 @@ def main():
         target = out / (path.stem.removeprefix("Animated").removesuffix("VisualSource") + ".json")
         target.write_text(json.dumps(document, separators=(",", ":")) + "\n", encoding="utf-8")
         print(target.name, target.stat().st_size, "bytes", len(document["layers"]), "layers", len(document["markers"]), "markers")
+    for name, document in (("ProgressRingIndeterminate", progress_ring_indeterminate()), ("ProgressRingDeterminate", progress_ring_determinate())):
+        target = out / f"{name}.json"
+        target.write_text(json.dumps(document, separators=(",", ":")) + "\n", encoding="utf-8")
+        print(target.name, target.stat().st_size, "bytes")
 
 
 if __name__ == "__main__":

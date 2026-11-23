@@ -136,6 +136,59 @@ fn the_foreground_of_an_icon_reaches_its_renderer() {
     icon.set_foreground(None);
 }
 
+#[test]
+fn an_icon_source_makes_an_icon_with_its_values_and_follows_them() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = crate::AnimatedIconSource::new();
+    let visual = self::source(DOCUMENT);
+    source.set_source(Some(visual.clone()));
+    source.set_mirrored_when_right_to_left(true);
+    let element = source.create_icon_element().expect("an icon");
+    let icon = element.cast::<AnimatedIcon>().expect("an animated icon");
+    assert!(icon.source().is_some_and(|shown| shown.ptr_eq(&visual)));
+    assert!(icon.mirrored_when_right_to_left());
+    source.set_mirrored_when_right_to_left(false);
+    assert!(!icon.mirrored_when_right_to_left());
+}
+
+#[test]
+fn an_icon_in_a_check_box_a_button_or_a_navigation_item_takes_their_states() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let icon = AnimatedIcon::new();
+    let check = ferroui_controls::CheckBox::new();
+    check.set_is_checked(Some(true));
+    check.set_content(Some(Control::boxed(&icon)));
+    let _window = attach(check.clone().upcast());
+    assert_eq!(AnimatedIcon::get_state(&icon).as_deref(), Some("NormalOn"));
+
+    let icon = AnimatedIcon::new();
+    let back = Button::new();
+    back.set_content(Some(Control::boxed(&icon)));
+    let _window = attach(back.clone().upcast());
+    assert_eq!(AnimatedIcon::get_state(&icon).as_deref(), Some("Normal"));
+
+    let icon = AnimatedIcon::new();
+    let item = NavigationViewItem::new();
+    let child = icon.clone();
+    item.set_template(Some(ferroui_controls::templates::FuncControlTemplate::new(move |_, _| {
+        let border = ferroui_controls::Border::new();
+        border.set_child(Some(child.clone().upcast()));
+        border.upcast()
+    })));
+    let _window = attach(item.clone().upcast());
+    assert_eq!(AnimatedIcon::get_state(&icon).as_deref(), Some("Normal"));
+}
+
+#[test]
+fn the_names_of_the_states_are_those_of_the_winui_templates() {
+    assert_eq!(state_name(false, false, None), "Normal");
+    assert_eq!(state_name(false, true, None), "PointerOver");
+    assert_eq!(state_name(true, true, None), "Pressed");
+    assert_eq!(state_name(false, true, Some(Some(false))), "PointerOverOff");
+    assert_eq!(state_name(true, false, Some(Some(true))), "PressedOn");
+    assert_eq!(state_name(false, false, Some(None)), "NormalIndeterminate");
+}
+
 /// The pages of the gallery, read by the runtime loader: the classes of this crate in markup.
 #[test]
 fn the_gallery_pages_load_with_the_classes_of_this_crate() {

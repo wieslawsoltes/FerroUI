@@ -17,7 +17,10 @@ use ferroui_base::{
 };
 use ferroui_controls::automation::peers::{AutomationPeer, ImageAutomationPeer};
 use ferroui_controls::primitives::{TemplatedControl, TemplatedControlImpl, ToggleButton};
-use ferroui_controls::{Button, ComboBox, Control, ControlImpl, ControlImplExt, IconElement, IconSource, NavigationViewItem};
+use ferroui_controls::{
+    Button, ComboBox, Control, ControlImpl, ControlImplExt, IconElement, IconSource, IconSourceImpl, IconSourceImplExt,
+    NavigationViewItem,
+};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
@@ -749,14 +752,20 @@ impl ControlImpl for AnimatedIcon {
 fn state_of(owner: &Control) -> String {
     let classes = owner.classes();
     let pressed = owner.downcast_ref::<Button>().map_or_else(|| classes.contains(":pressed"), Button::is_pressed);
+    let toggle = owner.downcast_ref::<ToggleButton>().map(ToggleButton::is_checked);
+    state_name(pressed, owner.is_pointer_over(), toggle)
+}
+
+/// The name of a state: the interaction, then `On`, `Off` or `Indeterminate` for a toggle.
+fn state_name(pressed: bool, pointer_over: bool, toggle: Option<Option<bool>>) -> String {
     let interaction = if pressed {
         "Pressed"
-    } else if owner.is_pointer_over() {
+    } else if pointer_over {
         "PointerOver"
     } else {
         "Normal"
     };
-    match owner.downcast_ref::<ToggleButton>().map(ToggleButton::is_checked) {
+    match toggle {
         Some(Some(true)) => format!("{interaction}On"),
         Some(Some(false)) => format!("{interaction}Off"),
         Some(None) => format!("{interaction}Indeterminate"),
@@ -1056,6 +1065,82 @@ impl AnimatedIcon {
         if let Some(timer) = timer {
             timer.stop();
         }
+    }
+}
+
+/// The description of an [`AnimatedIcon`] (`AnimatedIconSource`), for what takes an icon source.
+#[repr(C)]
+pub struct AnimatedIconSource {
+    base: IconSource,
+}
+
+ferro_class!(AnimatedIconSource: IconSource);
+ferroui_base::ferro_class_info!(AnimatedIconSource {
+    new: AnimatedIconSource::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals", content: Source },
+});
+ferro_impl_classes!(AnimatedIconSource: FerroObjectImpl);
+
+ferro_properties! {
+    impl AnimatedIconSource {
+        pub fn source_property() -> StyledProperty<Option<Ref<AnimatedVisualSource>>> {
+            FerroProperty::register::<Self, _>("Source", None)
+        }
+        pub fn fallback_icon_source_property() -> StyledProperty<Option<Ref<IconSource>>> {
+            FerroProperty::register::<Self, _>("FallbackIconSource", None)
+        }
+        pub fn mirrored_when_right_to_left_property() -> StyledProperty<bool> {
+            FerroProperty::register::<Self, _>("MirroredWhenRightToLeft", false)
+        }
+    }
+}
+
+impl IconSourceImpl for AnimatedIconSource {
+    fn create_icon_element_core(this: &Self) -> Option<Ref<IconElement>> {
+        let icon = AnimatedIcon::new();
+        icon.set_source(this.source());
+        icon.set_fallback_icon_source(this.fallback_icon_source());
+        icon.set_mirrored_when_right_to_left(this.mirrored_when_right_to_left());
+        Some(icon.upcast())
+    }
+
+    fn get_icon_element_property_core(this: &Self, property: &'static FerroProperty) -> Option<&'static FerroProperty> {
+        if property == Self::source_property().as_property() {
+            Some(AnimatedIcon::source_property().as_property())
+        } else if property == Self::fallback_icon_source_property().as_property() {
+            Some(AnimatedIcon::fallback_icon_source_property().as_property())
+        } else if property == Self::mirrored_when_right_to_left_property().as_property() {
+            Some(AnimatedIcon::mirrored_when_right_to_left_property().as_property())
+        } else {
+            Self::parent_get_icon_element_property_core(this, property)
+        }
+    }
+}
+
+impl AnimatedIconSource {
+    pub fn construct() -> Self {
+        Self { base: IconSource::construct() }
+    }
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+    pub fn source(&self) -> Option<Ref<AnimatedVisualSource>> {
+        self.get_value(Self::source_property())
+    }
+    pub fn set_source(&self, value: Option<Ref<AnimatedVisualSource>>) {
+        self.set_value(Self::source_property(), value);
+    }
+    pub fn fallback_icon_source(&self) -> Option<Ref<IconSource>> {
+        self.get_value(Self::fallback_icon_source_property())
+    }
+    pub fn set_fallback_icon_source(&self, value: Option<Ref<IconSource>>) {
+        self.set_value(Self::fallback_icon_source_property(), value);
+    }
+    pub fn mirrored_when_right_to_left(&self) -> bool {
+        self.get_value(Self::mirrored_when_right_to_left_property())
+    }
+    pub fn set_mirrored_when_right_to_left(&self, value: bool) {
+        self.set_value(Self::mirrored_when_right_to_left_property(), value);
     }
 }
 

@@ -80,6 +80,8 @@ pub struct ProgressRing {
     animation_target: Cell<f64>,
     displayed_progress: Cell<f64>,
     indeterminate_phase: Cell<f64>,
+    /// An animated visual shows the ring: the arc of the template stays still.
+    shown_by_visual: Cell<bool>,
 }
 
 ferro_class!(ProgressRing: TemplatedControl);
@@ -244,6 +246,7 @@ impl ProgressRing {
             animation_target: Cell::new(0.0),
             displayed_progress: Cell::new(0.0),
             indeterminate_phase: Cell::new(0.0),
+            shown_by_visual: Cell::new(false),
         }
     }
 
@@ -400,6 +403,7 @@ impl ProgressRing {
         self.attached.get()
             && self.is_active()
             && self.is_effectively_visible()
+            && !self.shown_by_visual.get()
             && self.indicator.borrow().is_some()
             && (self.is_indeterminate() || self.displayed_progress.get() < self.animation_target.get())
     }
@@ -475,6 +479,13 @@ impl ProgressRing {
             }
         }
         self.update_geometry();
+    }
+
+    /// Tells the ring that an animated visual shows it in place of the arc of its template: the
+    /// ring stops moving the arc (`ferroui-animated-visuals` plays the visual WinUI ships).
+    pub fn set_shown_by_visual(&self, value: bool) {
+        self.shown_by_visual.set(value);
+        self.update_animation();
     }
 
     /// The angles of the arc of the template, from the state of the compositions. Only the
