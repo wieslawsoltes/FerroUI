@@ -554,6 +554,10 @@ The opt-in threaded build (`setup.sh --threads`, `build-browser.sh <application>
 
 Rules that keep the boundary sound (section 5): imports by `raw_module = "./ferroui.js"` with `js_namespace`/`js_name`, typed getters on `extern` types, flat exports `<Class>_<Method>` listed in `ferroExports.ts` (every name on both sides), no `js-sys`/`web-sys`/closures, synchronous answers. Before building for a new target or feature set run `cargo tree -e features` on `ferroui-skia`: an unpublished Skia feature combination silently starts a source build.
 
+### Debug a browser build
+
+Use `scripts/build-browser.sh <application> --debug-symbols` to build in Cargo's development profile and retain DWARF in the app's WebAssembly file. The selected binary or example gets full debug information. Its dependencies use the existing development build. Serve the site and attach VS Code with Microsoft's WebAssembly DWARF Debugging extension installed. The same option is available as `build.debugSymbols` in a managed FerroUI browser profile. [Run and Debug Browser App](../designer/vscode/runtime.md#debug-rust-code-in-a-browser-app) · [Emscripten debug symbols](https://emscripten.org/docs/porting/Debugging.html)
+
 ### Remaining stages
 
 | Stage | Upstream files | What is known |

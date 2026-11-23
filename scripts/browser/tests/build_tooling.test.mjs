@@ -527,18 +527,27 @@ if (args[0] === "metadata") {
         CARGO_TARGET_DIR: path.join(root, "target") };
     const alias = path.join(root, "checkout-alias");
     fs.symlinkSync(root, alias);
-    const selection = workspace => {
-        const result = spawnSync("bash", [script, "live_inspector", "--debug"], {
+    const selection = (workspace, mode = "--debug") => {
+        const result = spawnSync("bash", [script, "live_inspector", mode], {
             env: { ...env, FERROUI_BROWSER_WORKSPACE: workspace }, encoding: "utf8",
         });
         assert.equal(result.status, 23, result.stderr + result.stdout);
         return JSON.parse(result.stderr.trim());
     };
     const target = flags => flags.slice(flags.indexOf("-p"), flags.indexOf("-p") + 4);
-    assert.deepEqual(target(selection(standalone)), ["-p", "live_inspector", "--bin", "live_inspector"]);
+    const standaloneBuild = selection(standalone);
+    assert.equal(standaloneBuild[0], "build");
+    assert.deepEqual(target(standaloneBuild), ["-p", "live_inspector", "--bin", "live_inspector"]);
     const example = selection(alias);
     assert.deepEqual(target(example), ["-p", "ferroui-browser", "--example", "live_inspector"]);
     assert.ok(!example.includes("--config"));
+    for (const [workspace, ordinary] of [[standalone, standaloneBuild], [alias, example]]) {
+        const symbols = selection(workspace, "--debug-symbols");
+        assert.equal(symbols[0], "rustc");
+        assert.deepEqual(target(symbols), target(ordinary));
+        assert.deepEqual(symbols.slice(-5), ["--message-format=json-render-diagnostics",
+            "--", "-Cdebuginfo=2", "-Cstrip=none", "-Clink-arg=-g3"]);
+    }
 });
 
 test("directory symlink cycles are rejected instead of reusing incomplete input coverage", t => {

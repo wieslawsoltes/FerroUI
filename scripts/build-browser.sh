@@ -1,7 +1,7 @@
 #!/bin/bash
 # Builds a browser application and assembles its site.
 #
-#   scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both]
+#   scripts/build-browser.sh <application> [--debug | --debug-symbols] [--out <directory>] [--threads | --both]
 #                            [--features <list>] [--webapp-prebuilt | --reuse-webapp]
 #                            [--editor-messages <file>]
 #
@@ -35,6 +35,7 @@
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
+# --debug-symbols also uses `dev` and retains DWARF for the browser debugger.
 #
 # --features <list> turns on features of the package that is built (cargo's --features): `vello`
 # adds the Vello render backend to the module beside Skia (the feature of the browser crate for its
@@ -89,9 +90,11 @@ FEATURES=""
 WEBAPP_PREBUILT=""
 REUSE_WEBAPP=""
 EDITOR_MESSAGES=""
+DEBUG_SYMBOLS=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --debug) PROFILE="debug";;
+    --debug-symbols) PROFILE="debug"; DEBUG_SYMBOLS="1";;
     --out) shift; OUT="$1";;
     --threads) THREADS="1";;
     --both) BOTH="1";;
@@ -105,7 +108,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 if [ -z "$APPLICATION" ]; then
-  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both] [--features <list>] [--webapp-prebuilt | --reuse-webapp] [--editor-messages <file>]" >&2
+  echo "usage: scripts/build-browser.sh <application> [--debug | --debug-symbols] [--out <directory>] [--threads | --both] [--features <list>] [--webapp-prebuilt | --reuse-webapp] [--editor-messages <file>]" >&2
   exit 2
 fi
 case "$FEATURES" in
@@ -154,7 +157,8 @@ if [ -n "$BOTH" ]; then
     # validation gates. A present receipt is always verified again by the child before reuse.
     if [ -f "$CRATE/dist/.ferroui-validated-webapp.json" ]; then MODE+=(--webapp-prebuilt); fi
   fi
-  [ "$PROFILE" = "debug" ] && MODE+=(--debug)
+  if [ -n "$DEBUG_SYMBOLS" ]; then MODE+=(--debug-symbols)
+  elif [ "$PROFILE" = "debug" ]; then MODE+=(--debug); fi
   [ -n "$FEATURES" ] && MODE+=(--features "$FEATURES")
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"}
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"} --threads
@@ -301,7 +305,7 @@ fi
 echo "== script module"
 prepare_webapp
 
-echo "== WebAssembly module ($PROFILE${THREADS:+, threads})"
+echo "== WebAssembly module ($PROFILE${THREADS:+, threads}${DEBUG_SYMBOLS:+, DWARF})"
 FLAGS=()
 [ "$PROFILE" = "browser" ] && FLAGS+=(--profile browser)
 [ -n "$FEATURES" ] && FLAGS+=(--features "$FEATURES")
@@ -346,10 +350,18 @@ if [ "$WORKSPACE_REAL" != "$ROOT_REAL" ] \
     && ! grep -qsF "${ROOT_REAL#"$WORKSPACE_REAL"/}/.cargo/config.toml" "$WORKSPACE/.cargo/config.toml"; then
   FLAGS+=(--config "$ROOT/.cargo/config.toml")
 fi
+# Pass the flags through Cargo so a cached ordinary build cannot satisfy a DWARF build.
+# cargo rustc applies them only to the selected binary or example, reusing its dependencies.
+CARGO_COMMAND=build
+RUSTC_FLAGS=()
+if [ -n "$DEBUG_SYMBOLS" ]; then
+  CARGO_COMMAND=rustc
+  RUSTC_FLAGS+=(-- -Cdebuginfo=2 -Cstrip=none -Clink-arg=-g3)
+fi
 # Bash 3 (the macOS system shell) treats an empty array as unset under -u.
 STATUS=0
-(cd "$WORKSPACE" && cargo build --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" ${FLAGS[@]+"${FLAGS[@]}"} \
-  --message-format=json-render-diagnostics > "$MESSAGES") || STATUS=$?
+(cd "$WORKSPACE" && cargo "$CARGO_COMMAND" --locked --target wasm32-unknown-emscripten "${CARGO_SELECTION[@]}" ${FLAGS[@]+"${FLAGS[@]}"} \
+  --message-format=json-render-diagnostics ${RUSTC_FLAGS[@]+"${RUSTC_FLAGS[@]}"} > "$MESSAGES") || STATUS=$?
 if [ -n "$EDITOR_MESSAGES" ]; then
   cp -- "$MESSAGES" "$EDITOR_MESSAGES"
   node -e 'for (const line of require("fs").readFileSync(process.argv[1], "utf8").split("\n")) {

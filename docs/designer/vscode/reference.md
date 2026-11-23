@@ -294,7 +294,7 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 
 1. Call `ferroui_browser_run` with the profile and `debug: true`. The managed Chromium session reports `browser.debuggable`. VS Code attaches its JavaScript Debug adapter after the first accepted frame.
 2. Read `ferroui_app_sessions` before attaching again. Call `ferroui_browser_debug` with the same `runtime` and the accepted `generation` as `expected_generation`. The tool uses the profile's owned Chromium instance and selects the current page.
-3. For development profiles, keep the debugger active through a save or call `ferroui_browser_rebuild`. FerroUI reattaches after a successful replacement frame. Start or stop the app using the exact browser session ID. [Debug browser host scripts](runtime.md#debug-browser-host-scripts)
+3. For development profiles, keep the debugger active through a save or call `ferroui_browser_rebuild`. FerroUI reattaches after a successful replacement frame. Start or stop the app using the exact browser session ID. For Rust breakpoints, enable the profile's `build.debugSymbols` and install the WebAssembly debugger on the workspace host. [Debug browser host scripts](runtime.md#debug-browser-host-scripts) · [Debug Rust code in the browser](runtime.md#debug-rust-code-in-a-browser-app)
 
 ### Control the Live App editor with MCP
 

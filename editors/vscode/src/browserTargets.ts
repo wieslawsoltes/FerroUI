@@ -16,6 +16,7 @@ export interface BrowserBuildProfile {
     manifestPath: string;
     features: string[];
     threads: boolean;
+    debugSymbols: boolean;
 }
 
 export interface ServedBrowserApp extends BrowserProfile {
@@ -96,12 +97,13 @@ function appProfile(value: unknown, folder: vscode.WorkspaceFolder): BrowserApp 
 
 function buildProfile(value: unknown): BrowserBuildProfile | undefined {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return;
-    const { application, toolchain = '.', manifestPath = 'Cargo.toml', features = [], threads = false } = value as Record<string, unknown>;
+    const { application, toolchain = '.', manifestPath = 'Cargo.toml', features = [], threads = false,
+        debugSymbols = false } = value as Record<string, unknown>;
     if (typeof application !== 'string' || !/^[A-Za-z0-9_][A-Za-z0-9_-]{0,95}$/.test(application)
-        || !location(toolchain) || !location(manifestPath) || typeof threads !== 'boolean'
+        || !location(toolchain) || !location(manifestPath) || typeof threads !== 'boolean' || typeof debugSymbols !== 'boolean'
         || !Array.isArray(features) || features.length > 64
         || !features.every((feature): feature is string => typeof feature === 'string' && /^[A-Za-z0-9_-]{1,96}$/.test(feature))) return;
-    return { application, toolchain, manifestPath, features: [...new Set(features)].sort(), threads };
+    return { application, toolchain, manifestPath, features: [...new Set(features)].sort(), threads, debugSymbols };
 }
 
 function location(value: unknown): value is string {

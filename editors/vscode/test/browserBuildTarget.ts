@@ -31,7 +31,7 @@ export async function verifyBrowserBuildTarget(workspace: vscode.Uri): Promise<v
     }
     const build = (manifest: string): BrowserBuildProfile => ({
         application: 'live_inspector', toolchain: vscode.Uri.joinPath(fixture, 'toolkit').fsPath,
-        manifestPath: vscode.Uri.joinPath(fixture, manifest).fsPath, features: [], threads: false,
+        manifestPath: vscode.Uri.joinPath(fixture, manifest).fsPath, features: [], threads: false, debugSymbols: false,
     });
     const resolve = (manifest: string) => resolveBrowserBuild({
         id: 'live-inspector', folder: workspace.toString(), label: 'Live Inspector', width: 960, height: 620,

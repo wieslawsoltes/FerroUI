@@ -307,9 +307,19 @@ For a separate app repository, set `build.toolchain` to the FerroUI checkout tha
 3. Save a source change. The current debugger remains attached while Cargo builds and Chromium starts the candidate. When the replacement presents its first frame, FerroUI attaches the debugger to that exact page and maps its `wwwroot` URLs back to the workspace. Existing breakpoints follow the source.
 4. Use **Stop Debugging** to end the debugger connection and keep Live App running. Choose **Attach Debugger to This App** from the session's context menu to attach again. **Stop or Disconnect This App** closes the managed browser and its debug listener.
 
-The same Run and Debug command can launch a served profile. It uses the workspace folder as the JavaScript source root. For an independently started Chromium profile, use VS Code's standard Chrome attach configuration. Rust source breakpoints require a Wasm build with DWARF and the WebAssembly DWARF Debugging extension. [VS Code browser debugging](https://code.visualstudio.com/docs/nodejs/browser-debugging) · [Emscripten debug symbols](https://emscripten.org/docs/porting/Debugging.html) · [Browser debugger MCP tools](reference.md#debug-a-browser-app-with-mcp)
+The same Run and Debug command can launch a served profile. It uses the workspace folder as the JavaScript source root. For an independently started Chromium profile, use VS Code's standard Chrome attach configuration. [VS Code browser debugging](https://code.visualstudio.com/docs/nodejs/browser-debugging) · [Browser debugger MCP tools](reference.md#debug-a-browser-app-with-mcp)
 
 ![VS Code paused at a JavaScript breakpoint in the workspace while Live App shows the accepted Chromium replacement and its visual tree](../images/vscode-browser-debugger.png)
+
+### Debug Rust code in a browser app
+
+1. Install Microsoft's **WebAssembly DWARF Debugging** extension on the workspace host. In the managed browser profile, set `"debugSymbols": true` inside `build`.
+2. Set a breakpoint in your app's Rust source. Choose **Run and Debug Browser App**, then use **Live App → Interact** to exercise the handler after the first frame appears. VS Code's debugger attaches after that frame.
+3. Save a change and wait for the new frame. FerroUI reattaches to the accepted replacement page. Trigger the handler again to reach the existing breakpoint. Use **Continue** to resume the program.
+
+The build keeps DWARF in the development WebAssembly file. The selected target is compiled with full debug information. Dependencies follow their Cargo development profile. To debug an independently built site, use `scripts/build-browser.sh <application> --debug-symbols` and open the output through a served profile.
+
+Use **Call Stack** to inspect Rust source locations. The adapter's Rust variable and expression support is limited. If the Variables view reports an error, use the Live App properties to inspect the running UI after resuming. [VS Code WebAssembly debugger](https://github.com/microsoft/vscode-dwarf-debugging-ext) · [Browser toolchain and debug symbols](../../porting/browser-platform.md#debug-a-browser-build)
 
 ## Inspect the actual window in Live App
 

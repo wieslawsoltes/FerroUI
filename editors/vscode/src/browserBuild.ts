@@ -64,8 +64,9 @@ async function assemble(target: BrowserBuildTarget, app: DevelopmentBrowserApp, 
     const messages = path.join(directory, 'cargo.jsonl');
     const dispose = () => rm(directory, { recursive: true, force: true, maxRetries: 3 });
     try {
-        const { application, features, threads } = app.build;
-        const args = [target.script, application, '--debug', '--out', site, '--reuse-webapp', '--editor-messages', messages];
+        const { application, features, threads, debugSymbols } = app.build;
+        const args = [target.script, application, debugSymbols ? '--debug-symbols' : '--debug',
+            '--out', site, '--reuse-webapp', '--editor-messages', messages];
         if (features.length) args.push('--features', features.join(','));
         if (threads) args.push('--threads');
         signal.throwIfAborted();

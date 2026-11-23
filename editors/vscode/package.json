@@ -1649,7 +1649,8 @@
                   "toolchain": { "type": "string", "description": "Path to the FerroUI checkout that contains scripts/build-browser.sh. Defaults to the profile's workspace folder." },
                   "manifestPath": { "type": "string", "description": "Cargo manifest for the app's workspace. Defaults to Cargo.toml in the profile's workspace folder." },
                   "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features for the selected browser target." },
-                  "threads": { "type": "boolean", "default": false, "description": "Use the installed threaded browser toolchain and cross-origin isolation." }
+                  "threads": { "type": "boolean", "default": false, "description": "Use the installed threaded browser toolchain and cross-origin isolation." },
+                  "debugSymbols": { "type": "boolean", "default": false, "description": "Retain WebAssembly DWARF symbols for Rust source breakpoints in Run and Debug Browser App." }
                 }
               }
             }
