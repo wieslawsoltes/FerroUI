@@ -653,9 +653,10 @@ fn a_confined_compositor_keeps_what_renders_on_the_render_thread() {
     root.set_size(Vector::new(200.0, 150.0));
     target.set_size(Size::new(200.0, 150.0));
     MediaContext::instance().immediate_render_requested(&confined.compositor);
-    // Each wait asked the loop for a frame out of turn first, and so did
-    // each of the two batches that followed a tick with nothing to draw
-    // (the render thread of this test ticks all the time).
+    // Each wait asked the loop for a frame out of turn first. A batch that
+    // missed its display frame asks for one more, once, whether it followed
+    // an idle tick or landed inside a tick (the render thread of this test
+    // ticks all the time, so it depends on the timing which of the two batches do).
     let out_of_turn = confined.render_loop.frames_requested_out_of_turn();
     assert!((2..=4).contains(&out_of_turn), "{out_of_turn} frames were requested out of turn");
 
