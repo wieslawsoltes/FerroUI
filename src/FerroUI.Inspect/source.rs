@@ -24,7 +24,6 @@ pub(super) fn xaml_location(info: XamlSourceInfo) -> Option<Value> {
 }
 
 pub(super) fn rust_location(info: RsxSourceInfo, use_invocation: bool) -> Option<Value> {
-    let uri = info.source_uri()?;
     let location = info.location();
     let (invocation_line, invocation_column) = location.invocation;
     let (line, column) = if use_invocation {
@@ -33,12 +32,20 @@ pub(super) fn rust_location(info: RsxSourceInfo, use_invocation: bool) -> Option
         location.element
     };
     let mut source = json!({
-        "uri":uri.as_str(), "language":"rust", "line":line, "column":column,
+        "language":"rust", "line":line, "column":column,
         "columnEncoding":"unicodeScalar",
         "invocation":{"line":invocation_line,"column":invocation_column,"index":location.index}
     });
     if let Some(revision) = location.revision {
         source["revision"] = json!(format!("{revision:016x}"));
+    }
+    if let Some(uri) = info.source_uri() {
+        source["uri"] = json!(uri.as_str());
+    } else if cfg!(target_os = "android") && location.revision.is_some() {
+        source["workspacePath"] = json!(info.file);
+        source["manifestPath"] = json!(info.manifest);
+    } else {
+        return None;
     }
     Some(source)
 }

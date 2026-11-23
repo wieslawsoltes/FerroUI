@@ -4,6 +4,7 @@
 # manifest, zipalign and apksigner. No Gradle (docs/porting/android-platform.md, section 9).
 #
 #   scripts/android/apk.sh smoke   [options]    the smoke application of ferroui-android
+#   scripts/android/apk.sh inspector [options]  the VS Code Live App example
 #   scripts/android/apk.sh catalog [options]    the ControlCatalog (samples/ControlCatalog.Android)
 #   scripts/android/apk.sh safearea [options]   the SafeAreaDemo (samples/SafeAreaDemo.Android)
 #   scripts/android/apk.sh sandbox [options]    the SingleProjectSandbox (samples/SingleProjectSandbox)
@@ -59,7 +60,7 @@ package_permissions=()
 extra_java_sources=()
 while [ $# -gt 0 ]; do
     case "$1" in
-        smoke|catalog|safearea|sandbox) app="$1" ;;
+        smoke|inspector|catalog|safearea|sandbox) app="$1" ;;
         package) app="$1" ;;
         --package) host_package="${2:?--package needs a value}"; shift ;;
         --label) package_label="${2:?--label needs a value}"; shift ;;
@@ -104,6 +105,14 @@ case "$app" in
         library_dir="examples"
         application_id="org.ferroui.smoke"
         label="FerroUI smoke"
+        ;;
+    inspector)
+        cargo_args=(-p ferroui-android --example android_inspector --features inspector-example)
+        library="android_inspector"
+        library_dir="examples"
+        application_id="org.ferroui.androidinspector"
+        label="Service Review"
+        permissions='    <uses-permission android:name="android.permission.INTERNET" />'
         ;;
     catalog)
         cargo_args=(-p control-catalog-android --lib)

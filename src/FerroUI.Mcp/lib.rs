@@ -62,7 +62,7 @@ pub struct ServerHandle {
     client: Client,
     log_guard: Option<ferroui_inspect::LogGuard>,
     pub address: Option<SocketAddr>,
-    /// Bearer token for HTTP; printed to stderr at startup, never included in tool responses.
+    /// Bearer token for HTTP. The ordinary inspector announces it at startup.
     pub token: Option<String>,
 }
 impl ServerHandle {
@@ -96,7 +96,13 @@ impl std::ops::Deref for UiServerHandle {
 
 /// Start the server on the UI thread. The returned handle is the lifetime of the service.
 pub fn serve(options: Options) -> io::Result<ServerHandle> {
-    serve_registered(options, None, None, None)
+    serve_registered(options, None, None, None, true)
+}
+
+/// Start an inspector with a private endpoint. The caller delivers the address and token
+/// from the handle over its own trusted channel.
+pub fn serve_private(options: Options) -> io::Result<ServerHandle> {
+    serve_registered(options, None, None, None, false)
 }
 
 /// Serve inspector tools and application tools through the same transport, permissions,
@@ -106,7 +112,7 @@ pub fn serve_with_tools(
     provider: std::rc::Rc<dyn UiToolProvider>,
 ) -> io::Result<UiServerHandle> {
     let registration = extensions::Registration::new(provider)?;
-    let server = serve_registered(options, Some(registration.catalog.clone()), None, None)?;
+    let server = serve_registered(options, Some(registration.catalog.clone()), None, None, true)?;
     Ok(UiServerHandle {
         server,
         _registration: registration,
@@ -123,7 +129,7 @@ pub fn serve_service(
     provider: Arc<dyn ServiceToolProvider>,
 ) -> io::Result<ServerHandle> {
     let service = services::ServiceCatalog::new(provider)?;
-    serve_registered(options, None, Some(service), None)
+    serve_registered(options, None, Some(service), None, false)
 }
 
 /// Use a securely persisted 256-bit bearer for a durable service, so restarting the process
@@ -140,7 +146,7 @@ pub fn serve_service_with_token(
         ));
     }
     let service = services::ServiceCatalog::new(provider)?;
-    serve_registered(options, None, Some(service), Some(bearer))
+    serve_registered(options, None, Some(service), Some(bearer), false)
 }
 
 fn serve_registered(
@@ -148,6 +154,7 @@ fn serve_registered(
     extension: Option<extensions::Catalog>,
     service: Option<services::ServiceCatalog>,
     bearer: Option<String>,
+    announce_endpoint: bool,
 ) -> io::Result<ServerHandle> {
     let dispatcher = service.is_none().then(|| {
         let dispatcher = Dispatcher::ui_thread();
@@ -168,7 +175,7 @@ fn serve_registered(
         ));
     }
     // A server that fails to start leaves stdio free for another attempt.
-    let result = start(options, dispatcher, extension, service, bearer);
+    let result = start(options, dispatcher, extension, service, bearer, announce_endpoint);
     if stdio && result.is_err() {
         STDIO_STARTED.store(false, Ordering::Release);
     }
@@ -181,6 +188,7 @@ fn start(
     extension: Option<extensions::Catalog>,
     service: Option<services::ServiceCatalog>,
     bearer: Option<String>,
+    announce_endpoint: bool,
 ) -> io::Result<ServerHandle> {
     let (http, address, token) = match &options.transport {
         Transport::Http(address) => {
@@ -209,7 +217,6 @@ fn start(
         None
     };
     let log_guard = (options.capture_logs && service.is_none()).then(LogCapture::install);
-    let is_service = service.is_some();
     let client = Client {
         dispatcher,
         extension,
@@ -236,7 +243,7 @@ fn start(
     std::thread::Builder::new()
         .name("FerroUI MCP".into())
         .spawn(task)?;
-    if !is_service {
+    if announce_endpoint {
         if let (Some(address), Some(token)) = (handle.address, &handle.token) {
             if !ferroui_reload_protocol::mcp_endpoint(address, token) {
                 eprintln!("FerroUI MCP: http://{address}/mcp\nAuthorization: Bearer {token}");

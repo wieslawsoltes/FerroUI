@@ -33,14 +33,26 @@ pub struct Site {
     pub manifest: &'static str,
 }
 
+static EDITOR_SOURCE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Enable source metadata for subsequently mounted RSX controls in this debug app.
+/// Call before mounting controls when the launcher cannot pass native environment variables.
+pub fn enable_editor_source_locations() {
+    if cfg!(debug_assertions) {
+        EDITOR_SOURCE.store(true, std::sync::atomic::Ordering::Relaxed);
+    }
+}
+
 #[inline]
 pub(crate) fn record_source_locations() -> bool {
     static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    cfg!(debug_assertions) && *ENABLED.get_or_init(|| {
-        ["FERROUI_EDITOR_RELOAD", "FERROUI_EDITOR_SOURCE"]
-            .iter()
-            .any(|name| std::env::var_os(name).as_deref() == Some("1".as_ref()))
-    })
+    cfg!(debug_assertions)
+        && (EDITOR_SOURCE.load(std::sync::atomic::Ordering::Relaxed)
+            || *ENABLED.get_or_init(|| {
+                ["FERROUI_EDITOR_RELOAD", "FERROUI_EDITOR_SOURCE"]
+                    .iter()
+                    .any(|name| std::env::var_os(name).as_deref() == Some("1".as_ref()))
+            }))
 }
 
 pub(crate) fn source_location(editor_source: crate::RsxSourceInfo) -> crate::RsxSourceLocation {

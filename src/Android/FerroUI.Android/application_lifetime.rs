@@ -4,6 +4,8 @@ use ferroui_controls::application_lifetimes::{
     IActivityApplicationLifetime, IApplicationLifetime, ISingleViewApplicationLifetime,
 };
 use ferroui_controls::Control;
+#[cfg(target_os = "android")]
+use ferroui_controls::{application_lifetimes::ISingleTopLevelApplicationLifetime, TopLevel};
 use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -33,6 +35,18 @@ impl IApplicationLifetime for ApplicationLifetime {
 
     fn as_activity_application_lifetime(&self) -> Option<&dyn IActivityApplicationLifetime> {
         Some(self)
+    }
+
+    #[cfg(target_os = "android")]
+    fn as_single_top_level_application_lifetime(&self) -> Option<&dyn ISingleTopLevelApplicationLifetime> {
+        Some(self)
+    }
+}
+
+#[cfg(target_os = "android")]
+impl ISingleTopLevelApplicationLifetime for ApplicationLifetime {
+    fn top_level(&self) -> Option<Ref<TopLevel>> {
+        crate::FerroActivity::current_main_activity()?.view()?.top_level()
     }
 }
 
