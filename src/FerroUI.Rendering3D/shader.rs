@@ -123,6 +123,49 @@ pub mod msl {
     }
 }
 
+/// The shader in GLSL ES 3.00 (feature `glsl`, step D8, `docs/porting/media3d.md`, section 3.20):
+/// [`SCENE3D_WGSL`] translated by naga at build time (`build.rs`), one source per entry point, with
+/// the names of its uniform blocks and samplers, for the GL executor of `ferroui-opengl`. The clip
+/// space is GL's with y flipped, so the first row of an output is the top of the scene and a front
+/// face is clockwise in window coordinates. Nothing of naga is linked.
+#[cfg(feature = "glsl")]
+pub mod glsl {
+    use crate::brush::BrushShader;
+
+    /// The binding point of the frame uniforms.
+    pub const FRAME_BLOCK_BINDING: u32 = 0;
+    /// The binding point of the draw uniforms.
+    pub const DRAW_BLOCK_BINDING: u32 = 1;
+    /// The binding point of the brush uniforms.
+    pub const BRUSH_BLOCK_BINDING: u32 = 2;
+    /// The texture unit of the texture of a brush.
+    pub const BRUSH_TEXTURE_UNIT: u32 = 0;
+    /// The texture unit of the resolved colour.
+    pub const RESOLVED_TEXTURE_UNIT: u32 = 1;
+
+    /// One entry point in GLSL ES 3.00.
+    pub struct GlslStage {
+        /// The source.
+        pub source: &'static str,
+        /// The names of its uniform blocks, with their binding points.
+        pub uniform_blocks: &'static [(&'static str, u32)],
+        /// The names of its samplers, with their texture units.
+        pub samplers: &'static [(&'static str, u32)],
+    }
+
+    include!(concat!(env!("OUT_DIR"), "/scene3d_glsl.rs"));
+
+    /// The fragment stage of the draws of a brush shader.
+    pub fn fragment_stage(shader: BrushShader) -> &'static GlslStage {
+        match shader {
+            BrushShader::Solid => &FRAGMENT,
+            BrushShader::Gradient => &GRADIENT_FRAGMENT,
+            BrushShader::GradientTexture => &GRADIENT_TEXTURE_FRAGMENT,
+            BrushShader::Image => &IMAGE_FRAGMENT,
+        }
+    }
+}
+
 #[cfg(test)]
 #[path = "shader_tests.rs"]
 mod tests;

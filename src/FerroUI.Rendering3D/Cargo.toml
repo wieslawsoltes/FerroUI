@@ -38,9 +38,13 @@ wgpu = ["dep:wgpu"]
 # `ferroui-metal` (feature `scene3d`) that the Skia backend draws with on Graphite. naga runs in the
 # build script only: nothing of it is linked.
 msl = ["dep:naga"]
+# The shader in GLSL ES 3.00 (`shader::glsl`, step D8), for the GL executor of `ferroui-opengl`
+# (feature `scene3d`) that the Skia backend draws with on Ganesh GL. naga runs in the build script
+# only: nothing of it is linked.
+glsl = ["dep:naga"]
 
 [build-dependencies]
-naga = { workspace = true, features = ["wgsl-in", "msl-out"], optional = true }
+naga = { workspace = true, features = ["wgsl-in", "msl-out", "glsl-out"], optional = true }
 
 [dev-dependencies]
 # The validation of `shaders/scene3d.wgsl` and its translation to GLSL ES 3.00 for WebGL2.
