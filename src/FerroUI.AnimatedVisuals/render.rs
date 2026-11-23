@@ -5,16 +5,17 @@
 use crate::evaluate::{FrameCommand, FrameCommands, GradientKind, MaskMode, Paint, ShapeDraw, StrokeStyle};
 use crate::model::MatteMode;
 use crate::path::{PathCommand, PathData};
+use ferroui_base::media::imaging::BitmapBlendingMode;
 use ferroui_base::media::immutable::{
     ImmutableDashStyle, ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen,
     ImmutableRadialGradientBrush, ImmutableSolidColorBrush,
 };
 use ferroui_base::media::{
-    Color, DrawingBrush, DrawingContext, DrawingGroup, FillRule, Geometry, GradientSpreadMethod, IBrush,
-    IImmutableBrush, IPen, PenLineCap, PenLineJoin, PushedState, StreamGeometry,
+    Color, DrawingContext, FillRule, Geometry, GradientSpreadMethod, IBrush, IEffect, IImmutableBrush, IPen,
+    ImmutableLuminanceToAlphaEffect, PenLineCap, PenLineJoin, PushedState, StreamGeometry,
 };
 use ferroui_base::platform::IGeometryContext;
-use ferroui_base::{Point, Rect, Ref, RelativePoint, RelativeScalar, RelativeUnit};
+use ferroui_base::{Matrix, Point, Rect, Ref, RelativePoint, RelativeScalar, RelativeUnit};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
@@ -26,6 +27,13 @@ const MOST_GEOMETRIES: usize = 1024;
 const KEPT_FRAMES: u64 = 120;
 /// How far the outside of an inverted mask reaches.
 const OUTSIDE: f64 = 1_000_000.0;
+
+/// What a push of a frame leaves to its `Pop`.
+enum Scope {
+    State(PushedState),
+    /// A group whose content is cut, when it ends, by what `coverage` fills.
+    Cut { group: PushedState, blend: BitmapBlendingMode, coverage: Vec<(Ref<Geometry>, f64)> },
+}
 
 struct KeptGeometry {
     path: PathData,
@@ -222,9 +230,9 @@ impl VisualRenderer {
         }
     }
 
-    /// The clip of a mask: its path, or for a subtracted or inverted mask everything but it.
-    fn mask_geometry(&mut self, path: &PathData, mode: MaskMode, inverted: bool) -> Ref<Geometry> {
-        if (mode == MaskMode::Subtract) == inverted {
+    /// The area of a mask: its path, or for an inverted mask everything but it.
+    fn mask_area(&mut self, path: &PathData, inverted: bool) -> Ref<Geometry> {
+        if !inverted {
             return self.geometry(path, false);
         }
         let mut outside = PathData::rectangle(Point::new(0.0, 0.0), OUTSIDE * 2.0, OUTSIDE * 2.0, 0.0);
@@ -232,21 +240,91 @@ impl VisualRenderer {
         self.geometry(&outside, true)
     }
 
+    /// The clip of a mask of full opacity: its area, or what a subtracted mask leaves.
+    fn mask_geometry(&mut self, path: &PathData, mode: MaskMode, inverted: bool) -> Ref<Geometry> {
+        self.mask_area(path, (mode == MaskMode::Subtract) != inverted)
+    }
+
+    /// Opens a group that `coverage` cuts when it ends. A backend without compositing layers has
+    /// no such group: it gets `None`, and what the group would cut stays.
+    fn begin_cut(
+        blend: BitmapBlendingMode,
+        coverage: Vec<(Ref<Geometry>, f64)>,
+        bounds: Rect,
+        context: &mut DrawingContext<'_>,
+    ) -> Option<Scope> {
+        let group = context.try_push_compositing_layer(BitmapBlendingMode::SourceOver, 1.0, bounds)?;
+        Some(Scope::Cut { group, blend, coverage })
+    }
+
+    fn end_scope(&mut self, scope: Scope, bounds: Rect, context: &mut DrawingContext<'_>) {
+        match scope {
+            Scope::State(state) => context.pop(state),
+            Scope::Cut { group, blend, coverage } => {
+                if let Some(cut) = context.try_push_compositing_layer(blend, 1.0, bounds) {
+                    for (geometry, opacity) in &coverage {
+                        let brush: Rc<dyn IBrush> = self.solid(with_opacity(Color::from_rgb(255, 255, 255), *opacity));
+                        context.draw_geometry(Some(&brush), None, geometry);
+                    }
+                    context.pop(cut);
+                }
+                context.pop(group);
+            }
+        }
+    }
+
     fn render_commands(&mut self, commands: &[FrameCommand], bounds: Rect, context: &mut DrawingContext<'_>) {
-        let mut pushed: Vec<PushedState> = Vec::new();
+        // Each scope keeps the area of the composition in the space outside it.
+        let mut scopes: Vec<(Scope, Rect)> = Vec::new();
+        let mut bounds = bounds;
         let mut index = 0;
         while index < commands.len() {
             match &commands[index] {
-                FrameCommand::PushTransform(matrix) => pushed.push(context.push_transform(*matrix)),
-                FrameCommand::PushOpacity(opacity) => pushed.push(context.push_opacity(*opacity)),
-                FrameCommand::PushMask { path, mode, inverted, .. } => {
-                    let geometry = self.mask_geometry(path, *mode, *inverted);
-                    pushed.push(context.push_geometry_clip(&geometry));
+                FrameCommand::PushTransform(matrix) => {
+                    scopes.push((Scope::State(context.push_transform(*matrix)), bounds));
+                    bounds = area_inside(bounds, *matrix);
+                }
+                FrameCommand::PushOpacity(opacity) => scopes.push((Scope::State(context.push_opacity(*opacity)), bounds)),
+                FrameCommand::PushMask { path, mode, inverted, opacity } => {
+                    let cut = (*opacity < 1.0).then(|| {
+                        let area = self.mask_area(path, *inverted);
+                        let blend = if *mode == MaskMode::Subtract {
+                            BitmapBlendingMode::DestinationOut
+                        } else {
+                            BitmapBlendingMode::DestinationIn
+                        };
+                        Self::begin_cut(blend, vec![(area, *opacity)], bounds, context)
+                    });
+                    let scope = match cut.flatten() {
+                        Some(scope) => scope,
+                        None => {
+                            let geometry = self.mask_geometry(path, *mode, *inverted);
+                            Scope::State(context.push_geometry_clip(&geometry))
+                        }
+                    };
+                    scopes.push((scope, bounds));
+                }
+                FrameCommand::PushCoverage(paths) => {
+                    let coverage: Vec<_> =
+                        paths.iter().map(|(path, opacity)| (self.geometry(path, false), *opacity)).collect();
+                    let scope = match Self::begin_cut(BitmapBlendingMode::DestinationIn, coverage, bounds, context) {
+                        Some(scope) => scope,
+                        None => {
+                            let mut union = PathData::default();
+                            for (path, _) in paths {
+                                union.append(path);
+                            }
+                            let geometry = self.geometry(&union, false);
+                            Scope::State(context.push_geometry_clip(&geometry))
+                        }
+                    };
+                    scopes.push((scope, bounds));
                 }
                 FrameCommand::Draw(draw) => self.draw(draw, context),
                 FrameCommand::Pop => {
-                    if let Some(state) = pushed.pop() {
-                        context.pop(state);
+                    if let Some((scope, outer)) = scopes.pop() {
+                        self.end_scope(scope, outer, context);
+                        bounds = outer;
                     }
                 }
                 FrameCommand::BeginMatte(mode) => {
@@ -260,13 +338,15 @@ impl VisualRenderer {
             }
             index += 1;
         }
-        while let Some(state) = pushed.pop() {
-            context.pop(state);
+        while let Some((scope, outer)) = scopes.pop() {
+            self.end_scope(scope, outer, context);
         }
     }
 
-    /// An alpha matte is an opacity mask of the drawing of its source. The inverted and luma
-    /// mattes have no route through the drawing context yet: their content is drawn uncut.
+    /// The content in a group, then its matte composed into the group: destination-in keeps what
+    /// the matte covers, destination-out what it does not. A luma matte passes through the
+    /// luminance mask first. These are layers of the backend, drawn on its GPU; nothing is read
+    /// back. A backend without compositing layers cannot cut the content, so it does not draw it.
     fn render_matted(
         &mut self,
         mode: MatteMode,
@@ -275,24 +355,32 @@ impl VisualRenderer {
         bounds: Rect,
         context: &mut DrawingContext<'_>,
     ) {
-        if mode != MatteMode::Alpha {
-            self.render_commands(content, bounds, context);
+        let Some(group) = context.try_push_compositing_layer(BitmapBlendingMode::SourceOver, 1.0, bounds) else {
             return;
-        }
-        let group = DrawingGroup::new();
-        {
-            let mut drawing = group.open();
-            // A clear rectangle gives the drawing the bounds of the composition, so the brush
-            // maps its space one to one onto the bounds of the mask.
-            let clear: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::new(Color::from_argb(0, 0, 0, 0)));
-            drawing.fill_rectangle(&clear, bounds, 0.0);
-            self.render_commands(source, bounds, &mut drawing);
-        }
-        let brush: Rc<dyn IBrush> = DrawingBrush::with_drawing(group.upcast::<ferroui_base::media::Drawing>()).into();
-        let state = context.push_opacity_mask(&brush, bounds);
+        };
         self.render_commands(content, bounds, context);
-        context.pop(state);
+        let blend = match mode {
+            MatteMode::Alpha | MatteMode::Luma => BitmapBlendingMode::DestinationIn,
+            MatteMode::AlphaInverted | MatteMode::LumaInverted => BitmapBlendingMode::DestinationOut,
+        };
+        if let Some(matte) = context.try_push_compositing_layer(blend, 1.0, bounds) {
+            if matches!(mode, MatteMode::Luma | MatteMode::LumaInverted) {
+                let effect: Rc<dyn IEffect> = Rc::new(ImmutableLuminanceToAlphaEffect);
+                let luminance = context.push_effect(&effect, bounds);
+                self.render_commands(source, bounds, context);
+                context.pop(luminance);
+            } else {
+                self.render_commands(source, bounds, context);
+            }
+            context.pop(matte);
+        }
+        context.pop(group);
     }
+}
+
+/// `bounds` seen from inside `matrix`. A matrix that cannot be inverted draws nothing.
+fn area_inside(bounds: Rect, matrix: Matrix) -> Rect {
+    matrix.try_invert().map_or(Rect::default(), |inverse| bounds.transform_to_aabb(inverse))
 }
 
 /// The index of the `EndMatteSource` and of the `Pop` of the matte that begins at `begin`.
@@ -304,6 +392,7 @@ fn matte_range(commands: &[FrameCommand], begin: usize) -> (usize, usize) {
             FrameCommand::PushTransform(_)
             | FrameCommand::PushOpacity(_)
             | FrameCommand::PushMask { .. }
+            | FrameCommand::PushCoverage(_)
             | FrameCommand::BeginMatte(_) => depth += 1,
             FrameCommand::EndMatteSource if depth == 0 => source_end = index,
             FrameCommand::Pop if depth == 0 => return (source_end.min(index), index),
@@ -321,7 +410,7 @@ mod tests {
     use ferroui_base::media::PlatformDrawingContext;
     use ferroui_base::platform::{IPlatformRenderInterface, IRenderTargetBitmapImpl, PixelFormat};
     use ferroui_base::{FerroLocator, PixelSize, Vector};
-    use ferroui_vello::PlatformRenderInterface;
+    use ferroui_vello::{PlatformRenderInterface, RenderTargetBitmapImpl, VelloRenderingMode};
     use serde_json::{json, Value};
     use std::sync::Arc;
 
@@ -338,12 +427,18 @@ mod tests {
         ])
     }
 
-    /// The frame drawn by the CPU mode of the Vello backend, and how many geometries were built.
-    fn draw(renderer: &mut VisualRenderer, visual: &AnimatedVisual, frame: f64) -> Arc<dyn IRenderTargetBitmapImpl> {
+    /// The frame drawn in `mode` of the Vello backend.
+    fn draw_in(
+        mode: VelloRenderingMode,
+        renderer: &mut VisualRenderer,
+        visual: &AnimatedVisual,
+        frame: f64,
+    ) -> Arc<dyn IRenderTargetBitmapImpl> {
         let interface: Rc<dyn IPlatformRenderInterface> = Rc::new(PlatformRenderInterface::default());
         let _scope = FerroLocator::enter_scope();
         FerroLocator::current_mutable().bind::<dyn IPlatformRenderInterface>().to_constant(interface.clone());
-        let target = interface.create_render_target_bitmap(PixelSize::new(SIZE, SIZE), Vector::new(96.0, 96.0));
+        let target: Arc<dyn IRenderTargetBitmapImpl> =
+            Arc::new(RenderTargetBitmapImpl::new(PixelSize::new(SIZE, SIZE), Vector::new(96.0, 96.0), vec![mode]));
         let mut commands = FrameCommands::default();
         visual.evaluate(frame, &mut commands);
         // An owned core: disposing the context ends the frame of the target.
@@ -351,6 +446,10 @@ mod tests {
         renderer.render(&commands, visual.width, visual.height, &mut context);
         context.dispose();
         target
+    }
+
+    fn draw(renderer: &mut VisualRenderer, visual: &AnimatedVisual, frame: f64) -> Arc<dyn IRenderTargetBitmapImpl> {
+        draw_in(VelloRenderingMode::Cpu, renderer, visual, frame)
     }
 
     fn pixel(target: &Arc<dyn IRenderTargetBitmapImpl>, x: i32, y: i32) -> (u8, u8, u8, u8) {
@@ -397,16 +496,67 @@ mod tests {
         assert_eq!(pixel(&subtracted, 30, 20), (0, 255, 0, 255));
     }
 
+    /// A matte of a white square on the left and a black one on the right, over a blue layer.
+    fn matted(mode: u8) -> AnimatedVisual {
+        let matte = square(10.0, 20.0, 20.0, [1.0, 1.0, 1.0]);
+        let black = square(30.0, 20.0, 20.0, [0.0, 0.0, 0.0]);
+        let shapes = json!([
+            {"ty": "gr", "it": [matte[0], matte[1], {"ty": "tr"}]},
+            {"ty": "gr", "it": [black[0], black[1], {"ty": "tr"}]},
+        ]);
+        visual(json!([
+            {"ty": 4, "ind": 1, "td": 1, "ip": 0, "op": 30, "ks": {}, "shapes": shapes},
+            {"ty": 4, "ind": 2, "tt": mode, "ip": 0, "op": 30, "ks": {}, "shapes": square(20.0, 20.0, 40.0, [0.0, 0.0, 1.0])}
+        ]))
+    }
+
+    /// Which halves of the blue layer each kind of matte keeps.
+    const MATTES: [(u8, bool, bool); 4] = [(1, true, true), (2, false, false), (3, true, false), (4, false, true)];
+
+    fn assert_mattes(mode: VelloRenderingMode) {
+        for (kind, left, right) in MATTES {
+            let mut renderer = VisualRenderer::new();
+            let target = draw_in(mode, &mut renderer, &matted(kind), 0.0);
+            let expect = |kept: bool| if kept { (0, 0, 255, 255) } else { (0, 0, 0, 0) };
+            assert_eq!(pixel(&target, 10, 20), expect(left), "{mode:?}, matte {kind}, left");
+            assert_eq!(pixel(&target, 30, 20), expect(right), "{mode:?}, matte {kind}, right");
+            // Outside the matte: only the inverted kinds keep it.
+            let outside = if kind % 2 == 0 { (0, 0, 255, 255) } else { (0, 0, 0, 0) };
+            assert_eq!(pixel(&target, 20, 2), outside, "{mode:?}, matte {kind}, outside");
+        }
+    }
+
     #[test]
-    fn an_alpha_matte_cuts_its_layer_to_the_matte() {
-        let document = visual(json!([
-            {"ty": 4, "ind": 1, "td": 1, "ip": 0, "op": 30, "ks": {}, "shapes": square(10.0, 20.0, 20.0, [1.0, 1.0, 1.0])},
-            {"ty": 4, "ind": 2, "tt": 1, "ip": 0, "op": 30, "ks": {}, "shapes": square(20.0, 20.0, 40.0, [0.0, 0.0, 1.0])}
-        ]));
+    fn each_kind_of_matte_keeps_its_part_of_the_layer() {
+        assert_mattes(VelloRenderingMode::Cpu);
+    }
+
+    /// The same frames on the device: the layers and the luminance pass of the GPU modes. Without
+    /// an adapter there is nothing to run them on.
+    #[cfg(feature = "device-tests")]
+    #[test]
+    fn each_kind_of_matte_keeps_its_part_of_the_layer_on_the_device() {
+        if let Err(error) = ferroui_vello::gpu::VelloWgpuDevice::headless() {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+        assert_mattes(VelloRenderingMode::Hybrid);
+        assert_mattes(VelloRenderingMode::Gpu);
+    }
+
+    #[test]
+    fn a_mask_at_half_opacity_keeps_half_of_what_it_covers() {
+        let mask = |mode: &str| json!([{"mode": mode, "inv": false, "o": {"k": 50}, "pt": {"k": {"c": true,
+            "v": [[0, 0], [20, 0], [20, 40], [0, 40]], "i": [[0, 0], [0, 0], [0, 0], [0, 0]], "o": [[0, 0], [0, 0], [0, 0], [0, 0]]}}}]);
+        let layer = |mode: &str| json!([{"ty": 4, "ind": 1, "ip": 0, "op": 30, "ks": {}, "hasMask": true,
+            "masksProperties": mask(mode), "shapes": square(20.0, 20.0, 40.0, [0.0, 1.0, 0.0])}]);
         let mut renderer = VisualRenderer::new();
-        let target = draw(&mut renderer, &document, 0.0);
-        assert_eq!(pixel(&target, 10, 20), (0, 0, 255, 255));
-        assert_eq!(pixel(&target, 30, 20).3, 0);
+        let added = draw(&mut renderer, &visual(layer("a")), 0.0);
+        assert!(pixel(&added, 10, 20).3.abs_diff(128) <= 1, "{:?}", pixel(&added, 10, 20));
+        assert_eq!(pixel(&added, 30, 20).3, 0);
+        let subtracted = draw(&mut renderer, &visual(layer("s")), 0.0);
+        assert!(pixel(&subtracted, 10, 20).3.abs_diff(128) <= 1, "{:?}", pixel(&subtracted, 10, 20));
+        assert_eq!(pixel(&subtracted, 30, 20).3, 255);
     }
 
     #[test]

@@ -60,6 +60,8 @@ pub enum FrameCommand {
     PushOpacity(f64),
     /// Clips what follows to a path of the current space.
     PushMask { path: PathData, mode: MaskMode, inverted: bool, opacity: f64 },
+    /// Keeps what the union of these paths covers, each with its opacity.
+    PushCoverage(Vec<(PathData, f64)>),
     /// What follows up to `EndMatteSource` is the matte of what follows after it, up to `Pop`.
     BeginMatte(MatteMode),
     EndMatteSource,
@@ -351,8 +353,9 @@ impl AnimatedVisual {
             out.push(FrameCommand::PushOpacity(opacity));
             pushed += 1;
         }
-        // Added masks are a union, which nested clips are not: they are one path.
-        let mut added = PathData::default();
+        // Added masks are a union, which nested clips are not: one path, or at partial opacity
+        // a coverage each path adds to.
+        let mut added: Vec<(PathData, f64)> = Vec::new();
         for mask in &layer.masks {
             let mode = match mask.mode {
                 b'a' => MaskMode::Add,
@@ -361,16 +364,24 @@ impl AnimatedVisual {
                 _ => continue,
             };
             let path = mask.path.path_at(local);
+            let opacity = (mask.opacity.at(local)[0] / 100.0).clamp(0.0, 1.0);
             if mode == MaskMode::Add && !mask.inverted {
-                added.append(&path);
+                added.push((path, opacity));
                 continue;
             }
-            let opacity = (mask.opacity.at(local)[0] / 100.0).clamp(0.0, 1.0);
             out.push(FrameCommand::PushMask { path, mode, inverted: mask.inverted, opacity });
             pushed += 1;
         }
-        if !added.is_empty() {
-            out.push(FrameCommand::PushMask { path: added, mode: MaskMode::Add, inverted: false, opacity: 1.0 });
+        if added.iter().any(|(path, _)| !path.is_empty()) {
+            if added.iter().all(|(_, opacity)| *opacity >= 1.0) {
+                let mut union = PathData::default();
+                for (path, _) in &added {
+                    union.append(path);
+                }
+                out.push(FrameCommand::PushMask { path: union, mode: MaskMode::Add, inverted: false, opacity: 1.0 });
+            } else {
+                out.push(FrameCommand::PushCoverage(added));
+            }
             pushed += 1;
         }
         match &layer.kind {

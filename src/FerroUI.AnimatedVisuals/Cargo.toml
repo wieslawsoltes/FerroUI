@@ -14,6 +14,10 @@ categories.workspace = true
 [lib]
 path = "lib.rs"
 
+[features]
+# The tests of the matte layers on the Vello modes of the device.
+device-tests = ["ferroui-vello/hybrid", "ferroui-vello/gpu"]
+
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
