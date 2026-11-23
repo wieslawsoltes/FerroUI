@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (83 done, 30 planned) | 113 |
+| `port` (84 done, 29 planned) | 113 |
 | `already` | 17 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -289,7 +289,7 @@ left out only with a recorded performance or better-code reason.
 | `f5af0ebf98` | #22707 | 2026-11-06 | controls | `port` (done) | controls2 | TableViewColumn minimum and maximum widths. |
 | `c4d24e9dab` | #22709 | 2026-11-06 | automation | `port` | automation | TableView row automation name from visible cells. |
 | `727fea6125` | #22741 | 2026-11-07 | platform-browser | `already` |  | `webapp/modules/ferroui/dom.ts` already returns left, top, right, bottom. |
-| `a81ceeaf3c` | #22656 | 2026-11-09 | platform-browser | `port` | browser | Clipboard in non-secure contexts. |
+| `a81ceeaf3c` | #22656 | 2026-11-09 | platform-browser | `port` (done) | platforms2 | Browser clipboard works without `navigator.clipboard` (non-secure contexts); file items of a paste event are copied before the event ends. |
 | `48132c0500` | #22716 | 2026-11-09 | controls | `port` (done) | controls | `IsActive` set before `Activated` is raised. |
 | `69be03931f` | #22736 | 2026-11-09 | platform | `port` (done) | controls | Documentation of glob patterns. |
 | `c9b5ae7b21` | #22746 | 2026-11-09 | controls | `already` |  | `Span::on_property_changed` compares the property, so `on_inlines_changed` runs. |

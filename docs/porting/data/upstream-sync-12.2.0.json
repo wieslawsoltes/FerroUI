@@ -1017,9 +1017,9 @@
    "date": "2026-11-09",
    "area": "platform-browser",
    "class": "port",
-   "note": "Clipboard in non-secure contexts.",
-   "part": "browser",
-   "state": "planned"
+   "note": "Browser clipboard works without `navigator.clipboard` (non-secure contexts); file items of a paste event are copied before the event ends.",
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "48132c0500826f5c21e08cf1a574432a8d92bd2f",
