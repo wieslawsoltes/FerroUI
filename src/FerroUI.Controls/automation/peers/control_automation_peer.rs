@@ -454,6 +454,24 @@ impl ControlAutomationPeer {
             );
         } else if property == Visual::visual_parent_property().as_property() {
             self.invalidate_parent();
+        } else if property == AutomationProperties::name_property().as_property() {
+            // Platforms cache the peer's attributes. Report the effective virtual value so
+            // removing an explicit name also restores a derived peer's content fallback.
+            self.raise_property_changed_event(
+                AutomationElementIdentifiers::name_property(),
+                None,
+                Some(Rc::new(self.get_name()) as BoxedValue),
+            );
+        } else if property == AutomationProperties::help_text_property().as_property()
+            || crate::tool_tip::is_tip_property(property)
+        {
+            // HelpText can come from validation, a tooltip, or a placeholder. The old
+            // attached value is not necessarily the old effective help text.
+            self.raise_property_changed_event(
+                AutomationElementIdentifiers::help_text_property(),
+                None,
+                Some(Rc::new(self.get_help_text()) as BoxedValue),
+            );
         } else if property == AutomationProperties::item_status_property().as_property() {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<String>>();
             self.raise_property_changed_event(
