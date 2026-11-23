@@ -136,6 +136,9 @@ struct Session {
     is_alt_down: Cell<bool>,
     /// Another key went down with Alt: its release does not show the tips.
     is_alt_chord: Cell<bool>,
+    /// Whether Alt and a key together can invoke. Not for AltGr or the Option key of a Mac, with
+    /// which people type characters.
+    can_chord: Cell<bool>,
     are_key_tips_enabled: Cell<bool>,
     changed: HandlerList<dyn Fn()>,
 }
@@ -158,6 +161,7 @@ fn ensure_session() -> Rc<Session> {
         display: RefCell::new(None),
         is_alt_down: Cell::new(false),
         is_alt_chord: Cell::new(false),
+        can_chord: Cell::new(false),
         are_key_tips_enabled: Cell::new(true),
         changed: HandlerList::new(),
     });
@@ -236,9 +240,15 @@ fn on_key_down(sender: &TopLevel, e: &KeyEventArgs) {
         // Used here, so that Alt does not also open the menu of the window.
         session.is_alt_down.set(true);
         session.is_alt_chord.set(false);
+        session
+            .can_chord
+            .set(e.key == Key::LeftAlt && !cfg!(target_vendor = "apple"));
         e.set_handled(true);
     } else if session.is_alt_down.get() {
         session.is_alt_chord.set(true);
+        if !session.can_chord.get() {
+            return;
+        }
         if let Some(text) = typed_text(e) {
             // Alt and a key: the same as Alt, then the key, when it is a key of this window.
             if session.starts_a_key(&root_of(sender), &text) {
