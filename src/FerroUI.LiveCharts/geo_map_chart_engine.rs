@@ -101,10 +101,11 @@ impl HeatLandSeries {
     }
 }
 
-/// A circle at a geographic coordinate, drawn over the map: the native counterpart of a
+/// A visual at a geographic coordinate, drawn over the map: the native counterpart of a
 /// `GeoVisualElement` around a `GeometryVisual<CircleGeometry>` (the markers of the source's
-/// snapshot suite). It is centred on its coordinate, follows pan, zoom and rotation at a constant
-/// size, and is hidden on the far side of a globe.
+/// snapshot suite), a geometry of any shape (`geometry_svg`) or a label (`text`). It is centred on
+/// its coordinate, follows pan, zoom and rotation at a constant size, and is hidden on the far
+/// side of a globe.
 #[derive(Clone, Debug, PartialEq)]
 pub struct GeoMarker {
     pub longitude: f64,
@@ -114,6 +115,12 @@ pub struct GeoMarker {
     pub fill: Option<Color>,
     pub stroke: Option<Color>,
     pub stroke_width: f64,
+    /// SVG path data drawn in place of the circle, fitted to a square of `size`
+    /// (`VariableSVGPathGeometry`). Path data the parser rejects is an error of the map.
+    pub geometry_svg: Option<String>,
+    /// A label drawn in place of a geometry (`LabelVisual`), in the `fill` colour with a text size
+    /// of `size`. An empty text is none.
+    pub text: Option<String>,
 }
 impl Default for GeoMarker {
     /// The city markers of the source's `MapsTests`: 14 pixels of orange red with a white
@@ -126,6 +133,8 @@ impl Default for GeoMarker {
             fill: Some(Color::from_rgb(255, 87, 51)),
             stroke: Some(Color::from_rgb(255, 255, 255)),
             stroke_width: 2.0,
+            geometry_svg: None,
+            text: None,
         }
     }
 }
@@ -674,9 +683,34 @@ impl GeoMapChartEngine {
             let Some(at) = project(&projector, viewport, viewport_center, marker) else {
                 continue;
             };
+            if let Some(text) = marker.text.as_deref().filter(|text| !text.is_empty()) {
+                if let Some(color) = marker.fill {
+                    scene.primitives.push(Primitive::new(
+                        Geometry::Text {
+                            // The origin is the top of a line, about 1.2 times the text size.
+                            origin: Point::new(at.x, at.y - marker.size * 0.6),
+                            text: text.to_owned(),
+                            size: marker.size,
+                            rotation: 0.0,
+                            anchor: TextAnchor::Center,
+                        },
+                        PaintStyle::fill(color),
+                    ));
+                }
+                continue;
+            }
             let half = marker.size * 0.5;
+            let rect = Rect::new(at.x - half, at.y - half, marker.size, marker.size);
+            let geometry = match marker.geometry_svg.as_deref() {
+                Some(data) => {
+                    let commands = crate::svg_path::parse(data)?;
+                    let bounds = crate::svg_path::bounds(&commands);
+                    Geometry::Path(crate::svg_path::fit(&commands, bounds, rect))
+                }
+                None => Geometry::Ellipse(rect),
+            };
             scene.primitives.push(Primitive::new(
-                Geometry::Ellipse(Rect::new(at.x - half, at.y - half, marker.size, marker.size)),
+                geometry,
                 PaintStyle {
                     fill: marker.fill,
                     stroke: marker.stroke,

@@ -116,7 +116,23 @@ impl GeoMarker {
             fill: self.fill(),
             stroke: self.stroke(),
             stroke_width: self.stroke_thickness(),
+            geometry_svg: self.geometry_svg(),
+            text: self.text(),
         }
+    }
+    /// SVG path data drawn in place of the circle, fitted to `Size`.
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.base.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.base.set_value(Self::geometry_svg_property(), value);
+    }
+    /// A label drawn in place of a geometry, in `Fill` with a text size of `Size`.
+    pub fn text(&self) -> Option<String> {
+        self.base.get_value(Self::text_property())
+    }
+    pub fn set_text(&self, value: Option<String>) {
+        self.base.set_value(Self::text_property(), value);
     }
     pub fn longitude(&self) -> f64 {
         self.base.get_value(Self::longitude_property())
@@ -174,6 +190,12 @@ ferro_properties! { impl GeoMarker {
     }
     pub fn stroke_thickness_property() -> StyledProperty<f64> {
         FerroProperty::register::<GeoMarker, _>("StrokeThickness", 2.0)
+    }
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<GeoMarker, _>("GeometrySvg", None)
+    }
+    pub fn text_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<GeoMarker, _>("Text", None)
     }
 } }
 
@@ -258,6 +280,10 @@ mod tests {
         );
         marker.set_size(20.0);
         assert_eq!(marker.snapshot().size, 20.0);
+        marker.set_geometry_svg(Some("M0,0 L1,1 Z".into()));
+        marker.set_text(Some("Label".into()));
+        assert_eq!(marker.snapshot().geometry_svg.as_deref(), Some("M0,0 L1,1 Z"));
+        assert_eq!(marker.snapshot().text.as_deref(), Some("Label"));
     }
 
     #[test]

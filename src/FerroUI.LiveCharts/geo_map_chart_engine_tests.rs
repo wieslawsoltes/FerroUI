@@ -228,6 +228,53 @@ fn marker_center(measurement: &GeoMapMeasurement, index: usize) -> Point {
     }
 }
 
+/// A geographic visual other than a circle: the path of `geometry_svg` fitted to the size of the
+/// marker, centred on the coordinate, and a label there in the fill colour.
+#[test]
+fn geo_visuals_draw_a_path_or_a_label_at_their_coordinate() {
+    const AT: (f64, f64) = (-74.00, 40.71);
+    let measure = |marker: GeoMarker| {
+        GeoMapChartEngine::measure(Size::new(800.0, 600.0), world(), &[], &[marker], &mercator())
+    };
+    let path = GeoMarker {
+        geometry_svg: Some("M0,0 L10,0 L10,10 L0,10 Z".into()),
+        ..GeoMarker::new(AT.0, AT.1)
+    };
+    let measured = measure(path.clone()).unwrap();
+    let expected = measured.project(AT.0, AT.1).unwrap();
+    let Some(Geometry::Path(commands)) = measured.scene.primitives.last().map(|p| &p.geometry) else {
+        panic!("the marker is the path")
+    };
+    let PathCommand::MoveTo(first) = commands[0] else {
+        panic!("the path starts with a move")
+    };
+    assert!((first.x - (expected.x - path.size * 0.5)).abs() < 1e-9);
+    assert!((first.y - (expected.y - path.size * 0.5)).abs() < 1e-9);
+
+    let label = GeoMarker {
+        text: Some("New York".into()),
+        ..GeoMarker::new(AT.0, AT.1)
+    };
+    let measured = measure(label.clone()).unwrap();
+    let last = measured.scene.primitives.last().unwrap();
+    let Geometry::Text { origin, text, size, anchor, .. } = &last.geometry else {
+        panic!("the marker is a label")
+    };
+    assert_eq!(text, "New York");
+    assert_eq!(*size, label.size);
+    assert_eq!(*anchor, TextAnchor::Center);
+    assert!((origin.x - expected.x).abs() < 1e-9);
+    assert_eq!(last.style.fill, label.fill);
+
+    // An empty text is none: the circle.
+    let empty = GeoMarker { text: Some(String::new()), ..GeoMarker::new(AT.0, AT.1) };
+    let measured = measure(empty).unwrap();
+    assert!(matches!(measured.scene.primitives.last().unwrap().geometry, Geometry::Ellipse(_)));
+
+    let invalid = GeoMarker { geometry_svg: Some("M0,0 X".into()), ..GeoMarker::new(AT.0, AT.1) };
+    assert!(measure(invalid).is_err());
+}
+
 /// GeoVisualElementTests: a marker is drawn at the projection of its coordinate, moved from the
 /// origin, and two coordinates are two pixels.
 #[test]

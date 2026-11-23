@@ -176,6 +176,10 @@ The tooltip of a Cartesian point is written as `GetPrimaryToolTipText` and `GetS
 
 Differences from the source: the source writes the value of every series through the Y axis and the header of a row series through the X axis, which labels the length of a bar by the categories; the native text takes the value axis of a row and its category labels, as the source's range rows do. A financial, OHLC or box point keeps every value (through the value axis) and a heat cell its weight, where the source writes the primary value alone. `mapping.json` records the eight `RangeBarTooltipTests` as ported and `CartesianSeries` as partial.
 
+### #624: the visuals of a map other than circles
+
+A `GeoMarker` (the source's `GeoVisualElement` around a visual) can draw a geometry of any shape, `GeometrySvg` fitted to its `Size` (`VariableSVGPathGeometry`), or a label, `Text` in its `Fill` at a text size of `Size` (`LabelVisual`). Both are centred on the coordinate, follow pan and zoom, and are hidden on the far side of a globe, as the circle is. They are scene primitives, so they draw on the GPU as every other geometry and text of the chart. A source visual is placed by its corner; the native marker stays centred, as its circle always was.
+
 ### #624: the SVG geometry of the polar line markers
 
 `GeometrySvg` of `PolarLineSeries` (the source's `CorePolarLineSeries` of `VariableSVGPathGeometry`) draws its path in place of each marker, fitted to the marker as `Svg.Draw`. `PolarChartEngine::draw_marker_geometries` replaces the circles of the scene, which stays on the GPU path of every other geometry; a series without a path keeps its circles, and path data the parser rejects is the chart's error.
@@ -186,7 +190,7 @@ Differences from the source: the source writes the value of every series through
 
 ## Remaining (#442)
 
-- Geographic map: a custom tooltip object (`IGeoMapTooltip`; no chart kind has one natively, `hover_changed` serves), visual elements other than circle markers at a coordinate, and the theme rules of the view.
+- Geographic map: a custom tooltip object (`IGeoMapTooltip`) is left out on purpose: no chart kind has one natively, and `hover_changed` serves. The theme rules of the view have nothing to port: the source's `ApplyTheme` of the map applies chart rules, and its default themes register none for it (its own comment calls this inert).
 - Polar: the source draws no axis names and has no polar sub-separators, so neither does the native chart.
-- Heat series: the heat legend is not animated (`Easing`, `AnimationsSpeed`).
+- Heat series: nothing is left of the legend's animation. `SKHeatLegend` declares `Easing` and `AnimationsSpeed` and never reads them, so the source's legend does not animate either.
 - Tooltips: the layout of `SKDefaultTooltip` (its table of a miniature, the series name and the value under a header, its wedge, shadow and animation); the placement and the texts are the source's (#624). The animation suites compare frame-by-frame baselines of the source (`AnimationBaselines/*.json`) made with the `EasingFunction` of a chart and the per-point visuals of the source, which the native scene transition does not have; their first draws are ported where a visual starts away from its place (the heat colours, the financial bars).
