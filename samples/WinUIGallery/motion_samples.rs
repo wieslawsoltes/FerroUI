@@ -2,20 +2,50 @@
 
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::{FerroObject, Ref};
-use ferroui_controls::animation::storyboard::{
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::media::IImage;
+use ferroui_base::{BoxedValue, FerroObject, Ref};
+use ferroui_controls::animation::{
     BackEase, BounceEase, CircleEase, CubicEase, DoubleAnimation, EasingFunctionBase, EasingMode, ElasticEase,
     ExponentialEase, PowerEase, QuadraticEase, QuarticEase, QuinticEase, SineEase, Storyboard,
 };
 use ferroui_base::media::TranslateTransform;
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{Button, ComboBox, Control, Grid, NumberBox, RadioButton};
+use ferroui_controls::{Button, ComboBox, Control, Grid, Image, ItemsSource, ListView, NumberBox, RadioButton};
+use std::rc::Rc;
+
+/// The image both examples of the ParallaxView page move.
+pub(crate) const PARALLAX_IMAGE: &str = "ferres://WinUIGallery/Assets/SampleMedia/cliff.jpg";
 
 pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
-    if page_id == "EasingFunction" {
-        wire_easing_functions(root);
+    match page_id {
+        "EasingFunction" => wire_easing_functions(root),
+        "ParallaxView" => wire_parallax_view(root),
+        _ => {}
     }
+}
+
+/// The image of both examples, and the items of the list: the source's `Items`, every control of
+/// the catalog by title.
+fn wire_parallax_view(root: &Ref<Control>) {
+    match crate::assets::load_bitmap(PARALLAX_IMAGE) {
+        Ok(bitmap) => {
+            let image: Rc<dyn IImage> = Rc::new(bitmap);
+            for name in ["ListParallaxImage", "ScrollParallaxImage"] {
+                root.get_control::<Image>(name).set_source(Some(image.clone()));
+            }
+        }
+        Err(error) => {
+            if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::VISUAL) {
+                logger.log(None, &format!("The image of the ParallaxView page was not loaded: {error}"));
+            }
+        }
+    }
+    let mut titles: Vec<&str> = crate::catalog_data::CATALOG.iter().map(|entry| entry.title).collect();
+    titles.sort_unstable();
+    let items = titles.into_iter().map(|title| Some(Rc::new(title.to_owned()) as BoxedValue));
+    root.get_control::<ListView>("ParallaxList").set_items_source(Some(ItemsSource::from_items(items)));
 }
 
 /// The storyboard of an example, with its animation aimed at the transform of the rectangle.
@@ -87,7 +117,8 @@ fn bind_exponent(root: &Ref<Control>, name: &str, animation: &Ref<DoubleAnimatio
                 ease.set_exponent(args.new_value());
             }
         }
-    });
+    })
+    .detach();
 }
 
 fn wire_easing_functions(root: &Ref<Control>) {

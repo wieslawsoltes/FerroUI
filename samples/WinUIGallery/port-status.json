@@ -721,6 +721,62 @@
         }
       ]
     },
+    "ParallaxView": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ParallaxView.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/motion_samples.rs",
+        "src/FerroUI.Controls.Motion/parallax_view.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/motion_samples_tests.rs",
+          "name": "both_parallax_examples_follow_their_scrolling_source"
+        }
+      ],
+      "notes": "Both source examples use the native ParallaxView of ferroui-controls-motion with the source's image and VerticalShift of 500. The image moves through expression animations on its composition visual, read from the manipulation property set of the scroll viewer. The ScrollView of the second example is a ScrollViewer.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ParallaxView/ParallaxViewParallaxListview.txt",
+          "source_sha256": "0407acceef634adccd738d1d8166bdd548888708f25131977c8c7ae8e856dddc",
+          "status": "ported",
+          "target_control": "Example1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "both_parallax_examples_follow_their_scrolling_source"
+            }
+          ],
+          "notes": "The ListView of the source over every control of the catalog, by title."
+        },
+        {
+          "source": "WinUIGallery/Samples/ParallaxView/ParallaxViewParallaxScrollview.txt",
+          "source_sha256": "654ba749cec4e06ac895859ba66ab72e7fd8cf53b0938941ff800dfdc87f37be",
+          "status": "ported",
+          "target_control": "Example2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "both_parallax_examples_follow_their_scrolling_source"
+            }
+          ],
+          "notes": "The nineteen rectangles of the source in a ScrollViewer."
+        }
+      ]
+    },
     "Expander": {
       "status": "ported",
       "implementation": [
