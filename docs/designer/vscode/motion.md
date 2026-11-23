@@ -165,8 +165,8 @@ Agents can read the component property name from `designer_programs` or `designe
 </KeyFrame>
 ```
 
-Mapped Rust keys use literal native immutable brush constructors. Editing stop fields preserves the
-original operands and comments. Editing geometry on a `from_stops` key expands it to the same
+Mapped Rust keys use literal native immutable brush constructors. Edits to inline stops preserve the
+original argument structure and comments. Editing geometry on a `from_stops` key expands it to the same
 brush's `new` constructor. `ImmutableRadialGradientBrush::with_radius` starts with the same
 relative radius on both axes. Use the X and Y radius channels to inspect them. Editing both radii
 to the same relative value keeps `with_radius`. Independent radii or a relative transform expand
@@ -199,6 +199,30 @@ Agents can read `curve_channels` and pass a channel such as `gradient_stop/1/sto
 Use the checked keyframe tools with the accepted source and frame to read, edit, or record the
 complete brush. App Preview exposes brush authoring when the application and preview helper both
 support it.
+
+#### Share gradient stops across Rust keys
+
+Pass a constant slice to a native brush constructor, or borrow a constant array. The Timeline resolves literal stop lists in the selected Cargo target, including lists brought into scope through a named import.
+
+```rust
+use ferroui_base::media::{
+    Colors,
+    immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush},
+};
+
+const APPROVAL_STOPS: &[ImmutableGradientStop] = &[
+    ImmutableGradientStop::new(0.25, Colors::STEEL_BLUE),
+    ImmutableGradientStop::new(1.0, Colors::MEDIUM_SEA_GREEN),
+];
+
+fn approval_brush() -> ImmutableLinearGradientBrush {
+    ImmutableLinearGradientBrush::from_stops(APPROVAL_STOPS)
+}
+```
+
+Choose a numbered stop in its curve or keyframe editor to change its offset or color. Apply to write a private inline stop list at that key. One Undo restores the reference to the constant. Geometry-only edits keep the stop reference. To change the palette for every key that uses it, use Go to Definition on the constant name and edit its initializer in Rust. Studio, the VS Code Timeline, App Preview, and their MCP tools use the same source plan.
+
+![The native Timeline shows the edited final key, its inline stops, and the rendered palette beside the first key’s shared reference](../images/vscode-shared-gradient-stops.png)
 
 ### Animate a transform list
 

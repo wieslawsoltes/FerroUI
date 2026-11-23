@@ -1,9 +1,10 @@
 use super::keyframe::{keyframe, record, MappedKey};
+use super::brush::{shared_key, shared_values};
 use super::{
     DelaySource, FloatSource, RsxAnimation, TargetType, TRACK_TARGET,
 };
-use crate::{tree::escape_xml, RsxCatalog};
-use ferroui_designer_animation::{Easing, FillMode, Repeat, Timeline};
+use crate::{local_rust::LocalRust, tree::escape_xml, RsxCatalog};
+use ferroui_designer_animation::{AnimationGradientStop, Easing, FillMode, Repeat, Timeline};
 use ferroui_designer_core::SourceSpan;
 use std::{cell::RefCell, collections::BTreeMap};
 use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, LitInt, UnOp};
@@ -17,14 +18,21 @@ pub(crate) fn valid_selector(selector: &str) -> bool {
         }))
 }
 
-pub(crate) fn clip(
+pub(crate) fn authored_clip(expr: &Expr, catalog: &RsxCatalog, bindings: &LocalRust) -> Option<RsxAnimation> {
+    let scope = bindings.source_scope(expr)?;
+    clip(expr, catalog, |expression| bindings.path(expression), |expression| shared_values(expression, scope))
+}
+
+pub(super) fn clip(
     expr: &Expr,
     catalog: &RsxCatalog,
     resolve: impl Fn(&Expr) -> Option<String>,
+    read_stops: impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
 ) -> Option<RsxAnimation> {
     // Structural edits reparse the clip by itself. Retain the imported paths
     // resolved in this accepted source scope for that detached check.
     let imports = RefCell::new(BTreeMap::new());
+    let stops = RefCell::new(BTreeMap::new());
     let resolve = |expression: &Expr| {
         let resolved = resolve(expression)?;
         let written = authored_path(expression)?;
@@ -32,6 +40,14 @@ pub(crate) fn clip(
             imports.borrow_mut().insert(written, resolved.clone());
         }
         Some(resolved)
+    };
+    // Detached edits use the same authored constant values while replacing only
+    // the selected use. They never patch source outside the animation builder.
+    let read_stops = |expression: &Expr| {
+        let name = shared_key(expression)?;
+        let values = read_stops(expression)?;
+        stops.borrow_mut().insert(name, values.clone());
+        Some(values)
     };
     let (factory, methods) = chain(expr)?;
     let duration = milliseconds(view_argument_with(factory, "animation", &resolve)?, &resolve)?;
@@ -44,7 +60,7 @@ pub(crate) fn clip(
     for method in methods {
         match method.method.to_string().as_str() {
             "key_frame" => {
-                for MappedKey { source: key, owner } in keyframe(method, duration, catalog, &resolve)? {
+                for MappedKey { source: key, owner } in keyframe(method, duration, catalog, &resolve, &read_stops)? {
                     if let Some(owner) = owner {
                         if target_type.as_ref().is_some_and(|target| *target != owner) {
                             return None;
@@ -81,6 +97,7 @@ pub(crate) fn clip(
         target_type,
         keys,
         imports: imports.into_inner(),
+        shared_stops: stops.into_inner(),
         attachment: None,
     })
 }

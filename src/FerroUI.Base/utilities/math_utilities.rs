@@ -183,7 +183,7 @@ impl MathUtilities {
 
     /// Returns whether the double is "close" to 0. Same as `are_close(value, 0.0)` but faster.
     #[inline]
-    pub fn is_zero(value: f64) -> bool {
+    pub const fn is_zero(value: f64) -> bool {
         value.abs() < 10.0 * Self::DOUBLE_EPSILON
     }
 

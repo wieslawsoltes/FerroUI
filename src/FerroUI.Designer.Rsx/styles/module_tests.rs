@@ -74,6 +74,36 @@ fn view() -> Element { rsx! { Border {
 }
 
 #[test]
+fn shared_gradient_keys_follow_an_unsaved_palette_module() {
+    let fixture = Fixture::create();
+    fixture.write("application.rs", "mod palette; mod screen;\n");
+    let initial = r#"use ferroui_base::media::{immutable::ImmutableGradientStop as Stop, Colors};
+pub const PALETTE: &[Stop] = &[Stop::new(0.2, Colors::STEEL_BLUE), Stop::new(1.0, Colors::MEDIUM_SEA_GREEN)];
+"#;
+    let palette = fixture.write("palette.rs", initial);
+    let screen = r#"use crate::palette::PALETTE;
+use ferroui_base::media::{immutable::ImmutableLinearGradientBrush as Gradient, IBrush};
+use ferroui_controls::Border;
+use ferroui_view::prelude::*;
+use std::rc::Rc;
+fn view() -> Element { rsx! { Border {
+    styles: [style("Border").animation(animation(ms(1000)).key_frame(1.0, |key|
+        key.set(Border::background_property(), Some(Rc::new(Gradient::from_stops(PALETTE)) as Rc<dyn IBrush>))))],
+} } }"#;
+    let uri = fixture.write("screen.rs", screen);
+    let modules = RustModuleSources::capture(&fixture.0, &fixture.0.join("application.rs"), &uri, screen, &[]).unwrap();
+    let caret = screen.find("rsx!").unwrap();
+    let catalog = RsxCatalog::built_in();
+    let render = |modules: &RustModuleSources| {
+        let view = catalog.project_with_modules(screen, caret, Some(modules)).unwrap();
+        view.preview_markup().animations[0].1.xaml.clone()
+    };
+    assert!(render(&modules).contains("Offset=\"0.2\""));
+    let draft = modules.with_file_text(&palette, &initial.replace("0.2,", "0.37,")).unwrap();
+    assert!(render(&draft).contains("Offset=\"0.37\""));
+}
+
+#[test]
 fn resolves_the_packed_integer_through_a_color_constructor_in_another_module() {
     let fixture = Fixture::create();
     fixture.write("application.rs", "mod tokens; mod brand; mod screen;\n");

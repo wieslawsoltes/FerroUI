@@ -10,7 +10,7 @@ pub struct ImmutableGradientStop {
 
 impl ImmutableGradientStop {
     /// Creates a gradient stop. The offset is clamped to `[0, 1]`.
-    pub fn new(offset: f64, color: Color) -> Self {
+    pub const fn new(offset: f64, color: Color) -> Self {
         let mut offset = offset;
         if MathUtilities::is_zero(offset) {
             offset = 0.0;
@@ -55,7 +55,8 @@ mod tests {
 
     #[test]
     fn offset_is_clamped() {
-        assert_eq!(0.0, ImmutableGradientStop::new(-1.0, Colors::RED).offset());
+        const FIRST: ImmutableGradientStop = ImmutableGradientStop::new(-1.0, Colors::RED);
+        assert_eq!(0.0, FIRST.offset());
         assert_eq!(1.0, ImmutableGradientStop::new(2.0, Colors::RED).offset());
         assert_eq!(0.5, ImmutableGradientStop::new(0.5, Colors::RED).offset());
         assert!(ImmutableGradientStop::new(-0.0, Colors::RED).offset().is_sign_positive());

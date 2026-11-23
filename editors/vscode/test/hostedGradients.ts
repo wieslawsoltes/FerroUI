@@ -79,7 +79,51 @@ export async function verifyHostedGradients(preview: NativePreview, update: (rev
     await verifyMappedGradient(preview, update);
     await verifyMappedCircularGradient(preview, update);
     await verifyMappedSolidBrush(preview, update);
+    await verifySharedGradientStops(preview, update);
     console.log('App Preview plotted native gradient geometry and stops, matched the recorded native frame, and preserved mapped Rust');
+}
+
+async function verifySharedGradientStops(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {
+    const original = [
+        'use ferroui_base::media::{Color, IBrush, immutable::{ImmutableGradientStop as Stop, ImmutableLinearGradientBrush as Brush}};',
+        'use ferroui_controls::Border;',
+        'use std::rc::Rc;',
+        'const BRAND_STOPS: &[Stop] = &[Stop::new(0.25, Color::from_argb(255, 41, 85, 137)),',
+        '    Stop::new(1.0, Color::from_argb(255, 80, 170, 151))];',
+        'fn view() { ferroui_view::rsx! { StackPanel {',
+        '    styles: [ferroui_view::style("Border#Card").animation(ferroui_view::animation(ferroui_view::ms(2000))',
+        '        .key_frame(0.0, |key| key.set(Border::background_property(), Some(Rc::new(Brush::from_stops(BRAND_STOPS)) as Rc<dyn IBrush>)))',
+        '        .key_frame(1.0, |key| key.set(Border::background_property(), Some(Rc::new(Brush::from_stops(/* selected use 🌿 */ BRAND_STOPS)) as Rc<dyn IBrush>)))',
+        '        .fill_mode(ferroui_base::animation::FillMode::Both))],',
+        '    Border { name: "Card", width: 240.0, height: 140.0 }',
+        '} } }',
+    ].join('\r\n');
+    const request = (revision: number, source: string): HostedSource => {
+        const draft = update(revision, source);
+        return { ...draft, projectPath: '/SharedGradient.rs', document: { ...draft.document, source, language: 'rust',
+            uri: new URL('SharedGradient.rs', draft.document.uri).toString(), caret: { line: 5, character: 34 } } };
+    };
+    const before = await preview.renderHosted(request(4157, original));
+    const { program, track } = trackOf(before);
+    assert.equal(track.keyframes.length, 2);
+    const key = track.keyframes[1];
+    assert.equal(key.curve_values?.find(value => value.channel === offset)?.value, .25);
+    const base = await preview.sampleHostedAnimation({ ...identity(before), program: program.id, elapsed: 2, restart: true });
+    const { patch } = await preview.planHostedKeyframe(identity(base.frame), {
+        program: program.id, target: track.target, property, previous: key.time, time: key.time,
+        easing: key.easing_text, component: { channel: offset, value: .56 },
+    });
+    assert.ok(patch);
+    const edited = apply(original, patch);
+    assert.equal(edited.split('fn view').shift(), original.split('fn view').shift());
+    assert.equal(edited.match(/from_stops\(BRAND_STOPS\)/g)?.length, 1);
+    assert.match(edited, /\/\* selected use 🌿 \*\/ &\[/u);
+    const after = await preview.renderHosted(request(4158, edited));
+    const updated = trackOf(after);
+    assert.deepEqual(updated.track.keyframes.map(key =>
+        key.curve_values?.find(value => value.channel === offset)?.value), [.25, .56]);
+    const sampled = await preview.sampleHostedAnimation({ ...identity(after), program: updated.program.id, elapsed: 2, restart: true });
+    assert.notEqual(sampled.frame.image.png, base.frame.image.png);
 }
 
 async function verifyMappedGradient(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {

@@ -19,7 +19,7 @@ mod transform_list;
 mod value;
 mod variant;
 
-use ferroui_designer_animation::{native_key_time, Easing, KeyframeEdit, ValueKind};
+use ferroui_designer_animation::{native_key_time, AnimationGradientStop, Easing, KeyframeEdit, ValueKind};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use std::collections::BTreeMap;
 pub(crate) use keyframe::{BUILTINS as BUILTIN_PROPERTIES, property as view_property};
@@ -57,6 +57,7 @@ pub struct RsxAnimation {
     target_type: Option<TargetType>,
     keys: Vec<KeySource>,
     imports: BTreeMap<String, String>,
+    shared_stops: BTreeMap<String, Vec<AnimationGradientStop>>,
     pub(crate) attachment: Option<program_comment::AnimationAttachment>,
 }
 

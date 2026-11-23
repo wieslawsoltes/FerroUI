@@ -1,13 +1,21 @@
-use super::super::{FloatSource, color::ColorSource, syntax};
+use super::super::{color::ColorSource, syntax, FloatSource};
+use super::operand::Leaf;
 use crate::blocks::keep_comments;
+use crate::local_rust::RustSourceScope;
 use ferroui_designer_animation::{AnimationGradientStop, AnimationValue};
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use syn::{Expr, spanned::Spanned};
+use syn::{spanned::Spanned, Expr, ExprArray};
 
 const STOP: &str = "::ferroui_base::media::immutable::ImmutableGradientStop::new";
 
 #[derive(Clone, Debug)]
-pub(super) struct StopsSource {
+pub(super) enum StopsSource {
+    Inline(InlineStops),
+    Shared(Leaf),
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct InlineStops {
     stops: Vec<StopSource>,
     array: SourceSpan,
     text: String,
@@ -25,17 +33,75 @@ impl StopsSource {
     pub(super) fn read(
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        shared: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
     ) -> Option<(Vec<AnimationGradientStop>, Self)> {
-        let Expr::Reference(reference) = expression else {
-            return None;
-        };
-        let Expr::Array(array) = reference.expr.as_ref() else {
-            return None;
-        };
-        if reference.mutability.is_some() || !reference.attrs.is_empty() || !array.attrs.is_empty()
-        {
-            return None;
+        if let Some(array) = borrowed(expression).and_then(array) {
+            let (values, source) = InlineStops::read(array, resolve)?;
+            return Some((values, Self::Inline(source)));
         }
+        Some((shared(expression)?, Self::Shared(Leaf::read(expression)?)))
+    }
+
+    pub(super) fn plan(
+        &self,
+        original: &[AnimationGradientStop],
+        next: &[AnimationGradientStop],
+        patches: &mut Vec<TextPatch>,
+    ) -> Result<(), String> {
+        match self {
+            Self::Inline(source) => source.plan(original, next, patches),
+            Self::Shared(source) => {
+                if original != next {
+                    source.plan(literal(next), patches);
+                }
+                Ok(())
+            }
+        }
+    }
+}
+
+pub(in crate::animation) fn shared_key(expression: &Expr) -> Option<String> {
+    match borrowed(expression) {
+        Some(path) => Some(format!("&{}", syntax::authored_path(path)?)),
+        None => syntax::authored_path(syntax::unparen(expression)),
+    }
+}
+
+pub(in crate::animation) fn shared_values(
+    expression: &Expr,
+    scope: RustSourceScope<'_>,
+) -> Option<Vec<AnimationGradientStop>> {
+    let reference = borrowed(expression);
+    let path = reference.unwrap_or_else(|| syntax::unparen(expression));
+    let (initializer, scope) = scope.constant_initializer(path)?;
+    let array = if reference.is_some() {
+        array(initializer)?
+    } else {
+        array(borrowed(initializer)?)?
+    };
+    InlineStops::read(array, &|path| scope.path(path)).map(|(values, _)| values)
+}
+
+fn borrowed(expression: &Expr) -> Option<&Expr> {
+    let Expr::Reference(reference) = syntax::unparen(expression) else {
+        return None;
+    };
+    (reference.attrs.is_empty() && reference.mutability.is_none())
+        .then(|| syntax::unparen(&reference.expr))
+}
+
+fn array(expression: &Expr) -> Option<&ExprArray> {
+    let Expr::Array(array) = syntax::unparen(expression) else {
+        return None;
+    };
+    array.attrs.is_empty().then_some(array)
+}
+
+impl InlineStops {
+    fn read(
+        array: &ExprArray,
+        resolve: &impl Fn(&Expr) -> Option<String>,
+    ) -> Option<(Vec<AnimationGradientStop>, Self)> {
         let mut values = Vec::with_capacity(array.elems.len());
         let mut stops = Vec::with_capacity(array.elems.len());
         for expr in &array.elems {
@@ -67,7 +133,7 @@ impl StopsSource {
         Some((values, result))
     }
 
-    pub(super) fn plan(
+    fn plan(
         &self,
         original: &[AnimationGradientStop],
         next: &[AnimationGradientStop],

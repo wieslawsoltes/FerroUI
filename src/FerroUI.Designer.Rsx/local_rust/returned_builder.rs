@@ -33,6 +33,14 @@ impl<'a> RustSourceScope<'a> {
         self.resolver.path_in(self.scope, expression)
     }
 
+    pub(crate) fn constant_initializer(self, path: &Expr) -> Option<(&'a Expr, Self)> {
+        let Resolved::Constant { item, scope, .. } = self.resolver.resolve(self.scope, path)? else {
+            return None;
+        };
+        let value = self.resolver.value_in(scope, &item.expr)?;
+        Some((value.expression, Self { scope: value.scope, ..self }))
+    }
+
     pub(crate) fn returned_builder(mut self, assignment: &Expr) -> Option<ReturnedBuilder<'a>> {
         let mut expression = ungroup(assignment);
         let mut resolved = None;

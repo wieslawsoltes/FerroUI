@@ -1,7 +1,7 @@
 use super::syntax::{authored_path, float, method_suffix, path, span};
 use super::{KeySource, Property, TargetType, ValueShape, TRACK_TARGET};
 use crate::RsxCatalog;
-use ferroui_designer_animation::{AnimationBrush, AnimationValue, Timeline, ValueKind, native_key_time};
+use ferroui_designer_animation::{AnimationBrush, AnimationGradientStop, AnimationValue, Timeline, ValueKind, native_key_time};
 use syn::{Expr, ExprMethodCall, Pat};
 
 pub(super) struct MappedKey {
@@ -14,6 +14,7 @@ pub(super) fn keyframe(
     duration: f64,
     catalog: &RsxCatalog,
     resolve: &impl Fn(&Expr) -> Option<String>,
+    shared_stops: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
 ) -> Option<Vec<MappedKey>> {
     if method.args.len() != 2 {
         return None;
@@ -63,7 +64,7 @@ pub(super) fn keyframe(
             return None;
         }
         let (getter, property) = read_property(&current.args[0], catalog, resolve)?;
-        let value = property.shape.read_keyframe(&current.args[1], catalog.project_effects, resolve)?;
+        let value = property.shape.read_keyframe(&current.args[1], catalog.project_effects, resolve, shared_stops)?;
         keys.push(MappedKey {
             source: KeySource {
                 property: property.name,

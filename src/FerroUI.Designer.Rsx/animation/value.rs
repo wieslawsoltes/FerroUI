@@ -122,9 +122,10 @@ impl ValueShape {
         expression: &Expr,
         project_effects: bool,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        shared_stops: &impl Fn(&Expr) -> Option<Vec<ferroui_designer_animation::AnimationGradientStop>>,
     ) -> Option<ValueSource> {
         if self.brush {
-            if let Some((value, source)) = BrushSource::read(expression, resolve) {
+            if let Some((value, source)) = BrushSource::read(expression, resolve, shared_stops) {
                 value.validate().ok()?;
                 return Some(ValueSource { value, source: ValueSyntax::Brush(Box::new(source)) });
             }

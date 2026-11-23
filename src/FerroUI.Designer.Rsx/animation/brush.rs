@@ -6,12 +6,14 @@ mod stops;
 use super::syntax;
 use arguments::Arguments;
 use ferroui_designer_animation::{
-    AnimationBrush, AnimationGradient, AnimationValue, GradientShape,
+    AnimationBrush, AnimationGradient, AnimationGradientStop, AnimationValue, GradientShape,
 };
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use stops::StopsSource;
 use solid::SolidSource;
 use syn::{Expr, Type};
+
+pub(super) use stops::{shared_key, shared_values};
 
 const IMMUTABLE: &str = "ferroui_base::media::immutable::Immutable";
 
@@ -40,6 +42,7 @@ impl BrushSource {
     pub(super) fn read(
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
+        shared_stops: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
     ) -> Option<(AnimationValue, Self)> {
         let operand = syntax::unparen(operand::optional(expression, resolve)??);
         let operand = match operand {
@@ -69,7 +72,7 @@ impl BrushSource {
             return Some((AnimationValue::Brush(brush), Self::Solid(source)));
         }
         let shape = GradientShape::defaults(class)?;
-        let (values, stops) = StopsSource::read(call.args.first()?, resolve)?;
+        let (values, stops) = StopsSource::read(call.args.first()?, resolve, shared_stops)?;
         let mut gradient = AnimationGradient::from_stops(shape, values);
         gradient.transform_origin = ferroui_base::RelativePoint::TOP_LEFT.into();
         let (gradient, constructor) = match method {

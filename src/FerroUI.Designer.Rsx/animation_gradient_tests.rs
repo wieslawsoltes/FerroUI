@@ -2,6 +2,8 @@ use crate::RsxCatalog;
 use ferroui_designer_animation::KeyframeEdit;
 use ferroui_designer_core::TextPatch;
 
+mod shared;
+
 const SOURCE: &str = r###"fn header() { rsx! { TextBlock { text: "Keep 🧭" } } }
 fn view() { rsx! {
     StackPanel {

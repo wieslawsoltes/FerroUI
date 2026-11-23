@@ -142,7 +142,7 @@ impl ProjectedStyles {
                     self.issue(rust::span(nested), "Reveal the computed nested Rust style");
                 }
             } else if let Some(animation) = rust::argument(call, "animation") {
-                if let Some(mut clip) = rust::clip(animation, catalog, |expression| bindings.path(expression)) {
+                if let Some(mut clip) = rust::authored_clip(animation, catalog, bindings) {
                     if needs_target_type {
                         rust::scope_untyped_clip(&mut clip, catalog);
                     }
