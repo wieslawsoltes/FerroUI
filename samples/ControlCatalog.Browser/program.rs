@@ -84,8 +84,9 @@ use wasm_bindgen::prelude::*;
 pub fn run_main(href: &str) {
     let options = parse_args(&[href]).unwrap_or_default();
     let initial_theme = catalog_theme_of_uri(href);
+    let (builder, options) = with_requested_backend(build_ferro_app(), options);
 
-    build_ferro_app()
+    builder
         .log_to_text_writer(std::io::stdout(), LogEventLevel::Warning, &[])
         .after_setup(move |_| {
             media_samples::install();
@@ -405,6 +406,30 @@ fn json_string(text: &str) -> String {
     literal
 }
 
+/// The builder and the options for the backend the page asked for: `?Renderer=ProGPU` draws with
+/// the ProGPU backend on the WebGPU device the page requested. A page without a device keeps the
+/// default backend and modes.
+#[cfg(feature = "progpu")]
+fn with_requested_backend(builder: AppBuilder, options: BrowserPlatformOptions) -> (AppBuilder, BrowserPlatformOptions) {
+    use ferroui_progpu::{ProGpuApplicationExtensions, ProGpuDevice};
+    if options.renderer != BrowserRenderer::External {
+        return (builder, options);
+    }
+    match ProGpuDevice::new() {
+        Ok(_) => (builder.use_browser().use_progpu(), options),
+        Err(error) => {
+            println!("DemoBrowserPlatformOptions.Renderer: ProGPU has no WebGPU device ({error}), the default draws");
+            let defaults = BrowserPlatformOptions::default();
+            (builder, BrowserPlatformOptions { renderer: defaults.renderer, rendering_mode: defaults.rendering_mode, ..options })
+        }
+    }
+}
+
+#[cfg(not(feature = "progpu"))]
+fn with_requested_backend(builder: AppBuilder, options: BrowserPlatformOptions) -> (AppBuilder, BrowserPlatformOptions) {
+    (builder, options)
+}
+
 /// The application builder of the catalog.
 pub fn build_ferro_app() -> AppBuilder {
     App::with_theme_fonts(AppBuilder::configure::<App>()).with_inter_font().with(Rc::new(FontManagerOptions {
@@ -526,7 +551,19 @@ fn parse_args(args: &[&str]) -> Option<BrowserPlatformOptions> {
     // the CPU mode for `Software2D`). A name that is no backend fails as an
     // unknown rendering mode does; a backend the module does not have
     // leaves Skia, and the line below says which one draws.
-    if let Some(name) = query_value(query, "Renderer") {
+    if let Some(name) = query_value(query, "Renderer").filter(|name| {
+        // The ProGPU backend is selected on the builder (`with_requested_backend`).
+        if !name.eq_ignore_ascii_case("ProGPU") {
+            return true;
+        }
+        if cfg!(feature = "progpu") {
+            options.renderer = BrowserRenderer::External;
+            options.rendering_mode = vec![BrowserRenderingMode::WebGPU];
+        } else {
+            println!("DemoBrowserPlatformOptions.Renderer: ProGPU is not in this module (built without the feature `progpu`)");
+        }
+        false
+    }) {
         match BrowserRenderer::parse(&name) {
             Some(renderer) if renderer.is_available() => options.renderer = renderer,
             Some(renderer) => println!(

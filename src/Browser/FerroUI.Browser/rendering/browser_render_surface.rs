@@ -1,7 +1,11 @@
 use super::web_render_target::{get_render_target, BrowserRenderTarget};
-use super::BrowserSurfaceShared;
+use super::{BrowserSurfaceShared, RenderStatistics};
+use crate::interop::canvas_helper::RENDER_TARGET_KIND_WEB_GPU;
+use crate::interop::thread_proxy;
 use ferroui_base::platform::surfaces::{IFramebufferPlatformSurface, IFramebufferRenderTarget, IPlatformRenderSurface};
 use ferroui_opengl::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget};
+use ferroui_base::PixelSize;
+use ferroui_controls::platform::IWebGpuCanvasSurface;
 use ferroui_opengl::IGlContext;
 use std::any::{Any, TypeId};
 use std::rc::Rc;
@@ -83,6 +87,12 @@ impl IPlatformRenderSurface for BrowserRenderSurface {
                 return Some(Rc::new(this));
             }
         }
+        if kind == TypeId::of::<dyn IWebGpuCanvasSurface>() {
+            if let Some(BrowserRenderTarget::WebGpu(_)) = self.target() {
+                let this: Rc<dyn IWebGpuCanvasSurface> = Rc::new(Self { shared: self.shared.clone() });
+                return Some(Rc::new(this));
+            }
+        }
         None
     }
 
@@ -99,6 +109,38 @@ impl IFramebufferPlatformSurface for BrowserRenderSurface {
             Some(BrowserRenderTarget::Software(target)) => target.create_framebuffer_render_target(self.shared.clone()),
             _ => panic!("the thread has no software render target of the canvas"),
         }
+    }
+}
+
+impl IWebGpuCanvasSurface for BrowserRenderSurface {
+    fn selector(&self) -> String {
+        match self.target() {
+            Some(BrowserRenderTarget::WebGpu(target)) => target.selector().to_string(),
+            _ => String::new(),
+        }
+    }
+
+    fn frame_size(&self) -> PixelSize {
+        let (size, _) = self.shared.size();
+        if let Some(BrowserRenderTarget::WebGpu(target)) = self.target() {
+            target.set_size(size);
+        }
+        size
+    }
+
+    fn prefers_rgba8(&self) -> bool {
+        matches!(self.target(), Some(BrowserRenderTarget::WebGpu(target)) if target.prefers_rgba8())
+    }
+
+    fn frame_presented(&self, size: PixelSize) {
+        RenderStatistics::frame_presented(
+            thread_proxy::current_thread(),
+            RENDER_TARGET_KIND_WEB_GPU,
+            0,
+            size.width,
+            size.height,
+        );
+        self.shared.frame_presented();
     }
 }
 

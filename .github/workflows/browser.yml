@@ -87,6 +87,10 @@ jobs:
           -p ferroui-browser --features vello --examples
           && cargo check --locked --target wasm32-unknown-emscripten
           -p control-catalog-browser --features vello
+      # The ProGPU backend on the WebGPU of the page, behind a feature no published site turns on. Its
+      # engine is compiled here with the Emscripten of this job (docs/porting/progpu-backend.md, 2.6).
+      - name: Check the catalog host with the ProGPU backend
+        run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features progpu
       # The JavaScript bridge of the CDP developer tools (docs/devtools-cdp.md), also behind a feature.
       - name: Check the catalog host with the CDP bridge
         run: cargo check --locked --target wasm32-unknown-emscripten -p control-catalog-browser --features cdp

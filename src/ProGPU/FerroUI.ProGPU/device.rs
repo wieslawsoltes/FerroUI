@@ -205,6 +205,7 @@ fn no_label() -> WGPUStringView {
     WGPUStringView { data: ptr::null(), length: 0 }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 unsafe extern "C" fn on_adapter(status: WGPURequestAdapterStatus, adapter: WGPUAdapter, _: WGPUStringView, slot: *mut c_void, _: *mut c_void) {
     if status == WGPURequestAdapterStatus_Success {
         // SAFETY: `slot` is the `WGPUAdapter` slot of `ProGpuDevice::new`.
@@ -212,6 +213,7 @@ unsafe extern "C" fn on_adapter(status: WGPURequestAdapterStatus, adapter: WGPUA
     }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 unsafe extern "C" fn on_device(status: WGPURequestDeviceStatus, device: WGPUDevice, _: WGPUStringView, slot: *mut c_void, _: *mut c_void) {
     if status == WGPURequestDeviceStatus_Success {
         // SAFETY: `slot` is the `WGPUDevice` slot of `ProGpuDevice::new`.
@@ -219,6 +221,7 @@ unsafe extern "C" fn on_device(status: WGPURequestDeviceStatus, device: WGPUDevi
     }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 unsafe extern "C" fn on_mapped(status: WGPUMapAsyncStatus, _: WGPUStringView, slot: *mut c_void, _: *mut c_void) {
     // SAFETY: `slot` is the flag of `ProGpuDevice::read_rgba8`.
     unsafe { *(slot as *mut i32) = if status == WGPUMapAsyncStatus_Success { 1 } else { -1 } };
@@ -228,6 +231,7 @@ impl ProGpuDevice {
     /// Creates a device on the default adapter of the WebGPU implementation: of the graphics API
     /// of the platform on Linux (Vulkan) and Windows (Direct3D 12), where the windows are drawn
     /// through surfaces of that API, and of any API without an adapter of it.
+    #[cfg(not(target_os = "emscripten"))]
     pub fn new() -> Result<Self, ProGpuDeviceError> {
         #[cfg(target_os = "linux")]
         if let Ok(device) = Self::on_backends(WGPUInstanceBackend_Vulkan) {
@@ -240,7 +244,31 @@ impl ProGpuDevice {
         Self::on_backends(WGPUInstanceBackend_All)
     }
 
+    /// The device the page requested before the module started, which the module cannot wait
+    /// for itself (the option `preinitializedWebGPUDevice` of the module).
+    #[cfg(target_os = "emscripten")]
+    pub fn new() -> Result<Self, ProGpuDeviceError> {
+        use progpu_native_sys::browser::{progpu_native_browser_device_queue, progpu_native_browser_imported_device};
+        if !progpu_native_sys::abi_matches() {
+            return Err(ProGpuDeviceError::AbiMismatch);
+        }
+        // SAFETY: plain queries of the module; a device that is not null is a reference owned here.
+        unsafe {
+            let device = progpu_native_browser_imported_device();
+            if device == 0 {
+                return Err(ProGpuDeviceError::NoDevice);
+            }
+            let queue = progpu_native_browser_device_queue(device);
+            if queue == 0 {
+                wgpuDeviceRelease(device as WGPUDevice);
+                return Err(ProGpuDeviceError::NoDevice);
+            }
+            Ok(Self { instance: ptr::null_mut(), adapter: ptr::null_mut(), device: device as WGPUDevice, queue: queue as WGPUQueue })
+        }
+    }
+
     /// Creates a device on the default adapter of `backends`.
+    #[cfg(not(target_os = "emscripten"))]
     fn on_backends(backends: WGPUInstanceBackend) -> Result<Self, ProGpuDeviceError> {
         if !progpu_native_sys::abi_matches() {
             return Err(ProGpuDeviceError::AbiMismatch);
@@ -347,7 +375,10 @@ impl ProGpuDevice {
         if !ENTERED.get() {
             // SAFETY: the device is alive; a poll that does not wait only completes what the
             // device has finished.
-            unsafe { wgpuDevicePoll(self.device, 0, ptr::null()) };
+            #[cfg(not(target_os = "emscripten"))]
+            unsafe {
+                wgpuDevicePoll(self.device, 0, ptr::null())
+            };
             MARK.with(|_| ());
             ENTERED.set(true);
         }
@@ -508,7 +539,16 @@ impl ProGpuDevice {
         }
     }
 
+    /// Reads a texture of `RGBA8Unorm` back. A page cannot wait for the GPU, so in the browser
+    /// the pixels are transparent, and the first read says so in the log.
+    #[cfg(target_os = "emscripten")]
+    pub fn read_rgba8(&self, _texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
+        notes::note_once("no-read-back", "pixels are not read back from the GPU in the browser");
+        vec![0; width as usize * height as usize * 4]
+    }
+
     /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
+    #[cfg(not(target_os = "emscripten"))]
     pub fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
         self.enter();
         // Rows of a copy are aligned to 256 bytes.
@@ -586,7 +626,9 @@ impl Drop for ProGpuDevice {
             if !self.adapter.is_null() {
                 wgpuAdapterRelease(self.adapter);
             }
-            wgpuInstanceRelease(self.instance);
+            if !self.instance.is_null() {
+                wgpuInstanceRelease(self.instance);
+            }
         }
     }
 }
@@ -595,6 +637,43 @@ impl ProGpuEngine {
     /// An engine on `device` rendering into targets of `format`, resolving its procedures from the
     /// linked wgpu-native.
     pub fn new(device: &Rc<ProGpuDevice>, format: TargetFormat) -> Result<Self, ProGpuDeviceError> {
+        let mut engine: *mut progpu_native_engine = ptr::null_mut();
+        // SAFETY: the options are borrowed for the call; the handles are those of the device.
+        let status = unsafe { Self::create(device, format, &mut engine) };
+        if status == PROGPU_NATIVE_STATUS_SUCCESS {
+            Ok(Self {
+                device: device.clone(),
+                engine,
+                format,
+                thread: Cell::new(std::thread::current().id()),
+                outlines_seen: Cell::new(0),
+                retained_stream: RefCell::new(None),
+            })
+        } else {
+            Err(ProGpuDeviceError::Engine(status))
+        }
+    }
+
+    /// Creates the engine of the C ABI on the WebGPU of the page.
+    #[cfg(target_os = "emscripten")]
+    unsafe fn create(device: &ProGpuDevice, format: TargetFormat, engine: *mut *mut progpu_native_engine) -> progpu_native_status {
+        use progpu_native_sys::browser::*;
+        let options = progpu_native_browser_engine_options {
+            struct_size: std::mem::size_of::<progpu_native_browser_engine_options>() as u32,
+            native_abi_version: PROGPU_NATIVE_ABI_VERSION,
+            adapter_abi_version: PROGPU_NATIVE_BROWSER_ADAPTER_ABI_VERSION,
+            target_format: format.engine_format(),
+            device: device.device as usize,
+            queue: device.queue as usize,
+            ..Default::default()
+        };
+        // SAFETY: the options are borrowed for the call; the slot is the caller's.
+        unsafe { progpu_native_browser_engine_create(&options, engine) }
+    }
+
+    /// Creates the engine of the C ABI, resolving its procedures from the linked wgpu-native.
+    #[cfg(not(target_os = "emscripten"))]
+    unsafe fn create(device: &ProGpuDevice, format: TargetFormat, engine: *mut *mut progpu_native_engine) -> progpu_native_status {
         let options = progpu_native_dawn_engine_options {
             struct_size: std::mem::size_of::<progpu_native_dawn_engine_options>() as u32,
             native_abi_version: PROGPU_NATIVE_ABI_VERSION,
@@ -609,14 +688,8 @@ impl ProGpuEngine {
             queue: device.queue as usize,
             flags: 0,
         };
-        let mut engine: *mut progpu_native_engine = ptr::null_mut();
-        // SAFETY: the options are borrowed for the call; the handles are those of the device.
-        let status = unsafe { progpu_native_dawn_engine_create(&options, &mut engine) };
-        if status == PROGPU_NATIVE_STATUS_SUCCESS {
-            Ok(Self { device: device.clone(), engine, format, thread: Cell::new(std::thread::current().id()), outlines_seen: Cell::new(0), retained_stream: RefCell::new(None), })
-        } else {
-            Err(ProGpuDeviceError::Engine(status))
-        }
+        // SAFETY: the options are borrowed for the call; the slot is the caller's.
+        unsafe { progpu_native_dawn_engine_create(&options, engine) }
     }
 
     /// The device of the engine.

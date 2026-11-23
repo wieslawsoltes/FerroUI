@@ -25,12 +25,20 @@ pub enum BrowserRenderingMode {
     WebGL1,
     /// Rendered with WebGL 2.
     WebGL2,
+    /// Rendered with the WebGPU of the page, by a backend the application chose
+    /// ([`BrowserRenderer::External`]). The canvas stays on the thread of the page.
+    WebGPU,
 }
 
 impl BrowserRenderingMode {
     /// The mode with the given name, ignoring case.
     pub fn parse(name: &str) -> Option<BrowserRenderingMode> {
-        [BrowserRenderingMode::Software2D, BrowserRenderingMode::WebGL1, BrowserRenderingMode::WebGL2]
+        [
+            BrowserRenderingMode::Software2D,
+            BrowserRenderingMode::WebGL1,
+            BrowserRenderingMode::WebGL2,
+            BrowserRenderingMode::WebGPU,
+        ]
             .into_iter()
             .find(|mode| mode.name().eq_ignore_ascii_case(name))
     }
@@ -41,6 +49,7 @@ impl BrowserRenderingMode {
             BrowserRenderingMode::Software2D => "Software2D",
             BrowserRenderingMode::WebGL1 => "WebGL1",
             BrowserRenderingMode::WebGL2 => "WebGL2",
+            BrowserRenderingMode::WebGPU => "WebGPU",
         }
     }
 }
@@ -57,6 +66,10 @@ impl BrowserRenderingMode {
 /// | `WebGL2` | Ganesh | the hybrid mode (`vello_gpu` over the WebGL2 context) |
 /// | `WebGL1` | Ganesh | not drawn: the mode is taken out of the list |
 /// | `Software2D` | Skia raster | the CPU mode (`vello_cpu`) |
+/// | `WebGPU` | not drawn: taken out of the list | not drawn: taken out of the list |
+///
+/// [`External`](Self::External) is a backend the application selected itself on its builder (the
+/// ProGPU backend, which draws the `WebGPU` mode): the list of modes is its own.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum BrowserRenderer {
     /// The Skia backend.
@@ -66,12 +79,17 @@ pub enum BrowserRenderer {
     /// `vello` of this crate.
     #[cfg_attr(not(feature = "skia"), default)]
     Vello,
+    /// A backend the application selected on its builder, after `use_browser`. This crate does
+    /// not depend on it: the application keeps its choice and its list of modes.
+    External,
 }
 
 impl BrowserRenderer {
     /// The backend with the given name, ignoring case.
     pub fn parse(name: &str) -> Option<BrowserRenderer> {
-        [BrowserRenderer::Skia, BrowserRenderer::Vello].into_iter().find(|renderer| renderer.name().eq_ignore_ascii_case(name))
+        [BrowserRenderer::Skia, BrowserRenderer::Vello, BrowserRenderer::External]
+            .into_iter()
+            .find(|renderer| renderer.name().eq_ignore_ascii_case(name))
     }
 
     /// The name of the backend.
@@ -79,6 +97,7 @@ impl BrowserRenderer {
         match self {
             BrowserRenderer::Skia => "Skia",
             BrowserRenderer::Vello => "Vello",
+            BrowserRenderer::External => "External",
         }
     }
 
@@ -87,6 +106,7 @@ impl BrowserRenderer {
         match self {
             BrowserRenderer::Skia => cfg!(feature = "skia"),
             BrowserRenderer::Vello => cfg!(feature = "vello"),
+            BrowserRenderer::External => true,
         }
     }
 
@@ -94,16 +114,18 @@ impl BrowserRenderer {
     /// The Vello backend has no renderer for WebGL 1; a list that asks for
     /// nothing else is drawn in memory.
     pub fn rendering_modes(self, modes: &[BrowserRenderingMode]) -> Vec<BrowserRenderingMode> {
-        match self {
-            BrowserRenderer::Skia => modes.to_vec(),
-            BrowserRenderer::Vello => {
-                let drawn: Vec<BrowserRenderingMode> =
-                    modes.iter().copied().filter(|mode| *mode != BrowserRenderingMode::WebGL1).collect();
-                match drawn.is_empty() && !modes.is_empty() {
-                    true => vec![BrowserRenderingMode::Software2D],
-                    false => drawn,
-                }
+        let without = |left_out: &[BrowserRenderingMode]| {
+            let drawn: Vec<BrowserRenderingMode> =
+                modes.iter().copied().filter(|mode| !left_out.contains(mode)).collect();
+            match drawn.is_empty() && !modes.is_empty() {
+                true => vec![BrowserRenderingMode::Software2D],
+                false => drawn,
             }
+        };
+        match self {
+            BrowserRenderer::Skia => without(&[BrowserRenderingMode::WebGPU]),
+            BrowserRenderer::Vello => without(&[BrowserRenderingMode::WebGL1, BrowserRenderingMode::WebGPU]),
+            BrowserRenderer::External => modes.to_vec(),
         }
     }
 }
@@ -248,6 +270,7 @@ fn pre_setup_browser(builder: &AppBuilder, options: Option<BrowserPlatformOption
             builder
         }
         BrowserRenderer::Vello => use_vello_renderer(&builder),
+        BrowserRenderer::External => builder,
     }
 }
 
@@ -324,12 +347,28 @@ impl BrowserAppBuilder for AppBuilder {
         match BrowserRenderer::default() {
             BrowserRenderer::Skia => use_skia_renderer(&builder),
             BrowserRenderer::Vello => use_vello_renderer(&builder),
+            BrowserRenderer::External => builder,
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn only_a_backend_the_application_chose_keeps_the_webgpu_mode() {
+        let modes = [BrowserRenderingMode::WebGPU, BrowserRenderingMode::WebGL2];
+        assert_eq!(vec![BrowserRenderingMode::WebGL2], BrowserRenderer::Skia.rendering_modes(&modes));
+        assert_eq!(vec![BrowserRenderingMode::WebGL2], BrowserRenderer::Vello.rendering_modes(&modes));
+        assert_eq!(modes.to_vec(), BrowserRenderer::External.rendering_modes(&modes));
+        assert_eq!(
+            vec![BrowserRenderingMode::Software2D],
+            BrowserRenderer::Skia.rendering_modes(&[BrowserRenderingMode::WebGPU])
+        );
+        assert_eq!(Some(BrowserRenderingMode::WebGPU), BrowserRenderingMode::parse("webgpu"));
+        assert_eq!(Some(BrowserRenderer::External), BrowserRenderer::parse("external"));
+    }
+
     use super::*;
 
     #[test]
@@ -337,6 +376,7 @@ mod tests {
         assert_eq!(1, BrowserRenderingMode::Software2D as i32);
         assert_eq!(2, BrowserRenderingMode::WebGL1 as i32);
         assert_eq!(3, BrowserRenderingMode::WebGL2 as i32);
+        assert_eq!(4, BrowserRenderingMode::WebGPU as i32);
     }
 
     #[test]

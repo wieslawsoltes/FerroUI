@@ -3,6 +3,8 @@
 
 mod app;
 mod bitmap;
+#[cfg(target_os = "emscripten")]
+mod canvas_target;
 mod context;
 mod device;
 mod drawing_context;

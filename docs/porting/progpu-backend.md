@@ -805,6 +805,29 @@ the device requested by the page (`navigator.gpu`, high-performance adapter) bef
 starts, the surface of the canvas of the view, and the same retained mode as the desktop. It sits
 beside the WebGL2 and 2D modes, which stay.
 
+As built (step P9):
+
+- **Engine.** On `wasm32-unknown-emscripten`, `progpu-native-sys` builds the archive
+  `progpu_native_browser` with `emcmake` and links no `wgpu-native`: the WebGPU is the page's,
+  through the `emdawnwebgpu` port. A small C ABI (`native/progpu_native_browser_c.h`) gives the
+  imported device, its queue and the swap chain of a canvas. The final module links the port
+  itself (`--use-port=emdawnwebgpu:cpp_bindings=false`), as a dependency cannot pass link
+  arguments on.
+- **No dependency of the browser crate on the backend.** `ferroui-progpu` is not published yet, so
+  `ferroui-browser` cannot depend on it, even optionally. The seam is
+  `IWebGpuCanvasSurface` in `ferroui-controls`, the mode `BrowserRenderingMode::WebGPU` and the
+  renderer `BrowserRenderer::External`, which keeps a backend the application selected on its
+  builder. Skia and Vello take the `WebGPU` mode out of their lists.
+- **The thread of the page.** A WebGPU device is not shared with a worker, so with this mode a
+  module built with threads does not start its render thread.
+- **The device** is requested by the page before the module exists
+  (`WebGpuRenderTarget.requestDevice`, the module option `preinitializedWebGPUDevice`). The catalog
+  does this for `?Renderer=ProGPU` in a module built with the feature `progpu`; without a device
+  it starts with the default backend.
+- **Limits.** A page cannot wait for the GPU, so reading pixels back gives transparent pixels and
+  says so once in the log: `RenderTargetBitmap` contents and encoders do not work in this mode yet.
+  The canvas shows the frame when the task that drew it returns.
+
 ### 2.7 The platform render interface (P3)
 
 What the backend implements today, and the rules it follows.
@@ -1081,7 +1104,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2. R2 is built against the whole-stream call (section 2.3.6); R1, R3, R4, R5 and R6 are open |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | written (section 2.2), first compiled in CI; the catalog runs and the proof of cooperative resize in the VMs are open |
-| P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | open |
+| P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | written (section 2.6), first compiled in CI; no browser run yet |
 | P10 | Measurements and size (section 4), the documentation, the NOTICE files | the tables of section 6 | open |
 
 ## 6. Results

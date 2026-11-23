@@ -519,6 +519,7 @@ dependencies = [
  "ferroui-media-camera",
  "ferroui-media-camera-browser",
  "ferroui-media-video-browser",
+ "ferroui-progpu",
  "wasm-bindgen",
 ]
 
