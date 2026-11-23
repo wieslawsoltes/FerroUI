@@ -141,8 +141,11 @@ Agents can read the component property name from `designer_programs` or `designe
 
 Mapped Rust keys use literal native immutable brush constructors. Editing stop fields preserves the
 original operands and comments. Editing geometry on a `from_stops` key expands it to the same
-brush's `new` constructor. Use the Rust source editor for computed values, or edit the declaration
-that owns a bound or resource-backed brush.
+brush's `new` constructor. `ImmutableRadialGradientBrush::with_radius` starts with the same
+relative radius on both axes. Use the X and Y radius channels to inspect them. Editing both radii
+to the same relative value keeps `with_radius`. Independent radii or a relative transform expand
+the call to `new` while preserving the stops and comments. Use the Rust source editor for
+computed values, or edit the declaration that owns a bound or resource-backed brush.
 
 ```rust
 .key_frame(1.0, |key| key.set(

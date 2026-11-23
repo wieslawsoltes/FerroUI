@@ -1,10 +1,10 @@
 use super::{
-    super::{FloatSource, syntax},
+    super::{syntax, FloatSource},
     operand::{self, GeometrySource, Leaf},
 };
 use ferroui_designer_animation::{
     AnimationGradient, AnimationValue, GradientDistance, GradientPoint, GradientShape,
-    GradientSpread,
+    GradientSpread, RelativeUnit,
 };
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::Expr;
@@ -15,29 +15,38 @@ pub(super) struct Arguments {
     spread: SourceSpan,
     origin: GeometrySource,
     transform: Leaf,
-    relative_transform: Leaf,
     geometry: Vec<GeometrySource>,
+    trailing: TrailingArguments,
+}
+
+#[derive(Clone, Debug)]
+enum TrailingArguments {
+    RelativeTransform(Leaf),
+    SharedRadius {
+        constructor: SourceSpan,
+        radius: FloatSource,
+        expression: Leaf,
+    },
 }
 
 impl Arguments {
     pub(super) fn read(
         mut value: AnimationGradient,
         operands: &[&Expr],
+        shared_radius: Option<SourceSpan>,
         resolve: &impl Fn(&Expr) -> Option<String>,
     ) -> Option<(AnimationGradient, Self)> {
-        let [
-            opacity,
-            transform,
-            origin,
-            spread,
-            geometry @ ..,
-            relative_transform,
-        ] = operands
-        else {
+        let [opacity, transform, origin, spread, geometry @ .., last] = operands else {
             return None;
         };
-        let defaults = value.shape.fields();
-        if defaults.len() != geometry.len() {
+        let mut defaults = value.shape.fields();
+        if shared_radius.is_some() {
+            if !matches!(value.shape, GradientShape::Radial { .. }) {
+                return None;
+            }
+            defaults.truncate(2);
+        }
+        if geometry.len() != defaults.len() {
             return None;
         }
         let opacity = syntax::float(opacity)?;
@@ -53,22 +62,38 @@ impl Arguments {
             GeometrySource::read(origin, &value.transform_origin.value(), resolve)?;
         value.transform_origin = point(&transform_origin)?;
         value.transform = operand::transform(transform, resolve)?;
-        value.relative_transform = operand::transform(relative_transform, resolve)?;
-        let (values, geometry): (Vec<_>, Vec<_>) = defaults
+        let (mut values, geometry): (Vec<_>, Vec<_>) = defaults
             .into_iter()
             .zip(geometry)
             .map(|((_, default), expr)| GeometrySource::read(expr, &default, resolve))
             .collect::<Option<Vec<_>>>()?
             .into_iter()
             .unzip();
+        let trailing = if let Some(constructor) = shared_radius {
+            let radius = syntax::float(last)?;
+            let value = GradientDistance {
+                scalar: radius.value,
+                unit: RelativeUnit::Relative,
+            }
+            .value();
+            values.extend([value.clone(), value]);
+            TrailingArguments::SharedRadius {
+                constructor,
+                radius,
+                expression: Leaf::read(last)?,
+            }
+        } else {
+            value.relative_transform = operand::transform(last, resolve)?;
+            TrailingArguments::RelativeTransform(Leaf::read(last)?)
+        };
         value.shape = shape(value.shape, &values)?;
         let source = Self {
             opacity,
             spread,
             origin,
             transform: Leaf::read(transform)?,
-            relative_transform: Leaf::read(relative_transform)?,
             geometry,
+            trailing,
         };
         Some((value, source))
     }
@@ -95,12 +120,6 @@ impl Arguments {
             self.transform
                 .plan(operand::transform_literal(&next.transform), patches);
         }
-        if original.relative_transform != next.relative_transform {
-            self.relative_transform.plan(
-                operand::transform_literal(&next.relative_transform),
-                patches,
-            );
-        }
         for ((source, (_, old)), (_, next)) in self
             .geometry
             .iter()
@@ -108,6 +127,47 @@ impl Arguments {
             .zip(next.shape.fields())
         {
             source.plan(&old, &next, patches)?;
+        }
+        match &self.trailing {
+            TrailingArguments::RelativeTransform(source) => {
+                if original.relative_transform != next.relative_transform {
+                    source.plan(
+                        operand::transform_literal(&next.relative_transform),
+                        patches,
+                    );
+                }
+            }
+            TrailingArguments::SharedRadius {
+                constructor,
+                radius,
+                expression,
+            } => {
+                let GradientShape::Radial {
+                    radius_x, radius_y, ..
+                } = next.shape
+                else {
+                    return Err(
+                        "Keep the Rust gradient constructor's shape when editing its key".into(),
+                    );
+                };
+                if radius_x == radius_y
+                    && radius_x.unit == RelativeUnit::Relative
+                    && next.relative_transform.is_none()
+                {
+                    radius.plan(radius_x.scalar, patches);
+                } else {
+                    patches.push(TextPatch {
+                        span: *constructor,
+                        replacement: "new".into(),
+                    });
+                    let arguments = [
+                        operand::geometry_literal(&radius_x.value())?,
+                        operand::geometry_literal(&radius_y.value())?,
+                        operand::transform_literal(&next.relative_transform),
+                    ];
+                    expression.plan(arguments.join(", "), patches);
+                }
+            }
         }
         Ok(())
     }

@@ -56,6 +56,7 @@ export async function verifyHostedGradients(preview: NativePreview, update: (rev
     assert.equal(pose.frame.image.png, reference.image.png, 'The sampled gradient matches the native static brush');
     await assert.rejects(preview.hostedCurve(identity(frame), query), /frame changed/i);
     await verifyMappedGradient(preview, update);
+    await verifyMappedCircularGradient(preview, update);
     console.log('App Preview plotted native gradient geometry and stops, matched the recorded native frame, and preserved mapped Rust');
 }
 
@@ -88,6 +89,61 @@ fn view() { rsx! {
     const { patch } = await preview.planHostedKeyframe(identity(frame), { ...edit, value });
     assert.ok(patch);
     assert.equal(apply(source, patch), source.replace('0.28f64', '0.34f64'));
+}
+
+async function verifyMappedCircularGradient(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {
+    const original = `fn headline() { rsx! { TextBlock { text: "Keep this heading 🧭" } } }
+fn view() { rsx! {
+    StackPanel {
+        styles: [ferroui_view::style("Border#Card").animation(
+            ferroui_view::animation(ferroui_view::ms(2000))
+                .key_frame(1.0, |key| key.set(ferroui_controls::Border::background_property(),
+                    Some(std::rc::Rc::new(ferroui_base::media::immutable::ImmutableRadialGradientBrush::with_radius(&[
+                        ferroui_base::media::immutable::ImmutableGradientStop::new(0.0, ferroui_base::media::Color::from_uint32(0xFFEAF2FF)),
+                        ferroui_base::media::immutable::ImmutableGradientStop::new(1.0, ferroui_base::media::Color::from_uint32(0xFF276280)),
+                    ], 1.0, None, None, ferroui_base::media::GradientSpreadMethod::Pad, None, None,
+                    /* native shared radius 🧭 */ 0.32f64)) as std::rc::Rc<dyn ferroui_base::media::IBrush>)))
+                .fill_mode(ferroui_base::animation::FillMode::Both)
+        )],
+        Border { name: "Card", width: 230.0, height: 126.0, background: "#1C3450" }
+    }
+} }
+`.replaceAll('\n', '\r\n');
+    const source = (revision: number, text: string) => {
+        const draft = update(revision, text);
+        return { ...draft, projectPath: '/RadialGradientView.rs', document: { ...draft.document,
+            uri: new URL('RadialGradientView.rs', draft.document.uri).toString(), language: 'rust' as const,
+            caret: { line: 1, character: 16 },
+        } };
+    };
+    const initial = await preview.renderHosted(source(4153, original));
+    const { program, track } = trackOf(initial);
+    const checkRadius = async (frame: HostedFrame, axis: 'x' | 'y', expected: number) => {
+        const { query } = trackOf(frame);
+        const curve = await preview.hostedCurve(identity(frame), { ...query, channel: `gradient/radius_${axis}/percent` });
+        assert.ok(curve.some(point => point.time === 2 && Math.abs(point.value - expected) < 1e-10));
+    };
+    await checkRadius(initial, 'x', 32);
+    await checkRadius(initial, 'y', 32);
+    const before = await preview.sampleHostedAnimation({ ...identity(initial), program: program.id, elapsed: 2, restart: true });
+    const authoredValue = track.keyframes.at(-1)!.value_text;
+    const value = authoredValue.replace('RadiusY="32%"', 'RadiusY="47%"');
+    assert.notEqual(value, authoredValue);
+    const { patch } = await preview.planHostedKeyframe(identity(before.frame), {
+        program: program.id, target: track.target, property, previous: 2, time: 2, easing: 'LinearEasing', value,
+    });
+    assert.ok(patch);
+    const revised = apply(original, patch);
+    assert.match(revised, /ImmutableRadialGradientBrush::new\(/);
+    assert.match(revised, /native shared radius 🧭 \*\/ Some\(/u);
+    assert.doesNotMatch(revised, /(?<!\r)\n/);
+    assert.equal(revised.split('fn view()')[0], original.split('fn view()')[0]);
+    const accepted = await preview.renderHosted(source(4154, revised));
+    await checkRadius(accepted, 'x', 32);
+    await checkRadius(accepted, 'y', 47);
+    const editedProgram = trackOf(accepted).program;
+    const pose = await preview.sampleHostedAnimation({ ...identity(accepted), program: editedProgram.id, elapsed: 2, restart: true });
+    assert.notEqual(pose.frame.image.png, before.frame.image.png);
 }
 
 function trackOf(frame: HostedFrame) {

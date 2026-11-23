@@ -72,3 +72,63 @@ fn gradient_key_edits_preserve_rust_source_and_round_trip_new_stops() {
     assert!(with_key.contains("ImmutableLinearGradientBrush::new("));
     assert!(with_key.contains("0.25f64"));
 }
+
+#[test]
+fn circular_radial_key_retains_shared_radius_and_expands_for_independent_radii() {
+    let source = SOURCE
+        .replace(
+            "ImmutableLinearGradientBrush::from_stops",
+            "ImmutableRadialGradientBrush::with_radius",
+        )
+        .replace(
+            "])) as std::rc::Rc",
+            concat!(
+                "], 1.0, None, None, ferroui_base::media::GradientSpreadMethod::Pad, None, None, ",
+                "/* 🧭 radius */ 0.35f64,)) as std::rc::Rc",
+            ),
+        )
+        .replace('\n', "\r\n");
+    let catalog = RsxCatalog::built_in();
+    let project = |source: &str| {
+        catalog
+            .project(source, source.rfind("rsx!").unwrap())
+            .unwrap()
+            .preview_markup()
+            .animations[0]
+            .1
+            .clone()
+    };
+    let clip = project(&source);
+    assert!(clip.xaml.contains("RadiusX=\"35%\" RadiusY=\"35%\""));
+    let circular = r##"<RadialGradientBrush RadiusX="42%" RadiusY="42%" TransformOrigin="0%,0%">
+        <GradientStop Offset="0.25" Color="#FF223344"/><GradientStop Offset="1" Color="#FF56BBAA"/>
+    </RadialGradientBrush>"##;
+    let patch = |clip: &crate::RsxAnimation, source: &str, value: &str| {
+        let patches = clip
+            .patch_keyframe(
+                "Background",
+                KeyframeEdit::Upsert {
+                    previous: Some(2.0),
+                    time: 2.0,
+                    value,
+                    easing: "LinearEasing",
+                },
+            )
+            .unwrap();
+        TextPatch::apply_all(source, patches).unwrap()
+    };
+    let shared = patch(&clip, &source, circular);
+    assert_eq!(shared, source.replace("0.35f64", "0.42f64"));
+    let elliptical = circular.replace("RadiusX=\"42%\"", "RadiusX=\"18\"");
+    let expanded = patch(&project(&shared), &shared, &elliptical);
+    assert!(expanded.contains("ImmutableRadialGradientBrush::new("));
+    assert!(expanded.contains("/* 🧭 radius */ Some("));
+    assert!(expanded.contains("None,)) as std::rc::Rc"));
+    assert!(expanded.contains("/* Keep stop */"));
+    assert!(expanded.starts_with(shared.split("fn view()").next().unwrap()));
+    assert_eq!(
+        expanded.matches('\n').count(),
+        expanded.matches("\r\n").count()
+    );
+    assert!(project(&expanded).xaml.contains("RadiusX=\"18\" RadiusY=\"42%\""));
+}

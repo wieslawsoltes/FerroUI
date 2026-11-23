@@ -2,7 +2,7 @@ mod arguments;
 mod operand;
 mod stops;
 
-use super::{FloatSource, color::ColorSource, syntax};
+use super::{color::ColorSource, syntax, FloatSource};
 use arguments::Arguments;
 use ferroui_designer_animation::{
     AnimationBrush, AnimationGradient, AnimationValue, BrushForm, GradientShape,
@@ -88,9 +88,18 @@ impl BrushSource {
                 let after_stops = syntax::span(call.args.first()?).end;
                 (gradient, Constructor::Defaults { name, after_stops })
             }
-            "new" => {
+            "new" | "with_radius" => {
+                let shared_radius = if method == "with_radius" {
+                    let Expr::Path(path) = call.func.as_ref() else {
+                        return None;
+                    };
+                    Some(syntax::span(&path.path.segments.last()?.ident))
+                } else {
+                    None
+                };
                 let operands = call.args.iter().skip(1).collect::<Vec<_>>();
-                let (gradient, args) = Arguments::read(gradient, &operands, resolve)?;
+                let (gradient, args) =
+                    Arguments::read(gradient, &operands, shared_radius, resolve)?;
                 (gradient, Constructor::Full(Box::new(args)))
             }
             _ => return None,
