@@ -259,7 +259,8 @@ fn wgsl_tokens(source: &str) -> Vec<&str> {
             block_comment_length(rest)
         } else {
             let is_word = |c: char| c.is_alphanumeric() || c == '_';
-            let token = if is_word(first) { rest.find(|c| !is_word(c)).unwrap_or(rest.len()) } else { first.len_utf8() };
+            let word = || rest.find(|c| !is_word(c)).unwrap_or(rest.len());
+            let token = if is_word(first) { word() } else { first.len_utf8() };
             tokens.push(&rest[..token]);
             token
         };
