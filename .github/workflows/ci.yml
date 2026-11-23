@@ -192,6 +192,7 @@ jobs:
         run: |
           python3 scripts/generate_api_model.py --check
           python3 scripts/generate_osprey_bindings.py --check
+          python3 scripts/generate_cpp_bindings.py --check
       - name: Tests of the binding generators
         run: python3 scripts/test_generate_bindings.py
       # The XAML schema of the designer's language service, read from the markup metadata of the

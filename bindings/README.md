@@ -11,11 +11,13 @@ same facts and a new language is one backend:
    language: the full bindings (`bindings/<language>/full/`) and the **selection** of each
    application from its manifest (`ferroui.json`: the classes it uses, with their bases, and
    the layers). Osprey is the first (`scripts/generate_osprey_bindings.py`, `bindings/osprey/`,
-   docs/osprey.md).
+   docs/osprey.md); C++ is the second (`scripts/generate_cpp_bindings.py`, `bindings/cpp/`, a
+   header-only library with RAII handles and typed accessors, `samples/CApi/cpp/`).
 
 ```sh
 python3 scripts/generate_api_model.py          # the model and the ID table of the library
 python3 scripts/generate_osprey_bindings.py    # the Osprey bindings: full, and each sample's selection
+python3 scripts/generate_cpp_bindings.py       # the C++ bindings: full, and each sample's selection
 python3 scripts/test_generate_bindings.py      # the tests of both
 ```
 

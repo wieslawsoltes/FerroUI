@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Tests of the generators of the bindings: the API model (`generate_api_model.py`), its Osprey
+"""Tests of the generators of the bindings: the API model (`generate_api_model.py`), its C++
+backend (`generate_cpp_bindings.py`), its Osprey
 backend (`generate_osprey_bindings.py`) and the selection of an application they share with the
 generator of its library (`ferroui_selection.py`).
 
@@ -14,7 +15,10 @@ import importlib.util
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 
 SCRIPTS = os.path.dirname(os.path.abspath(__file__))
@@ -30,6 +34,7 @@ def load(name):
 
 MODEL = load("generate_api_model")
 OSPREY = load("generate_osprey_bindings")
+CPP = load("generate_cpp_bindings")
 
 
 class ModelTests(unittest.TestCase):
@@ -99,6 +104,59 @@ class ModelTests(unittest.TestCase):
                          "bindings/model/ferroui-api.json is stale: python3 scripts/generate_api_model.py")
         self.assertEqual(MODEL.meta.read(MODEL.ID_TABLE), MODEL.id_table(*self.tables),
                          "src/FerroUI.CApi/api_ids.rs is stale: python3 scripts/generate_api_model.py")
+
+
+class CppTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        with open(CPP.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.text = CPP.generate(cls.model)
+
+    def test_names_follow_cpp(self):
+        self.assertEqual(CPP.snake(["font", "size"]), "font_size")
+        self.assertEqual(CPP.safe("template"), "template_")
+        self.assertEqual(CPP.safe("handle"), "handle_")
+        self.assertEqual(CPP.safe("font_size"), "font_size")
+
+    def test_accessors_chain_and_call_constants(self):
+        self.assertRegex(self.text, r"double font_size\(\) const \{ return detail::get_f64\(this->handle\(\), \d+\); \}")
+        self.assertRegex(self.text, r"Self& font_size\(double value_\) \{ detail::check\(ferro_set_f64\(this->handle\(\), \d+, value_\)\); return this->self\(\); \}")
+        self.assertNotIn("ferro_property_id(", self.text, "no name is looked up at run time")
+        self.assertIn("class Button final : public ButtonApi<Button>", self.text)
+        self.assertIn("static void set_row(const Object& target, std::int64_t value_)", self.text)
+        self.assertIn("Self& on_click(Handler&& handler)", self.text)
+
+    def test_a_selection_has_its_classes_and_their_bases(self):
+        text = CPP.generate(self.model, {"classes": ["Button"]})
+        self.assertIn("class Button final", text)
+        self.assertIn("class ContentControl final", text, "a base of the class")
+        self.assertNotIn("class Grid final", text)
+        self.assertIn("ferro_type_button();", text)
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in CPP.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            with open(os.path.join(directory, CPP.FILE), encoding="utf-8") as file:
+                self.assertEqual(file.read(), CPP.generate(self.model, manifest),
+                                 f"{directory} is stale: python3 scripts/generate_cpp_bindings.py")
+
+    @unittest.skipUnless(shutil.which("c++"), "no C++ compiler")
+    def test_every_accessor_compiles(self):
+        # A member of a class template is checked when it is instantiated.
+        lines = ['#include "ferroui.hpp"']
+        lines += [f"template class ferroui::{c['name']}Api<ferroui::{c['name']}>;" for c in self.model["classes"]]
+        with tempfile.TemporaryDirectory() as directory:
+            source = os.path.join(directory, "all.cpp")
+            with open(source, "w", encoding="utf-8") as file:
+                file.write("\n".join(lines) + "\n")
+            include = os.path.join(MODEL.ROOT, "src", "FerroUI.CApi", "include")
+            result = subprocess.run(["c++", "-std=c++17", "-fsyntax-only", f"-I{CPP.OUT}", f"-I{include}", source],
+                                    capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr[:2000])
 
 
 class OspreyTests(unittest.TestCase):

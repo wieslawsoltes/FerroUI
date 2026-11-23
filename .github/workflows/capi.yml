@@ -61,6 +61,8 @@ jobs:
         run: cargo test --locked -p ferroui-capi --no-default-features --lib
       - name: C tests of the ABI
         run: make -C samples/CApi test CARGO_FLAGS="--no-default-features --features type-tables"
+      - name: Tests of the C++ bindings
+        run: make -C samples/CApi test-cpp CARGO_FLAGS="--no-default-features --features type-tables"
       # The cost of a call through the ABI against Rust (docs/c-abi.md, section 8): informative,
       # a shared runner is not a quiet machine.
       - name: Call overhead (informative)
@@ -133,6 +135,7 @@ jobs:
         run: |
           make -C samples/CApi run CARGO_FLAGS="--no-default-features --features desktop"
           make -C samples/CApi run-gauge CARGO_FLAGS="--no-default-features --features desktop"
+          make -C samples/CApi run-cpp CARGO_FLAGS="--no-default-features --features desktop"
 
   sample-linux:
     name: C hello world (Linux, X11 under Xvfb)
@@ -163,3 +166,7 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 3000
         run: xvfb-run -a make -C samples/CApi run
+      - name: The C++ hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run-cpp
