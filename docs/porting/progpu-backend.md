@@ -915,18 +915,18 @@ being destroyed: the device, its engines and its textures are then left to the e
 call into the implementation on the thread, which the reverse order of destruction puts before the
 lock state. Objects released while the thread runs are released as usual.
 
-**Not done yet.** This list is the state of the backend, checked against the code:
+**Gaps, and how each is handled now.** This list is checked against the code:
 
 | What | What happens now |
 |---|---|
-| Fills and strokes with an image brush or a visual brush | **not drawn, and not logged** |
-| Opacity masks of image and visual brushes | the content is drawn without the mask, said once in the log |
+| Fills and strokes with an image or visual brush | drawn on the GPU through the outline of the shape; a brush kind the backend does not know is said once in the log |
+| Opacity masks of image and visual brushes | drawn on the GPU as a destination-in layer of the tiled brush |
 | Custom effects (#455), effects other than blur and drop shadow | the content is drawn without the effect, said once in the log |
 | Acrylic (`IDrawingContextWithAcrylicLikeSupport`) | not implemented |
 | Blend and colour-matrix layers of WinUI composition effects (`IDrawingContextImplWithLayerEffects`) | not implemented |
 | 3D scenes (`IDrawingContextImplWithScene3D`) | not implemented: a scene draws nothing and is counted |
-| A clear under a rounded, rotated or geometry clip | not drawn, said once in the log |
-| An inset shadow under a geometry clip or many nested clips | not drawn, said once in the log |
+| A clear under a rounded, rotated or geometry clip | drawn on the GPU: a destination-out layer, then a plus layer, both under the clip mask |
+| An inset shadow under a geometry clip | drawn on the GPU in a layer masked by the clip; more nested rounded clips than one chain holds are said once in the log |
 | Text: LCD raster, the sample grid of the rasterizer | grayscale, on the regular 8x8 grid (section 6.1) |
 | `IGlyphRunImpl::get_intersections` | returns nothing, so underlines do not skip descenders |
 | The Rust writer of `progpu-native` (P7) | not written; the backend uses the C ABI over the builder |
