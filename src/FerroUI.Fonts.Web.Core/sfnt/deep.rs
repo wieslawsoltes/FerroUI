@@ -30,7 +30,9 @@ const LAYER_VERTEX: u64 = 1 << 32;
 /// The tables kept without a walk: their content is checked elsewhere (`head`, `maxp`, `hmtx`,
 /// `vmtx`, `glyf`, `loca`), or is a program for an interpreter that takes any bytes (`fpgm`,
 /// `prep`), or a plain array (`cvt `).
-const CHECKED_ELSEWHERE: [&Tag; 9] = [b"cvt ", b"fpgm", b"glyf", b"head", b"hmtx", b"loca", b"maxp", b"prep", b"vmtx"];
+// `IFT ` and `IFTX` are checked by `ift::parse_patch_map`, and kept only when asked for.
+const CHECKED_ELSEWHERE: [&Tag; 11] =
+    [b"IFT ", b"IFTX", b"cvt ", b"fpgm", b"glyf", b"head", b"hmtx", b"loca", b"maxp", b"prep", b"vmtx"];
 
 /// The largest TrueType program kept.
 const MAX_PROGRAM: usize = 1 << 20;
