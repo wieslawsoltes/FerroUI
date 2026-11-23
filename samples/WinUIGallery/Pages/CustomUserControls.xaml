@@ -1,10 +1,9 @@
 <!-- Ported from the three pinned CustomUserControls examples of WinUI Gallery (14061eea) with the
      custom controls of the page in Rust (custom_controls.rs, which creates them in their hosts);
-     see ../NOTICE.md. The control theme below is the default style of
-     CounterControl.xaml (DefaultStyleKey); the template of ValidatedPasswordBox.xaml is built in
-     Rust, because a TextBox in a ControlTemplate of run-time loaded markup does not get its
-     template part. FerroUI has no PasswordBox, so the template's password box is a TextBox with a
-     PasswordChar, and its Header is the template's HeaderText. ThemeResource is DynamicResource and the headings are the
+     see ../NOTICE.md. The control themes below are the default
+     styles of CounterControl.xaml and ValidatedPasswordBox.xaml (DefaultStyleKey); FerroUI has no
+     PasswordBox, so the template's password box is a TextBox with a PasswordChar, and its Header
+     is the template's HeaderText. ThemeResource is DynamicResource and the headings are the
      theme's SubtitleTextBlockStyle with heading level 2. The Submit button's x:Bind of IsValid is
      the code behind in Rust. -->
 <StackPanel xmlns="https://github.com/ferroui"
@@ -18,6 +17,18 @@
             <TextBlock x:Name="CountText" FontSize="20" Text="0" HorizontalAlignment="Center"
                        AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Counter value" />
             <Button x:Name="ActionButton" Content="Increase" HorizontalAlignment="Center" MinWidth="100" />
+          </StackPanel>
+        </ControlTemplate>
+      </Setter>
+    </ControlTheme>
+    <ControlTheme x:Key="ValidatedPasswordBoxTheme" TargetType="TemplatedControl">
+      <Setter Property="IsTabStop" Value="False" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <StackPanel Spacing="4">
+            <TextBlock x:Name="HeaderText" />
+            <TextBox x:Name="PasswordInput" PasswordChar="●" />
+            <StackPanel x:Name="ValidationLines" AutomationProperties.LiveSetting="Polite" IsVisible="False" />
           </StackPanel>
         </ControlTemplate>
       </Setter>
