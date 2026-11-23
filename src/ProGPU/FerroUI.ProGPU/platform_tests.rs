@@ -373,6 +373,7 @@ fn a_geometry_drawn_twice_in_a_frame_keeps_each_brush() {
     assert_eq!(RED, surface.rgba(40, 8));
     assert_eq!(WHITE, surface.rgba(16, 8), "between the draws");
     target.dispose();
+}
 
 /// A bitmap whose pixels did not come back from the GPU refuses to be read or saved: it does not
 /// pass for an empty image.
