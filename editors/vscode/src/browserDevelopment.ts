@@ -119,12 +119,12 @@ export class BrowserDevelopment {
             });
             if (this.obsolete()) return;
             this.scope?.built(artifact.manifests);
-            this.status('Starting browser candidate');
             this.validation = new AbortController();
             const active = AbortSignal.any([signal, this.validation.signal, AbortSignal.timeout(30_000)]);
             const browser = await this.prepareBrowser(active);
             published = await this.sites!.publish(artifact.site, this.app.build.threads);
             page = await browser.openPage(published.url, this.app, active);
+            this.status('Starting browser candidate');
             const channel = await BrowserInspection.open(page, published.url, active, message => this.output.appendLine(message));
             await verifyRuntime({ channel }, active);
             const presented = Date.now();

@@ -96,9 +96,12 @@ export async function verifyBrowserReload(): Promise<void> {
         await save(xaml, '<TextBlock');
         await status('Starting browser candidate', buildTimeout);
         assert.deepEqual(await frame(live), accepted, 'Startup retains the accepted frame');
+        await live.click((await live.find('DispatchOrder')).node_id);
+        await waitFor(async () => (await frame(live)).equals(accepted) ? undefined : true,
+            'a new frame after input on the accepted page', 5_000);
         const startup = await status('Browser update failed');
         assert.equal(startup.generation, initial.generation);
-        assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 1');
+        assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 2');
         assert.ok((await history()).some(record => record.file.endsWith('Instructions.xaml') && record.outcome === 'buildFailed'));
 
         await save(xaml, originalXaml.replace('Confirm the orders ready for pickup', 'Review the outgoing routes'));
@@ -108,7 +111,7 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.equal(xamlAccepted.pid, initial.pid);
         assert.equal(new URL(xamlAccepted.browser!.url!).origin, new URL(initial.browser.url).origin);
         assert.equal((await xamlApp.find('DispatchInstructions')).text, 'Review the outgoing routes');
-        assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 1');
+        assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 2');
         assert.notDeepEqual(await frame(xamlApp), accepted);
         await waitFor(async () => (await fetch(initial.browser!.url!)).status === 404 ? true : undefined, 'retirement of the previous site');
         assert.ok((await history()).some(record => record.file.endsWith('Instructions.xaml')
@@ -120,7 +123,7 @@ export async function verifyBrowserReload(): Promise<void> {
         const compile = await status('Browser update failed', buildTimeout);
         assert.equal(compile.generation, xamlAccepted.generation);
         assert.match(await output(), /error:|mismatched closing delimiter|unclosed delimiter/);
-        assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 1');
+        assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 2');
 
         await Promise.all([
             save(host, 'await new Promise(resolve => setTimeout(resolve, 3500));\n' + originalHost),
@@ -137,7 +140,7 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.equal(rustAccepted.runtime, runtime);
         assert.equal(rustAccepted.pid, initial.pid);
         assert.equal((await rustApp.find('Heading')).text, 'Routes ready');
-        assert.equal((await rustApp.find('DispatchedCount')).text, 'Dispatched orders: 1');
+        assert.equal((await rustApp.find('DispatchedCount')).text, 'Dispatched orders: 2');
         assert.ok((await history()).some(record => record.file.endsWith('main.rs') && record.outcome === 'superseded'));
         const heading = await rustApp.find('Heading');
         const source = content<{ source?: { uri: string; canApply: boolean; version: number } }>(await invoke('ferroui_runtime_source',

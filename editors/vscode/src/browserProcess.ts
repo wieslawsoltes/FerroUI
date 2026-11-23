@@ -63,8 +63,11 @@ export class ManagedBrowser {
     async openPage(url: string, viewport: Pick<BrowserApp, 'width' | 'height'>, signal: AbortSignal, ownsBrowser = false): Promise<BrowserPage> {
         const cdp = this.cdp;
         signal.throwIfAborted();
-        // Receive the target ID even if a save supersedes this page during creation.
-        const { targetId } = await cdp.request<{ targetId: string }>('Target.createTarget', { url: 'about:blank' }, cdp.signal);
+        // Each development page has its own window so Chromium keeps rendering the
+        // accepted page while a candidate starts. Receive the ID even on superseding saves.
+        const { targetId } = await cdp.request<{ targetId: string }>('Target.createTarget', {
+            url: 'about:blank', newWindow: !ownsBrowser,
+        }, cdp.signal);
         const disconnect = () => ownsBrowser ? this.close() : this.closeTarget(targetId);
         let page: BrowserPage | undefined;
         try {
