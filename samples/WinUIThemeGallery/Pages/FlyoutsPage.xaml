@@ -1,6 +1,6 @@
 <UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:primitives="using:FerroUI.Themes.WinUI.Primitives"
+             xmlns:primitives="using:FerroUI.Themes.WinUI.Internal.Primitives"
              x:Class="WinUIThemeGallery.Pages.FlyoutsPage">
   <!-- The content of a flyout (FlyoutPresenter) and of tool tips (ToolTip), shown in the page
        because a picture of a page does not hold its popups (PopupRoot and OverlayPopupHost host

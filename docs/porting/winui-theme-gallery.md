@@ -281,7 +281,7 @@ the framework does not reproduce.
 
 | File | What |
 |---|---|
-| `samples/WinUIThemeGallery/theme.rs` | the one place of the code that names the theme crate (`use ferroui_themes_winui::{..}`): creation, density, accent, the variants (the markup of the flyouts page names the `InfoBarPanel` of the theme, `using:FerroUI.Themes.WinUI.Primitives`, for the content of its notification cards) |
+| `samples/WinUIThemeGallery/theme.rs` | the one place of the code that names the theme crate (`use ferroui_themes_winui::{..}`): creation, density, accent, the variants (the markup of the flyouts page names the `InfoBarPanel` of the theme, `using:FerroUI.Themes.WinUI.Internal.Primitives`, for the content of its notification cards) |
 | `samples/WinUIThemeGallery/app.rs`, `App.xaml` | the application: the theme first, then the styles of its document |
 | `samples/WinUIThemeGallery/main_window.rs`, `MainWindow.xaml` | the window: the toolbar, the list, the page |
 | `samples/WinUIThemeGallery/capture_host.rs`, `CaptureHost.xaml` | the host of a page, shared by the window, the capture mode and the comparison host |

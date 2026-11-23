@@ -1,11 +1,11 @@
 ﻿<UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:FerroUI.Diagnostics.ViewModels"
-             xmlns:controls="using:FerroUI.Diagnostics.Controls"
+             xmlns:controls="using:FerroUI.Diagnostics.Internal.Controls"
              xmlns:models="using:FerroUI.Diagnostics.Models"
              xmlns:local="using:FerroUI.Diagnostics.Views"
              xmlns:vmm="using:FerroUI.Diagnostics.ViewModels"
-             xmlns:lb="using:FerroUI.Diagnostics.Behaviors"
+             xmlns:lb="using:FerroUI.Diagnostics.Internal.Behaviors"
              x:Class="FerroUI.Diagnostics.Views.EventsPageView"
              Margin="2"
              x:DataType="vm:EventsPageViewModel">

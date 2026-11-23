@@ -12,7 +12,7 @@ use ferroui_markup_xaml::FerroXamlLoader;
 /// The dotted namespaces of the modules of this crate.
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_fluent", "FerroUI.Themes.Fluent"),
-    ("ferroui_themes_fluent::accents", "FerroUI.Themes.Fluent.Accents"),
+    ("ferroui_themes_fluent::accents", "FerroUI.Themes.Fluent.Internal.Accents"),
 ];
 
 /// What this crate states about itself for markup: its assembly name and

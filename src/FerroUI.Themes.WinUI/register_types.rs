@@ -16,9 +16,9 @@ use std::rc::Rc;
 /// The dotted namespaces of the modules of this crate.
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_winui", "FerroUI.Themes.WinUI"),
-    ("ferroui_themes_winui::accents", "FerroUI.Themes.WinUI.Accents"),
-    ("ferroui_themes_winui::converters", "FerroUI.Themes.WinUI.Converters"),
-    ("ferroui_themes_winui::primitives", "FerroUI.Themes.WinUI.Primitives"),
+    ("ferroui_themes_winui::accents", "FerroUI.Themes.WinUI.Internal.Accents"),
+    ("ferroui_themes_winui::converters", "FerroUI.Themes.WinUI.Internal.Converters"),
+    ("ferroui_themes_winui::primitives", "FerroUI.Themes.WinUI.Internal.Primitives"),
 ];
 
 /// What this crate states about itself for markup: its assembly name and

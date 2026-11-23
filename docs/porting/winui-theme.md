@@ -234,8 +234,8 @@ not a `TextBlock` by its style key (DEVIATIONS.md, RES-9).
   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">`, with
   `xmlns:winui="using:FerroUI.Themes.WinUI"` where the high contrast key is used and
   `xmlns:converters="using:FerroUI.Controls.Converters"` for the converters of the controls, and
-  `xmlns:winuiconverters="using:FerroUI.Themes.WinUI.Converters"` for the converters of the crate,
-  and `xmlns:primitives="using:FerroUI.Themes.WinUI.Primitives"` for its primitives (`InfoBarPanel`, `TabViewEqualWidthPanel`).
+  `xmlns:winuiconverters="using:FerroUI.Themes.WinUI.Internal.Converters"` for the converters of the crate,
+  and `xmlns:primitives="using:FerroUI.Themes.WinUI.Internal.Primitives"` for its primitives (`InfoBarPanel`, `TabViewEqualWidthPanel`).
 - A `*_themeresources.xaml` document of WinUI holds resources and styles. The port splits it:
   the resources go to `Resources/<same name>.xaml` (generated, section 5), the styles to the
   document of the FerroUI control, `Controls/<FerroUI control>.xaml`. `Controls/` documents
@@ -424,7 +424,7 @@ comparison (section 8.3) checks.
 | `TextCommandBarFlyout`, `CommandBarFlyout` | menu flyouts |
 | `DesktopAcrylicBackdrop`, Mica | the fallback colours; the window background is `SolidBackgroundFillColorBaseBrush` |
 | `ListViewItemPresenter` (native chrome of list items) | templates with elements (batch B3) |
-| `CornerRadiusToThicknessConverter` | the converter of the crate (`FerroUI.Themes.WinUI.Converters`, section 5) |
+| `CornerRadiusToThicknessConverter` | the converter of the crate (`FerroUI.Themes.WinUI.Internal.Converters`, section 5) |
 | `TextTrimming` resources, scaled double corner converters | the template writes the value or is adapted (MNI-5, SB-8) |
 
 ## 5. Resources

@@ -13,7 +13,7 @@
 <Styles x:Class="FerroUI.Themes.WinUI.WinUITheme"
         xmlns="https://github.com/ferroui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:accents="using:FerroUI.Themes.WinUI.Accents">
+        xmlns:accents="using:FerroUI.Themes.WinUI.Internal.Accents">
   <Styles.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>

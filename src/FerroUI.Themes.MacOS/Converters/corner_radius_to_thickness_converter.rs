@@ -67,7 +67,7 @@ ferro_markup_enum!(
         FilterLeftFromBottomLeft,
         FilterLeftFromTopLeft,
     },
-    { namespace: "FerroUI.Themes.MacOS.Converters" }
+    { namespace: "FerroUI.Themes.MacOS.Internal.Converters" }
 );
 
 /// Converts a corner radius to a thickness whose sides are corners of the radius, chosen by the
@@ -180,7 +180,7 @@ impl IValueConverter for CornerRadiusToThicknessConverter {
 }
 
 ferro_markup_type!(class CornerRadiusToThicknessConverter {
-    namespace: "FerroUI.Themes.MacOS.Converters",
+    namespace: "FerroUI.Themes.MacOS.Internal.Converters",
     handles: [Rc<CornerRadiusToThicknessConverter>, Option<Rc<CornerRadiusToThicknessConverter>>],
     this: Rc<CornerRadiusToThicknessConverter>,
     interfaces: [Rc<dyn IValueConverter>],

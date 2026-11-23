@@ -40,7 +40,7 @@ The rules:
   `Top`, `Bottom`, `Left`, `Right`) or `CornerRadiusToDoubleConverter` (`TopLeftValue`,
   `BottomRightValue` without a scale);
 * `CornerRadiusToThicknessConverter` becomes the converter of the same name of the theme crate
-  (`FerroUI.Themes.WinUI.Converters`), with its `ConversionKind` and `Multiplier`;
+  (`FerroUI.Themes.WinUI.Internal.Converters`), with its `ConversionKind` and `Multiplier`;
 * the font family `XamlAutoFontFamily` becomes `Segoe UI Variable Text, Segoe UI, $Default`;
 * a `Symbol` (`InfoBarCloseButtonSymbol`) is kept: FerroUI's `Symbol` of `ferroui-controls` has the
   members of WinUI's.
@@ -376,7 +376,7 @@ def convert_density_style(item, indent):
 NAMESPACES = {
     "winui": 'xmlns:winui="using:FerroUI.Themes.WinUI"',
     "converters": 'xmlns:converters="using:FerroUI.Controls.Converters"',
-    "winuiconverters": 'xmlns:winuiconverters="using:FerroUI.Themes.WinUI.Converters"',
+    "winuiconverters": 'xmlns:winuiconverters="using:FerroUI.Themes.WinUI.Internal.Converters"',
 }
 
 

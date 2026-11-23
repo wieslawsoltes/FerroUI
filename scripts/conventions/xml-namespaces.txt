@@ -52,12 +52,10 @@ open FerroUI.Controls.Utils # #1280
 open FerroUI.Data.Core # #1280
 open FerroUI.Data.Core.Plugins # #1280
 open FerroUI.Diagnostics # #1280
-open FerroUI.Diagnostics.Behaviors # #1280, decision 4: DevTools details, proposed *.Internal
-open FerroUI.Diagnostics.Controls # #1280, decision 4: DevTools details, proposed *.Internal
-open FerroUI.Diagnostics.Converters # #1280, decision 4: DevTools details, proposed *.Internal
-open FerroUI.Diagnostics.Models # #1280, decision 4: DevTools details, proposed *.Internal
-open FerroUI.Diagnostics.ViewModels # #1280, decision 4: DevTools details, proposed *.Internal
-open FerroUI.Diagnostics.Views # #1280, decision 4: DevTools details, proposed *.Internal
+open FerroUI.Diagnostics.Converters # #1280
+open FerroUI.Diagnostics.Models # #1280
+open FerroUI.Diagnostics.ViewModels # #1280
+open FerroUI.Diagnostics.Views # #1280
 open FerroUI.Dialogs # #1280
 open FerroUI.Interactivity # #1280
 open FerroUI.LiveCharts # #1281
@@ -75,16 +73,6 @@ open FerroUI.OpenGL.Controls # #1280
 open FerroUI.Platform # #1280
 open FerroUI.Platform.Storage # #1280
 open FerroUI.Rendering # #1280
-open FerroUI.Themes.Fluent.Accents # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.MacOS.Accents # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.MacOS.Converters # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.MacOS.Primitives # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.Material.Accents # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.Material.Converters # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.Material.Primitives # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.WinUI.Accents # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.WinUI.Converters # #1280, decision 4: theme details, proposed *.Internal
-open FerroUI.Themes.WinUI.Primitives # #1280, decision 4: theme details, proposed *.Internal
 open FerroUI.Utilities # #1280
 open FerroUI.View # #1280
 open FerroUI.Xaml.Interactions.DragAndDrop.Controls # #1280
@@ -98,16 +86,9 @@ uri https://github.com/ferroui/charts # #1281
 uri https://github.com/protranslate/xaml # #1281
 
 # Names in two namespaces. The decisions are in docs/porting/default-xml-namespace.md.
-collision Application # decision 4
 collision AreaSeries # decision 3
 collision Axis # decision 3
 collision Chart # decision 3
 collision ChartSeriesCollection # decision 3
-collision ColumnDefinition # decision 4
-collision CornerRadiusToThicknessConverter # decision 4
-collision CornerRadiusToThicknessConverterKind # decision 4
 collision DateTimeAxis # decision 3
-collision InfoBarPanel # decision 4
 collision LineSeries # decision 3
-collision SystemAccentColors # decision 4
-collision TabViewEqualWidthPanel # decision 4

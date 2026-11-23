@@ -9,8 +9,8 @@ use ferroui_base::TypeInfo;
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_diagnostics", "FerroUI"),
     ("ferroui_diagnostics::diagnostics", "FerroUI.Diagnostics"),
-    ("ferroui_diagnostics::diagnostics::behaviors", "FerroUI.Diagnostics.Behaviors"),
-    ("ferroui_diagnostics::diagnostics::controls", "FerroUI.Diagnostics.Controls"),
+    ("ferroui_diagnostics::diagnostics::behaviors", "FerroUI.Diagnostics.Internal.Behaviors"),
+    ("ferroui_diagnostics::diagnostics::controls", "FerroUI.Diagnostics.Internal.Controls"),
     ("ferroui_diagnostics::diagnostics::converters", "FerroUI.Diagnostics.Converters"),
     ("ferroui_diagnostics::diagnostics::models", "FerroUI.Diagnostics.Models"),
     ("ferroui_diagnostics::diagnostics::screenshots", "FerroUI.Diagnostics.Screenshots"),
@@ -57,9 +57,9 @@ use std::rc::Rc;
 
 /// The classes of the crate (`X::TYPE`).
 const TYPES: &[&TypeInfo] = &[
-    // FerroUI.Diagnostics.Behaviors
+    // FerroUI.Diagnostics.Internal.Behaviors
     <ColumnDefinition as StaticType>::TYPE,
-    // FerroUI.Diagnostics.Controls
+    // FerroUI.Diagnostics.Internal.Controls
     Application::TYPE,
     BrushEditor::TYPE,
     CommitTextBox::TYPE,

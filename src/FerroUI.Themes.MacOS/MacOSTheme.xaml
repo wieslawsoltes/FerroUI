@@ -12,7 +12,7 @@
 <Styles x:Class="FerroUI.Themes.MacOS.MacOSTheme"
         xmlns="https://github.com/ferroui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:accents="using:FerroUI.Themes.MacOS.Accents">
+        xmlns:accents="using:FerroUI.Themes.MacOS.Internal.Accents">
   <Styles.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>

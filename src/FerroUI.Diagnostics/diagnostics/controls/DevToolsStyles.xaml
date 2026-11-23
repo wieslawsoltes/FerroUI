@@ -1,6 +1,6 @@
 <Styles xmlns="https://github.com/ferroui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:controls="using:FerroUI.Diagnostics.Controls"
+        xmlns:controls="using:FerroUI.Diagnostics.Internal.Controls"
         x:ClassModifier="internal">
   <!--
   Deviation (DEVIATIONS.md, Developer tools): the design of the developer tools on the WinUI 3
