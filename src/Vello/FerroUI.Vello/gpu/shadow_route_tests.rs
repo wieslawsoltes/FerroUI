@@ -143,7 +143,7 @@ fn the_device_blur_of_the_compute_mode_agrees_with_the_cpu_reference() {
     for (name, shape, blur, is_inset) in [
         ("thin, direct", thin, 10.0, false),
         ("thin, reduced by 2", thin, 20.0, false),
-        ("thin, reduced by 3", thin, 40.0, false),
+        ("thin, reduced by 4", thin, 40.0, false),
         ("thin, reduced by 6", thin, 80.0, false),
         ("elliptical, direct", elliptical, 12.0, false),
         ("elliptical, reduced", elliptical, 40.0, false),
