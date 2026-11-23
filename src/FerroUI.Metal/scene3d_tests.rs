@@ -370,3 +370,187 @@ fn the_texture_of_a_brush_is_uploaded_once() {
         assert_eq!(0, report.textures_uploaded);
     }
 }
+
+/// A bitmap without pixels to read: a frame that is a texture of the device.
+struct FrameBitmap;
+
+impl ferroui_base::platform::IBitmapImpl for FrameBitmap {
+    fn dpi(&self) -> ferroui_base::Vector {
+        ferroui_base::Vector::new(96.0, 96.0)
+    }
+    fn pixel_size(&self) -> PixelSize {
+        PixelSize::new(4, 4)
+    }
+    fn version(&self) -> i32 {
+        1
+    }
+    fn save(
+        &self,
+        _: &mut dyn std::io::Write,
+        _: &ferroui_base::media::imaging::BitmapEncoderOptions,
+    ) -> std::io::Result<()> {
+        Err(std::io::Error::from(std::io::ErrorKind::Unsupported))
+    }
+    fn dispose(&self) {}
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+/// Gives one texture for every [`FrameBitmap`], as the producer stored it.
+struct StoredFrames {
+    texture: Retained<Texture>,
+    given: Cell<u32>,
+}
+
+// SAFETY: the texture is alive for as long as this object, and no producer writes it.
+unsafe impl Scene3DMetalDeviceTextures for StoredFrames {
+    fn sampling(&self, bitmap: &SharedBitmapImpl) -> DeviceBitmap {
+        match bitmap.as_any().is::<FrameBitmap>() {
+            true => DeviceBitmap::Stored,
+            false => DeviceBitmap::NotOnDevice,
+        }
+    }
+
+    fn device_texture(&self, _: &SharedBitmapImpl) -> Option<*mut c_void> {
+        self.given.set(self.given.get() + 1);
+        Some(Retained::as_ptr(&self.texture) as *mut c_void)
+    }
+}
+
+/// A 4 by 4 texture of the device in BGRA, every pixel `bgra`.
+fn stored_frame(executor: &Scene3DMetalExecutor, bgra: [u8; 4]) -> Retained<Texture> {
+    // SAFETY: a plain description; the upload is of 4 by 4 pixels of 4 bytes from a buffer of that
+    // size into a texture of that size.
+    unsafe {
+        let descriptor = MTLTextureDescriptor::texture2DDescriptorWithPixelFormat_width_height_mipmapped(
+            MTLPixelFormat::BGRA8Unorm,
+            4,
+            4,
+            false,
+        );
+        descriptor.setUsage(MTLTextureUsage::ShaderRead);
+        descriptor.setStorageMode(MTLStorageMode::Shared);
+        let texture = executor.device.newTextureWithDescriptor(&descriptor).expect("a texture of the frame");
+        let pixels: Vec<u8> = std::iter::repeat_n(bgra, 16).flatten().collect();
+        texture.replaceRegion_mipmapLevel_withBytes_bytesPerRow(
+            objc2_metal::MTLRegion {
+                origin: MTLOrigin { x: 0, y: 0, z: 0 },
+                size: MTLSize { width: 4, height: 4, depth: 1 },
+            },
+            0,
+            NonNull::new(pixels.as_ptr().cast_mut().cast()).unwrap(),
+            16,
+        );
+        texture
+    }
+}
+
+/// A quad over the viewport that samples the frame with `color` in a slot.
+fn stored_frame_scene(
+    color: ferroui_base::rendering::composition::frames::FrameColor,
+) -> (Arc<Scene3DSnapshot>, Arc<ferroui_base::rendering::scene3d::Scene3DFrameSlot>) {
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::{AlignmentX, AlignmentY, Stretch, TileMode};
+    use ferroui_base::rendering::composition::frames::*;
+    use ferroui_base::rendering::scene3d::Scene3DFrameSlot;
+    use ferroui_base::utilities::RefCountable;
+    use ferroui_base::RelativeRect;
+    let tile = ImmutableImageBrush::new(
+        None,
+        AlignmentX::Center,
+        AlignmentY::Center,
+        Some(RelativeRect::FILL),
+        1.0,
+        None,
+        RelativePoint::TOP_LEFT,
+        Some(RelativeRect::FILL),
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    );
+    let slot = Scene3DFrameSlot::new();
+    let bitmap: Arc<SharedBitmapImpl> = Arc::new(FrameBitmap);
+    let metadata = FrameMetadata {
+        identity: FrameIdentity { source: 1, generation: 1, sequence: 1 },
+        width: 4,
+        height: 4,
+        visible: FrameRegion { x: 0, y: 0, width: 4, height: 4 },
+        format: FrameFormat::Bgra8,
+        color,
+        alpha: FrameAlpha::Opaque,
+        rotation: FrameRotation::None,
+        mirrored: false,
+        top_left_origin: true,
+        timestamp: std::time::Duration::ZERO,
+        device: None,
+        device_generation: 1,
+        planes: vec![FramePlane { offset: 0, stride: 16, length: 64 }],
+        retained_bytes: 64,
+    };
+    slot.publish(RefCountable::create(bitmap, || {}), metadata);
+    let brush = SharedBrush::from_frame_slot(&tile, slot.clone());
+    let layers = vec![layer(Scene3DMaterialKind::Diffuse, brush)];
+    let scene = snapshot(
+        orthographic(0.0),
+        vec![model(quad(7_501, -1.0, -1.0, 1.0, 1.0, 0.0), layers, Vec::new())],
+        vec![ambient(255)],
+    );
+    (scene, slot)
+}
+
+#[test]
+fn a_stored_frame_is_sampled_with_its_colour_transfer_and_nothing_written() {
+    use ferroui_base::rendering::composition::frames::FrameColor;
+    let Some(mut executor) = executor() else { return };
+    let output = executor.create_output_texture(SIDE, SIDE).expect("an output texture");
+    let target = Scene3DMetalTarget { texture: &output, size: (SIDE, SIDE), antialiased: false };
+    let bgra = [200u8, 100, 50, 255];
+    let rec709 = |value: u8| {
+        let v = (f64::from(value) / 255.0).powf(2.4);
+        let curve = if v < 0.0031308 { 12.92 * v } else { 1.055 * v.powf(1.0 / 2.4) - 0.055 };
+        (curve * 255.0).round() as u8
+    };
+    let cases = [
+        (FrameColor::Srgb, [bgra[2], bgra[1], bgra[0]]),
+        (FrameColor::Rec709Full, [rec709(bgra[2]), rec709(bgra[1]), rec709(bgra[0])]),
+    ];
+    for (color, expected) in cases {
+        let frames = StoredFrames { texture: stored_frame(&executor, bgra), given: Cell::new(0) };
+        let (scene, _slot) = stored_frame_scene(color);
+        let before = counters();
+        let mut viewport = Scene3DMetalViewport::new();
+        for _ in 0..2 {
+            let report = executor
+                .render_with_textures(&mut viewport, &scene, &target, &frames)
+                .expect("a render");
+            assert_eq!(0, report.textures_uploaded);
+        }
+        assert_eq!(1, frames.given.get(), "{color:?}: asked once");
+        assert_eq!(1, counters().textures_on_device - before.textures_on_device);
+        assert_eq!(0, counters().textures_uploaded - before.textures_uploaded);
+        let pixels = read_back(&executor, &output, (SIDE, SIDE));
+        let index = ((SIDE / 2) * SIDE + SIDE / 2) as usize * 4;
+        for channel in 0..3 {
+            assert!(
+                pixels[index + channel].abs_diff(expected[channel]) <= 2,
+                "{color:?}: {:?}, expected {expected:?}",
+                &pixels[index..index + 4]
+            );
+        }
+        assert_eq!(255, pixels[index + 3]);
+    }
+}
+
+#[test]
+fn a_frame_without_a_texture_of_the_device_is_drawn_with_its_colour() {
+    use ferroui_base::rendering::composition::frames::FrameColor;
+    let Some(mut executor) = executor() else { return };
+    let output = executor.create_output_texture(SIDE, SIDE).expect("an output texture");
+    let target = Scene3DMetalTarget { texture: &output, size: (SIDE, SIDE), antialiased: false };
+    let (scene, _slot) = stored_frame_scene(FrameColor::Srgb);
+    let before = counters();
+    executor.render(&mut Scene3DMetalViewport::new(), &scene, &target).expect("a render");
+    assert_eq!(0, executor.texture_count());
+    assert_eq!(0, counters().textures_on_device - before.textures_on_device);
+}

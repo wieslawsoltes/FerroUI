@@ -48,8 +48,10 @@
 //! the calls of the encoders that take offsets and indices.
 
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::platform::SharedBitmapImpl;
 use ferroui_base::rendering::scene3d::{MeshData, Scene3DMaterialLayer, Scene3DModel, Scene3DSnapshot};
 use ferroui_base::Rect;
+use ferroui_render3d::brush::DeviceBitmap;
 use ferroui_render3d::brush::{
     texture_coordinate_bounds, BrushShader, BrushTextureIdentity, BrushTextureKey, BrushTextureSource,
     MaterialBrush, BRUSH_UNIFORMS_STRIDE,
@@ -137,6 +139,9 @@ pub struct Scene3DMetalCounters {
     /// takes): their layers are drawn with their colours and counted
     /// (`ferroui_render3d::layers_with_unsampled_brushes`).
     pub textures_refused: u64,
+    /// Textures of brushes the renderer already had on the device (a frame of a video, step D7):
+    /// sampled as they are, with nothing written.
+    pub textures_on_device: u64,
 }
 
 impl Scene3DMetalCounters {
@@ -154,6 +159,7 @@ impl Scene3DMetalCounters {
         textures_uploaded: 0,
         texture_bytes: 0,
         textures_refused: 0,
+        textures_on_device: 0,
     };
 }
 
@@ -220,6 +226,35 @@ impl Scene3DMetalTexture {
     /// The height in pixels.
     pub fn height(&self) -> u32 {
         self.height
+    }
+}
+
+/// The bitmaps a renderer has as textures of the device of the executor, whose pixels cannot be
+/// read: the frames of a video or a camera (step D7).
+///
+/// # Safety
+/// [`device_texture`](Self::device_texture) returns a valid `id<MTLTexture>`, which stays valid
+/// until the executor has taken its own reference when the call returns. The renderer keeps the
+/// storage of the frame from the producer until the GPU has done the renders that read it.
+pub unsafe trait Scene3DMetalDeviceTextures {
+    /// How `bitmap` is on this device. Asked for every layer that has such a bitmap.
+    fn sampling(&self, bitmap: &SharedBitmapImpl) -> DeviceBitmap;
+
+    /// The `id<MTLTexture>` of `bitmap`, asked once for each bitmap the executor does not hold.
+    fn device_texture(&self, bitmap: &SharedBitmapImpl) -> Option<*mut c_void>;
+}
+
+/// A renderer without such bitmaps.
+struct NoDeviceTextures;
+
+// SAFETY: it gives no texture.
+unsafe impl Scene3DMetalDeviceTextures for NoDeviceTextures {
+    fn sampling(&self, _: &SharedBitmapImpl) -> DeviceBitmap {
+        DeviceBitmap::NotOnDevice
+    }
+
+    fn device_texture(&self, _: &SharedBitmapImpl) -> Option<*mut c_void> {
+        None
     }
 }
 
@@ -349,6 +384,8 @@ struct BrushTexture {
     texture: Retained<Texture>,
     size: (u32, u32),
     last_used: u64,
+    /// A texture of the renderer (step D7): sampled, never written.
+    on_device: bool,
 }
 
 /// Texels to copy into a texture before the render pass of a render.
@@ -559,6 +596,18 @@ impl Scene3DMetalExecutor {
         scene: &Scene3DSnapshot,
         target: &Scene3DMetalTarget<'_>,
     ) -> Result<Scene3DMetalRenderReport, Scene3DMetalError> {
+        self.render_with_textures(viewport, scene, target, &NoDeviceTextures)
+    }
+
+    /// [`render`](Self::render) for a renderer that has some bitmaps of the scene as textures of
+    /// the device (`textures`, step D7): they are sampled without a copy.
+    pub fn render_with_textures(
+        &mut self,
+        viewport: &mut Scene3DMetalViewport,
+        scene: &Scene3DSnapshot,
+        target: &Scene3DMetalTarget<'_>,
+        textures: &dyn Scene3DMetalDeviceTextures,
+    ) -> Result<Scene3DMetalRenderReport, Scene3DMetalError> {
         if let Some(last) = &self.last_render {
             if last.status() == MTLCommandBufferStatus::Error {
                 let reason =
@@ -570,7 +619,7 @@ impl Scene3DMetalExecutor {
         objc2::rc::autoreleasepool(|_| {
             let sample_count = if target.antialiased && self.multisample { MULTISAMPLE_COUNT } else { 1 };
             let mut report = Scene3DMetalRenderReport::default();
-            match self.render_with(viewport, scene, target, sample_count, &mut report) {
+            match self.render_with(viewport, scene, target, textures, sample_count, &mut report) {
                 Ok(()) => Ok(report),
                 Err(error) if sample_count == 1 => Err(error),
                 Err(error) => {
@@ -578,7 +627,7 @@ impl Scene3DMetalExecutor {
                     self.multisample = false;
                     report_single_sample(&error.reason);
                     let mut report = Scene3DMetalRenderReport::default();
-                    self.render_with(viewport, scene, target, 1, &mut report).map(|()| report)
+                    self.render_with(viewport, scene, target, textures, 1, &mut report).map(|()| report)
                 }
             }
         })
@@ -589,6 +638,7 @@ impl Scene3DMetalExecutor {
         viewport: &mut Scene3DMetalViewport,
         scene: &Scene3DSnapshot,
         target: &Scene3DMetalTarget<'_>,
+        textures: &dyn Scene3DMetalDeviceTextures,
         sample_count: u32,
         report: &mut Scene3DMetalRenderReport,
     ) -> Result<(), Scene3DMetalError> {
@@ -613,7 +663,7 @@ impl Scene3DMetalExecutor {
                     continue;
                 }
                 for (face, layers) in [(Face::Front, &model.front), (Face::Back, &model.back)] {
-                    self.add_draws(viewport, model, layers, face, (index_count, texture_bounds), report)?;
+                    self.add_draws(viewport, model, layers, face, (index_count, texture_bounds), textures, report)?;
                 }
             }
         }
@@ -825,6 +875,7 @@ impl Scene3DMetalExecutor {
     /// The draws of the layers of one side of a model, in order, with their uniforms and the
     /// textures of their brushes (uploaded when their keys are new). The first diffuse layer
     /// writes depth (the first layer when the side has no diffuse layer).
+    #[allow(clippy::too_many_arguments)]
     fn add_draws(
         &mut self,
         viewport: &mut Scene3DMetalViewport,
@@ -832,16 +883,18 @@ impl Scene3DMetalExecutor {
         layers: &[Scene3DMaterialLayer],
         face: Face,
         (index_count, texture_bounds): (u32, Rect),
+        textures: &dyn Scene3DMetalDeviceTextures,
         report: &mut Scene3DMetalRenderReport,
     ) -> Result<(), Scene3DMetalError> {
         let depth_layer =
             layers.iter().position(|layer| LayerKind::of(layer.kind) == LayerKind::Diffuse).unwrap_or(0);
         for (index, layer) in layers.iter().enumerate() {
             let (uniforms, _) = DrawUniforms::of(model, layer, face);
-            let mut brush = MaterialBrush::of(layer.brush.as_ref(), texture_bounds);
+            let sampling = |bitmap: &SharedBitmapImpl| textures.sampling(bitmap);
+            let mut brush = MaterialBrush::of_with(layer.brush.as_ref(), texture_bounds, &sampling);
             let mut texture = None;
             if let Some(source) = brush.texture().cloned() {
-                if self.brush_texture(&source, report) {
+                if self.brush_texture(&source, textures, report) {
                     texture = Some(source.key());
                 } else {
                     // Texels that cannot be read or uploaded: the layer is drawn with its colour.
@@ -915,12 +968,29 @@ impl Scene3DMetalExecutor {
     /// an older version of the same bitmap that no draw of this render uses when it has the same
     /// size, otherwise into a new one. `false` when its texels cannot be read or are larger than
     /// the device takes (asked again only after [`LIFETIME`] renders).
-    fn brush_texture(&mut self, source: &BrushTextureSource, report: &mut Scene3DMetalRenderReport) -> bool {
+    fn brush_texture(
+        &mut self,
+        source: &BrushTextureSource,
+        textures: &dyn Scene3DMetalDeviceTextures,
+        report: &mut Scene3DMetalRenderReport,
+    ) -> bool {
         let key = source.key();
         let renders = self.renders;
         if let Some(texture) = self.textures.get_mut(&key) {
             texture.last_used = renders;
             return true;
+        }
+        if let Some(bitmap) = source.bitmap() {
+            if textures.sampling(&**bitmap) != DeviceBitmap::NotOnDevice {
+                if let Some(texture) = textures.device_texture(&**bitmap).and_then(|raw| self.given_texture(raw)) {
+                    let size = (texture.width() as u32, texture.height() as u32);
+                    let identity = source.identity();
+                    let kept = BrushTexture { identity, texture, size, last_used: renders, on_device: true };
+                    self.textures.insert(key, kept);
+                    count(|counters| counters.textures_on_device += 1);
+                    return true;
+                }
+            }
         }
         if let Some(last) = self.refused_textures.get_mut(&key) {
             *last = renders;
@@ -945,6 +1015,7 @@ impl Scene3DMetalExecutor {
                     matches!(other, BrushTextureKey::Image { identity: other, .. } if *other == identity)
                         && texture.last_used != renders
                         && texture.size == size
+                        && !texture.on_device
                 })
                 .map(|(other, _)| *other),
             _ => None,
@@ -966,8 +1037,27 @@ impl Scene3DMetalExecutor {
             counters.textures_uploaded += 1;
             counters.texture_bytes += texels.rgba.len() as u64;
         });
-        self.textures.insert(key, BrushTexture { identity: source.identity(), texture, size, last_used: renders });
+        let identity = source.identity();
+        self.textures.insert(key, BrushTexture { identity, texture, size, last_used: renders, on_device: false });
         true
+    }
+
+    /// A texture a renderer gave: a reference of the executor, when it can be sampled here (a
+    /// texture of this device of 8-bit RGBA or BGRA, one sample, readable by shaders).
+    fn given_texture(&self, raw: *mut c_void) -> Option<Retained<Texture>> {
+        use objc2_metal::MTLResource;
+        // SAFETY: a valid `id<MTLTexture>` (the contract of `Scene3DMetalDeviceTextures`).
+        let texture = unsafe { Retained::retain(raw.cast::<Texture>()) }?;
+        let format = texture.pixelFormat();
+        let same_device = std::ptr::eq(
+            Retained::as_ptr(&texture.device()).cast::<()>(),
+            Retained::as_ptr(&self.device).cast::<()>(),
+        );
+        (same_device
+            && (format == MTLPixelFormat::BGRA8Unorm || format == MTLPixelFormat::RGBA8Unorm)
+            && texture.sampleCount() == 1
+            && texture.usage().contains(MTLTextureUsage::ShaderRead))
+        .then_some(texture)
     }
 
     /// The transparent texture of one texel an image brush without an image samples, made on
