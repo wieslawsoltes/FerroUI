@@ -222,7 +222,7 @@ Each pull request carries its tests, its `DEVIATIONS.md` rows and a line in `CHA
 | `FontIcon.IsTextScaleFactorEnabled`, `FontIconSource.IsTextScaleFactorEnabled` | Not ported. | Missing | FerroUI has no text scale factor. |
 | `FontIconSource.FontFamily` is a nullable font family; null leaves the icon's own. | `Option<FontFamily>`, `None` by default; a change to `None` clears the value it had set on the icons. | Representation | Rust has no null font family. |
 | `IconSource::CreateIconElementCore` of the abstract base returns `E_NOTIMPL`, and `CreateIconElement` no element. | `create_icon_element` returns `Option<Ref<IconElement>>`: `None` for the base. | Representation | #286 panicked there; WinUI's base creates no element. |
-| `BitmapIconSource`, `ImageIconSource`, `AnimatedIconSource`, `BitmapIcon`, `ImageIcon`, `AnimatedIcon` | Not ported. | Missing | Not in #286; candidates for later. |
+| `AnimatedIconSource`, `AnimatedIcon` | Not ported. | Missing | Not in #286; candidates for later. |
 
 ### 10.2 Status (W5)
 
