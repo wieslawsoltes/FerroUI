@@ -14,7 +14,7 @@ struct ClipRow {
 }
 
 impl DesignerWorkspace {
-    pub(in crate::workspace) fn comparing_animation_clips(&self) -> bool {
+    pub(crate) fn comparing_animation_clips(&self) -> bool {
         self.timeline_ui.borrow().compare_clips
     }
 
@@ -30,10 +30,16 @@ impl DesignerWorkspace {
     }
 
     pub(in crate::workspace) fn toggle_clip_comparison(self: &Rc<Self>) {
+        self.set_clip_comparison(!self.comparing_animation_clips());
+    }
+
+    pub(crate) fn set_clip_comparison(self: &Rc<Self>, comparing: bool) {
         let mut ui = self.timeline_ui.borrow_mut();
-        ui.compare_clips = !ui.compare_clips;
+        if ui.compare_clips == comparing {
+            return;
+        }
+        ui.compare_clips = comparing;
         ui.view = None;
-        let comparing = ui.compare_clips;
         drop(ui);
         let mut session = self.session.borrow_mut();
         session.pause();

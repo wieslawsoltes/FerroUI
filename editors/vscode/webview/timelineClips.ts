@@ -1,4 +1,5 @@
 import type { TimelineClipTiming } from '../src/timelineProtocol';
+import type { TimelineLayout } from '../src/timelineLayout';
 import type { ClipFrame } from './clipFrame';
 import { create, element, labelButton } from './dom';
 import { bindClipDrag } from './timelineClipDrag';
@@ -27,7 +28,7 @@ interface ClipState<Frame> {
 interface Row { key: string; program: TimelineClipRow; label: HTMLButtonElement; order: HTMLElement; bar: HTMLButtonElement }
 
 interface ClipActions<Frame> {
-    changed(): void;
+    changed(layout: TimelineLayout): void;
     seek(time: number): void;
     transport(action: 'play_all' | 'pause' | 'stop', program: number): void;
     place(frame: Frame, programs: number[], start: number | undefined, gap: number): void;
@@ -67,9 +68,13 @@ export class TimelineClips<Frame extends ClipFrame> {
     private readonly placement: TimelineClipPlacement<Frame>;
     visible = false;
 
-    constructor(public enabled: boolean, private readonly actions: ClipActions<Frame>) {
+    constructor(private layoutChoice: TimelineLayout, private readonly actions: ClipActions<Frame>) {
         this.placement = new TimelineClipPlacement((...args) => actions.place(...args));
-        this.toggle.onclick = () => { this.enabled = !this.enabled; this.actions.changed(); };
+        this.toggle.onclick = () => {
+            const layout = this.enabled ? 'tracks' : 'clips';
+            this.applyLayout(layout);
+            this.actions.changed(layout);
+        };
         this.seek.oninput = () => this.actions.seek(this.seek.valueAsNumber);
         this.time.oninput = () => { this.drafting = true; };
         this.time.onblur = () => { this.drafting = false; this.showTime(); };
@@ -89,7 +94,7 @@ export class TimelineClips<Frame extends ClipFrame> {
         };
         this.keys.onclick = () => {
             const program = this.selected[0];
-            if (program) { this.enabled = false; this.actions.keys(program.id); }
+            if (program) { this.applyLayout('tracks'); this.actions.keys(program.id); }
         };
         this.zoomIn.onclick = () => this.zoom(1.25);
         this.zoomOut.onclick = () => this.zoom(.8);
@@ -103,6 +108,15 @@ export class TimelineClips<Frame extends ClipFrame> {
             else return;
             event.preventDefault();
         };
+    }
+
+    get enabled(): boolean { return this.layoutChoice === 'clips'; }
+    get layoutPreference(): TimelineLayout { return this.layoutChoice; }
+
+    applyLayout(layout: TimelineLayout): boolean {
+        if (layout === this.layoutChoice) return false;
+        this.layoutChoice = layout;
+        return true;
     }
 
     get reference(): number | undefined { return this.state?.reference; }

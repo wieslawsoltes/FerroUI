@@ -1,4 +1,5 @@
 import type { AnimationGraphMessage } from './animationGraph';
+import type { TimelineLayout, TimelineLayoutMessage } from './timelineLayout';
 import type { PreviewSourceBuffer, Range, Source } from './protocol';
 import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
     HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupAction,
@@ -64,7 +65,8 @@ export type HostedGesture = (HostedPoint & ({ type: 'click' } | { type: 'scroll'
 
 export type HostedInput = HostedAnimationFrame & HostedPoint & HostedGesture;
 
-export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | AnimationGraphMessage | { type: 'ready' | 'refresh' }
+export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | AnimationGraphMessage | TimelineLayoutMessage
+    | { type: 'ready'; layout: TimelineLayout } | { type: 'refresh' }
     | { type: 'templates'; frame: HostedAnimationFrame }
     | { type: 'animation'; request: number; frame: HostedAnimationFrame; control: HostedAnimationControl }
     | { type: 'clipPlacement'; request: number; frame: HostedAnimationFrame; draft: HostedClipDraft }
@@ -79,8 +81,8 @@ export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | An
     | { type: 'recordKeyframe'; frame: HostedAnimationFrame; request: number; draft: HostedKeyframeSample }
     | { type: 'keyframeGroup'; frame: HostedAnimationFrame; request: number; action: HostedKeyframeGroupAction }
     | { type: 'fixture'; revision: number; name: string | null };
-export type ToHosted = ToHostedPalette | ToHostedStyles | AnimationGraphMessage | { type: 'frame'; frame: HostedFrame }
-    | { type: 'animations'; state: HostedAnimationState; version: number }
+export type ToHosted = ToHostedPalette | ToHostedStyles | AnimationGraphMessage | TimelineLayoutMessage | { type: 'frame'; frame: HostedFrame }
+    | { type: 'animations'; state: HostedAnimationState; version: number; layout?: TimelineLayout }
     | { type: 'animationReply'; request: number }
     | { type: 'openKeyframe'; key: HostedKeyframeSelection }
     | { type: 'curveReply'; request: number; frame: HostedAnimationFrame; points?: CurvePoint[]; error?: string }

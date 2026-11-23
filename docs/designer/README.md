@@ -533,6 +533,8 @@ the rows. Select names in sequence order to reveal **Gap / overlap (s)**. Apply 
 clips, a positive gap, or a negative overlap. One Undo restores the original delays together.
 The placement uses native XAML `Delay` or a mapped Rust `.delay(...)` and preserves the keyframes
 and existing triggers. Use the compare icon again to return to the selected program's keys.
+Agents can switch this layout with `designer_timeline_set_layout` using the active document’s
+URI and revision from `designer_timeline_view`.
 [VS Code workflow and MCP arguments](vscode/motion.md#compare-and-sequence-clips)
 
 App Preview uses the same placement rules with the selected binary’s registered animators and

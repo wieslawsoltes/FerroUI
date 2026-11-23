@@ -1,4 +1,5 @@
 import type { AnimationGraphMode } from '../src/animationGraph';
+import type { TimelineLayout } from '../src/timelineLayout';
 import type { HostedAnimationControl, HostedAnimationFrame, HostedAnimationState } from '../src/hostedAnimationProtocol';
 import type { HostedAnimationProgram } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
@@ -46,7 +47,8 @@ export class HostedAnimationView {
     private rangeScope?: string;
     readonly keyframes: HostedKeyframeEditor;
 
-    constructor(private readonly send: (message: FromHosted) => void, compare: boolean, rememberComparison: (enabled: boolean) => void) {
+    constructor(private readonly send: (message: FromHosted) => void, layout: TimelineLayout,
+        private readonly rememberComparison: (enabled: boolean) => void) {
         this.keyframes = new HostedKeyframeEditor(send, () => {
             // Applying a key retires the animation toolbar until the next frame.
             const button = this.edit.disabled || this.edit.hidden ? element('hosted-refresh') : this.edit;
@@ -59,12 +61,10 @@ export class HostedAnimationView {
             () => fitTimeline(Number(this.seek.max)), () => this.seek.valueAsNumber, () => this.paint());
         this.clipRange = new TimelineWorkArea('clip', element('timeline-clips'),
             () => this.clips.viewport, () => this.clips.elapsed, () => this.paint());
-        this.clips = new TimelineClips<HostedAnimationFrame>(compare, {
-            changed: () => {
-                this.queued = undefined;
-                this.keyframes.close();
-                rememberComparison(this.clips.enabled);
-                this.paint();
+        this.clips = new TimelineClips<HostedAnimationFrame>(layout, {
+            changed: layout => {
+                this.send({ type: 'timelineLayout', layout });
+                this.showTimelineLayout();
             },
             seek: elapsed => this.queueSeek(elapsed),
             transport: action => {
@@ -79,7 +79,8 @@ export class HostedAnimationView {
                 this.paint();
             },
             keys: program => {
-                rememberComparison(false);
+                this.send({ type: 'timelineLayout', layout: 'tracks' });
+                this.rememberComparison(false);
                 this.control({ action: 'select', program });
             },
             layout: () => { this.clipRange.layout(); this.clipMarkers.layout(); },
@@ -125,15 +126,12 @@ export class HostedAnimationView {
         });
     }
 
-    update(state: HostedAnimationState, documentVersion: number): void {
+    update(state: HostedAnimationState, documentVersion: number, layout?: TimelineLayout): void {
         if (state.frame?.revision !== this.state.frame?.revision) {
             this.queued = this.submitted = this.pending = undefined;
         }
         const selected = state.selection ?? state.position?.program;
-        if (state.position?.clips && !this.state.position?.clips) this.clips.enabled = true;
-        if (state.position?.previewRange && state.position.playing && !this.state.position?.playing) {
-            this.clips.enabled = Boolean(state.position.clips);
-        }
+        if (layout) this.clips.applyLayout(layout);
         this.state = state;
         this.documentVersion = documentVersion;
         const catalog = JSON.stringify(state.programs.map(program => [program.id, program.name, animationGroup(program)]));
@@ -171,6 +169,17 @@ export class HostedAnimationView {
     curve(reply: Extract<ToHosted, { type: 'curveReply' }>) { this.curves.receive(reply); }
 
     setGraphMode(mode: AnimationGraphMode): void { this.curves.setGraphMode(mode); }
+
+    setTimelineLayout(layout: TimelineLayout): void {
+        if (this.clips.applyLayout(layout)) this.showTimelineLayout();
+    }
+
+    private showTimelineLayout(): void {
+        this.queued = undefined;
+        this.keyframes.close();
+        this.rememberComparison(this.clips.enabled);
+        this.paint();
+    }
 
     private canUse(interrupt = false): boolean {
         const frame = this.state.frame;

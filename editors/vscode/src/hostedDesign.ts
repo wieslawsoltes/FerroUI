@@ -35,6 +35,7 @@ import { choose } from './studioContext';
 import { chooseTransitionAction } from './studioPropertyTransitions';
 import { asPosition, asRange, languageOf, offsetAfterChanges, sourceOf } from './textDocument';
 import { writeTimelineClipboard } from './timelineKeyframeClipboard';
+import { isTimelineLayout, type TimelineLayout } from './timelineLayout';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
 import type { PaletteEdit } from './stylesProtocol';
@@ -127,17 +128,28 @@ export class HostedDesign implements vscode.Disposable {
         return { generation: session.generation, status: session.message, ...state, frame };
     }
 
-    graphDisplay(uri: vscode.Uri) { return this.session(uri).graphDisplay(); }
+    timelineDisplay(uri: vscode.Uri) { return this.session(uri).timelineDisplay(); }
 
     setGraphMode(uri: vscode.Uri, generation: number, revision: number, mode: AnimationGraphMode) {
-        const session = this.session(uri);
-        const display = session.graphDisplay();
-        if (display.generation !== generation) throw new Error('Read the current application preview generation.');
-        if (session.currentFrame?.revision !== revision) throw new Error('Read the current application preview revision.');
+        const session = this.timelineSession(uri, generation, revision);
+        const display = session.timelineDisplay();
         if (!display.available_modes.includes(mode)) throw new Error('The current App Preview does not support that graph mode.');
         session.panel.reveal(session.panel.viewColumn, true);
         session.setGraphMode(mode);
         return { ...display, mode };
+    }
+
+    setTimelineLayout(uri: vscode.Uri, generation: number, revision: number, layout: TimelineLayout) {
+        const session = this.timelineSession(uri, generation, revision);
+        session.setTimelineLayout(layout);
+        return session.timelineDisplay();
+    }
+
+    private timelineSession(uri: vscode.Uri, generation: number, revision: number): HostedSession {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        if (session.currentFrame?.revision !== revision) throw new Error('Read the current application preview revision.');
+        return session;
     }
 
     image(uri: vscode.Uri) {
@@ -382,6 +394,8 @@ class HostedSession {
     private disposed = false;
     private status = 'Building the selected Cargo target…';
     private graphMode: AnimationGraphMode = 'keys';
+    private timelineLayout?: TimelineLayout;
+    private displayPosition?: HostedAnimationState['position'];
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         readonly panel: vscode.WebviewPanel, private readonly editor: vscode.TextEditor, private readonly language: Language,
@@ -414,7 +428,10 @@ class HostedSession {
             vscode.window.onDidChangeTextEditorSelection(event => {
                 if (language === 'rust' && event.textEditor === editor) this.updateRustCaret(event.selections[0]?.active);
             }),
-            panel.onDidChangeViewState(() => this.schedule(0)),
+            panel.onDidChangeViewState(() => {
+                if (panel.visible) this.showTimelineDisplay();
+                this.schedule(0);
+            }),
             panel.onDidDispose(() => remove(this.dispose())),
             panel.webview.onDidReceiveMessage((message: FromHosted) => { void this.receive(message); }),
         ];
@@ -470,9 +487,9 @@ class HostedSession {
         return this.fixtures();
     }
 
-    graphDisplay() {
+    timelineDisplay() {
         const { programs } = this.animations.state;
-        return { mode: this.graphMode, generation: this.generation, revision: this.revision,
+        return { mode: this.graphMode, layout: this.timelineLayout ?? 'tracks', generation: this.generation, revision: this.revision,
             available_modes: availableGraphModes(programs.some(program => Boolean(program.curveTracks?.length)),
                 Boolean(this.client?.capabilities.timelineCurveVelocity)) };
     }
@@ -480,6 +497,19 @@ class HostedSession {
     setGraphMode(mode: AnimationGraphMode): void {
         this.graphMode = mode;
         this.post({ type: 'animationGraphMode', mode });
+    }
+
+    setTimelineLayout(layout: TimelineLayout): void {
+        const { position, busy, clipScope, programs } = this.animations.state;
+        if (layout === 'clips' && (!clipScope || !programs.some(program => program.clip))) {
+            throw new Error('Choose an App Preview with clips to compare.');
+        }
+        if (layout !== (this.timelineLayout ?? 'tracks') && (position?.playing || busy)) {
+            throw new Error('Pause App Preview playback before switching the layout.');
+        }
+        this.timelineLayout = layout;
+        this.panel.reveal(this.panel.viewColumn, true);
+        this.post({ type: 'timelineLayout', layout });
     }
 
     private update(): void {
@@ -892,14 +922,28 @@ class HostedSession {
     }
 
     private showAnimations(state: HostedAnimationState): void {
+        const previous = this.displayPosition;
+        this.displayPosition = state.position && { ...state.position };
+        let layout: TimelineLayout | undefined;
+        if (state.position?.clips && !previous?.clips) layout = 'clips';
+        if (state.position?.previewRange && state.position.playing && !previous?.playing) {
+            layout = state.position.clips ? 'clips' : 'tracks';
+        }
+        if (layout) this.timelineLayout = layout;
         this.post({ type: 'animations', version: this.editor.document.version,
-            state: { ...state, canShowVelocity: Boolean(this.client?.capabilities.timelineCurveVelocity) } });
+            state: { ...state, canShowVelocity: Boolean(this.client?.capabilities.timelineCurveVelocity) }, layout });
+    }
+
+    private showTimelineDisplay(): void {
+        this.post({ type: 'animationGraphMode', mode: this.graphMode });
+        this.post({ type: 'timelineLayout', layout: this.timelineLayout ?? 'tracks' });
     }
 
     private async receive(message: FromHosted): Promise<void> {
         if (message.type === 'ready') {
             this.ready = true;
-            this.post({ type: 'animationGraphMode', mode: this.graphMode });
+            if (!this.timelineLayout && isTimelineLayout(message.layout)) this.timelineLayout = message.layout;
+            this.showTimelineDisplay();
             if (this.frame) this.post({ type: 'frame', frame: this.frame });
             this.showAnimations(this.animations.state);
             this.report(this.status, this.frame?.revision === this.revision && Boolean(this.client));
@@ -908,6 +952,10 @@ class HostedSession {
         }
         if (message.type === 'animationGraphMode') {
             if (isAnimationGraphMode(message.mode)) this.setGraphMode(message.mode);
+            return;
+        }
+        if (message.type === 'timelineLayout') {
+            if (isTimelineLayout(message.layout)) this.timelineLayout = message.layout;
             return;
         }
         if (message.type === 'refresh') { this.refresh(); return; }

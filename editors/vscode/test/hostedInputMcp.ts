@@ -2,9 +2,10 @@ import { strict as assert } from 'node:assert';
 import { writeFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { HostedAnimationAction, HostedAnimationState } from '../src/hostedAnimationProtocol';
 import type { HostedGesture } from '../src/hostedProtocol';
 import type { McpFixture } from './mcp';
-import { verifyTimelineGraphMcp } from './timelineGraphMcp';
+import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
 import { until } from './wait';
 
 const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design"
@@ -25,16 +26,31 @@ const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:Tod
     </Grid>
 </Window>`;
 
-const motion = `<Window xmlns="https://github.com/ferroui" Width="420" Height="240" Background="#F2F6FB">
-    <Window.Styles><Style Selector="Border#Ticket"><Style.Animations>
-        <Animation Duration="0:0:2" FillMode="Both">
-            <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25"/></KeyFrame>
-            <KeyFrame Cue="100%" KeySpline="0.25,0.2,0.7,1.4"><Setter Property="Opacity" Value="1"/></KeyFrame>
-        </Animation>
-    </Style.Animations></Style></Window.Styles>
-    <Border Name="Ticket" Background="#FFFFFF" Margin="32" Padding="24" CornerRadius="12">
-        <TextBlock Text="Order confirmed" FontSize="26" Foreground="#194779"/>
-    </Border>
+const motion = `<Window xmlns="https://github.com/ferroui" Width="420" Height="260" Background="#F2F6FB">
+    <Window.Styles>
+        <Style Selector="Border#Ticket"><Style.Animations>
+            <Animation Duration="0:0:2" FillMode="Both">
+                <!--ferroui-designer-program:5469636b65742072657665616c-->
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25"/></KeyFrame>
+                <KeyFrame Cue="100%" KeySpline="0.25,0.2,0.7,1.4"><Setter Property="Opacity" Value="1"/></KeyFrame>
+            </Animation>
+        </Style.Animations></Style>
+        <Style Selector="Border#Receipt"><Style.Animations>
+            <Animation Delay="0:0:0.4" Duration="0:0:1" FillMode="Both">
+                <!--ferroui-designer-program:526563656970742072657665616c-->
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.1"/></KeyFrame>
+                <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1"/></KeyFrame>
+            </Animation>
+        </Style.Animations></Style>
+    </Window.Styles>
+    <StackPanel Margin="24" Spacing="12">
+        <Border Name="Ticket" Background="#FFFFFF" Padding="20" CornerRadius="12">
+            <TextBlock Text="Order confirmed" FontSize="24" Foreground="#194779"/>
+        </Border>
+        <Border Name="Receipt" Background="#D6E8DC" Padding="20" CornerRadius="12">
+            <TextBlock Text="Delivery scheduled" FontSize="18" Foreground="#234939"/>
+        </Border>
+    </StackPanel>
 </Window>`;
 
 interface Capture {
@@ -123,6 +139,8 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         try {
             await image(refreshed);
             await verifyTimelineGraphMcp({ invoke, content }, session, document, generation);
+            await verifyTimelineLayoutMcp({ invoke, content }, session, document, generation);
+            await verifyLayoutPlayback({ invoke, content }, session, generation);
         } finally {
             content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
         }
@@ -136,4 +154,23 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
             await config.update('assembly', originalAssembly, vscode.ConfigurationTarget.Workspace);
         }
     }
+}
+
+async function verifyLayoutPlayback({ invoke, content }: McpFixture, session: number, expected_generation: number) {
+    const read = async () => content<HostedAnimationState>(await invoke('designer_hosted_animations', { session }));
+    const layout = async () => content<{ layout: string }>(await invoke('designer_hosted_timeline_view', { session })).layout;
+    const animate = async (arguments_: HostedAnimationAction) => {
+        const { frame } = await read();
+        assert.ok(frame);
+        content(await invoke('designer_hosted_animation', { session, expected_generation,
+            expected_revision: frame.revision, expected_sequence: frame.sequence, arguments: arguments_ }));
+    };
+    const program = (await read()).programs.find(program => program.clip)?.id;
+    assert.ok(program);
+    await animate({ action: 'scrub_all', elapsed: .45 });
+    assert.equal(await layout(), 'clips');
+    assert.equal((await read()).position?.clips?.length, 2);
+    await animate({ action: 'play_range', program, range: { start: 0, end: .25, loop: false } });
+    assert.equal(await layout(), 'tracks');
+    await until(async () => !(await read()).position?.playing);
 }

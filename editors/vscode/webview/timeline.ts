@@ -92,13 +92,10 @@ let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 let appliedProgramEdit: string | undefined;
 let clipEdit: FrameTarget | undefined;
-const clips = new TimelineClips<FrameTarget>(Boolean(typeof saved === 'object' && saved.clips), {
-    changed: () => {
-        queued = undefined;
-        keyframeEditor.close();
-        closeViewOptions();
-        saveTimeline();
-        showTracks();
+const clips = new TimelineClips<FrameTarget>(typeof saved === 'object' && saved.clips ? 'clips' : 'tracks', {
+    changed: layout => {
+        vscode.postMessage({ type: 'timelineLayout', layout });
+        showTimelineLayout();
     },
     seek: seconds => {
         if (clips.reference === undefined || !model.frame || clipEdit) return;
@@ -115,6 +112,7 @@ const clips = new TimelineClips<FrameTarget>(Boolean(typeof saved === 'object' &
         showPosition();
     },
     keys: id => {
+        vscode.postMessage({ type: 'timelineLayout', layout: 'tracks' });
         const selected = model.programs.find(program => program.id === id);
         if (!selected) return;
         timedProgramSession = undefined;
@@ -234,6 +232,8 @@ window.addEventListener('message', event => {
         seek();
     } else if (message.type === 'animationGraphMode') {
         if (graph.apply(message.mode)) { saveTimeline(); showCurves(); }
+    } else if (message.type === 'timelineLayout') {
+        if (clips.applyLayout(message.layout)) showTimelineLayout();
     } else if (message.type === 'position') {
         model.position = message.position;
         model.frame = message.frame;
@@ -264,7 +264,7 @@ window.addEventListener('message', event => {
     }
 });
 vscode.postMessage({ type: 'ready' });
-vscode.postMessage({ type: 'animationGraphReady', saved: graph.preference });
+vscode.postMessage({ type: 'timelineDisplayReady', graph: graph.preference, layout: clips.layoutPreference });
 
 function current(): TimelineProgram | undefined { return model.programs.find(item => item.id === program); }
 
@@ -470,6 +470,14 @@ function remember(program: TimelineProgram): void {
 
 function saveTimeline(): void {
     if (remembered) vscode.setState({ ...remembered, frameRate, graph: graph.preference, clips: clips.enabled });
+}
+
+function showTimelineLayout(): void {
+    queued = undefined;
+    keyframeEditor.close();
+    closeViewOptions();
+    saveTimeline();
+    showTracks();
 }
 
 function showCurves(): void {

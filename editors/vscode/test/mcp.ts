@@ -139,7 +139,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_templates'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_template_source'));
-        for (const name of ['open', 'refresh', 'animations', 'animation', 'timeline_view', 'timeline_set_graph', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
+        for (const name of ['open', 'refresh', 'animations', 'animation', 'timeline_view', 'timeline_set_graph', 'timeline_set_layout', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'property_transitions', 'property_transition_draft', 'property_transition',
             'palette', 'palette_edit_draft', 'palette_edit',
@@ -153,6 +153,10 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
             graph_mode: 'velocity' })).content[0]?.text ?? '', /allowWrites/);
         assert.match((await invoke('designer_hosted_timeline_set_graph', { session: 1, expected_generation: 1,
             expected_revision: 1, graph_mode: 'velocity' })).content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_timeline_set_layout', { session: 1, expected_revision: 1,
+            layout: 'clips' })).content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_hosted_timeline_set_layout', { session: 1, expected_generation: 1,
+            expected_revision: 1, layout: 'clips' })).content[0]?.text ?? '', /allowWrites/);
         assert.match((await invoke('designer_hosted_refresh', { session: 1, expected_generation: 1,
             expected_revision: 1 })).content[0]?.text ?? '', /allowWrites/);
         assert.match((await invoke('designer_hosted_input', { session: 1, expected_generation: 1,

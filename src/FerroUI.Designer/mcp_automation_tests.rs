@@ -70,6 +70,52 @@ fn studio_mcp_graph_mode_drives_the_native_menu_and_keeps_source_history() {
 }
 
 #[test]
+fn studio_mcp_layout_shares_the_clip_toggle_and_keeps_the_active_program() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let owner = workspace.session();
+    let provider = DesignerMcp::with_workspace(&workspace);
+    workspace.set_timeline_visible(false);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    assert_eq!(before["layout"], "tracks");
+    let revision = before["revision"].as_u64().unwrap();
+    let set = |layout: &str, revision, permissions| provider.call("designer_timeline_set_layout", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision, "layout":layout,
+    }), permissions);
+    assert!(set("clips", revision, Permissions::default()).is_err());
+    assert!(set("clips", revision + 1, write()).is_err());
+    assert_eq!(read(), before);
+
+    let program = owner.borrow().animation_programs()[1].id;
+    {
+        let mut session = owner.borrow_mut();
+        session.select_animation_program(program).unwrap();
+        session.set_recording(true);
+        session.play();
+        assert!(session.is_playing());
+    }
+    let change = set("clips", revision, write()).unwrap();
+    assert_eq!(change["layout"], "clips");
+    assert_eq!(change["visible"], true);
+    let toggle = workspace.control().get_control::<Button>("TimelineClips");
+    assert!(toggle.classes().contains("active"));
+    assert!(!owner.borrow().is_playing() && !owner.borrow().recording());
+    assert_eq!(owner.borrow().active_animation_program(), Some(program));
+    toggle.raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(read()["layout"], "tracks");
+    assert!(!toggle.classes().contains("active"));
+    let session = owner.borrow();
+    assert_eq!(session.active_animation_program(), Some(program));
+    assert_eq!(session.document().source(), source);
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.document().can_undo());
+}
+
+#[test]
 fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");

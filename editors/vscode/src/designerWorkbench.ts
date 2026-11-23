@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { AnimationGraphMode } from './animationGraph';
+import type { TimelineLayout } from './timelineLayout';
 import type { BuiltProjects } from './builtProjects';
 import { ASSETS_VIEW, AssetsView } from './assetsView';
 import { BEHAVIORS_VIEW, BehaviorsView } from './behaviorsView';
@@ -490,13 +491,22 @@ export class DesignerWorkbench implements vscode.Disposable {
         return this.timeline.control(panel, frame, control, signal);
     }
 
-    timelineGraph(panel: DesignerPanel) { return this.timeline.graphDisplay(panel); }
+    timelineDisplay(panel: DesignerPanel) { return this.timeline.display(panel); }
 
     async setTimelineGraph(panel: DesignerPanel, frame: FrameTarget, mode: AnimationGraphMode, signal: AbortSignal) {
+        await this.revealTimeline(panel, frame, signal);
+        return this.timeline.setGraphMode(panel, frame, mode);
+    }
+
+    async setTimelineLayout(panel: DesignerPanel, frame: FrameTarget, layout: TimelineLayout, signal: AbortSignal) {
+        await this.revealTimeline(panel, frame, signal);
+        return this.timeline.setLayout(panel, frame, layout, signal);
+    }
+
+    private async revealTimeline(panel: DesignerPanel, frame: FrameTarget, signal: AbortSignal) {
         if (!panel.canUse(frame)) throw new Error('Read the current designer revision.');
         await this.revealDesign(panel, 'timeline');
         signal.throwIfAborted();
-        return this.timeline.setGraphMode(panel, frame, mode);
     }
 
     timelineMarkers(panel: DesignerPanel, frame: FrameTarget, program: number | undefined, signal: AbortSignal, edit?: TimelineMarkerAction) {

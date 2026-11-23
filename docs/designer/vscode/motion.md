@@ -714,6 +714,14 @@ Placement edits the native `Delay` attribute in XAML or the literal `.delay(ferr
 
 Agents can read each clip's `start`, `end`, and `editable` fields in `designer_programs`. Use `designer_program` with `place_clips` and the ordered `programs` IDs, optional `start`, and optional `gap` through `designer_studio_edit`. Use `scrub_all` with elapsed `time` to sample the combined pose. Studio exposes both actions directly through `designer_program`. VS Code also offers `scrub_all` in `designer_timeline_control`.
 
+To open the clip comparison layout through MCP, read `designer_timeline_view` and pass its `revision` as `expected_revision` to `designer_timeline_set_layout`. Set `layout` to `clips` or `tracks`. Pass the open design’s `session` in VS Code or the active document’s `uri` as `expected_uri` in Studio. The toolbar toggle and the agent use the same layout preference. Studio applies its usual playback pause when switching between layouts.
+
+![MCP opens the docked clip ruler with Overview reveal and Review reveal beside the onboarding design.](../images/vscode-timeline-mcp-clips.png)
+
+In App Preview, read `designer_hosted_timeline_view` and use `designer_hosted_timeline_set_layout` with `session`, `layout`, `expected_generation`, and `expected_revision`. Pause VS Code or App Preview playback before switching layouts. Combined sampling and playback open the app’s clip ruler. A single-clip preview range opens its property tracks. The `layout` field reports the current choice, including changes from the toolbar or playback.
+
+![MCP opens the Ticket reveal and Receipt reveal clip lanes above the native App Preview artboard.](../images/vscode-hosted-mcp-clips.png)
+
 ### Compare clips in App Preview
 
 ![App Preview shows two overlapping clips, their XAML delays, and the application artboard at 1.2 seconds](../images/vscode-app-preview-clip-sequence.png)

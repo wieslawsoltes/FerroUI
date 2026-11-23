@@ -2,7 +2,6 @@ export const animationGraphModes = ['keys', 'value', 'velocity'] as const;
 export type AnimationGraphMode = typeof animationGraphModes[number];
 
 export type AnimationGraphMessage = { type: 'animationGraphMode'; mode: AnimationGraphMode };
-export type TimelineGraphReady = { type: 'animationGraphReady'; saved: AnimationGraphMode };
 
 export function isAnimationGraphMode(mode: unknown): mode is AnimationGraphMode {
     return animationGraphModes.some(choice => mode === choice);

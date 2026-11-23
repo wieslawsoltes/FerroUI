@@ -10,7 +10,8 @@ declare function acquireVsCodeApi(): {
     setState(state: { compare: boolean }): void;
 };
 const vscode = acquireVsCodeApi();
-const animations = new HostedAnimationView(message => vscode.postMessage(message), Boolean(vscode.getState()?.compare),
+const timelineLayout = vscode.getState()?.compare ? 'clips' : 'tracks';
+const animations = new HostedAnimationView(message => vscode.postMessage(message), timelineLayout,
     compare => vscode.setState({ compare }));
 const palettes = new HostedPaletteView(message => vscode.postMessage(message));
 const styles = new HostedStylesView(message => vscode.postMessage(message));
@@ -29,8 +30,9 @@ let interactive = false;
 let request = 0;
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
-    if (data.type === 'animations') { animations.update(data.state, data.version); return; }
+    if (data.type === 'animations') { animations.update(data.state, data.version, data.layout); return; }
     if (data.type === 'animationGraphMode') { animations.setGraphMode(data.mode); return; }
+    if (data.type === 'timelineLayout') { animations.setTimelineLayout(data.layout); return; }
     if (data.type === 'animationReply') { animations.reply(data.request); return; }
     if (data.type === 'curveReply') { animations.curve(data); return; }
     if (data.type === 'openKeyframe') { animations.keyframes.open(data.key); return; }
@@ -111,4 +113,4 @@ templates.onclick = () => {
     }
 };
 fixture.onchange = () => vscode.postMessage({ type: 'fixture', revision: fixtureRevision, name: fixture.value || null });
-vscode.postMessage({ type: 'ready' });
+vscode.postMessage({ type: 'ready', layout: timelineLayout });

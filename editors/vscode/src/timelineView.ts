@@ -9,6 +9,7 @@ import { chooseTimelineKeyAction, keyframeOptions } from './studioKeyframes';
 import { chooseAnimationIssue, chooseAnimationTargets, revealAnimationProgram, showAnimationActions } from './studioPrograms';
 import { authorTimelineKeyframe } from './timelineKeyframeAuthoring';
 import { copyTimelineKeys, prepareTimelinePaste, timelineEditTime } from './timelineKeyframeClipboard';
+import { isTimelineLayout, type TimelineLayout } from './timelineLayout';
 import { TimelineMarkers } from './timelineMarkers';
 import { positionFromPose, TimelinePlayback } from './timelinePlayback';
 import { canPreviewProgram, canPreviewRange, previewClock } from './timelinePrograms';
@@ -18,6 +19,7 @@ import { timelineHtml } from './view';
 
 export const TIMELINE_VIEW = 'ferroui.timeline';
 const GRAPH_MODE = 'ferroui.timeline.graphMode';
+const TIMELINE_LAYOUT = 'ferroui.timeline.layout';
 
 interface Catalog {
     key: string;
@@ -40,11 +42,14 @@ export class TimelineView implements vscode.Disposable {
     private catalog?: Catalog;
     private shown?: string;
     private graphMode?: AnimationGraphMode;
+    private layout?: TimelineLayout;
 
     constructor(root: vscode.Uri, private readonly changed: () => void, private readonly preferences: vscode.Memento) {
         const saved = preferences.get(GRAPH_MODE);
         if (isAnimationGraphMode(saved)) this.graphMode = saved;
-        this.view = new DockView(root, timelineHtml, () => { changed(); this.showGraph(); }, message => { void this.receive(message); });
+        const layout = preferences.get(TIMELINE_LAYOUT);
+        if (isTimelineLayout(layout)) this.layout = layout;
+        this.view = new DockView(root, timelineHtml, () => { changed(); this.showDisplay(); }, message => { void this.receive(message); });
         this.playback = new TimelinePlayback(position => {
             this.view.post({ type: 'position', position, frame: this.frame() });
             if (!position?.busy) this.refresh();
@@ -69,28 +74,55 @@ export class TimelineView implements vscode.Disposable {
         return panel?.animationRecordingTime;
     }
 
-    graphDisplay(panel: DesignerPanel) {
-        return { mode: this.graphMode ?? 'keys', revision: panel.currentToken,
+    display(panel: DesignerPanel) {
+        return { mode: this.graphMode ?? 'keys', layout: this.layout ?? 'tracks', revision: panel.currentToken,
             available_modes: availableGraphModes(panel.supportsTimelineCurves, panel.supportsTimelineCurveVelocity) };
     }
 
     async setGraphMode(panel: DesignerPanel, frame: FrameTarget, mode: AnimationGraphMode) {
         if (this.panel !== panel || !panel.canUse(frame)) throw new Error('Read the current designer revision.');
-        const display = this.graphDisplay(panel);
+        const display = this.display(panel);
         if (!display.available_modes.includes(mode)) throw new Error('The current preview does not support that graph mode.');
         await this.saveGraph(mode);
         return { ...display, mode };
     }
 
-    private showGraph(): void {
+    async setLayout(panel: DesignerPanel, frame: FrameTarget, layout: TimelineLayout, signal: AbortSignal) {
+        if (this.panel !== panel || !panel.canUse(frame)) throw new Error('Read the current designer revision.');
+        if (layout === 'clips') {
+            const programs = panel.supportsTimelineClipPlacement ? await this.programs(panel).pending : [];
+            signal.throwIfAborted();
+            if (this.panel !== panel || !panel.canUse(frame)) throw new Error('Read the current designer revision.');
+            if (this.transitions.position || !programs.some(program => program.clip)) {
+                throw new Error('Choose a Timeline with clips to compare.');
+            }
+        }
+        const position = this.playback.position;
+        const display = this.display(panel);
+        if (layout !== display.layout && position?.session === panel.session && (position.busy || position.playing)) {
+            throw new Error('Pause Timeline playback before switching the layout.');
+        }
+        this.view.post({ type: 'timelineLayout', layout });
+        await this.saveLayout(layout);
+        return { ...display, layout };
+    }
+
+    private showDisplay(): void {
         if (this.graphMode) this.view.post({ type: 'animationGraphMode', mode: this.graphMode });
+        if (this.layout) this.view.post({ type: 'timelineLayout', layout: this.layout });
     }
 
     private async saveGraph(mode: AnimationGraphMode): Promise<void> {
         const changed = this.graphMode !== mode;
         this.graphMode = mode;
-        this.showGraph();
+        this.view.post({ type: 'animationGraphMode', mode });
         if (changed) await this.preferences.update(GRAPH_MODE, mode);
+    }
+
+    private async saveLayout(layout: TimelineLayout): Promise<void> {
+        const changed = this.layout !== layout;
+        this.layout = layout;
+        if (changed) await this.preferences.update(TIMELINE_LAYOUT, layout);
     }
 
     async previewMarkers(panel: DesignerPanel, frame: FrameTarget, id: number | undefined, signal: AbortSignal, edit?: TimelineMarkerAction) {
@@ -250,11 +282,14 @@ export class TimelineView implements vscode.Disposable {
     }
 
     private async receive(message: FromTimeline): Promise<void> {
-        if (message.type === 'animationGraphReady' || message.type === 'animationGraphMode') {
+        if (message.type === 'timelineDisplayReady' || message.type === 'animationGraphMode' || message.type === 'timelineLayout') {
             try {
-                if (message.type === 'animationGraphMode' && isAnimationGraphMode(message.mode)) await this.saveGraph(message.mode);
-                else if (message.type === 'animationGraphReady' && !this.graphMode && isAnimationGraphMode(message.saved)) await this.saveGraph(message.saved);
-                else this.showGraph();
+                if (message.type === 'timelineDisplayReady') {
+                    if (!this.graphMode && isAnimationGraphMode(message.graph)) await this.saveGraph(message.graph);
+                    if (!this.layout && isTimelineLayout(message.layout)) await this.saveLayout(message.layout);
+                    this.showDisplay();
+                } else if (message.type === 'animationGraphMode' && isAnimationGraphMode(message.mode)) await this.saveGraph(message.mode);
+                else if (message.type === 'timelineLayout' && isTimelineLayout(message.layout)) await this.saveLayout(message.layout);
             } catch (error) { this.report(error); }
             return;
         }

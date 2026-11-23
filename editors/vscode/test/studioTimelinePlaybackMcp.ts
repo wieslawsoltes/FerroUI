@@ -3,7 +3,7 @@ import type * as vscode from 'vscode';
 import type { OutlineNode } from '../src/protocol';
 import type { TimelineMarker, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
-import { verifyTimelineGraphMcp } from './timelineGraphMcp';
+import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
 import { until } from './wait';
 
 const scene = `<Canvas xmlns="https://github.com/ferroui">
@@ -39,6 +39,7 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     await source(scene);
     let frame = await wait();
     await verifyTimelineGraphMcp({ invoke, content }, session, document);
+    await verifyTimelineLayoutMcp({ invoke, content }, session, document);
     let program = (await programs()).find(item => item.selector === 'Button#Lead')!.id;
     const present = async (action: string, fields: object = {}) => {
         content(await invoke('designer_studio_present', { session, expected_revision: frame.revision, tool: 'designer_program',
