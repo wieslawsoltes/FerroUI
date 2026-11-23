@@ -23875,7 +23875,7 @@
   {
     "name": "SystemBackdropElement",
     "namespace": "https://github.com/ferroui",
-    "documentation": "SystemBackdropElement",
+    "documentation": "ferroui_controls::media::SystemBackdropElement",
     "base": "TemplatedControl",
     "constructible": true,
     "properties": {

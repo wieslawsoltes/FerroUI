@@ -11392,8 +11392,8 @@
     "element"
    ],
    "base": "TemplatedControl",
-   "rust_path": null,
-   "entry": null,
+   "rust_path": "ferroui_controls::media::SystemBackdropElement",
+   "entry": "ferro_type_system_backdrop_element",
    "creatable": true,
    "control": true,
    "children": "none",

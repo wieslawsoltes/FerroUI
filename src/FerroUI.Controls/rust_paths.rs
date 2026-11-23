@@ -323,6 +323,7 @@ ferroui_base::ferro_rust_paths! {
         crate::media::RevealBrush,
         crate::media::RevealHoverLight,
         crate::media::SystemBackdrop,
+        crate::media::SystemBackdropElement,
         crate::media::XamlAmbientLight,
         crate::navigation::PageStackEntry,
         crate::presenters::ContentPresenter,

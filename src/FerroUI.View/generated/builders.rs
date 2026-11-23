@@ -1700,6 +1700,19 @@ pub fn symbol_icon() -> El<ferroui_controls::SymbolIcon> {
     El::new()
 }
 
+pub use ferroui_controls::media::SystemBackdropElement;
+
+impl ViewClass for ferroui_controls::media::SystemBackdropElement {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::media::SystemBackdropElement>::new()
+    }
+}
+
+/// Starts an element of [`SystemBackdropElement`](ferroui_controls::media::SystemBackdropElement).
+pub fn system_backdrop_element() -> El<ferroui_controls::media::SystemBackdropElement> {
+    El::new()
+}
+
 pub use ferroui_controls::TabControl;
 
 impl ViewClass for ferroui_controls::TabControl {
@@ -8820,6 +8833,15 @@ pub trait SymbolIconSourceProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::SymbolIconSource>> SymbolIconSourceProps for El<T> {}
+
+/// The properties and routed events of [`SystemBackdropElement`](ferroui_controls::media::SystemBackdropElement).
+pub trait SystemBackdropElementProps: ElementBuilder {
+    /// Sets [`SystemBackdropElement::system_backdrop_property`](ferroui_controls::media::SystemBackdropElement::system_backdrop_property).
+    fn system_backdrop<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::media::SystemBackdrop>>, M>) -> Self {
+        self.prop(<ferroui_controls::media::SystemBackdropElement>::system_backdrop_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::media::SystemBackdropElement>> SystemBackdropElementProps for El<T> {}
 
 /// The properties and routed events of [`TabControl`](ferroui_controls::TabControl).
 pub trait TabControlProps: ElementBuilder {
