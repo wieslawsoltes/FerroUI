@@ -35,9 +35,13 @@ fn on_item_click(
         let item = root.get_control::<MenuItem>(name);
         let weak_item = item.downgrade();
         let weak_output = output.downgrade();
-        item.click(move |_, _| {
+        item.click(move |_, e| {
             if let (Some(item), Some(output)) = (weak_item.upgrade(), weak_output.upgrade()) {
-                output.set_text(Some(&handler(&item)));
+                // The click of a sub item bubbles through a split item: it is the sub item's.
+                let own = e.source().and_then(|source| source.cast::<MenuItem>()).is_none_or(|source| source == item);
+                if own {
+                    output.set_text(Some(&handler(&item)));
+                }
             }
         });
     }
@@ -75,9 +79,11 @@ fn wire_menu_flyout(root: &Ref<Control>) {
     on_item_click(
         root,
         &[
+            "SaveSplitItem",
             "SaveAsDocx",
             "SaveAsPdf",
             "SaveAsTxt",
+            "ShareSplitItem",
             "ShareViaEmail",
             "ShareViaLink",
         ],

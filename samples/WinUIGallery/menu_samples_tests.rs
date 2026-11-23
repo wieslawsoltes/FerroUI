@@ -74,6 +74,11 @@ fn menu_flyout_items_write_the_sort_option_and_the_clicked_item() {
         text(&root, "Control3bOutput").as_deref(),
         Some("Clicked: Share via link")
     );
+    // The primary part of a split item is its own action, and a sub item's click is not its.
+    root.get_control::<ferroui_controls_split_menu::SplitMenuFlyoutItem>("SaveSplitItem").invoke_primary();
+    assert_eq!(text(&root, "Control3bOutput").as_deref(), Some("Clicked: Save"));
+    click_item(&root, "SaveAsTxt");
+    assert_eq!(text(&root, "Control3bOutput").as_deref(), Some("Clicked: Save as .txt"));
 }
 
 #[test]

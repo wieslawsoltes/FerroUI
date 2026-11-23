@@ -4,9 +4,8 @@
      with items and Separator; ToggleMenuFlyoutItem and RadioMenuFlyoutItem are MenuItems with the
      ToggleType CheckBox and Radio. A KeyboardAccelerator is the item's HotKey, shown as its
      InputGesture. The AppBarButton is a CommandBarButton. The fifth example's Segoe UI (the
-     font of its ControlExample) is the font of its button. FerroUI has no SplitMenuFlyoutItem: Save
-     and Share are MenuItems whose items are the source's, so only the items raise
-     SplitMenuFlyoutItem_Click and the primary parts are not clickable. The glyphs need the symbol
+     font of its ControlExample) is the font of its button. Save and Share are the
+     SplitMenuFlyoutItem of ferroui-controls-split-menu. The glyphs need the symbol
      font of the platform (Segoe Fluent Icons on Windows). -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
@@ -68,17 +67,17 @@
       <Button Content="File Options">
         <Button.Flyout>
           <MenuFlyout>
-            <MenuItem x:Name="SaveSplitItem" Header="Save">
-              <MenuItem.Icon><FontIcon Glyph="&#xE74E;" /></MenuItem.Icon>
+            <SplitMenuFlyoutItem x:Name="SaveSplitItem" Header="Save">
+              <SplitMenuFlyoutItem.Icon><FontIcon Glyph="&#xE74E;" /></SplitMenuFlyoutItem.Icon>
               <MenuItem x:Name="SaveAsDocx" Header="Save as .docx" />
               <MenuItem x:Name="SaveAsPdf" Header="Save as .pdf" />
               <MenuItem x:Name="SaveAsTxt" Header="Save as .txt" />
-            </MenuItem>
-            <MenuItem x:Name="ShareSplitItem" Header="Share">
-              <MenuItem.Icon><SymbolIcon Symbol="Share" /></MenuItem.Icon>
+            </SplitMenuFlyoutItem>
+            <SplitMenuFlyoutItem x:Name="ShareSplitItem" Header="Share">
+              <SplitMenuFlyoutItem.Icon><SymbolIcon Symbol="Share" /></SplitMenuFlyoutItem.Icon>
               <MenuItem x:Name="ShareViaEmail" Header="Share via email" />
               <MenuItem x:Name="ShareViaLink" Header="Share via link" />
-            </MenuItem>
+            </SplitMenuFlyoutItem>
           </MenuFlyout>
         </Button.Flyout>
       </Button>
