@@ -52,7 +52,11 @@ fn empty_slots(count: usize) -> Slots {
 impl State {
     /// The provider of factory `index`. Each factory runs once: concurrent callers wait for the
     /// same run instead of starting it again and skipping the providers after it.
-    async fn provider_of(factory: &StorageProviderFactory, slots: &Slots, index: usize) -> Option<Rc<dyn IStorageProvider>> {
+    async fn provider_of(
+        factory: &StorageProviderFactory,
+        slots: &Slots,
+        index: usize,
+    ) -> Option<Rc<dyn IStorageProvider>> {
         loop {
             {
                 let mut all = slots.borrow_mut();
