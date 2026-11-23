@@ -35,7 +35,8 @@ pub use custom_effect::{
 };
 pub use custom_effect_registry::{CustomEffectRegistrationError, CustomEffectRegistry};
 pub use custom_effect_shader::{
-    shader_uniform_name, shader_uniform_name_matches, ShaderEffectDescription, ShaderEffectMode, ShaderEffectPadding,
+    shader_uniform_name, shader_uniform_name_matches, ShaderEffectDescription, ShaderEffectGlslParts,
+    ShaderEffectGlslStages, ShaderEffectMode, ShaderEffectPadding,
     ShaderUniformType, ShaderUniformValue, MAX_SHADER_CHILDREN, SHADER_LAYER_SCALE, SHADER_LAYER_SIZE,
     SHADER_WGSL_CHILDREN_BINDING, SHADER_WGSL_CONTENT_BINDING, SHADER_WGSL_FRAGMENT_ENTRY, SHADER_WGSL_PASS_BINDING,
     SHADER_WGSL_UNIFORMS_BINDING, SHADER_WGSL_VERTEX_ENTRY,

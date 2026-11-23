@@ -579,3 +579,40 @@ fn an_empty_slot_paints_nothing() {
     assert!(material.texture().is_none());
     assert!(image_coordinate(material.uniforms(), [0.5, 0.5]).is_none());
 }
+
+#[test]
+fn a_stored_frame_whose_first_row_is_its_bottom_is_sampled_upside_down() {
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::{AlignmentX, AlignmentY, SharedBrush};
+    use ferroui_base::rendering::composition::frames::FrameRotation;
+    use ferroui_base::rendering::scene3d::Scene3DFrameSlot;
+    use ferroui_base::utilities::RefCountable;
+    let mut frame = frame_metadata(FrameRotation::None, false);
+    frame.top_left_origin = false;
+    let tile = ImmutableImageBrush::new(
+        None,
+        AlignmentX::Center,
+        AlignmentY::Center,
+        Some(RelativeRect::FILL),
+        1.0,
+        None,
+        RelativePoint::TOP_LEFT,
+        Some(RelativeRect::FILL),
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    );
+    let slot = Scene3DFrameSlot::new();
+    let bitmap: Arc<ferroui_base::platform::SharedBitmapImpl> = Arc::new(FrameBitmap(400, 200));
+    slot.publish(RefCountable::create(bitmap, || {}), frame);
+    let brush = SharedBrush::from_frame_slot(&tile, slot).expect("a tile brush");
+    let material = MaterialBrush::of_with(Some(&brush), UNIT, &|_| DeviceBitmap::Stored);
+    assert!(!material.is_unsampled());
+    // The top of the visible region (row 50 of 200 from the top) is row 150 from the bottom.
+    let point = brush_point(material.uniforms(), [0.5, 0.0]);
+    let uv = image_coordinate(material.uniforms(), point).expect("inside the frame");
+    assert!((uv[0] - 0.5).abs() < 1e-4 && (uv[1] - 0.75).abs() < 1e-4, "{uv:?}");
+    let point = brush_point(material.uniforms(), [0.5, 1.0]);
+    let uv = image_coordinate(material.uniforms(), point).expect("inside the frame");
+    assert!((uv[1] - 0.25).abs() < 1e-4, "{uv:?}");
+}

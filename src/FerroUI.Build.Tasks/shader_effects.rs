@@ -26,11 +26,13 @@
 //!
 //! The WebGL2 route of `ferroui-vello` draws the effects of the library with
 //! these programs ([`library_shader_effects`], step 3 of the Vello route of
-//! docs/porting/gpu-rendering.md). The effects with images, and those of an
-//! application, are drawn by their CPU references there for now.
+//! docs/porting/gpu-rendering.md). An effect of an application gets the same
+//! route from its own build script: [`write_shader_effect_stages`] writes a
+//! file it includes and hands to `ShaderEffectDescription::with_glsl`.
 
 use ferroui_base::media::effects::{
-    CustomEffect, ImmutableCustomEffect, SHADER_WGSL_FRAGMENT_ENTRY, SHADER_WGSL_VERTEX_ENTRY,
+    CustomEffect, ImmutableCustomEffect, SHADER_WGSL_CHILDREN_BINDING, SHADER_WGSL_CONTENT_BINDING,
+    SHADER_WGSL_FRAGMENT_ENTRY, SHADER_WGSL_PASS_BINDING, SHADER_WGSL_UNIFORMS_BINDING, SHADER_WGSL_VERTEX_ENTRY,
 };
 use std::fmt;
 use std::fs;
@@ -56,11 +58,91 @@ pub struct ShaderEffectGlsl {
     pub uniform_offsets: Vec<u32>,
 }
 
+/// What the fragment stage of a shader effect binds, by name. A name is empty for what the
+/// program does not read: the compiler left it out.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ShaderEffectBindings {
+    /// The uniform block of the effect.
+    pub uniforms_block: String,
+    /// The uniform block of the pass.
+    pub pass_block: String,
+    /// The sampler of the content.
+    pub content: String,
+    /// The samplers of the children, in their order.
+    pub children: Vec<String>,
+}
+
+impl ShaderEffectGlsl {
+    /// The names of what the fragment stage binds, for a description with `children` images.
+    pub fn bindings(&self, children: usize) -> ShaderEffectBindings {
+        let named = |names: &[(u32, String)], binding: u32| {
+            names.iter().find(|(bound, _)| *bound == binding).map_or_else(String::new, |(_, name)| name.clone())
+        };
+        ShaderEffectBindings {
+            uniforms_block: named(&self.uniform_blocks, SHADER_WGSL_UNIFORMS_BINDING),
+            pass_block: named(&self.uniform_blocks, SHADER_WGSL_PASS_BINDING),
+            content: named(&self.textures, SHADER_WGSL_CONTENT_BINDING),
+            children: (0..children)
+                .map(|child| named(&self.textures, SHADER_WGSL_CHILDREN_BINDING + child as u32))
+                .collect(),
+        }
+    }
+
+    /// The Rust expression of a `ShaderEffectGlslParts` tuple with these stages.
+    fn parts_expression(&self, children: usize) -> String {
+        let bindings = self.bindings(children);
+        format!(
+            "({:?}, {:?}, {:?}, {:?}, {:?}, &{:?}, {}u32, &{:?})\n",
+            self.vertex,
+            self.fragment,
+            bindings.uniforms_block,
+            bindings.pass_block,
+            bindings.content,
+            bindings.children,
+            self.uniforms_size,
+            self.uniform_offsets,
+        )
+    }
+}
+
+/// Writes the GLSL ES 3.0 of the shader of the custom effect type `T`, with what it binds, to
+/// `$OUT_DIR/shader_effects/<NAME>.stages.rs`; `Ok(None)` for a type without a shader. For a
+/// build script. The effect then runs on the GPU on WebGL2:
+///
+/// ```ignore
+/// ShaderEffectDescription::overlay(SKSL, WGSL, BitmapBlendingMode::SourceOver).with_glsl(
+///     ShaderEffectGlslStages::from_generated(include!(concat!(
+///         env!("OUT_DIR"),
+///         "/shader_effects/ripple.stages.rs"
+///     ))),
+/// )
+/// ```
+///
+/// The build script builds the effect's type, so the type lives in a crate of its own that the
+/// effect's crate has as a build dependency, or the description is made without `with_glsl` there.
+pub fn write_shader_effect_stages<T: CustomEffect>() -> Result<Option<PathBuf>, ShaderEffectGlslError> {
+    let Some(description) = ImmutableCustomEffect::new(T::default()).shader() else {
+        return Ok(None);
+    };
+    let glsl = translate_shader_effect_module(&description.wgsl_module())?;
+    let out_dir = std::env::var_os("OUT_DIR").ok_or(ShaderEffectGlslError::NoOutDir)?;
+    let directory = Path::new(&out_dir).join("shader_effects");
+    fs::create_dir_all(&directory)?;
+    let path = directory.join(format!("{}.stages.rs", file_stem(T::NAME)));
+    let text = glsl.parts_expression(description.children.len());
+    if fs::read_to_string(&path).ok().as_deref() != Some(text.as_str()) {
+        fs::write(&path, text)?;
+    }
+    Ok(Some(path))
+}
+
 /// A shader effect of the library with its GLSL ES 3.0.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LibraryShaderEffect {
     /// [`CustomEffect::NAME`].
     pub name: &'static str,
+    /// The images it samples.
+    pub children: usize,
     /// [`shader_module_hash`] of its WGSL module: what tells it from an
     /// effect of an application of the same name.
     pub module_hash: u64,
@@ -80,18 +162,20 @@ fn library_entry<T: CustomEffect>() -> Result<LibraryShaderEffect, ShaderEffectG
     let module = description.wgsl_module();
     Ok(LibraryShaderEffect {
         name: T::NAME,
+        children: description.children.len(),
         module_hash: shader_module_hash(&module),
         glsl: translate_shader_effect_module(&module)?,
     })
 }
 
-/// The shader effects of the library that sample no image, in GLSL ES 3.0:
-/// what the WebGL2 route of `ferroui-vello` compiles (its build script writes
+/// The shader effects of the library, the page transitions with their images included, in GLSL
+/// ES 3.0: what the WebGL2 route of `ferroui-vello` compiles (its build script writes
 /// them into the crate, so the browser module carries no translator).
 pub fn library_shader_effects() -> Result<Vec<LibraryShaderEffect>, ShaderEffectGlslError> {
     use ferroui_base::media::effects::library::{
-        BurningFlameShaderEffect, GridShaderEffect, PixelateEffect, PointerSpotlightShaderEffect,
-        ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect, WaterRippleShaderEffect,
+        BurningFlameShaderEffect, DissolveTransitionEffect, GridShaderEffect, MaskTransitionEffect, PixelateEffect,
+        PointerSpotlightShaderEffect, ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect,
+        WaterRippleShaderEffect,
     };
     Ok(vec![
         library_entry::<PixelateEffect>()?,
@@ -102,6 +186,8 @@ pub fn library_shader_effects() -> Result<Vec<LibraryShaderEffect>, ShaderEffect
         library_entry::<ReactiveGridShaderEffect>()?,
         library_entry::<WaterRippleShaderEffect>()?,
         library_entry::<BurningFlameShaderEffect>()?,
+        library_entry::<DissolveTransitionEffect>()?,
+        library_entry::<MaskTransitionEffect>()?,
     ])
 }
 
@@ -342,18 +428,31 @@ mod tests {
     }
 
     #[test]
-    fn the_library_table_holds_the_effects_without_images_with_their_layout() {
+    fn the_library_table_holds_every_shader_effect_with_its_layout() {
         let table = library_shader_effects().expect("the library translates");
-        assert_eq!(8, table.len());
+        assert_eq!(10, table.len());
         for effect in &table {
             assert_ne!(0, effect.module_hash, "{}", effect.name);
             assert_eq!(0, effect.glsl.uniforms_size % 16, "{}", effect.name);
             // At least `layer_size` and `layer_scale`, in the order of the block.
             assert!(effect.glsl.uniform_offsets.len() >= 2, "{}", effect.name);
             assert!(effect.glsl.uniform_offsets.windows(2).all(|pair| pair[0] < pair[1]), "{}", effect.name);
-            let textures: Vec<u32> = effect.glsl.textures.iter().map(|(binding, _)| *binding).collect();
-            assert_eq!(vec![SHADER_WGSL_CONTENT_BINDING], textures, "{}", effect.name);
+            let bindings = effect.glsl.bindings(effect.children);
+            assert!(!bindings.pass_block.is_empty(), "{}", effect.name);
+            assert!(!bindings.content.is_empty(), "{}", effect.name);
+            assert_eq!(effect.children, bindings.children.len(), "{}", effect.name);
+            assert!(bindings.children.iter().all(|name| !name.is_empty()), "{}: {bindings:?}", effect.name);
         }
+        let with_images: Vec<&str> = table.iter().filter(|e| e.children > 0).map(|e| e.name).collect();
+        assert_eq!(vec!["dissolve-transition", "mask-transition"], with_images);
+    }
+
+    #[test]
+    fn the_parts_of_a_shader_effect_are_a_rust_tuple() {
+        let glsl = shader_effect_glsl::<MaskTransitionEffect>().expect("a shader").expect("translated");
+        let text = glsl.parts_expression(1);
+        assert!(text.starts_with("(\"#version 300 es"), "{}", &text[..40]);
+        assert!(text.contains("u32, &["), "{}", &text[text.len() - 40..]);
     }
 
     /// The page transitions (#455, E6): the textures of their images follow

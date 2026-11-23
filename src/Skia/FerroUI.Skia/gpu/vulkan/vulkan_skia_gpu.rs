@@ -154,11 +154,17 @@ impl IPlatformGraphicsContext for VulkanSkiaGpu {
     fn dispose(&self) {
         if self.vulkan.is_lost() {
             self.gr_context.dispose(false);
+            if let Some(external_objects) = &self.external_objects {
+                external_objects.release_frames(true);
+            }
         } else {
             // Releasing resources does vkQueueWaitIdle and destroys API objects,
             // both of which require external synchronization, i. e. the device lock
             let current = self.vulkan.ensure_current();
             self.gr_context.dispose(true);
+            if let Some(external_objects) = &self.external_objects {
+                external_objects.release_frames(false);
+            }
             current.dispose();
         }
 

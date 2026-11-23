@@ -33,6 +33,10 @@ mod i_vulkan_device;
 mod i_vulkan_platform_surface;
 mod i_vulkan_render_target;
 mod interop;
+#[cfg(target_os = "linux")]
+pub mod dma_buf;
+#[cfg(feature = "scene3d")]
+pub mod scene3d;
 pub mod unmanaged_interop;
 mod vulkan_bindings;
 mod vulkan_context;

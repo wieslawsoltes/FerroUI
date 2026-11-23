@@ -1578,3 +1578,98 @@ fn the_first_frame_of_the_library_makes_one_pipeline_per_shader_type() {
         }
     }
 }
+
+/// A texture of one colour per texel, as a producer's plane.
+fn nv12_plane(
+    device: &Arc<VelloWgpuDevice>,
+    format: wgpu::TextureFormat,
+    (width, height): (u32, u32),
+    bytes: &[u8],
+) -> Arc<crate::gpu::VelloDeviceTexture> {
+    let size = wgpu::Extent3d { width, height, depth_or_array_layers: 1 };
+    let texture = device.device().create_texture(&wgpu::TextureDescriptor {
+        label: Some("NV12 plane of a test"),
+        size,
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        view_formats: &[],
+    });
+    let bytes_per_row = width * (bytes.len() as u32 / (width * height));
+    device.queue().write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: &texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        bytes,
+        wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(bytes_per_row), rows_per_image: Some(height) },
+        size,
+    );
+    crate::gpu::VelloDeviceTexture::from_external(device, texture, crate::gpu::VelloTextureAlpha::Premultiplied)
+}
+
+/// The pixel at `x`, `y` of a frame of NV12 after the conversion pass.
+fn nv12_pixels(
+    device: &Arc<VelloWgpuDevice>,
+    luma: u8,
+    chroma: &[u8],
+    limited_range: bool,
+    bottom_up: bool,
+) -> (Vec<u8>, usize) {
+    let luma = nv12_plane(device, wgpu::TextureFormat::R8Unorm, (4, 4), &[luma; 16]);
+    let chroma = nv12_plane(device, wgpu::TextureFormat::Rg8Unorm, (2, 2), chroma);
+    let output = crate::gpu::effect_passes::nv12_conversion_texture(device, &luma, &chroma, limited_range, bottom_up)
+        .expect("the conversion pass");
+    let mut pixels = vec![0u8; output.width() as usize * output.height() as usize * 4];
+    device.read_texture(output.texture(), &mut pixels);
+    (pixels, output.width() as usize)
+}
+
+#[test]
+fn nv12_is_converted_by_the_bt709_matrix_in_both_ranges() {
+    let Ok(device) = VelloWgpuDevice::headless() else {
+        eprintln!("skipped: no graphics adapter");
+        return;
+    };
+    let at = |pixels: &[u8], stride: usize, x: usize, y: usize| -> [u8; 4] {
+        let start = (y * stride + x) * 4;
+        [pixels[start], pixels[start + 1], pixels[start + 2], pixels[start + 3]]
+    };
+    let near = |actual: [u8; 4], expected: [u8; 4], what: &str| {
+        let far = actual.iter().zip(expected).any(|(a, e)| a.abs_diff(e) > 3);
+        assert!(!far, "{what}: {actual:?}, expected {expected:?}");
+    };
+    let neutral = [128u8; 8];
+    let (white, stride) = nv12_pixels(&device, 235, &neutral, true, false);
+    near(at(&white, stride, 1, 1), [255, 255, 255, 255], "limited white");
+    let (black, stride) = nv12_pixels(&device, 16, &neutral, true, false);
+    near(at(&black, stride, 1, 1), [0, 0, 0, 255], "limited black");
+    let (full_white, stride) = nv12_pixels(&device, 255, &neutral, false, false);
+    near(at(&full_white, stride, 1, 1), [255, 255, 255, 255], "full white");
+    // The red of BT.709 in limited range.
+    let (red, stride) = nv12_pixels(&device, 63, &[102, 240, 102, 240, 102, 240, 102, 240], true, false);
+    near(at(&red, stride, 1, 1), [255, 0, 0, 255], "limited red");
+    // Outside the frame the target stays transparent.
+    if stride > 4 {
+        assert_eq!([0, 0, 0, 0], at(&white, stride, 4, 0));
+    }
+}
+
+#[test]
+fn nv12_chroma_is_sited_on_the_left_luma_column_and_read_bilinearly() {
+    let Ok(device) = VelloWgpuDevice::headless() else {
+        eprintln!("skipped: no graphics adapter");
+        return;
+    };
+    // Blue difference only in the right chroma column.
+    let chroma = [128, 128, 200, 128, 128, 128, 200, 128];
+    let (pixels, stride) = nv12_pixels(&device, 128, &chroma, false, false);
+    let blue = |x: usize| pixels[(stride + x) * 4 + 2];
+    // Column 0 is on the left chroma sample, column 2 on the right one, column 1 between them.
+    assert!(blue(0) < blue(1) && blue(1) < blue(2), "{} {} {}", blue(0), blue(1), blue(2));
+    assert_eq!(blue(2), blue(3), "beyond the last chroma sample the edge is held");
+}

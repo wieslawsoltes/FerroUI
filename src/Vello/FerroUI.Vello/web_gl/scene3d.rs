@@ -11,19 +11,31 @@
 //!   edge mode and brush textures are those of a kept output paints its copy again, with no 3D pass.
 //! - **A frame being recorded.** A render takes a new texture of the pool for its copy, so a scene
 //!   of this frame that already paints the old copy keeps it; the pool has it back afterwards.
+//! - **Frames on a mesh** (#608). A frame of a video or a camera is a texture of the pool, a
+//!   `web-sys` object the executor cannot name. The first render that samples it copies it on the
+//!   GPU (`blitFramebuffer`) into a texture of the contracts, which is kept while the bitmap
+//!   lives. Nothing goes through memory.
 //! - **State.** The executor changes the state of the context and does not restore it. What the
 //!   renderer set once when it was created (blending) is put back after each render.
 
+use super::external_objects::{self, VelloWebGlFrameBitmap};
 use super::frame_textures::{pooled_size, TexturePool};
 use super::VelloWebGlTexture;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::platform::SharedBitmapImpl;
 use ferroui_base::rendering::scene3d::Scene3DSnapshot;
-use ferroui_opengl::gl_consts::{GL_COLOR_ATTACHMENT0, GL_READ_FRAMEBUFFER, GL_TEXTURE_2D};
-use ferroui_opengl::scene3d::{
-    Scene3DGlError, Scene3DGlExecutor, Scene3DGlTarget, Scene3DGlTexture, Scene3DGlViewport,
+use ferroui_opengl::gl_consts::{
+    GL_CLAMP_TO_EDGE, GL_COLOR_ATTACHMENT0, GL_DRAW_FRAMEBUFFER, GL_LINEAR, GL_READ_FRAMEBUFFER, GL_RGBA, GL_RGBA8,
+    GL_TEXTURE0, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_TEXTURE_MIN_FILTER, GL_TEXTURE_WRAP_S, GL_TEXTURE_WRAP_T,
+    GL_UNSIGNED_BYTE,
 };
-use ferroui_opengl::IGlContext;
-use ferroui_render3d::brush::scene_texture_inputs;
+use ferroui_opengl::scene3d::{
+    Scene3DGlDeviceTextures, Scene3DGlError, Scene3DGlExecutor, Scene3DGlTarget, Scene3DGlTexture, Scene3DGlViewport,
+};
+use ferroui_opengl::{GlInterface, IGlContext};
+use ferroui_render3d::brush::{scene_texture_inputs, DeviceBitmap};
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Weak};
@@ -57,6 +69,8 @@ pub(super) struct WebGlScenes {
     executor: Option<Result<Scene3DGlExecutor, Scene3DGlError>>,
     /// The framebuffer of the contracts an output is read through.
     read_framebuffer: i32,
+    /// The copies of the frames on a mesh, as textures of the contracts, by the number of the bitmap.
+    frame_copies: RefCell<HashMap<u64, i32>>,
     slots: Vec<Slot>,
     clock: u64,
 }
@@ -104,6 +118,87 @@ fn restore_state(gl: &Gl) {
     gl.viewport(0, 0, gl.drawing_buffer_width(), gl.drawing_buffer_height());
 }
 
+/// The frames of a render: copied on the GPU into textures of the contracts, which the executor
+/// samples as they are (upright, premultiplied, on the curve of the canvas).
+struct WebGlFrames<'a> {
+    gl: &'a Gl,
+    interface: &'a GlInterface,
+    gpu: u64,
+    framebuffer: i32,
+    copies: &'a RefCell<HashMap<u64, i32>>,
+}
+
+impl WebGlFrames<'_> {
+    fn frame<'b>(&self, bitmap: &'b SharedBitmapImpl) -> Option<&'b VelloWebGlFrameBitmap> {
+        let frame = bitmap.as_any().downcast_ref::<VelloWebGlFrameBitmap>()?;
+        (frame.gpu_identity() == self.gpu).then_some(frame)
+    }
+
+    /// A new texture of the contracts with the pixels of `source`. The executor asks for it while
+    /// it collects its draws, before it binds its framebuffer and sets its state.
+    fn copy(&self, source: &VelloWebGlTexture, (width, height): (i32, i32)) -> Option<i32> {
+        let (gl, interface) = (self.gl, self.interface);
+        let name = interface.gen_texture();
+        if name == 0 {
+            return None;
+        }
+        interface.active_texture(GL_TEXTURE0);
+        interface.bind_texture(GL_TEXTURE_2D, name);
+        for (parameter, value) in [
+            (GL_TEXTURE_MIN_FILTER, GL_LINEAR),
+            (GL_TEXTURE_MAG_FILTER, GL_LINEAR),
+            (GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE),
+            (GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE),
+        ] {
+            interface.tex_parameteri(GL_TEXTURE_2D, parameter, value);
+        }
+        // SAFETY: a null pointer asks for storage alone.
+        unsafe {
+            interface.tex_image_2d(
+                GL_TEXTURE_2D,
+                0,
+                GL_RGBA8,
+                width,
+                height,
+                0,
+                GL_RGBA,
+                GL_UNSIGNED_BYTE,
+                std::ptr::null(),
+            );
+        }
+        interface.bind_texture(GL_TEXTURE_2D, 0);
+        gl.disable(Gl::SCISSOR_TEST);
+        gl.bind_framebuffer(Gl::READ_FRAMEBUFFER, Some(&source.framebuffer));
+        interface.bind_framebuffer(GL_DRAW_FRAMEBUFFER, self.framebuffer);
+        interface.framebuffer_texture_2d(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, name, 0);
+        gl.blit_framebuffer(0, 0, width, height, 0, 0, width, height, Gl::COLOR_BUFFER_BIT, Gl::NEAREST);
+        interface.framebuffer_texture_2d(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+        interface.bind_framebuffer(GL_DRAW_FRAMEBUFFER, 0);
+        gl.bind_framebuffer(Gl::READ_FRAMEBUFFER, None);
+        Some(name)
+    }
+}
+
+impl Scene3DGlDeviceTextures for WebGlFrames<'_> {
+    fn sampling(&self, bitmap: &SharedBitmapImpl) -> DeviceBitmap {
+        match self.frame(bitmap) {
+            Some(_) => DeviceBitmap::Converted,
+            None => DeviceBitmap::NotOnDevice,
+        }
+    }
+
+    fn device_texture(&self, bitmap: &SharedBitmapImpl) -> Option<(i32, (u32, u32))> {
+        let frame = self.frame(bitmap)?;
+        let (source, size) = frame.pool_texture()?;
+        if let Some(&name) = self.copies.borrow().get(&frame.number()) {
+            return Some((name, size));
+        }
+        let name = self.copy(&source, (size.0 as i32, size.1 as i32))?;
+        self.copies.borrow_mut().insert(frame.number(), name);
+        Some((name, size))
+    }
+}
+
 impl WebGlScenes {
     /// The texture of `scene` drawn at `size` pixels, with the pixels of the scene at its top
     /// left. `None` when the context cannot draw it: the caller draws the CPU reference.
@@ -114,6 +209,7 @@ impl WebGlScenes {
         context: &Rc<dyn IGlContext>,
         pool: &mut TexturePool,
         max_texture_size: u32,
+        gpu: u64,
         scene: &Arc<Scene3DSnapshot>,
         size: (u32, u32),
         scale: f64,
@@ -133,6 +229,15 @@ impl WebGlScenes {
             self.read_framebuffer = interface.gen_framebuffer();
         }
         let Some(Ok(executor)) = &mut self.executor else { return None };
+        // The copies of frames whose bitmaps are gone.
+        external_objects::release_retired();
+        self.frame_copies.borrow_mut().retain(|id, name| {
+            let held = external_objects::is_held(*id);
+            if !held {
+                interface.delete_texture(*name);
+            }
+            held
+        });
         self.clock += 1;
         let clock = self.clock;
         let scale_bits = scale.to_bits();
@@ -204,7 +309,14 @@ impl WebGlScenes {
 
         // 3. The render, and the copy into the texture of the pool.
         let target = Scene3DGlTarget { texture: &slot.texture, size, antialiased };
-        let rendered = executor.render(&mut slot.viewport, scene, &target);
+        let frames = WebGlFrames {
+            gl,
+            interface: &interface,
+            gpu,
+            framebuffer: self.read_framebuffer,
+            copies: &self.frame_copies,
+        };
+        let rendered = executor.render_with_textures(&mut slot.viewport, scene, &target, &frames);
         if rendered.is_ok() {
             interface.bind_framebuffer(GL_READ_FRAMEBUFFER, self.read_framebuffer);
             interface.framebuffer_texture_2d(
@@ -258,6 +370,9 @@ impl WebGlScenes {
                 executor.delete_output_texture(slot.texture);
             }
             executor.dispose();
+        }
+        for (_, name) in self.frame_copies.borrow_mut().drain() {
+            context.gl_interface().delete_texture(name);
         }
         if self.read_framebuffer != 0 {
             context.gl_interface().delete_framebuffer(self.read_framebuffer);

@@ -182,18 +182,35 @@ impl LinuxFrameStream {
             self.retry.borrow_mut().take();
             return Ok(None);
         }
-        let format = match info.format {
-            dma_buf::DRM_XR24 => FrameFormat::Bgra8,
-            dma_buf::DRM_XB24 => FrameFormat::Rgba8,
-            _ => return Err(unsupported("The DMA-BUF route takes XRGB and XBGR frames")),
+        let (format, plane_count) = match info.format {
+            dma_buf::DRM_XR24 => (FrameFormat::Bgra8, 1),
+            dma_buf::DRM_XB24 => (FrameFormat::Rgba8, 1),
+            dma_buf::DRM_NV12 => (FrameFormat::Nv12, 2),
+            _ => return Err(unsupported("The DMA-BUF route takes NV12, XRGB and XBGR frames")),
         };
-        if info.plane_count != 1 {
-            return Err(unsupported("The DMA-BUF route takes single-plane frames"));
+        if info.plane_count as usize != plane_count {
+            return Err(unsupported("The DMA-BUF frame has an unexpected number of planes"));
         }
         if !frame.is_ready() {
             return Ok(None);
         }
-        let (_, stride, offset) = info.plane(0);
+        // The last row of a plane need not reach its pitch.
+        let (width, height) = (u64::from(info.width), u64::from(info.height));
+        let planes = (0..plane_count)
+            .map(|plane| {
+                let (_, stride, offset) = info.plane(plane);
+                let (rows, row_bytes) = match (format, plane) {
+                    (FrameFormat::Nv12, 0) => (height, width),
+                    (FrameFormat::Nv12, _) => (height.div_ceil(2), width.div_ceil(2) * 2),
+                    _ => (height, width * 4),
+                };
+                FramePlane {
+                    offset: u64::from(offset),
+                    stride: u64::from(stride),
+                    length: (rows - 1) * u64::from(stride) + row_bytes,
+                }
+            })
+            .collect();
         let metadata = FrameMetadata {
             identity: FrameIdentity {
                 source: self.source,
@@ -209,10 +226,10 @@ impl LinuxFrameStream {
                 height: info.height,
             },
             format,
-            color: if info.color == 1 {
-                FrameColor::Srgb
-            } else {
-                FrameColor::Rec709Full
+            color: match info.color {
+                1 => FrameColor::Srgb,
+                3 => FrameColor::Rec709Limited,
+                _ => FrameColor::Rec709Full,
             },
             alpha: FrameAlpha::Opaque,
             rotation: FrameRotation::None,
@@ -221,11 +238,7 @@ impl LinuxFrameStream {
             timestamp: Duration::from_nanos(info.timestamp_ns),
             device: Some(producer.device.clone()),
             device_generation: producer.generation,
-            planes: vec![FramePlane {
-                offset: u64::from(offset),
-                stride: u64::from(stride),
-                length: u64::from(info.height) * u64::from(stride),
-            }],
+            planes,
             retained_bytes: info.bytes,
         };
         match producer.budget.lease(metadata, dma_buf::DmaBufFrame(frame)) {
