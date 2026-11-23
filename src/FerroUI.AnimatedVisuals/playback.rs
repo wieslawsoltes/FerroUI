@@ -294,6 +294,57 @@ mod tests {
         assert!(!clock.is_playing());
     }
 
+    /// Frames of 16 ms until the play ends: when it ended, in milliseconds from its start.
+    fn frames_until_the_end(clock: &mut PlayerClock, seconds: f64, rate: f64) -> f64 {
+        let mut now = 1000.0;
+        clock.advance(now, seconds, rate);
+        for _ in 0..100_000 {
+            now += 16.0;
+            if clock.advance(now, seconds, rate) {
+                return now - 1000.0;
+            }
+        }
+        panic!("the play did not end");
+    }
+
+    #[test]
+    fn a_play_takes_its_length_divided_by_the_rate_to_within_a_frame() {
+        for (seconds, rate, from, to) in [(2.0, 1.0, 0.0, 1.0), (2.0, 2.0, 0.0, 1.0), (2.0, 0.5, 0.0, 1.0), (4.0, 1.0, 0.25, 0.75)] {
+            let mut clock = PlayerClock::default();
+            clock.play(from, to, false);
+            let took = frames_until_the_end(&mut clock, seconds, rate);
+            let expected = seconds * (to - from) / rate * 1000.0;
+            assert!((took - expected).abs() <= 16.0, "{seconds} s at {rate}: {took} ms, not {expected} ms");
+            assert_eq!(clock.progress, to);
+            assert!(!clock.is_playing());
+        }
+    }
+
+    #[test]
+    fn the_progress_of_a_play_is_linear_in_time_and_a_pause_stops_it() {
+        let mut clock = PlayerClock::default();
+        clock.play(0.0, 1.0, false);
+        clock.advance(1000.0, 2.0, 1.0);
+        clock.advance(1500.0, 2.0, 1.0);
+        assert!((clock.progress - 0.25).abs() < 1e-9, "{}", clock.progress);
+        clock.pause();
+        clock.advance(2500.0, 2.0, 1.0);
+        assert!((clock.progress - 0.25).abs() < 1e-9, "paused: {}", clock.progress);
+        clock.resume();
+        clock.advance(3000.0, 2.0, 1.0);
+        clock.advance(3500.0, 2.0, 1.0);
+        assert!((clock.progress - 0.5).abs() < 1e-9, "after the pause: {}", clock.progress);
+    }
+
+    #[test]
+    fn a_looped_play_does_not_end_and_wraps_on_time() {
+        let mut clock = PlayerClock::default();
+        clock.play(0.0, 1.0, true);
+        clock.advance(1000.0, 2.0, 1.0);
+        assert!(!clock.advance(3500.0, 2.0, 1.0), "a loop does not end");
+        assert!((clock.progress - 0.25).abs() < 1e-9, "{}", clock.progress);
+    }
+
     #[test]
     fn a_looped_play_wraps_and_a_segment_can_go_through_the_end() {
         let mut clock = PlayerClock::default();

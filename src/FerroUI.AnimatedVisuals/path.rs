@@ -1,6 +1,10 @@
 //! Paths of cubic segments: Lottie Bezier shapes, the primitive shapes, their transforms, and trim
 //! paths by arc length.
 
+use ferroui_base::media::{CombinedGeometry, FillRule, Geometry, GeometryCombineMode, StreamGeometry};
+use std::rc::Rc;
+use ferroui_base::platform::IGeometryContext;
+use ferroui_base::Ref;
 use ferroui_base::{Matrix, Point};
 use serde_json::Value;
 
@@ -17,10 +21,69 @@ pub enum PathCommand {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct PathData {
     pub commands: Vec<PathCommand>,
+    /// The parts of a merge that keeps only some of their area. `commands` then holds the parts
+    /// one after the other, for what only needs their outlines.
+    pub(crate) combined: Option<Rc<CombinedPath>>,
+}
+
+/// How a merge item combines the paths before it (`mm`).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum MergeMode {
+    /// The paths one after the other.
+    Merge,
+    Add,
+    Subtract,
+    Intersect,
+    Exclude,
+}
+
+/// Paths combined by their area, folded from the first.
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) struct CombinedPath {
+    pub(crate) mode: GeometryCombineMode,
+    pub(crate) parts: Vec<PathData>,
 }
 
 /// The control point distance that makes a cubic Bezier a quarter circle of radius one.
 const CIRCLE: f64 = 0.552_284_749_830_793_6;
+
+/// The platform geometry of `path`.
+pub(crate) fn build_geometry(path: &PathData, even_odd: bool, filled: bool) -> Ref<Geometry> {
+    if let Some(combined) = &path.combined {
+        let mut parts = combined.parts.iter().map(|part| build_geometry(part, even_odd, filled));
+        if let Some(first) = parts.next() {
+            return parts.fold(first, |all, part| CombinedGeometry::with_mode(combined.mode, Some(all), Some(part)).upcast());
+        }
+    }
+    let geometry = StreamGeometry::new();
+    {
+        let mut context = geometry.open();
+        context.set_fill_rule(if even_odd { FillRule::EvenOdd } else { FillRule::NonZero });
+        let mut open = false;
+        for command in &path.commands {
+            match *command {
+                PathCommand::MoveTo(point) => {
+                    if open {
+                        context.end_figure(false);
+                    }
+                    context.begin_figure(point, filled);
+                    open = true;
+                }
+                PathCommand::LineTo(point) if open => context.line_to(point, true),
+                PathCommand::CubicTo(a, b, c) if open => context.cubic_bezier_to(a, b, c, true),
+                PathCommand::Close if open => {
+                    context.end_figure(true);
+                    open = false;
+                }
+                _ => {}
+            }
+        }
+        if open {
+            context.end_figure(false);
+        }
+    }
+    geometry.upcast()
+}
 
 /// A star or a polygon (`sr`), its corners on circles around `center`.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -79,12 +142,20 @@ impl PathData {
     }
 
     pub(crate) fn append(&mut self, other: &PathData) {
+        // A combined path alone stays combined; with others it is an outline among them.
+        self.combined = if self.commands.is_empty() { other.combined.clone() } else { None };
         self.commands.extend_from_slice(&other.commands);
     }
 
     pub(crate) fn transformed(&self, matrix: Matrix) -> PathData {
         let at = |point: Point| matrix.transform(point);
         PathData {
+            combined: self.combined.as_ref().map(|combined| {
+                Rc::new(CombinedPath {
+                    mode: combined.mode,
+                    parts: combined.parts.iter().map(|part| part.transformed(matrix)).collect(),
+                })
+            }),
             commands: self
                 .commands
                 .iter()
@@ -107,6 +178,7 @@ impl PathData {
         let p = Point::new;
         if r <= 0.0 {
             return PathData {
+                combined: None,
                 commands: vec![
                     PathCommand::MoveTo(p(right, t)),
                     PathCommand::LineTo(p(right, b)),
@@ -118,6 +190,7 @@ impl PathData {
         }
         let k = r * (1.0 - CIRCLE);
         PathData {
+            combined: None,
             commands: vec![
                 PathCommand::MoveTo(p(right, t + r)),
                 PathCommand::LineTo(p(right, b - r)),
@@ -140,6 +213,7 @@ impl PathData {
         let (x, y) = (center.x, center.y);
         let p = Point::new;
         PathData {
+            combined: None,
             commands: vec![
                 PathCommand::MoveTo(p(x, y - ry)),
                 PathCommand::CubicTo(p(x + kx, y - ry), p(x + rx, y - ky), p(x + rx, y)),
@@ -353,7 +427,7 @@ impl BezierShape {
         if self.closed {
             commands.push(PathCommand::Close);
         }
-        PathData { commands }
+        PathData { commands, combined: None }
     }
 }
 

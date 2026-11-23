@@ -130,6 +130,11 @@ fn point(value: Option<&Value>) -> Option<[f64; 2]> {
 }
 
 impl Animated {
+    /// Whether the value changes over the frames.
+    pub(crate) fn is_animated(&self) -> bool {
+        !self.keys.is_empty()
+    }
+
     pub(crate) fn constant(value: Components) -> Self {
         Self { value, keys: Vec::new() }
     }

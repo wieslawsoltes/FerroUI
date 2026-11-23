@@ -39,6 +39,7 @@ mod custom_drawing;
 // The section Custom effects: the pages of the families of the custom effects gallery (#455).
 pub(crate) mod custom_effects_pages;
 mod custom_drawing_example_control;
+pub(crate) mod animated_visuals_pages;
 pub(crate) mod renderer_parity_page;
 mod data_validation_page;
 mod dialogs_page;

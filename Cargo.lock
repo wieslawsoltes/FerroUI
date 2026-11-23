@@ -587,6 +587,7 @@ dependencies = [
  "ferroboard-controls",
  "ferroboard-core",
  "ferroboard-core-ferro",
+ "ferroui-animated-visuals",
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",

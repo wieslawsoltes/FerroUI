@@ -132,8 +132,95 @@ fn the_foreground_of_an_icon_reaches_its_renderer() {
     let _window = attach(icon.clone().upcast());
     assert!(icon.presenter.borrow().visual.is_some());
     icon.set_foreground(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(200, 10, 20)))));
-    assert_eq!(icon.presenter.borrow().renderer.color("Foreground"), Some(Color::from_rgb(200, 10, 20)));
+    assert_eq!(icon.presenter.borrow().colors, vec![("Foreground".to_owned(), Color::from_rgb(200, 10, 20))]);
     icon.set_foreground(None);
+}
+
+#[test]
+fn an_icon_source_makes_an_icon_with_its_values_and_follows_them() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = crate::AnimatedIconSource::new();
+    let visual = self::source(DOCUMENT);
+    source.set_source(Some(visual.clone()));
+    source.set_mirrored_when_right_to_left(true);
+    let element = source.create_icon_element().expect("an icon");
+    let icon = element.cast::<AnimatedIcon>().expect("an animated icon");
+    assert!(icon.source().is_some_and(|shown| shown.ptr_eq(&visual)));
+    assert!(icon.mirrored_when_right_to_left());
+    source.set_mirrored_when_right_to_left(false);
+    assert!(!icon.mirrored_when_right_to_left());
+}
+
+#[test]
+fn an_icon_in_a_check_box_a_button_or_a_navigation_item_takes_their_states() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let icon = AnimatedIcon::new();
+    let check = ferroui_controls::CheckBox::new();
+    check.set_is_checked(Some(true));
+    check.set_content(Some(Control::boxed(&icon)));
+    let _window = attach(check.clone().upcast());
+    assert_eq!(AnimatedIcon::get_state(&icon).as_deref(), Some("NormalOn"));
+
+    let icon = AnimatedIcon::new();
+    let back = Button::new();
+    back.set_content(Some(Control::boxed(&icon)));
+    let _window = attach(back.clone().upcast());
+    assert_eq!(AnimatedIcon::get_state(&icon).as_deref(), Some("Normal"));
+
+    let icon = AnimatedIcon::new();
+    let item = NavigationViewItem::new();
+    let child = icon.clone();
+    item.set_template(Some(ferroui_controls::templates::FuncControlTemplate::new(move |_, _| {
+        let border = ferroui_controls::Border::new();
+        border.set_child(Some(child.clone().upcast()));
+        border.upcast()
+    })));
+    let _window = attach(item.clone().upcast());
+    assert_eq!(AnimatedIcon::get_state(&icon).as_deref(), Some("Normal"));
+}
+
+#[test]
+fn the_names_of_the_states_are_those_of_the_winui_templates() {
+    assert_eq!(state_name(false, false, None), "Normal");
+    assert_eq!(state_name(false, true, None), "PointerOver");
+    assert_eq!(state_name(true, true, None), "Pressed");
+    assert_eq!(state_name(false, true, Some(Some(false))), "PointerOverOff");
+    assert_eq!(state_name(true, false, Some(Some(true))), "PressedOn");
+    assert_eq!(state_name(false, false, Some(None)), "NormalIndeterminate");
+}
+
+#[test]
+fn the_catalog_pages_build_and_show_their_controls() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let player_page = crate::catalog_pages::player_page();
+    let _window = attach(player_page.clone().upcast());
+    let icon_page = crate::catalog_pages::icon_page();
+    let _other = attach(icon_page.clone().upcast());
+}
+
+#[test]
+fn the_gallery_handlers_play_and_set_states() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_markup_xaml::register_types();
+    crate::register_types();
+    let load = |page: &str| {
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(page, None)
+            .unwrap_or_else(|error| panic!("{error}"))
+    };
+    let root = load(include_str!("../../samples/WinUIGallery/Pages/AnimatedVisualPlayer.xaml"));
+    crate::gallery_samples::wire(&root);
+    let player = root.get_control::<AnimatedVisualPlayer>("Player");
+    let click = RoutedEventArgs::with_event(&Button::click_event());
+    root.get_control::<Button>("PlayButton").raise_event(&click);
+    assert!(player.is_playing());
+    root.get_control::<Button>("StopButton").raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    assert!(!player.is_playing());
+    let root = load(include_str!("../../samples/WinUIGallery/Pages/AnimatedIcon.xaml"));
+    crate::gallery_samples::wire(&root);
+    let icon = root.get_control::<AnimatedIcon>("SearchAnimatedIcon");
+    let first = icon.source().unwrap();
+    root.get_control::<ComboBox>("AnimatedVisualSourceKind").set_selected_index(1);
+    assert!(!first.ptr_eq(&icon.source().unwrap()), "the choice of visual changes the source");
 }
 
 /// The pages of the gallery, read by the runtime loader: the classes of this crate in markup.

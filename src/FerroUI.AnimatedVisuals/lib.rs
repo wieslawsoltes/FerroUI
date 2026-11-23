@@ -11,7 +11,10 @@ mod path;
 mod playback;
 mod player;
 mod register_types;
+mod ring;
+#[cfg(test)]
 mod render;
+mod scene;
 mod source;
 mod value;
 
@@ -25,10 +28,22 @@ pub use icons::{
 pub use model::{AnimatedVisual, AnimatedVisualError, MatteMode, Marker};
 pub use path::{PathCommand, PathData};
 pub use playback::AnimatedIconAnimationQueueBehavior;
-pub use player::{AnimatedIcon, AnimatedVisualPlayer, PlayCompletion};
+pub use player::{AnimatedIcon, AnimatedIconSource, AnimatedVisualPlayer, PlayCompletion};
 pub use register_types::{register_types, ASSEMBLY};
-pub use render::VisualRenderer;
+#[cfg(test)]
+pub(crate) use render::VisualRenderer;
+pub use scene::CompositionScene;
 pub use source::{
     AnimatedVisualSource, IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, ImageLoader,
     LottieDocumentSource, LottieVisualSource,
 };
+
+// The sample code of this crate, compiled here too: the samples are not built with it.
+#[cfg(test)]
+extern crate self as ferroui_animated_visuals;
+#[cfg(test)]
+#[path = "../../samples/ControlCatalog/Pages/animated_visuals_pages.rs"]
+mod catalog_pages;
+#[cfg(test)]
+#[path = "../../samples/WinUIGallery/animated_visual_samples.rs"]
+mod gallery_samples;

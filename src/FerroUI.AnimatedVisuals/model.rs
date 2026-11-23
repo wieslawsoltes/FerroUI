@@ -1,7 +1,7 @@
 //! The model of a Lottie document, read once: layers, shapes, transforms and markers.
 
 use crate::content::{text_documents, DocumentFonts, ImageAsset, TextDocument};
-use crate::path::{BezierShape, PathData};
+use crate::path::{BezierShape, MergeMode, PathData};
 use ferroui_base::media::imaging::BitmapBlendingMode;
 use crate::value::{keyframes, parse_eases, Animated, Components, Ease};
 use ferroui_base::Matrix;
@@ -9,6 +9,9 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
 use std::rc::Rc;
+
+/// How far before the out point the last frame is taken.
+const LAST_FRAME_MARGIN: f64 = 1e-6;
 
 /// Why a document could not be read.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -48,6 +51,15 @@ pub enum MatteMode {
     AlphaInverted,
     Luma,
     LumaInverted,
+}
+
+/// A transform at a frame: anchor, position, scale as a factor and rotation in degrees.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct TransformParts {
+    pub(crate) anchor: [f64; 2],
+    pub(crate) position: [f64; 2],
+    pub(crate) scale: [f64; 2],
+    pub(crate) rotation: f64,
 }
 
 /// The transform of a layer, a group or a repeater.
@@ -111,6 +123,44 @@ impl Transform {
         matrix * Matrix::create_rotation(rotation) * Matrix::create_translation(position[0], position[1])
     }
 
+    /// Whether a skew takes part in the matrix.
+    pub(crate) fn has_skew(&self) -> bool {
+        self.skew.is_animated() || self.skew.at(0.0)[0] != 0.0
+    }
+
+    /// Whether any part of the transform changes.
+    pub(crate) fn is_animated(&self) -> bool {
+        self.anchor.is_animated()
+            || self.position.as_ref().is_some_and(Animated::is_animated)
+            || self.position_x.as_ref().is_some_and(Animated::is_animated)
+            || self.position_y.as_ref().is_some_and(Animated::is_animated)
+            || self.scale.is_animated()
+            || self.rotation.is_animated()
+            || self.skew.is_animated()
+            || self.skew_axis.is_animated()
+    }
+
+    /// The parts of the transform at `frame`.
+    pub(crate) fn parts_at(&self, frame: f64) -> TransformParts {
+        let anchor = self.anchor.at(frame);
+        let position = match (&self.position, &self.position_x, &self.position_y) {
+            (Some(position), _, _) => position.at(frame),
+            (None, x, y) => [
+                x.as_ref().map_or(0.0, |x| x.at(frame)[0]),
+                y.as_ref().map_or(0.0, |y| y.at(frame)[0]),
+                0.0,
+                0.0,
+            ],
+        };
+        let scale = self.scale.at(frame);
+        TransformParts {
+            anchor: [anchor[0], anchor[1]],
+            position: [position[0], position[1]],
+            scale: [scale[0] / 100.0, scale[1] / 100.0],
+            rotation: self.rotation.at(frame)[0],
+        }
+    }
+
     /// The opacity at `frame`, from 0 to 1.
     pub(crate) fn opacity_at(&self, frame: f64) -> f64 {
         (self.opacity.at(frame)[0] / 100.0).clamp(0.0, 1.0)
@@ -168,6 +218,11 @@ impl AnimatedShape {
         Some(Self { value: keys.first()?.start.clone(), keys })
     }
 
+    /// Whether the shape changes over the frames.
+    pub(crate) fn is_animated(&self) -> bool {
+        !self.keys.is_empty()
+    }
+
     pub(crate) fn path_at(&self, frame: f64) -> PathData {
         let (Some(first), Some(last)) = (self.keys.first(), self.keys.last()) else {
             return self.value.to_path();
@@ -221,6 +276,11 @@ impl GradientStops {
         }
         let value = keys.first()?.1.clone();
         Some(Self { count, keys, value })
+    }
+
+    /// Whether the stops change over the frames.
+    pub(crate) fn is_animated(&self) -> bool {
+        !self.keys.is_empty()
     }
 
     pub(crate) fn at(&self, frame: f64) -> Vec<f64> {
@@ -290,7 +350,14 @@ pub(crate) enum ShapeItem {
     GradientStroke { gradient: GradientModel, opacity: Animated, stroke: StrokeModel },
     Trim { start: Animated, end: Animated, offset: Animated },
     Repeater { copies: Animated, offset: Animated, above: bool, transform: Transform, start_opacity: Animated, end_opacity: Animated },
-    Merge,
+    Merge(MergeMode),
+}
+
+impl GradientModel {
+    /// Whether the points or the stops change over the frames.
+    pub(crate) fn is_animated(&self) -> bool {
+        self.start.is_animated() || self.end.is_animated() || self.stops.is_animated()
+    }
 }
 
 fn stroke_model(item: &Value) -> StrokeModel {
@@ -404,7 +471,13 @@ fn shape_item(item: &Value) -> Option<ShapeItem> {
                 end_opacity: transform.map_or_else(|| Animated::constant(FULL), |t| Animated::of(t, "eo", FULL)),
             }
         }
-        "mm" => ShapeItem::Merge,
+        "mm" => ShapeItem::Merge(match item.get("mm").and_then(Value::as_u64) {
+            Some(2) => MergeMode::Add,
+            Some(3) => MergeMode::Subtract,
+            Some(4) => MergeMode::Intersect,
+            Some(5) => MergeMode::Exclude,
+            _ => MergeMode::Merge,
+        }),
         _ => return None,
     })
 }
@@ -635,7 +708,9 @@ impl AnimatedVisual {
 
     /// The frame at `progress` of the animation (0 to 1).
     pub fn frame_at(&self, progress: f64) -> f64 {
-        self.in_point + (self.out_point - self.in_point) * progress.clamp(0.0, 1.0)
+        // The out point is the first frame after the animation: progress 1 shows the last one.
+        let frame = self.in_point + (self.out_point - self.in_point) * progress.clamp(0.0, 1.0);
+        if self.out_point > self.in_point { frame.min(self.out_point - LAST_FRAME_MARGIN) } else { frame }
     }
 
     /// The marker of this name.

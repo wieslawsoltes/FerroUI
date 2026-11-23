@@ -1,7 +1,7 @@
 use ferroui_animated_visuals::{
     AnimatedAcceptVisualSource, AnimatedBackVisualSource, AnimatedChevronDownSmallVisualSource,
     AnimatedChevronRightDownSmallVisualSource, AnimatedChevronUpDownSmallVisualSource, AnimatedFindVisualSource,
-    AnimatedGlobalNavigationButtonVisualSource, AnimatedIcon, AnimatedSettingsVisualSource,
+    AnimatedGlobalNavigationButtonVisualSource, AnimatedIcon, AnimatedIconSource, AnimatedSettingsVisualSource,
     AnimatedVisualPlayer, LottieVisualSource,
 };
 use ferroui_base::data::core::ValueTypes;
@@ -26,6 +26,7 @@ fn assert_every_type(root: &Ref<StackPanel>) {
     assert!(resource(root, "GlobalNavigation").cast::<AnimatedGlobalNavigationButtonVisualSource>().is_some());
     assert!(resource(root, "Settings").cast::<AnimatedSettingsVisualSource>().is_some());
     assert!(resource(root, "Lottie").cast::<LottieVisualSource>().is_some());
+    assert!(resource(root, "IconSource").cast::<AnimatedIconSource>().is_some());
     let player = root.find_control::<Control>("Player").and_then(|control| control.cast::<AnimatedVisualPlayer>());
     assert!(player.expect("the player").source().is_some());
     let icon = root.find_control::<Control>("Icon").and_then(|control| control.cast::<AnimatedIcon>());

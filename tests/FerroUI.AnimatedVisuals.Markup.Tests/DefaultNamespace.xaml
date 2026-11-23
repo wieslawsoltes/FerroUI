@@ -10,6 +10,7 @@
     <AnimatedGlobalNavigationButtonVisualSource x:Key="GlobalNavigation" />
     <AnimatedSettingsVisualSource x:Key="Settings" />
     <LottieVisualSource x:Key="Lottie" />
+    <AnimatedIconSource x:Key="IconSource" />
   </StackPanel.Resources>
   <AnimatedVisualPlayer x:Name="Player" AutoPlay="False">
     <AnimatedSettingsVisualSource />

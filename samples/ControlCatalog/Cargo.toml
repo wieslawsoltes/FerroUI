@@ -87,6 +87,8 @@ treedatagrid-demo = { path = "../TreeDataGridDemo", default-features = false }
 custom-effects = { path = "../CustomEffects", default-features = false }
 # The ItemsRepeater (the page ItemsRepeater, not in the original).
 ferroui-controls-repeater = { workspace = true }
+# AnimatedVisualPlayer, AnimatedIcon and the WinUI visuals of ProgressRing.
+ferroui-animated-visuals = { workspace = true }
 # The inking controls and their WinUI styles (the page Inking, not in the original).
 ferroui-controls-inking = { workspace = true }
 ferroui-controls-lottie = { workspace = true, optional = true }
