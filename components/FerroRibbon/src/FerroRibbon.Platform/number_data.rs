@@ -324,6 +324,34 @@ mod tests {
             _ => &[],
         }
     }
+    /// The fallback of a locale the system does not know (`zz`) is the system's, so no value
+    /// recorded for it is asserted: digits, group sizes, patterns and symbols. Its symbols and
+    /// separators must be present; that its numbers format and parse back is tested with the
+    /// formatter, in `native_locale_provider_formats_the_whole_source_number_corpus`.
+    #[cfg(not(target_os = "emscripten"))]
+    fn assert_usable_fallback(values: &serde_json::Value) {
+        for field in [
+            "CurrencyDecimalSeparator",
+            "CurrencyGroupSeparator",
+            "CurrencySymbol",
+            "NaNSymbol",
+            "NegativeInfinitySymbol",
+            "NegativeSign",
+            "NumberDecimalSeparator",
+            "NumberGroupSeparator",
+            "PercentDecimalSeparator",
+            "PercentGroupSeparator",
+            "PercentSymbol",
+            "PerMilleSymbol",
+            "PositiveInfinitySymbol",
+            "PositiveSign",
+        ] {
+            assert!(
+                values[field].as_str().is_some_and(|value| !value.is_empty()),
+                "zz {field}"
+            );
+        }
+    }
     #[test]
     #[cfg(not(target_os = "emscripten"))]
     #[cfg_attr(
@@ -351,6 +379,10 @@ mod tests {
             let name = row["name"].as_str().unwrap();
             let data = native_number_format(name).unwrap();
             let mut actual = values(&data);
+            if name == "zz" {
+                assert_usable_fallback(&actual);
+                continue;
+            }
             let mut recorded = row["number"].clone();
             for field in system_owned_fields(name) {
                 assert!(

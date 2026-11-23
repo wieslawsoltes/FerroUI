@@ -315,6 +315,61 @@ mod tests {
         serde_json::json!(text.encode_utf16().collect::<Vec<_>>())
     }
 
+    /// The fallback of a locale the system does not know (`zz`) is the system's, and differs
+    /// between its releases. The exact text recorded for `zz` is not asserted: its digits,
+    /// grouping, patterns and symbols. What is asserted is that the fallback is usable: every
+    /// number formats to text that parses back to the value within the precision of the format,
+    /// and NaN and the infinities give the symbols of the format data.
+    #[cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))]
+    fn assert_fallback_number(system: &NumberFormatInfo, format: &str, value: f64, text: &str) {
+        assert!(!text.is_empty(), "zz {format} {value}");
+        if value.is_nan() {
+            assert_eq!(text, system.nan_symbol(), "zz {format} {value}");
+            return;
+        }
+        if value.is_infinite() {
+            let symbol = if value > 0.0 {
+                system.positive_infinity_symbol()
+            } else {
+                system.negative_infinity_symbol()
+            };
+            assert_eq!(text, symbol, "zz {format} {value}");
+            return;
+        }
+        let mut number = text.to_owned();
+        for symbol in [
+            system.currency_symbol(),
+            system.percent_symbol(),
+            system.number_group_separator(),
+            system.currency_group_separator(),
+            system.percent_group_separator(),
+        ] {
+            number = number.replace(symbol, "");
+        }
+        let number = number
+            .replace(system.number_decimal_separator(), ".")
+            .replace(system.negative_sign(), "-")
+            .chars()
+            .filter(|c| !c.is_whitespace())
+            .collect::<String>();
+        let parsed: f64 = number
+            .parse()
+            .unwrap_or_else(|_| panic!("zz {format} {value}: {text:?} does not parse back"));
+        let half_unit = |digits: i32| 0.5 * 10_f64.powi(-digits);
+        let (expected, tolerance) = match format {
+            "P" => (value * 100.0, half_unit(system.percent_decimal_digits() as i32)),
+            "C" => (value, half_unit(system.currency_decimal_digits() as i32)),
+            "N" => (value, half_unit(system.number_decimal_digits() as i32)),
+            "N2" | "F2" | "0.00" => (value, half_unit(2)),
+            "E2" => (value, half_unit(2) * 10_f64.powi(value.abs().log10().floor() as i32)),
+            _ => (value, 0.0),
+        };
+        assert!(
+            (parsed - expected).abs() <= tolerance + 1e-9,
+            "zz {format} {value}: {text:?} parses back to {parsed}"
+        );
+    }
+
     #[test]
     #[cfg(any(target_os = "linux", target_os = "macos", target_os = "windows"))]
     #[cfg_attr(
@@ -378,6 +433,13 @@ mod tests {
                         value,
                     )])),
                 );
+                if name == "zz" {
+                    let system = ferroribbon_platform::native_number_format(name).unwrap();
+                    let text = actual.as_ref().unwrap().to_utf8().unwrap();
+                    assert_fallback_number(&system, format, value, &text);
+                    compared += 1;
+                    continue;
+                }
                 if actual
                     .as_ref()
                     .map(|v| serde_json::json!(v.as_utf16()))
