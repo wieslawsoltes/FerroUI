@@ -28,9 +28,9 @@
       "xml:space": 8
     },
     "page_statuses": {
-      "partial": 29,
+      "partial": 28,
       "pending": 35,
-      "ported": 62,
+      "ported": 63,
       "verified": 0
     },
     "pages": 126,
@@ -205,8 +205,8 @@
       "verified": 0
     },
     "member_candidates": {
-      "missing-source-candidate": 4771,
-      "source-candidate": 2691
+      "missing-source-candidate": 4769,
+      "source-candidate": 2693
     },
     "members_behavior": {
       "partial": 0,
@@ -220,8 +220,8 @@
       "verified": 0
     },
     "type_candidates": {
-      "missing-source-candidate": 988,
-      "source-candidate": 557
+      "missing-source-candidate": 987,
+      "source-candidate": 558
     },
     "types_behavior": {
       "partial": 0,
