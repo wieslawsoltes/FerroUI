@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -2034746434256777622;
+pub(crate) const API_FINGERPRINT: i64 = -6682138528347034761;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 507] = [
+pub(crate) static TYPE_NAMES: [&str; 508] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -412,6 +412,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
     "SymbolIcon",
     "SymbolIconSource",
     "SystemBackdrop",
+    "SystemBackdropElement",
     "SystemBackdropHostBrush",
     "TabControl",
     "TabItem",

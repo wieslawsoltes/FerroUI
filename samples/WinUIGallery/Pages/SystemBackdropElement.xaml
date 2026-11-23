@@ -1,0 +1,35 @@
+<!-- Ported from the pinned SystemBackdropElement example of WinUI Gallery (14061eea); see
+     ../NOTICE.md. The handlers of the backdrop type and the corner radius are in Rust
+     (materials_samples.rs). Slider has no Header or StepFrequency: the header is a text and the
+     step is TickFrequency with IsSnapToTickEnabled. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20">
+  <StackPanel x:Name="SystemBackdropElementExample1" Spacing="12">
+    <TextBlock Text="SystemBackdropElement Sample" FontSize="18" />
+    <Grid Width="300" Height="200" HorizontalAlignment="Center">
+      <SystemBackdropElement x:Name="DynamicBackdropHost" CornerRadius="8">
+        <SystemBackdropElement.SystemBackdrop>
+          <DesktopAcrylicBackdrop />
+        </SystemBackdropElement.SystemBackdrop>
+      </SystemBackdropElement>
+      <Button HorizontalAlignment="Center" VerticalAlignment="Center" Content="Click Me" />
+    </Grid>
+    <StackPanel Spacing="12">
+      <StackPanel Spacing="4">
+        <TextBlock Text="Backdrop Type" />
+        <ComboBox x:Name="BackdropTypeComboBox" SelectedIndex="0">
+          <ComboBoxItem Content="Acrylic" Tag="Acrylic" />
+          <ComboBoxItem Content="Mica" Tag="Mica" />
+          <ComboBoxItem Content="Mica Alt" Tag="MicaAlt" />
+        </ComboBox>
+      </StackPanel>
+      <StackPanel Spacing="4">
+        <TextBlock Text="Corner radius" />
+        <Slider x:Name="CornerRadiusSlider" Minimum="0" Maximum="50"
+                TickFrequency="1" IsSnapToTickEnabled="True" Value="8" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+  <TextBlock Margin="0,12,0,0" TextWrapping="Wrap"
+             Text="Theme updates for SystemBackdropElement are triggered by app or OS theme changes, not by setting theme directly on the element or a parent control." />
+</StackPanel>

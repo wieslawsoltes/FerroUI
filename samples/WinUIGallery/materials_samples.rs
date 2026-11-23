@@ -4,7 +4,9 @@
 
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{AcrylicBrush, Color};
-use ferroui_base::{BoxedValue, ObjectType, Ref, Vector3D};
+use ferroui_base::rendering::composition::system_backdrops::MicaKind;
+use ferroui_base::{BoxedValue, CornerRadius, ObjectType, Ref, Vector3D};
+use ferroui_controls::media::{DesktopAcrylicBackdrop, MicaBackdrop, SystemBackdrop, SystemBackdropElement};
 use ferroui_controls::primitives::{RangeBase, SelectingItemsControl};
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{Border, ComboBox, Control, Grid, Slider, TextBlock};
@@ -13,6 +15,41 @@ use std::rc::Rc;
 pub(crate) fn wire(root: &Ref<Control>) {
     wire_theme_shadow(root);
     wire_acrylic(root);
+    wire_system_backdrop_element(root);
+}
+
+/// `BackdropTypeComboBox_SelectionChanged` and `CornerRadiusSlider_ValueChanged` of
+/// `SystemBackdropElementPage.xaml.cs`.
+fn wire_system_backdrop_element(root: &Ref<Control>) {
+    let Some(host) = find::<SystemBackdropElement>(root, "DynamicBackdropHost") else {
+        return;
+    };
+    let combo = root.get_control::<ComboBox>("BackdropTypeComboBox");
+    let weak_host = host.downgrade();
+    on_selection(&combo, move |index| {
+        let Some(host) = weak_host.upgrade() else { return };
+        let mica = |kind| {
+            let backdrop = MicaBackdrop::new();
+            backdrop.set_kind(kind);
+            backdrop.upcast::<SystemBackdrop>()
+        };
+        host.set_system_backdrop(Some(match index {
+            1 => mica(MicaKind::Base),
+            2 => mica(MicaKind::BaseAlt),
+            _ => DesktopAcrylicBackdrop::new().upcast::<SystemBackdrop>(),
+        }));
+    });
+    let slider = root.get_control::<Slider>("CornerRadiusSlider");
+    let weak_slider = slider.downgrade();
+    let weak_host = host.downgrade();
+    slider.property_changed(move |change| {
+        if change.property() != RangeBase::value_property().as_property() {
+            return;
+        }
+        if let (Some(slider), Some(host)) = (weak_slider.upgrade(), weak_host.upgrade()) {
+            host.set_corner_radius(CornerRadius::uniform(slider.value()));
+        }
+    });
 }
 
 fn find<T: ObjectType>(root: &Ref<Control>, name: &str) -> Option<Ref<T>> {

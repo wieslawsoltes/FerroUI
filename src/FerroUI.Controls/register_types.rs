@@ -235,6 +235,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::frame_page::FramePage,
     crate::media::DesktopAcrylicBackdrop,
     crate::media::MicaBackdrop,
+    crate::media::SystemBackdropElement,
     crate::media::RevealBackgroundBrush,
     crate::media::RevealBorderBrush,
     crate::media::RevealBorderLight,

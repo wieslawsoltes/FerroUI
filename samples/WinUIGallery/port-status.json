@@ -4095,10 +4095,24 @@
       "examples": []
     },
     "SystemBackdropElement": {
-      "status": "pending",
-      "implementation": [],
-      "tests": [],
-      "notes": "G1 (#418) found no SystemBackdropElement on main: the system backdrop of an element exists only inside the framework (ElementSystemBackdrop of the menu flyout presenter, crate-private). The catalog has no sample definition for the page; the element is G2 work.",
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/SystemBackdropElement.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/materials_samples.rs",
+        "src/FerroUI.Controls/media/system_backdrop_element.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/materials_samples_tests.rs",
+          "name": "system_backdrop_element_follows_the_backdrop_type_and_the_corner_radius"
+        }
+      ],
+      "notes": "The source example uses the native SystemBackdropElement with its acrylic, Mica and Mica Alt backdrops, BackdropTypeComboBox_SelectionChanged and CornerRadiusSlider_ValueChanged in Rust (materials_samples.rs). The backdrop is drawn in the app inside the element; Slider's Header is a text and StepFrequency is TickFrequency with IsSnapToTickEnabled.",
       "examples": []
     },
     "MediaPlayerElement": {

@@ -22,7 +22,7 @@ fn button() = ferro_create(typeId: 28)
 // or vertically.
 fn stackPanel() = ferro_create(typeId: 387)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 429)
+fn textBlock() = ferro_create(typeId: 430)
 
 // ---- properties ----------------------------------------------------------------------------
 

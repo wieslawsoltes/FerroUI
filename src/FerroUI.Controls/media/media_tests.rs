@@ -212,6 +212,25 @@ fn template_with_fallback() -> Option<Rc<dyn crate::templates::IControlTemplate>
 }
 
 #[test]
+fn a_system_backdrop_element_has_the_backdrop_brush_while_it_is_in_a_window() {
+    let services = CompositorTestServices::new(Size::new(200.0, 100.0));
+    let element = SystemBackdropElement::new();
+    let backdrop = MicaBackdrop::new();
+    element.set_system_backdrop(Some(backdrop.upcast()));
+    assert!(element.background().is_none());
+
+    services.set_content(&element);
+    services.run_jobs();
+    let background = element.background().expect("the backdrop brush");
+    let xaml = XamlCompositionBrushBase::of(&*background).expect("the brush of the backdrop");
+    assert!(xaml.composition_brush().is_some());
+
+    element.set_system_backdrop(None);
+    services.run_jobs();
+    assert!(element.background().is_none());
+}
+
+#[test]
 fn a_system_backdrop_of_a_window_shows_its_fallback_where_the_platform_draws_none() {
     let services = CompositorTestServices::new(Size::new(200.0, 100.0));
     let top_level = services.top_level().clone();

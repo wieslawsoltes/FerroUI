@@ -800,93 +800,100 @@ fn swipeControl(attrs, children) = Element { elementType: 397, elementAttrs: att
 // builds the text block in code (`CSymbolIcon::ApplyTemplate`) with the font `Segoe Fluent
 // Icons` written in; here the template is the theme's and the font its resource.
 fn symbolIcon(attrs) = Element { elementType: 401, elementAttrs: attrs, elementChildren: [] }
+// systemBackdropElement(attrs: List<Attr<M>>) -> Element<M>: an element of the class
+// SystemBackdropElement. An element that hosts a system backdrop (WinUI
+// `Microsoft.UI.Xaml.Controls.SystemBackdropElement`). The backdrop is connected while the
+// element is in a window, and its brush is the element's background. WinUI derives the class
+// from `FrameworkElement`; here it is a templated control without a template, which has the
+// background and corner radius the backdrop target uses.
+fn systemBackdropElement(attrs) = Element { elementType: 404, elementAttrs: attrs, elementChildren: [] }
 // tabControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TabControl. A tab control that displays a tab strip along with the content of the
 // selected tab.
-fn tabControl(attrs, children) = Element { elementType: 405, elementAttrs: attrs, elementChildren: children }
+fn tabControl(attrs, children) = Element { elementType: 406, elementAttrs: attrs, elementChildren: children }
 // tabItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TabItem. An item in a `TabControl`.
-fn tabItem(attrs, children) = Element { elementType: 406, elementAttrs: attrs, elementChildren: children }
+fn tabItem(attrs, children) = Element { elementType: 407, elementAttrs: attrs, elementChildren: children }
 // tabStrip(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TabStrip. A strip of tabs: a [`SelectingItemsControl`] that always has a selected
 // item.
-fn tabStrip(attrs, children) = Element { elementType: 407, elementAttrs: attrs, elementChildren: children }
+fn tabStrip(attrs, children) = Element { elementType: 408, elementAttrs: attrs, elementChildren: children }
 // tabStripItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TabStripItem. Represents a tab in a `TabStrip`.
-fn tabStripItem(attrs, children) = Element { elementType: 408, elementAttrs: attrs, elementChildren: children }
+fn tabStripItem(attrs, children) = Element { elementType: 409, elementAttrs: attrs, elementChildren: children }
 // tabbedPage(attrs: List<Attr<M>>) -> Element<M>: an element of the class TabbedPage. A page
 // that displays its child pages through a tab strip.
-fn tabbedPage(attrs) = Element { elementType: 409, elementAttrs: attrs, elementChildren: [] }
+fn tabbedPage(attrs) = Element { elementType: 410, elementAttrs: attrs, elementChildren: [] }
 // tableView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TableView. A read-only tabular control that presents items in configurable columns.
-fn tableView(attrs, children) = Element { elementType: 411, elementAttrs: attrs, elementChildren: children }
+fn tableView(attrs, children) = Element { elementType: 412, elementAttrs: attrs, elementChildren: children }
 // tableViewCell(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TableViewCell. Represents a single cell in a
 // [`TableViewRow`](crate::TableViewRow).
-fn tableViewCell(attrs, children) = Element { elementType: 412, elementAttrs: attrs, elementChildren: children }
+fn tableViewCell(attrs, children) = Element { elementType: 413, elementAttrs: attrs, elementChildren: children }
 // tableViewCellsPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class TableViewCellsPresenter. Lays out the cells of a [`TableViewRow`]
 // according to the column definitions of the parent table view. The cells are recycled
 // alongside their owning row in a virtualizing stack panel, but are not virtualized in a
 // single row (i.e. there is no column virtualization).
-fn tableViewCellsPresenter(attrs, children) = Element { elementType: 413, elementAttrs: attrs, elementChildren: children }
+fn tableViewCellsPresenter(attrs, children) = Element { elementType: 414, elementAttrs: attrs, elementChildren: children }
 // tableViewColumnHeader(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class TableViewColumnHeader. Represents the header of a [`TableViewColumn`].
-fn tableViewColumnHeader(attrs, children) = Element { elementType: 415, elementAttrs: attrs, elementChildren: children }
+fn tableViewColumnHeader(attrs, children) = Element { elementType: 416, elementAttrs: attrs, elementChildren: children }
 // tableViewColumnHeadersPresenter(attrs: List<Attr<M>>, children: List<Element<M>>) ->
 // Element<M>: an element of the class TableViewColumnHeadersPresenter. Displays the column
 // headers for a [`TableView`]. Computes column widths (pixel and star) and exposes them via
 // the actual width of the columns so that the presenters of the cells can align cells with the
 // headers.
-fn tableViewColumnHeadersPresenter(attrs, children) = Element { elementType: 416, elementAttrs: attrs, elementChildren: children }
+fn tableViewColumnHeadersPresenter(attrs, children) = Element { elementType: 417, elementAttrs: attrs, elementChildren: children }
 // tableViewRow(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TableViewRow. A row container in a [`TableView`](crate::TableView).
-fn tableViewRow(attrs, children) = Element { elementType: 417, elementAttrs: attrs, elementChildren: children }
+fn tableViewRow(attrs, children) = Element { elementType: 418, elementAttrs: attrs, elementChildren: children }
 // templatedControl(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // TemplatedControl. A lookless control whose visual appearance is defined by its `Template`.
-fn templatedControl(attrs) = Element { elementType: 418, elementAttrs: attrs, elementChildren: [] }
+fn templatedControl(attrs) = Element { elementType: 419, elementAttrs: attrs, elementChildren: [] }
 // textBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBlock. A control
 // that displays a block of text.
-fn textBlock(attrs) = Element { elementType: 429, elementAttrs: attrs, elementChildren: [] }
+fn textBlock(attrs) = Element { elementType: 430, elementAttrs: attrs, elementChildren: [] }
 // textBox(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBox. Represents a
 // control that can be used to display or edit unformatted text. Template parts:
 // `PART_TextPresenter` (a [`TextPresenter`], required) and `PART_ScrollViewer` (a
 // [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every text position
 // (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code unit index.
-fn textBox(attrs) = Element { elementType: 431, elementAttrs: attrs, elementChildren: [] }
+fn textBox(attrs) = Element { elementType: 432, elementAttrs: attrs, elementChildren: [] }
 // textPresenter(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextPresenter.
 // The control that displays the text of a text box: the text, the selection, the pre-edit text
 // of an input method and the caret. Every text position (`CaretIndex`, `SelectionStart`,
 // `SelectionEnd`, the positions of [`CharacterHit`]) is a UTF-16 code unit index.
-fn textPresenter(attrs) = Element { elementType: 436, elementAttrs: attrs, elementChildren: [] }
+fn textPresenter(attrs) = Element { elementType: 437, elementAttrs: attrs, elementChildren: [] }
 // textSelectionHandle(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // TextSelectionHandle. A control that enables easy control over text selection using touch
 // based input.
-fn textSelectionHandle(attrs) = Element { elementType: 437, elementAttrs: attrs, elementChildren: [] }
+fn textSelectionHandle(attrs) = Element { elementType: 438, elementAttrs: attrs, elementChildren: [] }
 // textSelectionHandleCanvas(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class TextSelectionHandleCanvas. The canvas of the touch selection handles
 // of a text presenter. It lives in the text selector layer of the top level.
-fn textSelectionHandleCanvas(attrs, children) = Element { elementType: 438, elementAttrs: attrs, elementChildren: children }
+fn textSelectionHandleCanvas(attrs, children) = Element { elementType: 439, elementAttrs: attrs, elementChildren: children }
 // textSelectorLayer(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class TextSelectorLayer. The surface that hosts the text selection handles.
-fn textSelectorLayer(attrs, children) = Element { elementType: 439, elementAttrs: attrs, elementChildren: children }
+fn textSelectorLayer(attrs, children) = Element { elementType: 440, elementAttrs: attrs, elementChildren: children }
 // themeVariantScope(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class ThemeVariantScope. Decorator control that isolates a subtree of
 // controls with a locally defined [`ThemeVariant`].
-fn themeVariantScope(attrs, children) = Element { elementType: 441, elementAttrs: attrs, elementChildren: children }
+fn themeVariantScope(attrs, children) = Element { elementType: 442, elementAttrs: attrs, elementChildren: children }
 // thumb(attrs: List<Attr<M>>) -> Element<M>: an element of the class Thumb. A control that can
 // be dragged by the user.
-fn thumb(attrs) = Element { elementType: 444, elementAttrs: attrs, elementChildren: [] }
+fn thumb(attrs) = Element { elementType: 445, elementAttrs: attrs, elementChildren: [] }
 // tickBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class TickBar. An element
 // that is used for drawing the ticks of a [`Slider`](crate::Slider).
-fn tickBar(attrs) = Element { elementType: 446, elementAttrs: attrs, elementChildren: [] }
+fn tickBar(attrs) = Element { elementType: 447, elementAttrs: attrs, elementChildren: [] }
 // timePicker(attrs: List<Attr<M>>) -> Element<M>: an element of the class TimePicker. A
 // control to allow the user to select a time.
-fn timePicker(attrs) = Element { elementType: 448, elementAttrs: attrs, elementChildren: [] }
+fn timePicker(attrs) = Element { elementType: 449, elementAttrs: attrs, elementChildren: [] }
 // timePickerPresenter(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // TimePickerPresenter. Defines the presenter used for selecting a time. Intended for use with
 // [`TimePicker`] but can be used independently.
-fn timePickerPresenter(attrs) = Element { elementType: 450, elementAttrs: attrs, elementChildren: [] }
+fn timePickerPresenter(attrs) = Element { elementType: 451, elementAttrs: attrs, elementChildren: [] }
 // titleBar(attrs: List<Attr<M>>) -> Element<M>: an element of the class TitleBar. The title
 // bar of a window (WinUI's `TitleBar`): a back button, a pane toggle button, a left header, an
 // icon, a title and a subtitle, content (a search box, in WinUI Gallery) and a right header,
@@ -911,76 +918,76 @@ fn timePickerPresenter(attrs) = Element { elementType: 450, elementAttrs: attrs,
 // input ([`WindowDecorationProperties`] roles, which take effect while the client area extends
 // into the decorations), and follows [`WindowBase::is_active`]. A title is the title of the
 // window while the bar shows it, as in WinUI.
-fn titleBar(attrs) = Element { elementType: 452, elementAttrs: attrs, elementChildren: [] }
+fn titleBar(attrs) = Element { elementType: 453, elementAttrs: attrs, elementChildren: [] }
 // toggleButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ToggleButton. Represents a control that a user can select (check) or clear
 // (uncheck). Base class for controls that can switch states.
-fn toggleButton(attrs, children) = Element { elementType: 455, elementAttrs: attrs, elementChildren: children }
+fn toggleButton(attrs, children) = Element { elementType: 456, elementAttrs: attrs, elementChildren: children }
 // toggleSplitButton(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class ToggleSplitButton. A button with primary and secondary parts that can
 // each be pressed separately. The primary part behaves like a toggle button with two states
 // and the secondary part opens a flyout.
-fn toggleSplitButton(attrs, children) = Element { elementType: 457, elementAttrs: attrs, elementChildren: children }
+fn toggleSplitButton(attrs, children) = Element { elementType: 458, elementAttrs: attrs, elementChildren: children }
 // toggleSwitch(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class ToggleSwitch. A toggle switch control.
-fn toggleSwitch(attrs, children) = Element { elementType: 459, elementAttrs: attrs, elementChildren: children }
+fn toggleSwitch(attrs, children) = Element { elementType: 460, elementAttrs: attrs, elementChildren: children }
 // toolTip(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class ToolTip. A control which pops up a hint when a control is hovered. You will probably
 // not want to create a [`ToolTip`] control directly: if added to the tree it will act as a
 // simple [`ContentControl`] styled to look like a tooltip. To add a tooltip to a control, use
 // the `Tip` attached property ([`ToolTip::tip_property`]), assigning the content that you want
 // displayed.
-fn toolTip(attrs, children) = Element { elementType: 460, elementAttrs: attrs, elementChildren: children }
+fn toolTip(attrs, children) = Element { elementType: 461, elementAttrs: attrs, elementChildren: children }
 // track(attrs: List<Attr<M>>) -> Element<M>: an element of the class Track. A control that
 // positions a [`Thumb`] and the buttons before and after it along a range: the building block
 // of scroll bars and sliders.
-fn track(attrs) = Element { elementType: 465, elementAttrs: attrs, elementChildren: [] }
+fn track(attrs) = Element { elementType: 466, elementAttrs: attrs, elementChildren: [] }
 // transitioningContentControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class TransitioningContentControl. Displays the content according to a
 // data template, using a page transition to move between the old and new content.
-fn transitioningContentControl(attrs, children) = Element { elementType: 470, elementAttrs: attrs, elementChildren: children }
+fn transitioningContentControl(attrs, children) = Element { elementType: 471, elementAttrs: attrs, elementChildren: children }
 // treeView(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class TreeView. Displays a hierarchical tree of data.
-fn treeView(attrs, children) = Element { elementType: 473, elementAttrs: attrs, elementChildren: children }
+fn treeView(attrs, children) = Element { elementType: 474, elementAttrs: attrs, elementChildren: children }
 // treeViewItem(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TreeViewItem. An item in a [`TreeView`].
-fn treeViewItem(attrs, children) = Element { elementType: 475, elementAttrs: attrs, elementChildren: children }
+fn treeViewItem(attrs, children) = Element { elementType: 476, elementAttrs: attrs, elementChildren: children }
 // uniformGrid(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class UniformGrid. A panel which lays out its children in a grid with all cells having
 // the same size.
-fn uniformGrid(attrs, children) = Element { elementType: 478, elementAttrs: attrs, elementChildren: children }
+fn uniformGrid(attrs, children) = Element { elementType: 479, elementAttrs: attrs, elementChildren: children }
 // userControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class UserControl. Provides the base class for defining a new control that encapsulates
 // related existing controls and provides its own logic.
-fn userControl(attrs, children) = Element { elementType: 482, elementAttrs: attrs, elementChildren: children }
+fn userControl(attrs, children) = Element { elementType: 483, elementAttrs: attrs, elementChildren: children }
 // viewbox(attrs: List<Attr<M>>) -> Element<M>: an element of the class Viewbox. A control used
 // to scale a single child.
-fn viewbox(attrs) = Element { elementType: 484, elementAttrs: attrs, elementChildren: [] }
+fn viewbox(attrs) = Element { elementType: 485, elementAttrs: attrs, elementChildren: [] }
 // virtualizingCarouselPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>:
 // an element of the class VirtualizingCarouselPanel. A panel used by [`Carousel`] to display
 // the current item.
-fn virtualizingCarouselPanel(attrs, children) = Element { elementType: 486, elementAttrs: attrs, elementChildren: children }
+fn virtualizingCarouselPanel(attrs, children) = Element { elementType: 487, elementAttrs: attrs, elementChildren: children }
 // virtualizingStackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class VirtualizingStackPanel. Arranges and virtualizes content on a single
 // line that is oriented either horizontally or vertically.
-fn virtualizingStackPanel(attrs, children) = Element { elementType: 488, elementAttrs: attrs, elementChildren: children }
+fn virtualizingStackPanel(attrs, children) = Element { elementType: 489, elementAttrs: attrs, elementChildren: children }
 // visualLayerManager(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an
 // element of the class VisualLayerManager. A control that manages multiple layers such as
 // adorners, overlays, text selectors, and popups.
-fn visualLayerManager(attrs, children) = Element { elementType: 492, elementAttrs: attrs, elementChildren: children }
+fn visualLayerManager(attrs, children) = Element { elementType: 493, elementAttrs: attrs, elementChildren: children }
 // window(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Window. A top-level window.
-fn window(attrs, children) = Element { elementType: 497, elementAttrs: attrs, elementChildren: children }
+fn window(attrs, children) = Element { elementType: 498, elementAttrs: attrs, elementChildren: children }
 // windowNotificationManager(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // WindowNotificationManager. An [`INotificationManager`] that displays notifications in a
 // window.
-fn windowNotificationManager(attrs) = Element { elementType: 503, elementAttrs: attrs, elementChildren: [] }
+fn windowNotificationManager(attrs) = Element { elementType: 504, elementAttrs: attrs, elementChildren: [] }
 // wrapPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class WrapPanel. Positions child elements in sequential position from left to right,
 // breaking content to the next line at the edge of the containing box. Subsequent ordering
 // happens sequentially from top to bottom or from right to left, depending on the value of the
 // `Orientation` property.
-fn wrapPanel(attrs, children) = Element { elementType: 504, elementAttrs: attrs, elementChildren: children }
+fn wrapPanel(attrs, children) = Element { elementType: 505, elementAttrs: attrs, elementChildren: children }
 
 // ---- attributes of properties ----------------------------------------------------------------
 

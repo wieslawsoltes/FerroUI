@@ -19,9 +19,9 @@ fn button() = ferro_create(typeId: 28)
 // or vertically.
 fn stackPanel() = ferro_create(typeId: 387)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 429)
+fn textBlock() = ferro_create(typeId: 430)
 // window() -> int: creates a Window. A top-level window.
-fn window() = ferro_create(typeId: 497)
+fn window() = ferro_create(typeId: 498)
 
 // ---- properties ----------------------------------------------------------------------------
 
@@ -703,6 +703,12 @@ fn spacing(object, value) = {
 // getSpacing(object: int) -> float: reads Spacing (StackPanel); the fallback of its kind when
 // the read fails (`failure()` tells): a plain value, no Result.
 fn getSpacing(object) = ferro_get_f64_or(object: object, property: 802, fallback: 0.0)
+// systemBackdropObject(object: int, value: int) -> int: sets SystemBackdrop (ContextMenu,
+// SystemBackdropElement, TopLevel) to an object; 0 is null.
+fn systemBackdropObject(object, value) = {
+    let _ = ferro_set_handle(object: object, property: 829, value: value)
+    object
+}
 // tabIndex(object: int, value: int) -> int: sets TabIndex (Hyperlink, InputElement). Defines
 // the `TabIndex` property.
 fn tabIndex(object, value) = {

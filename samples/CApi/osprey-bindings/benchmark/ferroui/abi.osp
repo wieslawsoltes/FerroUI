@@ -9,10 +9,10 @@
 namespace ferroui;
 
 // apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format 1.
-fn apiFingerprint() = -2034746434256777622
+fn apiFingerprint() = -6682138528347034761
 // selectionFingerprint() -> int: the fingerprint of the selection of these bindings, which a
 // library built for the same manifest returns (ferro_selection_fingerprint); 0 for every class.
-fn selectionFingerprint() = -6832202519157143891
+fn selectionFingerprint() = -1772035029748087486
 // abiVersion() -> int: the version of the ABI the bindings were generated for.
 fn abiVersion() = 1
 
@@ -33,9 +33,9 @@ fn layoutableTypeId() = 189
 fn panelTypeId() = 261
 fn stackPanelTypeId() = 387
 fn styledElementTypeId() = 395
-fn templatedControlTypeId() = 418
-fn textBlockTypeId() = 429
-fn visualTypeId() = 490
+fn templatedControlTypeId() = 419
+fn textBlockTypeId() = 430
+fn visualTypeId() = 491
 fn actualThemeVariantPropertyId() = 9
 fn allowFocusOnInteractionPropertyId() = 20
 fn areHorizontalSnapPointsRegularPropertyId() = 30
