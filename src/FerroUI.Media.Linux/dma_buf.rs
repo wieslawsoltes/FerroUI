@@ -139,7 +139,6 @@ impl ferroui_media_controls::TextureFrameImporter for NativeGlTextureImporter {
             LeasedPlatformHandle, PlatformGraphicsExternalImageDmaBufProperties, PlatformGraphicsExternalImageFormat,
             PlatformGraphicsExternalImageProperties,
         };
-        use ferroui_media_controls::TextureFrameImporter as _;
         let Some(DmaBufFrame(native)) = frame.resource::<DmaBufFrame>() else {
             return ferroui_media_opengl::NativeGlTextureImporter.import(interop, frame);
         };
