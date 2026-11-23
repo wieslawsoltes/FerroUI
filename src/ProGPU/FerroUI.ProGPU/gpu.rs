@@ -9,7 +9,6 @@ use crate::scene::{SceneBuildError, SceneBuilder};
 use progpu_native_sys::webgpu::*;
 use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Instant;
 
 /// A texture of `RGBA8Unorm` of the device (premultiplied content) with its view: the content of
@@ -21,39 +20,24 @@ pub(crate) struct GpuTexture {
     width: u32,
     height: u32,
     version: Cell<u64>,
-    /// Tells this texture from any other, for what is kept by texture.
-    id: u64,
-}
-
-/// The identity of the next texture.
-static NEXT_TEXTURE_ID: AtomicU64 = AtomicU64::new(1);
-
-fn next_texture_id() -> u64 {
-    NEXT_TEXTURE_ID.fetch_add(1, Ordering::Relaxed)
 }
 
 impl GpuTexture {
     pub(crate) fn new(device: &Rc<ProGpuDevice>, width: u32, height: u32) -> Rc<Self> {
         let (width, height) = (width.max(1), height.max(1));
         let (texture, view) = device.create_target(width, height);
-        let id = next_texture_id();
-        Rc::new(Self { device: device.clone(), texture, view, width, height, version: Cell::new(1), id })
+        Rc::new(Self { device: device.clone(), texture, view, width, height, version: Cell::new(1) })
     }
 
     pub(crate) fn device(&self) -> &Rc<ProGpuDevice> {
         &self.device
     }
 
-    pub(crate) fn id(&self) -> u64 {
-        self.id
-    }
-
     /// A texture that is written from the CPU and sampled: the texture of a bitmap.
     pub(crate) fn new_image(device: &Rc<ProGpuDevice>, width: u32, height: u32) -> Rc<Self> {
         let (width, height) = (width.max(1), height.max(1));
         let (texture, view) = device.create_image_texture(width, height);
-        let id = next_texture_id();
-        Rc::new(Self { device: device.clone(), texture, view, width, height, version: Cell::new(0), id })
+        Rc::new(Self { device: device.clone(), texture, view, width, height, version: Cell::new(0) })
     }
 
     /// The pixels of a texture of [`new_image`](Self::new_image), read back (for the tests).
