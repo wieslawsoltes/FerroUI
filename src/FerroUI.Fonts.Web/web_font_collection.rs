@@ -714,7 +714,29 @@ pub struct WebFontCollection {
     shared: Rc<Shared>,
 }
 
+ferroui_base::ferro_thread_local! {
+    /// The collection of the application, once something has asked for it.
+    static CURRENT: RefCell<Option<Rc<WebFontCollection>>> = const { RefCell::new(None) };
+}
+
 impl WebFontCollection {
+    /// The collection of the application, registered with the font manager on first use.
+    /// Panics when no font backend is registered.
+    pub fn current() -> Rc<Self> {
+        if let Some(current) = CURRENT.with(|current| current.borrow().clone()) {
+            return current;
+        }
+        let collection = Rc::new(Self::new(None));
+        FontManager::current().add_font_collection(collection.clone());
+        CURRENT.with(|current| *current.borrow_mut() = Some(collection.clone()));
+        collection
+    }
+
+    /// Starts declaring a face from code: see [`FontFaceBuilder`](crate::FontFaceBuilder).
+    pub fn declare(&self, family: &str) -> crate::FontFaceBuilder<'_> {
+        crate::FontFaceBuilder::new(self, family)
+    }
+
     /// The key of the collection, unless another is given.
     pub const DEFAULT_KEY: &'static str = "fonts:WebFonts";
 

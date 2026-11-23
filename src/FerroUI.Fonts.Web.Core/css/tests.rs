@@ -107,6 +107,18 @@ fn a_descriptor_name_may_be_escaped() {
 }
 
 #[test]
+fn a_descriptor_set_from_code_reports_what_is_wrong() {
+    let mut face = FontFaceDescriptors::new("A", parse_src("url(a)").unwrap());
+    face.set_descriptor("font-weight", "100 900").unwrap();
+    face.set_descriptor("FONT-DISPLAY", "swap").unwrap();
+    assert_eq!(face.weight, Some(FontWeightRange { start: 100.0, end: 900.0 }));
+    assert_eq!(face.display, FontDisplay::Swap);
+    assert_eq!(face.set_descriptor("font-weight", "5000"), Err(CssParseError::InvalidValue("font-weight")));
+    assert_eq!(face.weight, Some(FontWeightRange { start: 100.0, end: 900.0 }), "it keeps its value");
+    assert!(face.set_descriptor("no-such-descriptor", "1").is_err());
+}
+
+#[test]
 fn family_names() {
     assert_eq!(parse_family_name("Open   Sans").unwrap(), "Open Sans");
     assert_eq!(parse_family_name("'serif'").unwrap(), "serif");

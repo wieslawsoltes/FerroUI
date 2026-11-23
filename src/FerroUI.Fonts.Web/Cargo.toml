@@ -40,9 +40,16 @@ ureq = { version = "2.12.1", default-features = false, features = ["tls"], optio
 
 [dev-dependencies]
 ferroui-fonts-web-core = { workspace = true, features = ["testing"] }
+ferroui-base = { workspace = true, features = ["testing", "type-tables"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The run-time loader of markup, for the tests that declare a face in XAML.
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }
 # A real backend for the tests. A path and no version: a development dependency without a version
 # is left out of the published package (docs/release.md, "Dependency order").
 ferroui-vello = { path = "../Vello/FerroUI.Vello" }
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

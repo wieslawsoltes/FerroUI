@@ -1977,8 +1977,10 @@ version = "0.6.0-preview.1"
 dependencies = [
  "brotli-decompressor",
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-fonts-web-core",
+ "ferroui-markup-xaml-loader",
  "ferroui-vello",
  "js-sys",
  "ureq",
